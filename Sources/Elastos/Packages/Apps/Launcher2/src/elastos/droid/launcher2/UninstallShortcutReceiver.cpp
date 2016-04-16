@@ -1,16 +1,15 @@
 
 #include "elastos/droid/launcher2/UninstallShortcutReceiver.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/AutoLock.h>
-#include <elastos/core/StringBuilder.h>
 #include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
-using Elastos::Core::CoreUtils;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Content::IIntent;
@@ -20,9 +19,10 @@ using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
-using Elastos::IO::ICloseable;;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashSet;

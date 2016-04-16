@@ -1,11 +1,10 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CSEARCHDROPTARGETBAR_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CSEARCHDROPTARGETBAR_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CSearchDropTargetBar.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/widget/FrameLayout.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -15,12 +14,12 @@
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
-using Elastos::Droid::View::Animation::IAccelerateInterpolator;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::Animation::IAccelerateInterpolator;
 using Elastos::Droid::Widget::FrameLayout;
 
 namespace Elastos {

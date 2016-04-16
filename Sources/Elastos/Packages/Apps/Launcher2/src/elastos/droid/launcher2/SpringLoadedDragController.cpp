@@ -1,7 +1,7 @@
 
 #include "elastos/droid/launcher2/SpringLoadedDragController.h"
-#include "Elastos.Droid.Service.h"
 #include "elastos/droid/launcher2/Alarm.h"
+#include "Elastos.Droid.Service.h"
 #include "R.h"
 
 namespace Elastos {

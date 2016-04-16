@@ -2,12 +2,12 @@
 #include "elastos/droid/launcher2/LauncherViewPropertyAnimator.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

@@ -2,16 +2,16 @@
 #include "elastos/droid/launcher2/CHotseat.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
-using Elastos::Core::CoreUtils;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {

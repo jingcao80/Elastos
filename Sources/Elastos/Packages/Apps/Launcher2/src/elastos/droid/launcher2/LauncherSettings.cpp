@@ -4,9 +4,9 @@
 #include <elastos/core/StringBuilder.h>
 #include "R.h"
 
-using Elastos::Droid::Provider::EIID_IBaseColumns;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::EIID_IBaseColumns;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {

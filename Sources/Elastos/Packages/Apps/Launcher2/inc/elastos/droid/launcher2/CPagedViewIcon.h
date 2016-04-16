@@ -1,16 +1,17 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CPAGEDVIEWICON_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CPAGEDVIEWICON_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CPagedViewIcon.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/widget/TextView.h"
 #include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/widget/TextView.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Utility.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Widget::TextView;
-using Elastos::Droid::Os::Runnable;
 
 namespace Elastos {
 namespace Droid {

@@ -1,8 +1,8 @@
 
 #include "elastos/droid/launcher2/CPackageChangedReceiver.h"
+#include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
-#include "Elastos.Droid.Net.h"
 
 using Elastos::Droid::Net::IUri;
 

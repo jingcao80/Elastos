@@ -1,20 +1,18 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CINFODROPTARGET_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CINFODROPTARGET_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CInfoDropTarget.h"
-#include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/ButtonDropTarget.h"
+#include "elastos/droid/launcher2/DropTarget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"
 
-using Elastos::Droid::Content::Res::IColorStateList;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IColorStateList;
 using Elastos::Droid::Graphics::Drawable::ITransitionDrawable;
 using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::Launcher2::ButtonDropTarget;
 
 namespace Elastos {
 namespace Droid {

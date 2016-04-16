@@ -1,10 +1,10 @@
 
 #include "elastos/droid/launcher2/DeferredHandler.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/AutoLock.h>
 #include "Elastos.Droid.Utility.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
 using Elastos::Droid::Os::EIID_IIdleHandler;
 using Elastos::Droid::Os::CLooperHelper;

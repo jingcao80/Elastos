@@ -1,8 +1,8 @@
 
 #include "elastos/droid/launcher2/CCling.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/Math.h>
+#include "R.h"
 
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::CPaint;

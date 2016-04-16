@@ -4,17 +4,16 @@
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.Droid.Utility.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
 using Elastos::Droid::Launcher2::DragView;
 using Elastos::Droid::Launcher2::ShortcutInfo;
 using Elastos::Droid::Launcher2::ApplicationInfo;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IComponentName;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CPoint;
@@ -23,15 +22,16 @@ using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::CPointF;
 using Elastos::Droid::Graphics::IPointF;
 using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::View::IVelocityTrackerHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 
 namespace Elastos {

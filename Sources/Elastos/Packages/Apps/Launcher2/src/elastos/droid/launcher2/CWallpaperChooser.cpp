@@ -4,11 +4,11 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
+using Elastos::Droid::Launcher2::IWallpaperChooserDialogFragment;
+// using Elastos::Droid::Launcher2::WallpaperChooserDialogFragment;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::App::IDialogFragment;
-using Elastos::Droid::Launcher2::IWallpaperChooserDialogFragment;
-// using Elastos::Droid::Launcher2::WallpaperChooserDialogFragment;
 
 namespace Elastos {
 namespace Droid {

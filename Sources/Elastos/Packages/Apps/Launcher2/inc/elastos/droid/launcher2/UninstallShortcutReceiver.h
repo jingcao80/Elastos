@@ -4,11 +4,11 @@
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include <elastos/core/Object.h>
-#include <elastos/core/Thread.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ISharedPreferences;

@@ -1,11 +1,10 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CHOLOGRAPHICLINEARLAYOUT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CHOLOGRAPHICLINEARLAYOUT_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CHolographicLinearLayout.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/widget/LinearLayout.h"
 #include "elastos/droid/launcher2/HolographicViewHelper.h"
+#include "elastos/droid/widget/LinearLayout.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"

@@ -4,9 +4,9 @@
 
 #include "_Launcher2.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
-#include <elastos/droid/os/Runnable.h>
-#include "elastos/droid/view/View.h"
+#include <elastos/droid/view/View.h>
 #include <elastos/droid/view/ViewGroup.h>
+#include <elastos/droid/os/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
@@ -15,7 +15,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Core::Object;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -35,6 +34,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::Widget::IScroller;
+using Elastos::Core::Object;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {

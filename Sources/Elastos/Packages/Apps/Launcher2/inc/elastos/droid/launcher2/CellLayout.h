@@ -13,7 +13,6 @@
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/view/ViewGroup.h>
 #include <elastos/droid/view/animation/LayoutAnimationController.h>
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -21,8 +20,8 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Core::Object;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -46,9 +45,9 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::Animation::LayoutAnimationController;
+using Elastos::Core::Object;
 using Elastos::Core::IComparator;
 using Elastos::Utility::IArrayList;
-//using Elastos::Utility::Arrays;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IStack;

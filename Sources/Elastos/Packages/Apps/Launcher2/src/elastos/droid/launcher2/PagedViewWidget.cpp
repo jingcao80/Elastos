@@ -1,9 +1,9 @@
 
 #include "elastos/droid/launcher2/PagedViewWidget.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/Math.h>
- #include <elastos/core/CoreUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Widget::ITextView;

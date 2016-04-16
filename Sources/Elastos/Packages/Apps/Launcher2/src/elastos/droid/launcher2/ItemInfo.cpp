@@ -1,15 +1,15 @@
 
 #include "elastos/droid/launcher2/ItemInfo.h"
-#include "Elastos.Droid.Service.h"
 #include "elastos/droid/os/Process.h"
+#include "Elastos.Droid.Service.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::Process;
-using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
 using Elastos::Core::StringBuilder;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFlushable;

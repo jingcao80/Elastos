@@ -2,9 +2,9 @@
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/StringBuilder.h>
 #include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/StringBuilder.h>
+#include "R.h"
 
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Core::StringBuilder;

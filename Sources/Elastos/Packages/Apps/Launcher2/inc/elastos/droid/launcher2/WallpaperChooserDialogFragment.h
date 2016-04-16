@@ -5,17 +5,17 @@
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/droid/app/DialogFragment.h>
-#include <elastos/droid/widget/BaseAdapter.h>
-#include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/graphics/drawable/Drawable.h>
+#include <elastos/droid/os/AsyncTask.h>
+#include <elastos/droid/widget/BaseAdapter.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
-#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include <elastos/core/Object.h>
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IDialog;
@@ -27,12 +27,12 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IColorFilter;
 using Elastos::Droid::Graphics::IMatrix;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::Os::AsyncTask;
-using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Widget::IGallery;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::BaseAdapter;

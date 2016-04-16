@@ -1,14 +1,13 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CFOLDEREDITTEXT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CFOLDEREDITTEXT_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CFolderEditText.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "_Elastos_Droid_Launcher2_CFolderEditText.h"
 #include "elastos/droid/widget/EditText.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;

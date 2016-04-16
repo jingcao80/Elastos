@@ -7,10 +7,10 @@
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::AppWidget::AppWidgetHost;
 using Elastos::Droid::AppWidget::IAppWidgetHostView;
 using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
 namespace Droid {

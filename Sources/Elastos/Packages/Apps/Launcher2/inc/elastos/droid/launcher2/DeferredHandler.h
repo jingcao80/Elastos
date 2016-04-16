@@ -3,12 +3,12 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IIdleHandler;

@@ -8,8 +8,9 @@
 #include "elastos/droid/launcher2/Utilities.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Process.h"
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/Thread.h>
@@ -18,8 +19,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/Arrays.h>
-#include "Elastos.CoreLibrary.IO.h"
-#include "Elastos.Droid.App.h"
+#include "R.h"
 
 using Elastos::Droid::App::ISearchManager;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
@@ -51,7 +51,6 @@ using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CEnvironment;
 using Elastos::Droid::Os::IEnvironment;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger64;
@@ -71,6 +70,7 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollections;
+using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::IMap;
 using Elastos::Utility::Arrays;
 using Elastos::Text::ICollatorHelper;

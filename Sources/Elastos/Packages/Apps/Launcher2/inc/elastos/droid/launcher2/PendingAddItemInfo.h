@@ -2,8 +2,8 @@
 #define  __ELASTOS_DROID_LAUNCHER2_PENDINGADDITEMINFO_H__
 
 #include "_Launcher2.h"
-#include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"

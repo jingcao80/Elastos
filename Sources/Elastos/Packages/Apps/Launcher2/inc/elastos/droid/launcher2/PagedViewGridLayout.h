@@ -11,10 +11,10 @@
 #include "Elastos.CoreLibrary.Core.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Widget::GridLayout;
-using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::GridLayout;
+using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Core::IRunnable;
 
 namespace Elastos {

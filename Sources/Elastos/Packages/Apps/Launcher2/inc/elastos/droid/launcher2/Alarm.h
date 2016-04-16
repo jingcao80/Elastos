@@ -8,8 +8,8 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IHandler;
-using Elastos::Core::IRunnable;
 using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {

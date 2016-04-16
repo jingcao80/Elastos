@@ -6,8 +6,8 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
-#include <Elastos.CoreLibrary.Core.h>
-#include <Elastos.CoreLibrary.IO.h>
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IIntent;

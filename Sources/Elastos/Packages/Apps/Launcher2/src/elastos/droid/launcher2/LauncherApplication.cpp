@@ -1,18 +1,18 @@
 
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Service.h"
+#include "R.h"
 
 using Elastos::Droid::App::ISearchManager;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Utility::IDisplayMetrics;
 
 namespace Elastos {

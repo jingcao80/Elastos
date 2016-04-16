@@ -1,11 +1,10 @@
 
 #include "elastos/droid/launcher2/DragLayer.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
-using Elastos::Core::CoreUtils;
 using Elastos::Droid::Animation::CValueAnimator;
 using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
@@ -19,6 +18,7 @@ using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::IFloat;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 
 namespace Elastos {

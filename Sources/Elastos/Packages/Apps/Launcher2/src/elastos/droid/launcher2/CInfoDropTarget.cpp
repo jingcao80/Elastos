@@ -4,18 +4,18 @@
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/os/Process.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/os/Process.h"
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::Process;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewParent;
 
 namespace Elastos {
 namespace Droid {

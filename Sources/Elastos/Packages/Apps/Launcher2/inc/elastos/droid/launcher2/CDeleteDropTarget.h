@@ -1,19 +1,18 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CDELETEDROPTARGET_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CDELETEDROPTARGET_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CDeleteDropTarget.h"
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/ButtonDropTarget.h"
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetHost.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/launcher2/ButtonDropTarget.h"
-#include <elastos/core/Object.h>
 #include "elastos/droid/os/Runnable.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 
 using Elastos::Droid::Launcher2::DragObject;

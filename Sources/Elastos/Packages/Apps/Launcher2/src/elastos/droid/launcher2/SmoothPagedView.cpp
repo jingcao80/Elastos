@@ -1,12 +1,12 @@
 
 #include "elastos/droid/launcher2/SmoothPagedView.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/Math.h>
 #include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/Math.h>
+#include "R.h"
 
-using Elastos::Droid::View::Animation::COvershootInterpolator;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
+using Elastos::Droid::View::Animation::COvershootInterpolator;
 using Elastos::Droid::View::Animation::EIID_IInterpolator;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Droid::Widget::IScroller;

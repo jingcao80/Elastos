@@ -6,14 +6,14 @@
 #include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "elastos/droid/launcher2/FolderInfo.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/utility/logging/Slogger.h>
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
 using Elastos::Droid::App::IActivity;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CColor;
 using Elastos::Droid::Graphics::IColor;
@@ -26,10 +26,10 @@ using Elastos::Droid::View::Animation::IAccelerateInterpolator;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::IFloat;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

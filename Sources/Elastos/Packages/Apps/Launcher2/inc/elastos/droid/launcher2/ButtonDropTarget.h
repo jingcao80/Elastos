@@ -9,8 +9,8 @@
 #include "Elastos.Droid.Utility.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Widget::TextView;
 
 namespace Elastos {

@@ -1,17 +1,16 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CFOCUSONLYTABWIDGET_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CFOCUSONLYTABWIDGET_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CFocusOnlyTabWidget.h"
-#include "elastos/droid/widget/TabWidget.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/TabWidget.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::View::IView;
 using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::TabWidget;
 
 namespace Elastos {

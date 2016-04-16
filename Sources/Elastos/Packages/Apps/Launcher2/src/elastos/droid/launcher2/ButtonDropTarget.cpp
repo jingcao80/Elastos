@@ -4,9 +4,9 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
+using Elastos::Droid::Launcher2::DragObject;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Launcher2::DragObject;
 
 namespace Elastos {
 namespace Droid {

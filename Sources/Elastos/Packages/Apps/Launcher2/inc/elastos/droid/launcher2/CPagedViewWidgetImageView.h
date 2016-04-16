@@ -2,17 +2,17 @@
 #define  __ELASTOS_DROID_LAUNCHER2_CPAGEDVIEWWIDGETIMAGEVIEW_H__
 
 #include "_Elastos_Droid_Launcher2_CPagedViewWidgetImageView.h"
-#include "elastos/droid/widget/ImageView.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/ImageView.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
-#include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::ICanvas;
-using Elastos::Droid::Widget::ImageView;
 using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::ImageView;
 
 namespace Elastos {
 namespace Droid {

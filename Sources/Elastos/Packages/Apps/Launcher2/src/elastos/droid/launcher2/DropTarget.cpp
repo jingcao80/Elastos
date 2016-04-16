@@ -1,8 +1,8 @@
 
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
 using Elastos::Utility::Logging::Slogger;
 

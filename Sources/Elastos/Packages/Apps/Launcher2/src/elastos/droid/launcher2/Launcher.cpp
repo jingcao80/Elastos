@@ -21,31 +21,21 @@
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Accounts.h"
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.Service.h"
-#include <elastos/core/AutoLock.h>
-#include <elastos/core/Character.h>
-#include "R.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/CoreUtils.h>
-#include <elastos/core/Math.h>
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Speech.h"
-#include "Elastos.Droid.Accounts.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/Character.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
-using Elastos::Core::StringBuilder;
-using Elastos::Core::CoreUtils;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::App::IApplication;
-using Elastos::Droid::App::ISearchManager;
-using Elastos::Droid::App::IActivityOptions;
-using Elastos::Droid::App::CActivityOptionsHelper;
-using Elastos::Droid::App::IActivityOptionsHelper;
-using Elastos::Droid::App::CActivityManagerHelper;
-using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::Accounts::IAccount;
 using Elastos::Droid::Accounts::IAccountManager;
 using Elastos::Droid::Accounts::IAccountManagerHelper;
@@ -54,12 +44,13 @@ using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
 using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
 using Elastos::Droid::Animation::IAnimatorSetBuilder;
-using Elastos::Droid::View::ISurface;
-using Elastos::Droid::View::Animation::CDecelerateInterpolator;
-using Elastos::Droid::View::Animation::IDecelerateInterpolator;
-using Elastos::Droid::View::Animation::CAccelerateInterpolator;
-using Elastos::Droid::View::Animation::IAccelerateInterpolator;
-using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::App::IApplication;
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Droid::App::IActivityOptions;
+using Elastos::Droid::App::CActivityOptionsHelper;
+using Elastos::Droid::App::IActivityOptionsHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::AppWidget::IAppWidgetHost;
 using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
 using Elastos::Droid::AppWidget::IAppWidgetManagerHelper;
@@ -96,6 +87,12 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::View::ISurface;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::IAccelerateInterpolator;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
@@ -108,11 +105,7 @@ using Elastos::Droid::View::IHapticFeedbackConstants;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::Animation::IAccelerateDecelerateInterpolator;
-using Elastos::Droid::Widget::IAdvanceable;
-using Elastos::Droid::Widget::IToast;
-using Elastos::Droid::Widget::CToastHelper;
-using Elastos::Droid::Widget::IToastHelper;
-using Elastos::Droid::Widget::CImageView;
+using Elastos::Droid::Speech::IRecognizerIntent;
 using Elastos::Droid::Text::CSpannableStringBuilder;
 using Elastos::Droid::Text::ISpannableStringBuilder;
 using Elastos::Droid::Text::CSelection;
@@ -124,7 +117,11 @@ using Elastos::Droid::Text::Method::IKeyListener;
 using Elastos::Droid::Text::Method::ITextKeyListener;
 using Elastos::Droid::Text::Method::ITextKeyListenerHelper;
 using Elastos::Droid::Text::Method::CTextKeyListenerHelper;
-using Elastos::Droid::Speech::IRecognizerIntent;
+using Elastos::Droid::Widget::IAdvanceable;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CImageView;
 using Elastos::Core::IFloat;
 using Elastos::Core::IBoolean;
 using Elastos::Core::EIID_IComparator;
@@ -134,6 +131,8 @@ using Elastos::Core::Character;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
 using Elastos::IO::IInputStream;
 using Elastos::IO::CDataInputStream;
 using Elastos::IO::IDataInputStream;
@@ -152,6 +151,7 @@ using Elastos::Utility::IMap;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

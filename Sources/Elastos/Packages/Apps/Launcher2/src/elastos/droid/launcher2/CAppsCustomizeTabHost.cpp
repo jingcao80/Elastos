@@ -5,15 +5,14 @@
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CoreUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType_Applications;
+using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType_Widgets;
 using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::View::LayoutInflater;
@@ -26,11 +25,11 @@ using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::EIID_ITabHostTabContentFactory;
 using Elastos::Droid::Widget::EIID_ITabHostOnTabChangeListener;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
-
-using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType_Applications;
-using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType_Widgets;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

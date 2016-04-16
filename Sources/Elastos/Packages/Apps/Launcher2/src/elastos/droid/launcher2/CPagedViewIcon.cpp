@@ -2,10 +2,10 @@
 #include "elastos/droid/launcher2/CPagedViewIcon.h"
 #include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Service.h"
+#include "R.h"
 
 using Elastos::Droid::App::CFastBitmapDrawable;
 using Elastos::Droid::App::IFastBitmapDrawable;

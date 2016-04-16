@@ -1,17 +1,17 @@
 
 #include "elastos/droid/launcher2/CPreloadReceiver.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
-using Elastos::Core::StringBuilder;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CThread;
 using Elastos::Core::IThread;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {

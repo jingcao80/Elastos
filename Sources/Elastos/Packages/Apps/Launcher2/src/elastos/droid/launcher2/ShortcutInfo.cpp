@@ -1,12 +1,12 @@
 
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/ApplicationInfo.h"
-#include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Content::IIntentShortcutIconResource;

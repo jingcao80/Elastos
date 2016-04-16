@@ -3,12 +3,12 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Provider::IBaseColumns;
 
 namespace Elastos {
 namespace Droid {

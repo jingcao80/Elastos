@@ -8,8 +8,8 @@
 #include "Elastos.Droid.View.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::ViewGroup;
 
 namespace Elastos {
 namespace Droid {

@@ -1,11 +1,11 @@
 
 #include "elastos/droid/launcher2/PagedView.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
-#include "Elastos.CoreLibrary.Core.h"
 
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::ITypedArray;

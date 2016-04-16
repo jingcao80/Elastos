@@ -3,11 +3,11 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
-using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::View::Animation::CAccelerateInterpolator;
 using Elastos::Droid::View::Animation::IAccelerateInterpolator;
 

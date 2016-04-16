@@ -2,20 +2,20 @@
 #include "elastos/droid/launcher2/HolographicViewHelper.h"
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include "elastos/droid/R.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/R.h"
+#include "R.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::Drawable::CStateListDrawable;
 using Elastos::Droid::Graphics::Drawable::IStateListDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::View::IView;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::CBitmapHelper;
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::PorterDuffMode_SRC_IN;
+using Elastos::Droid::View::IView;
 
 namespace Elastos {
 namespace Droid {

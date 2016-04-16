@@ -1,14 +1,14 @@
 
 #include "elastos/droid/launcher2/AddAdapter.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/CoreUtils.h>
 #include "Elastos.Droid.Widget.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Utility::CArrayList;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {

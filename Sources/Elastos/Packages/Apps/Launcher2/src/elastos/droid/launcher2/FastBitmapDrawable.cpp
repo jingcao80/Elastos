@@ -3,9 +3,9 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
-using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::IPixelFormat;
 
 namespace Elastos {
 namespace Droid {

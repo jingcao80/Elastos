@@ -1,14 +1,14 @@
 
 #include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::View::EIID_IOnDrawListener;
 using Elastos::Droid::View::IViewTreeObserver;
-using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::StringBuilder;

@@ -1,10 +1,10 @@
 #include "elastos/droid/launcher2/Utilities.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Utility.h"
-#include <elastos/utility/logging/Slogger.h>
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/AutoLock.h>
-#include <Elastos.CoreLibrary.Core.h>
-#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Content::Res::IResources;
@@ -37,7 +37,6 @@ using Elastos::Core::CSystem;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::IRandom;
 using Elastos::Utility::CRandom;
-
 
 namespace Elastos {
 namespace Droid {

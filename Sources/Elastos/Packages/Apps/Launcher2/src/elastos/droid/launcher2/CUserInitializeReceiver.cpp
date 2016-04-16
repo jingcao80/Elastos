@@ -1,10 +1,10 @@
 
 #include "elastos/droid/launcher2/CUserInitializeReceiver.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/CoreUtils.h>
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
 
 using Elastos::Droid::App::IWallpaperManager;
 using Elastos::Core::CoreUtils;

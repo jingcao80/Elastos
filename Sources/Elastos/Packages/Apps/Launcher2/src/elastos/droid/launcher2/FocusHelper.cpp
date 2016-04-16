@@ -2,10 +2,10 @@
 #include "elastos/droid/launcher2/FocusHelper.h"
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
+#include "R.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IConfiguration;

@@ -10,23 +10,19 @@
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "elastos/droid/launcher2/PagedViewGridLayout.h"
-#include "elastos/droid/view/ViewGroup.h"
-#include "elastos/droid/widget/GridLayout.h"
 #include "elastos/droid/view/View.h"
+#include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "Elastos.Droid.Service.h"
+#include "elastos/droid/widget/GridLayout.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Build.h"
-#include "R.h"
+#include "Elastos.Droid.Service.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/CoreUtils.h>
+#include "R.h"
 
-using Elastos::Core::IBoolean;
-using Elastos::Core::CoreUtils;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::StringBuilder;
 using Elastos::Droid::Animation::IAnimatorSetBuilder;
 using Elastos::Droid::AppWidget::IAppWidgetHost;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
@@ -37,15 +33,6 @@ using Elastos::Droid::AppWidget::IAppWidgetHostViewHelper;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
-using Elastos::Droid::View::ViewGroup;
-using Elastos::Droid::View::IGravity;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::LayoutInflater;
-using Elastos::Droid::View::IViewGroupLayoutParams;
-using Elastos::Droid::View::EIID_IViewOnClickListener;
-using Elastos::Droid::View::EIID_IViewOnKeyListener;
-using Elastos::Droid::View::Animation::CAccelerateInterpolator;
-using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::CCanvas;
@@ -59,15 +46,28 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Droid::Widget::IGridLayout;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::IGridLayoutSpec;
 using Elastos::Droid::Widget::GridLayout;
+using Elastos::Core::IBoolean;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

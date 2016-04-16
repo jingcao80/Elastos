@@ -1,11 +1,14 @@
 
 #include "elastos/droid/launcher2/DragView.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Service.h"
+#include "R.h"
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::PorterDuffMode_SRC_ATOP;
 using Elastos::Droid::Graphics::PaintStyle_FILL;
 using Elastos::Droid::Graphics::CRect;
@@ -15,9 +18,6 @@ using Elastos::Droid::Graphics::CBitmapHelper;
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::CPorterDuffColorFilter;
 using Elastos::Droid::Graphics::IPorterDuffColorFilter;
-using Elastos::Droid::Animation::IAnimator;
-using Elastos::Droid::Animation::ITimeInterpolator;
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewParent;

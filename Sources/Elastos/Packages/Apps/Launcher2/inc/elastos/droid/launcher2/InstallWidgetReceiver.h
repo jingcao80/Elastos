@@ -3,14 +3,15 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
+#include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.AppWidget.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
@@ -21,7 +22,6 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IListAdapter;
-using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 using Elastos::Core::Object;
 using Elastos::Utility::IList;
 

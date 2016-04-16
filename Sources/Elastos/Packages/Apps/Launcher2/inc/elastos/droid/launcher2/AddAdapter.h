@@ -4,12 +4,12 @@
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/BaseAdapter.h"
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::Drawable::IDrawable;

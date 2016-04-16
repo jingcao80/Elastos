@@ -10,7 +10,6 @@
 #include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::AppWidget::AppWidgetHostView;
-using Elastos::Droid::Launcher2::CheckLongPressHelper;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;

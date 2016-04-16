@@ -2,8 +2,8 @@
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/StringBuilder.h>
+#include "R.h"
 
 using Elastos::Core::StringBuilder;
 

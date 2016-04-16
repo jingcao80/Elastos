@@ -1,8 +1,8 @@
 
 #include "elastos/droid/launcher2/LauncherAnimatorUpdateListener.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include "R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Core::IFloat;

@@ -4,19 +4,17 @@
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/PagedView.h"
-#include <elastos/core/Object.h>
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Animation::ITimeInterpolator;
-using Elastos::Droid::Launcher2::PagedView;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Core::Object;
-
 
 namespace Elastos {
 namespace Droid {

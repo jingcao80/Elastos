@@ -3,13 +3,12 @@
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
-using Elastos::Core::CoreUtils;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
@@ -20,6 +19,7 @@ using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::EIID_IListAdapter;
 using Elastos::Droid::Widget::EIID_IAdapter;
 using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {

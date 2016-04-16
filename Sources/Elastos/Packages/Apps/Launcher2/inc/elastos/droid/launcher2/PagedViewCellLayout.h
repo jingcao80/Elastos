@@ -4,6 +4,9 @@
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/ViewGroup.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;

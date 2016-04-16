@@ -1,10 +1,10 @@
 
 #include "elastos/droid/launcher2/InterruptibleInOutAnimator.h"
-#include "Elastos.Droid.Service.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
-#include "R.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/Math.h>
+#include "R.h"
 
  using Elastos::Core::IFloat;
 

@@ -3,10 +3,10 @@
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/Math.h>
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
+#include <elastos/core/Math.h>
+#include "R.h"
 
 using Elastos::Droid::AppWidget::AppWidgetHostView;
 using Elastos::Droid::AppWidget::IAppWidgetHostView;
@@ -19,11 +19,11 @@ using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::IGravity;
 using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::CImageView;
-using Elastos::Droid::View::IGravity;
-using Elastos::Droid::Utility::IDisplayMetrics;
 
 namespace Elastos {
 namespace Droid {

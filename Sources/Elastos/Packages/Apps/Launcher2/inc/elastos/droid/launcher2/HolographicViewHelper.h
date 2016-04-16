@@ -3,10 +3,10 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Widget::IImageView;

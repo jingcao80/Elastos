@@ -12,22 +12,20 @@
 #include "elastos/droid/launcher2/LauncherViewPropertyAnimator.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/AppWidgetResizeFrame.h"
+#include "elastos/droid/R.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/Math.h>
-#include "elastos/droid/R.h"
-#include <elastos/core/CoreUtils.h>
-#include "Elastos.Droid.Widget.h"
+#include "R.h"
 
-using Elastos::Core::IThread;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CoreUtils;
 using Elastos::Droid::App::IWallpaperInfo;
 using Elastos::Droid::App::CWallpaperManagerHelper;
 using Elastos::Droid::App::IWallpaperManagerHelper;
 using Elastos::Droid::Animation::IAnimatorSetBuilder;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::IIntentHelper;
@@ -46,20 +44,22 @@ using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Droid::View::Animation::IDecelerateInterpolator;
 using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
-using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IImageView;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::IFloat;
+using Elastos::Core::IThread;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

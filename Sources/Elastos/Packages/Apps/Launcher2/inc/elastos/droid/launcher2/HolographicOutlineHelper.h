@@ -3,8 +3,8 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.Graphics.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::ICanvas;

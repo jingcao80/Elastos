@@ -3,20 +3,20 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/os/Runnable.h"
-#include <elastos/core/Object.h>
-#include "Elastos.Droid.Content.h"
+#include "elastos/droid/widget/FrameLayout.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Animation::IValueAnimator;
-using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Widget::FrameLayout;

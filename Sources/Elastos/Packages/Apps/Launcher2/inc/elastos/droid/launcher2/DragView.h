@@ -3,13 +3,13 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/view/View.h"
-#include <elastos/core/Object.h>
 #include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;

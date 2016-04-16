@@ -1,24 +1,25 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZETABHOST_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZETABHOST_H__
 
-#include "_Launcher2.h"
-#include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Launcher2_CAppsCustomizeTabHost.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/widget/TabHost.h"
 #include "elastos/droid/os/Runnable.h"
-#include "Elastos.Droid.Content.h"
+#include "elastos/droid/widget/TabHost.h"
 #include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.Core.h"
 
-using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::ILayoutInflater;
@@ -28,10 +29,7 @@ using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Droid::Widget::ITabHostTabContentFactory;
 using Elastos::Droid::Widget::ITabHostOnTabChangeListener;
-using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Core::IRunnable;
-
-using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType;
 
 namespace Elastos {
 namespace Droid {

@@ -1,7 +1,6 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CPRELOADRECEIVER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CPRELOADRECEIVER_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CPreloadReceiver.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"

@@ -1,9 +1,9 @@
 
 #include "elastos/droid/launcher2/HandleView.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;

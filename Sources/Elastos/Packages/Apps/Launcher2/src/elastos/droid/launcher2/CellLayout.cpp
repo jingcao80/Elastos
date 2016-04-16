@@ -4,12 +4,12 @@
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
-#include <elastos/utility/Arrays.h>
-#include <elastos/core/Math.h>
-#include <elastos/utility/logging/Logger.h>
-#include <elastos/droid/R.h>
-#include "R.h"
 #include "Elastos.Droid.Widget.h"
+#include <elastos/droid/R.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;

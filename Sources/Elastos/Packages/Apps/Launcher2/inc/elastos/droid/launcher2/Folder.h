@@ -3,28 +3,28 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/widget/LinearLayout.h"
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include <elastos/core/Object.h>
 #include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/widget/LinearLayout.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::Os::Runnable;
-using Elastos::Core::Object;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IPointF;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IActionMode;
@@ -42,9 +42,9 @@ using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::Widget::LinearLayout;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IOnEditorActionListener;
-using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Core::IComparator;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::Object;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {

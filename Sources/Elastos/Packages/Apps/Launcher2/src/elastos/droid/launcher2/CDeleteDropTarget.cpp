@@ -1,20 +1,21 @@
 
 #include "elastos/droid/launcher2/CDeleteDropTarget.h"
-#include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetHost.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/view/animation/AnimationUtils.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/Math.h>
+#include "R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
@@ -24,7 +25,6 @@ using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
-using Elastos::Droid::Os::IUserManager;
 using Elastos::Core::IFloat;
 
 namespace Elastos {

@@ -3,12 +3,12 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IValueAnimator;
@@ -16,9 +16,9 @@ using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Animation::IPropertyValuesHolder;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IOnDrawListener;
-using Elastos::Droid::Os::Runnable;
 using Elastos::Core::Object;
 using Elastos::Utility::IHashSet;
 

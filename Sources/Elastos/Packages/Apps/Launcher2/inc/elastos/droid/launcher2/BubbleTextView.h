@@ -8,18 +8,18 @@
 #include "elastos/droid/widget/TextView.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
-#include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Widget::TextView;
-using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::TextView;
 
 namespace Elastos {
 namespace Droid {

@@ -3,22 +3,22 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/launcher2/DeferredHandler.h"
 #include "elastos/droid/launcher2/AllAppsList.h"
 #include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/launcher2/FolderInfo.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Runnable.h"
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
-#include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Text.h"
-#include "elastos/droid/os/Runnable.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -32,20 +32,19 @@ using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::ILauncherAppsCallback;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IUserManager;
-using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Core::Object;
 using Elastos::Core::IRunnable;
 using Elastos::Core::IComparator;
-//using Elastos::Lang::Ref::IWeakReference;
+using Elastos::Text::ICollator;
 using Elastos::Utility::IList;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IArrayList;
-using Elastos::Text::ICollator;
 
 namespace Elastos {
 namespace Droid {

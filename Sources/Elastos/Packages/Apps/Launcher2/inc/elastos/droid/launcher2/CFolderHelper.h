@@ -1,7 +1,6 @@
 #ifndef __ELASTOS_DROID_LAUNCHER2_CFOLDERHELPER_H__
 #define __ELASTOS_DROID_LAUNCHER2_CFOLDERHELPER_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CFolderHelper.h"
 #include <elastos/core/Singleton.h>
 #include "Elastos.Droid.Content.h"

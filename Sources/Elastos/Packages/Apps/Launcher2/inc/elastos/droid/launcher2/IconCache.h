@@ -6,12 +6,12 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
-#include <Elastos.CoreLibrary.Core.h>
-#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IResolveInfo;

@@ -2,10 +2,10 @@
 #include "elastos/droid/launcher2/PagedViewCellLayout.h"
 #include "elastos/droid/launcher2/PagedViewCellLayoutChildren.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;

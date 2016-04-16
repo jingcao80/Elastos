@@ -2,25 +2,25 @@
 #include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
 #include "elastos/droid/launcher2/CWallpaperChooserDialogFragment.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/Math.h>
 #include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::App::IWallpaperManager;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
-using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemSelectedListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

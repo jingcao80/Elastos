@@ -12,8 +12,8 @@
 #include "Elastos.Droid.Os.h"
 
 using Elastos::Droid::App::Application;
-using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Os::IHandler;
 

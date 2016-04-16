@@ -3,17 +3,18 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/animation/Animator.h"
 #include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
-#include "Elastos.Droid.View.h"
+#include "elastos/droid/animation/Animator.h"
 #include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewPropertyAnimator;
+
 using Elastos::Droid::Animation::Animator;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {

@@ -2,9 +2,9 @@
 #define  __ELASTOS_DROID_LAUNCHER2_FOLDERINFO_H__
 
 #include "_Launcher2.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
-#include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"

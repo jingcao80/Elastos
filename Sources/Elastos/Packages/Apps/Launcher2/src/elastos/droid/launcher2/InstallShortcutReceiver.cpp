@@ -1,20 +1,19 @@
 
 #include "elastos/droid/launcher2/InstallShortcutReceiver.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
-#include "Elastos.Droid.Service.h"
-#include "R.h"
-#include <elastos/core/AutoLock.h>
-#include <elastos/core/CoreUtils.h>
-#include "Elastos.CoreLibrary.External.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
+#include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.External.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
+#include "R.h"
 
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
-using Elastos::Droid::Widget::IToast;
-using Elastos::Droid::Widget::CToastHelper;
-using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Content::IIntentHelper;
+using Elastos::Droid::Content::CIntentHelper;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -22,24 +21,25 @@ using Elastos::Droid::Content::CIntentShortcutIconResource;
 using Elastos::Droid::Content::IIntentShortcutIconResource;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::CBitmapFactory;
-using Elastos::Droid::Content::IIntentHelper;
-using Elastos::Droid::Content::CIntentHelper;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Utility::CBase64;
+using Elastos::Droid::Utility::IBase64;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::ISet;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 using Org::Json::CJSONStringer;
 using Org::Json::IJSONStringer;
 using Org::Json::CJSONTokener;
 using Org::Json::IJSONTokener;
 using Org::Json::CJSONObject;
 using Org::Json::IJSONObject;
-using Elastos::Droid::Utility::CBase64;
-using Elastos::Droid::Utility::IBase64;
-using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {

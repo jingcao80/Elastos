@@ -1,16 +1,16 @@
 
 #include "elastos/droid/launcher2/HideFromAccessibilityHelper.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 #include <elastos/core/CoreUtils.h>
+#include "R.h"
 
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
+using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CHashMap;
-using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
-using Elastos::Droid::View::IViewParent;
-using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {

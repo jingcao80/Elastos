@@ -1,24 +1,23 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CHOTSEAT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CHOTSEAT_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CHotseat.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/FrameLayout.h"
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Utility.h"
-#include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Core::Object;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {

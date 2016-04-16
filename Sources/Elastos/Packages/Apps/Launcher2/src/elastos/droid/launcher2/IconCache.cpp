@@ -3,11 +3,11 @@
 #include "elastos/droid/launcher2/Utilities.h"
 #include "elastos/droid/os/Process.h"
 #include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Service.h"
 #include "elastos/droid/R.h"
+#include "Elastos.Droid.Service.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/core/AutoLock.h>
 #include "R.h"
 
 using Elastos::Droid::App::IActivityManager;

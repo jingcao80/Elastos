@@ -1,15 +1,14 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CDRAWABLESATTEPROXYVIEW_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CDRAWABLESATTEPROXYVIEW_H__
 
-#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CDrawableStateProxyView.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/LinearLayout.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::LinearLayout;
 
 namespace Elastos {
