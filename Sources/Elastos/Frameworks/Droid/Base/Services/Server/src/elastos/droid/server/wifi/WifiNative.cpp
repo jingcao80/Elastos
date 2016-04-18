@@ -137,13 +137,13 @@ Object WifiNative::mClassLock;
 Int32 WifiNative::WIFI_SCAN_BUFFER_FULL = 0;
 Int32 WifiNative::WIFI_SCAN_COMPLETE = 1;
 Int32 WifiNative::sScanCmdId = 0;
-AutoPtr<WifiNative::ScanEventHandler> WifiNative::sScanEventHandler;
+AutoPtr<IWifiNativeScanEventHandler> WifiNative::sScanEventHandler;
 AutoPtr<WifiNative::ScanSettings> WifiNative::sScanSettings;
 Int32 WifiNative::sHotlistCmdId = 0;
-AutoPtr<WifiNative::HotlistEventHandler> WifiNative::sHotlistEventHandler;
-AutoPtr<WifiNative::SignificantWifiChangeEventHandler> WifiNative::sSignificantWifiChangeHandler;
+AutoPtr<IWifiNativeHotlistEventHandler> WifiNative::sHotlistEventHandler;
+AutoPtr<IWifiNativeSignificantWifiChangeEventHandler> WifiNative::sSignificantWifiChangeHandler;
 Int32 WifiNative::sSignificantWifiChangeCmdId;
-AutoPtr<WifiNative::RttEventHandler> WifiNative::sRttEventHandler;
+AutoPtr<IWifiNativeRttEventHandler> WifiNative::sRttEventHandler;
 Int32 WifiNative::sRttCmdId;
 
 WifiNative::MonitorThread::MonitorThread(
@@ -2037,7 +2037,7 @@ void WifiNative::OnFullScanResult(
 
 Boolean WifiNative::StartScan(
     /* [in] */ ScanSettings* settings,
-    /* [in] */ ScanEventHandler* eventHandler)
+    /* [in] */ IWifiNativeScanEventHandler* eventHandler)
 {
     AutoLock classlock(mClassLock);
     {
@@ -2255,7 +2255,7 @@ Boolean WifiNative::ResetHotlistNative(
 
 Boolean WifiNative::SetHotlist(
     /* [in] */ IWifiScannerHotlistSettings* settings,
-    /* [in] */ HotlistEventHandler* eventHandler)
+    /* [in] */ IWifiNativeHotlistEventHandler* eventHandler)
 {
     AutoLock classlock(mClassLock);
     {
@@ -2435,7 +2435,7 @@ Boolean WifiNative::UntrackSignificantWifiChangeNative(
 
 Boolean WifiNative::TrackSignificantWifiChange(
     /* [in] */ IWifiScannerWifiChangeSettings* settings,
-    /* [in] */ SignificantWifiChangeEventHandler* handler)
+    /* [in] */ IWifiNativeSignificantWifiChangeEventHandler* handler)
 {
     AutoLock classlock(mClassLock);
     {
@@ -2718,7 +2718,7 @@ Boolean WifiNative::CancelRangeRequestNative(
 
 Boolean WifiNative::RequestRtt(
     /* [in] */ ArrayOf<IRttManagerRttParams*>* params,
-    /* [in] */ RttEventHandler* handler)
+    /* [in] */ IWifiNativeRttEventHandler* handler)
 {
     AutoLock classlock(mClassLock);
     {

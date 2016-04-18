@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFINATIVE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFINATIVE_H__
 
+#include "_Elastos.Droid.Server.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Thread.h"
 
@@ -72,37 +73,37 @@ public:
         AutoPtr<ArrayOf<BucketSettings*> > buckets;
     };
 
-    class ScanEventHandler : public Object {
-    public:
-        virtual CARAPI_(void) OnScanResultsAvailable() = 0;
+    //class ScanEventHandler : public Object {
+    //public:
+    //    virtual CARAPI OnScanResultsAvailable() = 0;
 
-        virtual CARAPI_(void) OnFullScanResult(
-            /* [in] */ IScanResult* fullScanResult);
+    //    virtual CARAPI OnFullScanResult(
+    //        /* [in] */ IScanResult* fullScanResult);
 
-        virtual CARAPI_(void) OnSingleScanComplete() = 0;
+    //    virtual CARAPI OnSingleScanComplete() = 0;
 
-        virtual CARAPI_(void) OnScanPaused() = 0;
+    //    virtual CARAPI OnScanPaused() = 0;
 
-        virtual CARAPI_(void) OnScanRestarted() = 0;
-    };
+    //    virtual CARAPI OnScanRestarted() = 0;
+    //};
 
-    class HotlistEventHandler : public Object {
-    public:
-        virtual CARAPI_(void) OnHotlistApFound(
-            /* [in] */ ArrayOf<IScanResult*>* result) = 0;
-    };
+    //class HotlistEventHandler : public Object {
+    //public:
+    //    virtual CARAPI OnHotlistApFound(
+    //        /* [in] */ ArrayOf<IScanResult*>* result) = 0;
+    //};
 
-    class SignificantWifiChangeEventHandler : public Object {
-    public:
-        virtual CARAPI_(void) OnChangesFound(
-            /* [in] */ ArrayOf<IScanResult*>* result) = 0;
-    };
+    //class SignificantWifiChangeEventHandler : public Object {
+    //public:
+    //    virtual CARAPI OnChangesFound(
+    //        /* [in] */ ArrayOf<IScanResult*>* result) = 0;
+    //};
 
-    class RttEventHandler : public Object {
-    public:
-        virtual CARAPI OnRttResults(
-            /* [in] */ ArrayOf<IRttManagerRttResult*>* result) = 0;
-    };
+    //class RttEventHandler : public Object {
+    //public:
+    //    virtual CARAPI OnRttResults(
+    //        /* [in] */ ArrayOf<IRttManagerRttResult*>* result) = 0;
+    //};
 
 private:
     class MonitorThread : public Thread {
@@ -604,7 +605,7 @@ public:
 
     static CARAPI_(Boolean) StartScan(
         /* [in] */ ScanSettings* settings,
-        /* [in] */ ScanEventHandler* eventHandler);
+        /* [in] */ IWifiNativeScanEventHandler* eventHandler);
 
     static CARAPI_(void) StopScan();
 
@@ -616,7 +617,7 @@ public:
 
     static CARAPI_(Boolean) SetHotlist(
         /* [in] */ IWifiScannerHotlistSettings* settings,
-        /* [in] */ HotlistEventHandler* eventHandler);
+        /* [in] */ IWifiNativeHotlistEventHandler* eventHandler);
 
     static CARAPI_(void) ResetHotlist();
 
@@ -626,7 +627,7 @@ public:
 
     static CARAPI_(Boolean) TrackSignificantWifiChange(
         /* [in] */ IWifiScannerWifiChangeSettings* settings,
-        /* [in] */ SignificantWifiChangeEventHandler* handler);
+        /* [in] */ IWifiNativeSignificantWifiChangeEventHandler* handler);
 
     static CARAPI_(void) UntrackSignificantWifiChange();
 
@@ -660,7 +661,7 @@ public:
 
     static CARAPI_(Boolean) RequestRtt(
         /* [in] */ ArrayOf<IRttManagerRttParams*>* params,
-        /* [in] */ RttEventHandler* handler);
+        /* [in] */ IWifiNativeRttEventHandler* handler);
 
     static CARAPI_(Boolean) CancelRtt(
         /* [in] */ ArrayOf<IRttManagerRttParams*>* params);
@@ -838,16 +839,16 @@ private:
     static Int32 WIFI_SCAN_COMPLETE;// = 1;
 
     static Int32 sScanCmdId;// = 0;
-    static AutoPtr<ScanEventHandler> sScanEventHandler;
+    static AutoPtr<IWifiNativeScanEventHandler> sScanEventHandler;
     static AutoPtr<ScanSettings> sScanSettings;
 
     static Int32 sHotlistCmdId;// = 0;
-    static AutoPtr<HotlistEventHandler> sHotlistEventHandler;
+    static AutoPtr<IWifiNativeHotlistEventHandler> sHotlistEventHandler;
 
-    static AutoPtr<SignificantWifiChangeEventHandler> sSignificantWifiChangeHandler;
+    static AutoPtr<IWifiNativeSignificantWifiChangeEventHandler> sSignificantWifiChangeHandler;
     static Int32 sSignificantWifiChangeCmdId;
 
-    static AutoPtr<RttEventHandler> sRttEventHandler;
+    static AutoPtr<IWifiNativeRttEventHandler> sRttEventHandler;
     static Int32 sRttCmdId;
 };
 

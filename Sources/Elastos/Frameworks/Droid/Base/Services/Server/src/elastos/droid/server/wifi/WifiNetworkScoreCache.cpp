@@ -1,5 +1,8 @@
-
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/server/wifi/WifiNetworkScoreCache.h"
+
+using Elastos::Droid::Net::EIID_IINetworkScoreCache;
+using Elastos::Droid::Os::EIID_IBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -10,21 +13,26 @@ namespace Wifi {
 //                        WifiNetworkScoreCache
 //=====================================================================
 Int32 WifiNetworkScoreCache::INVALID_NETWORK_SCORE = 100000;
-String WifiNetworkScoreCache::TAG = "WifiNetworkScoreCache";
+String WifiNetworkScoreCache::TAG("WifiNetworkScoreCache");
 
 CAR_INTERFACE_IMPL_2(WifiNetworkScoreCache, Object, IINetworkScoreCache, IBinder);
 
-WifiNetworkScoreCache::WifiNetworkScoreCache(
-    /* [in] */ IContext* context)
+WifiNetworkScoreCache::WifiNetworkScoreCache()
 {
     DBG = TRUE;
+}
+
+ECode WifiNetworkScoreCache::constructor(
+    /* [in] */ IContext* context)
+{
     // ==================before translated======================
     // mContext = context;
     // mNetworkCache = new HashMap<String, ScoredNetwork>();
+    return NOERROR;
 }
 
-const ECode WifiNetworkScoreCache::UpdateScores(
-    /* [in] */ IList<android::net::ScoredNetwork*>* networks)
+ECode WifiNetworkScoreCache::UpdateScores(
+    /* [in] */ IList* networks)//ScoredNetwork
 {
     VALIDATE_NOT_NULL(networks);
     // ==================before translated======================
@@ -44,7 +52,7 @@ const ECode WifiNetworkScoreCache::UpdateScores(
     return NOERROR;
 }
 
-const ECode WifiNetworkScoreCache::ClearScores()
+ECode WifiNetworkScoreCache::ClearScores()
 {
     // ==================before translated======================
     // synchronized (mNetworkCache) {
@@ -138,7 +146,7 @@ ECode WifiNetworkScoreCache::GetNetworkScore(
     return NOERROR;
 }
 
-const void WifiNetworkScoreCache::Dump(
+void WifiNetworkScoreCache::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* writer,
     /* [in] */ ArrayOf<String>* args)

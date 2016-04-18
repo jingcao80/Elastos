@@ -11,10 +11,13 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 
 C_DEFINES += -DDROID_SERVER
 
-SOURCES = CStateChangeResult.cpp
+SOURCES = CRttServiceImpl.cpp
+SOURCES += CStateChangeResult.cpp
+SOURCES += CWifiNetworkScoreCache.cpp
+SOURCES += CWifiScanningService.cpp
+SOURCES += CWifiService.cpp
 SOURCES += NetworkUpdateResult.cpp
 SOURCES += RttService.cpp
-SOURCES += CRttServiceImpl.cpp
 SOURCES += SupplicantStateTracker.cpp
 SOURCES += WifiApConfigStore.cpp
 SOURCES += WifiAutoJoinController.cpp
@@ -22,5 +25,15 @@ SOURCES += WifiConfigStore.cpp
 SOURCES += WifiController.cpp
 SOURCES += WifiMonitor.cpp
 SOURCES += WifiNative.cpp
-#SOURCES += WifiNetworkScoreCache.cpp
+SOURCES += WifiNetworkScoreCache.cpp
+SOURCES += WifiNotificationController.cpp
+SOURCES += WifiParser.cpp
+SOURCES += WifiScanningService.cpp
+SOURCES += WifiScanningServiceImpl.cpp
+SOURCES += WifiService.cpp
+SOURCES += WifiServiceImpl.cpp
+SOURCES += WifiSettingsStore.cpp
+#SOURCES += WifiStateMachine.cpp
+SOURCES += WifiTrafficPoller.cpp
+SOURCES += WifiWatchdogStateMachine.cpp
 

@@ -1,38 +1,41 @@
-#ifndef __ELASTOS_DROID_SERVER_CWIFIP2PSERVICE_H__
-#define __ELASTOS_DROID_SERVER_CWIFIP2PSERVICE_H__
+#ifndef __ELASTOS_DROID_SERVER_WIFIP2PSERVICEIMPL_H__
+#define __ELASTOS_DROID_SERVER_WIFIP2PSERVICEIMPL_H__
 
-#include "_Elastos_Droid_Wifi_P2p_CWifiP2pService.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 #include "elastos/droid/utility/StateMachine.h"
 #include "elastos/droid/utility/State.h"
 #include "elastos/droid/utility/AsyncChannel.h"
+#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/SystemProperties.h"
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::SystemProperties;
-using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::IActivityManager;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::IWindow;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Net::INetworkInfo;
-using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceInfo;
-using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceRequest;
-using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponse;
 using Elastos::Droid::Internal::Utility::AsyncChannel;
 using Elastos::Droid::Internal::Utility::StateMachine;
 using Elastos::Droid::Internal::Utility::State;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IINetworkManagementService;
+using Elastos::Droid::Os::IMessenger;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Net::INetworkInfo;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
+using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceInfo;
+using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceRequest;
+using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponse;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -53,9 +56,57 @@ namespace Server {
 namespace Wifi {
 namespace P2p {
 
-CarClass(CWifiP2pService)
+class WifiP2pServiceImpl
+    : public IIWifiP2pManager
+    , public IBinder
 {
 public:
+    /**
+     * Error code definition.
+     * see the Table.8 in the WiFi Direct specification for the detail.
+     */
+    enum P2pStatus {
+        /* Success. */
+        P2pStatus_SUCCESS,
+
+        /* The target device is currently unavailable. */
+        P2pStatus_INFORMATION_IS_CURRENTLY_UNAVAILABLE,
+
+        /* Protocol error. */
+        P2pStatus_INCOMPATIBLE_PARAMETERS,
+
+        /* The target device reached the limit of the number of the connectable device.
+         * For example, device limit or group limit is set. */
+        P2pStatus_LIMIT_REACHED,
+
+        /* Protocol error. */
+        P2pStatus_INVALID_PARAMETER,
+
+        /* Unable to accommodate request. */
+        P2pStatus_UNABLE_TO_ACCOMMODATE_REQUEST,
+
+        /* Previous protocol error, or disruptive behavior. */
+        P2pStatus_PREVIOUS_PROTOCOL_ERROR,
+
+        /* There is no common channels the both devices can use. */
+        P2pStatus_NO_COMMON_CHANNEL,
+
+        /* Unknown p2p group. For example, Device A tries to invoke the previous persistent group,
+         *  but device B has removed the specified credential already. */
+        P2pStatus_UNKNOWN_P2P_GROUP,
+
+        /* Both p2p devices indicated an intent of 15 in group owner negotiation. */
+        P2pStatus_BOTH_GO_INTENT_15,
+
+        /* Incompatible provisioning method. */
+        P2pStatus_INCOMPATIBLE_PROVISIONING_METHOD,
+
+        /* Rejected by user */
+        P2pStatus_REJECTED_BY_USER,
+
+        /* Unknown error */
+        P2pStatus_UNKNOWN;
+    };
     /**
      * Information about a particular client and we track the service discovery requests
      * and the local services registered by the client.
@@ -66,7 +117,7 @@ public:
     public:
         ClientInfo(
             /* [in] */ IMessenger* m,
-            /* [in] */ CWifiP2pService* host);
+            /* [in] */ WifiP2pServiceImpl* host);
 
         CARAPI GetMessenger(
             /* [out] */ IMessenger** messenger);
@@ -91,7 +142,7 @@ public:
          */
         List<AutoPtr<IWifiP2pServiceInfo> > mServList;
 
-        CWifiP2pService* mHost;
+        WifiP2pServiceImpl* mHost;
     };
 
     class P2pStateMachine
@@ -511,8 +562,9 @@ public:
     public:
         P2pStateMachine(
             /* [in] */ const String& name,
+            //TODO
             /* [in] */ Boolean p2pSupported,
-            /* [in] */ CWifiP2pService* host);
+            /* [in] */ WifiP2pServiceImpl* host);
 
         CARAPI SendP2pStateChangedBroadcast(
             /* [in] */ Boolean enabled);
@@ -848,13 +900,26 @@ public:
         // Saved WifiP2pDevice from provisioning request
         AutoPtr<IWifiP2pDevice> mSavedProvDiscDevice;
 
-        CWifiP2pService* mHost;
+        WifiP2pServiceImpl* mHost;
+    };
+private:
+    /**
+     * Handles client connections
+     */
+    class ClientHandler : public Handler
+    {
+    public:
+        ClientHandler(
+            /* [in] */ ILooper* looper);
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
     };
 
 public:
-    CWifiP2pService();
+    WifiP2pServiceImpl();
 
-    ~CWifiP2pService();
+    ~WifiP2pServiceImpl();
 
     CARAPI constructor(
         /* [in] */ IContext * context);
@@ -864,31 +929,65 @@ public:
     CARAPI GetMessenger(
         /* [out] */ IMessenger** msg);
 
+    /**
+     * Get a reference to handler. This is used by a WifiStateMachine to establish
+     * an AsyncChannel communication with P2pStateMachine
+     * @hide
+     */
+    CARAPI_(AutoPtr<IMessenger>) GetP2pStateMachineMessenger();
+
+    CARAPI_(void) EnableVerboseLogging(
+        /* [in] */ Int32 verbose);
+
+    /** This is used to provide information to drivers to optimize performance depending
+     * on the current mode of operation.
+     * 0 - disabled
+     * 1 - source operation
+     * 2 - sink operation
+     *
+     * As an example, the driver could reduce the channel dwell time during scanning
+     * when acting as a source or sink to minimize impact on miracast.
+     */
+    CARAPI_(void) SetMiracastMode(
+        /* [in] */ Int32 mode);
+
     static CARAPI_(P2pStatus) ValueOf(
         /* [in] */ Int32 error);
+
+    CARAPI ToString(
+        /* [out] */ String* info)
+    {
+        VALIDATE_NOT_NULL(info)
+        return Object::ToString(info);
+    }
+
+    CARAPI WifiConfigStore::Dump(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String>* args);
 
 private:
     CARAPI EnforceAccessPermission();
 
     CARAPI EnforceChangePermission();
 
+    CARAPI EnforceConnectivityInternalPermission();
+
+    CARAPI_(Int32) CheckConnectivityInternalPermission();
+
+    CARAPI_(Int32) CheckLocationHardwarePermission();
+
+    CARAPI EnforceConnectivityInternalOrLocationHardwarePermission();
 public:
     static const String TAG;
-    static const Boolean DBG;
+    static Boolean DBG;
     static const String NETWORKTYPE;
 
     static const Boolean JOIN_GROUP;
     static const Boolean FORM_GROUP;
 
-    static const Boolean TRY_REINVOCATION;
-    static const Boolean NO_REINVOCATION;
-
     static const Boolean RELOAD;
     static const Boolean NO_RELOAD;
-
-    static const Int32 CONNECT_FAILURE;
-    static const Int32 CONNECT_SUCCESS;
-    static const Int32 NEEDS_PROVISION_REQ;
 
     /* Two minutes comes from the wpa_supplicant setting */
     static const Int32 GROUP_CREATING_WAIT_TIME_MS;
@@ -903,6 +1002,8 @@ public:
 
     static const Int32 BASE;
 
+    /* Delayed message to timeout group creation */
+    static const Int32 GROUP_CREATING_TIMED_OUT;
     /* User accepted a peer request */
     static const Int32 PEER_CONNECTION_USER_ACCEPT;
     /* User rejected a peer request */
@@ -911,21 +1012,57 @@ public:
     static const Int32 DROP_WIFI_USER_ACCEPT;
     /* User wants to keep his wifi connection and drop p2p */
     static const Int32 DROP_WIFI_USER_REJECT;
+    /* Delayed message to timeout p2p disable */
+    static const Int32 DISABLE_P2P_TIMED_OUT;
+
+    /* Commands to the WifiStateMachine */
+    static const Int32 P2P_CONNECTION_CHANGED;
+
+    /* These commands are used to temporarily disconnect wifi when we detect
+     * a frequency conflict which would make it impossible to have with p2p
+     * and wifi active at the same time.
+     *
+     * If the user chooses to disable wifi temporarily, we keep wifi disconnected
+     * until the p2p connection is done and terminated at which point we will
+     * bring back wifi up
+     *
+     * DISCONNECT_WIFI_REQUEST
+     *      msg.arg1 = 1 enables temporary disconnect and 0 disables it.
+     */
+    static const Int32 DISCONNECT_WIFI_REQUEST;
+    static const Int32 DISCONNECT_WIFI_RESPONSE;
+
+    static const Int32 SET_MIRACAST_MODE;
+
+    // During dhcp (and perhaps other times) we can't afford to drop packets
+    // but Discovery will switch our channel enough we will.
+    //   msg.arg1 = ENABLED for blocking, DISABLED for resumed.
+    //   msg.arg2 = msg to send when blocked
+    //   msg.obj  = StateMachine to send to when blocked
+    static const Int32 BLOCK_DISCOVERY;
+
+    // set country code
+    static const Int32 SET_COUNTRY_CODE;
+    static const Int32 P2P_MIRACAST_MODE_CHANGED;
+
+    static const Int32 ENABLED;
+    static const Int32 DISABLED;
 
     /* indicate wfd device P2pGroupOnwer:1 or P2pClient:2,empty unknown*/
-    static const String WFD_P2P_ROLE;// = "wlan.wfdp2p.role";
-    static const String WFD_DNSMASQ_PEER;// = "wlan.wfddnsmasq.peer";
-    static const String WFD_P2P_DEVICE_ADDR;// = "wlan.wfdp2p.addr";
+    //static const String WFD_P2P_ROLE;// = "wlan.wfdp2p.role";
+    //static const String WFD_DNSMASQ_PEER;// = "wlan.wfddnsmasq.peer";
+    //static const String WFD_P2P_DEVICE_ADDR;// = "wlan.wfdp2p.addr";
 
     /* Is chosen as a unique range to avoid conflict with
        the range defined in Tethering.java */
-    static const AutoPtr<ArrayOf<String> > DHCP_RANGE;
+    //static const AutoPtr<ArrayOf<String> > DHCP_RANGE;
     static const String SERVER_ADDRESS;
 
-    static const String SERVER_ADDRESS_TETHER;// = "192.168.43.1";//copy from Tethering.java
+    //static const String SERVER_ADDRESS_TETHER;// = "192.168.43.1";//copy from Tethering.java
 
     //tether mode with p2p
-    String mTetherInterfaceName;
+    //String mTetherInterfaceName;
+    AutoPtr<ClientHandler> mClientHandler;
 
     static Int32 mGroupCreatingTimeoutIndex;
     static Int32 mDisableP2pTimeoutIndex;
@@ -933,9 +1070,6 @@ public:
     AutoPtr<IContext> mContext;
     String mInterface;
     AutoPtr<INotification> mNotification;
-
-    //tether mode with p2p
-    AutoPtr<IConnectivityManager> mConnectivityManager;
 
     AutoPtr<IINetworkManagementService> mNwService;
     AutoPtr<DhcpStateMachine> mDhcpStateMachine;
@@ -958,14 +1092,30 @@ public:
     /* Invitation to join an existing p2p group */
     Boolean mJoinExistingGroup;
 
+    Boolean mIsInvite;
+
     /* Track whether we are in p2p discovery. This is used to avoid sending duplicate
      * broadcasts
      */
     Boolean mDiscoveryStarted;
 
+    /* Track whether servcice/peer discovery is blocked in favor of other wifi actions
+     * (notably dhcp)
+     */
+    Boolean mDiscoveryBlocked;
+
+    // Supplicant doesn't like setting the same country code multiple times (it may drop
+    // current connected network), so we save the country code here to avoid redundency
+    String mLastSetCountryCode;
+
+    /*
+     * remember if we were in a scan when it had to be stopped
+     */
+    Boolean mDiscoveryPostponed;
+
     AutoPtr<INetworkInfo> mNetworkInfo;
 
-    Boolean mTempoarilyDisconnectedWifi;
+    Boolean mTemporarilyDisconnectedWifi;
 
     /* The transaction Id of service discovery request */
     Byte mServiceTransactionId;
@@ -979,10 +1129,10 @@ public:
 
     /* The foreground application's messenger.
      * The connection request is notified only to foreground application  */
-    AutoPtr<IMessenger> mForegroundAppMessenger;
+    //AutoPtr<IMessenger> mForegroundAppMessenger;
 
     /* the package name of foreground application. */
-    String mForegroundAppPkgName;
+    //String mForegroundAppPkgName;
 };
 
 } // namespace P2p
@@ -991,4 +1141,4 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_SERVER_CWIFIP2PSERVICE_H__
+#endif // __ELASTOS_DROID_SERVER_WIFIP2PSERVICEIMPL_H__

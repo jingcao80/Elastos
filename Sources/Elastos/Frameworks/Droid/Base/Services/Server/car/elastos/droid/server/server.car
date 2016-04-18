@@ -100,6 +100,7 @@ module
     merge("wifi/RttService.car");
     merge("wifi/WifiScanningService.car");
     merge("wifi/WifiService.car");
+    merge("wifi/WifiNative.car");
 
     merge("wm/WindowManagerService.car");
 
@@ -215,6 +216,7 @@ module
     using interface Elastos.Droid.Net.IINetworkStatsService;
     using interface Elastos.Droid.Net.IINetworkPolicyListener;
     using interface Elastos.Droid.Net.IINetworkScoreService;
+    using interface Elastos.Droid.Net.IINetworkScoreCache;
     using interface Elastos.Droid.Net.Nsd.IINsdManager;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IBundle;
@@ -256,6 +258,8 @@ module
     using interface Elastos.Droid.View.IWindowSession;
     using interface Elastos.Droid.View.IIAssetAtlas;
     using interface Elastos.Droid.Wifi.IIRttManager;
+    using interface Elastos.Droid.Wifi.IIWifiScanner;
+    using interface Elastos.Droid.Wifi.IIWifiManager;
     using interface Elastos.Droid.Webkit.IIWebViewUpdateService;
 
     using interface Elastos.Core.IRunnable;
@@ -2299,6 +2303,33 @@ module
             [in] IContext* ctx);
 
         interface IIRttManager;
+        interface IBinder;
+    }
+
+    [local]
+    class CWifiNetworkScoreCache {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IINetworkScoreCache;
+        interface IBinder;
+    }
+
+    [local]
+    class CWifiScanningService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IIWifiScanner;
+        interface IBinder;
+    }
+
+    [local]
+    class CWifiService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IIWifiManager;
         interface IBinder;
     }
 

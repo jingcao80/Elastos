@@ -1,5 +1,8 @@
 
+#include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "elastos/droid/server/wifi/WifiTrafficPoller.h"
+
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {

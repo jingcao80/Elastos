@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFISERVICEIMPL_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFISERVICEIMPL_H__
 
+#include "Elastos.Droid.App.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -295,7 +296,11 @@ private:
     };
 
 public:
-    WifiServiceImpl(
+    CAR_INTERFACE_DECL();
+
+    WifiServiceImpl();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     /**
@@ -679,6 +684,13 @@ public:
     /* Return the Wifi Connection statistics object */
     virtual CARAPI GetConnectionStatistics(
         /* [out] */ IWifiConnectionStatistics** result);
+
+    CARAPI ToString(
+        /* [out] */ String* info)
+    {
+        VALIDATE_NOT_NULL(info)
+        return Object::ToString(info);
+    }
 
 protected:
     // @Override

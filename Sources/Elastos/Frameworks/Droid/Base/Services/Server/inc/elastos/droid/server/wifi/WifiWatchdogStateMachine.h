@@ -22,6 +22,7 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Os::IMessenger;
+using Elastos::Droid::Net::ILinkProperties;
 using Elastos::Droid::Wifi::ISupplicantState;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiManager;
@@ -79,6 +80,11 @@ public:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("DefaultState");
+        }
+
     private:
         WifiWatchdogStateMachine* mOwner;
     };
@@ -100,6 +106,11 @@ public:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName()
+        {
+            return String("WatchdogDisabledState");
+        }
 
     private:
         WifiWatchdogStateMachine* mOwner;
@@ -123,6 +134,11 @@ public:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("WatchdogEnabledState");
+        }
+
     private:
         WifiWatchdogStateMachine* mOwner;
     };
@@ -139,6 +155,11 @@ public:
 
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("NotConnectedState");
+        }
 
     private:
         WifiWatchdogStateMachine* mOwner;
@@ -164,6 +185,11 @@ public:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("VerifyingLinkState");
+        }
+
     private:
         Int32 mSampleCount;
         WifiWatchdogStateMachine* mOwner;
@@ -187,6 +213,11 @@ public:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("ConnectedState");
+        }
+
     private:
         WifiWatchdogStateMachine* mOwner;
     };
@@ -208,6 +239,11 @@ public:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName()
+        {
+            return String("OnlineWatchState");
+        }
 
     private:
         CARAPI_(void) HandleRssiChange();
@@ -239,6 +275,11 @@ public:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("LinkMonitoringState");
+        }
+
     private:
         Int32 mSampleCount;
 
@@ -265,6 +306,11 @@ public:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName()
+        {
+            return String("OnlineState");
+        }
 
     private:
         WifiWatchdogStateMachine* mOwner;

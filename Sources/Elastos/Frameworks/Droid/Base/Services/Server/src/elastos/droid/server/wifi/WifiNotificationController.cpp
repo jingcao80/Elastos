@@ -1,4 +1,4 @@
-
+#include "Elastos.Droid.App.h"
 #include "elastos/droid/server/wifi/WifiNotificationController.h"
 #include "elastos/droid/R.h"
 
@@ -105,13 +105,6 @@ const Int32 WifiNotificationController::NUM_SCANS_BEFORE_ACTUALLY_SCANNING;
 WifiNotificationController::WifiNotificationController(
     /* [in] */ IContext* context,
     /* [in] */ WifiStateMachine* wsm)
-    : case DISCONNECTED:
-                                 case CAPTIVE_PORTAL_CHECK:
-                                     resetNotification();
-                                     break;
-                             }
-                         } else if (intent.getAction().equals(
-                                 WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
 {
     // ==================before translated======================
     // mContext = context;
@@ -178,7 +171,7 @@ ECode WifiNotificationController::Dump(
 // synchronized
 void WifiNotificationController::CheckAndSetNotification(
     /* [in] */ INetworkInfo* networkInfo,
-    /* [in] */ IList<IScanResult>* scanResults)
+    /* [in] */ IList* scanResults)//IScanResult
 {
     // ==================before translated======================
     //
@@ -305,5 +298,4 @@ void WifiNotificationController::SetNotificationVisible(
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
 

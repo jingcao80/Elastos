@@ -1,6 +1,11 @@
 
 #include "elastos/droid/server/wifi/WifiServiceImpl.h"
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IBinderHelper;
+using Elastos::Droid::Os::CBinderHelper;
+using Elastos::Droid::Wifi::EIID_IIWifiManager;
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -74,7 +79,6 @@ ECode WifiServiceImpl::TdlsTask::DoInBackground(
     //
     // return 0;
     assert(0);
-    AutoPtr<Integer> empty;
     return NOERROR;
 }
 
@@ -144,7 +148,7 @@ void WifiServiceImpl::LockList::AddLock(
     assert(0);
 }
 
-AutoPtr<WifiLock> WifiServiceImpl::LockList::RemoveLock(
+AutoPtr<WifiServiceImpl::WifiLock> WifiServiceImpl::LockList::RemoveLock(
     /* [in] */ IBinder* binder)
 {
     // ==================before translated======================
@@ -393,9 +397,9 @@ WifiServiceImpl::BatchedScanRequest::BatchedScanRequest(
     /* [in] */ IBatchedScanSettings* settings,
     /* [in] */ IBinder* binder,
     /* [in] */ IWorkSource* ws)
+    : DeathRecipient(0, String(NULL), binder, NULL)
 {
     // ==================before translated======================
-    // super(0, null, binder, null);
     // this.settings = settings;
     // this.uid = getCallingUid();
     // this.pid = getCallingPid();
@@ -517,9 +521,8 @@ WifiServiceImpl::WifiLock::WifiLock(
     /* [in] */ const String& tag,
     /* [in] */ IBinder* binder,
     /* [in] */ IWorkSource* ws)
+    : DeathRecipient(lockMode, tag, binder, ws)
 {
-    // ==================before translated======================
-    // super(lockMode, tag, binder, ws);
 }
 
 ECode WifiServiceImpl::WifiLock::BinderDied()
@@ -578,9 +581,14 @@ ECode WifiServiceImpl::DeathRecipient::UnlinkDeathRecipient()
 WifiServiceImpl::Multicaster::Multicaster(
     /* [in] */ const String& tag,
     /* [in] */ IBinder* binder)
+    : DeathRecipient(0, tag, binder, NULL)
 {
     // ==================before translated======================
-    // super(Binder.getCallingUid(), tag, binder, null);
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    mMode = uid;
 }
 
 ECode WifiServiceImpl::Multicaster::BinderDied()
@@ -623,7 +631,13 @@ ECode WifiServiceImpl::Multicaster::GetUid(
 const String WifiServiceImpl::TAG("WifiService");
 const Boolean WifiServiceImpl::DBG = true;
 
-WifiServiceImpl::WifiServiceImpl(
+CAR_INTERFACE_IMPL_2(WifiServiceImpl, Object, IIWifiManager, IBinder);
+
+WifiServiceImpl::WifiServiceImpl()
+{
+}
+
+ECode WifiServiceImpl::constructor(
     /* [in] */ IContext* context)
 {
     // ==================before translated======================
@@ -648,6 +662,7 @@ WifiServiceImpl::WifiServiceImpl(
     //
     // mBatchedScanSupported = mContext.getResources().getBoolean(
     //         R.bool.config_wifi_batched_scan_supported);
+    return NOERROR;
 }
 
 ECode WifiServiceImpl::CheckAndStartWifi()

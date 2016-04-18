@@ -1,23 +1,15 @@
-/*
-  * Copyright (C) 2008 The Android Open Source Project
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFISCANNINGSERVICEIMPL_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFISCANNINGSERVICEIMPL_H__
 
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
 
 // package com.android.server.wifi;
 // import android.app.AlarmManager;
@@ -56,18 +48,32 @@
 // import java.util.List;
 // import java.util.Map;
 
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Net::Wifi::IScanResult;
-using Elastos::Io::IFileDescriptor;
-using Elastos::Io::IPrintWriter;
-using Elastos::Droid::Net::Wifi::WifiScanner::IScanSettings;
+using Elastos::Droid::App::IAlarmManager;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Com.android.internal.Utility.AsyncChannel;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
+using Elastos::Droid::Internal::Utility::State;
+using Elastos::Droid::Internal::Utility::IState;
+using Elastos::Droid::Internal::Utility::StateMachine;
+using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Net::Wifi::IWifiScanner;
+using Elastos::Droid::Wifi::IScanResult;
+using Elastos::Droid::Wifi::IWifiScannerScanSettings;
+using Elastos::Droid::Wifi::IWifiScannerHotlistSettings;
+using Elastos::Droid::Wifi::IIWifiScanner;
+using Elastos::Droid::Wifi::IWifiScannerChannelSpec;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::ICollection;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
@@ -76,20 +82,19 @@ namespace Wifi {
 
 class WifiScanningServiceImpl
     : public Object
-    , public IWifiScanner::Stub
+    , public IIWifiScanner
+    , public IBinder
 {
 public:
     class WifiScanningStateMachine
-        : public Object
-        , public IStateMachine
-        , public WifiNative::ScanEventHandler
-        , public WifiNative::HotlistEventHandler
-        , public WifiNative::SignificantWifiChangeEventHandler
+        : public StateMachine
+        , public IWifiNativeScanEventHandler
+        , public IWifiNativeHotlistEventHandler
+        , public IWifiNativeSignificantWifiChangeEventHandler
     {
     public:
         class DefaultState
-            : public Object
-            , public IState
+            : public State
         {
         public:
             // @Override
@@ -98,11 +103,16 @@ public:
             // @Override
             CARAPI_(Boolean) ProcessMessage(
                 /* [in] */ IMessage* msg);
+
+            CARAPI_(String) GetName()
+            {
+                return String("DefaultState");
+            }
+
         };
 
         class StartedState
-            : public Object
-            , public IState
+            : public State
         {
         public:
             // @Override
@@ -111,11 +121,16 @@ public:
             // @Override
             CARAPI_(Boolean) ProcessMessage(
                 /* [in] */ IMessage* msg);
+
+            CARAPI_(String) GetName()
+            {
+                return String("StartedState");
+            }
+
         };
 
         class PausedState
-            : public Object
-            , public IState
+            : public State
         {
         public:
             // @Override
@@ -124,9 +139,17 @@ public:
             // @Override
             CARAPI_(Boolean) ProcessMessage(
                 /* [in] */ IMessage* msg);
+
+            CARAPI_(String) GetName()
+            {
+                return String("PausedState");
+            }
+
         };
 
     public:
+        CAR_INTERFACE_DECL();
+
         WifiScanningStateMachine(
             /* [in] */ ILooper* looper);
 
@@ -148,11 +171,11 @@ public:
 
         // @Override
         CARAPI OnHotlistApFound(
-            /* [in] */ ArrayOf<IScanResult>* results);
+            /* [in] */ ArrayOf<IScanResult*>* results);
 
         // @Override
         CARAPI OnChangesFound(
-            /* [in] */ ArrayOf<IScanResult>* results);
+            /* [in] */ ArrayOf<IScanResult*>* results);
 
         // @Override
         CARAPI Dump(
@@ -161,20 +184,103 @@ public:
             /* [in] */ ArrayOf<String>* args);
 
     private:
-        /*const*/ AutoPtr<DefaultState> mDefaultState;
-        /*const*/ AutoPtr<StartedState> mStartedState;
-        /*const*/ AutoPtr<PausedState> mPausedState;
+        AutoPtr<DefaultState> mDefaultState;
+        AutoPtr<StartedState> mStartedState;
+        AutoPtr<PausedState> mPausedState;
+    };
+
+    class ClientInfo
+        : public Object
+    {
+    public:
+        ClientInfo(
+            /* [in] */ IAsyncChannel* c,
+            /* [in] */ IMessenger* m);
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+        virtual CARAPI AddScanRequest(
+            /* [in] */ IWifiScannerScanSettings* settings,
+            /* [in] */ Int32 id);
+
+        virtual CARAPI RemoveScanRequest(
+            /* [in] */ Int32 id);
+
+        virtual CARAPI GetScans(
+            /* [out] */ IIterator** result);//Map.Entry<Integer, WifiScanner.ScanSettings
+
+        virtual CARAPI GetScanSettings(
+            /* [out] */ ICollection** result);//IWifiScannerScanSettings
+
+        virtual CARAPI ReportScanResults(
+            /* [in] */ ArrayOf<IScanResult*>* results);
+
+        virtual CARAPI ReportScanResults(
+            /* [in] */ ArrayOf<IScanResult*>* results,
+            /* [in] */ Int32 handler);
+
+        virtual CARAPI DeliverScanResults(
+            /* [in] */ Int32 handler,
+            /* [in] */ ArrayOf<IScanResult*>* results);
+
+        virtual CARAPI ReportFullScanResult(
+            /* [in] */ IScanResult* result);
+
+        virtual CARAPI ReportPeriodChanged(
+            /* [in] */ Int32 handler,
+            /* [in] */ IWifiScannerScanSettings* settings,
+            /* [in] */ Int32 newPeriodInMs);
+
+        virtual CARAPI AddHostlistSettings(
+            /* [in] */ IWifiScannerHotlistSettings* settings,
+            /* [in] */ Int32 handler);
+
+        virtual CARAPI RemoveHostlistSettings(
+            /* [in] */ Int32 handler);
+
+        virtual CARAPI GetHotlistSettings(
+            /* [out] */ ICollection** result);//IWifiScannerHotlistSettings
+
+        virtual CARAPI ReportHotlistResults(
+            /* [in] */ ArrayOf<IScanResult*>* results);
+
+        virtual CARAPI AddSignificantWifiChange(
+            /* [in] */ Int32 handler);
+
+        virtual CARAPI RemoveSignificantWifiChange(
+            /* [in] */ Int32 handler);
+
+        virtual CARAPI GetWifiChangeHandlers(
+            /* [out] */ ICollection** result);//Integer
+
+        virtual CARAPI ReportWifiChanged(
+            /* [in] */ ArrayOf<IScanResult*>* results);
+
+        virtual CARAPI ReportWifiStabilized(
+            /* [in] */ ArrayOf<IScanResult*>* results);
+
+        virtual CARAPI Cleanup();
+
+    public:
+        AutoPtr<IHashMap> mScanSettings;//Integer, IWifiScannerScanSettings
+        AutoPtr<IHashMap> mScanPeriods;//Integer, Integer
+        AutoPtr<IHashMap> mHotlistSettings;//Integer, WifiScanner::HotlistSettings
+        AutoPtr<IHashSet> mSignificantWifiHandlers;//Integer
+
+    private:
+        static const Int32 MAX_LIMIT = 16;
+        AutoPtr<IAsyncChannel> mChannel;
+        AutoPtr<IMessenger> mMessenger;
     };
 
     class WifiChangeStateMachine
-        : public Object
-        , public IStateMachine
-        , public WifiNative::SignificantWifiChangeEventHandler
+        : public StateMachine
+        , public IWifiNativeSignificantWifiChangeEventHandler
     {
     public:
-        class DefaultState
-            : public Object
-            , public IState
+        class DefaultState : public State
         {
         public:
             // @Override
@@ -183,11 +289,15 @@ public:
             // @Override
             CARAPI_(Boolean) ProcessMessage(
                 /* [in] */ IMessage* msg);
+
+            CARAPI_(String) GetName()
+            {
+                return String("DefaultState");
+            }
+
         };
 
-        class StationaryState
-            : public Object
-            , public IState
+        class StationaryState : public State
         {
         public:
             // @Override
@@ -196,11 +306,15 @@ public:
             // @Override
             CARAPI_(Boolean) ProcessMessage(
                 /* [in] */ IMessage* msg);
+
+            CARAPI_(String) GetName()
+            {
+                return String("StationaryState");
+            }
+
         };
 
-        class MovingState
-            : public Object
-            , public IState
+        class MovingState : public State
         {
         public:
             // @Override
@@ -215,14 +329,18 @@ public:
 
             virtual CARAPI IssueFullScan();
 
+            CARAPI_(String) GetName()
+            {
+                return String("MovingState");
+            }
+
         public:
             Boolean mWifiChangeDetected;
             Boolean mScanResultsPending;
         };
 
         class ClientInfoLocal
-            : public Object
-            , public ClientInfo
+            : public ClientInfo
         {
         public:
             ClientInfoLocal();
@@ -230,19 +348,18 @@ public:
             // @Override
             CARAPI DeliverScanResults(
                 /* [in] */ Int32 handler,
-                /* [in] */ IScanResult* results[]);
+                /* [in] */ ArrayOf<IScanResult*>* results);
 
             // @Override
             CARAPI ReportPeriodChanged(
                 /* [in] */ Int32 handler,
-                /* [in] */ IScanSettings* settings,
+                /* [in] */ IWifiScannerScanSettings* settings,
                 /* [in] */ Int32 newPeriodInMs);
         };
 
     private:
         class InnerBroadcastReceiver3
-            : public Object
-            , public IBroadcastReceiver
+            : public BroadcastReceiver
         {
         public:
             InnerBroadcastReceiver3(
@@ -258,6 +375,8 @@ public:
         };
 
     public:
+        CAR_INTERFACE_DECL();
+
         WifiChangeStateMachine(
             /* [in] */ ILooper* looper);
 
@@ -266,26 +385,26 @@ public:
         virtual CARAPI Disable();
 
         virtual CARAPI Configure(
-            /* [in] */  WifiScanner);
+            /* [in] */ IWifiScannerWifiChangeSettings* settings);
 
         virtual CARAPI ReconfigureScan(
-            /* [in] */ ArrayOf<IScanResult>* results,
+            /* [in] */ ArrayOf<IScanResult*>* results,
             /* [in] */ Int32 period);
 
         virtual CARAPI ReconfigureScan(
-            /* [in] */  WifiScanner);
+            /* [in] */ IWifiScannerWifiChangeSettings* settings);
 
         // @Override
         CARAPI OnChangesFound(
-            /* [in] */ IScanResult* results[]);
+            /* [in] */ ArrayOf<IScanResult*>* results);
 
         virtual CARAPI AddScanRequest(
-            /* [in] */  WifiScanner);
+            /* [in] */ IWifiScannerScanSettings* settings);
 
         virtual CARAPI RemoveScanRequest();
 
         virtual CARAPI TrackSignificantWifiChange(
-            /* [in] */  WifiScanner);
+            /* [in] */ IWifiScannerWifiChangeSettings* settings);
 
         virtual CARAPI UntrackSignificantWifiChange();
 
@@ -295,7 +414,7 @@ public:
         AutoPtr<IState> mMovingState;
         AutoPtr<IAlarmManager> mAlarmManager;
         AutoPtr<IPendingIntent> mTimeoutIntent;
-        AutoPtr<IScanResult> mCurrentBssids[];
+        AutoPtr<ArrayOf<IScanResult*> > mCurrentBssids;
         AutoPtr<ClientInfo> mClientInfo;
 
     private:
@@ -312,122 +431,6 @@ public:
         static const Int32 MOVING_STATE_TIMEOUT_MS = 30000;
         static const String ACTION_TIMEOUT;
         static const Int32 SCAN_COMMAND_ID = 1;
-    };
-
-private:
-    class ClientHandler
-        : public Object
-        , public IHandler
-    {
-    public:
-        ClientHandler(
-            /* [in] */  android);
-
-        // @Override
-        CARAPI HandleMessage(
-            /* [in] */ IMessage* msg);
-    };
-
-    class InnerBroadcastReceiver1
-        : public Object
-        , public IBroadcastReceiver
-    {
-    public:
-        InnerBroadcastReceiver1(
-            /* [in] */ WifiScanningServiceImpl* owner);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        WifiScanningServiceImpl* mOwner;
-    };
-
-    class ClientInfo
-        : public Object
-    {
-    public:
-        ClientInfo(
-            /* [in] */ IAsyncChannel* c,
-            /* [in] */ IMessenger* m);
-
-        // @Override
-        CARAPI_(String) ToString();
-
-        virtual CARAPI AddScanRequest(
-            /* [in] */ IScanSettings* settings,
-            /* [in] */ Int32 id);
-
-        virtual CARAPI RemoveScanRequest(
-            /* [in] */ Int32 id);
-
-        virtual CARAPI GetScans(
-            /* [out] */ Iterator<Map.Entry<Integer, WifiScanner.ScanSettings>>** result);
-
-        virtual CARAPI GetScanSettings(
-            /* [out] */ Collection<ScanSettings>** result);
-
-        virtual CARAPI ReportScanResults(
-            /* [in] */ ArrayOf<IScanResult>* results);
-
-        virtual CARAPI ReportScanResults(
-            /* [in] */ ArrayOf<IScanResult>* results,
-            /* [in] */ Int32 handler);
-
-        virtual CARAPI DeliverScanResults(
-            /* [in] */ Int32 handler,
-            /* [in] */ IScanResult* results[]);
-
-        virtual CARAPI ReportFullScanResult(
-            /* [in] */ IScanResult* result);
-
-        virtual CARAPI ReportPeriodChanged(
-            /* [in] */ Int32 handler,
-            /* [in] */ IScanSettings* settings,
-            /* [in] */ Int32 newPeriodInMs);
-
-        virtual CARAPI AddHostlistSettings(
-            /* [in] */ IWifiScanner* ::HotlistSettings* settings,
-            /* [in] */ Int32 handler);
-
-        virtual CARAPI RemoveHostlistSettings(
-            /* [in] */ Int32 handler);
-
-        virtual CARAPI GetHotlistSettings(
-            /* [out] */ Collection<WifiScanner.HotlistSettings>** result);
-
-        virtual CARAPI ReportHotlistResults(
-            /* [in] */ ArrayOf<IScanResult>* results);
-
-        virtual CARAPI AddSignificantWifiChange(
-            /* [in] */ Int32 handler);
-
-        virtual CARAPI RemoveSignificantWifiChange(
-            /* [in] */ Int32 handler);
-
-        virtual CARAPI GetWifiChangeHandlers(
-            /* [out] */ Collection<Integer>** result);
-
-        virtual CARAPI ReportWifiChanged(
-            /* [in] */ ArrayOf<IScanResult>* results);
-
-        virtual CARAPI ReportWifiStabilized(
-            /* [in] */ ArrayOf<IScanResult>* results);
-
-        virtual CARAPI Cleanup();
-
-    public:
-        AutoPtr< IHashMap<Integer, IScanSettings> > mScanSettings;
-        AutoPtr< IHashMap<Integer, Integer> > mScanPeriods;
-        AutoPtr< IHashMap<Integer, WifiScanner::HotlistSettings> > mHotlistSettings;
-        AutoPtr< IHashSet<Integer> > mSignificantWifiHandlers;
-
-    private:
-        static const Int32 MAX_LIMIT = 16;
-        /*const*/ AutoPtr<IAsyncChannel> mChannel;
-        /*const*/ AutoPtr<IMessenger> mMessenger;
     };
 
     class SettingsComputer
@@ -450,29 +453,32 @@ private:
         };
 
     public:
+
+        SettingsComputer();
+
         virtual CARAPI PrepChannelMap(
-            /* [in] */  WifiScanner);
+            /* [in] */  IWifiScannerScanSettings* settings);
 
         virtual CARAPI AddScanRequestToBucket(
-            /* [in] */  WifiScanner,
+            /* [in] */ IWifiScannerScanSettings* settings,
             /* [out] */ Int32* result);
 
-        virtual CARAPI .ScanSettings getComputedSettings(
-            /* [out] */ WifiNative** result);
+        virtual CARAPI GetComputedSettings(
+            /* [out] */ WifiNative::ScanSettings** result);
 
         virtual CARAPI CompressBuckets();
 
     private:
-        static CARAPI_(AutoPtr< ArrayOf< AutoPtr<TimeBucket> > >) MiddleInitMtimebuckets();
+        static CARAPI_(AutoPtr<ArrayOf<TimeBucket*> >) MiddleInitMtimebuckets();
 
         CARAPI_(Int32) GetBestBucket(
-            /* [in] */  WifiScanner);
+            /* [in] */  IWifiScannerScanSettings* settings);
 
     public:
-        AutoPtr< IHashMap<Integer, Integer> > mChannelToBucketMap;
+        AutoPtr<IHashMap> mChannelToBucketMap;//Integer, Integer
 
     private:
-        static AutoPtr< ArrayOf<TimeBucket> > mTimeBuckets;
+        static AutoPtr<ArrayOf<TimeBucket*> > mTimeBuckets;
         static const Int32 MAX_BUCKETS = 8;
         static const Int32 MAX_CHANNELS = 8;
         static const Int32 DEFAULT_MAX_AP_PER_SCAN = 10;
@@ -481,31 +487,64 @@ private:
         AutoPtr<WifiNative::ScanSettings> mSettings;
     };
 
+private:
+    class ClientHandler
+        : public Handler
+    {
+    public:
+        ClientHandler(
+            /* [in] */ ILooper* looper);
+
+        // @Override
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+    };
+
+    class InnerBroadcastReceiver1
+        : public BroadcastReceiver
+    {
+    public:
+        InnerBroadcastReceiver1(
+            /* [in] */ WifiScanningServiceImpl* owner);
+
+        // @Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        WifiScanningServiceImpl* mOwner;
+    };
+
 public:
+    CAR_INTERFACE_DECL();
+
     WifiScanningServiceImpl();
 
-    WifiScanningServiceImpl(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // DFS needs 120 ms
     // @Override
-    CARAPI_(AutoPtr<IMessenger>) GetMessenger();
+    CARAPI GetMessenger(
+        /* [out] */ IMessenger** messenger);
 
     // @Override
-    CARAPI_(AutoPtr<IBundle>) GetAvailableChannels(
-        /* [in] */ Int32 band);
+    CARAPI GetAvailableChannels(
+        /* [in] */ Int32 band,
+        /* [out] */ IBundle** bundle);
 
     virtual CARAPI StartService(
         /* [in] */ IContext* context);
 
     virtual CARAPI ReplySucceeded(
         /* [in] */ IMessage* msg,
-        /* [in] */ Object* obj);
+        /* [in] */ IObject* obj);
 
     virtual CARAPI ReplyFailed(
         /* [in] */ IMessage* msg,
         /* [in] */ Int32 reason,
-        /* [in] */ String description);
+        /* [in] */ const String& description);
 
     virtual CARAPI ResetBuckets(
         /* [out] */ Boolean* result);
@@ -513,7 +552,7 @@ public:
     virtual CARAPI AddScanRequest(
         /* [in] */ ClientInfo* ci,
         /* [in] */ Int32 handler,
-        /* [in] */ IScanSettings* settings,
+        /* [in] */ IWifiScannerScanSettings* settings,
         /* [out] */ Boolean* result);
 
     virtual CARAPI RemoveScanRequest(
@@ -522,14 +561,14 @@ public:
 
     virtual CARAPI GetScanResults(
         /* [in] */ ClientInfo* ci,
-        /* [out] */ ScanResult[]** result);
+        /* [out] */ ArrayOf<IScanResult*>** result);
 
     virtual CARAPI ResetHotlist();
 
     virtual CARAPI SetHotlist(
         /* [in] */ ClientInfo* ci,
         /* [in] */ Int32 handler,
-        /* [in] */  WifiScanner);
+        /* [in] */ IWifiScannerHotlistSettings* settings);
 
     virtual CARAPI ResetHotlist(
         /* [in] */ ClientInfo* ci,
@@ -544,29 +583,36 @@ public:
         /* [in] */ Int32 handler);
 
     virtual CARAPI ConfigureWifiChange(
-        /* [in] */  WifiScanner);
+        /* [in] */ IWifiScannerWifiChangeSettings* settings);
 
     virtual CARAPI ReportWifiChanged(
-        /* [in] */ IScanResult* results[]);
+        /* [in] */ ArrayOf<IScanResult*>* results);
 
     virtual CARAPI ReportWifiStabilized(
-        /* [in] */ IScanResult* results[]);
+        /* [in] */ ArrayOf<IScanResult*>* results);
+
+    CARAPI ToString(
+        /* [out] */ String* info)
+    {
+        VALIDATE_NOT_NULL(info)
+        return Object::ToString(info);
+    }
 
 private:
     CARAPI_(void) EnforceConnectivityInternalPermission();
 
-    static CARAPI_(AutoPtr<IWifiScanner>) .ChannelSpec[] getChannelsForBand(
+    static CARAPI_(AutoPtr<ArrayOf<IWifiScannerChannelSpec*> >) GetChannelsForBand(
         /* [in] */ Int32 band);
 
     static CARAPI_(Int32) GetBandFromChannels(
-        /* [in] */  WifiScanner);
+        /* [in] */ ArrayOf<IWifiScannerChannelSpec*>* channels);
 
     static CARAPI_(Int32) GetBandFromChannels(
-        /* [in] */  WifiNative);
+        /* [in] */ ArrayOf<WifiNative::ChannelSettings*>* channels);
 
 public:
     /* client management */
-    AutoPtr< IHashMap<IMessenger, ClientInfo> > mClients;
+    AutoPtr<IHashMap> mClients;// IMessenger, ClientInfo
     AutoPtr<WifiChangeStateMachine> mWifiChangeStateMachine;
 
 private:
@@ -575,7 +621,7 @@ private:
     static const Int32 INVALID_KEY = 0;
     // same as WifiScanner
     static const Int32 MIN_PERIOD_PER_CHANNEL_MS = 200;
-    static const Int32 BASE = Protocol.BASE_WIFI_SCANNER_SERVICE;
+    static const Int32 BASE = IProtocol::BASE_WIFI_SCANNER_SERVICE;
     static const Int32 CMD_SCAN_RESULTS_AVAILABLE = BASE + 0;
     static const Int32 CMD_FULL_SCAN_RESULTS = BASE + 1;
     static const Int32 CMD_HOTLIST_AP_FOUND = BASE + 2;

@@ -1,5 +1,12 @@
-
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.App.h"
 #include "elastos/droid/server/wifi/WifiScanningServiceImpl.h"
+
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Wifi::EIID_IIWifiScanner;
+using Elastos::Droid::Wifi::IWifiScanner;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CHashSet;
 
 namespace Elastos {
 namespace Droid {
@@ -206,9 +213,19 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::ProcessM
 //=====================================================================
 //          WifiScanningServiceImpl::WifiScanningStateMachine
 //=====================================================================
+
+CAR_INTERFACE_IMPL_3(WifiScanningServiceImpl::WifiScanningStateMachine,
+        StateMachine,
+        IWifiNativeScanEventHandler,
+        IWifiNativeHotlistEventHandler,
+        IWifiNativeSignificantWifiChangeEventHandler);
+
 WifiScanningServiceImpl::WifiScanningStateMachine::WifiScanningStateMachine(
     /* [in] */ ILooper* looper)
 {
+    mDefaultState = new DefaultState();
+    mStartedState = new StartedState();
+    mPausedState = new PausedState();
     // ==================before translated======================
     // super(TAG, looper);
     //
@@ -269,7 +286,7 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnScanRestarted()
 }
 
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnHotlistApFound(
-    /* [in] */ ArrayOf<IScanResult>* results)
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
     // ==================before translated======================
@@ -280,7 +297,7 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnHotlistApFound(
 }
 
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnChangesFound(
-    /* [in] */ ArrayOf<IScanResult>* results)
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
     // ==================before translated======================
@@ -488,16 +505,15 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::IssueFullSca
 //   WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal
 //=====================================================================
 WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::ClientInfoLocal()
+    : ClientInfo(NULL, NULL)
 {
-    // ==================before translated======================
-    // super(null, null);
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::DeliverScanResults(
     /* [in] */ Int32 handler,
-    /* [in] */ IScanResult* results[])
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results[]);
+    VALIDATE_NOT_NULL(results);
     // ==================before translated======================
     // if (DBG) Log.d(TAG, "Delivering messages directly");
     // sendMessage(WIFI_CHANGE_CMD_NEW_SCAN_RESULTS, 0, 0, results);
@@ -507,7 +523,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::DeliverS
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::ReportPeriodChanged(
     /* [in] */ Int32 handler,
-    /* [in] */ IScanSettings* settings,
+    /* [in] */ IWifiScannerScanSettings* settings,
     /* [in] */ Int32 newPeriodInMs)
 {
     VALIDATE_NOT_NULL(settings);
@@ -557,9 +573,17 @@ const Int32 WifiScanningServiceImpl::WifiChangeStateMachine::MOVING_STATE_TIMEOU
 const String WifiScanningServiceImpl::WifiChangeStateMachine::ACTION_TIMEOUT("com.android.server.WifiScanningServiceImpl.action.TIMEOUT");
 const Int32 WifiScanningServiceImpl::WifiChangeStateMachine::SCAN_COMMAND_ID;
 
+CAR_INTERFACE_IMPL(WifiScanningServiceImpl::WifiChangeStateMachine,
+        StateMachine,
+        IWifiNativeSignificantWifiChangeEventHandler);
+
 WifiScanningServiceImpl::WifiChangeStateMachine::WifiChangeStateMachine(
     /* [in] */ ILooper* looper)
 {
+    mDefaultState = new DefaultState();
+    mStationaryState = new StationaryState();
+    mMovingState = new MovingState();
+    mClientInfo = new ClientInfoLocal();
     // ==================before translated======================
     // super("SignificantChangeStateMachine", looper);
     //
@@ -606,7 +630,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::Disable()
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::Configure(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
     // ==================before translated======================
     // sendMessage(WIFI_CHANGE_CMD_CONFIGURE, settings);
@@ -615,7 +639,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::Configure(
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::ReconfigureScan(
-    /* [in] */ ArrayOf<IScanResult>* results,
+    /* [in] */ ArrayOf<IScanResult*>* results,
     /* [in] */ Int32 period)
 {
     VALIDATE_NOT_NULL(results);
@@ -708,7 +732,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ReconfigureScan(
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::ReconfigureScan(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
     // ==================before translated======================
     //
@@ -752,9 +776,9 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ReconfigureScan(
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::OnChangesFound(
-    /* [in] */ IScanResult* results[])
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results[]);
+    VALIDATE_NOT_NULL(results);
     // ==================before translated======================
     // sendMessage(WIFI_CHANGE_CMD_CHANGE_DETECTED, 0, 0, results);
     assert(0);
@@ -762,7 +786,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::OnChangesFound(
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::AddScanRequest(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerScanSettings* settings)
 {
     // ==================before translated======================
     // if (DBG) Log.d(TAG, "Starting scans");
@@ -788,7 +812,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::RemoveScanRequest()
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::TrackSignificantWifiChange(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
     // ==================before translated======================
     // WifiNative.untrackSignificantWifiChange();
@@ -809,7 +833,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::UntrackSignificantWifiCha
 //                WifiScanningServiceImpl::ClientHandler
 //=====================================================================
 WifiScanningServiceImpl::ClientHandler::ClientHandler(
-    /* [in] */  android)
+    /* [in] */ ILooper* looper)
 {
     // ==================before translated======================
     // super(looper);
@@ -928,17 +952,21 @@ const Int32 WifiScanningServiceImpl::ClientInfo::MAX_LIMIT;
 WifiScanningServiceImpl::ClientInfo::ClientInfo(
     /* [in] */ IAsyncChannel* c,
     /* [in] */ IMessenger* m)
-    : " + c + " messenger: " + m);
-         }
 {
+    CHashMap::New((IHashMap**)&mScanSettings);
+    CHashMap::New((IHashMap**)&mScanPeriods);
+    CHashMap::New((IHashMap**)&mHotlistSettings);
+    CHashSet::New((IHashSet**)&mSignificantWifiHandlers);
     // ==================before translated======================
     // mChannel = c;
     // mMessenger = m;
     // if (DBG) Slog.d(TAG, "New client, channel: " + c + " messenger: " + m);
 }
 
-String WifiScanningServiceImpl::ClientInfo::ToString()
+ECode WifiScanningServiceImpl::ClientInfo::ToString(
+    /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // StringBuffer sb = new StringBuffer();
     // sb.append("mChannel ").append(mChannel).append("\n");
@@ -953,12 +981,11 @@ String WifiScanningServiceImpl::ClientInfo::ToString()
     // }
     //
     // return sb.toString();
-    assert(0);
-    return String("");
+    return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::AddScanRequest(
-    /* [in] */ IScanSettings* settings,
+    /* [in] */ IWifiScannerScanSettings* settings,
     /* [in] */ Int32 id)
 {
     VALIDATE_NOT_NULL(settings);
@@ -978,7 +1005,7 @@ ECode WifiScanningServiceImpl::ClientInfo::RemoveScanRequest(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetScans(
-    /* [out] */ Iterator<Map.Entry<Integer, WifiScanner.ScanSettings>>** result)
+    /* [out] */ IIterator** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -988,7 +1015,7 @@ ECode WifiScanningServiceImpl::ClientInfo::GetScans(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetScanSettings(
-    /* [out] */ Collection<ScanSettings>** result)
+    /* [out] */ ICollection** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -998,7 +1025,7 @@ ECode WifiScanningServiceImpl::ClientInfo::GetScanSettings(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportScanResults(
-    /* [in] */ ArrayOf<IScanResult>* results)
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
     // ==================before translated======================
@@ -1012,7 +1039,7 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportScanResults(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportScanResults(
-    /* [in] */ ArrayOf<IScanResult>* results,
+    /* [in] */ ArrayOf<IScanResult*>* results,
     /* [in] */ Int32 handler)
 {
     VALIDATE_NOT_NULL(results);
@@ -1065,9 +1092,9 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportScanResults(
 
 ECode WifiScanningServiceImpl::ClientInfo::DeliverScanResults(
     /* [in] */ Int32 handler,
-    /* [in] */ IScanResult* results[])
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results[]);
+    VALIDATE_NOT_NULL(results);
     // ==================before translated======================
     // WifiScanner.ParcelableScanResults parcelableScanResults =
     //         new WifiScanner.ParcelableScanResults(results);
@@ -1108,7 +1135,7 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportFullScanResult(
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportPeriodChanged(
     /* [in] */ Int32 handler,
-    /* [in] */ IScanSettings* settings,
+    /* [in] */ IWifiScannerScanSettings* settings,
     /* [in] */ Int32 newPeriodInMs)
 {
     VALIDATE_NOT_NULL(settings);
@@ -1127,7 +1154,7 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportPeriodChanged(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::AddHostlistSettings(
-    /* [in] */ IWifiScanner* ::HotlistSettings* settings,
+    /* [in] */ IWifiScannerHotlistSettings* settings,
     /* [in] */ Int32 handler)
 {
     VALIDATE_NOT_NULL(settings);
@@ -1147,7 +1174,7 @@ ECode WifiScanningServiceImpl::ClientInfo::RemoveHostlistSettings(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetHotlistSettings(
-    /* [out] */ Collection<WifiScanner.HotlistSettings>** result)
+    /* [out] */ ICollection** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -1157,7 +1184,7 @@ ECode WifiScanningServiceImpl::ClientInfo::GetHotlistSettings(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportHotlistResults(
-    /* [in] */ ArrayOf<IScanResult>* results)
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
     // ==================before translated======================
@@ -1224,7 +1251,7 @@ ECode WifiScanningServiceImpl::ClientInfo::RemoveSignificantWifiChange(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetWifiChangeHandlers(
-    /* [out] */ Collection<Integer>** result)
+    /* [out] */ ICollection** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -1234,7 +1261,7 @@ ECode WifiScanningServiceImpl::ClientInfo::GetWifiChangeHandlers(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportWifiChanged(
-    /* [in] */ ArrayOf<IScanResult>* results)
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
     // ==================before translated======================
@@ -1251,7 +1278,7 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportWifiChanged(
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportWifiStabilized(
-    /* [in] */ ArrayOf<IScanResult>* results)
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
     // ==================before translated======================
@@ -1303,15 +1330,41 @@ WifiScanningServiceImpl::SettingsComputer::TimeBucket::TimeBucket(
 //=====================================================================
 //              WifiScanningServiceImpl::SettingsComputer
 //=====================================================================
-AutoPtr< ArrayOf<TimeBucket> > WifiScanningServiceImpl::SettingsComputer::mTimeBuckets = WifiScanningServiceImpl::SettingsComputer::MiddleInitMtimebuckets();
+AutoPtr< ArrayOf<WifiScanningServiceImpl::SettingsComputer::TimeBucket*> > WifiScanningServiceImpl::SettingsComputer::mTimeBuckets = WifiScanningServiceImpl::SettingsComputer::MiddleInitMtimebuckets();
 const Int32 WifiScanningServiceImpl::SettingsComputer::MAX_BUCKETS;
 const Int32 WifiScanningServiceImpl::SettingsComputer::MAX_CHANNELS;
 const Int32 WifiScanningServiceImpl::SettingsComputer::DEFAULT_MAX_AP_PER_SCAN;
 const Int32 WifiScanningServiceImpl::SettingsComputer::DEFAULT_REPORT_THRESHOLD;
 const Int32 WifiScanningServiceImpl::SettingsComputer::DEFAULT_BASE_PERIOD_MS;
 
+WifiScanningServiceImpl::SettingsComputer::SettingsComputer()
+{
+    CHashMap::New((IHashMap**)&mChannelToBucketMap);
+    //TODO
+    //{
+    //    mSettings = new WifiNative.ScanSettings();
+    //    mSettings.max_ap_per_scan = DEFAULT_MAX_AP_PER_SCAN;
+    //    mSettings.base_period_ms = DEFAULT_BASE_PERIOD_MS;
+    //    mSettings.report_threshold = DEFAULT_REPORT_THRESHOLD;
+
+    //    mSettings.buckets = new WifiNative.BucketSettings[MAX_BUCKETS];
+    //    for (int i = 0; i < mSettings.buckets.length; i++) {
+    //        WifiNative.BucketSettings bucketSettings = new WifiNative.BucketSettings();
+    //        bucketSettings.bucket = i;
+    //        bucketSettings.report_events = 0;
+    //        bucketSettings.channels = new WifiNative.ChannelSettings[MAX_CHANNELS];
+    //        bucketSettings.num_channels = 0;
+    //        for (int j = 0; j < bucketSettings.channels.length; j++) {
+    //            WifiNative.ChannelSettings channelSettings = new WifiNative.ChannelSettings();
+    //            bucketSettings.channels[j] = channelSettings;
+    //        }
+    //        mSettings.buckets[i] = bucketSettings;
+    //    }
+    //}
+}
+
 ECode WifiScanningServiceImpl::SettingsComputer::PrepChannelMap(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerScanSettings* settings)
 {
     // ==================before translated======================
     // getBestBucket(settings);
@@ -1320,7 +1373,7 @@ ECode WifiScanningServiceImpl::SettingsComputer::PrepChannelMap(
 }
 
 ECode WifiScanningServiceImpl::SettingsComputer::AddScanRequestToBucket(
-    /* [in] */  WifiScanner,
+    /* [in] */  IWifiScannerScanSettings* settings,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1415,8 +1468,8 @@ ECode WifiScanningServiceImpl::SettingsComputer::AddScanRequestToBucket(
     return NOERROR;
 }
 
-ECode WifiScanningServiceImpl::SettingsComputer::.ScanSettings getComputedSettings(
-    /* [out] */ WifiNative** result)
+ECode WifiScanningServiceImpl::SettingsComputer::GetComputedSettings(
+    /* [out] */ WifiNative::ScanSettings** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -1449,7 +1502,7 @@ ECode WifiScanningServiceImpl::SettingsComputer::CompressBuckets()
     return NOERROR;
 }
 
-AutoPtr< ArrayOf< AutoPtr<TimeBucket> > > WifiScanningServiceImpl::SettingsComputer::MiddleInitMtimebuckets()
+AutoPtr<ArrayOf<WifiScanningServiceImpl::SettingsComputer::TimeBucket*> > WifiScanningServiceImpl::SettingsComputer::MiddleInitMtimebuckets()
 {
     // ==================before translated======================
     // TimeBucket[] result = new TimeBucket[] {
@@ -1462,12 +1515,12 @@ AutoPtr< ArrayOf< AutoPtr<TimeBucket> > > WifiScanningServiceImpl::SettingsCompu
     //                  new TimeBucket( 600, 500, 1500),
     //                  new TimeBucket( 1800, 1500, WifiScanner.MAX_SCAN_PERIOD_MS) };
     assert(0);
-    AutoPtr< ArrayOf< AutoPtr<TimeBucket> > > empty;
+    AutoPtr<ArrayOf<TimeBucket*> > empty;
     return empty;
 }
 
 Int32 WifiScanningServiceImpl::SettingsComputer::GetBestBucket(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerScanSettings* settings)
 {
     // ==================before translated======================
     //
@@ -1548,28 +1601,33 @@ const Int32 WifiScanningServiceImpl::CMD_DRIVER_UNLOADED;
 const Int32 WifiScanningServiceImpl::CMD_SCAN_PAUSED;
 const Int32 WifiScanningServiceImpl::CMD_SCAN_RESTARTED;
 
+CAR_INTERFACE_IMPL_2(WifiScanningServiceImpl, Object, IIWifiScanner, IBinder);
+
 WifiScanningServiceImpl::WifiScanningServiceImpl()
 {
+    CHashMap::New((IHashMap**)&mClients);
 }
 
-WifiScanningServiceImpl::WifiScanningServiceImpl(
+ECode WifiScanningServiceImpl::constructor(
     /* [in] */ IContext* context)
 {
     // ==================before translated======================
     // mContext = context;
+    return NOERROR;
 }
 
-AutoPtr<IMessenger> WifiScanningServiceImpl::GetMessenger()
+ECode WifiScanningServiceImpl::GetMessenger(
+    /* [out] */ IMessenger** messenger)
 {
     // ==================before translated======================
     // return new Messenger(mClientHandler);
     assert(0);
-    AutoPtr<IMessenger> empty;
-    return empty;
+    return NOERROR;
 }
 
-AutoPtr<IBundle> WifiScanningServiceImpl::GetAvailableChannels(
-    /* [in] */ Int32 band)
+ECode WifiScanningServiceImpl::GetAvailableChannels(
+    /* [in] */ Int32 band,
+    /* [out] */ IBundle** bundle)
 {
     // ==================before translated======================
     // WifiScanner.ChannelSpec channelSpecs[] = getChannelsForBand(band);
@@ -1581,8 +1639,7 @@ AutoPtr<IBundle> WifiScanningServiceImpl::GetAvailableChannels(
     // b.putIntegerArrayList(WifiScanner.GET_AVAILABLE_CHANNELS_EXTRA, list);
     // return b;
     assert(0);
-    AutoPtr<IBundle> empty;
-    return empty;
+    return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::StartService(
@@ -1622,7 +1679,7 @@ ECode WifiScanningServiceImpl::StartService(
 
 ECode WifiScanningServiceImpl::ReplySucceeded(
     /* [in] */ IMessage* msg,
-    /* [in] */ Object* obj)
+    /* [in] */ IObject* obj)
 {
     VALIDATE_NOT_NULL(msg);
     VALIDATE_NOT_NULL(obj);
@@ -1647,7 +1704,7 @@ ECode WifiScanningServiceImpl::ReplySucceeded(
 ECode WifiScanningServiceImpl::ReplyFailed(
     /* [in] */ IMessage* msg,
     /* [in] */ Int32 reason,
-    /* [in] */ String description)
+    /* [in] */ const String& description)
 {
     VALIDATE_NOT_NULL(msg);
     // ==================before translated======================
@@ -1724,7 +1781,7 @@ ECode WifiScanningServiceImpl::ResetBuckets(
 ECode WifiScanningServiceImpl::AddScanRequest(
     /* [in] */ ClientInfo* ci,
     /* [in] */ Int32 handler,
-    /* [in] */ IScanSettings* settings,
+    /* [in] */ IWifiScannerScanSettings* settings,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(ci);
@@ -1787,7 +1844,7 @@ ECode WifiScanningServiceImpl::RemoveScanRequest(
 
 ECode WifiScanningServiceImpl::GetScanResults(
     /* [in] */ ClientInfo* ci,
-    /* [out] */ ScanResult[]** result)
+    /* [out] */ ArrayOf<IScanResult*>** result)
 {
     VALIDATE_NOT_NULL(ci);
     VALIDATE_NOT_NULL(result);
@@ -1838,7 +1895,7 @@ ECode WifiScanningServiceImpl::ResetHotlist()
 ECode WifiScanningServiceImpl::SetHotlist(
     /* [in] */ ClientInfo* ci,
     /* [in] */ Int32 handler,
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerHotlistSettings* settings)
 {
     VALIDATE_NOT_NULL(ci);
     // ==================before translated======================
@@ -1896,7 +1953,7 @@ ECode WifiScanningServiceImpl::UntrackWifiChanges(
 }
 
 ECode WifiScanningServiceImpl::ConfigureWifiChange(
-    /* [in] */  WifiScanner)
+    /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
     // ==================before translated======================
     // mWifiChangeStateMachine.configure(settings);
@@ -1905,9 +1962,9 @@ ECode WifiScanningServiceImpl::ConfigureWifiChange(
 }
 
 ECode WifiScanningServiceImpl::ReportWifiChanged(
-    /* [in] */ IScanResult* results[])
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results[]);
+    VALIDATE_NOT_NULL(results);
     // ==================before translated======================
     // Collection<ClientInfo> clients = mClients.values();
     // for (ClientInfo ci : clients) {
@@ -1918,9 +1975,9 @@ ECode WifiScanningServiceImpl::ReportWifiChanged(
 }
 
 ECode WifiScanningServiceImpl::ReportWifiStabilized(
-    /* [in] */ IScanResult* results[])
+    /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results[]);
+    VALIDATE_NOT_NULL(results);
     // ==================before translated======================
     // Collection<ClientInfo> clients = mClients.values();
     // for (ClientInfo ci : clients) {
@@ -1939,7 +1996,7 @@ void WifiScanningServiceImpl::EnforceConnectivityInternalPermission()
     assert(0);
 }
 
-AutoPtr<IWifiScanner> WifiScanningServiceImpl::.ChannelSpec[] getChannelsForBand(
+AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > WifiScanningServiceImpl::GetChannelsForBand(
     /* [in] */ Int32 band)
 {
     // ==================before translated======================
@@ -1954,12 +2011,11 @@ AutoPtr<IWifiScanner> WifiScanningServiceImpl::.ChannelSpec[] getChannelsForBand
     //     return new WifiScanner.ChannelSpec[0];
     // }
     assert(0);
-    AutoPtr<IWifiScanner> empty;
-    return empty;
+    return NULL;
 }
 
 Int32 WifiScanningServiceImpl::GetBandFromChannels(
-    /* [in] */  WifiScanner)
+    /* [in] */ ArrayOf<IWifiScannerChannelSpec*>* channels)
 {
     // ==================before translated======================
     // int band = WifiScanner.WIFI_BAND_UNSPECIFIED;
@@ -1978,7 +2034,7 @@ Int32 WifiScanningServiceImpl::GetBandFromChannels(
 }
 
 Int32 WifiScanningServiceImpl::GetBandFromChannels(
-    /* [in] */  WifiNative)
+    /* [in] */ ArrayOf<WifiNative::ChannelSettings*>* channels)
 {
     // ==================before translated======================
     // int band = WifiScanner.WIFI_BAND_UNSPECIFIED;

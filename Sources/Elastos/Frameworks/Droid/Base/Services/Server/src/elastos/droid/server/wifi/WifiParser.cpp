@@ -18,7 +18,7 @@ WifiParser::WifiParser()
 }
 
 String WifiParser::Parse_akm(
-    /* [in] */ IE* full_IE[],
+    /* [in] */ ArrayOf<IE*>* full_IE,
     /* [in] */ IBitSet* ieee_cap)
 {
     // ==================before translated======================
@@ -257,5 +257,4 @@ String WifiParser::Parse_akm(
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
 

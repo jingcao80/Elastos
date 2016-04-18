@@ -1,9 +1,11 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFINETWORKSCORECACHE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFINETWORKSCORECACHE_H__
 
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
@@ -28,7 +30,9 @@ class WifiNetworkScoreCache
 public:
     CAR_INTERFACE_DECL();
 
-    WifiNetworkScoreCache(
+    WifiNetworkScoreCache();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // @Override
@@ -38,22 +42,29 @@ public:
     // @Override
     CARAPI ClearScores();
 
-    virtual CARAPI IsScoredNetwork(
+    CARAPI IsScoredNetwork(
         /* [in] */ IScanResult* result,
         /* [out] */ Boolean* isScoreNetwork);
 
-    virtual CARAPI GetNetworkScore(
+    CARAPI GetNetworkScore(
         /* [in] */ IScanResult* result,
         /* [out] */ Int32* rValue);
 
-    virtual CARAPI GetNetworkScore(
+    CARAPI GetNetworkScore(
         /* [in] */ IScanResult* result,
         /* [in] */ Int32 rssiBoost,
         /* [out] */ Int32* rValue);
 
+    CARAPI ToString(
+        /* [out] */ String* info)
+    {
+        VALIDATE_NOT_NULL(info)
+        return Object::ToString(info);
+    }
+
 protected:
     // @Override
-    const CARAPI_(void) Dump(
+    CARAPI_(void) Dump(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* writer,
         /* [in] */ ArrayOf<String>* args);
@@ -72,10 +83,10 @@ public:
 private:
     static String TAG;
     Boolean DBG;
-    /*const*/ AutoPtr<IContext> mContext;
+    AutoPtr<IContext> mContext;
     // The key is of the form "<ssid>"<bssid>
     // TODO: What about SSIDs that can't be encoded as UTF-8?
-    /*const*/ AutoPtr<IMap> mNetworkCache;//String, ScoredNetwork
+    AutoPtr<IMap> mNetworkCache;//String, ScoredNetwork
 };
 
 } // namespace Wifi

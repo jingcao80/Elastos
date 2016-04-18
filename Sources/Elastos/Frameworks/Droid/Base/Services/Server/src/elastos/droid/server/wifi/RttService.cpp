@@ -519,6 +519,8 @@ ECode RttService::RttServiceImpl::IssueNextRequest(
 //=====================================================================
 //              RttService::InnerWifiNativeRttEventHandler
 //=====================================================================
+CAR_INTERFACE_IMPL(RttService::InnerWifiNativeRttEventHandler, Object, IWifiNativeRttEventHandler);
+
 RttService::InnerWifiNativeRttEventHandler::InnerWifiNativeRttEventHandler(
     /* [in] */ RttServiceImpl* owner)
     : mOwner(owner)

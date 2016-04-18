@@ -44,4 +44,3 @@ ECode WifiService::OnBootPhase(
 } // namespace Droid
 } // namespace Elastos
 
-

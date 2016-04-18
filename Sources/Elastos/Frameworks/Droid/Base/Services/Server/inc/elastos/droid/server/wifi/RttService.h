@@ -222,14 +222,17 @@ public:
         static const Int32 CMD_DRIVER_UNLOADED = BASE + 1;
         static const Int32 CMD_ISSUE_NEXT_REQUEST = BASE + 2;
         static const Int32 CMD_RTT_RESPONSE = BASE + 3;
-        AutoPtr<WifiNative::RttEventHandler> mEventHandler;
+        AutoPtr<IWifiNativeRttEventHandler> mEventHandler;
     };
 
 private:
     class InnerWifiNativeRttEventHandler
-        : public WifiNative::RttEventHandler
+        : public Object
+        , public IWifiNativeRttEventHandler
     {
     public:
+        CAR_INTERFACE_DECL();
+
         InnerWifiNativeRttEventHandler(
             /* [in] */ RttServiceImpl* owner);
 

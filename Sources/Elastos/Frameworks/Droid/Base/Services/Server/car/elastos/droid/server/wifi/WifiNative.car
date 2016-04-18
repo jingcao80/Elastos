@@ -1,0 +1,46 @@
+module
+{
+    using interface Elastos.Droid.Wifi.IScanResult;
+    using interface Elastos.Droid.Wifi.IRttManagerRttResult;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Wifi {
+
+        interface IWifiNativeScanEventHandler {
+            OnScanResultsAvailable();
+
+            OnFullScanResult(
+                [in] IScanResult* fullScanResult);
+
+            OnSingleScanComplete();
+
+            OnScanPaused();
+
+            OnScanRestarted();
+        }
+
+        [deprecated]
+        interface IWifiNativeHotlistEventHandler {
+            OnHotlistApFound(
+                [in] ArrayOf<IScanResult*>* result);
+        }
+
+        [deprecated]
+        interface IWifiNativeSignificantWifiChangeEventHandler {
+            OnChangesFound(
+                [in] ArrayOf<IScanResult*>* result);
+        }
+
+        [deprecated]
+        interface IWifiNativeRttEventHandler {
+            OnRttResults(
+                [in] ArrayOf<IRttManagerRttResult*>* result);
+        }
+
+    } // Wifi
+    } // Server
+    } // Droid
+    } // Elastos
+}

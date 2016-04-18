@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/server/wifi/WifiSettingsStore.h"
 
 namespace Elastos {

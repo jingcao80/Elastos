@@ -1,29 +1,35 @@
 
-#include "elastos/droid/wifi/WifiWatchdogStateMachine.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.CoreLibrary.Text.h"
+#include "elastos/droid/server/wifi/WifiWatchdogStateMachine.h"
 #include "elastos/droid/os/SystemClock.h"
-#ifdef DROID_CORE
-#include "elastos/droid/provider/CSettingsGlobal.h"
-#include "elastos/droid/content/CIntentFilter.h"
-#include "elastos/droid/wifi/CWifiManagerHelper.h"
-#include "elastos/droid/wifi/CSupplicantState.h"
-#endif
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::Math;
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
 using Elastos::Text::IDecimalFormat;
+using Elastos::Text::INumberFormat;
 using Elastos::Text::CDecimalFormat;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Net::INetworkInfo;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Wifi::CWifiManagerHelper;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::SupplicantState;
+using Elastos::Droid::Wifi::IRssiPacketCountInfo;
+using Elastos::Droid::Wifi::IWifiManagerHelper;
+using Elastos::Core::StringUtils;
+using Elastos::Core::Math;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -166,7 +172,7 @@ ECode WifiWatchdogStateMachine::WatchdogDisabledState::ProcessMessage(
                 NetworkInfoDetailedState state;
                 networkInfo->GetDetailedState(&state);
                 switch (state) {
-                    case NetworkInfoDetailedState_VERIFYING_POOR_LINK:
+                    case Elastos::Droid::Net::NetworkInfoDetailedState_VERIFYING_POOR_LINK:
                         if (DBG) Logger::D("WifiWatchdogStateMachine::WatchdogDisabledState",
                             "Watchdog disabled, verify link");
                         mOwner->SendLinkStatusNotification(TRUE);
@@ -239,7 +245,7 @@ ECode WifiWatchdogStateMachine::WatchdogEnabledState::ProcessMessage(
             mOwner->UpdateCurrentBssid(bssID);
 
             switch (state) {
-               case NetworkInfoDetailedState_VERIFYING_POOR_LINK:
+                case Elastos::Droid::Net::NetworkInfoDetailedState_VERIFYING_POOR_LINK:
                     parcelable = NULL;
                     intent->GetParcelableExtra(IWifiManager::EXTRA_LINK_PROPERTIES,
                         (IParcelable**)&parcelable);
@@ -259,7 +265,7 @@ ECode WifiWatchdogStateMachine::WatchdogEnabledState::ProcessMessage(
                         mOwner->SendLinkStatusNotification(TRUE);
                     }
                     break;
-                case NetworkInfoDetailedState_CONNECTED:
+                case Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED:
                     if (DBG) Logger::D("WifiWatchdogStateMachine::WatchdogEnabledState::ProcessMessage",
                         "===========CONNECTED===========");
                     mOwner->TransitionTo(mOwner->mOnlineWatchState);
@@ -281,7 +287,7 @@ ECode WifiWatchdogStateMachine::WatchdogEnabledState::ProcessMessage(
             AutoPtr<ISupplicantState> iss = ISupplicantState::Probe(parcelable.Get());
             SupplicantState supplicantState;
             iss->Get(&supplicantState);
-            if (supplicantState == SupplicantState_COMPLETED) {
+            if (supplicantState == Elastos::Droid::Wifi::SupplicantState_COMPLETED) {
                 mOwner->mWifiInfo = NULL;
                 mOwner->mWifiManager->GetConnectionInfo((IWifiInfo**)&mOwner->mWifiInfo);
                 String bssid;
@@ -337,7 +343,8 @@ ECode WifiWatchdogStateMachine::VerifyingLinkState::Enter()
     mSampleCount = 0;
     if (mOwner->mCurrentBssid != NULL)
         mOwner->mCurrentBssid->NewLinkDetected();
-    AutoPtr<IMessage> m = mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0);
+    AutoPtr<IMessage> m;
+    mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0, (IMessage**)&m);
     mOwner->SendMessage(m);
     return NOERROR;
 }
@@ -371,7 +378,8 @@ ECode WifiWatchdogStateMachine::VerifyingLinkState::ProcessMessage(
             msg->GetArg1(&arg1);
             if (arg1 == mOwner->mRssiFetchToken) {
                 mOwner->mWsmChannel->SendMessage(IWifiManager::RSSI_PKTCNT_FETCH);
-                AutoPtr<IMessage> m = mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0);
+                AutoPtr<IMessage> m;
+                mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0, (IMessage**)&m);
                 mOwner->SendMessageDelayed(m, LINK_SAMPLING_INTERVAL_MS);
             }
             break;
@@ -522,7 +530,8 @@ ECode WifiWatchdogStateMachine::LinkMonitoringState::Enter()
 
     mSampleCount = 0;
     mOwner->mCurrentLoss = new VolumeWeightedEMA(EXP_COEFFICIENT_MONITOR);
-    AutoPtr<IMessage> m = mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0);
+    AutoPtr<IMessage> m;
+    mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0, (IMessage**)&m);
     mOwner->SendMessage(m);
     return NOERROR;
 }
@@ -561,7 +570,8 @@ ECode WifiWatchdogStateMachine::LinkMonitoringState::ProcessMessage(
             }
             else if (arg1 == mOwner->mRssiFetchToken) {
                 mOwner->mWsmChannel->SendMessage(IWifiManager::RSSI_PKTCNT_FETCH);
-                AutoPtr<IMessage> m = mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0);
+                AutoPtr<IMessage> m;
+                mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0, (IMessage**)&m);
                 mOwner->SendMessageDelayed(m, LINK_SAMPLING_INTERVAL_MS);
             }
             break;
@@ -601,9 +611,9 @@ ECode WifiWatchdogStateMachine::LinkMonitoringState::ProcessMessage(
                         AutoPtr<IDecimalFormat> df;
                         CDecimalFormat::New(String("#.##"), (IDecimalFormat**)&df);
                         String values, volumes;
-                        df->FormatDouble(mOwner->mCurrentLoss->mValue * 100, &values);
-                        df->FormatDouble(mOwner->mCurrentLoss->mVolume, &volumes);
-                        Logd(String("Incremental loss=") + StringUtils::Int32ToString(dbad) + "/" + StringUtils::Int32ToString(dtotal) +
+                        INumberFormat::Probe(df)->Format(mOwner->mCurrentLoss->mValue * 100, &values);
+                        INumberFormat::Probe(df)->Format(mOwner->mCurrentLoss->mVolume, &volumes);
+                        Logd(String("Incremental loss=") + StringUtils::ToString(dbad) + "/" + StringUtils::ToString(dtotal) +
                                 " Current loss=" + values + "% volume=" + volumes);
                     }
 
@@ -728,9 +738,9 @@ void WifiWatchdogStateMachine::BssidStatistics::UpdateLoss(
        AutoPtr<IDecimalFormat> df;
        CDecimalFormat::New(String("#.##"), (IDecimalFormat**)&df);
        String values, volumes;
-       df->FormatDouble((*mEntries)[index]->mValue * 100, &values);
-       df->FormatDouble((*mEntries)[index]->mVolume, &volumes);
-       mOwner->Logd(String("Cache updated: loss[")+ StringUtils::Int32ToString(rssi) +"]=" + values + "% volume=" + volumes);
+       INumberFormat::Probe(df)->Format((*mEntries)[index]->mValue * 100, &values);
+       INumberFormat::Probe(df)->Format((*mEntries)[index]->mVolume, &volumes);
+       mOwner->Logd(String("Cache updated: loss[")+ StringUtils::ToString(rssi) +"]=" + values + "% volume=" + volumes);
     }
 }
 
@@ -752,10 +762,10 @@ Double WifiWatchdogStateMachine::BssidStatistics::PresetLoss(
 Boolean WifiWatchdogStateMachine::BssidStatistics::PoorLinkDetected(
     /* [in] */ Int32 rssi)
 {
-    if (DBG) mOwner->Logd(String("Poor link detected, rssi=") + StringUtils::Int32ToString(rssi));
+    if (DBG) mOwner->Logd(String("Poor link detected, rssi=") + StringUtils::ToString(rssi));
 
     Int64 now = SystemClock::GetElapsedRealtime();
-    Int64 lastGood = now - mLastTimeGood;
+    //Int64 lastGood = now - mLastTimeGood;
     Int64 lastPoor = now - mLastTimePoor;
 
     // reduce the difficulty of good link target if last avoidance was long time ago
@@ -792,8 +802,8 @@ void WifiWatchdogStateMachine::BssidStatistics::NewLinkDetected()
 {
     // if this BSSID is currently being avoided, the reuse those values
     if (mBssidAvoidTimeMax > 0) {
-        if (DBG) Logd(String("Previous avoidance still in effect, rssi=") + StringUtils::Int32ToString(mGoodLinkTargetRssi) + " count=" +
-                StringUtils::Int32ToString(mGoodLinkTargetCount));
+        if (DBG) Logd(String("Previous avoidance still in effect, rssi=") + StringUtils::ToString(mGoodLinkTargetRssi) + " count=" +
+                StringUtils::ToString(mGoodLinkTargetCount));
         return;
     }
 
@@ -827,10 +837,11 @@ Int32 WifiWatchdogStateMachine::BssidStatistics::FindRssiTarget(
                     AutoPtr<IDecimalFormat> df;
                     CDecimalFormat::New(String("#.##"), (IDecimalFormat**)&df);
                     String ths, values, volumes;
-                    df->FormatDouble(threshold * 100, &ths);
-                    df->FormatDouble((*mEntries)[i]->mValue * 100, &values);
-                    df->FormatDouble((*mEntries)[i]->mVolume, &volumes);
-                    mOwner->Logd(String("Scan target found: rssi=") + StringUtils::Int32ToString(rssi) + " threshold=" + ths + "% value=" +
+                    INumberFormat* nf = INumberFormat::Probe(df);
+                    nf->Format(threshold * 100, &ths);
+                    nf->Format((*mEntries)[i]->mValue * 100, &values);
+                    nf->Format((*mEntries)[i]->mVolume, &volumes);
+                    mOwner->Logd(String("Scan target found: rssi=") + StringUtils::ToString(rssi) + " threshold=" + ths + "% value=" +
                         values + "% volume=" + volumes);
                 }
                 return rssi;
@@ -845,9 +856,9 @@ Int32 WifiWatchdogStateMachine::BssidStatistics::FindRssiTarget(
                     AutoPtr<IDecimalFormat> df;
                     CDecimalFormat::New(String("#.##"), (IDecimalFormat**)&df);
                     String ths, ls;
-                    df->FormatDouble(threshold * 100, &ths);
-                    df->FormatDouble(lossPreset * 100, &ls);
-                    Logd(String("Scan target found: rssi=") + StringUtils::Int32ToString(rssi) + "threshold=" + ths + "% value=" +
+                    INumberFormat::Probe(df)->Format(threshold * 100, &ths);
+                    INumberFormat::Probe(df)->Format(lossPreset * 100, &ls);
+                    Logd(String("Scan target found: rssi=") + StringUtils::ToString(rssi) + "threshold=" + ths + "% value=" +
                            ls + "% volume=preset");
                 }
                 return rssi;
@@ -889,7 +900,8 @@ ECode WifiWatchdogStateMachine::NetworkBroadcastReceiver::OnReceive(
     if (action.Equals(IWifiManager::RSSI_CHANGED_ACTION)) {
         Int32 extra;
         intent->GetInt32Extra(IWifiManager::EXTRA_NEW_RSSI, -200, &extra);
-        AutoPtr<IMessage> m = mOwner->ObtainMessage(EVENT_RSSI_CHANGE, extra, 0);
+        AutoPtr<IMessage> m;
+        mOwner->ObtainMessage(EVENT_RSSI_CHANGE, extra, 0, (IMessage**)&m);
         mOwner->SendMessage(m);
     }
     else if (action.Equals(IWifiManager::SUPPLICANT_STATE_CHANGED_ACTION)) {
@@ -941,11 +953,13 @@ WifiWatchdogStateMachine::WifiWatchdogStateMachine(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
-    AutoPtr<IHandler> h = GetHandler();
+    AutoPtr<IHandler> h;
+    GetHandler((IHandler**)&h);
     //AutoPtr<IMessenger> msgr;
     //mWifiManager->GetWifiStateMachineMessenger((IMessenger**)&msgr);
     mWsmChannel = new AsyncChannel();
-    mWsmChannel->ConnectSync(mContext, h, dstMessenger);
+    Int32 status;
+    mWsmChannel->ConnectSync(mContext, h, dstMessenger, &status);
 
     SetupNetworkReceiver();
 
@@ -1017,7 +1031,9 @@ void WifiWatchdogStateMachine::SetupNetworkReceiver()
 
 void WifiWatchdogStateMachine::RegisterForWatchdogToggle()
 {
-    AutoPtr<IContentObserver> contentObserver = new LocalContentObserver(GetHandler(), EVENT_WATCHDOG_TOGGLED, this);
+    AutoPtr<IHandler> h;
+    GetHandler((IHandler**)&h);
+    AutoPtr<IContentObserver> contentObserver = new LocalContentObserver(h, EVENT_WATCHDOG_TOGGLED, this);
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
@@ -1030,7 +1046,9 @@ void WifiWatchdogStateMachine::RegisterForWatchdogToggle()
 
 void WifiWatchdogStateMachine::RegisterForSettingsChanges()
 {
-    AutoPtr<IContentObserver> contentObserver = new LocalContentObserver(GetHandler(), EVENT_WATCHDOG_SETTINGS_CHANGE, this);
+    AutoPtr<IHandler> h;
+    GetHandler((IHandler**)&h);
+    AutoPtr<IContentObserver> contentObserver = new LocalContentObserver(h, EVENT_WATCHDOG_SETTINGS_CHANGE, this);
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
@@ -1121,7 +1139,7 @@ Int32 WifiWatchdogStateMachine::CalculateSignalLevel(
     CWifiManagerHelper::AcquireSingleton((IWifiManagerHelper**)&helper);
     Int32 signalLevel = 0;
     helper->CalculateSignalLevel(rssi, IWifiManager::RSSI_LEVELS, &signalLevel);
-    if (DBG) Logger::D(TAG, "RSSI current: %d new: %d, %d", mCurrentSignalLevel, rssi, signalLevel);
+    if (DBG) Logger::D("WifiWatchdogStateMachine", "RSSI current: %d new: %d, %d", mCurrentSignalLevel, rssi, signalLevel);
     return signalLevel;
 }
 
@@ -1134,14 +1152,14 @@ void WifiWatchdogStateMachine::SendLinkStatusNotification(
         if (mCurrentBssid != NULL) {
             mCurrentBssid->mLastTimeGood = SystemClock::GetElapsedRealtime();
         }
-        if (DBG) Logger::D(TAG, "GOOD_LINK_DETECTED: Good link notification is sent");
+        if (DBG) Logger::D("WifiWatchdogStateMachine", "GOOD_LINK_DETECTED: Good link notification is sent");
     }
     else {
         mWsmChannel->SendMessage(POOR_LINK_DETECTED);
         if (mCurrentBssid != NULL) {
             mCurrentBssid->mLastTimePoor = SystemClock::GetElapsedRealtime();
         }
-        if (DBG) Logger::D(TAG, "POOR_LINK_DETECTED: Poor link notification is sent");
+        if (DBG) Logger::D("WifiWatchdogStateMachine", "POOR_LINK_DETECTED: Poor link notification is sent");
     }
 }
 
@@ -1172,13 +1190,13 @@ Boolean WifiWatchdogStateMachine::PutSettingsGlobalBoolean(
 void WifiWatchdogStateMachine::Logd(
     /* [in] */ const String& s)
 {
-    Logger::D(TAG, s);
+    Logger::D("WifiWatchdogStateMachine", s);
 }
 
 void WifiWatchdogStateMachine::Loge(
     /* [in] */ const String& s)
 {
-    Logger::E(TAG, s);
+    Logger::E("WifiWatchdogStateMachine", s);
 }
 
 } // namespace Wifi
