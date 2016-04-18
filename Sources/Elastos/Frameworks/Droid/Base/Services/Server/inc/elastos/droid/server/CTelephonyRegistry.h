@@ -47,6 +47,7 @@ using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICalendar;
 using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Etl::List;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -427,37 +428,37 @@ private:
 
     Int32 mNumPhones;
 
-    AutoPtr< ArrayOf<Int32> > mCallState;
+    AutoPtr<ArrayOf<Int32> > mCallState;
 
-    AutoPtr< ArrayOf<String> > mCallIncomingNumber;
+    AutoPtr<ArrayOf<String> > mCallIncomingNumber;
 
-    AutoPtr< ArrayOf<Elastos::Droid::Telephony::IServiceState*> > mServiceState;
+    AutoPtr<ArrayOf<Elastos::Droid::Telephony::IServiceState*> > mServiceState;
 
-    AutoPtr< ArrayOf<ISignalStrength*> > mSignalStrength;
+    AutoPtr<ArrayOf<ISignalStrength*> > mSignalStrength;
 
-    AutoPtr< ArrayOf<Boolean> > mMessageWaiting;
+    AutoPtr<ArrayOf<Boolean> > mMessageWaiting;
 
-    AutoPtr< ArrayOf<Boolean> > mCallForwarding;
+    AutoPtr<ArrayOf<Boolean> > mCallForwarding;
 
-    AutoPtr< ArrayOf<Int32> > mDataActivity;
+    AutoPtr<ArrayOf<Int32> > mDataActivity;
 
-    AutoPtr< ArrayOf<Int32> > mDataConnectionState;
+    AutoPtr<ArrayOf<Int32> > mDataConnectionState;
 
-    AutoPtr< ArrayOf<Boolean> > mDataConnectionPossible;
+    AutoPtr<ArrayOf<Boolean> > mDataConnectionPossible;
 
-    AutoPtr< ArrayOf<String> > mDataConnectionReason;
+    AutoPtr<ArrayOf<String> > mDataConnectionReason;
 
-    AutoPtr< ArrayOf<String> > mDataConnectionApn;
+    AutoPtr<ArrayOf<String> > mDataConnectionApn;
 
-    List<String> mConnectedApns;
+    AutoPtr<ArrayOf<IArrayList*> > mConnectedApns;
 
-    AutoPtr< ArrayOf<ILinkProperties*> > mDataConnectionLinkProperties;
+    AutoPtr<ArrayOf<ILinkProperties*> > mDataConnectionLinkProperties;
 
-    AutoPtr< ArrayOf<INetworkCapabilities*> > mDataConnectionNetworkCapabilities;
+    AutoPtr<ArrayOf<INetworkCapabilities*> > mDataConnectionNetworkCapabilities;
 
-    AutoPtr< ArrayOf<IBundle*> > mCellLocation;
+    AutoPtr<ArrayOf<IBundle*> > mCellLocation;
 
-    AutoPtr< ArrayOf<Int32> > mDataConnectionNetworkType;
+    AutoPtr<ArrayOf<Int32> > mDataConnectionNetworkType;
 
     Int32 mOtaspMode;// = ServiceStateTracker.OTASP_UNKNOWN;
 
