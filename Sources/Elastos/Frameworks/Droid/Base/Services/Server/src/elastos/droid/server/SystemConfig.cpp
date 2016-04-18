@@ -4,12 +4,16 @@
 #include <elastos/droid/internal/utility/XmlUtils.h>
 #include <elastos/droid/internal/utility/ArrayUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
 
+using Elastos::Droid::Content::Pm::CFeatureInfo;
+using Elastos::Droid::Content::Pm::CSignature;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::CEnvironment;
-using Elastos::Droid::Content::Pm::CFeatureInfo;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
@@ -18,8 +22,9 @@ using Elastos::IO::ICloseable;
 using Elastos::IO::IReader;
 using Elastos::IO::IFileReader;
 using Elastos::IO::CFileReader;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
-
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -75,7 +80,7 @@ AutoPtr<HashSet<String> > SystemConfig::GetFixedImeApps()
     return mFixedImeApps;
 }
 
-AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > SystemConfig::GetSignatureAllowances()
+AutoPtr<HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > SystemConfig::GetSignatureAllowances()
 {
     return mSignatureAllowances;
 }
@@ -88,6 +93,7 @@ SystemConfig::SystemConfig()
     mPermissions = new HashMap<String, AutoPtr<PermissionEntry> >();
     mAllowInPowerSave = new HashSet<String>();
     mFixedImeApps = new HashSet<String>();
+
     mSignatureAllowances = new HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > >();
 
     AutoPtr<IEnvironment> environment;
@@ -207,6 +213,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
     Int32 uid;
     String name, gidStr, perm, nullStr, uidStr, fname, pos, pkgname;
     HashMap<Int32, AutoPtr<HashSet<String> > >::Iterator it;
+    HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > >::Iterator itSA;
     AutoPtr<HashSet<String> > perms;
 
     const String sname("name");
@@ -313,6 +320,46 @@ ECode SystemConfig::ReadPermissionsFromXml(
             XmlUtils::SkipCurrentTag(parser);
 
         }
+        else if (name.Equals("allow-permission")) {
+            parser->GetAttributeValue(nullStr, String("name"), &perm);
+            if (perm.IsNull()) {
+                parser->GetPositionDescription(&pos);
+                Slogger::W(TAG,
+                        "<allow-permission> without name at %s", pos.string());
+                XmlUtils::SkipCurrentTag(parser);
+                continue;
+            }
+            String signature;
+            parser->GetAttributeValue(nullStr, String("signature"), &signature);
+            if (signature.IsNull()) {
+                parser->GetPositionDescription(&pos);
+                Slogger::W(TAG,
+                        "<allow-permission> without signature at %s", pos.string());
+                XmlUtils::SkipCurrentTag(parser);
+                continue;
+            }
+            AutoPtr<ISignature> sig;
+            CSignature::New(signature, (ISignature**)&sig);
+            if (sig != NULL) {
+                perms = NULL;
+                itSA = mSignatureAllowances->Find(sig);
+                if (itSA != mSignatureAllowances->End()) {
+                    perms = itSA->mSecond;
+                }
+
+                if (perms == NULL) {
+                    perms = new HashSet<String>();
+                    (*mSignatureAllowances)[sig] = perms;
+                }
+                perms->Insert(perm);
+            }
+            else {
+                parser->GetPositionDescription(&pos);
+                Slogger::W(TAG,
+                        "<allow-permission> with bad signature at %s", pos.string());
+            }
+            XmlUtils::SkipCurrentTag(parser);
+        }
         else if (name.Equals("library") && !onlyFeatures) {
             String lname, lfile;
             FAIL_GOTO(parser->GetAttributeValue(nullStr, sname, &lname), _Exit_)
@@ -338,6 +385,9 @@ ECode SystemConfig::ReadPermissionsFromXml(
             if (fname.IsNull()) {
                 parser->GetPositionDescription(&pos);
                 Logger::W(TAG, "<feature> without name at %s", pos.string());
+            }
+            else if (IsLowRamDevice() && fname.Equals("android.software.managed_users")) {
+                Slogger::W(TAG, "Feature not supported on low memory device %s", fname.string());
             }
             else {
                 //Log.i(TAG, "Got feature " + fname);
@@ -368,7 +418,8 @@ ECode SystemConfig::ReadPermissionsFromXml(
             if (pkgname.IsNull()) {
                 parser->GetPositionDescription(&pos);
                 Logger::W(TAG, "<fixed-ime-app> without package at %s", pos.string());
-            } else {
+            }
+            else {
                 mFixedImeApps->Insert(pkgname);
             }
             XmlUtils::SkipCurrentTag(parser);
@@ -441,6 +492,14 @@ ECode SystemConfig::ReadPermission(
     return NOERROR;
 }
 
+Boolean SystemConfig::IsLowRamDevice()
+{
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    String str;
+    sp->Get(String("ro.config.low_ram"), String("false"), &str);
+    return str.Equals("true");
+}
 
 } // namespace Server
 } // namepsace Droid

@@ -13,6 +13,7 @@
 
 using Elastos::Droid::Content::Pm::IFeatureInfo;
 using Elastos::Droid::Content::Pm::ISignature;
+using Elastos::Utility::IHashMap;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::HashSet;
 using Elastos::IO::IFile;
@@ -45,7 +46,6 @@ public:
     };
 
 public:
-
     static AutoPtr<SystemConfig> GetInstance();
 
     AutoPtr<ArrayOf<Int32> > GetGlobalGids();
@@ -62,7 +62,7 @@ public:
 
     AutoPtr<HashSet<String> > GetFixedImeApps();
 
-    AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > GetSignatureAllowances();
+    AutoPtr<HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > GetSignatureAllowances();
 
     SystemConfig();
 
@@ -73,6 +73,8 @@ public:
     CARAPI ReadPermission(
         /* [in] */ IXmlPullParser* parser,
         /* [in] */ const String& name);
+
+    Boolean IsLowRamDevice();
 
 private:
 
@@ -91,29 +93,29 @@ public:
 
     // These are the built-in uid -> permission mappings that were read from the
     // system configuration files.
-    AutoPtr< HashMap<Int32, AutoPtr<HashSet<String> > > > mSystemPermissions;
+    AutoPtr<HashMap<Int32, AutoPtr<HashSet<String> > > > mSystemPermissions;
 
     // These are the built-in shared libraries that were read from the
     // system configuration files.  Keys are the library names; strings are the
     // paths to the libraries.
-    AutoPtr< HashMap<String, String> > mSharedLibraries;
+    AutoPtr<HashMap<String, String> > mSharedLibraries;
 
     // These are the features this devices supports that were read from the
     // system configuration files.
-    AutoPtr< HashMap<String, AutoPtr<IFeatureInfo> > > mAvailableFeatures;
+    AutoPtr<HashMap<String, AutoPtr<IFeatureInfo> > > mAvailableFeatures;
 
     // These are the permission -> gid mappings that were read from the
     // system configuration files.
-    AutoPtr< HashMap<String, AutoPtr<PermissionEntry> > > mPermissions;
+    AutoPtr<HashMap<String, AutoPtr<PermissionEntry> > > mPermissions;
 
     // These are the packages that are white-listed to be able to run in the
     // background while in power save mode, as read from the configuration files.
-    AutoPtr< HashSet<String> > mAllowInPowerSave;
+    AutoPtr<HashSet<String> > mAllowInPowerSave;
 
     // These are the app package names that should not allow IME switching.
-    AutoPtr< HashSet<String> > mFixedImeApps;
+    AutoPtr<HashSet<String> > mFixedImeApps;
 
-    AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > mSignatureAllowances;
+    AutoPtr<HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > mSignatureAllowances;
 };
 
 } // namespace Server

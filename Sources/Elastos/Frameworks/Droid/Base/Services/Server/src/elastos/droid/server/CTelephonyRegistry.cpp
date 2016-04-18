@@ -7,6 +7,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/etl/Algorithm.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <Elastos.Droid.Os.h>
@@ -269,6 +270,7 @@ ECode CTelephonyRegistry::constructor(
     mNumPhones = numPhones;
     mCallState = ArrayOf<Int32>::Alloc(numPhones);
     mDataActivity = ArrayOf<Int32>::Alloc(numPhones);
+    mConnectedApns = ArrayOf<IArrayList*>::Alloc(numPhones);
     mDataConnectionState = ArrayOf<Int32>::Alloc(numPhones);
     mDataConnectionNetworkType = ArrayOf<Int32>::Alloc(numPhones);
     mCallIncomingNumber = ArrayOf<String>::Alloc(numPhones);
@@ -287,6 +289,7 @@ ECode CTelephonyRegistry::constructor(
     for (Int32 i = 0; i < numPhones; i++) {
         (*mCallState)[i] =  ITelephonyManager::CALL_STATE_IDLE;
         (*mDataActivity)[i] = ITelephonyManager::DATA_ACTIVITY_NONE;
+        CArrayList::New(&((*mConnectedApns)[i]));
         (*mDataConnectionState)[i] = ITelephonyManager::DATA_UNKNOWN;
         (*mCallIncomingNumber)[i] = "";
         // CServiceState::New((Elastos::Droid::Telephony::IServiceState**)&(*mServiceState)[i]);
@@ -962,10 +965,12 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         Boolean modified = FALSE;
-        List<String>::Iterator lit = Find(mConnectedApns.Begin(), mConnectedApns.End(), apnType);
         if (state == ITelephonyManager::DATA_CONNECTED) {
-            if (lit == mConnectedApns.End()) {
-                mConnectedApns.PushBack(apnType);
+            AutoPtr<IArrayList> p = (*mConnectedApns)[phoneId];
+            Boolean b = FALSE;
+            p->Contains(CoreUtils::Convert(apnType), &b);
+            if (!b) {
+                p->Add(CoreUtils::Convert(apnType));
                 if ((*mDataConnectionState)[phoneId] != state) {
                     (*mDataConnectionState)[phoneId] = state;
                     modified = TRUE;
@@ -973,9 +978,11 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
             }
         }
         else {
-            if (lit != mConnectedApns.End()) {
-                mConnectedApns.Erase(lit);
-                if (mConnectedApns.IsEmpty()) {
+            Boolean bRm = FALSE, bEmp = FALSE;
+            (*mConnectedApns)[phoneId]->Remove(CoreUtils::Convert(apnType), &bRm);
+            if (bRm) {
+                (*mConnectedApns)[phoneId]->IsEmpty(&bEmp);
+                if (bEmp) {
                     (*mDataConnectionState)[phoneId] = state;
                     modified = TRUE;
                 }
