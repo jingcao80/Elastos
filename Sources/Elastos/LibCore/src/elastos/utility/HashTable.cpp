@@ -1082,7 +1082,7 @@ ECode HashTable::Put(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value)
 {
-    return Put(key, value, NULL);
+    return HashTable::Put(key, value, NULL);
 }
 
 ECode HashTable::ConstructorPut(

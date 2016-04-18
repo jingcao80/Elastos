@@ -64,19 +64,19 @@ ECode CProviderService::Initialize(
     sSupportsParameterTypes[String("Mac")] = TRUE;
     sSupportsParameterTypes[String("Signature")] = TRUE;
 
-
-    // Types that take a parameter to newInstance
-    AutoPtr<IClassInfo> clsInfo;
-    CObject::ReflectClassInfo(service->Probe(EIID_IInterface), (IClassInfo**)&clsInfo);
-    AutoPtr<IInterfaceInfo> itfInfo;
-    ECode ec = LoadClassOrThrow(String("Elastos.Security.Cert.CCertStoreParameters"),
-            String("Elastos.Security.Cert.ICertStoreParameters"),
-            clsInfo, (IInterfaceInfo**)&itfInfo);
-    if (FAILED(ec)) {
-        assert(SUCCEEDED(ec));
-        return ec;
-    }
-    sConstructorParameterClasses[String("CertStore")] = itfInfo;
+    //TODO
+//    // Types that take a parameter to newInstance
+//    AutoPtr<IClassInfo> clsInfo;
+//    CObject::ReflectClassInfo(service->Probe(EIID_IInterface), (IClassInfo**)&clsInfo);
+//    AutoPtr<IInterfaceInfo> itfInfo;
+//    ECode ec = LoadClassOrThrow(String("Elastos.Security.Cert.CCertStoreParameters"),
+//            String("Elastos.Security.Cert.ICertStoreParameters"),
+//            clsInfo, (IInterfaceInfo**)&itfInfo);
+//    if (FAILED(ec)) {
+//        assert(SUCCEEDED(ec));
+//        return ec;
+//    }
+//    sConstructorParameterClasses[String("CertStore")] = itfInfo;
 
     // Types that do not take any kind of parameter
     sConstructorParameterClasses[String("AlgorithmParameterGenerator")] = NULL;
@@ -520,7 +520,7 @@ ECode CProviderService::ToString(
     VALIDATE_NOT_NULL(content);
 
     StringBuilder sb;
-    sb += "Provider";
+    sb += "Provider ";
     String name;
     mProvider->GetName(&name);
     sb += name;
