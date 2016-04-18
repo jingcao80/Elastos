@@ -30,7 +30,8 @@ namespace Elastos {
 namespace DevSamples {
 namespace TextViewDemo {
 
-class CActivityOne : public Activity
+CarClass(CActivityOne)
+    , public Activity
 {
 public:
     class MyListener

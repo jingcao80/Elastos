@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TextView
+        android:id="@+id/DisplayTime"
+        android:layout_width="fill_parent"
+        android:layout_height="50px"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:textColor="#ff00ff00"
+        android:text="Get System Time"
+        android:background="#FFFFFF"/>
+
+    <Button android:id="@+id/Start"
+        android:layout_width="150px"
+        android:layout_height="50px"
+        android:text="Start Service">
+    </Button>
+
+    <Button android:id="@+id/Bind"
+        android:layout_width="150px"
+        android:layout_height="50px"
+        android:text="Bind Service">
+    </Button>
+
+    <Button android:id="@+id/Unbind"
+        android:layout_width="150px"
+        android:layout_height="50px"
+        android:text="Unbind Service">
+    </Button>
+
+    <Button android:id="@+id/Stop"
+        android:layout_width="150px"
+        android:layout_height="50px"
+        android:text="Stop Service">
+    </Button>
+
+</LinearLayout>
