@@ -239,10 +239,8 @@ ECode CTreeMap::PutInternal(
     AutoPtr<IInterface> result = created->mValue;
     created->mValue = value;
 
-    if (object) {
-        *object = created->Probe(EIID_IInterface);
-        REFCOUNT_ADD(*object)
-    }
+    *object = result;
+    REFCOUNT_ADD(*object)
     return NOERROR;
 }
 

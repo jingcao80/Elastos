@@ -696,8 +696,8 @@ ECode Collections::EmptyMap::Put(
     /* [in] */ PInterface key,
     /* [in] */ PInterface value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> oldValue;
+    return AbstractMap::Put(key, value, (IInterface**)&oldValue);
 }
 
 ECode Collections::EmptyMap::PutAll(
@@ -716,8 +716,8 @@ ECode Collections::EmptyMap::Remove(
 ECode Collections::EmptyMap::Remove(
     /* [in] */ PInterface key)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> value;
+    return AbstractMap::Remove(key, (IInterface**)&value);
 }
 
 ECode Collections::EmptyMap::GetSize(
@@ -1533,8 +1533,8 @@ ECode Collections::_SynchronizedCollection::Add(
 ECode Collections::_SynchronizedCollection::Add(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return Add(object, &modified);
 }
 
 ECode Collections::_SynchronizedCollection::AddAll(
@@ -1551,8 +1551,8 @@ ECode Collections::_SynchronizedCollection::AddAll(
 ECode Collections::_SynchronizedCollection::AddAll(
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return AddAll(collection, &modified);
 }
 
 ECode Collections::_SynchronizedCollection::Clear()
@@ -1619,8 +1619,8 @@ ECode Collections::_SynchronizedCollection::Remove(
 ECode Collections::_SynchronizedCollection::Remove(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return Remove(object, &modified);
 }
 
 ECode Collections::_SynchronizedCollection::RemoveAll(
@@ -1637,8 +1637,8 @@ ECode Collections::_SynchronizedCollection::RemoveAll(
 ECode Collections::_SynchronizedCollection::RemoveAll(
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return RemoveAll(collection, &modified);
 }
 
 ECode Collections::_SynchronizedCollection::RetainAll(
@@ -1655,8 +1655,8 @@ ECode Collections::_SynchronizedCollection::RetainAll(
 ECode Collections::_SynchronizedCollection::RetainAll(
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return RetainAll(collection, &modified);
 }
 
 ECode Collections::_SynchronizedCollection::GetSize(
@@ -1959,8 +1959,8 @@ ECode Collections::_SynchronizedList::Remove(
 ECode Collections::_SynchronizedList::Remove(
     /* [in] */ Int32 location)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> object;
+    return Remove(location, (IInterface**)&object);
 }
 
 ECode Collections::_SynchronizedList::Set(
@@ -1979,8 +1979,8 @@ ECode Collections::_SynchronizedList::Set(
     /* [in] */ Int32 location,
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> prevObject;
+    return Set(location, object, (IInterface**)&prevObject);
 }
 
 ECode Collections::_SynchronizedList::GetSubList(
@@ -2271,8 +2271,8 @@ ECode Collections::_SynchronizedMap::Put(
     /* [in] */ PInterface key,
     /* [in] */ PInterface value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> oldValue;
+    return Put(key, value, (IInterface**)&oldValue);
 }
 
 ECode Collections::_SynchronizedMap::PutAll(
@@ -2298,8 +2298,8 @@ ECode Collections::_SynchronizedMap::Remove(
 ECode Collections::_SynchronizedMap::Remove(
     /* [in] */ PInterface key)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> Value;
+    return Remove(key, (IInterface**)&Value);
 }
 
 ECode Collections::_SynchronizedMap::GetSize(
@@ -2682,8 +2682,8 @@ ECode Collections::_SynchronizedSortedMap::Put(
     /* [in] */ PInterface key,
     /* [in] */ PInterface value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> oldValue;
+    return _SynchronizedMap::Put(key, value, (IInterface**)&oldValue);
 }
 
 ECode Collections::_SynchronizedSortedMap::PutAll(
@@ -2702,8 +2702,8 @@ ECode Collections::_SynchronizedSortedMap::Remove(
 ECode Collections::_SynchronizedSortedMap::Remove(
     /* [in] */ PInterface key)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> value;
+    return _SynchronizedMap::Remove(key, (IInterface**)&value);
 }
 
 ECode Collections::_SynchronizedSortedMap::GetSize(
@@ -5510,6 +5510,9 @@ ECode Collections::AddAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    if (c == NULL || a ==NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Boolean modified = FALSE;
     for (Int32 i = 0; i < a->GetLength(); i++) {
         Boolean b;
@@ -5526,6 +5529,9 @@ ECode Collections::Disjoint(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    if (c1 == NULL || c2 == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Int32 n1, n2;
     c1->GetSize(&n1);
     c2->GetSize(&n2);
@@ -6011,8 +6017,8 @@ ECode Collections::_CheckedCollection::Remove(
 ECode Collections::_CheckedCollection::Remove(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return mC->Remove(object, &modified);
 }
 
 ECode Collections::_CheckedCollection::ContainsAll(
@@ -6040,8 +6046,8 @@ ECode Collections::_CheckedCollection::AddAll(
 ECode Collections::_CheckedCollection::AddAll(
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return AddAll(collection, &modified);
 }
 
 ECode Collections::_CheckedCollection::RemoveAll(
@@ -6055,8 +6061,8 @@ ECode Collections::_CheckedCollection::RemoveAll(
 ECode Collections::_CheckedCollection::RemoveAll(
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return mC->RemoveAll(collection, &modified);
 }
 
 ECode Collections::_CheckedCollection::RetainAll(
@@ -6070,8 +6076,8 @@ ECode Collections::_CheckedCollection::RetainAll(
 ECode Collections::_CheckedCollection::RetainAll(
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return mC->RetainAll(collection, &modified);
 }
 
 ECode Collections::_CheckedCollection::Clear()
@@ -6206,8 +6212,8 @@ ECode Collections::_CheckedList::AddAll(
     /* [in] */ Int32 location,
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return AddAll(location, collection, &modified);
 }
 
 ECode Collections::_CheckedList::Get(
@@ -6230,8 +6236,8 @@ ECode Collections::_CheckedList::Set(
     /* [in] */ Int32 location,
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> prevObject;
+    return Set(location, object, (IInterface**)&prevObject);
 }
 
 ECode Collections::_CheckedList::Add(
@@ -6245,8 +6251,8 @@ ECode Collections::_CheckedList::Add(
 ECode Collections::_CheckedList::Add(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    FAIL_RETURN(Collections::CheckType(object, mType));
+    return mL->Add(object);;
 }
 
 ECode Collections::_CheckedList::Remove(
@@ -6259,8 +6265,8 @@ ECode Collections::_CheckedList::Remove(
 ECode Collections::_CheckedList::Remove(
     /* [in] */ Int32 location)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> object;
+    return mL->Remove(location, (IInterface**)&object);
 }
 
 ECode Collections::_CheckedList::IndexOf(
@@ -6958,8 +6964,8 @@ ECode Collections::_CheckedMap::Remove(
 ECode Collections::_CheckedMap::Remove(
     /* [in] */ PInterface key)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> value;
+    return mM->Remove(key, (IInterface**)&value);
 }
 
 ECode Collections::_CheckedMap::PutAll(
