@@ -1,20 +1,20 @@
 
 #include "Elastos.Droid.Content.h"
-#include "elastos/droid/os/CPowerManagerWakeLock.h"
-#include "elastos/droid/os/CPowerManager.h"
 #include "elastos/droid/os/CBinder.h"
-#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/CPowerManager.h"
+#include "elastos/droid/os/CPowerManagerWakeLock.h"
 #include "elastos/droid/os/CWorkSource.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
-#include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::StringBuilder;
+using Elastos::Droid::Os::CWorkSource;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::EIID_IRunnable;
-using Elastos::Droid::Os::CWorkSource;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {

@@ -33,6 +33,7 @@ using Elastos::Droid::Server::Am::CActivityManagerService;
 using Elastos::Core::Thread;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileWriter;
+using Elastos::Text::ISimpleDateFormat;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {
@@ -213,6 +214,7 @@ public:
     Int32 mPhonePid;
     AutoPtr<IIActivityController> mController;
     Boolean mAllowRestart;
+    AutoPtr<ISimpleDateFormat> mTraceDateFormat;
 };
 
 } // namespace Server

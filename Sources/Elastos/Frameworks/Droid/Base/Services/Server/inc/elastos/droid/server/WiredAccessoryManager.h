@@ -4,23 +4,27 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
-#include "elastos/droid/os/UEventObserver.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/UEventObserver.h"
 #include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Droid::Os::UEventObserver;
-using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Os::UEventObserver;
 using Elastos::Droid::Server::Input::CInputManagerService;
+using Elastos::Droid::Server::Input::IWiredAccessoryCallbacks;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 class WiredAccessoryManager
-    : public CInputManagerService::WiredAccessoryCallbacks
+    : public IWiredAccessoryCallbacks
+    , public Object
 {
+
 friend class WiredAccessoryObserver;
 
 public:
@@ -83,7 +87,7 @@ public:
 
         CARAPI_(void) Init();
 
-        CARAPI_(void) OnUEvent(
+        CARAPI OnUEvent(
             /* [in] */ IUEvent* event);
 
     private:
@@ -122,6 +126,7 @@ private:
             (*info).AppendFormat("%p", this);
             return NOERROR;
         }
+
     private:
         WiredAccessoryManager* mHost;
     };
@@ -130,6 +135,8 @@ public:
     WiredAccessoryManager(
         /* [in] */ IContext* context,
         /* [in] */ CInputManagerService* inputManager);
+
+    CAR_INTERFACE_DECL()
 
     CARAPI NotifyWiredAccessoryChanged(
         /* [in] */ Int64 whenNanos,
@@ -188,7 +195,6 @@ private:
     static const Int32 MSG_NEW_DEVICE_STATE = 1;
     static const Int32 MSG_SYSTEM_READY = 2;
 
-
     Object mLock;
 
     AutoPtr<IPowerManagerWakeLock> mWakeLock;  // held while there is a pending route change
@@ -201,7 +207,7 @@ private:
     AutoPtr<WiredAccessoryObserver> mObserver;
     AutoPtr<CInputManagerService> mInputManager;
 
-    Boolean mUseDevInputEventForAudioJack;
+    static Boolean mUseDevInputEventForAudioJack;
 
     AutoPtr<IHandler> mHandler;
 };

@@ -1,19 +1,18 @@
-#include <elastos/droid/server/Watchdog.h>
-#include <elastos/droid/server/FgThread.h>
-#include <elastos/droid/server/UiThread.h>
-#include <elastos/droid/server/IoThread.h>
-#include <elastos/droid/server/DisplayThread.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/Process.h>
 #include <elastos/droid/os/SystemClock.h>
-#include <elastos/core/Math.h>
-#include <elastos/core/AutoLock.h>
-#include <elastos/core/StringBuilder.h>
+#include <elastos/droid/server/DisplayThread.h>
+#include <elastos/droid/server/FgThread.h>
+#include <elastos/droid/server/IoThread.h>
+#include <elastos/droid/server/UiThread.h>
+#include <elastos/droid/server/Watchdog.h>
 #include <elastos/utility/logging/Slogger.h>
-
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <Elastos.CoreLibrary.Text.h>
 #include <utils/Log.h>
-
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -21,34 +20,39 @@
 #include <string.h>
 #include <errno.h>
 
-using Elastos::Droid::Manifest;
-using Elastos::Droid::Os::Binder;
-using Elastos::Droid::Os::IDebug;
-// using Elastos::Droid::Os::CDebug;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::Process;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::ILooperHelper;
-using Elastos::Droid::Os::CLooperHelper;
-using Elastos::Droid::Os::IServiceManager;
-using Elastos::Droid::Os::CServiceManager;
-using Elastos::Droid::Os::IIPowerManager;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::CIntentFilter;
-using Elastos::Core::ISystem;
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Os::Binder;
+// using Elastos::Droid::Os::CDebug;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::IDebug;
+using Elastos::Droid::Os::IIPowerManager;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::ILooperHelper;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Text::CSimpleDateFormat;
+using Elastos::Text::IDateFormat;
+using Elastos::Text::ISimpleDateFormat;
+using Elastos::IO::ICloseable;
+using Elastos::IO::CFile;
+using Elastos::IO::CFileWriter;
+using Elastos::IO::IFileWriter;
+using Elastos::IO::IWriter;
+using Elastos::Utility::CDate;
+using Elastos::Utility::IDate;
+using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::CSystem;
+using Elastos::Core::ISystem;
 using Elastos::Core::IThread;
 using Elastos::Core::StringBuilder;
-using Elastos::IO::CFile;
-using Elastos::IO::IWriter;
-using Elastos::IO::IFileWriter;
-using Elastos::IO::CFileWriter;
-using Elastos::IO::ICloseable;
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -341,6 +345,8 @@ Watchdog::Watchdog()
     // And the display thread.
     mHandlerCheckers.PushBack(new HandlerChecker(DisplayThread::GetHandler(),
         String("display thread"), DEFAULT_TIMEOUT, this));
+
+    CSimpleDateFormat::New(String("dd_MMM_HH_mm_ss.SSS"), (ISimpleDateFormat**)&mTraceDateFormat);
 }
 
 ECode Watchdog::Init(
@@ -576,9 +582,8 @@ ECode Watchdog::Run()
         // Pass !waitedHalf so that just in case we somehow wind up here without having
         // dumped the halfway stacks, we properly re-initialize the trace file.
         AutoPtr<IFile> stack;
-        // assert(0 && "TODO");
-        //stack = CActivityManagerService::DumpStackTraces(
-        //    !waitedHalf, pids, NULL, NULL, NATIVE_STACKS_OF_INTEREST);
+        stack = CActivityManagerService::DumpStackTraces(
+           !waitedHalf, &pids, NULL, NULL, NATIVE_STACKS_OF_INTEREST);
 
         // Give some extra time to make sure the stack traces get written.
         // The system's been hanging for a minute, another second or two won't hurt much.
@@ -603,11 +608,39 @@ ECode Watchdog::Run()
         }
         ICloseable::Probe(sysrq_trigger)->Close();
 
+        AutoPtr<ISystemProperties> sysProp;
+        CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+        String tracesPath;
+        sysProp->Get(String("dalvik.vm.stack-trace-file"), String(NULL), &tracesPath);
+        AutoPtr<IDate> date;
+        CDate::New((IDate**)&date);
+        String str;
+        IDateFormat::Probe(mTraceDateFormat)->Format(date, &str);
+        String traceFileNameAmendment = String("_SystemServer_WDT") + str;
+
+        if (!tracesPath.IsNullOrEmpty()) {
+            AutoPtr<IFile> traceRenameFile;
+            CFile::New(tracesPath, (IFile**)&traceRenameFile);
+            String newTracesPath;
+            Int32 lpos = tracesPath.LastIndexOf(String("."));
+            if (-1 != lpos)
+                newTracesPath = tracesPath.Substring (0, lpos) + traceFileNameAmendment + tracesPath.Substring(lpos);
+            else
+                newTracesPath = tracesPath + traceFileNameAmendment;
+            AutoPtr<IFile> file;
+            CFile::New(newTracesPath, (IFile**)&file);
+            Boolean flag = FALSE;
+            traceRenameFile->RenameTo(file, &flag);
+            tracesPath = newTracesPath;
+        }
+
+        AutoPtr<IFile> newFd;
+        CFile::New(tracesPath, (IFile**)&newFd);
 
         // Try to add the error to the dropbox, but assuming that the ActivityManager
         // itself may be deadlocked.  (which has happened, causing this statement to
         // deadlock and the watchdog as a whole to be ineffective)
-        AutoPtr<DropboxThread> dropboxThread = new DropboxThread(subject, stack, this);
+        AutoPtr<DropboxThread> dropboxThread = new DropboxThread(subject, newFd, this);
         dropboxThread->Start();
         // try {
             dropboxThread->Join(2000);  // wait up to 2 seconds for it to return.

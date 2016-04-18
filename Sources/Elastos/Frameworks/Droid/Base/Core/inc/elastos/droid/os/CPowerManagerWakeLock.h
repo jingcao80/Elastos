@@ -4,9 +4,11 @@
 
 #include "_Elastos_Droid_Os_CPowerManagerWakeLock.h"
 #include "elastos/droid/ext/frameworkdef.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/os/Runnable.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Core::IRunnable;
 
 namespace Elastos {
@@ -178,7 +180,7 @@ private:
     Boolean mHeld;
     AutoPtr<IWorkSource> mWorkSource;
     AutoPtr<IRunnable> mReleaser;
-    AutoPtr<CPowerManager> mHost;//TODO
+    AutoPtr<CPowerManager> mHost;
     String mHistoryTag;
     String mTraceName;
 };

@@ -125,29 +125,30 @@ module
     using interface Elastos.Droid.Accounts.IAccountManagerResponse;
     using interface Elastos.Droid.Accounts.IIAccountAuthenticatorResponse;
     using interface Elastos.Droid.Accounts.IIAccountManager;
+    using interface Elastos.Droid.App.Admin.IIDevicePolicyManager;
     using interface Elastos.Droid.App.IActivityContainerCallback;
+    using interface Elastos.Droid.App.IAlertDialog;
+    using interface Elastos.Droid.App.IDialog;
     using interface Elastos.Droid.App.IIActivityContainer;
     using interface Elastos.Droid.App.IIActivityManager;
     using interface Elastos.Droid.App.IIAlarmManager;
     using interface Elastos.Droid.App.IIAppTask;
     using interface Elastos.Droid.App.IINotificationManager;
-    using interface Elastos.Droid.App.IIWallpaperManager;
+    using interface Elastos.Droid.App.IIProfileManager;
     using interface Elastos.Droid.App.IIUiModeManager;
     using interface Elastos.Droid.App.IIUserSwitchObserver;
+    using interface Elastos.Droid.App.IIWallpaperManager;
+    using interface Elastos.Droid.App.IPendingIntentOnFinished;
     using interface Elastos.Droid.App.IStopUserCallback;
     using interface Elastos.Droid.App.IWallpaperInfo;
-    using interface Elastos.Droid.App.IPendingIntentOnFinished;
-    using interface Elastos.Droid.App.IAlertDialog;
-    using interface Elastos.Droid.App.IDialog;
-    using interface Elastos.Droid.App.Admin.IIDevicePolicyManager;
     using interface Elastos.Droid.App.Job.IJobService;
-    using interface Elastos.Droid.Bluetooth.IIBluetoothManager;
     using interface Elastos.Droid.Bluetooth.IIBluetoothCallback;
-    using interface Elastos.Droid.Content.IContext;
-    using interface Elastos.Droid.Content.IComponentName;
-    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Bluetooth.IIBluetoothManager;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IIClipboard;
     using interface Elastos.Droid.Content.IIContentService;
     using interface Elastos.Droid.Content.IIIntentSender;
@@ -166,35 +167,36 @@ module
     using interface Elastos.Droid.Content.Pm.IPackageInstallerSessionParams;
     using interface Elastos.Droid.Content.Pm.IPackageManager;
     using interface Elastos.Droid.Content.Pm.IRegisteredServicesCacheListener;
-    using interface Elastos.Droid.Hardware.IISerialManager;
-    using interface Elastos.Droid.Hardware.IIConsumerIrService;
-    using interface Elastos.Droid.Hardware.IICmHardwareService;
-    using interface Elastos.Droid.Hardware.IITorchService;
+    using interface Elastos.Droid.Content.Res.IIThemeService;
+    using interface Elastos.Droid.Hardware.Display.IDisplayListener;
     using interface Elastos.Droid.Hardware.Display.IIDisplayManager;
     using interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlCallback;
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlService;
+    using interface Elastos.Droid.Hardware.IICmHardwareService;
+    using interface Elastos.Droid.Hardware.IIConsumerIrService;
+    using interface Elastos.Droid.Hardware.IISerialManager;
+    using interface Elastos.Droid.Hardware.IITorchService;
     using interface Elastos.Droid.Hardware.Input.IIInputManager;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
     using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
-    using interface Elastos.Droid.Hardware.Display.IDisplayListener;
-    using interface Elastos.Droid.Internal.App.IIProcessStats;
-    using interface Elastos.Droid.Internal.App.IIBatteryStats;
     using interface Elastos.Droid.Internal.App.IIAppOpsService;
+    using interface Elastos.Droid.Internal.App.IIBatteryStats;
+    using interface Elastos.Droid.Internal.App.IIProcessStats;
+    using interface Elastos.Droid.Internal.AppWidget.IIAppWidgetService;
     using interface Elastos.Droid.Internal.Os.IBatteryCallback;
     using interface Elastos.Droid.Internal.Os.IIParcelFileDescriptorFactory;
     using interface Elastos.Droid.Internal.Os.IIDropBoxManagerService;
     using interface Elastos.Droid.Internal.Os.IIKillSwitchService;
-    using interface Elastos.Droid.Internal.View.IInputMethodClient;
+    using interface Elastos.Droid.Internal.StatusBar.IIStatusBarService;
+    using interface Elastos.Droid.Internal.Telephony.IITelephonyRegistry;
+    using interface Elastos.Droid.Internal.TextService.IITextServicesManager;
     using interface Elastos.Droid.Internal.View.IIInputContext;
     using interface Elastos.Droid.Internal.View.IIInputMethod;
-    using interface Elastos.Droid.Internal.View.IIInputSessionCallback;
     using interface Elastos.Droid.Internal.View.IIInputMethodManager;
-    using interface Elastos.Droid.Internal.AppWidget.IIAppWidgetService;
+    using interface Elastos.Droid.Internal.View.IIInputSessionCallback;
+    using interface Elastos.Droid.Internal.View.IInputMethodClient;
     using interface Elastos.Droid.Internal.Widget.IILockSettings;
-    using interface Elastos.Droid.Internal.StatusBar.IIStatusBarService;
-    using interface Elastos.Droid.Internal.TextService.IITextServicesManager;
-    using interface Elastos.Droid.Internal.Telephony.IITelephonyRegistry;
     using interface Elastos.Droid.Location.IICountryDetector;
     using interface Elastos.Droid.Location.IIFusedGeofenceHardware;
     using interface Elastos.Droid.Location.IIGeoFenceListener;
@@ -689,6 +691,24 @@ module
 //         interface IIUserSwitchObserver;
 //         interface IBinder;
 //     }
+
+    [local]
+    class CProfileManagerService {
+        constructor(
+            [in] IContext* context);
+
+        interface IIProfileManager;
+        interface IBinder;
+    }
+
+    [local]
+    class CThemeService {
+        constructor(
+            [in] IContext* context);
+
+        interface IIThemeService;
+        interface IBinder;
+    }
 
 // //    namespace Updates {
 // //

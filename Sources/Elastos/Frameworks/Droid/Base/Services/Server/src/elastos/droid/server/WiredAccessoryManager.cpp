@@ -3,38 +3,42 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Handler.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Media.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.IO.h>
 
-using Elastos::Droid::R;
-using Elastos::Droid::Os::Looper;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::View::IInputDevice;
+using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::R;
+using Elastos::Droid::View::IInputDevice;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
-using Elastos::IO::IFile;
 using Elastos::IO::CFile;
-using Elastos::IO::ICloseable;
-using Elastos::IO::IFileReader;
 using Elastos::IO::CFileReader;
-using Elastos::Core::StringUtils;
-using Elastos::Core::StringBuilder;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileReader;
+using Elastos::IO::IReader;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
-
 
 ECode WiredAccessoryManager::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -43,19 +47,21 @@ ECode WiredAccessoryManager::MyHandler::HandleMessage(
     msg->GetWhat(&what);
 
     switch (what) {
-        case WiredAccessoryManager::MSG_NEW_DEVICE_STATE: {
+        case WiredAccessoryManager::MSG_NEW_DEVICE_STATE:
+        {
             Int32 arg1, arg2;
             msg->GetArg1(&arg1);
             msg->GetArg2(&arg2);
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ICharSequence* seq = ICharSequence::Probe(obj);
             String info;
-            seq->ToString(&info);
+            ICharSequence::Probe(obj)->ToString(&info);
             mHost->HandleMsgNewDeviceState(arg1, arg2, info);
             break;
+        }
 
         case WiredAccessoryManager::MSG_SYSTEM_READY:
+        {
             mHost->OnSystemReady();
             mHost->mWakeLock->ReleaseLock();
             break;
@@ -91,6 +97,7 @@ const String WiredAccessoryManager::NAME_HDMI("hdmi");
 
 const Int32 WiredAccessoryManager::MSG_NEW_DEVICE_STATE;
 const Int32 WiredAccessoryManager::MSG_SYSTEM_READY;
+Boolean WiredAccessoryManager::mUseDevInputEventForAudioJack = FALSE;
 
 WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::UEventInfo(
     /* [in] */ const String& devName,
@@ -100,7 +107,7 @@ WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::UEventInfo(
     : mDevName(devName)
     , mState1Bits(state1Bits)
     , mState2Bits(state2Bits)
-    , mStateNBits(stateNBits)
+    , mStateNbits(stateNBits)
 {}
 
 String WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::GetDevName()
@@ -171,15 +178,10 @@ void WiredAccessoryManager::WiredAccessoryObserver::Init()
                 AutoPtr<IFileReader> file;
                 CFileReader::New(uei->GetSwitchStatePath(), (IFileReader**)&file);
                 Int32 len;
-                file->ReadChars(buffer, 0, 1024, &len);
+                IReader::Probe(file)->Read(buffer, 0, 1024, &len);
                 ICloseable::Probe(file)->Close();
-                StringBuilder sb;
-                for (Int32 ci = 0; ci < len; ++ci) {
-                    sb.AppendChar((char)(*buffer)[ci]);
-                }
-                String bufferString = sb.ToString().Trim();
-                curState = StringUtils::ParseInt32(bufferString);
-
+                String bufferString(*buffer, 0, len);
+                curState = ValidateSwitchState(StringUtils::ParseInt32(bufferString.Trim()));
                 if (curState > 0) {
                     UpdateStateLocked(uei->GetDevPath(), uei->GetDevName(), curState);
                 }
@@ -202,6 +204,15 @@ void WiredAccessoryManager::WiredAccessoryObserver::Init()
     }
 }
 
+Int32 WiredAccessoryManager::WiredAccessoryObserver::ValidateSwitchState(
+    /* [in] */ Int32 state)
+{
+    // Some drivers, namely HTC headset ones, add additional bits to
+    // the switch state. As we only are able to deal with the states
+    // 0, 1 and 2, mask out all the other bits
+    return state & 0x3;
+}
+
 AutoPtr< List<AutoPtr<WiredAccessoryManager::WiredAccessoryObserver::UEventInfo> > >
 WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
 {
@@ -214,7 +225,8 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
         uei = new UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC, BIT_LINEOUT);
         if (uei->CheckSwitchExists()) {
             retVal->PuashBack(uei);
-        } else {
+        }
+        else {
             Slogger::W(mHost->TAG, "This kernel does not have wired headset support");
         }
     }
@@ -223,7 +235,8 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
     uei = new UEventInfo(NAME_USB_AUDIO, BIT_USB_HEADSET_ANLG, BIT_USB_HEADSET_DGTL, 0);
     if (uei->CheckSwitchExists()) {
         retVal->PushBack(uei);
-    } else {
+    }
+    else {
         Slogger::W(mHost->TAG, "This kernel does not have usb audio support");
     }
 
@@ -238,11 +251,13 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
     uei = new UEventInfo(NAME_HDMI_AUDIO, BIT_HDMI_AUDIO, 0, 0);
     if (uei->CheckSwitchExists()) {
         retVal->PushBack(uei);
-    } else {
+    }
+    else {
         uei = new UEventInfo(NAME_HDMI, BIT_HDMI_AUDIO, 0, 0);
         if (uei->CheckSwitchExists()) {
             retVal->PushBack(uei);
-        } else {
+        }
+        else {
             Slogger::W(mHost->TAG, "This kernel does not have HDMI audio support");
         }
     }
@@ -251,15 +266,17 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
 }
 
 // @Override
-void WiredAccessoryManager::WiredAccessoryObserver::OnUEvent(
+ECode WiredAccessoryManager::WiredAccessoryObserver::OnUEvent(
     /* [in] */ IUEvent* event)
 {
-    if (mHost->LOG) Slogger::V(mHost->TAG, "Headset UEVENT: %s", event->ToString().string());
+    if (mHost->LOG) Slogger::V(mHost->TAG, "Headset UEVENT: %s", Object::ToString(event).string());
 
 //     try {
-        String devPath = event->Get(String("DEVPATH"));
-        String name = event->Get(String("SWITCH_NAME"));
-        Int32 state = StringUtils::ParseInt32(name);//Integer.parseInt(event.get("SWITCH_STATE"));
+        String devPath;
+        event->Get(String("DEVPATH"), &devPath);
+        String name;
+        event->Get(String("SWITCH_NAME"), &name);
+        Int32 state = ValidateSwitchState(StringUtils::ParseInt32(name));//Integer.parseInt(event.get("SWITCH_STATE"));
         {
             AutoLock lock(mHost->mLock);
             UpdateStateLocked(devPath, name, state);
@@ -267,6 +284,7 @@ void WiredAccessoryManager::WiredAccessoryObserver::OnUEvent(
 //     } catch (NumberFormatException e) {
 //         Slog.e(TAG, "Could not parse switch state from event " + event);
 //     }
+        return NOERROR;
 }
 
 void WiredAccessoryManager::WiredAccessoryObserver::UpdateStateLocked(
@@ -289,7 +307,6 @@ WiredAccessoryManager::WiredAccessoryManager(
     /* [in] */ CInputManagerService* inputManager)
     : mHeadsetState(0)
     , mSwitchValues(0)
-    , mUseDevInputEventForAudioJack(FALSE)
 {
     mHandler = new MyHandler(Looper::GetMyLooper(), this);
     AutoPtr<IInterface> powerService;
@@ -309,14 +326,16 @@ WiredAccessoryManager::WiredAccessoryManager(
     mObserver = new WiredAccessoryObserver(this);
 }
 
+CAR_INTERFACE_IMPL(WiredAccessoryManager, Object, IWiredAccessoryCallbacks)
+
 void WiredAccessoryManager::OnSystemReady()
 {
     if (mUseDevInputEventForAudioJack) {
         Int32 switchValues = 0;
-        if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::_SW_HEADPHONE_INSERT) == 1) {
+        if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::SW_HEADPHONE_INSERT) == 1) {
             switchValues |= CInputManagerService::SW_HEADPHONE_INSERT_BIT;
         }
-        if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::_SW_MICROPHONE_INSERT) == 1) {
+        if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::SW_MICROPHONE_INSERT) == 1) {
             switchValues |= CInputManagerService::SW_MICROPHONE_INSERT_BIT;
         }
         if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::SW_LINEOUT_INSERT) == 1) {
@@ -333,7 +352,7 @@ void WiredAccessoryManager::OnSystemReady()
 }
 
 // @Override
-void WiredAccessoryManager::NotifyWiredAccessoryChanged(
+ECode WiredAccessoryManager::NotifyWiredAccessoryChanged(
     /* [in] */ Int64 whenNanos,
     /* [in] */ Int32 switchValues,
     /* [in] */ Int32 switchMask)
@@ -376,11 +395,12 @@ void WiredAccessoryManager::NotifyWiredAccessoryChanged(
 
         UpdateLocked(NAME_H2W, (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) | headset);
     }
+    return NOERROR;
 }
 
 ECode WiredAccessoryManager::SystemReady()
 {
-    synchronized (mLock) {
+    synchronized(mLock) {
         mWakeLock->AcquireLock();
 
         AutoPtr<IMessage> msg;
@@ -474,24 +494,31 @@ void WiredAccessoryManager::SetDeviceStateLocked(
 
         if ((headsetState & headset) != 0) {
             state = 1;
-        } else {
+        }
+        else {
             state = 0;
         }
 
         if (headset == BIT_HEADSET) {
             outDevice = IAudioManager::DEVICE_OUT_WIRED_HEADSET;
             inDevice = IAudioManager::DEVICE_IN_WIRED_HEADSET;
-        } else if (headset == BIT_HEADSET_NO_MIC){
+        }
+        else if (headset == BIT_HEADSET_NO_MIC){
             outDevice = IAudioManager::DEVICE_OUT_WIRED_HEADPHONE;
-        } else if (headset == BIT_LINEOUT){
+        }
+        else if (headset == BIT_LINEOUT){
             outDevice = IAudioManager::DEVICE_OUT_LINE;
-        } else if (headset == BIT_USB_HEADSET_ANLG) {
+        }
+        else if (headset == BIT_USB_HEADSET_ANLG) {
             outDevice = IAudioManager::DEVICE_OUT_ANLG_DOCK_HEADSET;
-        } else if (headset == BIT_USB_HEADSET_DGTL) {
+        }
+        else if (headset == BIT_USB_HEADSET_DGTL) {
             outDevice = IAudioManager::DEVICE_OUT_DGTL_DOCK_HEADSET;
-        } else if (headset == BIT_HDMI_AUDIO) {
+        }
+        else if (headset == BIT_HDMI_AUDIO) {
             outDevice = IAudioManager::DEVICE_OUT_HDMI;
-        } else {
+        }
+        else {
             Slogger::E(TAG, "setDeviceState() invalid headset type: %d", headset);
             return;
         }
