@@ -83,7 +83,7 @@ BroadcastRecord::~BroadcastRecord()
 String BroadcastRecord::ToString()
 {
     StringBuilder sb("BroadcastRecord{");
-    sb += StringUtils::ToString((Int32)this, 16);
+    sb += StringUtils::ToHexString((Int32)this);
     sb += " u";
     sb += mUserId;
     sb += " ";

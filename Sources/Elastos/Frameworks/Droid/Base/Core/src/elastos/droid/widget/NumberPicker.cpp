@@ -404,7 +404,7 @@ NumberPicker::SetSelectionCommand::SetSelectionCommand(
 ECode NumberPicker::SetSelectionCommand::Run()
 {
     AutoPtr<IInterface> obj;
-    mWeakHost->Resolve(EIID_INumberPicker, (IInterface**)&obj);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<INumberPicker> num = INumberPicker::Probe(obj);
     if (num == NULL) {
         return NOERROR;

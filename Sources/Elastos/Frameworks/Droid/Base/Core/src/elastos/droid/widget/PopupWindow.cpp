@@ -214,7 +214,7 @@ ECode PopupWindow::PopupWindowScrollChangedListener::OnScrollChanged()
     AutoPtr<IView> anchor;
     if (mHost->mAnchor != NULL) {
         AutoPtr<IInterface> objectReference;
-        mHost->mAnchor->Resolve(EIID_IView, (IInterface**)&objectReference);
+        mHost->mAnchor->Resolve(EIID_IInterface, (IInterface**)&objectReference);
         anchor = IView::Probe(objectReference);
     }
 
@@ -1441,7 +1441,7 @@ void PopupWindow::Update(
     AutoPtr<IView> oldView;
     if (oldAnchor != NULL) {
         AutoPtr<IInterface> obj;
-        oldAnchor->Resolve(EIID_IView, (IInterface**)&obj);
+        oldAnchor->Resolve(EIID_IInterface, (IInterface**)&obj);
         oldView = IView::Probe(obj);
     }
 
@@ -1494,7 +1494,7 @@ void PopupWindow::UnregisterForScrollChanged()
     AutoPtr<IView> anchor;
     if (mAnchor != NULL) {
         AutoPtr<IInterface> obj;
-        mAnchor->Resolve(EIID_IView, (IInterface**)&obj);
+        mAnchor->Resolve(EIID_IInterface, (IInterface**)&obj);
         anchor = IView::Probe(obj);
     }
     if (anchor != NULL) {

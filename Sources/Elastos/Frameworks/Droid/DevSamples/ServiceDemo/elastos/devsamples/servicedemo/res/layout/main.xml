@@ -15,12 +15,6 @@
         android:text="Get System Time"
         android:background="#FFFFFF"/>
 
-    <Button android:id="@+id/Start"
-        android:layout_width="150px"
-        android:layout_height="50px"
-        android:text="Start Service">
-    </Button>
-
     <Button android:id="@+id/Bind"
         android:layout_width="150px"
         android:layout_height="50px"
@@ -31,12 +25,6 @@
         android:layout_width="150px"
         android:layout_height="50px"
         android:text="Unbind Service">
-    </Button>
-
-    <Button android:id="@+id/Stop"
-        android:layout_width="150px"
-        android:layout_height="50px"
-        android:text="Stop Service">
     </Button>
 
 </LinearLayout>

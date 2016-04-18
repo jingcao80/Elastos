@@ -1207,7 +1207,7 @@ AutoPtr<IActionMenuPresenter> ActionMenuView::GetPresenter()
     AutoPtr<IActionMenuPresenter> presenter;
     if (mPresenter != NULL) {
         AutoPtr<IInterface> obj;
-        mPresenter->Resolve(EIID_IActionMenuPresenter, (IInterface**)&obj);
+        mPresenter->Resolve(EIID_IInterface, (IInterface**)&obj);
         presenter = IActionMenuPresenter::Probe(obj);
     }
     return presenter;

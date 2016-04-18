@@ -16,7 +16,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="CServiceOne" />
+        <service android:name="Elastos.DevSamples.ServiceDemo.CServiceOne" android:exported="true"/>
     </application>
 
   <!-- "android:name" need a classname that extends Instrumentation

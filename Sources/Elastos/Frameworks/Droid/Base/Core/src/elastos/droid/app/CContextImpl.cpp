@@ -2237,11 +2237,7 @@ ECode CContextImpl::BindServiceCommon(
     ActivityManagerNative::GetDefault()->BindService(
         appThread, GetActivityToken(), service, type, sd, flags, id, &res);
     if (res < 0) {
-        String info;
-        service->ToString(&info);
-        Slogger::E(TAG, "Not allowed to bind to service %s", info.string());
-//            throw new SecurityException(
-//                    "Not allowed to bind to service " + service);
+        Slogger::E(TAG, "Not allowed to bind to service %s", TO_CSTR(service));
         return E_SECURITY_EXCEPTION;
     }
     *succeeded = res != 0;
@@ -3712,7 +3708,7 @@ ECode CContextImpl::PerformFinalCleanup(
     /* [in] */ const String& who,
     /* [in] */ const String& what)
 {
-    //Log.i(TAG, "Cleanup up context: " + this);
+    //Logger::I(TAG, "Cleanup up context: %p, %s, %s", this, who.string(), what.string());
     AutoPtr<IContext> ctx = GetOuterContext();
     return mPackageInfo->RemoveContextRegistrations(ctx, who, what);
 }
@@ -3746,11 +3742,11 @@ void CContextImpl::SetOuterContext(
 
 AutoPtr<IContext> CContextImpl::GetOuterContext()
 {
-    AutoPtr<IInterface> context;
+    AutoPtr<IContext> context;
     if (mOuterContext != NULL) {
         mOuterContext->Resolve(EIID_IContext, (IInterface**)&context);
     }
-    return IContext::Probe(context);
+    return context;
 }
 
 AutoPtr<IBinder> CContextImpl::GetActivityToken()
@@ -3797,8 +3793,7 @@ AutoPtr<IFile> CContextImpl::ValidateFilePath(
     /* [in] */ const String& name,
     /* [in] */ Boolean createDirectory)
 {
-    AutoPtr<IFile> dir;
-    AutoPtr<IFile> f;
+    AutoPtr<IFile> dir, f;
     Char32 separatorChar;
     AutoPtr<IFileHelper> helper;
     CFileHelper::AcquireSingleton((IFileHelper**)&helper);

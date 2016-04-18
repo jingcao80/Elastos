@@ -721,7 +721,7 @@ void UserSwitcherController::NotifyAdapters()
         AutoPtr<IInterface> wr;
         mAdapters->Get(i, (IInterface**)&wr);
         AutoPtr<IInterface> obj;
-        IWeakReference::Probe(wr)->Resolve(EIID_IUserSwitcherControllerBaseUserAdapter, (IInterface**)&obj);
+        IWeakReference::Probe(wr)->Resolve(EIID_IInterface, (IInterface**)&obj);
         AutoPtr<BaseUserAdapter> adapter = (BaseUserAdapter*)IUserSwitcherControllerBaseUserAdapter::Probe(obj);
         if (adapter != NULL) {
             adapter->NotifyDataSetChanged();

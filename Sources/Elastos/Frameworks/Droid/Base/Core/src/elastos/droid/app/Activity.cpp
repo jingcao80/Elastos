@@ -252,6 +252,8 @@ ECode Activity::ToString(
 String Activity::ToString()
 {
     StringBuilder sb("Activity:(");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " embeddedID=";
     sb += mEmbeddedID;
     sb += ")";
     return sb.ToString();

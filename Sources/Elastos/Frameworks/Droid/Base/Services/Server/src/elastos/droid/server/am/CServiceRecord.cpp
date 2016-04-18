@@ -104,11 +104,11 @@ String CServiceRecord::StartItem::ToString()
     }
     StringBuilder sb(128);
     sb.Append("ServiceRecord{");
-    sb.Append(StringUtils::ToString((Int32)mSr, 16));
+    sb.Append(StringUtils::ToHexString((Int32)mSr));
     sb.AppendChar(' ');
     sb.Append(mSr->mShortName);
     sb.Append(" StartItem ");
-    sb.Append(StringUtils::ToString((Int32)this, 16));
+    sb.Append(StringUtils::ToHexString((Int32)this));
     sb.Append(" id=");
     sb.Append(mId);
     sb.AppendChar('}');
@@ -749,7 +749,7 @@ String CServiceRecord::ToString()
 
     StringBuilder sb(128);
     sb += "ServiceRecord{";
-    sb += StringUtils::ToString(Int32(this), 16);
+    sb += StringUtils::ToHexString((Int32)this);
     sb += " u";
     sb += mUserId;
     sb += ' ';

@@ -98,11 +98,7 @@ AutoPtr<IInputMethod> CIInputMethodWrapper::GetInternalInputMethod()
 {
     AutoPtr<IInputMethod> im;
     if (mInputMethod) {
-        AutoPtr<IInterface> obj;
-        mInputMethod->Resolve(EIID_IInputMethod, (IInterface**)&obj);
-        if (obj) {
-            im = IInputMethod::Probe(obj);
-        }
+        mInputMethod->Resolve(EIID_IInputMethod, (IInterface**)&im);
     }
 
     return im;
@@ -128,11 +124,7 @@ ECode CIInputMethodWrapper::ExecuteMessage(
     switch (what) {
         case DO_DUMP: {
             AutoPtr<IAbstractInputMethodService> target;
-            AutoPtr<IInterface> obj;
-            mTarget->Resolve(EIID_IAbstractInputMethodService, (IInterface**)&obj);
-            if (obj) {
-                target = IAbstractInputMethodService::Probe(obj);
-            }
+            mTarget->Resolve(EIID_IAbstractInputMethodService, (IInterface**)&target);
             if (target == NULL) {
                 return NOERROR;
             }

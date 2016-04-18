@@ -982,9 +982,9 @@ ECode CActivityThread::H::HandleMessage(
         }
         case CLEAN_UP_CONTEXT: {
             AutoPtr<ContextCleanupInfo> cci = (ContextCleanupInfo*)IObject::Probe(obj);
+            CContextImpl* ctx = (CContextImpl*)(cci->mContext.Get());
             assert(cci != NULL);
-            ec = ((CContextImpl*)cci->mContext.Get())->PerformFinalCleanup(
-                cci->mWho, cci->mWhat);
+            ec = ctx->PerformFinalCleanup(cci->mWho, cci->mWhat);
             break;
         }
         case GC_WHEN_IDLE:
@@ -2157,7 +2157,7 @@ ECode CActivityThread::ScheduleContextCleanup(
     VALIDATE_NOT_NULL(context);
 
     AutoPtr<ContextCleanupInfo> cci = new ContextCleanupInfo();
-    cci->mContext = (IContextImpl*)context;
+    cci->mContext = IContextImpl::Probe(context);
     cci->mWho = who;
     cci->mWhat = what;
 
@@ -2169,7 +2169,6 @@ ECode CActivityThread::PerformLaunchActivity(
     /* [in] */ IIntent* customIntent,
     /* [out] */ IActivity** activity)
 {
-    Slogger::I(TAG, " >>> PerformLaunchActivity");
     VALIDATE_NOT_NULL(activity);
     *activity = NULL;
 
@@ -2391,7 +2390,6 @@ ECode CActivityThread::PerformLaunchActivity(
 //        }
 //    }
 
-    Slogger::I(TAG, " <<< PerformLaunchActivity : %p : %s", r->mToken.Get(), TO_CSTR(r));
     *activity = a;
     REFCOUNT_ADD(*activity);
     return NOERROR;
@@ -4525,8 +4523,10 @@ ECode CActivityThread::HandleRelaunchActivity(
             return NOERROR;
         }
 
-       if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Relaunching activity %p with configChanges=0x"
-               , tmp->mToken.Get()/*, Integer.toHexString(configChanges)*/);
+       if (DEBUG_CONFIGURATION) {
+            Slogger::V(TAG, "Relaunching activity %s with configChanges=%08x",
+                TO_CSTR(tmp->mToken), configChanges);
+       }
 
         if (mPendingConfiguration != NULL) {
             changedConfig = mPendingConfiguration;
@@ -4551,8 +4551,10 @@ ECode CActivityThread::HandleRelaunchActivity(
         }
     }
 
-   if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Relaunching activity %p: changedConfig=%p"
-           , tmp->mToken.Get(), changedConfig.Get());
+    if (DEBUG_CONFIGURATION) {
+        Slogger::V(TAG, "Relaunching activity %s: changedConfig=%s",
+            TO_CSTR(tmp->mToken), TO_CSTR(changedConfig));
+    }
 
     // If there was a pending configuration change, execute it first.
     if (changedConfig != NULL) {
@@ -4562,7 +4564,7 @@ ECode CActivityThread::HandleRelaunchActivity(
     }
 
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(tmp->mToken);
-    if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Handling relaunch of %p", r.Get());
+    if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Handling relaunch of %s", TO_CSTR(r));
     if (r == NULL) {
         return NOERROR;
     }
@@ -4639,20 +4641,16 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
     /* [in] */ IConfiguration* newConfig)
 {
     AutoPtr< List<AutoPtr<IComponentCallbacks2> > > callbacks = new List<AutoPtr<IComponentCallbacks2> >();
-    // assert(0 && "TODO");
-    IComponentCallbacks* cc;
-    IComponentCallbacks2* cc2;
+    IComponentCallbacks2* cb;
 
     {
         AutoLock lock(mResourcesManager);
         List<AutoPtr<IApplication> >::Iterator it;
         for (it = mAllApplications.Begin(); it != mAllApplications.End(); ++it) {
-            // assert(0 && "TODO");
-            cc = IComponentCallbacks::Probe(*it);
-            assert(cc);
-            cc2 = IComponentCallbacks2::Probe(*it);
-            assert(cc2);
-            callbacks->PushBack(cc2);
+            assert(IComponentCallbacks::Probe(*it) != NULL);
+            cb = IComponentCallbacks2::Probe(*it);
+            assert(cb);
+            callbacks->PushBack(cb);
         }
 
         if (mActivities.Begin() != mActivities.End()) {
@@ -4670,12 +4668,10 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
                     if (!isFinish && (allActivities || !ar->mPaused)) {
                         // If the activity is currently resumed, its configuration
                         // needs to change right now.
-                        // assert(0 && "TODO");
-                        cc = IComponentCallbacks::Probe(a);
-                        assert(cc);
-                        cc2 = IComponentCallbacks2::Probe(a);
-                        assert(cc2);
-                        callbacks->PushBack(cc2);
+                        assert(IComponentCallbacks::Probe(a) != NULL);
+                        cb = IComponentCallbacks2::Probe(a);
+                        assert(cb);
+                        callbacks->PushBack(cb);
                     }
                     else if (thisConfig != NULL) {
                         // Otherwise, we will tell it about the change
@@ -4696,12 +4692,10 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
             HashMap<AutoPtr<IBinder>, AutoPtr<IService> >:: Iterator it;
             for (it = mServices.Begin(); it != mServices.End(); ++it) {
                 AutoPtr<IService> service = it->mSecond;
-                // assert(0 && "TODO");
-                cc = IComponentCallbacks::Probe(service);
-                assert(cc);
-                cc2 = IComponentCallbacks2::Probe(service);
-                assert(cc2);
-                callbacks->PushBack(cc2);
+                assert(IComponentCallbacks::Probe(service) != NULL);
+                cb = IComponentCallbacks2::Probe(service);
+                assert(cb);
+                callbacks->PushBack(cb);
             }
         }
     }
@@ -4711,12 +4705,10 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
             HashMap<AutoPtr<IBinder>, AutoPtr<ProviderClientRecord> >::Iterator it;
             for (it = mLocalProviders.Begin(); it != mLocalProviders.End(); ++it) {
                 AutoPtr<ProviderClientRecord> providerClientRecord = it->mSecond;
-                // assert(0 && "TODO");
-                cc = IComponentCallbacks::Probe(providerClientRecord->mLocalProvider);
-                assert(cc);
-                cc2 = IComponentCallbacks2::Probe(providerClientRecord->mLocalProvider);
-                assert(cc2);
-                callbacks->PushBack(cc2);
+                assert(IComponentCallbacks::Probe(providerClientRecord->mLocalProvider) != NULL);
+                cb = IComponentCallbacks2::Probe(providerClientRecord->mLocalProvider);
+                assert(cb);
+                callbacks->PushBack(cb);
             }
         }
     }
@@ -4899,7 +4891,7 @@ ECode CActivityThread::HandleActivityConfigurationChanged(
 //    if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Handle activity config changed: %s"
 //            , r->mActivityInfo->mName.string());
 
-    Activity*  activity = (Activity*)r->mActivity.Get();
+    Activity* activity = (Activity*)r->mActivity.Get();
     PerformConfigurationChanged(IComponentCallbacks2::Probe(r->mActivity), mCompatConfiguration);
 
     Int32 diffChanges;

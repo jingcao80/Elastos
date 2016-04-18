@@ -30,53 +30,53 @@ private:
     class TimeCalculator
         : public Object
     {
-        public:
-            TimeCalculator(const String& timezoneId);
+    public:
+        TimeCalculator(const String& timezoneId);
 
-            CARAPI_(Int64) ToMillis(
-                /* [in] */ Boolean ignoreDst);
+        CARAPI_(Int64) ToMillis(
+            /* [in] */ Boolean ignoreDst);
 
-            CARAPI SetTimeInMillis(
-                /* [in] */ Int64 millis);
+        CARAPI SetTimeInMillis(
+            /* [in] */ Int64 millis);
 
-            CARAPI_(String) Format(
-                /* [in] */ String& format);
+        CARAPI_(String) Format(
+            /* [in] */ String& format);
 
-            CARAPI SwitchTimezone(
-                /* [in] */ const String& timezone);
+        CARAPI SwitchTimezone(
+            /* [in] */ const String& timezone);
 
-            CARAPI_(String) Format2445(
-                /* [in] */ Boolean hasTime);
+        CARAPI_(String) Format2445(
+            /* [in] */ Boolean hasTime);
 
-            CARAPI_(String) ToStringInternal();
+        CARAPI_(String) ToStringInternal();
 
-            static CARAPI_(Int32) Compare(
-                /* [in] */ TimeCalculator* aObject,
-                /* [in] */ TimeCalculator* bObject);
+        static CARAPI_(Int32) Compare(
+            /* [in] */ TimeCalculator* aObject,
+            /* [in] */ TimeCalculator* bObject);
 
-            CARAPI CopyFieldsToTime(
-                /* [in] */ ITime* time);
+        CARAPI CopyFieldsToTime(
+            /* [in] */ ITime* time);
 
-            CARAPI CopyFieldsFromTime(
-                /* [in] */ ITime* time);
+        CARAPI CopyFieldsFromTime(
+            /* [in] */ ITime* time);
 
-        private:
-            CARAPI UpdateZoneInfoFromTimeZone();
+    private:
+        CARAPI UpdateZoneInfoFromTimeZone();
 
-            CARAPI LookupZoneInfo(
-                /* [in] */ const String& timezoneId,
-                /* [out] */ IZoneInfo** ret);
+        CARAPI LookupZoneInfo(
+            /* [in] */ const String& timezoneId,
+            /* [out] */ IZoneInfo** ret);
 
-            CARAPI_(Char32) ToChar(
-                /* [in] */ Int32 n);
+        CARAPI_(Char32) ToChar(
+            /* [in] */ Int32 n);
 
-        public:
-            const AutoPtr<IZoneInfoWallTime> mWallTime;
-            String mTimeZone;
+    public:
+        const AutoPtr<IZoneInfoWallTime> mWallTime;
+        String mTimeZone;
 
-        private:
-            // Information about the current timezone.
-            AutoPtr<IZoneInfo> mZoneInfo;
+    private:
+        // Information about the current timezone.
+        AutoPtr<IZoneInfo> mZoneInfo;
     };
 public:
     CAR_INTERFACE_DECL()

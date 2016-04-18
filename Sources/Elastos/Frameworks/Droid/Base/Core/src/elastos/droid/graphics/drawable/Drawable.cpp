@@ -232,7 +232,7 @@ ECode Drawable::GetCallback(
     VALIDATE_NOT_NULL(callback);
     *callback = NULL;
     if (mCallback != NULL) {
-        mCallback->Resolve(EIID_IDrawableCallback, (IInterface**)&callback);
+        mCallback->Resolve(EIID_IDrawableCallback, (IInterface**)callback);
     }
     return NOERROR;
 }

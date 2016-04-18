@@ -1127,22 +1127,22 @@ String CTime::TimeCalculator::ToStringInternal()
 {
     // This implementation possibly displays the un-normalized fields because that is
     // what it has always done.
-    assert(0 && "TODO");
-    // return String.format("%04d%02d%02dT%02d%02d%02d%s(%d,%d,%d,%d,%d)",
-    //                 wallTime.getYear(),
-    //                 wallTime.getMonth() + 1,
-    //                 wallTime.getMonthDay(),
-    //                 wallTime.getHour(),
-    //                 wallTime.getMinute(),
-    //                 wallTime.getSecond(),
-    //                 timezone,
-    //                 wallTime.getWeekDay(),
-    //                 wallTime.getYearDay(),
-    //                 wallTime.getGmtOffset(),
-    //                 wallTime.getIsDst(),
-    //                 toMillis(false /* use isDst */) / 1000
-    //         );
-    return String(NULL);
+    Int32 y, m, md, h, mi, se, wd, yed, go, isDst;
+    mWallTime->GetYear(&y);
+    mWallTime->GetMonth(&m);
+    mWallTime->GetMonthDay(&md);
+    mWallTime->GetHour(&h);
+    mWallTime->GetMinute(&mi);
+    mWallTime->GetSecond(&se);
+    mWallTime->GetWeekDay(&wd);
+    mWallTime->GetYearDay(&yed);
+    mWallTime->GetGmtOffset(&go);
+    mWallTime->GetIsDst(&isDst);
+    String str;
+    str.AppendFormat("%04d%02d%02dT%02d%02d%02d%s(%d,%d,%d,%d,%d)",
+        y, m + 1, md, h, mi, se, mTimeZone.string(),
+        wd, yed, go, isDst, ToMillis(FALSE /* use isDst */) / 1000);
+    return str;
 }
 
 Int32 CTime::TimeCalculator::Compare(

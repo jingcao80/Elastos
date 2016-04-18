@@ -134,7 +134,7 @@ ECode AutoCompleteTextView::PopupDataSetObserver::OnChanged()
 {
     if (mHost != NULL) {
         AutoPtr<IInterface> obj;
-        mHost->Resolve(EIID_IAutoCompleteTextView, (IInterface**)&obj);
+        mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         AutoPtr<IAutoCompleteTextView> tmp = IAutoCompleteTextView::Probe(obj);
         AutoCompleteTextView* impl = (AutoCompleteTextView*)tmp.Get();
         if (impl != NULL && impl->mAdapter != NULL) {

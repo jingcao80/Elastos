@@ -198,7 +198,7 @@ AutoPtr<IWeakReference> ActivityWindowElastos::GetActivity()
     // // Return a new WeakReference to prevent clients from releasing our internal WeakReference.
     // return new WeakReference<Activity>(mActivityRef.get());
 
-    AutoPtr<IActivity> activityTmp;
+    AutoPtr<IInterface> activityTmp;
     mActivityRef->Resolve(EIID_IInterface, (IInterface**)&activityTmp);
     IActivity* activity = IActivity::Probe(activityTmp);
     if (NULL == activity)

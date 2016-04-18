@@ -5,6 +5,7 @@ module
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Content.IServiceConnection;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
@@ -24,15 +25,16 @@ module
 
     /**
      * @Involve
-     * interface IService;
-     * interface IContext;
-     * interface IContextWrapper;
-     * interface IComponentCallbacks;
-     * interface IComponentCallbacks2;
+     * interface IBinder;
      */
     interface IGetSystemTimeService {
         GetSystemTime(
             [out] String* tiemStr);
+    }
+
+    class CGetSystemTimeService {
+        interface IGetSystemTimeService;
+        interface IBinder;
     }
 
     class CActivityOne {
@@ -54,7 +56,6 @@ module
     class CServiceOne {
         constructor();
 
-        interface IGetSystemTimeService;
         interface IService;
         interface IContext;
         interface IContextWrapper;

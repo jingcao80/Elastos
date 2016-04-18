@@ -65,13 +65,9 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
-    CARAPI ClickStartService();
-
     CARAPI ClickBindService();
 
     CARAPI ClickUnbindService();
-
-    CARAPI ClickStopService();
 
 private:
     AutoPtr<IServiceConnection> mServiceConnection;

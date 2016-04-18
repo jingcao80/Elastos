@@ -308,9 +308,9 @@ ECode ActivityTransitionState::StartExitOutTransition(
         HashMap<Int32, AutoPtr<IWeakReference> >::Iterator it = mExitTransitionCoordinators->Find(key);
         if (it != mExitTransitionCoordinators->End()) {
             AutoPtr<IWeakReference> wr = it->mSecond;
-            AutoPtr<IInterface> cec;
+            AutoPtr<IExitTransitionCoordinator> cec;
             wr->Resolve(EIID_IExitTransitionCoordinator, (IInterface**)&cec);
-            mCalledExitCoordinator = IExitTransitionCoordinator::Probe(cec);
+            mCalledExitCoordinator = cec;
             mExitTransitionCoordinators->Erase(it);
             if (mCalledExitCoordinator != NULL) {
                 mExitingFrom = NULL;

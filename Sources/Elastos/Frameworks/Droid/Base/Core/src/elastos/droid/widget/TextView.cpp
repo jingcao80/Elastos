@@ -223,7 +223,7 @@ UpdateTextServicesLocaleRunnable::UpdateTextServicesLocaleRunnable(
 ECode UpdateTextServicesLocaleRunnable::Run()
 {
     AutoPtr<IInterface> obj;
-    mTextView->Resolve(EIID_ITextView, (IInterface**)&obj);
+    mTextView->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
         TextView* tv = (TextView*)ITextView::Probe(obj);
         if (tv) {
@@ -252,7 +252,7 @@ CompressTextRunnable::CompressTextRunnable(
 ECode CompressTextRunnable::Run()
 {
     AutoPtr<IInterface> temp;
-    mTextView->Resolve(EIID_ITextView, (IInterface**)&temp);
+    mTextView->Resolve(EIID_IInterface, (IInterface**)&temp);
     AutoPtr<ITextView> textView = ITextView::Probe(temp);
     if (textView) {
         IView::Probe(textView)->RequestLayout();

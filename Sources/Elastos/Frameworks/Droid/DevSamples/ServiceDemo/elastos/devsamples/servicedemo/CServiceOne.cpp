@@ -1,15 +1,12 @@
 
 #include "CServiceOne.h"
+#include "CGetSystemTimeService.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.App.h>
-#include <Elastos.Droid.Text.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/droid/ext/frameworkext.h>
 
-using Elastos::Droid::Os::CBinder;
-using Elastos::Droid::Text::Format::ITime;
-using Elastos::Droid::Text::Format::CTime;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -17,8 +14,6 @@ namespace DevSamples {
 namespace ServiceDemo {
 
 static const String TAG("ServiceDemo::CServiceOne");
-
-CAR_INTERFACE_IMPL(CServiceOne, Service, IGetSystemTimeService)
 
 CAR_OBJECT_IMPL(CServiceOne)
 
@@ -47,7 +42,7 @@ ECode CServiceOne::OnBind(
 {
     VALIDATE_NOT_NULL(binder)
     Logger::I(TAG, "OnBind: %s", TO_CSTR(intent));
-    return CBinder::New(binder);
+    return CGetSystemTimeService::New(binder);
 }
 
 ECode CServiceOne::OnUnbind(
@@ -60,16 +55,7 @@ ECode CServiceOne::OnUnbind(
     return NOERROR;
 }
 
-ECode CServiceOne::GetSystemTime(
-    /* [out] */ String* timeStr)
-{
-    VALIDATE_NOT_NULL(timeStr)
-    AutoPtr<ITime> t;
-    CTime::New((ITime**)&t);
-    t->SetToNow();
-    *timeStr = Object::ToString(t);
-    return NOERROR;
-}
+
 
 } // namespace ServiceDemo
 } // namespace DevSamples

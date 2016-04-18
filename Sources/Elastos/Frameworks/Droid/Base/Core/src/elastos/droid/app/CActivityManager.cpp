@@ -991,6 +991,7 @@ Int32 CActivityManager::CheckComponentPermission(
     }
     // If the target is not exported, then nobody else can get to it.
     if (!exported) {
+        Slogger::W("CActivityManager", "Permission denied: checkComponentPermission() owningUid=%d", owningUid);
         return IPackageManager::PERMISSION_DENIED;
     }
     if (permission.IsNull()) {
@@ -1001,10 +1002,9 @@ Int32 CActivityManager::CheckComponentPermission(
     AutoPtr<IIPackageManager> pm = AppGlobals::GetPackageManager();
     if (FAILED(pm->CheckUidPermission(permission, uid, &result))) {
         // Should never happen, but if it does... deny!
-//        Slogger::E(TAG, "PackageManager is dead?!?");
+        Slogger::E("CActivityManager", "PackageManager is dead?!?");
         return IPackageManager::PERMISSION_DENIED;
     }
-
     return result;
 }
 

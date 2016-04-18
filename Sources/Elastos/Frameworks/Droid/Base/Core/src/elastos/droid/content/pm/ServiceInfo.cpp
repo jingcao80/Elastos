@@ -1,5 +1,10 @@
 
 #include "elastos/droid/content/pm/ServiceInfo.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -46,11 +51,15 @@ ECode ServiceInfo::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    // return "ServiceInfo{"
-    //         + Integer.toHexString(System.identityHashCode(this))
-    //         + " " + name + "}";
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    StringBuilder sb("ServiceInfo{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += mName;
+    sb += "";
+    sb += " exported=";
+    sb += mExported;
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 ECode ServiceInfo::ReadFromParcel(

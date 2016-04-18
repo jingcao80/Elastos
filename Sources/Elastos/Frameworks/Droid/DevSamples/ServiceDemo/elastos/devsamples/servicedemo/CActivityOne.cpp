@@ -46,17 +46,11 @@ ECode CActivityOne::ButtonListener::OnClick(
 
     Logger::I(TAG, "ButtonListener::OnClick: %08x", id);
     switch(id) {
-        case R::id::Start:
-        mHost->ClickStartService();
-        break;
         case R::id::Bind:
         mHost->ClickBindService();
         break;
         case R::id::Unbind:
         mHost->ClickUnbindService();
-        break;
-        case R::id::Stop:
-        mHost->ClickStopService();
         break;
     }
 
@@ -84,14 +78,11 @@ ECode CActivityOne::OnCreate(
 
     AutoPtr<IViewOnClickListener> l = (IViewOnClickListener*)new ButtonListener(this);
 
-    AutoPtr<IView> view = FindViewById(R::id::Start);
-    view->SetOnClickListener(l);
-    view = FindViewById(R::id::Bind);
+    AutoPtr<IView> view = FindViewById(R::id::Bind);
     view->SetOnClickListener(l);
     view = FindViewById(R::id::Unbind);
     view->SetOnClickListener(l);
-    view = FindViewById(R::id::Stop);
-    view->SetOnClickListener(l);
+
 
     view = FindViewById(R::id::DisplayTime);
     mTextView = ITextView::Probe(view);
@@ -141,17 +132,6 @@ ECode CActivityOne::OnActivityResult(
     return Activity::OnActivityResult(requestCode, resultCode, data);
 }
 
-ECode CActivityOne::ClickStartService()
-{
-    Logger::I(TAG, " >> ClickStartService() begin");
-    // CComponentName::New(this, String("ServiceDemo.CServiceOne"), (IComponentName**)&com);
-    // CIntent::New((IIntent**)&intent);
-    // intent->SetComponent(com);
-//     StartService(intent, (IComponentName**)&component);
-    Logger::I(TAG, " << ClickStartService() end");
-    return NOERROR;
-}
-
 ECode CActivityOne::ClickBindService()
 {
     Logger::I(TAG, " >> ClickBindService() begin. pid = %d, tid = %d\n", getpid(),gettid());
@@ -181,13 +161,6 @@ ECode CActivityOne::ClickUnbindService()
         Logger::I(TAG, "failed to UnbindService, ec=%08x", ec);
     }
     Logger::I(TAG, " << ClickUnbindService() end");
-    return NOERROR;
-}
-
-ECode CActivityOne::ClickStopService()
-{
-    Logger::I(TAG, " >> ClickStopService() begin");
-    Logger::I(TAG, " << ClickStopService() end");
     return NOERROR;
 }
 

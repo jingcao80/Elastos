@@ -37,7 +37,7 @@ void PseudoGridView::ViewGroupAdapterBridge::Refresh()
     }
 
     AutoPtr<IInterface> obj;
-    mViewGroup->Resolve(EIID_IViewGroup, (IInterface**)&obj);
+    mViewGroup->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<IViewGroup> viewGroup = IViewGroup::Probe(obj);
     if (viewGroup == NULL) {
         ReleaseAdapter();

@@ -730,7 +730,7 @@ ECode RecentTasksLoader::CancelLoadingThumbnailsAndIcons(
 void RecentTasksLoader::CancelLoadingThumbnailsAndIcons()
 {
     AutoPtr<IInterface> _rpv;
-    mRecentsPanel->Resolve(EIID_IRecentsPanelView, (IInterface**)&_rpv);
+    mRecentsPanel->Resolve(EIID_IInterface, (IInterface**)&_rpv);
     AutoPtr<IRecentsPanelView> rpv = IRecentsPanelView::Probe(_rpv);
     Boolean isShowing;
     rpv->IsShowing(&isShowing);

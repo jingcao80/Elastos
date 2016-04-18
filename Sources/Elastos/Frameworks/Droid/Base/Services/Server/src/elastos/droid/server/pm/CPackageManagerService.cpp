@@ -1690,7 +1690,7 @@ AutoPtr<IResolveInfo> CPackageManagerService::ServiceIntentResolver::NewResult(
     CResolveInfo::New((IResolveInfo**)&res);
     res->SetServiceInfo(si);
     if ((mFlags & IPackageManager::GET_RESOLVED_FILTER) != 0) {
-        res->SetFilter((IIntentFilter*)info->Probe(EIID_IIntentFilter));
+        res->SetFilter(IIntentFilter::Probe(info));
     }
     res->SetPriority(info->GetPriority());
     res->SetPreferredOrder(service->mOwner->mPreferredOrder);
@@ -5914,7 +5914,7 @@ ECode CPackageManagerService::GetServiceInfo(
         if (it != mServices->mServices.End()) {
             s = it->mSecond;
         }
-        if (DEBUG_PACKAGE_INFO) Logger::V(TAG, "getServiceInfo %p: %p", component, s.Get());
+        if (DEBUG_PACKAGE_INFO) Logger::V(TAG, "getServiceInfo %s: %s", TO_CSTR(component), TO_CSTR(s));
         if (s != NULL && mSettings->IsEnabledLPr(IComponentInfo::Probe(s->mInfo), flags, userId)) {
             String pkgName;
             component->GetPackageName(&pkgName);
@@ -6143,6 +6143,7 @@ ECode CPackageManagerService::CheckUidPermission(
         }
     }
 
+    Slogger::W(TAG, "Permission [%s] Denial for uid %d", permName.string(), uid);
     return NOERROR;
 }
 
@@ -8268,6 +8269,8 @@ ECode CPackageManagerService::QueryIntentServices(
         AutoPtr<IArrayList> al;
         CArrayList::New(1, (IArrayList**)&al);
         *services = IList::Probe(al);
+        REFCOUNT_ADD(*services)
+
         AutoPtr<IServiceInfo> si;
         GetServiceInfo(comp, flags, userId, (IServiceInfo**)&si);
         if (si != NULL) {
@@ -8276,7 +8279,6 @@ ECode CPackageManagerService::QueryIntentServices(
             ri->SetServiceInfo(si);
             (*services)->Add(ri);
         }
-        REFCOUNT_ADD(*services)
         return NOERROR;
     }
 
@@ -10696,7 +10698,7 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
     AutoPtr<IFile> destCodeFile, destResourceFile;
     ASSERT_SUCCEEDED(CFile::New(codePath, (IFile**)&destCodeFile))
     ASSERT_SUCCEEDED(CFile::New(resPath, (IFile**)&destResourceFile))
-Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string());
+    // Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string());
     AutoPtr<SharedUserSetting> suid;
     AutoPtr<PackageSetting> pkgSetting;
 
@@ -18427,10 +18429,6 @@ ECode CPackageManagerService::SetPermissionEnforced(
             // try {
             Boolean result;
             ECode ec = am->KillProcessesBelowForeground(String("setPermissionEnforcement"), &result);
-            // } catch (RemoteException e) {
-            // } finally {
-            //     Binder.restoreCallingIdentity(token);
-            // }
             Binder::RestoreCallingIdentity(token);
             return ec;
         }
@@ -18597,7 +18595,7 @@ ECode CPackageManagerService::SetComponentProtectedSetting(
 
     Int64 callingId = Binder::ClearCallingIdentity();
     // try {
-    Int32 packageUid = UserHandle::GetUid(userId, pkgSetting->mAppId);
+    UserHandle::GetUid(userId, pkgSetting->mAppId);
     // } finally {
     //     Binder.restoreCallingIdentity(callingId);
     // }
@@ -18634,19 +18632,12 @@ Boolean CPackageManagerService::UserNeedsBadging(
     if (it == mUserNeedsBadging.End()) {
         AutoPtr<IUserInfo> userInfo;
         Int64 token = Binder::ClearCallingIdentity();
-        // try {
         sUserManager->GetUserInfo(userId, (IUserInfo**)&userInfo);
-        // } finally {
-        //     Binder.restoreCallingIdentity(token);
-        // }
         Binder::RestoreCallingIdentity(token);
-        Boolean b;
+        Boolean b = FALSE;
         Boolean isManagedProfile;
         if (userInfo != NULL && (userInfo->IsManagedProfile(&isManagedProfile), isManagedProfile)) {
             b = TRUE;
-        }
-        else {
-            b = FALSE;
         }
         mUserNeedsBadging[userId] = b;
         return b;
@@ -18766,7 +18757,7 @@ ECode CPackageManagerService::IsPackageSignedByKeySetExactly(
             pkg = it->mSecond;
         }
         if (pkg == NULL) {
-            Slogger::W(TAG, "KeySet requested for unknown package:%s", packageName.string());
+            Slogger::E(TAG, "KeySet requested for unknown package:%s", packageName.string());
             Slogger::E(TAG, "Unknown package: %s", packageName.string());
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }

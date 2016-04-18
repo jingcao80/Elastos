@@ -116,8 +116,7 @@ ECode CComponentName::AppendShortClassName(
         Int32 PN = packageName.GetLength();
         Int32 CN = className.GetLength();
         if (CN > PN && className.GetChar(PN) == '.') {
-            AutoPtr<ArrayOf<Char32> > chars = className.GetChars();
-            sb->Append(*chars.Get(), PN, CN);
+            sb->Append(className.Substring(PN));
             return NOERROR;
         }
     }
@@ -157,6 +156,7 @@ ECode CComponentName::FlattenToString(
 ECode CComponentName::FlattenToShortString(
     /* [out] */ String* name)
 {
+    VALIDATE_NOT_NULL(name)
     StringBuilder sb(mPackage.GetLength() + mClass.GetLength());
     AppendShortString(&sb, mPackage, mClass);
     *name = sb.ToString();

@@ -1225,7 +1225,8 @@ ECode LoadedPkg::RemoveContextRegistrations(
         mUnregisteredReceivers.Erase(it);
     }
 
-    // Slogger::I(TAG, "RemoveContextRegistrations: %s, %s", who.string(), what.string());
+    // Slogger::I(TAG, "RemoveContextRegistrations:%p, %s, %s, mServices:%d, mUnboundServices:%d",
+    //     context, who.string(), what.string(), mServices.GetSize(), mUnboundServices.GetSize());
 
     AutoPtr<ServiceMap> smap;
     HashMap<AutoPtr<IContext>, AutoPtr<ServiceMap> >::Iterator sit;

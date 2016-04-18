@@ -72,7 +72,7 @@ ECode CountDownTimer::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IInterface> obj;
-    mWeakHost->Resolve(EIID_ISynchronize, (IInterface**)&obj);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj == NULL) {
         return NOERROR;
     }

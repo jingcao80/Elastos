@@ -78,9 +78,8 @@ ECode Dialog::ListenersHandler::HandleMessage(
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
 
-    AutoPtr<IInterface> dialogObj;
-    mDialog->Resolve(EIID_IDialogInterface, (IInterface**)&dialogObj);
-    IDialogInterface* dialog = IDialogInterface::Probe(dialogObj);
+    AutoPtr<IDialogInterface> dialog;
+    mDialog->Resolve(EIID_IDialogInterface, (IInterface**)&dialog);
 
     switch (what) {
         case Dialog::DISMISS: {

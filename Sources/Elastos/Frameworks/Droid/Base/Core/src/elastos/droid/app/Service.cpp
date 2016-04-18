@@ -8,6 +8,7 @@
 #include "elastos/droid/content/CComponentName.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Build;
@@ -16,6 +17,7 @@ using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::EIID_IComponentCallbacks;
 using Elastos::Droid::Content::EIID_IComponentCallbacks2;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -45,7 +47,7 @@ ECode Service::ToString(
 {
     VALIDATE_NOT_NULL(info);
     StringBuilder sb("Service:(");
-    sb += (Int32)this;
+    sb += StringUtils::ToHexString((Int32)this);
     sb += ")";
     sb.ToString(info);
     return NOERROR;

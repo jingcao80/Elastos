@@ -375,7 +375,7 @@ AutoPtr<IView> _SuggestionsAdapter::GetView(
     AutoPtr<IView> v = ResourceCursorAdapter::GetView(position, convertView, parent);
     if (v == NULL) {
         AutoPtr<IInterface> obj;
-        mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+        mWeakContext->Resolve(EIID_IInterface, (IInterface**)&obj);
         IContext* context = IContext::Probe(obj);
         if (context == NULL) {
             return NULL;
@@ -437,7 +437,7 @@ AutoPtr<ICharSequence> _SuggestionsAdapter::FormatUrl(
 {
     if (mUrlColor == NULL) {
         AutoPtr<IInterface> obj;
-        mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+        mWeakContext->Resolve(EIID_IInterface, (IInterface**)&obj);
         AutoPtr<IContext> context = IContext::Probe(obj);
 
         // Lazily get the URL color from the current theme.
@@ -681,7 +681,7 @@ AutoPtr<IDrawable> _SuggestionsAdapter::GetDefaultIcon1(
     }
 
     AutoPtr<IInterface> obj;
-    mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+    mWeakContext->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<IContext> context = IContext::Probe(obj);
 
     // Fall back to a default icon
@@ -717,7 +717,7 @@ AutoPtr<IDrawable> _SuggestionsAdapter::GetActivityIcon(
     /* [in] */ IComponentName* component)
 {
     AutoPtr<IInterface> obj;
-    mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+    mWeakContext->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<IContext> context = IContext::Probe(obj);
 
     AutoPtr<IPackageManager> pm;

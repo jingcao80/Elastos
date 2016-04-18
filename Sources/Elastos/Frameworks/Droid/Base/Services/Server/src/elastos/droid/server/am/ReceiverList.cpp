@@ -106,7 +106,7 @@ void ReceiverList::Dump(
         pw->Print(String("Filter #"));
         pw->Print(i);
         pw->Print(String(": BroadcastFilter{"));
-        pw->Print(StringUtils::ToString((Int32)bf.Get(), 16));
+        pw->Print(StringUtils::ToHexString((Int32)bf.Get()));
         pw->Println('}');
         bf->DumpInReceiverList(pw, pr, p2);
     }
@@ -119,7 +119,7 @@ String ReceiverList::ToString()
     }
     StringBuilder sb(128);
     sb += "ReceiverList{";
-    sb += StringUtils::ToString(Int32(this), 16);
+    sb += StringUtils::ToHexString(Int32(this));
     sb += ", pid=";
     sb += mPid;
     sb += ", processName=";
@@ -130,7 +130,7 @@ String ReceiverList::ToString()
     sb += mUserId;
     sb += "receiver=";
     sb += !IProxy::Probe(mReceiver) ? " local:" : " remote:";
-    sb += StringUtils::ToString((Int32)IBinder::Probe(mReceiver), 16);
+    sb += StringUtils::ToHexString((Int32)IBinder::Probe(mReceiver));
     sb += "}";
     return mStringName = sb.ToString();
 }

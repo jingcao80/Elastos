@@ -15,17 +15,13 @@ namespace ServiceDemo {
 
 CarClass(CServiceOne)
     , public Service
-    , public IGetSystemTimeService
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
 
-    CARAPI constructor();
+    TO_STRING_IMPL("ServiceDemo::CServiceOne")
 
-    CARAPI GetSystemTime(
-        /* [out] */ String* timeStr);
+    CARAPI constructor();
 
 protected:
     CARAPI OnCreate();

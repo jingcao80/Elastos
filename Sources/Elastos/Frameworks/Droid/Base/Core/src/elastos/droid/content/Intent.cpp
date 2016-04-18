@@ -2364,7 +2364,6 @@ ECode Intent::ToShortString(
         }
         first = FALSE;
         sb->Append(String("flg=0x"));
-//        Integer.toHexString(mFlags)
         sb->Append(StringUtils::ToHexString(mFlags));
     }
     if (!mPackage.IsNull()) {

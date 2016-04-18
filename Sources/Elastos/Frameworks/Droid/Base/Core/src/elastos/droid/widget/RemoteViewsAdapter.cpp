@@ -112,7 +112,7 @@ ECode RemoteViewsAdapter::MyRunnableEx::Run()
     AutoPtr<IRemoteAdapterConnectionCallback> callback;
     if (adapter->mCallback != NULL) {
         AutoPtr<IInterface> obj;
-        adapter->mCallback->Resolve(EIID_IRemoteAdapterConnectionCallback, (IInterface**)&obj);
+        adapter->mCallback->Resolve(EIID_IInterface, (IInterface**)&obj);
         callback = IRemoteAdapterConnectionCallback::Probe(obj);
     }
     if (callback != NULL) {
@@ -135,7 +135,7 @@ ECode RemoteViewsAdapter::MyRunnableEx2::Run()
     AutoPtr<IRemoteAdapterConnectionCallback> callback;
     if (adapter->mCallback != NULL) {
         AutoPtr<IInterface> obj;
-        adapter->mCallback->Resolve(EIID_IRemoteAdapterConnectionCallback, (IInterface**)&obj);
+        adapter->mCallback->Resolve(EIID_IInterface, (IInterface**)&obj);
         callback = IRemoteAdapterConnectionCallback::Probe(obj);
     }
     if (callback != NULL) {
@@ -176,7 +176,7 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::Bind(
 
         if (mAdapter != NULL) {
             AutoPtr<IInterface> obj;
-            mAdapter->Resolve(EIID_IRemoteViewsAdapter, (IInterface**)&obj);
+            mAdapter->Resolve(EIID_IInterface, (IInterface**)&obj);
             adapter = IRemoteViewsAdapter::Probe(obj);
         }
         ECode ec = NOERROR;
@@ -212,7 +212,7 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::Unbind(
 
         if (mAdapter != NULL) {
             AutoPtr<IInterface> obj;
-            mAdapter->Resolve(EIID_IRemoteViewsAdapter, (IInterface**)&obj);
+            mAdapter->Resolve(EIID_IInterface, (IInterface**)&obj);
             adapter = IRemoteViewsAdapter::Probe(obj);
         }
         ECode ec = NOERROR;
@@ -269,7 +269,7 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::OnServiceConnecte
     AutoPtr<IRemoteViewsAdapter> adapter;
     if (mAdapter != NULL) {
         AutoPtr<IInterface> obj;
-        mAdapter->Resolve(EIID_IRemoteViewsAdapter, (IInterface**)&obj);
+        mAdapter->Resolve(EIID_IInterface, (IInterface**)&obj);
         adapter = IRemoteViewsAdapter::Probe(obj);
     }
     if(adapter == NULL) return NOERROR;
@@ -296,7 +296,7 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::OnServiceDisconne
     AutoPtr<IRemoteViewsAdapter> adapter;
     if (mAdapter != NULL) {
         AutoPtr<IInterface> obj;
-        mAdapter->Resolve(EIID_IRemoteViewsAdapter, (IInterface**)&obj);
+        mAdapter->Resolve(EIID_IInterface, (IInterface**)&obj);
         adapter = IRemoteViewsAdapter::Probe(obj);
     }
     if(adapter == NULL) return NOERROR;

@@ -483,7 +483,7 @@ void FlashlightController::DispatchListeners(
             AutoPtr<IInterface> wr;
             mListeners->Get(i, (IInterface**)&wr);
             AutoPtr<IInterface> obj;
-            IWeakReference::Probe(wr)->Resolve(EIID_IFlashlightListener, (IInterface**)&obj);
+            IWeakReference::Probe(wr)->Resolve(EIID_IInterface, (IInterface**)&obj);
             AutoPtr<IFlashlightListener> l = IFlashlightListener::Probe(obj);
             if (l != NULL) {
                 if (message == DISPATCH_ERROR) {
@@ -515,7 +515,7 @@ void FlashlightController::CleanUpListenersLocked(
         AutoPtr<IInterface> wr;
         mListeners->Get(i, (IInterface**)&wr);
         AutoPtr<IInterface> obj;
-        IWeakReference::Probe(wr)->Resolve(EIID_IFlashlightListener, (IInterface**)&obj);
+        IWeakReference::Probe(wr)->Resolve(EIID_IInterface, (IInterface**)&obj);
         AutoPtr<IFlashlightListener> found = IFlashlightListener::Probe(obj);
 
         if (found.Get() == NULL || found.Get() == listener) {

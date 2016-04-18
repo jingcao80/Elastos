@@ -7,6 +7,8 @@
 #include "elastos/droid/server/am/IntentBindRecord.h"
 #include <elastos/droid/app/AppGlobals.h>
 #include <elastos/droid/os/Build.h>
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/utility/TimeUtils.h>
 #include <elastos/droid/Manifest.h>
@@ -31,13 +33,11 @@ using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Internal::Os::CTransferPipe;
 using Elastos::Droid::Internal::Os::ITransferPipe;
 using Elastos::Droid::Os::Build;
-using Elastos::Droid::Os::CBinderHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::Os::IBinderHelper;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Core::StringUtils;
@@ -178,11 +178,11 @@ ECode ActiveServices::ServiceRestarter::Run()
     return mOwner->PerformServiceRestartLocked(mService);
 }
 
-const String ActiveServices::TAG = CActivityManagerService::TAG;
-const String ActiveServices::TAG_MU = CActivityManagerService::TAG_MU;
-const Boolean ActiveServices::DEBUG_SERVICE = CActivityManagerService::DEBUG_SERVICE;
-const Boolean ActiveServices::DEBUG_SERVICE_EXECUTING = CActivityManagerService::DEBUG_SERVICE_EXECUTING;
-const Boolean ActiveServices::DEBUG_DELAYED_SERVICE = CActivityManagerService::DEBUG_SERVICE;
+const String ActiveServices::TAG("ActiveServices");
+const String ActiveServices::TAG_MU("ActiveServicesMU");
+const Boolean ActiveServices::DEBUG_SERVICE = TRUE; //CActivityManagerService::DEBUG_SERVICE;
+const Boolean ActiveServices::DEBUG_SERVICE_EXECUTING = TRUE; //CActivityManagerService::DEBUG_SERVICE_EXECUTING;
+const Boolean ActiveServices::DEBUG_DELAYED_SERVICE = TRUE; //CActivityManagerService::DEBUG_SERVICE;
 const Boolean ActiveServices::DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
 const Boolean ActiveServices::DEBUG_MU = CActivityManagerService::DEBUG_MU;
 const Boolean ActiveServices::LOG_SERVICE_START_STOP = FALSE;
@@ -280,10 +280,7 @@ ECode ActiveServices::StartServiceLocked(
     if (caller != NULL) {
         AutoPtr<ProcessRecord> callerApp = mAm->GetRecordForAppLocked(caller);
         if (callerApp == NULL) {
-            AutoPtr<IBinderHelper> bHelper;
-            CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-            Int32 pid;
-            bHelper->GetCallingPid(&pid);
+            Int32 pid = Binder::GetCallingPid();
             Slogger::E(TAG, "Unable to find app for caller %s (pid=%d) when starting service %s",
                 TO_CSTR(caller), pid, TO_CSTR(service));
             return E_SECURITY_EXCEPTION;
@@ -423,11 +420,13 @@ AutoPtr<IComponentName> ActiveServices::StartServiceInnerLocked(
         stracker->SetStarted(TRUE, mAm->mProcessStats->GetMemFactorLocked(), r->mLastActivity);
     }
     r->mCallStart = FALSE;
-    AutoPtr<IBatteryStatsImpl> stats;
-    r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-    if (stats) {
-        synchronized (stats) {
-            r->mStats->StartRunningLocked();
+    if (r->mStats != NULL) {
+        AutoPtr<IBatteryStatsImpl> stats;
+        r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+        if (stats) {
+            synchronized (stats) {
+                r->mStats->StartRunningLocked();
+            }
         }
     }
 
@@ -475,11 +474,14 @@ ECode ActiveServices::StopServiceLocked(
         service->mDelayedStop = TRUE;
         return NOERROR;
     }
-    AutoPtr<IBatteryStatsImpl> stats;
-    service->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-    if (stats) {
-        synchronized (stats) {
-            service->mStats->StopRunningLocked();
+
+    if (service->mStats != NULL) {
+        AutoPtr<IBatteryStatsImpl> stats;
+        service->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+        if (stats) {
+            synchronized (stats) {
+                service->mStats->StopRunningLocked();
+            }
         }
     }
 
@@ -506,11 +508,8 @@ ECode ActiveServices::StopServiceLocked(
     if (DEBUG_SERVICE) Slogger::V(TAG, "stopService: %s type=%s",
         TO_CSTR(service), resolvedType.string());
 
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int32 pid, uid;
-    bHelper->GetCallingPid(&pid);
-    bHelper->GetCallingUid(&uid);
+    Int32 pid = Binder::GetCallingPid();
+    Int32 uid = Binder::GetCallingUid();
     AutoPtr<ProcessRecord> callerApp = mAm->GetRecordForAppLocked(caller);
     if (caller != NULL && callerApp == NULL) {
         Logger::E(TAG, "Unable to find app for caller %s (pid=%d) when stopping service %s",
@@ -523,10 +522,9 @@ ECode ActiveServices::StopServiceLocked(
             pid, uid, userId, FALSE, FALSE);
     if (r != NULL) {
         if (r->mRecord != NULL) {
-            Int64 origId;
-            bHelper->ClearCallingIdentity(&origId);
+            Int64 origId = Binder::ClearCallingIdentity();
             ECode ec = StopServiceLocked(r->mRecord);
-            bHelper->RestoreCallingIdentity(origId);
+            Binder::RestoreCallingIdentity(origId);
             FAIL_RETURN(ec)
             *result = 1;
             return NOERROR;
@@ -545,15 +543,9 @@ ECode ActiveServices::PeekServiceLocked(
     /* [out] */ IBinder** token)
 {
     VALIDATE_NOT_NULL(token);
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int32 pid, uid;
-    bHelper->GetCallingPid(&pid);
-    bHelper->GetCallingUid(&uid);
-    AutoPtr<IUserHandleHelper> uhHelper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    Int32 userId;
-    uhHelper->GetCallingUserId(&userId);
+    Int32 pid = Binder::GetCallingPid();
+    Int32 uid = Binder::GetCallingUid();
+    Int32 userId = UserHandle::GetCallingUserId();
     AutoPtr<ServiceLookupResult> r = RetrieveServiceLocked(service, resolvedType,
            pid, uid, userId, FALSE, FALSE);
 
@@ -589,10 +581,8 @@ ECode ActiveServices::StopServiceTokenLocked(
 {
     if (DEBUG_SERVICE) Slogger::V(TAG, "stopServiceToken: %s %s startId=%d",
             TO_CSTR(className), TO_CSTR(token), startId);
-    AutoPtr<IUserHandleHelper> uhHelper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    Int32 userId;
-    uhHelper->GetCallingUserId(&userId);
+
+    Int32 userId = UserHandle::GetCallingUserId();
     AutoPtr<CServiceRecord> r = FindServiceLocked(className, token, userId);
     if (r != NULL) {
         if (startId >= 0) {
@@ -621,11 +611,13 @@ ECode ActiveServices::StopServiceTokenLocked(
             }
         }
 
-        AutoPtr<IBatteryStatsImpl> stats;
-        r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-        if (stats) {
-            synchronized(stats) {
-                r->mStats->StopRunningLocked();
+        if (r->mStats != NULL) {
+            AutoPtr<IBatteryStatsImpl> stats;
+            r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+            if (stats) {
+                synchronized(stats) {
+                    r->mStats->StopRunningLocked();
+                }
             }
         }
 
@@ -635,12 +627,10 @@ ECode ActiveServices::StopServiceTokenLocked(
                     SystemClock::GetUptimeMillis());
         }
         r->mCallStart = FALSE;
-        AutoPtr<IBinderHelper> bHelper;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-        Int64 origId;
-        bHelper->ClearCallingIdentity(&origId);
+
+        Int64 origId = Binder::ClearCallingIdentity();
         BringDownServiceIfNeededLocked(r, FALSE, FALSE);
-        bHelper->RestoreCallingIdentity(origId);
+        Binder::RestoreCallingIdentity(origId);
         *succeeded = TRUE;
         return NOERROR;
     }
@@ -655,20 +645,14 @@ ECode ActiveServices::SetServiceForegroundLocked(
     /* [in] */ INotification* notification,
     /* [in] */ Boolean removeNotification)
 {
-    AutoPtr<IUserHandleHelper> uhHelper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    Int32 userId;
-    uhHelper->GetCallingUserId(&userId);
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int64 origId;
-    bHelper->ClearCallingIdentity(&origId);
+    Int32 userId = UserHandle::GetCallingUserId();
+    Int64 origId = Binder::ClearCallingIdentity();
 //     try {
     AutoPtr<CServiceRecord> r = FindServiceLocked(className, token, userId);
     if (r != NULL) {
         if (id != 0) {
             if (notification == NULL) {
-                bHelper->RestoreCallingIdentity(origId);
+                Binder::RestoreCallingIdentity(origId);
                 Slogger::E(TAG, "NULL notification");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
@@ -707,7 +691,7 @@ ECode ActiveServices::SetServiceForegroundLocked(
         }
     }
  //     } finally {
-    bHelper->RestoreCallingIdentity(origId);
+    Binder::RestoreCallingIdentity(origId);
  //     }
     return NOERROR;
 }
@@ -799,27 +783,26 @@ Boolean ActiveServices::UpdateServiceClientActivitiesLocked(
 ECode ActiveServices::BindServiceLocked(
     /* [in] */ IApplicationThread* caller,
     /* [in] */ IBinder* token,
-    /* [in] */ IIntent* _service,
+    /* [in] */ IIntent* inService,
     /* [in] */ const String& resolvedType,
     /* [in] */ IIServiceConnection* connection,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     AutoPtr<IBinder> binder = IBinder::Probe(connection);
     if (DEBUG_SERVICE) {
-        String str, strBinder;
         Slogger::V(TAG, "bindService: %s type=%s conn=%s flags=0x%x",
-            TO_CSTR(_service), resolvedType.string(), TO_CSTR(binder), flags);
+            TO_CSTR(inService), resolvedType.string(), TO_CSTR(binder), flags);
     }
     AutoPtr<ProcessRecord> callerApp = mAm->GetRecordForAppLocked(caller);
     if (callerApp == NULL) {
-        AutoPtr<IBinderHelper> bHelper;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-        Int32 pid;
-        bHelper->GetCallingPid(&pid);
+        Int32 pid = Binder::GetCallingPid();
         Slogger::E(TAG, "Unable to find app for caller %s (pid=%d) when binding service %s",
-            TO_CSTR(caller), pid, TO_CSTR(_service));
+            TO_CSTR(caller), pid, TO_CSTR(inService));
         return E_SECURITY_EXCEPTION;
     }
 
@@ -828,12 +811,11 @@ ECode ActiveServices::BindServiceLocked(
         activity = ActivityRecord::IsInStackLocked(token);
         if (activity == NULL) {
             Slogger::W(TAG, "Binding with unknown activity: %s", TO_CSTR(token));
-            *result = 0;
             return NOERROR;
         }
     }
 
-    AutoPtr<IIntent> service = _service;
+    AutoPtr<IIntent> service = inService;
     Int32 clientLabel = 0;
     AutoPtr<IPendingIntent> clientIntent;
 
@@ -856,7 +838,7 @@ ECode ActiveServices::BindServiceLocked(
                 // System code calling with this stuff just needs to know
                 // this will happen.
                 service = NULL;
-                _service->CloneFilter((IIntent**)&service);
+                inService->CloneFilter((IIntent**)&service);
             }
         }
     }
@@ -868,13 +850,10 @@ ECode ActiveServices::BindServiceLocked(
 
     Boolean callerFg = callerApp->mSetSchedGroup != IProcess::THREAD_GROUP_BG_NONINTERACTIVE;
 
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int32 pid, cuid;
-    bHelper->GetCallingPid(&pid);
-    bHelper->GetCallingUid(&cuid);
-    AutoPtr<ServiceLookupResult> res = RetrieveServiceLocked(service, resolvedType,
-            pid, cuid, userId, TRUE, callerFg);
+    Int32 pid = Binder::GetCallingPid();
+    Int32 cuid = Binder::GetCallingPid();
+    AutoPtr<ServiceLookupResult> res = RetrieveServiceLocked(
+        service, resolvedType, pid, cuid, userId, TRUE, callerFg);
     if (res == NULL) {
         *result = 0;
         return NOERROR;
@@ -885,8 +864,7 @@ ECode ActiveServices::BindServiceLocked(
     }
     AutoPtr<CServiceRecord> s = res->mRecord;
 
-    Int64 origId;
-    bHelper->ClearCallingIdentity(&origId);
+    Int64 origId = Binder::ClearCallingIdentity();
 
 //     try {
     if (UnscheduleServiceRestartLocked(s, uid, FALSE)) {
@@ -986,7 +964,7 @@ ECode ActiveServices::BindServiceLocked(
 
     GetServiceMap(s->mUserId)->EnsureNotStartingBackground(s);
 //     } finally {
-    bHelper->RestoreCallingIdentity(origId);
+    Binder::RestoreCallingIdentity(origId);
 //     }
 
     *result = 1;
@@ -998,10 +976,7 @@ ECode ActiveServices::PublishServiceLocked(
     /* [in] */ IIntent* intent,
     /* [in] */ IBinder* service)
 {
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int64 origId;
-    bHelper->ClearCallingIdentity(&origId);
+    Int64 origId = Binder::ClearCallingIdentity();
     // try {
     if (DEBUG_SERVICE) {
         Slogger::V(TAG, "PUBLISHING %s %s: %s",
@@ -1050,7 +1025,7 @@ ECode ActiveServices::PublishServiceLocked(
         ServiceDoneExecutingLocked(r, sit != mDestroyingServices.End(), FALSE);
     }
     // } finally {
-    bHelper->RestoreCallingIdentity(origId);
+    Binder::RestoreCallingIdentity(origId);
     // }
     return NOERROR;
 }
@@ -1073,10 +1048,7 @@ ECode ActiveServices::UnbindServiceLocked(
         return NOERROR;
     }
 
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int64 origId;
-    bHelper->ClearCallingIdentity(&origId);
+    Int64 origId = Binder::ClearCallingIdentity();
 //     try {
     while (clist->Begin() != clist->End()) {
         AutoPtr<ConnectionRecord> r = clist->GetFront();
@@ -1099,7 +1071,7 @@ ECode ActiveServices::UnbindServiceLocked(
         }
     }
 //     } finally {
-    bHelper->RestoreCallingIdentity(origId);
+    Binder::RestoreCallingIdentity(origId);
 //     }
 
     *result = TRUE;
@@ -1111,10 +1083,7 @@ ECode ActiveServices::UnbindFinishedLocked(
     /* [in] */ IIntent* intent,
     /* [in] */ Boolean doRebind)
 {
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int64 origId;
-    bHelper->ClearCallingIdentity(&origId);
+    Int64 origId = Binder::ClearCallingIdentity();
 //     try {
     if (r != NULL) {
         AutoPtr<IIntentFilterComparison> filter;
@@ -1154,7 +1123,7 @@ ECode ActiveServices::UnbindFinishedLocked(
         ServiceDoneExecutingLocked(r, inDestroying, FALSE);
     }
 //     } finally {
-    bHelper->RestoreCallingIdentity(origId);
+    Binder::RestoreCallingIdentity(origId);
 //     }
     return NOERROR;
 }
@@ -1253,16 +1222,18 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
             AutoPtr<ServiceRestarter> res = new ServiceRestarter(this);
             AutoPtr<IBatteryStatsImplUidPkgServ> ss;
             AutoPtr<IBatteryStatsImpl> stats = mAm->mBatteryStatsService->GetActiveStatistics();
-            synchronized (stats) {
-                AutoPtr<IApplicationInfo> appInfo;
-                comInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
-                Int32 sInfoUid;
-                appInfo->GetUid(&sInfoUid);
-                String sInfoPkgName, sInfoName;
-                pkgInfo->GetPackageName(&sInfoPkgName);
-                pkgInfo->GetName(&sInfoName);
-                stats->GetServiceStatsLocked(sInfoUid, sInfoPkgName, sInfoName,
-                    (IBatteryStatsImplUidPkgServ**)&ss);
+            if (stats) {
+                synchronized(stats) {
+                    AutoPtr<IApplicationInfo> appInfo;
+                    comInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                    Int32 sInfoUid;
+                    appInfo->GetUid(&sInfoUid);
+                    String sInfoPkgName, sInfoName;
+                    pkgInfo->GetPackageName(&sInfoPkgName);
+                    pkgInfo->GetName(&sInfoName);
+                    stats->GetServiceStatsLocked(sInfoUid, sInfoPkgName, sInfoName,
+                        (IBatteryStatsImplUidPkgServ**)&ss);
+                }
             }
             CServiceRecord::NewByFriend((CServiceRecord**)&r);
             r->constructor(mAm, ss, name, filter, sInfo, callingFromFg, res);
@@ -1274,19 +1245,19 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
             List< AutoPtr<CServiceRecord> >::Iterator it = mPendingServices.Begin();
             while (it != mPendingServices.End()) {
                 AutoPtr<CServiceRecord> pr = *it;
-                Boolean isEqual;
                 AutoPtr<IApplicationInfo> appInfo;
                 IComponentInfo::Probe(pr->mServiceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-                Int32 aUid;
+                Int32 aUid, sUid;
                 appInfo->GetUid(&aUid);
                 AutoPtr<IApplicationInfo> sappInfo;
                 comInfo->GetApplicationInfo((IApplicationInfo**)&sappInfo);
-                Int32 sUid;
                 sappInfo->GetUid(&sUid);
-                if (aUid == sUid && IObject::Probe(pr->mName)->Equals(name, &isEqual), isEqual) {
+                if (aUid == sUid && Object::Equals(pr->mName, name)) {
                     it = mPendingServices.Erase(it);
                 }
-                else ++it;
+                else {
+                    ++it;
+                }
             }
         }
 //         } catch (RemoteException ex) {
@@ -1298,11 +1269,10 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
         r->mAppInfo->GetUid(&uid);
         AutoPtr<ServiceLookupResult> result;
         if (mAm->CheckComponentPermission(r->mPermission,
-                callingPid, callingUid, uid, r->mExported)
-                != IPackageManager::PERMISSION_GRANTED) {
+            callingPid, callingUid, uid, r->mExported) != IPackageManager::PERMISSION_GRANTED) {
             if (!r->mExported) {
-                Slogger::W(TAG, "Permission Denial: Accessing service %s from pid=%d, uid=%d that is not exported from uid %d",
-                        TO_CSTR(r->mName), callingPid, callingUid, uid);
+                Slogger::W(TAG, "Permission [%s] Denial: Accessing service %s from pid=%d, uid=%d that is not exported from uid %d",
+                    r->mPermission.string(), TO_CSTR(r->mName), callingPid, callingUid, uid);
                 StringBuilder sb("not exported from uid ");
                 sb += uid;
                 result = new ServiceLookupResult(NULL, sb.ToString());
@@ -1313,7 +1283,8 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
             result = new ServiceLookupResult(NULL, r->mPermission);
             return result;
         }
-        assert(0);
+        // assert(0 && "TODO");
+        Logger::I(TAG, "TODO: mIntentFirewall not ready.");
         // if (!mAm->mIntentFirewall->CheckService(r->mName, service, callingUid, callingPid,
         //         resolvedType, r->mAppInfo)) {
         //     return NULL;
@@ -1645,9 +1616,9 @@ String ActiveServices::BringUpServiceLocked(
     // Service is now being launched, its package can't be stopped.
 //     try {
     ECode ec = AppGlobals::GetPackageManager()->SetPackageStoppedState(
-            r->mPackageName, FALSE, r->mUserId);
-    if (!SUCCEEDED(ec)) Slogger::W(TAG, "Failed trying to unstop package %s: %d"
-            , r->mPackageName.string(), ec);
+        r->mPackageName, FALSE, r->mUserId);
+    if (FAILED(ec))
+        Slogger::W(TAG, "Failed trying to unstop package %s: %d", r->mPackageName.string(), ec);
 //     } catch (RemoteException e) {
 //     } catch (IllegalArgumentException e) {
 //         Slog.w(TAG, "Failed trying to unstop package "
@@ -1781,11 +1752,13 @@ ECode ActiveServices::RealStartServiceLocked(
     //     EventLogTags.writeAmCreateService(
     //             r->mUserId, System.identityHashCode(r), nameTerm, r->mApp.uid, r->mApp.pid);
     // }
-    AutoPtr<IBatteryStatsImpl> stats;
-    r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-    if (stats) {
-        synchronized(stats) {
-            r->mStats->StartLaunchedLocked();
+    if (r->mStats != NULL) {
+        AutoPtr<IBatteryStatsImpl> stats;
+        r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+        if (stats) {
+            synchronized(stats) {
+                r->mStats->StartLaunchedLocked();
+            }
         }
     }
 
@@ -2027,11 +2000,13 @@ ECode ActiveServices::BringDownServiceLocked(
     r->mPendingStarts.Clear();
 
     if (r->mApp != NULL) {
-        AutoPtr<IBatteryStatsImpl> stats;
-        r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-        if (stats) {
-            synchronized (stats) {
-                r->mStats->StopLaunchedLocked();
+        if (r->mStats != NULL) {
+            AutoPtr<IBatteryStatsImpl> stats;
+            r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+            if (stats) {
+                synchronized (stats) {
+                    r->mStats->StopLaunchedLocked();
+                }
             }
         }
 
@@ -2049,13 +2024,13 @@ ECode ActiveServices::BringDownServiceLocked(
             }
         }
         else {
-            if (DEBUG_SERVICE) Slogger::V(
-                TAG, "Removed service that has no process: %s", TO_CSTR(r));
+            if (DEBUG_SERVICE)
+                Slogger::V(TAG, "Removed service that has no process: %s", TO_CSTR(r));
         }
     }
     else {
-        if (DEBUG_SERVICE) Slogger::V(
-            TAG, "Removed service that is not running: %s", TO_CSTR(r));
+        if (DEBUG_SERVICE)
+            Slogger::V(TAG, "Removed service that is not running: %s", TO_CSTR(r));
     }
 
     if (r->mBindings.IsEmpty() == FALSE) {
@@ -2099,7 +2074,7 @@ ECode ActiveServices::RemoveConnectionLocked(
     }
     if (clist != NULL) {
         clist->Remove(c);
-        if (clist->Begin() == clist->End()) {
+        if (clist->IsEmpty()) {
             s->mConnections.Erase(it);
         }
     }
@@ -2125,12 +2100,12 @@ ECode ActiveServices::RemoveConnectionLocked(
     }
     if (clist != NULL) {
         clist->Remove(c);
-        if (clist->Begin() == clist->End()) {
+        if (clist->IsEmpty()) {
             mServiceConnections.Erase(cit);
         }
     }
 
-    if (b->mConnections.Begin() == b->mConnections.End()) {
+    if (b->mConnections.IsEmpty()) {
         b->mIntent->mApps.Erase(b->mClient);
     }
 
@@ -2192,8 +2167,6 @@ ECode ActiveServices::ServiceDoneExecutingLocked(
     if (it != mDestroyingServices.End())
         inDestroying = TRUE;
 
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
     if (r != NULL) {
         if (type == 1) {
             // This is a call from a service start...  take care of
@@ -2246,14 +2219,12 @@ ECode ActiveServices::ServiceDoneExecutingLocked(
                 r->mCallStart = FALSE;
             }
         }
-        Int64 origId;
-        bHelper->ClearCallingIdentity(&origId);
+        Int64 origId = Binder::ClearCallingIdentity();
         ServiceDoneExecutingLocked(r, inDestroying, inDestroying);
-        bHelper->RestoreCallingIdentity(origId);
+        Binder::RestoreCallingIdentity(origId);
     }
     else {
-        Int32 pid;
-        bHelper->GetCallingPid(&pid);
+        Int32 pid = Binder::GetCallingPid();
         Slogger::W(TAG, "Done executing unknown service from pid %d", pid);
     }
     return NOERROR;
@@ -2569,12 +2540,15 @@ ECode ActiveServices::KillServicesLocked(
     for (it = app->mServices.Begin(); it != app->mServices.End(); ++it) {
         AutoPtr<CServiceRecord> sr = *it;
         AutoPtr<IBatteryStatsImpl> stats;
-        sr->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-        if (stats) {
-            synchronized (stats) {
-                sr->mStats->StopLaunchedLocked();
+        if (sr->mStats != NULL) {
+            sr->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+            if (stats) {
+                synchronized (stats) {
+                    sr->mStats->StopLaunchedLocked();
+                }
             }
         }
+
         if (sr->mApp.Get() != app && sr->mApp != NULL && !sr->mApp->mPersistent) {
             sr->mApp->mServices.Erase(sr);
         }
@@ -2828,12 +2802,8 @@ AutoPtr<IList> ActiveServices::GetRunningServiceInfoLocked(
     AutoPtr<IList> res;
     CArrayList::New((IList**)&res);
 
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int32 uid;
-    bHelper->GetCallingUid(&uid);
-    Int64 ident;
-    bHelper->ClearCallingIdentity(&ident);
+    Int32 uid = Binder::GetCallingUid();
+    Int64 ident = Binder::ClearCallingIdentity();
 //     try {
     AutoPtr<IActivityManagerHelper> amHelper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
@@ -2863,10 +2833,7 @@ AutoPtr<IList> ActiveServices::GetRunningServiceInfoLocked(
         }
     }
     else {
-        AutoPtr<IUserHandleHelper> uhHelper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-        Int32 userId;
-        uhHelper->GetUserId(uid, &userId);
+        Int32 userId = UserHandle::GetUserId(uid);
         IComponentNameCServiceRecordHashMap::Iterator it;
         IComponentNameCServiceRecordHashMap& alls = GetServices(userId);
         Int32 size;
@@ -2887,7 +2854,7 @@ AutoPtr<IList> ActiveServices::GetRunningServiceInfoLocked(
         }
     }
 //     } finally {
-    bHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
 //     }
 
     return res;
@@ -2898,14 +2865,8 @@ ECode ActiveServices::GetRunningServiceControlPanelLocked(
     /* [out] */ IPendingIntent** intent)
 {
     VALIDATE_NOT_NULL(intent);
-    AutoPtr<IBinderHelper> bHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    Int32 uid;
-    bHelper->GetCallingUid(&uid);
-    AutoPtr<IUserHandleHelper> uhHelper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    Int32 userId;
-    uhHelper->GetUserId(uid, &userId);
+    Int32 uid = Binder::GetCallingUid();
+    Int32 userId = UserHandle::GetUserId(uid);
     AutoPtr<CServiceRecord> r = GetServiceByName(name, userId);
     if (r != NULL) {
         CServiceRecord::ConnectionHashMap::Iterator it;

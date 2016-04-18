@@ -699,10 +699,10 @@ ECode PackageParser::Service::ToString(
 {
     StringBuilder sb;
     sb += ("Service{");
-    sb += (Int32)this;
+    sb += StringUtils::ToHexString((Int32)this);
     sb += " ";
     AppendComponentShortName(&sb);
-    sb += "|";
+    sb += "}";
     *str = sb.ToString();
     return NOERROR;
 }
@@ -4919,8 +4919,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
         &setExported);
     if (setExported) {
         Boolean isExported;
-        sa->GetBoolean(R::styleable::AndroidManifestActivity_exported,
-            FALSE, &isExported);
+        sa->GetBoolean(R::styleable::AndroidManifestActivity_exported, FALSE, &isExported);
         IComponentInfo::Probe(a->mInfo)->SetExported(isExported);
     }
 
@@ -5308,7 +5307,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
     }
 
     if (!setExported) {
-        IComponentInfo::Probe(a->mInfo)->SetExported(a->mIntents.Begin() != a->mIntents.End());
+        IComponentInfo::Probe(a->mInfo)->SetExported(!a->mIntents.IsEmpty());
     }
 
     return a;
@@ -5951,7 +5950,7 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
             R::styleable::AndroidManifestService_label,
             R::styleable::AndroidManifestService_icon,
             R::styleable::AndroidManifestService_logo,
-            0,/*R::styleable::AndroidManifestService_banner,*/
+            R::styleable::AndroidManifestService_banner,
             mSeparateProcesses,
             R::styleable::AndroidManifestService_process,
             R::styleable::AndroidManifestService_description,
@@ -5970,15 +5969,11 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
         return NULL;
     }
 
-    Boolean setExported = FALSE;
-    sa->HasValue(
-        R::styleable::AndroidManifestService_exported,
-        &setExported);
+    Boolean setExported = FALSE, isExported = FALSE;
+    sa->HasValue(R::styleable::AndroidManifestService_exported, &setExported);
     if (setExported) {
-        Boolean isExported;
-        sa->GetBoolean(
-            R::styleable::AndroidManifestService_exported,
-            FALSE, &isExported);
+        // Boolean isExported;
+        sa->GetBoolean(R::styleable::AndroidManifestService_exported, FALSE, &isExported);
         IComponentInfo::Probe(s->mInfo)->SetExported(isExported);
     }
 
@@ -5998,25 +5993,19 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
     s->mInfo->SetFlags(0);
     Int32 ivalue;
     Boolean bvalue;
-    sa->GetBoolean(
-        R::styleable::AndroidManifestService_stopWithTask,
-        FALSE, &bvalue);
+    sa->GetBoolean(R::styleable::AndroidManifestService_stopWithTask, FALSE, &bvalue);
     if (bvalue) {
         s->mInfo->GetFlags(&ivalue);
         ivalue |= IServiceInfo::FLAG_STOP_WITH_TASK;
         s->mInfo->SetFlags(ivalue);
     }
-    sa->GetBoolean(
-        R::styleable::AndroidManifestService_isolatedProcess,
-        FALSE, &bvalue);
+    sa->GetBoolean(R::styleable::AndroidManifestService_isolatedProcess, FALSE, &bvalue);
     if (bvalue) {
         s->mInfo->GetFlags(&ivalue);
         ivalue |= IServiceInfo::FLAG_ISOLATED_PROCESS;
         s->mInfo->SetFlags(ivalue);
     }
-    sa->GetBoolean(
-        R::styleable::AndroidManifestService_singleUser,
-        FALSE, &bvalue);
+    sa->GetBoolean(R::styleable::AndroidManifestService_singleUser, FALSE, &bvalue);
     if (bvalue) {
         s->mInfo->GetFlags(&ivalue);
         ivalue |= IServiceInfo::FLAG_SINGLE_USER;
@@ -6026,9 +6015,8 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
         if (isExported && (flags & PARSE_IS_PRIVILEGED) == 0) {
             String description;
             parser->GetPositionDescription(&description);
-            // Slogger::W(TAG, String("Service exported request ignored due to singleUser: ")
-            //         + s->mClassName + " at " + mArchiveSourcePath + " "
-            //         + description);
+            Slogger::W(TAG, "Service exported request ignored due to singleUser: %s at %s %s",
+                s->mClassName.string(), mArchiveSourcePath.string(), description.string());
             IComponentInfo::Probe(s->mInfo)->SetExported(FALSE);
             setExported = TRUE;
         }
@@ -6095,7 +6083,7 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
     }
 
     if (!setExported) {
-        IComponentInfo::Probe(s->mInfo)->SetExported(s->mIntents.Begin() != s->mIntents.End());
+        IComponentInfo::Probe(s->mInfo)->SetExported(!s->mIntents.IsEmpty());
     }
 
     return s;
