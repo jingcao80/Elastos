@@ -1,0 +1,76 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IServiceConnection;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace ServiceDemo {
+
+    /**
+     * @Involve
+     * interface IService;
+     * interface IContext;
+     * interface IContextWrapper;
+     * interface IComponentCallbacks;
+     * interface IComponentCallbacks2;
+     */
+    interface IGetSystemTimeService {
+        GetSystemTime(
+            [out] String* tiemStr);
+    }
+
+    class CActivityOne {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CServiceOne {
+        constructor();
+
+        interface IGetSystemTimeService;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
+
+    class CServiceConnection{
+        constructor(
+            [in] IWeakReference* weakHost);
+
+        interface IServiceConnection;
+    }
+
+
+    } // namespace ServiceDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}

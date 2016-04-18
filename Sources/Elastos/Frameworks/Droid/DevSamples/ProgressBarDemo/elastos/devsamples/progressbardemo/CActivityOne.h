@@ -39,8 +39,8 @@ namespace Elastos {
 namespace DevSamples {
 namespace ProgressBarDemo {
 
-class CActivityOne
-    : public Activity
+CarClass(CActivityOne)
+    , public Activity
 {
 public:
     class ActivityOneCheckedChangeListener
