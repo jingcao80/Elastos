@@ -272,6 +272,12 @@ public:
         /* [in] */ const AutoPtr<T1>& lhs,
         /* [in] */ const AutoPtr<T2>& rhs);
 
+    static CARAPI_(AutoPtr<IClassInfo>) GetClassInfo(
+        /* [in] */ IInterface* obj);
+
+    static CARAPI_(AutoPtr<IClassLoader>) GetClassLoader(
+        /* [in] */ IInterface* obj);
+
     static CARAPI_(String) GetClassName(
         /* [in] */ IInterface* obj);
 

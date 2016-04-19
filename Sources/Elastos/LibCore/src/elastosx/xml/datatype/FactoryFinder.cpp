@@ -113,7 +113,7 @@ ECode FactoryFinder::FindClassLoader(
 {
     *pLoader = NULL;
     String path = clsName.Substring(0, clsName.LastIndexOf('.'));
-    return CPathClassLoader::New(path, pLoader);
+    return CPathClassLoader::New(path, NULL, pLoader);
 }
 
 } // namespace Datatype

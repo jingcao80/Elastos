@@ -179,6 +179,33 @@ ECode Object::GetWeakReference(
     return NOERROR;
 }
 
+AutoPtr<IClassInfo> Object::GetClassInfo(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IClassInfo> classInfo;
+    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    if (classInfo == NULL) {
+        ALOGD("error: failed to GetClassInfo with %s. It is not a Car class.", TO_CSTR(obj));
+    }
+    return classInfo;
+}
+
+AutoPtr<IClassLoader> Object::GetClassLoader(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IClassLoader> classLoader;
+    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    if (classInfo) {
+        AutoPtr<IInterface> clObj;
+        classInfo->GetClassLoader((IInterface**)&clObj);
+        classLoader = IClassLoader::Probe(clObj);
+    }
+    else {
+        ALOGD("error: failed to GetClassLoader with %s. It is not a Car class.", TO_CSTR(obj));
+    }
+    return classLoader;
+}
+
 String Object::GetClassName(
     /* [in] */ IInterface* obj)
 {

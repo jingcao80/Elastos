@@ -98,7 +98,7 @@ def check_released_return_value(logFile, firstLog, path, checkLineNum, paramType
     matchArrayItem = pattern.search(value)
 
     # ignore new: (IServerSocketChannel*) new
-    pattern = re.compile(r'\(.*\*\s*\)\s*new')
+    pattern = re.compile(r'\(.*\*\s*\)\s*new ')
     matchNew = pattern.search(value)
 
     # ignore singleton: XXX::GetInstance()

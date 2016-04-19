@@ -848,7 +848,7 @@ ECode LoadedPkg::GetSystemClassLoader(
 
     String systemModule("/system/lib/Elastos.Droid.Core.eco");
     AutoPtr<IClassLoader> cl;
-    ECode ec = CPathClassLoader::New(systemModule, (IClassLoader**)&cl);
+    ECode ec = CPathClassLoader::New(systemModule, NULL, (IClassLoader**)&cl);
     if (FAILED(ec)) {
         Slogger::E(TAG, "failed to load system class loaded %s", systemModule.string());
         return ec;

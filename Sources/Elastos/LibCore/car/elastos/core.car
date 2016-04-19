@@ -43,9 +43,11 @@ module
     namespace Elastos {
     namespace Core {
 
+    [local]
     class CPathClassLoader {
         constructor (
-            [in] String path);
+            [in] String classPath,
+            [in] IClassLoader* parent);
 
         interface IClassLoader;
     }

@@ -987,7 +987,7 @@ void ShutdownThread::DeviceRebootOrShutdown(
 {
     // Class<?> cl;
     AutoPtr<IClassLoader> oemClassLoader;
-    if (FAILED(CPathClassLoader::New(String("/system/framework/oem-services.jar"), (IClassLoader**)&oemClassLoader))) {
+    if (FAILED(CPathClassLoader::New(String("/system/framework/oem-services.jar"), NULL, (IClassLoader**)&oemClassLoader))) {
         Slogger::E(TAG, "failed to load system class loaded");
         return;
     }

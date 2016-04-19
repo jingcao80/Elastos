@@ -11,7 +11,7 @@ using Elastos::Utility::Etl::HashMap;
 namespace Elastos {
 namespace Core {
 
-class ClassLoader
+class ECO_PUBLIC ClassLoader
     : public Object
     , public IClassLoader
 {
@@ -37,6 +37,10 @@ private:
 
 public:
     CAR_INTERFACE_DECL();
+
+    CARAPI constructor(
+        /* [in] */ const String& classPath,
+        /* [in] */ IClassLoader* parent);
 
     /**
      * Returns the system class loader. This is the parent for new
@@ -95,77 +99,47 @@ protected:
     virtual CARAPI_(AutoPtr<IClassInfo>) FindLoadedClass(
         /* [in] */ const String& className);
 
-    /**
-     * Loads the class with the specified name, optionally linking it after
-     * loading. The following steps are performed:
-     * <ol>
-     * <li> Call {@link #findLoadedClass(String)} to determine if the requested
-     * class has already been loaded.</li>
-     * <li>If the class has not yet been loaded: Invoke this method on the
-     * parent class loader.</li>
-     * <li>If the class has still not been loaded: Call
-     * {@link #findClass(String)} to find the class.</li>
-     * </ol>
-     * <p>
-     * <strong>Note:</strong> In the Android reference implementation, the
-     * {@code resolve} parameter is ignored; classes are never linked.
-     * </p>
-     *
-     * @return the {@code Class} object.
-     * @param className
-     *            the name of the class to look for.
-     * @param resolve
-     *            Indicates if the class should be resolved after loading. This
-     *            parameter is ignored on the Android reference implementation;
-     *            classes are not resolved.
-     * @throws ClassNotFoundException
-     *             if the class can not be found.
-     */
-    virtual CARAPI LoadClass(
-        /* [in] */ const String& className,
-        /* [in] */ Boolean resolve,
-        /* [out] */ IClassInfo** klass);
-
 private:
     /**
      * Create the system class loader. Note this is NOT the bootstrap class
      * loader (which is managed by the VM). We use a null value for the parent
      * to indicate that the bootstrap loader is our parent.
      */
-    static CARAPI_(AutoPtr<IClassLoader>) CreateSystemClassLoader();
+    ECO_LOCAL static CARAPI_(AutoPtr<IClassLoader>) CreateSystemClassLoader();
 
 private:
+    AutoPtr< ArrayOf<String> > mClassPaths;
+
     /**
      * The parent ClassLoader.
      */
-    AutoPtr<ClassLoader> mParent;
+    AutoPtr<IClassLoader> mParent;
 
     HashMap<String, IClassInfo*> mClassTable;
 };
 
-/**
- * Provides an explicit representation of the boot class loader. It sits at the
- * head of the class loader chain and delegates requests to the VM's internal
- * class loading mechanism.
- */
-class BootClassLoader : public ClassLoader
-{
-public:
-    static CARAPI_(AutoPtr<BootClassLoader>) GetInstance();
+// /**
+//  * Provides an explicit representation of the boot class loader. It sits at the
+//  * head of the class loader chain and delegates requests to the VM's internal
+//  * class loading mechanism.
+//  */
+// class BootClassLoader : public ClassLoader
+// {
+// public:
+//     static CARAPI_(AutoPtr<IClassLoader>) GetInstance();
 
-protected:
-    CARAPI FindClass(
-        /* [in] */ const String& className,
-        /* [out] */ IClassInfo** klass);
+// protected:
+//     CARAPI FindClass(
+//         /* [in] */ const String& className,
+//         /* [out] */ IClassInfo** klass);
 
-    CARAPI LoadClass(
-        /* [in] */ const String& className,
-        /* [in] */ Boolean resolve,
-        /* [out] */ IClassInfo** klass);
+//     CARAPI LoadClass(
+//         /* [in] */ const String& className,
+//         /* [out] */ IClassInfo** klass);
 
-private:
-    static AutoPtr<BootClassLoader> sInstance;
-};
+// private:
+//     static AutoPtr<IClassLoader> sInstance;
+// };
 
 } // namespace Core
 } // namespace Elastos

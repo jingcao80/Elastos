@@ -16,35 +16,38 @@ namespace Core {
 //--------------------------------------------
 AutoPtr<IClassLoader> ClassLoader::SystemClassLoader::sLoader;
 
-
 //--------------------------------------------
 //  ClassLoader
 //--------------------------------------------
 CAR_INTERFACE_IMPL(ClassLoader, Object, IClassLoader)
 
+ECode ClassLoader::constructor(
+    /* [in] */ const String& classPath,
+    /* [in] */ IClassLoader* parent)
+{
+    if (classPath.IsNullOrEmpty()) {
+        ALOGE("ClassLoader::constructor: module path is null or empty");
+        return E_INVALID_ARGUMENT;
+    }
+
+    StringUtils::Split(classPath, ":", (ArrayOf<String>**)&mClassPaths);
+    assert(mClassPaths != NULL);
+    mParent = parent;
+    return NOERROR;
+}
+
 AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
 {
-    AutoPtr<CSystem> system;
-    CSystem::AcquireSingletonByFriend((CSystem**)&system);
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
     String classPath;
-    system->GetProperty(String("elastos.class.path"), String("."), &classPath);
+    system->GetProperty(String("elastos.class.path"), String("/system/lib/"), &classPath);
+    if (classPath.IsNullOrEmpty()) {
+        classPath = "/system/lib/Elastos.Droid.Core.eco";
+    }
 
-    // String[] paths = classPath.split(":");
-    // URL[] urls = new URL[paths.length];
-    // for (int i = 0; i < paths.length; i++) {
-    // try {
-    // urls[i] = new URL("file://" + paths[i]);
-    // }
-    // catch (Exception ex) {
-    // ex.printStackTrace();
-    // }
-    // }
-    //
-    // return new java.net.URLClassLoader(urls, null);
-
-    // TODO Make this a java.net.URLClassLoader once we have those?
     AutoPtr<IClassLoader> passClassLoader;
-    CPathClassLoader::New(classPath, (IClassLoader**)&passClassLoader);
+    CPathClassLoader::New(classPath, NULL/*BootClassLoader::GetInstance()*/, (IClassLoader**)&passClassLoader);
     return passClassLoader;
 }
 
@@ -56,11 +59,16 @@ AutoPtr<IClassLoader> ClassLoader::GetSystemClassLoader()
     return SystemClassLoader::sLoader;
 }
 
-ECode ClassLoader::FindClass(
-    /* [in] */ const String& className,
-    /* [out] */ IClassInfo** klass)
+AutoPtr<IClassLoader> ClassLoader::GetClassLoader(
+    /* [in] */ IClassInfo* clsInfo)
 {
-    return E_CLASS_NOT_FOUND_EXCEPTION;
+    AutoPtr<IInterface> obj;
+    clsInfo->GetClassLoader((IInterface**)&obj);
+    AutoPtr<IClassLoader> loader = IClassLoader::Probe(obj);
+    if (loader == NULL) {
+        loader = BootClassLoader::GetInstance();
+    }
+    return loader;
 }
 
 AutoPtr<IClassInfo> ClassLoader::FindLoadedClass(
@@ -78,20 +86,14 @@ ECode ClassLoader::LoadClass(
     /* [in] */ const String& className,
     /* [out] */ IClassInfo** klass)
 {
-    return LoadClass(className, FALSE, klass);
-}
-
-ECode ClassLoader::LoadClass(
-    /* [in] */ const String& className,
-    /* [in] */ Boolean resolve,
-    /* [out] */ IClassInfo** klass)
-{
     VALIDATE_NOT_NULL(klass);
     *klass = NULL;
-    AutoPtr<IClassInfo> clazz = FindLoadedClass(className);
 
+    AutoPtr<IClassInfo> clazz = FindLoadedClass(className);
     if (clazz == NULL) {
-        mParent->LoadClass(className, FALSE, (IClassInfo**)&clazz);
+        if (mParent != NULL) {
+            mParent->LoadClass(className, (IClassInfo**)&clazz);
+        }
 
         if (clazz == NULL) {
             FAIL_RETURN(FindClass(className, (IClassInfo**)&clazz));
@@ -103,78 +105,103 @@ ECode ClassLoader::LoadClass(
     return NOERROR;
 }
 
-AutoPtr<IClassLoader> ClassLoader::GetClassLoader(
-    /* [in] */ IClassInfo* clsInfo)
+ECode ClassLoader::FindClass(
+    /* [in] */ const String& className,
+    /* [out] */ IClassInfo** klass)
 {
-    AutoPtr<IInterface> obj;
-    clsInfo->GetClassLoader((IInterface**)&obj);
-    AutoPtr<IClassLoader> loader = IClassLoader::Probe(obj);
-    if (loader == NULL) {
-        loader = BootClassLoader::GetInstance();
+    VALIDATE_NOT_NULL(klass);
+    *klass = NULL;
+
+    if (className.IsNullOrEmpty()) {
+        ALOGE("ClassLoader::FindClass: className is null or empty");
+        return E_INVALID_ARGUMENT;
     }
-    return loader;
+
+    for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
+        String path = (*mClassPaths)[i];
+        AutoPtr<IModuleInfo> module;
+        ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&module);
+        if (FAILED(ec) || module == NULL) {
+            ALOGE("ClassLoader::FindClass %s, failed to AcquireModuleInfo %s",
+                className.string(), path.string());
+            continue;
+        }
+
+        ec = module->GetClassInfo(className, klass);
+        if (SUCCEEDED(ec)) {
+            (*klass)->SetClassLoader((IClassLoader*)this);
+            return NOERROR;
+        }
+    }
+
+    return E_CLASS_NOT_FOUND_EXCEPTION;
 }
 
 //-------------------------------------------------------
 //  BootClassLoader
 //-------------------------------------------------------
-AutoPtr<BootClassLoader> BootClassLoader::sInstance;
+// AutoPtr<IClassLoader> BootClassLoader::sInstance;
 
-AutoPtr<BootClassLoader> BootClassLoader::GetInstance()
-{
-    if (sInstance == NULL) {
-        sInstance = new BootClassLoader();
-    }
+// AutoPtr<IClassLoader> BootClassLoader::GetInstance()
+// {
+//     if (sInstance == NULL) {
+//         sInstance = (IClassLoader*)new BootClassLoader();
+//     }
 
-    return sInstance;
-}
+//     return sInstance;
+// }
 
-ECode BootClassLoader::FindClass(
-    /* [in] */ const String& className,
-    /* [out] */ IClassInfo** klass)
-{
-    String bootClassPath(gCore.mBootClassPathStr);
+// ECode BootClassLoader::LoadClass(
+//     /* [in] */ const String& className,
+//     /* [out] */ IClassInfo** klass)
+// {
+//     VALIDATE_NOT_NULL(klass)
+//     *klass = NULL;
+//     AutoPtr<IClassInfo> clazz = FindLoadedClass(className);
 
-    AutoPtr< ArrayOf<String> > paths;
-    if (bootClassPath.Equals(".")) {
-        AutoPtr<IFile> dir;
-        CFile::New(bootClassPath, (IFile**)&dir);
-        dir->List((ArrayOf<String>**)&paths);
-    }
-    else {
-        StringUtils::Split(bootClassPath, ":", (ArrayOf<String>**)&paths);
-    }
+//     if (clazz == NULL) {
+//         FAIL_RETURN(FindClass(className, (IClassInfo**)&clazz));
+//     }
 
-    for (Int32 i = 0; i < paths->GetLength(); i++) {
-        String path = (*paths)[i];
-        AutoPtr<IModuleInfo> module;
-        ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&module);
-        if (FAILED(ec) || module == NULL) continue;
-        ec = module->GetClassInfo(className, klass);
-        if (SUCCEEDED(ec)) return NOERROR;
-    }
+//     *klass = clazz;
+//     REFCOUNT_ADD(*klass);
+//     return NOERROR;
+// }
 
-    *klass = NULL;
-    return E_CLASS_NOT_FOUND_EXCEPTION;
-}
+// ECode BootClassLoader::FindClass(
+//     /* [in] */ const String& className,
+//     /* [out] */ IClassInfo** klass)
+// {
+//     VALIDATE_NOT_NULL(klass)
+//     *klass = NULL;
 
-ECode BootClassLoader::LoadClass(
-    /* [in] */ const String& className,
-    /* [in] */ Boolean resolve,
-    /* [out] */ IClassInfo** klass)
-{
-    VALIDATE_NOT_NULL(klass)
-    *klass = NULL;
-    AutoPtr<IClassInfo> clazz = FindLoadedClass(className);
+//     String bootClassPath("/system/lib/Elastos.Core.eco");//assert(0 && "TODO") gCore.mBootClassPathStr
 
-    if (clazz == NULL) {
-        FAIL_RETURN(FindClass(className, (IClassInfo**)&clazz));
-    }
+//     AutoPtr< ArrayOf<String> > paths;
+//     if (bootClassPath.Equals(".")) {
+//         AutoPtr<IFile> dir;
+//         CFile::New(bootClassPath, (IFile**)&dir);
+//         dir->List((ArrayOf<String>**)&paths);
+//     }
+//     else {
+//         StringUtils::Split(bootClassPath, ":", (ArrayOf<String>**)&paths);
+//     }
 
-    *klass = clazz;
-    REFCOUNT_ADD(*klass);
-    return NOERROR;
-}
+//     for (Int32 i = 0; i < paths->GetLength(); i++) {
+//         String path = (*paths)[i];
+//         AutoPtr<IModuleInfo> module;
+//         ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&module);
+//         if (FAILED(ec) || module == NULL) continue;
+//         ec = module->GetClassInfo(className, klass);
+//         if (SUCCEEDED(ec)) {
+//             (*klass)->SetClassLoader((IClassLoader*)this);
+//             return NOERROR;
+//         }
+//     }
+
+//     *klass = NULL;
+//     return E_CLASS_NOT_FOUND_EXCEPTION;
+// }
 
 }
 }
