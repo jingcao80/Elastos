@@ -426,7 +426,7 @@ Int32 View::sNextAccessibilityViewId = 0;
 Int32 View::sNextGeneratedId = 1;
 Object View::sNextGeneratedIdLock;
 
-AutoPtr<ISparseArray> View::mAttributeMap;
+AutoPtr<ISparseArray> View::sAttributeMap;
 
 const Int32 View::PROVIDER_BACKGROUND = 0;
 const Int32 View::PROVIDER_NONE = 1;
@@ -6584,8 +6584,7 @@ ECode View::OnKeyUp(
                 // This is a tap, so remove the longpress check
                 RemoveLongPressCallback();
 
-                PerformClick(res);
-                return NOERROR;
+                return PerformClick(res);
             }
         }
     }
@@ -6746,7 +6745,7 @@ ECode View::CreateContextMenu(
  */
 AutoPtr<IContextMenuInfo> View::GetContextMenuInfo()
 {
-    return AutoPtr<IContextMenuInfo>(NULL);
+    return NULL;
 }
 
 /**
@@ -17777,9 +17776,8 @@ ECode View::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
 {
-    return constructor(context, attrs, defStyleAttr);
+    return constructor(context, attrs, defStyleAttr, 0);
 }
-
 
 ECode View::constructor(
     /* [in] */ IContext* context,
@@ -17791,14 +17789,14 @@ ECode View::constructor(
 
     //printf("View::Init\n");
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::View),
-        ArraySize(R::styleable::View));
+            const_cast<Int32 *>(R::styleable::View),
+            ArraySize(R::styleable::View));
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
     if (mDebugViewAttributes) {
-            SaveAttributeData(attrs, a);
-        }
+        SaveAttributeData(attrs, a);
+    }
 
     AutoPtr<IDrawable> background;
 
@@ -17884,7 +17882,7 @@ ECode View::constructor(
                 break;
             case R::styleable::View_paddingStart:
                 a->GetDimensionPixelSize(attr, UNDEFINED_PADDING, &startPadding);
-                startPaddingDefined = (startPadding != UNDEFINED_PADDING);;
+                startPaddingDefined = (startPadding != UNDEFINED_PADDING);
                 break;
             case R::styleable::View_paddingEnd:
                 a->GetDimensionPixelSize(attr, UNDEFINED_PADDING, &endPadding);
@@ -18006,8 +18004,7 @@ ECode View::constructor(
                     viewFlagMasks |= DUPLICATE_PARENT_STATE;
                 }
                 break;
-            case R::styleable::View_visibility:
-            {
+            case R::styleable::View_visibility: {
                 Int32 visibility;
                 a->GetInt32(attr, 0, &visibility);
                 if (visibility != 0) {
@@ -18016,8 +18013,7 @@ ECode View::constructor(
                 }
                 break;
             }
-            case R::styleable::View_layoutDirection:
-            {
+            case R::styleable::View_layoutDirection: {
                 // Clear any layout direction flags (included resolved bits) already set
                 mPrivateFlags2 &=
                         ~(PFLAG2_LAYOUT_DIRECTION_MASK | PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK);
@@ -18029,8 +18025,7 @@ ECode View::constructor(
                 mPrivateFlags2 |= (value << PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT);
                 break;
             }
-            case R::styleable::View_drawingCacheQuality:
-            {
+            case R::styleable::View_drawingCacheQuality: {
                 Int32 cacheQuality;
                 a->GetInt32(attr, 0, &cacheQuality);
                 if (cacheQuality != 0) {
@@ -18039,17 +18034,13 @@ ECode View::constructor(
                 }
                 break;
             }
-            case R::styleable::View_contentDescription:
-            {
+            case R::styleable::View_contentDescription: {
                 String str;
                 a->GetString(attr, &str);
-                AutoPtr<ICharSequence> cs;
-                CString::New(str, (ICharSequence**)&cs);
-                SetContentDescription(cs);
+                SetContentDescription(CoreUtils::Convert(str));
                 break;
             }
-            case R::styleable::View_labelFor:
-            {
+            case R::styleable::View_labelFor: {
                 Int32 resId = 0;
                 a->GetResourceId(attr, IView::NO_ID, &resId);
                 SetLabelFor(resId);
@@ -18069,8 +18060,7 @@ ECode View::constructor(
                     viewFlagMasks |= IView::HAPTIC_FEEDBACK_ENABLED;
                 }
                 break;
-            case R::styleable::View_scrollbars:
-            {
+            case R::styleable::View_scrollbars: {
                 Int32 scrollbars;
                 a->GetInt32(attr, SCROLLBARS_NONE, &scrollbars);
                 if (scrollbars != SCROLLBARS_NONE) {
@@ -18087,8 +18077,7 @@ ECode View::constructor(
                     break;
                 }
                 // With builds < ICS, fall through and apply fading edges
-            case R::styleable::View_requiresFadingEdge:
-            {
+            case R::styleable::View_requiresFadingEdge: {
                 Int32 fadingEdge;
                 a->GetInt32(attr, FADING_EDGE_NONE, &fadingEdge);
                 if (fadingEdge != FADING_EDGE_NONE) {
@@ -18199,8 +18188,7 @@ ECode View::constructor(
                 a->GetInt32(attr, IView::LAYER_TYPE_NONE, &nTemp);
                 SetLayerType(nTemp, NULL);
                 break;
-            case R::styleable::View_textDirection:
-            {
+            case R::styleable::View_textDirection: {
                 // Clear any text direction flag already set
                 mPrivateFlags2 &= ~PFLAG2_TEXT_DIRECTION_MASK;
                 // Set the text direction flags depending on the value of the attribute
@@ -18211,8 +18199,7 @@ ECode View::constructor(
                 }
                 break;
             }
-            case R::styleable::View_textAlignment:
-            {
+            case R::styleable::View_textAlignment: {
                 // Clear any text alignment flag already set
                 mPrivateFlags2 &= ~PFLAG2_TEXT_ALIGNMENT_MASK;
                 // Set the text alignment flag depending on the value of the attribute
@@ -18229,22 +18216,19 @@ ECode View::constructor(
                 a->GetInt32(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT, &nTemp);
                 SetAccessibilityLiveRegion(nTemp);
                 break;
-            case R::styleable::View_transitionName:
-            {
+            case R::styleable::View_transitionName: {
                 String str;
                 a->GetString(attr, &str);
                 SetTransitionName(str);
                 break;
             }
-            case R::styleable::View_nestedScrollingEnabled:
-            {
+            case R::styleable::View_nestedScrollingEnabled: {
                 Boolean temp;
                 a->GetBoolean(attr, FALSE, &temp);
                 SetNestedScrollingEnabled(temp);
                 break;
             }
-            case R::styleable::View_stateListAnimator:
-            {
+            case R::styleable::View_stateListAnimator: {
                 Int32 temp;
                 a->GetResourceId(attr, 0, &temp);
                 AutoPtr<IStateListAnimator> animator;
@@ -18252,8 +18236,7 @@ ECode View::constructor(
                 SetStateListAnimator(animator);
                 break;
             }
-            case R::styleable::View_backgroundTint:
-            {
+            case R::styleable::View_backgroundTint: {
                 // This will get applied later during setBackground().
                 if (!mBackgroundTint) {
                     mBackgroundTint = new TintInfo();
@@ -18262,8 +18245,7 @@ ECode View::constructor(
                 mBackgroundTint->mHasTintList = TRUE;
                 break;
             }
-            case R::styleable::View_backgroundTintMode:
-            {
+            case R::styleable::View_backgroundTintMode: {
                 // This will get applied later during setBackground().
                 if (!mBackgroundTint) {
                     mBackgroundTint = new TintInfo();
@@ -18393,10 +18375,10 @@ ECode View::constructor(
 
 AutoPtr<ISparseArray> View::GetAttributeMap()
 {
-    if (mAttributeMap == NULL) {
-        CSparseArray::New((ISparseArray**)&mAttributeMap);
+    if (sAttributeMap == NULL) {
+        CSparseArray::New((ISparseArray**)&sAttributeMap);
     }
-    return mAttributeMap;
+    return sAttributeMap;
 }
 
 void View::SaveAttributeData(
