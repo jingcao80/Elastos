@@ -6224,7 +6224,7 @@ private:
     /**
      * Maps a Resource id to its name.
      */
-    static AutoPtr<ISparseArray> mAttributeMap;
+    static AutoPtr<ISparseArray> sAttributeMap;
 
     // correspond to the enum values of View_outlineProvider
     static const Int32 PROVIDER_BACKGROUND;// = 0;
