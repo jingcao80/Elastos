@@ -22,11 +22,11 @@ namespace Wm {
 DisplayContent::DisplayContent(
     /* [in] */ IDisplay* display,
     /* [in] */ CWindowManagerService* service)
-    : mInitialDisplayWidth(0)
-    , mInitialDisplayHeight(0)
+    : mInitialDisplayWidth(720)
+    , mInitialDisplayHeight(1280)
     , mInitialDisplayDensity(0)
-    , mBaseDisplayWidth(0)
-    , mBaseDisplayHeight(0)
+    , mBaseDisplayWidth(720)
+    , mBaseDisplayHeight(1280)
     , mBaseDisplayDensity(0)
     , mLayoutNeeded(FALSE)
     , mPendingLayoutChanges(0)
