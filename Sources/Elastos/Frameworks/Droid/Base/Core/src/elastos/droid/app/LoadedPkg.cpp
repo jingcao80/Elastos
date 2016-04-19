@@ -18,6 +18,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringBuffer.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::DroidRuntime;
@@ -34,7 +35,7 @@ using Elastos::Droid::Content::Pm::CApplicationInfo;
 using Elastos::Droid::View::DisplayAdjustments;
 
 using Elastos::Core::EIID_IRunnable;
-using Elastos::Core::CPathClassLoader;
+using Elastos::Core::ClassLoader;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -618,8 +619,7 @@ ECode LoadedPkg::constructor(
     mSecurityViolation = FALSE;
     mIncludeCode = TRUE;
     mRegisterPackage = FALSE;
-    //mClassLoader = ClassLoader.getSystemClassLoader();
-    GetSystemClassLoader((IClassLoader**)&mClassLoader);
+    mClassLoader = ClassLoader::GetSystemClassLoader();
     mResources = CResources::GetSystem();
     return NOERROR;
 }
@@ -828,7 +828,7 @@ ECode LoadedPkg::GetClassLoader(
     //     StrictMode.setThreadPolicy(oldPolicy);
     // } else {
         if (mBaseClassLoader == NULL) {
-            GetSystemClassLoader((IClassLoader**)&mClassLoader);
+            mClassLoader = ClassLoader::GetSystemClassLoader();
         }
         else {
             mClassLoader = mBaseClassLoader;
@@ -837,25 +837,6 @@ ECode LoadedPkg::GetClassLoader(
 
     *loader = mClassLoader;
     REFCOUNT_ADD(*loader)
-    return NOERROR;
-}
-
-ECode LoadedPkg::GetSystemClassLoader(
-    /* [out] */ IClassLoader** loader)
-{
-    VALIDATE_NOT_NULL(loader)
-    *loader = NULL;
-
-    String systemModule("/system/lib/Elastos.Droid.Core.eco");
-    AutoPtr<IClassLoader> cl;
-    ECode ec = CPathClassLoader::New(systemModule, NULL, (IClassLoader**)&cl);
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to load system class loaded %s", systemModule.string());
-        return ec;
-    }
-
-    *loader = cl;
-    REFCOUNT_ADD(*loader);
     return NOERROR;
 }
 

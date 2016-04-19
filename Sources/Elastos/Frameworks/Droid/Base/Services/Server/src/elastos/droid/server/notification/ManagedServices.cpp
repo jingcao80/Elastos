@@ -282,11 +282,11 @@ AutoPtr< ArrayOf<Int32> > ManagedServices::UserProfiles::GetCurrentProfileIds()
 Boolean ManagedServices::UserProfiles::IsCurrentProfile(
     /* [in] */ Int32 userId)
 {
+    AutoPtr<IInterface> obj;
     synchronized(mCurrentProfiles) {
-        AutoPtr<IInterface> obj;
         mCurrentProfiles->Get(userId, (IInterface**)&obj);
-        return obj != NULL;
     }
+    return obj != NULL;
 }
 
 //===============================================================================
@@ -528,7 +528,7 @@ void ManagedServices::OnPackagesChanged(
         builder += list;
     }
     else {
-        builder += NULL;
+        builder += "NULL";
     }
     builder += " mEnabledServicesPackageNames=";
     builder += mEnabledServicesPackageNames;

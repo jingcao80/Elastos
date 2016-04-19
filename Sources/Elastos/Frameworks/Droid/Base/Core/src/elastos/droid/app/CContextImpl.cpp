@@ -78,6 +78,7 @@
 // #include "elastos/droid/privacy/surrogate/CPrivacyLocationManager.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/ClassLoader.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
@@ -214,6 +215,7 @@ using Elastos::Droid::Wifi::P2p::CWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::EIID_IIWifiP2pManager;
 
+using Elastos::Core::ClassLoader;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFileHelper;
@@ -575,14 +577,17 @@ ECode CContextImpl::GetClassLoader(
     /* [out] */ IClassLoader** loader)
 {
     VALIDATE_NOT_NULL(loader);
-    *loader = NULL;
 
+    AutoPtr<IClassLoader> cl;
     if (mPackageInfo != NULL) {
-        mPackageInfo->GetClassLoader(loader);
+        mPackageInfo->GetClassLoader((IClassLoader**)&cl);
     }
     else {
-        LoadedPkg::GetSystemClassLoader(loader);
+        cl = ClassLoader::GetSystemClassLoader();
     }
+
+    *loader = cl;
+    REFCOUNT_ADD(*loader)
     return NOERROR;
 }
 

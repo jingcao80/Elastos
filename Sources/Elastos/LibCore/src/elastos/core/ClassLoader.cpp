@@ -41,9 +41,13 @@ AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     String classPath;
-    system->GetProperty(String("elastos.class.path"), String("/system/lib/"), &classPath);
+    system->GetProperty(String("elastos.class.path"), String(""), &classPath);
     if (classPath.IsNullOrEmpty()) {
         classPath = "/system/lib/Elastos.Droid.Core.eco";
+        ALOGI("ClassLoader: system property elastos.class.path is not setted. using %s", classPath.string());
+    }
+    else {
+        ALOGI("ClassLoader: get system property: elastos.class.path=%s", classPath.string());
     }
 
     AutoPtr<IClassLoader> passClassLoader;
@@ -122,8 +126,8 @@ ECode ClassLoader::FindClass(
         AutoPtr<IModuleInfo> module;
         ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&module);
         if (FAILED(ec) || module == NULL) {
-            ALOGE("ClassLoader::FindClass %s, failed to AcquireModuleInfo %s",
-                className.string(), path.string());
+            ALOGE("ClassLoader::FindClass %s, failed to AcquireModuleInfo at path %d/%d: %s",
+                className.string(), i +1, mClassPaths->GetLength(), path.string());
             continue;
         }
 

@@ -337,9 +337,6 @@ public:
         /* [in] */ IServiceConnection* c,
         /* [out] */ IIServiceConnection** result);
 
-    static CARAPI GetSystemClassLoader(
-        /* [out] */ IClassLoader** loader);
-
 private:
     /**
      * Setup value for Thread.getContextClassLoader(). If the
