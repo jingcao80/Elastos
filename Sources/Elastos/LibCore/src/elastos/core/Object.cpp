@@ -194,6 +194,7 @@ AutoPtr<IClassLoader> Object::GetClassLoader(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IClassLoader> classLoader;
+    AutoPtr<IClassInfo> classInfo;
     _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     if (classInfo) {
         AutoPtr<IInterface> clObj;

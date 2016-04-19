@@ -65,9 +65,9 @@ AutoPtr<IClassLoader> ClassLoader::GetClassLoader(
     AutoPtr<IInterface> obj;
     clsInfo->GetClassLoader((IInterface**)&obj);
     AutoPtr<IClassLoader> loader = IClassLoader::Probe(obj);
-    if (loader == NULL) {
-        loader = BootClassLoader::GetInstance();
-    }
+    // if (loader == NULL) {
+    //     loader = BootClassLoader::GetInstance();
+    // }
     return loader;
 }
 
