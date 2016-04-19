@@ -1,0 +1,18 @@
+
+>> process file: /home/kesalin/Elastos5/Sources//Elastos/Packages/Apps/Dialer/src/elastos/apps/dialer/calllog/CallLogAdapter.cpp
+   = warning: declaration for (ILayoutInflater**)&inflater) at line 621 not found!
+
+>> process file: /home/kesalin/Elastos5/Sources//Elastos/Packages/Apps/Dialer/src/elastos/apps/dialer/calllog/CallLogActivity.cpp
+   > error: invalid using of (IVoicemailStatusHelperImpl**)&mVoicemailStatusHelper) at line 191, it is declared as AutoPtr<IVoicemailStatusHelper> mVoicemailStatusHelper; 'in .h file' at line 120.
+
+>> process file: /home/kesalin/Elastos5/Sources//Elastos/Packages/Apps/Dialer/src/elastos/apps/dialer/CCallDetailActivity.cpp
+   > error: invalid using of (ICallDetailHistoryAdapter**)&details) at line 341, it is declared as AutoPtr<IArrayOf> details; '' at line 220.
+   > error: invalid using of (IVoicemailStatusHelperImpl**)&mVoicemailStatusHelper) at line 514, it is declared as AutoPtr<IVoicemailStatusHelper> mVoicemailStatusHelper; 'in .h file' at line 405.
+
+>> process file: /home/kesalin/Elastos5/Sources//Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.cpp
+   > error: invalid using of (IMessage**)&msg) at line 313, it is declared as AutoPtr<IMessenger> msg; '' at line 310.
+
+>> process file: /home/kesalin/Elastos5/Sources//Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/wifi/WifiStateMachine.cpp
+   = warning: declaration for (IUserHandle**)&USERHANDLE_ALL) at line 3348 not found!
+
+results: 4 errors, 2 warnings.

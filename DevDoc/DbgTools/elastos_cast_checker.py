@@ -77,7 +77,7 @@ def process_declare_line_in_header(logFile, firstLog, cppFilepath, match, lines,
         declLine = headerLines[declLineNum]
         #print 'declLine', declLine
         firstLog = check_match(firstLog, logFile, cppFilepath, match, lineNum, declLine, declLineNum)
-    elif len(param) >= 2 and param.startswith('m'):
+    elif len(param) >= 2 and param.startswith('m') and param[1].isupper():
         pass
     else:
         logInfo = ''
@@ -215,18 +215,8 @@ def isIgnored(path, usedType, param):
 ############################################################################################################
 ignored_list = [
     '/userfunc/userfunc.cpp#IInterface#pClassObject',
-    # '/launcher2/AppsCustomizePagedView.cpp#IBitmapCache#mCachedShortcutPreviewBitmap',
-    # '/launcher2/AppsCustomizePagedView.cpp#IPaintCache#mCachedShortcutPreviewPaint',
-    # '/launcher2/AppsCustomizePagedView.cpp#ICanvasCache#mCachedShortcutPreviewCanvas',
-    # '/launcher2/AppsCustomizePagedView.cpp#ICanvasCache#mCachedAppWidgetPreviewCanvas',
-    # '/launcher2/AppsCustomizePagedView.cpp#IRectCache#mCachedAppWidgetPreviewSrcRect',
-    # '/launcher2/AppsCustomizePagedView.cpp#IRectCache#mCachedAppWidgetPreviewDestRect',
-    # '/launcher2/AppsCustomizePagedView.cpp#IPaintCache#mCachedAppWidgetPreviewPaint',
     '/launcher2/Launcher.cpp#IAppWidgetProviderInfo#appWidgetInfo',
     '/launcher2/Launcher.cpp#IBundle#appSearchData',
-    # '/launcher2/SmoothPagedView.cpp#IScroller#mScroller',
-    # '/pinyinime/CEnvironmentHelper.cpp#IEnvironment#mInstance',
-    # '/phone/CPhoneStatusBar.cpp#IStatusBarKeyguardViewManager#mStatusBarKeyguardViewManager',
     '/framework/CTestSuite.cpp#IInterface#each',
     '/firewall/StringFilter.cpp#IPatternMatcher#mPattern',
     '/accessibility/AccessibilityManagerService.cpp#ISparseArray#mPendingEvents',
@@ -237,29 +227,15 @@ ignored_list = [
     '/server/CVibratorService.cpp#IThread#mThread',
     '/app/WindowDecorActionBar.cpp#IWeakReference#mCustomView',
     '/app/ProcessStats.cpp#IArrayMap#mProcesses',
-    # '/widget/ActionBarContextView.cpp#IActionMenuPresenter#mActionMenuPresenter',
-    # '/widget/ActionBarView.cpp#IActionMenuPresenter#mActionMenuPresenter',
-    # '/inputmethodservice/CIInputMethodSessionWrapper.cpp#ISparseArray#mPendingEvents',
-    # '/net/ProxyDataTracker.cpp#INetworkInfo#mNetworkInfo',
-    # '/net/ProxyDataTracker.cpp#ILinkProperties#mLinkProperties',
-    # '/net/ProxyDataTracker.cpp#INetworkCapabilities#mNetworkCapabilities',
-    # '/net/DhcpResults.cpp#IInetAddress#mGateway',
     '/animation/Keyframe.cpp#IInteger32#mValue',
     '/animation/Keyframe.cpp#IFloat#mValue',
     '/view/InputEventReceiver.cpp#IMessageQueue#mMessageQueue',
     '/view/View.cpp#IInterpolator#mScrollBarInterpolator',
-    # '/animation/GridLayoutAnimationController.cpp#ILinearInterpolator#mInterpolator',
-    # '/animation/GridLayoutAnimationController.cpp#IRandom#mRandomizer',
-    # '/view/TextureView.cpp#IPaint#mLayerPaint',
     '/view/InputDevice.cpp#IArrayList#mMotionRanges',
-    # '/soundtrigger/CSoundTriggerKeyphraseSoundModel.cpp#IUUID#mUuid',
-    # '/soundtrigger/CSoundTriggerKeyphraseSoundModel.cpp#IUUID#mVendorUuid',
     '/media/WebVttRenderingWidget.cpp#ICaptioningManagerCaptionStyle#mCaptionStyle',
     '/media/TtmlRenderer.cpp#IXmlPullParser#mParser',
-    # '/media/SubtitleTrack.cpp#IInterface#mNextRunAtEndTimeMs',
     '/widget/TabHost.cpp#IView#mTabContent',
     '/widget/Spinner.cpp#IAlertDialog#mPopup',
-    # '/widget/ListView.cpp#IListAdapter#mAdapter',
     '/res/CResources.cpp#IFormatter#f',
     '/accessibility/AccessibilityInjector.cpp#ITextToSpeech#mTextToSpeech',
     '/pm/PackageParser.cpp#IPermissionInfo#mInfo',
@@ -275,17 +251,8 @@ ignored_list = [
     '/marshal/metainfos.cpp#IInterface#modInfo',
     '/math/BigIntegerTest.cpp#IBigInteger#xNumber',
     '/Quintet/test.cpp#IBigInteger#i1',
-    # '/url/CJarURLConnectionImpl.cpp#IURLConnection#mJarFileURLConnection',
-    # '/text/SimpleDateFormat.cpp#INumberFormat#mNumberFormat',
-    # '/text/SimpleDateFormat.cpp#ICalendar#mCalendar',
-    # '/text/RuleBasedCollator.cpp#IRuleBasedCollatorICU#mICUColl',
-    # '/net/CPlainDatagramSocketImpl.cpp#IFileDescriptor#mFd',
-    # '/net/CMulticastSocket.cpp#IDatagramSocketImpl#mImpl',
-    # '/net/PlainSocketImpl.cpp#IInetAddress#mAddress',
     '/utility/Collections.cpp#IListIterator#mIterator',
     '/utility/CTreeMap.cpp#IWeakReference#mKeySet',
-    # '/x500/CX500Principal.cpp#IName#mDn',
-    # '/dialer/CCallDetailActivity.cpp#ICallTypeHelper#mCallTypeHelper',
 ]
 
 ############################################################################################################
