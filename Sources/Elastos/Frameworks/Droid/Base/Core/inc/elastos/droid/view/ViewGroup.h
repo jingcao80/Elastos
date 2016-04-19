@@ -1386,6 +1386,7 @@ public:
 
     CARAPI GetTextAlignment(
         /* [out] */ Int32* result);
+
 protected:
     CARAPI_(Boolean) OnRequestFocusInDescendants(
         /* [in] */ Int32 direction,

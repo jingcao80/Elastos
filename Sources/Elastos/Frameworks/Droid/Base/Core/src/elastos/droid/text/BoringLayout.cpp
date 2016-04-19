@@ -504,7 +504,8 @@ ECode BoringLayout::Draw(
 
     if (!mDirect.IsNull() && highlight == NULL) {
         c->DrawText(mDirect, 0, mBottom - mDesc, mPaint);
-    } else {
+    }
+    else {
         Layout::Draw(c, highlight, highlightpaint, cursorOffset);
     }
 

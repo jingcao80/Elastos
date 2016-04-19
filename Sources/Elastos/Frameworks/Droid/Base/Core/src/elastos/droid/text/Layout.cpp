@@ -725,7 +725,8 @@ ECode Layout::DrawText(
         if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTabOrEmoji) {
             // XXX: assumes there's nothing additional to be done
             canvas->DrawText(buf, start, end, x, lbaseline, p);
-        } else {
+        }
+        else {
             tl->Set(paint, buf, start, end, dir, directions, hasTabOrEmoji, tabStops);
             tl->Draw(canvas, x, ltop, lbaseline, lbottom);
         }

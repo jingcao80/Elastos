@@ -7497,7 +7497,7 @@ void TextView::MakeNewLayout(
                         hintBoring, mIncludePad));
                 }
 
-                mSavedHintLayout = (IBoringLayout*)mHintLayout.Get();
+                mSavedHintLayout = IBoringLayout::Probe(mHintLayout);
             }
             else if (shouldEllipsize && hbwidth <= hintWidth) {
                 if (mSavedHintLayout != NULL) {

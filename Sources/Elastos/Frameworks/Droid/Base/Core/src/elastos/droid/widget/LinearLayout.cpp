@@ -707,7 +707,7 @@ ECode LinearLayout::MeasureVertical(
         AutoPtr<IViewGroupLayoutParams> lv;
         child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
 
-        ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+        ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
         Float weight;
         lp->GetWeight(&weight);
@@ -846,7 +846,7 @@ ECode LinearLayout::MeasureVertical(
 
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
             Int32 top, left, right, bottom;
             IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
 
@@ -889,7 +889,7 @@ ECode LinearLayout::MeasureVertical(
 
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
             Float weight;
             lp->GetWeight(&weight);
@@ -907,8 +907,7 @@ ECode LinearLayout::MeasureVertical(
                 delta -= share;
 
                 Int32 childWidthMeasureSpec = GetChildMeasureSpec(widthMeasureSpec,
-                        mPaddingLeft + mPaddingRight +
-                                left + right, width);
+                        mPaddingLeft + mPaddingRight + left + right, width);
 
                 // TODO: Use a field like lp.isMeasured to figure out if this
                 // child has been previously measured
@@ -937,7 +936,7 @@ ECode LinearLayout::MeasureVertical(
                 Int32 state;
                 child->GetMeasuredState(&state);
                 childState = CombineMeasuredStates(childState, state
-                    & (IView::MEASURED_STATE_MASK >> IView::MEASURED_HEIGHT_STATE_SHIFT));
+                        & (IView::MEASURED_STATE_MASK >> IView::MEASURED_HEIGHT_STATE_SHIFT));
             }
 
             Int32 margin =  left + right;
@@ -968,7 +967,7 @@ ECode LinearLayout::MeasureVertical(
     }
     else {
         alternativeMaxWidth = Elastos::Core::Math::Max(alternativeMaxWidth,
-                                        weightedMaxWidth);
+                weightedMaxWidth);
         // We have no limit, so make all weighted views as tall as the largest child.
         // Children will have already been measured once.
         if (useLargestChild && heightMode != MeasureSpec::EXACTLY) {
@@ -983,7 +982,7 @@ ECode LinearLayout::MeasureVertical(
 
                 AutoPtr<IViewGroupLayoutParams> lv;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-                ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+                ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
                 Float weight;
                 lp->GetWeight(&weight);
