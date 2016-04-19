@@ -57,12 +57,14 @@
 #include "elastos/droid/graphics/drawable/CDrawableHelper.h"
 #include "elastos/droid/widget/CScrollBarDrawable.h"
 #include "elastos/droid/utility/Pools.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
@@ -73,7 +75,6 @@ using Elastos::Droid::Animation::PropertyValuesHolder;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
-using Elastos::Droid::Hardware::Display::DisplayManagerGlobal;
 using Elastos::Droid::Graphics::IInterpolator;
 using Elastos::Droid::Graphics::CInterpolator;
 using Elastos::Droid::Graphics::ILinearGradient;
@@ -104,6 +105,7 @@ using Elastos::Droid::Graphics::Drawable::IColorDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::Graphics::CanvasEdgeType_BW;
+using Elastos::Droid::Hardware::Display::DisplayManagerGlobal;
 using Elastos::Droid::Internal::Utility::EIID_IPredicate;
 using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
 using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
@@ -112,6 +114,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::IBaseBundle;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::Pools;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
@@ -146,6 +149,7 @@ using Elastos::Droid::View::CDispatcherState;
 using Elastos::Droid::View::ViewOutlineProvider;
 using Elastos::Droid::Widget::IScrollBarDrawable;
 using Elastos::Droid::Widget::CScrollBarDrawable;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CFloat;
 using Elastos::Core::CString;
 using Elastos::Core::IFloat;
@@ -421,6 +425,8 @@ Boolean View::sIgnoreMeasureCache = FALSE;
 Int32 View::sNextAccessibilityViewId = 0;
 Int32 View::sNextGeneratedId = 1;
 Object View::sNextGeneratedIdLock;
+
+AutoPtr<ISparseArray> View::mAttributeMap;
 
 const Int32 View::PROVIDER_BACKGROUND = 0;
 const Int32 View::PROVIDER_NONE = 1;
@@ -982,9 +988,9 @@ View::ScrollabilityCache::ScrollabilityCache(
     // actually use it.
     AutoPtr<ILinearGradient> lg;
     CLinearGradient::New(0, 0, 0, 1, 0xFF000000, 0, Elastos::Droid::Graphics::ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
-    mShader = IShader::Probe(lg.Get());
+    mShader = IShader::Probe(lg);
 
-    mPaint->SetShader(mShader.Get());
+    mPaint->SetShader(mShader);
     AutoPtr<IPorterDuffXfermode> mode;
     CPorterDuffXfermode::New(Elastos::Droid::Graphics::PorterDuffMode_DST_OUT, (IPorterDuffXfermode**)&mode);
     mPaint->SetXfermode(IXfermode::Probe(mode));
@@ -1032,14 +1038,14 @@ void View::ScrollabilityCache::SetFadeColor(
         if (color != 0) {
             CLinearGradient::New(0, 0, 0, 1, color | 0xFF000000,
                     color & 0x00FFFFFF, Elastos::Droid::Graphics::ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
-            mShader = IShader::Probe(lg.Get());
+            mShader = IShader::Probe(lg);
             mPaint->SetShader(mShader);
             // Restore the default transfer mode (src_over)
             mPaint->SetXfermode(NULL);
         }
         else {
             CLinearGradient::New(0, 0, 0, 1, 0xFF000000, 0, Elastos::Droid::Graphics::ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
-            mShader = IShader::Probe(lg.Get());
+            mShader = IShader::Probe(lg);
             mPaint->SetShader(mShader);
 
             AutoPtr<IPorterDuffXfermode> mode;
@@ -1265,15 +1271,10 @@ View::View()
 
 View::~View()
 {
-    if (!mKeyedTags.IsEmpty()) {
-        Logger::D("View", "===========View::~View() %p, mID: %08x", this, mID);
-    }
-
     // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
     if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
         mContext->Release();
     }
-    mKeyedTags.Clear();
     mInputEventConsistencyVerifier = NULL;
     mAccessibilityDelegate = NULL;
     mLayerPaint = NULL;
@@ -1552,12 +1553,12 @@ void View::InitializeScrollbarsInternal(
 
     AutoPtr<IDrawable> track;
     a->GetDrawable(R::styleable::View_scrollbarTrackHorizontal, (IDrawable**)&track);
-    scrollabilityCache->mScrollBar->SetHorizontalTrackDrawable(track.Get());
+    scrollabilityCache->mScrollBar->SetHorizontalTrackDrawable(track);
 
     AutoPtr<IDrawable> thumb;
     a->GetDrawable(R::styleable::View_scrollbarThumbHorizontal, (IDrawable**)&thumb);
     if (thumb != NULL) {
-        scrollabilityCache->mScrollBar->SetHorizontalThumbDrawable(thumb.Get());
+        scrollabilityCache->mScrollBar->SetHorizontalThumbDrawable(thumb);
     }
 
     Boolean alwaysDraw;
@@ -1569,12 +1570,12 @@ void View::InitializeScrollbarsInternal(
 
     track = NULL;
     a->GetDrawable(R::styleable::View_scrollbarTrackVertical, (IDrawable**)&track);
-    scrollabilityCache->mScrollBar->SetVerticalTrackDrawable(track.Get());
+    scrollabilityCache->mScrollBar->SetVerticalTrackDrawable(track);
 
     thumb = NULL;
     a->GetDrawable(R::styleable::View_scrollbarThumbVertical, (IDrawable**)&thumb);
     if (thumb != NULL) {
-        scrollabilityCache->mScrollBar->SetVerticalThumbDrawable(thumb.Get());
+        scrollabilityCache->mScrollBar->SetVerticalThumbDrawable(thumb);
     }
 
     a->GetBoolean(R::styleable::View_scrollbarAlwaysDrawVerticalTrack,
@@ -2162,7 +2163,7 @@ ECode View::RequestRectangleOnScreen(
         rectangle->Set((Int32)l, (Int32)t, (Int32)r, (Int32)b);
 
         Boolean result = FALSE;
-        parent->RequestChildRectangleOnScreen(child.Get(), rectangle, immediate, &result);
+        parent->RequestChildRectangleOnScreen(child, rectangle, immediate, &result);
 
         scrolled |= result;
 
@@ -2170,7 +2171,7 @@ ECode View::RequestRectangleOnScreen(
             AutoPtr<IMatrix> childMatrix;
             child->GetMatrix((IMatrix**)&childMatrix);
             Boolean res;
-            childMatrix->MapRect(position.Get(), &res);
+            childMatrix->MapRect(position, &res);
         }
 
         position->Offset(child->mLeft, child->mTop);
@@ -2368,7 +2369,8 @@ void View::OnFocusChanged(
 {
     if (gainFocus) {
         SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_FOCUSED);
-    } else {
+    }
+    else {
         NotifyViewAccessibilityStateChangedIfNeeded(
                     IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
     }
@@ -2380,7 +2382,7 @@ void View::OnFocusChanged(
             SetPressed(FALSE);
         }
 
-        if (imm.Get() != NULL && mAttachInfo.Get() != NULL
+        if (imm != NULL && mAttachInfo != NULL
                && mAttachInfo->mHasWindowFocus) {
             imm->FocusOut(this);
         }
@@ -6347,7 +6349,7 @@ ECode View::GetWindowVisibleDisplayFrame(
     if (mAttachInfo != NULL) {
         AutoPtr<IRect> r;
         FAIL_RETURN(mAttachInfo->mSession->GetDisplayFrame(
-                mAttachInfo->mWindow.Get(), (IRect**)&r));
+                mAttachInfo->mWindow, (IRect**)&r));
         // XXX This is really broken, and probably all needs to be done
         // in the window manager, and we need to know more about whether
         // we want the area behind or in front of the IME.
@@ -6935,129 +6937,122 @@ ECode View::OnTouchEvent(
         Int32 action;
         event->GetAction(&action);
         switch (action) {
-        case IMotionEvent::ACTION_UP: {
-                Boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
-                if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
-                    // take focus if we don't have it already and we should in
-                    // touch mode.
-                    Boolean focusTaken = FALSE, isFocusable, isFocusableInTouchMode, isFocused, bval;
-                    IsFocusable(&isFocusable);
-                    IsFocusableInTouchMode(&isFocusableInTouchMode);
-                    IsFocused(&isFocused);
-                    if (isFocusable && isFocusableInTouchMode && !isFocused) {
-                        RequestFocus(&focusTaken);
-                    }
+            case IMotionEvent::ACTION_UP: {
+                    Boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
+                    if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
+                        // take focus if we don't have it already and we should in
+                        // touch mode.
+                        Boolean focusTaken = FALSE, isFocusable, isFocusableInTouchMode, isFocused, bval;
+                        IsFocusable(&isFocusable);
+                        IsFocusableInTouchMode(&isFocusableInTouchMode);
+                        IsFocused(&isFocused);
+                        if (isFocusable && isFocusableInTouchMode && !isFocused) {
+                            RequestFocus(&focusTaken);
+                        }
 
-                    if (prepressed) {
-                        // The button is being released before we actually
-                        // showed it as pressed.  Make it show the pressed
-                        // state now (before scheduling the click) to ensure
-                        // the user sees it.
-                        SetPressed(TRUE, x, y);
-                    }
+                        if (prepressed) {
+                            // The button is being released before we actually
+                            // showed it as pressed.  Make it show the pressed
+                            // state now (before scheduling the click) to ensure
+                            // the user sees it.
+                            SetPressed(TRUE, x, y);
+                        }
 
-                    if (!mHasPerformedLongPress) {
-                        // This is a tap, so remove the longpress check
-                        RemoveLongPressCallback();
+                        if (!mHasPerformedLongPress) {
+                            // This is a tap, so remove the longpress check
+                            RemoveLongPressCallback();
 
-                        // Only perform take click actions if we were in the pressed state
-                        if (!focusTaken) {
-                            // Use a Runnable and post this rather than calling
-                            // performClick directly. This lets other visual state
-                            // of the view update before click actions start.
-                            if (mPerformClick == NULL) {
-                                mPerformClick = new ViewPerformClick(this);
-                            }
+                            // Only perform take click actions if we were in the pressed state
+                            if (!focusTaken) {
+                                // Use a Runnable and post this rather than calling
+                                // performClick directly. This lets other visual state
+                                // of the view update before click actions start.
+                                if (mPerformClick == NULL) {
+                                    mPerformClick = new ViewPerformClick(this);
+                                }
 
-                            if (Post(mPerformClick, &bval), !bval) {
-                                PerformClick(&bval);
+                                if (Post(mPerformClick, &bval), !bval) {
+                                    PerformClick(&bval);
+                                }
                             }
                         }
+
+                        if (mUnsetPressedState == NULL) {
+                            mUnsetPressedState = new UnsetPressedState(this);
+                        }
+
+                        if (prepressed) {
+                            PostDelayed(mUnsetPressedState,
+                                CViewConfiguration::GetPressedStateDuration(), &bval);
+                        }
+                        else if (Post(mUnsetPressedState, &bval), !bval) {
+                            // If the post failed, unpress right now
+                            mUnsetPressedState->Run();
+                        }
+
+                        RemoveTapCallback();
+                    }
+                }
+                break;
+
+            case IMotionEvent::ACTION_DOWN: {
+                    mHasPerformedLongPress = FALSE;
+
+                    if (PerformButtonActionOnTouchDown(event)) {
+                        break;
                     }
 
-                    if (mUnsetPressedState == NULL) {
-                        mUnsetPressedState = new UnsetPressedState(this);
-                    }
+                    // Walk up the hierarchy to determine if we're inside a scrolling container.
+                    Boolean isInScrollingContainer;
+                    IsInScrollingContainer(&isInScrollingContainer);
 
-                    if (prepressed) {
-                        PostDelayed(mUnsetPressedState,
-                            CViewConfiguration::GetPressedStateDuration(), &bval);
+                    // For views inside a scrolling container, delay the pressed feedback for
+                    // a short period in case this is a scroll.
+                    if (isInScrollingContainer) {
+                        mPrivateFlags |= PFLAG_PREPRESSED;
+                        if (mPendingCheckForTap == NULL) {
+                            mPendingCheckForTap = new CheckForTap(this);
+                        }
+                        event->GetX(&(mPendingCheckForTap->mX));
+                        event->GetY(&(mPendingCheckForTap->mY));
+                        Boolean isPost;
+                        PostDelayed(mPendingCheckForTap, CViewConfiguration::GetTapTimeout(), &isPost);
                     }
-                    else if (Post(mUnsetPressedState, &bval), !bval) {
-                        // If the post failed, unpress right now
-                        mUnsetPressedState->Run();
+                    else {
+                        // Not inside a scrolling container, so show the feedback right away
+                        SetPressed(TRUE, x, y);
+                        CheckForLongClick(0);
                     }
+                }
+                break;
 
+            case IMotionEvent::ACTION_CANCEL:
+                    SetPressed(FALSE);
                     RemoveTapCallback();
-                }
-            }
-            break;
+                    RemoveLongPressCallback();
+                break;
 
-        case IMotionEvent::ACTION_DOWN: {
-                mHasPerformedLongPress = FALSE;
+            case IMotionEvent::ACTION_MOVE: {
+                    DrawableHotspotChanged(x, y);
 
-                if (PerformButtonActionOnTouchDown(event)) {
-                    break;
-                }
+                    // Be lenient about moving outside of buttons
+                    Boolean isPointInView;
+                    PointInView(x, y, mTouchSlop, &isPointInView);
+                    if (!isPointInView) {
+                        // Outside button
+                        RemoveTapCallback();
+                        if ((mPrivateFlags & PFLAG_PRESSED) != 0) {
+                            // Remove any future long press/tap checks
+                            RemoveLongPressCallback();
 
-                // Walk up the hierarchy to determine if we're inside a scrolling container.
-                Boolean isInScrollingContainer;
-                IsInScrollingContainer(&isInScrollingContainer);
-
-                // For views inside a scrolling container, delay the pressed feedback for
-                // a short period in case this is a scroll.
-                if (isInScrollingContainer) {
-                    mPrivateFlags |= PFLAG_PREPRESSED;
-                    if (mPendingCheckForTap == NULL) {
-                        mPendingCheckForTap = new CheckForTap(this);
-                    }
-                    event->GetX(&(mPendingCheckForTap->mX));
-                    event->GetY(&(mPendingCheckForTap->mY));
-                    Boolean isPost;
-                    PostDelayed(mPendingCheckForTap.Get(), CViewConfiguration::GetTapTimeout(), &isPost);
-                }
-                else {
-                    // Not inside a scrolling container, so show the feedback right away
-                    SetPressed(TRUE, x, y);
-                    CheckForLongClick(0);
-                }
-            }
-            break;
-
-        case IMotionEvent::ACTION_CANCEL: {
-                SetPressed(FALSE);
-                RemoveTapCallback();
-                RemoveLongPressCallback();
-            }
-            break;
-
-        case IMotionEvent::ACTION_MOVE: {
-                DrawableHotspotChanged(x, y);
-                Float fx, fy;
-                event->GetX(&fx);
-                event->GetY(&fy);
-
-                Int32 x = (Int32)fx;
-                Int32 y = (Int32)fy;
-
-                // Be lenient about moving outside of buttons
-                Boolean isPointInView;
-                PointInView(x, y, mTouchSlop, &isPointInView);
-                if (!isPointInView) {
-                    // Outside button
-                    RemoveTapCallback();
-                    if ((mPrivateFlags & PFLAG_PRESSED) != 0) {
-                        // Remove any future long press/tap checks
-                        RemoveLongPressCallback();
-
-                        SetPressed(FALSE);
+                            SetPressed(FALSE);
+                        }
                     }
                 }
-            }
-            break;
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
 
         *res = TRUE;
@@ -11311,7 +11306,7 @@ ECode View::DispatchSaveInstanceState(
         if (state != NULL) {
             // Log.i(TAG, "Freezing #" + Integer.toHexString(mID)
             // + ": " + state);
-            container->Put(mID, state.Get());
+            container->Put(mID, state);
         }
     }
     return NOERROR;
@@ -12172,7 +12167,7 @@ ECode View::CreateSnapshot(
         if (canvas == NULL) {
             CCanvas::New((ICanvas**)&canvas);
         }
-        canvas->SetBitmap(bitmap.Get());
+        canvas->SetBitmap(bitmap);
         // Temporarily clobber the cached Canvas in case one of our children
         // is also using a drawing cache. Without this, the children would
         // steal the canvas by attaching their own bitmap to it and bad, bad
@@ -12181,7 +12176,7 @@ ECode View::CreateSnapshot(
     }
     else {
         // This case should hopefully never or seldom happen
-        CCanvas::New(bitmap.Get(), (ICanvas**)&canvas);
+        CCanvas::New(bitmap, (ICanvas**)&canvas);
     }
 
     if ((backgroundColor & 0xff000000) != 0) {
@@ -12379,11 +12374,12 @@ ECode View::SetClipBounds(
             CRect::New((IRect**)&mClipBounds);
         }
         else {
-            CRect* temp = (CRect*)clipBounds;
-            Invalidate(Elastos::Core::Math::Min(((CRect*)mClipBounds.Get())->mLeft, temp->mLeft),
-                    Elastos::Core::Math::Min(((CRect*)mClipBounds.Get())->mTop, temp->mTop),
-                    Elastos::Core::Math::Min(((CRect*)mClipBounds.Get())->mRight, temp->mRight),
-                    Elastos::Core::Math::Min(((CRect*)mClipBounds.Get())->mBottom, temp->mBottom));
+            CRect* temp1 = (CRect*)mClipBounds.Get();
+            CRect* temp2 = (CRect*)clipBounds;
+            Invalidate(Elastos::Core::Math::Min(temp1->mLeft, temp2->mLeft),
+                    Elastos::Core::Math::Min(temp1->mTop, temp2->mTop),
+                    Elastos::Core::Math::Min(temp1->mRight, temp2->mRight),
+                    Elastos::Core::Math::Min(temp1->mBottom, temp2->mBottom));
             mClipBounds->Set(clipBounds);
         }
     }
@@ -14203,7 +14199,7 @@ ECode View::SetBackgroundResource(
     if (resid != 0) {
         mContext->GetDrawable(resid, (IDrawable**)&d);
     }
-    SetBackground(d.Get());
+    SetBackground(d);
 
     mBackgroundResource = resid;
 
@@ -14946,7 +14942,7 @@ ECode View::GetRootView(
 {
     VALIDATE_NOT_NULL(res)
     if (mAttachInfo != NULL) {
-        AutoPtr<IView> v = mAttachInfo->mRootView.Get();
+        AutoPtr<IView> v = mAttachInfo->mRootView;
         if (v != NULL) {
             *res = v;
             REFCOUNT_ADD(*res)
@@ -15038,13 +15034,13 @@ ECode View::TransformMatrixToGlobal(
     AutoPtr<IViewParent> parent = mParent;
     Boolean res;
     IViewRootImpl* vri;
-    IView* vp = IView::Probe(parent.Get());
+    IView* vp = IView::Probe(parent);
     if (vp) {
         View* view = (View*)vp;
         vp->TransformMatrixToGlobal(m);
         m->PreTranslate(-view->mScrollX, -view->mScrollY, &res);
     }
-    else if ((vri = IViewRootImpl::Probe(parent.Get())) != NULL) {
+    else if ((vri = IViewRootImpl::Probe(parent)) != NULL) {
         ViewRootImpl* vr =  (ViewRootImpl*)vri;
         vr->TransformMatrixToGlobal(m);
         m->PreTranslate(0, -vr->mCurScrollY, &res);
@@ -15480,13 +15476,10 @@ ECode View::GetTag(
     /* [out] */ IInterface** res)
 {
     VALIDATE_NOT_NULL(res)
-    HashMap<Int32, AutoPtr<IInterface> >::Iterator find = mKeyedTags.Find(key);
-    if (find != mKeyedTags.End()) {
-        *res = find->mSecond;
-        REFCOUNT_ADD(*res)
-        return NOERROR;
-    }
     *res = NULL;
+    if (mKeyedTags != NULL) {
+        return mKeyedTags->Get(key, res);
+    }
     return NOERROR;
 }
 
@@ -15549,7 +15542,10 @@ void View::SetKeyedTag(
     /* [in] */ Int32 key,
     /* [in] */ IInterface* tag)
 {
-    mKeyedTags[key] = tag;
+    if (mKeyedTags == NULL) {
+        CSparseArray::New(2, (ISparseArray**)&mKeyedTags);
+    }
+    mKeyedTags->Put(key, tag);
 }
 
 ECode View::HackTurnOffWindowResizeAnim(
@@ -18395,26 +18391,31 @@ ECode View::constructor(
     return NOERROR;
 }
 
-HashMap<Int32, String> View::GetAttributeMap()
+AutoPtr<ISparseArray> View::GetAttributeMap()
 {
+    if (mAttributeMap == NULL) {
+        CSparseArray::New((ISparseArray**)&mAttributeMap);
+    }
     return mAttributeMap;
 }
 
 void View::SaveAttributeData(
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ ITypedArray* a)
+    /* [in] */ IAttributeSet* attrs,
+    /* [in] */ ITypedArray* a)
 {
-    Int32 length = 0;
-    if (attrs) {
-        attrs->GetAttributeCount(&length);
-        Int32 temp;
-        a->GetIndexCount(&temp);
-        length += temp * 2;
+    Int32 length;
+    Int32 ac = 0;
+    if (attrs != NULL) {
+        attrs->GetAttributeCount(&ac);
     }
+    Int32 ic;
+    a->GetIndexCount(&ic);
+    length = (ac + ic) * 2;
+
     mAttributes = ArrayOf<String>::Alloc(length);
 
     Int32 i = 0;
-    if (attrs) {
+    if (attrs != NULL) {
         Int32 count = 0;
         attrs->GetAttributeCount(&count);
         for (i = 0; i < count; i += 2) {
@@ -18426,9 +18427,11 @@ void View::SaveAttributeData(
         }
 
     }
-    Int32 ITypeLen;
-    a->GetLength(&ITypeLen);
-    for (Int32 j = 0; j < ITypeLen; ++j) {
+
+    AutoPtr<ISparseArray> attributeMap = GetAttributeMap();
+    Int32 len;
+    a->GetLength(&len);
+    for (Int32 j = 0; j < len; ++j) {
         Boolean value;
         if (a->HasValue(j, &value), value) {
             //try {
@@ -18437,16 +18440,15 @@ void View::SaveAttributeData(
             if (resourceId == 0) {
                 continue;
             }
-            String resourceName;
-            HashMap<Int32, String>::Iterator it = mAttributeMap.Find(resourceId);
-            if (it != mAttributeMap.End() && it->mSecond != NULL) {
-                resourceName = it->mSecond;
-            }
+
+            AutoPtr<IInterface> obj;
+            attributeMap->Get(resourceId, (IInterface**)&obj);
+            String resourceName = CoreUtils::Unbox(ICharSequence::Probe(obj));
             if (resourceName.IsNullOrEmpty()) {
                 AutoPtr<IResources> res;
                 a->GetResources((IResources**)&res);
                 res->GetResourceName(resourceId, &resourceName);
-                mAttributeMap.Insert(HashMap<Int32, String>::ValueType(resourceId, resourceName));
+                attributeMap->Put(resourceId, CoreUtils::Convert(resourceName));
             }
 
             (*mAttributes)[i] = resourceName;

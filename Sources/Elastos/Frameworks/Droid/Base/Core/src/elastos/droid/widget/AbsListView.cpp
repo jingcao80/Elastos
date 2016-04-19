@@ -6583,7 +6583,6 @@ ECode AbsListView::OnInterceptTouchEvent(
             if (touchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
                 // User clicked on an actual view (and was not stopping a fling).
                 // Remember where the motion event started
-                //
                 AutoPtr<IView> v;
                 GetChildAt(motionPosition - mFirstPosition, (IView**)&v);
                 v->GetTop(&mMotionViewOriginalTop);
@@ -6646,9 +6645,6 @@ ECode AbsListView::OnInterceptTouchEvent(
             OnSecondaryPointerUp(ev);
             break;
         }
-
-        default:
-            break;
     }
 
     *res = FALSE;

@@ -155,11 +155,11 @@ ECode ViewGroup::LayoutParams::SizeToString(
     VALIDATE_NOT_NULL(des);
 
     if (size == IViewGroupLayoutParams::WRAP_CONTENT) {
-        *des = String("wrap-content");
+        *des = "wrap-content";
         return NOERROR;
     }
     if (size == IViewGroupLayoutParams::MATCH_PARENT) {
-        *des = String("match-parent");
+        *des = "match-parent";
         return NOERROR;
     }
     *des = StringUtils::ToString(size);
@@ -1027,34 +1027,37 @@ Int32 ViewGroup::ViewLocationHolder::CompareTo(
         return 1;
     }
 
+    CRect* rect = (CRect*)mLocation.Get();
+    CRect* rectAnother = (CRect*)another->mLocation.Get();
+
     if (sComparisonStrategy == COMPARISON_STRATEGY_STRIPE) {
         // First is above second.
-        if (((CRect*)mLocation.Get())->mBottom - ((CRect*)another->mLocation.Get())->mTop <= 0) {
+        if (rect->mBottom - rectAnother->mTop <= 0) {
             return -1;
         }
         // First is below second.
-        if (((CRect*)mLocation.Get())->mTop - ((CRect*)another->mLocation.Get())->mBottom >= 0) {
+        if (rect->mTop - rectAnother->mBottom >= 0) {
             return 1;
         }
     }
 
     // We are ordering left-to-right, top-to-bottom.
     if (mLayoutDirection == IView::LAYOUT_DIRECTION_LTR) {
-        Int32 leftDifference = ((CRect*)mLocation.Get())->mLeft - ((CRect*)another->mLocation.Get())->mLeft;
+        Int32 leftDifference = rect->mLeft - rectAnother->mLeft;
         // First more to the left than second.
         if (leftDifference != 0) {
             return leftDifference;
         }
     }
     else { // RTL
-        Int32 rightDifference = ((CRect*)mLocation.Get())->mRight - ((CRect*)another->mLocation.Get())->mRight;
+        Int32 rightDifference = rect->mRight - rectAnother->mRight;
         // First more to the right than second.
         if (rightDifference != 0) {
             return -rightDifference;
         }
     }
     // Break tie by top.
-    Int32 topDiference = ((CRect*)mLocation.Get())->mTop - ((CRect*)another->mLocation.Get())->mTop;
+    Int32 topDiference = rect->mTop - rectAnother->mTop;
     if (topDiference != 0) {
         return topDiference;
     }
@@ -3364,9 +3367,7 @@ Boolean ViewGroup::DispatchTransformedTouchEvent(
             }
             return handled;
         }
-        AutoPtr<IMotionEvent> temp;
-        CMotionEvent::Obtain(event, (IMotionEvent**)&temp);
-        transformedEvent = temp;
+        CMotionEvent::Obtain(event, (IMotionEvent**)&transformedEvent);
     }
     else {
         event->Split(newPointerIdBits, (IMotionEvent**)&transformedEvent);
@@ -4555,7 +4556,7 @@ Boolean ViewGroup::DrawChild(
  */
 //@ViewDebug.ExportedProperty(category = "drawing")
 ECode ViewGroup::GetClipChildren(
-        /* [out] */ Boolean* res)
+    /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
     *res = ((mGroupFlags & FLAG_CLIP_CHILDREN) != 0);
@@ -4711,7 +4712,7 @@ AutoPtr<IView> ViewGroup::FindViewTraversal(
     /* [in] */ Int32 id)
 {
     if (id == mID) {
-        return AutoPtr<IView>(this);
+        return this;
     }
 
     for (Int32 i = 0; i < mChildrenCount; i++) {
@@ -4726,7 +4727,7 @@ AutoPtr<IView> ViewGroup::FindViewTraversal(
         }
     }
 
-    return AutoPtr<IView>(NULL);
+    return NULL;
 }
 
 /**
@@ -4835,7 +4836,7 @@ ECode ViewGroup::AddView(
 
     params->SetWidth(width);
     params->SetHeight(height);
-    return AddView(child, -1, params.Get());
+    return AddView(child, -1, params);
 }
 
 /**

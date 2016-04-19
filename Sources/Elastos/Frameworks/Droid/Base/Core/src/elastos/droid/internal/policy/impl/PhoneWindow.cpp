@@ -56,8 +56,6 @@
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::R;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::ISearchManager;
@@ -74,11 +72,40 @@ using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
-using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Internal::View::EIID_IRootViewSurfaceTaker;
+using Elastos::Droid::Internal::View::StandaloneActionMode;
+using Elastos::Droid::Internal::View::Menu::IMenuPresenter;
+using Elastos::Droid::Internal::View::Menu::IMenuDialogHelper;
+using Elastos::Droid::Internal::View::Menu::CMenuDialogHelper;
+using Elastos::Droid::Internal::View::Menu::CListMenuPresenter;
+using Elastos::Droid::Internal::View::Menu::IListMenuPresenter;
+using Elastos::Droid::Internal::View::Menu::CIconMenuPresenter;
+using Elastos::Droid::Internal::View::Menu::IBaseMenuPresenter;
+using Elastos::Droid::Internal::View::Menu::CContextMenuBuilder;
+using Elastos::Droid::Internal::View::Menu::CMenuBuilder;
+using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilder;
+using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilderCallback;
+using Elastos::Droid::Internal::View::Menu::EIID_IMenuPresenterCallback;
+using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
+using Elastos::Droid::Internal::View::Menu::IMenuPresenterCallback;
+using Elastos::Droid::Internal::Widget::CBackgroundFallback;
+using Elastos::Droid::Internal::Widget::IDecorContentParent;
+using Elastos::Droid::Internal::Widget::IAbsActionBarView;
+using Elastos::Droid::Internal::Widget::EIID_IOnDismissedListener;
+using Elastos::Droid::Internal::Widget::EIID_IOnSwipeProgressChangedListener;
+using Elastos::Droid::Internal::Widget::CActionBarContextView;
+using Elastos::Droid::Internal::Widget::IActionBarContainer;
 using Elastos::Droid::Media::Session::CMediaSessionLegacyHelperHelper;
 using Elastos::Droid::Media::Session::IMediaSessionLegacyHelperHelper;
 using Elastos::Droid::Media::Session::IMediaSessionLegacyHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Transition::CTransitionInflaterHelper;
 using Elastos::Droid::Transition::CTransitionManager;
 using Elastos::Droid::Transition::ITransitionInflaterHelper;
@@ -88,6 +115,11 @@ using Elastos::Droid::Transition::ITransitionSet;
 using Elastos::Droid::Transition::CSceneHelper;
 using Elastos::Droid::Transition::ISceneHelper;
 using Elastos::Droid::Transition::CScene;
+using Elastos::Droid::Utility::CTypedValue;
+using Elastos::Droid::Utility::CTypedValueHelper;
+using Elastos::Droid::Utility::ITypedValueHelper;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::Accessibility::EIID_IAccessibilityEventSource;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
@@ -112,17 +144,6 @@ using Elastos::Droid::View::EIID_IKeyEventCallback;
 using Elastos::Droid::View::EIID_IMenu;
 using Elastos::Droid::View::EIID_IWindow;
 using Elastos::Droid::View::IDispatcherState;
-using Elastos::Droid::Internal::View::EIID_IRootViewSurfaceTaker;
-using Elastos::Droid::Internal::View::Menu::IMenuPresenter;
-using Elastos::Droid::Internal::View::Menu::IMenuDialogHelper;
-using Elastos::Droid::Internal::View::Menu::CMenuDialogHelper;
-using Elastos::Droid::Internal::View::Menu::CListMenuPresenter;
-using Elastos::Droid::Internal::View::Menu::IListMenuPresenter;
-using Elastos::Droid::Internal::View::Menu::CIconMenuPresenter;
-using Elastos::Droid::Internal::View::Menu::IBaseMenuPresenter;
-using Elastos::Droid::Internal::View::StandaloneActionMode;
-using Elastos::Droid::Internal::Widget::CBackgroundFallback;
-using Elastos::Droid::Internal::Widget::IDecorContentParent;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::EIID_IViewGroup;
 using Elastos::Droid::View::EIID_IViewManager;
@@ -137,16 +158,6 @@ using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewStub;
 using Elastos::Droid::View::LayoutInflater;
-using Elastos::Droid::Internal::View::Menu::CContextMenuBuilder;
-using Elastos::Droid::Internal::View::Menu::CMenuBuilder;
-using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilder;
-using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilderCallback;
-using Elastos::Droid::Internal::View::Menu::EIID_IMenuPresenterCallback;
-using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
-using Elastos::Droid::Internal::View::Menu::IMenuPresenterCallback;
-using Elastos::Droid::Internal::Widget::IAbsActionBarView;
-using Elastos::Droid::Internal::Widget::EIID_IOnDismissedListener;
-using Elastos::Droid::Internal::Widget::EIID_IOnSwipeProgressChangedListener;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IListAdapter;
@@ -154,19 +165,8 @@ using Elastos::Droid::Widget::EIID_IFrameLayout;
 using Elastos::Droid::Widget::CPopupWindow;
 using Elastos::Droid::Widget::Toast;
 using Elastos::Droid::Widget::IToast;
-using Elastos::Droid::Provider::Settings;
-using Elastos::Droid::Provider::ISettingsSystem;
-using Elastos::Droid::Internal::Widget::CActionBarContextView;
-using Elastos::Droid::Internal::Widget::IActionBarContainer;
-using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Os::Build;
-using Elastos::Droid::Os::ServiceManager;
-using Elastos::Droid::Utility::CTypedValue;
-using Elastos::Droid::Utility::CTypedValueHelper;
-using Elastos::Droid::Utility::ITypedValueHelper;
-using Elastos::Droid::Utility::IDisplayMetrics;
-using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::R;
+using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -2284,7 +2284,6 @@ PhoneWindow::PanelFeatureState::SavedState::SavedState()
     : mFeatureId(0)
     , mIsOpen(FALSE)
     , mIsInExpandedMode(FALSE)
-
 {
 }
 
@@ -2421,19 +2420,19 @@ ECode PhoneWindow::PanelFeatureState::SetStyle(
 ECode PhoneWindow::PanelFeatureState::SetMenu(
     /* [in] */ IMenuBuilder* menu)
 {
-     if (menu == mMenu) return NOERROR;
+    if (menu == mMenu) return NOERROR;
 
-     if (mMenu != NULL) {
-         mMenu->RemoveMenuPresenter(IMenuPresenter::Probe(mIconMenuPresenter));
-         mMenu->RemoveMenuPresenter(IMenuPresenter::Probe(mListMenuPresenter));
-     }
+    if (mMenu != NULL) {
+        mMenu->RemoveMenuPresenter(IMenuPresenter::Probe(mIconMenuPresenter));
+        mMenu->RemoveMenuPresenter(IMenuPresenter::Probe(mListMenuPresenter));
+    }
 
-     mMenu = menu;
-     if (menu != NULL) {
-         if (mIconMenuPresenter != NULL) menu->AddMenuPresenter(IMenuPresenter::Probe(mIconMenuPresenter));
-         if (mListMenuPresenter != NULL) menu->AddMenuPresenter(IMenuPresenter::Probe(mListMenuPresenter));
-     }
-     return NOERROR;
+    mMenu = menu;
+    if (menu != NULL) {
+        if (mIconMenuPresenter != NULL) menu->AddMenuPresenter(IMenuPresenter::Probe(mIconMenuPresenter));
+        if (mListMenuPresenter != NULL) menu->AddMenuPresenter(IMenuPresenter::Probe(mListMenuPresenter));
+    }
+    return NOERROR;
 }
 
 AutoPtr<IMenuView> PhoneWindow::PanelFeatureState::GetListMenuView(
@@ -2471,22 +2470,22 @@ AutoPtr<IMenuView> PhoneWindow::PanelFeatureState::GetIconMenuView(
     /* [in] */ IContext* context,
     /* [in] */ IMenuPresenterCallback* cb)
 {
-     if (mMenu == NULL) return NULL;
+    if (mMenu == NULL) return NULL;
 
-     if (mIconMenuPresenter == NULL) {
-         CIconMenuPresenter::New(context, (IIconMenuPresenter**)&mIconMenuPresenter);
-         IMenuPresenter* menuPresenter = IMenuPresenter::Probe(mIconMenuPresenter);
-         menuPresenter->SetCallback(cb);
-         IBaseMenuPresenter* baseMenuPresenter = IBaseMenuPresenter::Probe(mIconMenuPresenter);
-         baseMenuPresenter->SetId(R::id::icon_menu_presenter);
-         mMenu->AddMenuPresenter(IMenuPresenter::Probe(mIconMenuPresenter));
-     }
+    if (mIconMenuPresenter == NULL) {
+        CIconMenuPresenter::New(context, (IIconMenuPresenter**)&mIconMenuPresenter);
+        IMenuPresenter* menuPresenter = IMenuPresenter::Probe(mIconMenuPresenter);
+        menuPresenter->SetCallback(cb);
+        IBaseMenuPresenter* baseMenuPresenter = IBaseMenuPresenter::Probe(mIconMenuPresenter);
+        baseMenuPresenter->SetId(R::id::icon_menu_presenter);
+        mMenu->AddMenuPresenter(IMenuPresenter::Probe(mIconMenuPresenter));
+    }
 
-     AutoPtr<IMenuView> result;
-     IMenuPresenter* menuPresenter = IMenuPresenter::Probe(mIconMenuPresenter);
-     menuPresenter->GetMenuView(IViewGroup::Probe(mDecorView), (IMenuView**)&result);
+    AutoPtr<IMenuView> result;
+    IMenuPresenter* menuPresenter = IMenuPresenter::Probe(mIconMenuPresenter);
+    menuPresenter->GetMenuView(IViewGroup::Probe(mDecorView), (IMenuView**)&result);
 
-     return result;
+    return result;
 }
 
 AutoPtr<IParcelable> PhoneWindow::PanelFeatureState::OnSaveInstanceState()

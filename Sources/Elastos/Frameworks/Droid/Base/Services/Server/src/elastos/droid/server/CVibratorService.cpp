@@ -707,8 +707,10 @@ void CVibratorService::UnlinkVibration(
         // If Vibration object has a pattern,
         // the Vibration object has also been linkedToDeath.
         AutoPtr<IProxy> proxy = (IProxy*)vib->mToken->Probe(EIID_IProxy);
-        Boolean result;
-        proxy->UnlinkToDeath(vib, 0, &result);
+        if (proxy != NULL) {
+            Boolean result;
+            proxy->UnlinkToDeath(vib, 0, &result);
+        }
     }
 }
 

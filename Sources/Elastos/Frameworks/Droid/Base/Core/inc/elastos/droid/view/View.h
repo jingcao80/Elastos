@@ -5693,7 +5693,7 @@ private:
         /* [in] */ Int32 key,
         /* [in] */ IInterface* tag);
 
-    HashMap<Int32, String> CARAPICALLTYPE GetAttributeMap();
+    static CARAPI_(AutoPtr<ISparseArray>) GetAttributeMap(); /*SparseArray<String>*/
 
     CARAPI_(void) SaveAttributeData(
         /* [in] */ IAttributeSet* attrs,
@@ -6221,6 +6221,11 @@ private:
     static Int32 sNextGeneratedId;
     static Object sNextGeneratedIdLock;
 
+    /**
+     * Maps a Resource id to its name.
+     */
+    static AutoPtr<ISparseArray> mAttributeMap;
+
     // correspond to the enum values of View_outlineProvider
     static const Int32 PROVIDER_BACKGROUND;// = 0;
     static const Int32 PROVIDER_NONE;// = 1;
@@ -6240,7 +6245,7 @@ private:
     /**
      * Map used to store views' tags.
      */
-    HashMap<Int32, AutoPtr<IInterface> > mKeyedTags;
+    AutoPtr<ISparseArray> mKeyedTags; /* SparseArray<Object> */
 
     /**
      * Cache if a left padding has been defined
@@ -6259,8 +6264,6 @@ private:
     AutoPtr<IViewParent> mNestedScrollingParent;
 
     AutoPtr< ArrayOf<Int32> > mTempNestedScrollConsumed;
-
-    HashMap<Int32, String> mAttributeMap;
 };
 
 } // namespace View
