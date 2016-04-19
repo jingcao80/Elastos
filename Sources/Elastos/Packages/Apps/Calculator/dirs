@@ -1,2 +1,2 @@
 
-DIRS += src/elastos/apps/calculator/calculator2
+DIRS += src/elastos/droid/calculator2

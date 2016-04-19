@@ -446,6 +446,10 @@
 #> Elastos/Frameworks/Droid/Base/Test-runner/lib
 > Elastos/Frameworks/Droid/Base/Test-runner
 
+# ==== buid Packages/Apps/Calculator ====
+> Elastos/Packages/Apps/Calculator/src/elastos/droid/calculator2 Elastos.Droid.Calculator2.car
+> Elastos/Packages/Apps/Calculator/src/elastos/droid/calculator2
+
 # ==== build Packages/Apps/Settings ====
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings Settings.car
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/dashboard
