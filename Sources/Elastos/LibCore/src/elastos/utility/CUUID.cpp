@@ -279,7 +279,7 @@ ECode CUUID::CompareTo(
     IUUID* uo = IUUID::Probe(other);
     if (other == NULL || uo == NULL) {
         *result = -1;
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     *result = 0;

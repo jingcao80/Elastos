@@ -483,7 +483,7 @@ ECode URI::CompareTo(
 
     IURI* uo = IURI::Probe(uri);
     if (IURI::Probe(uri) == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     Int32 ret;

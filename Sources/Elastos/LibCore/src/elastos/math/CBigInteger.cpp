@@ -773,7 +773,7 @@ ECode CBigInteger::CompareTo(
 
     IBigInteger* other = (IBigInteger*)_other->Probe(EIID_IBigInteger);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     CBigInteger* bi = (CBigInteger*)other;

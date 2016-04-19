@@ -36,7 +36,7 @@ ECode CBoolean::CompareTo(
 
     IBoolean* other = (IBoolean*)_other->Probe(EIID_IBoolean);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Boolean otherValue = FALSE;
     other->GetValue(&otherValue);

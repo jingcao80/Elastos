@@ -91,7 +91,7 @@ ECode CInteger32::CompareTo(
 
     IInteger32* other = IInteger32::Probe(_other);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Int32 otherValue;
     other->GetValue(&otherValue);

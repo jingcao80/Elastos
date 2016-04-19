@@ -91,7 +91,7 @@ ECode CInteger64::CompareTo(
 
     IInteger64* other = IInteger64::Probe(_other);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Int64 otherValue;
     other->GetValue(&otherValue);

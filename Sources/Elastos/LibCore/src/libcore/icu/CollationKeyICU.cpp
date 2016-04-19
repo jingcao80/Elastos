@@ -27,7 +27,7 @@ ECode CollationKeyICU::CompareTo(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<ICollationKeyICU> other = ICollationKeyICU::Probe(_other);
-    if (other == NULL) return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    if (other == NULL) return E_CLASS_CAST_EXCEPTION;
 
     // Get the bytes from the other collation key.
     CollationKeyICU* c = (CollationKeyICU*)(other.Get());

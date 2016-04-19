@@ -111,7 +111,7 @@ ECode CString::CompareTo(
 
     AutoPtr<ICharSequence> res = ICharSequence::Probe(another);
     if (res == NULL) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     String str;

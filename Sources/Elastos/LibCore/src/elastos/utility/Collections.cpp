@@ -4578,7 +4578,7 @@ ECode Collections::Max(
         it->GetNext((IInterface**)&next);
         AutoPtr<IComparable> res = IComparable::Probe(max);
         Int32 val;
-        res->CompareTo(next, &val);
+        FAIL_RETURN(res->CompareTo(next, &val));
         if (val < 0) {
             max = next;
         }
@@ -4637,7 +4637,8 @@ ECode Collections::Min(
         it->GetNext((IInterface**)&next);
         AutoPtr<IComparable> com = IComparable::Probe(min);
         Int32 res;
-        if ((com->CompareTo(next, &res), res) > 0) {
+        FAIL_RETURN((com->CompareTo(next, &res)));
+        if (res > 0) {
             min = next;
         }
     }
@@ -5510,7 +5511,7 @@ ECode Collections::AddAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (c == NULL || a ==NULL) {
+    if (c == NULL || a == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
     Boolean modified = FALSE;
@@ -5564,7 +5565,7 @@ ECode Collections::CheckType(
     if (obj != NULL && obj->Probe(type) == NULL) {
         // throw new ClassCastException("Attempt to insert element of type " + obj.getClass() +
         //         " into collection of type " + type);
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        return E_CLASS_CAST_EXCEPTION;
     }
     return NOERROR;
 }
@@ -5996,6 +5997,7 @@ ECode Collections::_CheckedCollection::Add(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
+    FAIL_RETURN(Collections::CheckType(object, mType));
     return mC->Add(object, modified);
 }
 
@@ -6003,6 +6005,7 @@ ECode Collections::_CheckedCollection::Add(
     /* [in] */ IInterface* object)
 {
     Boolean modified;
+    FAIL_RETURN(Collections::CheckType(object, mType));
     return mC->Add(object, &modified);;
 }
 
@@ -6192,6 +6195,7 @@ Collections::_CheckedList::_CheckedList(
     /* [in] */ InterfaceID type)
     : _CheckedCollection(ICollection::Probe(l), type)
 {
+    mL = l;
 }
 
 ECode Collections::_CheckedList::AddAll(
@@ -6252,7 +6256,7 @@ ECode Collections::_CheckedList::Add(
     /* [in] */ IInterface* object)
 {
     FAIL_RETURN(Collections::CheckType(object, mType));
-    return mL->Add(object);;
+    return mL->Add(object);
 }
 
 ECode Collections::_CheckedList::Remove(
