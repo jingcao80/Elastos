@@ -1,42 +1,18 @@
-I/DEBUG   (  236):     #07 pc 024af904  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::View::View::SetFrame(int, int, int, int)+240)
-I/DEBUG   (  236):     #08 pc 024af5d0  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::View::View::Layout(int, int, int, int)+272)
-I/DEBUG   (  236):     #09 pc 024e9c84  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::View::ViewGroup::Layout(int, int, int, int)+288)
-I/DEBUG   (  236):     #10 pc 0262b2ec  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Widget::FrameLayout::LayoutChildren(int, int, int, int, unsigned char)+1140)
-I/DEBUG   (  236):     #11 pc 0262ae64  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Widget::FrameLayout::OnLayout(unsigned char, int, int, int, int)+88)
-I/DEBUG   (  236):     #12 pc 024af634  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::View::View::Layout(int, int, int, int)+372)
-I/DEBUG   (  236):     #13 pc 024e9c84  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::View::ViewGroup::Layout(int, int, int, int)+288)
-I/DEBUG   (  236):     #14 pc 02508fdc  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #15 pc 02507d98  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #16 pc 02503bac  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #17 pc 024fb6b4  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #18 pc 023fd9a0  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #19 pc 023ff784  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #20 pc 023ff630  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #21 pc 023fd8c8  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #22 pc 01fa7a98  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Handler::DispatchMessage(Elastos::Droid::Os::IMessage*)+152)
-I/DEBUG   (  236):     #23 pc 01fa9d10  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Looper::Loop()+572)
-I/DEBUG   (  236):     #24 pc 01292d68  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #25 pc 012bda7c  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #26 pc 0003d570  /system/lib/Elastos.Runtime.eco/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/View.cpp:13643
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/View.cpp:13564
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ViewGroup.cpp:6174 (discriminator 5)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/FrameLayout.cpp:652
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/FrameLayout.cpp:528
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/View.cpp:13568 (discriminator 2)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ViewGroup.cpp:6174 (discriminator 5)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ViewRootImpl.cpp:3436 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ViewRootImpl.cpp:3145
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ViewRootImpl.cpp:2226
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ViewRootImpl.cpp:497
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:210
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:672
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:634
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:188 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:676
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Looper.cpp:131 (discriminator 1)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThread.cpp:6410
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThreadHelper.cpp:71
+I/DEBUG   (  272):     #07 pc 000288d0  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  272):     #08 pc 01bc0028  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #09 pc 01bc0508  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #10 pc 01bc031c  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #11 pc 01c2ba34  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #12 pc 01c2ade4  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #13 pc 01a3e170  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #14 pc 01a3da70  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #15 pc 0003d920  /system/lib/Elastos.Runtime.eco
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/reflection/CModuleInfo.cpp:125
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/RuntimeInit.cpp:232
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/RuntimeInit.cpp:340 (discriminator 3)
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/RuntimeInit.cpp:276
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/ZygoteConnection.cpp:834
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/ZygoteConnection.cpp:508
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/CZygoteInit.cpp:679
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/os/CZygoteInit.cpp:573
 /home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/reflection/invoke_gnuc.S:38
-
-
-->GetLayoutParams(

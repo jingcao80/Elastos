@@ -9159,10 +9159,8 @@ Int32 CActivityManagerService::CheckCallingPermission(
     /* [in] */ const String& permission)
 {
     Int32 result;
-    CheckPermission(permission,
-            Binder::GetCallingPid(),
-            UserHandle::GetAppId(Binder::GetCallingUid()),
-            &result);
+    CheckPermission(permission, Binder::GetCallingPid(),
+        UserHandle::GetAppId(Binder::GetCallingUid()), &result);
     return result;
 }
 
@@ -9175,8 +9173,8 @@ ECode CActivityManagerService::EnforceCallingPermission(
     }
 
     Slogger::W(TAG, "Permission Denial: %s from pid=%d, uid=%d requires %s",
-            func.string(), Binder::GetCallingPid(), Binder::GetCallingUid(),
-            permission.string());
+        func.string(), Binder::GetCallingPid(), Binder::GetCallingUid(),
+        permission.string());
     return E_SECURITY_EXCEPTION;
 }
 

@@ -5782,7 +5782,9 @@ ECode CPackageManagerService::GetActivityInfo(
             a = it->mSecond;
         }
 
-        // if (DEBUG_PACKAGE_INFO) Logger::V(TAG, "getActivityInfo " + component + ": " + a);
+        if (DEBUG_PACKAGE_INFO) {
+            Logger::V(TAG, "GetActivityInfo %s: %s", TO_CSTR(component), TO_CSTR(a));
+        }
         if (a != NULL && mSettings->IsEnabledLPr(IComponentInfo::Probe(a->mInfo), flags, userId)) {
             String pkgName;
             component->GetPackageName(&pkgName);
@@ -5804,7 +5806,8 @@ ECode CPackageManagerService::GetActivityInfo(
 
         if (Object::Equals(mResolveComponentName, component)) {
             AutoPtr<PackageUserState> state = new PackageUserState();
-            *info = PackageParser::GenerateActivityInfo(mResolveActivity, flags, state, userId);
+            AutoPtr<IActivityInfo> ai = PackageParser::GenerateActivityInfo(mResolveActivity, flags, state, userId);
+            *info = ai;
             REFCOUNT_ADD(*info)
         }
     }

@@ -107,13 +107,14 @@ ECode CallDetailHistoryAdapter::GetView(
             AutoPtr<IView> header;
             mLayoutInflater->Inflate(R::layout::call_detail_history_header,
                     parent, FALSE, (IView**)&header);
-            *bkView = header
+            *bkView = header;
+            REFCOUNT_ADD(*bkView);
         }
         else {
             *bkView = convertView;
+            REFCOUNT_ADD(*bkView);
         }
 
-        REFCOUNT_ADD(*bkView);
         return NOERROR;
     }
 

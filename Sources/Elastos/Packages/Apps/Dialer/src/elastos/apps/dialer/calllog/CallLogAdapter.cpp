@@ -615,7 +615,7 @@ ECode CallLogAdapter::NewChildView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** result)
 {
-    VALIDATE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<ILayoutInflater> inflater
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
@@ -633,7 +633,8 @@ ECode CallLogAdapter::NewChildView(
     ((CallLogListItemViews*)views)->mPhoneCallDetailsViews
             ->mCallLocationAndDate->SetElegantTextHeight(FALSE);
 
-    *result = view;
+    *result = temp;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

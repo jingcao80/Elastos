@@ -1003,7 +1003,7 @@ ECode ProfileManagerService::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    *str = String("CProfileManagerService");
+    *str = "CProfileManagerService";
     return NOERROR;
 }
 

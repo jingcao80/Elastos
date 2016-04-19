@@ -15,11 +15,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
+        <!-- TODO
+        <service android:name="Elastos.DevSamples.ServiceDemo.CServiceOne" />
+        -->
         <service android:name="Elastos.DevSamples.ServiceDemo.CServiceOne" android:exported="true"/>
     </application>
-
-  <!-- "android:name" need a classname that extends Instrumentation
-    <instrumentation android:targetPackage="ServiceDemo" android:name="elastos.droid.devsamples.imageviewdemo.ins" />
-  -->
 </manifest>

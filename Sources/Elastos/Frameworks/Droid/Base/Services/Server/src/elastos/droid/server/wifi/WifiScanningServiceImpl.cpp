@@ -1514,7 +1514,7 @@ AutoPtr<ArrayOf<WifiScanningServiceImpl::SettingsComputer::TimeBucket*> > WifiSc
     //                  new TimeBucket( 300, 240, 500),
     //                  new TimeBucket( 600, 500, 1500),
     //                  new TimeBucket( 1800, 1500, WifiScanner.MAX_SCAN_PERIOD_MS) };
-    assert(0);
+    // assert(0 && "TODO");
     AutoPtr<ArrayOf<TimeBucket*> > empty;
     return empty;
 }

@@ -326,7 +326,7 @@ String Object::ToString(
     /* [in] */ T1* obj)
 {
     if (obj == NULL) {
-        return String("NULL");
+        return String(NULL);
     }
 
     IObject* o = (IObject*)obj->Probe(EIID_IObject);

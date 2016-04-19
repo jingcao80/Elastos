@@ -69,7 +69,7 @@ void IntentBindRecord::DumpInService(
         AutoPtr<AppBindRecord> a = it->mSecond;
         pw->Print(prefix);
         pw->Print(String("* Client AppBindRecord{"));
-        pw->Print(StringUtils::ToString((Int32)a.Get(), 16));
+        pw->Print(StringUtils::ToHexString((Int32)a.Get()));
         pw->PrintChar(' ');
         pw->Print(a->mClient->ToString());
         pw->Println('}');
@@ -100,7 +100,7 @@ String IntentBindRecord::ToString()
 
     StringBuilder sb(128);
     sb += "IntentBindRecord{";
-    sb += StringUtils::ToString(Int32(this), 16);
+    sb += StringUtils::ToHexString(Int32(this));
     sb += ' ';
     if ((CollectFlags()& IContext::BIND_AUTO_CREATE) != 0) {
         sb += "CR ";
