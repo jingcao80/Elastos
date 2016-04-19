@@ -1072,9 +1072,13 @@ ECode AbstractQueuedSynchronizer::GetFirstQueuedThread(
     /* [out] */ IThread** outthread)
 {
     VALIDATE_NOT_NULL(outthread);
+    *outthread = NULL;
     // handle only fast path, else relay
-    *outthread = (mHead == mTail) ? NULL : FullGetFirstQueuedThread();
-    REFCOUNT_ADD(*outthread);
+    if (mHead != mTail) {
+        AutoPtr<IThread> temp = FullGetFirstQueuedThread();
+        *outthread = temp;
+        REFCOUNT_ADD(*outthread);
+    }
     return NOERROR;
 }
 

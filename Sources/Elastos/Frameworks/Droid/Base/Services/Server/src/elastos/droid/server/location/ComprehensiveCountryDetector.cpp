@@ -95,7 +95,8 @@ ECode ComprehensiveCountryDetector::DetectCountry(
 {
     VALIDATE_NOT_NULL(country)
     // Don't start the LocationBasedCountryDetector if we have been stopped.
-    *country = DetectCountry(FALSE, !mStopped);
+    AutoPtr<ICountry> temp = DetectCountry(FALSE, !mStopped);
+    *country = temp;
     REFCOUNT_ADD(*country)
     return NOERROR;
 }

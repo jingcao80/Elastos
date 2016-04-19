@@ -31,7 +31,8 @@ ECode JellyBeanBrowserAccessibilityManager::InnerAccessibilityNodeProvider::Crea
     /* [out] */ IAccessibilityNodeInfo** info)
 {
     VALIDATE_NOT_NULL(info);
-    *info = mOwner->CreateAccessibilityNodeInfo(virtualViewId);
+    AutoPtr<IAccessibilityNodeInfo> temp = mOwner->CreateAccessibilityNodeInfo(virtualViewId);
+    *info = temp;
     REFCOUNT_ADD(*info);
     return NOERROR;
 }
@@ -43,7 +44,8 @@ ECode JellyBeanBrowserAccessibilityManager::InnerAccessibilityNodeProvider::Find
     /* [out] */ IList** nodeInfos)
 {
     VALIDATE_NOT_NULL(nodeInfos);
-    *nodeInfos = mOwner->FindAccessibilityNodeInfosByText(text, virtualViewId);
+    AutoPtr<IList> temp = mOwner->FindAccessibilityNodeInfosByText(text, virtualViewId);
+    *nodeInfos = temp;
     REFCOUNT_ADD(*nodeInfos);
     return NOERROR;
 }

@@ -22,7 +22,8 @@ ECode CProfileManagerHelper::GetService(
     /* [out] */ IIProfileManager** service)
 {
     VALIDATE_NOT_NULL(service);
-    *service = ProfileManager::GetService();
+    AutoPtr<IIProfileManager> temp = ProfileManager::GetService();
+    *service = temp;
     REFCOUNT_ADD(*service);
     return NOERROR;
 }

@@ -297,7 +297,7 @@ ECode CMac::Clone(
     AutoPtr<CMac> mac;
     CMac::NewByFriend(newSpiImpl, mProvider, mAlgorithm, (CMac**)&mac);
     mac->mIsInitMac = mIsInitMac;
-    *result = (IInterface*)(IMac*)mac;
+    *result = TO_IINTERFACE(mac);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

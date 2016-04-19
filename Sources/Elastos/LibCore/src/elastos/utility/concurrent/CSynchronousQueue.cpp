@@ -723,8 +723,8 @@ ECode CSynchronousQueue::Poll(
     /* [out] */ IInterface** res)
 {
     VALIDATE_NOT_NULL(res)
-
-    *res = mTransferer->Transfer(NULL, TRUE, 0);
+    AutoPtr<IInterface> temp = mTransferer->Transfer(NULL, TRUE, 0);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }

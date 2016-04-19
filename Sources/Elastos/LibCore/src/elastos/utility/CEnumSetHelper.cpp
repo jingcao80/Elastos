@@ -20,7 +20,8 @@ ECode CEnumSetHelper::AllOf(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::AllOf(type);
+    AutoPtr<IEnumSet> temp = EnumSet::AllOf(type);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -30,7 +31,8 @@ ECode CEnumSetHelper::CopyOf(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::CopyOf(s);
+    AutoPtr<IEnumSet> temp = EnumSet::CopyOf(s);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -47,7 +49,8 @@ ECode CEnumSetHelper::ComplementOf(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::ComplementOf(s);
+    AutoPtr<IEnumSet> temp = EnumSet::ComplementOf(s);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -57,7 +60,8 @@ ECode CEnumSetHelper::Of(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::Of(i);
+    AutoPtr<IEnumSet> temp = EnumSet::Of(i);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -68,7 +72,8 @@ ECode CEnumSetHelper::Of(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::Of(i1, i2);
+    AutoPtr<IEnumSet> temp = EnumSet::Of(i1, i2);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -80,7 +85,8 @@ ECode CEnumSetHelper::Of(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::Of(i1, i2, i3);
+    AutoPtr<IEnumSet> temp = EnumSet::Of(i1, i2, i3);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -93,7 +99,8 @@ ECode CEnumSetHelper::Of(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::Of(i1, i2, i3, i4);
+    AutoPtr<IEnumSet> temp = EnumSet::Of(i1, i2, i3, i4);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -107,7 +114,8 @@ ECode CEnumSetHelper::Of(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::Of(i1, i2, i3, i4, i5);
+    AutoPtr<IEnumSet> temp = EnumSet::Of(i1, i2, i3, i4, i5);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -117,7 +125,8 @@ ECode CEnumSetHelper::Of(
     /* [out] */ IEnumSet** res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = EnumSet::Of(array);
+    AutoPtr<IEnumSet> temp = EnumSet::Of(array);
+    *res = temp;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }

@@ -7129,8 +7129,9 @@ ECode CPackageManagerService::GetLastChosenActivity(
     if (DEBUG_PREFERRED) Logger::V(TAG, "Querying last chosen activity for %p", intent);
     AutoPtr<IList> query;
     QueryIntentActivities(intent, resolvedType, flags, userId, (IList**)&query);
-    *info = FindPreferredActivity(intent, resolvedType, flags, query, 0,
-            FALSE, FALSE, FALSE, userId);
+    AutoPtr<IResolveInfo> ri = FindPreferredActivity(
+        intent, resolvedType, flags, query, 0, FALSE, FALSE, FALSE, userId);
+    *info = ri;
     REFCOUNT_ADD(*info)
     return NOERROR;
 }
@@ -7327,9 +7328,10 @@ ECode CPackageManagerService::ChooseBestActivity(
                 CActivityInfo::New(ainfo1, (IActivityInfo**)&ainfo2);
                 ri->SetActivityInfo(ainfo2);
                 AutoPtr<IApplicationInfo> appinfo1, appinfo2;
-                IComponentInfo::Probe(ainfo2)->GetApplicationInfo((IApplicationInfo**)&appinfo1);
+                IComponentInfo* ci2 = IComponentInfo::Probe(ainfo2);
+                ci2->GetApplicationInfo((IApplicationInfo**)&appinfo1);
                 CApplicationInfo::New(appinfo1, (IApplicationInfo**)&appinfo2);
-                IComponentInfo::Probe(ainfo2)->SetApplicationInfo(appinfo2);
+                ci2->SetApplicationInfo(appinfo2);
                 Int32 uid;
                 appinfo2->GetUid(&uid);
                 appinfo2->SetUid(UserHandle::GetUid(userId, UserHandle::GetAppId(uid)));
@@ -18402,7 +18404,8 @@ ECode CPackageManagerService::GetVerifierDeviceIdentity(
             String("Only package verification agents can read the verifier device identity")))
 
     synchronized (mPackagesLock) {
-        *identity = mSettings->GetVerifierDeviceIdentityLPw();
+        AutoPtr<IVerifierDeviceIdentity> temp = mSettings->GetVerifierDeviceIdentityLPw();
+        *identity = temp;
         REFCOUNT_ADD(*identity)
     }
     return NOERROR;

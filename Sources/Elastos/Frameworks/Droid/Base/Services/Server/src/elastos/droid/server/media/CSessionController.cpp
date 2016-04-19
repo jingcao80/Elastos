@@ -281,7 +281,8 @@ ECode CSessionController::GetPlaybackState(
     /* [out] */ IPlaybackState** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = mHost->GetStateWithUpdatedPosition();
+    AutoPtr<IPlaybackState> temp = mHost->GetStateWithUpdatedPosition();
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

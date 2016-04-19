@@ -18,12 +18,10 @@ ECode CDhcpStateMachineHelper::MakeDhcpStateMachine(
     /* [out] */ IDhcpStateMachine** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = NULL;
 
-    *result = DhcpStateMachine::MakeDhcpStateMachine(context, controller, intf);
-    if(*result != NULL)
-        REFCOUNT_ADD(*result)
-
+    AutoPtr<IDhcpStateMachine> temp = DhcpStateMachine::MakeDhcpStateMachine(context, controller, intf);
+    *result = temp;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

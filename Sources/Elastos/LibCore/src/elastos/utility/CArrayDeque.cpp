@@ -655,7 +655,8 @@ ECode CArrayDeque::ToArray(
     Int32 value = 0;
     GetSize(&value);
     AutoPtr<ArrayOf<IInterface*> > res = ArrayOf<IInterface*>::Alloc(value);
-    *array = CopyElements(res);
+    AutoPtr<ArrayOf<IInterface*> > temp = CopyElements(res);
+    *array = temp;
     REFCOUNT_ADD(*array)
     return NOERROR;
 }

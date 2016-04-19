@@ -11310,7 +11310,8 @@ ECode CActivityManagerService::GetHomeActivityToken(
     FAIL_RETURN(EnforceCallingPermission(Manifest::permission::MANAGE_ACTIVITY_STACKS,
             String("getHomeActivityToken()")));
     synchronized(this) {
-        *token = mStackSupervisor->GetHomeActivityToken();
+        AutoPtr<IBinder> temp = mStackSupervisor->GetHomeActivityToken();
+        *token = temp;
         REFCOUNT_ADD(*token);
     }
     return NOERROR;

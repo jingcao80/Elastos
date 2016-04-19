@@ -86,7 +86,9 @@ ECode BasicCredentialsProvider::GetCredentials(
             Logger::E("BasicCredentialsProvider", "Authentication scope may not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        *credentials = MatchCredentials(mCredMap, authscope);
+
+        AutoPtr<ICredentials> temp = MatchCredentials(mCredMap, authscope);
+        *credentials = temp;
         REFCOUNT_ADD(*credentials)
     }
     return NOERROR;

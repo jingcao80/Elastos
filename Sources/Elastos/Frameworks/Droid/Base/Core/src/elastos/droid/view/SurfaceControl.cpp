@@ -461,7 +461,8 @@ ECode SurfaceControl::CreateDisplay(
         Slogger::E(TAG, "name must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    *token = NativeCreateDisplay(name, secure);
+    AutoPtr<IBinder> temp = NativeCreateDisplay(name, secure);
+    *token = temp;
     REFCOUNT_ADD(*token)
     return NOERROR;
 }

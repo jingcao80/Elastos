@@ -15,7 +15,8 @@ ECode CMultihomePlainSocketFactoryHelper::GetSocketFactory(
     /* [out] */ IMultihomePlainSocketFactory** factory)
 {
     VALIDATE_NOT_NULL(factory)
-    *factory = MultihomePlainSocketFactory::GetSocketFactory();
+    AutoPtr<IMultihomePlainSocketFactory> temp = MultihomePlainSocketFactory::GetSocketFactory();
+    *factory = temp;
     REFCOUNT_ADD(*factory)
     return NOERROR;
 }

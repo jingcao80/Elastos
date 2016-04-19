@@ -420,7 +420,8 @@ ECode AdapterViewAnimator::GetCurrentView(
     /* [out] */ IView** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = GetViewAtRelativeIndex(mActiveOffset);
+    AutoPtr<IView> temp = GetViewAtRelativeIndex(mActiveOffset);
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -582,7 +583,8 @@ ECode AdapterViewAnimator::GetSelectedView(
     /* [out] */ IView** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = GetViewAtRelativeIndex(mActiveOffset);
+    AutoPtr<IView> temp = GetViewAtRelativeIndex(mActiveOffset);
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

@@ -21,31 +21,24 @@ ECode CHardwareCameraHelper::Open(
     /* [in] */ Int32 cameraId,
     /* [out] */ IHardwareCamera** camera)
 {
-    VALIDATE_NOT_NULL(camera);
-
     return HardwareCamera::Open(cameraId, camera);
 }
 
 ECode CHardwareCameraHelper::Open(
     /* [out] */ IHardwareCamera** camera)
 {
-    VALIDATE_NOT_NULL(camera);
-
     return HardwareCamera::Open(camera);
 }
 
 ECode CHardwareCameraHelper::GetEmptyParameters(
     /* [out] */ IParameters** para)
 {
-    VALIDATE_NOT_NULL(para);
-
     return HardwareCamera::GetEmptyParameters(para);
 }
 
 ECode CHardwareCameraHelper::GetNumberOfCameras(
     /* [out] */ Int32* num)
 {
-    VALIDATE_NOT_NULL(num);
     return HardwareCamera::GetNumberOfCameras(num);
 }
 
@@ -54,7 +47,6 @@ ECode CHardwareCameraHelper::CheckInitErrors(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
     *result = HardwareCamera::CheckInitErrors(err);
     return NOERROR;
 }
@@ -63,8 +55,8 @@ ECode CHardwareCameraHelper::OpenUninitialized(
     /* [out] */ IHardwareCamera** camera)
 {
     VALIDATE_NOT_NULL(camera);
-
-    *camera = HardwareCamera::OpenUninitialized();
+    AutoPtr<IHardwareCamera> temp = HardwareCamera::OpenUninitialized();
+    *camera = temp;
     REFCOUNT_ADD(*camera);
     return NOERROR;
 }
@@ -73,8 +65,6 @@ ECode CHardwareCameraHelper::GetParametersCopy(
     /* [in] */ IParameters* parameters,
     /* [out] */ IParameters** para)
 {
-    VALIDATE_NOT_NULL(para);
-
     return HardwareCamera::GetParametersCopy(parameters, para);
 }
 
@@ -83,8 +73,6 @@ ECode CHardwareCameraHelper::OpenLegacy(
     /* [in] */ Int32 halVersion,
     /* [out] */ IHardwareCamera** camera)
 {
-    VALIDATE_NOT_NULL(camera);
-
     return HardwareCamera::OpenLegacy(cameraId, halVersion, camera);
 }
 

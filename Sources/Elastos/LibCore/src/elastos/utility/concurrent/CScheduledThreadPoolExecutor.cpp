@@ -789,18 +789,19 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::Poll(
     /* [out] */ IInterface** e)
 {
     VALIDATE_NOT_NULL(e)
+    *e = NULL;
 
     AutoPtr<IReentrantLock> lock = mLock;
     ILock::Probe(lock)->Lock();
     AutoPtr<IRunnableScheduledFuture> first = (*mQueue)[0];
     Int64 d = 0;
     if ((first == NULL) || ((first->GetDelay(TimeUnit::GetNANOSECONDS(), &d), d) > 0)) {
-        *e = NULL;
         ILock::Probe(lock)->UnLock();
         return NOERROR;
     }
     else {
-        *e = FinishPoll(first);
+        AutoPtr<IInterface> temp = FinishPoll(first);
+        *e = temp;
         REFCOUNT_ADD(*e)
         ILock::Probe(lock)->UnLock();
         return NOERROR;
@@ -822,11 +823,12 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::Take(
             Int64 delay;
             first->GetDelay(TimeUnit::GetNANOSECONDS(), &delay);
             if (delay <= 0) {
-                *res = FinishPoll(first);
-                REFCOUNT_ADD(*res)
+                AutoPtr<IInterface> temp = FinishPoll(first);
                 if (mLeader == NULL && (*mQueue)[0] != NULL)
                     mAvailable->Signal();
                 ILock::Probe(lock)->UnLock();
+                *res = temp;
+                REFCOUNT_ADD(*res)
                 return NOERROR;
             }
             first = NULL; // don't retain ref while waiting
@@ -850,6 +852,7 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::Poll(
     /* [out] */ IInterface** e)
 {
     VALIDATE_NOT_NULL(e)
+    *e = NULL;
 
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
@@ -859,7 +862,6 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::Poll(
         AutoPtr<IRunnableScheduledFuture> first = (*mQueue)[0];
         if (first == NULL) {
             if (nanos <= 0) {
-                *e = NULL;
                 if (mLeader == NULL && (*mQueue)[0] != NULL)
                     mAvailable->Signal();
                 ILock::Probe(lock)->UnLock();
@@ -872,15 +874,15 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::Poll(
             Int64 delay;
             first->GetDelay(TimeUnit::GetNANOSECONDS(), &delay);
             if (delay <= 0) {
-                *e = FinishPoll(first);
-                REFCOUNT_ADD(*e)
+                AutoPtr<IInterface> temp = FinishPoll(first);
                 if (mLeader == NULL && (*mQueue)[0] != NULL)
                     mAvailable->Signal();
                 ILock::Probe(lock)->UnLock();
+                *e = temp;
+                REFCOUNT_ADD(*e)
                 return NOERROR;
             }
             if (nanos <= 0) {
-                *e = NULL;
                 if (mLeader == NULL && (*mQueue)[0] != NULL)
                     mAvailable->Signal();
                 ILock::Probe(lock)->UnLock();

@@ -58,6 +58,67 @@ def log_fine_info(logFile, firstLog, path):
         print logInfo
     return firstLog
 
+def check_released_return_value(logFile, firstLog, path, checkLineNum, paramType, paramName, value):
+    if isReturnValueIgnored(path, paramType, paramName, value):
+        return firstLog
+
+    pattern = re.compile(r'\w(.*)\(.*')
+    match = pattern.search(value)
+
+    # ignore IXXXX::Probe(XXX)
+    pattern = re.compile(r'I\w*\:\:Probe\(.*\)')
+    matchProbe = pattern.search(value)
+
+    # ignore XXX->Probe(EIID_IIMediaProjection)
+    pattern = re.compile(r'.*->Probe\(EIID_I\w*\)')
+    matchObjProbe = pattern.search(value)
+
+    # ignore XXX->Probe(iid);
+    pattern = re.compile(r'.*->Probe\(\w*\);')
+    matchObjProbe2 = pattern.search(value)
+
+    # ignore XXX.Get();
+    pattern = re.compile(r'.*\.Get\(\)')
+    matchGet = pattern.search(value)
+
+    # ignore ArrayOf::Alloc()
+    pattern = re.compile(r'ArrayOf<\w*\s*\*\s*>\:\:Alloc\(.*\)')
+    matchArrayOfAlloc = pattern.search(value)
+
+    # ignore TO_IINTERFACE()
+    pattern = re.compile(r'TO_IINTERFACE\(.*\)')
+    matchToInterface = pattern.search(value)
+
+    # ignore ETL: *pkgs.Begin()
+    pattern = re.compile(r'\*.*\.Begin\(\)')
+    matchEtl = pattern.search(value)
+
+    # ignore item of array: (*mArray)[(index << 1) + 1];
+    pattern = re.compile(r'\*.*\[.*\];')
+    matchArrayItem = pattern.search(value)
+
+    # ignore new: (IServerSocketChannel*) new
+    pattern = re.compile(r'\(.*\*\s*\)\s*new')
+    matchNew = pattern.search(value)
+
+    # ignore singleton: XXX::GetInstance()
+    pattern = re.compile(r'::GetInstance\(.*\)')
+    matchSingleton = pattern.search(value)
+
+    # ignore ->mImeActionLabel;
+    pattern = re.compile(r'->m\w*;')
+    matchMember= pattern.search(value)
+
+    if matchMember == None and matchSingleton == None \
+        and matchNew == None and matchArrayItem == None and matchToInterface == None \
+        and matchArrayOfAlloc == None and matchGet == None \
+        and matchObjProbe2 == None and matchProbe == None and matchObjProbe == None and match:
+        firstLog = log_fine_info(logFile, firstLog, path)
+        logInfo = ' @ warning: return value at line {0:d} for *{1} = {2} maybe released before assignment!\n'.format(checkLineNum+1, paramName, value)
+        logFile.write(logInfo)
+        print logInfo
+    return firstLog
+
 def check_add_ref(logFile, firstLog, path, lines, lineNum, match):
     #print 'found {0}** {1} at line {2:d}'.format(paramType, paramName, lineNum + 1)
     paramType = match.group(2)
@@ -82,7 +143,9 @@ def check_add_ref(logFile, firstLog, path, lines, lineNum, match):
             match = pattern.search(line)
             if match and line.startswith('*'):
                 value=match.group(2)
-                if value.startswith('NULL;') == False and isIgnored(path, paramType, paramName, value) == False:
+                if not (value.startswith("new ") or value.startswith("*")):
+                    firstLog = check_released_return_value(logFile, firstLog, path, index, paramType, paramName, value)
+                if value.startswith('NULL;') == False and isTypeCastIgnored(path, paramType, paramName, value) == False:
                     if checkLineNum != 0:
                         firstLog = log_fine_info(logFile, firstLog, path)
                         logInfo = ' > error: assignment at line {0:d} for {1}** {2} needs AddRef!\n'.format(checkLineNum+1, paramType, paramName)
@@ -148,6 +211,7 @@ def summarize_log(logPath):
     if(os.path.isfile(logPath)):
         errorCount = 0
         warningCount = 0
+        infoCount = 0
 
         # summarize
         logFile = open(logPath, 'r')
@@ -157,11 +221,13 @@ def summarize_log(logPath):
                 errorCount = errorCount + 1
             elif line.startswith('= warning:') == True:
                 warningCount = warningCount + 1
+            elif line.startswith('@ warning:') == True:
+                infoCount = infoCount + 1
         logFile.close()
 
         # log
         logFile = open(logPath, 'a')
-        logInfo = '\n\nresults: {0:d} errors, {1:d} warnings.'.format(errorCount, warningCount)
+        logInfo = '\n\nresults: {0:d} typecast errors, {1:d} typecast warnings, {2:d} released-return-value warnings.'.format(errorCount, warningCount, infoCount)
         logFile.write(logInfo)
         print logInfo
         logFile.close()
@@ -191,7 +257,7 @@ def get_finename(path):
 
 def log_ignored(path, usedType, param, value):
     key = generate_ignored_key(path, usedType, param, value)
-    if key in ignored_list:
+    if key in type_cast_ignored_list:
         return
 
     ignored_file = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.ignored'
@@ -204,12 +270,16 @@ def generate_ignored_key(path, usedType, param, value):
     key = '{0}#{1}#{2}#{3}'.format(filename, usedType, param, value);
     return key
 
-def isIgnored(path, usedType, param, value):
+def isTypeCastIgnored(path, usedType, param, value):
     key = generate_ignored_key(path, usedType, param, value)
-    return key in ignored_list
+    return key in type_cast_ignored_list
+
+def isReturnValueIgnored(path, paramType, paramName, value):
+    key = generate_ignored_key(path, paramType, paramName, value)
+    return key in return_value_ignored_list
 
 ############################################################################################################
-ignored_list = [
+type_cast_ignored_list = [
     '/elapi/elapi.cpp#void#package#itfPack;',
     '/elapi/elapi.cpp#void#package#itfPack;',
     '/reflection/CClsModule.cpp#TypeDescriptor#orgTypeDesc#mTypeAliasList[typeDype->mIndex].mOrgTypeDesc;',
@@ -232,11 +302,20 @@ ignored_list = [
     '/regex/Pattern.cpp#RegexPattern#result#regexP;',
     '/regex/CMatcher.cpp#RegexMatcher#result#pattern->matcher(status);',
 ]
+
+return_value_ignored_list = [
+    '/android_linux/proxy.cpp#IInterface#object#(IInterface *)&(mInterfaces[index].mVTPtr);',
+    '/linux_rpc/proxy.cpp#IInterface#object#(IInterface *)&(mInterfaces[index].mVTPtr);',
+    '/tsccm/AbstractConnPool.cpp#BasicPoolEntry#entry#reinterpret_cast<BasicPoolEntry*>(value->Probe(EIID_BasicPoolEntry));',
+    '/regex/CMatcher.cpp#RegexMatcher#result#pattern->matcher(status);',
+]
 ############################################################################################################
 
 #results: 121 errors, 0 warnings.
 scan_path = '/home/kesalin/Elastos5/Sources/'                                           # default sacn dir
 log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.log'     # default log file path
+
+#scan_path = '/home/kesalin/test/python/test.cpp'
 
 print "python  :", sys.argv[0]
 argc = len(sys.argv)

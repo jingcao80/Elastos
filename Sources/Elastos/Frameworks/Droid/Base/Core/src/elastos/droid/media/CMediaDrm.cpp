@@ -875,7 +875,8 @@ ECode CMediaDrm::QueryKeyStatus(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    *result = KeyedVectorToHashMap(infoMap);
+    AutoPtr<IHashMap> temp = KeyedVectorToHashMap(infoMap);
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -884,7 +885,8 @@ ECode CMediaDrm::GetProvisionRequest(
     /* [out] */ IMediaDrmProvisionRequest** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = GetProvisionRequestNative(CERTIFICATE_TYPE_NONE, String(""));
+    AutoPtr<IMediaDrmProvisionRequest> temp = GetProvisionRequestNative(CERTIFICATE_TYPE_NONE, String(""));
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -938,7 +940,8 @@ ECode CMediaDrm::GetSecureStops(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    *result = ListOfVectorsToArrayListOfByteArray(secureStops);
+    AutoPtr<IList> temp = ListOfVectorsToArrayListOfByteArray(secureStops);
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -1142,7 +1145,8 @@ ECode CMediaDrm::ProvideCertificateResponse(
     /* [out] */ IMediaDrmCertificate** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = ProvideProvisionResponseNative(response);
+    AutoPtr<IMediaDrmCertificate> temp = ProvideProvisionResponseNative(response);
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -1168,6 +1172,7 @@ ECode CMediaDrm::ReleaseResources()
         drm->disconnect();
     }
     mNativeContext = 0;
+    return NOERROR;
 }
 
 ECode CMediaDrm::IsCryptoSchemeSupported(
@@ -1603,6 +1608,7 @@ ECode CMediaDrm::NativeSetup(
     sp<JNIDrmListener> listener = new JNIDrmListener(mediadrm_this);
     drm->setListener(listener);
     mNativeContext = (Int64)drm.get();
+    return NOERROR;
 }
 
 void CMediaDrm::NativeFinalize()

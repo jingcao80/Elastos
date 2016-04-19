@@ -634,7 +634,8 @@ ECode CJDBCResultSet::GetTime(
     /* [out] */ ITime ** sqltime)
 {
     VALIDATE_NOT_NULL(sqltime)
-    *sqltime = InternalGetTime(colIndex, NULL);
+    AutoPtr<ITime> temp = InternalGetTime(colIndex, NULL);
+    *sqltime = temp;
     REFCOUNT_ADD(*sqltime)
     return NOERROR;
 }
@@ -645,7 +646,8 @@ ECode CJDBCResultSet::GetTime(
     /* [out] */ ITime ** sqltime)
 {
     VALIDATE_NOT_NULL(sqltime)
-    *sqltime = InternalGetTime(colIndex, pCal);
+    AutoPtr<ITime> temp = InternalGetTime(colIndex, pCal);
+    *sqltime = temp;
     REFCOUNT_ADD(*sqltime)
     return NOERROR;
 }
@@ -676,7 +678,8 @@ ECode CJDBCResultSet::GetTimestamp(
     /* [out] */ ITimestamp ** timestamp)
 {
     REFCOUNT_ADD(*timestamp)
-    *timestamp = InternalGetTimestamp(colIndex, NULL);
+    AutoPtr<ITimestamp> temp = InternalGetTimestamp(colIndex, NULL);
+    *timestamp = temp;
     REFCOUNT_ADD(*timestamp)
     return NOERROR;
 }
@@ -687,7 +690,8 @@ ECode CJDBCResultSet::GetTimestamp(
     /* [out] */ ITimestamp ** timestamp)
 {
     REFCOUNT_ADD(*timestamp)
-    *timestamp = InternalGetTimestamp(colIndex, pCal);
+    AutoPtr<ITimestamp> temp = InternalGetTimestamp(colIndex, pCal);
+    *timestamp = temp;
     REFCOUNT_ADD(*timestamp)
     return NOERROR;
 }
@@ -712,6 +716,7 @@ ECode CJDBCResultSet::GetTimestamp(
 ECode CJDBCResultSet::GetType(
     /* [out] */ Int32 * value)
 {
+    VALIDATE_NOT_NULL(value)
     *value = IResultSet::TYPE_SCROLL_SENSITIVE;
     return NOERROR;
 }
@@ -783,6 +788,7 @@ ECode CJDBCResultSet::InsertRow()
 ECode CJDBCResultSet::IsAfterLast(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL || tr->mNrows <= 0) {
         *value = FALSE;
     }
@@ -793,6 +799,7 @@ ECode CJDBCResultSet::IsAfterLast(
 ECode CJDBCResultSet::IsBeforeFirst(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL || tr->mNrows <= 0) {
         *value = FALSE;
     }
@@ -803,6 +810,7 @@ ECode CJDBCResultSet::IsBeforeFirst(
 ECode CJDBCResultSet::IsFirst(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL) {
         *value = TRUE;
     }
@@ -813,6 +821,7 @@ ECode CJDBCResultSet::IsFirst(
 ECode CJDBCResultSet::IsLast(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL) {
         *value = TRUE;
     }
@@ -823,6 +832,7 @@ ECode CJDBCResultSet::IsLast(
 ECode CJDBCResultSet::GetLast(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL || tr->mNrows <= 0) {
         *value = FALSE;
     }
@@ -854,6 +864,7 @@ ECode CJDBCResultSet::MoveToInsertRow()
 ECode CJDBCResultSet::GetNext(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL) {
         *value = FALSE;
     }
@@ -865,6 +876,7 @@ ECode CJDBCResultSet::GetNext(
 ECode CJDBCResultSet::GetPrevious(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL) {
         return E_SQL_EXCEPTION;
     }
@@ -928,6 +940,7 @@ ECode CJDBCResultSet::Relative(
     /* [in] */ Int32 rows,
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     if (tr == NULL) {
         *value = FALSE;
         return NOERROR;
@@ -944,6 +957,7 @@ ECode CJDBCResultSet::Relative(
 ECode CJDBCResultSet::RowDeleted(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     *value = FALSE;
     return NOERROR;
 }
@@ -951,6 +965,7 @@ ECode CJDBCResultSet::RowDeleted(
 ECode CJDBCResultSet::RowInserted(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     *value = FALSE;
     return NOERROR;
 }
@@ -958,6 +973,7 @@ ECode CJDBCResultSet::RowInserted(
 ECode CJDBCResultSet::RowUpdated(
     /* [out] */ Boolean * value)
 {
+    VALIDATE_NOT_NULL(value)
     *value = FALSE;
     return NOERROR;
 }
@@ -1953,7 +1969,8 @@ ECode CJDBCResultSet::GetDate(
     /* [out] */ ISQLDate ** idate)
 {
     VALIDATE_NOT_NULL(idate)
-    *idate = InternalGetDate(colIndex, NULL);
+    AutoPtr<ISQLDate> temp = InternalGetDate(colIndex, NULL);
+    *idate = temp;
     REFCOUNT_ADD(*idate)
     return NOERROR;
 }
@@ -1964,7 +1981,8 @@ ECode CJDBCResultSet::GetDate(
     /* [out] */ ISQLDate ** idate)
 {
     VALIDATE_NOT_NULL(idate)
-    *idate = InternalGetDate(colIndex, cal);
+    AutoPtr<ISQLDate> temp = InternalGetDate(colIndex, cal);
+    *idate = temp;
     REFCOUNT_ADD(*idate)
     return NOERROR;
 }

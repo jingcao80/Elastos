@@ -143,6 +143,7 @@ ECode CMediaHTTPConnection::Connect(
     /* [in] */ const String& headers,
     /* [out] */ IBinder** result)
 {
+    VALIDATE_NOT_NULL(result)
     if (VERBOSE) {
         Logger::D(TAG, "connect: uri=%s, headers=%s",
                 uri.string(), headers.string());
@@ -151,13 +152,15 @@ ECode CMediaHTTPConnection::Connect(
     // try {
     Disconnect();
     mAllowCrossDomainRedirect = TRUE;
+    mURL = NULL;
     CURL::New(uri, (IURL**)&mURL);
     mHeaders = ConvertHeaderStringToMap(headers);
     // } catch (MalformedURLException e) {
     //     return null;
     // }
 
-    *result = NativeGetIMemory();
+    AutoPtr<IBinder> temp = NativeGetIMemory();
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

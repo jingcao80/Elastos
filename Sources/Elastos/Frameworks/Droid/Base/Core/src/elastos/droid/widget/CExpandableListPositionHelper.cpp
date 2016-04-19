@@ -15,7 +15,8 @@ ECode CExpandableListPositionHelper::ObtainGroupPosition(
     /* [out] */ IExpandableListPosition** position)
 {
     VALIDATE_NOT_NULL(position);
-    *position = ExpandableListPosition::ObtainGroupPosition(groupPosition);
+    AutoPtr<IExpandableListPosition> temp = ExpandableListPosition::ObtainGroupPosition(groupPosition);
+    *position = temp;
     REFCOUNT_ADD(*position);
     return NOERROR;
 }
@@ -26,7 +27,8 @@ ECode CExpandableListPositionHelper::ObtainChildPosition(
     /* [out] */ IExpandableListPosition** position)
 {
     VALIDATE_NOT_NULL(position);
-    *position = ExpandableListPosition::ObtainChildPosition(groupPosition, childPosition);
+    AutoPtr<IExpandableListPosition> temp = ExpandableListPosition::ObtainChildPosition(groupPosition, childPosition);
+    *position = temp;
     REFCOUNT_ADD(*position);
     return NOERROR;
 }
@@ -36,7 +38,8 @@ ECode CExpandableListPositionHelper::ObtainPosition(
     /* [out] */ IExpandableListPosition** position)
 {
     VALIDATE_NOT_NULL(position);
-    *position = ExpandableListPosition::ObtainPosition(packedPosition);
+    AutoPtr<IExpandableListPosition> temp = ExpandableListPosition::ObtainPosition(packedPosition);
+    *position = temp;
     REFCOUNT_ADD(*position);
     return NOERROR;
 }
@@ -49,7 +52,8 @@ ECode CExpandableListPositionHelper::Obtain(
     /* [out] */ IExpandableListPosition** position)
 {
     VALIDATE_NOT_NULL(position);
-    *position = ExpandableListPosition::Obtain(type, groupPos, childPos, flatListPos);
+    AutoPtr<IExpandableListPosition> temp = ExpandableListPosition::Obtain(type, groupPos, childPos, flatListPos);
+    *position = temp;
     REFCOUNT_ADD(*position);
     return NOERROR;
 }

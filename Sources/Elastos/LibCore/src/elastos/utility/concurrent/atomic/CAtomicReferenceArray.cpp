@@ -51,8 +51,8 @@ ECode CAtomicReferenceArray::Get(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-
-    *outface = GetRaw(CheckedByteOffset(i));
+    AutoPtr<IInterface> temp = GetRaw(CheckedByteOffset(i));
+    *outface = temp;
     REFCOUNT_ADD(*outface)
     return NOERROR;
 }

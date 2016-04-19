@@ -17,7 +17,8 @@ ECode CActivityChooserModelHelper::Get(
     /* [out] */ IActivityChooserModel** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = ActivityChooserModel::Get(context, historyFileName);
+    AutoPtr<IActivityChooserModel> temp = ActivityChooserModel::Get(context, historyFileName);
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

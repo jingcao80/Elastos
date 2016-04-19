@@ -238,7 +238,8 @@ ECode StateListDrawable::GetStateDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    *drawable = mStateListState->GetChild(index);
+    AutoPtr<IDrawable> temp = mStateListState->GetChild(index);
+    *drawable = temp;
     REFCOUNT_ADD(*drawable);
     return NOERROR;
 }

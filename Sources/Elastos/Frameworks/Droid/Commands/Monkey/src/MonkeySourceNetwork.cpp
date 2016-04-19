@@ -512,9 +512,10 @@ ECode MonkeySourceNetwork::CommandQueueImpl::GetNextQueuedEvent(
     /* [out] */ IMonkeyEvent **event)
 {
     VALIDATE_NOT_NULL(event)
-    *event = queueEvents->GetFront();
-    REFCOUNT_ADD(*event);
+    AutoPtr<IMonkeyEvent> temp = queueEvents->GetFront();
     queueEvents->PopFront();
+    *event = temp;
+    REFCOUNT_ADD(*event);
     return NOERROR;
 }
 

@@ -101,9 +101,10 @@ ECode InetAddress::GetAllByNameOnNet(
     VALIDATE_NOT_NULL(addresses)
     *addresses = NULL;
 
-    AutoPtr< ArrayOf<IInetAddress*> > addrs;
+    AutoPtr< ArrayOf<IInetAddress*> > addrs, temp;
     FAIL_RETURN(GetAllByNameImpl(host, netId, (ArrayOf<IInetAddress*>**)&addrs));
-    *addresses = addrs->Clone();
+    temp = addrs->Clone();
+    *addresses = temp;
     REFCOUNT_ADD(*addresses);
     return NOERROR;
 }

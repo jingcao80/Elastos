@@ -205,6 +205,7 @@ ECode CExchanger::Exchange(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
+    *outface = NULL;
 
     AutoPtr<IInterface> v;
     AutoPtr<IInterface> item = (x == NULL) ? sNULL_ITEM.Get() : x; // translate null args
@@ -213,8 +214,10 @@ ECode CExchanger::Exchange(
         ((Thread::Interrupted() || // disambiguates null return
           (v = ArenaExchange(item, FALSE, 0L)) == NULL)))
         return E_INTERRUPTED_EXCEPTION;
-    *outface = (Object::Equals(v, sNULL_ITEM)) ? NULL : v;
-    REFCOUNT_ADD(*outface)
+    if (!Object::Equals(v, sNULL_ITEM)) {
+        *outface = v;
+        REFCOUNT_ADD(*outface)
+    }
     return NOERROR;
 }
 
@@ -225,6 +228,7 @@ ECode CExchanger::Exchange(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
+    *outface = NULL;
 
     AutoPtr<IInterface> v;
     AutoPtr<IInterface> item = (x == NULL) ? sNULL_ITEM.Get() : x;
@@ -237,8 +241,11 @@ ECode CExchanger::Exchange(
         return E_INTERRUPTED_EXCEPTION;
     if (Object::Equals(v, sTIMED_OUT))
         return E_TIMEOUT_EXCEPTION;
-    *outface = (Object::Equals(v, sNULL_ITEM)) ? NULL : v;
-    REFCOUNT_ADD(*outface)
+
+    if (!Object::Equals(v, sNULL_ITEM)) {
+        *outface = v;
+        REFCOUNT_ADD(*outface)
+    }
     return NOERROR;
 }
 

@@ -29,6 +29,7 @@ ECode ServerSocketChannelImpl::ServerSocketAdapter::Accept(
     /* [out] */ ISocket** socket)
 {
     VALIDATE_NOT_NULL(socket)
+    *socket = NULL;
 
     Boolean isflag = FALSE;
     if (IsBound(&isflag), !isflag) {
@@ -49,6 +50,7 @@ ECode ServerSocketChannelImpl::ServerSocketAdapter::ImplAccept(
     /* [out] */ ISocket** aSocket)
 {
     VALIDATE_NOT_NULL(aSocket)
+    *aSocket = NULL;
 
     AutoPtr<ISocket> clientSocket;
     clientSocketChannel->GetSocket((ISocket**)&clientSocket);
@@ -133,6 +135,7 @@ ECode ServerSocketChannelImpl::Accept(
     /* [out] */ ISocketChannel** channel)
 {
     VALIDATE_NOT_NULL(channel)
+    *channel = NULL;
 
     Boolean isflag = FALSE;
     if (IsOpen(&isflag), !isflag) {
@@ -166,8 +169,11 @@ ECode ServerSocketChannelImpl::Accept(
         result->IsConnected(&isflag);
         End(isflag);
     // }
-    *channel = isflag ? ISocketChannel::Probe(result) : NULL;
-    REFCOUNT_ADD(*channel)
+
+    if (isflag) {
+        *channel =  ISocketChannel::Probe(result);
+        REFCOUNT_ADD(*channel)
+    }
     return NOERROR;
 }
 
@@ -175,8 +181,8 @@ ECode ServerSocketChannelImpl::GetFD(
     /* [out] */ IFileDescriptor** outfd)
 {
     VALIDATE_NOT_NULL(outfd)
-
-    *outfd = mSocket->GetFD();
+    AutoPtr<IFileDescriptor> temp = mSocket->GetFD();
+    *outfd = temp;
     REFCOUNT_ADD(*outfd)
     return NOERROR;
 }

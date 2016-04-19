@@ -76,7 +76,8 @@ ECode ObserverList::ObserverListIterator::GetNext(
     }
 
     if (mIndex < mListEndMarker) {
-        *object = mOwner->GetObserverAt(mIndex++);
+        AutoPtr<IInterface> obj = mOwner->GetObserverAt(mIndex++);
+        *object = obj;
         REFCOUNT_ADD(*object);
         return NOERROR;
     }

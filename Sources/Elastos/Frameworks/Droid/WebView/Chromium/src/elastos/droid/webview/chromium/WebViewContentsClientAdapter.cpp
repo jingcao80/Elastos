@@ -225,7 +225,8 @@ ECode WebViewContentsClientAdapter::PermissionRequestAdapter::GetOrigin(
     // ==================before translated======================
     // return mAwPermissionRequest.getOrigin();
 
-    *result = mAwPermissionRequest->GetOrigin();
+    AutoPtr<IUri> temp = mAwPermissionRequest->GetOrigin();
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

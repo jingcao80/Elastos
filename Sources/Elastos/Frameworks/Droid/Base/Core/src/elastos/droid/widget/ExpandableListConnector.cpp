@@ -259,7 +259,8 @@ ECode ExpandableListConnector::GetUnflattenedPos(
     AutoPtr<GroupMetadata> midExpGm;
 
     if (numExpGroups == 0) {
-        *result = PositionMetadata::Obtain(flPos, IExpandableListPosition::GROUP, flPos, -1, NULL, 0);
+        AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(flPos, IExpandableListPosition::GROUP, flPos, -1, NULL, 0);
+        *result = temp;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -279,15 +280,17 @@ ECode ExpandableListConnector::GetUnflattenedPos(
             rightExpGroupIndex = midExpGroupIndex - 1;
         }
         else if (flPos == midExpGm->mFlPos) {
-            *result = PositionMetadata::Obtain(flPos, IExpandableListPosition::GROUP,
+            AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(flPos, IExpandableListPosition::GROUP,
                 midExpGm->mGPos, -1, midExpGm, midExpGroupIndex);
+            *result = temp;
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
         else if (flPos <= midExpGm->mLastChildFlPos) {
             Int32 childPos = flPos - (midExpGm.Get()->mFlPos + 1);
-            *result = PositionMetadata::Obtain(flPos, ExpandableListPosition::CHILD,
+            AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(flPos, ExpandableListPosition::CHILD,
                 midExpGm->mGPos, childPos, midExpGm, midExpGroupIndex);
+            *result = temp;
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
@@ -317,7 +320,8 @@ ECode ExpandableListConnector::GetUnflattenedPos(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    *result = PositionMetadata::Obtain(flPos, ExpandableListPosition::GROUP, groupPos, -1, NULL, insertPosition);
+    AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(flPos, ExpandableListPosition::GROUP, groupPos, -1, NULL, insertPosition);
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -326,8 +330,9 @@ ECode ExpandableListConnector::GetFlattenedPos(
     /* [in] */ IExpandableListPosition* pos,
     /* [out] */ IPositionMetadata** result)
 {
-    VALIDATE_NOT_NULL(pos)
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+    VALIDATE_NOT_NULL(pos)
 
     AutoPtr<IList> egml = mExpGroupMetadataList;
     Int32 numExpGroups = 0;
@@ -337,10 +342,11 @@ ECode ExpandableListConnector::GetFlattenedPos(
     Int32 midExpGroupIndex = 0;
     AutoPtr<GroupMetadata> midExpGm;
 
+    ExpandableListPosition* elp = (ExpandableListPosition*)pos;
     if (numExpGroups == 0) {
-        *result = PositionMetadata::Obtain(((ExpandableListPosition*)pos)->mGroupPos,
-            ((ExpandableListPosition*)pos)->mType, ((ExpandableListPosition*)pos)->mGroupPos,
-            ((ExpandableListPosition*)pos)->mChildPos, NULL, 0);
+        AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(elp->mGroupPos,
+            elp->mType, elp->mGroupPos, elp->mChildPos, NULL, 0);
+        *result = temp;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -352,36 +358,32 @@ ECode ExpandableListConnector::GetFlattenedPos(
         IObject* objTmp = IObject::Probe(interfaceTmp);
         midExpGm = (GroupMetadata*)objTmp;
 
-        if (((ExpandableListPosition*)pos)->mGroupPos > midExpGm->mGPos) {
+        if (elp->mGroupPos > midExpGm->mGPos) {
             leftExpGroupIndex = midExpGroupIndex + 1;
         }
-        else if (((ExpandableListPosition*)pos)->mGroupPos < midExpGm->mGPos) {
+        else if (elp->mGroupPos < midExpGm->mGPos) {
             rightExpGroupIndex = midExpGroupIndex - 1;
         }
-        else if (((ExpandableListPosition*)pos)->mGroupPos == midExpGm->mGPos) {
-            if (((ExpandableListPosition*)pos)->mType == IExpandableListPosition::GROUP) {
-                *result = PositionMetadata::Obtain(midExpGm->mFlPos, ((ExpandableListPosition*)pos)->mType,
-                    ((ExpandableListPosition*)pos)->mGroupPos,
-                    ((ExpandableListPosition*)pos)->mChildPos, midExpGm, midExpGroupIndex);
+        else if (elp->mGroupPos == midExpGm->mGPos) {
+            if (elp->mType == IExpandableListPosition::GROUP) {
+                AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(midExpGm->mFlPos, elp->mType,
+                    elp->mGroupPos, elp->mChildPos, midExpGm, midExpGroupIndex);
+                *result = temp;
                 REFCOUNT_ADD(*result);
                 return NOERROR;
             }
-            else if (((ExpandableListPosition*)pos)->mType == IExpandableListPosition::CHILD) {
-                *result = PositionMetadata::Obtain(midExpGm->mFlPos + ((ExpandableListPosition*)pos)->mChildPos + 1,
-                    ((ExpandableListPosition*)pos)->mType, ((ExpandableListPosition*)pos)->mGroupPos,
-                    ((ExpandableListPosition*)pos)->mChildPos, midExpGm, midExpGroupIndex);
+            else if (elp->mType == IExpandableListPosition::CHILD) {
+                AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(midExpGm->mFlPos + elp->mChildPos + 1,
+                    elp->mType, elp->mGroupPos, elp->mChildPos, midExpGm, midExpGroupIndex);
+                *result = temp;
                 REFCOUNT_ADD(*result);
                 return NOERROR;
             }
-            else {
-                *result = NULL;
-                return NOERROR;
-            }
+            return NOERROR;
         }
     }
 
-    if (((ExpandableListPosition*)pos)->mType != IExpandableListPosition::GROUP) {
-        *result = NULL;
+    if (elp->mType != IExpandableListPosition::GROUP) {
         return NOERROR;
     }
 
@@ -391,9 +393,10 @@ ECode ExpandableListConnector::GetFlattenedPos(
         IObject* objTmp = IObject::Probe(interfaceTmp);
         GroupMetadata* leftExpGm = (GroupMetadata*)objTmp;
 
-        Int32 flPos = leftExpGm->mLastChildFlPos + (((ExpandableListPosition*)pos)->mGroupPos - leftExpGm->mGPos);
-        *result = PositionMetadata::Obtain(flPos, ((ExpandableListPosition*)pos)->mType, ((ExpandableListPosition*)pos)->mGroupPos,
-            ((ExpandableListPosition*)pos)->mChildPos, NULL, leftExpGroupIndex);
+        Int32 flPos = leftExpGm->mLastChildFlPos + (elp->mGroupPos - leftExpGm->mGPos);
+        AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(flPos, elp->mType, elp->mGroupPos,
+            elp->mChildPos, NULL, leftExpGroupIndex);
+        *result = temp;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -403,16 +406,15 @@ ECode ExpandableListConnector::GetFlattenedPos(
         IObject* objTmp = IObject::Probe(interfaceTmp);
         GroupMetadata* rightExpGm = (GroupMetadata*)objTmp;
 
-        Int32 flPos = rightExpGm->mFlPos - (rightExpGm->mGPos - ((ExpandableListPosition*)pos)->mGroupPos);
-        *result = PositionMetadata::Obtain(flPos, ((ExpandableListPosition*)pos)->mType, ((ExpandableListPosition*)pos)->mGroupPos,
-            ((ExpandableListPosition*)pos)->mChildPos, NULL, rightExpGroupIndex);
+        Int32 flPos = rightExpGm->mFlPos - (rightExpGm->mGPos - elp->mGroupPos);
+        AutoPtr<IPositionMetadata> temp = PositionMetadata::Obtain(flPos, elp->mType, elp->mGroupPos,
+            elp->mChildPos, NULL, rightExpGroupIndex);
+        *result = temp;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
-    else {
-        *result = NULL;
-        return NOERROR;
-    }
+
+    return NOERROR;
 }
 
 Boolean ExpandableListConnector::AreAllItemsEnabled()

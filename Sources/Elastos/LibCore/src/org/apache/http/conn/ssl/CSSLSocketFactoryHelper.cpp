@@ -43,7 +43,8 @@ ECode CSSLSocketFactoryHelper::GetSocketFactory(
     /* [out] */ ISSLSocketFactory** factory)
 {
     VALIDATE_NOT_NULL(factory)
-    *factory = CSSLSocketFactory::GetSocketFactory();
+    AutoPtr<ISSLSocketFactory> temp = CSSLSocketFactory::GetSocketFactory();
+    *factory = temp;
     REFCOUNT_ADD(*factory)
     return NOERROR;
 }

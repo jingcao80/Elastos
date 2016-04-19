@@ -114,7 +114,9 @@ ECode CSessionManagerImpl::CreateSession(
         Binder::RestoreCallingIdentity(token);
         return ec;
     }
-    *result = record->GetSessionBinder();
+
+    AutoPtr<IISession> temp = record->GetSessionBinder();
+    *result = temp;
     REFCOUNT_ADD(*result)
     // } finally {
     //     Binder.restoreCallingIdentity(token);

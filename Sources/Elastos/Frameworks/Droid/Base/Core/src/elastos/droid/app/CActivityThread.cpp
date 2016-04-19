@@ -1340,7 +1340,8 @@ ECode CActivityThread::GetHandler(
     /* [out] */ IHandler** h)
 {
     VALIDATE_NOT_NULL(h)
-    *h = GetHandler();
+    AutoPtr<IHandler> temp = GetHandler();
+    *h = temp;
     REFCOUNT_ADD(*h)
     return NOERROR;
 }

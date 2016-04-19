@@ -106,8 +106,10 @@ ECode CServices::GetProvider(
         return NOERROR;
     }
     HashMap< String, AutoPtr<IProvider> >::Iterator it = sProvidersNames.Find(name);
-    *provider = it != sProvidersNames.End() ? it->mSecond : NULL;
-    REFCOUNT_ADD(*provider);
+    if (it != sProvidersNames.End()) {
+        *provider =  it->mSecond;
+        REFCOUNT_ADD(*provider);
+    }
     return NOERROR;
 }
 
@@ -213,8 +215,10 @@ ECode CServices::GetServices(
     VALIDATE_NOT_NULL(services)
     AutoLock lock(this);
     HashMap< String, AutoPtr<IArrayList> >::Iterator it = sServices.Find(key);
-    *services = it != sServices.End() ? it->mSecond : NULL;
-    REFCOUNT_ADD(*services);
+    if (it != sServices.End()) {
+        *services = it->mSecond;
+        REFCOUNT_ADD(*services);
+    }
     return NOERROR;
 }
 

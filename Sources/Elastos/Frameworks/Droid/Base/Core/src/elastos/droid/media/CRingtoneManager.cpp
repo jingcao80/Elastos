@@ -359,10 +359,10 @@ ECode CRingtoneManager::GetActualDefaultRingtoneUri(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
 
     String setting = GetSettingForType(type);
     if (setting == NULL) {
-        *result = NULL;
         return NOERROR;
     }
     AutoPtr<IContentResolver> contentResolver;
@@ -375,8 +375,11 @@ ECode CRingtoneManager::GetActualDefaultRingtoneUri(
     uriHelper->Parse(uriString, (IUri**)&uri);
 
     if ((uriString == NULL) || (type & TYPE_RINGTONE) == 0) {
-        *result = !uriString.IsNull() ? uri : NULL;
-        REFCOUNT_ADD(*result);
+        if (!uriString.IsNull()) {
+            *result = uri;
+            REFCOUNT_ADD(*result);
+        }
+
         return NOERROR;
     }
 
@@ -440,6 +443,7 @@ ECode CRingtoneManager::GetDefaultType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = -1;
 
     AutoPtr<IUri> uri;
     Boolean tempState = FALSE;
@@ -447,16 +451,18 @@ ECode CRingtoneManager::GetDefaultType(
     Boolean tempState2 = FALSE;
     if (defaultRingtoneUri == NULL) {
         *result = -1;
-    } else if ((IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI, &tempState), tempState)
-        || (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI_2, &tempState1), tempState1)
-        || (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI_3, &tempState2), tempState2)) {
+    }
+    else if (Object::Equals(defaultRingtoneUri, Settings::System::DEFAULT_RINGTONE_URI)
+        || Object::Equals(defaultRingtoneUri, Settings::System::DEFAULT_RINGTONE_URI_2)
+        || Object::Equals(defaultRingtoneUri, Settings::System::DEFAULT_RINGTONE_URI_3)
+    ) {
         *result = TYPE_RINGTONE;
-    } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_NOTIFICATION_URI, &tempState), tempState) {
+    }
+    else if (Object::Equals(defaultRingtoneUri, Settings::System::DEFAULT_NOTIFICATION_URI)){
         *result = TYPE_NOTIFICATION;
-    } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_ALARM_ALERT_URI, &tempState), tempState) {
+    }
+    else if (Object::Equals(defaultRingtoneUri, Settings::System::DEFAULT_ALARM_ALERT_URI)){
         *result = TYPE_ALARM;
-    } else {
-        *result = -1;
     }
     return NOERROR;
 }
@@ -497,10 +503,9 @@ ECode CRingtoneManager::GetStaticDefaultRingtoneUri(
     String uriString;
     Settings::System::GetString(contentResolver, ISettingsSystem::DEFAULT_RINGTONE, &uriString);
 
-    AutoPtr<IUri> uri;
-    Uri::Parse(uriString, (IUri**)&uri);
-    *result = !uriString.IsNull() ? uri : NULL;
-    REFCOUNT_ADD(*result);
+    if (!uriString.IsNull()) {
+        return Uri::Parse(uriString, result);
+    }
     return NOERROR;
 }
 
@@ -519,20 +524,16 @@ ECode CRingtoneManager::GetDefaultRingtoneSubIdByUri(
      * DEFAULT_RINGTONE_URI_2: content://settings/system/ringtone_2
      * DEFAULT_RINGTONE_URI_3: content://settings/system/ringtone_3
      */
-    String defaultUriStr;
-    IObject::Probe(defaultRingtoneUri)->ToString(&defaultUriStr);
-    String defaultRingtoneUriStr;
-    IObject::Probe(Settings::System::DEFAULT_RINGTONE_URI)->ToString(&defaultRingtoneUriStr);
+    String defaultUriStr = Object::ToString(defaultRingtoneUri);
+    String defaultRingtoneUriStr = Object::ToString(Settings::System::DEFAULT_RINGTONE_URI);
     if (defaultUriStr.Equals(defaultRingtoneUriStr)) {
         *result = 0;
         return NOERROR;
     }
-    String uriString;
-    IObject::Probe(defaultRingtoneUri)->ToString(&uriString);
+
     Int32 parsedSubId = -1;
-    IObject::Probe(Settings::System::DEFAULT_RINGTONE_URI)->ToString(&defaultRingtoneUriStr);
-    if (uriString.StartWith(defaultRingtoneUriStr)) {
-        parsedSubId = StringUtils::ParseInt32(uriString.Substring(uriString.LastIndexOf('_') + 1));
+    if (defaultUriStr.StartWith(defaultRingtoneUriStr)) {
+        parsedSubId = StringUtils::ParseInt32(defaultUriStr.Substring(defaultUriStr.LastIndexOf('_') + 1));
         if ((parsedSubId > 0 &&  parsedSubId <= ISettingsSystem::MAX_NUM_RINGTONES)) {
             *result = parsedSubId - 1;
             return NOERROR;

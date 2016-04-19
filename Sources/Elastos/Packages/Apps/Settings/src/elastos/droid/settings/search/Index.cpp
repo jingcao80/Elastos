@@ -472,7 +472,8 @@ ECode Index::SaveSearchQueryTask::DoInBackground(
     // } catch (Exception e) {
     //     Logger::D(TAG, "Cannot update saved Search queries", e);
     // }
-    *result = CoreUtils::Convert(lastInsertedRowId);
+    AutoPtr<IInteger64> iobj = CoreUtils::Convert(lastInsertedRowId);
+    *result = iobj.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

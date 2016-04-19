@@ -108,7 +108,8 @@ ECode AbstractPooledConnAdapter::GetState(
     VALIDATE_NOT_NULL(state)
     *state = NULL;
     FAIL_RETURN(AssertAttached())
-    *state = mPoolEntry->GetState();
+    AutoPtr<IObject> temp = mPoolEntry->GetState();
+    *state = temp;
     REFCOUNT_ADD(*state)
     return NOERROR;
 }

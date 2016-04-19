@@ -15,7 +15,8 @@ ECode CMagnificationSpecHelper::Obtain(
     /* [out] */ IMagnificationSpec** spec)
 {
     VALIDATE_NOT_NULL(spec)
-    *spec = CMagnificationSpec::Obtain(other);
+    AutoPtr<IMagnificationSpec> temp = CMagnificationSpec::Obtain(other);
+    *spec = temp;
     REFCOUNT_ADD(*spec)
     return NOERROR;
 }
@@ -24,7 +25,8 @@ ECode CMagnificationSpecHelper::Obtain(
     /* [out] */ IMagnificationSpec** spec)
 {
     VALIDATE_NOT_NULL(spec)
-    *spec = CMagnificationSpec::Obtain();
+    AutoPtr<IMagnificationSpec> temp = CMagnificationSpec::Obtain();
+    *spec = temp;
     REFCOUNT_ADD(*spec)
     return NOERROR;
 }

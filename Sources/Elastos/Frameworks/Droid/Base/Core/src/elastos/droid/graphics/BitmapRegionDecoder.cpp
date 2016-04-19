@@ -316,6 +316,9 @@ ECode BitmapRegionDecoder::NativeDecodeRegion(
     /* [in] */ IBitmapFactoryOptions* options,
     /* [out] */ IBitmap** bitmap)
 {
+    VALIDATE_NOT_NULL(bitmap)
+    *bitmap = NULL;
+
     SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     AutoPtr<IBitmap> tileBitmap;
     SkImageDecoder* decoder = ((SkBitmapRegionDecoder*)brd)->getDecoder();
@@ -401,7 +404,8 @@ ECode BitmapRegionDecoder::NativeDecodeRegion(
     AutoPtr< ArrayOf<Byte> > buff = allocator->getStorageObjAndReset();
     Int32 bitmapCreateFlags = 0;
     if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsNative::kBitmapCreateFlag_Premultiplied;
-    *bitmap = GraphicsNative::CreateBitmap(nativeBitmap, buff, bitmapCreateFlags, NULL, NULL, -1);
+    AutoPtr<IBitmap> temp = GraphicsNative::CreateBitmap(nativeBitmap, buff, bitmapCreateFlags, NULL, NULL, -1);
+    *bitmap = temp;
     REFCOUNT_ADD(*bitmap);
     return NOERROR;
 }

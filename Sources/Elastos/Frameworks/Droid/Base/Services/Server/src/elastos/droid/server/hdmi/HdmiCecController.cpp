@@ -825,7 +825,8 @@ ECode HdmiCecController::GetLocalDeviceList(
     VALIDATE_NOT_NULL(result)
 
     AssertRunOnServiceThread();
-    *result = HdmiUtils::SparseArrayToList(mLocalDevices);
+    AutoPtr<IList> temp = HdmiUtils::SparseArrayToList(mLocalDevices);
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

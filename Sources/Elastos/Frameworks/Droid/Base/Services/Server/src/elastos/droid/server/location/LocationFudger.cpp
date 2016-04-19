@@ -102,24 +102,30 @@ ECode LocationFudger::GetOrCreate(
     /* [out] */ ILocation** outLocation)
 {
     VALIDATE_NOT_NULL(outLocation)
+    *outLocation = NULL;
+
     synchronized(this) {
         AutoPtr<ILocation> coarse;
         location->GetExtraLocation(ILocation::EXTRA_COARSE_LOCATION, (ILocation**)&coarse);
         if (coarse == NULL) {
-            *outLocation = AddCoarseLocationExtraLocked(location);
+            coarse = AddCoarseLocationExtraLocked(location);
+            *outLocation = coarse;
             REFCOUNT_ADD(*outLocation)
             return NOERROR;
         }
         Float accuracy;
         coarse->GetAccuracy(&accuracy);
         if (accuracy < mAccuracyInMeters) {
-            *outLocation = AddCoarseLocationExtraLocked(location);
+            coarse = AddCoarseLocationExtraLocked(location);
+            *outLocation = coarse;
             REFCOUNT_ADD(*outLocation)
             return NOERROR;
         }
+
         *outLocation = coarse;
         REFCOUNT_ADD(*outLocation)
     }
+
     return NOERROR;
 }
 

@@ -121,12 +121,15 @@ ECode CPhoneStatusBarView::SelectPanelForTouch(
     /* [out] */ IPanelView** view)
 {
     VALIDATE_NOT_NULL(view);
+    *view = NULL;
+
     // No double swiping. If either panel is open, nothing else can be pulled down.
     Float v = 0;
-    *view = (mNotificationPanel->GetExpandedHeight(&v), v) > 0
-            ? NULL
-            : mNotificationPanel;
-    REFCOUNT_ADD(*view);
+    mNotificationPanel->GetExpandedHeight(&v);
+    if (v <= 0) {
+        *view = mNotificationPanel;
+        REFCOUNT_ADD(*view);
+    }
     return NOERROR;
 }
 

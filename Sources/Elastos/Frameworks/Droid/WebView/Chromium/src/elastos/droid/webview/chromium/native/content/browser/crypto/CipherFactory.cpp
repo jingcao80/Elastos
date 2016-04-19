@@ -108,7 +108,7 @@ ECode CipherFactory::InnerCallable::Call(
         generator->GenerateKey((ISecretKey**)&secretKey);
         AutoPtr<IKey> key = IKey::Probe(secretKey);
         AutoPtr<CipherData> cipherData = new CipherData(key, iv);
-        *result = (IInterface*)(IObject*)cipherData;
+        *result = TO_IINTERFACE(cipherData);
         REFCOUNT_ADD(*result);
     // } catch (GeneralSecurityException e) {
     //     Log.e(TAG, "Couldn't get generator instances.");

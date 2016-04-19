@@ -1344,14 +1344,18 @@ ECode CPackageInstallerService::GetSessionInfo(
     /* [out] */ IPackageInstallerSessionInfo** info)
 {
     VALIDATE_NOT_NULL(info)
+    *info = NULL;
     synchronized (mSessionsLock) {
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
             session = it->mSecond;
         }
-        *info = session != NULL ? session->GenerateInfo() : NULL;
-        REFCOUNT_ADD(*info)
+        if (session != NULL) {
+            AutoPtr<IPackageInstallerSessionInfo> temp = session->GenerateInfo();
+            *info = temp;
+            REFCOUNT_ADD(*info)
+        }
     }
     return NOERROR;
 }

@@ -498,8 +498,9 @@ ECode NinePatchDrawable::GetOpticalInsets(
 {
     VALIDATE_NOT_NULL(insets);
     if (NeedsMirroring()) {
-        *insets = Insets::Of(mOpticalInsets->mRight, mOpticalInsets->mTop,
+        AutoPtr<IInsets> temp = Insets::Of(mOpticalInsets->mRight, mOpticalInsets->mTop,
                 mOpticalInsets->mLeft, mOpticalInsets->mBottom);
+        *insets = temp;
         REFCOUNT_ADD(*insets);
         return NOERROR;
     }

@@ -14,7 +14,8 @@ ECode CRegionHelper::Obtain(
     /* [out] */ IRegion** region)
 {
     VALIDATE_NOT_NULL(region)
-    *region = CRegion::Obtain();
+    AutoPtr<IRegion> temp = CRegion::Obtain();
+    *region = temp;
     REFCOUNT_ADD(*region)
     return NOERROR;
 }
@@ -24,7 +25,8 @@ ECode CRegionHelper::Obtain(
     /* [out] */ IRegion** region)
 {
     VALIDATE_NOT_NULL(region)
-    *region = CRegion::Obtain(other);
+    AutoPtr<IRegion> temp = CRegion::Obtain(other);
+    *region = temp;
     REFCOUNT_ADD(*region)
     return NOERROR;
 }

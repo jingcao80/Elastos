@@ -157,7 +157,8 @@ ECode AnimationDrawable::GetFrame(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    *drawable = mAnimationState->GetChild(index);
+    AutoPtr<IDrawable> temp = mAnimationState->GetChild(index);
+    *drawable = temp;
     REFCOUNT_ADD(*drawable);
     return NOERROR;
 }

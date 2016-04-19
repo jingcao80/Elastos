@@ -1217,7 +1217,8 @@ ECode CMediaRouterService::GetState(
     Int64 token = Binder::ClearCallingIdentity();
     // try {
     synchronized (mLock) {
-        *result = GetStateLocked(client);
+        AutoPtr<IMediaRouterClientState> temp = GetStateLocked(client);
+        *result = temp;
         REFCOUNT_ADD(*result)
     }
     // } finally {

@@ -327,7 +327,8 @@ ECode Charset::DefaultCharset(
     /* [out] */ ICharset** charset)
 {
     VALIDATE_NOT_NULL(charset);
-    *charset = GetDefaultCharset();
+    AutoPtr<ICharset> temp = GetDefaultCharset();
+    *charset = temp;
     REFCOUNT_ADD(*charset)
     return NOERROR;
 }

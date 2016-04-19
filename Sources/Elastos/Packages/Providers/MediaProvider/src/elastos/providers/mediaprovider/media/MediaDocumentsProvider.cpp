@@ -816,23 +816,27 @@ ECode MediaDocumentsProvider::OpenDocumentThumbnail(
     // try {
         if (TYPE_IMAGES_BUCKET.Equals(ident->mType)) {
             Int64 id = GetImageForBucketCleared(ident->mId);
-            *result = OpenOrCreateImageThumbnailCleared(id, signal);
+            AutoPtr<IAssetFileDescriptor> temp = OpenOrCreateImageThumbnailCleared(id, signal);
+            *result = temp;
             REFCOUNT_ADD(*result);
             Binder::RestoreCallingIdentity(token);
             return NOERROR;
         } else if (TYPE_IMAGE.Equals(ident->mType)) {
-            *result = OpenOrCreateImageThumbnailCleared(ident->mId, signal);
+            AutoPtr<IAssetFileDescriptor> temp = OpenOrCreateImageThumbnailCleared(ident->mId, signal);
+            *result = temp;
             REFCOUNT_ADD(*result);
             Binder::RestoreCallingIdentity(token);
             return NOERROR;
         } else if (TYPE_VIDEOS_BUCKET.Equals(ident->mType)) {
             Int64 id = GetVideoForBucketCleared(ident->mId);
-            *result = OpenOrCreateVideoThumbnailCleared(id, signal);
+            AutoPtr<IAssetFileDescriptor> temp = OpenOrCreateVideoThumbnailCleared(id, signal);
+            *result = temp;
             REFCOUNT_ADD(*result);
             Binder::RestoreCallingIdentity(token);
             return NOERROR;
         } else if (TYPE_VIDEO.Equals(ident->mType)) {
-            *result = OpenOrCreateVideoThumbnailCleared(ident->mId, signal);
+            AutoPtr<IAssetFileDescriptor> temp = OpenOrCreateVideoThumbnailCleared(ident->mId, signal);
+            *result = temp;
             REFCOUNT_ADD(*result);
             Binder::RestoreCallingIdentity(token);
             return NOERROR;

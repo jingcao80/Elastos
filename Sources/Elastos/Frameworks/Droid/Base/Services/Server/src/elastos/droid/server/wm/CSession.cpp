@@ -674,7 +674,8 @@ ECode CSession::GetWindowId(
     /* [out] */ IIWindowId** winId)
 {
     VALIDATE_NOT_NULL(winId)
-    *winId = mService->GetWindowId(window);
+    AutoPtr<IIWindowId> temp = mService->GetWindowId(window);
+    *winId = temp;
     REFCOUNT_ADD(*winId)
     return NOERROR;
 }

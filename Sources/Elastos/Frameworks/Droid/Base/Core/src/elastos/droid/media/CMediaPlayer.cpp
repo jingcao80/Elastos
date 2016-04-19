@@ -1087,7 +1087,9 @@ ECode CMediaPlayer::MyAnchor::SetSubtitleWidget(
 ECode CMediaPlayer::MyAnchor::GetSubtitleLooper(
     /* [out] */ ILooper** result)
 {
-    *result = Looper::GetMainLooper();
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ILooper> temp = Looper::GetMainLooper();
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

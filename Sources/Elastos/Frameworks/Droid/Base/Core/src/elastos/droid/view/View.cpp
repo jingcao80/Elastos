@@ -4620,69 +4620,58 @@ ECode View::FindUserSetNextFocus(
     /* [out] */ IView** res)
 {
     VALIDATE_NOT_NULL(res)
+
+    AutoPtr<IView> temp;
     switch (direction) {
         case IView::FOCUS_LEFT:
             if (mNextFocusLeftId == IView::NO_ID) {
-                *res = NULL;
-                return NOERROR;
+                break;
             }
-            *res = FindViewInsideOutShouldExist(root, mNextFocusLeftId);
-            REFCOUNT_ADD(*res)
-            return NOERROR;
+            temp = FindViewInsideOutShouldExist(root, mNextFocusLeftId);
+            break;
 
         case IView::FOCUS_RIGHT:
             if (mNextFocusRightId == IView::NO_ID) {
-                *res = NULL;
-                return NOERROR;
+                break;
             }
-            *res = FindViewInsideOutShouldExist(root, mNextFocusRightId);
-            REFCOUNT_ADD(*res)
-            return NOERROR;
+            temp = FindViewInsideOutShouldExist(root, mNextFocusRightId);
+            break;
 
         case IView::FOCUS_UP:
             if (mNextFocusUpId == IView::NO_ID) {
-                *res = NULL;
-                return NOERROR;
+                break;
             }
-            *res = FindViewInsideOutShouldExist(root, mNextFocusUpId);
-            REFCOUNT_ADD(*res)
-            return NOERROR;
+            temp = FindViewInsideOutShouldExist(root, mNextFocusUpId);
+            break;
 
         case IView::FOCUS_DOWN:
             if (mNextFocusDownId == IView::NO_ID) {
-                *res = NULL;
-                return NOERROR;
+                break;
             }
-            *res = FindViewInsideOutShouldExist(root, mNextFocusDownId);
-            REFCOUNT_ADD(*res)
-            return NOERROR;
+            temp = FindViewInsideOutShouldExist(root, mNextFocusDownId);
+            break;
 
         case IView::FOCUS_FORWARD:
             if (mNextFocusForwardId == IView::NO_ID) {
-                *res = NULL;
-                return NOERROR;
+                break;
             }
-            *res = FindViewInsideOutShouldExist(root, mNextFocusForwardId);
-            REFCOUNT_ADD(*res)
-            return NOERROR;
+            temp = FindViewInsideOutShouldExist(root, mNextFocusForwardId);
+            break;
 
         case IView::FOCUS_BACKWARD: {
             if (mID == IView::NO_ID) {
-                *res = NULL;
-                return NOERROR;
+                break;
             }
             const Int32 id = mID;
-            AutoPtr<IView> view;
             AutoPtr<_Predicate> p = new _Predicate(id);
             root->FindViewByPredicateInsideOut(
-                this, p, (IView**)&view);
-            *res = view;
-            REFCOUNT_ADD(*res)
-            return NOERROR;
+                this, p, (IView**)&temp);
+            break;
         }
     }
 
-    *res = NULL;
+    *res = temp;
+    REFCOUNT_ADD(*res)
     return NOERROR;
 }
 

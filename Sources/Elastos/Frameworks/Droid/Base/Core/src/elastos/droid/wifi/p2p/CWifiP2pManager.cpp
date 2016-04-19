@@ -49,7 +49,8 @@ ECode CWifiP2pManager::Initialize(
     VALIDATE_NOT_NULL(channel);
     AutoPtr<IMessenger> messenger;
     GetMessenger((IMessenger**)&messenger);
-    *channel = InitalizeChannel(srcContext, srcLooper, listener, messenger);
+    AutoPtr<IWifiP2pManagerChannel> temp = InitalizeChannel(srcContext, srcLooper, listener, messenger);
+    *channel = temp;
     REFCOUNT_ADD(*channel);
     return NOERROR;
 }
@@ -63,7 +64,8 @@ ECode CWifiP2pManager::InitializeInternal(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IMessenger> messenger;
     GetP2pStateMachineMessenger((IMessenger**)&messenger);
-    *result = InitalizeChannel(srcContext, srcLooper, listener, messenger);
+    AutoPtr<IWifiP2pManagerChannel> temp = InitalizeChannel(srcContext, srcLooper, listener, messenger);
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

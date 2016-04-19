@@ -583,7 +583,7 @@ ECode SuggestionAdapter::GetItem(
     /* [out] */ IInterface** item)
 {
     VALIDATE_NOT_NULL(item)
-    *item = (IObject*)((*mPopupWindow->mSuggestionInfos)[position]);
+    *item = TO_IINTERFACE((*mPopupWindow->mSuggestionInfos)[position]);
     REFCOUNT_ADD(*item)
     return NOERROR;
 }

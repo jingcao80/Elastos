@@ -474,7 +474,8 @@ ECode CUserManagerService::GetProfileParent(
             return NOERROR;
         }
         else {
-            *info = GetUserInfoLocked(parentUserId);
+            AutoPtr<IUserInfo> temp = GetUserInfoLocked(parentUserId);
+            *info = temp;
             REFCOUNT_ADD(*info)
         }
     }
@@ -1564,7 +1565,8 @@ ECode CUserManagerService::CreateProfileForUser(
         Slogger::W(LOG_TAG, "Only user owner can have profiles");
         return NOERROR;
     }
-    *userInfo = CreateUserInternal(name, flags, userId);
+    AutoPtr<IUserInfo> temp = CreateUserInternal(name, flags, userId);
+    *userInfo = temp;
     REFCOUNT_ADD(*userInfo)
     return NOERROR;
 }
@@ -1577,7 +1579,8 @@ ECode CUserManagerService::CreateUser(
     VALIDATE_NOT_NULL(uInfo)
     *uInfo = NULL;
     FAIL_RETURN(CheckManageUsersPermission(String("Only the system can create users")))
-    *uInfo = CreateUserInternal(name, flags, IUserHandle::USER_NULL);
+    AutoPtr<IUserInfo> temp = CreateUserInternal(name, flags, IUserHandle::USER_NULL);
+    *uInfo = temp;
     REFCOUNT_ADD(*uInfo)
     return NOERROR;
 }
@@ -1944,7 +1947,8 @@ ECode CUserManagerService::GetApplicationRestrictionsForUser(
     }
     synchronized (mPackagesLock) {
         // Read the restrictions from XML
-        *bundle = ReadApplicationRestrictionsLocked(packageName, userId);
+        AutoPtr<IBundle> temp = ReadApplicationRestrictionsLocked(packageName, userId);
+        *bundle = temp;
         REFCOUNT_ADD(*bundle)
     }
     return NOERROR;

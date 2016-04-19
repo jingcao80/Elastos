@@ -1645,10 +1645,12 @@ ECode HdmiCecLocalDeviceTv::GetDeviceInfoList(
 
     AssertRunOnServiceThread();
     if (includeLocalDevice) {
-        *result = HdmiUtils::SparseArrayToList(mDeviceInfos);
+        AutoPtr<IList> temp = HdmiUtils::SparseArrayToList(mDeviceInfos);
+        *result = temp;
         REFCOUNT_ADD(*result)
         return NOERROR;
-    } else {
+    }
+    else {
         AutoPtr<IArrayList> infoList;
         CArrayList::New((IArrayList**)&infoList);
         Int32 size;

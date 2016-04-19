@@ -967,13 +967,15 @@ ECode StateMachine::GetLogRec(
     /* [out] */ IStateMachineLogRec** logRec)
 {
     VALIDATE_NOT_NULL(logRec)
+    *logRec = NULL;
+
     // mSmHandler can be null if the state machine has quit.
     AutoPtr<SmHandler> smh = mSmHandler;
     if (smh == NULL) {
-        *logRec = NULL;
         return NOERROR;
     }
-    *logRec = smh->mLogRecords->Get(index);
+    AutoPtr<IStateMachineLogRec> temp = smh->mLogRecords->Get(index);
+    *logRec = temp;
     REFCOUNT_ADD(*logRec)
     return NOERROR;
 }

@@ -147,20 +147,15 @@ ECode ActivityChooserView::InnerForwardingListener::GetPopup(
     /* [out] */ IListPopupWindow** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getListPopupWindow();
 
-    *result = mOwner->GetListPopupWindow();
+    AutoPtr<IListPopupWindow> temp = mOwner->GetListPopupWindow();
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 Boolean ActivityChooserView::InnerForwardingListener::OnForwardingStarted()
 {
-    // ==================before translated======================
-    // showPopup();
-    // return true;
-
     Boolean resTmp;
     mOwner->ShowPopup(&resTmp);
     return TRUE;
@@ -168,10 +163,6 @@ Boolean ActivityChooserView::InnerForwardingListener::OnForwardingStarted()
 
 Boolean ActivityChooserView::InnerForwardingListener::OnForwardingStopped()
 {
-    // ==================before translated======================
-    // dismissPopup();
-    // return true;
-
     Boolean resTmp;
     mOwner->DismissPopup(&resTmp);
     return TRUE;

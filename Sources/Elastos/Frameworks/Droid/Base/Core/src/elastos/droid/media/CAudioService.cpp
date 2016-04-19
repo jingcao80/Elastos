@@ -982,7 +982,9 @@ ECode CAudioService::VolumeController::IsSameBinder(
 ECode CAudioService::VolumeController::AsBinder(
     /* [out] */ IBinder** result)
 {
-    *result = Binder(mController);
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IBinder> temp = Binder(mController);
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

@@ -18,6 +18,9 @@ def read_file(path):
             handle.close()
     return lines
 
+def isCodeLine(line):
+    return (len(line) > 0) and (line.startswith("//") == False)
+
 def find_declare_match(param, line):
     pattern = re.compile(r'AutoPtr\s*<(.*)>\s*(.*)'+'[, ]'+param+'[; ,]')
     return pattern.search(line)
@@ -34,7 +37,7 @@ def find_declare_line(param, lines, lineIndex):
 
     for i in range(lineIndex, 0, -1):
         line = lines[i]
-        if (len(line) > 1) and (line.startswith("//") == False):
+        if isCodeLine(line):
             match = find_declare_match(param, line)
             if match:
                 #print line, 'match', match.group()
@@ -104,7 +107,7 @@ def process_file(path, logFile):
     lines = read_file(path)
     lineNum = 0
     for eachLine in lines:
-        if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
+        if isCodeLine(eachLine):
             pattern = re.compile(r'(\()(I\w*)(\s*\*\*\s*\)\s*&\s*)([a-zA-Z]\w*)(\s*\))')
             match = pattern.search(eachLine)
             if match:

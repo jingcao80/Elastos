@@ -25,7 +25,8 @@ ECode CRange::GetLower(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = mRange->GetLower();
+    AutoPtr<IInterface> temp = mRange->GetLower();
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -34,7 +35,8 @@ ECode CRange::GetUpper(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = mRange->GetUpper();
+    AutoPtr<IInterface> temp = mRange->GetUpper();
+    *result = temp;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

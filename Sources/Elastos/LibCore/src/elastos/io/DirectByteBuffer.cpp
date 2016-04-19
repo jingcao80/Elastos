@@ -700,7 +700,8 @@ ECode DirectByteBuffer::AsCharBuffer(
     *buffer = NULL;
 
     FAIL_RETURN(CheckNotFreed());
-    *buffer = ByteBufferAsCharBuffer::AsCharBuffer(this);
+    AutoPtr<ICharBuffer> temp = ByteBufferAsCharBuffer::AsCharBuffer(this);
+    *buffer = temp;
     REFCOUNT_ADD(*buffer)
     return NOERROR;
 }
@@ -712,7 +713,8 @@ ECode DirectByteBuffer::AsDoubleBuffer(
     *buffer = NULL;
 
     FAIL_RETURN(CheckNotFreed());
-    *buffer = ByteBufferAsDoubleBuffer::AsDoubleBuffer(this);
+    AutoPtr<IDoubleBuffer> temp = ByteBufferAsDoubleBuffer::AsDoubleBuffer(this);
+    *buffer = temp;
     REFCOUNT_ADD(*buffer)
     return NOERROR;
 }
@@ -724,7 +726,8 @@ ECode DirectByteBuffer::AsFloatBuffer(
     *buffer = NULL;
 
     FAIL_RETURN(CheckNotFreed());
-    *buffer = ByteBufferAsFloatBuffer::AsFloatBuffer(this);
+    AutoPtr<IFloatBuffer> temp = ByteBufferAsFloatBuffer::AsFloatBuffer(this);
+    *buffer = temp;
     REFCOUNT_ADD(*buffer)
     return NOERROR;
 }
@@ -736,7 +739,8 @@ ECode DirectByteBuffer::AsInt16Buffer(
     *buffer = NULL;
 
     FAIL_RETURN(CheckNotFreed());
-    *buffer = ByteBufferAsInt16Buffer::AsInt16Buffer(this);
+    AutoPtr<IInt16Buffer> temp = ByteBufferAsInt16Buffer::AsInt16Buffer(this);
+    *buffer = temp;
     REFCOUNT_ADD(*buffer)
     return NOERROR;
 }
@@ -748,7 +752,8 @@ ECode DirectByteBuffer::AsInt32Buffer(
     *buffer = NULL;
 
     FAIL_RETURN(CheckNotFreed());
-    *buffer = ByteBufferAsInt32Buffer::AsInt32Buffer(this);
+    AutoPtr<IInt32Buffer> temp = ByteBufferAsInt32Buffer::AsInt32Buffer(this);
+    *buffer = temp;
     REFCOUNT_ADD(*buffer)
     return NOERROR;
 }
@@ -760,7 +765,8 @@ ECode DirectByteBuffer::AsInt64Buffer(
     *buffer = NULL;
 
     FAIL_RETURN(CheckNotFreed());
-    *buffer = ByteBufferAsInt64Buffer::AsInt64Buffer(this);
+    AutoPtr<IInt64Buffer> temp = ByteBufferAsInt64Buffer::AsInt64Buffer(this);
+    *buffer = temp;
     REFCOUNT_ADD(*buffer)
     return NOERROR;
 }

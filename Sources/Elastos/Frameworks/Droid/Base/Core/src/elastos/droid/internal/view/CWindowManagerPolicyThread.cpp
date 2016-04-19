@@ -23,7 +23,8 @@ ECode CWindowManagerPolicyThread::GetThread(
     /* [out] */ IThread** thread)
 {
     VALIDATE_NOT_NULL(thread);
-    *thread = WindowManagerPolicyThread::GetThread();
+    AutoPtr<IThread> temp = WindowManagerPolicyThread::GetThread();
+    *thread = temp;
     REFCOUNT_ADD(*thread);
     return NOERROR;
 }
@@ -32,7 +33,8 @@ ECode CWindowManagerPolicyThread::GetLooper(
     /* [out] */ ILooper** looper)
 {
     VALIDATE_NOT_NULL(looper);
-    *looper = WindowManagerPolicyThread::GetLooper();
+    AutoPtr<ILooper> temp = WindowManagerPolicyThread::GetLooper();
+    *looper = temp;
     REFCOUNT_ADD(*looper);
     return NOERROR;
 }

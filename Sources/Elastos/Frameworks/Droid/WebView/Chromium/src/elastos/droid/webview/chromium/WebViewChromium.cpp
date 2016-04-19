@@ -3358,13 +3358,14 @@ ECode WebViewChromium::GetCertificate(
     CheckNeedsPost(&resTmp);
     if (resTmp) {
         AutoPtr<ICallable> callable = new InnerGetCertificateCallable(this);
-        AutoPtr<IInterface> interfaceTmp = RunOnUiThreadBlocking(callable);
-        *result = ISslCertificate::Probe(interfaceTmp);
+        AutoPtr<IInterface> temp = RunOnUiThreadBlocking(callable);
+        *result = ISslCertificate::Probe(temp);
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
 
-    *result = mAwContents->GetCertificate();
+    AutoPtr<ISslCertificate> temp = mAwContents->GetCertificate();
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -4240,7 +4241,8 @@ ECode WebViewChromium::CapturePicture(
         return NOERROR;
     }
 
-    *result = mAwContents->CapturePicture();
+    AutoPtr<IPicture> temp = mAwContents->CapturePicture();
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -4529,7 +4531,8 @@ ECode WebViewChromium::GetFavicon(
         return NOERROR;
     }
 
-    *result = mAwContents->GetFavicon();
+    AutoPtr<IBitmap> temp = mAwContents->GetFavicon();
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -5554,7 +5557,8 @@ ECode WebViewChromium::GetAccessibilityNodeProvider(
         return NOERROR;
     }
 
-    *result = mAwContents->GetAccessibilityNodeProvider();
+    AutoPtr<IAccessibilityNodeProvider> temp = mAwContents->GetAccessibilityNodeProvider();
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -5897,8 +5901,9 @@ ECode WebViewChromium::OnCreateInputConnection(
     /* [in] */ IEditorInfo* outAttrs,
     /* [out] */ IInputConnection** result)
 {
-    VALIDATE_NOT_NULL(outAttrs);
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    VALIDATE_NOT_NULL(outAttrs);
     // ==================before translated======================
     // mFactory.startYourEngines(false);
     // if (checkNeedsPost()) {
@@ -5910,11 +5915,12 @@ ECode WebViewChromium::OnCreateInputConnection(
     Boolean resTmp = FALSE;
     CheckNeedsPost(&resTmp);
     if (resTmp) {
-       *result = NULL;
+
        return NOERROR;
     }
 
-    *result = mAwContents->OnCreateInputConnection(outAttrs);
+    AutoPtr<IInputConnection> temp = mAwContents->OnCreateInputConnection(outAttrs);
+    *result = temp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

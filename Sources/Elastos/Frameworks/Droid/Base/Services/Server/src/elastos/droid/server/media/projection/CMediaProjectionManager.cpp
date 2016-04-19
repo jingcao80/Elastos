@@ -111,7 +111,8 @@ ECode CMediaProjectionManager::GetActiveProjectionInfo(
     }
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    *result = mHost->GetActiveProjectionInfo();
+    AutoPtr<IMediaProjectionInfo> temp = mHost->GetActiveProjectionInfo();
+    *result = temp;
     REFCOUNT_ADD(*result)
     Binder::RestoreCallingIdentity(token);
     return NOERROR;

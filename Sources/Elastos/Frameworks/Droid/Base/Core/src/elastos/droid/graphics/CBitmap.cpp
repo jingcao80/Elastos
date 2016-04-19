@@ -1559,12 +1559,12 @@ ECode CBitmap::NativeCreate(
     /* [out] */ IBitmap** bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
+    *bitmap = NULL;
 
     SkColorType colorType = GraphicsNative::LegacyBitmapConfigToColorType(nativeConfig);
     if (colors != NULL) {
         Int32 n = colors->GetLength();
         if (n < (Int32)SkAbs32(stride) * height) {
-            *bitmap = NULL;
             return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
         }
     }
@@ -1581,7 +1581,6 @@ ECode CBitmap::NativeCreate(
     AutoPtr< ArrayOf<Byte> > buff;
     FAIL_RETURN(GraphicsNative::AllocateDroidPixelRef(&nativeBitmap, NULL, (ArrayOf<Byte>**)&buff));
     if (buff == NULL) {
-        *bitmap = NULL;
         return NOERROR;
     }
 
@@ -1589,7 +1588,8 @@ ECode CBitmap::NativeCreate(
         FAIL_RETURN(GraphicsNative::SetPixels(colors, offset, stride, 0, 0, width, height, nativeBitmap));
     }
 
-    *bitmap = GraphicsNative::CreateBitmap(new SkBitmap(nativeBitmap), buff, GetPremulBitmapCreateFlags(isMutable), NULL, NULL, -1);
+    AutoPtr<IBitmap> temp = GraphicsNative::CreateBitmap(new SkBitmap(nativeBitmap), buff, GetPremulBitmapCreateFlags(isMutable), NULL, NULL, -1);
+    *bitmap = temp;
     REFCOUNT_ADD(*bitmap);
     return NOERROR;
 }
@@ -1600,18 +1600,21 @@ ECode CBitmap::NativeCopy(
     /* [in] */ Boolean isMutable,
     /* [out] */ IBitmap** bitmap)
 {
+    VALIDATE_NOT_NULL(bitmap)
+    *bitmap = NULL;
+
     const SkBitmap* src = reinterpret_cast<SkBitmap*>(srcBitmap);
     SkColorType dstCT = GraphicsNative::LegacyBitmapConfigToColorType(nativeConfig);
     SkBitmap result;
     GraphicsNative::DroidPixelAllocator allocator;
 
     if (!src->copyTo(&result, dstCT, &allocator)) {
-        *bitmap = NULL;
         return NOERROR;
     }
 
-    *bitmap = GraphicsNative::CreateBitmap(new SkBitmap(result), allocator.getStorageObj(),
+    AutoPtr<IBitmap> temp = GraphicsNative::CreateBitmap(new SkBitmap(result), allocator.getStorageObj(),
             GetPremulBitmapCreateFlags(isMutable), NULL, NULL, -1);
+    *bitmap = temp;
     REFCOUNT_ADD(*bitmap);
     return NOERROR;
 }

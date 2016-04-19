@@ -523,6 +523,7 @@ ECode HdmiControlService::BinderService::GetInputDevices(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
     mHost->EnforceAccessPermission();
     // No need to hold the lock for obtaining TV device as the local device instance
@@ -539,9 +540,10 @@ ECode HdmiControlService::BinderService::GetInputDevices(
         else {
             ((HdmiCecLocalDeviceTv*) tv.Get())->GetSafeExternalInputsLocked((IList**)&cecDevices);
         }
-        AutoPtr<IList> mhlDevicesLocked;
+        AutoPtr<IList> mhlDevicesLocked, temp;
         mHost->GetMhlDevicesLocked((IList**)&mhlDevicesLocked);
-        *result = HdmiUtils::MergeToUnmodifiableList(cecDevices, mhlDevicesLocked);
+        temp = HdmiUtils::MergeToUnmodifiableList(cecDevices, mhlDevicesLocked);
+        *result = temp;
         REFCOUNT_ADD(*result)
     }
     return NOERROR;
