@@ -1035,7 +1035,7 @@ void LinearLayout::ForceUniformWidth(
         if (v != IView::GONE) {
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
             Int32 width;
             IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
@@ -1118,7 +1118,7 @@ ECode LinearLayout::MeasureHorizontal(
 
         AutoPtr<IViewGroupLayoutParams> lv;
         child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-        ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+        ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
         Int32 width, height;
         IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
@@ -1288,7 +1288,7 @@ ECode LinearLayout::MeasureHorizontal(
 
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
             Int32 left, top, right, bottom;
             IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
@@ -1343,7 +1343,7 @@ ECode LinearLayout::MeasureHorizontal(
 
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
             Float weight;
             lp->GetWeight(&weight);
@@ -1475,7 +1475,7 @@ ECode LinearLayout::MeasureHorizontal(
 
                 AutoPtr<IViewGroupLayoutParams> lv;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-                ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+                ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
                 Float weight;
                 lp->GetWeight(&weight);
@@ -1532,7 +1532,7 @@ void LinearLayout::ForceUniformHeight(
         if (visibility != IView::GONE) {
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
             Int32 height;
             IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
@@ -1662,7 +1662,7 @@ void LinearLayout::LayoutVertical(
 
                 AutoPtr<IViewGroupLayoutParams> lv;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-                ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+                ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
                 Int32 width, height, gravity;
                 IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
@@ -1785,7 +1785,7 @@ void LinearLayout::LayoutHorizontal(
 
                 AutoPtr<IViewGroupLayoutParams> lv;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-                ILinearLayoutLayoutParams* lp = (ILinearLayoutLayoutParams*)lv.Get();
+                ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
                 Int32 width, height,  gravity;
                 IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
@@ -1934,9 +1934,9 @@ ECode LinearLayout::GenerateLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params);
-    AutoPtr<ILinearLayoutLayoutParams> lp;
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
+    AutoPtr<ILinearLayoutLayoutParams> lp;
     FAIL_RETURN(CLinearLayoutLayoutParams::New(ctx, attrs, (ILinearLayoutLayoutParams**)&lp));
     *params = IViewGroupLayoutParams::Probe(lp);
     REFCOUNT_ADD(*params);
