@@ -235,7 +235,7 @@ ignored_list = [
 ############################################################################################################
 
 #results: 121 errors, 0 warnings.
-scan_path = '/home/kesalin/Elastos/Sources/'                                           # default sacn dir
+scan_path = '/home/kesalin/Elastos5/Sources/'                                           # default sacn dir
 log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.log'     # default log file path
 
 print "python  :", sys.argv[0]
