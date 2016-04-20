@@ -20,6 +20,8 @@
 #include <dirent.h>
 #include <assert.h>
 
+using Elastos::Core::IClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::Logging::Logger;
 
 #ifndef ASSERT_TRUE
@@ -124,14 +126,10 @@ ECode DroidRuntime::CallMain(
     AutoPtr<IMethodInfo> methodInfo;
     AutoPtr<IArgumentList> argumentList;
 
-    ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "Acquire \"%s\" module info failed!\n",
-            moduleName.string());
-        return ec;
-    }
+    AutoPtr<IClassLoader> cl;
+    CPathClassLoader::New(moduleName, NULL, (IClassLoader**)&cl);
 
-    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+    ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
         Logger::E(TAG, "Acquire \"%s/%s\" class info failed!\n",
             moduleName.string(), className.string());

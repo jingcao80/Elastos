@@ -58,6 +58,8 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("BroadcastReceiver::PendingResult")
+
         PendingResult();
 
         PendingResult(
@@ -218,14 +220,13 @@ public:
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("BroadcastReceiver")
+
     BroadcastReceiver();
 
     virtual ~BroadcastReceiver();
 
     CARAPI constructor();
-
-    CARAPI ToString(
-        /* [out] */ String* info);
 
     /**
      * This method is called when the BroadcastReceiver is receiving an Intent

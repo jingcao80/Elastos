@@ -6,7 +6,8 @@
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/app/CInstrumentationHelper.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-#include "elastos/droid/os/CUserHandle.h"
+#include "elastos/droid/app/ApplicationLoaders.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/content/res/CResources.h"
@@ -14,6 +15,7 @@
 #include "elastos/droid/content/pm/PackageManager.h"
 #include "elastos/droid/content/pm/CApplicationInfo.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/droid/DroidRuntime.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
@@ -24,7 +26,7 @@
 using Elastos::Droid::DroidRuntime;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Content::EIID_IPendingResult;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IAssetManager;
@@ -32,14 +34,18 @@ using Elastos::Droid::Content::Res::CAssetManager;
 using Elastos::Droid::Content::Pm::PackageManager;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::CApplicationInfo;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::DisplayAdjustments;
 
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::IO::CFile;
+using Elastos::IO::IFileHelper;
+using Elastos::IO::CFileHelper;
 using Elastos::Utility::Etl::Pair;
 using Elastos::Utility::Logging::Slogger;
 
@@ -92,8 +98,8 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
         mCurIntent->GetInt32Extra(String("seq"), -1, &seq);
         String action;
         mCurIntent->GetAction(&action);
-        Slogger::I(CActivityThread::TAG, "Dispatching broadcast %s seq=%d to %s"
-                , action.string(), seq, TO_CSTR(mHost->mReceiver));
+        Slogger::I(CActivityThread::TAG, "Dispatching broadcast %s seq=%d to %s",
+            action.string(), seq, TO_CSTR(mHost->mReceiver));
         Slogger::I(CActivityThread::TAG, "  mRegistered=%d mOrderedHint=%d", mHost->mRegistered, ordered);
     }
 
@@ -113,9 +119,11 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     }
     // Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
     // try {
-    Slogger::W(TAG, "SetPendingResult: Need ClassLoader.");
-    AutoPtr<IClassLoader> cl;
-    // ClassLoader cl =  mReceiver.getClass().getClassLoader();
+    AutoPtr<IClassLoader> cl = Object::GetClassLoader(receiver.Get());
+    if (cl == NULL) {
+        Slogger::W(TAG, "LoadedPkg::ReceiverDispatcher::Args::Run(): %s is not a CAR class.",
+            TO_CSTR(receiver));
+    }
     intent->SetExtrasClassLoader(cl);
     SetExtrasClassLoader(cl);
     receiver->SetPendingResult(this);
@@ -132,7 +140,8 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
         if (mHost->mInstrumentation == NULL ||
                 (mHost->mInstrumentation->OnException(mHost->mReceiver, ec, &result), !result)) {
             // Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            Slogger::E(CActivityThread::TAG, "Error receiving broadcast %p in %p ec: 0x%08x", intent.Get(), mHost->mReceiver.Get(), ec);
+            Slogger::E(CActivityThread::TAG, "Error receiving broadcast %s in %s ec: 0x%08x",
+                TO_CSTR(intent), TO_CSTR(mHost->mReceiver), ec);
             mHost = NULL;
             return E_RUNTIME_EXCEPTION;
             // throw new RuntimeException(
@@ -584,8 +593,8 @@ ECode LoadedPkg::constructor(
     mSplitAppDirs = info->mSplitSourceDirs;
     mSplitResDirs = info->mUid == myUid ? info->mSplitSourceDirs : info->mSplitPublicSourceDirs;
     mOverlayDirs = info->mResourceDirs;
-    if (!CUserHandle::IsSameUser(info->mUid, myUid) && !Process::IsIsolated()) {
-        info->mDataDir = PackageManager::GetDataDirForUser(CUserHandle::GetUserId(myUid),
+    if (!UserHandle::IsSameUser(info->mUid, myUid) && !Process::IsIsolated()) {
+        info->mDataDir = PackageManager::GetDataDirForUser(UserHandle::GetUserId(myUid),
              mPackageName);
     }
 
@@ -708,6 +717,50 @@ ECode LoadedPkg::SetCompatibilityInfo(
     return mDisplayAdjustments->SetCompatibilityInfo(compatInfo);
 }
 
+AutoPtr<ArrayOf<String> > LoadedPkg::GetLibrariesFor(
+    /* [in] */ const String& packageName)
+{
+    AutoPtr<IApplicationInfo> ai;
+
+    ECode ec = CActivityThread::GetPackageManager()->GetApplicationInfo(packageName,
+        IPackageManager::GET_SHARED_LIBRARY_FILES, UserHandle::GetMyUserId(),
+        (IApplicationInfo**)&ai);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "failed to GetLibrariesFor %s", packageName.string());
+    }
+
+    if (ai == NULL) {
+        return NULL;
+    }
+
+    AutoPtr<ArrayOf<String> > libs;
+    ai->GetSharedLibraryFiles((ArrayOf<String>**)&libs);
+    return libs;
+}
+
+String LoadedPkg::GetModulePath(
+    /* [in] */ const String& appSourceDir,
+    /* [in] */ const String& packageName)
+{
+    StringBuilder sb;
+    if (appSourceDir.EndWith(".epk")) {
+        sb.Append("/data/elastos/");
+        sb.Append(packageName);
+        sb.Append(".eco");
+    }
+    else if (appSourceDir.EndWith("framework-res.apk")) {
+            sb.Append("/system/lib/Elastos.Droid.Server.eco");
+    }
+    else {
+        sb.Append("/data/data/com.elastos.runtime/elastos/");
+        sb.Append(packageName);
+        sb.Append("/");
+        sb.Append(packageName);
+        sb.Append(".eco");
+    }
+    return sb.ToString();
+}
+
 ECode LoadedPkg::GetClassLoader(
     /* [out] */ IClassLoader** loader)
 {
@@ -721,120 +774,127 @@ ECode LoadedPkg::GetClassLoader(
         return NOERROR;
     }
 
-    // if (mIncludeCode && !mPackageName.equals("android")) {
-    //     // Avoid the binder call when the package is the current application package.
-    //     // The activity manager will perform ensure that dexopt is performed before
-    //     // spinning up the process.
-    //     if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
-    //         final String isa = DroidRuntime.getRuntime()->GetInstructionSetString();
-    //         try {
-    //             ActivityThread.getPackageManager().performDexOptIfNeeded(mPackageName, isa);
-    //         } catch (RemoteException re) {
-    //             // Ignored.
-    //         }
-    //     }
+    if (mIncludeCode && !mPackageName.Equals("android")) {
+        // Avoid the binder call when the package is the current application package.
+        // The activity manager will perform ensure that dexopt is performed before
+        // spinning up the process.
+        // if (!Objects.Equals(mPackageName, CActivityThread::GetCurrentPackageName())) {
+        //     String isa = DroidRuntime::GetRuntime()->GetInstructionSetString();
+        //     CActivityThread::GetPackageManager()->PerformDexOptIfNeeded(mPackageName, isa);
+        // }
 
-    //     final ArrayList<String> zipPaths = new ArrayList<>();
-    //     final ArrayList<String> libPaths = new ArrayList<>();
+        if (mRegisterPackage) {
+            // TODO
+            // ActivityManagerNative::GetDefault()->AddPackageDependency(mPackageName);
+        }
 
-    //     if (mRegisterPackage) {
-    //         try {
-    //             ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
-    //         } catch (RemoteException e) {
-    //         }
-    //     }
+        List<String> zipPaths, libPaths;
+        zipPaths.PushBack(mAppDir);
+        // if (mSplitAppDirs != NULL) {
+        //     for (Int32 i = 0; i < mSplitAppDirs->GetLength(); ++i) {
+        //         zipPaths.PushBack((*mSplitAppDirs)[i]);
+        //     }
+        // }
 
-    //     zipPaths.add(mAppDir);
-    //     if (mSplitAppDirs != null) {
-    //         Collections.addAll(zipPaths, mSplitAppDirs);
-    //     }
+        libPaths.PushBack(mLibDir);
 
-    //     libPaths.add(mLibDir);
+        // /*
+        //  * The following is a bit of a hack to inject
+        //  * instrumentation into the system: If the app
+        //  * being started matches one of the instrumentation names,
+        //  * then we combine both the "instrumentation" and
+        //  * "instrumented" app into the path, along with the
+        //  * concatenation of both apps' shared library lists.
+        //  */
+        // CActivityThread* at = (CActivityThread*)mActivityThread;
+        // String instrumentationPackageName = at->mInstrumentationPackageName;
+        // String instrumentationAppDir = at->mInstrumentationAppDir;
+        // AutoPtr<ArrayOf<String> > instrumentationSplitAppDirs = at->mInstrumentationSplitAppDirs;
+        // String instrumentationLibDir = at->mInstrumentationLibDir;
 
-    //     /*
-    //      * The following is a bit of a hack to inject
-    //      * instrumentation into the system: If the app
-    //      * being started matches one of the instrumentation names,
-    //      * then we combine both the "instrumentation" and
-    //      * "instrumented" app into the path, along with the
-    //      * concatenation of both apps' shared library lists.
-    //      */
+        // String instrumentedAppDir = at->mInstrumentedAppDir;
+        // AutoPtr<ArrayOf<String> > instrumentedSplitAppDirs = at->mInstrumentedSplitAppDirs;
+        // String instrumentedLibDir = at->mInstrumentedLibDir;
+        // AutoPtr<ArrayOf<String> > instrumentationLibs;
 
-    //     String instrumentationPackageName = mActivityThread.mInstrumentationPackageName;
-    //     String instrumentationAppDir = mActivityThread.mInstrumentationAppDir;
-    //     String[] instrumentationSplitAppDirs = mActivityThread.mInstrumentationSplitAppDirs;
-    //     String instrumentationLibDir = mActivityThread.mInstrumentationLibDir;
+        // if (mAppDir.Equals(instrumentationAppDir) || mAppDir.Equals(instrumentedAppDir)) {
+        //     zipPaths.Clear();
+        //     zipPaths.PushBack(instrumentationAppDir);
+        //     if (instrumentationSplitAppDirs != NULL) {
+        //         for (Int32 i = 0; i < instrumentationSplitAppDirs->GetLength(); ++i) {
+        //             zipPaths.PushBack((*instrumentationSplitAppDirs)[i]);
+        //         }
+        //     }
+        //     zipPaths.PushBack(instrumentedAppDir);
+        //     if (instrumentedSplitAppDirs != NULL) {
+        //         for (Int32 i = 0; i < instrumentedSplitAppDirs->GetLength(); ++i) {
+        //             zipPaths.PushBack((*instrumentedSplitAppDirs)[i]);
+        //         }
+        //     }
 
-    //     String instrumentedAppDir = mActivityThread.mInstrumentedAppDir;
-    //     String[] instrumentedSplitAppDirs = mActivityThread.mInstrumentedSplitAppDirs;
-    //     String instrumentedLibDir = mActivityThread.mInstrumentedLibDir;
-    //     String[] instrumentationLibs = null;
+        //     libPaths.Clear();
+        //     libPaths.PushBack(instrumentationLibDir);
+        //     libPaths.PushBack(instrumentedLibDir);
 
-    //     if (mAppDir.equals(instrumentationAppDir)
-    //             || mAppDir.equals(instrumentedAppDir)) {
-    //         zipPaths.clear();
-    //         zipPaths.add(instrumentationAppDir);
-    //         if (instrumentationSplitAppDirs != null) {
-    //             Collections.addAll(zipPaths, instrumentationSplitAppDirs);
-    //         }
-    //         zipPaths.add(instrumentedAppDir);
-    //         if (instrumentedSplitAppDirs != null) {
-    //             Collections.addAll(zipPaths, instrumentedSplitAppDirs);
-    //         }
+        //     if (!instrumentedAppDir.Equals(instrumentationAppDir)) {
+        //         instrumentationLibs = GetLibrariesFor(instrumentationPackageName);
+        //     }
+        // }
 
-    //         libPaths.clear();
-    //         libPaths.add(instrumentationLibDir);
-    //         libPaths.add(instrumentedLibDir);
+        // if (mSharedLibraries != NULL) {
+        //     List<String>::Iterator it;
+        //     for (Int32 i = 0; i < mSharedLibraries->GetLength(); ++i) {
+        //         String lib = (*mSharedLibraries)[i];
+        //         it = Find(zipPaths.Begin(), zipPaths.End(), lib);
+        //         if (it != zipPaths.End()) {
+        //             zipPaths.PushFront(lib);
+        //         }
+        //     }
+        // }
 
-    //         if (!instrumentedAppDir.equals(instrumentationAppDir)) {
-    //             instrumentationLibs = getLibrariesFor(instrumentationPackageName);
-    //         }
-    //     }
+        // if (instrumentationLibs != NULL) {
+        //     List<String>::Iterator it;
+        //     for (Int32 i = 0; i < instrumentationLibs->GetLength(); ++i) {
+        //         String lib = (*instrumentationLibs)[i];
+        //         it = Find(zipPaths.Begin(), zipPaths.End(), lib);
+        //         if (it != zipPaths.End()) {
+        //             zipPaths.PushFront(lib);
+        //         }
+        //     }
+        // }
 
-    //     if (mSharedLibraries != null) {
-    //         for (String lib : mSharedLibraries) {
-    //             if (!zipPaths.contains(lib)) {
-    //                 zipPaths.add(0, lib);
-    //             }
-    //         }
-    //     }
+        AutoPtr<IFileHelper> fh;
+        CFileHelper::AcquireSingleton((IFileHelper**)&fh);
+        String psep;
+        fh->GetPathSeparator(&psep);
 
-    //     if (instrumentationLibs != null) {
-    //         for (String lib : instrumentationLibs) {
-    //             if (!zipPaths.contains(lib)) {
-    //                 zipPaths.add(0, lib);
-    //             }
-    //         }
-    //     }
+        // String zip = TextUtils::Join(psep, &zipPaths);
+        String zip = GetModulePath(mAppDir, mPackageName);
+        String lib = TextUtils::Join(psep, &libPaths);
 
-    //     final String zip = TextUtils.join(File.pathSeparator, zipPaths);
-    //     final String lib = TextUtils.join(File.pathSeparator, libPaths);
+        /*
+         * With all the combination done (if necessary, actually
+         * create the class loader.
+         */
+        // Slogger::V(TAG, "GetClassLoader for %s : Class path: %s, JNI path: %s",
+        //     mPackageName.string(), zip.string(), lib.string());
 
-    //     /*
-    //      * With all the combination done (if necessary, actually
-    //      * create the class loader.
-    //      */
-
-    //     if (ActivityThread.localLOGV)
-    //         Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + lib);
-
-    //     // Temporarily disable logging of disk reads on the Looper thread
-    //     // as this is early and necessary.
-    //     StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-
-    //     mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, lib,
-    //             mBaseClassLoader);
-
+        // Temporarily disable logging of disk reads on the Looper thread
+        // as this is early and necessary.
+        // StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        mClassLoader = ApplicationLoaders::GetDefault()->GetClassLoader(zip, lib, mBaseClassLoader);
     //     StrictMode.setThreadPolicy(oldPolicy);
-    // } else {
+    }
+    else {
         if (mBaseClassLoader == NULL) {
             mClassLoader = ClassLoader::GetSystemClassLoader();
         }
         else {
             mClassLoader = mBaseClassLoader;
         }
-    // }
+    }
 
+    Slogger::V(TAG, "GetClassLoader for %s : %s", mPackageName.string(), TO_CSTR(mClassLoader));
     *loader = mClassLoader;
     REFCOUNT_ADD(*loader)
     return NOERROR;
@@ -1030,35 +1090,17 @@ ECode LoadedPkg::MakeApplication(
         String appSourceDir, packageName;
         mApplicationInfo->GetSourceDir(&appSourceDir);
         IPackageItemInfo::Probe(mApplicationInfo)->GetPackageName(&packageName);
-        StringBuilder sb;
-        if (appSourceDir.EndWith(".epk")) {
-            sb.Append("/data/elastos/");
-            sb.Append(packageName);
-            sb.Append(".eco");
-        }
-        else {
-            sb.Append("/data/data/com.elastos.runtime/elastos/");
-            sb.Append(packageName);
-            sb.Append("/");
-            sb.Append(packageName);
-            sb.Append(".eco");
-        }
-        String path = sb.ToString();
-        Int32 index = appClass.LastIndexOf('.');
-        String shortClassName = index > 0 ? appClass.Substring(index + 1) : appClass;
+        String path = LoadedPkg::GetModulePath(appSourceDir, packageName);;
 
-        Slogger::I(TAG, " >> MakeApplication: path %s, appClass %s, shortClassName %s",
-            path.string(), appClass.string(), shortClassName.string());
+        AutoPtr<IClassLoader> cl;
+        CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
 
-        AutoPtr<IModuleInfo> moduleInfo;
-        if (FAILED(CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo))) {
-            Slogger::E(TAG, "HandleBindApplication: Cann't Find the Instrumentation path is %s", path.string());
-            return E_RUNTIME_EXCEPTION;
-        }
+        Slogger::I(TAG, " >> MakeApplication: appClass %s, classLoader:%s", appClass.string(), TO_CSTR(cl));
 
         AutoPtr<IClassInfo> classInfo;
-        if (FAILED(moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo))) {
-            Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", shortClassName.string());
+        ECode ec = cl->LoadClass(appClass, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "HandleBindApplication: LoadClass %s in failed.", appClass.string(), TO_CSTR(cl));
             return E_RUNTIME_EXCEPTION;
         }
 
@@ -1067,7 +1109,7 @@ ECode LoadedPkg::MakeApplication(
         IContext* ctx = IContext::Probe(appContext);
         AutoPtr<IInstrumentationHelper> helper;
         CInstrumentationHelper::AcquireSingleton((IInstrumentationHelper**)&helper);
-        ECode ec = helper->NewApplication(classInfo, ctx, (IApplication**)&app);
+        ec = helper->NewApplication(classInfo, ctx, (IApplication**)&app);
         if (FAILED(ec)) {
             Boolean bval;
             activityThread->mInstrumentation->OnException(app, ec, &bval);

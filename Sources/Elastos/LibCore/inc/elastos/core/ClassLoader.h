@@ -43,13 +43,6 @@ public:
         /* [in] */ IClassLoader* parent);
 
     /**
-     * Returns the system class loader. This is the parent for new
-     * {@code ClassLoader} instances and is typically the class loader used to
-     * start the application.
-     */
-    static CARAPI_(AutoPtr<IClassLoader>) GetSystemClassLoader();
-
-    /**
      * Loads the class with the specified name. Invoking this method is
      * equivalent to calling {@code loadClass(className, false)}.
      * <p>
@@ -68,9 +61,18 @@ public:
         /* [in] */ const String& className,
         /* [out] */ IClassInfo** klass);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    /**
+     * Returns the system class loader. This is the parent for new
+     * {@code ClassLoader} instances and is typically the class loader used to
+     * start the application.
+     */
+    static CARAPI_(AutoPtr<IClassLoader>) GetSystemClassLoader();
+
     static CARAPI_(AutoPtr<IClassLoader>) GetClassLoader(
         /* [in] */ IClassInfo* clsInfo);
-
 protected:
     /**
      * Overridden by subclasses, throws a {@code ClassNotFoundException} by

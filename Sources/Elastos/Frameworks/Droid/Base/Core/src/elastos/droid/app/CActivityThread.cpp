@@ -42,6 +42,7 @@
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/ClassLoader.h>
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -116,6 +117,8 @@ using Elastos::Core::IClassLoader;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::Thread;
+using Elastos::Core::ClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::CFile;
@@ -1266,10 +1269,8 @@ AutoPtr<IIPackageManager> CActivityThread::GetPackageManager()
     }
     AutoPtr<IInterface> b = ServiceManager::GetService(String("package"));
     assert(b != NULL);
-    //Slogger::V("PackageManager", "default service binder = " + b);
     sPackageManager = IIPackageManager::Probe(b);
     assert(sPackageManager != NULL);
-    //Slogger::V("PackageManager", "default service = " + sPackageManager);
     return sPackageManager;
 }
 
@@ -2211,46 +2212,30 @@ ECode CActivityThread::PerformLaunchActivity(
     String appDir;
     LoadedPkg* lp = (LoadedPkg*)r->mPackageInfo.Get();
     lp->GetAppDir(&appDir);
-    StringBuilder sb;
-    if (appDir.EndWith(".epk")) {
-        sb.Append("/data/elastos/");
-        sb.Append(packageName);
-        sb.Append(".eco");
-    }
-    else {
-        sb.Append("/data/data/com.elastos.runtime/elastos/");
-        sb.Append(packageName);
-        sb.Append("/");
-        sb.Append(packageName);
-        sb.Append(".eco");
-    }
-    String path = sb.ToString();
+    String path = LoadedPkg::GetModulePath(appDir, packageName);
 
-    Slogger::I(TAG, " >> PerformLaunchActivity: %s, packageName:%s, className:%s",
-        path.string(), packageName.string(), className.string());
+    AutoPtr<IClassLoader> cl;
+    CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
 
-    AutoPtr<IModuleInfo> moduleInfo;
-    ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "PerformLaunchActivity: Cann't Find the path is %s", path.string());
-        return E_RUNTIME_EXCEPTION;
-    }
+    Slogger::I(TAG, " >> PerformLaunchActivity: packageName:%s, className:%s, classLoader:%s",
+        packageName.string(), className.string(), TO_CSTR(cl));
 
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+    ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "PerformLaunchActivity: Get class info of [%s] failed.",
-            className.string());
+        Slogger::E(TAG, "PerformLaunchActivity: LoadClass [%s] in %s failed.",
+            className.string(), TO_CSTR(cl));
         return E_RUNTIME_EXCEPTION;
     }
 
     AutoPtr<IInterface> object;
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "PerformLaunchActivity: Create activity object [%s] failed.",
-            className.string());
+        Slogger::E(TAG, "PerformLaunchActivity: Create activity Object [%s] [%s] [%s] failed.",
+            packageName.string(), path.string(), className.string());
         return E_RUNTIME_EXCEPTION;
     }
+
     AutoPtr<IActivity> a;
     a = IActivity::Probe(object);
 
@@ -2748,21 +2733,17 @@ ECode CActivityThread::HandleReceiver(
 
 
 //    try {
-    AutoPtr<IModuleInfo> moduleInfo;
+    AutoPtr<IClassLoader> cl;
+    CPathClassLoader::New(path, NULL/* ClassLoader::GetSystemClassLoader()*/, (IClassLoader**)&cl);
+
     AutoPtr<IClassInfo> classInfo;
+    ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "HandleReceiver: Load class [%s] in %s failed.", className.string(), TO_CSTR(cl));
+        return ec;
+    }
+
     AutoPtr<IInterface> object;
-    ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Cann't Find the path is %s", path.string());
-        return ec;
-    }
-
-    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Get class info of [%s] failed.", className.string());
-        return ec;
-    }
-
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
         Slogger::E(TAG, "HandleReceiver: Create activity object [%s] failed.", className.string());
@@ -2916,41 +2897,24 @@ ECode CActivityThread::HandleCreateBackupAgent(
 //         try {
         String appDir;
         packageInfo->GetAppDir(&appDir);
-        if (DEBUG_BACKUP) Slogger::V(TAG, "Initializing agent class[%s], pkgName[%s], appDir[%s]", className.string(), pkgName.string(), appDir.string());
+        String path = LoadedPkg::GetModulePath(appDir, pkgName);
+        AutoPtr<IClassLoader> cl;
+        CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
 
-        StringBuilder sb;
-        if (appDir.EndWith(".epk")) {
-            sb.Append("/data/elastos/");
-            sb.Append(pkgName);
-            sb.Append(".eco");
+        if (DEBUG_BACKUP) {
+            Slogger::V(TAG, "Initializing agent class[%s], pkgName[%s], appDir[%s], classLoader:%s",
+                className.string(), pkgName.string(), appDir.string(), TO_CSTR(cl));
         }
-        else if(appDir.EndWith("framework-res.apk")) {
-            sb.Append("/system/lib/Elastos.Droid.Server.eco");
-        }
-        else {
-            sb.Append("/data/data/com.elastos.runtime/elastos/");
-            sb.Append(pkgName);
-            sb.Append("/");
-            sb.Append(pkgName);
-            sb.Append(".eco");
-        }
-        String path = sb.ToString();
 
-        AutoPtr<IModuleInfo> moduleInfo;
         AutoPtr<IClassInfo> classInfo;
-        AutoPtr<IInterface> object;
-        ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
+        ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "CreateBackupAgent: Can't find the path is %s", path.string());
+            Slogger::E(TAG, "CreateBackupAgent: LoadClass %s in %s failed.",
+                className.string(), TO_CSTR(cl));
             return E_RUNTIME_EXCEPTION;
         }
 
-        ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
-        if (FAILED(ec)) {
-            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", className.string());
-            assert(0 && "TODO");
-            return E_RUNTIME_EXCEPTION;
-        }
+        AutoPtr<IInterface> object;
         ec = classInfo->CreateObject((IInterface**)&object);
         if (FAILED(ec)) {
             Slogger::E(TAG, "CreateBackupAgent: Create BackupAgent object failed.");
@@ -3038,42 +3002,28 @@ ECode CActivityThread::HandleCreateService(
     GetPackageInfoNoCheck(appInfo, data->mCompatInfo, (ILoadedPkg**)&lp);
     LoadedPkg* packageInfo = (LoadedPkg*)lp.Get();
 
-    String pkgName;
+    String appDir, pkgName, className;
     IPackageItemInfo::Probe(data->mInfo)->GetPackageName(&pkgName);
-    String appDir;
     packageInfo->GetAppDir(&appDir);
-    StringBuilder sb;
-    // for epk
-    if (appDir.EndWith(".epk")) {
-        sb.Append("/data/elastos/");
-        sb.Append(pkgName);
-        sb.Append(".eco");
-    }
-    else {
-        sb.Append("/data/data/com.elastos.runtime/elastos/");
-        sb.Append(pkgName);
-        sb.Append("/");
-        sb.Append(pkgName);
-        sb.Append(".eco");
+    IPackageItemInfo::Probe(data->mInfo)->GetName(&className);
+
+    String path = LoadedPkg::GetModulePath(appDir, pkgName);
+    AutoPtr<IClassLoader> cl;
+    CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
+
+    if (localLOGV) {
+        Slogger::V(TAG, "Creating service %s %s, classLoader:%s",
+            pkgName.string(), className.string(), TO_CSTR(cl));
     }
 
-    String path = sb.ToString();
-    AutoPtr<IModuleInfo> moduleInfo;
-    ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        if (localLOGV) {
-           Slogger::E(TAG, "HandleCreateService: Cann't Find the path is %s", path.string());
-        }
-        return E_RUNTIME_EXCEPTION;
-    }
-    String className;
-    IPackageItemInfo::Probe(data->mInfo)->GetName(&className);
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+    ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleCreateService: Get class info of %s failed.", className.string());
+        Slogger::E(TAG, "HandleCreateService: LoadClass %s in %s failed.",
+            className.string(), TO_CSTR(cl));
         return E_RUNTIME_EXCEPTION;
     }
+
     AutoPtr<IInterface> object;
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
@@ -3085,10 +3035,6 @@ ECode CActivityThread::HandleCreateService(
     service = IService::Probe(object);
 
 //    try {
-    if (localLOGV) {
-        Slogger::V(TAG, "Creating service %s, path %s", className.string(), path.string());
-    }
-
     AutoPtr<IContextImpl> cimpl;
     CContextImpl::CreateAppContext(this, packageInfo, (IContextImpl**)&cimpl);
     CContextImpl* appContext = (CContextImpl*)cimpl.Get();
@@ -5317,8 +5263,10 @@ ECode CActivityThread::HandleBindApplication(
         instrApp->mDataDir = ci->mDataDir;
         instrApp->mNativeLibraryDir = ci->mNativeLibraryDir;
 
+        AutoPtr<IClassLoader> appCtxClsLoader;
+        appContext->GetClassLoader((IClassLoader**)&appCtxClsLoader);
         AutoPtr<ILoadedPkg> pi;
-        GetPackageInfo(instrApp, data->mCompatInfo, NULL/*appContext.getClassLoader()*/,
+        GetPackageInfo(instrApp, data->mCompatInfo, appCtxClsLoader,
             FALSE, TRUE, FALSE, (ILoadedPkg**)&pi);
         AutoPtr<IContextImpl> instrContext;
         CContextImpl::CreateAppContext(this, pi, (IContextImpl**)&instrContext);
@@ -5332,17 +5280,16 @@ ECode CActivityThread::HandleBindApplication(
             return E_RUNTIME_EXCEPTION;
         }
         String path = className.Substring(0, index) + ".eco";
-        AutoPtr<IModuleInfo> moduleInfo;
-        if (FAILED(CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo))) {
-            Slogger::E(TAG, "HandleBindApplication: Cann't Find the Instrumentation path is %s", path.string());
+        AutoPtr<IClassLoader> cl;
+        CPathClassLoader::New(path, NULL/*ClassLoader::GetSystemClassLoader()*/, (IClassLoader**)&cl);
+
+        AutoPtr<IClassInfo> classInfo;
+        ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "HandleBindApplication: LoadClass %s in %s failed.", className.string(), TO_CSTR(cl));
             return E_RUNTIME_EXCEPTION;
         }
 
-        AutoPtr<IClassInfo> classInfo;
-        if (FAILED(moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo))) {
-            Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", className.string());
-            return E_RUNTIME_EXCEPTION;
-        }
         AutoPtr<IInterface> object;
         if (FAILED(classInfo->CreateObject((IInterface**)&object))) {
             Slogger::E(TAG, "HandleBindApplication: Create Instrumentation object failed.");
@@ -6088,11 +6035,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
             c = IContext::Probe(mInitialApplication);
         }
         else {
-//             try {
             context->CreatePackageContext(appPkgName, IContext::CONTEXT_INCLUDE_CODE, (IContext**)&c);
-//             } catch (PackageManager.NameNotFoundException e) {
-//                 // Ignore
-//             }
         }
 
         if (c == NULL) {
@@ -6100,43 +6043,26 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
                 appPkgName.string(), name.string());
             return NULL;
         }
-//         try {
-//             final java.lang.ClassLoader cl = c.getClassLoader();
 
-        String packagePath, className;
-        if (name.Equals("com.android.providers.settings.SettingsProvider")) {
-            packagePath = "/data/elastos/Elastos.Droid.SettingsProvider.eco";
-            className = "Elastos.Droid.SettingsProvider.CSettingsProvider";
-        }
-        else {
-            Int32 index = name.LastIndexOf('.');
-            String packageName = name.Substring(0, index);
-            StringBuilder sb;
-            sb.Append("/data/elastos/");
-            sb.Append(packageName);
-            sb.Append(".eco");
-
-            packagePath = sb.ToString();
-            className = name;
-        }
-
-        AutoPtr<IModuleInfo> moduleInfo;
-        ECode ec = CReflector::AcquireModuleInfo(packagePath, (IModuleInfo**)&moduleInfo);
-        if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Cann't find the path %s, ec=%08x", packagePath.string(), ec);
+        AutoPtr<IClassLoader> cl;
+        c->GetClassLoader((IClassLoader**)&cl);
+        if (cl == NULL) {
+            Slogger::E(TAG, "Unable to get class loader in %s for package %s while loading content provider %s",
+                TO_CSTR(c), appPkgName.string(), name.string());
             return NULL;
         }
 
         AutoPtr<IClassInfo> classInfo;
-        ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+        ECode ec = cl->LoadClass(name, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Get class info of %s failed, ec=%08x", className.string(), ec);
+            Slogger::E(TAG, "InstallProvider: LoadClass %s in %s failed, ec=%08x", name.string(), TO_CSTR(cl), ec);
             return NULL;
         }
+
         AutoPtr<IInterface> object;
         ec = classInfo->CreateObject((IInterface**)&object);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Create ContentProvider object %s failed, ec=%08x", className.string(), ec);
+            Slogger::E(TAG, "InstallProvider: Create ContentProvider object %s failed, ec=%08x", name.string(), ec);
             return NULL;
         }
 

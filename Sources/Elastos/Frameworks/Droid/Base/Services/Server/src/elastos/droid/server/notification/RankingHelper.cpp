@@ -79,8 +79,7 @@ RankingHelper::RankingHelper(
     for (Int32 i = 0; i < N; i++) {
         // try {
         AutoPtr<IClassLoader> loader;
-        assert(0 && "TODO");
-        // mContext->GetClassLoader((IClassLoader**)&loader);
+        mContext->GetClassLoader((IClassLoader**)&loader);
         AutoPtr<IClassInfo> extractorClass;
         ECode ec = loader->LoadClass((*extractorNames)[i], (IClassInfo**)&extractorClass);
         if (FAILED(ec)) {

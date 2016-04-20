@@ -338,16 +338,6 @@ ECode BroadcastReceiver::constructor()
     return NOERROR;
 }
 
-ECode BroadcastReceiver::ToString(
-    /* [out] */ String* info)
-{
-    VALIDATE_NOT_NULL(info);
-    String str("BroadcastReceiver:(");
-    str.AppendFormat("%p", this);
-    *info = str;
-    return NOERROR;
-}
-
 ECode BroadcastReceiver::GoAsync(
     /* [out] */ IPendingResult** pendingResult)
 {
@@ -388,14 +378,11 @@ ECode BroadcastReceiver::GetResultCode(
     /* [out] */ Int32* code)
 {
     VALIDATE_NOT_NULL(code);
+    *code = 0;
 
     if (NULL != mPendingResult) {
         FAIL_RETURN(mPendingResult->GetResultCode(code));
     }
-    else {
-        *code = 0;
-    }
-
     return NOERROR;
 }
 

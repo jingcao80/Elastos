@@ -845,10 +845,8 @@ ECode Fragment::Instantiate(
     FAIL_RETURN(clazz->CreateObject((IInterface**)&obj));
     AutoPtr<IFragment> f = IFragment::Probe(obj);
     if (args != NULL) {
-        AutoPtr<IClassLoader> cLoader;
-        assert(0 && "TODO");
-//TODO:
-//            args.setClassLoader(f.getClass().getClassLoader());
+        AutoPtr<IClassLoader> cl = Object::GetClassLoader(f.Get());
+        args->SetClassLoader(cl);
         f->SetArguments(args);
     }
     *fragment = f;

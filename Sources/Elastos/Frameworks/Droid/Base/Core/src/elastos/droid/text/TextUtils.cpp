@@ -513,6 +513,49 @@ String TextUtils::Join(
 }
 
 String TextUtils::Join(
+    /* [in] */ const String& delimiter,
+    /* [in] */ ArrayOf<String>* tokens)
+{
+    StringBuilder sb;
+    Boolean firstTime = TRUE;
+
+    for (Int32 i = 0; i < tokens->GetLength(); ++i) {
+        if (firstTime) {
+            firstTime = FALSE;
+        }
+        else {
+            sb.Append(delimiter);
+        }
+
+        sb.Append((*tokens)[i]);
+    }
+
+    return sb.ToString();
+}
+
+String TextUtils::Join(
+    /* [in] */ const String& delimiter,
+    /* [in] */ List<String>* tokens)
+{
+    StringBuilder sb;
+    Boolean firstTime = TRUE;
+    if (tokens != NULL) {
+        List<String>::Iterator it;
+        for (it = tokens->Begin(); it != tokens->End(); ++it) {
+            if (firstTime) {
+                firstTime = FALSE;
+            }
+            else {
+                sb.Append(delimiter);
+            }
+
+            sb.Append(*it);
+        }
+    }
+    return sb.ToString();
+}
+
+String TextUtils::Join(
     /* [in] */ ICharSequence* delimiter,
     /* [in] */ IIterable* tokens)
 {

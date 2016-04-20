@@ -794,8 +794,8 @@ Boolean CResourcesManager::AttachThemeAssets(
         }
     }
 
-    if (!isThemeApk && !String("android").Equals(basePackageName) &&
-            (piThemeOverlayTargets->Contains(CoreUtils::Convert(String("android")), &result), result)) {
+    if (!isThemeApk && !basePackageName.Equals("android") &&
+            (piThemeOverlayTargets->Contains(CoreUtils::Convert("android"), &result), result)) {
         String elastosPackageName;
         piElastos->GetPackageName(&elastosPackageName);
         String resCachePath= ThemeUtils::GetTargetCacheDir(elastosPackageName, piTheme);

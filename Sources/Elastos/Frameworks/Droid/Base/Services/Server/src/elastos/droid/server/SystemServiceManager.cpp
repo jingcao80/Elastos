@@ -3,6 +3,8 @@
 #include "elastos/utility/logging/Slogger.h"
 
 using Elastos::Core::StringBuilder;
+using Elastos::Core::IClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -59,33 +61,28 @@ ECode SystemServiceManager::StartService(
 }
 
 ECode SystemServiceManager::StartService(
-    /* [in] */ const String& classNameSignature,
+    /* [in] */ const String& className,
     /* [out] */ ISystemService** result)
 {
     VALIDATE_NOT_NULL(result)
     *result = NULL;
-    if (classNameSignature.IsNullOrEmpty()) {
+    if (className.IsNullOrEmpty()) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     AutoPtr<IModuleInfo> moduleInfo;
     AutoPtr<IClassInfo> serviceClass;
 
-    const String moduleName("Elastos.Droid.Server.eco");
-    ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "Failed to create service %s: Acquire %s module info failed!",
-            classNameSignature.string(), moduleName.string());
-        return ec;
-    }
+    AutoPtr<IClassLoader> cl;
+    CPathClassLoader::New(String("/system/lib/Elastos.Droid.Server.eco"), NULL, (IClassLoader**)&cl);
 
-    ec = moduleInfo->GetClassInfo(classNameSignature, (IClassInfo**)&serviceClass);
+    ECode ec = cl->LoadClass(className, (IClassInfo**)&serviceClass);
     if (FAILED(ec)) {
         Slogger::E(TAG, "Failed to create service %s: "
             "service class not found, usually indicates that the caller should "
             "have called PackageManager.hasSystemFeature() to check whether the "
             "feature is available on this device before trying to start the "
-            "services that implement it",  classNameSignature.string());
+            "services that implement it",  className.string());
         return ec;
     }
 

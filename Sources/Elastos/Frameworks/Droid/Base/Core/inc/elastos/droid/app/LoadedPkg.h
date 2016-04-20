@@ -337,6 +337,10 @@ public:
         /* [in] */ IServiceConnection* c,
         /* [out] */ IIServiceConnection** result);
 
+    static String GetModulePath(
+        /* [in] */ const String& appSourceDir,
+        /* [in] */ const String& packageName);
+
 private:
     /**
      * Setup value for Thread.getContextClassLoader(). If the
@@ -367,6 +371,18 @@ private:
         /* [in] */ IClassLoader* cl,
         /* [in] */ const String& packageName,
         /* [in] */ Int32 id);
+
+    /**
+     * Gets the array of shared libraries that are listed as
+     * used by the given package.
+     *
+     * @param packageName the name of the package (note: not its
+     * file name)
+     * @return null-ok; the array of shared libraries, each one
+     * a fully-qualified path
+     */
+    static AutoPtr<ArrayOf<String> > GetLibrariesFor(
+        /* [in] */ const String& packageName);
 
 public:
     String mPackageName;

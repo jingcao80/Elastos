@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/popup_element"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="#444444"
     android:orientation="vertical"
     android:padding="10sp" >
 
     <TextView
         android:id="@+id/txtView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="40px"
         android:layout_marginTop="100px"
         android:layout_marginBottom="20px"

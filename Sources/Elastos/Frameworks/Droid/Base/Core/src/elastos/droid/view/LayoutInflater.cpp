@@ -674,13 +674,11 @@ String LayoutInflater::GetReflectionClassName(
         sb += prefix;
     }
     Int32 index = name.LastIndexOf('.');
-    if (index != -1) {
-        sb += name.Substring(0, index + 1);
+    if (index == -1) {
         sb += "C";
-        sb += name.Substring(index + 1, strlen(name));
+        sb += name;
     }
     else {
-        sb += "C";
         sb += name;
     }
     return sb.ToString();
@@ -787,8 +785,7 @@ ECode LayoutInflater::CreateView(
 #if defined(_DEBUG) || defined(_ELASTOS_DEBUG)
     Int32 viewId;
     (*view)->GetId(&viewId);
-    Slogger::D(TAG, " << CreateView: %s, id: 0x%08x, type: %sC%s ",
-        TO_CSTR(*view), viewId, prefix.IsNull() ? "" : prefix.string(), name.string());
+    Slogger::D(TAG, " << CreateView: %s, id: 0x%08x, type: %s", TO_CSTR(*view), viewId, reflectionClassName.string());
 #endif
 
     return NOERROR;

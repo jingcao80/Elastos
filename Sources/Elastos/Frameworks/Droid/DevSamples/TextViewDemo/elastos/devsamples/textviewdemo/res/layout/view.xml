@@ -2,11 +2,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 <TextView
     android:id="@+id/textview1"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="50px"
     android:layout_gravity="center_horizontal"
     android:gravity="center_vertical"
@@ -16,7 +16,7 @@
 
 <TextView
     android:id="@+id/textview2"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="50px"
     android:layout_gravity="center_horizontal"
     android:gravity="center_vertical"

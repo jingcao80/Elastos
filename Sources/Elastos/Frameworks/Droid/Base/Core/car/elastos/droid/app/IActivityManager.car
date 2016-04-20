@@ -722,6 +722,9 @@ module
 
         ResumeAppSwitches();
 
+        AddPackageDependency(
+            [in] String packageName);
+
         KillApplicationWithAppId(
             [in] String pkg,
             [in] Int32 appid,

@@ -4,12 +4,14 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Text.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Core::Object;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::IIterable;
 using Elastos::Utility::Regex::IPattern;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
@@ -161,6 +163,19 @@ public:
     static CARAPI_(String) Join(
         /* [in] */ ICharSequence* delimiter,
         /* [in] */ ArrayOf<IInterface*>* tokens);
+
+    /**
+     * Returns a string containing the tokens joined by delimiters.
+     * @param tokens an array objects to be joined. Strings will be formed from
+     *     the objects by calling object.toString().
+     */
+    static CARAPI_(String) Join(
+        /* [in] */ const String& delimiter,
+        /* [in] */ ArrayOf<String>* tokens);
+
+    static CARAPI_(String) Join(
+        /* [in] */ const String& delimiter,
+        /* [in] */ List<String>* tokens);
 
     /**
      * Returns a string containing the tokens joined by delimiters.

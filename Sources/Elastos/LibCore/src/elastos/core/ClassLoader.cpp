@@ -1,9 +1,11 @@
 
 #include "ClassLoader.h"
 #include "CPathClassLoader.h"
-#include "CSystem.h"
 #include "Globals.h"
+#include "StringUtils.h"
+#include "StringBuilder.h"
 #include "io/CFile.h"
+#include <cutils/properties.h>
 
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
@@ -36,22 +38,69 @@ ECode ClassLoader::constructor(
     return NOERROR;
 }
 
-AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
+ECode ClassLoader::ToString(
+    /* [out] */ String* str)
 {
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    String classPath;
-    system->GetProperty(String("elastos.class.path"), String(""), &classPath);
-    if (classPath.IsNullOrEmpty()) {
-        classPath = "/system/lib/Elastos.Droid.Core.eco";
-        ALOGI("ClassLoader: system property elastos.class.path is not setted. using %s", classPath.string());
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb;
+    if (mParent != NULL) {
+        sb += "ClassLoader{0x";
+        sb += StringUtils::ToHexString((Int32)this);
+        sb += " ";
+        for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
+            if (i != 0) {
+                sb += ":";
+            }
+            sb += (*mClassPaths)[i];
+        }
+        sb += " parent:";
+        sb += Object::ToString(mParent);
+        sb += "}";
     }
     else {
-        ALOGI("ClassLoader: get system property: elastos.class.path=%s", classPath.string());
+        sb += "ClassLoader{0x";
+        sb += StringUtils::ToHexString((Int32)this);
+        sb += " ";
+        for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
+            if (i != 0) {
+                sb += ":";
+            }
+            sb += (*mClassPaths)[i];
+        }
+        sb += "}";
+    }
+    *str = sb.ToString();
+    return NOERROR;
+}
+
+static String GetSystemProperties(
+    /* [in] */ const String& key,
+    /* [in] */ const String& def)
+{
+    static const  Int32 SYSTEM_PROPERTY_VALUE_MAX = 91;
+    int len;
+    char buf[SYSTEM_PROPERTY_VALUE_MAX + 1];
+
+    len = property_get(key.string(), buf, "");
+    if ((len <= 0) && (!def.IsNull())) {
+        return def;
+    }
+    else if (len >= 0) {
+        return String(buf);
+    }
+
+    return String("");
+}
+
+AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
+{
+    String classPath = GetSystemProperties(String("elastos.class.path"), String(NULL));
+    if (classPath.IsNullOrEmpty()) {
+        classPath = "/system/lib/Elastos.Droid.Core.eco";
     }
 
     AutoPtr<IClassLoader> passClassLoader;
-    CPathClassLoader::New(classPath, NULL/*BootClassLoader::GetInstance()*/, (IClassLoader**)&passClassLoader);
+    CPathClassLoader::New(classPath, NULL, (IClassLoader**)&passClassLoader);
     return passClassLoader;
 }
 
@@ -66,12 +115,17 @@ AutoPtr<IClassLoader> ClassLoader::GetSystemClassLoader()
 AutoPtr<IClassLoader> ClassLoader::GetClassLoader(
     /* [in] */ IClassInfo* clsInfo)
 {
+    if (clsInfo == NULL) {
+        ALOGE("ClassLoader::GetClassLoader: invalid argument. class info is NULL.");
+        return NULL;
+    }
+
     AutoPtr<IInterface> obj;
     clsInfo->GetClassLoader((IInterface**)&obj);
     AutoPtr<IClassLoader> loader = IClassLoader::Probe(obj);
-    // if (loader == NULL) {
-    //     loader = BootClassLoader::GetInstance();
-    // }
+    if (loader == NULL) {
+        loader = GetSystemClassLoader();
+    }
     return loader;
 }
 

@@ -71,25 +71,18 @@ CAR_SINGLETON_IMPL(CSystem)
 
 ECode CSystem::constructor()
 {
-    AutoPtr<CFileInputStream> input;
-    CFileInputStream::NewByFriend(CFileDescriptor::IN, (CFileInputStream**)&input);
-    AutoPtr<CBufferedInputStream> bi;
-    CBufferedInputStream::NewByFriend((IInputStream*)input->Probe(EIID_IInputStream), (CBufferedInputStream**)&bi);
-    mIn = (IInputStream*)bi->Probe(EIID_IInputStream);
+    AutoPtr<IInputStream> input;
+    CFileInputStream::New(CFileDescriptor::IN, (IInputStream**)&input);
+    CBufferedInputStream::New(input, (IInputStream**)&mIn);
 
-    AutoPtr<CFileOutputStream> output;
-    CFileOutputStream::NewByFriend(CFileDescriptor::OUT, (CFileOutputStream**)&output);
-    AutoPtr<CPrintStream> outputPs;
-    CPrintStream::NewByFriend((IOutputStream*)output->Probe(EIID_IOutputStream), (CPrintStream**)&outputPs);
-    mOut = (IPrintStream*)outputPs->Probe(EIID_IPrintStream);
+    AutoPtr<IOutputStream> output;
+    CFileOutputStream::New(CFileDescriptor::OUT, (IOutputStream**)&output);
+    CPrintStream::New(output, (IPrintStream**)&mOut);
 
-    AutoPtr<CFileOutputStream> err;
-    CFileOutputStream::NewByFriend(CFileDescriptor::ERR, (CFileOutputStream**)&err);
-    AutoPtr<CPrintStream> errPs;
-    CPrintStream::NewByFriend((IOutputStream*)err->Probe(EIID_IOutputStream), (CPrintStream**)&errPs);
-    if (errPs) {
-        mErr = (IPrintStream*)errPs->Probe(EIID_IPrintStream);
-    }
+    AutoPtr<IOutputStream> err;
+    CFileOutputStream::New(CFileDescriptor::ERR, (IOutputStream**)&err);
+    CPrintStream::New(err, (IPrintStream**)&mErr);
+
     return NOERROR;
 }
 
@@ -242,8 +235,8 @@ ECode CSystem::GetEnvs(
 {
     VALIDATE_NOT_NULL(map);
 
-    AutoPtr<CHashMap> hashMap;
-    CHashMap::NewByFriend((CHashMap**)&hashMap);
+    AutoPtr<IMap> hashMap;
+    CHashMap::New((IMap**)&hashMap);
     char ** p = environ;
     Int32 index = 0;
     String entry, key, value;
@@ -254,15 +247,15 @@ ECode CSystem::GetEnvs(
             key = entry.Substring(0, index);
             value = entry.Substring(index + 1);
 
-            AutoPtr<CString> ko, vo;
-            CString::NewByFriend(key, (CString**)&ko);
-            CString::NewByFriend(value, (CString**)&vo);
-            hashMap->Put(ko->Probe(EIID_IInterface), vo->Probe(EIID_IInterface), NULL);
+            AutoPtr<ICharSequence> ko, vo;
+            CString::New(key, (ICharSequence**)&ko);
+            CString::New(value, (ICharSequence**)&vo);
+            hashMap->Put(ko.Get(), vo.Get(), NULL);
         }
         ++p;
     }
 
-    *map = (IMap*)hashMap.Get();
+    *map = hashMap;
     REFCOUNT_ADD(*map);
     return NOERROR;
 }
@@ -272,8 +265,8 @@ ECode CSystem::InheritedChannel(
 {
     VALIDATE_NOT_NULL(value);
 
-    AutoPtr<CSelectorProviderHelper> helper;
-    CSelectorProviderHelper::AcquireSingletonByFriend((CSelectorProviderHelper**)&helper);
+    AutoPtr<ISelectorProviderHelper> helper;
+    CSelectorProviderHelper::AcquireSingleton((ISelectorProviderHelper**)&helper);
     AutoPtr<ISelectorProvider> provider;
     helper->GetProvider((ISelectorProvider**)&provider);
     provider->InheritedChannel(value);

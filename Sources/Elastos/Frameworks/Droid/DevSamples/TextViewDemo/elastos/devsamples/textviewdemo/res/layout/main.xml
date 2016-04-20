@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="match_parent">
+
     <TextView
         android:id="@+id/myTextView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="100px"
         android:layout_weight="1"
         android:layout_gravity="center_horizontal"
@@ -15,7 +16,7 @@
         android:background="#FFFFFF"/>
 
     <EditText android:id="@+id/myEditText"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="60px"
         android:layout_weight="1"
         android:hint="Input text here."/>
@@ -61,7 +62,7 @@
     </RadioGroup>
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
@@ -113,7 +114,7 @@
 
     <ListView
         android:id="@+id/myListView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="250px">
     </ListView>
 

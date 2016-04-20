@@ -45,6 +45,7 @@ SOURCES += CAlertDialogBuilder.cpp
 SOURCES += CAirplaneModeSettings.cpp
 SOURCES += CAirplaneModeSettingsHelper.cpp
 SOURCES += AliasActivity.cpp
+SOURCES += ApplicationLoaders.cpp
 SOURCES += AppGlobals.cpp
 SOURCES += AppImportanceMonitor.cpp
 SOURCES += AppOpsManager.cpp

@@ -41,7 +41,7 @@ public:
      */
     // @SuppressWarnings("unchecked")
     CARAPI StartService(
-        /* [in] */ const String& classNameSignature,
+        /* [in] */ const String& className,
         /* [out] */ ISystemService** service);
 
     /**

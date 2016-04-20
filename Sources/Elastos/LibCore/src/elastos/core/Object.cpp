@@ -1,6 +1,7 @@
 
 #include "Object.h"
 #include "Thread.h"
+#include "ClassLoader.h"
 #include <utils/Log.h>
 
 using Elastos::Core::Thread;
@@ -197,12 +198,10 @@ AutoPtr<IClassLoader> Object::GetClassLoader(
     AutoPtr<IClassInfo> classInfo;
     _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     if (classInfo) {
-        AutoPtr<IInterface> clObj;
-        classInfo->GetClassLoader((IInterface**)&clObj);
-        classLoader = IClassLoader::Probe(clObj);
+        classLoader = ClassLoader::GetClassLoader(classInfo);
     }
     else {
-        ALOGD("error: failed to GetClassLoader with %s. It is not a Car class.", TO_CSTR(obj));
+        ALOGW("error: Object::GetClassLoader failed to GetClassLoader with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return classLoader;
 }

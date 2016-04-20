@@ -90,7 +90,7 @@ ECode BaseBundle::constructor(
 
     mClassLoader = loader;
     if (mClassLoader == NULL) {
-        //mClassLoader = getClass().getClassLoader();
+        mClassLoader = Object::GetClassLoader(TO_IINTERFACE(this));
     }
 
     return NOERROR;
