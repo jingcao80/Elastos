@@ -749,7 +749,7 @@ String LoadedPkg::GetModulePath(
         sb.Append(".eco");
     }
     else if (appSourceDir.EndWith("framework-res.apk")) {
-            sb.Append("/system/lib/Elastos.Droid.Server.eco");
+        sb.Append("/system/lib/Elastos.Droid.Server.eco");
     }
     else {
         sb.Append("/data/data/com.elastos.runtime/elastos/");

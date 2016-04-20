@@ -62,57 +62,73 @@ def check_released_return_value(logFile, firstLog, path, checkLineNum, paramType
     if isReturnValueIgnored(path, paramType, paramName, value):
         return firstLog
 
-    pattern = re.compile(r'\w(.*)\(.*')
-    match = pattern.search(value)
-
     # ignore IXXXX::Probe(XXX)
     pattern = re.compile(r'I\w*\:\:Probe\(.*\)')
-    matchProbe = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore XXX->Probe(EIID_IIMediaProjection)
     pattern = re.compile(r'.*->Probe\(EIID_I\w*\)')
-    matchObjProbe = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore XXX->Probe(iid);
     pattern = re.compile(r'.*->Probe\(\w*\);')
-    matchObjProbe2 = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore XXX.Get();
     pattern = re.compile(r'.*\.Get\(\)')
-    matchGet = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore ArrayOf::Alloc()
     pattern = re.compile(r'ArrayOf<\w*\s*\*\s*>\:\:Alloc\(.*\)')
-    matchArrayOfAlloc = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore TO_IINTERFACE()
     pattern = re.compile(r'TO_IINTERFACE\(.*\)')
-    matchToInterface = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore ETL: *pkgs.Begin()
     pattern = re.compile(r'\*.*\.Begin\(\)')
-    matchEtl = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore item of array: (*mArray)[(index << 1) + 1];
     pattern = re.compile(r'\*.*\[.*\];')
-    matchArrayItem = pattern.search(value)
+    match = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore new: (IServerSocketChannel*) new
     pattern = re.compile(r'\(.*\*\s*\)\s*new ')
-    matchNew = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore singleton: XXX::GetInstance()
     pattern = re.compile(r'::GetInstance\(.*\)')
-    matchSingleton = pattern.search(value)
+    if match:
+        return firstLog
 
     # ignore ->mImeActionLabel;
     pattern = re.compile(r'->m\w*;')
-    matchMember= pattern.search(value)
+    if match:
+        return firstLog
 
-    if matchMember == None and matchSingleton == None \
-        and matchNew == None and matchArrayItem == None and matchToInterface == None \
-        and matchArrayOfAlloc == None and matchGet == None \
-        and matchObjProbe2 == None and matchProbe == None and matchObjProbe == None and match:
+    pattern = re.compile(r'\w(.*)\(.*')
+    match = pattern.search(value)
+
+    if match:
         firstLog = log_fine_info(logFile, firstLog, path)
         logInfo = ' @ warning: return value at line {0:d} for *{1} = {2} maybe released before assignment!\n'.format(checkLineNum+1, paramName, value)
         logFile.write(logInfo)
