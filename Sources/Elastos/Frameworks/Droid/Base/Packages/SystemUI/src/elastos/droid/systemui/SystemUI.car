@@ -208,22 +208,17 @@ module
 
     //recents
     merge("../../../../car/elastos/droid/recents/AlternateRecentsComponent.car");
-    merge("../../../../car/elastos/droid/recents/Constants.car");
+    //merge("../../../../car/elastos/droid/recents/Constants.car");
     merge("../../../../car/elastos/droid/recents/RecentsActivity.car");
     merge("../../../../car/elastos/droid/recents/RecentsAppWidgetHost.car");
     //merge("../../../../car/elastos/droid/recents/RecentsConfiguration.car");
 
     //recents/model
-    //merge("../../../../car/elastos/droid/recents/model/BitmapLruCache.car");
-    //merge("../../../../car/elastos/droid/recents/model/DrawableLruCache.car");
-    //merge("../../../../car/elastos/droid/recents/model/KeyStoreLruCache.car");
     merge("../../../../car/elastos/droid/recents/model/RecentsPackageMonitor.car");
-    //merge("../../../../car/elastos/droid/recents/model/StringLruCache.car");
     merge("../../../../car/elastos/droid/recents/model/Task.car");
     merge("../../../../car/elastos/droid/recents/model/TaskGrouping.car");
     merge("../../../../car/elastos/droid/recents/model/TaskStack.car");
     merge("../../../../car/elastos/droid/recents/model/SpaceNode.car");
-    //merge("../../../../car/elastos/droid/recents/model/RecentsTaskLoader.car");
 
     //recents/views
     merge("../../../../car/elastos/droid/recents/views/DebugOverlayView.car");
@@ -319,6 +314,7 @@ module
     interface Elastos.Droid.SystemUI.ISystemUI;
     interface Elastos.Droid.SystemUI.ISwipeHelperCallback;
     interface Elastos.Droid.SystemUI.Qs.IQSPanel;
+    interface Elastos.Droid.SystemUI.Recents.IRecentsAppWidgetHostCallbacks;
     interface Elastos.Droid.SystemUI.Recents.Model.ITaskStack;
     interface Elastos.Droid.SystemUI.StatusBar.IActivatableNotificationViewOnActivatedListener;
     interface Elastos.Droid.SystemUI.StatusBar.IBaseStatusBar;
@@ -341,6 +337,8 @@ module
     interface Elastos.Droid.SystemUI.StatusBar.Policy.IZenModeController;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.IIconMerger;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.ISystemUIDialog;
+    interface Elastos.Droid.SystemUI.Recents.Views.IRecentsViewCallbacks;
+    interface Elastos.Droid.SystemUI.Recents.Views.IDebugOverlayViewCallbacks;
 
     namespace Elastos {
     namespace Droid {
@@ -938,12 +936,53 @@ module
             interface IRecentsComponent;
             interface ISystemUI;
         }
+
+        class CRecentsActivity {
+            constructor();
+
+            interface IActivity;
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IRecentsActivity;
+        }
+
     } // Recent
 
     //===========================================================================
     //                              Recents
     //===========================================================================
     namespace Recents {
+
+        class CRecentsActivity {
+            constructor();
+
+            interface IActivity;
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IRecentsViewCallbacks;
+            interface IRecentsAppWidgetHostCallbacks;
+            interface IDebugOverlayViewCallbacks;
+            interface IRecentsActivity;
+        }
+
     namespace Views {
         [local]
         class CDebugOverlayView {

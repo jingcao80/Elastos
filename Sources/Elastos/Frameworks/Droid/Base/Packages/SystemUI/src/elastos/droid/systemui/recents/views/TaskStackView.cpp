@@ -1,4 +1,4 @@
-
+#include "elastos/droid/systemui/recents/model/TaskGrouping.h"
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/droid/view/LayoutInflater.h>
@@ -18,6 +18,7 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskStackCallbacks;
+using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
 
 namespace Elastos {
 namespace Droid {
@@ -957,8 +958,9 @@ void TaskStackView::OnFirstLayout()
         GetChildAt(i, (IView**)&v);
         TaskView* tv = (TaskView*)ITaskView::Probe(v);
         AutoPtr<Task> task = tv->GetTask();
+        AutoPtr<TaskGrouping> tg = (TaskGrouping*)(launchTargetTask->mGroup).Get();
         Boolean occludesLaunchTarget = (launchTargetTask != NULL) &&
-                launchTargetTask->mGroup->IsTaskAboveTask(task, launchTargetTask);
+            tg->IsTaskAboveTask(task, launchTargetTask);
         tv->PrepareEnterRecentsAnimation(task->mIsLaunchTarget, occludesLaunchTarget, offscreenY);
     }
 
@@ -1018,8 +1020,9 @@ void TaskStackView::StartEnterRecentsAnimation(
             ctx->mCurrentStackViewIndex = i;
             ctx->mCurrentStackViewCount = childCount;
             ctx->mCurrentTaskRect = mLayoutAlgorithm->mTaskRect;
+            AutoPtr<TaskGrouping> tg = (TaskGrouping*)(launchTargetTask->mGroup).Get();
             ctx->mCurrentTaskOccludesLaunchTarget = (launchTargetTask != NULL) &&
-                    launchTargetTask->mGroup->IsTaskAboveTask(task, launchTargetTask);
+                tg->IsTaskAboveTask(task, launchTargetTask);
             ctx->mUpdateListener = mRequestUpdateClippingListener;
             mLayoutAlgorithm->GetStackTransform(task, mStackScroller->GetStackScroll(),
                 ctx->mCurrentTaskTransform, NULL);
@@ -1077,7 +1080,8 @@ void TaskStackView::StartLaunchTaskAnimation(
             t->StartLaunchTaskAnimation(r, TRUE, TRUE, lockToTask);
         }
         else {
-            Boolean occludesLaunchTarget = launchTargetTask->mGroup->IsTaskAboveTask(
+            AutoPtr<TaskGrouping> tg = (TaskGrouping*)(launchTargetTask->mGroup).Get();
+            Boolean occludesLaunchTarget = tg->IsTaskAboveTask(
                 t->GetTask(), launchTargetTask);
             t->StartLaunchTaskAnimation(NULL, FALSE, occludesLaunchTarget, lockToTask);
         }

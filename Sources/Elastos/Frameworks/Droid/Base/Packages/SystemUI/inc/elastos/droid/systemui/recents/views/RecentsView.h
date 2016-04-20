@@ -35,49 +35,20 @@ namespace Views {
 class RecentsView
     : public FrameLayout
     , public IRecentsView
+    , public ITaskStackViewCallbacks
+    , public IPackageCallbacks
 {
 private:
-    class CallBacks
-        : public Object
-        , public ITaskStackViewCallbacks
-        , public IPackageCallbacks
-    {
-    public:
-        CallBacks(
-            /* [in] */ RecentsView* host);
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI OnTaskViewClicked(
-            /* [in] */ ITaskStackView* stackView,
-            /* [in] */ ITaskView* tv,
-            /* [in] */ ITaskStack* stack,
-            /* [in] */ ITask* t,
-            /* [in] */ Boolean lockToTask);
-
-        CARAPI OnTaskViewAppInfoClicked(
-            /* [in] */ ITask* t);
-
-        CARAPI OnTaskViewDismissed(
-            /* [in] */ ITask* t);
-
-        CARAPI OnAllTaskViewsDismissed();
-
-        CARAPI OnTaskStackFilterTriggered();
-
-        CARAPI OnTaskStackUnfilterTriggered();
-
-        CARAPI OnComponentRemoved(
-            /* [in] */ IHashSet* cns);
-
-    private:
-        RecentsView* mHost;
-    };
-
     class OnAnimationStartedRunnable : public Runnable
     {
     public:
+        OnAnimationStartedRunnable(
+            /* [in] */ SystemServicesProxy* ssp);
+
         CARAPI Run();
+
+    private:
+        AutoPtr<SystemServicesProxy> mSsp;
     };
 
     class OnAnimationStartedListener
@@ -86,6 +57,7 @@ private:
     {
     public:
         OnAnimationStartedListener(
+            /* [in] */ SystemServicesProxy* ssp,
             /* [in] */ RecentsView* host);
 
         CAR_INTERFACE_DECL()
@@ -96,6 +68,7 @@ private:
     private:
         RecentsView* mHost;
         Boolean mTriggered;
+        AutoPtr<SystemServicesProxy> mSsp;
     };
 
     class LaunchRunnable : public Runnable
@@ -260,9 +233,6 @@ public:
     AutoPtr<IView> mSearchBar;
     AutoPtr<IRecentsViewCallbacks> mCb;
     Boolean mAlreadyLaunchingTask;
-
-private:
-    AutoPtr<CallBacks> mCallBacks;
 };
 
 } // namespace Views

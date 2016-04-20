@@ -211,7 +211,7 @@ ECode Task::SetCallbacks(
 
 /** Set the grouping */
 ECode Task::SetGroup(
-    /* [in] */ TaskGrouping* group)
+    /* [in] */ ITaskGrouping* group)
 {
     if (group != NULL && mGroup != NULL) {
         Logger::E("Task", "This task is already assigned to a group.");
@@ -269,7 +269,8 @@ ECode Task::ToString(
      VALIDATE_NOT_NULL(str);
     String groupAffiliation("no group");
     if (mGroup != NULL) {
-        groupAffiliation = StringUtils::ToString(mGroup->mAffiliation);
+        AutoPtr<TaskGrouping> tk = (TaskGrouping*)mGroup.Get();
+        groupAffiliation = StringUtils::ToString(tk->mAffiliation);
     }
     StringBuilder sb;
     sb += "Task (";

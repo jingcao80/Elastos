@@ -107,6 +107,11 @@ RecentsActivity::RecentsActivity()
     mIntentReceiver = new IntentReceiver(this);
 }
 
+ECode RecentsActivity::constructor()
+{
+    return NOERROR;
+}
+
 ECode RecentsActivity::OnPause()
 {
     OverridePendingTransition(

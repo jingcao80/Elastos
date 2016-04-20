@@ -6,6 +6,7 @@
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::SystemUI::Recents::Model::ITask;
+using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
 
 namespace Elastos {
 namespace Droid {
@@ -130,7 +131,8 @@ void TaskStackViewLayoutAlgorithm::ComputeMinMaxScroll(
 
         if (i < (taskCount - 1)) {
             // Increment the peek height
-            Float pPeek = task->mGroup->IsFrontMostTask(task) ? pBetweenAffiliateOffset :
+            AutoPtr<TaskGrouping> tg = (TaskGrouping*)(task->mGroup).Get();
+            Float pPeek = tg->IsFrontMostTask(task) ? pBetweenAffiliateOffset :
                 pWithinAffiliateOffset;
             pAtSecondFrontMostCardTop = pAtFrontMostCardTop;
             pAtFrontMostCardTop += pPeek;

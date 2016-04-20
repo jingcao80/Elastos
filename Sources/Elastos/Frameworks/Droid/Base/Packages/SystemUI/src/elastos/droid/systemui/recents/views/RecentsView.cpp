@@ -1,4 +1,5 @@
-
+#include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
+#include "elastos/droid/systemui/recents/model/TaskGrouping.h"
 #include "elastos/droid/systemui/recents/views/RecentsView.h"
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
 #include "elastos/droid/systemui/recents/Constants.h"
@@ -34,7 +35,8 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
-// using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
+using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
+using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
 
 namespace Elastos {
 namespace Droid {
@@ -42,78 +44,40 @@ namespace SystemUI {
 namespace Recents {
 namespace Views {
 
-CAR_INTERFACE_IMPL_2(RecentsView::CallBacks, Object, ITaskStackViewCallbacks, IPackageCallbacks)
+//--------------------------------------------------------------
+// RecentsView::OnAnimationStartedRunnable
+//--------------------------------------------------------------
 
-RecentsView::CallBacks::CallBacks(
-    /* [in] */ RecentsView* host)
-    : mHost(host)
+RecentsView::OnAnimationStartedRunnable::OnAnimationStartedRunnable(
+    /* [in] */ SystemServicesProxy* ssp)
+    : mSsp(ssp)
 {}
-
-ECode RecentsView::CallBacks::OnTaskViewClicked(
-    /* [in] */ ITaskStackView* stackView,
-    /* [in] */ ITaskView* tv,
-    /* [in] */ ITaskStack* stack,
-    /* [in] */ ITask* t,
-    /* [in] */ Boolean lockToTask)
-{
-    return mHost->OnTaskViewClicked(stackView, tv, stack, t, lockToTask);
-}
-
-ECode RecentsView::CallBacks::OnTaskViewAppInfoClicked(
-    /* [in] */ ITask* t)
-{
-    return mHost->OnTaskViewAppInfoClicked(t);
-}
-
-ECode RecentsView::CallBacks::OnTaskViewDismissed(
-    /* [in] */ ITask* t)
-{
-    return mHost->OnTaskViewDismissed(t);
-}
-
-ECode RecentsView::CallBacks::OnAllTaskViewsDismissed()
-{
-    return mHost->OnAllTaskViewsDismissed();
-}
-
-ECode RecentsView::CallBacks::OnTaskStackFilterTriggered()
-{
-    return mHost->OnTaskStackFilterTriggered();
-}
-
-ECode RecentsView::CallBacks::OnTaskStackUnfilterTriggered()
-{
-    return mHost->OnTaskStackUnfilterTriggered();
-}
-
-ECode RecentsView::CallBacks::OnComponentRemoved(
-    /* [in] */ IHashSet* cns)
-{
-    return mHost->OnComponentRemoved(cns);
-}
 
 ECode RecentsView::OnAnimationStartedRunnable::Run()
 {
-    assert(0);
-    // AutoPtr<SystemServicesProxy> ssp =
-    //     RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
-    // ssp->LockCurrentTask();
+    mSsp->LockCurrentTask();
     return NOERROR;
 }
+
+//--------------------------------------------------------------
+// RecentsView::OnAnimationStartedListener
+//--------------------------------------------------------------
 
 CAR_INTERFACE_IMPL(RecentsView::OnAnimationStartedListener, Object, IActivityOptionsOnAnimationStartedListener)
 
 RecentsView::OnAnimationStartedListener::OnAnimationStartedListener(
+    /* [in] */ SystemServicesProxy* ssp,
     /* [in] */ RecentsView* host)
     : mHost(host)
     , mTriggered(FALSE)
+    , mSsp(ssp)
 {}
 
 // @Override
 ECode RecentsView::OnAnimationStartedListener::OnAnimationStarted()
 {
     if (!mTriggered) {
-        AutoPtr<Runnable> runnable = new OnAnimationStartedRunnable();
+        AutoPtr<Runnable> runnable = new OnAnimationStartedRunnable(mSsp);
         Boolean res;
         mHost->PostDelayed(runnable, 350, &res);
         mTriggered = TRUE;
@@ -135,42 +99,43 @@ RecentsView::LaunchRunnable::LaunchRunnable(
 // @Override
 ECode RecentsView::LaunchRunnable::Run()
 {
-    assert(0);
-    // Task* task = (Task*)mTask.Get();
-    // AutoPtr<SystemServicesProxy> ssp =
-    //     RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
-    // if (task->mIsActive) {
-    //     // Bring an active task to the foreground
-    //     ssp->MoveTaskToFront(task->mKey->mId, mLaunchOpts);
-    // }
-    // else {
-    //     AutoPtr<IContext> context;
-    //     mHost->GetContext((IContext**)&context);
-    //     if (ssp->StartActivityFromRecents(context, task->mKey->mId,
-    //             task->mActivityLabel, mLaunchOpts)) {
-    //         if (mLaunchOpts == NULL && mLockToTask) {
-    //             ssp->LockCurrentTask();
-    //         }
-    //     }
-    //     else {
-    //         // Dismiss the task and return the user to home if we fail to
-    //         // launch the task
-    //         mHost->OnTaskViewDismissed(task);
-    //         if (mHost->mCb != NULL) {
-    //             mHost->mCb->OnTaskLaunchFailed();
-    //         }
-    //     }
-    // }
-
+    Task* task = (Task*)mTask.Get();
+    AutoPtr<SystemServicesProxy> ssp;
+    RecentsTaskLoader::GetInstance()->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
+    if (task->mIsActive) {
+        // Bring an active task to the foreground
+        ssp->MoveTaskToFront(task->mKey->mId, mLaunchOpts);
+    }
+    else {
+        AutoPtr<IContext> context;
+        mHost->GetContext((IContext**)&context);
+        if (ssp->StartActivityFromRecents(context, task->mKey->mId,
+                task->mActivityLabel, mLaunchOpts)) {
+            if (mLaunchOpts == NULL && mLockToTask) {
+                ssp->LockCurrentTask();
+            }
+        }
+        else {
+            // Dismiss the task and return the user to home if we fail to
+            // launch the task
+            mHost->OnTaskViewDismissed(task);
+            if (mHost->mCb != NULL) {
+                mHost->mCb->OnTaskLaunchFailed();
+            }
+        }
+    }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(RecentsView, FrameLayout, IRecentsView)
+//--------------------------------------------------------------
+// RecentsView
+//--------------------------------------------------------------
+
+CAR_INTERFACE_IMPL_3(RecentsView, FrameLayout, IRecentsView, ITaskStackViewCallbacks, IPackageCallbacks)
 
 RecentsView::RecentsView()
     : mAlreadyLaunchingTask(FALSE)
 {
-    mCallBacks = new CallBacks(this);
 }
 
 ECode RecentsView::constructor(
@@ -249,7 +214,7 @@ ECode RecentsView::SetTaskStacks(
         GetContext((IContext**)&context);
         AutoPtr<TaskStackView> stackView = new TaskStackView();
         stackView->constructor(context, stack);
-        stackView->SetCallbacks(mCallBacks);
+        stackView->SetCallbacks((ITaskStackViewCallbacks*)this);
         // Enable debug mode drawing
         if (mConfig->mDebugModeEnabled) {
             stackView->SetDebugOverlay(mDebugOverlay);
@@ -649,6 +614,9 @@ ECode RecentsView::OnTaskViewClicked(
     }
 
     // Compute the thumbnail to scale up from
+    AutoPtr<RecentsTaskLoader> rtl = RecentsTaskLoader::GetInstance();
+    AutoPtr<SystemServicesProxy> ssp;
+    rtl->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
     AutoPtr<IActivityOptions> opts;
     Int32 w, h;
     if (task->mThumbnail != NULL && (task->mThumbnail->GetWidth(&w), w > 0) &&
@@ -690,7 +658,7 @@ ECode RecentsView::OnTaskViewClicked(
         }
         AutoPtr<IActivityOptionsOnAnimationStartedListener> animStartedListener;
         if (lockToTask) {
-            animStartedListener = new OnAnimationStartedListener(this);
+            animStartedListener = new OnAnimationStartedListener(ssp, this);
         }
         AutoPtr<IActivityOptionsHelper> aoHelper;
         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
@@ -708,7 +676,8 @@ ECode RecentsView::OnTaskViewClicked(
         Post(launchRunnable, &res);
     }
     else {
-        if (!task->mGroup->IsFrontMostTask(task)) {
+        AutoPtr<TaskGrouping> tg = (TaskGrouping*)(task->mGroup).Get();
+        if (!tg->IsFrontMostTask(task)) {
             // For affiliated tasks that are behind other tasks, we must animate the front cards
             // out of view before starting the task transition
             stackView->StartLaunchTaskAnimation(tv, launchRunnable, lockToTask);

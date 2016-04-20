@@ -5,8 +5,12 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
+SOURCES = recents.cpp
 SOURCES += Constants.cpp
 SOURCES += RecentsConfiguration.cpp
+SOURCES += RecentsAppWidgetHost.cpp
+SOURCES += AlternateRecentsComponent.cpp
+SOURCES += RecentsActivity.cpp
 
 ELASTOS_LIBS += model/model.lib
 ELASTOS_LIBS += views/views.lib

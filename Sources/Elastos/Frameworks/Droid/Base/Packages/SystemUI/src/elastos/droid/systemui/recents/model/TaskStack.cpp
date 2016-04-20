@@ -268,7 +268,7 @@ void TaskStack::RemoveTask(
         // Remove the task from the list
         mTaskList->Remove(t);
         // Remove it from the group as well, and if it is empty, remove the group
-        AutoPtr<TaskGrouping> group = t->mGroup;
+        AutoPtr<TaskGrouping> group = (TaskGrouping*)(t->mGroup).Get();
         group->RemoveTask(t);
         if (group->GetTaskCount() == 0) {
             RemoveGroup(group);
@@ -300,7 +300,7 @@ void TaskStack::SetTasks(
         // Remove the task from the list
         mTaskList->Remove(t);
         // Remove it from the group as well, and if it is empty, remove the group
-        AutoPtr<TaskGrouping> group = t->mGroup;
+        AutoPtr<TaskGrouping> group = (TaskGrouping*)(t->mGroup).Get();
         group->RemoveTask(t);
         if (group->GetTaskCount() == 0) {
             RemoveGroup(group);

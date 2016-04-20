@@ -76,6 +76,8 @@ public:
 
     RecentsActivity();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnPause();
 

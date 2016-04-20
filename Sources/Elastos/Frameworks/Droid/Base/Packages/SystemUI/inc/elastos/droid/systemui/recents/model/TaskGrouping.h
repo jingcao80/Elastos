@@ -15,7 +15,6 @@ namespace SystemUI {
 namespace Recents {
 namespace Model {
 
-
 /** Represents a grouping of tasks witihin a stack. */
 class TaskGrouping
     : public Object

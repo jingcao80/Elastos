@@ -18,8 +18,6 @@ namespace SystemUI {
 namespace Recents {
 namespace Model {
 
-class TaskGrouping;
-
 /**
  * A task represents the top most task in the system's task stack.
  */
@@ -127,7 +125,7 @@ public:
 
     /** Set the grouping */
     CARAPI SetGroup(
-        /* [in] */ TaskGrouping* group);
+        /* [in] */ ITaskGrouping* group);
 
     /** Notifies the callback listeners that this task has been loaded */
     CARAPI NotifyTaskDataLoaded(
@@ -150,7 +148,7 @@ public:
 
 public:
     AutoPtr<TaskKey> mKey;
-    AutoPtr<TaskGrouping> mGroup;
+    AutoPtr<ITaskGrouping> mGroup;
     Int32 mTaskAffiliation;
     Int32 mTaskAffiliationColor;
     Boolean mIsLaunchTarget;

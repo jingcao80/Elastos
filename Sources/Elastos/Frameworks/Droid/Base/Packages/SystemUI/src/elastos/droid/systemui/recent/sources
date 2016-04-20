@@ -17,3 +17,4 @@ SOURCES += RecentsActivity.cpp
 SOURCES += RecentsHorizontalScrollView.cpp
 SOURCES += RecentsVerticalScrollView.cpp
 SOURCES += CRecents.cpp
+SOURCES += CRecentsActivity.cpp
