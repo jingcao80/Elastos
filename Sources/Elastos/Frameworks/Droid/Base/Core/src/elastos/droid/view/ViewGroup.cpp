@@ -3045,7 +3045,8 @@ ECode ViewGroup::DispatchTouchEvent(
                                         break;
                                     }
                                 }
-                            } else {
+                            }
+                            else {
                                 mLastTouchDownIndex = childIndex;
                             }
                             ev->GetX(&mLastTouchDownX);
@@ -3128,7 +3129,6 @@ ECode ViewGroup::DispatchTouchEvent(
     if (!handled && mInputEventConsistencyVerifier != NULL) {
         mInputEventConsistencyVerifier->OnUnhandledEvent(IInputEvent::Probe(ev), 1);
     }
-
     *res = handled;
     return NOERROR;
 }

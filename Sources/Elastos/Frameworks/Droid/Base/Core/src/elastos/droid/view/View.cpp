@@ -5894,16 +5894,15 @@ ECode View::DispatchKeyEvent(
     event->GetKeyCode(&keyCode);
     Boolean onKey;
     if (li != NULL && li->mOnKeyListener != NULL && (mViewFlags & ENABLED_MASK) == ENABLED
-        && (li->mOnKeyListener->OnKey(this, keyCode, event, &onKey), onKey)) {
+            && (li->mOnKeyListener->OnKey(this, keyCode, event, &onKey), onKey)) {
         *res = TRUE;
         return NOERROR;
     }
 
     Boolean result = FALSE;
     event->Dispatch(
-        this,
-        mAttachInfo != NULL ? mAttachInfo->mKeyDispatchState : NULL,
-        TO_IINTERFACE(this), &result);
+            this, mAttachInfo != NULL ? mAttachInfo->mKeyDispatchState : NULL,
+            TO_IINTERFACE(this), &result);
     if (result) {
         *res = TRUE;
         return NOERROR;
@@ -5955,14 +5954,14 @@ ECode View::DispatchTouchEvent(
         // Defensive cleanup for new gesture
         StopNestedScroll();
     }
-    Boolean bval;
+
+    Boolean bval = FALSE;
     if (OnFilterTouchEventForSecurity(event, &bval), bval) {
         //noinspection SimplifiableIfStatement
         AutoPtr<ListenerInfo> li = mListenerInfo;
-        Boolean bval = FALSE;
         if (li != NULL && li->mOnTouchListener != NULL
-            && (mViewFlags & ENABLED_MASK) == ENABLED
-            && (li->mOnTouchListener->OnTouch(this, event, &bval), bval)) {
+                && (mViewFlags & ENABLED_MASK) == ENABLED
+                && (li->mOnTouchListener->OnTouch(this, event, &bval), bval)) {
             result = TRUE;
         }
 
@@ -6521,10 +6520,8 @@ ECode View::OnKeyDown(
         event->GetRepeatCount(&repeatCount);
         // Long clickable items don't necessarily have to be clickable
         if (((mViewFlags & CLICKABLE) == CLICKABLE ||
-            (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) &&
-            (repeatCount == 0)) {
+                (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) && (repeatCount == 0)) {
             SetPressed(TRUE);
-
             CheckForLongClick(0);
             *res = TRUE;
             return NOERROR;
@@ -6932,7 +6929,7 @@ ECode View::OnTouchEvent(
     }
 
     if (((viewFlags & CLICKABLE) == CLICKABLE ||
-        (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)) {
+            (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)) {
         Int32 action;
         event->GetAction(&action);
         switch (action) {

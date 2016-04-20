@@ -9,7 +9,7 @@
 #include "elastos/droid/widget/FastScroller.h"
 #include "elastos/droid/widget/COverScroller.h"
 #include "elastos/droid/content/CIntentFilterComparison.h"
-// #include "elastos/droid/os/CStrictMode.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/utility/CSparseBooleanArray.h"
 #include "elastos/droid/utility/CInt64SparseArray.h"
@@ -42,7 +42,7 @@ using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::IStrictMode;
-// using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Text::EIID_ITextWatcher;
 using Elastos::Droid::Text::EIID_IEditable;
@@ -1812,7 +1812,7 @@ ECode AbsListView::PerformClick::Run()
     AutoPtr<IListAdapter> adapter = mHost->mAdapter;
     Int32 motionPosition = mClickMotionPosition;
     if (adapter != NULL && mHost->mItemCount > 0
-        && motionPosition != IAdapterView::INVALID_POSITION) {
+            && motionPosition != IAdapterView::INVALID_POSITION) {
         Int32 count;
         IAdapter::Probe(adapter)->GetCount(&count);
         if (motionPosition < count && SameWindow()) {
@@ -2660,8 +2660,8 @@ ECode AbsListView::ClearScrollingCacheRunnable::Run()
         mHost->mCachingStarted = mHost->mCachingActive = FALSE;
         mHost->SetChildrenDrawnWithCacheEnabled(FALSE);
         if ((mHost->mPersistentDrawingCache
-            & IViewGroup::PERSISTENT_SCROLLING_CACHE) == 0) {
-                mHost->SetChildrenDrawingCacheEnabled(FALSE);
+                & IViewGroup::PERSISTENT_SCROLLING_CACHE) == 0) {
+            mHost->SetChildrenDrawingCacheEnabled(FALSE);
         }
 
         Boolean res;
@@ -3260,7 +3260,7 @@ void AbsListView::UpdateOnScreenCheckedViews()
         Boolean res;
         mCheckStates->Get(position, &res);
         if (checkable != NULL) {
-            checkable ->SetChecked(res);
+            checkable->SetChecked(res);
         }
         else if (useActivated) {
             child->SetActivated(res);
@@ -3291,7 +3291,7 @@ ECode AbsListView::SetChoiceMode(
         }
         Boolean stableIds;
         if (mCheckedIdStates == NULL && mAdapter != NULL &&
-            (IAdapter::Probe(mAdapter)->HasStableIds(&stableIds), stableIds)) {
+                (IAdapter::Probe(mAdapter)->HasStableIds(&stableIds), stableIds)) {
             CInt64SparseArray::New(0, (IInt64SparseArray**)&mCheckedIdStates);
         }
         // Modal multi-choice mode only has choices when the mode is active. Clear them.
@@ -3869,7 +3869,7 @@ AutoPtr<IParcelable> AbsListView::OnSaveInstanceState()
         if (textFilter != NULL) {
             AutoPtr<ICharSequence> filterText;
             ITextView::Probe(textFilter)->GetText((ICharSequence**)&filterText);
-            if (filterText->Probe(EIID_IEditable) != NULL) {
+            if (IEditable::Probe(filterText) != NULL) {
                 filterText->ToString(&(ss->mFilter));
             }
         }
@@ -5507,7 +5507,7 @@ void AbsListView::ScrollIfNeeded(
         if (mScrollStrictSpan == NULL) {
             // If it's non-null, we're already in a scroll.
             AutoPtr<IStrictMode> helper;
-            // CStrictMode::AcquireSingleton((IStrictMode**)&helper);
+            CStrictMode::AcquireSingleton((IStrictMode**)&helper);
             helper->EnterCriticalSpan(String("AbsListView-scroll"),
                     (IStrictModeSpan**)&mScrollStrictSpan);
         }
@@ -5879,7 +5879,8 @@ ECode AbsListView::OnTouchEvent(
         mVelocityTracker->AddMovement(vtev);
     }
     IInputEvent::Probe(vtev)->Recycle();
-    return TRUE;
+    *res = TRUE;
+    return NOERROR;
 }
 
 void AbsListView::OnTouchDown(
@@ -6056,10 +6057,9 @@ void AbsListView::OnTouchUp(
                     Boolean isEnabled;
                     mAdapter->IsEnabled(motionPosition, &isEnabled);
                     if (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_TAP) {
-                        AutoPtr<IRunnable> target = mTouchMode == TOUCH_MODE_DOWN ?
-                                (IRunnable*)mPendingCheckForTap.Get() : (IRunnable*)mPendingCheckForLongPress.Get();
                         Boolean res;
-                        RemoveCallbacks(target, &res);
+                        RemoveCallbacks(mTouchMode == TOUCH_MODE_DOWN ?
+                                (IRunnable*)mPendingCheckForTap.Get() : (IRunnable*)mPendingCheckForLongPress.Get(), &res);
 
                         mLayoutMode = LAYOUT_NORMAL;
                         if (!mDataChanged && isEnabled) {
@@ -6072,9 +6072,8 @@ void AbsListView::OnTouchUp(
                             if (mSelector != NULL) {
                                 AutoPtr<IDrawable> d;
                                 mSelector->GetCurrent((IDrawable**)&d);
-                                AutoPtr<ITransitionDrawable> td = ITransitionDrawable::Probe(d);
-                                if (td != NULL) {
-                                    td->ResetTransition();
+                                if (d != NULL && ITransitionDrawable::Probe(d) != NULL) {
+                                    ITransitionDrawable::Probe(d)->ResetTransition();
                                 }
                                 mSelector->SetHotspot(x, y);
                             }
@@ -6139,12 +6138,12 @@ void AbsListView::OnTouchUp(
                     // allow the weird behavior where you can scroll to a boundary then
                     // fling further.
                     Boolean flingVelocity = Elastos::Core::Math::Abs(initialVelocity) > mMinimumVelocity;
+                    Boolean res;
                     if (flingVelocity &&
                             !((mFirstPosition == 0 &&
                             firstChildTop == contentTop - mOverscrollDistance) ||
                             (mFirstPosition + childCount == mItemCount &&
                             lastChildBottom == contentBottom + mOverscrollDistance))) {
-                        Boolean res;
                         if ((DispatchNestedPreFling(0, -initialVelocity, &res), !res)) {
                             if (mFlingRunnable == NULL) {
                                 mFlingRunnable = new FlingRunnable(this);
@@ -6152,7 +6151,6 @@ void AbsListView::OnTouchUp(
                             ReportScrollStateChange(IAbsListViewOnScrollListener::SCROLL_STATE_FLING);
 
                             mFlingRunnable->Start(-initialVelocity);
-                            Boolean res;
                             DispatchNestedFling(0, -initialVelocity, TRUE, &res);
                         }
                         else {
@@ -6170,9 +6168,7 @@ void AbsListView::OnTouchUp(
                         if (mPositionScroller != NULL) {
                             mPositionScroller->Stop();
                         }
-                        Boolean res;
                         if (flingVelocity && (DispatchNestedPreFling(0, -initialVelocity, &res), !res)) {
-                            Boolean res;
                             DispatchNestedFling(0, -initialVelocity, FALSE, &res);
                         }
                     }
@@ -6369,13 +6365,16 @@ ECode AbsListView::OnNestedScroll(
     Int32 motionIndex = count / 2;
     AutoPtr<IView> motionView;
     GetChildAt(motionIndex, (IView**)&motionView);
-    Int32 top;
-    motionView->GetTop(&top);
-    const Int32 oldTop = motionView != NULL ? top : 0;
+    Int32 oldTop = 0;
+    if (motionView != NULL) {
+        motionView->GetTop(&oldTop);
+    }
     if (motionView == NULL || TrackMotionScroll(-dyUnconsumed, -dyUnconsumed)) {
         Int32 myUnconsumed = dyUnconsumed;
         Int32 myConsumed = 0;
         if (motionView != NULL) {
+            Int32 top;
+            motionView->GetTop(&top);
             myConsumed = top - oldTop;
             myUnconsumed -= myConsumed;
         }
@@ -6416,9 +6415,8 @@ ECode AbsListView::Draw(
 {
     AdapterView::Draw(canvas);
     if (mEdgeGlowTop != NULL) {
-        AutoPtr<IRect> rect;
-        Boolean temp;
         Int32 scrollY = mScrollY;
+        Boolean temp;
         mEdgeGlowTop->IsFinished(&temp);
         if (!temp) {
             Int32 restoreCount;
@@ -6464,11 +6462,13 @@ ECode AbsListView::Draw(
             if (temp) {
                 Int32 w;
                 GetWidth(&w);
+                Int32 h;
+                GetHeight(&h);
                 Int32 bottom;
                 GetPaddingBottom(&bottom);
                 Int32 maxH;
                 mEdgeGlowBottom->GetMaxHeight(&maxH);
-                Invalidate(0, height - bottom - maxH, w, height);
+                Invalidate(0, h - bottom - maxH, w, h);
             }
             canvas->RestoreToCount(restoreCount);
         }
@@ -6822,7 +6822,7 @@ void AbsListView::SmoothScrollBy(
     view->GetBottom(&bottomTemp);
     if (distance == 0 || mItemCount == 0 || childCount == 0 ||
             (firstPos == 0 && topTemp == topLimit && distance < 0) ||
-            (lastPos == mItemCount && bottomTemp== bottomLimit && distance > 0)) {
+            (lastPos == mItemCount && bottomTemp == bottomLimit && distance > 0)) {
         mFlingRunnable->EndFling();
         if (mPositionScroller != NULL) {
             mPositionScroller->Stop();
@@ -6856,7 +6856,7 @@ ECode AbsListView::SmoothScrollByOffset(
             Boolean childVisible;
             if (child->GetGlobalVisibleRect(visibleRect, &childVisible), childVisible) {
                 // the child is partially visible
-                Int32 childRectArea ;
+                Int32 childRectArea;
                 child->GetWidth(&childRectArea);
                 Int32 childHeight;
                 child->GetHeight(&childHeight);
@@ -6892,7 +6892,7 @@ ECode AbsListView::SmoothScrollByOffset(
 void AbsListView::CreateScrollingCache()
 {
     Boolean res;
-    if (mScrollingCacheEnabled && !mCachingStarted && (IsHardwareAccelerated(&res), res)) {
+    if (mScrollingCacheEnabled && !mCachingStarted && (IsHardwareAccelerated(&res), !res)) {
         SetChildrenDrawnWithCacheEnabled(TRUE);
         SetChildrenDrawingCacheEnabled(TRUE);
         mCachingStarted = mCachingActive = TRUE;
@@ -6902,15 +6902,14 @@ void AbsListView::CreateScrollingCache()
 void AbsListView::ClearScrollingCache()
 {
     Boolean res;
-    if (IsHardwareAccelerated(&res), res) {
+    if (IsHardwareAccelerated(&res), !res) {
         if (mClearScrollingCache == NULL) {
             AutoPtr<ClearScrollingCacheRunnable> temp
                     = new ClearScrollingCacheRunnable(this);
             mClearScrollingCache = temp;
         }
+        Post(mClearScrollingCache, &res);
     }
-
-    Post(mClearScrollingCache, &res);
 }
 
 ECode AbsListView::ScrollListBy(
@@ -7135,7 +7134,7 @@ Boolean AbsListView::TrackMotionScroll(
 
     Int32 absIncrementalDeltaY = Math::Abs(incrementalDeltaY);
     if (spaceAbove < absIncrementalDeltaY
-        || spaceBelow < absIncrementalDeltaY) {
+            || spaceBelow < absIncrementalDeltaY) {
         FillGap(down);
     }
 
@@ -7438,8 +7437,8 @@ void AbsListView::HandleDataChanged()
     mLastHandledItemCount = mItemCount;
 
     Boolean hasStableIds;
-    IAdapter::Probe(mAdapter)->HasStableIds(&hasStableIds);
-    if (mChoiceMode != IAbsListView::CHOICE_MODE_NONE && mAdapter != NULL && hasStableIds) {
+    if (mChoiceMode != IAbsListView::CHOICE_MODE_NONE && mAdapter != NULL &&
+            (IAdapter::Probe(mAdapter)->HasStableIds(&hasStableIds), hasStableIds)) {
         ConfirmCheckedPositionsById();
     }
 
@@ -7448,6 +7447,7 @@ void AbsListView::HandleDataChanged()
 
     Boolean res;
 
+    using Elastos::Core::Math;
     if (count > 0) {
         Int32 newPos;
         Int32 selectablePos;
@@ -7497,7 +7497,7 @@ void AbsListView::HandleDataChanged()
                         // restore in touch mode. Just leave mSyncPosition as it is (possibly
                         // adjusting if the available range changed) and return.
                         mLayoutMode = LAYOUT_SYNC;
-                        mSyncPosition = Elastos::Core::Math::Min(Elastos::Core::Math::Max(0, mSyncPosition), count - 1);
+                        mSyncPosition = Math::Min(Math::Max(0, mSyncPosition), count - 1);
 
                         return;
                     }
@@ -7535,7 +7535,7 @@ void AbsListView::HandleDataChanged()
                 case SYNC_FIRST_POSITION:
                     // Leave mSyncPosition as it is -- just pin to available range
                     mLayoutMode = LAYOUT_SYNC;
-                    mSyncPosition = Elastos::Core::Math::Min(Elastos::Core::Math::Max(0, mSyncPosition), count - 1);
+                    mSyncPosition = Math::Min(Math::Max(0, mSyncPosition), count - 1);
 
                     return;
                 default:
@@ -7609,7 +7609,7 @@ void AbsListView::OnDisplayHint(
             if (mFiltered && mPopup != NULL) {
                 Boolean showing;
                 mPopup->IsShowing(&showing);
-                if(showing)
+                if(!showing)
                 ShowPopup();
             }
             break;
@@ -7686,33 +7686,29 @@ ECode AbsListView::GetDistance(
     dest->GetWidth(&dWidth);
 
     switch (direction) {
-        case IView::FOCUS_RIGHT: {
+        case IView::FOCUS_RIGHT:
                 sX = source->mRight;
                 sY = source->mTop + sHeight / 2;
                 dX = dest->mLeft;
                 dY = dest->mTop + dHeight / 2;
-            }
             break;
-        case IView::FOCUS_DOWN: {
+        case IView::FOCUS_DOWN:
                 sX = source->mLeft + sWidth / 2;
                 sY = source->mBottom;
                 dX = dest->mLeft + dWidth / 2;
                 dY = dest->mTop;
-            }
             break;
-        case IView::FOCUS_LEFT: {
+        case IView::FOCUS_LEFT:
                 sX = source->mLeft;
                 sY = source->mTop + sHeight / 2;
                 dX = dest->mRight;
                 dY = dest->mTop + dHeight / 2;
-            }
             break;
-        case IView::FOCUS_UP: {
+        case IView::FOCUS_UP:
                 sX = source->mLeft + sWidth / 2;
                 sY = source->mTop;
                 dX = dest->mLeft + dWidth / 2;
                 dY = dest->mBottom;
-            }
             break;
         case IView::FOCUS_FORWARD:
         case IView::FOCUS_BACKWARD:
@@ -7768,15 +7764,17 @@ Boolean AbsListView::SendToTextFilter(
                 mPopup->IsShowing(&showing);
                 if(showing) {
                     Int32 action, repeatCount;
-                    Boolean tracking, canceled;
                     event->GetAction(&action);
                     event->GetRepeatCount(&repeatCount);
+                    Boolean tracking, canceled;
                     event->IsTracking(&tracking);
                     event->IsCanceled(&canceled);
                     if (action == IKeyEvent::ACTION_DOWN && repeatCount == 0) {
                         AutoPtr<IDispatcherState> state;
                         GetKeyDispatcherState((IDispatcherState**)&state);
-                        state->StartTracking(event, TO_IINTERFACE(this));
+                        if (state != NULL) {
+                            state->StartTracking(event, TO_IINTERFACE(this));
+                        }
                         handled = TRUE;
                     }
                     else if (action == IKeyEvent::ACTION_UP && tracking && !canceled) {
@@ -7991,7 +7989,7 @@ ECode AbsListView::OnTextChanged(
             DismissPopup();
             mFiltered = FALSE;
         }
-        AutoPtr<IFilterable> filterable = (IFilterable*)mAdapter->Probe(EIID_IFilterable);
+        AutoPtr<IFilterable> filterable = IFilterable::Probe(mAdapter);
         if (filterable != NULL) {
             AutoPtr<IFilter> f;
             filterable->GetFilter((IFilter**)&f);
