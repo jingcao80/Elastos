@@ -7595,7 +7595,8 @@ AutoPtr<IResolveInfo> CPackageManagerService::FindPreferredActivity(
                         pir->RemoveFilter(pa);
                         // Re-add the filter as a "last chosen" entry (!always)
                         AutoPtr<PreferredActivity> lastChosen = new PreferredActivity(
-                                pa, pa->mPref->mMatch, NULL, pa->mPref->mComponent, FALSE);
+                            pa->mPref->mMatch, NULL, pa->mPref->mComponent, FALSE);
+                        lastChosen->constructor(pa);
                         pir->AddFilter(lastChosen);
                         changed = TRUE;
                         if (changed) {
@@ -16893,8 +16894,9 @@ ECode CPackageManagerService::AddPreferredActivityInternal(
         activity->FlattenToShortString(&str);
         Slogger::I(TAG, "%s activity %s for user %d:", opname.string(), str.string(), userId);
         // filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-        mSettings->EditPreferredActivitiesLPw(userId)->AddFilter(
-                new PreferredActivity(filter, match, set, activity, always));
+        AutoPtr<PreferredActivity> pa = new PreferredActivity(match, set, activity, always);
+        pa->constructor(filter);
+        mSettings->EditPreferredActivitiesLPw(userId)->AddFilter(pa.Get());
         mSettings->WritePackageRestrictionsLPr(userId);
     }
 
@@ -17164,7 +17166,8 @@ ECode CPackageManagerService::AddPersistentPreferredActivity(
     synchronized (mPackagesLock) {
         Slogger::I(TAG, "Adding persistent preferred activity %p for user %d :", activity, userId);
         // filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-        AutoPtr<PersistentPreferredActivity> a = new PersistentPreferredActivity(filter, activity);
+        AutoPtr<PersistentPreferredActivity> a = new PersistentPreferredActivity(activity);
+        a->constructor(filter);
         mSettings->EditPersistentPreferredActivitiesLPw(userId)->AddFilter(a);
         mSettings->WritePackageRestrictionsLPr(userId);
     }
@@ -17241,8 +17244,9 @@ ECode CPackageManagerService::AddCrossProfileIntentFilter(
         return NOERROR;
     }
     synchronized (mPackagesLock) {
-        AutoPtr<CrossProfileIntentFilter> filter = new CrossProfileIntentFilter(intentFilter,
-                ownerPackage, UserHandle::GetUserId(callingUid), targetUserId, flags);
+        AutoPtr<CrossProfileIntentFilter> filter = new CrossProfileIntentFilter(
+            ownerPackage, UserHandle::GetUserId(callingUid), targetUserId, flags);
+        filter->constructor(intentFilter);
         mSettings->EditCrossProfileIntentResolverLPw(sourceUserId)->AddFilter(filter);
         mSettings->WritePackageRestrictionsLPr(sourceUserId);
     }

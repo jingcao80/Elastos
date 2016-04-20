@@ -36,37 +36,12 @@ const String IntentFilter::CAT_STR("cat");
 const String IntentFilter::NAME_STR("name");
 const String IntentFilter::ACTION_STR("action");
 
-CAR_INTERFACE_IMPL(IntentFilter, Object, IIntentFilter)
+CAR_INTERFACE_IMPL_2(IntentFilter, Object, IIntentFilter, IParcelable)
 
 IntentFilter::IntentFilter()
     : mPriority(0)
     , mHasPartialTypes(FALSE)
 {}
-
-IntentFilter::IntentFilter(
-    /* [in] */ const String& action)
-    : mPriority(0)
-    , mHasPartialTypes(FALSE)
-{
-    constructor(action);
-}
-
-IntentFilter::IntentFilter(
-    /* [in] */ const String& action,
-    /* [in] */ const String& dataType)
-    : mPriority(0)
-    , mHasPartialTypes(FALSE)
-{
-    constructor(action, dataType);
-}
-
-IntentFilter::IntentFilter(
-    /* [in] */ IIntentFilter* o)
-    : mPriority(0)
-    , mHasPartialTypes(FALSE)
-{
-    constructor(o);
-}
 
 IntentFilter::~IntentFilter()
 {

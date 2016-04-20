@@ -17,8 +17,10 @@ namespace Pm {
 class CrossProfileIntentFilter : public IntentFilter
 {
 public:
+    CARAPI constructor(
+        /* [in] */ IIntentFilter* filter);
+
     CrossProfileIntentFilter(
-        /* [in] */ IIntentFilter* filter,
         /* [in] */ const String& ownerPackage,
         /* [in] */ Int32 ownerUserId,
         /* [in] */ Int32 targetUserId,

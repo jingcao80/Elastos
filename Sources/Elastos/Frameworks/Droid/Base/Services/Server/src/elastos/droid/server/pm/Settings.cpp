@@ -3231,7 +3231,8 @@ void Settings::ApplyDefaultPreferredActivityLPw(
                 //     Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
                 // }
             }
-            AutoPtr<PreferredActivity> pa = new PreferredActivity(filter, systemMatch, set, cn, TRUE);
+            AutoPtr<PreferredActivity> pa = new PreferredActivity(systemMatch, set, cn, TRUE);
+            pa->constructor(filter);
             EditPreferredActivitiesLPw(userId)->AddFilter(pa);
         }
         else if (haveNonSys == NULL) {

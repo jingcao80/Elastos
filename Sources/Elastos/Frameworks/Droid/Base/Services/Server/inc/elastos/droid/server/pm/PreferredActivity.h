@@ -19,14 +19,17 @@ class PreferredActivity
     , public PreferredComponent::ICallbacks
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
+        /* [in] */ IIntentFilter* filter);
+
     PreferredActivity(
-        /* [in] */ IIntentFilter* filter,
         /* [in] */ Int32 match,
         /* [in] */ ArrayOf<IComponentName*>* set,
         /* [in] */ IComponentName* activity,
         /* [in] */ Boolean always);
 
-    CAR_INTERFACE_DECL()
 
     PreferredActivity(
         /* [in] */ IXmlPullParser* parser);

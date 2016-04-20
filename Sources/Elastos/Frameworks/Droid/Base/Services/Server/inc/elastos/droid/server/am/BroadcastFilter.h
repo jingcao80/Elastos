@@ -22,8 +22,12 @@ class BroadcastFilter
     , public IBroadcastFilter
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
+        /* [in] */ IIntentFilter* filter);
+
     BroadcastFilter(
-        /* [in] */ IIntentFilter* filter,
         /* [in] */ ReceiverList* receiverList,
         /* [in] */ const String& packageName,
         /* [in] */ const String& requiredPermission,
@@ -32,8 +36,6 @@ public:
         /* [in] */ Boolean isSystem);
 
     ~BroadcastFilter();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI_(void) Dump(
         /* [in] */ IPrintWriter* pw,

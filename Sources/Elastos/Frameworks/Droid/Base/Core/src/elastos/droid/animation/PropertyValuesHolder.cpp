@@ -1049,7 +1049,7 @@ ECode PropertyValuesHolder::Clone(
 {
     AutoPtr<PropertyValuesHolder> v = new PropertyValuesHolder(mPropertyName);
     CloneSuperData(v);
-    *holder = (IPropertyValuesHolder*)v->Probe(EIID_IPropertyValuesHolder);
+    *holder = (IPropertyValuesHolder*)v.Get();
     REFCOUNT_ADD(*holder)
     return NOERROR;
 }
@@ -1058,8 +1058,7 @@ ECode PropertyValuesHolder::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    String tmp;
-    IObject::Probe(mKeyframes)->ToString(&tmp);
+    String tmp = Object::ToString(mKeyframes);
     *str = mPropertyName + String(": ") + tmp;
     return NOERROR;
 }
@@ -1137,9 +1136,8 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
     }
 
     if (returnVal == NULL) {
-        Slogger::W(String("PropertyValuesHolder"), String("Method ") +
-                methodName + String("() with type ") /*+ valueType */+
-                String(" not found on target class ") /*+ targetClass*/);
+        Slogger::W("PropertyValuesHolder", "Method %s() with type not found on target class %p",
+            methodName.string(), targetClass);
     }
 
     return returnVal;

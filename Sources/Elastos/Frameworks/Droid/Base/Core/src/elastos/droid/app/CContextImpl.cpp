@@ -1981,6 +1981,10 @@ ECode CContextImpl::RegisterReceiverInternal(
     /* [in] */ IContext* context,
     /* [out] */ IIntent** intent)
 {
+    VALIDATE_NOT_NULL(intent)
+    *intent = NULL;
+    Slogger::I(TAG, "RegisterReceiverInternal: %s, %s", TO_CSTR(receiver), TO_CSTR(filter));
+
     AutoPtr<IIntentReceiver> rd;
     if (receiver != NULL) {
         if (mPackageInfo != NULL && context != NULL) {

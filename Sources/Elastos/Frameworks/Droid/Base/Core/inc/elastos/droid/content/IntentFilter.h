@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_CONTENT_HH_INTENTFILTER_H__
-#define __ELASTOS_DROID_CONTENT_HH_INTENTFILTER_H__
+#ifndef __ELASTOS_DROID_CONTENT_INTENTFILTER_H__
+#define __ELASTOS_DROID_CONTENT_INTENTFILTER_H__
 
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>
@@ -19,6 +19,7 @@ namespace Content {
 class ECO_PUBLIC IntentFilter
     : public Object
     , public IIntentFilter
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()
@@ -733,44 +734,6 @@ protected:
      */
     IntentFilter();
 
-    /**
-     * New IntentFilter that matches a single action with no data.  If
-     * no data characteristics are subsequently specified, then the
-     * filter will only match intents that contain no data.
-     *
-     * @param action The action to match, i.e. Intent.ACTION_MAIN.
-     */
-    IntentFilter(
-        /* [in] */ const String& action);
-
-    /**
-     * New IntentFilter that matches a single action and data type.
-     *
-     * <p><em>Note: MIME type matching in the Android framework is
-     * case-sensitive, unlike formal RFC MIME types.  As a result,
-     * you should always write your MIME types with lower case letters,
-     * and any MIME types you receive from outside of Android should be
-     * converted to lower case before supplying them here.</em></p>
-     *
-     * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
-     * not syntactically correct.
-     *
-     * @param action The action to match, i.e. Intent.ACTION_VIEW.
-     * @param dataType The type to match, i.e. "vnd.android.cursor.dir/person".
-     *
-     */
-    IntentFilter(
-        /* [in] */ const String& action,
-        /* [in] */ const String& dataType);
-
-    /**
-     * New IntentFilter containing a copy of an existing filter.
-     *
-     * @param o The original filter to copy.
-     */
-    IntentFilter(
-        /* [in] */ IIntentFilter* o);
-
     virtual ~IntentFilter();
 
 private:
@@ -825,4 +788,4 @@ protected:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_CONTENT_HH_INTENTFILTER_H__
+#endif // __ELASTOS_DROID_CONTENT_INTENTFILTER_H__

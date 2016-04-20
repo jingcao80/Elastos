@@ -24,11 +24,15 @@ const String PersistentPreferredActivity::ATTR_FILTER("filter");
 const String PersistentPreferredActivity::TAG("PersistentPreferredActivity");
 const Boolean PersistentPreferredActivity::DEBUG_FILTERS;
 
+ECode PersistentPreferredActivity::constructor(
+    /* [in] */ IIntentFilter* filter)
+{
+    return IntentFilter::constructor(filter);
+}
+
 PersistentPreferredActivity::PersistentPreferredActivity(
-    /* [in] */ IIntentFilter* filter,
     /* [in] */ IComponentName* activity)
-    : IntentFilter(filter)
-    , mComponent(activity)
+    : mComponent(activity)
 {}
 
 

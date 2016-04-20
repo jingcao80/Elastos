@@ -17,8 +17,10 @@ namespace Pm {
 class PersistentPreferredActivity : public IntentFilter
 {
 public:
+    CARAPI constructor(
+        /* [in] */ IIntentFilter* filter);
+
     PersistentPreferredActivity(
-        /* [in] */ IIntentFilter* filter,
         /* [in] */ IComponentName* activity);
 
     PersistentPreferredActivity(

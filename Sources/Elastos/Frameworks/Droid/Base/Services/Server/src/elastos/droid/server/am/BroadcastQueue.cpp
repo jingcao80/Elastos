@@ -158,9 +158,7 @@ Boolean BroadcastQueue::ReplaceOrderedBroadcastLocked(
         r->mIntent->FilterEquals((*it)->mIntent, &b);
         if (b) {
             if (DEBUG_BROADCAST) {
-                String str;
-                IObject::Probe(r->mIntent)->ToString(&str);
-                Slogger::V(TAG, "***** DROPPING ORDERED [%s]:%s", mQueueName.string(), str.string());
+                Slogger::V(TAG, "***** DROPPING ORDERED [%s]:%s", mQueueName.string(), TO_CSTR(r->mIntent));
             }
             *it = r;
             return TRUE;
@@ -179,7 +177,7 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
             rs = r->ToString();
         }
 
-        Slogger::V(TAG, "Process cur broadcast %s for app %s", rs.string(), app->ToString().string());
+        Slogger::V(TAG, "Process cur broadcast %s for app %s", rs.string(), TO_CSTR(app));
     }
 
     if (app->mThread == NULL) {
@@ -219,7 +217,7 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
     }
     if (DEBUG_BROADCAST)
         Slogger::V(TAG, "Process cur broadcast %s DELIVERED for app ",
-            TO_CSTR(r), app->ToString().string());
+            TO_CSTR(r), TO_CSTR(app));
     started = TRUE;
     // } finally {
 failed:
@@ -474,22 +472,9 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
     /* [in] */ BroadcastFilter* filter,
     /* [in] */ Boolean ordered)
 {
-    // TODO: delete???
-    if (filter->mReceiverList == NULL) {
-        if (ordered) {
-            r->mReceiver = NULL;
-            r->mCurFilter = NULL;
-            r->mState = BroadcastRecord::CALL_IN_RECEIVE;
-        }
-        return;
-    }
-
     if (DEBUG_BROADCAST) {
-        String rs, fs;
-        if (r) rs = r->ToString();
-        if (filter) fs = filter->ToString();
-        Slogger::W(TAG, "DeliverToRegisteredReceiverLocked: \n >>> record:[%s]\n >>> filter:[%s]",
-            rs.string(), fs.string());
+        Slogger::W(TAG, "DeliverToRegisteredReceiverLocked: \n >>> record:[%s]\n >>> filter:[%s] >>> ordered:%d",
+            TO_CSTR(r), TO_CSTR(filter), ordered);
     }
 
     Boolean skip = FALSE;
@@ -514,7 +499,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
             r->mIntent->ToString(&str);
             Slogger::W(TAG, "Permission Denial: receiving %s to %s (pid=%d, uid=%d)"
                 " requires %s due to sender %s (uid %d)", str.string(),
-                filter->mReceiverList->mApp->ToString().string(), filter->mReceiverList->mPid,
+                TO_CSTR(filter->mReceiverList->mApp), filter->mReceiverList->mPid,
                 filter->mReceiverList->mUid, r->mRequiredPermission.string(),
                 r->mCallerPackage.string(), r->mCallingUid);
             skip = TRUE;
@@ -608,8 +593,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     AutoLock lock(mService);
     AutoPtr<BroadcastRecord> r;
     if (DEBUG_BROADCAST) {
-        Slogger::V(TAG, "processNextBroadcast [%s]: %d broadcasts, %d ordered broadcasts"
-                , mQueueName.string(), mParallelBroadcasts.GetSize(), mOrderedBroadcasts.GetSize());
+        Slogger::V(TAG, "processNextBroadcast [%s]: %d broadcasts, %d ordered broadcasts",
+            mQueueName.string(), mParallelBroadcasts.GetSize(), mOrderedBroadcasts.GetSize());
     }
 
     mService->UpdateCpuStats();
@@ -637,10 +622,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             AutoPtr<IInterface> target;
             r->mReceivers->Get(i, (IInterface**)&target);
             if (DEBUG_BROADCAST) {
-                String str;
-                IObject::Probe(target)->ToString(&str);
-                Slogger::V(TAG, "Delivering non-ordered on [%s] to registered %s: %s"
-                        , mQueueName.string(), str.string(), TO_CSTR(r));
+                Slogger::V(TAG, "Delivering non-ordered on [%s] to registered %s: %s",
+                    mQueueName.string(), TO_CSTR(target), TO_CSTR(r));
             }
             DeliverToRegisteredReceiverLocked(r, (BroadcastFilter*)IBroadcastFilter::Probe(target), FALSE);
         }
@@ -660,7 +643,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     if (mPendingBroadcast != NULL) {
         if (DEBUG_BROADCAST_LIGHT) {
             Slogger::V(TAG, "processNextBroadcast [%s]: waiting for %s",
-                mQueueName.string(), mPendingBroadcast->mCurApp->ToString().string());
+                mQueueName.string(), TO_CSTR(mPendingBroadcast->mCurApp));
         }
 
         Boolean isDead;
@@ -678,8 +661,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             return NOERROR;
         }
         else {
-            Slogger::W(TAG, "pending app  [%s]%s died before responding to broadcast"
-                    , mQueueName.string(), mPendingBroadcast->mCurApp->ToString().string());
+            Slogger::W(TAG, "pending app  [%s]%s died before responding to broadcast",
+                mQueueName.string(), TO_CSTR(mPendingBroadcast->mCurApp));
             mPendingBroadcast->mState = BroadcastRecord::IDLE;
             mPendingBroadcast->mNextReceiver = mPendingBroadcastRecvIndex;
             mPendingBroadcast = NULL;
@@ -935,8 +918,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     }
     if (r->mCurApp != NULL && r->mCurApp->mCrashing) {
         // If the target process is crashing, just skip it.
-        Slogger::W(TAG, "Skipping deliver ordered [%s] %s to %s: process crashing"
-            , mQueueName.string(), TO_CSTR(r), r->mCurApp->ToString().string());
+        Slogger::W(TAG, "Skipping deliver ordered [%s] %s to %s: process crashing",
+            mQueueName.string(), TO_CSTR(r), TO_CSTR(r->mCurApp));
         skip = TRUE;
     }
     AutoPtr<IUserHandleHelper> uhHelper;

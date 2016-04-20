@@ -1579,6 +1579,8 @@ ECode CActivityThread::GetPackageInfo(
             mResourcePackages[pkgName] = wr;
         }
     }
+
+    asset = NULL;
     if (packageInfo->mResources != NULL
             && (packageInfo->mResources->GetAssets((IAssetManager**)&asset), asset->IsUpToDate(&isUp), !isUp)) {
         packageInfo->mResources = NULL;
@@ -2432,7 +2434,6 @@ ECode CActivityThread::HandleLaunchActivity(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IIntent* customIntent)
 {
-    Slogger::I(TAG, " >>> HandleLaunchActivity");
     assert(r);
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(r->mActivityInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
@@ -2524,7 +2525,6 @@ ECode CActivityThread::HandleLaunchActivity(
 //        }
     }
 
-    Slogger::I(TAG, " <<< HandleLaunchActivity");
     return NOERROR;
 }
 
@@ -2726,15 +2726,15 @@ ECode CActivityThread::HandleReceiver(
         sb.Append(packageName);
         sb.Append(".eco");
         path = sb.ToString();
-
-        Slogger::D(TAG, "HandleReceiver: load object from pakcage: %s, class: %s",
-            packageName.string(), className.string());
     }
-
 
 //    try {
     AutoPtr<IClassLoader> cl;
     CPathClassLoader::New(path, NULL/* ClassLoader::GetSystemClassLoader()*/, (IClassLoader**)&cl);
+
+    Slogger::I(TAG, " >> HandleReceiver: packageName:%s, className:%s, classLoader:%s",
+        packageName.string(), className.string(), TO_CSTR(cl));
+    assert(0 && "TODO");
 
     AutoPtr<IClassInfo> classInfo;
     ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
@@ -2996,16 +2996,17 @@ ECode CActivityThread::HandleCreateService(
     // we are back active so skip it.
     UnscheduleGcIdler();
 
+    String appDir, pkgName, className;
+    IPackageItemInfo* pii = IPackageItemInfo::Probe(data->mInfo);
+    pii->GetPackageName(&pkgName);
+    pii->GetName(&className);
+
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(data->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
     AutoPtr<ILoadedPkg> lp;
     GetPackageInfoNoCheck(appInfo, data->mCompatInfo, (ILoadedPkg**)&lp);
     LoadedPkg* packageInfo = (LoadedPkg*)lp.Get();
-
-    String appDir, pkgName, className;
-    IPackageItemInfo::Probe(data->mInfo)->GetPackageName(&pkgName);
     packageInfo->GetAppDir(&appDir);
-    IPackageItemInfo::Probe(data->mInfo)->GetName(&className);
 
     String path = LoadedPkg::GetModulePath(appDir, pkgName);
     AutoPtr<IClassLoader> cl;
@@ -3086,8 +3087,7 @@ ECode CActivityThread::HandleBindService(
         if (!data->mRebind) {
             AutoPtr<IBinder> binder;
             s->OnBind(data->mIntent, (IBinder**)&binder);
-            activityManager->PublishService(
-                    data->mToken, data->mIntent, binder);
+            activityManager->PublishService(data->mToken, data->mIntent, binder);
         }
         else {
             s->OnRebind(data->mIntent);
@@ -3296,7 +3296,6 @@ ECode CActivityThread::PerformResumeActivity(
     /* [in] */ Boolean clearHide,
     /* [out] */ IActivityClientRecord** result)
 {
-    Slogger::I(TAG, " >>> PerformResumeActivity");
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
@@ -3343,7 +3342,6 @@ ECode CActivityThread::PerformResumeActivity(
 
     *result = r;
     REFCOUNT_ADD(*result)
-    Slogger::I(TAG, " <<< PerformResumeActivity");
     return NOERROR;
 }
 
@@ -3372,7 +3370,6 @@ ECode CActivityThread::HandleResumeActivity(
     /* [in] */ Boolean isForward,
     /* [in] */ Boolean reallyResume)
 {
-    Slogger::I(TAG, " >>> HandleResumeActivity");
     // If we are getting ready to gc after going to the background, well
     // we are back active so skip it.
     UnscheduleGcIdler();
@@ -3454,7 +3451,7 @@ ECode CActivityThread::HandleResumeActivity(
             if (r->mNewConfig != NULL) {
 //                if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Resuming activity %s with newConfig %p"
 //                        , r->mActivityInfo->mName.string(), r->mNewConfig.Get());
-                Activity*  activity = (Activity*)r->mActivity.Get();
+                Activity* activity = (Activity*)r->mActivity.Get();
                 PerformConfigurationChanged(activity, r->mNewConfig);
                 Int32 changed;
                 activity->mCurrentConfig->Diff(r->mNewConfig, &changed);
@@ -3520,7 +3517,6 @@ ECode CActivityThread::HandleResumeActivity(
 //            } catch (RemoteException ex) {
 //            }
     }
-    Slogger::I(TAG, " <<< HandleResumeActivity");
     return NOERROR;
 }
 
@@ -3594,7 +3590,6 @@ ECode CActivityThread::HandlePauseActivity(
     /* [in] */ Int32 configChanges,
     /* [in] */ Boolean dontReport)
 {
-    Slogger::V(TAG, " >>>> HandlePauseActivity");
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
         Slogger::V(TAG, "userLeaving=%d handling pause of %s", userLeaving, TO_CSTR(r));
@@ -3621,7 +3616,6 @@ ECode CActivityThread::HandlePauseActivity(
 
        mSomeActivitiesChanged = TRUE;
     }
-    Slogger::V(TAG, " <<<< HandlePauseActivity");
     return NOERROR;
 }
 

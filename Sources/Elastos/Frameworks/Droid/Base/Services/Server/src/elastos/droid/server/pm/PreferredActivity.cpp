@@ -20,13 +20,17 @@ namespace Pm {
 const String PreferredActivity::TAG("PreferredActivity");
 const Boolean PreferredActivity::DEBUG_FILTERS;
 
+ECode PreferredActivity::constructor(
+    /* [in] */ IIntentFilter* filter)
+{
+    return IntentFilter::constructor(filter);
+}
+
 PreferredActivity::PreferredActivity(
-    /* [in] */ IIntentFilter* filter,
     /* [in] */ Int32 match,
     /* [in] */ ArrayOf<IComponentName*>* set,
     /* [in] */ IComponentName* activity,
     /* [in] */ Boolean always)
-    : IntentFilter(filter)
 {
     mPref = new PreferredComponent(this, match, set, activity, always);
 }

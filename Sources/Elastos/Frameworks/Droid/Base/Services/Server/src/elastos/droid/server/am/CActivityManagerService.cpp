@@ -19015,13 +19015,7 @@ ECode CActivityManagerService::HandleIncomingUser(
         mUserManager->HasUserRestriction(IUserManager::DISALLOW_DEBUGGING_FEATURES,
             targetUserId, &res);
         if (res) {
-            AutoPtr<IDebug> dbg;
-            assert(0);
-            // CDebug::AcquireSingleton((IDebug**)&dbg);
-            String callers;
-            // dbg->GetCallers(3, &callers);
-            Slogger::E(TAG, "Shell does not have permission to access user %d\n %s",
-                targetUserId, callers.string());
+            Slogger::E(TAG, "Shell does not have permission to access user %d\n", targetUserId);
         }
     }
 
@@ -19082,8 +19076,8 @@ ECode CActivityManagerService::IsSingleton(
     if (DEBUG_MU) {
         String infoDes = Object::ToString(aInfo);
         Slogger::V(TAG, "isSingleton(%s, %s, %s, 0x%s) = %d",
-                componentProcessName.string(), infoDes.string(), className.string(),
-                StringUtils::ToString(flags, 16).string(), *result);
+            componentProcessName.string(), infoDes.string(), className.string(),
+            StringUtils::ToString(flags, 16).string(), *result);
     }
     return NOERROR;
 }
@@ -19314,7 +19308,7 @@ ECode CActivityManagerService::BindBackupAgent(
 
 ECode CActivityManagerService::ClearPendingBackup()
 {
-    if (DEBUG_BACKUP) Slogger::V(TAG, "clearPendingBackup");
+    if (DEBUG_BACKUP) Slogger::V(TAG, "ClearPendingBackup");
     FAIL_RETURN(EnforceCallingPermission(Manifest::permission::BACKUP, String("clearPendingBackup")));
 
     AutoLock lock(this);
@@ -19328,7 +19322,7 @@ ECode CActivityManagerService::BackupAgentCreated(
     /* [in] */ const String& agentPackageName,
     /* [in] */ IBinder* agent)
 {
-    if (DEBUG_BACKUP) Slogger::V(TAG, "backupAgentCreated: %s = %p", agentPackageName.string(), agent);
+    if (DEBUG_BACKUP) Slogger::V(TAG, "BackupAgentCreated: %s = %p", agentPackageName.string(), agent);
 
     {
         AutoLock lock(this);
@@ -19488,30 +19482,25 @@ ECode CActivityManagerService::RegisterReceiver(
     /* [in] */ Int32 userId,
     /* [out] */ IIntent** intent)
 {
-    VALIDATE_NOT_NULL(filter);
     VALIDATE_NOT_NULL(intent);
     *intent = NULL;
+    VALIDATE_NOT_NULL(filter);
 
     String nullStr;
     FAIL_RETURN(EnforceNotIsolatedCaller(String("registerReceiver")));
     AutoPtr<List<AutoPtr<IIntent> > > stickyIntents;
     AutoPtr<ProcessRecord> callerApp;
-    Int32 callingUid;
-    Int32 callingPid;
+    Int32 callingUid, callingPid;
 
-    String callerPackage(aCallerPackage.string());
+    String callerPackage(aCallerPackage);
     {
         AutoLock lock(this);
 
         if (caller != NULL) {
             callerApp = GetRecordForAppLocked(caller);
             if (callerApp == NULL) {
-                // throw new SecurityException(
-                //         "Unable to find app for caller " + caller
-                //         + " (pid=" + Binder::GetCallingPid()
-                //         + ") when registering receiver " + receiver);
-                Slogger::E(TAG, "Unable to find app for caller %p (pid=%d) when registering receiver %p"
-                        , caller, Binder::GetCallingPid(), receiver);
+                Slogger::E(TAG, "Unable to find app for caller %s (pid=%d) when registering receiver %s",
+                    TO_CSTR(caller), Binder::GetCallingPid(), TO_CSTR(receiver));
                 return E_SECURITY_EXCEPTION;
             }
 
@@ -19521,8 +19510,6 @@ ECode CActivityManagerService::RegisterReceiver(
             if (uid != IProcess::SYSTEM_UID
                 && !(callerApp->mPkgList->ContainsKey(CoreUtils::Convert(callerPackage), &res), res)
                 && !callerPackage.Equals("android")) {
-                // throw new SecurityException("Given caller package " + callerPackage
-                //         + " is not running in process " + callerApp);
                 Slogger::E(TAG, "Given caller package %s is not running in process %s",
                     callerPackage.string(), TO_CSTR(callerApp));
                 return E_SECURITY_EXCEPTION;
@@ -19538,7 +19525,7 @@ ECode CActivityManagerService::RegisterReceiver(
         }
 
         FAIL_RETURN(HandleIncomingUser(callingPid, callingUid, userId,
-                TRUE, ALLOW_FULL_ONLY, String("registerReceiver"), callerPackage, &userId));
+            TRUE, ALLOW_FULL_ONLY, String("registerReceiver"), callerPackage, &userId));
 
         Int32 count ;
         filter->CountActions(&count);
@@ -19569,11 +19556,14 @@ ECode CActivityManagerService::RegisterReceiver(
                     AutoPtr<StringIntentMap> stickies = it->mSecond;
                     StringIntentMap::Iterator it2 = stickies->Find(action);
                     if (it2 != stickies->End()) {
-                        AutoPtr<List<AutoPtr<IIntent> > > intents = it2->mSecond;
                         if (stickyIntents == NULL) {
                             stickyIntents = new List<AutoPtr<IIntent> >();
                         }
-                        stickyIntents->Insert(stickyIntents->End(), intents->Begin(), intents->End());
+                        AutoPtr<List<AutoPtr<IIntent> > > intents = it2->mSecond;
+                        List<AutoPtr<IIntent> >::Iterator it3 = intents->Begin();
+                        for (; it3 != intents->End(); ++it3) {
+                            stickyIntents->PushBack(*it3);
+                        }
                     }
                 }
             }
@@ -19593,7 +19583,8 @@ ECode CActivityManagerService::RegisterReceiver(
             // and also it may need to wait application response, so we
             // cannot lock ActivityManagerService here.
             Int32 res;
-            if (filter->Match(resolver, intent, TRUE, TAG, &res), res >= 0) {
+            filter->Match(resolver, intent, TRUE, TAG, &res);
+            if (res >= 0) {
                 if (allSticky == NULL) {
                     allSticky = new List<AutoPtr<IIntent> >();
                 }
@@ -19624,8 +19615,7 @@ ECode CActivityManagerService::RegisterReceiver(
         rl = rrIt->mSecond;
     }
     if (rl == NULL) {
-        rl = new ReceiverList(this, callerApp, callingPid, callingUid,
-                userId, receiver);
+        rl = new ReceiverList(this, callerApp, callingPid, callingUid, userId, receiver);
         if (rl->mApp != NULL) {
             rl->mApp->mReceivers.Insert(rl);
         }
@@ -19669,14 +19659,16 @@ ECode CActivityManagerService::RegisterReceiver(
         callerApp->mInfo->GetFlags(&flags);
         isSystem = (flags & IApplicationInfo::FLAG_SYSTEM) != 0;
     }
-    AutoPtr<BroadcastFilter> bf = new BroadcastFilter(filter, rl, callerPackage,
-            permission, callingUid, userId, isSystem);
+    AutoPtr<BroadcastFilter> bf = new BroadcastFilter(
+        rl, callerPackage, permission, callingUid, userId, isSystem);
+    bf->constructor(filter);
     rl->PushBack(bf);
     if (!bf->DebugCheck()) {
         Slogger::W(TAG, "==> For Dynamic broadast");
     }
 
     mReceiverResolver->AddFilter(bf);
+
     // Enqueue broadcasts for all existing stickies that match
     // this filter.
     if (allSticky != NULL) {
@@ -19690,8 +19682,8 @@ ECode CActivityManagerService::RegisterReceiver(
             AutoPtr<IIntent> intent = *it;
             AutoPtr<BroadcastQueue> queue = BroadcastQueueForIntent(intent);
             AutoPtr<BroadcastRecord> r = new BroadcastRecord(queue, intent, NULL,
-                   String(NULL), -1, -1, nullStr, nullStr, IAppOpsManager::OP_NONE, receivers, NULL, 0,
-                   String(NULL), NULL, FALSE, TRUE, TRUE, -1);
+               nullStr, -1, -1, nullStr, nullStr, IAppOpsManager::OP_NONE, receivers, NULL, 0,
+               nullStr, NULL, FALSE, TRUE, TRUE, -1);
             queue->EnqueueParallelBroadcastLocked(r);
             queue->ScheduleBroadcastsLocked();
         }
@@ -19900,7 +19892,7 @@ AutoPtr<IList> CActivityManagerService::CollectReceiverComponents(
 ECode CActivityManagerService::BroadcastIntentLocked(
     /* [in] */ ProcessRecord* callerApp,
     /* [in] */ const String& callerPackage,
-    /* [in] */ IIntent* _intent,
+    /* [in] */ IIntent* inIntent,
     /* [in] */ const String& resolvedType,
     /* [in] */ IIntentReceiver* resultTo,
     /* [in] */ Int32 resultCode,
@@ -19919,7 +19911,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     *result = IActivityManager::BROADCAST_STICKY_CANT_HAVE_PERMISSION;
 
     AutoPtr<IIntent> intent;
-    CIntent::New(_intent, (IIntent**)&intent);
+    CIntent::New(inIntent, (IIntent**)&intent);
 
     // By default broadcasts do not go to stopped apps.
     intent->AddFlags(IIntent::FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -19942,8 +19934,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         intent->GetFlags(&flags);
         if (callingUid != IProcess::SYSTEM_UID || (flags
                 & IIntent::FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
-            // Slogger::W(TAG, StringBuilder("Skipping broadcast of ") + intent
-            // + ": user " + userId + " is stopped");
+            Slogger::W(TAG, "Skipping broadcast of %s: user:%d is stopped", TO_CSTR(intent), userId);
             *result = IActivityManager::BROADCAST_SUCCESS;
             return NOERROR;
         }
@@ -19966,8 +19957,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         Boolean b;
         AppGlobals::GetPackageManager()->IsProtectedBroadcast(action, &b);
         if (b) {
-            Slogger::W(TAG, "Permission Denial: not allowed to send broadcast %s from pid=%d, uid=%d"
-                    , action.string(), callingPid, callingUid);
+            Slogger::W(TAG, "Permission Denial: not allowed to send broadcast %s from pid=%d, uid=%d",
+                action.string(), callingPid, callingUid);
             //throw new SecurityException(msg);
             return E_SECURITY_EXCEPTION;
         }
@@ -20097,8 +20088,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
             String action;
             intent->GetAction(&action);
             Slogger::W(TAG, "Permission Denial: %s broadcast from %s (pid=%d, uid=%d)"
-                " requires Manifest::permission::BROADCAST_PACKAGE_REMOVED"
-                , action.string(), callerPackage.string(), callingPid, callingUid);
+                " requires Manifest::permission::BROADCAST_PACKAGE_REMOVED",
+                action.string(), callerPackage.string(), callingPid, callingUid);
             return E_SECURITY_EXCEPTION;
         }
 
@@ -20206,11 +20197,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
                     for (i = list->Begin(); i != list->End(); i++) {
                         intent->FilterEquals(*i, &bval);
                         if (bval) {
-                            // throw new IllegalArgumentException(
-                            //         "Sticky broadcast " + intent + " for user "
-                            //         + userId + " conflicts with existing global broadcast");
-                            Slogger::E(TAG, "Sticky broadcast %p for user %d conflicts with existing global broadcast"
-                                    , intent.Get(), userId);
+                            Slogger::E(TAG, "Sticky broadcast %s for user %d conflicts with existing global broadcast",
+                                TO_CSTR(intent), userId);
                             return E_ILLEGAL_ARGUMENT_EXCEPTION;
                         }
                     }
@@ -20320,10 +20308,10 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         // registered receivers separately so they don't wait for the
         // components to be launched.
         AutoPtr<BroadcastRecord> r = new BroadcastRecord(queue, intent, callerApp,
-                callerPackage, callingPid, callingUid, resolvedType, requiredPermission,
-                appOp, rlist, resultTo, resultCode, resultData, map,
-                ordered, sticky, FALSE, userId);
-        if (DEBUG_BROADCAST) Slogger::V(TAG, "Enqueueing parallel broadcast %p", r.Get());
+            callerPackage, callingPid, callingUid, resolvedType, requiredPermission,
+            appOp, rlist, resultTo, resultCode, resultData, map,
+            ordered, sticky, FALSE, userId);
+        if (DEBUG_BROADCAST) Slogger::V(TAG, "Enqueueing parallel broadcast %s", TO_CSTR(r));
         Boolean replaced = replacePending && queue->ReplaceParallelBroadcastLocked(r);
         if (!replaced) {
             queue->EnqueueParallelBroadcastLocked(r);
@@ -20361,8 +20349,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
             }
         }
         else if (action.Equals(IIntent::ACTION_EXTERNAL_APPLICATIONS_AVAILABLE)) {
-            intent->GetStringArrayExtra(String(IIntent::EXTRA_CHANGED_PACKAGE_LIST),
-                                        (ArrayOf<String> **)&skipPackages);
+            intent->GetStringArrayExtra(
+                IIntent::EXTRA_CHANGED_PACKAGE_LIST, (ArrayOf<String> **)&skipPackages);
         }
         if (skipPackages != NULL && (skipPackages->GetLength() > 0)) {
             for (Int32 i = 0; i < skipPackages->GetLength(); ++i) {
@@ -20440,7 +20428,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
                 requiredPermission, appOp, receivers, resultTo, resultCode,
                 resultData, map, ordered, sticky, FALSE, userId);
         if (DEBUG_BROADCAST) {
-            Slogger::V(TAG, "Enqueueing ordered broadcast %p: prev had %d", r.Get(), queue->mOrderedBroadcasts.GetSize());
+            Slogger::V(TAG, "Enqueueing ordered broadcast %s: prev had %d",
+                TO_CSTR(r), queue->mOrderedBroadcasts.GetSize());
         }
         if (DEBUG_BROADCAST) {
             Int32 seq = -1;
@@ -20550,7 +20539,7 @@ ECode CActivityManagerService::BroadcastIntent(
 ECode CActivityManagerService::BroadcastIntentInPackage(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 uid,
-    /* [in] */ IIntent* _intent,
+    /* [in] */ IIntent* inIntent,
     /* [in] */ const String& resolvedType,
     /* [in] */ IIntentReceiver* resultTo,
     /* [in] */ Int32 resultCode,
@@ -20562,14 +20551,16 @@ ECode CActivityManagerService::BroadcastIntentInPackage(
     /* [in] */ Int32 userId,
     /* [out] */ Int32* status)
 {
+    VALIDATE_NOT_NULL(status)
+
     AutoLock lock(this);
     AutoPtr<IIntent> intent;
-    FAIL_RETURN(VerifyBroadcastLocked(_intent, (IIntent**)&intent));
+    FAIL_RETURN(VerifyBroadcastLocked(inIntent, (IIntent**)&intent));
 
     Int64 origId = Binder::ClearCallingIdentity();
     BroadcastIntentLocked(NULL, packageName, intent, resolvedType,
-            resultTo, resultCode, resultData, map, requiredPermission,
-            IAppOpsManager::OP_NONE, serialized, sticky, -1, uid, userId, status);
+        resultTo, resultCode, resultData, map, requiredPermission,
+        IAppOpsManager::OP_NONE, serialized, sticky, -1, uid, userId, status);
     Binder::RestoreCallingIdentity(origId);
     return NOERROR;
 }

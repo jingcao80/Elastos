@@ -24,14 +24,18 @@ const String CrossProfileIntentFilter::ATTR_OWNER_PACKAGE("wnerPackage");
 const String CrossProfileIntentFilter::ATTR_FILTER("filter");
 const String CrossProfileIntentFilter::TAG("CrossProfileIntentFilter");
 
+ECode CrossProfileIntentFilter::constructor(
+    /* [in] */ IIntentFilter* filter)
+{
+    return IntentFilter::constructor(filter);
+}
+
 CrossProfileIntentFilter::CrossProfileIntentFilter(
-    /* [in] */ IIntentFilter* filter,
     /* [in] */ const String& ownerPackage,
     /* [in] */ Int32 ownerUserId,
     /* [in] */ Int32 targetUserId,
     /* [in] */ Int32 flags)
-    : IntentFilter(filter)
-    , mTargetUserId(targetUserId)
+    : mTargetUserId(targetUserId)
     , mOwnerUserId(ownerUserId)
     , mOwnerPackage(ownerPackage)
     , mFlags(flags)

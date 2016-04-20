@@ -17,26 +17,29 @@ namespace Am {
 CAR_INTERFACE_IMPL(BroadcastFilter, IntentFilter, IBroadcastFilter)
 
 BroadcastFilter::BroadcastFilter(
-    /* [in] */ IIntentFilter* intentFilter,
     /* [in] */ ReceiverList* receiverList,
     /* [in] */ const String& packageName,
     /* [in] */ const String& requiredPermission,
     /* [in] */ Int32 owningUid,
     /* [in] */ Int32 userId,
     /* [in] */ Boolean isSystem)
-    : IntentFilter(intentFilter)
-    , mReceiverList(receiverList)
+    : mReceiverList(receiverList)
     , mPackageName(packageName)
     , mRequiredPermission(requiredPermission)
     , mOwningUid(owningUid)
     , mOwningUserId(userId)
     , mIsSystem(isSystem)
 {
-    IntentFilter::constructor(intentFilter);
 }
 
 BroadcastFilter::~BroadcastFilter()
 {
+}
+
+ECode BroadcastFilter::constructor(
+    /* [in] */ IIntentFilter* intentFilter)
+{
+    return IntentFilter::constructor(intentFilter);
 }
 
 void BroadcastFilter::Dump(

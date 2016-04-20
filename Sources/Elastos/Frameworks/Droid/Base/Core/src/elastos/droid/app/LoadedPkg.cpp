@@ -784,8 +784,7 @@ ECode LoadedPkg::GetClassLoader(
         // }
 
         if (mRegisterPackage) {
-            // TODO
-            // ActivityManagerNative::GetDefault()->AddPackageDependency(mPackageName);
+            ActivityManagerNative::GetDefault()->AddPackageDependency(mPackageName);
         }
 
         List<String> zipPaths, libPaths;
