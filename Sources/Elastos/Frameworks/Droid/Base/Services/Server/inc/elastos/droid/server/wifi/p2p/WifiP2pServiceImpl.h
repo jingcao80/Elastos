@@ -1,14 +1,18 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFIP2PSERVICEIMPL_H__
 #define __ELASTOS_DROID_SERVER_WIFIP2PSERVICEIMPL_H__
 
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
+#include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
-#include "elastos/droid/utility/StateMachine.h"
-#include "elastos/droid/utility/State.h"
-#include "elastos/droid/utility/AsyncChannel.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/internal/utility/AsyncChannel.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
+#include "elastos/droid/server/wifi/WifiMonitor.h"
 
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::INotification;
@@ -16,9 +20,11 @@ using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterfaceOnKeyListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Utility::AsyncChannel;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Internal::Utility::StateMachine;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Os::IBinder;
@@ -26,11 +32,25 @@ using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Net::INetworkInfo;
+using Elastos::Droid::Net::IDhcpStateMachine;
+using Elastos::Net::IInetAddress;;
+using Elastos::Droid::Server::Wifi::WifiNative;
+using Elastos::Droid::Server::Wifi::WifiMonitor;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Wifi::IWpsInfo;
+using Elastos::Droid::Wifi::P2p::IWifiP2pDevice;
 using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
+using Elastos::Droid::Wifi::P2p::IWifiP2pDeviceList;
+using Elastos::Droid::Wifi::P2p::IWifiP2pInfo;
+using Elastos::Droid::Wifi::P2p::IWifiP2pGroup;
+using Elastos::Droid::Wifi::P2p::IWifiP2pGroupList;
+using Elastos::Droid::Wifi::P2p::IWifiP2pConfig;
+using Elastos::Droid::Wifi::P2p::IWifiP2pWfdInfo;
+using Elastos::Droid::Wifi::P2p::IWifiP2pGroupListGroupDeleteListener;
 using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceInfo;
 using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceRequest;
 using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponse;
@@ -39,25 +59,13 @@ using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
-
-class Net::DhcpStateMachine;
-
-namespace Server {
-namespace Wifi {
-
-class WifiMonitor;
-class WifiNative;
-
-}}}
-
-namespace Elastos {
-namespace Droid {
 namespace Server {
 namespace Wifi {
 namespace P2p {
 
 class WifiP2pServiceImpl
-    : public IIWifiP2pManager
+    : public Object
+    , public IIWifiP2pManager
     , public IBinder
 {
 public:
@@ -105,7 +113,7 @@ public:
         P2pStatus_REJECTED_BY_USER,
 
         /* Unknown error */
-        P2pStatus_UNKNOWN;
+        P2pStatus_UNKNOWN
     };
     /**
      * Information about a particular client and we track the service discovery requests
@@ -325,10 +333,10 @@ public:
             P2pStateMachine* mHost;
         };
 
-        class UserAuthorizingInvitationState : public State
+        class UserAuthorizingNegotiationRequestState : public State
         {
         public:
-            UserAuthorizingInvitationState(
+            UserAuthorizingNegotiationRequestState(
                 /* [in] */ P2pStateMachine* host);
 
             // @Override
@@ -344,7 +352,32 @@ public:
 
             CARAPI_(String) GetName()
             {
-                return String("UserAuthorizingInvitationState");
+                return String("UserAuthorizingNegotiationRequestState");
+            }
+        private:
+            P2pStateMachine* mHost;
+        };
+
+        class UserAuthorizingInviteRequestState : public State
+        {
+        public:
+            UserAuthorizingInviteRequestState (
+                /* [in] */ P2pStateMachine* host);
+
+            // @Override
+            CARAPI Enter();
+
+            // @Override
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* message,
+                /* [out] */ Boolean* result);
+
+            // @Override
+            CARAPI Exit();
+
+            CARAPI_(String) GetName()
+            {
+                return String("UserAuthorizingInviteRequestState");
             }
         private:
             P2pStateMachine* mHost;
@@ -493,8 +526,8 @@ public:
         };
 
         class GroupDeleteListener
-            : public ElRefBase
-            , public IGroupDeleteListener
+            : public Object
+            , public IWifiP2pGroupListGroupDeleteListener
         {
         public:
             CAR_INTERFACE_DECL()
@@ -510,7 +543,7 @@ public:
         };
 
         class PositiveButtonListener
-            : public ElRefBase
+            : public Object
             , public IDialogInterfaceOnClickListener
         {
         public:
@@ -527,7 +560,7 @@ public:
         };
 
         class NegativeButtonListener
-            : public ElRefBase
+            : public Object
             , public IDialogInterfaceOnClickListener
         {
         public:
@@ -544,7 +577,7 @@ public:
         };
 
         class DialogCancelListener
-            : public ElRefBase
+            : public Object
             , public IDialogInterfaceOnCancelListener
         {
         public:
@@ -559,12 +592,113 @@ public:
             P2pStateMachine* mHost;
         };
 
+        class NotifyP2pProvDiscShowPinRequestOnClickListener
+            : public Object
+            , public IDialogInterfaceOnClickListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            NotifyP2pProvDiscShowPinRequestOnClickListener(
+                /* [in] */ P2pStateMachine* host,
+                /* [in] */ const String& address,
+                /* [in] */ const String& pin);
+
+            CARAPI OnClick(
+                /* [in] */ IDialogInterface* dialog,
+                /* [in] */ Int32 which);
+        private:
+            P2pStateMachine* mHost;
+            String mAddress;
+            String mPin;
+        };
+
+        class NotifyInvitationReceivedPositiveButtonListener
+            : public Object
+            , public IDialogInterfaceOnClickListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            NotifyInvitationReceivedPositiveButtonListener(
+                /* [in] */ P2pStateMachine* host,
+                /* [in] */ IWpsInfo* wpsInfo,
+                /* [in] */ IEditText* pin);
+
+            CARAPI OnClick(
+                /* [in] */ IDialogInterface* dialog,
+                /* [in] */ Int32 which);
+        private:
+            P2pStateMachine* mHost;
+            AutoPtr<IWpsInfo> mWpsInfo;
+            AutoPtr<IEditText> mPin;
+        };
+
+        class NotifyInvitationReceivedNegativeButtonListener
+            : public Object
+            , public IDialogInterfaceOnClickListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            NotifyInvitationReceivedNegativeButtonListener(
+                /* [in] */ P2pStateMachine* host);
+
+            CARAPI OnClick(
+                /* [in] */ IDialogInterface* dialog,
+                /* [in] */ Int32 which);
+        private:
+            P2pStateMachine* mHost;
+        };
+
+        class NotifyInvitationReceivedDialogCancelListener
+            : public Object
+            , public IDialogInterfaceOnCancelListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            NotifyInvitationReceivedDialogCancelListener(
+                /* [in] */ P2pStateMachine* host);
+
+            CARAPI OnCancel(
+                /* [in] */ IDialogInterface* dialog);
+        private:
+            P2pStateMachine* mHost;
+        };
+
+        class NotifyInvitationReceivedDialogKeyListener
+            : public Object
+            , public IDialogInterfaceOnKeyListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            NotifyInvitationReceivedDialogKeyListener(
+                /* [in] */ P2pStateMachine* host,
+                /* [in] */ IAlertDialog* dialog);
+
+            CARAPI OnKey(
+                /* [in] */ IDialogInterface* dialog,
+                /* [in] */ Int32 keyCode,
+                /* [in] */ IKeyEvent* event,
+                /* [out] */ Boolean* consumed);
+        private:
+            P2pStateMachine* mHost;
+            AutoPtr<IAlertDialog> mDialog;
+        };
+
     public:
         P2pStateMachine(
             /* [in] */ const String& name,
-            //TODO
+            /* [in] */ ILooper* looper,
             /* [in] */ Boolean p2pSupported,
             /* [in] */ WifiP2pServiceImpl* host);
+
+        CARAPI Dump(
+            /* [in] */ IFileDescriptor* fd,
+            /* [in] */ IPrintWriter* pw,
+            /* [in] */ ArrayOf<String>* args);
 
         CARAPI SendP2pStateChangedBroadcast(
             /* [in] */ Boolean enabled);
@@ -574,9 +708,12 @@ public:
 
         CARAPI SendThisDeviceChangedBroadcast();
 
-        CARAPI SendP2pPeersChangedBroadcast();
+        CARAPI SendPeersChangedBroadcast();
 
         CARAPI SendP2pConnectionChangedBroadcast();
+
+        CARAPI SendMiracastModeChanged(
+            /* [in] */ Int32 mode);
 
         CARAPI SendP2pPersistentGroupsChangedBroadcast();
 
@@ -597,6 +734,10 @@ public:
             /* [in] */ const String& pin,
             /* [in] */ const String& peerAddress);
 
+        CARAPI NotifyP2pProvDiscShowPinRequest(
+            /* [in] */ const String& pin,
+            /* [in] */ const String& peerAddress);
+
         CARAPI NotifyInvitationReceived();
 
         /**
@@ -607,17 +748,35 @@ public:
             /* [in] */ Boolean reload);
 
         /**
-         * Try to connect to the target device.
-         *
-         * Use the persistent credential if it has been stored.
-         *
-         * @param config
-         * @param tryInvocation if true, try to invoke. Otherwise, never try to invoke.
-         * @return
+         * A config is valid if it has a peer address that has already been
+         * discovered
+         * @return true if it is invalid, false otherwise
          */
-        CARAPI_(Int32) Connect(
-            /* [in] */ IWifiP2pConfig* config,
-            /* [in] */ Boolean tryInvocation);
+        CARAPI_(Boolean) IsConfigInvalid(
+            /* [in] */ IWifiP2pConfig* config);
+
+        /* TODO: The supplicant does not provide group capability changes as an event.
+         * Having it pushed as an event would avoid polling for this information right
+         * before a connection
+         */
+        CARAPI_(AutoPtr<IWifiP2pDevice>) FetchCurrentDeviceDetails(
+            /* [in] */ IWifiP2pConfig* config);
+
+        /**
+         * Start a p2p group negotiation and display pin if necessary
+         * @param config for the peer
+         */
+        CARAPI P2pConnectWithPinDisplay(
+            /* [in] */ IWifiP2pConfig* config);
+
+        /**
+         * Reinvoke a persistent group.
+         *
+         * @param config for the peer
+         * @return true on success, false on failure
+         */
+        CARAPI_(Boolean) ReinvokePersistentGroup(
+            /* [in] */ IWifiP2pConfig* config);
 
         /**
          * Return the network id of the group owner profile which has the p2p client with
@@ -652,15 +811,12 @@ public:
             /* [in] */ Boolean isRemovable);
 
         CARAPI SetWifiP2pInfoOnGroupFormation(
-            /* [in] */ const String& serverAddress);
+            /* [in] */ IInetAddress* serverInetAddress);
 
         CARAPI ResetWifiP2pInfo();
 
         CARAPI_(String) GetDeviceName(
             /* [in] */ const String& deviceAddress);
-
-        CARAPI P2pConnectWithPinDisplay(
-            /* [in] */ IWifiP2pConfig* config);
 
         CARAPI_(String) GetPersistedDeviceName();
 
@@ -671,9 +827,6 @@ public:
             /* [in] */ IWifiP2pWfdInfo* wfdInfo);
 
         CARAPI InitializeP2pSettings();
-
-        CARAPI_(Boolean) SetGroupOwnerPsk(
-            /* [in] */ const String& devName);
 
         CARAPI UpdateThisDevice(
             /* [in] */ Int32 status);
@@ -719,13 +872,6 @@ public:
 
         static CARAPI_(String) CmdToString(
             /* [in] */ Int32 what);
-
-        CARAPI_(AutoPtr<IWifiP2pDevice>) GetWifiP2pDeviceFromPeers(
-            /* [in] */ const String& s);
-
-        CARAPI_(Boolean) ComparedMacAddr(
-            /* [in] */ const String& inputa,
-            /* [in] */ const String& inputb);
 
         /**
          * Update service discovery request to wpa_supplicant.
@@ -794,61 +940,6 @@ public:
             /* [in] */ Boolean createIfNotExist,
             /* [out] */ ClientInfo** clientInfo);
 
-        /**
-         * Send detached message to dialog listener in the foreground application.
-         * @param reason
-         */
-        CARAPI SendDetachedMsg(
-            /* [in] */ Int32 reason);
-
-        /**
-         * Send a request to show wps pin to dialog listener in the foreground application.
-         * @param pin WPS pin
-         * @return
-         */
-        CARAPI_(Boolean) SendShowPinReqToFrontApp(
-            /* [in] */ const String& pin);
-
-        /**
-         * Send a request to establish the connection to dialog listener in the foreground
-         * application.
-         * @param dev source device
-         * @param config
-         * @return
-         */
-        CARAPI_(Boolean) SendConnectNoticeToApp(
-            /* [in] */ IWifiP2pDevice* dev,
-            /* [in] */ IWifiP2pConfig* config);
-
-        /**
-         * Send dialog event message to front application's dialog listener.
-         * @param msg
-         * @return true if success.
-         */
-        CARAPI_(Boolean) SendDialogMsgToFrontApp(
-            /* [in] */ IMessage* msg);
-
-        /**
-         * Set dialog listener application.
-         * @param m
-         * @param appPkgName if null, reset the listener.
-         * @param isReset if true, try to reset.
-         * @return
-         */
-        CARAPI_(Boolean) SetDialogListenerApp(
-            /* [in] */ IMessenger* m,
-            /* [in] */ const String& appPkgName,
-            /* [in] */ Boolean isReset);
-
-        /**
-         * Return true if the specified package name is foreground app's.
-         *
-         * @param pkgName application package name.
-         * @return
-         */
-        CARAPI_(Boolean) IsForegroundApp(
-            /* [in] */ const String& pkgName);
-
     public:
         AutoPtr<DefaultState> mDefaultState;// = new DefaultState();
         AutoPtr<P2pNotSupportedState> mP2pNotSupportedState;// = new P2pNotSupportedState();
@@ -859,7 +950,8 @@ public:
         // Inactive is when p2p is enabled with no connectivity
         AutoPtr<InactiveState> mInactiveState;// = new InactiveState();
         AutoPtr<GroupCreatingState> mGroupCreatingState;// = new GroupCreatingState();
-        AutoPtr<UserAuthorizingInvitationState> mUserAuthorizingInvitationState;// = new UserAuthorizingInvitationState();
+        AutoPtr<UserAuthorizingInviteRequestState> mUserAuthorizingInviteRequestState;// = new UserAuthorizingInviteRequestState();
+        AutoPtr<UserAuthorizingNegotiationRequestState> mUserAuthorizingNegotiationRequestState;// = new UserAuthorizingNegotiationRequestState();
         AutoPtr<ProvisionDiscoveryState> mProvisionDiscoveryState;// = new ProvisionDiscoveryState();
         AutoPtr<GroupNegotiationState> mGroupNegotiationState;// = new GroupNegotiationState();
         AutoPtr<FrequencyConflictState> mFrequencyConflictState;// =new FrequencyConflictState();
@@ -872,7 +964,7 @@ public:
         AutoPtr<WifiMonitor> mWifiMonitor;
 
         AutoPtr<IWifiP2pDeviceList> mPeers;
-        AutoPtr<IWifiP2pDeviceList> mNotP2pDevice;
+        //AutoPtr<IWifiP2pDeviceList> mNotP2pDevice;
 
         // /* During a connection, supplicant can tell us that a device was lost. From a supplicant's
         //  * perspective, the discovery stops during connection and it purges device since it does
@@ -887,9 +979,10 @@ public:
 
         AutoPtr<IWifiP2pInfo> mWifiP2pInfo;
         AutoPtr<IWifiP2pGroup> mGroup;
+        Boolean mPendingReformGroupIndication;// = false;
 
         // wfd info
-        AutoPtr<IWifiP2pDevice> mWifiP2pDevice;
+        //AutoPtr<IWifiP2pDevice> mWifiP2pDevice;
 
         // Saved WifiP2pConfig for a peer connection
         AutoPtr<IWifiP2pConfig> mSavedPeerConfig;
@@ -898,10 +991,11 @@ public:
         AutoPtr<IWifiP2pGroup> mSavedP2pGroup;
 
         // Saved WifiP2pDevice from provisioning request
-        AutoPtr<IWifiP2pDevice> mSavedProvDiscDevice;
+        //AutoPtr<IWifiP2pDevice> mSavedProvDiscDevice;
 
         WifiP2pServiceImpl* mHost;
     };
+
 private:
     /**
      * Handles client connections
@@ -910,13 +1004,18 @@ private:
     {
     public:
         ClientHandler(
+            /* [in] */ WifiP2pServiceImpl* host,
             /* [in] */ ILooper* looper);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+    private:
+        WifiP2pServiceImpl* mHost;
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     WifiP2pServiceImpl();
 
     ~WifiP2pServiceImpl();
@@ -934,7 +1033,8 @@ public:
      * an AsyncChannel communication with P2pStateMachine
      * @hide
      */
-    CARAPI_(AutoPtr<IMessenger>) GetP2pStateMachineMessenger();
+    CARAPI GetP2pStateMachineMessenger(
+        /* [out] */ IMessenger** messenger);
 
     CARAPI_(void) EnableVerboseLogging(
         /* [in] */ Int32 verbose);
@@ -948,7 +1048,7 @@ public:
      * As an example, the driver could reduce the channel dwell time during scanning
      * when acting as a source or sink to minimize impact on miracast.
      */
-    CARAPI_(void) SetMiracastMode(
+    CARAPI SetMiracastMode(
         /* [in] */ Int32 mode);
 
     static CARAPI_(P2pStatus) ValueOf(
@@ -961,7 +1061,7 @@ public:
         return Object::ToString(info);
     }
 
-    CARAPI WifiConfigStore::Dump(
+    CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
@@ -1072,7 +1172,7 @@ public:
     AutoPtr<INotification> mNotification;
 
     AutoPtr<IINetworkManagementService> mNwService;
-    AutoPtr<DhcpStateMachine> mDhcpStateMachine;
+    AutoPtr<IDhcpStateMachine> mDhcpStateMachine;
 
     AutoPtr<IActivityManager> mActivityMgr;
 
@@ -1127,12 +1227,6 @@ public:
     /* clients(application) information list. */
     HashMap<AutoPtr<IMessenger>, AutoPtr<ClientInfo> > mClientInfoList;
 
-    /* The foreground application's messenger.
-     * The connection request is notified only to foreground application  */
-    //AutoPtr<IMessenger> mForegroundAppMessenger;
-
-    /* the package name of foreground application. */
-    //String mForegroundAppPkgName;
 };
 
 } // namespace P2p

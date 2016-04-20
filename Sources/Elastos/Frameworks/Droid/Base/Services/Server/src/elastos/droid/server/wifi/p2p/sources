@@ -1,0 +1,15 @@
+TARGET_NAME= p2p
+TARGET_TYPE= lib
+
+INCLUDES += ../..
+#INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+#INCLUDES += $(PREBUILD_INC)/skia/core
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = CWifiP2pService.cpp
+SOURCES += WifiP2pService.cpp
+SOURCES += WifiP2pServiceImpl.cpp

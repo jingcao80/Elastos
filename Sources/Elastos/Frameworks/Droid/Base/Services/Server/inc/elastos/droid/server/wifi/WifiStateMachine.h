@@ -20,6 +20,7 @@ using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::App::IIBatteryStats;
+using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Internal::Utility::IState;
@@ -1207,89 +1208,89 @@ private:
 
 public:
     /* The base for wifi message types */
-    static const Int32 BASE; //= IProtocol::BASE_WIFI;
+    static const Int32 BASE = IProtocol::BASE_WIFI;
     /* Start the supplicant */
-    static const Int32 CMD_START_SUPPLICANT                ; //= BASE + 11;
+    static const Int32 CMD_START_SUPPLICANT                = BASE + 11;
     /* Stop the supplicant */
-    static const Int32 CMD_STOP_SUPPLICANT                 ; //= BASE + 12;
+    static const Int32 CMD_STOP_SUPPLICANT                 = BASE + 12;
     /* Start the driver */
-    static const Int32 CMD_START_DRIVER                    ; //= BASE + 13;
+    static const Int32 CMD_START_DRIVER                    = BASE + 13;
     /* Stop the driver */
-    static const Int32 CMD_STOP_DRIVER                     ; //= BASE + 14;
+    static const Int32 CMD_STOP_DRIVER                     = BASE + 14;
     /* Indicates Static IP succeeded */
-    static const Int32 CMD_STATIC_IP_SUCCESS               ; //= BASE + 15;
+    static const Int32 CMD_STATIC_IP_SUCCESS               = BASE + 15;
     /* Indicates Static IP failed */
-    static const Int32 CMD_STATIC_IP_FAILURE               ; //= BASE + 16;
+    static const Int32 CMD_STATIC_IP_FAILURE               = BASE + 16;
     /* Indicates supplicant stop failed */
-    static const Int32 CMD_STOP_SUPPLICANT_FAILED          ; //= BASE + 17;
+    static const Int32 CMD_STOP_SUPPLICANT_FAILED          = BASE + 17;
     /* Delayed stop to avoid shutting down driver too quick*/
-    static const Int32 CMD_DELAYED_STOP_DRIVER             ; //= BASE + 18;
+    static const Int32 CMD_DELAYED_STOP_DRIVER             = BASE + 18;
     /* A delayed message sent to start driver when it fail to come up */
-    static const Int32 CMD_DRIVER_START_TIMED_OUT          ; //= BASE + 19;
+    static const Int32 CMD_DRIVER_START_TIMED_OUT          = BASE + 19;
 
     /* Start the soft access point */
-    static const Int32 CMD_START_AP                        ; //= BASE + 21;
+    static const Int32 CMD_START_AP                        = BASE + 21;
     /* Indicates soft ap start succeeded */
-    static const Int32 CMD_START_AP_SUCCESS                ; //= BASE + 22;
+    static const Int32 CMD_START_AP_SUCCESS                = BASE + 22;
     /* Indicates soft ap start failed */
-    static const Int32 CMD_START_AP_FAILURE                ; //= BASE + 23;
+    static const Int32 CMD_START_AP_FAILURE                = BASE + 23;
     /* Stop the soft access point */
-    static const Int32 CMD_STOP_AP                         ; //= BASE + 24;
+    static const Int32 CMD_STOP_AP                         = BASE + 24;
     /* Set the soft access point configuration */
-    static const Int32 CMD_SET_AP_CONFIG                   ; //= BASE + 25;
+    static const Int32 CMD_SET_AP_CONFIG                   = BASE + 25;
     /* Soft access point configuration set completed */
-    static const Int32 CMD_SET_AP_CONFIG_COMPLETED         ; //= BASE + 26;
+    static const Int32 CMD_SET_AP_CONFIG_COMPLETED         = BASE + 26;
     /* Request the soft access point configuration */
-    static const Int32 CMD_REQUEST_AP_CONFIG               ; //= BASE + 27;
+    static const Int32 CMD_REQUEST_AP_CONFIG               = BASE + 27;
     /* Response to access point configuration request */
-    static const Int32 CMD_RESPONSE_AP_CONFIG              ; //= BASE + 28;
+    static const Int32 CMD_RESPONSE_AP_CONFIG              = BASE + 28;
     /* Invoked when getting a tether state change notification */
-    static const Int32 CMD_TETHER_STATE_CHANGE             ; //= BASE + 29;
+    static const Int32 CMD_TETHER_STATE_CHANGE             = BASE + 29;
     /* A delayed message sent to indicate tether state change failed to arrive */
-    static const Int32 CMD_TETHER_NOTIFICATION_TIMED_OUT   ; //= BASE + 30;
+    static const Int32 CMD_TETHER_NOTIFICATION_TIMED_OUT   = BASE + 30;
 
-    static const Int32 CMD_BLUETOOTH_ADAPTER_STATE_CHANGE  ; //= BASE + 31;
+    static const Int32 CMD_BLUETOOTH_ADAPTER_STATE_CHANGE  = BASE + 31;
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
-    static const Int32 CMD_PING_SUPPLICANT                 ; //= BASE + 51;
+    static const Int32 CMD_PING_SUPPLICANT                 = BASE + 51;
     /* Add/update a network configuration */
-    static const Int32 CMD_ADD_OR_UPDATE_NETWORK           ; //= BASE + 52;
+    static const Int32 CMD_ADD_OR_UPDATE_NETWORK           = BASE + 52;
     /* Delete a network */
-    static const Int32 CMD_REMOVE_NETWORK                  ; //= BASE + 53;
+    static const Int32 CMD_REMOVE_NETWORK                  = BASE + 53;
     /* Enable a network. The device will attempt a connection to the given network. */
-    static const Int32 CMD_ENABLE_NETWORK                  ; //= BASE + 54;
+    static const Int32 CMD_ENABLE_NETWORK                  = BASE + 54;
     /* Enable all networks */
-    static const Int32 CMD_ENABLE_ALL_NETWORKS             ; //= BASE + 55;
+    static const Int32 CMD_ENABLE_ALL_NETWORKS             = BASE + 55;
     /* Blacklist network. De-prioritizes the given BSSID for connection. */
-    static const Int32 CMD_BLACKLIST_NETWORK               ; //= BASE + 56;
+    static const Int32 CMD_BLACKLIST_NETWORK               = BASE + 56;
     /* Clear the blacklist network list */
-    static const Int32 CMD_CLEAR_BLACKLIST                 ; //= BASE + 57;
+    static const Int32 CMD_CLEAR_BLACKLIST                 = BASE + 57;
     /* Save configuration */
-    static const Int32 CMD_SAVE_CONFIG                     ; //= BASE + 58;
+    static const Int32 CMD_SAVE_CONFIG                     = BASE + 58;
     /* Get configured networks */
-    static const Int32 CMD_GET_CONFIGURED_NETWORKS         ; //= BASE + 59;
+    static const Int32 CMD_GET_CONFIGURED_NETWORKS         = BASE + 59;
     /* Get available frequencies */
-    static const Int32 CMD_GET_CAPABILITY_FREQ             ; //= BASE + 60;
+    static const Int32 CMD_GET_CAPABILITY_FREQ             = BASE + 60;
     /* Get adaptors */
-    static const Int32 CMD_GET_SUPPORTED_FEATURES          ; //= BASE + 61;
+    static const Int32 CMD_GET_SUPPORTED_FEATURES          = BASE + 61;
     /* Get configured networks with real preSharedKey */
-    static const Int32 CMD_GET_PRIVILEGED_CONFIGURED_NETWORKS; //= BASE + 62;
+    static const Int32 CMD_GET_PRIVILEGED_CONFIGURED_NETWORKS = BASE + 62;
     /* Get Link Layer Stats thru HAL */
-    static const Int32 CMD_GET_LINK_LAYER_STATS            ; //= BASE + 63;
+    static const Int32 CMD_GET_LINK_LAYER_STATS            = BASE + 63;
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
-    static const Int32 CMD_START_SCAN                      ; //= BASE + 71;
+    static const Int32 CMD_START_SCAN                      = BASE + 71;
     /* Set operational mode. CONNECT, SCAN ONLY, SCAN_ONLY with Wi-Fi off mode */
-    static const Int32 CMD_SET_OPERATIONAL_MODE            ; //= BASE + 72;
+    static const Int32 CMD_SET_OPERATIONAL_MODE            = BASE + 72;
     /* Disconnect from a network */
-    static const Int32 CMD_DISCONNECT                      ; //= BASE + 73;
+    static const Int32 CMD_DISCONNECT                      = BASE + 73;
     /* Reconnect to a network */
-    static const Int32 CMD_RECONNECT                       ; //= BASE + 74;
+    static const Int32 CMD_RECONNECT                       = BASE + 74;
     /* Reassociate to a network */
-    static const Int32 CMD_REASSOCIATE                     ; //= BASE + 75;
+    static const Int32 CMD_REASSOCIATE                     = BASE + 75;
     /* Get Connection Statistis */
-    static const Int32 CMD_GET_CONNECTION_STATISTICS       ; //= BASE + 76;
+    static const Int32 CMD_GET_CONNECTION_STATISTICS       = BASE + 76;
 
     /* Controls suspend mode optimizations
      *
@@ -1302,40 +1303,40 @@ public:
      * - turn off roaming
      * - DTIM wake up settings
      */
-    static const Int32 CMD_SET_HIGH_PERF_MODE              ; //= BASE + 77;
+    static const Int32 CMD_SET_HIGH_PERF_MODE              = BASE + 77;
     /* Set the country code */
-    static const Int32 CMD_SET_COUNTRY_CODE                ; //= BASE + 80;
+    static const Int32 CMD_SET_COUNTRY_CODE                = BASE + 80;
     /* Enables RSSI poll */
-    static const Int32 CMD_ENABLE_RSSI_POLL                ; //= BASE + 82;
+    static const Int32 CMD_ENABLE_RSSI_POLL                = BASE + 82;
     /* RSSI poll */
-    static const Int32 CMD_RSSI_POLL                       ; //= BASE + 83;
+    static const Int32 CMD_RSSI_POLL                       = BASE + 83;
     /* Set up packet filtering */
-    static const Int32 CMD_START_PACKET_FILTERING          ; //= BASE + 84;
+    static const Int32 CMD_START_PACKET_FILTERING          = BASE + 84;
     /* Clear packet filter */
-    static const Int32 CMD_STOP_PACKET_FILTERING           ; //= BASE + 85;
+    static const Int32 CMD_STOP_PACKET_FILTERING           = BASE + 85;
     /* Enable suspend mode optimizations in the driver */
-    static const Int32 CMD_SET_SUSPEND_OPT_ENABLED         ; //= BASE + 86;
+    static const Int32 CMD_SET_SUSPEND_OPT_ENABLED         = BASE + 86;
     /* Delayed NETWORK_DISCONNECT */
-    static const Int32 CMD_DELAYED_NETWORK_DISCONNECT      ; //= BASE + 87;
+    static const Int32 CMD_DELAYED_NETWORK_DISCONNECT      = BASE + 87;
     /* When there are no saved networks, we do a periodic scan to notify user of
      * an open network */
-    static const Int32 CMD_NO_NETWORKS_PERIODIC_SCAN       ; //= BASE + 88;
+    static const Int32 CMD_NO_NETWORKS_PERIODIC_SCAN       = BASE + 88;
     /* Test network Disconnection NETWORK_DISCONNECT */
-    static const Int32 CMD_TEST_NETWORK_DISCONNECT         ; //= BASE + 89;
+    static const Int32 CMD_TEST_NETWORK_DISCONNECT         = BASE + 89;
 
     /* arg1 values to CMD_STOP_PACKET_FILTERING and CMD_START_PACKET_FILTERING */
     static const Int32 MULTICAST_V6 ; //= 1;
     static const Int32 MULTICAST_V4 ; //= 0;
 
    /* Set the frequency band */
-    static const Int32 CMD_SET_FREQUENCY_BAND              ; //= BASE + 90;
+    static const Int32 CMD_SET_FREQUENCY_BAND              = BASE + 90;
     /* When there are saved networks and PNO fails, we do a periodic scan to notify
        a saved/open network in suspend mode */
-    static const Int32 CMD_PNO_PERIODIC_SCAN               ; //= BASE + 91;
+    static const Int32 CMD_PNO_PERIODIC_SCAN               = BASE + 91;
     /* Enable TDLS on a specific MAC address */
-    static const Int32 CMD_ENABLE_TDLS                     ; //= BASE + 92;
+    static const Int32 CMD_ENABLE_TDLS                     = BASE + 92;
     /* DHCP/IP configuration watchdog */
-    static const Int32 CMD_OBTAINING_IP_ADDRESS_WATCHDOG_TIMER   ; //= BASE + 93;
+    static const Int32 CMD_OBTAINING_IP_ADDRESS_WATCHDOG_TIMER   = BASE + 93;
 
     /**
      * Make this timer 40 seconds, which is about the normal DHCP timeout.
@@ -1348,7 +1349,7 @@ public:
 
     /* Commands from/to the SupplicantStateTracker */
     /* Reset the supplicant state tracker */
-    static const Int32 CMD_RESET_SUPPLICANT_STATE          ; //= BASE + 111;
+    static const Int32 CMD_RESET_SUPPLICANT_STATE          = BASE + 111;
 
     /**
      * Watchdog for protecting against b/16823537
@@ -1358,66 +1359,66 @@ public:
 
     Int32 roamWatchdogCount; //= 0;
     /* Roam state watchdog */
-    static const Int32 CMD_ROAM_WATCHDOG_TIMER   ; //= BASE + 94;
+    static const Int32 CMD_ROAM_WATCHDOG_TIMER   = BASE + 94;
     /* Screen change intent handling */
-    static const Int32 CMD_SCREEN_STATE_CHANGED             ; //= BASE + 95;
+    static const Int32 CMD_SCREEN_STATE_CHANGED             = BASE + 95;
 
     Int32 disconnectingWatchdogCount; //= 0;
     static const Int32 DISCONNECTING_GUARD_TIMER_MSEC; //= 5000;
 
     /* Disconnecting state watchdog */
-    static const Int32 CMD_DISCONNECTING_WATCHDOG_TIMER    ; //= BASE + 96;
+    static const Int32 CMD_DISCONNECTING_WATCHDOG_TIMER    = BASE + 96;
 
     /* P2p commands */
     /* We are ok with no response here since we wont do much with it anyway */
-    static const Int32 CMD_ENABLE_P2P               ; //= BASE + 131;
+    static const Int32 CMD_ENABLE_P2P               = BASE + 131;
     /* In order to shut down supplicant cleanly, we wait till p2p has
      * been disabled */
-    static const Int32 CMD_DISABLE_P2P_REQ          ; //= BASE + 132;
-    static const Int32 CMD_DISABLE_P2P_RSP          ; //= BASE + 133;
+    static const Int32 CMD_DISABLE_P2P_REQ          = BASE + 132;
+    static const Int32 CMD_DISABLE_P2P_RSP          = BASE + 133;
 
-    static const Int32 CMD_BOOT_COMPLETED           ; //= BASE + 134;
+    static const Int32 CMD_BOOT_COMPLETED           = BASE + 134;
 
     /* change the batch scan settings.
      * arg1 = responsible UID
      * arg2 = csph (channel scans per hour)
      * obj = bundle with the new settings and the optional worksource
      */
-    static const Int32 CMD_SET_BATCHED_SCAN         ; //= BASE + 135;
-    static const Int32 CMD_START_NEXT_BATCHED_SCAN  ; //= BASE + 136;
-    static const Int32 CMD_POLL_BATCHED_SCAN        ; //= BASE + 137;
+    static const Int32 CMD_SET_BATCHED_SCAN         = BASE + 135;
+    static const Int32 CMD_START_NEXT_BATCHED_SCAN  = BASE + 136;
+    static const Int32 CMD_POLL_BATCHED_SCAN        = BASE + 137;
 
     /* We now have a valid IP configuration. */
-    static const Int32 CMD_IP_CONFIGURATION_SUCCESSFUL     ; //= BASE + 138;
+    static const Int32 CMD_IP_CONFIGURATION_SUCCESSFUL     = BASE + 138;
     /* We no longer have a valid IP configuration. */
-    static const Int32 CMD_IP_CONFIGURATION_LOST           ; //= BASE + 139;
+    static const Int32 CMD_IP_CONFIGURATION_LOST           = BASE + 139;
     /* Link configuration (IP address, DNS, ...) changes notified via netlink */
-    static const Int32 CMD_UPDATE_LINKPROPERTIES           ; //= BASE + 140;
+    static const Int32 CMD_UPDATE_LINKPROPERTIES           = BASE + 140;
 
     /* Supplicant is trying to associate to a given BSSID */
-    static const Int32 CMD_TARGET_BSSID                    ; //= BASE + 141;
+    static const Int32 CMD_TARGET_BSSID                    = BASE + 141;
 
     /* Reload all networks and reconnect */
-    static const Int32 CMD_RELOAD_TLS_AND_RECONNECT        ; //= BASE + 142;
+    static const Int32 CMD_RELOAD_TLS_AND_RECONNECT        = BASE + 142;
 
-    static const Int32 CMD_AUTO_CONNECT                    ; //= BASE + 143;
+    static const Int32 CMD_AUTO_CONNECT                    = BASE + 143;
 
-    static const Int32 network_status_unwanted_disconnect; //= 0;
-    static const Int32 network_status_unwanted_disable_autojoin; //= 1;
+    static const Int32 network_status_unwanted_disconnect = 0;
+    static const Int32 network_status_unwanted_disable_autojoin = 1;
 
-    static const Int32 CMD_UNWANTED_NETWORK                ; //= BASE + 144;
+    static const Int32 CMD_UNWANTED_NETWORK                = BASE + 144;
 
-    static const Int32 CMD_AUTO_ROAM                       ; //= BASE + 145;
+    static const Int32 CMD_AUTO_ROAM                       = BASE + 145;
 
-    static const Int32 CMD_AUTO_SAVE_NETWORK               ; //= BASE + 146;
+    static const Int32 CMD_AUTO_SAVE_NETWORK               = BASE + 146;
 
-    static const Int32 CMD_ASSOCIATED_BSSID               ; //= BASE + 147;
+    static const Int32 CMD_ASSOCIATED_BSSID               = BASE + 147;
 
     /* Supplicant is trying to associate to a given SSID */
-    static const Int32 CMD_TARGET_SSID                    ; //= BASE + 148;
+    static const Int32 CMD_TARGET_SSID                    = BASE + 148;
 
     /* Is IBSS mode supported by the driver? */
-    static const Int32 CMD_GET_IBSS_SUPPORTED       ; //= BASE + 149;
+    static const Int32 CMD_GET_IBSS_SUPPORTED       = BASE + 149;
 
     /* Wifi state machine modes of operation */
     /* CONNECT_MODE - connect to any 'known' AP when it becomes available */
