@@ -1269,104 +1269,105 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
 
         Int64 origId = Binder::ClearCallingIdentity();
 
-        Int32 flags;
-        AutoPtr<IApplicationInfo> appInfo;
-        IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-        if (aInfo != NULL &&
-                ((appInfo->GetFlags(&flags), flags)&IApplicationInfo::FLAG_CANT_SAVE_STATE) != 0) {
-            // This may be a heavy-weight process!  Check to see if we already
-            // have another, different heavy-weight process running.
-            String infoProcessName, appInfoPackageName;
-            IComponentInfo::Probe(aInfo)->GetProcessName(&infoProcessName);
-            IPackageItemInfo::Probe(appInfo)->GetPackageName(&appInfoPackageName);
-            Int32 appInfoUid;
-            appInfo->GetUid(&appInfoUid);
-            Int32 infoUid;
-            mService->mHeavyWeightProcess->mInfo->GetUid(&infoUid);
-            if (infoProcessName.Equals(appInfoPackageName)) {
-                if (mService->mHeavyWeightProcess != NULL) {
-                    if ((infoUid != appInfoUid ||
-                                !mService->mHeavyWeightProcess->mProcessName.Equals(infoProcessName))) {
-                        Int32 appCallingUid = callingUid;
-                        if (caller != NULL) {
-                            AutoPtr<ProcessRecord> callerApp = mService->GetRecordForAppLocked(caller);
-                            if (callerApp != NULL) {
-                                callerApp->mInfo->GetUid(&appCallingUid);
-                            } else {
-                                //Slogger::W(TAG, "Unable to find app for caller " + caller
-                                //        + " (pid=" + callingPid + ") when starting: "
-                                //        + intent.toString());
-                                AutoPtr<IActivityOptionsHelper> aoHelper;
-                                CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
-                                aoHelper->Abort(options);
+        if (aInfo != NULL) {
+            Int32 flags;
+            AutoPtr<IApplicationInfo> appInfo;
+            IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            if (appInfo->GetFlags(&flags), flags & IApplicationInfo::FLAG_CANT_SAVE_STATE != 0) {
+                // This may be a heavy-weight process!  Check to see if we already
+                // have another, different heavy-weight process running.
+                String infoProcessName, appInfoPackageName;
+                IComponentInfo::Probe(aInfo)->GetProcessName(&infoProcessName);
+                IPackageItemInfo::Probe(appInfo)->GetPackageName(&appInfoPackageName);
+                Int32 appInfoUid;
+                appInfo->GetUid(&appInfoUid);
+                Int32 infoUid;
+                mService->mHeavyWeightProcess->mInfo->GetUid(&infoUid);
+                if (infoProcessName.Equals(appInfoPackageName)) {
+                    if (mService->mHeavyWeightProcess != NULL) {
+                        if ((infoUid != appInfoUid ||
+                                    !mService->mHeavyWeightProcess->mProcessName.Equals(infoProcessName))) {
+                            Int32 appCallingUid = callingUid;
+                            if (caller != NULL) {
+                                AutoPtr<ProcessRecord> callerApp = mService->GetRecordForAppLocked(caller);
+                                if (callerApp != NULL) {
+                                    callerApp->mInfo->GetUid(&appCallingUid);
+                                } else {
+                                    //Slogger::W(TAG, "Unable to find app for caller " + caller
+                                    //        + " (pid=" + callingPid + ") when starting: "
+                                    //        + intent.toString());
+                                    AutoPtr<IActivityOptionsHelper> aoHelper;
+                                    CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
+                                    aoHelper->Abort(options);
 
-                                *result = IActivityManager::START_PERMISSION_DENIED;
-                                return NOERROR;
+                                    *result = IActivityManager::START_PERMISSION_DENIED;
+                                    return NOERROR;
+                                }
                             }
-                        }
 
-                        AutoPtr<ArrayOf<IIntent*> > intents = ArrayOf<IIntent*>::Alloc(1);
-                        intents->Set(0, intent);
-                        AutoPtr<ArrayOf<String> > strings = ArrayOf<String>::Alloc(1);
-                        strings->Set(0, resolvedType);
-                        AutoPtr<IIIntentSender> target;
-                        mService->GetIntentSenderLocked(
-                                IActivityManager::INTENT_SENDER_ACTIVITY, String("android"),
-                                appCallingUid, userId, NULL, String(NULL), 0, intents,
-                                strings, IPendingIntent::FLAG_CANCEL_CURRENT
-                                | IPendingIntent::FLAG_ONE_SHOT, NULL,
-                                (IIIntentSender**)&target);
+                            AutoPtr<ArrayOf<IIntent*> > intents = ArrayOf<IIntent*>::Alloc(1);
+                            intents->Set(0, intent);
+                            AutoPtr<ArrayOf<String> > strings = ArrayOf<String>::Alloc(1);
+                            strings->Set(0, resolvedType);
+                            AutoPtr<IIIntentSender> target;
+                            mService->GetIntentSenderLocked(
+                                    IActivityManager::INTENT_SENDER_ACTIVITY, String("android"),
+                                    appCallingUid, userId, NULL, String(NULL), 0, intents,
+                                    strings, IPendingIntent::FLAG_CANCEL_CURRENT
+                                    | IPendingIntent::FLAG_ONE_SHOT, NULL,
+                                    (IIIntentSender**)&target);
 
-                        AutoPtr<IIntent> newIntent;
-                        CIntent::New((IIntent**)&newIntent);
-                        if (requestCode >= 0) {
-                            // Caller is requesting a result.
-                            newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_HAS_RESULT, TRUE);
-                        }
-                        AutoPtr<IIntentSender> tmpIntentSender;
-                        CIntentSender::New(target, (IIntentSender**)&tmpIntentSender);// IParcelable
-                        newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_INTENT,
-                                IParcelable::Probe(tmpIntentSender));
-                        if (mService->mHeavyWeightProcess->mActivities.GetSize() > 0) {
-                            AutoPtr<ActivityRecord> hist = (*(mService->mHeavyWeightProcess->mActivities.Begin()));
-                            newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_CUR_APP,
-                                    hist->mPackageName);
-                            newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_CUR_TASK,
-                                    hist->mTask->mTaskId);
-                        }
-                        String infoPackageName;
-                        IPackageItemInfo::Probe(aInfo)->GetPackageName(&infoPackageName);
-                        newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_NEW_APP,
-                                infoPackageName);
-                        Int32 oldFlags;
-                        intent->GetFlags(&oldFlags);
-                        newIntent->SetFlags(oldFlags);
-                        newIntent->SetClassName(String("android"),
-                                //HeavyWeightSwitcherActivity.class.getName()
-                                String("App.CHeavyWeightSwitcherActivity"));
+                            AutoPtr<IIntent> newIntent;
+                            CIntent::New((IIntent**)&newIntent);
+                            if (requestCode >= 0) {
+                                // Caller is requesting a result.
+                                newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_HAS_RESULT, TRUE);
+                            }
+                            AutoPtr<IIntentSender> tmpIntentSender;
+                            CIntentSender::New(target, (IIntentSender**)&tmpIntentSender);// IParcelable
+                            newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_INTENT,
+                                    IParcelable::Probe(tmpIntentSender));
+                            if (mService->mHeavyWeightProcess->mActivities.GetSize() > 0) {
+                                AutoPtr<ActivityRecord> hist = (*(mService->mHeavyWeightProcess->mActivities.Begin()));
+                                newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_CUR_APP,
+                                        hist->mPackageName);
+                                newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_CUR_TASK,
+                                        hist->mTask->mTaskId);
+                            }
+                            String infoPackageName;
+                            IPackageItemInfo::Probe(aInfo)->GetPackageName(&infoPackageName);
+                            newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_NEW_APP,
+                                    infoPackageName);
+                            Int32 oldFlags;
+                            intent->GetFlags(&oldFlags);
+                            newIntent->SetFlags(oldFlags);
+                            newIntent->SetClassName(String("android"),
+                                    //HeavyWeightSwitcherActivity.class.getName()
+                                    String("App.CHeavyWeightSwitcherActivity"));
 
-                        intent = newIntent;
-                        resolvedType = NULL;
-                        caller = NULL;
-                        callingUid = Binder::GetCallingUid();
-                        callingPid = Binder::GetCallingPid();
-                        componentSpecified = TRUE;
-                        //try {
-                            AutoPtr<IResolveInfo> rInfo;
-                            ECode ec = AppGlobals::GetPackageManager()->ResolveIntent(
-                                        intent, String(NULL),
-                                        IPackageManager::MATCH_DEFAULT_ONLY
-                                        | CActivityManagerService::STOCK_PM_FLAGS, userId,
-                                        (IResolveInfo**)&rInfo);
-                        if (!FAILED(ec)) {
-                            //aInfo = rInfo != NULL ? rInfo.activityInfo : NULL;
-                            if (rInfo != NULL)
-                                rInfo->GetActivityInfo((IActivityInfo**)&aInfo);
-                            aInfo = mService->GetActivityInfoForUser(aInfo, userId);
-                        } else {
-                        //} catch (RemoteException e) {
-                            aInfo = NULL;
-                        //}
+                            intent = newIntent;
+                            resolvedType = NULL;
+                            caller = NULL;
+                            callingUid = Binder::GetCallingUid();
+                            callingPid = Binder::GetCallingPid();
+                            componentSpecified = TRUE;
+                            //try {
+                                AutoPtr<IResolveInfo> rInfo;
+                                ECode ec = AppGlobals::GetPackageManager()->ResolveIntent(
+                                            intent, String(NULL),
+                                            IPackageManager::MATCH_DEFAULT_ONLY
+                                            | CActivityManagerService::STOCK_PM_FLAGS, userId,
+                                            (IResolveInfo**)&rInfo);
+                            if (!FAILED(ec)) {
+                                //aInfo = rInfo != NULL ? rInfo.activityInfo : NULL;
+                                if (rInfo != NULL)
+                                    rInfo->GetActivityInfo((IActivityInfo**)&aInfo);
+                                aInfo = mService->GetActivityInfoForUser(aInfo, userId);
+                            } else {
+                            //} catch (RemoteException e) {
+                                aInfo = NULL;
+                            //}
+                            }
                         }
                     }
                 }
