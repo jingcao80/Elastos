@@ -4,21 +4,27 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/BatteryStats.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/utility/etl/HashSet.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Etl::HashSet;
-using Elastos::IO::IFileInputStream;
-using Elastos::Core::IRunnable;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 using Elastos::Utility::Concurrent::Locks::IReentrantLock;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Net::INetworkStats;
+using Elastos::Droid::Net::INetworkStatsEntry;
 using Elastos::Droid::Internal::Net::INetworkStatsFactory;
+using Elastos::Droid::Internal::Utility::IJournaledFile;
 using Elastos::Droid::Telephony::ISignalStrength;
+using Elastos::Droid::Utility::IPrinter;
+using Elastos::Core::IRunnable;
+using Elastos::Core::IInteger32;
+using Elastos::IO::IFileInputStream;
+using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -30,75 +36,138 @@ namespace Os {
  * otherwise.
  */
 class BatteryStatsImpl
-    : public ElRefBase
-    , public IBatteryStats
-    , public BatteryStats
+    : public BatteryStats
+    , public IBatteryStatsImpl
     , public IParcelable
 {
 public:
-    class MyHandler : public HandlerBase
+    class MyHandler : public Handler
     {
     public:
         MyHandler(
+            /* [in] */ ILooper* looper,
             /* [in] */ BatteryStatsImpl* host)
-            : mHost(host)
+            : Handler(looper, NULL, TRUE)
+            , mHost(host)
         {}
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
         BatteryStatsImpl* mHost;
     };
 
-    interface BatteryCallback : public IInterface
+    class TimeBase : public Object
     {
     public:
-        virtual CARAPI_(void) BatteryNeedsCpuUpdate() = 0;
-        virtual CARAPI_(void) BatteryPowerChanged(
-            /* [in] */ Boolean onBattery) = 0;
-    };
+        TimeBase();
 
-    interface IUnpluggable : public IInterface
-    {
-    public:
-        virtual CARAPI_(void) Unplug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime) = 0;
+        // CARAPI_(void) dump(PrintWriter pw, String prefix);
 
-        virtual CARAPI_(void) Plug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime) = 0;
+        CARAPI_(void) Add(
+            /* [in] */ ITimeBaseObs* observer);
+
+        CARAPI_(void) Remove(
+            /* [in] */ ITimeBaseObs* observer);
+
+        CARAPI_(void) Init(
+            /* [in] */ Int64 uptime,
+            /* [in] */ Int64 realtime);
+
+        CARAPI_(void) Reset(
+            /* [in] */ Int64 uptime,
+            /* [in] */ Int64 realtime);
+
+        CARAPI_(Int64) ComputeUptime(
+            /* [in] */ Int64 curTime,
+            /* [in] */ Int32 which);
+
+        CARAPI_(Int64) ComputeRealtime(
+            /* [in] */ Int64 curTime,
+            /* [in] */ Int32 which);
+
+        CARAPI_(Int64) GetUptime(
+            /* [in] */ Int64 curTime);
+
+        CARAPI_(Int64) GetRealtime(
+            /* [in] */ Int64 curTime);
+
+        CARAPI_(Int64) GetUptimeStart();
+
+        CARAPI_(Int64) GetRealtimeStart();
+
+        CARAPI_(Boolean) IsRunning();
+
+        CARAPI_(Boolean) SetRunning(
+            /* [in] */ Boolean running,
+            /* [in] */ Int64 uptime,
+            /* [in] */ Int64 realtime);
+
+        CARAPI_(void) ReadSummaryFromParcel(
+            /* [in] */ IParcel* in);
+
+        CARAPI_(void) WriteSummaryToParcel(
+            /* [in] */ IParcel* out,
+            /* [in] */ Int64 uptime,
+            /* [in] */ Int64 realtime);
+
+        CARAPI_(void) ReadFromParcel(
+            /* [in] */ IParcel* in);
+
+        CARAPI_(void) WriteToParcel(
+            /* [in] */ IParcel* out,
+            /* [in] */ Int64 uptime,
+            /* [in] */ Int64 realtime);
+
+    private:
+        List<AutoPtr<ITimeBaseObs> > mObservers;
+
+        Int64 mUptime;
+        Int64 mRealtime;
+
+        Boolean mRunning;
+
+        Int64 mPastUptime;
+        Int64 mUptimeStart;
+        Int64 mPastRealtime;
+        Int64 mRealtimeStart;
+        Int64 mUnpluggedUptime;
+        Int64 mUnpluggedRealtime;
     };
 
     /**
      * State for keeping track of counting information.
      */
     class Counter
-        : public BatteryStatsCounter
-        , public IUnpluggable
+        : public Object
+        , public IBatteryStatsCounter
+        , public ITimeBaseObs
     {
     public:
         Counter(
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables,
+            /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
         Counter(
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables);
+            /* [in] */ TimeBase* timeBase);
 
-        virtual ~Counter();
+        virtual ~Counter() {}
 
         CAR_INTERFACE_DECL()
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out);
 
-        CARAPI_(void) Unplug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        CARAPI OnTimeStarted(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
 
-        CARAPI_(void) Plug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        CARAPI OnTimeStopped(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
 
         /**
          * Writes a possibly null Counter to a Parcel.
@@ -110,10 +179,11 @@ public:
             /* [in] */ IParcel* out,
             /* [in] */ Counter* counter);
 
-        CARAPI_(Int32) GetCountLocked(
-            /* [in] */ Int32 which);
+        CARAPI GetCountLocked(
+            /* [in] */ Int32 which,
+            /* [out] */ Int32* count);
 
-        CARAPI_(void) LogState(
+        CARAPI LogState(
             /* [in] */ IPrinter* pw,
             /* [in] */ const String& prefix);
 
@@ -133,7 +203,7 @@ public:
 
     protected:
         AutoPtr<IAtomicInteger32> mCount;
-        AutoPtr< List<AutoPtr<IUnpluggable> > > mUnpluggables;
+        AutoPtr<TimeBase> mTimeBase;
         Int32 mLoadedCount;
         Int32 mLastCount;
         Int32 mUnpluggedCount;
@@ -146,55 +216,124 @@ public:
     {
     public:
         SamplingCounter(
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables,
+            /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
         SamplingCounter(
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables);
+            /* [in] */ TimeBase* timeBase);
 
         CARAPI_(void) AddCountAtomic(
             /* [in] */ Int64 count);
+    };
+
+    class Int64SamplingCounter
+        : public Object
+        , public IBatteryStatsInt64Counter
+        , public ITimeBaseObs
+    {
+    public:
+        Int64SamplingCounter(
+            /* [in] */ TimeBase* timeBase,
+            /* [in] */ IParcel* in);
+
+        Int64SamplingCounter(
+            /* [in] */ TimeBase* timeBase);
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI_(void) WriteToParcel(
+            /* [in] */ IParcel* out);
+
+        // @Override
+        CARAPI OnTimeStarted(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
+
+        // @Override
+        CARAPI OnTimeStopped(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
+
+        CARAPI GetCountLocked(
+            /* [in] */ Int32 which,
+            /* [out] */ Int64* count);
+
+        // @Override
+        CARAPI LogState(
+            /* [in] */ IPrinter* pw,
+            /* [in] */ const String& prefix);
+
+        CARAPI_(void) AddCountLocked(
+            /* [in] */ Int64 count);
+
+        /**
+         * Clear state of this counter.
+         */
+        CARAPI_(void) Reset(
+            /* [in] */ Boolean detachIfReset);
+
+        CARAPI_(void) Detach();
+
+        CARAPI_(void) WriteSummaryFromParcelLocked(
+            /* [in] */ IParcel* out);
+
+        CARAPI_(void) ReadSummaryFromParcelLocked(
+            /* [in] */ IParcel* in);
+
+    public:
+        AutoPtr<TimeBase> mTimeBase;
+        Int64 mCount;
+        Int64 mLoadedCount;
+        Int64 mLastCount;
+        Int64 mUnpluggedCount;
+        Int64 mPluggedCount;
     };
 
     /**
      * State for keeping track of timing information.
      */
     class Timer
-        : public BatteryStatsTimer
-        , public IUnpluggable
+        : public Object
+        , public IBatteryStatsTimer
+        , public ITimeBaseObs
     {
     public:
         /**
          * Constructs from a parcel.
          * @param type
-         * @param unpluggables
-         * @param powerType
+         * @param timeBase
          * @param in
          */
         Timer(
             /* [in] */ Int32 type,
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables,
+            /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
         Timer(
             /* [in] */ Int32 type,
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables);
+            /* [in] */ TimeBase* timeBase);
 
-        virtual ~Timer();
+        virtual ~Timer() {}
 
         CAR_INTERFACE_DECL()
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out,
-            /* [in] */ Int64 batteryRealtime);
+            /* [in] */ Int64 elapsedRealtimeUs);
 
-        CARAPI_(void) Unplug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        // @Override
+        CARAPI OnTimeStarted(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
 
-        CARAPI_(void) Plug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        // @Override
+        CARAPI OnTimeStopped(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
 
         /**
          * Writes a possibly null Timer to a Parcel.
@@ -205,16 +344,18 @@ public:
         static CARAPI_(void) WriteTimerToParcel(
             /* [in] */ IParcel* out,
             /* [in] */ Timer* timer,
-            /* [in] */ Int64 batteryRealtime);
+            /* [in] */ Int64 elapsedRealtimeUs);
 
-        CARAPI_(Int64) GetTotalTimeLocked(
-            /* [in] */ Int64 batteryRealtime,
-            /* [in] */ Int32 which);
+        CARAPI GetTotalTimeLocked(
+            /* [in] */ Int64 elapsedRealtimeUs,
+            /* [in] */ Int32 which,
+            /* [out] */ Int64* time);
 
-        CARAPI_(Int32) GetCountLocked(
-            /* [in] */ Int32 which);
+        CARAPI GetCountLocked(
+            /* [in] */ Int32 which,
+            /* [out] */ Int64* count);
 
-        CARAPI_(void) LogState(
+        CARAPI LogState(
             /* [in] */ IPrinter* pw,
             /* [in] */ const String& prefix);
 
@@ -224,26 +365,25 @@ public:
 
         virtual CARAPI_(Int32) ComputeCurrentCountLocked() = 0;
 
-        CARAPI_(void) WriteSummaryFromParcelLocked(
-            /* [in] */ IParcel* out,
-            /* [in] */ Int64 batteryRealtime);
-
-        CARAPI_(void) ReadSummaryFromParcelLocked(
-            /* [in] */ IParcel* in);
-
         /**
          * Clear state of this timer.  Returns true if the timer is inactive
          * so can be completely dropped.
          */
         CARAPI_(Boolean) Reset(
-            /* [in] */ BatteryStatsImpl* stats,
             /* [in] */ Boolean detachIfReset);
 
         CARAPI_(void) Detach();
 
+        CARAPI_(void) WriteSummaryFromParcelLocked(
+            /* [in] */ IParcel* out,
+            /* [in] */ Int64 elapsedRealtimeUs);
+
+        CARAPI_(void) ReadSummaryFromParcelLocked(
+            /* [in] */ IParcel* in);
+
     protected:
         Int32 mType;
-        AutoPtr< List<AutoPtr<IUnpluggable> > > mUnpluggables;
+        AutoPtr<TimeBase> mTimeBase;
 
         Int32 mCount;
         Int32 mLoadedCount;
@@ -280,17 +420,15 @@ public:
         Int64 mUnpluggedTime;
     };
 
-    class SamplingTimer : public Timer
+    class SamplingTimer : CARAPI_(AutoPtr<T>)imer
     {
     public:
         SamplingTimer(
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables,
-            /* [in] */ Boolean inDischarge,
+            /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
         SamplingTimer(
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables,
-            /* [in] */ Boolean inDischarge,
+            /* [in] */ TimeBase* timeBase,
             /* [in] */ Boolean trackReportedValues);
 
         CARAPI_(void) SetStale();
@@ -303,24 +441,32 @@ public:
         CARAPI_(void) UpdateCurrentReportedCount(
             /* [in] */ Int32 count);
 
+        CARAPI_(void) AddCurrentReportedCount(
+            /* [in] */ Int32 delta);
+
         CARAPI_(void) UpdateCurrentReportedTotalTime(
             /* [in] */ Int64 totalTime);
 
-        CARAPI_(void) Unplug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        CARAPI_(void) AddCurrentReportedTotalTime(
+            /* [in] */ Int64 delta);
 
-        CARAPI_(void) Plug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        CARAPI OnTimeStarted(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
 
-        CARAPI_(void) LogState(
+        CARAPI OnTimeStopped(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
+
+        CARAPI LogState(
             /* [in] */ IPrinter* pw,
             /* [in] */ const String& prefix);
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out,
-            /* [in] */ Int64 batteryRealtime);
+            /* [in] */ Int64 elapsedRealtimeUs);
 
     protected:
         CARAPI_(Int64) ComputeRunTimeLocked(
@@ -330,7 +476,6 @@ public:
 
     private:
         CARAPI_(Boolean) Reset(
-            /* [in] */ BatteryStatsImpl* stats,
             /* [in] */ Boolean detachIfReset);
 
         CARAPI_(void) WriteSummaryFromParcelLocked(
@@ -367,7 +512,7 @@ public:
         /**
          * Whether we are currently in a discharge cycle.
          */
-        Boolean mInDischarge;
+        Boolean mTimeBaseRunning;
 
         /**
          * Whether we are currently recording reported values.
@@ -375,7 +520,7 @@ public:
         Boolean mTrackingReportedValues;
 
         /*
-         * A sequnce counter, incremented once for each update of the stats.
+         * A sequence counter, incremented once for each update of the stats.
          */
         Int32 mUpdateVersion;
 
@@ -385,70 +530,156 @@ public:
     class Uid;
 
     /**
+     * A timer that increments in batches.  It does not run for durations, but just jumps
+     * for a pre-determined amount.
+     */
+    class BatchTimer : CARAPI_(AutoPtr<T>)imer
+    {
+    public:
+        BatchTimer(
+            /* [in] */ Uid* uid,
+            /* [in] */ Int32 type,
+            /* [in] */ TimeBase* timeBase,
+            /* [in] */ IParcel* in);
+
+        BatchTimer(
+            /* [in] */ Uid* uid,
+            /* [in] */ Int32 type,
+            /* [in] */ TimeBase* timeBase);
+
+        // @Override
+        CARAPI_(void) WriteToParcel(
+            /* [in] */ IParcel* out,
+            /* [in] */ Int64 elapsedRealtimeUs);
+
+        CARAPI OnTimeStopped(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
+
+        CARAPI OnTimeStarted(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
+
+        CARAPI LogState(
+            /* [in] */ IPrinter* pw,
+            /* [in] */ const String& prefix);
+
+        CARAPI_(void) AddDuration(
+            /* [in] */ BatteryStatsImpl* stats,
+            /* [in] */ Int64 durationMillis);
+
+        CARAPI_(void) AbortLastDuration(
+            /* [in] */ BatteryStatsImpl* stats);
+
+    protected:
+        CARAPI_(Int32) ComputeCurrentCountLocked();
+
+        CARAPI_(Int64) ComputeRunTimeLocked(
+            /* [in] */ Int64 curBatteryRealtime);
+
+        // @Override
+        CARAPI_(Boolean) Reset(
+            /* [in] */ Boolean detachIfReset);
+
+    private:
+        CARAPI_(Int64) ComputeOverage(
+            /* [in] */ Int64 curTime);
+
+        CARAPI_(void) RecomputeLastDuration(
+            /* [in] */ Int64 curTime,
+            /* [in] */ Boolean abort);
+
+    public:
+        AutoPtr<Uid> mUid;
+
+        /**
+         * The last time at which we updated the timer.  This is in elapsed realtime microseconds.
+         */
+        Int64 mLastAddedTime;
+
+        /**
+         * The last duration that we added to the timer.  This is in microseconds.
+         */
+        Int64 mLastAddedDuration;
+
+        /**
+         * Whether we are currently in a discharge cycle.
+         */
+        Boolean mInDischarge;
+    };
+
+    /**
      * State for keeping track of timing information.
      */
-    class StopwatchTimer : public Timer
+    class StopwatchTimer : CARAPI_(AutoPtr<T>)imer
     {
     public:
         StopwatchTimer(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
             /* [in] */ List<AutoPtr<StopwatchTimer> >* timerPool,
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables,
+            /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
         StopwatchTimer(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
             /* [in] */ List<AutoPtr<StopwatchTimer> >* timerPool,
-            /* [in] */ List<AutoPtr<IUnpluggable> >* unpluggables);
-
-        ~StopwatchTimer();
+            /* [in] */ TimeBase* timeBase);
 
         CARAPI_(void) SetTimeout(
             /* [in] */ Int64 timeout);
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out,
-            /* [in] */ Int64 batteryRealtime);
+            /* [in] */ Int64 elapsedRealtimeUs);
 
-        CARAPI_(void) Plug(
-            /* [in] */ Int64 batteryUptime,
-            /* [in] */ Int64 batteryRealtime);
+        CARAPI OnTimeStopped(
+            /* [in] */ Int64 elapsedRealtime,
+            /* [in] */ Int64 baseUptime,
+            /* [in] */ Int64 baseRealtime);
 
-        CARAPI_(void) LogState(
+        CARAPI LogState(
             /* [in] */ IPrinter* pw,
             /* [in] */ const String& prefix);
 
     protected:
+        CARAPI_(void) StartRunningLocked(
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(Boolean) IsRunningLocked();
+
+        CARAPI_(Int64) CheckpointRunningLocked(
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(void) StopRunningLocked(
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(void) StopAllRunningLocked(
+            /* [in] */ Int64 elapsedRealtimeMs);
+
         CARAPI_(Int64) ComputeRunTimeLocked(
             /* [in] */ Int64 curBatteryRealtime);
 
         CARAPI_(Int32) ComputeCurrentCountLocked();
 
-    private:
-        CARAPI_(void) StartRunningLocked(
-            /* [in] */ BatteryStatsImpl* stats);
-
-        CARAPI_(Boolean) IsRunningLocked();
-
-        CARAPI_(void) StopRunningLocked(
-            /* [in] */ BatteryStatsImpl* stats);
-
-        // Update the total time for all other running Timers with the same type as this Timer
-        // due to a change in timer count
-        static CARAPI_(void) RefreshTimersLocked(
-            /* [in] */ BatteryStatsImpl* stats,
-            /* [in] */ List<AutoPtr<StopwatchTimer> >* pool);
-
         CARAPI_(Boolean) Reset(
-            /* [in] */ BatteryStatsImpl* stats,
             /* [in] */ Boolean detachIfReset);
 
         CARAPI_(void) Detach();
 
         CARAPI_(void) ReadSummaryFromParcelLocked(
             /* [in] */ IParcel* in);
+
+    private:
+        // Update the total time for all other running Timers with the same type as this Timer
+        // due to a change in timer count
+        static CARAPI_(Int64) RefreshTimersLocked(
+            /* [in] */ Int64 batteryRealtime,
+            /* [in] */ List<AutoPtr<StopwatchTimer> >* pool,
+            /* [in] */ StopwatchTimer* self);
 
     private:
         AutoPtr<Uid> mUid;
@@ -478,6 +709,41 @@ public:
         Boolean mInList;
 
         friend class BatteryStatsImpl;
+    };
+
+    template<typename T>
+    class OverflowArrayMap : public Object
+    {
+    public:
+        OverflowArrayMap(
+            /* [in] */ BatteryStatsImpl* host);
+
+        HashMap<String, AutoPtr<T> > GetMap();
+
+        CARAPI_(void) Clear();
+
+        CARAPI_(void) Add(
+            /* [in] */ const String& name,
+            /* [in] */ T* obj);
+
+        CARAPI_(void) Cleanup();
+
+        CARAPI_(AutoPtr<T>) StartObject(
+            /* [in] */ const String& name);
+
+        CARAPI_(AutoPtr<T>) StopObject(
+            /* [in] */ const String& name);
+
+        virtual CARAPI_(AutoPtr<T>) InstantiateObject() = 0;
+
+    protected:
+        HashMap<String, AutoPtr<T> > mMap;
+        AutoPtr<T> mCurOverflow;
+        AutoPtr<HashMap<String, Int32/* MutableInt*/> > mActiveOverflow;
+
+    private:
+        static const String OVERFLOW_NAME;
+        BatteryStatsImpl* mHost;
     };
 
     /**
@@ -1231,7 +1497,7 @@ public:
     };
 
 private:
-    class KernelWakelockStats : public ElRefBase
+    class KernelWakelockStats : public Object
     {
     public:
         KernelWakelockStats(
@@ -1260,11 +1526,15 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI_(void) Lock();
 
     CARAPI_(void) Unlock();
 
-    AutoPtr< HashMap<String, AutoPtr<BatteryStatsTimer> > > GetKernelWakelockStats();
+    HashMap<String, AutoPtr<BatteryStatsTimer> >& GetKernelWakelockStats();
+
+    HashMap<String, AutoPtr<SamplingTimer> >& GetWakeupReasonStats();
 
     /*
      * Get the KernelWakelockTimer associated with name, and create a new one if one
@@ -1273,20 +1543,15 @@ public:
     CARAPI_(AutoPtr<SamplingTimer>) GetKernelWakelockTimerLocked(
         /* [in] */ const String& name);
 
-    /**
-     * @deprecated use getRadioDataUptime
-     */
-    CARAPI_(Int64) GetRadioDataUptimeMs();
-
-    /**
-     * Returns the duration that the cell radio was up for data transfers.
-     */
-    CARAPI_(Int64) GetRadioDataUptime();
-
     CARAPI_(Int32) GetBluetoothPingCount();
 
     CARAPI_(void) SetBtHeadset(
         /* [in] */ IBluetoothHeadset* headset);
+
+    CARAPI_(void) WriteHistoryDelta(
+        /* [in] */ IParcel* dest,
+        /* [in] */ HistoryItem* cur,
+        /* [in] */ HistoryItem* last);
 
     CARAPI_(void) DoUnplugLocked(
         /* [in] */ Int64 batteryUptime,
@@ -1724,28 +1989,21 @@ private:
     CARAPI_(void) HandleReportPowerChange(
         /* [in] */ Boolean onBattery);
 
-    AutoPtr< HashMap<String, AutoPtr<KernelWakelockStats> > > ReadKernelWakelockStats();
+    HashMap<String, AutoPtr<KernelWakelockStats> >& ReadKernelWakelockStats();
 
-    AutoPtr< HashMap<String, AutoPtr<KernelWakelockStats> > > ParseProcWakelocks(
+    HashMap<String, AutoPtr<KernelWakelockStats> >& ParseProcWakelocks(
         /* [in] */ ArrayOf<Byte>* wlBuffer,
         /* [in] */ Int32 len,
         /* [in] */ Boolean wakeup_sources);
 
-    CARAPI_(void) DoDataPlug(
-        /* [in] */ ArrayOf<Int64>* dataTransfer,
-        /* [in] */ Int64 currentBytes);
-
-    CARAPI_(void) DoDataUnplug(
-        /* [in] */ ArrayOf<Int64>* dataTransfer,
-        /* [in] */ Int64 currentBytes);
-
-    /**
-     * Radio uptime in microseconds when transferring data. This value is very approximate.
-     * @return
-     */
-    CARAPI_(Int64) GetCurrentRadioDataUptime();
-
     CARAPI_(Int32) GetCurrentBluetoothPingCount();
+
+    CARAPI_(Int32) WriteHistoryTag(
+        /* [in] */ HistoryTag* tag);
+
+    CARAPI_(void) ReadHistoryTag(
+        /* [in] */ Int32 index,
+        /* [in] */ HistoryTag* tag);
 
     CARAPI_(void) AddHistoryBufferLocked(
         /* [in] */ Int64 curTime);
@@ -1842,13 +2100,46 @@ private:
     CARAPI_(AutoPtr<INetworkStats>) GetNetworkStatsDetailGroupedByUid();
 
 public:
-    static const Int32 MSG_UPDATE_WAKELOCKS;// = 1;
-    static const Int32 MSG_REPORT_POWER_CHANGE;// = 2;
+    static const Int32 MSG_UPDATE_WAKELOCKS = 1;
+    static const Int32 MSG_REPORT_POWER_CHANGE = 2;
 
     static const Int64 DELAY_UPDATE_WAKELOCKS = 5 * 1000;
 
-    static const Int32 MAX_HISTORY_BUFFER = 128 * 1024; // 128KB
-    static const Int32 MAX_MAX_HISTORY_BUFFER = 144 * 1024; // 144KB
+    static const Int32 MAX_HISTORY_BUFFER = 256*1024; // 256KB
+    static const Int32 MAX_MAX_HISTORY_BUFFER = 320*1024; // 320KB
+
+    static const Int32 MAX_LEVEL_STEPS = 200;
+
+    // Part of initial delta int that specifies the time delta.
+    static const Int32 DELTA_TIME_MASK = 0x7ffff;
+    static const Int32 DELTA_TIME_LONG = 0x7ffff;   // The delta is a following long
+    static const Int32 DELTA_TIME_INT = 0x7fffe;    // The delta is a following int
+    static const Int32 DELTA_TIME_ABS = 0x7fffd;    // Following is an entire abs update.
+    // Flag in delta int: a new battery level int follows.
+    static const Int32 DELTA_BATTERY_LEVEL_FLAG   = 0x00080000;
+    // Flag in delta int: a new full state and battery status int follows.
+    static const Int32 DELTA_STATE_FLAG           = 0x00100000;
+    // Flag in delta int: a new full state2 int follows.
+    static const Int32 DELTA_STATE2_FLAG          = 0x00200000;
+    // Flag in delta int: contains a wakelock or wakeReason tag.
+    static const Int32 DELTA_WAKELOCK_FLAG        = 0x00400000;
+    // Flag in delta int: contains an event description.
+    static const Int32 DELTA_EVENT_FLAG           = 0x00800000;
+    // These upper bits are the frequently changing state bits.
+    static const Int32 DELTA_STATE_MASK           = 0xff000000;
+
+    // These are the pieces of battery state that are packed in to the upper bits of
+    // the state int that have been packed in to the first delta int.  They must fit
+    // in DELTA_STATE_MASK.
+    static const Int32 STATE_BATTERY_STATUS_MASK  = 0x00000007;
+    static const Int32 STATE_BATTERY_STATUS_SHIFT = 29;
+    static const Int32 STATE_BATTERY_HEALTH_MASK  = 0x00000007;
+    static const Int32 STATE_BATTERY_HEALTH_SHIFT = 26;
+    static const Int32 STATE_BATTERY_PLUG_MASK    = 0x00000003;
+    static const Int32 STATE_BATTERY_PLUG_SHIFT   = 24;
+
+    AutoPtr<IAtomicFile> mCheckinFile;
+    AutoPtr<IHandler> mHandler;
 
 private:
     static const String TAG;
@@ -1862,7 +2153,7 @@ private:
     static const Int32 MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static const Int32 VERSION = 62 + (USE_OLD_HISTORY ? 1000 : 0);
+    static const Int32 VERSION = 114 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     static const Int32 MAX_HISTORY_ITEMS = 2000;
@@ -1873,13 +2164,7 @@ private:
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
-    static const Int32 MAX_WAKELOCKS_PER_UID = 30;
-
-    // The system process gets more.  It is special.  Oh so special.
-    // With, you know, special needs.  Like this.
-    static const Int32 MAX_WAKELOCKS_PER_UID_IN_SYSTEM = 50;
-
-    static const String BATCHED_WAKELOCK_NAME;
+    static const Int32 MAX_WAKELOCKS_PER_UID = 100;
 
     static Int32 sNumSpeedSteps;
 
@@ -1892,11 +2177,14 @@ private:
     // This should probably be exposed in the API, though it's not critical
     static const Int32 BATTERY_PLUGGED_NONE = 0;
 
-    AutoPtr<IAtomicFile> mFile;
+    AutoPtr<IJournaledFile> mFile;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<IBatteryCallback> mCallback;
 
-    AutoPtr<BatteryCallback> mCallback;
+    /**
+     * Mapping isolated uids to the actual owning app uid.
+     */
+    HashMap<Int32, Int32> mIsolatedUids;
 
     /**
      * The statistics we have collected organized by uids.
@@ -1915,15 +2203,27 @@ private:
     List<AutoPtr<StopwatchTimer> > mFullWifiLockTimers;
     List<AutoPtr<StopwatchTimer> > mWifiMulticastTimers;
     List<AutoPtr<StopwatchTimer> > mWifiScanTimers;
+    HashMap<Int32, AutoPtr<List<AutoPtr<StopwatchTimer> > > > mWifiBatchedScanTimers;
+    List<AutoPtr<StopwatchTimer> > mAudioTurnedOnTimers;
+    List<AutoPtr<StopwatchTimer> > mVideoTurnedOnTimers;
 
     // Last partial timers we use for distributing CPU usage.
     List<AutoPtr<StopwatchTimer> > mLastPartialTimers;
 
     // These are the objects that will want to do something when the device
     // is unplugged from power.
-    List<AutoPtr<IUnpluggable> > mUnpluggables;
+    AutoPtr<TimeBase> mOnBatteryTimeBase;
+    // These are the objects that will want to do something when the device
+    // is unplugged from power *and* the screen is off.
+    AutoPtr<TimeBase> mOnBatteryScreenOffTimeBase;
+
+    // Set to true when we want to distribute CPU across wakelocks for the next
+    // CPU update, even if we aren't currently running wake locks.
+    Boolean mDistributeWakelockCpu;
 
     Boolean mShuttingDown;
+
+    AutoPtr<HistoryEventTracker> mActiveEvents;
 
     Int64 mHistoryBaseTime;
     Boolean mHaveBatteryLevel;
@@ -1934,9 +2234,18 @@ private:
     AutoPtr<HistoryItem> mHistoryLastWritten;
     AutoPtr<HistoryItem> mHistoryLastLastWritten;
     AutoPtr<HistoryItem> mHistoryReadTmp;
+    AutoPtr<HistoryItem> mHistoryAddTmp;
+    HashMap<AutoPtr<HistoryTag>, AutoPtr<IInteger32> > mHistoryTagPool;
+    AutoPtr<ArrayOf<String> > mReadHistoryStrings;
+    AutoPtr<ArrayOf<Int32> > mReadHistoryUids;
+    Int32 mReadHistoryChars;
+    Int32 mNextHistoryTagIdx;
+    Int32 mNumHistoryTagChars;
     Int32 mHistoryBufferLastPos;
     Boolean mHistoryOverflow;
-    Int64 mLastHistoryTime;
+    Int64 mLastHistoryElapsedRealtime;
+    Int64 mTrackRunningHistoryElapsedRealtime;
+    Int64 mTrackRunningHistoryUptime;
 
     AutoPtr<HistoryItem> mHistoryCur;
 
@@ -1951,34 +2260,47 @@ private:
 
     Int32 mStartCount;
 
-    Int64 mBatteryUptime;
-    Int64 mBatteryLastUptime;
-    Int64 mBatteryRealtime;
-    Int64 mBatteryLastRealtime;
+    Int64 mStartClockTime;
+    String mStartPlatformVersion;
+    String mEndPlatformVersion;
+
+    Int64 mLastRecordedClockTime;
+    Int64 mLastRecordedClockRealtime;
 
     Int64 mUptime;
     Int64 mUptimeStart;
-    Int64 mLastUptime;
     Int64 mRealtime;
     Int64 mRealtimeStart;
-    Int64 mLastRealtime;
 
-    Boolean mScreenOn;
+    Int32 mWakeLockNesting;
+    Boolean mWakeLockImportant;
+    Boolean mRecordAllHistory;
+    Boolean mNoAutoReset;
+
+    Int32 mScreenState;
+
     AutoPtr<StopwatchTimer> mScreenOnTimer;
 
     Int32 mScreenBrightnessBin;
     AutoPtr< ArrayOf<StopwatchTimer*> > mScreenBrightnessTimer;
 
-    AutoPtr<Counter> mInputEventCounter;
+    Boolean mInteractive;
+    AutoPtr<StopwatchTimer> mInteractiveTimer;
+
+    Boolean mLowPowerModeEnabled;
+    AutoPtr<StopwatchTimer> mLowPowerModeEnabledTimer;
 
     Boolean mPhoneOn;
     AutoPtr<StopwatchTimer> mPhoneOnTimer;
 
-    Boolean mAudioOn;
+    Int32 mAudioOnNesting;
     AutoPtr<StopwatchTimer> mAudioOnTimer;
 
-    Boolean mVideoOn;
+    Int32 mVideoOnNesting;
     AutoPtr<StopwatchTimer> mVideoOnTimer;
+
+    Boolean mFlashlightOn;
+    AutoPtr<StopwatchTimer> mFlashlightOnTimer;
 
     Int32 mPhoneSignalStrengthBin;
     Int32 mPhoneSignalStrengthBinRaw;
@@ -1989,15 +2311,37 @@ private:
     Int32 mPhoneDataConnectionType;
     AutoPtr< ArrayOf<StopwatchTimer*> > mPhoneDataConnectionsTimer;
 
+    AutoPtr< ArrayOf<Int64SamplingCounter*> > mNetworkByteActivityCounters;
+    AutoPtr< ArrayOf<Int64SamplingCounter*> > mNetworkPacketActivityCounters;
+
     Boolean mWifiOn;
     AutoPtr<StopwatchTimer> mWifiOnTimer;
-    Int32 mWifiOnUid;
 
     Boolean mGlobalWifiRunning;
     AutoPtr<StopwatchTimer> mGlobalWifiRunningTimer;
 
+    Int32 mWifiState;
+    AutoPtr< ArrayOf<StopwatchTimer*> > mWifiStateTimer;
+
+    Int32 mWifiSupplState;
+    AutoPtr< ArrayOf<StopwatchTimer*> > mWifiSupplStateTimer;
+
+    Int32 mWifiSignalStrengthBin;
+    AutoPtr< ArrayOf<StopwatchTimer*> > mWifiSignalStrengthsTimer;
+
     Boolean mBluetoothOn;
     AutoPtr<StopwatchTimer> mBluetoothOnTimer;
+
+    Int32 mBluetoothState;
+    AutoPtr< ArrayOf<StopwatchTimer*> > mBluetoothStateTimer;
+
+    Int32 mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+    Int64 mMobileRadioActiveStartTime;
+    AutoPtr<StopwatchTimer> mMobileRadioActiveTimer;
+    AutoPtr<StopwatchTimer> mMobileRadioActivePerAppTimer;
+    AutoPtr<Int64SamplingCounter> mMobileRadioActiveAdjustedTime;
+    AutoPtr<Int64SamplingCounter> mMobileRadioActiveUnknownTime;
+    AutoPtr<Int64SamplingCounter> mMobileRadioActiveUnknownCount;
 
     /** Bluetooth headset object */
     AutoPtr<IBluetoothHeadset> mBtHeadset;
@@ -2008,20 +2352,15 @@ private:
      */
     Boolean mOnBattery;
     Boolean mOnBatteryInternal;
-    Int64 mTrackBatteryPastUptime;
-    Int64 mTrackBatteryUptimeStart;
-    Int64 mTrackBatteryPastRealtime;
-    Int64 mTrackBatteryRealtimeStart;
-
-    Int64 mUnpluggedBatteryUptime;
-    Int64 mUnpluggedBatteryRealtime;
 
     /*
      * These keep track of battery levels (1-100) at the last plug event and the last unplug event.
      */
     Int32 mDischargeStartLevel;
     Int32 mDischargeUnplugLevel;
+    Int32 mDischargePlugLevel;
     Int32 mDischargeCurrentLevel;
+    Int32 mCurrentBatteryLevel;
     Int32 mLowDischargeAmountSinceCharge;
     Int32 mHighDischargeAmountSinceCharge;
     Int32 mDischargeScreenOnUnplugLevel;
@@ -2031,16 +2370,23 @@ private:
     Int32 mDischargeAmountScreenOff;
     Int32 mDischargeAmountScreenOffSinceCharge;
 
+    Int32 mInitStepMode;
+    Int32 mCurStepMode;
+    Int32 mModStepMode;
+
+    Int32 mLastDischargeStepLevel;
+    Int64 mLastDischargeStepTime;
+    Int32 mMinDischargeStepLevel;
+    Int32 mNumDischargeStepDurations;
+    AutoPtr<ArrayOf<Int64> > mDischargeStepDurations;
+
+    Int32 mLastChargeStepLevel;
+    Int64 mLastChargeStepTime;
+    Int32 mMaxChargeStepLevel;
+    Int32 mNumChargeStepDurations;
+    AutoPtr<ArrayOf<Int64> > mChargeStepDurations;
+
     Int64 mLastWriteTime;
-
-    // Mobile data transferred while on battery
-    AutoPtr< ArrayOf<Int64> > mMobileDataTx;
-    AutoPtr< ArrayOf<Int64> > mMobileDataRx;
-    AutoPtr< ArrayOf<Int64> > mTotalDataTx;
-    AutoPtr< ArrayOf<Int64> > mTotalDataRx;
-
-    Int64 mRadioDataUptime;
-    Int64 mRadioDataStart;
 
     Int32 mBluetoothPingCount;
     Int32 mBluetoothPingStart;
@@ -2054,6 +2400,10 @@ private:
      */
     HashMap<String, AutoPtr<SamplingTimer> > mKernelWakelockStats;
 
+    String mLastWakeupReason;
+    Int64 mLastWakeupUptimeMs;
+    HashMap<String, AutoPtr<SamplingTimer> > mWakeupReasonStats;
+
     AutoPtr< ArrayOf<String> > mProcWakelocksName;
     AutoPtr< ArrayOf<Int64> > mProcWakelocksData;
 
@@ -2063,14 +2413,18 @@ private:
      */
     HashMap<String, AutoPtr<KernelWakelockStats> > mProcWakelockFileStats;
 
-    HashMap<String, Int32> mUidCache;
-
     AutoPtr<INetworkStatsFactory> mNetworkStatsFactory;
+    AutoPtr<INetworkStats> mCurMobileSnapshot;
+    AutoPtr<INetworkStats> mLastMobileSnapshot;
+    AutoPtr<INetworkStats> mCurWifiSnapshot;
+    AutoPtr<INetworkStats> mLastWifiSnapshot;
+    AutoPtr<INetworkStats> mTmpNetworkStats;
+    AutoPtr<INetworkStatsEntry> mTmpNetworkStatsEntry;
 
-    /** Network ifaces that {@link ConnectivityManager} has claimed as mobile. */
-    HashSet<String> mMobileIfaces;
-
-    Int32 mChangedBufferStates;
+    // @GuardedBy("this")
+    AutoPtr<ArrayOf<String> > mMobileIfaces;
+    // @GuardedBy("this")
+    AutoPtr<ArrayOf<String> > mWifiIfaces;
 
     Int32 mChangedStates;
 
@@ -2093,7 +2447,165 @@ private:
     AutoPtr<INetworkStats> mNetworkDetailCache;
 
     Object mLock;
+
+    friend class OverflowArrayMap;
 };
+
+
+const String BatteryStatsImpl::OverflowArrayMap<T>::OVERFLOW_NAME("*overflow*");
+
+template<typename T>
+BatteryStatsImpl::OverflowArrayMap<T>::OverflowArrayMap(
+    /* [in] */ BatteryStatsImpl* host)
+    : mHost(host)
+{}
+
+template<typename T>
+HashMap<String, AutoPtr<T> > BatteryStatsImpl::OverflowArrayMap<T>::GetMap()
+{
+    return mMap;
+}
+
+template<typename T>
+void BatteryStatsImpl::OverflowArrayMap<T>::Clear()
+{
+    mMap.Clear();
+    mCurOverflow = NULL;
+    mActiveOverflow = NULL;
+}
+
+template<typename T>
+void BatteryStatsImpl::OverflowArrayMap<T>::Add(
+    /* [in] */ const String& name,
+    /* [in] */ T* obj)
+{
+    mMap[name] = obj;
+    if (OVERFLOW_NAME.Equals(name)) {
+        mCurOverflow = obj;
+    }
+}
+
+template<typename T>
+void BatteryStatsImpl::OverflowArrayMap<T>::Cleanup()
+{
+    if (mActiveOverflow != NULL) {
+        if (mActiveOverflow->Begin() == mActiveOverflow->End()) {
+            mActiveOverflow = NULL;
+        }
+    }
+    if (mActiveOverflow == NULL) {
+        // There is no currently active overflow, so we should no longer have
+        // an overflow entry.
+        HashMap<String, AutoPtr<T> >::Iterator it = mMap.Find(OVERFLOW_NAME);
+        if (it != mMap.End()) {
+            Slogger::W(TAG, "Cleaning up with no active overflow, but have overflow entry %s", TO_CSTR(it->mSecond));
+            mMap.Erase(it);
+        }
+        mCurOverflow = NULL;
+    }
+    else {
+        // There is currently active overflow, so we should still have an overflow entry.
+        HashMap<String, AutoPtr<T> >::Iterator it = mMap.Find(OVERFLOW_NAME);
+        if (mCurOverflow == NULL || it == mMap.End()) {
+            Slogger::W(TAG, "Cleaning up with active overflow, but no overflow entry: cur=%s,  map=%s",
+                    TO_CSTR(mCurOverflow), TO_CSTR(it->mSecond));
+        }
+    }
+}
+
+template<typename T>
+AutoPtr<T> BatteryStatsImpl::OverflowArrayMap<T>::StartObject(
+    /* [in] */ const String& name)
+{
+    AutoPtr<T> obj;
+    HashMap<String, AutoPtr<T> >::Iterator it = mMap.Find(name);
+    if (it != mMap.End()) {
+        obj = it->mSecond;
+    }
+    if (obj != NULL) {
+        return obj;
+    }
+
+    // No object exists for the given name, but do we currently have it
+    // running as part of the overflow?
+    if (mActiveOverflow != NULL) {
+        HashMap<String, Int32>::Iterator overflowIt = mActiveOverflow->Find(name);
+        if (overflowIt != mActiveOverflow->End()) {
+            // We are already actively counting this name in the overflow object.
+            obj = mCurOverflow;
+            if (obj == NULL) {
+                // Shouldn't be here, but we'll try to recover.
+                Slogger::W(TAG, "Have active overflow %s but null overflow", name.string());
+                obj = mCurOverflow = InstantiateObject();
+                mMap[OVERFLOW_NAME] = obj;
+            }
+            overflowIt->mSecond++;
+            return obj;
+        }
+    }
+
+    // No object exists for given name nor in the overflow; we need to make
+    // a new one.
+    Int32 N = mMap.GetSize();
+    if (N >= BatteryStatsImpl::MAX_WAKELOCKS_PER_UID) {
+        // Went over the limit on number of objects to track; this one goes
+        // in to the overflow.
+        obj = mCurOverflow;
+        if (obj == NULL) {
+            // Need to start overflow now...
+            obj = mCurOverflow = InstantiateObject();
+            mMap[OVERFLOW_NAME] = obj;
+        }
+        if (mActiveOverflow == NULL) {
+            mActiveOverflow = new HashMap<String, Int32>();
+        }
+        (*mActiveOverflow)[name] = 1;
+        return obj;
+    }
+
+    // Normal case where we just need to make a new object.
+    obj = InstantiateObject();
+    mMap[name] = obj;
+    return obj;
+}
+
+template<typename T>
+AutoPtr<T> BatteryStatsImpl::OverflowArrayMap<T>::StopObject(
+    /* [in] */ const String& name)
+{
+    AutoPtr<T> obj;
+    HashMap<String, AutoPtr<T> >::Iterator it = mMap.Find(name);
+    if (it != mMap.End()) {
+        obj = it->mSecond;
+    }
+    if (obj != NULL) {
+        return obj;
+    }
+
+    // No object exists for the given name, but do we currently have it
+    // running as part of the overflow?
+    if (mActiveOverflow != NULL) {
+        HashMap<String, Int32>::Iterator overflowIt = mActiveOverflow->Find(name);
+        if (overflowIt != mActiveOverflow->End()) {
+            // We are already actively counting this name in the overflow object.
+            obj = mCurOverflow;
+            if (obj != NULL) {
+                overflowIt->mSecond--;
+                if (overflowIt->mSecond <= 0) {
+                    mActiveOverflow->Erase(overflowIt);
+                }
+                return obj;
+            }
+        }
+    }
+
+    // Huh, they are stopping an active operation but we can't find one!
+    // That's not good.
+    Slogger::W(TAG, "Unable to find object for %s mapsize=%d activeoverflow=%p curoverflow=%s",
+            name.string(), mMap.GetSize(), mActiveOverflow.Get(), TO_CSTR(mCurOverflow));
+    return NULL;
+}
+
 
 } // namespace Os
 } // namespace Droid
