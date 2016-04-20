@@ -11,7 +11,7 @@ namespace Dialer {
 namespace CallLog {
 
 CarClass(CCallLogAdapterHelper)
-    , public singleton
+    , public Singleton
     , public ICallLogAdapterHelper
 {
 public:

@@ -1,0 +1,19 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace DailerBinder {
+
+    /**
+     * @Involve
+     * interface IListFragment
+     */
+    interface IAnalyticsListFragment {
+    }
+
+    } // DailerBinder
+    } // Apps
+    } // Elastos
+
+}

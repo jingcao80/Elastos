@@ -1,0 +1,32 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace Location {
+
+    /**
+     * @Involve
+     * interface IService
+     * interface IIntentService
+     */
+    interface IUpdateCountryService {
+
+    }
+
+    interface IUpdateCountryServiceHelper {
+        UpdateCountry(
+            [in] IContext* context,
+            [in] ILocation* location);
+    }
+
+    } // Location
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}
