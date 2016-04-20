@@ -5,12 +5,6 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.h"
 
-
-// package com.android.server.wifi.p2p;
-// import android.content.Context;
-// import android.util.Log;
-// import com.android.server.SystemService;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Server::SystemService;
 
@@ -48,4 +42,3 @@ private:
 } // namespace Elastos
 
 #endif // __ELASTOS_DROID_SERVER_WIFI_P2P_WIFIP2PSERVICE_H__
-
