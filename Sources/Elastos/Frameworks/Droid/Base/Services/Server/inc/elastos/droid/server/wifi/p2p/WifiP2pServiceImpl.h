@@ -964,7 +964,6 @@ public:
         AutoPtr<WifiMonitor> mWifiMonitor;
 
         AutoPtr<IWifiP2pDeviceList> mPeers;
-        //AutoPtr<IWifiP2pDeviceList> mNotP2pDevice;
 
         // /* During a connection, supplicant can tell us that a device was lost. From a supplicant's
         //  * perspective, the discovery stops during connection and it purges device since it does
@@ -981,17 +980,11 @@ public:
         AutoPtr<IWifiP2pGroup> mGroup;
         Boolean mPendingReformGroupIndication;// = false;
 
-        // wfd info
-        //AutoPtr<IWifiP2pDevice> mWifiP2pDevice;
-
         // Saved WifiP2pConfig for a peer connection
         AutoPtr<IWifiP2pConfig> mSavedPeerConfig;
 
         // Saved WifiP2pGroup from invitation request
         AutoPtr<IWifiP2pGroup> mSavedP2pGroup;
-
-        // Saved WifiP2pDevice from provisioning request
-        //AutoPtr<IWifiP2pDevice> mSavedProvDiscDevice;
 
         WifiP2pServiceImpl* mHost;
     };
@@ -1148,20 +1141,8 @@ public:
     static const Int32 ENABLED;
     static const Int32 DISABLED;
 
-    /* indicate wfd device P2pGroupOnwer:1 or P2pClient:2,empty unknown*/
-    //static const String WFD_P2P_ROLE;// = "wlan.wfdp2p.role";
-    //static const String WFD_DNSMASQ_PEER;// = "wlan.wfddnsmasq.peer";
-    //static const String WFD_P2P_DEVICE_ADDR;// = "wlan.wfdp2p.addr";
-
-    /* Is chosen as a unique range to avoid conflict with
-       the range defined in Tethering.java */
-    //static const AutoPtr<ArrayOf<String> > DHCP_RANGE;
     static const String SERVER_ADDRESS;
 
-    //static const String SERVER_ADDRESS_TETHER;// = "192.168.43.1";//copy from Tethering.java
-
-    //tether mode with p2p
-    //String mTetherInterfaceName;
     AutoPtr<ClientHandler> mClientHandler;
 
     static Int32 mGroupCreatingTimeoutIndex;

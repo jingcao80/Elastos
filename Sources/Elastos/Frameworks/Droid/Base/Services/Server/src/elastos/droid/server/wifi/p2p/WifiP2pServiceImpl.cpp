@@ -155,10 +155,6 @@ const Int32 WifiP2pServiceImpl::DISABLED = 0;
    the range defined in Tethering.java */
 const String WifiP2pServiceImpl::SERVER_ADDRESS("192.168.49.1");
 
-//const String WifiP2pServiceImpl::WFD_P2P_ROLE("wlan.wfdp2p.role");
-//const String WifiP2pServiceImpl::WFD_DNSMASQ_PEER("wlan.wfddnsmasq.peer");
-//const String WifiP2pServiceImpl::WFD_P2P_DEVICE_ADDR("wlan.wfdp2p.addr");
-
 Int32 WifiP2pServiceImpl::mGroupCreatingTimeoutIndex = 0;
 Int32 WifiP2pServiceImpl::mDisableP2pTimeoutIndex = 0;
 
@@ -918,12 +914,12 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceived()
     String pinStr;
     switch (setup) {
         case IWpsInfo::KEYPAD:
-            // if (WifiP2pServiceImpl::DBG) Logd("Enter pin section visible");
+            if (WifiP2pServiceImpl::DBG) Logd("Enter pin section visible");
             textEntryView->FindViewById(Elastos::Droid::R::id::enter_pin_section, (IView**)&v);
             v->SetVisibility(IView::VISIBLE);
             break;
         case IWpsInfo::DISPLAY:
-            // if (WifiP2pServiceImpl::DBG) Logd("Shown pin section visible");
+            if (WifiP2pServiceImpl::DBG) Logd("Shown pin section visible");
             wps->GetPin(&pinStr);
             AddRowToDialog(group, Elastos::Droid::R::string::wifi_p2p_show_pin_message, pinStr);
             break;
@@ -3026,8 +3022,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
     String address;
     String name;
     Int32 id;
-    //Int32 gc;
-    //Int32 connectRet;
     Int32 netId;
     Boolean ret = FALSE;
     Boolean b;
@@ -3769,7 +3763,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::ProcessMessage
                 // wait P2P_GROUP_STARTED_EVENT.
                 break;
             }
-            mHost->Loge(String("Invitation result %d"));//, status);
+            mHost->Loge(String("Invitation result %d"));//, status;
             if (status == P2pStatus_UNKNOWN_P2P_GROUP) {
                 // target device has already removed the credential.
                 // So, remove this credential accordingly.
@@ -4442,7 +4436,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
             AutoPtr<IWifiP2pConfig> config = IWifiP2pConfig::Probe(obj);
 
             if (mHost->IsConfigInvalid(config)) {
-                mHost->Loge("Dropping connect requeset ");// + config);
+                mHost->Loge("Dropping connect requeset ");// + config;
                 mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_FAILED);
                 break;
             }
@@ -4471,7 +4465,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
                 // invocation was succeeded.
                 break;
             }
-            mHost->Loge("Invitation result TODO");//, status);
+            mHost->Loge("Invitation result TODO");//, status;
             if (status == P2pStatus_UNKNOWN_P2P_GROUP) {
                 // target device has already removed the credential.
                 // So, remove this credential accordingly.
