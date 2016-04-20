@@ -25,7 +25,7 @@ void DisplayThread::EnsureThreadLocked()
         sInstance->Start();
         AutoPtr<ILooper> looper;
         sInstance->GetLooper((ILooper**)&looper);
-        CHandler::New((IHandler**)&sHandler);
+        CHandler::New(looper, (IHandler**)&sHandler);
     }
 }
 
