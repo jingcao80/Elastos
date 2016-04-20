@@ -262,6 +262,7 @@ module
     using interface Elastos.Droid.Wifi.IIRttManager;
     using interface Elastos.Droid.Wifi.IIWifiScanner;
     using interface Elastos.Droid.Wifi.IIWifiManager;
+    using interface Elastos.Droid.Wifi.P2p.IIWifiP2pManager;
     using interface Elastos.Droid.Webkit.IIWebViewUpdateService;
 
     using interface Elastos.Core.IRunnable;
@@ -2270,27 +2271,26 @@ module
     } // namespace Server
     } // namespace Hdmi
 
-    //namespace Elastos {
-    //namespace Droid {
-    //namespace Server {
-    //namespace Wifi {
-    //namespace P2p {
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Wifi {
+    namespace P2p {
 
-    //[local]
-    //class CWifiP2pService {
-    //    constructor(
-    //        [in] IContext* ctx);
+    [local]
+    class CWifiP2pService {
+        constructor(
+            [in] IContext* ctx);
 
-    //    interface IWifiP2pService;
-    //    interface ISystemService;
-    //    interface IBinder;
-    //}
+        interface IIWifiP2pManager;
+        interface IBinder;
+    }
 
-    //} // namespace P2p
-    //} // namespace Wifi
-    //} // namespace Server
-    //} // namespace Droid
-    //} // namespace Elastos
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
 
     namespace Elastos {
     namespace Droid {

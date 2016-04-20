@@ -1,51 +1,47 @@
-#include "elastos/droid/wifi/p2p/WifiP2pServiceImpl.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.Net.h"
+#include "elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/Pair.h>
+#include <elastos/core/StringToIntegral.h>
+#include "elastos/core/CoreUtils.h"
 
-#include "elastos/droid/content/CIntent.h"
-#include "elastos/droid/content/res/CResources.h"
-#include "elastos/droid/net/CNetworkInfo.h"
 #include "elastos/droid/net/NetworkUtils.h"
-#include "elastos/droid/net/CLinkAddress.h"
-#include "elastos/droid/net/DhcpStateMachine.h"
-#include "elastos/droid/net/wifi/WifiNative.h"
-#include "elastos/droid/net/wifi/WifiMonitor.h"
-#include "elastos/droid/net/wifi/WifiStateMachine.h"
-#include "elastos/droid/net/wifi/p2p/CWifiP2pDevice.h"
-#include "elastos/droid/net/wifi/p2p/CWifiP2pGroup.h"
-#include "elastos/droid/net/wifi/p2p/CWifiP2pInfo.h"
-#include "elastos/droid/net/wifi/p2p/CWifiP2pConfig.h"
-#include "elastos/droid/net/wifi/p2p/CWifiP2pDeviceList.h"
-#include "elastos/droid/net/wifi/p2p/CWifiP2pGroupList.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ServiceManager.h"
-#include "elastos/droid/os/CMessageHelper.h"
-#include "elastos/droid/os/CMessenger.h"
-#include "elastos/droid/os/CSystemProperties.h"
-#include "elastos/droid/app/CAlertDialogBuilder.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
 
-using Elastos::Utility::Etl::Pair;
-using Elastos::Core::CString;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::IInteger32;
-using Elastos::Net::IInetAddress;
-using Elastos::Droid::Provider::Settings;
-using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IActivityManagerRunningTaskInfo;
+using Elastos::Droid::Content::Pm::IIPackageManager;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnKeyListener;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::R;
-using Elastos::Core::StringBuffer;
-using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
@@ -57,43 +53,54 @@ using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::View::IWindowManagerLayoutParams;
-using Elastos::Droid::View::LayoutInflater;
-using Elastos::Droid::View::ILayoutInflater;
-using Elastos::Droid::Content::Pm::IIPackageManager;
-using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Content::Res::CResources;
-using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
-using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Net::INetworkInfo;
-using Elastos::Droid::Net::DhcpStateMachine;
+using Elastos::Droid::Net::IStaticIpConfiguration;
 using Elastos::Droid::Net::CNetworkInfo;
 using Elastos::Droid::Net::NetworkUtils;
+using Elastos::Droid::Net::INetworkUtils;
 using Elastos::Droid::Net::CLinkAddress;
 using Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED;
 using Elastos::Droid::Net::NetworkInfoDetailedState_FAILED;
 using Elastos::Droid::Net::NetworkInfoDetailedState_DISCONNECTED;
-using Elastos::Droid::Wifi::WifiNative;
-using Elastos::Droid::Wifi::WifiMonitor;
-using Elastos::Droid::Wifi::WifiStateMachine;
+using Elastos::Droid::Net::IInterfaceConfiguration;
+using Elastos::Droid::Net::ILinkAddress;
+using Elastos::Droid::Net::IDhcpStateMachineHelper;
+using Elastos::Droid::Net::CDhcpStateMachineHelper;
+using Elastos::Droid::Server::Wifi::WifiStateMachine;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::P2p::IWifiP2pInfo;
+using Elastos::Droid::Wifi::P2p::IWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::CWifiP2pConfig;
 using Elastos::Droid::Wifi::P2p::CWifiP2pDevice;
 using Elastos::Droid::Wifi::P2p::CWifiP2pDeviceList;
 using Elastos::Droid::Wifi::P2p::CWifiP2pGroup;
 using Elastos::Droid::Wifi::P2p::CWifiP2pGroupList;
-using Elastos::Droid::Wifi::P2p::P2pStatus;
+using Elastos::Droid::Wifi::P2p::CWifiP2pInfo;
+using Elastos::Droid::Wifi::P2p::CWifiP2pConfig;
 using Elastos::Droid::Wifi::P2p::Nsd::EIID_IWifiP2pServiceInfo;
 using Elastos::Droid::Wifi::P2p::Nsd::EIID_IWifiP2pServiceRequest;
-using Elastos::Droid::App::IActivity;
-using Elastos::Droid::App::IAlertDialogBuilder;
-using Elastos::Droid::App::CAlertDialogBuilder;
-using Elastos::Droid::App::IActivityManagerRunningTaskInfo;
+using Elastos::Droid::Wifi::P2p::EIID_IIWifiP2pManager;
+using Elastos::Droid::Wifi::P2p::EIID_IWifiP2pGroupListGroupDeleteListener;
+using Elastos::Droid::Wifi::P2p::IWifiP2pProvDiscEvent;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::CString;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringToIntegral;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IThread;
+using Elastos::Core::StringBuffer;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Net::IInetAddress;
 
 namespace Elastos {
 namespace Droid {
@@ -144,19 +151,9 @@ const Int32 WifiP2pServiceImpl::P2P_MIRACAST_MODE_CHANGED = IProtocol::BASE_WIFI
 const Int32 WifiP2pServiceImpl::ENABLED = 1;
 const Int32 WifiP2pServiceImpl::DISABLED = 0;
 
-//static AutoPtr<ArrayOf<String> > InitServiceDHCPRange()
-//{
-//    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
-//    array->Set(0, String("192.168.49.2"));
-//    array->Set(0, String("192.168.49.254"));
-//    return array;
-//}
-
 /* Is chosen as a unique range to avoid conflict with
    the range defined in Tethering.java */
-//TODO const AutoPtr<ArrayOf<String> > WifiP2pServiceImpl::DHCP_RANGE = InitServiceDHCPRange();
 const String WifiP2pServiceImpl::SERVER_ADDRESS("192.168.49.1");
-//TODO const String WifiP2pServiceImpl::SERVER_ADDRESS_TETHER("192.168.43.1");
 
 //const String WifiP2pServiceImpl::WFD_P2P_ROLE("wlan.wfdp2p.role");
 //const String WifiP2pServiceImpl::WFD_DNSMASQ_PEER("wlan.wfddnsmasq.peer");
@@ -195,6 +192,8 @@ ECode WifiP2pServiceImpl::ClientInfo::SetMessenger(
 //==================================================================
 // WifiP2pServiceImpl
 //==================================================================
+CAR_INTERFACE_IMPL_2(WifiP2pServiceImpl, Object, IIWifiP2pManager, IBinder);
+
 WifiP2pServiceImpl::WifiP2pServiceImpl()
     : mP2pSupported(FALSE)
     , mAutonomousGroup(FALSE)
@@ -222,9 +221,6 @@ ECode WifiP2pServiceImpl::constructor(
     //STOPSHIP: get this from native side
     mInterface = String("p2p0");
 
-    AutoPtr<IInterface> obj;
-    context->GetSystemService(IActivity::ACTIVITY_SERVICE, (IInterface**)&obj);
-
     CNetworkInfo::New(IConnectivityManager::TYPE_WIFI_P2P, 0, NETWORKTYPE,
         String(""), (INetworkInfo**)&mNetworkInfo);
 
@@ -240,10 +236,10 @@ ECode WifiP2pServiceImpl::constructor(
 
     AutoPtr<IHandlerThread> wifiP2pThread;
     CHandlerThread::New(String("WifiP2pService"), (IHandlerThread**)&wifiP2pThread);
-    wifiP2pThread->Start();
+    IThread::Probe(wifiP2pThread)->Start();
     AutoPtr<ILooper> looper;
     wifiP2pThread->GetLooper((ILooper**)&looper);
-    mClientHandler = new ClientHandler(looper);
+    mClientHandler = new ClientHandler(this, looper);
 
     Slogger::I(TAG, " WifiP2pService start! P2pSupported %d, device type: %s", mP2pSupported, str.string());
     mP2pStateMachine = new P2pStateMachine(TAG, looper, mP2pSupported, this);
@@ -251,7 +247,7 @@ ECode WifiP2pServiceImpl::constructor(
     return NOERROR;
 }
 
-P2pStatus WifiP2pServiceImpl::ValueOf(
+WifiP2pServiceImpl::P2pStatus WifiP2pServiceImpl::ValueOf(
     /* [in] */ Int32 error)
 {
     switch(error) {
@@ -284,6 +280,32 @@ P2pStatus WifiP2pServiceImpl::ValueOf(
     }
 }
 
+ECode WifiP2pServiceImpl::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    /*TODO
+    if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+            != PackageManager.PERMISSION_GRANTED) {
+        pw.println("Permission Denial: can't dump WifiP2pService from from pid="
+                + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid());
+        return;
+    }
+    mP2pStateMachine.dump(fd, pw, args);
+    pw.println("mAutonomousGroup " + mAutonomousGroup);
+    pw.println("mJoinExistingGroup " + mJoinExistingGroup);
+    pw.println("mDiscoveryStarted " + mDiscoveryStarted);
+    pw.println("mNetworkInfo " + mNetworkInfo);
+    pw.println("mTemporarilyDisconnectedWifi " + mTemporarilyDisconnectedWifi);
+    pw.println("mServiceDiscReqId " + mServiceDiscReqId);
+    pw.println();
+    */
+    return NOERROR;
+}
+
+
 ECode WifiP2pServiceImpl::ConnectivityServiceReady()
 {
     AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
@@ -302,16 +324,16 @@ ECode WifiP2pServiceImpl::GetMessenger(
     return CMessenger::New(mClientHandler, msg);
 }
 
-AutoPtr<IMessenger> WifiP2pServiceImpl::GetP2pStateMachineMessenger()
+ECode WifiP2pServiceImpl::GetP2pStateMachineMessenger(
+    /* [out] */ IMessenger** messenger)
 {
+    VALIDATE_NOT_NULL(messenger);
     EnforceConnectivityInternalOrLocationHardwarePermission();
     EnforceAccessPermission();
     EnforceChangePermission();
-    AutoPtr<IMessenger> msg;
     AutoPtr<IHandler> handler;
     mP2pStateMachine->GetHandler((IHandler**)&handler);
-    CMessenger::New(handler, (IMessage**)&msg);
-    return msg;
+    return CMessenger::New(handler, messenger);
 }
 
 void WifiP2pServiceImpl::EnableVerboseLogging(
@@ -324,11 +346,12 @@ void WifiP2pServiceImpl::EnableVerboseLogging(
     }
 }
 
-void WifiP2pServiceImpl::SetMiracastMode(
+ECode WifiP2pServiceImpl::SetMiracastMode(
     /* [in] */ Int32 mode)
 {
     EnforceConnectivityInternalPermission();
     mP2pStateMachine->SendMessage(SET_MIRACAST_MODE, mode);
+    return NOERROR;
 }
 
 ECode WifiP2pServiceImpl::EnforceAccessPermission()
@@ -382,7 +405,8 @@ ECode WifiP2pServiceImpl::EnforceConnectivityInternalOrLocationHardwarePermissio
 //==================================================================
 // WifiP2pServiceImpl::P2pStateMachine::GroupDeleteListener
 //==================================================================
-CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::GroupDeleteListener, IGroupDeleteListener)
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::GroupDeleteListener,
+        Object, IWifiP2pGroupListGroupDeleteListener)
 
 WifiP2pServiceImpl::P2pStateMachine::GroupDeleteListener::GroupDeleteListener(
     /* [in] */ P2pStateMachine* host)
@@ -407,6 +431,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupDeleteListener::OnDeleteGroup(
 //==================================================================
 WifiP2pServiceImpl::P2pStateMachine::P2pStateMachine(
     /* [in] */ const String& name,
+    /* [in] */ ILooper* looper,
     /* [in] */ Boolean p2pSupported,
     /* [in] */ WifiP2pServiceImpl* host)
     : StateMachine(name)
@@ -421,7 +446,8 @@ WifiP2pServiceImpl::P2pStateMachine::P2pStateMachine(
     // Inactive is when p2p is enabled with no connectivity
     mInactiveState = new InactiveState(this);
     mGroupCreatingState = new GroupCreatingState(this);
-    mUserAuthorizingInvitationState = new UserAuthorizingInvitationState(this);
+    mUserAuthorizingInviteRequestState = new UserAuthorizingInviteRequestState(this);
+    mUserAuthorizingNegotiationRequestState = new UserAuthorizingNegotiationRequestState(this);
     mProvisionDiscoveryState = new ProvisionDiscoveryState(this);
     mGroupNegotiationState = new GroupNegotiationState(this);
     mFrequencyConflictState = new FrequencyConflictState(this);
@@ -434,12 +460,13 @@ WifiP2pServiceImpl::P2pStateMachine::P2pStateMachine(
     mWifiMonitor = new WifiMonitor(this, mWifiNative);
 
     CWifiP2pDeviceList::New((IWifiP2pDeviceList**)&mPeers);
-    CWifiP2pDeviceList::New((IWifiP2pDeviceList**)&mNotP2pDevice);
 
     CWifiP2pDeviceList::New((IWifiP2pDeviceList**)&mPeersLostDuringConnection);
-    AutoPtr<IGroupDeleteListener> listener = new GroupDeleteListener(this);
+    AutoPtr<IWifiP2pGroupListGroupDeleteListener> listener = new GroupDeleteListener(this);
     CWifiP2pGroupList::New(NULL, listener, (IWifiP2pGroupList**)&mGroups);
     CWifiP2pInfo::New((IWifiP2pInfo**)&mWifiP2pInfo);
+    mPendingReformGroupIndication = FALSE;
+    CWifiP2pConfig::New((IWifiP2pConfig**)&mSavedPeerConfig);
 
     AddState(mDefaultState);
     AddState(mP2pNotSupportedState, mDefaultState);
@@ -449,7 +476,8 @@ WifiP2pServiceImpl::P2pStateMachine::P2pStateMachine(
     AddState(mP2pEnabledState, mDefaultState);
     AddState(mInactiveState, mP2pEnabledState);
     AddState(mGroupCreatingState, mP2pEnabledState);
-    AddState(mUserAuthorizingInvitationState, mGroupCreatingState);
+    AddState(mUserAuthorizingInviteRequestState, mGroupCreatingState);
+    AddState(mUserAuthorizingNegotiationRequestState, mGroupCreatingState);
     AddState(mProvisionDiscoveryState, mGroupCreatingState);
     AddState(mGroupNegotiationState, mGroupCreatingState);
     AddState(mFrequencyConflictState, mGroupCreatingState);
@@ -463,6 +491,24 @@ WifiP2pServiceImpl::P2pStateMachine::P2pStateMachine(
     else {
         SetInitialState(mP2pNotSupportedState);
     }
+
+    SetLogRecSize(50);
+    SetLogOnlyTransitions(TRUE);
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    assert(0);
+    //TODO
+    //super.dump(fd, pw, args);
+    //pw.println("mWifiP2pInfo " + mWifiP2pInfo);
+    //pw.println("mGroup " + mGroup);
+    //pw.println("mSavedPeerConfig " + mSavedPeerConfig);
+    //pw.println("mSavedP2pGroup " + mSavedP2pGroup);
+    //pw.println();
 }
 
 ECode WifiP2pServiceImpl::P2pStateMachine::SendP2pStateChangedBroadcast(
@@ -511,10 +557,13 @@ ECode WifiP2pServiceImpl::P2pStateMachine::SendThisDeviceChangedBroadcast()
     return mHost->mContext->SendStickyBroadcastAsUser(intent, UserHandle::ALL);
 }
 
-ECode WifiP2pServiceImpl::P2pStateMachine::SendP2pPeersChangedBroadcast()
+ECode WifiP2pServiceImpl::P2pStateMachine::SendPeersChangedBroadcast()
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IWifiP2pManager::WIFI_P2P_PEERS_CHANGED_ACTION, (IIntent**)&intent);
+    AutoPtr<IWifiP2pDeviceList> wpdl;
+    CWifiP2pDeviceList::New(mPeers, (IWifiP2pDeviceList**)&wpdl);
+    intent->PutExtra(IWifiP2pManager::EXTRA_P2P_DEVICE_LIST, IParcelable::Probe(wpdl));
     intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     return mHost->mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
 }
@@ -538,24 +587,26 @@ ECode WifiP2pServiceImpl::P2pStateMachine::SendP2pConnectionChangedBroadcast()
         IWifiP2pManager::EXTRA_NETWORK_INFO,
         IParcelable::Probe(netInfo.Get()));
 
-    AutoPtr<IWifiP2pDevice> device;
-    if (mWifiP2pDevice != NULL) {
-        CWifiP2pDevice::New(mWifiP2pDevice, (IWifiP2pDevice**)&device);
-    }
-    else {
-        CWifiP2pDevice::New((IWifiP2pDevice**)&device);
-    }
+    AutoPtr<IWifiP2pGroup> group;
+    CWifiP2pGroup::New(mGroup, (IWifiP2pGroup**)&group);
     intent->PutExtra(
-        IWifiP2pManager::EXTRA_WIFI_P2P_DEVICE,
-        IParcelable::Probe(device.Get()));
+        IWifiP2pManager::EXTRA_WIFI_P2P_GROUP,
+        IParcelable::Probe(group.Get()));
 
     mHost->mContext->SendStickyBroadcastAsUser(intent, UserHandle::ALL);
 
     AutoPtr<INetworkInfo> networkInfo;
     CNetworkInfo::New(mHost->mNetworkInfo, (INetworkInfo**)&networkInfo);
     mHost->mWifiChannel->SendMessage(
-        IWifiP2pService::P2P_CONNECTION_CHANGED,
+        WifiP2pServiceImpl::P2P_CONNECTION_CHANGED,
         networkInfo->Probe(EIID_IInterface));
+    return NOERROR;
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::SendMiracastModeChanged(
+    /* [in] */ Int32 mode)
+{
+    mHost->mWifiChannel->SendMessage(WifiP2pServiceImpl::P2P_MIRACAST_MODE_CHANGED, mode);
     return NOERROR;
 }
 
@@ -571,57 +622,31 @@ ECode WifiP2pServiceImpl::P2pStateMachine::SendP2pPersistentGroupsChangedBroadca
 ECode WifiP2pServiceImpl::P2pStateMachine::StartDhcpServer(
     /* [in] */ const String& intf)
 {
-    String serverAddr;
-    if (mHost->mAutonomousGroup)
-        //TODO serverAddr = WifiP2pServiceImpl::SERVER_ADDRESS_TETHER;
-    else
-        serverAddr = WifiP2pServiceImpl::SERVER_ADDRESS;
     // try {
     AutoPtr<IInterfaceConfiguration> ifcg;
     mHost->mNwService->GetInterfaceConfig(intf, (IInterfaceConfiguration**)&ifcg);
 
     AutoPtr<IInetAddress> addr;
-    NetworkUtils::NumericToInetAddress(serverAddr, (IInetAddress**)&addr);
+    NetworkUtils::NumericToInetAddress(SERVER_ADDRESS, (IInetAddress**)&addr);
     AutoPtr<ILinkAddress> linkAddr;
     CLinkAddress::New(addr, 24, (ILinkAddress**)&linkAddr);
     ifcg->SetLinkAddress(linkAddr);
     ifcg->SetInterfaceUp();
     mHost->mNwService->SetInterfaceConfig(intf, ifcg);
     /* This starts the dnsmasq server */
-    // try {
-    //TODO ECode ec = mHost->mNwService->StartTethering(DHCP_RANGE);
-    if (FAILED(ec)) {
-        Slogger::E(WifiP2pServiceImpl::TAG, "Error startTethering %s, ec=%08x", intf.string(), ec);
-    }
-    // } catch (Exception e) {
-    //         loge("Error startTethering " + intf + ", :" + e);
-    // }
+    AutoPtr<IInterface> svrObj;
+    mHost->mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&svrObj);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(svrObj);
 
-    //tether mode with p2p, just tether when user call createGroupOwner
-    //if negotiate self,just keep the old style.
-    if (mHost->mAutonomousGroup) {
-        //mConnectivityManager deleted
-        //if (mHost->mConnectivityManager == NULL) {
-        //    AutoPtr<IInterface> svrObj;
-        //    mHost->mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&svrObj);
-        //    mHost->mConnectivityManager = IConnectivityManager::Probe(svrObj);
-        //}
-        Logd("p2p: mAutonomousGroup is true, set tether mode, share internet.");
-        Int32 result;
-        //mHost->mConnectivityManager->Tether(intf, &result);
-        if (result != IConnectivityManager::TETHER_ERROR_NO_ERROR) {
-            Slogger::E(WifiP2pServiceImpl::TAG, "p2p: Error tethering on %s", intf.string());
-            return NOERROR;
-        }
-        //TODO Slogger::D(WifiP2pServiceImpl::TAG, "p2p: mTetherInterfaceName :%s", intf.string());
-        //TODO mHost->mTetherInterfaceName = intf;
+    AutoPtr<ArrayOf<String> > tetheringDhcpRanges;
+    cm->GetTetheredDhcpRanges((ArrayOf<String>**)&tetheringDhcpRanges);
+    Boolean started = FALSE;
+    if (mHost->mNwService->IsTetheringStarted(&started), started) {
+        if (WifiP2pServiceImpl::DBG) Logd("Stop existing tethering and restart it");
+        mHost->mNwService->StopTethering();
     }
-    else {
-        /*  */
-        Logd("p2p: mAutonomousGroup is false, do not set tether mode.");
-        /* This starts the dnsmasq server */
-        //TODO return mHost->mNwService->StartTethering(DHCP_RANGE);
-    }
+    mHost->mNwService->TetherInterface(intf);
+    return mHost->mNwService->StartTethering(tetheringDhcpRanges);
     // } catch (Exception e) {
     //     Loge("Error configuring interface " + intf + ", :" + e);
     //     return;
@@ -636,26 +661,18 @@ ECode WifiP2pServiceImpl::P2pStateMachine::StopDhcpServer(
 {
     // try {
     ECode ec = NOERROR;
-    //tether mode with p2p
-    if (mHost->mAutonomousGroup) {
-        Logd("p2p: mAutonomousGroup is true, untether.");
-        //mConnectivityManager deleted
-        //if (mHost->mConnectivityManager == NULL) {
-        //    AutoPtr<IInterface> obj;
-        //    mHost->mContext->GetSystemService(
-        //        IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-        //    mHost->mConnectivityManager = IConnectivityManager::Probe(obj);
-        //}
-        //Int32 result;
-        //ec = mHost->mConnectivityManager->Untether(mHost->mTetherInterfaceName, &result);
-        if (result != IConnectivityManager::TETHER_ERROR_NO_ERROR) {
-            Logd("p2p: Untether initiate failed!");
+    mHost->mNwService->UntetherInterface(intf);
+    AutoPtr<ArrayOf<String> > interfaces;
+    mHost->mNwService->ListTetheredInterfaces((ArrayOf<String>**)&interfaces);
+    for (Int32 i = 0; i < interfaces->GetLength(); ++i) {
+        String tmp = (*interfaces)[i];
+        Logd(String("List all interfaces ") + tmp);
+        if (tmp.Compare(intf) != 0) {
+            Logd("Found other tethering interfaces, so keep tethering alive");
+            return NOERROR;
         }
     }
-    else {
-        Logd("p2p: mAutonomousGroup is false, untether.");
-        ec = mHost->mNwService->StopTethering();
-    }
+    ec = mHost->mNwService->StopTethering();
 
     if (FAILED(ec)) {
         Slogger::E(WifiP2pServiceImpl::TAG, "Error stopping Dhcp server, ec=%08x", ec);
@@ -673,7 +690,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::StopDhcpServer(
 ECode WifiP2pServiceImpl::P2pStateMachine::NotifyP2pEnableFailure()
 {
     Logd("p2p: NotifyP2pEnableFailure.");
-    AutoPtr<IResources> r = CResources::GetSystem();
+    AutoPtr<IResourcesHelper> resHelper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHelper);
+    AutoPtr<IResources> r;
+    resHelper->GetSystem((IResources**)&r);
 
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
@@ -698,9 +718,9 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyP2pEnableFailure()
     builder->Create((IAlertDialog**)&dialog);
 
     AutoPtr<IWindow> win;
-    dialog->GetWindow((IWindow**)&win);
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&win);
     win->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT);
-    return dialog->Show();
+    return IDialog::Probe(dialog)->Show();
 }
 
 ECode WifiP2pServiceImpl::P2pStateMachine::AddRowToDialog(
@@ -712,7 +732,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::AddRowToDialog(
         Slogger::D(WifiP2pServiceImpl::TAG, "p2p: AddRowToDialog: %s.", value.string());
     }
 
-    AutoPtr<IResources> r = CResources::GetSystem();
+    AutoPtr<IResourcesHelper> resHelper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHelper);
+    AutoPtr<IResources> r;
+    resHelper->GetSystem((IResources**)&r);
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(mHost->mContext, (ILayoutInflater**)&inflater);
     AutoPtr<IView> row;
@@ -749,7 +772,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationSent(
             pin.string(), peerAddress.string());
     }
 
-    AutoPtr<IResources> r = CResources::GetSystem();
+    AutoPtr<IResourcesHelper> resHelper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHelper);
+    AutoPtr<IResources> r;
+    resHelper->GetSystem((IResources**)&r);
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(mHost->mContext, (ILayoutInflater**)&inflater);
     AutoPtr<IView> textEntryView;
@@ -783,9 +809,51 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationSent(
     builder->Create((IAlertDialog**)&dialog);
 
     AutoPtr<IWindow> win;
-    dialog->GetWindow((IWindow**)&win);
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&win);
     win->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT);
-    return dialog->Show();
+    return IDialog::Probe(dialog)->Show();
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::NotifyP2pProvDiscShowPinRequest(
+    /* [in] */ const String& pin,
+    /* [in] */ const String& peerAddress)
+{
+    AutoPtr<IResourcesHelper> resHelper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHelper);
+    AutoPtr<IResources> r;
+    resHelper->GetSystem((IResources**)&r);
+    String tempDevAddress = peerAddress;
+    String tempPin = pin;
+
+    AutoPtr<IView> textEntryView;
+    AutoPtr<ILayoutInflater> inflater;
+    LayoutInflater::From(mHost->mContext, (ILayoutInflater**)&inflater);
+    inflater->Inflate(R::layout::wifi_p2p_dialog, NULL, (IView**)&textEntryView);
+
+    AutoPtr<IView> tempView;
+    textEntryView->FindViewById(R::id::info, (IView**)&tempView);
+    AutoPtr<IViewGroup> group = IViewGroup::Probe(tempView);
+    AddRowToDialog(group, R::string::wifi_p2p_to_message, GetDeviceName(peerAddress));
+    AddRowToDialog(group, R::string::wifi_p2p_show_pin_message, pin);
+
+    AutoPtr<IAlertDialogBuilder> builder;
+    CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
+    String title;
+    r->GetString(R::string::wifi_p2p_invitation_sent_title, &title);
+    builder->SetTitle(CoreUtils::Convert(title));
+    builder->SetView(textEntryView);
+    String accept;
+    r->GetString(R::string::accept, &accept);
+    AutoPtr<IDialogInterfaceOnClickListener> listener =
+        new NotifyP2pProvDiscShowPinRequestOnClickListener(this, tempDevAddress, tempPin);
+    builder->SetPositiveButton(CoreUtils::Convert(accept), listener);
+    builder->SetCancelable(FALSE);
+    AutoPtr<IAlertDialog> dialog;
+    builder->Create((IAlertDialog**)&dialog);
+    AutoPtr<IWindow> win;
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&win);
+    win->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT);
+    return IDialog::Probe(dialog)->Show();
 }
 
 ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceived()
@@ -794,7 +862,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceived()
         Slogger::D(WifiP2pServiceImpl::TAG, "p2p: NotifyInvitationReceived");
     }
 
-    AutoPtr<IResources> r = CResources::GetSystem();
+    AutoPtr<IResourcesHelper> resHelper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHelper);
+    AutoPtr<IResources> r;
+    resHelper->GetSystem((IResources**)&r);
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(mHost->mContext, (ILayoutInflater**)&inflater);
     AutoPtr<IView> textEntryView;
@@ -808,48 +879,36 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceived()
     mSavedPeerConfig->GetDeviceAddress(&addr);
     AddRowToDialog(group, R::string::wifi_p2p_from_message, GetDeviceName(addr));
 
-/*
-    AutoPtr<IWpsInfo> wps;
-    mSavedPeerConfig->GetWps((IWpsInfo**)&wps);
-
-    AutoPtr<Elastos::Droid::Widget::IEditText> pin;
-    textEntryView->FindViewById(Elastos::Droid::R::id::wifi_p2p_wps_pin, (IEditText**)&pin);
+    AutoPtr<IView> editTextView;
+    textEntryView->FindViewById(Elastos::Droid::R::id::wifi_p2p_wps_pin, (IView**)&editTextView);
+    AutoPtr<Elastos::Droid::Widget::IEditText> pin = IEditText::Probe(editTextView);
 
     AutoPtr<IAlertDialog> dialog;
     AutoPtr<IAlertDialogBuilder> builder;
-    // CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
 
     String title, accept;
     r->GetString(Elastos::Droid::R::string::wifi_p2p_invitation_to_connect_title, &title);
     r->GetString(Elastos::Droid::R::string::accept, &accept);
-    AutoPtr<ICharSequence> csTitle;
-    CString::New(title, (ICharSequence**)&csTitle);
-    builder->SetTitle(csTitle);
+    builder->SetTitle(CoreUtils::Convert(title));
     builder->SetView(textEntryView);
-//TODO: Need
-    //builder->setPositiveButton(r->GetString(R.string.accept), new OnClickListener() {
-    //                 public void onClick(DialogInterface dialog, int which) {
-    //                     if (wps.setup == WpsInfo.KEYPAD) {
-    //                         mSavedPeerConfig.wps.pin = pin.getText().toString();
-    //                     }
-    //                     if (WifiP2pServiceImpl::DBG) Logd(getName() + " accept invitation " + mSavedPeerConfig);
-    //                     sendMessage(PEER_CONNECTION_USER_ACCEPT);
-    //                 }
-    //             })
-    //builder->setNegativeButton(r->GetString(R.string.decline), new OnClickListener() {
-    //                 @Override
-    //                 public void onClick(DialogInterface dialog, int which) {
-    //                     if (WifiP2pServiceImpl::DBG) Logd(getName() + " ignore connect");
-    //                     sendMessage(PEER_CONNECTION_USER_REJECT);
-    //                 }
-    //             })
-    //builder->setOnCancelListener(new DialogInterface.OnCancelListener() {
-    //                 @Override
-    //                 public void onCancel(DialogInterface arg0) {
-    //                     if (WifiP2pServiceImpl::DBG) Logd(getName() + " ignore connect");
-    //                     sendMessage(PEER_CONNECTION_USER_REJECT);
-    //                 }
-    //             })
+
+    AutoPtr<IWpsInfo> wps;
+    mSavedPeerConfig->GetWps((IWpsInfo**)&wps);
+
+    AutoPtr<IDialogInterfaceOnClickListener> positiveListener =
+        new NotifyInvitationReceivedPositiveButtonListener(this, wps, pin);
+    builder->SetPositiveButton(CoreUtils::Convert(accept), positiveListener);
+
+    AutoPtr<IDialogInterfaceOnClickListener> negativeListener =
+        new NotifyInvitationReceivedNegativeButtonListener(this);
+    String decline;
+    r->GetString(R::string::decline, &decline);
+    builder->SetNegativeButton(CoreUtils::Convert(decline), negativeListener);
+
+    AutoPtr<IDialogInterfaceOnCancelListener> cancelListener =
+        new NotifyInvitationReceivedDialogCancelListener(this);
+    builder->SetOnCancelListener(cancelListener);
     builder->Create((IAlertDialog**)&dialog);
 
     //make the enter pin area or the display pin area visible
@@ -872,13 +931,24 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceived()
             break;
     }
 
+    AutoPtr<IConfiguration> config;
+    r->GetConfiguration((IConfiguration**)&config);
+    Int32 uiMode;
+    config->GetUiMode(&uiMode);
+    if ((uiMode & IConfiguration::UI_MODE_TYPE_APPLIANCE) ==
+            IConfiguration::UI_MODE_TYPE_APPLIANCE) {
+        // For appliance devices, add a key listener which accepts.
+        AutoPtr<IDialogInterfaceOnKeyListener> keyListener =
+            new NotifyInvitationReceivedDialogKeyListener(this, dialog);
+        IDialog::Probe(dialog)->SetOnKeyListener(keyListener);
+        // TODO: add timeout for this dialog.
+        // TODO: update UI in appliance mode to tell user what to do.
+    }
+
     AutoPtr<IWindow> win;
-    dialog->GetWindow((IWindow**)&win);
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&win);
     win->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT);
-    return dialog->Show();
-    */
-    SendMessage(PEER_CONNECTION_USER_ACCEPT);
-    return NOERROR;
+    return IDialog::Probe(dialog)->Show();
 }
 
 /**
@@ -913,7 +983,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::UpdatePersistentNetworks(
         String bssid = (*result)[2];
         String flags = (*result)[3];
         // try {
-        ECode ec = StringUtils::ParseInt32((*result)[0], 10, &netId);
+        ECode ec = StringToIntegral::Parse((*result)[0], 10, &netId);
         if (FAILED(ec)) {
             Slogger::E(WifiP2pServiceImpl::TAG, "NumberFormatException %s", (*result)[0].string());
             continue;
@@ -974,29 +1044,64 @@ ECode WifiP2pServiceImpl::P2pStateMachine::UpdatePersistentNetworks(
     return NOERROR;
 }
 
-Int32 WifiP2pServiceImpl::P2pStateMachine::Connect(
-    /* [in] */ IWifiP2pConfig* config,
-    /* [in] */ Boolean tryInvocation)
+Boolean WifiP2pServiceImpl::P2pStateMachine::IsConfigInvalid(
+    /* [in] */ IWifiP2pConfig* config)
 {
-    if (config == NULL) {
-        Loge("config is NULL");
-        return ;//CONNECT_FAILURE;
-    }
-
-    String addr, devAddr;
-    config->GetDeviceAddress(&addr);
-    if (mSavedPeerConfig != NULL)
-        mSavedPeerConfig->GetDeviceAddress(&devAddr);
-    Boolean isResp = (mSavedPeerConfig != NULL && addr.Equals(devAddr));
-    mSavedPeerConfig = config;
-
+    if (config == NULL) return TRUE;
+    String deviceAddress;
+    config->GetDeviceAddress(&deviceAddress);
+    if (TextUtils::IsEmpty(deviceAddress)) return TRUE;
     AutoPtr<IWifiP2pDevice> dev;
-    mPeers->Get(addr, (IWifiP2pDevice**)&dev);
-    if (dev == NULL) {
-        Slogger::E(WifiP2pServiceImpl::TAG, "target device not found %s", addr.string());
-        return ;//CONNECT_FAILURE;
+    mPeers->Get(deviceAddress, (IWifiP2pDevice**)&dev);
+    if (dev == NULL) return TRUE;
+    return FALSE;
+}
+
+AutoPtr<IWifiP2pDevice> WifiP2pServiceImpl::P2pStateMachine::FetchCurrentDeviceDetails(
+    /* [in] */ IWifiP2pConfig* config)
+{
+    /* Fetch & update group capability from supplicant on the device */
+    String deviceAddress;
+    config->GetDeviceAddress(&deviceAddress);
+    Int32 gc = mWifiNative->GetGroupCapability(deviceAddress);
+    mPeers->UpdateGroupCapability(deviceAddress, gc);
+    AutoPtr<IWifiP2pDevice> dev;
+    mPeers->Get(deviceAddress, (IWifiP2pDevice**)&dev);
+    return dev;
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::P2pConnectWithPinDisplay(
+    /* [in] */ IWifiP2pConfig* config)
+{
+    Boolean join = FALSE;
+    AutoPtr<IWifiP2pDevice> dev = FetchCurrentDeviceDetails(config);
+
+    if (mHost->mIsInvite) {
+        join = TRUE;
+    } else {
+        dev->IsGroupOwner(&join);
     }
 
+    String pin = mWifiNative->P2pConnect(config, join);
+    //try {
+    Int32 ival;
+    ECode ec = StringToIntegral::Parse(pin, 10, &ival);
+    if (SUCCEEDED(ec)) {
+        String deviceAddress;
+        config->GetDeviceAddress(&deviceAddress);
+        NotifyInvitationSent(pin, deviceAddress);
+    }
+    //} catch (NumberFormatException ignore) {
+        // do nothing if p2pConnect did not return a pin
+    //}
+    mHost->mIsInvite = FALSE;
+    return NOERROR;
+}
+
+Boolean WifiP2pServiceImpl::P2pStateMachine::ReinvokePersistentGroup(
+    /* [in] */ IWifiP2pConfig* config)
+{
+    AutoPtr<IWifiP2pDevice> dev = FetchCurrentDeviceDetails(config);
     Boolean join;
     dev->IsGroupOwner(&join);
     String address,ssid;
@@ -1021,25 +1126,27 @@ Int32 WifiP2pServiceImpl::P2pStateMachine::Connect(
             // Skip WPS and start 4way handshake immediately.
             b = mWifiNative->P2pGroupAdd(netId);
             if (!b) {
-                return ;//CONNECT_FAILURE;
+                return FALSE;
             }
-            return ;//CONNECT_SUCCESS;
+            return TRUE;
         }
     }
 
     dev->IsDeviceLimit(&b);
     if (!join && b) {
         Loge("target device reaches the device limit.");
-        return ;//CONNECT_FAILURE;
+        return FALSE;
     }
 
     dev->IsInvitationCapable(&b);
-    if (!join && tryInvocation && b) {
+    if (!join && b) {
         Int32 netId = IWifiP2pGroup::PERSISTENT_NET_ID;
         Int32 id;
         config->GetNetId(&id);
         if (id >= 0) {
             String oAddr;
+            String addr;
+            config->GetDeviceAddress(&addr);
             mGroups->GetOwnerAddr(id, &oAddr);
             if (addr.Equals(oAddr)) {
                 netId = id;
@@ -1059,26 +1166,18 @@ Int32 WifiP2pServiceImpl::P2pStateMachine::Connect(
             // Invoke the persistent group.
             if (mWifiNative->P2pReinvoke(netId, address)) {
                 // Save network id. It'll be used when an invitation result event is received.
-                mSavedPeerConfig->SetNetId(netId);
-                return ;//CONNECT_SUCCESS;
+                config->SetNetId(netId);
+                return TRUE;
             }
             else {
                 Loge("p2pReinvoke() failed, update networks");
                 UpdatePersistentNetworks(RELOAD);
-                // continue with negotiation
+                return FALSE;
             }
         }
     }
 
-    //Stop discovery before issuing connect
-    mWifiNative->P2pStopFind();
-
-    if (!isResp) {
-        return ;//NEEDS_PROVISION_REQ;
-    }
-
-    P2pConnectWithPinDisplay(config);
-    return ;//CONNECT_SUCCESS;
+    return FALSE;
 }
 
 Int32 WifiP2pServiceImpl::P2pStateMachine::GetNetworkIdFromClientList(
@@ -1086,12 +1185,16 @@ Int32 WifiP2pServiceImpl::P2pStateMachine::GetNetworkIdFromClientList(
 {
     if (deviceAddress == NULL) return -1;
 
-    AutoPtr<ArrayOf<IWifiP2pGroup*> > groups;
-    mGroups->GetGroupList((ArrayOf<IWifiP2pGroup*>**)&groups);
+    AutoPtr<ArrayOf<IInterface*> > groups;
+    AutoPtr<ICollection> list;
+    mGroups->GetGroupList((ICollection**)&list);
+    list->ToArray((ArrayOf<IInterface*>**)&groups);
     if (groups != NULL) {
         for(Int32 i = 0; i < groups->GetLength(); i++) {
+            AutoPtr<IInterface> obj = (*groups)[i];
+            IWifiP2pGroup* wifiP2pGroup = IWifiP2pGroup::Probe(obj);
             Int32 netId;
-            (*groups)[i]->GetNetworkId(&netId);
+            wifiP2pGroup->GetNetworkId(&netId);
             AutoPtr<ArrayOf<String> > p2pClientList = GetClientList(netId);
             if (p2pClientList == NULL) continue;
             for (Int32 j = 0; j < p2pClientList->GetLength(); j++) {
@@ -1164,15 +1267,13 @@ Boolean WifiP2pServiceImpl::P2pStateMachine::RemoveClientFromList(
 }
 
 ECode WifiP2pServiceImpl::P2pStateMachine::SetWifiP2pInfoOnGroupFormation(
-    /* [in] */ const String& serverAddress)
+    /* [in] */ IInetAddress* serverInetAddress)
 {
     mWifiP2pInfo->SetGroupFormed(TRUE);
     Boolean b;
     mGroup->IsGroupOwner(&b);
     mWifiP2pInfo->SetIsGroupOwner(b);
-    AutoPtr<IInetAddress> addr;
-    NetworkUtils::NumericToInetAddress(serverAddress, (IInetAddress**)&addr);
-    mWifiP2pInfo->SetGroupOwnerAddress(addr);
+    mWifiP2pInfo->SetGroupOwnerAddress(serverInetAddress);
     return NOERROR;
 }
 
@@ -1192,42 +1293,13 @@ String WifiP2pServiceImpl::P2pStateMachine::GetDeviceName(
     if (d != NULL) {
         String name;
         d->GetDeviceName(&name);
-            return name;
+        if (name.Equals(String(""))) {
+            return deviceAddress;
+        }
+        return name;
     }
     //Treat the address as name if there is no match
     return deviceAddress;
-}
-
-ECode WifiP2pServiceImpl::P2pStateMachine::P2pConnectWithPinDisplay(
-    /* [in] */ IWifiP2pConfig* config)
-{
-    AutoPtr<IWifiP2pDevice> dev;
-    String addr;
-    config->GetDeviceAddress(&addr);
-    mPeers->Get(addr, (IWifiP2pDevice**)&dev);
-    if (dev == NULL) {
-        Slogger::E(WifiP2pServiceImpl::TAG, "target device is not found %s", addr.string());
-        return NOERROR;
-    }
-
-    Boolean b;
-    dev->IsGroupOwner(&b);
-    String pin = mWifiNative->P2pConnect(config, b);
-    // try {
-    Int32 ival;
-    ECode ec = StringUtils::ParseInt32(pin, 10, &ival);
-    if (SUCCEEDED(ec)) {
-        if (!SendShowPinReqToFrontApp(pin)) {
-            return NotifyInvitationSent(pin, addr);
-        }
-    }
-    else {
-        Slogger::W(WifiP2pServiceImpl::TAG, "do nothing if p2pConnect did not return a pin");
-    }
-    // } catch (NumberFormatException ignore) {
-    //     // do nothing if p2pConnect did not return a pin
-    // }
-    return NOERROR;
 }
 
 String WifiP2pServiceImpl::P2pStateMachine::GetPersistedDeviceName()
@@ -1237,6 +1309,13 @@ String WifiP2pServiceImpl::P2pStateMachine::GetPersistedDeviceName()
     String deviceName;
     Settings::Global::GetString(cr, ISettingsGlobal::WIFI_P2P_DEVICE_NAME, &deviceName);
     if (deviceName.IsNull()) {
+        AutoPtr<IResources> res;
+        mHost->mContext->GetResources((IResources**)&res);
+        String str;
+        res->GetString(R::string::def_wifi_direct_name, &str);
+        if (!TextUtils::IsEmpty(str)) {
+            return str;
+        }
         /* We use the 4 digits of the ANDROID_ID to have a friendly
          * default that has low likelihood of collision with a peer */
         String id;
@@ -1275,7 +1354,7 @@ Boolean WifiP2pServiceImpl::P2pStateMachine::SetWfdInfo(
 {
     if (WifiP2pServiceImpl::DBG) {
         String info;
-        wfdInfo->ToString(&info);
+        IObject::Probe(wfdInfo)->ToString(&info);
         Slogger::D(WifiP2pServiceImpl::TAG, "P2pStateMachine::SetWfdInfo: %s", info.string());
     }
 
@@ -1332,28 +1411,23 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InitializeP2pSettings()
         Slogger::D(WifiP2pServiceImpl::TAG, "DeviceAddress: %s", addr.string());
     }
 
-    mWifiNative->SetWfdEnable(TRUE); // set wfd enable default
-
     mHost->mClientInfoList.Clear();
     mWifiNative->P2pFlush();
     mWifiNative->P2pServiceFlush();
     mHost->mServiceTransactionId = 0;
     mHost->mServiceDiscReqId = NULL;
 
+    AutoPtr<IContentResolver> cr;
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+    String countryCode;
+    Settings::Global::GetString(cr, ISettingsGlobal::WIFI_COUNTRY_CODE, &countryCode);
+
+    if (!countryCode.IsNullOrEmpty()) {
+        mHost->mP2pStateMachine->SendMessage(SET_COUNTRY_CODE, TO_IINTERFACE(CoreUtils::Convert(countryCode)));
+    }
+
     UpdatePersistentNetworks(RELOAD);
     return NOERROR;
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::SetGroupOwnerPsk(
-    /* [in] */ const String& goPsk)
-{
-    if (goPsk.IsNull()) return FALSE;
-
-    if (!mWifiNative->SetGroupOwnerPsk(goPsk)) {
-        Slogger::E(WifiP2pServiceImpl::TAG, "Failed to set GroupOwner psk: [%s]", goPsk.string());
-        return FALSE;
-    }
-    return TRUE;
 }
 
 ECode WifiP2pServiceImpl::P2pStateMachine::UpdateThisDevice(
@@ -1369,13 +1443,22 @@ ECode WifiP2pServiceImpl::P2pStateMachine::HandleGroupCreationFailure()
     ResetWifiP2pInfo();
     mHost->mNetworkInfo->SetDetailedState(NetworkInfoDetailedState_FAILED, String(NULL), String(NULL));
     SendP2pConnectionChangedBroadcast();
-    mSavedPeerConfig = NULL;
-    /* After cancelling group formation, new connections on existing peers can fail
-     * at supplicant. Flush and restart discovery */
-    mWifiNative->P2pFlush();
+    // Remove only the peer we failed to connect to so that other devices discovered
+    // that have not timed out still remain in list for connection
+    Boolean peersChanged;
+    mPeers->Remove(mPeersLostDuringConnection, &peersChanged);
+    String deviceAddress;
+    mSavedPeerConfig->GetDeviceAddress(&deviceAddress);
+    AutoPtr<IWifiP2pDevice> dev;
+    if (!deviceAddress.IsNull() &&
+            (mPeers->Remove(deviceAddress, (IWifiP2pDevice**)&dev), dev) != NULL) {
+        peersChanged = TRUE;
+    }
+    if (peersChanged) {
+        SendPeersChangedBroadcast();
+    }
+
     Boolean b;
-    mPeers->Remove(mPeersLostDuringConnection, &b);
-    if (b) SendP2pPeersChangedBroadcast();
     mPeersLostDuringConnection->Clear(&b);
     mHost->mServiceDiscReqId = NULL;
     SendMessage(IWifiP2pManager::DISCOVER_PEERS);
@@ -1384,32 +1467,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::HandleGroupCreationFailure()
 
 ECode WifiP2pServiceImpl::P2pStateMachine::HandleGroupRemoved()
 {
-    AutoPtr<ArrayOf<IWifiP2pDevice*> > devices;
-    mGroup->GetClientList((ArrayOf<IWifiP2pDevice*>**)&devices);
-    Boolean changed = FALSE;
-
-    AutoPtr<ArrayOf<IWifiP2pDevice*> > list;
-    mPeers->GetDeviceList((ArrayOf<IWifiP2pDevice*>**)&list);
-    if (list != NULL) {
-        for (Int32 i = 0; i < list->GetLength(); i++) {
-            AutoPtr<IWifiP2pDevice> d = (*list)[i];
-            Boolean b = FALSE;
-            if (devices != NULL) {
-                b = devices->Contains(d);
-            }
-            if (!b) {
-                AutoPtr<IWifiP2pDevice> owner;
-                mGroup->GetOwner((IWifiP2pDevice**)&owner);
-                owner->Equals(d, &b);
-            }
-
-            if (b) {
-                d->SetStatus(IWifiP2pDevice::AVAILABLE);
-                changed = TRUE;
-            }
-        }
-    }
-
     Boolean b;
     mGroup->IsGroupOwner(&b);
     String name;
@@ -1419,9 +1476,22 @@ ECode WifiP2pServiceImpl::P2pStateMachine::HandleGroupRemoved()
     }
     else {
         if (WifiP2pServiceImpl::DBG) Logd("stop DHCP client");
-        mHost->mDhcpStateMachine->SendMessage(DhcpStateMachine::CMD_STOP_DHCP);
+        IStateMachine::Probe(mHost->mDhcpStateMachine)->SendMessage(IDhcpStateMachine::CMD_STOP_DHCP);
         mHost->mDhcpStateMachine->DoQuit();
         mHost->mDhcpStateMachine = NULL;
+
+        //try {
+        String iface;
+        mGroup->GetInterface(&iface);
+        ECode ec = mHost->mNwService->RemoveInterfaceFromLocalNetwork(iface);
+        if (FAILED(ec)) {
+            Loge("Failed to remove iface from local network ");
+        }
+        //} catch (RemoteException e) {
+        //    loge("Failed to remove iface from local network " + e);
+        //} catch (IllegalStateException ie) {
+        //    loge("Failed to remove iface from local network " + ie);
+        ///}
     }
 
     // try {
@@ -1432,22 +1502,41 @@ ECode WifiP2pServiceImpl::P2pStateMachine::HandleGroupRemoved()
     // } catch (Exception e) {
     //     Loge("Failed to clear addresses " + e);
     // }
-    NetworkUtils::ResetConnections(name, NetworkUtils::RESET_ALL_ADDRESSES);
+    Int32 result;
+    NetworkUtils::ResetConnections(name, INetworkUtils::RESET_ALL_ADDRESSES, &result);
 
     // Clear any timeout that was set. This is essential for devices
     // that reuse the main p2p interface for a created group.
     mWifiNative->SetP2pGroupIdle(name, 0);
 
+    Boolean peersChanged = FALSE;
+    // Remove only peers part of the group, so that other devices discovered
+    // that have not timed out still remain in list for connection
+    AutoPtr<ICollection> clientList;
+    mGroup->GetClientList((ICollection**)&clientList);
+    Boolean bTemp;
+    AutoPtr<ArrayOf<IInterface*> > array;
+    clientList->ToArray((ArrayOf<IInterface*>**)&array);
+    Int32 size = array->GetLength();
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj = (*array)[i];
+        IWifiP2pDevice* d = IWifiP2pDevice::Probe(obj);
+        if (mPeers->Remove(d, &bTemp)) peersChanged = TRUE;
+    }
+    AutoPtr<IWifiP2pDevice> owner;
+    mGroup->GetOwner((IWifiP2pDevice**)&owner);
+    if (mPeers->Remove(owner, &bTemp), bTemp) peersChanged = TRUE;
+    if (mPeers->Remove(mPeersLostDuringConnection, &bTemp), bTemp) peersChanged = TRUE;
+    if (peersChanged) {
+        SendPeersChangedBroadcast();
+    }
+
     mGroup = NULL;
-    mWifiNative->P2pFlush();
-    mPeers->Remove(mPeersLostDuringConnection, &b);
-    if (b) SendP2pPeersChangedBroadcast();
     mPeersLostDuringConnection->Clear(&b);
     mHost->mServiceDiscReqId = NULL;
-    if (changed) SendP2pPeersChangedBroadcast();
 
     if (mHost->mTemporarilyDisconnectedWifi) {
-        mHost->mWifiChannel->SendMessage(IWifiP2pService::DISCONNECT_WIFI_REQUEST, 0);
+        mHost->mWifiChannel->SendMessage(WifiP2pServiceImpl::DISCONNECT_WIFI_REQUEST, 0);
         mHost->mTemporarilyDisconnectedWifi = FALSE;
     }
     return NOERROR;
@@ -1542,36 +1631,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::Loge(
     return NOERROR;
 }
 
-AutoPtr<IWifiP2pDevice> WifiP2pServiceImpl::P2pStateMachine::GetWifiP2pDeviceFromPeers(
-    /* [in] */ const String& deviceAddress)
-{
-    AutoPtr<ArrayOf<IWifiP2pDevice*> > list;
-    mPeers->GetDeviceList((ArrayOf<IWifiP2pDevice*>**)&list);
-    if (list != NULL) {
-        String addr;
-        for (Int32 i = 0; i < list->GetLength(); ++i) {
-            AutoPtr<IWifiP2pDevice> d = (*list)[i];
-            d->GetDeviceAddress(&addr);
-            if (ComparedMacAddr(addr, deviceAddress)) {
-                return d;
-            }
-        }
-    }
-
-    return NULL;
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::ComparedMacAddr(
-    /* [in] */ const String& inputa,
-    /* [in] */ const String& inputb)
-{
-    //42:fc:89:a8:96:09
-    if (inputa.IsNull() || inputb.IsNull())
-        return FALSE;
-
-    return inputa.Equals(inputb);
-}
-
 /**
  * Update service discovery request to wpa_supplicant.
  */
@@ -1658,7 +1717,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::RemoveServiceRequest(
     it = clientInfo->mReqList.Begin();
     for(; it != clientInfo->mReqList.End(); ++it) {
         Boolean b;
-        it->mSecond->Equals(req, &b);
+        IObject::Probe(it->mSecond)->Equals(req, &b);
         if (b) {
             removed = TRUE;
             clientInfo->mReqList.Erase(it);
@@ -1890,156 +1949,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GetClientInfo(
     return NOERROR;
 }
 
-ECode WifiP2pServiceImpl::P2pStateMachine::SendDetachedMsg(
-    /* [in] */ Int32 reason)
-{
-    //TODO if (mHost->mForegroundAppMessenger == NULL) return NOERROR;
-
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain((IMessage**)&msg);
-    msg->SetWhat(IWifiP2pManager::DIALOG_LISTENER_DETACHED);
-    msg->SetArg1(reason);
-    // try {
-    //TODO mHost->mForegroundAppMessenger->Send(msg);
-    // } catch (RemoteException e) {
-    // }
-    //TODO mHost->mForegroundAppMessenger = NULL;
-    //TODO mHost->mForegroundAppPkgName = NULL;
-    return NOERROR;
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::SendShowPinReqToFrontApp(
-    /* [in] */ const String& pin)
-{
-    //TODO if (!IsForegroundApp(mHost->mForegroundAppPkgName)) {
-        SendDetachedMsg(IWifiP2pManager::NOT_IN_FOREGROUND);
-        return FALSE;
-    }
-
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain((IMessage**)&msg);
-    msg->SetWhat(IWifiP2pManager::SHOW_PIN_REQUESTED);
-    AutoPtr<IBundle> bundle;
-    CBundle::New((IBundle**)&bundle);
-    bundle->PutString(IWifiP2pManager::WPS_PIN_BUNDLE_KEY, pin);
-    msg->SetData(bundle);
-    return SendDialogMsgToFrontApp(msg);
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::SendConnectNoticeToApp(
-    /* [in] */ IWifiP2pDevice* inDev,
-    /* [in] */ IWifiP2pConfig* config)
-{
-    AutoPtr<IWifiP2pDevice> dev = inDev;
-    if (dev == NULL) {
-        String addr;
-        config->GetDeviceAddress(&addr);
-        CWifiP2pDevice::New(addr, (IWifiP2pDevice**)&dev);
-    }
-
-    //TODO if (!IsForegroundApp(mHost->mForegroundAppPkgName)) {
-        if (WifiP2pServiceImpl::DBG) Logd("application is NOT foreground");
-        SendDetachedMsg(IWifiP2pManager::NOT_IN_FOREGROUND);
-        return FALSE;
-    }
-
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain((IMessage**)&msg);
-    msg->SetWhat(IWifiP2pManager::CONNECTION_REQUESTED);
-    AutoPtr<IBundle> bundle;
-    CBundle::New((IBundle**)&bundle);
-    bundle->PutParcelable(IWifiP2pManager::P2P_DEV_BUNDLE_KEY, IParcelable::Probe(dev));
-    bundle->PutParcelable(IWifiP2pManager::P2P_CONFIG_BUNDLE_KEY, IParcelable::Probe(config));
-    msg->SetData(bundle);
-    return SendDialogMsgToFrontApp(msg);
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::SendDialogMsgToFrontApp(
-    /* [in] */ IMessage* msg)
-{
-    //TODO if (FAILED(mHost->mForegroundAppMessenger->Send(msg))) {
-        //TODO mHost->mForegroundAppMessenger = NULL;
-        //TODO mHost->mForegroundAppPkgName = NULL;
-        return FALSE;
-    }
-    return TRUE;
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::SetDialogListenerApp(
-    /* [in] */ IMessenger* m,
-    /* [in] */ const String& appPkgName,
-    /* [in] */ Boolean isReset)
-{
-    //TODO if (mHost->mForegroundAppPkgName != String(NULL) && !mHost->mForegroundAppPkgName.Equals(appPkgName)) {
-        //TODO if (IsForegroundApp(mHost->mForegroundAppPkgName)) {
-            // The current dialog listener is foreground app's.
-            if (WifiP2pServiceImpl::DBG) Logd("application is NOT foreground");
-            return FALSE;
-        }
-        // detach an old listener.
-        SendDetachedMsg(IWifiP2pManager::NOT_IN_FOREGROUND);
-    }
-
-    if (isReset) {
-        if (WifiP2pServiceImpl::DBG) Logd("reset dialog listener");
-        //TODO mHost->mForegroundAppMessenger = NULL;
-        //TODO mHost->mForegroundAppPkgName = NULL;
-        return TRUE;
-    }
-
-    if (!IsForegroundApp(appPkgName)) {
-        return FALSE;
-    }
-
-    //TODO mHost->mForegroundAppMessenger = m;
-    //TODO mHost->mForegroundAppPkgName = appPkgName;
-    if (WifiP2pServiceImpl::DBG)
-        Slogger::E(WifiP2pServiceImpl::TAG, "set dialog listener. app= %s", appPkgName.string());
-    return TRUE;
-}
-
-Boolean WifiP2pServiceImpl::P2pStateMachine::IsForegroundApp(
-    /* [in] */ const String& pkgName)
-{
-    if (pkgName.IsNull()) return FALSE;
-
-    AutoPtr<IObjectContainer> container;
-    //deleted mHost->mActivityMgr->GetRunningTasks(1, (IObjectContainer**)&container);
-    if (container == NULL) {
-        return FALSE;
-    }
-
-    Int32 count;
-    container->GetObjectCount(&count);
-    if (count == 0) {
-        return FALSE;
-    }
-
-    AutoPtr<IObjectEnumerator> enumerator;
-    container->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext = FALSE;
-    while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> current;
-        enumerator->Current((IInterface**)&current);
-        AutoPtr<IActivityManagerRunningTaskInfo> taskInfo =
-            IActivityManagerRunningTaskInfo::Probe(current);
-
-        AutoPtr<IComponentName> name;
-        taskInfo->GetBaseActivity((IComponentName**)&name);
-        String pName;
-        name->GetPackageName(&pName);
-        return pkgName.Equals(pName);
-    }
-
-    return FALSE;
-}
-
 String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
     /* [in] */ Int32 what)
 {
@@ -2100,11 +2009,11 @@ String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
         case IWifiP2pManager::SET_DEVICE_NAME: return String("SET_DEVICE_NAME");
         case IWifiP2pManager::SET_DEVICE_NAME_FAILED: return String("SET_DEVICE_NAME_FAILED");
         case IWifiP2pManager::SET_DEVICE_NAME_SUCCEEDED: return String("SET_DEVICE_NAME_SUCCEEDED");
-        case IWifiP2pManager::SET_DIALOG_LISTENER: return String("SET_DIALOG_LISTENER");
-        case IWifiP2pManager::DIALOG_LISTENER_DETACHED: return String("DIALOG_LISTENER_DETACHED");
-        case IWifiP2pManager::DIALOG_LISTENER_ATTACHED: return String("DIALOG_LISTENER_ATTACHED");
-        case IWifiP2pManager::CONNECTION_REQUESTED: return String("CONNECTION_REQUESTED");
-        case IWifiP2pManager::SHOW_PIN_REQUESTED: return String("SHOW_PIN_REQUESTED");
+        //case IWifiP2pManager::SET_DIALOG_LISTENER: return String("SET_DIALOG_LISTENER");
+        //case IWifiP2pManager::DIALOG_LISTENER_DETACHED: return String("DIALOG_LISTENER_DETACHED");
+        //case IWifiP2pManager::DIALOG_LISTENER_ATTACHED: return String("DIALOG_LISTENER_ATTACHED");
+        //case IWifiP2pManager::CONNECTION_REQUESTED: return String("CONNECTION_REQUESTED");
+        //case IWifiP2pManager::SHOW_PIN_REQUESTED: return String("SHOW_PIN_REQUESTED");
         case IWifiP2pManager::DELETE_PERSISTENT_GROUP: return String("DELETE_PERSISTENT_GROUP");
         case IWifiP2pManager::DELETE_PERSISTENT_GROUP_FAILED: return String("DELETE_PERSISTENT_GROUP_FAILED");
         case IWifiP2pManager::DELETE_PERSISTENT_GROUP_SUCCEEDED: return String("DELETE_PERSISTENT_GROUP_SUCCEEDED");
@@ -2113,9 +2022,9 @@ String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
         case IWifiP2pManager::SET_WFD_INFO: return String("SET_WFD_INFO");
         case IWifiP2pManager::SET_WFD_INFO_FAILED: return String("SET_WFD_INFO_FAILED");
         case IWifiP2pManager::SET_WFD_INFO_SUCCEEDED: return String("SET_WFD_INFO_SUCCEEDED");
-        case IWifiP2pManager::SET_GO_PSK: return String("SET_GO_PSK");
-        case IWifiP2pManager::SET_GO_PSK_FAILED: return String("SET_GO_PSK_FAILED");
-        case IWifiP2pManager::SET_GO_PSK_SUCCEEDED: return String("SET_GO_PSK_SUCCEEDED");
+        //case IWifiP2pManager::SET_GO_PSK: return String("SET_GO_PSK");
+        //case IWifiP2pManager::SET_GO_PSK_FAILED: return String("SET_GO_PSK_FAILED");
+        //case IWifiP2pManager::SET_GO_PSK_SUCCEEDED: return String("SET_GO_PSK_SUCCEEDED");
 
         case WifiMonitor::SUP_CONNECTION_EVENT: return String("SUP_CONNECTION_EVENT");
         case WifiMonitor::SUP_DISCONNECTION_EVENT: return String("SUP_DISCONNECTION_EVENT");
@@ -2150,12 +2059,12 @@ String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
         case WifiMonitor::AP_STA_DISCONNECTED_EVENT: return String("AP_STA_DISCONNECTED_EVENT");
         case WifiMonitor::AP_STA_CONNECTED_EVENT: return String("AP_STA_CONNECTED_EVENT");
 
-        case WifiStateMachine::CMD_LOAD_DRIVER: return String("CMD_LOAD_DRIVER");
-        case WifiStateMachine::CMD_UNLOAD_DRIVER: return String("CMD_UNLOAD_DRIVER");
-        case WifiStateMachine::CMD_LOAD_DRIVER_SUCCESS: return String("CMD_LOAD_DRIVER_SUCCESS");
-        case WifiStateMachine::CMD_LOAD_DRIVER_FAILURE: return String("CMD_LOAD_DRIVER_FAILURE");
-        case WifiStateMachine::CMD_UNLOAD_DRIVER_SUCCESS: return String("CMD_UNLOAD_DRIVER_SUCCESS");
-        case WifiStateMachine::CMD_UNLOAD_DRIVER_FAILURE: return String("CMD_UNLOAD_DRIVER_FAILURE");
+        //case WifiStateMachine::CMD_LOAD_DRIVER: return String("CMD_LOAD_DRIVER");
+        //case WifiStateMachine::CMD_UNLOAD_DRIVER: return String("CMD_UNLOAD_DRIVER");
+        //case WifiStateMachine::CMD_LOAD_DRIVER_SUCCESS: return String("CMD_LOAD_DRIVER_SUCCESS");
+        //case WifiStateMachine::CMD_LOAD_DRIVER_FAILURE: return String("CMD_LOAD_DRIVER_FAILURE");
+        //case WifiStateMachine::CMD_UNLOAD_DRIVER_SUCCESS: return String("CMD_UNLOAD_DRIVER_SUCCESS");
+        //case WifiStateMachine::CMD_UNLOAD_DRIVER_FAILURE: return String("CMD_UNLOAD_DRIVER_FAILURE");
         case WifiStateMachine::CMD_START_SUPPLICANT: return String("CMD_START_SUPPLICANT");
         case WifiStateMachine::CMD_STOP_SUPPLICANT: return String("CMD_STOP_SUPPLICANT");
         case WifiStateMachine::CMD_START_DRIVER: return String("CMD_START_DRIVER");
@@ -2165,7 +2074,7 @@ String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
         case WifiStateMachine::CMD_STOP_SUPPLICANT_FAILED: return String("CMD_STOP_SUPPLICANT_FAILED");
         case WifiStateMachine::CMD_DELAYED_STOP_DRIVER: return String("CMD_DELAYED_STOP_DRIVER");
         case WifiStateMachine::CMD_DRIVER_START_TIMED_OUT: return String("CMD_DRIVER_START_TIMED_OUT");
-        case WifiStateMachine::CMD_CAPTIVE_CHECK_COMPLETE: return String("CMD_CAPTIVE_CHECK_COMPLETE");
+        //case WifiStateMachine::CMD_CAPTIVE_CHECK_COMPLETE: return String("CMD_CAPTIVE_CHECK_COMPLETE");
         case WifiStateMachine::CMD_START_AP: return String("CMD_START_AP");
         case WifiStateMachine::CMD_START_AP_SUCCESS: return String("CMD_START_AP_SUCCESS");
         case WifiStateMachine::CMD_START_AP_FAILURE: return String("CMD_START_AP_FAILURE");
@@ -2187,8 +2096,8 @@ String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
         case WifiStateMachine::CMD_SAVE_CONFIG: return String("CMD_SAVE_CONFIG");
         case WifiStateMachine::CMD_GET_CONFIGURED_NETWORKS: return String("CMD_GET_CONFIGURED_NETWORKS");
         case WifiStateMachine::CMD_START_SCAN: return String("CMD_START_SCAN");
-        case WifiStateMachine::CMD_SET_SCAN_MODE: return String("CMD_SET_SCAN_MODE");
-        case WifiStateMachine::CMD_SET_SCAN_TYPE: return String("CMD_SET_SCAN_TYPE");
+        //case WifiStateMachine::CMD_SET_SCAN_MODE: return String("CMD_SET_SCAN_MODE");
+        //case WifiStateMachine::CMD_SET_SCAN_TYPE: return String("CMD_SET_SCAN_TYPE");
         case WifiStateMachine::CMD_DISCONNECT: return String("CMD_DISCONNECT");
         case WifiStateMachine::CMD_RECONNECT: return String("CMD_RECONNECT");
         case WifiStateMachine::CMD_REASSOCIATE: return String("CMD_REASSOCIATE");
@@ -2201,7 +2110,7 @@ String WifiP2pServiceImpl::P2pStateMachine::CmdToString(
         case WifiStateMachine::CMD_SET_SUSPEND_OPT_ENABLED: return String("CMD_SET_SUSPEND_OPT_ENABLED");
         case WifiStateMachine::CMD_NO_NETWORKS_PERIODIC_SCAN: return String("CMD_NO_NETWORKS_PERIODIC_SCAN");
         case WifiStateMachine::CMD_SET_FREQUENCY_BAND: return String("CMD_SET_FREQUENCY_BAND");
-        case WifiStateMachine::CMD_ENABLE_BACKGROUND_SCAN: return String("CMD_ENABLE_BACKGROUND_SCAN");
+        //case WifiStateMachine::CMD_ENABLE_BACKGROUND_SCAN: return String("CMD_ENABLE_BACKGROUND_SCAN");
         case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE: return String("CMD_RESET_SUPPLICANT_STATE");
         case WifiStateMachine::CMD_ENABLE_P2P: return String("CMD_ENABLE_P2P");
         case WifiStateMachine::CMD_DISABLE_P2P_REQ: return String("CMD_DISABLE_P2P_REQ");
@@ -2251,7 +2160,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::DefaultState::ProcessMessage(
             if (arg1 == AsyncChannel::STATUS_SUCCESSFUL) {
                 if (WifiP2pServiceImpl::DBG)
                     Slogger::D(WifiP2pServiceImpl::TAG, "Full connection with WifiStateMachine established");
-                mHost->mHost->mWifiChannel = (AsyncChannel*)obj.Get();
+                mHost->mHost->mWifiChannel = (AsyncChannel*)IAsyncChannel::Probe(obj);
             }
             else {
                 Slogger::E(WifiP2pServiceImpl::TAG, "Full connection failure, error = %d", arg1);
@@ -2271,8 +2180,26 @@ ECode WifiP2pServiceImpl::P2pStateMachine::DefaultState::ProcessMessage(
 
         case AsyncChannel::CMD_CHANNEL_FULL_CONNECTION: {
             AutoPtr<AsyncChannel> ac = new AsyncChannel();
-            AutoPtr<IHandler> handler = mHost->GetHandler();
+            AutoPtr<IHandler> handler;
+            mHost->GetHandler((IHandler**)&handler);
             ac->Connect(mHost->mHost->mContext, handler, replyTo);
+            break;
+        }
+        case BLOCK_DISCOVERY: {
+            mHost->mHost->mDiscoveryBlocked = (arg1 == ENABLED ? TRUE : FALSE);
+            // always reset this - we went to a state that doesn't support discovery so
+            // it would have stopped regardless
+            mHost->mHost->mDiscoveryPostponed = FALSE;
+            if (mHost->mHost->mDiscoveryBlocked) {
+                //try {
+                AutoPtr<IStateMachine> m = IStateMachine::Probe(obj);
+                Int32 arg2;
+                message->GetArg2(&arg2);
+                m->SendMessage(arg2);
+                //} catch (Exception e) {
+                //    loge("unable to send BLOCK_DISCOVERY response: " + e);
+                //}
+            }
             break;
         }
         case IWifiP2pManager::DISCOVER_PEERS:
@@ -2341,10 +2268,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::DefaultState::ProcessMessage(
             mHost->ReplyToMessage(message, IWifiP2pManager::SET_WFD_INFO_FAILED,
                     IWifiP2pManager::BUSY);
             break;
-        case IWifiP2pManager::SET_GO_PSK:
-            mHost->ReplyToMessage(message, IWifiP2pManager::SET_GO_PSK_FAILED,
-                    IWifiP2pManager::BUSY);
-            break;
         case IWifiP2pManager::REQUEST_PEERS: {
             AutoPtr<IWifiP2pDeviceList> list;
             CWifiP2pDeviceList::New(mHost->mPeers, (IWifiP2pDeviceList**)&list);
@@ -2370,23 +2293,20 @@ ECode WifiP2pServiceImpl::P2pStateMachine::DefaultState::ProcessMessage(
             mHost->ReplyToMessage(message, IWifiP2pManager::RESPONSE_PERSISTENT_GROUP_INFO, groupList);
             break;
         }
-        case IWifiP2pManager::SET_DIALOG_LISTENER: {
-            AutoPtr<IBundle> bundle;
-            message->GetData((IBundle**)&bundle);
-            String appPkgName;
-            bundle->GetString(IWifiP2pManager::APP_PKG_BUNDLE_KEY, &appPkgName);
-            Boolean isReset;
-            bundle->GetBoolean(IWifiP2pManager::RESET_DIALOG_LISTENER_BUNDLE_KEY, &isReset);
-            if (mHost->SetDialogListenerApp(replyTo, appPkgName, isReset)) {
-                mHost->ReplyToMessage(message, IWifiP2pManager::DIALOG_LISTENER_ATTACHED);
-            }
-            else {
-                mHost->ReplyToMessage(message, IWifiP2pManager::DIALOG_LISTENER_DETACHED,
-                    IWifiP2pManager::NOT_IN_FOREGROUND);
-            }
+        case IWifiP2pManager::START_WPS: {
+            mHost->ReplyToMessage(message, IWifiP2pManager::START_WPS_FAILED,
+            IWifiP2pManager::BUSY);
             break;
         }
-            // Ignore
+        case IWifiP2pManager::GET_HANDOVER_REQUEST:
+        case IWifiP2pManager::GET_HANDOVER_SELECT:
+            mHost->ReplyToMessage(message, IWifiP2pManager::RESPONSE_GET_HANDOVER_MESSAGE, (IInterface*)NULL);
+            break;
+        case IWifiP2pManager::INITIATOR_REPORT_NFC_HANDOVER:
+        case IWifiP2pManager::RESPONDER_REPORT_NFC_HANDOVER:
+            mHost->ReplyToMessage(message, IWifiP2pManager::REPORT_NFC_HANDOVER_FAILED,
+            IWifiP2pManager::BUSY);
+            break;
         case WifiMonitor::P2P_INVITATION_RESULT_EVENT:
         case WifiMonitor::SCAN_RESULTS_EVENT:
         case WifiMonitor::SUP_CONNECTION_EVENT:
@@ -2411,15 +2331,20 @@ ECode WifiP2pServiceImpl::P2pStateMachine::DefaultState::ProcessMessage(
         case DROP_WIFI_USER_REJECT:
         case GROUP_CREATING_TIMED_OUT:
         case DISABLE_P2P_TIMED_OUT:
-        case DhcpStateMachine::CMD_PRE_DHCP_ACTION:
-        case DhcpStateMachine::CMD_POST_DHCP_ACTION:
-        case DhcpStateMachine::CMD_ON_QUIT:
+        case IDhcpStateMachine::CMD_PRE_DHCP_ACTION:
+        case IDhcpStateMachine::CMD_POST_DHCP_ACTION:
+        case IDhcpStateMachine::CMD_ON_QUIT:
         case WifiMonitor::P2P_PROV_DISC_FAILURE_EVENT:
+        case SET_MIRACAST_MODE:
+        case IWifiP2pManager::START_LISTEN:
+        case IWifiP2pManager::STOP_LISTEN:
+        case IWifiP2pManager::SET_CHANNEL:
+        case SET_COUNTRY_CODE:
             break;
-        case WifiStateMachine::CMD_ENABLE_P2P:
+         case WifiStateMachine::CMD_ENABLE_P2P:
             // Enable is lazy and has no response
             break;
-        case WifiStateMachine::CMD_DISABLE_P2P_REQ:
+         case WifiStateMachine::CMD_DISABLE_P2P_REQ:
             // If we end up handling in default, p2p is not enabled
             mHost->mHost->mWifiChannel->SendMessage(WifiStateMachine::CMD_DISABLE_P2P_RSP);
             break;
@@ -2501,10 +2426,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pNotSupportedState::ProcessMessage(
             mHost->ReplyToMessage(message, IWifiP2pManager::ADD_LOCAL_SERVICE_FAILED,
                     IWifiP2pManager::P2P_UNSUPPORTED);
             break;
-        case IWifiP2pManager::SET_DIALOG_LISTENER:
-            mHost->ReplyToMessage(message, IWifiP2pManager::DIALOG_LISTENER_DETACHED,
-                    IWifiP2pManager::P2P_UNSUPPORTED);
-            break;
         case IWifiP2pManager::REMOVE_LOCAL_SERVICE:
             mHost->ReplyToMessage(message, IWifiP2pManager::REMOVE_LOCAL_SERVICE_FAILED,
                     IWifiP2pManager::P2P_UNSUPPORTED);
@@ -2539,8 +2460,16 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pNotSupportedState::ProcessMessage(
             mHost->ReplyToMessage(message, IWifiP2pManager::SET_WFD_INFO_FAILED,
                     IWifiP2pManager::P2P_UNSUPPORTED);
             break;
-        case IWifiP2pManager::SET_GO_PSK:
-            mHost->ReplyToMessage(message, IWifiP2pManager::SET_GO_PSK_FAILED,
+        case IWifiP2pManager::START_WPS:
+            mHost->ReplyToMessage(message, IWifiP2pManager::START_WPS_FAILED,
+                IWifiP2pManager::P2P_UNSUPPORTED);
+            break;
+        case IWifiP2pManager::START_LISTEN:
+            mHost->ReplyToMessage(message, IWifiP2pManager::START_LISTEN_FAILED,
+                IWifiP2pManager::P2P_UNSUPPORTED);
+            break;
+        case IWifiP2pManager::STOP_LISTEN:
+            mHost->ReplyToMessage(message, IWifiP2pManager::STOP_LISTEN_FAILED,
                     IWifiP2pManager::P2P_UNSUPPORTED);
             break;
        default:
@@ -2564,8 +2493,8 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pDisablingState::Enter()
 {
     if (WifiP2pServiceImpl::DBG)
         Slogger::D(WifiP2pServiceImpl::TAG, " Enter %s", GetName().string());
-    AutoPtr<IMessage> msg = mHost->ObtainMessage(DISABLE_P2P_TIMED_OUT,
-        ++mDisableP2pTimeoutIndex, 0);
+    AutoPtr<IMessage> msg;
+    mHost->ObtainMessage(DISABLE_P2P_TIMED_OUT, ++mDisableP2pTimeoutIndex, 0, (IMessage**)&msg);
     mHost->SendMessageDelayed(msg, DISABLE_P2P_WAIT_TIME_MS);
     return NOERROR;
 }
@@ -2594,7 +2523,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pDisablingState::ProcessMessage(
             mHost->DeferMessage(message);
             break;
         case DISABLE_P2P_TIMED_OUT:
-            if (mHost->mHost->mGroupCreatingTimeoutIndex == arg1) {
+            if (mHost->mHost->mDisableP2pTimeoutIndex == arg1) {
                 mHost->Loge("P2p disable timed out");
                 mHost->TransitionTo(mHost->mP2pDisabledState);
             }
@@ -2763,11 +2692,11 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
             break;
         case WifiStateMachine::CMD_DISABLE_P2P_REQ:
             mHost->mPeers->Clear(&b);
-            if (b) mHost->SendP2pPeersChangedBroadcast();
+            if (b) mHost->SendPeersChangedBroadcast();
             mHost->mGroups->Clear(&b);
             if (b) mHost->SendP2pPersistentGroupsChangedBroadcast();
 
-            mHost->mWifiNative->CloseSupplicantConnection();
+            mHost->mWifiMonitor->StopMonitoring();
             mHost->TransitionTo(mHost->mP2pDisablingState);
             break;
         case IWifiP2pManager::SET_DEVICE_NAME:
@@ -2791,7 +2720,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
 
             if (WifiP2pServiceImpl::DBG) {
                 String temp("NULL");
-                if (wfdInfo) wfdInfo->ToString(&temp);
+                if (wfdInfo) IObject::Probe(wfdInfo)->ToString(&temp);
                 String info("P2pEnabledState set WFD info:");
                 info += temp;
                 mHost->Logd(info.string());
@@ -2806,23 +2735,37 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
             }
             break;
         }
-        case IWifiP2pManager::SET_GO_PSK:
+        case BLOCK_DISCOVERY:
         {
-            AutoPtr<IWifiP2pDevice> device = IWifiP2pDevice::Probe(obj);
-            if (device) device->GetDeviceName(&name);
-            if (!name.IsNull() && (name.GetLength() < 13) && (name.GetLength() > 7)
-                && mHost->SetGroupOwnerPsk(name)) {
-                if (WifiP2pServiceImpl::DBG)
-                    Slogger::D(WifiP2pServiceImpl::TAG, "set GroupOnwer psk to [%s]", name.string());
-                mHost->ReplyToMessage(message, IWifiP2pManager::SET_GO_PSK_SUCCEEDED);
+            Boolean blocked = (arg1 == ENABLED ? TRUE : FALSE);
+            if (mHost->mHost->mDiscoveryBlocked == blocked) break;
+            mHost->mHost->mDiscoveryBlocked = blocked;
+            if (blocked && mHost->mHost->mDiscoveryStarted) {
+                mHost->mWifiNative->P2pStopFind();
+                mHost->mHost->mDiscoveryPostponed = TRUE;
             }
-            else {
-                mHost->ReplyToMessage(message, IWifiP2pManager::SET_GO_PSK_FAILED,
-                    IWifiP2pManager::ERROR);
+            if (!blocked && mHost->mHost->mDiscoveryPostponed) {
+                mHost->mHost->mDiscoveryPostponed = FALSE;
+                mHost->mWifiNative->P2pFind(DISCOVER_TIMEOUT_S);
+            }
+            if (blocked) {
+                //try {
+                AutoPtr<IStateMachine> m = IStateMachine::Probe(obj);
+                Int32 arg2;
+                message->GetArg2(&arg2);
+                m->SendMessage(arg2);
+                //} catch (Exception e) {
+                //    loge("unable to send BLOCK_DISCOVERY response: " + e);
+                //}
             }
             break;
         }
         case IWifiP2pManager::DISCOVER_PEERS:
+            if (mHost->mHost->mDiscoveryBlocked) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::DISCOVER_PEERS_FAILED,
+                IWifiP2pManager::BUSY);
+                break;
+            }
             // do not send service discovery request while normal find operation.
             mHost->ClearSupplicantServiceRequest();
             if (mHost->mWifiNative->P2pFind(DISCOVER_TIMEOUT_S)) {
@@ -2846,6 +2789,11 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
             }
             break;
         case IWifiP2pManager::DISCOVER_SERVICES:
+            if (mHost->mHost->mDiscoveryBlocked) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::DISCOVER_SERVICES_FAILED,
+                IWifiP2pManager::BUSY);
+                break;
+            }
             if (WifiP2pServiceImpl::DBG) mHost->Logd("P2pEnabledState discover services");
             if (!mHost->UpdateSupplicantServiceRequest()) {
                 mHost->ReplyToMessage(message, IWifiP2pManager::DISCOVER_SERVICES_FAILED,
@@ -2866,7 +2814,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
 
             if (WifiP2pServiceImpl::DBG) {
                 String temp;
-                device->ToString(&temp);
+                IObject::Probe(device)->ToString(&temp);
                 String info("P2pEnabledState found device:\n");
                 info += temp;
                 mHost->Logd(info.string());
@@ -2875,14 +2823,17 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
             mHost->mHost->mThisDevice->GetDeviceAddress(&addr);
             device->GetDeviceAddress(&devAddr);
             if (addr.Equals(devAddr)) break;
-            mHost->mPeers->Update(device);
-            mHost->SendP2pPeersChangedBroadcast();
+            mHost->mPeers->UpdateSupplicantDetails(device);
+            mHost->SendPeersChangedBroadcast();
             break;
         }
         case WifiMonitor::P2P_DEVICE_LOST_EVENT: {
             AutoPtr<IWifiP2pDevice> device = IWifiP2pDevice::Probe(obj);
-            mHost->mPeers->Remove(device, &b);
-            if (b) mHost->SendP2pPeersChangedBroadcast();
+            AutoPtr<IWifiP2pDevice> d2;
+            String deviceName;
+            device->GetDeviceName(&deviceName);
+            mHost->mPeers->Remove(deviceName, (IWifiP2pDevice**)&d2);
+            if (d2 != NULL) mHost->SendPeersChangedBroadcast();
             break;
         }
         case IWifiP2pManager::ADD_LOCAL_SERVICE: {
@@ -2931,16 +2882,15 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
             break;
         case WifiMonitor::P2P_SERV_DISC_RESP_EVENT: {
             if (WifiP2pServiceImpl::DBG) mHost->Logd("P2pEnabledState receive service response");
-            AutoPtr<IObjectContainer> container = IObjectContainer::Probe(obj);
+            AutoPtr<IList> container = IList::Probe(obj);
             assert(obj != NULL);
-            AutoPtr<IObjectEnumerator> enumerator;
-            container->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-            Boolean hasNext = FALSE;
+            Int32 size;
+            container->GetSize(&size);
             AutoPtr<IWifiP2pServiceResponse> resp;
             AutoPtr<IWifiP2pDevice> device;
-            while (enumerator->MoveNext(&hasNext), hasNext) {
+            for(Int32 i = 0; i < size; ++i) {
                 AutoPtr<IInterface> current;
-                enumerator->Current((IInterface**)&current);
+                container->Get(i, (IInterface**)&current);
                 resp = IWifiP2pServiceResponse::Probe(current);
                 device = NULL;
                 resp->GetSrcDevice((IWifiP2pDevice**)&device);
@@ -2957,6 +2907,72 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
             mHost->mGroups->Remove(arg1);
             mHost->ReplyToMessage(message, IWifiP2pManager::DELETE_PERSISTENT_GROUP_SUCCEEDED);
             break;
+        case SET_MIRACAST_MODE:
+            mHost->mWifiNative->SetMiracastMode(arg1);
+            mHost->SendMiracastModeChanged(arg1);
+            break;
+        case IWifiP2pManager::START_LISTEN:
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("P2pEnabledState start listen mode");
+            mHost->mWifiNative->P2pFlush();
+            if (mHost->mWifiNative->P2pExtListen(TRUE, 500, 500)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::START_LISTEN_SUCCEEDED);
+            }
+            else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::START_LISTEN_FAILED);
+            }
+            break;
+        case IWifiP2pManager::STOP_LISTEN:
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("P2pEnabledState stop listen mode");
+            if (mHost->mWifiNative->P2pExtListen(FALSE, 0, 0)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::STOP_LISTEN_SUCCEEDED);
+            }
+            else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::STOP_LISTEN_FAILED);
+            }
+            mHost->mWifiNative->P2pFlush();
+            break;
+        case IWifiP2pManager::SET_CHANNEL: {
+            AutoPtr<IBundle> p2pChannels = IBundle::Probe(obj);
+            Int32 lc;
+            p2pChannels->GetInt32(String("lc"), 0, &lc);
+            Int32 oc;
+            p2pChannels->GetInt32(String("oc"), 0, &oc);
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("P2pEnabledState set listen and operating channel");
+            if (mHost->mWifiNative->P2pSetChannel(lc, oc)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::SET_CHANNEL_SUCCEEDED);
+            } else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::SET_CHANNEL_FAILED);
+            }
+            break;
+        }
+        case SET_COUNTRY_CODE: {
+            String countryCode;
+            ICharSequence::Probe(obj)->ToString(&countryCode);
+            countryCode = countryCode.ToUpperCase(/*Locale.ROOT*/);
+            if (mHost->mHost->mLastSetCountryCode == NULL ||
+                countryCode.Equals(mHost->mHost->mLastSetCountryCode) == FALSE) {
+                if (mHost->mWifiNative->SetCountryCode(countryCode)) {
+                    mHost->mHost->mLastSetCountryCode = countryCode;
+                }
+            }
+            break;
+        }
+        case IWifiP2pManager::GET_HANDOVER_REQUEST: {
+            AutoPtr<IBundle> requestBundle;
+            CBundle::New((IBundle**)&requestBundle);
+            requestBundle->PutString(IWifiP2pManager::EXTRA_HANDOVER_MESSAGE,
+                                    mHost->mWifiNative->GetNfcHandoverRequest());
+            mHost->ReplyToMessage(message, IWifiP2pManager::RESPONSE_GET_HANDOVER_MESSAGE, TO_IINTERFACE(requestBundle));
+            break;
+        }
+        case IWifiP2pManager::GET_HANDOVER_SELECT: {
+            AutoPtr<IBundle> selectBundle;
+            CBundle::New((IBundle**)&selectBundle);
+            selectBundle->PutString(IWifiP2pManager::EXTRA_HANDOVER_MESSAGE,
+                                    mHost->mWifiNative->GetNfcHandoverSelect());
+            mHost->ReplyToMessage(message, IWifiP2pManager::RESPONSE_GET_HANDOVER_MESSAGE, TO_IINTERFACE(selectBundle));
+            break;
+        }
         default:
             *result = FALSE;  // NOT_HANDLED;
             return NOERROR;
@@ -2967,8 +2983,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::ProcessMessage(
 
 ECode WifiP2pServiceImpl::P2pStateMachine::P2pEnabledState::Exit()
 {
+    mHost->SendP2pDiscoveryChangedBroadcast(FALSE);
     mHost->SendP2pStateChangedBroadcast(FALSE);
     mHost->mHost->mNetworkInfo->SetIsAvailable(FALSE);
+    mHost->mHost->mLastSetCountryCode = String(NULL);
     return NOERROR;
 }
 
@@ -2984,9 +3002,8 @@ WifiP2pServiceImpl::P2pStateMachine::InactiveState::InactiveState(
 ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::Enter()
 {
     if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Enter %s", GetName().string());
-    //Start listening every time we get inactive
-    //TODO: Fix listen after driver behavior is fixed
-    //mHost->mWifiNative->P2pListen();
+    mHost->mHost->mIsInvite = FALSE;
+    mHost->mSavedPeerConfig->Invalidate();
     return NOERROR;
 }
 
@@ -3009,8 +3026,8 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
     String address;
     String name;
     Int32 id;
-    Int32 gc;
-    Int32 connectRet;
+    //Int32 gc;
+    //Int32 connectRet;
     Int32 netId;
     Boolean ret = FALSE;
     Boolean b;
@@ -3020,32 +3037,26 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
         case IWifiP2pManager::CONNECT: {
             if (WifiP2pServiceImpl::DBG) mHost->Logd("InactiveState  sending connect");
             AutoPtr<IWifiP2pConfig> config = IWifiP2pConfig::Probe(obj);
-            mHost->mHost->mAutonomousGroup = FALSE;
 
-            /* Update group capability before connect */
-            config->GetDeviceAddress(&addr);
-            gc = mHost->mWifiNative->GetGroupCapability(addr);
-            mHost->mPeers->UpdateGroupCapability(addr, gc);
-            connectRet = mHost->Connect(config, /*TODO deleted TRY_REINVOCATION*/);
-            if (connectRet == //CONNECT_FAILURE) {
+            if (mHost->IsConfigInvalid(config)) {
                 mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_FAILED);
                 break;
             }
+
+            mHost->mHost->mAutonomousGroup = FALSE;
+            mHost->mWifiNative->P2pStopFind();
+            if (mHost->ReinvokePersistentGroup(config)) {
+                mHost->TransitionTo(mHost->mGroupNegotiationState);
+            } else {
+                mHost->TransitionTo(mHost->mProvisionDiscoveryState);
+            }
+            mHost->mSavedPeerConfig = config;
+
             mHost->mSavedPeerConfig->GetDeviceAddress(&devAddr);
             mHost->mPeers->UpdateStatus(devAddr, IWifiP2pDevice::INVITED);
 
-            //1. add start,user kick to connect
-            mHost->mWifiP2pDevice = mHost->GetWifiP2pDeviceFromPeers(devAddr);
-            //add end
-
-            mHost->SendP2pPeersChangedBroadcast();
+            mHost->SendPeersChangedBroadcast();
             mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_SUCCEEDED);
-            if (connectRet == ;//NEEDS_PROVISION_REQ) {
-                if (WifiP2pServiceImpl::DBG) mHost->Logd("Sending prov disc");
-                mHost->TransitionTo(mHost->mProvisionDiscoveryState);
-                break;
-            }
-            mHost->TransitionTo(mHost->mGroupNegotiationState);
             break;
         }
         case IWifiP2pManager::STOP_DISCOVERY:
@@ -3062,15 +3073,16 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
             }
             break;
         case WifiMonitor::P2P_GO_NEGOTIATION_REQUEST_EVENT: {
-            mHost->mSavedPeerConfig = IWifiP2pConfig::Probe(obj);
+            AutoPtr<IWifiP2pConfig> config = IWifiP2pConfig::Probe(obj);
+            if (mHost->IsConfigInvalid(config)) {
+                mHost->Loge("Dropping GO neg request ");// + config;
+                break;
+            }
+            mHost->mSavedPeerConfig = config;
             mHost->mHost->mAutonomousGroup = FALSE;
             mHost->mHost->mJoinExistingGroup = FALSE;
-            mHost->mSavedPeerConfig->GetDeviceAddress(&devAddr);
-            AutoPtr<IWifiP2pDevice> dev;
-            mHost->mPeers->Get(devAddr, (IWifiP2pDevice**)&dev);
-            if (!mHost->SendConnectNoticeToApp(dev, mHost->mSavedPeerConfig)) {
-                mHost->TransitionTo(mHost->mUserAuthorizingInvitationState);
-            }
+
+            mHost->TransitionTo(mHost->mUserAuthorizingNegotiationRequestState);
             break;
         }
         case WifiMonitor::P2P_INVITATION_RECEIVED_EVENT: {
@@ -3082,10 +3094,16 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
                 break;
             }
 
-            mHost->mSavedPeerConfig = NULL;
-            CWifiP2pConfig::New((IWifiP2pConfig**)&mHost->mSavedPeerConfig);
+            AutoPtr<IWifiP2pConfig> config;
+            CWifiP2pConfig::New((IWifiP2pConfig**)&config);
             owner->GetDeviceAddress(&address);
-            mHost->mSavedPeerConfig->SetDeviceAddress(address);
+            config->SetDeviceAddress(address);
+            if (mHost->IsConfigInvalid(config)) {
+                mHost->Loge("Dropping invitation request ");// + config;
+                break;
+            }
+
+            mHost->mSavedPeerConfig = config;
 
             //Check if we have the owner in peer list and use appropriate
             //wps method. Default is to use PBC.
@@ -3108,23 +3126,36 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
 
             mHost->mHost->mAutonomousGroup = FALSE;
             mHost->mHost->mJoinExistingGroup = TRUE;
-            //TODO In the p2p client case, we should set source address correctly.
-            mHost->mSavedPeerConfig->GetDeviceAddress(&devAddr);
-            AutoPtr<IWifiP2pDevice> dev;
-            mHost->mPeers->Get(devAddr, (IWifiP2pDevice**)&dev);
-            if (!mHost->SendConnectNoticeToApp(dev, mHost->mSavedPeerConfig)) {
-                mHost->TransitionTo(mHost->mUserAuthorizingInvitationState);
-            }
+            mHost->mHost->mIsInvite = TRUE;
+
+            mHost->TransitionTo(mHost->mUserAuthorizingInviteRequestState);
             break;
         }
         case WifiMonitor::P2P_PROV_DISC_PBC_REQ_EVENT:
         case WifiMonitor::P2P_PROV_DISC_ENTER_PIN_EVENT:
-        case WifiMonitor::P2P_PROV_DISC_SHOW_PIN_EVENT:
             //We let the supplicant handle the provision discovery response
             //and wait instead for the GO_NEGOTIATION_REQUEST_EVENT.
             //Handling provision discovery and issuing a p2p_connect before
             //group negotiation comes through causes issues
            break;
+        case WifiMonitor::P2P_PROV_DISC_SHOW_PIN_EVENT: {
+               AutoPtr<IWifiP2pProvDiscEvent> provDisc = IWifiP2pProvDiscEvent::Probe(obj);
+               AutoPtr<IWifiP2pDevice> device;
+               provDisc->GetDevice((IWifiP2pDevice**)&device);;
+               if (device == NULL) {
+                   Slogger::D(TAG, "Device entry is null");
+                   break;
+               }
+               String pin;
+               provDisc->GetPin(&pin);
+               String deviceAddress;
+               device->GetDeviceAddress(&deviceAddress);
+               mHost->NotifyP2pProvDiscShowPinRequest(pin, deviceAddress);
+               mHost->mPeers->UpdateStatus(deviceAddress, IWifiP2pDevice::INVITED);
+               mHost->SendPeersChangedBroadcast();
+               mHost->TransitionTo(mHost->mGroupNegotiationState);
+               break;
+        }
         case IWifiP2pManager::CREATE_GROUP:
             mHost->mHost->mAutonomousGroup = TRUE;
             message->GetArg1(&netId);
@@ -3163,12 +3194,75 @@ ECode WifiP2pServiceImpl::P2pStateMachine::InactiveState::ProcessMessage(
             }
             else {
                 String info;
-                mHost->mGroup->ToString(&info);
+                IObject::Probe(mHost->mGroup)->ToString(&info);
                 Slogger::E(WifiP2pServiceImpl::TAG, "Unexpected group creation, remove %s", info.string());
                 mHost->mGroup->GetInterface(&name);
                 mHost->mWifiNative->P2pGroupRemove(name);
             }
             break;
+        case IWifiP2pManager::START_LISTEN:
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("InactiveState start listen mode");
+            mHost->mWifiNative->P2pFlush();
+            if (mHost->mWifiNative->P2pExtListen(TRUE, 500, 500)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::START_LISTEN_SUCCEEDED);
+            } else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::START_LISTEN_FAILED);
+            }
+            break;
+        case IWifiP2pManager::STOP_LISTEN:
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("InactiveState stop listen mode");
+            if (mHost->mWifiNative->P2pExtListen(FALSE, 0, 0)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::STOP_LISTEN_SUCCEEDED);
+            } else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::STOP_LISTEN_FAILED);
+            }
+            mHost->mWifiNative->P2pFlush();
+            break;
+        case IWifiP2pManager::SET_CHANNEL: {
+            AutoPtr<IBundle> p2pChannels = IBundle::Probe(obj);
+            Int32 lc;
+            p2pChannels->GetInt32(String("lc"), 0, &lc);
+            Int32 oc;
+            p2pChannels->GetInt32(String("oc"), 0, &oc);
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("InactiveState set listen and operating channel");
+            if (mHost->mWifiNative->P2pSetChannel(lc, oc)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::SET_CHANNEL_SUCCEEDED);
+            } else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::SET_CHANNEL_FAILED);
+            }
+            break;
+        }
+        case IWifiP2pManager::INITIATOR_REPORT_NFC_HANDOVER: {
+            String handoverSelect;
+
+            if (obj != NULL) {
+                AutoPtr<IBundle> bundle = IBundle::Probe(obj);
+                bundle->GetString(IWifiP2pManager::EXTRA_HANDOVER_MESSAGE, &handoverSelect);
+            }
+            if (!handoverSelect.IsNull()
+                && mHost->mWifiNative->InitiatorReportNfcHandover(handoverSelect)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::REPORT_NFC_HANDOVER_SUCCEEDED);
+                mHost->TransitionTo(mHost->mGroupCreatingState);
+            } else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::REPORT_NFC_HANDOVER_FAILED);
+            }
+            break;
+        }
+        case IWifiP2pManager::RESPONDER_REPORT_NFC_HANDOVER: {
+            String handoverRequest;
+            if (obj != NULL) {
+                AutoPtr<IBundle> bundle = IBundle::Probe(obj);
+                bundle->GetString(IWifiP2pManager::EXTRA_HANDOVER_MESSAGE, &handoverRequest);
+            }
+            if (!handoverRequest.IsNull()
+                && mHost->mWifiNative->ResponderReportNfcHandover(handoverRequest)) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::REPORT_NFC_HANDOVER_SUCCEEDED);
+                mHost->TransitionTo(mHost->mGroupCreatingState);
+            } else {
+                mHost->ReplyToMessage(message, IWifiP2pManager::REPORT_NFC_HANDOVER_FAILED);
+            }
+            break;
+        }
         default:
             *result = FALSE;  // NOT_HANDLED;
             return NOERROR;
@@ -3189,8 +3283,8 @@ WifiP2pServiceImpl::P2pStateMachine::GroupCreatingState::GroupCreatingState(
 ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatingState::Enter()
 {
     if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Enter %s", GetName().string());
-    AutoPtr<IMessage> msg = mHost->ObtainMessage(GROUP_CREATING_TIMED_OUT,
-        ++mGroupCreatingTimeoutIndex, 0);
+    AutoPtr<IMessage> msg;
+    mHost->ObtainMessage(GROUP_CREATING_TIMED_OUT, ++mGroupCreatingTimeoutIndex, 0, (IMessage**)&msg);
     mHost->SendMessageDelayed(msg, GROUP_CREATING_WAIT_TIME_MS);
     return NOERROR;
 }
@@ -3225,8 +3319,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatingState::ProcessMessage(
         case WifiMonitor::P2P_DEVICE_LOST_EVENT: {
             AutoPtr<IWifiP2pDevice> device = IWifiP2pDevice::Probe(obj);
             device->GetDeviceAddress(&addr);
-            // If we lose a device during an autonomous group creation,
-            // mHost->mSavedPeerConfig can be empty
+
             if (mHost->mSavedPeerConfig != NULL) {
                 mHost->mSavedPeerConfig->GetDeviceAddress(&devAddr);
                 if(!devAddr.Equals(addr)) {
@@ -3239,7 +3332,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatingState::ProcessMessage(
             }
             // Do nothing
             if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Add device to lost list %d", device.Get());
-            mHost->mPeersLostDuringConnection->Update(device);
+            mHost->mPeersLostDuringConnection->UpdateSupplicantDetails(device);
             break;
         }
         case IWifiP2pManager::DISCOVER_PEERS:
@@ -3258,6 +3351,11 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatingState::ProcessMessage(
             mHost->TransitionTo(mHost->mInactiveState);
             mHost->ReplyToMessage(message, IWifiP2pManager::CANCEL_CONNECT_SUCCEEDED);
             break;
+        case WifiMonitor::P2P_GO_NEGOTIATION_SUCCESS_EVENT:
+            // We hit this scenario when NFC handover is invoked.
+            mHost->mHost->mAutonomousGroup = FALSE;
+            mHost->TransitionTo(mHost->mGroupNegotiationState);
+            break;
         default:
             ret = FALSE;  // NOT_HANDLED;
             break;
@@ -3268,22 +3366,22 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatingState::ProcessMessage(
 }
 
 //==================================================================
-// WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState
+// WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingNegotiationRequestState
 //==================================================================
-WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState::UserAuthorizingInvitationState(
+WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingNegotiationRequestState::UserAuthorizingNegotiationRequestState(
     /* [in] */ P2pStateMachine* host)
     : mHost(host)
 {
 }
 
-ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState::Enter()
+ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingNegotiationRequestState::Enter()
 {
     if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Enter %s", GetName().string());
     mHost->NotifyInvitationReceived();
     return NOERROR;
 }
 
-ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState::ProcessMessage(
+ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingNegotiationRequestState::ProcessMessage(
     /* [in] */ IMessage* message,
     /* [out] */ Boolean* result)
 {
@@ -3296,29 +3394,24 @@ ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState::Proce
             GetName().string(), P2pStateMachine::CmdToString(what).string());
     }
 
-    String addr;
     switch (what) {
-        case PEER_CONNECTION_USER_ACCEPT:
-            if (mHost->Connect(mHost->mSavedPeerConfig, /*TODO deleted TRY_REINVOCATION*/) == //CONNECT_FAILURE) {
-                mHost->HandleGroupCreationFailure();
-                mHost->TransitionTo(mHost->mInactiveState);
-                break;
-            }
-            mHost->mSavedPeerConfig->GetDeviceAddress(&addr);
-            mHost->mPeers->UpdateStatus(addr, IWifiP2pDevice::INVITED);
-            //2.add start,
-            mHost->mWifiP2pDevice = mHost->GetWifiP2pDeviceFromPeers(addr);
-            //add end
-            mHost->SendP2pPeersChangedBroadcast();
+        case PEER_CONNECTION_USER_ACCEPT: {
+            mHost->mWifiNative->P2pStopFind();
+            mHost->P2pConnectWithPinDisplay(mHost->mSavedPeerConfig);
+            String deviceAddr;
+            mHost->mSavedPeerConfig->GetDeviceAddress(&deviceAddr);
+            mHost->mPeers->UpdateStatus(deviceAddr, IWifiP2pDevice::INVITED);
+
+            mHost->SendPeersChangedBroadcast();
             mHost->TransitionTo(mHost->mGroupNegotiationState);
             break;
+        }
         case PEER_CONNECTION_USER_REJECT:
             if (WifiP2pServiceImpl::DBG) {
                 String info;
-                if (mHost->mSavedPeerConfig) mHost->mSavedPeerConfig->ToString(&info);
-                Slogger::D(WifiP2pServiceImpl::TAG, "User rejected invitation %s", info.string());
+                if (mHost->mSavedPeerConfig) IObject::Probe(mHost->mSavedPeerConfig)->ToString(&info);
+                Slogger::D(WifiP2pServiceImpl::TAG, "User rejected negotiation %s", info.string());
             }
-            mHost->mSavedPeerConfig = NULL;
             mHost->TransitionTo(mHost->mInactiveState);
             break;
         default:
@@ -3328,7 +3421,73 @@ ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState::Proce
     return NOERROR;
 }
 
-ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInvitationState::Exit()
+ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingNegotiationRequestState::Exit()
+{
+    //TODO: dismiss dialog if not already done
+    return NOERROR;
+}
+
+//==================================================================
+// WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInviteRequestState
+//==================================================================
+WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInviteRequestState::UserAuthorizingInviteRequestState(
+    /* [in] */ P2pStateMachine* host)
+    : mHost(host)
+{
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInviteRequestState::Enter()
+{
+    if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Enter %s", GetName().string());
+    mHost->NotifyInvitationReceived();
+    return NOERROR;
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInviteRequestState::ProcessMessage(
+    /* [in] */ IMessage* message,
+    /* [out] */ Boolean* result)
+{
+    *result = TRUE;  // HANDLED;
+    Int32 what;
+    message->GetWhat(&what);
+
+    if (WifiP2pServiceImpl::DBG) {
+        Slogger::D(WifiP2pServiceImpl::TAG, "%s ProcessMessage : %s",
+            GetName().string(), P2pStateMachine::CmdToString(what).string());
+    }
+
+    switch (what) {
+        case PEER_CONNECTION_USER_ACCEPT: {
+            mHost->mWifiNative->P2pStopFind();
+            if (!mHost->ReinvokePersistentGroup(mHost->mSavedPeerConfig)) {
+                // Do negotiation when persistence fails
+                mHost->P2pConnectWithPinDisplay(mHost->mSavedPeerConfig);
+            }
+
+            String deviceAddr;
+            mHost->mSavedPeerConfig->GetDeviceAddress(&deviceAddr);
+            mHost->mPeers->UpdateStatus(deviceAddr, IWifiP2pDevice::INVITED);
+
+            mHost->SendPeersChangedBroadcast();
+            mHost->TransitionTo(mHost->mGroupNegotiationState);
+            break;
+        }
+        case PEER_CONNECTION_USER_REJECT:
+            if (WifiP2pServiceImpl::DBG) {
+                String info;
+                if (mHost->mSavedPeerConfig) IObject::Probe(mHost->mSavedPeerConfig)->ToString(&info);
+                Slogger::D(WifiP2pServiceImpl::TAG, "User rejected negotiation %s", info.string());
+            }
+            mHost->TransitionTo(mHost->mInactiveState);
+            break;
+        default:
+            *result = FALSE;  // NOT_HANDLED;
+            return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingInviteRequestState::Exit()
 {
     //TODO: dismiss dialog if not already done
     return NOERROR;
@@ -3410,11 +3569,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::ProvisionDiscoveryState::ProcessMessa
                 }
                 else {
                     mHost->mHost->mJoinExistingGroup = FALSE;
-                    AutoPtr<IWifiP2pDevice> dev;
-                    mHost->mPeers->Get(devAddr, (IWifiP2pDevice**)&dev);
-                    if (!mHost->SendConnectNoticeToApp(dev, mHost->mSavedPeerConfig)) {
-                        mHost->TransitionTo(mHost->mUserAuthorizingInvitationState);
-                    }
+                    mHost->TransitionTo(mHost->mUserAuthorizingNegotiationRequestState);
                 }
             }
             break;
@@ -3436,9 +3591,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::ProvisionDiscoveryState::ProcessMessa
                 provDisc->GetPin(&pin);
                 wps->SetPin(pin);
                 mHost->P2pConnectWithPinDisplay(mHost->mSavedPeerConfig);
-                if (!mHost->SendShowPinReqToFrontApp(pin)) {
-                    mHost->NotifyInvitationSent(pin, addr);
-                }
+                mHost->NotifyInvitationSent(pin, addr);
                 mHost->TransitionTo(mHost->mGroupNegotiationState);
             }
             break;
@@ -3468,6 +3621,7 @@ WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::GroupNegotiationStat
 ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::Enter()
 {
     if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Enter %s", GetName().string());
+    mHost->mPendingReformGroupIndication = FALSE;
     return NOERROR;
 }
 
@@ -3500,6 +3654,12 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::ProcessMessage
         case WifiMonitor::P2P_GROUP_FORMATION_SUCCESS_EVENT:
             if (WifiP2pServiceImpl::DBG) mHost->Logd("GroupNegotiationState go success");
             break;
+        // Action of removing and reforming group will be taken
+        // when we enter in GroupCreatedState
+        case WifiMonitor::P2P_REMOVE_AND_REFORM_GROUP_EVENT:
+            mHost->Logd("P2P_REMOVE_AND_REFORM_GROUP_EVENT event received in GroupNegotiationState state");
+            mHost->mPendingReformGroupIndication = TRUE;
+            break;
         case WifiMonitor::P2P_GROUP_STARTED_EVENT:
             mHost->mGroup = IWifiP2pGroup::Probe(obj);
             if (WifiP2pServiceImpl::DBG) mHost->Logd("GroupNegotiationState group started");
@@ -3527,27 +3687,42 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::ProcessMessage
                  * TODO: Verify multi-channel scenarios and supplicant behavior are
                  * better before adding a time out in future
                  */
+                //Set group idle timeout of 10 sec, to avoid GO beaconing incase of any
+                //failure during 4-way Handshake.
+                if (!mHost->mHost->mAutonomousGroup) {
+                    mHost->mWifiNative->SetP2pGroupIdle(name, GROUP_IDLE_TIME_S);
+                }
                 mHost->StartDhcpServer(name);
             }
             else {
                 mHost->mWifiNative->SetP2pGroupIdle(name, GROUP_IDLE_TIME_S);
-                mHost->mHost->mDhcpStateMachine = DhcpStateMachine::MakeDhcpStateMachine(
-                    mHost->mHost->mContext, mHost, name);
-                mHost->mHost->mDhcpStateMachine->SendMessage(DhcpStateMachine::CMD_START_DHCP);
+                AutoPtr<IDhcpStateMachineHelper> dhcpsmHelper;
+                CDhcpStateMachineHelper::AcquireSingleton((IDhcpStateMachineHelper**)&dhcpsmHelper);
+                dhcpsmHelper->MakeDhcpStateMachine(
+                    mHost->mHost->mContext, mHost, name, (IDhcpStateMachine**)&(mHost->mHost->mDhcpStateMachine));
+                // TODO: We should use DHCP state machine PRE message like WifiStateMachine
+                mHost->mWifiNative->SetP2pPowerSave(name, FALSE);
+                IStateMachine::Probe(mHost->mHost->mDhcpStateMachine)->SendMessage(IDhcpStateMachine::CMD_START_DHCP);
                 AutoPtr<IWifiP2pDevice> groupOwner;
                 mHost->mGroup->GetOwner((IWifiP2pDevice**)&groupOwner);
-                /* update group owner details with the ones found at discovery */
                 groupOwner->GetDeviceAddress(&addr);
-                AutoPtr<IWifiP2pDevice> dev;
-                mHost->mPeers->Get(addr, (IWifiP2pDevice**)&dev);
-                groupOwner->Update(dev);
-                mHost->mPeers->UpdateStatus(addr, IWifiP2pDevice::CONNECTED);
-                //3.add start,user kick to connect
-                mHost->mWifiP2pDevice = mHost->GetWifiP2pDeviceFromPeers(addr);
-                //add end
-                mHost->SendP2pPeersChangedBroadcast();
+                AutoPtr<IWifiP2pDevice> peer;
+                mHost->mPeers->Get(addr, (IWifiP2pDevice**)&peer);
+                if (peer != NULL) {
+                    /* update group owner details with the ones found at discovery */
+                    groupOwner->UpdateSupplicantDetails(peer);
+                    mHost->mPeers->UpdateStatus(addr, IWifiP2pDevice::CONNECTED);
+                    mHost->SendPeersChangedBroadcast();
+                }
+                else {
+                    // A supplicant bug can lead to reporting an invalid
+                    // group owner address (all zeroes) at times. Avoid a
+                    // crash, but continue group creation since it is not
+                    // essential.
+                    mHost->Logw(String("Unknown group owner "));// + groupOwner;
+                }
             }
-            mHost->mSavedPeerConfig = NULL;
+
             mHost->TransitionTo(mHost->mGroupCreatedState);
             break;
         case WifiMonitor::P2P_GO_NEGOTIATION_FAILURE_EVENT: {
@@ -3594,7 +3769,8 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::ProcessMessage
                 // wait P2P_GROUP_STARTED_EVENT.
                 break;
             }
-            else if (status == P2pStatus_UNKNOWN_P2P_GROUP) {
+            mHost->Loge(String("Invitation result %d"));//, status);
+            if (status == P2pStatus_UNKNOWN_P2P_GROUP) {
                 // target device has already removed the credential.
                 // So, remove this credential accordingly.
                 mHost->mSavedPeerConfig->GetNetId(&netId);
@@ -3604,12 +3780,18 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::ProcessMessage
                     mHost->RemoveClientFromList(netId, addr, TRUE);
                 }
 
-                // invocation is failed or deferred. Try another way to connect.
+                //Reinvocation has failed, try group negotiation
                 mHost->mSavedPeerConfig->SetNetId(IWifiP2pGroup::PERSISTENT_NET_ID);
-                if (mHost->Connect(mHost->mSavedPeerConfig, /*TODO deleted NO_REINVOCATION*/) == //CONNECT_FAILURE) {
-                    mHost->HandleGroupCreationFailure();
-                    mHost->TransitionTo(mHost->mInactiveState);
-                }
+                mHost->TransitionTo(mHost->mProvisionDiscoveryState);
+            }
+            else if (status == P2pStatus_INFORMATION_IS_CURRENTLY_UNAVAILABLE) {
+
+                // Devices setting persistent_reconnect to 0 in wpa_supplicant
+                // always defer the invocation request and return
+                // "information is currently unable" error.
+                // So, try another way to connect for interoperability.
+                mHost->mSavedPeerConfig->SetNetId(IWifiP2pGroup::PERSISTENT_NET_ID);
+                mHost->P2pConnectWithPinDisplay(mHost->mSavedPeerConfig);
             }
             else if (status == P2pStatus_NO_COMMON_CHANNEL) {
                 mHost->TransitionTo(mHost->mFrequencyConflictState);
@@ -3632,7 +3814,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupNegotiationState::ProcessMessage
 //==================================================================
 // WifiP2pServiceImpl::P2pStateMachine::PositiveButtonListener
 //==================================================================
-CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::PositiveButtonListener, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::PositiveButtonListener, Object, IDialogInterfaceOnClickListener)
 
 WifiP2pServiceImpl::P2pStateMachine::PositiveButtonListener::PositiveButtonListener(
     /* [in] */ P2pStateMachine* host)
@@ -3650,7 +3832,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::PositiveButtonListener::OnClick(
 //==================================================================
 // WifiP2pServiceImpl::P2pStateMachine::NegativeButtonListener
 //==================================================================
-CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NegativeButtonListener, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NegativeButtonListener, Object, IDialogInterfaceOnClickListener)
 
 WifiP2pServiceImpl::P2pStateMachine::NegativeButtonListener::NegativeButtonListener(
     /* [in] */ P2pStateMachine* host)
@@ -3668,7 +3850,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::NegativeButtonListener::OnClick(
 //==================================================================
 // WifiP2pServiceImpl::P2pStateMachine::DialogCancelListener
 //==================================================================
-CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::DialogCancelListener, IDialogInterfaceOnCancelListener)
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::DialogCancelListener, Object, IDialogInterfaceOnCancelListener)
 
 WifiP2pServiceImpl::P2pStateMachine::DialogCancelListener::DialogCancelListener(
     /* [in] */ P2pStateMachine* host)
@@ -3679,6 +3861,141 @@ ECode WifiP2pServiceImpl::P2pStateMachine::DialogCancelListener::OnCancel(
     /* [in] */ IDialogInterface* dialog)
 {
     mHost->SendMessage(WifiP2pServiceImpl::DROP_WIFI_USER_REJECT);
+    return NOERROR;
+}
+
+//==================================================================
+// WifiP2pServiceImpl::P2pStateMachine::NotifyP2pProvDiscShowPinRequestOnClickListener
+//==================================================================
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NotifyP2pProvDiscShowPinRequestOnClickListener,
+        Object, IDialogInterfaceOnClickListener)
+
+WifiP2pServiceImpl::P2pStateMachine::NotifyP2pProvDiscShowPinRequestOnClickListener::NotifyP2pProvDiscShowPinRequestOnClickListener(
+    /* [in] */ P2pStateMachine* host,
+    /* [in] */ const String& address,
+    /* [in] */ const String& pin)
+    : mHost(host)
+    , mAddress(address)
+    , mPin(pin)
+{}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::NotifyP2pProvDiscShowPinRequestOnClickListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    mHost->mSavedPeerConfig = NULL;
+    CWifiP2pConfig::New((IWifiP2pConfig**)&mHost->mSavedPeerConfig);
+    mHost->mSavedPeerConfig->SetDeviceAddress(mAddress);
+    AutoPtr<IWpsInfo> wps;
+    mHost->mSavedPeerConfig->GetWps((IWpsInfo**)&wps);
+    wps->SetSetup(IWpsInfo::DISPLAY);
+    wps->SetPin(mPin);
+    mHost->mWifiNative->P2pConnect(mHost->mSavedPeerConfig, FORM_GROUP);
+    return NOERROR;
+}
+
+//==================================================================
+// WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedPositiveButtonListener
+//==================================================================
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedPositiveButtonListener,
+        Object, IDialogInterfaceOnClickListener)
+
+WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedPositiveButtonListener::NotifyInvitationReceivedPositiveButtonListener(
+    /* [in] */ P2pStateMachine* host,
+    /* [in] */ IWpsInfo* wpsInfo,
+    /* [in] */ IEditText* pin)
+    : mHost(host)
+    , mWpsInfo(wpsInfo)
+    , mPin(pin)
+{}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedPositiveButtonListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    Int32 setup;
+    mWpsInfo->GetSetup(&setup);
+    if (setup == IWpsInfo::KEYPAD) {
+        AutoPtr<IWpsInfo> wps;
+        mHost->mSavedPeerConfig->GetWps((IWpsInfo**)&wps);
+        AutoPtr<ICharSequence> cs;
+        ITextView::Probe(mPin)->GetText((ICharSequence**)&cs);
+        String text;
+        cs->ToString(&text);
+        wps->SetPin(text);
+    }
+    //if (WifiP2pServiceImpl::DBG) Logd(getName() + " accept invitation " + mSavedPeerConfig);
+    mHost->SendMessage(WifiP2pServiceImpl::PEER_CONNECTION_USER_ACCEPT);
+    return NOERROR;
+}
+
+//==================================================================
+// WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedNegativeButtonListener
+//==================================================================
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedNegativeButtonListener,
+        Object, IDialogInterfaceOnClickListener)
+
+WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedNegativeButtonListener::NotifyInvitationReceivedNegativeButtonListener(
+    /* [in] */ P2pStateMachine* host)
+    : mHost(host)
+{}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedNegativeButtonListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    if (WifiP2pServiceImpl::DBG) mHost->Logd("NotifyInvitationReceivedNegativeButtonListener ignore connect");
+    mHost->SendMessage(PEER_CONNECTION_USER_REJECT);
+    return NOERROR;
+}
+
+//==================================================================
+// WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogCancelListener
+//==================================================================
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogCancelListener,
+        Object, IDialogInterfaceOnCancelListener)
+
+WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogCancelListener::NotifyInvitationReceivedDialogCancelListener(
+    /* [in] */ P2pStateMachine* host)
+    : mHost(host)
+{}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogCancelListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    if (WifiP2pServiceImpl::DBG) mHost->Logd("NotifyInvitationReceivedDialogCancelListener ignore connect");
+    mHost->SendMessage(PEER_CONNECTION_USER_REJECT);
+    return NOERROR;
+}
+
+//==================================================================
+// WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogKeyListener
+//==================================================================
+CAR_INTERFACE_IMPL(WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogKeyListener,
+        Object, IDialogInterfaceOnKeyListener)
+
+WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogKeyListener::NotifyInvitationReceivedDialogKeyListener(
+    /* [in] */ P2pStateMachine* host,
+    /* [in] */ IAlertDialog* dialog)
+    : mHost(host)
+    , mDialog(dialog)
+{}
+
+ECode WifiP2pServiceImpl::P2pStateMachine::NotifyInvitationReceivedDialogKeyListener::OnKey(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* consumed)
+{
+    VALIDATE_NOT_NULL(consumed);
+    // TODO: make the actual key come from a config value.
+    if (keyCode == IKeyEvent::KEYCODE_VOLUME_MUTE) {
+        mHost->SendMessage(PEER_CONNECTION_USER_ACCEPT);
+        IDialogInterface::Probe(mDialog)->Dismiss();
+        *consumed = TRUE;
+        return NOERROR;
+    }
+    *consumed = FALSE;
     return NOERROR;
 }
 
@@ -3701,7 +4018,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::FrequencyConflictState::Enter()
 ECode WifiP2pServiceImpl::P2pStateMachine::FrequencyConflictState::NotifyFrequencyConflict()
 {
     mHost->Logd("Notify frequency conflict");
-    AutoPtr<IResources> r = CResources::GetSystem();
+    AutoPtr<IResourcesHelper> resHelper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHelper);
+    AutoPtr<IResources> r;
+    resHelper->GetSystem((IResources**)&r);
 
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(mHost->mHost->mContext, (IAlertDialogBuilder**)&builder);
@@ -3738,9 +4058,9 @@ ECode WifiP2pServiceImpl::P2pStateMachine::FrequencyConflictState::NotifyFrequen
     builder->Create((IAlertDialog**)&dialog);
 
     AutoPtr<IWindow> win;
-    dialog->GetWindow((IWindow**)&win);
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&win);
     win->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT);
-    dialog->Show();
+    IDialog::Probe(dialog)->Show();
     mFrequencyConflictDialog = dialog;
     return NOERROR;
 }
@@ -3779,7 +4099,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::FrequencyConflictState::ProcessMessag
             break;
         case DROP_WIFI_USER_ACCEPT:
             // User accepted dropping wifi in favour of p2p
-            mHost->mHost->mWifiChannel->SendMessage(IWifiP2pService::DISCONNECT_WIFI_REQUEST, 1);
+            mHost->mHost->mWifiChannel->SendMessage(WifiP2pServiceImpl::DISCONNECT_WIFI_REQUEST, 1);
             mHost->mHost->mTemporarilyDisconnectedWifi = TRUE;
             break;
         case DISCONNECT_WIFI_RESPONSE:
@@ -3799,7 +4119,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::FrequencyConflictState::ProcessMessag
 ECode WifiP2pServiceImpl::P2pStateMachine::FrequencyConflictState::Exit()
 {
     if (mFrequencyConflictDialog != NULL) {
-        mFrequencyConflictDialog->Dismiss();
+        IDialogInterface::Probe(mFrequencyConflictDialog)->Dismiss();
         mFrequencyConflictDialog = NULL;
     }
     return NOERROR;
@@ -3817,29 +4137,48 @@ WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::GroupCreatedState(
 ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::Enter()
 {
     if (WifiP2pServiceImpl::DBG) Slogger::D(WifiP2pServiceImpl::TAG, "Enter %s", GetName().string());
-    String nullStr;
-    mHost->mHost->mNetworkInfo->SetDetailedState(
-        Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED, nullStr, nullStr);
 
-    mHost->UpdateThisDevice(IWifiP2pDevice::CONNECTED);
+    if (mHost->mPendingReformGroupIndication) {
+        mHost->mPendingReformGroupIndication = FALSE;
+        String interfaceName;
+        mHost->mGroup->GetInterface(&interfaceName);
+        if (mHost->mWifiNative->P2pGroupRemove(interfaceName)) {
+            Slogger::D(WifiP2pServiceImpl::TAG, "Removed P2P group successfully");
+            mHost->TransitionTo(mHost->mOngoingGroupRemovalState);
+        } else {
+            Slogger::D(WifiP2pServiceImpl::TAG, "Failed to remove the P2P group");
+            mHost->HandleGroupRemoved();
+            mHost->TransitionTo(mHost->mInactiveState);
+        }
+        if (mHost->mHost->mAutonomousGroup) {
+            Slogger::D(WifiP2pServiceImpl::TAG, "AutonomousGroup is set, reform P2P Group");
+            mHost->SendMessage(IWifiP2pManager::CREATE_GROUP);
+        } else {
+            Slogger::D(WifiP2pServiceImpl::TAG, "AutonomousGroup is not set, will not reform P2P Group");
+        }
+    } else {
+        // Once connected, peer config details are invalid
+        mHost->mSavedPeerConfig->Invalidate();
+        String nullStr;
+        mHost->mHost->mNetworkInfo->SetDetailedState(
+                Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED, nullStr, nullStr);
 
-    //DHCP server has already been started if I am a group owner
-    Boolean b;
-    mHost->mGroup->IsGroupOwner(&b);
-    if (b) {
-        // mHost->SetWifiP2pInfoOnGroupFormation(SERVER_ADDRESS);
-        String serverAddr;
-        if (mHost->mHost->mAutonomousGroup)
-            //TODO serverAddr = WifiP2pServiceImpl::SERVER_ADDRESS_TETHER;
-        else
-            serverAddr = WifiP2pServiceImpl::SERVER_ADDRESS;
-        mHost->SetWifiP2pInfoOnGroupFormation(serverAddr);
-    }
+        mHost->UpdateThisDevice(IWifiP2pDevice::CONNECTED);
 
-    // In case of a negotiation group, connection changed is sent
-    // after a client joins. For autonomous, send now
-    if (mHost->mHost->mAutonomousGroup) {
-        mHost->SendP2pConnectionChangedBroadcast();
+        //DHCP server has already been started if I am a group owner
+        Boolean b;
+        mHost->mGroup->IsGroupOwner(&b);
+        if (b) {
+            AutoPtr<IInetAddress> iAddr;
+            NetworkUtils::NumericToInetAddress(WifiP2pServiceImpl::SERVER_ADDRESS, (IInetAddress**)&iAddr);
+            mHost->SetWifiP2pInfoOnGroupFormation(iAddr);
+        }
+
+        // In case of a negotiation group, connection changed is sent
+        // after a client joins. For autonomous, send now
+        if (mHost->mHost->mAutonomousGroup) {
+            mHost->SendP2pConnectionChangedBroadcast();
+        }
     }
     return NOERROR;
 }
@@ -3865,7 +4204,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
     String name;
     String pin;
     String emptyStr("");
-    Int32 setup;
     Int32 netId;
     Boolean b;
 
@@ -3873,37 +4211,11 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
         case WifiMonitor::AP_STA_CONNECTED_EVENT: {
             AutoPtr<IWifiP2pDevice> device = IWifiP2pDevice::Probe(obj);
             device->GetDeviceAddress(&deviceAddress);
-            Boolean notP2pDevice = TRUE;
+            // Clear timeout that was set when group was started.
+            String interfaceName;
+            mHost->mGroup->GetInterface(&interfaceName);
+            mHost->mWifiNative->SetP2pGroupIdle(interfaceName, 0);
             if (!deviceAddress.IsNull()) {
-                if (mHost->mSavedProvDiscDevice != NULL) {
-                    mHost->mSavedProvDiscDevice->GetDeviceAddress(&devAddr);
-                    if (deviceAddress.Equals(devAddr))  {
-                        mHost->mSavedProvDiscDevice = NULL;
-                        notP2pDevice = FALSE;
-                        String devInfo;
-                        device->ToString(&devInfo);
-                        mHost->Loge("GroupCreatedState: p2p device connect action............! device info:");
-                        mHost->Loge(devInfo.string());
-                    }
-                }
-
-                AutoPtr<IWifiP2pWfdInfo> info;
-                device->GetWfdInfo((IWifiP2pWfdInfo**)&info);
-                if (notP2pDevice) {
-                    String devInfo;
-                    device->ToString(&devInfo);
-                    if (info != NULL) {
-                        notP2pDevice = FALSE;
-                        mHost->Loge("GroupCreatedState: p2p device connect action............001! device info:");
-                        mHost->Loge(devInfo.string());
-                    }
-                    else {
-                        mHost->mNotP2pDevice->Update(device);
-                        mHost->Loge("GroupCreatedState: not p2p device connect action........! device info:");
-                        mHost->Loge(devInfo.string());
-                        break;
-                    }
-                }
 
                 AutoPtr<IWifiP2pDevice> dev;
                 mHost->mPeers->Get(deviceAddress, (IWifiP2pDevice**)&dev);
@@ -3915,46 +4227,21 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
                 }
                 mHost->mPeers->UpdateStatus(deviceAddress, IWifiP2pDevice::CONNECTED);
 
-                //2.add start,user kick to connect
-                mHost->mWifiP2pDevice = mHost->GetWifiP2pDeviceFromPeers(deviceAddress);
-                if (mHost->mWifiP2pDevice == NULL && info != NULL) {
-                    mHost->mWifiP2pDevice = device;
-                }
-                //TODO SystemProperties::Set(WFD_P2P_ROLE, String("1"));//GO
-                //TODO SystemProperties::Set(WFD_P2P_DEVICE_ADDR, deviceAddress);//
-                //add end
-
                 if (WifiP2pServiceImpl::DBG) mHost->Logd("GroupCreatedState ap sta connected");
-                mHost->SendP2pPeersChangedBroadcast();
-                mHost->SendP2pConnectionChangedBroadcast();//miracast give longer time to waiting for getPeeripAddress.
+                mHost->SendPeersChangedBroadcast();
             }
             else {
                 mHost->Loge("Connect on NULL device address, ignore");
             }
-            mHost->Loge("GroupCreatedState: AP_STA_CONNECTED_EVENT end!!!!");
+            mHost->SendP2pConnectionChangedBroadcast();
             break;
         }
         case WifiMonitor::AP_STA_DISCONNECTED_EVENT: {
             AutoPtr<IWifiP2pDevice> device = IWifiP2pDevice::Probe(obj);
             device->GetDeviceAddress(&deviceAddress);
             if (!deviceAddress.IsNull()) {
-                AutoPtr<IWifiP2pDevice> dev;
-                mHost->mNotP2pDevice->Get(deviceAddress, (IWifiP2pDevice**)&dev);
-                if (NULL != dev) {
-                    mHost->Loge("GroupCreatedState: AP_STA_DISCONNECTED_EVENT not p2p device break;!!!!");
-                    Boolean result;
-                    mHost->mNotP2pDevice->Remove(device, &result);
-                    break;
-                }
 
                 mHost->mPeers->UpdateStatus(deviceAddress, IWifiP2pDevice::AVAILABLE);
-
-                //TODO SystemProperties::Set(WFD_P2P_ROLE, emptyStr);//empty
-                //TODO SystemProperties::Set(WFD_DNSMASQ_PEER, emptyStr);//empty
-                //TODO SystemProperties::Set(WFD_P2P_DEVICE_ADDR, emptyStr);//empty
-                //2.add start,user kick to connect
-                mHost->mWifiP2pDevice = NULL;
-                //add end
 
                 mHost->mGroup->RemoveClient(deviceAddress, &b);
                 if (b) {
@@ -3976,56 +4263,79 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
                 else {
                     if (WifiP2pServiceImpl::DBG) {
                         Slogger::D(WifiP2pServiceImpl::TAG, "Failed to remove client %s", deviceAddress.string());
-                        AutoPtr<ArrayOf<IWifiP2pDevice*> > clients;
-                        mHost->mGroup->GetClientList((ArrayOf<IWifiP2pDevice*> **)&clients);
+                        AutoPtr<ArrayOf<IInterface*> > clients;
+                        AutoPtr<ICollection> list;
+                        mHost->mGroup->GetClientList((ICollection**)&list);
+                        list->ToArray((ArrayOf<IInterface*>**)&clients);
                         if (clients) {
                             for (Int32 i = 0; i < clients->GetLength(); ++i) {
-                                IWifiP2pDevice* c = (*clients)[i];
+                                IWifiP2pDevice* c = IWifiP2pDevice::Probe((*clients)[i]);
                                 c->GetDeviceAddress(&deviceAddress);
                                 Slogger::D(WifiP2pServiceImpl::TAG, "client %d: %s", i, deviceAddress.string());
                             }
                         }
                     }
                 }
-                mHost->SendP2pPeersChangedBroadcast();
+                mHost->SendPeersChangedBroadcast();
                 if (WifiP2pServiceImpl::DBG) mHost->Logd("GroupCreatedState ap sta disconnected");
             }
             else {
                 String info;
-                device->ToString(&info);
+                IObject::Probe(device)->ToString(&info);
                 Slogger::E(WifiP2pServiceImpl::TAG, "Disconnect on unknown device: %s", info.string());
             }
             break;
         }
-        case DhcpStateMachine::CMD_POST_DHCP_ACTION: {
-            AutoPtr<DhcpInfoInternal> dhcpInfo = (DhcpInfoInternal*)obj.Get();
-            if (arg1 == DhcpStateMachine::DHCP_SUCCESS && dhcpInfo != NULL) {
-                if (WifiP2pServiceImpl::DBG)
-                    Slogger::D(WifiP2pServiceImpl::TAG, "DhcpInfo: %s", dhcpInfo->ToString().string());
-                addr = dhcpInfo->mServerAddress;
-                mHost->SetWifiP2pInfoOnGroupFormation(addr);
-
-                //TODO SystemProperties::Set(WFD_P2P_ROLE, String("2"));//client
-                AutoPtr<ISystemProperties> sp;
-                CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
-                String gateway;
-                sp->Get(String("dhcp.p2p.gateway"), &gateway);
-                if (!gateway.IsNull())
-                    Slogger::D(WifiP2pServiceImpl::TAG, "gateway=[%s]",  gateway.string());
-                else
-                    mHost->Loge("gateway not set in the property yet.");
-
-                String ipaddress;
-                sp->Get(String("dhcp.p2p.ipaddress"), &ipaddress);
-                if (!ipaddress.IsNull())
-                    Slogger::D(WifiP2pServiceImpl::TAG, "ipaddress=[%s]",  ipaddress.string());
-                else
-                    mHost->Loge("gateway not set in the property yet.");
+        case WifiMonitor::P2P_REMOVE_AND_REFORM_GROUP_EVENT: {
+            /* First remove p2p group and then restart only if
+             * autonoums group formation is set to true
+             */
+            Slogger::D(WifiP2pServiceImpl::TAG, "Received event P2P_REMOVE_AND_REFORM_GROUP, remove P2P group");
+            String interfaceName;
+            mHost->mGroup->GetInterface(&interfaceName);
+            if (mHost->mWifiNative->P2pGroupRemove(interfaceName)) {
+                Slogger::D(TAG, "Removed P2P group successfully");
+                mHost->TransitionTo(mHost->mOngoingGroupRemovalState);
+                mHost->ReplyToMessage(message, IWifiP2pManager::REMOVE_GROUP_SUCCEEDED);
+            } else {
+                Slogger::D(TAG, "Failed to remove the P2P group");
+                mHost->HandleGroupRemoved();
+                mHost->TransitionTo(mHost->mInactiveState);
+                mHost->ReplyToMessage(message, IWifiP2pManager::REMOVE_GROUP_FAILED, IWifiP2pManager::ERROR);
+            }
+            if (mHost->mHost->mAutonomousGroup) {
+                Slogger::D(TAG, "AutonomousGroup is set, reform P2P Group");
+                mHost->SendMessage(IWifiP2pManager::CREATE_GROUP);
+            } else {
+                Slogger::D(TAG, "AutonomousGroup is not set, will not reform P2P Group");
+            }
+            break;
+        }
+        case IDhcpStateMachine::CMD_POST_DHCP_ACTION: {
+            AutoPtr<IDhcpResults> dhcpResults = IDhcpResults::Probe(obj);
+            if (arg1 == IDhcpStateMachine::DHCP_SUCCESS &&
+                    dhcpResults != NULL) {
+                if (WifiP2pServiceImpl::DBG) mHost->Logd("DhcpResults: TODO");// + dhcpResults;
+                AutoPtr<IInetAddress> iAddress;
+                dhcpResults->GetServerAddress((IInetAddress**)&iAddress);
+                mHost->SetWifiP2pInfoOnGroupFormation(iAddress);
 
                 mHost->SendP2pConnectionChangedBroadcast();
                 //Turn on power save on client
                 mHost->mGroup->GetInterface(&name);
                 mHost->mWifiNative->SetP2pPowerSave(name, TRUE);
+
+                //try {
+                String iface;
+                mHost->mGroup->GetInterface(&iface);
+                AutoPtr<IList> list;
+                IStaticIpConfiguration::Probe(dhcpResults)->GetRoutes(iface, (IList**)&list);
+                mHost->mHost->mNwService->AddInterfaceToLocalNetwork(iface, list);
+                //} catch (RemoteException e) {
+                //    loge("Failed to add iface to local network " + e);
+                //} catch (IllegalStateException ie) {
+                //    loge("Failed to add iface to local network " + ie);
+                //}
             }
             else {
                 mHost->Loge("DHCP failed");
@@ -4034,7 +4344,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
             break;
         }
         case IWifiP2pManager::REMOVE_GROUP:
-        case WifiMonitor::NETWORK_DISCONNECTION_EVENT://client receive disconnect will wait too long,idle timeout
             if (WifiP2pServiceImpl::DBG) mHost->Logd("GroupCreatedState remove group");
             mHost->mGroup->GetInterface(&name);
             if (mHost->mWifiNative->P2pGroupRemove(name)) {
@@ -4061,45 +4370,9 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
          */
         case WifiMonitor::P2P_GROUP_REMOVED_EVENT: {
             if (WifiP2pServiceImpl::DBG) mHost->Logd("GroupCreatedState group removed");
-            /*reset wfd p2p role to empty*/
-            //TODO SystemProperties::Set(WFD_P2P_ROLE, emptyStr);
-            //TODO SystemProperties::Set(WFD_DNSMASQ_PEER, emptyStr);//empty
-
-            AutoPtr<ISystemProperties> sp;
-            CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
-            String gateway;
-            sp->Get(String("dhcp.p2p.gateway"), &gateway);
-            if (!gateway.IsNull()) {
-                SystemProperties::Set(String("dhcp.p2p.gateway"), emptyStr);
-            }
-            else {
-                mHost->Loge("gateway not set in the property yet.");
-            }
-
-            String ipaddress;
-            sp->Get(String("dhcp.p2p.ipaddress"), &ipaddress);
-            if (!ipaddress.IsNull()) {
-                SystemProperties::Set(String("dhcp.p2p.ipaddress"), emptyStr);
-            }
-            else {
-                mHost->Loge("ipaddress not set in the property yet.");
-            }
-
-            /*=== clear ip add start "p2p0" 2013-01-08 14:34 ===*/
-            Slogger::D(WifiP2pServiceImpl::TAG, "clear interface ip %s", mHost->mHost->mInterface.string());
-            // try {
-            mHost->mHost->mNwService->ClearInterfaceAddresses(mHost->mHost->mInterface);
-            mHost->mGroup->GetInterface(&name);
-            if (FAILED(mHost->mHost->mNwService->DisableIpv6(name))) {
-                Slogger::E(WifiP2pServiceImpl::TAG, "Failed to clear addresses or disable ipv6 %s", name.string());
-            }
-            // } catch (Exception e) {
-            //
-            // }
-            /*=== clear ip add end ===*/
-            mHost->mWifiP2pDevice = NULL;
 
             mHost->HandleGroupRemoved();
+            mHost->mWifiNative->P2pFlush();
             mHost->TransitionTo(mHost->mInactiveState);
             break;
         }
@@ -4110,10 +4383,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
             if (b) {
                 if (WifiP2pServiceImpl::DBG) {
                     String info;
-                    device->ToString(&info);
+                    IObject::Probe(device)->ToString(&info);
                     Slogger::D(WifiP2pServiceImpl::TAG, "Add device to lost list %s", info.string());
                 }
-                mHost->mPeersLostDuringConnection->Update(device);
+                mHost->mPeersLostDuringConnection->UpdateSupplicantDetails(device);
                 *result = TRUE;  // HANDLED;
                 return NOERROR;
             }
@@ -4125,67 +4398,65 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
             mHost->SendMessage(IWifiP2pManager::REMOVE_GROUP);
             mHost->DeferMessage(message);
             break;
-        case IWifiP2pManager::CONNECT: {
-            AutoPtr<IWifiP2pConfig> config = IWifiP2pConfig::Probe(obj);
-            config->GetDeviceAddress(&addr);
-            if (mHost->mSavedProvDiscDevice != NULL) {
-                mHost->mSavedProvDiscDevice->GetDeviceAddress(&devAddr);
+            // This allows any client to join the GO during the
+            // WPS window
+        case IWifiP2pManager::START_WPS: {
+            AutoPtr<IWpsInfo> wps = IWpsInfo::Probe(obj);
+            if (wps == NULL) {
+                mHost->ReplyToMessage(message, IWifiP2pManager::START_WPS_FAILED);
+                break;
             }
-
-            if (addr.IsNull() || (mHost->mSavedProvDiscDevice != NULL && devAddr.Equals(addr))) {
-                AutoPtr<IWpsInfo> wps;
-                config->GetWps((IWpsInfo**)&wps);
-                wps->GetSetup(&setup);
-                String wpsPin;
-                wps->GetPin(&wpsPin);
-                mHost->mGroup->GetInterface(&name);
-                if (setup == IWpsInfo::PBC) {
-                    mHost->mWifiNative->StartWpsPbc(name, String(NULL));
-                }
-                else {
-                    if (wpsPin.IsNull()) {
-                        pin = mHost->mWifiNative->StartWpsPinDisplay(name);
-                        Int32 value;
-                        ECode ec = StringUtils::ParseInt32(pin, 10, &value);
-                        if (SUCCEEDED(ec)) {
-                            if (mHost->SendShowPinReqToFrontApp(pin)) {
-                                mHost->NotifyInvitationSent(
-                                    pin, !addr.IsNull() ? addr : String("any"));
-                            }
+            Boolean ret = TRUE;
+            Int32 setup;
+            wps->GetSetup(&setup);
+            String iface;
+            mHost->mGroup->GetInterface(&iface);
+            if (setup == IWpsInfo::PBC) {
+                ret = mHost->mWifiNative->StartWpsPbc(iface, String(NULL));
+            } else {
+                String pin;
+                wps->GetPin(&pin);
+                if (pin.IsNull()) {
+                    pin = mHost->mWifiNative->StartWpsPinDisplay(iface);
+                    //try {
+                        Int32 intValue;
+                        ECode ec = StringToIntegral::Parse(pin, 10, &intValue);
+                        if (FAILED(ec)) {
+                            ret = FALSE;
                         }
                         else {
-                            // do nothing if pin is invalid
+                            mHost->NotifyInvitationSent(pin, String("any"));
                         }
-                    }
-                    else {
-                        mHost->mWifiNative->StartWpsPinKeypad(name, pin);
-                    }
+                    //} catch (NumberFormatException ignore) {
+                    //    ret = false;
+                    //}
+                } else {
+                    ret = mHost->mWifiNative->StartWpsPinKeypad(iface, pin);
                 }
-                if (!addr.IsNull()) {
-                    mHost->mPeers->UpdateStatus(addr, IWifiP2pDevice::INVITED);
-                    //add start
-                    mHost->mWifiP2pDevice = mHost->GetWifiP2pDeviceFromPeers(addr);
-                    //add end
-                    mHost->SendP2pPeersChangedBroadcast();
-                }
+            }
+            mHost->ReplyToMessage(message, ret ? IWifiP2pManager::START_WPS_SUCCEEDED :
+                                                 IWifiP2pManager::START_WPS_FAILED);
+            break;
+        }
+        case IWifiP2pManager::CONNECT: {
+            AutoPtr<IWifiP2pConfig> config = IWifiP2pConfig::Probe(obj);
+
+            if (mHost->IsConfigInvalid(config)) {
+                mHost->Loge("Dropping connect requeset ");// + config);
+                mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_FAILED);
+                break;
+            }
+            config->GetDeviceAddress(&addr);
+            Slogger::D(WifiP2pServiceImpl::TAG, "Inviting device : %s", addr.string());
+            mHost->mSavedPeerConfig = config;
+            if (mHost->mWifiNative->P2pInvite(mHost->mGroup, addr)) {
+                mHost->mPeers->UpdateStatus(addr, IWifiP2pDevice::INVITED);
+                mHost->SendPeersChangedBroadcast();
                 mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_SUCCEEDED);
             }
             else {
-                Slogger::D(WifiP2pServiceImpl::TAG, "Inviting device : %s", addr.string());
-                mHost->mSavedPeerConfig = config;
-                if (mHost->mWifiNative->P2pInvite(mHost->mGroup, addr)) {
-                    mHost->mPeers->UpdateStatus(addr, IWifiP2pDevice::INVITED);
-                    //add start
-                    mHost->mWifiP2pDevice = mHost->GetWifiP2pDeviceFromPeers(addr);
-                    //add end
-                    mHost->SendP2pPeersChangedBroadcast();
-                    mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_SUCCEEDED);
-                }
-                else {
-                    mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_FAILED,
-                        IWifiP2pManager::ERROR);
-                    mHost->mWifiP2pDevice = NULL;
-                }
+                mHost->ReplyToMessage(message, IWifiP2pManager::CONNECT_FAILED,
+                    IWifiP2pManager::ERROR);
             }
             // TODO: figure out updating the status to declined when invitation is rejected
             break;
@@ -4200,7 +4471,8 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
                 // invocation was succeeded.
                 break;
             }
-            else if (status == P2pStatus_UNKNOWN_P2P_GROUP) {
+            mHost->Loge("Invitation result TODO");//, status);
+            if (status == P2pStatus_UNKNOWN_P2P_GROUP) {
                 // target device has already removed the credential.
                 // So, remove this credential accordingly.
                 mHost->mGroup->GetNetworkId(&netId);
@@ -4210,7 +4482,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
                     if (!mHost->RemoveClientFromList(netId, addr, FALSE)) {
                         // not found the client on the list
                         Slogger::E(WifiP2pServiceImpl::TAG, "Already removed the client, ignore");
-                        break;
                     }
                     // try invitation.
                     mHost->SendMessage(IWifiP2pManager::CONNECT, mHost->mSavedPeerConfig);
@@ -4222,9 +4493,9 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
         case WifiMonitor::P2P_PROV_DISC_ENTER_PIN_EVENT:
         case WifiMonitor::P2P_PROV_DISC_SHOW_PIN_EVENT: {
             AutoPtr<IWifiP2pProvDiscEvent> provDisc = IWifiP2pProvDiscEvent::Probe(obj);
-            mHost->mSavedProvDiscDevice = NULL;
-            provDisc->GetDevice((IWifiP2pDevice**)&mHost->mSavedProvDiscDevice);
-            mHost->mSavedProvDiscDevice->GetDeviceAddress(&addr);
+            AutoPtr<IWifiP2pDevice> device;
+            provDisc->GetDevice((IWifiP2pDevice**)&device);
+            device->GetDeviceAddress(&addr);
 
             mHost->mSavedPeerConfig = NULL;
             CWifiP2pConfig::New((IWifiP2pConfig**)&mHost->mSavedPeerConfig);
@@ -4243,7 +4514,12 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::ProcessMessage(
                 wps->SetSetup(IWpsInfo::PBC);
             }
 
-            if (!mHost->SendConnectNoticeToApp(mHost->mSavedProvDiscDevice, mHost->mSavedPeerConfig)) {
+            Boolean b;
+            mHost->mGroup->IsGroupOwner(&b);
+            if (WifiP2pServiceImpl::DBG) mHost->Logd("mGroup.isGroupOwner() TODO");//, b;
+            if (b) {
+                if (WifiP2pServiceImpl::DBG)
+                    mHost->Logd("Local device is Group Owner, transiting to mUserAuthorizingJoinState");
                 mHost->TransitionTo(mHost->mUserAuthorizingJoinState);
             }
             break;
@@ -4266,7 +4542,6 @@ ECode WifiP2pServiceImpl::P2pStateMachine::GroupCreatedState::Exit()
     mHost->ResetWifiP2pInfo();
     String nullStr;
     mHost->mHost->mNetworkInfo->SetDetailedState(NetworkInfoDetailedState_DISCONNECTED, nullStr, nullStr);
-    mHost->mWifiP2pDevice = NULL;
     mHost->SendP2pConnectionChangedBroadcast();
     return NOERROR;
 }
@@ -4306,6 +4581,8 @@ ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingJoinState::ProcessMess
             //Ignore more client requests
             break;
         case PEER_CONNECTION_USER_ACCEPT: {
+            //Stop discovery to avoid failure due to channel switch
+            mHost->mWifiNative->P2pStopFind();
             String interfaceName;
             mHost->mGroup->GetInterface(&interfaceName);
             AutoPtr<IWpsInfo> info;
@@ -4320,13 +4597,11 @@ ECode WifiP2pServiceImpl::P2pStateMachine::UserAuthorizingJoinState::ProcessMess
             else {
                 mHost->mWifiNative->StartWpsPinKeypad(interfaceName, pin);
             }
-            mHost->mSavedPeerConfig = NULL;
             mHost->TransitionTo(mHost->mGroupCreatedState);
             break;
         }
         case PEER_CONNECTION_USER_REJECT:
             if (WifiP2pServiceImpl::DBG) mHost->Logd("User rejected incoming request");
-            mHost->mSavedPeerConfig = NULL;
             mHost->TransitionTo(mHost->mGroupCreatedState);
             break;
         default:
@@ -4392,8 +4667,10 @@ ECode WifiP2pServiceImpl::P2pStateMachine::OngoingGroupRemovalState::ProcessMess
 //  WifiP2pServiceImpl::ClientHandler
 /////////////////////
 WifiP2pServiceImpl::ClientHandler::ClientHandler(
+    /* [in] */ WifiP2pServiceImpl* host,
     /* [in] */ ILooper* looper)
     : Handler(looper)
+    , mHost(host)
 {
 }
 
@@ -4426,15 +4703,16 @@ ECode WifiP2pServiceImpl::ClientHandler::HandleMessage(
         case IWifiP2pManager::REQUEST_CONNECTION_INFO:
         case IWifiP2pManager::REQUEST_GROUP_INFO:
         case IWifiP2pManager::DELETE_PERSISTENT_GROUP:
-        case IWifiP2pManager::REQUEST_PERSISTENT_GROUP_INFO:
+        case IWifiP2pManager::REQUEST_PERSISTENT_GROUP_INFO: {
             AutoPtr<IMessage> message;
             AutoPtr<IMessageHelper> helper;
             CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
             helper->Obtain(msg, (IMessage**)&message);
-            mP2pStateMachine->SendMessage(message);
+            mHost->mP2pStateMachine->SendMessage(message);
             break;
+        }
         default:
-            Logging::D(WifiP2pServiceImpl::TAG, "ClientHandler.handleMessage ignoring msg=%d", msg);
+            Slogger::D(WifiP2pServiceImpl::TAG, "ClientHandler.handleMessage ignoring msg=%d", msg);
             break;
     }
     return NOERROR;

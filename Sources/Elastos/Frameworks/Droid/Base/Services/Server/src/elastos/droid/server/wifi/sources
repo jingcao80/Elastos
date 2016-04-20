@@ -37,3 +37,4 @@ SOURCES += WifiSettingsStore.cpp
 SOURCES += WifiTrafficPoller.cpp
 SOURCES += WifiWatchdogStateMachine.cpp
 
+ELASTOS_LIBS += p2p/p2p.lib
