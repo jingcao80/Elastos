@@ -990,12 +990,14 @@ ECode ProfileManagerService::GetNotificationGroup(
     Boolean flag = FALSE;
     if (uid->Equals(_uuid.Get(), &flag), flag) {
         *result = mWildcardGroup;
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
     AutoPtr<IInterface> obj;
     mGroups->Get(uid, (IInterface**)&obj);
     AutoPtr<INotificationGroup> ng = INotificationGroup::Probe(obj);
     *result = ng;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

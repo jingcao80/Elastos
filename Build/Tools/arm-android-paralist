@@ -466,4 +466,8 @@
 > Elastos/Packages/Apps/Launcher2/src/elastos/droid/launcher2 Launcher2.car
 > Elastos/Packages/Apps/Launcher2/src/elastos/droid/launcher2
 
+# ==== build Packages/Providers/MediaProvider ====
+> Elastos/Packages/Providers/MediaProvider/src/elastos/droid/providers/media Elastos.Droid.Providers.Media.car
+> Elastos/Packages/Providers/MediaProvider/src/elastos/droid/providers/media
+
 > Elastos
