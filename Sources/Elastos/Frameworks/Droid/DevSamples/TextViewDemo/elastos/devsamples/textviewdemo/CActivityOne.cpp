@@ -336,7 +336,7 @@ ECode CActivityOne::OnCreate(
 
         String key1("key1");
         String key2("key2");
-        for (Int32 i = 0; i < 5; i++) {
+        for (Int32 i = 0; i < 20; i++) {
             AutoPtr<IMap> map;
             CHashMap::New((IMap**)&map);
 

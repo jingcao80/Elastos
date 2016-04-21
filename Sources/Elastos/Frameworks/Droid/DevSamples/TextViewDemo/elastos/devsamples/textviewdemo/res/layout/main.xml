@@ -7,18 +7,18 @@
     <TextView
         android:id="@+id/myTextView"
         android:layout_width="match_parent"
-        android:layout_height="100px"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center_vertical"
-        android:textColor="#ff00ff00"
-        android:text="abcdefg1234567890"
+        android:textColor="#ff00ffff"
+        android:textSize="100dp"
+        android:text="Hello World!"
         android:background="#FFFFFF"/>
 
     <EditText android:id="@+id/myEditText"
         android:layout_width="match_parent"
-        android:layout_height="60px"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textSize="50dp"
         android:hint="Input text here."/>
 
     <LinearLayout
@@ -115,7 +115,7 @@
     <ListView
         android:id="@+id/myListView"
         android:layout_width="match_parent"
-        android:layout_height="250px">
+        android:layout_height="500px">
     </ListView>
 
 </LinearLayout>
