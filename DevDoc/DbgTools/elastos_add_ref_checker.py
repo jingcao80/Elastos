@@ -112,16 +112,19 @@ def check_released_return_value(logFile, firstLog, path, checkLineNum, paramType
 
     # ignore new: (IServerSocketChannel*) new
     pattern = re.compile(r'\(.*\*\s*\)\s*new ')
+    match = pattern.search(value)
     if match:
         return firstLog
 
     # ignore singleton: XXX::GetInstance()
     pattern = re.compile(r'::GetInstance\(.*\)')
+    match = pattern.search(value)
     if match:
         return firstLog
 
     # ignore ->mImeActionLabel;
     pattern = re.compile(r'->m\w*;')
+    match = pattern.search(value)
     if match:
         return firstLog
 
