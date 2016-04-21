@@ -38,20 +38,6 @@ module
     }
 
     /**
-     * State for keeping track of counting information.
-     */
-    /**
-     * @Involve
-     * interface IBatteryStatsCounter
-     * interface ITimeBaseObs;
-     */
-    [local]
-    interface IBatteryStatsImplCounter {
-        WriteToParcel(
-            [in] IParcel* parcel);
-    }
-
-    /**
      * @Involve
      * interface IBatteryStatsCounter
      * interface ITimeBaseObs;

@@ -242,6 +242,8 @@ public:
         , public IBatteryStatsHistoryEventTracker
     {
     public:
+        CAR_INTERFACE_DECL()
+
         UpdateState(
             /* [in] */ Int32 code,
             /* [in] */ const String& name,
@@ -454,8 +456,6 @@ private:
     static const AutoPtr< ArrayOf<String> > BLUETOOTH_STATE_NAMES;
 
     static const AutoPtr< ArrayOf<String> > HISTORY_EVENT_CHECKIN_NAMES;
-
-
 
     AutoPtr<StringBuilder> mFormatBuilder;
     AutoPtr<IFormatter> mFormatter;
