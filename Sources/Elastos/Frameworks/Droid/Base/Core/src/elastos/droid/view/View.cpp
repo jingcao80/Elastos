@@ -9296,11 +9296,10 @@ void View::InvalidateInternal(
     }
 
     Boolean isOpaque;
-    IsOpaque(&isOpaque);
     if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
             || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)
             || (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED
-            || (fullInvalidate && isOpaque != mLastIsOpaque)) {
+            || (fullInvalidate && (IsOpaque(&isOpaque), isOpaque != mLastIsOpaque))) {
         if (fullInvalidate) {
             IsOpaque(&mLastIsOpaque);
             mPrivateFlags &= ~PFLAG_DRAWN;
@@ -9319,7 +9318,7 @@ void View::InvalidateInternal(
         if (p && ai && l < r && t < b) {
             AutoPtr<IRect> damage = ai->mTmpInvalRect;
             damage->Set(l, t, r, b);
-            p->InvalidateChild(this, (IRect*)damage);
+            p->InvalidateChild(this, damage);
         }
 
         // Damage the entire projection receiver, if necessary.
@@ -9395,21 +9394,21 @@ void View::InvalidateViewProperty(
     IsHardwareAccelerated(&isHardwareAccelerated);
     mRenderNode->IsValid(&isValid);
     if (!isHardwareAccelerated || !isValid || (mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
-            if (invalidateParent) {
-                InvalidateParentCaches();
-            }
-            if (forceRedraw) {
-                mPrivateFlags |= PFLAG_DRAWN; // force another invalidation with the new orientation
-            }
-            Invalidate(FALSE);
-        } else {
-            DamageInParent();
+        if (invalidateParent) {
+            InvalidateParentCaches();
         }
-        Float z;
-        GetZ(&z);
-        if (isHardwareAccelerated && invalidateParent && z != 0) {
-            DamageShadowReceiver();
+        if (forceRedraw) {
+            mPrivateFlags |= PFLAG_DRAWN; // force another invalidation with the new orientation
         }
+        Invalidate(FALSE);
+    }
+    else {
+        DamageInParent();
+    }
+    Float z;
+    if (isHardwareAccelerated && invalidateParent && (GetZ(&z), z != 0)) {
+        DamageShadowReceiver();
+    }
 }
 
 ECode View::DamageInParent()
@@ -12729,11 +12728,7 @@ Boolean View::Draw(
     Float tempAlpha, transitionAlpha;
     GetAlpha(&tempAlpha);
     GetTransitionAlpha(&transitionAlpha);
-
-    Float alpha = 1;
-    if (!usingRenderNodeProperties) {
-        alpha = (tempAlpha * transitionAlpha);
-    }
+    Float alpha = usingRenderNodeProperties ? 1 : (tempAlpha * transitionAlpha);
     if (transformToApply != NULL || alpha < 1 || !HasIdentityMatrix() ||
             (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
         if (transformToApply != NULL || !childHasIdentityMatrix) {
@@ -12801,6 +12796,8 @@ Boolean View::Draw(
                         layerFlags |= ICanvas::CLIP_TO_LAYER_SAVE_FLAG;
                     }
                     if (usingRenderNodeProperties) {
+                        GetAlpha(&tempAlpha);
+                        GetTransitionAlpha(&transitionAlpha);
                         Boolean res;
                         renderNode->SetAlpha(alpha * tempAlpha * transitionAlpha, &res);
                     }

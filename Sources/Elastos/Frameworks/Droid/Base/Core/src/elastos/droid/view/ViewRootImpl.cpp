@@ -3697,7 +3697,7 @@ void ViewRootImpl::PerformDraw()
 {
     LocalTrace(mView, "::ENTER >> ViewRootImpl::PerformDraw()");
 
-    if (!mAttachInfo->mDisplayState == IDisplay::STATE_OFF && !mReportNextDraw) {
+    if (mAttachInfo->mDisplayState == IDisplay::STATE_OFF && !mReportNextDraw) {
         return;
     }
 

@@ -5582,9 +5582,6 @@ void AbsListView::ScrollIfNeeded(
 
                         Int32 overscrollMode;
                         GetOverScrollMode(&overscrollMode);
-                        Int32 height, width;
-                        GetHeight(&height);
-                        GetWidth(&width);
                         if (overscrollMode == IView::OVER_SCROLL_ALWAYS ||
                             (overscrollMode == IView::OVER_SCROLL_IF_CONTENT_SCROLLS
                                 && !ContentFits())) {
@@ -5593,6 +5590,9 @@ void AbsListView::ScrollIfNeeded(
                                 mTouchMode = TOUCH_MODE_OVERSCROLL;
                             }
                             if (incrementalDeltaY > 0) {
+                                Int32 height, width;
+                                GetHeight(&height);
+                                GetWidth(&width);
                                 mEdgeGlowTop->OnPull((Float) -overscroll / height,
                                     (Float) x / width);
                                 mEdgeGlowBottom->IsFinished(&temp);
@@ -5606,6 +5606,9 @@ void AbsListView::ScrollIfNeeded(
                                 Invalidate(0, 0, width, maxH + top);
                             }
                             else if (incrementalDeltaY < 0) {
+                                Int32 height, width;
+                                GetHeight(&height);
+                                GetWidth(&width);
                                 mEdgeGlowBottom->OnPull((Float) overscroll / height,
                                         1.f - (Float) x / width);
                                 mEdgeGlowTop->IsFinished(&temp);
@@ -5650,13 +5653,13 @@ void AbsListView::ScrollIfNeeded(
                     0, mOverscrollDistance, TRUE);
                 Int32 overscrollMode;
                 GetOverScrollMode(&overscrollMode);
-                Int32 height, width;
-                GetHeight(&height);
-                GetWidth(&width);
                 if (overscrollMode == IView::OVER_SCROLL_ALWAYS ||
                     (overscrollMode == IView::OVER_SCROLL_IF_CONTENT_SCROLLS &&
                     !ContentFits())) {
                         if (rawDeltaY > 0) {
+                            Int32 height, width;
+                            GetHeight(&height);
+                            GetWidth(&width);
                             mEdgeGlowTop->OnPull((Float) overScrollDistance / height,
                                     (Float) x / width);
                             mEdgeGlowBottom->IsFinished(&temp);
@@ -5670,6 +5673,9 @@ void AbsListView::ScrollIfNeeded(
                             Invalidate(0, 0, width, maxH + top);
                         }
                         else if (rawDeltaY < 0) {
+                            Int32 height, width;
+                            GetHeight(&height);
+                            GetWidth(&width);
                             mEdgeGlowBottom->OnPull((Float) overScrollDistance / height,
                                     1.f - (Float) x / width);
                             mEdgeGlowTop->IsFinished(&temp);
@@ -5703,9 +5709,10 @@ void AbsListView::ScrollIfNeeded(
                 mMotionCorrection = 0;
                 AutoPtr<IView> motionView;
                 GetChildAt(motionPosition - mFirstPosition, (IView**)&motionView);
-                Int32 viewTop;
-                motionView->GetTop(&viewTop);
-                mMotionViewOriginalTop = motionView != NULL ? viewTop : 0;
+                mMotionViewOriginalTop = 0;
+                if (motionView != NULL) {
+                    motionView->GetTop(&mMotionViewOriginalTop);
+                }
                 mMotionY = y + scrollOffsetCorrection;
                 mMotionPosition = motionPosition;
             }
@@ -6980,17 +6987,15 @@ Boolean AbsListView::TrackMotionScroll(
     Int32 effectivePaddingTop = 0;
     Int32 effectivePaddingBottom = 0;
     Int32 topTmp = 0, bottomTmp = 0;
-    mListPadding->GetTop(&topTmp);
-    mListPadding->GetBottom(&bottomTmp);
     if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
-        effectivePaddingTop = topTmp;
-        effectivePaddingBottom = bottomTmp;
+        mListPadding->GetTop(&effectivePaddingTop);
+        mListPadding->GetBottom(&effectivePaddingBottom);
     }
 
     // FIXME account for grid vertical spacing too?
+    Int32 spaceAbove = effectivePaddingTop - firstTop;
     Int32 h;
     GetHeight(&h);
-    Int32 spaceAbove = effectivePaddingTop - firstTop;
     Int32 end = h - effectivePaddingBottom;
     Int32 spaceBelow = lastBottom - end;
 
@@ -7015,6 +7020,7 @@ Boolean AbsListView::TrackMotionScroll(
 
     // Update our guesses for where the first and last views are
     if (firstPosition == 0) {
+        mListPadding->GetTop(&topTmp);
         mFirstPositionDistanceGuess = firstTop - topTmp;
     }
     else {
@@ -7022,12 +7028,16 @@ Boolean AbsListView::TrackMotionScroll(
     }
 
     if (firstPosition + childCount == mItemCount) {
+        mListPadding->GetBottom(&bottomTmp);
         mLastPositionDistanceGuess = lastBottom + bottomTmp;
     }
     else {
         mLastPositionDistanceGuess += incrementalDeltaY;
     }
 
+    mListPadding->GetTop(&topTmp);
+    mListPadding->GetBottom(&bottomTmp);
+    GetHeight(&h);
     Boolean cannotScrollDown = (firstPosition == 0 &&
             firstTop >= topTmp && incrementalDeltaY >= 0);
     Boolean cannotScrollUp = (firstPosition + childCount == mItemCount &&
@@ -7038,9 +7048,9 @@ Boolean AbsListView::TrackMotionScroll(
     }
 
     Boolean down = incrementalDeltaY < 0;
+
     Boolean inTouchMode;
-    IsInTouchMode(&inTouchMode);
-    if (inTouchMode) {
+    if (IsInTouchMode(&inTouchMode), inTouchMode) {
         HideSelector();
     }
 
@@ -7053,6 +7063,7 @@ Boolean AbsListView::TrackMotionScroll(
     if (down) {
         Int32 top = -incrementalDeltaY;
         if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
+            mListPadding->GetTop(&topTmp);
             top += topTmp;
         }
         for (Int32 i = 0; i < childCount; i++) {
@@ -7079,10 +7090,10 @@ Boolean AbsListView::TrackMotionScroll(
         }
     }
     else {
-        Int32 height;
-        GetHeight(&height);
-        Int32 bottom = height - incrementalDeltaY;
+        GetHeight(&h);
+        Int32 bottom = h - incrementalDeltaY;
         if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
+            mListPadding->GetBottom(&bottomTmp);
             bottom -= bottomTmp;
         }
         for (Int32 i = childCount - 1; i >= 0; i--) {
@@ -7116,7 +7127,6 @@ Boolean AbsListView::TrackMotionScroll(
 
     if (count > 0) {
         DetachViewsFromParent(start, count);
-
         mRecycler->RemoveSkippedScrap();
     }
 
@@ -7165,6 +7175,7 @@ Boolean AbsListView::TrackMotionScroll(
     mBlockLayoutRequests = FALSE;
 
     InvokeOnItemScrollListener();
+
     return FALSE;
 }
 

@@ -87,27 +87,27 @@
         android:orientation="horizontal">
         <Button android:id="@+id/AnamtionButton"
             android:layout_width="110px"
-            android:layout_height="50px"
+            android:layout_height="wrap_content"
             android:text="Animation">
         </Button>
         <Button android:id="@+id/DialogButton"
             android:layout_width="110px"
-            android:layout_height="50px"
+            android:layout_height="wrap_content"
             android:text="Dialog">
         </Button>
         <Button android:id="@+id/PopupWindowButton"
             android:layout_width="160px"
-            android:layout_height="50px"
+            android:layout_height="wrap_content"
             android:text="PopupWindow">
         </Button>
         <Button android:id="@+id/PowerManagerButton"
             android:layout_width="160px"
-            android:layout_height="50px"
+            android:layout_height="wrap_content"
             android:text="PowerManager">
         </Button>
         <Button android:id="@+id/ConnectivityManagerButton"
             android:layout_width="160px"
-            android:layout_height="50px"
+            android:layout_height="wrap_content"
             android:text="ConnectivityManager">
         </Button>
     </LinearLayout>
