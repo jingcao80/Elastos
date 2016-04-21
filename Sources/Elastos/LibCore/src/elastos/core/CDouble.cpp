@@ -110,7 +110,7 @@ ECode CDouble::CompareTo(
 
     IDouble* other = (IDouble*)_other->Probe(EIID_IDouble);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Double otherValue;
     other->GetValue(&otherValue);

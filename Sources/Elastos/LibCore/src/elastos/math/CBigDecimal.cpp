@@ -2035,7 +2035,7 @@ ECode CBigDecimal::CompareTo(
     *result = -1;
     IBigDecimal* ival = (IBigDecimal*)other->Probe(EIID_IBigDecimal);
     if (ival == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     CBigDecimal* val = (CBigDecimal*)ival;

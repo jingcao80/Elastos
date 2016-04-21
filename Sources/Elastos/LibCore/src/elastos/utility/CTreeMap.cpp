@@ -238,9 +238,11 @@ ECode CTreeMap::PutInternal(
     FAIL_RETURN(Find(key, CREATE, (Node**)&created));
     AutoPtr<IInterface> result = created->mValue;
     created->mValue = value;
-
-    *object = result;
-    REFCOUNT_ADD(*object)
+    if (object) {
+        *object = result;
+        REFCOUNT_ADD(*object)
+    }
+    
     return NOERROR;
 }
 

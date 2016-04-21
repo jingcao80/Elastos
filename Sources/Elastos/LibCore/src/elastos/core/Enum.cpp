@@ -77,7 +77,7 @@ ECode Enum::CompareTo(
 
     AutoPtr<IEnum> res = IEnum::Probe(o);
     if (res == NULL) {
-        return E_ILLEGAL_STATE_EXCEPTION;
+        return E_CLASS_CAST_EXCEPTION;
     }
     *value = mOrdinal - ((Enum*)res.Get())->mOrdinal;
     return NOERROR;

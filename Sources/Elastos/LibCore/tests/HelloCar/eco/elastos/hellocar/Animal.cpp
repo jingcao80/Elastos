@@ -45,7 +45,7 @@ ECode Animal::CompareTo(
     IAnimal* oa = IAnimal::Probe(another);
     if (oa == NULL) {
         *result = 1;
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     Animal* a = (Animal*)oa;

@@ -90,7 +90,7 @@ ECode CChar32::CompareTo(
 
     IChar32* other = (IChar32*)_other->Probe(EIID_IChar32);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
 
     Char32 otherValue;

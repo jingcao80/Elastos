@@ -165,7 +165,7 @@ ECode CharBuffer::CompareTo(
     VALIDATE_NOT_NULL(otherBuffer);
 
     *result = -1;
-    if (ICharBuffer::Probe(otherBuffer) == NULL) return NOERROR;
+    if (ICharBuffer::Probe(otherBuffer) == NULL) return E_CLASS_CAST_EXCEPTION;
 
     Int32 remaining = 0;
     Int32 otherRemaining = 0;

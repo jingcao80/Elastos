@@ -277,7 +277,7 @@ ECode File::CompareTo(
     VALIDATE_NOT_NULL(obj)
 
     IFile* afile = IFile::Probe(obj);
-    if (afile == NULL) return NOERROR;
+    if (afile == NULL) return E_CLASS_CAST_EXCEPTION;
 
     String anotherPath;
     afile->GetPath(&anotherPath);
@@ -295,7 +295,7 @@ ECode File::CompareTo(
     VALIDATE_NOT_NULL(another)
 
     IFile* afile = IFile::Probe(another);
-    if (afile == NULL) return E_INVALID_ARGUMENT;
+    if (afile == NULL) return E_CLASS_CAST_EXCEPTION;
 
     String anotherPath;
     afile->GetPath(&anotherPath);

@@ -110,7 +110,7 @@ ECode CFloat::CompareTo(
 
     IFloat* other = (IFloat*)_other->Probe(EIID_IFloat);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Float otherValue;
     other->GetValue(&otherValue);

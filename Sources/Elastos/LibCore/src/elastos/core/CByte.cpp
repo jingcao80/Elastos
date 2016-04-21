@@ -91,7 +91,7 @@ ECode CByte::CompareTo(
 
     IByte* other = (IByte*)_other->Probe(EIID_IByte);
     if (other == NULL) {
-        return NOERROR;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Byte otherValue;
     other->GetValue(&otherValue);

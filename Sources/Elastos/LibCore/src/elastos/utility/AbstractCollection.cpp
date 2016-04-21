@@ -74,7 +74,7 @@ ECode AbstractCollection::Clear()
     while ((it->HasNext(&hasnext), hasnext)) {
         AutoPtr<IInterface> nextobject;
         it->GetNext((IInterface**)&nextobject);
-        it->Remove();
+        FAIL_RETURN(it->Remove());
     }
     return NOERROR;
 }

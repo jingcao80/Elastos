@@ -205,7 +205,7 @@ ECode Date::CompareTo(
 
     AutoPtr<IDate> date = IDate::Probe(_date);
     if (date == NULL) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        return E_CLASS_CAST_EXCEPTION;
     }
     Int64 otherTime;
     date->GetTime(&otherTime);
