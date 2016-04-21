@@ -3,11 +3,14 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
-    merge("car/Am.car");
+    merge("../../../../../car/elastos/droid/commands/am/Am.car");
 
     using interface Elastos.Droid.App.IIActivityController;
-    using interface Elastos.Droid.Content.IIntentReceiver;
+    using interface Elastos.Droid.App.IIActivityManager;
     using interface Elastos.Droid.App.IInstrumentationWatcher;
+    using interface Elastos.Droid.Content.IIntentReceiver;
+    using interface Elastos.Droid.Internal.Os.IBaseCommand;
+    using interface Elastos.Droid.Os.IBinder;
 
     namespace Elastos {
     namespace Droid {
@@ -16,28 +19,27 @@ module
 
         singleton class CAm {
             interface IAm;
+            interface IBaseCommand;
         }
 
         class CMyActivityController {
             constructor(
-                [in] Handle32 am);
-
-            constructor(
-                [in] Handle32 am,
+                [in] IIActivityManager* am,
                 [in] String gdbPort);
-
             interface IIActivityController;
+            interface IBinder;
         }
 
         class CIntentReceiver {
+            constructor();
             interface IIntentReceiver;
+            interface IBinder;
         }
 
         class CInstrumentationWatcher {
-            constructor(
-                [in] Handle32 am);
-
+            constructor();
             interface IInstrumentationWatcher;
+            interface IBinder;
         }
 
     } // namespace Am
