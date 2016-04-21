@@ -1,17 +1,21 @@
 
-#include "elastos/droid/os/BatteryStatsImpl.h"
+#include "elastos/droid/internal/os/BatteryStatsImpl.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/utility/TimeUtils.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CAtomicFile.h"
 #include "elastos/droid/net/CNetworkStatsFactory.h"
 #include "elastos/droid/net/CConnectivityManagerHelper.h"
 #include "elastos/droid/net/CNetworkStats.h"
 #include "elastos/droid/net/CNetworkStatsEntry.h"
 #include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/view/Display.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::ICharSequence;
@@ -22,6 +26,8 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::IThread;
 using Elastos::Core::CThread;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::IO::CFileInputStream;
@@ -34,19 +40,28 @@ using Elastos::IO::IStringWriter;
 using Elastos::IO::CStringWriter;
 using Elastos::IO::CPrintWriter;
 using Elastos::IO::IFlushable;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Bluetooth::IBluetoothDevice;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Net::IConnectivityManagerHelper;
 using Elastos::Droid::Net::CConnectivityManagerHelper;
 using Elastos::Droid::Net::CNetworkStatsEntry;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::View::IDisplay;
+using Elastos::Droid::View::Display;
+using Elastos::Droid::Utility::ISparseInt32Array;
 using Elastos::Droid::Internal::Net::CNetworkStatsFactory;
 using Elastos::Droid::Net::CNetworkStats;
 using Elastos::Droid::Telephony::ITelephonyManager;
@@ -55,6 +70,7 @@ using Elastos::Droid::Text::Format::IDateUtils;
 
 namespace Elastos {
 namespace Droid {
+namespace Internal {
 namespace Os {
 
 //==============================================================================
@@ -3495,6 +3511,8 @@ BatteryStatsImpl::BatteryStatsImpl()
     , mPhoneSimStateRaw(-1)
     , mLastWakeupUptimeMs(0)
     , mChangedStates(0)
+    , mChangedStates2(0)
+    , mInitialAcquireWakeUid(-1)
     , mWakeLockNesting(0)
     , mSensorNesting(0)
     , mGpsNesting(0)
@@ -4041,141 +4059,346 @@ void BatteryStatsImpl::WriteHistoryDelta(
     /* [in] */ HistoryItem* cur,
     /* [in] */ HistoryItem* last)
 {
-    // begin from this
     if (last == NULL || cur->mCmd != HistoryItem::CMD_UPDATE) {
-        dest.writeInt(DELTA_TIME_ABS);
-        cur.writeToParcel(dest, 0);
+        dest->WriteInt32(DELTA_TIME_ABS);
+        cur->WriteToParcel(dest);
         return;
     }
 
-    final long deltaTime = cur.time - last.time;
-    final int lastBatteryLevelInt = buildBatteryLevelInt(last);
-    final int lastStateInt = buildStateInt(last);
+    Int64 deltaTime = cur->mTime - last->mTime;
+    Int32 lastBatteryLevelInt = BuildBatteryLevelInt(last);
+    int32 lastStateInt = BuildStateInt(last);
 
-    int deltaTimeToken;
-    if (deltaTime < 0 || deltaTime > Integer.MAX_VALUE) {
+    Int32 deltaTimeToken;
+    if (deltaTime < 0 || deltaTime > Elastos::Core::Math::INT32_MAX_VALUE) {
         deltaTimeToken = DELTA_TIME_LONG;
-    } else if (deltaTime >= DELTA_TIME_ABS) {
-        deltaTimeToken = DELTA_TIME_INT;
-    } else {
-        deltaTimeToken = (int)deltaTime;
     }
-    int firstToken = deltaTimeToken | (cur.states&DELTA_STATE_MASK);
-    final int batteryLevelInt = buildBatteryLevelInt(cur);
-    final boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
+    else if (deltaTime >= DELTA_TIME_ABS) {
+        deltaTimeToken = DELTA_TIME_INT;
+    }
+    else {
+        deltaTimeToken = (Int32)deltaTime;
+    }
+    Int32 firstToken = deltaTimeToken | (cur->mStates & DELTA_STATE_MASK);
+    Int32 batteryLevelInt = BuildBatteryLevelInt(cur);
+    Boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
     if (batteryLevelIntChanged) {
         firstToken |= DELTA_BATTERY_LEVEL_FLAG;
     }
-    final int stateInt = buildStateInt(cur);
-    final boolean stateIntChanged = stateInt != lastStateInt;
+    Int32 stateInt = BuildStateInt(cur);
+    Boolean stateIntChanged = stateInt != lastStateInt;
     if (stateIntChanged) {
         firstToken |= DELTA_STATE_FLAG;
     }
-    final boolean state2IntChanged = cur.states2 != last.states2;
+    Boolean state2IntChanged = cur->mStates2 != last->mStates2;
     if (state2IntChanged) {
         firstToken |= DELTA_STATE2_FLAG;
     }
-    if (cur.wakelockTag != null || cur.wakeReasonTag != null) {
+    if (cur->mWakelockTag != NULL || cur->mWakeReasonTag != NULL) {
         firstToken |= DELTA_WAKELOCK_FLAG;
     }
-    if (cur.eventCode != HistoryItem.EVENT_NONE) {
+    if (cur->mEventCode != HistoryItem::EVENT_NONE) {
         firstToken |= DELTA_EVENT_FLAG;
     }
-    dest.writeInt(firstToken);
-    if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
-            + " deltaTime=" + deltaTime);
+    dest->WriteInt32(firstToken);
+    if (DEBUG)
+        Slogger::I(TAG, "WRITE DELTA: firstToken=0x%s deltaTime=%d",
+                StringUtils::ToHexString(firstToken).string(), deltaTime);
 
     if (deltaTimeToken >= DELTA_TIME_INT) {
         if (deltaTimeToken == DELTA_TIME_INT) {
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: int deltaTime=" + (int)deltaTime);
-            dest.writeInt((int)deltaTime);
-        } else {
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: long deltaTime=" + deltaTime);
-            dest.writeLong(deltaTime);
+            if (DEBUG) Slogger::I(TAG, "WRITE DELTA: int deltaTime=%d", (Int32)deltaTime);
+            dest->WriteInt32((Int32)deltaTime);
+        }
+        else {
+            if (DEBUG) Slogger::I(TAG, "WRITE DELTA: long deltaTime=%d", deltaTime);
+            dest->WriteInt64(deltaTime);
         }
     }
     if (batteryLevelIntChanged) {
-        dest.writeInt(batteryLevelInt);
-        if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryToken=0x"
-                + Integer.toHexString(batteryLevelInt)
-                + " batteryLevel=" + cur.batteryLevel
-                + " batteryTemp=" + cur.batteryTemperature
-                + " batteryVolt=" + (int)cur.batteryVoltage);
+        dest->WriteInt32(batteryLevelInt);
+        if (DEBUG)
+            Slogger::I(TAG, "WRITE DELTA: batteryToken=0x%s batteryLevel=%d batteryTemp=%d batteryVolt=%d",
+                    StringUtils::ToHexString(batteryLevelInt).string(), cur->mBatteryLevel, cur->mBatteryTemperature,
+                    (Int32)cur->mBatteryVoltage);
     }
     if (stateIntChanged) {
-        dest.writeInt(stateInt);
-        if (DEBUG) Slog.i(TAG, "WRITE DELTA: stateToken=0x"
-                + Integer.toHexString(stateInt)
-                + " batteryStatus=" + cur.batteryStatus
-                + " batteryHealth=" + cur.batteryHealth
-                + " batteryPlugType=" + cur.batteryPlugType
-                + " states=0x" + Integer.toHexString(cur.states));
+        dest->WriteInt32(stateInt);
+        if (DEBUG)
+            Slogger::I(TAG, "WRITE DELTA: stateToken=0x%s batteryStatus=%d batteryHealth=%d batteryPlugType=%d states=0x%s",
+                    StringUtils::ToHexString(stateInt).string(), cur->mBatteryStatus, cur->mBatteryHealth,
+                    (Int32)cur->mBatteryPlugType, StringUtils::ToHexString(cur->mStates).string());
     }
     if (state2IntChanged) {
-        dest.writeInt(cur.states2);
-        if (DEBUG) Slog.i(TAG, "WRITE DELTA: states2=0x"
-                + Integer.toHexString(cur.states2));
+        dest->WriteInt32(cur.states2);
+        if (DEBUG)
+            Slogger::I(TAG, "WRITE DELTA: states2=0x%s", StringUtils::ToHexString(cur->mStates2).string());
     }
-    if (cur.wakelockTag != null || cur.wakeReasonTag != null) {
-        int wakeLockIndex;
-        int wakeReasonIndex;
-        if (cur.wakelockTag != null) {
-            wakeLockIndex = writeHistoryTag(cur.wakelockTag);
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
-                + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
-        } else {
+    if (cur->mWakelockTag != NULL || cur->mWakeReasonTag != NULL) {
+        Int32 wakeLockIndex;
+        Int32 wakeReasonIndex;
+        if (cur->mWakelockTag != NULL) {
+            wakeLockIndex = WriteHistoryTag(cur->mWakelockTag);
+            if (DEBUG)
+                Slogger::I(TAG, "WRITE DELTA: wakelockTag=#%d %d:%s",
+                        cur->mWakelockTag->mPoolIdx, cur->mWakelockTag->mUid, cur->mWakelockTag->mString.string());
+        }
+        else {
             wakeLockIndex = 0xffff;
         }
-        if (cur.wakeReasonTag != null) {
-            wakeReasonIndex = writeHistoryTag(cur.wakeReasonTag);
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: wakeReasonTag=#" + cur.wakeReasonTag.poolIdx
-                + " " + cur.wakeReasonTag.uid + ":" + cur.wakeReasonTag.string);
-        } else {
+        if (cur->mWakeReasonTag != NULL) {
+            wakeReasonIndex = WriteHistoryTag(cur->mWakeReasonTag);
+            if (DEBUG)
+                Slogger::I(TAG, "WRITE DELTA: wakeReasonTag=#%d %d:%s",
+                        cur->mWakeReasonTag->mPoolIdx, , cur->mWakeReasonTag->mUid, cur->mWakeReasonTag->mString.string());
+        }
+        else {
             wakeReasonIndex = 0xffff;
         }
-        dest.writeInt((wakeReasonIndex<<16) | wakeLockIndex);
+        dest->WriteInt32((wakeReasonIndex << 16) | wakeLockIndex);
     }
-    if (cur.eventCode != HistoryItem.EVENT_NONE) {
-        int index = writeHistoryTag(cur.eventTag);
-        int codeAndIndex = (cur.eventCode&0xffff) | (index<<16);
-        dest.writeInt(codeAndIndex);
-        if (DEBUG) Slog.i(TAG, "WRITE DELTA: event=" + cur.eventCode + " tag=#"
-                + cur.eventTag.poolIdx + " " + cur.eventTag.uid + ":"
-                + cur.eventTag.string);
+    if (cur->mEventCode != HistoryItem::EVENT_NONE) {
+        Int32 index = WriteHistoryTag(cur->mEventTag);
+        Int32 codeAndIndex = (cur->mEventCode & 0xffff) | (index << 16);
+        dest->WriteInt32(codeAndIndex);
+        if (DEBUG)
+            Slogger::I(TAG, "WRITE DELTA: event=%d tag=#%d %d:%s",
+                    cur->mEventCode, cur->mEventTag->mPoolIdx, cur->mEventTag->mUid, cur->mEventTag->mString.string());
     }
 }
 
+Int32 BatteryStatsImpl::BuildBatteryLevelInt(
+    /* [in] */ HistoryItem* h)
+{
+    return ((((Int32)h->mBatteryLevel) << 25) & 0xfe000000)
+            | ((((Int32)h->mBatteryTemperature) << 14) & 0x01ffc000)
+            | (((Int32)h->mBatteryVoltage) & 0x00003fff);
+}
+
+Int32 BatteryStatsImpl::BuildStateInt(
+    /* [in] */ HistoryItem* h)
+{
+    Int32 plugType = 0;
+    if ((h->mBatteryPlugType & IBatteryManager::BATTERY_PLUGGED_AC) != 0) {
+        plugType = 1;
+    }
+    else if ((h->mBatteryPlugType & IBatteryManager::BATTERY_PLUGGED_USB) != 0) {
+        plugType = 2;
+    }
+    else if ((h->mBatteryPlugType & IBatteryManager::BATTERY_PLUGGED_WIRELESS) != 0) {
+        plugType = 3;
+    }
+    return ((h->mBatteryStatus & STATE_BATTERY_STATUS_MASK) << STATE_BATTERY_STATUS_SHIFT)
+            | ((h->mBatteryHealth & STATE_BATTERY_HEALTH_MASK) << STATE_BATTERY_HEALTH_SHIFT)
+            | ((plugType & STATE_BATTERY_PLUG_MASK) << STATE_BATTERY_PLUG_SHIFT)
+            | (h->mStates & (~DELTA_STATE_MASK));
+}
+
+void BatteryStatsImpl::ReadHistoryDelta(
+    /* [in] */ IParcel* src,
+    /* [in] */ HistoryItem* cur)
+{
+    Int32 firstToken;
+    src->ReadInt32(&firstToken);
+    Int32 deltaTimeToken = firstToken & DELTA_TIME_MASK;
+    cur->mCmd = HistoryItem::CMD_UPDATE;
+    cur->mNumReadInts = 1;
+    if (DEBUG)
+        Slogger::I(TAG, "READ DELTA: firstToken=0x%s deltaTimeToken=%d",
+                StringUtils::ToHexString(firstToken).string(), deltaTimeToken);
+
+    if (deltaTimeToken < DELTA_TIME_ABS) {
+        cur->mTime += deltaTimeToken;
+    }
+    else if (deltaTimeToken == DELTA_TIME_ABS) {
+        src->ReadInt64(&cur->mTime);
+        cur->mNumReadInts += 2;
+        if (DEBUG)
+            Slogger::I(TAG, "READ DELTA: ABS time=%d", cur->mTime);
+        cur->ReadFromParcel(src);
+        return;
+    }
+    else if (deltaTimeToken == DELTA_TIME_INT) {
+        Int32 delta;
+        src->ReadInt32(&delta);
+        cur->mTime += delta;
+        cur->mNumReadInts += 1;
+        if (DEBUG) Slogger::I(TAG, "READ DELTA: time delta=%d new time=%d", delta, cur->mTime);
+    }
+    else {
+        Int64 delta;
+        src->ReadInt64(&delta);
+        if (DEBUG) Slogger::I(TAG, "READ DELTA: time delta=%d new time=%d", delta, cur->mTime);
+        cur->mTime += delta;
+        cur->mNumReadInts += 2;
+    }
+
+    if ((firstToken & DELTA_BATTERY_LEVEL_FLAG) != 0) {
+        Int32 batteryLevelInt;
+        src->ReadInt32(&batteryLevelInt);
+        cur->mBatteryLevel = (Byte)((batteryLevelInt >> 25) & 0x7f);
+        cur->mBatteryTemperature = (Char32)((batteryLevelInt << 7) >> 21);
+        cur->mBatteryVoltage = (Char32)(batteryLevelInt & 0x3fff);
+        cur->mNumReadInts += 1;
+        if (DEBUG)
+            Slogger::I(TAG, "READ DELTA: batteryToken=0x%s batteryLevel=%d batteryTemp=%d batteryVolt=%d",
+                    StringUtils::ToHexString(batteryLevelInt).string(), cur->mBatteryLevel, cur->mBatteryTemperature,
+                    (Int32)cur->mBatteryVoltage);
+    }
+
+    if ((firstToken & DELTA_STATE_FLAG) != 0) {
+        Int32 stateInt;
+        src->ReadInt32(&stateInt);
+        cur->mStates = (firstToken & DELTA_STATE_MASK) | (stateInt & (~DELTA_STATE_MASK));
+        cur->mBatteryStatus = (Byte)((stateInt >> STATE_BATTERY_STATUS_SHIFT)
+                & STATE_BATTERY_STATUS_MASK);
+        cur->mBatteryHealth = (Byte)((stateInt >> STATE_BATTERY_HEALTH_SHIFT)
+                & STATE_BATTERY_HEALTH_MASK);
+        cur->mBatteryPlugType = (Byte)((stateInt >> STATE_BATTERY_PLUG_SHIFT)
+                & STATE_BATTERY_PLUG_MASK);
+        switch (cur->mBatteryPlugType) {
+            case 1:
+                cur->mBatteryPlugType = IBatteryManager::BATTERY_PLUGGED_AC;
+                break;
+            case 2:
+                cur->mBatteryPlugType = IBatteryManager::BATTERY_PLUGGED_USB;
+                break;
+            case 3:
+                cur->mBatteryPlugType = IBatteryManager::BATTERY_PLUGGED_WIRELESS;
+                break;
+        }
+        cur->mNumReadInts += 1;
+        if (DEBUG)
+            Slogger::I(TAG, "READ DELTA: stateToken=0x%s batteryStatus=%d batteryHealth=%d batteryPlugType=%d states=0x%s",
+                    StringUtils::ToHexString(stateInt).string(), cur->mBatteryStatus, cur->mBatteryHealth,
+                    cur->mBatteryPlugType, StringUtils::ToHexString(cur->mStarts).string());
+    }
+    else {
+        cur->mStates = (firstToken & DELTA_STATE_MASK) | (cur->mStates & (~DELTA_STATE_MASK));
+    }
+
+    if ((firstToken & DELTA_STATE2_FLAG) != 0) {
+        src->ReadInt32(&cur->mStates2);
+        if (DEBUG) Slogger::I(TAG, "READ DELTA: states2=0x%s", StringUtils::ToHexString(cur->mStates2).string());
+    }
+
+    if ((firstToken & DELTA_WAKELOCK_FLAG) != 0) {
+        Int32 indexes;
+        src->ReadInt32(&indexes);
+        Int32 wakeLockIndex = indexes & 0xffff;
+        Int32 wakeReasonIndex = (indexes >> 16) & 0xffff;
+        if (wakeLockIndex != 0xffff) {
+            cur->mWakelockTag = cur->mLocalWakelockTag;
+            ReadHistoryTag(wakeLockIndex, cur->mWakelockTag);
+            if (DEBUG)
+                Slogger::I(TAG, "READ DELTA: wakelockTag=#%d %d:%s",
+                        cur->mWakelockTag-mPoolIdx, cur->mWakelockTag->mUid, cur->mWakelockTag->mString.string());
+        }
+        else {
+            cur->mWakelockTag = NULL;
+        }
+        if (wakeReasonIndex != 0xffff) {
+            cur->mWakeReasonTag = cur->mLocalWakeReasonTag;
+            ReadHistoryTag(wakeReasonIndex, cur->mWakeReasonTag);
+            if (DEBUG)
+                Slogger::I(TAG, "READ DELTA: wakeReasonTag=#%d %d:%s",
+                        cur->mWakeReasonTag-mPoolIdx, cur->mWakeReasonTag->mUid, cur->mWakeReasonTag->mString.string());
+        }
+        else {
+            cur->mWakeReasonTag = NULL;
+        }
+        cur->mNumReadInts += 1;
+    }
+    else {
+        cur->mWakelockTag = NULL;
+        cur->mWakeReasonTag = NULL;
+    }
+
+    if ((firstToken & DELTA_EVENT_FLAG) != 0) {
+        cur->mEventTag = cur->mLocalEventTag;
+        Int32 codeAndIndex;
+        src->ReadInt32(&codeAndIndex);
+        cur->mEventCode = (codeAndIndex & 0xffff);
+        Int32 index = ((codeAndIndex >> 16) & 0xffff);
+        ReadHistoryTag(index, cur->mEventTag);
+        cur->mNumReadInts += 1;
+        if (DEBUG)
+            Slogger::I(TAG, "READ DELTA: event=%d tag=#%d %d:%s",
+                cur->mEventCode, cur->mEventTag->mPoolIdx, cur->mEventTag->mUid, cur->mEventTag->mString.string());
+    }
+    else {
+        cur->mEventCode = HistoryItem::EVENT_NONE;
+    }
+}
+
+void BatteryStatsImpl::CommitCurrentHistoryBatchLocked()
+{
+    mHistoryLastWritten->mCmd = HistoryItem::CMD_NULL;
+}
+
 void BatteryStatsImpl::AddHistoryBufferLocked(
-    /* [in] */ Int64 curTime)
+    /* [in] */ Int64 elapsedRealtimeMs,
+    /* [in] */ Int64 uptimeMs,
+    /* [in] */ HistoryItem* cur)
 {
     if (!mHaveBatteryLevel || !mRecordingHistory) {
         return;
     }
 
-    Int64 timeDiff = (mHistoryBaseTime+curTime) - mHistoryLastWritten->mTime;
+    Int64 timeDiff = (mHistoryBaseTime + elapsedRealtimeMs) - mHistoryLastWritten->mTime;
+    Int32 diffStates = mHistoryLastWritten->mStates ^ cur->mStates;
+    Int32 diffStates2 = mHistoryLastWritten->mStates2 ^ cur->mStates2;
+    Int32 lastDiffStates = mHistoryLastWritten->mStates ^ mHistoryLastLastWritten->mStates;
+    Int32 lastDiffStates2 = mHistoryLastWritten->mStates2 ^ mHistoryLastLastWritten->mStates2;
+    if (DEBUG)
+        Slogger::I(TAG, "ADD: tdelta=%d diff=%s lastDiff=%s diff2=%s lastDiff2=%s",
+                timeDiff, StringUtils::ToHexString(diffStates).string(), StringUtils::ToHexString(lastDiffStates).string(),
+                StringUtils::ToHexString(diffStates2).string(), StringUtils::ToHexString(lastDiffStates2).string());
     if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten->mCmd == HistoryItem::CMD_UPDATE
-            && timeDiff < 2000
-            && ((mHistoryLastWritten->mStates ^ mHistoryCur->mStates)&mChangedBufferStates) == 0) {
-        // If the current is the same as the one before, then we no
-        // longer need the entry.
-        // mHistoryBuffer->SetDataSize(mHistoryBufferLastPos);
+            && timeDiff < 1000 && (diffStates & lastDiffStates) == 0
+            && (diffStates2 & lastDiffStates2) == 0
+            && (mHistoryLastWritten->mWakelockTag == NULL || cur->mWakelockTag == NULL)
+            && (mHistoryLastWritten->mWakeReasonTag == NULL || cur->mWakeReasonTag == NULL)
+            && (mHistoryLastWritten->mEventCode == HistoryItem::EVENT_NONE
+                    || cur->mEventCode == HistoryItem::EVENT_NONE)
+            && mHistoryLastWritten->mBatteryLevel == cur->mBatteryLevel
+            && mHistoryLastWritten->mBatteryStatus == cur->mBatteryStatus
+            && mHistoryLastWritten->mBatteryHealth == cur->mBatteryHealth
+            && mHistoryLastWritten->mBatteryPlugType == cur->mBatteryPlugType
+            && mHistoryLastWritten->mBatteryTemperature == cur->mBatteryTemperature
+            && mHistoryLastWritten->mBatteryVoltage == cur->mBatteryVoltage) {
+        // We can merge this new change in with the last one.  Merging is
+        // allowed as long as only the states have changed, and within those states
+        // as long as no bit has changed both between now and the last entry, as
+        // well as the last entry and the one before it (so we capture any toggles).
+        if (DEBUG) Slogger::I(TAG, "ADD: rewinding back to %d", mHistoryBufferLastPos);
+        mHistoryBuffer->SetDataSize(mHistoryBufferLastPos);
         mHistoryBuffer->SetDataPosition(mHistoryBufferLastPos);
         mHistoryBufferLastPos = -1;
-        if (mHistoryLastLastWritten->mCmd == HistoryItem::CMD_UPDATE
-                && timeDiff < 500 && mHistoryLastLastWritten->Same(mHistoryCur)) {
-            // If this results in us returning to the state written
-            // prior to the last one, then we can just delete the last
-            // written one and drop the new one.  Nothing more to do.
-            mHistoryLastWritten->SetTo(mHistoryLastLastWritten);
-            mHistoryLastLastWritten->mCmd = HistoryItem::CMD_NULL;
-            return;
+        elapsedRealtimeMs = mHistoryLastWritten->mTime - mHistoryBaseTime;
+        // If the last written history had a wakelock tag, we need to retain it.
+        // Note that the condition above made sure that we aren't in a case where
+        // both it and the current history item have a wakelock tag.
+        if (mHistoryLastWritten->mWakelockTag != NULL) {
+            cur->mWakelockTag = cur->mLocalWakelockTag;
+            cur->mWakelockTag->SetTo(mHistoryLastWritten->mWakelockTag);
         }
-        mChangedBufferStates |= mHistoryLastWritten->mStates ^ mHistoryCur->mStates;
-        curTime = mHistoryLastWritten->mTime - mHistoryBaseTime;
+        // If the last written history had a wake reason tag, we need to retain it.
+        // Note that the condition above made sure that we aren't in a case where
+        // both it and the current history item have a wakelock tag.
+        if (mHistoryLastWritten->mWakeReasonTag != NULL) {
+            cur->mWakeReasonTag = cur->mLocalWakeReasonTag;
+            cur->mWakeReasonTag->SetTo(mHistoryLastWritten->mWakeReasonTag);
+        }
+        // If the last written history had an event, we need to retain it.
+        // Note that the condition above made sure that we aren't in a case where
+        // both it and the current history item have an event.
+        if (mHistoryLastWritten->mEventCode != HistoryItem::EVENT_NONE) {
+            cur->mEventCode = mHistoryLastWritten->mEventCode;
+            cur->mEventTag = cur->mLocalEventTag;
+            cur->mEventTag->SetTo(mHistoryLastWritten->mEventTag);
+        }
         mHistoryLastWritten->SetTo(mHistoryLastLastWritten);
-    }
-    else {
-        mChangedBufferStates = 0;
     }
 
     Int32 dataSize;
@@ -4183,62 +4406,96 @@ void BatteryStatsImpl::AddHistoryBufferLocked(
     if (dataSize >= MAX_HISTORY_BUFFER) {
         if (!mHistoryOverflow) {
             mHistoryOverflow = TRUE;
-            AddHistoryBufferLocked(curTime, HistoryItem::CMD_OVERFLOW);
+            AddHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem::CMD_UPDATE, cur);
+            AddHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem::CMD_OVERFLOW, cur);
+            return;
         }
 
         // Once we've reached the maximum number of items, we only
         // record changes to the battery level and the most interesting states.
         // Once we've reached the maximum maximum number of items, we only
         // record changes to the battery level.
-        if (mHistoryLastWritten->mBatteryLevel == mHistoryCur->mBatteryLevel &&
+        if (mHistoryLastWritten->mBatteryLevel == cur->mBatteryLevel &&
                 (dataSize >= MAX_MAX_HISTORY_BUFFER
-                        || ((mHistoryLastWritten->mStates ^ mHistoryCur->mStates)
-                                & HistoryItem::MOST_INTERESTING_STATES) == 0)) {
+                        || ((mHistoryLastWritten->mStates ^ cur->mStates)
+                                & HistoryItem::MOST_INTERESTING_STATES) == 0
+                        || ((mHistoryLastWritten->mStates2 ^ cur->mStates2)
+                                & HistoryItem::MOST_INTERESTING_STATES2) == 0)) {
             return;
         }
+
+        AddHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem::CMD_UPDATE, cur);
+        return;
     }
 
-    AddHistoryBufferLocked(curTime, HistoryItem::CMD_UPDATE);
+    if (dataSize == 0) {
+        // The history is currently empty; we need it to start with a time stamp.
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        sys->GetCurrentTimeMillis(&cur->mCurrentTime);
+        mLastRecordedClockTime = cur->mCurrentTime;
+        mLastRecordedClockRealtime = elapsedRealtimeMs;
+        AddHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem::CMD_RESET, cur);
+    }
+    AddHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem::CMD_UPDATE, cur);
 }
 
-void BatteryStatsImpl::AddHistoryBufferLocked(
-    /* [in] */ Int64 curTime,
-    /* [in] */ Byte cmd)
+ECode BatteryStatsImpl::AddHistoryBufferLocked(
+    /* [in] */ Int64 elapsedRealtimeMs,
+    /* [in] */ Int64 uptimeMs,
+    /* [in] */ Byte cmd,
+    /* [in] */ HistoryItem* cur)
 {
-    Int32 origPos = 0;
     if (mIteratingHistory) {
-        mHistoryBuffer->GetDataPosition(&origPos);
-        Int32 size;
-        mHistoryBuffer->GetElementSize(&size);
-        mHistoryBuffer->SetDataPosition(size);
+        Slogger::E(TAG, "Can't do this while iterating history!");
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
     mHistoryBuffer->GetDataPosition(&mHistoryBufferLastPos);
     mHistoryLastLastWritten->SetTo(mHistoryLastWritten);
-    mHistoryLastWritten->SetTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
-    mHistoryLastWritten->WriteDelta(mHistoryBuffer, mHistoryLastLastWritten);
-    mLastHistoryTime = curTime;
+    mHistoryLastWritten->SetTo(mHistoryBaseTime + elapsedRealtimeMs, cmd, cur);
+    WriteHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
+    mLastHistoryElapsedRealtime = elapsedRealtimeMs;
+    cur->mWakelockTag = NULL;
+    cur->mWakeReasonTag = NULL;
+    cur->mEventCode = HistoryItem::EVENT_NONE;
+    cur->mEventTag = NULL;
     if (DEBUG_HISTORY) {
-        StringBuilder sb("Writing history buffer: was ");
-        sb += mHistoryBufferLastPos;
-        sb += " now ";
-        Int32 position;
-        mHistoryBuffer->GetDataPosition(&position);
-        sb += position;
-        sb += " size is now ";
         Int32 size;
         mHistoryBuffer->GetElementSize(&size);
-        sb += size;
-        Logger::I(TAG, sb.ToString());
-    }
-    if (mIteratingHistory) {
-        mHistoryBuffer->SetDataPosition(origPos);
+        Slogger::I(TAG, "Writing history buffer: was %d now %d size is now %d",
+                mHistoryBufferLastPos, mHistoryBufferLastPos, size);
     }
 }
 
 void BatteryStatsImpl::AddHistoryRecordLocked(
-    /* [in] */ Int64 curTime)
+    /* [in] */ Int64 elapsedRealtimeMs,
+    /* [in] */ Int64 uptimeMs)
 {
-    AddHistoryBufferLocked(curTime);
+    if (mTrackRunningHistoryElapsedRealtime != 0) {
+        Int64 diffElapsed = elapsedRealtimeMs - mTrackRunningHistoryElapsedRealtime;
+        Int64 diffUptime = uptimeMs - mTrackRunningHistoryUptime;
+        if (diffUptime < (diffElapsed-20)) {
+            Int64 wakeElapsedTime = elapsedRealtimeMs - (diffElapsed - diffUptime);
+            mHistoryAddTmp->SetTo(mHistoryLastWritten);
+            mHistoryAddTmp->mWakelockTag = NULL;
+            mHistoryAddTmp->mWakeReasonTag = NULL;
+            mHistoryAddTmp->mEventCode = HistoryItem::EVENT_NONE;
+            mHistoryAddTmp->mStates &= ~HistoryItem::STATE_CPU_RUNNING_FLAG;
+            AddHistoryRecordInnerLocked(wakeElapsedTime, uptimeMs, mHistoryAddTmp);
+        }
+    }
+    mHistoryCur->mStates |= HistoryItem::STATE_CPU_RUNNING_FLAG;
+    mTrackRunningHistoryElapsedRealtime = elapsedRealtimeMs;
+    mTrackRunningHistoryUptime = uptimeMs;
+    AddHistoryRecordInnerLocked(elapsedRealtimeMs, uptimeMs, mHistoryCur);
+}
+
+void BatteryStatsImpl::AddHistoryRecordInnerLocked(
+    /* [in] */ Int64 curTime,
+    /* [in] */ Int64 uptimeMs,
+    /* [in] */ HistoryItem* cur)
+{
+    AddHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, cur);
 
     if (!USE_OLD_HISTORY) {
         return;
@@ -4253,13 +4510,14 @@ void BatteryStatsImpl::AddHistoryRecordLocked(
     // are now resetting back to their original value, then just collapse
     // into one record.
     if (mHistoryEnd != NULL && mHistoryEnd->mCmd == HistoryItem::CMD_UPDATE
-            && (mHistoryBaseTime+curTime) < (mHistoryEnd->mTime + 2000)
-            && ((mHistoryEnd->mStates ^ mHistoryCur->mStates) & mChangedStates) == 0) {
+            && (mHistoryBaseTime + elapsedRealtimeMs) < (mHistoryEnd->mTime + 1000)
+            && ((mHistoryEnd->mStates ^ cur->mStates) & mChangedStates) == 0
+            && ((mHistoryEnd->mStates2 ^ cur->mStates2) & mChangedStates2) == 0) {
         // If the current is the same as the one before, then we no
         // longer need the entry.
         if (mHistoryLastEnd != NULL && mHistoryLastEnd->mCmd == HistoryItem::CMD_UPDATE
-                && (mHistoryBaseTime + curTime) < (mHistoryEnd->mTime + 500)
-                && mHistoryLastEnd->Same(mHistoryCur)) {
+                && (mHistoryBaseTime + elapsedRealtimeMs) < (mHistoryEnd->mTime + 500)
+                && mHistoryLastEnd->SameNonEvent(cur)) {
             mHistoryLastEnd->mNext = NULL;
             mHistoryEnd->mNext = mHistoryCache;
             mHistoryCache = mHistoryEnd;
@@ -4267,17 +4525,19 @@ void BatteryStatsImpl::AddHistoryRecordLocked(
             mHistoryLastEnd = NULL;
         }
         else {
-            mChangedStates |= mHistoryEnd->mStates ^ mHistoryCur->mStates;
-            mHistoryEnd->SetTo(mHistoryEnd->mTime, HistoryItem::CMD_UPDATE, mHistoryCur);
+            mChangedStates |= mHistoryEnd->mStates ^ cur->mStates;
+            mChangedStates2 |= mHistoryEnd->mStates ^ cur->mStates2;
+            mHistoryEnd->SetTo(mHistoryEnd->mTime, HistoryItem::CMD_UPDATE, cur);
         }
         return;
     }
 
     mChangedStates = 0;
+    mChangedStates2 = 0;
 
     if (mNumHistoryItems == MAX_HISTORY_ITEMS
             || mNumHistoryItems == MAX_MAX_HISTORY_ITEMS) {
-        AddHistoryRecordLocked(curTime, HistoryItem::CMD_OVERFLOW);
+        AddHistoryRecordLocked(elapsedRealtimeMs, HistoryItem::CMD_OVERFLOW);
     }
 
     if (mNumHistoryItems >= MAX_HISTORY_ITEMS) {
@@ -4286,20 +4546,36 @@ void BatteryStatsImpl::AddHistoryRecordLocked(
         // Once we've reached the maximum maximum number of items, we only
         // record changes to the battery level.
         if (mHistoryEnd != NULL && mHistoryEnd->mBatteryLevel
-                == mHistoryCur->mBatteryLevel &&
+                == cur->mBatteryLevel &&
                 (mNumHistoryItems >= MAX_MAX_HISTORY_ITEMS
-                        || ((mHistoryEnd->mStates ^ mHistoryCur->mStates)
+                        || ((mHistoryEnd->mStates ^ cur->mStates)
                                 & HistoryItem::MOST_INTERESTING_STATES) == 0)) {
             return;
         }
     }
 
-    AddHistoryRecordLocked(curTime, HistoryItem::CMD_UPDATE);
+    AddHistoryRecordLocked(elapsedRealtimeMs, HistoryItem::CMD_UPDATE);
+}
+
+void BatteryStatsImpl::AddHistoryEventLocked(
+    /* [in] */ Int64 elapsedRealtimeMs,
+    /* [in] */ Int64 uptimeMs,
+    /* [in] */ Int32 code,
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    mHistoryCur->mEventCode = code;
+    mHistoryCur->mEventTag = mHistoryCur->mLocalEventTag;
+    mHistoryCur->mEventTag->mString = name;
+    mHistoryCur->mEventTag->mUid = uid;
+    AddHistoryRecordLocked(elapsedRealtimeMs, uptimeMs);
 }
 
 void BatteryStatsImpl::AddHistoryRecordLocked(
-    /* [in] */ Int64 curTime,
-    /* [in] */ Byte cmd)
+    /* [in] */ Int64 elapsedRealtimeMs,
+    /* [in] */ Int64 uptimeMs,
+    /* [in] */ Byte cmd,
+    /* [in] */ HistoryItem* cur)
 {
     AutoPtr<HistoryItem> rec = mHistoryCache;
     if (rec != NULL) {
@@ -4308,7 +4584,7 @@ void BatteryStatsImpl::AddHistoryRecordLocked(
     else {
         rec = new HistoryItem();
     }
-    rec->SetTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
+    rec->SetTo(mHistoryBaseTime + elapsedRealtimeMs, cmd, cur);
 
     AddHistoryRecordLocked(rec);
 }
@@ -4341,169 +4617,381 @@ void BatteryStatsImpl::ClearHistoryLocked()
     }
 
     mHistoryBaseTime = 0;
-    mLastHistoryTime = 0;
+    mLastHistoryElapsedRealtime = 0;
+    mTrackRunningHistoryElapsedRealtime = 0;
+    mTrackRunningHistoryUptime = 0;
 
     // mHistoryBuffer->SetDataSize(0);
     mHistoryBuffer->SetDataPosition(0);
     // mHistoryBuffer->SetDataCapacity(MAX_HISTORY_BUFFER / 2);
-    mHistoryLastLastWritten->mCmd = HistoryItem::CMD_NULL;
-    mHistoryLastWritten->mCmd = HistoryItem::CMD_NULL;
+    mHistoryLastLastWritten->Clear();
+    mHistoryLastWritten->Clear();
+    mHistoryTagPool->Clear();
+    mNextHistoryTagIdx = 0;
+    mNumHistoryTagChars = 0;
     mHistoryBufferLastPos = -1;
     mHistoryOverflow = FALSE;
+    mLastRecordedClockTime = 0;
+    mLastRecordedClockRealtime = 0;
 }
 
-void BatteryStatsImpl::DoUnplugLocked(
-    /* [in] */ Int64 batteryUptime,
-    /* [in] */ Int64 batteryRealtime)
+void BatteryStatsImpl::UpdateTimeBasesLocked(
+    /* [in] */ Boolean unplugged,
+    /* [in] */ Boolean screenOff,
+    /* [in] */ Int64 uptime,
+    /* [in] */ Int64 realtime)
 {
-    AutoPtr<INetworkStatsEntry> entry;
-    // Track UID data usage
-    AutoPtr<INetworkStats> uidStats = GetNetworkStatsDetailGroupedByUid();
-    Int32 size;
-    uidStats->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<INetworkStatsEntry> temp;
-        uidStats->GetValues(i, entry, (INetworkStatsEntry**)&temp);
-        entry = temp;
-
-        AutoPtr<Uid> u;
-        Int32 uid;
-        entry->GetUid(&uid);
-        HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Find(uid);
-        if (it == mUidStats.End()) continue;
-        u = it->mSecond;
-
-        entry->GetRxBytes(&u->mStartedTcpBytesReceived);
-        entry->GetTxBytes(&u->mStartedTcpBytesSent);
-        u->mTcpBytesReceivedAtLastUnplug = u->mCurrentTcpBytesReceived;
-        u->mTcpBytesSentAtLastUnplug = u->mCurrentTcpBytesSent;
-    }
-
-    List<AutoPtr<IUnpluggable> >::ReverseIterator rit = mUnpluggables.RBegin();
-    for (; rit != mUnpluggables.REnd(); ++rit) {
-        (*rit)->Unplug(batteryUptime, batteryRealtime);
-    }
-
-    // Track both mobile and total overall data
-    AutoPtr<INetworkStats> ifaceStats = GetNetworkStatsSummary();
-    AutoPtr<IObjectContainer> container;
-    CObjectContainer::New((IObjectContainer**)&container);
-    HashSet<String>::Iterator it = mMobileIfaces.Begin();
-    for (; it != mMobileIfaces.End(); ++it) {
-        AutoPtr<ICharSequence> cs;
-        CString::New(*it, (ICharSequence**)&cs);
-        container->Add((IInterface*)cs);
-    }
-
-    AutoPtr<INetworkStatsEntry> temp;
-    ifaceStats->GetTotal(entry, container, (INetworkStatsEntry**)&temp);
-    entry = temp;
-    Int64 rxBytes, txBytes;
-    entry->GetRxBytes(&rxBytes);
-    entry->GetTxBytes(&txBytes);
-    DoDataUnplug(mMobileDataRx, rxBytes);
-    DoDataUnplug(mMobileDataTx, txBytes);
-
-    temp = NULL;
-    ifaceStats->GetTotal(entry, (INetworkStatsEntry**)&temp);
-    entry = temp;
-    entry->GetRxBytes(&rxBytes);
-    entry->GetTxBytes(&txBytes);
-    DoDataUnplug(mTotalDataRx, rxBytes);
-    DoDataUnplug(mTotalDataTx, txBytes);
-
-    // Track radio awake time
-    mRadioDataStart = GetCurrentRadioDataUptime();
-    mRadioDataUptime = 0;
-
-    // Track bt headset ping count
-    mBluetoothPingStart = GetCurrentBluetoothPingCount();
-    mBluetoothPingCount = 0;
-}
-
-void BatteryStatsImpl::DoPlugLocked(
-    /* [in] */ Int64 batteryUptime,
-    /* [in] */ Int64 batteryRealtime)
-{
-    for (Int32 iu = mUidStats.GetSize() - 1; iu >= 0; iu--) {
-        AutoPtr<Uid> u = mUidStats[iu];
-        if (u->mStartedTcpBytesReceived >= 0) {
-            u->mCurrentTcpBytesReceived = u->ComputeCurrentTcpBytesReceived();
-            u->mStartedTcpBytesReceived = -1;
+    if (mOnBatteryTimeBase->SetRunning(unplugged, uptime, realtime)) {
+        if (unplugged) {
+            // Track bt headset ping count
+            mBluetoothPingStart = GetCurrentBluetoothPingCount();
+            mBluetoothPingCount = 0;
         }
-        if (u->mStartedTcpBytesSent >= 0) {
-            u->mCurrentTcpBytesSent = u->ComputeCurrentTcpBytesSent();
-            u->mStartedTcpBytesSent = -1;
+        else {
+            // Track bt headset ping count
+            mBluetoothPingCount = GetBluetoothPingCount();
+            mBluetoothPingStart = -1;
         }
     }
 
-    List<AutoPtr<IUnpluggable> >::ReverseIterator rit = mUnpluggables.RBegin();
-    for (; rit != mUnpluggables.REnd(); ++rit) {
-        (*rit)->Plug(batteryUptime, batteryRealtime);
+    Boolean unpluggedScreenOff = unplugged && screenOff;
+    if (unpluggedScreenOff != mOnBatteryScreenOffTimeBase->IsRunning()) {
+        UpdateKernelWakelocksLocked();
+        RequestWakelockCpuUpdate();
+        if (!unpluggedScreenOff) {
+            // We are switching to no longer tracking wake locks, but we want
+            // the next CPU update we receive to take them in to account.
+            mDistributeWakelockCpu = TRUE;
+        }
+        mOnBatteryScreenOffTimeBase->SetRunning(unpluggedScreenOff, uptime, realtime);
     }
+}
 
-    // Track both mobile and total overall data
-    AutoPtr<INetworkStats> ifaceStats = GetNetworkStatsSummary();
-    AutoPtr<IObjectContainer> container;
-    CObjectContainer::New((IObjectContainer**)&container);
-    HashSet<String>::Iterator it = mMobileIfaces.Begin();
-    for (; it != mMobileIfaces.End(); ++it) {
-        AutoPtr<ICharSequence> cs;
-        CString::New(*it, (ICharSequence**)&cs);
-        container->Add((IInterface*)cs);
+void BatteryStatsImpl::AddIsolatedUidLocked(
+    /* [in] */ Int32 isolatedUid,
+    /* [in] */ Int32 appUid)
+{
+    mIsolatedUids[isolatedUid] = appUid;
+}
+
+void BatteryStatsImpl::RemoveIsolatedUidLocked(
+    /* [in] */ Int32 isolatedUid,
+    /* [in] */ Int32 appUid)
+{
+    Int32 curUid = -1;
+    HashMap<Int32, Int32>::Iterator it = mIsolatedUids.Find(isolatedUid);
+    if (it != mIsolatedUids.End()) {
+        curUid = it->mSecond;
     }
+    if (curUid == appUid) {
+        mIsolatedUids.Erase(it);
+    }
+}
 
-    AutoPtr<INetworkStatsEntry> entry;
-    ifaceStats->GetTotal(NULL, container, (INetworkStatsEntry**)&entry);
-    Int64 rxBytes, txBytes;
-    entry->GetRxBytes(&rxBytes);
-    entry->GetTxBytes(&txBytes);
-    DoDataPlug(mMobileDataRx, rxBytes);
-    DoDataPlug(mMobileDataTx, txBytes);
+Int32 BatteryStatsImpl::MapUid(
+    /* [in] */ Int32 uid)
+{
+    Int32 isolated = -1;
+    HashMap<Int32, Int32>::Iterator it = mIsolatedUids.Find(uid);
+    if (it != mIsolatedUids.End()) {
+        isolated = it->mSecond;
+    }
+    return isolated > 0 ? isolated : uid;
+}
 
-    AutoPtr<INetworkStatsEntry> temp;
-    ifaceStats->GetTotal(entry, (INetworkStatsEntry**)&temp);
-    entry = temp;
-    entry->GetRxBytes(&rxBytes);
-    entry->GetTxBytes(&txBytes);
-    DoDataPlug(mTotalDataRx, rxBytes);
-    DoDataPlug(mTotalDataTx, txBytes);
+void BatteryStatsImpl::NoteEventLocked(
+    /* [in] */ Int32 code,
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    if (!mActiveEvents->UpdateState(code, name, uid, 0)) {
+        return;
+    }
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    AddHistoryEventLocked(elapsedRealtime, uptime, code, name, uid);
+}
 
-    // Track radio awake time
-    mRadioDataUptime = GetRadioDataUptime();
-    mRadioDataStart = -1;
+void BatteryStatsImpl::NoteCurrentTimeChangedLocked()
+{
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 currentTime;
+    sys->GetCurrentTimeMillis(&currentTime);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (IsStartClockTimeValid()) {
+        // Has the time changed sufficiently that it is really worth recording?
+        if (mLastRecordedClockTime != 0) {
+            Int64 expectedClockTime = mLastRecordedClockTime
+                    + (elapsedRealtime - mLastRecordedClockRealtime);
+            if (currentTime >= (expectedClockTime - 500)
+                    && currentTime <= (expectedClockTime + 500)) {
+                // Not sufficiently changed, skip!
+                return;
+            }
+        }
+    }
+    RecordCurrentTimeChangeLocked(currentTime, elapsedRealtime, uptime);
+    if (IsStartClockTimeValid()) {
+        mStartClockTime = currentTime;
+    }
+}
 
-    // Track bt headset ping count
-    mBluetoothPingCount = GetBluetoothPingCount();
-    mBluetoothPingStart = -1;
+void BatteryStatsImpl::NoteProcessStartLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    if (IsOnBattery()) {
+        AutoPtr<Uid> u = GetUidStatsLocked(uid);
+        u->GetProcessStatsLocked(name)->IncStartsLocked();
+    }
+    if (!mActiveEvents->UpdateState(HistoryItem::EVENT_PROC_START, name, uid, 0)) {
+        return;
+    }
+    if (!mRecordAllHistory) {
+        return;
+    }
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    AddHistoryEventLocked(elapsedRealtime, uptime, HistoryItem::EVENT_PROC_START, name, uid);
+}
+
+void BatteryStatsImpl::NoteProcessStateLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 state)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    GetUidStatsLocked(uid)->UpdateProcessStateLocked(name, state, elapsedRealtime);
+}
+
+void BatteryStatsImpl::NoteProcessFinishLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    if (!mActiveEvents->UpdateState(HistoryItem::EVENT_PROC_FINISH, name, uid, 0)) {
+        return;
+    }
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    GetUidStatsLocked(uid)->UpdateProcessStateLocked(name, Uid::PROCESS_STATE_NONE,
+            elapsedRealtime);
+    if (!mRecordAllHistory) {
+        return;
+    }
+    AddHistoryEventLocked(elapsedRealtime, uptime, HistoryItem::EVENT_PROC_FINISH, name, uid);
+}
+
+void BatteryStatsImpl::NoteSyncStartLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    GetUidStatsLocked(uid)->NoteStartSyncLocked(name, elapsedRealtime);
+    if (!mActiveEvents->UpdateState(HistoryItem::EVENT_SYNC_START, name, uid, 0)) {
+        return;
+    }
+    AddHistoryEventLocked(elapsedRealtime, uptime, HistoryItem::EVENT_SYNC_START, name, uid);
+}
+
+void BatteryStatsImpl::NoteSyncFinishLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    GetUidStatsLocked(uid)->NoteStopSyncLocked(name, elapsedRealtime);
+    if (!mActiveEvents->UpdateState(HistoryItem::EVENT_SYNC_FINISH, name, uid, 0)) {
+        return;
+    }
+    AddHistoryEventLocked(elapsedRealtime, uptime, HistoryItem::EVENT_SYNC_FINISH, name, uid);
+}
+
+void BatteryStatsImpl::NoteJobStartLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    GetUidStatsLocked(uid)->NoteStartJobLocked(name, elapsedRealtime);
+    if (!mActiveEvents->UpdateState(HistoryItem::EVENT_JOB_START, name, uid, 0)) {
+        return;
+    }
+    AddHistoryEventLocked(elapsedRealtime, uptime, HistoryItem::EVENT_JOB_START, name, uid);
+}
+
+void BatteryStatsImpl::NoteJobFinishLocked(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    GetUidStatsLocked(uid)->NoteStopJobLocked(name, elapsedRealtime);
+    if (!mActiveEvents->UpdateState(HistoryItem::EVENT_JOB_FINISH, name, uid, 0)) {
+        return;
+    }
+    AddHistoryEventLocked(elapsedRealtime, uptime, HistoryItem::EVENT_JOB_FINISH, name, uid);
+}
+
+void BatteryStatsImpl::RequestWakelockCpuUpdate()
+{
+    Boolean hasMessages;
+    if (mHandler->HasMessages(MSG_UPDATE_WAKELOCKS, &hasMessages), !hasMessages) {
+        AutoPtr<IMessage> m;
+        mHandler->ObtainMessage(MSG_UPDATE_WAKELOCKS, (IMessage**)&m);
+        Boolean result;
+        mHandler->SendMessageDelayed(m, DELAY_UPDATE_WAKELOCKS, &result);
+    }
+}
+
+void BatteryStatsImpl::SetRecordAllHistoryLocked(
+    /* [in] */ Boolean enabled)
+{
+    mRecordAllHistory = enabled;
+    if (!enabled) {
+        // Clear out any existing state.
+        mActiveEvents->RemoveEvents(HistoryItem::EVENT_WAKE_LOCK);
+        // Record the currently running processes as stopping, now that we are no
+        // longer tracking them.
+        AutoPtr<IHashMap> active = mActiveEvents->GetStateForEvent(HistoryItem::EVENT_PROC);
+        if (active != NULL) {
+            Int64 mSecRealtime = SystemClock::GetElapsedRealtime();
+            Int64 mSecUptime = SystemClock::GetUptimeMillis();
+            AutoPtr<ISet> set;
+            active->GetEntrySet((ISet**)&set);
+            AutoPtr<IIterator> it;
+            set->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> item;
+                it->GetNext((IInterface**)&item);
+                AutoPtr<IMapEntry> ent = IMapEntry::Probe(item);
+                AutoPtr<IInterface> value;
+                ent->GetValue((IInterface**)&value);
+                AutoPtr<ISparseInt32Array> uids = ISparseInt32Array::Probe(value);
+                Int32 size;
+                uids->GetSize(&size);
+                for (Int32 j = 0; j < size; j++) {
+                    AutoPtr<IInterface> ki;
+                    ent->GetKey((IInterface**)&ki);
+                    String key;
+                    ICharSequence::Probe(ki)->ToString(&key);
+                    Int32 uidKey;
+                    uids->KeyAt(j, &uidKey);
+                    AddHistoryEventLocked(mSecRealtime, mSecUptime,
+                            HistoryItem::EVENT_PROC_FINISH, key, uidKey);
+                }
+            }
+        }
+    }
+    else {
+        // Record the currently running processes as starting, now that we are tracking them.
+        AutoPtr<IHashMap> active = mActiveEvents->GetStateForEvent(HistoryItem::EVENT_PROC);\
+        if (active != NULL) {
+            Int64 mSecRealtime = SystemClock::GetElapsedRealtime();
+            Int64 mSecUptime = SystemClock::GetUptimeMillis();
+            AutoPtr<ISet> set;
+            active->GetEntrySet((ISet**)&set);
+            AutoPtr<IIterator> it;
+            set->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> item;
+                it->GetNext((IInterface**)&item);
+                AutoPtr<IMapEntry> ent = IMapEntry::Probe(item);
+                AutoPtr<IInterface> value;
+                ent->GetValue((IInterface**)&value);
+                AutoPtr<ISparseInt32Array> uids = ISparseInt32Array::Probe(value);
+                Int32 size;
+                uids->GetSize(&size);
+                for (Int32 j = 0; j < size; j++) {
+                    AutoPtr<IInterface> ki;
+                    ent->GetKey((IInterface**)&ki);
+                    String key;
+                    ICharSequence::Probe(ki)->ToString(&key);
+                    Int32 uidKey;
+                    uids->KeyAt(j, &uidKey);
+                    AddHistoryEventLocked(mSecRealtime, mSecUptime,
+                            HistoryItem::EVENT_PROC_START, key, uidKey);
+                }
+            }
+        }
+    }
+}
+
+void BatteryStatsImpl::SetNoAutoReset(
+    /* [in] */ Boolean enabled)
+{
+    mNoAutoReset = enabled;
 }
 
 void BatteryStatsImpl::NoteStartWakeLocked(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid,
     /* [in] */ const String& name,
-    /* [in] */ Int32 type)
+    /* [in] */ const String& _historyName,
+    /* [in] */ Int32 type,
+    /* [in] */ Boolean unimportantForLogging,
+    /* [in] */ Int64 elapsedRealtime,
+    /* [in] */ Int64 uptime)
 {
+    String historyName = _historyName;
+    uid = MapUid(uid);
     if (type == WAKE_TYPE_PARTIAL) {
         // Only care about partial wake locks, since full wake locks
         // will be canceled when the user puts the screen to sleep.
+        AggregateLastWakeupUptimeLocked(uptime);
+        if (historyName.IsNull()) {
+            historyName = name;
+        }
+        if (mRecordAllHistory) {
+            if (mActiveEvents->UpdateState(HistoryItem::EVENT_WAKE_LOCK_START, historyName,
+                    uid, 0)) {
+                AddHistoryEventLocked(elapsedRealtime, uptime,
+                        HistoryItem::EVENT_WAKE_LOCK_START, historyName, uid);
+            }
+        }
         if (mWakeLockNesting == 0) {
             mHistoryCur->mStates |= HistoryItem::STATE_WAKE_LOCK_FLAG;
             if (DEBUG_HISTORY) {
-                Logger::V(TAG, "Start wake lock to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+                Logger::V(TAG, "Start wake lock to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
             }
-            AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            mHistoryCur->MwakelockTag = mHistoryCur->mLocalWakelockTag;
+            mHistoryCur->MwakelockTag->mString = mInitialAcquireWakeName = historyName;
+            mHistoryCur->MwakelockTag->mUid = mInitialAcquireWakeUid = uid;
+            mWakeLockImportant = !unimportantForLogging;
+            AddHistoryRecordLocked(elapsedRealtime, uptime);
+        }
+        else if (!mWakeLockImportant && !unimportantForLogging
+                && mHistoryLastWritten->mCmd == HistoryItem::CMD_UPDATE) {
+            if (mHistoryLastWritten->mWakelockTag != NULL) {
+                // We'll try to update the last tag.
+                mHistoryLastWritten->mWakelockTag = NULL;
+                mHistoryCur->mWakelockTag = mHistoryCur->mLocalWakelockTag;
+                mHistoryCur->mWakelockTag->mString = mInitialAcquireWakeName = historyName;
+                mHistoryCur->mWakelockTag->mUid = mInitialAcquireWakeUid = uid;
+                AddHistoryRecordLocked(elapsedRealtime, uptime);
+            }
+            mWakeLockImportant = true;
         }
         mWakeLockNesting++;
     }
     if (uid >= 0) {
-        Boolean bval;
-        if (mHandler->HasMessages(MSG_UPDATE_WAKELOCKS, &bval), !bval) {
-            mHandler->SendEmptyMessageDelayed(MSG_UPDATE_WAKELOCKS,
-                DELAY_UPDATE_WAKELOCKS, &bval);
-        }
-
-        GetUidStatsLocked(uid)->NoteStartWakeLocked(pid, name, type);
+        //if (uid == 0) {
+        //    Slog.wtf(TAG, "Acquiring wake lock from root: " + name);
+        //}
+        RequestWakelockCpuUpdate();
+        GetUidStatsLocked(uid)->NoteStartWakeLocked(pid, name, type, elapsedRealtime);
     }
 }
 
@@ -4511,25 +4999,73 @@ void BatteryStatsImpl::NoteStopWakeLocked(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid,
     /* [in] */ const String& name,
-    /* [in] */ Int32 type)
+    /* [in] */ const String& _historyName,
+    /* [in] */ Int32 type,
+    /* [in] */ Int64 elapsedRealtime,
+    /* [in] */ Int64 uptime)
 {
+    String historyName = _historyName;
+    uid = MapUid(uid);
     if (type == WAKE_TYPE_PARTIAL) {
         mWakeLockNesting--;
+        if (mRecordAllHistory) {
+            if (historyName.IsNull()) {
+                historyName = name;
+            }
+            if (mActiveEvents->UpdateState(HistoryItem::EVENT_WAKE_LOCK_FINISH, historyName,
+                    uid, 0)) {
+                AddHistoryEventLocked(elapsedRealtime, uptime,
+                        HistoryItem::EVENT_WAKE_LOCK_FINISH, historyName, uid);
+            }
+        }
         if (mWakeLockNesting == 0) {
             mHistoryCur->mStates &= ~HistoryItem::STATE_WAKE_LOCK_FLAG;
             if (DEBUG_HISTORY) {
-                Logger::V(TAG, "Stop wake lock to: ", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+                Logger::V(TAG, "Stop wake lock to: ", StringUtils::ToHexString(mHistoryCur->mStates).string());
             }
-            AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            mInitialAcquireWakeName = String(NULL);
+            mInitialAcquireWakeUid = -1;
+            AddHistoryRecordLocked(elapsedRealtime, uptime);
         }
     }
     if (uid >= 0) {
-        Boolean bval;
-        if (mHandler->HasMessages(MSG_UPDATE_WAKELOCKS, &bval), !bval) {
-            mHandler->SendEmptyMessageDelayed(DELAY_UPDATE_WAKELOCKS,
-                DELAY_UPDATE_WAKELOCKS, &bval);
-        }
-        GetUidStatsLocked(uid)->NoteStopWakeLocked(pid, name, type);
+        RequestWakelockCpuUpdate();
+        GetUidStatsLocked(uid)->NoteStopWakeLocked(pid, name, type, elapsedRealtime);
+    }
+}
+
+void BatteryStatsImpl::NoteChangeWakelockFromSourceLocked(
+    /* [in] */ IWorkSource* ws,
+    /* [in] */ Int32 pid,
+    /* [in] */ const String& name,
+    /* [in] */ const String& historyName,
+    /* [in] */ Int32 type,
+    /* [in] */ IWorkSource* newWs,
+    /* [in] */ Int32 newPid,
+    /* [in] */ const String& newName,
+    /* [in] */ const String& newHistoryName,
+    /* [in] */ Int32 newType,
+    /* [in] */ Boolean newUnimportantForLogging)
+{
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    // For correct semantics, we start the need worksources first, so that we won't
+    // make inappropriate history items as if all wake locks went away and new ones
+    // appeared.  This is okay because tracking of wake locks allows nesting.
+    Int32 NN;
+    newWs->GetSize(&NN);
+    for (Int32 i = 0; i < NN; i++) {
+        Int32 value;
+        newWs->Get(i, &value);
+        NoteStartWakeLocked(value, newPid, newName, newHistoryName, newType,
+                newUnimportantForLogging, elapsedRealtime, uptime);
+    }
+    Int32 NO;
+    ws->GetSize(&NO);
+    for (Int32 i = 0; i < NO; i++) {
+        Int32 value;
+        ws->Get(i, &value);
+        NoteStopWakeLocked(value, pid, name, historyName, type, elapsedRealtime, uptime);
     }
 }
 
@@ -4552,29 +5088,63 @@ void BatteryStatsImpl::NoteStopWakeFromSourceLocked(
     /* [in] */ IWorkSource* ws,
     /* [in] */ Int32 pid,
     /* [in] */ const String& name,
+    /* [in] */ const String& historyName,
     /* [in] */ Int32 type)
 {
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     Int32 N;
     ws->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         Int32 value;
         ws->Get(i, &value);
-        NoteStopWakeLocked(value, pid, name, type);
+        NoteStopWakeLocked(value, pid, name, historyName, type, elapsedRealtime, uptime);
     }
+}
+
+void BatteryStatsImpl::AggregateLastWakeupUptimeLocked(
+    /* [in] */ Int64 uptimeMs)
+{
+    if (mLastWakeupReason != NULL) {
+        Int64 deltaUptime = uptimeMs - mLastWakeupUptimeMs;
+        AutoPtr<SamplingTimer> timer = GetWakeupReasonTimerLocked(mLastWakeupReason);
+        timer->AddCurrentReportedCount(1);
+        timer->AddCurrentReportedTotalTime(deltaUptime * 1000); // time is in microseconds
+        mLastWakeupReason = String(NULL);
+    }
+}
+
+void BatteryStatsImpl::NoteWakeupReasonLocked(
+    /* [in] */ const String& reason)
+{
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (DEBUG_HISTORY)
+        Slogger::V(TAG, "Wakeup reason \"%s\": %s", reason.string(), StringUtils::ToHexString(mHistoryCur->mStates));
+    AggregateLastWakeupUptimeLocked(uptime);
+    mHistoryCur->mWakeReasonTag = mHistoryCur->mLocalWakeReasonTag;
+    mHistoryCur->mWakeReasonTag->mString = reason;
+    mHistoryCur->mWakeReasonTag->mUid = 0;
+    mLastWakeupReason = reason;
+    mLastWakeupUptimeMs = uptime;
+    AddHistoryRecordLocked(elapsedRealtime, uptime);
 }
 
 Int32 BatteryStatsImpl::StartAddingCpuLocked()
 {
     mHandler->RemoveMessages(MSG_UPDATE_WAKELOCKS);
 
-    if (mScreenOn) {
+    if (mPartialTimers.Begin() == mPartialTimers.End()) {
+        mLastPartialTimers.Clear();
+        mDistributeWakelockCpu = FALSE;
         return 0;
     }
 
-    if (mPartialTimers.Begin() == mPartialTimers.End()) {
-        mLastPartialTimers.Clear();
+    if (!mOnBatteryScreenOffTimeBase->IsRunning() && !mDistributeWakelockCpu) {
         return 0;
     }
+
+    mDistributeWakelockCpu = FALSE;
 
     // How many timers should consume CPU?  Only want to include ones
     // that have already been in the list.
@@ -4679,6 +5249,7 @@ void BatteryStatsImpl::NoteProcessDiedLocked(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid)
 {
+    uid = MapUid(uid);
     AutoPtr<Uid> u;
     HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Find(uid);
     if (it != mUidStats.End()) {
@@ -4694,6 +5265,7 @@ Int64 BatteryStatsImpl::GetProcessWakeTime(
     /* [in] */ Int32 pid,
     /* [in] */ Int64 realtime)
 {
+    uid = MapUid(uid);
     AutoPtr<Uid> u;
     HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Find(uid);
     if (it != mUidStats.End()) {
@@ -4706,7 +5278,7 @@ Int64 BatteryStatsImpl::GetProcessWakeTime(
             p = pit->mSecond;
         }
         if (p != NULL) {
-            return p->mWakeSum + (p->mWakeStart != 0 ? (realtime - p->mWakeStart) : 0);
+            return p->mWakeSumMs + (p->mWakeNesting > 0 ? (realtime - p->mWakeStartMs) : 0);
         }
     }
     return 0;
@@ -4718,6 +5290,7 @@ void BatteryStatsImpl::ReportExcessiveWakeLocked(
     /* [in] */ Int64 overTime,
     /* [in] */ Int64 usedTime)
 {
+    uid = MapUid(uid);
     AutoPtr<Uid> u;
     HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Find(uid);
     if (it != mUidStats.End()) {
@@ -4734,6 +5307,7 @@ void BatteryStatsImpl::ReportExcessiveCpuLocked(
     /* [in] */ Int64 overTime,
     /* [in] */ Int64 usedTime)
 {
+    uid = MapUid(uid);
     AutoPtr<Uid> u;
     HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Find(uid);
     if (it != mUidStats.End()) {
@@ -4748,99 +5322,137 @@ void BatteryStatsImpl::NoteStartSensorLocked(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 sensor)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+
     if (mSensorNesting == 0) {
         mHistoryCur->mStates |= HistoryItem::STATE_SENSOR_ON_FLAG;
         if (DEBUG_HISTORY) {
-            Logger::V(TAG, "Start sensor to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+            Logger::V(TAG, "Start sensor to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
         }
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
     mSensorNesting++;
-    GetUidStatsLocked(uid)->NoteStartSensor(sensor);
+    GetUidStatsLocked(uid)->NoteStartSensor(sensor, elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteStopSensorLocked(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 sensor)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     mSensorNesting--;
     if (mSensorNesting == 0) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_SENSOR_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Stop sensor to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "Stop sensor to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
-    GetUidStatsLocked(uid)->NoteStopSensor(sensor);
+    GetUidStatsLocked(uid)->NoteStopSensor(sensor, elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteStartGpsLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     if (mGpsNesting == 0) {
         mHistoryCur->mStates |= HistoryItem::STATE_GPS_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Start GPS to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "Start GPS to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
     mGpsNesting++;
-    GetUidStatsLocked(uid)->NoteStartGps();
+    GetUidStatsLocked(uid)->NoteStartGps(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteStopGpsLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     mGpsNesting--;
     if (mGpsNesting == 0) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_GPS_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Stop GPS to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "Stop GPS to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
-    GetUidStatsLocked(uid)->NoteStopGps();
+    GetUidStatsLocked(uid)->NoteStopGps(elapsedRealtime);
 }
 
-void BatteryStatsImpl::NoteScreenOnLocked()
+void BatteryStatsImpl::NoteScreenStateLocked(
+    /* [in] */ Int32 state)
 {
-    if (!mScreenOn) {
-        mHistoryCur->mStates |= HistoryItem::STATE_SCREEN_ON_FLAG;
-        if (DEBUG_HISTORY)
-            Logger::V(TAG, "Screen on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        mScreenOn = TRUE;
-        mScreenOnTimer->StartRunningLocked(this);
-        if (mScreenBrightnessBin >= 0) {
-            (*mScreenBrightnessTimer)[mScreenBrightnessBin]->StartRunningLocked(this);
+    if (mScreenState != state) {
+        Int32 oldState = mScreenState;
+        mScreenState = state;
+        if (DEBUG) Slogger::V(TAG, "Screen state: oldState=%s, newState=%s",
+                Display::StateToString(oldState).string(), Display::StateToString(state).string());
+
+        if (state != IDisplay::STATE_UNKNOWN) {
+            Int32 stepState = state - 1;
+            if (stepState < 4) {
+                mModStepMode |= (mCurStepMode & STEP_LEVEL_MODE_SCREEN_STATE) ^ stepState;
+                mCurStepMode = (mCurStepMode & ~STEP_LEVEL_MODE_SCREEN_STATE) | stepState;
+            }
+            else {
+                Slogger::(TAG, "Unexpected screen state: %d", state);
+            }
         }
 
-        // Fake a wake lock, so we consider the device waked as long
-        // as the screen is on.
-        NoteStartWakeLocked(-1, -1, String("dummy"), WAKE_TYPE_PARTIAL);
+        if (state == IDisplay::STATE_ON) {
+            // Screen turning on.
+            Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+            Int64 uptime = SystemClock::GetUptimeMillis();
+            mHistoryCur->mStates |= HistoryItem::STATE_SCREEN_ON_FLAG;
+            if (DEBUG_HISTORY) Slogger::V(TAG, "Screen on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+            AddHistoryRecordLocked(elapsedRealtime, uptime);
+            mScreenOnTimer->StartRunningLocked(elapsedRealtime);
+            if (mScreenBrightnessBin >= 0) {
+                (*mScreenBrightnessTimer)[mScreenBrightnessBin]->StartRunningLocked(elapsedRealtime);
+            }
 
-        // Update discharge amounts.
-        if (mOnBatteryInternal) {
-            UpdateDischargeScreenLevelsLocked(FALSE, TRUE);
+            UpdateTimeBasesLocked(mOnBatteryTimeBase->IsRunning(), FALSE,
+                    SystemClock::GetUptimeMillis() * 1000, elapsedRealtime * 1000);
+
+            // Fake a wake lock, so we consider the device waked as long
+            // as the screen is on.
+            NoteStartWakeLocked(-1, -1, String("screen"), String(NULL), WAKE_TYPE_PARTIAL, FALSE,
+                    elapsedRealtime, uptime);
+
+            // Update discharge amounts.
+            if (mOnBatteryInternal) {
+                UpdateDischargeScreenLevelsLocked(FALSE, TRUE);
+            }
         }
-    }
-}
+        else if (oldState == IDisplay::STATE_ON) {
+            // Screen turning off or dozing.
+            Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+            Int64 uptime = SystemClock::GetUptimeMillis();
+            mHistoryCur->mStates &= ~HistoryItem::STATE_SCREEN_ON_FLAG;
+            if (DEBUG_HISTORY) Slogger::V(TAG, "Screen off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+            AddHistoryRecordLocked(elapsedRealtime, uptime);
+            mScreenOnTimer->StopRunningLocked(elapsedRealtime);
+            if (mScreenBrightnessBin >= 0) {
+                (*mScreenBrightnessTimer)[mScreenBrightnessBin]->StopRunningLocked(elapsedRealtime);
+            }
 
-void BatteryStatsImpl::NoteScreenOffLocked()
-{
-    if (mScreenOn) {
-        mHistoryCur->mStates &= ~HistoryItem::STATE_SCREEN_ON_FLAG;
-        if (DEBUG_HISTORY)
-            Logger::V(TAG, "Screen off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        mScreenOn = FALSE;
-        mScreenOnTimer->StopRunningLocked(this);
-        if (mScreenBrightnessBin >= 0) {
-            (*mScreenBrightnessTimer)[mScreenBrightnessBin]->StopRunningLocked(this);
-        }
+            NoteStopWakeLocked(-1, -1, String("screen"), String("screen"), WAKE_TYPE_PARTIAL,
+                    elapsedRealtime, uptime);
 
-        NoteStopWakeLocked(-1, -1, String("dummy"), WAKE_TYPE_PARTIAL);
+            UpdateTimeBasesLocked(mOnBatteryTimeBase->IsRunning(), TRUE,
+                    SystemClock::GetUptimeMillis() * 1000, elapsedRealtime * 1000);
 
-        // Update discharge amounts.
-        if (mOnBatteryInternal) {
-            UpdateDischargeScreenLevelsLocked(TRUE, FALSE);
+            // Update discharge amounts.
+            if (mOnBatteryInternal) {
+                UpdateDischargeScreenLevelsLocked(TRUE, FALSE);
+            }
         }
     }
 }
@@ -4853,42 +5465,131 @@ void BatteryStatsImpl::NoteScreenBrightnessLocked(
     if (bin < 0) bin = 0;
     else if (bin >= NUM_SCREEN_BRIGHTNESS_BINS) bin = NUM_SCREEN_BRIGHTNESS_BINS - 1;
     if (mScreenBrightnessBin != bin) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
         mHistoryCur->mStates = (mHistoryCur->mStates & ~HistoryItem::STATE_BRIGHTNESS_MASK)
                 | (bin << HistoryItem::STATE_BRIGHTNESS_SHIFT);
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Screen brightness %d to: %s", bin, StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        if (mScreenOn) {
+            Logger::V(TAG, "Screen brightness %d to: %s", bin, StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        if (mScreenState == IDisplay::STATE_ON) {
             if (mScreenBrightnessBin >= 0) {
-                (*mScreenBrightnessTimer)[mScreenBrightnessBin]->StopRunningLocked(this);
+                (*mScreenBrightnessTimer)[mScreenBrightnessBin]->StopRunningLocked(elapsedRealtime);
             }
-            (*mScreenBrightnessTimer)[bin]->StartRunningLocked(this);
+            (*mScreenBrightnessTimer)[bin]->StartRunningLocked(elapsedRealtime);
         }
         mScreenBrightnessBin = bin;
     }
-}
-
-void BatteryStatsImpl::NoteInputEventAtomic()
-{
-    mInputEventCounter->StepAtomic();
 }
 
 void BatteryStatsImpl::NoteUserActivityLocked(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 event)
 {
-    GetUidStatsLocked(uid)->NoteUserActivityLocked(event);
+    if (mOnBatteryInternal) {
+        uid = MapUid(uid);
+        GetUidStatsLocked(uid)->NoteUserActivityLocked(event);
+    }
+}
+
+void BatteryStatsImpl::NoteInteractiveLocked(
+    /* [in] */ Boolean interactive)
+{
+    if (mInteractive != interactive) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        mInteractive = interactive;
+        if (DEBUG) Slogger::V(TAG, "Interactive: %d", interactive);
+        if (interactive) {
+            mInteractiveTimer->StartRunningLocked(elapsedRealtime);
+        }
+        else {
+            mInteractiveTimer->StopRunningLocked(elapsedRealtime);
+        }
+    }
+}
+
+void BatteryStatsImpl::NoteMobileRadioPowerState(
+    /* [in] */ Int32 powerState,
+    /* [in] */ Int64 timestampNs)
+{
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (mMobileRadioPowerState != powerState) {
+        Int64 realElapsedRealtimeMs;
+        Boolean active =
+                powerState == IDataConnectionRealTimeInfo::DC_POWER_STATE_MEDIUM
+                        || powerState == IDataConnectionRealTimeInfo::DC_POWER_STATE_HIGH;
+        if (active) {
+            mMobileRadioActiveStartTime = realElapsedRealtimeMs = elapsedRealtime;
+            mHistoryCur->mStates |= HistoryItem::STATE_MOBILE_RADIO_ACTIVE_FLAG;
+        }
+        else {
+            realElapsedRealtimeMs = timestampNs / (1000*1000);
+            Int64 lastUpdateTimeMs = mMobileRadioActiveStartTime;
+            if (realElapsedRealtimeMs < lastUpdateTimeMs) {
+                Slogger::W(TAG, "Data connection inactive timestamp %d is before start time %d",
+                        realElapsedRealtimeMs, lastUpdateTimeMs);
+                realElapsedRealtimeMs = elapsedRealtime;
+            }
+            else if (realElapsedRealtimeMs < elapsedRealtime) {
+                mMobileRadioActiveAdjustedTime->AddCountLocked(elapsedRealtime
+                        - realElapsedRealtimeMs);
+            }
+            mHistoryCur->mStates &= ~HistoryItem::STATE_MOBILE_RADIO_ACTIVE_FLAG;
+        }
+        if (DEBUG_HISTORY) Slogger::V(TAG, "Mobile network active %d to: %s", active,
+                StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mMobileRadioPowerState = powerState;
+        if (active) {
+            mMobileRadioActiveTimer->StartRunningLocked(elapsedRealtime);
+            mMobileRadioActivePerAppTimer->StartRunningLocked(elapsedRealtime);
+        }
+        else {
+            mMobileRadioActiveTimer->StopRunningLocked(realElapsedRealtimeMs);
+            UpdateNetworkActivityLocked(NET_UPDATE_MOBILE, realElapsedRealtimeMs);
+            mMobileRadioActivePerAppTimer->StopRunningLocked(realElapsedRealtimeMs);
+        }
+    }
+}
+
+void BatteryStatsImpl::NoteLowPowerMode(
+    /* [in] */ Boolean enabled)
+{
+    if (mLowPowerModeEnabled != enabled) {
+        Int32 stepState = enabled ? STEP_LEVEL_MODE_POWER_SAVE : 0;
+        mModStepMode |= (mCurStepMode & STEP_LEVEL_MODE_POWER_SAVE) ^ stepState;
+        mCurStepMode = (mCurStepMode & ~STEP_LEVEL_MODE_POWER_SAVE) | stepState;
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mLowPowerModeEnabled = enabled;
+        if (enabled) {
+            mHistoryCur->mStates2 |= HistoryItem::STATE2_LOW_POWER_FLAG;
+            if (DEBUG_HISTORY) Slogger::V(TAG, "Low power mode enabled to: %s",
+                    StringUtils::ToHexString(mHistoryCur->mStates2).string());
+            mLowPowerModeEnabledTimer->StartRunningLocked(elapsedRealtime);
+        }
+        else {
+            mHistoryCur->mStates2 &= ~HistoryItem::STATE2_LOW_POWER_FLAG;
+            if (DEBUG_HISTORY) Slogger::V(TAG, "Low power mode disabled to: %s",
+                    StringUtils::ToHexString(mHistoryCur->mStates2));
+            mLowPowerModeEnabledTimer->StopRunningLocked(elapsedRealtime);
+        }
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+    }
 }
 
 void BatteryStatsImpl::NotePhoneOnLocked()
 {
     if (!mPhoneOn) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
         mHistoryCur->mStates |= HistoryItem::STATE_PHONE_IN_CALL_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Phone on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "Phone on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mPhoneOn = TRUE;
-        mPhoneOnTimer->StartRunningLocked(this);
+        mPhoneOnTimer->StartRunningLocked(elapsedRealtime);
     }
 }
 
@@ -4897,22 +5598,23 @@ void BatteryStatsImpl::NotePhoneOffLocked()
     if (mPhoneOn) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_PHONE_IN_CALL_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Phone off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+            Logger::V(TAG, "Phone off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
         AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
         mPhoneOn = FALSE;
         mPhoneOnTimer->StopRunningLocked(this);
     }
 }
 
-void BatteryStatsImpl::StopAllSignalStrengthTimersLocked(
+void BatteryStatsImpl::StopAllPhoneSignalStrengthTimersLocked(
         /* [in] */ Int32 except)
 {
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
     for (Int32 i = 0; i < ISignalStrength::NUM_SIGNAL_STRENGTH_BINS; i++) {
         if (i == except) {
             continue;
         }
         while ((*mPhoneSignalStrengthsTimer)[i]->IsRunningLocked()) {
-            (*mPhoneSignalStrengthsTimer)[i]->StopRunningLocked(this);
+            (*mPhoneSignalStrengthsTimer)[i]->StopRunningLocked(elapsedRealtime);
         }
     }
 }
@@ -4936,27 +5638,30 @@ Int32 BatteryStatsImpl::FixPhoneServiceState(
 void BatteryStatsImpl::UpdateAllPhoneStateLocked(
     /* [in] */ Int32 state,
     /* [in] */ Int32 simState,
-    /* [in] */ Int32 bin)
+    /* [in] */ Int32 strengthBin)
 {
     Boolean scanning = FALSE;
     Boolean newHistory = FALSE;
 
     mPhoneServiceStateRaw = state;
     mPhoneSimStateRaw = simState;
-    mPhoneSignalStrengthBinRaw = bin;
+    mPhoneSignalStrengthBinRaw = strengthBin;
+
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
 
     if (simState == ITelephonyManager::SIM_STATE_ABSENT) {
         // In this case we will always be STATE_OUT_OF_SERVICE, so need
         // to infer that we are scanning from other data.
         if (state == IServiceState::STATE_OUT_OF_SERVICE
-                && bin > ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+                && strengthBin > ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
             state = IServiceState::STATE_IN_SERVICE;
         }
     }
 
     // If the phone is powered off, stop all timers.
     if (state == IServiceState::STATE_POWER_OFF) {
-        bin = -1;
+        strengthBin = -1;
 
     // If we are in service, make sure the correct signal string timer is running.
     }
@@ -4968,13 +5673,13 @@ void BatteryStatsImpl::UpdateAllPhoneStateLocked(
     }
     else if (state == IServiceState::STATE_OUT_OF_SERVICE) {
         scanning = TRUE;
-        bin = ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        strengthBin = ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         if (!mPhoneSignalScanningTimer->IsRunningLocked()) {
             mHistoryCur->mStates |= HistoryItem::STATE_PHONE_SCANNING_FLAG;
             newHistory = TRUE;
             if (DEBUG_HISTORY)
-                Logger::V(TAG, "Phone started scanning to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-            mPhoneSignalScanningTimer->StartRunningLocked(this);
+                Logger::V(TAG, "Phone started scanning to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+            mPhoneSignalScanningTimer->StartRunningLocked(elapsedRealtime);
         }
     }
 
@@ -4983,9 +5688,9 @@ void BatteryStatsImpl::UpdateAllPhoneStateLocked(
         if (mPhoneSignalScanningTimer->IsRunningLocked()) {
             mHistoryCur->mStates &= ~HistoryItem::STATE_PHONE_SCANNING_FLAG;
             if (DEBUG_HISTORY)
-                Logger::V(TAG, "Phone stopped scanning to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+                Logger::V(TAG, "Phone stopped scanning to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
             newHistory = TRUE;
-            mPhoneSignalScanningTimer->StopRunningLocked(this);
+            mPhoneSignalScanningTimer->StopRunningLocked(elapsedRealtime);
         }
     }
 
@@ -4993,33 +5698,33 @@ void BatteryStatsImpl::UpdateAllPhoneStateLocked(
         mHistoryCur->mStates = (mHistoryCur->mStates & ~HistoryItem::STATE_PHONE_STATE_MASK)
                 | (state << HistoryItem::STATE_PHONE_STATE_SHIFT);
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Phone state %d to: %s", state, StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+            Logger::V(TAG, "Phone state %d to: %s", state, StringUtils::ToHexString(mHistoryCur->mStates).string());
         newHistory = TRUE;
         mPhoneServiceState = state;
     }
 
-    if (mPhoneSignalStrengthBin != bin) {
+    if (mPhoneSignalStrengthBin != strengthBin) {
         if (mPhoneSignalStrengthBin >= 0) {
-            (*mPhoneSignalStrengthsTimer)[mPhoneSignalStrengthBin]->StopRunningLocked(this);
+            (*mPhoneSignalStrengthsTimer)[mPhoneSignalStrengthBin]->StopRunningLocked(elapsedRealtime);
         }
-        if (bin >= 0) {
-            if (!(*mPhoneSignalStrengthsTimer)[bin]->IsRunningLocked()) {
-                (*mPhoneSignalStrengthsTimer)[bin]->StartRunningLocked(this);
+        if (strengthBin >= 0) {
+            if (!(*mPhoneSignalStrengthsTimer)[strengthBin]->IsRunningLocked()) {
+                (*mPhoneSignalStrengthsTimer)[strengthBin]->StartRunningLocked(elapsedRealtime);
             }
-            mHistoryCur->mStates = (mHistoryCur->mStates & ~HistoryItem::STATE_SIGNAL_STRENGTH_MASK)
-                    | (bin << HistoryItem::STATE_SIGNAL_STRENGTH_SHIFT);
+            mHistoryCur->mStates = (mHistoryCur->mStates & ~HistoryItem::STATE_PHONE_SIGNAL_STRENGTH_MASK)
+                    | (strengthBin << HistoryItem::STATE_PHONE_SIGNAL_STRENGTH_SHIFT);
             if (DEBUG_HISTORY)
-                Logger::V(TAG, "Signal strength %d to: %s", bin, StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+                Logger::V(TAG, "Signal strength %d to: %s", strengthBin, StringUtils::ToHexString(mHistoryCur->mStates).string());
             newHistory = TRUE;
         }
         else {
-            StopAllSignalStrengthTimersLocked(-1);
+            StopAllPhoneSignalStrengthTimersLocked(-1);
         }
-        mPhoneSignalStrengthBin = bin;
+        mPhoneSignalStrengthBin = strengthBin;
     }
 
     if (newHistory) {
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
 }
 
@@ -5088,6 +5793,9 @@ void BatteryStatsImpl::NotePhoneDataConnectionStateLocked(
             case ITelephonyManager::NETWORK_TYPE_EHRPD:
                 bin = DATA_CONNECTION_EHRPD;
                 break;
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+                bin = DATA_CONNECTION_HSPAP;
+                break;
             default:
                 bin = DATA_CONNECTION_OTHER;
                 break;
@@ -5095,119 +5803,235 @@ void BatteryStatsImpl::NotePhoneDataConnectionStateLocked(
     }
     if (DEBUG) Logger::I(TAG, "Phone Data Connection -> %d = %d", dataType, hasData);
     if (mPhoneDataConnectionType != bin) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
         mHistoryCur->mStates = (mHistoryCur->mStates & ~HistoryItem::STATE_DATA_CONNECTION_MASK)
                 | (bin << HistoryItem::STATE_DATA_CONNECTION_SHIFT);
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Data connection %d to: %s", bin, StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "Data connection %d to: %s", bin, StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         if (mPhoneDataConnectionType >= 0) {
-            (*mPhoneDataConnectionsTimer)[mPhoneDataConnectionType]->StopRunningLocked(this);
+            (*mPhoneDataConnectionsTimer)[mPhoneDataConnectionType]->StopRunningLocked(elapsedRealtime);
         }
         mPhoneDataConnectionType = bin;
-        (*mPhoneDataConnectionsTimer)[bin]->StartRunningLocked(this);
+        (*mPhoneDataConnectionsTimer)[bin]->StartRunningLocked(elapsedRealtime);
     }
 }
 
 void BatteryStatsImpl::NoteWifiOnLocked()
 {
     if (!mWifiOn) {
-        mHistoryCur->mStates |= HistoryItem::STATE_WIFI_ON_FLAG;
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mHistoryCur->mStates2 |= HistoryItem::STATE2_WIFI_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mWifiOn = TRUE;
-        mWifiOnTimer->StartRunningLocked(this);
+        mWifiOnTimer->StartRunningLocked(elapsedRealtime);
     }
 }
 
 void BatteryStatsImpl::NoteWifiOffLocked()
 {
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     if (mWifiOn) {
-        mHistoryCur->mStates &= ~HistoryItem::STATE_WIFI_ON_FLAG;
+        mHistoryCur->mStates2 &= ~HistoryItem::STATE2_WIFI_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mWifiOn = FALSE;
-        mWifiOnTimer->StopRunningLocked(this);
-    }
-    if (mWifiOnUid >= 0) {
-        GetUidStatsLocked(mWifiOnUid)->NoteWifiStoppedLocked();
-        mWifiOnUid = -1;
+        mWifiOnTimer->StopRunningLocked(elapsedRealtime);
     }
 }
 
 void BatteryStatsImpl::NoteAudioOnLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     if (!mAudioOn) {
         mHistoryCur->mStates |= HistoryItem::STATE_AUDIO_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Audio on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        mAudioOn = TRUE;
-        mAudioOnTimer->StartRunningLocked(this);
+            Logger::V(TAG, "Audio on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime));
+        mAudioOnTimer->StopRunningLocked(elapsedRealtime);
     }
-    GetUidStatsLocked(uid)->NoteAudioTurnedOnLocked();
+    mAudioOnNesting++;
+    GetUidStatsLocked(uid)->NoteAudioTurnedOnLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteAudioOffLocked(
     /* [in] */ Int32 uid)
 {
-    if (mAudioOn) {
+    if (mAudioOnNesting == 0) {
+        return;
+    }
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (--mAudioOnNesting == 0) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_AUDIO_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Audio off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        mAudioOn = FALSE;
-        mAudioOnTimer->StopRunningLocked(this);
+            Slogger::V(TAG, "Audio off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mAudioOnTimer->StopRunningLocked(elapsedRealtime);
     }
-    GetUidStatsLocked(uid)->NoteAudioTurnedOffLocked();
+    GetUidStatsLocked(uid)->NoteAudioTurnedOffLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteVideoOnLocked(
     /* [in] */ Int32 uid)
 {
-    if (!mVideoOn) {
-        mHistoryCur->mStates |= HistoryItem::STATE_VIDEO_ON_FLAG;
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (mVideoOnNesting == 0) {
+        mHistoryCur->mStates2 |= HistoryItem::STATE2_VIDEO_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Video on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        mVideoOn = TRUE;
-        mVideoOnTimer->StartRunningLocked(this);
+            Slogger::V(TAG, "Video on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mVideoOnTimer->StartRunningLocked(elapsedRealtime);
     }
-    GetUidStatsLocked(uid)->NoteVideoTurnedOnLocked();
+    mVideoOnNesting++;
+    GetUidStatsLocked(uid)->NoteVideoTurnedOnLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteVideoOffLocked(
     /* [in] */ Int32 uid)
 {
-    if (mVideoOn) {
-        mHistoryCur->mStates &= ~HistoryItem::STATE_VIDEO_ON_FLAG;
-        if (DEBUG_HISTORY)
-            Logger::V(TAG, "Video off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
-        mVideoOn = FALSE;
-        mVideoOnTimer->StopRunningLocked(this);
+    if (mVideoOnNesting == 0) {
+        return;
     }
-    GetUidStatsLocked(uid)->NoteVideoTurnedOffLocked();
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (--mVideoOnNesting == 0) {
+        mHistoryCur->mStates2 &= ~HistoryItem::STATE2_VIDEO_ON_FLAG;
+        if (DEBUG_HISTORY)
+            Slogger::V(TAG, "Video off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mVideoOnTimer->StopRunningLocked(elapsedRealtime);
+    }
+    getUidStatsLocked(uid)->NoteVideoTurnedOffLocked(elapsedRealtime);
+}
+
+void BatteryStatsImpl::NoteResetAudioLocked()
+{
+    if (mAudioOnNesting > 0) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mAudioOnNesting = 0;
+        mHistoryCur->mStates &= ~HistoryItem::STATE_AUDIO_ON_FLAG;
+        if (DEBUG_HISTORY)
+            Slogger::V(TAG, "Audio off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mAudioOnTimer->StopAllRunningLocked(elapsedRealtime);
+        HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Begin();
+        for (; it != mUidStats.End(); ++it) {
+            AutoPtr<Uid> uid = it->mSecond;
+            uid->NoteResetAudioLocked(elapsedRealtime);
+        }
+    }
+}
+
+void BatteryStatsImpl::NoteResetVideoLocked()
+{
+    if (mVideoOnNesting > 0) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mAudioOnNesting = 0;
+        mHistoryCur->mStates2 &= ~HistoryItem::STATE2_VIDEO_ON_FLAG;
+        if (DEBUG_HISTORY)
+            Slogger::V(TAG, "Video off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mVideoOnTimer->StopAllRunningLocked(elapsedRealtime);
+        HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Begin();
+        for (; it != mUidStats.End(); ++it) {
+            AutoPtr<Uid> uid = it->mSecond;
+            uid->NoteResetVideoLocked(elapsedRealtime);
+        }
+    }
+}
+
+void BatteryStatsImpl::NoteActivityResumedLocked(
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    GetUidStatsLocked(uid)->NoteActivityResumedLocked(SystemClock::GetElapsedRealtime());
+}
+
+void BatteryStatsImpl::NoteActivityPausedLocked(
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    GetUidStatsLocked(uid)->NoteActivityPausedLocked(SystemClock::GetElapsedRealtime());
+}
+
+void BatteryStatsImpl::NoteVibratorOnLocked(
+    /* [in] */ Int32 uid,
+    /* [in] */ Int64 durationMillis)
+{
+    uid = MapUid(uid);
+    GetUidStatsLocked(uid)->NoteVibratorOnLocked(durationMillis);
+}
+
+void BatteryStatsImpl::NoteVibratorOffLocked(
+    /* [in] */ Int32 uid)
+{
+    uid = mapUid(uid);
+    GetUidStatsLocked(uid)->NoteVibratorOffLocked();
+}
+
+void BatteryStatsImpl::NoteFlashlightOnLocked()
+{
+    if (!mFlashlightOn) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mHistoryCur->mStates2 |= HistoryItem::STATE2_FLASHLIGHT_FLAG;
+        if (DEBUG_HISTORY)
+            Slogger::V(TAG, "Flashlight on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mFlashlightOn = TRUE;
+        mFlashlightOnTimer->StartRunningLocked(elapsedRealtime);
+    }
+}
+
+void BatteryStatsImpl::NoteFlashlightOffLocked()
+{
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
+    if (mFlashlightOn) {
+        mHistoryCur->mStates2 &= ~HistoryItem::STATE2_FLASHLIGHT_FLAG;
+        if (DEBUG_HISTORY)
+            Slogger::V(TAG, "Flashlight off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+        mFlashlightOn = FALSE;
+        mFlashlightOnTimer->StopRunningLocked(elapsedRealtime);
+    }
 }
 
 void BatteryStatsImpl::NoteWifiRunningLocked(
     /* [in] */ IWorkSource* ws)
 {
     if (!mGlobalWifiRunning) {
-        mHistoryCur->mStates |= HistoryItem::STATE_WIFI_RUNNING_FLAG;
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mHistoryCur->mStates2 |= HistoryItem::STATE2_WIFI_RUNNING_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI running to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI running to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mGlobalWifiRunning = TRUE;
-        mGlobalWifiRunningTimer->StartRunningLocked(this);
+        mGlobalWifiRunningTimer->StartRunningLocked(elapsedRealtime);
         Int32 N;
         ws->GetSize(&N);
         for (Int32 i = 0; i < N; i++) {
             Int32 value;
             ws->Get(i, &value);
-            GetUidStatsLocked(value)->NoteWifiRunningLocked();
+            Int32 uid = MapUid(value);
+            GetUidStatsLocked(uid)->NoteWifiRunningLocked(elapsedRealtime);
         }
     }
     else {
@@ -5220,18 +6044,21 @@ void BatteryStatsImpl::NoteWifiRunningChangedLocked(
     /* [in] */ IWorkSource* newWs)
 {
     if (mGlobalWifiRunning) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
         Int32 N;
         oldWs->GetSize(&N);
         for (Int32 i = 0; i < N; i++) {
             Int32 value;
             oldWs->Get(i, &value);
-            GetUidStatsLocked(value)->NoteWifiStoppedLocked();
+            Int32 uid = MapUid(value);
+            GetUidStatsLocked(uid)->NoteWifiStoppedLocked(elapsedRealtime);
         }
         newWs->GetSize(&N);
         for (Int32 i = 0; i < N; i++) {
             Int32 value;
             newWs->Get(i, &value);
-            GetUidStatsLocked(value)->NoteWifiRunningLocked();
+            Int32 uid = MapUid(value);
+            GetUidStatsLocked(uid)->NoteWifiRunningLocked(elapsedRealtime);
         }
     }
     else {
@@ -5243,18 +6070,21 @@ void BatteryStatsImpl::NoteWifiStoppedLocked(
     /* [in] */ IWorkSource* ws)
 {
     if (mGlobalWifiRunning) {
-        mHistoryCur->mStates &= ~HistoryItem::STATE_WIFI_RUNNING_FLAG;
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        mHistoryCur->mStates2 &= ~HistoryItem::STATE2_WIFI_RUNNING_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI stopped to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI stopped to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mGlobalWifiRunning = FALSE;
-        mGlobalWifiRunningTimer->StopRunningLocked(this);
+        mGlobalWifiRunningTimer->StopRunningLocked(elapsedRealtime);
         Int32 N;
         ws->GetSize(&N);
         for (Int32 i = 0; i < N; i++) {
             Int32 value;
             ws->Get(i, &value);
-            GetUidStatsLocked(value)->NoteWifiStoppedLocked();
+            Int32 uid = MapUid(value);
+            GetUidStatsLocked(uid)->NoteWifiStoppedLocked(elapsedRealtime);
         }
     }
     else {
@@ -5262,106 +6092,245 @@ void BatteryStatsImpl::NoteWifiStoppedLocked(
     }
 }
 
+void BatteryStatsImpl::NoteWifiStateLocked(
+    /* [in] */ Int32 wifiState,
+    /* [in] */ const String& accessPoint)
+{
+    if (DEBUG) Logger::I(TAG, "WiFi state -> %d", wifiState);
+    if (mWifiState != wifiState) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        if (mWifiState >= 0) {
+            (*mWifiStateTimer)[mWifiState]->StopRunningLocked(elapsedRealtime);
+        }
+        mWifiState = wifiState;
+        (*mWifiStateTimer)[wifiState]->StartRunningLocked(elapsedRealtime);
+    }
+}
+
+void BatteryStatsImpl::NoteWifiSupplicantStateChangedLocked(
+    /* [in] */ Int32 supplState,
+    /* [in] */ Boolean failedAuth)
+{
+    if (DEBUG) Logger::I(TAG, "WiFi suppl state -> %d", supplState);
+    if (mWifiSupplState != supplState) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        if (mWifiSupplState >= 0) {
+            (*mWifiSupplStateTimer)[mWifiSupplState]->StopRunningLocked(elapsedRealtime);
+        }
+        mWifiSupplState = supplState;
+        (*mWifiSupplStateTimer)[supplState]->StartRunningLocked(elapsedRealtime);
+        mHistoryCur->mStates2 =
+                (mHistoryCur->mStates2 & ~HistoryItem::STATE2_WIFI_SUPPL_STATE_MASK)
+                | (supplState << HistoryItem::STATE2_WIFI_SUPPL_STATE_SHIFT);
+        if (DEBUG_HISTORY)
+            Slogger::V(TAG, "Wifi suppl state %d to: %s",
+                    supplState, StringUtils::ToHexString(mHistoryCur->mStates2).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
+    }
+}
+
+void BatteryStatsImpl::StopAllWifiSignalStrengthTimersLocked(
+    /* [in] */ Int32 except)
+{
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    for (Int32 i = 0; i < NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+        if (i == except) {
+            continue;
+        }
+        while ((*mWifiSignalStrengthsTimer)[i]->IsRunningLocked()) {
+            (*mWifiSignalStrengthsTimer)[i]->StopRunningLocked(elapsedRealtime);
+        }
+    }
+}
+
+void BatteryStatsImpl::NoteWifiRssiChangedLocked(
+    /* [in] */ Int32 newRssi)
+{
+    AutoPtr<IWifiManagerHelper> helper;
+    CWifiManagerHelper::AcquireSingleton((IWifiManagerHelper**)&helper);
+    Int32 strengthBin;
+    helper->CalculateSignalLevel(newRssi, NUM_WIFI_SIGNAL_STRENGTH_BINS, &strengthBin);
+    if (DEBUG) Logger::I(TAG, "WiFi rssi -> %d bin=%d", newRssi, strengthBin);
+    if (mWifiSignalStrengthBin != strengthBin) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
+        if (mWifiSignalStrengthBin >= 0) {
+            (*mWifiSignalStrengthsTimer)[mWifiSignalStrengthBin]->StopRunningLocked(
+                    elapsedRealtime);
+        }
+        if (strengthBin >= 0) {
+            if (!(*mWifiSignalStrengthsTimer)[strengthBin]->IsRunningLocked()) {
+                (*mWifiSignalStrengthsTimer)[strengthBin]->StartRunningLocked(elapsedRealtime);
+            }
+            mHistoryCur->mStates2 =
+                    (mHistoryCur->mStates2 & ~HistoryItem::STATE2_WIFI_SIGNAL_STRENGTH_MASK)
+                    | (strengthBin << HistoryItem::STATE2_WIFI_SIGNAL_STRENGTH_SHIFT);
+            if (DEBUG_HISTORY)
+                Slogger::V(TAG, "Wifi signal strength %d to: %s",
+                        strengthBin, StringUtils::ToHexString(mHistoryCur->mStates2).string());
+            AddHistoryRecordLocked(elapsedRealtime, uptime);
+        }
+        else {
+            StopAllWifiSignalStrengthTimersLocked(-1);
+        }
+        mWifiSignalStrengthBin = strengthBin;
+    }
+}
+
 void BatteryStatsImpl::NoteBluetoothOnLocked()
 {
     if (!mBluetoothOn) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
         mHistoryCur->mStates |= HistoryItem::STATE_BLUETOOTH_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Bluetooth on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Slogger::V(TAG, "Bluetooth on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mBluetoothOn = TRUE;
-        mBluetoothOnTimer->StartRunningLocked(this);
+        mBluetoothOnTimer->StartRunningLocked(elapsedRealtime);
     }
 }
 
 void BatteryStatsImpl::NoteBluetoothOffLocked()
 {
     if (mBluetoothOn) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        Int64 uptime = SystemClock::GetUptimeMillis();
         mHistoryCur->mStates &= ~HistoryItem::STATE_BLUETOOTH_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Bluetooth off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "Bluetooth off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
         mBluetoothOn = FALSE;
-        mBluetoothOnTimer->StopRunningLocked(this);
+        mBluetoothOnTimer->StopRunningLocked(elapsedRealtime);
+    }
+}
+
+void BatteryStatsImpl::NoteBluetoothStateLocked(
+    /* [in] */ Int32 bluetoothState)
+{
+    if (DEBUG) Logger::I(TAG, "Bluetooth state -> %d", bluetoothState);
+    if (mBluetoothState != bluetoothState) {
+        Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+        if (mBluetoothState >= 0) {
+            (*mBluetoothStateTimer)[mBluetoothState]->StopRunningLocked(elapsedRealtime);
+        }
+        mBluetoothState = bluetoothState;
+        (*mBluetoothStateTimer)[bluetoothState]->StartRunningLocked(elapsedRealtime);
     }
 }
 
 void BatteryStatsImpl::NoteFullWifiLockAcquiredLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     if (mWifiFullLockNesting == 0) {
         mHistoryCur->mStates |= HistoryItem::STATE_WIFI_FULL_LOCK_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI full lock on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI full lock on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
     mWifiFullLockNesting++;
-    GetUidStatsLocked(uid)->NoteFullWifiLockAcquiredLocked();
+    GetUidStatsLocked(uid)->NoteFullWifiLockAcquiredLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteFullWifiLockReleasedLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     mWifiFullLockNesting--;
     if (mWifiFullLockNesting == 0) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_WIFI_FULL_LOCK_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI full lock off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI full lock off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
-    GetUidStatsLocked(uid)->NoteFullWifiLockReleasedLocked();
+    GetUidStatsLocked(uid)->NoteFullWifiLockReleasedLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteWifiScanStartedLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     if (mWifiScanNesting == 0) {
         mHistoryCur->mStates |= HistoryItem::STATE_WIFI_SCAN_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI full lock on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI full lock on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
     mWifiScanNesting++;
-    GetUidStatsLocked(uid)->NoteWifiScanStartedLocked();
+    GetUidStatsLocked(uid)->NoteWifiScanStartedLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteWifiScanStoppedLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     mWifiScanNesting--;
     if (mWifiScanNesting == 0) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_WIFI_SCAN_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI full lock on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI full lock on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
-    GetUidStatsLocked(uid)->NoteWifiScanStoppedLocked();
+    GetUidStatsLocked(uid)->NoteWifiScanStoppedLocked(elapsedRealtime);
+}
+
+void BatteryStatsImpl::NoteWifiBatchedScanStartedLocked(
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 csph)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    GetUidStatsLocked(uid)->NoteWifiBatchedScanStartedLocked(csph, elapsedRealtime);
+}
+
+void BatteryStatsImpl::NoteWifiBatchedScanStoppedLocked(
+    /* [in] */ Int32 uid)
+{
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    GetUidStatsLocked(uid)->NoteWifiBatchedScanStoppedLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteWifiMulticastEnabledLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     if (mWifiMulticastNesting == 0) {
         mHistoryCur->mStates |= HistoryItem::STATE_WIFI_MULTICAST_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI multicast on to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI multicast on to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
     mWifiMulticastNesting++;
-    GetUidStatsLocked(uid)->NoteWifiMulticastEnabledLocked();
+    GetUidStatsLocked(uid)->NoteWifiMulticastEnabledLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteWifiMulticastDisabledLocked(
     /* [in] */ Int32 uid)
 {
+    uid = MapUid(uid);
+    Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
+    Int64 uptime = SystemClock::GetUptimeMillis();
     mWifiMulticastNesting--;
     if (mWifiMulticastNesting == 0) {
         mHistoryCur->mStates &= ~HistoryItem::STATE_WIFI_MULTICAST_ON_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "WIFI multicast off to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
-        AddHistoryRecordLocked(SystemClock::GetElapsedRealtime());
+            Logger::V(TAG, "WIFI multicast off to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
+        AddHistoryRecordLocked(elapsedRealtime, uptime);
     }
-    GetUidStatsLocked(uid)->NoteWifiMulticastDisabledLocked();
+    GetUidStatsLocked(uid)->NoteWifiMulticastDisabledLocked(elapsedRealtime);
 }
 
 void BatteryStatsImpl::NoteFullWifiLockAcquiredFromSourceLocked(
@@ -5412,6 +6381,31 @@ void BatteryStatsImpl::NoteWifiScanStoppedFromSourceLocked(
     }
 }
 
+void BatteryStatsImpl::NoteWifiBatchedScanStartedFromSourceLocked(
+    /* [in] */ IWorkSource* ws,
+    /* [in] */ Int32 csph)
+{
+    Int32 N;
+    ws->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        Int32 value;
+        ws->Get(i, &value);
+        NoteWifiBatchedScanStartedLocked(value, csph);
+    }
+}
+
+void BatteryStatsImpl::NoteWifiBatchedScanStoppedFromSourceLocked(
+    /* [in] */ IWorkSource* ws)
+{
+    Int32 N;
+    ws->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        Int32 value;
+        ws->Get(i, &value);
+        NoteWifiBatchedScanStoppedLocked(value);
+    }
+}
+
 void BatteryStatsImpl::NoteWifiMulticastEnabledFromSourceLocked(
     /* [in] */ IWorkSource* ws)
 {
@@ -5436,20 +6430,71 @@ void BatteryStatsImpl::NoteWifiMulticastDisabledFromSourceLocked(
     }
 }
 
+AutoPtr<ArrayOf<String> > BatteryStatsImpl::IncludeInStringArray(
+    /* [in] */ ArrayOf<String>* array,
+    /* [in] */ const String& str)
+{
+    if (ArrayUtils::IndexOf(array, const_cast<String>(str)) >= 0) {
+        return array;
+    }
+    AutoPtr<ArrayOf<String> > newArray = ArrayOf<String>::Alloc(array->GetLength() + 1);
+    newArray->Copy(array);
+    (*newArray)[array->GetLength()] = str;
+    return newArray;
+}
+
+AutoPtr<ArrayOf<String> > BatteryStatsImpl::ExcludeFromStringArray(
+    /* [in] */ ArrayOf<String>* array,
+    /* [in] */ const String& str)
+{
+    Int32 index = ArrayUtils::IndexOf(array, str);
+    if (index >= 0) {
+        AutoPtr<ArrayOf<String> > newArray = ArrayOf<String>::Alloc(array->GetLength() - 1);
+        if (index > 0) {
+            newArray->Copy(array);
+        }
+        if (index < array->GetLength() - 1) {
+            newArray->Copy(index, array, index + 1, array->GetLength() - index - 1);
+        }
+        return newArray;
+    }
+    return array;
+}
+
 void BatteryStatsImpl::NoteNetworkInterfaceTypeLocked(
     /* [in] */ const String& iface,
     /* [in] */ Int32 networkType)
 {
+    if (TextUtils::IsEmpty(iface)) return;
     AutoPtr<IConnectivityManagerHelper> helper;
     CConnectivityManagerHelper::AcquireSingleton((IConnectivityManagerHelper**)&helper);
     Boolean result;
     if (helper->IsNetworkTypeMobile(networkType, &result), result) {
-        mMobileIfaces.Insert(iface);
+        mMobileIfaces = IncludeInStringArray(mMobileIfaces, iface);
+        if (DEBUG) Slogger::D(TAG, "Note mobile iface %s: %p", iface.string(), mMobileIfaces.Get());
     }
     else {
-        mMobileIfaces.Erase(iface);
+        mMobileIfaces = ExcludeFromStringArray(mMobileIfaces, iface);
+        if (DEBUG) Slogger::D(TAG, "Note non-mobile iface %s: %p", iface, mMobileIfaces.Get());
+    }
+    if (helper->IsNetworkTypeWifi(networkType, &result), result) {
+        mWifiIfaces = IncludeInStringArray(mWifiIfaces, iface);
+        if (DEBUG) Slogger::D(TAG, "Note wifi iface %s: %p", iface, mWifiIfaces.Get());
+    }
+    else {
+        mWifiIfaces = ExcludeFromStringArray(mWifiIfaces, iface);
+        if (DEBUG) Slogger::D(TAG, "Note non-wifi iface %s: %p", iface, mWifiIfaces.Get());
     }
 }
+// begin from this
+CARAPI_(void) NoteNetworkStatsEnabledLocked();
+
+CARAPI_(Int64) GetScreenOnTime(
+    /* [in] */ Int64 elapsedRealtimeUs,
+    /* [in] */ Int32 which);
+
+CARAPI_(Int32) GetScreenOnCount(
+    /* [in] */ Int32 which);
 
 Int64 BatteryStatsImpl::GetScreenOnTime(
     /* [in] */ Int64 batteryRealtime,
@@ -5844,7 +6889,7 @@ void BatteryStatsImpl::SetOnBatteryLocked(
         mHistoryCur->mBatteryLevel = (Byte)level;
         mHistoryCur->mStates &= ~HistoryItem::STATE_BATTERY_PLUGGED_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Battery unplugged to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+            Logger::V(TAG, "Battery unplugged to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
         AddHistoryRecordLocked(mSecRealtime);
         mTrackBatteryUptimeStart = uptime;
         mTrackBatteryRealtimeStart = realtime;
@@ -5868,7 +6913,7 @@ void BatteryStatsImpl::SetOnBatteryLocked(
         mHistoryCur->mBatteryLevel = (Byte)level;
         mHistoryCur->mStates |= HistoryItem::STATE_BATTERY_PLUGGED_FLAG;
         if (DEBUG_HISTORY)
-            Logger::V(TAG, "Battery plugged to: %s", StringUtils::Int32ToHexString(mHistoryCur->mStates).string());
+            Logger::V(TAG, "Battery plugged to: %s", StringUtils::ToHexString(mHistoryCur->mStates).string());
         AddHistoryRecordLocked(mSecRealtime);
         mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
         mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
@@ -7499,5 +8544,6 @@ AutoPtr<INetworkStats> BatteryStatsImpl::GetNetworkStatsDetailGroupedByUid()
 }
 
 } // namespace Os
+} // namespace Internal
 } // namespace Droid
 } // namespace Elastos

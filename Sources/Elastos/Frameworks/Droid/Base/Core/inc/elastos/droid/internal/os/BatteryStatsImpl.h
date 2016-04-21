@@ -14,6 +14,7 @@ using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Net::INetworkStats;
 using Elastos::Droid::Net::INetworkStatsEntry;
 using Elastos::Droid::Internal::Net::INetworkStatsFactory;
@@ -28,6 +29,7 @@ using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
+namespace Internal {
 namespace Os {
 
 /**
@@ -1368,7 +1370,8 @@ public:
         CARAPI_(void) NoteStartWakeLocked(
             /* [in] */ Int32 pid,
             /* [in] */ const String& name,
-            /* [in] */ Int32 type);
+            /* [in] */ Int32 type,
+            /* [in] */ Int64 elapsedRealtime);
 
         CARAPI_(void) NoteStopWakeLocked(
             /* [in] */ Int32 pid,
@@ -1553,25 +1556,102 @@ public:
         /* [in] */ HistoryItem* cur,
         /* [in] */ HistoryItem* last);
 
-    CARAPI_(void) DoUnplugLocked(
-        /* [in] */ Int64 batteryUptime,
-        /* [in] */ Int64 batteryRealtime);
+    CARAPI_(void) ReadHistoryDelta(
+        /* [in] */ IParcel* src,
+        /* [in] */ HistoryItem* cur);
 
-    CARAPI_(void) DoPlugLocked(
-        /* [in] */ Int64 batteryUptime,
-        /* [in] */ Int64 batteryRealtime);
+    CARAPI_(void) CommitCurrentHistoryBatchLocked();
+
+    CARAPI_(void) UpdateTimeBasesLocked(
+        /* [in] */ Boolean unplugged,
+        /* [in] */ Boolean screenOff,
+        /* [in] */ Int64 uptime,
+        /* [in] */ Int64 realtime);
+
+    CARAPI_(void) AddIsolatedUidLocked(
+        /* [in] */ Int32 isolatedUid,
+        /* [in] */ Int32 appUid);
+
+    CARAPI_(void) RemoveIsolatedUidLocked(
+        /* [in] */ Int32 isolatedUid,
+        /* [in] */ Int32 appUid);
+
+    CARAPI_(Int32) MapUid(
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteEventLocked(
+        /* [in] */ Int32 code,
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteCurrentTimeChangedLocked();
+
+    CARAPI_(void) NoteProcessStartLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteProcessStateLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid,
+        /* [in] */ Int32 state);
+
+    CARAPI_(void) NoteProcessFinishLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteSyncStartLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteSyncFinishLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteJobStartLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteJobFinishLocked(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) SetRecordAllHistoryLocked(
+        /* [in] */ Boolean enabled);
+
+    CARAPI_(void) SetNoAutoReset(
+        /* [in] */ Boolean enabled);
 
     CARAPI_(void) NoteStartWakeLocked(
         /* [in] */ Int32 uid,
         /* [in] */ Int32 pid,
         /* [in] */ const String& name,
-        /* [in] */ Int32 type);
+        /* [in] */ const String& historyName,
+        /* [in] */ Int32 type,
+        /* [in] */ Boolean unimportantForLogging,
+        /* [in] */ Int64 elapsedRealtime,
+        /* [in] */ Int64 uptime);
 
     CARAPI_(void) NoteStopWakeLocked(
         /* [in] */ Int32 uid,
         /* [in] */ Int32 pid,
         /* [in] */ const String& name,
-        /* [in] */ Int32 type);
+        /* [in] */ const String& historyName,
+        /* [in] */ Int32 type,
+        /* [in] */ Int64 elapsedRealtime,
+        /* [in] */ Int64 uptime);
+
+    CARAPI_(void) NoteChangeWakelockFromSourceLocked(
+        /* [in] */ IWorkSource* ws,
+        /* [in] */ Int32 pid,
+        /* [in] */ const String& name,
+        /* [in] */ const String& historyName,
+        /* [in] */ Int32 type,
+        /* [in] */ IWorkSource* newWs,
+        /* [in] */ Int32 newPid,
+        /* [in] */ const String& newName,
+        /* [in] */ const String& newHistoryName,
+        /* [in] */ Int32 newType,
+        /* [in] */ Boolean newUnimportantForLogging);
 
     CARAPI_(void) NoteStartWakeFromSourceLocked(
         /* [in] */ IWorkSource* ws,
@@ -1583,7 +1663,11 @@ public:
         /* [in] */ IWorkSource* ws,
         /* [in] */ Int32 pid,
         /* [in] */ const String& name,
+        /* [in] */ const String& historyName,
         /* [in] */ Int32 type);
+
+    CARAPI_(void) NoteWakeupReasonLocked(
+        /* [in] */ const String& reason);
 
     CARAPI_(Int32) StartAddingCpuLocked();
 
@@ -1628,18 +1712,25 @@ public:
     CARAPI_(void) NoteStopGpsLocked(
         /* [in] */ Int32 uid);
 
-    CARAPI_(void) NoteScreenOnLocked();
-
-    CARAPI_(void) NoteScreenOffLocked();
+    CARAPI_(void) NoteScreenStateLocked(
+        /* [in] */ Int32 state);
 
     CARAPI_(void) NoteScreenBrightnessLocked(
         /* [in] */ Int32 brightness);
 
-    CARAPI_(void) NoteInputEventAtomic();
-
     CARAPI_(void) NoteUserActivityLocked(
         /* [in] */ Int32 uid,
         /* [in] */ Int32 event);
+
+    CARAPI_(void) NoteInteractiveLocked(
+        /* [in] */ Boolean interactive);
+
+    CARAPI_(void) NoteMobileRadioPowerState(
+        /* [in] */ Int32 powerState,
+        /* [in] */ Int64 timestampNs);
+
+    CARAPI_(void) NoteLowPowerMode(
+        /* [in] */ Boolean enabled);
 
     CARAPI_(void) NotePhoneOnLocked();
 
@@ -1676,6 +1767,27 @@ public:
     CARAPI_(void) NoteVideoOffLocked(
         /* [in] */ Int32 uid);
 
+    CARAPI_(void) NoteResetAudioLocked();
+
+    CARAPI_(void) NoteResetVideoLocked();
+
+    CARAPI_(void) NoteActivityResumedLocked(
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteActivityPausedLocked(
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteVibratorOnLocked(
+        /* [in] */ Int32 uid,
+        /* [in] */ Int64 durationMillis);
+
+    CARAPI_(void) NoteVibratorOffLocked(
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteFlashlightOnLocked();
+
+    CARAPI_(void) NoteFlashlightOffLocked();
+
     CARAPI_(void) NoteWifiRunningLocked(
         /* [in] */ IWorkSource* ws);
 
@@ -1686,9 +1798,23 @@ public:
     CARAPI_(void) NoteWifiStoppedLocked(
         /* [in] */ IWorkSource* ws);
 
+    CARAPI_(void) NoteWifiStateLocked(
+        /* [in] */ Int32 wifiState,
+        /* [in] */ const String& accessPoint);
+
+    CARAPI_(void) NoteWifiSupplicantStateChangedLocked(
+        /* [in] */ Int32 supplState,
+        /* [in] */ Boolean failedAuth);
+
+    CARAPI_(void) NoteWifiRssiChangedLocked(
+        /* [in] */ Int32 newRssi);
+
     CARAPI_(void) NoteBluetoothOnLocked();
 
     CARAPI_(void) NoteBluetoothOffLocked();
+
+    CARAPI_(void) NoteBluetoothStateLocked(
+        /* [in] */ Int32 bluetoothState);
 
     CARAPI_(void) NoteFullWifiLockAcquiredLocked(
         /* [in] */ Int32 uid);
@@ -1700,6 +1826,13 @@ public:
         /* [in] */ Int32 uid);
 
     CARAPI_(void) NoteWifiScanStoppedLocked(
+        /* [in] */ Int32 uid);
+
+    CARAPI_(void) NoteWifiBatchedScanStartedLocked(
+        /* [in] */ Int32 uid,
+        /* [in] */ Int32 csph);
+
+    CARAPI_(void) NoteWifiBatchedScanStoppedLocked(
         /* [in] */ Int32 uid);
 
     CARAPI_(void) NoteWifiMulticastEnabledLocked(
@@ -1720,6 +1853,13 @@ public:
     CARAPI_(void) NoteWifiScanStoppedFromSourceLocked(
         /* [in] */ IWorkSource* ws);
 
+    CARAPI_(void) NoteWifiBatchedScanStartedFromSourceLocked(
+        /* [in] */ IWorkSource* ws,
+        /* [in] */ Int32 csph);
+
+    CARAPI_(void) NoteWifiBatchedScanStoppedFromSourceLocked(
+        /* [in] */ IWorkSource* ws);
+
     CARAPI_(void) NoteWifiMulticastEnabledFromSourceLocked(
         /* [in] */ IWorkSource* ws);
 
@@ -1729,6 +1869,15 @@ public:
     CARAPI_(void) NoteNetworkInterfaceTypeLocked(
         /* [in] */ const String& iface,
         /* [in] */ Int32 networkType);
+
+    CARAPI_(void) NoteNetworkStatsEnabledLocked();
+
+    CARAPI_(Int64) GetScreenOnTime(
+        /* [in] */ Int64 elapsedRealtimeUs,
+        /* [in] */ Int32 which);
+
+    CARAPI_(Int32) GetScreenOnCount(
+        /* [in] */ Int32 which);
 
     CARAPI_(Int64) GetScreenOnTime(
         /* [in] */ Int64 batteryRealtime,
@@ -2005,26 +2154,56 @@ private:
         /* [in] */ Int32 index,
         /* [in] */ HistoryTag* tag);
 
-    CARAPI_(void) AddHistoryBufferLocked(
-        /* [in] */ Int64 curTime);
+    CARAPI_(Int32) BuildBatteryLevelInt(
+        /* [in] */ HistoryItem* h);
+
+    CARAPI_(Int32) BuildStateInt(
+        /* [in] */ HistoryItem* h);
 
     CARAPI_(void) AddHistoryBufferLocked(
-        /* [in] */ Int64 curTime,
-        /* [in] */ Byte cmd);
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs,
+        /* [in] */ HistoryItem* cur);
+
+    CARAPI AddHistoryBufferLocked(
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs,
+        /* [in] */ Byte cmd,
+        /* [in] */ HistoryItem* cur);
 
     CARAPI_(void) AddHistoryRecordLocked(
-        /* [in] */ Int64 curTime);
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs);
+
+    CARAPI_(void) AddHistoryRecordInnerLocked(
+        /* [in] */ Int64 curTime,
+        /* [in] */ Int64 uptimeMs,
+        /* [in] */ HistoryItem* cur);
+
+    CARAPI_(void) AddHistoryEventLocked(
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs,
+        /* [in] */ Int32 code,
+        /* [in] */ const String& name,
+        /* [in] */ Int32 uid);
 
     CARAPI_(void) AddHistoryRecordLocked(
-        /* [in] */ Int64 curTime,
-        /* [in] */ Byte cmd);
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs,
+        /* [in] */ Byte cmd,
+        /* [in] */ HistoryItem* cur);
 
     CARAPI_(void) AddHistoryRecordLocked(
         /* [in] */ HistoryItem* rec);
 
     CARAPI_(void) ClearHistoryLocked();
 
-    CARAPI_(void) StopAllSignalStrengthTimersLocked(
+    CARAPI_(void) RequestWakelockCpuUpdate();
+
+    CARAPI_(void) AggregateLastWakeupUptimeLocked(
+        /* [in] */ Int64 uptimeMs);
+
+    CARAPI_(void) StopAllPhoneSignalStrengthTimersLocked(
         /* [in] */ Int32 except);
 
     CARAPI_(Int32) FixPhoneServiceState(
@@ -2034,7 +2213,18 @@ private:
     CARAPI_(void) UpdateAllPhoneStateLocked(
         /* [in] */ Int32 state,
         /* [in] */ Int32 simState,
-        /* [in] */ Int32 bin);
+        /* [in] */ Int32 strengthBin);
+
+    CARAPI_(void) StopAllWifiSignalStrengthTimersLocked(
+        /* [in] */ Int32 except);
+
+    static CARAPI_(AutoPtr<ArrayOf<String> >) IncludeInStringArray(
+        /* [in] */ ArrayOf<String>* array,
+        /* [in] */ const String& str);
+
+    static CARAPI_(AutoPtr<ArrayOf<String> >) ExcludeFromStringArray(
+        /* [in] */ ArrayOf<String>* array,
+        /* [in] */ const String& str);
 
     CARAPI_(void) InitTimes();
 
@@ -2427,6 +2617,10 @@ private:
     AutoPtr<ArrayOf<String> > mWifiIfaces;
 
     Int32 mChangedStates;
+    Int32 mChangedStates2;
+
+    String mInitialAcquireWakeName;
+    Int32 mInitialAcquireWakeUid;
 
     Int32 mWakeLockNesting;
 
@@ -2608,6 +2802,7 @@ AutoPtr<T> BatteryStatsImpl::OverflowArrayMap<T>::StopObject(
 
 
 } // namespace Os
+} // namespace Internal
 } // namespace Droid
 } // namespace Elastos
 
