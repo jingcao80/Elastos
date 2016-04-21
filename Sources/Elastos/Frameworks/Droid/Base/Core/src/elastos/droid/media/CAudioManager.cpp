@@ -1804,6 +1804,30 @@ ECode CAudioManager::IsInputDevice(
     return NOERROR;
 }
 
+Int32 CAudioManager::GetInt32FieldValue(
+    /* [in] */ const String& fieldName)
+{
+    HashMap<String, Int32> sFieldValueMap;
+    sFieldValueMap[String("FX_KEY_CLICK")] = IAudioManager::FX_KEY_CLICK;
+    sFieldValueMap[String("FX_FOCUS_NAVIGATION_UP")] = IAudioManager::FX_FOCUS_NAVIGATION_UP;
+    sFieldValueMap[String("FX_FOCUS_NAVIGATION_DOWN")] = IAudioManager::FX_FOCUS_NAVIGATION_DOWN;
+    sFieldValueMap[String("FX_FOCUS_NAVIGATION_LEFT")] = IAudioManager::FX_FOCUS_NAVIGATION_LEFT;
+    sFieldValueMap[String("FX_FOCUS_NAVIGATION_RIGHT")] = IAudioManager::FX_FOCUS_NAVIGATION_RIGHT;
+    sFieldValueMap[String("FX_KEYPRESS_STANDARD")] = IAudioManager::FX_KEYPRESS_STANDARD;
+    sFieldValueMap[String("FX_KEYPRESS_SPACEBAR")] = IAudioManager::FX_KEYPRESS_SPACEBAR;
+    sFieldValueMap[String("FX_KEYPRESS_DELETE")] = IAudioManager::FX_KEYPRESS_DELETE;
+    sFieldValueMap[String("FX_KEYPRESS_RETURN")] = IAudioManager::FX_KEYPRESS_RETURN;
+    sFieldValueMap[String("FX_KEYPRESS_INVALID")] = IAudioManager::FX_KEYPRESS_INVALID;
+
+    HashMap<String, Int32>::Iterator it = sFieldValueMap.Find(fieldName);
+    if (it != sFieldValueMap.End()) {
+        return it->mSecond;
+    }
+
+    Logger::E(TAG, "Faied to GetInt32FieldValue for %s.", fieldName.string());
+    return -1;
+}
+
 ECode CAudioManager::GetDevicesForStream(
     /* [in] */ Int32 streamType,
     /* [out] */ Int32* result)

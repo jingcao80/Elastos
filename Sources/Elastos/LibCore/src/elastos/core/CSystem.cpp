@@ -71,17 +71,23 @@ CAR_SINGLETON_IMPL(CSystem)
 
 ECode CSystem::constructor()
 {
-    AutoPtr<IInputStream> input;
-    CFileInputStream::New(CFileDescriptor::IN, (IInputStream**)&input);
-    CBufferedInputStream::New(input, (IInputStream**)&mIn);
+    if (mIn == NULL) {
+        AutoPtr<IInputStream> input;
+        CFileInputStream::New(CFileDescriptor::IN, (IInputStream**)&input);
+        CBufferedInputStream::New(input, (IInputStream**)&mIn);
+    }
 
-    AutoPtr<IOutputStream> output;
-    CFileOutputStream::New(CFileDescriptor::OUT, (IOutputStream**)&output);
-    CPrintStream::New(output, (IPrintStream**)&mOut);
+    if (mOut == NULL) {
+        AutoPtr<IOutputStream> output;
+        CFileOutputStream::New(CFileDescriptor::OUT, (IOutputStream**)&output);
+        CPrintStream::New(output, (IPrintStream**)&mOut);
+    }
 
-    AutoPtr<IOutputStream> err;
-    CFileOutputStream::New(CFileDescriptor::ERR, (IOutputStream**)&err);
-    CPrintStream::New(err, (IPrintStream**)&mErr);
+    if (mErr == NULL) {
+        AutoPtr<IOutputStream> err;
+        CFileOutputStream::New(CFileDescriptor::ERR, (IOutputStream**)&err);
+        CPrintStream::New(err, (IPrintStream**)&mErr);
+    }
 
     return NOERROR;
 }

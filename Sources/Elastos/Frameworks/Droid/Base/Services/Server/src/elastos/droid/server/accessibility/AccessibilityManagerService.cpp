@@ -252,22 +252,18 @@ ECode AccessibilityManagerService::Service::constructor(
     mId = sIdCounter++;
     mComponentName = componentName;
     mAccessibilityServiceInfo = accessibilityServiceInfo;
-    IObject::Probe(sFakeAccessibilityServiceComponentName)->Equals(componentName,
-            &mIsAutomation);
+    mIsAutomation = Object::Equals(sFakeAccessibilityServiceComponentName, componentName);
     if (!mIsAutomation) {
-        ASSERT_SUCCEEDED(CIntent::New((IIntent**)&mIntent));
+        CIntent::New((IIntent**)&mIntent);
         mIntent->SetComponent(mComponentName);
-        mIntent->PutExtra(IIntent::EXTRA_CLIENT_LABEL,
-                R::string::accessibility_binding_label);
+        mIntent->PutExtra(IIntent::EXTRA_CLIENT_LABEL, R::string::accessibility_binding_label);
         AutoPtr<IIntent> i;
         CIntent::New(ISettings::ACTION_ACCESSIBILITY_SETTINGS, (IIntent**)&i);
         AutoPtr<IPendingIntentHelper> helper;
-        ASSERT_SUCCEEDED(CPendingIntentHelper::AcquireSingleton(
-                (IPendingIntentHelper**)&helper));
+        CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
         AutoPtr<IPendingIntent> pendingI;
         helper->GetActivity(mHost->mContext, 0, i, 0, (IPendingIntent**)&pendingI);
-        ASSERT_SUCCEEDED(mIntent->PutExtra(IIntent::EXTRA_CLIENT_INTENT,
-                IParcelable::Probe(pendingI)));
+        mIntent->PutExtra(IIntent::EXTRA_CLIENT_INTENT, IParcelable::Probe(pendingI));
     }
     SetDynamicallyConfigurableProperties(accessibilityServiceInfo);
 
@@ -292,9 +288,9 @@ void AccessibilityManagerService::Service::SetDynamicallyConfigurableProperties(
     mIsDefault = (flags & IAccessibilityServiceInfo::DEFAULT) != 0;
 
     AutoPtr<IResolveInfo> resolveInfo;
-    ASSERT_SUCCEEDED(info->GetResolveInfo((IResolveInfo**)&resolveInfo));
+    info->GetResolveInfo((IResolveInfo**)&resolveInfo);
     AutoPtr<IServiceInfo> serviceInfo;
-    ASSERT_SUCCEEDED(resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo));
+    resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(serviceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
     Int32 version;
@@ -3037,12 +3033,17 @@ ECode AccessibilityManagerService::UserStateDeathRecipient::ProxyDied()
 //===============================================================================
 
 AccessibilityManagerService::AccessibilityContentObserver::AccessibilityContentObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ AccessibilityManagerService* host)
     : mHost(host)
 {
-    ContentObserver::constructor(handler);
+}
 
+AccessibilityManagerService::AccessibilityContentObserver::~AccessibilityContentObserver()
+{}
+
+ECode AccessibilityManagerService::AccessibilityContentObserver::constructor(
+    /* [in] */ IHandler* handler)
+{
     AutoPtr<ISettingsSecure> settingsSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
 
@@ -3080,10 +3081,8 @@ AccessibilityManagerService::AccessibilityContentObserver::AccessibilityContentO
     settingsSecure->GetUriFor(
             ISettingsSecure::ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
             (IUri**)&mHighTextContrastUri);
+    return ContentObserver::constructor(handler);
 }
-
-AccessibilityManagerService::AccessibilityContentObserver::~AccessibilityContentObserver()
-{}
 
 void AccessibilityManagerService::AccessibilityContentObserver::Register(
     /* [in] */ IContentResolver* contentResolver)
@@ -3480,7 +3479,8 @@ ECode AccessibilityManagerService::constructor(
     RegisterBroadcastReceivers();
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    AutoPtr<AccessibilityContentObserver> observer = new AccessibilityContentObserver(mMainHandler, this);
+    AutoPtr<AccessibilityContentObserver> observer = new AccessibilityContentObserver(this);
+    observer->constructor(mMainHandler);
     observer->Register(cr);
     return NOERROR;
 }

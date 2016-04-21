@@ -1506,6 +1506,9 @@ public:
         /* [in] */ Int32 device,
         /* [out] */ Boolean* result);
 
+    static CARAPI_(Int32) GetInt32FieldValue(
+        /* [in] */ const String& filedName);
+
 private:
     static CARAPI_(AutoPtr<IIAudioService>) GetService();
 

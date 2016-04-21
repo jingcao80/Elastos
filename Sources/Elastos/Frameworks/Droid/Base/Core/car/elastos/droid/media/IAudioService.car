@@ -327,6 +327,8 @@ module
 
         RemoveMediaPlayerAndUpdateRemoteController(
             [in] String packageName);
+
+        SystemReady();
     }
 
     } // namespace Media

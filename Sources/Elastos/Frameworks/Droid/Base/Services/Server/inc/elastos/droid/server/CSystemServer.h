@@ -27,6 +27,7 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Media::IAudioService;
 using Elastos::Droid::Server::CMountService;
 using Elastos::Droid::Server::Am::CActivityManagerService;
 using Elastos::Droid::Server::Display::CDisplayManagerService;
@@ -73,7 +74,7 @@ private:
         AutoPtr<CInputManagerService> mInputManagerF;
         // AutoPtr<CTelephonyRegistry> mTelephonyRegistryF;
         // AutoPtr<CMediaRouterService> mMediaRouterF;
-        // AutoPtr<CAudioService> mAudioServiceF;
+        AutoPtr<IAudioService> mAudioServiceF;
         // AutoPtr<CMmsServiceBroker> mMmsServiceF;
     };
 

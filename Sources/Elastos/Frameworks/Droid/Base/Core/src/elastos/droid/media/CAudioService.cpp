@@ -102,7 +102,7 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
-const String CAudioService::TAG("AudioService");
+const String CAudioService::TAG("CAudioService");
 const String CAudioService::SOUND_EFFECTS_PATH("/media/audio/ui/");
 const String CAudioService::TAG_AUDIO_ASSETS("audio_assets");
 const String CAudioService::ATTR_VERSION("version");
@@ -271,8 +271,7 @@ ECode CAudioService::SoundPoolListenerThread::Run()
     Looper::Prepare();
     mHost->mSoundPoolLooper = Looper::GetMyLooper();
 
-    Object& lock = mHost->mSoundEffectsLock;
-    synchronized(lock) {
+    synchronized(mHost->mSoundEffectsLock) {
         if (mHost->mSoundPool != NULL) {
             mHost->mSoundPoolCallBack = new SoundPoolCallback(mHost);
             mHost->mSoundPool->SetOnLoadCompleteListener(mHost->mSoundPoolCallBack);
@@ -352,10 +351,8 @@ ECode CAudioService::VolumeStreamState::VolumeDeathHandler::Mute(
         }
     }
     if (updateVolume) {
-        SendMsg(mHost->mHost->mAudioHandler,
-                MSG_SET_ALL_VOLUMES,
-                SENDMSG_QUEUE,
-                0, 0, (IInterface*)(IObject*)mHost, 0);
+        SendMsg(mHost->mHost->mAudioHandler, MSG_SET_ALL_VOLUMES,
+            SENDMSG_QUEUE, 0, 0, (IInterface*)(IObject*)mHost, 0);
     }
     return NOERROR;
 }
@@ -371,8 +368,8 @@ CAudioService::VolumeStreamState::VolumeStreamState(
     /* [in] */ CAudioService* host,
     /* [in] */ const String& settingName,
     /* [in] */ Int32 streamType)
+    : mHost(host)
 {
-    mHost = host;
     Logger::W(TAG, "TODO: CConcurrentHashMap is not completed");
     // CConcurrentHashMap::New(8, 0.75f, 4, (IConcurrentHashMap**)&mIndex);
     CHashMap::New((IHashMap**)&mIndex);
@@ -417,7 +414,7 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
             CInteger32::New(mIndexMax, (IInteger32**)&iValue);
             //TODO: delete this lock when mIndex is IConcurrentHashMap
             AutoLock lock(mIndex);
-            IMap::Probe(mIndex)->Put(iKey, iValue);
+            mIndex->Put(iKey, iValue);
             return NOERROR;
         }
         // do not read system stream volume from settings: this stream is always aliased
@@ -440,7 +437,7 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
             CInteger32::New(index, (IInteger32**)&iValue);
             //TODO: delete this lock when mIndex is IConcurrentHashMap
             AutoLock _lock(mIndex);
-            IMap::Probe(mIndex)->Put(iKey, iValue);
+            mIndex->Put(iKey, iValue);
             return NOERROR;
         }
 
@@ -462,7 +459,7 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
                                     CAudioManager::DEFAULT_STREAM_VOLUME[mStreamType] : -1;
             Int32 index;
             Settings::System::GetInt32ForUser(
-                    mHost->mContentResolver, name, defaultIndex, IUserHandle::USER_CURRENT, &index);
+                mHost->mContentResolver, name, defaultIndex, IUserHandle::USER_CURRENT, &index);
             if (index == -1) {
                 continue;
             }
@@ -473,7 +470,7 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
             CInteger32::New(GetValidIndex(10 * index), (IInteger32**)&iValue);
             //TODO: delete this lock when mIndex is IConcurrentHashMap
             AutoLock lock(mIndex);
-            IMap::Probe(mIndex)->Put(iKey, iValue);
+            mIndex->Put(iKey, iValue);
         }
     }
     return NOERROR;
@@ -518,7 +515,8 @@ ECode CAudioService::VolumeStreamState::ApplyAllVolumes()
         AutoLock lock(mIndex);
         // then apply device specific volumes
         AutoPtr<ISet> set;
-        IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
+
+        mIndex->GetEntrySet((ISet**)&set);
 
         AutoPtr<ArrayOf<IInterface*> > array;
         set->ToArray((ArrayOf<IInterface*>**)&array);
@@ -536,9 +534,10 @@ ECode CAudioService::VolumeStreamState::ApplyAllVolumes()
                 if (IsMuted()) {
                     index = 0;
                 }
-                else if (((device & IAudioSystem::DEVICE_OUT_ALL_A2DP) != 0 &&
-                        mHost->mAvrcpAbsVolSupported)
-                            || ((device & mHost->mFullVolumeDevices) != 0))
+                else if (
+                    ((device & IAudioSystem::DEVICE_OUT_ALL_A2DP) != 0
+                        && mHost->mAvrcpAbsVolSupported)
+                    || ((device & mHost->mFullVolumeDevices) != 0))
                 {
                     index = (mIndexMax + 5)/10;
                 }
@@ -572,6 +571,7 @@ ECode CAudioService::VolumeStreamState::SetIndex(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     synchronized(this) {
         Int32 oldIndex;
@@ -592,7 +592,7 @@ ECode CAudioService::VolumeStreamState::SetIndex(
         {
             //TODO: delete this lock when mIndex is IConcurrentHashMap
             AutoLock lock(mIndex);
-            IMap::Probe(mIndex)->Put(iKey, iValue);
+            mIndex->Put(iKey, iValue);
         }
 
         if (oldIndex != index) {
@@ -610,14 +610,11 @@ ECode CAudioService::VolumeStreamState::SetIndex(
                     (*mHost->mStreamStates)[streamType]->SetIndex(scaledIndex, device, &b);
                     if (currentDevice) {
                         (*mHost->mStreamStates)[streamType]->SetIndex(scaledIndex,
-                                mHost->GetDeviceForStream(streamType), &b);
+                            mHost->GetDeviceForStream(streamType), &b);
                     }
                 }
             }
             *result = TRUE;
-        }
-        else {
-            *result = FALSE;
         }
     }
     return NOERROR;
@@ -627,20 +624,23 @@ ECode CAudioService::VolumeStreamState::GetIndex(
     /* [in] */ Int32 device,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = -1;
+
     synchronized(this) {
         AutoPtr<IInterface> obj;
         AutoPtr<IInteger32> iKey;
         CInteger32::New(device, (IInteger32**)&iKey);
         //TODO: delete this lock when mIndex is IConcurrentHashMap
         AutoLock lock(mIndex);
-        IMap::Probe(mIndex)->Get(iKey, (IInterface**)&obj);
+        mIndex->Get(iKey, (IInterface**)&obj);
         AutoPtr<IInteger32> index = IInteger32::Probe(obj);
         if (index == NULL) {
             // there is always an entry for IAudioSystem::DEVICE_OUT_DEFAULT
             obj = NULL;
             AutoPtr<IInteger32> iKey;
             CInteger32::New(IAudioSystem::DEVICE_OUT_DEFAULT, (IInteger32**)&iKey);
-            IMap::Probe(mIndex)->Get(iKey, (IInterface**)&obj);
+            mIndex->Get(iKey, (IInterface**)&obj);
             index = IInteger32::Probe(obj);
         }
         index->GetValue(result);
@@ -674,7 +674,7 @@ ECode CAudioService::VolumeStreamState::SetAllIndexes(
         {
             //TODO: delete this lock when mIndex is IConcurrentHashMap
             AutoLock lock(mIndex);
-            IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
+            mIndex->GetEntrySet((ISet**)&set);
             set->GetIterator((IIterator**)&i);
             while (i->HasNext(&b), b) {
                 AutoPtr<IInterface> obj;
@@ -718,7 +718,7 @@ ECode CAudioService::VolumeStreamState::SetAllIndexesToMax()
         //TODO: delete this lock when mIndex is IConcurrentHashMap
         AutoLock lock(mIndex);
         AutoPtr<ISet> set;
-        IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
+        mIndex->GetEntrySet((ISet**)&set);
         AutoPtr<IIterator> i;
         set->GetIterator((IIterator**)&i);
         Boolean b;
@@ -766,7 +766,7 @@ ECode CAudioService::VolumeStreamState::CheckFixedVolumeDevices()
             //TODO: delete this lock when mIndex is IConcurrentHashMap
             AutoLock lock(mIndex);
             AutoPtr<ISet> set;
-            IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
+            mIndex->GetEntrySet((ISet**)&set);
 
             AutoPtr<ArrayOf<IInterface*> > array;
             set->ToArray((ArrayOf<IInterface*>**)&array);
@@ -868,7 +868,7 @@ void CAudioService::VolumeStreamState::Dump(
     //TODO: delete this lock when mIndex is IConcurrentHashMap
     AutoLock lock(mIndex);
     AutoPtr<ISet> set;
-    IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
+    mIndex->GetEntrySet((ISet**)&set);
     AutoPtr<IIterator> i;
     set->GetIterator((IIterator**)&i);
     Boolean b;
@@ -1181,7 +1181,8 @@ CAR_INTERFACE_IMPL(CAudioService::ForceControlStreamClient,
 CAudioService::ForceControlStreamClient::ForceControlStreamClient(
     /* [in] */ CAudioService* host,
     /* [in] */ IBinder* cb)
-    : mCb(cb)
+    : mHost(host)
+    , mCb(cb)
 {
     if (cb != NULL) {
         // try {
@@ -1232,7 +1233,8 @@ CAR_INTERFACE_IMPL(CAudioService::RmtSbmxFullVolDeathHandler,
 CAudioService::RmtSbmxFullVolDeathHandler::RmtSbmxFullVolDeathHandler(
     /* [in] */ CAudioService* host,
     /* [in] */ IBinder* cb)
-    : mICallback(cb)
+    : mHost(host)
+    , mICallback(cb)
 {
     // try {
     AutoPtr<IProxy> proxy = (IProxy*)cb->Probe(EIID_IProxy);
@@ -1338,16 +1340,14 @@ ECode CAudioService::SetModeDeathHandler::GetBinder(
 //  CAudioService::SoundPoolCallback
 //==============================================================================
 
-CAR_INTERFACE_IMPL(CAudioService::SoundPoolCallback,
-        Object, ISoundPoolOnLoadCompleteListener)
+CAR_INTERFACE_IMPL(CAudioService::SoundPoolCallback, Object, ISoundPoolOnLoadCompleteListener)
 
 CAudioService::SoundPoolCallback::SoundPoolCallback(
     /* [in] */ CAudioService* host)
-    : mStatus(1)
+    : mHost(host)
+    , mStatus(1)
 {
-    AutoPtr<IArrayList> list;
-    CArrayList::New((IArrayList**)&list);
-    mSamples = IList::Probe(list);
+    CArrayList::New((IList**)&mSamples);
 }
 
 ECode CAudioService::SoundPoolCallback::OnLoadComplete(
@@ -1355,8 +1355,7 @@ ECode CAudioService::SoundPoolCallback::OnLoadComplete(
     /* [in] */ Int32 sampleId,
     /* [in] */ Int32 status)
 {
-    Object& lock = mHost->mSoundEffectsLock;
-    synchronized(lock) {
+    synchronized(mHost->mSoundEffectsLock) {
         Int32 i;
         AutoPtr<IInteger32> i32;
         CInteger32::New(sampleId, (IInteger32**)&i32);
@@ -1414,8 +1413,7 @@ CAudioService::ScoClient::ScoClient(
 
 ECode CAudioService::ScoClient::ProxyDied()
 {
-    AutoPtr<IArrayList> lock = mHost->mScoClients;
-    synchronized(lock) {
+    synchronized(mHost->mScoClients.Get()) {
         Logger::W(TAG, "SCO client died");
         Int32 index;
         mHost->mScoClients->IndexOf(TO_IINTERFACE(this), &index);
@@ -1433,8 +1431,7 @@ ECode CAudioService::ScoClient::ProxyDied()
 ECode CAudioService::ScoClient::IncCount(
     /* [in] */ Int32 scoAudioMode)
 {
-    AutoPtr<IArrayList> lock = mHost->mScoClients;
-    synchronized(lock) {
+    synchronized(mHost->mScoClients.Get()) {
         RequestScoState(IBluetoothHeadset::STATE_AUDIO_CONNECTED, scoAudioMode);
         if (mStartcount == 0) {
             // try {
@@ -1452,8 +1449,7 @@ ECode CAudioService::ScoClient::IncCount(
 
 ECode CAudioService::ScoClient::DecCount()
 {
-    AutoPtr<IArrayList> lock = mHost->mScoClients;
-    synchronized(lock) {
+    synchronized(mHost->mScoClients.Get()) {
         if (mStartcount == 0) {
             Logger::W(TAG, "ScoClient.decCount() already 0");
         }
@@ -1477,8 +1473,7 @@ ECode CAudioService::ScoClient::DecCount()
 ECode CAudioService::ScoClient::ClearCount(
     /* [in] */ Boolean stopSco)
 {
-    AutoPtr<IArrayList> lock = mHost->mScoClients;
-    synchronized(lock) {
+    synchronized(mHost->mScoClients.Get()) {
         if (mStartcount != 0) {
             // try {
             AutoPtr<IProxy> proxy = (IProxy*)mCb->Probe(EIID_IProxy);
@@ -1525,8 +1520,7 @@ ECode CAudioService::ScoClient::TotalCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IArrayList> lock = mHost->mScoClients;
-    synchronized(lock) {
+    synchronized(mHost->mScoClients.Get()) {
         Int32 count = 0;
         Int32 size;
         mHost->mScoClients->GetSize(&size);
@@ -2046,8 +2040,7 @@ Boolean CAudioService::AudioHandler::OnLoadSoundEffects()
 {
     Int32 status = 0;
 
-    Object& lock = mHost->mSoundEffectsLock;
-    synchronized(lock) {
+    synchronized(mHost->mSoundEffectsLock) {
         if (!mHost->mSystemReady) {
             Logger::W(TAG, "onLoadSoundEffects() called before boot complete");
             return FALSE;
@@ -2124,8 +2117,7 @@ Boolean CAudioService::AudioHandler::OnLoadSoundEffects()
                 file->ToString(&str);
                 AutoPtr<IInterface> obj;
                 SOUND_EFFECT_FILES->Get(mHost->SOUND_EFFECT_FILES_MAP[effect][0], (IInterface**)&obj);
-                String s;
-                ICharSequence::Probe(obj)->ToString(&s);
+                String s = Object::ToString(obj);
                 String filePath = str + SOUND_EFFECTS_PATH + s;
 
                 Int32 sampleId;
@@ -2186,8 +2178,7 @@ Boolean CAudioService::AudioHandler::OnLoadSoundEffects()
 
 void CAudioService::AudioHandler::OnUnloadSoundEffects()
 {
-    Object& lock = mHost->mSoundEffectsLock;
-    synchronized(lock) {
+    synchronized(mHost->mSoundEffectsLock) {
         if (mHost->mSoundPool == NULL) {
             return;
         }
@@ -2220,8 +2211,7 @@ void CAudioService::AudioHandler::OnPlaySoundEffect(
     /* [in] */ Int32 effectType,
     /* [in] */ Int32 volume)
 {
-    Object& lock = mHost->mSoundEffectsLock;
-    synchronized(lock) {
+    synchronized(mHost->mSoundEffectsLock) {
 
         OnLoadSoundEffects();
 
@@ -2239,8 +2229,9 @@ void CAudioService::AudioHandler::OnPlaySoundEffect(
 
         if (mHost->SOUND_EFFECT_FILES_MAP[effectType][1] > 0) {
             Int32 result;
-            mHost->mSoundPool->Play(mHost->SOUND_EFFECT_FILES_MAP[effectType][1],
-                                volFloat, volFloat, 0, 0, 1.0f, &result);
+            mHost->mSoundPool->Play(
+                mHost->SOUND_EFFECT_FILES_MAP[effectType][1],
+                volFloat, volFloat, 0, 0, 1.0f, &result);
         }
         else {
             AutoPtr<IMediaPlayer> mediaPlayer;
@@ -2250,9 +2241,9 @@ void CAudioService::AudioHandler::OnPlaySoundEffect(
             String str;
             file->ToString(&str);
             AutoPtr<IInterface> obj;
-            SOUND_EFFECT_FILES->Get(mHost->SOUND_EFFECT_FILES_MAP[effectType][0], (IInterface**)&obj);
-            String s;
-            ICharSequence::Probe(obj)->ToString(&s);
+            SOUND_EFFECT_FILES->Get(
+                mHost->SOUND_EFFECT_FILES_MAP[effectType][0], (IInterface**)&obj);
+            String s = Object::ToString(obj);
             String filePath = str + SOUND_EFFECTS_PATH + s;
             mediaPlayer->SetDataSource(filePath);
             mediaPlayer->SetAudioStreamType(IAudioSystem::STREAM_SYSTEM);
@@ -2617,7 +2608,7 @@ ECode CAudioService::AudioServiceBroadcastReceiver::OnReceive(
 //  CAudioService::MyDisplayStatusCallback
 //==============================================================================
 
-CAR_INTERFACE_IMPL(CAudioService::MyDisplayStatusCallback,
+CAR_INTERFACE_IMPL(CAudioService::MyDisplayStatusCallback, \
         Object, IHdmiPlaybackClientDisplayStatusCallback)
 
 ECode CAudioService::MyDisplayStatusCallback::OnComplete(
@@ -2641,7 +2632,7 @@ ECode CAudioService::MyDisplayStatusCallback::OnComplete(
 //  CAudioService::StreamOverride
 //==============================================================================
 
-CAR_INTERFACE_IMPL(CAudioService::StreamOverride,
+CAR_INTERFACE_IMPL(CAudioService::StreamOverride, \
         Object, IAccessibilityManagerTouchExplorationStateChangeListener)
 
 Int32 CAudioService::StreamOverride::sDelayMs = 0;
@@ -2660,15 +2651,17 @@ ECode CAudioService::StreamOverride::Init(
 {
     AutoPtr<IInterface> service;
     ctxt->GetSystemService(IContext::ACCESSIBILITY_SERVICE, ((IInterface**)&service));
-    AutoPtr<IAccessibilityManager> accessibilityManager = IAccessibilityManager::Probe(service);
+    IAccessibilityManager* accessibilityManager = IAccessibilityManager::Probe(service);
+    if (accessibilityManager) {
+        Boolean b;
+        accessibilityManager->IsTouchExplorationEnabled(&b);
 
-    Boolean b;
-    accessibilityManager->IsTouchExplorationEnabled(&b);
+        UpdateDefaultStreamOverrideDelay(b);
 
-    UpdateDefaultStreamOverrideDelay(b);
+        AutoPtr<StreamOverride> so = new StreamOverride();
+        accessibilityManager->AddTouchExplorationStateChangeListener(so, &b);
+    }
 
-    AutoPtr<StreamOverride> so = new StreamOverride();
-    accessibilityManager->AddTouchExplorationStateChangeListener(so, &b);
     return NOERROR;
 }
 
@@ -3191,13 +3184,9 @@ ECode CAudioService::constructor(
     CBoolean::New(cameraSoundForced, (IBoolean**)&mCameraSoundForced);
 
     SendMsg(mAudioHandler,
-            MSG_SET_FORCE_USE,
-            SENDMSG_QUEUE,
-            IAudioSystem::FOR_SYSTEM,
-            cameraSoundForced ?
-                    IAudioSystem::FORCE_SYSTEM_ENFORCED : IAudioSystem::FORCE_NONE,
-            NULL,
-            0);
+        MSG_SET_FORCE_USE, SENDMSG_QUEUE, IAudioSystem::FOR_SYSTEM,
+        cameraSoundForced ? IAudioSystem::FORCE_SYSTEM_ENFORCED : IAudioSystem::FORCE_NONE,
+        NULL, 0);
 
     Int32 val;
     Settings::Global::GetInt32(mContentResolver,
@@ -3314,8 +3303,8 @@ ECode CAudioService::OnSystemReady()
     adapter = CBluetoothAdapter::GetDefaultAdapter();
     if (adapter != NULL) {
         Boolean b;
-        adapter->GetProfileProxy(mContext, mBluetoothProfileServiceListener,
-                                IBluetoothProfile::A2DP, &b);
+        adapter->GetProfileProxy(
+            mContext, mBluetoothProfileServiceListener, IBluetoothProfile::A2DP, &b);
     }
 
     service = NULL;
@@ -3333,13 +3322,8 @@ ECode CAudioService::OnSystemReady()
         }
     }
 
-    SendMsg(mAudioHandler,
-            MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
-            SENDMSG_REPLACE,
-            0,
-            0,
-            NULL,
-            SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
+    SendMsg(mAudioHandler, MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
+        SENDMSG_REPLACE, 0, 0, NULL, SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
 
     return StreamOverride::Init(mContext);
 }
@@ -5897,16 +5881,11 @@ void CAudioService::LoadTouchSoundAssets()
                 xmlPullParser->GetAttributeValue(String(NULL), ATTR_ASSET_ID, &id);
                 String file;
                 xmlPullParser->GetAttributeValue(String(NULL), ATTR_ASSET_FILE, &file);
-                Int32 fx = 0;
-
-                // try {
-// TODO: Need Field
-                // Field field = AudioManager.class.getField(id);
-                // field->GetInt32(NULL, &fx);
-                // } catch (Exception e) {
-                //     Log.w(TAG, "Invalid touch sound ID: "+id);
-                //     continue;
-                // }
+                Int32 fx = CAudioManager::GetInt32FieldValue(id);
+                if (fx < 0) {
+                    Logger::W(TAG, "Invalid touch sound ID:%d", id.string());
+                    continue;
+                }
 
                 AutoPtr<ICharSequence> cs;
                 CString::New(file, (ICharSequence**)&cs);
@@ -6328,11 +6307,12 @@ Boolean CAudioService::IsInCommunication()
 {
     Boolean IsInCall = FALSE;
 
-    //TODO:
-    // AutoPtr<IInterface> service;
-    // mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
-    // AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
-    // telecomManager->IsInCall(&IsInCall);
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
+    AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
+    if (telecomManager) {
+        telecomManager->IsInCall(&IsInCall);
+    }
 
     Int32 mode;
     GetMode(&mode);

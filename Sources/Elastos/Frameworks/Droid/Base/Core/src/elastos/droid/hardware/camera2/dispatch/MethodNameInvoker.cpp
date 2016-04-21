@@ -49,7 +49,7 @@ ECode MethodNameInvoker::Invoke(
 
     AutoPtr<ICharSequence> charObj = CoreUtils::Convert(methodName);
     AutoPtr<IInterface> obj;
-    IMap::Probe(mMethods)->Get(TO_IINTERFACE(charObj), (IInterface**)&obj);
+    mMethods->Get(TO_IINTERFACE(charObj), (IInterface**)&obj);
     AutoPtr<IMethodInfo> targetMethod = IMethodInfo::Probe(obj);
     if (targetMethod == NULL) {
         AutoPtr<ArrayOf<IMethodInfo*> > methodInfos;
@@ -65,7 +65,7 @@ ECode MethodNameInvoker::Invoke(
             if (name.Equals(methodName) &&
                     (params->GetLength() == paramInfo->GetLength()) ) {
                 targetMethod = method;
-                IMap::Probe(mMethods)->Put(TO_IINTERFACE(charObj), targetMethod);
+                mMethods->Put(TO_IINTERFACE(charObj), targetMethod);
                 break;
             }
         }

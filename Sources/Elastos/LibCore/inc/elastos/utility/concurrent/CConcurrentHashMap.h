@@ -1030,6 +1030,10 @@ public:
         /* [in] */ IInterface* value,
         /* [out] */ IInterface** oldValue);
 
+    CARAPI Put(
+        /* [in] */ IInterface* key,
+        /* [in] */ IInterface* value);
+
     /** Implementation for put and putIfAbsent */
     CARAPI_(AutoPtr<IInterface>) PutVal(
         /* [in] */ IInterface* key,
@@ -1058,6 +1062,11 @@ public:
     CARAPI Remove(
         /* [in] */ IInterface* key,
         /* [out] */ IInterface** value);
+
+    CARAPI Remove(
+        /* [in] */ IInterface* key);
+
+    using AbstractMap::Remove;
 
     /**
      * Implementation for the four public remove/replace methods:

@@ -1234,8 +1234,8 @@ String CActivityThread::GetCurrentPackageName()
 {
     String name;
     AutoPtr<IActivityThread> am = GetCurrentActivityThread();
-    if (am != NULL) {
-        CActivityThread* ca = (CActivityThread*)am.Get();
+    CActivityThread* ca = (CActivityThread*)am.Get();
+    if (ca != NULL && ca->mBoundApplication != NULL) {
         IPackageItemInfo::Probe(ca->mBoundApplication->mAppInfo)->GetPackageName(&name);
     }
     return name;
@@ -1244,8 +1244,8 @@ String CActivityThread::GetCurrentPackageName()
 String CActivityThread::GetCurrentProcessName()
 {
     AutoPtr<IActivityThread> am = GetCurrentActivityThread();
-    if (am != NULL) {
-        CActivityThread* ca = (CActivityThread*)am.Get();
+    CActivityThread* ca = (CActivityThread*)am.Get();
+    if (ca != NULL && ca->mBoundApplication != NULL) {
         return ca->mBoundApplication->mProcessName;
     }
     return String(NULL);

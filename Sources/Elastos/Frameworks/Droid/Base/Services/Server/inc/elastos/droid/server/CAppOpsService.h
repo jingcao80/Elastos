@@ -6,6 +6,7 @@
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/utility/SparseArray.h>
+#include <elastos/utility/etl/HashSet.h>
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
@@ -38,6 +39,7 @@ using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::IFileOutputStream;
 using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IIterator;
@@ -232,10 +234,10 @@ private:
         Restriction();
 
         Int32 mMode;
-        AutoPtr<IArraySet> mExceptionPackages;// = NO_EXCEPTIONS;//ArraySet<String>
+        AutoPtr<HashSet<String> > mExceptionPackages;// = NO_EXCEPTIONS;//ArraySet<String>
 
     private:
-        static const AutoPtr<IArraySet> NO_EXCEPTIONS;// = new ArraySet<String>();
+        static const AutoPtr<HashSet<String> > NO_EXCEPTIONS;// = new ArraySet<String>();
     };
 
 public:

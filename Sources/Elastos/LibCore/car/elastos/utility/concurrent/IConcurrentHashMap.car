@@ -1,6 +1,9 @@
 
 module
 {
+    interface Elastos.Utility.ISet;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Utility.ICollection;
     interface Elastos.Utility.IEnumeration;
 
     namespace Elastos {
@@ -77,6 +80,335 @@ module
          */
         Elements(
             [out] IEnumeration** outenum);
+
+
+        // From IConcurrentMap
+        //
+        /**
+         * If the specified key is not already associated
+         * with a value, associate it with the given value.
+         * This is equivalent to
+         *  <pre> {@code
+         * if (!map.containsKey(key))
+         *   return map.put(key, value);
+         * else
+         *   return map.get(key);}</pre>
+         *
+         * except that the action is performed atomically.
+         *
+         * @param key key with which the specified value is to be associated
+         * @param value value to be associated with the specified key
+         * @return the previous value associated with the specified key, or
+         *         <tt>null</tt> if there was no mapping for the key.
+         *         (A <tt>null</tt> return can also indicate that the map
+         *         previously associated <tt>null</tt> with the key,
+         *         if the implementation supports null values.)
+         * @throws UnsupportedOperationException if the <tt>put</tt> operation
+         *         is not supported by this map
+         * @throws ClassCastException if the class of the specified key or value
+         *         prevents it from being stored in this map
+         * @throws NullPointerException if the specified key or value is null,
+         *         and this map does not permit null keys or values
+         * @throws IllegalArgumentException if some property of the specified key
+         *         or value prevents it from being stored in this map
+         *
+         */
+        PutIfAbsent(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] IInterface** outface);
+
+        /**
+         * Removes the entry for a key only if currently mapped to a given value.
+         * This is equivalent to
+         *  <pre> {@code
+         * if (map.containsKey(key) && map.get(key).equals(value)) {
+         *   map.remove(key);
+         *   return true;
+         * } else
+         *   return false;}</pre>
+         *
+         * except that the action is performed atomically.
+         *
+         * @param key key with which the specified value is associated
+         * @param value value expected to be associated with the specified key
+         * @return <tt>true</tt> if the value was removed
+         * @throws UnsupportedOperationException if the <tt>remove</tt> operation
+         *         is not supported by this map
+         * @throws ClassCastException if the key or value is of an inappropriate
+         *         type for this map
+         *         (<a href="../Collection.html#optional-restrictions">optional</a>)
+         * @throws NullPointerException if the specified key or value is null,
+         *         and this map does not permit null keys or values
+         *         (<a href="../Collection.html#optional-restrictions">optional</a>)
+         */
+        Remove(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] Boolean* result);
+
+        /**
+         * Replaces the entry for a key only if currently mapped to a given value.
+         * This is equivalent to
+         *  <pre> {@code
+         * if (map.containsKey(key) && map.get(key).equals(oldValue)) {
+         *   map.put(key, newValue);
+         *   return true;
+         * } else
+         *   return false;}</pre>
+         *
+         * except that the action is performed atomically.
+         *
+         * @param key key with which the specified value is associated
+         * @param oldValue value expected to be associated with the specified key
+         * @param newValue value to be associated with the specified key
+         * @return <tt>true</tt> if the value was replaced
+         * @throws UnsupportedOperationException if the <tt>put</tt> operation
+         *         is not supported by this map
+         * @throws ClassCastException if the class of a specified key or value
+         *         prevents it from being stored in this map
+         * @throws NullPointerException if a specified key or value is null,
+         *         and this map does not permit null keys or values
+         * @throws IllegalArgumentException if some property of a specified key
+         *         or value prevents it from being stored in this map
+         */
+        Replace(
+            [in] IInterface* key,
+            [in] IInterface* oldValue,
+            [in] IInterface* newValue,
+            [out] Boolean* result);
+
+        /**
+         * Replaces the entry for a key only if currently mapped to some value.
+         * This is equivalent to
+         *  <pre> {@code
+         * if (map.containsKey(key)) {
+         *   return map.put(key, value);
+         * } else
+         *   return null;}</pre>
+         *
+         * except that the action is performed atomically.
+         *
+         * @param key key with which the specified value is associated
+         * @param value value to be associated with the specified key
+         * @return the previous value associated with the specified key, or
+         *         <tt>null</tt> if there was no mapping for the key.
+         *         (A <tt>null</tt> return can also indicate that the map
+         *         previously associated <tt>null</tt> with the key,
+         *         if the implementation supports null values.)
+         * @throws UnsupportedOperationException if the <tt>put</tt> operation
+         *         is not supported by this map
+         * @throws ClassCastException if the class of the specified key or value
+         *         prevents it from being stored in this map
+         * @throws NullPointerException if the specified key or value is null,
+         *         and this map does not permit null keys or values
+         * @throws IllegalArgumentException if some property of the specified key
+         *         or value prevents it from being stored in this map
+         */
+        Replace(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] IInterface** result);
+
+
+        // From IMap
+        //
+        /**
+         * Removes all elements from this {@code Map}, leaving it empty.
+         *
+         * @throws UnsupportedOperationException
+         *                if removing elements from this {@code Map} is not supported.
+         * @see #isEmpty()
+         * @see #size()
+         */
+        Clear();
+
+        /**
+         * Returns whether this {@code Map} contains the specified key.
+         *
+         * @param key
+         *            the key to search for.
+         * @return {@code true} if this map contains the specified key,
+         *         {@code false} otherwise.
+         */
+        ContainsKey(
+            [in] IInterface* key,
+            [out] Boolean* result);
+
+        /**
+         * Returns whether this {@code Map} contains the specified value.
+         *
+         * @param value
+         *            the value to search for.
+         * @return {@code true} if this map contains the specified value,
+         *         {@code false} otherwise.
+         */
+        ContainsValue(
+            [in] IInterface* value,
+            [out] Boolean* result);
+
+        /**
+         * Returns a {@code Set} containing all of the mappings in this {@code Map}. Each mapping is
+         * an instance of {@link Map.Entry}. As the {@code Set} is backed by this {@code Map},
+         * changes in one will be reflected in the other.
+         *
+         * @return a set of the mappings
+         */
+        GetEntrySet(
+            [out] ISet** entries);
+
+        /**
+         * Compares the argument to the receiver, and returns {@code true} if the
+         * specified object is a {@code Map} and both {@code Map}s contain the same mappings.
+         *
+         * @param object
+         *            the {@code Object} to compare with this {@code Object}.
+         * @return boolean {@code true} if the {@code Object} is the same as this {@code Object}
+         *         {@code false} if it is different from this {@code Object}.
+         * @see #hashCode()
+         * @see #entrySet()
+         */
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        /**
+         * Returns the value of the mapping with the specified key.
+         *
+         * @param key
+         *            the key.
+         * @return the value of the mapping with the specified key, or {@code null}
+         *         if no mapping for the specified key is found.
+         */
+        Get(
+            [in] IInterface* key,
+            [out] IInterface** value);
+
+        /**
+         * Returns an integer hash code for the receiver. {@code Object}s which are equal
+         * return the same value for this method.
+         *
+         * @return the receiver's hash.
+         * @see #equals(Object)
+         */
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        /**
+         * Returns whether this map is empty.
+         *
+         * @return {@code true} if this map has no elements, {@code false}
+         *         otherwise.
+         * @see #size()
+         */
+        IsEmpty(
+            [out] Boolean* result);
+
+        /**
+         * Returns a set of the keys contained in this {@code Map}. The {@code Set} is backed by
+         * this {@code Map} so changes to one are reflected by the other. The {@code Set} does not
+         * support adding.
+         *
+         * @return a set of the keys.
+         */
+        GetKeySet(
+            [out] ISet** keySet);
+
+        /**
+         * Maps the specified key to the specified value.
+         *
+         * @param key
+         *            the key.
+         * @param value
+         *            the value.
+         * @return the value of any previous mapping with the specified key or
+         *         {@code null} if there was no mapping.
+         * @throws UnsupportedOperationException
+         *                if adding to this {@code Map} is not supported.
+         * @throws ClassCastException
+         *                if the class of the key or value is inappropriate for
+         *                this {@code Map}.
+         * @throws IllegalArgumentException
+         *                if the key or value cannot be added to this {@code Map}.
+         * @throws NullPointerException
+         *                if the key or value is {@code null} and this {@code Map} does
+         *                not support {@code null} keys or values.
+         */
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] IInterface** oldValue);
+
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value);
+
+        /**
+         * Copies every mapping in the specified {@code Map} to this {@code Map}.
+         *
+         * @param map
+         *            the {@code Map} to copy mappings from.
+         * @throws UnsupportedOperationException
+         *                if adding to this {@code Map} is not supported.
+         * @throws ClassCastException
+         *                if the class of a key or a value of the specified {@code Map} is
+         *                inappropriate for this {@code Map}.
+         * @throws IllegalArgumentException
+         *                if a key or value cannot be added to this {@code Map}.
+         * @throws NullPointerException
+         *                if a key or value is {@code null} and this {@code Map} does not
+         *                support {@code null} keys or values.
+         */
+        PutAll(
+            [in] IMap* map);
+
+        /**
+         * Removes a mapping with the specified key from this {@code Map}.
+         *
+         * @param key
+         *            the key of the mapping to remove.
+         * @return the value of the removed mapping or {@code null} if no mapping
+         *         for the specified key was found.
+         * @throws UnsupportedOperationException
+         *                if removing from this {@code Map} is not supported.
+         */
+        Remove(
+            [in] IInterface* key,
+            [out] IInterface** value);
+
+        Remove(
+            [in] IInterface* key);
+
+        /**
+         * Returns the number of mappings in this {@code Map}.
+         *
+         * @return the number of mappings in this {@code Map}.
+         */
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Returns a {@code Collection} of the values contained in this {@code Map}. The {@code Collection}
+         * is backed by this {@code Map} so changes to one are reflected by the other. The
+         * {@code Collection} supports {@link Collection#remove}, {@link Collection#removeAll},
+         * {@link Collection#retainAll}, and {@link Collection#clear} operations,
+         * and it does not support {@link Collection#add} or {@link Collection#addAll} operations.
+         * <p>
+         * This method returns a {@code Collection} which is the subclass of
+         * {@link AbstractCollection}. The {@link AbstractCollection#iterator} method of this subclass returns a
+         * "wrapper object" over the iterator of this {@code Map}'s {@link #entrySet()}. The {@link AbstractCollection#size} method
+         * wraps this {@code Map}'s {@link #size} method and the {@link AbstractCollection#contains} method wraps this {@code Map}'s
+         * {@link #containsValue} method.
+         * <p>
+         * The collection is created when this method is called at first time and
+         * returned in response to all subsequent calls. This method may return
+         * different Collection when multiple calls to this method, since it has no
+         * synchronization performed.
+         *
+         * @return a collection of the values contained in this map.
+         */
+        GetValues(
+            [out] ICollection** value);
     }
 
     } // namespace Concurrent

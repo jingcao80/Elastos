@@ -132,7 +132,7 @@ const String SystemServer::USB_SERVICE_CLASS(
     "com.android.server.usb.UsbService$Lifecycle");
 const String SystemServer::WIFI_SERVICE_CLASS(
     "com.android.server.wifi.WifiService");
-const String SystemServer::WIFI_P2P_SERVICE_CLASS("LElastos/Droid/Net/Wifi/P2p/CWifiP2pService;");
+const String SystemServer::WIFI_P2P_SERVICE_CLASS("Elastos.Droid.Net.Wifi.P2p.CWifiP2pService");
     //"com.android.server.wifi.p2p.WifiP2pService";
 const String SystemServer::ETHERNET_SERVICE_CLASS(
     "com.android.server.ethernet.EthernetService");
@@ -355,9 +355,9 @@ ECode SystemServer::StartBootstrapServices()
     // Activity manager runs the show.
     AutoPtr<CActivityManagerService::Lifecycle> am = new CActivityManagerService::Lifecycle();
     ECode ec = am->constructor(mSystemContext);
-    if (FAILED(ec)) Slogger::E(TAG, "Failed to create Activity manager service.");
+    if (FAILED(ec)) ReportWtf("create Activity manager service.", ec);
     ec = mSystemServiceManager->StartService(am.Get());
-    if (FAILED(ec)) Slogger::E(TAG, "Failed to start Activity manager service.");
+    if (FAILED(ec)) ReportWtf("starting Activity manager service.", ec);
     mActivityManagerService = am->GetService();
     mActivityManagerService->SetSystemServiceManager(mSystemServiceManager);
 
@@ -369,7 +369,7 @@ ECode SystemServer::StartBootstrapServices()
     service = NULL;
     mPowerManagerService = new PowerManagerService();
     ec = mPowerManagerService->constructor(mSystemContext);
-    if (FAILED(ec)) Slogger::E(TAG, "Failed to start Power manager service.");
+    if (FAILED(ec)) ReportWtf("starting Power manager service.", ec);
     mSystemServiceManager->StartService(mPowerManagerService.Get());
 
     // Now that the power manager has been started, let the activity manager
@@ -381,7 +381,7 @@ ECode SystemServer::StartBootstrapServices()
     // starts up.
     service = NULL;
     ec = CDisplayManagerService::New(mSystemContext, (ISystemService**)&service);
-    if (FAILED(ec)) Slogger::E(TAG, "Failed to start Display manager service.");
+    if (FAILED(ec)) ReportWtf("starting Display manager service.", ec);
     mSystemServiceManager->StartService(service);
     mDisplayManagerService = (CDisplayManagerService*)service.Get();
 
@@ -420,7 +420,7 @@ ECode SystemServer::StartBootstrapServices()
     Slogger::I(TAG, "set up the Application instance for the system process and get started.");
     // Set up the Application instance for the system process and get started.
     ec = mActivityManagerService->SetSystemProcess();
-    if (FAILED(ec)) Slogger::E(TAG, "Failed to start the Application instance for the system process.");
+    if (FAILED(ec)) ReportWtf("starting the Application instance for the system process.", ec);
     return ec;
 }
 
@@ -521,13 +521,13 @@ ECode SystemServer::StartOtherServices()
     Slogger::I(TAG, "Scheduling Policy");
     AutoPtr<IISchedulingPolicyService> sps;
     ec = CSchedulingPolicyService::New((IISchedulingPolicyService**)&sps);
-    if (FAILED(ec)) Slogger::E(TAG, "failed to start Scheduling Policy service");
+    if (FAILED(ec)) ReportWtf("starting Scheduling Policy service", ec);
     ServiceManager::AddService(String("scheduling_policy"), sps.Get());
 
     Slogger::I(TAG, "Telephony Registry todo");
     // AutoPtr<IITelephonyRegistry> telephonyRegistry;
     // ec = CTelephonyRegistry::New(context, (IITelephonyRegistry**)&telephonyRegistry);
-    // if (FAILED(ec)) Slogger::E(TAG, "failed to start Telephony Registry");
+    // if (FAILED(ec)) ReportWtf("starting Telephony Registry", ec);
     // ServiceManager::AddService(String("telephony.registry"), telephonyRegistry.Get());
 
     Slogger::I(TAG, "Entropy Mixer");
@@ -542,7 +542,7 @@ ECode SystemServer::StartOtherServices()
     Slogger::I(TAG, "Account Manager todo");
     // AutoPtr<IIAccountManager> accountManager;
     // ec = CAccountManagerService::New(context, (IIAccountManager**)&accountManager);
-    // if (FAILED(ec)) Slogger::E(TAG, "failed to start Account Manager service");
+    // if (FAILED(ec)) ReportWtf("starting Account Manager service", ec);
     // ServiceManager::AddService(IContext::ACCOUNT_SERVICE, accountManager.Get());
 
     Slogger::I(TAG, "Content Manager");
@@ -557,21 +557,21 @@ ECode SystemServer::StartOtherServices()
     Slogger::I(TAG, "Vibrator Service");
     AutoPtr<IIVibratorService> vs;
     ec = CVibratorService::New(context, (IIVibratorService**)&vs);
-    if (FAILED(ec)) Slogger::E(TAG, "failed to start Vibrator service");
+    if (FAILED(ec)) ReportWtf("starting Vibrator service", ec);
     ServiceManager::AddService(String("vibrator"), vs.Get());
     vibrator = (CVibratorService*)vs.Get();
 
     Slogger::I(TAG, "Consumer IR Service");
     AutoPtr<IIConsumerIrService> cirs;
     ec = CConsumerIrService::New(context, (IIConsumerIrService**)&cirs);
-    if (FAILED(ec)) Slogger::E(TAG, "failed to start Consumer IR service");
+    if (FAILED(ec)) ReportWtf("starting Consumer IR service", ec);
     ServiceManager::AddService(IContext::CONSUMER_IR_SERVICE, cirs.Get());
     consumerIr = (CConsumerIrService*)cirs.Get();
 
     Slogger::I(TAG, "Alarm Manager Service");
     AutoPtr<AlarmManagerService> alarmMgr = new AlarmManagerService();
     ec = alarmMgr->constructor(context);
-    if (FAILED(ec)) Slogger::E(TAG, "failed to start Alarm Manager service");
+    if (FAILED(ec)) ReportWtf("starting Alarm Manager service", ec);
     mSystemServiceManager->StartService(alarmMgr.Get());
     service = ServiceManager::GetService(IContext::ALARM_SERVICE);
     alarm = IIAlarmManager::Probe(service);
@@ -582,13 +582,13 @@ ECode SystemServer::StartOtherServices()
     Slogger::I(TAG, "Input Manager");
     AutoPtr<IIInputManager> inputMgr;
     ec = CInputManagerService::New(context, (IIInputManager**)&inputMgr);
-    if (FAILED(ec)) Slogger::E(TAG, "failed to start Input Manager service");
+    if (FAILED(ec)) ReportWtf("starting Input Manager service", ec);
     inputManager = (CInputManagerService*)inputMgr.Get();
 
     Slogger::I(TAG, "Window Manager");
     wm = CWindowManagerService::Main(context, inputMgr,
-            mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL,
-            !mFirstBoot, mOnlyCore);
+        mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL,
+        !mFirstBoot, mOnlyCore);
     ServiceManager::AddService(IContext::WINDOW_SERVICE, IIWindowManager::Probe(wm));
     ServiceManager::AddService(IContext::INPUT_SERVICE, inputMgr.Get());
 
@@ -631,17 +631,14 @@ ECode SystemServer::StartOtherServices()
             Slogger::I(TAG, "Input Method Service");
             ec = CInputMethodManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
                 (CInputMethodManagerService**)&imm);
-            if (FAILED(ec)) {
-                ReportWtf("starting Input Manager Service", ec);
-            }
+            if (FAILED(ec)) ReportWtf("starting Input Manager Service", ec);
+
             ServiceManager::AddService(IContext::INPUT_METHOD_SERVICE, (IIInputMethodManager*)imm.Get());
 
             Slogger::I(TAG, "Accessibility Manager todo");
             // AutoPtr<IIAccessibilityManager> accessManager;
             // ec = CAccessibilityManagerService::New(context, (IIAccessibilityManager**)&accessManager);
-            // if (FAILED(ec)) {
-            //     ReportWtf("starting Accessibility Service", ec);
-            // }
+            // if (FAILED(ec)) ReportWtf("starting Accessibility Service", ec);
             // ServiceManager::AddService(IContext::ACCESSIBILITY_SERVICE, accessManager);
         }
     }
@@ -652,9 +649,7 @@ ECode SystemServer::StartOtherServices()
     }
 
     // ec = mPackageManagerService->PerformBootDexOpt();
-    // if (FAILED(ec)) {
-    //     ReportWtf("making display ready", ec);
-    // }
+    // if (FAILED(ec)) ReportWtf("making display ready", ec);
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
@@ -671,14 +666,14 @@ ECode SystemServer::StartOtherServices()
                  */
                 Slogger::I(TAG, "Mount Service");
                 ec = CMountService::NewByFriend(context, (CMountService**)&mountService);
-                if (FAILED(ec)) Slogger::E(TAG, "failed to start Mount service");
+                if (FAILED(ec)) ReportWtf("starting Mount service", ec);
                 ServiceManager::AddService(String("mount"), IIMountService::Probe(mountService));
         }
 
         if (!disableNonCoreServices) {
             Slogger::I(TAG,  "Lock Settings Service");
             ec = CLockSettingsService::NewByFriend(context, (CLockSettingsService**)&lockSettings);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start lock settings service");
+            if (FAILED(ec)) ReportWtf("starting Lock settings service", ec);
             ServiceManager::AddService(String("lock_settings"), TO_IINTERFACE(lockSettings));
 
             systemProperties->Get(PERSISTENT_DATA_BLOCK_PROP, &str);
@@ -686,7 +681,7 @@ ECode SystemServer::StartOtherServices()
                 Slogger::I(TAG,  "Persistent Data Block Service todo");
                 // AutoPtr<ISystemService> pdb;
                 // ec = CPersistentDataBlockService::New(context, (ISystemService**)&pdb);
-                // if (FAILED(ec)) Slogger::E(TAG, "failed to start CPersistentDataBlockService");
+                // if (FAILED(ec)) ReportWtf("starting CPersistentDataBlockService", ec);
                 // mSystemServiceManager->StartService(pdb.Get());
             }
 
@@ -695,7 +690,7 @@ ECode SystemServer::StartOtherServices()
             Slogger::I(TAG,  "Device Policy Manager Service todo");
             // AutoPtr<ISystemService> dpm;
             // ec = CDevicePolicyManagerServiceLifecycle::New(context, (ISystemService**)&dpm);
-            // if (FAILED(ec)) Slogger::E(TAG, "failed to start CDevicePolicyManagerServiceLifecycle");
+            // if (FAILED(ec)) ReportWtf("starting CDevicePolicyManagerServiceLifecycle", ec);
             // mSystemServiceManager->StartService(dpm.Get());
         }
 
@@ -703,7 +698,7 @@ ECode SystemServer::StartOtherServices()
             Slogger::I(TAG, "Status Bar todo");
             // ec = CStatusBarManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
             //     (CStatusBarManagerService**)&statusBar);
-            // if (FAILED(ec)) Slogger::E(TAG, "failed to start CStatusBarManagerService");
+            // if (FAILED(ec)) ReportWtf("starting CStatusBarManagerService", ec);
             // ServiceManager::AddService(IContext::STATUS_BAR_SERVICE, TO_IINTERFACE(statusBar));
         }
 
@@ -711,63 +706,51 @@ ECode SystemServer::StartOtherServices()
             Slogger::I(TAG, "Clipboard Service todo");
             // AutoPtr<IIClipboard> cb;
             // ec = CClipboardService::New(context, (IIClipboard**)&cb);
-            // if (FAILED(ec)) Slogger::E(TAG, "failed to start Clipboard Service");
+            // if (FAILED(ec)) ReportWtf("starting Clipboard Service", ec);
             // ServiceManager::AddService(IContext::CLIPBOARD_SERVICE, cb.Get());
         }
 
         if (!disableNetwork) {
+            Slogger::I(TAG, "Network manager Service");
             AutoPtr<IINetworkManagementService> nms;
             ec = CNetworkManagementService::Create(context, (IINetworkManagementService**)&nms);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkManagement Service");
+            if (FAILED(ec)) ReportWtf("starting NetworkManagement Service", ec);
             networkManagement = (CNetworkManagementService*)nms.Get();
             ec = ServiceManager::AddService(IContext::NETWORKMANAGEMENT_SERVICE, nms.Get());
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add NetworkManagement Service");
-            Slogger::I(TAG, "leliang_debug NetworkManagement service done, ec:0x%x, networkManagement:%p", ec, networkManagement.Get());
+            if (FAILED(ec)) ReportWtf("add NetworkManagement Service", ec);
         }
 
         if (!disableNonCoreServices) {
+            Slogger::I(TAG, "Text Services manager Service");
             ec = CTextServicesManagerService::NewByFriend(context, (CTextServicesManagerService**)&tsms);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start Text Service Manager Service");
+            if (FAILED(ec)) ReportWtf("starting Text Service Manager Service", ec);
             ec = ServiceManager::AddService(IContext::TEXT_SERVICES_MANAGER_SERVICE, TO_IINTERFACE(tsms));
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Text Service Manager Service");
-            Slogger::I(TAG, "leliang_debug Text Service Manager service done, ec:0x%x, tsms:%p", ec, tsms.Get());
+            if (FAILED(ec)) ReportWtf("Add Text Service Manager Service", ec);
         }
 
         if (!disableNetwork) {
-    //         try {
+            Slogger::I(TAG, "Network Score Service");
             ec = CNetworkScoreService::NewByFriend(context, (CNetworkScoreService**)&networkScore);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start Network Score Service");
+            if (FAILED(ec)) ReportWtf("starting Network Score Service", ec);
             ec = ServiceManager::AddService(IContext::NETWORK_SCORE_SERVICE, TO_IINTERFACE(networkScore));
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Network Score Service");
-            Slogger::I(TAG, "leliang_debug Network Score service done, ec:0x%x, networkScore:%p", ec, networkScore.Get());
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Network Score Service", ec);
-    //         }
+            if (FAILED(ec)) ReportWtf("Add Network Score Service", ec);
 
-    //         try {
+            Slogger::I(TAG, "Network Stats Service");
             ec = CNetworkStatsService::NewByFriend(context, networkManagement, alarm, (CNetworkStatsService**)&networkStats);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkStatsService Service, ec:0x%x, networkStats:%p", ec, networkStats.Get());
+            if (FAILED(ec)) ReportWtf("starting NetworkStatsService Service", ec);
             ec = ServiceManager::AddService(IContext::NETWORK_STATS_SERVICE, TO_IINTERFACE(networkStats));
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add NetworkStatsService Service");
-            Slogger::I(TAG, "leliang_debug NetworkStatsService service done, ec:0x%x, networkStats:%p", ec, networkStats.Get());
+            if (FAILED(ec)) ReportWtf("Add NetworkStatsService Service", ec);
 
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting NetworkStats Service", ec);
-    //         }
-
-    //         try {
+            Slogger::I(TAG, "Network Policy Manager Service");
             ec = CNetworkPolicyManagerService::NewByFriend(
-                         context, mActivityManagerService,
-                         IIPowerManager::Probe(ServiceManager::GetService(IContext::POWER_SERVICE)),
-                         networkStats, networkManagement,
-                         (CNetworkPolicyManagerService**)&networkPolicy);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkPolicy Service, ec:0x%x, service: %p", ec, networkPolicy.Get());
+                context, mActivityManagerService,
+                IIPowerManager::Probe(ServiceManager::GetService(IContext::POWER_SERVICE)),
+                networkStats, networkManagement,
+                (CNetworkPolicyManagerService**)&networkPolicy);
+            if (FAILED(ec)) ReportWtf("starting NetworkPolicy Service", ec);
             ec = ServiceManager::AddService(IContext::NETWORK_POLICY_SERVICE, TO_IINTERFACE(networkPolicy));
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add NetworkPolicy Service");
-            Slogger::I(TAG, "leliang_debug NetworkPolicy service done, ec:0x%x, networkPolicy:%p", ec, networkPolicy.Get());
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting NetworkPolicy Service", ec);
-    //         }
+            if (FAILED(ec)) ReportWtf("Add NetworkPolicy Service", ec);
+
 
             Slogger::I(TAG, "leliang_debug CWifiP2pService not ok ????????");
             //mSystemServiceManager->StartService(WIFI_P2P_SERVICE_CLASS);
@@ -786,28 +769,20 @@ ECode SystemServer::StartOtherServices()
     //          mSystemServiceManager->StartService(ETHERNET_SERVICE_CLASS);
             }
 
-    //         try {
+            Slogger::I(TAG, "Connectivity Service");
             ec = CConnectivityService::NewByFriend(context, networkManagement, networkStats, networkPolicy,
                     (CConnectivityService**)&connectivity);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start Connectivity Service, ec:0x%x, service: %p", ec, connectivity.Get());
+            if (FAILED(ec)) ReportWtf("starting Connectivity Service", ec);
             ec = ServiceManager::AddService(IContext::CONNECTIVITY_SERVICE, TO_IINTERFACE(connectivity));
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Connectivity Service");
-            Slogger::I(TAG, "leliang_debug Connectivity service done, ec:0x%x, connectivity:%p", ec, connectivity.Get());
+            if (FAILED(ec)) ReportWtf("Add Connectivity Service", ec);
             networkStats->BindConnectivityManager(connectivity);
             networkPolicy->BindConnectivityManager(connectivity);
-    //      } catch (Throwable e) {
-    //             ReportWtf("starting Connectivity Service", ec);
-    //         }
 
-    //         try {
+            Slogger::I(TAG, "Nsd Service");
             ec = CNsdService::Create(context, (CNsdService**)&serviceDiscovery);
-            if (FAILED(ec)) Slogger::E(TAG, "failed to start NsdService Service, ec:0x%x, service: %p", ec, serviceDiscovery.Get());
+            if (FAILED(ec)) ReportWtf("starting NsdService Service,", ec);
             ec = ServiceManager::AddService(IContext::NSD_SERVICE, TO_IINTERFACE(serviceDiscovery));
-            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Network Service Discovery Service");
-            Slogger::I(TAG, "leliang_debug NsdService service done, ec:0x%x, serviceDiscovery:%p", ec, serviceDiscovery.Get());
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Service Discovery Service", ec);
-    //         }
+            if (FAILED(ec)) ReportWtf("Add Network Service Discovery Service", ec);
         }
 
         if (!disableNonCoreServices) {
@@ -1121,9 +1096,7 @@ ECode SystemServer::StartOtherServices()
 
     Slogger::I(TAG, "Window Manager Service ready...");
     ec = wm->SystemReady();
-    if (FAILED(ec)) {
-        ReportWtf("making Window Manager Service ready", ec);
-    }
+    if (FAILED(ec)) ReportWtf("making Window Manager Service ready", ec);
 
     if (safeMode) {
         mActivityManagerService->ShowSafeModeOverlay();
@@ -1152,15 +1125,12 @@ ECode SystemServer::StartOtherServices()
 
     Slogger::I(TAG, "Package Manager Service ready...");
     ec = mPackageManagerService->SystemReady();
-    if (FAILED(ec)) {
-        ReportWtf("making Package Manager Service ready", ec);
-    }
+    if (FAILED(ec)) ReportWtf("making Package Manager Service ready", ec);
 
     // TODO: use boot phase and communicate these flags some other way
     ec = mDisplayManagerService->SystemReady(safeMode, mOnlyCore);
-    if (FAILED(ec)) {
-        ReportWtf("making Display Manager Service ready", ec);
-    }
+    if (FAILED(ec)) ReportWtf("making Display Manager Service ready", ec);
+
 
     Slogger::I(TAG, "other services ready...");
 
@@ -1184,7 +1154,7 @@ ECode SystemServer::StartOtherServices()
     bundle->mInputManagerF = inputManager;
     // bundle->mTelephonyRegistryF = telephonyRegistry;
     // bundle->mMediaRouterF = mediaRouter;
-    // bundle->mAudioServiceF = audioService;
+    bundle->mAudioServiceF = audioService;
     // bundle->mMmsServiceF = mmsService;
 
     // We now tell the activity manager it is okay to run third party
@@ -1235,9 +1205,7 @@ ECode SystemServer::SystemReadyRunnable::Run()
         ISystemService::PHASE_ACTIVITY_MANAGER_READY);
 
     ec = mHost->mActivityManagerService->StartObservingNativeCrashes();
-    if (FAILED(ec)) {
-        mHost->ReportWtf("observing native crashes", ec);
-    }
+    if (FAILED(ec)) mHost->ReportWtf("observing native crashes", ec);
 
     Slogger::I(SystemServer::TAG, "WebViewFactory preparation todo");
     AutoPtr<IWebViewFactory> webViewFactory;
@@ -1246,58 +1214,43 @@ ECode SystemServer::SystemReadyRunnable::Run()
 
     Slogger::I(SystemServer::TAG, "start system ui　todo");
     // ec = StartSystemUi(mHost->mSystemContext);
-    // if (FAILED(ec)) {
-    //     mHost->ReportWtf("starting System UI", ec);
-    // }
+    // if (FAILED(ec)) mHost->ReportWtf("starting System UI", ec);
 
     if (mServiceBundle->mMountServiceF != NULL) {
         mServiceBundle->mMountServiceF->SystemReady();
-        // if (FAILED(ec)) {
-        //     mHost->ReportWtf("making Mount Service ready", ec);
-        // }
+        // if (FAILED(ec)) mHost->ReportWtf("making Mount Service ready", ec);
     }
 
     // if (mServiceBundle->mNetworkScoreF != NULL) {
     //     ec = mServiceBundle->mNetworkScoreF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making Network Score Service ready", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("making Network Score Service ready", ec);
     // }
 
     // if (mServiceBundle->mNetworkManagementF != NULL) {
     //     ec = mServiceBundle->mNetworkManagementF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making Network Managment Service ready", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("making Network Managment Service ready", ec);
     // }
 
     // if (mServiceBundle->mNetworkStatsF != NULL) {
     //     ec = mServiceBundle->mNetworkStatsF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making Network Stats Service ready", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("making Network Stats Service ready", ec);
     // }
 
     // if (mServiceBundle->mNetworkPolicyF != NULL) {
     //     ec = mServiceBundle->mNetworkPolicyF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making Network Policy Service ready", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("making Network Policy Service ready", ec);
+
     // }
 
     // if (mServiceBundle->mConnectivityF != NULL) {
     //     ec = mServiceBundle->mConnectivityF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making Connectivity Service ready", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("making Connectivity Service ready", ec);
     // }
 
-    // if (mServiceBundle->mAudioServiceF != NULL) {
-    //     ec = mServiceBundle->mAudioServiceF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making AudioService ready", ec);
-    //     }
-    // }
+    if (mServiceBundle->mAudioServiceF != NULL) {
+        ec = mServiceBundle->mAudioServiceF->SystemReady();
+        if (FAILED(ec)) mHost->ReportWtf("making AudioService ready", ec);
+    }
 
     Watchdog::GetInstance()->Start();
 
@@ -1308,87 +1261,64 @@ ECode SystemServer::SystemReadyRunnable::Run()
 
     if (mServiceBundle->mWallpaperF != NULL) {
         ec = mServiceBundle->mWallpaperF->SystemRunning();
-        if (FAILED(ec)) {
-            mHost->ReportWtf("Notifying WallpaperService running", ec);
-        }
+        if (FAILED(ec)) mHost->ReportWtf("Notifying WallpaperService running", ec);
     }
 
     if (mServiceBundle->mImmF != NULL) {
         ec = mServiceBundle->mImmF->SystemRunning(mServiceBundle->mStatusBarF);
-        if (FAILED(ec)) {
-            mHost->ReportWtf("Notifying InputMethodService running", ec);
-        }
+        if (FAILED(ec)) mHost->ReportWtf("Notifying InputMethodService running", ec);
     }
 
     // if (mServiceBundle->mLocationF != NULL) {
     //     ec = mServiceBundle->mLocationF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying Location Service running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying Location Service running", ec);
     // }
 
     // if (mServiceBundle->mCountryDetectorF != NULL) {
     //     ec = mServiceBundle->mCountryDetectorF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying CountryDetectorService running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying CountryDetectorService running", ec);
     // }
 
     // if (mServiceBundle->mNetworkTimeUpdaterF != NULL) {
     //     ec = mServiceBundle->mNetworkTimeUpdaterF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying NetworkTimeService running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying NetworkTimeService running", ec);
     // }
 
     // if (mServiceBundle->mCommonTimeMgmtServiceF != NULL) {
     //     ec = mServiceBundle->mCommonTimeMgmtServiceF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying CommonTimeManagementService running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying CommonTimeManagementService running", ec);
     // }
 
     if (mServiceBundle->mTextServiceManagerServiceF != NULL) {
         ec = mServiceBundle->mTextServiceManagerServiceF->SystemRunning();
-        if (FAILED(ec)) {
-            mHost->ReportWtf("Notifying TextServicesManagerService running", ec);
-        }
+        if (FAILED(ec)) mHost->ReportWtf("Notifying TextServicesManagerService running", ec);
     }
 
     // if (mServiceBundle->mAtlasF != NULL) {
     //     ec = mServiceBundle->mAtlasF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying AssetAtlasService running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying AssetAtlasService running", ec);
     // }
 
     if (mServiceBundle->mInputManagerF != NULL) {
         // TODO(BT) Pass parameter to input manager
         ec = mServiceBundle->mInputManagerF->SystemRunning();
-        if (FAILED(ec)) {
-            mHost->ReportWtf("Notifying InputManagerService running", ec);
-        }
+        if (FAILED(ec)) mHost->ReportWtf("Notifying InputManagerService running", ec);
     }
 
     // if (mServiceBundle->mTelephonyRegistryF != NULL) {
     //     ec = mServiceBundle->mTelephonyRegistryF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying TelephonyRegistry running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying TelephonyRegistry running", ec);
+
     // }
 
     // if (mServiceBundle->mMediaRouterF != NULL) {
     //     ec = mServiceBundle->mMediaRouterF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying MediaRouterService running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying MediaRouterService running", ec);
     // }
 
     // if (mServiceBundle->mMmsServiceF != NULL) {
     //     ec = mServiceBundle->mMmsServiceF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying MmsService running", ec);
-    //     }
+    //     if (FAILED(ec)) mHost->ReportWtf("Notifying MmsService running", ec);
     // }
 
     return NOERROR;

@@ -225,7 +225,8 @@ AutoPtr<IInterface> CConcurrentHashMap::PutVal(
     Int32 hc = Object::GetHashCode(key);
     Int32 hash = Spread(hc);
     Int32 binCount = 0;
-    for (AutoPtr<ArrayOf<Node*> > tab = mTable;;) {
+    AutoPtr<ArrayOf<Node*> > tab = mTable;
+    for (;;) {
         AutoPtr<Node> f; Int32 n, i, fh;
         if (tab == NULL || (n = tab->GetLength()) == 0)
             tab = InitTable();
@@ -2834,6 +2835,14 @@ ECode CConcurrentHashMap::Put(
     return NOERROR;
 }
 
+ECode CConcurrentHashMap::Put(
+    /* [in] */ IInterface* key,
+    /* [in] */ IInterface* value)
+{
+    PutVal(key, value, FALSE);
+    return NOERROR;
+}
+
 ECode CConcurrentHashMap::PutAll(
     /* [in] */ IMap* map)
 {
@@ -2868,6 +2877,13 @@ ECode CConcurrentHashMap::Remove(
     return NOERROR;
 }
 
+ECode CConcurrentHashMap::Remove(
+    /* [in] */ IInterface* key)
+{
+    ReplaceNode(key, NULL, NULL);
+    return NOERROR;
+}
+
 ECode CConcurrentHashMap::GetSize(
     /* [out] */ Int32* outsize)
 {
@@ -2875,8 +2891,8 @@ ECode CConcurrentHashMap::GetSize(
 
     Int64 n = SumCount();
     *outsize = ((n < 0L) ? 0 :
-            (n > (Int64)Elastos::Core::Math::INT32_MAX_VALUE) ? Elastos::Core::Math::INT32_MAX_VALUE :
-            (Int32)n);
+        (n > (Int64)Elastos::Core::Math::INT32_MAX_VALUE) ? Elastos::Core::Math::INT32_MAX_VALUE :
+        (Int32)n);
     return NOERROR;
 }
 

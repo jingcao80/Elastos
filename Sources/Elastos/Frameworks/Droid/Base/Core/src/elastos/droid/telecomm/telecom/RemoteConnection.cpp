@@ -143,10 +143,11 @@ RemoteConnection::VideoProvider::VideoProvider()
 {
     CVideoCallbackServant::New(mVideoCallbackDelegate, (IVideoCallbackServant**)&mVideoCallbackServant);
 
-    AutoPtr<IMap> m;
-    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&m);
-    assert(0 && "TODO");
-    // mListeners = Collections.newSetFromMap(m);
+    AutoPtr<IMap> map;
+    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&map);
+    AutoPtr<ICollections> cls;
+    CCollections::AcquireSingleton((ICollections**)&cls);
+    cls->SetFromMap(map, (ISet**)&mListeners);
 }
 
 RemoteConnection::VideoProvider::VideoProvider(
@@ -254,13 +255,13 @@ RemoteConnection::RemoteConnection()
     , mAddressPresentation(0)
     , mCallerDisplayNamePresentation(0)
 {
-    AutoPtr<IMap> m;
-    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&m);
-    assert(0 && "TODO");
-    // mCallbacks = Collections.newSetFromMap(m);
-    CArrayList::New((IList**)&mConferenceableConnections);
+    AutoPtr<IMap> map;
+    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&map);
     AutoPtr<ICollections> cls;
     CCollections::AcquireSingleton((ICollections**)&cls);
+    cls->SetFromMap(map, (ISet**)&mCallbacks);
+
+    CArrayList::New((IList**)&mConferenceableConnections);
     cls->UnmodifiableList(mConferenceableConnections, (IList**)&mUnmodifiableconferenceableConnections);
 }
 

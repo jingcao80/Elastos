@@ -2392,7 +2392,7 @@ ECode CContextImpl::GetSystemService(
     }
     else if (IContext::HDMI_CONTROL_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
+        // assert(0 && "TODO");
         // public Object createStaticService() {
         //     IBinder b = ServiceManager.getService(HDMI_CONTROL_SERVICE);
         //     return new HdmiControlManager(IHdmiControlService.Stub.asInterface(b));
@@ -2623,7 +2623,7 @@ ECode CContextImpl::GetSystemService(
         return E_NOT_IMPLEMENTED;
     }
     else if (IContext::TELECOM_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
         // public Object createService(ContextImpl ctx) {
         //     return new TelecomManager(ctx.getOuterContext());
         // }});

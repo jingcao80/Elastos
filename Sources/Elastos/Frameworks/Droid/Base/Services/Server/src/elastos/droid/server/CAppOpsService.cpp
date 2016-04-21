@@ -340,13 +340,8 @@ ECode CAppOpsService::ClientState::ProxyDied()
 //================================================================================
 // CAppOpsService::Restriction
 //================================================================================
-static AutoPtr<IArraySet> InitNO_EXCEPTIONS()
-{
-    AutoPtr<IArraySet> set;
-    CArraySet::New((IArraySet**)&set);
-    return set;
-}
-const AutoPtr<IArraySet> CAppOpsService::Restriction::NO_EXCEPTIONS = InitNO_EXCEPTIONS();
+
+const AutoPtr<HashSet<String> > CAppOpsService::Restriction::NO_EXCEPTIONS = new HashSet<String>();
 
 CAppOpsService::Restriction::Restriction()
     : mMode(0)
@@ -1139,6 +1134,7 @@ Int32 CAppOpsService::CheckRestrictionLocked(
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName)
 {
+    Int32 mode = IAppOpsManager::MODE_ALLOWED;
     AutoPtr<IInterface> obj;
     mAudioRestrictions->Get(code, (IInterface**)&obj);
     if (obj != NULL) {
@@ -1147,15 +1143,19 @@ Int32 CAppOpsService::CheckRestrictionLocked(
         usageRestrictions->Get(usage, (IInterface**)&obj);
         Restriction* r = (Restriction*)IObject::Probe(obj);
         if (r != NULL) {
-            AutoPtr<ICharSequence> csq = CoreUtils::Convert(packageName);
-            Boolean contains;
-            ISet::Probe(r->mExceptionPackages)->Contains(csq.Get(), &contains);
+            HashSet<String>::Iterator it = r->mExceptionPackages->Find(packageName);
+            Boolean contains = (it != r->mExceptionPackages->End());
             if (!contains) {
-                return r->mMode;
+                mode = r->mMode;
             }
         }
     }
-    return IAppOpsManager::MODE_ALLOWED;
+
+    if (DEBUG) {
+        Logger::D(TAG, "CheckRestrictionLocked: code:%d, usage:%d, uid:%d, packageName:%s, result:%d, ALLOWED:%d",
+            code, usage, uid, packageName.string(), mode, (mode == IAppOpsManager::MODE_ALLOWED));
+    }
+    return mode;
 }
 
 //@Override
@@ -1182,13 +1182,11 @@ ECode CAppOpsService::SetAudioRestriction(
             r->mMode = mode;
             if (exceptionPackages != NULL) {
                 Int32 N = exceptionPackages->GetLength();
-                CArraySet::New((IArraySet**)&r->mExceptionPackages);
-                ISet* set = ISet::Probe(r->mExceptionPackages);
+                r->mExceptionPackages = new HashSet<String>();
                 for (Int32 i = 0; i < N; i++) {
                     String pkg = (*exceptionPackages)[i];
                     if (pkg != NULL) {
-                        AutoPtr<ICharSequence> csq = CoreUtils::Convert(pkg.Trim());
-                        set->Add(csq.Get());
+                        r->mExceptionPackages->Insert(pkg.Trim());
                     }
                 }
             }

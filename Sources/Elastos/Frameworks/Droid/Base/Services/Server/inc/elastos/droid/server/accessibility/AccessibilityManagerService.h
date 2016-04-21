@@ -860,10 +860,12 @@ private:
     {
     public:
         AccessibilityContentObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ AccessibilityManagerService* host);
 
         ~AccessibilityContentObserver();
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
 
         CARAPI_(void) Register(
             /* [in] */ IContentResolver* contentResolver);

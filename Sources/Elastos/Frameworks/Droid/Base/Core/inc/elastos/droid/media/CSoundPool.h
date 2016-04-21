@@ -141,8 +141,6 @@ public:
                 /* [in] */ SoundPoolImpl* host,
                 /* [in] */ ILooper* looper);
 
-            CAR_INTERFACE_DECL();
-
             CARAPI HandleMessage(
                 /* [in] */ IMessage* msg);
 
@@ -152,14 +150,16 @@ public:
         };
 
     public:
-        SoundPoolImpl(
-            /* [in] */ CSoundPool* proxy,
-            /* [in] */ Int32 maxStreams,
-            /* [in] */ IAudioAttributes* attr);
+        CAR_INTERFACE_DECL()
+
+        SoundPoolImpl();
 
         ~SoundPoolImpl();
 
-        CAR_INTERFACE_DECL()
+        CARAPI constructor(
+            /* [in] */ CSoundPool* proxy,
+            /* [in] */ Int32 maxStreams,
+            /* [in] */ IAudioAttributes* attr);
 
         CARAPI Load(
             /* [in] */ const String& path,
@@ -247,6 +247,14 @@ public:
 
         CARAPI ReleaseSoundPoolDelegate();
 
+        // post event from native code to message handler
+        static CARAPI_(void) PostEventFromNative(
+            /* [in] */ IWeakReference* weakRef,
+            /* [in] */ Int32 msg,
+            /* [in] */ Int32 arg1,
+            /* [in] */ Int32 arg2,
+            /* [in] */ IInterface* obj);
+
     private:
         CARAPI_(Int32) _Load(
             /* [in] */ const String& uri,
@@ -265,24 +273,21 @@ public:
             /* [in] */ Float leftVolume,
             /* [in] */ Float rightVolume);
 
-        // post event from native code to message handler
-        static CARAPI_(void) PostEventFromNative(
-            /* [in] */ IInterface* weakRef,
-            /* [in] */ Int32 msg,
-            /* [in] */ Int32 arg1,
-            /* [in] */ Int32 arg2,
-            /* [in] */ IInterface* obj);
-
         CARAPI_(Int32) Native_setup(
-            /* [in] */ IInterface* weakRef,
+            /* [in] */ IWeakReference* weakRef,
             /* [in] */ Int32 maxStreams,
-            /* [in] */ IInterface* attributes/*AudioAttributes*/);
+            /* [in] */ IAudioAttributes* attributes/*AudioAttributes*/);
 
     protected:
         CARAPI_(void) Finalize();
 
     public:
         static ECode sStaticLoadLibrary;
+
+        // SoundPool messages
+        //
+        // must match SoundPool.h
+        static const Int32 SAMPLE_LOADED;
 
     private:
         static String TAG;
@@ -296,11 +301,6 @@ public:
         Object mLock;
         AutoPtr<IAudioAttributes> mAttributes;
         AutoPtr<IIAppOpsService> mAppOps;
-
-        // SoundPool messages
-        //
-        // must match SoundPool.h
-        static Int32 SAMPLE_LOADED;
     };
 
     class SoundPoolStub
@@ -684,34 +684,12 @@ public:
 protected:
     CARAPI_(void) Finalize();
 
-private:
-    CARAPI NativeLoad(
-        /* [in] */ const String& uri,
-        /* [in] */ Int32 priority,
-        /* [in] */ Int32* id);
-
-    CARAPI NativeLoad(
-        /* [in] */ IFileDescriptor* fd,
-        /* [in] */ Int64 offset,
-        /* [in] */ Int64 length,
-        /* [in] */ Int32 priority,
-        /* [in] */ Int32* id);
-
 public:
     static const String TAG; // = "SoundPool";
     static const Boolean DEBUG; // = FALSE;
 
 private:
     AutoPtr<ISoundPoolDelegate> mImpl;
-
-    Handle32 mNativeContext; // accessed by native methods
-
-    Object mLock;
-
-    // SoundPool messages
-    //
-    // must match SoundPool.h
-    static const Int32 SAMPLE_LOADED = 1;
 };
 
 } // namespace Media

@@ -17,6 +17,7 @@ using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
+using Elastos::Utility::IMap;
 using Elastos::Utility::Concurrent::IConcurrentHashMap;
 using Elastos::Utility::Concurrent::CConcurrentHashMap;
 using Elastos::Utility::Logging::Logger;
@@ -318,12 +319,11 @@ Connection::Connection()
 {
     mConnectionDeathListener = new MyListener(this);
 
+    AutoPtr<IMap> map;
+    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&map);
     AutoPtr<ICollections> cls;
     CCollections::AcquireSingleton((ICollections**)&cls);
-    AutoPtr<IConcurrentHashMap> map;
-    CConcurrentHashMap::New(8, 0.9f, 1, (IConcurrentHashMap**)&map);
-    assert(0 && "TODO"); // utility ICollections TODO
-    // cls->NewSetFromMap(map, (ISet**)&mListeners);
+    cls->SetFromMap(map, (ISet**)&mListeners);
     CArrayList::New((IList**)&mConferenceableConnections);
     cls->UnmodifiableList(mConferenceableConnections, (IList**)&mUnmodifiableConferenceableConnections);
 }
