@@ -378,21 +378,21 @@ ECode CFormatter::GetIoException()
 
 ECode CFormatter::Format(
     /* [in] */ const String& format,
-    /* [in] */ ArrayOf<IInterface*>* mArgs)
+    /* [in] */ ArrayOf<IInterface*>* args)
 {
-    return Format(mLocale, format, mArgs);
+    return Format(mLocale, format, args);
 }
 
 ECode CFormatter::Format(
     /* [in] */ ILocale* l,
     /* [in] */ const String& format,
-    /* [in] */ ArrayOf<IInterface*>* mArgs)
+    /* [in] */ ArrayOf<IInterface*>* args)
 {
     AutoPtr<ILocale> originalLocale = mLocale;
     // try {
     mLocale = (l == NULL ? (CLocale::US).Get() : l);
     mLocaleData = LocaleData::Get(mLocale);
-    FAIL_RETURN(DoFormat(format, mArgs));
+    FAIL_RETURN(DoFormat(format, args));
     // } finally {
     mLocale = originalLocale;
     // }
@@ -401,7 +401,7 @@ ECode CFormatter::Format(
 
 ECode CFormatter::DoFormat(
     /* [in] */ const String& format,
-    /* [in] */ ArrayOf<IInterface*>* mArgs)
+    /* [in] */ ArrayOf<IInterface*>* args)
 {
     FAIL_RETURN(CheckNotClosed());
 
@@ -432,7 +432,7 @@ ECode CFormatter::DoFormat(
             if (token->RequireArgument()) {
                 Int32 index = token->GetArgIndex() == FormatToken::UNSET ? currentObjectIndex++ : token->GetArgIndex();
                 mArgument = NULL;
-                FAIL_RETURN(GetArgument(mArgs, index, &fsp, lastArgument, hasLastArgumentSet, (IInterface**)&mArgument));
+                FAIL_RETURN(GetArgument(args, index, &fsp, lastArgument, hasLastArgumentSet, (IInterface**)&mArgument));
                 lastArgument = mArgument;
                 hasLastArgumentSet = TRUE;
             }
@@ -466,7 +466,7 @@ void CFormatter::OutputCharSequence(
 }
 
 ECode CFormatter::GetArgument(
-    /* [in] */ ArrayOf<IInterface*>* mArgs,
+    /* [in] */ ArrayOf<IInterface*>* args,
     /* [in] */ Int32 index,
     /* [in] */ FormatSpecifierParser* fsp,
     /* [in] */ IInterface* lastArgument,
@@ -480,11 +480,11 @@ ECode CFormatter::GetArgument(
         return E_MISSING_FORMAT_WIDTH_EXCEPTION;
     }
 
-    if (mArgs == NULL) {
+    if (args == NULL) {
         return NOERROR;
     }
 
-    if (index >= mArgs->GetLength()) {
+    if (index >= args->GetLength()) {
         // throw new MissingFormatArgumentException(fsp.getFormatSpecifierText());
         return E_MISSING_FORMAT_WIDTH_EXCEPTION;
     }
@@ -494,8 +494,7 @@ ECode CFormatter::GetArgument(
         REFCOUNT_ADD(*argument);
         return NOERROR;
     }
-
-    *argument = (*mArgs)[index];
+    *argument = (*args)[index];
     REFCOUNT_ADD(*argument);
     return NOERROR;
 }
@@ -516,7 +515,7 @@ AutoPtr<ICharSequence> CFormatter::Transform(
         switch (token->GetConversionType()) {
         case 's':
             if (mArg == NULL) {
-                CString::New(String("null"), (ICharSequence**)&outseq);
+                CString::New(String("NULL"), (ICharSequence**)&outseq);
                 return outseq;
             }
             else if (!(IFormattable::Probe(mArg))) {
@@ -704,7 +703,7 @@ AutoPtr<ICharSequence> CFormatter::TransformFromHashCode()
     AutoPtr<ICharSequence> cs;
     String result;
     if (mArg == NULL) {
-        result = "null";
+        result = "NULL";
     }
     else {
         Int32 codevalue = Object::GetHashCode(mArg);
@@ -738,7 +737,7 @@ AutoPtr<ICharSequence> CFormatter::TransformFromString()
     }
     AutoPtr<ICharSequence> result;
     String midstr;
-    String outstr = mArg != NULL ? Object::ToString(mArg) : String("null");
+    String outstr = mArg != NULL ? Object::ToString(mArg) : String("NULL");
     CString::New(outstr, (ICharSequence**)&result);
     return Padding(result, 0);
 }
@@ -747,7 +746,7 @@ AutoPtr<ICharSequence> CFormatter::TransformFromCharacter()
 {
     if (mArg == NULL) {
         AutoPtr<ICharSequence> cs;
-        CString::New(String("null"), (ICharSequence**)&cs);
+        CString::New(String("NULL"), (ICharSequence**)&cs);
         return Padding(cs, 0);
     }
     if (IChar32::Probe(mArg) /*mArg instanceof Character*/) {
@@ -963,7 +962,7 @@ AutoPtr<ICharSequence> CFormatter::TransformFromNull()
 {
     mFormatToken->mFlagZero = FALSE;
     AutoPtr<ICharSequence> cs;
-    CString::New(String("null"), (ICharSequence**)&cs);
+    CString::New(String("NULL"), (ICharSequence**)&cs);
     return Padding(cs, 0);
 }
 

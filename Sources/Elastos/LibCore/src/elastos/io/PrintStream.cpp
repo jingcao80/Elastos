@@ -194,17 +194,16 @@ ECode PrintStream::Format(
     /* [in] */ ArrayOf<IInterface*>* args,
     /* [out] */ IPrintStream** pw)
 {
-    VALIDATE_NOT_NULL(pw)
-    *pw = NULL;
-
     if (format.IsNull()) {
         return E_EOF_EXCEPTION;
     }
     AutoPtr<IFormatter> res;
     FAIL_RETURN(CFormatter::New(this, l, (IFormatter**)&res));
     res->Format(format, args);
-    *pw = this;
-    REFCOUNT_ADD(*pw)
+    if (pw) {
+        *pw = this;
+        REFCOUNT_ADD(*pw)
+    }
     return NOERROR;
 }
 
@@ -233,6 +232,10 @@ ECode PrintStream::Newline()
 ECode PrintStream::Print(
     /* [in] */ ArrayOf<Char32>* charArray)
 {
+    if (charArray == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     AutoPtr<ArrayOf<Byte> > dst;
     Int32 dstOffset = 0;
     FAIL_RETURN(Character::ToChars(
@@ -320,6 +323,10 @@ ECode PrintStream::Println()
 ECode PrintStream::Println(
     /* [in] */ ArrayOf<Char32>* charArray)
 {
+    if (charArray == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     AutoPtr<ArrayOf<Byte> > dst;
     Int32 dstOffset = 0;
     FAIL_RETURN(Character::ToChars(
@@ -331,7 +338,9 @@ ECode PrintStream::Println(
 ECode PrintStream::PrintCharln(
     /* [in] */ Char32 ch)
 {
-    return Println(StringUtils::ToString((Int32)ch));
+    AutoPtr<ArrayOf<Byte> > charArray;
+    FAIL_RETURN(Character::ToChars(ch, (ArrayOf<Byte>**)&charArray));
+    return Println(String((const char*)charArray->GetPayload()));
 }
 
 ECode PrintStream::Println(
@@ -362,9 +371,7 @@ ECode PrintStream::Println(
 ECode PrintStream::Println(
     /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //PrintStringln(String.valueOf(obj));
-    return E_NOT_IMPLEMENTED;
+    return Println(Object::ToString(obj));
 }
 
 ECode PrintStream::Println(
