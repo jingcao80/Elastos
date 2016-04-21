@@ -250,7 +250,6 @@ AutoPtr<IIntentReceiver> LoadedPkg::ReceiverDispatcher::GetIIntentReceiver()
         mIIntentReceiver->Release();
     }
     mHasUsed = TRUE;
-
     return r;
 }
 
@@ -1361,9 +1360,8 @@ ECode LoadedPkg::ForgetReceiverDispatcher(
         if (ite != map->End()) rd = ite->mSecond;
         if (rd != NULL) {
             map->Erase(ite);
-            if (map->Begin() == map->End()) {
+            if (map->IsEmpty()) {
                 mReceivers.Erase(it);
-                map = NULL;
             }
             Boolean b;
             r->GetDebugUnregister(&b);
@@ -1374,10 +1372,6 @@ ECode LoadedPkg::ForgetReceiverDispatcher(
                     holder = new ReceiverMap();
                     mUnregisteredReceivers[context] = holder;
                 }
-            // RuntimeException ex = new IllegalArgumentException(
-            //         "Originally unregistered here:");
-            // ex.fillInStackTrace();
-            // rd.setUnregisterLocation(ex);
                 (*holder)[r] = rd;
             }
             rd->mForgotten = TRUE;
@@ -1394,20 +1388,16 @@ ECode LoadedPkg::ForgetReceiverDispatcher(
         ReceiverMapIterator ite = holder->Find(r);
         if (ite != holder->End()) rd = ite->mSecond;
         if (rd != NULL) {
-        //         RuntimeException ex = rd.getUnregisterLocation();
-        //         throw new IllegalArgumentException(
-        //                 "Unregistering Receiver " + r
-        //                 + " that was already unregistered", ex);
+            Slogger::E(TAG, "Unregistering Receiver %s that was already unregistered", TO_CSTR(r));
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
     if (context == NULL) {
-        //     throw new IllegalStateException("Unbinding Receiver " + r
-        //             + " from Context that is no longer in use: " + context);
+        Slogger::E(TAG, "Unbinding Receiver %s  from Context that is no longer in use.", TO_CSTR(r));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     else {
-        //     throw new IllegalArgumentException("Receiver not registered: " + r);
+        Slogger::E(TAG, "Receiver not registered: %s", TO_CSTR(r));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 }

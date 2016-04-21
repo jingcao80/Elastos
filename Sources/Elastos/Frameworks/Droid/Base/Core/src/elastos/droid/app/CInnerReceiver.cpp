@@ -84,14 +84,6 @@ ECode CInnerReceiver::PerformReceive(
     return NOERROR;
 }
 
-ECode CInnerReceiver::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = String("CInnerReceiver");
-    return NOERROR;
-}
-
 } // namespace App
 } // namespace Droid
 } // namespace Elastos

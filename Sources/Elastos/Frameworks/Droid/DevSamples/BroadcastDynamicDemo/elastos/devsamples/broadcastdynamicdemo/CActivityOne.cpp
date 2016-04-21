@@ -45,18 +45,18 @@ ECode CActivityOne::MyListener::OnClick(
     switch(id) {
     case R::id::RegisterReceiver:
         Logger::I(TAG, "MyListener::OnClick Register");
-        mHost->Send();
+        mHost->Register();
         break;
 
-    // case R::id::UnregisterReceiver:
-    //     Logger::I(TAG, "MyListener::OnClick Unregister");
-    //     mHost->Unregister();
-    //     break;
+    case R::id::UnregisterReceiver:
+        Logger::I(TAG, "MyListener::OnClick Unregister");
+        mHost->Unregister();
+        break;
 
-    // case R::id::SendBroadcast:
-    //     Logger::I(TAG, "MyListener::OnClick Send");
-    //     mHost->Send();
-    //     break;
+    case R::id::SendBroadcast:
+        Logger::I(TAG, "MyListener::OnClick Send");
+        mHost->Send();
+        break;
     }
 
     return NOERROR;
@@ -85,13 +85,12 @@ ECode CActivityOne::OnCreate(
     AutoPtr<IView> view = FindViewById(R::id::RegisterReceiver);
     view->SetOnClickListener(l.Get());
 
-    // view = FindViewById(R::id::UnregisterReceiver);
-    // view->SetOnClickListener(l.Get());
+    view = FindViewById(R::id::UnregisterReceiver);
+    view->SetOnClickListener(l.Get());
 
-    // view = FindViewById(R::id::SendBroadcast);
-    // view->SetOnClickListener(l.Get());
+    view = FindViewById(R::id::SendBroadcast);
+    view->SetOnClickListener(l.Get());
 
-    Register();
     return NOERROR;
 }
 

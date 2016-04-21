@@ -36,8 +36,7 @@ public:
         /* [in] */ Boolean sticky,
         /* [in] */ Int32 sendingUser);
 
-    CARAPI ToString(
-        /* [out] */ String* str);
+    TO_STRING_IMPL("CInnerReceiver")
 
 private:
     AutoPtr<IWeakReference> mDispatcher; // LoadedPkg::ReceiverDispatcher

@@ -108,7 +108,7 @@ public:
             /* [in] */ Int32 sendingUser);
 
     public:
-        AutoPtr<IIntentReceiver> mIIntentReceiver;
+        IIntentReceiver* mIIntentReceiver; // ref count managered by mRegistered and mHasUsed.
         AutoPtr<IBroadcastReceiver> mReceiver;
         AutoPtr<IContext> mContext;
         AutoPtr<IHandler> mActivityThread;

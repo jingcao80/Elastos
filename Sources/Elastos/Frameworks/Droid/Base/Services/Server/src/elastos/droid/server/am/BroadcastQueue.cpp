@@ -46,9 +46,9 @@ static Boolean IsLowRamDeviceStatic()
 
 const String BroadcastQueue::TAG("BroadcastQueue");
 const String BroadcastQueue::TAG_MU("BroadcastQueueMU");
-const Boolean BroadcastQueue::DEBUG_BROADCAST = FALSE;
-const Boolean BroadcastQueue::DEBUG_BROADCAST_LIGHT = FALSE;
-const Boolean BroadcastQueue::DEBUG_MU = FALSE;
+const Boolean BroadcastQueue::DEBUG_BROADCAST = TRUE;
+const Boolean BroadcastQueue::DEBUG_BROADCAST_LIGHT = TRUE;
+const Boolean BroadcastQueue::DEBUG_MU = TRUE;
 const Int32 BroadcastQueue::MAX_BROADCAST_HISTORY = IsLowRamDeviceStatic() ? 10 : 50;
 const Int32 BroadcastQueue::MAX_BROADCAST_SUMMARY_HISTORY = IsLowRamDeviceStatic() ? 25 : 300;
 const Int32 BroadcastQueue::BROADCAST_INTENT_MSG = 200;//CActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
@@ -683,7 +683,9 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             }
             return NOERROR;
         }
-        r = mOrderedBroadcasts.GetFront();
+
+        Slogger::I(TAG, " ============ mOrderedBroadcasts size:%d", mOrderedBroadcasts.GetSize());
+        r = *mOrderedBroadcasts.Begin();
         mCurrentBroadcast = r;
         assert(r != NULL);
 
@@ -700,15 +702,12 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         Int32 numReceivers = 0;
         if (r->mReceivers != NULL)
             r->mReceivers->GetSize(&numReceivers);
-        if (mService->mProcessesReady && r->mDispatchTime > 0) {
+        if (mService->mProcessesReady && r->mDispatchTime > 0 && numReceivers > 0) {
             Int64 now = SystemClock::GetUptimeMillis();
-            if ((numReceivers > 0) &&
-                    (now > r->mDispatchTime + (2 * mTimeoutPeriod * numReceivers))) {
-                String str;
-                IObject::Probe(r->mIntent)->ToString(&str);
+            if (now > r->mDispatchTime + (2 * mTimeoutPeriod * numReceivers)) {
                 Slogger::W(TAG, "Hung broadcast [%s] discarded after timeout failure: now=%lld"
                     " dispatchTime=%lld startTime=%lld intent=%s numReceivers=%d nextReceiver=%d state=%d"
-                    , mQueueName.string(), now, r->mDispatchTime, r->mReceiverTime, str.string()
+                    , mQueueName.string(), now, r->mDispatchTime, r->mReceiverTime, TO_CSTR(r->mIntent)
                     , numReceivers, r->mNextReceiver, r->mState);
                 BroadcastTimeoutLocked(FALSE); // forcibly finish this broadcast
                 forceReceive = TRUE;
@@ -718,15 +717,14 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
         if (r->mState != BroadcastRecord::IDLE) {
             if (DEBUG_BROADCAST) {
-                Slogger::D(TAG, "processNextBroadcast(%s) called when not idle (state=%d)"
-                        , mQueueName.string(), r->mState);
+                Slogger::D(TAG, "processNextBroadcast(%s) called when not idle (state=%d)",
+                    mQueueName.string(), r->mState);
             }
             return NOERROR;
         }
 
         if (r->mReceivers == NULL || r->mNextReceiver >= numReceivers || r->mResultAbort || forceReceive) {
-            // No more receivers for this broadcast!  Send the final
-            // result if requested...
+            // No more receivers for this broadcast!  Send the final result if requested...
             if (r->mResultTo != NULL) {
                 // try {
                 if (DEBUG_BROADCAST) {
@@ -758,7 +756,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
             // ... and on to the next...
             AddBroadcastToHistoryLocked(r);
-            mOrderedBroadcasts.PopFront();
+            mOrderedBroadcasts.Erase(mOrderedBroadcasts.Begin());
             mCurrentBroadcast = NULL;
             r = NULL;
             looped = TRUE;

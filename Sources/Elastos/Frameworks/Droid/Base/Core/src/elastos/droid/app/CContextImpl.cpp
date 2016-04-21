@@ -2025,15 +2025,12 @@ ECode CContextImpl::UnregisterReceiver(
         AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<IIntentReceiver> rd;
         mPackageInfo->ForgetReceiverDispatcher(ctx, receiver, (IIntentReceiver**)&rd);
-//        try {
         ActivityManagerNative::GetDefault()->UnregisterReceiver(rd);
-//        } catch (RemoteException e) {
-//        }
         return NOERROR;
-    } else {
-        return E_RUNTIME_EXCEPTION;
-//        throw new RuntimeException("Not supported in system context");
     }
+
+    Logger::E(TAG, "Not supported in system context");
+    return E_RUNTIME_EXCEPTION;
 }
 
 ECode CContextImpl::ValidateServiceIntent(
