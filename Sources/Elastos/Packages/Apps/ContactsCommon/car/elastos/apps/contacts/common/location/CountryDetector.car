@@ -1,0 +1,58 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace Location {
+
+    interface ICountryDetector {
+        const String KEY_PREFERENCE_TIME_UPDATED = "preference_time_updated";
+        const String KEY_PREFERENCE_CURRENT_COUNTRY = "preference_current_country";
+
+        /**
+         * Factory method for {@link CountryDetector} that allows the caller to provide mock objects.
+         */
+        // @NeededForTesting
+        GetInstanceForTest(
+            [in] IContext* context,
+            [in] ITelephonyManager* telephonyManager,
+            [in] ILocationManager* locationManager,
+            [in] ILocaleProvider* localeProvider,
+            [in] IGeocoder* geocoder,
+            [out] ICountryDetector** detector);
+
+        GetCurrentCountryIso(
+            [out] String* iso);
+
+    }
+
+    interface ICountryDetectorHelper {
+        RegisterForLocationUpdates(
+            [in] IContext* context,
+            [in] ILocationManager* locationManager);
+
+         /**
+         * Returns the instance of the country detector. {@link #initialize(Context)} must have been
+         * called previously.
+         *
+         * @return the initialized country detector.
+         */
+        GetInstance(
+            [in] IContext* context,
+            [out] ICountryDetector** detector);
+    }
+
+    interface ICountryDetectorLocaleProvider {
+        GetDefaultLocale(
+            [out] ILocale** locale);
+    }
+
+    } // Location
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

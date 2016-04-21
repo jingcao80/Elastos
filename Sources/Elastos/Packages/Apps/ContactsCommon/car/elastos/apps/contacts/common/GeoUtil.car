@@ -1,0 +1,33 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+
+    interface IGeoUtil {
+        /**
+         * Returns the country code of the country the user is currently in. Before calling this
+         * method, make sure that {@link CountryDetector#initialize(Context)} has already been called
+         * in {@link Application#onCreate()}.
+         * @return The ISO 3166-1 two letters country code of the country the user
+         *         is in.
+         */
+        GetCurrentCountryIso(
+            [in] IContext* context,
+            [out] String* result);
+
+        GetGeocodedLocationFor(
+            [in] IContext* context,
+            [in] String phoneNumber,
+            [out] String* result);
+    }
+
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

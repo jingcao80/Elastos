@@ -10,7 +10,7 @@ namespace Dialer {
 namespace CallLog {
 
 CarClass(CCallLogAdapter)
-    , CallLogAdapter
+    , public CallLogAdapter
 {
 public:
     CAR_OBJECT_DECL()

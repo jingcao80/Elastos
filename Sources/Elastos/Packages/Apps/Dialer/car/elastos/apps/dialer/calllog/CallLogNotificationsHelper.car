@@ -1,0 +1,22 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace CallLog {
+
+    interface ICallLogNotificationsHelper {
+        /** Removes the missed call notifications. */
+        RemoveMissedCallNotifications(
+            [in] IContext* context);
+
+        /** Update the voice mail notifications. */
+        UpdateVoicemailNotifications(
+            [in] IContext* context);
+    }
+
+    } //CallLog
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
