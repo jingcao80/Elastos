@@ -19,8 +19,7 @@ ECode PipedInputStream::constructor(
 {
     VALIDATE_NOT_NULL(ipos)
 
-    Connect(ipos);
-    return NOERROR;
+    return Connect(ipos);
 }
 
 ECode PipedInputStream::constructor(Int32 pipeSize)
@@ -40,8 +39,7 @@ ECode PipedInputStream::constructor(
     VALIDATE_NOT_NULL(ipos)
 
     FAIL_RETURN(constructor(pipeSize));
-    Connect(ipos);
-    return NOERROR;
+    return Connect(ipos);
 }
 
 ECode PipedInputStream::Available(
@@ -73,8 +71,7 @@ ECode PipedInputStream::Connect(
 {
     VALIDATE_NOT_NULL(src)
 
-    src->Connect((IPipedInputStream*)Probe(EIID_IPipedInputStream));
-    return NOERROR;
+    return src->Connect((IPipedInputStream*)Probe(EIID_IPipedInputStream));
 }
 
  ECode PipedInputStream::EstablishConnection()
@@ -122,8 +119,7 @@ ECode PipedInputStream::Read(
                 return NOERROR;
             }
             Boolean is_alive;
-            mLastWriter->IsAlive(&is_alive);
-            if ((attempts-- <= 0) && mLastWriter != NULL && !is_alive) {
+            if ((attempts-- <= 0) && (mLastWriter != NULL) && (mLastWriter->IsAlive(&is_alive), !is_alive)) {
                 // throw new IOException("Pipe broken");
                 return E_IO_EXCEPTION;
             }
@@ -193,8 +189,7 @@ ECode PipedInputStream::Read(
                 return NOERROR;
             }
             Boolean is_alive;
-            mLastWriter->IsAlive(&is_alive);
-            if ((attempts-- <= 0) && mLastWriter != NULL && !is_alive) {
+            if ((attempts-- <= 0) && (mLastWriter != NULL) && (mLastWriter->IsAlive(&is_alive), !is_alive)) {
                 // throw new IOException("Pipe broken");
                 return E_IO_EXCEPTION;
             }
@@ -275,8 +270,7 @@ ECode PipedInputStream::Receive(
             // try {
             while (mBuffer != NULL && mOut == mIn) {
                 Boolean is_alive;
-                mLastWriter->IsAlive(&is_alive);
-                if (mLastReader != NULL && !is_alive) {
+                if ((mLastWriter != NULL) && (mLastWriter->IsAlive(&is_alive), !is_alive)) {
                     // throw new IOException("Pipe broken");
                     return E_IO_EXCEPTION;
                 }
@@ -295,8 +289,7 @@ ECode PipedInputStream::Receive(
             mIn = 0;
         }
         Boolean is_alive;
-        mLastWriter->IsAlive(&is_alive);
-        if (mLastReader != NULL && !is_alive) {
+        if ((mLastWriter != NULL) && (mLastWriter->IsAlive(&is_alive), !is_alive)) {
             // throw new IOException("Pipe broken");
             return E_IO_EXCEPTION;
         }

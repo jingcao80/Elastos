@@ -108,6 +108,7 @@ ECode CString::CompareTo(
 {
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
+    VALIDATE_NOT_NULL(another);
 
     AutoPtr<ICharSequence> res = ICharSequence::Probe(another);
     if (res == NULL) {
