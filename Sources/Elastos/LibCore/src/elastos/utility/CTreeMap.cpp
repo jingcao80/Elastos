@@ -242,7 +242,7 @@ ECode CTreeMap::PutInternal(
         *object = result;
         REFCOUNT_ADD(*object)
     }
-    
+
     return NOERROR;
 }
 
