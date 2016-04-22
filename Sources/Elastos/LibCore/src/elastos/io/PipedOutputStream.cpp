@@ -20,8 +20,7 @@ ECode PipedOutputStream::constructor(
 {
     VALIDATE_NOT_NULL(target)
 
-    FAIL_RETURN(Connect(target));
-    return NOERROR;
+    return Connect(target);
 }
 
 ECode PipedOutputStream::Close()
@@ -38,21 +37,16 @@ ECode PipedOutputStream::Close()
 ECode PipedOutputStream::Connect(
     /* [in] */ IPipedInputStream* stream)
 {
-    VALIDATE_NOT_NULL(stream)
-
     if (NULL == stream) {
-        // throw new NullPointerException("stream == null");
         return E_NULL_POINTER_EXCEPTION;
     }
     synchronized (stream) {
         if (mTarget != NULL) {
-            // throw new IOException("Already connected");
             return E_IO_EXCEPTION;
         }
         Boolean is_connected;
         stream->IsConnected(&is_connected);
         if (is_connected) {
-            // throw new IOException("Pipe already connected");
             return E_IO_EXCEPTION;
         }
         stream->EstablishConnection();
@@ -79,11 +73,9 @@ ECode PipedOutputStream::Write(
 {
     AutoPtr<IPipedInputStream> stream = mTarget;
     if (NULL == stream) {
-        // throw new IOException("Pipe not connected");
         return E_IO_EXCEPTION;
     }
-    ((PipedInputStream*)stream.Get())->Receive(oneByte);
-    return NOERROR;
+    return ((PipedInputStream*)stream.Get())->Receive(oneByte);
 }
 
 } // namespace IO
