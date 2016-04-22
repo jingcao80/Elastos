@@ -1,5 +1,7 @@
 
 #include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/os/Process.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/StringBuilder.h>
@@ -58,9 +60,7 @@ ECode ItemInfo::constructor(
     mUser = info->mUser;
     mContentDescription = info->mContentDescription;
     // tempdebug:
-    assert(0 && "need class LauncherModel");
-    //return LauncherModel::CheckItemInfo(this);
-    return NOERROR;
+    return LauncherModel::CheckItemInfo(this);
 }
 
 String ItemInfo::GetPackageName(
@@ -102,22 +102,20 @@ void ItemInfo::OnAddToDatabase(
     /* [in] */ IContext* context,
     /* [in] */ IContentValues* values)
 {
-    assert(0 && "need class LauncherSettings");
-    // values->Put(LauncherSettings::BaseLauncherColumns::ITEM_TYPE, mItemType);
-    // values->Put(LauncherSettings::Favorites::CONTAINER, mContainer);
-    // values->Put(LauncherSettings::Favorites::SCREEN, mScreen);
-    // values->Put(LauncherSettings::Favorites::CELLX, mCellX);
-    // values->Put(LauncherSettings::Favorites::CELLY, mCellY);
-    // values->Put(LauncherSettings::Favorites::SPANX, mSpanX);
-    // values->Put(LauncherSettings::Favorites::SPANY, mSpanY);
+    values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, mItemType);
+    values->Put(LauncherSettings::Favorites::CONTAINER, mContainer);
+    values->Put(LauncherSettings::Favorites::SCREEN, mScreen);
+    values->Put(LauncherSettings::Favorites::CELLX, mCellX);
+    values->Put(LauncherSettings::Favorites::CELLY, mCellY);
+    values->Put(LauncherSettings::Favorites::SPANX, mSpanX);
+    values->Put(LauncherSettings::Favorites::SPANY, mSpanY);
 
     AutoPtr<IInterface> object;
     context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&object);
     AutoPtr<IUserManager> manager = IUserManager::Probe(object);
     Int64 serialNumber;
     manager->GetSerialNumberForUser(mUser, &serialNumber);
-    assert(0 && "need class LauncherSettings");
-    //values->Put(LauncherSettings::Favorites::PROFILE_ID, serialNumber);
+    values->Put(LauncherSettings::Favorites::PROFILE_ID, serialNumber);
     return;
 }
 
@@ -126,9 +124,8 @@ void ItemInfo::UpdateValuesWithCoordinates(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY)
 {
-    assert(0 && "need class LauncherSettings");
-    // values->Put(LauncherSettings::Favorites::CELLX, cellX);
-    // values->Put(LauncherSettings::Favorites::CELLY, cellY);
+    values->Put(LauncherSettings::Favorites::CELLX, cellX);
+    values->Put(LauncherSettings::Favorites::CELLY, cellY);
     return;
 }
 
@@ -169,8 +166,7 @@ void ItemInfo::WriteBitmap(
 {
     if (bitmap != NULL) {
         AutoPtr<ArrayOf<Byte> > data = FlattenBitmap(bitmap);
-        assert(0 && "need class LauncherSettings");
-        //values->Put(LauncherSettings::Favorites::ICON, data);
+        values->Put(LauncherSettings::Favorites::ICON, data);
     }
 }
 

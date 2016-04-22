@@ -37,11 +37,13 @@ using Elastos::Core::Object;
 using Elastos::Core::IRunnable;
 using Elastos::Utility::IArrayList;
 
-
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * A ViewGroup that coordinates dragging across its descendants
+ */
 class DragLayer
     : public FrameLayout
     , public IDragLayer

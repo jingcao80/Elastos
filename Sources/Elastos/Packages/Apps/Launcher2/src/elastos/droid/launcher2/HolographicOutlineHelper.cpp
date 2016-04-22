@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/HolographicOutlineHelper.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -42,8 +43,7 @@ const Int32 HolographicOutlineHelper::EXTRA_THICK = 2;
 Boolean HolographicOutlineHelper::InitStaticBlock()
 {
     Float scale;
-    assert(0 && "need class LauncherApplication");
-    //LauncherApplication::GetScreenDensity(&scale);
+    LauncherApplication::GetScreenDensity(&scale);
 
     MIN_OUTER_BLUR_RADIUS = (Int32)(scale * 1.0f);
     MAX_OUTER_BLUR_RADIUS = (Int32)(scale * 12.0f);

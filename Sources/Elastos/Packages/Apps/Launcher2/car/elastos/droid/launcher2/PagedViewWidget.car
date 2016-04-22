@@ -20,18 +20,20 @@ module
             [in] IView* v);
     }
 
-    /*
-    * @invoke
-    * interface Elastos.Droid.View.IView
-    * interface Elastos.Droid.View.IViewGroup
-    *
-    * interface Elastos.Droid.View.IViewParent
-    * interface Elastos.Droid.View.IViewManager
-    * interface Elastos.Droid.View.IKeyEventCallback
-    * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
-    * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
-    * interface ILinearLayout
-    */
+    /**
+     * The linear layout used strictly for the widget/wallpaper tab of the customization tray
+     *
+     * @invoke
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface ILinearLayout
+     */
     [deprecated, local]
     interface IPagedViewWidget {
         ApplyFromAppWidgetProviderInfo(

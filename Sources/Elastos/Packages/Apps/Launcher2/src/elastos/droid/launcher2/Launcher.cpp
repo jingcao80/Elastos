@@ -18,11 +18,13 @@
 #include "elastos/droid/launcher2/Folder.h"
 #include "elastos/droid/launcher2/LauncherViewPropertyAnimator.h"
 #include "elastos/droid/launcher2/Workspace.h"
+#include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/text/SpannableStringBuilder.h"
 #include "Elastos.Droid.Accounts.h"
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.Service.h"
@@ -106,6 +108,7 @@ using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::Animation::IAccelerateDecelerateInterpolator;
 using Elastos::Droid::Speech::IRecognizerIntent;
+using Elastos::Droid::Text::SpannableStringBuilder;
 using Elastos::Droid::Text::CSpannableStringBuilder;
 using Elastos::Droid::Text::ISpannableStringBuilder;
 using Elastos::Droid::Text::CSelection;
@@ -119,6 +122,7 @@ using Elastos::Droid::Text::Method::ITextKeyListenerHelper;
 using Elastos::Droid::Text::Method::CTextKeyListenerHelper;
 using Elastos::Droid::Widget::IAdvanceable;
 using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::ITabHost;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::CImageView;
@@ -304,8 +308,7 @@ ECode Launcher::MyBroadcastReceiver::OnReceive(
             || (IIntent::ACTION_MANAGED_PROFILE_REMOVED.Equals(action))) {
         AutoPtr<ILauncherModel> mode;
         mHost->GetModel((ILauncherModel**)&mode);
-        assert(0);
-        //mode->ForceReload();
+        mode->ForceReload();
     }
     return NOERROR;
 }
@@ -554,8 +557,7 @@ ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationEnd(
     if (mHost->mWorkspace != NULL && !mSpringLoaded &&
             (LauncherApplication::IsScreenLarge(&res), !res)) {
         // Hide the workspace scrollbar
-        assert(0);
-        //IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(TRUE);
+        IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(TRUE);
         mHost->HideDockDivider();
     }
     if (!mAnimationCancelled) {
@@ -672,16 +674,13 @@ ECode Launcher::MyAnimatorListenerAdapter3::OnAnimationEnd(
     mHost->DispatchOnLauncherTransitionEnd(mFromView, mAnimated, TRUE);
     mHost->DispatchOnLauncherTransitionEnd(mToView, mAnimated, TRUE);
     if (mHost->mWorkspace != NULL) {
-        assert(0);
-        //IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(FALSE);
+        IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(FALSE);
     }
     if (mOnCompleteRunnable != NULL) {
         mOnCompleteRunnable->Run();
     }
-    assert(0);
-    //IPagedView::Probe(mHost->mAppsCustomizeContent)->UpdateCurrentPageScroll();
-    //return IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
-    return NOERROR;
+    IPagedView::Probe(mHost->mAppsCustomizeContent)->UpdateCurrentPageScroll();
+    return IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
 }
 
 Launcher::MyRunnable8::MyRunnable8(
@@ -886,8 +885,7 @@ Launcher::MyRunnable15::MyRunnable15(
 ECode Launcher::MyRunnable15::Run()
 {
     if (mHost->mAppsCustomizeContent != NULL) {
-        assert(0);
-        //return mHost->mAppsCustomizeContent->SetApps(mApps);
+        return mHost->mAppsCustomizeContent->SetApps(mApps);
     }
     return NOERROR;
 }
@@ -1241,9 +1239,10 @@ ECode Launcher::OnCreate(
 
     // Update customization drawer _after_ restoring the states
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        // mAppsCustomizeContent->OnPackagesUpdated(
-        //     LauncherModel::GetSortedWidgetsAndShortcuts(this));
+        AutoPtr<IArrayList> list;
+        LauncherModel::GetSortedWidgetsAndShortcuts(IContext::Probe(this),
+                (IArrayList**)&list);
+        mAppsCustomizeContent->OnPackagesUpdated(list);
     }
 
     // if (PROFILE_STARTUP) {
@@ -1254,22 +1253,19 @@ ECode Launcher::OnCreate(
         if (sPausedFromUserAction) {
             // If the user leaves launcher, then we should just load items asynchronously when
             // they return.
-            assert(0);
-            //mModel->StartLoader(TRUE, -1);
+            mModel->StartLoader(TRUE, -1);
         }
         else {
             // We only load the page synchronously if the user rotates (or triggers a
             // configuration change) while launcher is in the foreground
             Int32 page;
-            assert(0);
-            //IPagedView::Proeb(mWorkspace)->GetCurrentPage(&page);
-            //mModel->StartLoader(TRUE, page);
+            IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
+            mModel->StartLoader(TRUE, page);
         }
     }
 
     Boolean res;
-    assert(0);
-    //mModel->IsAllAppsLoaded(&res);
+    mModel->IsAllAppsLoaded(&res);
     if (!res) {
         AutoPtr<IViewParent> p;
         IView::Probe(mAppsCustomizeContent)->GetParent((IViewParent**)&p);
@@ -1337,9 +1333,8 @@ void Launcher::CheckForLocaleChange()
 {
     if (sLocaleConfiguration == NULL) {
         AutoPtr<MyAsyncTask> task = new MyAsyncTask(this);
-        assert(0);
-        //task->Execute();
-        return;
+        AutoPtr<ArrayOf<IInterface*> > null;
+        task->Execute(null);
     }
 
     AutoPtr<IResources> resources;
@@ -1361,18 +1356,19 @@ void Launcher::CheckForLocaleChange()
     Int32 mnc;
     configuration->GetMnc(&mnc);
 
-    Boolean localeChanged = !locale.Equals(previousLocale) || mcc != previousMcc || mnc != previousMnc;
+    Boolean localeChanged = !locale.Equals(previousLocale) || mcc != previousMcc
+            || mnc != previousMnc;
 
     if (localeChanged) {
         sLocaleConfiguration->mLocale = locale;
         sLocaleConfiguration->mMcc = mcc;
         sLocaleConfiguration->mMnc = mnc;
 
-        assert(0);
-        //mIconCache->Flush();
+        ((IconCache*)mIconCache.Get())->Flush();
 
         AutoPtr<LocaleConfiguration> localeConfiguration = sLocaleConfiguration;
-        AutoPtr<MyThread> t = new MyThread(this, String("WriteLocaleConfiguration"), localeConfiguration);
+        AutoPtr<MyThread> t = new MyThread(this, String("WriteLocaleConfiguration"),
+                localeConfiguration);
         t->Start();
     }
     return;
@@ -1462,8 +1458,7 @@ ECode Launcher::IsDraggingEnabled(
     // We prevent dragging when we are loading the workspace as it is possible to pick up a view
     // that is subsequently removed from the workspace in startBinding().
     Boolean res;
-    assert(0);
-    //mModel->IsLoadingWorkspace(&res);
+    mModel->IsLoadingWorkspace(&res);
     *result = !res;
     return NOERROR;
 }
@@ -1687,8 +1682,7 @@ ECode Launcher::OnResume()
     sPausedFromUserAction = FALSE;
     if (mRestoring || mOnResumeNeedsLoad) {
         mWorkspaceLoading = TRUE;
-        assert(0);
-        //mModel->StartLoader(TRUE, -1);
+        mModel->StartLoader(TRUE, -1);
         mRestoring = FALSE;
         mOnResumeNeedsLoad = FALSE;
     }
@@ -1705,8 +1699,7 @@ ECode Launcher::OnResume()
         }
 
         if (mAppsCustomizeContent != NULL) {
-            assert(0);
-            //mAppsCustomizeContent->SetBulkBind(TRUE);
+            mAppsCustomizeContent->SetBulkBind(TRUE);
         }
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
@@ -1715,8 +1708,7 @@ ECode Launcher::OnResume()
             r->Run();
         }
         if (mAppsCustomizeContent != NULL) {
-            assert(0);
-            //mAppsCustomizeContent->SetBulkBind(FALSE);
+            mAppsCustomizeContent->SetBulkBind(FALSE);
         }
         mOnResumeCallbacks->Clear();
         // if (DEBUG_RESUME_TIME) {
@@ -1733,8 +1725,7 @@ ECode Launcher::OnResume()
     }
     if (mAppsCustomizeContent != NULL) {
         // Resets the previous all apps icon press state
-        assert(0);
-        //mAppsCustomizeContent->ResetDrawableState();
+        mAppsCustomizeContent->ResetDrawableState();
     }
     // It is possible that widgets can receive updates while launcher is not in the foreground.
     // Consequently, the widgets will be inflated in the orientation of the foreground activity
@@ -1742,8 +1733,7 @@ ECode Launcher::OnResume()
     // orientation.
     AutoPtr<IWorkspace> workspace;
     GetWorkspace((IWorkspace**)&workspace);
-    assert(0);
-    //workspace->ReinflateWidgetsIfNecessary();
+    workspace->ReinflateWidgetsIfNecessary();
 
     // Again, as with the above scenario, it's possible that one or more of the global icons
     // were updated in the wrong orientation.
@@ -1773,11 +1763,9 @@ ECode Launcher::OnRetainNonConfigurationInstance(
     VALIDATE_NOT_NULL(obj);
 
     // Flag the loader to stop early before switching
-    assert(0);
-    //mModel->StopLoader();
+    mModel->StopLoader();
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        //mAppsCustomizeContent->Surrender();
+        mAppsCustomizeContent->Surrender();
     }
     AutoPtr<IBoolean> b = CoreUtils::Convert(TRUE);
     *obj = TO_IINTERFACE(b);
@@ -1816,18 +1804,19 @@ ECode Launcher::OnKeyDown(
         listenerHelper->GetInstance((ITextKeyListener**)&listener);
 
         Boolean gotKey;
-        IKeyListener::Probe(listener)->OnKeyDown(IView::Probe(mWorkspace), IEditable::Probe(mDefaultKeySsb),
-                keyCode, event, &gotKey);
-        assert(0);
-        // if (gotKey && mDefaultKeySsb != NULL && mDefaultKeySsb->Length() > 0) {
-        //     // something usable has been typed - start a search
-        //     // the typed text will be retrieved and cleared by
-        //     // showSearchDialog()
-        //     // If there are multiple keystrokes before the search dialog takes focus,
-        //     // onSearchRequested() will be called for every keystroke,
-        //     // but it is idempotent, so it's fine.
-        //     return OnSearchRequested(result);
-        // }
+        IKeyListener::Probe(listener)->OnKeyDown(IView::Probe(mWorkspace),
+                IEditable::Probe(mDefaultKeySsb), keyCode, event, &gotKey);
+        Int32 length;
+        if (gotKey && mDefaultKeySsb != NULL &&
+                (((SpannableStringBuilder*)mDefaultKeySsb.Get())->GetLength(&length), length) > 0) {
+            // something usable has been typed - start a search
+            // the typed text will be retrieved and cleared by
+            // showSearchDialog()
+            // If there are multiple keystrokes before the search dialog takes focus,
+            // onSearchRequested() will be called for every keystroke,
+            // but it is idempotent, so it's fine.
+            return OnSearchRequested(result);
+        }
     }
 
     // Eat the long press event so the keyboard doesn't come up.
@@ -1850,9 +1839,8 @@ String Launcher::GetTypedText()
 
 void Launcher::ClearTypedText()
 {
-    assert(0);
-    // mDefaultKeySsb->Clear();
-    // mDefaultKeySsb->ClearSpans();
+    ((SpannableStringBuilder*)mDefaultKeySsb.Get())->Clear();
+    ((SpannableStringBuilder*)mDefaultKeySsb.Get())->ClearSpans();
     AutoPtr<ISelection> helper;
     CSelection::AcquireSingleton((ISelection**)&helper);
     helper->SetSelection(ISpannable::Probe(mDefaultKeySsb), 0);
@@ -1899,8 +1887,7 @@ void Launcher::RestoreState(
     Int32 currentScreen;
     savedState->GetInt32(RUNTIME_STATE_CURRENT_SCREEN, -1, &currentScreen);
     if (currentScreen > -1) {
-        assert(0);
-        //mWorkspace->SetCurrentPage(currentScreen);
+        IPagedView::Probe(mWorkspace)->SetCurrentPage(currentScreen);
     }
 
     Int64 pendingAddContainer;
@@ -1929,8 +1916,7 @@ void Launcher::RestoreState(
     if (renameFolder) {
         Int64 id;
         savedState->GetInt64(RUNTIME_STATE_PENDING_FOLDER_RENAME_ID, &id);
-        assert(0);
-        //mModel->GetFolderById(this, sFolders, id, (IFolderInfo**)&mFolderInfo);
+        mModel->GetFolderById(this, sFolders, id, (IFolderInfo**)&mFolderInfo);
         mRestoring = TRUE;
     }
 
@@ -1940,21 +1926,18 @@ void Launcher::RestoreState(
         String curTab;
         savedState->GetString(String("apps_customize_currentTab"), &curTab);
         if (!curTab.IsNull()) {
-            assert(0);
-            // AutoPtr<AppsCustomizePagedView::ContentType> type;
-            // mAppsCustomizeTabHost->GetContentTypeForTabTag(curTab, (AppsCustomizePagedView::ContentType**)&type);
-            // mAppsCustomizeTabHost->SetContentTypeImmediate(type);
+            AppsCustomizePagedViewContentType type;
+            mAppsCustomizeTabHost->GetContentTypeForTabTag(curTab, &type);
+            mAppsCustomizeTabHost->SetContentTypeImmediate(type);
 
             Int32 page;
-            assert(0);
-            // IPagedView::Probe(mAppsCustomizeContent)->GetCurrentPage(&page);
-            // IPagedView::Probe(mAppsCustomizeContent)->LoadAssociatedPages(page);
+            IPagedView::Probe(mAppsCustomizeContent)->GetCurrentPage(&page);
+            IPagedView::Probe(mAppsCustomizeContent)->LoadAssociatedPages(page);
         }
 
         Int32 currentIndex;
         savedState->GetInt32(String("apps_customize_currentIndex"), &currentIndex);
-        assert(0);
-        // mAppsCustomizeContent->RestorePageForIndex(currentIndex);
+        mAppsCustomizeContent->RestorePageForIndex(currentIndex);
     }
 }
 
@@ -2009,8 +1992,7 @@ void Launcher::SetupViews()
             (IView**)&view6);
     mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view6);
 
-    assert(0);
-    //mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
+    mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
 
     // Setup the drag controller (drop targets have to be added in reverse order in priority)
     dragController->SetDragScoller(IDragScroller::Probe(mWorkspace));
@@ -2029,11 +2011,9 @@ ECode Launcher::CreateShortcut(
     VALIDATE_NOT_NULL(outview);
 
     Int32 page;
-    assert(0);
-    //mWorkspace->GetCurrentPage(&page);
+    IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
     AutoPtr<IView> view;
-    assert(0);
-    //mWorkspace->GetChildAt(page, (IView**)&view);
+    IViewGroup::Probe(mWorkspace)->GetChildAt(page, (IView**)&view);
     return CreateShortcut(
             Elastos::Droid::Launcher2::R::layout::application,
             IViewGroup::Probe(view) , info, outview);
@@ -2086,8 +2066,7 @@ ECode Launcher::CompleteAddApplication(
     AutoPtr<IUserHandle> user;
     Process::MyUserHandle((IUserHandle**)&user);
     AutoPtr<IShortcutInfo> info;
-    assert(0);
-    //mModel->GetShortcutInfo(packageManager, data, user, this, (IShortcutInfo**)&info);
+    mModel->GetShortcutInfo(packageManager, data, user, this, (IShortcutInfo**)&info);
 
     if (info != NULL) {
         // Necessary flags are added when the activity is launched via
@@ -2120,8 +2099,7 @@ void Launcher::CompleteAddShortcut(
     Boolean foundCellSpan = FALSE;
 
     AutoPtr<IShortcutInfo> info;
-    assert(0);
-    //mModel->InfoFromShortcutIntent(this, data, NULL, (IShortcutInfo**)&info);
+    mModel->InfoFromShortcutIntent(this, data, NULL, (IShortcutInfo**)&info);
     if (info == NULL) {
         return;
     }
@@ -2630,15 +2608,14 @@ ECode Launcher::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     Int32 page;
-    assert(0);
-    //IPagedView::Probe(mWorkspace)->GetNextPage(&page);
+    IPagedView::Probe(mWorkspace)->GetNextPage(&page);
     outState->PutInt32(RUNTIME_STATE_CURRENT_SCREEN, page);
     Activity::OnSaveInstanceState(outState);
 
-    Int32 ordinal;
-    assert(0);
+    //Int32 ordinal;
+    assert(0); //ordinal ?= mState
     //mState->Ordinal(&ordinal);
-    outState->PutInt32(RUNTIME_STATE, ordinal);
+    outState->PutInt32(RUNTIME_STATE, mState/*ordinal*/);
     // We close any open folder since it will not be re-opened, and we need to make sure
     // this state is reflected.
     CloseFolder();
@@ -2663,14 +2640,12 @@ ECode Launcher::OnSaveInstanceState(
     // Save the current AppsCustomize tab
     if (mAppsCustomizeTabHost != NULL) {
         String currentTabTag;
-        assert(0);
-        //mAppsCustomizeTabHost->GetCurrentTabTag(&currentTabTag);
+        ITabHost::Probe(mAppsCustomizeTabHost)->GetCurrentTabTag(&currentTabTag);
         if (!currentTabTag.IsNull()) {
             outState->PutString(String("apps_customize_currentTab"), currentTabTag);
         }
         Int32 currentIndex;
-        assert(0);
-        //mAppsCustomizeContent->GetSaveInstanceStateIndex(&currentIndex);
+        mAppsCustomizeContent->GetSaveInstanceStateIndex(&currentIndex);
         outState->PutInt32(String("apps_customize_currentIndex"), currentIndex);
     }
     return NOERROR;
@@ -2690,9 +2665,9 @@ ECode Launcher::OnDestroy()
     AutoPtr<IApplication> appl;
     GetApplication((IApplication**)&appl);
     AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(appl);
-    assert(0);
-    //mModel->StopLoader();
-    //app->SetLauncher(NULL);
+    mModel->StopLoader();
+    AutoPtr<ILauncherModel> mode;
+    app->SetLauncher(NULL, (ILauncherModel**)&mode);
 
     //try {
     if ((ECode)E_NULL_POINTER_EXCEPTION == IAppWidgetHost::Probe(mAppWidgetHost)->StopListening()){
@@ -2714,8 +2689,7 @@ ECode Launcher::OnDestroy()
     // Disconnect any of the callbacks and drawables associated with ItemInfos on the workspace
     // to prevent leaking Launcher activities on orientation change.
     if (mModel != NULL) {
-        assert(0);
-        //mModel->UnbindItemInfosAndClearQueuedBindRunnables();
+        mModel->UnbindItemInfosAndClearQueuedBindRunnables();
     }
 
     AutoPtr<IContentResolver> resolver;
@@ -2771,8 +2745,9 @@ ECode Launcher::StartSearch(
     }
     if (appSearchData == NULL) {
         CBundle::New((IBundle**)&appSearchData);
-        assert(0);
-        //appSearchData->PutString(ISearch::SOURCE, String("launcher-search"));
+        //import com.android.common.Search;
+        //public final static String SOURCE = "source";
+        appSearchData->PutString(/*Search.SOURCE*/ String("source"), String("launcher-search"));
     }
     AutoPtr<IRect> sourceBounds;
     CRect::New((IRect**)&sourceBounds);
@@ -2826,10 +2801,10 @@ ECode Launcher::StartGlobalSearch(
     }
     intent->SetSourceBounds(sourceBounds);
     //try {
-    assert(0);
-    // if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION == StartActivity(intent)) {
-    //     Slogger::E(TAG, "Global search activity not found: " + globalSearchActivity);
-    // }
+    if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION ==
+            Activity::StartActivity(intent)) {
+        Slogger::E(TAG, String("Global search activity not found: ") + TO_STR(globalSearchActivity));
+    }
     //} catch (ActivityNotFoundException ex) {
         //Log.e(TAG, "Global search activity not found: " + globalSearchActivity);
     //}
@@ -3060,8 +3035,7 @@ ECode Launcher::AddAppWidgetFromDrop(
         // the widget, or we need to start an activity to configure the widget, or both.
         AutoPtr<ILauncherAppWidgetHost> host;
         GetAppWidgetHost((ILauncherAppWidgetHost**)&host);
-        assert(0);
-        //IAppWidgetHost::Probe(host)->AllocateAppWidgetId(&appWidgetId);
+        IAppWidgetHost::Probe(host)->AllocateAppWidgetId(&appWidgetId);
 
         AutoPtr<IUserHandle> handle;
         _info->mInfo->GetProfile((IUserHandle**)&handle);
@@ -3102,7 +3076,6 @@ ECode Launcher::ProcessShortcut(
     String shortcutName;
     intent->GetStringExtra(IIntent::EXTRA_SHORTCUT_NAME, &shortcutName);
 
-    Boolean res;
     if (!applicationName.IsNull() && (applicationName.Equals(shortcutName))) {
         AutoPtr<IIntent> mainIntent;
         CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&mainIntent);
@@ -3115,7 +3088,8 @@ ECode Launcher::ProcessShortcut(
         GetText(Elastos::Droid::Launcher2::R::string::title_select_application, (ICharSequence**)&cchar);
         pickIntent->PutExtra(IIntent::EXTRA_TITLE, cchar);
         return StartActivityForResultSafely(pickIntent, REQUEST_PICK_APPLICATION);
-    } else {
+    }
+    else {
         return StartActivityForResultSafely(intent, REQUEST_CREATE_SHORTCUT);
     }
     return NOERROR;
@@ -3371,33 +3345,36 @@ ECode Launcher::OnClickVoiceButton(
     Boolean res;
     v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY, &res);
 
-    assert(0);
-//     // try {
-//     AutoPtr<IInterface> obj;
-//     ECode ec;
-//     FAIL_GOTO(ec = GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj), ERROR)
-//     AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(obj);
-//     AutoPtr<IComponentName> activityName;
-//     FAIL_GOTO(ec = searchManager->GetGlobalSearchActivity((IComponentName**)&activityName), ERROR)
-//     AutoPtr<IIntent> intent;
-//     CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
-//     FAIL_GOTO(ec = intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK), ERROR)
-//     if (activityName != NULL) {
-//         String pname;
-//         FAIL_GOTO(ec = activityName->GetPackageName(&pname), ERROR)
-//         FAIL_GOTO(ec = intent->SetPackage(pname), ERROR)
-//     }
-//     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String("onClickVoiceButton"));
-//     FAIL_GOTO(ec = StartActivity(NULL, intent, cchar, &res), ERROR)
-//     // } catch (ActivityNotFoundException e) {
-// ERROR:
-//     if ((ECode)ec == E_ACTIVITY_NOT_FOUND_EXCEPTION) {
-//         AutoPtr<IIntent> intent;
-//         CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
-//         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-//         StartActivitySafely(NULL, intent, String("onClickVoiceButton"));
-//     }
-//     // }
+    // try
+    ECode ec;
+    {
+        AutoPtr<IInterface> obj;
+        FAIL_GOTO(ec = GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj), ERROR)
+        AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(obj);
+        AutoPtr<IComponentName> activityName;
+        FAIL_GOTO(ec = searchManager->GetGlobalSearchActivity((IComponentName**)&activityName), ERROR)
+        AutoPtr<IIntent> intent;
+        CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
+        FAIL_GOTO(ec = intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK), ERROR)
+        if (activityName != NULL) {
+            String pname;
+            FAIL_GOTO(ec = activityName->GetPackageName(&pname), ERROR)
+            FAIL_GOTO(ec = intent->SetPackage(pname), ERROR)
+        }
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String("onClickVoiceButton"));
+        FAIL_GOTO(ec = StartActivity(NULL, intent, cchar, &res), ERROR)
+    // } catch (ActivityNotFoundException e) {
+    }
+ERROR:
+    if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
+        AutoPtr<IIntent> intent;
+        CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
+        intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String("onClickVoiceButton"));
+        Boolean res;
+        StartActivitySafely(NULL, intent, cchar, &res);
+    }
+    // }
     return NOERROR;
 }
 
@@ -3442,26 +3419,22 @@ ECode Launcher::StartApplicationDetailsActivity(
     if (ec == (ECode)E_SECURITY_EXCEPTION) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-
-        // toast->Show();
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::activity_not_found,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
         Slogger::E(TAG, "Launcher does not have permission to launch settings");
     }
     //} catch (ActivityNotFoundException e) {
     if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-
-        // toast->Show();
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+            Elastos::Droid::Launcher2::R::string::activity_not_found,
+            IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
         Slogger::E(TAG, "Unable to launch settings");
     }
     //}
@@ -3476,15 +3449,13 @@ ECode Launcher::StartApplicationUninstallActivity(
     if ((info->mFlags & IApplicationInfo::DOWNLOADED_FLAG) == 0) {
         // System applications cannot be installed. For now, show a toast explaining that.
         // We may give them the option of disabling apps this way.
-        Int32 messageId = Elastos::Droid::Launcher2::R::string::uninstall_system_app_text;
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(messageId);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-        // return toast->Show();
-        return NOERROR;
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::uninstall_system_app_text,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        return toast->Show();
     }
     else {
         String packageName;
@@ -3515,95 +3486,96 @@ ECode Launcher::StartActivity(
 
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-//     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
+    intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
 
-//     //try {
-//     // Only launch using the new animation if the shortcut has not opted out (this is a
-//     // private contract between launcher and may be ignored in the future).
-//     ECode ec;
-//     Boolean res;
-//     Boolean useLaunchAnimation = (v != NULL) &&
-//             (intent->HasExtra(INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION, &res), !res);
-//     AutoPtr<IParcelable> parcelable;
-//     FAIL_GOTO(ec = intent->GetParcelableExtra(IItemInfo::EXTRA_PROFILE,
-//             (IParcelable**)&parcelable), ERROR)
-//     AutoPtr<IUserHandle> user = IUserHandle::Probe(parcelable);
-//     AutoPtr<IInterface> obj;
-//     FAIL_GOTO(ec = GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj), ERROR)
-//     AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
-//     if (useLaunchAnimation) {
-//         Int32 width;
-//         FAIL_GOTO(ec = v->GetMeasuredWidth(&width), ERROR)
-//         Int32 height;
-//         FAIL_GOTO(ec = v->GetMeasuredHeight(&height), ERROR)
+    //try {
+    // Only launch using the new animation if the shortcut has not opted out (this is a
+    // private contract between launcher and may be ignored in the future).
+    ECode ec;
+    {
+        Boolean res;
+        Boolean useLaunchAnimation = (v != NULL) &&
+                (intent->HasExtra(INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION, &res), !res);
+        AutoPtr<IParcelable> parcelable;
+        FAIL_GOTO(ec = intent->GetParcelableExtra(IItemInfo::EXTRA_PROFILE,
+                (IParcelable**)&parcelable), ERROR)
+        AutoPtr<IUserHandle> user = IUserHandle::Probe(parcelable);
+        AutoPtr<IInterface> obj;
+        FAIL_GOTO(ec = GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj), ERROR)
+        AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
+        if (useLaunchAnimation) {
+            Int32 width;
+            FAIL_GOTO(ec = v->GetMeasuredWidth(&width), ERROR)
+            Int32 height;
+            FAIL_GOTO(ec = v->GetMeasuredHeight(&height), ERROR)
 
-//         AutoPtr<IActivityOptionsHelper> helper;
-//         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&helper);
-//         AutoPtr<IActivityOptions> opts;
-//         FAIL_GOTO(ec = helper->MakeScaleUpAnimation(v, 0, 0, width, height,
-//                 (IActivityOptions**)&opts), ERROR)
+            AutoPtr<IActivityOptionsHelper> helper;
+            CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&helper);
+            AutoPtr<IActivityOptions> opts;
+            FAIL_GOTO(ec = helper->MakeScaleUpAnimation(v, 0, 0, width, height,
+                    (IActivityOptions**)&opts), ERROR)
 
-//         AutoPtr<IUserHandle> _user;
-//         FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
-//         Boolean res;
-//         if (user == NULL || (IObject::Probe(user)->Equals(_user, &res), res)) {
-//             // Could be launching some bookkeeping activity
-//             AutoPtr<IBundle> bundle;
-//             FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
-//             FAIL_GOTO(ec = Activity::StartActivity(intent, bundle), ERROR)
-//         }
-//         else {
-//             AutoPtr<IComponentName> componentName;
-//             FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
-//             AutoPtr<IRect> sourceBounds;
-//             FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
-//             AutoPtr<IBundle> bundle;
-//             FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
-//             FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, bundle), ERROR)
-//         }
-//     }
-//     else {
-//         AutoPtr<IUserHandle> _user;
-//         FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
-//         Boolean res;
-//         if (user == NULL || (user->Equals(_user, &res), res)) {
-//             FAIL_GOTO(ec = Activity::StartActivity(intent), ERROR)
-//         }
-//         else {
-//             AutoPtr<IComponentName> componentName;
-//             FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
-//             AutoPtr<IRect> sourceBounds;
-//             FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
-//             FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, NULL), ERROR)
-//         }
-//     }
-//     *result = TRUE;
-//     return NOERROR;
-// ERROR:
-//     //} catch (SecurityException e) {
-//     if ((ECode)ec == E_SECURITY_EXCEPTION) {
-//         AutoPtr<IToastHelper> helper;
-//         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-//         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(Elastos::Droid::Launcher2::R::string::activity_not_found);
-//         AutoPtr<IToast> toast;
-//         Toast::MakeText(IContext::Probe(this), cchar,
-//                 IToast::LENGTH_SHORT, (IToast**)&toast);
-//         toast->Show();
-//         StringBuilder sb;
-//         sb += "Launcher does not have the permission to launch ";
-//         sb += TO_STR(intent);
-//         sb += ". Make sure to create a MAIN intent-filter for the corresponding activity ";
-//         sb += "or use the exported attribute for this activity. ";
-//         sb += "tag=";
-//         sb += TO_STR(tag);
-//         sb += " intent=";
-//         sb += TO_STR(intent);
-//         sb += ec;
-//         Slogger::E(TAG, sb.ToString());
-//     }
-//     //}
-//     *result = FALSE;
+            AutoPtr<IUserHandle> _user;
+            FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
+            Boolean res;
+            if (user == NULL || (IObject::Probe(user)->Equals(_user, &res), res)) {
+                // Could be launching some bookkeeping activity
+                AutoPtr<IBundle> bundle;
+                FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
+                FAIL_GOTO(ec = Activity::StartActivity(intent, bundle), ERROR)
+            }
+            else {
+                AutoPtr<IComponentName> componentName;
+                FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
+                AutoPtr<IRect> sourceBounds;
+                FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
+                AutoPtr<IBundle> bundle;
+                FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
+                FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, bundle), ERROR)
+            }
+        }
+        else {
+            AutoPtr<IUserHandle> _user;
+            FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
+            Boolean res;
+            if (user == NULL || (user->Equals(_user, &res), res)) {
+                FAIL_GOTO(ec = Activity::StartActivity(intent), ERROR)
+            }
+            else {
+                AutoPtr<IComponentName> componentName;
+                FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
+                AutoPtr<IRect> sourceBounds;
+                FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
+                FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, NULL), ERROR)
+            }
+        }
+        *result = TRUE;
+        return NOERROR;
+    }
+ERROR:
+    //} catch (SecurityException e) {
+    if (ec == (ECode)E_SECURITY_EXCEPTION) {
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::activity_not_found,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
+        StringBuilder sb;
+        sb += "Launcher does not have the permission to launch ";
+        sb += TO_STR(intent);
+        sb += ". Make sure to create a MAIN intent-filter for the corresponding activity ";
+        sb += "or use the exported attribute for this activity. ";
+        sb += "tag=";
+        sb += TO_STR(tag);
+        sb += " intent=";
+        sb += TO_STR(intent);
+        sb += ec;
+        Slogger::E(TAG, sb.ToString());
+    }
+    //}
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -3616,16 +3588,15 @@ ECode Launcher::StartActivitySafely(
     VALIDATE_NOT_NULL(result);
 
     Boolean success = FALSE;
-    // try {
     if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION == StartActivity(v, intent, tag, &success)) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-        // toast->Show();
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::activity_not_found,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
+
         StringBuilder sb;
         sb += "Unable to launch. tag=";
         sb += TO_STR(tag);
@@ -3634,10 +3605,7 @@ ECode Launcher::StartActivitySafely(
         sb += E_ACTIVITY_NOT_FOUND_EXCEPTION;
         Slogger::E(TAG, sb.ToString());
     }
-    // } catch (ActivityNotFoundException e) {
-        // Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-        // Log.e(TAG, "Unable to launch. tag=" + tag + " intent=" + intent, e);
-    // }
+
     *result = success;
     return NOERROR;
 }
@@ -3645,22 +3613,17 @@ ECode Launcher::StartActivitySafely(
 ECode Launcher::StartAppWidgetConfigureActivitySafely(
     /* [in] */ Int32 appWidgetId)
 {
-    // try {
     if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION ==
             IAppWidgetHost::Probe(mAppWidgetHost)->StartAppWidgetConfigureActivityForResult(
                 IActivity::Probe(this), appWidgetId, 0, REQUEST_CREATE_APPWIDGET, NULL)) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-        // toast->Show();
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::activity_not_found,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        return toast->Show();
     }
-    // } catch (ActivityNotFoundException e) {
-        // Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
-    // }
     return NOERROR;
 }
 
@@ -3674,23 +3637,22 @@ ECode Launcher::StartActivityForResultSafely(
     if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        assert(0);
-        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-        // toast->Show();
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::activity_not_found,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
     }
     //} catch (SecurityException e) {
     if (ec == (ECode)E_SECURITY_EXCEPTION) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
-        // AutoPtr<IToast> toast;
-        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
-        // toast->Show();
+        AutoPtr<IToast> toast;
+        helper->MakeText(IContext::Probe(this),
+                Elastos::Droid::Launcher2::R::string::activity_not_found,
+                IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
+
         StringBuilder sb;
         sb += "Launcher does not have the permission to launch ";
         sb += TO_STR(intent);
@@ -3741,13 +3703,12 @@ void Launcher::HandleFolderClick(
         // Find the open folder...
         Int32 folderScreen;
         if (openFolder != NULL) {
-            assert(0);
-            //mWorkspace->GetPageForView(openFolder, &folderScreen);
+            IPagedView::Probe(mWorkspace)->GetPageForView(IView::Probe(openFolder),
+                    &folderScreen);
             // .. and close it
             CloseFolder(openFolder);
             Int32 page;
-            assert(0);
-            //mWorkspace->GetCurrentPage(&page);
+            IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
             if (folderScreen != page) {
                 // Close any folder open on the current screen
                 CloseFolder();
@@ -3886,8 +3847,8 @@ void Launcher::GrowAndFadeOutFolderIcon(
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     Int32 num;
-    assert(0);
-    //resources->GetInteger(Elastos::Droid::R::integer::config_folderAnimDuration, &num)
+    resources->GetInteger(Elastos::Droid::Launcher2::R::integer::config_folderAnimDuration,
+            &num);
     IAnimator::Probe(oa)->SetDuration(num);
     IAnimator::Probe(oa)->Start();
 }
@@ -4063,22 +4024,20 @@ ECode Launcher::OnLongClick(
     AutoPtr<IView> itemUnderLongClick = longClickCellInfo->mCell;
     Boolean tmp1, tmp2;
     IsHotseatLayout(v, &tmp1);
-    assert(0);
-    //IPagedView::Probe(mWorkspace)->AllowLongPress(&tmp2);
+    IPagedView::Probe(mWorkspace)->AllowLongPress(&tmp2);
     Boolean allowLongPress = tmp1 || tmp2;
     if (allowLongPress && (mDragController->IsDragging(&res), !res)) {
         if (itemUnderLongClick == NULL) {
             // User long pressed on empty space
-            assert(0);
-            // mWorkspace->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
-            //         IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING);
+            Boolean res;
+            IView::Probe(mWorkspace)->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
+                    IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING, &res);
             StartWallpaper();
         }
         else {
             if (IFolder::Probe(itemUnderLongClick) == NULL) {
                 // User long pressed on an item
-                assert(0);
-                //mWorkspace->StartDrag(longClickCellInfo);
+                mWorkspace->StartDrag(longClickCellInfo);
             }
         }
     }
@@ -4404,8 +4363,7 @@ void Launcher::ShowAppsCustomizeHelper(
         Boolean res;
         if (!springLoaded && (LauncherApplication::IsScreenLarge(&res), !res)) {
             // Hide the workspace scrollbar
-            assert(0);
-            //IPagedView::Probe(mWorkspace)->HideScrollingIndicator(TRUE);
+            IPagedView::Probe(mWorkspace)->HideScrollingIndicator(TRUE);
             HideDockDivider();
 
             // Hide the search bar
@@ -4495,8 +4453,7 @@ void Launcher::HideAppsCustomizeHelper(
 
         DispatchOnLauncherTransitionPrepare(fromView, animated, TRUE);
         DispatchOnLauncherTransitionPrepare(toView, animated, TRUE);
-        assert(0);
-        //IPagedView::Probe(mAppsCustomizeContent)->PauseScrolling();
+        IPagedView::Probe(mAppsCustomizeContent)->PauseScrolling();
 
         AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, fromView,
                 toView, animated, onCompleteRunnable);
@@ -4522,8 +4479,7 @@ void Launcher::HideAppsCustomizeHelper(
         DispatchOnLauncherTransitionPrepare(toView, animated, TRUE);
         DispatchOnLauncherTransitionStart(toView, animated, TRUE);
         DispatchOnLauncherTransitionEnd(toView, animated, TRUE);
-        assert(0);
-        //IPagedView::Probe(mWorkspace)->HideScrollingIndicator(FALSE);
+        IPagedView::Probe(mWorkspace)->HideScrollingIndicator(FALSE);
     }
 }
 
@@ -4585,8 +4541,7 @@ ECode Launcher::ShowWorkspace(
         }
     }
 
-    assert(0);
-    //IPagedView::Probe(mWorkspace)->FlashScrollingIndicator(animated);
+    IPagedView::Probe(mWorkspace)->FlashScrollingIndicator(animated);
 
     // Change the state *after* we've called all the transition code
     mState = Launcher_WORKSPACE;
@@ -5375,8 +5330,7 @@ ECode Launcher::BindItems(
             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
             {
                 Int32 page;
-                assert(0);
-                //IPagedView::Probe(workspace)->GetCurrentPage(&page);
+                IPagedView::Probe(workspace)->GetCurrentPage(&page);
                 AutoPtr<IView> view;
                 IViewGroup::Probe(workspace)->GetChildAt(page, (IView**)&view);
                 AutoPtr<IFolderIcon> newFolder;
@@ -5443,8 +5397,7 @@ ECode Launcher::BindAppWidget(
             appWidgetInfo, (IAppWidgetHostView**)&(_item->mHostView));
 
     IView::Probe(_item->mHostView)->SetTag(TO_IINTERFACE(item));
-    assert(0);
-    //item->OnBindAppWidget(ILauncher::Probe(this));
+    item->OnBindAppWidget(ILauncher::Probe(this));
 
     workspace->AddInScreen(IView::Probe(_item->mHostView), _item->mContainer, _item->mScreen, _item->mCellX,
             _item->mCellY, _item->mSpanX, _item->mSpanY, FALSE);
@@ -5482,8 +5435,7 @@ ECode Launcher::FinishBindingItems()
         IView::Probe(mWorkspace)->HasFocus(&res);
         if (!res) {
             Int32 page;
-            assert(0);
-            //IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
+            IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
             AutoPtr<IView> view;
             IViewGroup::Probe(mWorkspace)->GetChildAt(page, (IView**)&view);
             Boolean tmp;
@@ -5513,16 +5465,14 @@ ECode Launcher::FinishBindingItems()
     if (mVisible || mWorkspaceLoading) {
         AutoPtr<IRunnable> newAppsRunnable = new MyRunnable14(this);
         Int32 page;
-        assert(0);
-        //IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
+        IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
         Boolean willSnapPage = mNewShortcutAnimatePage > -1 &&
                 mNewShortcutAnimatePage != page;
         if (CanRunNewAppsAnimation()) {
             // If the user has not interacted recently, then either snap to the new page to show
             // the new-apps animation or just run them if they are to appear on the current page
             if (willSnapPage) {
-                assert(0);
-                //IPagedView::Probe(mWorkspace)->SnapToPage(mNewShortcutAnimatePage, newAppsRunnable);
+                mWorkspace->SnapToPage(mNewShortcutAnimatePage, newAppsRunnable);
             }
             else {
                 RunNewAppsAnimation(FALSE);
@@ -5547,8 +5497,7 @@ Boolean Launcher::CanRunNewAppsAnimation()
     system->GetCurrentTimeMillis(&ctime);
 
     Int64 time;
-    assert(0);
-    //mDragController->GetLastGestureUpTime(&time);
+    mDragController->GetLastGestureUpTime(&time);
     Int64 diff = ctime - time;
     return diff > (NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS * 1000);
 }
@@ -5680,8 +5629,7 @@ ECode Launcher::BindAppsAdded(
     }
 
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        //mAppsCustomizeContent->AddApps(apps);
+        mAppsCustomizeContent->AddApps(apps);
     }
     return NOERROR;
 }
@@ -5699,8 +5647,7 @@ ECode Launcher::BindAppsUpdated(
     }
 
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        //mAppsCustomizeContent->UpdateApps(apps);
+        mAppsCustomizeContent->UpdateApps(apps);
     }
     return NOERROR;
 }
@@ -5725,8 +5672,7 @@ ECode Launcher::BindComponentsRemoved(
     }
 
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        //mAppsCustomizeContent->RemoveApps(appInfos);
+        mAppsCustomizeContent->RemoveApps(appInfos);
     }
 
     // Notify the drag controller
@@ -5742,8 +5688,7 @@ ECode Launcher::BindPackagesUpdated(
     }
 
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        //mAppsCustomizeContent->OnPackagesUpdated(widgetsAndShortcuts);
+        mAppsCustomizeContent->OnPackagesUpdated(widgetsAndShortcuts);
     }
     return NOERROR;
 }
@@ -6142,12 +6087,10 @@ ECode Launcher::DumpState()
     sb3 += "sFolders.size=";
     sb3 += size;
     Slogger::D(TAG, sb3.ToString());
-    assert(0);
-    //mModel->DumpState();
+    mModel->DumpState();
 
     if (mAppsCustomizeContent != NULL) {
-        assert(0);
-        //mAppsCustomizeContent->DumpState();
+        mAppsCustomizeContent->DumpState();
     }
     Slogger::D(TAG, "END launcher2 dump state");
     return NOERROR;

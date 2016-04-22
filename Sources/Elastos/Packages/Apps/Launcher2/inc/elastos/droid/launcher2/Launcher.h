@@ -1754,6 +1754,8 @@ private:
 
 
 private:
+    friend class LauncherModel;
+
     static const String TAG;
     static const Boolean LOGD;
 

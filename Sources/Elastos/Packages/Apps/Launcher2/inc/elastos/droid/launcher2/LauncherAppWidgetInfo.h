@@ -15,6 +15,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * Represents a widget (either instantiated or about to be) in the Launcher.
+ */
 class LauncherAppWidgetInfo
     : public ItemInfo
     , public ILauncherAppWidgetInfo

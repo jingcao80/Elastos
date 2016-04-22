@@ -6,6 +6,8 @@
 #include "elastos/droid/launcher2/InstallWidgetReceiver.h"
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "elastos/droid/launcher2/Utilities.h"
+#include "elastos/droid/launcher2/Launcher.h"
+#include "elastos/droid/launcher2/WidgetPreviewLoader.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Process.h"
 #include "Elastos.Droid.App.h"
@@ -33,6 +35,8 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentHelper;
 using Elastos::Droid::Content::CIntentHelper;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentProviderClient;
+using Elastos::Droid::Content::IContextWrapper;
 using Elastos::Droid::Content::IIntentShortcutIconResource;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CContentValues;
@@ -61,7 +65,7 @@ using Elastos::Core::Thread;
 using Elastos::Core::CThread;
 using Elastos::Core::IThread;
 using Elastos::Core::StringUtils;
-using Elastos::IO::ICloseable;;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::ISet;
@@ -298,8 +302,7 @@ ECode LauncherModel::MyRunnable3::Run()
                 sb += ", not in the list of folders";
                 String msg = sb.ToString();
                 Slogger::E(TAG, msg);
-                assert(0);
-                //Launcher::DumpDebugLogsToConsole();
+                Launcher::DumpDebugLogsToConsole();
             }
         }
 
@@ -355,22 +358,43 @@ LauncherModel::MyRunnable5::MyRunnable5(
     /* [in] */ IContentResolver* cr,
     /* [in] */ Boolean notify,
     /* [in] */ IContentValues* values,
-    /* [in] */ ItemInfo* item)
+    /* [in] */ ItemInfo* item,
+    /* [in] */ Int64 container,
+    /* [in] */ Int32 screen,
+    /* [in] */ Int32 cellX,
+    /* [in] */ Int32 cellY)
     : mCr(cr)
     , mNotify(notify)
     , mValues(values)
     , mItem(item)
+    , mContainer(container)
+    , mScreen(screen)
+    , mCellX(cellX)
+    , mCellY(cellY)
 {
 }
 
 ECode LauncherModel::MyRunnable5::Run()
 {
-    assert(0);
-    // String transaction = "DbDebug    Add item (" + item.title + ") to db, id: "
-    //         + item.id + " (" + container + ", " + screen + ", " + cellX + ", "
-    //         + cellY + ")";
-    // Launcher::sDumpLogs->Add(transaction);
-    // Slogger::D(TAG, transaction);
+    StringBuilder sb;
+    sb += "DbDebug    Add item (";
+    String title;
+    mItem->mTitle->ToString(&title);
+    sb += title;
+    sb += ") to db, id: ";
+    sb += mItem->mId;
+    sb += " (";
+    sb += mContainer;
+    sb += ", ";
+    sb += mScreen;
+    sb += ", ";
+    sb += mCellX;
+    sb += ", ";
+    sb += mCellY;
+    sb += ")";
+    AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
+    Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
+    Slogger::D(TAG, sb.ToString());
 
     AutoPtr<IUri> tmp;
     mCr->Insert(mNotify ? LauncherSettings::Favorites::CONTENT_URI :
@@ -401,11 +425,13 @@ ECode LauncherModel::MyRunnable5::Run()
                     LauncherModel::sBgFolders->ContainsKey(TO_IINTERFACE(value), &res);
                     if (!res) {
                         // Adding an item to a folder that doesn't exist.
-                        assert(0);
-                        // String msg = "adding item: " + item + " to a folder that " +
-                        //         " doesn't exist";
-                        // Slogger::E(TAG, msg);
-                        // Launcher::DumpDebugLogsToConsole();
+                        StringBuilder sb;
+                        sb += "adding item: ";
+                        sb += TO_STR(mItem);
+                        sb += " to a folder that ";
+                        sb += " doesn't exist";
+                        Slogger::E(TAG, sb.ToString());
+                        Launcher::DumpDebugLogsToConsole();
                     }
                 }
                 break;
@@ -430,12 +456,25 @@ LauncherModel::MyRunnable6::MyRunnable6(
 
 ECode LauncherModel::MyRunnable6::Run()
 {
-    assert(0);
-    // String transaction = "DbDebug    Delete item (" + item.title + ") from db, id: "
-    //         + item.id + " (" + item.container + ", " + item.screen + ", " + item.cellX +
-    //         ", " + item.cellY + ")";
-    // Launcher::sDumpLogs->Add(transaction);
-    // Slogger::D(TAG, transaction);
+    StringBuilder sb;
+    sb += "DbDebug    Delete item (";
+    String title;
+    mItem->mTitle->ToString(&title);
+    sb += title;
+    sb += ") from db, id: ";
+    sb += mItem->mId;
+    sb += " (";
+    sb += mItem->mContainer;
+    sb += ", ";
+    sb += mItem->mScreen;
+    sb += ", ";
+    sb += mItem->mCellX;
+    sb += ", ";
+    sb += mItem->mCellY;
+    sb += ")";
+    AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
+    Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
+    Slogger::D(TAG, sb.ToString());
 
     Int32 tmp;
     mCr->Delete(mUriToDelete, String(NULL), NULL, &tmp);
@@ -457,11 +496,15 @@ ECode LauncherModel::MyRunnable6::Run()
                     if (mItem->mContainer == mItem->mId) {
                         // We are deleting a folder which still contains items that
                         // think they are contained by that folder.
-                        assert(0);
-                        // String msg = "deleting a folder (" + item + ") which still " +
-                        //         "contains items (" + info + ")";
-                        // Slogger::E(TAG, msg);
-                        // Launcher::DumpDebugLogsToConsole();
+                        StringBuilder sb;
+                        sb += "deleting a folder (";
+                        sb += TO_STR(mItem);
+                        sb += ") which still ";
+                        sb += "contains items (";
+                        sb += TO_STR(info);
+                        sb += ")";
+                        Slogger::E(TAG, sb.ToString());
+                        Launcher::DumpDebugLogsToConsole();
                     }
                 }
                 LauncherModel::sBgWorkspaceItems->Remove(TO_IINTERFACE(mItem));
@@ -771,9 +814,11 @@ ECode LauncherModel::LoaderTask::MyRunnable13::Run()
 
 LauncherModel::LoaderTask::MyRunnable14::MyRunnable14(
     /* [in] */ LoaderTask* host,
-    /* [in] */ ILauncherModelCallbacks* oldCallbacks)
+    /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+    /* [in] */ Int64 t)
     : mHost(host)
     , mOldCallbacks(oldCallbacks)
+    , mT(t)
 {
 }
 
@@ -787,9 +832,11 @@ ECode LauncherModel::LoaderTask::MyRunnable14::Run()
 
     // If we're profiling, ensure this is the last thing in the queue.
     if (DEBUG_LOADERS) {
-        assert(0);
-        // Slogger::D(TAG, "bound workspace in "
-        //     + (SystemClock.uptimeMillis()-t) + "ms");
+        StringBuilder sb;
+        sb += "bound workspace in ";
+        sb += SystemClock::GetUptimeMillis() - mT;
+        sb += "ms";
+        Slogger::D(TAG, sb.ToString());
     }
 
     mHost->mIsLoadingAndBindingWorkspace = FALSE;
@@ -815,9 +862,15 @@ ECode LauncherModel::LoaderTask::MyRunnable15::Run()
         callbacks->BindAllApplications(mList);
     }
     if (DEBUG_LOADERS) {
-        assert(0);
-        // Slogger::D(TAG, "bound all " + list.size() + " apps from cache in "
-        //         + (SystemClock.GetUptimeMillis()-t) + "ms");
+        StringBuilder sb;
+        sb += "bound all ";
+        Int32 size;
+        mList->GetSize(&size);
+        sb += size;
+        sb += " apps from cache in ";
+        sb += SystemClock::GetUptimeMillis() - t;
+        sb += "ms";
+        Slogger::D(TAG, sb.ToString());
     }
     return NOERROR;
 }
@@ -842,9 +895,15 @@ ECode LauncherModel::LoaderTask::MyRunnable16::Run()
             mCallbacks->BindAppsAdded(mAdded);
         }
         if (DEBUG_LOADERS) {
-            assert(0);
-            // Slogger::D(TAG, "bound " + mAdded.size() + " apps in "
-            //     + (SystemClock.uptimeMillis() - t) + "ms");
+            StringBuilder sb;
+            sb += "bound ";
+            Int32 size;
+            mAdded->GetSize(&size);
+            sb += size;
+            sb += " apps in ";
+            sb += SystemClock::GetUptimeMillis() - t;
+            sb += "ms";
+            Slogger::D(TAG, sb.ToString());
         }
     }
     else {
@@ -1014,8 +1073,10 @@ void LauncherModel::LoaderTask::LoadAndBindWorkspace()
 
     // Load the workspace
     if (DEBUG_LOADERS) {
-        assert(0);
-        //Slogger::D(TAG, "loadAndBindWorkspace mWorkspaceLoaded=" + mWorkspaceLoaded);
+        StringBuilder sb;
+        sb += "loadAndBindWorkspace mWorkspaceLoaded=";
+        sb += mHost->mWorkspaceLoaded;
+        Slogger::D(TAG, sb.ToString());
     }
 
     if (!mHost->mWorkspaceLoaded) {
@@ -1053,10 +1114,11 @@ void LauncherModel::LoaderTask::WaitForIdle()
             //}
         }
         if (DEBUG_LOADERS) {
-            assert(0);
-            // Slogger::D(TAG, "waited "
-            //         + (SystemClock.uptimeMillis()-workspaceWaitTime)
-            //         + "ms for previous step to finish binding");
+            StringBuilder sb;
+            sb += "waited ";
+            sb += SystemClock::GetUptimeMillis() - workspaceWaitTime;
+            sb += "ms for previous step to finish binding";
+            Slogger::D(TAG, sb.ToString());
         }
     }
 }
@@ -1118,9 +1180,10 @@ ECode LauncherModel::LoaderTask::Run()
         // starving at boot time. Staring at a blank home is not cool.
         synchronized(mHost->mLock) {
             if (DEBUG_LOADERS) {
-                assert(0);
-                // Slogger::D(TAG, "Setting thread priority to " +
-                //     (mIsLaunching ? "DEFAULT" : "BACKGROUND"));
+                StringBuilder sb;
+                sb += "Setting thread priority to ";
+                sb += mIsLaunching ? "DEFAULT" : "BACKGROUND";
+                Slogger::D(TAG, sb.ToString());
             }
             Process::SetThreadPriority(mIsLaunching
                     ? IProcess::THREAD_PRIORITY_DEFAULT
@@ -1135,8 +1198,7 @@ ECode LauncherModel::LoaderTask::Run()
         LoadAndBindWorkspace();
 
         if (mStopped) {
-            assert(0);
-            //break keep_running;
+            goto keep_running;
         }
 
         // Whew! Hard work done.  Slow us down, and wait until the UI thread has
@@ -1179,9 +1241,21 @@ ECode LauncherModel::LoaderTask::Run()
             fit->GetNext((IInterface**)&key);
             AutoPtr<IInterface> obj;
             sBgDbIconCache->Get(key, (IInterface**)&obj);
-            assert(0);
-            // UpdateSavedIcon(mContext, (ShortcutInfo*)IShortcutInfo::Probe(key),
-            //         IArrayOf::Probe(obj));
+            AutoPtr<IArrayOf> arrayObj = IArrayOf::Probe(obj);
+            Int32 length;
+            arrayObj->GetLength(&length);
+            AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(length);
+            for (Int32 i = 0; i < length; i++) {
+                AutoPtr<IInterface> obj;
+                arrayObj->Get(i, (IInterface**)&obj);
+                AutoPtr<IByte> b = IByte::Probe(obj);
+                Byte value;
+                b->GetValue(&value);
+                (*array)[i] = value;
+            }
+
+            mHost->UpdateSavedIcon(mContext, IShortcutInfo::Probe(key), array);
+
         }
         sBgDbIconCache->Clear();
     }
@@ -1246,10 +1320,11 @@ ECode LauncherModel::LoaderTask::TryGetCallbacks(
         REFCOUNT_ADD(*newCallbacks);
         return NOERROR;
     }
+    return NOERROR;
 }
 
 Boolean LauncherModel::LoaderTask::CheckItemPlacement(
-    /* [in] */ ArrayOf<ArrayOf<ArrayOf<ItemInfo*> > >* occupied,
+    /* [in] */ ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* >* occupied,
     /* [in] */ ItemInfo* item)
 {
     Int32 containerIndex = item->mScreen;
@@ -1273,15 +1348,23 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
         // We use the last index to refer to the hotseat and the screen as the rank, so
         // test and update the occupied state accordingly
         if ((*occupied)[ILauncher::SCREEN_COUNT][item->mScreen][0] != NULL) {
-            assert(0);
-            // Slogger::E(TAG, "Error loading shortcut into hotseat " + item
-            //     + " into position (" + item.screen + ":" + item.cellX + "," + item.cellY
-            //     + ") occupied by " + occupied[Launcher.SCREEN_COUNT][item.screen][0]);
+            StringBuilder sb;
+            sb += "Error loading shortcut into hotseat ";
+            sb += TO_STR(item);
+            sb += " into position (";
+            sb += item->mScreen;
+            sb += ":";
+            sb += item->mCellX;
+            sb += ",";
+            sb += item->mCellY;
+            sb += ") occupied by ";
+            ItemInfo* tmp = (*(*(*occupied)[ILauncher::SCREEN_COUNT])[item->mScreen])[0];
+            sb += TO_STR(tmp);
+            Slogger::E(TAG, sb.ToString());
             return FALSE;
         }
         else {
-            assert(0);
-            //(*((*occupied)[ILauncher::SCREEN_COUNT]))[item->mScreen]->Set(0, item);
+            (*((*occupied)[ILauncher::SCREEN_COUNT]))[item->mScreen]->Set(0, item);
             return TRUE;
         }
     }
@@ -1294,20 +1377,28 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
     for (Int32 x = item->mCellX; x < (item->mCellX+item->mSpanX); x++) {
         for (Int32 y = item->mCellY; y < (item->mCellY+item->mSpanY); y++) {
             if ((*occupied)[containerIndex][x][y] != NULL) {
-                assert(0);
-                // Slogger::E(TAG, "Error loading shortcut " + item
-                //     + " into cell (" + containerIndex + "-" + item.screen + ":"
-                //     + x + "," + y
-                //     + ") occupied by "
-                //     + occupied[containerIndex][x][y]);
+                StringBuilder sb;
+                sb += "Error loading shortcut ";
+                sb += TO_STR(item);
+                sb += " into cell (";
+                sb += containerIndex;
+                sb += "-";
+                sb += item->mScreen;
+                sb += ":";
+                sb += x;
+                sb += ",";
+                sb += y;
+                sb += ") occupied by ";
+                ItemInfo* tmp = (*(*(*occupied)[containerIndex])[x])[y];
+                sb += TO_STR(tmp);
+                Slogger::E(TAG, sb.ToString());
                 return FALSE;
             }
         }
     }
     for (Int32 x = item->mCellX; x < (item->mCellX+item->mSpanX); x++) {
         for (Int32 y = item->mCellY; y < (item->mCellY+item->mSpanY); y++) {
-            assert(0);
-            //occupied->Set(containerIndex, x, y) = item;
+            (*((*occupied)[containerIndex]))[x]->Set(y, item);
         }
     }
 
@@ -1316,423 +1407,430 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
 
 void LauncherModel::LoaderTask::LoadWorkspace()
 {
-//     Int64 t = DEBUG_LOADERS ? SystemClock::GetUptimeMillis() : 0;
+    Int64 t = DEBUG_LOADERS ? SystemClock::GetUptimeMillis() : 0;
 
-//     AutoPtr<IContext> context = mContext;
-//     AutoPtr<IContentResolver> contentResolver;
-//     context->GetContentResolver((IContentResolver**)&contentResolver);
-//     AutoPtr<IPackageManager> manager;
-//     context->GetPackageManager((IPackageManager**)&manager);
+    AutoPtr<IContext> context = mContext;
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    AutoPtr<IPackageManager> manager;
+    context->GetPackageManager((IPackageManager**)&manager);
 
-//     AutoPtr<IAppWidgetManagerHelper> helper;
-//     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
-//     AutoPtr<IAppWidgetManager> widgets;
-//     helper->GetInstance(context, (IAppWidgetManager**)&widgets);
+    AutoPtr<IAppWidgetManagerHelper> helper;
+    CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
+    AutoPtr<IAppWidgetManager> widgets;
+    helper->GetInstance(context, (IAppWidgetManager**)&widgets);
 
-//     Boolean isSafeMode;
-//     manager->IsSafeMode(&isSafeMode);
+    Boolean isSafeMode;
+    manager->IsSafeMode(&isSafeMode);
 
-//     // Make sure the default workspace is loaded, if needed
-//     AutoPtr<ILauncherProvider> provider;
-//     assert(0 && "need class LauncherApplication");
-//     //mHost->mApp->GetLauncherProvider((ILauncherProvider**)&provider);
-//     provider->LoadDefaultFavoritesIfNecessary(0, FALSE);
+    // Make sure the default workspace is loaded, if needed
+    AutoPtr<ILauncherProvider> provider;
+    mHost->mApp->GetLauncherProvider((ILauncherProvider**)&provider);
+    provider->LoadDefaultFavoritesIfNecessary(0, FALSE);
 
-//     synchronized(sBgLock) {
-//         sBgWorkspaceItems->Clear();
-//         sBgAppWidgets->Clear();
-//         sBgFolders->Clear();
-//         sBgItemsIdMap->Clear();
-//         sBgDbIconCache->Clear();
+    synchronized(sBgLock) {
+        sBgWorkspaceItems->Clear();
+        sBgAppWidgets->Clear();
+        sBgFolders->Clear();
+        sBgItemsIdMap->Clear();
+        sBgDbIconCache->Clear();
 
-//         AutoPtr<IArrayList> itemsToRemove;
-//         CArrayList::New((IArrayList**)&itemsToRemove);
+        AutoPtr<IArrayList> itemsToRemove;
+        CArrayList::New((IArrayList**)&itemsToRemove);
 
-//         AutoPtr<ICursor> c;
-//         contentResolver->Query(
-//                 LauncherSettings::Favorites::CONTENT_URI, NULL,
-//                 String(NULL), NULL, String(NULL), (ICursor**)&c);
+        AutoPtr<ICursor> c;
+        contentResolver->Query(
+                LauncherSettings::Favorites::CONTENT_URI, NULL,
+                String(NULL), NULL, String(NULL), (ICursor**)&c);
 
-//         // +1 for the hotseat (it can be larger than the workspace)
-//         // Load workspace in reverse order to ensure that latest items are loaded first (and
-//         // before any earlier duplicates)
-//         AutoPtr<ArrayOf<AutoPtr<ArrayOf<AutoPtr<ArrayOf<ItemInfo*> > > > > > occupied =
-//                 ArrayOf<AutoPtr<ArrayOf<AutoPtr<ArrayOf<ItemInfo*> > > > >::Alloc(
-//                 ILauncher::SCREEN_COUNT + 1);
+        // +1 for the hotseat (it can be larger than the workspace)
+        // Load workspace in reverse order to ensure that latest items are loaded first (and
+        // before any earlier duplicates)
+        AutoPtr<ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* > > occupied =
+                ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* >::Alloc(
+                ILauncher::SCREEN_COUNT + 1);
 
-//         for (Int32 i = 0; i < ILauncher::SCREEN_COUNT + 1; i++) {
-//             AutoPtr<ArrayOf<AutoPtr<ArrayOf<ItemInfo*> > > > array2 =
-//                 ArrayOf<AutoPtr<ArrayOf<ItemInfo*> > >::Alloc(mCellCountX + 1);
-//             (*occupied)[i] = array2;
+        for (Int32 i = 0; i < ILauncher::SCREEN_COUNT + 1; i++) {
+            AutoPtr<ArrayOf<ArrayOf<ItemInfo*>* > > array2 =
+                ArrayOf<ArrayOf<ItemInfo*>* >::Alloc(mCellCountX + 1);
+            //(*occupied)[i] = array2;
+            occupied->Set(i, array2);
 
-//             for (Int32 j = 0; i < mCellCountX + 1; i++) {
+            for (Int32 j = 0; i < mCellCountX + 1; i++) {
+                AutoPtr<ArrayOf<ItemInfo*> > array3 =
+                        ArrayOf<ItemInfo*>::Alloc(mCellCountY + 1);
+                //(*array2)[j] = array3;
+                array2->Set(j, array3);
+            }
+        }
 
-//                 AutoPtr<ArrayOf<ItemInfo*> > array3 =
-//                         ArrayOf<ItemInfo*>::Alloc(mCellCountY + 1);
-//                 (*array2)[j] = array3;
-//             }
+        //try
+        {
+            Int32 idIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex), FINALLY)
+            Int32 intentIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::INTENT, &intentIndex), FINALLY)
+            Int32 titleIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::TITLE, &titleIndex), FINALLY)
+            Int32 iconTypeIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON_TYPE, &iconTypeIndex), FINALLY)
+            Int32 iconIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON, &iconIndex), FINALLY)
+            Int32 iconPackageIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON_PACKAGE, &iconPackageIndex), FINALLY)
+            Int32 iconResourceIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON_RESOURCE, &iconResourceIndex), FINALLY)
+            Int32 containerIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CONTAINER, &containerIndex), FINALLY)
+            Int32 itemTypeIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, &itemTypeIndex), FINALLY)
+            Int32 appWidgetIdIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::APPWIDGET_ID, &appWidgetIdIndex), FINALLY)
+            Int32 screenIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SCREEN, &screenIndex), FINALLY)
+            Int32 cellXIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLX, &cellXIndex), FINALLY)
+            Int32 cellYIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLY, &cellYIndex), FINALLY)
+            Int32 spanXIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SPANX, &spanXIndex), FINALLY)
+            Int32 spanYIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SPANY, &spanYIndex), FINALLY)
+            Int32 profileIdIndex;
+            FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::PROFILE_ID, &profileIdIndex), FINALLY)
+            //final int uriIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.URI);
+            //final int displayModeIndex = c.getColumnIndexOrThrow(
+            //        LauncherSettings.Favorites.DISPLAY_MODE);
 
-//         }
+            AutoPtr<IShortcutInfo> info;
+            String intentDescription;
+            AutoPtr<LauncherAppWidgetInfo> appWidgetInfo;
+            Int32 container;
+            Int64 id;
+            AutoPtr<IIntent> intent;
+            AutoPtr<IUserHandle> user;
 
-//         //try {
-//         Int32 idIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex), FINALLY)
-//         Int32 intentIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::INTENT, &intentIndex), FINALLY)
-//         Int32 titleIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::TITLE, &titleIndex), FINALLY)
-//         Int32 iconTypeIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON_TYPE, &iconTypeIndex), FINALLY)
-//         Int32 iconIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON, &iconIndex), FINALLY)
-//         Int32 iconPackageIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON_PACKAGE, &iconPackageIndex), FINALLY)
-//         Int32 iconResourceIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON_RESOURCE, &iconResourceIndex), FINALLY)
-//         Int32 containerIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CONTAINER, &containerIndex), FINALLY)
-//         Int32 itemTypeIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, &itemTypeIndex), FINALLY)
-//         Int32 appWidgetIdIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::APPWIDGET_ID, &appWidgetIdIndex), FINALLY)
-//         Int32 screenIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SCREEN, &screenIndex), FINALLY)
-//         Int32 cellXIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLX, &cellXIndex), FINALLY)
-//         Int32 cellYIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLY, &cellYIndex), FINALLY)
-//         Int32 spanXIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SPANX, &spanXIndex), FINALLY)
-//         Int32 spanYIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SPANY, &spanYIndex), FINALLY)
-//         Int32 profileIdIndex;
-//         FAIL_GOTO(c->GetColumnIndexOrThrow(LauncherSettings::Favorites::PROFILE_ID, &profileIdIndex), FINALLY)
-//         //final int uriIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.URI);
-//         //final int displayModeIndex = c.getColumnIndexOrThrow(
-//         //        LauncherSettings.Favorites.DISPLAY_MODE);
+            Boolean res;
+            while (!mStopped && (c->MoveToNext(&res), res)) {
+                //try {
+                Int32 itemType;
+                FAIL_GOTO(c->GetInt32(itemTypeIndex, &itemType), FAILED)
 
-//         AutoPtr<ShortcutInfo> info;
-//         String intentDescription;
-//         AutoPtr<LauncherAppWidgetInfo> appWidgetInfo;
-//         Int32 container;
-//         Int64 id;
-//         AutoPtr<IIntent> intent;
-//         AutoPtr<IUserHandle> user;
+                switch (itemType) {
+                case LauncherSettings::Favorites::ITEM_TYPE_APPLICATION:
+                case LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT:
+                {
+                    FAIL_GOTO(c->GetString(intentIndex, &intentDescription), FAILED)
+                    Int32 serialNumber;
+                    FAIL_GOTO(c->GetInt32(profileIdIndex, &serialNumber), FAILED)
+                    FAIL_GOTO(mHost->mUserManager->GetUserForSerialNumber(serialNumber,
+                            (IUserHandle**)&user), FAILED)
+                    // If the user doesn't exist anymore, skip.
+                    if (user == NULL) {
+                        Int64 index;
+                        FAIL_GOTO(c->GetInt64(idIndex, &index), FAILED)
+                        AutoPtr<IInteger64> obj = CoreUtils::Convert(index);
+                        FAIL_GOTO(itemsToRemove->Add(TO_IINTERFACE(obj)), FAILED)
+                        continue;
+                    }
+                    //try {
+                    AutoPtr<IIntentHelper> helper;
+                    CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
+                    if ((ECode)E_URI_SYNTAX_EXCEPTION == helper->ParseUri(intentDescription,
+                            0, (IIntent**)&intent)) {
+                        continue;
+                    }
+                    //} catch (URISyntaxException e) {
+                        //continue;
+                    //}
 
-//         Boolean res;
-//         while (!mStopped && (c->MoveToNext(&res), res)) {
-//             //try {
-//             Int32 itemType;
-//             FAIL_GOTO(c->GetInt32(itemTypeIndex, &itemType), FAILED)
+                    if (itemType == LauncherSettings::Favorites::ITEM_TYPE_APPLICATION) {
+                        FAIL_GOTO(mHost->GetShortcutInfo(manager, intent, user, context, c, iconIndex,
+                                titleIndex, mLabelCache, (IShortcutInfo**)&info), FAILED)
+                    }
+                    else {
+                        info = mHost->GetShortcutInfo(c, context, iconTypeIndex,
+                                iconPackageIndex, iconResourceIndex, iconIndex, titleIndex);
 
-//             switch (itemType) {
-//             case LauncherSettings::Favorites::ITEM_TYPE_APPLICATION:
-//             case LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT:
-//             {
-//                 FAIL_GOTO(c->GetString(intentIndex, &intentDescription), FAILED)
-//                 Int32 serialNumber;
-//                 FAIL_GOTO(c->GetInt32(profileIdIndex, &serialNumber), FAILED)
-//                 FAIL_GOTO(mHost->mUserManager->GetUserForSerialNumber(serialNumber,
-//                         (IUserHandle**)&user), FAILED)
-//                 // If the user doesn't exist anymore, skip.
-//                 if (user == NULL) {
-//                     Int64 index;
-//                     FAIL_GOTO(c->GetInt64(idIndex, &index), FAILED)
-//                     AutoPtr<IInteger64> obj = CoreUtils::Convert(index);
-//                     FAIL_GOTO(itemsToRemove->Add(TO_IINTERFACE(obj)), FAILED)
-//                     continue;
-//                 }
-//                 //try {
-//                 AutoPtr<IIntentHelper> helper;
-//                 CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-//                 if ((ECode)E_URI_SYNTAX_EXCEPTION == helper->ParseUri(intentDescription,
-//                         0, (IIntent**)&intent)) {
-//                     continue;
-//                 }
-//                 //} catch (URISyntaxException e) {
-//                     //continue;
-//                 //}
+                        // App shortcuts that used to be automatically added to Launcher
+                        // didn't always have the correct intent flags set, so do that
+                        // here
+                        String action;
+                        FAIL_GOTO(intent->GetAction(&action), FAILED)
+                        if (!action.IsNull()) {
+                            AutoPtr<ArrayOf<String> > categories;
+                            FAIL_GOTO(intent->GetCategories((ArrayOf<String>**)&categories), FAILED)
+                            if (categories != NULL && (action.Equals(IIntent::ACTION_MAIN))) {
+                                for (Int32 i = 0; i < categories->GetLength(); i++) {
+                                    if ((*categories)[i].Equals(IIntent::CATEGORY_LAUNCHER)) {
+                                        FAIL_GOTO(intent->AddFlags(
+                                            IIntent::FLAG_ACTIVITY_NEW_TASK |
+                                            IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED), FAILED)
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-//                 if (itemType == LauncherSettings::Favorites::ITEM_TYPE_APPLICATION) {
-//                         FAIL_GOTO(mHost->GetShortcutInfo(manager, intent, user, context, c, iconIndex,
-//                             titleIndex, mLabelCache, (ShortcutInfo**)&info), FAILED)
-//                 }
-//                 else {
-//                     info = mHost->GetShortcutInfo(c, context, iconTypeIndex,
-//                             iconPackageIndex, iconResourceIndex, iconIndex, titleIndex);
+                    if (info != NULL) {
+                        ShortcutInfo* _info = (ShortcutInfo*)info.Get();
+                        _info->mIntent = intent;
+                        FAIL_GOTO(c->GetInt64(idIndex, &(_info->mId)), FAILED)
+                        FAIL_GOTO(c->GetInt32(containerIndex, &container), FAILED)
+                        _info->mContainer = container;
+                        FAIL_GOTO(c->GetInt32(screenIndex, &(_info->mScreen)), FAILED)
+                        FAIL_GOTO(c->GetInt32(cellXIndex, &(_info->mCellX)), FAILED)
+                        FAIL_GOTO(c->GetInt32(cellYIndex, &(_info->mCellY)), FAILED)
+                        FAIL_GOTO(_info->mIntent->PutExtra(ItemInfo::EXTRA_PROFILE,
+                                IParcelable::Probe(_info->mUser)), FAILED)
 
-//                     // App shortcuts that used to be automatically added to Launcher
-//                     // didn't always have the correct intent flags set, so do that
-//                     // here
-//                     String action;
-//                     FAIL_GOTO(intent->GetAction(&action), FAILED)
-//                     if (!action.IsNull()) {
-//                         AutoPtr<ArrayOf<String> > categories;
-//                         FAIL_GOTO(intent->GetCategories((ArrayOf<String>**)&categories), FAILED)
-//                         Boolean res;
-//                         if (categories != NULL && (action.Equals(IIntent::ACTION_MAIN))) {
-//                             assert(0);
-//                             // if (categories->Contains(IIntent::CATEGORY_LAUNCHER)) {
-//                             //     FAIL_GOTO(intent->AddFlags(
-//                             //         Intent::FLAG_ACTIVITY_NEW_TASK |
-//                             //         Intent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED), FAILED)
-//                             // }
-//                         }
-//                     }
-//                 }
+                        // check & update map of what's occupied
+                        if (!CheckItemPlacement(occupied, (ItemInfo*)IItemInfo::Probe(info))) {
+                            break;
+                        }
 
-//                 if (info != NULL) {
-//                     info->mIntent = intent;
-//                     FAIL_GOTO(c->GetInt64(idIndex, &(info->mId)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(containerIndex, &container), FAILED)
-//                     info->mContainer = container;
-//                     FAIL_GOTO(c->GetInt32(screenIndex, &(info->mScreen)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(cellXIndex, &(info->mCellX)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(cellYIndex, &(info->mCellY)), FAILED)
-//                     FAIL_GOTO(info->mIntent->PutExtra(ItemInfo::EXTRA_PROFILE,
-//                             IParcelable::Probe(info->mUser)), FAILED)
+                        switch (container) {
+                            case LauncherSettings::Favorites::CONTAINER_DESKTOP:
+                            case LauncherSettings::Favorites::CONTAINER_HOTSEAT:
+                                FAIL_GOTO(sBgWorkspaceItems->Add(TO_IINTERFACE(info)), FAILED)
+                                break;
+                            default:
+                            {
+                                // Item is in a user folder
+                                AutoPtr<FolderInfo> folderInfo =
+                                        FindOrMakeFolder(sBgFolders, container);
+                                FAIL_GOTO(folderInfo->Add(info), FAILED)
+                                break;
+                            }
+                        }
+                        AutoPtr<IInteger64> obj = CoreUtils::Convert(_info->mId);
+                        FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj),
+                                TO_IINTERFACE(info)), FAILED)
 
-//                     // check & update map of what's occupied
-//                     assert(0);
-//                     // if (!CheckItemPlacement(occupied, (ItemInfo*)IItemInfo::Probe(info))) {
-//                     //     break;
-//                     // }
+                        // now that we've loaded everthing re-save it with the
+                        // icon in case it disappears somehow.
+                        Boolean res;
+                        FAIL_GOTO(mHost->QueueIconToBeChecked(sBgDbIconCache, info, c,
+                                iconIndex, &res), FAILED)
+                    }
+                    else {
+                        // Failed to load the shortcut, probably because the
+                        // activity manager couldn't resolve it (maybe the app
+                        // was uninstalled), or the db row was somehow screwed up.
+                        // Delete it.
+                        FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
+                        StringBuilder sb;
+                        sb += "Error loading shortcut ";
+                        sb += id;
+                        sb += ", removing it";
+                        Slogger::E(TAG, sb.ToString());
+                        AutoPtr<IUri> uri;
+                        LauncherSettings::Favorites::GetContentUri(id, FALSE, (IUri**)&uri);
+                        Int32 tmp;
+                        FAIL_GOTO(contentResolver->Delete(uri, String(NULL), NULL, &tmp), FAILED)
+                    }
+                    break;
+                }
+                case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
+                {
+                    FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
+                    AutoPtr<FolderInfo> folderInfo = FindOrMakeFolder(sBgFolders, id);
 
-//                     switch (container) {
-//                         case LauncherSettings::Favorites::CONTAINER_DESKTOP:
-//                         case LauncherSettings::Favorites::CONTAINER_HOTSEAT:
-//                             FAIL_GOTO(sBgWorkspaceItems->Add(TO_IINTERFACE(info)), FAILED)
-//                             break;
-//                         default:
-//                         {
-//                             // Item is in a user folder
-//                             AutoPtr<FolderInfo> folderInfo =
-//                                     FindOrMakeFolder(sBgFolders, container);
-//                             FAIL_GOTO(folderInfo->Add(info), FAILED)
-//                             break;
-//                         }
-//                     }
-//                     AutoPtr<IInteger64> obj = CoreUtils::Convert(info->mId);
-//                     FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj),
-//                             TO_IINTERFACE(info)), FAILED)
+                    String str;
+                    FAIL_GOTO(c->GetString(titleIndex, &str), FAILED)
+                    folderInfo->mTitle = CoreUtils::Convert(str);
+                    folderInfo->mId = id;
+                    FAIL_GOTO(c->GetInt32(containerIndex, &container), FAILED)
+                    folderInfo->mContainer = container;
+                    FAIL_GOTO(c->GetInt32(screenIndex, &(folderInfo->mScreen)), FAILED)
+                    FAIL_GOTO(c->GetInt32(cellXIndex, &(folderInfo->mCellX)), FAILED)
+                    FAIL_GOTO(c->GetInt32(cellYIndex, &(folderInfo->mCellY)), FAILED)
 
-//                     // now that we've loaded everthing re-save it with the
-//                     // icon in case it disappears somehow.
-//                     Boolean res;
-//                     FAIL_GOTO(mHost->QueueIconToBeChecked(sBgDbIconCache, info, c,
-//                             iconIndex, &res), FAILED)
-//                 }
-//                 else {
-//                     // Failed to load the shortcut, probably because the
-//                     // activity manager couldn't resolve it (maybe the app
-//                     // was uninstalled), or the db row was somehow screwed up.
-//                     // Delete it.
-//                     FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
-//                     assert(0);
-//                     //Slogger:E(TAG, "Error loading shortcut " + id + ", removing it");
-//                     AutoPtr<IUri> uri;
-//                     LauncherSettings::Favorites::GetContentUri(id, FALSE, (IUri**)&uri);
-//                     Int32 tmp;
-//                     FAIL_GOTO(contentResolver->Delete(uri, String(NULL), NULL, &tmp), FAILED)
-//                 }
-//                 break;
-//             }
-//             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
-//             {
-//                 FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
-//                 AutoPtr<FolderInfo> folderInfo = FindOrMakeFolder(sBgFolders, id);
+                    // check & update map of what's occupied
+                    if (!CheckItemPlacement(occupied, folderInfo)) {
+                        break;
+                    }
+                    switch (container) {
+                        case LauncherSettings::Favorites::CONTAINER_DESKTOP:
+                        case LauncherSettings::Favorites::CONTAINER_HOTSEAT:
+                            sBgWorkspaceItems->Add(TO_IINTERFACE(folderInfo));
+                            break;
+                    }
 
-//                 String str;
-//                 FAIL_GOTO(c->GetString(titleIndex, &str), FAILED)
-//                 folderInfo->mTitle = CoreUtils::Convert(str);
-//                 folderInfo->mId = id;
-//                 FAIL_GOTO(c->GetInt32(containerIndex, &container), FAILED)
-//                 folderInfo->mContainer = container;
-//                 FAIL_GOTO(c->GetInt32(screenIndex, &(folderInfo->mScreen)), FAILED)
-//                 FAIL_GOTO(c->GetInt32(cellXIndex, &(folderInfo->mCellX)), FAILED)
-//                 FAIL_GOTO(c->GetInt32(cellYIndex, &(folderInfo->mCellY)), FAILED)
+                    AutoPtr<IInteger64> obj = CoreUtils::Convert(folderInfo->mId);
+                    FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj),
+                            TO_IINTERFACE(folderInfo)), FAILED)
 
-//                 // check & update map of what's occupied
-//                 assert(0);
-//                 // if (!CheckItemPlacement(occupied, folderInfo)) {
-//                 //     break;
-//                 // }
-//                 switch (container) {
-//                     case LauncherSettings::Favorites::CONTAINER_DESKTOP:
-//                     case LauncherSettings::Favorites::CONTAINER_HOTSEAT:
-//                         sBgWorkspaceItems->Add(TO_IINTERFACE(folderInfo));
-//                         break;
-//                 }
+                    FAIL_GOTO(sBgFolders->Put(TO_IINTERFACE(obj),
+                            TO_IINTERFACE(folderInfo)), FAILED)
+                    break;
+                }
+                case LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET:
+                {
+                    // Read all Launcher-specific widget details
+                    Int32 appWidgetId;
+                    FAIL_GOTO(c->GetInt32(appWidgetIdIndex, &appWidgetId), FAILED)
+                    FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
 
-//                 AutoPtr<IInteger64> obj = CoreUtils::Convert(folderInfo->mId);
-//                 FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj),
-//                         TO_IINTERFACE(folderInfo)), FAILED)
+                    AutoPtr<IAppWidgetProviderInfo> provider;
+                    FAIL_GOTO(widgets->GetAppWidgetInfo(appWidgetId,
+                            (IAppWidgetProviderInfo**)&provider), FAILED)
 
-//                 FAIL_GOTO(sBgFolders->Put(TO_IINTERFACE(obj),
-//                         TO_IINTERFACE(folderInfo)), FAILED)
-//                 break;
-//             }
-//             case LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET:
-//             {
-//                 // Read all Launcher-specific widget details
-//                 Int32 appWidgetId;
-//                 FAIL_GOTO(c->GetInt32(appWidgetIdIndex, &appWidgetId), FAILED)
-//                 FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
+                    if (!isSafeMode) {
+                        if (provider == NULL) {
+                            StringBuilder log;
+                            log += "Deleting widget that isn't installed anymore: id=";
+                            log += id;
+                            log += " appWidgetId=";
+                            log += appWidgetId;
+                            Slogger::E(TAG, log.ToString());
+                            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
+                            Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
+                            AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                            itemsToRemove->Add(TO_IINTERFACE(obj));
+                        }
+                        else {
+                            AutoPtr<IComponentName> name;
+                            provider->GetProvider((IComponentName**)&name);
+                            if (name == NULL) {
+                                StringBuilder log;
+                                log += "Deleting widget that isn't installed anymore: id=";
+                                log += id;
+                                log += " appWidgetId=";
+                                log += appWidgetId;
+                                Slogger::E(TAG, log.ToString());
+                                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
+                                Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
+                                AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                                itemsToRemove->Add(TO_IINTERFACE(obj));
+                            }
+                            else {
+                                String packageName;
+                                name->GetPackageName(&packageName);
+                                if (packageName.IsNull()) {
+                                    StringBuilder log;
+                                    log +=  "Deleting widget that isn't installed anymore: id=";
+                                    log += id;
+                                    log += " appWidgetId=";
+                                    log += appWidgetId;
+                                    Slogger::E(TAG, log.ToString());
+                                    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
+                                    Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
+                                    AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                                    itemsToRemove->Add(TO_IINTERFACE(obj));
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        AutoPtr<IComponentName> name;
+                        FAIL_GOTO(provider->GetProvider((IComponentName**)&name), FAILED)
+                        appWidgetInfo = new LauncherAppWidgetInfo();
+                        appWidgetInfo->constructor(appWidgetId, name);
+                        appWidgetInfo->mId = id;
+                        FAIL_GOTO(c->GetInt32(screenIndex, &(appWidgetInfo->mScreen)), FAILED)
+                        FAIL_GOTO(c->GetInt32(cellXIndex, &(appWidgetInfo->mCellX)), FAILED)
+                        FAIL_GOTO(c->GetInt32(cellYIndex, &(appWidgetInfo->mCellY)), FAILED)
+                        FAIL_GOTO(c->GetInt32(spanXIndex, &(appWidgetInfo->mSpanX)), FAILED)
+                        FAIL_GOTO(c->GetInt32(spanYIndex, &(appWidgetInfo->mSpanY)), FAILED)
+                        AutoPtr<ArrayOf<Int32> > minSpan;
+                        Launcher::GetMinSpanForWidget(context, provider, (ArrayOf<Int32>**)&minSpan);
+                        appWidgetInfo->mMinSpanX = (*minSpan)[0];
+                        appWidgetInfo->mMinSpanY = (*minSpan)[1];
 
-//                 AutoPtr<IAppWidgetProviderInfo> provider;
-//                 FAIL_GOTO(widgets->GetAppWidgetInfo(appWidgetId,
-//                         (IAppWidgetProviderInfo**)&provider), FAILED)
+                        FAIL_GOTO(c->GetInt32(containerIndex, &container), FAILED)
+                        if (container != LauncherSettings::Favorites::CONTAINER_DESKTOP &&
+                            container != LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
+                            Slogger::E(TAG, "Widget found where container != "
+                                "CONTAINER_DESKTOP nor CONTAINER_HOTSEAT - ignoring!");
+                            continue;
+                        }
+                        Int32 tmp;
+                        FAIL_GOTO(c->GetInt32(containerIndex, &tmp), FAILED)
+                        appWidgetInfo->mContainer = tmp;
 
-//                 if (!isSafeMode) {
-//                     if (provider == NULL) {
-//                         assert(0);
-//                         // String log = "Deleting widget that isn't installed anymore: id="
-//                         //     + id + " appWidgetId=" + appWidgetId;
-//                         // Slogger::E(TAG, log);
-//                         assert(0);
-//                         //Launcher.sDumpLogs.add(log);
-//                         AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-//                         itemsToRemove->Add(TO_IINTERFACE(obj));
-//                     }
-//                     else {
-//                         AutoPtr<IComponentName> name;
-//                         provider->GetProvider((IComponentName**)&name);
-//                         if (name == NULL) {
-//                             assert(0);
-//                             // String log = "Deleting widget that isn't installed anymore: id="
-//                             //     + id + " appWidgetId=" + appWidgetId;
-//                             // Log.e(TAG, log);
-//                             assert(0);
-//                             //Launcher.sDumpLogs.add(log);
-//                             AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-//                             itemsToRemove->Add(TO_IINTERFACE(obj));
-//                         }
-//                         else {
-//                             String packageName;
-//                             name->GetPackageName(&packageName);
-//                             if (packageName.IsNull()) {
-//                                 assert(0);
-//                                 // String log = "Deleting widget that isn't installed anymore: id="
-//                                 //     + id + " appWidgetId=" + appWidgetId;
-//                                 // Log.e(TAG, log);
-//                                 assert(0);
-//                                 //Launcher.sDumpLogs.add(log);
-//                                 AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-//                                 itemsToRemove->Add(TO_IINTERFACE(obj));
-//                             }
-//                         }
-//                     }
-//                 }
-//                 else {
-//                     AutoPtr<IComponentName> name;
-//                     FAIL_GOTO(provider->GetProvider((IComponentName**)&name), FAILED)
-//                     appWidgetInfo = new LauncherAppWidgetInfo();
-//                     appWidgetInfo->constructor(appWidgetId, name);
-//                     appWidgetInfo->mId = id;
-//                     FAIL_GOTO(c->GetInt32(screenIndex, &(appWidgetInfo->mScreen)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(cellXIndex, &(appWidgetInfo->mCellX)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(cellYIndex, &(appWidgetInfo->mCellY)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(spanXIndex, &(appWidgetInfo->mSpanX)), FAILED)
-//                     FAIL_GOTO(c->GetInt32(spanYIndex, &(appWidgetInfo->mSpanY)), FAILED)
-//                     AutoPtr<ArrayOf<Int32> > minSpan;
-//                     assert(0);
-//                     //Launcher::GetMinSpanForWidget(context, provider, (ArrayOf<Int32>**)&minSpan);
-//                     appWidgetInfo->mMinSpanX = (*minSpan)[0];
-//                     appWidgetInfo->mMinSpanY = (*minSpan)[1];
+                        // check & update map of what's occupied
+                        if (!CheckItemPlacement(occupied, appWidgetInfo)) {
+                            break;
+                        }
+                        AutoPtr<IInteger64> obj = CoreUtils::Convert(appWidgetInfo->mId);
+                        FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj), TO_IINTERFACE(appWidgetInfo)), FAILED)
+                        FAIL_GOTO(sBgAppWidgets->Add(TO_IINTERFACE(appWidgetInfo)), FAILED)
+                    }
+                    break;
+                }
+            }
+        }
+        //catch (Exception e) {
+FAILED:
+            Slogger::W(TAG, "Desktop items loading interrupted:");
+            //}
+        }
+        //} finally {
+FINALLY:
+        ICloseable::Probe(c)->Close();
+        //}
+        Int32 size;
+        itemsToRemove->GetSize(&size);
+        if (size > 0) {
+            AutoPtr<IContentProviderClient> client;
+            contentResolver->AcquireContentProviderClient(
+                    LauncherSettings::Favorites::CONTENT_URI, (IContentProviderClient**)&client);
+            // Remove dead items
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                itemsToRemove->Get(i, (IInterface**)&obj);
+                AutoPtr<IInteger64> value = IInteger64::Probe(obj);
+                Int64 id;
+                value->GetValue(&id);
 
-//                     FAIL_GOTO(c->GetInt32(containerIndex, &container), FAILED)
-//                     if (container != LauncherSettings::Favorites::CONTAINER_DESKTOP &&
-//                         container != LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
-//                         Slogger::E(TAG, "Widget found where container != "
-//                             "CONTAINER_DESKTOP nor CONTAINER_HOTSEAT - ignoring!");
-//                         continue;
-//                     }
-//                     Int32 tmp;
-//                     FAIL_GOTO(c->GetInt32(containerIndex, &tmp), FAILED)
-//                     appWidgetInfo->mContainer = tmp;
+                if (DEBUG_LOADERS) {
+                    StringBuilder sb;
+                    sb += "Removed id = ";
+                    sb += id;
+                    Slogger::D(TAG, sb.ToString());
+                }
+                // Don't notify content observers
+                //try {
+                AutoPtr<IUri> uri;
+                LauncherSettings::Favorites::GetContentUri(id, FALSE, (IUri**)&uri);
+                Int32 tmp;
+                if ((ECode)E_REMOTE_EXCEPTION == client->Delete(uri, String(NULL), NULL, &tmp)) {
+                    StringBuilder sb;
+                    sb += "Could not remove id = ";
+                    sb += id;
+                    Slogger::W(TAG, sb.ToString());
+                }
+                //} catch (RemoteException e) {
+                    //Log.w(TAG, "Could not remove id = " + id);
+                //}
+            }
+        }
 
-//                     // check & update map of what's occupied
-//                     assert(0);
-//                     // if (!CheckItemPlacement(occupied, appWidgetInfo)) {
-//                     //     break;
-//                     // }
-//                     AutoPtr<IInteger64> obj = CoreUtils::Convert(appWidgetInfo->mId);
-//                     FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj), TO_IINTERFACE(appWidgetInfo)), FAILED)
-//                     FAIL_GOTO(sBgAppWidgets->Add(TO_IINTERFACE(appWidgetInfo)), FAILED)
-//                 }
-//                 break;
-//             }
-//             }
-//             //catch (Exception e) {
-// FAILED:
-//             Slogger::W(TAG, "Desktop items loading interrupted:");
-//             //}
-//         }
-//         //} finally {
-// FINALLY:
-//         c->Close();
-//         //}
-//         Int32 size;
-//         itemsToRemove->GetSize(&size);
-//         if (size > 0) {
-//             AutoPtr<IContentProviderClient> client;
-//             contentResolver->AcquireContentProviderClient(
-//                     LauncherSettings::Favorites::CONTENT_URI, (IContentProviderClient**)&client);
-//             // Remove dead items
-//             for (Int32 i = 0; i < size; i++) {
-//                 AutoPtr<IInterface> obj;
-//                 itemsToRemove->Get(i, (IInterface)&obj);
-//                 AutoPtr<IInteger64> value = IInteger64::Probe(obj);
-//                 Int64 id;
-//                 value->GetValue(&id);
-
-//                 if (DEBUG_LOADERS) {
-//                     StringBuilder sb;
-//                     sb += "Removed id = ";
-//                     sb += id;
-//                     Slogger::D(TAG, sb.ToString());
-//                 }
-//                 // Don't notify content observers
-//                 //try {
-//                 AutoPtr<IUri> uri;
-//                 LauncherSettings::Favorites::GetContentUri(id, FALSE, (IUri**)&uri);
-//                 Int32 tmp;
-//                 if ((ECode)E_REMOTE_EXCEPTION == client->Delete(uri, NULL, NULL, &tmp)) {
-//                     StringBuilder sb;
-//                     sb += "Could not remove id = ";
-//                     sb += id;
-//                     Slogger::W(TAG, sb.ToString());
-//                 }
-//                 //} catch (RemoteException e) {
-//                     //Log.w(TAG, "Could not remove id = " + id);
-//                 //}
-//             }
-//         }
-
-//         if (DEBUG_LOADERS) {
-//             SystemClock::GetUptimeMillis()
-//             StringBuilder sb;
-//             sb += "loaded workspace in ";
-//             sb += SystemClock::GetUptimeMillis() - t;
-//             sb += "ms";
-//             Slogger::D(TAG, sb.ToString());
-//             Slogger::D(TAG, "workspace layout: ");
-//             for (Int32 y = 0; y < mCellCountY; y++) {
-//                 StringBuilder line;
-//                 line += "[ ";
-//                 for (Int32 s = 0; s < ILauncher::SCREEN_COUNT; s++) {
-//                     if (s > 0) {
-//                         line += " | ";
-//                     }
-//                     for (Int32 x = 0; x < mCellCountX; x++) {
-//                         line += (((*occupied)[s][x][y] != NULL) ? "#" : ".");
-//                     }
-//                 }
-//                 line += " ]";
-//                 Slogger::D(TAG, line.ToString());
-//             }
-//         }
-//     }
+        if (DEBUG_LOADERS) {
+            StringBuilder sb;
+            sb += "loaded workspace in ";
+            sb += SystemClock::GetUptimeMillis() - t;
+            sb += "ms";
+            Slogger::D(TAG, sb.ToString());
+            Slogger::D(TAG, "workspace layout: ");
+            for (Int32 y = 0; y < mCellCountY; y++) {
+                StringBuilder line;
+                line += "[ ";
+                for (Int32 s = 0; s < ILauncher::SCREEN_COUNT; s++) {
+                    if (s > 0) {
+                        line += " | ";
+                    }
+                    for (Int32 x = 0; x < mCellCountX; x++) {
+                        line += (((*occupied)[s][x][y] != NULL) ? "#" : ".");
+                    }
+                }
+                line += " ]";
+                Slogger::D(TAG, line.ToString());
+            }
+        }
+    }
 }
 
 void LauncherModel::LoaderTask::FilterCurrentWorkspaceItems(
@@ -2029,7 +2127,7 @@ void LauncherModel::LoaderTask::BindWorkspace(
             (isLoadingSynchronously ? mDeferredBindRunnables : NULL));
 
     // Tell the workspace that we're done binding items
-    r = new MyRunnable14(this, oldCallbacks);
+    r = new MyRunnable14(this, oldCallbacks, t);
     if (isLoadingSynchronously) {
         mDeferredBindRunnables->Add(r);
     }
@@ -2041,8 +2139,7 @@ void LauncherModel::LoaderTask::BindWorkspace(
 void LauncherModel::LoaderTask::LoadAndBindAllApps()
 {
     if (DEBUG_LOADERS) {
-        assert(0);
-        //Slogger::D(TAG, "loadAndBindAllApps mAllAppsLoaded=" + mHost->mAllAppsLoaded);
+        Slogger::D(TAG, "loadAndBindAllApps mAllAppsLoaded=" + mHost->mAllAppsLoaded);
     }
     if (!mHost->mAllAppsLoaded) {
         LoadAllAppsByBatch();
@@ -2231,14 +2328,34 @@ void LauncherModel::LoaderTask::LoadAllAppsByBatch()
 
 ECode LauncherModel::LoaderTask::DumpState()
 {
-    assert(0);
-    // synchronized(sBgLock) {
-    //     Slogger::D(TAG, "mLoaderTask.mContext=" + mContext);
-    //     Slogger::D(TAG, "mLoaderTask.mIsLaunching=" + mIsLaunching);
-    //     Slogger::D(TAG, "mLoaderTask.mStopped=" + mStopped);
-    //     Slogger::D(TAG, "mLoaderTask.mLoadAndBindStepFinished=" + mLoadAndBindStepFinished);
-    //     Slogger::D(TAG, "mItems size=" + sBgWorkspaceItems.size());
-    // }
+    synchronized(sBgLock) {
+        StringBuilder sb1;
+        sb1 += "mLoaderTask.mContext=";
+        sb1 += TO_STR(mContext);
+        Slogger::D(TAG, sb1.ToString());
+
+        StringBuilder sb2;
+        sb2 += "mLoaderTask.mIsLaunching=";
+        sb2 += mIsLaunching;
+        Slogger::D(TAG, sb2.ToString());
+
+        StringBuilder sb3;
+        sb3 += "mLoaderTask.mStopped=";
+        sb3 += mStopped;
+        Slogger::D(TAG, sb3.ToString());
+
+        StringBuilder sb4;
+        sb4 += "mLoaderTask.mLoadAndBindStepFinished=";
+        sb4 += mLoadAndBindStepFinished;
+        Slogger::D(TAG, sb4.ToString());
+
+        StringBuilder sb5;
+        sb5 += "mItems size=";
+        Int32 size;
+        sBgWorkspaceItems->GetSize(&size);
+        sb5 += size;
+        Slogger::D(TAG, sb5.ToString());
+    }
     return NOERROR;
 }
 
@@ -2248,7 +2365,8 @@ const Int32 LauncherModel::PackageUpdatedTask::OP_UPDATE = 2;
 const Int32 LauncherModel::PackageUpdatedTask::OP_REMOVE = 3; // uninstlled
 const Int32 LauncherModel::PackageUpdatedTask::OP_UNAVAILABLE = 4; // external media unmounted
 
-CAR_INTERFACE_IMPL(LauncherModel::PackageUpdatedTask, Object, IRunnable);
+CAR_INTERFACE_IMPL_2(LauncherModel::PackageUpdatedTask, Object,
+        ILauncherModelPackageUpdatedTask, IRunnable);
 
 LauncherModel::PackageUpdatedTask::PackageUpdatedTask(
     /* [in] */ LauncherModel* host,
@@ -2295,10 +2413,10 @@ ECode LauncherModel::PackageUpdatedTask::Run()
                 AutoPtr<IContext> ctx;
                 context->GetApplicationContext((IContext**)&ctx);
                 AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
-                assert(0);
-                // AutoPtr<WidgetPreviewLoader::CacheDb> db;
-                // app->GetWidgetPreviewCacheDb((WidgetPreviewLoader::CacheDb**)&db);
-                // WidgetPreviewLoader->RemoveFromDb(db, (*packages)[i]);
+                AutoPtr<IWidgetPreviewLoaderCacheDb> db;
+                app->GetWidgetPreviewCacheDb((IWidgetPreviewLoaderCacheDb**)&db);
+                WidgetPreviewLoader::RemoveFromDb(
+                        (WidgetPreviewLoader::CacheDb*)db.Get(), (*packages)[i]);
             }
             break;
         }
@@ -2316,10 +2434,10 @@ ECode LauncherModel::PackageUpdatedTask::Run()
                 AutoPtr<IContext> ctx;
                 context->GetApplicationContext((IContext**)&ctx);
                 AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
-                assert(0);
-                // AutoPtr<WidgetPreviewLoader::CacheDb> db;
-                // app->GetWidgetPreviewCacheDb((WidgetPreviewLoader::CacheDb**)&db);
-                // WidgetPreviewLoader->RemoveFromDb(db, (*packages)[i]);
+                AutoPtr<IWidgetPreviewLoaderCacheDb> db;
+                app->GetWidgetPreviewCacheDb((IWidgetPreviewLoaderCacheDb**)&db);
+                WidgetPreviewLoader::RemoveFromDb(
+                        (WidgetPreviewLoader::CacheDb*)db.Get(), (*packages)[i]);
             }
             break;
         }
@@ -2377,9 +2495,10 @@ ECode LauncherModel::PackageUpdatedTask::Run()
     removedApps->IsEmpty(&res);
     if (mOp == OP_REMOVE || !res) {
         Boolean permanent = (mOp == OP_REMOVE);
+        AutoPtr<IList> list;
+        Arrays::AsList(packages, (IList**)&list);
         AutoPtr<IArrayList> removedPackageNames;
-        assert(0);
-        //CArrayList::New(Arrays::AsList(packages), (IArrayList**)&removedPackageNames);
+        CArrayList::New(ICollection::Probe(list),(IArrayList**)&removedPackageNames);
 
         AutoPtr<IRunnable> r = new MyRunnable19(mHost->mCallbacks, callbacks, removedPackageNames,
                 removedApps, permanent, mUser);
@@ -2576,8 +2695,7 @@ ECode LauncherModel::constructor(
     mIconCache = iconCache;
 
     AutoPtr<IBitmap> icon;
-    assert(0);
-    //mIconCache->GetFullResDefaultActivityIcon();
+    mIconCache->GetFullResDefaultActivityIcon();
     mDefaultIcon = Utilities::CreateIconBitmap(icon, IContext::Probe(app));
     AutoPtr<IResources> res;
     IContext::Probe(app)->GetResources((IResources**)&res);
@@ -2762,6 +2880,7 @@ ECode LauncherModel::CheckItemInfoLocked(
         Slogger::E(TAG, msg.ToString());
         return E_RUNTIME_EXCEPTION;
     }
+    return NOERROR;
 }
 
 ECode LauncherModel::CheckItemInfo(
@@ -2805,8 +2924,7 @@ ECode LauncherModel::FlushWorkerThread()
         Boolean success = FALSE;
         while (!success) {
             //try {
-            assert(0);
-            ECode ec;// = waiter->Wait();
+            ECode ec = ((Object*)IObject::Probe(waiter))->Wait();
             if (SUCCEEDED(ec)) {
                 success = TRUE;
             }
@@ -2825,28 +2943,47 @@ ECode LauncherModel::MoveItemInDatabase(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY)
 {
-    assert(0);
-    // String transaction = "DbDebug    Modify item (" + item.title + ") in db, id: " + item.id +
-    //         " (" + item.container + ", " + item.screen + ", " + item.cellX + ", " + item.cellY +
-    //         ") --> " + "(" + container + ", " + screen + ", " + cellX + ", " + cellY + ")";
-    // Launcher::sDumpLogs->Add(transaction);
-    // Slogger::D(TAG, transaction);
+    StringBuilder sb;
+    sb += "DbDebug    Modify item (";
+    sb += item->mTitle;
+    sb += ") in db, id: ";
+    sb += item->mId;
+    sb += " (";
+    sb += item->mContainer;
+    sb += ", ";
+    sb += item->mScreen;
+    sb += ", ";
+    sb += item->mCellX;
+    sb += ", ";
+    sb += item->mCellY;
+    sb += ") --> ";
+    sb += "(";
+    sb += container;
+    sb += ", ";
+    sb += screen;
+    sb += ", ";
+    sb += cellX;
+    sb += ", ";
+    sb += cellY;
+    sb += ")";
+    AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
+    Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
+    Slogger::D(TAG, sb.ToString());
     item->mContainer = container;
     item->mCellX = cellX;
     item->mCellY = cellY;
 
     // We store hotseat items in canonical form which is this orientation invariant position
     // in the hotseat
-    assert(0);
-    // if (ILauncher::Probe(context) != NULL && screen < 0 &&
-    //         container == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
-    //     AutoPtr<IHotseat> hotseat;
-    //     ILauncher::Probe(context)->GetHotseat((IHotseat**)&hotseat);
-    //     hotseat->GetOrderInHotseat(cellX, cellY, &(item->mScreen));
-    // }
-    // else {
-    //     item->mScreen = screen;
-    // }
+    if (ILauncher::Probe(context) != NULL && screen < 0 &&
+            container == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
+        AutoPtr<IHotseat> hotseat;
+        ILauncher::Probe(context)->GetHotseat((IHotseat**)&hotseat);
+        hotseat->GetOrderInHotseat(cellX, cellY, &(item->mScreen));
+    }
+    else {
+        item->mScreen = screen;
+    }
 
     AutoPtr<IContentValues> values;
     CContentValues::New((IContentValues**)&values);
@@ -2868,12 +3005,32 @@ ECode LauncherModel::ModifyItemInDatabase(
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY)
 {
-    assert(0);
-    // String transaction = "DbDebug    Modify item (" + item.title + ") in db, id: " + item.id +
-    //         " (" + item.container + ", " + item.screen + ", " + item.cellX + ", " + item.cellY +
-    //         ") --> " + "(" + container + ", " + screen + ", " + cellX + ", " + cellY + ")";
-    // Launcher::sDumpLogs->Add(transaction);
-    // Slogger::D(TAG, transaction);
+    StringBuilder sb;
+    sb += "DbDebug    Modify item (";
+    sb += item->mTitle;
+    sb += ") in db, id: ";
+    sb += item->mId;
+    sb += " (";
+    sb += item->mContainer;
+    sb += ", ";
+    sb += item->mScreen;
+    sb += ", ";
+    sb += item->mCellX;
+    sb += ", ";
+    sb += item->mCellY;
+    sb += ") --> ";
+    sb += "(";
+    sb += container;
+    sb += ", ";
+    sb += screen;
+    sb += ", ";
+    sb += cellX;
+    sb += ", ";
+    sb += cellY;
+    sb += ")";
+    AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
+    Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
+    Slogger::D(TAG, sb.ToString());
     item->mCellX = cellX;
     item->mCellY = cellY;
     item->mSpanX = spanX;
@@ -2881,16 +3038,15 @@ ECode LauncherModel::ModifyItemInDatabase(
 
     // We store hotseat items in canonical form which is this orientation invariant position
     // in the hotseat
-    assert(0);
-    // if (ILauncher::Probe(context) != NULL && screen < 0 &&
-    //         container == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
-    //     AutoPtr<IHotseat> hotseat;
-    //     ILauncher::Probe(context)->GetHotseat((IHotseat**)&hotseat);
-    //     hotseat->GetOrderInHotseat(cellX, cellY, &(item->mScreen));
-    // }
-    // else {
-    //     item->mScreen = screen;
-    // }
+    if (ILauncher::Probe(context) != NULL && screen < 0 &&
+            container == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
+        AutoPtr<IHotseat> hotseat;
+        ILauncher::Probe(context)->GetHotseat((IHotseat**)&hotseat);
+        hotseat->GetOrderInHotseat(cellX, cellY, &(item->mScreen));
+    }
+    else {
+        item->mScreen = screen;
+    }
 
     AutoPtr<IContentValues> values;
     CContentValues::New((IContentValues**)&values);
@@ -3116,8 +3272,7 @@ ECode LauncherModel::AddItemToDatabase(
     if (ILauncher::Probe(context) != NULL && screen < 0 &&
             container == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
         AutoPtr<IHotseat> hotseat;
-        assert(0);
-        //ILauncher::Probe(context)->GetHotseat((IHotseat**)&hotseat);
+        ILauncher::Probe(context)->GetHotseat((IHotseat**)&hotseat);
         hotseat->GetOrderInHotseat(cellX, cellY, &(item->mScreen));
     }
     else {
@@ -3134,14 +3289,14 @@ ECode LauncherModel::AddItemToDatabase(
     context->GetApplicationContext((IContext**)&ctx);
     AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
     AutoPtr<ILauncherProvider> provider;
-    assert(0);
-    //app->GetLauncherProvider((ILauncherProvider**)&provider);
+    app->GetLauncherProvider((ILauncherProvider**)&provider);
     provider->GenerateNewId(&(item->mId));
     values->Put(IBaseColumns::ID, item->mId);
     item->UpdateValuesWithCoordinates(values, item->mCellX, item->mCellY);
 
     //final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-    AutoPtr<IRunnable> r = new MyRunnable5(cr, notify, values, item);
+    AutoPtr<IRunnable> r = new MyRunnable5(cr, notify, values, item, container,
+            screen, cellX, cellY);
     RunOnWorkerThread(r);
     return NOERROR;
 }
@@ -3215,20 +3370,18 @@ ECode LauncherModel::DeleteFolderContentsFromDatabase(
     return NOERROR;
 }
 
-// ECode LauncherModel::Initialize(
-//     /* [in] */ ILauncherModelCallback* _callbacks)
-// {
-//     assert(0);
-//     // synchronized(mLock) {
-//     //     mCallbacks = IWeakReference::Probe(_callbacks);
-//     // }
-//     return NOERROR;
-// }
+ECode LauncherModel::Initialize(
+    /* [in] */ ILauncherModelCallbacks* _callbacks)
+{
+    synchronized(mLock) {
+        mCallbacks = IWeakReference::Probe(_callbacks);
+    }
+    return NOERROR;
+}
 
 ECode LauncherModel::GetLauncherAppsCallback(
     /* [out] */ ILauncherAppsCallback** _callbacks)
 {
-    assert(0 && "LauncherModel::Initialize");
     VALIDATE_NOT_NULL(_callbacks);
 
     *_callbacks = mLauncherAppsCallback;
@@ -3441,10 +3594,10 @@ ECode LauncherModel::IsLoadingWorkspace(
 }
 
 ECode LauncherModel::EnqueuePackageUpdated(
-    /* [in] */ PackageUpdatedTask* task)
+    /* [in] */ ILauncherModelPackageUpdatedTask* task)
 {
     Boolean res;
-    return sWorker->Post(task, &res);
+    return sWorker->Post(IRunnable::Probe(task), &res);
 }
 
 ECode LauncherModel::GetSortedWidgetsAndShortcuts(
@@ -3506,7 +3659,7 @@ ECode LauncherModel::GetShortcutInfo(
     /* [in] */ IIntent* intent,
     /* [in] */ IUserHandle* user,
     /* [in] */ IContext* context,
-    /* [out] */ ShortcutInfo** sinfo)
+    /* [out] */ IShortcutInfo** sinfo)
 {
     VALIDATE_NOT_NULL(sinfo);
 
@@ -3522,7 +3675,7 @@ ECode LauncherModel::GetShortcutInfo(
     /* [in] */ Int32 iconIndex,
     /* [in] */ Int32 titleIndex,
     /* [in] */ IHashMap* labelCache,
-    /* [out] */ ShortcutInfo** sinfo)
+    /* [out] */ IShortcutInfo** sinfo)
 {
     VALIDATE_NOT_NULL(sinfo);
 
@@ -3589,11 +3742,10 @@ ECode LauncherModel::GetShortcutInfo(
     }
 
     AutoPtr<IPackageManager> _manager;
-    assert(0);
-    //mApp->GetPackageManager((IPackageManager**)&_manager);
+    IContext::Probe(mApp)->GetPackageManager((IPackageManager**)&_manager);
     _manager->GetUserBadgedLabel(info->mTitle, user, (ICharSequence**)&(info->mContentDescription));
     info->mItemType = LauncherSettings::Favorites::ITEM_TYPE_APPLICATION;
-    *sinfo = info;
+    *sinfo = IShortcutInfo::Probe(info);
     REFCOUNT_ADD(*sinfo);
     return NOERROR;
 }
@@ -3631,7 +3783,7 @@ ECode LauncherModel::GetWorkspaceShortcutItemInfosWithIntent(
     return NOERROR;
 }
 
-AutoPtr<ShortcutInfo> LauncherModel::GetShortcutInfo(
+AutoPtr<IShortcutInfo> LauncherModel::GetShortcutInfo(
     /* [in] */ ICursor* c,
     /* [in] */ IContext* context,
     /* [in] */ Int32 iconTypeIndex,
@@ -3650,8 +3802,7 @@ AutoPtr<ShortcutInfo> LauncherModel::GetShortcutInfo(
     info->mTitle = CoreUtils::Convert(str);
 
     AutoPtr<IPackageManager> manager;
-    assert(0);
-    //mApp->GetPackageManager((IPackageManager**)&manager);
+    IContext::Probe(mApp)->GetPackageManager((IPackageManager**)&manager);
     manager->GetUserBadgedLabel(info->mTitle, info->mUser,
             (ICharSequence**)&(info->mContentDescription));
 
@@ -3716,7 +3867,7 @@ AutoPtr<ShortcutInfo> LauncherModel::GetShortcutInfo(
         }
     }
     info->SetIcon(icon);
-    return info;
+    return IShortcutInfo::Probe(info);
 }
 
 ECode LauncherModel::GetIconFromCursor(
@@ -3759,12 +3910,12 @@ ECode LauncherModel::AddShortcut(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Boolean notify,
-    /* [out] */ ShortcutInfo** sinfo)
+    /* [out] */ IShortcutInfo** sinfo)
 {
     VALIDATE_NOT_NULL(sinfo);
 
     AutoPtr<ShortcutInfo> info;
-    InfoFromShortcutIntent(context, data, NULL, (ShortcutInfo**)&info);
+    InfoFromShortcutIntent(context, data, NULL, (IShortcutInfo**)&info);
     if (info == NULL) {
         *sinfo = NULL;
         return NOERROR;
@@ -3895,7 +4046,7 @@ ECode LauncherModel::InfoFromShortcutIntent(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* data,
     /* [in] */ IBitmap* fallbackIcon,
-    /* [out] */ ShortcutInfo** sinfo)
+    /* [out] */ IShortcutInfo** sinfo)
 {
     VALIDATE_NOT_NULL(sinfo);
 
@@ -3938,30 +4089,31 @@ ECode LauncherModel::InfoFromShortcutIntent(
     else {
         AutoPtr<IParcelable> extra;
         data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_ICON_RESOURCE, (IParcelable**)&extra);
-        assert(0);
-    //     if (extra != NULL && IIntentShortcutIconResource::Probe(extra) != NULL) {
-    //         //try {
-    //         iconResource = IIntentShortcutIconResource::Probe(extra);
-    //         AutoPtr<IPackageManager> packageManager;
-    //         FAIL_GOTO(context->GetPackageManager((IPackageManager**)&packageManager), ERROR)
-    //         String packageName;
-    //         iconResource->GetPackageName(&packageName);
-    //         AutoPtr<IResources> resources;
-    //         FAIL_GOTO(packageManager->GetResourcesForApplication(packageName,
-    //                 (IResources**)&resources), ERROR)
+        if (extra != NULL && IIntentShortcutIconResource::Probe(extra) != NULL) {
+            //try {
+            {
+                iconResource = IIntentShortcutIconResource::Probe(extra);
+                AutoPtr<IPackageManager> packageManager;
+                FAIL_GOTO(context->GetPackageManager((IPackageManager**)&packageManager), ERROR)
+                String packageName;
+                iconResource->GetPackageName(&packageName);
+                AutoPtr<IResources> resources;
+                FAIL_GOTO(packageManager->GetResourcesForApplication(packageName,
+                        (IResources**)&resources), ERROR)
 
-    //         String resourceName;
-    //         iconResource->GetResourceName(&resourceName);
-    //         Int32 id;
-    //         resources->GetIdentifier(resourceName, String(NULL), String(NULL), &id);
-    //         AutoPtr<IDrawable> drawable;
-    //         drawable = mIconCache->GetFullResIcon(resources, id, user);
-    //         icon = Utilities::CreateIconBitmap(drawable, context);
-    //         //} catch (Exception e) {
-    // ERROR:
-    //             Slogger::W(TAG, "Could not load shortcut icon: " + extra);
-    //         //}
-    //     }
+                String resourceName;
+                iconResource->GetResourceName(&resourceName);
+                Int32 id;
+                resources->GetIdentifier(resourceName, String(NULL), String(NULL), &id);
+                AutoPtr<IDrawable> drawable;
+                drawable = mIconCache->GetFullResIcon(resources, id, user);
+                icon = Utilities::CreateIconBitmap(drawable, context);
+                //} catch (Exception e) {
+            }
+    ERROR:
+                Slogger::W(TAG, String("Could not load shortcut icon: ") + TO_STR(extra));
+            //}
+        }
     }
 
     AutoPtr<ShortcutInfo> info = new ShortcutInfo();
@@ -3979,8 +4131,7 @@ ECode LauncherModel::InfoFromShortcutIntent(
 
     info->mTitle = CoreUtils::Convert(name);
     AutoPtr<IPackageManager> packageManager;
-    assert(0);
-    //mApp->GetPackageManager((IPackageManager**)&packageManager);
+    IContext::Probe(mApp)->GetPackageManager((IPackageManager**)&packageManager);
     AutoPtr<ICharSequence> tmp = CoreUtils::Convert(name);
     packageManager->GetUserBadgedLabel(tmp, info->mUser,
             (ICharSequence**)&(info->mContentDescription));
@@ -3988,14 +4139,14 @@ ECode LauncherModel::InfoFromShortcutIntent(
     info->mCustomIcon = customIcon;
     info->mIconResource = iconResource;
 
-    *sinfo = info;
+    *sinfo = IShortcutInfo::Probe(info);
     REFCOUNT_ADD(*sinfo);
     return NOERROR;
 }
 
 ECode LauncherModel::QueueIconToBeChecked(
     /* [in] */ IHashMap* cache,
-    /* [in] */ ShortcutInfo* info,
+    /* [in] */ IShortcutInfo* info,
     /* [in] */ ICursor* c,
     /* [in] */ Int32 iconIndex,
     /* [out] */ Boolean* result)
@@ -4013,7 +4164,8 @@ ECode LauncherModel::QueueIconToBeChecked(
     // into the DB.  We do this so when we're loading, if the
     // package manager can't find an icon (for example because
     // the app is on SD) then we can use that instead.
-    if (!info->mCustomIcon && !info->mUsingFallbackIcon) {
+    ShortcutInfo* _info = (ShortcutInfo*)info;
+    if (!_info->mCustomIcon && !_info->mUsingFallbackIcon) {
         AutoPtr<ArrayOf<Byte> > blob;
         c->GetBlob(iconIndex, (ArrayOf<Byte>**)&blob);
         AutoPtr<IArrayOf> array = CoreUtils::Convert(blob);
@@ -4027,7 +4179,7 @@ ECode LauncherModel::QueueIconToBeChecked(
 
 ECode LauncherModel::UpdateSavedIcon(
     /* [in] */ IContext* context,
-    /* [in] */ ShortcutInfo* info,
+    /* [in] */ IShortcutInfo* info,
     /* [in] */ ArrayOf<Byte>* data)
 {
     Boolean needSave = FALSE;
@@ -4038,7 +4190,7 @@ ECode LauncherModel::UpdateSavedIcon(
         AutoPtr<IBitmap> saved;
         FAIL_GOTO(factory->DecodeByteArray(data, 0, data->GetLength(), (IBitmap**)&saved), ERROR)
         AutoPtr<IBitmap> loaded;
-        loaded = info->GetIcon(mIconCache);
+        loaded = ((ShortcutInfo*)info)->GetIcon(mIconCache);
         FAIL_GOTO(saved->SameAs(loaded, &needSave), ERROR)
         needSave = !needSave;
     }
@@ -4056,7 +4208,7 @@ ERROR:
         Slogger::D(TAG, sb.ToString());
         // This is slower than is ideal, but this only happens once
         // or when the app is updated with a new icon.
-        UpdateItemInDatabase(context, info);
+        UpdateItemInDatabase(context, (ItemInfo*)IItemInfo::Probe(info));
     }
     return NOERROR;
 }

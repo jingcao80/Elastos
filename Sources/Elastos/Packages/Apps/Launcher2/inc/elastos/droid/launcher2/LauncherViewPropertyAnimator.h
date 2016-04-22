@@ -16,6 +16,7 @@ using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::IEnumSet;
 
 namespace Elastos {
 namespace Droid {
@@ -23,6 +24,7 @@ namespace Launcher2 {
 
 class LauncherViewPropertyAnimator
     : public Animator
+    , public ILauncherViewPropertyAnimator
     , public IAnimatorListener
 {
 public:
@@ -132,18 +134,8 @@ public:
         /* [in] */ Float value);
 
 public:
-    enum Properties {
-            TRANSLATION_X,
-            TRANSLATION_Y,
-            SCALE_X,
-            SCALE_Y,
-            ROTATION_Y,
-            ALPHA,
-            START_DELAY,
-            DURATION,
-            INTERPOLATOR
-    };
-    //AutoPtr<IEnumSet> mPropertiesToSet = EnumSet.noneOf(Properties.class);
+    AutoPtr<IEnumSet> mPropertiesToSet;
+
     AutoPtr<IViewPropertyAnimator> mViewPropertyAnimator;
     AutoPtr<IView> mTarget;
 

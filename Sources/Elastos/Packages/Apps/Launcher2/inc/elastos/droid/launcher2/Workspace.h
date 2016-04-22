@@ -55,6 +55,11 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * The workspace is a wide area with a wallpaper and a finite number of pages.
+ * Each page contains a number of icons, folders or widgets the user can
+ * interact with. A workspace is meant to be used with a fixed width only.
+ */
 class Workspace
     : public SmoothPagedView
     , public IDropTarget
@@ -1074,6 +1079,7 @@ public:
         /* [in] */ Float fade);
 
 protected:
+    friend class SpringLoadedDragController;
     /**
      * Initializes various states for this workspace.
      */

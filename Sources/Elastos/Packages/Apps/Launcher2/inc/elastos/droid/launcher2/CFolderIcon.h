@@ -10,7 +10,7 @@ namespace Droid {
 namespace Launcher2 {
 
 /**
- * We use a custom tab view to process our own focus traversals.
+ * An icon that can appear on in the workspace representing an {@link UserFolder}.
  */
 CarClass(CFolderIcon)
     , public FolderIcon

@@ -1,8 +1,13 @@
 
 #include "elastos/droid/launcher2/SpringLoadedDragController.h"
 #include "elastos/droid/launcher2/Alarm.h"
+#include "elastos/droid/launcher2/Workspace.h"
 #include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.View.h"
 #include "R.h"
+
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
 
 namespace Elastos {
 namespace Droid {
@@ -44,24 +49,18 @@ ECode SpringLoadedDragController::OnAlarm(
     if (mScreen != NULL) {
         // Snap to the screen that we are hovering over now
         AutoPtr<IWorkspace> w;
-        assert(0 && "need class mLauncher");
-        //mLauncher->GetWorkspace((IWorkspace**)&w);
+        mLauncher->GetWorkspace((IWorkspace**)&w);
         Int32 page;
-        assert(0 && "need class IWorkspace");
-        //w->IndexOfChild(mScreen, &page);
+        IViewGroup::Probe(w)->IndexOfChild(IView::Probe(mScreen), &page);
         Int32 tmp;
-        assert(0 && "need class IWorkspace");
-        //w->GetCurrentPage(&tmp);
+        IPagedView::Probe(w)->GetCurrentPage(&tmp);
         if (page != tmp) {
-            assert(0 && "need class IWorkspace");
-            //return w->SnapToPage(page);
-            return NOERROR;
+            return ((Workspace*)w.Get())->SnapToPage(page);
         }
     }
     else {
         AutoPtr<IDragController> controller;
-        assert(0 && "need class mLauncher");
-        //mLauncher->GetDragController((IDragController**)&controller);
+        mLauncher->GetDragController((IDragController**)&controller);
         return controller->CancelDrag();
     }
     return NOERROR;

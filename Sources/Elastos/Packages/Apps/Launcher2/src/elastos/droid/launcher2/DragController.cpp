@@ -59,10 +59,8 @@ ECode DragController::ScrollRunnable::Run()
         Boolean tmp;
         mHost->mDragScroller->OnExitScrollArea(&tmp);
         AutoPtr<IDragLayer> dragLayer;
-        assert(0 && "need class mLauncher");
-        //mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-        assert(0 && "need class mLauncher");
-        //dragLayer->OnExitScrollArea();
+        mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        dragLayer->OnExitScrollArea();
 
         Boolean res;
         mHost->IsDragging(&res);
@@ -120,8 +118,7 @@ ECode DragController::constructor(
     /* [in] */ ILauncher* launcher)
 {
     AutoPtr<IResources> r;
-    assert(0 && "need class mLauncher");
-    //launcher->GetResources((IResources**)&r);
+    IView::Probe(launcher)->GetResources((IResources**)&r);
     mLauncher = launcher;
     CHandler::New((IHandler**)&mHandler);
     r->GetDimensionPixelSize(
@@ -133,8 +130,7 @@ ECode DragController::constructor(
     helper->Obtain((IVelocityTracker**)&mVelocityTracker);
 
     AutoPtr<IInterface> obj;
-    assert(0 && "need class mLauncher");
-    //launcher->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
+    IContext::Probe(launcher)->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
     mVibrator = IVibrator::Probe(obj);
 
     AutoPtr<IDisplayMetrics> metrics;
@@ -170,9 +166,9 @@ ECode DragController::StartDrag(
 {
     AutoPtr<ArrayOf<Int32> > loc = mCoordinatesTemp;
     AutoPtr<IDragLayer> dragLayer;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-    //dragLayer->GetLocationInDragLayer(v, loc);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    Float tmp;
+    dragLayer->GetLocationInDragLayer(v, loc, &tmp);
     Int32 viewExtraPaddingLeft;
     Int32 viewExtraPaddingTop;
     if (extraPadding != NULL) {
@@ -224,8 +220,7 @@ ECode DragController::StartDrag(
     // Hide soft keyboard, if visible
     if (mInputMethodManager == NULL) {
         AutoPtr<IInterface> obj;
-        assert(0 && "need class mLauncher");
-        //mLauncher->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
+        IContext::Probe(mLauncher)->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
         mInputMethodManager = IInputMethodManager::Probe(obj);
     }
     Boolean res;
@@ -467,9 +462,9 @@ AutoPtr<ArrayOf<Int32> > DragController::GetClampedDragLayerPos(
     /* [in] */ Float y)
 {
     AutoPtr<IDragLayer> dragLayer;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-    //dragLayer->GetLocalVisibleRect(mDragLayerRect);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    Boolean tmp;
+    IView::Probe(dragLayer)->GetLocalVisibleRect(mDragLayerRect, &tmp);
     Int32 left;
     mDragLayerRect->GetLeft(&left);
     Int32 right;
@@ -600,9 +595,8 @@ void DragController::ClearScrollRunnable()
         Boolean res;
         mDragScroller->OnExitScrollArea(&res);
         AutoPtr<IDragLayer> dragLayer;
-        assert(0 && "need class dragLayer");
-        //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-        //dragLayer->OnExitScrollArea();
+        mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        dragLayer->OnExitScrollArea();
     }
 }
 
@@ -675,12 +669,10 @@ void DragController::CheckScrollState(
     viewConfig->GetScaledWindowTouchSlop(&slop);
     Int32 delay = mDistanceSinceScroll < slop ? RESCROLL_DELAY : SCROLL_DELAY;
     AutoPtr<IDragLayer> dragLayer;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
 
     Int32 direction;
-    assert(0 && "need class dragLayer");
-    //dragLayer->GetLayoutDirection(&direction);
+    IView::Probe(dragLayer)->GetLayoutDirection(&direction);
     Boolean isRtl = (direction == IView::LAYOUT_DIRECTION_RTL);
     Int32 forwardDirection = isRtl ? SCROLL_RIGHT : SCROLL_LEFT;
     Int32 backwardsDirection = isRtl ? SCROLL_LEFT : SCROLL_RIGHT;
@@ -692,8 +684,7 @@ void DragController::CheckScrollState(
             Boolean res;
             mDragScroller->OnEnterScrollArea(x, y, forwardDirection, &res);
             if (res) {
-                assert(0 && "need class dragLayer");
-                //dragLayer->OnEnterScrollArea(forwardDirection);
+                dragLayer->OnEnterScrollArea(forwardDirection);
                 mScrollRunnable->SetDirection(forwardDirection);
                 Boolean tmp;
                 mHandler->PostDelayed(mScrollRunnable, delay, &tmp);
@@ -706,8 +697,7 @@ void DragController::CheckScrollState(
             Boolean res;
             mDragScroller->OnEnterScrollArea(x, y, backwardsDirection, &res);
             if (res) {
-                assert(0 && "need class dragLayer");
-                //dragLayer->OnEnterScrollArea(backwardsDirection);
+                dragLayer->OnEnterScrollArea(backwardsDirection);
                 mScrollRunnable->SetDirection(backwardsDirection);
                 Boolean tmp;
                 mHandler->PostDelayed(mScrollRunnable, delay, &tmp);
@@ -892,8 +882,7 @@ void DragController::Drop(
             accepted = TRUE;
         }
     }
-    assert(0 && "dropTarget is not a view");
-    //mDragObject->mDragSource->OnDropCompleted((View) dropTarget, mDragObject, FALSE, accepted);
+    mDragObject->mDragSource->OnDropCompleted(IView::Probe(dropTarget), mDragObject, FALSE, accepted);
 }
 
 AutoPtr<IDropTarget> DragController::FindDropTarget(

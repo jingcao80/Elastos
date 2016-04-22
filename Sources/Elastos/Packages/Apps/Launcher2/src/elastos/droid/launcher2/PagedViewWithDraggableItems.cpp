@@ -128,23 +128,20 @@ ECode PagedViewWithDraggableItems::OnLongClick(
         return NOERROR;
     }
     // When we have exited all apps or are in transition, disregard long clicks
-    assert(0);
-    //mLauncher->IsAllAppsVisible(&res);
+    mLauncher->IsAllAppsVisible(&res);
     if (!res) {
         *result = FALSE;
         return NOERROR;
     }
     AutoPtr<IWorkspace> ws;
-    assert(0);
-    //mLauncher->GetWorkspace((IWorkspace**)&ws);
-    //ws->IsSwitchingState(&res);
+    mLauncher->GetWorkspace((IWorkspace**)&ws);
+    ws->IsSwitchingState(&res);
     if (res) {
         *result = FALSE;
         return NOERROR;
     }
     // Return if global dragging is not enabled
-    assert(0);
-    //mLauncher->IsDraggingEnabled(&res);
+    mLauncher->IsDraggingEnabled(&res);
     if (!res) {
         *result = FALSE;
         return NOERROR;

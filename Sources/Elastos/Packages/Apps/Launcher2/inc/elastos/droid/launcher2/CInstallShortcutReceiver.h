@@ -9,9 +9,6 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-/**
- * We use a custom tab view to process our own focus traversals.
- */
 CarClass(CInstallShortcutReceiver)
     , public InstallShortcutReceiver
 {

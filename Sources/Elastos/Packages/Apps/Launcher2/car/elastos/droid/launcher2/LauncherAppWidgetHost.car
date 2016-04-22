@@ -4,9 +4,13 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    /*
-    * @invoke interface IAppWidgetHost
-    */
+    /**
+     * Specific {@link AppWidgetHost} that creates our {@link LauncherAppWidgetHostView}
+     * which correctly captures all long-press events. This ensures that users can
+     * always pick up and move widgets.
+     *
+     * @invoke interface IAppWidgetHost
+     */
     interface ILauncherAppWidgetHost {
         OnProvidersChanged();
     }

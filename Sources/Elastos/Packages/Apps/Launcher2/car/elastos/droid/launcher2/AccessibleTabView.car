@@ -5,6 +5,8 @@ module
     namespace Launcher2 {
 
     /**
+     * We use a custom tab view to process our own focus traversals.
+     *
      * @Involve
      * interface Elastos.Droid.View.IView
      *

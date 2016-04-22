@@ -68,8 +68,8 @@ public:
     CARAPI GetModel(
         /* [out] */ ILauncherModel** mode);
 
-    //CARAPI GetWidgetPreviewCacheDb(
-    //    /* [out] */ IWidgetPreviewLoaderCacheDb** db);
+    CARAPI GetWidgetPreviewCacheDb(
+        /* [out] */ IWidgetPreviewLoaderCacheDb** db);
 
     CARAPI SetLauncherProvider(
         /* [in] */ ILauncherProvider* provider);
@@ -99,7 +99,7 @@ protected:
 private:
     AutoPtr<LauncherModel> mModel;
     AutoPtr<IconCache> mIconCache;
-    //AutoPtr<IWidgetPreviewLoaderCacheDb> mWidgetPreviewCacheDb;
+    AutoPtr<IWidgetPreviewLoaderCacheDb> mWidgetPreviewCacheDb;
     static Boolean sIsScreenLarge;
     static Float sScreenDensity;
     static Int32 sLongPressTimeout;

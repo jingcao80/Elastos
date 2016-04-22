@@ -9,7 +9,11 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    /*
+    /**
+     * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
+     * because we want to make the bubble taller than the text and TextView's clip is
+     * too aggressive.
+     *
      * @invoke
      * interface Elastos.Droid.View.IView
      * interface Elastos.Droid.View.OnPreDrawListener

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/ShortcutAndWidgetContainer.h"
+#include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
@@ -69,15 +70,15 @@ ECode ShortcutAndWidgetContainer::GetChildAt(
         ViewGroup::GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        assert(0 && "need class CellLayout");
-        // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
+        AutoPtr<CellLayout::LayoutParams> lp =
+                (CellLayout::LayoutParams*)IObject::Probe(params);
 
-        // if ((lp->mCellX <= x) && (x < lp->mCellX + lp->mCellHSpan) &&
-        //         (lp->mCellY <= y) && (y < lp->mCellY + lp->mCellVSpan)) {
-        //     *view = child;
-        //     REFCOUNT_ADD(*view);
-        //     return NOERROR;
-        // }
+        if ((lp->mCellX <= x) && (x < lp->mCellX + lp->mCellHSpan) &&
+                (lp->mCellY <= y) && (y < lp->mCellY + lp->mCellVSpan)) {
+            *view = child;
+            REFCOUNT_ADD(*view);
+            return NOERROR;
+        }
     }
     *view = NULL;
     return NOERROR;
@@ -100,10 +101,9 @@ ECode ShortcutAndWidgetContainer::DispatchDraw(
             ViewGroup::GetChildAt(i, (IView**)&child);
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            assert(0 && "need class CellLayout");
-            // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
-
-            // canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
+            AutoPtr<CellLayout::LayoutParams> lp =
+                    (CellLayout::LayoutParams*)IObject::Probe(params);
+            canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
         }
     }
     return ViewGroup::DispatchDraw(canvas);
@@ -125,12 +125,14 @@ void ShortcutAndWidgetContainer::OnMeasure(
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
 }
 
-// ECode ShortcutAndWidgetContainer::SetupLp(
-//     /* [in] */ CellLayout::LayoutParams* lp)
-// {
-//     return lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap, InvertLayoutHorizontally(),
-//             mCountX);
-// }
+ECode ShortcutAndWidgetContainer::SetupLp(
+    /* [in] */ ICellLayoutLayoutParams* lp)
+{
+    ((CellLayout::LayoutParams*)lp)->Setup(mCellWidth, mCellHeight,
+            mWidthGap, mHeightGap, InvertLayoutHorizontally(),
+            mCountX);
+    return NOERROR;
+}
 
 ECode ShortcutAndWidgetContainer::SetInvertIfRtl(
     /* [in] */ Boolean invert)
@@ -146,16 +148,15 @@ ECode ShortcutAndWidgetContainer::MeasureChild(
     const Int32 cellHeight = mCellHeight;
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    assert(0 && "need class CellLayout");
-    // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
-
-    // lp->Setup(cellWidth, cellHeight, mWidthGap, mHeightGap, InvertLayoutHorizontally(), mCountX);
-    // Int32 childWidthMeasureSpec;
-    // MeasureSpec::MakeMeasureSpec(lp->mWidth, MeasureSpec::EXACTLY, &childWidthMeasureSpec);
-    // Int32 childheightMeasureSpec;
-    // MeasureSpec->MakeMeasureSpec(lp->mHeight, MeasureSpec::EXACTLY, &childheightMeasureSpec);
-    // return child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
-    return NOERROR;
+    AutoPtr<CellLayout::LayoutParams> lp =
+            (CellLayout::LayoutParams*)IObject::Probe(params);
+    lp->Setup(cellWidth, cellHeight, mWidthGap, mHeightGap,
+            InvertLayoutHorizontally(), mCountX);
+    Int32 childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(
+            lp->mWidth, MeasureSpec::EXACTLY);
+    Int32 childheightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(
+            lp->mHeight, MeasureSpec::EXACTLY);
+    return child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
 }
 
 Boolean ShortcutAndWidgetContainer::InvertLayoutHorizontally()
@@ -193,25 +194,23 @@ ECode ShortcutAndWidgetContainer::OnLayout(
         if (visibility != GONE) {
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            assert(0 && "need class CellLayout");
-            // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
+            AutoPtr<CellLayout::LayoutParams> lp =
+                    (CellLayout::LayoutParams*)IObject::Probe(params);
+            Int32 childLeft = lp->mX;
+            Int32 childTop = lp->mY;
+            child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
+            if (lp->mDropped) {
+                lp->mDropped = FALSE;
 
-            // Int32 childLeft = lp->mX;
-            // Int32 childTop = lp->mY;
-            // child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
-
-            // if (lp->mDropped) {
-            //     lp->mDropped = FALSE;
-
-            //     AutoPtr<ArrayOf<Int32> > cellXY = mTmpCellXY;
-            //     GetLocationOnScreen(cellXY);
-            //     AutoPTR<IBinder> token;
-            //     getWindowToken((IBinder**)&token);
-            //     mWallpaperManager->SendWallpaperCommand(token,
-            //             WallpaperManager::COMMAND_DROP,
-            //             (*cellXY)[0] + childLeft + lp->mWidth / 2,
-            //             (*cellXY)[1] + childTop + lp->mHeight / 2, 0, NULL);
-            // }
+                AutoPtr<ArrayOf<Int32> > cellXY = mTmpCellXY;
+                GetLocationOnScreen(cellXY);
+                AutoPtr<IBinder> token;
+                GetWindowToken((IBinder**)&token);
+                mWallpaperManager->SendWallpaperCommand(token,
+                        IWallpaperManager::COMMAND_DROP,
+                        (*cellXY)[0] + childLeft + lp->mWidth / 2,
+                        (*cellXY)[1] + childTop + lp->mHeight / 2, 0, NULL);
+            }
         }
     }
     return NOERROR;

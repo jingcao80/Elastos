@@ -42,6 +42,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * An icon that can appear on in the workspace representing an {@link UserFolder}.
+ */
 class FolderIcon
     : public LinearLayout
     , public IFolderListener

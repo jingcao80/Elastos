@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/WidgetPreviewLoader.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Service.h"
@@ -105,8 +106,7 @@ ECode LauncherApplication::OnCreate()
 
 ECode LauncherApplication::RecreateWidgetPreviewDb()
 {
-    assert(0);
-    //mWidgetPreviewCacheDb = new WidgetPreviewLoader::CacheDb(this);
+    mWidgetPreviewCacheDb = new WidgetPreviewLoader::CacheDb(IContext::Probe(this));
     return NOERROR;
 }
 
@@ -127,8 +127,7 @@ ECode LauncherApplication::SetLauncher(
 {
     VALIDATE_NOT_NULL(mode);
 
-    assert(0);
-    //mModel->Initialize(launcher);
+    mModel->Initialize(ILauncherModelCallbacks::Probe(launcher));
     *mode = ILauncherModel::Probe(mModel);
     REFCOUNT_ADD(*mode);
     return NOERROR;
@@ -154,15 +153,15 @@ ECode LauncherApplication::GetModel(
     return NOERROR;
 }
 
-// ECode LauncherApplication::GetWidgetPreviewCacheDb(
-//     /* [out] */ IWidgetPreviewLoaderCacheDb** db)
-// {
-//     VALIDATE_NOT_NULL(db);
+ECode LauncherApplication::GetWidgetPreviewCacheDb(
+    /* [out] */ IWidgetPreviewLoaderCacheDb** db)
+{
+    VALIDATE_NOT_NULL(db);
 
-//     *db = mWidgetPreviewCacheDb;
-//     REFCOUNT_ADD(*db);
-//     return NOERROR;
-// }
+    *db = mWidgetPreviewCacheDb;
+    REFCOUNT_ADD(*db);
+    return NOERROR;
+}
 
 ECode LauncherApplication::SetLauncherProvider(
     /* [in] */ ILauncherProvider* provider)

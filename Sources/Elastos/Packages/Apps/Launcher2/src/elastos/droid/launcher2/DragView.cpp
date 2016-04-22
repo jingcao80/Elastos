@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/DragView.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/launcher2/DragLayer.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Service.h"
@@ -133,8 +134,7 @@ ECode DragView::constructor(
 
 {
     View::constructor(IContext::Probe(launcher));
-    assert(0 && "need interface Ilauncher");
-    //launcher->GetDragLayer((IDragLayer**)&mDragLayer);
+    launcher->GetDragLayer((IDragLayer**)&mDragLayer);
     mInitialScale = initialScale;
 
     AutoPtr<IResources> res;
@@ -392,12 +392,12 @@ ECode DragView::Show(
     IViewGroup::Probe(mDragLayer)->AddView(this);
 
     // Start the pick-up animation
-    assert(0 && "need class DragLayer");
-    // AutoPtr<DragLayer::LayoutParams> lp = new DragLayer::LayoutParams(0, 0);
-    // mBitmap->GetWidth(&(lp->mWidth));
-    // mBitmap->GetHeight(&(lp->mHeight));
-    // lp->mCustomPosition = TRUE;
-    // SetLayoutParams(lp);
+    AutoPtr<DragLayer::LayoutParams> lp = new DragLayer::LayoutParams();
+    lp->constructor(0, 0);
+    mBitmap->GetWidth(&(lp->mWidth));
+    mBitmap->GetHeight(&(lp->mHeight));
+    lp->mCustomPosition = TRUE;
+    SetLayoutParams(lp);
     SetTranslationX(touchX - mRegistrationX);
     SetTranslationY(touchY - mRegistrationY);
     // Post the animation to skip other expensive work happening on the first frame

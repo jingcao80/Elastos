@@ -17,6 +17,10 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * An icon on a PagedView, specifically for items in the launcher's paged view (with compound
+ * drawables on the top).
+ */
 CarClass(CPagedViewIcon)
     , public TextView
     , public IPagedViewIcon

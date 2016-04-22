@@ -26,7 +26,7 @@ ECode FolderInfo::constructor()
 }
 
 ECode FolderInfo::Add(
-    /* [in] */ ShortcutInfo* item)
+    /* [in] */ IShortcutInfo* item)
 {
     mContents->Add(TO_IINTERFACE(item));
     Int32 size;
@@ -41,7 +41,7 @@ ECode FolderInfo::Add(
 }
 
 ECode FolderInfo::Remove(
-    /* [in] */ ShortcutInfo* item)
+    /* [in] */ IShortcutInfo* item)
 {
     mContents->Remove(TO_IINTERFACE(item));
     Int32 size;

@@ -63,19 +63,18 @@ ECode HandleView::FocusSearch(
     AutoPtr<IView> newFocus;
     ImageView::FocusSearch(direction, (IView**)&newFocus);
     Boolean res;
-    assert(0 && "need class Launcher");
-    //mLauncher->IsAllAppsVisible(&res);
+    mLauncher->IsAllAppsVisible(&res);
     if (newFocus == NULL && !res) {
         AutoPtr<IWorkspace> workspace;
-        assert(0 && "need class Workspace");
-        // mLauncher->GetWorkspace((IWorkspace**)&workspace);
-        // workspace->DispatchUnhandledMove(NULL, direction);
-        // if (mOrientation == ORIENTATION_HORIZONTAL && direction == FOCUS_DOWN) {
-        //     *view = IView::Probe(this);
-        // }
-        // else {
-        //     *view = IView::Probe(workspace);
-        // }
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        Boolean tmp;
+        IView::Probe(workspace)->DispatchUnhandledMove(NULL, direction, &tmp);
+        if (mOrientation == ORIENTATION_HORIZONTAL && direction == FOCUS_DOWN) {
+            *view = IView::Probe(this);
+        }
+        else {
+            *view = IView::Probe(workspace);
+        }
         REFCOUNT_ADD(*view);
         return NOERROR;
     }
@@ -93,8 +92,7 @@ ECode HandleView::OnTouchEvent(
     Int32 action;
     ev->GetAction(&action);
     Boolean res;
-    assert(0 && "need class Launcher");
-    //mLauncher->IsAllAppsVisible(&res)
+    mLauncher->IsAllAppsVisible(&res);
     if (action == IMotionEvent::ACTION_DOWN && res) {
         *result = FALSE;
         return NOERROR;

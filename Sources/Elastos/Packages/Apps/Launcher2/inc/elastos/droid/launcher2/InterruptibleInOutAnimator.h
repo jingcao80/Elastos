@@ -18,6 +18,13 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * A convenience class for two-way animations, e.g. a fadeIn/fadeOut animation.
+ * With a regular ValueAnimator, if you call reverse to show the 'out' animation, you'll get
+ * a frame-by-frame mirror of the 'in' animation -- i.e., the interpolated values will
+ * be exactly reversed. Using this class, both the 'in' and the 'out' animation use the
+ * interpolator in the same direction.
+ */
 class InterruptibleInOutAnimator
     : public Object
 {

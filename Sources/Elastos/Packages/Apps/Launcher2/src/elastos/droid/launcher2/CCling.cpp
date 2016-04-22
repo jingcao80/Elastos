@@ -1,10 +1,14 @@
 
 #include "elastos/droid/launcher2/CCling.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include "R.h"
 
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::IXfermode;
@@ -208,26 +212,24 @@ ECode CCling::OnTouchEvent(
             mDrawIdentifier.Equals(FOLDER_LANDSCAPE) ||
             mDrawIdentifier.Equals(FOLDER_LARGE)) {
         AutoPtr<IWorkspace> workspace;
-        assert(0 && "need class Launcher");
-        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
         AutoPtr<IFolder> f;
-        assert(0 && "need class workspace");
-        //workspace->GetOpenFolder((IFolder**)&f);
-        // if (f != NULL) {
-        //     AutoPtr<IRect> r;
-        //     CRect::New((IRect**)&r);
-        //     f->GetHitRect(r);
-        //     Float x;
-        //     event->GetX(&x);
-        //     Float y;
-        //     event->GetY(&y);
-        //     Boolean tmp;
-        //     r->Contains((Int32)x, (Int32)y, &tmp)
-        //     if (tmp) {
-        //         *res = FALSE;
-        //         return NOERROR;
-        //     }
-        // }
+        workspace->GetOpenFolder((IFolder**)&f);
+        if (f != NULL) {
+            AutoPtr<IRect> r;
+            CRect::New((IRect**)&r);
+            IView::Probe(f)->GetHitRect(r);
+            Float x;
+            event->GetX(&x);
+            Float y;
+            event->GetY(&y);
+            Boolean tmp;
+            r->Contains((Int32)x, (Int32)y, &tmp);
+            if (tmp) {
+                *res = FALSE;
+                return NOERROR;
+            }
+        }
     }
     *res = TRUE;
     return NOERROR;
@@ -241,8 +243,7 @@ ECode CCling::DispatchDraw(
         CDisplayMetrics::New((IDisplayMetrics**)&metrics);
 
         AutoPtr<IWindowManager> manager;
-        assert(0 && "need class Launcher");
-        //mLauncher->GetWindowManager((IWindowManager**)&manager);
+        IActivity::Probe(mLauncher)->GetWindowManager((IWindowManager**)&manager);
         AutoPtr<IDisplay> display;
         manager->GetDefaultDisplay((IDisplay**)&display);
         display->GetMetrics(metrics);
@@ -387,8 +388,7 @@ AutoPtr<ArrayOf<Int32> > CCling::GetPunchThroughPositions()
     }
     else if (mDrawIdentifier.Equals(WORKSPACE_LARGE)) {
         Float scale;
-        assert(0 && "need class LauncherApplication");
-        //LauncherApplication::GetScreenDensity(&scale);
+        LauncherApplication::GetScreenDensity(&scale);
         const Int32 cornerXOffset = (Int32) (scale * 15);
         const Int32 cornerYOffset = (Int32) (scale * 10);
         AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);

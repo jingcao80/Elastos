@@ -38,7 +38,7 @@ public:
      * @param item
      */
     CARAPI Add(
-        /* [in] */ ShortcutInfo* item);
+        /* [in] */ IShortcutInfo* item);
 
     /**
      * Remove an app or shortcut. Does not change the DB.
@@ -46,7 +46,7 @@ public:
      * @param item
      */
     CARAPI Remove(
-        /* [in] */ ShortcutInfo* item);
+        /* [in] */ IShortcutInfo* item);
 
     CARAPI SetTitle(
         /* [in] */ ICharSequence* title);

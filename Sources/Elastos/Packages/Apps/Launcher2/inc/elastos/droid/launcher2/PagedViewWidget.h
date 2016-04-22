@@ -27,6 +27,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * The linear layout used strictly for the widget/wallpaper tab of the customization tray
+ */
 class PagedViewWidget
     : public LinearLayout
     , public IPagedViewWidget

@@ -33,12 +33,10 @@ DragEnforcer::DragEnforcer()
 ECode DragEnforcer::constructor(
     /* [in] */ IContext* context)
 {
-    assert(0 && "need class Launcher");
-    // AutoPtr<ILauncher> launcher = ILauncher::Probe(context);
-    // AutoPtr<IDragController> controller;
-    // launcher->GetDragController((IDragController**)&controller);
-    // return controller->AddDragListener(this);
-    return NOERROR;
+    AutoPtr<ILauncher> launcher = ILauncher::Probe(context);
+    AutoPtr<IDragController> controller;
+    launcher->GetDragController((IDragController**)&controller);
+    return controller->AddDragListener(IDragControllerDragListener::Probe(this));
 }
 
 ECode DragEnforcer::OnDragEnter()

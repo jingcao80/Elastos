@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/BubbleTextView.h"
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
 #include "elastos/droid/R.h"
 #include "R.h"
@@ -142,9 +143,8 @@ ECode BubbleTextView::SetTag(
     /* [in] */ IInterface* tag)
 {
     if (tag != NULL) {
-        AutoPtr<IItemInfo> info = IItemInfo::Probe(tag);
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::CheckItemInfo(info);
+        AutoPtr<ItemInfo> info = (ItemInfo*)IItemInfo::Probe(tag);
+        LauncherModel::CheckItemInfo(info);
     }
     return TextView::SetTag(tag);
 }
@@ -350,10 +350,9 @@ ECode BubbleTextView::SetCellLayoutPressedOrFocusedIcon()
         if (parent != NULL) {
             AutoPtr<IViewParent> tmp;
             IView::Probe(parent)->GetParent((IViewParent**)&tmp);
-            assert(0 && "need class CellLayout");
-            // AutoPtr<ICellLayout> layout = ICellLayout::Probe(tmp);
-            // layout->SetPressedOrFocusedIcon((mPressedOrFocusedBackground != NULL) ?
-            //         this : NULL);
+            AutoPtr<ICellLayout> layout = ICellLayout::Probe(tmp);
+            layout->SetPressedOrFocusedIcon((mPressedOrFocusedBackground != NULL) ?
+                    this : NULL);
         }
     }
     return NOERROR;

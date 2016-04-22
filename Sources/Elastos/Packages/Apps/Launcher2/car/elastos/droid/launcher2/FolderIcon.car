@@ -45,6 +45,8 @@ module
     }
 
     /**
+     * An icon that can appear on in the workspace representing an {@link UserFolder}.
+     *
      * @Involve
      * extends Elastos.Droid.View.IView
      * extends Elastos.Droid.View.IViewGroup

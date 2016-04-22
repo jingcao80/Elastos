@@ -51,8 +51,7 @@ ECode CFolderEditText::OnKeyPreIme(
     Int32 code;
     event->GetKeyCode(&code);
     if (code == IKeyEvent::KEYCODE_BACK) {
-        assert(0 && "need class Folder");
-        //mFolder->DoneEditingFolderName(TRUE);
+        mFolder->DoneEditingFolderName(TRUE);
     }
     return EditText::OnKeyPreIme(keyCode, event, result);
 }

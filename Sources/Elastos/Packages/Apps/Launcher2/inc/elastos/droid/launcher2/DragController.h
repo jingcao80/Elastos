@@ -34,6 +34,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * Class for initiating a drag within a view or across multiple views.
+ */
 class DragController
     : public Object
     , public IDragController

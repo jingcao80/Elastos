@@ -2,6 +2,8 @@ module
 {
     using interface Elastos.Droid.View.IView;
 
+    interface Elastos.Droid.Launcher2.IPagedViewCellLayoutChildren;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -9,8 +11,112 @@ module
     interface IPagedViewCellLayoutLayoutParams {
     }
 
+    /**
+     * An abstraction of the original CellLayout which supports laying out items
+     * which span multiple cells into a grid-like layout.  Also supports dimming
+     * to give a preview of its contents.
+     */
+    [local]
     interface IPagedViewCellLayout {
-        //~~~~~~~~~
+        GetCellWidth(
+            [out] Int32* width);
+
+        GetCellHeight(
+            [out] Int32* height);
+
+        AddViewToCellLayout(
+            [in] IView* child,
+            [in] Int32 index,
+            [in] Int32 childId,
+            [in] IPagedViewCellLayoutLayoutParams* params,
+            [out] Boolean* result);
+
+        /**
+         * Clears all the key listeners for the individual icons.
+         */
+        ResetChildrenOnKeyListeners();
+
+        GetChildrenLayout(
+            [out] IPagedViewCellLayoutChildren** children);
+
+        GetCellCountX(
+            [out] Int32* count);
+
+        GetCellCountY(
+            [out] Int32* count);
+
+        GetContentWidth(
+            [out] Int32* width);
+
+        GetContentHeight(
+            [out] Int32* height);
+
+        GetWidthBeforeFirstLayout(
+            [out] Int32* width);
+
+        EnableCenteredContent(
+            [in] Boolean enabled);
+
+        SetCellCount(
+            [in] Int32 xCount,
+            [in] Int32 yCount);
+
+        SetGap(
+            [in] Int32 widthGap,
+            [in] Int32 heightGap);
+
+        GetCellCountForDimensions(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out, callee] ArrayOf<Int32>* dimensions);
+
+        /**
+         * Start dragging the specified child
+         *
+         * @param child The child that is being dragged
+         */
+        OnDragChild(
+            [in] IView* child);
+
+        /**
+         * Estimates the number of cells that the specified width would take up.
+         */
+        EstimateCellHSpan(
+            [in] Int32 width,
+            [out] Int32* span);
+
+        /**
+         * Estimates the number of cells that the specified height would take up.
+         */
+        EstimateCellVSpan(
+            [in] Int32 height,
+            [out] Int32* span);
+
+        /** Returns an estimated center position of the cell at the specified index */
+        EstimateCellPosition(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out, callee] ArrayOf<Int32>* position);
+
+        CalculateCellCount(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 maxCellCountX,
+            [in] Int32 maxCellCountY);
+
+        /**
+         * Estimates the width that the number of hSpan cells will take up.
+         */
+        EstimateCellWidth(
+            [in] Int32 hSpan,
+            [out] Int32* width);
+
+        /**
+         * Estimates the height that the number of vSpan cells will take up.
+         */
+        EstimateCellHeight(
+            [in] Int32 vSpan,
+            [out] Int32* height);
     }
 
     [local]

@@ -9,19 +9,22 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    /**
-    * @Involve
-    * interface Elastos.Droid.View.IView
-    * interface Elastos.Droid.View.IViewGroup
-    *
-    * interface Elastos.Droid.View.IViewParent
-    * interface Elastos.Droid.View.IViewManager
-    * interface Elastos.Droid.View.IKeyEventCallback
-    * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
-    * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
-    *
-    * interface IDragControllerDragListener
-    */
+    /*
+     * Ths bar will manage the transition between the QSB search bar and the delete drop
+     * targets so that each of the individual IconDropTargets don't have to.
+     *
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface IDragControllerDragListener
+     */
     [local]
     interface ISearchDropTargetBar {
         Setup(

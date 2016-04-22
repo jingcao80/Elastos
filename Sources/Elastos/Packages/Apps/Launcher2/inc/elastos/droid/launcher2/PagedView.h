@@ -168,46 +168,59 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
 
-    virtual CARAPI SetPageSwitchListener(
+    CARAPI SetPageSwitchListener(
         /* [in] */ IPageSwitchListener* pageSwitchListener);
 
     /**
      * Note: this is a reimplementation of IView::IsLayoutRtl() since that is currently hidden api.
      */
-    virtual CARAPI_(Boolean) IsLayoutRtl();
+    CARAPI IsLayoutRtl(
+        /* [out] */ Boolean* result);
+
+    CARAPI_(Boolean) IsLayoutRtl();
 
     /**
      * Returns the index of the currently displayed page.
      *
      * @return The index of the currently displayed page.
      */
-    virtual CARAPI_(Int32) GetCurrentPage();
+    CARAPI GetCurrentPage(
+        /* [out] */ Int32* page);
 
-    virtual CARAPI_(Int32) GetNextPage();
+    CARAPI_(Int32) GetCurrentPage();
 
-    virtual CARAPI_(Int32) GetPageCount();
+    CARAPI GetNextPage(
+        /* [out] */ Int32* page);
 
-    virtual CARAPI_(AutoPtr<IView>) GetPageAt(
+    CARAPI GetPageCount(
+        /* [out] */ Int32* count);
+
+    CARAPI_(Int32) GetPageCount();
+
+    CARAPI GetPageAt(
+        /* [in] */ Int32 index,
+        /* [out] */ IView** page);
+
+    CARAPI_(AutoPtr<IView>) GetPageAt(
         /* [in] */ Int32 index);
 
     /**
-     * Called during AllApps/Home transitions to avoid Unnecessary work. When that other animati
-     n
+     * Called during AllApps/Home transitions to avoid Unnecessary work. When that other animatin
      * ends, {@link #resumeScrolling()} should be called, along with
      * {@link #UpdateCurrentPageScroll()} to correctly set the final state and re-enable scrolling.
      */
-    virtual CARAPI PauseScrolling();
+    CARAPI PauseScrolling();
 
     /**
      * Enables scrolling again.
      * @see #pauseScrolling()
      */
-    virtual CARAPI ResumeScrolling();
+    CARAPI ResumeScrolling();
 
     /**
      * Sets the current page.
      */
-    virtual CARAPI SetCurrentPage(
+    CARAPI SetCurrentPage(
         /* [in] */ Int32 currentPage);
 
     /**
@@ -235,10 +248,10 @@ public:
     // A layout scale of 1.0f assumes that the pages, in their unshrunken state, have a
     // scale of 1.0f. A layout scale of 0.8f assumes the pages have a scale of 0.8f, and
     // tightens the layout accordingly
-    virtual CARAPI SetLayoutScale(
+    CARAPI SetLayoutScale(
         /* [in] */ Float childrenScale);
 
-    virtual CARAPI SetPageSpacing(
+    CARAPI SetPageSpacing(
         /* [in] */ Int32 pageSpacing);
 
     // @Override
@@ -308,53 +321,41 @@ public:
         /* [in] */ IView* child,
         /* [in] */ IView* focused);
 
-    virtual CARAPI_(Int32) GetPageNearestToCenterOfScreen();
+    CARAPI GetPageNearestToCenterOfScreen(
+        /* [out] */ Int32* page);
 
     // We want the duration of the page snap animation to be influenced by the distance that
     // the screen has to travel, however, we don't want this duration to be effected in a
     // purely linear fashion. Instead, we use this method to moderate the effect that the distance
     // of travel has on the overall snap duration.
-    virtual CARAPI_(Float) DistanceInfluenceForSnapDuration(
-        /* [in] */ Float f);
+    CARAPI DistanceInfluenceForSnapDuration(
+        /* [in] */ Float f,
+        /* [out] */ Float* distance);
 
-    virtual CARAPI ScrollLeft();
+    CARAPI ScrollLeft();
 
-    virtual CARAPI ScrollRight();
+    CARAPI ScrollRight();
 
-    virtual CARAPI_(Int32) GetPageForView(
-        /* [in] */ IView* v);
+    CARAPI GetPageForView(
+        /* [in] */ IView* v,
+        /* [out] */ Int32* page);
 
     /**
      * @return True is long presses are still allowed for the current touch
      */
-    virtual CARAPI_(Boolean) AllowLongPress();
+    CARAPI AllowLongPress(
+        /* [out] */ Boolean* result);
 
     /**
      * Set TRUE to allow long-press events to be triggered, usually checked by
      * {@link Launcher} to accept or block dpad-initiated long-presses.
      */
-    virtual CARAPI SetAllowLongPress(
+    CARAPI SetAllowLongPress(
         /* [in] */ Boolean allowLongPress);
 
-    /**
-     * This method is called ONLY to synchronize the number of pages that the paged view has.
-     * To actually fill the pages with information, implement syncPageItems() below.  It is
-     * guaranteed that syncPageItems() will be called for a particular page before it is shown,
-     * and therefore, individual page items do not need to be updated in this method.
-     */
-    virtual CARAPI SyncPages() = 0;
+    CARAPI ShowScrollIndicatorTrack();
 
-    /**
-     * This method is called to synchronize the items that are on a particular page.  If views on
-     * the page can be reused, then they should be updated within this method.
-     */
-    virtual CARAPI SyncPageItems(
-        /* [in] */ Int32 page,
-        /* [in] */ Boolean immediate) = 0;
-
-    virtual CARAPI ShowScrollIndicatorTrack();
-
-    virtual CARAPI HideScrollIndicatorTrack();
+    CARAPI HideScrollIndicatorTrack();
 
     /* Accessibility */
     // @Override
@@ -390,15 +391,16 @@ protected:
 
     virtual CARAPI_(Boolean) IsDataReady();
 
-    virtual CARAPI_(Int32) IndexToPage(
-        /* [in] */ Int32 index);
+    CARAPI IndexToPage(
+        /* [in] */ Int32 index,
+        /* [out] */ Int32* page);
 
     /**
      * Updates the scroll of the current page immediately to its final scroll position.  We use this
      * in CustomizePagedView to allow tabs to share the same PagedView while resetting the scroll of
      * the previous tab page.
      */
-    virtual CARAPI UpdateCurrentPageScroll();
+    CARAPI UpdateCurrentPageScroll();
 
     virtual CARAPI NotifyPageSwitchListener();
 
@@ -447,7 +449,7 @@ protected:
     virtual CARAPI_(Int32) GetScaledMeasuredWidth(
         /* [in] */ IView* child);
 
-    virtual CARAPI GetVisiblePages(
+    CARAPI GetVisiblePages(
         /* [in] */ ArrayOf<Int32>* range);
 
     virtual CARAPI_(Boolean) ShouldDrawChild(
@@ -532,10 +534,10 @@ protected:
         /* [in] */ Int32 delta,
         /* [in] */ Int32 duration);
 
-    virtual CARAPI LoadAssociatedPages(
+    CARAPI LoadAssociatedPages(
         /* [in] */ Int32 page);
 
-    virtual CARAPI LoadAssociatedPages(
+    CARAPI LoadAssociatedPages(
         /* [in] */ Int32 page,
         /* [in] */ Boolean immediateAndOnly);
 
@@ -558,15 +560,15 @@ protected:
 
     virtual CARAPI_(Boolean) IsScrollingIndicatorEnabled();
 
-    virtual CARAPI FlashScrollingIndicator(
+    CARAPI FlashScrollingIndicator(
         /* [in] */ Boolean animated);
 
-    virtual CARAPI ShowScrollingIndicator(
+    CARAPI ShowScrollingIndicator(
         /* [in] */ Boolean immediately);
 
-    virtual CARAPI CancelScrollingIndicatorAnimations();
+    CARAPI CancelScrollingIndicatorAnimations();
 
-    virtual CARAPI HideScrollingIndicator(
+    CARAPI HideScrollingIndicator(
         /* [in] */ Boolean immediately);
 
     /**

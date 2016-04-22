@@ -19,14 +19,13 @@ CAR_INTERFACE_IMPL_2(LauncherSettings::Favorites, Object, ILauncherSettingsBaseL
 static AutoPtr<IUri> InitCONTENT_URI()
 {
     StringBuilder sb;
-    assert(0 && "need class LauncherProvider");
-    // sb += "content://";
-    // sb += LauncherProvider::AUTHORITY;
-    // sb += "/";
-    // sb += LauncherProvider::TABLE_FAVORITES;
-    // sb += "?";
-    // sb += LauncherProvider::PARAMETER_NOTIFY;
-    // sb += "=true";
+    sb += "content://";
+    sb += ILauncherProvider::AUTHORITY;
+    sb += "/";
+    sb += ILauncherProvider::TABLE_FAVORITES;
+    sb += "?";
+    sb += ILauncherProvider::PARAMETER_NOTIFY;
+    sb += "=true";
 
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
@@ -40,14 +39,13 @@ AutoPtr<IUri> LauncherSettings::Favorites::CONTENT_URI = InitCONTENT_URI();
 static AutoPtr<IUri> InitCONTENT_URI_NO_NOTIFICATION()
 {
     StringBuilder sb;
-    assert(0 && "need class LauncherProvider");
-    // sb += "content://";
-    // sb += LauncherProvider::AUTHORITY;
-    // sb += "/";
-    // sb += LauncherProvider::TABLE_FAVORITES;
-    // sb += "?";
-    // sb += LauncherProvider::PARAMETER_NOTIFY;
-    // sb += "=false";
+    sb += "content://";
+    sb += ILauncherProvider::AUTHORITY;
+    sb += "/";
+    sb += ILauncherProvider::TABLE_FAVORITES;
+    sb += "?";
+    sb += ILauncherProvider::PARAMETER_NOTIFY;
+    sb += "=false";
 
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
@@ -97,17 +95,16 @@ LauncherSettings::Favorites::GetContentUri(
     *uri = NULL;
 
     StringBuilder sb;
-    assert(0 && "need class LauncherProvider");
-    // sb += "content://";
-    // sb += LauncherProvider::AUTHORITY;
-    // sb += "/";
-    // sb += LauncherProvider::TABLE_FAVORITES;
-    // sb += "/";
-    // sb += id;
-    // sb += "?";
-    // sb += LauncherProvider::PARAMETER_NOTIFY;
-    // sb += "=";
-    // sb += notify;
+    sb += "content://";
+    sb += ILauncherProvider::AUTHORITY;
+    sb += "/";
+    sb += ILauncherProvider::TABLE_FAVORITES;
+    sb += "/";
+    sb += id;
+    sb += "?";
+    sb += ILauncherProvider::PARAMETER_NOTIFY;
+    sb += "=";
+    sb += notify;
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> tmp;

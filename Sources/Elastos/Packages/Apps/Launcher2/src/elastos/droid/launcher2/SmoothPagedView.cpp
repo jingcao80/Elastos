@@ -123,7 +123,8 @@ ECode SmoothPagedView::SnapToDestination()
         return PagedView::SnapToDestination();
     }
     else {
-        Int32 whichPage = GetPageNearestToCenterOfScreen();
+        Int32 whichPage;
+        GetPageNearestToCenterOfScreen(&whichPage);
         return SnapToPageWithVelocity(whichPage, 0);
     }
     return NOERROR;

@@ -353,8 +353,6 @@ void WallpaperChooserDialogFragment::CancelLoader()
     if (mLoader != NULL) {
         AsyncTask::Status status = mLoader->GetStatus();
         if (status != AsyncTask::FINISHED) {
-            assert(0);
-            //java : mLoader.cancel(true);
             mLoader->Cancel();
             mLoader = NULL;
         }

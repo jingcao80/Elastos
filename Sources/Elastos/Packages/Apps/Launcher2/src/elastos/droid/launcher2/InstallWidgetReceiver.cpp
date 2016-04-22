@@ -151,8 +151,8 @@ ECode InstallWidgetReceiver::WidgetListAdapter::GetView(
     widgetInfo->GetMinWidth(&width);
     Int32 height;
     widgetInfo->GetMinHeight(&height);
-    assert(0 && "need class ICellLayout");
-    //mTargetLayout->RectToCell(width, height, widgetSpan);
+    AutoPtr<ArrayOf<Int32> > outArray;
+    mTargetLayout->RectToCell(width, height, widgetSpan, (ArrayOf<Int32>**)&outArray);
 
     AutoPtr<IView> _view2;
     convertView->FindViewById(Elastos::Droid::Launcher2::R::id::provider, (IView**)&_view2);
@@ -168,8 +168,8 @@ ECode InstallWidgetReceiver::WidgetListAdapter::GetView(
     context->GetString(
             Elastos::Droid::Launcher2::R::string::external_drop_widget_pick_format,
             array, &format);
-    assert(0 && "SetText");
-    //t->SetText(format);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(format);
+    t->SetText(cchar);
 
     *view = convertView;
     REFCOUNT_ADD(*view);
@@ -233,10 +233,8 @@ ECode InstallWidgetReceiver::WidgetListAdapter::OnClick(
 
     AutoPtr<PendingAddWidgetInfo> createInfo = new PendingAddWidgetInfo();
     createInfo->constructor(widgetInfo, mMimeType, IParcelable::Probe(mClipData));
-    assert(0 && "need class mLauncher");
-    // return mLauncher->AddAppWidgetFromDrop(createInfo, LauncherSettings::Favorites::CONTAINER_DESKTOP,
-    //         mTargetLayoutScreen, NULL, NULL, mTargetLayoutPos);
-    return NOERROR;
+    return mLauncher->AddAppWidgetFromDrop(createInfo, LauncherSettings::Favorites::CONTAINER_DESKTOP,
+            mTargetLayoutScreen, NULL, NULL, mTargetLayoutPos);
 }
 
 } // namespace Launcher2

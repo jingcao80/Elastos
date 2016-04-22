@@ -19,6 +19,15 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/* Class that does most of the work of enabling dragging items out of a PagedView by performing a
+ * vertical drag. Used by both CustomizePagedView and AllAppsPagedView.
+ * Subclasses must do the following:
+ *   * call setDragSlopeThreshold after making an instance of the PagedViewWithDraggableItems
+ *   * call child.setOnLongClickListener(this) and child.setOnTouchListener(this) on all children
+ *       (good place to do it is in syncPageItems)
+ *   * override beginDragging(View) (but be careful to call super.beginDragging(View)
+ *
+ */
 class PagedViewWithDraggableItems
     : public PagedView
     , public IViewOnLongClickListener

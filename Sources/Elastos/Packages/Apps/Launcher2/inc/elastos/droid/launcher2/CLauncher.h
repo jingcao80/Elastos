@@ -9,6 +9,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * Default launcher application.
+ */
 CarClass(CLauncher)
     , public Launcher
 {

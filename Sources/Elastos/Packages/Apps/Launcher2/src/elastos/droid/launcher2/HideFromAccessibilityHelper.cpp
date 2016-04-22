@@ -4,6 +4,7 @@
 #include <elastos/core/CoreUtils.h>
 #include "R.h"
 
+using Elastos::Droid::Launcher2::ECLSID_CAppsCustomizeTabHost;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
@@ -129,10 +130,8 @@ ECode HideFromAccessibilityHelper::OnChildViewRemoved(
 Boolean HideFromAccessibilityHelper::IncludeView(
     /* [in] */ IView* v)
 {
-    assert(0 && "need class AppsCustomizeTabHost");
-    // return !HasAncestorOfType(v, ECLSID_CCling) &&
-    //             (!mOnlyAllApps || HasAncestorOfType(v, ECLSID_CAppsCustomizeTabHost));
-    return FALSE;
+    return !HasAncestorOfType(v, ECLSID_CCling) &&
+                (!mOnlyAllApps || HasAncestorOfType(v, ECLSID_CAppsCustomizeTabHost));
 }
 
 Boolean HideFromAccessibilityHelper::HasAncestorOfType(

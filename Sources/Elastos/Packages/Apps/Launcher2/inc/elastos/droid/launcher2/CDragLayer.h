@@ -9,6 +9,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * A ViewGroup that coordinates dragging across its descendants
+ */
 CarClass(CDragLayer)
     , public DragLayer
 {

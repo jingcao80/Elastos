@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/LauncherAppWidgetHost.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetHostView.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
@@ -43,10 +44,8 @@ ECode LauncherAppWidgetHost::OnProvidersChanged()
     // Once we get the message that widget packages are updated, we need to rebind items
     // in AppsCustomize accordingly.
     AutoPtr<IArrayList> list;
-    assert(0 && "need class LauncherModel");
-    //LauncherModel::GetSortedWidgetsAndShortcuts(IContext::Probe(mLauncher), (IArrayList**)&list);
-    //mLauncher->BindPackagesUpdated(list);
-    return NOERROR;
+    LauncherModel::GetSortedWidgetsAndShortcuts(IContext::Probe(mLauncher), (IArrayList**)&list);
+    return mLauncher->BindPackagesUpdated(list);
 }
 
 } // namespace Launcher2

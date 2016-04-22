@@ -1,11 +1,11 @@
 
 #include "elastos/droid/launcher2/CWallpaperChooser.h"
-//#include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
+#include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
 using Elastos::Droid::Launcher2::IWallpaperChooserDialogFragment;
-// using Elastos::Droid::Launcher2::WallpaperChooserDialogFragment;
+using Elastos::Droid::Launcher2::WallpaperChooserDialogFragment;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::App::IDialogFragment;
@@ -36,12 +36,9 @@ ECode CWallpaperChooser::OnCreate(
         /* When the screen is XLarge, the fragment is not included in the layout, so show it
          * as a dialog
          */
-
         AutoPtr<IWallpaperChooserDialogFragment> wfragment;
-        assert(0 && "need class WallpaperChooserDialogFragment");
-    //  WallpaperChooserDialogFragment::NewInstance((IWallpaperChooserDialogFragment**)&wfragment);
+        WallpaperChooserDialogFragment::NewInstance((IWallpaperChooserDialogFragment**)&wfragment);
         AutoPtr<IDialogFragment> fragment = IDialogFragment::Probe(wfragment);
-
         AutoPtr<IFragmentManager> _fmanager;
         GetFragmentManager((IFragmentManager**)&_fmanager);
         fragment->Show(_fmanager, String("dialog"));

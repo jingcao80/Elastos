@@ -1,7 +1,7 @@
 
 #include "elastos/droid/launcher2/CAppsCustomizePagedView.h"
 #include "elastos/droid/launcher2/DragLayer.h"
-//#include "elastos/droid/launcher2/WidgetPreviewLoader.h"
+#include "elastos/droid/launcher2/WidgetPreviewLoader.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/Launcher.h"
@@ -10,6 +10,7 @@
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "elastos/droid/launcher2/PagedViewGridLayout.h"
+#include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/view/LayoutInflater.h"
@@ -55,6 +56,7 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnKeyListener;
 using Elastos::Droid::View::Animation::CAccelerateInterpolator;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::Widget::ITabHost;
 using Elastos::Droid::Widget::IGridLayout;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
@@ -108,8 +110,7 @@ ECode AsyncTaskPageData::Cleanup(
                 AutoPtr<IInterface> obj2;
                 mGeneratedImages->Get(i, (IInterface**)&obj2);
                 AutoPtr<IBitmap> map = IBitmap::Probe(obj2);
-                assert(0);
-                //mWidgetPreviewLoader->RecycleBitmap(obj1, obj2);
+                mWidgetPreviewLoader->RecycleBitmap(obj1, map);
             }
         }
         mGeneratedImages->Clear();
@@ -195,8 +196,7 @@ CAppsCustomizePagedView::MyRunnable2::MyRunnable2(
 ECode CAppsCustomizePagedView::MyRunnable2::Run()
 {
     AutoPtr<ILauncherAppWidgetHost> launcherAppWidgetHost;
-    assert(0);
-    //mHost->mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&launcherAppWidgetHost);
+    mHost->mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&launcherAppWidgetHost);
     IAppWidgetHost::Probe(launcherAppWidgetHost)->AllocateAppWidgetId(&(mHost->mWidgetLoadingId));
 
     AutoPtr<IAppWidgetManager> manager;
@@ -233,8 +233,7 @@ ECode CAppsCustomizePagedView::MyRunnable3::Run()
     }
     AutoPtr<ILauncherAppWidgetHost> launcherAppWidgetHost;
 
-    assert(0);
-    //mHost->mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&launcherAppWidgetHost);
+    mHost->mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&launcherAppWidgetHost);
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     AutoPtr<IAppWidgetHostView> hostView;
@@ -245,8 +244,7 @@ ECode CAppsCustomizePagedView::MyRunnable3::Run()
     IView::Probe(hostView)->SetVisibility(INVISIBLE);
 
     AutoPtr<IWorkspace> workspace;
-    assert(0);
-    //mHost->mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mHost->mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<ArrayOf<Int32> > unScaledSize;
     workspace->EstimateItemSize(mInfo->mSpanX,
             mInfo->mSpanY, IItemInfo::Probe(mInfo), FALSE,
@@ -254,17 +252,14 @@ ECode CAppsCustomizePagedView::MyRunnable3::Run()
 
     // We want the first widget layout to be the correct size. This will be important
     // for width size reporting to the AppWidgetManager.
-    AutoPtr<IDragLayerLayoutParams> lp = new DragLayer::LayoutParams();
-    ((DragLayer::LayoutParams*)lp.Get())->constructor((*unScaledSize)[0],
-            (*unScaledSize)[1]);
+    AutoPtr<DragLayer::LayoutParams> lp = new DragLayer::LayoutParams();
+    lp->constructor((*unScaledSize)[0], (*unScaledSize)[1]);
     lp->SetX(0);
     lp->SetY(0);
-    assert(0);
-    //lp->SetCustomPosition(TRUE);
+    lp->mCustomPosition = TRUE;
     IView::Probe(hostView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     return IViewGroup::Probe(dragLayer)->AddView(IView::Probe(hostView));
 }
 
@@ -278,21 +273,18 @@ ECode CAppsCustomizePagedView::MyRunnable4::Run()
 {
     // We don't enter spring-loaded mode if the drag has been cancelled
     AutoPtr<IDragController> dragController;
-    assert(0);
-    //mHost->mLauncher->GetDragController((IDragController**)&dragController);
+    mHost->mLauncher->GetDragController((IDragController**)&dragController);
     Boolean res;
     dragController->IsDragging(&res);
     if (res) {
         // Dismiss the cling
-        assert(0);
-        //mHost->mLauncher->DismissAllAppsCling(NULL);
+        mHost->mLauncher->DismissAllAppsCling(NULL);
 
         // Reset the alpha on the dragged icon before we drag
         mHost->ResetDrawableState();
 
         // Go into spring loaded mode (must happen before we startDrag())
-        assert(0);
-        //mHost->mLauncher->EnterSpringLoadedDragMode();
+        mHost->mLauncher->EnterSpringLoadedDragMode();
     }
     return NOERROR;
 }
@@ -380,9 +372,8 @@ ECode CAppsCustomizePagedView::MyRunnable5::Run()
         maxPreviewHeight = (*maxSize)[1];
     }
 
-    assert(0);
-    // mHost->mWidgetPreviewLoader->SetPreviewSize(
-    //         maxPreviewWidth, maxPreviewHeight, mHost->mWidgetSpacingLayout);
+    mHost->mWidgetPreviewLoader->SetPreviewSize(
+            maxPreviewWidth, maxPreviewHeight, mHost->mWidgetSpacingLayout);
     if (mImmediate) {
         AutoPtr<IAppsCustomizePagedViewAsyncTaskPageData> data =
                 new AsyncTaskPageData(mPage, mItems, maxPreviewWidth,
@@ -568,8 +559,7 @@ Int32 CAppsCustomizePagedView::GetMiddleComponentIndexOnCurrentPage()
             GetPageAt(currentPage, (IView**)&view);
             AutoPtr<IPagedViewCellLayout> layout = IPagedViewCellLayout::Probe(view);
             AutoPtr<IPagedViewCellLayoutChildren> childrenLayout;
-            assert(0);
-            //layout->GetChildrenLayout((IPagedViewCellLayoutChildren**)&childrenLayout);
+            layout->GetChildrenLayout((IPagedViewCellLayoutChildren**)&childrenLayout);
             Int32 numItemsPerPage = mCellCountX * mCellCountY;
             Int32 childCount;
             IViewGroup::Probe(childrenLayout)->GetChildCount(&childCount);
@@ -657,8 +647,8 @@ ECode CAppsCustomizePagedView::OnDataReady(
     /* [in] */ Int32 height)
 {
     if (mWidgetPreviewLoader == NULL) {
-        assert(0);
-        //mWidgetPreviewLoader = new WidgetPreviewLoader(mLauncher);
+        mWidgetPreviewLoader = new WidgetPreviewLoader();
+        ((WidgetPreviewLoader*)mWidgetPreviewLoader.Get())->constructor(mLauncher);
     }
 
     // Note that we transpose the counts in portrait so that we get a similar layout
@@ -744,8 +734,7 @@ ECode CAppsCustomizePagedView::ShowAllAppsCling()
         mWidgetSpacingLayout->EstimateCellPosition(mClingFocusedX, mClingFocusedY,
                 (ArrayOf<Int32>**)&pos);
         AutoPtr<IDragLayer> dragLayer;
-        assert(0);
-        //mLauncher->GetDragLayer(&dragLayer);
+        mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
         Float tmp;
         dragLayer->GetLocationInDragLayer(IView::Probe(this), offset, &tmp);
         // PagedViews are centered horizontally but top aligned
@@ -759,8 +748,7 @@ ECode CAppsCustomizePagedView::ShowAllAppsCling()
         Int32 top;
         IView::Probe(dragLayer)->GetPaddingTop(&top);
         (*pos)[1] += (*offset)[1] - top;
-        assert(0);
-        //return mLauncher->ShowFirstRunAllAppsCling(pos);
+        return mLauncher->ShowFirstRunAllAppsCling(pos);
     }
     return NOERROR;
 }
@@ -896,13 +884,11 @@ ECode CAppsCustomizePagedView::OnClick(
 {
     // When we have exited all apps or are in transition, disregard clicks
     Boolean res;
-    assert(0);
-    //mLauncher->IsAllAppsVisible(res);
+    mLauncher->IsAllAppsVisible(&res);
     if (!res) return NOERROR;
 
     AutoPtr<IWorkspace> workspace;
-    assert(0);
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     workspace->IsSwitchingState(&res);
     if (res) return NOERROR;
 
@@ -920,9 +906,10 @@ ECode CAppsCustomizePagedView::OnClick(
         // NOTE: We want all transitions from launcher to act as if the wallpaper were enabled
         // to be consistent.  So re-enable the flag here, and we will re-disable it as necessary
         // when Launcher resumes and we are still in AllApps.
-        assert(0);
-        //mLauncher->UpdateWallpaperVisibility(true);
-        //mLauncher->StartActivitySafely(v, appInfo->mIntent, appInfo);
+        mLauncher->UpdateWallpaperVisibility(TRUE);
+        Boolean tmp;
+        mLauncher->StartActivitySafely(IView::Probe(v), appInfo->mIntent,
+            TO_IINTERFACE(appInfo), &tmp);
 
     }
     else if (IPagedViewWidget::Probe(v) != NULL) {
@@ -934,11 +921,9 @@ ECode CAppsCustomizePagedView::OnClick(
         GetContext((IContext**)&context);
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        assert(0);
-        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
-        //         Elastos::Droid::Launcher2::R::string::long_press_widget_to_add);
-        // helper->MakeText(context, cchar, IToast::LENGTH_SHORT,
-        //         (IToast**)&mWidgetInstructionToast);
+        helper->MakeText(context,
+                Elastos::Droid::Launcher2::R::string::long_press_widget_to_add,
+                IToast::LENGTH_SHORT, (IToast**)&mWidgetInstructionToast);
 
         // Create a little animation to show that the widget can move
         AutoPtr<IResources> resources;
@@ -1120,8 +1105,7 @@ void CAppsCustomizePagedView::CleanupWidgetPreloading(
              // Delete the widget id which was allocated
             if (mWidgetLoadingId != -1) {
                 AutoPtr<ILauncherAppWidgetHost> appWidgetHost;
-                assert(0);
-                //mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&appWidgetHost);
+                mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&appWidgetHost);
                 IAppWidgetHost::Probe(appWidgetHost)->DeleteAppWidgetId(mWidgetLoadingId);
             }
 
@@ -1133,8 +1117,7 @@ void CAppsCustomizePagedView::CleanupWidgetPreloading(
             // Delete the widget id which was allocated
             if (mWidgetLoadingId != -1) {
                 AutoPtr<ILauncherAppWidgetHost> appWidgetHost;
-                assert(0);
-                //mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&appWidgetHost);
+                mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&appWidgetHost);
                 IAppWidgetHost::Probe(appWidgetHost)->DeleteAppWidgetId(mWidgetLoadingId);
             }
 
@@ -1201,8 +1184,7 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         Int32 spanX = ((PendingAddWidgetInfo*)createItemInfo.Get())->mSpanX;
         Int32 spanY = ((PendingAddWidgetInfo*)createItemInfo.Get())->mSpanY;
         AutoPtr<IWorkspace> workspace;
-        assert(0);
-        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
         AutoPtr<ArrayOf<Int32> > size;
         workspace->EstimateItemSize(spanX, spanY,
                 IItemInfo::Probe(createWidgetInfo), TRUE, (ArrayOf<Int32>**)&size);
@@ -1220,15 +1202,14 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         maxHeight = Elastos::Core::Math::Min((Int32)(height * minScale), (*size)[1]);
 
         AutoPtr<ArrayOf<Int32> > previewSizeBeforeScale = ArrayOf<Int32>::Alloc(1);
-        assert(0);
-        // mWidgetPreviewLoader->GenerateWidgetPreview(createWidgetInfo.info, spanX,
-        //         spanY, maxWidth, maxHeight, NULL,
-        //         previewSizeBeforeScale, (IBitmap**)&preview);
+        mWidgetPreviewLoader->GenerateWidgetPreview(
+                ((PendingAddWidgetInfo*)createWidgetInfo.Get())->mInfo, spanX,
+                spanY, maxWidth, maxHeight, NULL,
+                previewSizeBeforeScale, (IBitmap**)&preview);
 
         // Compare the size of the drag preview to the preview in the AppsCustomize tray
         Int32 previewWidth;
-        assert(0);
-        //mWidgetPreviewLoader->MaxWidthForWidgetPreview(spanX, &previewWidth)
+        mWidgetPreviewLoader->MaxWidthForWidgetPreview(spanX, &previewWidth);
         Int32 previewWidthInAppsCustomize = Elastos::Core::Math::Min((*previewSizeBeforeScale)[0],
                 previewWidth);
         Int32 width2;
@@ -1253,10 +1234,8 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         // Hence use myUserHandle().
         AutoPtr<IUserHandle> user;
         Process::MyUserHandle((IUserHandle**)&user);
-        AutoPtr<IDrawable> icon;
-        assert(0);
-        // mIconCache->GetFullResIcon(createShortcutInfo->mShortcutActivityInfo,
-        //         user, (IDrawable**)&icon);
+        AutoPtr<IDrawable> icon = ((IconCache*)mIconCache.Get())->GetFullResIcon(
+                createShortcutInfo->mShortcutActivityInfo, user);
         Int32 intrinsicWidth;
         icon->GetIntrinsicWidth(&intrinsicWidth);
         Int32 intrinsicHeight;
@@ -1268,9 +1247,8 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         mCanvas->SetBitmap(preview);
         Int32 tmp;
         mCanvas->Save(&tmp);
-        assert(0);
-        // WidgetPreviewLoader::RenderDrawableToBitmap(icon, preview, 0, 0,
-        //         intrinsicWidth, intrinsicHeight);
+        WidgetPreviewLoader::RenderDrawableToBitmap(icon, preview, 0, 0,
+                intrinsicWidth, intrinsicHeight);
         mCanvas->Restore();
         mCanvas->SetBitmap(NULL);
         ((PendingAddItemInfo*)createItemInfo.Get())->mSpanX = 1;
@@ -1307,11 +1285,9 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
             FALSE, (IBitmap**)&outline);
 
     // Start the drag
-    assert(0);
-    //mLauncher->LockScreenOrientation();
+    mLauncher->LockScreenOrientation();
     AutoPtr<IWorkspace> workspace;
-    assert(0);
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     workspace->OnDragStartedWithItem(createItemInfo, outline, clipAlpha);
     mDragController->StartDrag(IView::Probe(image), preview, IDragSource::Probe(this), createItemInfo,
             IDragController::DRAG_ACTION_COPY, previewPadding, scale);
@@ -1357,17 +1333,14 @@ void CAppsCustomizePagedView::EndDragging(
     /* [in] */ Boolean success)
 {
     AutoPtr<IWorkspace> workspace;
-    assert(0);
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     if (isFlingToDelete || !success || (TO_IINTERFACE(target) !=
             TO_IINTERFACE(workspace) && IDeleteDropTarget::Probe(target) != NULL)) {
         // Exit spring loaded mode if we have not successfully dropped or have not handled the
         // drop in Workspace
-        assert(0);
-        //mLauncher->ExitSpringLoadedDragMode();
+        mLauncher->ExitSpringLoadedDragMode();
     }
-    assert(0);
-    //mLauncher->UnlockScreenOrientation(FALSE);
+    mLauncher->UnlockScreenOrientation(FALSE);
 }
 
 ECode CAppsCustomizePagedView::GetContent(
@@ -1454,8 +1427,7 @@ ECode CAppsCustomizePagedView::OnDropCompleted(
         Boolean showOutOfSpaceMessage = FALSE;
         if (IWorkspace::Probe(target) == NULL) {
             Int32 currentScreen;
-            assert(0);
-            //mLauncher->GetCurrentWorkspaceScreen(&currentScreen);
+            mLauncher->GetCurrentWorkspaceScreen(&currentScreen);
             AutoPtr<IWorkspace> workspace = IWorkspace::Probe(target);
             AutoPtr<IView> view;
             IViewGroup::Probe(workspace)->GetChildAt(currentScreen, (IView**)&view);
@@ -1468,8 +1440,7 @@ ECode CAppsCustomizePagedView::OnDropCompleted(
             }
         }
         if (showOutOfSpaceMessage) {
-            assert(0);
-            //mLauncher->ShowOutOfSpaceMessage(FALSE);
+            mLauncher->ShowOutOfSpaceMessage(FALSE);
         }
 
         ((DragObject*)d)->mDeferDragViewCleanupPostAnimation = FALSE;
@@ -1598,15 +1569,14 @@ void CAppsCustomizePagedView::UpdateCurrentTab(
     AutoPtr<IAppsCustomizeTabHost> tabHost = GetTabHost();
     if (tabHost != NULL) {
         String tag;
-        assert(0);
-        //tabHost->GetCurrentTabTag(&tag);
+        ITabHost::Probe(tabHost)->GetCurrentTabTag(&tag);
         if (!tag.IsNull()) {
             String type;
             tabHost->GetTabTagForContentType(AppsCustomizePagedViewContentType_Widgets, &type);
-            Boolean res;
             if (currentPage >= mNumAppsPages && !tag.Equals(type)) {
                 tabHost->SetCurrentTabFromContent(AppsCustomizePagedViewContentType_Widgets);
-            } else if (currentPage < mNumAppsPages) {
+            }
+            else if (currentPage < mNumAppsPages) {
                 tabHost->GetTabTagForContentType(AppsCustomizePagedViewContentType_Applications, &type);
                 if (tag.Equals(type)) {
                     tabHost->SetCurrentTabFromContent(AppsCustomizePagedViewContentType_Applications);
@@ -1632,11 +1602,10 @@ void CAppsCustomizePagedView::SetVisibilityOnChildren(
 void CAppsCustomizePagedView::SetupPage(
     /* [in] */ IPagedViewCellLayout* layout)
 {
-    assert(0);
-    // layout->SetCellCount(mCellCountX, mCellCountY);
-    // layout->SetGap(mPageLayoutWidthGap, mPageLayoutHeightGap);
-    // layout->SetPadding(mPageLayoutPaddingLeft, mPageLayoutPaddingTop,
-    //         mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
+    layout->SetCellCount(mCellCountX, mCellCountY);
+    layout->SetGap(mPageLayoutWidthGap, mPageLayoutHeightGap);
+    IView::Probe(layout)->SetPadding(mPageLayoutPaddingLeft, mPageLayoutPaddingTop,
+            mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
 
     // Note: We force a measure here to get around the fact that when we do layout calculations
     // immediately after syncing, we don't have a proper width.  That said, we already know the
@@ -1661,7 +1630,8 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
     /* [in] */ Boolean immediate)
 {
     // ensure that we have the right number of items on the pages
-    Boolean isRtl = IsLayoutRtl();
+    Boolean isRtl;
+    IsLayoutRtl(&isRtl);
     Int32 numCells = mCellCountX * mCellCountY;
     Int32 startIndex = page * numCells;
     Int32 size;
@@ -1700,8 +1670,9 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
         AutoPtr<PagedViewCellLayout::LayoutParams> params =
                 new PagedViewCellLayout::LayoutParams();
         params->constructor(x, y, 1, 1);
-        assert(0);
-        //layout->AddViewToCellLayout(icon, -1, i, params);
+        Boolean tmp;
+        layout->AddViewToCellLayout(IView::Probe(icon), -1, i,
+                IPagedViewCellLayoutLayoutParams::Probe(params), &tmp);
 
         items->Add(info);
         images->Add(((ApplicationInfo*)info.Get())->mIconBitmap);
@@ -1770,7 +1741,6 @@ void CAppsCustomizePagedView::PrepareLoadWidgetPreviewsTask(
     /* [in] */ Int32 cellCountX)
 {
     // Prune all tasks that are no longer needed
-    Int32 minPageDiff = Elastos::Core::Math::INT32_MAX_VALUE;
     AutoPtr<IIterator> iter;
     mRunningTasks->GetIterator((IIterator**)&iter);
     Boolean res;
@@ -1805,13 +1775,15 @@ void CAppsCustomizePagedView::PrepareLoadWidgetPreviewsTask(
             Callback1, Callback2, mWidgetPreviewLoader);
 
     // Ensure that the task is appropriately prioritized and runs in parallel
-    AutoPtr<IAppsCustomizePagedViewAppsCustomizeAsyncTask> t =
+    AutoPtr<AppsCustomizeAsyncTask> t =
             new AppsCustomizeAsyncTask(page, AsyncTaskPageDataType_LoadWidgetPreviewData);
     Int32 priorityForPage = GetThreadPriorityForPage(page);
-    assert(0);
-    //t->SetThreadPriority(priorityForPage);
-    //t->ExecuteOnExecutor(AsyncTask::THREAD_POOL_EXECUTOR, pageData);
-    mRunningTasks->Add(t);
+    t->SetThreadPriority(priorityForPage);
+
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+    array->Set(0, TO_IINTERFACE(pageData));
+    ((AsyncTask*)t)->ExecuteOnExecutor(AsyncTask::THREAD_POOL_EXECUTOR, array);
+    mRunningTasks->Add(TO_IINTERFACE(t));
 }
 
 void CAppsCustomizePagedView::SetupPage(
@@ -1868,8 +1840,7 @@ ECode CAppsCustomizePagedView::SyncWidgetPageItems(
     AutoPtr<IPagedViewGridLayout> layout = IPagedViewGridLayout::Probe(view);
     Int32 x;
     layout->GetCellCountX(&x);
-    assert(0);
-    //layout->SetColumnCount(x);
+    IGridLayout::Probe(layout)->SetColumnCount(x);
     Int32 size2;
     items->GetSize(&size2);
     for (Int32 i = 0; i < size2; ++i) {
@@ -1956,8 +1927,7 @@ void CAppsCustomizePagedView::LoadWidgetPreviewsInBackground(
     // previews synchronously
     if (task != NULL) {
         // Ensure that this task starts running at the correct priority
-        assert(0);
-        //task->SyncThreadPriority();
+        task->SyncThreadPriority();
     }
 
     // Load each of the widget/shortcut previews
@@ -1968,21 +1938,16 @@ void CAppsCustomizePagedView::LoadWidgetPreviewsInBackground(
     for (Int32 i = 0; i < count; ++i) {
         if (task != NULL) {
             // Ensure we haven't been cancelled yet
-            Boolean res;
-            assert(0);
-            //task->IsCancelled(&res);
-            if (res) break;
+            if (((AsyncTask*)task)->IsCancelled()) break;
             // Before work on each item, ensure that this task is running at the correct
             // priority
-            assert(0);
-            //task->SyncThreadPriority();
+            task->SyncThreadPriority();
         }
 
         AutoPtr<IInterface> obj;
         items->Get(i, (IInterface**)&obj);
         AutoPtr<IBitmap> bitmap;
-        assert(0);
-        //mWidgetPreviewLoader->GetPreview((IBitmap**)&bitmap);
+        mWidgetPreviewLoader->GetPreview(obj, (IBitmap**)&bitmap);
         images->Add(TO_IINTERFACE(bitmap));
     }
 }
@@ -1990,55 +1955,54 @@ void CAppsCustomizePagedView::LoadWidgetPreviewsInBackground(
 void CAppsCustomizePagedView::OnSyncWidgetPageItems(
     /* [in] */ IAppsCustomizePagedViewAsyncTaskPageData* data)
 {
-    assert(0);
-//     if (mInTransition) {
-//         mDeferredSyncWidgetPageItems->Add(data);
-//         return;
-//     }
-//     //try {
-//     Int32 page = ((AsyncTaskPageData*)data)->mPage;
-//     AutoPtr<IView> view;
-//     FAIL_GOTO(GetPageAt(page, (IView**)&view), FINALLY);
-//     AutoPtr<IPagedViewGridLayout> layout = IPagedViewGridLayout::Probe(view);
+    if (mInTransition) {
+        mDeferredSyncWidgetPageItems->Add(data);
+        return;
+    }
+    //try
+    {
+        Int32 page = ((AsyncTaskPageData*)data)->mPage;
+        AutoPtr<IView> view;
+        FAIL_GOTO(GetPageAt(page, (IView**)&view), FINALLY);
+        AutoPtr<IPagedViewGridLayout> layout = IPagedViewGridLayout::Probe(view);
 
-//     AutoPtr<IArrayList> items = ((AsyncTaskPageData*)data)->mItems;
-//     Int32 count;
-//     FAIL_GOTO(items->GetSize(&count), FINALLY);
-//     for (Int32 i = 0; i < count; ++i) {
-//         AutoPtr<IView> view;
-//         FAIL_GOTO(IViewGroup::Probe(layout)->GetChildAt(i, (IView**)&view), FINALLY);
-//         AutoPtr<IPagedViewWidget> widget = IPagedViewWidget::Probe(view);
-//         if (widget != NULL) {
-//             AutoPtr<IInterface> obj;
-//             ((AsyncTaskPageData*)data)->mGeneratedImages->Get(i, (IInterface**)&obj);
-//             AutoPtr<IBitmap> preview = IBitmap::Probe(obj);
-//             AutoPtr<IFastBitmapDrawable> drawable = new FastBitmapDrawable();
-//             ((FastBitmapDrawable*)drawable.Get())->constructor(preview);
-//             FAIL_GOTO(widget->ApplyPreview(drawable, i), FINALLY)
-//         }
-//     }
+        AutoPtr<IArrayList> items = ((AsyncTaskPageData*)data)->mItems;
+        Int32 count;
+        FAIL_GOTO(items->GetSize(&count), FINALLY);
+        for (Int32 i = 0; i < count; ++i) {
+            AutoPtr<IView> view;
+            FAIL_GOTO(IViewGroup::Probe(layout)->GetChildAt(i, (IView**)&view), FINALLY);
+            AutoPtr<IPagedViewWidget> widget = IPagedViewWidget::Probe(view);
+            if (widget != NULL) {
+                AutoPtr<IInterface> obj;
+                ((AsyncTaskPageData*)data)->mGeneratedImages->Get(i, (IInterface**)&obj);
+                AutoPtr<IBitmap> preview = IBitmap::Probe(obj);
+                AutoPtr<IFastBitmapDrawable> drawable = new FastBitmapDrawable();
+                ((FastBitmapDrawable*)drawable.Get())->constructor(preview);
+                FAIL_GOTO(widget->ApplyPreview(drawable, i), FINALLY)
+            }
+        }
 
-//     EnableHwLayersOnVisiblePages();
+        EnableHwLayersOnVisiblePages();
 
-//     // Update all thread priorities
-//     AutoPtr<IIterator> iter;
-//     mRunningTasks->GetIterator((IIterator**)&iter);
-//     Boolean res;
-//     while (iter->HasNext(&res), res) {
-//         AutoPtr<IInterface> obj;
-//         iter->GetNext((IInterface**)&obj);
-//         AutoPtr<AppsCustomizeAsyncTask> task =
-//                 IAppsCustomizePagedViewAppsCustomizeAsyncTask::Probe(obj);
-//         Int32 pageIndex = task->mPage;
-//         Int32 priorityForPage;
-//         assert(0);
-//         // FAIL_GOTO(GetThreadPriorityForPage(pageIndex, &priorityForPage), FINALLY);
-//         // FAIL_GOTO(task->SetThreadPriority(priorityForPage), FINALLY);
-//     }
-//     //} finally {
-// FINALLY:
-//     data->Cleanup(FALSE);
-//     //}
+        // Update all thread priorities
+        AutoPtr<IIterator> iter;
+        mRunningTasks->GetIterator((IIterator**)&iter);
+        Boolean res;
+        while (iter->HasNext(&res), res) {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            AutoPtr<AppsCustomizeAsyncTask> task =
+                    (AppsCustomizeAsyncTask*)IAppsCustomizePagedViewAppsCustomizeAsyncTask::Probe(obj);
+            Int32 pageIndex = task->mPage;
+            Int32 priorityForPage = GetThreadPriorityForPage(pageIndex);
+            FAIL_GOTO(task->SetThreadPriority(priorityForPage), FINALLY);
+        }
+    }
+    //} finally {
+FINALLY:
+    data->Cleanup(FALSE);
+    //}
 }
 
 ECode CAppsCustomizePagedView::SyncPages()
@@ -2087,14 +2051,16 @@ CARAPI CAppsCustomizePagedView::GetPageAt(
 {
     VALIDATE_NOT_NULL(view);
 
-    Int32 _index = IndexToPage(index);
+    Int32 _index;
+    IndexToPage(index, &_index);
     return GetChildAt(_index, view);
 }
 
 CARAPI CAppsCustomizePagedView::ScreenScrolled(
     /* [in] */ Int32 screenCenter)
 {
-    Boolean isRtl = IsLayoutRtl();
+    Boolean isRtl;
+    IsLayoutRtl(&isRtl);
     PagedViewWithDraggableItems::ScreenScrolled(screenCenter);
 
     Int32 count;
@@ -2231,7 +2197,6 @@ void CAppsCustomizePagedView::EnableHwLayersOnVisiblePages()
     for (Int32 i = 0; i < screenCount; i++) {
         AutoPtr<IView> layout;
         GetPageAt(i, (IView**)&layout);
-        Boolean res;
         if (!(leftScreen <= i && i <= rightScreen &&
                 (i == forceDrawScreen || (ShouldDrawChild(layout))))) {
             layout->SetLayerType(LAYER_TYPE_NONE, NULL);
@@ -2241,7 +2206,6 @@ void CAppsCustomizePagedView::EnableHwLayersOnVisiblePages()
     for (Int32 i = 0; i < screenCount; i++) {
         AutoPtr<IView> layout;
         GetPageAt(i, (IView**)&layout);
-        Boolean res;
         if (leftScreen <= i && i <= rightScreen &&
                 (i == forceDrawScreen || (ShouldDrawChild(layout)))) {
             Int32 type;
@@ -2418,8 +2382,7 @@ ECode CAppsCustomizePagedView::Reset()
 
     AutoPtr<IAppsCustomizeTabHost> tabHost = GetTabHost();
     String tag;
-    assert(0);
-    //tabHost->GetCurrentTabTag(&tag);
+    ITabHost::Probe(tabHost)->GetCurrentTabTag(&tag);
     if (tag != NULL) {
         String type;
         tabHost->GetTabTagForContentType(AppsCustomizePagedViewContentType_Applications, &type);
@@ -2470,19 +2433,55 @@ void CAppsCustomizePagedView::DumpAppWidgetProviderInfoList(
         AutoPtr<IInterface> obj;
         list->Get(i, (IInterface**)&obj);
 
-        assert(0);
-        // if (IAppWidgetProviderInfo::Probe(obj) != NULL) {
-        //     AUtoPtr<IAppWidgetProviderInfo> info = IAppWidgetProviderInfo::Probe(obj);
-        //     Log.d(tag, "   label=\"" + info.label + "\" previewImage=" + info.previewImage
-        //             + " resizeMode=" + info.resizeMode + " configure=" + info.configure
-        //             + " initialLayout=" + info.initialLayout
-        //             + " minWidth=" + info.minWidth + " minHeight=" + info.minHeight);
-        // }
-        // else if (IResolveInfo::Probe(obj) != NULL) {
-        //     AutoPtr<IResolveInfo> info = IResolveInfo::Probe(obj);
-        //     Log.d(tag, "   label=\"" + info.loadLabel(mPackageManager) + "\" icon="
-        //             + info.icon);
-        // }
+        if (IAppWidgetProviderInfo::Probe(obj) != NULL) {
+            AutoPtr<IAppWidgetProviderInfo> info = IAppWidgetProviderInfo::Probe(obj);
+
+            StringBuilder sb;
+            sb += "   label=\"";
+            String label;
+            info->GetLabel(&label);
+            sb += label;
+            sb += "\" previewImage=";
+            Int32 image;
+            info->GetPreviewImage(&image);
+            sb += image;
+            sb += " resizeMode=";
+            Int32 mode;
+            info->GetResizeMode(&mode);
+            sb += mode;
+            sb += " configure=";
+            AutoPtr<IComponentName> name;
+            info->GetConfigure((IComponentName**)&name);
+            sb += TO_STR(name);
+            sb += " initialLayout=";
+            Int32 layout;
+            info->GetInitialLayout(&layout);
+            sb += layout;
+            sb += " minWidth=";
+            Int32 width;
+            info->GetMinWidth(&width);
+            sb += width;
+            sb += " minHeight=";
+            Int32 height;
+            info->GetMinHeight(&height);
+            sb += height;
+            Slogger::D(tag, sb.ToString());
+        }
+        else if (IResolveInfo::Probe(obj) != NULL) {
+            AutoPtr<IResolveInfo> info = IResolveInfo::Probe(obj);
+            StringBuilder sb;
+            sb += "   label=\"";
+            AutoPtr<ICharSequence> label;
+            info->LoadLabel(mPackageManager, (ICharSequence**)&label);
+            String str;
+            label->ToString(&str);
+            sb += str;
+            sb += "\" icon=";
+            Int32 icon;
+            info->GetIcon(&icon);
+            sb += icon;
+            Slogger::D(tag, sb.ToString());
+        }
     }
 }
 
@@ -2569,9 +2568,7 @@ ECode CAppsCustomizePagedView::GetCurrentPageDescription(
     GetContext((IContext**)&context);
     String str;
     context->GetString(stringId, &str);
-    assert(0);
-    //*result = String::Format(str, page + 1, count);
-    return NOERROR;
+    return result->AppendFormat(str, page + 1, count);
 }
 
 

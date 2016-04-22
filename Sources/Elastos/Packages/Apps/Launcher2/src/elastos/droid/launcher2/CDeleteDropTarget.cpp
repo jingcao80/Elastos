@@ -5,9 +5,13 @@
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetHost.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/FolderInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include "R.h"
 
@@ -26,6 +30,7 @@ using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Core::IFloat;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -62,8 +67,7 @@ ECode CDeleteDropTarget::FlingAlongVectorAnimatorUpdateListener::OnAnimationUpda
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IView> view;
-    assert(0 && "need class DragLayer");
-    //mDragLayer->GetAnimatedView((IView**)&view);
+    mDragLayer->GetAnimatedView((IView**)&view);
     AutoPtr<IDragView> dragView = IDragView::Probe(view);
 
     AutoPtr<IInterface> value;
@@ -118,12 +122,10 @@ ECode CDeleteDropTarget::FlingAlongVectorAnimatorUpdateListener::OnAnimationUpda
 
     Float x2;
     mVelocity->GetX(&x2);
-    assert(0 && "need mVelocity->SetX");
-    //mVelocity->SetX(x2 * mFriction);
+    mVelocity->SetX(x2 * mFriction);
     Float y2;
     mVelocity->GetY(&y2);
-    assert(0 && "need ");
-    //mVelocity->SetY(y2 * mFriction);
+    mVelocity->SetY(y2 * mFriction);
     mPrevTime = curTime;
     return NOERROR;
 }
@@ -139,8 +141,7 @@ CDeleteDropTarget::MyRunnable::MyRunnable(
 ECode CDeleteDropTarget::MyRunnable::Run()
 {
     IButtonDropTarget::Probe(mHost->mSearchDropTargetBar)->OnDragEnd();
-    assert(0 && "need class mLauncher ");
-    //mHost->mLauncher->ExitSpringLoadedDragMode();
+    mHost->mLauncher->ExitSpringLoadedDragMode();
     mHost->CompleteDrop(mD);
     return NOERROR;
 }
@@ -200,8 +201,7 @@ ECode CDeleteDropTarget::MyAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IView> view;
-    assert(0 && "need class DragLayer");
-    //mDragLayer->GetAnimatedView((IView**)&view);
+    mDragLayer->GetAnimatedView((IView**)&view);
     AutoPtr<IDragView> dragView = IDragView::Probe(view);
 
     AutoPtr<IInterface> value;
@@ -247,7 +247,6 @@ CDeleteDropTarget::MyTimeInterpolator2::MyTimeInterpolator2(
 {
 }
 
-//@Override
 CARAPI CDeleteDropTarget::MyTimeInterpolator2::GetInterpolation(
     /* [in] */ Float t,
     /* [out] */ Float* result)
@@ -291,13 +290,11 @@ ECode CDeleteDropTarget::MyRunnable2::Run()
     // If we are dragging from AllApps, then we allow AppsCustomizePagedView to clean up
     // itself, otherwise, complete the drop to initiate the deletion process
     if (!mIsAllApps) {
-        assert(0 && "need class mLauncher");
-        //mHost->mLauncher->ExitSpringLoadedDragMode();
+        mHost->mLauncher->ExitSpringLoadedDragMode();
         mHost->CompleteDrop(mD);
     }
     AutoPtr<IDragController> controller;
-    assert(0 && "need class mLauncher");
-    // mHost->mLauncher->GetDragController((IDragController**)&controller);
+    mHost->mLauncher->GetDragController((IDragController**)&controller);
     return controller->OnDeferredEndFling(mD);
 }
 
@@ -376,11 +373,10 @@ ECode CDeleteDropTarget::OnFinishInflate()
     config->GetOrientation(&orientation);
     if (orientation == IConfiguration::ORIENTATION_LANDSCAPE) {
         Boolean res;
-        assert(0 && "need class LauncherApplication");
-        //LauncherApplication::IsScreenLarge(&res);
+        LauncherApplication::IsScreenLarge(&res);
         if (!res) {
-            assert(0 && "need SetText");
-            //SetText(String(""));
+            AutoPtr<ICharSequence> text = CoreUtils::Convert(String(""));
+            SetText(text);
         }
     }
     return NOERROR;
@@ -565,12 +561,10 @@ void CDeleteDropTarget::AnimateToTrashAndCompleteDrop(
     /* [in] */ DragObject* d)
 {
     AutoPtr<IDragLayer> dragLayer;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     AutoPtr<IRect> from;
     CRect::New((IRect**)&from);
-    assert(0 && "need class dragLayer");
-    //dragLayer->GetViewRectRelativeToSelf(d->mDragView, from);
+    dragLayer->GetViewRectRelativeToSelf(IView::Probe(d->mDragView), from);
     Int32 mWidth;
     IView::Probe(d->mDragView)->GetMeasuredWidth(&mWidth);
     Int32 mHeight;
@@ -594,11 +588,10 @@ void CDeleteDropTarget::AnimateToTrashAndCompleteDrop(
     CDecelerateInterpolator::New(2, (IInterpolator**)&polator);
     AutoPtr<IInterpolator> polator2;
     CLinearInterpolator::New((IInterpolator**)&polator2);
-    assert(0 && "need class dragLayer");
-    // dragLayer->AnimateView(d->mDragView, from, to, scale, 1.0f, 1.0f, 0.1f, 0.1f,
-    //         DELETE_ANIMATION_DURATION, polator,
-    //         polator2, onAnimationEndRunnable,
-    //         IDragLayer::ANIMATION_END_DISAPPEAR, NULL);
+    dragLayer->AnimateView(d->mDragView, from, to, scale, 1.0f, 1.0f, 0.1f, 0.1f,
+            DELETE_ANIMATION_DURATION, polator,
+            polator2, onAnimationEndRunnable,
+            IDragLayer::ANIMATION_END_DISAPPEAR, NULL);
 }
 
 void CDeleteDropTarget::CompleteDrop(
@@ -609,32 +602,26 @@ void CDeleteDropTarget::CompleteDrop(
 
     if (IsAllAppsApplication(d->mDragSource, item)) {
         // Uninstall the application if it is being dragged from AppsCustomize
-        assert(0 && "need class mLauncher");
-        //mLauncher->StartApplicationUninstallActivity(IApplicationInfo::Probe(item), _item->mUser);
+        mLauncher->StartApplicationUninstallActivity(IApplicationInfo::Probe(item), _item->mUser);
     }
     else if (IsWorkspaceOrFolderApplication(d)) {
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::DeleteItemFromDatabase(mLauncher, item);
+        LauncherModel::DeleteItemFromDatabase(IContext::Probe(mLauncher), _item);
     }
     else if (IsWorkspaceFolder(d)) {
         // Remove the folder from the workspace and delete the contents from launcher model
         AutoPtr<IFolderInfo> folderInfo = IFolderInfo::Probe(item);
-        assert(0 && "need class mLauncher");
-        //mLauncher->RemoveFolder(folderInfo);
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::DeleteFolderContentsFromDatabase(mLauncher, folderInfo);
+        mLauncher->RemoveFolder(folderInfo);
+        LauncherModel::DeleteFolderContentsFromDatabase(IContext::Probe(mLauncher),
+                (FolderInfo*)folderInfo.Get());
     }
     else if (IsWorkspaceOrFolderWidget(d)) {
         // Remove the widget from the workspace
-        assert(0 && "need class mLauncher");
-        //mLauncher->RemoveAppWidget(ILauncherAppWidgetInfo::Probe(item));
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::DeleteItemFromDatabase(mLauncher, item);
+        mLauncher->RemoveAppWidget(ILauncherAppWidgetInfo::Probe(item));
+        LauncherModel::DeleteItemFromDatabase(IContext::Probe(mLauncher), _item);
 
         LauncherAppWidgetInfo* launcherAppWidgetInfo = (LauncherAppWidgetInfo*)ILauncherAppWidgetInfo::Probe(item);
         AutoPtr<ILauncherAppWidgetHost> appWidgetHost;
-        assert(0 && "need class mLauncher");
-        //mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&appWidgetHost);
+        mLauncher->GetAppWidgetHost((ILauncherAppWidgetHost**)&appWidgetHost);
         if (appWidgetHost != NULL) {
             // Deleting an app widget ID is a void call but writes to disk before returning
             // to the caller...
@@ -670,8 +657,7 @@ AutoPtr<IAnimatorUpdateListener> CDeleteDropTarget::CreateFlingToTrashAnimatorLi
     GetIconRect(mWidth, mHeight, iWidth, iHeight, (IRect**)&to);
     AutoPtr<IRect> from;
     CRect::New((IRect**)&from);
-    assert(0 && "need class dragLayer");
-    //dragLayer->GetViewRectRelativeToSelf(d->mDragView, from);
+    dragLayer->GetViewRectRelativeToSelf(IView::Probe(d->mDragView), from);
 
     // Calculate how far along the velocity vector we should put the intermediate point on
     // the bezier curve
@@ -720,8 +706,7 @@ AutoPtr<IAnimatorUpdateListener> CDeleteDropTarget::CreateFlingAlongVectorAnimat
 {
     AutoPtr<IRect> from;
     CRect::New((IRect**)&from);
-    assert(0 && "need class dragLayer");
-    //dragLayer->GetViewRectRelativeToSelf(d->mDragView, from);
+    dragLayer->GetViewRectRelativeToSelf(IView::Probe(d->mDragView), from);
 
     AutoPtr<IAnimatorUpdateListener> listener = new FlingAlongVectorAnimatorUpdateListener(
             dragLayer, vel, from, startTime, FLING_TO_DELETE_FRICTION);
@@ -756,8 +741,7 @@ ECode CDeleteDropTarget::OnFlingToDelete(
     AutoPtr<IViewConfiguration> config;
     vcHelper->Get(IContext::Probe(mLauncher), (IViewConfiguration**)&config);
     AutoPtr<IDragLayer> dragLayer;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     const Int32 duration = FLING_DELETE_ANIMATION_DURATION;
     Int64 startTime;
     AnimationUtils::CurrentAnimationTimeMillis(&startTime);
@@ -777,10 +761,8 @@ ECode CDeleteDropTarget::OnFlingToDelete(
                 duration, config);
     }
     AutoPtr<IRunnable> onAnimationEndRunnable = new MyRunnable2(this, isAllApps, _d);
-    assert(0 && "need class dragLayer");
-    // return dragLayer->AnimateView(_d->mDragView, updateCb, duration, tInterpolator, onAnimationEndRunnable,
-    //         IDragLayer::ANIMATION_END_DISAPPEAR, NULL);
-    return NOERROR;
+    return dragLayer->AnimateView(_d->mDragView, updateCb, duration, tInterpolator, onAnimationEndRunnable,
+            IDragLayer::ANIMATION_END_DISAPPEAR, NULL);
 }
 
 } // namespace Launcher2

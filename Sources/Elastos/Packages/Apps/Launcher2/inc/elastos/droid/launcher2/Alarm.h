@@ -15,9 +15,6 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-/**
- * The ListAdapter which presents all the valid widgets that can be created for a given drop.
- */
 class Alarm
     : public Object
     , public IAlarm

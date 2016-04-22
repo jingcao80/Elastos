@@ -6,7 +6,7 @@ module
     interface Elastos.Droid.Launcher2.ILauncher;
     interface Elastos.Droid.Launcher2.ILauncherModel;
     interface Elastos.Droid.Launcher2.ILauncherProvider;
-    //interface Elastos.Droid.Launcher2.IWidgetPreviewLoaderCacheDb;
+    interface Elastos.Droid.Launcher2.IWidgetPreviewLoaderCacheDb;
 
     namespace Elastos {
     namespace Droid {
@@ -20,6 +20,7 @@ module
      * interface Elastos.Droid.Content.IComponentCallbacks;
      * interface IApplication
      */
+    [local]
     interface ILauncherApplication {
         RecreateWidgetPreviewDb();
 
@@ -33,8 +34,8 @@ module
         GetModel(
             [out] ILauncherModel** mode);
 
-        //GetWidgetPreviewCacheDb(
-        //    [out] IWidgetPreviewLoaderCacheDb** db);
+        GetWidgetPreviewCacheDb(
+            [out] IWidgetPreviewLoaderCacheDb** db);
 
         SetLauncherProvider(
             [in] ILauncherProvider* provider);

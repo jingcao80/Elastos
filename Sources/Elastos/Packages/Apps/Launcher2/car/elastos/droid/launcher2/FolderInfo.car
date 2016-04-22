@@ -8,13 +8,6 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    /*
-    * @invoke interface IItemInfo
-    */
-    interface IFolderInfo {
-
-    }
-
     interface IFolderListener {
         OnAdd(
             [in] IShortcutInfo* item);
@@ -26,6 +19,39 @@ module
             [in] ICharSequence* title);
 
         OnItemsChanged();
+    }
+
+    /*
+    * @invoke interface IItemInfo
+    */
+    interface IFolderInfo {
+        /**
+         * Add an app or shortcut
+         *
+         * @param item
+         */
+        Add(
+            [in] IShortcutInfo* item);
+
+        /**
+         * Remove an app or shortcut. Does not change the DB.
+         *
+         * @param item
+         */
+        Remove(
+            [in] IShortcutInfo* item);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        AddListener(
+            [in] IFolderListener* listener);
+
+        RemoveListener(
+            [in] IFolderListener* listener);
+
+        ItemsChanged();
+
     }
 
     } // namespace Launcher2

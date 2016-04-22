@@ -1,5 +1,8 @@
 
 #include "elastos/droid/launcher2/CHotseat.h"
+#include "elastos/droid/launcher2/FocusHelper.h"
+#include "elastos/droid/launcher2/CellLayout.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/CoreUtils.h>
@@ -36,8 +39,7 @@ ECode CHotseat::MyOnTouchListener::OnTouch(
         Int32 action;
         event->GetAction(&action);
         if ((action & IMotionEvent::ACTION_MASK) == IMotionEvent::ACTION_DOWN) {
-            assert(0 && "need class mLauncher");
-            //mLauncher->OnTouchDownAllAppsButton(v, &result);
+            mLauncher->OnTouchDownAllAppsButton(v);
         }
     }
     *result = FALSE;
@@ -56,8 +58,7 @@ ECode CHotseat::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     if (mLauncher != NULL) {
-        assert(0 && "need class mLauncher");
-        //return mLauncher->OnClickAllAppsButton(v);
+        return mLauncher->OnClickAllAppsButton(v);
     }
     return NOERROR;
 }
@@ -130,10 +131,8 @@ ECode CHotseat::Setup(
     /* [in] */ ILauncher* launcher)
 {
     mLauncher = launcher;
-    assert(0 && "need class FocusHelper");
-    //AutoPtr<IViewOnKeyListener> listener = new HotseatIconKeyEventListener();
-    //return SetOnKeyListener(listener);
-    return NOERROR;
+    AutoPtr<IViewOnKeyListener> listener = new HotseatIconKeyEventListener();
+    return SetOnKeyListener(listener);
 }
 
 ECode CHotseat::GetLayout(
@@ -160,8 +159,7 @@ ECode CHotseat::GetOrderInHotseat(
 
     if (HasVerticalHotseat()) {
         Int32 countY;
-        assert(0 && "need class ICellLayout");
-        //mContent->GetCountY(&countY);
+        mContent->GetCountY(&countY);
         *result = countY - y - 1;
     }
     else {
@@ -188,8 +186,7 @@ ECode CHotseat::GetCellYFromOrder(
 
     if (HasVerticalHotseat()) {
         Int32 countY;
-        assert(0 && "need class ICellLayout");
-        //mContent->GetCountY(&countY);
+        mContent->GetCountY(&countY);
         *result = countY - (rank + 1);
     }
     else {
@@ -212,27 +209,23 @@ ECode CHotseat::OnFinishInflate()
 {
     FrameLayout::OnFinishInflate();
     if (mCellCountX < 0) {
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::GetCellCountX(&mCellCountX);
+        LauncherModel::GetCellCountX(&mCellCountX);
     }
     if (mCellCountY < 0) {
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::GetCellCountY(&mCellCountY);
+        LauncherModel::GetCellCountY(&mCellCountY);
     }
     AutoPtr<IView> view;
     FindViewById(Elastos::Droid::Launcher2::R::id::layout, (IView**)&view);
     mContent = ICellLayout::Probe(view);
-    assert(0 && "need class ICellLayout");
-    // mContent->SetGridSize(mCellCountX, mCellCountY);
-    // mContent->SetIsHotseat(TRUE);
+    mContent->SetGridSize(mCellCountX, mCellCountY);
+    mContent->SetIsHotseat(TRUE);
 
     return ResetLayout();
 }
 
 ECode CHotseat::ResetLayout()
 {
-    assert(0 && "need class ICellLayout");
-    // mContent->RemoveAllViewsInLayout();
+    IViewGroup::Probe(mContent)->RemoveAllViewsInLayout();
 
     // Add the Apps button
     AutoPtr<IContext> context;
@@ -270,12 +263,12 @@ ECode CHotseat::ResetLayout()
     GetCellXFromOrder(mAllAppsButtonRank, &x);
     Int32 y;
     GetCellYFromOrder(mAllAppsButtonRank, &y);
-    assert(0 && "need class CellLayout");
-    // AutoPtr<CellLayout::LayoutParams> lp = new CellLayout::LayoutParams(x,y,1,1);
-    // lp->mCanReorder = FALSE;
-    assert(0 && "need class ICellLayout");
-    //return mContent->AddViewToCellLayout(allAppsButton, -1, 0, lp, TRUE);
-    return NOERROR;
+    AutoPtr<CellLayout::LayoutParams> lp = new CellLayout::LayoutParams();
+    lp->constructor(x,y,1,1);
+    lp->mCanReorder = FALSE;
+    Boolean tmp;
+    return mContent->AddViewToCellLayout(IView::Probe(allAppsButton), -1, 0,
+            ICellLayoutLayoutParams::Probe(lp), TRUE, &tmp);
 }
 
 } // namespace Launcher2

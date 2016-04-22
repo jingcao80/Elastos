@@ -5,6 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Utility.h"
@@ -19,7 +20,6 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-class ShortcutInfo;
 /**
  * Represents an app in AllAppsView.
  */
@@ -66,7 +66,8 @@ public:
         /* [in] */ const String& label,
         /* [in] */ IArrayList* list);
 
-    CARAPI_(AutoPtr<ShortcutInfo>) MakeShortcut();
+    CARAPI MakeShortcut(
+        /* [out] */ IShortcutInfo** info);
 
 public:
     /**

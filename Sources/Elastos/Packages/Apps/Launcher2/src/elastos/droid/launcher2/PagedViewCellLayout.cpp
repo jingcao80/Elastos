@@ -1,6 +1,8 @@
 
 #include "elastos/droid/launcher2/PagedViewCellLayout.h"
 #include "elastos/droid/launcher2/PagedViewCellLayoutChildren.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
@@ -101,8 +103,7 @@ ECode PagedViewCellLayout::LayoutParams::Setup(
             mTopMargin - mBottomMargin;
 
     Boolean res;
-    assert(0 && "need class LauncherApplication");
-    //LauncherApplication::IsScreenLarge(&res);
+    LauncherApplication::IsScreenLarge(&res);
     if (res) {
         mX = hStartPadding + myCellX * (cellWidth + widthGap) + mLeftMargin;
         mY = vStartPadding + myCellY * (cellHeight + heightGap) + mTopMargin;
@@ -201,9 +202,8 @@ ECode PagedViewCellLayout::constructor(
             Elastos::Droid::Launcher2::R::dimen::apps_customize_cell_height,
             &mCellHeight);
     mOriginalCellHeight = mCellHeight;
-    assert(0 && "need class LauncherModel");
-    //LauncherModel::GetCellCountX(&mCellCountX);
-    //LauncherModel::GetCellCountY(&mCellCountY);
+    LauncherModel::GetCellCountX(&mCellCountX);
+    LauncherModel::GetCellCountY(&mCellCountY);
     mOriginalWidthGap = mOriginalHeightGap = mWidthGap = mHeightGap = -1;
     resources->GetDimensionPixelSize(
         Elastos::Droid::Launcher2::R::dimen::apps_customize_max_gap,
@@ -213,7 +213,7 @@ ECode PagedViewCellLayout::constructor(
     mChildren->SetCellDimensions(mCellWidth, mCellHeight);
     mChildren->SetGap(mWidthGap, mHeightGap);
 
-    AddView(IView::Probe(mChildren));
+    return AddView(IView::Probe(mChildren));
 }
 
 PagedViewCellLayout::GetCellWidth(
@@ -253,12 +253,12 @@ ECode PagedViewCellLayout::AddViewToCellLayout(
     /* [in] */ IView* child,
     /* [in] */ Int32 index,
     /* [in] */ Int32 childId,
-    /* [in] */ PagedViewCellLayout::LayoutParams* params,
+    /* [in] */ IPagedViewCellLayoutLayoutParams* params,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<PagedViewCellLayout::LayoutParams> lp = params;
+    AutoPtr<PagedViewCellLayout::LayoutParams> lp = (PagedViewCellLayout::LayoutParams*)params;
 
     // Generate an id for each view, this assumes we have at most 256x256 cells
     // per workspace screen

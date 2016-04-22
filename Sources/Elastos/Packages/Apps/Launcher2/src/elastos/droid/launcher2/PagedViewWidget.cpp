@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/PagedViewWidget.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
@@ -132,8 +133,7 @@ ECode PagedViewWidget::OnDetachedFromWindow()
             preview->GetBitmap((IBitmap**)&map);
             if (sRecyclePreviewsWhenDetachedFromWindow &&
                     mInfo != NULL && preview != NULL && map != NULL) {
-                assert(0 && "need class IWidgetPreviewLoader");
-                //mWidgetPreviewLoader->RecycleBitmap(mInfo, map);
+                mWidgetPreviewLoader->RecycleBitmap(mInfo, map);
             }
             image->SetImageDrawable(NULL);
         }
@@ -174,12 +174,10 @@ ECode PagedViewWidget::ApplyFromAppWidgetProviderInfo(
     AutoPtr<ITextView> dims = ITextView::Probe(view3);
     if (dims != NULL) {
         Int32 x;
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::GetCellCountX(&x);
+        LauncherModel::GetCellCountX(&x);
         Int32 hSpan = Elastos::Core::Math::Min((*cellSpan)[0], x);
         Int32 y;
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::GetCellCountY(&y);
+        LauncherModel::GetCellCountY(&y);
         Int32 vSpan = Elastos::Core::Math::Min((*cellSpan)[1], y);
         String tmpStr;
         tmpStr.AppendFormat(mDimensionsFormatString, hSpan, vSpan);

@@ -14,6 +14,8 @@ module
     namespace Launcher2 {
 
     /**
+     * Implements a DropTarget.
+     *
      * @Involve
      * interface Elastos.Droid.View.IView
      *

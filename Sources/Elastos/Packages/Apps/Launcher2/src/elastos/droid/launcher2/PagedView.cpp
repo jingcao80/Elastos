@@ -304,11 +304,22 @@ ECode PagedView::SetPageSwitchListener(
     return NOERROR;
 }
 
-Boolean PagedView::IsLayoutRtl()
+ECode PagedView::IsLayoutRtl(
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     Int32 layoutDirection;
     GetLayoutDirection(&layoutDirection);
-    return (layoutDirection == LAYOUT_DIRECTION_RTL);
+    *result = (layoutDirection == LAYOUT_DIRECTION_RTL);
+    return NOERROR;
+}
+
+Boolean PagedView::IsLayoutRtl()
+{
+    Boolean res;
+    IsLayoutRtl(&res);
+    return res;
 }
 
 ECode PagedView::SetDataIsReady()
@@ -324,17 +335,53 @@ Boolean PagedView::IsDataReady()
 
 Int32 PagedView::GetCurrentPage()
 {
-    return mCurrentPage;
+    Int32 page;
+    GetCurrentPage(&page);
+    return page;
 }
 
-Int32 PagedView::GetNextPage()
+ECode PagedView::GetCurrentPage(
+    /* [out] */ Int32* page)
 {
-    return (mNextPage != INVALID_PAGE) ? mNextPage : mCurrentPage;
+    VALIDATE_NOT_NULL(page);
+
+    *page = mCurrentPage;
+    return NOERROR;
+}
+
+ECode PagedView::GetNextPage(
+    /* [out] */ Int32* page)
+{
+    VALIDATE_NOT_NULL(page);
+
+    *page = (mNextPage != INVALID_PAGE) ? mNextPage : mCurrentPage;
+    return NOERROR;
 }
 
 Int32 PagedView::GetPageCount()
 {
-    return GetPageCount();
+    Int32 count;
+    GetPageCount(&count);
+    return count;
+}
+
+ECode PagedView::GetPageCount(
+    /* [out] */ Int32* count)
+{
+    VALIDATE_NOT_NULL(count);
+
+    return GetChildCount(count);
+}
+
+ECode PagedView::GetPageAt(
+    /* [in] */ Int32 index,
+    /* [out] */ IView** page)
+{
+    VALIDATE_NOT_NULL(page);
+
+    *page = GetPageAt(index);
+    REFCOUNT_ADD(*page);
+    return NOERROR;
 }
 
 AutoPtr<IView> PagedView::GetPageAt(
@@ -345,10 +392,14 @@ AutoPtr<IView> PagedView::GetPageAt(
     return NOERROR;
 }
 
-Int32 PagedView::IndexToPage(
-    /* [in] */ Int32 index)
+ECode PagedView::IndexToPage(
+    /* [in] */ Int32 index,
+    /* [out] */ Int32* page)
 {
-    return index;
+    VALIDATE_NOT_NULL(page);
+
+    *page = index;
+    return NOERROR;
 }
 
 ECode PagedView::UpdateCurrentPageScroll()
@@ -1070,7 +1121,8 @@ ECode PagedView::RequestChildRectangleOnScreen(
     VALIDATE_NOT_NULL(res);
     Int32 index;
     IndexOfChild(child, &index);
-    Int32 page = IndexToPage(index);
+    Int32 page;
+    IndexToPage(index, &page);
     Boolean isFinished;
     if (page != mCurrentPage || !(mScroller->IsFinished(&isFinished), isFinished)) {
         SnapToPage(page);
@@ -1802,7 +1854,8 @@ ECode PagedView::RequestChildFocus(
     ViewGroup::RequestChildFocus(child, focused);
     Int32 index;
     IndexOfChild(child, &index);
-    Int32 page = IndexToPage(index);
+    Int32 page;
+    IndexToPage(index, &page);
     Boolean res;
     if (page >= 0 && page != GetCurrentPage() && (IsInTouchMode(&res), !res)) {
         SnapToPage(page);
@@ -1841,8 +1894,11 @@ Int32 PagedView::GetChildWidth(
     return (minWidth > measuredWidth) ? minWidth : measuredWidth;
 }
 
-Int32 PagedView::GetPageNearestToCenterOfScreen()
+ECode PagedView::GetPageNearestToCenterOfScreen(
+    /* [out] */ Int32* page)
 {
+    VALIDATE_NOT_NULL(page);
+
     Int32 minDistanceFromScreenCenter = Elastos::Core::Math::INT32_MAX_VALUE;
     Int32 minDistanceFromScreenCenterIndex = -1;
     Int32 scrollX;
@@ -1862,24 +1918,27 @@ Int32 PagedView::GetPageNearestToCenterOfScreen()
             minDistanceFromScreenCenterIndex = i;
         }
     }
-    return minDistanceFromScreenCenterIndex;
+    *page = minDistanceFromScreenCenterIndex;
+    return NOERROR;
 }
 
 ECode PagedView::SnapToDestination()
 {
-    return SnapToPage(GetPageNearestToCenterOfScreen(), PAGE_SNAP_ANIMATION_DURATION);
+    Int32 page;
+    GetPageNearestToCenterOfScreen(&page);
+    return SnapToPage(page, PAGE_SNAP_ANIMATION_DURATION);
 }
 
-// We want the duration of the page snap animation to be influenced by the distance that
-// the screen has to travel, however, we don't want this duration to be effected in a
-// purely linear fashion. Instead, we use this method to moderate the effect that the distance
-// of travel has on the overall snap duration.
-Float PagedView::DistanceInfluenceForSnapDuration(
-    /* [in] */ Float f)
+ECode PagedView::DistanceInfluenceForSnapDuration(
+    /* [in] */ Float f,
+    /* [out] */ Float* distance)
 {
+    VALIDATE_NOT_NULL(distance);
+
     f -= 0.5f; // center the values about 0.
     f *= 0.3f * Elastos::Core::Math::PI / 2.0f;
-    return (Float) Elastos::Core::Math::Sin(f);
+    *distance = (Float) Elastos::Core::Math::Sin(f);
+    return NOERROR;
 }
 
 ECode PagedView::SnapToPageWithVelocity(
@@ -1910,8 +1969,9 @@ ECode PagedView::SnapToPageWithVelocity(
     // we keep this value close to half screen size in order to reduce the variance in snap
     // duration as a function of the distance the page needs to travel.
     Float distanceRatio = Elastos::Core::Math::Min(1.0f, 1.0f * Elastos::Core::Math::Abs(delta) / (2 * halfScreenSize));
-    Float distance = halfScreenSize + halfScreenSize *
-            DistanceInfluenceForSnapDuration(distanceRatio);
+    Float _distance;
+    DistanceInfluenceForSnapDuration(distanceRatio, &_distance);
+    Float distance = halfScreenSize + halfScreenSize * _distance;
 
     velocity = Elastos::Core::Math::Abs(velocity);
     velocity = Elastos::Core::Math::Max(mMinSnapVelocity, velocity);
@@ -2015,9 +2075,12 @@ ECode PagedView::ScrollRight()
     return NOERROR;
 }
 
-Int32 PagedView::GetPageForView(
-    /* [in] */ IView* v)
+ECode PagedView::GetPageForView(
+    /* [in] */ IView* v,
+    /* [out] */ Int32* page)
 {
+    VALIDATE_NOT_NULL(page);
+
     Int32 result = -1;
     if (v != NULL) {
         AutoPtr<IViewParent> vp;
@@ -2025,19 +2088,25 @@ Int32 PagedView::GetPageForView(
         Int32 count = GetPageCount();
         for (Int32 i = 0; i < count; i++) {
             if (IView::Probe(vp) == GetPageAt(i)) {
-                return i;
+                *page = i;
+                return NOERROR;
             }
         }
     }
-    return result;
+    *page = result;
+    return NOERROR;
 }
 
 /**
  * @return True is long presses are still allowed for the current touch
  */
-Boolean PagedView::AllowLongPress()
+ECode PagedView::AllowLongPress(
+    /* [out] */ Boolean* result)
 {
-    return mAllowLongPress;
+    VALIDATE_NOT_NULL(result);
+
+    *result = mAllowLongPress;
+    return NOERROR;
 }
 
 /**
@@ -2406,7 +2475,9 @@ String PagedView::GetCurrentPageDescription()
     String format;
     context->GetString(R::string::default_scroll_format, &format);
     String str;
-    str.AppendFormat(format, GetNextPage() + 1, GetPageCount());
+    Int32 page;
+    GetNextPage(&page);
+    str.AppendFormat(format, page + 1, GetPageCount());
     return str;
 }
 

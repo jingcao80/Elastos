@@ -41,6 +41,7 @@ module
     merge("../../../../car/elastos/droid/launcher2/LauncherApplication.car");
     merge("../../../../car/elastos/droid/launcher2/LauncherSettings.car");
     merge("../../../../car/elastos/droid/launcher2/LauncherAppWidgetHostView.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherViewPropertyAnimator.car");
     merge("../../../../car/elastos/droid/launcher2/LauncherAppWidgetHost.car");
     merge("../../../../car/elastos/droid/launcher2/PagedView.car");
     merge("../../../../car/elastos/droid/launcher2/PagedViewWidget.car");
@@ -570,6 +571,7 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
+        interface IActivity;
         interface IViewOnClickListener;
         interface IViewOnLongClickListener;
         interface ILauncherModelCallbacks;
