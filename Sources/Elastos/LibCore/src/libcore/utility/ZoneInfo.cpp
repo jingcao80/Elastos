@@ -504,7 +504,7 @@ ECode ZoneInfo::ToString(
     /* [out] */ String* str)
 {
     StringBuilder sb;
-    // First the basics...
+
     String id;
     GetID(&id);
     sb += "ZoneInfo[";
@@ -515,42 +515,9 @@ ECode ZoneInfo::ToString(
     sb += mUseDst;
     sb += ",mDstSavings=";
     sb += mDstSavings;
+    sb += ",transitions=";
+    sb += mTransitions->GetLength();
     sb += "]";
-
-    // ...followed by a zdump(1)-like description of all our transition data.
-    sb.AppendChar('\n');
-    AutoPtr<IFormatter> f;
-    CFormatter::New(&sb, (IFormatter**)&f);
-    for (Int32 i = 0; i < mTransitions->GetLength(); ++i) {
-        Int32 type = (*mTypes)[i] & 0xff;
-        String utcTime = FormatTime((*mTransitions)[i], TimeZone::UTC());
-        String localTime = FormatTime((*mTransitions)[i], this);
-        Int32 offset = (*mOffsets)[type];
-        Int32 gmtOffset = mRawOffset / 1000 + offset;
-        AutoPtr<ArrayOf<IInterface*> > arguments = ArrayOf<IInterface*>::Alloc(7);
-        AutoPtr<IInteger32> integer;
-        CInteger32::New(i, (IInteger32**)&integer);
-        arguments->Set(0, integer);
-        integer = NULL;
-        CInteger32::New((*mTransitions)[i], (IInteger32**)&integer);
-        arguments->Set(1, integer);
-        AutoPtr<ICharSequence> cs;
-        CString::New(utcTime, (ICharSequence**)&cs);
-        arguments->Set(2, cs);
-        cs = NULL;
-        CString::New(localTime, (ICharSequence**)&cs);
-        arguments->Set(3, cs);
-        AutoPtr<IBoolean> b;
-        CBoolean::New((*mIsDsts)[i],(IBoolean**)&b);
-        arguments->Set(4, b);
-        integer = NULL;
-        CInteger32::New(offset, (IInteger32**)&integer);
-        arguments->Set(5, integer);
-        integer = NULL;
-        CInteger32::New(gmtOffset, (IInteger32**)&integer);
-        arguments->Set(6, integer);
-        f->Format(String("%4d : time=%11d %s = %s isDst=%d offset=%5d gmtOffset=%d\n"), arguments);
-    }
     *str = sb.ToString();
     return NOERROR;
 }
