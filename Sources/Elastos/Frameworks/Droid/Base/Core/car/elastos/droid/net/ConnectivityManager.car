@@ -78,8 +78,7 @@ module
          * @hide
          */
         // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        const String CONNECTIVITY_ACTION_IMMEDIATE =
-                "android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE";
+        const String CONNECTIVITY_ACTION_IMMEDIATE = "android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE";
 
         /**
          * The lookup key for a {@link NetworkInfo} object. Retrieve with
@@ -201,7 +200,7 @@ module
          */
         // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
         // @Deprecated
-        const String ACTION_BACKGROUND_DATA_SETTING_CHANGED ="android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
+        const String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
 
         /**
          * Broadcast Action: The network connection may not be good
@@ -211,7 +210,7 @@ module
          * @hide
          */
         // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        const String INET_CONDITION_ACTION ="android.net.conn.INET_CONDITION_ACTION";
+        const String INET_CONDITION_ACTION = "android.net.conn.INET_CONDITION_ACTION";
 
         /**
          * Broadcast Action: A tetherable connection has come or gone.
@@ -223,7 +222,7 @@ module
          * @hide
          */
         // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        const String ACTION_TETHER_STATE_CHANGED ="android.net.conn.TETHER_STATE_CHANGED";
+        const String ACTION_TETHER_STATE_CHANGED = "android.net.conn.TETHER_STATE_CHANGED";
 
         /**
          * Broadcast intent action indicating that a Station is connected
@@ -231,8 +230,7 @@ module
          *
          * @hide
          */
-        const String TETHER_CONNECT_STATE_CHANGED =
-                "android.net.conn.TETHER_CONNECT_STATE_CHANGED";
+        const String TETHER_CONNECT_STATE_CHANGED = "android.net.conn.TETHER_CONNECT_STATE_CHANGED";
 
         /**
          * @hide
@@ -263,8 +261,7 @@ module
          * @hide
          */
         // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        const String ACTION_CAPTIVE_PORTAL_TEST_COMPLETED =
-                "android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED";
+        const String ACTION_CAPTIVE_PORTAL_TEST_COMPLETED = "android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED";
 
         /**
          * The lookup key for a boolean that indicates whether a captive portal was detected.
@@ -277,21 +274,21 @@ module
          * The absence of a connection type.
          * @hide
          */
-        const Int32 TYPE_NONE        = -1;
+        const Int32 TYPE_NONE = -1;
 
         /**
          * The Mobile data connection.  When active, all data traffic
          * will use this network type's interface by default
          * (it has a default route)
          */
-        const Int32 TYPE_MOBILE      = 0;
+        const Int32 TYPE_MOBILE = 0;
 
         /**
          * The WIFI data connection.  When active, all data traffic
          * will use this network type's interface by default
          * (it has a default route).
          */
-        const Int32 TYPE_WIFI        = 1;
+        const Int32 TYPE_WIFI = 1;
 
         /**
          * An MMS-specific Mobile data connection.  This network type may use the
@@ -299,7 +296,7 @@ module
          * one.  This is used by applications needing to talk to the carrier's
          * Multimedia Messaging Service servers.
          */
-        const Int32 TYPE_MOBILE_MMS  = 2;
+        const Int32 TYPE_MOBILE_MMS = 2;
 
         /**
          * A SUPL-specific Mobile data connection.  This network type may use the
@@ -315,7 +312,7 @@ module
          * one.  This is sometimes by the system when setting up an upstream connection
          * for tethering so that the carrier is aware of DUN traffic.
          */
-        const Int32 TYPE_MOBILE_DUN  = 4;
+        const Int32 TYPE_MOBILE_DUN = 4;
 
         /**
          * A High Priority Mobile data connection.  This network type uses the
@@ -331,26 +328,26 @@ module
          * will use this network type's interface by default
          * (it has a default route).
          */
-        const Int32 TYPE_WIMAX       = 6;
+        const Int32 TYPE_WIMAX = 6;
 
         /**
          * The Bluetooth data connection.  When active, all data traffic
          * will use this network type's interface by default
          * (it has a default route).
          */
-        const Int32 TYPE_BLUETOOTH   = 7;
+        const Int32 TYPE_BLUETOOTH = 7;
 
         /**
          * Dummy data connection.  This should not be used on shipping devices.
          */
-        const Int32 TYPE_DUMMY       = 8;
+        const Int32 TYPE_DUMMY = 8;
 
         /**
          * The Ethernet data connection.  When active, all data traffic
          * will use this network type's interface by default
          * (it has a default route).
          */
-        const Int32 TYPE_ETHERNET    = 9;
+        const Int32 TYPE_ETHERNET = 9;
 
         /**
          * Over the air Administration.
@@ -362,20 +359,20 @@ module
          * IP Multimedia Subsystem.
          * {@hide}
          */
-        const Int32 TYPE_MOBILE_IMS  = 11;
+        const Int32 TYPE_MOBILE_IMS = 11;
 
         /**
          * Carrier Branded Services.
          * {@hide}
          */
-        const Int32 TYPE_MOBILE_CBS  = 12;
+        const Int32 TYPE_MOBILE_CBS = 12;
 
         /**
          * A Wi-Fi p2p connection. Only requesting processes will have access to
          * the peers connected.
          * {@hide}
          */
-        const Int32 TYPE_WIFI_P2P    = 13;
+        const Int32 TYPE_WIFI_P2P = 13;
 
         /**
          * The network to use for initially attaching to the network

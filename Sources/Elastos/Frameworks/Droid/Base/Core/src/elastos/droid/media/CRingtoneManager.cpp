@@ -13,6 +13,7 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IProfileGroup;
+using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::App::ProfileGroupMode;
 using Elastos::Droid::App::ProfileGroupMode_DEFAULT;
 using Elastos::Droid::App::ProfileGroupMode_SUPPRESS;

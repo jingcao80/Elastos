@@ -1,0 +1,31 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Services {
+    namespace SecurityBridge {
+    namespace Api {
+
+    /**
+     * This class defines an interface to a package manager security bridge.
+     */
+    interface IPackageManagerMonitor {
+        /**
+         * This method handles approval requests for APK installations
+         * @param apkFilePath Package APK file path
+         * @param originalAPKFilePath Original package APK file path
+         * @return true if it is allowed to continue with the installation. otherwise - false.
+         * @hide
+         */
+        ApproveAppInstallRequest(
+            [in] String apkFilePath,
+            [in] String originalAPKFilePath,
+            [out] Boolean* result);
+    }
+
+    } // namespace Api
+    } // namespace SecurityBridge
+    } // namespace Services
+    } // namespace Droid
+    } // namespace Elastos
+}

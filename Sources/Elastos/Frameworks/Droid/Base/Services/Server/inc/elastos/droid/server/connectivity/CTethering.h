@@ -3,24 +3,34 @@
 #define __ELASTOS_DROID_SERVER_CONNECTIVITY_CTETHERING_H__
 
 #include "_Elastos_Droid_Server_Connectivity_CTethering.h"
-#include "elastos/droid/server/net/BaseNetworkObserver.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/internal/utility/State.h"
 #include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/server/net/BaseNetworkObserver.h"
+#include <elastos/core/Thread.h>
 
-using Elastos::Droid::Os::IINetworkManagementService;
-using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Net::IConnectivityManager;
-using Elastos::Droid::Net::IINetworkStatsService;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Internal::Utility::StateMachine;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Net::IConnectivityManagerNetworkCallback;
+using Elastos::Droid::Net::IINetworkStatsService;
+using Elastos::Droid::Net::ILinkProperties;
+using Elastos::Droid::Net::INetwork;
+using Elastos::Droid::Net::INetworkCapabilities;
+using Elastos::Droid::Net::INetworkRequest;
+using Elastos::Droid::Os::IINetworkManagementService;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Server::Net::BaseNetworkObserver;
+using Elastos::Droid::Wifi::IWifiDevice;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IList;
 using Elastos::Core::IInteger32;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Droid {
@@ -141,6 +151,8 @@ public:
 
         CARAPI_(Boolean) IsTethered();
 
+        CARAPI_(String) GetTethered();
+
         CARAPI_(Boolean) IsErrored();
 
         CARAPI_(void) SetLastErrorAndTransitionToInitialState(
@@ -214,6 +226,50 @@ public:
         class TetherMasterUtilState : public State
         {
         public:
+            class MyNetWorkCallback
+                : public Object
+                , public IConnectivityManagerNetworkCallback
+            {
+            public:
+                MyNetWorkCallback(
+                    /* [in] */ TetherMasterUtilState* host);
+
+                ~MyNetWorkCallback();
+
+                CAR_INTERFACE_DECL()
+
+                CARAPI OnAvailable(
+                    /* [in] */ INetwork* network);
+
+                CARAPI OnLost(
+                    /* [in] */ INetwork* network);
+
+                CARAPI OnLinkPropertiesChanged(
+                    /* [in] */ INetwork* network,
+                    /* [in] */ ILinkProperties* lp);
+
+                CARAPI OnPreCheck(
+                    /* [in] */ INetwork* network);
+
+                CARAPI OnLosing(
+                    /* [in] */ INetwork* network,
+                    /* [in] */ Int32 maxMsToLive);
+
+                CARAPI OnUnavailable();
+
+                CARAPI OnCapabilitiesChanged(
+                    /* [in] */ INetwork* network,
+                    /* [in] */ INetworkCapabilities* networkCapabilities);
+
+            public:
+                String mCurrentUpstreamIface;
+                String mLastUpstreamIface;
+                Boolean mCurrentIPV6Connected;
+
+            private:
+                TetherMasterUtilState* mHost;
+            };
+
             TetherMasterUtilState(
                 /* [in] */ TetherMasterSM* host) : mHost(host)
             {}
@@ -240,11 +296,26 @@ public:
 
             CARAPI_(Boolean) TurnOffMasterTetherSettings();
 
+            CARAPI_(void) AddUpstreamV6Interface(
+                /* [in] */ const String& iface);
+
+            CARAPI_(void) RemoveUpstreamV6Interface(
+                /* [in] */ const String& iface);
+
             CARAPI_(void) ChooseUpstreamType(
                 /* [in]*/ Boolean tryCell);
 
             CARAPI_(void) NotifyTetheredOfNewUpstreamIface(
                 /* [in]*/ const String& ifaceName);
+
+        private:
+            CARAPI_(Boolean) IsIpv6Connected(
+                /* [in] */ ILinkProperties* lp);
+
+            CARAPI_(AutoPtr<INetworkRequest>) GetNetworkRequest(
+                /* [in] */ Int32 upType);
+
+            CARAPI_(AutoPtr<IConnectivityManagerNetworkCallback>) GetNetworkCallback();
 
         public:
             static const Boolean TRY_TO_SETUP_MOBILE_CONNECTION;
@@ -450,10 +521,18 @@ public:
 
         static const Int32 UPSTREAM_SETTLE_TIME_MS = 10000;
         static const Int32 CELL_CONNECTION_RENEW_MS = 40000;
+        AutoPtr<IConnectivityManagerNetworkCallback> mNetworkCallback;
+        Boolean mPrevIPV6Connected;
         CTethering* mHost;
     };
 
 private:
+    enum UpstreamInfoUpdateType
+    {
+        UPSTREAM_IFACE_REMOVED,
+        UPSTREAM_IFACE_ADDED
+    };
+
     class StateReceiver : public BroadcastReceiver
     {
     public:
@@ -477,7 +556,31 @@ private:
         CTethering* mHost;
     };
 
+    /*
+     * DnsmasqThread is used to read the Device info from dnsmasq.
+     */
+    class DnsmasqThread
+        : public Thread
+    {
+    public:
+        DnsmasqThread(
+            /* [in] */ CTethering* tethering,
+            /* [in] */ IWifiDevice* device,
+            /* [in] */ Int32 interval,
+            /* [in] */ Int32 maxTimes);
+
+        CARAPI Run();
+
+    private:
+        CTethering* mTethering;
+        Int32 mInterval;
+        Int32 mMaxTimes;
+        AutoPtr<IWifiDevice> mDevice;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     CAR_OBJECT_DECL()
 
     CTethering();
@@ -511,6 +614,9 @@ public:
 
     CARAPI InterfaceRemoved(
         /* [in] */ const String& iface);
+
+    CARAPI GetTetherConnectedSta(
+        /* [out] */ IList** result);
 
     CARAPI Tether(
         /* [in] */ const String& iface,
@@ -560,6 +666,9 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    CARAPI InterfaceMessageRecevied(
+        /* [in] */ const String& message);
+
 private:
     // We can't do this once in the Tethering() constructor and cache the value, because the
     // CONNECTIVITY_SERVICE is registered only after the Tethering() constructor has completed.
@@ -569,6 +678,12 @@ private:
         /* [in] */ const String& iface);
 
     CARAPI_(void) SendTetherStateChangedBroadcast();
+
+    CARAPI_(void) SendUpstreamIfaceChangeBroadcast(
+        /* [in]  */ const String& upstreamIface,
+        /* [in]  */ const String& tetheredIface,
+        /* [in]  */ Int32 ip_type,
+        /* [in]  */ UpstreamInfoUpdateType update_type);
 
     CARAPI_(void) ShowTetheredNotification(
         /* [in] */ Int32 icon);
@@ -581,8 +696,30 @@ private:
     CARAPI_(Boolean) ConfigureUsbIface(
         /* [in] */ Boolean enabled);
 
+    CARAPI_(void) SendTetherConnectStateChangedBroadcast();
+
+    CARAPI_(Boolean) ReadDeviceInfoFromDnsmasq(
+        /* [in] */ IWifiDevice* device);
+
 public:
     static const String TAG;
+    /* Intent to indicate change in upstream interface change */
+    static const String UPSTREAM_IFACE_CHANGED_ACTION;
+
+    // Upstream Interface Name i.e. rmnet_data0, wlan0 etc.
+    static const String EXTRA_UPSTREAM_IFACE;
+
+    // Tethered Interface Name i.e. rndis0, wlan0, usb0 etc.
+    static const String EXTRA_TETHERED_IFACE;
+
+    // Upstream Interface IP Type i.e IPV6 or IPV4
+    static const String EXTRA_UPSTREAM_IP_TYPE;
+
+    // Update Type i.e Add upstream interface or delete upstream interface
+    static const String EXTRA_UPSTREAM_UPDATE_TYPE;
+
+    // Default Value for Extra Infomration
+    static const Int32 EXTRA_UPSTREAM_INFO_DEFAULT;
 
 private:
     AutoPtr<IContext> mContext;
@@ -639,6 +776,17 @@ private:
 
     Boolean mRndisEnabled; // track the RNDIS function enabled state
     Boolean mUsbTetherRequested; // true if USB tethering should be started when RNDIS is enabled
+
+    // Once STA established connection to hostapd, it will be added
+    // to mL2ConnectedDeviceMap. Then after deviceinfo update from dnsmasq,
+    // it will be added to mConnectedDeviceMap
+    AutoPtr<IHashMap> mL2ConnectedDeviceMap;
+    AutoPtr<IHashMap> mConnectedDeviceMap;
+    static const String mDhcpLocation;
+
+    // Device name polling interval(ms) and max times
+    static const Int32 DNSMASQ_POLLING_INTERVAL;
+    static const Int32 DNSMASQ_POLLING_MAX_TIMES;
 };
 
 } // Connectivity

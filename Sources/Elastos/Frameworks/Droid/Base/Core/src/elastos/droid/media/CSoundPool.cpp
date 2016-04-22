@@ -1,15 +1,14 @@
-
-#include "elastos/droid/media/CSoundPool.h"
+#include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/media/CAudioAttributes.h"
 #include "elastos/droid/media/CAudioAttributesBuilder.h"
-#include "elastos/droid/app/CActivityThread.h"
-#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/media/CSoundPool.h"
+#include "elastos/droid/os/CLooperHelper.h"
 #include "elastos/droid/os/CParcelFileDescriptor.h"
 #include "elastos/droid/os/CParcelFileDescriptorHelper.h"
-#include "elastos/droid/os/CLooperHelper.h"
-#include <elastos/droid/os/ServiceManager.h>
 #include <elastos/droid/os/Looper.h>
 #include <elastos/droid/os/Process.h>
+#include <elastos/droid/os/ServiceManager.h>
+#include "elastos/droid/os/SystemProperties.h"
 #include "Elastos.CoreLibrary.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Content.h"
@@ -26,21 +25,22 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::App::IIAppOpsService;
+using Elastos::Droid::Media::CAudioAttributes;
 using Elastos::Droid::Os::CLooperHelper;
 using Elastos::Droid::Os::CParcelFileDescriptor;
 using Elastos::Droid::Os::CParcelFileDescriptorHelper;
 using Elastos::Droid::Os::EIID_IHandler;
-using Elastos::Droid::Os::Looper;
-using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::IParcelFileDescriptorHelper;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::IO::CFile;
-using Elastos::IO::IFile;
 using Elastos::IO::ICloseable;
+using Elastos::IO::IFile;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::AutoLock;
@@ -100,10 +100,10 @@ ECode CSoundPool::Builder::Build(
         aab->SetUsage(IAudioAttributes::USAGE_MEDIA);
         AutoPtr<IAudioAttributes> attr;
         aab->Build((IAudioAttributes**)&attr);
-        mAudioAttributes = attr.Get();
+        mAudioAttributes = attr;
     }
     AutoPtr<ISoundPool> sp;
-    CSoundPool::New(mMaxStreams, mAudioAttributes.Get(), (ISoundPool**)&sp);
+    CSoundPool::New(mMaxStreams, mAudioAttributes, (ISoundPool**)&sp);
     *result = sp.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -254,7 +254,10 @@ ECode CSoundPool::SoundPoolImpl::Load(
         afd->GetFileDescriptor((IFileDescriptor**)&fd);
         Int64 startOffset;
         afd->GetStartOffset(&startOffset);
-        *result = _Load(fd.Get(), startOffset, len, priority);
+        *result = _Load(fd, startOffset, len, priority);
+    }
+    else {
+        *result = 0;
     }
     return NOERROR;
 }
@@ -445,12 +448,13 @@ ECode CSoundPool::SoundPoolImpl::SetOnLoadCompleteListener(
             // setup message handler
             AutoPtr<ILooper> looper = Looper::GetMyLooper();
             if (looper != NULL) {
-                mEventHandler = new EventHandler(mProxy, this, looper.Get());
-            } else {
+                mEventHandler = new EventHandler(mProxy, this, looper);
+            }
+            else {
                 looper = NULL;
                 looper = Looper::GetMainLooper();
                 if (looper != NULL) {
-                    mEventHandler = new EventHandler(mProxy, this, looper.Get());
+                    mEventHandler = new EventHandler(mProxy, this, looper);
                 }
                 else {
                     mEventHandler = NULL;
@@ -554,7 +558,7 @@ void CSoundPool::SoundPoolImpl::PostEventFromNative(
         AutoPtr<IMessage> m;
         eh->ObtainMessage(msg, arg1, arg2, obj, (IMessage**)&m);
         Boolean flag = FALSE;
-        eh->SendMessage(m.Get(), &flag);
+        eh->SendMessage(m, &flag);
     }
 }
 
@@ -572,6 +576,11 @@ Int32 CSoundPool::SoundPoolImpl::Native_setup(
     /* [in] */ Int32 maxStreams,
     /* [in] */ IAudioAttributes* aa)
 {
+    if (aa == NULL) {
+        Logger::E(TAG, "Error creating SoundPool: invalid audio attributes");
+        return -1;
+    }
+
     CAudioAttributes* jaa = (CAudioAttributes*)aa;
     audio_attributes_t *paa = NULL;
     // read the AudioAttributes values
@@ -598,6 +607,7 @@ Int32 CSoundPool::SoundPoolImpl::Native_setup(
 
     // audio attributes were copied in SoundPool creation
     free(paa);
+
     return 0;
 }
 

@@ -197,6 +197,10 @@ module
     merge("../../../car/elastos/droid/sax.car");
     }
 
+    submodule Elastos.Droid.SecurityBridge {
+    merge("../../../car/elastos/droid/securitybridge.car");
+    }
+
     submodule Elastos.Droid.Service {
     merge("../../../car/elastos/droid/service.car");
     }

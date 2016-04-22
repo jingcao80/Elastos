@@ -6,7 +6,12 @@
 #include <Elastos.Droid.Internal.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Net::CLinkProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Utility::CSparseArray;
 
 using Elastos::Utility::CArrayList;
@@ -23,6 +28,45 @@ const Int32 NetworkAgentInfo::UNVALIDATED_SCORE_PENALTY = 40;
 // Score for explicitly connected network.
 const Int32 NetworkAgentInfo::EXPLICITLY_SELECTED_NETWORK_SCORE = 100;
 
+const String NetworkAgentInfo::EXTRA_FEATURE_ID(String("cneFeatureId"));
+
+const String NetworkAgentInfo::EXTRA_FEATURE_PARAMETER(String("cneFeatureParameter"));
+
+const String NetworkAgentInfo::EXTRA_PARAMETER_VALUE(String("cneParameterValue"));
+
+const Int32 NetworkAgentInfo::FEATURE_ID = 1;
+
+const Int32 NetworkAgentInfo::FEATURE_PARAM = 1;
+
+const Int32 NetworkAgentInfo::FEATURE_OFF = 1;
+
+const Int32 NetworkAgentInfo::FEATURE_ON = FEATURE_OFF + 1;
+
+//-----------------------------------------------------------------------
+//          NetworkAgentInfo::MyBroadcastReceiver
+//-----------------------------------------------------------------------
+NetworkAgentInfo::MyBroadcastReceiver::MyBroadcastReceiver(
+    /* [in] */ NetworkAgentInfo* host)
+    : mHost(host)
+{}
+
+ECode NetworkAgentInfo::MyBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals("com.quicinc.cne.CNE_PREFERENCE_CHANGED")) {
+        Int32 featureId;
+        intent->GetInt32Extra(EXTRA_FEATURE_ID, -1, &featureId);
+        Int32 featureParam;
+        intent->GetInt32Extra(EXTRA_FEATURE_PARAMETER, -1, &featureParam);
+        Int32 featureVal;
+        intent->GetInt32Extra(EXTRA_PARAMETER_VALUE, -1, &featureVal);
+        mHost->HandlePrefChange(featureId, featureParam, featureVal);
+    }
+}
+
 CAR_INTERFACE_IMPL(NetworkAgentInfo, Object, INetworkAgentInfo)
 
 NetworkAgentInfo::NetworkAgentInfo(
@@ -35,6 +79,7 @@ NetworkAgentInfo::NetworkAgentInfo(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ INetworkMisc* misc)
+    : mIsCneWqeEnabled(FALSE)
 {
     CSparseArray::New((ISparseArray**)&mNetworkRequests);
     CArrayList::New((IArrayList**)&mNetworkLingered);
@@ -50,6 +95,18 @@ NetworkAgentInfo::NetworkAgentInfo(
     mNetworkMisc = misc;
     mCreated = FALSE;
     mValidated = FALSE;
+    mContext = context;
+    AutoPtr<ISystemProperties> properties;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&properties);
+    Int32 val;
+    properties->GetInt32(String("persist.cne.feature"), 0, &val);
+    if (val == 3) {
+        AutoPtr<MyBroadcastReceiver> myBR = new MyBroadcastReceiver(this);
+        AutoPtr<IIntentFilter> intentFilter;
+        CIntentFilter::New(String("com.quicinc.cne.CNE_PREFERENCE_CHANGED"), (IIntentFilter**)&intentFilter);
+        AutoPtr<IIntent> tmpIntent;
+        mContext->RegisterReceiver(IBroadcastReceiver::Probe(myBR), intentFilter, (IIntent**)&tmpIntent);
+    }
 }
 
 ECode NetworkAgentInfo::AddRequest(
@@ -80,6 +137,7 @@ ECode NetworkAgentInfo::GetCurrentScore(
     // so they are not scattered about the transports.
 
     *score = mCurrentScore;
+    if (mIsCneWqeEnabled) return NOERROR;
 
     if (!mValidated) *score -= UNVALIDATED_SCORE_PENALTY;
     if (*score < 0) *score = 0;
@@ -163,6 +221,21 @@ String NetworkAgentInfo::Name()
     }
     sb += "]";
     return sb.ToString();
+}
+
+void NetworkAgentInfo::HandlePrefChange(
+    /* [in] */ Int32 featureId,
+    /* [in] */ Int32 featureParam,
+    /* [in] */ Int32 value)
+{
+    if (featureId == FEATURE_ID && featureParam == FEATURE_PARAM) {
+        if (value == FEATURE_ON) {
+            mIsCneWqeEnabled = TRUE;
+        }
+        else if (value == FEATURE_OFF) {
+            mIsCneWqeEnabled = FALSE;
+        }
+    }
 }
 
 } // Connectivity

@@ -169,16 +169,20 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
 
         if (name.Equals(String("region"))) {
             cue->SetRegionId(value);
-        } else if (name.Equals(String("vertical"))) {
+        }
+        else if (name.Equals(String("vertical"))) {
             AutoPtr<ITextTrackCue> ttc = mHost->mCue;
             if (value.Equals(String("rl"))) {
                 ttc->SetWritingDirection(ITextTrackCue::WRITING_DIRECTION_VERTICAL_RL);
-            } else if (value.Equals(String("lr"))) {
+            }
+            else if (value.Equals(String("lr"))) {
                 ttc->SetWritingDirection(ITextTrackCue::WRITING_DIRECTION_VERTICAL_LR);
-            } else {
+            }
+            else {
                 Slogger::W("cue setting", "%s has invalid value%s", name.string(), value.string());
             }
-        } else if (name.Equals(String("line"))) {
+        }
+        else if (name.Equals(String("line"))) {
             // try {
             /* TRICKY: we know that there are no spaces in value */
             assert(value.IndexOf(' ') < 0);
@@ -189,9 +193,11 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
                 Int32 val;
                 WebVttParserHelper::ParseIntPercentage(value, &val);
                 cue->SetLinePosition(val);
-            } else if (bRet) {
+            }
+            else if (bRet) {
                 Slogger::W("cue setting", "%s contains an invalid character %s", name.string(), value.string());
-            } else {
+            }
+            else {
                 cue->SetSnapToLines(TRUE);
                 cue->SetLinePosition(StringUtils::ParseInt32(value));
             }
@@ -199,7 +205,8 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
                 // Slogger::W("cue setting", "%s is not numeric or percentage%s", name.string(), value.string());
             // }
             // TODO: add support for optional alignment value [,start|middle|end]
-        } else if (name.Equals(String("position"))) {
+        }
+        else if (name.Equals(String("position"))) {
             // try {
             Int32 val;
             WebVttParserHelper::ParseIntPercentage(value, &val);
@@ -207,7 +214,8 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
             // } catch (NumberFormatException e) {
                 // Slogger::W("cue setting", "%s is not numeric or percentage %s", name.string(), value.string());
             // }
-        } else if (name.Equals(String("size"))) {
+        }
+        else if (name.Equals(String("size"))) {
             // try {
             Int32 val;
             WebVttParserHelper::ParseIntPercentage(value, &val);
@@ -215,18 +223,24 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
             // } catch (NumberFormatException e) {
                 // Slogger::W("cue setting", "%s is not numeric or percentage %s", name.string(), value.string());
             // }
-        } else if (name.Equals(String("align"))) {
+        }
+        else if (name.Equals(String("align"))) {
             if (value.Equals(String("start"))) {
                 cue->SetAlignment(ITextTrackCue::ALIGNMENT_START);
-            } else if (value.Equals(String("middle"))) {
+            }
+            else if (value.Equals(String("middle"))) {
                 cue->SetAlignment(ITextTrackCue::ALIGNMENT_MIDDLE);
-            } else if (value.Equals(String("end"))) {
+            }
+            else if (value.Equals(String("end"))) {
                 cue->SetAlignment(ITextTrackCue::ALIGNMENT_END);
-            } else if (value.Equals(String("left"))) {
+            }
+            else if (value.Equals(String("left"))) {
                 cue->SetAlignment(ITextTrackCue::ALIGNMENT_LEFT);
-            } else if (value.Equals(String("right"))) {
+            }
+            else if (value.Equals(String("right"))) {
                 cue->SetAlignment(ITextTrackCue::ALIGNMENT_RIGHT);
-            } else {
+            }
+            else {
                 Slogger::W("cue setting", "%s has invalid value %s", name.string(), value.string());
                 continue;
             }

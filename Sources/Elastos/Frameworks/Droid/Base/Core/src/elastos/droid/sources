@@ -46,6 +46,7 @@ ELASTOS_LIBS += opengl/opengl.lib
 ELASTOS_LIBS += preference/preference.lib
 ELASTOS_LIBS += provider/provider.lib
 ELASTOS_LIBS += sax/sax.lib
+ELASTOS_LIBS += services/securitybridge/api/securitybridge.lib
 ELASTOS_LIBS += server/server.lib
 ELASTOS_LIBS += server/backup/backup.lib
 ELASTOS_LIBS += server/net/net.lib

@@ -14,6 +14,7 @@ module
     merge("wifi/WifiChannel.car");
     merge("wifi/WifiConfiguration.car");
     merge("wifi/WifiConnectionStatistics.car");
+    merge("wifi/WifiDevice.car");
     merge("wifi/WifiEnterpriseConfig.car");
     merge("wifi/WifiInfo.car");
     merge("wifi/WifiLinkLayerStats.car");

@@ -5,28 +5,29 @@
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Utility.h>
-#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/ext/frameworkext.h"
 
-using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::App::IAppOpsManager;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIClipboard;
-using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Content::IClipDataItem;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::BroadcastReceiver;
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IClipDescription;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIClipboard;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::IOnPrimaryClipChangedListener;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IIUserManager;
 using Elastos::Droid::Os::IRemoteCallbackList;
+using Elastos::Droid::Services::SecurityBridge::Api::IClipboardManagerMonitor;
 using Elastos::Droid::Utility::ISparseArray;
-using Elastos::Utility::IList;
 using Elastos::Utility::IHashSet;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -226,7 +227,8 @@ private:
     AutoPtr<IAppOpsManager> mAppOps;
     AutoPtr<IBinder> mPermissionOwner;
 
-    /* private SparseArray<PerUserClipboard> mClipboards = new SparseArray<PerUserClipboard>(); */
+    static const String SECURITY_BRIDGE_NAME;
+    AutoPtr<IClipboardManagerMonitor> mSecurityBridge;
     AutoPtr<ISparseArray> mClipboards;
 };
 

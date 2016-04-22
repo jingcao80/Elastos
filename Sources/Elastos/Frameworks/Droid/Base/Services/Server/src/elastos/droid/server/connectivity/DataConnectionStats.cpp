@@ -10,7 +10,7 @@ using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_ABSENT;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NETWORK_LOCKED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERSO_LOCKED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NOT_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERM_DISABLED;
@@ -172,7 +172,7 @@ void DataConnectionStats::UpdateSimState(
             mSimState = IccCardConstantsState_PUK_REQUIRED;
         }
         else {
-            mSimState = IccCardConstantsState_NETWORK_LOCKED;
+            mSimState = IccCardConstantsState_PERSO_LOCKED;
         }
     }
     else {

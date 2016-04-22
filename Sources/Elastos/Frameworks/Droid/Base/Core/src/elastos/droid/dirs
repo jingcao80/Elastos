@@ -32,6 +32,7 @@ DIRS += view
 DIRS += sax
 DIRS += server
 DIRS += service
+DIRS += services
 DIRS += speech
 #DIRS += systemui
 DIRS += telephony

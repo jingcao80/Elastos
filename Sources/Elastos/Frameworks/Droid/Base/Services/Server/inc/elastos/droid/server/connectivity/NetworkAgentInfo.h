@@ -3,9 +3,12 @@
 #define __ELASTOS_DROID_SERVER_CONNECTIVITY_NETWORK_AGENT_INFO_H__
 
 #include <elastos/droid/server/connectivity/NetworkMonitor.h>
+#include <elastos/droid/content/BroadcastReceiver.h>
 #include "_Elastos.Droid.Server.h"
 
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Net::ILinkProperties;
 using Elastos::Droid::Net::INetwork;
 using Elastos::Droid::Net::INetworkCapabilities;
@@ -14,9 +17,8 @@ using Elastos::Droid::Net::INetworkMisc;
 using Elastos::Droid::Net::INetworkRequest;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Utility::ISparseArray;
-using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Server::Connectivity::NetworkMonitor;
+using Elastos::Droid::Utility::ISparseArray;
 
 using Elastos::Utility::IArrayList;
 
@@ -35,6 +37,24 @@ class NetworkAgentInfo
     : public Object
     , public INetworkAgentInfo
 {
+    friend class MyBroadcastReceiver;
+
+private:
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        MyBroadcastReceiver(
+            /* [in] */ NetworkAgentInfo* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        NetworkAgentInfo* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -71,6 +91,12 @@ public:
 
     CARAPI_(String) Name();
 
+private:
+    CARAPI_(void) HandlePrefChange(
+        /* [in] */ Int32 featureId,
+        /* [in] */ Int32 featureParam,
+        /* [in] */ Int32 value);
+
 public:
     AutoPtr<INetworkInfo> mNetworkInfo;
     AutoPtr<INetwork> mNetwork;
@@ -89,14 +115,30 @@ public:
     AutoPtr<IAsyncChannel> mAsyncChannel;
 
 private:
+    AutoPtr<IContext> mContext;
     // This represents the last score received from the NetworkAgent.
     Int32 mCurrentScore;
+    Boolean mIsCneWqeEnabled;
 
     // Penalty applied to scores of Networks that have not been validated.
     static const Int32 UNVALIDATED_SCORE_PENALTY;// = 40;
 
     // Score for explicitly connected network.
     static const Int32 EXPLICITLY_SELECTED_NETWORK_SCORE;// = 100;
+
+    static const String EXTRA_FEATURE_ID;
+
+    static const String EXTRA_FEATURE_PARAMETER;
+
+    static const String EXTRA_PARAMETER_VALUE;
+
+    static const Int32 FEATURE_ID;
+
+    static const Int32 FEATURE_PARAM;
+
+    static const Int32 FEATURE_OFF;
+
+    static const Int32 FEATURE_ON;
 };
 
 } // Connectivity

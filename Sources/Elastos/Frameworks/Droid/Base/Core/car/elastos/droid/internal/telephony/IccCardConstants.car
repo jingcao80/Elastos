@@ -12,7 +12,7 @@ module
         IccCardConstantsState_ABSENT,
         IccCardConstantsState_PIN_REQUIRED,
         IccCardConstantsState_PUK_REQUIRED,
-        IccCardConstantsState_NETWORK_LOCKED,
+        IccCardConstantsState_PERSO_LOCKED,
         IccCardConstantsState_READY,
         IccCardConstantsState_NOT_READY,
         IccCardConstantsState_PERM_DISABLED,

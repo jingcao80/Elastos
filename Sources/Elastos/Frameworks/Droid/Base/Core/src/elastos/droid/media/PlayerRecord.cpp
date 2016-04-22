@@ -390,7 +390,8 @@ ECode PlayerRecord::ResetControllerInfoForRcc(
     if (rcClient == NULL) {
         // here mcse.mRcClientDeathHandler is NULL;
         return ResetPlaybackInfo();
-    } else {
+    }
+    else {
         AutoPtr<IBinder> b = IBinder::Probe(mRcClient);
         AutoPtr<RcClientDeathHandler> rcdh = new RcClientDeathHandler(this, b.Get(), mMediaIntent.Get());
         // try {
@@ -400,7 +401,7 @@ ECode PlayerRecord::ResetControllerInfoForRcc(
         // } catch (RemoteException e) {
             // remote control client is DOA, disqualify it
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            // Slogger::W(TAG, "registerRemoteControlClient() has a dead client %p", b);
+            Slogger::W(TAG, "registerRemoteControlClient() has a dead client %p", b.Get());
             mRcClient = NULL;
         }
         // }

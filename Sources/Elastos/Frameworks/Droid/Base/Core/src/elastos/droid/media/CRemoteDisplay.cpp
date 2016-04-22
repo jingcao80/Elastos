@@ -1,13 +1,12 @@
 
 #include "elastos/droid/media/CRemoteDisplay.h"
+#include "elastos/droid/view/CSurface.h"
+#include <elastos/utility/logging/Logger.h>
 #include <binder/IServiceManager.h>
 #include <media/IRemoteDisplay.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IRemoteDisplayClient.h>
-#include <elastos/utility/logging/Logger.h>
 #include <gui/Surface.h>
-
-#include "elastos/droid/view/CSurface.h"
 
 using Elastos::Droid::Graphics::ISurfaceTexture;
 using Elastos::Droid::View::CSurface;

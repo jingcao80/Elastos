@@ -1,33 +1,34 @@
 
-#include <Elastos.Droid.Net.h>
-#include "elastos/droid/server/clipboard/ClipboardService.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/AppGlobals.h"
+#include "elastos/droid/server/clipboard/ClipboardService.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/UserHandle.h"
+#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.SecurityBridge.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::AppGlobals;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::EIID_IIClipboard;
-using Elastos::Droid::Content::CIntentFilter;
-using Elastos::Droid::Content::IContentProviderHelper;
 using Elastos::Droid::Content::CContentProviderHelper;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::EIID_IIClipboard;
 using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::IContentProviderHelper;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IPackageInfo;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Os::Binder;
-using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::CRemoteCallbackList;
 using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IUserManager;
-using Elastos::Droid::Os::CRemoteCallbackList;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Utility::CSparseArray;
@@ -42,6 +43,7 @@ namespace Server {
 namespace Clipboard {
 
 const String ClipboardService::TAG("ClipboardService");
+const String ClipboardService::SECURITY_BRIDGE_NAME("com.android.services.SecurityBridge.core.ClipboardManagerSB");
 
 //==============================================================================
 //          ClipboardService::ListenerInfo
@@ -141,6 +143,20 @@ ECode ClipboardService::constructor(
     AutoPtr<IBroadcastReceiver> myBR = (IBroadcastReceiver*)new MyBroadcastReceiver(this);
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(myBR, userFilter, (IIntent**)&intent);
+    AutoPtr<IInterface> bridgeObject;
+
+    // try {
+    /*
+     * load and create the security bridge
+     */
+    assert(0 && "TODO");
+    // bridgeObject = getClass().getClassLoader().loadClass(SECURITY_BRIDGE_NAME).newInstance();
+    mSecurityBridge = IClipboardManagerMonitor::Probe(bridgeObject);
+
+    // } catch (Exception e){
+        // Slogger::W(TAG, "No security bridge jar found, using default");
+        // mSecurityBridge = new ClipboardManagerMonitor();
+    // }
     return NOERROR;
 }
 
@@ -197,6 +213,7 @@ ECode ClipboardService::SetPrimaryClip(
         const Int32 userId = UserHandle::GetUserId(callingUid);
         AutoPtr<PerUserClipboard> clipboard = GetClipboard(userId);
         RevokeUris(clipboard);
+        mSecurityBridge->NotifyCopy(Binder::GetCallingUid(), clip);
         SetPrimaryClipInternal(clipboard, clip);
         AutoPtr<IList> related;
         GetRelatedProfiles(userId, (IList**)&related);
@@ -326,7 +343,15 @@ ECode ClipboardService::GetPrimaryClip(
             return NOERROR;
         }
         FAIL_RETURN(AddActiveOwnerLocked(Binder::GetCallingUid(), pkg));
-        *clip = GetClipboard()->mPrimaryClip;
+        AutoPtr<IClipData> _clip = GetClipboard()->mPrimaryClip;
+        if (_clip != NULL) {
+            Boolean flag = FALSE;
+            mSecurityBridge->ApprovePasteRequest(Binder::GetCallingUid(), _clip.Get(), &flag);
+            if (!flag) {
+                _clip = NULL;
+            }
+        }
+        *clip = _clip;
         REFCOUNT_ADD(*clip);
         return NOERROR;
     }
@@ -376,7 +401,14 @@ ECode ClipboardService::HasPrimaryClip(
             return NOERROR;
         }
 
-        *hasPrimaryClip = GetClipboard()->mPrimaryClip != NULL;
+        Boolean hasClip = FALSE;
+        AutoPtr<IClipData> cd = GetClipboard()->mPrimaryClip;
+        if (cd != NULL) {
+            mSecurityBridge->ApprovePasteRequest(Binder::GetCallingUid(),
+                cd, &hasClip);
+        }
+        *hasPrimaryClip = hasClip;
+
         return NOERROR;
     }
     return NOERROR;

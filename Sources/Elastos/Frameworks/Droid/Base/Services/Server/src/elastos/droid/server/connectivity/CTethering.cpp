@@ -1,79 +1,111 @@
 
+#include <elastos/droid/net/NetworkUtils.h>
+#include <elastos/droid/os/ServiceManager.h>
+#include <elastos/droid/R.h>
 #include "elastos/droid/server/connectivity/CTethering.h"
 #include "elastos/droid/server/IoThread.h"
-#include <elastos/droid/net/NetworkUtils.h>
-#include <elastos/droid/R.h>
+#include <elastos/droid/system/OsConstants.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
-#include <Elastos.Droid.Content.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <Elastos.Droid.App.h>
-#include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Hardware.h>
-#include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Internal.h>
-#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Wifi.h>
+#include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Droid::R;
-using Elastos::Droid::Os::CBinder;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::App::CNotification;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
-using Elastos::Droid::App::CPendingIntentHelper;
-using Elastos::Droid::App::CNotification;
-using Elastos::Droid::App::INotificationManager;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
-using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Hardware::Usb::IUsbManager;
-using Elastos::Droid::Net::INetwork;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Utility::IState;
+using Elastos::Droid::Net::CLinkAddress;
+using Elastos::Droid::Net::CNetworkRequestBuilder;
+using Elastos::Droid::Net::CRouteInfoHelper;
+using Elastos::Droid::Net::EIID_IConnectivityManagerNetworkCallback;
+using Elastos::Droid::Net::EIID_IINetworkManagementEventObserver;
 using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Net::IInterfaceConfiguration;
+using Elastos::Droid::Net::ILinkAddress;
+using Elastos::Droid::Net::ILinkProperties;
 using Elastos::Droid::Net::INetworkInfo;
+using Elastos::Droid::Net::INetworkRequest;
+using Elastos::Droid::Net::INetworkRequestBuilder;
 using Elastos::Droid::Net::IRouteInfo;
 using Elastos::Droid::Net::IRouteInfoHelper;
-using Elastos::Droid::Net::CRouteInfoHelper;
-using Elastos::Droid::Net::ILinkProperties;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Net::NetworkInfoDetailedState_FAILED;
 using Elastos::Droid::Net::NetworkUtils;
-using Elastos::Droid::Net::IInterfaceConfiguration;
-using Elastos::Droid::Net::ILinkAddress;
-using Elastos::Droid::Net::CLinkAddress;
+using Elastos::Droid::Os::CBinder;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Provider::CSettingsGlobal;
-using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Internal::Utility::IState;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::R;
 using Elastos::Droid::Server::IoThread;
+using Elastos::Droid::System::OsConstants;
+using Elastos::Droid::Wifi::IWifiManager;
 
+using Elastos::Core::CInteger32;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
-using Elastos::Core::CString;
-using Elastos::Core::CInteger32;
-using Elastos::Utility::Arrays;
-using Elastos::Utility::IIterator;
-using Elastos::Utility::ICollection;
-using Elastos::Utility::IList;
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::CArrayList;
-using Elastos::Utility::Regex::IPatternHelper;
-using Elastos::Utility::Regex::CPatternHelper;
-using Elastos::Utility::Logging::Logger;
-using Elastos::Net::IInet4Address;
-using Elastos::Net::IInetAddress;
-using Elastos::Net::IInet4AddressHelper;
+using Elastos::Core::StringUtils;
+using Elastos::IO::CBufferedReader;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::CInputStreamReader;
+using Elastos::IO::IBufferedReader;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IDataInputStream;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IReader;
 using Elastos::Net::CInet4AddressHelper;
+using Elastos::Net::IInet4Address;
+using Elastos::Net::IInet4AddressHelper;
+using Elastos::Net::IInet6Address;
+using Elastos::Net::IInetAddress;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IList;
+using Elastos::Utility::ISet;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::Regex::IPatternHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -103,7 +135,7 @@ ECode CTethering::StateReceiver::OnReceive(
         }
         mHost->mUsbTetherRequested = FALSE;
     }
-    else if (action.Equals(IConnectivityManager::CONNECTIVITY_ACTION)) {
+    else if (action.Equals(IConnectivityManager::CONNECTIVITY_ACTION_IMMEDIATE)) {
         AutoPtr<IParcelable> obj;
         intent->GetParcelableExtra(
                 IConnectivityManager::EXTRA_NETWORK_INFO, (IParcelable**)&obj);
@@ -111,12 +143,21 @@ ECode CTethering::StateReceiver::OnReceive(
         NetworkInfoDetailedState state;
         if (networkInfo != NULL &&
                 (networkInfo->GetDetailedState(&state), state != NetworkInfoDetailedState_FAILED)) {
-            if (VDBG) Logger::D(TAG, "Tethering got CONNECTIVITY_ACTION");
-            mHost->mTetherMasterSM->SendMessage(TetherMasterSM::CMD_UPSTREAM_CHANGED);
+            if (VDBG) Logger::D(TAG, "Tethering got CONNECTIVITY_ACTION_IMMEDIATE");
+            mHost->mTetherMasterSM->SendMessage(TetherMasterSM::CMD_UPSTREAM_CHANGED, networkInfo.Get());
         }
     }
     else if (action.Equals(IIntent::ACTION_CONFIGURATION_CHANGED)) {
         mHost->UpdateConfiguration();
+    }
+    else if (action.Equals(IWifiManager::WIFI_AP_STATE_CHANGED_ACTION)) {
+        Int32 wifiApState;
+        intent->GetInt32Extra(String("wifi_state"), IWifiManager::WIFI_AP_STATE_DISABLED, &wifiApState);
+        if (wifiApState == IWifiManager::WIFI_AP_STATE_ENABLED ||
+            wifiApState == IWifiManager::WIFI_AP_STATE_DISABLED) {
+            mHost->mConnectedDeviceMap->Clear();
+            mHost->mL2ConnectedDeviceMap->Clear();
+        }
     }
     return NOERROR;
 }
@@ -239,7 +280,7 @@ ECode CTethering::TetherInterfaceSM::StartingState::ProcessMessage(
 ECode CTethering::TetherInterfaceSM::TetheredState::Enter()
 {
     ECode ec = mHost->mHost->mNMService->TetherInterface(mHost->mIfaceName);
-    if(FAILED(ec)){
+    if (FAILED(ec)){
         Logger::E(CTethering::TAG, "Error Tethering: 0x%x", ec);
         mHost->SetLastError(IConnectivityManager::TETHER_ERROR_TETHER_IFACE_ERROR);
         mHost->TransitionTo(mHost->mInitialState);
@@ -265,10 +306,12 @@ void CTethering::TetherInterfaceSM::TetheredState::CleanupUpstream()
         if (FAILED(ec)) {
             if (VDBG) Logger::E(CTethering::TAG, "Exception in forceUpdate: %x", ec);
         }
+        if (VDBG) Logger::D(CTethering::TAG, "Disabling NAT - Tethered Iface = %s mMyUpstreamIfaceName= %s", mHost->mIfaceName.string(), mHost->mMyUpstreamIfaceName.string());
         ec = mHost->mHost->mNMService->DisableNat(mHost->mIfaceName, mHost->mMyUpstreamIfaceName);
         if (FAILED(ec)) {
             if (VDBG) Logger::E(CTethering::TAG, "Exception in disableNat: %x", ec);
         }
+        mHost->mHost->SendUpstreamIfaceChangeBroadcast(mHost->mMyUpstreamIfaceName, mHost->mIfaceName, OsConstants::_AF_INET, UPSTREAM_IFACE_REMOVED);
         mHost->mMyUpstreamIfaceName = NULL;
     }
 }
@@ -316,6 +359,8 @@ ECode CTethering::TetherInterfaceSM::TetheredState::ProcessMessage(
             AutoPtr<IInterface> obj;
             message->GetObj((IInterface**)&obj);
             String newUpstreamIfaceName;
+            if (VDBG) Logger::D(TAG, "Current Upstream Iface = %s New Upstream Iface = %s Tethered Iface = %s", mHost->mMyUpstreamIfaceName.string(),
+                newUpstreamIfaceName.string(), mHost->mIfaceName.string());
             if (obj != NULL) ICharSequence::Probe(obj)->ToString(&newUpstreamIfaceName);
             if ((mHost->mMyUpstreamIfaceName.IsNull() && newUpstreamIfaceName.IsNull()) ||
                     (!mHost->mMyUpstreamIfaceName.IsNull() &&
@@ -325,7 +370,9 @@ ECode CTethering::TetherInterfaceSM::TetheredState::ProcessMessage(
             }
             CleanupUpstream();
             if (!newUpstreamIfaceName.IsNull()) {
+                if (VDBG) Logger::D(TAG, "Enabling NAT - Tethered Iface = %s newUpstreamIfaceName =%s", mHost->mIfaceName.string(), newUpstreamIfaceName.string());
                 ec = mHost->mHost->mNMService->EnableNat(mHost->mIfaceName, newUpstreamIfaceName);
+                mHost->mHost->SendUpstreamIfaceChangeBroadcast(newUpstreamIfaceName, mHost->mIfaceName, OsConstants::_AF_INET, UPSTREAM_IFACE_ADDED);
                 if (FAILED(ec)) {
                     Logger::E(CTethering::TAG, "Exception enabling Nat: %d", ec);
                     ec = mHost->mHost->mNMService->UntetherInterface(mHost->mIfaceName);
@@ -517,6 +564,12 @@ Boolean CTethering::TetherInterfaceSM::IsTethered()
     return mTethered;
 }
 
+String CTethering::TetherInterfaceSM::GetTethered()
+{
+    AutoLock lock(mHost->mPublicSync);
+    return mIfaceName;
+}
+
 void CTethering::TetherInterfaceSM::SetTethered(
     /* [in] */ Boolean tethered)
 {
@@ -697,6 +750,9 @@ void CTethering::TetherMasterSM::TetherMasterUtilState::ChooseUpstreamType(
                 mHost->mHost->mPreferredUpstreamMobileApn, upType);
     }
 
+    AutoPtr<IConnectivityManager> cm = mHost->mHost->GetConnectivityManager();
+    AutoPtr<ILinkProperties> linkProperties;
+    cm->GetLinkProperties(upType, (ILinkProperties**)&linkProperties);
     // if we're on DUN, put our own grab on it
     if (upType == IConnectivityManager::TYPE_MOBILE_DUN ||
             upType == IConnectivityManager::TYPE_MOBILE_HIPRI) {
@@ -725,7 +781,20 @@ void CTethering::TetherMasterSM::TetherMasterUtilState::ChooseUpstreamType(
     }
     else {
         AutoPtr<ILinkProperties> linkProperties;
-        connMgr->GetLinkProperties(upType, (ILinkProperties**)&linkProperties);
+        AutoPtr<IConnectivityManager> connectivity = mHost->mHost->GetConnectivityManager();
+        AutoPtr<INetworkInfo> info;
+        connectivity->GetNetworkInfo(upType, (INetworkInfo**)&info);
+        assert(info);
+        Boolean isConnected = FALSE;
+        info->IsConnected(&isConnected);
+        if ((info != NULL) && isConnected && mHost->mNetworkCallback == NULL ) {
+            mHost->mNetworkCallback = GetNetworkCallback();
+            AutoPtr<INetworkRequest> networkRequest = GetNetworkRequest(upType);
+            //  Register for Network Callback to receive IPV6 information
+            if (DBG) Logger::D(TAG, "Registering NetworkCallback");
+            connectivity->RegisterNetworkCallback(networkRequest.Get(), mHost->mNetworkCallback);
+        }
+
         if (linkProperties != NULL) {
             // Find the interface with the default IPv4 route. It may be the
             // interface described by linkProperties, or one of the interfaces
@@ -817,6 +886,192 @@ void CTethering::TetherMasterSM::TetherMasterUtilState::NotifyTetheredOfNewUpstr
         CString::New(ifaceName, (ICharSequence**)&cs);
         sm->SendMessage(TetherInterfaceSM::CMD_TETHER_CONNECTION_CHANGED, cs);
     }
+}
+
+void CTethering::TetherMasterSM::TetherMasterUtilState::AddUpstreamV6Interface(
+    /* [in] */ const String& iface)
+{
+    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
+    AutoPtr<IINetworkManagementService> service = IINetworkManagementService::Probe(obj);
+
+    Logger::D(TAG, "adding v6 interface %s", iface.string());
+    // try {
+        service->AddUpstreamV6Interface(iface);
+        List< AutoPtr<TetherInterfaceSM> >::Iterator it = mHost->mNotifyList.Begin();
+        for (; it != mHost->mNotifyList.End(); ++it) {
+            mHost->mHost->SendUpstreamIfaceChangeBroadcast(
+                iface, (*it)->GetTethered(), OsConstants::_AF_INET6, UPSTREAM_IFACE_ADDED);
+        }
+    // } catch (RemoteException e) {
+        // Logger::E(TAG, "Unable to append v6 upstream interface");
+    // }
+}
+
+void CTethering::TetherMasterSM::TetherMasterUtilState::RemoveUpstreamV6Interface(
+    /* [in] */ const String& iface)
+{
+    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
+    AutoPtr<IINetworkManagementService> service = IINetworkManagementService::Probe(obj);
+
+    Logger::D(TAG, "removing v6 interface %s", iface.string());
+    // try {
+        service->RemoveUpstreamV6Interface(iface);
+        List< AutoPtr<TetherInterfaceSM> >::Iterator it = mHost->mNotifyList.Begin();
+        for (; it != mHost->mNotifyList.End(); ++it) {
+            mHost->mHost->SendUpstreamIfaceChangeBroadcast(
+                iface, (*it)->GetTethered(), OsConstants::_AF_INET6, UPSTREAM_IFACE_REMOVED);
+        }
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "Unable to remove v6 upstream interface");
+    // }
+}
+
+Boolean CTethering::TetherMasterSM::TetherMasterUtilState::IsIpv6Connected(
+    /* [in] */ ILinkProperties* lp)
+{
+    Boolean ret = FALSE;
+    AutoPtr<IList> addresses;
+    if (lp == NULL) {
+        return FALSE;
+    }
+    // try {
+        lp->GetAddresses((IList**)&addresses);
+        Int32 size;
+        addresses->GetSize(&size);
+        Boolean flag = FALSE;
+        Boolean isLinkAddress = FALSE;
+        Boolean isLoopbackAddress = FALSE;
+        Boolean isMulticastAddress = FALSE;
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> addr;
+            addresses->Get(i, (IInterface**)&addr);
+            if (IInet6Address::Probe(addr)) {
+                AutoPtr<IInet6Address> i6addr = IInet6Address::Probe(addr);
+                IInetAddress::Probe(i6addr)->IsAnyLocalAddress(&flag);
+                IInetAddress::Probe(i6addr)->IsLinkLocalAddress(&isLinkAddress);
+                IInetAddress::Probe(i6addr)->IsLoopbackAddress(&isLoopbackAddress);
+                IInetAddress::Probe(i6addr)->IsMulticastAddress(&isMulticastAddress);
+                if (!flag && !isLinkAddress &&
+                        !isLoopbackAddress && !isMulticastAddress) {
+                    ret = TRUE;
+                    break;
+                }
+
+            }
+        }
+    // } catch(Exception e) {
+        // Log.e(TAG, "Exception getting LinkProperties", e);
+    // }
+    return ret;
+}
+
+AutoPtr<INetworkRequest> CTethering::TetherMasterSM::TetherMasterUtilState::GetNetworkRequest(
+    /* [in] */ Int32 upType)
+{
+    if (VDBG) Logger::D(TAG, "getNetworkRequest upType=%d", upType);
+    Int32 ncType = -1, transportType = -1;
+    switch (upType) {
+        case IConnectivityManager::TYPE_MOBILE:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_INTERNET;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_WIFI:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_INTERNET;
+            transportType = INetworkCapabilities::TRANSPORT_WIFI;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_MMS:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_MMS;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_SUPL:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_SUPL;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_DUN:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_DUN;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_HIPRI:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_INTERNET;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_BLUETOOTH:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_INTERNET;
+            transportType = INetworkCapabilities::TRANSPORT_BLUETOOTH;
+            break;
+        }
+        case IConnectivityManager::TYPE_ETHERNET:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_INTERNET;
+            transportType = INetworkCapabilities::TRANSPORT_ETHERNET;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_FOTA:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_FOTA;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_IMS:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_IMS;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_CBS:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_CBS;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_WIFI_P2P:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_WIFI_P2P;
+            transportType = INetworkCapabilities::TRANSPORT_WIFI;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_IA:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_IA;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        case IConnectivityManager::TYPE_MOBILE_EMERGENCY:
+        {
+            ncType = INetworkCapabilities::NET_CAPABILITY_EIMS;
+            transportType = INetworkCapabilities::TRANSPORT_CELLULAR;
+            break;
+        }
+        default:
+            ncType = -1;
+    }
+    if (VDBG) Logger::D(TAG, "ncType =%d transportType = %d", ncType, transportType);
+    AutoPtr<INetworkRequestBuilder> nrBuilder;
+    CNetworkRequestBuilder::New((INetworkRequestBuilder**)&nrBuilder);
+    nrBuilder->AddCapability(ncType);
+    nrBuilder->AddTransportType(transportType);
+    AutoPtr<INetworkRequest> networkRequest;
+    nrBuilder->Build((INetworkRequest**)&networkRequest);
+    return networkRequest;
+}
+
+AutoPtr<IConnectivityManagerNetworkCallback> CTethering::TetherMasterSM::TetherMasterUtilState::GetNetworkCallback()
+{
+    AutoPtr<MyNetWorkCallback> myNetCallback = new MyNetWorkCallback(this);
+    return IConnectivityManagerNetworkCallback::Probe(myNetCallback);
 }
 
 
@@ -933,6 +1188,7 @@ ECode CTethering::TetherMasterSM::TetherModeAliveState::ProcessMessage(
             break;
         }
         case CMD_UPSTREAM_CHANGED:
+            if (VDBG) Logger::D(TAG, "CMD_UPSTREAM_CHANGED event received");
             // need to try DUN immediately if Wifi goes down
             mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
             ChooseUpstreamType(mTryCell);
@@ -1061,6 +1317,107 @@ ECode CTethering::TetherMasterSM::SetDnsForwardersErrorState::Enter()
 }
 
 //===========================================================================
+//  CTethering::TetherMasterSM::MyNetWorkCallback
+//===========================================================================
+CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::MyNetWorkCallback(
+    /* [in] */ TetherMasterUtilState* host)
+    : mHost(host)
+{}
+
+CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::~MyNetWorkCallback()
+{}
+
+CAR_INTERFACE_IMPL(CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback, Object, IConnectivityManagerNetworkCallback)
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnAvailable(
+    /* [in] */ INetwork* network)
+{
+    if (DBG) Logger::D(TAG, "network available: %p", network);
+    // try {
+        AutoPtr<IConnectivityManager> connectivity = mHost->mHost->mHost->GetConnectivityManager();
+        AutoPtr<ILinkProperties> lp;
+        connectivity->GetLinkProperties(network, (ILinkProperties**)&lp);
+        mCurrentIPV6Connected = mHost->IsIpv6Connected(lp.Get());
+        lp->GetInterfaceName(&mCurrentUpstreamIface);
+        mLastUpstreamIface = mCurrentUpstreamIface;
+        if (mHost->mHost->mPrevIPV6Connected != mCurrentIPV6Connected) {
+            if (mCurrentIPV6Connected) {
+                mHost->AddUpstreamV6Interface(mCurrentUpstreamIface);
+            }
+        }
+    // } catch(Exception e) {
+        // Logger::E(TAG, "Exception querying ConnectivityManager", e);
+    // }
+    mHost->mHost->mPrevIPV6Connected = mCurrentIPV6Connected;
+    return NOERROR;
+}//
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnLost(
+    /* [in] */ INetwork* network)
+{
+    if (DBG) Logger::D(TAG, "network lost: ", Object::ToString(network).string());
+
+    if (mHost->mHost->mNetworkCallback != NULL) {
+        mHost->RemoveUpstreamV6Interface(mLastUpstreamIface);
+        if (DBG) Logger::D(TAG, "Unregistering NetworkCallback()");
+        AutoPtr<IConnectivityManager> connectivity = mHost->mHost->mHost->GetConnectivityManager();
+        connectivity->UnregisterNetworkCallback(mHost->mHost->mNetworkCallback.Get());
+        mHost->mHost->mNetworkCallback = NULL;
+        mHost->mHost->mPrevIPV6Connected = FALSE;
+        mLastUpstreamIface = NULL;
+    }
+    return NOERROR;
+}
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnLinkPropertiesChanged(
+    /* [in] */ INetwork* network,
+    /* [in] */ ILinkProperties* lp)
+{
+    mCurrentIPV6Connected = mHost->IsIpv6Connected(lp);
+    lp->GetInterfaceName(&mCurrentUpstreamIface);
+    mLastUpstreamIface = mCurrentUpstreamIface;
+    if (VDBG) Logger::D(TAG, "NetworkCallback.onLinkPropertiesChanged: network=%p, LP = %pcurrentIPV6Connected=%d prevIPV6Connected =%d", network, lp, mCurrentIPV6Connected, mHost->mHost->mPrevIPV6Connected);
+    AutoPtr<IList> addresses;
+    lp->GetAddresses((IList**)&addresses);
+
+    if (mHost->mHost->mPrevIPV6Connected != mCurrentIPV6Connected ) {
+        if (mCurrentIPV6Connected) {
+            mHost->AddUpstreamV6Interface(mCurrentUpstreamIface);
+        }
+        else {
+            mHost->RemoveUpstreamV6Interface(mCurrentUpstreamIface);
+        }
+        mHost->mHost->mPrevIPV6Connected = mCurrentIPV6Connected;
+    }
+    return NOERROR;
+}
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnPreCheck(
+    /* [in] */ INetwork* network)
+{
+    return NOERROR;
+}
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnLosing(
+    /* [in] */ INetwork* network,
+    /* [in] */ Int32 maxMsToLive)
+{
+    return NOERROR;
+}
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnUnavailable()
+{
+    return NOERROR;
+}
+
+ECode CTethering::TetherMasterSM::TetherMasterUtilState::MyNetWorkCallback::OnCapabilitiesChanged(
+    /* [in] */ INetwork* network,
+    /* [in] */ INetworkCapabilities* networkCapabilities)
+{
+    return NOERROR;
+}
+
+//===========================================================================
 //  CTethering::TetherMasterSM
 //===========================================================================
 const Int32 CTethering::TetherMasterSM::CMD_TETHER_MODE_REQUESTED;
@@ -1079,6 +1436,7 @@ CTethering::TetherMasterSM::TetherMasterSM(
     , mSequenceNumber(0)
     , mCurrentConnectionSequence(0)
     , mMobileApnReserved(0)
+    , mPrevIPV6Connected(FALSE)
     , mHost(host)
 {
     //Add states
@@ -1104,6 +1462,72 @@ CTethering::TetherMasterSM::TetherMasterSM(
 CTethering::TetherMasterSM::~TetherMasterSM()
 {
     mNotifyList.Clear();
+}
+
+//===========================================================================
+//          CTethering::DnsmasqThread
+//===========================================================================
+CTethering::DnsmasqThread::DnsmasqThread(
+    /* [in] */ CTethering* tethering,
+    /* [in] */ IWifiDevice* device,
+    /* [in] */ Int32 interval,
+    /* [in] */ Int32 maxTimes)
+{
+    Thread::constructor(String("Tethering"));
+    mTethering = tethering;
+    mInterval = interval;
+    mMaxTimes = maxTimes;
+    mDevice = device;
+}
+
+ECode CTethering::DnsmasqThread::Run()
+{
+    Boolean result = FALSE;
+
+    // try {
+        String deviceAddress;
+        while (mMaxTimes > 0) {
+            result = mTethering->ReadDeviceInfoFromDnsmasq(mDevice);
+            if (result) {
+                mDevice->GetDeviceAddress(&deviceAddress);
+                if (DBG) Slogger::D(TAG, "Successfully poll device info for %s", deviceAddress.string());
+                break;
+            }
+
+            mMaxTimes --;
+            Thread::Sleep(mInterval);
+        }
+    // } catch (Exception ex) {
+        // result = FALSE;
+        // mDevice->GetDeviceAddress(&deviceAddress);
+        // Slogger::E(TAG, "Pulling %serror", deviceAddress.string());
+    // }
+
+    if (!result) {
+        mDevice->GetDeviceAddress(&deviceAddress);
+        if (DBG) Slogger::D(TAG, "Pulling timeout, suppose STA uses static ip %s", deviceAddress.string());
+    }
+
+    // When STA uses static ip, device info will be unavaiable from dnsmasq,
+    // thus no matter the result is success or failure, we will broadcast the event.
+    // But if the device is not in L2 connected state, it means the hostapd connection is
+    // disconnected before dnsmasq get device info, so in this case, don't broadcast
+    // connection event.
+    mDevice->GetDeviceAddress(&deviceAddress);
+    AutoPtr<IInterface> obj;
+    mTethering->mL2ConnectedDeviceMap->Get(StringUtils::ParseCharSequence(deviceAddress), (IInterface**)&obj);
+    AutoPtr<IWifiDevice> other = IWifiDevice::Probe(obj);
+    assert(other);
+    Int32 deviceState;
+    other->GetDeviceState(&deviceState);
+    if (other != NULL && deviceState == IWifiDevice::CONNECTED) {
+        mTethering->mConnectedDeviceMap->Put(StringUtils::ParseCharSequence(deviceAddress), mDevice);
+        mTethering->SendTetherConnectStateChangedBroadcast();
+    }
+    else {
+        if (DBG) Slogger::D(TAG, "Device %s already disconnected, ignoring", deviceAddress.string());
+    }
+    return NOERROR;
 }
 
 //===========================================================================
@@ -1140,6 +1564,19 @@ static AutoPtr< ArrayOf<String> > InitDhcpDefaultRange()
 }
 
 const String CTethering::TAG("Tethering");
+
+const String CTethering::UPSTREAM_IFACE_CHANGED_ACTION("com.android.server.connectivity.UPSTREAM_IFACE_CHANGED");
+
+const String CTethering::EXTRA_UPSTREAM_IFACE("tetheringUpstreamIface");
+
+const String CTethering::EXTRA_TETHERED_IFACE("tetheredClientIface");
+
+const String CTethering::EXTRA_UPSTREAM_IP_TYPE("tetheringUpstreamIpType");
+
+const String CTethering::EXTRA_UPSTREAM_UPDATE_TYPE("tetheringUpstreamUpdateType");
+
+const Int32 CTethering::EXTRA_UPSTREAM_INFO_DEFAULT = -1;
+
 const Boolean CTethering::DBG = FALSE;
 const Boolean CTethering::VDBG = FALSE;
 
@@ -1154,6 +1591,14 @@ AutoPtr< ArrayOf<String> > CTethering::DHCP_DEFAULT_RANGE = InitDhcpDefaultRange
 
 const String CTethering::DNS_DEFAULT_SERVER1("8.8.8.8");
 const String CTethering::DNS_DEFAULT_SERVER2("8.8.4.4");
+
+const String CTethering::mDhcpLocation("/data/misc/dhcp/dnsmasq.leases");
+
+// Device name polling interval(ms) and max times
+const Int32 CTethering::DNSMASQ_POLLING_INTERVAL = 1000;
+const Int32 CTethering::DNSMASQ_POLLING_MAX_TIMES = 10;
+
+CAR_INTERFACE_IMPL_2(CTethering, BaseNetworkObserver, IINetworkManagementEventObserver, IBinder)
 
 CAR_OBJECT_IMPL(CTethering)
 
@@ -1192,7 +1637,9 @@ ECode CTethering::constructor(
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IUsbManager::ACTION_USB_STATE);
-    filter->AddAction(IConnectivityManager::CONNECTIVITY_ACTION);
+    filter->AddAction(IConnectivityManager::CONNECTIVITY_ACTION_IMMEDIATE);
+    filter->AddAction(IIntent::ACTION_CONFIGURATION_CHANGED);
+    filter->AddAction(IWifiManager::WIFI_AP_STATE_CHANGED_ACTION);
     AutoPtr<IIntent> result;
     mContext->RegisterReceiver(mStateReceiver, filter, (IIntent**)&result);
 
@@ -1220,6 +1667,10 @@ ECode CTethering::constructor(
     mDefaultDnsServers = ArrayOf<String>::Alloc(2);
     (*mDefaultDnsServers)[0] = DNS_DEFAULT_SERVER1;
     (*mDefaultDnsServers)[1] = DNS_DEFAULT_SERVER2;
+
+    CHashMap::New((IHashMap**)&mL2ConnectedDeviceMap);
+    CHashMap::New((IHashMap**)&mConnectedDeviceMap);
+
     return NOERROR;
 }
 
@@ -1331,7 +1782,7 @@ Boolean CTethering::IsUsb(
         CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
         Boolean match = FALSE;
         helper->Matches(regex, iface, &match);
-        if(match) {
+        if (match) {
             return TRUE;
         }
     }
@@ -1349,7 +1800,7 @@ Boolean CTethering::IsWifi(
         CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
         Boolean match = FALSE;
         helper->Matches(regex, iface, &match);
-        if(match) {
+        if (match) {
             return TRUE;
         }
     }
@@ -1367,7 +1818,7 @@ Boolean CTethering::IsBluetooth(
         CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
         Boolean match = FALSE;
         helper->Matches(regex, iface, &match);
-        if(match) {
+        if (match) {
             return TRUE;
         }
     }
@@ -1437,6 +1888,114 @@ ECode CTethering::InterfaceRemoved(
         mIfaces.Erase(it);
     }
     return NOERROR;
+}
+
+ECode CTethering::GetTetherConnectedSta(
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<IList> tetherConnectedStaList;
+    CArrayList::New((IList**)&tetherConnectedStaList);
+
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Boolean flag = FALSE;
+    res->GetBoolean(R::bool_::config_softap_extention, &flag);
+    if (flag) {
+        AutoPtr<ISet> keySet;
+        mConnectedDeviceMap->GetKeySet((ISet**)&keySet);
+        AutoPtr<IIterator> it;
+        keySet->GetIterator((IIterator**)&it);
+        it->HasNext(&flag);
+        String key;
+
+        while (flag) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            ICharSequence::Probe(obj)->ToString(&key);
+            mConnectedDeviceMap->Get(StringUtils::ParseCharSequence(key), (IInterface**)&obj);
+            AutoPtr<IWifiDevice> device;
+            device = IWifiDevice::Probe(obj);
+            if (VDBG) {
+                String deviceName;
+                device->GetDeviceName(&deviceName);
+                Slogger::D(TAG, "getTetherConnectedSta: addr=%s name=%s", key.string(), deviceName.string());
+            }
+            tetherConnectedStaList->Add(device);
+        }
+    }
+
+    *result = tetherConnectedStaList;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+void CTethering::SendTetherConnectStateChangedBroadcast()
+{
+    Boolean flag = FALSE;
+    GetConnectivityManager()->IsTetheringSupported(&flag);
+    if (!flag) return;
+
+    AutoPtr<IIntent> broadcast;
+    CIntent::New(IConnectivityManager::TETHER_CONNECT_STATE_CHANGED, (IIntent**)&broadcast);
+    broadcast->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING |
+    IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    AutoPtr<IUserHandle> all;
+    uhh->GetALL((IUserHandle**)&all);
+    mContext->SendStickyBroadcastAsUser(broadcast.Get(), all);
+
+    ShowTetheredNotification(R::drawable::stat_sys_tether_wifi);
+}
+
+Boolean CTethering::ReadDeviceInfoFromDnsmasq(
+    /* [in] */ IWifiDevice* device)
+{
+    Boolean result = FALSE;
+    AutoPtr<IFileInputStream> fstream;
+
+    // try {
+        CFileInputStream::New(mDhcpLocation, (IFileInputStream**)&fstream);
+        AutoPtr<IDataInputStream> in;
+        CDataInputStream::New(IInputStream::Probe(fstream), (IDataInputStream**)&in);
+
+        AutoPtr<IReader> reader;
+        CInputStreamReader::New(IInputStream::Probe(in), (IReader**)&reader);
+        AutoPtr<IBufferedReader> br;
+        CBufferedReader::New(reader, (IBufferedReader**)&br);
+
+        String line;
+        while ((br->ReadLine(&line), !line.IsNullOrEmpty())) {
+            AutoPtr<ArrayOf<String> > fields;
+            StringUtils::Split(line, String(" "), (ArrayOf<String>**)&fields);
+
+            // 949295 00:0a:f5:6a:bf:70 192.168.43.32 android-93de88df9ec61bac *
+            if (fields->GetLength() > 3) {
+                String addr = (*fields)[1];
+                String name = (*fields)[3];
+
+                String deviceAddress;
+                device->GetDeviceAddress(&deviceAddress);
+                if (addr.Equals(deviceAddress)) {
+                    device->SetDeviceName(name);
+                    result = TRUE;
+                    break;
+                }
+            }
+        }
+    // } catch (IOException ex) {
+        // Log.e(TAG, "readDeviceNameFromDnsmasq: " + ex);
+    // } finally {
+        if (fstream != NULL) {
+            // try {
+                ICloseable::Probe(fstream)->Close();
+            // } catch (IOException ex) {}
+        }
+    // }
+
+   return result;
 }
 
 ECode CTethering::Tether(
@@ -1512,7 +2071,7 @@ ECode CTethering::GetLastTetherError(
         if (it != mIfaces.End()) {
             sm = it->mSecond;
         }
-        if(sm == NULL){
+        if (sm == NULL){
             Logger::E(TAG, "Tried to getLastTetherError on an unknown iface :%s", iface.string());
             *value = IConnectivityManager::TETHER_ERROR_UNKNOWN_IFACE;
             return NOERROR;
@@ -1615,6 +2174,104 @@ void CTethering::SendTetherStateChangedBroadcast()
     }
 }
 
+void CTethering::SendUpstreamIfaceChangeBroadcast(
+    /* [in]  */ const String& upstreamIface,
+    /* [in]  */ const String& tetheredIface,
+    /* [in]  */ Int32 ip_type,
+    /* [in]  */ UpstreamInfoUpdateType update_type)
+{
+    Boolean flag = FALSE;
+    GetConnectivityManager()->IsTetheringSupported(&flag);
+    if (!flag) return;
+
+    AutoPtr<IArrayList> availableList;
+    CArrayList::New((IArrayList**)&availableList);
+    AutoPtr<IArrayList> activeList;
+    CArrayList::New((IArrayList**)&activeList);
+    AutoPtr<IArrayList> erroredList;
+    CArrayList::New((IArrayList**)&erroredList);
+
+    Boolean wifiTethered = FALSE;
+    Boolean usbTethered = FALSE;
+    Boolean bluetoothTethered = FALSE;
+
+    synchronized(mPublicSync) {
+        HashMap<String, AutoPtr<TetherInterfaceSM> >::Iterator it = mIfaces.Begin();
+        for (; it != mIfaces.End(); ++it) {
+            AutoPtr<TetherInterfaceSM> sm;
+            sm = it->mSecond;
+            if (sm != NULL) {
+                if (sm->IsErrored()) {
+                    erroredList->Add(StringUtils::ParseCharSequence(it->mFirst));
+                }
+                else if (sm->IsAvailable()) {
+                    availableList->Add(StringUtils::ParseCharSequence(it->mFirst));
+                }
+                else if (sm->IsTethered()) {
+                    if (IsUsb(it->mFirst)) {
+                        usbTethered = TRUE;
+                    }
+                    else if (IsWifi(it->mFirst)) {
+                        wifiTethered = TRUE;
+                  }
+                  else if (IsBluetooth(it->mFirst)) {
+                        bluetoothTethered = TRUE;
+                    }
+                    activeList->Add(StringUtils::ParseCharSequence(it->mFirst));
+                }
+            }
+        }
+    }
+
+    AutoPtr<IIntent> broadcast;
+    CIntent::New(IConnectivityManager::ACTION_TETHER_STATE_CHANGED, (IIntent**)&broadcast);
+    broadcast->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING |
+            IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    broadcast->PutStringArrayListExtra(IConnectivityManager::EXTRA_AVAILABLE_TETHER,
+            availableList);
+    broadcast->PutStringArrayListExtra(IConnectivityManager::EXTRA_ACTIVE_TETHER, activeList);
+    broadcast->PutStringArrayListExtra(IConnectivityManager::EXTRA_ERRORED_TETHER,
+            erroredList);
+
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    AutoPtr<IUserHandle> all;
+    uhh->GetALL((IUserHandle**)&all);
+    mContext->SendStickyBroadcastAsUser(broadcast.Get(), all);
+    if (DBG) {
+        Int32 avaiableSize;
+        availableList->GetSize(&avaiableSize);
+        Int32 activeSize;
+        activeList->GetSize(&activeSize);
+        Int32 errorSize;
+        erroredList->GetSize(&errorSize);
+        Slogger::D(TAG, "sendTetherStateChangedBroadcast %d, %d, %d", avaiableSize, activeSize, errorSize);
+    }
+
+    if (usbTethered) {
+        if (wifiTethered || bluetoothTethered) {
+            ShowTetheredNotification(R::drawable::stat_sys_tether_general);
+        }
+        else {
+            ShowTetheredNotification(R::drawable::stat_sys_tether_usb);
+        }
+    }
+    else if (wifiTethered) {
+        if (bluetoothTethered) {
+            ShowTetheredNotification(R::drawable::stat_sys_tether_general);
+        }
+        else {
+            ShowTetheredNotification(R::drawable::stat_sys_tether_wifi);
+        }
+    }
+    else if (bluetoothTethered) {
+        ShowTetheredNotification(R::drawable::stat_sys_tether_bluetooth);
+    }
+    else {
+        ClearTetheredNotification();
+    }
+}
+
 void CTethering::ShowTetheredNotification(
     /* [in] */ Int32 icon)
 {
@@ -1633,13 +2290,22 @@ void CTethering::ShowTetheredNotification(
         Int32 _icon;
         mTetheredNotification->GetIcon(&_icon);
         if (_icon == icon) {
-            return;
+            AutoPtr<IResources> res;
+            mContext->GetResources((IResources**)&res);
+            Boolean flag = FALSE;
+            res->GetBoolean(R::bool_::config_softap_extention, &flag);
+            if (flag && icon == R::drawable::stat_sys_tether_wifi) {
+                // if softap extension feature is on, allow to update icon.
+            }
+            else {
+                return;
+            }
         }
         notificationManager->CancelAsUser(String(NULL), _icon, ALL);
     }
 
     AutoPtr<IIntent> intent;
-    CIntent::New((IIntent**)&intent);
+    CIntent::New((IIntent **)&intent);
     intent->SetClassName(String("com.android.settings"), String("com.android.settings.TetherSettings"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NO_HISTORY);
 
@@ -1658,7 +2324,38 @@ void CTethering::ShowTetheredNotification(
     AutoPtr<ICharSequence> title;
     r->GetText(R::string::tethered_notification_title, (ICharSequence**)&title);
     AutoPtr<ICharSequence> message;
-    r->GetText(R::string::tethered_notification_message, (ICharSequence**)&message);
+    Int32 size;
+    mConnectedDeviceMap->GetSize(&size);
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Boolean flag = FALSE;
+    res->GetBoolean(R::bool_::config_softap_extention, &flag);
+    if (flag && icon == R::drawable::stat_sys_tether_wifi) {
+        if (size == 0) {
+            r->GetText(R::string::tethered_notification_no_device_message, (ICharSequence**)&message);
+        }
+        else if (size == 1) {
+            AutoPtr<ICharSequence> tmp;
+            r->GetText(R::string::tethered_notification_one_device_message, (ICharSequence**)&tmp);
+            String strTmp;
+            tmp->ToString(&strTmp);
+            String tag("");
+            tag.AppendFormat(strTmp.string(), size);
+            message = StringUtils::ParseCharSequence(tag);
+         }
+         else {
+            AutoPtr<ICharSequence> cs;
+            r->GetText(R::string::tethered_notification_multi_device_message, (ICharSequence**)&cs);
+            String str;
+            cs->ToString(&str);
+            String tag("");
+            tag.AppendFormat(str.string(), size);
+            message = StringUtils::ParseCharSequence(tag);
+         }
+    }
+    else {
+        r->GetText(R::string::tethered_notification_message, (ICharSequence**)&message);
+    }
 
     if (mTetheredNotification == NULL) {
         CNotification::New((INotification**)&mTetheredNotification);
@@ -1669,9 +2366,16 @@ void CTethering::ShowTetheredNotification(
     mTetheredNotification->GetDefaults(&defaultValue);
     mTetheredNotification->SetDefaults(defaultValue & ~INotification::DEFAULT_SOUND);
     mTetheredNotification->SetFlags(INotification::FLAG_ONGOING_EVENT);
-    mTetheredNotification->SetTickerText(title);
+
+    res->GetBoolean(R::bool_::config_softap_extention, &flag);
+    if (flag && icon == R::drawable::stat_sys_tether_wifi && size > 0) {
+        mTetheredNotification->SetTickerText(message);
+    }
+    else {
+        mTetheredNotification->SetTickerText(title);
+    }
+
     mTetheredNotification->SetVisibility(INotification::VISIBILITY_PUBLIC);
-    AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     Int32 color;
     res->GetColor(R::color::system_notification_accent_color, &color);
@@ -1754,7 +2458,7 @@ Boolean CTethering::ConfigureUsbIface(
                 NetworkUtils::NumericToInetAddress(USB_NEAR_IFACE_ADDR, (IInetAddress**)&addr);
 
                 AutoPtr<ILinkAddress> linkAddr;
-                CLinkAddress::New(addr, USB_PREFIX_LENGTH, (ILinkAddress**)&linkAddr);
+                CLinkAddress::New(addr, USB_PREFIX_LENGTH, (ILinkAddress **)&linkAddr);
                 ifcg->SetLinkAddress(linkAddr);
                 if (enabled) {
                     ec = ifcg->SetInterfaceUp();
@@ -1867,6 +2571,13 @@ void CTethering::CheckDunRequired()
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
     global->GetInt32(contentresolver, ISettingsGlobal::TETHER_DUN_REQUIRED,
          2, &secureSetting);
+    // Allow override of TETHER_DUN_REQUIRED via prop
+    AutoPtr<ISystemProperties> properties;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&properties);
+    Int32 prop;
+    properties->GetInt32(String("persist.sys.dun.override"), -1, &prop);
+    secureSetting = ((prop < 3) && (prop >= 0)) ? prop : secureSetting;
+
     {
         AutoLock lock(mPublicSync);
         // 2 = not set, 0 = DUN not required, 1 = DUN required
@@ -1902,12 +2613,17 @@ void CTethering::CheckDunRequired()
                     mUpstreamIfaceTypes.PushBack(HIPRI_TYPE);
                 }
             }
-        }
+        /* if DUN is still available, make that a priority */
         if (Find(mUpstreamIfaceTypes.Begin(), mUpstreamIfaceTypes.End(), DUN_TYPE)
                 != mUpstreamIfaceTypes.End()) {
             mPreferredUpstreamMobileApn = IConnectivityManager::TYPE_MOBILE_DUN;
         }
         else {
+            mPreferredUpstreamMobileApn = IConnectivityManager::TYPE_MOBILE_HIPRI;
+        }
+    }
+    else {
+            /* dun_required is not set, fall back to HIPRI in that case */
             mPreferredUpstreamMobileApn = IConnectivityManager::TYPE_MOBILE_HIPRI;
         }
     }
@@ -2035,6 +2751,58 @@ ECode CTethering::ToString(
     /* [out] */ String* str)
 {
     return Object::ToString(str);
+}
+
+ECode CTethering::InterfaceMessageRecevied(
+    /* [in] */ const String& message)
+{
+    AutoPtr<IResources> resource;
+    mContext->GetResources((IResources**)&resource);
+    Boolean flag = FALSE;
+    resource->GetBoolean(Elastos::Droid::R::bool_::config_softap_extention, &flag);
+    // if softap extension feature not enabled, do nothing
+    if (!flag) {
+        return NOERROR;
+    }
+
+    if (DBG) Slogger::D(TAG, "interfaceMessageRecevied: message=%s", message.string());
+
+    // try {
+       AutoPtr<IWifiDevice> device;
+       assert(0 && "TODO");
+       // CWifiDevice::New(message, (IWifiDevice**)&device);
+
+       Int32 deviceState;
+       device->GetDeviceState(&deviceState);
+       String deviceAddress;
+       device->GetDeviceAddress(&deviceAddress);
+       if (deviceState == IWifiDevice::CONNECTED) {
+           mL2ConnectedDeviceMap->Put(StringUtils::ParseCharSequence(deviceAddress).Get(), device.Get());
+
+           // When hostapd reported STA-connection event, it is possible that device
+           // info can't fetched from dnsmasq, then we start a thread to poll the
+           // device info, the thread will exit after device info avaiable.
+           // For static ip case, dnsmasq don't hold the device info, thus thread
+           // will exit after a timeout.
+           if (ReadDeviceInfoFromDnsmasq(device)) {
+               mConnectedDeviceMap->Put(StringUtils::ParseCharSequence(deviceAddress).Get(), device.Get());
+               SendTetherConnectStateChangedBroadcast();
+           }
+           else {
+               if (DBG) Slogger::D(TAG, "Starting poll device info for %s", deviceAddress.string());
+               AutoPtr<DnsmasqThread> dthread;
+               dthread = new DnsmasqThread(this, device.Get(), DNSMASQ_POLLING_INTERVAL, DNSMASQ_POLLING_MAX_TIMES);
+               dthread->Start();
+           }
+       }
+       else if (deviceState == IWifiDevice::DISCONNECTED) {
+           mL2ConnectedDeviceMap->Remove(StringUtils::ParseCharSequence(deviceAddress).Get());
+           mConnectedDeviceMap->Remove(StringUtils::ParseCharSequence(deviceAddress).Get());
+           SendTetherConnectStateChangedBroadcast();
+       }
+    // } catch (IllegalArgumentException ex) {
+        // Slogger::E(TAG, "WifiDevice IllegalArgument: ");
+    // }
 }
 
 } // namespace Connectivity

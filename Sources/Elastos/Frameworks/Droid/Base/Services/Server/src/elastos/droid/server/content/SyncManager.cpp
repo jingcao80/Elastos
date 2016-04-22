@@ -2006,6 +2006,9 @@ ECode SyncManager::BootCompletedReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    Boolean fromQuickBoot = FALSE;
+    intent->GetBooleanExtra(String("from_quickboot"), FALSE, &fromQuickBoot);
+    if(fromQuickBoot) return NOERROR;
     mHost->mSyncHandler->OnBootCompleted();
     return NOERROR;
 }
@@ -2083,6 +2086,9 @@ ECode SyncManager::ShutdownIntentReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    Boolean fromQuickBoot = FALSE;
+    intent->GetBooleanExtra(String("from_quickboot"), FALSE, &fromQuickBoot);
+    if (fromQuickBoot) return NOERROR;
     Logger::W(SyncManager::TAG, "Writing sync state before shutdown...");
     mHost->GetSyncStorageEngine()->WriteAllState();
     return NOERROR;

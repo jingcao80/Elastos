@@ -685,8 +685,8 @@ protected:
     CARAPI_(void) Finalize();
 
 public:
-    static const String TAG; // = "SoundPool";
-    static const Boolean DEBUG; // = FALSE;
+    static const String TAG;
+    static const Boolean DEBUG;
 
 private:
     AutoPtr<ISoundPoolDelegate> mImpl;

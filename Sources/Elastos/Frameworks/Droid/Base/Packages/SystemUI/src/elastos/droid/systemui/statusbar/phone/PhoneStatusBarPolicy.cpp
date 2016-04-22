@@ -9,22 +9,22 @@
 #include "Elastos.Droid.Telecomm.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IAlarmClockInfo;
+using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Bluetooth::CBluetoothAdapterHelper;
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
 using Elastos::Droid::Bluetooth::IBluetoothAdapterHelper;
-using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
-using Elastos::Droid::Internal::Telephony::IIccCardConstants;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_ABSENT;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_CARD_IO_ERROR;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NETWORK_LOCKED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERSO_LOCKED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
+using Elastos::Droid::Internal::Telephony::IIccCardConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IUserHandle;
@@ -222,7 +222,7 @@ void PhoneStatusBarPolicy::UpdateSimState(
             mSimState = IccCardConstantsState_PUK_REQUIRED;
         }
         else {
-            mSimState = IccCardConstantsState_NETWORK_LOCKED;
+            mSimState = IccCardConstantsState_PERSO_LOCKED;
         }
     }
     else {

@@ -1,0 +1,30 @@
+module
+{
+    merge("services/securitybridge/api/ClipboardManagerMonitor.car");
+    merge("services/securitybridge/api/PackageManagerMonitor.car");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Services {
+    namespace SecurityBridge {
+    namespace Api {
+
+    class CClipboardManagerMonitor {
+        constructor();
+
+        interface IClipboardManagerMonitor;
+    }
+
+    class CPackageManagerMonitor {
+        constructor();
+
+        interface IPackageManagerMonitor;
+    }
+
+    } // namespace Api
+    } // namespace SecurityBridge
+    } // namespace Services
+    } // namespace Droid
+    } // namespace Elastos
+
+}

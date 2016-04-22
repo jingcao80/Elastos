@@ -886,13 +886,15 @@ AutoPtr<IContentValues> CMediaScanner::MyMediaScannerClient::ToValues()
         if (tempState) {
             if (!mArtist.IsNullOrEmpty()) {
                 map->Put(String("artist"), mArtist);
-            } else {
+            }
+            else {
                 map->Put(String("artist"), String("<unknown>"));
             }
 
             if (!mAlbum.IsNullOrEmpty()) {
                 map->Put(String("album"), mAlbum);
-            } else {
+            }
+            else {
                 map->Put(String("album"), String("<unknown>"));
             }
 
@@ -907,19 +909,22 @@ AutoPtr<IContentValues> CMediaScanner::MyMediaScannerClient::ToValues()
         else if ((mediaFile->IsAudioFileType(mFileType, &tempState), tempState)) {
             if (!mArtist.IsNullOrEmpty()) {
                 map->Put(String("artist"), mArtist);
-            } else {
+            }
+            else {
                 map->Put(String("artist"), String("<unknown>"));
             }
 
             if (!mAlbumArtist.IsNullOrEmpty()) {
                 map->Put(String("album_artist"), mAlbumArtist);
-            } else {
+            }
+            else {
                 map->Put(String("album_artist"), String("<unknown>"));
             }
 
             if (!mAlbum.IsNullOrEmpty()) {
                 map->Put(String("album"), mAlbum);
-            } else {
+            }
+            else {
                 map->Put(String("album"), String("<unknown>"));
             }
 
@@ -1020,7 +1025,8 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
             exif->GetGpsDateTime(&time);
             if (time != -1) {
                 values->Put(String("datetaken"), time);
-            } else {
+            }
+            else {
                 // If no time zone information is available, we should consider using
                 // EXIF local time as taken time if the difference between file time
                 // and EXIF local time is not less than 1 Day, otherwise MediaProvider
@@ -1072,9 +1078,11 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
         mediaFile->IsVideoFileType(mFileType, &tempState);
         if (tempState) {
             tableUri = mOwner->mVideoUri;
-        } else if ((mediaFile->IsImageFileType(mFileType, &tempState), tempState)) {
+        }
+        else if ((mediaFile->IsImageFileType(mFileType, &tempState), tempState)) {
             tableUri = mOwner->mImagesUri;
-        } else if ((mediaFile->IsAudioFileType(mFileType, &tempState), tempState)) {
+        }
+        else if ((mediaFile->IsAudioFileType(mFileType, &tempState), tempState)) {
             tableUri = mOwner->mAudioUri;
         }
     }
@@ -1105,7 +1113,8 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                         DoesPathHaveFilename(entry->mPath, mOwner->mDefaultNotificationFilename)) {
                     needToSetSettings = TRUE;
                 }
-            } else if (ringtones && !RingtoneDefaultsSet()) {
+            }
+            else if (ringtones && !RingtoneDefaultsSet()) {
                 AutoPtr<ITelephonyManager> defaultTelephonyManager;
                 CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
                 Int32 phoneCount = 0;
@@ -1118,7 +1127,8 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                         break;
                     }
                 }
-            } else if (alarms && !mOwner->mDefaultAlarmSet) {
+            }
+            else if (alarms && !mOwner->mDefaultAlarmSet) {
                 if (TextUtils::IsEmpty(mOwner->mDefaultAlarmAlertFilename) ||
                         DoesPathHaveFilename(entry->mPath, mOwner->mDefaultAlarmAlertFilename)) {
                     needToSetSettings = TRUE;
@@ -1136,9 +1146,11 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                 inserter->FlushAll();
             }
             mOwner->mMediaProvider->Insert(mOwner->mPackageName, tableUri, values, (IUri**)&result);
-        } else if (entry->mFormat == (Int32)IMtpConstants::FORMAT_ASSOCIATION) {
+        }
+        else if (entry->mFormat == (Int32)IMtpConstants::FORMAT_ASSOCIATION) {
             inserter->InsertwithPriority(tableUri, values);
-        } else {
+        }
+        else {
             inserter->Insert(tableUri, values);
         }
 
@@ -1167,11 +1179,14 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
             mediaFile->GetFileTypeForMimeType(mMimeType, &fileType);
             if ((mediaFile->IsAudioFileType(fileType, &tempState), tempState)) {
                 mediaType = 2;
-            } else if ((mediaFile->IsVideoFileType(fileType, &tempState), tempState)) {
+            }
+            else if ((mediaFile->IsVideoFileType(fileType, &tempState), tempState)) {
                 mediaType = 3;
-            } else if ((mediaFile->IsImageFileType(fileType, &tempState), tempState)) {
+            }
+            else if ((mediaFile->IsImageFileType(fileType, &tempState), tempState)) {
                 mediaType = 1;
-            } else if ((mediaFile->IsPlayListFileType(fileType, &tempState), tempState)) {
+            }
+            else if ((mediaFile->IsPlayListFileType(fileType, &tempState), tempState)) {
                 mediaType = 4;
             }
             values->Put(String("media_type"), mediaType);
@@ -1185,7 +1200,8 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
         if (notifications) {
             SetSettingIfNotSet(ISettingsSystem::NOTIFICATION_SOUND, tableUri, rowId);
             mOwner->mDefaultNotificationSet = TRUE;
-        } else if (ringtones) {
+        }
+        else if (ringtones) {
             // memorize default system ringtone persistently
             SetSettingIfNotSet(ISettingsSystem::DEFAULT_RINGTONE, tableUri, rowId);
             AutoPtr<ITelephonyManager> defaultTelephonyManager;
@@ -1214,7 +1230,8 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                 SetSettingIfNotSet(uri, tableUri, rowId);
                 (*(mOwner->mDefaultRingtonesSet))[i] = TRUE;
             }
-        } else if (alarms) {
+        }
+        else if (alarms) {
             SetSettingIfNotSet(ISettingsSystem::ALARM_ALERT, tableUri, rowId);
             mOwner->mDefaultAlarmSet = TRUE;
         }
@@ -1416,7 +1433,7 @@ ECode CMediaScanner::StopScan()
     {
         AutoLock lock(mLock);
 
-        if(mScanCount > 0) {
+        if (mScanCount > 0) {
             mStopScan = TRUE;
         }
     }
@@ -2003,8 +2020,8 @@ void CMediaScanner::ExitScan()
     {
         AutoLock lock(mLock);
         mScanCount--;
-        if( mScanCount == 0 ){
-            if(mStopScan == TRUE) {
+        if ( mScanCount == 0 ){
+            if (mStopScan == TRUE) {
                 mStopScan = FALSE;
             }
         }
@@ -2083,7 +2100,8 @@ ECode CMediaScanner::IsNoMediaPath(
         if (it != mNoMediaPaths.End()) {
             *result = TRUE;
             return NOERROR;
-        } else {
+        }
+        else {
             // check to see if any parent directories have a ".nomedia" file
             // start from 1 so we don't bother checking in the root directory
             Int32 offset = 1;

@@ -24,10 +24,10 @@ ECode SRTRenderer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* eventHandler)
 {
-     mContext = context;
-     mRender = (eventHandler == NULL);
-     mEventHandler = eventHandler;
-     return NOERROR;
+    mContext = context;
+    mRender = (eventHandler == NULL);
+    mEventHandler = eventHandler;
+    return NOERROR;
 }
 
 ECode SRTRenderer::Supports(
@@ -43,7 +43,7 @@ ECode SRTRenderer::Supports(
         format->GetString(IMediaFormat::KEY_MIME, &str);
         if (!str.Equals(IMediaPlayer::MEDIA_MIMETYPE_TEXT_SUBRIP)) {
             *result = FALSE;
-             return NOERROR;
+            return NOERROR;
         }
 
         Int32 ret;
@@ -69,7 +69,8 @@ ECode SRTRenderer::CreateTrack(
     AutoPtr<ISRTTrack> stk;
     if (mRender) {
         CSRTTrack::New(mRenderingWidget, format, (ISRTTrack**)&stk);
-    } else {
+    }
+    else {
         CSRTTrack::New(mEventHandler, format, (ISRTTrack**)&stk);
     }
 
