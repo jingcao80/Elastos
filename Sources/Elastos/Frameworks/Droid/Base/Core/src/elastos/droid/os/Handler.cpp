@@ -156,7 +156,7 @@ ECode Handler::constructor(
     mTakeStrongRefOfCallback = TRUE;
     mAsynchronous = async;
 #if defined(_DEBUG)
-     mIsConstructed = TRUE;
+    mIsConstructed = TRUE;
 #endif
     return NOERROR;
 }
@@ -195,7 +195,7 @@ ECode Handler::constructor(
     }
 
 #if defined(_DEBUG)
-     mIsConstructed = TRUE;
+    mIsConstructed = TRUE;
 #endif
     return NOERROR;
 }
@@ -228,7 +228,7 @@ ECode Handler::constructor(
     }
 
 #if defined(_DEBUG)
-     mIsConstructed = TRUE;
+    mIsConstructed = TRUE;
 #endif
     return NOERROR;
 }
@@ -496,10 +496,10 @@ Boolean Handler::EnqueueMessage(
     /* [in] */ Int64 uptimeMillis)
 {
 #if defined(_DEBUG)
-     if (!mIsConstructed) {
+    if (!mIsConstructed) {
         Logger::E("Handler", "Error: Handler::constructor is not called.");
         assert(0 && "Error: Handler::constructor is not called.");
-     }
+    }
 #endif
 
     msg->SetTarget(this);
@@ -588,10 +588,10 @@ ECode Handler::RemoveMessages(
     /* [in] */ IInterface* obj)
 {
 #if defined(_DEBUG)
-     if (!mIsConstructed) {
+    if (!mIsConstructed) {
         Logger::E("Handler", "Error: Handler::constructor is not called.");
         assert(0 && "Error: Handler::constructor is not called.");
-     }
+    }
 #endif
 
     AutoPtr<IMessageQueue> queue = mQueue;
@@ -612,10 +612,10 @@ ECode Handler::RemoveCallbacksAndMessages(
     /* [in] */ IInterface* obj)
 {
 #if defined(_DEBUG)
-     if (!mIsConstructed) {
+    if (!mIsConstructed) {
         Logger::E("Handler", "Error: Handler::constructor is not called.");
         assert(0 && "Error: Handler::constructor is not called.");
-     }
+    }
 #endif
 
     AutoPtr<IMessageQueue> queue = mQueue;

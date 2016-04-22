@@ -1020,7 +1020,7 @@ ECode Dialog::OnContextMenuClosed(
     return NOERROR;
 }
 
-ECode Dialog::Dialog::OnSearchRequested(
+ECode Dialog::OnSearchRequested(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)

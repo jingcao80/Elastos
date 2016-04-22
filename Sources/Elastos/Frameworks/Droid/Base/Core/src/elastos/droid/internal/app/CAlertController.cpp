@@ -84,7 +84,7 @@ ECode CAlertController::ButtonViewOnClickListener::OnClick(
 
     // Post a message so we dismiss after the above handlers are executed
     AutoPtr<IMessage> msg;
-    helper->Obtain(mHost->mHandler, ButtonHandler::MSG_DISMISS_DIALOG, ac, (IMessage**)&msg);
+    helper->Obtain(mHost->mHandler, ButtonHandler::MSG_DISMISS_DIALOG, mHost->mDialogInterface, (IMessage**)&msg);
     msg->SendToTarget();
 
     return NOERROR;
@@ -278,6 +278,7 @@ ECode CAlertController::constructor(
     mDialogInterface = di;
     mWindow = window;
     mHandler = new ButtonHandler(di);
+    mHandler->constructor();
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
     mButtonHandler = new ButtonViewOnClickListener(wr);
@@ -804,7 +805,7 @@ void CAlertController::SetupContent(
             IViewGroup::Probe(contentPanel)->AddView(IView::Probe(mListView), linearParams);
 
             AutoPtr<IViewGroupLayoutParams> lParams;
-            CLinearLayoutLayoutParams::New(lp, lp, 1.0f, (IViewGroupLayoutParams**)&lParams);
+            CLinearLayoutLayoutParams::New(lp, 0, 1.0f, (IViewGroupLayoutParams**)&lParams);
             IView::Probe(contentPanel)->SetLayoutParams(lParams);
         }
         else {

@@ -1950,10 +1950,10 @@ void ScrollView::EndDrag()
         mEdgeGlowBottom->OnRelease();
     }
 
-     if (mScrollStrictSpan != NULL) {
-         mScrollStrictSpan->Finish();
-         mScrollStrictSpan = NULL;
-     }
+    if (mScrollStrictSpan != NULL) {
+        mScrollStrictSpan->Finish();
+        mScrollStrictSpan = NULL;
+    }
 }
 
 ECode ScrollView::ScrollTo(
