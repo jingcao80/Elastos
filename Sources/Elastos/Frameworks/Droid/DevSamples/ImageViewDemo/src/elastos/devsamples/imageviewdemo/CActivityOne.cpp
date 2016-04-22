@@ -1,5 +1,5 @@
 
-#include "CActivityOne.h"
+#include "elastos/devsamples/imageviewdemo/CActivityOne.h"
 #include "R.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>

@@ -16,6 +16,7 @@ module
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
 
+
     namespace Elastos {
     namespace DevSamples {
     namespace ImageViewDemo {
