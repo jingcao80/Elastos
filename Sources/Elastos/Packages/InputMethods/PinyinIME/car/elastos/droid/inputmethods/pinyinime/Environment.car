@@ -10,7 +10,7 @@ module
     namespace PinyinIME {
 
     [local]
-    interface IPinyinEnvironment {
+    interface IEnvironment {
         OnConfigurationChanged(
             [in] IConfiguration* newConfig,
             [in] IContext* ctx);
@@ -61,7 +61,7 @@ module
     }
 
     [local]
-    interface IPinyinEnvironmentHelper {
+    interface IEnvironmentHelper {
         GetInstance(
             [out] IPinyinEnvironment** env);
     }

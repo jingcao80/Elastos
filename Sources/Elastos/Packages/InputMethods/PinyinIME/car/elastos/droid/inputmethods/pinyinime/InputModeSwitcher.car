@@ -10,12 +10,6 @@ module
 
     [deprecated]
     interface IToggleStates {
-        SetRowIdToEnable(
-            [in] Int32 id);
-
-        GetRowIdToEnable(
-            [out] Int32* id);
-
         SetQwerty(
             [in] Boolean qwerty);
 
@@ -28,22 +22,31 @@ module
         GetQwertyUpperCase(
             [out] Boolean* qwertyUpperCase);
 
+        SetRowIdToEnable(
+            [in] Int32 id);
+
+        GetRowIdToEnable(
+            [out] Int32* id);
+
+        SetKeyStates(
+            [in] ArrayOf<Int32>* keyStates);
+
+        GetKeyStates(
+            [out, callee] ArrayOf<Int32>* keyStates);
+
         SetKeyStatesNum(
             [in] Int32 keyStatesNum);
 
         GetKeyStatesNum(
             [out] Int32* keyStatesNum);
-
-        SetKeyStates(
-            [in] ArrayOf<Int32> * keyStates);
-
-        GetKeyStates(
-            [out, callee] ArrayOf<Int32> * keyStates);
     }
 
     interface IInputModeSwitcher {
         GetInputMode(
             [out] Int32* value);
+
+        GetToggleStates(
+            [out] IToggleStates** states);
 
         GetSkbLayout(
             [out] Int32* value);
@@ -101,9 +104,6 @@ module
         TryHandleLongPressSwitch(
             [in] Int32 keyCode,
             [out] Boolean* result);
-
-        GetToggleStates(
-            [out] IToggleStates** states);
     }
 
     } // namespace PinyinIME

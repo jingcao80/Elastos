@@ -278,8 +278,8 @@ module
      * @Involve
      * interface Elastos.Droid.Content.IContext
      * interface Elastos.Droid.Content.IContextWrapper
-     * interface IComponentCallbacks
-     * interface IComponentCallbacks2
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
      */
     [local]
     interface IService {

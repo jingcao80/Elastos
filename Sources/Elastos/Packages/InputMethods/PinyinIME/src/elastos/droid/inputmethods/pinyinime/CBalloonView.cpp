@@ -11,34 +11,50 @@ namespace Inputmethods {
 namespace PinyinIME {
 
 String CBalloonView::SUSPENSION_POINTS("...");
+
 CAR_OBJECT_IMPL(CBalloonView);
+
 CAR_INTERFACE_IMPL(CBalloonView, View, ICandidateView);
 
 CBalloonView::CBalloonView()
     : mLabeColor(0xff000000)
     , mSuspensionPointsWidth(0.f)
-{
-}
-
-PInterface CBalloonView::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IBalloonView) {
-        return (IInterface*)this;
-    }
-
-    return View::Probe(riid);
-}
+{}
 
 ECode CBalloonView::constructor(
     /* [in] */ IContext* context)
 {
-    View::constructor(context);
+    FAIL_RETURN(View::constructor(context));
     CPaint::New((IPaint**)&mPaintLabel);
     mPaintLabel->SetColor(mLabeColor);
     mPaintLabel->SetAntiAlias(TRUE);
     mPaintLabel->SetFakeBoldText(TRUE);
     return mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
+}
+
+ECode CBalloonView::SetIcon(
+    /* [in] */ IDrawable* icon)
+{
+    mIcon = icon;
+    return NOERROR;
+}
+
+ECode CBalloonView::SetTextConfig(
+    /* [in] */ const String& label,
+    /* [in] */ Float fontSize,
+    /* [in] */ Boolean textBold,
+    /* [in] */ Int32 textColor)
+{
+    // Icon should be cleared so that the label will be enabled.
+    mIcon = NULL;
+    mLabel = label;
+    mPaintLabel->SetTextSize(fontSize);
+    mPaintLabel->SetFakeBoldText(textBold);
+    mPaintLabel->SetColor(textColor);
+    mFmi = NULL;
+    mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
+    mPaintLabel->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
+    return NOERROR;
 }
 
 void CBalloonView::OnMeasure(
@@ -61,7 +77,8 @@ void CBalloonView::OnMeasure(
         Int32 value = 0;
         measuredWidth += (mIcon->GetIntrinsicWidth(&value), value);
         measuredHeight += (mIcon->GetIntrinsicHeight(&value), value);
-    } else if (NULL != mLabel) {
+    }
+    else if (NULL != mLabel) {
         Float value = 0.f;
         measuredWidth += (Int32) (mPaintLabel->MeasureText(mLabel, &value), value);
 
@@ -79,10 +96,8 @@ void CBalloonView::OnMeasure(
         measuredHeight = heightSize;
     }
 
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    AutoPtr<IPinyinEnvironment> env;
-    helper->GetInstance((IPinyinEnvironment**)&env);
+    AutoPtr<IEnvironment> env;
+    Environment::GetInstance((IPinyinEnvironment**)&env);
     Int32 width = 0;
     env->GetScreenWidth(&width);
     Int32 maxWidth = width - mPaddingLeft - mPaddingRight;
@@ -145,30 +160,6 @@ String CBalloonView::GetLimitedLabelForDrawing(
             return rawLabel.Substring(0, subLen) + SUSPENSION_POINTS;
         }
     } while (TRUE);
-}
-
-ECode CBalloonView::SetIcon(
-    /* [in] */ IDrawable* icon)
-{
-    mIcon = icon;
-    return NOERROR;
-}
-
-ECode CBalloonView::SetTextConfig(
-    /* [in] */ const String& label,
-    /* [in] */ Float fontSize,
-    /* [in] */ Boolean textBold,
-    /* [in] */ Int32 textColor)
-{
-    // Icon should be cleared so that the label will be enabled.
-    mIcon = NULL;
-    mLabel = label;
-    mPaintLabel->SetTextSize(fontSize);
-    mPaintLabel->SetFakeBoldText(textBold);
-    mPaintLabel->SetColor(textColor);
-    mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
-    mPaintLabel->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
-    return NOERROR;
 }
 
 } // namespace PinyinIME

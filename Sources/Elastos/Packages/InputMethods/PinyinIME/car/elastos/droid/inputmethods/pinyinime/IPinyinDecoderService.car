@@ -7,112 +7,119 @@ module
     namespace Inputmethods {
     namespace PinyinIME {
 
-        [deprecated]
-        interface IPinyinDecoderService {
-            GetInt32(
-                [out] Int32* value);
+    /**
+     * @Involve Elastos.Droid.App.IService
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     */
+    [deprecated]
+    interface IPinyinDecoderService {
+        GetInt32(
+            [out] Int32* value);
 
-            SetMaxLens(
-                [in] Int32 maxSpsLen,
-                [in] Int32 maxHzsLen);
+        SetMaxLens(
+            [in] Int32 maxSpsLen,
+            [in] Int32 maxHzsLen);
 
-            ImSearch(
-                [in] ArrayOf<Byte>* pyBuf,
-                [in] Int32 pyLen,
-                [out] Int32* value);
+        ImSearch(
+            [in] ArrayOf<Byte>* pyBuf,
+            [in] Int32 pyLen,
+            [out] Int32* value);
 
-            ImDelSearch(
-                [in] Int32 pos,
-                [in] Boolean is_pos_in_splid,
-                [in] Boolean clear_fixed_this_step,
-                [out] Int32* value);
+        ImDelSearch(
+            [in] Int32 pos,
+            [in] Boolean is_pos_in_splid,
+            [in] Boolean clear_fixed_this_step,
+            [out] Int32* value);
 
-            ImResetSearch();
+        ImResetSearch();
 
-            ImAddLetter(
-                [in] Byte ch,
-                [out] Int32* value);
+        ImAddLetter(
+            [in] Byte ch,
+            [out] Int32* value);
 
-            ImGetPyStr(
-                [in] Boolean decoded,
-                [out] String* pyStr);
+        ImGetPyStr(
+            [in] Boolean decoded,
+            [out] String* pyStr);
 
-            ImGetPyStrLen(
-                [in] Boolean decoded,
-                [out] Int32* len);
+        ImGetPyStrLen(
+            [in] Boolean decoded,
+            [out] Int32* len);
 
-            ImGetSplStart(
-                [out, callee] ArrayOf<Int32>* values);
+        ImGetSplStart(
+            [out, callee] ArrayOf<Int32>* values);
 
-            ImGetChoice(
-                [in] Int32 choiceId,
-                [out] String* choice);
+        ImGetChoice(
+            [in] Int32 choiceId,
+            [out] String* choice);
 
-            ImGetChoices(
-                [in] Int32 choicesNum,
-                [out] String* choices);
+        ImGetChoices(
+            [in] Int32 choicesNum,
+            [out] String* choices);
 
-            ImGetChoiceList(
-                [in] Int32 choicesStart,
-                [in] Int32 choicesNum,
-                [in] Int32 sentFixedLen,
-                [out, callee] ArrayOf<String>* strList);
+        ImGetChoiceList(
+            [in] Int32 choicesStart,
+            [in] Int32 choicesNum,
+            [in] Int32 sentFixedLen,
+            [out, callee] ArrayOf<String>* strList);
 
-            ImChoose(
-                [in] Int32 choiceId,
-                [out] Int32* choose);
+        ImChoose(
+            [in] Int32 choiceId,
+            [out] Int32* choose);
 
-            ImCancelLastChoice(
-                [out] Int32* value);
+        ImCancelLastChoice(
+            [out] Int32* value);
 
-            ImGetFixedLen(
-                [out] Int32* value);
+        ImGetFixedLen(
+            [out] Int32* value);
 
-            ImCancelInput(
-                [out] Boolean* status);
+        ImCancelInput(
+            [out] Boolean* status);
 
-            ImFlushCache();
+        ImFlushCache();
 
-            ImGetPredictsNum(
-                [in] String fixedStr,
-                [out] Int32* value);
+        ImGetPredictsNum(
+            [in] String fixedStr,
+            [out] Int32* value);
 
-            ImGetPredictList(
-                [in] Int32 predictsStart,
-                [in] Int32 predictsNum,
-                [out, callee] ArrayOf<String>* strList);
+        ImGetPredictItem(
+            [in] Int32 predictNo,
+            [out] String* item);
 
-            ImGetPredictItem(
-                [in] Int32 predictNo,
-                [out] String* item);
+        ImGetPredictList(
+            [in] Int32 predictsStart,
+            [in] Int32 predictsNum,
+            [out, callee] ArrayOf<String>* strList);
 
-            SyncUserDict(
-                [in] String tomerge,
-                [out] String* value);
+        SyncUserDict(
+            [in] String tomerge,
+            [out] String* value);
 
-            SyncBegin(
-                [out] Boolean* begin);
+        SyncBegin(
+            [out] Boolean* begin);
 
-            SyncFinish();
+        SyncFinish();
 
-            SyncPutLemmas(
-                [in] String tomerge,
-                [out] Int32* value);
+        SyncPutLemmas(
+            [in] String tomerge,
+            [out] Int32* value);
 
-            SyncGetLemmas(
-                [out] String* value);
+        SyncGetLemmas(
+            [out] String* value);
 
-            SyncGetLastCount(
-                [out] Int32* value);
+        SyncGetLastCount(
+            [out] Int32* value);
 
-            SyncGetTotalCount(
-                [out] Int32* value);
+        SyncGetTotalCount(
+            [out] Int32* value);
 
-            SyncClearLastGot();
+        SyncClearLastGot();
 
-            ImSyncGetCapacity(
-                [out] Int32* value);
-        }
+        ImSyncGetCapacity(
+            [out] Int32* value);
+    }
 
     } // namespace PinyinIME
     } // namespace Inputmethods

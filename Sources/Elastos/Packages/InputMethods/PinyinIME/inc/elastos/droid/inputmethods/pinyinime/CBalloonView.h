@@ -20,9 +20,6 @@ public:
 
     CAR_INTERFACE_DECL();
 
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -43,11 +40,12 @@ protected:
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
+private:
     CARAPI_(String) GetLimitedLabelForDrawing(
         /* [in] */ const String& rawLabel,
         /* [in] */ Float widthToDraw);
 
-protected:
+private:
     /**
      * Suspension points used to display long items.
      */

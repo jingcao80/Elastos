@@ -12,6 +12,15 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Widget.IRelativeLayout
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface Elastos.Droid.View.IViewOnTouchListener
      */
     [local]
     interface ISkbContainer {

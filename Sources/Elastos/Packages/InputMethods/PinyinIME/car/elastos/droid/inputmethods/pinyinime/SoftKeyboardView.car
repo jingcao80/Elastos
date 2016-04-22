@@ -11,6 +11,9 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     [deprecated, local]
     interface ISoftKeyboardView {
@@ -42,7 +45,7 @@ module
         OnKeyPress(
             [in] Int32 x,
             [in] Int32 y,
-            [in] /*SkbContainer.LongPressTimer*/ IHandler* longPressTimer,
+            [in] IHandler* longPressTimer,
             [in] Boolean movePress,
             [out] ISoftKey** key);
 

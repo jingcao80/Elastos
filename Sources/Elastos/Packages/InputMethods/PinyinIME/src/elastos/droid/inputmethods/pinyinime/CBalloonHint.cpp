@@ -7,6 +7,7 @@ using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Graphics::Drawable::IColorDrawable;
 using Elastos::Droid::Graphics::Drawable::CColorDrawable;
 using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::View::MeasureSpec;
 
 namespace Elastos {
 namespace Droid {
@@ -25,7 +26,7 @@ CBalloonHint::BalloonTimer::BalloonTimer(
     , mTimerPending(FALSE)
     , mHost(host)
 {
-    memset(mPositionInParent, 0, sizeof(mPositionInParent));
+    mPositionInParent = ArrayOf<Int32>::Alloc(2);
 }
 
 void CBalloonHint::BalloonTimer::StartTimer(
@@ -37,14 +38,13 @@ void CBalloonHint::BalloonTimer::StartTimer(
 {
     mAction = action;
     if (ACTION_HIDE != action) {
-        assert(positionInParent != NULL);
-        mPositionInParent[0] = (*positionInParent)[0];
-        mPositionInParent[1] = (*positionInParent)[1];
+        (*mPositionInParent)[0] = (*positionInParent)[0];
+        (*mPositionInParent)[1] = (*positionInParent)[1];
     }
     mWidth = width;
     mHeight = height;
     Boolean result = FALSE;
-    Handler::PostDelayed(this, tm, &result);
+    PostDelayed(this, tm, &result);
     mTimerPending = TRUE;
 }
 
@@ -57,7 +57,7 @@ Boolean CBalloonHint::BalloonTimer::RemoveTimer()
 {
     if (mTimerPending) {
         mTimerPending = FALSE;
-        Handler::RemoveCallbacks(this);
+        RemoveCallbacks(this);
         return TRUE;
     }
 
@@ -73,41 +73,39 @@ ECode CBalloonHint::BalloonTimer::Run()
 {
     switch (mAction) {
         case ACTION_SHOW: {
-            Int32 x = 0, y = 0;
-            mHost->mParent->GetLocationInWindow(&x, &y);
-            mHost->mParentLocationInWindow[0] = x;
-            mHost->mParentLocationInWindow[1] = y;
+            mHost->mParent->GetLocationInWindow(mHost->mParentLocationInWindow);
             mHost->ShowAtLocation(mHost->mParent, IGravity::LEFT | IGravity::TOP,
-                    mPositionInParent[0], mPositionInParent[1]
-                            + mHost->mParentLocationInWindow[1]);
+                    (*mPositionInParent)[0], (*mPositionInParent)[1]
+                            + (*mHost->mParentLocationInWindow)[1]);
             break;
         }
         case ACTION_HIDE:
             mHost->Dismiss();
             break;
         case ACTION_UPDATE: {
-            Int32 x = 0, y = 0;
-            mHost->mParent->GetLocationInWindow(&x, &y);
-            mHost->mParentLocationInWindow[0] = x;
-            mHost->mParentLocationInWindow[1] = y;
-            mHost->Update(mPositionInParent[0], mPositionInParent[1]
-                    + mHost->mParentLocationInWindow[1], mWidth, mHeight);
+            mHost->mParent->GetLocationInWindow(mHost->mParentLocationInWindow));
+            mHost->Update((*mPositionInParent)[0], (*mPositionInParent)[1]
+                    + (*mHost->mParentLocationInWindow)[1], mWidth, mHeight);
         }
     }
     mTimerPending = FALSE;
     return NOERROR;
 }
 
+
 const Int32 CBalloonHint::TIME_DELAY_SHOW = 0;
 const Int32 CBalloonHint::TIME_DELAY_DISMISS = 200;
+
 CAR_OBJECT_IMPL(CBalloonHint);
+
 CAR_INTERFACE_IMPL(CBalloonHint, PopupWindow, IBalloonHint);
+
 CBalloonHint::CBalloonHint()
     : mMeasureSpecMode(0)
     , mForceDismiss(FALSE)
 {
     CRect::New((IRect**)&mPaddingRect);
-    memset(mParentLocationInWindow, 0, sizeof(mParentLocationInWindow));
+    mParentLocationInWindow = ArrayOf<Int32>::Alloc(2);
 }
 
 ECode CBalloonHint::constructor(
@@ -115,7 +113,7 @@ ECode CBalloonHint::constructor(
     /* [in] */ IView* parent,
     /* [in] */ Int32 measureSpecMode)
 {
-    Init(context);
+    FAIL_RETURN(PopupWindow::constructor(context));
     mParent = parent;
     mMeasureSpecMode = measureSpecMode;
 
@@ -165,7 +163,8 @@ ECode CBalloonHint::SetBalloonBackground(
     if (NULL != drawable) {
         Boolean result = FALSE;
         drawable->GetPadding(mPaddingRect, &result);
-    } else {
+    }
+    else {
         mPaddingRect->Set(0, 0, 0, 0);
     }
     return NOERROR;
@@ -234,19 +233,16 @@ ECode CBalloonHint::DelayedShow(
     /* [in] */ Int64 delay,
     /* [in] */ ArrayOf<Int32>* locationInParent)
 {
-    assert(locationInParent != NULL);
     if (mBalloonTimer->IsPending()) {
         mBalloonTimer->RemoveTimer();
     }
     if (delay <= 0) {
-        Int32 x = 0, y = 0;
-        mParent->GetLocationInWindow(&x, &y);
-        mParentLocationInWindow[0] = x;
-        mParentLocationInWindow[1] = y;
+        mParent->GetLocationInWindow(mParentLocationInWindow);
         ShowAtLocation(mParent, IGravity::LEFT | IGravity::TOP,
                 (*locationInParent)[0], (*locationInParent)[1]
-                        + mParentLocationInWindow[1]);
-    } else {
+                        + (*mParentLocationInWindow)[1]);
+    }
+    else {
         mBalloonTimer->StartTimer(delay, BalloonTimer::ACTION_SHOW,
                 locationInParent, -1, -1);
     }
@@ -259,19 +255,16 @@ ECode CBalloonHint::DelayedUpdate(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    assert(locationInParent != NULL);
     mBalloonView->Invalidate();
     if (mBalloonTimer->IsPending()) {
         mBalloonTimer->RemoveTimer();
     }
     if (delay <= 0) {
-        Int32 x = 0, y = 0;
-        mParent->GetLocationInWindow(&x, &y);
-        mParentLocationInWindow[0] = x;
-        mParentLocationInWindow[1] = y;
+        mParent->GetLocationInWindow(mParentLocationInWindow);
         Update((*locationInParent)[0], (*locationInParent)[1]
-                + mParentLocationInWindow[1], width, height);
-    } else {
+                + (*mParentLocationInWindow)[1], width, height);
+    }
+    else {
         mBalloonTimer->StartTimer(delay, BalloonTimer::ACTION_UPDATE,
                 locationInParent, width, height);
     }
@@ -291,7 +284,8 @@ ECode CBalloonHint::DelayedDismiss(
     }
     if (delay <= 0) {
         Dismiss();
-    } else {
+    }
+    else {
         mBalloonTimer->StartTimer(delay, BalloonTimer::ACTION_HIDE, NULL, -1,
                 -1);
     }
@@ -311,9 +305,9 @@ void CBalloonHint::SetBalloonSize(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    Int32 widthMeasureSpec = Elastos::Droid::View::View::MeasureSpec::MakeMeasureSpec(width,
+    Int32 widthMeasureSpec = MeasureSpec::MakeMeasureSpec(width,
             mMeasureSpecMode);
-    Int32 heightMeasureSpec = Elastos::Droid::View::View::MeasureSpec::MakeMeasureSpec(height,
+    Int32 heightMeasureSpec = MeasureSpec::MakeMeasureSpec(height,
             mMeasureSpecMode);
     mBalloonView->Measure(widthMeasureSpec, heightMeasureSpec);
 
@@ -344,386 +338,6 @@ void CBalloonHint::SetBalloonSize(
     if (IsShowing(&isShowing), isShowing) {
         mForceDismiss = oldWidth - newWidth > 1 || newWidth - oldWidth > 1;
     }
-}
-
-ECode CBalloonHint::SetAllowScrollingAnchorParent(
-        /* [in] */ Boolean enabled)
-{
-    return PopupWindow::SetAllowScrollingAnchorParent(enabled);
-}
-
-ECode CBalloonHint::GetBackground(
-    /* [out] */ IDrawable** background)
-{
-    VALIDATE_NOT_NULL(background);
-    AutoPtr<IDrawable> bk = PopupWindow::GetBackground();
-    *background = bk.Get();
-    REFCOUNT_ADD(*background);
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetBackgroundDrawable(
-    /* [in] */ IDrawable* background)
-{
-    return PopupWindow::SetBackgroundDrawable(background);
-}
-
-ECode CBalloonHint::GetAnimationStyle(
-    /* [out] */ Int32* style)
-{
-    VALIDATE_NOT_NULL(style);
-    *style = PopupWindow::GetAnimationStyle();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetIgnoreCheekPress()
-{
-    return PopupWindow::SetIgnoreCheekPress();
-}
-
-ECode CBalloonHint::SetAnimationStyle(
-    /* [in] */ Int32 animationStyle)
-{
-    return PopupWindow::SetAnimationStyle(animationStyle);
-}
-
-ECode CBalloonHint::GetContentView(
-    /* [out] */ IView** contentView)
-{
-    VALIDATE_NOT_NULL(contentView);
-    AutoPtr<IView> cv = PopupWindow::GetContentView();
-    *contentView = cv.Get();
-    REFCOUNT_ADD(*contentView);
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetContentView(
-    /* [in] */ IView* contentView)
-{
-    return PopupWindow::SetContentView(contentView);
-}
-
-ECode CBalloonHint::SetTouchInterceptor(
-    /* [in] */ IViewOnTouchListener* l)
-{
-    return PopupWindow::SetTouchInterceptor(l);
-}
-
-ECode CBalloonHint::IsFocusable(
-    /* [out] */ Boolean* isFocusable)
-{
-    VALIDATE_NOT_NULL(isFocusable);
-    *isFocusable = PopupWindow::IsFocusable();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetFocusable(
-     /* [in] */ Boolean focusable)
-{
-    return PopupWindow::SetFocusable(focusable);
-}
-
-ECode CBalloonHint::GetInputMethodMode(
-    /* [out] */ Int32* inputMethodMode)
-{
-    VALIDATE_NOT_NULL(inputMethodMode);
-    *inputMethodMode = PopupWindow::GetInputMethodMode();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetInputMethodMode(
-    /* [in] */ Int32 mode)
-{
-    return PopupWindow::SetInputMethodMode(mode);
-}
-
-ECode CBalloonHint::SetSoftInputMode(
-    /* [in] */ Int32 mode)
-{
-    return PopupWindow::SetSoftInputMode(mode);
-}
-
-ECode CBalloonHint::GetSoftInputMode(
-    /* [out] */ Int32* softInputMode)
-{
-    VALIDATE_NOT_NULL(softInputMode);
-    *softInputMode = PopupWindow::GetSoftInputMode();
-    return NOERROR;
-}
-
-ECode CBalloonHint::IsTouchable(
-    /* [out] */ Boolean* touchable)
-{
-    VALIDATE_NOT_NULL(touchable);
-    *touchable = PopupWindow::IsTouchable();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetTouchable(
-    /* [in] */ Boolean touchable)
-{
-    return PopupWindow::SetTouchable(touchable);
-}
-
-ECode CBalloonHint::IsOutsideTouchable(
-    /* [out] */ Boolean* touchable)
-{
-    VALIDATE_NOT_NULL(touchable);
-    *touchable = PopupWindow::IsOutsideTouchable();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetOutsideTouchable(
-    /* [in] */ Boolean touchable)
-{
-    return PopupWindow::SetOutsideTouchable(touchable);
-}
-
-ECode CBalloonHint::IsClippingEnabled(
-    /* [out] */ Boolean* enabled)
-{
-    VALIDATE_NOT_NULL(enabled);
-    *enabled = PopupWindow::IsClippingEnabled();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetClippingEnabled(
-    /* [in] */ Boolean enabled)
-{
-    return PopupWindow::SetClippingEnabled(enabled);
-}
-
-ECode CBalloonHint::SetClipToScreenEnabled(
-    /* [in] */ Boolean enabled)
-{
-    return PopupWindow::SetClipToScreenEnabled(enabled);
-}
-
-ECode CBalloonHint::IsSplitTouchEnabled(
-    /* [out] */ Boolean* enabled)
-{
-    VALIDATE_NOT_NULL(enabled);
-    *enabled = PopupWindow::IsSplitTouchEnabled();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetSplitTouchEnabled(
-    /* [in] */ Boolean enabled)
-{
-    return PopupWindow::SetSplitTouchEnabled(enabled);
-}
-
-ECode CBalloonHint::IsLayoutInScreenEnabled(
-    /* [out] */ Boolean* enabled)
-{
-    VALIDATE_NOT_NULL(enabled);
-    *enabled = PopupWindow::IsLayoutInScreenEnabled();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetLayoutInScreenEnabled(
-    /* [in] */ Boolean enabled)
-{
-    return PopupWindow::SetLayoutInScreenEnabled(enabled);
-}
-
-ECode CBalloonHint::SetLayoutInsetDecor(
-    /* [in] */ Boolean enabled)
-{
-    return PopupWindow::SetLayoutInsetDecor(enabled);
-}
-
-ECode CBalloonHint::SetWindowLayoutType(
-    /* [in] */ Int32 layoutType)
-{
-    return PopupWindow::SetWindowLayoutType(layoutType);
-}
-
-ECode CBalloonHint::GetWindowLayoutType(
-    /* [out] */ Int32* layoutType)
-{
-    VALIDATE_NOT_NULL(layoutType);
-    *layoutType = PopupWindow::GetWindowLayoutType();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetTouchModal(
-    /* [in] */ Boolean touchModal)
-{
-    return PopupWindow::SetTouchModal(touchModal);
-}
-
-ECode CBalloonHint::SetWindowLayoutMode(
-    /* [in] */ Int32 widthSpec,
-    /* [in] */ Int32 heightSpec)
-{
-    return PopupWindow::SetWindowLayoutMode(widthSpec, heightSpec);
-}
-
-ECode CBalloonHint::GetHeight(
-    /* [out] */ Int32* height)
-{
-    VALIDATE_NOT_NULL(height);
-    *height = PopupWindow::GetHeight();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetHeight(
-    /* [in] */ Int32 height)
-{
-    return PopupWindow::SetHeight(height);
-}
-
-ECode CBalloonHint::GetWidth(
-    /* [out] */ Int32* width)
-{
-    VALIDATE_NOT_NULL(width);
-    *width = PopupWindow::GetWidth();
-    return NOERROR;
-}
-
-ECode CBalloonHint::SetWidth(
-    /* [in] */ Int32 width)
-{
-    return PopupWindow::SetWidth(width);
-}
-
-ECode CBalloonHint::IsShowing(
-    /* [out] */ Boolean* isShowing)
-{
-    VALIDATE_NOT_NULL(isShowing);
-    *isShowing = PopupWindow::IsShowing();
-    return NOERROR;
-}
-
-ECode CBalloonHint::ShowAtLocation(
-    /* [in] */ IView* parent,
-    /* [in] */ Int32 gravity,
-    /* [in] */ Int32 x,
-    /* [in] */ Int32 y)
-{
-    return PopupWindow::ShowAtLocation(parent, gravity, x, y);
-}
-
-ECode CBalloonHint::ShowAtLocation(
-    /* [in] */ IBinder* token,
-    /* [in] */ Int32 gravity,
-    /* [in] */ Int32 x,
-    /* [in] */ Int32 y)
-{
-    return PopupWindow::ShowAtLocation(token, gravity, x, y);
-}
-
-ECode CBalloonHint::ShowAsDropDown(
-    /* [in] */ IView* anchor)
-{
-    return PopupWindow::ShowAsDropDown(anchor);
-}
-
-ECode CBalloonHint::ShowAsDropDown(
-    /* [in] */ IView* anchor,
-    /* [in] */ Int32 xoff,
-    /* [in] */ Int32 yoff)
-{
-    return PopupWindow::ShowAsDropDown(anchor, xoff, yoff);
-}
-
-ECode CBalloonHint::IsAboveAnchor(
-    /* [out] */ Boolean* isAboveAnchor)
-{
-    VALIDATE_NOT_NULL(isAboveAnchor);
-    *isAboveAnchor = PopupWindow::IsAboveAnchor();
-    return NOERROR;
-}
-
-ECode CBalloonHint::GetMaxAvailableHeight(
-    /* [in] */ IView* anchor,
-    /* [out] */ Int32* maxAvailableHeight)
-{
-    VALIDATE_NOT_NULL(maxAvailableHeight);
-    *maxAvailableHeight = PopupWindow::GetMaxAvailableHeight(anchor);
-    return NOERROR;
-}
-
-ECode CBalloonHint::GetMaxAvailableHeight(
-    /* [in] */ IView* anchor,
-    /* [in] */ Int32 yOffset,
-    /* [out] */ Int32* maxAvailableHeight)
-{
-    VALIDATE_NOT_NULL(maxAvailableHeight);
-    *maxAvailableHeight = PopupWindow::GetMaxAvailableHeight(anchor, yOffset);
-    return NOERROR;
-}
-
-ECode CBalloonHint::GetMaxAvailableHeight(
-    /* [in] */ IView* anchor,
-    /* [in] */ Int32 yOffset,
-    /* [in] */ Boolean ignoreBottomDecorations,
-    /* [out] */ Int32* maxAvailableHeight)
-{
-    VALIDATE_NOT_NULL(maxAvailableHeight);
-    *maxAvailableHeight = PopupWindow::GetMaxAvailableHeight(anchor, yOffset, ignoreBottomDecorations);
-    return NOERROR;
-}
-
-ECode CBalloonHint::Dismiss()
-{
-    return PopupWindow::Dismiss();
-}
-
-ECode CBalloonHint::SetOnDismissListener(
-    /* [in] */ IPopupWindowOnDismissListener* l)
-{
-    return PopupWindow::SetOnDismissListener(l);
-}
-
-ECode CBalloonHint::Update()
-{
-    return PopupWindow::Update();
-}
-
-ECode CBalloonHint::Update(
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
-{
-    return PopupWindow::Update(width, height);
-}
-
-ECode CBalloonHint::Update(
-    /* [in] */ Int32 x,
-    /* [in] */ Int32 y,
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
-{
-    return PopupWindow::Update(x, y, width, height);
-}
-
-ECode CBalloonHint::Update(
-    /* [in] */ Int32 x,
-    /* [in] */ Int32 y,
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height,
-    /* [in] */ Boolean force)
-{
-    return PopupWindow::Update(x, y, width, height, force);
-}
-
-ECode CBalloonHint::Update(
-    /* [in] */ IView* anchor,
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
-{
-    return PopupWindow::Update(anchor, width, height);
-}
-
-ECode CBalloonHint::Update(
-    /* [in] */ IView* anchor,
-    /* [in] */ Int32 xoff,
-    /* [in] */ Int32 yoff,
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
-{
-    return PopupWindow::Update(anchor, xoff, yoff, width, height);
 }
 
 } // namespace PinyinIME

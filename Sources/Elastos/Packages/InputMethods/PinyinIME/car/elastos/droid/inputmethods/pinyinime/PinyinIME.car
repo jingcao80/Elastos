@@ -16,6 +16,16 @@ module
         ImeState_STATE_APP_COMPLETION
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.InputMethodService.IInputMethodService
+     * interface Elastos.Droid.InputMethodService.IAbstractInputMethodService
+     * interface Elastos.Droid.App.IService
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     */
     [local]
     interface IPinyinIME {
         ResponseSoftKeyEvent(
