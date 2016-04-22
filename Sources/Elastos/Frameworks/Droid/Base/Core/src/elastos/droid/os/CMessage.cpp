@@ -3,9 +3,13 @@
 #include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/utility/TimeUtils.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Core::ICloneable;
 using Elastos::Utility::Logging::Logger;
 
@@ -532,45 +536,57 @@ ECode CMessage::WriteToParcel(
     return NOERROR;
 }
 
-// String toString(long now) {
-//     StringBuilder b = new StringBuilder();
-//     b.append("{ when=");
-//     TimeUtils.formatDuration(when - now, b);
+ECode CMessage::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = ToString(SystemClock::GetUptimeMillis());
+    return NOERROR;
+}
 
-//     if (target != null) {
-//         if (callback != null) {
-//             b.append(" callback=");
-//             b.append(callback.getClass().getName());
-//         } else {
-//             b.append(" what=");
-//             b.append(what);
-//         }
+String CMessage::ToString(
+    /* [in] */ Int64 now)
+{
+    StringBuilder b;
+    b.Append("{ when=");
+    TimeUtils::FormatDuration(mWhen - now, b);
 
-//         if (arg1 != 0) {
-//             b.append(" arg1=");
-//             b.append(arg1);
-//         }
+    if (mTarget != NULL) {
+        if (mCallback != NULL) {
+            b.Append(" callback=");
+            b.Append(mCallback/*.getClass().getName()*/);
+        }
+        else {
+            b.Append(" what=");
+            b.Append(mWhat);
+        }
 
-//         if (arg2 != 0) {
-//             b.append(" arg2=");
-//             b.append(arg2);
-//         }
+        if (mArg1 != 0) {
+            b.Append(" arg1=");
+            b.Append(mArg1);
+        }
 
-//         if (obj != null) {
-//             b.append(" obj=");
-//             b.append(obj);
-//         }
+        if (mArg2 != 0) {
+            b.Append(" arg2=");
+            b.Append(mArg2);
+        }
 
-//         b.append(" target=");
-//         b.append(target.getClass().getName());
-//     } else {
-//         b.append(" barrier=");
-//         b.append(arg1);
-//     }
+        if (mObj != NULL) {
+            b.Append(" obj=");
+            b.Append(mObj);
+        }
 
-//     b.append(" }");
-//     return b.toString();
-// }
+        b.Append(" target=");
+        b.Append(mTarget/*.getClass().getName()*/);
+    }
+    else {
+        b.Append(" barrier=");
+        b.Append(mArg1);
+    }
+
+    b.Append(" }");
+    return b.ToString();
+}
 
 } // namespace Os
 } // namespace Droid

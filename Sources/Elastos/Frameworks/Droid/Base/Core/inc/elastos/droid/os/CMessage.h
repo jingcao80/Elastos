@@ -243,6 +243,13 @@ public:
 
     CARAPI RecycleUnchecked();
 
+    // @Override
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    CARAPI_(String) ToString(
+        /* [in] */ Int64 now);
+
 public:
     /**
      * User-defined message code so that the recipient can identify
