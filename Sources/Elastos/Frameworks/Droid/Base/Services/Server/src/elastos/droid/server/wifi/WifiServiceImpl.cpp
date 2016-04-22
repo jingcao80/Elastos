@@ -1,10 +1,80 @@
-
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Net.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Wifi.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/Manifest.h"
 #include "elastos/droid/server/wifi/WifiServiceImpl.h"
+#include "elastos/droid/server/am/BatteryStatsService.h"
+#include "elastos/core/StringUtils.h"
+#include "elastos/core/CoreUtils.h"
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::Bluetooth::IBluetoothAdapter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::CWorkSource;
 using Elastos::Droid::Os::IBinderHelper;
 using Elastos::Droid::Os::CBinderHelper;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::CMessenger;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::IHandlerThread;
+using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::IUserManagerHelper;
+using Elastos::Droid::Os::CUserManagerHelper;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Net::CDhcpInfo;
+using Elastos::Droid::Net::ILinkAddress;
+using Elastos::Droid::Net::INetworkUtils;
+using Elastos::Droid::Net::CNetworkUtils;
+using Elastos::Droid::Net::IStaticIpConfiguration;
+using Elastos::Droid::Net::IConnectivityManagerHelper;
+using Elastos::Droid::Net::CConnectivityManagerHelper;
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Server::Am::BatteryStatsService;
+using Elastos::Droid::R;
+using Elastos::Droid::Wifi::CScanSettings;
 using Elastos::Droid::Wifi::EIID_IIWifiManager;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::CBatchedScanSettings;
+using Elastos::Droid::Wifi::CWifiActivityEnergyInfo;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IReader;
+using Elastos::IO::IFileReader;
+using Elastos::IO::CFileReader;
+using Elastos::IO::IBufferedReader;
+using Elastos::IO::CBufferedReader;
+using Elastos::Net::IInetAddress;
+using Elastos::Net::IInet4Address;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,71 +84,86 @@ namespace Wifi {
 //=====================================================================
 //                      WifiServiceImpl::TdlsTask
 //=====================================================================
-//AutoPtr<Integer> WifiServiceImpl::TdlsTask::DoInBackground(
-//    /* [in] */  TdlsTaskParams)
 ECode WifiServiceImpl::TdlsTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    // ==================before translated======================
-    //
-    // // Retrieve parameters for the call
-    // TdlsTaskParams param = params[0];
-    // String remoteIpAddress = param.remoteIpAddress.trim();
-    // boolean enable = param.enable;
-    //
-    // // Get MAC address of Remote IP
-    // String macAddress = null;
-    //
-    // BufferedReader reader = null;
-    //
-    // try {
-    //     reader = new BufferedReader(new FileReader("/proc/net/arp"));
-    //
-    //     // Skip over the line bearing colum titles
-    //     String line = reader.readLine();
-    //
-    //     while ((line = reader.readLine()) != null) {
-    //         String[] tokens = line.split("[ ]+");
-    //         if (tokens.length < 6) {
-    //             continue;
-    //         }
-    //
-    //         // ARP column format is
-    //         // Address HWType HWAddress Flags Mask IFace
-    //         String ip = tokens[0];
-    //         String mac = tokens[3];
-    //
-    //         if (remoteIpAddress.equals(ip)) {
-    //             macAddress = mac;
-    //             break;
-    //         }
-    //     }
-    //
-    //     if (macAddress == null) {
-    //         Slog.w(TAG, "Did not find remoteAddress {" + remoteIpAddress + "} in " +
-    //                 "/proc/net/arp");
-    //     } else {
-    //         enableTdlsWithMacAddress(macAddress, enable);
-    //     }
-    //
-    // } catch (FileNotFoundException e) {
-    //     Slog.e(TAG, "Could not open /proc/net/arp to lookup mac address");
-    // } catch (IOException e) {
-    //     Slog.e(TAG, "Could not read /proc/net/arp to lookup mac address");
-    // } finally {
-    //     try {
-    //         if (reader != null) {
-    //             reader.close();
-    //         }
-    //     }
-    //     catch (IOException e) {
-    //         // Do nothing
-    //     }
-    // }
-    //
-    // return 0;
-    assert(0);
+    VALIDATE_NOT_NULL(result);
+    // Retrieve parameters for the call
+    AutoPtr<TdlsTaskParams> param = (TdlsTaskParams*)(IObject::Probe((*params)[0]));
+    String remoteIpAddress = param->remoteIpAddress.Trim();
+    Boolean enable = param->enable;
+
+    // Get MAC address of Remote IP
+    String macAddress;
+
+    AutoPtr<IBufferedReader> reader;
+
+    //try {
+    AutoPtr<IFileReader> fileReader;
+    ECode ec = CFileReader::New(String("/proc/net/arp"), (IFileReader**)&fileReader);
+    if (FAILED(ec)) {
+        Slogger::E(WifiServiceImpl::TAG, "Could not open /proc/net/arp to lookup mac address");
+        AutoPtr<IInteger32> res = CoreUtils::Convert(0);
+        *result = TO_IINTERFACE(res);
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    ec = CBufferedReader::New(IReader::Probe(fileReader), (IBufferedReader**)&reader);
+    if (FAILED(ec)) {
+        Slogger::E(WifiServiceImpl::TAG, "Could not open /proc/net/arp to lookup mac address");
+        AutoPtr<IInteger32> res = CoreUtils::Convert(0);
+        *result = TO_IINTERFACE(res);
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+
+    // Skip over the line bearing colum titles
+    String line;
+    reader->ReadLine(&line);
+
+    while ((reader->ReadLine(&line), !line.IsNull())) {
+        AutoPtr<ArrayOf<String> > tokens;
+        StringUtils::Split(line, String("[ ]+"), (ArrayOf<String>**)&tokens);
+        if (tokens->GetLength() < 6) {
+            continue;
+        }
+
+        // ARP column format is
+        // Address HWType HWAddress Flags Mask IFace
+        String ip = (*tokens)[0];
+        String mac = (*tokens)[3];
+
+        if (remoteIpAddress.Equals(ip)) {
+            macAddress = mac;
+            break;
+        }
+    }
+
+    if (macAddress.IsNull()) {
+        Slogger::W(WifiServiceImpl::TAG, "Did not find remoteAddress {%s} in /proc/net/arp", remoteIpAddress.string());
+    } else {
+        mOwner->EnableTdlsWithMacAddress(macAddress, enable);
+    }
+
+    //} catch (FileNotFoundException e) {
+    //    Slog.e(TAG, "Could not open /proc/net/arp to lookup mac address");
+    //} catch (IOException e) {
+    //    Slog.e(TAG, "Could not read /proc/net/arp to lookup mac address");
+    //} finally {
+    //    try {
+    if (reader != NULL) {
+        ICloseable::Probe(reader)->Close();
+    }
+    //    }
+    //    catch (IOException e) {
+    //        // Do nothing
+    //    }
+    //}
+
+    AutoPtr<IInteger32> res = CoreUtils::Convert(0);
+    *result = TO_IINTERFACE(res);
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -89,10 +174,11 @@ ECode WifiServiceImpl::TdlsTask::DoInBackground(
 ECode WifiServiceImpl::LockList::HasLocks(
     /* [out] */ Boolean* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return !mList.isEmpty();
-    assert(0);
+    Boolean isEmpty;
+    mList->IsEmpty(&isEmpty);
+    *result = !isEmpty;
     return NOERROR;
 }
 
@@ -100,22 +186,25 @@ ECode WifiServiceImpl::LockList::HasLocks(
 ECode WifiServiceImpl::LockList::GetStrongestLockMode(
     /* [out] */ Int32* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mList.isEmpty()) {
-    //     return WifiManager.WIFI_MODE_FULL;
-    // }
-    //
-    // if (mFullHighPerfLocksAcquired > mFullHighPerfLocksReleased) {
-    //     return WifiManager.WIFI_MODE_FULL_HIGH_PERF;
-    // }
-    //
-    // if (mFullLocksAcquired > mFullLocksReleased) {
-    //     return WifiManager.WIFI_MODE_FULL;
-    // }
-    //
-    // return WifiManager.WIFI_MODE_SCAN_ONLY;
-    assert(0);
+    Boolean isEmpty;
+    if (mList->IsEmpty(&isEmpty), isEmpty) {
+        *result = IWifiManager::WIFI_MODE_FULL;
+        return NOERROR;
+    }
+
+    if (mOwner->mFullHighPerfLocksAcquired > mOwner->mFullHighPerfLocksReleased) {
+        *result = IWifiManager::WIFI_MODE_FULL_HIGH_PERF;
+        return NOERROR;
+    }
+
+    if (mOwner->mFullLocksAcquired > mOwner->mFullLocksReleased) {
+        *result = IWifiManager::WIFI_MODE_FULL;
+        return NOERROR;
+    }
+
+    *result = IWifiManager::WIFI_MODE_SCAN_ONLY;
     return NOERROR;
 }
 
@@ -123,185 +212,234 @@ ECode WifiServiceImpl::LockList::GetStrongestLockMode(
 ECode WifiServiceImpl::LockList::UpdateWorkSource(
     /* [in] */ IWorkSource* ws)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(ws);
-    // ==================before translated======================
-    // for (int i = 0; i < mLocks.mList.size(); i++) {
-    //     ws.add(mLocks.mList.get(i).mWorkSource);
-    // }
-    assert(0);
+    Int32 size;
+    mOwner->mLocks->mList->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mOwner->mLocks->mList->Get(i, (IInterface**)&obj);
+        WifiLock* wifiLock = (WifiLock*)(IObject::Probe(obj));
+        Boolean added;
+        ws->Add(wifiLock->mWorkSource, &added);
+    }
     return NOERROR;
 }
 
-WifiServiceImpl::LockList::LockList()
+WifiServiceImpl::LockList::LockList(
+    /* [in] */ WifiServiceImpl* owner)
+    : mOwner(owner)
 {
-    // ==================before translated======================
-    // mList = new ArrayList<WifiLock>();
+    CArrayList::New((IList**)&mList);
 }
 
 void WifiServiceImpl::LockList::AddLock(
     /* [in] */ WifiLock* lock)
 {
-    // ==================before translated======================
-    // if (findLockByBinder(lock.mBinder) < 0) {
-    //     mList.add(lock);
-    // }
-    assert(0);
+    if (FindLockByBinder(lock->mBinder) < 0) {
+         mList->Add(TO_IINTERFACE(lock));
+     }
 }
 
 AutoPtr<WifiServiceImpl::WifiLock> WifiServiceImpl::LockList::RemoveLock(
     /* [in] */ IBinder* binder)
 {
-    // ==================before translated======================
-    // int index = findLockByBinder(binder);
-    // if (index >= 0) {
-    //     WifiLock ret = mList.remove(index);
-    //     ret.unlinkDeathRecipient();
-    //     return ret;
-    // } else {
-    //     return null;
-    // }
-    assert(0);
-    AutoPtr<WifiLock> empty;
-    return empty;
+    Int32 index = FindLockByBinder(binder);
+    if (index >= 0) {
+        AutoPtr<IInterface> obj;
+        mList->Remove(index, (IInterface**)&obj);
+        AutoPtr<WifiLock> ret = (WifiLock*)(IObject::Probe(obj));
+        ret->UnlinkDeathRecipient();
+        return ret;
+    } else {
+        return NULL;
+    }
+    return NULL;
 }
 
 Int32 WifiServiceImpl::LockList::FindLockByBinder(
     /* [in] */ IBinder* binder)
 {
-    // ==================before translated======================
-    // int size = mList.size();
-    // for (int i = size - 1; i >= 0; i--) {
-    //     if (mList.get(i).mBinder == binder)
-    //         return i;
-    // }
-    // return -1;
-    assert(0);
-    return 0;
+    Int32 size;
+    mList->GetSize(&size);
+    for (Int32 i = size - 1; i >= 0; --i) {
+        AutoPtr<IInterface> obj;
+        mList->Get(i, (IInterface**)&obj);
+        AutoPtr<WifiLock> ret = (WifiLock*)(IObject::Probe(obj));
+        if (ret->mBinder.Get() == binder)
+            return i;
+    }
+    return -1;
 }
 
 void WifiServiceImpl::LockList::Dump(
     /* [in] */ IPrintWriter* pw)
 {
-    // ==================before translated======================
-    // for (WifiLock l : mList) {
-    //     pw.print("    ");
-    //     pw.println(l);
-    // }
-    assert(0);
+    Int32 size;
+    mList->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mList->Get(i, (IInterface**)&obj);
+        AutoPtr<WifiLock> ret = (WifiLock*)(IObject::Probe(obj));
+        pw->Print(String("    "));
+        String str;
+        ret->ToString(&str);
+        pw->Println(str);
+    }
 }
 
 //=====================================================================
 //                    WifiServiceImpl::ClientHandler
 //=====================================================================
 WifiServiceImpl::ClientHandler::ClientHandler(
+    /* [in] */ WifiServiceImpl* owner,
     /* [in] */ ILooper* looper)
+    : Handler(looper)
+    , mOwner(owner)
 {
-    // ==================before translated======================
-    // super(looper);
 }
 
 ECode WifiServiceImpl::ClientHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
-    //         if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-    //             if (DBG) Slog.d(TAG, "New client listening to asynchronous messages");
-    //             // We track the clients by the Messenger
-    //             // since it is expected to be always available
-    //             mTrafficPoller.addClient(msg.replyTo);
-    //         } else {
-    //             Slog.e(TAG, "Client connection failure, error=" + msg.arg1);
-    //         }
-    //         break;
-    //     }
-    //     case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-    //         if (msg.arg1 == AsyncChannel.STATUS_SEND_UNSUCCESSFUL) {
-    //             if (DBG) Slog.d(TAG, "Send failed, client connection lost");
-    //         } else {
-    //             if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
-    //         }
-    //         mTrafficPoller.removeClient(msg.replyTo);
-    //         break;
-    //     }
-    //     case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
-    //         AsyncChannel ac = new AsyncChannel();
-    //         ac.connect(mContext, this, msg.replyTo);
-    //         break;
-    //     }
-    //     /* Client commands are forwarded to state machine */
-    //     case WifiManager.CONNECT_NETWORK:
-    //     case WifiManager.SAVE_NETWORK: {
-    //         WifiConfiguration config = (WifiConfiguration) msg.obj;
-    //         int networkId = msg.arg1;
-    //         if (msg.what == WifiManager.SAVE_NETWORK) {
-    //             if (config != null) {
-    //                 if (config.networkId == WifiConfiguration.INVALID_NETWORK_ID) {
-    //                     config.creatorUid = Binder.getCallingUid();
-    //                 } else {
-    //                     config.lastUpdateUid = Binder.getCallingUid();
-    //                 }
-    //             }
-    //             Slog.e("WiFiServiceImpl ", "SAVE"
-    //                     + " nid=" + Integer.toString(networkId)
-    //                     + " uid=" + Integer.toString(config.creatorUid)
-    //                     + "/" + Integer.toString(config.lastUpdateUid));
-    //         }
-    //         if (msg.what == WifiManager.CONNECT_NETWORK) {
-    //             if (config != null) {
-    //                 if (config.networkId == WifiConfiguration.INVALID_NETWORK_ID) {
-    //                     config.creatorUid = Binder.getCallingUid();
-    //                 } else {
-    //                     config.lastUpdateUid = Binder.getCallingUid();
-    //                 }
-    //             }
-    //             Slog.e("WiFiServiceImpl ", "CONNECT "
-    //                     + " nid=" + Integer.toString(networkId)
-    //                     + " uid=" + Binder.getCallingUid());
-    //         }
-    //         if (config != null && config.isValid()) {
-    //             if (DBG) Slog.d(TAG, "Connect with config" + config);
-    //             mWifiStateMachine.sendMessage(Message.obtain(msg));
-    //         } else if (config == null
-    //                 && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
-    //             if (DBG) Slog.d(TAG, "Connect with networkId" + networkId);
-    //             mWifiStateMachine.sendMessage(Message.obtain(msg));
-    //         } else {
-    //             Slog.e(TAG, "ClientHandler.handleMessage ignoring invalid msg=" + msg);
-    //             if (msg.what == WifiManager.CONNECT_NETWORK) {
-    //                 replyFailed(msg, WifiManager.CONNECT_NETWORK_FAILED,
-    //                         WifiManager.INVALID_ARGS);
-    //             } else {
-    //                 replyFailed(msg, WifiManager.SAVE_NETWORK_FAILED,
-    //                         WifiManager.INVALID_ARGS);
-    //             }
-    //         }
-    //         break;
-    //     }
-    //     case WifiManager.FORGET_NETWORK:
-    //         if (isOwner(msg.sendingUid)) {
-    //             mWifiStateMachine.sendMessage(Message.obtain(msg));
-    //         } else {
-    //             Slog.e(TAG, "Forget is not authorized for user");
-    //             replyFailed(msg, WifiManager.FORGET_NETWORK_FAILED,
-    //                     WifiManager.NOT_AUTHORIZED);
-    //         }
-    //         break;
-    //     case WifiManager.START_WPS:
-    //     case WifiManager.CANCEL_WPS:
-    //     case WifiManager.DISABLE_NETWORK:
-    //     case WifiManager.RSSI_PKTCNT_FETCH: {
-    //         mWifiStateMachine.sendMessage(Message.obtain(msg));
-    //         break;
-    //     }
-    //     default: {
-    //         Slog.d(TAG, "ClientHandler.handleMessage ignoring msg=" + msg);
-    //         break;
-    //     }
-    // }
-    assert(0);
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case IAsyncChannel::CMD_CHANNEL_HALF_CONNECTED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == IAsyncChannel::STATUS_SUCCESSFUL) {
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "New client listening to asynchronous messages");
+                // We track the clients by the Messenger
+                // since it is expected to be always available
+                AutoPtr<IMessenger> replyTo;
+                msg->GetReplyTo((IMessenger**)&replyTo);
+                mOwner->mTrafficPoller->AddClient(replyTo);
+            } else {
+                Slogger::E(TAG, "Client connection failure, error=%d", arg1);
+            }
+            break;
+        }
+        case IAsyncChannel::CMD_CHANNEL_DISCONNECTED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == IAsyncChannel::STATUS_SEND_UNSUCCESSFUL) {
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Send failed, client connection lost");
+            } else {
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Client connection lost with reason: %d", arg1);
+            }
+            AutoPtr<IMessenger> replyTo;
+            msg->GetReplyTo((IMessenger**)&replyTo);
+            mOwner->mTrafficPoller->RemoveClient(replyTo);
+            break;
+        }
+        case IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION: {
+            AutoPtr<IAsyncChannel> ac;
+            CAsyncChannel::New((IAsyncChannel**)&ac);
+            AutoPtr<IMessenger> replyTo;
+            msg->GetReplyTo((IMessenger**)&replyTo);
+            ac->Connect(mOwner->mContext, this, replyTo);
+            break;
+        }
+        /* Client commands are forwarded to state machine */
+        case IWifiManager::CONNECT_NETWORK:
+        case IWifiManager::SAVE_NETWORK: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(obj);
+            Int32 networkId;
+            msg->GetArg1(&networkId);
+            if (what == IWifiManager::SAVE_NETWORK) {
+                if (config != NULL) {
+                    Int32 confignwId;
+                    config->GetNetworkId(&confignwId);
+                    AutoPtr<IBinderHelper> binderHelper;
+                    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+                    Int32 uid;
+                    binderHelper->GetCallingUid(&uid);
+                    if (confignwId == IWifiConfiguration::INVALID_NETWORK_ID) {
+                        config->SetCreatorUid(uid);
+                    } else {
+                        config->SetLastUpdateUid(uid);
+                    }
+                }
+                Slogger::E("WiFiServiceImpl ", "SAVE nid=%d", networkId);
+                        //+ " uid=" + Integer.toString(config.creatorUid)
+                        //+ "/" + Integer.toString(config.lastUpdateUid);
+            }
+            if (what == IWifiManager::CONNECT_NETWORK) {
+                if (config != NULL) {
+                    AutoPtr<IBinderHelper> binderHelper;
+                    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+                    Int32 uid;
+                    binderHelper->GetCallingUid(&uid);
+                    Int32 confignwId;
+                    config->GetNetworkId(&confignwId);
+                    if (confignwId == IWifiConfiguration::INVALID_NETWORK_ID) {
+                        config->SetCreatorUid(uid);
+                    } else {
+                        config->SetLastUpdateUid(uid);
+                    }
+                }
+                Slogger::E("WiFiServiceImpl ", "CONNECT  nid=%d", networkId);
+                        //+ " uid=" + Binder.getCallingUid();
+            }
+            Boolean isValid;
+            if (config != NULL && (config->IsValid(&isValid), isValid)) {
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Connect with config");// + config);
+                AutoPtr<IMessage> message;
+                AutoPtr<IMessageHelper> helper;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+                helper->Obtain(msg, (IMessage**)&message);
+                mOwner->mWifiStateMachine->SendMessage(message);
+            } else if (config == NULL
+                    && networkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+                if (WifiServiceImpl::DBG) Slogger::D(TAG, "Connect with networkId %d", networkId);
+                AutoPtr<IMessage> message;
+                AutoPtr<IMessageHelper> helper;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+                helper->Obtain(msg, (IMessage**)&message);
+                mOwner->mWifiStateMachine->SendMessage(message);
+            } else {
+                Slogger::E(WifiServiceImpl::TAG, "ClientHandler.handleMessage ignoring invalid msg=");// + msg);
+                if (what == IWifiManager::CONNECT_NETWORK) {
+                    ReplyFailed(msg, IWifiManager::CONNECT_NETWORK_FAILED, IWifiManager::INVALID_ARGS);
+                } else {
+                    ReplyFailed(msg, IWifiManager::SAVE_NETWORK_FAILED, IWifiManager::INVALID_ARGS);
+                }
+            }
+            break;
+        }
+        case IWifiManager::FORGET_NETWORK:
+            Int32 sendingUid;
+            msg->GetSendingUid(&sendingUid);
+            if (mOwner->IsOwner(sendingUid)) {
+                AutoPtr<IMessage> message;
+                AutoPtr<IMessageHelper> helper;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+                helper->Obtain(msg, (IMessage**)&message);
+                mOwner->mWifiStateMachine->SendMessage(message);
+            } else {
+                Slogger::E(TAG, "Forget is not authorized for user");
+                ReplyFailed(msg, IWifiManager::FORGET_NETWORK_FAILED, IWifiManager::NOT_AUTHORIZED);
+            }
+            break;
+        case IWifiManager::START_WPS:
+        case IWifiManager::CANCEL_WPS:
+        case IWifiManager::DISABLE_NETWORK:
+        case IWifiManager::RSSI_PKTCNT_FETCH: {
+            AutoPtr<IMessage> message;
+            AutoPtr<IMessageHelper> helper;
+            CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+            helper->Obtain(msg, (IMessage**)&message);
+            mOwner->mWifiStateMachine->SendMessage(message);
+            break;
+        }
+        default: {
+            Slogger::D(TAG, "ClientHandler.handleMessage ignoring msg=");// + msg);
+            break;
+        }
+    }
     return NOERROR;
 }
 
@@ -310,58 +448,69 @@ void WifiServiceImpl::ClientHandler::ReplyFailed(
     /* [in] */ Int32 what,
     /* [in] */ Int32 why)
 {
-    // ==================before translated======================
-    // Message reply = msg.obtain();
-    // reply.what = what;
-    // reply.arg1 = why;
-    // try {
-    //     msg.replyTo.send(reply);
-    // } catch (RemoteException e) {
-    //     // There's not much we can do if reply can't be sent!
-    // }
-    assert(0);
+    AutoPtr<IMessage> reply;
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+    helper->Obtain((IMessage**)&reply);
+    reply->SetWhat(what);
+    reply->SetArg1(why);
+    //try {
+    AutoPtr<IMessenger> messenger;
+    msg->GetReplyTo((IMessenger**)&messenger);
+    messenger->Send(reply);
+    //} catch (RemoteException e) {
+    //    // There's not much we can do if reply can't be sent!
+    //}
 }
 
 //=====================================================================
 //               WifiServiceImpl::WifiStateMachineHandler
 //=====================================================================
 WifiServiceImpl::WifiStateMachineHandler::WifiStateMachineHandler(
+    /* [in] */ WifiServiceImpl* owner,
     /* [in] */ ILooper* looper)
+    : Handler(looper)
+    , mOwner(owner)
 {
-    // ==================before translated======================
-    // super(looper);
-    // mWsmChannel = new AsyncChannel();
-    // mWsmChannel.connect(mContext, this, mWifiStateMachine.getHandler());
+    CAsyncChannel::New((IAsyncChannel**)&mWsmChannel);
+    AutoPtr<IHandler> handler;
+    mOwner->mWifiStateMachine->GetHandler((IHandler**)&handler);
+    mWsmChannel->Connect(mOwner->mContext, this, handler);
 }
 
 ECode WifiServiceImpl::WifiStateMachineHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
-    //         if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-    //             mWifiStateMachineChannel = mWsmChannel;
-    //         } else {
-    //             Slog.e(TAG, "WifiStateMachine connection failure, error=" + msg.arg1);
-    //             mWifiStateMachineChannel = null;
-    //         }
-    //         break;
-    //     }
-    //     case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-    //         Slog.e(TAG, "WifiStateMachine channel lost, msg.arg1 =" + msg.arg1);
-    //         mWifiStateMachineChannel = null;
-    //         //Re-establish connection to state machine
-    //         mWsmChannel.connect(mContext, this, mWifiStateMachine.getHandler());
-    //         break;
-    //     }
-    //     default: {
-    //         Slog.d(TAG, "WifiStateMachineHandler.handleMessage ignoring msg=" + msg);
-    //         break;
-    //     }
-    // }
-    assert(0);
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case IAsyncChannel::CMD_CHANNEL_HALF_CONNECTED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == IAsyncChannel::STATUS_SUCCESSFUL) {
+                mOwner->mWifiStateMachineChannel = mWsmChannel;
+            } else {
+                Slogger::E(TAG, "WifiStateMachine connection failure, error=%d", arg1);
+                mOwner->mWifiStateMachineChannel = NULL;
+            }
+            break;
+        }
+        case IAsyncChannel::CMD_CHANNEL_DISCONNECTED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            Slogger::E(TAG, "WifiStateMachine channel lost, msg.arg1 =%d", arg1);
+            mOwner->mWifiStateMachineChannel = NULL;
+            //Re-establish connection to state machine
+            AutoPtr<IHandler> handler;
+            mOwner->mWifiStateMachine->GetHandler((IHandler**)&handler);
+            mWsmChannel->Connect(mOwner->mContext, this, handler);
+            break;
+        }
+        default: {
+            Slogger::D(TAG, "WifiStateMachineHandler.handleMessage ignoring msg=");// + msg);
+            break;
+        }
+    }
     return NOERROR;
 }
 
@@ -372,21 +521,16 @@ WifiServiceImpl::InnerBroadcastReceiver1::InnerBroadcastReceiver1(
     /* [in] */ WifiServiceImpl* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode WifiServiceImpl::InnerBroadcastReceiver1::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // if (mSettingsStore.handleAirplaneModeToggled()) {
-    //     mWifiController.sendMessage(CMD_AIRPLANE_TOGGLED);
-    // }
-    assert(0);
+    Boolean result;
+    if (mOwner->mSettingsStore->HandleAirplaneModeToggled(&result), result) {
+         mOwner->mWifiController->SendMessage(WifiController::CMD_AIRPLANE_TOGGLED);
+    }
     return NOERROR;
 }
 
@@ -394,23 +538,25 @@ ECode WifiServiceImpl::InnerBroadcastReceiver1::OnReceive(
 //                 WifiServiceImpl::BatchedScanRequest
 //=====================================================================
 WifiServiceImpl::BatchedScanRequest::BatchedScanRequest(
+    /* [in] */ WifiServiceImpl* owner,
     /* [in] */ IBatchedScanSettings* settings,
     /* [in] */ IBinder* binder,
     /* [in] */ IWorkSource* ws)
-    : DeathRecipient(0, String(NULL), binder, NULL)
+    : DeathRecipient(owner, 0, String(NULL), binder, NULL)
 {
-    // ==================before translated======================
-    // this.settings = settings;
-    // this.uid = getCallingUid();
-    // this.pid = getCallingPid();
-    // workSource = ws;
+    settings = settings;
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    binderHelper->GetCallingPid(&pid);
+    workSource = ws;
 }
 
-ECode WifiServiceImpl::BatchedScanRequest::BinderDied()
+ECode WifiServiceImpl::BatchedScanRequest::ProxyDied()
 {
-    // ==================before translated======================
-    // stopBatchedScan(settings, uid, pid);
-    assert(0);
+    mOwner->StopBatchedScan(settings, uid, pid);
     return NOERROR;
 }
 
@@ -418,9 +564,7 @@ ECode WifiServiceImpl::BatchedScanRequest::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "BatchedScanRequest{settings=" + settings + ", binder=" + mBinder + "}";
-    assert(0);
+    *result = String("BatchedScanRequest{settings=TODO") + /*settings +*/ String(", binder=TODO");// + mBinder + "}";
     return NOERROR;
 }
 
@@ -430,9 +574,7 @@ ECode WifiServiceImpl::BatchedScanRequest::IsSameApp(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (this.uid == uid && this.pid == pid);
-    assert(0);
+    *result = (this->uid == uid && this->pid == pid);
     return NOERROR;
 }
 
@@ -443,52 +585,51 @@ WifiServiceImpl::InnerBroadcastReceiver2::InnerBroadcastReceiver2(
     /* [in] */ WifiServiceImpl* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode WifiServiceImpl::InnerBroadcastReceiver2::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // String action = intent.getAction();
-    // if (action.equals(Intent.ACTION_SCREEN_ON)) {
-    //     mWifiController.sendMessage(CMD_SCREEN_ON);
-    // } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
-    //     mWifiController.sendMessage(CMD_USER_PRESENT);
-    // } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-    //     mWifiController.sendMessage(CMD_SCREEN_OFF);
-    // } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-    //     int pluggedType = intent.getIntExtra("plugged", 0);
-    //     mWifiController.sendMessage(CMD_BATTERY_CHANGED, pluggedType, 0, null);
-    // } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-    //     int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
-    //             BluetoothAdapter.STATE_DISCONNECTED);
-    //     mWifiStateMachine.sendBluetoothAdapterStateChange(state);
-    // } else if (action.equals(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
-    //     boolean emergencyMode = intent.getBooleanExtra("phoneinECMState", false);
-    //     mWifiController.sendMessage(CMD_EMERGENCY_MODE_CHANGED, emergencyMode ? 1 : 0, 0);
-    // } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
-    //     int wifiApState = intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
-    //             WifiManager.WIFI_AP_STATE_FAILED);
-    //     Slog.d(TAG, "wifiApState=" + wifiApState);
-    //     /*
-    //      * If start SoftAp fails, WifiStateMachine would transition to InitialState,
-    //      * but WifiController is left stuck in ApEnabledState, which in turn
-    //      * fails to turn on WLAN again.
-    //      *
-    //      * Register WifiService to receive WIFI_AP_STATE_CHANGED_ACTION intent
-    //      * from WifiStateMachine, and if wifiApState is failed, inform WifiController
-    //      * to transtion to ApStaDisabledState.
-    //      */
-    //     if (wifiApState == WifiManager.WIFI_AP_STATE_FAILED) {
-    //         setWifiApEnabled(null, false);
-    //     }
-    // }
-    assert(0);
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals(IIntent::ACTION_SCREEN_ON)) {
+        mOwner->mWifiController->SendMessage(WifiController::CMD_SCREEN_ON);
+    } else if (action.Equals(IIntent::ACTION_USER_PRESENT)) {
+        mOwner->mWifiController->SendMessage(WifiController::CMD_USER_PRESENT);
+    } else if (action.Equals(IIntent::ACTION_SCREEN_OFF)) {
+        mOwner->mWifiController->SendMessage(WifiController::CMD_SCREEN_OFF);
+    } else if (action.Equals(IIntent::ACTION_BATTERY_CHANGED)) {
+        Int32 pluggedType;
+        intent->GetInt32Extra(String("plugged"), 0, &pluggedType);
+        mOwner->mWifiController->SendMessage(WifiController::CMD_BATTERY_CHANGED, pluggedType, 0, NULL);
+    } else if (action.Equals(IBluetoothAdapter::ACTION_CONNECTION_STATE_CHANGED)) {
+        Int32 state;
+        intent->GetInt32Extra(IBluetoothAdapter::EXTRA_CONNECTION_STATE,
+                IBluetoothAdapter::STATE_DISCONNECTED, &state);
+        mOwner->mWifiStateMachine->SendBluetoothAdapterStateChange(state);
+    } else if (action.Equals(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
+        Boolean emergencyMode;
+        intent->GetBooleanExtra(String("phoneinECMState"), FALSE, &emergencyMode);
+        mOwner->mWifiController->SendMessage(WifiController::CMD_EMERGENCY_MODE_CHANGED, emergencyMode ? 1 : 0, 0);
+    } else if (action.Equals(IWifiManager::WIFI_AP_STATE_CHANGED_ACTION)) {
+        Int32 wifiApState;
+        intent->GetInt32Extra(IWifiManager::EXTRA_WIFI_AP_STATE,
+                IWifiManager::WIFI_AP_STATE_FAILED, &wifiApState);
+        Slogger::D(TAG, "wifiApState=%d", wifiApState);
+        /*
+         * If start SoftAp fails, WifiStateMachine would transition to InitialState,
+         * but WifiController is left stuck in ApEnabledState, which in turn
+         * fails to turn on WLAN again.
+         *
+         * Register WifiService to receive WIFI_AP_STATE_CHANGED_ACTION intent
+         * from WifiStateMachine, and if wifiApState is failed, inform WifiController
+         * to transtion to ApStaDisabledState.
+         */
+        if (wifiApState == IWifiManager::WIFI_AP_STATE_FAILED) {
+            mOwner->SetWifiApEnabled(NULL, FALSE);
+        }
+    }
     return NOERROR;
 }
 
@@ -499,17 +640,13 @@ WifiServiceImpl::InnerContentObserver1::InnerContentObserver1(
     /* [in] */ WifiServiceImpl* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode WifiServiceImpl::InnerContentObserver1::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    // ==================before translated======================
-    // mSettingsStore.handleWifiScanAlwaysAvailableToggled();
-    // mWifiController.sendMessage(CMD_SCAN_ALWAYS_MODE_CHANGED);
-    assert(0);
+    mOwner->mSettingsStore->HandleWifiScanAlwaysAvailableToggled();
+    mOwner->mWifiController->SendMessage(WifiController::CMD_SCAN_ALWAYS_MODE_CHANGED);
     return NOERROR;
 }
 
@@ -517,21 +654,21 @@ ECode WifiServiceImpl::InnerContentObserver1::OnChange(
 //                      WifiServiceImpl::WifiLock
 //=====================================================================
 WifiServiceImpl::WifiLock::WifiLock(
+    /* [in] */ WifiServiceImpl* owner,
     /* [in] */ Int32 lockMode,
     /* [in] */ const String& tag,
     /* [in] */ IBinder* binder,
     /* [in] */ IWorkSource* ws)
-    : DeathRecipient(lockMode, tag, binder, ws)
+    : DeathRecipient(owner, lockMode, tag, binder, ws)
 {
 }
 
-ECode WifiServiceImpl::WifiLock::BinderDied()
+ECode WifiServiceImpl::WifiLock::ProxyDied()
 {
-    // ==================before translated======================
-    // synchronized (mLocks) {
-    //     releaseWifiLockLocked(mBinder);
-    // }
-    assert(0);
+    {
+        AutoLock lock(mOwner->mLocks);
+        mOwner->ReleaseWifiLockLocked(mBinder);
+    }
     return NOERROR;
 }
 
@@ -539,39 +676,46 @@ ECode WifiServiceImpl::WifiLock::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "WifiLock{" + mTag + " type=" + mMode + " binder=" + mBinder + "}";
-    assert(0);
+    *result = String("WifiLock{") + mTag + String(" type=") + StringUtils::ToString(mMode) + String(" binder=TODO ");// + mBinder + "}";
     return NOERROR;
 }
 
 //=====================================================================
 //                   WifiServiceImpl::DeathRecipient
 //=====================================================================
+CAR_INTERFACE_IMPL(WifiServiceImpl::DeathRecipient, Object, IProxyDeathRecipient)
+
 WifiServiceImpl::DeathRecipient::DeathRecipient(
+    /* [in] */ WifiServiceImpl* owner,
     /* [in] */ Int32 mode,
     /* [in] */ const String& tag,
     /* [in] */ IBinder* binder,
     /* [in] */ IWorkSource* ws)
+    : mOwner(owner)
 {
-    // ==================before translated======================
-    // super();
-    // mTag = tag;
-    // mMode = mode;
-    // mBinder = binder;
-    // mWorkSource = ws;
-    // try {
-    //     mBinder.linkToDeath(this, 0);
-    // } catch (RemoteException e) {
-    //     binderDied();
-    // }
+    mTag = tag;
+    mMode = mode;
+    mBinder = binder;
+    mWorkSource = ws;
+    //try {
+    AutoPtr<IProxy> proxy = (IProxy*)mBinder->Probe(EIID_IProxy);//IProxy::Probe(mBinder);
+    if (proxy != NULL) {
+        proxy->LinkToDeath(this, 0);
+    //    //if (FAILED(ec))
+    //    //    ProxyDied();
+    }
+    //} catch (RemoteException e) {
+        //binderDied();
+    //}
 }
 
 ECode WifiServiceImpl::DeathRecipient::UnlinkDeathRecipient()
 {
-    // ==================before translated======================
-    // mBinder.unlinkToDeath(this, 0);
-    assert(0);
+    AutoPtr<IProxy> proxy = (IProxy*)mBinder->Probe(EIID_IProxy);//IProxy::Probe(mBinder);
+    if (proxy != NULL) {
+        Boolean b;
+        proxy->UnlinkToDeath(this, 0, &b);
+    }
     return NOERROR;
 }
 
@@ -579,9 +723,10 @@ ECode WifiServiceImpl::DeathRecipient::UnlinkDeathRecipient()
 //                     WifiServiceImpl::Multicaster
 //=====================================================================
 WifiServiceImpl::Multicaster::Multicaster(
+    /* [in] */ WifiServiceImpl* owner,
     /* [in] */ const String& tag,
     /* [in] */ IBinder* binder)
-    : DeathRecipient(0, tag, binder, NULL)
+    : DeathRecipient(owner, 0, tag, binder, NULL)
 {
     // ==================before translated======================
     AutoPtr<IBinderHelper> binderHelper;
@@ -591,17 +736,17 @@ WifiServiceImpl::Multicaster::Multicaster(
     mMode = uid;
 }
 
-ECode WifiServiceImpl::Multicaster::BinderDied()
+ECode WifiServiceImpl::Multicaster::ProxyDied()
 {
-    // ==================before translated======================
-    // Slog.e(TAG, "Multicaster binderDied");
-    // synchronized (mMulticasters) {
-    //     int i = mMulticasters.indexOf(this);
-    //     if (i != -1) {
-    //         removeMulticasterLocked(i, mMode);
-    //     }
-    // }
-    assert(0);
+    Slogger::E(TAG, "Multicaster binderDied");
+    {
+        AutoLock lock(mOwner->mMulticasters);
+        Int32 i;
+        mOwner->mMulticasters->IndexOf(TO_IINTERFACE(this), &i);
+        if (i != -1) {
+            mOwner->RemoveMulticasterLocked(i, mMode);
+        }
+    }
     return NOERROR;
 }
 
@@ -609,9 +754,7 @@ ECode WifiServiceImpl::Multicaster::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "Multicaster{" + mTag + " binder=" + mBinder + "}";
-    assert(0);
+    *result = String("Multicaster{") + mTag + String(" binder=TOOD");// + mBinder + "}";
     return NOERROR;
 }
 
@@ -619,9 +762,7 @@ ECode WifiServiceImpl::Multicaster::GetUid(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMode;
-    assert(0);
+    *result = mMode;
     return NOERROR;
 }
 
@@ -635,72 +776,76 @@ CAR_INTERFACE_IMPL_2(WifiServiceImpl, Object, IIWifiManager, IBinder);
 
 WifiServiceImpl::WifiServiceImpl()
 {
+    CArrayList::New((IList**)&mBatchedScanners);
 }
 
 ECode WifiServiceImpl::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // mContext = context;
-    //
-    // mInterfaceName =  SystemProperties.get("wifi.interface", "wlan0");
-    //
-    // mTrafficPoller = new WifiTrafficPoller(mContext, mInterfaceName);
-    // mWifiStateMachine = new WifiStateMachine(mContext, mInterfaceName, mTrafficPoller);
-    // mWifiStateMachine.enableRssiPolling(true);
-    // mBatteryStats = BatteryStatsService.getService();
-    // mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
-    //
-    // mNotificationController = new WifiNotificationController(mContext, mWifiStateMachine);
-    // mSettingsStore = new WifiSettingsStore(mContext);
-    //
-    // HandlerThread wifiThread = new HandlerThread("WifiService");
-    // wifiThread.start();
-    // mClientHandler = new ClientHandler(wifiThread.getLooper());
-    // mWifiStateMachineHandler = new WifiStateMachineHandler(wifiThread.getLooper());
-    // mWifiController = new WifiController(mContext, this, wifiThread.getLooper());
-    //
-    // mBatchedScanSupported = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_batched_scan_supported);
+    mContext = context;
+
+    AutoPtr<ISystemProperties> syspro;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&syspro);
+    syspro->Get(String("wifi.interface"), String("wlan0"), &mInterfaceName);
+
+    mTrafficPoller = new WifiTrafficPoller(mContext, mInterfaceName);
+    //TODO mWifiStateMachine = new WifiStateMachine(mContext, mInterfaceName, mTrafficPoller);
+    mWifiStateMachine->EnableRssiPolling(TRUE);
+    mBatteryStats = BatteryStatsService::GetService();
+
+    AutoPtr<IInterface> appOpsObj;
+    mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&appOpsObj);
+    mAppOps = IAppOpsManager::Probe(appOpsObj);
+
+    mNotificationController = new WifiNotificationController(mContext, mWifiStateMachine);
+    mSettingsStore = new WifiSettingsStore(mContext);
+
+    AutoPtr<IHandlerThread> wifiThread;
+    CHandlerThread::New(String("WifiService"), (IHandlerThread**)&wifiThread);
+    IThread::Probe(wifiThread)->Start();
+    AutoPtr<ILooper> looper;
+    wifiThread->GetLooper((ILooper**)&looper);
+    mClientHandler = new ClientHandler(this, looper);
+    mWifiStateMachineHandler = new WifiStateMachineHandler(this, looper);
+    mWifiController = new WifiController(mContext, this, looper);
+
+    AutoPtr<IResources> resources;
+    mContext->GetResources((IResources**)&resources);
+    resources->GetBoolean(R::bool_::config_wifi_batched_scan_supported, &mBatchedScanSupported);
     return NOERROR;
 }
 
 ECode WifiServiceImpl::CheckAndStartWifi()
 {
-    // ==================before translated======================
-    // /* Check if wi-fi needs to be enabled */
-    // boolean wifiEnabled = mSettingsStore.isWifiToggleEnabled();
-    // Slog.i(TAG, "WifiService starting up with Wi-Fi " +
-    //         (wifiEnabled ? "enabled" : "disabled"));
-    //
-    // registerForScanModeChange();
-    // mContext.registerReceiver(
-    //         new BroadcastReceiver() {
-    //             @Override
-    //             public void onReceive(Context context, Intent intent) {
-    //                 if (mSettingsStore.handleAirplaneModeToggled()) {
-    //                     mWifiController.sendMessage(CMD_AIRPLANE_TOGGLED);
-    //                 }
-    //             }
-    //         },
-    //         new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
-    //
-    // // Adding optimizations of only receiving broadcasts when wifi is enabled
-    // // can result in race conditions when apps toggle wifi in the background
-    // // without active user involvement. Always receive broadcasts.
-    // registerForBroadcasts();
-    //
-    // mWifiController.start();
-    //
-    // mIsControllerStarted = true;
-    //
-    // // If we are already disabled (could be due to airplane mode), avoid changing persist
-    // // state here
-    // if (wifiEnabled) setWifiEnabled(wifiEnabled);
-    //
-    // mWifiWatchdogStateMachine = WifiWatchdogStateMachine.
-    //        makeWifiWatchdogStateMachine(mContext, mWifiStateMachine.getMessenger());
-    assert(0);
+    /* Check if wi-fi needs to be enabled */
+    Boolean wifiEnabled;
+    mSettingsStore->IsWifiToggleEnabled(&wifiEnabled);
+    Slogger::I(TAG, "WifiService starting up with Wi-Fi %s", (wifiEnabled ? "enabled" : "disabled"));
+
+    RegisterForScanModeChange();
+    AutoPtr<IBroadcastReceiver> receiver = new InnerBroadcastReceiver1(this);
+    AutoPtr<IIntentFilter> intentFilter;
+    CIntentFilter::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntentFilter**)&intentFilter);
+    AutoPtr<IIntent> intent;
+    mContext->RegisterReceiver(receiver, intentFilter, (IIntent**)&intent);
+
+    // Adding optimizations of only receiving broadcasts when wifi is enabled
+    // can result in race conditions when apps toggle wifi in the background
+    // without active user involvement. Always receive broadcasts.
+    RegisterForBroadcasts();
+
+    mWifiController->Start();
+
+    mIsControllerStarted = TRUE;
+
+    // If we are already disabled (could be due to airplane mode), avoid changing persist
+    // state here
+    Boolean bTemp;
+    if (wifiEnabled) SetWifiEnabled(wifiEnabled, &bTemp);
+
+    AutoPtr<IMessenger> messenger;
+    mWifiStateMachine->GetMessenger((IMessenger**)&messenger);
+    mWifiWatchdogStateMachine = WifiWatchdogStateMachine::MakeWifiWatchdogStateMachine(mContext, messenger);
     return NOERROR;
 }
 
@@ -708,15 +853,13 @@ ECode WifiServiceImpl::PingSupplicant(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncPingSupplicant(mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return false;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        mWifiStateMachine->SyncPingSupplicant(mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = FALSE;
+    }
     return NOERROR;
 }
 
@@ -724,15 +867,13 @@ ECode WifiServiceImpl::GetChannelList(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncGetChannelList(mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return null;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        mWifiStateMachine->SyncGetChannelList(mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = NULL;
+    }
     return NOERROR;
 }
 
@@ -740,50 +881,47 @@ ECode WifiServiceImpl::StartScan(
     /* [in] */ IScanSettings* settings,
     /* [in] */ IWorkSource* workSource)
 {
-    VALIDATE_NOT_NULL(settings);
-    VALIDATE_NOT_NULL(workSource);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (settings != null) {
-    //     // TODO: should be removed once the startCustomizedScan API is opened up
-    //     mContext.enforceCallingOrSelfPermission(android.Manifest.permission.LOCATION_HARDWARE,
-    //             "LocationHardware");
-    //     settings = new ScanSettings(settings);
-    //     if (!settings.isValid()) {
-    //         Slog.e(TAG, "invalid scan setting");
-    //         return;
-    //     }
-    // }
-    // if (workSource != null) {
-    //     enforceWorkSourcePermission();
-    //     // WifiManager currently doesn't use names, so need to clear names out of the
-    //     // supplied WorkSource to allow future WorkSource combining.
-    //     workSource.clearNames();
-    // }
-    // mWifiStateMachine.startScan(Binder.getCallingUid(), scanRequestCounter++,
-    //         settings, workSource);
-    assert(0);
+    AutoPtr<IScanSettings> scanSettings = settings;
+    EnforceChangePermission();
+    if (settings != NULL) {
+        // TODO: should be removed once the startCustomizedScan API is opened up
+        mContext->EnforceCallingOrSelfPermission(Manifest::permission::LOCATION_HARDWARE,
+                String("LocationHardware"));
+        scanSettings = NULL;
+        CScanSettings::New(settings, (IScanSettings**)&scanSettings);
+        Boolean isValid;
+
+        if (scanSettings->IsValid(&isValid), !isValid) {
+            Slogger::E(TAG, "invalid scan setting");
+            return NOERROR;
+        }
+    }
+    if (workSource != NULL) {
+        EnforceWorkSourcePermission();
+        // WifiManager currently doesn't use names, so need to clear names out of the
+        // supplied WorkSource to allow future WorkSource combining.
+        workSource->ClearNames();
+    }
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    mWifiStateMachine->StartScan(uid, scanRequestCounter++, scanSettings, workSource);
     return NOERROR;
 }
 
 ECode WifiServiceImpl::IsBatchedScanSupported(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBatchedScanSupported;
-    assert(0);
+    *result = mBatchedScanSupported;
     return NOERROR;
 }
 
 ECode WifiServiceImpl::PollBatchedScan()
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (mBatchedScanSupported == false) return;
-    // mWifiStateMachine.requestBatchedScanPoll();
-    assert(0);
-    return NOERROR;
+    EnforceChangePermission();
+    if (mBatchedScanSupported == FALSE) return NOERROR;
+    return mWifiStateMachine->RequestBatchedScanPoll();
 }
 
 ECode WifiServiceImpl::GetWpsNfcConfigurationToken(
@@ -791,11 +929,8 @@ ECode WifiServiceImpl::GetWpsNfcConfigurationToken(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceConnectivityInternalPermission();
-    // return mWifiStateMachine.syncGetWpsNfcConfigurationToken(netId);
-    assert(0);
-    return NOERROR;
+    EnforceConnectivityInternalPermission();
+    return mWifiStateMachine->SyncGetWpsNfcConfigurationToken(netId, result);
 }
 
 ECode WifiServiceImpl::RequestBatchedScan(
@@ -804,28 +939,31 @@ ECode WifiServiceImpl::RequestBatchedScan(
     /* [in] */ IWorkSource* workSource,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(requested);
-    VALIDATE_NOT_NULL(binder);
-    VALIDATE_NOT_NULL(workSource);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (workSource != null) {
-    //     enforceWorkSourcePermission();
-    //     // WifiManager currently doesn't use names, so need to clear names out of the
-    //     // supplied WorkSource to allow future WorkSource combining.
-    //     workSource.clearNames();
-    // }
-    // if (mBatchedScanSupported == false) return false;
-    // requested = new BatchedScanSettings(requested);
-    // if (requested.isInvalid()) return false;
-    // BatchedScanRequest r = new BatchedScanRequest(requested, binder, workSource);
-    // synchronized(mBatchedScanners) {
-    //     mBatchedScanners.add(r);
-    //     resolveBatchedScannersLocked();
-    // }
-    // return true;
-    assert(0);
+    EnforceChangePermission();
+    if (workSource != NULL) {
+        EnforceWorkSourcePermission();
+        // WifiManager currently doesn't use names, so need to clear names out of the
+        // supplied WorkSource to allow future WorkSource combining.
+        workSource->ClearNames();
+    }
+    if (mBatchedScanSupported == FALSE) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<IBatchedScanSettings> batchedScanSettings;
+    CBatchedScanSettings::New(requested, (IBatchedScanSettings**)&batchedScanSettings);
+    Boolean isInvalid;
+    if (batchedScanSettings->IsInvalid(&isInvalid), isInvalid) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<BatchedScanRequest> r = new BatchedScanRequest(this, batchedScanSettings, binder, workSource);
+    synchronized(mBatchedScanners) {
+        mBatchedScanners->Add(TO_IINTERFACE(r));
+        ResolveBatchedScannersLocked();
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -834,37 +972,51 @@ ECode WifiServiceImpl::GetBatchedScanResults(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // if (mBatchedScanSupported == false) return new ArrayList<BatchedScanResult>();
-    // int uid = Binder.getCallingUid();
-    // int userId = UserHandle.getCallingUserId();
-    // long ident = Binder.clearCallingIdentity();
-    // try {
-    //     if (mAppOps.noteOp(AppOpsManager.OP_WIFI_SCAN, uid, callingPackage)
-    //             != AppOpsManager.MODE_ALLOWED) {
-    //         return new ArrayList<BatchedScanResult>();
-    //     }
-    //     if (!isCurrentProfile(userId)) {
-    //         return new ArrayList<BatchedScanResult>();
-    //     }
-    //     return mWifiStateMachine.syncGetBatchedScanResultsList();
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    if (mBatchedScanSupported == FALSE) {
+        CArrayList::New(result);
+        return NOERROR;
+    }
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    AutoPtr<IUserHandleHelper> uhHelper;
+    Int32 userId;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
+    uhHelper->GetCallingUserId(&userId);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    Int32 noteOp;
+    if ((mAppOps->NoteOp(IAppOpsManager::OP_WIFI_SCAN, uid, callingPackage, &noteOp), noteOp)
+                != IAppOpsManager::MODE_ALLOWED) {
+        CArrayList::New(result);
+        return NOERROR;
+    }
+    if (!IsCurrentProfile(userId)) {
+        CArrayList::New(result);
+        return NOERROR;
+    }
+    mWifiStateMachine->SyncGetBatchedScanResultsList(result);
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
     return NOERROR;
 }
 
 ECode WifiServiceImpl::StopBatchedScan(
     /* [in] */ IBatchedScanSettings* settings)
 {
-    VALIDATE_NOT_NULL(settings);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (mBatchedScanSupported == false) return;
-    // stopBatchedScan(settings, getCallingUid(), getCallingPid());
-    assert(0);
+    EnforceChangePermission();
+    if (mBatchedScanSupported == FALSE) return NOERROR;
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    Int32 pid;
+    binderHelper->GetCallingPid(&pid);
+    StopBatchedScan(settings, uid, pid);
     return NOERROR;
 }
 
@@ -873,38 +1025,46 @@ ECode WifiServiceImpl::SetWifiEnabled(
     /* [in] */ Boolean enable,
     /* [out] */ Boolean* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // Slog.d(TAG, "setWifiEnabled: " + enable + " pid=" + Binder.getCallingPid()
-    //             + ", uid=" + Binder.getCallingUid());
-    // if (DBG) {
-    //     Slog.e(TAG, "Invoking mWifiStateMachine.setWifiEnabled\n");
-    // }
-    //
-    // /*
-    // * Caller might not have WRITE_SECURE_SETTINGS,
-    // * only CHANGE_WIFI_STATE is enforced
-    // */
-    //
-    // long ident = Binder.clearCallingIdentity();
-    // try {
-    //     if (! mSettingsStore.handleWifiToggled(enable)) {
-    //         // Nothing to do if wifi cannot be toggled
-    //         return true;
-    //     }
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    //
-    // if (!mIsControllerStarted) {
-    //     Slog.e(TAG,"WifiController is not yet started, abort setWifiEnabled");
-    //     return false;
-    // }
-    //
-    // mWifiController.sendMessage(CMD_WIFI_TOGGLED);
-    // return true;
-    assert(0);
+    EnforceChangePermission();
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    Int32 pid;
+    binderHelper->GetCallingPid(&pid);
+    Slogger::D(TAG, "setWifiEnabled: %d, pid = %d, uid = %d", enable, pid, uid);
+    if (DBG) {
+        Slogger::E(TAG, "Invoking mWifiStateMachine.setWifiEnabled\n");
+    }
+
+    /*
+    * Caller might not have WRITE_SECURE_SETTINGS,
+    * only CHANGE_WIFI_STATE is enforced
+    */
+
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    Boolean bTemp;
+    if (!(mSettingsStore->HandleWifiToggled(enable, &bTemp), bTemp)) {
+        // Nothing to do if wifi cannot be toggled
+        *result = TRUE;
+        return NOERROR;
+    }
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
+
+    if (!mIsControllerStarted) {
+        Slogger::E(TAG,"WifiController is not yet started, abort setWifiEnabled");
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    mWifiController->SendMessage(WifiController::CMD_WIFI_TOGGLED);
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -912,32 +1072,37 @@ ECode WifiServiceImpl::GetWifiEnabledState(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.syncGetWifiState();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->SyncGetWifiState(result);
 }
 
 ECode WifiServiceImpl::SetWifiApEnabled(
     /* [in] */ IWifiConfiguration* wifiConfig,
     /* [in] */ Boolean enabled)
 {
-    VALIDATE_NOT_NULL(wifiConfig);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // ConnectivityManager.enforceTetherChangePermission(mContext);
-    // UserManager um = UserManager.get(mContext);
-    // if (um.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING)) {
-    //     throw new SecurityException("DISALLOW_CONFIG_TETHERING is enabled for this user.");
-    // }
-    // // null wifiConfig is a meaningful input for CMD_SET_AP
-    // if (wifiConfig == null || wifiConfig.isValid()) {
-    //     mWifiController.obtainMessage(CMD_SET_AP, enabled ? 1 : 0, 0, wifiConfig).sendToTarget();
-    // } else {
-    //     Slog.e(TAG, "Invalid WifiConfiguration");
-    // }
-    assert(0);
+    EnforceChangePermission();
+    AutoPtr<IConnectivityManagerHelper> cmHelper;
+    CConnectivityManagerHelper::AcquireSingleton((IConnectivityManagerHelper**)&cmHelper);
+    cmHelper->EnforceTetherChangePermission(mContext);
+    AutoPtr<IUserManager> um;
+    AutoPtr<IUserManagerHelper> umHelper;
+    CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&umHelper);
+    umHelper->Get(mContext, (IUserManager**)&um);
+    Boolean restriction;
+    if (um->HasUserRestriction(IUserManager::DISALLOW_CONFIG_TETHERING, &restriction), restriction) {
+        //throw new SecurityException("DISALLOW_CONFIG_TETHERING is enabled for this user.");
+        Slogger::E(TAG, "DISALLOW_CONFIG_TETHERING is enabled for this user.");
+        return E_SECURITY_EXCEPTION;
+    }
+    // null wifiConfig is a meaningful input for CMD_SET_AP
+    Boolean isValid;
+    if (wifiConfig == NULL || (wifiConfig->IsValid(&isValid), isValid)) {
+        AutoPtr<IMessage> msg;
+        mWifiController->ObtainMessage(WifiController::CMD_SET_AP, enabled ? 1 : 0, 0, TO_IINTERFACE(wifiConfig), (IMessage**)&msg);
+        msg->SendToTarget();
+    } else {
+        Slogger::E(TAG, "Invalid WifiConfiguration");
+    }
     return NOERROR;
 }
 
@@ -945,135 +1110,115 @@ ECode WifiServiceImpl::GetWifiApEnabledState(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.syncGetWifiApState();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->SyncGetWifiApState(result);
 }
 
 ECode WifiServiceImpl::GetWifiApConfiguration(
     /* [out] */ IWifiConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.syncGetWifiApConfiguration();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->SyncGetWifiApConfiguration(result);
 }
 
 ECode WifiServiceImpl::SetWifiApConfiguration(
     /* [in] */ IWifiConfiguration* wifiConfig)
 {
-    VALIDATE_NOT_NULL(wifiConfig);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (wifiConfig == null)
-    //     return;
-    // if (wifiConfig.isValid()) {
-    //     mWifiStateMachine.setWifiApConfiguration(wifiConfig);
-    // } else {
-    //     Slog.e(TAG, "Invalid WifiConfiguration");
-    // }
-    assert(0);
+    EnforceChangePermission();
+    if (wifiConfig == NULL)
+        return NOERROR;
+    Boolean isValid;
+    if (wifiConfig->IsValid(&isValid), isValid) {
+        return mWifiStateMachine->SetWifiApConfiguration(wifiConfig);
+    } else {
+        Slogger::E(TAG, "Invalid WifiConfiguration");
+    }
     return NOERROR;
 }
 
 ECode WifiServiceImpl::IsScanAlwaysAvailable(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mSettingsStore.isScanAlwaysAvailable();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mSettingsStore->IsScanAlwaysAvailable(result);
 }
 
 ECode WifiServiceImpl::Disconnect()
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    // mWifiStateMachine.disconnectCommand();
-    assert(0);
-    return NOERROR;
+    EnforceChangePermission();
+    return mWifiStateMachine->DisconnectCommand();
 }
 
 ECode WifiServiceImpl::Reconnect()
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    // mWifiStateMachine.reconnectCommand();
-    assert(0);
-    return NOERROR;
+    EnforceChangePermission();
+    return mWifiStateMachine->ReconnectCommand();
 }
 
 ECode WifiServiceImpl::Reassociate()
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    // mWifiStateMachine.reassociateCommand();
-    assert(0);
-    return NOERROR;
+    EnforceChangePermission();
+    return mWifiStateMachine->ReassociateCommand();
 }
 
 ECode WifiServiceImpl::GetSupportedFeatures(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncGetSupportedFeatures(mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return 0;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncGetSupportedFeatures(mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = 0;
+    }
     return NOERROR;
 }
 
 ECode WifiServiceImpl::ReportActivityInfo(
     /* [out] */ IWifiActivityEnergyInfo** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // WifiLinkLayerStats stats;
-    // WifiActivityEnergyInfo energyInfo = null;
-    // if (mWifiStateMachineChannel != null) {
-    //     stats = mWifiStateMachine.syncGetLinkLayerStats(mWifiStateMachineChannel);
-    //     if (stats != null) {
-    //         // Convert the LinkLayerStats into EnergyActivity
-    //         energyInfo = new WifiActivityEnergyInfo(
-    //                 WifiActivityEnergyInfo.STACK_STATE_STATE_IDLE, stats.tx_time,
-    //                 stats.rx_time, stats.on_time - stats.tx_time - stats.rx_time,
-    //                 0 /* TBD */);
-    //     }
-    //     return energyInfo;
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return null;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    AutoPtr<IWifiLinkLayerStats> stats;
+    AutoPtr<IWifiActivityEnergyInfo> energyInfo;
+    if (mWifiStateMachineChannel != NULL) {
+        mWifiStateMachine->SyncGetLinkLayerStats(mWifiStateMachineChannel, (IWifiLinkLayerStats**)&stats);
+        if (stats != NULL) {
+            // Convert the LinkLayerStats into EnergyActivity
+            Int32 on_time, tx_time, rx_time;
+            stats->GetOn_time(&on_time);
+            stats->GetTx_time(&tx_time);
+            stats->GetRx_time(&rx_time);
+            CWifiActivityEnergyInfo::New(
+                    IWifiActivityEnergyInfo::STACK_STATE_STATE_IDLE, tx_time,
+                    rx_time, on_time - tx_time - rx_time,
+                    0 /* TBD */, (IWifiActivityEnergyInfo**)&energyInfo);
+        }
+        *result = energyInfo;
+        REFCOUNT_ADD(*result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = NULL;
+    }
     return NOERROR;
 }
 
 ECode WifiServiceImpl::GetConfiguredNetworks(
     /* [out] */ IList** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncGetConfiguredNetworks(Binder.getCallingUid(),
-    //             mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return null;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        AutoPtr<IBinderHelper> binderHelper;
+        CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+        Int32 uid;
+        binderHelper->GetCallingUid(&uid);
+        return mWifiStateMachine->SyncGetConfiguredNetworks(uid,
+                mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = NULL;
+    }
     return NOERROR;
 }
 
@@ -1081,16 +1226,15 @@ ECode WifiServiceImpl::GetPrivilegedConfiguredNetworks(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceReadCredentialPermission();
-    // enforceAccessPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncGetPrivilegedConfiguredNetwork(mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return null;
-    // }
-    assert(0);
+    EnforceReadCredentialPermission();
+    EnforceAccessPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncGetPrivilegedConfiguredNetwork(mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = NULL;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1098,31 +1242,35 @@ ECode WifiServiceImpl::AddOrUpdateNetwork(
     /* [in] */ IWifiConfiguration* config,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (config.isValid()) {
-    //     //TODO: pass the Uid the WifiStateMachine as a message parameter
-    //     Slog.e("addOrUpdateNetwork", " uid = " + Integer.toString(Binder.getCallingUid())
-    //             + " SSID " + config.SSID
-    //             + " nid=" + Integer.toString(config.networkId));
-    //     if (config.networkId == WifiConfiguration.INVALID_NETWORK_ID) {
-    //         config.creatorUid = Binder.getCallingUid();
-    //     } else {
-    //         config.lastUpdateUid = Binder.getCallingUid();
-    //     }
-    //     if (mWifiStateMachineChannel != null) {
-    //         return mWifiStateMachine.syncAddOrUpdateNetwork(mWifiStateMachineChannel, config);
-    //     } else {
-    //         Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //         return -1;
-    //     }
-    // } else {
-    //     Slog.e(TAG, "bad network configuration");
-    //     return -1;
-    // }
-    assert(0);
+    EnforceChangePermission();
+    Boolean isValid;
+    if (config->IsValid(&isValid), isValid) {
+        //TODO: pass the Uid the WifiStateMachine as a message parameter
+        AutoPtr<IBinderHelper> binderHelper;
+        CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+        Int32 uid;
+        binderHelper->GetCallingUid(&uid);
+        String SSID;
+        config->GetSSID(&SSID);
+        Int32 networkId;
+        config->GetNetworkId(&networkId);
+        Slogger::E("addOrUpdateNetwork", " uid = %d, SSID=%s, nid=%d", uid,SSID.string(), networkId);
+        if (networkId == IWifiConfiguration::INVALID_NETWORK_ID) {
+            config->SetCreatorUid(uid);
+        } else {
+            config->SetLastUpdateUid(uid);
+        }
+        if (mWifiStateMachineChannel != NULL) {
+            return mWifiStateMachine->SyncAddOrUpdateNetwork(mWifiStateMachineChannel, config, result);
+        } else {
+            Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+            *result = -1;
+        }
+    } else {
+        Slogger::E(TAG, "bad network configuration");
+        *result = -1;
+    }
     return NOERROR;
 }
 
@@ -1131,21 +1279,24 @@ ECode WifiServiceImpl::RemoveNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceChangePermission();
-    //
-    // if (!isOwner(Binder.getCallingUid())) {
-    //     Slog.e(TAG, "Remove is not authorized for user");
-    //     return false;
-    // }
-    //
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncRemoveNetwork(mWifiStateMachineChannel, netId);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return false;
-    // }
-    assert(0);
+    EnforceChangePermission();
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    if (!IsOwner(uid)) {
+        Slogger::E(TAG, "Remove is not authorized for user");
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncRemoveNetwork(mWifiStateMachineChannel, netId, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = FALSE;
+    }
     return NOERROR;
 }
 
@@ -1155,16 +1306,14 @@ ECode WifiServiceImpl::EnableNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncEnableNetwork(mWifiStateMachineChannel, netId,
-    //             disableOthers);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return false;
-    // }
-    assert(0);
+    EnforceChangePermission();
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncEnableNetwork(mWifiStateMachineChannel, netId,
+                disableOthers, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        return false;
+    }
     return NOERROR;
 }
 
@@ -1173,15 +1322,13 @@ ECode WifiServiceImpl::DisableNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncDisableNetwork(mWifiStateMachineChannel, netId);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return false;
-    // }
-    assert(0);
+    EnforceChangePermission();
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncDisableNetwork(mWifiStateMachineChannel, netId, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = FALSE;
+    }
     return NOERROR;
 }
 
@@ -1189,15 +1336,12 @@ ECode WifiServiceImpl::GetConnectionInfo(
     /* [out] */ IWifiInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // /*
-    //  * Make sure we have the latest information, by sending
-    //  * a status request to the supplicant.
-    //  */
-    // return mWifiStateMachine.syncRequestConnectionInfo();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    /*
+     * Make sure we have the latest information, by sending
+     * a status request to the supplicant.
+     */
+    return mWifiStateMachine->SyncRequestConnectionInfo(result);
 }
 
 ECode WifiServiceImpl::GetScanResults(
@@ -1205,24 +1349,32 @@ ECode WifiServiceImpl::GetScanResults(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // int userId = UserHandle.getCallingUserId();
-    // int uid = Binder.getCallingUid();
-    // long ident = Binder.clearCallingIdentity();
-    // try {
-    //     if (mAppOps.noteOp(AppOpsManager.OP_WIFI_SCAN, uid, callingPackage)
-    //             != AppOpsManager.MODE_ALLOWED) {
-    //         return new ArrayList<ScanResult>();
-    //     }
-    //     if (!isCurrentProfile(userId)) {
-    //         return new ArrayList<ScanResult>();
-    //     }
-    //     return mWifiStateMachine.syncGetScanResultsList();
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    AutoPtr<IUserHandleHelper> uhHelper;
+    Int32 userId;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
+    uhHelper->GetCallingUserId(&userId);
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    Int32 noteOp;
+    if ((mAppOps->NoteOp(IAppOpsManager::OP_WIFI_SCAN, uid, callingPackage, &noteOp), noteOp)
+            != IAppOpsManager::MODE_ALLOWED) {
+        CArrayList::New(result);
+        return NOERROR;
+    }
+    if (!IsCurrentProfile(userId)) {
+        CArrayList::New(result);
+        return NOERROR;
+    }
+    mWifiStateMachine->SyncGetScanResultsList(result);
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
     return NOERROR;
 }
 
@@ -1230,16 +1382,14 @@ ECode WifiServiceImpl::SaveConfiguration(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean result = true;
-    // enforceChangePermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncSaveConfig(mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return false;
-    // }
-    assert(0);
+    EnforceChangePermission();
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncSaveConfig(mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = FALSE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1247,17 +1397,17 @@ ECode WifiServiceImpl::SetCountryCode(
     /* [in] */ const String& countryCode,
     /* [in] */ Boolean persist)
 {
-    // ==================before translated======================
-    // Slog.i(TAG, "WifiService trying to set country code to " + countryCode +
-    //         " with persist set to " + persist);
-    // enforceConnectivityInternalPermission();
-    // final long token = Binder.clearCallingIdentity();
-    // try {
-    //     mWifiStateMachine.setCountryCode(countryCode, persist);
-    // } finally {
-    //     Binder.restoreCallingIdentity(token);
-    // }
-    assert(0);
+    Slogger::I(TAG, "WifiService trying to set country code to %s with persist set to %d", countryCode.string(), persist);
+    EnforceConnectivityInternalPermission();
+    Int64 token;
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    binderHelper->ClearCallingIdentity(&token);
+    //try {
+    mWifiStateMachine->SetCountryCode(countryCode, persist);
+    //} finally {
+    binderHelper->RestoreCallingIdentity(token);
+    //}
     return NOERROR;
 }
 
@@ -1265,41 +1415,38 @@ ECode WifiServiceImpl::SetFrequencyBand(
     /* [in] */ Int32 band,
     /* [in] */ Boolean persist)
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    // if (!isDualBandSupported()) return;
-    // Slog.i(TAG, "WifiService trying to set frequency band to " + band +
-    //         " with persist set to " + persist);
-    // final long token = Binder.clearCallingIdentity();
-    // try {
-    //     mWifiStateMachine.setFrequencyBand(band, persist);
-    // } finally {
-    //     Binder.restoreCallingIdentity(token);
-    // }
-    assert(0);
+    EnforceChangePermission();
+    Boolean bTemp;
+    if (!(IsDualBandSupported(&bTemp), bTemp)) return NOERROR;
+    Slogger::I(TAG, "WifiService trying to set frequency band to %d  with persist set to %d", band, persist);
+    Int64 token;
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    binderHelper->ClearCallingIdentity(&token);
+    //try {
+    mWifiStateMachine->SetFrequencyBand(band, persist);
+    //} finally {
+    binderHelper->RestoreCallingIdentity(token);
+    //}
     return NOERROR;
 }
 
 ECode WifiServiceImpl::GetFrequencyBand(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.getFrequencyBand();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->GetFrequencyBand(result);
 }
 
 ECode WifiServiceImpl::IsDualBandSupported(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // //TODO: Should move towards adding a driver API that checks at runtime
-    // return mContext.getResources().getBoolean(
-    //         com.android.internal.R.bool.config_wifi_dual_band_support);
-    assert(0);
+    //TODO: Should move towards adding a driver API that checks at runtime
+    AutoPtr<IResources> resources;
+    mContext->GetResources((IResources**)&resources);
+    resources->GetBoolean(
+            R::bool_::config_wifi_dual_band_support, result);
     return NOERROR;
 }
 
@@ -1307,15 +1454,14 @@ ECode WifiServiceImpl::IsIbssSupported(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return (mWifiStateMachine.syncIsIbssSupported(mWifiStateMachineChannel) == 1);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return false;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        Int32 supported;
+        *result = ((mWifiStateMachine->SyncIsIbssSupported(mWifiStateMachineChannel, &supported), supported) == 1);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = FALSE;
+    }
     return NOERROR;
 }
 
@@ -1323,92 +1469,120 @@ ECode WifiServiceImpl::GetDhcpInfo(
     /* [out] */ IDhcpInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // DhcpResults dhcpResults = mWifiStateMachine.syncGetDhcpResults();
-    //
-    // DhcpInfo info = new DhcpInfo();
-    //
-    // if (dhcpResults.ipAddress != null &&
-    //         dhcpResults.ipAddress.getAddress() instanceof Inet4Address) {
-    //     info.ipAddress = NetworkUtils.inetAddressToInt(
-    //        (Inet4Address) dhcpResults.ipAddress.getAddress());
-    //     info.netmask = NetworkUtils.prefixLengthToNetmaskInt(
-    //        dhcpResults.ipAddress.getNetworkPrefixLength());
-    // }
-    //
-    // if (dhcpResults.gateway != null) {
-    //     info.gateway = NetworkUtils.inetAddressToInt((Inet4Address) dhcpResults.gateway);
-    // }
-    //
-    // int dnsFound = 0;
-    // for (InetAddress dns : dhcpResults.dnsServers) {
-    //     if (dns instanceof Inet4Address) {
-    //         if (dnsFound == 0) {
-    //             info.dns1 = NetworkUtils.inetAddressToInt((Inet4Address)dns);
-    //         } else {
-    //             info.dns2 = NetworkUtils.inetAddressToInt((Inet4Address)dns);
-    //         }
-    //         if (++dnsFound > 1) break;
-    //     }
-    // }
-    // InetAddress serverAddress = dhcpResults.serverAddress;
-    // if (serverAddress instanceof Inet4Address) {
-    //     info.serverAddress = NetworkUtils.inetAddressToInt((Inet4Address)serverAddress);
-    // }
-    // info.leaseDuration = dhcpResults.leaseDuration;
-    //
-    // return info;
-    assert(0);
+    EnforceAccessPermission();
+    AutoPtr<IDhcpResults> dhcpResults;
+    mWifiStateMachine->SyncGetDhcpResults((IDhcpResults**)&dhcpResults);
+
+    AutoPtr<IDhcpInfo> info;
+    CDhcpInfo::New((IDhcpInfo**)&info);
+
+    AutoPtr<ILinkAddress> ipAddress;
+    IStaticIpConfiguration::Probe(dhcpResults)->GetIpAddress((ILinkAddress**)&ipAddress);
+    AutoPtr<INetworkUtils> networkUtils;
+    CNetworkUtils::AcquireSingleton((INetworkUtils**)&networkUtils);
+    if (ipAddress != NULL) {
+        AutoPtr<IInetAddress> address;
+        ipAddress->GetAddress((IInetAddress**)&address);
+        IInet4Address* ip4 = IInet4Address::Probe(address);
+        if(ip4 != NULL) {
+            Int32 intInetAddress;
+            networkUtils->InetAddressToInt(ip4, &intInetAddress);
+            info->SetIpAddress(intInetAddress);
+            Int32 preFixLength;
+            ipAddress->GetNetworkPrefixLength(&preFixLength);
+            Int32 netmaskInt;
+            networkUtils->PrefixLengthToNetmaskInt(preFixLength, &netmaskInt);
+            info->SetNetmask(netmaskInt);
+        }
+    }
+
+    AutoPtr<IInetAddress> gatewayAddress;
+    IStaticIpConfiguration::Probe(dhcpResults)->GetGateway((IInetAddress**)&gatewayAddress);
+    if (gatewayAddress != NULL) {
+        Int32 gateway;
+        networkUtils->InetAddressToInt(IInet4Address::Probe(gatewayAddress), &gateway);
+        info->SetGateway(gateway);
+    }
+
+    Int32 dnsFound = 0;
+    AutoPtr<IArrayList> servers;
+    IStaticIpConfiguration::Probe(dhcpResults)->GetDnsServers((IArrayList**)&servers);
+    Int32 size;
+    servers->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        servers->Get(i, (IInterface**)&obj);
+        IInetAddress* dns = IInetAddress::Probe(obj);
+        IInet4Address* ip4 = IInet4Address::Probe(dns);
+
+        if (ip4 != NULL) {
+            if (dnsFound == 0) {
+                Int32 dns1;
+                networkUtils->InetAddressToInt(ip4, &dns1);
+                info->SetDns1(dns1);
+            } else {
+                Int32 dns2;
+                networkUtils->InetAddressToInt(ip4, &dns2);
+                info->SetDns2(dns2);
+            }
+            if (++dnsFound > 1) break;
+        }
+    }
+    AutoPtr<IInetAddress> serverAddress;
+    dhcpResults->GetServerAddress((IInetAddress**)&serverAddress);
+    IInet4Address* ip4SA = IInet4Address::Probe(serverAddress);
+    if (ip4SA != NULL) {
+        Int32 intSA;
+        networkUtils->InetAddressToInt(ip4SA, &intSA);
+        info->SetServerAddress(intSA);
+    }
+    Int32 duration;
+    dhcpResults->GetLeaseDuration(&duration);
+    info->SetLeaseDuration(duration);;
+
+    *result = info;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode WifiServiceImpl::StartWifi()
 {
-    // ==================before translated======================
-    // enforceConnectivityInternalPermission();
-    // /* TODO: may be add permissions for access only to connectivity service
-    //  * TODO: if a start issued, keep wifi alive until a stop issued irrespective
-    //  * of WifiLock & device idle status unless wifi enabled status is toggled
-    //  */
-    //
-    // mWifiStateMachine.setDriverStart(true);
-    // mWifiStateMachine.reconnectCommand();
-    assert(0);
+    EnforceConnectivityInternalPermission();
+    /* TODO: may be add permissions for access only to connectivity service
+     * TODO: if a start issued, keep wifi alive until a stop issued irrespective
+     * of WifiLock & device idle status unless wifi enabled status is toggled
+     */
+
+    mWifiStateMachine->SetDriverStart(TRUE);
+    mWifiStateMachine->ReconnectCommand();
     return NOERROR;
 }
 
 ECode WifiServiceImpl::StopWifi()
 {
-    // ==================before translated======================
-    // enforceConnectivityInternalPermission();
-    // /*
-    //  * TODO: if a stop is issued, wifi is brought up only by startWifi
-    //  * unless wifi enabled status is toggled
-    //  */
-    // mWifiStateMachine.setDriverStart(false);
-    assert(0);
+    EnforceConnectivityInternalPermission();
+    /*
+     * TODO: if a stop is issued, wifi is brought up only by startWifi
+     * unless wifi enabled status is toggled
+     */
+    mWifiStateMachine->SetDriverStart(FALSE);
     return NOERROR;
 }
 
 ECode WifiServiceImpl::AddToBlacklist(
     /* [in] */ const String& bssid)
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    //
-    // mWifiStateMachine.addToBlacklist(bssid);
-    assert(0);
+    EnforceChangePermission();
+
+    mWifiStateMachine->AddToBlacklist(bssid);
     return NOERROR;
 }
 
 ECode WifiServiceImpl::ClearBlacklist()
 {
-    // ==================before translated======================
-    // enforceChangePermission();
-    //
-    // mWifiStateMachine.clearBlacklist();
-    assert(0);
+    EnforceChangePermission();
+
+    mWifiStateMachine->ClearBlacklist();
     return NOERROR;
 }
 
@@ -1416,16 +1590,19 @@ ECode WifiServiceImpl::EnableTdls(
     /* [in] */ const String& remoteAddress,
     /* [in] */ Boolean enable)
 {
-    // ==================before translated======================
-    // if (remoteAddress == null) {
-    //   throw new IllegalArgumentException("remoteAddress cannot be null");
-    // }
-    //
-    // TdlsTaskParams params = new TdlsTaskParams();
-    // params.remoteIpAddress = remoteAddress;
-    // params.enable = enable;
-    // new TdlsTask().execute(params);
-    assert(0);
+    if (remoteAddress.IsNull()) {
+        //throw new IllegalArgumentException("remoteAddress cannot be null");
+        Slogger::E(TAG, "remoteAddress cannot be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoPtr<TdlsTaskParams> params = new TdlsTaskParams();
+    params->remoteIpAddress = remoteAddress;
+    params->enable = enable;
+    AutoPtr<TdlsTask> tdlsTask = new TdlsTask(this);
+    AutoPtr<ArrayOf<IInterface*> > arrayParams = ArrayOf<IInterface*>::Alloc(1);
+    arrayParams->Set(0, TO_IINTERFACE(params));
+    tdlsTask->Execute(arrayParams);
     return NOERROR;
 }
 
@@ -1433,25 +1610,25 @@ ECode WifiServiceImpl::EnableTdlsWithMacAddress(
     /* [in] */ const String& remoteMacAddress,
     /* [in] */ Boolean enable)
 {
-    // ==================before translated======================
-    // if (remoteMacAddress == null) {
-    //   throw new IllegalArgumentException("remoteMacAddress cannot be null");
-    // }
-    //
-    // mWifiStateMachine.enableTdls(remoteMacAddress, enable);
-    assert(0);
-    return NOERROR;
+    if (remoteMacAddress.IsNull()) {
+        //throw new IllegalArgumentException("remoteMacAddress cannot be null");
+        Slogger::E(TAG, "remoteMacAddress cannot be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    return mWifiStateMachine->EnableTdls(remoteMacAddress, enable);
 }
 
 ECode WifiServiceImpl::GetWifiServiceMessenger(
     /* [out] */ IMessenger** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // enforceChangePermission();
-    // return new Messenger(mClientHandler);
-    assert(0);
+    EnforceAccessPermission();
+    EnforceChangePermission();
+    AutoPtr<IMessenger> messenger;
+    CMessenger::New(mClientHandler, (IMessenger**)&messenger);
+    *result = messenger;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -1459,25 +1636,18 @@ ECode WifiServiceImpl::GetConfigFile(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.getConfigFile();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->GetConfigFile(result);
 }
 
 ECode WifiServiceImpl::EnforceWakeSourcePermission(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid)
 {
-    // ==================before translated======================
-    // if (uid == android.os.Process.myUid()) {
-    //     return;
-    // }
-    // mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
-    //         pid, uid, null);
-    assert(0);
-    return NOERROR;
+    if (uid == Process::MyUid()) {
+        return NOERROR;
+    }
+    return mContext->EnforcePermission(Manifest::permission::UPDATE_DEVICE_STATS, pid, uid, String(NULL));
 }
 
 ECode WifiServiceImpl::AcquireWifiLock(
@@ -1487,32 +1657,45 @@ ECode WifiServiceImpl::AcquireWifiLock(
     /* [in] */ IWorkSource* ws,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(binder);
-    VALIDATE_NOT_NULL(ws);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-    // if (lockMode != WifiManager.WIFI_MODE_FULL &&
-    //         lockMode != WifiManager.WIFI_MODE_SCAN_ONLY &&
-    //         lockMode != WifiManager.WIFI_MODE_FULL_HIGH_PERF) {
-    //     Slog.e(TAG, "Illegal argument, lockMode= " + lockMode);
-    //     if (DBG) throw new IllegalArgumentException("lockMode=" + lockMode);
-    //     return false;
-    // }
-    // if (ws != null && ws.size() == 0) {
-    //     ws = null;
-    // }
-    // if (ws != null) {
-    //     enforceWakeSourcePermission(Binder.getCallingUid(), Binder.getCallingPid());
-    // }
-    // if (ws == null) {
-    //     ws = new WorkSource(Binder.getCallingUid());
-    // }
-    // WifiLock wifiLock = new WifiLock(lockMode, tag, binder, ws);
-    // synchronized (mLocks) {
-    //     return acquireWifiLockLocked(wifiLock);
-    // }
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(Manifest::permission::WAKE_LOCK, String(NULL));
+    if (lockMode != IWifiManager::WIFI_MODE_FULL &&
+            lockMode != IWifiManager::WIFI_MODE_SCAN_ONLY &&
+            lockMode != IWifiManager::WIFI_MODE_FULL_HIGH_PERF) {
+        Slogger::E(TAG, "Illegal argument, lockMode= %d", lockMode);
+        *result = FALSE;
+        if (DBG) {
+            //throw new IllegalArgumentException("lockMode=" + lockMode);
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        return NOERROR;
+    }
+    if (ws != NULL) {
+        Int32 size;
+        ws->GetSize(&size);
+        if(size == 0) {
+            ws = NULL;
+        }
+    }
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    Int32 pid;
+    binderHelper->GetCallingPid(&pid);
+    if (ws != NULL) {
+        EnforceWakeSourcePermission(uid, pid);
+    }
+    if (ws == NULL) {
+        AutoPtr<IWorkSource> nws;
+        CWorkSource::New(uid, (IWorkSource**)&nws);
+        ws = nws;
+    }
+    AutoPtr<WifiLock> wifiLock = new WifiLock(this, lockMode, tag, binder, ws);
+    synchronized (mLocks) {
+        return AcquireWifiLockLocked(wifiLock);
+    }
     return NOERROR;
 }
 
@@ -1520,34 +1703,47 @@ ECode WifiServiceImpl::UpdateWifiLockWorkSource(
     /* [in] */ IBinder* lock,
     /* [in] */ IWorkSource* ws)
 {
-    VALIDATE_NOT_NULL(lock);
-    VALIDATE_NOT_NULL(ws);
-    // ==================before translated======================
-    // int uid = Binder.getCallingUid();
-    // int pid = Binder.getCallingPid();
-    // if (ws != null && ws.size() == 0) {
-    //     ws = null;
-    // }
-    // if (ws != null) {
-    //     enforceWakeSourcePermission(uid, pid);
-    // }
-    // long ident = Binder.clearCallingIdentity();
-    // try {
-    //     synchronized (mLocks) {
-    //         int index = mLocks.findLockByBinder(lock);
-    //         if (index < 0) {
-    //             throw new IllegalArgumentException("Wifi lock not active");
-    //         }
-    //         WifiLock wl = mLocks.mList.get(index);
-    //         noteReleaseWifiLock(wl);
-    //         wl.mWorkSource = ws != null ? new WorkSource(ws) : new WorkSource(uid);
-    //         noteAcquireWifiLock(wl);
-    //     }
-    // } catch (RemoteException e) {
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    Int32 pid;
+    binderHelper->GetCallingPid(&pid);
+
+    if (ws != NULL) {
+        Int32 size;
+        ws->GetSize(&size);
+        if(size == 0) {
+            ws = NULL;
+        }
+    }
+    if (ws != NULL) {
+        EnforceWakeSourcePermission(uid, pid);
+    }
+
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    synchronized (mLocks) {
+        Int32 index = mLocks->FindLockByBinder(lock);
+        if (index < 0) {
+            //throw new IllegalArgumentException("Wifi lock not active");
+            Slogger::E(TAG, "Wifi lock not active");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        AutoPtr<IInterface> obj;
+        mLocks->mList->Get(index, (IInterface**)&obj);
+        AutoPtr<WifiLock> wl = (WifiLock*)(IObject::Probe(obj));
+        NoteReleaseWifiLock(wl);
+        AutoPtr<IWorkSource> nws;
+        (ws != NULL) ? CWorkSource::New(ws, (IWorkSource**)&nws): CWorkSource::New(uid, (IWorkSource**)&nws);
+        wl->mWorkSource = nws;
+        NoteAcquireWifiLock(wl);
+    }
+    //} catch (RemoteException e) {
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
     return NOERROR;
 }
 
@@ -1555,31 +1751,28 @@ ECode WifiServiceImpl::ReleaseWifiLock(
     /* [in] */ IBinder* lock,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(lock);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-    // synchronized (mLocks) {
-    //     return releaseWifiLockLocked(lock);
-    // }
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(Manifest::permission::WAKE_LOCK, String(NULL));
+    synchronized (mLocks) {
+         *result = ReleaseWifiLockLocked(lock);
+    }
     return NOERROR;
 }
 
 ECode WifiServiceImpl::InitializeMulticastFiltering()
 {
-    // ==================before translated======================
-    // enforceMulticastChangePermission();
-    //
-    // synchronized (mMulticasters) {
-    //     // if anybody had requested filters be off, leave off
-    //     if (mMulticasters.size() != 0) {
-    //         return;
-    //     } else {
-    //         mWifiStateMachine.startFilteringMulticastV4Packets();
-    //     }
-    // }
-    assert(0);
+    EnforceMulticastChangePermission();
+
+    synchronized (mMulticasters) {
+        // if anybody had requested filters be off, leave off
+        Int32 size;
+        mMulticasters->GetSize(&size);
+        if (size != 0) {
+            return NOERROR;
+        } else {
+            mWifiStateMachine->StartFilteringMulticastV4Packets();
+        }
+    }
     return NOERROR;
 }
 
@@ -1588,48 +1781,58 @@ ECode WifiServiceImpl::AcquireMulticastLock(
     /* [in] */ const String& tag)
 {
     VALIDATE_NOT_NULL(binder);
-    // ==================before translated======================
-    // enforceMulticastChangePermission();
-    //
-    // synchronized (mMulticasters) {
-    //     mMulticastEnabled++;
-    //     mMulticasters.add(new Multicaster(tag, binder));
-    //     // Note that we could call stopFilteringMulticastV4Packets only when
-    //     // our new size == 1 (first call), but this function won't
-    //     // be called often and by making the stopPacket call each
-    //     // time we're less fragile and self-healing.
-    //     mWifiStateMachine.stopFilteringMulticastV4Packets();
-    // }
-    //
-    // int uid = Binder.getCallingUid();
-    // final long ident = Binder.clearCallingIdentity();
-    // try {
-    //     mBatteryStats.noteWifiMulticastEnabled(uid);
-    // } catch (RemoteException e) {
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
+    EnforceMulticastChangePermission();
+
+    synchronized (mMulticasters) {
+        mMulticastEnabled++;
+        AutoPtr<Multicaster> multicaster = new Multicaster(this, tag, binder);
+        mMulticasters->Add(TO_IINTERFACE(multicaster));
+        // Note that we could call stopFilteringMulticastV4Packets only when
+        // our new size == 1 (first call), but this function won't
+        // be called often and by making the stopPacket call each
+        // time we're less fragile and self-healing.
+        mWifiStateMachine->StopFilteringMulticastV4Packets();
+    }
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    mBatteryStats->NoteWifiMulticastEnabled(uid);
+    //} catch (RemoteException e) {
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
     return NOERROR;
 }
 
 ECode WifiServiceImpl::ReleaseMulticastLock()
 {
-    // ==================before translated======================
-    // enforceMulticastChangePermission();
-    //
-    // int uid = Binder.getCallingUid();
-    // synchronized (mMulticasters) {
-    //     mMulticastDisabled++;
-    //     int size = mMulticasters.size();
-    //     for (int i = size - 1; i >= 0; i--) {
-    //         Multicaster m = mMulticasters.get(i);
-    //         if ((m != null) && (m.getUid() == uid)) {
-    //             removeMulticasterLocked(i, uid);
-    //         }
-    //     }
-    // }
-    assert(0);
+    EnforceMulticastChangePermission();
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int32 uid;
+    binderHelper->GetCallingUid(&uid);
+    synchronized (mMulticasters) {
+        mMulticastDisabled++;
+        Int32 size;
+        mMulticasters->GetSize(&size);
+        for (Int32 i = size - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            mMulticasters->Get(i, (IInterface**)&obj);
+            Multicaster* m = (Multicaster*)(IObject::Probe(obj));
+            if (m != NULL) {
+                Int32 mcUid;
+                if((m->GetUid(&mcUid), mcUid) == uid) {
+                    RemoveMulticasterLocked(i, uid);
+                }
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -1637,103 +1840,77 @@ ECode WifiServiceImpl::IsMulticastEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    //
-    // synchronized (mMulticasters) {
-    //     return (mMulticasters.size() > 0);
-    // }
-    assert(0);
+    EnforceAccessPermission();
+
+    synchronized (mMulticasters) {
+        Int32 size;
+        mMulticasters->GetSize(&size);
+        *result = (size > 0);
+    }
     return NOERROR;
 }
 
 ECode WifiServiceImpl::GetWifiMonitor(
     /* [out] */ WifiMonitor** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mWifiStateMachine.getWifiMonitor();
-    assert(0);
-    return NOERROR;
+    return mWifiStateMachine->GetWifiMonitor(result);
 }
 
 ECode WifiServiceImpl::EnableVerboseLogging(
     /* [in] */ Int32 verbose)
 {
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // mWifiStateMachine.enableVerboseLogging(verbose);
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->EnableVerboseLogging(verbose);
 }
 
 ECode WifiServiceImpl::GetVerboseLoggingLevel(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.getVerboseLoggingLevel();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->GetVerboseLoggingLevel(result);
 }
 
 ECode WifiServiceImpl::EnableAggressiveHandover(
     /* [in] */ Int32 enabled)
 {
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // mWifiStateMachine.enableAggressiveHandover(enabled);
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->EnableAggressiveHandover(enabled);
 }
 
 ECode WifiServiceImpl::GetAggressiveHandover(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.getAggressiveHandover();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->GetAggressiveHandover(result);
 }
 
 ECode WifiServiceImpl::SetAllowScansWithTraffic(
     /* [in] */ Int32 enabled)
 {
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // mWifiStateMachine.setAllowScansWithTraffic(enabled);
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->SetAllowScansWithTraffic(enabled);
 }
 
 ECode WifiServiceImpl::GetAllowScansWithTraffic(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // return mWifiStateMachine.getAllowScansWithTraffic();
-    assert(0);
-    return NOERROR;
+    EnforceAccessPermission();
+    return mWifiStateMachine->GetAllowScansWithTraffic(result);
 }
 
 ECode WifiServiceImpl::GetConnectionStatistics(
     /* [out] */ IWifiConnectionStatistics** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // enforceAccessPermission();
-    // enforceReadCredentialPermission();
-    // if (mWifiStateMachineChannel != null) {
-    //     return mWifiStateMachine.syncGetConnectionStatistics(mWifiStateMachineChannel);
-    // } else {
-    //     Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-    //     return null;
-    // }
-    assert(0);
+    EnforceAccessPermission();
+    EnforceReadCredentialPermission();
+    if (mWifiStateMachineChannel != NULL) {
+        return mWifiStateMachine->SyncGetConnectionStatistics(mWifiStateMachineChannel, result);
+    } else {
+        Slogger::E(TAG, "mWifiStateMachineChannel is not initialized");
+        *result = NULL;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1742,6 +1919,7 @@ void WifiServiceImpl::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
+    Slogger::E(TAG, "WifiServiceImpl::Dump TODO");
     // ==================before translated======================
     // if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
     //         != PackageManager.PERMISSION_GRANTED) {
@@ -1809,362 +1987,423 @@ void WifiServiceImpl::StopBatchedScan(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid)
 {
-    // ==================before translated======================
-    // ArrayList<BatchedScanRequest> found = new ArrayList<BatchedScanRequest>();
-    // synchronized(mBatchedScanners) {
-    //     for (BatchedScanRequest r : mBatchedScanners) {
-    //         if (r.isSameApp(uid, pid) && (settings == null || settings.equals(r.settings))) {
-    //             found.add(r);
-    //             if (settings != null) break;
-    //         }
-    //     }
-    //     for (BatchedScanRequest r : found) {
-    //         mBatchedScanners.remove(r);
-    //     }
-    //     if (found.size() != 0) {
-    //         resolveBatchedScannersLocked();
-    //     }
-    // }
-    assert(0);
+    AutoPtr<IArrayList> found;
+    CArrayList::New((IArrayList**)&found);
+    synchronized(mBatchedScanners) {
+        Int32 size;
+        mBatchedScanners->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            mBatchedScanners->Get(i, (IInterface**)&obj);
+            BatchedScanRequest* r = (BatchedScanRequest*)(IObject::Probe(obj));
+            Boolean sameApp = FALSE;
+            if (r->IsSameApp(uid, pid, &sameApp), sameApp) {
+                Boolean equals;
+                if (settings == NULL || (IObject::Probe(settings)->Equals(r->settings.Get(), &equals), equals)) {
+                    found->Add(TO_IINTERFACE(r));
+                    if (settings != NULL) break;
+                }
+            }
+        }
+        Int32 foundSize;
+        found->GetSize(&foundSize);
+        for (Int32 i = 0; i < foundSize; ++i) {
+            AutoPtr<IInterface> obj;
+            found->Get(i, (IInterface**)&obj);
+            mBatchedScanners->Remove(obj);
+        }
+        if (foundSize != 0) {
+            ResolveBatchedScannersLocked();
+        }
+    }
 }
 
 void WifiServiceImpl::ResolveBatchedScannersLocked()
 {
-    // ==================before translated======================
-    // BatchedScanSettings setting = new BatchedScanSettings();
-    // WorkSource responsibleWorkSource = null;
-    // int responsibleUid = 0;
-    // double responsibleCsph = 0; // Channel Scans Per Hour
-    //
-    // if (mBatchedScanners.size() == 0) {
-    //     mWifiStateMachine.setBatchedScanSettings(null, 0, 0, null);
-    //     return;
-    // }
-    // for (BatchedScanRequest r : mBatchedScanners) {
-    //     BatchedScanSettings s = r.settings;
-    //
-    //     // evaluate responsibility
-    //     int currentChannelCount;
-    //     int currentScanInterval;
-    //     double currentCsph;
-    //
-    //     if (s.channelSet == null || s.channelSet.isEmpty()) {
-    //         // all channels - 11 B and 9 A channels roughly.
-    //         currentChannelCount = 9 + 11;
-    //     } else {
-    //         currentChannelCount = s.channelSet.size();
-    //         // these are rough est - no real need to correct for reg-domain;
-    //         if (s.channelSet.contains("A")) currentChannelCount += (9 - 1);
-    //         if (s.channelSet.contains("B")) currentChannelCount += (11 - 1);
-    //
-    //     }
-    //     if (s.scanIntervalSec == BatchedScanSettings.UNSPECIFIED) {
-    //         currentScanInterval = BatchedScanSettings.DEFAULT_INTERVAL_SEC;
-    //     } else {
-    //         currentScanInterval = s.scanIntervalSec;
-    //     }
-    //     currentCsph = 60 * 60 * currentChannelCount / currentScanInterval;
-    //
-    //     if (currentCsph > responsibleCsph) {
-    //         responsibleUid = r.uid;
-    //         responsibleWorkSource = r.workSource;
-    //         responsibleCsph = currentCsph;
-    //     }
-    //
-    //     if (s.maxScansPerBatch != BatchedScanSettings.UNSPECIFIED &&
-    //             s.maxScansPerBatch < setting.maxScansPerBatch) {
-    //         setting.maxScansPerBatch = s.maxScansPerBatch;
-    //     }
-    //     if (s.maxApPerScan != BatchedScanSettings.UNSPECIFIED &&
-    //             (setting.maxApPerScan == BatchedScanSettings.UNSPECIFIED ||
-    //             s.maxApPerScan > setting.maxApPerScan)) {
-    //         setting.maxApPerScan = s.maxApPerScan;
-    //     }
-    //     if (s.scanIntervalSec != BatchedScanSettings.UNSPECIFIED &&
-    //             s.scanIntervalSec < setting.scanIntervalSec) {
-    //         setting.scanIntervalSec = s.scanIntervalSec;
-    //     }
-    //     if (s.maxApForDistance != BatchedScanSettings.UNSPECIFIED &&
-    //             (setting.maxApForDistance == BatchedScanSettings.UNSPECIFIED ||
-    //             s.maxApForDistance > setting.maxApForDistance)) {
-    //         setting.maxApForDistance = s.maxApForDistance;
-    //     }
-    //     if (s.channelSet != null && s.channelSet.size() != 0) {
-    //         if (setting.channelSet == null || setting.channelSet.size() != 0) {
-    //             if (setting.channelSet == null) setting.channelSet = new ArrayList<String>();
-    //             for (String i : s.channelSet) {
-    //                 if (setting.channelSet.contains(i) == false) setting.channelSet.add(i);
-    //             }
-    //         } // else, ignore the constraint - we already use all channels
-    //     } else {
-    //         if (setting.channelSet == null || setting.channelSet.size() != 0) {
-    //             setting.channelSet = new ArrayList<String>();
-    //         }
-    //     }
-    // }
-    //
-    // setting.constrain();
-    // mWifiStateMachine.setBatchedScanSettings(setting, responsibleUid, (int)responsibleCsph,
-    //         responsibleWorkSource);
-    assert(0);
+    AutoPtr<IBatchedScanSettings> setting;
+    CBatchedScanSettings::New((IBatchedScanSettings**)&setting);
+    AutoPtr<IWorkSource> responsibleWorkSource;
+    Int32 responsibleUid = 0;
+    Double responsibleCsph = 0; // Channel Scans Per Hour
+
+    Int32 size;
+    if ((mBatchedScanners->GetSize(&size), size) == 0) {
+        mWifiStateMachine->SetBatchedScanSettings(NULL, 0, 0, NULL);
+        return;
+    }
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mBatchedScanners->Get(i, (IInterface**)&obj);
+        BatchedScanRequest* r = (BatchedScanRequest*)(IObject::Probe(obj));
+
+        AutoPtr<IBatchedScanSettings> s = r->settings;
+
+        // evaluate responsibility
+        Int32 currentChannelCount;
+        Int32 currentScanInterval;
+        Double currentCsph;
+
+        AutoPtr<ICollection> channelSet;
+        s->GetChannelSet((ICollection**)&channelSet);
+        Boolean isEmpty;
+        if (channelSet == NULL || (channelSet->IsEmpty(&isEmpty), isEmpty)) {
+            // all channels - 11 B and 9 A channels roughly.
+            currentChannelCount = 9 + 11;
+        } else {
+            channelSet->GetSize(&currentChannelCount);
+            // these are rough est - no real need to correct for reg-domain;
+            Boolean contains;
+            if (channelSet->Contains(CoreUtils::Convert("A"), &contains), contains) currentChannelCount += (9 - 1);
+            if (channelSet->Contains(CoreUtils::Convert("B"), &contains), contains) currentChannelCount += (11 - 1);
+
+        }
+        Int32 scanIntervalSec;
+        s->GetScanIntervalSec(&scanIntervalSec);
+        if (scanIntervalSec == IBatchedScanSettings::UNSPECIFIED) {
+            currentScanInterval = IBatchedScanSettings::DEFAULT_INTERVAL_SEC;
+        } else {
+            currentScanInterval = scanIntervalSec;
+        }
+        currentCsph = 60 * 60 * currentChannelCount / currentScanInterval;
+
+        if (currentCsph > responsibleCsph) {
+            responsibleUid = r->uid;
+            responsibleWorkSource = r->workSource;
+            responsibleCsph = currentCsph;
+        }
+
+        Int32 maxScansPerBatch;
+        s->GetMaxScansPerBatch(&maxScansPerBatch);
+        Int32 settingsMaxScansPerBatch;
+        setting->GetMaxScansPerBatch(&settingsMaxScansPerBatch);
+        if (maxScansPerBatch != IBatchedScanSettings::UNSPECIFIED &&
+                maxScansPerBatch < settingsMaxScansPerBatch) {
+            setting->SetMaxScansPerBatch(maxScansPerBatch);
+        }
+
+        Int32 maxApPerScan;
+        s->GetMaxApPerScan(&maxApPerScan);
+        Int32 settingMaxApPerScan;
+        setting->GetMaxApPerScan(&settingMaxApPerScan);
+        if (maxApPerScan != IBatchedScanSettings::UNSPECIFIED &&
+                (settingMaxApPerScan == IBatchedScanSettings::UNSPECIFIED ||
+                maxApPerScan > settingMaxApPerScan)) {
+            setting->SetMaxApPerScan(maxApPerScan);
+        }
+        Int32 settingScanIntervalSec;
+        setting->GetScanIntervalSec(&settingScanIntervalSec);
+        if (scanIntervalSec != IBatchedScanSettings::UNSPECIFIED &&
+                scanIntervalSec < settingScanIntervalSec) {
+            setting->SetScanIntervalSec(scanIntervalSec);
+        }
+
+        Int32 maxApForDistance;
+        s->GetMaxApForDistance(&maxApForDistance);
+        Int32 settingMaxApForDistance;
+        setting->GetMaxApForDistance(&settingMaxApForDistance);
+        if (maxApForDistance != IBatchedScanSettings::UNSPECIFIED &&
+                (settingMaxApForDistance == IBatchedScanSettings::UNSPECIFIED ||
+                maxApForDistance > settingMaxApForDistance)) {
+            setting->SetMaxApForDistance(maxApForDistance);
+        }
+
+        Int32 channelSetSize = 0;
+        AutoPtr<ICollection> settingChannelSet;
+        setting->GetChannelSet((ICollection**)&settingChannelSet);
+        Int32 settingChannelSetSize = 0;
+        if (channelSet != NULL && (channelSet->GetSize(&channelSetSize), channelSetSize) != 0) {
+            if (settingChannelSet == NULL ||
+                    (settingChannelSet->GetSize(&settingChannelSetSize), settingChannelSetSize) != 0) {
+                if (settingChannelSet == NULL) {
+                    CArrayList::New((ICollection**)&settingChannelSet);
+                    setting->SetChannelSet(settingChannelSet);
+                }
+                AutoPtr<ArrayOf<IInterface*> > array;
+                channelSet->ToArray((ArrayOf<IInterface*>**)&array);
+                for (Int32 i = 0; i < array->GetLength(); ++i) {
+                    AutoPtr<IInterface> obj = (*array)[i];
+                    //ICharSequence* cs = ICharSequence::Probe(obj);
+                    //String str;
+                    //cs->ToString(&str);
+                    Boolean contains;
+                    if ((settingChannelSet->Contains(obj, &contains), contains) == FALSE)
+                        settingChannelSet->Add(obj);
+                }
+            } // else, ignore the constraint - we already use all channels
+        } else {
+            if (settingChannelSet == NULL || (settingChannelSet->GetSize(&channelSetSize), channelSetSize) != 0) {
+                settingChannelSet = NULL;
+                CArrayList::New((ICollection**)&settingChannelSet);
+                setting->SetChannelSet(settingChannelSet);
+            }
+        }
+    }
+
+    setting->Constrain();
+    mWifiStateMachine->SetBatchedScanSettings(setting, responsibleUid, (Int32)responsibleCsph,
+            responsibleWorkSource);
 }
 
 void WifiServiceImpl::EnforceAccessPermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_WIFI_STATE,
-    //         "WifiService");
-    assert(0);
+     mContext->EnforceCallingOrSelfPermission(Manifest::permission::ACCESS_WIFI_STATE, String("WifiService"));
 }
 
 void WifiServiceImpl::EnforceChangePermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CHANGE_WIFI_STATE,
-    //                                         "WifiService");
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(Manifest::permission::CHANGE_WIFI_STATE, String("WifiService"));
 }
 
 void WifiServiceImpl::EnforceReadCredentialPermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_WIFI_CREDENTIAL,
-    //                                         "WifiService");
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(Manifest::permission::READ_WIFI_CREDENTIAL, String("WifiService"));
 }
 
 void WifiServiceImpl::EnforceWorkSourcePermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingPermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
-    //         "WifiService");
-    assert(0);
+    mContext->EnforceCallingPermission(Manifest::permission::UPDATE_DEVICE_STATS, String("WifiService"));
 }
 
 void WifiServiceImpl::EnforceMulticastChangePermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(
-    //         android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
-    //         "WifiService");
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(
+             Manifest::permission::CHANGE_WIFI_MULTICAST_STATE,
+             String("WifiService"));
 }
 
 void WifiServiceImpl::EnforceConnectivityInternalPermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(
-    //         android.Manifest.permission.CONNECTIVITY_INTERNAL,
-    //         "ConnectivityService");
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(
+             Manifest::permission::CONNECTIVITY_INTERNAL,
+             String("ConnectivityService"));
 }
 
 Boolean WifiServiceImpl::IsCurrentProfile(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // int currentUser = ActivityManager.getCurrentUser();
-    // if (userId == currentUser) {
-    //     return true;
-    // }
-    // List<UserInfo> profiles = UserManager.get(mContext).getProfiles(currentUser);
-    // for (UserInfo user : profiles) {
-    //     if (userId == user.id) {
-    //         return true;
-    //     }
-    // }
-    // return false;
-    assert(0);
+    AutoPtr<IActivityManagerHelper> cmHelper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&cmHelper);
+    Int32 currentUser;
+    cmHelper->GetCurrentUser(&currentUser);
+    if (userId == currentUser) {
+        return TRUE;
+    }
+    AutoPtr<IUserManager> um;
+    AutoPtr<IUserManagerHelper> umHelper;
+    CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&umHelper);
+    umHelper->Get(mContext, (IUserManager**)&um);
+    AutoPtr<IList> profiles;//UserInfo
+    um->GetProfiles(currentUser, (IList**)&profiles);
+    Int32 size;
+    profiles->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        profiles->Get(i, (IInterface**)&obj);
+        IUserInfo* profile = IUserInfo::Probe(obj);
+        Int32 id;
+        profile->GetId(&id);
+        if (userId == id) {
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 
 Boolean WifiServiceImpl::IsOwner(
     /* [in] */ Int32 uid)
 {
-    // ==================before translated======================
-    // long ident = Binder.clearCallingIdentity();
-    // int userId = UserHandle.getUserId(uid);
-    // try {
-    //     int ownerUser = UserHandle.USER_OWNER;
-    //     if (userId == ownerUser) {
-    //         return true;
-    //     }
-    //     List<UserInfo> profiles = UserManager.get(mContext).getProfiles(ownerUser);
-    //     for (UserInfo profile : profiles) {
-    //         if (userId == profile.id) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-    // finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    AutoPtr<IUserHandleHelper> uhHelper;
+    Int32 userId;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
+    uhHelper->GetUserId(uid, &userId);
+    //try {
+    Int32 ownerUser = IUserHandle::USER_OWNER;
+    if (userId == ownerUser) {
+        return TRUE;
+    }
+    AutoPtr<IUserManager> um;
+    AutoPtr<IUserManagerHelper> umHelper;
+    CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&umHelper);
+    umHelper->Get(mContext, (IUserManager**)&um);
+    AutoPtr<IList> profiles;//UserInfo
+    um->GetProfiles(ownerUser, (IList**)&profiles);
+    Int32 size;
+    profiles->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        profiles->Get(i, (IInterface**)&obj);
+        IUserInfo* profile = IUserInfo::Probe(obj);
+        Int32 id;
+        profile->GetId(&id);
+        if (userId == id) {
+            return TRUE;
+        }
+    }
+    //}
+    //finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
     return FALSE;
 }
 
 void WifiServiceImpl::RegisterForScanModeChange()
 {
-    // ==================before translated======================
-    // ContentObserver contentObserver = new ContentObserver(null) {
-    //     @Override
-    //     public void onChange(boolean selfChange) {
-    //         mSettingsStore.handleWifiScanAlwaysAvailableToggled();
-    //         mWifiController.sendMessage(CMD_SCAN_ALWAYS_MODE_CHANGED);
-    //     }
-    // };
-    //
-    // mContext.getContentResolver().registerContentObserver(
-    //         Settings.Global.getUriFor(Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE),
-    //         false, contentObserver);
-    assert(0);
+    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver1(this);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    AutoPtr<IUri> uri;
+    Settings::Global::GetUriFor(ISettingsGlobal::WIFI_SCAN_ALWAYS_AVAILABLE, (IUri**)&uri);
+    cr->RegisterContentObserver( uri, FALSE, contentObserver);
 }
 
 void WifiServiceImpl::RegisterForBroadcasts()
 {
-    // ==================before translated======================
-    // IntentFilter intentFilter = new IntentFilter();
-    // intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-    // intentFilter.addAction(Intent.ACTION_USER_PRESENT);
-    // intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-    // intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
-    // intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-    // intentFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-    // intentFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
-    // intentFilter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-    // mContext.registerReceiver(mReceiver, intentFilter);
-    assert(0);
+    AutoPtr<IIntentFilter> intentFilter;
+    CIntentFilter::New((IIntentFilter**)&intentFilter);
+    intentFilter->AddAction(IIntent::ACTION_SCREEN_ON);
+    intentFilter->AddAction(IIntent::ACTION_USER_PRESENT);
+    intentFilter->AddAction(IIntent::ACTION_SCREEN_OFF);
+    intentFilter->AddAction(IIntent::ACTION_BATTERY_CHANGED);
+    intentFilter->AddAction(IWifiManager::NETWORK_STATE_CHANGED_ACTION);
+    intentFilter->AddAction(IWifiManager::WIFI_AP_STATE_CHANGED_ACTION);
+    intentFilter->AddAction(IBluetoothAdapter::ACTION_CONNECTION_STATE_CHANGED);
+    intentFilter->AddAction(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
+    AutoPtr<IIntent> tmp;
+    mContext->RegisterReceiver(mReceiver, intentFilter, (IIntent**)&tmp);
 }
 
 void WifiServiceImpl::NoteAcquireWifiLock(
     /* [in] */ WifiLock* wifiLock)
 {
-    // ==================before translated======================
-    // switch(wifiLock.mMode) {
-    //     case WifiManager.WIFI_MODE_FULL:
-    //     case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
-    //     case WifiManager.WIFI_MODE_SCAN_ONLY:
-    //         mBatteryStats.noteFullWifiLockAcquiredFromSource(wifiLock.mWorkSource);
-    //         break;
-    // }
-    assert(0);
+    switch(wifiLock->mMode) {
+        case IWifiManager::WIFI_MODE_FULL:
+        case IWifiManager::WIFI_MODE_FULL_HIGH_PERF:
+        case IWifiManager::WIFI_MODE_SCAN_ONLY:
+            mBatteryStats->NoteFullWifiLockAcquiredFromSource(wifiLock->mWorkSource);
+            break;
+    }
 }
 
 void WifiServiceImpl::NoteReleaseWifiLock(
     /* [in] */ WifiLock* wifiLock)
 {
-    // ==================before translated======================
-    // switch(wifiLock.mMode) {
-    //     case WifiManager.WIFI_MODE_FULL:
-    //     case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
-    //     case WifiManager.WIFI_MODE_SCAN_ONLY:
-    //         mBatteryStats.noteFullWifiLockReleasedFromSource(wifiLock.mWorkSource);
-    //         break;
-    // }
-    assert(0);
+    switch(wifiLock->mMode) {
+        case IWifiManager::WIFI_MODE_FULL:
+        case IWifiManager::WIFI_MODE_FULL_HIGH_PERF:
+        case IWifiManager::WIFI_MODE_SCAN_ONLY:
+            mBatteryStats->NoteFullWifiLockReleasedFromSource(wifiLock->mWorkSource);
+            break;
+    }
 }
 
 Boolean WifiServiceImpl::AcquireWifiLockLocked(
     /* [in] */ WifiLock* wifiLock)
 {
-    // ==================before translated======================
-    // if (DBG) Slog.d(TAG, "acquireWifiLockLocked: " + wifiLock);
-    //
-    // mLocks.addLock(wifiLock);
-    //
-    // long ident = Binder.clearCallingIdentity();
-    // try {
-    //     noteAcquireWifiLock(wifiLock);
-    //     switch(wifiLock.mMode) {
-    //     case WifiManager.WIFI_MODE_FULL:
-    //         ++mFullLocksAcquired;
-    //         break;
-    //     case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
-    //         ++mFullHighPerfLocksAcquired;
-    //         break;
-    //
-    //     case WifiManager.WIFI_MODE_SCAN_ONLY:
-    //         ++mScanLocksAcquired;
-    //         break;
-    //     }
-    //     mWifiController.sendMessage(CMD_LOCKS_CHANGED);
-    //     return true;
-    // } catch (RemoteException e) {
-    //     return false;
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
-    return FALSE;
+    if (DBG) Slogger::D(TAG, "acquireWifiLockLocked: ");// + wifiLock);
+
+    mLocks->AddLock(wifiLock);
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    NoteAcquireWifiLock(wifiLock);
+    switch(wifiLock->mMode) {
+        case IWifiManager::WIFI_MODE_FULL:
+            ++mFullLocksAcquired;
+            break;
+        case IWifiManager::WIFI_MODE_FULL_HIGH_PERF:
+            ++mFullHighPerfLocksAcquired;
+            break;
+
+        case IWifiManager::WIFI_MODE_SCAN_ONLY:
+            ++mScanLocksAcquired;
+            break;
+    }
+    mWifiController->SendMessage(WifiController::CMD_LOCKS_CHANGED);
+    //} catch (RemoteException e) {
+    //    return false;
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
+    return TRUE;
 }
 
 Boolean WifiServiceImpl::ReleaseWifiLockLocked(
     /* [in] */ IBinder* lock)
 {
-    // ==================before translated======================
-    // boolean hadLock;
-    //
-    // WifiLock wifiLock = mLocks.removeLock(lock);
-    //
-    // if (DBG) Slog.d(TAG, "releaseWifiLockLocked: " + wifiLock);
-    //
-    // hadLock = (wifiLock != null);
-    //
-    // long ident = Binder.clearCallingIdentity();
-    // try {
-    //     if (hadLock) {
-    //         noteReleaseWifiLock(wifiLock);
-    //         switch(wifiLock.mMode) {
-    //             case WifiManager.WIFI_MODE_FULL:
-    //                 ++mFullLocksReleased;
-    //                 break;
-    //             case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
-    //                 ++mFullHighPerfLocksReleased;
-    //                 break;
-    //             case WifiManager.WIFI_MODE_SCAN_ONLY:
-    //                 ++mScanLocksReleased;
-    //                 break;
-    //         }
-    //         mWifiController.sendMessage(CMD_LOCKS_CHANGED);
-    //     }
-    // } catch (RemoteException e) {
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    //
-    // return hadLock;
-    assert(0);
-    return FALSE;
+    Boolean hadLock;
+
+    AutoPtr<WifiLock> wifiLock = mLocks->RemoveLock(lock);
+
+    if (DBG) Slogger::D(TAG, "releaseWifiLockLocked: ");// + wifiLock);
+
+    hadLock = (wifiLock != NULL);
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    if (hadLock) {
+        NoteReleaseWifiLock(wifiLock);
+        switch(wifiLock->mMode) {
+            case IWifiManager::WIFI_MODE_FULL:
+                ++mFullLocksReleased;
+                break;
+            case IWifiManager::WIFI_MODE_FULL_HIGH_PERF:
+                ++mFullHighPerfLocksReleased;
+                break;
+            case IWifiManager::WIFI_MODE_SCAN_ONLY:
+                ++mScanLocksReleased;
+                break;
+        }
+        mWifiController->SendMessage(WifiController::CMD_LOCKS_CHANGED);
+    }
+    //} catch (RemoteException e) {
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
+
+    return hadLock;
 }
 
 void WifiServiceImpl::RemoveMulticasterLocked(
     /* [in] */ Int32 i,
     /* [in] */ Int32 uid)
 {
-    // ==================before translated======================
-    // Multicaster removed = mMulticasters.remove(i);
-    //
-    // if (removed != null) {
-    //     removed.unlinkDeathRecipient();
-    // }
-    // if (mMulticasters.size() == 0) {
-    //     mWifiStateMachine.startFilteringMulticastV4Packets();
-    // }
-    //
-    // final long ident = Binder.clearCallingIdentity();
-    // try {
-    //     mBatteryStats.noteWifiMulticastDisabled(uid);
-    // } catch (RemoteException e) {
-    // } finally {
-    //     Binder.restoreCallingIdentity(ident);
-    // }
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mMulticasters->Remove(i, (IInterface**)&obj);
+    AutoPtr<Multicaster> removed = (Multicaster*)(IObject::Probe(obj));
+
+    if (removed != NULL) {
+        removed->UnlinkDeathRecipient();
+    }
+    Int32 size;
+    if ((mMulticasters->GetSize(&size), size) == 0) {
+        mWifiStateMachine->StartFilteringMulticastV4Packets();
+    }
+
+    AutoPtr<IBinderHelper> binderHelper;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
+    Int64 ident;
+    binderHelper->ClearCallingIdentity(&ident);
+    //try {
+    mBatteryStats->NoteWifiMulticastDisabled(uid);
+    //} catch (RemoteException e) {
+    //} finally {
+    binderHelper->RestoreCallingIdentity(ident);
+    //}
 }
 
 } // namespace Wifi
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
-

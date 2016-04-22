@@ -11,43 +11,6 @@
 #include "elastos/droid/internal/utility/State.h"
 #include "elastos/droid/server/wifi/WifiNative.h"
 
-// package com.android.server.wifi;
-// import android.app.AlarmManager;
-// import android.app.PendingIntent;
-// import android.content.BroadcastReceiver;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.content.IntentFilter;
-// import android.net.wifi.IWifiScanner;
-// import android.net.wifi.ScanResult;
-// import android.net.wifi.WifiManager;
-// import android.net.wifi.WifiScanner;
-// import android.net.wifi.WifiScanner.ScanSettings;
-// import android.net.wifi.WifiSsid;
-// import android.os.Bundle;
-// import android.os.Handler;
-// import android.os.HandlerThread;
-// import android.os.Looper;
-// import android.os.Message;
-// import android.os.Messenger;
-// import android.os.RemoteException;
-// import android.os.SystemClock;
-// import android.util.Log;
-// import android.util.Slog;
-// import com.android.internal.util.AsyncChannel;
-// import com.android.internal.util.Protocol;
-// import com.android.internal.util.StateMachine;
-// import com.android.internal.util.State;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.util.ArrayList;
-// import java.util.Collection;
-// import java.util.HashMap;
-// import java.util.HashSet;
-// import java.util.Iterator;
-// import java.util.List;
-// import java.util.Map;
-
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -643,4 +606,3 @@ private:
 } // namespace Elastos
 
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFISCANNINGSERVICEIMPL_H__
-

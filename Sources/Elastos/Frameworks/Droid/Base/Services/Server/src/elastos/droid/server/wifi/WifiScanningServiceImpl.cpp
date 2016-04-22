@@ -1,12 +1,15 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/server/wifi/WifiScanningServiceImpl.h"
+#include <elastos/utility/logging/Logger.h>
+
 
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Wifi::EIID_IIWifiScanner;
 using Elastos::Droid::Wifi::IWifiScanner;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::CHashSet;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +21,7 @@ namespace Wifi {
 //=====================================================================
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::Enter()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "DefaultState");
-    assert(0);
+    if (WifiScanningServiceImpl::DBG) Logger::D(TAG, "DefaultState");
     return NOERROR;
 }
 
@@ -2056,5 +2057,3 @@ Int32 WifiScanningServiceImpl::GetBandFromChannels(
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
-
