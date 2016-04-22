@@ -81,11 +81,15 @@ void BroadcastFilter::DumpBroadcastFilterState(
 String BroadcastFilter::ToString()
 {
     StringBuilder sb(128);
-    sb += ("BroadcastFilter{");
-    sb += (StringUtils::ToHexString(Int32(this)));
-    sb += ("userId=");
-    sb += (mOwningUserId);
-    sb += ' ';
+    sb += "BroadcastFilter{";
+    sb += StringUtils::ToHexString(Int32(this));
+    sb += " userId=";
+    sb += mOwningUserId;
+    sb += " mPackageName=";
+    sb += mPackageName;
+    sb += " mRequiredPermission=";
+    sb += mRequiredPermission;
+    sb += " ";
     sb += mReceiverList->ToString();
     sb += "}";
     return sb.ToString();

@@ -16,11 +16,12 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
-#include "elastos/droid/view/View.h"
 #include "elastos/droid/os/CHandler.h"
-#include "elastos/droid/widget/CBlinkLayout.h"
+#include "elastos/droid/app/LoadedPkg.h"
+#include "elastos/droid/view/View.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
+#include "elastos/droid/widget/CBlinkLayout.h"
 
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Content::Res::IResources;
@@ -28,6 +29,7 @@ using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
+using Elastos::Droid::App::LoadedPkg;
 using Elastos::Droid::Widget::CBlinkLayout;
 using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Core::ICharSequence;
@@ -842,41 +844,42 @@ ECode LayoutInflater::OnCreateView(
     return OnCreateView(name, attrs, view);
 }
 
-static String Replace(const String& name, const char* regix, const char* replacement)
-{
-    String result;
-    StringUtils::ReplaceAll(name, String(regix), String(replacement), &result);
-    return result;
-}
+// static String Replace(const String& name, const char* regix, const char* replacement)
+// {
+//     String result;
+//     StringUtils::ReplaceAll(name, String(regix), String(replacement), &result);
+//     return result;
+// }
 
 String LayoutInflater::ConvertViewName(
     /* [in] */ const String& nameIn)
 {
     String name(nameIn.string());
-    if (name.IndexOf("$") >= 0) {
-        // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
-        // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
-        name = Replace(name, "\\$", "");
-    }
+    //TODO delete
+    // if (name.IndexOf("$") >= 0) {
+    //     // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
+    //     // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
+    //     name = Replace(name, "\\$", "");
+    // }
 
-    if (name.StartWith("com.android.internal.widget.")) {
-        return Replace(name, "com.android.internal.widget.",
-            "Elastos.Droid.Internal.Widget.");
-    }
-    else if (name.StartWith("android.preference.")) {
-        return Replace(name, "android.preference.",
-            "Elastos.Droid.Preference.");
-    }
-    else if (name.StartWith("android.opengl.")) {
-        return Replace(name, "android.opengl.",
-            "Elastos.Droid.Opengl.");
-    }
+    // if (name.StartWith("com.android.internal.widget.")) {
+    //     return Replace(name, "com.android.internal.widget.",
+    //         "Elastos.Droid.Internal.Widget.C");
+    // }
+    // else if (name.StartWith("android.preference.")) {
+    //     return Replace(name, "android.preference.",
+    //         "Elastos.Droid.Preference.C");
+    // }
+    // else if (name.StartWith("android.opengl.")) {
+    //     return Replace(name, "android.opengl.",
+    //         "Elastos.Droid.Opengl.C");
+    // }
     return name;
 }
 
 ECode LayoutInflater::CreateViewFromTag(
     /* [in] */ IView* parent,
-    /* [in] */ const String& _name,
+    /* [in] */ const String& inName,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Boolean inheritContext,
     /* [out] */ IView** view)
@@ -885,14 +888,14 @@ ECode LayoutInflater::CreateViewFromTag(
     *view = NULL;
 
     String name;
-    if (!_name.Compare("view")) {
+    if (!inName.Compare("view")) {
         attrs->GetAttributeValue(String(NULL), String("class"), &name);
     }
     else {
-        name = _name;
+        name = inName;
     }
 
-    name = ConvertViewName(name);
+    name = LoadedPkg::GetElastosClassName(name);
 
     if (DEBUG) {
         Slogger::D(TAG, "******** Creating view: %s, mFactory2: %p, mFactory: %p, mPrivateFactory: %p",

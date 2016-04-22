@@ -341,6 +341,9 @@ public:
         /* [in] */ const String& appSourceDir,
         /* [in] */ const String& packageName);
 
+    static String GetElastosClassName(
+        /* [in] */ const String& androidClassName);
+
 private:
     /**
      * Setup value for Thread.getContextClassLoader(). If the
@@ -424,6 +427,8 @@ private:
     Object mServicesLock;
 
     Int32 mClientCount;
+
+    static AutoPtr< HashMap<String, String> > sAndroidElastosClassnameMap;
 };
 
 } // namespace App

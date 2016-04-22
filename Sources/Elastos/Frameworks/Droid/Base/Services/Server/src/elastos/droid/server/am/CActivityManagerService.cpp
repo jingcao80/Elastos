@@ -2943,14 +2943,14 @@ AutoPtr<BroadcastQueue> CActivityManagerService::BroadcastQueueForIntent(
     /* [in] */ IIntent* intent)
 {
     ELA_ASSERT_WITH_BLOCK(intent != NULL) {
-        Slogger::I(TAG, ":BroadcastQueueForIntent: intent is NULL.");
+        Slogger::I(TAG, "BroadcastQueueForIntent: intent is NULL.");
     }
 
     Int32 flags = 0;
     intent->GetFlags(&flags);
     Boolean isFg = (flags & IIntent::FLAG_RECEIVER_FOREGROUND) != 0;
     if (DEBUG_BACKGROUND_BROADCAST) {
-        Slogger::I(TAG, "Broadcast intent %s on %s queue.",
+        Slogger::I(TAG, "Broadcast %s on %s queue.",
             TO_CSTR(intent), (isFg ? "foreground" : "background"));
     }
     return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
@@ -19925,15 +19925,14 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     }
 
    FAIL_RETURN(HandleIncomingUser(callingPid, callingUid, userId,
-           TRUE, ALLOW_NON_FULL, String("broadcast"), callerPackage, &userId));
+        TRUE, ALLOW_NON_FULL, String("broadcast"), callerPackage, &userId));
 
     // Make sure that the user who is receiving this broadcast is running.
     // If not, we will just skip it.
     if (userId != IUserHandle::USER_ALL && !IsUserRunningLocked(userId, FALSE)) {
         Int32 flags;
         intent->GetFlags(&flags);
-        if (callingUid != IProcess::SYSTEM_UID || (flags
-                & IIntent::FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
+        if (callingUid != IProcess::SYSTEM_UID || (flags & IIntent::FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
             Slogger::W(TAG, "Skipping broadcast of %s: user:%d is stopped", TO_CSTR(intent), userId);
             *result = IActivityManager::BROADCAST_SUCCESS;
             return NOERROR;
@@ -20161,8 +20160,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
             return E_SECURITY_EXCEPTION;
         }
         if (!requiredPermission.IsNull()) {
-            Slogger::W(TAG, "Can't broadcast sticky intent %p and enforce permission %s"
-                    , intent.Get(), requiredPermission.string());
+            Slogger::W(TAG, "Can't broadcast sticky intent %s and enforce permission %s",
+                TO_CSTR(intent), requiredPermission.string());
             *result = IActivityManager::BROADCAST_STICKY_CANT_HAVE_PERMISSION;
             return NOERROR;
         }
@@ -20265,13 +20264,12 @@ ECode CActivityManagerService::BroadcastIntentLocked(
             AutoPtr<CUserManagerService> ums = GetUserManagerLocked();
             for (Int32 i = 0; i < users->GetLength(); i++) {
                 Boolean res;
-                ums->HasUserRestriction(IUserManager::DISALLOW_DEBUGGING_FEATURES,
-                    (*users)[i], &res);
+                ums->HasUserRestriction(IUserManager::DISALLOW_DEBUGGING_FEATURES, (*users)[i], &res);
                 if (res) {
                     continue;
                 }
                 AutoPtr<List<AutoPtr<BroadcastFilter> > > registeredReceiversForUser =
-                        mReceiverResolver->QueryIntent(intent, resolvedType, FALSE, (*users)[i]);
+                     mReceiverResolver->QueryIntent(intent, resolvedType, FALSE, (*users)[i]);
                 if (registeredReceivers == NULL) {
                     registeredReceivers = registeredReceiversForUser;
                 }
@@ -20287,8 +20285,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         }
     }
 
-    Boolean replacePending =
-        (flags & IIntent::FLAG_RECEIVER_REPLACE_PENDING) !=  0;
+    Boolean replacePending = (flags & IIntent::FLAG_RECEIVER_REPLACE_PENDING) !=  0;
 
     if (DEBUG_BROADCAST) {
         String action;
@@ -20311,9 +20308,12 @@ ECode CActivityManagerService::BroadcastIntentLocked(
             callerPackage, callingPid, callingUid, resolvedType, requiredPermission,
             appOp, rlist, resultTo, resultCode, resultData, map,
             ordered, sticky, FALSE, userId);
-        if (DEBUG_BROADCAST) Slogger::V(TAG, "Enqueueing parallel broadcast %s", TO_CSTR(r));
+        if (DEBUG_BROADCAST) {
+            Slogger::V(TAG, "Enqueueing parallel broadcast %s, receivers %d", TO_CSTR(r), registeredReceivers->GetSize());
+        }
         Boolean replaced = replacePending && queue->ReplaceParallelBroadcastLocked(r);
         if (!replaced) {
+            if (DEBUG_BROADCAST) Slogger::V(TAG, "Enqueue and Schedule parallel broadcast %s", TO_CSTR(r));
             queue->EnqueueParallelBroadcastLocked(r);
             queue->ScheduleBroadcastsLocked();
         }
@@ -20322,7 +20322,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     }
 
     // Merge into one list.
-    List< AutoPtr<BroadcastFilter> >::Iterator ir(NULL);
+    List< AutoPtr<BroadcastFilter> >::Iterator ir;
     if (registeredReceivers != NULL) {
         ir = registeredReceivers->Begin();
     }
@@ -20420,26 +20420,35 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         }
     }
 
+    if (receivers != NULL && DEBUG_BROADCAST) {
+        Int32 NT;
+        receivers->GetSize(&NT);
+        Slogger::V(TAG, " == receivers has %d items:", NT);
+        for (Int32 it = 0; it < NT; it++) {
+            AutoPtr<IInterface> item;
+            receivers->Get(it, (IInterface**)&item);
+            // AutoPtr<IResolveInfo> curt = IResolveInfo::Probe(item);
+            Slogger::V(TAG, " >> item %d: %s", it, TO_CSTR(item));
+        }
+    }
+
     Int32 size;
     if ((receivers != NULL && (receivers->GetSize(&size), size > 0)) || resultTo != NULL)  {
         AutoPtr<BroadcastQueue> queue = BroadcastQueueForIntent(intent);
         AutoPtr<BroadcastRecord> r = new BroadcastRecord(queue, intent, callerApp,
-                callerPackage, callingPid, callingUid, resolvedType,
-                requiredPermission, appOp, receivers, resultTo, resultCode,
-                resultData, map, ordered, sticky, FALSE, userId);
-        if (DEBUG_BROADCAST) {
-            Slogger::V(TAG, "Enqueueing ordered broadcast %s: prev had %d",
-                TO_CSTR(r), queue->mOrderedBroadcasts.GetSize());
-        }
+            callerPackage, callingPid, callingUid, resolvedType,
+            requiredPermission, appOp, receivers, resultTo, resultCode,
+            resultData, map, ordered, sticky, FALSE, userId);
         if (DEBUG_BROADCAST) {
             Int32 seq = -1;
             r->mIntent->GetInt32Extra(String("seq"), -1, &seq);
-            String ia;
-            r->mIntent->GetAction(&ia);
-            Slogger::I(TAG, "Enqueueing broadcast %s seq=%d", action.string(), seq);
+            Slogger::V(TAG, "Enqueueing ordered broadcast %s seq=%d: prev had %d",
+                TO_CSTR(r), seq, queue->mOrderedBroadcasts.GetSize());
         }
+
         Boolean replaced = replacePending && queue->ReplaceOrderedBroadcastLocked(r);
         if (!replaced) {
+            if (DEBUG_BROADCAST) Slogger::V(TAG, "Enqueue and Schedule ordered broadcast %s", TO_CSTR(r));
             queue->EnqueueOrderedBroadcastLocked(r);
             queue->ScheduleBroadcastsLocked();
         }
@@ -20529,9 +20538,9 @@ ECode CActivityManagerService::BroadcastIntent(
         IPackageItemInfo::Probe(callerApp->mInfo)->GetPackageName(&callerPackage);
     }
     ECode ec = BroadcastIntentLocked(callerApp,
-            callerPackage, newIntent, resolvedType, resultTo,
-            resultCode, resultData, map, requiredPermission, appOp, serialized,
-            sticky, callingPid, callingUid, userId, result);
+        callerPackage, newIntent, resolvedType, resultTo,
+        resultCode, resultData, map, requiredPermission, appOp, serialized,
+        sticky, callingPid, callingUid, userId, result);
     Binder::RestoreCallingIdentity(origId);
     return ec;
 }

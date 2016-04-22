@@ -128,9 +128,9 @@ String ReceiverList::ToString()
     sb += mUid;
     sb += ", userId=";
     sb += mUserId;
-    sb += "receiver=";
+    sb += " receiver=";
     sb += !IProxy::Probe(mReceiver) ? " local:" : " remote:";
-    sb += StringUtils::ToHexString((Int32)IBinder::Probe(mReceiver));
+    sb += TO_CSTR(mReceiver);
     sb += "}";
     return mStringName = sb.ToString();
 }

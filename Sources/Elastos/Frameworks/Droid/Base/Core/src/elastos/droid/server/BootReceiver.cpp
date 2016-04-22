@@ -158,7 +158,7 @@ ECode BootReceiver::OnReceive(
 ECode BootReceiver::RemoveOldUpdatePackages(
     /* [in] */ IContext* context)
 {
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
     // AutoPtr<IDownloads> downloads;
     // CDownloads::AcquireSingleton((IDownloads**)&downloads);
     // downloads->RemoveAllDownloadsByPackage(context, OLD_UPDATER_PACKAGE, OLD_UPDATER_CLASS);
@@ -203,77 +203,80 @@ ECode BootReceiver::LogBootEvents(
     String bootReason;
     SystemProperties::Get(String("ro.boot.bootreason"), String(NULL), &bootReason);
 
-    assert(0 && "TODO");
-    // String recovery = RecoverySystem::HandleAftermath();
-    // if (!recovery.IsNull() && db != NULL) {
-    //     db->AddText(String("SYSTEM_RECOVERY_LOG"), headers + recovery);
-    // }
+    if (db != NULL) {
+        // assert(0 && "TODO");
+        // String recovery = RecoverySystem::HandleAftermath();
+        // if (!recovery.IsNull()) {
+        //     db->AddText(String("SYSTEM_RECOVERY_LOG"), headers + recovery);
+        // }
 
-    String lastKmsgFooter("");
-    if (bootReason != NULL) {
-        StringBuilder sb(512);
-        sb.Append("\n");
-        sb.Append("Boot info:\n");
-        sb.Append("Last boot reason: ");
-        sb.Append(bootReason);
-        sb.Append("\n");
-        lastKmsgFooter = sb.ToString();
-    }
+        String lastKmsgFooter("");
+        if (bootReason != NULL) {
+            StringBuilder sb(512);
+            sb.Append("\n");
+            sb.Append("Boot info:\n");
+            sb.Append("Last boot reason: ");
+            sb.Append(bootReason);
+            sb.Append("\n");
+            lastKmsgFooter = sb.ToString();
+        }
 
-    Int64 ival;
-    SystemProperties::GetInt64(String("ro.runtime.firstboot"), 0, &ival);
-    if (ival == 0) {
-        String str1, str2;
-        SystemProperties::Get(String("ro.crypto.state"), &str1);
-        SystemProperties::Get(String("vold.decrypt"), &str2);
-        if (str1.Equals("encrypted")
-            && str2.Equals("trigger_restart_min_framework")) {
-            // Encrypted, first boot to get PIN/pattern/password so data is tmpfs
-            // Don't set ro.runtime.firstboot so that we will do this again
-            // when data is properly mounted
+        Int64 ival;
+        SystemProperties::GetInt64(String("ro.runtime.firstboot"), 0, &ival);
+        if (ival == 0) {
+            String str1, str2;
+            SystemProperties::Get(String("ro.crypto.state"), &str1);
+            SystemProperties::Get(String("vold.decrypt"), &str2);
+            if (str1.Equals("encrypted")
+                && str2.Equals("trigger_restart_min_framework")) {
+                // Encrypted, first boot to get PIN/pattern/password so data is tmpfs
+                // Don't set ro.runtime.firstboot so that we will do this again
+                // when data is properly mounted
+            }
+            else {
+                AutoPtr<ISystem> system;
+                CSystem::AcquireSingleton((ISystem**)&system);
+                system->GetCurrentTimeMillis(&ival);
+                String now = StringUtils::ToString(ival);
+                SystemProperties::Set(String("ro.runtime.firstboot"), now);
+            }
+            db->AddText(String("SYSTEM_BOOT"), headers);
+
+            // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
+            AddFileWithFootersToDropBox(
+                db, prefs, headers, lastKmsgFooter,
+                String("/proc/last_kmsg"), -LOG_SIZE, String("SYSTEM_LAST_KMSG"));
+            AddFileWithFootersToDropBox(
+                db, prefs, headers, lastKmsgFooter,
+                String("/sys/fs/pstore/console-ramoops"), -LOG_SIZE,
+                String("SYSTEM_LAST_KMSG"));
+            AddFileToDropBox(
+                db, prefs, headers, String("/cache/recovery/log"),
+                -LOG_SIZE, String("SYSTEM_RECOVERY_LOG"));
+            AddFileToDropBox(
+                db, prefs, headers, String("/data/dontpanic/apanic_console"),
+                -LOG_SIZE, String("APANIC_CONSOLE"));
+            AddFileToDropBox(db, prefs, headers,
+                String("/data/dontpanic/apanic_threads"),
+                -LOG_SIZE, String("APANIC_THREADS"));
+            AddAuditErrorsToDropBox(db, prefs, headers, -LOG_SIZE, String("SYSTEM_AUDIT"));
+            AddFsckErrorsToDropBox(db, prefs, headers, -LOG_SIZE, String("SYSTEM_FSCK"));
         }
         else {
-            AutoPtr<ISystem> system;
-            CSystem::AcquireSingleton((ISystem**)&system);
-            system->GetCurrentTimeMillis(&ival);
-            String now = StringUtils::ToString(ival);
-            SystemProperties::Set(String("ro.runtime.firstboot"), now);
+            db->AddText(String("SYSTEM_RESTART"), headers);
         }
-        if (db != NULL) db->AddText(String("SYSTEM_BOOT"), headers);
 
-        // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
-        AddFileWithFootersToDropBox(
-            db, prefs, headers, lastKmsgFooter,
-            String("/proc/last_kmsg"), -LOG_SIZE, String("SYSTEM_LAST_KMSG"));
-        AddFileWithFootersToDropBox(
-            db, prefs, headers, lastKmsgFooter,
-            String("/sys/fs/pstore/console-ramoops"), -LOG_SIZE,
-            String("SYSTEM_LAST_KMSG"));
-        AddFileToDropBox(
-            db, prefs, headers, String("/cache/recovery/log"),
-            -LOG_SIZE, String("SYSTEM_RECOVERY_LOG"));
-        AddFileToDropBox(
-            db, prefs, headers, String("/data/dontpanic/apanic_console"),
-            -LOG_SIZE, String("APANIC_CONSOLE"));
-        AddFileToDropBox(db, prefs, headers,
-            String("/data/dontpanic/apanic_threads"),
-            -LOG_SIZE, String("APANIC_THREADS"));
-        AddAuditErrorsToDropBox(db, prefs, headers, -LOG_SIZE, String("SYSTEM_AUDIT"));
-        AddFsckErrorsToDropBox(db, prefs, headers, -LOG_SIZE, String("SYSTEM_FSCK"));
-    } else {
-        if (db != NULL) db->AddText(String("SYSTEM_RESTART"), headers);
-    }
-
-    // Scan existing tombstones (in case any new ones appeared)
-    AutoPtr< ArrayOf<IFile*> > tombstoneFiles;
-    TOMBSTONE_DIR->ListFiles((ArrayOf<IFile*>**)&tombstoneFiles);
-    Boolean isFile;
-    for (Int32 i = 0; tombstoneFiles != NULL && i < tombstoneFiles->GetLength(); i++) {
-        (*tombstoneFiles)[i]->IsFile(&isFile);
-        if (isFile) {
-            String path;
-            (*tombstoneFiles)[i]->GetPath(&path);
-            AddFileToDropBox(db, prefs, headers, path, LOG_SIZE, String("SYSTEM_TOMBSTONE"));
+        // Scan existing tombstones (in case any new ones appeared)
+        AutoPtr< ArrayOf<IFile*> > tombstoneFiles;
+        TOMBSTONE_DIR->ListFiles((ArrayOf<IFile*>**)&tombstoneFiles);
+        Boolean isFile;
+        for (Int32 i = 0; tombstoneFiles != NULL && i < tombstoneFiles->GetLength(); i++) {
+            (*tombstoneFiles)[i]->IsFile(&isFile);
+            if (isFile) {
+                String path;
+                (*tombstoneFiles)[i]->GetPath(&path);
+                AddFileToDropBox(db, prefs, headers, path, LOG_SIZE, String("SYSTEM_TOMBSTONE"));
+            }
         }
     }
 

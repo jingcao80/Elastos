@@ -61,14 +61,7 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
-    CARAPI Register();
-
-    CARAPI Unregister();
-
     CARAPI Send();
-private:
-    AutoPtr<IBroadcastReceiver> mReceiverOne;
-    AutoPtr<IBroadcastReceiver> mReceiverTwo;
 };
 
 } // namespace BroadcastStaticDemo

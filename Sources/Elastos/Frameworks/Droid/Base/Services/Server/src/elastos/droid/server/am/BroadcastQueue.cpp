@@ -46,9 +46,9 @@ static Boolean IsLowRamDeviceStatic()
 
 const String BroadcastQueue::TAG("BroadcastQueue");
 const String BroadcastQueue::TAG_MU("BroadcastQueueMU");
-const Boolean BroadcastQueue::DEBUG_BROADCAST = TRUE;
-const Boolean BroadcastQueue::DEBUG_BROADCAST_LIGHT = TRUE;
-const Boolean BroadcastQueue::DEBUG_MU = TRUE;
+const Boolean BroadcastQueue::DEBUG_BROADCAST = FALSE;
+const Boolean BroadcastQueue::DEBUG_BROADCAST_LIGHT = FALSE;
+const Boolean BroadcastQueue::DEBUG_MU = FALSE;
 const Int32 BroadcastQueue::MAX_BROADCAST_HISTORY = IsLowRamDeviceStatic() ? 10 : 50;
 const Int32 BroadcastQueue::MAX_BROADCAST_SUMMARY_HISTORY = IsLowRamDeviceStatic() ? 25 : 300;
 const Int32 BroadcastQueue::BROADCAST_INTENT_MSG = 200;//CActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
@@ -593,7 +593,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     AutoLock lock(mService);
     AutoPtr<BroadcastRecord> r;
     if (DEBUG_BROADCAST) {
-        Slogger::V(TAG, "processNextBroadcast [%s]: %d broadcasts, %d ordered broadcasts",
+        Slogger::V(TAG, "ProcessNextBroadcast [%s]: %d broadcasts, %d ordered broadcasts",
             mQueueName.string(), mParallelBroadcasts.GetSize(), mOrderedBroadcasts.GetSize());
     }
 
@@ -684,7 +684,6 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             return NOERROR;
         }
 
-        Slogger::I(TAG, " ============ mOrderedBroadcasts size:%d", mOrderedBroadcasts.GetSize());
         r = *mOrderedBroadcasts.Begin();
         mCurrentBroadcast = r;
         assert(r != NULL);
@@ -788,14 +787,15 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
     AutoPtr<IInterface> nextReceiver;
     r->mReceivers->Get(recIdx, (IInterface**)&nextReceiver);
+
     IBroadcastFilter* bf = IBroadcastFilter::Probe(nextReceiver);
     if (bf != NULL) {
         // Simple case: this is a registered receiver who gets
         // a direct call.
         AutoPtr<BroadcastFilter> filter = (BroadcastFilter*)bf;
         if (DEBUG_BROADCAST)  {
-            Slogger::V(TAG, "Delivering ordered [%s] to registered %s: %s",
-                mQueueName.string(), TO_CSTR(filter), TO_CSTR(r));
+            Slogger::V(TAG, "Delivering ordered [%s] to registered %s: %s, filter:%s",
+                mQueueName.string(), TO_CSTR(filter), TO_CSTR(r), TO_CSTR(nextReceiver));
         }
         DeliverToRegisteredReceiverLocked(r, filter, r->mOrdered);
         if (r->mReceiver == NULL || !r->mOrdered) {
@@ -817,23 +817,21 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     AutoPtr<IResolveInfo> info = IResolveInfo::Probe(nextReceiver);
     AutoPtr<IActivityInfo> aInfo;
     info->GetActivityInfo((IActivityInfo**)&aInfo);
-    AutoPtr<IApplicationInfo> appInfo;
-    IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-    String permission;
-    aInfo->GetPermission(&permission);
-    String processName;
-    IComponentInfo::Probe(aInfo)->GetProcessName(&processName);
-    String packageName;
-    IPackageItemInfo::Probe(aInfo)->GetPackageName(&packageName);
-    String name;
-    IPackageItemInfo::Probe(aInfo)->GetName(&name);
-    Int32 flags;
-    aInfo->GetFlags(&flags);
+    IComponentInfo* aci = IComponentInfo::Probe(aInfo);
+    IPackageItemInfo* api = IPackageItemInfo::Probe(aInfo);
     Boolean exported;
-    IComponentInfo::Probe(aInfo)->GetExported(&exported);
-    Int32 appUid;
+    Int32 flags, appUid;
+    String permission, processName, packageName, name, appPackageName;
+    aInfo->GetPermission(&permission);
+    aInfo->GetFlags(&flags);
+    aci->GetExported(&exported);
+    aci->GetProcessName(&processName);
+    api->GetPackageName(&packageName);
+    api->GetName(&name);
+
+    AutoPtr<IApplicationInfo> appInfo;
+    aci->GetApplicationInfo((IApplicationInfo**)&appInfo);
     appInfo->GetUid(&appUid);
-    String appPackageName;
     IPackageItemInfo::Probe(appInfo)->GetPackageName(&appPackageName);
 
     AutoPtr<IComponentName> component;
@@ -843,23 +841,17 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     Int32 perm = mService->CheckComponentPermission(permission,
             r->mCallingPid, r->mCallingUid, appUid, exported);
     if (perm != IPackageManager::PERMISSION_GRANTED) {
+        String str;
+        component->FlattenToShortString(&str);
         if (!exported) {
-            String str;
-            r->mIntent->ToString(&str);
-            String str2;
-            component->FlattenToShortString(&str2);
             Slogger::W(TAG, "Permission Denial: broadcasting %s from %s (pid=%d, uid=%d)"
-                " is not exported from uid %d due to receiver %s", str.string(),
-                r->mCallerPackage.string(), r->mCallingPid, r->mCallingUid, appUid, str2.string());
+                " is not exported from uid %d due to receiver %s", TO_CSTR(r->mIntent),
+                r->mCallerPackage.string(), r->mCallingPid, r->mCallingUid, appUid, str.string());
         }
         else {
-            String str;
-            r->mIntent->ToString(&str);
-            String str2;
-            component->FlattenToShortString(&str2);
             Slogger::W(TAG, "Permission Denial: broadcasting %s from %s (pid=%d, uid=%d)"
-                " requires %s due to receiver ", str.string(), r->mCallerPackage.string(),
-                r->mCallingPid, r->mCallingUid, permission.string(), str2.string());
+                " requires %s due to receiver ", TO_CSTR(r->mIntent), r->mCallerPackage.string(),
+                r->mCallingPid, r->mCallingUid, permission.string(), str.string());
         }
         skip = TRUE;
     }
@@ -872,11 +864,10 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         //     perm = IPackageManager::PERMISSION_DENIED;
         // }
         if (perm != IPackageManager::PERMISSION_GRANTED) {
-            String str, str2;
-            IObject::Probe(r->mIntent)->ToString(&str);
-            component->FlattenToShortString(&str2);
+            String str;
+            component->FlattenToShortString(&str);
             Slogger::W(TAG, "Permission Denial: receiving %s to %s requires %s due to sender %s (uid %d)",
-                str.string(), str2.string(), r->mRequiredPermission.string(),
+                TO_CSTR(r->mIntent), str.string(), r->mRequiredPermission.string(),
                 r->mCallerPackage.string(), r->mCallingUid);
             skip = TRUE;
         }
@@ -942,8 +933,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
     if (skip) {
         if (DEBUG_BROADCAST)  {
-            Slogger::V(TAG, "Skipping delivery of ordered [%s] %s for whatever reason",
-                mQueueName.string(), TO_CSTR(r));
+            Slogger::V(TAG, "Skipping delivery of ordered [%s] %s, %s, for whatever reason",
+                mQueueName.string(), TO_CSTR(r), TO_CSTR(nextReceiver));
         }
         r->mReceiver = NULL;
         r->mCurFilter = NULL;
@@ -964,10 +955,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     }
     r->mCurReceiver = aInfo;
     if (DEBUG_MU && r->mCallingUid > IUserHandle::PER_USER_RANGE) {
-        String str;
-        IObject::Probe(aInfo)->ToString(&str);
         Slogger::V(TAG_MU, "Updated broadcast record activity info for secondary user,"
-            " %s, callingUid = %d, uid = %d", str.string(), r->mCallingUid,  appUid);
+            " %s, callingUid = %d, uid = %d", TO_CSTR(aInfo), r->mCallingUid,  appUid);
     }
 
     // Broadcast is being executed, its package can't be stopped.
@@ -989,16 +978,11 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         app->AddPackage(packageName, versionCode, mService->mProcessStats);
         ECode ec = ProcessCurBroadcastLocked(r, app);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            String str;
-            IObject::Probe(r->mCurComponent)->ToString(&str);
-            Slogger::W(TAG, "Exception when sending broadcast to %s", str.string());
+            Slogger::W(TAG, "Exception when sending broadcast to %s", TO_CSTR(r->mCurComponent));
         }
         else if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-            String str, str2;
-            IObject::Probe(r->mCurComponent)->ToString(&str);
-            IObject::Probe(r->mIntent)->ToString(&str2);
-            Slogger::W/*wtf*/(TAG, "Failed sending broadcast to %s with %s",
-                str.string(), str2.string());
+            Slogger::W(TAG, "Failed sending broadcast to %s with %s",
+                TO_CSTR(r->mCurComponent), TO_CSTR(r->mIntent));
             // If some unexpected exception happened, just skip
             // this broadcast.  At this point we are not in the call
             // from a client, so throwing an exception out from here
@@ -1006,7 +990,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             // sent the broadcast.
             LogBroadcastReceiverDiscardLocked(r);
             FinishReceiverLocked(r, r->mResultCode, r->mResultData,
-                    r->mResultExtras, r->mResultAbort, FALSE);
+                r->mResultExtras, r->mResultAbort, FALSE);
             ScheduleBroadcastsLocked();
             // We need to reset the state if we failed to start the receiver.
             r->mState = BroadcastRecord::IDLE;
@@ -1022,8 +1006,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
     // Not running -- get it started, to be executed when the app comes up.
     if (DEBUG_BROADCAST) {
-        Slogger::V(TAG, "Need to start app [%s] %s for broadcast %s"
-                , mQueueName.string(), targetProcess.string(), TO_CSTR(r));
+        Slogger::V(TAG, "Need to start app [%s] %s for broadcast %s",
+            mQueueName.string(), targetProcess.string(), TO_CSTR(r));
     }
     AutoPtr<ISystemProperties> systemProperties;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperties);
@@ -1041,13 +1025,11 @@ ECode BroadcastQueue::ProcessNextBroadcast(
                     == NULL) {
         // Ah, this recipient is unavailable.  Finish it if necessary,
         // and mark the broadcast record as ready for the next.
-        String str;
-        IObject::Probe(r->mIntent)->ToString(&str);
-        Slogger::W(TAG, "Unable to launch app %s/%d for broadcast %s: process is bad"
-                , appPackageName.string(), appUid, str.string());
+        Slogger::W(TAG, "Unable to launch app %s/%d for broadcast %s: process is bad",
+            appPackageName.string(), appUid, TO_CSTR(r->mIntent));
         LogBroadcastReceiverDiscardLocked(r);
         FinishReceiverLocked(r, r->mResultCode, r->mResultData,
-                r->mResultExtras, r->mResultAbort, FALSE);
+            r->mResultExtras, r->mResultAbort, FALSE);
         ScheduleBroadcastsLocked();
         r->mState = BroadcastRecord::IDLE;
         return NOERROR;

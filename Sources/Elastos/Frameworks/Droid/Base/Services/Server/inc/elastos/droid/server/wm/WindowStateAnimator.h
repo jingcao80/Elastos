@@ -30,6 +30,9 @@ class AppWindowAnimator;
 class WindowStateAnimator : public Object
 {
 public:
+
+    TO_STRING_IMPL("WindowStateAnimator")
+
     WindowStateAnimator(
         /* [in] */ WindowState* win);
 

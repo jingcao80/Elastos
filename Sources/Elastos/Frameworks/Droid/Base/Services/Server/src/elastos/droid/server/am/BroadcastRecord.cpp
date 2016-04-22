@@ -87,9 +87,16 @@ String BroadcastRecord::ToString()
     sb += " u";
     sb += mUserId;
     sb += " ";
+    sb += " callerPackage:";
+    sb += mCallerPackage;
+    sb += " action:";
     String action;
     mIntent->ToString(&action);
     sb += action;
+    sb += " resolvedType:";
+    sb += mResolvedType;
+    sb += " requiredPermission:";
+    sb += mRequiredPermission;
     sb += "}";
     return sb.ToString();
 }

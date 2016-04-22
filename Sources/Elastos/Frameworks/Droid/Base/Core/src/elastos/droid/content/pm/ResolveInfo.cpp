@@ -1,14 +1,19 @@
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/pm/ResolveInfo.h"
 #include "elastos/droid/content/pm/CActivityInfo.h"
 #include "elastos/droid/content/pm/CProviderInfo.h"
 #include "elastos/droid/content/pm/CServiceInfo.h"
 #include "elastos/droid/os/UserHandle.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Os::UserHandle;
-
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
 using Elastos::Utility::Logging::Slogger;
 
@@ -80,7 +85,7 @@ ECode ResolveInfo::GetComponentInfo(
     REFCOUNT_ADD(*info)
 
     if (*info == NULL) {
-        // throw new IllegalStateException("Missing ComponentInfo!");
+        Slogger::E(TAG, "Missing ComponentInfo!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -223,30 +228,37 @@ ECode ResolveInfo::Dump(
 ECode ResolveInfo::ToString(
     /* [out] */ String* str)
 {
-    return NOERROR;
+    VALIDATE_NOT_NULL(str)
 
-    // final ComponentInfo ci = getComponentInfo();
-    // StringBuilder sb = new StringBuilder(128);
-    // sb.append("ResolveInfo{");
-    // sb.append(Integer.toHexString(System.identityHashCode(this)));
-    // sb.append(' ');
-    // ComponentName.appendShortString(sb, ci.packageName, ci.name);
-    // if (priority != 0) {
-    //     sb.append(" p=");
-    //     sb.append(priority);
-    // }
-    // if (preferredOrder != 0) {
-    //     sb.append(" o=");
-    //     sb.append(preferredOrder);
-    // }
-    // sb.append(" m=0x");
-    // sb.append(Integer.toHexString(match));
-    // if (targetUserId != UserHandle.USER_CURRENT) {
-    //     sb.append(" targetUserId=");
-    //     sb.append(targetUserId);
-    // }
-    // sb.append('}');
-    // return sb.toString();
+    AutoPtr<IComponentInfo> ci;
+    GetComponentInfo((IComponentInfo**)&ci);
+    IPackageItemInfo* pi = IPackageItemInfo::Probe(ci);
+
+    StringBuilder sb(128);
+    sb += "ResolveInfo{";
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    String pkgName, name;
+    pi->GetPackageName(&pkgName);
+    pi->GetName(&name);
+    CComponentName::AppendShortString((IStringBuilder*)&sb, pkgName, name);
+    if (mPriority != 0) {
+        sb += " priority=";
+        sb += mPriority;
+    }
+    if (mPreferredOrder != 0) {
+        sb += " order=";
+        sb += mPreferredOrder;
+    }
+    sb += " match=0x";
+    sb += StringUtils::ToHexString(mMatch);
+    if (mTargetUserId != UserHandle::USER_CURRENT) {
+        sb += " targetUserId=";
+        sb += mTargetUserId;
+    }
+    sb += ('}');
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 ECode ResolveInfo::ReadFromParcel(

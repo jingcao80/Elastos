@@ -471,9 +471,10 @@ ECode SharedPreferencesImpl::constructor(
     /* [in] */ IFile* file,
     /* [in] */ Int32 mode)
 {
-    Logger::I(TAG, " >> SharedPreferencesImpl::constructor MakeBackupFile");
     CWeakHashMap::New((IWeakHashMap**)&mListeners);
+    mFile = file;
     mBackupFile = MakeBackupFile(file);
+    mMode = mode;
 
     StartLoadFromDisk();
     return NOERROR;
@@ -506,13 +507,15 @@ void SharedPreferencesImpl::LoadFromDiskLocked()
     }
 
     // Debugging
-    Boolean isCanRead = FALSE;
-    if ((mFile->Exists(&isCanRead), isCanRead) && !(mFile->CanRead(&isCanRead), isCanRead)) {
+    Boolean exists, isCanRead = FALSE;
+    if ((mFile->Exists(&exists), exists) && !(mFile->CanRead(&isCanRead), isCanRead)) {
         Logger::W(TAG, "Attempt to read preferences file %p without permission", mFile.Get());
     }
 
     AutoPtr<IHashMap> map;
     AutoPtr<IStructStat> stat;
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
 
     do {
         ECode ec = NOERROR;
@@ -530,8 +533,7 @@ void SharedPreferencesImpl::LoadFromDiskLocked()
             if (FAILED(ec)) {
                 break;
             }
-            AutoPtr<IIoUtils> ioUtils;
-            CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+
             AutoPtr<IInputStream> str;
             ec = CBufferedInputStream::New(fileStr, 16*1024, (IInputStream**)&str);
             AutoPtr<ICloseable> closeable = ICloseable::Probe(str);

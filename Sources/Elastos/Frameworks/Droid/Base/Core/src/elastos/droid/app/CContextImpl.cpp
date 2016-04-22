@@ -1538,8 +1538,8 @@ ECode CContextImpl::SendOrderedBroadcast(
     GetUserId(&id);
     Int32 result;
     ActivityManagerNative::GetDefault()->BroadcastIntent(
-        appThread, intent, resolvedType, NULL,
-        IActivity::RESULT_OK, String(NULL), NULL, receiverPermission,
+        appThread, intent, resolvedType, NULL, IActivity::RESULT_OK,
+        String(NULL), NULL, receiverPermission,
         IAppOpsManager::OP_NONE, TRUE, FALSE, id, &result);
 //    } catch (RemoteException e) {
 //    }

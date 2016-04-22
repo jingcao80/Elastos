@@ -2203,21 +2203,16 @@ ECode CActivityThread::PerformLaunchActivity(
         CComponentName::New(pkgName, targetActivity, (IComponentName**)&component);
     }
 
-    String packageName;
+    String packageName, className;
     component->GetPackageName(&packageName);
-    String className;
     component->GetClassName(&className);
     assert(!packageName.IsNull());
     assert(!className.IsNull());
 
     // for epk
-    String appDir;
     LoadedPkg* lp = (LoadedPkg*)r->mPackageInfo.Get();
-    lp->GetAppDir(&appDir);
-    String path = LoadedPkg::GetModulePath(appDir, packageName);
-
     AutoPtr<IClassLoader> cl;
-    CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
+    lp->GetClassLoader((IClassLoader**)&cl);
 
     Slogger::I(TAG, " >> PerformLaunchActivity: packageName:%s, className:%s, classLoader:%s",
         packageName.string(), className.string(), TO_CSTR(cl));
@@ -2233,8 +2228,8 @@ ECode CActivityThread::PerformLaunchActivity(
     AutoPtr<IInterface> object;
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "PerformLaunchActivity: Create activity Object [%s] [%s] [%s] failed.",
-            packageName.string(), path.string(), className.string());
+        Slogger::E(TAG, "PerformLaunchActivity: Create activity Object [%s][%s] failed.",
+            packageName.string(), className.string());
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -2690,12 +2685,12 @@ ECode CActivityThread::HandleReceiver(
     UnscheduleGcIdler();
 
     AutoPtr<IComponentName> component;
-    String packageName, className;
+    String packageName, rawClassName;
 
     AutoPtr<IIntent> intent = data->mIntent;
     data->mIntent->GetComponent((IComponentName**)&component);
     component->GetPackageName(&packageName);
-    component->GetClassName(&className);
+    component->GetClassName(&rawClassName);
 
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(data->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
@@ -2703,43 +2698,26 @@ ECode CActivityThread::HandleReceiver(
     GetPackageInfoNoCheck(appInfo, data->mCompatInfo, (ILoadedPkg**)&pi);
     LoadedPkg* packageInfo = (LoadedPkg*)pi.Get();
 
-    AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
-
     AutoPtr<IBroadcastReceiver> receiver;
-    String path;
+    AutoPtr<IClassLoader> cl;
+
     //TODO: com.android.server.BootReceiver is declared in android system manifest xml file.
     // the package declared in the same xml file is "android"
     // so maybe we should change the package name in that xml file
-    if (className.Equals("com.android.server.BootReceiver")
-        || className.Equals("com.android.server.MasterClearReceiver")) {
-        path = "/system/lib/Elastos.Droid.Server.eco";
-        Int32 lastIndex = className.LastIndexOf(".");
-        if (lastIndex != -1) {
-            StringBuilder sb("Elastos.Droid.Server.C");
-            sb += className.Substring(lastIndex + 1);
-            className = sb.ToString();
-        }
+    String className = LoadedPkg::GetElastosClassName(rawClassName);
+    if (rawClassName.Equals("com.android.server.MasterClearReceiver")) {
+        String path("/system/lib/Elastos.Droid.Server.eco");
+        CPathClassLoader::New(path, NULL, (IClassLoader**)&cl);
     }
     else {
-        StringBuilder sb;
-        sb.Append("/data/elastos/");
-        sb.Append(packageName);
-        sb.Append(".eco");
-        path = sb.ToString();
+        packageInfo->GetClassLoader((IClassLoader**)&cl);
     }
-
-//    try {
-    AutoPtr<IClassLoader> cl;
-    CPathClassLoader::New(path, NULL/* ClassLoader::GetSystemClassLoader()*/, (IClassLoader**)&cl);
-
-    Slogger::I(TAG, " >> HandleReceiver: packageName:%s, className:%s, classLoader:%s",
-        packageName.string(), className.string(), TO_CSTR(cl));
-    assert(0 && "TODO");
 
     AutoPtr<IClassInfo> classInfo;
     ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Load class [%s] in %s failed.", className.string(), TO_CSTR(cl));
+        Slogger::E(TAG, "HandleReceiver: packageName [%s], Load class [%s] in %s failed.",
+            packageName.string(), className.string(), TO_CSTR(cl));
         return ec;
     }
 
@@ -2767,14 +2745,10 @@ ECode CActivityThread::HandleReceiver(
     packageInfo->MakeApplication(FALSE, mInstrumentation, (IApplication**)&app);
 
     if (localLOGV) {
-        String appName;
+        String appName, pkg, comp, dir;
         IContext::Probe(app)->GetPackageName(&appName);
-        String pkg;
         packageInfo->GetPackageName(&pkg);
-
-        String comp;
         component->ToShortString(&comp);
-        String dir;
         packageInfo->GetAppDir(&dir);
         Slogger::V(TAG, "Performing receive of %p: app=%p, appName=%s, pkg=%s, comp=%s, dir=%s",
             data->mIntent.Get(), app.Get(), appName.string(), pkg.string(),
@@ -2800,6 +2774,7 @@ ECode CActivityThread::HandleReceiver(
             Slogger::I(TAG, "Finishing failed broadcast to %s", comp.string());
         }
 
+        AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
         data->SendFinished(mgr);
         ec = E_RUNTIME_EXCEPTION;
         Slogger::E(TAG, "Unable to start receiver %s", comp.string());
@@ -2895,15 +2870,12 @@ ECode CActivityThread::HandleCreateBackupAgent(
     }
     else {
 //         try {
-        String appDir;
-        packageInfo->GetAppDir(&appDir);
-        String path = LoadedPkg::GetModulePath(appDir, pkgName);
         AutoPtr<IClassLoader> cl;
-        CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
+        packageInfo->GetClassLoader((IClassLoader**)&cl);
 
         if (DEBUG_BACKUP) {
-            Slogger::V(TAG, "Initializing agent class[%s], pkgName[%s], appDir[%s], classLoader:%s",
-                className.string(), pkgName.string(), appDir.string(), TO_CSTR(cl));
+            Slogger::V(TAG, "Initializing agent class[%s], pkgName[%s],classLoader:%s",
+                className.string(), pkgName.string(), TO_CSTR(cl));
         }
 
         AutoPtr<IClassInfo> classInfo;
@@ -2996,7 +2968,7 @@ ECode CActivityThread::HandleCreateService(
     // we are back active so skip it.
     UnscheduleGcIdler();
 
-    String appDir, pkgName, className;
+    String pkgName, className;
     IPackageItemInfo* pii = IPackageItemInfo::Probe(data->mInfo);
     pii->GetPackageName(&pkgName);
     pii->GetName(&className);
@@ -3006,12 +2978,9 @@ ECode CActivityThread::HandleCreateService(
     AutoPtr<ILoadedPkg> lp;
     GetPackageInfoNoCheck(appInfo, data->mCompatInfo, (ILoadedPkg**)&lp);
     LoadedPkg* packageInfo = (LoadedPkg*)lp.Get();
-    packageInfo->GetAppDir(&appDir);
 
-    String path = LoadedPkg::GetModulePath(appDir, pkgName);
     AutoPtr<IClassLoader> cl;
-    CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
-
+    packageInfo->GetClassLoader((IClassLoader**)&cl);
     if (localLOGV) {
         Slogger::V(TAG, "Creating service %s %s, classLoader:%s",
             pkgName.string(), className.string(), TO_CSTR(cl));

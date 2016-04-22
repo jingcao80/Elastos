@@ -21,9 +21,7 @@ class ECO_PUBLIC R {
         public: static const int wunderland = 0x7f020003;
     };
     public: class id {
-        public: static const int RegisterReceiver = 0x7f050000;
-        public: static const int SendBroadcast = 0x7f050001;
-        public: static const int UnregisterReceiver = 0x7f050002;
+        public: static const int SendBroadcast = 0x7f050000;
     };
     public: class layout {
         public: static const int main = 0x7f030000;

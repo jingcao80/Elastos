@@ -39,18 +39,11 @@ private:
     };
 
 public:
+    CARAPI constructor();
+
     CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
-
-    CARAPI ToString(
-        /* [out] */ String* info)
-    {
-        VALIDATE_NOT_NULL(info);
-        *info = String("MasterClearReceiver: ");
-        (*info).AppendFormat("%p", this);
-        return NOERROR;
-    }
 
 public:
     static const String EXTRA_WIPE_MEDIA;

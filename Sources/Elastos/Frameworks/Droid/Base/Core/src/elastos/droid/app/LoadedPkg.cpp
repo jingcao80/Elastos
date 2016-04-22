@@ -546,6 +546,9 @@ ECode LoadedPkg::ServiceDispatcher::DoDeath(
 //==============================================================================
 // LoadedPkg
 //==============================================================================
+
+AutoPtr< HashMap<String, String> > LoadedPkg::sAndroidElastosClassnameMap;
+
 CAR_INTERFACE_IMPL(LoadedPkg, Object, ILoadedPkg)
 
 AutoPtr<IApplication> LoadedPkg::GetApplication()
@@ -750,14 +753,53 @@ String LoadedPkg::GetModulePath(
     else if (appSourceDir.EndWith("framework-res.apk")) {
         sb.Append("/system/lib/Elastos.Droid.Server.eco");
     }
-    else {
-        sb.Append("/data/data/com.elastos.runtime/elastos/");
-        sb.Append(packageName);
-        sb.Append("/");
-        sb.Append(packageName);
-        sb.Append(".eco");
-    }
+    // else {
+    //     sb.Append("/data/data/com.elastos.runtime/elastos/");
+    //     sb.Append(packageName);
+    //     sb.Append("/");
+    //     sb.Append(packageName);
+    //     sb.Append(".eco");
+    // }
     return sb.ToString();
+}
+
+// static String Replace(const String& name, const char* regix, const char* replacement)
+// {
+//     String result;
+//     StringUtils::ReplaceAll(name, String(regix), String(replacement), &result);
+//     return result;
+// }
+
+String LoadedPkg::GetElastosClassName(
+    /* [in] */ const String& className)
+{
+    // String className(androidClassName);
+    // if (className.IndexOf("$") >= 0) {
+    //     // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
+    //     // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
+    //     className = Replace(className, "\\$", "");
+    // }
+
+    if (sAndroidElastosClassnameMap == NULL) {
+        sAndroidElastosClassnameMap = new HashMap<String, String>();
+        (*sAndroidElastosClassnameMap)[String("android.opengl.")]               = String("Elastos.Droid.Opengl.C");
+        (*sAndroidElastosClassnameMap)[String("android.preference.")]           = String("Elastos.Droid.Preference.C");
+        (*sAndroidElastosClassnameMap)[String("com.android.server.")]           = String("Elastos.Droid.Server.C");
+        (*sAndroidElastosClassnameMap)[String("com.android.internal.widget.")]  = String("Elastos.Droid.Internal.Widget.C");
+    }
+
+    Int32 lastIndex = className.LastIndexOf(".");
+    if (lastIndex != -1) {
+        String ns = className.Substring(0, lastIndex + 1);
+        HashMap<String, String>::Iterator it = sAndroidElastosClassnameMap->Find(ns);
+        if (it != sAndroidElastosClassnameMap->End()) {
+            StringBuilder sb(it->mSecond);
+            sb += className.Substring(lastIndex + 1);
+            return sb.ToString();
+        }
+    }
+
+    return className;
 }
 
 ECode LoadedPkg::GetClassLoader(
@@ -1085,15 +1127,11 @@ ECode LoadedPkg::MakeApplication(
     }
     else {
         //    try {
-        String appSourceDir, packageName;
-        mApplicationInfo->GetSourceDir(&appSourceDir);
-        IPackageItemInfo::Probe(mApplicationInfo)->GetPackageName(&packageName);
-        String path = LoadedPkg::GetModulePath(appSourceDir, packageName);;
-
         AutoPtr<IClassLoader> cl;
-        CPathClassLoader::New(path, ClassLoader::GetSystemClassLoader(), (IClassLoader**)&cl);
+        GetClassLoader((IClassLoader**)&cl);
 
-        Slogger::I(TAG, " >> MakeApplication: appClass %s, classLoader:%s", appClass.string(), TO_CSTR(cl));
+        Slogger::I(TAG, " >> MakeApplication: packageName %s, appClass %s, classLoader:%s",
+            mPackageName.string(), appClass.string(), TO_CSTR(cl));
 
         AutoPtr<IClassInfo> classInfo;
         ECode ec = cl->LoadClass(appClass, (IClassInfo**)&classInfo);

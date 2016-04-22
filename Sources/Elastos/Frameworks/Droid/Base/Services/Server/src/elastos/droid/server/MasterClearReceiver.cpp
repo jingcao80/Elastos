@@ -27,6 +27,7 @@ ECode MasterClearReceiver::RebootThread::Run()
         // try {
     Boolean wipeMedia = FALSE;
     mIntent->GetBooleanExtra(EXTRA_WIPE_MEDIA, FALSE, &wipeMedia);
+    assert(0 && "TODO");
     //     RecoverySystem.rebootWipeUserData(context, mShutdown, mReason, wipeMedia);
     //     Log.wtf(TAG, "Still running after master clear?!");
     // } catch (IOException e) {
@@ -35,6 +36,11 @@ ECode MasterClearReceiver::RebootThread::Run()
     //     Slog.e(TAG, "Can't perform master clear/factory reset", e);
     // }
     return NOERROR;
+}
+
+ECode MasterClearReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
 }
 
 ECode MasterClearReceiver::OnReceive(

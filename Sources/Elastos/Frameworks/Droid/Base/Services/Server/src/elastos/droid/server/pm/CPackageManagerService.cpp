@@ -5265,8 +5265,9 @@ ECode CPackageManagerService::IsPackageAvailable(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     if (!sUserManager->Exists(userId)) {
-        *result = FALSE;
         return NOERROR;
     }
     FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId,
@@ -5284,7 +5285,6 @@ ECode CPackageManagerService::IsPackageAvailable(
             }
         }
     }
-    *result = FALSE;
     return NOERROR;
 }
 

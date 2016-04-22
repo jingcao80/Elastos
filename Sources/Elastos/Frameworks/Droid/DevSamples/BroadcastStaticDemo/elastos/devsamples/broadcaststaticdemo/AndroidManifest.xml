@@ -19,12 +19,14 @@
         <receiver android:name="Elastos.DevSamples.BroadcastStaticDemo.CBroadcastReceiverOne">
             <intent-filter android:priority="100">
                 <action android:name="Elastos.DevSamples.BroadcastStaticDemo.TEST_RECEIVER"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
         <receiver android:name="Elastos.DevSamples.BroadcastStaticDemo.CBroadcastReceiverTwo">
             <intent-filter android:priority="110">
                 <action android:name="Elastos.DevSamples.BroadcastStaticDemo.TEST_RECEIVER"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
     </application>
