@@ -136,11 +136,16 @@ void ApplicationInfo::DumpApplicationInfoList(
     return;
 }
 
-AutoPtr<ShortcutInfo> ApplicationInfo::MakeShortcut()
+ECode ApplicationInfo::MakeShortcut(
+    /* [out] */ IShortcutInfo** info)
 {
-    AutoPtr<ShortcutInfo> info = new ShortcutInfo();
-    info->constructor(this);
-    return info;
+    VALIDATE_NOT_NULL(info);
+
+    AutoPtr<ShortcutInfo> _info = new ShortcutInfo();
+    _info->constructor(this);
+    *info = IShortcutInfo::Probe(_info);
+    REFCOUNT_ADD(*info);
+    return NOERROR;
 }
 
 } // namespace Launcher2

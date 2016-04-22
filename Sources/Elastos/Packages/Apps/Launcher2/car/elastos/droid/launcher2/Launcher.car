@@ -1,9 +1,38 @@
 module
 {
-    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    using interface Elastos.Droid.AppWidget.IAppWidgetHostView;
+    using interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.Os.IUserHandle;
     using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IViewGroup;
 
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IHashMap;
+
+    interface Elastos.Droid.Launcher2.ICling;
+    interface Elastos.Droid.Launcher2.IHotseat;
+    interface Elastos.Droid.Launcher2.IFolder;
+    interface Elastos.Droid.Launcher2.IItemInfo;
+    interface Elastos.Droid.Launcher2.ICellLayout;
+    interface Elastos.Droid.Launcher2.IFolderIcon;
+    interface Elastos.Droid.Launcher2.IDragController;
+    interface Elastos.Droid.Launcher2.ILauncherModel;
     interface Elastos.Droid.Launcher2.IShortcutInfo;
+    interface Elastos.Droid.Launcher2.ISearchDropTargetBar;
+    interface Elastos.Droid.Launcher2.IApplicationInfo;
+    interface Elastos.Droid.Launcher2.IWorkspace;
+    interface Elastos.Droid.Launcher2.ILauncherAppWidgetInfo;
+    interface Elastos.Droid.Launcher2.ILauncherAppWidgetHost;
+    interface Elastos.Droid.Launcher2.IPendingAddWidgetInfo;
 
     namespace Elastos {
     namespace Droid {
@@ -18,6 +47,8 @@ module
     }
 
     /**
+     * Default launcher application.
+     *
      * @Involve
      * interface Elastos.Droid.Content.IContext
      * interface Elastos.Droid.Content.IContextWrapper
@@ -30,11 +61,13 @@ module
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
+     * interface Activity
      * interface IViewOnClickListener
      * interface IOnLongClickListener
      * interface ILauncherModelCallbacks
      * interface IViewOnTouchListener
      */
+    [deprecated, local]
     interface ILauncher {
         const Boolean PROFILE_STARTUP = FALSE;
         const Boolean DEBUG_WIDGETS = FALSE;
@@ -58,7 +91,487 @@ module
         const Int32 APPWIDGET_HOST_ID = 1024;
 
 
-        //~~~~~~~~~~~~~
+        GetDragLayer(
+            [out] IDragLayer** layer);
+
+        IsDraggingEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Creates a view representing a shortcut.
+         *
+         * @param info The data structure describing the shortcut.
+         *
+         * @return A View inflated from R.layout.application.
+         */
+        CreateShortcut(
+            [in] IShortcutInfo* info,
+            [out] IView** view);
+
+        /**
+         * Creates a view representing a shortcut inflated from the specified resource.
+         *
+         * @param layoutResId The id of the XML layout used to create the shortcut.
+         * @param parent The group the shortcut belongs to.
+         * @param info The data structure describing the shortcut.
+         *
+         * @return A View inflated from layoutResId.
+         */
+        CreateShortcut(
+            [in] Int32 layoutResId,
+            [in] IViewGroup* parent,
+            [in] IShortcutInfo* info,
+            [out] IView** view);
+
+        /**
+         * Add an application shortcut to the workspace.
+         *
+         * @param data The intent describing the application.
+         * @param cellInfo The position on screen where to create the shortcut.
+         */
+        CompleteAddApplication(
+            [in] IIntent* data,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] Int32 cellX,
+            [in] Int32 cellY);
+
+        OnWindowVisibilityChanged(
+            [in] Int32 visibility);
+
+        AddWidgetToAutoAdvanceIfNeeded(
+            [in] IView* hostView,
+            [in] IAppWidgetProviderInfo* appWidgetInfo);
+
+        RemoveWidgetToAutoAdvance(
+            [in] IView* hostView);
+
+        RemoveAppWidget(
+            [in] ILauncherAppWidgetInfo* launcherInfo);
+
+        ShowOutOfSpaceMessage(
+            [in] Boolean isHotseatLayout);
+
+        GetAppWidgetHost(
+            [out] ILauncherAppWidgetHost** host);
+
+        GetModel(
+            [out] ILauncherModel** mode);
+
+        CloseSystemDialogs();
+
+        GetDragController(
+            [out] IDragController** controller);
+
+        /**
+         * Starts the global search activity. This code is a copied from SearchManager
+         */
+        StartGlobalSearch(
+            [in] String initialQuery,
+            [in] Boolean selectInitialQuery,
+            [in] IBundle* appSearchData,
+            [in] IRect* sourceBounds);
+
+        IsWorkspaceLocked(
+            [out] Boolean* result);
+
+        AddAppWidgetImpl(
+            [in] Int32 appWidgetId,
+            [in] IItemInfo* info,
+            [in] IAppWidgetHostView* boundWidget,
+            [in] IAppWidgetProviderInfo* appWidgetInfo);
+
+        /**
+         * Process a shortcut drop.
+         *
+         * @param componentName The name of the component
+         * @param screen The screen where it should be added
+         * @param cell The cell it should be added to, optional
+         * @param position The location on the screen where it was dropped, optional
+         */
+        ProcessShortcutFromDrop(
+            [in] IComponentName* componentName,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] ArrayOf<Int32>* cell,
+            [in] ArrayOf<Int32>* loc);
+
+        /**
+         * Process a widget drop.
+         *
+         * @param info The PendingAppWidgetInfo of the widget being added.
+         * @param screen The screen where it should be added
+         * @param cell The cell it should be added to, optional
+         * @param position The location on the screen where it was dropped, optional
+         */
+        AddAppWidgetFromDrop(
+            [in] IPendingAddWidgetInfo* info,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] ArrayOf<Int32>* cell,
+            [in] ArrayOf<Int32>* span,
+            [in] ArrayOf<Int32>* loc);
+
+        ProcessShortcut(
+            [in] IIntent* intent);
+
+        ProcessWallpaper(
+            [in] IIntent* intent);
+
+        AddFolder(
+            [in] ICellLayout* layout,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [out] IFolderIcon** icon);
+
+        RemoveFolder(
+            [in] IFolderInfo* folder);
+
+        /**
+         * Launches the intent referred by the clicked shortcut.
+         *
+         * @param v The view representing the clicked shortcut.
+         */
+        OnClick(
+            [in] IView* v);
+
+        OnTouch(
+            [in] IView* v,
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * Event handler for the search button
+         *
+         * @param v The view that was clicked.
+         */
+        OnClickSearchButton(
+            [in] IView* v);
+
+        /**
+         * Event handler for the voice button
+         *
+         * @param v The view that was clicked.
+         */
+        OnClickVoiceButton(
+            [in] IView* v);
+
+        /**
+         * Event handler for the "grid" button that appears on the home screen, which
+         * enters all apps mode.
+         *
+         * @param v The view that was clicked.
+         */
+        OnClickAllAppsButton(
+            [in] IView* v);
+
+        OnTouchDownAllAppsButton(
+            [in] IView* v);
+
+        OnClickAppMarketButton(
+            [in] IView* v);
+
+        StartApplicationDetailsActivity(
+            [in] IComponentName* componentName,
+            [in] IUserHandle* user);
+
+        StartApplicationUninstallActivity(
+            [in] IApplicationInfo* appInfo,
+            [in] IUserHandle* user);
+
+        StartActivity(
+            [in] IView* v,
+            [in] IIntent* intent,
+            [in] IInterface* tag,
+            [out] Boolean* result);
+
+        StartActivitySafely(
+            [in] IView* v,
+            [in] IIntent* intent,
+            [in] IInterface* tag,
+            [out] Boolean* result);
+
+        StartAppWidgetConfigureActivitySafely(
+            [in] Int32 appWidgetId);
+
+        StartActivityForResultSafely(
+            [in] IIntent* intent,
+            [in] Int32 requestCode);
+
+        /**
+         * Opens the user folder described by the specified tag. The opening of the folder
+         * is animated relative to the specified View. If the View is null, no animation
+         * is played.
+         *
+         * @param folderInfo The FolderInfo describing the folder to open.
+         */
+        OpenFolder(
+            [in] IFolderIcon* folderIcon);
+
+        CloseFolder();
+
+        CloseFolder(
+            [in] IFolder* folder);
+
+        OnLongClick(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        IsHotseatLayout(
+            [in] IView* layout,
+            [out] Boolean* result);
+
+        GetHotseat(
+            [out] IHotseat** seat);
+
+        GetSearchBar(
+            [out] ISearchDropTargetBar** bar);
+
+        /**
+         * Returns the CellLayout of the specified container at the specified screen.
+         */
+        GetCellLayout(
+            [in] Int64 container,
+            [in] Int32 screen,
+            [out] ICellLayout** layout);
+
+        GetWorkspace(
+            [out] IWorkspace** workspace);
+
+        IsAllAppsVisible(
+            [out] Boolean* result);
+
+        DisableWallpaperIfInAllApps();
+
+        UpdateWallpaperVisibility(
+            [in] Boolean visible);
+
+        ShowWorkspace(
+            [in] Boolean animated);
+
+        ShowWorkspace(
+            [in] Boolean animated,
+            [in] IRunnable* onCompleteRunnable);
+
+        ShowAllApps(
+            [in] Boolean animated);
+
+        EnterSpringLoadedDragMode();
+
+        ExitSpringLoadedDragModeDelayed(
+            [in] Boolean successfulDrop,
+            [in] Boolean extendedDelay,
+            [in] IRunnable* onCompleteRunnable);
+
+        ExitSpringLoadedDragMode();
+
+        HideDockDivider();
+
+        ShowDockDivider(
+            [in] Boolean animated);
+
+        LockAllApps();
+
+        UnlockAllApps();
+
+        /**
+         * Shows the hotseat area.
+         */
+        ShowHotseat(
+            [in] Boolean animated);
+
+        /**
+         * Hides the hotseat area.
+         */
+        HideHotseat(
+            [in] Boolean animated);
+
+        /**
+         * Add an item from all apps or customize onto the given workspace screen.
+         * If layout is null, add to the current screen.
+         */
+        AddExternalItemToScreen(
+            [in] IItemInfo* itemInfo,
+            [in] ICellLayout* layout);
+
+        /**
+         * If the activity is currently paused, signal that we need to re-run the loader
+         * in onResume.
+         *
+         * This needs to be called from incoming places where resources might have been loaded
+         * while we are paused.  That is becaues the Configuration might be wrong
+         * when we're not running, and if it comes back to what it was when we
+         * were paused, we are not restarted.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         *
+         * @return true if we are currently paused.  The caller might be able to
+         * skip some work in that case since we will come back again.
+         */
+        SetLoadOnResume(
+            [out] Boolean* result);
+
+        /**
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        GetCurrentWorkspaceScreen(
+            [out] Int32* screen);
+
+        /**
+         * Refreshes the shortcuts shown on the workspace.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        StartBinding();
+
+        /**
+         * Bind the items start-end from the list.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindItems(
+            [in] IArrayList* shortcuts,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindFolders(
+            [in] IHashMap* folders);
+
+        /**
+         * Add the views for a widget to the workspace.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindAppWidget(
+            [in] ILauncherAppWidgetInfo* item);
+
+        OnPageBoundSynchronously(
+            [in] Int32 page);
+
+        /**
+         * Callback saying that there aren't any more items to bind.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        FinishBindingItems();
+
+         /**
+         * Add the icons for all apps.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindAllApplications(
+            [in] IArrayList* apps);
+
+        /**
+         * A package was installed.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindAppsAdded(
+            [in] IArrayList* apps);
+
+        /**
+         * A package was updated.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindAppsUpdated(
+            [in] IArrayList* apps);
+
+        /**
+         * A package was uninstalled.  We take both the super set of packageNames
+         * in addition to specific applications to remove, the reason being that
+         * this can be called when a package is updated as well.  In that scenario,
+         * we only remove specific components from the workspace, where as
+         * package-removal should clear all items by package name.
+         *
+         * Implementation of the method from LauncherModel.Callbacks.
+         */
+        BindComponentsRemoved(
+            [in] IArrayList* packageNames,
+            [in] IArrayList* appInfos,
+            [in] Boolean matchPackageNamesOnly,
+            [in] IUserHandle* user);
+
+        BindPackagesUpdated(
+            [in] IArrayList* widgetsAndShortcuts);
+
+        IsRotationEnabled(
+            [out] Boolean* result);
+
+        LockScreenOrientation();
+
+        UnlockScreenOrientation(
+            [in] Boolean immediate);
+
+        ShowFirstRunWorkspaceCling();
+
+        ShowFirstRunAllAppsCling(
+            [in] ArrayOf<Int32>* position);
+
+        ShowFirstRunFoldersCling(
+            [out] ICling** cling);
+
+        IsFolderClingVisible(
+            [out] Boolean* result);
+
+        DismissWorkspaceCling(
+            [in] IView* v);
+
+        DismissAllAppsCling(
+            [in] IView* v);
+
+        DismissFolderCling(
+            [in] IView* v);
+
+        /**
+         * Prints out out state for debugging.
+         */
+        DumpState();
+    }
+
+    [local]
+    interface ILauncherHelper {
+        GetScreen(
+            [out] Int32* screen);
+
+        SetScreen(
+            [in] Int32 screen);
+
+        GetSpanForWidget(
+            [in] IContext* context,
+            [in] IComponentName* component,
+            [in] Int32 minWidth,
+            [in] Int32 minHeight,
+            [out, callee] ArrayOf<Int32>* array);
+
+        GetSpanForWidget(
+            [in] IContext* context,
+            [in] IAppWidgetProviderInfo* info,
+            [out, callee] ArrayOf<Int32>* array);
+
+        GetMinSpanForWidget(
+            [in] IContext* context,
+            [in] IAppWidgetProviderInfo* info,
+            [out, callee] ArrayOf<Int32>* array);
+
+        GetSpanForWidget(
+            [in] IContext* context,
+            [in] IPendingAddWidgetInfo* info,
+            [out, callee] ArrayOf<Int32>* array);
+
+        GetMinSpanForWidget(
+            [in] IContext* context,
+            [in] IPendingAddWidgetInfo* info,
+            [out, callee] ArrayOf<Int32>* array);
+
+        DumpDebugLogsToConsole();
     }
 
     [local]

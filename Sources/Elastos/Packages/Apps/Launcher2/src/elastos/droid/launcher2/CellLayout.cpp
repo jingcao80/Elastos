@@ -2264,8 +2264,7 @@ ECode CellLayout::AnimateChildToPosition(
             lp->mTmpCellX = cellX;
             lp->mTmpCellY = cellY;
         }
-        assert(0);
-        //clc->SetupLp(lp);
+        clc->SetupLp(lp);
         lp->mIsLockedToGrid = FALSE;
         Int32 newX = lp->mX;
         Int32 newY = lp->mY;
@@ -2707,8 +2706,8 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
             Boolean exactDirectionOnly = FALSE;
             Boolean directionMatches = (*direction)[0] == (*curDirection)[0] &&
                     (*direction)[0] == (*curDirection)[0];
-            if ((directionMatches || !exactDirectionOnly) &&
-                Elastos::Core::Math::Compare(distance,  bestDistance) < 0
+            if (((directionMatches || !exactDirectionOnly) &&
+                Elastos::Core::Math::Compare(distance,  bestDistance) < 0)
                 || (Elastos::Core::Math::Compare(distance, bestDistance) == 0
                 && curDirectionScore > bestDirectionScore)) {
                 bestDistance = distance;
@@ -2727,7 +2726,7 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
     return bestXY;
 }
 
-Boolean CellLayout:: AddViewToTempLocation(
+Boolean CellLayout::AddViewToTempLocation(
     /* [in] */ IView* v,
     /* [in] */ IRect* rectOccupiedByPotentialDrop,
     /* [in] */ ArrayOf<Int32>* direction,
@@ -3407,8 +3406,9 @@ void CellLayout::CommitTempPlacement()
             info->mSpanY = lp->mCellVSpan;
         }
     }
-    assert(0);
-    //mLauncher->GetWorkspace()->UpdateItemLocationsInDatabase(this);
+    AutoPtr<IWorkspace> workspace;
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    workspace->UpdateItemLocationsInDatabase(this);
 }
 
 ECode CellLayout::SetUseTempCoords(

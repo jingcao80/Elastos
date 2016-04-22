@@ -178,7 +178,11 @@ private:
             /* [in] */ IContentResolver* cr,
             /* [in] */ Boolean notify,
             /* [in] */ IContentValues* values,
-            /* [in] */ ItemInfo* item);
+            /* [in] */ ItemInfo* item,
+            /* [in] */ Int64 container,
+            /* [in] */ Int32 screen,
+            /* [in] */ Int32 cellX,
+            /* [in] */ Int32 cellY);
 
         CARAPI Run();
 
@@ -187,6 +191,10 @@ private:
         Boolean mNotify;
         AutoPtr<IContentValues> mValues;
         AutoPtr<ItemInfo> mItem;
+        Int64 mContainer;
+        Int32 mScreen;
+        Int32 mCellX;
+        Int32 mCellY;
     };
 
     class MyRunnable6
@@ -480,13 +488,15 @@ private:
         public:
             MyRunnable14(
                 /* [in] */ LoaderTask* host,
-                /* [in] */ ILauncherModelCallbacks* oldCallbacks);
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+                /* [in] */ Int64 t);
 
             CARAPI Run();
 
         private:
             AutoPtr<LoaderTask> mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+            Int64 mT;
         };
 
         class MyRunnable15
@@ -564,7 +574,7 @@ private:
 
         // check & update map of what's occupied; used to discard overlapping/invalid items
         CARAPI_(Boolean) CheckItemPlacement(
-            /* [in] */ ArrayOf<ArrayOf<ArrayOf<ItemInfo*> > >* occupied,
+            /* [in] */ ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* >* occupied,
             /* [in] */ ItemInfo* item);
 
         CARAPI_(void) LoadWorkspace();
@@ -629,6 +639,7 @@ private:
 
     class PackageUpdatedTask
         : public Object
+        , public ILauncherModelPackageUpdatedTask
         , public IRunnable
     {
     public:
@@ -740,7 +751,6 @@ public:
         /* [in] */ Int32 screen,
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY);
-
 
     static CARAPI CheckItemInfoLocked(
         /* [in] */ Int64 itemId,
@@ -872,8 +882,8 @@ public:
     /**
      * Set this as the current Launcher activity object for the loader.
      */
-    // CARAPI Initialize(
-    //     /* [in] */ ILauncherModelCallbacks* _callbacks);
+    CARAPI Initialize(
+        /* [in] */ ILauncherModelCallbacks* _callbacks);
 
     CARAPI GetLauncherAppsCallback(
         /* [out] */ ILauncherAppsCallback** _callback);
@@ -916,7 +926,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI EnqueuePackageUpdated(
-        /* [in] */ PackageUpdatedTask* task);
+        /* [in] */ ILauncherModelPackageUpdatedTask* task);
 
     // Returns a list of ResolveInfos/AppWindowInfos in sorted order
     static CARAPI GetSortedWidgetsAndShortcuts(
@@ -932,7 +942,7 @@ public:
         /* [in] */ IIntent* intent,
         /* [in] */ IUserHandle* user,
         /* [in] */ IContext* context,
-        /* [out] */ ShortcutInfo** sinfo);
+        /* [out] */ IShortcutInfo** sinfo);
 
     /**
      * Make an ShortcutInfo object for a shortcut that is an application.
@@ -948,7 +958,7 @@ public:
         /* [in] */ Int32 iconIndex,
         /* [in] */ Int32 titleIndex,
         /* [in] */ IHashMap* labelCache,
-        /* [out] */ ShortcutInfo** sinfo);
+        /* [out] */ IShortcutInfo** sinfo);
 
     /**
      * Returns the set of workspace ShortcutInfos with the specified intent.
@@ -971,7 +981,7 @@ public:
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ Boolean notify,
-        /* [out] */ ShortcutInfo** sinfo);
+        /* [out] */ IShortcutInfo** sinfo);
 
     /**
      * Attempts to find an AppWidgetProviderInfo that matches the given component.
@@ -993,18 +1003,18 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IIntent* data,
         /* [in] */ IBitmap* fallbackIcon,
-        /* [out] */ ShortcutInfo** sinfo);
+        /* [out] */ IShortcutInfo** sinfo);
 
     CARAPI QueueIconToBeChecked(
         /* [in] */ IHashMap* cache,
-        /* [in] */ ShortcutInfo* info,
+        /* [in] */ IShortcutInfo* info,
         /* [in] */ ICursor* c,
         /* [in] */ Int32 iconIndex,
         /* [out] */ Boolean* result);
 
     CARAPI UpdateSavedIcon(
         /* [in] */ IContext* context,
-        /* [in] */ ShortcutInfo* info,
+        /* [in] */ IShortcutInfo* info,
         /* [in] */ ArrayOf<Byte>* data);
 
     static CARAPI GetAppNameComparator(
@@ -1043,7 +1053,7 @@ private:
     /**
      * Make an ShortcutInfo object for a shortcut that isn't an application.
      */
-    CARAPI_(AutoPtr<ShortcutInfo>) GetShortcutInfo(
+    CARAPI_(AutoPtr<IShortcutInfo>) GetShortcutInfo(
         /* [in] */ ICursor* c,
         /* [in] */ IContext* context,
         /* [in] */ Int32 iconTypeIndex,

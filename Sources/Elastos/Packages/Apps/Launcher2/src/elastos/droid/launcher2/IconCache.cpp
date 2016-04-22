@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/launcher2/Utilities.h"
+#include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "elastos/droid/os/Process.h"
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/R.h"
@@ -234,16 +235,15 @@ void IconCache::GetTitleAndIcon(
     /* [in] */ IHashMap* labelCache)
 {
     synchronized(mCacheLock) {
-        assert(0 && "need class ApplicationInfo");
-        // ApplicationInfo* _info = (ApplicationInfo*)application;
-        // AutoPtr<IUserHandle> handle;
-        // info->GetUser((IUserHandle**)&handle);
-        // AutoPtr<CacheEntry> entry = CacheLocked(ApplicationInfo->mComponentName, info, labelCache,
-        //         handle);
+        ApplicationInfo* _info = (ApplicationInfo*)application;
+        AutoPtr<IUserHandle> handle;
+        info->GetUser((IUserHandle**)&handle);
+        AutoPtr<CacheEntry> entry = CacheLocked(_info->mComponentName, info, labelCache,
+                handle);
 
-        // _info->mIitle = entry->mTitle;
-        // _info->mIconBitmap = entry->mIcon;
-        // _info->mContentDescription = entry->mContentDescription;
+        _info->mTitle = CoreUtils::Convert(entry->mTitle);
+        _info->mIconBitmap = entry->mIcon;
+        _info->mContentDescription = entry->mContentDescription;
     }
     return;
 }

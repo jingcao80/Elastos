@@ -2,78 +2,112 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_WIDGETPREVIEWLOADER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_WIDGETPREVIEWLOADER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/database/sqlite/SQLiteOpenHelper.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
+#include "R.h"
+
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
+using Elastos::Droid::Database::Sqlite::SQLiteOpenHelper;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Core::Object;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-class SoftReferenceThreadLocal
-    : public Object
-{
-public:
-    SoftReferenceThreadLocal();
+// class SoftReferenceThreadLocal
+//     : public Object
+// {
+// public:
+//     SoftReferenceThreadLocal();
 
-    CARAPI_(void) Set(
-        /* [in] */ IInterface* t);
+//     CARAPI_(void) Set(
+//         /* [in] */ IInterface* t);
 
-    CARAPI_(AutoPtr<IInterface>) Get();
+//     CARAPI_(AutoPtr<IInterface>) Get();
 
-protected:
-    virtual CARAPI_(AutoPtr<IInterface>) InitialValue() = 0;
+// protected:
+//     virtual CARAPI_(AutoPtr<IInterface>) InitialValue() = 0;
 
-private:
-    AutoPtr<IThreadLocal> mThreadLocal;
-};
+// private:
+//     AutoPtr<IThreadLocal> mThreadLocal;
+// };
 
-class CanvasCache
-    : public SoftReferenceThreadLocal
-{
-protected:
-    //@Override
-    CARAPI_(AutoPtr<IInterface>) InitialValue();
-};
+// class CanvasCache
+//     : public SoftReferenceThreadLocal
+// {
+// protected:
+//     //@Override
+//     CARAPI_(AutoPtr<IInterface>) InitialValue();
+// };
 
-class PaintCache
-    : public SoftReferenceThreadLocal
-{
-protected:
-    //@Override
-    CARAPI_(AutoPtr<IInterface>) InitialValue();
-};
+// class PaintCache
+//     : public SoftReferenceThreadLocal
+// {
+// protected:
+//     //@Override
+//     CARAPI_(AutoPtr<IInterface>) InitialValue();
+// };
 
-class BitmapCache
-    : public SoftReferenceThreadLocal
-{
-protected:
-    //@Override
-    CARAPI_(AutoPtr<IInterface>) InitialValue();
-};
+// class BitmapCache
+//     : public SoftReferenceThreadLocal
+// {
+// protected:
+//     //@Override
+//     CARAPI_(AutoPtr<IInterface>) InitialValue();
+// };
 
-class RectCache
-    : public SoftReferenceThreadLocal
-{
-protected:
-    //@Override
-    CARAPI_(AutoPtr<IInterface>) InitialValue();
-};
+// class RectCache
+//     : public SoftReferenceThreadLocal
+// {
+// protected:
+//     //@Override
+//     CARAPI_(AutoPtr<IInterface>) InitialValue();
+// };
 
-class BitmapFactoryOptionsCache
-    : public SoftReferenceThreadLocal
-{
-protected::
-    //@Override
-    CARAPI_(AutoPtr<IInterface>) InitialValue();
-};
+// class BitmapFactoryOptionsCache
+//     : public SoftReferenceThreadLocal
+// {
+// protected::
+//     //@Override
+//     CARAPI_(AutoPtr<IInterface>) InitialValue();
+// };
 
 class WidgetPreviewLoader
     : public Object
+    , public IWidgetPreviewLoader
 {
 private:
+    class MyAsyncTask2;
+
+public:
     class CacheDb
         : public SQLiteOpenHelper
+        , public IWidgetPreviewLoaderCacheDb
     {
     public:
+        CAR_INTERFACE_DECL();
+
         CacheDb(
             /* [in] */ IContext* context);
 
@@ -88,6 +122,9 @@ private:
             /* [in] */ Int32 newVersion);
 
     private:
+        friend class MyAsyncTask2;
+        friend class WidgetPreviewLoader;
+
         const static Int32 DB_VERSION;
         const static String DB_NAME;
         const static String TABLE_NAME;
@@ -97,13 +134,14 @@ private:
         AutoPtr<IContext> mContext;
     };
 
+private:
     class MyAsyncTask
         : public AsyncTask
     {
     public:
         MyAsyncTask(
             /* [in] */ IInterface* o,
-            /* [in] */ IBitmap** bitmap,
+            /* [in] */ IBitmap* bitmap,
             /* [in] */ WidgetPreviewLoader* host);
 
         CARAPI DoInBackground(
@@ -112,7 +150,7 @@ private:
 
     private:
         IInterface* mO;
-        IBitmap* mBitmap;
+        IBitmap* mGeneratedPreview;
         WidgetPreviewLoader* mHost;
     };
 
@@ -122,8 +160,7 @@ private:
     public:
         MyAsyncTask2(
             /* [in] */ CacheDb* cacheDb,
-            /* [in] */ const String& packageName,
-            /* [in] */ WidgetPreviewLoader* host);
+            /* [in] */ const String& packageName);
 
         CARAPI DoInBackground(
             /* [in] */ ArrayOf<IInterface*>* params,
@@ -132,14 +169,17 @@ private:
     private:
         CacheDb* mCacheDb;
         String mPackageName;
-        WidgetPreviewLoader* mHost;
     };
 
 public:
-    WidgetPreviewLoader(
+    CAR_INTERFACE_DECL();
+
+    WidgetPreviewLoader();
+
+    CARAPI constructor(
         /* [in] */ ILauncher* launcher);
 
-    CARAPI_(void RecreateDb();
+    CARAPI RecreateDb();
 
     CARAPI SetPreviewSize(
         /* [in] */ Int32 previewWidth,
@@ -168,13 +208,15 @@ public:
         /* [in] */ IBitmap* preview,
         /* [out] */ IBitmap** bitmap);
 
-    CARAPI_(Int32) MaxWidthForWidgetPreview(
-        /* [in] */ Int32 spanX);
+    CARAPI MaxWidthForWidgetPreview(
+        /* [in] */ Int32 spanX,
+        /* [out] */ Int32* width);
 
-    CARAPI_(Int32) MaxHeightForWidgetPreview(
-        /* [in] */ Int32 spanY);
+    CARAPI MaxHeightForWidgetPreview(
+        /* [in] */ Int32 spanY,
+        /* [out] */ Int32* height);
 
-    public GenerateWidgetPreview(
+    CARAPI GenerateWidgetPreview(
         /* [in] */ IAppWidgetProviderInfo* info,
         /* [in] */ Int32 cellHSpan,
         /* [in] */ Int32 cellVSpan,
@@ -226,6 +268,19 @@ private:
         /* [in] */ Int32 h,
         /* [in] */ Float scale);
 
+public:
+    static pthread_key_t mCachedShortcutPreviewBitmap;
+    static pthread_key_t mCachedShortcutPreviewPaint;
+    static pthread_key_t mCachedShortcutPreviewCanvas;
+
+    static pthread_key_t mCachedAppWidgetPreviewCanvas;
+    static pthread_key_t mCachedAppWidgetPreviewSrcRect;
+    static pthread_key_t mCachedAppWidgetPreviewDestRect;
+    static pthread_key_t mCachedAppWidgetPreviewPaint;
+
+    static pthread_key_t mCachedBitmapFactoryOptions;
+    static pthread_once_t sKeyOnce;
+
 private:
     static const String TAG;
     static const String ANDROID_INCREMENTAL_VERSION_NAME_KEY;
@@ -239,27 +294,27 @@ private:
     AutoPtr<IPagedViewCellLayout> mWidgetSpacingLayout;
 
     // Used for drawing shortcut previews
-    AutoPtr<BitmapCache> mCachedShortcutPreviewBitmap = new BitmapCache();
-    AutoPtr<PaintCache> mCachedShortcutPreviewPaint = new PaintCache();
-    AutoPtr<CanvasCache> mCachedShortcutPreviewCanvas = new CanvasCache();
+    // AutoPtr<BitmapCache> mCachedShortcutPreviewBitmap = new BitmapCache();
+    // AutoPtr<PaintCache> mCachedShortcutPreviewPaint = new PaintCache();
+    // AutoPtr<CanvasCache> mCachedShortcutPreviewCanvas = new CanvasCache();
 
     // Used for drawing widget previews
-    AutoPtr<CanvasCache> mCachedAppWidgetPreviewCanvas = new CanvasCache();
-    AutoPtr<RectCache> mCachedAppWidgetPreviewSrcRect = new RectCache();
-    AutoPtr<RectCache> mCachedAppWidgetPreviewDestRect = new RectCache();
-    AutoPtr<PaintCache> mCachedAppWidgetPreviewPaint = new PaintCache();
+    // AutoPtr<CanvasCache> mCachedAppWidgetPreviewCanvas = new CanvasCache();
+    // AutoPtr<RectCache> mCachedAppWidgetPreviewSrcRect = new RectCache();
+    // AutoPtr<RectCache> mCachedAppWidgetPreviewDestRect = new RectCache();
+    // AutoPtr<PaintCache> mCachedAppWidgetPreviewPaint = new PaintCache();
     String mCachedSelectQuery;
-    AutoPtr<BitmapFactoryOptionsCache> mCachedBitmapFactoryOptions = new BitmapFactoryOptionsCache();
+    //AutoPtr<BitmapFactoryOptionsCache> mCachedBitmapFactoryOptions = new BitmapFactoryOptionsCache();
 
     Int32 mAppIconSize;
     Int32 mProfileBadgeSize;
     Int32 mProfileBadgeMargin;
 
-    AutoPtr<IconCache> mIconCache;
+    AutoPtr<IIconCache> mIconCache;
 
     const Float sWidgetPreviewIconPaddingPercentage;
 
-    AutoPtr<CacheDb> mDb;
+    AutoPtr<IWidgetPreviewLoaderCacheDb> mDb;
 
     AutoPtr<IHashMap> mLoadedPreviews;
     Object mLoadedPreviewsLock;

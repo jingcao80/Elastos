@@ -1,5 +1,14 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Launcher2.ILauncher;
+    interface Elastos.Droid.Launcher2.IDragController;
+    interface Elastos.Droid.Launcher2.IPendingAddWidgetInfo;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -25,7 +34,10 @@ module
      * A generic template for an async task used in AppsCustomize.
      */
     interface IAppsCustomizePagedViewAppsCustomizeAsyncTask {
+        SetThreadPriority(
+            [in] Int32 p);
 
+        SyncThreadPriority();
     }
 
     /**
@@ -38,7 +50,6 @@ module
     }
 
     /*
-    *
      * The Apps/Customize page that displays all the applications, widgets, and shortcuts.
      *
      * @invoke
@@ -59,7 +70,112 @@ module
      * interface IPagedViewWidgetShortPressListener,
      * interface ILauncherTransitionable
     */
+    [local]
     interface IAppsCustomizePagedView {
+        /** Get the index of the item to restore to if we need to restore the current page. */
+        GetSaveInstanceStateIndex(
+            [out] Int32* index);
+
+        /** Returns the page in the current orientation which is expected to contain the specified
+         *  item index. */
+        GetPageForComponent(
+            [in] Int32 index,
+            [out] Int32* page);
+
+        /** Restores the page for an item at the specified index */
+        RestorePageForIndex(
+            [in] Int32 index);
+
+        ShowAllAppsCling();
+
+        OnPackagesUpdated(
+            [in] IArrayList* widgetsAndShortcuts);
+
+        SetBulkBind(
+            [in] Boolean bulkBind);
+
+        OnKey(
+            [in] IView* v,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        GetDefaultOptionsForWidget(
+            [in] ILauncher* launcher,
+            [in] IPendingAddWidgetInfo* info,
+            [out] IBundle** bundle);
+
+        OnLauncherTransitionPrepare(
+            [in] ILauncher* l,
+            [in] Boolean animated,
+            [in] Boolean toWorkspace);
+
+        OnLauncherTransitionStart(
+            [in] ILauncher* l,
+            [in] Boolean animated,
+            [in] Boolean toWorkspace);
+
+        OnLauncherTransitionStep(
+            [in] ILauncher* l,
+            [in] Float t);
+
+        OnLauncherTransitionEnd(
+            [in] ILauncher* l,
+            [in] Boolean animated,
+            [in] Boolean toWorkspace);
+
+        ClearAllWidgetPages();
+
+        SetContentType(
+            [in] AppsCustomizePagedViewContentType type);
+
+        SyncAppsPageItems(
+            [in] Int32 page,
+            [in] Boolean immediate);
+
+        SyncWidgetPageItems(
+            [in] Int32 page,
+            [in] Boolean immediate);
+
+        // We want our pages to be z-ordered such that the further a page is to the left, the higher
+        // it is in the z-order. This is important to insure touch events are handled correctly.
+        GetPageAt(
+            [in] Int32 index,
+            [out] IView** view);
+
+        /**
+         * Used by the parent to get the content width to set the tab bar to
+         * @return
+         */
+        GetPageContentWidth(
+            [out] Int32* width);
+
+        /*
+         * AllAppsView implementation
+         */
+        Setup(
+            [in] ILauncher* launcher,
+            [in] IDragController* dragController);
+
+        SetApps(
+            [in] IArrayList* list);
+
+        AddApps(
+            [in] IArrayList* list);
+
+        RemoveApps(
+            [in] IArrayList* appInfos);
+
+        UpdateApps(
+            [in] IArrayList* list);
+
+        Reset();
+
+        DumpState();
+
+        Surrender();
+
+        ResetDrawableState();
     }
 
     } // namespace Launcher2

@@ -2,6 +2,8 @@ module
 {
     using interface Elastos.Droid.View.IView;
 
+    interface Elastos.Droid.Launcher2.ICellLayoutLayoutParams;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -18,8 +20,30 @@ module
      */
     [local]
     interface IShortcutAndWidgetContainer {
+        SetCellDimensions(
+            [in] Int32 cellWidth,
+            [in] Int32 cellHeight,
+            [in] Int32 widthGap,
+            [in] Int32 heightGap,
+            [in] Int32 countX);
+
+        GetChildAt(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] IView** view);
+
+        SetupLp(
+            [in] ICellLayoutLayoutParams* lp);
+
+        // Set whether or not to invert the layout horizontally if the layout is in RTL mode.
+        SetInvertIfRtl(
+            [in] Boolean invert);
+
         MeasureChild(
             [in] IView* child);
+
+        IsLayoutRtl(
+            [out] Boolean* result);
     }
 
     } // namespace Launcher2

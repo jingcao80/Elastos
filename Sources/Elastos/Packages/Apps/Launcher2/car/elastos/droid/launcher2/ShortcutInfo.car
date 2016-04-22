@@ -4,9 +4,11 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    /*
-    * @invoke interface IItemInfo
-    */
+    /**
+     * Represents a launchable icon on the workspaces and in folders.
+     *
+     * @invoke interface IItemInfo
+     */
     interface IShortcutInfo {
     }
 

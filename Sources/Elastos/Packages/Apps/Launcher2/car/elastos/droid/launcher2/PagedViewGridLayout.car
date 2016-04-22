@@ -7,6 +7,8 @@ module
     namespace Launcher2 {
 
     /**
+     * The grid based layout used strictly for the widget/wallpaper tab of the AppsCustomize pane
+     *
      * @Involve
      * extends Elastos.Droid.View.IView
      * extends Elastos.Droid.View.IViewGroup

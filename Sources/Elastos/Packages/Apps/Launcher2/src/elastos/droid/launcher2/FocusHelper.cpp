@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/FocusHelper.h"
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/Folder.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
@@ -187,8 +188,7 @@ AutoPtr<IViewGroup> FocusHelper::GetAppsCustomizePage(
 {
     AutoPtr<IPagedView> pview = IPagedView::Probe(container);
     AutoPtr<IView> view;
-    assert(0);
-    //pview->GetPageAt(index, (IView**)&view);
+    pview->GetPageAt(index, (IView**)&view);
     AutoPtr<IViewGroup> page = IViewGroup::Probe(view);
     if (IPagedViewCellLayout::Probe(page) != NULL) {
         // There are two layers, a PagedViewCellLayout and PagedViewCellLayoutChildren
@@ -223,8 +223,7 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
     Int32 index;
     IViewGroup::Probe(container)->IndexOfChild(IView::Probe(parent), &index);
     Int32 pageIndex;
-    assert(0);
-    //container->IndexToPage(index, &pageIndex);
+    container->IndexToPage(index, &pageIndex);
 
     Int32 pageCount;
     IViewGroup::Probe(container)->GetChildCount(&pageCount);
@@ -437,9 +436,8 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
         AutoPtr<IViewParent> parent2;
         IView::Probe(itemContainer)->GetParent((IViewParent**)&parent2);
         parentLayout = IViewGroup::Probe(parent2);
-        assert(0);
-        // IPagedViewCellLayout::Probe(parentLayout)->GetCellCountX(&countX);
-        // IPagedViewCellLayout::Probe(parentLayout)->GetCellCountY(&countY);
+        IPagedViewCellLayout::Probe(parentLayout)->GetCellCountX(&countX);
+        IPagedViewCellLayout::Probe(parentLayout)->GetCellCountY(&countY);
     }
     else {
         parentLayout = IViewGroup::Probe(parent);
@@ -463,8 +461,7 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
     Int32 index;
     IViewGroup::Probe(container)->IndexOfChild(IView::Probe(parentLayout), &index);
     Int32 pageIndex;
-    assert(0);
-    //container->IndexToPage(index, &pageIndex);
+    container->IndexToPage(index, &pageIndex);
     Int32 pageCount;
     IViewGroup::Probe(container)->GetChildCount(&pageCount);
 
@@ -495,8 +492,7 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                         newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
                                 pageIndex - 1);
                         if (newParent != NULL) {
-                            assert(0);
-                            // container->SnapToPage(pageIndex - 1);
+                            container->SnapToPage(pageIndex - 1);
                             Int32 count;
                             newParent->GetChildCount(&count);
                             newParent->GetChildAt(count - 1, (IView**)&child);
@@ -526,8 +522,7 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                         newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
                                 pageIndex + 1);
                         if (newParent != NULL) {
-                            assert(0);
-                            //container->SnapToPage(pageIndex + 1);
+                            container->SnapToPage(pageIndex + 1);
                             newParent->GetChildAt(0, (IView**)&child);
                             if (child != NULL) {
                                 Boolean tmp;
@@ -595,8 +590,7 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                     newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
                             pageIndex - 1);
                     if (newParent != NULL) {
-                        assert(0);
-                        //container->SnapToPage(pageIndex - 1);
+                        container->SnapToPage(pageIndex - 1);
                         newParent->GetChildAt(0, (IView**)&child);
                         if (child != NULL) {
                             Boolean tmp;
@@ -623,8 +617,7 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                     newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
                             pageIndex + 1);
                     if (newParent != NULL) {
-                        assert(0);
-                        //container->SnapToPage(pageIndex + 1);
+                        container->SnapToPage(pageIndex + 1);
                         newParent->GetChildAt(0, (IView**)&child);
                         if (child != NULL) {
                             Boolean tmp;
@@ -782,8 +775,7 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
     Int32 buttonCount;
     parent->GetChildCount(&buttonCount);
     Int32 pageIndex;
-    assert(0);
-    //workspace->GetCurrentPage(&pageIndex);
+    IPagedView::Probe(workspace)->GetCurrentPage(&pageIndex);
 
     // NOTE: currently we don't special case for the phone UI in different
     // orientations, even though the hotseat is on the side in landscape mode.  This
@@ -804,8 +796,7 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
                     view->RequestFocus(&tmp);
                 }
                 else {
-                    assert(0);
-                    //workspace->SnapToPage(pageIndex - 1);
+                    IPagedView::Probe(workspace)->SnapToPage(pageIndex - 1);
                 }
             }
             wasHandled = TRUE;
@@ -820,8 +811,7 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
                     view->RequestFocus(&tmp);
                 }
                 else {
-                    assert(0);
-                    //workspace->SnapToPage(pageIndex + 1);
+                    IPagedView::Probe(workspace)->SnapToPage(pageIndex + 1);
                 }
             }
             wasHandled = TRUE;
@@ -830,8 +820,7 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
             if (handleKeyEvent) {
                 // Select the first bubble text view in the current page of the workspace
                 AutoPtr<IView> view;
-                assert(0);
-                //workspace->GetChildAt(pageIndex, (IView**)&view);
+                IViewGroup::Probe(workspace)->GetChildAt(pageIndex, (IView**)&view);
                 AutoPtr<ICellLayout> layout = ICellLayout::Probe(view);
                 AutoPtr<IShortcutAndWidgetContainer> children;
                 layout->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&children);
@@ -841,7 +830,6 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
                     newIcon->RequestFocus(&tmp);
                 }
                 else {
-                    assert(0);
                     Boolean tmp;
                     IView::Probe(workspace)->RequestFocus(&tmp);
                 }
@@ -1031,11 +1019,9 @@ Boolean FocusHelper::HandleIconKeyEvent(
     AutoPtr<IViewGroup> hotseat = IViewGroup::Probe(view2);
 
     Int32 pageIndex;
-    assert(0);
-    //workspace->IndexOfChild(layout, &pageIndex);
+    IViewGroup::Probe(workspace)->IndexOfChild(IView::Probe(layout), &pageIndex);
     Int32 pageCount;
-    assert(0);
-    //workspace->GetChildCount(&pageCount);
+    IViewGroup::Probe(workspace)->GetChildCount(&pageCount);
 
     Int32 action;
     e->GetAction(&action);
@@ -1063,8 +1049,7 @@ Boolean FocusHelper::HandleIconKeyEvent(
                         }
                         else {
                             // Snap to the previous page
-                            assert(0);
-                            //workspace->SnapToPage(pageIndex - 1);
+                            IPagedView::Probe(workspace)->SnapToPage(pageIndex - 1);
                         }
                     }
                 }
@@ -1091,8 +1076,7 @@ Boolean FocusHelper::HandleIconKeyEvent(
                         }
                         else {
                             // Snap to the next page
-                            assert(0);
-                            //workspace->SnapToPage(pageIndex + 1);
+                            IPagedView::Probe(workspace)->SnapToPage(pageIndex + 1);
                         }
                     }
                 }
@@ -1145,8 +1129,7 @@ Boolean FocusHelper::HandleIconKeyEvent(
                     }
                     else {
                         // Snap to the previous page
-                        assert(0);
-                        //workspace->SnapToPage(pageIndex - 1);
+                        IPagedView::Probe(workspace)->SnapToPage(pageIndex - 1);
                     }
                 }
                 else {
@@ -1172,8 +1155,7 @@ Boolean FocusHelper::HandleIconKeyEvent(
                     }
                     else {
                         // Snap to the next page
-                        assert(0);
-                        //workspace->SnapToPage(pageIndex + 1);
+                        IPagedView::Probe(workspace)->SnapToPage(pageIndex + 1);
                     }
                 }
                 else {
@@ -1235,11 +1217,8 @@ Boolean FocusHelper::HandleFolderKeyEvent(
 
     AutoPtr<IViewParent> viewParent3;
     IView::Probe(layout)->GetParent((IViewParent**)&viewParent3);
-    AutoPtr<IFolder> folder = IFolder::Probe(viewParent3);
-
-    AutoPtr<IView> title;
-    assert(0);
-    //folder->GetFolderName((IView**)&title);
+    AutoPtr<Folder> folder = (Folder*)IFolder::Probe(viewParent3);
+    AutoPtr<IView> title = IView::Probe(folder->mFolderName);
 
     Int32 action;
     e->GetAction(&action);

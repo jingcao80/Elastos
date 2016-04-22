@@ -2,6 +2,9 @@
 #include "elastos/droid/launcher2/AppWidgetResizeFrame.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
+#include "elastos/droid/launcher2/Launcher.h"
+#include "elastos/droid/launcher2/DragLayer.h"
+#include "elastos/droid/launcher2/Workspace.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
@@ -133,8 +136,7 @@ ECode AppWidgetResizeFrame::constructor(
     IAppWidgetHostView::Probe(widgetView)->GetAppWidgetInfo(
             (IAppWidgetProviderInfo**)&info2);
     AutoPtr<ArrayOf<Int32> > result;
-    assert(0 && "need class Launcher");
-    //Launcher::GetMinSpanForWidget(mLauncher, info2, (ArrayOf<Int32>**)&result);
+    Launcher::GetMinSpanForWidget(IContext::Probe(mLauncher), info2, (ArrayOf<Int32>**)&result);
     mMinHSpan = (*result)[0];
     mMinVSpan = (*result)[1];
 
@@ -214,9 +216,7 @@ ECode AppWidgetResizeFrame::constructor(
     // When we create the resize frame, we first mark all cells as unoccupied. The appropriate
     // cells (same if not resized, or different) will be marked as occupied when the resize
     // frame is dismissed.
-    assert(0 && "need class mCellLayout");
-    //return mCellLayout->MarkCellsAsUnoccupiedForView(mWidgetView);
-    return NOERROR;
+    return mCellLayout->MarkCellsAsUnoccupiedForView(IView::Probe(mWidgetView));
 }
 
 ECode AppWidgetResizeFrame::BeginResizeIfPointInRegion(
@@ -303,25 +303,25 @@ ECode AppWidgetResizeFrame::VisualizeResizeForDelta(
     UpdateDeltas(deltaX, deltaY);
     AutoPtr<IViewGroupLayoutParams> res;
     GetLayoutParams((IViewGroupLayoutParams**)&res);
-    assert(0 && "need class CDragLayer::LayoutParams");
-    // AutoPtr<CDragLayer::LayoutParams> lp =
-    //         (CDragLayer::LayoutParams*)IDragLayerLayoutParams::Probe(res);
 
-    // if (mLeftBorderActive) {
-    //     lp->SetX(mBaselineX + mDeltaX);
-    //     lp->SetWidth(mBaselineWidth - mDeltaX);
-    // }
-    // else if (mRightBorderActive) {
-    //     lp->SetWidth(mBaselineWidth + mDeltaX);
-    // }
+    AutoPtr<DragLayer::LayoutParams> lp =
+            (DragLayer::LayoutParams*)IDragLayerLayoutParams::Probe(res);
 
-    // if (mTopBorderActive) {
-    //     lp->SetY(mBaselineY + mDeltaY);
-    //     lp->SetHeight(mBaselineHeight - mDeltaY);
-    // }
-    // else if (mBottomBorderActive) {
-    //     lp->SetHeight(mBaselineHeight + mDeltaY);
-    // }
+    if (mLeftBorderActive) {
+        lp->SetX(mBaselineX + mDeltaX);
+        lp->SetWidth(mBaselineWidth - mDeltaX);
+    }
+    else if (mRightBorderActive) {
+        lp->SetWidth(mBaselineWidth + mDeltaX);
+    }
+
+    if (mTopBorderActive) {
+        lp->SetY(mBaselineY + mDeltaY);
+        lp->SetHeight(mBaselineHeight - mDeltaY);
+    }
+    else if (mBottomBorderActive) {
+        lp->SetHeight(mBaselineHeight + mDeltaY);
+    }
 
     ResizeWidgetIfNeeded(onDismiss);
     return RequestLayout();
@@ -331,18 +331,14 @@ ECode AppWidgetResizeFrame::ResizeWidgetIfNeeded(
     /* [in] */ Boolean onDismiss)
 {
     Int32 width;
-    assert(0 && "need class celllayout");
-    //mCellLayout->GetCellWidth(&width);
+    mCellLayout->GetCellWidth(&width);
     Int32 wgap;
-    assert(0 && "need class celllayout");
-    //mCellLayout->GetWidthGap(&wgap);
+    mCellLayout->GetWidthGap(&wgap);
     Int32 xThreshold = width + wgap;
     Int32 height;
-    assert(0 && "need class celllayout");
-    //mCellLayout->GetCellHeight(&height);
+    mCellLayout->GetCellHeight(&height);
     Int32 hgap;
-    assert(0 && "need class celllayout");
-    //mCellLayout->GetHeightGap(&hgap);
+    mCellLayout->GetHeightGap(&hgap);
     Int32 yThreshold = height + hgap;
 
     Int32 deltaX = mDeltaX + mDeltaXAddOn;
@@ -357,11 +353,9 @@ ECode AppWidgetResizeFrame::ResizeWidgetIfNeeded(
     Int32 cellYInc = 0;
 
     Int32 countX;
-    assert(0 && "need class celllayout");
-    //mCellLayout->GetCountX(&countX);
+    mCellLayout->GetCountX(&countX);
     Int32 countY;
-    assert(0 && "need class celllayout");
-    //mCellLayout->GetCountY(&countY);
+    mCellLayout->GetCountY(&countY);
 
     if (Elastos::Core::Math::Abs(hSpanIncF) > RESIZE_THRESHOLD) {
         hSpanInc = Elastos::Core::Math::Round(hSpanIncF);
@@ -374,96 +368,94 @@ ECode AppWidgetResizeFrame::ResizeWidgetIfNeeded(
 
     AutoPtr<IViewGroupLayoutParams> res;
     IView::Probe(mWidgetView)->GetLayoutParams((IViewGroupLayoutParams**)&res);
-    assert(0 && "need class CellLayout::LayoutParams");
-    // AutoPtr<ICellLayoutLayoutParams> lp = ICellLayoutLayoutParams::Probe(res);
-    // CellLayout::LayoutParams* _lp = (CellLayout::LayoutParams*)lp;
+    AutoPtr<CellLayout::LayoutParams> _lp =
+            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(res);
 
-    // Int32 spanX = _lp->mCellHSpan;
-    // Int32 spanY = _lp->mCellVSpan;
-    // Int32 cellX = _lp->mUseTmpCoords ? _lp->mTmpCellX : _lp->mCellX;
-    // Int32 cellY = _lp->mUseTmpCoords ? _lp->mTmpCellY : _lp->mCellY;
+    Int32 spanX = _lp->mCellHSpan;
+    Int32 spanY = _lp->mCellVSpan;
+    Int32 cellX = _lp->mUseTmpCoords ? _lp->mTmpCellX : _lp->mCellX;
+    Int32 cellY = _lp->mUseTmpCoords ? _lp->mTmpCellY : _lp->mCellY;
 
-    // Int32 hSpanDelta = 0;
-    // Int32 vSpanDelta = 0;
+    Int32 hSpanDelta = 0;
+    Int32 vSpanDelta = 0;
 
-    // // For each border, we bound the resizing based on the minimum width, and the maximum
-    // // expandability.
-    // if (mLeftBorderActive) {
-    //     cellXInc = Elastos::Core::Math::Max(-cellX, hSpanInc);
-    //     cellXInc = Elastos::Core::Math::Min(_lp->mCellHSpan - mMinHSpan, cellXInc);
-    //     hSpanInc *= -1;
-    //     hSpanInc = Elastos::Core::Math::Min(cellX, hSpanInc);
-    //     hSpanInc = Elastos::Core::Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
-    //     hSpanDelta = -hSpanInc;
+    // For each border, we bound the resizing based on the minimum width, and the maximum
+    // expandability.
+    if (mLeftBorderActive) {
+        cellXInc = Elastos::Core::Math::Max(-cellX, hSpanInc);
+        cellXInc = Elastos::Core::Math::Min(_lp->mCellHSpan - mMinHSpan, cellXInc);
+        hSpanInc *= -1;
+        hSpanInc = Elastos::Core::Math::Min(cellX, hSpanInc);
+        hSpanInc = Elastos::Core::Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
+        hSpanDelta = -hSpanInc;
 
-    // }
-    // else if (mRightBorderActive) {
-    //     hSpanInc = Elastos::Core::Math::Min(countX - (cellX + spanX), hSpanInc);
-    //     hSpanInc = Elastos::Core::Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
-    //     hSpanDelta = hSpanInc;
-    // }
+    }
+    else if (mRightBorderActive) {
+        hSpanInc = Elastos::Core::Math::Min(countX - (cellX + spanX), hSpanInc);
+        hSpanInc = Elastos::Core::Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
+        hSpanDelta = hSpanInc;
+    }
 
-    // if (mTopBorderActive) {
-    //     cellYInc = Elastos::Core::Math::Max(-cellY, vSpanInc);
-    //     cellYInc = Elastos::Core::Math::Min(_lp->mCellVSpan - mMinVSpan, cellYInc);
-    //     vSpanInc *= -1;
-    //     vSpanInc = Elastos::Core::Math::Min(cellY, vSpanInc);
-    //     vSpanInc = Elastos::Core::Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
-    //     vSpanDelta = -vSpanInc;
-    // }
-    // else if (mBottomBorderActive) {
-    //     vSpanInc = Elastos::Core::Math::Min(countY - (cellY + spanY), vSpanInc);
-    //     vSpanInc = Elastos::Core::Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
-    //     vSpanDelta = vSpanInc;
-    // }
+    if (mTopBorderActive) {
+        cellYInc = Elastos::Core::Math::Max(-cellY, vSpanInc);
+        cellYInc = Elastos::Core::Math::Min(_lp->mCellVSpan - mMinVSpan, cellYInc);
+        vSpanInc *= -1;
+        vSpanInc = Elastos::Core::Math::Min(cellY, vSpanInc);
+        vSpanInc = Elastos::Core::Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
+        vSpanDelta = -vSpanInc;
+    }
+    else if (mBottomBorderActive) {
+        vSpanInc = Elastos::Core::Math::Min(countY - (cellY + spanY), vSpanInc);
+        vSpanInc = Elastos::Core::Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
+        vSpanDelta = vSpanInc;
+    }
 
-    // (*mDirectionVector)[0] = 0;
-    // (*mDirectionVector)[1] = 0;
-    // // Update the widget's dimensions and position according to the deltas computed above
-    // if (mLeftBorderActive || mRightBorderActive) {
-    //     spanX += hSpanInc;
-    //     cellX += cellXInc;
-    //     if (hSpanDelta != 0) {
-    //         (*mDirectionVector)[0] = mLeftBorderActive ? -1 : 1;
-    //     }
-    // }
+    (*mDirectionVector)[0] = 0;
+    (*mDirectionVector)[1] = 0;
+    // Update the widget's dimensions and position according to the deltas computed above
+    if (mLeftBorderActive || mRightBorderActive) {
+        spanX += hSpanInc;
+        cellX += cellXInc;
+        if (hSpanDelta != 0) {
+            (*mDirectionVector)[0] = mLeftBorderActive ? -1 : 1;
+        }
+    }
 
-    // if (mTopBorderActive || mBottomBorderActive) {
-    //     spanY += vSpanInc;
-    //     cellY += cellYInc;
-    //     if (vSpanDelta != 0) {
-    //         (*mDirectionVector)[1] = mTopBorderActive ? -1 : 1;
-    //     }
-    // }
+    if (mTopBorderActive || mBottomBorderActive) {
+        spanY += vSpanInc;
+        cellY += cellYInc;
+        if (vSpanDelta != 0) {
+            (*mDirectionVector)[1] = mTopBorderActive ? -1 : 1;
+        }
+    }
 
-    // if (!onDismiss && vSpanDelta == 0 && hSpanDelta == 0) return NOERROR;
+    if (!onDismiss && vSpanDelta == 0 && hSpanDelta == 0) return NOERROR;
 
-    // // We always want the final commit to match the feedback, so we make sure to use the
-    // // last used direction vector when committing the resize / reorder.
-    // if (onDismiss) {
-    //     (*mDirectionVector)[0] = (*mLastDirectionVector)[0];
-    //     (*mDirectionVector)[1] = (*mLastDirectionVector)[1];
-    // }
-    // else {
-    //     (*mLastDirectionVector)[0] = (*mDirectionVector)[0];
-    //     (*mLastDirectionVector)[1] = (*mDirectionVector)[1];
-    // }
+    // We always want the final commit to match the feedback, so we make sure to use the
+    // last used direction vector when committing the resize / reorder.
+    if (onDismiss) {
+        (*mDirectionVector)[0] = (*mLastDirectionVector)[0];
+        (*mDirectionVector)[1] = (*mLastDirectionVector)[1];
+    }
+    else {
+        (*mLastDirectionVector)[0] = (*mDirectionVector)[0];
+        (*mLastDirectionVector)[1] = (*mDirectionVector)[1];
+    }
 
     Boolean tmp;
-    assert(0 && "need class celllayout");
-    // mCellLayout->CreateAreaForResize(cellX, cellY, spanX, spanY, mWidgetView,
-    //         mDirectionVector, onDismiss, &tmp)
+    mCellLayout->CreateAreaForResize(cellX, cellY, spanX, spanY, IView::Probe(mWidgetView),
+            mDirectionVector, onDismiss, &tmp);
     if (tmp) {
-        assert(0 && "need class CellLayout::LayoutParams");
-        // _lp->mTmpCellX = cellX;
-        // _lp->mTmpCellY = cellY;
-        // _lp->mCellHSpan = spanX;
-        // _lp->mCellVSpan = spanY;
-        // mRunningVInc += vSpanDelta;
-        // mRunningHInc += hSpanDelta;
-        // if (!onDismiss) {
-        //     UpdateWidgetSizeRanges(mWidgetView, mLauncher, spanX, spanY);
-        // }
+        _lp->mTmpCellX = cellX;
+        _lp->mTmpCellY = cellY;
+        _lp->mCellHSpan = spanX;
+        _lp->mCellVSpan = spanY;
+        mRunningVInc += vSpanDelta;
+        mRunningHInc += hSpanDelta;
+        if (!onDismiss) {
+            UpdateWidgetSizeRanges(IAppWidgetHostView::Probe(mWidgetView),
+                    mLauncher, spanX, spanY);
+        }
     }
     return IView::Probe(mWidgetView)->RequestLayout();
 }
@@ -499,13 +491,11 @@ AutoPtr<IRect> AppWidgetResizeFrame::GetWidgetSizeRanges(
     }
 
     AutoPtr<IRect> landMetrics;
-    assert(0 && "need class Workspace");
-    // Workspace::GetCellLayoutMetrics(launcher, ICellLayout::LANDSCAPE,
-    //         (IRect**)&landMetrics);
+    Workspace::GetCellLayoutMetrics(launcher, ICellLayout::LANDSCAPE,
+            (IRect**)&landMetrics);
     AutoPtr<IRect> portMetrics;
-    assert(0 && "need class Workspace");
-    // Workspace::GetCellLayoutMetrics(launcher, ICellLayout::PORTRAIT,
-    //         (IRect**)&portMetrics);
+    Workspace::GetCellLayoutMetrics(launcher, ICellLayout::PORTRAIT,
+            (IRect**)&portMetrics);
     AutoPtr<IResources> resources;
     IContext::Probe(launcher)->GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> metrics;
@@ -545,18 +535,14 @@ ECode AppWidgetResizeFrame::CommitResize()
 ECode AppWidgetResizeFrame::OnTouchUp()
 {
     Int32 width;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetCellWidth(&width);
+    mCellLayout->GetCellWidth(&width);
     Int32 wgap;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetWidthGap(&wgap);
+    mCellLayout->GetWidthGap(&wgap);
     Int32 xThreshold = width + wgap;
     Int32 height;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetCellHeight(&height);
+    mCellLayout->GetCellHeight(&height);
     Int32 hgap;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetHeightGap(&hgap);
+    mCellLayout->GetHeightGap(&hgap);
     Int32 yThreshold = height + hgap;
 
     mDeltaXAddOn = mRunningHInc * xThreshold;
@@ -577,11 +563,9 @@ ECode AppWidgetResizeFrame::SnapToWidget(
     AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(res);
 
     Int32 left;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetLeft(&left);
+    IView::Probe(mCellLayout)->GetLeft(&left);
     Int32 pleft;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetPaddingLeft(&pleft);
+    IView::Probe(mCellLayout)->GetPaddingLeft(&pleft);
     Int32 pleft2;
     IView::Probe(mDragLayer)->GetPaddingLeft(&pleft2);
     Int32 x;
@@ -590,11 +574,9 @@ ECode AppWidgetResizeFrame::SnapToWidget(
             + pleft2 - x;
 
     Int32 top;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetTop(&top);
+    IView::Probe(mCellLayout)->GetTop(&top);
     Int32 ptop;
-    assert(0 && "need class CellLayout");
-    //mCellLayout->GetPaddingTop(&ptop);
+    IView::Probe(mCellLayout)->GetPaddingTop(&ptop);
     Int32 ptop2;
     IView::Probe(mDragLayer)->GetPaddingTop(&ptop2);
     Int32 y;

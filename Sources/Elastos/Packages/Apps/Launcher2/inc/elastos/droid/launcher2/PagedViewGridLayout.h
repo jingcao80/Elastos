@@ -21,6 +21,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * The grid based layout used strictly for the widget/wallpaper tab of the AppsCustomize pane
+ */
 class PagedViewGridLayout
     : public GridLayout
     , public IPagedViewGridLayout

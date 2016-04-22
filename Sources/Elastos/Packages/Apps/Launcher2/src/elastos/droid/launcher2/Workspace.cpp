@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/Workspace.h"
+#include "elastos/droid/launcher2/Launcher.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "elastos/droid/launcher2/FolderIcon.h"
@@ -21,6 +22,7 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IWallpaperInfo;
 using Elastos::Droid::App::CWallpaperManagerHelper;
 using Elastos::Droid::App::IWallpaperManagerHelper;
@@ -400,7 +402,6 @@ ECode Workspace::ReorderAlarmListener::OnAlarm(
     /* [in] */ IAlarm* alarm)
 {
     AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
-    assert(0 && "in out");
     mHost->FindNearestArea((Int32)(*(mHost->mDragViewVisualCenter))[0],
             (Int32)(*(mHost->mDragViewVisualCenter))[1], mSpanX, mSpanY,
             mHost->mDragTargetLayout, mHost->mTargetCell, (ArrayOf<Int32>**)&(mHost->mTargetCell));
@@ -440,8 +441,7 @@ Workspace::MyRunnable::MyRunnable(
 ECode Workspace::MyRunnable::Run()
 {
     AutoPtr<ILauncherModel> launcherModel;
-    assert(0);
-    //mHost->mLauncher->GetModel((ILauncherModel**)&launcherModel);
+    mHost->mLauncher->GetModel((ILauncherModel**)&launcherModel);
     return ((LauncherModel*)launcherModel.Get())->BindRemainingSynchronousPages();
 }
 
@@ -510,8 +510,7 @@ Workspace::MyRunnable2::MyRunnable2(
 ECode Workspace::MyRunnable2::Run()
 {
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     return dragLayer->AddResizeFrame(mInfo, mHostView, mCellLayout);
 }
 
@@ -560,9 +559,7 @@ Workspace::MyRunnable5::MyRunnable5(
 
 ECode Workspace::MyRunnable5::Run()
 {
-    //return mHost->mLauncher->ExitSpringLoadedDragModeDelayed(TRUE, FALSE, NULL);
-    assert(0);
-    return NOERROR;
+    return mHost->mLauncher->ExitSpringLoadedDragModeDelayed(TRUE, FALSE, NULL);
 }
 
 Workspace::MyRunnabl6::MyRunnabl6(
@@ -589,15 +586,13 @@ ECode Workspace::MyRunnabl6::Run()
             AutoPtr<ArrayOf<Int32> > span = ArrayOf<Int32>::Alloc(2);
             (*span)[0] = mItem->mSpanX;
             (*span)[1] = mItem->mSpanY;
-            assert(0);
-            // mHost->mLauncher->AddAppWidgetFromDrop(IPendingAddWidgetInfo::Probe(pendingInfo),
-            //         mContainer, mScreen, mHost->mTargetCell, span, NULL);
+            mHost->mLauncher->AddAppWidgetFromDrop(IPendingAddWidgetInfo::Probe(mPendingInfo),
+                    mContainer, mScreen, mHost->mTargetCell, span, NULL);
             break;
         }
         case LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT:
-            assert(0);
-            // mHost->mLauncher->ProcessShortcutFromDrop(mPendingInfo->mComponentName,
-            //         mContainer, mScreen, mHost->mTargetCell, NULL);
+            mHost->mLauncher->ProcessShortcutFromDrop(mPendingInfo->mComponentName,
+                    mContainer, mScreen, mHost->mTargetCell, NULL);
             break;
         default:
             // throw new IllegalStateException("Unknown item type: " +
@@ -998,8 +993,7 @@ ECode Workspace::constructor(
         AutoPtr<IPoint> maxDims;
         CPoint::New((IPoint**)&minDims);
         AutoPtr<IWindowManager> windowManager;
-        assert(0);
-        //mLauncher->GetWindowManager((IWindowManager**)&windowManager);
+        IActivity::Probe(mLauncher)->GetWindowManager((IWindowManager**)&windowManager);
         AutoPtr<IDisplay> display;
         windowManager->GetDefaultDisplay((IDisplay**)&display);
         display->GetCurrentSizeRange(minDims, maxDims);
@@ -1081,8 +1075,7 @@ ECode Workspace::EstimateItemSize(
     GetChildCount(&count);
     if (count > 0) {
         AutoPtr<IWorkspace> workspace;
-        assert(0);
-        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
         AutoPtr<IView> view;
         IViewGroup::Probe(workspace)->GetChildAt(0, (IView**)&view);
         AutoPtr<ICellLayout> cl = ICellLayout::Probe(view);
@@ -1134,8 +1127,7 @@ ECode Workspace::OnDragStart(
 {
     mIsDragOccuring = TRUE;
     UpdateChildrenLayersEnabled(FALSE);
-    assert(0);
-    //mLauncher->LockScreenOrientation();
+    mLauncher->LockScreenOrientation();
     SetChildrenBackgroundAlphaMultipliers(1.0f);
     // Prevent any Un/InstallShortcutReceivers from updating the db while we are dragging
     InstallShortcutReceiver::EnableInstallQueue();
@@ -1146,8 +1138,7 @@ ECode Workspace::OnDragEnd()
 {
     mIsDragOccuring = FALSE;
     UpdateChildrenLayersEnabled(FALSE);
-    assert(0);
-    //mLauncher->UnlockScreenOrientation(FALSE);
+    mLauncher->UnlockScreenOrientation(FALSE);
 
     // Re-enable any Un/InstallShortcutReceiver and now process any queued items
     AutoPtr<IContext> context;
@@ -1161,8 +1152,7 @@ ECode Workspace::InitWorkspace()
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     mCurrentPage = mDefaultPage;
-    assert(0);
-    //Launcher::SetScreen(mCurrentPage);
+    Launcher::SetScreen(mCurrentPage);
     AutoPtr<IContext> ctx;
     context->GetApplicationContext((IContext**)&ctx);
     AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
@@ -1184,8 +1174,7 @@ ECode Workspace::InitWorkspace()
 
     mWallpaperOffset = new WallpaperOffsetInterpolator(this);
     AutoPtr<IWindowManager> windowManager;
-    assert(0);
-    //mLauncher->GetWindowManager((IWindowManager**)&windowManager);
+    IActivity::Probe(mLauncher)->GetWindowManager((IWindowManager**)&windowManager);
     AutoPtr<IDisplay> display;
     windowManager->GetDefaultDisplay((IDisplay**)&display);
     display->GetSize(mDisplaySize);
@@ -1282,8 +1271,7 @@ ECode Workspace::GetOpenFolder(
     VALIDATE_NOT_NULL(outfolder);
 
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     Int32 count;
     IViewGroup::Probe(dragLayer)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
@@ -1365,8 +1353,7 @@ ECode Workspace::AddInScreen(
     AutoPtr<ICellLayout> layout;
     if (container == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
         AutoPtr<IHotseat> hotseat;
-        assert(0);
-        //mLauncher->GetHotseat((IHotseat**)&hotseat);
+        mLauncher->GetHotseat((IHotseat**)&hotseat);
         hotseat->GetLayout((ICellLayout**)&layout);
         child->SetOnKeyListener(NULL);
 
@@ -1377,16 +1364,14 @@ ECode Workspace::AddInScreen(
 
         if (screen < 0) {
             AutoPtr<IHotseat> hotseat;
-            assert(0);
-            //mLauncher->GetHotseat((IHotseat**)&hotseat);
+            mLauncher->GetHotseat((IHotseat**)&hotseat);
             hotseat->GetOrderInHotseat(x, y, &screen);
         }
         else {
             // Note: We do this to ensure that the hotseat is always laid out in the orientation
             // of the hotseat in order regardless of which orientation they were added
             AutoPtr<IHotseat> hotseat;
-            assert(0);
-            //mLauncher->GetHotseat((IHotseat**)&hotseat);
+            mLauncher->GetHotseat((IHotseat**)&hotseat);
             hotseat->GetCellXFromOrder(screen, &x);
             hotseat->GetCellYFromOrder(screen, &y);
         }
@@ -1548,8 +1533,7 @@ ECode Workspace::IsFinishedSwitchingState(
 void Workspace::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
-    assert(0);
-    //mLauncher->OnWindowVisibilityChanged(visibility);
+    mLauncher->OnWindowVisibilityChanged(visibility);
 }
 
 ECode Workspace::DispatchUnhandledMove(
@@ -1627,12 +1611,10 @@ ECode Workspace::ReinflateWidgetsIfNecessary()
                     Boolean res;
                     lahv->OrientationChangedSincedInflation(&res);
                     if (res) {
-                        assert(0);
-                        //mLauncher->RemoveAppWidget(info);
+                        mLauncher->RemoveAppWidget(info);
                         // Remove the current widget which is inflated with the wrong orientation
                         IViewGroup::Probe(cl)->RemoveView(IView::Probe(lahv));
-                        assert(0);
-                        //mLauncher->BindAppWidget(info);
+                        mLauncher->BindAppWidget(info);
                     }
                 }
             }
@@ -1786,9 +1768,7 @@ ECode Workspace::OnPageEndMoving()
 ECode Workspace::NotifyPageSwitchListener()
 {
     SmoothPagedView::NotifyPageSwitchListener();
-    //return Launcher::SetScreen(mCurrentPage);
-    assert(0);
-    return NOERROR;
+    return Launcher::SetScreen(mCurrentPage);
 }
 
 Float Workspace::WallpaperTravelToScreenWidthRatio(
@@ -1836,8 +1816,7 @@ ECode Workspace::SetWallpaperDimension()
     CPoint::New((IPoint**)&maxDims);
 
     AutoPtr<IWindowManager> windowManager;
-    assert(0);
-    //mLauncher->GetWindowManager((IWindowManager**)&windowManager);
+    IActivity::Probe(mLauncher)->GetWindowManager((IWindowManager**)&windowManager);
     AutoPtr<IDisplay> display;
     windowManager->GetDefaultDisplay((IDisplay**)&display);
     display->GetCurrentSizeRange(minDims, maxDims);
@@ -2063,6 +2042,7 @@ ECode Workspace::HideOutlines()
                 CHILDREN_OUTLINE_FADE_OUT_DELAY);
         return IAnimator::Probe(mChildrenOutlineFadeOutAnimation)->Start();
     }
+    return NOERROR;
 }
 
 ECode Workspace::ShowOutlinesTemporarily()
@@ -2238,7 +2218,8 @@ void Workspace::SetChildrenBackgroundAlphaMultipliers(
 ECode Workspace::ScreenScrolled(
     /* [in] */ Int32 screenCenter)
 {
-    Boolean isRtl = IsLayoutRtl();
+    Boolean isRtl;
+    IsLayoutRtl(&isRtl);
     SmoothPagedView::ScreenScrolled(screenCenter);
 
     UpdatePageAlphaValues(screenCenter);
@@ -2383,8 +2364,7 @@ ECode Workspace::OnRequestFocusInDescendants(
     VALIDATE_NOT_NULL(result);
 
     Boolean res;
-    assert(0);
-    //mLauncher->IsAllAppsVisible(&res);
+    mLauncher->IsAllAppsVisible(&res);
     if (!res) {
         AutoPtr<IFolder> openFolder;
         GetOpenFolder((IFolder**)&openFolder);
@@ -2421,8 +2401,7 @@ ECode Workspace::AddFocusables(
     /* [in] */ Int32 focusableMode)
 {
     Boolean res;
-    assert(0);
-    //mLauncher->IsAllAppsVisible(&res);
+    mLauncher->IsAllAppsVisible(&res);
     if (!res) {
         AutoPtr<IFolder> openFolder;
         GetOpenFolder((IFolder**)&openFolder);
@@ -2629,8 +2608,7 @@ ECode Workspace::OnDragStartedWithItem(
 ECode Workspace::ExitWidgetResizeMode()
 {
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     return dragLayer->ClearAllResizeFrames();
 }
 
@@ -2690,7 +2668,8 @@ ECode Workspace::GetChangeStateAnimation(
     }
 
     // Stop any scrolling, move to the current page right away
-    Int32 page = GetNextPage();
+    Int32 page;
+    GetNextPage(&page);
     SetCurrentPage(page);
 
     State oldState = mState;
@@ -3185,8 +3164,7 @@ ECode Workspace::BeginDragShared(
     b->GetHeight(&bmpHeight);
 
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     Float scale;
     dragLayer->GetLocationInDragLayer(child, mTempXY, &scale);
     Int32 width;
@@ -3259,9 +3237,8 @@ ECode Workspace::AddApplicationShortcut(
     /* [in] */ Int32 intersectY)
 {
     AutoPtr<IView> view;
-    assert(0);
-    // mLauncher->CreateShortcut(Elastos::Droid::Launcher2::R::layout:application, target,
-    //     IShortcutInfo::Probe(info), (IView**)&view);
+    mLauncher->CreateShortcut(Elastos::Droid::Launcher2::R::layout::application,
+            IViewGroup::Probe(target), IShortcutInfo::Probe(info), (IView**)&view);
 
     AutoPtr<ArrayOf<Int32> > cellXY = ArrayOf<Int32>::Alloc(2);
     Boolean res;
@@ -3308,12 +3285,10 @@ ECode Workspace::AcceptDrop(
                 _d->mDragView, mDragViewVisualCenter);
 
         // We want the point to be mapped to the dragTarget.
-        assert(0);
-        //->IsHotseatLayout(dropTargetLayout, &res);
+        mLauncher->IsHotseatLayout(IView::Probe(dropTargetLayout), &res);
         if (res) {
             AutoPtr<IHotseat> hotseat;
-            assert(0);
-            //mLauncher->GetHotseat((IHotseat**)&hotseat);
+            mLauncher->GetHotseat((IHotseat**)&hotseat);
             MapPointFromSelfToHotseatLayout(hotseat, mDragViewVisualCenter);
         }
         else {
@@ -3340,7 +3315,6 @@ ECode Workspace::AcceptDrop(
             minSpanY = ((PendingAddWidgetInfo*)IPendingAddWidgetInfo::Probe(_d->mDragInfo))->mMinSpanY;
         }
 
-        assert(0 && "in out");
         FindNearestArea((Int32)(*mDragViewVisualCenter)[0],
                 (Int32)(*mDragViewVisualCenter)[1], minSpanX, minSpanY, dropTargetLayout,
                 mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
@@ -3373,12 +3347,10 @@ ECode Workspace::AcceptDrop(
             // Don't show the message if we are dropping on the AllApps button and the hotseat
             // is full
             Boolean isHotseat;
-            assert(0);
-            //mLauncher->IsHotseatLayout(dropTargetLayout, &isHotseat);
+            mLauncher->IsHotseatLayout(IView::Probe(dropTargetLayout), &isHotseat);
             if (mTargetCell != NULL && isHotseat) {
                 AutoPtr<IHotseat> hotseat;
-                assert(0);
-                //mLauncher->GetHotseat((IHotseat**)&hotseat);
+                mLauncher->GetHotseat((IHotseat**)&hotseat);
                 Int32 seat;
                 hotseat->GetOrderInHotseat((*mTargetCell)[0], (*mTargetCell)[1], &seat);
                 Boolean res;
@@ -3389,8 +3361,7 @@ ECode Workspace::AcceptDrop(
                 }
             }
 
-            assert(0);
-            //mLauncher->ShowOutOfSpaceMessage(isHotseat);
+            mLauncher->ShowOutOfSpaceMessage(isHotseat);
             *result = FALSE;
             return NOERROR;
         }
@@ -3552,16 +3523,14 @@ ECode Workspace::CreateUserFolderIfNecessary(
         AutoPtr<IRect> folderLocation;
         CRect::New((IRect**)&folderLocation);
         AutoPtr<IDragLayer> dragLayer;
-        assert(0);
-        //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
         Float scale;
         dragLayer->GetDescendantRectRelativeToSelf(v, folderLocation, &scale);
         IViewGroup::Probe(target)->RemoveView(v);
 
         AutoPtr<IFolderIcon> fi;
-        assert(0);
-        //mLauncher->AddFolder(target, container, screen, (*targetCell)[0],
-        //        (*targetCell)[1], (IFolderIcon**)&fi);
+        mLauncher->AddFolder(target, container, screen, (*targetCell)[0],
+               (*targetCell)[1], (IFolderIcon**)&fi);
         destInfo->mCellX = -1;
         destInfo->mCellY = -1;
         sourceInfo->mCellX = -1;
@@ -3641,12 +3610,10 @@ ECode Workspace::OnDrop(
     // We want the point to be mapped to the dragTarget.
     if (dropTargetLayout != NULL) {
         Boolean res;
-        assert(0);
-        //mLauncher->IsHotseatLayout(dropTargetLayout, &res);
+        mLauncher->IsHotseatLayout(IView::Probe(dropTargetLayout), &res);
         if (res) {
             AutoPtr<IHotseat> hotseat;
-            assert(0);
-            //mLauncher->GetHotseat((IHotseat**)&hotseat);
+            mLauncher->GetHotseat((IHotseat**)&hotseat);
             MapPointFromSelfToHotseatLayout(hotseat, mDragViewVisualCenter);
         }
         else {
@@ -3672,8 +3639,7 @@ ECode Workspace::OnDrop(
             GetParentCellLayoutForView(cell, (ICellLayout**)&cellLayout);
             Boolean hasMovedLayouts = (TO_IINTERFACE(cellLayout) != TO_IINTERFACE(dropTargetLayout));
             Boolean hasMovedIntoHotseat;
-            assert(0);
-            //mLauncher->IsHotseatLayout(dropTargetLayout, &hasMovedIntoHotseat);
+            mLauncher->IsHotseatLayout(IView::Probe(dropTargetLayout), &hasMovedIntoHotseat);
             Int64 container = hasMovedIntoHotseat ?
                     LauncherSettings::Favorites::CONTAINER_HOTSEAT :
                     LauncherSettings::Favorites::CONTAINER_DESKTOP;
@@ -3689,7 +3655,6 @@ ECode Workspace::OnDrop(
             // First we find the cell nearest to point at which the item is
             // dropped, without any consideration to whether there is an item there.
 
-            assert(0 && "in out");
             FindNearestArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], spanX, spanY,
                     dropTargetLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
@@ -3843,8 +3808,7 @@ ECode Workspace::OnDrop(
             else {
                 Int32 duration = snapScreen < 0 ? -1 : ADJACENT_SCREEN_DROP_DURATION;
                 AutoPtr<IDragLayer> dragLayer;
-                assert(0);
-                //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+                mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
                 dragLayer->AnimateViewIntoPosition(_d->mDragView, cell, duration,
                         onCompleteRunnable, this);
             }
@@ -3940,11 +3904,9 @@ ECode Workspace::GetCellLayoutMetrics(
     VALIDATE_NOT_NULL(rect);
 
     AutoPtr<IResources> res;
-    assert(0);
-    //launcher->GetResources((IResources**)&res);
+    IContext::Probe(launcher)->GetResources((IResources**)&res);
     AutoPtr<IWindowManager> windowManager;
-    assert(0);
-    //launcher->GetWindowManager((IWindowManager**)&windowManager);
+    IActivity::Probe(launcher)->GetWindowManager((IWindowManager**)&windowManager);
     AutoPtr<IDisplay> display;
     windowManager->GetDefaultDisplay((IDisplay**)&display);
     AutoPtr<IPoint> smallestSize;
@@ -4040,7 +4002,8 @@ ECode Workspace::OnDragExit(
         if (IsPageMoving()) {
             // If the user drops while the page is scrolling, we should use that page as the
             // destination instead of the page that is being hovered over.
-            Int32 page = GetNextPage();
+            Int32 page;
+            GetNextPage(&page);
             AutoPtr<IView> view = GetPageAt(page);
             mDropToLayout = ICellLayout::Probe(view);
         }
@@ -4475,8 +4438,7 @@ ECode Workspace::OnDragOver(
     IsSmall(&res);
     if (res) {
         AutoPtr<IHotseat> hotseat;
-        assert(0);
-        //mLauncher->GetHotseat((IHotseat**)&hotseat);
+        mLauncher->GetHotseat((IHotseat**)&hotseat);
         if (hotseat != NULL && !IsExternalDragWidget(_d)) {
             IView::Probe(hotseat)->GetHitRect(r);
             Boolean res;
@@ -4496,8 +4458,7 @@ ECode Workspace::OnDragOver(
             Boolean isInSpringLoadedMode = (mState == State_SPRING_LOADED);
             if (isInSpringLoadedMode) {
                 Boolean res;
-                assert(0);
-                //mLauncher->IsHotseatLayout(layout, &res);
+                mLauncher->IsHotseatLayout(IView::Probe(layout), &res);
                 if (res) {
                     mSpringLoadedDragController->Cancel();
                 }
@@ -4510,8 +4471,7 @@ ECode Workspace::OnDragOver(
     else {
         // Test to see if we are over the hotseat otherwise just use the current page
         AutoPtr<IHotseat> hotseat;
-        assert(0);
-        //mLauncher->GetHotseat((IHotseat**)&hotseat);
+        mLauncher->GetHotseat((IHotseat**)&hotseat);
         if (hotseat != NULL && !IsDragWidget(_d)) {
             IView::Probe(hotseat)->GetHitRect(r);
             Boolean res;
@@ -4533,12 +4493,10 @@ ECode Workspace::OnDragOver(
     if (mDragTargetLayout != NULL) {
         // We want the point to be mapped to the dragTarget.
         Boolean res;
-        assert(0);
-        //mLauncher->IsHotseatLayout(mDragTargetLayout, &res);
+        mLauncher->IsHotseatLayout(IView::Probe(mDragTargetLayout), &res);
         if (res) {
             AutoPtr<IHotseat> hotseat;
-            assert(0);
-            //mLauncher->GetHotseat((IHotseat**)&hotseat);
+            mLauncher->GetHotseat((IHotseat**)&hotseat);
             MapPointFromSelfToHotseatLayout(hotseat, mDragViewVisualCenter);
         }
         else {
@@ -4547,7 +4505,6 @@ ECode Workspace::OnDragOver(
 
         AutoPtr<ItemInfo> info = (ItemInfo*)IItemInfo::Probe(_d->mDragInfo);
 
-        assert(0 && "in out");
         FindNearestArea((Int32)(*mDragViewVisualCenter)[0],
                 (Int32)(*mDragViewVisualCenter)[1], item->mSpanX, item->mSpanY,
                 mDragTargetLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
@@ -4685,9 +4642,8 @@ ECode Workspace::AddExternalItemToScreen(
         return NOERROR;
     }
 
-    assert(0);
-    //mLauncher->IsHotseatLayout(layout, &res);
-    //mLauncher->ShowOutOfSpaceMessage(res);
+    mLauncher->IsHotseatLayout(IView::Probe(layout), &res);
+    mLauncher->ShowOutOfSpaceMessage(res);
     *result = FALSE;
     return NOERROR;
 }
@@ -4720,8 +4676,7 @@ ECode Workspace::OnDropExternal(
 
     Int64 container;
     Boolean res;
-    assert(0);
-    //mLauncher->IsHotseatLayout(cellLayout, &res);
+    mLauncher->IsHotseatLayout(IView::Probe(cellLayout), &res);
     if (res) {
         container = LauncherSettings::Favorites::CONTAINER_HOTSEAT;
     }
@@ -4730,8 +4685,7 @@ ECode Workspace::OnDropExternal(
     }
     Int32 screen;
     IndexOfChild(IView::Probe(cellLayout), &screen);
-    assert(0);
-    //mLauncher->IsHotseatLayout(cellLayout, &res);
+    mLauncher->IsHotseatLayout(IView::Probe(cellLayout), &res);
     if (!res && screen != mCurrentPage && mState != State_SPRING_LOADED) {
         SnapToPage(screen);
     }
@@ -4742,7 +4696,6 @@ ECode Workspace::OnDropExternal(
 
         Boolean findNearestVacantCell = TRUE;
         if (pendingInfo->mItemType == LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT) {
-            assert(0 && "in out");
             FindNearestArea((Int32)(*touchXY)[0], (Int32)(*touchXY)[1], spanX, spanY,
                     cellLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
             Float distance;
@@ -4769,7 +4722,6 @@ ECode Workspace::OnDropExternal(
                 minSpanY = item->mMinSpanY;
             }
             AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
-            assert(0 && "in out: mTargetCell");
             cellLayout->CreateArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], minSpanX, minSpanY,
                     info->mSpanX, info->mSpanY, NULL, mTargetCell, resultSpan,
@@ -4824,10 +4776,10 @@ ECode Workspace::OnDropExternal(
                     info = new ShortcutInfo();
                     info->constructor((ApplicationInfo*)IApplicationInfo::Probe(info));
                 }
-                assert(0);
-                // mLauncher->CreateShortcut(
-                //         Elastos::Droid::Launcher2::R::layout.::application, cellLayout,
-                //         IShortcutInfo::Probe(info), (IView**)&view);
+                mLauncher->CreateShortcut(
+                        Elastos::Droid::Launcher2::R::layout::application,
+                        IViewGroup::Probe(cellLayout),
+                        IShortcutInfo::Probe(info), (IView**)&view);
                 break;
             }
             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
@@ -4848,7 +4800,6 @@ ECode Workspace::OnDropExternal(
         // First we find the cell nearest to point at which the item is
         // dropped, without any consideration to whether there is an item there.
         if (touchXY != NULL) {
-            assert(0 && "in out");
             FindNearestArea((Int32)(*touchXY)[0], (Int32)(*touchXY)[1], spanX, spanY,
                     cellLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
             Float distance;
@@ -4870,7 +4821,6 @@ ECode Workspace::OnDropExternal(
 
         if (touchXY != NULL) {
             // when dragging and dropping, just find the closest free spot
-            assert(0 && "in out");
             cellLayout->CreateArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], 1, 1, 1, 1,
                     NULL, mTargetCell, NULL, ICellLayout::MODE_ON_DROP_EXTERNAL,
@@ -4900,8 +4850,7 @@ ECode Workspace::OnDropExternal(
             // the correct final location.
             SetFinalTransitionTransform(cellLayout);
             AutoPtr<IDragLayer> dragLayer;
-            assert(0);
-            //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+            mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
             dragLayer->AnimateViewIntoPosition(d->mDragView, view,
                     exitSpringLoadedRunnable);
             ResetTransitionTransform(cellLayout);
@@ -4919,10 +4868,10 @@ ECode Workspace::CreateWidgetBitmap(
 
     AutoPtr<ArrayOf<Int32> > unScaledSize;
     AutoPtr<IWorkspace> workspace;
-    assert(0);
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
-    // workspace->EstimateItemSize(widgetInfo->mSpanX,
-    //         widgetInfo->mSpanY, widgetInfo, FALSE, (ArrayOf<Int32>**)&unScaledSize);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    ItemInfo* _widgetInfo = (ItemInfo*)widgetInfo;
+    workspace->EstimateItemSize(_widgetInfo->mSpanX,
+            _widgetInfo->mSpanY, widgetInfo, FALSE, (ArrayOf<Int32>**)&unScaledSize);
     Int32 visibility;
     layout->GetVisibility(&visibility);
     layout->SetVisibility(VISIBLE);
@@ -4971,8 +4920,7 @@ void Workspace::GetFinalPositionForDropAnimation(
 
     SetFinalTransitionTransform(layout);
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     Float cellLayoutScale;
     dragLayer->GetDescendantCoordRelativeToSelf(IView::Probe(layout), loc, &cellLayoutScale);
     ResetTransitionTransform(layout);
@@ -5025,8 +4973,7 @@ ECode Workspace::AnimateWidgetDrop(
     AutoPtr<IRect> from;
     CRect::New((IRect**)&from);
     AutoPtr<IDragLayer> _dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&_dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&_dragLayer);
     _dragLayer->GetViewRectRelativeToSelf(IView::Probe(dragView), from);
 
     AutoPtr<ArrayOf<Int32> > finalPos = ArrayOf<Int32>::Alloc(2);
@@ -5036,8 +4983,7 @@ ECode Workspace::AnimateWidgetDrop(
             external, scalePreview);
 
     AutoPtr<IResources> res;
-    assert(0);
-    //mLauncher->GetResources((IResources**)&res);
+    IContext::Probe(mLauncher)->GetResources((IResources**)&res);
     Int32 tmp;
     res->GetInteger(
             Elastos::Droid::Launcher2::R::integer::config_dropAnimMaxDuration,
@@ -5048,8 +4994,7 @@ ECode Workspace::AnimateWidgetDrop(
     if (IAppWidgetHostView::Probe(finalView) != NULL && external) {
         Slogger::D(TAG, "6557954 Animate widget drop, final view is appWidgetHostView");
         AutoPtr<IDragLayer> dragLayer;
-        assert(0);
-        //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
         IViewGroup::Probe(dragLayer)->RemoveView(finalView);
     }
     if ((animationType == IWorkspace::ANIMATE_INTO_POSITION_AND_RESIZE || external) && finalView != NULL) {
@@ -5063,12 +5008,10 @@ ECode Workspace::AnimateWidgetDrop(
     }
 
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     if (animationType == IWorkspace::CANCEL_TWO_STAGE_WIDGET_DROP_ANIMATION) {
         AutoPtr<IDragLayer> _dragLayer;
-        assert(0);
-        //mLauncher->GetDragLayer((IDragLayer**)&_dragLayer);
+        mLauncher->GetDragLayer((IDragLayer**)&_dragLayer);
         _dragLayer->AnimateViewIntoPosition(dragView, finalPos, 0.0f, 0.1f, 0.1f,
                 IDragLayer::ANIMATION_END_DISAPPEAR, onCompleteRunnable, duration);
     }
@@ -5140,7 +5083,8 @@ ECode Workspace::GetCurrentDropLayout(
 {
     VALIDATE_NOT_NULL(layout);
 
-    Int32 page = GetNextPage();
+    Int32 page;
+    GetNextPage(&page);
     AutoPtr<IView> view;
     GetChildAt(page, (IView**)&view);
     *layout = ICellLayout::Probe(view);
@@ -5204,12 +5148,10 @@ ECode Workspace::OnDropCompleted(
     else if (mDragInfo != NULL) {
         AutoPtr<ICellLayout> cellLayout;
         Boolean res;
-        assert(0);
-        //mLauncher->IsHotseatLayout(target, &res);
+        mLauncher->IsHotseatLayout(target, &res);
         if (res) {
             AutoPtr<IHotseat> hotseat;
-            assert(0);
-            //mLauncher->GetHotseat((IHotseat**)&hotseat);
+            mLauncher->GetHotseat((IHotseat**)&hotseat);
             hotseat->GetLayout((ICellLayout**)&cellLayout);
         }
         else {
@@ -5242,8 +5184,7 @@ ECode Workspace::UpdateItemLocationsInDatabase(
     Int32 container = LauncherSettings::Favorites::CONTAINER_DESKTOP;
 
     Boolean res;
-    assert(0);
-    //mLauncher->IsHotseatLayout(cl, &res);
+    mLauncher->IsHotseatLayout(IView::Probe(cl), &res);
     if (res) {
         screen = -1;
         container = LauncherSettings::Favorites::CONTAINER_HOTSEAT;
@@ -5304,8 +5245,7 @@ void Workspace::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     SmoothPagedView::OnRestoreInstanceState(state);
-    assert(0);
-    //Launcher::SetScreen(mCurrentPage);
+    Launcher::SetScreen(mCurrentPage);
 }
 
 ECode Workspace::DispatchRestoreInstanceState(
@@ -5393,8 +5333,7 @@ ECode Workspace::OnEnterScrollArea(
     Boolean isPortrait = !res;
 
     AutoPtr<IHotseat> hotseat;
-    assert(0);
-    //mLauncher->GetHotseat((IHotseat**)&hotseat);
+    mLauncher->GetHotseat((IHotseat**)&hotseat);
     if (hotseat != NULL && isPortrait) {
         AutoPtr<IRect> r;
         CRect::New((IRect**)&r);
@@ -5412,7 +5351,8 @@ ECode Workspace::OnEnterScrollArea(
     if (!res && !mIsSwitchingState) {
         mInScrollArea = TRUE;
 
-        Int32 _page = GetNextPage();
+        Int32 _page;
+        GetNextPage(&_page);
         Int32 page = _page +
                    (direction == IDragController::SCROLL_LEFT ? -1 : 1);
 
@@ -5509,8 +5449,7 @@ ECode Workspace::GetWorkspaceAndHotseatCellLayouts(
     }
 
     AutoPtr<IHotseat> hotseat;
-    assert(0);
-    //mLauncher->GetHotseat((IHotseat**)&hotseat);
+    mLauncher->GetHotseat((IHotseat**)&hotseat);
     if (hotseat != NULL) {
         AutoPtr<ICellLayout> cellLayout;
         hotseat->GetLayout((ICellLayout**)&cellLayout);
@@ -5538,8 +5477,7 @@ ECode Workspace::GetAllShortcutAndWidgetContainers(
         childrenLayouts->Add(TO_IINTERFACE(container));
     }
     AutoPtr<IHotseat> hotseat;
-    assert(0);
-    //mLauncher->GetHotseat((IHotseat**)&hotseat);
+    mLauncher->GetHotseat((IHotseat**)&hotseat);
     if (hotseat != NULL) {
         AutoPtr<ICellLayout> cellLayout;
         hotseat->GetLayout((ICellLayout**)&cellLayout);
@@ -5894,17 +5832,14 @@ ECode Workspace::GetCurrentPageDescription(
             Elastos::Droid::Launcher2::R::string::workspace_scroll_format, &_str);
     Int32 count;
     GetChildCount(&count);
-    assert(0);
-    //*str = String::Format(_str, page + 1, count);
-    return NOERROR;
+    return str->AppendFormat(_str, page + 1, count);
 }
 
 ECode Workspace::GetLocationInDragLayer(
     /* [in] */ ArrayOf<Int32>* loc)
 {
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     Float tmp;
     return dragLayer->GetLocationInDragLayer(IView::Probe(this), loc, &tmp);
 }

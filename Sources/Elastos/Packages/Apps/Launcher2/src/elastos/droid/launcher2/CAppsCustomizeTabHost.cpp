@@ -3,6 +3,7 @@
 #include "elastos/droid/launcher2/PagedViewWidget.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/FocusHelper.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
@@ -129,8 +130,7 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
     // Take the visible pages and re-parent them temporarily to mAnimatorBuffer
     // and then cross fade to the new pages
     AutoPtr<ArrayOf<Int32> > visiblePageRange = ArrayOf<Int32>::Alloc(2);
-    assert(0);
-    //IPagedView::Probe(mHost->mAppsCustomizePane)->GetVisiblePages(visiblePageRange);
+    IPagedView::Probe(mHost->mAppsCustomizePane)->GetVisiblePages(visiblePageRange);
     if ((*visiblePageRange)[0] == -1 && (*visiblePageRange)[1] == -1) {
         // If we can't get the visible page ranges, then just skip the animation
         mHost->ReloadCurrentPage();
@@ -140,8 +140,7 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
     CArrayList::New((IArrayList**)&visiblePages);
     for (Int32 i = (*visiblePageRange)[0]; i <= (*visiblePageRange)[1]; i++) {
         AutoPtr<IView> view;
-        assert(0);
-        //mHost->mAppsCustomizePane->GetPageAt(i, (IView**)&view);
+        mHost->mAppsCustomizePane->GetPageAt(i, (IView**)&view);
         visiblePages->Add(TO_IINTERFACE(view));
     }
 
@@ -162,12 +161,10 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
         visiblePages->Get(i, (IInterface**)&obj);
         AutoPtr<IView> child = IView::Probe(obj);
         if (IPagedViewCellLayout::Probe(child) != NULL) {
-            assert(0);
-            //IPagedViewCellLayout::Probe(child)->ResetChildrenOnKeyListeners();
+            IPagedViewCellLayout::Probe(child)->ResetChildrenOnKeyListeners();
         }
         else if (IPagedViewGridLayout::Probe(child) != NULL) {
-            assert(0);
-            //IPagedViewGridLayout::Probe(child)->ResetChildrenOnKeyListeners();
+            IPagedViewGridLayout::Probe(child)->ResetChildrenOnKeyListeners();
         }
         PagedViewWidget::SetDeletePreviewsWhenDetachedFromWindow(FALSE);
         IViewGroup::Probe(mHost->mAppsCustomizePane)->RemoveView(child);
@@ -324,9 +321,8 @@ ECode CAppsCustomizeTabHost::OnFinishInflate()
             layout::tab_widget_indicator,
             IViewGroup::Probe(tabs), FALSE, (IView**)&view5);
     tabView = ITextView::Probe(view5);
-    assert(0);
-    //tabView->SetText(label);
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(label);
+    tabView->SetText(cchar);
     IView::Probe(tabView)->SetContentDescription(cchar);
     AutoPtr<ITabSpec> spec;
     NewTabSpec(APPS_TAB_TAG, (ITabSpec**)&spec);
@@ -344,9 +340,8 @@ ECode CAppsCustomizeTabHost::OnFinishInflate()
             IViewGroup::Probe(tabs), FALSE, (IView**)&view6);
     tabView = NULL;
     tabView = ITextView::Probe(view6);
-    assert(0);
-    //tabView->SetText(label);
     cchar = CoreUtils::Convert(label);
+    tabView->SetText(cchar);
     IView::Probe(tabView)->SetContentDescription(cchar);
     AutoPtr<ITabSpec> spec2;
     NewTabSpec(WIDGETS_TAB_TAG, (ITabSpec**)&spec2);
@@ -356,20 +351,17 @@ ECode CAppsCustomizeTabHost::OnFinishInflate()
     SetOnTabChangedListener(this);
 
     // Setup the key listener to jump between the last tab view and the market icon
-    assert(0);
-    // AutoPtr<AppsCustomizeTabKeyEventListener> keyListener =
-    //         new AppsCustomizeTabKeyEventListener();
+    AutoPtr<IViewOnKeyListener> keyListener =
+            new AppsCustomizeTabKeyEventListener();
     Int32 count;
     tabs->GetTabCount(&count);
     AutoPtr<IView> lastTab;
     tabs->GetChildTabViewAt(count - 1, (IView**)&lastTab);
-    assert(0);
-    //lastTab->SetOnKeyListener(keyListener);
+    lastTab->SetOnKeyListener(keyListener);
     AutoPtr<IView> shopButton;
     FindViewById(Elastos::Droid::Launcher2::R::id::market_button,
             (IView**)&shopButton);
-    assert(0);
-    //shopButton->SetOnKeyListener(keyListener);
+    shopButton->SetOnKeyListener(keyListener);
 
     // Hide the tab bar until we measure
     return IView::Probe(mTabsContainer)->SetAlpha(0.0f);
@@ -389,8 +381,7 @@ void CAppsCustomizeTabHost::OnMeasure(
     // Set the width of the tab list to the content width
     if (remeasureTabWidth) {
         Int32 contentWidth;
-        assert(0);
-        //mAppsCustomizePane->GetPageContentWidth(&contentWidth);
+        mAppsCustomizePane->GetPageContentWidth(&contentWidth);
         if (contentWidth > 0 && width != contentWidth) {
             // Set the width and show the tab bar
             params->SetWidth(contentWidth);
@@ -442,9 +433,7 @@ ECode CAppsCustomizeTabHost::OnTouchEvent(
 
 ECode CAppsCustomizeTabHost::OnTabChangedStart()
 {
-    //return IPagedView::Probe(mAppsCustomizePane)->HideScrollingIndicator(FALSE);
-    assert(0);
-    return NOERROR;
+    return IPagedView::Probe(mAppsCustomizePane)->HideScrollingIndicator(FALSE);
 }
 
 ECode CAppsCustomizeTabHost::ReloadCurrentPage()
@@ -452,24 +441,19 @@ ECode CAppsCustomizeTabHost::ReloadCurrentPage()
     Boolean res;
     LauncherApplication::IsScreenLarge(&res);
     if (!res) {
-        assert(0);
-        //IPagedView::Probe(mAppsCustomizePane)->FlashScrollingIndicator(TRUE);
+        IPagedView::Probe(mAppsCustomizePane)->FlashScrollingIndicator(TRUE);
     }
 
     Int32 page;
-    assert(0);
-    //IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
-    //IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page);
-    //mAppsCustomizePane->RequestFocus();
-    return NOERROR;
+    IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
+    IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page);
+    return IView::Probe(mAppsCustomizePane)->RequestFocus(&res);
 }
 
 ECode CAppsCustomizeTabHost::OnTabChangedEnd(
     /* [in] */ AppsCustomizePagedViewContentType type)
 {
-    assert(0);
-    //return mAppsCustomizePane->SetContentType(type);
-    return NOERROR;
+    return mAppsCustomizePane->SetContentType(type);
 }
 
 ECode CAppsCustomizeTabHost::OnTabChanged(
@@ -559,8 +543,7 @@ ECode CAppsCustomizeTabHost::Reset()
     }
     else {
         // Reset immediately
-        assert(0);
-        //mAppsCustomizePane->Reset();
+        mAppsCustomizePane->Reset();
     }
     return NOERROR;
 }
@@ -598,8 +581,7 @@ ECode CAppsCustomizeTabHost::OnLauncherTransitionPrepare(
     /* [in] */ Boolean animated,
     /* [in] */ Boolean toWorkspace)
 {
-    assert(0);
-    //mAppsCustomizePane->OnLauncherTransitionPrepare(l, animated, toWorkspace);
+    mAppsCustomizePane->OnLauncherTransitionPrepare(l, animated, toWorkspace);
     mInTransition = TRUE;
     mTransitioningToWorkspace = toWorkspace;
 
@@ -608,8 +590,7 @@ ECode CAppsCustomizeTabHost::OnLauncherTransitionPrepare(
         SetVisibilityOfSiblingsWithLowerZOrder(VISIBLE);
         // Stop the scrolling indicator - we don't want All Apps to be invalidating itself
         // during the transition, especially since it has a hardware layer set on it
-        assert(0);
-        //IPagedView::Probe(mAppsCustomizePane)->CancelScrollingIndicatorAnimations();
+        IPagedView::Probe(mAppsCustomizePane)->CancelScrollingIndicatorAnimations();
     }
     else {
         // Going from Workspace -> All Apps
@@ -618,21 +599,18 @@ ECode CAppsCustomizeTabHost::OnLauncherTransitionPrepare(
         // Make sure the current page is loaded (we start loading the side pages after the
         // transition to prevent slowing down the animation)
         Int32 page;
-        assert(0);
-        //IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
-        //IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page, TRUE);
+        IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
+        IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page, TRUE);
 
         Boolean res;
         LauncherApplication::IsScreenLarge(&res);
         if (!res) {
-            assert(0);
-            //IPagedView::Probe(mAppsCustomizePane)->ShowScrollingIndicator(TRUE);
+            IPagedView::Probe(mAppsCustomizePane)->ShowScrollingIndicator(TRUE);
         }
     }
 
     if (mResetAfterTransition) {
-        assert(0);
-        //mAppsCustomizePane->Reset();
+        mAppsCustomizePane->Reset();
         mResetAfterTransition = FALSE;
     }
     return NOERROR;
@@ -662,8 +640,7 @@ ECode CAppsCustomizeTabHost::OnLauncherTransitionEnd(
     /* [in] */ Boolean animated,
     /* [in] */ Boolean toWorkspace)
 {
-    assert(0);
-    //mAppsCustomizePane->OnLauncherTransitionEnd(l, animated, toWorkspace);
+    mAppsCustomizePane->OnLauncherTransitionEnd(l, animated, toWorkspace);
     mInTransition = FALSE;
     if (animated) {
         SetLayerType(LAYER_TYPE_NONE, NULL);
@@ -671,23 +648,19 @@ ECode CAppsCustomizeTabHost::OnLauncherTransitionEnd(
 
     if (!toWorkspace) {
         // Dismiss the workspace cling
-        assert(0);
-        //l->DismissWorkspaceCling(NULL);
+        l->DismissWorkspaceCling(NULL);
         // Show the all apps cling (if not already shown)
-        assert(0);
-        //mAppsCustomizePane->ShowAllAppsCling();
+        mAppsCustomizePane->ShowAllAppsCling();
         // Make sure adjacent pages are loaded (we wait until after the transition to
         // prevent slowing down the animation)
         Int32 page;
-        assert(0);
-        //IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
-        //IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page);
+        IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
+        IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page);
 
         Boolean res;
         LauncherApplication::IsScreenLarge(&res);
         if (!res) {
-            assert(0);
-            //IPagedView::Probe(mAppsCustomizePane)->HideScrollingIndicator(FALSE);
+            IPagedView::Probe(mAppsCustomizePane)->HideScrollingIndicator(FALSE);
         }
 
         // Going from Workspace -> All Apps
@@ -742,10 +715,9 @@ ECode CAppsCustomizeTabHost::OnWindowVisible()
         // We unload the widget previews when the UI is hidden, so need to reload pages
         // Load the current page synchronously, and the neighboring pages asynchronously
         Int32 page;
-        assert(0);
-        //IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
-        //IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page, TRUE);
-        //IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page);
+        IPagedView::Probe(mAppsCustomizePane)->GetCurrentPage(&page);
+        IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page, TRUE);
+        IPagedView::Probe(mAppsCustomizePane)->LoadAssociatedPages(page);
     }
     return NOERROR;
 }
@@ -755,9 +727,7 @@ ECode CAppsCustomizeTabHost::OnTrimMemory()
     IView::Probe(mContent)->SetVisibility(GONE);
     // Clear the widget pages of all their subviews - this will trigger the widget previews
     // to delete their bitmaps
-    assert(0);
-    //return mAppsCustomizePane->ClearAllWidgetPages();
-    return NOERROR;
+    return mAppsCustomizePane->ClearAllWidgetPages();
 }
 
 ECode CAppsCustomizeTabHost::IsTransitioning(

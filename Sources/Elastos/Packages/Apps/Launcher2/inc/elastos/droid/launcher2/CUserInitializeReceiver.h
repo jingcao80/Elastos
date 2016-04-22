@@ -17,6 +17,10 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * Takes care of setting initial wallpaper for a user, by selecting the
+ * first wallpaper that is not in use by another user.
+ */
 CarClass(CUserInitializeReceiver)
     , public BroadcastReceiver
 {

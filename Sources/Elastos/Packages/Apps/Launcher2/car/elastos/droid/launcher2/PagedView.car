@@ -6,7 +6,17 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    [local]
+    interface IPageSwitchListener {
+        OnPageSwitch(
+            [in] IView* newPage,
+            [in] Int32 newPageIndex);
+    }
+
     /**
+     * An abstraction of the original Workspace which supports browsing through a
+     * sequential list of "pages"
+     *
      * @Involve
      * interface IViewGroup;
      * interface IView;
@@ -16,15 +26,158 @@ module
      * interface IViewParent;
      * interface IViewManager;
      */
-    [local]
+    [deprecated, local]
     interface IPagedView {
-    }
+        SetPageSwitchListener(
+            [in] IPageSwitchListener* pageSwitchListener);
 
-    [local]
-    interface IPageSwitchListener {
-        OnPageSwitch(
-            [in] IView* newPage,
-            [in] Int32 newPageIndex);
+        /**
+         * Note: this is a reimplementation of IView::IsLayoutRtl() since that is currently hidden api.
+         */
+        IsLayoutRtl(
+            [out] Boolean* result);
+
+        /**
+         * Returns the index of the currently displayed page.
+         *
+         * @return The index of the currently displayed page.
+         */
+        GetCurrentPage(
+            [out] Int32* page);
+
+        GetNextPage(
+            [out] Int32* page);
+
+        GetPageCount(
+            [out] Int32* count);
+
+        GetPageAt(
+            [in] Int32 index,
+            [out] IView** page);
+
+        /**
+         * Called during AllApps/Home transitions to avoid Unnecessary work. When that other animatin
+         * ends, {@link #resumeScrolling()} should be called, along with
+         * {@link #UpdateCurrentPageScroll()} to correctly set the final state and re-enable scrolling.
+         */
+        PauseScrolling();
+
+        /**
+         * Enables scrolling again.
+         * @see #pauseScrolling()
+         */
+        ResumeScrolling();
+
+        /**
+         * Sets the current page.
+         */
+        SetCurrentPage(
+            [in] Int32 currentPage);
+
+        // A layout scale of 1.0f assumes that the pages, in their unshrunken state, have a
+        // scale of 1.0f. A layout scale of 0.8f assumes the pages have a scale of 0.8f, and
+        // tightens the layout accordingly
+        SetLayoutScale(
+            [in] Float childrenScale);
+
+        SetPageSpacing(
+            [in] Int32 pageSpacing);
+
+        GetPageNearestToCenterOfScreen(
+            [out] Int32* page);
+
+        // We want the duration of the page snap animation to be influenced by the distance that
+        // the screen has to travel, however, we don't want this duration to be effected in a
+        // purely linear fashion. Instead, we use this method to moderate the effect that the distance
+        // of travel has on the overall snap duration.
+        DistanceInfluenceForSnapDuration(
+            [in] Float f,
+            [out] Float* distance);
+
+        ScrollLeft();
+
+        ScrollRight();
+
+        GetPageForView(
+            [in] IView* v,
+            [out] Int32* page);
+
+        /**
+         * @return True is long presses are still allowed for the current touch
+         */
+        AllowLongPress(
+            [out] Boolean* result);
+
+        /**
+         * Set TRUE to allow long-press events to be triggered, usually checked by
+         * {@link Launcher} to accept or block dpad-initiated long-presses.
+         */
+        SetAllowLongPress(
+            [in] Boolean allowLongPress);
+
+        /**
+         * This method is called ONLY to synchronize the number of pages that the paged view has.
+         * To actually fill the pages with information, implement syncPageItems() below.  It is
+         * guaranteed that syncPageItems() will be called for a particular page before it is shown,
+         * and therefore, individual page items do not need to be updated in this method.
+         */
+        SyncPages();
+
+        /**
+         * This method is called to synchronize the items that are on a particular page.  If views on
+         * the page can be reused, then they should be updated within this method.
+         */
+        SyncPageItems(
+            [in] Int32 page,
+            [in] Boolean immediate);
+
+        ShowScrollIndicatorTrack();
+
+        HideScrollIndicatorTrack();
+
+        IndexToPage(
+            [in] Int32 index,
+            [out] Int32* page);
+
+        /**
+         * Updates the scroll of the current page immediately to its final scroll position.  We use this
+         * in CustomizePagedView to allow tabs to share the same PagedView while resetting the scroll of
+         * the previous tab page.
+         */
+        UpdateCurrentPageScroll();
+
+        GetVisiblePages(
+            [in] ArrayOf<Int32>* range);
+
+        LoadAssociatedPages(
+            [in] Int32 page);
+
+        LoadAssociatedPages(
+            [in] Int32 page,
+            [in] Boolean immediateAndOnly);
+
+        SnapToPage(
+            [in] Int32 whichPage);
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] Int32 duration);
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] Int32 delta,
+            [in] Int32 duration);
+
+        FlashScrollingIndicator(
+            [in] Boolean animated);
+
+        ShowScrollingIndicator(
+            [in] Boolean immediately);
+
+        CancelScrollingIndicatorAnimations();
+
+        HideScrollingIndicator(
+            [in] Boolean immediately);
     }
 
     } // namespace Launcher2

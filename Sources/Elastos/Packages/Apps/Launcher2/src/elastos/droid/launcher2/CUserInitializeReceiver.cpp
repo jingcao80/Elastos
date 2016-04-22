@@ -64,7 +64,6 @@ void CUserInitializeReceiver::AddWallpapers(
     /* [in] */ Int32 resid,
     /* [in] */ IArrayList* outList)
 {
-
     AutoPtr<ArrayOf<String> > extras;
     resources->GetStringArray(resid, (ArrayOf<String>**)&extras);
 

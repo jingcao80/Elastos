@@ -175,15 +175,13 @@ ECode ButtonDropTarget::GetIconRect(
 {
     VALIDATE_NOT_NULL(rect);
 
-    assert(0 && "need class DragLayer");
-    // AutoPtr<IDragLayer> dragLayer;
-    // mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    AutoPtr<IDragLayer> dragLayer;
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
 
     // Find the rect to animate to (the view is center aligned)
     AutoPtr<IRect> to;
     CRect::New((IRect**)&to);
-    assert(0 && "need class DragLayer");
-    // dragLayer->GetViewRectRelativeToSelf(this, to);
+    dragLayer->GetViewRectRelativeToSelf(this, to);
 
     const Int32 width = drawableWidth;
     const Int32 height = drawableHeight;
@@ -240,11 +238,10 @@ ECode ButtonDropTarget::GetDropTargetDelegate(
 ECode ButtonDropTarget::GetLocationInDragLayer(
     /* [in] */ ArrayOf<Int32>* loc)
 {
-    assert(0 && "need class DragLayer");
-    // AutoPtr<IDragLayer> layer;
-    // mLauncher->GetDragLayer((IDragLayer**)&layer);
-    // return layer->GetLocationInDragLayer(this, loc);
-    return NOERROR;
+    AutoPtr<IDragLayer> layer;
+    mLauncher->GetDragLayer((IDragLayer**)&layer);
+    Float tmp;
+    return layer->GetLocationInDragLayer(IView::Probe(this), loc, &tmp);
 }
 
 } // namespace Launcher2

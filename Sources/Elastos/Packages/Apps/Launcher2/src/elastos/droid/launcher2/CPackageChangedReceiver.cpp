@@ -1,5 +1,7 @@
 
 #include "elastos/droid/launcher2/CPackageChangedReceiver.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/WidgetPreviewLoader.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
@@ -26,12 +28,11 @@ ECode CPackageChangedReceiver::OnReceive(
 
     AutoPtr<IContext> ctx;
     context->GetApplicationContext((IContext**)&ctx);
-    assert(0 && "need class LauncherApplication");
-    // AutoPtr<LauncherApplication> app = (LauncherApplication*)IObject::Probe(ctx);
-    // AutoPtr<WidgetPreviewLoader::CacheDb> db;
-    // app->GetWidgetPreviewCacheDb((WidgetPreviewLoader::CacheDb**)&db)
-    // return WidgetPreviewLoader::RemoveFromDb(db, packageName);
-    return NOERROR;
+    AutoPtr<LauncherApplication> app = (LauncherApplication*)IObject::Probe(ctx);
+    AutoPtr<IWidgetPreviewLoaderCacheDb> db;
+    app->GetWidgetPreviewCacheDb((IWidgetPreviewLoaderCacheDb**)&db);
+    return WidgetPreviewLoader::RemoveFromDb(
+            (WidgetPreviewLoader::CacheDb*)db.Get(), packageName);
 }
 
 } // namespace Launcher2

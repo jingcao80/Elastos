@@ -526,8 +526,15 @@ module
 
         SetFadeForOverScroll(
             [in] Float fade);
+
+        ReinflateWidgetsIfNecessary();
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] IRunnable* r);
     }
 
+    [local]
     interface IWorkspaceHelper {
         GetCellLayoutMetrics(
             [in] ILauncher* launcher,

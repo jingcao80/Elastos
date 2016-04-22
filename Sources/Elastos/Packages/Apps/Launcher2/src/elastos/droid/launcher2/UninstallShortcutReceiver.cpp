@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/UninstallShortcutReceiver.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Widget.h"
@@ -125,8 +126,7 @@ void UninstallShortcutReceiver::ProcessUninstallShortcut(
     /* [in] */ PendingUninstallShortcutInfo* pendingInfo)
 {
     String spKey;
-    assert(0 && "need class LauncherApplication");
-    //LauncherApplication::GetSharedPreferencesKey(&spKey);
+    LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sharedPrefs;
     context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&sharedPrefs);
 

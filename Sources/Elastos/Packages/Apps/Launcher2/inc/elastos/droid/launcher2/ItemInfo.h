@@ -167,4 +167,6 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Launcher2::ItemInfo, IInterface)
+
 #endif // __ELASTOS_DROID_LAUNCHER2_ITEMINFO_H__

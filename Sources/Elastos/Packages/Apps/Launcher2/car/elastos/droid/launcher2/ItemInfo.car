@@ -4,6 +4,9 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    /**
+     * Represents an item in the launcher.
+     */
     interface IItemInfo {
         /**
          * Intent extra to store the profile. Format: UserHandle

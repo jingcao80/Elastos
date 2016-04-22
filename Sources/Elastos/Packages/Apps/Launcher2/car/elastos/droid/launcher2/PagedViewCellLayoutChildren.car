@@ -5,6 +5,10 @@ module
     namespace Launcher2 {
 
     /**
+     * An abstraction of the original CellLayout which supports laying out items
+     * which span multiple cells into a grid-like layout.  Also supports dimming
+     * to give a preview of its contents.
+     *
      * @Involve
      * interface IView;
      * interface IDrawableCallback;

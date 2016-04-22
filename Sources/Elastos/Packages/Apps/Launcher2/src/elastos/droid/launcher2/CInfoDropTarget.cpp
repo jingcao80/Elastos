@@ -4,10 +4,12 @@
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/os/Process.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/core/CoreUtils.h>
 #include "R.h"
 
 using Elastos::Droid::Content::IIntent;
@@ -16,6 +18,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewParent;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -70,11 +73,10 @@ ECode CInfoDropTarget::OnFinishInflate()
     config->GetOrientation(&orientation);
     if (orientation == IConfiguration::ORIENTATION_LANDSCAPE) {
         Boolean res;
-        assert(0 && "need class LauncherApplication");
-        //LauncherApplication::IsScreenLarge(&res);
+        LauncherApplication::IsScreenLarge(&res);
         if (!res) {
-            assert(0 && "SetText");
-            //SetText("");
+            AutoPtr<ICharSequence> text = CoreUtils::Convert(String(""));
+            SetText(text);
         }
     }
     return NOERROR;
@@ -118,8 +120,7 @@ ECode CInfoDropTarget::AcceptDrop(
         Process::MyUserHandle((IUserHandle**)&user);
     }
     if (componentName != NULL) {
-        assert(0 && "need class mLauncher");
-        //mLauncher->StartApplicationDetailsActivity(componentName, user);
+        mLauncher->StartApplicationDetailsActivity(componentName, user);
     }
 
     // There is no post-drop animation, so clean up the DragView now

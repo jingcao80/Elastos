@@ -55,7 +55,6 @@ private:
     public:
         MyThread(
             /* [in] */ const String& name,
-            /* [in] */ InstallShortcutReceiver* host,
             /* [in] */ ISharedPreferences* sharedPrefs,
             /* [in] */ Int32 screen,
             /* [in] */ IIntent* intent);
@@ -63,7 +62,6 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<InstallShortcutReceiver> mHost;
         AutoPtr<ISharedPreferences> mSharedPrefs;
         Int32 mScreen;
         AutoPtr<IIntent> mIntent;

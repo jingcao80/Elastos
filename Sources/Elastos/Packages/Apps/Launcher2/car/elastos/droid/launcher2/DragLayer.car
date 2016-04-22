@@ -19,6 +19,8 @@ module
     namespace Launcher2 {
 
     /**
+     * A ViewGroup that coordinates dragging across its descendants
+     *
      * @Involve
      * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
      * interface Elastos.Droid.View.IViewGroupLayoutParams

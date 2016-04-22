@@ -1,15 +1,35 @@
 module
 {
+    using interface Elastos.Droid.Content.IComponentName;
+
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
-    /*
-    * @invoke interface IItemInfo
+    /**
+     * Represents an app in AllAppsView.
+     *
+     * @invoke interface IItemInfo
     */
     interface IApplicationInfo {
         const Int32 DOWNLOADED_FLAG = 1;
         const Int32 UPDATED_SYSTEM_APP_FLAG = 2;
+
+        /**
+         * Creates the application intent based on a component name and various launch flags.
+         * Sets {@link #itemType} to {@link LauncherSettings.BaseLauncherColumns#ITEM_TYPE_APPLICATION}.
+         *
+         * @param className the class name of the component representing the intent
+         * @param launchFlags the launch flags
+         */
+        SetActivity(
+            [in] IComponentName* className,
+            [in] Int32 launchFlags);
+
+        MakeShortcut(
+            [out] IShortcutInfo** info);
     }
 
     } // namespace Launcher2

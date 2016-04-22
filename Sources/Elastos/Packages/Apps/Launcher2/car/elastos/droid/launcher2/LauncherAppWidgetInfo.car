@@ -1,13 +1,30 @@
 module
 {
+    interface Elastos.Droid.Launcher2.ILauncher;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
-    /*
-    * @invoke interface IItemInfo
-    */
+    /**
+     * Represents a widget (either instantiated or about to be) in the Launcher.
+     *
+     * @invoke interface IItemInfo
+     */
+    [local]
     interface ILauncherAppWidgetInfo {
+        /**
+         * When we bind the widget, we should notify the widget that the size has changed if we have not
+         * done so already (only really for default workspace widgets).
+         */
+        OnBindAppWidget(
+            [in] ILauncher* launcher);
+
+        /**
+         * Trigger an update callback to the widget to notify it that its size has changed.
+         */
+        NotifyWidgetSizeChanged(
+            [in] ILauncher* launcher);
     }
 
     } // namespace Launcher2

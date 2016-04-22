@@ -30,9 +30,7 @@ CPreloadReceiver::MyRunnable::MyRunnable(
 
 ECode CPreloadReceiver::MyRunnable::Run()
 {
-    assert(0 && "need class LauncherProvider");
-    //return mProvider->LoadDefaultFavoritesIfNecessary(mWorkspaceResId, mOverridePrevious);
-    return NOERROR;
+    return mProvider->LoadDefaultFavoritesIfNecessary(mWorkspaceResId, mOverridePrevious);
 }
 
 const String CPreloadReceiver::TAG("Launcher.PreloadReceiver");
@@ -50,8 +48,7 @@ ECode CPreloadReceiver::OnReceive(
     context->GetApplicationContext((IContext**)&ctx);
     AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
     AutoPtr<ILauncherProvider> provider;
-    assert(0 && "need class LauncherApplication");
-    //app->GetLauncherProvider((ILauncherProvider**)&provider);
+    app->GetLauncherProvider((ILauncherProvider**)&provider);
     if (provider != NULL) {
         String name;
         intent->GetStringExtra(IPreloadReceiver::EXTRA_WORKSPACE_NAME, &name);

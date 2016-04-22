@@ -1,5 +1,7 @@
 
 #include "elastos/droid/launcher2/DragLayer.h"
+#include "elastos/droid/launcher2/CellLayout.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
@@ -362,8 +364,7 @@ Boolean DragLayer::IsEventOverFolderTextRegion(
     /* [in] */ IMotionEvent* ev)
 {
     AutoPtr<IView> view;
-    assert(0 && "need class folder");
-    //folder->GetEditTextRegion((IView**)&view);
+    folder->GetEditTextRegion((IView**)&view);
     Float tmp;
     GetDescendantRectRelativeToSelf(view, mHitRect, &tmp);
     Float x;
@@ -436,31 +437,25 @@ Boolean DragLayer::HandleTouchDown(
     }
 
     AutoPtr<IWorkspace> workspace;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<IFolder> currentFolder;
-    assert(0 && "need class workspace");
-    //workspace->GetOpenFolder((IFolder**)&currentFolder);
+    workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder != NULL) {
         Boolean res;
-        assert(0 && "need class mLauncher");
-        //mLauncher->IsFolderClingVisible(&res);
+        mLauncher->IsFolderClingVisible(&res);
         if (!res  && intercept) {
-            Int32 res2;
-            assert(0 && "need class Folder");
-            //currentFolder->IsEditingName(&res2);
+            Boolean res2;
+            currentFolder->IsEditingName(&res2);
             if (res2) {
                 if (!IsEventOverFolderTextRegion(currentFolder, ev)) {
-                    assert(0 && "need class Folder");
-                    //currentFolder->DismissEditingName();
+                    currentFolder->DismissEditingName();
                     return TRUE;
                 }
             }
             Float tmp;
             GetDescendantRectRelativeToSelf(IView::Probe(currentFolder), hitRect, &tmp);
             if (!IsEventOverFolder(currentFolder, ev)) {
-                assert(0 && "need class mLauncher");
-                //mLauncher->CloseFolder();
+                mLauncher->CloseFolder();
                 return TRUE;
             }
         }
@@ -498,16 +493,14 @@ ECode DragLayer::OnInterceptHoverEvent(
     }
 
     AutoPtr<IWorkspace> workspace;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     if (workspace == NULL) {
         *result = FALSE;
         return NOERROR;
     }
 
     AutoPtr<IFolder> currentFolder;
-    assert(0 && "need class workspace");
-    //workspace->GetOpenFolder((IFolder**)&currentFolder);
+    workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -531,8 +524,7 @@ ECode DragLayer::OnInterceptHoverEvent(
                     isOverFolder = IsEventOverFolder(currentFolder, ev);
                     if (!isOverFolder) {
                         Boolean tmp;
-                        assert(0 && "need class Folder");
-                        //currentFolder->IsEditingName(&tmp);
+                        currentFolder->IsEditingName(&tmp);
                         SendTapOutsideFolderAccessibilityEvent(tmp);
                         mHoverPointClosesFolder = TRUE;
                         *result = TRUE;
@@ -551,8 +543,7 @@ ECode DragLayer::OnInterceptHoverEvent(
                     isOverFolder = IsEventOverFolder(currentFolder, ev);
                     if (!isOverFolder && !mHoverPointClosesFolder) {
                         Boolean tmp;
-                        assert(0 && "need class Folder");
-                        //currentFolder->IsEditingName(&tmp);
+                        currentFolder->IsEditingName(&tmp);
                         SendTapOutsideFolderAccessibilityEvent(tmp);
                         mHoverPointClosesFolder = TRUE;
                         *result = TRUE;
@@ -616,11 +607,9 @@ ECode DragLayer::OnRequestSendAccessibilityEvent(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<IWorkspace> workspace;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<IFolder> currentFolder;
-    assert(0 && "need class workspace");
-    //workspace->GetOpenFolder((IFolder**)&currentFolder);
+    workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder != NULL) {
         if (TO_IINTERFACE(child) == TO_IINTERFACE(currentFolder)) {
             return FrameLayout::OnRequestSendAccessibilityEvent(child, event, result);
@@ -637,11 +626,9 @@ ECode DragLayer::AddChildrenForAccessibility(
     /* [in] */ IArrayList* childrenForAccessibility)
 {
     AutoPtr<IWorkspace> workspace;
-    assert(0 && "need class mLauncher");
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<IFolder> currentFolder;
-    assert(0 && "need class workspace");
-    //workspace->GetOpenFolder((IFolder**)&currentFolder);
+    workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder != NULL) {
         // Only add the folder as a child for accessibility when it is open
         return childrenForAccessibility->Add(TO_IINTERFACE(currentFolder));
@@ -970,7 +957,8 @@ ECode DragLayer::AnimateViewIntoPosition(
 
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<ICellLayoutLayoutParams> lp =  ICellLayoutLayoutParams::Probe(params);
+    AutoPtr<CellLayout::LayoutParams> lp =
+            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(params);
     parentChildren->MeasureChild(child);
 
     AutoPtr<IRect> r;
@@ -980,15 +968,11 @@ ECode DragLayer::AnimateViewIntoPosition(
     AutoPtr<ArrayOf<Int32> > coord = ArrayOf<Int32>::Alloc(2);
     Float childScale;
     child->GetScaleX(&childScale);
-    Int32 x;
-    assert(0 && "need class lp");
-    //lp->GetX(&x);
+    Int32 x = lp->GetX();
     Int32 width;
     child->GetMeasuredWidth(&width);
     (*coord)[0] = x + (Int32)(width * (1 - childScale) / 2);
-    Int32 y;
-    assert(0 && "need class lp");
-    //lp->GetY(&y);
+    Int32 y = lp->GetY();
     Int32 height;
     child->GetMeasuredHeight(&height);
     (*coord)[1] = y + (Int32)(height * (1 - childScale) / 2);
@@ -1254,8 +1238,7 @@ void DragLayer::UpdateChildIndices()
 {
     if (mLauncher != NULL) {
         AutoPtr<IWorkspace> workspace;
-        assert(0 && "need class mLauncher");
-        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
         IndexOfChild(IView::Probe(workspace), &mWorkspaceIndex);
         AutoPtr<ISearchDropTargetBar> bar;
         IndexOfChild(IView::Probe(bar), &mQsbIndex);
@@ -1322,40 +1305,32 @@ ECode DragLayer::DispatchDraw(
     FrameLayout::DispatchDraw(canvas);
 
     Boolean res;
-    assert(0 && "need class LauncherApplication");
-    //LauncherApplication::IsScreenLarge(&res);
+    LauncherApplication::IsScreenLarge(&res);
     if (mInScrollArea && !res) {
         AutoPtr<IWorkspace> workspace;
-        assert(0 && "need class mLauncher");
-        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
         Int32 width;
-        assert(0 && "need class workspace");
-        //workspace->GetWidth(&width);
+        IView::Probe(workspace)->GetWidth(&width);
         AutoPtr<IRect> childRect;
         CRect::New((IRect**)&childRect);
         AutoPtr<IView> view;
-        assert(0 && "need class workspace");
-        //workspace->GetChildAt(0, (IView**)&view);
+        IViewGroup::Probe(workspace)->GetChildAt(0, (IView**)&view);
         Float value;
         GetDescendantRectRelativeToSelf(view, childRect, &value);
 
         Int32 page;
-        assert(0 && "need class workspace");
-        //workspace->GetNextPage(&page);
+        IPagedView::Probe(workspace)->GetNextPage(&page);
         Boolean isRtl = IsLayoutDirectionRtl();
         AutoPtr<IView> tmp;
-        assert(0 && "need class workspace");
-        //workspace->GetChildAt(isRtl ? page + 1 : page - 1, (IView**)&tmp);
+        IViewGroup::Probe(workspace)->GetChildAt(isRtl ? page + 1 : page - 1, (IView**)&tmp);
         AutoPtr<ICellLayout> leftPage = ICellLayout::Probe(tmp);
         AutoPtr<IView> tmp2;
-        assert(0 && "need class workspace");
-        //workspace->GetChildAt(isRtl ? page - 1 : page + 1, (IView**)&tmp2);
+        IViewGroup::Probe(workspace)->GetChildAt(isRtl ? page - 1 : page + 1, (IView**)&tmp2);
         AutoPtr<ICellLayout> rightPage = ICellLayout::Probe(tmp2);
 
         if (leftPage != NULL) {
             Boolean res;
-            assert(0 && "need class ICellLayout");
-            //leftPage->GetIsDragOverlapping(&res);
+            leftPage->GetIsDragOverlapping(&res);
             if (res) {
                 Int32 top;
                 childRect->GetTop(&top);
@@ -1369,8 +1344,7 @@ ECode DragLayer::DispatchDraw(
         }
         else if (rightPage != NULL) {
             Boolean res;
-            assert(0 && "need class ICellLayout");
-            //rightPage->GetIsDragOverlapping(&res);
+            rightPage->GetIsDragOverlapping(&res);
             if (res) {
                 Int32 _width;
                 mRightHoverDrawable->GetIntrinsicWidth(&_width);

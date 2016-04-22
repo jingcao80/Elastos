@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/CAccessibleTabView.h"
+#include "elastos/droid/launcher2/FocusHelper.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
@@ -39,11 +40,10 @@ ECode CAccessibleTabView::OnKeyDown(
 {
     VALIDATE_NOT_NULL(result);
 
-    assert(0 && "need class FocusHelper");
-    // if(FocusHelper::HandleTabKeyEvent(this, keyCode, event)) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
+    if(FocusHelper::HandleTabKeyEvent(IAccessibleTabView::Probe(this), keyCode, event)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     Boolean res;
     TextView::OnKeyDown(keyCode, event, &res);
     *result = res;
@@ -57,11 +57,10 @@ ECode CAccessibleTabView::OnKeyUp(
 {
     VALIDATE_NOT_NULL(result);
 
-    assert(0 && "need class FocusHelper");
-    // if (FocusHelper::HandleTabKeyEvent(this, keyCode, event)) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
+    if (FocusHelper::HandleTabKeyEvent(IAccessibleTabView::Probe(this), keyCode, event)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     Boolean res;
     TextView::OnKeyUp(keyCode, event, &res);
     *result = res;

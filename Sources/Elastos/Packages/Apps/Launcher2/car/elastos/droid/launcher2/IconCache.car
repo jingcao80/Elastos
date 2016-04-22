@@ -4,6 +4,9 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    /**
+     * Cache of application icons.  Icons can be made from any thread.
+     */
     interface IIconCache {
     }
 

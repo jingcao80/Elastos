@@ -134,9 +134,11 @@ ECode Folder::MyAnimatorListenerAdapter::OnAnimationStart(
     mHost->mContent->GetCountX(&x);
     Int32 y;
     mHost->mContent->GetCountY(&y);
-    assert(0);
-    // mHost->SendCustomAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED,
-    //         String::AppendFormat(str, x, y));
+
+    String tmp;
+    tmp.AppendFormat(str, x, y);
+    mHost->SendCustomAccessibilityEvent(
+            IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED, tmp);
     mHost->mState = STATE_ANIMATING;
     return NOERROR;
 }
@@ -147,8 +149,7 @@ ECode Folder::MyAnimatorListenerAdapter::OnAnimationEnd(
     mHost->mState = STATE_OPEN;
     mHost->SetLayerType(LAYER_TYPE_NONE, NULL);
     AutoPtr<ICling> cling;
-    assert(0);
-    //mHost->mLauncher->ShowFirstRunFoldersCling((ICling**)&cling);
+    mHost->mLauncher->ShowFirstRunFoldersCling((ICling**)&cling);
     if (cling != NULL) {
         IView::Probe(cling)->BringToFront();
     }
@@ -223,9 +224,8 @@ ECode Folder::MyRunnable::Run()
 {
     FolderInfo* _Info = (FolderInfo*)(mHost->mInfo.Get());
     AutoPtr<ICellLayout> cellLayout;
-    assert(0);
-    // mHost->mLauncher->GetCellLayout(_Info->mContainer, _Info->mScreen,
-    //         (ICellLayout)&cellLayout);
+    mHost->mLauncher->GetCellLayout(_Info->mContainer, _Info->mScreen,
+            (ICellLayout**)&cellLayout);
 
     AutoPtr<IView> child;
     // Move the item from the folder to the workspace, in the position of the folder
@@ -235,10 +235,9 @@ ECode Folder::MyRunnable::Run()
         AutoPtr<IInterface> obj;
         _Info->mContents->Get(0, (IInterface**)&obj);
         AutoPtr<IShortcutInfo> finalItem = IShortcutInfo::Probe(obj);
-        assert(0);
-        // mHost->mLauncher->CreateShortcut(
-        //         Elastos::Droid::Launcher2::R::layout::application, cellLayout,
-        //         finalItem, (IView**)&child);
+        mHost->mLauncher->CreateShortcut(
+                Elastos::Droid::Launcher2::R::layout::application, IViewGroup::Probe(cellLayout),
+                finalItem, (IView**)&child);
         LauncherModel::AddOrMoveItemInDatabase(IContext::Probe(mHost->mLauncher),
                 IItemInfo::Probe(finalItem), _Info->mContainer, _Info->mScreen,
                 _Info->mCellX, _Info->mCellY);
@@ -252,17 +251,15 @@ ECode Folder::MyRunnable::Run()
         if (IDropTarget::Probe(mHost->mFolderIcon) != NULL) {
             mHost->mDragController->RemoveDropTarget(IDropTarget::Probe(mHost->mFolderIcon));
         }
-        assert(0);
-        //mHost->mLauncher->RemoveFolder(mInfo);
+        mHost->mLauncher->RemoveFolder(mHost->mInfo);
     }
     // We add the child after removing the folder to prevent both from existing at
     // the same time in the CellLayout.
     if (child != NULL) {
         AutoPtr<IWorkspace> workspace;
-        assert(0);
-        //mHost->mLauncher->GetWorkspace((IWorkspace**)&workspace);
-        // workspace->AddInScreen(child, _Info->mContainer, _Info->mScreen,
-        //         _Info->mCellX, _Info->mCellY, _Info->mSpanX, _Info->mSpanY);
+        mHost->mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        workspace->AddInScreen(child, _Info->mContainer, _Info->mScreen,
+                _Info->mCellX, _Info->mCellY, _Info->mSpanX, _Info->mSpanY);
     }
     return NOERROR;
 }
@@ -426,8 +423,8 @@ ECode Folder::OnClick(
         CRect::New((*pos)[0], (*pos)[1], (*pos)[0] + width, (*pos)[1] + height, (IRect**)&rect);
         item->mIntent->SetSourceBounds(rect);
 
-        assert(0);
-        //return mLauncher->StartActivitySafely(v, item->mIntent, item);
+        Boolean tmp;
+        return mLauncher->StartActivitySafely(v, item->mIntent, TO_IINTERFACE(item), &tmp);
     }
     return NOERROR;
 }
@@ -440,8 +437,7 @@ ECode Folder::OnLongClick(
 
     // Return if global dragging is not enabled
     Boolean res;
-    assert(0);
-    //mLauncher->IsDraggingEnabled(&res);
+    mLauncher->IsDraggingEnabled(&res);
     if (!res) {
         *result = TRUE;
         return NOERROR;
@@ -457,14 +453,12 @@ ECode Folder::OnLongClick(
             *result = FALSE;
             return NOERROR;
         }
-        assert(0);
-        //mLauncher->DismissFolderCling(NULL);
+        mLauncher->DismissFolderCling(NULL);
 
         AutoPtr<IWorkspace> workspace;
-        assert(0);
-        // mLauncher->GetWorkspace((IWorkspace**)&workspace);
-        // workspace->OnDragStartedWithItem(v);
-        // workspace->BeginDragShared(v, this);
+        mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        workspace->OnDragStartedWithItem(v);
+        workspace->BeginDragShared(v, this);
         AutoPtr<ITextView> textView = ITextView::Probe(v);
         AutoPtr<ArrayOf<IDrawable*> > array;
         textView->GetCompoundDrawables((ArrayOf<IDrawable*>**)&array);
@@ -476,8 +470,7 @@ ECode Folder::OnLongClick(
         mCurrentDragView = v;
 
         IViewGroup::Probe(mContent)->RemoveView(mCurrentDragView);
-        assert(0);
-        //mInfo->Remove(mCurrentDragInfo);
+        mInfo->Remove(mCurrentDragInfo);
         mDragInProgress = TRUE;
         mItemAddedBackToSelfViaIcon = FALSE;
     }
@@ -522,8 +515,7 @@ ECode Folder::DoneEditingFolderName(
     ITextView::Probe(mFolderName)->GetText((ICharSequence**)&text);
     String newTitle;
     text->ToString(&newTitle);
-    assert(0);
-    //mInfo->SetTitle(newTitle);
+    mInfo->SetTitle(text);
     LauncherModel::UpdateItemInDatabase(IContext::Probe(mLauncher), (ItemInfo*)IItemInfo::Probe(mInfo));
 
     if (commit) {
@@ -533,9 +525,10 @@ ECode Folder::DoneEditingFolderName(
         context->GetString(
             Elastos::Droid::Launcher2::R::string::folder_renamed,
             &str);
-        assert(0);
-        // SendCustomAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED,
-        //         String::Format(str, newTitle));
+
+        String arg;
+        arg.AppendFormat(str, newTitle.string());
+        SendCustomAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED, arg);
     }
     // In order to clear the focus from the text field, we set the focus on ourself. This
     // ensures that every time the field is clicked, focus is gained, giving reliable behavior.
@@ -704,23 +697,18 @@ ECode Folder::Bind(
         overflow->Get(i, (IInterface**)&obj);
         AutoPtr<IShortcutInfo> item = IShortcutInfo::Probe(obj);
 
-        assert(0);
-        //mInfo->Remove(item);
+        mInfo->Remove(item);
         LauncherModel::DeleteItemFromDatabase(IContext::Probe(mLauncher),
                 (ItemInfo*)IItemInfo::Probe(item));
     }
 
     mItemsInvalidated = TRUE;
     UpdateTextViewFocus();
-    assert(0);
-    //mInfo->AddListener(this);
+    mInfo->AddListener(this);
 
     String str;
     ((FolderInfo*)mInfo.Get())->mTitle->ToString(&str);
-    Boolean res;
-    assert(0);
-    //sDefaultFolderName.ContentEquals(str, &res);
-    if (!res) {
+    if (!sDefaultFolderName.Equals(str)) {
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
         ITextView::Probe(mFolderName)->SetText(cchar);
     }
@@ -922,9 +910,7 @@ ECode Folder::CreateAndAddShortcut(
             (IView**)&view);
     AutoPtr<ITextView> textView = ITextView::Probe(view);
     AutoPtr<ShortcutInfo> _item = (ShortcutInfo*)item;
-    AutoPtr<IBitmap> map;
-    assert(0);
-    //item->GetIcon(mIconCache, (IBitmap**)&map);
+    AutoPtr<IBitmap> map = _item->GetIcon((IconCache*)mIconCache.Get());
     AutoPtr<FastBitmapDrawable> drawable = new FastBitmapDrawable();
     drawable->constructor(map);
     textView->SetCompoundDrawablesWithIntrinsicBounds(NULL,
@@ -1107,7 +1093,8 @@ AutoPtr<ArrayOf<Float> > Folder::GetDragViewVisualCenter(
     AutoPtr<ArrayOf<Float> >  res;
     if (recycle == NULL) {
         res = ArrayOf<Float>::Alloc(2);
-    } else {
+    }
+    else {
         res = recycle;
     }
 
@@ -1133,8 +1120,7 @@ AutoPtr<ArrayOf<Float> > Folder::GetDragViewVisualCenter(
 
 ECode Folder::CompleteDragExit()
 {
-    assert(0);
-    //mLauncher->CloseFolder();
+    mLauncher->CloseFolder();
     mCurrentDragInfo = NULL;
     mCurrentDragView = NULL;
     mSuppressOnAdd = FALSE;
@@ -1361,19 +1347,15 @@ void Folder::CenterAboutIcon()
     Int32 centeredTop = centerY - height / 2;
 
     AutoPtr<IWorkspace> workspace;
-    assert(0);
-    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     Int32 currentPage;
-    assert(0);
-    //workspace->GetCurrentPage(&currentPage);
+    IPagedView::Probe(workspace)->GetCurrentPage(&currentPage);
     // In case the workspace is scrolling, we need to use the final scroll to compute
     // the folders bounds.
-    assert(0);
-    //workspace->SetFinalScrollForPageChange(currentPage);
+    workspace->SetFinalScrollForPageChange(currentPage);
     // We first fetch the currently visible CellLayoutChildren
     AutoPtr<IView> view2;
-    assert(0);
-    //workspace->GetChildAt(currentPage, (IView**)&view2);
+    IViewGroup::Probe(workspace)->GetChildAt(currentPage, (IView**)&view2);
     AutoPtr<ICellLayout> currentLayout = ICellLayout::Probe(view2);
     AutoPtr<IShortcutAndWidgetContainer> boundingLayout;
     currentLayout->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&boundingLayout);
@@ -1382,8 +1364,7 @@ void Folder::CenterAboutIcon()
     Float tmp;
     parent->GetDescendantRectRelativeToSelf(IView::Probe(boundingLayout), bounds, &tmp);
     // We reset the workspaces scroll
-    assert(0);
-    //workspace->ResetFinalScrollForPageChange(currentPage);
+    workspace->ResetFinalScrollForPageChange(currentPage);
 
     // We need to bound the folder to the currently visible CellLayoutChildren
 
@@ -1633,8 +1614,7 @@ ECode Folder::OnDrop(
     AutoPtr<IShortcutInfo> item;
     if (IApplicationInfo::Probe(_d->mDragInfo) != NULL) {
         // Came from all apps -- make a copy
-        assert(0);
-        //IApplicationInfo::Probe(_d->mDragInfo)->MakeShortcut((IShortcutInfo**)&item);
+        IApplicationInfo::Probe(_d->mDragInfo)->MakeShortcut((IShortcutInfo**)&item);
         ShortcutInfo* _item = (ShortcutInfo*)item.Get();
         _item->mSpanX = 1;
         _item->mSpanY = 1;
@@ -1653,8 +1633,8 @@ ECode Folder::OnDrop(
         mCurrentDragView->GetLayoutParams((IViewGroupLayoutParams**)&res);
         CellLayout::LayoutParams* lp = (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(res);
         lp->mCellX = (*mEmptyCell)[0];
-        lp->mCellY = (*mEmptyCell)[1];
         si->mCellX = (*mEmptyCell)[0];
+        lp->mCellY = (*mEmptyCell)[1];
         assert(0 && "not mCellY???");
         si->mCellX = (*mEmptyCell)[1];
 
@@ -1666,8 +1646,7 @@ ECode Folder::OnDrop(
         _d->mDragView->HasDrawn(&success);
         if (success) {
             AutoPtr<IDragLayer> dragLayer;
-            assert(0);
-            //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+            mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
             dragLayer->AnimateViewIntoPosition(_d->mDragView, mCurrentDragView);
         }
         else {
@@ -1680,9 +1659,7 @@ ECode Folder::OnDrop(
         SetupContentDimensions(count);
         mSuppressOnAdd = TRUE;
     }
-    assert(0);
-    //return mInfo->Add(TO_IINTERFACE(item));
-    return NOERROR;
+    return mInfo->Add(item);
 }
 
 ECode Folder::HideItem(
@@ -1811,8 +1788,7 @@ ECode Folder::GetLocationInDragLayer(
     /* [in] */ ArrayOf<Int32>* loc)
 {
     AutoPtr<IDragLayer> dragLayer;
-    assert(0);
-    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     Float tmp;
     return dragLayer->GetLocationInDragLayer(IView::Probe(this), loc, &tmp);
 }

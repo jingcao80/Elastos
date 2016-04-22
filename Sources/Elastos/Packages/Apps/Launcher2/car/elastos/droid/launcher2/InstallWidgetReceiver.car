@@ -4,6 +4,10 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    /**
+     * We will likely flesh this out later, to handle allow external apps to place widgets, but for now,
+     * we just want to expose the action around for checking elsewhere.
+     */
     interface IInstallWidgetReceiver {
         const String ACTION_INSTALL_WIDGET =
                 "com.android.launcher.action.INSTALL_WIDGET";

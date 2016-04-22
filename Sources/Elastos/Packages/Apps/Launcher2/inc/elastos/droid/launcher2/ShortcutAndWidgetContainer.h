@@ -43,8 +43,8 @@ public:
         /* [in] */ Int32 y,
         /* [out] */ IView** view);
 
-    //CARAPI SetupLp(
-    //    /* [in] */ CellLayout::LayoutParams* lp);
+    CARAPI SetupLp(
+        /* [in] */ ICellLayoutLayoutParams* lp);
 
     // Set whether or not to invert the layout horizontally if the layout is in RTL mode.
     CARAPI SetInvertIfRtl(

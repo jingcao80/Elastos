@@ -1,0 +1,31 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    enum LauncherViewPropertyAnimatorProperties {
+        LauncherViewPropertyAnimator_TRANSLATION_X,
+        LauncherViewPropertyAnimator_TRANSLATION_Y,
+        LauncherViewPropertyAnimator_SCALE_X,
+        LauncherViewPropertyAnimator_SCALE_Y,
+        LauncherViewPropertyAnimator_ROTATION_Y,
+        LauncherViewPropertyAnimator_ALPHA,
+        LauncherViewPropertyAnimator_START_DELAY,
+        LauncherViewPropertyAnimator_DURATION,
+        LauncherViewPropertyAnimator_INTERPOLATOR,
+    }
+
+    /**
+     * @Involve
+     * interface IAnimatorListener
+     * interface ICloneable
+     * interface IAnimator
+     */
+    interface ILauncherViewPropertyAnimator {
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -47,6 +47,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * The data needed to perform either of the custom AsyncTasks.
+ */
 class AsyncTaskPageData
     : public Object
     , public IAppsCustomizePagedViewAsyncTaskPageData
@@ -78,6 +81,9 @@ public:
     AutoPtr<IWidgetPreviewLoader> mWidgetPreviewLoader;
 };
 
+/**
+ * A generic template for an async task used in AppsCustomize.
+ */
 class AppsCustomizeAsyncTask
     : public AsyncTask
     , public IAppsCustomizePagedViewAppsCustomizeAsyncTask
@@ -111,6 +117,9 @@ public:
     Int32 mThreadPriority;
 };
 
+/**
+ * The Apps/Customize page that displays all the applications, widgets, and shortcuts.
+ */
 CarClass(CAppsCustomizePagedView)
     , public PagedViewWithDraggableItems
     , public IAppsCustomizePagedView
@@ -309,24 +318,20 @@ public:
     CARAPI GetContent(
         /* [out] */ IView** view);
 
-    //@Override
     CARAPI OnLauncherTransitionPrepare(
         /* [in] */ ILauncher* l,
         /* [in] */ Boolean animated,
         /* [in] */ Boolean toWorkspace);
 
-    //@Override
     CARAPI OnLauncherTransitionStart(
         /* [in] */ ILauncher* l,
         /* [in] */ Boolean animated,
         /* [in] */ Boolean toWorkspace);
 
-    //@Override
     CARAPI OnLauncherTransitionStep(
         /* [in] */ ILauncher* l,
-        /* [in] */ float t);
+        /* [in] */ Float t);
 
-    //@Override
     CARAPI OnLauncherTransitionEnd(
         /* [in] */ ILauncher* l,
         /* [in] */ Boolean animated,

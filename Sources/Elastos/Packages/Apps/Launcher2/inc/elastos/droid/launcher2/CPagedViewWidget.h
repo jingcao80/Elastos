@@ -10,9 +10,9 @@ namespace Droid {
 namespace Launcher2 {
 
 /**
- * We use a custom tab view to process our own focus traversals.
+ * The linear layout used strictly for the widget/wallpaper tab of the customization tray
  */
- CarClass(CPagedViewWidget)
+CarClass(CPagedViewWidget)
     , public PagedViewWidget
 {
 public:

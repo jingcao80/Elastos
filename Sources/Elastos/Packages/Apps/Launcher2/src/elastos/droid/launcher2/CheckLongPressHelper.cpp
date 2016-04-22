@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/CheckLongPressHelper.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
@@ -50,10 +51,11 @@ ECode CheckLongPressHelper::PostCheckForLongPress()
     if (mPendingCheckForLongPress == NULL) {
         mPendingCheckForLongPress = new CheckForLongPress(this);
     }
-    //Boolean res;
-    assert(0 && "need class LauncherApplication");
-    //return mView->PostDelayed(mPendingCheckForLongPress, LauncherApplication::GetLongPressTimeout(), &res);
-    return NOERROR;
+
+    Int32 timeout;
+    LauncherApplication::GetLongPressTimeout(&timeout);
+    Boolean res;
+    return mView->PostDelayed(mPendingCheckForLongPress, timeout, &res);
 }
 
 void CheckLongPressHelper::CancelLongPress()

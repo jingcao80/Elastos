@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/LauncherProvider.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/launcher2/Utilities.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/os/Process.h"
@@ -169,8 +170,7 @@ ECode LauncherProvider::DatabaseHelper::OnCreate(
 ECode LauncherProvider::DatabaseHelper::SetFlagToLoadDefaultWorkspaceLater()
 {
     String spKey;
-    assert(0);
-    //LauncherApplication::GetSharedPreferencesKey(&spKey);
+    LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sp;
     mContext->GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&sp);
     AutoPtr<ISharedPreferencesEditor> editor;
@@ -574,15 +574,113 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
     AutoPtr<ICursor> c;
     String actionQuickContact("com.android.contacts.action.QUICK_CONTACT");
     db->BeginTransaction();
-    //try {
-    // Select and iterate through each matching widget
-    AutoPtr<ArrayOf<String> > stringArray = ArrayOf<String>::Alloc(2);
-    (*stringArray)[0] = IBaseColumns::ID;
-    (*stringArray)[1] = ILauncherSettingsBaseLauncherColumns::INTENT;
-    ECode ec = db->Query(TABLE_FAVORITES, stringArray,
-            selectWhere, NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+    //try
+    ECode ec;
+    {
+        // Select and iterate through each matching widget
+        AutoPtr<ArrayOf<String> > stringArray = ArrayOf<String>::Alloc(2);
+        (*stringArray)[0] = IBaseColumns::ID;
+        (*stringArray)[1] = ILauncherSettingsBaseLauncherColumns::INTENT;
+        FAIL_GOTO(ec = db->Query(TABLE_FAVORITES, stringArray,
+                selectWhere, NULL, String(NULL), String(NULL), String(NULL),
+                (ICursor**)&c), ERROR2)
+
+        if (c == NULL) {
+            *result = FALSE;
+            db->EndTransaction();
+            return NOERROR;
+        }
+
+        Int32 count;
+        FAIL_GOTO(ec = c->GetCount(&count), ERROR2)
+        if (LOGD) Slogger::D(LauncherProvider::TAG, "found upgrade cursor count=%d", count);
+
+        Int32 idIndex;
+        FAIL_GOTO(ec = c->GetColumnIndex(IBaseColumns::ID, &idIndex), ERROR2)
+        Int32 intentIndex;
+        FAIL_GOTO(ec = c->GetColumnIndex(ILauncherSettingsBaseLauncherColumns::INTENT,
+                &intentIndex), ERROR2)
+
+        Boolean res;
+        while (c->MoveToNext(&res), res) {
+            Int64 favoriteId;
+            FAIL_GOTO(ec = c->GetInt64(idIndex, &favoriteId), ERROR2)
+            String intentUri;
+            FAIL_GOTO(ec = c->GetString(intentIndex, &intentUri), ERROR2)
+            if (!intentUri.IsNull()) {
+                //try
+                {
+                    AutoPtr<IIntentHelper> helper;
+                    CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
+                    AutoPtr<IIntent> intent;
+                    helper->ParseUri(intentUri, 0, (IIntent**)&intent);
+                    String str;
+                    intent->ToString(&str);
+                    Slogger::D("Home", str);
+                    AutoPtr<IUri> uri;
+                    FAIL_GOTO(ec =intent->GetData((IUri**)&uri), ERROR1)
+                    if (uri != NULL) {
+                        String data;
+                        IObject::Probe(uri)->ToString(&data);
+                        String action;
+                        FAIL_GOTO(ec =intent->GetAction(&action), ERROR1)
+                        if ((action.Equals(IIntent::ACTION_VIEW) || actionQuickContact.Equals(action))
+                                    && (data.StartWith(String("content://contacts/people/"))
+                                    || data.StartWith(String("content://com.android.contacts/contacts/lookup/")))) {
+                            AutoPtr<IIntent> newIntent;
+                            CIntent::New(actionQuickContact, (IIntent**)&newIntent);
+                            // When starting from the launcher, start in a new, cleared task
+                            // CLEAR_WHEN_TASK_RESET cannot reset the root of a task, so we
+                            // clear the whole thing preemptively here since
+                            // QuickContactActivity will finish itself when launching other
+                            // detail activities.
+                            FAIL_GOTO(ec = newIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
+                                    IIntent::FLAG_ACTIVITY_CLEAR_TASK), ERROR1)
+                            FAIL_GOTO(ec = newIntent->PutExtra(
+                                    ILauncher::INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION, TRUE), ERROR1)
+                            FAIL_GOTO(ec = newIntent->SetData(uri), ERROR1)
+                            // Determine the type and also put that in the shortcut
+                            // (that can speed up launch a bit)
+                            String type;
+                            FAIL_GOTO(ec = newIntent->ResolveType(mContext, &type), ERROR1)
+                            FAIL_GOTO(ec = newIntent->SetDataAndType(uri, type), ERROR1)
+
+                            AutoPtr<IContentValues> values;
+                            CContentValues::New((IContentValues**)&values);
+                            String str;
+                            FAIL_GOTO(ec = newIntent->ToURI(&str), ERROR1)
+                            FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::INTENT,
+                                    str), ERROR1)
+
+                            StringBuilder sb;
+                            sb += IBaseColumns::ID;
+                            sb += "=";
+                            sb += favoriteId;
+                            String updateWhere = sb.ToString();
+                            Int32 tmp;
+                            FAIL_GOTO(ec = db->Update(TABLE_FAVORITES, values, updateWhere,
+                                    NULL, &tmp), ERROR1)
+                        }
+                    }
+                }
+            ERROR1:
+                //} catch (RuntimeException ex) {
+                if (ec == (ECode)E_RUNTIME_EXCEPTION) {
+                    Slogger::E("LauncherProvider", "Problem upgrading shortcut %d", ec);
+                }
+                //} catch (URISyntaxException e) {
+                if (ec == (ECode)E_URI_SYNTAX_EXCEPTION) {
+                    Slogger::E("LauncherProvider", "Problem upgrading shortcut %d", ec);
+                }
+                //}
+            }
+        }
+        FAIL_GOTO(ec = db->SetTransactionSuccessful(), ERROR2)
+    }
+
+ERROR2:
     if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(LauncherProvider::TAG, "Problem while upgrading contacts%d", ec);
+        Slogger::W("LauncherProvider", "Problem while upgrading contacts %d", ec);
         db->EndTransaction();
         if (c != NULL) {
             ICloseable::Probe(c)->Close();
@@ -590,97 +688,6 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
         *result = FALSE;
         return NOERROR;
     }
-    if (c == NULL) {
-        *result = FALSE;
-        db->EndTransaction();
-        return NOERROR;
-    }
-
-    Int32 count;
-    c->GetCount(&count);
-    if (LOGD) Slogger::D(LauncherProvider::TAG, "found upgrade cursor count=%d", count);
-
-    Int32 idIndex;
-    c->GetColumnIndex(IBaseColumns::ID, &idIndex);
-    Int32 intentIndex;
-    c->GetColumnIndex(ILauncherSettingsBaseLauncherColumns::INTENT, &intentIndex);
-
-    Boolean res;
-    while (c->MoveToNext(&res), res) {
-        Int64 favoriteId;
-        c->GetInt64(idIndex, &favoriteId);
-        String intentUri;
-        c->GetString(intentIndex, &intentUri);
-        if (!intentUri.IsNull()) {
-            //try {
-            AutoPtr<IIntentHelper> helper;
-            CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-            AutoPtr<IIntent> intent;
-            helper->ParseUri(intentUri, 0, (IIntent**)&intent);
-            String str;
-            intent->ToString(&str);
-            Slogger::D("Home", str);
-            AutoPtr<IUri> uri;
-            intent->GetData((IUri**)&uri);
-            if (uri != NULL) {
-                String data;
-                IObject::Probe(uri)->ToString(&data);
-                String action;
-                intent->GetAction(&action);
-                if ((action.Equals(IIntent::ACTION_VIEW) || actionQuickContact.Equals(action))
-                            && (data.StartWith(String("content://contacts/people/"))
-                            || data.StartWith(String("content://com.android.contacts/contacts/lookup/")))) {
-                    AutoPtr<IIntent> newIntent;
-                    CIntent::New(actionQuickContact, (IIntent**)&newIntent);
-                    // When starting from the launcher, start in a new, cleared task
-                    // CLEAR_WHEN_TASK_RESET cannot reset the root of a task, so we
-                    // clear the whole thing preemptively here since
-                    // QuickContactActivity will finish itself when launching other
-                    // detail activities.
-                    newIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
-                            IIntent::FLAG_ACTIVITY_CLEAR_TASK);
-                    newIntent->PutExtra(
-                            ILauncher::INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION, TRUE);
-                    newIntent->SetData(uri);
-                    // Determine the type and also put that in the shortcut
-                    // (that can speed up launch a bit)
-                    String type;
-                    newIntent->ResolveType(mContext, &type);
-                    newIntent->SetDataAndType(uri, type);
-
-                    AutoPtr<IContentValues> values;
-                    CContentValues::New((IContentValues**)&values);
-                    String str;
-                    newIntent->ToURI(&str);
-                    values->Put(LauncherSettings::Favorites::INTENT, str);
-
-                    StringBuilder sb;
-                    sb += IBaseColumns::ID;
-                    sb += "=";
-                    sb += favoriteId;
-                    String updateWhere = sb.ToString();
-                    Int32 tmp;
-                    ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL, &tmp);
-                    if (ec == (ECode)E_SQL_EXCEPTION) {
-                        Slogger::W(LauncherProvider::TAG, "Problem while upgrading contacts %d", ec);
-                        db->EndTransaction();
-                        if (c != NULL) {
-                            ICloseable::Probe(c)->Close();
-                        }
-                        *result = FALSE;
-                        return NOERROR;
-                    }
-                }
-            }
-            assert(0);
-            //} catch (RuntimeException ex) {
-                //Slogger::E(TAG, "Problem upgrading shortcut", ex);
-            //} catch (URISyntaxException e) {
-                //Slogger::E(TAG, "Problem upgrading shortcut", e);
-            //}
-        }
-    }
-    db->SetTransactionSuccessful();
     // } catch (SQLException ex) {
     //     Log.w(TAG, "Problem while upgrading contacts", ex);
     //     return false;
@@ -699,89 +706,83 @@ ECode LauncherProvider::DatabaseHelper::NormalizeIcons(
     /* [in] */ ISQLiteDatabase* db)
 {
     Slogger::D(LauncherProvider::TAG, "normalizing icons");
-    assert(0);
-//     db->BeginTransaction();
-//     AutoPtr<ICursor> c;
-//     AutoPtr<ISQLiteStatement> update;
-//     //try {
-//     Boolean logged = FALSE;
-//     ECode ec = db->CompileStatement(String("UPDATE favorites SET icon=? WHERE _id=?"),
-//             (ISQLiteStatement**)&update);
-//     if (ec == (ECode)E_SQL_EXCEPTION) {
-//         Slogger::W(LauncherProvider::TAG,
-//                 "Problem while allocating appWidgetIds for existing widgets %d", ec);
-//         goto FINALLY;
-//     }
+    db->BeginTransaction();
+    AutoPtr<ICursor> c;
+    AutoPtr<ISQLiteStatement> update;
+    //try
+    ECode ec;
+    {
+        Boolean logged = FALSE;
+        StringBuilder sb;
+        Int32 idIndex;
+        Int32 iconIndex;
 
-//     StringBuilder sb;
-//     sb += "SELECT _id, icon FROM favorites WHERE iconType=";
-//     sb += ILauncherSettingsBaseLauncherColumns::ICON_TYPE_BITMAP;
-//     ec = db->RawQuery(sb.ToString(), NULL, (ICursor**)&c);
-//     if (ec == (ECode)E_SQL_EXCEPTION) {
-//         Slogger::W(LauncherProvider::TAG,
-//                 "Problem while allocating appWidgetIds for existing widgets %d", ec);
-//         goto FINALLY;
-//     }
+        FAIL_GOTO(ec = db->CompileStatement(String("UPDATE favorites SET icon=? WHERE _id=?"),
+                (ISQLiteStatement**)&update), ERROR2)
+        sb += "SELECT _id, icon FROM favorites WHERE iconType=";
+        sb += ILauncherSettingsBaseLauncherColumns::ICON_TYPE_BITMAP;
+        FAIL_GOTO(ec = db->RawQuery(sb.ToString(), NULL, (ICursor**)&c), ERROR2)
+        FAIL_GOTO(ec = c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex), ERROR2)
+        FAIL_GOTO(ec = c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON,
+                &iconIndex), ERROR2)
 
-//     Int32 idIndex;
-//     c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex);
-//     Int32 iconIndex;
-//     c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON, &iconIndex);
+        Boolean res;
+        while (c->MoveToNext(&res), res) {
+            Int64 id;
+            FAIL_GOTO(ec = c->GetInt64(idIndex, &id), ERROR2)
+            AutoPtr<ArrayOf<Byte> > data;
+            FAIL_GOTO(ec = c->GetBlob(iconIndex, (ArrayOf<Byte>**)&data), ERROR2)
+            //try
+            {
+                AutoPtr<IBitmapFactory> factory;
+                CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
+                AutoPtr<IBitmap> _bitmap;
+                AutoPtr<IBitmap> bitmap;
+                FAIL_GOTO(factory->DecodeByteArray(data, 0, data->GetLength(),
+                        (IBitmap**)&_bitmap), ERROR1)
 
-//     Boolean res;
-//     while (c->MoveToNext(&res), res) {
-//         Int64 id;
-//         c->GetInt64(idIndex, &id);
-//         AutoPtr<ArrayOf<Byte> > data;
-//         c->GetBlob(iconIndex, (ArrayOf<Byte>**)&data);
-//         //try {
-//         AutoPtr<IBitmapFactory> factory;
-//         CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
-//         AutoPtr<IBitmap> _bitmap;
-//         AutoPtr<IBitmap> bitmap;
-//         FAIL_GOTO(factory->DecodeByteArray(data, 0, data->GetLength(),
-//                 (IBitmap**)&_bitmap), ERROR)
+                bitmap = Utilities::ResampleIconBitmap(_bitmap, mContext);
+                if (bitmap != NULL) {
+                    FAIL_GOTO(ISQLiteProgram::Probe(update)->BindInt64(1, id), ERROR1)
+                    data = ItemInfo::FlattenBitmap(bitmap);
+                    if (data != NULL) {
+                        FAIL_GOTO(ISQLiteProgram::Probe(update)->BindBlob(2, *data), ERROR1)
+                        FAIL_GOTO(update->Execute(), ERROR1)
+                    }
+                    FAIL_GOTO(bitmap->Recycle(), ERROR1)
+                }
+            }
+            //} catch (Exception e) {
+        ERROR1:
+            if (!logged) {
+                Slogger::E(LauncherProvider::TAG, "Failed normalizing icon " /*+ id, e*/);
+            }
+            else {
+                Slogger::E(LauncherProvider::TAG, "Also failed normalizing icon "/* + id*/);
+            }
+            logged = TRUE;
+        //}
+        }
 
-//         bitmap = Utilities::ResampleIconBitmap(_bitmap, mContext);
-//         if (bitmap != NULL) {
-//             FAIL_GOTO(ISQLiteProgram::Probe(update)->BindInt64(1, id), ERROR)
-//             data = ItemInfo::FlattenBitmap(bitmap);
-//             if (data != NULL) {
-//                 FAIL_GOTO(ISQLiteProgram::Probe(update)->BindBlob(2, *data), ERROR)
-//                 FAIL_GOTO(update->Execute(), ERROR)
-//             }
-//             FAIL_GOTO(bitmap->Recycle(), ERROR)
-//         }
-//         //} catch (Exception e) {
-// ERROR:
-//             if (!logged) {
-//                 Slogger::E(LauncherProvider::TAG, "Failed normalizing icon " /*+ id, e*/);
-//             } else {
-//                 Slogger::E(LauncherProvider::TAG, "Also failed normalizing icon "/* + id*/);
-//             }
-//             logged = true;
-//             goto FINALLY;
-//         //}
-//     }
-//     ec = db->SetTransactionSuccessful();
-//     if (ec == (ECode)E_SQL_EXCEPTION) {
-//         Slogger::W(LauncherProvider::TAG,
-//                 "Problem while allocating appWidgetIds for existing widgets %d", ec);
-//         goto FINALLY;
-//     }
-//     //} catch (SQLException ex) {
-//         //Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-//     //} finally {
-// FINALLY:
-//     db->EndTransaction();
-//     if (update != NULL) {
-//         update->Close();
-//     }
-//     if (c != NULL) {
-//         ICloseable::Probe(c)->Close();
-//     }
-//     //}
-//     return NOERROR;
+        ec = db->SetTransactionSuccessful();
+
+    ERROR2:
+        if (ec == (ECode)E_SQL_EXCEPTION) {
+            Slogger::W(LauncherProvider::TAG,
+                    "Problem while allocating appWidgetIds for existing widgets %d", ec);
+        }
+    }
+    //} catch (SQLException ex) {
+        //Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
+    //} finally {
+    db->EndTransaction();
+    if (update != NULL) {
+        ICloseable::Probe(update)->Close();
+    }
+    if (c != NULL) {
+        ICloseable::Probe(c)->Close();
+    }
+    //}
     return NOERROR;
 }
 
@@ -836,130 +837,135 @@ ECode LauncherProvider::DatabaseHelper::InitializeMaxId(
 ECode LauncherProvider::DatabaseHelper::ConvertWidgets(
     /* [in] */ ISQLiteDatabase* db)
 {
-    assert(0);
+    AutoPtr<IAppWidgetManagerHelper> helper;
+    CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
+    AutoPtr<IAppWidgetManager> appWidgetManager;
+    helper->GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
+
+    AutoPtr<ArrayOf<Int32> > bindSources = ArrayOf<Int32>::Alloc(3);
+    (*bindSources)[0] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK;
+    (*bindSources)[1] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_PHOTO_FRAME;
+    (*bindSources)[2] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH;
+
+    String selectWhere;
+    BuildOrWhereString(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, bindSources, &selectWhere);
+
+    AutoPtr<ICursor> c;
+
+    db->BeginTransaction();
+    //try
+    ECode ec;
+    {
+        // Select and iterate through each matching widget
+        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
+        (*array)[0] = IBaseColumns::ID;
+        (*array)[1] = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE;
+        FAIL_GOTO(ec = db->Query(TABLE_FAVORITES, array,
+                selectWhere, NULL, String(NULL), String(NULL), String(NULL),
+                (ICursor**)&c), ERROR2)
+
+        if (LOGD) Slogger::D("LauncherProvider", "found upgrade cursor count=" /*+ c.getCount()*/);
+
+        AutoPtr<IContentValues> values;
+        CContentValues::New((IContentValues**)&values);
+        Boolean res;
+        while (c != NULL && (c->MoveToNext(&res), res)) {
+            Int64 favoriteId;
+            FAIL_GOTO(ec = c->GetInt64(0, &favoriteId), ERROR2)
+            Int32 favoriteType;
+            FAIL_GOTO(ec = c->GetInt32(1, &favoriteType), ERROR2)
+
+            // Allocate and update database with new appWidgetId
+            //try
+            {
+                Int32 appWidgetId;
+                FAIL_GOTO(ec = mAppWidgetHost->AllocateAppWidgetId(&appWidgetId), ERROR1)
+
+                if (LOGD) {
+                    StringBuilder sb;
+                    sb += "allocated appWidgetId=";
+                    sb += appWidgetId;
+                    sb += " for favoriteId=";
+                    sb += favoriteId;
+                    Slogger::D("LauncherProvider", sb.ToString());
+                }
+                FAIL_GOTO(ec = values->Clear(), ERROR1)
+                FAIL_GOTO(ec = values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+                        LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET), ERROR1)
+                FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::APPWIDGET_ID,
+                        appWidgetId), ERROR1)
+
+                // Original widgets might not have valid spans when upgrading
+                if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH) {
+                    FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SPANX, 4), ERROR1)
+                    FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SPANY, 1), ERROR1)
+                }
+                else {
+                    FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SPANX, 2), ERROR1)
+                    FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SPANY, 2), ERROR1)
+                }
+
+                StringBuilder sb;
+                sb += IBaseColumns::ID;
+                sb += "=";
+                sb += favoriteId;
+                String updateWhere;
+                sb.ToString(&updateWhere);
+                Int32 tmp;
+                FAIL_GOTO(ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL, &tmp), ERROR1)
+
+                if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK) {
+                    // TODO: check return value
+                    AutoPtr<IComponentName> name;
+                    CComponentName::New(String("com.android.alarmclock"),
+                            String("com.android.alarmclock.AnalogAppWidgetProvider"),
+                            (IComponentName**)&name);
+                    Boolean res;
+                    FAIL_GOTO(ec = appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name,
+                            &res), ERROR1)
+                }
+                else if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_PHOTO_FRAME) {
+                    // TODO: check return value
+                    AutoPtr<IComponentName> name;
+                    CComponentName::New(String("com.android.camera"),
+                            String("com.android.camera.PhotoAppWidgetProvider"),
+                            (IComponentName**)&name);
+                    Boolean res;
+                    FAIL_GOTO(ec = appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name,
+                            &res), ERROR1)
+                }
+                else if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH) {
+                    // TODO: check return value
+                    AutoPtr<IComponentName> name;
+                    GetSearchWidgetProvider((IComponentName**)&name);
+                    Boolean res;
+                    FAIL_GOTO(ec = appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name,
+                            &res), ERROR1)
+                }
+            }
+            //} catch (RuntimeException ex) {
+        ERROR1:
+                if (ec == (ECode)E_SQL_EXCEPTION) {
+                    Slogger::W("LauncherProvider", "Problem while allocating appWidgetIds for existing widgets");
+                }
+            //}
+        }
+
+        FAIL_GOTO(ec = db->SetTransactionSuccessful(), ERROR2)
+    }
+    //} catch (SQLException ex) {
+ERROR2:
+    if (ec == (ECode)E_SQL_EXCEPTION) {
+        Slogger::W("LauncherProvider", "Problem while allocating appWidgetIds for existing widgets");
+    }
+    //    Log.w(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
+    //} finally {
+    db->EndTransaction();
+    if (c != NULL) {
+        return ICloseable::Probe(c)->Close();
+    }
+    //}
     return NOERROR;
-//     AutoPtr<IAppWidgetManagerHelper> helper;
-//     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
-//     AutoPtr<IAppWidgetManager> appWidgetManager;
-//     helper->GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
-
-//     AutoPtr<ArrayOf<Int32> > bindSources = ArrayOf<Int32>::Alloc(3);
-//     (*bindSources)[0] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK;
-//     (*bindSources)[1] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_PHOTO_FRAME;
-//     (*bindSources)[2] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH;
-
-//     String selectWhere;
-//     BuildOrWhereString(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, bindSources, &selectWhere);
-
-//     AutoPtr<ICursor> c;
-
-//     db->BeginTransaction();
-//     //try {
-//     // Select and iterate through each matching widget
-//     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
-//     (*array)[0] = IBaseColumns::ID;
-//     (*array)[1] = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE;
-//     ECode ec = db->Query(TABLE_FAVORITES, array,
-//             selectWhere, NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
-//     if (ec == (ECode)E_SQL_EXCEPTION) {
-//         Slogger::W(LauncherProvider::TAG, "Problem while allocating appWidgetIds for existing widgets");
-//         goto FINALLY;
-//     }
-
-//     if (LOGD) Slogger::D(LauncherProvider::TAG, "found upgrade cursor count=" /*+ c.getCount()*/);
-
-//     AutoPtr<IContentValues> values;
-//     CContentValues::New((IContentValues**)&values);
-//     Boolean res;
-//     while (c != NULL && (c->MoveToNext(&res), res)) {
-//         Int64 favoriteId;
-//         c->GetInt64(0, &favoriteId);
-//         Int32 favoriteType;
-//         c->GetInt32(1, &favoriteType);
-
-//         // Allocate and update database with new appWidgetId
-//         //try {
-//         Int32 appWidgetId;
-//         mAppWidgetHost->AllocateAppWidgetId(&appWidgetId);
-
-//         if (LOGD) {
-//             assert(0);
-//             // Slogger::D(LauncherProvider::TAG, "allocated appWidgetId=" + appWidgetId
-//             //         + " for favoriteId=" + favoriteId);
-//         }
-//         values->Clear();
-//         values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
-//                 LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET);
-//         values->Put(LauncherSettings::Favorites::APPWIDGET_ID, appWidgetId);
-
-//         // Original widgets might not have valid spans when upgrading
-//         if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH) {
-//             values->Put(LauncherSettings::Favorites::SPANX, 4);
-//             values->Put(LauncherSettings::Favorites::SPANY, 1);
-//         }
-//         else {
-//             values->Put(LauncherSettings::Favorites::SPANX, 2);
-//             values->Put(LauncherSettings::Favorites::SPANY, 2);
-//         }
-
-//         StringBuilder sb;
-//         sb += IBaseColumns::ID;
-//         sb += "=";
-//         sb += favoriteId;
-//         String updateWhere;
-//         sb.ToString(&updateWhere);
-//         Int32 tmp;
-//         ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL, &tmp);
-//         if (ec == (ECode)E_SQL_EXCEPTION) {
-//             Slogger::W(LauncherProvider::TAG, "Problem while allocating appWidgetIds for existing widgets");
-//             goto FINALLY;
-//         }
-
-//         if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK) {
-//             // TODO: check return value
-//             AutoPtr<IComponentName> name;
-//             CComponentName::New(String("com.android.alarmclock"),
-//                     String("com.android.alarmclock.AnalogAppWidgetProvider"),
-//                     (IComponentName**)&name);
-//             Boolean res;
-//             appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name, &res);
-//         }
-//         else if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_PHOTO_FRAME) {
-//             // TODO: check return value
-//             AutoPtr<IComponentName> name;
-//             CComponentName::New(String("com.android.camera"),
-//                     String("com.android.camera.PhotoAppWidgetProvider"),
-//                     (IComponentName**)&name);
-//             Boolean res;
-//             appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name, &res);
-//         }
-//         else if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH) {
-//             // TODO: check return value
-//             AutoPtr<IComponentName> name;
-//             GetSearchWidgetProvider((IComponentName**)&name);
-//             Boolean res;
-//             appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name, &res);
-//         }
-//         assert(0);
-//         //} catch (RuntimeException ex) {
-//             Slogger::E(LauncherProvider::TAG, "Problem allocating appWidgetId");
-//         //}
-//     }
-
-//     ec = db->SetTransactionSuccessful();
-//     if (ec == (ECode)E_SQL_EXCEPTION) {
-//         Slogger::W(LauncherProvider::TAG, "Problem while allocating appWidgetIds for existing widgets");
-//         goto FINALLY;
-//     }
-//     //} catch (SQLException ex) {
-//     //    Log.w(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-//     //} finally {
-// FINALLY:
-//     db->EndTransaction();
-//     if (c != NULL) {
-//         ICloseable::Probe(c)->Close();
-//     }
-//     //}
 }
 
 ECode LauncherProvider::DatabaseHelper::BeginDocument(
@@ -983,9 +989,14 @@ ECode LauncherProvider::DatabaseHelper::BeginDocument(
     if (!name.Equals(firstElementName)) {
         // throw new XmlPullParserException("Unexpected start tag: found " + parser.getName() +
         //         ", expected " + firstElementName);
-        assert(0);
-        // Slogger::E("LauncherProvider::DatabaseHelper", "Unexpected start tag: found " + parser.getName() +
-        //         ", expected " + firstElementName);
+        String name;
+        parser->GetName(&name);
+        StringBuilder sb;
+        sb += "Unexpected start tag: found ";
+        sb += name;
+        sb += ", expected ";
+        sb += firstElementName;
+        Slogger::E("LauncherProvider::DatabaseHelper", sb.ToString());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     return NOERROR;
@@ -1014,196 +1025,199 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
             Elastos::Droid::Launcher2::R::integer::hotseat_all_apps_index,
             &allAppsButtonRank);
     Int32 i = 0;
-    //try {
-    AutoPtr<IXmlResourceParser> parser;
-    ECode ec = NOERROR;
-    ec = resources->GetXml(workspaceResourceId,
-            (IXmlResourceParser**)&parser);
-    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
-    BeginDocument(IXmlPullParser::Probe(parser), TAG_FAVORITES);
+    //try
+    ECode ec;
+    {
+        AutoPtr<IXmlResourceParser> parser;
+        FAIL_GOTO(ec = resources->GetXml(workspaceResourceId,
+                (IXmlResourceParser**)&parser), ERROR1)
+        AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
+        BeginDocument(IXmlPullParser::Probe(parser), TAG_FAVORITES);
 
-    Int32 depth;
-    IXmlPullParser::Probe(parser)->GetDepth(&depth);
+        Int32 depth;
+        IXmlPullParser::Probe(parser)->GetDepth(&depth);
 
-    Int32 type;
-    Int32 _depth;
-    while (((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
-            (IXmlPullParser::Probe(parser)->GetDepth(&_depth), _depth) > depth) &&
-            type != IXmlPullParser::END_DOCUMENT) {
+        Int32 type;
+        Int32 _depth;
+        while (((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
+                (IXmlPullParser::Probe(parser)->GetDepth(&_depth), _depth) > depth) &&
+                type != IXmlPullParser::END_DOCUMENT) {
 
-        if (type != IXmlPullParser::START_TAG) {
-            continue;
-        }
-
-        Boolean added = FALSE;
-        String name;
-        IXmlPullParser::Probe(parser)->GetName(&name);
-
-        AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
-            ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
-        AutoPtr<ITypedArray> a;
-        mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
-
-        Int64 container = LauncherSettings::Favorites::CONTAINER_DESKTOP;
-        Boolean res;
-        a->HasValue(Elastos::Droid::Launcher2::R::styleable::Favorite_container,
-                &res);
-        if (res) {
-            String str;
-            a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_container,
-                    &str);
-            container = StringUtils::ParseInt64(str);
-        }
-
-        String screen;
-        a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_screen,
-                &screen);
-        String x;
-        a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_x, &x);
-        String y;
-        a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_y, &y);
-
-        // If we are adding to the hotseat, the screen is used as the position in the
-        // hotseat. This screen can't be at position 0 because AllApps is in the
-        // zeroth position.
-        if (container == LauncherSettings::Favorites::CONTAINER_HOTSEAT
-                && StringUtils::ParseInt32(screen) == allAppsButtonRank) {
-            //throw new RuntimeException("Invalid screen position for hotseat item");
-            Slogger::E(LauncherProvider::TAG, "Invalid screen position for hotseat item");
-            return E_RUNTIME_EXCEPTION;
-        }
-
-        values->Clear();
-        values->Put(LauncherSettings::Favorites::CONTAINER, container);
-        values->Put(LauncherSettings::Favorites::SCREEN, screen);
-        values->Put(LauncherSettings::Favorites::CELLX, x);
-        values->Put(LauncherSettings::Favorites::CELLY, y);
-
-        if (TAG_FAVORITE.Equals(name)) {
-            Int64 id;
-            AddAppShortcut(db, values, a, packageManager, intent, &id);
-            added = id >= 0;
-        }
-        else if (TAG_SEARCH.Equals(name)) {
-            AddSearchWidget(db, values, &added);
-        }
-        else if (TAG_CLOCK.Equals(name)) {
-            AddClockWidget(db, values, &added);
-        }
-        else if (TAG_APPWIDGET.Equals(name)) {
-            AddAppWidget(parser, attrs, type, db, values, a, packageManager, &added);
-        }
-        else if (TAG_SHORTCUT.Equals(name)) {
-            Int64 id;
-            AddUriShortcut(db, values, a, &id);
-            added = id >= 0;
-        }
-        else if (TAG_FOLDER.Equals(name)) {
-            String title;
-            Int32 titleResId;
-            a->GetResourceId(Elastos::Droid::Launcher2::R::styleable::Favorite_title, -1,
-                    &titleResId);
-            AutoPtr<IResources> resources;
-            mContext->GetResources((IResources**)&resources);
-            if (titleResId != -1) {
-                resources->GetString(titleResId, &title);
-            } else {
-                resources->GetString(
-                        Elastos::Droid::Launcher2::R::string::folder_name,
-                        &title);
+            if (type != IXmlPullParser::START_TAG) {
+                continue;
             }
-            values->Put(LauncherSettings::Favorites::TITLE, title);
-            Int64 folderId;
-            AddFolder(db, values, &folderId);
-            added = folderId >= 0;
 
-            AutoPtr<IArrayList> folderItems;
-            CArrayList::New((IArrayList**)&folderItems);
+            Boolean added = FALSE;
+            String name;
+            IXmlPullParser::Probe(parser)->GetName(&name);
 
-            Int32 folderDepth;
-            IXmlPullParser::Probe(parser)->GetDepth(&folderDepth);
-            Int32 dep;
-            while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
-                    (IXmlPullParser::Probe(parser)->GetDepth(&dep), dep) > folderDepth) {
-                if (type != IXmlPullParser::START_TAG) {
-                    continue;
-                }
-                String folder_item_name;
-                IXmlPullParser::Probe(parser)->GetName(&folder_item_name);
+            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
+                ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
+            AutoPtr<ITypedArray> a;
+            FAIL_GOTO(ec = mContext->ObtainStyledAttributes(attrs, attrIds,
+                    (ITypedArray**)&a), ERROR1)
 
-                AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                        const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
-                        ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
-                AutoPtr<ITypedArray> ar;
-                mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&ar);
-                values->Clear();
-                values->Put(LauncherSettings::Favorites::CONTAINER, folderId);
+            Int64 container = LauncherSettings::Favorites::CONTAINER_DESKTOP;
+            Boolean res;
+            FAIL_GOTO(ec = a->HasValue(Elastos::Droid::Launcher2::R::styleable::Favorite_container,
+                    &res), ERROR1)
+            if (res) {
+                String str;
+                FAIL_GOTO(ec = a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_container,
+                        &str), ERROR1)
+                container = StringUtils::ParseInt64(str);
+            }
 
-                if ((TAG_FAVORITE.Equals(folder_item_name))
-                        && folderId >= 0) {
-                    Int64 id;
-                    AddAppShortcut(db, values, ar, packageManager, intent, &id);
-                    if (id >= 0) {
-                        AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-                        folderItems->Add(TO_IINTERFACE(obj));
-                    }
-                }
-                else if ((TAG_SHORTCUT.Equals(folder_item_name))
-                        && folderId >= 0) {
-                    Int64 id;
-                    AddUriShortcut(db, values, ar, &id);
-                    if (id >= 0) {
-                        AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-                        folderItems->Add(TO_IINTERFACE(obj));
-                    }
+            String screen;
+            FAIL_GOTO(ec = a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_screen,
+                    &screen), ERROR1)
+            String x;
+            FAIL_GOTO(ec = a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_x,
+                    &x), ERROR1)
+            String y;
+            FAIL_GOTO(ec = a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_y,
+                    &y), ERROR1)
+
+            // If we are adding to the hotseat, the screen is used as the position in the
+            // hotseat. This screen can't be at position 0 because AllApps is in the
+            // zeroth position.
+            if (container == LauncherSettings::Favorites::CONTAINER_HOTSEAT
+                    && StringUtils::ParseInt32(screen) == allAppsButtonRank) {
+                //throw new RuntimeException("Invalid screen position for hotseat item");
+                Slogger::E(LauncherProvider::TAG, "Invalid screen position for hotseat item");
+                return E_RUNTIME_EXCEPTION;
+            }
+
+            FAIL_GOTO(ec = values->Clear(), ERROR1)
+            FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::CONTAINER, container), ERROR1)
+            FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SCREEN, screen), ERROR1)
+            FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::CELLX, x), ERROR1)
+            FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::CELLY, y), ERROR1)
+
+            if (TAG_FAVORITE.Equals(name)) {
+                Int64 id;
+                AddAppShortcut(db, values, a, packageManager, intent, &id);
+                added = id >= 0;
+            }
+            else if (TAG_SEARCH.Equals(name)) {
+                AddSearchWidget(db, values, &added);
+            }
+            else if (TAG_CLOCK.Equals(name)) {
+                AddClockWidget(db, values, &added);
+            }
+            else if (TAG_APPWIDGET.Equals(name)) {
+                AddAppWidget(parser, attrs, type, db, values, a, packageManager, &added);
+            }
+            else if (TAG_SHORTCUT.Equals(name)) {
+                Int64 id;
+                AddUriShortcut(db, values, a, &id);
+                added = id >= 0;
+            }
+            else if (TAG_FOLDER.Equals(name)) {
+                String title;
+                Int32 titleResId;
+                FAIL_GOTO(ec = a->GetResourceId(Elastos::Droid::Launcher2::R::styleable::Favorite_title, -1,
+                        &titleResId), ERROR1)
+                AutoPtr<IResources> resources;
+                FAIL_GOTO(ec = mContext->GetResources((IResources**)&resources), ERROR1)
+                if (titleResId != -1) {
+                    FAIL_GOTO(ec = resources->GetString(titleResId, &title), ERROR1)
                 }
                 else {
-                    // throw new RuntimeException("Folders can " +
-                    //         "contain only shortcuts");
-                    Slogger::E(LauncherProvider::TAG, "Folders can contain only shortcuts");
-                    return E_RUNTIME_EXCEPTION;
+                    FAIL_GOTO(ec = resources->GetString(
+                            Elastos::Droid::Launcher2::R::string::folder_name,
+                            &title), ERROR1)
                 }
-                ar->Recycle();
-            }
-            // We can only have folders with >= 2 items, so we need to remove the
-            // folder and clean up if less than 2 items were included, or some
-            // failed to add, and less than 2 were actually added
-            Int32 size;
-            folderItems->GetSize(&size);
-            if (size < 2 && folderId >= 0) {
-                // We just delete the folder and any items that made it
-                DeleteId(db, folderId);
-                if (size > 0) {
-                    AutoPtr<IInterface> obj;
-                    folderItems->Get(0, (IInterface**)&obj);
-                    AutoPtr<IInteger64> value = IInteger64::Probe(obj);
-                    Int64 id;
-                    value->GetValue(&id);
-                    DeleteId(db, id);
-                }
-                added = FALSE;
-            }
-        }
-        if (added) i++;
-        a->Recycle();
-    }
-    *result = i;
-    return NOERROR;
+                FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::TITLE, title), ERROR1)
+                Int64 folderId;
+                AddFolder(db, values, &folderId);
+                added = folderId >= 0;
 
-    assert(0);
-//ERROR:
+                AutoPtr<IArrayList> folderItems;
+                CArrayList::New((IArrayList**)&folderItems);
+
+                Int32 folderDepth;
+                IXmlPullParser::Probe(parser)->GetDepth(&folderDepth);
+                Int32 dep;
+                while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
+                        (IXmlPullParser::Probe(parser)->GetDepth(&dep), dep) > folderDepth) {
+                    if (type != IXmlPullParser::START_TAG) {
+                        continue;
+                    }
+                    String folder_item_name;
+                    IXmlPullParser::Probe(parser)->GetName(&folder_item_name);
+
+                    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+                            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
+                            ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
+                    AutoPtr<ITypedArray> ar;
+                    FAIL_GOTO(ec = mContext->ObtainStyledAttributes(attrs, attrIds,
+                            (ITypedArray**)&ar), ERROR1)
+                    FAIL_GOTO(ec = values->Clear(), ERROR1)
+                    FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::CONTAINER, folderId), ERROR1)
+
+                    if ((TAG_FAVORITE.Equals(folder_item_name))
+                            && folderId >= 0) {
+                        Int64 id;
+                        AddAppShortcut(db, values, ar, packageManager, intent, &id);
+                        if (id >= 0) {
+                            AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                            folderItems->Add(TO_IINTERFACE(obj));
+                        }
+                    }
+                    else if ((TAG_SHORTCUT.Equals(folder_item_name))
+                            && folderId >= 0) {
+                        Int64 id;
+                        AddUriShortcut(db, values, ar, &id);
+                        if (id >= 0) {
+                            AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                            folderItems->Add(TO_IINTERFACE(obj));
+                        }
+                    }
+                    else {
+                        // throw new RuntimeException("Folders can " +
+                        //         "contain only shortcuts");
+                        Slogger::E(LauncherProvider::TAG, "Folders can contain only shortcuts");
+                        return E_RUNTIME_EXCEPTION;
+                    }
+                    FAIL_GOTO(ec = ar->Recycle(), ERROR1)
+                }
+                // We can only have folders with >= 2 items, so we need to remove the
+                // folder and clean up if less than 2 items were included, or some
+                // failed to add, and less than 2 were actually added
+                Int32 size;
+                folderItems->GetSize(&size);
+                if (size < 2 && folderId >= 0) {
+                    // We just delete the folder and any items that made it
+                    DeleteId(db, folderId);
+                    if (size > 0) {
+                        AutoPtr<IInterface> obj;
+                        folderItems->Get(0, (IInterface**)&obj);
+                        AutoPtr<IInteger64> value = IInteger64::Probe(obj);
+                        Int64 id;
+                        value->GetValue(&id);
+                        DeleteId(db, id);
+                    }
+                    added = FALSE;
+                }
+            }
+            if (added) i++;
+            FAIL_GOTO(ec = a->Recycle(), ERROR1)
+        }
+    }
+ERROR1 :
     //} catch (XmlPullParserException e) {
     if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
-        Slogger::W(LauncherProvider::TAG, "Got exception parsing favorites. %d", ec);
+        Slogger::W("LauncherProvider", "Got exception parsing favorites. %d", ec);
     }
     //} catch (IOException e) {
     if (ec == (ECode)E_IO_EXCEPTION) {
-        Slogger::W(LauncherProvider::TAG, "Got exception parsing favorites. %d", ec);
+        Slogger::W("LauncherProvider", "Got exception parsing favorites. %d", ec);
     }
     //} catch (RuntimeException e) {
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-        Slogger::W(LauncherProvider::TAG, "Got exception parsing favorites. %d", ec);
+        Slogger::W("LauncherProvider", "Got exception parsing favorites. %d", ec);
     }
     //}
     *result = i;
@@ -1231,11 +1245,13 @@ ECode LauncherProvider::DatabaseHelper::AddAppShortcut(
     a->GetString(
         Elastos::Droid::Launcher2::R::styleable::Favorite_className,
         &className);
-    //try {
+    //try
+    ECode ec;
+    {
         AutoPtr<IComponentName> cn;
         //try {
         CComponentName::New(packageName, className, (IComponentName**)&cn);
-        ECode ec = packageManager->GetActivityInfo(cn, 0, (IActivityInfo**)&info);
+        ec = packageManager->GetActivityInfo(cn, 0, (IActivityInfo**)&info);
         //} catch (PackageManager.NameNotFoundException nnfe) {
         if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
             AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
@@ -1247,33 +1263,43 @@ ECode LauncherProvider::DatabaseHelper::AddAppShortcut(
         }
         //}
         GenerateNewId(&id);
-        intent->SetComponent(cn);
-        intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
-                IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        FAIL_GOTO(ec = intent->SetComponent(cn), ERROR)
+        FAIL_GOTO(ec = intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
+                IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED), ERROR)
         String str;
-        intent->ToUri(0, &str);
-        values->Put(ILauncherSettingsBaseLauncherColumns::INTENT, str);
+        FAIL_GOTO(ec = intent->ToUri(0, &str), ERROR)
+        FAIL_GOTO(ec = values->Put(ILauncherSettingsBaseLauncherColumns::INTENT, str), ERROR)
 
         AutoPtr<ICharSequence> label;
         IPackageItemInfo::Probe(info)->LoadLabel(packageManager, (ICharSequence**)&label);
         String str2;
         label->ToString(&str2);
-        values->Put(ILauncherSettingsBaseLauncherColumns::TITLE, str2);
-        values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
-                ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_APPLICATION);
-        values->Put(LauncherSettings::Favorites::SPANX, 1);
-        values->Put(LauncherSettings::Favorites::SPANY, 1);
+        FAIL_GOTO(ec = values->Put(ILauncherSettingsBaseLauncherColumns::TITLE, str2), ERROR)
+        FAIL_GOTO(ec = values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+                ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_APPLICATION), ERROR)
+        FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SPANX, 1), ERROR)
+        FAIL_GOTO(ec = values->Put(LauncherSettings::Favorites::SPANY, 1), ERROR)
         Int64 _id;
         GenerateNewId(&_id);
-        values->Put(IBaseColumns::ID, _id);
+        FAIL_GOTO(ec = values->Put(IBaseColumns::ID, _id), ERROR)
         Int64 num;
         DbInsertAndCheck(this, db, TABLE_FAVORITES, String(NULL), values, &num);
         if (num < 0) {
             *result = -1;
             return NOERROR;
         }
-    //}
-    assert(0);
+    }
+
+ERROR:
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+        StringBuilder sb;
+        sb += "Unable to add favorite: ";
+        sb += packageName;
+        sb += "/";
+        sb += className;
+        sb += ec;
+        Slogger::W("LauncherProvider", sb.ToString());
+    }
     //catch (PackageManager.NameNotFoundException e) {
         // Slogger:::W(TAG, "Unable to add favorite: " + packageName +
         //         "/" + className, e);
@@ -1762,8 +1788,7 @@ ECode LauncherProvider::OnCreate(
     GetContext((IContext**)&context);
     mOpenHelper = new DatabaseHelper();
     mOpenHelper->constructor(context);
-    assert(0);
-    //ILauncherApplication::Probe(context)->SetLauncherProvider(this);
+    ILauncherApplication::Probe(context)->SetLauncherProvider(this);
     *result = TRUE;
     return NOERROR;
 }
@@ -1780,7 +1805,8 @@ ECode LauncherProvider::GetType(
         sb += "vnd.android.cursor.dir/";
         sb += args->mTable;
         return sb.ToString(type);
-    } else {
+    }
+    else {
         StringBuilder sb;
         sb += "vnd.android.cursor.item/";
         sb += args->mTable;
@@ -1987,8 +2013,7 @@ ECode LauncherProvider::LoadDefaultFavoritesIfNecessary(
 {
     synchronized(this) {
         String spKey;
-        assert(0);
-        //LauncherApplication::GetSharedPreferencesKey(&spKey);
+        LauncherApplication::GetSharedPreferencesKey(&spKey);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         AutoPtr<ISharedPreferences> sp;

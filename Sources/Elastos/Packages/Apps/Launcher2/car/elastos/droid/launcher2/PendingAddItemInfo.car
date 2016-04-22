@@ -5,25 +5,27 @@ module
     namespace Launcher2 {
 
     /*
-    * @invoke
-    * interface IItemInfo
-    */
+     * @invoke
+     * interface IItemInfo
+     */
     interface IPendingAddItemInfo {
     }
 
     /*
-    * @invoke
-    * interface IItemInfo
-    * interface IPendingAddItemInfo
-    */
+     * @invoke
+     * interface IItemInfo
+     * interface IPendingAddItemInfo
+     */
     interface IPendingAddShortcutInfo {
     }
 
-    /*
-    * @invoke
-    * interface IItemInfo
-    * interface IPendingAddItemInfo
-    */
+    /**
+     * We pass this object with a drag from the customization tray
+     *
+     * @invoke
+     * interface IItemInfo
+     * interface IPendingAddItemInfo
+     */
     interface IPendingAddWidgetInfo {
     }
 

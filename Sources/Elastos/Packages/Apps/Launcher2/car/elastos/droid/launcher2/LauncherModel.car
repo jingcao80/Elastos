@@ -1,9 +1,23 @@
 module
 {
+    using interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.IContentValues;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Content.Pm.ILauncherAppsCallback;
+    using interface Elastos.Droid.Content.Pm.IPackageManager;
+    using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Os.IUserHandle;
+    using interface Elastos.Core.IComparator;
+
+    using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IArrayList;
     using interface Elastos.Utility.IHashMap;
-    using interface Elastos.Droid.Os.IUserHandle;
 
+    interface Elastos.Droid.Launcher2.IFolderInfo;
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
     interface Elastos.Droid.Launcher2.ILauncherAppWidgetInfo;
 
     namespace Elastos {
@@ -63,15 +77,152 @@ module
             [in] Int32 page);
     }
 
-    /**
-     * interface IBroadcastReceiver
-     */
-    interface ILauncherModel {
-
+    interface ILauncherModelPackageUpdatedTask {
     }
 
-    interface ILauncherModelHelper {
+    /**
+     * Maintains in-memory state of the Launcher. It is expected that there should be only one
+     * LauncherModel object held in a static. Also provide APIs for updating the database state
+     * for the Launcher.
+     *
+     * interface IBroadcastReceiver
+     */
+    [deprecated, local]
+    interface ILauncherModel {
+        GetFallbackIcon(
+            [out] IBitmap** bitmap);
 
+        UnbindItemInfosAndClearQueuedBindRunnables();
+
+        /** Unbinds all the sBgWorkspaceItems and sBgAppWidgets on the main thread */
+        UnbindWorkspaceItemsOnMainThread();
+
+        FlushWorkerThread();
+
+        /**
+         * Find a folder in the db, creating the FolderInfo if necessary, and adding it to folderList.
+         */
+        GetFolderById(
+            [in] IContext* context,
+            [in] IHashMap* folderList,
+            [in] Int64 id,
+            [out] IFolderInfo** info);
+
+        Initialize(
+            [in] ILauncherModelCallbacks* _callbacks);
+
+        GetLauncherAppsCallback(
+            [out] ILauncherAppsCallback** _callback);
+
+        ForceReload();
+
+        ResetLoadedState(
+            [in] Boolean resetAllAppsLoaded,
+            [in] Boolean resetWorkspaceLoaded);
+
+        /**
+         * When the launcher is in the background, it's possible for it to miss paired
+         * configuration changes.  So whenever we trigger the loader from the background
+         * tell the launcher that it needs to re-run the loader when it comes back instead
+         * of doing it now.
+         */
+        StartLoaderFromBackground();
+
+        StartLoader(
+            [in] Boolean isLaunching,
+            [in] Int32 synchronousBindPage);
+
+        BindRemainingSynchronousPages();
+
+        StopLoader();
+
+        IsAllAppsLoaded(
+            [out] Boolean* result);
+
+        IsLoadingWorkspace(
+            [out] Boolean* result);
+
+        EnqueuePackageUpdated(
+            [in] ILauncherModelPackageUpdatedTask* task);
+
+        /**
+         * This is called from the code that adds shortcuts from the intent receiver.  This
+         * doesn't have a Cursor, but
+         */
+        GetShortcutInfo(
+            [in] IPackageManager* manager,
+            [in] IIntent* intent,
+            [in] IUserHandle* user,
+            [in] IContext* context,
+            [out] IShortcutInfo** sinfo);
+
+        /**
+         * Make an ShortcutInfo object for a shortcut that is an application.
+         *
+         * If c is not null, then it will be used to fill in missing data like the title and icon.
+         */
+        GetShortcutInfo(
+            [in] IPackageManager* manager,
+            [in] IIntent* intent,
+            [in] IUserHandle* user,
+            [in] IContext* context,
+            [in] ICursor* c,
+            [in] Int32 iconIndex,
+            [in] Int32 titleIndex,
+            [in] IHashMap* labelCache,
+            [out] IShortcutInfo** sinfo);
+
+        GetIconFromCursor(
+            [in] ICursor* c,
+            [in] Int32 iconIndex,
+            [in] IContext* context,
+            [out] IBitmap** map);
+
+        AddShortcut(
+            [in] IContext* context,
+            [in] IIntent* data,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Boolean notify,
+            [out] IShortcutInfo** sinfo);
+
+        /**
+         * Attempts to find an AppWidgetProviderInfo that matches the given component.
+         */
+        FindAppWidgetProviderInfoWithComponent(
+            [in] IContext* context,
+            [in] IComponentName* component,
+            [out] IAppWidgetProviderInfo** pinfo);
+
+        /**
+         * Returns a list of all the widgets that can handle configuration with a particular mimeType.
+         */
+        ResolveWidgetsForMimeType(
+            [in] IContext* context,
+            [in] String mimeType,
+            [out] IList** list);
+
+        InfoFromShortcutIntent(
+            [in] IContext* context,
+            [in] IIntent* data,
+            [in] IBitmap* fallbackIcon,
+            [out] IShortcutInfo** sinfo);
+
+        QueueIconToBeChecked(
+            [in] IHashMap* cache,
+            [in] IShortcutInfo* info,
+            [in] ICursor* c,
+            [in] Int32 iconIndex,
+            [out] Boolean* result);
+
+        UpdateSavedIcon(
+            [in] IContext* context,
+            [in] IShortcutInfo* info,
+            [in] ArrayOf<Byte>* data);
+
+        DumpState();
     }
 
     } // namespace Launcher2

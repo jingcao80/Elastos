@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/PagedViewCellLayoutChildren.h"
+#include "elastos/droid/launcher2/PagedViewCellLayout.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
@@ -101,21 +102,20 @@ void PagedViewCellLayoutChildren::OnMeasure(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        assert(0 && "need class PagedViewCellLayout");
-        // AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-        //     (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+        AutoPtr<PagedViewCellLayout::LayoutParams> lp =
+            (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
         Int32 left;
         GetPaddingLeft(&left);
         Int32 top;
         GetPaddingTop(&top);
-        assert(0 && "need class PagedViewCellLayout");
-        // lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
-        //         left, top);
+        lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
+                left, top);
 
-        // Int32 childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mWidth, View::MeasureSpec::EXACTLY);
-        // Int32 childheightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mHeight, View::MeasureSpec::EXACTLY);
-
-        // child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
+        Int32 childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mWidth,
+                View::MeasureSpec::EXACTLY);
+        Int32 childheightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mHeight,
+                View::MeasureSpec::EXACTLY);
+        child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
 
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
@@ -144,11 +144,10 @@ ECode PagedViewCellLayoutChildren::OnLayout(
             if (visibility != GONE) {
                 AutoPtr<IViewGroupLayoutParams> params;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-                assert(0 && "need class PagedViewCellLayout");
-                // AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-                //         (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
-                // minRowX = Elastos::Core::Math::Min(minRowX, lp->mX);
-                // maxRowX = Elastos::Core::Math::Max(maxRowX, lp->mX + lp->mWidth);
+                AutoPtr<PagedViewCellLayout::LayoutParams> lp =
+                        (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+                minRowX = Elastos::Core::Math::Min(minRowX, lp->mX);
+                maxRowX = Elastos::Core::Math::Max(maxRowX, lp->mX + lp->mWidth);
             }
         }
         Int32 maxRowWidth = maxRowX - minRowX;
@@ -165,13 +164,12 @@ ECode PagedViewCellLayoutChildren::OnLayout(
         if (visibility != GONE) {
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            assert(0 && "need class PagedViewCellLayout");
-            // AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-            //         (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+            AutoPtr<PagedViewCellLayout::LayoutParams> lp =
+                    (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
 
-            // Int32 childLeft = offsetX + lp->mX;
-            // Int32 childTop = lp->mY;
-            // child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
+            Int32 childLeft = offsetX + lp->mX;
+            Int32 childTop = lp->mY;
+            child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
         }
     }
     return NOERROR;

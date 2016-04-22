@@ -146,7 +146,7 @@ public:
         /* [in] */ IView* child,
         /* [in] */ Int32 index,
         /* [in] */ Int32 childId,
-        /* [in] */ PagedViewCellLayout::LayoutParams* params,
+        /* [in] */ IPagedViewCellLayoutLayoutParams* params,
         /* [out] */ Boolean* result);
 
     //@Override

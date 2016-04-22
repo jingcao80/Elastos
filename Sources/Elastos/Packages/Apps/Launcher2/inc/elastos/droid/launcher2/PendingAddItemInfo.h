@@ -18,6 +18,9 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/**
+ * We pass this object with a drag from the customization tray
+ */
 class PendingAddItemInfo
     : public ItemInfo
     , public IPendingAddItemInfo

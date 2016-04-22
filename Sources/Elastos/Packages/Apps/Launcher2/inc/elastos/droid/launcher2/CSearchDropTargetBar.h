@@ -26,6 +26,10 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+/*
+ * Ths bar will manage the transition between the QSB search bar and the delete drop
+ * targets so that each of the individual IconDropTargets don't have to.
+ */
 CarClass(CSearchDropTargetBar)
     , public FrameLayout
     , public ISearchDropTargetBar

@@ -2,6 +2,9 @@
 #include "elastos/droid/launcher2/InstallShortcutReceiver.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/CellLayout.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Widget.h"
@@ -57,12 +60,10 @@ InstallShortcutReceiver::PendingInstallShortcutInfo::PendingInstallShortcutInfo(
 
 InstallShortcutReceiver::MyThread::MyThread(
     /* [in] */ const String& name,
-    /* [in] */ InstallShortcutReceiver* host,
     /* [in] */ ISharedPreferences* sharedPrefs,
     /* [in] */ Int32 screen,
     /* [in] */ IIntent* intent)
-    : mHost(host)
-    , mSharedPrefs(sharedPrefs)
+    : mSharedPrefs(sharedPrefs)
     , mScreen(screen)
     , mIntent(intent)
 {
@@ -71,7 +72,7 @@ InstallShortcutReceiver::MyThread::MyThread(
 
 ECode InstallShortcutReceiver::MyThread::Run()
 {
-    synchronized(mHost->sLock) {
+    synchronized(sLock) {
         // If the new app is going to fall into the same page as before,
         // then just continue adding to the current page
         Int32 newAppsScreen;
@@ -82,7 +83,7 @@ ECode InstallShortcutReceiver::MyThread::Run()
         if (newAppsScreen == -1 || newAppsScreen == mScreen) {
             String str;
             mIntent->ToUri(0, &str);
-            mHost->AddToStringSet(mSharedPrefs,
+            AddToStringSet(mSharedPrefs,
                 editor, InstallShortcutReceiver::NEW_APPS_LIST_KEY,
                 str);
         }
@@ -129,48 +130,48 @@ ECode InstallShortcutReceiver::AddToInstallQueue(
     /* [in] */ PendingInstallShortcutInfo* info)
 {
     synchronized(sLock){
-        //try {
+    //try
+    {
         AutoPtr<IJSONStringer> json;
         CJSONStringer::New((IJSONStringer**)&json);
-        assert(0 && "yi chang");
-        ECode ec = json->Object();
-        ec = json->Key(DATA_INTENT_KEY);
+        FAIL_GOTO(json->Object(), EXIT)
+        FAIL_GOTO(json->Key(DATA_INTENT_KEY), EXIT)
         String str;
         info->mData->ToUri(0, &str);
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
-        ec = json->Value(TO_IINTERFACE(cchar));
-        ec = json->Key(LAUNCH_INTENT_KEY);
+        FAIL_GOTO(json->Value(TO_IINTERFACE(cchar)), EXIT)
+        FAIL_GOTO(json->Key(LAUNCH_INTENT_KEY), EXIT)
         String str2;
         info->mLaunchIntent->ToUri(0, &str2);
         AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(str2);
-        ec = json->Value(TO_IINTERFACE(cchar2));
-        ec = json->Key(NAME_KEY);
+        FAIL_GOTO(json->Value(TO_IINTERFACE(cchar2)), EXIT)
+        FAIL_GOTO(json->Key(NAME_KEY), EXIT)
         AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(info->mName);
-        ec = json->Value(TO_IINTERFACE(cchar3));
+        FAIL_GOTO(json->Value(TO_IINTERFACE(cchar3)), EXIT)
         if (info->mIcon != NULL) {
             AutoPtr<ArrayOf<Byte> > iconByteArray = ItemInfo::FlattenBitmap(info->mIcon);
-            ec = json->Key(ICON_KEY);
+            FAIL_GOTO(json->Key(ICON_KEY), EXIT)
             AutoPtr<IBase64> base64;
             CBase64::AcquireSingleton((IBase64**)&base64);
             String str;
             base64->EncodeToString(iconByteArray, 0, iconByteArray->GetLength(),
                     IBase64::DEFAULT, &str);
             AutoPtr<ICharSequence> obj = CoreUtils::Convert(str);
-            ec = json->Value(obj);
+            FAIL_GOTO(json->Value(obj), EXIT)
         }
         if (info->mIconResource != NULL) {
-            ec = json->Key(ICON_RESOURCE_NAME_KEY);
+            FAIL_GOTO(json->Key(ICON_RESOURCE_NAME_KEY), EXIT)
             String resourceName;
             info->mIconResource->GetResourceName(&resourceName);
             AutoPtr<ICharSequence> obj = CoreUtils::Convert(resourceName);
-            ec = json->Value(obj);
-            ec = json->Key(ICON_RESOURCE_PACKAGE_NAME_KEY);
+            FAIL_GOTO(json->Value(obj), EXIT)
+            FAIL_GOTO(json->Key(ICON_RESOURCE_PACKAGE_NAME_KEY), EXIT)
             String packageName;
             info->mIconResource->GetPackageName(&packageName);
             AutoPtr<ICharSequence> obj2 = CoreUtils::Convert(packageName);
-            ec = json->Value(obj2);
+            FAIL_GOTO(json->Value(obj2), EXIT)
         }
-        ec = json->EndObject();
+        FAIL_GOTO(json->EndObject(), EXIT)
         AutoPtr<ISharedPreferencesEditor> editor;
         sharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
         String res;
@@ -178,10 +179,11 @@ ECode InstallShortcutReceiver::AddToInstallQueue(
         AddToStringSet(sharedPrefs, editor, APPS_PENDING_INSTALL, res);
         Boolean tmp;
         editor->Commit(&tmp);
-        //} catch (org.json.JSONException e) {
+    }
+    //} catch (org.json.JSONException e) {
 EXIT:
-        Slogger::D("InstallShortcutReceiver", "Exception when adding shortcut: %d", ec);
-        //}
+    Slogger::D("InstallShortcutReceiver", "Exception when adding shortcut");
+    //}
     }
     return NOERROR;
 }
@@ -275,6 +277,7 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
         edit->Commit(&res);
         return infos;
     }
+    return NULL;
 }
 
 ECode InstallShortcutReceiver::OnReceive(
@@ -327,11 +330,9 @@ ECode InstallShortcutReceiver::OnReceive(
 
     // Queue the item up for adding if launcher has not loaded properly yet
     Int32 x;
-    assert(0 && "need class launchermodel");
-    //LauncherModel::GetCellCountX(&x);
+    LauncherModel::GetCellCountX(&x);
     Int32 y;
-    assert(0 && "need class launchermodel");
-    //LauncherModel::GetCellCountY(&y);
+    LauncherModel::GetCellCountY(&y);
     Boolean launcherNotLoaded = x <= 0 || y <= 0;
 
     AutoPtr<PendingInstallShortcutInfo> info =
@@ -340,8 +341,7 @@ ECode InstallShortcutReceiver::OnReceive(
     info->mIconResource = iconResource;
     if (mUseInstallQueue || launcherNotLoaded) {
         String spKey;
-        assert(0 && "need class LauncherApplication");
-        //LauncherApplication::GetSharedPreferencesKey(&spKey);
+        LauncherApplication::GetSharedPreferencesKey(&spKey);
         AutoPtr<ISharedPreferences> sp;
         context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE,
                 (ISharedPreferences**)&sp);
@@ -370,8 +370,7 @@ ECode InstallShortcutReceiver::FlushInstallQueue(
     /* [in] */ IContext* context)
 {
     String spKey;
-    assert(0 && "need class LauncherApplication");
-    //LauncherApplication::GetSharedPreferencesKey(&spKey);
+    LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sp;
     context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE,
             (ISharedPreferences**)&sp);
@@ -394,8 +393,7 @@ void InstallShortcutReceiver::ProcessInstallShortcut(
     /* [in] */ PendingInstallShortcutInfo* pendingInfo)
 {
     String spKey;
-    assert(0 && "need class LauncherApplication");
-    //LauncherApplication::GetSharedPreferencesKey(&spKey);
+    LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sp;
     context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE,
             (ISharedPreferences**)&sp);
@@ -416,15 +414,12 @@ void InstallShortcutReceiver::ProcessInstallShortcut(
         // processInstallShortcut, we give it time for its shortcut to get added to the
         // database (getItemsInLocalCoordinates reads the database)
         AutoPtr<ILauncherModel> modle;
-        assert(0 && "need class ILauncherApplication");
-        //app->GetModel((ILauncherModel**)&modle);
-        //modle->FlushWorkerThread();
+        app->GetModel((ILauncherModel**)&modle);
+        modle->FlushWorkerThread();
         AutoPtr<IArrayList> items;
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::GetItemsInLocalCoordinates(context, (IArrayList**)&items);
+        LauncherModel::GetItemsInLocalCoordinates(context, (IArrayList**)&items);
         Boolean exists;
-        assert(0 && "need class LauncherModel");
-        //LauncherModel::ShortcutExists(context, name, intent, &exists);
+        LauncherModel::ShortcutExists(context, name, intent, &exists);
 
         // Try adding to the workspace screens incrementally, starting at the default or center
         // screen and alternating between +1, -1, +2, -2, etc. (using ~ ceil(i/2f)*(-1)^(i-1))
@@ -497,9 +492,13 @@ Boolean InstallShortcutReceiver::InstallShortcut(
                     AutoPtr<ArrayOf<String> > categories;
                     intent->GetCategories((ArrayOf<String>**)&categories);
                     if (categories != NULL) {
-                        Boolean res2;
-                        assert(0 && "Contains");
-                        //categories->Contains(IIntent::CATEGORY_LAUNCHER, &res2);
+                        Boolean res2 = FALSE;
+                        for (Int32 i = 0; i < categories->GetLength(); i++){
+                            if((*categories)[i].Equals(IIntent::CATEGORY_LAUNCHER)) {
+                                res2 = TRUE;
+                                break;
+                            }
+                        }
                         if (res2) {
                             intent->AddFlags(
                                     IIntent::FLAG_ACTIVITY_NEW_TASK |
@@ -514,23 +513,20 @@ Boolean InstallShortcutReceiver::InstallShortcut(
             Boolean duplicate;
             data->GetBooleanExtra(ILauncher::EXTRA_SHORTCUT_DUPLICATE, TRUE, &duplicate);
             if (duplicate || !shortcutExists) {
-                assert(0 && "MyThread this");
-                // AutoPtr<MyThread> t = new MyThread(String("setNewAppsThread"),
-                //     this, sharedPrefs, screen, intent);
-                // t->Start();
+                AutoPtr<MyThread> t = new MyThread(String("setNewAppsThread"),
+                    sharedPrefs, screen, intent);
+                t->Start();
 
                 // Update the Launcher db
                 AutoPtr<IContext> ctx;
                 context->GetApplicationContext((IContext**)&ctx);
                 AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
                 AutoPtr<ILauncherModel> model;
-                assert(0 && "GetModel");
-                ///p->GetModel((ILauncherModel**)&model);
+                app->GetModel((ILauncherModel**)&model);
                 AutoPtr<IShortcutInfo> info;
-                assert(0 && "model");
-                // model->AddShortcut(context, data,
-                //         LauncherSettings::Favorites::CONTAINER_DESKTOP, screen,
-                //         (*tmpCoordinates)[0], (*tmpCoordinates)[1], TRUE, (IShortcutInfo**)&info);
+                model->AddShortcut(context, data,
+                        LauncherSettings::Favorites::CONTAINER_DESKTOP, screen,
+                        (*tmpCoordinates)[0], (*tmpCoordinates)[1], TRUE, (IShortcutInfo**)&info);
                 if (info == NULL) {
                     return FALSE;
                 }
@@ -556,12 +552,10 @@ Boolean InstallShortcutReceiver::FindEmptyCell(
     /* [in] */ Int32 screen)
 {
     Int32 xCount;
-    assert(0 && "LauncherModel");
-    //LauncherModel::GetCellCountX(&xCount);
+    LauncherModel::GetCellCountX(&xCount);
     Int32 yCount;
-    assert(0 && "LauncherModel");
-    //LauncherModel::GetCellCountY(&yCount);
-    AutoPtr<ArrayOf<AutoPtr<ArrayOf<Boolean> > > > occupied = ArrayOf<AutoPtr<ArrayOf<Boolean> > >::Alloc(xCount);
+    LauncherModel::GetCellCountY(&yCount);
+    AutoPtr<ArrayOf<ArrayOf<Boolean>* > > occupied = ArrayOf<ArrayOf<Boolean>* >::Alloc(xCount);
     for (Int32 i = 0; i < xCount; i++) {
         (*occupied)[i] = ArrayOf<Boolean>::Alloc(yCount);
     }
@@ -589,9 +583,10 @@ Boolean InstallShortcutReceiver::FindEmptyCell(
             }
         }
     }
-    assert(0 && "CellLayout");
-    //return CellLayout::FindVacantCell(xy, 1, 1, xCount, yCount, occupied);
-    return FALSE;
+    Boolean tmp;
+    CellLayout::FindVacantCell(xy, 1, 1, xCount, yCount,
+            occupied.Get(), &tmp);
+    return tmp;
 }
 
 } // namespace Launcher2

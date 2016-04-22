@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/AppWidgetResizeFrame.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/StringBuilder.h>
 #include "R.h"
@@ -58,8 +59,7 @@ ECode LauncherAppWidgetInfo::OnBindAppWidget(
 ECode LauncherAppWidgetInfo::NotifyWidgetSizeChanged(
     /* [in] */ ILauncher* launcher)
 {
-    assert(0 && "need class AppWidgetResizeFrame");
-    //AppWidgetResizeFrame::UpdateWidgetSizeRanges(mHostView, launcher, mSpanX, mSpanY);
+    AppWidgetResizeFrame::UpdateWidgetSizeRanges(mHostView, launcher, mSpanX, mSpanY);
     mHasNotifiedInitialWidgetSizeChanged = TRUE;
     return NOERROR;
 }

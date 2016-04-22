@@ -10,7 +10,9 @@ namespace Droid {
 namespace Launcher2 {
 
 /**
- * We use a custom tab view to process our own focus traversals.
+ * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
+ * because we want to make the bubble taller than the text and TextView's clip is
+ * too aggressive.
  */
  CarClass(CBubbleTextView)
     , public BubbleTextView

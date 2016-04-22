@@ -1,10 +1,61 @@
 module
 {
+    using interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    using interface Elastos.Droid.Graphics.IBitmap;
+
+    interface Elastos.Droid.Launcher2.IPagedViewCellLayout;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
+    interface IWidgetPreviewLoaderCacheDb {
+    }
+
+    [deprecated, local]
     interface IWidgetPreviewLoader {
+        RecreateDb();
+
+        SetPreviewSize(
+            [in] Int32 previewWidth,
+            [in] Int32 previewHeight,
+            [in] IPagedViewCellLayout* widgetSpacingLayout);
+
+        GetPreview(
+            [in] IInterface* o,
+            [out] IBitmap** bitmap);
+
+        RecycleBitmap(
+            [in] IInterface* o,
+            [in] IBitmap* bitmapToRecycle);
+
+        GeneratePreview(
+            [in] IInterface* info,
+            [in] IBitmap* preview,
+            [out] IBitmap** bitmap);
+
+        GenerateWidgetPreview(
+            [in] IAppWidgetProviderInfo* info,
+            [in] IBitmap* preview,
+            [out] IBitmap** bitmap);
+
+        MaxWidthForWidgetPreview(
+            [in] Int32 spanX,
+            [out] Int32* width);
+
+        MaxHeightForWidgetPreview(
+            [in] Int32 spanY,
+            [out] Int32* height);
+
+        GenerateWidgetPreview(
+            [in] IAppWidgetProviderInfo* info,
+            [in] Int32 cellHSpan,
+            [in] Int32 cellVSpan,
+            [in] Int32 maxPreviewWidth,
+            [in] Int32 maxPreviewHeight,
+            [in] IBitmap* preview,
+            [in] ArrayOf<Int32>* preScaledWidthOut,
+            [out] IBitmap** bitmap);
     }
 
     } // namespace Launcher2
