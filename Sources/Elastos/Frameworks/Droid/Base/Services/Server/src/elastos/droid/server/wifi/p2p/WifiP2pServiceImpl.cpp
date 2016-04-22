@@ -50,7 +50,6 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::CMessenger;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
-using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::EIID_IBinder;

@@ -1,4 +1,3 @@
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFIWATCHDOGSTATEMACHINE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFIWATCHDOGSTATEMACHINE_H__
 
@@ -320,7 +319,7 @@ private:
     /**
      * Bundle of good link count parameters
      */
-    class GoodLinkTarget: public ElRefBase
+    class GoodLinkTarget: public Object
     {
     public:
         GoodLinkTarget(
@@ -341,7 +340,7 @@ private:
     /**
      * Bundle of max avoidance time parameters
      */
-    class MaxAvoidTime: public ElRefBase
+    class MaxAvoidTime: public Object
     {
     public:
         MaxAvoidTime(
@@ -362,7 +361,7 @@ private:
      *    - exponential:      O(1) time and O(1) space for both update and query
      *    - moving average:   reflect most recent results and expire old ones
      */
-    class VolumeWeightedEMA: public ElRefBase
+    class VolumeWeightedEMA: public Object
     {
     public:
         VolumeWeightedEMA(
@@ -389,7 +388,7 @@ private:
     /**
      * Record (RSSI -> pakce loss %) mappings of one BSSID
      */
-    class BssidStatistics: public ElRefBase
+    class BssidStatistics: public Object
     {
     public:
         /**
@@ -807,5 +806,5 @@ private:
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wifi::WifiWatchdogStateMachine::VolumeWeightedEMA, IInterface);
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFIWATCHDOGSTATEMACHINE_H__

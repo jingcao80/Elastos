@@ -5,14 +5,6 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/wifi/WifiServiceImpl.h"
 
-// package com.android.server.wifi;
-// import android.content.Context;
-// import android.net.wifi.ScanResult;
-// import android.net.wifi.WifiScanner;
-// import android.util.Log;
-// import com.android.server.SystemService;
-// import java.util.List;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Server::SystemService;
 

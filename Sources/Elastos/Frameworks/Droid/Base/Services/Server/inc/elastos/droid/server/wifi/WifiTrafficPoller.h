@@ -49,14 +49,22 @@ private:
         : public Handler
     {
     public:
+        TrafficHandler(
+            /* [in] */ WifiTrafficPoller* owner)
+            : mOwner(owner)
+        {
+        }
+
         virtual CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+    private:
+        WifiTrafficPoller* mOwner;
     };
 
 public:
     WifiTrafficPoller(
         /* [in] */ IContext* context,
-        /* [in] */ String iface);
+        /* [in] */ const String& iface);
 
     virtual CARAPI AddClient(
         /* [in] */ IMessenger* client);

@@ -15,18 +15,6 @@
 #include "elastos/droid/server/wifi/WifiWatchdogStateMachine.h"
 #include "elastos/droid/server/wifi/WifiController.h"
 
-
-// import static com.android.server.wifi.WifiController.CMD_AIRPLANE_TOGGLED;
-// import static com.android.server.wifi.WifiController.CMD_BATTERY_CHANGED;
-// import static com.android.server.wifi.WifiController.CMD_EMERGENCY_MODE_CHANGED;
-// import static com.android.server.wifi.WifiController.CMD_LOCKS_CHANGED;
-// import static com.android.server.wifi.WifiController.CMD_SCAN_ALWAYS_MODE_CHANGED;
-// import static com.android.server.wifi.WifiController.CMD_SCREEN_OFF;
-// import static com.android.server.wifi.WifiController.CMD_SCREEN_ON;
-// import static com.android.server.wifi.WifiController.CMD_SET_AP;
-// import static com.android.server.wifi.WifiController.CMD_USER_PRESENT;
-// import static com.android.server.wifi.WifiController.CMD_WIFI_TOGGLED;
-
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -84,30 +72,42 @@ public:
     class TdlsTask
         : public AsyncTask//<TdlsTaskParams, Integer, Integer>
     {
-    protected:
+    public:
+        TdlsTask(
+            /* [in] */ WifiServiceImpl* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
-        //CARAPI_(AutoPtr<Integer>) DoInBackground(
-        //    /* [in] */  TdlsTaskParams);
         CARAPI DoInBackground(
             /* [in] */ ArrayOf<IInterface*>* params,
             /* [out] */ IInterface** result);
 
+    private:
+        WifiServiceImpl* mOwner;
     };
 
     class DeathRecipient
         : public Object
-        //TODO , public IBinder::DeathRecipient
+        , public IProxyDeathRecipient
     {
     public:
+        CAR_INTERFACE_DECL();
+
         DeathRecipient(
+            /* [in] */ WifiServiceImpl* owner,
             /* [in] */ Int32 mode,
             /* [in] */ const String& tag,
             /* [in] */ IBinder* binder,
             /* [in] */ IWorkSource* ws);
 
+        //CARAPI ProxyDied() = 0;
+
         virtual CARAPI UnlinkDeathRecipient();
 
     public:
+        WifiServiceImpl* mOwner;
         String mTag;
         Int32 mMode;
         AutoPtr<IBinder> mBinder;
@@ -119,20 +119,23 @@ public:
     {
     public:
         WifiLock(
+            /* [in] */ WifiServiceImpl* owner,
             /* [in] */ Int32 lockMode,
             /* [in] */ const String& tag,
             /* [in] */ IBinder* binder,
             /* [in] */ IWorkSource* ws);
 
-        virtual CARAPI BinderDied();
+        CARAPI ProxyDied();
 
         virtual CARAPI ToString(
             /* [out] */ String* result);
+
     };
 
     class LockList
         : public Object
     {
+        friend class WifiServiceImpl;
     public:
         // synchronized
         virtual CARAPI HasLocks(
@@ -147,7 +150,8 @@ public:
             /* [in] */ IWorkSource* ws);
 
     private:
-        LockList();
+        LockList(
+            /* [in] */ WifiServiceImpl* owner);
 
         CARAPI_(void) AddLock(
             /* [in] */ WifiLock* lock);
@@ -163,6 +167,7 @@ public:
 
     private:
         AutoPtr<IList> mList;//WifiLock
+        WifiServiceImpl* mOwner;
     };
 
 private:
@@ -174,6 +179,7 @@ private:
     {
     public:
         ClientHandler(
+            /* [in] */ WifiServiceImpl* owner,
             /* [in] */ ILooper* looper);
 
         // @Override
@@ -185,6 +191,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [in] */ Int32 what,
             /* [in] */ Int32 why);
+    private:
+        WifiServiceImpl* mOwner;
     };
 
     /**
@@ -195,6 +203,7 @@ private:
     {
     public:
         WifiStateMachineHandler(
+            /* [in] */ WifiServiceImpl* owner,
             /* [in] */ ILooper* looper);
 
         // @Override
@@ -203,6 +212,7 @@ private:
 
     private:
         AutoPtr<IAsyncChannel> mWsmChannel;
+        WifiServiceImpl* mOwner;
     };
 
     class InnerBroadcastReceiver1
@@ -226,11 +236,12 @@ private:
     {
     public:
         BatchedScanRequest(
+            /* [in] */ WifiServiceImpl* owner,
             /* [in] */ IBatchedScanSettings* settings,
             /* [in] */ IBinder* binder,
             /* [in] */ IWorkSource* ws);
 
-        virtual CARAPI BinderDied();
+        CARAPI ProxyDied();
 
         virtual CARAPI ToString(
             /* [out] */ String* result);
@@ -283,10 +294,11 @@ private:
     {
     public:
         Multicaster(
+            /* [in] */ WifiServiceImpl* owner,
             /* [in] */ const String& tag,
             /* [in] */ IBinder* binder);
 
-        virtual CARAPI BinderDied();
+        CARAPI ProxyDied();
 
         virtual CARAPI ToString(
             /* [out] */ String* result);

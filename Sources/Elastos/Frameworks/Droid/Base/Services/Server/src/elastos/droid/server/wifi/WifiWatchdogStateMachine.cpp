@@ -37,7 +37,6 @@ namespace Server {
 namespace Wifi {
 
 const Boolean WifiWatchdogStateMachine::DBG = FALSE;
-//const String WifiWatchdogStateMachine::TAG("WifiWatchdogStateMachine");
 const Int32 WifiWatchdogStateMachine::BASE;
 const Int32 WifiWatchdogStateMachine::EVENT_WATCHDOG_TOGGLED;
 const Int32 WifiWatchdogStateMachine::EVENT_NETWORK_STATE_CHANGE;
@@ -51,7 +50,6 @@ const Int32 WifiWatchdogStateMachine::EVENT_SCREEN_OFF;
 const Int32 WifiWatchdogStateMachine::CMD_RSSI_FETCH;
 const Int32 WifiWatchdogStateMachine::POOR_LINK_DETECTED;
 const Int32 WifiWatchdogStateMachine::GOOD_LINK_DETECTED;
-//const Boolean WifiWatchdogStateMachine::DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED;
 const Int32 WifiWatchdogStateMachine::LINK_MONITOR_LEVEL_THRESHOLD;
 const Int32 WifiWatchdogStateMachine::BSSID_STAT_CACHE_SIZE;
 const Int32 WifiWatchdogStateMachine::BSSID_STAT_RANGE_LOW_DBM;
@@ -129,6 +127,7 @@ ECode WifiWatchdogStateMachine::DefaultState::ProcessMessage(
             break;
         default:
             // loge("Unhandled message " + msg + " in state " + getCurrentState().getName());
+            mOwner->Loge(String("Unhandled message"));
             break;
     }
     *result = HANDLED;
@@ -141,7 +140,7 @@ ECode WifiWatchdogStateMachine::DefaultState::ProcessMessage(
 //==============================================================
 ECode WifiWatchdogStateMachine::WatchdogDisabledState::Enter()
 {
-    // if (DBG) logd(getName());
+    if (DBG) mOwner->Logd(GetName());
     return NOERROR;
 }
 
@@ -329,7 +328,7 @@ ECode WifiWatchdogStateMachine::WatchdogEnabledState::ProcessMessage(
 //==============================================================
 ECode WifiWatchdogStateMachine::NotConnectedState::Enter()
 {
-    // if (DBG) logd(getName());
+    if (DBG) mOwner->Logd(GetName());
     return NOERROR;
 }
 
@@ -395,7 +394,7 @@ ECode WifiWatchdogStateMachine::VerifyingLinkState::ProcessMessage(
             IRssiPacketCountInfo* info = IRssiPacketCountInfo::Probe(obj);
             Int32 rssi;
             info->GetRssi(&rssi);
-            // if (DBG) logd("Fetch RSSI succeed, rssi=" + rssi);
+            if (DBG) Logger::E("WifiWatchdogStateMachine", "Fetch RSSI succeed, rssi=%d", rssi);
 
             Int64 time = mOwner->mCurrentBssid->mBssidAvoidTimeMax - SystemClock::GetElapsedRealtime();
             if (time <= 0) {
@@ -955,8 +954,6 @@ WifiWatchdogStateMachine::WifiWatchdogStateMachine(
     mWifiManager = IWifiManager::Probe(obj);
     AutoPtr<IHandler> h;
     GetHandler((IHandler**)&h);
-    //AutoPtr<IMessenger> msgr;
-    //mWifiManager->GetWifiStateMachineMessenger((IMessenger**)&msgr);
     mWsmChannel = new AsyncChannel();
     Int32 status;
     mWsmChannel->ConnectSync(mContext, h, dstMessenger, &status);
