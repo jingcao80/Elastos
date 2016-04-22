@@ -1,2 +1,2 @@
+DIRS+=src/elastos/droid/commands/am
 
-DIRS+=src

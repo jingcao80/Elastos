@@ -6,7 +6,6 @@ module
     namespace Commands {
     namespace Am {
 
-    [deprecated]
     interface IAm {
         Main(
             [in] ArrayOf<String> args);
