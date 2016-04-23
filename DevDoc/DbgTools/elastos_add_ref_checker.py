@@ -246,7 +246,7 @@ def summarize_log(logPath):
 
         # log
         logFile = open(logPath, 'a')
-        logInfo = '\n\nresults: {0:d} typecast errors, {1:d} typecast warnings, {2:d} released-return-value warnings.'.format(errorCount, warningCount, infoCount)
+        logInfo = '\n\nresults: {0:d} AddRef errors, {1:d} AddRef warnings, {2:d} released-return-value warnings.'.format(errorCount, warningCount, infoCount)
         logFile.write(logInfo)
         print logInfo
         logFile.close()
