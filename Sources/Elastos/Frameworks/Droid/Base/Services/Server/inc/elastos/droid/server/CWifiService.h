@@ -53,6 +53,8 @@ private:
         : public HandlerBase
     {
     public:
+        TO_STRING_IMPL("CWifiService::AsyncServiceHandler")
+
         AsyncServiceHandler(
             /* [in] */ ILooper* l,
             /* [in] */ CWifiService* owner)
@@ -74,6 +76,8 @@ private:
         : public HandlerBase
     {
     public:
+        TO_STRING_IMPL("CWifiService::WifiStateMachineHandler")
+
         WifiStateMachineHandler(
             /* [in] */ ILooper* l,
             /* [in] */ CWifiService* owner);

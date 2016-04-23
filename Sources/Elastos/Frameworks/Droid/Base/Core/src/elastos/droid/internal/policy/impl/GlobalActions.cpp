@@ -1451,6 +1451,8 @@ GlobalActions::GlobalActions(
     // PhoneStateListener mPhoneStateListener;
     mRingerModeReceiver = new RingerModeReceiver(this);
     mHandler = new DialogHandler(this);
+    mHandler->constructor();
+
     mAirplaneModeObserver = new AirplaneModeObserver(mHandler, this);
 
 

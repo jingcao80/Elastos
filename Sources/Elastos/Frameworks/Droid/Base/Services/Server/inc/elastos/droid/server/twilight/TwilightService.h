@@ -96,6 +96,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("TwilightService::LocationHandler")
+
         LocationHandler(
             /* [in] */ TwilightService* owner);
 

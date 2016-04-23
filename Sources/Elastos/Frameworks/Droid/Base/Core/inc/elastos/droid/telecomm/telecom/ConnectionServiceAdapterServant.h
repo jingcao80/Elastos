@@ -33,6 +33,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ConnectionServiceAdapterServant::MyHandler")
+
         MyHandler(
             /* [in] */ ConnectionServiceAdapterServant* host);
 
@@ -62,7 +64,7 @@ public:
 private:
     AutoPtr<IIConnectionServiceAdapter> mDelegate;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 
     AutoPtr<IIConnectionServiceAdapter> mStub;
 };

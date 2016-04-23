@@ -220,6 +220,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AlwaysOnHotwordDetector::MyHandler")
+
         MyHandler(
             /* [in] */ AlwaysOnHotwordDetector* host);
 

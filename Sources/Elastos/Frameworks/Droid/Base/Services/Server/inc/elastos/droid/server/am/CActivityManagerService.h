@@ -260,6 +260,8 @@ public:
     class MainHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CActivityManagerService::MainHandler")
+
         MainHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CActivityManagerService* host);
@@ -782,6 +784,8 @@ private:
     class BgHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CActivityManagerService::BgHandler")
+
         BgHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CActivityManagerService* host);

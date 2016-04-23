@@ -66,6 +66,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("MediaFocusControl::MediaEventHandler")
+
         MediaEventHandler(
             /* [in] */ MediaFocusControl* host,
             /* [in] */ ILooper* looper)

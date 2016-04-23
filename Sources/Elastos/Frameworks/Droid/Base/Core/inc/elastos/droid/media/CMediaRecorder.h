@@ -72,6 +72,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CMediaRecorder::EventHandler")
+
         EventHandler(
             /* [in] */ CMediaRecorder* host,
             /* [in] */ ILooper* looper);

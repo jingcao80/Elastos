@@ -104,6 +104,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("Notifier::NotifierHandler")
+
         NotifierHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ Notifier* service)

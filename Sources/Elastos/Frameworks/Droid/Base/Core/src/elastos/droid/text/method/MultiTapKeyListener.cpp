@@ -27,6 +27,12 @@ MultiTapKeyListener::Timeout::Timeout(
     /* [in] */ IEditable* buffer)
 {
     mBuffer = buffer;
+}
+
+ECode MultiTapKeyListener::Timeout::constructor()
+{
+    HandlerRunnable::constructor();
+
     Int32 bufLen;
     ICharSequence::Probe(mBuffer)->GetLength(&bufLen);
     ISpannable::Probe(mBuffer)->SetSpan(TO_IINTERFACE(this), 0, bufLen, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);

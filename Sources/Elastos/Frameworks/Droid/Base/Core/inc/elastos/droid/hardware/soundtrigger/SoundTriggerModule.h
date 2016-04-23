@@ -22,6 +22,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("SoundTriggerModule::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ ISoundTriggerStatusListener* mdst);

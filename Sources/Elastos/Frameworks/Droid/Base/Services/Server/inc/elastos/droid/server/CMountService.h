@@ -54,6 +54,8 @@ public:
     class MountServiceHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CMountService::MountServiceHandler")
+
         MountServiceHandler(
             /* [in] */ ILooper* l,
             /* [in] */ CMountService* service);
@@ -68,6 +70,8 @@ public:
     class ObbActionHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CMountService::ObbActionHandler")
+
         ObbActionHandler(
             /* [in] */ ILooper* l,
             /* [in] */ CMountService* service);

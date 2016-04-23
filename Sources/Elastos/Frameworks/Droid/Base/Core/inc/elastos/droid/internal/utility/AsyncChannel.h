@@ -39,6 +39,8 @@ private:
             : public Handler
         {
         public:
+            TO_STRING_IMPL("AsyncChannel::SyncHandler")
+
             /** Constructor */
             SyncHandler(
                 /* [in] */ ILooper* looper)

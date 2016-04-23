@@ -46,6 +46,8 @@ public:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ BatteryStatsImpl* host)

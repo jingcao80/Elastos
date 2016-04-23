@@ -22,10 +22,8 @@ const Int32 JobService::MSG_JOB_FINISHED = 2;
 // JobService::JobHandler:
 //================================================================================
 JobService::JobHandler::JobHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ JobService* host)
-    : Handler(looper)
-    , mHost(host)
+    : mHost(host)
 {
 }
 
@@ -162,7 +160,8 @@ ECode JobService::EnsureHandler()
         if (mHandler == NULL) {
             AutoPtr<ILooper> looper;
             GetMainLooper((ILooper**)&looper);
-            mHandler = new JobHandler(looper, this);
+            mHandler = new JobHandler(this);
+            mHandler->constructor(looper);
         }
     }
     return NOERROR;

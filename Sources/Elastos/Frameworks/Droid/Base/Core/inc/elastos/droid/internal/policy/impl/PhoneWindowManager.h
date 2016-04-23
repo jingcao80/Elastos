@@ -461,6 +461,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::PolicyHandler")
+
         PolicyHandler(
             /* [in] */ PhoneWindowManager* host);
 
@@ -548,6 +550,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ScreenshotHandler")
+
         ScreenshotHandler(
             /* [in] */ IServiceConnection *conn,
             /* [in] */ PhoneWindowManager* host);

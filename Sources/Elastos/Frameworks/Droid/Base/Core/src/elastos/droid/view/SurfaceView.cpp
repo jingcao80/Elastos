@@ -338,21 +338,6 @@ SurfaceView::SurfaceView()
     , mHeight(-1)
     , mFormat(-1)
 {
-    mLocation = ArrayOf<Int32>::Alloc(2);
-    CSurface::New((ISurface**)&mSurface);       // Current surface in use
-    CSurface::New((ISurface**)&mNewSurface);    // New surface we are switching to
-    CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mLayout);
-    CRect::New((IRect**)&mVisibleInsets);
-    CRect::New((IRect**)&mWinFrame);
-    CRect::New((IRect**)&mOverscanInsets);
-    CRect::New((IRect**)&mContentInsets);
-    CRect::New((IRect**)&mStableInsets);
-    CSurfaceViewWindow::New(this, (IBaseIWindow**)&mWindow);
-    CConfiguration::New((IConfiguration**)&mConfiguration);
-    mHandler = new MyHandler(this);
-    mScrollChangedListener = new MyOnScrollChangedListener(this);
-    CRect::New((IRect**)&mSurfaceFrame);
-    mDrawListener = new MyOnPreDrawListener(this);
 }
 
 ECode SurfaceView::constructor(
@@ -399,6 +384,25 @@ SurfaceView::~SurfaceView()
 
 void SurfaceView::Init()
 {
+    mLocation = ArrayOf<Int32>::Alloc(2);
+    CSurface::New((ISurface**)&mSurface);       // Current surface in use
+    CSurface::New((ISurface**)&mNewSurface);    // New surface we are switching to
+    CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mLayout);
+    CRect::New((IRect**)&mVisibleInsets);
+    CRect::New((IRect**)&mWinFrame);
+    CRect::New((IRect**)&mOverscanInsets);
+    CRect::New((IRect**)&mContentInsets);
+    CRect::New((IRect**)&mStableInsets);
+    CSurfaceViewWindow::New(this, (IBaseIWindow**)&mWindow);
+    CConfiguration::New((IConfiguration**)&mConfiguration);
+    AutoPtr<MyHandler> h = new MyHandler(this);
+    h->constructor();
+    mHandler = h.Get();
+
+    mScrollChangedListener = new MyOnScrollChangedListener(this);
+    CRect::New((IRect**)&mSurfaceFrame);
+    mDrawListener = new MyOnPreDrawListener(this);
+
     SetWillNotDraw(TRUE);
 }
 

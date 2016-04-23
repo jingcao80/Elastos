@@ -192,6 +192,7 @@ ECode Dialog::constructor(
     mWindow->SetGravity(IGravity::CENTER);
 
     mListenersHandler = new ListenersHandler(this);
+    mListenersHandler->constructor();
     CHandler::New((IHandler**)&mHandler);
     assert(mHandler != NULL);
 

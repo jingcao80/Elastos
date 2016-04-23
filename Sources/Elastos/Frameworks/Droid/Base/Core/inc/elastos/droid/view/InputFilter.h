@@ -24,6 +24,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("InputFilter::H")
+
         H(
             /* [in] */ ILooper* loop,
             /* [in] */ InputFilter* host);

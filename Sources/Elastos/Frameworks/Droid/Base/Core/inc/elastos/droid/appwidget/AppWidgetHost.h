@@ -74,11 +74,11 @@ private:
     class ECO_LOCAL UpdateHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("AppWidgetHost::UpdateHandler")
+
         UpdateHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ AppWidgetHost* host)
-            : Handler(looper)
-            , mHost(host)
+            : mHost(host)
         {}
 
         CARAPI HandleMessage(
@@ -245,7 +245,7 @@ protected:
     static AutoPtr<IIAppWidgetService> sService;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<UpdateHandler> mHandler;
     Int32 mHostId;
     AutoPtr<IIAppWidgetHost> mCallbacks;
     /* final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();*/

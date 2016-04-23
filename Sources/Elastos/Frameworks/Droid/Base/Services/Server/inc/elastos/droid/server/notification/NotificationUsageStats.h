@@ -329,6 +329,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("NotificationUsageStats::SQLiteLogHandler")
+
         SQLiteLogHandler(
             /* [in] */ SQLiteLog* host);
 

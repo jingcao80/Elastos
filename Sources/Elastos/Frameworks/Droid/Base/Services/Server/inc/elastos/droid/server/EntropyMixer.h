@@ -60,6 +60,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("EntropyMixer::MyHandler")
+
         MyHandler(
             /* [in] */ EntropyMixer* host);
 

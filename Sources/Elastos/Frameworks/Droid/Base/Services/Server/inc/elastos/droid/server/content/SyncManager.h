@@ -248,6 +248,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("SyncManager::SyncHandler")
+
         /**
          * Used to keep track of whether a sync notification is active and who it is for.
          */

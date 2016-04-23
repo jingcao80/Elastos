@@ -65,6 +65,8 @@ protected:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("VoiceInteractionService::MyHandler")
+
         MyHandler(
             /* [in] */ VoiceInteractionService* host);
 

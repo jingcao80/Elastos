@@ -82,6 +82,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("Dialog::ListenersHandler")
+
         ListenersHandler(
             /* [in] */ IDialog* host);
 
@@ -558,7 +560,7 @@ private:
 
     AutoPtr<IHandler> mHandler;
 
-    AutoPtr<IHandler> mListenersHandler;
+    AutoPtr<ListenersHandler> mListenersHandler;
 
     AutoPtr<IActionMode> mActionMode;
 

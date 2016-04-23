@@ -127,6 +127,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("NetworkTimeUpdateService::ConnectionHandler")
+
         MyHandler(
             /* [in] */ ILooper* l,
             /* [in] */ NetworkTimeUpdateService* host);

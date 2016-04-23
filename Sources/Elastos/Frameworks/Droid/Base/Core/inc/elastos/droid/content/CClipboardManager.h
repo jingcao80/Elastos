@@ -25,6 +25,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CClipboardManager::Handler")
+
         MyHandler(
             /* [in] */ CClipboardManager* host)
             : mHost(host)
@@ -138,7 +140,7 @@ private:
     List<AutoPtr<IClipboardManagerOnPrimaryClipChangedListener> > mPrimaryClipChangedListeners;
     AutoPtr<IOnPrimaryClipChangedListener> mPrimaryClipChangedServiceListener;
     Object mPrimaryClipChangedListenersLock;
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 };
 
 }

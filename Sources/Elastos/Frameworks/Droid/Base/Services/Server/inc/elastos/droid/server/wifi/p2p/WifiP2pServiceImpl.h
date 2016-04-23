@@ -996,6 +996,8 @@ private:
     class ClientHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiP2pServiceImpl::ClientHandler")
+
         ClientHandler(
             /* [in] */ WifiP2pServiceImpl* host,
             /* [in] */ ILooper* looper);

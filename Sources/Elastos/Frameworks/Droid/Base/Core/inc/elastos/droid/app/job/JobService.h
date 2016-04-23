@@ -32,8 +32,9 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("JobService::JobHandler")
+
         JobHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ JobService* host);
 
         //@Override

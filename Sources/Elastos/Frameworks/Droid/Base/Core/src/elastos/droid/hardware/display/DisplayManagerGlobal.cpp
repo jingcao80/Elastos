@@ -42,10 +42,8 @@ AutoPtr<IDisplayManagerGlobal> DisplayManagerGlobal::sInstance;
 Object DisplayManagerGlobal::sInstanceLock;
 
 DisplayManagerGlobal::DisplayListenerDelegate::DisplayListenerDelegate(
-    /* [in] */ IDisplayListener* listener,
-    /* [in] */ ILooper* looper)
-    : Handler(looper)
-    , mListener(listener)
+    /* [in] */ IDisplayListener* listener)
+    : mListener(listener)
 {
 }
 
@@ -92,7 +90,16 @@ DisplayManagerGlobal::VirtualDisplayCallback::VirtualDisplayCallback(
     /* [in] */ IHandler* handler)
 {
     if (callback != NULL) {
-        mDelegate = new VirtualDisplayCallbackDelegate(callback, handler);
+        AutoPtr<ILooper> looper;
+        if (handler != NULL) {
+            handler->GetLooper((ILooper**)&looper);
+        }
+        else {
+            looper = Looper::GetMyLooper();
+        }
+
+        mDelegate = new VirtualDisplayCallbackDelegate(callback);
+        mDelegate->constructor(looper, NULL, TRUE /*async*/);
     }
 }
 
@@ -124,19 +131,9 @@ ECode DisplayManagerGlobal::VirtualDisplayCallback::OnStopped()
 }
 
 DisplayManagerGlobal::VirtualDisplayCallbackDelegate::VirtualDisplayCallbackDelegate(
-    /* [in] */ IVirtualDisplayCallback* callback,
-    /* [in] */ IHandler* handler)
+    /* [in] */ IVirtualDisplayCallback* callback)
     : mCallback(callback)
 {
-    AutoPtr<ILooper> looper;
-    if (handler != NULL) {
-        handler->GetLooper((ILooper**)&looper);
-    }
-    else {
-        looper = Looper::GetMyLooper();
-    }
-
-    Handler::constructor(looper, NULL, TRUE /*async*/);
 }
 
 ECode DisplayManagerGlobal::VirtualDisplayCallbackDelegate::HandleMessage(
@@ -346,7 +343,8 @@ ECode DisplayManagerGlobal::RegisterDisplayListener(
     synchronized(mLock) {
         List<AutoPtr<DisplayListenerDelegate> >::Iterator iter = FindDisplayListenerLocked(listener);
         if (iter == mDisplayListeners.End()) {
-            AutoPtr<DisplayListenerDelegate> delegate = new DisplayListenerDelegate(listener, looper);
+            AutoPtr<DisplayListenerDelegate> delegate = new DisplayListenerDelegate(listener);
+            delegate->constructor(looper);
             mDisplayListeners.PushBack(delegate);
             RegisterCallbackIfNeededLocked();
         }

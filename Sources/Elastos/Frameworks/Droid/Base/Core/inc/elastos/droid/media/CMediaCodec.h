@@ -30,6 +30,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CMediaCodec::EventHandler")
+
         EventHandler(
             /* [in] */ CMediaCodec* host,
             /* [in] */ ILooper* looper)

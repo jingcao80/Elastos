@@ -45,9 +45,10 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CInputManager::InputDeviceListenerDelegate")
+
         InputDeviceListenerDelegate(
-            /* [in] */ IInputDeviceListener* listener,
-            /* [in] */ ILooper* looper);
+            /* [in] */ IInputDeviceListener* listener);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);

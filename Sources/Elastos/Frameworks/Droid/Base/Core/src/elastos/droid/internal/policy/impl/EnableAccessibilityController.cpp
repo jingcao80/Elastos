@@ -147,6 +147,7 @@ ECode EnableAccessibilityController::constructor(
 
     // Init global variable.
     mHandler = new SpeakHandler(this);
+    mHandler->constructor();
 
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);

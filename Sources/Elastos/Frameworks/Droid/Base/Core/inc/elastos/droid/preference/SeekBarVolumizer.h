@@ -45,6 +45,8 @@ private:
     {
         friend class SeekBarVolumizer;
     public:
+        TO_STRING_IMPL("SeekBarVolumizer::SeekBarVolumizerH")
+
         SeekBarVolumizerH(
             /* [in] */ SeekBarVolumizer* owner);
 

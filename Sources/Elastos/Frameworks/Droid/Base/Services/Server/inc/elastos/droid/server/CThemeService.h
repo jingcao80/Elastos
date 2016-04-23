@@ -61,6 +61,8 @@ private:
         friend class CThemeService;
 
     public:
+        TO_STRING_IMPL("CThemeService::ThemeWorkerHandler")
+
         ThemeWorkerHandler(
             /* [in] */ CThemeService* host,
             /* [in] */ ILooper* looper);
@@ -81,6 +83,8 @@ private:
         friend class CThemeService;
 
     public:
+        TO_STRING_IMPL("CThemeService::ResourceProcessingHandler")
+
         ResourceProcessingHandler(
             /* [in] */ CThemeService* host,
             /* [in] */ ILooper* lp);

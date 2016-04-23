@@ -926,9 +926,10 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("HardwareCamera::EventHandler")
+
         EventHandler(
-            /* [in] */ HardwareCamera* c,
-            /* [in] */ ILooper* looper);
+            /* [in] */ HardwareCamera* c);
 
         // @Override
         CARAPI HandleMessage(
@@ -2020,7 +2021,7 @@ private:
 
     Int64 mNativeContext; // accessed by native methods
     // EventHandler mEventHandler;
-    AutoPtr<IHandler> mEventHandler;
+    AutoPtr<EventHandler> mEventHandler;
     AutoPtr<IShutterCallback> mShutterCallback;
     AutoPtr<IPictureCallback> mRawImageCallback;
     AutoPtr<IPictureCallback> mJpegCallback;

@@ -53,8 +53,9 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("IntentService::ServiceHandler")
+
         ServiceHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ IntentService* host);
 
         //@Override

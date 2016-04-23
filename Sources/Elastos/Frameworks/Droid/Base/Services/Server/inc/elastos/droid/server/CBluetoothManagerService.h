@@ -99,6 +99,8 @@ private:
     {
     friend class CBluetoothManagerService;
     public:
+        TO_STRING_IMPL("BluetoothHandler::BluetoothHandler")
+
         BluetoothHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CBluetoothManagerService* host);

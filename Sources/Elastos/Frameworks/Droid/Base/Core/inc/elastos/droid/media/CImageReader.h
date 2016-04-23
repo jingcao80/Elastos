@@ -48,6 +48,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CImageReader::ListenerHandler")
+
         ListenerHandler(
             /* [in] */ CImageReader* host,
             /* [in] */ ILooper* looper)

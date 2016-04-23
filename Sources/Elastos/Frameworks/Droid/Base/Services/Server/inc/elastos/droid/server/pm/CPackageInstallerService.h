@@ -179,6 +179,8 @@ private:
     class Callbacks : public Handler
     {
     public:
+        TO_STRING_IMPL("CPackageInstallerService::Handler")
+
         Callbacks(
             /* [in] */ ILooper* looper);
 

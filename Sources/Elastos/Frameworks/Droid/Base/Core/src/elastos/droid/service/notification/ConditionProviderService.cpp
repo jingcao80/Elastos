@@ -18,12 +18,20 @@ namespace Notification {
 //====================================
 // ConditionProviderService
 //====================================
+const String ConditionProviderService::TAG("ConditionProviderService");
 
 CAR_INTERFACE_IMPL(ConditionProviderService, Service, IConditionProviderService)
 
 ConditionProviderService::ConditionProviderService()
-    : TAG("ConditionProviderService")
 {
+}
+
+ECode ConditionProviderService::constructor()
+{
+    AutoPtr<H> h = new H(this);
+    h->constructor();
+    mHandler = h.Get();
+    return NOERROR;
 }
 
 ECode ConditionProviderService::GetNotificationInterface(
@@ -152,7 +160,7 @@ const Int32 ConditionProviderService::H::ON_SUBSCRIBE;
 const Int32 ConditionProviderService::H::ON_UNSUBSCRIBE;
 
 ConditionProviderService::H::H(
-    /* [in] */ Provider* host)
+    /* [in] */ ConditionProviderService* host)
     : mHost(host)
 {
 }
@@ -167,28 +175,32 @@ ECode ConditionProviderService::H::HandleMessage(
     switch(what) {
         case ON_CONNECTED: {
             name = "onConnected";
-            mHost->OnConnected();
+            assert(0 && "TODO");
+            // mHost->OnConnected();
             break;
         }
         case ON_REQUEST_CONDITIONS: {
             name = "onRequestConditions";
             Int32 arg1;
             msg->GetArg1(&arg1);
-            mHost->OnRequestConditions(arg1);
+            assert(0 && "TODO");
+            // mHost->OnRequestConditions(arg1);
             break;
         }
         case ON_SUBSCRIBE: {
             name = "onSubscribe";
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            mHost->OnSubscribe(IUri::Probe(obj));
+            assert(0 && "TODO");
+            // mHost->OnSubscribe(IUri::Probe(obj));
             break;
         }
         case ON_UNSUBSCRIBE: {
             name = "onUnsubscribe";
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            mHost->OnUnsubscribe(IUri::Probe(obj));
+            assert(0 && "TODO");
+            // mHost->OnUnsubscribe(IUri::Probe(obj));
             break;
         }
     }

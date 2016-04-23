@@ -32,6 +32,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WiredAccessoryManager::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ WiredAccessoryManager* service)

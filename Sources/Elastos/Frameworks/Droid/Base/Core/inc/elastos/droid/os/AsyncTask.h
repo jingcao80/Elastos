@@ -176,6 +176,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AsyncTask::InternalHandler")
+
         InternalHandler()
         {}
 

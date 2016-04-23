@@ -177,7 +177,8 @@ ECode AppWidgetHost::constructor(
     mContext = context;
     mHostId = hostId;
     mOnClickHandler = handler;
-    mHandler = new UpdateHandler(looper, this);
+    mHandler = new UpdateHandler(this);
+    mHandler->constructor(looper);
     assert(context != NULL);
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);

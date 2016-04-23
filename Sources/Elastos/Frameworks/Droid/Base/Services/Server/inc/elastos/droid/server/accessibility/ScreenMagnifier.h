@@ -263,6 +263,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ScreenMagnifier::HandlerInDetectingStateHandlerHandler")
+
         HandlerInDetectingStateHandlerHandler(
             /* [in] */ DetectingStateHandler* owner,
             /* [in] */ ScreenMagnifier* host);
@@ -386,6 +388,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ScreenMagnifier::HandlerInScreenStateObserver")
+
         HandlerInScreenStateObserver(
             /* [in] */ ScreenStateObserver* host);
 
@@ -403,6 +407,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ScreenMagnifier::InitmHandler")
+
         InitmHandler(
             /* [in] */ ScreenMagnifier* host);
 

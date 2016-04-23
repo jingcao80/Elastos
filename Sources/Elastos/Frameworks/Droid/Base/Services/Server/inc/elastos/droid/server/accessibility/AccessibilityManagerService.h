@@ -554,6 +554,8 @@ private:
     {
         friend class KeyEventDispatcher;
     public:
+        TO_STRING_IMPL("AccessibilityManagerService::InvocationHandler")
+
         InvocationHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ Service* host);
@@ -628,6 +630,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AccessibilityManagerService::EventDispatchHandler")
+
         EventDispatchHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ Service* host);
@@ -693,6 +697,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AccessibilityManagerService::MainHandler")
+
         MainHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ AccessibilityManagerService* service);

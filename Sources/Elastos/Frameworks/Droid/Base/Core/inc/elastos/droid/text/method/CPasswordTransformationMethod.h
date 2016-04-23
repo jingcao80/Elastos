@@ -76,6 +76,8 @@ private:
         friend class PasswordCharSequence;
 
     public:
+        TO_STRING_IMPL("CPasswordTransformationMethod::Visible")
+
         Visible();
 
         CAR_INTERFACE_DECL()

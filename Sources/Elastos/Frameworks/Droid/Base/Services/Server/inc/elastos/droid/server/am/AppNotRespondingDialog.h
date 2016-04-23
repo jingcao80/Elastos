@@ -21,6 +21,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AppNotRespondingDialog::MyHandler")
+
         MyHandler(
             /* [in] */ AppNotRespondingDialog* host);
 

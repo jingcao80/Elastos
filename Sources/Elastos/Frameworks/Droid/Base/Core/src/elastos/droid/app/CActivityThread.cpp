@@ -1220,6 +1220,7 @@ ECode CActivityThread::constructor()
 
     mResourcesManager = CResourcesManager::GetInstance();
     mH = new H(this);
+    mH->constructor();
 
     CConfiguration::New((IConfiguration**)&mMainThreadConfig);
     return NOERROR;

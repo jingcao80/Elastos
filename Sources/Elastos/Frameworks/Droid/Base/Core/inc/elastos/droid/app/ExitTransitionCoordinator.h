@@ -127,6 +127,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ExitTransitionCoordinator::MyHandler")
+
         MyHandler(
             /* [in] */ ExitTransitionCoordinator* host);
 

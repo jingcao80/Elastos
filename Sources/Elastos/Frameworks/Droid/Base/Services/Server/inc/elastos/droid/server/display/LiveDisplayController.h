@@ -95,6 +95,8 @@ private:
     class LiveDisplayHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("LiveDisplayController::LiveDisplayHandler")
+
         LiveDisplayHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ LiveDisplayController* host);

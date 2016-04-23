@@ -60,8 +60,7 @@ ECode Presentation::PresentationDisplayListener::OnDisplayChanged(
 //======================================================================================
 Presentation::PresentationHandler::PresentationHandler(
     /* [in] */ Presentation* host)
-    : Handler(FALSE)
-    , mHost(host)
+    : mHost(host)
 {
 }
 
@@ -115,6 +114,7 @@ Presentation::Presentation()
 {
     mDisplayListener = new PresentationDisplayListener(this);
     mHandler = new PresentationHandler(this);
+    mHandler->constructor(FALSE);
 }
 
 Presentation::~Presentation()

@@ -172,6 +172,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiDisplayAdapter::WifiDisplayHandler")
+
         WifiDisplayHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ WifiDisplayAdapter* host);

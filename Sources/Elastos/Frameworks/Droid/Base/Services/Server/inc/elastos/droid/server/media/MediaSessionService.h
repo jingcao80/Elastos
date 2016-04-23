@@ -146,6 +146,8 @@ public:
     class MessageHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("MediaSessionService::MessageHandler")
+
         MessageHandler(
             /* [in] */ MediaSessionService* host)
             : mHost(host)

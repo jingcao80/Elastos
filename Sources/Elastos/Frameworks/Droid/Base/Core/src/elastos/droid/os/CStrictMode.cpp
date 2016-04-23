@@ -745,8 +745,7 @@ ECode CStrictMode::AndroidBlockGuardPolicy::HandleViolation(
     }
 
     // Not perfect, but fast and good enough for dup suppression.
-    Int32 crashFingerprint;
-    info->HashCode(&crashFingerprint);
+    Int32 crashFingerprint = Object::GetHashCode(info);
     Int64 lastViolationTime = 0;
     if (mLastViolationTime.Find(crashFingerprint) != mLastViolationTime.End()) {
         lastViolationTime = mLastViolationTime[crashFingerprint];
@@ -1110,8 +1109,7 @@ ECode CStrictMode::OnVmPolicyViolation(
     cinfo->mTags = NULL;
     cinfo->mBroadcastIntentAction = NULL;
 
-    Int32 fingerprint;
-    info->HashCode(&fingerprint);
+    Int32 fingerprint = Object::GetHashCode(info);
     const Int64 now = SystemClock::GetUptimeMillis();
     Int64 lastViolationTime = 0;
     Int64 timeSinceLastViolationMillis = 0x7FFFFFFFFFFFFFFFL; // Long.MAX_VALUE;

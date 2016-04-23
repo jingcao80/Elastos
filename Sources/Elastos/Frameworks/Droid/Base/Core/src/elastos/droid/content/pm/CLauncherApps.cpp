@@ -590,9 +590,10 @@ ECode CLauncherApps::AddCallbackLocked(
     if (h == NULL) {
         CHandler::New((IHandler**)&h);
     }
-    AutoPtr<CallbackMessageHandler> toAdd = new CallbackMessageHandler();
+
     AutoPtr<ILooper> looper;
     h->GetLooper((ILooper**)&looper);
+    AutoPtr<CallbackMessageHandler> toAdd = new CallbackMessageHandler();
     toAdd->constructor(looper, callback);
     mCallbacks->Add(TO_IINTERFACE(toAdd));
     return NOERROR;

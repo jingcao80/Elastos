@@ -62,12 +62,10 @@ public:
         {
             friend class ListenerTransport;
         public:
-            ListenerTransportHandler(
-                /* [in] */ ListenerTransport* listener);
+            TO_STRING_IMPL("LocationManager::ListenerTransportHandler")
 
             ListenerTransportHandler(
-                /* [in] */ ListenerTransport* listener,
-                /* [in] */ ILooper* looper);
+                /* [in] */ ListenerTransport* listener);
 
             CARAPI HandleMessage(
                 /* [in] */ IMessage* msg);
@@ -151,6 +149,8 @@ public:
         {
             friend class GpsStatusListenerTransport;
         public:
+            TO_STRING_IMPL("LocationManager::GpsHandler")
+
             GpsHandler(
                 /* [in] */ GpsStatusListenerTransport* host);
 

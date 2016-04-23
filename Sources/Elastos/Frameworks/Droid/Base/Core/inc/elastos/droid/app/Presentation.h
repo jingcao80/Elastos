@@ -61,6 +61,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("Presentation::PresentationHandler")
+
         PresentationHandler(
             /* [in] */ Presentation* host);
 

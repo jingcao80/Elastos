@@ -85,8 +85,10 @@ private:
     {
         friend class Provider;
     public:
+        TO_STRING_IMPL("ConditionProviderService::H")
+
         H(
-            /* [in] */ Provider* host);
+            /* [in] */ ConditionProviderService* host);
 
         // @Override
         CARAPI HandleMessage(
@@ -98,13 +100,15 @@ private:
         const static Int32 ON_SUBSCRIBE = 3;
         const static Int32 ON_UNSUBSCRIBE = 4;
 
-        Provider* mHost;
+        ConditionProviderService* mHost;
     };
 
 public:
     CAR_INTERFACE_DECL()
 
     ConditionProviderService();
+
+    CARAPI constructor();
 
     virtual CARAPI OnConnected() = 0;
 
@@ -136,7 +140,7 @@ private:
     ECO_LOCAL CARAPI_(Boolean) IsBound();
 
 private:
-    const String TAG;// = ConditionProviderService.class.getSimpleName()
+    static const String TAG;// = ConditionProviderService.class.getSimpleName()
            // + "[" + getClass().getSimpleName() + "]";
 
     AutoPtr<H> mHandler;

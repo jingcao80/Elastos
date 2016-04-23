@@ -639,6 +639,8 @@ private:
         friend class TvInputManagerService;
 
     public:
+        TO_STRING_IMPL("TvInputManagerService::WatchLogHandler")
+
         CARAPI constructor(
             /* [in] */ IContentResolver* contentResolver,
             /* [in] */ ILooper* looper);

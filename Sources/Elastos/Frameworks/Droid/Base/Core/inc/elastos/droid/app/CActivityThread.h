@@ -125,6 +125,7 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CActivityThread::H")
         H(
             /* [in] */ CActivityThread* host);
 
@@ -1371,7 +1372,7 @@ public:
 
     AutoPtr<IApplicationThread> mAppThread;
     AutoPtr<ILooper> mLooper;
-    AutoPtr<IHandler> mH;
+    AutoPtr<H> mH;
     HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> > mActivities;
 
     // List of new activities (via ActivityRecord.nextIdle) that should

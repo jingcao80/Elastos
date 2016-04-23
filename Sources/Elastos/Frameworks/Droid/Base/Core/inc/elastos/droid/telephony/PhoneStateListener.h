@@ -92,6 +92,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("PhoneStateListener::MyHandler")
+
         MyHandler(
             /* [in] */ PhoneStateListener* host,
             /* [in] */ ILooper* looper)

@@ -82,6 +82,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CountDownTimer::MyHandler")
+
         MyHandler(
             /* [in] */ IWeakReference* wr);
 

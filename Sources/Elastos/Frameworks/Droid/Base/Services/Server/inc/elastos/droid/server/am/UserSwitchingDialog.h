@@ -31,6 +31,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("UserSwitchingDialog::InnerHandler")
+
         InnerHandler(
             /* [in] */ UserSwitchingDialog* owner);
 

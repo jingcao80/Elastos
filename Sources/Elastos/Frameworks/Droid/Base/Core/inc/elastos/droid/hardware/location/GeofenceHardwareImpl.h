@@ -87,6 +87,8 @@ private:
     class ECO_LOCAL GeofenceHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("GeofenceHardwareImpl::GeofenceHandler")
+
         GeofenceHandler(
             /* [in] */ GeofenceHardwareImpl* host);
 
@@ -101,6 +103,8 @@ private:
     class ECO_LOCAL CallbacksHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("GeofenceHardwareImpl::CallbacksHandler")
+
         CallbacksHandler(
             /* [in] */ GeofenceHardwareImpl* host);
 
@@ -115,6 +119,8 @@ private:
     class ECO_LOCAL ReaperHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("GeofenceHardwareImpl::ReaperHandler")
+
         ReaperHandler(
             /* [in] */ GeofenceHardwareImpl* host);
 

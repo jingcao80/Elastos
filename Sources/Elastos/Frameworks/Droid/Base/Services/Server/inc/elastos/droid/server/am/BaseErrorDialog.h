@@ -21,6 +21,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("BaseErrorDialog::MyHandler")
+
         MyHandler(
             /* [in] */ BaseErrorDialog* service)
             : mHost(service)

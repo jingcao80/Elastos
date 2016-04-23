@@ -60,6 +60,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AudioEffect::NativeEventHandler")
+
         NativeEventHandler(
             /* [in] */ AudioEffect* ae,
             /* [in] */ ILooper* looper);

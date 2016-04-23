@@ -31,8 +31,7 @@ namespace App {
 
 ProgressDialog::ViewUpdateHandler::ViewUpdateHandler(
     /* [in] */ ProgressDialog* host)
-    : Handler(FALSE)
-    , mHost(host)
+    : mHost(host)
 {}
 
 ECode ProgressDialog::ViewUpdateHandler::HandleMessage(
@@ -182,6 +181,7 @@ ECode ProgressDialog::OnCreate(
          * must be updated on the same thread that created them.
          */
         mViewUpdateHandler = new ViewUpdateHandler(this);
+        mViewUpdateHandler->constructor();
 
         Int32 resourceId = 0;
         a->GetResourceId(

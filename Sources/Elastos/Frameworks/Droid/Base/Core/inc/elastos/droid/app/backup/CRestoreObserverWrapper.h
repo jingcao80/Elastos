@@ -28,6 +28,8 @@ private:
     class WrapperHandler: public HandlerBase
     {
     public:
+        TO_STRING_IMPL("CRestoreObserverWrapper::WrapperHandler")
+
         WrapperHandler(
             /* [in] */ IRestoreObserver* appObserver);
 
@@ -61,7 +63,7 @@ public:
         /* [in] */ Int32 error);
 
 private:
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<WrapperHandler> mHandler;
     AutoPtr<IRestoreObserver> mAppObserver;
 
     static const Int32 MSG_RESTORE_STARTING;

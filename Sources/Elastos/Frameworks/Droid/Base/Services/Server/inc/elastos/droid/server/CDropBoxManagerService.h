@@ -43,6 +43,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CDropBoxManagerService::MyHandler")
+
         MyHandler(
             /* [in] */ CDropBoxManagerService* host)
             : mHost(host)

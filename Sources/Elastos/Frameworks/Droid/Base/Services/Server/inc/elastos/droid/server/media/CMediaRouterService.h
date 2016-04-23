@@ -276,6 +276,8 @@ public:
         };
 
     public:
+        TO_STRING_IMPL("CMediaRouterService::UserHandler")
+
         UserHandler(
             /* [in] */ CMediaRouterService* service,
             /* [in] */ UserRecord* userRecord);

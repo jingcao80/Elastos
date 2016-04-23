@@ -79,6 +79,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("GeofenceProxy::MyHandler")
+
         MyHandler(
             /* [in] */ GeofenceProxy* host);
 

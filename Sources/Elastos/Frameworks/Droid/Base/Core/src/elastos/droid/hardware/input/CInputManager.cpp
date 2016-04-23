@@ -40,10 +40,8 @@ AutoPtr<IInputManager> CInputManager::sInstance;
 Object CInputManager::sInstanceLock;
 
 CInputManager::InputDeviceListenerDelegate::InputDeviceListenerDelegate(
-    /* [in] */ IInputDeviceListener* listener,
-    /* [in] */ ILooper* looper)
-    : Handler(looper)
-    , mListener(listener)
+    /* [in] */ IInputDeviceListener* listener)
+    : mListener(listener)
 {
 }
 
@@ -286,7 +284,8 @@ ECode CInputManager::RegisterInputDeviceListener(
         List<AutoPtr<InputDeviceListenerDelegate> >::Iterator find =
             FindInputDeviceListenerLocked(listener);
         if (find == mInputDeviceListeners.End()) {
-            AutoPtr<InputDeviceListenerDelegate> delegate = new InputDeviceListenerDelegate(listener, looper);
+            AutoPtr<InputDeviceListenerDelegate> delegate = new InputDeviceListenerDelegate(listener);
+            delegate->constructor(looper);
             mInputDeviceListeners.PushBack(delegate);
         }
     }

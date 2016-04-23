@@ -1651,6 +1651,7 @@ ECode CAudioService::AudioSystemThread::Run()
 
     synchronized(mHost) {
         mHost->mAudioHandler = new AudioHandler(mHost);
+        mHost->mAudioHandler->constructor();
 
         // Notify that the handler has been created
         mHost->Notify();

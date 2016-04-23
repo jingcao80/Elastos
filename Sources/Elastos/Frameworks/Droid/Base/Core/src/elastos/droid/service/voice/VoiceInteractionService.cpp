@@ -149,6 +149,7 @@ ECode VoiceInteractionService::OnCreate()
 {
     FAIL_RETURN(Service::OnCreate());
     mHandler = new MyHandler(this);
+    mHandler->constructor();
     return NOERROR;
 }
 

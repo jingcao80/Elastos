@@ -93,6 +93,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AccessibilityInteractionController::PrivateHandler")
+
         PrivateHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ AccessibilityInteractionController* host);

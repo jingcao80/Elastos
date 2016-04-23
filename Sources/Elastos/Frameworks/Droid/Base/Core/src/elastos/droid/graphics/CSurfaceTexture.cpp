@@ -25,11 +25,9 @@ namespace Droid {
 namespace Graphics {
 
 CSurfaceTexture::AvailableHandler::AvailableHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ IOnFrameAvailableListener* listener,
     /* [in] */ CSurfaceTexture* host)
-    : Handler(looper, NULL, TRUE)
-    , mHost(host)
+    : mHost(host)
     , mListener(listener)
 {}
 
@@ -40,7 +38,9 @@ ECode CSurfaceTexture::AvailableHandler::HandleMessage(
 }
 
 CAR_OBJECT_IMPL(CSurfaceTexture);
+
 CAR_INTERFACE_IMPL(CSurfaceTexture, Object, ISurfaceTexture);
+
 CSurfaceTexture::CSurfaceTexture()
     : mSurfaceTexture(0)
 {}
@@ -92,9 +92,10 @@ ECode CSurfaceTexture::SetOnFrameAvailableListener(
         AutoPtr<ILooper> tmp;
         AutoPtr<ILooper> looper = handler != NULL ? (handler->GetLooper((ILooper**)&tmp), tmp) :
                 mCreatorLooper != NULL ? mCreatorLooper : Looper::GetMainLooper();
-
-        mOnFrameAvailableHandler = new AvailableHandler(looper, listener, this);
-    } else {
+        mOnFrameAvailableHandler = new AvailableHandler(listener, this);
+        mOnFrameAvailableHandler->constructor(looper);
+    }
+    else {
         mOnFrameAvailableHandler = NULL;
     }
     return NOERROR;

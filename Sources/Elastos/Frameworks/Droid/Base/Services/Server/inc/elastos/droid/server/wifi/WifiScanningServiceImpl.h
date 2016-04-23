@@ -455,6 +455,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiScanningServiceImpl::ClientHandler")
+
         ClientHandler(
             /* [in] */ ILooper* looper);
 

@@ -36,6 +36,7 @@ ECode CountDownTimer::constructor(
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
     mHandler = new MyHandler(wr);
+    mHandler->constructor();
     return NOERROR;
 }
 

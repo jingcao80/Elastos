@@ -69,9 +69,7 @@ ECode TrustManager::TrustManagerTrustListener::ToString(
 //======================================================================================
 // TrustManager::MyHandler
 //======================================================================================
-TrustManager::MyHandler::MyHandler(
-    /* [in] */ ILooper* looper)
-    : Handler(looper)
+TrustManager::MyHandler::MyHandler()
 {}
 
 //@Override
@@ -123,7 +121,8 @@ ECode TrustManager::constructor(
     /* [in] */ IBinder* b)
 {
     AutoPtr<ILooper> looper = Looper::GetMainLooper();
-    mHandler = new MyHandler(looper);
+    mHandler = new MyHandler();
+    mHandler->constructor(looper);
 
     mService = IITrustManager::Probe(b);
     CArrayMap::New((IArrayMap**)&mTrustListeners);

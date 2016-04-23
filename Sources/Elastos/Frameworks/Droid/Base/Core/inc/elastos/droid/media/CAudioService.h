@@ -592,11 +592,12 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAudioService::AudioHandler")
+
         AudioHandler(
             /* [in] */ CAudioService* host)
             : mHost(host)
         {
-            Handler::constructor();
         }
 
         CARAPI HandleMessage(

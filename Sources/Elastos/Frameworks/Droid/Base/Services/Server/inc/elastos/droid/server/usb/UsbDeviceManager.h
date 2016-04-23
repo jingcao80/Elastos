@@ -141,6 +141,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("UsbDeviceManager::UsbHandler")
+
         UsbHandler(
             /* [in] */ UsbDeviceManager* host,
             /* [in] */ ILooper* looper);

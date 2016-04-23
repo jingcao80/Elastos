@@ -41,10 +41,8 @@ AsyncQueryHandler::WorkerArgs::~WorkerArgs()
 // AsyncQueryHandler::WorkerHandler
 //==============================================================
 AsyncQueryHandler::WorkerHandler::WorkerHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ IWeakReference* context)
-    : Handler(looper)
-    , mWeakContext(context)
+    : mWeakContext(context)
 {}
 
 AsyncQueryHandler::WorkerHandler::~WorkerHandler()
@@ -180,7 +178,8 @@ ECode AsyncQueryHandler::CreateHandler(
     VALIDATE_NOT_NULL(handler)
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
-    AutoPtr<WorkerHandler> worker = new WorkerHandler(looper, wr);
+    AutoPtr<WorkerHandler> worker = new WorkerHandler(wr);
+    worker->constructor(looper);
     *handler = (IHandler*)worker.Get();
     REFCOUNT_ADD(*handler);
     return NOERROR;

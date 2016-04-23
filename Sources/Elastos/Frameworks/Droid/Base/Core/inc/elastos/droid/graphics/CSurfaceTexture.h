@@ -60,8 +60,9 @@ private:
     class AvailableHandler: public Handler
     {
     public:
+        TO_STRING_IMPL("CSurfaceTexture::AvailableHandler")
+
         AvailableHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ IOnFrameAvailableListener* listener,
             /* [in] */ CSurfaceTexture* host);
 
@@ -326,7 +327,7 @@ public:
 
 private:
     AutoPtr<ILooper> mCreatorLooper;
-    AutoPtr<IHandler> mOnFrameAvailableHandler;
+    AutoPtr<AvailableHandler> mOnFrameAvailableHandler;
 };
 
 } // namespace Graphics

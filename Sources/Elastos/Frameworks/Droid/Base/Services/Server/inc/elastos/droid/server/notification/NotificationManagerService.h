@@ -816,6 +816,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("NotificationManagerService::WorkerHandler")
+
         WorkerHandler(
             /* [in] */ NotificationManagerService* host);
 
@@ -833,6 +835,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("NotificationManagerService::RankingWorkerHandler")
+
         RankingWorkerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ NotificationManagerService* host);

@@ -45,6 +45,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("GeofenceManager::GeofenceHandler")
+
         GeofenceHandler(
             /* [in] */ GeofenceManager* host);
 

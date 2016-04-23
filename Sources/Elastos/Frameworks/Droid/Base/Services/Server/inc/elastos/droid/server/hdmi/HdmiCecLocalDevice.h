@@ -87,6 +87,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("HdmiCecLocalDevice::InnerSub_Handler")
+
         InnerSub_Handler(
             /* [in] */ HdmiCecLocalDevice* host);
 

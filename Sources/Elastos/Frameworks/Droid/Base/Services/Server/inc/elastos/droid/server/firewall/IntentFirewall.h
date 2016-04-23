@@ -193,6 +193,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("IntentFirewall::FirewallHandler")
+
         CAR_INTERFACE_DECL();
 
         FirewallHandler(

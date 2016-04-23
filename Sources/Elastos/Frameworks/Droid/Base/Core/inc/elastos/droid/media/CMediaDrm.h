@@ -337,6 +337,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CMediaDrm::EventHandler")
+
         EventHandler(
             /* [in] */ CMediaDrm* host,
             /* [in] */ ILooper* looper)

@@ -33,6 +33,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("VideoCallbackServant::MyHandler")
+
         MyHandler(
             /* [in] */ VideoCallbackServant* host);
 

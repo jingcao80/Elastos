@@ -26,6 +26,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("SurfaceView::MyHandler")
+
         MyHandler(
             /* [in] */ SurfaceView* host)
             : mHost(host)

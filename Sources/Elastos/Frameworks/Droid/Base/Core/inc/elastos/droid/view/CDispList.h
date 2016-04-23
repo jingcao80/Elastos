@@ -22,15 +22,10 @@ CarClass(CDispList) , public Handler
 protected:
 
     class MyToast
-        : public IToast
-        , public Toast
-        , public ElRefBase
+        : public Toast
     {
     public:
-        CAR_INTERFACE_DECL()
-
         MyToast(
-            /* [in] */ IContext* ctx,
             /* [in] */ CDispList* host);
 
         CARAPI OnHide();
@@ -88,10 +83,6 @@ protected:
     };
 
 public:
-    IHANDLER_METHODS_DECL()
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 
     CARAPI HandleMessage(
         /* [in] */ IMessage* msg);

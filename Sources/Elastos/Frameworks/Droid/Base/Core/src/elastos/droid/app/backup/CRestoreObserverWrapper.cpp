@@ -96,6 +96,7 @@ ECode CRestoreObserverWrapper::constructor(
 {
     mAppObserver = appObserver;
     mHandler = new WrapperHandler(mAppObserver);
+    mHandler->constructor();
 
     return NOERROR;
 }

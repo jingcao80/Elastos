@@ -91,6 +91,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("TvInputService::ServiceHandler")
+
         ServiceHandler(
             /* [in] */ TvInputService* host)
             : mHost(host)
@@ -224,7 +226,7 @@ private:
      * Handler instance to handle request from TV Input Manager Service. Should be run in the main
      * looper to be synchronously run with {@code Session.mHandler}.
      */
-    AutoPtr<IHandler> mServiceHandler;
+    AutoPtr<ServiceHandler> mServiceHandler;
     AutoPtr<IRemoteCallbackList> mCallbacks;
 
     AutoPtr<ITvInputManager> mTvInputManager;

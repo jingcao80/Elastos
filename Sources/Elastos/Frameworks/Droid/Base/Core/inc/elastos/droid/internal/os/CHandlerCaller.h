@@ -21,6 +21,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CHandlerCaller::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ Boolean async,

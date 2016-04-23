@@ -34,6 +34,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("PreferenceFragment::PreferenceFragmentHandler")
+
         PreferenceFragmentHandler(
             /* [in] */ PreferenceFragment* host);
 
@@ -216,7 +218,7 @@ private:
     Boolean mHavePrefs;
     Boolean mInitDone;
     Int32 mLayoutResId;
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<PreferenceFragmentHandler> mHandler;
     AutoPtr<IRunnable> mRequestFocus;
     AutoPtr<IViewOnKeyListener> mListOnKeyListener;
 };

@@ -25,6 +25,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAudioTrack::EventHandler")
+
         EventHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CAudioTrack* host,

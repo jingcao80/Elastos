@@ -95,7 +95,6 @@ NetInitiatedActivity::NetInitiatedActivity()
     , mDefault_response_timeout(6)
     , mNetInitiatedReceiver(new NetInitiatedReceiver(this))
 {
-    mHandler = new MyHandler(this);
 }
 
 ECode NetInitiatedActivity::HandleGPSNoResponseTimeout()
@@ -111,6 +110,9 @@ ECode NetInitiatedActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     AlertActivity::OnCreate(savedInstanceState);
+
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
 
     // Set up the "dialog"
     AutoPtr<IIntent> intent;

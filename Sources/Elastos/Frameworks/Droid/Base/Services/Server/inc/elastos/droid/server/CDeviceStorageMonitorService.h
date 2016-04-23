@@ -26,6 +26,8 @@ private:
     class MyHandler : public HandlerBase
     {
     public:
+        TO_STRING_IMPL("CDeviceStorageMonitorService::MyHandler")
+
         MyHandler(
             /* [in] */ CDeviceStorageMonitorService* service)
             : mHost(service)

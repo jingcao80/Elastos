@@ -142,6 +142,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("RemoteController::EventHandler")
+
         EventHandler(
             /* [in] */ RemoteController* host,
             /* [in] */ ILooper* looper);

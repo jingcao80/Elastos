@@ -185,10 +185,8 @@ android::sp<android::Camera> HardwareCamera::get_native_camera(
 
 
 HardwareCamera::EventHandler::EventHandler(
-    /* [in] */ HardwareCamera* c,
-    /* [in] */ ILooper* looper)
-    : Handler(looper)
-    , mCamera(c)
+    /* [in] */ HardwareCamera* c)
+    : mCamera(c)
 {
 }
 
@@ -2572,10 +2570,14 @@ Int32 HardwareCamera::CameraInitVersion(
 
     AutoPtr<ILooper> looper;
     if ((looper = Looper::GetMyLooper()) != NULL) {
-        mEventHandler = new EventHandler(this, looper);
-    } else if ((looper = Looper::GetMainLooper()) != NULL) {
-        mEventHandler = new EventHandler(this, looper);
-    } else {
+        mEventHandler = new EventHandler(this);
+        mEventHandler->constructor(looper);
+    }
+    else if ((looper = Looper::GetMainLooper()) != NULL) {
+        mEventHandler = new EventHandler(this);
+        mEventHandler->constructor(looper);
+    }
+    else {
         mEventHandler = NULL;
     }
 

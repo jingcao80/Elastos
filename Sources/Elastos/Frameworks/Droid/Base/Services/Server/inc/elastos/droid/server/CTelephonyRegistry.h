@@ -137,6 +137,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CTelephonyRegistry::MyHandler")
+
         MyHandler(
             /* [in] */ CTelephonyRegistry* host);
 

@@ -48,6 +48,8 @@ public:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("KeyboardView::MyHandler")
+
         MyHandler(
             /* [in] */ KeyboardView* host)
             : mHost(host)
@@ -561,7 +563,7 @@ protected:
     /** Whether the requirement of a headset to hear passwords if accessibility is enabled is announced. */
     Boolean mHeadsetRequiredToHearPasswordsAnnounced;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 
     Int64 mOldEventTime;
     Boolean mUsedVelocity;

@@ -251,6 +251,8 @@ class SyncStorageEngine
     : public Handler
 {
 public:
+    TO_STRING_IMPL("SyncStorageEngine")
+
     SyncStorageEngine(
         /* [in] */ IContext* context,
         /* [in] */ IFile* dataDir);

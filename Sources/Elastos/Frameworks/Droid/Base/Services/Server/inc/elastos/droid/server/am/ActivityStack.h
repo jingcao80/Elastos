@@ -61,6 +61,8 @@ protected:
         : public Handler
     {
     public:
+      TO_STRING_IMPL("ActivityStack::ActivityStackHandler")
+
         ActivityStackHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ ActivityStack* owner);

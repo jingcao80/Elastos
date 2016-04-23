@@ -403,6 +403,8 @@ public:/* package */
     class PackageHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CPackageManagerService::PackageHandler")
+
         PackageHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CPackageManagerService* host)

@@ -288,13 +288,15 @@ CAR_INTERFACE_IMPL(ConnectionServiceAdapterServant, Object, IConnectionServiceAd
 
 ConnectionServiceAdapterServant::ConnectionServiceAdapterServant()
 {
-    mHandler = new MyHandler(this);
-    CConnectionServiceAdapterStub::New(mHandler, (IIConnectionServiceAdapter**)&mStub);
 }
 
 ECode ConnectionServiceAdapterServant::constructor(
     /* [in] */ IIConnectionServiceAdapter* delegate)
 {
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
+    CConnectionServiceAdapterStub::New(mHandler, (IIConnectionServiceAdapter**)&mStub);
+
     mDelegate = delegate;
     return NOERROR;
 }

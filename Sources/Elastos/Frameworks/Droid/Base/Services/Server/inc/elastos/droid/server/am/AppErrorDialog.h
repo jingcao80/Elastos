@@ -23,6 +23,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AppErrorDialog::MyHandler")
+
         MyHandler(
             /* [in] */ AppErrorDialog* host);
 

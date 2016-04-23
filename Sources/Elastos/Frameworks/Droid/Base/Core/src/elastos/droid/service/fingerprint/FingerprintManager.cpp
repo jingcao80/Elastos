@@ -151,11 +151,6 @@ CAR_INTERFACE_IMPL(FingerprintManager, Object, IFingerprintManager)
 
 FingerprintManager::FingerprintManager()
 {
-    CBinder::New((IBinder**)&mToken);
-    AutoPtr<MHandler> mh = new MHandler(this);
-    mHandler = IHandler::Probe(mh.Get());
-    AutoPtr<MServiceReceiver> ms = new MServiceReceiver(this);
-    mServiceReceiver = IIFingerprintServiceReceiver::Probe(ms.Get());
 }
 
 ECode FingerprintManager::constructor(
@@ -167,6 +162,14 @@ ECode FingerprintManager::constructor(
     if (mService == NULL) {
         Slogger::V(TAG, "FingerprintManagerService was null");
     }
+
+    CBinder::New((IBinder**)&mToken);
+    AutoPtr<MHandler> mh = new MHandler(this);
+    mh->constructor();
+    mHandler = IHandler::Probe(mh.Get());
+    AutoPtr<MServiceReceiver> ms = new MServiceReceiver(this);
+    ms->constructor();
+    mServiceReceiver = IIFingerprintServiceReceiver::Probe(ms.Get());
     return NOERROR;
 }
 

@@ -45,6 +45,8 @@ private:
     class MyHandler : public HandlerBase
     {
     public:
+        TO_STRING_IMPL("IInputConnectionWrapper::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ IInputConnectionWrapper* host);

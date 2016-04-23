@@ -227,8 +227,8 @@ ECode GestureDetector::constructor(
     if (handler != NULL) {
         AutoPtr<ILooper> looper;
         handler->GetLooper((ILooper**)&looper);
-        mHandler = new GestureHandler(looper, this);
-        mHandler->constructor();
+        mHandler = new GestureHandler(this);
+        mHandler->constructor(looper);
     }
     else {
         mHandler = new GestureHandler(this);

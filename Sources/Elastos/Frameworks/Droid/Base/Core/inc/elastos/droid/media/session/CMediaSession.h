@@ -73,6 +73,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CMediaSession::CallbackMessageHandler")
+
         CallbackMessageHandler(
             /* [in] */ CMediaSession* host,
             /* [in] */ ILooper* looper,

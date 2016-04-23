@@ -118,6 +118,8 @@ private:
     class MessageHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("MediaSessionRecord::MessageHandler")
+
         MessageHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ MediaSessionRecord* host)

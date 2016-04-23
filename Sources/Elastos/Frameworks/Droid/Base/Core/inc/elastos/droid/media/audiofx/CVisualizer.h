@@ -63,6 +63,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CVisualizer::NativeEventHandler")
+
         NativeEventHandler(
             /* [in] */ CVisualizer* v,
             /* [in] */ ILooper* looper);

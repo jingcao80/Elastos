@@ -7334,7 +7334,9 @@ ViewRootImpl::SyntheticInputStage::SyntheticInputStage(
 {
     mTrackball = new SyntheticTrackballHandler(host);
     mJoystick = new SyntheticJoystickHandler(host);
+    mJoystick->constructor(TRUE);
     mTouchNavigation = new SyntheticTouchNavigationHandler(host);
+    mTouchNavigation->constructor(TRUE);
     mKeyboard = new SyntheticKeyboardHandler(host);
 }
 
@@ -7551,8 +7553,7 @@ const Int32 ViewRootImpl::SyntheticJoystickHandler::MSG_ENQUEUE_Y_AXIS_KEY_REPEA
 
 ViewRootImpl::SyntheticJoystickHandler::SyntheticJoystickHandler(
     /* [in] */ ViewRootImpl* host)
-    : Handler(TRUE)
-    , mLastXDirection(0)
+    : mLastXDirection(0)
     , mLastYDirection(0)
     , mLastXKeyCode(0)
     , mLastYKeyCode(0)
@@ -7729,8 +7730,7 @@ const Float ViewRootImpl::SyntheticTouchNavigationHandler::FLING_TICK_DECAY = 0.
 
 ViewRootImpl::SyntheticTouchNavigationHandler::SyntheticTouchNavigationHandler(
     /* [in] */ ViewRootImpl* host)
-    : Handler(TRUE)
-    , mCurrentDeviceId(-1)
+    : mCurrentDeviceId(-1)
     , mCurrentSource(0)
     , mCurrentDeviceSupported(FALSE)
     , mConfigTickDistance(0)

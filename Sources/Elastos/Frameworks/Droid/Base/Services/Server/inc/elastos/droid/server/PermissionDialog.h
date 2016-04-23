@@ -26,6 +26,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("PermissionDialog::MyHandler")
+
         MyHandler(
             /* [in] */ PermissionDialog* host);
 

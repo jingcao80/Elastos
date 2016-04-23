@@ -115,6 +115,8 @@ public:
             : public Handler
         {
         public:
+            TO_STRING_IMPL("Connection::VideoProviderHandler")
+
             VideoProviderHandler(
                 /* [in] */ VideoProvider* host);
 

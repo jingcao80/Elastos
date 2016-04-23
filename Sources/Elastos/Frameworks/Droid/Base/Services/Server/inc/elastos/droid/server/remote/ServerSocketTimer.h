@@ -30,6 +30,8 @@ private:
         class TimerThreadHandler : public HandlerBase
         {
         public:
+            TO_STRING_IMPL("ServerSocketTimer::TimerThreadHandler")
+
             TimerThreadHandler(
                 /* [in] */ ILooper* looper,
                 /* [in] */ TimerThread* host);

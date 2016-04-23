@@ -41,9 +41,10 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DisplayManagerGlobal::DisplayListenerDelegate")
+
         DisplayListenerDelegate(
-            /* [in] */ IDisplayListener* listener,
-            /* [in] */ ILooper* looper);
+            /* [in] */ IDisplayListener* listener);
 
         CARAPI_(void) SendDisplayEvent(
             /* [in] */ Int32 displayId,
@@ -61,9 +62,10 @@ private:
     class VirtualDisplayCallbackDelegate : public Handler
     {
     public:
+        TO_STRING_IMPL("DisplayManagerGlobal::VirtualDisplayCallbackDelegate")
+
         VirtualDisplayCallbackDelegate(
-            /* [in] */ IVirtualDisplayCallback* callback,
-            /* [in] */ IHandler* handler);
+            /* [in] */ IVirtualDisplayCallback* callback);
 
         //@Override
         HandleMessage(

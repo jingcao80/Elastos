@@ -166,6 +166,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CInputManagerService::InputManagerHandler")
+
         InputManagerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CInputManagerService* host);

@@ -51,14 +51,22 @@ CAR_INTERFACE_IMPL(CClipboardManager, Object/*Elastos::Droid::Text::ClipboardMan
 CClipboardManager::CClipboardManager()
     : mContext(NULL)
 {
-    mHandler = new MyHandler(this);
-    mPrimaryClipChangedServiceListener =
-        new PrimaryClipChangedServiceListener(this);
 }
 
 CClipboardManager::~CClipboardManager()
 {
     mPrimaryClipChangedListeners.Clear();
+}
+
+ECode CClipboardManager::constructor(
+    /* [in] */ IContext* context)
+{
+    mContext = context;
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
+    mPrimaryClipChangedServiceListener =
+        new PrimaryClipChangedServiceListener(this);
+    return NOERROR;
 }
 
 ECode CClipboardManager::SetPrimaryClip(
@@ -184,13 +192,6 @@ ECode CClipboardManager::HasText(
     AutoPtr<IIClipboard> clipboard;
     FAIL_RETURN(GetService((IIClipboard**)&clipboard));
     FAIL_RETURN(clipboard->HasClipboardText(pkg, hasText));
-    return NOERROR;
-}
-
-ECode CClipboardManager::constructor(
-    /* [in] */ IContext* context)
-{
-    mContext = context;
     return NOERROR;
 }
 

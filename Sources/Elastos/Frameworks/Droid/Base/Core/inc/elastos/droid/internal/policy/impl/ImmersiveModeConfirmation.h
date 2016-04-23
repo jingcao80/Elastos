@@ -46,6 +46,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ImmersiveModeConfirmation::H")
+
         H(
             /* [in] */ ImmersiveModeConfirmation* host);
 

@@ -53,8 +53,9 @@ private:
             : public AsyncQueryHandler::WorkerHandler
         {
         public:
+            TO_STRING_IMPL("CCallerInfoAsyncQuery::CallerInfoWorkerHandler")
+
             CallerInfoWorkerHandler(
-                /* [in] */ ILooper* looper,
                 /* [in] */ IWeakReference* host);
 
             CARAPI HandleMessage(
@@ -62,6 +63,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("CCallerInfoAsyncQuery::CallerInfoAsyncQueryHandler")
+
         /**
          * Asynchronous query handler class for the contact / callerinfo object.
          */

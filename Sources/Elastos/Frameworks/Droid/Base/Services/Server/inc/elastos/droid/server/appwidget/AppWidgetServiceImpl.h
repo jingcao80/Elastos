@@ -81,6 +81,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AppWidgetServiceImpl::CallbackHandler")
+
         CallbackHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ AppWidgetServiceImpl* owner);

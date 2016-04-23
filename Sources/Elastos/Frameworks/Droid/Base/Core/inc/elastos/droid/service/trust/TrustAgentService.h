@@ -67,6 +67,8 @@ private:
     {
         friend class TrustAgentService;
     public:
+        TO_STRING_IMPL("TrustAgentService::MHandler")
+
         MHandler(
             /* [in] */ TrustAgentService* host);
 

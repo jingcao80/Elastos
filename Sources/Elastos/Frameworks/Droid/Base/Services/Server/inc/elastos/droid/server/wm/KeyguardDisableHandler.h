@@ -23,6 +23,8 @@ public:
     class KeyguardTokenWatcher : public TokenWatcher
     {
     public:
+        TO_STRING_IMPL("KeyguardDisableHandler::KeyguardTokenWatcher")
+
         KeyguardTokenWatcher(
             /* [in] */ KeyguardDisableHandler* handler);
 

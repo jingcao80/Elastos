@@ -178,6 +178,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiServiceImpl::ClientHandler")
+
         ClientHandler(
             /* [in] */ WifiServiceImpl* owner,
             /* [in] */ ILooper* looper);
@@ -202,6 +204,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiServiceImpl::WifiStateMachineHandler")
+
         WifiStateMachineHandler(
             /* [in] */ WifiServiceImpl* owner,
             /* [in] */ ILooper* looper);

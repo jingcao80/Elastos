@@ -152,6 +152,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("LightsService::MyHandler")
+
         MyHandler(
             /* [in] */ LightsService* host)
             : mHost(host)

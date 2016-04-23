@@ -113,6 +113,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAccountManagerService::MessageHandler")
+
         MessageHandler(
             /* [in] */ CAccountManagerService* service);
 

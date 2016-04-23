@@ -62,6 +62,8 @@ private:
     {
         friend class UsbDebuggingManager;
     public:
+        TO_STRING_IMPL("UsbDebuggingManager::UsbDebuggingHandler")
+
         UsbDebuggingHandler(
             /* [in] */ UsbDebuggingManager* host,
             /* [in] */ ILooper* looper);

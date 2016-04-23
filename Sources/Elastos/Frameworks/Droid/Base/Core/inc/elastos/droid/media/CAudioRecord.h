@@ -36,6 +36,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAudioRecord::NativeEventHandler")
+
         NativeEventHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CAudioRecord* owner)

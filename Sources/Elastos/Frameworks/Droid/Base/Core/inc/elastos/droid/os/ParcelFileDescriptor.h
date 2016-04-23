@@ -92,6 +92,8 @@ private:
 
     class MyHander : public Handler {
     public:
+        TO_STRING_IMPL("ParcelFileDescriptor::MyHander")
+
         MyHander(
             /* [in] */ ILooper* looper,
             /* [in] */ IParcelFileDescriptorOnCloseListener* listener);

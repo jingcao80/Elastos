@@ -29,6 +29,8 @@ public:
     class H : public Handler
     {
     public:
+        TO_STRING_IMPL("ScreenRotationAnimation::H")
+
         H(
             /* [in] */ ILooper* looper,
             /* [in] */ ScreenRotationAnimation* host);

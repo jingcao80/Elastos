@@ -23,6 +23,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AppWaitingForDebuggerDialog::MyHandler")
+
         MyHandler(
             /* [in] */ AppWaitingForDebuggerDialog* host)
             : mHost(host)

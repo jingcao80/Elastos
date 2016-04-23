@@ -326,6 +326,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("GpsLocationProvider::ProviderHandler")
+
         ProviderHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ GpsLocationProvider* host);

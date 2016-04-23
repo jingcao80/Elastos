@@ -144,6 +144,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CMediaController::MessageHandler")
+
         MessageHandler(
             /* [in] */ ILooper * looper,
             /* [in] */ IMediaControllerCallback * cb,

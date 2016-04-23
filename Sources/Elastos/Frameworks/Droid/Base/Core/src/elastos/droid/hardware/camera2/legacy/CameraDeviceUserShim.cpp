@@ -127,10 +127,8 @@ ECode CameraDeviceUserShim::CameraLooper::WaitForOpen(
 }
 
 CameraDeviceUserShim::CallbackHandler::CallbackHandler(
-    /* [in] */ CameraCallbackThread* host,
-    /* [in] */ ILooper* looper)
-    : Handler(looper)
-    , mHost(host)
+    /* [in] */ CameraCallbackThread* host)
+    : mHost(host)
 {
 }
 
@@ -323,7 +321,9 @@ AutoPtr<IHandler> CameraDeviceUserShim::CameraCallbackThread::GetHandler()
     if (mHandler == NULL) {
         AutoPtr<ILooper> lopper;
         mHandlerThread->GetLooper((ILooper**)&lopper);
-        mHandler = new CallbackHandler(this, lopper);
+        AutoPtr<CallbackHandler> ch = new CallbackHandler(this);
+        ch->constructor(lopper);
+        mHandler = ch.Get();
     }
     return mHandler;
 }

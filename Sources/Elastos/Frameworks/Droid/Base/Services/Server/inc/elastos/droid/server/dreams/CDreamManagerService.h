@@ -227,6 +227,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CDreamManagerService::DreamHandler")
+
         DreamHandler(
             /* [in] */ ILooper* looper)
             : Handler(looper, TRUE/*async*/)

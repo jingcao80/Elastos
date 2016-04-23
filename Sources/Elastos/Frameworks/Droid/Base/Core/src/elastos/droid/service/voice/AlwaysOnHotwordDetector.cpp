@@ -352,6 +352,8 @@ ECode AlwaysOnHotwordDetector::constructor(
     mKeyphraseEnrollmentInfo->GetKeyphraseMetadata(text, locale, (IKeyphraseMetadata**)&mKeyphraseMetadata);
     mExternalCallback = (Callback*)callback;
     AutoPtr<MyHandler> mh = new MyHandler(this);
+    mh->constructor();
+
     mHandler = (IHandler*)(mh.Get());
     AutoPtr<IIRecognitionStatusCallback> icb;
     CAlwaysOnHotwordDetectorSoundTriggerListener::New(mHandler, (IIRecognitionStatusCallback**)&icb);

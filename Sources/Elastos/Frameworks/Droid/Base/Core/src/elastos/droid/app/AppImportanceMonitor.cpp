@@ -92,10 +92,8 @@ ECode AppImportanceMonitor::ProcessObserver::ToString(
 // AppImportanceMonitor::MyHandler
 //=================================================================================
 AppImportanceMonitor::MyHandler::MyHandler(
-    /* [in] */ AppImportanceMonitor* host,
-    /* [in] */ ILooper* looper)
-    : Handler(looper)
-    , mHost(host)
+    /* [in] */ AppImportanceMonitor* host)
+    : mHost(host)
 {}
 
 ECode AppImportanceMonitor::MyHandler::HandleMessage(
@@ -133,7 +131,8 @@ ECode AppImportanceMonitor::constructor(
     /* [in] */ ILooper* looper)
 {
     mContext = context;
-    mHandler = new MyHandler(this, looper);
+    mHandler = new MyHandler(this);
+    mHandler->constructor(looper);
 
     CAppImportanceMonitorProcessObserver::New(this, (IIProcessObserver**)&mProcessObserver);
 

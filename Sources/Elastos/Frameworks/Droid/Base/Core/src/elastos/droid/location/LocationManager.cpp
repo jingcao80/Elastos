@@ -46,13 +46,6 @@ LocationManager::ListenerTransport::ListenerTransportHandler::ListenerTransportH
 {
 }
 
-LocationManager::ListenerTransport::ListenerTransportHandler::ListenerTransportHandler(
-    /* [in] */ ListenerTransport* listener,
-    /* [in] */ ILooper* looper)
-    : mLTHost(listener)
-{
-}
-
 ECode LocationManager::ListenerTransport::ListenerTransportHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
@@ -84,9 +77,11 @@ ECode LocationManager::ListenerTransport::constructor(
     AutoPtr<ListenerTransportHandler> h;
     if (looper == NULL) {
         h = new ListenerTransportHandler(this);
+        h->constructor();
     }
     else {
-        h = new ListenerTransportHandler(this, looper);
+        h = new ListenerTransportHandler(this);
+        h->constructor(looper);
     }
     mListenerHandler = IHandler::Probe(h);
     return NOERROR;
@@ -280,6 +275,7 @@ ECode LocationManager::GpsStatusListenerTransport::constructor(
     mNmeaListener = NULL;
     mLMHost = (LocationManager*)host;
     AutoPtr<GpsHandler> gh = new GpsHandler(this);
+    gh->constructor();
     mGpsHandler = IHandler::Probe(gh);
     return NOERROR;
 }

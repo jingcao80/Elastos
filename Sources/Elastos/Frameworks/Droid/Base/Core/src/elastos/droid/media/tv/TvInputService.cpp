@@ -346,8 +346,6 @@ CAR_INTERFACE_IMPL(TvInputService, Elastos::Droid::App::Service, ITvInputService
 
 TvInputService::TvInputService()
 {
-    mServiceHandler = new ServiceHandler(this);
-    CRemoteCallbackList::New((IRemoteCallbackList**)&mCallbacks);
 }
 
 TvInputService::~TvInputService()
@@ -356,6 +354,9 @@ TvInputService::~TvInputService()
 
 ECode TvInputService::constructor()
 {
+    mServiceHandler = new ServiceHandler(this);
+    mServiceHandler->constructor();
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mCallbacks);
     return NOERROR;
 }
 

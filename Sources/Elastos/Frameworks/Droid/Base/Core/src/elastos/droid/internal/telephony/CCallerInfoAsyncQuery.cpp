@@ -44,9 +44,8 @@ const Boolean CCallerInfoAsyncQuery::ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION;
 //==============================================================================
 
 CCallerInfoAsyncQuery::CallerInfoAsyncQueryHandler::CallerInfoWorkerHandler::CallerInfoWorkerHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ IWeakReference* weakHost)
-    : WorkerHandler(looper, weakHost)
+    : WorkerHandler(weakHost)
 {
 }
 
@@ -126,7 +125,8 @@ ECode CCallerInfoAsyncQuery::CallerInfoAsyncQueryHandler::CreateHandler(
 
     AutoPtr<IWeakReference> weakHost;
     GetWeakReference((IWeakReference**)&weakHost);
-    AutoPtr<CallerInfoWorkerHandler> worker = new CallerInfoWorkerHandler(looper, weakHost);
+    AutoPtr<CallerInfoWorkerHandler> worker = new CallerInfoWorkerHandler(weakHost);
+    worker->constructor(looper);
     *handler = IHandler::Probe(worker);
     REFCOUNT_ADD(*handler);
     return NOERROR;
@@ -445,6 +445,7 @@ ECode CCallerInfoAsyncQuery::Allocate(
         return E_FAIL;
     }
     mHandler = new CallerInfoAsyncQueryHandler(this, context);
+    mHandler->constructor();
     mHandler->mQueryUri = contactRef;
     return NOERROR;
 }

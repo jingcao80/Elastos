@@ -15116,8 +15116,7 @@ ECode CActivityManagerService::HandleApplicationStrictModeViolation(
     }
 
    if ((violationMask & IStrictMode::PENALTY_DROPBOX) != 0) {
-       Int32 stackFingerprint;
-       info->HashCode(&stackFingerprint);
+       Int32 stackFingerprint = Object::GetHashCode(info);
        Boolean logIt = TRUE;
        AutoLock lock(mAlreadyLoggedViolatedStacksLock);
        HashSet<Int32>::Iterator it = mAlreadyLoggedViolatedStacks.Find(stackFingerprint);

@@ -30,6 +30,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AutomaticBrightnessController::AutomaticBrightnessHandler")
+
         AutomaticBrightnessHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ AutomaticBrightnessController* host);

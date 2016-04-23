@@ -101,6 +101,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAlertController::ButtonHandler")
+
         ButtonHandler(
             /* [in] */ IDialogInterface* dialog);
 

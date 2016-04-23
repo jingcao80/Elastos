@@ -77,7 +77,6 @@ ImmersiveModeConfirmation::H::H(
     /* [in] */ ImmersiveModeConfirmation* owner)
     :mOwner(owner)
 {
-    Handler::constructor();
 }
 
 ECode ImmersiveModeConfirmation::H::HandleMessage(
@@ -353,6 +352,8 @@ ECode ImmersiveModeConfirmation::constructor(
 {
     mContext = context;
     mHandler = new H(this);
+    mHandler->constructor();
+
     mConfirm = new InnerRunnable1(this);
     mShowDelayMs = GetNavBarExitDuration() * 3;
     AutoPtr<IInterface> iService;

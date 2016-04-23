@@ -36,6 +36,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("InCallService::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* loop,
             /* [in] */ InCallService* host);

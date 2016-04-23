@@ -68,6 +68,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("VirtualDisplayAdapter::Callback")
+
         Callback(
             /* [in] */ IIVirtualDisplayCallback* callback,
             /* [in] */ IHandler* handler,

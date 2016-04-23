@@ -55,6 +55,8 @@ private:
             : public Handler
         {
         public:
+            TO_STRING_IMPL("CAudioManager::MyHandler")
+
             MyHandler(
                 /* [in] */ ILooper* looper,
                 /* [in] */ FocusEventHandlerDelegate* host)

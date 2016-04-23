@@ -86,6 +86,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ActivityStackSupervisor::ActivityStackSupervisorHandler")
+
         ActivityStackSupervisorHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ ActivityStackSupervisor* owner);

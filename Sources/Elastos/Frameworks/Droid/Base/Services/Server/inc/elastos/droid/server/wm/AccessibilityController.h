@@ -64,6 +64,8 @@ private:
                 class AnimationController : public Handler
                 {
                 public:
+                    TO_STRING_IMPL("ViewportWindow::MyHandler")
+
                     AnimationController(
                         /* [in] */ IContext* context,
                         /* [in] */ ILooper* looper,
@@ -199,6 +201,8 @@ private:
         class MyHandler : public Handler
         {
         public:
+            TO_STRING_IMPL("DisplayMagnifier::MyHandler")
+
             MyHandler(
                 /* [in] */ ILooper* looper,
                 /* [in] */ DisplayMagnifier* host);
@@ -287,6 +291,8 @@ private:
         class MyHandler : public Handler
         {
         public:
+            TO_STRING_IMPL("WindowsForAccessibilityObserver::MyHandler")
+
             MyHandler(
                 /* [in] */ ILooper* looper,
                 /* [in] */ WindowsForAccessibilityObserver* host);

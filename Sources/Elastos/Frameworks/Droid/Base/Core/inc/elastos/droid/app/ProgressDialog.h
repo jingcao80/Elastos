@@ -32,6 +32,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ProgressDialog::ViewUpdateHandler")
+
         ViewUpdateHandler(
             /* [in] */ ProgressDialog* host);
 
@@ -168,7 +170,7 @@ protected:
     Boolean mIndeterminate;
 
     Boolean mHasStarted;
-    AutoPtr<IHandler> mViewUpdateHandler;
+    AutoPtr<ViewUpdateHandler> mViewUpdateHandler;
 };
 
 } // namespace App

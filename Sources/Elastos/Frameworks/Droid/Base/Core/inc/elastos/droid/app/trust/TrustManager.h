@@ -31,8 +31,9 @@ private:
         : public Handler
     {
     public:
-        MyHandler(
-            /* [in] */ ILooper* looper);
+        TO_STRING_IMPL("TrustManager::MyHandler")
+
+        MyHandler();
 
         ////@Override
         CARAPI HandleMessage(
@@ -141,7 +142,7 @@ private:
     AutoPtr<IITrustManager> mService;
     AutoPtr<IArrayMap> mTrustListeners;// ArrayMap<ITrustListener, IITrustListener>;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 };
 
 } // namespace Trust

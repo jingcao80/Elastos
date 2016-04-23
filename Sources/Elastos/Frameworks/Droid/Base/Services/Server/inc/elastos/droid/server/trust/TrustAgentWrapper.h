@@ -63,6 +63,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("TrustAgentWrapper::InnerSub_Handler")
+
         InnerSub_Handler(
             /* [in] */ TrustAgentWrapper* host);
 

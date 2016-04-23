@@ -76,6 +76,8 @@ private:
     class BackupHandler : public HandlerBase
     {
     public:
+        TO_STRING_IMPL("CBackupManagerService::BackupHandler")
+
         BackupHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CBackupManagerService* service);

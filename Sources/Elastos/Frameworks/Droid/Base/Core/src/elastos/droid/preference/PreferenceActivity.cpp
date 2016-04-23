@@ -639,13 +639,15 @@ PreferenceActivity::PreferenceActivity()
     , mPreferenceHeaderItemResId(0)
     , mPreferenceHeaderRemoveEmptyIcon(FALSE)
 {
-    mHandler = new MHandler(this);
 }
 
 ECode PreferenceActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     ListActivity::OnCreate(savedInstanceState);
+
+    mHandler = new MHandler(this);
+    mHandler->constructor();
 
     // Theming for the PreferenceActivity layout and for the Preference Header(s) layout
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(

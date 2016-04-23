@@ -17,14 +17,9 @@ const Int32 CDispList::MSG_SHOW_ITEM  = 0;
 const Int32 CDispList::MSG_SHOW_NEXT  = 1;
 const Int32 CDispList::DURATION  = IToast::LENGTH_SHORT;
 
-CAR_INTERFACE_IMPL(CDispList::MyToast, IToast)
-IHANDLER_METHODS_IMPL(CDispList, Handler)
-
 CDispList::MyToast::MyToast(
-    /* [in] */ IContext* ctx,
     /* [in] */ CDispList* host) : mHost(host)
 {
-    Toast::Init(ctx);
 }
 
 ECode CDispList::MyToast::OnHide()
@@ -150,16 +145,10 @@ CDispList::CDispList()
 {
 }
 
-PInterface CDispList::Probe(
-    /* [in] */ REIID riid)
-{
-    return _CDispList::Probe(riid);
-}
-
 ECode CDispList::constructor(
     /* [in] */ IContext* ctx)
 {
-    Handler::Init();
+    Handler::constructor();
 
     mContext = ctx;
     mCurItem = IDispList::ADVANCED_DISPLAY_TYPE_UNKNOWN;

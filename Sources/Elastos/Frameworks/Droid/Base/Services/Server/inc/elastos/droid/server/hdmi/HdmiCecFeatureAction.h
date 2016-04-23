@@ -51,6 +51,8 @@ private:
         , public IHdmiCecFeatureActionActionTimer
     {
     public:
+        TO_STRING_IMPL("HdmiCecFeatureAction::ActionTimerHandler")
+
         CAR_INTERFACE_DECL()
 
         ActionTimerHandler(

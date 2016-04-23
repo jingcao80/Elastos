@@ -164,6 +164,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("MmsServiceBroker::ConnectionHandler")
+
         ConnectionHandler(
             /* [in] */ MmsServiceBroker* host);
 

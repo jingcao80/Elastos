@@ -45,9 +45,16 @@ ECode WindowIdFocusObserver::H::HandleMessage(
 
 WindowIdFocusObserver::WindowIdFocusObserver()
 {
+}
+
+ECode WindowIdFocusObserver::constructor()
+{
     CHashMap::New((IHashMap**)&mRegistrations);
-    mHandler = new H(this);
+    AutoPtr<H> h = new H(this);
+    h->constructor();
+    mHandler = h.Get();
     CWindowIdFocusObserver::New(this, (IIWindowFocusObserver**)&mIObserver);
+    return NOERROR;
 }
 
 } // namespace View

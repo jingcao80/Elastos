@@ -64,6 +64,8 @@ public:
         };
 
     public:
+        TO_STRING_IMPL("ConnectionService::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ ConnectionService* host);

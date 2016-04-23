@@ -36,10 +36,14 @@ private:
     friend class MultiTapKeyListener;
 
     public:
+        TO_STRING_IMPL("MultiTapKeyListener::Timeout")
+
         CAR_INTERFACE_DECL()
 
         Timeout(
             /* [in] */ IEditable* buffer);
+
+        CARAPI constructor();
 
         CARAPI Run();
 

@@ -211,6 +211,7 @@ CAR_INTERFACE_IMPL(Connection::VideoProvider, Object, IConnectionVideoProvider)
 Connection::VideoProvider::VideoProvider()
 {
     mMessageHandler = new VideoProviderHandler(this);
+    mMessageHandler->constructor();
     CVideoProviderBinder::New(mMessageHandler, (IIVideoProvider**)&mBinder);
 }
 

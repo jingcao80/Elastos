@@ -285,6 +285,8 @@ private:
         friend class HdmiDeviceEventListener;
         friend class TvInputHardwareManager;
     public:
+        TO_STRING_IMPL("TvInputHardwareManager::ListenerHandler")
+
         ListenerHandler(
             /* [in] */ TvInputHardwareManager* host);
 

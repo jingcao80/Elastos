@@ -136,6 +136,8 @@ public:
             friend class CSoundPool;
             friend class SoundPoolImpl;
         public:
+            TO_STRING_IMPL("CSoundPool::EventHandler")
+
             EventHandler(
                 /* [in] */ CSoundPool* soundPool,
                 /* [in] */ SoundPoolImpl* host,

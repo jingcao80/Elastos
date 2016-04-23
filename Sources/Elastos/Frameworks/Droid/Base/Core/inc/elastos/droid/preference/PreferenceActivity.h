@@ -50,6 +50,8 @@ private:
     {
         friend class PreferenceActivity;
     public:
+        TO_STRING_IMPL("PreferenceActivity::MHandler")
+
         MHandler(
             /* [in] */ PreferenceActivity* host);
 
@@ -882,7 +884,7 @@ private:
     AutoPtr<IButton> mNextButton;
     Int32 mPreferenceHeaderItemResId;
     Boolean mPreferenceHeaderRemoveEmptyIcon;
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MHandler> mHandler;
 };
 
 } // Preference

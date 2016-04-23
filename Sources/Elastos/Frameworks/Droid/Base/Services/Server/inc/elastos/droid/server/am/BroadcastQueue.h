@@ -39,6 +39,8 @@ private:
     class BroadcastHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("BroadcastQueue::BroadcastHandler")
+
         BroadcastHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ BroadcastQueue* host)

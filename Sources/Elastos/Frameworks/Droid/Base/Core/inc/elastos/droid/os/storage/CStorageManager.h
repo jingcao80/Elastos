@@ -42,6 +42,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CStorageManager::ObbHandler")
+
         ObbHandler(
             /* [in] */ ObbListenerDelegate * host,
             /* [in] */ ILooper * looper)

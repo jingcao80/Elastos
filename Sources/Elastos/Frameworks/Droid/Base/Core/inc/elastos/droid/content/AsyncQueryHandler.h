@@ -47,8 +47,9 @@ protected:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AsyncQueryHandler::WorkerHandler")
+
         WorkerHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ IWeakReference* context);
 
         virtual ~WorkerHandler();
@@ -65,6 +66,8 @@ friend class WorkerHandler;
 
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("AsyncQueryHandler")
 
     // must call constructor right after create a AsyncQueryHandler.
     AsyncQueryHandler();
@@ -248,7 +251,7 @@ private:
     /* package */
 //    final WeakReference<ContentResolver> mResolver;
     AutoPtr<IWeakReference> mResolver;
-    AutoPtr<IHandler> mWorkerThreadHandler;
+    AutoPtr<WorkerHandler> mWorkerThreadHandler;
     Object mAsyncQueryHandlerLock;
 };
 

@@ -32,6 +32,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WindowIdFocusObserver::H")
+
         H(
             /* [in] */ WindowIdFocusObserver* host);
 
@@ -49,6 +51,8 @@ public:
      * of its callbacks are dispatched on the current calling thread.
      */
     WindowIdFocusObserver();
+
+    CARAPI constructor();
 
     /**
      * Called when one of the monitored windows gains input focus.

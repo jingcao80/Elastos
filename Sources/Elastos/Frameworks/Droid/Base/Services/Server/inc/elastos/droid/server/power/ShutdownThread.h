@@ -194,6 +194,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("ShutdownThread::ShutdownMusicHandler")
+
         ShutdownMusicHandler(
             /* [in] */ ShutdownThread* host)
             : mHost(host)

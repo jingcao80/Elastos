@@ -135,6 +135,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ViewRootImpl::ViewRootHandler")
+
         ViewRootHandler(
             /* [in] */ ViewRootImpl* host);
 
@@ -756,6 +758,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ViewRootImpl::SyntheticJoystickHandler")
+
         SyntheticJoystickHandler(
             /* [in] */ ViewRootImpl* host);
 
@@ -805,6 +809,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("ViewRootImpl::SyntheticTouchNavigationHandler")
+
         SyntheticTouchNavigationHandler(
             /* [in] */ ViewRootImpl* host);
 

@@ -28,6 +28,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AudioPortEventHandler::EventHandler")
+
         EventHandler(
             /* [in] */ AudioPortEventHandler* host,
             /* [in] */ ILooper* looper)

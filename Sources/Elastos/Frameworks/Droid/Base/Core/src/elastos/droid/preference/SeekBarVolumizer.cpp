@@ -144,8 +144,7 @@ SeekBarVolumizer::SeekBarVolumizer()
     , mLastProgress(-1)
     , mVolumeBeforeMute(-1)
 {
-    mUiHandler = new SeekBarVolumizerH(this);
-    mReceiver = new SeekBarVolumizerReceiver(this);
+
 }
 
 ECode SeekBarVolumizer::constructor(
@@ -154,6 +153,11 @@ ECode SeekBarVolumizer::constructor(
     /* [in] */ IUri* defaultUri,
     /* [in] */ ISeekBarVolumizerCallback* callback)
 {
+    mUiHandler = new SeekBarVolumizerH(this);
+    mUiHandler->constructor();
+    mReceiver = new SeekBarVolumizerReceiver(this);
+    mReceiver->constructor();
+
     mContext = context;
     AutoPtr<IInterface> object;
     context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&object);

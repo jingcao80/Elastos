@@ -175,6 +175,7 @@ TrustAgentService::TrustAgentService()
 ECode TrustAgentService::constructor()
 {
     AutoPtr<MHandler> mh = new MHandler(this);
+    mh->constructor();
     mHandler = IHandler::Probe(mh.Get());
     return NOERROR;
 }

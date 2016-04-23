@@ -14,7 +14,9 @@ namespace Droid {
 namespace View {
 
 CAR_OBJECT_IMPL(CWindowIdFocusObserver);
+
 CAR_INTERFACE_IMPL(CWindowIdFocusObserver, Object, IIWindowFocusObserver);
+
 ECode CWindowIdFocusObserver::constructor(
     /* [in] */ IWindowIdFocusObserver* observer)
 {
@@ -69,7 +71,7 @@ ECode CWindowIdFocusObserver::FocusLost(
 ECode CWindowIdFocusObserver::ToString(
     /* [out] */ String* str)
 {
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 } // namespace View

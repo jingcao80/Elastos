@@ -304,6 +304,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CConnectivityService::InternalHandler")
+
         InternalHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CConnectivityService* host)
@@ -323,6 +325,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CConnectivityService::NetworkStateTrackerHandler")
+
         NetworkStateTrackerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CConnectivityService* host)

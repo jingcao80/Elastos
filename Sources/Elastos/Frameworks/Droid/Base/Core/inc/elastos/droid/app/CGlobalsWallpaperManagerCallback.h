@@ -27,6 +27,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CGlobalsWallpaperManagerCallback::MyHandler")
+
         MyHandler(
             /* [in] */ CGlobalsWallpaperManagerCallback* host)
             : mHost(host)

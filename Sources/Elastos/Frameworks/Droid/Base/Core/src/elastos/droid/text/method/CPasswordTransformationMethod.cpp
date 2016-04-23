@@ -179,16 +179,18 @@ ECode CPasswordTransformationMethod::PasswordCharSequence::GetChars(
 CPasswordTransformationMethod::Visible::Visible()
 {}
 
-CAR_INTERFACE_IMPL_5(CPasswordTransformationMethod::Visible, Object, IHandler, IUpdateLayout, IUpdateAppearance, IRunnable, IPasswordTransformationMethodVisible)
+CAR_INTERFACE_IMPL_4(CPasswordTransformationMethod::Visible, Handler, IUpdateLayout, IUpdateAppearance, IRunnable, IPasswordTransformationMethodVisible)
 
 ECode CPasswordTransformationMethod::Visible::constructor(
     /* [in] */ ISpannable* sp,
     /* [in] */ IPasswordTransformationMethod* ptm)
 {
+    Handler::constructor();
+
     mText = sp;
     mTransformer = ptm;
     Boolean result;
-    return IHandler::Probe(this)->PostAtTime(IRunnable::Probe(this), SystemClock::GetUptimeMillis() + 1500, &result);
+    return PostAtTime(IRunnable::Probe(this), SystemClock::GetUptimeMillis() + 1500, &result);
 }
 
 ECode CPasswordTransformationMethod::Visible::Run()

@@ -16,10 +16,8 @@ namespace App {
 // IntentService::ServiceHandler
 //==================================================================
 IntentService::ServiceHandler::ServiceHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ IntentService* host)
-    : Handler(looper)
-    , mHost(host)
+    : mHost(host)
 {
 }
 
@@ -77,7 +75,8 @@ ECode IntentService::OnCreate()
     IThread::Probe(thread)->Start();
 
     thread->GetLooper((ILooper**)&mServiceLooper);
-    mServiceHandler = new ServiceHandler(mServiceLooper, this);
+    mServiceHandler = new ServiceHandler(this);
+    mServiceHandler->constructor(mServiceLooper);
     return NOERROR;
 }
 

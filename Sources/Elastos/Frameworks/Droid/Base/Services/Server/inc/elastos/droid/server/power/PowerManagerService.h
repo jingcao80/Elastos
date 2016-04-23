@@ -473,6 +473,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("PowerManagerService::PowerManagerHandler")
+
         PowerManagerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ PowerManagerService* service)

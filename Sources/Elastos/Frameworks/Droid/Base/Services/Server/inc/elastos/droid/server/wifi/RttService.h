@@ -153,6 +153,8 @@ public:
             : public Handler
         {
         public:
+            TO_STRING_IMPL("RttService::ClientHandler")
+
             ClientHandler(
                 /* [in] */ ILooper* looper);
 

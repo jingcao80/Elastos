@@ -594,6 +594,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("GlobalActions::DialogHandler")
+
         DialogHandler(
             /* [in] */ GlobalActions* host);
 
@@ -876,7 +878,7 @@ private:
     //AutoPtr<IPhoneStateListener> mPhoneStateListener;
     AutoPtr<RingerModeReceiver> mRingerModeReceiver;
     AutoPtr<AirplaneModeObserver> mAirplaneModeObserver;
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<DialogHandler> mHandler;
 };
 
 } // namespace Impl

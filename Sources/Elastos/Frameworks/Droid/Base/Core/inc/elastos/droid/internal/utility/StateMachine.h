@@ -268,6 +268,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("StateMachine::SmHandler")
+
         /**
          * Constructor
          *

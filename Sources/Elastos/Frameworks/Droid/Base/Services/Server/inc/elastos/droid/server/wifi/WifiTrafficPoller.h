@@ -49,6 +49,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiTrafficPoller::TrafficHandler")
+
         TrafficHandler(
             /* [in] */ WifiTrafficPoller* owner)
             : mOwner(owner)

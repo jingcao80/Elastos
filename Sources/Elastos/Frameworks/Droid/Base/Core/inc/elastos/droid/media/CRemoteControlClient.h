@@ -369,6 +369,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CRemoteControlClient::EventHandler")
+
         EventHandler(
             /* [in] */ IRemoteControlClient* rcc,
             /* [in] */ ILooper* looper,

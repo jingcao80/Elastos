@@ -58,6 +58,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DockObserver::MyHandler")
+
         MyHandler(
             /* [in] */ DockObserver* host);
 

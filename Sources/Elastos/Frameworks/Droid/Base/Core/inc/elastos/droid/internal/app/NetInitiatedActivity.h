@@ -47,6 +47,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("NetInitiatedActivity::ButtonHandler")
+
         MyHandler(
             /* [in] */ NetInitiatedActivity* host)
             : mHost(host)
@@ -122,7 +124,7 @@ private:
     Int32 mDefault_response_timeout;
 
     AutoPtr<NetInitiatedReceiver> mNetInitiatedReceiver;
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 };
 
 } //namespace App

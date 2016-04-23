@@ -116,6 +116,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("NsdManager::ServiceHandler")
+
         ServiceHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ NsdManager* host);

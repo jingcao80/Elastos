@@ -23,6 +23,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CBasePermissionDialog::MyHandler")
+
         MyHandler(
             /* [in] */ CBasePermissionDialog* host);
 

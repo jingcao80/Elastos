@@ -31,9 +31,10 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AppImportanceMonitor::MyHandler")
+
         MyHandler(
-            /* [in] */ AppImportanceMonitor* host,
-            /* [in] */ ILooper* looper);
+            /* [in] */ AppImportanceMonitor* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
@@ -138,7 +139,7 @@ private:
 
     static const Int32 MSG_UPDATE;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 };
 
 

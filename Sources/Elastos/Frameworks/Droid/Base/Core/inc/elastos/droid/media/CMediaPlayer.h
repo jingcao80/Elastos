@@ -507,6 +507,8 @@ public:
             : public Handler
         {
         public:
+            TO_STRING_IMPL("CMediaPlayer::TimeProvider::EventHandler")
+
             EventHandler(
                 /* [in] */ TimeProvider* host,
                 /* [in] */ ILooper* looper)
@@ -615,6 +617,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CMediaPlayer::EventHandler")
+
         friend class CMediaPlayer;
 
         EventHandler(

@@ -17,6 +17,8 @@ class HandlerRunnable
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("HandlerRunnable")
+
     HandlerRunnable(
         /* [in] */ Boolean async = FALSE);
 

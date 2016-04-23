@@ -51,6 +51,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("VideoCallImpl::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* loop,
             /* [in] */ VideoCallImpl* host);

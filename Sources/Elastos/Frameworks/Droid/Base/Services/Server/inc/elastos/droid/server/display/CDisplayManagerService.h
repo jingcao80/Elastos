@@ -284,6 +284,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CDisplayManagerService::DisplayManagerHandler")
+
         DisplayManagerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CDisplayManagerService* host);

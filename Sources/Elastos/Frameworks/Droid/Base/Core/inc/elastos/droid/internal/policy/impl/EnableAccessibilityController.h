@@ -42,6 +42,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("EnableAccessibilityController::SpeakHandler")
+
         SpeakHandler(
             /* [in] */ EnableAccessibilityController* host);
 
@@ -112,7 +114,7 @@ private:
     static const Int32 SPEAK_WARNING_DELAY_MILLIS = 2000;
     static const Int32 ENABLE_ACCESSIBILITY_DELAY_MILLIS = 6000;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<SpeakHandler> mHandler;
     AutoPtr<IIWindowManager> mWindowManager;
     AutoPtr<IIAccessibilityManager> mAccessibilityManager;
     AutoPtr<IContext> mContext;

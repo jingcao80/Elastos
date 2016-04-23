@@ -107,15 +107,18 @@ PreferenceFragment::PreferenceFragment()
     , mInitDone(FALSE)
     , mLayoutResId(R::layout::preference_list_fragment)
 {
-    mHandler = new PreferenceFragmentHandler(this);
-    mRequestFocus = new RequestFocus(this);
-    mListOnKeyListener = new PreferenceFragmentOnKeyListener(this);
 }
 
 ECode PreferenceFragment::OnCreate(
     /*[in]*/ IBundle* savedInstanceState)
 {
     Fragment::OnCreate(savedInstanceState);
+
+    mHandler = new PreferenceFragmentHandler(this);
+    mHandler->constructor();
+    mRequestFocus = new RequestFocus(this);
+    mListOnKeyListener = new PreferenceFragmentOnKeyListener(this);
+
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     CPreferenceManager::New(activity, FIRST_REQUEST_CODE, (IPreferenceManager**)&mPreferenceManager);

@@ -52,6 +52,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CJetPlayer::NativeEventHandler")
+
         NativeEventHandler(
             /* [in] */ IWeakReference* jet,
             /* [in] */ ILooper* looper);

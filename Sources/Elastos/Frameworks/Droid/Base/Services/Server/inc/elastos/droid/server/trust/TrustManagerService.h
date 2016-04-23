@@ -209,6 +209,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("TrustManagerService::InnerSub_Handler")
+
         InnerSub_Handler(
             /* [in] */ TrustManagerService* host);
 

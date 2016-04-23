@@ -28,6 +28,8 @@ private:
     class H : public Handler
     {
     public:
+        TO_STRING_IMPL("LockTaskNotify::H")
+
         H(
             /* [in] */ LockTaskNotify* host)
             : mHost(host)

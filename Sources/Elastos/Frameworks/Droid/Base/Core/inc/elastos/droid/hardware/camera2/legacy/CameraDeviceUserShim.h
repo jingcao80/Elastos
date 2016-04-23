@@ -166,9 +166,10 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CameraCallbackThread::CallbackHandler")
+
         CallbackHandler(
-            /* [in] */ CameraCallbackThread* host,
-            /* [in] */ ILooper* looper);
+            /* [in] */ CameraCallbackThread* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);

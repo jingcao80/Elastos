@@ -497,10 +497,6 @@ KeyboardView::KeyboardView()
     , mOldEventTime(0)
     , mUsedVelocity(FALSE)
 {
-    CRect::New(0, 0, 0, 0, (IRect**)&mClipRegion);
-    CRectF::New((IRectF**)&mDirtyRect);
-    mHandler = new MyHandler(this);
-    mCoordinates = ArrayOf<Int32>::Alloc(2);
 }
 
 ECode KeyboardView::constructor(
@@ -525,6 +521,13 @@ ECode KeyboardView::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     View::constructor(context, attrs, defStyleAttr, defStyleRes);
+
+    CRect::New(0, 0, 0, 0, (IRect**)&mClipRegion);
+    CRectF::New((IRectF**)&mDirtyRect);
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
+    mCoordinates = ArrayOf<Int32>::Alloc(2);
+
     AutoPtr<ITypedArray> a;
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::KeyboardView),

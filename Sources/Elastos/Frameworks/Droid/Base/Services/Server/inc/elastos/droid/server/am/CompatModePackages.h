@@ -26,6 +26,8 @@ public:
     class CompatHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CompatModePackages::CompatHandler")
+
         CompatHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CompatModePackages* host)

@@ -30,6 +30,8 @@ private:
     {
         friend class FingerprintManager;
     public:
+        TO_STRING_IMPL("FingerprintManager::MHandler")
+
         MHandler(
             /* [in] */ FingerprintManager* host);
 

@@ -111,12 +111,15 @@ CAR_INTERFACE_IMPL(VideoCallbackServant, Object, IVideoCallbackServant)
 
 VideoCallbackServant::VideoCallbackServant()
 {
-    mHandler = new MyHandler(this);
 }
 
 ECode VideoCallbackServant::constructor(
     /* [in] */ IIVideoCallback* delegate)
 {
+    AutoPtr<MyHandler> h = new MyHandler(this);
+    h->constructor();
+    mHandler = h.Get();
+
     mDelegate = delegate;
     return NOERROR;
 }

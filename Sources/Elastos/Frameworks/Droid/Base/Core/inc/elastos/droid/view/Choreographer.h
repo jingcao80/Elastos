@@ -66,6 +66,8 @@ private:
     class FrameHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("Choreographer::FrameHandler")
+
         FrameHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ Choreographer* host);

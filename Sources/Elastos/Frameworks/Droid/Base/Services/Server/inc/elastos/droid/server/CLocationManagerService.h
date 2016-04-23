@@ -129,6 +129,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CLocationManagerService::LocationWorkerHandler")
+
         LocationWorkerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CLocationManagerService* host);

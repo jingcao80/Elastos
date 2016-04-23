@@ -39,6 +39,8 @@ public:
     {
         friend class ActiveServices;
     public:
+        TO_STRING_IMPL("ActiveServices::ServiceMap")
+
         ServiceMap(
             /* [in] */ ILooper* looper,
             /* [in] */ Int32 userId,

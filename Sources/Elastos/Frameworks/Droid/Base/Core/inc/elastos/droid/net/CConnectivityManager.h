@@ -87,6 +87,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CConnectivityManager::CallbackHandler")
+
         CallbackHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ IHashMap* callbackMap,

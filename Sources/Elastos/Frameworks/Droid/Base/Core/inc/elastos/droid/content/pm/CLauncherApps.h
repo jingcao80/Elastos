@@ -50,6 +50,8 @@ private:
 
     class CallbackMessageHandler : public Handler {
     public:
+        TO_STRING_IMPL("CLauncherApps::CallbackMessageHandler")
+
         CallbackMessageHandler();
 
         CARAPI constructor(

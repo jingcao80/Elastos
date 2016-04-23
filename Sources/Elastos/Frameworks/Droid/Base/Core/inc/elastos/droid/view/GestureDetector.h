@@ -77,16 +77,11 @@ private:
     class ECO_LOCAL GestureHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("GestureDetector::GestureHandler")
+
         GestureHandler(
             /* [in] */ GestureDetector* host)
             : mHost(host)
-        {}
-
-        GestureHandler(
-            /* [in] */ ILooper* looper,
-            /* [in] */ GestureDetector* host)
-            : Handler(looper)
-            , mHost(host)
         {}
 
         CARAPI HandleMessage(
