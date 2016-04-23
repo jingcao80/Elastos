@@ -115,7 +115,7 @@ ECode Linkify::TransformFilterPhoneNumber::TransformUrl(
 
 /*****************************Linkify::ComparatorLinkSpec*****************************/
 
-Int32 Linkify::ComparatorLinkSpec::ComparatorLinkSpecFunc(
+Boolean Linkify::ComparatorLinkSpec::operator() (
     /* [in] */ LinkSpec* a,
     /* [in] */ LinkSpec* b)
 {
@@ -124,21 +124,21 @@ Int32 Linkify::ComparatorLinkSpec::ComparatorLinkSpecFunc(
     LinkSpec* bT = (LinkSpec*)b;
 
     if (aT->start < bT->start) {
-        return -1;
+        return TRUE;
     }
 
     if (aT->start > bT->start) {
-        return 1;
+        return FALSE;
     }
 
     if (aT->end < bT->end) {
-        return 1;
+        return TRUE;
     }
 
     if (aT->end > bT->end) {
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 }
 
 /*****************************Linkify*****************************/
@@ -480,8 +480,8 @@ void Linkify::PruneOverlaps(
     /* [in] */ List< AutoPtr<LinkSpec> >* links)
 {
 //    AutoPtr<ComparatorLinkSpec> c = new ComparatorLinkSpec();
-
-    links->Sort(Linkify::ComparatorLinkSpec::ComparatorLinkSpecFunc);
+    Linkify::ComparatorLinkSpec func;
+    links->Sort(func);
 
     Int32 len = links->GetSize();
     Int32 i = 0;

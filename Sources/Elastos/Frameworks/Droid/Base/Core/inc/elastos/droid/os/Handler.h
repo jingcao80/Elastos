@@ -45,6 +45,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("Handler")
+
     // sub class must call constructor() implicitly.
     Handler();
 
@@ -61,6 +63,24 @@ public:
         /* [in] */ Boolean async = FALSE);
 
     Handler(
+        /* [in] */ ILooper* looper,
+        /* [in] */ IHandlerCallback* callback,
+        /* [in] */ Boolean takeStrongRefOfCallback,
+        /* [in] */ Boolean async = FALSE);
+
+    CARAPI constructor(
+        /* [in] */ Boolean async = FALSE);
+
+    CARAPI constructor(
+        /* [in] */ IHandlerCallback* callback,
+        /* [in] */ Boolean takeStrongRefOfCallback,
+        /* [in] */ Boolean async = FALSE);
+
+    CARAPI constructor(
+        /* [in] */ ILooper* looper,
+        /* [in] */ Boolean async = FALSE);
+
+    CARAPI constructor(
         /* [in] */ ILooper* looper,
         /* [in] */ IHandlerCallback* callback,
         /* [in] */ Boolean takeStrongRefOfCallback,
@@ -230,24 +250,6 @@ public:
     CARAPI GetMessageQueue(
         /* [out] */ IMessageQueue** cq);
 
-    CARAPI constructor(
-        /* [in] */ Boolean async = FALSE);
-
-    CARAPI constructor(
-        /* [in] */ IHandlerCallback* callback,
-        /* [in] */ Boolean takeStrongRefOfCallback,
-        /* [in] */ Boolean async = FALSE);
-
-    CARAPI constructor(
-        /* [in] */ ILooper* looper,
-        /* [in] */ Boolean async = FALSE);
-
-    CARAPI constructor(
-        /* [in] */ ILooper* looper,
-        /* [in] */ IHandlerCallback* callback,
-        /* [in] */ Boolean takeStrongRefOfCallback,
-        /* [in] */ Boolean async = FALSE);
-
 private:
     CARAPI_(Boolean) EnqueueMessage(
         /* [in] */ IMessageQueue* queue,
@@ -260,6 +262,10 @@ private:
     CARAPI_(AutoPtr<IMessage>) GetPostMessage(
         /* [in] */ IRunnable* r,
         /* [in] */ IInterface* token);
+
+#if defined(_DEBUG)
+     void CheckConstructed();
+#endif
 
 public:
     Object mQueueLock;

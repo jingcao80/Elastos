@@ -70,7 +70,7 @@ private:
         /* [in] */ IComponentName* globalSearch,
         /* [out] */ Boolean* rst);
 
-    static CARAPI_(Int32) ComparatorResolveInfo(
+    static CARAPI_(Boolean) ComparatorResolveInfo(
         /* [in] */ IResolveInfo* lhs,
         /* [in] */ IResolveInfo* rhs);
 

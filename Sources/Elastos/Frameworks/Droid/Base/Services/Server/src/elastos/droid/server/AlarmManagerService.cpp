@@ -1835,7 +1835,9 @@ ECode AlarmManagerService::constructor(
     CArrayList::New((IArrayList**)&mBlockedUids);
 
     mHandler = new AlarmHandler(this);
+    mHandler->constructor();
     mResultReceiver = new ResultReceiver(this);
+    mResultReceiver->constructor();
 
     CSparseArray::New((ISparseArray**)&mNextAlarmClockForUser);
     CSparseArray::New((ISparseArray**)&mTmpSparseAlarmClockArray);

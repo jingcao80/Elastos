@@ -950,7 +950,7 @@ public:/* package */
 
     struct ResolvePrioritySorterFunc
     {
-        Int32 operator()(
+        Boolean operator()(
             /* [in] */ AutoPtr<IResolveInfo>& r1,
             /* [in] */ AutoPtr<IResolveInfo>& r2);
     };

@@ -29,6 +29,34 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 
+template <class T>
+struct IntentComparator
+{
+    Boolean operator()(T* o1, T* o2) {
+        IIntentFilter* if1 = IIntentFilter::Probe(o1);
+        IIntentFilter* if2 = IIntentFilter::Probe(o2);
+        assert(if1 != NULL && if2 != NULL);
+
+        Int32 q1, q2, ival;
+        if1->GetPriority(&q1);
+        if2->GetPriority(&q2);
+        if (q1 > q2) {
+            return TRUE;
+        }
+        if (q1 < q2) {
+            return FALSE;
+        }
+
+        if1->OnCompareTie(if2, &ival);
+        if (ival < 0) {
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+};
+
+
 template <typename F, typename R>
 class IntentResolver : public Object
 {
@@ -190,33 +218,10 @@ private:
         /* [in] */ List< AutoPtr<R> >* dest,
         /* [in] */ Int32 userId);
 
-    // private void verifyDataStructures(IntentFilter src);
-
-    // private void compareMaps(IntentFilter src, String name, HashMap<String, F[]> cur,
-    //         HashMap<String, ArrayList<F>> old);
-
 private:
     static const String TAG;
     static const Boolean DEBUG = FALSE;
     static const Boolean localLOGV = DEBUG || FALSE;
-
-    // private final IntentResolverOld<F, R> mOldResolver = new IntentResolverOld<F, R>() {
-    //     @Override protected String packageForFilter(F filter) {
-    //         return IntentResolver.this.packageForFilter(filter);
-    //     }
-    //     @Override protected boolean allowFilterResult(F filter, List<R> dest) {
-    //         return IntentResolver.this.allowFilterResult(filter, dest);
-    //     }
-    //     @Override protected boolean isFilterStopped(F filter, int userId) {
-    //         return IntentResolver.this.isFilterStopped(filter, userId);
-    //     }
-    //     @Override protected R newResult(F filter, int match, int userId) {
-    //         return IntentResolver.this.newResult(filter, match, userId);
-    //     }
-    //     @Override protected void sortResults(List<R> results) {
-    //         IntentResolver.this.sortResults(results);
-    //     }
-    // };
 
     /**
      * All filters that have been registered.
@@ -260,6 +265,8 @@ private:
      * All of the actions that have been registered and specified a MIME type.
      */
     HashMap<String, AutoPtr< ArrayOf<F*> > > mTypedActionToFilter;
+
+    IntentComparator<R> mResolvePrioritySorter;
 };
 
 template <typename F, typename R>
@@ -733,8 +740,7 @@ template <typename F, typename R>
 void IntentResolver<F, R>::SortResults(
     /* [in] */ List< AutoPtr<R> >* results)
 {
-    PRINT_FILE_LINE_EX("TODO: SortResults");
-    // Collections.sort(results, mResolvePrioritySorter);
+    results->Sort(mResolvePrioritySorter);
 }
 
 template <typename F, typename R>

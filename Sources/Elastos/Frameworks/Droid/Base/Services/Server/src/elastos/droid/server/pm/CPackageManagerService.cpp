@@ -1973,7 +1973,7 @@ void CPackageManagerService::ProviderIntentResolver::DumpFilter(
 //                  CPackageManagerService::ResolvePrioritySorter
 //==============================================================================
 
-Int32 CPackageManagerService::ResolvePrioritySorterFunc::operator()(
+Boolean CPackageManagerService::ResolvePrioritySorterFunc::operator()(
     /* [in] */ AutoPtr<IResolveInfo>& r1,
     /* [in] */ AutoPtr<IResolveInfo>& r2)
 {
@@ -1981,34 +1981,34 @@ Int32 CPackageManagerService::ResolvePrioritySorterFunc::operator()(
     r1->GetPriority(&v1);
     r2->GetPriority(&v2);
     if (v1 != v2) {
-        return (v1 > v2) ? -1 : 1;
+        return (v1 > v2) ? TRUE : FALSE;
     }
 
     r1->GetPreferredOrder(&v1);
     r2->GetPreferredOrder(&v2);
     if (v1 != v2) {
-        return (v1 > v2) ? -1 : 1;
+        return (v1 > v2) ? TRUE : FALSE;
     }
 
     Boolean b1, b2;
     r1->GetIsDefault(&b1);
     r2->GetIsDefault(&b2);
     if (b1 != b2) {
-        return b1 ? -1 : 1;
+        return b1 ? TRUE : FALSE;
     }
 
     r1->GetMatch(&v1);
     r2->GetMatch(&v2);
     if (v1 != v2) {
-        return (v1 > v2) ? -1 : 1;
+        return (v1 > v2) ? TRUE : FALSE;
     }
 
     r1->GetSystem(&b1);
     r2->GetSystem(&b2);
     if (b1 != b2) {
-        return b1 ? -1 : 1;
+        return b1 ? TRUE : FALSE;
     }
-    return 0;
+    return TRUE;
 }
 
 CAR_INTERFACE_IMPL(CPackageManagerService::ResolvePrioritySorter, Object, IComparator)

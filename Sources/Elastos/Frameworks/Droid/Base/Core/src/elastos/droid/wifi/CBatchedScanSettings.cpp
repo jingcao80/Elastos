@@ -221,7 +221,7 @@ ECode CBatchedScanSettings::Constrain()
 
 //@Override
 ECode CBatchedScanSettings::Equals(
-    /* [in] */ IObject* obj,
+    /* [in] */ IInterface* obj,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -253,7 +253,7 @@ ECode CBatchedScanSettings::Equals(
 }
 
 //@Override
-ECode CBatchedScanSettings::HashCode(
+ECode CBatchedScanSettings::GetHashCode(
     /* [out] */ Int32* code)
 {
     VALIDATE_NOT_NULL(code);
@@ -261,7 +261,7 @@ ECode CBatchedScanSettings::HashCode(
     Int32 _code;
     assert(0);
     // TODO
-    // mChannelSet->HashCode(&_code);
+    // mChannelSet->GetHashCode(&_code);
     // *code = mMaxScansPerBatch +
     //             (mMaxApPerScan * 3) +
     //             (mScanIntervalSec * 5) +

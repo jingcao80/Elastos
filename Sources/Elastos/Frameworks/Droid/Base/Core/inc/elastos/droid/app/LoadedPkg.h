@@ -427,8 +427,6 @@ private:
     Object mServicesLock;
 
     Int32 mClientCount;
-
-    static AutoPtr< HashMap<String, String> > sAndroidElastosClassnameMap;
 };
 
 } // namespace App

@@ -462,6 +462,10 @@ ECode Handler::SendMessageAtTime(
     *result = FALSE;
     VALIDATE_NOT_NULL(msg);
 
+#if defined(_DEBUG)
+    CheckConstructed();
+#endif
+
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
         Logger::E("Handler", "Error: SendMessageAtTime called with no mQueue");
@@ -480,6 +484,10 @@ ECode Handler::SendMessageAtFrontOfQueue(
     *result = FALSE;
     VALIDATE_NOT_NULL(msg);
 
+#if defined(_DEBUG)
+    CheckConstructed();
+#endif
+
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
         Logger::E("Handler", "Error: SendMessageAtFrontOfQueue called with no mQueue");
@@ -495,20 +503,13 @@ Boolean Handler::EnqueueMessage(
     /* [in] */ IMessage* msg,
     /* [in] */ Int64 uptimeMillis)
 {
-#if defined(_DEBUG)
-    if (!mIsConstructed) {
-        Logger::E("Handler", "Error: Handler::constructor is not called.");
-        assert(0 && "Error: Handler::constructor is not called.");
-    }
-#endif
-
     msg->SetTarget(this);
     if (mAsynchronous) {
         msg->SetAsynchronous(true);
     }
 
     Boolean result;
-    mQueue->EnqueueMessage(msg, uptimeMillis, &result);
+    queue->EnqueueMessage(msg, uptimeMillis, &result);
     return result;
 }
 
@@ -518,6 +519,10 @@ ECode Handler::HasCallbacks(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
+
+#if defined(_DEBUG)
+    CheckConstructed();
+#endif
 
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
@@ -560,6 +565,10 @@ ECode Handler::HasMessages(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
+#if defined(_DEBUG)
+    CheckConstructed();
+#endif
+
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
         Logger::E("Handler", "Error: HasMessagesEx3 called with no mQueue");
@@ -588,10 +597,14 @@ ECode Handler::RemoveMessages(
     /* [in] */ IInterface* obj)
 {
 #if defined(_DEBUG)
+<<<<<<< HEAD
     if (!mIsConstructed) {
         Logger::E("Handler", "Error: Handler::constructor is not called.");
         assert(0 && "Error: Handler::constructor is not called.");
     }
+=======
+    CheckConstructed();
+>>>>>>> debug broadcast. update etl's comparator.
 #endif
 
     AutoPtr<IMessageQueue> queue = mQueue;
@@ -612,10 +625,14 @@ ECode Handler::RemoveCallbacksAndMessages(
     /* [in] */ IInterface* obj)
 {
 #if defined(_DEBUG)
+<<<<<<< HEAD
     if (!mIsConstructed) {
         Logger::E("Handler", "Error: Handler::constructor is not called.");
         assert(0 && "Error: Handler::constructor is not called.");
     }
+=======
+    CheckConstructed();
+>>>>>>> debug broadcast. update etl's comparator.
 #endif
 
     AutoPtr<IMessageQueue> queue = mQueue;
@@ -717,6 +734,16 @@ ECode Handler::GetMessageQueue(
     REFCOUNT_ADD(*cq)
     return NOERROR;
 }
+
+#if defined(_DEBUG)
+void Handler::CheckConstructed()
+{
+     if (!mIsConstructed) {
+        Logger::E("Handler", "Error: %s 's constructor is not called.", TO_CSTR(this));
+        assert(0 && "Error: Handler::constructor is not called.");
+     }
+}
+#endif
 
 } // namespace Os
 } // namespace Droid

@@ -2,6 +2,7 @@
 #include "elastos/droid/app/CPendingIntent.h"
 #include "elastos/droid/app/CPendingIntentFinishedDispatcher.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
@@ -14,6 +15,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::EIID_IIntentReceiver;
 using Elastos::Droid::Content::EIID_IIIntentSender;
 using Elastos::Droid::Content::CIntentSender;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -95,6 +97,13 @@ ECode CPendingIntent::Send(
     /* [in] */ IHandler *handler,
     /* [in] */ const String& requiredPermission)
 {
+#if defined(_DEBUG)
+    if (handler != NULL) {
+        Handler* h = (Handler*)handler;
+        assert(h->mIsConstructed && "Handle::constructor is not called yet.");
+    }
+#endif
+
     // try {
     String resolvedType;
     if (intent != NULL) {

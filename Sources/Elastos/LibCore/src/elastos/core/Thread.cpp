@@ -723,7 +723,7 @@ ECode Thread::Start()
 {
 #if defined(_DEBUG)
     if (!mIsConstructed) {
-        ALOGE("Error: Thread::constructor is not called.");
+        ALOGE("Error: %s, name:%s 's constructor is not called.", TO_CSTR(this), mName.string());
         assert(0 && "Thread::constructor is not called");
     }
 #endif

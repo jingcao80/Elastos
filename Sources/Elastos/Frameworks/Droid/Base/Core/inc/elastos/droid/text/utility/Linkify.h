@@ -87,10 +87,9 @@ private:
             /* [out] */ String* ret);
     };
 
-    class ComparatorLinkSpec
+    struct ComparatorLinkSpec
     {
-    public:
-        static Int32 ComparatorLinkSpecFunc(
+        Boolean operator() (
             /* [in] */ LinkSpec* a,
             /* [in] */ LinkSpec* b);
     };

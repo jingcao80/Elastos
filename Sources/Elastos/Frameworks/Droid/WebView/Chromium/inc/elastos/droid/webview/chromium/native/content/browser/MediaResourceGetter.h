@@ -86,14 +86,17 @@ private:
         virtual CARAPI_(Boolean) IsSuccess();
 
         // @Override
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* result)
 
         // @Override
-        CARAPI_(Int32) HashCode();
+        CARAPI GetHashCode(
+            /* [out] */ Int32* result);
 
         // @Override
-        CARAPI_(Boolean) Equals(
-            /* [in] */ Object* obj);
+        CARAPI Equals(
+            /* [in] */ IInterface* obj,
+            /* [out] */ Boolean* result);
 
         static CARAPI_(Int32) GetDurationInMilliseconds(
             /* [in] */ IInterface* obj);

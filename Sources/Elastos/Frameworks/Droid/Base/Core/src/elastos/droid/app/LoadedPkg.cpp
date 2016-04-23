@@ -547,8 +547,6 @@ ECode LoadedPkg::ServiceDispatcher::DoDeath(
 // LoadedPkg
 //==============================================================================
 
-AutoPtr< HashMap<String, String> > LoadedPkg::sAndroidElastosClassnameMap;
-
 CAR_INTERFACE_IMPL(LoadedPkg, Object, ILoadedPkg)
 
 AutoPtr<IApplication> LoadedPkg::GetApplication()
@@ -780,19 +778,17 @@ String LoadedPkg::GetElastosClassName(
     //     className = Replace(className, "\\$", "");
     // }
 
-    if (sAndroidElastosClassnameMap == NULL) {
-        sAndroidElastosClassnameMap = new HashMap<String, String>();
-        (*sAndroidElastosClassnameMap)[String("android.opengl.")]               = String("Elastos.Droid.Opengl.C");
-        (*sAndroidElastosClassnameMap)[String("android.preference.")]           = String("Elastos.Droid.Preference.C");
-        (*sAndroidElastosClassnameMap)[String("com.android.server.")]           = String("Elastos.Droid.Server.C");
-        (*sAndroidElastosClassnameMap)[String("com.android.internal.widget.")]  = String("Elastos.Droid.Internal.Widget.C");
-    }
+    HashMap<String, String> classNameMap;
+    classNameMap[String("android.opengl.")]               = String("Elastos.Droid.Opengl.C");
+    classNameMap[String("android.preference.")]           = String("Elastos.Droid.Preference.C");
+    classNameMap[String("com.android.internal.widget.")]  = String("Elastos.Droid.Internal.Widget.C");
+    classNameMap[String("com.android.server.")]           = String("Elastos.Droid.Server.C");
 
     Int32 lastIndex = className.LastIndexOf(".");
     if (lastIndex != -1) {
         String ns = className.Substring(0, lastIndex + 1);
-        HashMap<String, String>::Iterator it = sAndroidElastosClassnameMap->Find(ns);
-        if (it != sAndroidElastosClassnameMap->End()) {
+        HashMap<String, String>::Iterator it = classNameMap.Find(ns);
+        if (it != classNameMap.End()) {
             StringBuilder sb(it->mSecond);
             sb += className.Substring(lastIndex + 1);
             return sb.ToString();

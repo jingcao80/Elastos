@@ -78,8 +78,10 @@ Boolean MediaResourceGetter::MediaMetadata::IsSuccess()
     return mSuccess;
 }
 
-String MediaResourceGetter::MediaMetadata::ToString()
+ECode MediaResourceGetter::MediaMetadata::ToString(
+    /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
     String strRet("MediaMetadata[");
         strRet += "durationInMilliseconds=";
         strRet += StringUtils::ToString(mDurationInMilliseconds);
@@ -91,44 +93,58 @@ String MediaResourceGetter::MediaMetadata::ToString()
         strRet += StringUtils::ToString(mSuccess);
         strRet += "]";
 
-    return strRet;
+    *result = strRet;
+    return NOERROR;
 }
 
-Int32 MediaResourceGetter::MediaMetadata::HashCode()
+ECode MediaResourceGetter::MediaMetadata::GetHashCode(
+    /* [out] */ Int32* hash)
 {
+    VALIDATE_NOT_NULL(hash)
     const Int32 prime = 31;
     Int32 result = 1;
     result = prime * result + mDurationInMilliseconds;
     result = prime * result + mHeight;
     result = prime * result + (mSuccess ? 1231 : 1237);
     result = prime * result + mWidth;
-    return result;
+    *hash = result;
+    return NOERROR;
 }
 
-Boolean MediaResourceGetter::MediaMetadata::Equals(
-    /* [in] */ Object* obj)
+
+ECode MediaResourceGetter::MediaMetadata::Equals(
+    /* [in] */ IInterface* obj,
+    /* [out] */ Boolean* result)
 {
-    if (this == obj)
-        return TRUE;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    IObject* otherObj = IObject::Probe(obj);
+    if (this == otherObj) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
     if (obj == NULL)
-        return FALSE;
+        return NOERROR;
 
     Slogger::E("MediaMetadata::Equals", "be aware of the obj real type");
     // how to check the obj is an instance of MediaMetadata
     // if (getClass() != obj.getClass())
     //     return FALSE;
 
-    AutoPtr<MediaMetadata> other = (MediaMetadata*)obj;
+    AutoPtr<MediaMetadata> other = (MediaMetadata*)otherObj;
     if (mDurationInMilliseconds != other->mDurationInMilliseconds)
-        return FALSE;
+        return NOERROR;
     if (mHeight != other->mHeight)
-        return FALSE;
+        return NOERROR;
     if (mSuccess != other->mSuccess)
-        return FALSE;
+        return NOERROR;
     if (mWidth != other->mWidth)
-        return FALSE;
+        return NOERROR;
 
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 Int32 MediaResourceGetter::MediaMetadata::GetDurationInMilliseconds(

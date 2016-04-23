@@ -1,4 +1,5 @@
 #include "CBroadcastReceiverOne.h"
+#include "CActivityOne.h"
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Content.h>
 #include <elastos/utility/logging/Logger.h>
@@ -24,15 +25,23 @@ ECode CBroadcastReceiverOne::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    String msg;
-    AutoPtr<IBundle> bundle;
-    GetResultExtras(TRUE, (IBundle**)&bundle);
-    if (bundle) {
-        bundle->GetString(String("msg"), &msg);
-    }
+    if (CActivityOne::TEST_ORDERED_BROADCAST) {
+        String msg;
+        AutoPtr<IBundle> bundle;
+        GetResultExtras(TRUE, (IBundle**)&bundle);
+        if (bundle) {
+            bundle->GetString(String("msg"), &msg);
+        }
 
-    Logger::I(TAG, "Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
-    return NOERROR;
+        Logger::I(TAG, "Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
+        return NOERROR;
+    }
+    else {
+        String msg;
+        intent->GetStringExtra(String("msg"), &msg);
+        Logger::I(TAG, "Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
+        return NOERROR;
+    }
 }
 
 } // namespace BroadcastStaticDemo

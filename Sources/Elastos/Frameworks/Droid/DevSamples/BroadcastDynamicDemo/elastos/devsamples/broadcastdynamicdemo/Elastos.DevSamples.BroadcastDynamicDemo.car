@@ -43,6 +43,12 @@ module
         interface IBroadcastReceiver;
     }
 
+    class CBroadcastReceiverTwo {
+        constructor();
+
+        interface IBroadcastReceiver;
+    }
+
     } // namespace BroadcastDynamicDemo
     } // namespace DevSamples
     } // namespace Elastos

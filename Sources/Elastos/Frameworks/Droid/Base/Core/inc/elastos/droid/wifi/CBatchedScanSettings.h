@@ -70,11 +70,11 @@ public:
 
     //@Override
     CARAPI Equals(
-        /* [in] */ IObject* obj,
+        /* [in] */ IInterface* obj,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI HashCode(
+    CARAPI GetHashCode(
         /* [out] */ Int32* code);
 
     //@Override

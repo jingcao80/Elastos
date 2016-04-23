@@ -1017,27 +1017,27 @@ ECode ProcessCpuTracker::GetTotalCpuPercent(
     return NOERROR;
 }
 
-static Int32 LoadCompare(
+static Boolean LoadCompare(
     /* [in] */ const AutoPtr<ProcessCpuTracker::Stats>& sta,
     /* [in] */ const AutoPtr<ProcessCpuTracker::Stats>& stb)
 {
     Int32 ta = sta->mRel_utime + sta->mRel_stime;
     Int32 tb = stb->mRel_utime + stb->mRel_stime;
     if (ta != tb) {
-        return ta > tb ? -1 : 1;
+        return ta > tb ? TRUE : FALSE;
     }
     if (sta->mAdded != stb->mAdded) {
-        return sta->mAdded ? -1 : 1;
+        return sta->mAdded ? TRUE : FALSE;
     }
     if (sta->mRemoved != stb->mRemoved) {
-        return sta->mAdded ? -1 : 1;
+        return sta->mAdded ? TRUE : FALSE;
     }
-    return 0;
+    return TRUE;
 }
 
 void ProcessCpuTracker::BuildWorkingProcs()
 {
-    Int32 (*cmpFunc)(const AutoPtr<ProcessCpuTracker::Stats>&, const AutoPtr<ProcessCpuTracker::Stats>&);
+    Boolean (*cmpFunc)(const AutoPtr<ProcessCpuTracker::Stats>&, const AutoPtr<ProcessCpuTracker::Stats>&);
     cmpFunc = LoadCompare;
 
     if (!mWorkingProcsSorted) {

@@ -710,6 +710,10 @@ public:
     virtual CARAPI ReadFromXml(
         /* [in] */ IXmlPullParser* parser);
 
+    virtual CARAPI OnCompareTie(
+        /* [in] */ IIntentFilter* other,
+        /* [out] */ Int32* result);
+
     virtual CARAPI Dump(
         /* [in] */ IPrinter* du,
         /* [in] */ const String& prefix);

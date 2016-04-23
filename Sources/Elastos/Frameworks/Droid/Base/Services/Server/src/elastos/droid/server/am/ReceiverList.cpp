@@ -54,7 +54,7 @@ ECode ReceiverList::Equals(
     return NOERROR;
 }
 
-ECode ReceiverList::HashCode(
+ECode ReceiverList::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode)
@@ -133,6 +133,14 @@ String ReceiverList::ToString()
     sb += TO_CSTR(mReceiver);
     sb += "}";
     return mStringName = sb.ToString();
+}
+
+ECode ReceiverList::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = ToString();
+    return NOERROR;
 }
 
 } // namespace Am

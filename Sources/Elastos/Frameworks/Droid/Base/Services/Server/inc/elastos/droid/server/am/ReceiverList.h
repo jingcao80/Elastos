@@ -40,7 +40,7 @@ public:
         /* [in] */ IInterface* o,
         /* [out] */ Boolean* result);
 
-    CARAPI HashCode(
+    CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
 
     CARAPI ProxyDied();
@@ -54,6 +54,9 @@ public:
         /* [out] */ const String& prefix);
 
     CARAPI_(String) ToString();
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 public:
     CActivityManagerService* mOwner;

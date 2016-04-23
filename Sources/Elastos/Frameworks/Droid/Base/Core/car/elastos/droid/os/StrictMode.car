@@ -685,8 +685,6 @@ module
     }
 
     interface IStrictModeViolationInfo {
-        HashCode(
-            [out] Int32* code);
 
         /**
          * Save a ViolationInfo instance to a parcel.

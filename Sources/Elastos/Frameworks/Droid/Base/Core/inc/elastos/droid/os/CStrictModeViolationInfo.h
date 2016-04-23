@@ -38,7 +38,7 @@ public:
         /* [in] */ IParcel* pin,
         /* [in] */ Boolean unsetGatheringBit);
 
-    CARAPI HashCode(
+    CARAPI GetHashCode(
         /* [out] */ Int32* code);
 
     /**

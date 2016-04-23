@@ -1483,6 +1483,15 @@ ECode IntentFilter::ReadFromXml(
     return NOERROR;
 }
 
+ECode IntentFilter::OnCompareTie(
+    /* [in] */ IIntentFilter* other,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    return NOERROR;
+}
+
 ECode IntentFilter::Dump(
     /* [in] */ IPrinter* du,
     /* [in] */ const String& prefix)
@@ -1571,7 +1580,7 @@ ECode IntentFilter::Dump(
         sb->Reset();
         *sb += prefix;
         *sb += "mPriority=";
-        *sb += StringUtils::ToString(mPriority);
+        *sb += mPriority;
         *sb += ", mHasPartialTypes=";
         *sb += StringUtils::BooleanToString(mHasPartialTypes);
         du->Println(sb->ToString());

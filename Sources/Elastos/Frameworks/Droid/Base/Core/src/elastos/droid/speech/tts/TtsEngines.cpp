@@ -278,7 +278,8 @@ ECode TtsEngines::GetEngines(
         }
     }
 
-    c->Sort((IList*)(*ppRet), (IComparator*)EngineInfoComparator::Comparator);
+    assert(0 && "TODO");
+    // c->Sort(*ppRet, (IComparator*)EngineInfoComparator::Comparator);
 
     return NOERROR;
 }

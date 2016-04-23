@@ -346,21 +346,23 @@ ECode Searchables::IsInstalled(
     return NOERROR;
 }
 
-Int32 Searchables::ComparatorResolveInfo(
+Boolean Searchables::ComparatorResolveInfo(
     /* [in] */ IResolveInfo* lhs,
     /* [in] */ IResolveInfo* rhs)
 {
     if(lhs == rhs)
-        return 0;
+        return TRUE;
     Boolean lhsSystem, rhsSystem;
     IsSystemApp(lhs, &lhsSystem);
     IsSystemApp(rhs, &rhsSystem);
 
     if (lhsSystem && !rhsSystem) {
-        return -1;
-    } else if (rhsSystem && !lhsSystem) {
-        return 1;
-    } else {
+        return TRUE;
+    }
+    else if (rhsSystem && !lhsSystem) {
+        return FALSE;
+    }
+    else {
         // Either both system engines, or both non system
         // engines.
         //
@@ -369,7 +371,10 @@ Int32 Searchables::ComparatorResolveInfo(
         Int32 rPriorty, lPriorty;
         rhs->GetPriority(&rPriorty);
         lhs->GetPriority(&lPriorty);
-        return rPriorty - lPriorty;
+        Int32 ival = rPriorty - lPriorty;
+        if (ival <= 0)
+            return TRUE;
+        return FALSE;
     }
 }
 

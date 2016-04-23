@@ -55,6 +55,9 @@ protected:
 
     CARAPI OnDestroy();
 
+public:
+    static const Boolean TEST_ORDERED_BROADCAST;
+
 private:
     CARAPI OnActivityResult(
         /* [in] */ Int32 requestCode,

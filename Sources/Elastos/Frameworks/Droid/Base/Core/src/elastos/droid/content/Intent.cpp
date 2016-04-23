@@ -103,6 +103,8 @@ ECode Intent::constructor(
     intent->GetType(&mType);
     intent->GetPackage(&mPackage);
     intent->GetFlags(&mFlags);
+    intent->GetContentUserHint(&mContentUserHint);
+
     AutoPtr<IComponentName> componentName;
     intent->GetComponent((IComponentName**)&componentName);
     if (componentName != NULL) {

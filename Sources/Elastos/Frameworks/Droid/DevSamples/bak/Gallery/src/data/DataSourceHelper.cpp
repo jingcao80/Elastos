@@ -69,7 +69,7 @@ AutoPtr<List<String> > DataSourceHelper::GetItemList(
     return list;
 }
 
-Int32 DataSourceHelper::TimeComparator(
+Boolean DataSourceHelper::TimeComparator(
     /* [in] */ const String& lhs,
     /* [in] */ const String& rhs)
 {
@@ -88,7 +88,7 @@ Int32 DataSourceHelper::TimeComparator(
     Int64 diff = last1 - last2;
 
     if (diff > 0) {
-        return 1;
+        return TRUE;
     }
     else if (diff == 0) {
         Int32 result = 0;
@@ -104,10 +104,10 @@ Int32 DataSourceHelper::TimeComparator(
         else {
             result = lhs.Compare(rhs);
         }
-        return result > 0 ? 1 : 0;
+        return result > 0 ? TRUE : FALSE;
     }
     else {
-        return 0;
+        return FALSE;
     }
 }
 

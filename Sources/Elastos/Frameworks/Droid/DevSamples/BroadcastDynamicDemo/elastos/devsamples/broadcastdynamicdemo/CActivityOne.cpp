@@ -1,6 +1,7 @@
 
 #include "CActivityOne.h"
 #include "CBroadcastReceiverOne.h"
+#include "CBroadcastReceiverTwo.h"
 #include "R.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
@@ -23,7 +24,8 @@ namespace DevSamples {
 namespace BroadcastDynamicDemo {
 
 static const String TAG("BroadcastDynamicDemo::CActivityOne");
-const String RECEIVER_KEY("Elastos.DevSamples.BroadcastDynamicDemo.TEST_RECEIVER");
+const String RECEIVER_KEY("Elastos.DevSamples.BroadcastDemo.TEST_RECEIVER");
+const Boolean CActivityOne::TEST_ORDERED_BROADCAST = TRUE;
 
 //=======================================================================
 // MyListener
@@ -121,6 +123,7 @@ ECode CActivityOne::OnStop()
 ECode CActivityOne::OnDestroy()
 {
     Logger::I(TAG, " >> OnDestroy()");
+    Unregister();
     return Activity::OnDestroy();
 }
 
@@ -135,16 +138,24 @@ ECode CActivityOne::OnActivityResult(
 
 ECode CActivityOne::Register()
 {
-    if (mReceiverOne != NULL) {
-        return NOERROR;
+    if (mReceiverOne == NULL) {
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New(RECEIVER_KEY, (IIntentFilter**)&filter);
+        filter->SetPriority(150);
+        AutoPtr<IIntent> intent;
+        CBroadcastReceiverOne::New((IBroadcastReceiver**)&mReceiverOne);
+        RegisterReceiver(mReceiverOne, filter, (IIntent**)&intent);
     }
 
-    AutoPtr<IIntentFilter> filter;
-    AutoPtr<IIntent> intent;
-
-    CBroadcastReceiverOne::New((IBroadcastReceiver**)&mReceiverOne);
-    CIntentFilter::New(RECEIVER_KEY, (IIntentFilter**)&filter);
-    return RegisterReceiver(mReceiverOne,filter, (IIntent**)&intent);
+    if (mReceiverTwo == NULL) {
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New(RECEIVER_KEY, (IIntentFilter**)&filter);
+        filter->SetPriority(250);
+        AutoPtr<IIntent> intent;
+        CBroadcastReceiverTwo::New((IBroadcastReceiver**)&mReceiverTwo);
+        RegisterReceiver(mReceiverTwo, filter, (IIntent**)&intent);
+    }
+    return NOERROR;
 }
 
 ECode CActivityOne::Unregister()
@@ -153,6 +164,11 @@ ECode CActivityOne::Unregister()
         UnregisterReceiver(mReceiverOne);
         mReceiverOne = NULL;
     }
+
+    if (mReceiverTwo != NULL) {
+        UnregisterReceiver(mReceiverTwo);
+        mReceiverTwo = NULL;
+    }
     return NOERROR;
 }
 
@@ -160,7 +176,14 @@ ECode CActivityOne::Send()
 {
     AutoPtr<IIntent> intent;
     CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
-    return SendBroadcast(intent);
+    intent->PutExtra(String("msg"), String("Hello Broadcast!"));
+
+    if (TEST_ORDERED_BROADCAST) {
+        return SendOrderedBroadcast(intent, String(NULL));
+    }
+    else {
+        return SendBroadcast(intent);
+    }
 }
 
 } // namespace BroadcastDynamicDemo

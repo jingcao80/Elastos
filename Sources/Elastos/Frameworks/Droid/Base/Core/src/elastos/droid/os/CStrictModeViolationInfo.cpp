@@ -123,7 +123,7 @@ ECode CStrictModeViolationInfo::constructor(
     return NOERROR;
 }
 
-ECode CStrictModeViolationInfo::HashCode(
+ECode CStrictModeViolationInfo::GetHashCode(
     /* [out] */ Int32* code)
 {
 //TODO:

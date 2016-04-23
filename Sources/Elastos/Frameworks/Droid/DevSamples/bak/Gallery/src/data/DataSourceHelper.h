@@ -27,7 +27,7 @@ public:
     static AutoPtr< List<String> > GetItemList(
         /* [in] */ const String& key);
 
-    static Int32 TimeComparator(
+    static Boolean TimeComparator(
         /* [in] */ const String& lhs,
         /* [in] */ const String& rhs);
 

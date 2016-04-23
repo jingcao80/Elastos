@@ -22,7 +22,8 @@ namespace DevSamples {
 namespace BroadcastStaticDemo {
 
 static const String TAG("BroadcastStaticDemo::CActivityOne");
-const String RECEIVER_KEY("Elastos.DevSamples.BroadcastStaticDemo.TEST_RECEIVER");
+const String RECEIVER_KEY("Elastos.DevSamples.BroadcastDemo.TEST_RECEIVER");
+const Boolean CActivityOne::TEST_ORDERED_BROADCAST = TRUE;
 
 //=======================================================================
 // MyListener
@@ -121,7 +122,13 @@ ECode CActivityOne::Send()
     AutoPtr<IIntent> intent;
     CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
     intent->PutExtra(String("msg"), String("Hello Broadcast!"));
-    return SendOrderedBroadcast(intent, String(NULL));
+
+    if (TEST_ORDERED_BROADCAST) {
+        return SendOrderedBroadcast(intent, String(NULL));
+    }
+    else {
+        return SendBroadcast(intent);
+    }
 }
 
 } // namespace BroadcastStaticDemo

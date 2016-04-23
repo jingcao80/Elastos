@@ -83,11 +83,31 @@ String BroadcastFilter::ToString()
     StringBuilder sb(128);
     sb += "BroadcastFilter{";
     sb += StringUtils::ToHexString(Int32(this));
+    sb += " priority=";
+    sb += mPriority;
+    if (!mActions.IsEmpty()) {
+        sb += " actions{";
+        List<String>::Iterator it = mActions.Begin();
+        for (; it != mActions.End(); ++it) {
+            sb += *it;
+            sb += ";";
+        }
+        sb += "}";
+    }
+    if (mCategories != NULL && !mCategories->IsEmpty()) {
+        sb += " categories{";
+        List<String>::Iterator it = mCategories->Begin();
+        for (; it != mCategories->End(); ++it) {
+            sb += *it;
+            sb += ";";
+        }
+        sb += "}";
+    }
     sb += " userId=";
     sb += mOwningUserId;
-    sb += " mPackageName=";
+    sb += " packageName=";
     sb += mPackageName;
-    sb += " mRequiredPermission=";
+    sb += " requiredPermission=";
     sb += mRequiredPermission;
     sb += " ";
     sb += mReceiverList->ToString();

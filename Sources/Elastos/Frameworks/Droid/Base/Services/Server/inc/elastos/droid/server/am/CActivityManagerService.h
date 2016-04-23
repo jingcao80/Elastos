@@ -396,7 +396,7 @@ public:
 
         ~MemItem();
 
-        static CARAPI_(Int32) Compare(
+        static CARAPI_(Boolean) Compare(
             /* [in] */ MemItem* lhs,
             /* [in] */ MemItem* rhs);
 

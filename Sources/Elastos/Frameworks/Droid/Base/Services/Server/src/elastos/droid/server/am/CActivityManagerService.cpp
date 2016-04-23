@@ -493,9 +493,9 @@ const String CActivityManagerService::TAG_MU("CActivityManagerServiceMU");
 const Boolean CActivityManagerService::DEBUG = TRUE;
 const Boolean CActivityManagerService::localLOGV = DEBUG;
 const Boolean CActivityManagerService::DEBUG_BACKUP = localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_BROADCAST = FALSE;//localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_BROADCAST_LIGHT = FALSE;//DEBUG_BROADCAST || FALSE;
-const Boolean CActivityManagerService::DEBUG_BACKGROUND_BROADCAST = FALSE;//DEBUG_BROADCAST || FALSE;
+const Boolean CActivityManagerService::DEBUG_BROADCAST = TRUE;//localLOGV || FALSE;
+const Boolean CActivityManagerService::DEBUG_BROADCAST_LIGHT = TRUE;//DEBUG_BROADCAST || FALSE;
+const Boolean CActivityManagerService::DEBUG_BACKGROUND_BROADCAST = TRUE;//DEBUG_BROADCAST || FALSE;
 const Boolean CActivityManagerService::DEBUG_CLEANUP = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_CONFIGURATION = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_FOCUS = FALSE;
@@ -918,17 +918,17 @@ CActivityManagerService::MemItem::~MemItem()
 {
 }
 
-Int32 CActivityManagerService::MemItem::Compare(
+Boolean CActivityManagerService::MemItem::Compare(
     /* [in] */ MemItem* lhs,
     /* [in] */ MemItem* rhs)
 {
     if (lhs->mPss < rhs->mPss) {
-        return 1;
+        return FALSE;
     }
     else if (lhs->mPss > rhs->mPss) {
-        return -1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 //==============================================================================
@@ -949,12 +949,15 @@ Boolean CActivityManagerService::ReceiverResolver::AllowFilterResult(
     /* [in] */ BroadcastFilter* filter,
     /* [in] */ List<AutoPtr<BroadcastFilter> >* dest)
 {
-    // IBinder target = filter.receiverList.receiver.asBinder();
-    // for (Int32 i=dest.size()-1; i>=0; i--) {
-    //     if (dest.get(i).receiverList.receiver.asBinder() == target) {
-    //         return FALSE;
-    //     }
-    // }
+    IBinder* target = IBinder::Probe(filter->mReceiverList->mReceiver);
+    List<AutoPtr<BroadcastFilter> >::ReverseIterator rit = dest->RBegin();
+    for (; rit != dest->REnd(); ++rit) {
+        BroadcastFilter* bf = *rit;
+        IBinder* r = IBinder::Probe(bf->mReceiverList->mReceiver);
+        if (r == target) {
+            return FALSE;
+        }
+    }
     return TRUE;
 }
 
@@ -973,7 +976,8 @@ AutoPtr<BroadcastFilter> CActivityManagerService::ReceiverResolver::NewResult(
 AutoPtr< ArrayOf<BroadcastFilter*> > CActivityManagerService::ReceiverResolver::NewArray(
     /* [in] */ Int32 size)
 {
-    return ArrayOf<BroadcastFilter*>::Alloc(size);
+    AutoPtr< ArrayOf<BroadcastFilter*> > array = ArrayOf<BroadcastFilter*>::Alloc(size);
+    return array;
 }
 
 Boolean CActivityManagerService::ReceiverResolver::IsPackageForFilter(
@@ -19595,7 +19599,10 @@ ECode CActivityManagerService::RegisterReceiver(
 
     // The first sticky in the list is returned directly back to the client.
     AutoPtr<IIntent> sticky = allSticky != NULL ? *allSticky->Begin() : NULL;
-    if (DEBUG_BROADCAST) Slogger::V(TAG, "Register receiver %s: %s", TO_CSTR(filter), TO_CSTR(sticky));
+    if (DEBUG_BROADCAST) {
+        Slogger::V(TAG, "Register receiver %s, filter %s: %s",
+            TO_CSTR(receiver), TO_CSTR(filter), TO_CSTR(sticky));
+    }
     if (receiver == NULL) {
         *intent = sticky;
         REFCOUNT_ADD(*intent)
@@ -19668,6 +19675,11 @@ ECode CActivityManagerService::RegisterReceiver(
     }
 
     mReceiverResolver->AddFilter(bf);
+
+    if (DEBUG_BROADCAST) {
+        Slogger::V(TAG, "Register receiver %s, filter: %s, ReceiverList: %s",
+            TO_CSTR(receiver), TO_CSTR(bf), TO_CSTR(rl));
+    }
 
     // Enqueue broadcasts for all existing stickies that match
     // this filter.
@@ -19788,7 +19800,7 @@ AutoPtr<IList> CActivityManagerService::CollectReceiverComponents(
                 IUserManager::DISALLOW_DEBUGGING_FEATURES, user, &res), res)) {
                 continue;
             }
-            Slogger::D(TAG, " >> CollectReceiverComponents %s", TO_CSTR(intent));
+
             AutoPtr<IList> newReceivers;
             pm->QueryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user, (IList**)&newReceivers);
             if (user != 0 && newReceivers != NULL) {
@@ -20278,10 +20290,20 @@ ECode CActivityManagerService::BroadcastIntentLocked(
                         registeredReceiversForUser->Begin(), registeredReceiversForUser->End());
                 }
             }
+
         }
         else {
             registeredReceivers = mReceiverResolver->QueryIntent(
                 intent, resolvedType, FALSE, userId);
+        }
+
+        if (registeredReceivers != NULL && DEBUG_BROADCAST) {
+            Slogger::I(TAG, " == registeredReceivers: %d", registeredReceivers->GetSize());
+            List<AutoPtr<BroadcastFilter> >::Iterator it = registeredReceivers->Begin();
+            Int32 i = 0;
+            for (; it != registeredReceivers->End(); ++it) {
+                Slogger::I(TAG, " >> registeredReceivers %d: %s", i++, TO_CSTR(*it));
+            }
         }
     }
 
@@ -20301,6 +20323,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         for (it = registeredReceivers->Begin(); it != registeredReceivers->End(); ++it) {
             rlist->Add((*it)->Probe(EIID_IInterface));
         }
+
         // If we are not serializing this broadcast, then send the
         // registered receivers separately so they don't wait for the
         // components to be launched.
@@ -20377,9 +20400,10 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         }
 
         Int32 NT = 0;
-        Int32 it = 0;
-        if (receivers != NULL)
+        if (receivers != NULL) {
             receivers->GetSize(&NT);
+        }
+        Int32 it = 0;
         AutoPtr<IResolveInfo> curt;
         AutoPtr<BroadcastFilter> curr;
         while (it < NT  && registeredReceivers != NULL && ir != registeredReceivers->End()) {
@@ -20427,7 +20451,6 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         for (Int32 it = 0; it < NT; it++) {
             AutoPtr<IInterface> item;
             receivers->Get(it, (IInterface**)&item);
-            // AutoPtr<IResolveInfo> curt = IResolveInfo::Probe(item);
             Slogger::V(TAG, " >> item %d: %s", it, TO_CSTR(item));
         }
     }

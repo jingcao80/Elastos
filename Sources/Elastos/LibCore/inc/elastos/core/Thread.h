@@ -81,6 +81,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("Thread")
+
     Thread();
 
     virtual ~Thread();

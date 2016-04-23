@@ -67,7 +67,7 @@ ECode DateTimeSuggestion::Equals(
 }
 
 //@Override
-ECode DateTimeSuggestion::HashCode(
+ECode DateTimeSuggestion::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);

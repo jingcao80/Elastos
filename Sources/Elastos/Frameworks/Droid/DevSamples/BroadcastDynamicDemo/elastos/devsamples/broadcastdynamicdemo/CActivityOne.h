@@ -66,8 +66,13 @@ private:
     CARAPI Unregister();
 
     CARAPI Send();
+
+public:
+    static const Boolean TEST_ORDERED_BROADCAST;
+
 private:
     AutoPtr<IBroadcastReceiver> mReceiverOne;
+    AutoPtr<IBroadcastReceiver> mReceiverTwo;
 };
 
 } // namespace BroadcastDynamicDemo
