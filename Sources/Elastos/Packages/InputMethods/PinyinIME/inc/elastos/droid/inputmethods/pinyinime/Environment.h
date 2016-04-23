@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CPINYINENVIRONMENT_H__
 #define __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CPINYINENVIRONMENT_H__
 
-#include "_Elastos_Droid_Inputmethods_PinyinIME_CPinyinEnvironment.h"
+#include "Elastos.Droid.Inputmethods.Pinyin.h"
+#include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IConfiguration;
@@ -18,64 +19,47 @@ namespace PinyinIME {
  * is calculated from the Float values of and screen size. In this way, this
  * input method can work even when screen size is changed.
  */
-CarClass(CPinyinEnvironment)
-    , public Object
-    , public IPinyinEnvironment
+class Environment : public Object
 {
 public:
-    CAR_OBJECT_DECL();
-
-    CAR_INTERFACE_DECL();
-
-    CPinyinEnvironment();
+    staitc CARAPI_(AutoPtr<Environment>) GetInstance();
 
     CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig,
         /* [in] */ IContext* context);
 
-    CARAPI GetConfiguration(
-        /* [out] */ IConfiguration** config);
+    CARAPI_(AutoPtr<IConfiguration>) GetConfiguration();
 
-    CARAPI GetScreenWidth(
-        /* [out] */ Int32* width);
+    CARAPI_(Int32) GetScreenWidth();
 
-    CARAPI GetScreenHeight(
-        /* [out] */ Int32* height);
+    CARAPI_(Int32) GetScreenHeight();
 
-    CARAPI GetHeightForCandidates(
-        /* [out] */ Int32* height);
+    CARAPI_(Int32) GetHeightForCandidates();
 
-    CARAPI GetKeyXMarginFactor(
-        /* [out] */ Float* factor);
+    CARAPI_(Float) GetKeyXMarginFactor();
 
-    CARAPI GetKeyYMarginFactor(
-        /* [out] */ Float* factor);
+    CARAPI_(Float) GetKeyYMarginFactor();
 
-    CARAPI GetKeyHeight(
-        /* [out] */ Int32* height);
+    CARAPI_(Int32) GetKeyHeight();
 
-    CARAPI GetKeyBalloonWidthPlus(
-        /* [out] */ Int32* plus);
+    CARAPI_(Int32) GetKeyBalloonWidthPlus();
 
-    CARAPI GetKeyBalloonHeightPlus(
-        /* [out] */ Int32* plus);
+    CARAPI_(Int32) GetKeyBalloonHeightPlus();
 
-    CARAPI GetSkbHeight(
-        /* [out] */ Int32* height);
+    CARAPI_(Int32) GetSkbHeight();
 
-    CARAPI GetKeyTextSize(
-        /* [in] */ Boolean isFunctionKey,
-        /* [out] */ Int32* size);
+    CARAPI_(Int32) GetKeyTextSize(
+        /* [in] */ Boolean isFunctionKey);
 
-    CARAPI GetBalloonTextSize(
-        /* [in] */ Boolean isFunctionKey,
-        /* [out] */ Int32* size);
+    CARAPI_(Int32) GetBalloonTextSize(
+        /* [in] */ Boolean isFunctionKey);
 
-    CARAPI HasHardKeyboard(
-        /* [out] */ Boolean* has);
+    CARAPI_(Boolean) HasHardKeyboard();
 
-    CARAPI NeedDebug(
-        /* [out] */ Boolean* debug);
+    CARAPI_(Boolean) NeedDebug();
+
+private:
+    Environment();
 
 private:
     /**
@@ -135,6 +119,8 @@ private:
      * one of screen width and height.
      */
     static const Float FUNCTION_BALLOON_TEXT_SIZE_RATIO;
+
+    static AutoPtr<IEnvironment> sInstance;
 
     Int32 mScreenWidth;
     Int32 mScreenHeight;

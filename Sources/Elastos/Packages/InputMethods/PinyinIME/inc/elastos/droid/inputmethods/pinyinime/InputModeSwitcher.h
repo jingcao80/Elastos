@@ -1,13 +1,12 @@
 
-#ifndef __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CINPUTMODESWITCHER_H__
-#define __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CINPUTMODESWITCHER_H__
+#ifndef __ELASTOS_DROID_INPUTMETHODS_PINYINIME_INPUTMODESWITCHER_H__
+#define __ELASTOS_DROID_INPUTMETHODS_PINYINIME_INPUTMODESWITCHER_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
-#include "_CInputModeSwitcher.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::Inputmethods::PinyinIME::IPinyinIME;
-using Elastos::Droid::Inputmethods::PinyinIME::IToggleStates;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -17,82 +16,98 @@ namespace PinyinIME {
 /**
  * Switcher used to switching input mode between Chinese, English, symbol,etc.
  */
-CarClass(CInputModeSwitcher)
+class InputModeSwitcher : public Object
 {
 public:
-    CInputModeSwitcher();
+    class ToggleStates : public Object
+    {
+    public:
+        ToggleStates();
 
-    CARAPI constructor(
+    public:
+        /**
+         * If it is true, this soft keyboard is a QWERTY one.
+         */
+        Boolean mQwerty;
+
+        /**
+         * If {@link #mQwerty} is true, this variable is used to decide the
+         * letter case of the QWERTY keyboard.
+         */
+        Boolean mQwertyUpperCase;
+
+        /**
+         * The id of enabled row in the soft keyboard. Refer to
+         * {@link com.android.inputmethod.pinyin.SoftKeyboard.KeyRow} for
+         * details.
+         */
+        Int32 mRowIdToEnable;
+
+        /**
+         * Used to store all other toggle states for the current input mode.
+         */
+        AutoPtr<ArrayOf<Int32> > mKeyStates;
+
+        /**
+         * Number of states to toggle.
+         */
+        Int32 mKeyStatesNum;
+    };
+
+public:
+    InputModeSwitcher(
         /* [in] */ IPinyinIME* imeService);
 
-    CARAPI GetInputMode(
-        /* [out] */ Int32* mode);
+    CARAPI_(Int32) GetInputMode();
 
-    CARAPI GetToggleStates(
-        /* [out] */ IToggleStates** states);
+    CARAPI_(AutoPtr<ToggleStates>) GetToggleStates();
 
-    CARAPI GetSkbLayout(
-        /* [out] */ Int32* skbLayout);
+    CARAPI_(Int32) GetSkbLayout();
 
     // Return the icon to update.
-    CARAPI SwitchLanguageWithHkb(
-        /* [out] */ Int32* icon);
+    CARAPI_(Int32) SwitchLanguageWithHkb();
 
     // Return the icon to update.
-    CARAPI SwitchModeForUserKey(
-        /* [in] */ Int32 userKey,
-        /* [out] */ Int32* icon);
+    CARAPI_(Int32) SwitchModeForUserKey(
+        /* [in] */ Int32 userKey);
 
     // Return the icon to update.
-    CARAPI RequestInputWithHkb(
-        /* [in] */ IEditorInfo* editorInfo,
-        /* [out] */ Int32* icon);
+    CARAPI_(Int32) RequestInputWithHkb(
+        /* [in] */ IEditorInfo* editorInfo);
 
     // Return the icon to update.
-    CARAPI RequestInputWithSkb(
-        /* [in] */ IEditorInfo* editorInfo,
-        /* [out] */ Int32* icon);
+    CARAPI_(Int32) RequestInputWithSkb(
+        /* [in] */ IEditorInfo* editorInfo);
 
     // Return the icon to update.
-    CARAPI RequestBackToPreviousSkb(
-        /* [out] */ Int32* icon);
+    CARAPI_(Int32) RequestBackToPreviousSkb();
 
-    CARAPI GetTooggleStateForCnCand(
-        /* [out] */ Int32* state);
+    CARAPI_(Int32) GetTooggleStateForCnCand();
 
-    CARAPI IsEnglishWithHkb(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsEnglishWithHkb();
 
-    CARAPI IsEnglishWithSkb(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsEnglishWithSkb();
 
-    CARAPI IsEnglishUpperCaseWithSkb(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsEnglishUpperCaseWithSkb();
 
-    CARAPI IsChineseText(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsChineseText();
 
-    CARAPI IsChineseTextWithHkb(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsChineseTextWithHkb();
 
-    CARAPI IsChineseTextWithSkb(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsChineseTextWithSkb();
 
-    CARAPI IsSymbolWithSkb(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsSymbolWithSkb();
 
-    CARAPI IsEnterNoramlState(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsEnterNoramlState();
 
-    CARAPI TryHandleLongPressSwitch(
-        /* [in] */ Int32 keyCode,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) TryHandleLongPressSwitch(
+        /* [in] */ Int32 keyCode);
 
 private:
-    void SaveInputMode(
+    CARAPI_(void) SaveInputMode(
         /* [in] */ Int32 newInputMode);
 
-    void PrepareToggleStates(
+    CARAPI_(void) PrepareToggleStates(
         /* [in] */ Boolean needSkb);
 
 public:
@@ -304,7 +319,7 @@ private:
     /**
      * Used to indicate required toggling operations.
      */
-    AutoPtr<IToggleStates> mToggleStates;
+    AutoPtr<ToggleStates> mToggleStates;
 
     /**
      * The current field is a short message field?
@@ -324,7 +339,7 @@ private:
     /**
      * IME service.
      */
-    AutoPtr<IPinyinIME> mImeService;
+    PinyinIME* mImeService;
 
     /**
      * Key toggling state for Chinese mode.
@@ -417,4 +432,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif  // __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CINPUTMODESWITCHER_H__
+#endif  // __ELASTOS_DROID_INPUTMETHODS_PINYINIME_INPUTMODESWITCHER_H__

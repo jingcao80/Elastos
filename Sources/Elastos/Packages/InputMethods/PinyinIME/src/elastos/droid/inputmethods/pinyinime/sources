@@ -1,3 +1,4 @@
+
 TARGET_NAME = PinyinIME
 TARGET_TYPE = eco
 
@@ -13,7 +14,9 @@ LUBE_FLAGS += -n -u
 
 SOURCES = PinyinIME.car
 SOURCES += R.cpp
-SOURCES += CDecodingInfo.cpp
+SOURCES += Environment.cpp
+SOURCES += InputModeSwitcher.cpp
+
 SOURCES += CPinyinSettings.cpp
 #SOURCES += CSoundManager.cpp
 #SOURCES += CSoundManagerHelper.cpp
@@ -22,7 +25,7 @@ SOURCES += CPinyinSettings.cpp
 #SOURCES += SoftKey.cpp
 #SOURCES += XmlKeyboardLoader.cpp
 #SOURCES += SoftKeyToggle.cpp
-#SOURCES += CPinyinEnvironment.cpp
+
 #SOURCES += CPinyinEnvironmentHelper.cpp
 #SOURCES += SoftKeyboard.cpp
 #SOURCES += CBalloonHint.cpp
@@ -38,7 +41,7 @@ SOURCES += CPinyinSettings.cpp
 #SOURCES += EnglishInputProcessor.cpp
 #SOURCES += KeyMapDream.cpp
 #SOURCES += CToggleStates.cpp
-#SOURCES += CInputModeSwitcher.cpp
+
 #SOURCES += CPinyinIME.cpp
 #SOURCES += CSettingsActivity.cpp
 #SOURCES += Elastos.Droid.Core.cpp

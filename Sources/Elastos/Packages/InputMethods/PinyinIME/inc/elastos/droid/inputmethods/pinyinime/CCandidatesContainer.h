@@ -8,6 +8,7 @@
 using Elastos::Droid::View::IGestureDetector;
 using Elastos::Droid::Widget::IImageButton;
 using Elastos::Droid::Widget::IViewFlipper;
+using Elastos::Droid::Widget::RelativeLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -24,47 +25,19 @@ namespace PinyinIME {
  * </p>
  */
 CarClass(CCandidatesContainer)
-    , public Elastos::Droid::Widget::RelativeLayout
+    , public RelativeLayout
     , public ICandidatesContainer
 {
 public:
     CandidatesContainer();
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
-
-    CARAPI OnAnimationStart(
-        /* [in] */  IAnimation* animation);
-
-    CARAPI OnAnimationEnd(
-        /* [in] */  IAnimation* animation);
-
-    CARAPI OnAnimationRepeat(
-        /* [in] */  IAnimation* animation);
-
-    CARAPI OnTouch(
-        /* [in] */ IView* v,
-        /* [in] */ IMotionEvent* event,
-        /* [out] */ Boolean* result);
-
-    CARAPI SetIgnoreGravity(
-        /* [in] */ Int32 viewId);
-
-    CARAPI GetGravity(
-        /* [out] */ Int32* gravity);
-
-    CARAPI SetGravity(
-        /* [in] */ Int32 gravity);
-
-    CARAPI SetHorizontalGravity(
-        /* [in] */ Int32 horizontalGravity);
-
-    CARAPI SetVerticalGravity(
-        /* [in] */ Int32 verticalGravity);
 
     CARAPI Initialize(
         /* [in] */ ICandidateViewListener* cvListener,
@@ -102,31 +75,61 @@ public:
 
     CARAPI UpdateArrowStatus();
 
+    CARAPI OnTouch(
+        /* [in] */ IView* v,
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
+
     // The reason why we handle candiate view's touch events here is because
     // that the view under the focused view may get touch events instead of the
     // focused one.
-    Boolean OnTouchEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
     CARAPI LoadAnimation(
         /* [in] */ Boolean animLeftRight,
         /* [in] */ Boolean forward);
 
+    CARAPI OnAnimationEnd(
+        /* [in] */  IAnimation* animation);
+
+    CARAPI OnAnimationRepeat(
+        /* [in] */  IAnimation* animation);
+
+    CARAPI OnAnimationStart(
+        /* [in] */  IAnimation* animation);
+
+//    CARAPI SetIgnoreGravity(
+//        /* [in] */ Int32 viewId);
+//
+//    CARAPI GetGravity(
+//        /* [out] */ Int32* gravity);
+//
+//    CARAPI SetGravity(
+//        /* [in] */ Int32 gravity);
+//
+//    CARAPI SetHorizontalGravity(
+//        /* [in] */ Int32 horizontalGravity);
+//
+//    CARAPI SetVerticalGravity(
+//        /* [in] */ Int32 verticalGravity);
+
 protected:
-    void OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
 private:
-    void EnableArrow(
+    CARAPI_(void) EnableArrow(
         /* [in] */ IImageButton* arrowBtn,
         /* [in] */ Boolean enabled);
 
-    void ShowArrow(
+    CARAPI_(void) ShowArrow(
         /* [in] */ IImageButton* arrowBtn,
         /* [in] */ Boolean show);
 
-    AutoPtr<IAnimation> CreateAnimation(
+    CARAPI_(AutoPtr<IAnimation>) CreateAnimation(
         /* [in] */ Float xFrom,
         /* [in] */ Float xTo,
         /* [in] */ Float yFrom,
@@ -135,9 +138,9 @@ private:
         /* [in] */ Float alphaTo,
         /* [in] */ Int64 duration);
 
-    void StartAnimation();
+    CARAPI_(void StartAnimation();
 
-    void StopAnimation();
+    CARAPI_(void StopAnimation();
 
 protected:
     /**

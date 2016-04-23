@@ -24,8 +24,8 @@ module
             [in] IGestureDetector* gestureDetector,
             [in] ICandidateViewListener* cvListener);
 
-        SetDecodingInfo(
-            [in] IDecodingInfo* decInfo);
+//        SetDecodingInfo(
+//            [in] IDecodingInfo* decInfo);
 
         GetActiveCandiatePosInPage(
             [out] Int32* pos);

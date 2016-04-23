@@ -16,6 +16,7 @@ module
         ImeState_STATE_APP_COMPLETION
     }
 
+    // should be delete
     /**
      * @Involve
      * interface Elastos.Droid.InputMethodService.IInputMethodService

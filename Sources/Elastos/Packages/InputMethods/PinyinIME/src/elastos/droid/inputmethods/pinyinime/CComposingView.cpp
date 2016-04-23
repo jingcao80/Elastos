@@ -2,8 +2,8 @@
 #include "CComposingView.h"
 #include "elastos/droid/graphics/CPaint.h"
 
-using Elastos::Core::IStringBuffer;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Core::IStringBuffer;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +13,7 @@ namespace PinyinIME {
 const Int32 CComposingView::LEFT_RIGHT_MARGIN = 5;
 
 CAR_OBJECT_IMPL(CComposingView);
+
 CAR_INTERFACE_IMPL(CComposingView, View, IComposingView);
 
 CComposingView::CComposingView()
@@ -20,7 +21,106 @@ CComposingView::CComposingView()
     , mStrColorHl(0)
     , mStrColorIdle(0)
     , mFontSize(0)
+{}
+
+ECode CComposingView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
 {
+    FAIL_RETURN(View::constructor(context, attrs));
+
+    AutoPtr<IResources> r;
+    context->GetResources((IResources**)&r);
+    r->GetDrawable(R::drawable::composing_hl_bg, (IDrawable**)&mHlDrawable);
+    r->GetDrawable(R::drawable::composing_area_cursor, (IDrawable**)&mCursor);
+
+    r->GetColor(R::color::composing_color, &mStrColor);
+    r->GetColor(R::color::composing_color_hl, &mStrColorHl);
+    r->GetColor(R::color::composing_color_idle, &mStrColorIdle);
+
+    r->GetDimensionPixelSize(R::dimen::composing_height, &mFontSize);
+
+    CPaint::New((IPaint**)&mPaint);
+    mPaint->SetColor(mStrColor);
+    mPaint->SetAntiAlias(TRUE);
+    mPaint->SetTextSize(mFontSize);
+
+    return mPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
+}
+
+ECode CComposingView::Reset()
+{
+    mComposingStatus = ComposingStatus_SHOW_PINYIN;
+    return NOERROR;
+}
+
+ECode CComposingView::SetDecodingInfo(
+    /* [in] */ IDecodingInfo* decInfo,
+    /* [in] */ ImeState imeStatus)
+{
+    mDecInfo = decInfo;
+
+    if (ImeState_STATE_INPUT == imeStatus) {
+        mComposingStatus = ComposingStatus_SHOW_PINYIN;
+        mDecInfo->MoveCursorToEdge(FALSE);
+    }
+    else {
+        Int32 value = 0;
+        if ((decInfo->GetFixedLen(&value), value) != 0
+                || ComposingStatus_EDIT_PINYIN == mComposingStatus) {
+            mComposingStatus = ComposingStatus_EDIT_PINYIN;
+        }
+        else {
+            mComposingStatus = ComposingStatus_SHOW_STRING_LOWERCASE;
+        }
+        mDecInfo->MoveCursor(0);
+    }
+
+    Measure(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
+    RequestLayout();
+    return Invalidate();
+}
+
+ECode CComposingView::MoveCursor(
+    /* [in] */ Int32 keyCode,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (keyCode != IKeyEvent::KEYCODE_DPAD_LEFT
+            && keyCode != IKeyEvent::KEYCODE_DPAD_RIGHT) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    if (ComposingStatus_EDIT_PINYIN == mComposingStatus) {
+        Int32 offset = 0;
+        if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT) {
+            offset = -1;
+        }
+        else if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) offset = 1;
+        mDecInfo->MoveCursor(offset);
+    }
+    else if (ComposingStatus_SHOW_STRING_LOWERCASE == mComposingStatus) {
+        if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
+                || keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
+            mComposingStatus = ComposingStatus_EDIT_PINYIN;
+
+            Measure(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
+            RequestLayout();
+        }
+
+    }
+    Invalidate();
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode CComposingView::GetComposingStatus(
+    /* [out] */ ComposingStatus* status)
+{
+    VALIDATE_NOT_NULL(status);
+    *status = mComposingStatus;
+    return NOERROR;
 }
 
 void CComposingView::OnMeasure(
@@ -33,7 +133,8 @@ void CComposingView::OnMeasure(
 
     if (NULL == mDecInfo) {
         width = 0;
-    } else {
+    }
+    else {
         width = mPaddingLeft + mPaddingRight + LEFT_RIGHT_MARGIN * 2;
 
         String str;
@@ -41,7 +142,8 @@ void CComposingView::OnMeasure(
             AutoPtr<IStringBuffer> strBuf;
             mDecInfo->GetOrigianlSplStr((IStringBuffer**)&strBuf);
             strBuf->ToString(&str);
-        } else {
+        }
+        else {
             mDecInfo->GetComposingStrForDisplay(&str);
         }
         Float value = 0.f;
@@ -132,113 +234,6 @@ void CComposingView::DrawForPinyin(
         }
         canvas->DrawText(cmpsStr, oriPos, cmpsStr.GetLength(), x, y, mPaint);
     }
-}
-
-PInterface CComposingView::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IComposingView) {
-        return (IInterface*)(IComposingView*)this;
-    }
-
-    return View::Probe(riid);
-}
-
-ECode CComposingView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    Init(context, attrs);
-
-    AutoPtr<IResources> r;
-    context->GetResources((IResources**)&r);
-    r->GetDrawable(0x7f02000d/*R.drawable.composing_hl_bg*/, (IDrawable**)&mHlDrawable);
-    r->GetDrawable(0x7f02000c/*R.drawable.composing_area_cursor*/, (IDrawable**)&mCursor);
-
-    r->GetColor(0x7f070007/*R.color.composing_color*/, &mStrColor);
-    r->GetColor(0x7f070008/*R.color.composing_color_hl*/, &mStrColorHl);
-    r->GetColor(0x7f070009/*R.color.composing_color_idle*/, &mStrColorIdle);
-
-    r->GetDimensionPixelSize(0x7f080002/*R.dimen.composing_height*/, &mFontSize);
-
-    CPaint::New((IPaint**)&mPaint);
-    mPaint->SetColor(mStrColor);
-    mPaint->SetAntiAlias(TRUE);
-    mPaint->SetTextSize(mFontSize);
-
-    return mPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
-}
-
-ECode CComposingView::Reset()
-{
-    mComposingStatus = ComposingStatus_SHOW_PINYIN;
-    return NOERROR;
-}
-
-ECode CComposingView::SetDecodingInfo(
-    /* [in] */ IDecodingInfo* decInfo,
-    /* [in] */ ImeState imeStatus)
-{
-    mDecInfo = decInfo;
-
-    if (ImeState_STATE_INPUT == imeStatus) {
-        mComposingStatus = ComposingStatus_SHOW_PINYIN;
-        mDecInfo->MoveCursorToEdge(FALSE);
-    } else {
-        Int32 value = 0;
-        if ((decInfo->GetFixedLen(&value), value) != 0
-                || ComposingStatus_EDIT_PINYIN == mComposingStatus) {
-            mComposingStatus = ComposingStatus_EDIT_PINYIN;
-        } else {
-            mComposingStatus = ComposingStatus_SHOW_STRING_LOWERCASE;
-        }
-        mDecInfo->MoveCursor(0);
-    }
-
-    Measure(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
-    RequestLayout();
-    return Invalidate();
-}
-
-ECode CComposingView::MoveCursor(
-    /* [in] */ Int32 keyCode,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    if (keyCode != IKeyEvent::KEYCODE_DPAD_LEFT
-            && keyCode != IKeyEvent::KEYCODE_DPAD_RIGHT) {
-        *result = FALSE;
-        return NOERROR;
-    }
-
-    if (ComposingStatus_EDIT_PINYIN == mComposingStatus) {
-        Int32 offset = 0;
-        if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT)
-            offset = -1;
-        else if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) offset = 1;
-        mDecInfo->MoveCursor(offset);
-    } else if (ComposingStatus_SHOW_STRING_LOWERCASE == mComposingStatus) {
-        if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
-                || keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
-            mComposingStatus = ComposingStatus_EDIT_PINYIN;
-
-            Measure(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
-            RequestLayout();
-        }
-
-    }
-
-    Invalidate();
-    *result = TRUE;
-    return NOERROR;
-}
-
-ECode CComposingView::GetComposingStatus(
-    /* [out] */ ComposingStatus* status)
-{
-    VALIDATE_NOT_NULL(status);
-    *status = mComposingStatus;
-    return NOERROR;
 }
 
 } // namespace PinyinIME

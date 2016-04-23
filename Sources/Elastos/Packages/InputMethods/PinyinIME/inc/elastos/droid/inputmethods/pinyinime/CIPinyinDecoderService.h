@@ -5,7 +5,12 @@
 #include "_CIPinyinDecoderService.h"
 #include "CPinyinDecoderService.h"
 
-using Elastos::Droid::App::IService;
+using Elastos::Droid::App::Service;
+using Elastos::Droid::Content::IContext
+using Elastos::Droid::Content::IContextWrapper
+using Elastos::Droid::Content::IComponentCallbacks
+using Elastos::Droid::Content::IComponentCallbacks2
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +18,9 @@ namespace Inputmethods {
 namespace PinyinIME {
 
 CarClass(CIPinyinDecoderService)
+    , public Service
+    , public IPinyinDecoderService
+    , public IBinder
 {
 public:
     CARAPI constructor(
@@ -86,14 +94,14 @@ public:
         /* [in] */ const String& fixedStr,
         /* [out] */ Int32* value);
 
+    CARAPI ImGetPredictItem(
+        /* [in] */ Int32 predictNo,
+        /* [out] */ String* item);
+
     CARAPI ImGetPredictList(
         /* [in] */ Int32 predictsStart,
         /* [in] */ Int32 predictsNum,
         /* [out, callee] */ ArrayOf<String>** strList);
-
-    CARAPI ImGetPredictItem(
-        /* [in] */ Int32 predictNo,
-        /* [out] */ String* item);
 
     CARAPI SyncUserDict(
         /* [in] */ const String& tomerge,

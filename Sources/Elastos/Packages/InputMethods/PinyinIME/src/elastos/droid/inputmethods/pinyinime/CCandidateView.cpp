@@ -1,35 +1,31 @@
 
-#include "CPinyinCandidateView.h"
+#include "CCandidateView.h"
 #include "CDecodingInfo.h"
 #include "CBalloonHint.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
 #include "elastos/droid/graphics/CPaint.h"
 
-
-using Elastos::Core::StringUtils;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Os::EIID_IHandler;
+using Elastos::Core::StringUtils;
+using Elastos::Core::EIID_IRunnable;
 
 namespace Elastos {
 namespace Droid {
 namespace Inputmethods {
 namespace PinyinIME {
 
-CAR_OBJECT_IMPL(CPinyinCandidateView);
-CAR_INTERFACE_IMPL(CPinyinCandidateView, View, ICandidateView);
-
-CPinyinCandidateView::PressTimer::PressTimer(
-    /* [in] */ CPinyinCandidateView* host)
-    : mTimerPending(FALSE)
+CCandidateView::PressTimer::PressTimer(
+    /* [in] */ CCandidateView* host)
+    : HandlerRunnable()
+    , mTimerPending(FALSE)
     , mPageNoToShow(0)
     , mActiveCandOfPage(0)
     , mHost(host)
-{
-}
+{}
 
-void CPinyinCandidateView::PressTimer::StartTimer(
+void CCandidateView::PressTimer::StartTimer(
     /* [in] */ Int64 afterMillis,
     /* [in] */ Int32 pageNo,
     /* [in] */ Int32 activeInPage)
@@ -42,32 +38,32 @@ void CPinyinCandidateView::PressTimer::StartTimer(
     mActiveCandOfPage = activeInPage;
 }
 
-Int32 CPinyinCandidateView::PressTimer::GetPageToShow()
+Int32 CCandidateView::PressTimer::GetPageToShow()
 {
     return mPageNoToShow;
 }
 
-Int32 CPinyinCandidateView::PressTimer::GetActiveCandOfPageToShow()
+Int32 CCandidateView::PressTimer::GetActiveCandOfPageToShow()
 {
     return mActiveCandOfPage;
 }
 
-Boolean CPinyinCandidateView::PressTimer::RemoveTimer()
+Boolean CCandidateView::PressTimer::RemoveTimer()
 {
     if (mTimerPending) {
         mTimerPending = FALSE;
-        Handler::RemoveCallbacks(this);
+        RemoveCallbacks(this);
         return TRUE;
     }
     return FALSE;
 }
 
-Boolean CPinyinCandidateView::PressTimer::IsPending()
+Boolean CCandidateView::PressTimer::IsPending()
 {
     return mTimerPending;
 }
 
-ECode CPinyinCandidateView::PressTimer::Run()
+ECode CCandidateView::PressTimer::Run()
 {
     if (mPageNoToShow >= 0 && mActiveCandOfPage >= 0) {
         // Always enable to highlight the clicked one.
@@ -79,10 +75,14 @@ ECode CPinyinCandidateView::PressTimer::Run()
 }
 
 
-const Float CPinyinCandidateView::MIN_ITEM_WIDTH = 22;
-String CPinyinCandidateView::SUSPENSION_POINTS = String("...");
+const Float CCandidateView::MIN_ITEM_WIDTH = 22;
+String CCandidateView::SUSPENSION_POINTS("...");
 
-CPinyinCandidateView::CPinyinCandidateView()
+CAR_OBJECT_IMPL(CCandidateView);
+
+CAR_INTERFACE_IMPL(CCandidateView, View, ICandidateView);
+
+CCandidateView::CCandidateView()
     : mContentWidth(0)
     , mContentHeight(0)
     , mShowFootnote(TRUE)
@@ -107,7 +107,45 @@ CPinyinCandidateView::CPinyinCandidateView()
     memset(mLocationTmp, 0, sizeof(mLocationTmp));
 }
 
-void CPinyinCandidateView::OnMeasure(
+ECode CCandidateView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    FAIL_RETURN(View::constructor(context, attrs));
+
+    AutoPtr<IResources> r;
+    context->GetResources((IResources**)&r);
+
+    AutoPtr<IConfiguration> conf;
+    r->GetConfiguration((IConfiguration**)&conf);
+    Int32 value = 0;
+    if ((conf->GetKeyboard(&value), value == IConfiguration::KEYBOARD_NOKEYS)
+            || (conf->GetHardKeyboardHidden(&value), value == IConfiguration::HARDKEYBOARDHIDDEN_YES)) {
+        mShowFootnote = FALSE;
+    }
+
+    r->GetDrawable(R::drawable::candidate_hl_bg, (IDrawable**)&mActiveCellDrawable);
+    r->GetDrawable(R::drawable::candidates_vertical_line, (IDrawable**)&mSeparatorDrawable);
+    r->GetDimension(R::dimen::candidate_margin_left_right, &mCandidateMargin);
+
+    r->GetColor(R::color::candidate_color, &mImeCandidateColor);
+    r->GetColor(R::color::recommended_candidate_color, &mRecommendedCandidateColor);
+    mNormalCandidateColor = mImeCandidateColor;
+    r->GetColor(R::color::active_candidate_color, &mActiveCandidateColor);
+
+    CPaint::New((IPaint**)&mCandidatesPaint);
+    mCandidatesPaint->SetAntiAlias(TRUE);
+
+    CPaint::New((IPaint**)&mFootnotePaint);
+    mFootnotePaint->SetAntiAlias(TRUE);
+    Int32 color = 0;
+    r->GetColor(R::color::footnote_color, &color);
+    mFootnotePaint->SetColor(color);
+    CRectF::New((IRectF**)&mActiveCellRect);
+    return NOERROR;
+}
+
+void CCandidateView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -123,7 +161,130 @@ void CPinyinCandidateView::OnMeasure(
     }
 }
 
-void CPinyinCandidateView::OnSizeChanged()
+ECode CCandidateView::Initialize(
+    /* [in] */ IArrowUpdater* arrowUpdater,
+    /* [in] */ IBalloonHint* balloonHint,
+    /* [in] */ IGestureDetector* gestureDetector,
+    /* [in] */ ICandidateViewListener* cvListener)
+{
+    mArrowUpdater = arrowUpdater;
+    mBalloonHint = balloonHint;
+    mGestureDetector = gestureDetector;
+    mCvListener = cvListener;
+    return NOERROR;
+}
+
+ECode CCandidateView::SetDecodingInfo(
+    /* [in] */ IDecodingInfo* decInfo)
+{
+    if (NULL == decInfo) return NOERROR;
+    mDecInfo = decInfo;
+    mPageNoCalculated = -1;
+
+    Boolean state = FALSE;
+    if (mDecInfo->CandidatesFromApp(&state), state) {
+        mNormalCandidateColor = mRecommendedCandidateColor;
+        mCandidateTextSize = mRecommendedCandidateTextSize;
+    }
+    else {
+        mNormalCandidateColor = mImeCandidateColor;
+        mCandidateTextSize = mImeCandidateTextSize;
+    }
+
+    Float size = 0.f;
+    if ((mCandidatesPaint->GetTextSize(&size), size) != mCandidateTextSize) {
+        mCandidatesPaint->SetTextSize(mCandidateTextSize);
+        mFmiCandidates = NULL;
+        mCandidatesPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmiCandidates);
+        mCandidatesPaint->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
+    }
+
+    // Remove any pending timer for the previous list.
+    mTimer->RemoveTimer();
+    return NOERROR;
+}
+
+ECode CCandidateView::GetActiveCandiatePosInPage(
+    /* [out] */ Int32* pos)
+{
+    VALIDATE_NOT_NULL(pos);
+    *pos = mActiveCandInPage;
+    return NOERROR;
+}
+
+ECode CCandidateView::GetActiveCandiatePosGlobal(
+    /* [out] */ Int32* pos)
+{
+    VALIDATE_NOT_NULL(pos);
+    *pos = ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo] + mActiveCandInPage;
+    return NOERROR;
+}
+
+ECode CCandidateView::ShowPage(
+    /* [in] */ Int32 pageNo,
+    /* [in] */ Int32 activeCandInPage,
+    /* [in] */ Boolean enableActiveHighlight)
+{
+    if (NULL == mDecInfo) return NOERROR;
+    mPageNo = pageNo;
+    mActiveCandInPage = activeCandInPage;
+    if (mEnableActiveHighlight != enableActiveHighlight) {
+        mEnableActiveHighlight = enableActiveHighlight;
+    }
+
+    if (!CalculatePage(mPageNo)) {
+        mUpdateArrowStatusWhenDraw = TRUE;
+    }
+    else {
+        mUpdateArrowStatusWhenDraw = FALSE;
+    }
+
+    return Invalidate();
+}
+
+ECode CCandidateView::EnableActiveHighlight(
+    /* [in] */ Boolean enableActiveHighlight)
+{
+    if (enableActiveHighlight == mEnableActiveHighlight) return NOERROR;
+
+    mEnableActiveHighlight = enableActiveHighlight;
+    return Invalidate();
+}
+
+ECode CCandidateView::ActiveCursorForward(
+    /* [out] */ Boolean* active)
+{
+    VALIDATE_NOT_NULL(active);
+    Boolean result = FALSE;
+    if (!(mDecInfo->PageReady(mPageNo, &result), result)) {
+        *active = FALSE;
+        return NOERROR;
+    }
+    Int32 pageSize = ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo + 1]
+            - ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo];
+    if (mActiveCandInPage + 1 < pageSize) {
+        ShowPage(mPageNo, mActiveCandInPage + 1, TRUE);
+        *active = TRUE;
+        return NOERROR;
+    }
+    *active = FALSE;
+    return NOERROR;
+}
+
+ECode CCandidateView::ActiveCurseBackward(
+    /* [out] */ Boolean* active)
+{
+    VALIDATE_NOT_NULL(active);
+    if (mActiveCandInPage > 0) {
+        ShowPage(mPageNo, mActiveCandInPage - 1, TRUE);
+        *active = TRUE;
+        return NOERROR;
+    }
+    *active = FALSE;
+    return NOERROR;
+}
+
+void CCandidateView::OnSizeChanged()
 {
     mContentWidth = GetMeasuredWidth() - mPaddingLeft - mPaddingRight;
     mContentHeight = (Int32) ((GetMeasuredHeight() - mPaddingTop - mPaddingBottom) * 0.95f);
@@ -151,7 +312,8 @@ void CPinyinCandidateView::OnSizeChanged()
         mFmiCandidates = NULL;
         mCandidatesPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmiCandidates);
         mCandidatesPaint->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
-    } else {
+    }
+    else {
         // Reset the decoding information to update members for painting.
         SetDecodingInfo(mDecInfo);
     }
@@ -176,7 +338,7 @@ void CPinyinCandidateView::OnSizeChanged()
     // mActiveCandInPage = 0;
 }
 
-Boolean CPinyinCandidateView::CalculatePage(
+Boolean CCandidateView::CalculatePage(
     /* [in] */ Int32 pageNo)
 {
     if (pageNo == mPageNoCalculated) return TRUE;
@@ -223,7 +385,8 @@ Boolean CPinyinCandidateView::CalculatePage(
                 lastItemWidth = itemWidth;
                 pSize++;
                 charNum += itemStr.GetLength();
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -243,7 +406,8 @@ Boolean CPinyinCandidateView::CalculatePage(
             if (mCandidateMarginExtra <= marginExtra) {
                 marginExtra = mCandidateMarginExtra;
             }
-        } else if (pSize == 1) {
+        }
+        else if (pSize == 1) {
             marginExtra = 0;
         }
         mCandidateMarginExtra = marginExtra;
@@ -252,7 +416,7 @@ Boolean CPinyinCandidateView::CalculatePage(
     return TRUE;
 }
 
-void CPinyinCandidateView::OnDraw(
+void CCandidateView::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
     View::OnDraw(canvas);
@@ -336,7 +500,8 @@ void CPinyinCandidateView::OnDraw(
         }
         if (mActiveCandInPage == i && mEnableActiveHighlight) {
             mCandidatesPaint->SetColor(mActiveCandidateColor);
-        } else {
+        }
+        else {
             mCandidatesPaint->SetColor(mNormalCandidateColor);
         }
         canvas->DrawText(cand, xPos + centerOffset, yPos, mCandidatesPaint);
@@ -355,7 +520,7 @@ void CPinyinCandidateView::OnDraw(
     }
 }
 
-String CPinyinCandidateView::GetLimitedCandidateForDrawing(
+String CCandidateView::GetLimitedCandidateForDrawing(
     /* [in] */ const String& rawCandidate,
     /* [in] */ Float widthToDraw)
 {
@@ -371,7 +536,7 @@ String CPinyinCandidateView::GetLimitedCandidateForDrawing(
     } while (TRUE);
 }
 
-Float CPinyinCandidateView::DrawVerticalSeparator(
+Float CCandidateView::DrawVerticalSeparator(
     /* [in] */ ICanvas* canvas,
     /* [in] */ Float xPos)
 {
@@ -383,7 +548,7 @@ Float CPinyinCandidateView::DrawVerticalSeparator(
     return (mSeparatorDrawable->GetIntrinsicWidth(&value), value);
 }
 
-Int32 CPinyinCandidateView::MapToItemInPage(
+Int32 CCandidateView::MapToItemInPage(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
@@ -391,14 +556,14 @@ Int32 CPinyinCandidateView::MapToItemInPage(
     // touch events occur before onDraw(). It usually happens with
     // monkey test.
     Boolean ready = FALSE;
-    if (!(mDecInfo->PageReady(mPageNo, &ready), ready) || mPageNoCalculated != mPageNo
+    if ((mDecInfo->PageReady(mPageNo, &ready), !ready) || mPageNoCalculated != mPageNo
             || mCandRects.IsEmpty()) {
         return -1;
     }
 
     Int32 pageStart = ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo];
     Int32 pageSize = ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo + 1] - pageStart;
-    if ((Int32)mCandRects.GetSize() < pageSize) {
+    if (mCandRects.GetSize() < pageSize) {
         return -1;
     }
 
@@ -429,222 +594,14 @@ Int32 CPinyinCandidateView::MapToItemInPage(
     return nearest;
 }
 
-Boolean CPinyinCandidateView::OnTouchEvent(
-    /* [in] */ IMotionEvent* event)
+ECode CCandidateView::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
-    return View::OnTouchEvent(event);
+    return View::OnTouchEvent(event, result);
 }
 
-void CPinyinCandidateView::ShowBalloon(
-    /* [in] */ Int32 candPos,
-    /* [in] */ Boolean delayedShow)
-{
-    mBalloonHint->RemoveTimer();
-
-    AutoPtr<IRectF> r = mCandRects[candPos];
-    Float left = 0.f, right = 0.f, top = 0.f, bottom = 0.f;
-    r->GetLeft(&left);
-    r->GetRight(&right);
-    r->GetTop(&top);
-    r->GetBottom(&bottom);
-    Int32 desired_width = (Int32) (right - left);
-    Int32 desired_height = (Int32) (bottom - top);
-    CDecodingInfo* decInfo = (CDecodingInfo*)mDecInfo.Get();
-    mBalloonHint->SetBalloonConfig(decInfo->mCandidatesList[decInfo->mPageStart[mPageNo] + candPos], 44, TRUE,
-            mImeCandidateColor, desired_width, desired_height);
-
-    Int32 x = 0, y = 0, value = 0;
-    GetLocationOnScreen(&x, &y);
-    mLocationTmp[0] = x;
-    mLocationTmp[1] = y;
-
-    mHintPositionToInputView[0] = mLocationTmp[0]
-            + (Int32) (left - ((mBalloonHint->GetWidth(&value), value) - desired_width) / 2);
-    mHintPositionToInputView[1] = -(mBalloonHint->GetHeight(&value), value);
-
-    Int64 delay = CBalloonHint::TIME_DELAY_SHOW;
-    if (!delayedShow) delay = 0;
-    mBalloonHint->Dismiss();
-    Boolean isShowing = FALSE;
-    AutoPtr<ArrayOf<Int32> > inputs = ArrayOf<Int32>::Alloc(2);
-    (*inputs)[0] = mHintPositionToInputView[0];
-    (*inputs)[1] = mHintPositionToInputView[1];
-    if (!(mBalloonHint->IsShowing(&isShowing), isShowing)) {
-        mBalloonHint->DelayedShow(delay, inputs);
-    } else {
-        mBalloonHint->DelayedUpdate(0, inputs, -1, -1);
-    }
-}
-
-ECode CPinyinCandidateView::ShowPage(
-    /* [in] */ Int32 pageNo,
-    /* [in] */ Int32 activeCandInPage,
-    /* [in] */ Boolean enableActiveHighlight)
-{
-    if (NULL == mDecInfo) return NOERROR;
-    mPageNo = pageNo;
-    mActiveCandInPage = activeCandInPage;
-    if (mEnableActiveHighlight != enableActiveHighlight) {
-        mEnableActiveHighlight = enableActiveHighlight;
-    }
-
-    if (!CalculatePage(mPageNo)) {
-        mUpdateArrowStatusWhenDraw = TRUE;
-    } else {
-        mUpdateArrowStatusWhenDraw = FALSE;
-    }
-
-    return View::Invalidate();
-}
-
-ECode CPinyinCandidateView::SetDecodingInfo(
-    /* [in] */ IDecodingInfo* decInfo)
-{
-    if (NULL == decInfo) return NOERROR;
-    mDecInfo = decInfo;
-    mPageNoCalculated = -1;
-
-    Boolean state = FALSE;
-    if (mDecInfo->CandidatesFromApp(&state), state) {
-        mNormalCandidateColor = mRecommendedCandidateColor;
-        mCandidateTextSize = mRecommendedCandidateTextSize;
-    } else {
-        mNormalCandidateColor = mImeCandidateColor;
-        mCandidateTextSize = mImeCandidateTextSize;
-    }
-
-    Float size = 0.f;
-    if ((mCandidatesPaint->GetTextSize(&size), size) != mCandidateTextSize) {
-        mCandidatesPaint->SetTextSize(mCandidateTextSize);
-        mFmiCandidates = NULL;
-        mCandidatesPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmiCandidates);
-        mCandidatesPaint->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
-    }
-
-    // Remove any pending timer for the previous list.
-    mTimer->RemoveTimer();
-    return NOERROR;
-}
-
-PInterface CPinyinCandidateView::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_ICandidateView) {
-        return (IInterface*)(ICandidateView*)this;
-    }
-
-    return View::Probe(riid);
-}
-
-ECode CPinyinCandidateView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    Init(context, attrs);
-
-    AutoPtr<IResources> r;
-    context->GetResources((IResources**)&r);
-
-    AutoPtr<IConfiguration> conf;
-    r->GetConfiguration((IConfiguration**)&conf);
-    Int32 value = 0;
-    if ((conf->GetKeyboard(&value), value) == IConfiguration::KEYBOARD_NOKEYS
-            || (conf->GetHardKeyboardHidden(&value), value) == IConfiguration::HARDKEYBOARDHIDDEN_YES) {
-        mShowFootnote = FALSE;
-    }
-
-    r->GetDrawable(0x7f020005/*R::drawable::candidate_hl_bg*/, (IDrawable**)&mActiveCellDrawable);
-    r->GetDrawable(0x7f020007/*R::drawable::candidates_vertical_line*/, (IDrawable**)&mSeparatorDrawable);
-    r->GetDimension(0x7f080001/*R::dimen::candidate_margin_left_right*/, &mCandidateMargin);
-
-    r->GetColor(0x7f070003/*R::color::candidate_color*/, &mImeCandidateColor);
-    r->GetColor(0x7f070005/*R::color::recommended_candidate_color*/, &mRecommendedCandidateColor);
-    mNormalCandidateColor = mImeCandidateColor;
-    r->GetColor(0x7f070004/*R::color::active_candidate_color*/, &mActiveCandidateColor);
-
-    CPaint::New((IPaint**)&mCandidatesPaint);
-    mCandidatesPaint->SetAntiAlias(TRUE);
-
-    CPaint::New((IPaint**)&mFootnotePaint);
-    mFootnotePaint->SetAntiAlias(TRUE);
-    Int32 color = 0;
-    r->GetColor(0x7f070006/*R::color::footnote_color*/, &color);
-    mFootnotePaint->SetColor(color);
-    return CRectF::New((IRectF**)&mActiveCellRect);
-}
-
-ECode CPinyinCandidateView::Initialize(
-    /* [in] */ IArrowUpdater* arrowUpdater,
-    /* [in] */ IBalloonHint* balloonHint,
-    /* [in] */ IGestureDetector* gestureDetector,
-    /* [in] */ ICandidateViewListener* cvListener)
-{
-    mArrowUpdater = arrowUpdater;
-    mBalloonHint = balloonHint;
-    mGestureDetector = gestureDetector;
-    mCvListener = cvListener;
-    return NOERROR;
-}
-
-ECode CPinyinCandidateView::GetActiveCandiatePosInPage(
-    /* [out] */ Int32* pos)
-{
-    VALIDATE_NOT_NULL(pos);
-    *pos = mActiveCandInPage;
-    return NOERROR;
-}
-
-ECode CPinyinCandidateView::GetActiveCandiatePosGlobal(
-    /* [out] */ Int32* pos)
-{
-    VALIDATE_NOT_NULL(pos);
-    *pos = ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo] + mActiveCandInPage;
-    return NOERROR;
-}
-
-ECode CPinyinCandidateView::EnableActiveHighlight(
-    /* [in] */ Boolean enableActiveHighlight)
-{
-    if (enableActiveHighlight == mEnableActiveHighlight) return NOERROR;
-
-    mEnableActiveHighlight = enableActiveHighlight;
-    return View::Invalidate();
-}
-
-ECode CPinyinCandidateView::ActiveCursorForward(
-    /* [out] */ Boolean* active)
-{
-    VALIDATE_NOT_NULL(active);
-    Boolean result = FALSE;
-    if (!(mDecInfo->PageReady(mPageNo, &result), result)) {
-        *active = FALSE;
-        return NOERROR;
-    }
-    Int32 pageSize = ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo + 1]
-            - ((CDecodingInfo*)mDecInfo.Get())->mPageStart[mPageNo];
-    if (mActiveCandInPage + 1 < pageSize) {
-        ShowPage(mPageNo, mActiveCandInPage + 1, TRUE);
-        *active = TRUE;
-        return NOERROR;
-    }
-    *active = FALSE;
-    return NOERROR;
-}
-
-ECode CPinyinCandidateView::ActiveCurseBackward(
-    /* [out] */ Boolean* active)
-{
-    VALIDATE_NOT_NULL(active);
-    if (mActiveCandInPage > 0) {
-        ShowPage(mPageNo, mActiveCandInPage - 1, TRUE);
-        *active = TRUE;
-        return NOERROR;
-    }
-    *active = FALSE;
-    return NOERROR;
-}
-
-ECode CPinyinCandidateView::OnTouchEventReal(
+ECode CCandidateView::OnTouchEventReal(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
@@ -708,6 +665,48 @@ ECode CPinyinCandidateView::OnTouchEventReal(
     return NOERROR;
 }
 
+
+void CCandidateView::ShowBalloon(
+    /* [in] */ Int32 candPos,
+    /* [in] */ Boolean delayedShow)
+{
+    mBalloonHint->RemoveTimer();
+
+    AutoPtr<IRectF> r = mCandRects[candPos];
+    Float left = 0.f, right = 0.f, top = 0.f, bottom = 0.f;
+    r->GetLeft(&left);
+    r->GetRight(&right);
+    r->GetTop(&top);
+    r->GetBottom(&bottom);
+    Int32 desired_width = (Int32) (right - left);
+    Int32 desired_height = (Int32) (bottom - top);
+    CDecodingInfo* decInfo = (CDecodingInfo*)mDecInfo.Get();
+    mBalloonHint->SetBalloonConfig(decInfo->mCandidatesList[decInfo->mPageStart[mPageNo] + candPos], 44, TRUE,
+            mImeCandidateColor, desired_width, desired_height);
+
+    Int32 x = 0, y = 0, value = 0;
+    GetLocationOnScreen(&x, &y);
+    mLocationTmp[0] = x;
+    mLocationTmp[1] = y;
+
+    mHintPositionToInputView[0] = mLocationTmp[0]
+            + (Int32) (left - ((mBalloonHint->GetWidth(&value), value) - desired_width) / 2);
+    mHintPositionToInputView[1] = -(mBalloonHint->GetHeight(&value), value);
+
+    Int64 delay = CBalloonHint::TIME_DELAY_SHOW;
+    if (!delayedShow) delay = 0;
+    mBalloonHint->Dismiss();
+    Boolean isShowing = FALSE;
+    AutoPtr<ArrayOf<Int32> > inputs = ArrayOf<Int32>::Alloc(2);
+    (*inputs)[0] = mHintPositionToInputView[0];
+    (*inputs)[1] = mHintPositionToInputView[1];
+    if (!(mBalloonHint->IsShowing(&isShowing), isShowing)) {
+        mBalloonHint->DelayedShow(delay, inputs);
+    }
+    else {
+        mBalloonHint->DelayedUpdate(0, inputs, -1, -1);
+    }
+}
 
 } // namespace PinyinIME
 } // namespace Inputmethods

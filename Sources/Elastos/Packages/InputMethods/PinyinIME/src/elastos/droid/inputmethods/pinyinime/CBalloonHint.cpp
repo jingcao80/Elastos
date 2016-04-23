@@ -20,7 +20,8 @@ const Int32 CBalloonHint::BalloonTimer::ACTION_UPDATE;
 
 CBalloonHint::BalloonTimer::BalloonTimer(
     /* [in]*/ CBalloonHint* host)
-    : mAction(0)
+    : HandlerRunnable()
+    , mAction(0)
     , mWidth(0)
     , mHeight(0)
     , mTimerPending(FALSE)

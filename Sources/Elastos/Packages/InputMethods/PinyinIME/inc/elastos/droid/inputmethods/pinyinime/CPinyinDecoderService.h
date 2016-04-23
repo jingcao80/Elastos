@@ -3,10 +3,8 @@
 #define __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CPINYINDECODERSERVICE_H__
 
 #include "_CPinyinDecoderService.h"
-#include "elastos/droid/app/Service.h"
-#include <sys/types.h>
-
-using Elastos::Droid::Inputmethods::PinyinIME::IPinyinDecoderService;
+#include <elastos/droid/app/Service.h>
+// #include <sys/types.h>
 
 namespace Elastos {
 namespace Droid {
@@ -17,19 +15,13 @@ namespace PinyinIME {
  * This class is used to separate the input method kernel in an individual
  * service so that both IME and IME-syncer can use it.
  */
-class CPinyinDecoderService: public Elastos::Droid::App::Service
+CarClass(CPinyinDecoderService)
+    , public Service
 {
 public:
-    // static {
-    //     try {
-    //         System.loadLibrary("jni_pinyinime");
-    //     } catch (UnsatisfiedLinkError ule) {
-    //         Log.e("PinyinDecoderService",
-    //                 "WARNING: Could not load jni_pinyinime natives");
-    //     }
-    // }
-
     CPinyinDecoderService();
+
+    CARAPI constructor();
 
     CARAPI OnCreate();
 
@@ -46,104 +38,99 @@ private:
 
     CARAPI InitPinyinEngine();
 
-    static String Char16ArrayToString(
+    static CARAPI_(String) Char16ArrayToString(
         /* [in] */ Char16* buf,
         /* [in] */ Int32 size);
 
-    static AutoPtr<ArrayOf<Char16> > StringToChar16Array(
-        /* [in] */ const String& str);
-
 private:
-    //method
-    static Boolean nativeImOpenDecoder(
+    static CARAPI_(Boolean) NativeImOpenDecoder(
         /* [in] */ ArrayOf<Byte>* fn_sys_dict,
         /* [in] */ ArrayOf<Byte>* fn_usr_dict);
 
-    static Boolean nativeImOpenDecoderFd(
+    static CARAPI_(Boolean) NativeImOpenDecoderFd(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ Int64 startOffset,
         /* [in] */ Int64 length,
         /* [in, out] */ ArrayOf<Byte>* fn_usr_dict);
 
-    static void nativeImSetMaxLens(
+    static CARAPI_(void) NativeImSetMaxLens(
         /* [in] */ Int32 maxSpsLen,
         /* [in] */ Int32 maxHzsLen);
 
-    static Boolean nativeImCloseDecoder();
+    static CARAPI_(Boolean) NativeImCloseDecoder();
 
-    static Int32 nativeImSearch(
+    static CARAPI_(Int32) NativeImSearch(
         /* [in] */ ArrayOf<Byte>* pyBuf,
         /* [in] */ Int32 pyLen);
 
-    static Int32 nativeImDelSearch(
+    static CARAPI_(Int32) NativeImDelSearch(
         /* [in] */ Int32 pos,
         /* [in] */ Boolean is_pos_in_splid,
         /* [in] */ Boolean clear_fixed_this_step);
 
-    static void nativeImResetSearch();
+    static CARAPI_(void) NativeImResetSearch();
 
-    static Int32 nativeImAddLetter(
+    static CARAPI_(Int32) NativeImAddLetter(
         /* [in] */ Byte ch);
 
-    static String nativeImGetPyStr(
+    static CARAPI_(String) NativeImGetPyStr(
         /* [in] */ Boolean decoded);
 
-    static Int32 nativeImGetPyStrLen(
+    static CARAPI_(Int32) NativeImGetPyStrLen(
         /* [in] */ Boolean decoded);
 
-    static CARAPI_(AutoPtr<ArrayOf<Int32> >) nativeImGetSplStart();
+    static CARAPI_(AutoPtr<ArrayOf<Int32> >) NativeImGetSplStart();
 
-    static String nativeImGetChoice(
+    static CARAPI_(String) NativeImGetChoice(
         /* [in] */ Int32 choiceId);
 
-    static Int32 nativeImChoose(
+    static CARAPI_(Int32) NativeImChoose(
         /* [in] */ Int32 choiceId);
 
-    static Int32 nativeImCancelLastChoice();
+    static CARAPI_(Int32) NativeImCancelLastChoice();
 
-    static Int32 nativeImGetFixedLen();
+    static CARAPI_(Int32) NativeImGetFixedLen();
 
-    static Boolean nativeImCancelInput();
+    static CARAPI_(Boolean) NativeImCancelInput();
 
-    static Boolean nativeImFlushCache();
+    static CARAPI_(Boolean) NativeImFlushCache();
 
-    static Int32 nativeImGetPredictsNum(
+    static CARAPI_(Int32) NativeImGetPredictsNum(
         /* [in] */ const String& fixedStr);
 
-    static String nativeImGetPredictItem(
+    static CARAPI_(String) NativeImGetPredictItem(
         /* [in] */ Int32 predictNo);
 
     // Sync related
-    static String nativeSyncUserDict(
+    static CARAPI_(String) NativeSyncUserDict(
         /* [in] */ ArrayOf<Byte>* user_dict,
         /* [in] */ const String& tomerge);
 
-    static Boolean nativeSyncBegin(
+    static CARAPI_(Boolean) NativeSyncBegin(
         /* [in] */ ArrayOf<Byte>* user_dict);
 
-    static Boolean nativeSyncFinish();
+    static CARAPI_(Boolean) NativeSyncFinish();
 
-    static String nativeSyncGetLemmas();
+    static CARAPI_(String) NativeSyncGetLemmas();
 
-    static Int32 nativeSyncPutLemmas(
+    static CARAPI_(Int32) NativeSyncPutLemmas(
         /* [in] */ const String& tomerge);
 
-    static Int32 nativeSyncGetLastCount();
+    static CARAPI_(Int32) NativeSyncGetLastCount();
 
-    static Int32 nativeSyncGetTotalCount();
+    static CARAPI_(Int32) NativeSyncGetTotalCount();
 
-    static Boolean nativeSyncClearLastGot();
+    static CARAPI_(Boolean) NativeSyncClearLastGot();
 
-    static Int32 nativeSyncGetCapacity();
+    static CARAPI_(Int32) NativeSyncGetCapacity();
 
 private:
-    AutoPtr<IPinyinDecoderService> mBinder;
     static const Int32 MAX_PATH_FILE_LENGTH;
-    static Boolean mInited;
+    static Boolean sInited;
 
     String mUsr_dict_file;
+    AutoPtr<IPinyinDecoderService> mBinder;
 
-private:
     friend class CIPinyinDecoderService;
 };
 

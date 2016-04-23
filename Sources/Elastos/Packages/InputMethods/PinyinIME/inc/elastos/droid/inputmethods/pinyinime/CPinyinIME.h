@@ -40,18 +40,489 @@ using Elastos::Droid::View::IWindow;
 using Elastos::Droid::Widget::IPopupWindow;
 using Elastos::Droid::Widget::ILinearLayout;
 
-
 namespace Elastos {
 namespace Droid {
 namespace Inputmethods {
 namespace PinyinIME {
 
-
 /**
  * Main class of the Pinyin input method.
  */
-CarClass(CPinyinIME), public Elastos::Droid::InputMethodService::InputMethodService
+CarClass(CPinyinIME)
+    , public InputMethodService
 {
+public:
+    /**
+     * Used to notify IME that the user selects a candidate or performs an
+     * gesture.
+     */
+    class ChoiceNotifier
+        : public HandlerBase
+        , public ICandidateViewListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ChoiceNotifier(
+            /* [in] */ CPinyinIME* ime);
+
+        CARAPI OnClickChoice(
+            /* [in] */ Int32 choiceId);
+
+        CARAPI OnToLeftGesture();
+
+        CARAPI OnToRightGesture();
+
+        CARAPI OnToTopGesture();
+
+        CARAPI OnToBottomGesture();
+
+    private:
+        CPinyinIME* mIme;
+    };
+
+    class OnGestureListener
+        : public GestureDetector::SimpleOnGestureListener
+    {
+    public:
+        OnGestureListener(
+            /* [in] */ Boolean reponseGestures,
+            /* [in] */ IPinyinIME* ime);
+
+        CARAPI OnDown(
+            /* [in] */ IMotionEvent* e,
+            /* [out] */ Boolean* res);
+
+        CARAPI OnScroll(
+            /* [in] */ IMotionEvent* e1,
+            /* [in] */ IMotionEvent* e2,
+            /* [in] */ Float distanceX,
+            /* [in] */ Float distanceY,
+            /* [out] */ Boolean* res);
+
+        CARAPI OnFling(
+            /* [in] */ IMotionEvent* me1,
+            /* [in] */ IMotionEvent* me2,
+            /* [in] */ Float velocityX,
+            /* [in] */ Float velocityY,
+            /* [out] */ Boolean* res);
+
+        CARAPI_(void) OnDirectionGesture(
+            /* [in] */ Int32 gravity);
+
+    private:
+        /**
+         * When user presses and drags, the minimum x-distance to make a
+         * response to the drag event.
+         */
+        static const Int32 MIN_X_FOR_DRAG;
+
+        /**
+         * When user presses and drags, the minimum y-distance to make a
+         * response to the drag event.
+         */
+        static const Int32 MIN_Y_FOR_DRAG;
+
+        /**
+         * Velocity threshold for a screen-move gesture. If the minimum
+         * x-velocity is less than it, no gesture.
+         */
+        static const Float VELOCITY_THRESHOLD_X1;
+
+        /**
+         * Velocity threshold for a screen-move gesture. If the maximum
+         * x-velocity is less than it, no gesture.
+         */
+        static const Float VELOCITY_THRESHOLD_X2;
+
+        /**
+         * Velocity threshold for a screen-move gesture. If the minimum
+         * y-velocity is less than it, no gesture.
+         */
+        static const Float VELOCITY_THRESHOLD_Y1;
+
+        /**
+         * Velocity threshold for a screen-move gesture. If the maximum
+         * y-velocity is less than it, no gesture.
+         */
+        static const Float VELOCITY_THRESHOLD_Y2;
+
+        /** If it FALSE, we will not response detected gestures. */
+        Boolean mReponseGestures;
+
+        /** The minimum X velocity observed in the gesture. */
+        Float mMinVelocityX;
+
+        /** The minimum Y velocity observed in the gesture. */
+        Float mMinVelocityY;
+
+        /** The first down time for the series of touch events for an action. */
+        Int64 mTimeDown;
+
+        /** The last time when onScroll() is called. */
+        Int64 mTimeLastOnScroll;
+
+        /** This flag used to indicate that this gesture is not a gesture. */
+        Boolean mNotGesture;
+
+        /** This flag used to indicate that this gesture has been recognized. */
+        Boolean mGestureRecognized;
+
+        AutoPtr<IPinyinIME> mIme;
+    };
+
+    /**
+     * Connection used for binding to the Pinyin decoding service.
+     */
+    class PinyinDecoderServiceConnection
+        : public ElRefBase
+        , public IServiceConnection
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        PinyinDecoderServiceConnection(
+            /* [in] */ CPinyinIME* ime);
+
+        CARAPI OnServiceConnected(
+            /* [in] */ IComponentName* name,
+            /* [in] */ IBinder* service);
+
+        CARAPI OnServiceDisconnected(
+            /* [in] */ IComponentName* name);
+
+    private:
+        CPinyinIME* mIme;
+    };
+
+    CarClass(CDecodingInfo)
+        , public Object
+        , public IDecodingInfo
+    {
+    public:
+        CAR_OBJECT_DECL();
+
+        CAR_INTERFACE_DECL();
+
+        CDecodingInfo();
+
+        CARAPI constructor(
+            /* [in] */ IPinyinIME* ime);
+
+        CARAPI SetTotalChoicesNum(
+            /* [in] */ Int32 totalChoicesNum);
+
+        CARAPI GetTotalChoicesNum(
+            /* [out] */ Int32* totalChoicesNum);
+
+        CARAPI SetPosDelSpl(
+            /* [in] */ Int32 posDelSpl);
+
+        CARAPI GetPosDelSpl(
+            /* [out] */ Int32* posDelSpl);
+
+        CARAPI SetPosInSpl(
+            /* [in] */ Boolean posDelSpl);
+
+        CARAPI GetPosInSpl(
+            /* [out] */ Boolean* posDelSpl);
+
+        CARAPI SetCandidatesList(
+            /* [in] */ ArrayOf<String>* candidatesList);
+
+        CARAPI GetCandidatesList(
+            /* [out, callee] */ ArrayOf<String>** candidatesList);
+
+        CARAPI SetPageStartList(
+            /* [in] */ ArrayOf<Int32>* pageStartList);
+
+        CARAPI GetPageStartList(
+            /* [out, callee] */ ArrayOf<Int32>** pageStartList);
+
+        CARAPI SetCnToPageList(
+            /* [in] */ ArrayOf<Int32>* cnToPageList);
+
+        CARAPI GetCnToPageList(
+            /* [out, callee] */ ArrayOf<Int32>** cnToPageList);
+
+        CARAPI Reset();
+
+        CARAPI IsCandidatesListEmpty(
+            /* [out] */ Boolean* empty);
+
+        CARAPI IsSplStrFull(
+            /* [out] */ Boolean* full);
+
+        CARAPI AddSplChar(
+            /* [in] */ Char32 ch,
+            /* [in] */ Boolean reset);
+
+        // Prepare to delete before cursor. We may delete a spelling char if
+        // the cursor is in the range of unfixed part, delete a whole spelling
+        // if the cursor in inside the range of the fixed part.
+        // This function only marks the position used to delete.
+        CARAPI PrepareDeleteBeforeCursor();
+
+        CARAPI GetLength(
+            /* [out] */ Int32* length);
+
+        CARAPI GetCharAt(
+            /* [in] */ Int32 index,
+            /* [out] */ Char32* ch);
+
+        CARAPI GetOrigianlSplStr(
+            /* [out] */ IStringBuffer** str);
+
+        CARAPI GetSplStrDecodedLen(
+            /* [out] */ Int32* len);
+
+        CARAPI GetSplStart(
+            /* [out, callee] */ ArrayOf<Int32>** splStart);
+
+        CARAPI GetComposingStr(
+            /* [out] */ String* str);
+
+        CARAPI GetComposingStrActivePart(
+            /* [out] */ String* part);
+
+        CARAPI GetActiveCmpsLen(
+            /* [out] */ Int32* len);
+
+        CARAPI GetComposingStrForDisplay(
+            /* [out] */ String* str);
+
+        CARAPI GetActiveCmpsDisplayLen(
+            /* [out] */ Int32* len);
+
+        CARAPI GetFullSent(
+            /* [out] */ String* value);
+
+        CARAPI GetCurrentFullSent(
+            /* [in] */ Int32 activeCandPos,
+            /* [out] */ String* value);
+
+        CARAPI ResetCandidates();
+
+        CARAPI CandidatesFromApp(
+            /* [out] */ Boolean* state);
+
+        CARAPI CanDoPrediction(
+            /* [out] */ Boolean* state);
+
+        CARAPI SelectionFinished(
+            /* [out] */ Boolean* state);
+
+        CARAPI GetCandidate(
+            /* [in] */ Int32 candId,
+            /* [out] */ String* candidate);
+
+        CARAPI PageReady(
+            /* [in] */ Int32 pageNo,
+            /* [out] */ Boolean* state);
+
+        CARAPI PreparePage(
+            /* [in] */ Int32 pageNo,
+            /* [out] */ Boolean* state);
+
+        CARAPI PreparePredicts(
+            /* [in] */ ICharSequence* history);
+
+        CARAPI GetCurrentPageSize(
+            /* [in] */ Int32 currentPage,
+            /* [out] */ Int32* value);
+
+        CARAPI GetCurrentPageStart(
+            /* [in] */ Int32 currentPage,
+            /* [out] */ Int32* value);
+
+        CARAPI PageForwardable(
+            /* [in] */ Int32 currentPage,
+            /* [out] */ Boolean* state);
+
+        CARAPI PageBackwardable(
+            /* [in] */ Int32 currentPage,
+            /* [out] */ Boolean* state);
+
+        CARAPI CharBeforeCursorIsSeparator(
+            /* [out] */ Boolean* state);
+
+        CARAPI GetCursorPos(
+            /* [out] */ Int32* pos);
+
+        CARAPI GetCursorPosInCmps(
+            /* [out] */ Int32* pos);
+
+        CARAPI GetCursorPosInCmpsDisplay(
+            /* [out] */ Int32* pos);
+
+        CARAPI MoveCursorToEdge(
+            /* [in] */ Boolean left);
+
+        CARAPI MoveCursor(
+            /* [in] */ Int32 offset);
+
+        CARAPI GetSplNum(
+            /* [out] */ Int32* value);
+
+        CARAPI GetFixedLen(
+            /* [out] */ Int32* value);
+
+        CARAPI SetPinyinDecoderService(
+            /* [in] */ IPinyinDecoderService* pinyinService);
+
+        CARAPI GetPinyinDecoderService(
+            /* [out] */ IPinyinDecoderService** pinyinService);
+
+        CARAPI PrepareAppCompletions(
+            /* [in] */ ArrayOf<ICompletionInfo*>* completions);
+
+        CARAPI GetAppCompletions(
+            /* [out, callee] */ ArrayOf<ICompletionInfo*>** completions);
+
+        // After the user chooses a candidate, input method will do a
+        // re-decoding and give the new candidate list.
+        // If candidate id is less than 0, means user is inputting Pinyin,
+        // not selecting any choice.
+        CARAPI ChooseDecodingCandidate(
+            /* [in] */ Int32 candId);
+
+        CARAPI ChoosePredictChoice(
+            /* [in] */ Int32 choiceId);
+
+    private:
+        CARAPI_(void) UpdateDecInfoForSearch(
+            /* [in] */ Int32 totalChoicesNum);
+
+        CARAPI_(void) GetCandiagtesForCache();
+
+    public:
+        /**
+         * The total number of choices for display. The list may only contains
+         * the first part. If user tries to navigate to next page which is not
+         * in the result list, we need to get these items.
+         **/
+        Int32 mTotalChoicesNum;
+
+        /**
+         * Candidate list. The first one is the full-sentence candidate.
+         */
+        Vector<String> mCandidatesList;
+
+        /**
+         * Element i stores the starting position of page i.
+         */
+        Vector<Int32> mPageStart;
+
+        /**
+         * Element i stores the number of characters to page i.
+         */
+        Vector<Int32> mCnToPage;
+
+        /**
+         * The position to delete in Pinyin string. If it is less than 0, IME
+         * will do an incremental search, otherwise IME will do a deletion
+         * operation. if {@link #mIsPosInSpl} is TRUE, IME will delete the whole
+         * string for mPosDelSpl-th spelling, otherwise it will only delete
+         * mPosDelSpl-th character in the Pinyin string.
+         */
+        Int32 mPosDelSpl;
+
+        /**
+         * If {@link #mPosDelSpl} is big than or equal to 0, this member is used
+         * to indicate that whether the postion is counted in spelling id or
+         * character.
+         */
+        Boolean mIsPosInSpl;
+
+    private:
+        /**
+         * Maximum length of the Pinyin string
+         */
+        static const Int32 PY_STRING_MAX;
+
+        /**
+         * Maximum number of candidates to display in one page.
+         */
+        static const Int32 MAX_PAGE_SIZE_DISPLAY;
+
+        /**
+         * Spelling (Pinyin) string.
+         */
+        AutoPtr<StringBuffer> mSurface;
+
+        /**
+         * Byte buffer used as the Pinyin string parameter for native function
+         * call.
+         */
+        AutoPtr<ArrayOf<Byte> > mPyBuf;
+
+        /**
+         * The length of surface string successfully decoded by engine.
+         */
+        Int32 mSurfaceDecodedLen;
+
+        /**
+         * Composing string.
+         */
+        String mComposingStr;
+
+        /**
+         * Length of the active composing string.
+         */
+        Int32 mActiveCmpsLen;
+
+        /**
+         * Composing string for display, it is copied from mComposingStr, and
+         * add spaces between spellings.
+         **/
+        String mComposingStrDisplay;
+
+        /**
+         * Length of the active composing string for display.
+         */
+        Int32 mActiveCmpsDisplayLen;
+
+        /**
+         * The first full sentence choice.
+         */
+        String mFullSent;
+
+        /**
+         * Number of characters which have been fixed.
+         */
+        Int32 mFixedLen;
+
+        /**
+         * If this flag is TRUE, selection is finished.
+         */
+        Boolean mFinishSelection;
+
+        /**
+         * The starting position for each spelling. The first one is the number
+         * of the real starting position elements.
+         */
+        AutoPtr<ArrayOf<Int32> > mSplStart;
+
+        /**
+         * Editing cursor in mSurface.
+         */
+        Int32 mCursorPos;
+
+        /**
+         * Remote Pinyin-to-Hanzi decoding engine service.
+         */
+        AutoPtr<IPinyinDecoderService> mIPinyinDecoderService;
+
+        /**
+         * The complication information suggested by application.
+         */
+        AutoPtr<ArrayOf<ICompletionInfo*> > mAppCompletions;
+
+        IPinyinIME* mPinyinIME;
+
+        friend class PinyinCandidateView;
+    };
+
 private:
     class PopupTimer
         : public HandlerRunnable
@@ -91,60 +562,6 @@ private:
 
     private:
         CPinyinIME* mHost;
-    };
-
-public:
-    /**
-     * Used to notify IME that the user selects a candidate or performs an
-     * gesture.
-     */
-    class ChoiceNotifier
-        : public HandlerBase
-        , public ICandidateViewListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        ChoiceNotifier(
-            /* [in] */ CPinyinIME* ime);
-
-        CARAPI OnClickChoice(
-            /* [in] */ Int32 choiceId);
-
-        CARAPI OnToLeftGesture();
-
-        CARAPI OnToRightGesture();
-
-        CARAPI OnToTopGesture();
-
-        CARAPI OnToBottomGesture();
-
-    private:
-        CPinyinIME* mIme;
-    };
-
-    /**
-     * Connection used for binding to the Pinyin decoding service.
-     */
-    class PinyinDecoderServiceConnection
-        : public ElRefBase
-        , public IServiceConnection
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        PinyinDecoderServiceConnection(
-            /* [in] */ CPinyinIME* ime);
-
-        CARAPI OnServiceConnected(
-            /* [in] */ IComponentName* name,
-            /* [in] */ IBinder* service);
-
-        CARAPI OnServiceDisconnected(
-            /* [in] */ IComponentName* name);
-
-    private:
-        CPinyinIME* mIme;
     };
 
 public:
@@ -1069,12 +1486,12 @@ private:
     /**
      * Necessary environment configurations like screen size for this IME.
      */
-    AutoPtr<IPinyinEnvironment> mEnvironment;
+    AutoPtr<Environment> mEnvironment;
 
     /**
      * Used to switch input mode.
      */
-    AutoPtr<IInputModeSwitcher> mInputModeSwitcher;
+    AutoPtr<InputModeSwitcher> mInputModeSwitcher;
 
     /**
      * Soft keyboard container view to host real soft keyboard view.

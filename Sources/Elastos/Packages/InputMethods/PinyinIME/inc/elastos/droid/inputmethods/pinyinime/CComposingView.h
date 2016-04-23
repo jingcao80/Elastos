@@ -3,6 +3,9 @@
 #define __ELASTOS_DROID_INPUTMETHODS_PINYINIME_CCOMPOSINGVIEW_H__
 
 #include "_Elastos_Droid_Inputmethods_PinyinIME_CComposingView.h"
+#include <elastos/droid/view/View.h>
+
+using Elastos::Droid::View::View;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +17,7 @@ namespace PinyinIME {
  * syllables and the Chinese string for the selected syllables.)
  */
 CarClass(CComposingView)
-    , public Elastos::Droid::View::View
+    , public View
     , public IComposingView
 {
 public:
@@ -23,9 +26,6 @@ public:
     CAR_OBJECT_DECL();
 
     CAR_INTERFACE_DECL();
-
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -52,22 +52,22 @@ public:
         /* [out] */ ComposingStatus* status);
 
 protected:
-    void OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    void OnDraw(
+    CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
 private:
-    void DrawCursor(
+    CARAPI_(void) DrawCursor(
         /* [in] */ ICanvas* canvas,
         /* [in] */ Float x);
 
-    void DrawForPinyin(
+    CARAPI_(void) DrawForPinyin(
         /* [in] */ ICanvas* canvas);
 
-protected:
+private:
     static const Int32 LEFT_RIGHT_MARGIN;
 
     /**

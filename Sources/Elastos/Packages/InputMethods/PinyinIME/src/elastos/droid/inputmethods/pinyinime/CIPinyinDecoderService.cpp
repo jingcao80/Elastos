@@ -6,6 +6,10 @@ namespace Droid {
 namespace Inputmethods {
 namespace PinyinIME {
 
+CAR_OBJECT_IMPL(CIPinyinDecoderService);
+
+CAR_INTERFACE_IMPL2(CIPinyinDecoderService, Service, IPinyinDecoderService, IBinder);
+
 ECode CIPinyinDecoderService::constructor(
     /* [in] */ IService* host)
 {
@@ -25,7 +29,7 @@ ECode CIPinyinDecoderService::SetMaxLens(
     /* [in] */ Int32 maxSpsLen,
     /* [in] */ Int32 maxHzsLen)
 {
-    CPinyinDecoderService::nativeImSetMaxLens(maxSpsLen, maxHzsLen);
+    CPinyinDecoderService::NativeImSetMaxLens(maxSpsLen, maxHzsLen);
     return NOERROR;
 }
 
@@ -35,7 +39,7 @@ ECode CIPinyinDecoderService::ImSearch(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeImSearch(pyBuf, pyLen);
+    *value = CPinyinDecoderService::NativeImSearch(pyBuf, pyLen);
     return NOERROR;
 }
 
@@ -46,15 +50,14 @@ ECode CIPinyinDecoderService::ImDelSearch(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeImDelSearch(pos, is_pos_in_splid,
+    *value = CPinyinDecoderService::NativeImDelSearch(pos, is_pos_in_splid,
             clear_fixed_this_step);
-
     return NOERROR;
 }
 
 ECode CIPinyinDecoderService::ImResetSearch()
 {
-    CPinyinDecoderService::nativeImResetSearch();
+    CPinyinDecoderService::NativeImResetSearch();
     return NOERROR;
 }
 
@@ -63,7 +66,7 @@ ECode CIPinyinDecoderService::ImAddLetter(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeImAddLetter(ch);
+    *value = CPinyinDecoderService::NativeImAddLetter(ch);
     return NOERROR;
 }
 
@@ -72,7 +75,7 @@ ECode CIPinyinDecoderService::ImGetPyStr(
     /* [out] */ String* pyStr)
 {
     VALIDATE_NOT_NULL(pyStr);
-    *pyStr = CPinyinDecoderService::nativeImGetPyStr(decoded);
+    *pyStr = CPinyinDecoderService::NativeImGetPyStr(decoded);
     return NOERROR;
 }
 
@@ -81,7 +84,7 @@ ECode CIPinyinDecoderService::ImGetPyStrLen(
     /* [out] */ Int32* len)
 {
     VALIDATE_NOT_NULL(len);
-    *len = CPinyinDecoderService::nativeImGetPyStrLen(decoded);
+    *len = CPinyinDecoderService::NativeImGetPyStrLen(decoded);
     return NOERROR;
 }
 
@@ -89,7 +92,7 @@ ECode CIPinyinDecoderService::ImGetSplStart(
     /* [out, callee]*/ ArrayOf<Int32>** values)
 {
     VALIDATE_NOT_NULL(values);
-    AutoPtr<ArrayOf<Int32> > data = CPinyinDecoderService::nativeImGetSplStart();
+    AutoPtr<ArrayOf<Int32> > data = CPinyinDecoderService::NativeImGetSplStart();
     *values = data.Get();
     REFCOUNT_ADD(*values);
     return NOERROR;
@@ -100,7 +103,7 @@ ECode CIPinyinDecoderService::ImGetChoice(
     /* [out] */ String* choice)
 {
     VALIDATE_NOT_NULL(choice);
-    *choice = CPinyinDecoderService::nativeImGetChoice(choiceId);
+    *choice = CPinyinDecoderService::NativeImGetChoice(choiceId);
     return NOERROR;
 }
 
@@ -111,10 +114,12 @@ ECode CIPinyinDecoderService::ImGetChoices(
     VALIDATE_NOT_NULL(choices);
     String retStr;
     for (Int32 i = 0; i < choicesNum; i++) {
-        if (retStr.IsNull())
-            retStr = CPinyinDecoderService::nativeImGetChoice(i);
-        else
-            retStr += String(" ") + CPinyinDecoderService::nativeImGetChoice(i);
+        if (retStr.IsNull()) {
+            retStr = CPinyinDecoderService::NativeImGetChoice(i);
+        }
+        else {
+            retStr += String(" ") + CPinyinDecoderService::NativeImGetChoice(i);
+        }
     }
     *choices = retStr;
     return NOERROR;
@@ -129,9 +134,9 @@ ECode CIPinyinDecoderService::ImGetChoiceList(
     VALIDATE_NOT_NULL(strList);
     AutoPtr<ArrayOf<String> > choiceList = ArrayOf<String>::Alloc(choicesNum);
     for (Int32 i = choicesStart; i < choicesStart + choicesNum; i++) {
-        String retStr = CPinyinDecoderService::nativeImGetChoice(i);
+        String retStr = CPinyinDecoderService::NativeImGetChoice(i);
         if (0 == i) retStr = retStr.Substring(sentFixedLen);
-        choiceList->Set(i - choicesStart, retStr);
+        choiceList[i - choicesStart] = retStr;
     }
     *strList = choiceList;
     REFCOUNT_ADD(*strList);
@@ -143,7 +148,7 @@ ECode CIPinyinDecoderService::ImChoose(
     /* [out] */ Int32* choose)
 {
     VALIDATE_NOT_NULL(choose);
-    *choose = CPinyinDecoderService::nativeImChoose(choiceId);
+    *choose = CPinyinDecoderService::NativeImChoose(choiceId);
     return NOERROR;
 }
 
@@ -151,7 +156,7 @@ ECode CIPinyinDecoderService::ImCancelLastChoice(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeImCancelLastChoice();
+    *value = CPinyinDecoderService::NativeImCancelLastChoice();
     return NOERROR;
 }
 
@@ -159,7 +164,7 @@ ECode CIPinyinDecoderService::ImGetFixedLen(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeImGetFixedLen();
+    *value = CPinyinDecoderService::NativeImGetFixedLen();
     return NOERROR;
 }
 
@@ -167,13 +172,13 @@ ECode CIPinyinDecoderService::ImCancelInput(
     /* [out] */ Boolean* status)
 {
     VALIDATE_NOT_NULL(status);
-    *status = CPinyinDecoderService::nativeImCancelInput();
+    *status = CPinyinDecoderService::NativeImCancelInput();
     return NOERROR;
 }
 
 ECode CIPinyinDecoderService::ImFlushCache()
 {
-    CPinyinDecoderService::nativeImFlushCache();
+    CPinyinDecoderService::NativeImFlushCache();
     return NOERROR;
 }
 
@@ -182,7 +187,7 @@ ECode CIPinyinDecoderService::ImGetPredictsNum(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeImGetPredictsNum(fixedStr);
+    *value = CPinyinDecoderService::NativeImGetPredictsNum(fixedStr);
     return NOERROR;
 }
 
@@ -191,7 +196,7 @@ ECode CIPinyinDecoderService::ImGetPredictItem(
     /* [out] */ String* item)
 {
     VALIDATE_NOT_NULL(item);
-    *item = CPinyinDecoderService::nativeImGetPredictItem(predictNo);
+    *item = CPinyinDecoderService::NativeImGetPredictItem(predictNo);
     return NOERROR;
 }
 
@@ -203,7 +208,7 @@ ECode CIPinyinDecoderService::ImGetPredictList(
     VALIDATE_NOT_NULL(strList);
     AutoPtr<ArrayOf<String> > predictList = ArrayOf<String>::Alloc(predictsNum);
     for (Int32 i = predictsStart; i < predictsStart + predictsNum; i++) {
-        predictList->Set(i - predictsStart, CPinyinDecoderService::nativeImGetPredictItem(i));
+        predictList[i - predictsStart] = CPinyinDecoderService::NativeImGetPredictItem(i);
     }
     *strList = predictList;
     REFCOUNT_ADD(*strList);
@@ -218,7 +223,7 @@ ECode CIPinyinDecoderService::SyncUserDict(
     AutoPtr<ArrayOf<Byte> > usr_dict = ArrayOf<Byte>::Alloc(CPinyinDecoderService::MAX_PATH_FILE_LENGTH);
 
     if (mHost->GetUsrDictFileName(usr_dict)) {
-        *value = CPinyinDecoderService::nativeSyncUserDict(usr_dict, tomerge);
+        *value = CPinyinDecoderService::NativeSyncUserDict(usr_dict, tomerge);
         return NOERROR;
     }
     *value = String(NULL);
@@ -232,17 +237,16 @@ ECode CIPinyinDecoderService::SyncBegin(
     AutoPtr<ArrayOf<Byte> > usr_dict = ArrayOf<Byte>::Alloc(CPinyinDecoderService::MAX_PATH_FILE_LENGTH);
 
     if (mHost->GetUsrDictFileName(usr_dict)) {
-        *begin = CPinyinDecoderService::nativeSyncBegin(usr_dict);
+        *begin = CPinyinDecoderService::NativeSyncBegin(usr_dict);
         return NOERROR;
     }
-
     *begin = FALSE;
     return NOERROR;
 }
 
 ECode CIPinyinDecoderService::SyncFinish()
 {
-    CPinyinDecoderService::nativeSyncFinish();
+    CPinyinDecoderService::NativeSyncFinish();
     return NOERROR;
 }
 
@@ -251,7 +255,7 @@ ECode CIPinyinDecoderService::SyncPutLemmas(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeSyncPutLemmas(tomerge);
+    *value = CPinyinDecoderService::NativeSyncPutLemmas(tomerge);
     return NOERROR;
 }
 
@@ -259,7 +263,7 @@ ECode CIPinyinDecoderService::SyncGetLemmas(
     /* [out] */ String* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeSyncGetLemmas();
+    *value = CPinyinDecoderService::NativeSyncGetLemmas();
     return NOERROR;
 }
 
@@ -267,7 +271,7 @@ ECode CIPinyinDecoderService::SyncGetLastCount(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeSyncGetLastCount();
+    *value = CPinyinDecoderService::NativeSyncGetLastCount();
     return NOERROR;
 }
 
@@ -275,13 +279,13 @@ ECode CIPinyinDecoderService::SyncGetTotalCount(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeSyncGetTotalCount();
+    *value = CPinyinDecoderService::NativeSyncGetTotalCount();
     return NOERROR;
 }
 
 ECode CIPinyinDecoderService::SyncClearLastGot()
 {
-    CPinyinDecoderService::nativeSyncClearLastGot();
+    CPinyinDecoderService::NativeSyncClearLastGot();
     return NOERROR;
 }
 
@@ -289,13 +293,14 @@ ECode CIPinyinDecoderService::ImSyncGetCapacity(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = CPinyinDecoderService::nativeSyncGetCapacity();
+    *value = CPinyinDecoderService::NativeSyncGetCapacity();
     return NOERROR;
 }
 
 ECode CIPinyinDecoderService::ToString(
     /* [out] */ String* str)
 {
+    assert(0);
     return E_NOT_IMPLEMENTED;
 }
 

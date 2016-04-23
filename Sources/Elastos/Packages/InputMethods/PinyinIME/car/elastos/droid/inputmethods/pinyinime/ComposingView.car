@@ -67,9 +67,9 @@ module
          * view will set its status to {@link ComposingStatus#SHOW_STRING_LOWERCASE}
          * or {@link ComposingStatus#EDIT_PINYIN} automatically.
          */
-        SetDecodingInfo(
-            [in] IDecodingInfo* decInfo,
-            [in] ImeState imeStatus);
+//        SetDecodingInfo(
+//            [in] IDecodingInfo* decInfo,
+//            [in] ImeState imeStatus);
 
         MoveCursor(
             [in] Int32 keyCode,

@@ -27,8 +27,8 @@ module
         SetService(
             [in] IInputMethodService* service);
 
-        SetInputModeSwitcher(
-            [in] IInputModeSwitcher* inputModeSwitcher);
+//        SetInputModeSwitcher(
+//            [in] IInputModeSwitcher* inputModeSwitcher);
 
         SetGestureDetector(
             [in] IGestureDetector* gestureDetector);

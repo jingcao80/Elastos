@@ -6,14 +6,11 @@ module
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/BalloonHint.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/CandidateViewListener.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/IPinyinDecoderService.car");
-    merge("../../../../../car/elastos/droid/inputmethods/pinyinime/DecodingInfo.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/CandidatesContainer.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/SoftKey.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/PinyinIME.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/CandidateView.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/ComposingView.car");
-    merge("../../../../../car/elastos/droid/inputmethods/pinyinime/Environment.car");
-    merge("../../../../../car/elastos/droid/inputmethods/pinyinime/InputModeSwitcher.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/Settings.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/SkbContainer.car");
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/SoftKeyboard.car");
@@ -21,10 +18,18 @@ module
     merge("../../../../../car/elastos/droid/inputmethods/pinyinime/SoundManager.car");
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     using interface Elastos.Droid.InputMethodService.IInputMethodService;
+    using interface Elastos.Droid.InputMethodService.IAbstractInputMethodService;
+    using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.IGestureDetector;
     using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
 
     namespace Elastos {
     namespace Droid {
@@ -52,14 +57,6 @@ module
     //         interface IKeyEventCallback;
     //         interface IAccessibilityEventSource;
     //     }
-
-        [local]
-        class CDecodingInfo {
-            constructor(
-                [in] IPinyinIME* ime);
-
-            interface IDecodingInfo;
-        }
 
         singleton class CPinyinSettings {
             interface ISettings;
@@ -93,18 +90,18 @@ module
     //         interface IArrowUpdater;
     //     }
 
-    //     [local]
-    //     class CPinyinCandidateView {
-    //         constructor(
-    //             [in] IContext* ctx,
-    //             [in] IAttributeSet* attrs);
+    [local]
+    class CCandidateView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-    //         interface ICandidateView;
-    //         interface IView;
-    //         interface IDrawableCallback;
-    //         interface IKeyEventCallback;
-    //         interface IAccessibilityEventSource;
-    //     }
+        interface ICandidateView;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
     //     [local]
     //     class CComposingView {
@@ -173,7 +170,13 @@ module
     //     }
 
         class CPinyinDecoderService {
+            constructor();
+
             interface Elastos.Droid.App.IService;
+            interface Elastos.Droid.Content.IContext;
+            interface Elastos.Droid.Content.IContextWrapper;
+            interface Elastos.Droid.Content.IComponentCallbacks;
+            interface Elastos.Droid.Content.IComponentCallbacks2;
         }
 
         [local]
@@ -182,6 +185,11 @@ module
                 [in] Elastos.Droid.App.IService* host);
 
             interface Elastos.Droid.Inputmethods.PinyinIME.IPinyinDecoderService;
+            interface Elastos.Droid.App.IService;
+            interface Elastos.Droid.Content.IContext;
+            interface Elastos.Droid.Content.IContextWrapper;
+            interface Elastos.Droid.Content.IComponentCallbacks;
+            interface Elastos.Droid.Content.IComponentCallbacks2;
             interface Elastos.Droid.Os.IBinder;
         }
 
@@ -189,21 +197,13 @@ module
             constructor();
 
             interface IInputMethodService;
-            interface Elastos.Droid.Inputmethods.PinyinIME.IPinyinIME;
+            interface IAbstractInputMethodService;
+            interface IService;
+            interface IContext;
+            interface IContextWrapper;
+            interface IComponentCallbacks;
             interface IComponentCallbacks2;
             interface IKeyEventCallback;
-        }
-
-        [local]
-        class CInputModeSwitcher {
-            constructor(
-                [in] Elastos.Droid.Inputmethods.PinyinIME.IPinyinIME* ime);
-
-            interface Elastos.Droid.Inputmethods.PinyinIME.IInputModeSwitcher;
-        }
-
-        class CToggleStates {
-            interface Elastos.Droid.Inputmethods.PinyinIME.IToggleStates;
         }
 
         class CSettingsActivity {

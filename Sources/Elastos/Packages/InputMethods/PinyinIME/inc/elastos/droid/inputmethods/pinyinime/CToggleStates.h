@@ -43,7 +43,7 @@ public:
 
     CARAPI GetKeyStates(
         /* [out, callee] */ ArrayOf<Int32> ** keyStates);
-
+fdfd
 public:
     /**
      * If it is true, this soft keyboard is a QWERTY one.

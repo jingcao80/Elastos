@@ -16,7 +16,6 @@ using Elastos::Droid::View::Animation::CAlphaAnimation;
 using Elastos::Droid::View::Animation::ITranslateAnimation;
 using Elastos::Droid::View::Animation::IAlphaAnimation;
 
-
 namespace Elastos {
 namespace Droid {
 namespace Inputmethods {
@@ -26,10 +25,20 @@ Int32 CCandidatesContainer::ARROW_ALPHA_ENABLED = 0xff;
 Int32 CCandidatesContainer::ARROW_ALPHA_DISABLED = 0x40;
 Int32 CCandidatesContainer::ANIMATION_TIME = 200;
 
+CAR_OBJECT_IMPL(CCandidatesContainer);
+
+CAR_INTERFACE_IMPL(CCandidatesContainer, RelativeLayout, ICandidatesContainer);
+
 CCandidatesContainer::CCandidatesContainer()
     : mXOffsetForFlipper(0)
     , mCurrentPage(-1)
+{}
+
+ECode CCandidatesContainer::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
 {
+    return RelativeLayout::constructor(context, attrs);
 }
 
 ECode CCandidatesContainer::Initialize(
@@ -39,15 +48,15 @@ ECode CCandidatesContainer::Initialize(
 {
     mCvListener = cvListener;
 
-    mLeftArrowBtn = IImageButton::Probe(FindViewById(0x7f0a0001 /*R::id::arrow_left_btn*/));
-    mRightArrowBtn = IImageButton::Probe(FindViewById(0x7f0a0002/*R::id::arrow_right_btn*/));
+    mLeftArrowBtn = IImageButton::Probe(FindViewById(R::id::arrow_left_btn));
+    mRightArrowBtn = IImageButton::Probe(FindViewById(R::id::arrow_right_btn));
     mLeftArrowBtn->SetOnTouchListener(this);
     mRightArrowBtn->SetOnTouchListener(this);
 
-    mFlipper = IViewFlipper::Probe(FindViewById(0x7f0a0003 /*R::id::candidate_flipper*/));
+    mFlipper = IViewFlipper::Probe(FindViewById(R::id::candidate_flipper));
     mFlipper->SetMeasureAllChildren(TRUE);
 
-    RelativeLayout::Invalidate();
+    Invalidate();
     RequestLayout();
 
     Int32 count = 0;
@@ -55,7 +64,7 @@ ECode CCandidatesContainer::Initialize(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> view;
         mFlipper->GetChildAt(i, (IView**)&view);
-        AutoPtr<ICandidateView> cv = ICandidateView::Probe(view);
+        ICandidateView* cv = ICandidateView::Probe(view);
         cv->Initialize(this, balloonHint, gestureDetector, mCvListener);
     }
     return NOERROR;
@@ -73,7 +82,8 @@ ECode CCandidatesContainer::ShowCandidates(
     if (decInfo->IsCandidatesListEmpty(&empty), empty) {
         ShowArrow(mLeftArrowBtn, FALSE);
         ShowArrow(mRightArrowBtn, FALSE);
-    } else {
+    }
+    else {
         ShowArrow(mLeftArrowBtn, TRUE);
         ShowArrow(mRightArrowBtn, TRUE);
     }
@@ -93,7 +103,7 @@ ECode CCandidatesContainer::ShowCandidates(
     ICandidateView::Probe(cv)->ShowPage(mCurrentPage, 0, enableActiveHighlight);
 
     UpdateArrowStatus();
-    return RelativeLayout::Invalidate();
+    return Invalidate();
 }
 
 ECode CCandidatesContainer::GetCurrentPage(
@@ -110,17 +120,15 @@ ECode CCandidatesContainer::EnableActiveHighlight(
     AutoPtr<IView> cv;
     mFlipper->GetCurrentView((IView**)&cv);
     ICandidateView::Probe(cv)->EnableActiveHighlight(enableActiveHighlight);
-    return RelativeLayout::Invalidate();
+    return Invalidate();
 }
 
 void CCandidatesContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    AutoPtr<IPinyinEnvironment> env;
-    helper->GetInstance((IPinyinEnvironment**)&env);
+    AutoPtr<IEnvironment> env;
+    Environment::GetInstance((IEnvironment**)&env);
     Int32 measuredWidth = 0, value = 0;
     env->GetScreenWidth(&measuredWidth);
     Int32 measuredHeight = GetPaddingTop();
@@ -173,6 +181,7 @@ ECode CCandidatesContainer::ActiveCurseForward(
     AutoPtr<IView> view;
     mFlipper->GetCurrentView((IView**)&view);
     ICandidateView* cv = ICandidateView::Probe(view);
+
     if (cv->ActiveCursorForward(&state), state) {
         cv->Invalidate();
         *result = TRUE;
@@ -292,12 +301,14 @@ ECode CCandidatesContainer::UpdateArrowStatus()
 
     if (backwardEnabled) {
         EnableArrow(mLeftArrowBtn, TRUE);
-    } else {
+    }
+    else {
         EnableArrow(mLeftArrowBtn, FALSE);
     }
     if (forwardEnabled) {
         EnableArrow(mRightArrowBtn, TRUE);
-    } else {
+    }
+    else {
         EnableArrow(mRightArrowBtn, FALSE);
     }
     return NOERROR;
@@ -307,29 +318,57 @@ void CCandidatesContainer::EnableArrow(
     /* [in] */ IImageButton* arrowBtn,
     /* [in] */ Boolean enabled)
 {
-    assert(arrowBtn != NULL);
     arrowBtn->SetEnabled(enabled);
-    if (enabled)
+    if (enabled) {
         arrowBtn->SetAlpha(ARROW_ALPHA_ENABLED);
-    else
+    }
+    else {
         arrowBtn->SetAlpha(ARROW_ALPHA_DISABLED);
+    }
 }
 
 void CCandidatesContainer::ShowArrow(
     /* [in] */ IImageButton* arrowBtn,
     /* [in] */ Boolean show)
 {
-    assert(arrowBtn != NULL);
-    if (show)
+    if (show) {
         arrowBtn->SetVisibility(IView::VISIBLE);
-    else
+    }
+    else {
         arrowBtn->SetVisibility(IView::INVISIBLE);
+    }
 }
+
+ECode CCandidatesContainer::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 action = 0;
+    event->GetAction(&action);
+    if (action == IMotionEvent::ACTION_DOWN) {
+        if (v == mLeftArrowBtn) {
+            mCvListener->OnToRightGesture();
+        }
+        else if (v == mRightArrowBtn) {
+            mCvListener->OnToLeftGesture();
+        }
+    }
+    else if (action == IMotionEvent::ACTION_UP) {
+        AutoPtr<IView> cv;
+        mFlipper->GetCurrentView((IView**)&cv);
+        ICandidateView::Probe(cv)->EnableActiveHighlight(TRUE);
+    }
+
+    *result = FALSE;
+    return NOERROR;
+}
+
 
 Boolean CCandidatesContainer::OnTouchEvent(
     /* [in] */ IMotionEvent* event)
 {
-    assert(event != NULL);
     event->OffsetLocation(-mXOffsetForFlipper, 0);
     AutoPtr<IView> view;
     mFlipper->GetCurrentView((IView**)&view);
@@ -352,7 +391,8 @@ ECode CCandidatesContainer::LoadAnimation(
             }
             mInAnimInUse = mInAnimPushLeft;
             mOutAnimInUse = mOutAnimPushLeft;
-        } else {
+        }
+        else {
             if (NULL == mInAnimPushRight) {
                 mInAnimPushRight = CreateAnimation(-1.0f, 0, 0, 0, 0, 1.0f,
                         ANIMATION_TIME);
@@ -362,7 +402,8 @@ ECode CCandidatesContainer::LoadAnimation(
             mInAnimInUse = mInAnimPushRight;
             mOutAnimInUse = mOutAnimPushRight;
         }
-    } else {
+    }
+    else {
         if (forward) {
             if (NULL == mInAnimPushUp) {
                 mInAnimPushUp = CreateAnimation(0, 0, 1.0f, 0, 0, 1.0f,
@@ -372,7 +413,8 @@ ECode CCandidatesContainer::LoadAnimation(
             }
             mInAnimInUse = mInAnimPushUp;
             mOutAnimInUse = mOutAnimPushUp;
-        } else {
+        }
+        else {
             if (NULL == mInAnimPushDown) {
                 mInAnimPushDown = CreateAnimation(0, 0, -1.0f, 0, 0, 1.0f,
                         ANIMATION_TIME);
@@ -426,34 +468,11 @@ void CCandidatesContainer::StopAnimation()
     mFlipper->StopFlipping();
 }
 
-PInterface CCandidatesContainer::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_ICandidatesContainer) {
-        return reinterpret_cast<PInterface>(this);
-    }
-
-    return RelativeLayout::Probe(riid);
-}
-
-ECode CCandidatesContainer::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return RelativeLayout::constructor(context, attrs);
-}
-
-ECode CCandidatesContainer::OnAnimationStart(
-    /* [in] */  IAnimation* animation)
-{
-    return NOERROR;
-}
-
 ECode CCandidatesContainer::OnAnimationEnd(
     /* [in] */  IAnimation* animation)
 {
     Boolean pressed = FALSE;
-    if (!(mLeftArrowBtn->IsPressed(&pressed), pressed) && !(mRightArrowBtn->IsPressed(&pressed), pressed)) {
+    if ((mLeftArrowBtn->IsPressed(&pressed), !pressed) && (mRightArrowBtn->IsPressed(&pressed), !pressed)) {
         AutoPtr<IView> cv;
         mFlipper->GetCurrentView((IView**)&cv);
         ICandidateView::Probe(cv)->EnableActiveHighlight(TRUE);
@@ -467,27 +486,9 @@ ECode CCandidatesContainer::OnAnimationRepeat(
     return NOERROR;
 }
 
-ECode CCandidatesContainer::OnTouch(
-    /* [in] */ IView* v,
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
+ECode CCandidatesContainer::OnAnimationStart(
+    /* [in] */  IAnimation* animation)
 {
-    VALIDATE_NOT_NULL(result);
-    Int32 action = 0;
-    event->GetAction(&action);
-    if (action == IMotionEvent::ACTION_DOWN) {
-        if (v == mLeftArrowBtn) {
-            mCvListener->OnToRightGesture();
-        } else if (v == mRightArrowBtn) {
-            mCvListener->OnToLeftGesture();
-        }
-    } else if (action == IMotionEvent::ACTION_UP) {
-        AutoPtr<IView> cv;
-        mFlipper->GetCurrentView((IView**)&cv);
-        ICandidateView::Probe(cv)->EnableActiveHighlight(TRUE);
-    }
-
-    *result = FALSE;
     return NOERROR;
 }
 

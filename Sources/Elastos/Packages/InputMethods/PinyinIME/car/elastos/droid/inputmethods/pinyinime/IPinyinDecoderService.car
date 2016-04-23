@@ -8,7 +8,8 @@ module
     namespace PinyinIME {
 
     /**
-     * @Involve Elastos.Droid.App.IService
+     * @Involve
+     * interface Elastos.Droid.App.IService
      * interface Elastos.Droid.Content.IContext
      * interface Elastos.Droid.Content.IContextWrapper
      * interface IComponentCallbacks

@@ -4,9 +4,12 @@
 
 #include "_Elastos_Droid_Inputmethods_PinyinIME_CPinyinCandidateView.h"
 #include "elastos/droid/os/HandlerRunnable.h"
+#include <elastos/utility/etl/Vector.h>
 
 using Elastos::Droid::Os::HandlerRunnable;
 using Elastos::Droid::View::IGestureDetector;
+using Elastos::Droid::View::View;
+using Elastos::Utility::Etl::Vector;
 
 namespace Elastos {
 namespace Droid {
@@ -17,8 +20,8 @@ namespace PinyinIME {
  * View to show candidate list. There two candidate view instances which are
  * used to show animation when user navigates between pages.
  */
-CarClass(CPinyinCandidateView)
-    , public Elastos::Droid::View::View
+CarClass(CCandidateView)
+    , public View
     , public ICandidateView
 {
 private:
@@ -27,20 +30,20 @@ private:
     {
     public:
         PressTimer(
-            /* [in] */ CPinyinCandidateView* host);
+            /* [in] */ CCandidateView* host);
 
-        void StartTimer(
+        CARAPI_(void) StartTimer(
             /* [in] */ Int64 afterMillis,
             /* [in] */ Int32 pageNo,
             /* [in] */ Int32 activeInPage);
 
-        Int32 GetPageToShow();
+        CARAPI_(Int32) GetPageToShow();
 
-        Int32 GetActiveCandOfPageToShow();
+        CARAPI_(Int32) GetActiveCandOfPageToShow();
 
-        Boolean RemoveTimer();
+        CARAPI_(Boolean) RemoveTimer();
 
-        Boolean IsPending();
+        CARAPI_(Boolean) IsPending();
 
         CARAPI Run();
 
@@ -48,7 +51,7 @@ private:
         Boolean mTimerPending;
         Int32 mPageNoToShow;
         Int32 mActiveCandOfPage;
-        CPinyinCandidateView* mHost;
+        CCandidateView* mHost;
     };
 
 public:
@@ -56,18 +59,9 @@ public:
 
     CAR_INTERFACE_DECL();
 
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
     CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs);
-
-    // Because the candidate view under the current focused one may also get
-    // touching events. Here we just bypass the event to the container and let
-    // it decide which view should handle the event.
-    Boolean OnTouchEvent(
-        /* [in] */ IMotionEvent* event);
 
     CARAPI Initialize(
         /* [in] */ IArrowUpdater* arrowUpdater,
@@ -106,40 +100,48 @@ public:
     CARAPI ActiveCurseBackward(
         /* [out] */ Boolean* active);
 
+    // Because the candidate view under the current focused one may also get
+    // touching events. Here we just bypass the event to the container and let
+    // it decide which view should handle the event.
+    CARAPI_(Boolean) OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
+
     CARAPI OnTouchEventReal(
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
 protected:
-    void OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    void OnDraw(
+    CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
-    void OnSizeChanged();
+private:
+    CARAPI_(void) OnSizeChanged();
 
-    Boolean CalculatePage(
+    CARAPI_(Boolean) CalculatePage(
         /* [in] */ Int32 pageNo);
 
-    String GetLimitedCandidateForDrawing(
+    CARAPI_(String) GetLimitedCandidateForDrawing(
         /* [in] */ const String& rawCandidate,
         /* [in] */ Float widthToDraw);
 
-    Float DrawVerticalSeparator(
+    CARAPI_(Float) DrawVerticalSeparator(
         /* [in] */ ICanvas* canvas,
         /* [in] */ Float xPos);
 
-    Int32 MapToItemInPage(
+    CARAPI_(Int32) MapToItemInPage(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
-    void ShowBalloon(
+    CARAPI_(void) ShowBalloon(
         /* [in] */ Int32 candPos,
         /* [in] */ Boolean delayedShow);
 
-protected:
+private:
     /**
      * The minimum width to show a item.
      */
@@ -307,7 +309,7 @@ protected:
     /**
      * Rectangles for the candidates in this page.
      **/
-    List<AutoPtr<IRectF> > mCandRects;
+    Vector<AutoPtr<IRectF> > mCandRects;
 
     /**
      * FontMetricsInt used to measure the size of candidates.

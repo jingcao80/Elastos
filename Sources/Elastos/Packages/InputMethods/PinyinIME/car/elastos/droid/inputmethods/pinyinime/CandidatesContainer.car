@@ -34,9 +34,9 @@ module
             [in] IBalloonHint* balloonHint,
             [in] IGestureDetector* gestureDetector);
 
-        ShowCandidates(
-            [in] IDecodingInfo* decInfo,
-            [in] Boolean enableActiveHighlight);
+//        ShowCandidates(
+//            [in] IDecodingInfo* decInfo,
+//            [in] Boolean enableActiveHighlight);
 
         GetCurrentPage(
             [out] Int32* page);
