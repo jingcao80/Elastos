@@ -1,4 +1,5 @@
 
+#include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/widget/PopupWindow.h"
 #include "elastos/droid/graphics/CRect.h"

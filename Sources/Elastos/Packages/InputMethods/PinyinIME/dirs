@@ -1,3 +1,3 @@
 
-DIRS += src/elastos/droid/inputmethods/pinyinime
+DIRS += src/elastos/droid/inputmethod/pinyin
 

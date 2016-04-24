@@ -2,19 +2,10 @@
 #ifndef __ELASTOS_DROID_INPUTMETHODSERVICE_ELASTOS_DROID_INPUTMEHTODSERVICE_INPUTMETHODSERVICE_H__
 #define __ELASTOS_DROID_INPUTMETHODSERVICE_ELASTOS_DROID_INPUTMEHTODSERVICE_INPUTMETHODSERVICE_H__
 
-#ifdef DROID_CORE
-#include "elastos/droid/inputmethodservice/CSoftInputWindow.h"
-#include "elastos/droid/inputmethodservice/AbstractInputMethodImpl.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/inputmethodservice/AbstractInputMethodService.h"
-#include "elastos/droid/inputmethodservice/AbstractInputMethodSessionImpl.h"
-#include "elastos/droid/view/ViewTreeObserver.h"
-#else
 #include "Elastos.Droid.Core.h"
 #include "elastos/droid/inputmethodservice/AbstractInputMethodService.h"
 #include "elastos/droid/inputmethodservice/AbstractInputMethodImpl.h"
 #include "elastos/droid/inputmethodservice/AbstractInputMethodSessionImpl.h"
-#endif
 
 using Elastos::Core::ICharSequence;
 using Elastos::Droid::Content::Res::IConfiguration;
@@ -50,12 +41,12 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
 
-class InputMethodService
+class ECO_PUBLIC InputMethodService
     : public AbstractInputMethodService
     , public IInputMethodService
 {
 private:
-    class _OnComputeInternalInsetsListener
+    class ECO_LOCAL _OnComputeInternalInsetsListener
         : public Object
         , public IOnComputeInternalInsetsListener
     {
@@ -74,7 +65,7 @@ private:
         InputMethodService* mHost;
     };
 
-    class _OnClickListener
+    class ECO_LOCAL _OnClickListener
         : public Object
         , public IViewOnClickListener
     {
@@ -165,17 +156,6 @@ public:
             /* [in] */ InputMethodService* host);
 
         ~InputMethodSessionImpl();
-
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
 
         CARAPI FinishInput();
 
@@ -1256,8 +1236,8 @@ private:
 
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG;
 
     AutoPtr<IInputMethodManager> mImm;
     Int32 mTheme;
@@ -1319,14 +1299,12 @@ private:
     AutoPtr<IViewOnClickListener> mActionClickListener;
 
     Int32 mVolumeKeyCursorControl;
-    static const Int32 VOLUME_CURSOR_OFF = 0;
-    static const Int32 VOLUME_CURSOR_ON = 1;
-    static const Int32 VOLUME_CURSOR_ON_REVERSE = 2;
+    ECO_LOCAL static const Int32 VOLUME_CURSOR_OFF = 0;
+    ECO_LOCAL static const Int32 VOLUME_CURSOR_ON = 1;
+    ECO_LOCAL static const Int32 VOLUME_CURSOR_ON_REVERSE = 2;
 
-    static const Int32 MOVEMENT_DOWN = -1;
-    static const Int32 MOVEMENT_UP = -2;
-
-    friend class _OnComputeInternalInsetsListener;
+    ECO_LOCAL static const Int32 MOVEMENT_DOWN = -1;
+    ECO_LOCAL static const Int32 MOVEMENT_UP = -2;
 };
 
 } // namespace InputMethodService

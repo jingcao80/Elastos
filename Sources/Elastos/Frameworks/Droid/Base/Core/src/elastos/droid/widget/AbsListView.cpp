@@ -476,7 +476,7 @@ ECode AbsListView::ListItemAccessibilityDelegate::PerformAccessibilityAction(
     Int32 position;
     mHost->GetPositionForView(host, &position);
     AutoPtr<IAdapter> adapterTemp;
-    (IAdapterView*)mHost->GetAdapter((IAdapter**)&adapterTemp);
+    mHost->GetAdapter((IAdapter**)&adapterTemp);
     AutoPtr<IListAdapter> adapter = IListAdapter::Probe(adapterTemp);
 
     if ((position == IAdapterView::INVALID_POSITION) || (adapter == NULL)) {

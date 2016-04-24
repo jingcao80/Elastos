@@ -1,0 +1,119 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InputMethod {
+    namespace Pinyin {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IPopupWindow
+     */
+    [deprecated, local]
+    interface IBalloonHint {
+        GetContext(
+            [out] IContext** ctx);
+
+        GetPadding(
+            [out] IRect** rect);
+
+        SetBalloonBackground(
+            [in] IDrawable* drawable);
+
+        /**
+         * Set configurations to show text label in this balloon.
+         *
+         * @param label The text label to show in the balloon.
+         * @param textSize The text size used to show label.
+         * @param textBold Used to indicate whether the label should be bold.
+         * @param textColor The text color used to show label.
+         * @param width The desired width of the balloon. The real width is
+         *        determined by the desired width and balloon's measuring
+         *        specification.
+         * @param height The desired width of the balloon. The real width is
+         *        determined by the desired width and balloon's measuring
+         *        specification.
+         */
+        SetBalloonConfig(
+            [in] String label,
+            [in] Float textSize,
+            [in] Boolean textBold,
+            [in] Int32 textColor,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * Set configurations to show text label in this balloon.
+         *
+         * @param icon The icon used to shown in this balloon.
+         * @param width The desired width of the balloon. The real width is
+         *        determined by the desired width and balloon's measuring
+         *        specification.
+         * @param height The desired width of the balloon. The real width is
+         *        determined by the desired width and balloon's measuring
+         *        specification.
+         */
+        SetBalloonConfig(
+            [in] IDrawable* icon,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        NeedForceDismiss(
+            [out] Boolean* result);
+
+        GetPaddingLeft(
+            [out] Int32* left);
+
+        GetPaddingTop(
+            [out] Int32* top);
+
+        GetPaddingRight(
+            [out] Int32* right);
+
+        GetPaddingBottom(
+            [out] Int32* bottom);
+
+        DelayedShow(
+            [in] Int64 delay,
+            [in] ArrayOf<Int32>* locationInParent);
+
+        DelayedUpdate(
+            [in] Int64 delay,
+            [in] ArrayOf<Int32>* locationInParent,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        DelayedDismiss(
+            [in] Int64 delay);
+
+        RemoveTimer();
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IBalloonView {
+        SetIcon(
+            [in] IDrawable* icon);
+
+        SetTextConfig(
+            [in] String label,
+            [in] Float fontSize,
+            [in] Boolean textBold,
+            [in] Int32 textColor);
+    }
+
+    } // namespace Pinyin
+    } // namespace InputMethod
+    } // namespace Droid
+    } // namespace Elastos
+}

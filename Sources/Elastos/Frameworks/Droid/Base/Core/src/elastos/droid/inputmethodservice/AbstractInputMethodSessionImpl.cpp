@@ -1,9 +1,5 @@
 
-#ifdef DROID_CORE
 #include "elastos/droid/inputmethodservice/AbstractInputMethodSessionImpl.h"
-#else
-#include "elastos/droid/inputmethodservice/AbstractInputMethodSessionImpl.h"
-#endif
 
 using Elastos::Droid::View::EIID_IKeyEventCallback;
 using Elastos::Droid::View::InputMethod::EIID_IInputMethodSession;
@@ -11,6 +7,7 @@ using Elastos::Droid::View::InputMethod::EIID_IInputMethodSession;
 namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
+
 CAR_INTERFACE_IMPL(AbstractInputMethodSessionImpl, Object, IAbstractInputMethodSessionImpl);
 
 AbstractInputMethodSessionImpl::AbstractInputMethodSessionImpl(

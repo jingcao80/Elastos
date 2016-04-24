@@ -1,0 +1,60 @@
+
+TARGET_NAME = Elastos.Droid.InputMethod.Pinyin
+TARGET_TYPE = eco
+
+EXPORT_ALL_SYMBOLS=1
+
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+IMPORTS += Elastos.CoreLibrary.eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES = Elastos.Droid.InputMethod.Pinyin.car
+#SOURCES += R.cpp
+SOURCES += Environment.cpp
+SOURCES += InputModeSwitcher.cpp
+SOURCES += CBalloonHint.cpp
+SOURCES += CBalloonView.cpp
+SOURCES += CCandidateView.cpp
+SOURCES += CCandidatesContainer.cpp
+SOURCES += CComposingView.cpp
+SOURCES += CIPinyinDecoderService.cpp
+SOURCES += CPinyinDecoderService.cpp
+
+#SOURCES += CPinyinSettings.cpp
+#SOURCES += CSoundManager.cpp
+#SOURCES += CSoundManagerHelper.cpp
+#SOURCES += SkbPool.cpp
+#SOURCES += SkbTemplate.cpp
+#SOURCES += SoftKey.cpp
+#SOURCES += XmlKeyboardLoader.cpp
+#SOURCES += SoftKeyToggle.cpp
+
+#SOURCES += SoftKeyboard.cpp
+#SOURCES += CPinyinCandidateView.cpp
+#SOURCES += CSkbContainer.cpp
+#SOURCES += CSoftKeyboardView.cpp
+#SOURCES += CPinyinGestureListener.cpp
+#SOURCES += EnglishInputProcessor.cpp
+#SOURCES += KeyMapDream.cpp
+
+#SOURCES += CPinyinIME.cpp
+#SOURCES += CSettingsActivity.cpp
+#SOURCES += Elastos.Droid.Core.cpp
+#SOURCES += Org.Kxml2.IO.cpp
+#SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lcutils -lutils
+ELASTOS_LIBS += share/share.lib
+
+AAPT_FLAGS = -0 .dat
+RES_NAMESPACE = Elastos.Droid.InputMethod.Pinyin
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;

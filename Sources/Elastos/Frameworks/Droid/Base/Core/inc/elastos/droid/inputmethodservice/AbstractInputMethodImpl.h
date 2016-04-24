@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
 
-class AbstractInputMethodImpl
+class ECO_PUBLIC AbstractInputMethodImpl
     : public Object
     , public IAbstractInputMethodImpl
     , public IInputMethod

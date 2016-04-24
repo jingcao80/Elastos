@@ -2,8 +2,6 @@
 #ifndef __ELASTOS_DROID_WIDGET_POPUPWINDOW_H__
 #define __ELASTOS_DROID_WIDGET_POPUPWINDOW_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/widget/FrameLayout.h"
 
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
@@ -21,12 +19,12 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class PopupWindow
+class ECO_PUBLIC PopupWindow
     : public Object
     , public IPopupWindow
 {
 private:
-    class PopupViewContainer
+    class ECO_LOCAL PopupViewContainer
         : public FrameLayout
     {
     public:
@@ -64,7 +62,7 @@ private:
         static const String TAG;
     };
 
-    class PopupWindowScrollChangedListener
+    class ECO_LOCAL PopupWindowScrollChangedListener
         : public Object
         , public IOnScrollChangedListener
     {
@@ -1008,7 +1006,7 @@ private:
        /* [in] */ Int32 gravity);
 
 private:
-    static const Int32 DEFAULT_ANCHORED_GRAVITY;
+    ECO_LOCAL static const Int32 DEFAULT_ANCHORED_GRAVITY;
     AutoPtr<IContext> mContext;
     AutoPtr<IWindowManager> mWindowManager;
 
@@ -1064,7 +1062,7 @@ private:
 
     Int32 mAnimationStyle;
 
-    static AutoPtr<ArrayOf<Int32> > ABOVE_ANCHOR_STATE_SET;//[1];
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > ABOVE_ANCHOR_STATE_SET;//[1];
 
     // WeakReference<View>
     AutoPtr<IWeakReference> mAnchor;

@@ -545,8 +545,7 @@ ECode ProfileManagerService::RemoveProfile(
     profile->GetName(&name);
     AutoPtr<IInterface> obj;
     mProfileNames->Remove(StringUtils::ParseCharSequence(name).Get(), (IInterface**)&obj);
-    if (obj != NULL)
-    {
+    if (obj != NULL) {
         AutoPtr<IUUID> uuid;
         profile->GetUuid((IUUID**)&uuid);
         AutoPtr<IInterface> tmpObj;
@@ -558,10 +557,8 @@ ECode ProfileManagerService::RemoveProfile(
             return NOERROR;
         }
     }
-    else {
-        *result = FALSE;
-        return NOERROR;
-    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode ProfileManagerService::UpdateProfile(
@@ -753,6 +750,7 @@ ECode ProfileManagerService::RemoveNotificationGroup(
     }
 
     PersistIfDirty();
+    return NOERROR;
 }
 
 ECode ProfileManagerService::UpdateNotificationGroup(
@@ -920,6 +918,7 @@ ECode ProfileManagerService::LoadXml(
             mDirty = TRUE;
         }
     // }
+    return NOERROR;
 }
 
 void ProfileManagerService::InitialiseStructure()

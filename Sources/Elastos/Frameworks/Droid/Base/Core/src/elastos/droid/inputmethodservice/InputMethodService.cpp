@@ -1,10 +1,12 @@
 
+#include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/inputmethodservice/InputMethodService.h"
+#include "elastos/droid/inputmethodservice/CSoftInputWindow.h"
 #include "elastos/droid/view/ViewTreeObserver.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/inputmethod/CExtractedTextRequest.h"

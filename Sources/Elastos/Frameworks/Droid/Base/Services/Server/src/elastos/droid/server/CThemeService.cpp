@@ -259,6 +259,7 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
                 break;
             }
     }
+    return NOERROR;
 }
 
 //-----------------------------------------------------------------------------------
@@ -409,6 +410,7 @@ ECode CThemeService::MyUserChangeReceiver::OnReceive(
             }
         // }
     }
+    return NOERROR;
 }
 
 //-----------------------------------------------------------------------------------
@@ -497,6 +499,7 @@ ECode CThemeService::constructor(
     mWallpaperChangeReceiver = new MyWallpaperChangeReceiver(this);
     mUserChangeReceiver = new MyUserChangeReceiver(this);
     mOldestFilesFirstComparator = new MyComparator();
+    return NOERROR;
 }
 
 void CThemeService::SystemRunning()
@@ -1692,6 +1695,7 @@ ECode CThemeService::GetProgress(
         *result = mProgress;
         return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode CThemeService::CacheComposedIcon(
@@ -1784,6 +1788,7 @@ ECode CThemeService::IsThemeBeingProcessed(
         *result = flag;
         return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode CThemeService::RegisterThemeProcessingListener(

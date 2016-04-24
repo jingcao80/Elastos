@@ -18,7 +18,7 @@ namespace InputMethodService {
  * interface.  This takes care of basic maintenance of the session,
  * but most behavior must be implemented in a derived class.
  */
-class AbstractInputMethodSessionImpl
+class ECO_PUBLIC AbstractInputMethodSessionImpl
     : public Object
     , public IAbstractInputMethodSessionImpl
 {

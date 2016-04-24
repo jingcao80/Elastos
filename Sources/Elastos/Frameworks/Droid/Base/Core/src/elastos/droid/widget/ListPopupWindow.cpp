@@ -1,6 +1,6 @@
 
 #include "elastos/droid/animation/CObjectAnimatorHelper.h"
-//#include "elastos/droid/graphics/CRect.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/CTextUtils.h"

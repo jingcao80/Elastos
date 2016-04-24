@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_OS_HANDLERRUNNABLE_H__
 #define __ELASTOS_DROID_OS_HANDLERRUNNABLE_H__
 
-#include "elastos/droid/os/Handler.h"
+#include <elastos/droid/os/Handler.h>
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +10,7 @@ namespace Os {
 /**
  * Base class for HandlerRunnable
  */
-class HandlerRunnable
+class ECO_PUBLIC HandlerRunnable
     : public Handler
     , public IRunnable
 {

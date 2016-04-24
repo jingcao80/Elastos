@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InputMethod {
+    namespace Pinyin {
+
+    interface ISoundManager {
+        UpdateRingerMode();
+
+        PlayKeyDown();
+    }
+
+    [local]
+    interface ISoundManagerHelper {
+        GetInstance(
+            [in] IContext* ctx,
+            [out] ISoundManager** sm);
+    }
+
+    } // namespace Pinyin
+    } // namespace InputMethod
+    } // namespace Droid
+    } // namespace Elastos
+}
