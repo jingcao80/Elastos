@@ -27,6 +27,7 @@ ECode CClipRectAnimation::constructor(
     /* [in] */ IRect* fromClip,
     /* [in] */ IRect* toClip)
 {
+    FAIL_RETURN(Animation::constructor());
     if (fromClip == NULL || toClip == NULL) {
         // throw new RuntimeException("Expected non-null animation clip rects");
         return E_RUNTIME_EXCEPTION;

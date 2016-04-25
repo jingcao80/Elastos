@@ -12413,20 +12413,20 @@ Boolean View::DrawAnimation(
     /* [in] */ IAnimation* a,
     /* [in] */ Boolean scalingRequired)
 {
-     AutoPtr<ITransformation> invalidationTransform;
-     ViewGroup* parent = (ViewGroup*)parentObj;
-     Int32 flags = parent->mGroupFlags;
-     Boolean initialized;
-     a->IsInitialized(&initialized);
-     if (!initialized) {
-         Int32 w, h;
-         IView::Probe(parent)->GetWidth(&w);
-         IView::Probe(parent)->GetHeight(&h);
-         a->Initialize(mRight - mLeft, mBottom - mTop, w, h);
-         a->InitializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
-         if (mAttachInfo != NULL) a->SetListenerHandler(mAttachInfo->mHandler);
-         OnAnimationStart();
-     }
+    AutoPtr<ITransformation> invalidationTransform;
+    ViewGroup* parent = (ViewGroup*)parentObj;
+    Int32 flags = parent->mGroupFlags;
+    Boolean initialized;
+    a->IsInitialized(&initialized);
+    if (!initialized) {
+        Int32 w, h;
+        IView::Probe(parent)->GetWidth(&w);
+        IView::Probe(parent)->GetHeight(&h);
+        a->Initialize(mRight - mLeft, mBottom - mTop, w, h);
+        a->InitializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
+        if (mAttachInfo != NULL) a->SetListenerHandler(mAttachInfo->mHandler);
+        OnAnimationStart();
+    }
 
     AutoPtr<ITransformation> t = parent->GetChildTransformation();
     Boolean more;
@@ -16206,9 +16206,8 @@ ECode View::SetAnimation(
         // the next frame we draw. Keeping the START_ON_FIRST_FRAME start time
         // would cause the animation to start when the screen turns back on
         Int64 start = 0;
-        animation->GetStartTime(&start);
         if (mAttachInfo != NULL &&  mAttachInfo->mDisplayState == IDisplay::STATE_OFF
-            && start == IAnimation::START_ON_FIRST_FRAME) {
+            && (animation->GetStartTime(&start), start) == IAnimation::START_ON_FIRST_FRAME) {
             Int64 currentTime;
             AnimationUtils::CurrentAnimationTimeMillis(&currentTime);
             animation->SetStartTime(currentTime);

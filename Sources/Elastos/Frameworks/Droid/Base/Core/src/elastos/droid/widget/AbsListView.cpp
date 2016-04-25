@@ -5531,7 +5531,7 @@ void AbsListView::ScrollIfNeeded(
             }
 
             AutoPtr<IView> motionView;
-            this->GetChildAt(motionIndex, (IView**)&motionView);
+            GetChildAt(motionIndex, (IView**)&motionView);
             Int32 motionViewPrevTop = 0;
             if (motionView != NULL) {
                 motionView->GetTop(&motionViewPrevTop);
@@ -5545,7 +5545,7 @@ void AbsListView::ScrollIfNeeded(
 
             // Check to see if we have bumped into the scroll limit
             motionView = NULL;
-            this->GetChildAt(motionIndex, (IView**)&motionView);
+            GetChildAt(motionIndex, (IView**)&motionView);
             if (motionView != NULL) {
                 // Check if the top of the motion view is where it is
                 // supposed to be
@@ -7038,7 +7038,6 @@ Boolean AbsListView::TrackMotionScroll(
         mLastPositionDistanceGuess += incrementalDeltaY;
     }
 
-    GetHeight(&h);
     Boolean cannotScrollDown = (firstPosition == 0 &&
             firstTop >= listPadding->mTop && incrementalDeltaY >= 0);
     GetHeight(&h);

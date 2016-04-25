@@ -78,6 +78,7 @@ ECode TranslateAnimation::constructor(
     /* [in] */ Float fromYDelta,
     /* [in] */ Float toYDelta)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromXValue = fromXDelta;
     mToXValue = toXDelta;
     mFromYValue = fromYDelta;
@@ -101,6 +102,7 @@ ECode TranslateAnimation::constructor(
    /* [in] */ Float toYType,
    /* [in] */ Float toYValue)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromXValue = fromXValue;
     mToXValue = toXValue;
     mFromYValue = fromYValue;

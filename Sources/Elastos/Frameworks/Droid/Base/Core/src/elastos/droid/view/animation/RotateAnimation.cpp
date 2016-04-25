@@ -71,6 +71,7 @@ ECode RotateAnimation::constructor(
     /* [in] */ Float fromDegrees,
     /* [in] */ Float toDegrees)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromDegrees = fromDegrees;
     mToDegrees = toDegrees;
     mPivotX = 0.0f;
@@ -85,6 +86,7 @@ ECode RotateAnimation::constructor(
     /* [in] */ Float pivotX,
     /* [in] */ Float pivotY)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromDegrees = fromDegrees;
     mToDegrees = toDegrees;
 
@@ -104,6 +106,7 @@ ECode RotateAnimation::constructor(
     /* [in] */ Int32 pivotYType,
     /* [in] */ Float pivotYValue)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromDegrees = fromDegrees;
     mToDegrees = toDegrees;
 

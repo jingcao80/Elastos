@@ -146,6 +146,7 @@ ECode ScaleAnimation::constructor(
     /* [in] */ Float fromY,
     /* [in] */ Float toY)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromX = fromX;
     mToX = toX;
     mFromY = fromY;
@@ -164,6 +165,7 @@ ECode ScaleAnimation::constructor(
     /* [in] */ Float pivotX,
     /* [in] */ Float pivotY)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromX = fromX;
     mToX = toX;
     mFromY = fromY;
@@ -188,6 +190,7 @@ ECode ScaleAnimation::constructor(
     /* [in] */ Float pivotYType,
     /* [in] */ Float pivotYValue)
 {
+    FAIL_RETURN(Animation::constructor());
     mFromX = fromX;
     mToX = toX;
     mFromY = fromY;
