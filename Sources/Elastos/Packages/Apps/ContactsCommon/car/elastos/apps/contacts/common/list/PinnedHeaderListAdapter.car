@@ -1,0 +1,27 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    interface IPinnedHeaderListAdapter {
+        const Int32 PARTITION_HEADER_TYPE = 0;
+
+        GetPinnedPartitionHeadersEnabled(
+            [out] Boolean* result);
+
+        SetPinnedPartitionHeadersEnabled(
+            [in] Boolean flag);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

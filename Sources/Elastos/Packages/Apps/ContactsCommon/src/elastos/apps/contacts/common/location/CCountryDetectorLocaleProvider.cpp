@@ -7,7 +7,7 @@ namespace Contacts {
 namespace Common {
 namespace Location {
 
-CAR_OBJECT_IMPL()
+CAR_OBJECT_IMPL(CCountryDetectorLocaleProvider)
 
 } // Location
 } // Common

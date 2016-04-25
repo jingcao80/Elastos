@@ -1,0 +1,39 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup;
+     */
+    interface IContactListItemView {
+        /**
+         * Where to put contact photo. This affects the other Views' layout or look-and-feel.
+         *
+         * TODO: replace enum with int constants
+         */
+        enum PhotoPosition {
+            LEFT,
+            RIGHT
+        }
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

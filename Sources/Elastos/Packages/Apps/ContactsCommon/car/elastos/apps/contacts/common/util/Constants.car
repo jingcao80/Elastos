@@ -1,0 +1,28 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace Util {
+
+    interface IConstants {
+        /**
+         * Log tag for performance measurement.
+         * To enable: adb shell setprop log.tag.ContactsPerf VERBOSE
+         */
+        const String PERFORMANCE_TAG = "ContactsPerf";
+
+        // Used for lookup URI that contains an encoded JSON string.
+        const String LOOKUP_URI_ENCODED = "encoded";
+    }
+
+    } // Util
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

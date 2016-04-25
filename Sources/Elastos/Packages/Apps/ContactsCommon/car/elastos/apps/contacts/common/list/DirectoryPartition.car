@@ -1,0 +1,114 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface com.android.common.widget.CompositeCursorAdapter.Partition
+     */
+    interface IDirectoryPartition {
+        const Int32 STATUS_NOT_LOADED = 0;
+        const Int32 STATUS_LOADING = 1;
+        const Int32 STATUS_LOADED = 2;
+
+        const Int32 RESULT_LIMIT_DEFAULT = -1;
+
+        /**
+         * Directory ID, see {@link Directory}.
+         */
+        GetDirectoryId(
+            [out] Int64* directoryId);
+
+        SetDirectoryId(
+            [in] Int64 directoryId);
+
+        /**
+         * See {@link Directory#DISPLAY_NAME}.
+         */
+        GetDisplayName(
+            [out] String* displayName);
+
+        SetDisplayName(
+            [in] String displayName);
+
+        GetStatus(
+            [out] Int32 status);
+
+        SetStatus(
+            [in] Int32 status);
+
+        IsLoading(
+            [out] Boolean* loading);
+
+        /**
+         * Returns true if this directory should be loaded before non-priority directories.
+         */
+        IsPriorityDirectory(
+            [out] Boolean* priorityDirectory);
+
+        SetPriorityDirectory(
+            [in] Boolean priorityDirectory);
+
+        /**
+         * Returns true if this directory supports photos.
+         */
+        IsPhotoSupported(
+            [out] Boolean* flag);
+
+        SetPhotoSupported(
+            [in] Boolean flag);
+
+        /**
+         * Max number of results for this directory. Defaults to {@link #RESULT_LIMIT_DEFAULT} which
+         * implies using the adapter's
+         * {@link com.android.contacts.common.list.ContactListAdapter#getDirectoryResultLimit()}
+         */
+        GetResultLimit(
+            [out] Int32 resultLimit);
+
+        SetResultLimit(
+            [in] Int32 resultLimit);
+
+        /**
+         * Used by extended directories to specify a custom content URI. Extended directories MUST have
+         * a content URI
+         */
+        GetContentUri(
+            [out] String* contentUri);
+
+        SetContentUri(
+            [in] String contentUri);
+
+        /**
+         * A label to display in the header next to the display name.
+         */
+        GetLabel(
+            [out] String* label);
+
+        SetLabel(
+            [in] String label);
+
+        /**
+         * Whether or not to display the phone number in app that have that option - Dialer. If false,
+         * Phone Label should be used instead of Phone Number.
+         */
+        IsDisplayNumber(
+            [out] Boolean* displayNumber);
+
+        SetDisplayNumber(
+            [in] Boolean displayNumber);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

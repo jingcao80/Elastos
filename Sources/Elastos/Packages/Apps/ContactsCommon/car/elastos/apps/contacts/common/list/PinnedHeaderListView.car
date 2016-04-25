@@ -1,0 +1,147 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     * extends Elastos.Droid.Widget.IListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.View.IAdapterViewOnItemClickListener
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IOnDateChangedListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface Elastos.App.Contacts.Common.List.IAutoScrollListView
+     */
+    interface IPinnedHeaderListView {
+        SetScrollToSectionOnHeaderTouch(
+            [in] Boolean value);
+
+        GetPinnedHeaderHeight(
+            [in] Int32 viewIndex,
+            [out] Int32* height);
+
+        /**
+         * Set header to be pinned at the top.
+         *
+         * @param viewIndex index of the header view
+         * @param y is position of the header in pixels.
+         * @param animate true if the transition to the new coordinate should be animated
+         */
+        SetHeaderPinnedAtTop(
+            [in] Int32 viewIndex,
+            [in] Int32 y,
+            [in] Boolean animate);
+
+        /**
+         * Set header to be pinned at the bottom.
+         *
+         * @param viewIndex index of the header view
+         * @param y is position of the header in pixels.
+         * @param animate true if the transition to the new coordinate should be animated
+         */
+        SetHeaderPinnedAtBottom(
+            [in] Int32 viewIndex,
+            [in] Int32 y,
+            [in] Boolean animate);
+
+        /**
+         * Set header to be pinned at the top of the first visible item.
+         *
+         * @param viewIndex index of the header view
+         * @param position is position of the header in pixels.
+         */
+        SetFadingHeader(
+            [in] Int32 viewIndex,
+            [in] Int32 position,
+            [in] Boolean fade);
+
+        /**
+         * Makes header invisible.
+         *
+         * @param viewIndex index of the header view
+         * @param animate true if the transition to the new coordinate should be animated
+         */
+        SetHeaderInvisible(
+            [in] Int32 viewIndex,
+            [in] Boolean animate);
+
+        /**
+         * Returns the sum of heights of headers pinned to the top.
+         */
+        GetTotalTopPinnedHeaderHeight(
+            [out] Int32* height);
+
+        /**
+         * Returns the list item position at the specified y coordinate.
+         */
+        GetPositionAt(
+            [in] Int32 y,
+            [out] Int32* result);
+    }
+
+    /**
+     * Adapter interface.  The list adapter must implement this interface.
+     */
+    interface IPinnedHeaderAdapter {
+        /**
+         * Returns the overall number of pinned headers, visible or not.
+         */
+        GetPinnedHeaderCount(
+            [out] Int32 count);
+
+        /**
+         * Creates or updates the pinned header view.
+         */
+        GetPinnedHeaderView(
+            [in] Int32 viewIndex,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /**
+         * Configures the pinned headers to match the visible list items. The
+         * adapter should call {@link PinnedHeaderListView#setHeaderPinnedAtTop},
+         * {@link PinnedHeaderListView#setHeaderPinnedAtBottom},
+         * {@link PinnedHeaderListView#setFadingHeader} or
+         * {@link PinnedHeaderListView#setHeaderInvisible}, for each header that
+         * needs to change its position or visibility.
+         */
+        ConfigurePinnedHeaders(
+            [in] IPinnedHeaderListView* listView);
+
+        /**
+         * Returns the list position to scroll to if the pinned header is touched.
+         * Return -1 if the list does not need to be scrolled.
+         */
+        GetScrollPositionForHeader(
+            [in] Int32 viewIndex,
+            [out] Int32* position);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

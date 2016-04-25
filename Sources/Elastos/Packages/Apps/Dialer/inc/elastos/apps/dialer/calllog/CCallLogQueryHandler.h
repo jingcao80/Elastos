@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGQUERYHANDLER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGQUERYHANDLER_H__
 
-#include "_Elastos_Apps_Dialer_CCallLogQueryHandler.h"
+#include "_Elastos_Apps_Dialer_CallLog_CCallLogQueryHandler.h"
 #include "NoNullCursorAsyncQueryHandler.h"
 
 using Elastos::Droid:Content:IContentResolver;

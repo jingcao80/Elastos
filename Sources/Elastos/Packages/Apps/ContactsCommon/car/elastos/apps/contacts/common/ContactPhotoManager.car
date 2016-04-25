@@ -1,0 +1,249 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+
+    inteface IContactPhotoManagerDefaultImageRequest {
+
+    }
+
+    interface IContactPhotoManagerDefaultImageProvider {
+        /**
+         * Applies the default avatar to the ImageView. Extent is an indicator for the size (width
+         * or height). If darkTheme is set, the avatar is one that looks better on dark background
+         *
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a
+         * default letter tile avatar should be drawn.
+         */
+        ApplyDefaultImage(
+            [in] IImageView* view,
+            [in] Int32 extent,
+            [in] Boolean darkTheme,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+    }
+
+    interface IContactPhotoManager {
+        /** Contact type constants used for default letter images */
+        const Int32 TYPE_PERSON = LetterTileDrawable.TYPE_PERSON;
+        const Int32 TYPE_BUSINESS = LetterTileDrawable.TYPE_BUSINESS;
+        const Int32 TYPE_VOICEMAIL = LetterTileDrawable.TYPE_VOICEMAIL;
+        const Int32 TYPE_DEFAULT = LetterTileDrawable.TYPE_DEFAULT;
+
+        /** Scale and offset default constants used for default letter images */
+        const Float SCALE_DEFAULT = 1.0f;
+        const Float OFFSET_DEFAULT = 0.0f;
+
+        const Boolean IS_CIRCULAR_DEFAULT = false;
+
+        const String CONTACT_PHOTO_SERVICE = "contactPhotos";
+
+        /**
+         * Load thumbnail image into the supplied image view. If the photo is already cached,
+         * it is displayed immediately.  Otherwise a request is sent to load the photo
+         * from the database.
+         */
+        // abstract
+        LoadThumbnail(
+            [in] IImageView* view,
+            [in] Int64 photoId,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest,
+            [in] IContactPhotoManagerDefaultImageProvider* defaultProvider);
+
+        /**
+         * Calls {@link #loadThumbnail(ImageView, long, boolean, DefaultImageRequest,
+         * DefaultImageProvider)} using the {@link DefaultImageProvider} {@link #DEFAULT_AVATAR}.
+        */
+        LoadThumbnail(
+            [in] IImageView* view,
+            [in] Int64 photoId,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+
+        /**
+         * Load photo into the supplied image view. If the photo is already cached,
+         * it is displayed immediately. Otherwise a request is sent to load the photo
+         * from the location specified by the URI.
+         *
+         * @param view The target view
+         * @param photoUri The uri of the photo to load
+         * @param requestedExtent Specifies an approximate Max(width, height) of the targetView.
+         * This is useful if the source image can be a lot bigger that the target, so that the decoding
+         * is done using efficient sampling. If requestedExtent is specified, no sampling of the image
+         * is performed
+         * @param darkTheme Whether the background is dark. This is used for default avatars
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a default
+         * letter tile avatar should be drawn.
+         * @param defaultProvider The provider of default avatars (this is used if photoUri doesn't
+         * refer to an existing image)
+         */
+        // abstract
+        LoadPhoto(
+            [in] IImageView* view,
+            [in] IUri* photoUri,
+            [in] Int32 requestedExtent,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest,
+            [in] IContactPhotoManagerDefaultImageProvider* defaultProvider);
+
+        /**
+         * Calls {@link #loadPhoto(ImageView, Uri, boolean, boolean, DefaultImageRequest,
+         * DefaultImageProvider)} with {@link #DEFAULT_AVATAR} and with the assumption, that
+         * the image is a thumbnail.
+         *
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a default
+         * letter tile avatar should be drawn.
+         */
+        LoadDirectoryPhoto(
+            [in] IImageView* view,
+            [in] IUri* photoUri,
+            [in] Int32 requestedExtent,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+        /**
+         * Remove photo from the supplied image view. This also cancels current pending load request
+         * inside this photo manager.
+         */
+        // abstract
+        RemovePhoto(
+            [in] IImageView* view);
+
+        /**
+         * Cancels all pending requests to load photos asynchronously.
+         */
+        // abstract
+        CancelPendingRequests(
+            [in] IView* fragmentRootView);
+
+        /**
+         * Temporarily stops loading photos from the database.
+         */
+        // abstract
+        Pause();
+
+        /**
+         * Resumes loading photos from the database.
+         */
+        // abstract
+        Resume();
+
+        /**
+         * Marks all cached photos for reloading.  We can continue using cache but should
+         * also make sure the photos haven't changed in the background and notify the views
+         * if so.
+         */
+        // abstract
+        RefreshCache();
+
+        /**
+         * Stores the given bitmap directly in the LRU bitmap cache.
+         * @param photoUri The URI of the photo (for future requests).
+         * @param bitmap The bitmap.
+         * @param photoBytes The bytes that were parsed to create the bitmap.
+         */
+        // abstract
+        CacheBitmap(
+            [in] IUri* photoUri,
+            [in] IBitmap* bitmap,
+            [in] ArrayOf<Byte> photoBytes);
+
+        /**
+         * Initiates a background process that over time will fill up cache with
+         * preload photos.
+         */
+        // abstract
+        PreloadPhotosInBackground();
+    }
+
+    interface IContactPhotoManagerHelper {
+        /**
+         * Given a {@link DefaultImageRequest}, returns a {@link Drawable}, that when drawn, will
+         * draw a letter tile avatar based on the request parameters defined in the
+         * {@link DefaultImageRequest}.
+         */
+        GetDefaultAvatarDrawableForContact(
+            [in] IResources* resources,
+            [in] Boolean hires,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest,
+            [out] IDrawable** drawable);
+
+        /**
+         * Given a {@link DefaultImageRequest}, returns an Uri that can be used to request a
+         * letter tile avatar when passed to the {@link ContactPhotoManager}. The internal
+         * implementation of this uri is not guaranteed to remain the same across application
+         * versions, so the actual uri should never be persisted in long-term storage and reused.
+         *
+         * @param request A {@link DefaultImageRequest} object with the fields configured
+         * to return a
+         * @return A Uri that when later passed to the {@link ContactPhotoManager} via
+         * {@link #loadPhoto(ImageView, Uri, int, boolean, DefaultImageRequest)}, can be
+         * used to request a default contact image, drawn as a letter tile using the
+         * parameters as configured in the provided {@link DefaultImageRequest}
+         */
+        GetDefaultAvatarUriForContact(
+            [in] IContactPhotoManagerDefaultImageRequest* request,
+            [out] IUri** uri);
+
+        /**
+         * Adds a business contact type encoded fragment to the URL.  Used to ensure photo URLS
+         * from Nearby Places can be identified as business photo URLs rather than URLs for personal
+         * contact photos.
+         *
+         * @param photoUrl The photo URL to modify.
+         * @return URL with the contact type parameter added and set to TYPE_BUSINESS.
+         */
+        AppendBusinessContactType(
+            [in] String photoUrl,
+            [out] String* contactType);
+
+        /**
+         * Removes the contact type information stored in the photo URI encoded fragment.
+         *
+         * @param photoUri The photo URI to remove the contact type from.
+         * @return The photo URI with contact type removed.
+         */
+        RemoveContactType(
+            [in] IUri* photoUri,
+            [out] IUri** uri);
+
+        /**
+         * Inspects a photo URI to determine if the photo URI represents a business.
+         *
+         * @param photoUri The URI to inspect.
+         * @return Whether the URI represents a business photo or not.
+         */
+        IsBusinessContactUri(
+            [in] IUri* photoUri,
+            [out] Boolean* result);
+
+        GetDEFAULT_AVATAR(
+            [out] IContactPhotoManagerDefaultImageRequest** request);
+
+        GetDEFAULT_BLANK(
+            [out] IContactPhotoManagerDefaultImageRequest** request);
+
+        GetInstance(
+            [in] IContext* context,
+            [out] IContactPhotoManager* instance);
+
+        CreateContactPhotoManager(
+            [in] IContext* context,
+            [out] IContactPhotoManager* instance);
+    }
+
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

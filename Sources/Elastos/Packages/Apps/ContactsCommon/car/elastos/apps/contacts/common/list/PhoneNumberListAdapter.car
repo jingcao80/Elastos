@@ -1,0 +1,76 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.App.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.App.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.App.Contacts.Common.List.IContactEntryListAdapter
+     */
+    interface IPhoneNumberListAdapter {
+        GetPhoneNumber(
+            [in] Int32 position,
+            [out] String* phoneNumber);
+
+        /**
+         * Builds a {@link Data#CONTENT_URI} for the given cursor position.
+         *
+         * @return Uri for the data. may be null if the cursor is not ready.
+         */
+        GetDataUri(
+            [in] Int32 position,
+            [out] IUri* url);
+
+        GetDataUri(
+            [in] Int32 partitionIndex,
+            [in] Cursor cursor,
+            [out] IUri* url);
+
+        SetPhotoPosition(
+            [in] IContactListItemView::PhotoPosition photoPosition);
+
+        GetPhotoPosition(
+            [out] IContactListItemView::PhotoPosition* photoPosition);
+
+        SetUseCallableUri(
+            [in] Boolean useCallableUri);
+
+        UsesCallableUri(
+            [out] Boolean* useCallableUri);
+    }
+
+    interface IPhoneNumberListAdapterPhoneQuery {
+        const Int32 PHONE_ID                = 0;
+        const Int32 PHONE_TYPE              = 1;
+        const Int32 PHONE_LABEL             = 2;
+        const Int32 PHONE_NUMBER            = 3;
+        const Int32 CONTACT_ID              = 4;
+        const Int32 LOOKUP_KEY              = 5;
+        const Int32 PHOTO_ID                = 6;
+        const Int32 DISPLAY_NAME            = 7;
+        const Int32 PHOTO_URI               = 8;
+    }
+
+    interface IPhoneNumberListAdapterPhoneQueryHelper {
+        GetPROJECTION_PRIMARY(
+            [out, callee] ArrayOf<String>* result);
+
+        GetPROJECTION_ALTERNATIVE(
+            [out, callee] ArrayOf<String>* result);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}
+
