@@ -28,7 +28,7 @@ ECode CBroadcastReceiverOne::OnReceive(
     if (CActivityOne::TEST_ORDERED_BROADCAST) {
         String msg;
         intent->GetStringExtra(String("msg"), &msg);
-        Logger::I(TAG, "Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
+        Logger::I(TAG, " == Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
         return NOERROR;
     }
     else {
@@ -39,7 +39,7 @@ ECode CBroadcastReceiverOne::OnReceive(
             bundle->GetString(String("msg"), &msg);
         }
 
-        Logger::I(TAG, "Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
+        Logger::I(TAG, " == Get Broadcast: %s, msg: %s", TO_CSTR(intent), msg.string());
         return NOERROR;
     }
 }

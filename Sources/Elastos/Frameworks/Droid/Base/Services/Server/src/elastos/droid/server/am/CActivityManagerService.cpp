@@ -20297,11 +20297,11 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         }
 
         if (registeredReceivers != NULL && DEBUG_BROADCAST) {
-            Slogger::I(TAG, " == registeredReceivers: %d", registeredReceivers->GetSize());
+            Slogger::I(TAG, " == registeredReceivers has %d items:", registeredReceivers->GetSize());
             List<AutoPtr<BroadcastFilter> >::Iterator it = registeredReceivers->Begin();
             Int32 i = 0;
             for (; it != registeredReceivers->End(); ++it) {
-                Slogger::I(TAG, " >> registeredReceivers %d: %s", i++, TO_CSTR(*it));
+                Slogger::I(TAG, " >> item %d: %s", i++, TO_CSTR(*it));
             }
         }
     }
