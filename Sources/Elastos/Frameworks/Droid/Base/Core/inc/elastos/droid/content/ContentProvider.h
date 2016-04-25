@@ -1219,8 +1219,6 @@ public:
 private:
     friend class CContentProviderTransport;
 
-    ECO_LOCAL static const String TAG;
-
     /*
      * Note: if you add methods to ContentProvider, you must add similar methods to
      *       MockContentProvider.

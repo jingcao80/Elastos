@@ -193,7 +193,7 @@ public:
     virtual CARAPI OnUpgrade(
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ Int32 oldVersion,
-        /* [in] */ Int32 newVersion)=0;
+        /* [in] */ Int32 newVersion) = 0;
 
     /**
      * Called when the database needs to be downgraded. This is strictly similar to
@@ -232,8 +232,6 @@ private:
         /* [out] */ ISQLiteDatabase** result);
 
 private:
-    ECO_LOCAL static const String TAG;
-
     // When true, getReadableDatabase returns a read-only database if it is just being opened.
     // The database handle is reopened in read/write mode when getWritableDatabase is called.
     // We leave this behavior disabled in production because it is inefficient and breaks

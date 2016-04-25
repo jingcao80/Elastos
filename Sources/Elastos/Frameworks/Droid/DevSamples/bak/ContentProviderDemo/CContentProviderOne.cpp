@@ -1,19 +1,33 @@
 
 #include "CContentProviderOne.h"
+#include "Utils.h"
 
 namespace Elastos {
 namespace Droid {
 namespace DevSamples {
 namespace ContentProviderDemo {
 
-ECode CContentProviderOne::Initialize()
+AutoPtr<IUriMatcher> sUriMatcher;
+
+AutoPtr<IUriMatcher> CContentProviderOne::GetUriMatcher()
 {
-    return NOERROR;
+    if (sUriMatcher == NULL) {
+        CUriMatcher::New((IUriMatcher**)&sUriMatcher);
+        sUriMatcher->AddURI(Utils::AUTOHORITY, Utils::TABLE_NAME, Utils::ITEM);
+        sUriMatcher->AddURI(Utils::AUTOHORITY, Utils::TABLE_NAME + "/#", Utils::ITEM_ID);
+    }
+    return sUriMatcher;
+}
+
+ECode CContentProviderOne::constructor()
+{
+    return ContentProvider::constructor();
 }
 
 ECode CContentProviderOne::OnCreate(
     /* [out] */ Boolean* succeeded)
 {
+    VALIDATE_NOT_NULL(succeeded)
     return NOERROR;
 }
 

@@ -5,12 +5,12 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_DevSamples_ImageViewDemo_R_H__
-#define __Elastos_DevSamples_ImageViewDemo_R_H__
+#ifndef __Elastos_DevSamples_ContentProviderDemo_R_H__
+#define __Elastos_DevSamples_ContentProviderDemo_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace DevSamples {
-namespace ImageViewDemo {
+namespace ContentProviderDemo {
 class ECO_PUBLIC R {
     public: class attr {
     };
@@ -21,7 +21,11 @@ class ECO_PUBLIC R {
         public: static const int wunderland = 0x7f020003;
     };
     public: class id {
-        public: static const int ImageView = 0x7f050000;
+        public: static const int Add = 0x7f050001;
+        public: static const int Create = 0x7f050000;
+        public: static const int Delete = 0x7f050004;
+        public: static const int Query = 0x7f050002;
+        public: static const int Update = 0x7f050003;
     };
     public: class layout {
         public: static const int main = 0x7f030000;
@@ -34,4 +38,4 @@ class ECO_PUBLIC R {
 };
 };
 
-#endif // __Elastos_DevSamples_ImageViewDemo_R_H__
+#endif // __Elastos_DevSamples_ContentProviderDemo_R_H__

@@ -90,6 +90,7 @@ EXPORT_HEADERS += elastos/droid/media/MediaRouterSimpleCallback.h
 EXPORT_HEADERS += elastos/droid/media/VolumeProvider.h
 EXPORT_HEADERS += elastos/droid/media/session/MediaControllerCallback.h
 
+EXPORT_HEADERS += elastos/droid/net/Uri.h
 EXPORT_HEADERS += elastos/droid/net/ConnectivityManagerNetworkCallback.h
 EXPORT_HEADERS += elastos/droid/net/ReturnOutValue.h
 EXPORT_HEADERS += elastos/droid/net/NetworkUtils.h

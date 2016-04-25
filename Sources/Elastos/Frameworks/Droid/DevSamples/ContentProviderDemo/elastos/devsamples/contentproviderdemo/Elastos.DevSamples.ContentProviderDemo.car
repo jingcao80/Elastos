@@ -1,0 +1,61 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Database.Sqlite.ISQLiteOpenHelper;
+    using interface Elastos.Droid.Database.Sqlite.ISQLiteDatabaseCursorFactory;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace ContentProviderDemo {
+
+    class CActivityOne {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CContentProviderOne {
+        constructor();
+
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
+
+    [local]
+    class CDatabaseOpenHelper {
+        constructor(
+            [in] IContext* context);
+
+        interface ISQLiteOpenHelper;
+    }
+
+    } // namespace ContentProviderDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}

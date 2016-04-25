@@ -5,12 +5,12 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_DevSamples_ImageViewDemo_R_H__
-#define __Elastos_DevSamples_ImageViewDemo_R_H__
+#ifndef __Elastos_DevSamples_ContentResolverDemo_R_H__
+#define __Elastos_DevSamples_ContentResolverDemo_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace DevSamples {
-namespace ImageViewDemo {
+namespace ContentResolverDemo {
 class ECO_PUBLIC R {
     public: class attr {
     };
@@ -34,4 +34,4 @@ class ECO_PUBLIC R {
 };
 };
 
-#endif // __Elastos_DevSamples_ImageViewDemo_R_H__
+#endif // __Elastos_DevSamples_ContentResolverDemo_R_H__

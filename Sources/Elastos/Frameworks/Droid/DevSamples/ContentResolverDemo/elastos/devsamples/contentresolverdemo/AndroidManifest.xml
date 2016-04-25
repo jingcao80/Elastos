@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="Elastos.DevSamples.ContentResolverDemo"
+      android:versionCode="1"
+      android:versionName="1.0">
+
+    <application android:icon="@null" android:label="@string/app_name">
+        <activity android:name="Elastos.DevSamples.ContentResolverDemo.CActivityOne"
+                  android:label="@string/app_name"
+                  android:theme="@android:style/Theme.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+  <!-- "android:name" need a classname that extends Instrumentation
+    <instrumentation android:targetPackage="ContentResolverDemo" android:name="elastos.droid.devsamples.imageviewdemo.ins" />
+  -->
+</manifest>

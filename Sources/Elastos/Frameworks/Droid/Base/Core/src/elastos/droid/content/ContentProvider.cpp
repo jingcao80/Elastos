@@ -85,7 +85,7 @@ ECode ContentProvider::OpenPipeAsyncTask::DoInBackground(
 //================================================================
 // ContentProvider
 //================================================================
-const String ContentProvider::TAG("ContentProvider");
+static const String TAG("ContentProvider");
 
 pthread_key_t ContentProvider::sTlsKey;
 pthread_once_t ContentProvider::sKeyOnce = PTHREAD_ONCE_INIT;

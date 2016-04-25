@@ -16,7 +16,7 @@ namespace Droid {
 namespace Database {
 namespace Sqlite {
 
-const String SQLiteOpenHelper::TAG("SQLiteOpenHelper");
+static const String TAG("SQLiteOpenHelper");
 const Boolean SQLiteOpenHelper::DEBUG_STRICT_READONLY;
 
 CAR_INTERFACE_IMPL(SQLiteOpenHelper, Object, ISQLiteOpenHelper)
