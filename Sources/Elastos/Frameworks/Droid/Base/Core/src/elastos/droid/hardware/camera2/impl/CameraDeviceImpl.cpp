@@ -1599,7 +1599,8 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
 
     // Need a valid handler, or current thread needs to have a looper, if
     // callback is valid
-    FAIL_RETURN(CheckHandler(handler, _callback, (IHandler**)&handler))
+    AutoPtr<IHandler> newHandler;
+    FAIL_RETURN(CheckHandler(handler, _callback, (IHandler**)&newHandler))
 
     // Make sure that there all requests have at least 1 surface; all surfaces are non-null
     Int32 size;
@@ -1665,7 +1666,7 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
         if (_callback != NULL) {
             AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
             CCameraDeviceImplCaptureCallbackHolder::New(_callback,
-                    requestList, handler, repeating, (ICameraDeviceImplCaptureCallbackHolder**)&holder);
+                    requestList, newHandler, repeating, (ICameraDeviceImplCaptureCallbackHolder**)&holder);
             mCaptureCallbackMap->Put(requestId, TO_IINTERFACE(holder));
         }
         else {
@@ -1965,7 +1966,8 @@ ECode CameraDeviceImpl::CheckHandler(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    if (handler == NULL) {
+    AutoPtr<IHandler> _handler = handler;
+    if (_handler == NULL) {
         AutoPtr<ILooper> looper = Looper::GetMyLooper();
         if (looper == NULL) {
             // throw new IllegalArgumentException(
@@ -1973,9 +1975,9 @@ ECode CameraDeviceImpl::CheckHandler(
             Slogger::E("CameraDeviceImpl", "No handler given, and current thread has no looper!");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        CHandler::New(looper, (IHandler**)&handler);
+        CHandler::New(looper, (IHandler**)&_handler);
     }
-    *result = handler;
+    *result = _handler;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

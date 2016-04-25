@@ -513,7 +513,7 @@ ECode CameraCaptureSessionImpl::CaptureBurst(
 
         FAIL_RETURN(CheckNotClosed())
 
-         AutoPtr<IHandler> newHandler;
+        AutoPtr<IHandler> newHandler;
         CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
@@ -549,16 +549,16 @@ ECode CameraCaptureSessionImpl::SetRepeatingRequest(
 
         FAIL_RETURN(CheckNotClosed())
 
-        AutoPtr<IHandler> tmp = handler;
-        CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)handler);
+        AutoPtr<IHandler> newHandler;
+        CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
             // Log.v(TAG, mIdString + "setRepeatingRequest - request " + request + ", callback " +
-            //         _callback + " handler" + " " + handler);
+            //         _callback + " newHandler" + " " + newHandler);
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
-        CreateCaptureCallbackProxy(handler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
+        CreateCaptureCallbackProxy(newHandler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
         Int32 _value;
         FAIL_RETURN(mDeviceImpl->SetRepeatingRequest(request, back, mDeviceHandler, &_value))
         return AddPendingSequence(_value, value);
@@ -590,16 +590,17 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
 
         FAIL_RETURN(CheckNotClosed())
 
-        CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)handler);
+        AutoPtr<IHandler> newHandler;
+        CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
             // CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
             // Log.v(TAG, mIdString + "setRepeatingBurst - requests " + Arrays.toString(requestArray) +
-            //         ", callback " + _callback + " handler" + "" + handler);
+            //         ", callback " + _callback + " newHandler" + "" + newHandler);
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
-        CreateCaptureCallbackProxy(handler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
+        CreateCaptureCallbackProxy(newHandler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
         Int32 _value;
         FAIL_RETURN(mDeviceImpl->SetRepeatingBurst(requests, back, mDeviceHandler, &_value))
         return AddPendingSequence(_value, value);

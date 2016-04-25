@@ -11,12 +11,17 @@ namespace Hdmi {
 
 CAR_INTERFACE_IMPL(HdmiRecordSources::RecordSource, Object, IRecordSource)
 
-HdmiRecordSources::RecordSource::RecordSource(
+HdmiRecordSources::RecordSource::RecordSource()
+{
+}
+
+ECode HdmiRecordSources::RecordSource::constructor(
     /* [in] */ Int32 sourceType,
     /* [in] */ Int32 extraDataSize)
-    : mSourceType(sourceType)
-    , mExtraDataSize(extraDataSize)
 {
+    mSourceType = sourceType;
+    mExtraDataSize = extraDataSize;
+    return NOERROR;
 }
 
 ECode HdmiRecordSources::RecordSource::GetDataSize(
@@ -69,8 +74,9 @@ ECode HdmiRecordSources::OwnSource::ExtraParamToByteArray(
 }
 
 HdmiRecordSources::OwnSource::OwnSource()
-    : RecordSource(HdmiRecordSources::RECORD_SOURCE_TYPE_OWN_SOURCE, EXTRA_DATA_SIZE)
 {
+    RecordSource::constructor(HdmiRecordSources::RECORD_SOURCE_TYPE_OWN_SOURCE,
+            EXTRA_DATA_SIZE);
 }
 
 CAR_INTERFACE_IMPL_2(HdmiRecordSources::AribData, Object, IHdmiRecordSourcesAribData,
@@ -237,11 +243,11 @@ HdmiRecordSources::DigitalServiceSource::DigitalServiceSource(
     /* [in] */ Int32 identificatinoMethod,
     /* [in] */ Int32 broadcastSystem,
     /* [in] */ IHdmiRecordSourcesDigitalServiceIdentification* identification)
-    : RecordSource(RECORD_SOURCE_TYPE_DIGITAL_SERVICE, EXTRA_DATA_SIZE)
-    , mIdentificationMethod(identificatinoMethod)
+    : mIdentificationMethod(identificatinoMethod)
     , mBroadcastSystem(broadcastSystem)
     , mIdentification(identification)
 {
+    RecordSource::constructor(RECORD_SOURCE_TYPE_DIGITAL_SERVICE, EXTRA_DATA_SIZE);
 }
 
 ECode HdmiRecordSources::DigitalServiceSource::ExtraParamToByteArray(
@@ -265,11 +271,12 @@ HdmiRecordSources::AnalogueServiceSource::AnalogueServiceSource(
     /* [in] */ Int32 broadcastType,
     /* [in] */ Int32 frequency,
     /* [in] */ Int32 broadcastSystem)
-    : RecordSource(HdmiRecordSources::RECORD_SOURCE_TYPE_ANALOGUE_SERVICE, EXTRA_DATA_SIZE)
-    , mBroadcastType(broadcastType)
+    : mBroadcastType(broadcastType)
     , mFrequency(frequency)
     , mBroadcastSystem(broadcastSystem)
 {
+    RecordSource::constructor(HdmiRecordSources::RECORD_SOURCE_TYPE_ANALOGUE_SERVICE,
+            EXTRA_DATA_SIZE);
 }
 
 ECode HdmiRecordSources::AnalogueServiceSource::ExtraParamToByteArray(
@@ -294,9 +301,10 @@ CAR_INTERFACE_IMPL(HdmiRecordSources::ExternalPlugData, RecordSource,
 
 HdmiRecordSources::ExternalPlugData::ExternalPlugData(
     /* [in] */ Int32 plugNumber)
-    : RecordSource(HdmiRecordSources::RECORD_SOURCE_TYPE_EXTERNAL_PLUG, EXTRA_DATA_SIZE)
-    , mPlugNumber(plugNumber)
+    : mPlugNumber(plugNumber)
 {
+    RecordSource::constructor(HdmiRecordSources::RECORD_SOURCE_TYPE_EXTERNAL_PLUG,
+        EXTRA_DATA_SIZE);
 }
 
 HdmiRecordSources::ExternalPlugData::ExtraParamToByteArray(
@@ -316,9 +324,10 @@ CAR_INTERFACE_IMPL(HdmiRecordSources::ExternalPhysicalAddress, RecordSource,
 
 HdmiRecordSources::ExternalPhysicalAddress::ExternalPhysicalAddress(
     /* [in] */ Int32 physicalAddress)
-    : RecordSource(HdmiRecordSources::RECORD_SOURCE_TYPE_EXTERNAL_PHYSICAL_ADDRESS, EXTRA_DATA_SIZE)
-    , mPhysicalAddress(physicalAddress)
+    : mPhysicalAddress(physicalAddress)
 {
+    RecordSource::constructor(HdmiRecordSources::RECORD_SOURCE_TYPE_EXTERNAL_PHYSICAL_ADDRESS,
+            EXTRA_DATA_SIZE);
 }
 
 ECode HdmiRecordSources::ExternalPhysicalAddress::ExtraParamToByteArray(

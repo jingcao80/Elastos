@@ -1387,6 +1387,94 @@ module
 
     } // namespace Camera2
 
+    namespace Hdmi {
+        class CHdmiDeviceInfo {
+            constructor();
+
+            /**
+             * Constructor. Used to initialize the instance for CEC device.
+             *
+             * @param logicalAddress logical address of HDMI-CEC device
+             * @param physicalAddress physical address of HDMI-CEC device
+             * @param portId HDMI port ID (1 for HDMI1)
+             * @param deviceType type of device
+             * @param vendorId vendor id of device. Used for vendor specific command.
+             * @param displayName name of device
+             * @param powerStatus device power status
+             * @hide
+             */
+            constructor(
+                [in] Int32 logicalAddress,
+                [in] Int32 physicalAddress,
+                [in] Int32 portId,
+                [in] Int32 deviceType,
+                [in] Int32 vendorId,
+                [in] String displayName,
+                [in] Int32 powerStatus);
+
+            /**
+             * Constructor. Used to initialize the instance for CEC device.
+             *
+             * @param logicalAddress logical address of HDMI-CEC device
+             * @param physicalAddress physical address of HDMI-CEC device
+             * @param portId HDMI port ID (1 for HDMI1)
+             * @param deviceType type of device
+             * @param vendorId vendor id of device. Used for vendor specific command.
+             * @param displayName name of device
+             * @hide
+             */
+            constructor(
+                [in] Int32 logicalAddress,
+                [in] Int32 physicalAddress,
+                [in] Int32 portId,
+                [in] Int32 deviceType,
+                [in] Int32 vendorId,
+                [in] String displayName);
+
+            /**
+             * Constructor. Used to initialize the instance for device representing hardware port.
+             *
+             * @param physicalAddress physical address of the port
+             * @param portId HDMI port ID (1 for HDMI1)
+             * @hide
+             */
+            constructor(
+                [in] Int32 physicalAddress,
+                [in] Int32 portId);
+
+            /**
+             * Constructor. Used to initialize the instance for MHL device.
+             *
+             * @param physicalAddress physical address of HDMI device
+             * @param portId portId HDMI port ID (1 for HDMI1)
+             * @param adopterId adopter id of MHL
+             * @param devicedI device id of MHL
+             * @hide
+             */
+            constructor(
+                [in] Int32 physicalAddress,
+                [in] Int32 portId,
+                [in] Int32 adopterId,
+                [in] Int32 deviceId);
+
+            interface IHdmiDeviceInfo;
+            interface IParcelable;
+        }
+
+        singleton class CHdmiDeviceInfoHelper {
+            interface IHdmiDeviceInfoHelper;
+        }
+
+        singleton class CHdmiRecordSourcesHelper {
+            interface IHdmiRecordSourcesHelper;
+        }
+
+        singleton class CHdmiTimerRecordSourcesHelper {
+            interface IHdmiTimerRecordSourcesHelper;
+        }
+
+    } //namespace Hdmi
+
     namespace Location {
         class CActivityRecognitionHardware {
             interface IActivityRecognitionHardware;

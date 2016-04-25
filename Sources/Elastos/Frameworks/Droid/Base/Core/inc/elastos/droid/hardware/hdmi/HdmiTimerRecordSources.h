@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_DROID_HARDWARE_HDMI_HDMITIMERRECODSOURCES_H__
 #define __ELASTOS_DROID_HARDWARE_HDMI_HDMITIMERRECODSOURCES_H__
 
-#include "Elastos.Droid.Core_server.h"
+#include "elastos/droid/hardware/hdmi/HdmiRecordSources.h"
+#include "Elastos.Droid.Hardware.h"
 #include <elastos/core/Object.h>
 
 namespace Elastos {
@@ -14,111 +15,6 @@ class HdmiTimerRecordSources
     : public Object
     , public IHdmiTimerRecordSources
 {
-public:
-    class Time
-        : public TimeUnit
-        , public IHdmiTimerRecordSourcesTime
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-    private:
-        Time(
-            /* [in] */ Int32 hour,
-            /* [in] */ Int32 minute);
-    };
-
-    class Duration
-        : public TimeUnit
-        , public IHdmiTimerRecordSourcesDuration
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-    private:
-        Duration(
-            /* [in] */ Int32 hour,
-            /* [in] */ Int32 minute);
-    };
-
-    class TimerInfo
-        : public Object
-        , public IHdmiTimerRecordSourcesTimerInfo
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CARAPI ToByteArray(
-            /* [in] */ ArrayOf<Byte>* data,
-            /* [in] */ Int32 index,
-            /* [out] */ Int32* result);
-
-        CARAPI GetDataSize(
-            /* [out] */ Int32* size);
-
-    private:
-        TimerInfo(
-            /* [in] */ Int32 dayOfMonth,
-            /* [in] */ Int32 monthOfYear,
-            /* [in] */ Time* startTime,
-            /* [in] */ Duration* duration,
-            /* [in] */ Int32 recordingSequence);
-
-    private:
-        static const Int32 DAY_OF_MONTH_SIZE;
-        static const Int32 MONTH_OF_YEAR_SIZE;
-        static const Int32 START_TIME_SIZE; // 1byte for hour and 1byte for minute.
-        static const Int32 DURATION_SIZE; // 1byte for hour and 1byte for minute.
-        static const Int32 RECORDING_SEQUENCE_SIZE;
-        static const Int32 BASIC_INFO_SIZE;
-
-        /** Day of month. */
-        const Int32 mDayOfMonth;
-        /** Month of year. */
-        const Int32 mMonthOfYear;
-        /**
-         * Time of day.
-         * [Hour][Minute]. 0 &lt;= Hour &lt;= 24, 0 &lt;= Minute &lt;= 60 in BCD format.
-         */
-        AutoPtr<Time> mStartTime;
-        /**
-         * Duration. [Hour][Minute].
-         * 0 &lt;= Hour &lt;= 99, 0 &lt;= Minute &lt;= 60 in BCD format.
-         * */
-        AutoPtr<Duration> mDuration;
-        /**
-         * Indicates if recording is repeated and, if so, on which days. For repeated recordings,
-         * the recording sequence value is the bitwise OR of the days when recordings are required.
-         * [Recording Sequence] shall be set to 0x00 when the recording is not repeated. Bit 7 is
-         * reserved and shall be set to zero.
-         */
-        Int32 mRecordingSequence;
-    };
-
-    class TimerRecordSource
-        : public Object
-        , public ITimerRecordSource
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CARAPI GetDataSize(
-            /* [out] */ Int32* size);
-
-        CARAPI ToByteArray(
-            /* [in] */ ArrayOf<Byte>* data,
-            /* [in] */ Int32 index,
-            /* [out] */ Int32* result);
-    private:
-        TimerRecordSource(
-            /* [in] */ TimerInfo* timerInfo,
-            /* [in] */ IRecordSource* recordSource);
-
-    private:
-        AutoPtr<IRecordSource> mRecordSource;
-        AutoPtr<TimerInfo> mTimerInfo;
-    };
-
 private:
     class TimeUnit
         : public Object
@@ -144,8 +40,122 @@ private:
         Int32 mMinute;
     };
 
+public:
+    class Time
+        : public TimeUnit
+        , public IHdmiTimerRecordSourcesTime
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+    private:
+        friend class HdmiTimerRecordSources;
+
+        Time(
+            /* [in] */ Int32 hour,
+            /* [in] */ Int32 minute);
+    };
+
+    class Duration
+        : public TimeUnit
+        , public IHdmiTimerRecordSourcesDuration
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+    private:
+        friend class HdmiTimerRecordSources;
+
+        Duration(
+            /* [in] */ Int32 hour,
+            /* [in] */ Int32 minute);
+    };
+
+    class TimerInfo
+        : public Object
+        , public IHdmiTimerRecordSourcesTimerInfo
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI ToByteArray(
+            /* [in] */ ArrayOf<Byte>* data,
+            /* [in] */ Int32 index,
+            /* [out] */ Int32* result);
+
+        CARAPI GetDataSize(
+            /* [out] */ Int32* size);
+
+    private:
+        friend class HdmiTimerRecordSources;
+
+        TimerInfo(
+            /* [in] */ Int32 dayOfMonth,
+            /* [in] */ Int32 monthOfYear,
+            /* [in] */ IHdmiTimerRecordSourcesTime* startTime,
+            /* [in] */ IHdmiTimerRecordSourcesDuration* duration,
+            /* [in] */ Int32 recordingSequence);
+
+    private:
+        static const Int32 DAY_OF_MONTH_SIZE;
+        static const Int32 MONTH_OF_YEAR_SIZE;
+        static const Int32 START_TIME_SIZE; // 1byte for hour and 1byte for minute.
+        static const Int32 DURATION_SIZE; // 1byte for hour and 1byte for minute.
+        static const Int32 RECORDING_SEQUENCE_SIZE;
+        static const Int32 BASIC_INFO_SIZE;
+
+        /** Day of month. */
+        const Int32 mDayOfMonth;
+        /** Month of year. */
+        const Int32 mMonthOfYear;
+        /**
+         * Time of day.
+         * [Hour][Minute]. 0 &lt;= Hour &lt;= 24, 0 &lt;= Minute &lt;= 60 in BCD format.
+         */
+        AutoPtr<IHdmiTimerRecordSourcesTime> mStartTime;
+        /**
+         * Duration. [Hour][Minute].
+         * 0 &lt;= Hour &lt;= 99, 0 &lt;= Minute &lt;= 60 in BCD format.
+         * */
+        AutoPtr<IHdmiTimerRecordSourcesDuration> mDuration;
+        /**
+         * Indicates if recording is repeated and, if so, on which days. For repeated recordings,
+         * the recording sequence value is the bitwise OR of the days when recordings are required.
+         * [Recording Sequence] shall be set to 0x00 when the recording is not repeated. Bit 7 is
+         * reserved and shall be set to zero.
+         */
+        Int32 mRecordingSequence;
+    };
+
+    class TimerRecordSource
+        : public Object
+        , public ITimerRecordSource
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI GetDataSize(
+            /* [out] */ Int32* size);
+
+        CARAPI ToByteArray(
+            /* [in] */ ArrayOf<Byte>* data,
+            /* [in] */ Int32 index,
+            /* [out] */ Int32* result);
+    private:
+        friend class HdmiTimerRecordSources;
+
+        TimerRecordSource(
+            /* [in] */ IHdmiTimerRecordSourcesTimerInfo* timerInfo,
+            /* [in] */ IRecordSource* recordSource);
+
+    private:
+        AutoPtr<IRecordSource> mRecordSource;
+        AutoPtr<IHdmiTimerRecordSourcesTimerInfo> mTimerInfo;
+    };
+
+private:
     class ExternalSourceDecorator
-        : public RecordSource
+        : public HdmiRecordSources::RecordSource
     {
     public:
         CARAPI ExtraParamToByteArray(
@@ -154,9 +164,11 @@ private:
             /* [out] */ Int32* array);
 
     private:
+        friend class HdmiTimerRecordSources;
+
         ExternalSourceDecorator(
             /* [in] */ IRecordSource* recordSource,
-            /* [in] */ Int32 externalSourceSpecifier)
+            /* [in] */ Int32 externalSourceSpecifier);
 
     private:
         AutoPtr<IRecordSource> mRecordSource;
@@ -166,7 +178,7 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    virtual ~HdmiClient() {}
+    virtual ~HdmiTimerRecordSources() {}
 
     /**
      * Create {@link TimerRecordSource} for digital source which is used for &lt;Set Digital

@@ -1,5 +1,8 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiTimerRecordSources.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -69,8 +72,8 @@ CAR_INTERFACE_IMPL(HdmiTimerRecordSources::TimerInfo, Object, IHdmiTimerRecordSo
 HdmiTimerRecordSources::TimerInfo::TimerInfo(
     /* [in] */ Int32 dayOfMonth,
     /* [in] */ Int32 monthOfYear,
-    /* [in] */ Time* startTime,
-    /* [in] */ Duration* duration,
+    /* [in] */ IHdmiTimerRecordSourcesTime* startTime,
+    /* [in] */ IHdmiTimerRecordSourcesDuration* duration,
     /* [in] */ Int32 recordingSequence)
     : mDayOfMonth(dayOfMonth)
     , mMonthOfYear(monthOfYear)
@@ -95,9 +98,9 @@ ECode HdmiTimerRecordSources::TimerInfo::ToByteArray(
     index += MONTH_OF_YEAR_SIZE;
     // [Start Time]
     Int32 res;
-    mStartTime->ToByteArray(data, index, &res);
+    IHdmiTimerRecordSourcesTimeUnit::Probe(mStartTime)->ToByteArray(data, index, &res);
     index += res;
-    mDuration.toByteArray(data, index, &res);
+    IHdmiTimerRecordSourcesTimeUnit::Probe(mDuration)->ToByteArray(data, index, &res);
     index += res;
     // [Duration]
     // [Recording Sequence]
@@ -117,10 +120,10 @@ ECode HdmiTimerRecordSources::TimerInfo::GetDataSize(
 CAR_INTERFACE_IMPL(HdmiTimerRecordSources::TimerRecordSource, Object, ITimerRecordSource)
 
 HdmiTimerRecordSources::TimerRecordSource::TimerRecordSource(
-    /* [in] */ TimerInfo* timerInfo,
+    /* [in] */ IHdmiTimerRecordSourcesTimerInfo* timerInfo,
     /* [in] */ IRecordSource* recordSource)
-    : mTimerInfo(timerInfo)
-    , mRecordSource(recordSource)
+    : mRecordSource(recordSource)
+    , mTimerInfo(timerInfo)
 {
 }
 
@@ -142,7 +145,7 @@ CARAPI HdmiTimerRecordSources::TimerRecordSource::ToByteArray(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(size);
+    VALIDATE_NOT_NULL(result);
 
     // Basic infos including [Day of Month] [Month of Year] [Start Time] [Duration]
     // [Recording Sequence]
@@ -163,7 +166,8 @@ HdmiTimerRecordSources::ExternalSourceDecorator::ExternalSourceDecorator(
     // External source has one byte field for [External Source Specifier].
     Int32 size;
     recordSource->GetDataSize(FALSE, &size);
-    RecordSource(((RecordSource*)recordSource.Get())->mSourceType, size + 1);
+    HdmiRecordSources::RecordSource* _recordSource = (HdmiRecordSources::RecordSource*)recordSource;
+    HdmiRecordSources::RecordSource::constructor(_recordSource->mSourceType, size + 1);
 }
 
 HdmiTimerRecordSources::ExternalSourceDecorator::ExtraParamToByteArray(
@@ -203,8 +207,8 @@ ECode HdmiTimerRecordSources::OfDigitalSource(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, source))
-    AutoPtr<ITimerRecordSource> tmp = new TimerRecordSource(timerInfo, source);
+    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, IRecordSource::Probe(source)))
+    AutoPtr<ITimerRecordSource> tmp = new TimerRecordSource(timerInfo, IRecordSource::Probe(source));
     *result = tmp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -218,8 +222,8 @@ ECode HdmiTimerRecordSources::OfAnalogueSource(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, source))
-    AutoPtr<ITimerRecordSource> tmp = new TimerRecordSource(timerInfo, source);
+    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, IRecordSource::Probe(source)))
+    AutoPtr<ITimerRecordSource> tmp = new TimerRecordSource(timerInfo, IRecordSource::Probe(source));
     *result = tmp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -233,8 +237,8 @@ ECode HdmiTimerRecordSources::OfExternalPlug(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, source))
-    AutoPtr<ExternalSourceDecorator> decorator = new ExternalSourceDecorator(source,
+    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, IRecordSource::Probe(source)))
+    AutoPtr<IRecordSource> decorator = new ExternalSourceDecorator(IRecordSource::Probe(source),
             EXTERNAL_SOURCE_SPECIFIER_EXTERNAL_PLUG);
 
     AutoPtr<ITimerRecordSource> tmp = new TimerRecordSource(timerInfo, decorator);
@@ -251,8 +255,8 @@ ECode HdmiTimerRecordSources::OfExternalPhysicalAddress(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, source))
-    AutoPtr<ExternalSourceDecorator> decorator = new ExternalSourceDecorator(source,
+    FAIL_RETURN(CheckTimerRecordSourceInputs(timerInfo, IRecordSource::Probe(source)))
+    AutoPtr<IRecordSource> decorator = new ExternalSourceDecorator(IRecordSource::Probe(source),
                     EXTERNAL_SOURCE_SPECIFIER_EXTERNAL_PHYSICAL_ADDRESS);
     AutoPtr<ITimerRecordSource> tmp = new TimerRecordSource(timerInfo, decorator);
     *result = tmp;
@@ -305,7 +309,7 @@ ECode HdmiTimerRecordSources::CheckTimeValue(
     }
     if (minute < 0 || minute > 59) {
         //throw new IllegalArgumentException("Minute should be in rage of [0, 59]:" + minute);
-        Slogger::E(TAG, "Minute should be in rage of [0, 59]:%d", minut);
+        Slogger::E(TAG, "Minute should be in rage of [0, 59]:%d", minute);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -366,8 +370,10 @@ ECode HdmiTimerRecordSources::TimerInfoOf(
         Slogger::E(TAG, "Month of year should be in range of [1, 12]:%d", monthOfYear);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    FAIL_RETURN(CheckTimeValue(startTime.mHour, startTime.mMinute))
-    FAIL_RETURN(CheckDurationValue(duration.mHour, duration.mMinute))
+    HdmiTimerRecordSources::Time* _startTime = (HdmiTimerRecordSources::Time*)startTime;
+    FAIL_RETURN(CheckTimeValue(_startTime->mHour, _startTime->mMinute))
+    HdmiTimerRecordSources::Duration* _duration = (HdmiTimerRecordSources::Duration*)duration;
+    FAIL_RETURN(CheckDurationValue(_duration->mHour, _duration->mMinute))
     // Recording sequence should use least 7 bits or no bits.
     if ((recordingSequence != 0)
             && ((recordingSequence & ~RECORDING_SEQUENCE_REPEAT_MASK) != 0)) {
@@ -392,7 +398,7 @@ ECode HdmiTimerRecordSources::CheckTimerRecordSource(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    Int32 recordSourceSize = recordSource->GetLength() - ITimerInfo::BASIC_INFO_SIZE;
+    Int32 recordSourceSize = recordSource->GetLength() - TimerInfo::BASIC_INFO_SIZE;
     switch (sourcetype) {
         case IHdmiControlManager::TIMER_RECORDING_TYPE_DIGITAL:
             *result = IHdmiRecordSourcesDigitalServiceSource::EXTRA_DATA_SIZE == recordSourceSize;
@@ -401,7 +407,8 @@ ECode HdmiTimerRecordSources::CheckTimerRecordSource(
             *result = IHdmiRecordSourcesAnalogueServiceSource::EXTRA_DATA_SIZE == recordSourceSize;
             return NOERROR;
         case IHdmiControlManager::TIMER_RECORDING_TYPE_EXTERNAL:
-            Int32 specifier = (*recordSource)[ITimerInfo::BASIC_INFO_SIZE];
+        {
+            Int32 specifier = (*recordSource)[TimerInfo::BASIC_INFO_SIZE];
             if (specifier == EXTERNAL_SOURCE_SPECIFIER_EXTERNAL_PLUG) {
                 // One byte for specifier.
                 *result = IHdmiRecordSourcesExternalPlugData::EXTRA_DATA_SIZE + 1 == recordSourceSize;
@@ -417,6 +424,7 @@ ECode HdmiTimerRecordSources::CheckTimerRecordSource(
                 *result = FALSE;
                 return NOERROR;
             }
+        }
         default:
             *result = FALSE;
             return NOERROR;

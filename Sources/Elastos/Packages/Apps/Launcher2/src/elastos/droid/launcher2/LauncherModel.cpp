@@ -3914,13 +3914,14 @@ ECode LauncherModel::AddShortcut(
 {
     VALIDATE_NOT_NULL(sinfo);
 
-    AutoPtr<ShortcutInfo> info;
+    AutoPtr<IShortcutInfo> info;
     InfoFromShortcutIntent(context, data, NULL, (IShortcutInfo**)&info);
     if (info == NULL) {
         *sinfo = NULL;
         return NOERROR;
     }
-    AddItemToDatabase(context, info, container, screen, cellX, cellY, notify);
+    AddItemToDatabase(context, (ItemInfo*)IItemInfo::Probe(info), container, screen,
+            cellX, cellY, notify);
 
     *sinfo = info;
     REFCOUNT_ADD(*sinfo);

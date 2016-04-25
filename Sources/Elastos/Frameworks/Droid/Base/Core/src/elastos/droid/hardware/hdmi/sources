@@ -14,5 +14,11 @@ SOURCES += HdmiPortInfo.cpp
 SOURCES += HdmiRecordListener.cpp
 SOURCES += HdmiControlManager.cpp
 SOURCES += HdmiDeviceInfo.cpp
+SOURCES += CHdmiDeviceInfoHelper.cpp
 SOURCES += HdmiTvClient.cpp
 SOURCES += HdmiRecordSources.cpp
+SOURCES += CHdmiRecordSourcesHelper.cpp
+SOURCES += HdmiTimerRecordSources.cpp
+SOURCES += CHdmiTimerRecordSourcesHelper.cpp
+
+SOURCES += hdmi.cpp

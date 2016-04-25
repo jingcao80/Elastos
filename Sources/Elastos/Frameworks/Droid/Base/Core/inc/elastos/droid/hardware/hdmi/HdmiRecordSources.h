@@ -25,7 +25,9 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        RecordSource(
+        RecordSource();
+
+        CARAPI constructor(
             /* [in] */ Int32 sourceType,
             /* [in] */ Int32 extraDataSize);
 
@@ -46,7 +48,7 @@ public:
             /* [in] */ Int32 index,
             /* [out] */ Int32* result);
 
-    protected:
+    public:
         Int32 mSourceType;
         Int32 mExtraDataSize;
     };
