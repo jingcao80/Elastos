@@ -4,7 +4,7 @@ EXPORT_HEADERS += elastos/droid/Manifest.h
 
 EXPORT_HEADERS += elastos/droid/app/Activity.h
 EXPORT_HEADERS += elastos/droid/app/AppGlobals.h
-//EXPORT_HEADERS += elastos/droid/app/ListActivity.h
+EXPORT_HEADERS += elastos/droid/app/ListActivity.h
 EXPORT_HEADERS += elastos/droid/app/Fragment.h
 EXPORT_HEADERS += elastos/droid/app/DialogFragment.h
 //EXPORT_HEADERS += elastos/droid/app/FragmentMacro.h
@@ -124,7 +124,7 @@ EXPORT_HEADERS += elastos/droid/provider/Settings.h
 EXPORT_HEADERS += elastos/droid/provider/SearchIndexableData.h
 EXPORT_HEADERS += elastos/droid/provider/DocumentsProvider.h
 
-//EXPORT_HEADERS += elastos/droid/preference/PreferenceActivity.h
+EXPORT_HEADERS += elastos/droid/preference/PreferenceActivity.h
 EXPORT_HEADERS += elastos/droid/preference/Preference.h
 EXPORT_HEADERS += elastos/droid/preference/PreferenceFragment.h
 EXPORT_HEADERS += elastos/droid/preference/TwoStatePreference.h

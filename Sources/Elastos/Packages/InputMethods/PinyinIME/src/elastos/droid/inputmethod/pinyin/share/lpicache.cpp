@@ -15,7 +15,7 @@
  */
 
 #include <assert.h>
-#include "include/lpicache.h"
+#include "lpicache.h"
 
 namespace ime_pinyin {
 

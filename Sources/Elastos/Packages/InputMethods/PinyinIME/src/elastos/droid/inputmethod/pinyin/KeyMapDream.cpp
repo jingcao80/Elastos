@@ -1,5 +1,6 @@
 
-#include "KeyMapDream.h"
+#include "Elastos.Droid.View.h"
+#include "elastos/droid/inputmethod/pinyin/KeyMapDream.h"
 
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::CKeyEventHelper;
@@ -11,7 +12,7 @@ namespace InputMethod {
 namespace Pinyin {
 
 const Int32 KeyMapDream::SHIFT_FWCH;
-const Int32 KeyMapDream::mKeyMap[] = {
+const Int32 KeyMapDream::sKeyMap[] = {
     IKeyEvent::KEYCODE_UNKNOWN,
     IKeyEvent::KEYCODE_SOFT_LEFT,
     IKeyEvent::KEYCODE_SOFT_RIGHT,
@@ -94,8 +95,8 @@ Char32 KeyMapDream::GetChineseLabel(
     Int32 maxKeyCode = 0;
     helper->GetMaxKeyCode(&maxKeyCode);
     if (keyCode <= 0 || keyCode >= maxKeyCode) return 0;
-    assert ((mKeyMap[keyCode] & 0x000000ff) == keyCode);
-    return (Char32) (mKeyMap[keyCode] >> SHIFT_FWCH);
+    assert ((sKeyMap[keyCode] & 0x000000ff) == keyCode);
+    return (Char32) (sKeyMap[keyCode] >> SHIFT_FWCH);
 }
 
 } // namespace Pinyin

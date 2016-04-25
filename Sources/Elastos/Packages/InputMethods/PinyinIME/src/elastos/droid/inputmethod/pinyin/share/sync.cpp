@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "include/sync.h"
+#include "sync.h"
 #include <assert.h>
 #include <string.h>
 

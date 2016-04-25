@@ -2,8 +2,9 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSETTINGACTIVITY_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSETTINGACTIVITY_H__
 
-#include "_CSettingsActivity.h"
-#include "preference/PreferenceActivity.h"
+#include <elastos/droid/ext/frameworkdef.h>
+#include "_Elastos_Droid_InputMethod_Pinyin_CSettingsActivity.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
 
 using Elastos::Droid::Preference::PreferenceActivity;
 using Elastos::Droid::Preference::ICheckBoxPreference;
@@ -12,7 +13,6 @@ using Elastos::Droid::Preference::IPreferenceGroup;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceScreen;
 using Elastos::Droid::Preference::IPreferenceFragment;
-using Elastos::Droid::Inputmethods::PinyinIME::ISettings;
 using Elastos::Droid::View::IViewOnClickListener;
 
 namespace Elastos {
@@ -28,35 +28,17 @@ class CSettingsActivity
     , public IPreferenceOnPreferenceChangeListener
 {
 public:
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
+    CAR_OBJECT_DECL();
 
-    CARAPI_(UInt32) AddRef();
+    CAR_INTERFACE_DECL();
 
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID);
+    CARAPI_(Boolean) OnPreferenceChange(
+        /* [in] */ IPreference* preference,
+        /* [in] */ IInterface* newValue);
 
     CARAPI_(void) UpdatePreference(
         /* [in] */ IPreferenceGroup* parentPref,
         /* [in] */ const String& prefKey);
-
-    CARAPI OnPreferenceChange(
-        /* [in] */ IPreference* preference,
-        /* [in] */ IInterface* newValue,
-        /* [out] */ Boolean* change);
-
-    CARAPI OnPreferenceTreeClick(
-        /* [in] */ IPreferenceScreen* preferenceScreen,
-        /* [in] */ IPreference* preference,
-        /* [out] */ Boolean* result);
-
-    CARAPI OnPreferenceStartFragment(
-        /* [in] */ IPreferenceFragment* caller,
-        /* [in] */ IPreference* pref,
-        /* [out] */ Boolean* result);
 
 protected:
     CARAPI OnCreate(
@@ -64,9 +46,9 @@ protected:
 
     CARAPI OnResume();
 
-    CARAPI OnPause();
-
     CARAPI OnDestroy();
+
+    CARAPI OnPause();
 
 private:
     CARAPI_(void) UpdateWidgets();
@@ -77,7 +59,6 @@ private:
     AutoPtr<ICheckBoxPreference> mKeySoundPref;
     AutoPtr<ICheckBoxPreference> mVibratePref;
     AutoPtr<ICheckBoxPreference> mPredictionPref;
-    AutoPtr<ISettings> mSettings;
 };
 
 } // namespace Pinyin

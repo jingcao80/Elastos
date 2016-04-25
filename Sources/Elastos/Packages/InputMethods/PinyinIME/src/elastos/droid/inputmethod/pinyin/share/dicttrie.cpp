@@ -17,11 +17,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "include/dicttrie.h"
-#include "include/dictbuilder.h"
-#include "include/lpicache.h"
-#include "include/mystdlib.h"
-#include "include/ngram.h"
+#include "dicttrie.h"
+#include "dictbuilder.h"
+#include "lpicache.h"
+#include "mystdlib.h"
+#include "ngram.h"
 
 namespace ime_pinyin {
 

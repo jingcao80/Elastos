@@ -1,14 +1,14 @@
 
-#include "CPinyinDecoderService.h"
-#include <string.h>
-#include <unistd.h>
-#include "include/pinyinime.h"
-#include "include/sync.h"
-#include "include/userdict.h"
-#include "CIPinyinDecoderService.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "elastos/droid/inputmethod/pinyin/CPinyinDecoderService.h"
+#include "elastos/droid/inputmethod/pinyin/CIPinyinDecoderService.h"
+#include "elastos/droid/inputmethod/pinyin/native/pinyinime.h"
+#include "elastos/droid/inputmethod/pinyin/native/sync.h"
+#include "elastos/droid/inputmethod/pinyin/native/userdict.h"
 #include "R.h"
 
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
+using Elastos::IO::ICloseable;
 using namespace ime_pinyin;
 
 #define RET_BUF_LEN 256
@@ -24,6 +24,8 @@ namespace Pinyin {
 
 const Int32 CPinyinDecoderService::MAX_PATH_FILE_LENGTH = 100;
 Boolean CPinyinDecoderService::sInited = FALSE;
+
+CAR_OBJECT_IMPL(CPinyinDecoderService);
 
 CPinyinDecoderService::CPinyinDecoderService()
 {
@@ -287,7 +289,7 @@ String CPinyinDecoderService::NativeSyncGetLemmas()
 Int32 CPinyinDecoderService::NativeSyncPutLemmas(
     /* [in] */ const String& tomerge)
 {
-    AutoPtr<ArrayOf<char16> > ptr = StringToChar16Array(tomerge);
+    AutoPtr<ArrayOf<char16> > ptr = tomerge.GetChar16s();
     Int32 len = (size_t)ptr->GetLength();
 
     return sync_worker.put_lemmas(ptr->GetPayload(), len);
@@ -328,7 +330,7 @@ Boolean CPinyinDecoderService::GetUsrDictFileName(
     return TRUE;
 }
 
-ECode CPinyinDecoderService::InitPinyinEngine()
+void CPinyinDecoderService::InitPinyinEngine()
 {
     AutoPtr<ArrayOf<Byte> > usr_dict;
     usr_dict = ArrayOf<Byte>::Alloc(MAX_PATH_FILE_LENGTH);
@@ -354,11 +356,10 @@ ECode CPinyinDecoderService::InitPinyinEngine()
         Int64 offset = 0, length = 0;
         afd->GetStartOffset(&offset);
         afd->GetLength(&length);
-        sInited = nativeImOpenDecoderFd(fd, offset, length, usr_dict);
+        sInited = NativeImOpenDecoderFd(fd, offset, length, usr_dict);
     }
 
     afd->Close();
-    return NOERROR;
 }
 
 ECode CPinyinDecoderService::OnCreate()
@@ -371,9 +372,10 @@ ECode CPinyinDecoderService::OnCreate()
     // created.
     AutoPtr<IFileOutputStream> stream;
     OpenFileOutput(String("dummy"), 0, (IFileOutputStream**)&stream);
-    stream->Close();
+    ICloseable::Probe(stream)->Close();
 
-    return InitPinyinEngine();
+    InitPinyinEngine();
+    return NOERROR;
 }
 
 ECode CPinyinDecoderService::OnDestroy()

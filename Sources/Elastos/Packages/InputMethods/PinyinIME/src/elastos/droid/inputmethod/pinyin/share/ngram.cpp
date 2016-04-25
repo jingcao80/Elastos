@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "include/mystdlib.h"
-#include "include/ngram.h"
+#include "mystdlib.h"
+#include "ngram.h"
 
 namespace ime_pinyin {
 

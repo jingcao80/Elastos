@@ -17,13 +17,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "include/dictdef.h"
+#include "dictdef.h"
 
 #ifdef ___BUILD_MODEL___
-#include "include/spellingtable.h"
+#include "spellingtable.h"
 #endif
 
-#include "include/spellingtrie.h"
+#include "spellingtrie.h"
 
 namespace ime_pinyin {
 

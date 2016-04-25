@@ -20,6 +20,8 @@ CarClass(CPinyinDecoderService)
     , public Elastos::Droid::App::Service
 {
 public:
+    CAR_OBJECT_DECL();
+
     CPinyinDecoderService();
 
     CARAPI constructor();
@@ -37,7 +39,7 @@ private:
     CARAPI_(Boolean) GetUsrDictFileName(
         /* [in, out] */ ArrayOf<Byte>* usr_dict);
 
-    CARAPI InitPinyinEngine();
+    CARAPI_(void) InitPinyinEngine();
 
     static CARAPI_(String) Char16ArrayToString(
         /* [in] */ Char16* buf,
@@ -130,6 +132,7 @@ private:
     static Boolean sInited;
 
     String mUsr_dict_file;
+
     AutoPtr<IPinyinDecoderService> mBinder;
 
     friend class CIPinyinDecoderService;

@@ -22,8 +22,13 @@ SOURCES += CCandidatesContainer.cpp
 SOURCES += CComposingView.cpp
 SOURCES += CIPinyinDecoderService.cpp
 SOURCES += CPinyinDecoderService.cpp
+SOURCES += EnglishInputProcessor.cpp
+SOURCES += KeyMapDream.cpp
+SOURCES += Settings.cpp
+SOURCES += CSettingsActivity.cpp
+SOURCES += CSkbContainer.cpp
 
-#SOURCES += CPinyinSettings.cpp
+
 #SOURCES += CSoundManager.cpp
 #SOURCES += CSoundManagerHelper.cpp
 #SOURCES += SkbPool.cpp
@@ -34,14 +39,10 @@ SOURCES += CPinyinDecoderService.cpp
 
 #SOURCES += SoftKeyboard.cpp
 #SOURCES += CPinyinCandidateView.cpp
-#SOURCES += CSkbContainer.cpp
 #SOURCES += CSoftKeyboardView.cpp
 #SOURCES += CPinyinGestureListener.cpp
-#SOURCES += EnglishInputProcessor.cpp
-#SOURCES += KeyMapDream.cpp
 
 #SOURCES += CPinyinIME.cpp
-#SOURCES += CSettingsActivity.cpp
 #SOURCES += Elastos.Droid.Core.cpp
 #SOURCES += Org.Kxml2.IO.cpp
 #SOURCES += Elastos.CoreLibrary.cpp

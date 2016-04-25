@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "include/utf16reader.h"
+#include "utf16reader.h"
 
 namespace ime_pinyin {
 

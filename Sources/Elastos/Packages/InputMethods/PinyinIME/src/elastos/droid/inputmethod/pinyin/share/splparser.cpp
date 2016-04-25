@@ -15,7 +15,7 @@
  */
 
 #include <assert.h>
-#include "include/splparser.h"
+#include "splparser.h"
 
 namespace ime_pinyin {
 

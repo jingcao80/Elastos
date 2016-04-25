@@ -1,31 +1,30 @@
 
-#include "CSkbContainer.h"
-#include "elastos/droid/view/CMotionEventHelper.h"
-#include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/os/CSystemProperties.h"
-#include "elastos/droid/widget/CPopupWindow.h"
-#include "SoftKeyboard.h"
-#include "SkbPool.h"
-#include "CPinyinEnvironmentHelper.h"
-#include "CBalloonHint.h"
-#include "CSoftKeyboardView.h"
+#include "elastos/droid/inputmethod/pinyin/CSkbContainer.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
+#include "elastos/droid/inputmethod/pinyin/SkbPool.h"
+#include "elastos/droid/inputmethod/pinyin/CBalloonHint.h"
+#include "elastos/droid/inputmethod/pinyin/CSoftKeyboardView.h"
+#include <elastos/droid/os/SystemClock.h>
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::View::EIID_IView;
-using Elastos::Droid::View::EIID_IViewOnTouchListener;
-using Elastos::Droid::View::CMotionEventHelper;
-using Elastos::Droid::View::IMotionEventHelper;
-using Elastos::Droid::View::IGravity;
-using Elastos::Droid::Widget::CPopupWindow;
+// using Elastos::Droid::Os::ISystemProperties;
+// using Elastos::Droid::Os::CSystemProperties;
+// using Elastos::Droid::View::EIID_IView;
+// using Elastos::Droid::View::EIID_IViewOnTouchListener;
+// using Elastos::Droid::View::CMotionEventHelper;
+// using Elastos::Droid::View::IMotionEventHelper;
+// using Elastos::Droid::View::IGravity;
+// using Elastos::Droid::Widget::CPopupWindow;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+//=====================================================
+// CSkbContainer::LongPressTimer
+//=====================================================
 const Int32 CSkbContainer::LongPressTimer::LONG_PRESS_TIMEOUT1 = 500;
 const Int32 CSkbContainer::LongPressTimer::LONG_PRESS_TIMEOUT2 = 100;
 const Int32 CSkbContainer::LongPressTimer::LONG_PRESS_TIMEOUT3 = 100;
@@ -36,13 +35,12 @@ CSkbContainer::LongPressTimer::LongPressTimer(
     /* [in] */ CSkbContainer* skbContainer)
     : mSkbContainer(skbContainer)
     , mResponseTimes(0)
-{
-}
+{}
 
 void CSkbContainer::LongPressTimer::StartTimer()
 {
     Boolean result;
-    PostDelayed(this, LONG_PRESS_TIMEOUT1, &result);
+    postAtTime(this, SystemClock::GetUptimeMillis() + LONG_PRESS_TIMEOUT1, &result);
     mResponseTimes = 0;
 }
 
@@ -79,9 +77,8 @@ ECode CSkbContainer::LongPressTimer::Run()
                 else {
                     timeout = LONG_PRESS_TIMEOUT3;
                 }
-
                 Boolean result;
-                PostDelayed(this, timeout, &result);
+                postAtTime(this, SystemClock::GetUptimeMillis() + timeout, &result);
             }
         }
         else {
@@ -90,17 +87,20 @@ ECode CSkbContainer::LongPressTimer::Run()
             }
         }
     }
-
     return NOERROR;
 }
 
 
-//class CSkbContainer
+//=====================================================
+// CSkbContainer
+//=====================================================
 const Int32 CSkbContainer::Y_BIAS_CORRECTION = -10;
 const Int32 CSkbContainer::MOVE_TOLERANCE = 6;
 Boolean CSkbContainer::POPUPWINDOW_FOR_PRESSED_UI = FALSE;
+
 CAR_OBJECT_IMPL(CSkbContainer);
-CAR_INTERFACE_IMPL(CSkbContainer, RelativeLayout, ISkbContainer);
+
+CAR_INTERFACE_IMPL_2(CSkbContainer, RelativeLayout, ISkbContainer, IViewOnTouchListener);
 
 CSkbContainer::CSkbContainer()
     : mSkbLayout(0)
@@ -119,44 +119,65 @@ CSkbContainer::CSkbContainer()
     memset(mXyPosTmp, 0, sizeof(mXyPosTmp));
 }
 
-ECode CSkbContainer::SetService(
+ECode CSkbContainer::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    FAIL_RETURN(RelativeLayout::constructor(context, attrs));
+
+    mEnvironment = Environment::GetInstance();
+
+    mLongPressTimer = new LongPressTimer(this);
+
+    // If it runs on an emulator, no bias correction
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    String temp;
+    sp->Get(String("ro.kernel.qemu"), &temp);
+    if (String("1").Equals(temp)) {
+        mYBiasCorrection = 0;
+    }
+    else {
+        mYBiasCorrection = Y_BIAS_CORRECTION;
+    }
+    CBalloonHint::New(context, this, MeasureSpec::AT_MOST, (IBalloonHint**)&mBalloonPopup);
+    if (POPUPWINDOW_FOR_PRESSED_UI) {
+        CBalloonHint::New(context, this, MeasureSpec::AT_MOST, (IBalloonHint**)&mBalloonOnKey);
+    }
+
+    CPopupWindow::New(mContext, (IPopupWindow**)&mPopupSkb);
+    mPopupSkb->SetBackgroundDrawable(NULL);
+    mPopupSkb->SetClippingEnabled(FALSE);
+    return NOERROR;
+}
+
+void CSkbContainer::SetService(
     /* [in] */ IInputMethodService* service)
 {
     mService = service;
-    return NOERROR;
 }
 
-ECode CSkbContainer::SetInputModeSwitcher(
-    /* [in] */ IInputModeSwitcher* inputModeSwitcher)
+void CSkbContainer::SetInputModeSwitcher(
+    /* [in] */ InputModeSwitcher* inputModeSwitcher)
 {
     mInputModeSwitcher = inputModeSwitcher;
-    return NOERROR;
 }
 
-ECode CSkbContainer::SetGestureDetector(
+void CSkbContainer::SetGestureDetector(
     /* [in] */ IGestureDetector* gestureDetector)
 {
     mGestureDetector = gestureDetector;
-    return NOERROR;
 }
 
-ECode CSkbContainer::IsCurrentSkbSticky(
-    /* [out] */ Boolean* result)
+Boolean CSkbContainer::IsCurrentSkbSticky()
 {
-    VALIDATE_NOT_NULL(result);
-    if (NULL == mMajorView) {
-        *result = TRUE;
-        return NOERROR;
-    }
+    if (NULL == mMajorView) return TRUE;
 
-    AutoPtr<ISoftKeyboard> skb;
-    mMajorView->GetSoftKeyboard((ISoftKeyboard**)&skb);
+    AutoPtr<SoftKeyboard> skb = mMajorView->GetSoftKeyboard();
     if (NULL != skb) {
-        *result = ((SoftKeyboard*)skb.Get())->GetStickyFlag();
+        return skb->GetStickyFlag();
     }
-
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 ECode CSkbContainer::ToggleCandidateMode(
@@ -549,51 +570,6 @@ Boolean CSkbContainer::OnTouchEvent(
     }
 
     return TRUE;
-}
-
-
-//class CSkbContainer
-PInterface CSkbContainer::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_ISkbContainer) {
-        return (IInterface*)(ISkbContainer*)this;
-    }
-
-    return RelativeLayout::Probe(riid);
-}
-
-ECode CSkbContainer::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    RelativeLayout::constructor(context);
-
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    helper->GetInstance((IPinyinEnvironment**)&mEnvironment);
-
-    mLongPressTimer = new LongPressTimer(this);
-
-    // If it runs on an emulator, no bias correction
-    AutoPtr<ISystemProperties> sp;
-    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
-    String temp;
-    sp->Get(String("ro.kernel.qemu"), &temp);
-
-    if (String("1").Equals(temp)) {
-        mYBiasCorrection = 0;
-    } else {
-        mYBiasCorrection = Y_BIAS_CORRECTION;
-    }
-    CBalloonHint::New(context, this, MeasureSpec::AT_MOST, (IBalloonHint**)&mBalloonPopup);
-    if (POPUPWINDOW_FOR_PRESSED_UI) {
-        CBalloonHint::New(context, this, MeasureSpec::AT_MOST, (IBalloonHint**)&mBalloonOnKey);
-    }
-
-    CPopupWindow::New(mContext, (IPopupWindow**)&mPopupSkb);
-    mPopupSkb->SetBackgroundDrawable(NULL);
-    return mPopupSkb->SetClippingEnabled(FALSE);
 }
 
 ECode CSkbContainer::OnTouch(

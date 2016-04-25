@@ -22,7 +22,7 @@ public:
 private:
     // Number of shift bits to store full-width symbols
     static const Int32 SHIFT_FWCH = 8;
-    static const Int32 mKeyMap[];
+    static const Int32 sKeyMap[];
 };
 
 } // namespace Pinyin

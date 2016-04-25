@@ -18,11 +18,11 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "include/lpicache.h"
-#include "include/matrixsearch.h"
-#include "include/mystdlib.h"
-#include "include/ngram.h"
-#include "include/userdict.h"
+#include "lpicache.h"
+#include "matrixsearch.h"
+#include "mystdlib.h"
+#include "ngram.h"
+#include "userdict.h"
 
 namespace ime_pinyin {
 
