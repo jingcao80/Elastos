@@ -153,6 +153,7 @@ LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(PREBUILD_LIB)/libm.a
 LIBRARIES += $(PREBUILD_LIB)/libinputservice.so
 LIBRARIES += $(PREBUILD_LIB)/libbatteryservice.a
+LIBRARIES += $(PREBUILD_LIB)/libwifi-service.so
 LIBRARIES += -licuuc -llog -lbinder -lutils -lcutils -lselinux -lsurfaceflinger -lsensorservice -lgui -lskia -landroidfw -linput -lhardware -lusbhost -lsuspend -lpower -lhardware_legacy -ldl -lnetutils -lmedia -linputflinger -lui
 
 #ELASTOS_LIBS += server/server.lib

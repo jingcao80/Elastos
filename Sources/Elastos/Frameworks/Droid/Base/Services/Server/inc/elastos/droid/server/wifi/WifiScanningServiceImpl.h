@@ -60,6 +60,12 @@ public:
             : public State
         {
         public:
+            DefaultState(
+                /* [in] */ WifiScanningStateMachine* owner)
+                : mOwner(owner)
+            {
+            }
+
             // @Override
             CARAPI Enter();
 
@@ -72,12 +78,20 @@ public:
                 return String("DefaultState");
             }
 
+        private:
+            WifiScanningStateMachine* mOwner;
         };
 
         class StartedState
             : public State
         {
         public:
+            StartedState(
+                /* [in] */ WifiScanningStateMachine* owner)
+                : mOwner(owner)
+            {
+            }
+
             // @Override
             CARAPI Enter();
 
@@ -90,12 +104,20 @@ public:
                 return String("StartedState");
             }
 
+        private:
+            WifiScanningStateMachine* mOwner;
         };
 
         class PausedState
             : public State
         {
         public:
+            PausedState(
+                /* [in] */ WifiScanningStateMachine* owner)
+                : mOwner(owner)
+            {
+            }
+
             // @Override
             CARAPI Enter();
 
@@ -108,12 +130,15 @@ public:
                 return String("PausedState");
             }
 
+        private:
+            WifiScanningStateMachine* mOwner;
         };
 
     public:
         CAR_INTERFACE_DECL();
 
         WifiScanningStateMachine(
+            /* [in] */ WifiScanningServiceImpl* owner,
             /* [in] */ ILooper* looper);
 
         // @Override
@@ -150,6 +175,7 @@ public:
         AutoPtr<DefaultState> mDefaultState;
         AutoPtr<StartedState> mStartedState;
         AutoPtr<PausedState> mPausedState;
+        WifiScanningServiceImpl* mOwner;
     };
 
     class ClientInfo
@@ -157,6 +183,7 @@ public:
     {
     public:
         ClientInfo(
+            /* [in] */ WifiScanningServiceImpl* owner,
             /* [in] */ IAsyncChannel* c,
             /* [in] */ IMessenger* m);
 
@@ -236,6 +263,7 @@ public:
         static const Int32 MAX_LIMIT = 16;
         AutoPtr<IAsyncChannel> mChannel;
         AutoPtr<IMessenger> mMessenger;
+        WifiScanningServiceImpl* mOwner;
     };
 
     class WifiChangeStateMachine
@@ -246,6 +274,12 @@ public:
         class DefaultState : public State
         {
         public:
+            DefaultState(
+                /* [in] */ WifiChangeStateMachine* owner)
+                : mOwner(owner)
+            {
+            }
+
             // @Override
             CARAPI Enter();
 
@@ -258,11 +292,19 @@ public:
                 return String("DefaultState");
             }
 
+        private:
+            WifiChangeStateMachine* mOwner;
         };
 
         class StationaryState : public State
         {
         public:
+            StationaryState(
+                /* [in] */ WifiChangeStateMachine* owner)
+                : mOwner(owner)
+            {
+            }
+
             // @Override
             CARAPI Enter();
 
@@ -275,11 +317,19 @@ public:
                 return String("StationaryState");
             }
 
+        private:
+            WifiChangeStateMachine* mOwner;
         };
 
         class MovingState : public State
         {
         public:
+            MovingState(
+                /* [in] */ WifiChangeStateMachine* owner)
+                : mOwner(owner)
+            {
+            }
+
             // @Override
             CARAPI Enter();
 
@@ -300,13 +350,16 @@ public:
         public:
             Boolean mWifiChangeDetected;
             Boolean mScanResultsPending;
+        private:
+            WifiChangeStateMachine* mOwner;
         };
 
         class ClientInfoLocal
             : public ClientInfo
         {
         public:
-            ClientInfoLocal();
+            ClientInfoLocal(
+                /* [in] */ WifiChangeStateMachine* owner);
 
             // @Override
             CARAPI DeliverScanResults(
@@ -318,6 +371,8 @@ public:
                 /* [in] */ Int32 handler,
                 /* [in] */ IWifiScannerScanSettings* settings,
                 /* [in] */ Int32 newPeriodInMs);
+        private:
+            WifiChangeStateMachine* mOwner;
         };
 
     private:
@@ -341,6 +396,7 @@ public:
         CAR_INTERFACE_DECL();
 
         WifiChangeStateMachine(
+            /* [in] */ WifiScanningServiceImpl* owner,
             /* [in] */ ILooper* looper);
 
         virtual CARAPI Enable();
@@ -372,9 +428,9 @@ public:
         virtual CARAPI UntrackSignificantWifiChange();
 
     public:
-        AutoPtr<IState> mDefaultState;
-        AutoPtr<IState> mStationaryState;
-        AutoPtr<IState> mMovingState;
+        AutoPtr<State> mDefaultState;
+        AutoPtr<State> mStationaryState;
+        AutoPtr<State> mMovingState;
         AutoPtr<IAlarmManager> mAlarmManager;
         AutoPtr<IPendingIntent> mTimeoutIntent;
         AutoPtr<ArrayOf<IScanResult*> > mCurrentBssids;
@@ -394,6 +450,7 @@ public:
         static const Int32 MOVING_STATE_TIMEOUT_MS = 30000;
         static const String ACTION_TIMEOUT;
         static const Int32 SCAN_COMMAND_ID = 1;
+        WifiScanningServiceImpl* mOwner;
     };
 
     class SettingsComputer
@@ -458,11 +515,14 @@ private:
         TO_STRING_IMPL("WifiScanningServiceImpl::ClientHandler")
 
         ClientHandler(
+            /* [in] */ WifiScanningServiceImpl* owner,
             /* [in] */ ILooper* looper);
 
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+    private:
+        WifiScanningServiceImpl* mOwner;
     };
 
     class InnerBroadcastReceiver1
@@ -504,7 +564,7 @@ public:
 
     virtual CARAPI ReplySucceeded(
         /* [in] */ IMessage* msg,
-        /* [in] */ IObject* obj);
+        /* [in] */ IInterface* obj);
 
     virtual CARAPI ReplyFailed(
         /* [in] */ IMessage* msg,
@@ -607,4 +667,5 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wifi::WifiScanningServiceImpl::SettingsComputer::TimeBucket, IInterface);
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFISCANNINGSERVICEIMPL_H__

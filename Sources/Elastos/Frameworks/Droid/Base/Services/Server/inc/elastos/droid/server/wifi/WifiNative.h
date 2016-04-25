@@ -856,5 +856,6 @@ private:
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wifi::WifiNative::BucketSettings, IInterface);
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wifi::WifiNative::ChannelSettings, IInterface);
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFINATIVE_H__
