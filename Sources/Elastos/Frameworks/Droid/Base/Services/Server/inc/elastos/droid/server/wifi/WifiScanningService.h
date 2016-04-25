@@ -5,11 +5,6 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/wifi/WifiScanningServiceImpl.h"
 
-// package com.android.server.wifi;
-// import android.content.Context;
-// import android.util.Log;
-// import com.android.server.SystemService;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Server::SystemService;
 
@@ -45,4 +40,3 @@ private:
 } // namespace Elastos
 
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFISCANNINGSERVICE_H__
-

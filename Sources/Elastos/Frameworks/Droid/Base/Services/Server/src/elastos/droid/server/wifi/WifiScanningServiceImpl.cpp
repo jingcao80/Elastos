@@ -1,14 +1,60 @@
 #include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Wifi.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/os/HandlerThread.h"
 #include "elastos/droid/server/wifi/WifiScanningServiceImpl.h"
+#include "elastos/core/CoreUtils.h"
+#include "elastos/core/StringUtils.h"
+#include "elastos/core/StringBuffer.h"
 #include <elastos/utility/logging/Logger.h>
 
 
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Internal::Utility::CAsyncChannel;
+using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::CMessenger;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::HandlerThread;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::Wifi::EIID_IIWifiScanner;
 using Elastos::Droid::Wifi::IWifiScanner;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::CScanResult;
+using Elastos::Droid::Wifi::CWifiScannerScanSettings;
+using Elastos::Droid::Wifi::CWifiScannerChannelSpec;
+using Elastos::Droid::Wifi::IWifiScannerBssidInfo;
+using Elastos::Droid::Wifi::CWifiScannerBssidInfo;
+using Elastos::Droid::Wifi::CWifiScannerWifiChangeSettings;
+using Elastos::Droid::Wifi::IWifiScannerParcelableScanResults;
+using Elastos::Droid::Wifi::CWifiScannerParcelableScanResults;
+using Elastos::Droid::Wifi::IWifiSsidHelper;
+using Elastos::Droid::Wifi::CWifiSsidHelper;
+using Elastos::Droid::Wifi::IWifiSsid;
+using Elastos::Droid::Wifi::IScanResultInformationElement;
+using Elastos::Droid::Wifi::IWifiScannerOperationResult;
+using Elastos::Droid::Wifi::CWifiScannerOperationResult;
+using Elastos::Droid::Wifi::CWifiScannerHotlistSettings;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuffer;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ISet;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::CHashSet;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -28,52 +74,53 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::Enter()
 Boolean WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    //
-    // if (DBG) Log.d(TAG, "DefaultState got" + msg);
-    //
-    // ClientInfo ci = mClients.get(msg.replyTo);
-    //
-    // switch (msg.what) {
-    //     case CMD_DRIVER_LOADED:
-    //         if (WifiNative.startHal() && WifiNative.getInterfaces() != 0) {
-    //             WifiNative.ScanCapabilities capabilities =
-    //                     new WifiNative.ScanCapabilities();
-    //             if (WifiNative.getScanCapabilities(capabilities)) {
-    //                 transitionTo(mStartedState);
-    //             } else {
-    //                 loge("could not get scan capabilities");
-    //             }
-    //         } else {
-    //             loge("could not start HAL");
-    //         }
-    //         break;
-    //     case WifiScanner.CMD_SCAN:
-    //     case WifiScanner.CMD_START_BACKGROUND_SCAN:
-    //     case WifiScanner.CMD_STOP_BACKGROUND_SCAN:
-    //     case WifiScanner.CMD_SET_HOTLIST:
-    //     case WifiScanner.CMD_RESET_HOTLIST:
-    //     case WifiScanner.CMD_CONFIGURE_WIFI_CHANGE:
-    //     case WifiScanner.CMD_START_TRACKING_CHANGE:
-    //     case WifiScanner.CMD_STOP_TRACKING_CHANGE:
-    //         replyFailed(msg, WifiScanner.REASON_UNSPECIFIED, "not available");
-    //         break;
-    //
-    //     case CMD_SCAN_RESULTS_AVAILABLE:
-    //         if (DBG) log("ignored scan results available event");
-    //         break;
-    //
-    //     case CMD_FULL_SCAN_RESULTS:
-    //         if (DBG) log("ignored full scan result event");
-    //         break;
-    //
-    //     default:
-    //         break;
-    // }
-    //
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    if (WifiScanningServiceImpl::DBG) Logger::D(WifiScanningServiceImpl::TAG, "DefaultState got");// + msg);
+
+    AutoPtr<IMessenger> replyTo;
+    msg->GetReplyTo((IMessenger**)&replyTo);
+    AutoPtr<IInterface> objValue;
+    mOwner->mOwner->mClients->Get(TO_IINTERFACE(replyTo), (IInterface**)&objValue);
+    AutoPtr<ClientInfo> ci = (ClientInfo*)(IObject::Probe(objValue));
+
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case WifiScanningServiceImpl::CMD_DRIVER_LOADED:
+            if (WifiNative::StartHal() && WifiNative::GetInterfaces() != 0) {
+                AutoPtr<WifiNative::ScanCapabilities> capabilities = new WifiNative::ScanCapabilities();
+                if (WifiNative::GetScanCapabilities(capabilities)) {
+                    mOwner->TransitionTo(mOwner->mStartedState);
+                } else {
+                    Logger::E(WifiScanningServiceImpl::TAG, "could not get scan capabilities");
+                }
+            } else {
+                Logger::E(WifiScanningServiceImpl::TAG, "could not start HAL");
+            }
+            break;
+        case IWifiScanner::CMD_SCAN:
+        case IWifiScanner::CMD_START_BACKGROUND_SCAN:
+        case IWifiScanner::CMD_STOP_BACKGROUND_SCAN:
+        case IWifiScanner::CMD_SET_HOTLIST:
+        case IWifiScanner::CMD_RESET_HOTLIST:
+        case IWifiScanner::CMD_CONFIGURE_WIFI_CHANGE:
+        case IWifiScanner::CMD_START_TRACKING_CHANGE:
+        case IWifiScanner::CMD_STOP_TRACKING_CHANGE:
+            mOwner->mOwner->ReplyFailed(msg, IWifiScanner::REASON_UNSPECIFIED, String("not available"));
+            break;
+
+        case WifiScanningServiceImpl::CMD_SCAN_RESULTS_AVAILABLE:
+            if (WifiScanningServiceImpl::DBG) Logger::D(WifiScanningServiceImpl::TAG, "ignored scan results available event");
+            break;
+
+        case WifiScanningServiceImpl::CMD_FULL_SCAN_RESULTS:
+            if (WifiScanningServiceImpl::DBG) Logger::D(WifiScanningServiceImpl::TAG, "ignored full scan result event");
+            break;
+
+        default:
+            break;
+    }
+
+    return TRUE;
 }
 
 //=====================================================================
@@ -81,103 +128,189 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::Process
 //=====================================================================
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Enter()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "StartedState");
-    assert(0);
+    if (DBG) Logger::D(TAG, "StartedState");
     return NOERROR;
 }
 
 Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    //
-    // if (DBG) Log.d(TAG, "StartedState got" + msg);
-    //
-    // ClientInfo ci = mClients.get(msg.replyTo);
-    //
-    // switch (msg.what) {
-    //     case CMD_DRIVER_UNLOADED:
-    //         transitionTo(mDefaultState);
-    //         break;
-    //     case WifiScanner.CMD_SCAN:
-    //         replyFailed(msg, WifiScanner.REASON_UNSPECIFIED, "not implemented");
-    //         break;
-    //     case WifiScanner.CMD_START_BACKGROUND_SCAN:
-    //         if (addScanRequest(ci, msg.arg2, (ScanSettings) msg.obj)) {
-    //             replySucceeded(msg, null);
-    //         } else {
-    //             replyFailed(msg, WifiScanner.REASON_INVALID_REQUEST, "bad request");
-    //         }
-    //         break;
-    //     case WifiScanner.CMD_STOP_BACKGROUND_SCAN:
-    //         removeScanRequest(ci, msg.arg2);
-    //         break;
-    //     case WifiScanner.CMD_GET_SCAN_RESULTS:
-    //         replySucceeded(msg, getScanResults(ci));
-    //         break;
-    //     case WifiScanner.CMD_SET_HOTLIST:
-    //         setHotlist(ci, msg.arg2, (WifiScanner.HotlistSettings) msg.obj);
-    //         replySucceeded(msg, null);
-    //         break;
-    //     case WifiScanner.CMD_RESET_HOTLIST:
-    //         resetHotlist(ci, msg.arg2);
-    //         break;
-    //     case WifiScanner.CMD_START_TRACKING_CHANGE:
-    //         trackWifiChanges(ci, msg.arg2);
-    //         replySucceeded(msg, null);
-    //         break;
-    //     case WifiScanner.CMD_STOP_TRACKING_CHANGE:
-    //         untrackWifiChanges(ci, msg.arg2);
-    //         break;
-    //     case WifiScanner.CMD_CONFIGURE_WIFI_CHANGE:
-    //         configureWifiChange((WifiScanner.WifiChangeSettings) msg.obj);
-    //         break;
-    //     case CMD_SCAN_RESULTS_AVAILABLE: {
-    //             ScanResult[] results = WifiNative.getScanResults();
-    //             Collection<ClientInfo> clients = mClients.values();
-    //             for (ClientInfo ci2 : clients) {
-    //                 ci2.reportScanResults(results);
-    //             }
-    //         }
-    //         break;
-    //     case CMD_FULL_SCAN_RESULTS: {
-    //             ScanResult result = (ScanResult) msg.obj;
-    //             if (DBG) Log.d(TAG, "reporting fullscan result for " + result.SSID);
-    //             Collection<ClientInfo> clients = mClients.values();
-    //             for (ClientInfo ci2 : clients) {
-    //                 ci2.reportFullScanResult(result);
-    //             }
-    //         }
-    //         break;
-    //
-    //     case CMD_HOTLIST_AP_FOUND: {
-    //             ScanResult[] results = (ScanResult[])msg.obj;
-    //             if (DBG) Log.d(TAG, "Found " + results.length + " results");
-    //             Collection<ClientInfo> clients = mClients.values();
-    //             for (ClientInfo ci2 : clients) {
-    //                 ci2.reportHotlistResults(results);
-    //             }
-    //         }
-    //         break;
-    //     case CMD_WIFI_CHANGE_DETECTED: {
-    //             ScanResult[] results = (ScanResult[])msg.obj;
-    //             reportWifiChanged(results);
-    //         }
-    //         break;
-    //     case CMD_WIFI_CHANGES_STABILIZED: {
-    //             ScanResult[] results = (ScanResult[])msg.obj;
-    //             reportWifiStabilized(results);
-    //         }
-    //         break;
-    //
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    //
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    if (DBG) Logger::D(TAG, "StartedState got" );//+ msg);
+
+    AutoPtr<IMessenger> replyTo;
+    msg->GetReplyTo((IMessenger**)&replyTo);
+    AutoPtr<IInterface> objValue;
+    mOwner->mOwner->mClients->Get(TO_IINTERFACE(replyTo), (IInterface**)&objValue);
+    AutoPtr<ClientInfo> ci = (ClientInfo*)(IObject::Probe(objValue));
+
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_DRIVER_UNLOADED:
+            mOwner->TransitionTo(mOwner->mDefaultState);
+            break;
+        case IWifiScanner::CMD_SCAN:
+            mOwner->mOwner->ReplyFailed(msg, IWifiScanner::REASON_UNSPECIFIED, String("not implemented"));
+            break;
+        case IWifiScanner::CMD_START_BACKGROUND_SCAN: {
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            Boolean addRes;
+            if (mOwner->mOwner->AddScanRequest(ci, arg2, IWifiScannerScanSettings::Probe(obj), &addRes), addRes) {
+                mOwner->mOwner->ReplySucceeded(msg, NULL);
+            } else {
+                mOwner->mOwner->ReplyFailed(msg, IWifiScanner::REASON_INVALID_REQUEST, String("bad request"));
+            }
+            break;
+        }
+        case IWifiScanner::CMD_STOP_BACKGROUND_SCAN: {
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            mOwner->mOwner->RemoveScanRequest(ci, arg2);
+            break;
+        }
+        case IWifiScanner::CMD_GET_SCAN_RESULTS: {
+
+            AutoPtr<ArrayOf<IScanResult*> > scanResults;;
+            mOwner->mOwner->GetScanResults(ci, (ArrayOf<IScanResult*>**)&scanResults);
+            AutoPtr<IArrayOf> result = CoreUtils::Convert(scanResults.Get());
+            mOwner->mOwner->ReplySucceeded(msg, result);
+            break;
+        }
+        case IWifiScanner::CMD_SET_HOTLIST: {
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            IWifiScannerHotlistSettings* wshls = IWifiScannerHotlistSettings::Probe(obj);
+            mOwner->mOwner->SetHotlist(ci, arg2, wshls);
+            mOwner->mOwner->ReplySucceeded(msg, NULL);
+            break;
+        }
+        case IWifiScanner::CMD_RESET_HOTLIST: {
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            mOwner->mOwner->ResetHotlist(ci, arg2);
+            break;
+        }
+        case IWifiScanner::CMD_START_TRACKING_CHANGE: {
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            mOwner->mOwner->TrackWifiChanges(ci, arg2);
+            mOwner->mOwner->ReplySucceeded(msg, NULL);
+            break;
+        }
+        case IWifiScanner::CMD_STOP_TRACKING_CHANGE: {
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            mOwner->mOwner->UntrackWifiChanges(ci, arg2);
+            break;
+        }
+        case IWifiScanner::CMD_CONFIGURE_WIFI_CHANGE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            IWifiScannerWifiChangeSettings* wswcs = IWifiScannerWifiChangeSettings::Probe(obj);
+            mOwner->mOwner->ConfigureWifiChange(wswcs);
+            break;
+        }
+        case CMD_SCAN_RESULTS_AVAILABLE: {
+                AutoPtr<ArrayOf<IScanResult*> > results = WifiNative::GetScanResults();
+                AutoPtr<ICollection> clients;
+                mOwner->mOwner->mClients->GetValues((ICollection**)&clients);
+                AutoPtr<ArrayOf<IInterface*> > array;
+                clients->ToArray((ArrayOf<IInterface*>**)&array);
+                for (Int32 i = 0; i < array->GetLength(); ++i) {
+                    AutoPtr<IInterface> obj = (*array)[i];
+                    ClientInfo* ci2 = (ClientInfo*)(IObject::Probe(obj));
+                    ci2->ReportScanResults(results);
+                }
+            }
+            break;
+        case CMD_FULL_SCAN_RESULTS: {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+
+                AutoPtr<IScanResult> result = IScanResult::Probe(obj);
+                String ssid;
+                result->GetSSID(&ssid);
+                if (DBG) Logger::D(TAG, "reporting fullscan result for %s", ssid.string());
+                AutoPtr<ICollection> clients;
+                mOwner->mOwner->mClients->GetValues((ICollection**)&clients);
+                AutoPtr<ArrayOf<IInterface*> > array;
+                clients->ToArray((ArrayOf<IInterface*>**)&array);
+                for (Int32 i = 0; i < array->GetLength(); ++i) {
+                    AutoPtr<IInterface> obj = (*array)[i];
+                    ClientInfo* ci2 = (ClientInfo*)(IObject::Probe(obj));
+                    ci2->ReportFullScanResult(result);
+                }
+            }
+            break;
+
+        case CMD_HOTLIST_AP_FOUND: {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+                Int32 length;
+                iarray->GetLength(&length);
+                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
+                for (Int32 i = 0; i < length; ++i) {
+                    AutoPtr<IInterface> object;
+                    iarray->Get(i, (IInterface**)&object);
+                    results->Set(i, IScanResult::Probe(object));
+                }
+                if (DBG) Logger::D(TAG, "Found %d results", length);
+                AutoPtr<ICollection> clients;
+                mOwner->mOwner->mClients->GetValues((ICollection**)&clients);
+                AutoPtr<ArrayOf<IInterface*> > array;
+                clients->ToArray((ArrayOf<IInterface*>**)&array);
+                for (Int32 i = 0; i < array->GetLength(); ++i) {
+                    AutoPtr<IInterface> obj = (*array)[i];
+                    ClientInfo* ci2 = (ClientInfo*)(IObject::Probe(obj));
+                    ci2->ReportHotlistResults(results);
+                }
+            }
+            break;
+        case CMD_WIFI_CHANGE_DETECTED: {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+                Int32 length;
+                iarray->GetLength(&length);
+                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
+                for (Int32 i = 0; i < length; ++i) {
+                    AutoPtr<IInterface> object;
+                    iarray->Get(i, (IInterface**)&object);
+                    results->Set(i, IScanResult::Probe(object));
+                }
+                mOwner->mOwner->ReportWifiChanged(results);
+            }
+            break;
+        case CMD_WIFI_CHANGES_STABILIZED: {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+                Int32 length;
+                iarray->GetLength(&length);
+                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
+                for (Int32 i = 0; i < length; ++i) {
+                    AutoPtr<IInterface> object;
+                    iarray->Get(i, (IInterface**)&object);
+                    results->Set(i, IScanResult::Probe(object));
+                }
+                mOwner->mOwner->ReportWifiStabilized(results);
+            }
+            break;
+
+        default:
+            return FALSE;
+    }
+
+    return TRUE;
 }
 
 //=====================================================================
@@ -185,30 +318,26 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Process
 //=====================================================================
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::Enter()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "PausedState");
-    assert(0);
+    if (DBG) Logger::D(TAG, "PausedState");
     return NOERROR;
 }
 
 Boolean WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    //
-    // if (DBG) Log.d(TAG, "PausedState got" + msg);
-    //
-    // switch (msg.what) {
-    //     case CMD_SCAN_RESTARTED:
-    //         transitionTo(mStartedState);
-    //         break;
-    //     default:
-    //         deferMessage(msg);
-    //         break;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    if (DBG) Logger::D(TAG, "PausedState got");// + msg);
+
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_SCAN_RESTARTED:
+            mOwner->TransitionTo(mOwner->mStartedState);
+            break;
+        default:
+            mOwner->DeferMessage(msg);
+            break;
+    }
+    return TRUE;
 }
 
 //=====================================================================
@@ -222,40 +351,37 @@ CAR_INTERFACE_IMPL_3(WifiScanningServiceImpl::WifiScanningStateMachine,
         IWifiNativeSignificantWifiChangeEventHandler);
 
 WifiScanningServiceImpl::WifiScanningStateMachine::WifiScanningStateMachine(
+    /* [in] */ WifiScanningServiceImpl* owner,
     /* [in] */ ILooper* looper)
+    : StateMachine(TAG, looper)
+    , mOwner(owner)
 {
-    mDefaultState = new DefaultState();
-    mStartedState = new StartedState();
-    mPausedState = new PausedState();
-    // ==================before translated======================
-    // super(TAG, looper);
-    //
-    // setLogRecSize(512);
-    // setLogOnlyTransitions(false);
-    // // setDbg(DBG);
-    //
-    // addState(mDefaultState);
-    //     addState(mStartedState, mDefaultState);
-    //     addState(mPausedState, mDefaultState);
-    //
-    // setInitialState(mDefaultState);
+    mDefaultState = new DefaultState(this);
+    mStartedState = new StartedState(this);
+    mPausedState = new PausedState(this);
+
+    SetLogRecSize(512);
+    SetLogOnlyTransitions(false);
+    // setDbg(DBG);
+
+    AddState(mDefaultState);
+        AddState(mStartedState, mDefaultState);
+        AddState(mPausedState, mDefaultState);
+
+    SetInitialState(mDefaultState);
 }
 
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnScanResultsAvailable()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onScanResultAvailable event received");
-    // sendMessage(CMD_SCAN_RESULTS_AVAILABLE);
-    assert(0);
+    if (DBG) Logger::D(TAG, "onScanResultAvailable event received");
+    SendMessage(CMD_SCAN_RESULTS_AVAILABLE);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnSingleScanComplete()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onSingleScanComplete event received");
-    // sendMessage(CMD_SCAN_RESULTS_AVAILABLE);
-    assert(0);
+    if (DBG) Logger::D(TAG, "onSingleScanComplete event received");
+    SendMessage(CMD_SCAN_RESULTS_AVAILABLE);
     return NOERROR;
 }
 
@@ -263,26 +389,20 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnFullScanResult(
     /* [in] */ IScanResult* fullScanResult)
 {
     VALIDATE_NOT_NULL(fullScanResult);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Full scanresult received");
-    // sendMessage(CMD_FULL_SCAN_RESULTS, 0, 0, fullScanResult);
-    assert(0);
+    if (DBG) Logger::D(TAG, "Full scanresult received");
+    SendMessage(CMD_FULL_SCAN_RESULTS, 0, 0, TO_IINTERFACE(fullScanResult));
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnScanPaused()
 {
-    // ==================before translated======================
-    // sendMessage(CMD_SCAN_PAUSED);
-    assert(0);
+    SendMessage(CMD_SCAN_PAUSED);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnScanRestarted()
 {
-    // ==================before translated======================
-    // sendMessage(CMD_SCAN_RESTARTED);
-    assert(0);
+    SendMessage(CMD_SCAN_RESTARTED);
     return NOERROR;
 }
 
@@ -290,10 +410,8 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnHotlistApFound(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "HotlistApFound event received");
-    // sendMessage(CMD_HOTLIST_AP_FOUND, 0, 0, results);
-    assert(0);
+    if (DBG) Logger::D(TAG, "HotlistApFound event received");
+    SendMessage(CMD_HOTLIST_AP_FOUND, 0, 0, CoreUtils::Convert(results));
     return NOERROR;
 }
 
@@ -301,10 +419,8 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnChangesFound(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onWifiChangesFound event received");
-    // sendMessage(CMD_WIFI_CHANGE_DETECTED, 0, 0, results);
-    assert(0);
+    if (DBG) Logger::D(TAG, "onWifiChangesFound event received");
+    SendMessage(CMD_WIFI_CHANGE_DETECTED, 0, 0, CoreUtils::Convert(results));
     return NOERROR;
 }
 
@@ -316,11 +432,11 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::Dump(
     VALIDATE_NOT_NULL(fd);
     VALIDATE_NOT_NULL(pw);
     VALIDATE_NOT_NULL(args);
-    // ==================before translated======================
-    // super.dump(fd, pw, args);
-    // pw.println("number of clients : " + mClients.size());
-    // pw.println();
-    assert(0);
+    StateMachine::Dump(fd, pw, args);
+    Int32 size;
+    mOwner->mClients->GetSize(&size);
+    pw->Println(String("number of clients : ") + StringUtils::ToString(size));
+    pw->Println();
     return NOERROR;
 }
 
@@ -329,37 +445,34 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::Dump(
 //=====================================================================
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::Enter()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Entering IdleState");
-    assert(0);
+    if (DBG) Logger::D(TAG, "Entering IdleState");
     return NOERROR;
 }
 
 Boolean WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "DefaultState state got " + msg);
-    // switch (msg.what) {
-    //     case WIFI_CHANGE_CMD_ENABLE :
-    //         transitionTo(mMovingState);
-    //         break;
-    //     case WIFI_CHANGE_CMD_DISABLE:
-    //         // nothing to do
-    //         break;
-    //     case WIFI_CHANGE_CMD_NEW_SCAN_RESULTS:
-    //         // nothing to do
-    //         break;
-    //     case WIFI_CHANGE_CMD_CONFIGURE:
-    //         /* save configuration till we transition to moving state */
-    //         deferMessage(msg);
-    //         break;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    if (DBG) Logger::D(TAG, "DefaultState state got ");// + msg);
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case WIFI_CHANGE_CMD_ENABLE :
+            mOwner->TransitionTo(mOwner->mMovingState);
+            break;
+        case WIFI_CHANGE_CMD_DISABLE:
+            // nothing to do
+            break;
+        case WIFI_CHANGE_CMD_NEW_SCAN_RESULTS:
+            // nothing to do
+            break;
+        case WIFI_CHANGE_CMD_CONFIGURE:
+            /* save configuration till we transition to moving state */
+            mOwner->DeferMessage(msg);
+            break;
+        default:
+            return FALSE;
+    }
+    return TRUE;
 }
 
 //=====================================================================
@@ -367,44 +480,54 @@ Boolean WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::ProcessMe
 //=====================================================================
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::Enter()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Entering StationaryState");
-    // reportWifiStabilized(mCurrentBssids);
-    assert(0);
+    if (DBG) Logger::D(TAG, "Entering StationaryState");
+    mOwner->mOwner->ReportWifiStabilized(mOwner->mCurrentBssids);
     return NOERROR;
 }
 
 Boolean WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Stationary state got " + msg);
-    // switch (msg.what) {
-    //     case WIFI_CHANGE_CMD_ENABLE :
-    //         // do nothing
-    //         break;
-    //     case WIFI_CHANGE_CMD_CHANGE_DETECTED:
-    //         if (DBG) Log.d(TAG, "Got wifi change detected");
-    //         reportWifiChanged((ScanResult[])msg.obj);
-    //         transitionTo(mMovingState);
-    //         break;
-    //     case WIFI_CHANGE_CMD_DISABLE:
-    //         if (DBG) Log.d(TAG, "Got Disable Wifi Change");
-    //         mCurrentBssids = null;
-    //         removeScanRequest();
-    //         untrackSignificantWifiChange();
-    //         transitionTo(mDefaultState);
-    //         break;
-    //     case WIFI_CHANGE_CMD_CONFIGURE:
-    //         /* save configuration till we transition to moving state */
-    //         deferMessage(msg);
-    //         break;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    if (DBG) Logger::D(TAG, "Stationary state got ");// + msg);
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case WIFI_CHANGE_CMD_ENABLE :
+            // do nothing
+            break;
+        case WIFI_CHANGE_CMD_CHANGE_DETECTED: {
+            if (DBG) Logger::D(TAG, "Got wifi change detected");
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+            Int32 length;
+            iarray->GetLength(&length);
+            AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
+            for (Int32 i = 0; i < length; ++i) {
+                AutoPtr<IInterface> object;
+                iarray->Get(i, (IInterface**)&object);
+                results->Set(i, IScanResult::Probe(object));
+            }
+            mOwner->mOwner->ReportWifiChanged(results);
+            mOwner->TransitionTo(mOwner->mMovingState);
+            break;
+        }
+        case WIFI_CHANGE_CMD_DISABLE:
+            if (DBG) Logger::D(TAG, "Got Disable Wifi Change");
+            mOwner->mCurrentBssids = NULL;
+            mOwner->RemoveScanRequest();
+            mOwner->UntrackSignificantWifiChange();
+            mOwner->TransitionTo(mOwner->mDefaultState);
+            break;
+        case WIFI_CHANGE_CMD_CONFIGURE:
+            /* save configuration till we transition to moving state */
+            mOwner->DeferMessage(msg);
+            break;
+        default:
+            return FALSE;
+    }
+    return TRUE;
 }
 
 //=====================================================================
@@ -412,101 +535,140 @@ Boolean WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::Proces
 //=====================================================================
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::Enter()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Entering MovingState");
-    // issueFullScan();
-    assert(0);
+    if (DBG) Logger::D(TAG, "Entering MovingState");
+    IssueFullScan();
     return NOERROR;
 }
 
 Boolean WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "MovingState state got " + msg);
-    // switch (msg.what) {
-    //     case WIFI_CHANGE_CMD_ENABLE :
-    //         // do nothing
-    //         break;
-    //     case WIFI_CHANGE_CMD_DISABLE:
-    //         if (DBG) Log.d(TAG, "Got Disable Wifi Change");
-    //         mCurrentBssids = null;
-    //         removeScanRequest();
-    //         untrackSignificantWifiChange();
-    //         transitionTo(mDefaultState);
-    //         break;
-    //     case WIFI_CHANGE_CMD_NEW_SCAN_RESULTS:
-    //         if (DBG) Log.d(TAG, "Got scan results");
-    //         if (mScanResultsPending) {
-    //             if (DBG) Log.d(TAG, "reconfiguring scan");
-    //             reconfigureScan((ScanResult[])msg.obj, STATIONARY_SCAN_PERIOD_MS);
-    //             mWifiChangeDetected = false;
-    //             mAlarmManager.setExact(AlarmManager.RTC_WAKEUP,
-    //                     System.currentTimeMillis() + MOVING_STATE_TIMEOUT_MS,
-    //                     mTimeoutIntent);
-    //             mScanResultsPending = false;
-    //         }
-    //         break;
-    //     case WIFI_CHANGE_CMD_CONFIGURE:
-    //         if (DBG) Log.d(TAG, "Got configuration from app");
-    //         WifiScanner.WifiChangeSettings settings =
-    //                 (WifiScanner.WifiChangeSettings) msg.obj;
-    //         reconfigureScan(settings);
-    //         mWifiChangeDetected = false;
-    //         long unchangedDelay = settings.unchangedSampleSize * settings.periodInMs;
-    //         mAlarmManager.cancel(mTimeoutIntent);
-    //         mAlarmManager.setExact(AlarmManager.RTC_WAKEUP,
-    //                 System.currentTimeMillis() + unchangedDelay,
-    //                 mTimeoutIntent);
-    //         break;
-    //     case WIFI_CHANGE_CMD_CHANGE_DETECTED:
-    //         if (DBG) Log.d(TAG, "Change detected");
-    //         mAlarmManager.cancel(mTimeoutIntent);
-    //         reportWifiChanged((ScanResult[])msg.obj);
-    //         mWifiChangeDetected = true;
-    //         issueFullScan();
-    //         break;
-    //     case WIFI_CHANGE_CMD_CHANGE_TIMEOUT:
-    //         if (DBG) Log.d(TAG, "Got timeout event");
-    //         if (mWifiChangeDetected == false) {
-    //             transitionTo(mStationaryState);
-    //         }
-    //         break;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    if (DBG) Logger::D(TAG, "MovingState state got ");// + msg);
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case WIFI_CHANGE_CMD_ENABLE :
+            // do nothing
+            break;
+        case WIFI_CHANGE_CMD_DISABLE:
+            if (DBG) Logger::D(TAG, "Got Disable Wifi Change");
+            mOwner->mCurrentBssids = NULL;
+            mOwner->RemoveScanRequest();
+            mOwner->UntrackSignificantWifiChange();
+            mOwner->TransitionTo(mOwner->mDefaultState);
+            break;
+        case WIFI_CHANGE_CMD_NEW_SCAN_RESULTS: {
+            if (DBG) Logger::D(TAG, "Got scan results");
+            if (mScanResultsPending) {
+                if (DBG) Logger::D(TAG, "reconfiguring scan");
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+                Int32 length;
+                iarray->GetLength(&length);
+                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
+                for (Int32 i = 0; i < length; ++i) {
+                    AutoPtr<IInterface> object;
+                    iarray->Get(i, (IInterface**)&object);
+                    results->Set(i, IScanResult::Probe(object));
+                }
+                mOwner->ReconfigureScan(results, STATIONARY_SCAN_PERIOD_MS);
+                mWifiChangeDetected = FALSE;
+                AutoPtr<ISystem> system;
+                CSystem::AcquireSingleton((ISystem**)&system);
+                Int64 currentTimeMillis;
+                system->GetCurrentTimeMillis(&currentTimeMillis);
+                mOwner->mAlarmManager->SetExact(IAlarmManager::RTC_WAKEUP,
+                        currentTimeMillis + MOVING_STATE_TIMEOUT_MS,
+                        mOwner->mTimeoutIntent);
+                mScanResultsPending = FALSE;
+            }
+            break;
+        }
+        case WIFI_CHANGE_CMD_CONFIGURE: {
+            if (DBG) Logger::D(TAG, "Got configuration from app");
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<IWifiScannerWifiChangeSettings> settings =
+                    IWifiScannerWifiChangeSettings::Probe(obj);
+            mOwner->ReconfigureScan(settings);
+            mWifiChangeDetected = FALSE;
+            Int32 unchangedSampleSize;
+            settings->GetUnchangedSampleSize(&unchangedSampleSize);
+            Int32 periodInMs;
+            settings->GetPeriodInMs(&periodInMs);
+            Int64 unchangedDelay = unchangedSampleSize * periodInMs;
+            mOwner->mAlarmManager->Cancel(mOwner->mTimeoutIntent);
+            AutoPtr<ISystem> system;
+            CSystem::AcquireSingleton((ISystem**)&system);
+            Int64 currentTimeMillis;
+            system->GetCurrentTimeMillis(&currentTimeMillis);
+            mOwner->mAlarmManager->SetExact(IAlarmManager::RTC_WAKEUP,
+                    currentTimeMillis + unchangedDelay,
+                    mOwner->mTimeoutIntent);
+            break;
+        }
+        case WIFI_CHANGE_CMD_CHANGE_DETECTED: {
+            if (DBG) Logger::D(TAG, "Change detected");
+            mOwner->mAlarmManager->Cancel(mOwner->mTimeoutIntent);
+
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+            Int32 length;
+            iarray->GetLength(&length);
+            AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
+            for (Int32 i = 0; i < length; ++i) {
+                AutoPtr<IInterface> object;
+                iarray->Get(i, (IInterface**)&object);
+                results->Set(i, IScanResult::Probe(object));
+            }
+
+            mOwner->mOwner->ReportWifiChanged(results);
+            mWifiChangeDetected = TRUE;
+            IssueFullScan();
+            break;
+        }
+        case WIFI_CHANGE_CMD_CHANGE_TIMEOUT:
+            if (DBG) Logger::D(TAG, "Got timeout event");
+            if (mWifiChangeDetected == FALSE) {
+                mOwner->TransitionTo(mOwner->mStationaryState);
+            }
+            break;
+        default:
+            return FALSE;
+    }
+    return TRUE;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::Exit()
 {
-    // ==================before translated======================
-    // mAlarmManager.cancel(mTimeoutIntent);
-    assert(0);
+    mOwner->mAlarmManager->Cancel(mOwner->mTimeoutIntent);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::IssueFullScan()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Issuing full scan");
-    // WifiScanner.ScanSettings settings = new WifiScanner.ScanSettings();
-    // settings.band = WifiScanner.WIFI_BAND_BOTH;
-    // settings.periodInMs = MOVING_SCAN_PERIOD_MS;
-    // settings.reportEvents = WifiScanner.REPORT_EVENT_AFTER_EACH_SCAN;
-    // addScanRequest(settings);
-    // mScanResultsPending = true;
-    assert(0);
+    if (DBG) Logger::D(TAG, "Issuing full scan");
+    AutoPtr<IWifiScannerScanSettings> settings;
+    CWifiScannerScanSettings::New((IWifiScannerScanSettings**)&settings);
+    settings->SetBand(IWifiScanner::WIFI_BAND_BOTH);
+    settings->SetPeriodInMs(MOVING_SCAN_PERIOD_MS);
+    settings->SetReportEvents(IWifiScanner::REPORT_EVENT_AFTER_EACH_SCAN);
+    mOwner->AddScanRequest(settings);
+    mScanResultsPending = TRUE;
     return NOERROR;
 }
 
 //=====================================================================
 //   WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal
 //=====================================================================
-WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::ClientInfoLocal()
-    : ClientInfo(NULL, NULL)
+WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::ClientInfoLocal(
+    /* [in] */ WifiChangeStateMachine* owner)
+    : ClientInfo(owner->mOwner, NULL, NULL)
+    , mOwner(owner)
 {
 }
 
@@ -514,11 +676,8 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::DeliverS
     /* [in] */ Int32 handler,
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Delivering messages directly");
-    // sendMessage(WIFI_CHANGE_CMD_NEW_SCAN_RESULTS, 0, 0, results);
-    assert(0);
+    if (DBG) Logger::D(TAG, "Delivering messages directly");
+    mOwner->SendMessage(WIFI_CHANGE_CMD_NEW_SCAN_RESULTS, 0, 0, CoreUtils::Convert(results));
     return NOERROR;
 }
 
@@ -527,10 +686,7 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::ReportPe
     /* [in] */ IWifiScannerScanSettings* settings,
     /* [in] */ Int32 newPeriodInMs)
 {
-    VALIDATE_NOT_NULL(settings);
-    // ==================before translated======================
     // // nothing to do; no one is listening for this
-    assert(0);
     return NOERROR;
 }
 
@@ -541,19 +697,13 @@ WifiScanningServiceImpl::WifiChangeStateMachine::InnerBroadcastReceiver3::InnerB
     /* [in] */ WifiChangeStateMachine* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::InnerBroadcastReceiver3::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // sendMessage(WIFI_CHANGE_CMD_CHANGE_TIMEOUT);
-    assert(0);
+    mOwner->SendMessage(WIFI_CHANGE_CMD_CHANGE_TIMEOUT);
     return NOERROR;
 }
 
@@ -579,63 +729,61 @@ CAR_INTERFACE_IMPL(WifiScanningServiceImpl::WifiChangeStateMachine,
         IWifiNativeSignificantWifiChangeEventHandler);
 
 WifiScanningServiceImpl::WifiChangeStateMachine::WifiChangeStateMachine(
+    /* [in] */ WifiScanningServiceImpl* owner,
     /* [in] */ ILooper* looper)
+    : StateMachine(String("SignificantChangeStateMachine"), looper)
+    , mOwner(owner)
 {
-    mDefaultState = new DefaultState();
-    mStationaryState = new StationaryState();
-    mMovingState = new MovingState();
-    mClientInfo = new ClientInfoLocal();
-    // ==================before translated======================
-    // super("SignificantChangeStateMachine", looper);
-    //
-    // mClients.put(null, mClientInfo);
-    //
-    // addState(mDefaultState);
-    // addState(mStationaryState, mDefaultState);
-    // addState(mMovingState, mDefaultState);
-    //
-    // setInitialState(mDefaultState);
+    mDefaultState = new DefaultState(this);
+    mStationaryState = new StationaryState(this);
+    mMovingState = new MovingState(this);
+    mClientInfo = new ClientInfoLocal(this);
+
+    mOwner->mClients->Put(NULL, TO_IINTERFACE(mClientInfo));
+
+    AddState(mDefaultState.Get());
+    AddState(mStationaryState.Get(), mDefaultState.Get());
+    AddState(mMovingState.Get(), mDefaultState.Get());
+
+    SetInitialState(mDefaultState.Get());
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::Enable()
 {
-    // ==================before translated======================
-    // if (mAlarmManager == null) {
-    //     mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-    // }
-    //
-    // if (mTimeoutIntent == null) {
-    //     Intent intent = new Intent(ACTION_TIMEOUT, null);
-    //     mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-    //
-    //     mContext.registerReceiver(
-    //             new BroadcastReceiver() {
-    //                 @Override
-    //                 public void onReceive(Context context, Intent intent) {
-    //                     sendMessage(WIFI_CHANGE_CMD_CHANGE_TIMEOUT);
-    //                 }
-    //             }, new IntentFilter(ACTION_TIMEOUT));
-    // }
-    //
-    // sendMessage(WIFI_CHANGE_CMD_ENABLE);
-    assert(0);
+    if (mAlarmManager == NULL) {
+        AutoPtr<IInterface> alarmObj;
+        mOwner->mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&alarmObj);
+        mAlarmManager = IAlarmManager::Probe(alarmObj);
+    }
+
+    if (mTimeoutIntent == NULL) {
+        AutoPtr<IIntent> intent;
+        CIntent::New(ACTION_TIMEOUT, NULL, (IIntent**)&intent);
+        AutoPtr<IPendingIntentHelper> piHelper;
+        CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&piHelper);
+        piHelper->GetBroadcast(mOwner->mContext, 0, intent, 0, (IPendingIntent**)&mTimeoutIntent);
+
+        AutoPtr<IBroadcastReceiver> br= new InnerBroadcastReceiver3(this);
+        AutoPtr<IIntentFilter> intentFilter;
+        CIntentFilter::New(ACTION_TIMEOUT, (IIntentFilter**)&intentFilter);
+        AutoPtr<IIntent> intentTemp;
+        mOwner->mContext->RegisterReceiver(br, intentFilter, (IIntent**)&intentTemp);
+    }
+
+    SendMessage(WIFI_CHANGE_CMD_ENABLE);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::Disable()
 {
-    // ==================before translated======================
-    // sendMessage(WIFI_CHANGE_CMD_DISABLE);
-    assert(0);
+    SendMessage(WIFI_CHANGE_CMD_DISABLE);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::Configure(
     /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
-    // ==================before translated======================
-    // sendMessage(WIFI_CHANGE_CMD_CONFIGURE, settings);
-    assert(0);
+    SendMessage(WIFI_CHANGE_CMD_CONFIGURE, TO_IINTERFACE(settings));
     return NOERROR;
 }
 
@@ -643,136 +791,201 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ReconfigureScan(
     /* [in] */ ArrayOf<IScanResult*>* results,
     /* [in] */ Int32 period)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // // find brightest APs and set them as sentinels
-    // if (results.length < MAX_APS_TO_TRACK) {
-    //     Log.d(TAG, "too few APs (" + results.length + ") available to track wifi change");
-    //     return;
-    // }
-    //
-    // removeScanRequest();
-    //
-    // // remove duplicate BSSIDs
-    // HashMap<String, ScanResult> bssidToScanResult = new HashMap<String, ScanResult>();
-    // for (ScanResult result : results) {
-    //     ScanResult saved = bssidToScanResult.get(result.BSSID);
-    //     if (saved == null) {
-    //         bssidToScanResult.put(result.BSSID, result);
-    //     } else if (saved.level > result.level) {
-    //         bssidToScanResult.put(result.BSSID, result);
-    //     }
-    // }
-    //
-    // // find brightest BSSIDs
-    // ScanResult brightest[] = new ScanResult[MAX_APS_TO_TRACK];
-    // Collection<ScanResult> results2 = bssidToScanResult.values();
-    // for (ScanResult result : results2) {
-    //     for (int j = 0; j < brightest.length; j++) {
-    //         if (brightest[j] == null
-    //                 || (brightest[j].level < result.level)) {
-    //             for (int k = brightest.length; k > (j + 1); k--) {
-    //                 brightest[k - 1] = brightest[k - 2];
-    //             }
-    //             brightest[j] = result;
-    //             break;
-    //         }
-    //     }
-    // }
-    //
-    // // Get channels to scan for
-    // ArrayList<Integer> channels = new ArrayList<Integer>();
-    // for (int i = 0; i < brightest.length; i++) {
-    //     boolean found = false;
-    //     for (int j = i + 1; j < brightest.length; j++) {
-    //         if (brightest[j].frequency == brightest[i].frequency) {
-    //             found = true;
-    //         }
-    //     }
-    //     if (!found) {
-    //         channels.add(brightest[i].frequency);
-    //     }
-    // }
-    //
-    // if (DBG) Log.d(TAG, "Found " + channels.size() + " channels");
-    //
-    // // set scanning schedule
-    // WifiScanner.ScanSettings settings = new WifiScanner.ScanSettings();
-    // settings.band = WifiScanner.WIFI_BAND_UNSPECIFIED;
-    // settings.channels = new WifiScanner.ChannelSpec[channels.size()];
-    // for (int i = 0; i < channels.size(); i++) {
-    //     settings.channels[i] = new WifiScanner.ChannelSpec(channels.get(i));
-    // }
-    //
-    // settings.periodInMs = period;
-    // addScanRequest(settings);
-    //
-    // WifiScanner.WifiChangeSettings settings2 = new WifiScanner.WifiChangeSettings();
-    // settings2.rssiSampleSize = 3;
-    // settings2.lostApSampleSize = 3;
-    // settings2.unchangedSampleSize = 3;
-    // settings2.minApsBreachingThreshold = 2;
-    // settings2.bssidInfos = new WifiScanner.BssidInfo[brightest.length];
-    //
-    // for (int i = 0; i < brightest.length; i++) {
-    //     WifiScanner.BssidInfo BssidInfo = new WifiScanner.BssidInfo();
-    //     BssidInfo.bssid = brightest[i].BSSID;
-    //     int threshold = (100 + brightest[i].level) / 32 + 2;
-    //     BssidInfo.low = brightest[i].level - threshold;
-    //     BssidInfo.high = brightest[i].level + threshold;
-    //     settings2.bssidInfos[i] = BssidInfo;
-    //
-    //     if (DBG) Log.d(TAG, "Setting bssid=" + BssidInfo.bssid + ", " +
-    //             "low=" + BssidInfo.low + ", high=" + BssidInfo.high);
-    // }
-    //
-    // trackSignificantWifiChange(settings2);
-    // mCurrentBssids = brightest;
-    assert(0);
+    // find brightest APs and set them as sentinels
+    if (results->GetLength() < MAX_APS_TO_TRACK) {
+        Logger::D(TAG, "too few APs (%d) available to track wifi change", results->GetLength());
+        return NOERROR;
+    }
+
+    RemoveScanRequest();
+
+    // remove duplicate BSSIDs
+    AutoPtr<IHashMap> bssidToScanResult;
+    CHashMap::New((IHashMap**)&bssidToScanResult);
+    for (Int32 i = 0; i < results->GetLength(); ++i) {
+        AutoPtr<IScanResult> result = (*results)[i];
+        String bssid;
+        result->GetBSSID(&bssid);
+        AutoPtr<IInterface> valueObj;
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(bssid);
+        bssidToScanResult->Get(cs, (IInterface**)&valueObj);
+        if (valueObj == NULL) {
+            bssidToScanResult->Put(cs, TO_IINTERFACE(result));
+        } else {
+            AutoPtr<IScanResult> saved = IScanResult::Probe(valueObj);
+            Int32 level1;
+            saved->GetLevel(&level1);
+            Int32 level2;
+            result->GetLevel(&level2);
+            if (level1 > level2)
+                bssidToScanResult->Put(cs, TO_IINTERFACE(result));
+        }
+    }
+
+    // find brightest BSSIDs
+    AutoPtr<ArrayOf<IScanResult*> > brightest = ArrayOf<IScanResult*>::Alloc(MAX_APS_TO_TRACK);
+    AutoPtr<ICollection> results2;
+    bssidToScanResult->GetValues((ICollection**)&results2);
+
+    AutoPtr<ArrayOf<IInterface*> > array;
+    results2->ToArray((ArrayOf<IInterface*>**)&array);
+    for (Int32 i = 0; i < array->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*array)[i];
+        AutoPtr<IScanResult> result = IScanResult::Probe(obj);
+
+        for (Int32 j = 0; j < brightest->GetLength(); j++) {
+            Boolean update = (*brightest)[j] == NULL;
+            if (!update) {
+                Int32 level1;
+                (*brightest)[j]->GetLevel(&level1);
+                Int32 level2;
+                result->GetLevel(&level2);
+                update = level1 < level2;
+            }
+            if (update) {
+                for (Int32 k = brightest->GetLength(); k > (j + 1); k--) {
+                    brightest->Set(k-1, (*brightest)[k - 2]);
+                }
+                brightest->Set(j, result);
+                break;
+            }
+        }
+    }
+
+    // Get channels to scan for
+    AutoPtr<IArrayList> channels;//Integer
+    CArrayList::New((IArrayList**)&channels);
+    for (Int32 i = 0; i < brightest->GetLength(); ++i) {
+        Boolean found = FALSE;
+        Int32 frequency;
+        (*brightest)[i]->GetFrequency(&frequency);
+        for (Int32 j = i + 1; j < brightest->GetLength(); j++) {
+            Int32 frequency2;
+            (*brightest)[j]->GetFrequency(&frequency2);
+            if (frequency2 == frequency) {
+                found = TRUE;
+            }
+        }
+        if (!found) {
+            channels->Add(CoreUtils::Convert(frequency));
+        }
+    }
+
+    Int32 size;
+    channels->GetSize(&size);
+
+    if (DBG) Logger::D(TAG, "Found %d channels", size);
+
+    // set scanning schedule
+    AutoPtr<IWifiScannerScanSettings> settings;
+    CWifiScannerScanSettings::New((IWifiScannerScanSettings**)&settings);
+    settings->SetBand(IWifiScanner::WIFI_BAND_UNSPECIFIED);
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > wscs = ArrayOf<IWifiScannerChannelSpec*>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        channels->Get(i, (IInterface**)&obj);
+        IInteger32* i32 = IInteger32::Probe(obj);
+        Int32 fre;
+        i32->GetValue(&fre);
+        AutoPtr<IWifiScannerChannelSpec> channelSpec;
+        CWifiScannerChannelSpec::New(fre, (IWifiScannerChannelSpec**)&channelSpec);
+        wscs->Set(i, channelSpec);
+    }
+    settings->SetChannels(wscs);
+
+    settings->SetPeriodInMs(period);
+    AddScanRequest(settings);
+
+    AutoPtr<IWifiScannerWifiChangeSettings> settings2;
+    CWifiScannerWifiChangeSettings::New((IWifiScannerWifiChangeSettings**)&settings2);
+    settings2->SetRssiSampleSize(3);
+    settings2->SetLostApSampleSize(3);
+    settings2->SetUnchangedSampleSize(3);
+    settings2->SetMinApsBreachingThreshold(2);
+
+    AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > wsbi = ArrayOf<IWifiScannerBssidInfo*>::Alloc(brightest->GetLength());
+    for (Int32 i = 0; i < brightest->GetLength(); ++i) {
+        AutoPtr<IWifiScannerBssidInfo> BssidInfo;
+        CWifiScannerBssidInfo::New((IWifiScannerBssidInfo**)&BssidInfo);
+        String bssid;
+        (*brightest)[i]->GetBSSID(&bssid);
+        BssidInfo->SetBssid(bssid);
+        Int32 level;
+        (*brightest)[i]->GetLevel(&level);
+        Int32 threshold = (100 + level) / 32 + 2;
+        BssidInfo->SetLow(level - threshold);
+        BssidInfo->SetHigh(level + threshold);
+        wsbi->Set(i, BssidInfo);
+
+        if (DBG) Logger::D(TAG, "Setting bssid=%s, low=%d, high=%d",  bssid.string(), level - threshold, level + threshold);
+    }
+    settings2->SetBssidInfos(wsbi);
+
+    TrackSignificantWifiChange(settings2);
+    mCurrentBssids = brightest;
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::ReconfigureScan(
     /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
-    // ==================before translated======================
-    //
-    // if (settings.bssidInfos.length < MAX_APS_TO_TRACK) {
-    //     Log.d(TAG, "too few APs (" + settings.bssidInfos.length
-    //             + ") available to track wifi change");
-    //     return;
-    // }
-    //
-    // if (DBG) Log.d(TAG, "Setting configuration specified by app");
-    //
-    // mCurrentBssids = new ScanResult[settings.bssidInfos.length];
-    // HashSet<Integer> channels = new HashSet<Integer>();
-    //
-    // for (int i = 0; i < settings.bssidInfos.length; i++) {
-    //     ScanResult result = new ScanResult();
-    //     result.BSSID = settings.bssidInfos[i].bssid;
-    //     mCurrentBssids[i] = result;
-    //     channels.add(settings.bssidInfos[i].frequencyHint);
-    // }
-    //
-    // // cancel previous scan
-    // removeScanRequest();
-    //
-    // // set new scanning schedule
-    // WifiScanner.ScanSettings settings2 = new WifiScanner.ScanSettings();
-    // settings2.band = WifiScanner.WIFI_BAND_UNSPECIFIED;
-    // settings2.channels = new WifiScanner.ChannelSpec[channels.size()];
-    // int i = 0;
-    // for (Integer channel : channels) {
-    //     settings2.channels[i++] = new WifiScanner.ChannelSpec(channel);
-    // }
-    //
-    // settings2.periodInMs = settings.periodInMs;
-    // addScanRequest(settings2);
-    //
-    // // start tracking new APs
-    // trackSignificantWifiChange(settings);
-    assert(0);
+    AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssidInfos;
+    settings->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&bssidInfos);
+    if (bssidInfos->GetLength() < MAX_APS_TO_TRACK) {
+        Logger::D(TAG, "too few APs (%d) available to track wifi change", bssidInfos->GetLength());
+        return NOERROR;
+    }
+
+    if (DBG) Logger::D(TAG, "Setting configuration specified by app");
+
+    //AutoPtr<ArrayOf<IScanResult*> > scanResults =
+    mCurrentBssids = ArrayOf<IScanResult*>::Alloc(bssidInfos->GetLength());
+    AutoPtr<IHashSet> channels;//Integer
+    CHashSet::New((IHashSet**)&channels);
+
+    for (Int32 i = 0; i < bssidInfos->GetLength(); ++i) {
+        AutoPtr<IScanResult> result;
+        CScanResult::New((IScanResult**)&result);
+        String bssid;
+        (*bssidInfos)[i]->GetBssid(&bssid);
+        result->SetBSSID(bssid);
+        mCurrentBssids->Set(i, result);
+        Int32 frequencyHint;
+        (*bssidInfos)[i]->GetFrequencyHint(&frequencyHint);
+        channels->Add(CoreUtils::Convert(frequencyHint));
+    }
+
+    // cancel previous scan
+    RemoveScanRequest();
+
+    // set new scanning schedule
+    AutoPtr<IWifiScannerScanSettings> settings2;
+    CWifiScannerScanSettings::New((IWifiScannerScanSettings**)&settings2);
+    settings2->SetBand(IWifiScanner::WIFI_BAND_UNSPECIFIED);
+    Int32 size;
+    channels->GetSize(&size);
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > wscs = ArrayOf<IWifiScannerChannelSpec*>::Alloc(size);
+    Int32 i = 0;
+    AutoPtr<ArrayOf<IInterface*> > setArray;
+    channels->ToArray((ArrayOf<IInterface*>**)&setArray);
+    for (Int32 j = 0; i < setArray->GetLength(); ++j) {
+        AutoPtr<IInterface> obj = (*setArray)[j];
+        IInteger32* i32 = IInteger32::Probe(obj);
+        Int32 fre;
+        i32->GetValue(&fre);
+        AutoPtr<IWifiScannerChannelSpec> channelSpec;
+        CWifiScannerChannelSpec::New(fre, (IWifiScannerChannelSpec**)&channelSpec);
+        wscs->Set(i++, channelSpec);
+    }
+    settings2->SetChannels(wscs);
+
+    Int32 periodInMs;
+    settings->GetPeriodInMs(&periodInMs);
+    settings2->SetPeriodInMs(periodInMs);
+    AddScanRequest(settings2);
+
+    // start tracking new APs
+    TrackSignificantWifiChange(settings);
     return NOERROR;
 }
 
@@ -780,53 +993,53 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::OnChangesFound(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // sendMessage(WIFI_CHANGE_CMD_CHANGE_DETECTED, 0, 0, results);
-    assert(0);
+    SendMessage(WIFI_CHANGE_CMD_CHANGE_DETECTED, 0, 0, CoreUtils::Convert(results));
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::AddScanRequest(
     /* [in] */ IWifiScannerScanSettings* settings)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Starting scans");
-    // Message msg = Message.obtain();
-    // msg.what = WifiScanner.CMD_START_BACKGROUND_SCAN;
-    // msg.arg2 = SCAN_COMMAND_ID;
-    // msg.obj = settings;
-    // mClientHandler.sendMessage(msg);
-    assert(0);
+    if (DBG) Logger::D(TAG, "Starting scans");
+    AutoPtr<IMessage> msg;
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+    helper->Obtain((IMessage**)&msg);
+
+    msg->SetWhat(IWifiScanner::CMD_START_BACKGROUND_SCAN);
+    msg->SetArg2(SCAN_COMMAND_ID);
+    msg->SetObj(settings);
+    Boolean bTemp;
+    mOwner->mClientHandler->SendMessage(msg, &bTemp);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::RemoveScanRequest()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Stopping scans");
-    // Message msg = Message.obtain();
-    // msg.what = WifiScanner.CMD_STOP_BACKGROUND_SCAN;
-    // msg.arg2 = SCAN_COMMAND_ID;
-    // mClientHandler.sendMessage(msg);
-    assert(0);
+    if (DBG) Logger::D(TAG, "Stopping scans");
+    AutoPtr<IMessage> msg;
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+    helper->Obtain((IMessage**)&msg);
+
+    msg->SetWhat(IWifiScanner::CMD_STOP_BACKGROUND_SCAN);
+    msg->SetArg2(SCAN_COMMAND_ID);
+    Boolean bTemp;
+    mOwner->mClientHandler->SendMessage(msg, &bTemp);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::TrackSignificantWifiChange(
     /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
-    // ==================before translated======================
-    // WifiNative.untrackSignificantWifiChange();
-    // WifiNative.trackSignificantWifiChange(settings, this);
-    assert(0);
+    WifiNative::UntrackSignificantWifiChange();
+    WifiNative::TrackSignificantWifiChange(settings, this);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::UntrackSignificantWifiChange()
 {
-    // ==================before translated======================
-    // WifiNative.untrackSignificantWifiChange();
-    assert(0);
+    WifiNative::UntrackSignificantWifiChange();
     return NOERROR;
 }
 
@@ -834,84 +1047,111 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::UntrackSignificantWifiCha
 //                WifiScanningServiceImpl::ClientHandler
 //=====================================================================
 WifiScanningServiceImpl::ClientHandler::ClientHandler(
+    /* [in] */ WifiScanningServiceImpl* owner,
     /* [in] */ ILooper* looper)
+    : Handler(looper)
+    , mOwner(owner)
 {
-    // ==================before translated======================
-    // super(looper);
 }
 
 ECode WifiScanningServiceImpl::ClientHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    //
-    // if (DBG) Log.d(TAG, "ClientHandler got" + msg);
-    //
-    // switch (msg.what) {
-    //
-    //     case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-    //         if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-    //             AsyncChannel c = (AsyncChannel) msg.obj;
-    //             if (DBG) Slog.d(TAG, "New client listening to asynchronous messages: " +
-    //                     msg.replyTo);
-    //             ClientInfo cInfo = new ClientInfo(c, msg.replyTo);
-    //             mClients.put(msg.replyTo, cInfo);
-    //         } else {
-    //             Slog.e(TAG, "Client connection failure, error=" + msg.arg1);
-    //         }
-    //         return;
-    //     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-    //         if (msg.arg1 == AsyncChannel.STATUS_SEND_UNSUCCESSFUL) {
-    //             Slog.e(TAG, "Send failed, client connection lost");
-    //         } else {
-    //             if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
-    //         }
-    //         if (DBG) Slog.d(TAG, "closing client " + msg.replyTo);
-    //         ClientInfo ci = mClients.remove(msg.replyTo);
-    //         if (ci != null) {                       /* can be null if send failed above */
-    //             ci.cleanup();
-    //         }
-    //         return;
-    //     case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION:
-    //         AsyncChannel ac = new AsyncChannel();
-    //         ac.connect(mContext, this, msg.replyTo);
-    //         return;
-    // }
-    //
-    // ClientInfo ci = mClients.get(msg.replyTo);
-    // if (ci == null) {
-    //     Slog.e(TAG, "Could not find client info for message " + msg.replyTo);
-    //     replyFailed(msg, WifiScanner.REASON_INVALID_LISTENER, "Could not find listener");
-    //     return;
-    // }
-    //
-    // try {
-    //     enforceConnectivityInternalPermission();
-    // } catch (SecurityException e) {
-    //     replyFailed(msg, WifiScanner.REASON_NOT_AUTHORIZED, "Not authorized");
-    //     return;
-    // }
-    //
-    // int validCommands[] = {
-    //         WifiScanner.CMD_SCAN,
-    //         WifiScanner.CMD_START_BACKGROUND_SCAN,
-    //         WifiScanner.CMD_STOP_BACKGROUND_SCAN,
-    //         WifiScanner.CMD_SET_HOTLIST,
-    //         WifiScanner.CMD_RESET_HOTLIST,
-    //         WifiScanner.CMD_CONFIGURE_WIFI_CHANGE,
-    //         WifiScanner.CMD_START_TRACKING_CHANGE,
-    //         WifiScanner.CMD_STOP_TRACKING_CHANGE };
-    //
-    // for (int cmd : validCommands) {
-    //     if (cmd == msg.what) {
-    //         mStateMachine.sendMessage(Message.obtain(msg));
-    //         return;
-    //     }
-    // }
-    //
-    // replyFailed(msg, WifiScanner.REASON_INVALID_REQUEST, "Invalid request");
-    assert(0);
+    if (DBG) Logger::D(TAG, "ClientHandler got");// + msg);
+
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+
+        case IAsyncChannel::CMD_CHANNEL_HALF_CONNECTED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == IAsyncChannel::STATUS_SUCCESSFUL) {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                AutoPtr<IAsyncChannel> c = IAsyncChannel::Probe(obj);
+                if (DBG) Logger::D(TAG, "New client listening to asynchronous messages: ");// + msg.replyTo);
+                AutoPtr<IMessenger> replyTo;
+                msg->GetReplyTo((IMessenger**)&replyTo);
+                AutoPtr<ClientInfo> cInfo = new ClientInfo(mOwner, c, replyTo);
+                mOwner->mClients->Put(replyTo, TO_IINTERFACE(cInfo));
+            } else {
+                Logger::E(TAG, "Client connection failure, error=", arg1);
+            }
+            return NOERROR;
+        }
+        case IAsyncChannel::CMD_CHANNEL_DISCONNECTED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == IAsyncChannel::STATUS_SEND_UNSUCCESSFUL) {
+                Logger::E(TAG, "Send failed, client connection lost");
+            } else {
+                if (DBG) Logger::D(TAG, "Client connection lost with reason: %d", arg1);
+            }
+            if (DBG) Logger::D(TAG, "closing client ");// + msg.replyTo);
+            AutoPtr<IMessenger> replyTo;
+            msg->GetReplyTo((IMessenger**)&replyTo);
+            AutoPtr<IInterface> obj;
+            mOwner->mClients->Remove(replyTo, (IInterface**)&obj);
+            ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+            if (ci != NULL) {                       /* can be null if send failed above */
+                ci->Cleanup();
+            }
+            return NOERROR;
+        }
+        case IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION: {
+            AutoPtr<IAsyncChannel> ac;
+            CAsyncChannel::New((IAsyncChannel**)&ac);
+            AutoPtr<IMessenger> replyTo;
+            msg->GetReplyTo((IMessenger**)&replyTo);
+            ac->Connect(mOwner->mContext, this, replyTo);
+            return NOERROR;
+        }
+    }
+
+    AutoPtr<IMessenger> replyTo;
+    msg->GetReplyTo((IMessenger**)&replyTo);
+    AutoPtr<IInterface> obj;
+    mOwner->mClients->Get(replyTo, (IInterface**)&obj);
+    ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+    if (ci == NULL) {
+        Logger::E(TAG, "Could not find client info for message ");// + msg.replyTo);
+        mOwner->ReplyFailed(msg, IWifiScanner::REASON_INVALID_LISTENER, String("Could not find listener"));
+        return NOERROR;
+    }
+
+    //try {
+    mOwner->EnforceConnectivityInternalPermission();
+    //} catch (SecurityException e) {
+    //TODO    replyFailed(msg, WifiScanner.REASON_NOT_AUTHORIZED, "Not authorized");
+    //    return;
+    //}
+
+    Int32 validCommands[] = {
+            IWifiScanner::CMD_SCAN,
+            IWifiScanner::CMD_START_BACKGROUND_SCAN,
+            IWifiScanner::CMD_STOP_BACKGROUND_SCAN,
+            IWifiScanner::CMD_SET_HOTLIST,
+            IWifiScanner::CMD_RESET_HOTLIST,
+            IWifiScanner::CMD_CONFIGURE_WIFI_CHANGE,
+            IWifiScanner::CMD_START_TRACKING_CHANGE,
+            IWifiScanner::CMD_STOP_TRACKING_CHANGE };
+
+    for (UInt32 i = 0; i < sizeof(validCommands)/sizeof(Int32); ++i) {
+        Int32 cmd = validCommands[i];
+        Int32 what;
+        msg->GetWhat(&what);
+        if (cmd == what) {
+            AutoPtr<IMessageHelper> helper;
+            CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+            AutoPtr<IMessage> message;
+            helper->Obtain(msg, (IMessage**)&message);
+            mOwner->mStateMachine->SendMessage(message);
+            return NOERROR;
+        }
+    }
+
+    mOwner->ReplyFailed(msg, IWifiScanner::REASON_INVALID_REQUEST, String("Invalid request"));
     return NOERROR;
 }
 
@@ -922,26 +1162,20 @@ WifiScanningServiceImpl::InnerBroadcastReceiver1::InnerBroadcastReceiver1(
     /* [in] */ WifiScanningServiceImpl* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode WifiScanningServiceImpl::InnerBroadcastReceiver1::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // int state = intent.getIntExtra(
-    //         WifiManager.EXTRA_SCAN_AVAILABLE, WifiManager.WIFI_STATE_DISABLED);
-    // if (DBG) Log.d(TAG, "SCAN_AVAILABLE : " + state);
-    // if (state == WifiManager.WIFI_STATE_ENABLED) {
-    //     mStateMachine.sendMessage(CMD_DRIVER_LOADED);
-    // } else if (state == WifiManager.WIFI_STATE_DISABLED) {
-    //     mStateMachine.sendMessage(CMD_DRIVER_UNLOADED);
-    // }
-    assert(0);
+    Int32 state;
+    intent->GetInt32Extra(IWifiManager::EXTRA_SCAN_AVAILABLE, IWifiManager::WIFI_STATE_DISABLED, &state);
+    if (DBG) Logger::D(TAG, "SCAN_AVAILABLE : %d", state);
+    if (state == IWifiManager::WIFI_STATE_ENABLED) {
+        mOwner->mStateMachine->SendMessage(CMD_DRIVER_LOADED);
+    } else if (state == IWifiManager::WIFI_STATE_DISABLED) {
+        mOwner->mStateMachine->SendMessage(CMD_DRIVER_UNLOADED);
+    }
     return NOERROR;
 }
 
@@ -951,91 +1185,90 @@ ECode WifiScanningServiceImpl::InnerBroadcastReceiver1::OnReceive(
 const Int32 WifiScanningServiceImpl::ClientInfo::MAX_LIMIT;
 
 WifiScanningServiceImpl::ClientInfo::ClientInfo(
+    /* [in] */ WifiScanningServiceImpl* owner,
     /* [in] */ IAsyncChannel* c,
     /* [in] */ IMessenger* m)
+    : mOwner(owner)
 {
     CHashMap::New((IHashMap**)&mScanSettings);
     CHashMap::New((IHashMap**)&mScanPeriods);
     CHashMap::New((IHashMap**)&mHotlistSettings);
     CHashSet::New((IHashSet**)&mSignificantWifiHandlers);
-    // ==================before translated======================
-    // mChannel = c;
-    // mMessenger = m;
-    // if (DBG) Slog.d(TAG, "New client, channel: " + c + " messenger: " + m);
+    mChannel = c;
+    mMessenger = m;
+    if (DBG) Logger::D(TAG, "New client, channel: TODO  messenger: TODO");
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // StringBuffer sb = new StringBuffer();
-    // sb.append("mChannel ").append(mChannel).append("\n");
-    // sb.append("mMessenger ").append(mMessenger).append("\n");
-    //
-    // Iterator<Map.Entry<Integer, ScanSettings>> it = mScanSettings.entrySet().iterator();
-    // for (; it.hasNext(); ) {
-    //     Map.Entry<Integer, ScanSettings> entry = it.next();
-    //     sb.append("[ScanId ").append(entry.getKey()).append("\n");
-    //     sb.append("ScanSettings ").append(entry.getValue()).append("\n");
-    //     sb.append("]");
-    // }
-    //
-    // return sb.toString();
-    return NOERROR;
+    AutoPtr<StringBuffer> sb = new StringBuffer();
+    sb->Append("mChannel ");
+    sb->Append("TODO"/*mChannel*/);
+    sb->Append("\n");
+    sb->Append("mMessenger ");
+    sb->Append("TODO"/*mMessenger*/);
+    sb->Append("\n");
+
+    //TODO
+    //Iterator<Map.Entry<Integer, ScanSettings>> it = mScanSettings.entrySet().iterator();
+    //for (; it.hasNext(); ) {
+    //    Map.Entry<Integer, ScanSettings> entry = it.next();
+    //    sb.append("[ScanId ").append(entry.getKey()).append("\n");
+    //    sb.append("ScanSettings ").append(entry.getValue()).append("\n");
+    //    sb.append("]");
+    //}
+
+    return sb->ToString(result);
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::AddScanRequest(
     /* [in] */ IWifiScannerScanSettings* settings,
     /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(settings);
-    // ==================before translated======================
-    // mScanSettings.put(id, settings);
-    assert(0);
+    mScanSettings->Put(CoreUtils::Convert(id), settings);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::RemoveScanRequest(
     /* [in] */ Int32 id)
 {
-    // ==================before translated======================
-    // mScanSettings.remove(id);
-    assert(0);
+    mScanSettings->Remove(CoreUtils::Convert(id));
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetScans(
     /* [out] */ IIterator** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mScanSettings.entrySet().iterator();
-    assert(0);
-    return NOERROR;
+    AutoPtr<ISet> entrySet;
+    mScanSettings->GetEntrySet((ISet**)&entrySet);
+    return entrySet->GetIterator(result);
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetScanSettings(
     /* [out] */ ICollection** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mScanSettings.values();
-    assert(0);
-    return NOERROR;
+    return mScanSettings->GetValues(result);
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportScanResults(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // Iterator<Integer> it = mScanSettings.keySet().iterator();
-    // while (it.hasNext()) {
-    //     int handler = it.next();
-    //     reportScanResults(results, handler);
-    // }
-    assert(0);
+    AutoPtr<ISet> keySet;
+    mScanSettings->GetKeySet((ISet**)&keySet);
+    AutoPtr<IIterator> it;
+    keySet->GetIterator((IIterator**)&it);
+
+    Boolean next;
+    while (it->HasNext(&next), next) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IInteger32* i32 = IInteger32::Probe(obj);
+        Int32 handler;
+        i32->GetValue(&handler);
+        ReportScanResults(results, handler);
+    }
     return NOERROR;
 }
 
@@ -1043,51 +1276,76 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportScanResults(
     /* [in] */ ArrayOf<IScanResult*>* results,
     /* [in] */ Int32 handler)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // ScanSettings settings = mScanSettings.get(handler);
-    // WifiScanner.ChannelSpec desiredChannels[] = settings.channels;
-    // if (settings.band != WifiScanner.WIFI_BAND_UNSPECIFIED
-    //         || desiredChannels == null || desiredChannels.length == 0)  {
-    //     desiredChannels = getChannelsForBand(settings.band);
-    // }
-    //
-    // // check the channels this client asked for ..
-    // int num_results = 0;
-    //
-    // if (results != null) {
-    //     for (ScanResult result : results) {
-    //         for (WifiScanner.ChannelSpec channelSpec : desiredChannels) {
-    //             if (channelSpec.frequency == result.frequency) {
-    //                 num_results++;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // if (num_results == 0) {
-    //     // nothing to report
-    //     return;
-    // }
-    //
-    // ScanResult results2[] = new ScanResult[num_results];
-    // int index = 0;
-    // for (ScanResult result : results) {
-    //     for (WifiScanner.ChannelSpec channelSpec : desiredChannels) {
-    //         if (channelSpec.frequency == result.frequency) {
-    //             WifiSsid wifiSsid = WifiSsid.createFromAsciiEncoded(result.SSID);
-    //             ScanResult newResult = new ScanResult(wifiSsid, result.BSSID, "",
-    //                     result.level, result.frequency, result.timestamp);
-    //             results2[index] = newResult;
-    //             index++;
-    //             break;
-    //         }
-    //     }
-    // }
-    //
-    // deliverScanResults(handler, results2);
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mScanSettings->Get(CoreUtils::Convert(handler), (IInterface**)&obj);
+    AutoPtr<IWifiScannerScanSettings> settings = IWifiScannerScanSettings::Probe(obj);
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > desiredChannels;
+    settings->GetChannels((ArrayOf<IWifiScannerChannelSpec*>**)&desiredChannels);
+    Int32 band;
+    settings->GetBand(&band);
+    if (band != IWifiScanner::WIFI_BAND_UNSPECIFIED
+            || desiredChannels == NULL || desiredChannels->GetLength() == 0)  {
+        desiredChannels = mOwner->GetChannelsForBand(band);
+    }
+
+    // check the channels this client asked for ..
+    Int32 num_results = 0;
+
+    if (results != NULL) {
+        for (Int32 i = 0; i < results->GetLength(); ++i) {
+            AutoPtr<IScanResult> result = (*results)[i];
+            for (Int32 j = 0; j < desiredChannels->GetLength(); ++j) {
+                AutoPtr<IWifiScannerChannelSpec> channelSpec = (*desiredChannels)[j];
+                Int32 freq1, freq2;
+                channelSpec->GetFrequency(&freq1);
+                result->GetFrequency(&freq2);
+                if (freq1 == freq2) {
+                    num_results++;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (num_results == 0) {
+        // nothing to report
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<IScanResult*> >  results2 = ArrayOf<IScanResult*>::Alloc(num_results);
+    Int32 index = 0;
+    for (Int32 i = 0; i < results->GetLength(); ++i) {
+        AutoPtr<IScanResult> result = (*results)[i];
+        for (Int32 j = 0; j < desiredChannels->GetLength(); ++j) {
+            AutoPtr<IWifiScannerChannelSpec> channelSpec = (*desiredChannels)[j];
+            Int32 freq1, freq2;
+            channelSpec->GetFrequency(&freq1);
+            result->GetFrequency(&freq2);
+            if (freq1 == freq2) {
+                AutoPtr<IWifiSsidHelper> wsHelper;
+                CWifiSsidHelper::AcquireSingleton((IWifiSsidHelper**)&wsHelper);
+                String ssid;
+                result->GetSSID(&ssid);
+                AutoPtr<IWifiSsid> wifiSsid;
+                wsHelper->CreateFromAsciiEncoded(ssid, (IWifiSsid**)&wifiSsid);
+
+                Int32 level;
+                result->GetLevel(&level);
+                Int64 timestamp;
+                result->GetTimestamp(&timestamp);
+                String bssid;
+                result->GetBSSID(&bssid);
+                AutoPtr<IScanResult> newResult;
+                CScanResult::New(wifiSsid, bssid, String(""),
+                        level, freq2, timestamp, (IScanResult**)&newResult);
+                results2->Set(index,  newResult);
+                index++;
+                break;
+            }
+        }
+    }
+
+    DeliverScanResults(handler, results2);
     return NOERROR;
 }
 
@@ -1095,42 +1353,71 @@ ECode WifiScanningServiceImpl::ClientInfo::DeliverScanResults(
     /* [in] */ Int32 handler,
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // WifiScanner.ParcelableScanResults parcelableScanResults =
-    //         new WifiScanner.ParcelableScanResults(results);
-    // mChannel.sendMessage(WifiScanner.CMD_SCAN_RESULT, 0, handler, parcelableScanResults);
-    assert(0);
+    AutoPtr<IWifiScannerParcelableScanResults> parcelableScanResults;
+    CWifiScannerParcelableScanResults::New(results, (IWifiScannerParcelableScanResults**)&parcelableScanResults);
+    mChannel->SendMessage(IWifiScanner::CMD_SCAN_RESULT, 0, handler, parcelableScanResults);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportFullScanResult(
     /* [in] */ IScanResult* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Iterator<Integer> it = mScanSettings.keySet().iterator();
-    // while (it.hasNext()) {
-    //     int handler = it.next();
-    //     ScanSettings settings = mScanSettings.get(handler);
-    //     WifiScanner.ChannelSpec desiredChannels[] = settings.channels;
-    //     if (settings.band != WifiScanner.WIFI_BAND_UNSPECIFIED
-    //             || desiredChannels == null || desiredChannels.length == 0)  {
-    //         desiredChannels = getChannelsForBand(settings.band);
-    //     }
-    //     for (WifiScanner.ChannelSpec channelSpec : desiredChannels) {
-    //         if (channelSpec.frequency == result.frequency) {
-    //             WifiSsid wifiSsid = WifiSsid.createFromAsciiEncoded(result.SSID);
-    //             ScanResult newResult = new ScanResult(wifiSsid, result.BSSID, "",
-    //                     result.level, result.frequency, result.timestamp);
-    //             if (DBG) Log.d(TAG, "sending it to " + handler);
-    //             newResult.informationElements = result.informationElements.clone();
-    //             mChannel.sendMessage(
-    //                     WifiScanner.CMD_FULL_SCAN_RESULT, 0, handler, newResult);
-    //         }
-    //     }
-    // }
-    assert(0);
+    AutoPtr<ISet> keySet;
+    mScanSettings->GetKeySet((ISet**)&keySet);
+    AutoPtr<IIterator> it;
+    keySet->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> keyObj;
+        it->GetNext((IInterface**)&keyObj);
+        Int32 handler;
+        IInteger32::Probe(keyObj)->GetValue(&handler);
+
+        AutoPtr<IInterface> valueObj;
+        mScanSettings->Get(keyObj, (IInterface**)&valueObj);
+        AutoPtr<IWifiScannerScanSettings> settings = IWifiScannerScanSettings::Probe(valueObj);
+        AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > desiredChannels;
+        settings->GetChannels((ArrayOf<IWifiScannerChannelSpec*>**)&desiredChannels);
+
+        Int32 band;
+        settings->GetBand(&band);
+        if (band != IWifiScanner::WIFI_BAND_UNSPECIFIED
+                || desiredChannels == NULL || desiredChannels->GetLength() == 0)  {
+            desiredChannels = GetChannelsForBand(band);
+        }
+
+        for (Int32 i = 0; i < desiredChannels->GetLength(); ++i) {
+            AutoPtr<IWifiScannerChannelSpec> channelSpec = (*desiredChannels)[i];
+            Int32 freq1, freq2;
+            channelSpec->GetFrequency(&freq1);
+            result->GetFrequency(&freq2);
+            if (freq1 == freq2) {
+                AutoPtr<IWifiSsidHelper> wsHelper;
+                CWifiSsidHelper::AcquireSingleton((IWifiSsidHelper**)&wsHelper);
+                String ssid;
+                result->GetSSID(&ssid);
+                AutoPtr<IWifiSsid> wifiSsid;
+                wsHelper->CreateFromAsciiEncoded(ssid, (IWifiSsid**)&wifiSsid);
+
+                String bssid;
+                result->GetBSSID(&bssid);
+                Int32 level;
+                result->GetLevel(&level);
+                Int64 timestamp;
+                result->GetTimestamp(&timestamp);
+
+                AutoPtr<IScanResult> newResult;
+                CScanResult::New(wifiSsid, bssid, String(""),
+                        level, freq2, timestamp, (IScanResult**)&newResult);
+                if (DBG) Logger::D(TAG, "sending it to %d", handler);
+                AutoPtr<ArrayOf<IScanResultInformationElement*> > ie;
+                result->GetInformationElements((ArrayOf<IScanResultInformationElement*>**)&ie);
+                AutoPtr<ArrayOf<IScanResultInformationElement*> > ie2 = ie->Clone();
+                newResult->SetInformationElements(ie2);
+                mChannel->SendMessage(IWifiScanner::CMD_FULL_SCAN_RESULT, 0, handler, newResult);
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -1139,18 +1426,18 @@ ECode WifiScanningServiceImpl::ClientInfo::ReportPeriodChanged(
     /* [in] */ IWifiScannerScanSettings* settings,
     /* [in] */ Int32 newPeriodInMs)
 {
-    VALIDATE_NOT_NULL(settings);
-    // ==================before translated======================
-    // Integer prevPeriodObject = mScanPeriods.get(handler);
-    // int prevPeriodInMs = settings.periodInMs;
-    // if (prevPeriodObject != null) {
-    //     prevPeriodInMs = prevPeriodObject;
-    // }
-    //
-    // if (prevPeriodInMs != newPeriodInMs) {
-    //     mChannel.sendMessage(WifiScanner.CMD_PERIOD_CHANGED, newPeriodInMs, handler);
-    // }
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mScanPeriods->Get(CoreUtils::Convert(handler), (IInterface**)&obj);
+    IInteger32* prevPeriodObject = IInteger32::Probe(obj);
+    Int32 prevPeriodInMs;
+    settings->GetPeriodInMs(&prevPeriodInMs);
+    if (prevPeriodObject != NULL) {
+        prevPeriodObject->GetValue(&prevPeriodInMs);
+    }
+
+    if (prevPeriodInMs != newPeriodInMs) {
+        mChannel->SendMessage(IWifiScanner::CMD_PERIOD_CHANGED, newPeriodInMs, handler);
+    }
     return NOERROR;
 }
 
@@ -1158,96 +1445,106 @@ ECode WifiScanningServiceImpl::ClientInfo::AddHostlistSettings(
     /* [in] */ IWifiScannerHotlistSettings* settings,
     /* [in] */ Int32 handler)
 {
-    VALIDATE_NOT_NULL(settings);
-    // ==================before translated======================
-    // mHotlistSettings.put(handler, settings);
-    assert(0);
+    mHotlistSettings->Put(CoreUtils::Convert(handler), settings);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::RemoveHostlistSettings(
     /* [in] */ Int32 handler)
 {
-    // ==================before translated======================
-    // mHotlistSettings.remove(handler);
-    assert(0);
+    mHotlistSettings->Remove(CoreUtils::Convert(handler));
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::GetHotlistSettings(
     /* [out] */ ICollection** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mHotlistSettings.values();
-    assert(0);
-    return NOERROR;
+    return mHotlistSettings->GetValues(result);
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportHotlistResults(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // Iterator<Map.Entry<Integer, WifiScanner.HotlistSettings>> it =
-    //         mHotlistSettings.entrySet().iterator();
-    // while (it.hasNext()) {
-    //     Map.Entry<Integer, WifiScanner.HotlistSettings> entry = it.next();
-    //     int handler = entry.getKey();
-    //     WifiScanner.HotlistSettings settings = entry.getValue();
-    //     int num_results = 0;
-    //
-    //     if (results != null) {
-    //         for (ScanResult result : results) {
-    //             for (WifiScanner.BssidInfo BssidInfo : settings.bssidInfos) {
-    //                 if (result.BSSID.equalsIgnoreCase(BssidInfo.bssid)) {
-    //                     num_results++;
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     if (num_results == 0) {
-    //         // nothing to report
-    //         return;
-    //     }
-    //
-    //     ScanResult results2[] = new ScanResult[num_results];
-    //     int index = 0;
-    //     for (ScanResult result : results) {
-    //         for (WifiScanner.BssidInfo BssidInfo : settings.bssidInfos) {
-    //             if (result.BSSID.equalsIgnoreCase(BssidInfo.bssid)) {
-    //                 results2[index] = result;
-    //                 index++;
-    //             }
-    //         }
-    //     }
-    //
-    //     WifiScanner.ParcelableScanResults parcelableScanResults =
-    //             new WifiScanner.ParcelableScanResults(results2);
-    //
-    //     mChannel.sendMessage(WifiScanner.CMD_AP_FOUND, 0, handler, parcelableScanResults);
-    // }
-    assert(0);
+    AutoPtr<ISet> entrySet;
+    mHotlistSettings->GetEntrySet((ISet**)&entrySet);
+    AutoPtr<IIterator> it;
+    entrySet->GetIterator((IIterator**)&it);
+
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), &hasNext) {
+        AutoPtr<IInterface> mapEntryObj;
+        it->GetNext((IInterface**)&mapEntryObj);
+        IMapEntry* mapEntry = IMapEntry::Probe(mapEntryObj);
+        AutoPtr<IInterface> ko, vo;
+        mapEntry->GetKey((IInterface**)&ko);
+        mapEntry->GetValue((IInterface**)&vo);
+        IInteger32* i32 = IInteger32::Probe(ko);
+        Int32 handler;
+        i32->GetValue(&handler);
+        IWifiScannerHotlistSettings* settings = IWifiScannerHotlistSettings::Probe(vo);
+        Int32 num_results = 0;
+
+        if (results != NULL) {
+            for (Int32 i = 0; i < results->GetLength(); ++i) {
+                AutoPtr<IScanResult> result = (*results)[i];
+                AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssidInfos;
+                settings->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&bssidInfos);
+                String resultBssid;
+                result->GetBSSID(&resultBssid);
+                for (Int32 j = 0; j < bssidInfos->GetLength(); ++j) {
+                    AutoPtr<IWifiScannerBssidInfo> bssidInfo = (*bssidInfos)[j];
+                    String bssidInfoBssid;
+                    bssidInfo->GetBssid(&bssidInfoBssid);
+                    if (resultBssid.EqualsIgnoreCase(bssidInfoBssid)) {
+                        num_results++;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (num_results == 0) {
+            // nothing to report
+            return NOERROR;
+        }
+
+        AutoPtr<ArrayOf<IScanResult*> > results2 = ArrayOf<IScanResult*>::Alloc(num_results);
+        Int32 index = 0;
+        for (Int32 i = 0; i < results->GetLength(); ++i) {
+            AutoPtr<IScanResult> result = (*results)[i];
+            AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssidInfos;
+            settings->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&bssidInfos);
+            String resultBssid;
+            result->GetBSSID(&resultBssid);
+            for (Int32 j = 0; j < bssidInfos->GetLength(); ++j) {
+                AutoPtr<IWifiScannerBssidInfo> bssidInfo = (*bssidInfos)[j];
+                String bssidInfoBssid;
+                bssidInfo->GetBssid(&bssidInfoBssid);
+                if (resultBssid.EqualsIgnoreCase(bssidInfoBssid)) {
+                    results2->Set(index, result);
+                    index++;
+                }
+            }
+        }
+
+        AutoPtr<IWifiScannerParcelableScanResults> parcelableScanResults;
+        CWifiScannerParcelableScanResults::New(results2, (IWifiScannerParcelableScanResults**)&parcelableScanResults);
+
+        mChannel->SendMessage(IWifiScanner::CMD_AP_FOUND, 0, handler, parcelableScanResults);
+    }
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::AddSignificantWifiChange(
     /* [in] */ Int32 handler)
 {
-    // ==================before translated======================
-    // mSignificantWifiHandlers.add(handler);
-    assert(0);
-    return NOERROR;
+    return mSignificantWifiHandlers->Add(CoreUtils::Convert(handler));
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::RemoveSignificantWifiChange(
     /* [in] */ Int32 handler)
 {
-    // ==================before translated======================
-    // mSignificantWifiHandlers.remove(handler);
-    assert(0);
+    mSignificantWifiHandlers->Remove(CoreUtils::Convert(handler));
     return NOERROR;
 }
 
@@ -1255,62 +1552,72 @@ ECode WifiScanningServiceImpl::ClientInfo::GetWifiChangeHandlers(
     /* [out] */ ICollection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSignificantWifiHandlers;
-    assert(0);
+    AutoPtr<ICollection> temp = ICollection::Probe(mSignificantWifiHandlers);
+    *result = temp;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportWifiChanged(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // WifiScanner.ParcelableScanResults parcelableScanResults =
-    //         new WifiScanner.ParcelableScanResults(results);
-    // Iterator<Integer> it = mSignificantWifiHandlers.iterator();
-    // while (it.hasNext()) {
-    //     int handler = it.next();
-    //     mChannel.sendMessage(WifiScanner.CMD_WIFI_CHANGE_DETECTED,
-    //             0, handler, parcelableScanResults);
-    // }
-    assert(0);
+    AutoPtr<IWifiScannerParcelableScanResults> parcelableScanResults;
+    CWifiScannerParcelableScanResults::New(results, (IWifiScannerParcelableScanResults**)&parcelableScanResults);
+
+    AutoPtr<IIterator> it;
+    mSignificantWifiHandlers->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Int32 handler;
+        IInteger32::Probe(obj)->GetValue(&handler);
+        mChannel->SendMessage(IWifiScanner::CMD_WIFI_CHANGE_DETECTED,
+                0, handler, parcelableScanResults);
+    }
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::ReportWifiStabilized(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // WifiScanner.ParcelableScanResults parcelableScanResults =
-    //         new WifiScanner.ParcelableScanResults(results);
-    // Iterator<Integer> it = mSignificantWifiHandlers.iterator();
-    // while (it.hasNext()) {
-    //     int handler = it.next();
-    //     mChannel.sendMessage(WifiScanner.CMD_WIFI_CHANGES_STABILIZED,
-    //             0, handler, parcelableScanResults);
-    // }
-    assert(0);
+    AutoPtr<IWifiScannerParcelableScanResults> parcelableScanResults;
+    CWifiScannerParcelableScanResults::New(results, (IWifiScannerParcelableScanResults**)&parcelableScanResults);
+
+    AutoPtr<IIterator> it;
+    mSignificantWifiHandlers->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Int32 handler;
+        IInteger32::Probe(obj)->GetValue(&handler);
+        mChannel->SendMessage(IWifiScanner::CMD_WIFI_CHANGES_STABILIZED,
+                0, handler, parcelableScanResults);
+    }
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ClientInfo::Cleanup()
 {
-    // ==================before translated======================
-    // mScanSettings.clear();
-    // resetBuckets();
-    //
-    // mHotlistSettings.clear();
-    // resetHotlist();
-    //
-    // for (Integer handler :  mSignificantWifiHandlers) {
-    //     untrackWifiChanges(this, handler);
-    // }
-    //
-    // mSignificantWifiHandlers.clear();
-    // Log.d(TAG, "Successfully stopped all requests for client " + this);
-    assert(0);
+    mScanSettings->Clear();
+    Boolean bTemp;
+    mOwner->ResetBuckets(&bTemp);
+
+    mHotlistSettings->Clear();
+    mOwner->ResetHotlist();
+
+    AutoPtr<ArrayOf<IInterface*> > array;
+    ICollection::Probe(mSignificantWifiHandlers)->ToArray((ArrayOf<IInterface*>**)&array);
+    for (Int32 i = 0; i < array->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*array)[i];
+        Int32 handler;
+        IInteger32::Probe(obj)->GetValue(&handler);
+        mOwner->UntrackWifiChanges(this, handler);
+    }
+
+    mSignificantWifiHandlers->Clear();
+    Logger::D(TAG, "Successfully stopped all requests for client %p", this);
     return NOERROR;
 }
 
@@ -1322,10 +1629,9 @@ WifiScanningServiceImpl::SettingsComputer::TimeBucket::TimeBucket(
     /* [in] */ Int32 min,
     /* [in] */ Int32 max)
 {
-    // ==================before translated======================
-    // periodInSecond = p;
-    // periodMinInSecond = min;
-    // periodMaxInSecond = max;
+    periodInSecond = p;
+    periodMinInSecond = min;
+    periodMaxInSecond = max;
 }
 
 //=====================================================================
@@ -1341,35 +1647,32 @@ const Int32 WifiScanningServiceImpl::SettingsComputer::DEFAULT_BASE_PERIOD_MS;
 WifiScanningServiceImpl::SettingsComputer::SettingsComputer()
 {
     CHashMap::New((IHashMap**)&mChannelToBucketMap);
-    //TODO
-    //{
-    //    mSettings = new WifiNative.ScanSettings();
-    //    mSettings.max_ap_per_scan = DEFAULT_MAX_AP_PER_SCAN;
-    //    mSettings.base_period_ms = DEFAULT_BASE_PERIOD_MS;
-    //    mSettings.report_threshold = DEFAULT_REPORT_THRESHOLD;
+    {
+        mSettings = new WifiNative::ScanSettings();
+        mSettings->max_ap_per_scan = DEFAULT_MAX_AP_PER_SCAN;
+        mSettings->base_period_ms = DEFAULT_BASE_PERIOD_MS;
+        mSettings->report_threshold = DEFAULT_REPORT_THRESHOLD;
 
-    //    mSettings.buckets = new WifiNative.BucketSettings[MAX_BUCKETS];
-    //    for (int i = 0; i < mSettings.buckets.length; i++) {
-    //        WifiNative.BucketSettings bucketSettings = new WifiNative.BucketSettings();
-    //        bucketSettings.bucket = i;
-    //        bucketSettings.report_events = 0;
-    //        bucketSettings.channels = new WifiNative.ChannelSettings[MAX_CHANNELS];
-    //        bucketSettings.num_channels = 0;
-    //        for (int j = 0; j < bucketSettings.channels.length; j++) {
-    //            WifiNative.ChannelSettings channelSettings = new WifiNative.ChannelSettings();
-    //            bucketSettings.channels[j] = channelSettings;
-    //        }
-    //        mSettings.buckets[i] = bucketSettings;
-    //    }
-    //}
+        mSettings->buckets = ArrayOf<WifiNative::BucketSettings*>::Alloc(MAX_BUCKETS);
+        for (Int32 i = 0; i < mSettings->buckets->GetLength(); ++i) {
+            AutoPtr<WifiNative::BucketSettings> bucketSettings = new WifiNative::BucketSettings();
+            bucketSettings->bucket = i;
+            bucketSettings->report_events = 0;
+            bucketSettings->channels = ArrayOf<WifiNative::ChannelSettings*>::Alloc(MAX_CHANNELS);
+            bucketSettings->num_channels = 0;
+            for (Int32 j = 0; j < bucketSettings->channels->GetLength(); ++j) {
+                AutoPtr<WifiNative::ChannelSettings> channelSettings = new WifiNative::ChannelSettings();
+                bucketSettings->channels->Set(j, channelSettings);
+            }
+            mSettings->buckets->Set(i, bucketSettings);
+        }
+    }
 }
 
 ECode WifiScanningServiceImpl::SettingsComputer::PrepChannelMap(
     /* [in] */ IWifiScannerScanSettings* settings)
 {
-    // ==================before translated======================
-    // getBestBucket(settings);
-    assert(0);
+    GetBestBucket(settings);
     return NOERROR;
 }
 
@@ -1378,209 +1681,243 @@ ECode WifiScanningServiceImpl::SettingsComputer::AddScanRequestToBucket(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //
-    // int bucketIndex = getBestBucket(settings);
-    // if (bucketIndex == -1) {
-    //     Log.e(TAG, "Ignoring invalid settings");
-    //     return -1;
-    // }
-    //
-    // WifiScanner.ChannelSpec desiredChannels[] = settings.channels;
-    // if (settings.band != WifiScanner.WIFI_BAND_UNSPECIFIED
-    //         || desiredChannels == null
-    //         || desiredChannels.length == 0) {
-    //     // set channels based on band
-    //     desiredChannels = getChannelsForBand(settings.band);
-    //     if (desiredChannels == null) {
-    //         // still no channels; then there's nothing to scan
-    //         Log.e(TAG, "No channels to scan!!");
-    //         return -1;
-    //     }
-    // }
-    //
-    // // merge the channel lists for these buckets
-    // Log.d(TAG, "merging " + desiredChannels.length + " channels "
-    //         + " for period " + settings.periodInMs);
-    //
-    // WifiNative.BucketSettings bucket = mSettings.buckets[bucketIndex];
-    // boolean added = (bucket.num_channels == 0)
-    //         && (bucket.band == WifiScanner.WIFI_BAND_UNSPECIFIED);
-    // Log.d(TAG, "existing " + bucket.num_channels + " channels ");
-    //
-    // HashSet<WifiScanner.ChannelSpec> newChannels = new HashSet<WifiScanner.ChannelSpec>();
-    // for (WifiScanner.ChannelSpec desiredChannelSpec : desiredChannels) {
-    //
-    //     Log.d(TAG, "desired channel " + desiredChannelSpec.frequency);
-    //
-    //     boolean found = false;
-    //     for (WifiNative.ChannelSettings existingChannelSpec : bucket.channels) {
-    //         if (desiredChannelSpec.frequency == existingChannelSpec.frequency) {
-    //             found = true;
-    //             break;
-    //         }
-    //     }
-    //
-    //     if (!found) {
-    //         newChannels.add(desiredChannelSpec);
-    //     } else {
-    //         if (DBG) Log.d(TAG, "Already scanning channel " + desiredChannelSpec.frequency);
-    //     }
-    // }
-    //
-    // if (settings.band != WifiScanner.WIFI_BAND_UNSPECIFIED
-    //         || (bucket.num_channels + newChannels.size()) > bucket.channels.length) {
-    //     // can't accommodate all channels; switch to specifying band
-    //     bucket.num_channels = 0;
-    //     bucket.band = getBandFromChannels(bucket.channels)
-    //             | getBandFromChannels(desiredChannels);
-    //     bucket.channels = new WifiNative.ChannelSettings[0];
-    //     Log.d(TAG, "switching to using band " + bucket.band);
-    // } else {
-    //     for (WifiScanner.ChannelSpec desiredChannelSpec : newChannels) {
-    //
-    //         Log.d(TAG, "adding new channel spec " + desiredChannelSpec.frequency);
-    //
-    //         WifiNative.ChannelSettings channelSettings = bucket.channels[bucket.num_channels];
-    //         channelSettings.frequency = desiredChannelSpec.frequency;
-    //         bucket.num_channels++;
-    //         mChannelToBucketMap.put(bucketIndex, channelSettings.frequency);
-    //     }
-    // }
-    //
-    // if (bucket.report_events < settings.reportEvents) {
-    //     if (DBG) Log.d(TAG, "setting report_events to " + settings.reportEvents);
-    //     bucket.report_events = settings.reportEvents;
-    // } else {
-    //     if (DBG) Log.d(TAG, "report_events is " + settings.reportEvents);
-    // }
-    //
-    // if (added) {
-    //     bucket.period_ms = mTimeBuckets[bucketIndex].periodInSecond * 1000;
-    //     mSettings.num_buckets++;
-    // }
-    //
-    // if (mSettings.max_ap_per_scan < settings.numBssidsPerScan) {
-    //     mSettings.max_ap_per_scan = settings.numBssidsPerScan;
-    // }
-    //
-    // return bucket.period_ms;
-    assert(0);
+
+    Int32 bucketIndex = GetBestBucket(settings);
+    if (bucketIndex == -1) {
+        Logger::E(TAG, "Ignoring invalid settings");
+        *result = -1;
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > desiredChannels;
+    settings->GetChannels((ArrayOf<IWifiScannerChannelSpec*>**)&desiredChannels);
+
+    Int32 band;
+    settings->GetBand(&band);
+    if (band != IWifiScanner::WIFI_BAND_UNSPECIFIED
+            || desiredChannels == NULL
+            || desiredChannels->GetLength() == 0) {
+        // set channels based on band
+        desiredChannels = GetChannelsForBand(band);
+        if (desiredChannels == NULL) {
+            // still no channels; then there's nothing to scan
+            Logger::E(TAG, "No channels to scan!!");
+            *result = -1;
+            return NOERROR;
+        }
+    }
+
+    Int32 periodInMs;
+    settings->GetPeriodInMs(&periodInMs);
+    // merge the channel lists for these buckets
+    Logger::D(TAG, "merging %d channels for period %d", desiredChannels->GetLength() , periodInMs);
+
+
+    AutoPtr<WifiNative::BucketSettings> bucket = (*mSettings->buckets)[bucketIndex];
+    Boolean added = (bucket->num_channels == 0)
+            && (bucket->band == IWifiScanner::WIFI_BAND_UNSPECIFIED);
+    Logger::D(TAG, "existing %d channels ", bucket->num_channels);
+
+    AutoPtr<IHashSet> newChannels;//IWifiScannerChannelSpec
+    CHashSet::New((IHashSet**)&newChannels);
+
+    for (Int32 i = 0; i < desiredChannels->GetLength(); ++i) {
+        AutoPtr<IWifiScannerChannelSpec> desiredChannelSpec = (*desiredChannels)[i];
+
+        Int32 frequency;
+        desiredChannelSpec->GetFrequency(&frequency);
+        Logger::D(TAG, "desired channel %d", frequency);
+
+        Boolean found = FALSE;
+        AutoPtr<ArrayOf<WifiNative::ChannelSettings*> > bucketChannels = bucket->channels;
+        for (Int32 j = 0; j < bucketChannels->GetLength(); ++j) {
+            AutoPtr<WifiNative::ChannelSettings> existingChannelSpec = (*bucketChannels)[j];
+            if (frequency == existingChannelSpec->frequency) {
+                found = TRUE;
+                break;
+            }
+        }
+
+        if (!found) {
+            newChannels->Add(desiredChannelSpec);
+        } else {
+            if (DBG) Logger::D(TAG, "Already scanning channel %d", frequency);
+        }
+    }
+
+    Int32 newChannelsSize;
+    newChannels->GetSize(&newChannelsSize);
+    if (band != IWifiScanner::WIFI_BAND_UNSPECIFIED
+            || (bucket->num_channels + newChannelsSize) > bucket->channels->GetLength()) {
+        // can't accommodate all channels; switch to specifying band
+        bucket->num_channels = 0;
+        bucket->band = GetBandFromChannels(bucket->channels)
+                | GetBandFromChannels(desiredChannels);
+        bucket->channels = ArrayOf<WifiNative::ChannelSettings*>::Alloc(0);
+        Logger::D(TAG, "switching to using band %d", band);
+    } else {
+        AutoPtr<ArrayOf<IInterface*> > array;
+        newChannels->ToArray((ArrayOf<IInterface*>**)&array);
+        for (Int32 i = 0; i < array->GetLength(); ++i) {
+            AutoPtr<IInterface> obj = (*array)[i];
+            IWifiScannerChannelSpec* desiredChannelSpec = IWifiScannerChannelSpec::Probe(obj);
+
+            Int32 frequency;
+            desiredChannelSpec->GetFrequency(&frequency);
+            Logger::D(TAG, "adding new channel spec %d", frequency);
+
+            AutoPtr<WifiNative::ChannelSettings> channelSettings = (*bucket->channels)[bucket->num_channels];
+            channelSettings->frequency = frequency;
+            bucket->num_channels++;
+            mChannelToBucketMap->Put(CoreUtils::Convert(bucketIndex),
+                    CoreUtils::Convert(channelSettings->frequency));
+        }
+    }
+
+    Int32 reportEvents;
+    settings->GetReportEvents(&reportEvents);
+    if (bucket->report_events < reportEvents) {
+        if (DBG) Logger::D(TAG, "setting report_events to %d", reportEvents);
+        bucket->report_events = reportEvents;
+    } else {
+        if (DBG) Logger::D(TAG, "report_events is %d", reportEvents);
+    }
+
+    if (added) {
+        bucket->period_ms = (*mTimeBuckets)[bucketIndex]->periodInSecond * 1000;
+        mSettings->num_buckets++;
+    }
+
+    Int32 numBssidsPerScan;
+    settings->GetNumBssidsPerScan(&numBssidsPerScan);
+    if (mSettings->max_ap_per_scan < numBssidsPerScan) {
+        mSettings->max_ap_per_scan = numBssidsPerScan;
+    }
+
+    *result = bucket->period_ms;
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::SettingsComputer::GetComputedSettings(
     /* [out] */ WifiNative::ScanSettings** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSettings;
-    assert(0);
+    VALIDATE_NOT_NULL(*result);
+    *result = mSettings;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::SettingsComputer::CompressBuckets()
 {
-    // ==================before translated======================
-    // int num_buckets = 0;
-    // for (int i = 0; i < mSettings.buckets.length; i++) {
-    //     if (mSettings.buckets[i].num_channels != 0
-    //             || mSettings.buckets[i].band != WifiScanner.WIFI_BAND_UNSPECIFIED) {
-    //         mSettings.buckets[num_buckets] = mSettings.buckets[i];
-    //         num_buckets++;
-    //     }
-    // }
-    // // remove unused buckets
-    // for (int i = num_buckets; i < mSettings.buckets.length; i++) {
-    //     mSettings.buckets[i] = null;
-    // }
-    //
-    // mSettings.num_buckets = num_buckets;
-    // if (num_buckets != 0) {
-    //     mSettings.base_period_ms = mSettings.buckets[0].period_ms;
-    // }
-    assert(0);
+    Int32 num_buckets = 0;
+    for (Int32 i = 0; i < mSettings->buckets->GetLength(); ++i) {
+        if ((*mSettings->buckets)[i]->num_channels != 0
+                || (*mSettings->buckets)[i]->band != IWifiScanner::WIFI_BAND_UNSPECIFIED) {
+            mSettings->buckets->Set(num_buckets, (*mSettings->buckets)[i]);
+            num_buckets++;
+        }
+    }
+    // remove unused buckets
+    for (Int32 i = num_buckets; i < mSettings->buckets->GetLength(); ++i) {
+        mSettings->buckets->Set(i,  NULL);
+    }
+
+    mSettings->num_buckets = num_buckets;
+    if (num_buckets != 0) {
+        mSettings->base_period_ms = (*mSettings->buckets)[0]->period_ms;
+    }
     return NOERROR;
 }
 
 AutoPtr<ArrayOf<WifiScanningServiceImpl::SettingsComputer::TimeBucket*> > WifiScanningServiceImpl::SettingsComputer::MiddleInitMtimebuckets()
 {
-    // ==================before translated======================
-    // TimeBucket[] result = new TimeBucket[] {
-    //                  new TimeBucket( 1, 0, 5 ),
-    //                  new TimeBucket( 5, 5, 10 ),
-    //                  new TimeBucket( 10, 10, 25 ),
-    //                  new TimeBucket( 30, 25, 55 ),
-    //                  new TimeBucket( 60, 55, 100),
-    //                  new TimeBucket( 300, 240, 500),
-    //                  new TimeBucket( 600, 500, 1500),
-    //                  new TimeBucket( 1800, 1500, WifiScanner.MAX_SCAN_PERIOD_MS) };
-    // assert(0 && "TODO");
-    AutoPtr<ArrayOf<TimeBucket*> > empty;
-    return empty;
+    AutoPtr<ArrayOf<TimeBucket*> > timeBuckets = ArrayOf<TimeBucket*>::Alloc(8);
+    timeBuckets->Set(0, new TimeBucket( 1, 0, 5 ));
+    timeBuckets->Set(1, new TimeBucket( 5, 5, 10 ));
+    timeBuckets->Set(2, new TimeBucket( 10, 10, 25 ));
+    timeBuckets->Set(3, new TimeBucket( 30, 25, 55 ));
+    timeBuckets->Set(4, new TimeBucket( 60, 55, 100));
+    timeBuckets->Set(5, new TimeBucket( 300, 240, 500));
+    timeBuckets->Set(6, new TimeBucket( 600, 500, 1500));
+    timeBuckets->Set(7, new TimeBucket( 1800, 1500, IWifiScanner::MAX_SCAN_PERIOD_MS));
+    return timeBuckets;
 }
 
 Int32 WifiScanningServiceImpl::SettingsComputer::GetBestBucket(
     /* [in] */ IWifiScannerScanSettings* settings)
 {
-    // ==================before translated======================
-    //
-    // // check to see if any of the channels are being scanned already
-    // // and find the smallest bucket index (it represents the quickest
-    // // period of scan)
-    //
-    // WifiScanner.ChannelSpec channels[] = settings.channels;
-    // if (channels == null) {
-    //     // set channels based on band
-    //     channels = getChannelsForBand(settings.band);
-    // }
-    //
-    // if (channels == null) {
-    //     // still no channels; then there's nothing to scan
-    //     Log.e(TAG, "No channels to scan!!");
-    //     return -1;
-    // }
-    //
-    // int mostFrequentBucketIndex = mTimeBuckets.length;
-    //
-    // for (WifiScanner.ChannelSpec desiredChannelSpec : channels) {
-    //     if (mChannelToBucketMap.containsKey(desiredChannelSpec.frequency)) {
-    //         int bucket = mChannelToBucketMap.get(desiredChannelSpec.frequency);
-    //         if (bucket < mostFrequentBucketIndex) {
-    //             mostFrequentBucketIndex = bucket;
-    //         }
-    //     }
-    // }
-    //
-    // int bestBucketIndex = -1;                                   // best by period
-    // for (int i = 0; i < mTimeBuckets.length; i++) {
-    //     TimeBucket bucket = mTimeBuckets[i];
-    //     if (bucket.periodMinInSecond * 1000 <= settings.periodInMs
-    //             && settings.periodInMs < bucket.periodMaxInSecond * 1000) {
-    //         // we set the time period to this
-    //         bestBucketIndex = i;
-    //         break;
-    //     }
-    // }
-    //
-    // if (mostFrequentBucketIndex < bestBucketIndex) {
-    //     for (WifiScanner.ChannelSpec desiredChannelSpec : channels) {
-    //         mChannelToBucketMap.put(desiredChannelSpec.frequency, mostFrequentBucketIndex);
-    //     }
-    //     Log.d(TAG, "returning mf bucket number " + mostFrequentBucketIndex);
-    //     return mostFrequentBucketIndex;
-    // } else if (bestBucketIndex != -1) {
-    //     for (WifiScanner.ChannelSpec desiredChannelSpec : channels) {
-    //         mChannelToBucketMap.put(desiredChannelSpec.frequency, bestBucketIndex);
-    //     }
-    //     Log.d(TAG, "returning best bucket number " + bestBucketIndex);
-    //     return bestBucketIndex;
-    // }
-    //
-    // Log.e(TAG, "Could not find suitable bucket for period " + settings.periodInMs);
-    // return -1;
-    assert(0);
-    return 0;
+    // check to see if any of the channels are being scanned already
+    // and find the smallest bucket index (it represents the quickest
+    // period of scan)
+
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > channels;
+    settings->GetChannels((ArrayOf<IWifiScannerChannelSpec*>**)&channels);
+    if (channels == NULL) {
+        // set channels based on band
+        Int32 band;
+        settings->GetBand(&band);
+        channels = GetChannelsForBand(band);
+    }
+
+    if (channels == NULL) {
+        // still no channels; then there's nothing to scan
+        Logger::E(TAG, "No channels to scan!!");
+        return -1;
+    }
+
+    Int32 mostFrequentBucketIndex = mTimeBuckets->GetLength();
+
+    for (Int32 i = 0; i < channels->GetLength(); ++i) {
+        AutoPtr<IWifiScannerChannelSpec> desiredChannelSpec = (*channels)[i];
+        Int32 frequency;
+        desiredChannelSpec->GetFrequency(&frequency);
+        Boolean containskey;
+        if (mChannelToBucketMap->ContainsKey(CoreUtils::Convert(frequency), &containskey), containskey) {
+            AutoPtr<IInterface> valObj;
+            mChannelToBucketMap->Get(CoreUtils::Convert(frequency), (IInterface**)&valObj);
+            Int32 bucket;
+            IInteger32::Probe(valObj)->GetValue(&bucket);
+            if (bucket < mostFrequentBucketIndex) {
+                mostFrequentBucketIndex = bucket;
+            }
+        }
+    }
+
+    Int32 bestBucketIndex = -1;                                   // best by period
+    Int32 periodInMs;
+    settings->GetPeriodInMs(&periodInMs);
+    for (Int32 i = 0; i < mTimeBuckets->GetLength(); i++) {
+        AutoPtr<TimeBucket> bucket = (*mTimeBuckets)[i];
+        if (bucket->periodMinInSecond * 1000 <= periodInMs
+                && periodInMs < bucket->periodMaxInSecond * 1000) {
+            // we set the time period to this
+            bestBucketIndex = i;
+            break;
+        }
+    }
+
+    if (mostFrequentBucketIndex < bestBucketIndex) {
+        for (Int32 i = 0; i < channels->GetLength(); ++i) {
+            AutoPtr<IWifiScannerChannelSpec> desiredChannelSpec = (*channels)[i];
+            Int32 frequency;
+            desiredChannelSpec->GetFrequency(&frequency);
+            mChannelToBucketMap->Put(CoreUtils::Convert(frequency), CoreUtils::Convert(mostFrequentBucketIndex));
+        }
+        Logger::D(TAG, "returning mf bucket number %d", mostFrequentBucketIndex);
+        return mostFrequentBucketIndex;
+    } else if (bestBucketIndex != -1) {
+        for (Int32 i = 0; i < channels->GetLength(); ++i) {
+            AutoPtr<IWifiScannerChannelSpec> desiredChannelSpec = (*channels)[i];
+            Int32 frequency;
+            desiredChannelSpec->GetFrequency(&frequency);
+            mChannelToBucketMap->Put(CoreUtils::Convert(frequency), CoreUtils::Convert(bestBucketIndex));
+        }
+        Logger::D(TAG, "returning best bucket number %d", bestBucketIndex);
+        return bestBucketIndex;
+    }
+
+    Logger::E(TAG, "Could not find suitable bucket for period %d", periodInMs);
+    return -1;
 }
 
 //=====================================================================
@@ -1612,17 +1949,18 @@ WifiScanningServiceImpl::WifiScanningServiceImpl()
 ECode WifiScanningServiceImpl::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // mContext = context;
+    mContext = context;
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::GetMessenger(
     /* [out] */ IMessenger** messenger)
 {
-    // ==================before translated======================
-    // return new Messenger(mClientHandler);
-    assert(0);
+    VALIDATE_NOT_NULL(messenger);
+    AutoPtr<IMessenger> mes;
+    CMessenger::New(mClientHandler, (IMessenger**)&mes);
+    *messenger = mes;
+    REFCOUNT_ADD(*messenger);
     return NOERROR;
 }
 
@@ -1630,75 +1968,74 @@ ECode WifiScanningServiceImpl::GetAvailableChannels(
     /* [in] */ Int32 band,
     /* [out] */ IBundle** bundle)
 {
-    // ==================before translated======================
-    // WifiScanner.ChannelSpec channelSpecs[] = getChannelsForBand(band);
-    // ArrayList<Integer> list = new ArrayList<Integer>(channelSpecs.length);
-    // for (WifiScanner.ChannelSpec channelSpec : channelSpecs) {
-    //     list.add(channelSpec.frequency);
-    // }
-    // Bundle b = new Bundle();
-    // b.putIntegerArrayList(WifiScanner.GET_AVAILABLE_CHANNELS_EXTRA, list);
-    // return b;
-    assert(0);
+    VALIDATE_NOT_NULL(bundle);
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > channelSpecs = GetChannelsForBand(band);
+    AutoPtr<IArrayList> list;
+    CArrayList::New(channelSpecs->GetLength(), (IArrayList**)&list);
+
+    for (Int32 i = 0; i < channelSpecs->GetLength(); ++i) {
+        AutoPtr<IWifiScannerChannelSpec> channelSpec = (*channelSpecs)[i];
+        Int32 frequency;
+        channelSpec->GetFrequency(&frequency);
+        list->Add(CoreUtils::Convert(frequency));
+    }
+    AutoPtr<IBundle> b;
+    CBundle::New((IBundle**)&b);
+    b->PutIntegerArrayList(IWifiScanner::GET_AVAILABLE_CHANNELS_EXTRA, list);
+    *bundle = b;
+    REFCOUNT_ADD(*bundle);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::StartService(
     /* [in] */ IContext* context)
 {
-    VALIDATE_NOT_NULL(context);
-    // ==================before translated======================
-    // mContext = context;
-    //
-    // HandlerThread thread = new HandlerThread("WifiScanningService");
-    // thread.start();
-    //
-    // mClientHandler = new ClientHandler(thread.getLooper());
-    // mStateMachine = new WifiScanningStateMachine(thread.getLooper());
-    // mWifiChangeStateMachine = new WifiChangeStateMachine(thread.getLooper());
-    //
-    // mContext.registerReceiver(
-    //         new BroadcastReceiver() {
-    //             @Override
-    //             public void onReceive(Context context, Intent intent) {
-    //                 int state = intent.getIntExtra(
-    //                         WifiManager.EXTRA_SCAN_AVAILABLE, WifiManager.WIFI_STATE_DISABLED);
-    //                 if (DBG) Log.d(TAG, "SCAN_AVAILABLE : " + state);
-    //                 if (state == WifiManager.WIFI_STATE_ENABLED) {
-    //                     mStateMachine.sendMessage(CMD_DRIVER_LOADED);
-    //                 } else if (state == WifiManager.WIFI_STATE_DISABLED) {
-    //                     mStateMachine.sendMessage(CMD_DRIVER_UNLOADED);
-    //                 }
-    //             }
-    //         }, new IntentFilter(WifiManager.WIFI_SCAN_AVAILABLE));
-    //
-    // mStateMachine.start();
-    // mWifiChangeStateMachine.start();
-    assert(0);
+    mContext = context;
+
+    AutoPtr<HandlerThread> thread = new HandlerThread(String("WifiScanningService"));
+    thread->Start();
+
+    AutoPtr<ILooper> looper;
+    thread->GetLooper((ILooper**)&looper);
+    mClientHandler = new ClientHandler(this, looper);
+    mStateMachine = new WifiScanningStateMachine(this, looper);
+    mWifiChangeStateMachine = new WifiChangeStateMachine(this, looper);
+
+    AutoPtr<IBroadcastReceiver> receiver = new InnerBroadcastReceiver1(this);
+    AutoPtr<IIntentFilter> intentFilter;
+    CIntentFilter::New(IWifiManager::WIFI_SCAN_AVAILABLE, (IIntentFilter**)&intentFilter);
+    AutoPtr<IIntent> intentTemp;
+    mContext->RegisterReceiver(receiver, intentFilter, (IIntent**)&intentTemp);
+
+    mStateMachine->Start();
+    mWifiChangeStateMachine->Start();
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ReplySucceeded(
     /* [in] */ IMessage* msg,
-    /* [in] */ IObject* obj)
+    /* [in] */ IInterface* obj)
 {
-    VALIDATE_NOT_NULL(msg);
-    VALIDATE_NOT_NULL(obj);
-    // ==================before translated======================
-    // if (msg.replyTo != null) {
-    //     Message reply = Message.obtain();
-    //     reply.what = WifiScanner.CMD_OP_SUCCEEDED;
-    //     reply.arg2 = msg.arg2;
-    //     reply.obj = obj;
-    //     try {
-    //         msg.replyTo.send(reply);
-    //     } catch (RemoteException e) {
-    //         // There's not much we can do if reply can't be sent!
-    //     }
-    // } else {
-    //     // locally generated message; doesn't need a reply!
-    // }
-    assert(0);
+    AutoPtr<IMessenger> replyTo;
+    msg->GetReplyTo((IMessenger**)&replyTo);
+    if (replyTo != NULL) {
+        AutoPtr<IMessage> reply;
+        AutoPtr<IMessageHelper> helper;
+        CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+        helper->Obtain((IMessage**)&reply);
+        reply->SetWhat(IWifiScanner::CMD_OP_SUCCEEDED);
+        Int32 arg2;
+        msg->GetArg2(&arg2);
+        reply->SetArg2(arg2);
+        reply->SetObj(obj);
+        //try {
+            replyTo->Send(reply);
+        //} catch (RemoteException e) {
+        //    // There's not much we can do if reply can't be sent!
+        //}
+    } else {
+        // locally generated message; doesn't need a reply!
+    }
     return NOERROR;
 }
 
@@ -1707,22 +2044,29 @@ ECode WifiScanningServiceImpl::ReplyFailed(
     /* [in] */ Int32 reason,
     /* [in] */ const String& description)
 {
-    VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    // if (msg.replyTo != null) {
-    //     Message reply = Message.obtain();
-    //     reply.what = WifiScanner.CMD_OP_FAILED;
-    //     reply.arg2 = msg.arg2;
-    //     reply.obj = new WifiScanner.OperationResult(reason, description);
-    //     try {
-    //         msg.replyTo.send(reply);
-    //     } catch (RemoteException e) {
-    //         // There's not much we can do if reply can't be sent!
-    //     }
-    // } else {
-    //     // locally generated message; doesn't need a reply!
-    // }
-    assert(0);
+    AutoPtr<IMessenger> replyTo;
+    msg->GetReplyTo((IMessenger**)&replyTo);
+    if (replyTo != NULL) {
+        AutoPtr<IMessage> reply;
+        AutoPtr<IMessageHelper> helper;
+        CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+        helper->Obtain((IMessage**)&reply);
+
+        reply->SetWhat(IWifiScanner::CMD_OP_FAILED);
+        Int32 arg2;
+        msg->GetArg2(&arg2);
+        reply->SetArg2(arg2);
+        AutoPtr<IWifiScannerOperationResult> wfsor;
+        CWifiScannerOperationResult::New(reason, description, (IWifiScannerOperationResult**)&wfsor);
+        reply->SetObj(wfsor);
+        //try {
+        replyTo->Send(reply);
+        //} catch (RemoteException e) {
+            // There's not much we can do if reply can't be sent!
+        //}
+    } else {
+        // locally generated message; doesn't need a reply!
+    }
     return NOERROR;
 }
 
@@ -1730,52 +2074,81 @@ ECode WifiScanningServiceImpl::ResetBuckets(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // SettingsComputer c = new SettingsComputer();
-    // Collection<ClientInfo> clients = mClients.values();
-    // for (ClientInfo ci : clients) {
-    //     Collection<ScanSettings> settings = ci.getScanSettings();
-    //     for (ScanSettings s : settings) {
-    //         c.prepChannelMap(s);
-    //     }
-    // }
-    //
-    // for (ClientInfo ci : clients) {
-    //     Iterator it = ci.getScans();
-    //     while (it.hasNext()) {
-    //         Map.Entry<Integer, WifiScanner.ScanSettings> entry =
-    //                 (Map.Entry<Integer,WifiScanner.ScanSettings>)it.next();
-    //         int id = entry.getKey();
-    //         ScanSettings s = entry.getValue();
-    //         int newPeriodInMs = c.addScanRequestToBucket(s);
-    //         if (newPeriodInMs  == -1) {
-    //             if (DBG) Log.d(TAG, "could not find a good bucket");
-    //             return false;
-    //         }
-    //         if (newPeriodInMs != s.periodInMs) {
-    //             ci.reportPeriodChanged(id, s, newPeriodInMs);
-    //         }
-    //     }
-    // }
-    //
-    // c.compressBuckets();
-    //
-    // WifiNative.ScanSettings s = c.getComputedSettings();
-    // if (s.num_buckets == 0) {
-    //     if (DBG) Log.d(TAG, "Stopping scan because there are no buckets");
-    //     WifiNative.stopScan();
-    //     return true;
-    // } else {
-    //     if (WifiNative.startScan(s, mStateMachine)) {
-    //         if (DBG) Log.d(TAG, "Successfully started scan of " + s.num_buckets + " buckets at"
-    //                 + "time = " + SystemClock.elapsedRealtimeNanos()/1000);
-    //         return true;
-    //     } else {
-    //         if (DBG) Log.d(TAG, "Failed to start scan of " + s.num_buckets + " buckets");
-    //         return false;
-    //     }
-    // }
-    assert(0);
+    AutoPtr<SettingsComputer> c = new SettingsComputer();
+    AutoPtr<ICollection> clients;
+    mClients->GetValues((ICollection**)&clients);
+    AutoPtr<ArrayOf<IInterface*> > clientsArray;
+    clients->ToArray((ArrayOf<IInterface*>**)&clientsArray);
+    for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*clientsArray)[i];
+        ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+
+        AutoPtr<ICollection> settings;
+        ci->GetScanSettings((ICollection**)&settings);
+        AutoPtr<ArrayOf<IInterface*> > settingsArray;
+        settings->ToArray((ArrayOf<IInterface*>**)&settingsArray);
+        for (Int32 j = 0; j < settingsArray->GetLength(); ++j) {
+            AutoPtr<IInterface> obj = (*settingsArray)[j];
+            IWifiScannerScanSettings* s = IWifiScannerScanSettings::Probe(obj);
+            c->PrepChannelMap(s);
+        }
+    }
+
+    for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*clientsArray)[i];
+        ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+        AutoPtr<IIterator> it;
+        ci->GetScans((IIterator**)&it);
+
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            //Map.Entry<Integer, WifiScanner.ScanSettings> entry =
+            //        (Map.Entry<Integer,WifiScanner.ScanSettings>)it.next();
+            AutoPtr<IInterface> mapEntryObj;
+            it->GetNext((IInterface**)&mapEntryObj);
+            IMapEntry* mapEntry = IMapEntry::Probe(mapEntryObj);
+            AutoPtr<IInterface> ko, vo;
+            mapEntry->GetKey((IInterface**)&ko);
+            mapEntry->GetValue((IInterface**)&vo);
+            Int32 id;
+            IInteger32::Probe(ko)->GetValue(&id);
+            IWifiScannerScanSettings* s = IWifiScannerScanSettings::Probe(vo);
+            Int32 newPeriodInMs;
+            c->AddScanRequestToBucket(s, &newPeriodInMs);
+            if (newPeriodInMs  == -1) {
+                if (DBG) Logger::D(TAG, "could not find a good bucket");
+                *result = FALSE;
+                return NOERROR;
+            }
+            Int32 periodInMs;
+            s->GetPeriodInMs(&periodInMs);
+            if (newPeriodInMs != periodInMs) {
+                ci->ReportPeriodChanged(id, s, newPeriodInMs);
+            }
+        }
+    }
+
+    c->CompressBuckets();
+
+    AutoPtr<WifiNative::ScanSettings> s;
+    c->GetComputedSettings((WifiNative::ScanSettings**)&s);
+    if (s->num_buckets == 0) {
+        if (DBG) Logger::D(TAG, "Stopping scan because there are no buckets");
+        WifiNative::StopScan();
+        *result = TRUE;
+        return NOERROR;
+    } else {
+        if (WifiNative::StartScan(s, mStateMachine)) {
+            if (DBG) Logger::D(TAG, "Successfully started scan of %d buckets", s->num_buckets);
+                    //+ "at time = " + SystemClock.elapsedRealtimeNanos()/1000);
+            *result = TRUE;
+            return NOERROR;
+        } else {
+            if (DBG) Logger::D(TAG, "Failed to start scan of %d buckets", s->num_buckets);
+            *result= FALSE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 
@@ -1785,49 +2158,56 @@ ECode WifiScanningServiceImpl::AddScanRequest(
     /* [in] */ IWifiScannerScanSettings* settings,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(ci);
-    VALIDATE_NOT_NULL(settings);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // sanity check the input
-    // if (settings.periodInMs < WifiScanner.MIN_SCAN_PERIOD_MS) {
-    //     Log.d(TAG, "Failing scan request because periodInMs is " + settings.periodInMs);
-    //     return false;
-    // }
-    //
-    // int minSupportedPeriodMs = 0;
-    // if (settings.channels != null) {
-    //     minSupportedPeriodMs = settings.channels.length * MIN_PERIOD_PER_CHANNEL_MS;
-    // } else {
-    //     if ((settings.band & WifiScanner.WIFI_BAND_24_GHZ) == 0) {
-    //         /* 2.4 GHz band has 11 to 13 channels */
-    //         minSupportedPeriodMs += 1000;
-    //     }
-    //     if ((settings.band & WifiScanner.WIFI_BAND_5_GHZ) == 0) {
-    //         /* 5 GHz band has another 10 channels */
-    //         minSupportedPeriodMs += 1000;
-    //     }
-    //     if ((settings.band & WifiScanner.WIFI_BAND_5_GHZ_DFS_ONLY) == 0) {
-    //         /* DFS requires passive scan which takes longer time */
-    //         minSupportedPeriodMs += 2000;
-    //     }
-    // }
-    //
-    // if (settings.periodInMs < minSupportedPeriodMs) {
-    //     Log.d(TAG, "Failing scan request because minSupportedPeriodMs is "
-    //             + minSupportedPeriodMs + " but the request wants " + settings.periodInMs);
-    //     return false;
-    // }
-    //
-    // ci.addScanRequest(settings, handler);
-    // if (resetBuckets()) {
-    //     return true;
-    // } else {
-    //     ci.removeScanRequest(handler);
-    //     Log.d(TAG, "Failing scan request because failed to reset scan");
-    //     return false;
-    // }
-    assert(0);
+    // sanity check the input
+    Int32 periodInMs;
+    settings->GetPeriodInMs(&periodInMs);
+    if (periodInMs < IWifiScanner::MIN_SCAN_PERIOD_MS) {
+        Logger::D(TAG, "Failing scan request because periodInMs is %d", periodInMs);
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    Int32 minSupportedPeriodMs = 0;
+    AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > channels;
+    settings->GetChannels((ArrayOf<IWifiScannerChannelSpec*>**)&channels);
+    Int32 band;
+    settings->GetBand(&band);
+    if (channels != NULL) {
+        minSupportedPeriodMs = channels->GetLength() * MIN_PERIOD_PER_CHANNEL_MS;
+    } else {
+        if ((band & IWifiScanner::WIFI_BAND_24_GHZ) == 0) {
+            /* 2.4 GHz band has 11 to 13 channels */
+            minSupportedPeriodMs += 1000;
+        }
+        if ((band & IWifiScanner::WIFI_BAND_5_GHZ) == 0) {
+            /* 5 GHz band has another 10 channels */
+            minSupportedPeriodMs += 1000;
+        }
+        if ((band & IWifiScanner::WIFI_BAND_5_GHZ_DFS_ONLY) == 0) {
+            /* DFS requires passive scan which takes longer time */
+            minSupportedPeriodMs += 2000;
+        }
+    }
+
+    if (periodInMs < minSupportedPeriodMs) {
+        Logger::D(TAG, "Failing scan request because minSupportedPeriodMs is %d but the request wants %d",
+                minSupportedPeriodMs, periodInMs);
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    ci->AddScanRequest(settings, handler);
+    Boolean bTemp;
+    if (ResetBuckets(&bTemp), bTemp) {
+        *result = TRUE;
+        return NOERROR;
+    } else {
+        ci->RemoveScanRequest(handler);
+        Logger::D(TAG, "Failing scan request because failed to reset scan");
+        *result = FALSE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1835,11 +2215,9 @@ ECode WifiScanningServiceImpl::RemoveScanRequest(
     /* [in] */ ClientInfo* ci,
     /* [in] */ Int32 handler)
 {
-    VALIDATE_NOT_NULL(ci);
-    // ==================before translated======================
-    // ci.removeScanRequest(handler);
-    // resetBuckets();
-    assert(0);
+    ci->RemoveScanRequest(handler);
+    Boolean bTemp;
+    ResetBuckets(&bTemp);
     return NOERROR;
 }
 
@@ -1847,49 +2225,69 @@ ECode WifiScanningServiceImpl::GetScanResults(
     /* [in] */ ClientInfo* ci,
     /* [out] */ ArrayOf<IScanResult*>** result)
 {
-    VALIDATE_NOT_NULL(ci);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // ScanResult results[] = WifiNative.getScanResults();
-    // ci.reportScanResults(results);
-    // return results;
-    assert(0);
+    AutoPtr<ArrayOf<IScanResult*> > results = WifiNative::GetScanResults();
+    ci->ReportScanResults(results);
+    *result = results;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ResetHotlist()
 {
-    // ==================before translated======================
-    // Collection<ClientInfo> clients = mClients.values();
-    // int num_hotlist_ap = 0;
-    //
-    // for (ClientInfo ci : clients) {
-    //     Collection<WifiScanner.HotlistSettings> c = ci.getHotlistSettings();
-    //     for (WifiScanner.HotlistSettings s : c) {
-    //         num_hotlist_ap +=  s.bssidInfos.length;
-    //     }
-    // }
-    //
-    // if (num_hotlist_ap == 0) {
-    //     WifiNative.resetHotlist();
-    // } else {
-    //     WifiScanner.BssidInfo bssidInfos[] = new WifiScanner.BssidInfo[num_hotlist_ap];
-    //     int index = 0;
-    //     for (ClientInfo ci : clients) {
-    //         Collection<WifiScanner.HotlistSettings> settings = ci.getHotlistSettings();
-    //         for (WifiScanner.HotlistSettings s : settings) {
-    //             for (int i = 0; i < s.bssidInfos.length; i++, index++) {
-    //                 bssidInfos[index] = s.bssidInfos[i];
-    //             }
-    //         }
-    //     }
-    //
-    //     WifiScanner.HotlistSettings settings = new WifiScanner.HotlistSettings();
-    //     settings.bssidInfos = bssidInfos;
-    //     settings.apLostThreshold = 3;
-    //     WifiNative.setHotlist(settings, mStateMachine);
-    // }
-    assert(0);
+    AutoPtr<ICollection> clients;
+    mClients->GetValues((ICollection**)&clients);
+    AutoPtr<ArrayOf<IInterface*> > clientsArray;
+    clients->ToArray((ArrayOf<IInterface*>**)&clientsArray);
+    Int32 num_hotlist_ap = 0;
+
+    for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*clientsArray)[i];
+        ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+        AutoPtr<ICollection> c;
+        ci->GetHotlistSettings((ICollection**)&c);
+        AutoPtr<ArrayOf<IInterface*> > cArray;
+        c->ToArray((ArrayOf<IInterface*>**)&cArray);
+        for (Int32 j = 0; j < cArray->GetLength(); ++j) {
+            AutoPtr<IInterface> sObj = (*cArray)[j];
+            IWifiScannerHotlistSettings* s = IWifiScannerHotlistSettings::Probe(sObj);
+
+            AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssidInfos;
+            s->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&bssidInfos);
+            num_hotlist_ap +=  bssidInfos->GetLength();
+        }
+    }
+
+    if (num_hotlist_ap == 0) {
+        WifiNative::ResetHotlist();
+    } else {
+        AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssidInfos = ArrayOf<IWifiScannerBssidInfo*>::Alloc(num_hotlist_ap);
+        Int32 index = 0;
+        for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+            AutoPtr<IInterface> obj = (*clientsArray)[i];
+            ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+            AutoPtr<ICollection> c;
+            ci->GetHotlistSettings((ICollection**)&c);
+            AutoPtr<ArrayOf<IInterface*> > cArray;
+            c->ToArray((ArrayOf<IInterface*>**)&cArray);
+            for (Int32 j = 0; j < cArray->GetLength(); ++j) {
+                AutoPtr<IInterface> sObj = (*cArray)[j];
+                IWifiScannerHotlistSettings* s = IWifiScannerHotlistSettings::Probe(sObj);
+
+                AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > sbssidInfos;
+                s->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&sbssidInfos);
+                for (Int32 k = 0; k < sbssidInfos->GetLength(); k++, index++) {
+                    bssidInfos->Set(index, (*sbssidInfos)[k]);
+                }
+            }
+        }
+
+        AutoPtr<IWifiScannerHotlistSettings> settings;
+        CWifiScannerHotlistSettings::New((IWifiScannerHotlistSettings**)&settings);
+        settings->SetBssidInfos(bssidInfos);
+        settings->SetApLostThreshold(3);
+        WifiNative::SetHotlist(settings, mStateMachine);
+    }
     return NOERROR;
 }
 
@@ -1898,11 +2296,8 @@ ECode WifiScanningServiceImpl::SetHotlist(
     /* [in] */ Int32 handler,
     /* [in] */ IWifiScannerHotlistSettings* settings)
 {
-    VALIDATE_NOT_NULL(ci);
-    // ==================before translated======================
-    // ci.addHostlistSettings(settings, handler);
-    // resetHotlist();
-    assert(0);
+    ci->AddHostlistSettings(settings, handler);
+    ResetHotlist();
     return NOERROR;
 }
 
@@ -1910,11 +2305,8 @@ ECode WifiScanningServiceImpl::ResetHotlist(
     /* [in] */ ClientInfo* ci,
     /* [in] */ Int32 handler)
 {
-    VALIDATE_NOT_NULL(ci);
-    // ==================before translated======================
-    // ci.removeHostlistSettings(handler);
-    // resetHotlist();
-    assert(0);
+    ci->RemoveHostlistSettings(handler);
+    ResetHotlist();
     return NOERROR;
 }
 
@@ -1922,11 +2314,8 @@ ECode WifiScanningServiceImpl::TrackWifiChanges(
     /* [in] */ ClientInfo* ci,
     /* [in] */ Int32 handler)
 {
-    VALIDATE_NOT_NULL(ci);
-    // ==================before translated======================
-    // mWifiChangeStateMachine.enable();
-    // ci.addSignificantWifiChange(handler);
-    assert(0);
+    mWifiChangeStateMachine->Enable();
+    ci->AddSignificantWifiChange(handler);
     return NOERROR;
 }
 
@@ -1934,123 +2323,133 @@ ECode WifiScanningServiceImpl::UntrackWifiChanges(
     /* [in] */ ClientInfo* ci,
     /* [in] */ Int32 handler)
 {
-    VALIDATE_NOT_NULL(ci);
-    // ==================before translated======================
-    // ci.removeSignificantWifiChange(handler);
-    // Collection<ClientInfo> clients = mClients.values();
-    // for (ClientInfo ci2 : clients) {
-    //     if (ci2.getWifiChangeHandlers().size() != 0) {
-    //         // there is at least one client watching for
-    //         // significant changes; so nothing more to do
-    //         return;
-    //     }
-    // }
-    //
-    // // no more clients looking for significant wifi changes
-    // // no need to keep the state machine running; disable it
-    // mWifiChangeStateMachine.disable();
-    assert(0);
+    ci->RemoveSignificantWifiChange(handler);
+    AutoPtr<ICollection> clients;
+    mClients->GetValues((ICollection**)&clients);
+    AutoPtr<ArrayOf<IInterface*> > clientsArray;
+    clients->ToArray((ArrayOf<IInterface*>**)&clientsArray);
+
+    for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*clientsArray)[i];
+        ClientInfo* ci2 = (ClientInfo*)(IObject::Probe(obj));
+        AutoPtr<ICollection> c;
+        ci2->GetWifiChangeHandlers((ICollection**)&c);
+        Int32 size;
+        c->GetSize(&size);
+        if (size != 0) {
+            // there is at least one client watching for
+            // significant changes; so nothing more to do
+            return NOERROR;
+        }
+    }
+
+    // no more clients looking for significant wifi changes
+    // no need to keep the state machine running; disable it
+    mWifiChangeStateMachine->Disable();
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ConfigureWifiChange(
     /* [in] */ IWifiScannerWifiChangeSettings* settings)
 {
-    // ==================before translated======================
-    // mWifiChangeStateMachine.configure(settings);
-    assert(0);
+    mWifiChangeStateMachine->Configure(settings);
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ReportWifiChanged(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // Collection<ClientInfo> clients = mClients.values();
-    // for (ClientInfo ci : clients) {
-    //     ci.reportWifiChanged(results);
-    // }
-    assert(0);
+    AutoPtr<ICollection> clients;
+    mClients->GetValues((ICollection**)&clients);
+    AutoPtr<ArrayOf<IInterface*> > clientsArray;
+    clients->ToArray((ArrayOf<IInterface*>**)&clientsArray);
+
+    for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*clientsArray)[i];
+        ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+        ci->ReportWifiChanged(results);
+    }
     return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::ReportWifiStabilized(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
-    VALIDATE_NOT_NULL(results);
-    // ==================before translated======================
-    // Collection<ClientInfo> clients = mClients.values();
-    // for (ClientInfo ci : clients) {
-    //     ci.reportWifiStabilized(results);
-    // }
-    assert(0);
+    AutoPtr<ICollection> clients;
+    mClients->GetValues((ICollection**)&clients);
+    AutoPtr<ArrayOf<IInterface*> > clientsArray;
+    clients->ToArray((ArrayOf<IInterface*>**)&clientsArray);
+
+    for (Int32 i = 0; i < clientsArray->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*clientsArray)[i];
+        ClientInfo* ci = (ClientInfo*)(IObject::Probe(obj));
+        ci->ReportWifiStabilized(results);
+    }
     return NOERROR;
 }
 
 void WifiScanningServiceImpl::EnforceConnectivityInternalPermission()
 {
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(
-    //         android.Manifest.permission.CONNECTIVITY_INTERNAL,
-    //         "WifiScanningServiceImpl");
-    assert(0);
+    mContext->EnforceCallingOrSelfPermission(
+             Manifest::permission::CONNECTIVITY_INTERNAL,
+             String("WifiScanningServiceImpl"));
 }
 
 AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > WifiScanningServiceImpl::GetChannelsForBand(
     /* [in] */ Int32 band)
 {
-    // ==================before translated======================
-    // int channels[] = WifiNative.getChannelsForBand(band);
-    // if (channels != null) {
-    //     WifiScanner.ChannelSpec channelSpecs[] = new WifiScanner.ChannelSpec[channels.length];
-    //     for (int i = 0; i < channels.length; i++) {
-    //         channelSpecs[i] = new WifiScanner.ChannelSpec(channels[i]);
-    //     }
-    //     return channelSpecs;
-    // } else {
-    //     return new WifiScanner.ChannelSpec[0];
-    // }
-    assert(0);
+    AutoPtr<ArrayOf<Int32> > channels = WifiNative::GetChannelsForBand(band);
+    if (channels != NULL) {
+        AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > channelSpecs =
+            ArrayOf<IWifiScannerChannelSpec*>::Alloc(channels->GetLength());
+        for (Int32 i = 0; i < channels->GetLength(); i++) {
+            AutoPtr<IWifiScannerChannelSpec> wfscs;
+            CWifiScannerChannelSpec::New((*channels)[i], (IWifiScannerChannelSpec**)&wfscs);
+            channelSpecs->Set(i, wfscs);
+        }
+        return channelSpecs;
+    } else {
+        AutoPtr<ArrayOf<IWifiScannerChannelSpec*> > channelSpecs =
+            ArrayOf<IWifiScannerChannelSpec*>::Alloc(0);
+        return channelSpecs;
+    }
     return NULL;
 }
 
 Int32 WifiScanningServiceImpl::GetBandFromChannels(
     /* [in] */ ArrayOf<IWifiScannerChannelSpec*>* channels)
 {
-    // ==================before translated======================
-    // int band = WifiScanner.WIFI_BAND_UNSPECIFIED;
-    // for (WifiScanner.ChannelSpec channel : channels) {
-    //     if (2400 <= channel.frequency && channel.frequency < 2500) {
-    //         band |= WifiScanner.WIFI_BAND_24_GHZ;
-    //     } else if (5100 <= channel.frequency && channel.frequency < 6000) {
-    //         band |= WifiScanner.WIFI_BAND_5_GHZ;
-    //     } else {
-    //         /* TODO: Add DFS Range */
-    //     }
-    // }
-    // return band;
-    assert(0);
-    return 0;
+    Int32 band = IWifiScanner::WIFI_BAND_UNSPECIFIED;
+    for (Int32 i = 0; i < channels->GetLength(); ++i) {
+        AutoPtr<IWifiScannerChannelSpec> channel = (*channels)[i];
+        Int32 frequency;
+        channel->GetFrequency(&frequency);
+        if (2400 <= frequency && frequency < 2500) {
+            band |= IWifiScanner::WIFI_BAND_24_GHZ;
+        } else if (5100 <= frequency && frequency < 6000) {
+            band |= IWifiScanner::WIFI_BAND_5_GHZ;
+        } else {
+            /* TODO: Add DFS Range */
+        }
+    }
+    return band;
 }
 
 Int32 WifiScanningServiceImpl::GetBandFromChannels(
     /* [in] */ ArrayOf<WifiNative::ChannelSettings*>* channels)
 {
-    // ==================before translated======================
-    // int band = WifiScanner.WIFI_BAND_UNSPECIFIED;
-    // for (WifiNative.ChannelSettings channel : channels) {
-    //     if (2400 <= channel.frequency && channel.frequency < 2500) {
-    //         band |= WifiScanner.WIFI_BAND_24_GHZ;
-    //     } else if (5100 <= channel.frequency && channel.frequency < 6000) {
-    //         band |= WifiScanner.WIFI_BAND_5_GHZ;
-    //     } else {
-    //         /* TODO: Add DFS Range */
-    //     }
-    // }
-    // return band;
-    assert(0);
-    return 0;
+    Int32 band = IWifiScanner::WIFI_BAND_UNSPECIFIED;
+    for (Int32 i = 0; i < channels->GetLength(); ++i) {
+        AutoPtr<WifiNative::ChannelSettings> channel = (*channels)[i];
+        if (2400 <= channel->frequency && channel->frequency < 2500) {
+            band |= IWifiScanner::WIFI_BAND_24_GHZ;
+        } else if (5100 <= channel->frequency && channel->frequency < 6000) {
+            band |= IWifiScanner::WIFI_BAND_5_GHZ;
+        } else {
+            /* TODO: Add DFS Range */
+        }
+    }
+    return band;
 }
 
 } // namespace Wifi
