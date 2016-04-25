@@ -115,8 +115,8 @@ CSkbContainer::CSkbContainer()
     , mXLast(0)
     , mYLast(0)
 {
-    memset(mSkvPosInContainer, 0, sizeof(mSkvPosInContainer));
-    memset(mXyPosTmp, 0, sizeof(mXyPosTmp));
+    mSkvPosInContainer = ArrayOf<Int32>::Alloc(2);
+    mXyPosTmp = ArrayOf<Int32>::Alloc(2);
 }
 
 ECode CSkbContainer::constructor(
@@ -180,36 +180,33 @@ Boolean CSkbContainer::IsCurrentSkbSticky()
     return TRUE;
 }
 
-ECode CSkbContainer::ToggleCandidateMode(
+void CSkbContainer::ToggleCandidateMode(
     /* [in] */ Boolean candidatesShowing)
 {
     Boolean result = FALSE;
-    if (NULL == mMajorView || !(mInputModeSwitcher->IsChineseText(&result), result)
-            || mLastCandidatesShowing == candidatesShowing) return NOERROR;
+    if (NULL == mMajorView || !mInputModeSwitcher->IsChineseText()
+            || mLastCandidatesShowing == candidatesShowing) return;
     mLastCandidatesShowing = candidatesShowing;
 
-    AutoPtr<ISoftKeyboard> skb;
-    mMajorView->GetSoftKeyboard((ISoftKeyboard**)&skb);
-    if (NULL == skb) return NOERROR;
+    AutoPtr<SoftKeyboard> skb = mMajorView->GetSoftKeyboard();
+    if (NULL == skb) return;
 
-    Int32 state = 0;
-    mInputModeSwitcher->GetTooggleStateForCnCand(&state);
+    Int32 state = mInputModeSwitcher->GetTooggleStateForCnCand();
     if (!candidatesShowing) {
-        ((SoftKeyboard*)skb.Get())->DisableToggleState(state, FALSE);
-        AutoPtr<IToggleStates> states;
-        mInputModeSwitcher->GetToggleStates((IToggleStates**)&states);
-        ((SoftKeyboard*)skb.Get())->EnableToggleStates(states);
-    } else {
-        ((SoftKeyboard*)skb.Get())->EnableToggleState(state, FALSE);
+        skb->DisableToggleState(state, FALSE);
+        AutoPtr<ToggleStates> states = mInputModeSwitcher->GetToggleStates();
+        skb->EnableToggleStates(states);
+    }
+    else {
+        skb->EnableToggleState(state, FALSE);
     }
 
-    return mMajorView->Invalidate();
+    mMajorView->Invalidate();
 }
 
-ECode CSkbContainer::UpdateInputMode()
+void CSkbContainer::UpdateInputMode()
 {
-    Int32 skbLayout = 0;
-    mInputModeSwitcher->GetSkbLayout(&skbLayout);
+    Int32 skbLayout = mInputModeSwitcher->GetSkbLayout();
     if (mSkbLayout != skbLayout) {
         mSkbLayout = skbLayout;
         UpdateSkbLayout();
@@ -217,69 +214,64 @@ ECode CSkbContainer::UpdateInputMode()
 
     mLastCandidatesShowing = FALSE;
 
-    if (NULL == mMajorView) return NOERROR;
+    if (NULL == mMajorView) return;
 
-    AutoPtr<ISoftKeyboard> skb;
-    mMajorView->GetSoftKeyboard((ISoftKeyboard**)&skb);
+    AutoPtr<SoftKeyboard> skb = mMajorView->GetSoftKeyboard();
     if (NULL == skb) return NOERROR;
-    AutoPtr<IToggleStates> states;
-    mInputModeSwitcher->GetToggleStates((IToggleStates**)&states);
-    ((SoftKeyboard*)skb.Get())->EnableToggleStates(states);
-    return Invalidate();
+    AutoPtr<ToggleStates> states = mInputModeSwitcher->GetToggleStates();
+    skb->EnableToggleStates(states);
+    Invalidate();
 }
 
 void CSkbContainer::UpdateSkbLayout()
 {
-    Int32 screenWidth = 0;
-    mEnvironment->GetScreenWidth(&screenWidth);
-    Int32 keyHeight = 0;
-    mEnvironment->GetKeyHeight(&keyHeight);
-    Int32 skbHeight = 0;
-    mEnvironment->GetSkbHeight(&skbHeight);
+    Int32 screenWidth = mEnvironment->GetScreenWidth();
+    Int32 keyHeight = mEnvironment->GetKeyHeight();
+    Int32 skbHeight = mEnvironment->GetSkbHeight();
 
     AutoPtr<IResources> r;
     mContext->GetResources((IResources**)&r);
     if (NULL == mSkbFlipper) {
-        mSkbFlipper = (IViewFlipper*) FindViewById(0x7f0a0008/*R.id.alpha_floatable*/).Get();
+        mSkbFlipper = IViewFlipper::Probe(FindViewById(R::id::alpha_floatable));
     }
-
     AutoPtr<IView> view;
     mSkbFlipper->GetChildAt(0, (IView**)&view);
-    mMajorView = ISoftKeyboardView::Probe(view);
+    mMajorView = (CSoftKeyboardView*)ISoftKeyboardView::Probe(view);
 
     AutoPtr<SoftKeyboard> majorSkb;
     AutoPtr<SkbPool> skbPool = SkbPool::GetInstance();
 
     switch (mSkbLayout) {
-    case 0x7f040003/*R.xml.skb_qwerty*/:
-        majorSkb = skbPool->GetSoftKeyboard(0x7f040003/*R.xml.skb_qwerty*/,
-                0x7f040003/*R.xml.skb_qwerty*/, screenWidth, skbHeight, mContext);
+    case R::xml::skb_qwerty:
+        majorSkb = skbPool->GetSoftKeyboard(R::xml::skb_qwerty,
+                R::xml::skb_qwerty, screenWidth, skbHeight, mContext);
         break;
 
-    case 0x7f040005/*R.xml.skb_sym1*/:
-        majorSkb = skbPool->GetSoftKeyboard(0x7f040005/*R.xml.skb_sym1*/, 0x7f040005/*R.xml.skb_sym1*/,
+    case R::xml::skb_sym1:
+        majorSkb = skbPool->GetSoftKeyboard(R::xml::skb_sym1, R::xml::skb_sym1,
                 screenWidth, skbHeight, mContext);
         break;
 
-    case 0x7f040006/*R.xml.skb_sym2*/:
-        majorSkb = skbPool->GetSoftKeyboard(0x7f040006/*R.xml.skb_sym2*/, 0x7f040006/*R.xml.skb_sym2*/,
+    case R::xml::skb_sym2:
+        majorSkb = skbPool->GetSoftKeyboard(R::xml::skb_sym2, R::xml::skb_sym2,
                 screenWidth, skbHeight, mContext);
         break;
 
-    case 0x7f040004/*R.xml.skb_smiley*/:
-        majorSkb = skbPool->GetSoftKeyboard(0x7f040004/*R.xml.skb_smiley*/,
-                0x7f040004/*R.xml.skb_smiley*/, screenWidth, skbHeight, mContext);
+    case R::xml::skb_smiley:
+        majorSkb = skbPool->GetSoftKeyboard(R::xml::skb_smiley,
+                R::xml::skb_smiley, screenWidth, skbHeight, mContext);
         break;
 
-    case 0x7f040002/*R.xml.skb_phone*/:
-        majorSkb = skbPool->GetSoftKeyboard(0x7f040002/*R.xml.skb_phone*/,
-                0x7f040002/*R.xml.skb_phone*/, screenWidth, skbHeight, mContext);
+    case R::xml::skb_phone:
+        majorSkb = skbPool->GetSoftKeyboard(R::xml::skb_phone,
+                R::xml::skb_phone, screenWidth, skbHeight, mContext);
         break;
-    // default:
+    default:
+        break;
     }
 
     Boolean result = FALSE;
-    if (NULL == majorSkb || !(mMajorView->SetSoftKeyboard(majorSkb, &result), result)) {
+    if (NULL == majorSkb || !mMajorView->SetSoftKeyboard(majorSkb)) {
         return;
     }
     mMajorView->SetBalloonHint(mBalloonOnKey, mBalloonPopup, FALSE);
@@ -290,10 +282,10 @@ void CSkbContainer::ResponseKeyEvent(
     /* [in] */ SoftKey* sKey)
 {
     if (NULL == sKey) return;
-    (IPinyinIME::Probe(mService))->ResponseSoftKeyEvent(sKey);
+    ((CPinyinIME*)IPinyinIME::Probe(mService))->ResponseSoftKeyEvent(sKey);
 }
 
-AutoPtr<ISoftKeyboardView> CSkbContainer::InKeyboardView(
+AutoPtr<CSoftKeyboardView> CSkbContainer::InKeyboardView(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ ArrayOf<Int32>* positionInParent)
@@ -302,7 +294,6 @@ AutoPtr<ISoftKeyboardView> CSkbContainer::InKeyboardView(
         Int32 value = 0;
         if (mPopupX <= x && mPopupX + (mPopupSkb->GetWidth(&value), value) > x
                 && mPopupY <= y && mPopupY + (mPopupSkb->GetHeight(&value), value) > y) {
-            assert(positionInParent != NULL);
             (*positionInParent)[0] = mPopupX;
             (*positionInParent)[1] = mPopupY;
             mPopupSkbView->SetOffsetToSkbContainer(positionInParent);
@@ -333,13 +324,12 @@ void CSkbContainer::PopupSymbols()
         mPopupY = (skbContainerHeight - skb->GetSkbTotalHeight()) / 2;
 
         if (NULL == mPopupSkbView) {
-            CSoftKeyboardView::New(mContext, NULL, (ISoftKeyboardView**)&mPopupSkbView);
-            ((CSoftKeyboardView*)mPopupSkbView.Get())->OnMeasure(IViewGroupLayoutParams::WRAP_CONTENT,
+            CSoftKeyboardView::NewByFriend(mContext, NULL, (CSoftKeyboardView**)&mPopupSkbView);
+            mPopupSkbView->OnMeasure(IViewGroupLayoutParams::WRAP_CONTENT,
                     IViewGroupLayoutParams::WRAP_CONTENT);
         }
         mPopupSkbView->SetOnTouchListener(this);
-        Boolean result = FALSE;
-        mPopupSkbView->SetSoftKeyboard(skb, &result);
+        mPopupSkbView->SetSoftKeyboard(skb);
         mPopupSkbView->SetBalloonHint(mBalloonOnKey, mBalloonPopup, TRUE);
 
         mPopupSkb->SetContentView(mPopupSkbView);
@@ -351,12 +341,9 @@ void CSkbContainer::PopupSymbols()
                 + (mPopupSkbView->GetPaddingTop(&value), value)
                 + (mPopupSkbView->GetPaddingBottom(&value), value));
 
-        Int32 x = 0, y = 0;
-        GetLocationInWindow(&x, &y);
-        mXyPosTmp[0] = x;
-        mXyPosTmp[1] = y;
+        GetLocationInWindow(mXyPosTmp);
         mPopupSkb->ShowAtLocation(this, IGravity::NO_GRAVITY, mPopupX, mPopupY
-                + mXyPosTmp[1]);
+                + (*mXyPosTmp)[1]);
         mPopupSkbShow = TRUE;
         mPopupSkbNoResponse = TRUE;
         // Invalidate itself to dim the current soft keyboards.
@@ -389,46 +376,33 @@ void CSkbContainer::ResetKeyPress(
     }
 }
 
-ECode CSkbContainer::HandleBack(
-    /* [in] */ Boolean realAction,
-    /* [out] */ Boolean* result)
+Boolean CSkbContainer::HandleBack(
+    /* [in] */ Boolean realAction)
 {
-    VALIDATE_NOT_NULL(result);
     if (mPopupSkbShow) {
-        if (!realAction) {
-            *result = TRUE;
-            return NOERROR;
-        }
+        if (!realAction) return TRUE;
 
         DismissPopupSkb();
         mDiscardEvent = TRUE;
-        *result = TRUE;
-        return NOERROR;
+        return TRUE;
     }
-    *result = FALSE;
-    return NOERROR;
+    return FALSE;
 }
 
-ECode CSkbContainer::DismissPopups()
+void CSkbContainer::DismissPopups()
 {
-    Boolean result = FALSE;
-    HandleBack(TRUE, &result);
+    HandleBack(TRUE);
     ResetKeyPress(0);
-    return NOERROR;
 }
 
 void CSkbContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    AutoPtr<IPinyinEnvironment> env;
-    helper->GetInstance((IPinyinEnvironment**)&env);
-    Int32 measuredWidth = 0, value = 0;
-    env->GetScreenWidth(&measuredWidth);
+    AutoPtr<Environment> env = Environment::GetInstance();
+    Int32 measuredWidth = env->GetScreenWidth();
     Int32 measuredHeight = GetPaddingTop();
-    measuredHeight += (env->GetSkbHeight(&value), value);
+    measuredHeight += env->GetSkbHeight();
     widthMeasureSpec = MeasureSpec::MakeMeasureSpec(measuredWidth,
             MeasureSpec::EXACTLY);
     heightMeasureSpec = MeasureSpec::MakeMeasureSpec(measuredHeight,
@@ -436,15 +410,18 @@ void CSkbContainer::OnMeasure(
     RelativeLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 }
 
-Boolean CSkbContainer::OnTouchEvent(
-    /* [in] */ IMotionEvent* event)
+ECode CSkbContainer::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
-    RelativeLayout::OnTouchEvent(event);
+    VALIDATE_NOT_NULL(result);
+    FAIL_RETURN(RelativeLayout::OnTouchEvent(event, result));
 
     Boolean flipping = FALSE;
     if (mSkbFlipper->IsFlipping(&flipping), flipping) {
         ResetKeyPress(0);
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
     }
 
     Float value = 0.f;
@@ -455,10 +432,11 @@ Boolean CSkbContainer::OnTouchEvent(
 
     // Ignore short-distance movement event to get better performance.
     Int32 action = 0;
-    if ((event->GetAction(&action), action) == IMotionEvent::ACTION_MOVE) {
+    if (event->GetAction(&action), action == IMotionEvent::ACTION_MOVE) {
         if (Elastos::Core::Math::Abs(x - mXLast) <= MOVE_TOLERANCE
                 && Elastos::Core::Math::Abs(y - mYLast) <= MOVE_TOLERANCE) {
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
     }
 
@@ -470,7 +448,8 @@ Boolean CSkbContainer::OnTouchEvent(
         if (mGestureDetector->OnTouchEvent(event, &result), result) {
             ResetKeyPress(0);
             mDiscardEvent = TRUE;
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
     }
 
@@ -483,15 +462,10 @@ Boolean CSkbContainer::OnTouchEvent(
 
             mSkv = NULL;
             mSoftKeyDown = NULL;
-            AutoPtr<ArrayOf<Int32> > pos = ArrayOf<Int32>::Alloc(2);
-            (*pos)[0] = mSkvPosInContainer[0];
-            (*pos)[1] = mSkvPosInContainer[1];
-            mSkv = InKeyboardView(x, y, pos);
+            mSkv = InKeyboardView(x, y, mSkvPosInContainer);
             if (NULL != mSkv) {
-                AutoPtr<ISoftKey> key;
-                mSkv->OnKeyPress(x - mSkvPosInContainer[0], y
-                        - mSkvPosInContainer[1], mLongPressTimer, FALSE, (ISoftKey**)&key);
-                mSoftKeyDown = (SoftKey*)key.Get();
+                mSoftKeyDown = mSkv->OnKeyPress(x - (*mSkvPosInContainer)[0], y
+                        - (*mSkvPosInContainer)[1], mLongPressTimer, FALSE);
             }
             break;
         }
@@ -509,22 +483,18 @@ Boolean CSkbContainer::OnTouchEvent(
                 break;
             }
 
-            AutoPtr<ArrayOf<Int32> > pos = ArrayOf<Int32>::Alloc(2);
-            (*pos)[0] = mSkvPosInContainer[0];
-            (*pos)[1] = mSkvPosInContainer[1];
-            AutoPtr<ISoftKeyboardView> skv = InKeyboardView(x, y, pos);
+            AutoPtr<CSoftKeyboardView> skv = InKeyboardView(x, y, mSkvPosInContainer);
             if (NULL != skv) {
                 if (skv != mSkv) {
                     mSkv = skv;
-                    AutoPtr<ISoftKey> key;
-                    mSkv->OnKeyPress(x - mSkvPosInContainer[0], y
-                            - mSkvPosInContainer[1], mLongPressTimer, TRUE, (ISoftKey**)&key);
-                    mSoftKeyDown = (SoftKey*)key.Get();
-                } else if (NULL != skv) {
+                    mSoftKeyDown = mSkv->OnKeyPress(x - (*mSkvPosInContainer)[0], y
+                            - (*mSkvPosInContainer)[1], mLongPressTimer, TRUE);
+                }
+                else if (NULL != skv) {
                     if (NULL != mSkv) {
-                        AutoPtr<ISoftKey> key;
-                        mSkv->OnKeyMove(x - mSkvPosInContainer[0], y - mSkvPosInContainer[1], (ISoftKey**)&key);
-                        mSoftKeyDown = (SoftKey*)key.Get();
+                        mSoftKeyDown = mSkv->OnKeyMove(
+                                x - (*mSkvPosInContainer)[0], y
+                                        - (*mSkvPosInContainer)[1]);
                         if (NULL == mSoftKeyDown) {
                             mDiscardEvent = TRUE;
                         }
@@ -545,8 +515,8 @@ Boolean CSkbContainer::OnTouchEvent(
             // The view which got the {@link MotionEvent#ACTION_DOWN} event is
             // always used to handle this event.
             if (NULL != mSkv) {
-                AutoPtr<ISoftKey> key;
-                mSkv->OnKeyRelease(x - mSkvPosInContainer[0], y - mSkvPosInContainer[1], (ISoftKey**)&key);
+                mSkv->OnKeyRelease(x - (*mSkvPosInContainer)[0], y
+                        - (*mSkvPosInContainer)[1]);
             }
 
             if (!mPopupSkbShow || !mPopupSkbNoResponse) {
@@ -566,10 +536,12 @@ Boolean CSkbContainer::OnTouchEvent(
     }
 
     if (NULL == mSkv) {
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
     }
 
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode CSkbContainer::OnTouch(
@@ -599,9 +571,7 @@ ECode CSkbContainer::OnTouch(
             (event->GetDeviceId(&value), value),
             (event->GetEdgeFlags(&value), value),
             (IMotionEvent**)&newEv);
-
-    *result = RelativeLayout::OnTouchEvent(newEv);
-    return NOERROR;
+    return OnTouchEvent(newEv, result);
 }
 
 } // namespace Pinyin

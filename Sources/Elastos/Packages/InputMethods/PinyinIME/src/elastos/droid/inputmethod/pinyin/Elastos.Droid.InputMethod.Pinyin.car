@@ -7,7 +7,6 @@ module
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidateViewListener.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/IPinyinDecoderService.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidatesContainer.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKey.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/PinyinIME.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidateView.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/ComposingView.car");
@@ -64,14 +63,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
     }
-
-    //     class CPinyinEnvironment {
-    //         interface IPinyinEnvironment;
-    //     }
-
-    //     singleton class CPinyinEnvironmentHelper {
-    //         interface IPinyinEnvironmentHelper;
-    //     }
 
     [local]
     class CCandidatesContainer {
@@ -137,18 +128,18 @@ module
         interface IViewOnTouchListener;
     }
 
-    //     [local]
-    //     class CSoftKeyboardView {
-    //         constructor(
-    //             [in] IContext* ctx,
-    //             [in] IAttributeSet* attrs);
+    [local]
+    class CSoftKeyboardView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-    //         interface ISoftKeyboardView;
-    //         interface IView;
-    //         interface IDrawableCallback;
-    //         interface IKeyEventCallback;
-    //         interface IAccessibilityEventSource;
-    //     }
+        interface ISoftKeyboardView;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
     //     [local]
     //     class CSoundManager {
@@ -172,15 +163,15 @@ module
     //         interface IOnDoubleTapListener;
     //     }
 
-        class CPinyinDecoderService {
-            constructor();
+    class CPinyinDecoderService {
+        constructor();
 
-            interface Elastos.Droid.App.IService;
-            interface Elastos.Droid.Content.IContext;
-            interface Elastos.Droid.Content.IContextWrapper;
-            interface Elastos.Droid.Content.IComponentCallbacks;
-            interface Elastos.Droid.Content.IComponentCallbacks2;
-        }
+        interface Elastos.Droid.App.IService;
+        interface Elastos.Droid.Content.IContext;
+        interface Elastos.Droid.Content.IContextWrapper;
+        interface Elastos.Droid.Content.IComponentCallbacks;
+        interface Elastos.Droid.Content.IComponentCallbacks2;
+    }
 
     [local]
     class CIPinyinDecoderService {
@@ -196,24 +187,24 @@ module
         interface Elastos.Droid.Os.IBinder;
     }
 
-        class CPinyinIME {
-            constructor();
+    class CPinyinIME {
+        constructor();
 
-            interface IInputMethodService;
-            interface IAbstractInputMethodService;
-            interface IService;
-            interface IContext;
-            interface IContextWrapper;
-            interface IComponentCallbacks;
-            interface IComponentCallbacks2;
-            interface IKeyEventCallback;
-        }
+        interface IInputMethodService;
+        interface IAbstractInputMethodService;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IKeyEventCallback;
+    }
 
-        class CSettingsActivity {
-            constructor();
+    class CSettingsActivity {
+        constructor();
 
-            interface IActivity;
-        }
+        interface IActivity;
+    }
 
     } // namespace Pinyin
     } // namespace InputMethod

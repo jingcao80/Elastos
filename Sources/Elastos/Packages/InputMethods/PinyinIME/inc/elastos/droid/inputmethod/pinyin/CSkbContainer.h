@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSKBCONTAINER_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSKBCONTAINER_H__
 
-#include "_Elastos_Droid_Inputmethods_PinyinIME_CSkbContainer.h"
+#include "_Elastos_Droid_InputMethod_Pinyin_CSkbContainer.h"
 #include "elastos/droid/inputmethod/pinyin/SoftKey.h"
 #include <elastos/droid/os/HandlerRunnable.h>
 #include <elastos/droid/widget/RelativeLayout.h>
@@ -138,7 +138,7 @@ protected:
     CARAPI_(void) ResponseKeyEvent(
         /* [in] */ SoftKey* sKey);
 
-    CARAPI_(AutoPtr<cSoftKeyboardView>) InKeyboardView(
+    CARAPI_(AutoPtr<CSoftKeyboardView>) InKeyboardView(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ ArrayOf<Int32>* positionInParent);
@@ -279,7 +279,7 @@ protected:
     /**
      * The position of the soft keyboard view in the container.
      */
-    Int32 mSkvPosInContainer[2];
+    AutoPtr< ArrayOf<Int32> > mSkvPosInContainer;
 
     /**
      * The key pressed by user.
@@ -294,7 +294,7 @@ protected:
     /**
      * For temporary use.
      */
-    Int32 mXyPosTmp[2];
+    AutoPtr< ArrayOf<Int32> > mXyPosTmp;
 };
 
 } // namespace Pinyin

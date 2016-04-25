@@ -2,9 +2,8 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSOFTKEYBOARDVIEW_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSOFTKEYBOARDVIEW_H__
 
-#include "_Elastos_Droid_Inputmethods_PinyinIME_CSoftKeyboardView.h"
-#include "CSkbContainer.h"
-#include "SoftKeyboard.h"
+#include "_Elastos_Droid_InputMethod_Pinyin_CSoftKeyboardView.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
 
 using Elastos::Droid::Os::IVibrator;
 
@@ -65,12 +64,11 @@ public:
     // If movePress is true, means that this function is called because user
     // moves his finger to this button. If movePress is false, means that this
     // function is called when user just presses this key.
-    CARAPI OnKeyPress(
+    CARAPI_(AutoPtr<SoftKey>) OnKeyPress(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] *//* SkbContainer.LongPressTimer*/ IHandler* longPressTimer,
-        /* [in] */ Boolean movePress,
-        /* [out] */ ISoftKey** key);
+        /* [in] */ Boolean movePress);
 
     CARAPI OnKeyRelease(
         /* [in] */ Int32 x,

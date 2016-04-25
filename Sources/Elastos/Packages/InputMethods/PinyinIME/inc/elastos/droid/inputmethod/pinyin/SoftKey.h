@@ -2,9 +2,11 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEY_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEY_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.InputMethod.Pinyin.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -20,100 +22,78 @@ class SoftKeyboard;
  *
  * @see com.android.inputmethod.pinyin.SoftKeyToggle
  */
-class SoftKey
-    : public Object
-    , public ISoftKey
+class SoftKey : public Object
 {
 public:
-    CAR_INTERFACE_DECL();
-
     SoftKey();
 
-    void SetKeyType(
+    CARAPI_(void) SetKeyType(
         /* [in] */ SoftKeyType* keyType,
         /* [in] */ IDrawable* keyIcon,
         /* [in] */ IDrawable* keyIconPopup);
 
     // The caller guarantees that all parameters are in [0, 1]
-    void SetKeyDimensions(
+    CARAPI_(void) SetKeyDimensions(
         /* [in] */ Float left,
         /* [in] */ Float top,
         /* [in] */ Float right,
         /* [in] */ Float bottom);
 
-    void SetKeyAttribute(
+    CARAPI_(void) SetKeyAttribute(
         /* [in] */ Int32 keyCode,
         /* [in] */ const String& label,
         /* [in] */ Boolean repeat,
         /* [in] */ Boolean balloon);
 
-    void SetPopupSkbId(
+    CARAPI_(void) SetPopupSkbId(
         /* [in] */ Int32 popupSkbId);
 
     // Call after setKeyDimensions(). The caller guarantees that the
     // keyboard with and height are valid.
-    void SetSkbCoreSize(
+    CARAPI_(void) SetSkbCoreSize(
         /* [in] */ Int32 skbWidth,
         /* [in] */ Int32 skbHeight);
 
-    virtual AutoPtr<IDrawable> GetKeyIcon();
+    virtual CARAPI_(AutoPtr<IDrawable>) GetKeyIcon();
 
-    virtual AutoPtr<IDrawable> GetKeyIconPopup();
+    virtual CARAPI_(AutoPtr<IDrawable>) GetKeyIconPopup();
 
-    virtual CARAPI GetKeyCode(
-        /* [out] */ Int32* code);
+    virtual CARAPI_(Int32) GetKeyCode();
 
-    virtual CARAPI GetKeyLabel(
-        /* [out] */ String* label);
+    virtual CARAPI_(String) GetKeyLabel();
 
-    virtual void ChangeCase(
+    virtual CARAPI_(void) ChangeCase(
         /* [in] */ Boolean upperCase);
 
-    virtual AutoPtr<IDrawable> GetKeyBg();
+    virtual CARAPI_(AutoPtr<IDrawable>) GetKeyBg();
 
-    virtual AutoPtr<IDrawable> GetKeyHlBg();
+    virtual CARAPI_(AutoPtr<IDrawable>) GetKeyHlBg();
 
-    virtual Int32 GetColor();
+    virtual CARAPI_(Int32) GetColor();
 
-    virtual Int32 GetColorHl();
+    virtual CARAPI_(Int32) GetColorHl();
 
-    virtual Int32 GetColorBalloon();
+    virtual CARAPI_(Int32) GetColorBalloon();
 
-    virtual CARAPI IsKeyCodeKey(
-        /* [out] */ Boolean* result);
+    virtual CARAPI_(Boolean) IsKeyCodeKey();
 
-    virtual CARAPI IsUserDefKey(
-        /* [out] */ Boolean* result);
+    virtual CARAPI_(Boolean) IsUserDefKey();
 
-    virtual CARAPI IsUniStrKey(
-        /* [out] */ Boolean* result);
+    virtual CARAPI_(Boolean) IsUniStrKey();
 
-    virtual Boolean NeedBalloon();
+    virtual CARAPI_(Boolean) NeedBalloon();
 
-    virtual Boolean Repeatable();
+    virtual CARAPI_(Boolean) Repeatable();
 
-    Int32 GetPopupResId();
+    CARAPI_(Int32) GetPopupResId();
 
-    Int32 GetWidth();
+    CARAPI_(Int32) GetWidth();
 
-    Int32 GetHeight();
+    CARAPI_(Int32) GetHeight();
 
-    Boolean MoveWithinKey(
+    CARAPI_(Boolean) MoveWithinKey(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
-
-    // @Override
-    // public String toString() {
-    //     String str = "\n";
-    //     str += "  keyCode: " + String.valueOf(mKeyCode) + "\n";
-    //     str += "  keyMask: " + String.valueOf(mKeyMask) + "\n";
-    //     str += "  keyLabel: " + (mKeyLabel == NULL ? "NULL" : mKeyLabel) + "\n";
-    //     str += "  popupResId: " + String.valueOf(mPopupSkbId) + "\n";
-    //     str += "  Position: " + String.valueOf(mLeftF) + ", "
-    //             + String.valueOf(mTopF) + ", " + String.valueOf(mRightF) + ", "
-    //             + String.valueOf(mBottomF) + "\n";
-    //     return str;
-    // }
 
     CARAPI ToString(
         /* [out] */ String* info);
@@ -169,11 +149,6 @@ protected:
     String mKeyLabel;
 
     Int32 mKeyCode;
-
-private:
-    friend class SoftKeyboard;
-    friend class SkbContainer;
-    friend class SoftKeyboardView;
 };
 
 } // namespace Pinyin
