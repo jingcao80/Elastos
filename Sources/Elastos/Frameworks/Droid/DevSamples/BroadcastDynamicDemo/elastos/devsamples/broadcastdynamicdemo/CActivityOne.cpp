@@ -179,7 +179,14 @@ ECode CActivityOne::Send()
     intent->PutExtra(String("msg"), String("Hello Broadcast!"));
 
     if (TEST_ORDERED_BROADCAST) {
+#if 1
         return SendOrderedBroadcast(intent, String(NULL));
+#else
+        // test permission.
+        //
+        String permission("kesalin.permission.BROADCAST_PERMISSION");
+        return SendOrderedBroadcast(intent, permission);
+#endif
     }
     else {
         return SendBroadcast(intent);
