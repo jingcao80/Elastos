@@ -15,8 +15,8 @@
  */
 
 #include <assert.h>
-#include "include/mystdlib.h"
-#include "include/searchutility.h"
+#include "mystdlib.h"
+#include "searchutility.h"
 
 namespace ime_pinyin {
 

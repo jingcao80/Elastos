@@ -16,12 +16,12 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-class ListActivity
+class ECO_PUBLIC ListActivity
     : public Activity
     , public IListActivity
 {
 private:
-    class MyListener
+    class ECO_LOCAL MyListener
         : public Object
         , public IAdapterViewOnItemClickListener
     {
@@ -41,7 +41,7 @@ private:
         ListActivity* mHost;
     };
 
-    class RequestRunnable
+    class ECO_LOCAL RequestRunnable
         : public Runnable
     {
     public:
@@ -165,7 +165,6 @@ private:
     AutoPtr<IRunnable> mRequestFocus;
 
     AutoPtr<IAdapterViewOnItemClickListener> mOnClickListener;
-    Object mLock;
 };
 
 } // namespace App

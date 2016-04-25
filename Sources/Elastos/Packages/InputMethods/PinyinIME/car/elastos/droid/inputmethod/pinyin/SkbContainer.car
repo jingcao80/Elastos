@@ -1,9 +1,6 @@
 
 module
 {
-    using interface Elastos.Droid.View.IGestureDetector;
-    using interface Elastos.Droid.InputMethodService.IInputMethodService;
-
     namespace Elastos {
     namespace Droid {
     namespace InputMethod {
@@ -24,28 +21,6 @@ module
      */
     [local]
     interface ISkbContainer {
-        SetService(
-            [in] IInputMethodService* service);
-
-//        SetInputModeSwitcher(
-//            [in] IInputModeSwitcher* inputModeSwitcher);
-
-        SetGestureDetector(
-            [in] IGestureDetector* gestureDetector);
-
-        IsCurrentSkbSticky(
-            [out] Boolean* sticky);
-
-        ToggleCandidateMode(
-            [in] Boolean candidatesShowing);
-
-        UpdateInputMode();
-
-        HandleBack(
-            [in] Boolean realAction,
-            [out] Boolean* result);
-
-        DismissPopups();
     }
 
     } // namespace Pinyin

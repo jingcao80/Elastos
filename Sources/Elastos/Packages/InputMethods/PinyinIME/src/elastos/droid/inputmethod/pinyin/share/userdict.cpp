@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "include/userdict.h"
-#include "include/splparser.h"
-#include "include/ngram.h"
+#include "userdict.h"
+#include "splparser.h"
+#include "ngram.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

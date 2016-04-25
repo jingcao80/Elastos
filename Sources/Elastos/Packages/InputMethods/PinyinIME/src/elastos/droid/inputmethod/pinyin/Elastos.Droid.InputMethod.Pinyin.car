@@ -11,7 +11,6 @@ module
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/PinyinIME.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidateView.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/ComposingView.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/Settings.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/SkbContainer.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyboard.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyboardView.car");
@@ -65,10 +64,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
     }
-
-        singleton class CPinyinSettings {
-            interface ISettings;
-        }
 
     //     class CPinyinEnvironment {
     //         interface IPinyinEnvironment;
@@ -124,23 +119,23 @@ module
         interface IAccessibilityEventSource;
     }
 
-    //     [local]
-    //     class CSkbContainer {
-    //         constructor(
-    //             [in] IContext* ctx,
-    //             [in] IAttributeSet* attrs);
+    [local]
+    class CSkbContainer {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-    //         interface ISkbContainer;
-    //         interface IRelativeLayout;
-    //         interface IViewGroup;
-    //         interface IView;
-    //         interface IViewParent;
-    //         interface IViewManager;
-    //         interface IDrawableCallback;
-    //         interface IKeyEventCallback;
-    //         interface IAccessibilityEventSource;
-    //         interface IViewOnTouchListener;
-    //     }
+        interface ISkbContainer;
+        interface IRelativeLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IViewOnTouchListener;
+    }
 
     //     [local]
     //     class CSoftKeyboardView {
@@ -215,6 +210,8 @@ module
         }
 
         class CSettingsActivity {
+            constructor();
+
             interface IActivity;
         }
 

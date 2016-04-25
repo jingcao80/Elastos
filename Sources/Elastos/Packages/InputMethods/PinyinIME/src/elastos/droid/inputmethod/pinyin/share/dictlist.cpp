@@ -17,10 +17,10 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/dictlist.h"
-#include "include/mystdlib.h"
-#include "include/ngram.h"
-#include "include/searchutility.h"
+#include "dictlist.h"
+#include "mystdlib.h"
+#include "ngram.h"
+#include "searchutility.h"
 
 namespace ime_pinyin {
 

@@ -38,17 +38,18 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class PreferenceActivity
+class ECO_PUBLIC PreferenceActivity
     : public ListActivity
     , public IPreferenceActivity
     , public IPreferenceManagerOnPreferenceTreeClickListener
     , public IPreferenceFragmentOnPreferenceStartFragmentCallback
 {
 private:
-    class MHandler
+    class ECO_LOCAL MHandler
         : public Handler
     {
         friend class PreferenceActivity;
+
     public:
         TO_STRING_IMPL("PreferenceActivity::MHandler")
 
@@ -63,7 +64,7 @@ private:
         PreferenceActivity* mHost;
     };
 
-    class HeaderAdapter
+    class ECO_LOCAL HeaderAdapter
         : public ArrayAdapter
         , public IPreferenceActivityHeaderAdapter
     {
@@ -330,7 +331,7 @@ public:
     };
 
 private:
-    class BackButtonListener
+    class ECO_LOCAL BackButtonListener
         : public Object
         , public IViewOnClickListener
     {
@@ -347,7 +348,7 @@ private:
         PreferenceActivity* mParent;
     };
 
-    class SkipButtonListener
+    class ECO_LOCAL SkipButtonListener
         : public Object
         , public IViewOnClickListener
     {
@@ -364,7 +365,7 @@ private:
         PreferenceActivity* mParent;
     };
 
-    class NextButtonListener
+    class ECO_LOCAL NextButtonListener
         : public Object
         , public IViewOnClickListener
     {
@@ -833,33 +834,33 @@ private:
     CARAPI HandleBuildHeaders();
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
     // Constants for state save/restore
-    static const String HEADERS_TAG;
-    static const String CUR_HEADER_TAG;
-    static const String PREFERENCES_TAG;
+    ECO_LOCAL static const String HEADERS_TAG;
+    ECO_LOCAL static const String CUR_HEADER_TAG;
+    ECO_LOCAL static const String PREFERENCES_TAG;
 
-    static const String BACK_STACK_PREFS;
+    ECO_LOCAL static const String BACK_STACK_PREFS;
 
     // show Back and Next buttons? takes boolean parameter
     // Back will then return RESULT_CANCELED and Next RESULT_OK
-    static const String EXTRA_PREFS_SHOW_BUTTON_BAR ;
+    ECO_LOCAL static const String EXTRA_PREFS_SHOW_BUTTON_BAR ;
 
     // add a Skip button?
-    static const String EXTRA_PREFS_SHOW_SKIP;
+    ECO_LOCAL static const String EXTRA_PREFS_SHOW_SKIP;
 
     // specify custom text for the Back or Next buttons, or cause a button to not appear
     // at all by setting it to null
-    static const String EXTRA_PREFS_SET_NEXT_TEXT;
-    static const String EXTRA_PREFS_SET_BACK_TEXT;
+    ECO_LOCAL static const String EXTRA_PREFS_SET_NEXT_TEXT;
+    ECO_LOCAL static const String EXTRA_PREFS_SET_BACK_TEXT;
 
     /**
      * The starting request code given out to preference framework.
      */
-    static const Int32 FIRST_REQUEST_CODE = 100;
+    ECO_LOCAL static const Int32 FIRST_REQUEST_CODE = 100;
 
-    static const Int32 MSG_BIND_PREFERENCES = 1;
-    static const Int32 MSG_BUILD_HEADERS = 2;
+    ECO_LOCAL static const Int32 MSG_BIND_PREFERENCES = 1;
+    ECO_LOCAL static const Int32 MSG_BUILD_HEADERS = 2;
 
     AutoPtr<IList> mHeaders;
 

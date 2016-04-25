@@ -15,7 +15,7 @@
  */
 
 #include <stdlib.h>
-#include "include/utf16char.h"
+#include "utf16char.h"
 
 namespace ime_pinyin {
 

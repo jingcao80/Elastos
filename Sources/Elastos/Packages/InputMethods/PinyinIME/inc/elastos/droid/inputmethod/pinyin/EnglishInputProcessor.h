@@ -2,10 +2,11 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_ENGLISHINPUTPROCESSOR_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_ENGLISHINPUTPROCESSOR_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::InputMethod::IInputConnection;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +16,7 @@ namespace Pinyin {
 /**
  * Class to handle English input.
  */
-class EnglishInputProcessor: public ElRefBase
+class EnglishInputProcessor: public Object
 {
 public:
     EnglishInputProcessor();

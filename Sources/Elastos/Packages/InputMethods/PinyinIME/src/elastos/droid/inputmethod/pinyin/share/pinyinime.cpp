@@ -15,10 +15,10 @@
  */
 
 #include <stdlib.h>
-#include "include/pinyinime.h"
-#include "include/dicttrie.h"
-#include "include/matrixsearch.h"
-#include "include/spellingtrie.h"
+#include "pinyinime.h"
+#include "dicttrie.h"
+#include "matrixsearch.h"
+#include "spellingtrie.h"
 
 #ifdef __cplusplus
 extern "C" {

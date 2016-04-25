@@ -98,7 +98,7 @@ ECode ListActivity::OnContentChanged()
 ECode ListActivity::SetListAdapter(
     /* [in] */ IListAdapter* adapter)
 {
-    AutoLock lock(mLock);
+    AutoLock lock(this);
     FAIL_RETURN(EnsureList())
     mAdapter = adapter;
     return IAdapterView::Probe(mList)->SetAdapter(IAdapter::Probe(adapter));

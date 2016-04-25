@@ -19,15 +19,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/dictbuilder.h"
-#include "include/dicttrie.h"
-#include "include/mystdlib.h"
-#include "include/ngram.h"
-#include "include/searchutility.h"
-#include "include/spellingtable.h"
-#include "include/spellingtrie.h"
-#include "include/splparser.h"
-#include "include/utf16reader.h"
+#include "dictbuilder.h"
+#include "dicttrie.h"
+#include "mystdlib.h"
+#include "ngram.h"
+#include "searchutility.h"
+#include "spellingtable.h"
+#include "spellingtrie.h"
+#include "splparser.h"
+#include "utf16reader.h"
 
 namespace ime_pinyin {
 

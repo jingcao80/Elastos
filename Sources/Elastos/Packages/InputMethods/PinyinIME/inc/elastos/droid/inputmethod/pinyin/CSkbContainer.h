@@ -3,15 +3,16 @@
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSKBCONTAINER_H__
 
 #include "_Elastos_Droid_Inputmethods_PinyinIME_CSkbContainer.h"
-#include "SoftKey.h"
-#include "elastos/droid/os/HandlerRunnable.h"
-#include "elastos/droid/widget/RelativeLayout.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKey.h"
+#include <elastos/droid/os/HandlerRunnable.h>
+#include <elastos/droid/widget/RelativeLayout.h>
 
 using Elastos::Droid::InputMethodService::IInputMethodService;
 using Elastos::Droid::Os::HandlerRunnable;
 using Elastos::Droid::View::IGestureDetector;
 using Elastos::Droid::Widget::IViewFlipper;
 using Elastos::Droid::Widget::IPopupWindow;
+using Elastos::Droid::Widget::RelativeLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -22,8 +23,9 @@ namespace Pinyin {
  * The top container to host soft keyboard view(s).
  */
 CarClass(CSkbContainer)
-    , public Elastos::Droid::Widget::RelativeLayout
+    , public RelativeLayout
     , public ISkbContainer
+    , public IViewOnTouchListener
 {
 public:
     class LongPressTimer
@@ -33,9 +35,9 @@ public:
         LongPressTimer(
             /* [in] */ CSkbContainer* skbContainer);
 
-        void StartTimer();
+        CARAPI_(void) StartTimer();
 
-        Boolean RemoveTimer();
+        CARAPI_(Boolean) RemoveTimer();
 
         CARAPI Run();
 
@@ -86,15 +88,37 @@ public:
 
     CAR_INTERFACE_DECL();
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    CARAPI SetIgnoreGravity(
+    CARAPI_(void) SetService(
+        /* [in] */ IInputMethodService* service);
+
+    CARAPI_(void) SetInputModeSwitcher(
+        /* [in] */ InputModeSwitcher* inputModeSwitcher);
+
+    CARAPI_(void) SetGestureDetector(
+        /* [in] */ IGestureDetector* gestureDetector);
+
+    CARAPI_(Boolean) IsCurrentSkbSticky();
+
+    CARAPI_(void) ToggleCandidateMode(
+        /* [in] */ Boolean candidatesShowing);
+
+    CARAPI_(void) UpdateInputMode();
+
+    CARAPI_(Boolean) HandleBack(
+        /* [in] */ Boolean realAction);
+
+    CARAPI_(void) DismissPopups();
+
+    CARAPI_(void) SetIgnoreGravity(
         /* [in] */ Int32 viewId);
+
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
     // Function for interface OnTouchListener, it is used to handle touch events
     // which will be delivered to the popup soft keyboard view.
@@ -103,33 +127,30 @@ public:
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
-    Boolean OnTouchEvent(
-        /* [in] */ IMotionEvent* event);
-
 protected:
-    void OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
 protected:
-    void UpdateSkbLayout();
+    CARAPI_(void) UpdateSkbLayout();
 
-    void ResponseKeyEvent(
+    CARAPI_(void) ResponseKeyEvent(
         /* [in] */ SoftKey* sKey);
 
-    AutoPtr<ISoftKeyboardView> InKeyboardView(
+    CARAPI_(AutoPtr<cSoftKeyboardView>) InKeyboardView(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ ArrayOf<Int32>* positionInParent);
 
-    void PopupSymbols();
+    CARAPI_(void) PopupSymbols();
 
-    void DimSoftKeyboard(
+    CARAPI_(void) DimSoftKeyboard(
         /* [in] */ Boolean dimSkb);
 
-    void DismissPopupSkb();
+    CARAPI_(void) DismissPopupSkb();
 
-    void ResetKeyPress(
+    CARAPI_(void) ResetKeyPress(
         /* [in] */ Int64 delay);
 
 protected:
@@ -170,29 +191,29 @@ protected:
      * Input mode switcher used to switch between different modes like Chinese,
      * English, etc.
      */
-    AutoPtr<IInputModeSwitcher> mInputModeSwitcher;
+    AutoPtr<InputModeSwitcher> mInputModeSwitcher;
 
     /**
      * The gesture detector.
      */
     AutoPtr<IGestureDetector> mGestureDetector;
 
-    AutoPtr<IPinyinEnvironment> mEnvironment;
+    AutoPtr<Environment> mEnvironment;
 
     AutoPtr<IViewFlipper> mSkbFlipper;
 
     /**
      * The popup balloon hint for key press/release.
      */
-    AutoPtr<IBalloonHint> mBalloonPopup;
+    AutoPtr<CBalloonHint> mBalloonPopup;
 
     /**
      * The on-key balloon hint for key press/release.
      */
-    AutoPtr<IBalloonHint> mBalloonOnKey;
+    AutoPtr<CBalloonHint> mBalloonOnKey;
 
     /** The major sub soft keyboard. */
-    AutoPtr<ISoftKeyboardView> mMajorView;
+    AutoPtr<CSoftKeyboardView> mMajorView;
 
     /**
      * The last parameter when function {@link #toggleCandidateMode(Boolean)}
@@ -214,7 +235,7 @@ protected:
     AutoPtr<IPopupWindow> mPopupSkb;
 
     /** The view of the popup sub soft keyboard. */
-    AutoPtr<ISoftKeyboardView> mPopupSkbView;
+    AutoPtr<CSoftKeyboardView> mPopupSkbView;
 
     Int32 mPopupX;
 
@@ -253,7 +274,7 @@ protected:
     /**
      * The soft keyboard view.
      */
-    AutoPtr<ISoftKeyboardView> mSkv;
+    AutoPtr<CSoftKeyboardView> mSkv;
 
     /**
      * The position of the soft keyboard view in the container.

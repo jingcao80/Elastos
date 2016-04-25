@@ -1,7 +1,7 @@
 TARGET_NAME= share
 TARGET_TYPE= lib
 
-INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/droid/inputmethod/pinyin/
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/droid/inputmethod/pinyin/native
 
 SOURCES = dictbuilder.cpp
 SOURCES += dictlist.cpp
