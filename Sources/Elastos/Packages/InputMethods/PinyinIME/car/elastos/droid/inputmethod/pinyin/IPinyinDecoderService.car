@@ -16,7 +16,7 @@ module
      * interface IComponentCallbacks2
      */
     [deprecated]
-    interface IPinyinDecoderService {
+    interface IIPinyinDecoderService {
         GetInt32(
             [out] Int32* value);
 

@@ -133,7 +133,7 @@ private:
 
     String mUsr_dict_file;
 
-    AutoPtr<IPinyinDecoderService> mBinder;
+    AutoPtr<IIPinyinDecoderService> mBinder;
 
     friend class CIPinyinDecoderService;
 };

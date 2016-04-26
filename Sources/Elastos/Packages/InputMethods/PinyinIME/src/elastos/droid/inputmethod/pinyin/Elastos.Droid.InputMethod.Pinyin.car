@@ -156,7 +156,7 @@ module
         constructor(
             [in] Elastos.Droid.App.IService* host);
 
-        interface IPinyinDecoderService;
+        interface IIPinyinDecoderService;
         interface Elastos.Droid.App.IService;
         interface Elastos.Droid.Content.IContext;
         interface Elastos.Droid.Content.IContextWrapper;

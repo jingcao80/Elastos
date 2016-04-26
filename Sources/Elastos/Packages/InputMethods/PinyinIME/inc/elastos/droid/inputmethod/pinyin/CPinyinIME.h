@@ -13,6 +13,7 @@
 #include "elastos/droid/inputmethod/pinyin/InputModeSwitcher.h"
 #include "elastos/droid/inputmethod/pinyin/SoftKey.h"
 #include <elastos/droid/inputmethodservice/InputMethodService.h>
+#include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/os/HandlerRunnable.h>
 #include <elastos/droid/view/GestureDetector.h>
@@ -21,6 +22,7 @@
 #include <elastos/utility/etl/Vector.h>
 
 using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::Handler;
@@ -203,6 +205,8 @@ public:
     class DecodingInfo
         : public Object
     {
+        friend class CPinyinIME;
+
     public:
         DecodingInfo(
             /* [in] */ CPinyinIME* ime);
@@ -434,7 +438,7 @@ public:
         /**
          * Remote Pinyin-to-Hanzi decoding engine service.
          */
-        AutoPtr<IPinyinDecoderService> mIPinyinDecoderService;
+        AutoPtr<IIPinyinDecoderService> mIPinyinDecoderService;
 
         /**
          * The complication information suggested by application.
@@ -461,6 +465,15 @@ private:
     private:
         AutoPtr< ArrayOf<Int32> > mParentLocation;
         CPinyinIME* mHost;
+    };
+
+    class MyReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
     };
 
 //    class BuilderListener

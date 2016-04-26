@@ -1,8 +1,11 @@
 
 #include <elastos/droid/ext/frameworkdef.h>
+#include "Elastos.Droid.Preference.h"
 #include "elastos/droid/inputmethod/pinyin/CPinyinIME.h"
 #include "elastos/droid/inputmethod/pinyin/CCandidatesContainer.h"
 #include "elastos/droid/inputmethod/pinyin/KeyMapDream.h"
+#include "elastos/droid/inputmethod/pinyin/Settings.h"
+#include "elastos/droid/inputmethod/pinyin/SoundManager.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -17,13 +20,13 @@
 // using Elastos::Droid::Content::IIntent;
 // using Elastos::Droid::Content::CIntent;
 // using Elastos::Droid::Content::ISharedPreferences;
-// using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::EIID_IServiceConnection;
 // using Elastos::Droid::InputMethodService::IInputMethodService;
 // using Elastos::Droid::InputMethodService::EIID_IInputMethodService;
 // using Elastos::Droid::Os::CHandler;
-// using Elastos::Droid::Preference::IPreferenceManagerHelper;
-// using Elastos::Droid::Preference::CPreferenceManagerHelper;
-// using Elastos::Droid::View::CGestureDetector;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IInputEvent;
 // using Elastos::Droid::View::CKeyEvent;
@@ -354,36 +357,39 @@ void CPinyinIME::OnGestureListener::OnDirectionGesture(
 }
 
 
-#if 0
-//class PinyinDecoderServiceConnection
-CAR_INTERFACE_IMPL(CPinyinIME::PinyinDecoderServiceConnection, IServiceConnection);
+//==========================================================
+// CPinyinIME::PinyinDecoderServiceConnection
+//==========================================================
+CAR_INTERFACE_IMPL(CPinyinIME::PinyinDecoderServiceConnection, Object, IServiceConnection);
+
 CPinyinIME::PinyinDecoderServiceConnection::PinyinDecoderServiceConnection(
     /* [in] */ CPinyinIME* ime)
     : mIme(ime)
 {}
 
-CPinyinIME::PinyinDecoderServiceConnection::OnServiceConnected(
+ECode CPinyinIME::PinyinDecoderServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    return mIme->mDecInfo->SetPinyinDecoderService(IPinyinDecoderService::Probe(service));
+    mIme->mDecInfo->mIPinyinDecoderService = IIPinyinDecoderService::Probe(service);
+    return NOERROR;
 }
 
-CPinyinIME::PinyinDecoderServiceConnection::OnServiceDisconnected(
+ECode CPinyinIME::PinyinDecoderServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
     return NOERROR;
 }
 
-const Int32 CDecodingInfo::PY_STRING_MAX = 28;
-const Int32 CDecodingInfo::MAX_PAGE_SIZE_DISPLAY = 10;
-static String TAG("CDecodingInfo");
 
-CAR_OBJECT_IMPL(CDecodingInfo);
+//==========================================================
+// CPinyinIME::PinyinDecoderServiceConnection
+//==========================================================
+const Int32 CPinyinIME::DecodingInfo::PY_STRING_MAX = 28;
+const Int32 CPinyinIME::DecodingInfo::MAX_PAGE_SIZE_DISPLAY = 10;
 
-CAR_INTERFACE_IMPL(CDecodingInfo, Object, IDecodingInfo);
-
-CDecodingInfo::CDecodingInfo()
+CPinyinIME::DecodingInfo::DecodingInfo(
+    /* [in] */ CPinyinIME* ime)
     : mTotalChoicesNum(0)
     , mPosDelSpl(-1)
     , mIsPosInSpl(FALSE)
@@ -393,18 +399,12 @@ CDecodingInfo::CDecodingInfo()
     , mFixedLen(0)
     , mFinishSelection(FALSE)
     , mCursorPos(0)
+    , mHost(ime)
 {
     mSurface = new StringBuffer();
 }
 
-ECode CDecodingInfo::constructor(
-    /* [in] */ IPinyinIME* ime)
-{
-    mPinyinIME = ime;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::Reset()
+void CPinyinIME::DecodingInfo::Reset()
 {
     Int32 length = 0;
     mSurface->GetLength(&length);
@@ -419,33 +419,23 @@ ECode CDecodingInfo::Reset()
     mActiveCmpsLen = 0;
     mActiveCmpsDisplayLen = 0;
 
-    return ResetCandidates();
+    ResetCandidates();
 }
 
-ECode CDecodingInfo::IsCandidatesListEmpty(
-    /* [out] */ Boolean* empty)
+Boolean CPinyinIME::DecodingInfo::IsCandidatesListEmpty()
 {
-    VALIDATE_NOT_NULL(empty);
-    *empty = mCandidatesList.IsEmpty();
-    return NOERROR;
+    return mCandidatesList.IsEmpty();
 }
 
-ECode CDecodingInfo::IsSplStrFull(
-    /* [out] */ Boolean* full)
+Boolean CPinyinIME::DecodingInfo::IsSplStrFull()
 {
-    VALIDATE_NOT_NULL(full);
     Int32 length = 0;
     mSurface->GetLength(&length);
-    if (length >= PY_STRING_MAX - 1) {
-        *full = TRUE;
-        return NOERROR;
-    }
-
-    *full = FALSE;
-    return NOERROR;
+    if (length >= PY_STRING_MAX - 1) return TRUE;
+    return FALSE;
 }
 
-ECode CDecodingInfo::AddSplChar(
+void CPinyinIME::DecodingInfo::AddSplChar(
     /* [in] */ Char32 ch,
     /* [in] */ Boolean reset)
 {
@@ -462,10 +452,9 @@ ECode CDecodingInfo::AddSplChar(
     }
     mSurface->InsertChar(mCursorPos, ch);
     mCursorPos++;
-    return NOERROR;
 }
 
-ECode CDecodingInfo::PrepareDeleteBeforeCursor()
+void CPinyinIME::DecodingInfo::PrepareDeleteBeforeCursor()
 {
     if (mCursorPos > 0) {
         Int32 pos;
@@ -484,117 +473,83 @@ ECode CDecodingInfo::PrepareDeleteBeforeCursor()
             mIsPosInSpl = FALSE;
         }
     }
-
-    return NOERROR;
 }
 
-ECode CDecodingInfo::GetLength(
-    /* [out] */ Int32* length)
+Int32 CPinyinIME::DecodingInfo::GetLength()
 {
-    VALIDATE_NOT_NULL(length);
-    return mSurface->GetLength(length);
+    Int32 length;
+    mSurface->GetLength(&length);
+    return length;
 }
 
-ECode CDecodingInfo::GetCharAt(
-    /* [in] */ Int32 index,
-    /* [out] */ Char32* ch)
+Char32 CPinyinIME::DecodingInfo::GetCharAt(
+    /* [in] */ Int32 index)
 {
-    VALIDATE_NOT_NULL(ch);
-    return mSurface->GetCharAt(index, ch);
+    Char32 ch;
+    mSurface->GetCharAt(index, &ch);
+    return ch;
 }
 
-ECode CDecodingInfo::GetOrigianlSplStr(
-    /* [out] */ IStringBuffer** str)
+AutoPtr<StringBuffer> CPinyinIME::DecodingInfo::GetOrigianlSplStr()
 {
-    VALIDATE_NOT_NULL(str);
-    *str = mSurface;
-    REFCOUNT_ADD(*str);
-    return NOERROR;
+    return mSurface;
 }
 
-ECode CDecodingInfo::GetSplStrDecodedLen(
-    /* [out] */ Int32* len)
+Int32 CPinyinIME::DecodingInfo::GetSplStrDecodedLen()
 {
-    VALIDATE_NOT_NULL(len);
-    *len = mSurfaceDecodedLen;
-    return NOERROR;
+    return mSurfaceDecodedLen;
 }
 
-ECode CDecodingInfo::GetSplStart(
-    /* [out, callee] */ ArrayOf<Int32>** splStart)
+AutoPtr< ArrayOf<Int32> > CPinyinIME::DecodingInfo::GetSplStart()
 {
-    VALIDATE_NOT_NULL(splStart);
-    *splStart = mSplStart;
-    REFCOUNT_ADD(*splStart);
-    return NOERROR;
+    return mSplStart;
 }
 
-ECode CDecodingInfo::GetComposingStr(
-    /* [out] */ String* str)
+String CPinyinIME::DecodingInfo::GetComposingStr()
 {
-    VALIDATE_NOT_NULL(str);
-    *str = mComposingStr;
-    return NOERROR;
+    return mComposingStr;
 }
 
-ECode CDecodingInfo::GetComposingStrActivePart(
-    /* [out] */ String* part)
+String CPinyinIME::DecodingInfo::GetComposingStrActivePart()
 {
-    VALIDATE_NOT_NULL(part);
     assert (mActiveCmpsLen <= (Int32)mComposingStr.GetLength());
-    *part = mComposingStr.Substring(0, mActiveCmpsLen);
-    return NOERROR;
+    return mComposingStr.Substring(0, mActiveCmpsLen);
 }
 
-ECode CDecodingInfo::GetActiveCmpsLen(
-    /* [out] */ Int32* len)
+Int32 CPinyinIME::DecodingInfo::GetActiveCmpsLen()
 {
-    VALIDATE_NOT_NULL(len);
-    *len = mActiveCmpsLen;
-    return NOERROR;
+    return mActiveCmpsLen;
 }
 
-ECode CDecodingInfo::GetComposingStrForDisplay(
-    /* [out] */ String* str)
+String CPinyinIME::DecodingInfo::GetComposingStrForDisplay()
 {
-    VALIDATE_NOT_NULL(str);
-    *str = mComposingStrDisplay;
-    return NOERROR;
+    return mComposingStrDisplay;
 }
 
-ECode CDecodingInfo::GetActiveCmpsDisplayLen(
-    /* [out] */ Int32* len)
+Int32 CPinyinIME::DecodingInfo::GetActiveCmpsDisplayLen()
 {
-    VALIDATE_NOT_NULL(len);
-    *len = mActiveCmpsDisplayLen;
-    return NOERROR;
+    return mActiveCmpsDisplayLen;
 }
 
-ECode CDecodingInfo::GetFullSent(
-    /* [out] */ String* value)
+String CPinyinIME::DecodingInfo::GetFullSent()
 {
-    VALIDATE_NOT_NULL(value);
-    *value = mFullSent;
-    return NOERROR;
+    return mFullSent;
 }
 
-ECode CDecodingInfo::GetCurrentFullSent(
-    /* [in] */ Int32 activeCandPos,
-    /* [out] */ String* value)
+String CPinyinIME::DecodingInfo::GetCurrentFullSent(
+    /* [in] */ Int32 activeCandPos)
 {
-    VALIDATE_NOT_NULL(value);
     // try {
     String retStr = mFullSent.Substring(0, mFixedLen);
     retStr += mCandidatesList[activeCandPos];
-    *value = retStr;
+    return retStr;
     // } catch (Exception e) {
     // //TODO
     //     return "";
     // }
-    return NOERROR;
 }
 
-ECode CDecodingInfo::ResetCandidates()
+void CPinyinIME::DecodingInfo::ResetCandidates()
 {
     mCandidatesList.Clear();
     mTotalChoicesNum = 0;
@@ -603,71 +558,53 @@ ECode CDecodingInfo::ResetCandidates()
     mPageStart.PushBack(0);
     mCnToPage.Clear();
     mCnToPage.PushBack(0);
-    return NOERROR;
 }
 
-ECode CDecodingInfo::CandidatesFromApp(
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::CandidatesFromApp()
 {
-    VALIDATE_NOT_NULL(state);
-    ImeState imestate;
-    mPinyinIME->GetImeState(&imestate);
-    *state = ImeState_STATE_APP_COMPLETION == imestate;
-    return NOERROR;
+    return STATE_APP_COMPLETION == mHost->mImeState;
 }
 
-ECode CDecodingInfo::CanDoPrediction(
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::CanDoPrediction()
 {
-    VALIDATE_NOT_NULL(state);
-    *state = mComposingStr.GetLength() == mFixedLen;
-    return NOERROR;
+    return mComposingStr.GetLength() == mFixedLen;
 }
 
-ECode CDecodingInfo::SelectionFinished(
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::SelectionFinished()
 {
-    VALIDATE_NOT_NULL(state);
-    *state = mFinishSelection;
-    return NOERROR;
+    return mFinishSelection;
 }
 
-ECode CDecodingInfo::ChooseDecodingCandidate(
+void CPinyinIME::DecodingInfo::ChooseDecodingCandidate(
     /* [in] */ Int32 candId)
 {
-    ImeState imestate;
-    mPinyinIME->GetImeState(&imestate);
-    if (imestate != ImeState_STATE_PREDICT) {
+    if (mHost->mImeState != STATE_PREDICT) {
         ResetCandidates();
         Int32 totalChoicesNum = 0;
         // try {
         if (candId < 0) {
-            String str = mSurface->ToString();
-            Int32 len = str.GetByteLength();
-            if (len == 0) {
+            if (GetLength() == 0) {
                 totalChoicesNum = 0;
             }
             else {
                 if (mPyBuf == NULL) {
                     mPyBuf = ArrayOf<Byte>::Alloc(PY_STRING_MAX);
                 }
-                for (Int32 i = 0; i < len; i++) {
-                    Char32 ch;
-                    GetCharAt(i, &ch);
-                    (*mPyBuf)[i] = ch;
+                for (Int32 i = 0; i < GetLength(); i++) {
+                    (*mPyBuf)[i] = (Byte)GetCharAt(i);
                 }
-                (*mPyBuf)[len] = 0;
+                (*mPyBuf)[GetLength()] = 0;
 
                 if (mPosDelSpl < 0) {
-                    mIPinyinDecoderService->ImSearch(mPyBuf, len, &totalChoicesNum);
+                    mIPinyinDecoderService->ImSearch(mPyBuf, GetLength(), &totalChoicesNum);
                 }
                 else {
                     Boolean clear_fixed_this_step = TRUE;
-                    if (ImeState_STATE_COMPOSING == imestate) {
+                    if (STATE_COMPOSING == mHost->mImeState) {
                         clear_fixed_this_step = FALSE;
                     }
                     mIPinyinDecoderService->ImDelSearch(mPosDelSpl, mIsPosInSpl,
-                                    clear_fixed_this_step, &totalChoicesNum);
+                            clear_fixed_this_step, &totalChoicesNum);
                     mPosDelSpl = -1;
                 }
             }
@@ -679,10 +616,9 @@ ECode CDecodingInfo::ChooseDecodingCandidate(
         // }
         UpdateDecInfoForSearch(totalChoicesNum);
     }
-    return NOERROR;
 }
 
-void CDecodingInfo::UpdateDecInfoForSearch(
+void CPinyinIME::DecodingInfo::UpdateDecInfoForSearch(
     /* [in] */ Int32 totalChoicesNum)
 {
     mTotalChoicesNum = totalChoicesNum;
@@ -693,8 +629,6 @@ void CDecodingInfo::UpdateDecInfoForSearch(
 
     // try {
     String pyStr, tmp;
-    Int32 len = 0;
-
     mSplStart = NULL;
     ECode ec = mIPinyinDecoderService->ImGetSplStart((ArrayOf<Int32>**)&mSplStart);
     FAIL_GOTO(ec, label);
@@ -702,9 +636,7 @@ void CDecodingInfo::UpdateDecInfoForSearch(
     FAIL_GOTO(ec, label);
     ec = mIPinyinDecoderService->ImGetPyStrLen(TRUE, &mSurfaceDecodedLen);
     FAIL_GOTO(ec, label);
-    if (!pyStr.IsNull()) {
-        assert(mSurfaceDecodedLen <= pyStr.GetLength());
-    }
+    assert(mSurfaceDecodedLen <= pyStr.GetLength());
 
     ec = mIPinyinDecoderService->ImGetChoice(0, &mFullSent);
     FAIL_GOTO(ec, label);
@@ -712,32 +644,18 @@ void CDecodingInfo::UpdateDecInfoForSearch(
     FAIL_GOTO(ec, label);
 
     // Update the surface string to the one kept by engine.
-    if (pyStr.IsNull()) {
-        ec = mSurface->Replace(0, (mSurface->GetLength(&len), len), String(""));
-    }
-    else {
-        ec = mSurface->Replace(0, (mSurface->GetLength(&len), len), pyStr);
-    }
-    FAIL_GOTO(ec, label);
+    mSurface->Replace(0, GetLength(), pyStr);
 
-    mSurface->GetLength(&len);
-    if (mCursorPos > len) {
-        mCursorPos = len;
+    if (mCursorPos > GetLength()) {
+        mCursorPos = GetLength();
     }
-
-    ec = mSurface->Substring((*mSplStart)[mFixedLen + 1], &tmp);
-    FAIL_GOTO(ec, label);
-    mComposingStr = mFullSent.Substring(0, mFixedLen);
-    if (mComposingStr.IsNull()) {
-        mComposingStr = tmp;
-    }
-    else {
-        mComposingStr.Append(tmp);
-    }
+    mSurface->Substring((*mSplStart)[mFixedLen + 1], &tmp);
+    mComposingStr = mFullSent.Substring(0, mFixedLen) + tmp;
 
     mActiveCmpsLen = mComposingStr.GetLength();
     if (mSurfaceDecodedLen > 0) {
-        mActiveCmpsLen = mActiveCmpsLen - (len - mSurfaceDecodedLen);
+        mActiveCmpsLen = mActiveCmpsLen
+                - (GetLength() - mSurfaceDecodedLen);
     }
 
     // Prepare the display string.
@@ -748,19 +666,15 @@ void CDecodingInfo::UpdateDecInfoForSearch(
     else {
         mComposingStrDisplay = mFullSent.Substring(0, mFixedLen);
         for (Int32 pos = mFixedLen + 1; pos < mSplStart->GetLength() - 1; pos++) {
-            ec = mSurface->Substring((*mSplStart)[pos], (*mSplStart)[pos + 1], &tmp);
-            FAIL_GOTO(ec, label);
+            mSurface->Substring((*mSplStart)[pos], (*mSplStart)[pos + 1], &tmp);
             mComposingStrDisplay += tmp;
             if ((*mSplStart)[pos + 1] < mSurfaceDecodedLen) {
                 mComposingStrDisplay += String(" ");
             }
         }
-
         mActiveCmpsDisplayLen = mComposingStrDisplay.GetLength();
-        mSurface->GetLength(&len);
-        if (mSurfaceDecodedLen < len) {
-            ec = mSurface->Substring(mSurfaceDecodedLen, &tmp);
-            FAIL_GOTO(ec, label);
+        if (mSurfaceDecodedLen < GetLength()) {
+            mSurface->Substring(mSurfaceDecodedLen, &tmp);
             mComposingStrDisplay += tmp;
         }
     }
@@ -790,19 +704,16 @@ label:
     }
     // Prepare page 0.
     if (!mFinishSelection) {
-        Boolean result = FALSE;
-        PreparePage(0, &result);
+        PreparePage(0);
     }
 }
 
-ECode CDecodingInfo::ChoosePredictChoice(
+void CPinyinIME::DecodingInfo::ChoosePredictChoice(
     /* [in] */ Int32 choiceId)
 {
-    ImeState imestate;
-    mPinyinIME->GetImeState(&imestate);
-    if (ImeState_STATE_PREDICT != imestate || choiceId < 0
+    if (STATE_PREDICT != mHost->mImeState || choiceId < 0
             || choiceId >= mTotalChoicesNum) {
-        return NOERROR;
+        return;
     }
 
     String tmp = mCandidatesList[choiceId];
@@ -812,9 +723,7 @@ ECode CDecodingInfo::ChoosePredictChoice(
     mCandidatesList.PushBack(tmp);
     mTotalChoicesNum = 1;
 
-    Int32 len = 0;
-    mSurface->GetLength(&len);
-    mSurface->Replace(0, len, String(""));
+    mSurface->Replace(0, GetLength(), String(""));
     mCursorPos = 0;
     mFullSent = tmp;
     mFixedLen = tmp.GetLength();
@@ -822,25 +731,20 @@ ECode CDecodingInfo::ChoosePredictChoice(
     mActiveCmpsLen = mFixedLen;
 
     mFinishSelection = TRUE;
-    return NOERROR;
 }
 
-ECode CDecodingInfo::GetCandidate(
-    /* [in] */ Int32 candId,
-    /* [out] */ String* candidate)
+String CPinyinIME::DecodingInfo::GetCandidate(
+    /* [in] */ Int32 candId)
 {
-    VALIDATE_NOT_NULL(candidate);
     // Only loaded items can be gotten, so we use mCandidatesList.size()
     // instead mTotalChoiceNum.
     if (candId < 0 || candId > mCandidatesList.GetSize()) {
-        *candidate = String(NULL);
-        return NOERROR;
+        return String(NULL);
     }
-    *candidate = mCandidatesList[candId];
-    return NOERROR;
+    return mCandidatesList[candId];
 }
 
-void CDecodingInfo::GetCandiagtesForCache()
+void CPinyinIME::DecodingInfo::GetCandiagtesForCache()
 {
     Int32 fetchStart = mCandidatesList.GetSize();
     Int32 fetchSize = mTotalChoicesNum - fetchStart;
@@ -848,31 +752,29 @@ void CDecodingInfo::GetCandiagtesForCache()
         fetchSize = MAX_PAGE_SIZE_DISPLAY;
     }
     // try {
-    ImeState imestate;
-    mPinyinIME->GetImeState(&imestate);
-    if (ImeState_STATE_INPUT == imestate ||
-            ImeState_STATE_IDLE == imestate ||
-            ImeState_STATE_COMPOSING == imestate){
+    if (STATE_INPUT == mHost->mImeState ||
+            STATE_IDLE == mHost->mImeState ||
+            STATE_COMPOSING == mHost->mImeState){
         AutoPtr<ArrayOf<String> > newList;
-        mIPinyinDecoderService->ImGetChoiceList(fetchStart, fetchSize, mFixedLen, (ArrayOf<String>**)&newList);
-
+        mIPinyinDecoderService->ImGetChoiceList(
+                fetchStart, fetchSize, mFixedLen, (ArrayOf<String>**)&newList);
         if (newList != NULL && newList->GetLength() > 0) {
             for (Int32 i = 0; i < newList->GetLength(); i++) {
                 mCandidatesList.PushBack((*newList)[i]);
             }
         }
     }
-    else if (ImeState_STATE_PREDICT == imestate) {
+    else if (STATE_PREDICT == mHost->mImeState) {
         AutoPtr<ArrayOf<String> > newList;
-        mIPinyinDecoderService->ImGetPredictList(fetchStart, fetchSize, (ArrayOf<String>**)&newList);
-
+        mIPinyinDecoderService->ImGetPredictList(
+                fetchStart, fetchSize, (ArrayOf<String>**)&newList);
         if (newList != NULL && newList->GetLength() > 0) {
             for (Int32 i = 0; i < newList->GetLength(); i++) {
                 mCandidatesList.PushBack((*newList)[i]);
             }
         }
     }
-    else if (ImeState_STATE_APP_COMPLETION == imestate) {
+    else if (STATE_APP_COMPLETION == mHost->mImeState) {
         if (NULL != mAppCompletions) {
             for (Int32 pos = fetchStart; pos < fetchSize; pos++) {
                 AutoPtr<ICompletionInfo> ci = (*mAppCompletions)[pos];
@@ -893,54 +795,39 @@ void CDecodingInfo::GetCandiagtesForCache()
     // }
 }
 
-ECode CDecodingInfo::PageReady(
-    /* [in] */ Int32 pageNo,
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::PageReady(
+    /* [in] */ Int32 pageNo)
 {
-    VALIDATE_NOT_NULL(state);
     // If the page number is less than 0, return FALSE
-    if (pageNo < 0) {
-        *state = FALSE;
-        return NOERROR;
-    }
+    if (pageNo < 0) return FALSE;
 
     // Page pageNo's ending information is not ready.
     if (mPageStart.GetSize() <= pageNo + 1) {
-        *state = FALSE;
-        return NOERROR;
+        return FALSE;
     }
 
-    *state = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
-ECode CDecodingInfo::PreparePage(
-    /* [in] */ Int32 pageNo,
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::PreparePage(
+    /* [in] */ Int32 pageNo)
 {
-    VALIDATE_NOT_NULL(state);
     // If the page number is less than 0, return FALSE
-    if (pageNo < 0) {
-        *state = FALSE;
-        return NOERROR;
-    }
+    if (pageNo < 0) return FALSE;
 
     // Make sure the starting information for page pageNo is ready.
     if (mPageStart.GetSize() <= pageNo) {
-        *state = FALSE;
-        return NOERROR;
+        return FALSE;
     }
 
     // Page pageNo's ending information is also ready.
     if (mPageStart.GetSize() > pageNo + 1) {
-        *state = TRUE;
-        return NOERROR;
+        return TRUE;
     }
 
     // If cached items is enough for page pageNo.
     if (mCandidatesList.GetSize() - mPageStart[pageNo] >= MAX_PAGE_SIZE_DISPLAY) {
-        *state = TRUE;
-        return NOERROR;
+        return TRUE;
     }
 
     // Try to get more items from engine
@@ -949,140 +836,97 @@ ECode CDecodingInfo::PreparePage(
     // Try to find if there are available new items to display.
     // If no new item, return FALSE;
     if (mPageStart[pageNo] >= mCandidatesList.GetSize()) {
-        *state = FALSE;
-        return NOERROR;
+        return FALSE;
     }
 
     // If there are new items, return TRUE;
-    *state = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
-ECode CDecodingInfo::PreparePredicts(
+void CPinyinIME::DecodingInfo::PreparePredicts(
     /* [in] */ ICharSequence* history)
 {
-    if (NULL == history) return NOERROR;
+    if (NULL == history) return;
 
     ResetCandidates();
 
-    Boolean result = FALSE;
-    if (Settings::GetPrediction(&result), result) {
+    if (Settings::GetPrediction()) {
         String preEdit;
         history->ToString(&preEdit);
         if (!preEdit.IsNull()) {
             // try {
-            FAIL_RETURN(mIPinyinDecoderService->ImGetPredictsNum(preEdit, &mTotalChoicesNum));
+            ECode ec = mIPinyinDecoderService->ImGetPredictsNum(preEdit, &mTotalChoicesNum);
+            if (FAILED(ec)) return;
             // } catch (RemoteException e) {
             //     return;
             // }
         }
     }
 
-    Boolean state = FALSE;
-    PreparePage(0, &state);
+    PreparePage(0);
     mFinishSelection = FALSE;
-    return NOERROR;
 }
 
-ECode CDecodingInfo::PrepareAppCompletions(
+void CPinyinIME::DecodingInfo::PrepareAppCompletions(
     /* [in] */ ArrayOf<ICompletionInfo*>* completions)
 {
     ResetCandidates();
     mAppCompletions = completions;
     mTotalChoicesNum = completions->GetLength();
-    Boolean state = FALSE;
-    PreparePage(0, &state);
+    PreparePage(0);
     mFinishSelection = FALSE;
-    return NOERROR;
 }
 
-ECode CDecodingInfo::GetCurrentPageSize(
-    /* [in] */ Int32 currentPage,
-    /* [out] */ Int32* value)
+Int32 CPinyinIME::DecodingInfo::GetCurrentPageSize(
+    /* [in] */ Int32 currentPage)
 {
-    VALIDATE_NOT_NULL(value);
-    if (mPageStart.GetSize() <= currentPage + 1) {
-        *value = 0;
-        return NOERROR;
-    }
-    *value = mPageStart[currentPage + 1] - mPageStart[currentPage];
-    return NOERROR;
+    if (mPageStart.GetSize() <= currentPage + 1) return 0;
+    return mPageStart[currentPage + 1]
+            - mPageStart[currentPage];
 }
 
-ECode CDecodingInfo::GetCurrentPageStart(
-    /* [in] */ Int32 currentPage,
-    /* [out] */ Int32* value)
+Int32 CPinyinIME::DecodingInfo::GetCurrentPageStart(
+    /* [in] */ Int32 currentPage)
 {
-    VALIDATE_NOT_NULL(value);
-    if (mPageStart.GetSize() < currentPage + 1) {
-        *value = mTotalChoicesNum;
-        return NOERROR;
-    }
-    *value = mPageStart[currentPage];
-    return NOERROR;
+    if (mPageStart.GetSize() < currentPage + 1) return mTotalChoicesNum;
+    return mPageStart[currentPage];
 }
 
-ECode CDecodingInfo::PageForwardable(
-    /* [in] */ Int32 currentPage,
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::PageForwardable(
+    /* [in] */ Int32 currentPage)
 {
-    VALIDATE_NOT_NULL(state);
-    if (mPageStart.GetSize() <= currentPage + 1) {
-        *state = FALSE;
-        return NOERROR;
-    }
+    if (mPageStart.GetSize() <= currentPage + 1) return FALSE;
     if (mPageStart[currentPage + 1] >= mTotalChoicesNum) {
-        *state = FALSE;
-        return NOERROR;
+        return FALSE;
     }
-    *state = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
-ECode CDecodingInfo::PageBackwardable(
-    /* [in] */ Int32 currentPage,
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::PageBackwardable(
+    /* [in] */ Int32 currentPage)
 {
-    VALIDATE_NOT_NULL(state);
-    if (currentPage > 0) {
-        *state = TRUE;
-        return NOERROR;
-    }
-    *state = FALSE;
-    return NOERROR;
+    if (currentPage > 0) return TRUE;
+    return FALSE;
 }
 
-ECode CDecodingInfo::CharBeforeCursorIsSeparator(
-    /* [out] */ Boolean* state)
+Boolean CPinyinIME::DecodingInfo::CharBeforeCursorIsSeparator()
 {
-    VALIDATE_NOT_NULL(state);
-    Int32 len = 0;
-    mSurface->GetLength(&len);
-    if (mCursorPos > len) {
-        *state = FALSE;
-        return NOERROR;
-    }
+    Int32 len = GetLength();
+    if (mCursorPos > len) return FALSE;
     Char32 ch = 0;
     if (mCursorPos > 0 && (mSurface->GetCharAt(mCursorPos - 1, &ch), ch == '\'')) {
-        *state = TRUE;
-        return NOERROR;
+        return TRUE;
     }
-    *state = FALSE;
-    return NOERROR;
+    return FALSE;
 }
 
-ECode CDecodingInfo::GetCursorPos(
-    /* [out] */ Int32* pos)
+Int32 CPinyinIME::DecodingInfo::GetCursorPos()
 {
-    VALIDATE_NOT_NULL(pos);
-    *pos = mCursorPos;
-    return NOERROR;
+    return mCursorPos;
 }
 
-ECode CDecodingInfo::GetCursorPosInCmps(
-    /* [out] */ Int32* pos)
+Int32 CPinyinIME::DecodingInfo::GetCursorPosInCmps()
 {
-    VALIDATE_NOT_NULL(pos);
     Int32 cursorPos = mCursorPos;
 
     for (Int32 hzPos = 0; hzPos < mFixedLen; hzPos++) {
@@ -1091,16 +935,12 @@ ECode CDecodingInfo::GetCursorPosInCmps(
             cursorPos += 1;
         }
     }
-    *pos = cursorPos;
-    return NOERROR;
+    return cursorPos;
 }
 
-ECode CDecodingInfo::GetCursorPosInCmpsDisplay(
-    /* [out] */ Int32* value)
+Int32 CPinyinIME::DecodingInfo::GetCursorPosInCmpsDisplay()
 {
-    VALIDATE_NOT_NULL(value);
-    Int32 cursorPos = 0;
-    GetCursorPosInCmps(&cursorPos);
+    Int32 cursorPos = GetCursorPosInCmps();
     // +2 is because: one for mSplStart[0], which is used for other
     // purpose(The length of the segmentation string), and another
     // for the first spelling which does not need a space before it.
@@ -1112,11 +952,10 @@ ECode CDecodingInfo::GetCursorPosInCmpsDisplay(
             cursorPos++;
         }
     }
-    *value = cursorPos;
-    return NOERROR;
+    return cursorPos;
 }
 
-ECode CDecodingInfo::MoveCursorToEdge(
+void CPinyinIME::DecodingInfo::MoveCursorToEdge(
     /* [in] */ Boolean left)
 {
     if (left) {
@@ -1125,13 +964,12 @@ ECode CDecodingInfo::MoveCursorToEdge(
     else {
         mSurface->GetLength(&mCursorPos);
     }
-    return NOERROR;
 }
 
-ECode CDecodingInfo::MoveCursor(
+void CPinyinIME::DecodingInfo::MoveCursor(
     /* [in] */ Int32 offset)
 {
-    if (offset > 1 || offset < -1) return NOERROR;
+    if (offset > 1 || offset < -1) return;
 
     if (offset != 0) {
         Int32 hzPos = 0;
@@ -1151,272 +989,94 @@ ECode CDecodingInfo::MoveCursor(
             }
         }
     }
-    Int32 len = 0;
     mCursorPos += offset;
     if (mCursorPos < 0) {
         mCursorPos = 0;
     }
-    else if (mCursorPos > (mSurface->GetLength(&len), len)) {
-        mCursorPos = len;
+    else if (mCursorPos > GetLength()) {
+        mCursorPos = GetLength();
     }
-    return NOERROR;
 }
 
-ECode CDecodingInfo::GetSplNum(
-    /* [out] */ Int32* value)
+Int32 CPinyinIME::DecodingInfo::GetSplNum()
 {
-    VALIDATE_NOT_NULL(value);
-    *value = (*mSplStart)[0];
-    return NOERROR;
+    return (*mSplStart)[0];
 }
 
-ECode CDecodingInfo::GetFixedLen(
-    /* [out] */ Int32* value)
+Int32 CPinyinIME::DecodingInfo::GetFixedLen()
 {
-    VALIDATE_NOT_NULL(value);
-    *value = mFixedLen;
-    return NOERROR;
+    return mFixedLen;
 }
 
-ECode CDecodingInfo::SetTotalChoicesNum(
-    /* [in] */ Int32 totalChoicesNum)
+
+//==========================================================
+// CPinyinIME::MyReceiver
+//==========================================================
+ECode CPinyinIME::MyReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
 {
-    mTotalChoicesNum = totalChoicesNum;
+    SoundManager::GetInstance(context)->UpdateRingerMode();
     return NOERROR;
 }
 
-ECode CDecodingInfo::GetTotalChoicesNum(
-    /* [out] */ Int32* totalChoicesNum)
-{
-    VALIDATE_NOT_NULL(totalChoicesNum);
-    *totalChoicesNum = mTotalChoicesNum;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::SetPosDelSpl(
-    /* [in] */ Int32 posDelSpl)
-{
-    mPosDelSpl = posDelSpl;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetPosDelSpl(
-    /* [out] */ Int32* posDelSpl)
-{
-    VALIDATE_NOT_NULL(posDelSpl);
-    *posDelSpl = mPosDelSpl;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::SetPosInSpl(
-    /* [in] */ Boolean posInSpl)
-{
-    mIsPosInSpl = posInSpl;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetPosInSpl(
-    /* [out] */ Boolean* posInSpl)
-{
-    VALIDATE_NOT_NULL(posInSpl);
-    *posInSpl = mIsPosInSpl;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::SetCandidatesList(
-    /* [in] */ ArrayOf<String>* candidatesList)
-{
-    mCandidatesList.Clear();
-    if (candidatesList != NULL && candidatesList->GetLength() > 0) {
-        for (Int32 i = 0; i < candidatesList->GetLength(); i++) {
-            mCandidatesList.PushBack((*candidatesList)[i]);
-        }
-    }
-
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetCandidatesList(
-    /* [out, callee] */ ArrayOf<String>** candidatesList)
-{
-    VALIDATE_NOT_NULL(candidatesList);
-    if (mCandidatesList.IsEmpty()) {
-        *candidatesList = NULL;
-    }
-
-    AutoPtr<ArrayOf<String> > results = ArrayOf<String>::Alloc(mCandidatesList.GetSize());
-    Vector<String>::Iterator ator = mCandidatesList.Begin();
-    for (Int32 i = 0; ator != mCandidatesList.End(); ++ator, i++) {
-        results->Set(i, *ator);
-    }
-    *candidatesList = results;
-    REFCOUNT_ADD(*candidatesList);
-    return NOERROR;
-}
-
-ECode CDecodingInfo::SetPageStartList(
-    /* [in] */ ArrayOf<Int32>* pageStartList)
-{
-    mPageStart.Clear();
-    if (pageStartList != NULL && pageStartList->GetLength() > 0) {
-        for (Int32 i = 0; i < pageStartList->GetLength(); i++) {
-            mPageStart.PushBack((*pageStartList)[i]);
-        }
-    }
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetPageStartList(
-    /* [out, callee] */ ArrayOf<Int32>** pageStartList)
-{
-    VALIDATE_NOT_NULL(pageStartList);
-    if (mPageStart.IsEmpty()) {
-        *pageStartList = NULL;
-    }
-
-    AutoPtr<ArrayOf<Int32> > results = ArrayOf<Int32>::Alloc(mPageStart.GetSize());
-    Vector<Int32>::Iterator ator = mPageStart.Begin();
-    for (Int32 i = 0; ator != mPageStart.End(); ++ator, i++) {
-        results->Set(i, *ator);
-    }
-    *pageStartList = results;
-    REFCOUNT_ADD(*pageStartList);
-    return NOERROR;
-}
-
-ECode CDecodingInfo::SetCnToPageList(
-    /* [in] */ ArrayOf<Int32>* cnToPageList)
-{
-    mCnToPage.Clear();
-    if (cnToPageList != NULL && cnToPageList->GetLength() > 0) {
-        for (Int32 i = 0; i < cnToPageList->GetLength(); i++) {
-            mCnToPage.PushBack((*cnToPageList)[i]);
-        }
-    }
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetCnToPageList(
-    /* [out, callee] */ ArrayOf<Int32>** cnToPageList)
-{
-    VALIDATE_NOT_NULL(cnToPageList);
-    if (mCnToPage.IsEmpty()) {
-        *cnToPageList = NULL;
-    }
-
-    AutoPtr<ArrayOf<Int32> > results = ArrayOf<Int32>::Alloc(mCnToPage.GetSize());
-    Vector<Int32>::Iterator ator = mCnToPage.Begin();
-    for (Int32 i = 0; ator != mCnToPage.End(); ++ator, i++) {
-        results->Set(i, *ator);
-    }
-    *cnToPageList = results;
-    REFCOUNT_ADD(*cnToPageList);
-    return NOERROR;
-}
-
-ECode CDecodingInfo::SetPinyinDecoderService(
-    /* [in] */ IPinyinDecoderService* pinyinService)
-{
-    mIPinyinDecoderService = pinyinService;
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetPinyinDecoderService(
-    /* [out] */ IPinyinDecoderService** pinyinService)
-{
-    VALIDATE_NOT_NULL(pinyinService);
-    *pinyinService = mIPinyinDecoderService;
-    REFCOUNT_ADD(*pinyinService);
-    return NOERROR;
-}
-
-ECode CDecodingInfo::GetAppCompletions(
-    /* [out, callee] */ ArrayOf<ICompletionInfo*>** completions)
-{
-    VALIDATE_NOT_NULL(completions);
-    *completions = mAppCompletions;
-    REFCOUNT_ADD(*completions);
-    return NOERROR;
-}
-
-
-//class CPinyinIME
-String CPinyinIME::TAG("PinyinIME");
+//==========================================================
+// CPinyinIME
+//==========================================================
+const String CPinyinIME::TAG("PinyinIME");
 const Boolean CPinyinIME::SIMULATE_KEY_DELETE = TRUE;
+
 CPinyinIME::CPinyinIME()
-    : mImeState(Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE)
+    : mImeState(STATE_IDLE)
 {
+    mFloatingWindowTimer = new PopupTimer(this);
+    mDecInfo = new DecodingInfo(this);
+    mReceiver = new MyReceiver();
 }
 
 CPinyinIME::~CPinyinIME()
-{
-}
+{}
 
 ECode CPinyinIME::constructor()
 {
-    mFloatingWindowTimer = new PopupTimer(this);
-    CDecodingInfo::New(this, (IDecodingInfo**)&mDecInfo);
     return NOERROR;
-}
-
-PInterface CPinyinIME::Probe(
-    /* [in] */ REIID riid)
-{
-    return _CPinyinIME::Probe(riid);
-}
-
-UInt32 CPinyinIME::AddRef()
-{
-    return _CPinyinIME::AddRef();
-}
-
-UInt32 CPinyinIME::Release()
-{
-    return _CPinyinIME::Release();
 }
 
 ECode CPinyinIME::OnCreate()
 {
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    helper->GetInstance((IPinyinEnvironment**)&mEnvironment);
-
+    mEnvironment = Environment::GetInstance();
     // if (mEnvironment.needDebug()) {
     //     Log.d(TAG, "onCreate.");
     // }
-    InputMethodService::OnCreate();
+    FAIL_RETURN(InputMethodService::OnCreate());
 
     StartPinyinDecoderService();
     mImEn = new EnglishInputProcessor();
 
     AutoPtr<IContext> ctx;
-    InputMethodService::GetApplicationContext((IContext**)&ctx);
-
+    GetApplicationContext((IContext**)&ctx);
     AutoPtr<IPreferenceManagerHelper> pmHelper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&pmHelper);
     AutoPtr<ISharedPreferences> sp;
     pmHelper->GetDefaultSharedPreferences(ctx, (ISharedPreferences**)&sp);
+    Settings::GetInstance(sp);
 
-    AutoPtr<ISettings> settings;
-    CPinyinSettings::AcquireSingleton((ISettings**)&settings);
-    settings->GetInstance(sp);
-
-    CInputModeSwitcher::New(this, (IInputModeSwitcher**)&mInputModeSwitcher);
+    mInputModeSwitcher = new InputModeSwitcher(this);
     mChoiceNotifier = new ChoiceNotifier(this);
-
-    CPinyinGestureListener::New(FALSE, this, (IGestureDetectorOnGestureListener**)&mGestureListenerSkb);
-    CPinyinGestureListener::New(TRUE, this, (IGestureDetectorOnGestureListener**)&mGestureListenerCandidates);
+    mGestureListenerSkb = new OnGestureListener(FALSE, this);
+    mGestureListenerCandidates = new OnGestureListener(TRUE, this);
     CGestureDetector::New(this, mGestureListenerSkb, (IGestureDetector**)&mGestureDetectorSkb);
     CGestureDetector::New(this, mGestureListenerCandidates, (IGestureDetector**)&mGestureDetectorCandidates);
 
     AutoPtr<IResources> res;
-    InputMethodService::GetResources((IResources**)&res);
-    assert(res != NULL);
+    GetResources((IResources**)&res);
     AutoPtr<IConfiguration> config;
     res->GetConfiguration((IConfiguration**)&config);
-    return mEnvironment->OnConfigurationChanged(config, this);
+    mEnvironment->OnConfigurationChanged(config, this);
+    return NOERROR;
 }
 
+#if 0
 //add by kinier for fix the candidate word can not display bug
 ECode CPinyinIME::OnEvaluateFullscreenMode(
     /* [out] */ Boolean* screenMode)
@@ -2741,1314 +2401,6 @@ void CPinyinIME::LaunchSettings()
     intent->SetClassName(/*PinyinIME.this*/this, String("PinyinIME.CSettingsActivity"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     InputMethodService::StartActivity(intent);
-}
-
-ECode CPinyinIME::GetAssets(
-    /* [out] */ IAssetManager** assetManager)
-{
-    return InputMethodService::GetAssets(assetManager);
-}
-
-ECode CPinyinIME::GetResources(
-    /* [out] */ IResources** resources)
-{
-    return InputMethodService::GetResources(resources);
-}
-
-ECode CPinyinIME::GetPackageManager(
-    /* [out] */ IPackageManager** packageManager)
-{
-    return InputMethodService::GetPackageManager(packageManager);
-}
-
-ECode CPinyinIME::GetContentResolver(
-    /* [out] */ IContentResolver** resolver)
-{
-    return InputMethodService::GetContentResolver(resolver);
-}
-
-ECode CPinyinIME::GetApplicationContext(
-    /* [out] */ IContext** ctx)
-{
-    return InputMethodService::GetApplicationContext(ctx);
-}
-
-ECode CPinyinIME::GetText(
-    /* [in] */ Int32 resId,
-    /* [out] */ ICharSequence** text)
-{
-    return InputMethodService::GetText(resId, text);
-}
-
-ECode CPinyinIME::GetString(
-    /* [in] */ Int32 resId,
-    /* [out] */ String* str)
-{
-    return InputMethodService::GetString(resId, str);
-}
-
-ECode CPinyinIME::SetTheme(
-    /* [in] */ Int32 resid)
-{
-    return InputMethodService::SetTheme(resid);
-}
-
-ECode CPinyinIME::GetTheme(
-    /* [out] */ IResourcesTheme** theme)
-{
-    return InputMethodService::GetTheme(theme);
-}
-
-ECode CPinyinIME::ObtainStyledAttributes(
-    /* [in] */ ArrayOf<Int32>* attrs,
-    /* [out] */ ITypedArray** styles)
-{
-    return InputMethodService::ObtainStyledAttributes(attrs, styles);
-}
-
-ECode CPinyinIME::ObtainStyledAttributes(
-    /* [in] */ Int32 resid,
-    /* [in] */ ArrayOf<Int32>* attrs,
-    /* [out] */ ITypedArray** styles)
-{
-    return InputMethodService::ObtainStyledAttributes(resid, attrs, styles);
-}
-
-ECode CPinyinIME::ObtainStyledAttributes(
-    /* [in] */ IAttributeSet* set,
-    /* [in] */ ArrayOf<Int32>* attrs,
-    /* [out] */ ITypedArray** styles)
-{
-    return InputMethodService::ObtainStyledAttributes(set, attrs, styles);
-}
-
-ECode CPinyinIME::ObtainStyledAttributes(
-    /* [in] */ IAttributeSet* set,
-    /* [in] */ ArrayOf<Int32>* attrs,
-    /* [in] */ Int32 defStyleAttr,
-    /* [in] */ Int32 defStyleRes,
-    /* [out] */ ITypedArray** styles)
-{
-    return InputMethodService::ObtainStyledAttributes(set, attrs, defStyleAttr, defStyleRes, styles);
-}
-
-ECode CPinyinIME::GetClassLoader(
-    /* [out] */ IClassLoader** loader)
-{
-    return InputMethodService::GetClassLoader(loader);
-}
-
-ECode CPinyinIME::GetPackageName(
-    /* [out] */ String* packageName)
-{
-    return InputMethodService::GetPackageName(packageName);
-}
-
-ECode CPinyinIME::GetApplicationInfo(
-    /* [out] */ IApplicationInfo** info)
-{
-    return InputMethodService::GetApplicationInfo(info);
-}
-
-ECode CPinyinIME::GetPackageResourcePath(
-    /* [out] */ String* path)
-{
-    return InputMethodService::GetPackageResourcePath(path);
-}
-
-ECode CPinyinIME::GetExternalFilesDir(
-    /* [in] */ const String& type,
-    /* [out] */ IFile** filesDir)
-{
-    return InputMethodService::GetExternalFilesDir(type, filesDir);
-}
-
-ECode CPinyinIME::GetCacheDir(
-    /* [out] */ IFile** cacheDir)
-{
-    return InputMethodService::GetCacheDir(cacheDir);
-}
-
-ECode CPinyinIME::GetDir(
-    /* [in] */ const String& name,
-    /* [in] */ Int32 mode,
-    /* [out] */ IFile** dir)
-{
-    return InputMethodService::GetDir(name, mode, dir);
-}
-
-ECode CPinyinIME::StartActivity(
-    /* [in] */ IIntent* intent)
-{
-    return InputMethodService::StartActivity(intent);
-}
-
-ECode CPinyinIME::StartIntentSender(
-    /* [in] */ IIntentSender* intent,
-    /* [in] */ IIntent* fillInIntent,
-    /* [in] */ Int32 flagsMask,
-    /* [in] */ Int32 flagsValues,
-    /* [in] */ Int32 extraFlags)
-{
-    return InputMethodService::StartIntentSender(intent, fillInIntent, flagsMask, flagsValues, extraFlags);
-}
-
-ECode CPinyinIME::SendBroadcast(
-    /* [in] */ IIntent* intent)
-{
-    return InputMethodService::SendBroadcast(intent);
-}
-
-ECode CPinyinIME::StartService(
-    /* [in] */ IIntent* service,
-    /* [out] */ IComponentName** name)
-{
-    return InputMethodService::StartService(service, name);
-}
-
-ECode CPinyinIME::StopService(
-    /* [in] */ IIntent* service,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::StopService(service, succeeded);
-}
-
-ECode CPinyinIME::BindService(
-    /* [in] */ IIntent* service,
-    /* [in] */ IServiceConnection* conn,
-    /* [in] */ Int32 flags,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::BindService(service, conn, flags, succeeded);
-}
-
-ECode CPinyinIME::UnbindService(
-    /* [in] */ IServiceConnection* conn)
-{
-    return InputMethodService::UnbindService(conn);
-}
-
-ECode CPinyinIME::GetSystemService(
-    /* [in] */ const String& name,
-    /* [out] */ IInterface** object)
-{
-    return InputMethodService::GetSystemService(name, object);
-}
-
-ECode CPinyinIME::CreatePackageContext(
-    /* [in] */ const String& capsuleName,
-    /* [in] */ Int32 flags,
-    /* [out] */ IContext** ctx)
-{
-    return InputMethodService::CreatePackageContext(capsuleName, flags, ctx);
-}
-
-ECode CPinyinIME::CheckCallingPermission(
-    /* [in] */ const String& permission,
-    /* [out] */ Int32* value)
-{
-    return InputMethodService::CheckCallingPermission(permission, value);
-}
-
-ECode CPinyinIME::EnforceCallingOrSelfPermission(
-    /* [in] */ const String& permission,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforceCallingOrSelfPermission(permission, message);
-}
-
-ECode CPinyinIME::RevokeUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 modeFlags)
-{
-    return InputMethodService::RevokeUriPermission(uri, modeFlags);
-}
-
-ECode CPinyinIME::CheckCallingOrSelfPermission(
-    /* [in] */ const String& permission,
-    /* [out] */ Int32* perm)
-{
-    return InputMethodService::CheckCallingOrSelfPermission(permission, perm);
-}
-
-ECode CPinyinIME::CheckPermission(
-    /* [in] */ const String& permission,
-    /* [in] */ Int32 pid,
-    /* [in] */ Int32 uid,
-    /* [out] */ Int32 * result)
-{
-    return InputMethodService::CheckPermission(permission, pid, uid, result);
-}
-
-ECode CPinyinIME::CheckUriPermission(
-    /* [in] */ IUri * uri,
-    /* [in] */ const String& readPermission,
-    /* [in] */ const String& writePermission,
-    /* [in] */ Int32 pid,
-    /* [in] */ Int32 uid,
-    /* [in] */ Int32 modeFlags,
-    /* [out] */ Int32 * result)
-{
-    return InputMethodService::CheckUriPermission(uri, readPermission, writePermission, pid, uid, modeFlags, result);
-}
-
-ECode CPinyinIME::CheckUriPermission(
-    /* [in] */ IUri * uri,
-    /* [in] */ Int32 pid,
-    /* [in] */ Int32 uid,
-    /* [in] */ Int32 modeFlags,
-    /* [out] */ Int32 * result)
-{
-    return InputMethodService::CheckUriPermission(uri, pid, uid, modeFlags, result);
-}
-
-ECode CPinyinIME::GrantUriPermission(
-    /* [in] */ const String& toCapsule,
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 modeFlags)
-{
-    return InputMethodService::GrantUriPermission(toCapsule, uri, modeFlags);
-}
-
-ECode CPinyinIME::GetBaseContext(
-    /* [out] */ IContext** ctx)
-{
-    return InputMethodService::GetBaseContext(ctx);
-}
-
-ECode CPinyinIME::Attach(
-    /* [in] */ IContext* ctx,
-    /* [in] */ IActivityThread* apartment,
-    /* [in] */ const String& className,
-    /* [in] */ IBinder* token,
-    /* [in] */ IApplication* application,
-    /* [in] */ IIActivityManager* activityManager)
-{
-    return InputMethodService::Attach(ctx, apartment, className, token, application, activityManager);
-}
-
-ECode CPinyinIME::OnStart(
-    /* [in] */ IIntent* intent,
-    /* [in] */ Int32 startId)
-{
-    return InputMethodService::OnStart(intent, startId);
-}
-
-ECode CPinyinIME::OnStartCommand(
-    /* [in] */ IIntent* intent,
-    /* [in] */ Int32 flags,
-    /* [in] */ Int32 startId,
-    /* [out] */ Int32* result)
-{
-    return InputMethodService::OnStartCommand(intent, flags, startId, result);
-}
-
-ECode CPinyinIME::OnBind(
-    /* [in] */ IIntent* intent,
-    /* [out] */ IBinder** binder)
-{
-    VALIDATE_NOT_NULL(binder);
-    ECode ec = InputMethodService::OnBind(intent, binder);
-    // assert(*binder != NULL);
-    // AutoPtr<IProxy> proxy = (IProxy*)(*binder)->Probe(EIID_IProxy);
-    // assert(proxy != NULL);
-    return ec;
-}
-
-ECode CPinyinIME::OnUnbind(
-    /* [in] */ IIntent* intent,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::OnUnbind(intent, succeeded);
-}
-
-ECode CPinyinIME::OnRebind(
-    /* [in] */ IIntent* intent)
-{
-    return InputMethodService::OnRebind(intent);
-}
-
-ECode CPinyinIME::GetClassName(
-    /* [out] */ String* className)
-{
-    return InputMethodService::GetClassName(className);
-}
-
-ECode CPinyinIME::GetKeyDispatcherState(
-    /* [out] */ IDispatcherState** dispatcherState)
-{
-    return InputMethodService::GetKeyDispatcherState(dispatcherState);
-}
-
-ECode CPinyinIME::OnCreateInputMethodInterface(
-    /* [out] */ IAbstractInputMethodImpl** inputMethodImpl)
-{
-    return InputMethodService::OnCreateInputMethodInterface(inputMethodImpl);
-}
-
-ECode CPinyinIME::OnCreateInputMethodSessionInterface(
-    /* [out] */ IAbstractInputMethodSessionImpl** abstractInputMethodSessionImpl)
-{
-    return InputMethodService::OnCreateInputMethodSessionInterface(abstractInputMethodSessionImpl);
-}
-
-ECode CPinyinIME::OnTrackballEvent(
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* state)
-{
-    return InputMethodService::OnTrackballEvent(event, state);
-}
-
-ECode CPinyinIME::OnInitializeInterface()
-{
-    return InputMethodService::OnInitializeInterface();
-}
-
-ECode CPinyinIME::GetLayoutInflater(
-    /* [out] */ ILayoutInflater** inflater)
-{
-    return InputMethodService::GetLayoutInflater(inflater);
-}
-
-ECode CPinyinIME::GetWindow(
-    /* [out] */ IDialog** dialog)
-{
-    return InputMethodService::GetWindow(dialog);
-}
-
-ECode CPinyinIME::GetMaxWidth(
-    /* [out] */ Int32* maxWidth)
-{
-    return InputMethodService::GetMaxWidth(maxWidth);
-}
-
-ECode CPinyinIME::GetCurrentInputBinding(
-    /* [out] */ IInputBinding** binding)
-{
-    return InputMethodService::GetCurrentInputBinding(binding);
-}
-
-ECode CPinyinIME::GetCurrentInputConnection(
-    /* [out] */ IInputConnection** inputConnection)
-{
-    return InputMethodService::GetCurrentInputConnection(inputConnection);
-}
-
-ECode CPinyinIME::GetCurrentInputStarted(
-    /* [out] */ Boolean* state)
-{
-    return InputMethodService::GetCurrentInputStarted(state);
-}
-
-ECode CPinyinIME::GetCurrentInputEditorInfo(
-    /* [out] */ IEditorInfo** editorInfo)
-{
-    return InputMethodService::GetCurrentInputEditorInfo(editorInfo);
-}
-
-ECode CPinyinIME::UpdateFullscreenMode()
-{
-    return InputMethodService::UpdateFullscreenMode();
-}
-
-ECode CPinyinIME::OnConfigureWindow(
-    /* [in] */ IWindow* win,
-    /* [in] */ Boolean isFullscreen,
-    /* [in] */ Boolean isCandidatesOnly)
-{
-    return InputMethodService::OnConfigureWindow(win, isFullscreen, isCandidatesOnly);
-}
-
-ECode CPinyinIME::IsFullscreenMode(
-    /* [out] */ Boolean* fullScreenMode)
-{
-    return InputMethodService::IsFullscreenMode(fullScreenMode);
-}
-
-ECode CPinyinIME::SetExtractViewShown(
-    /* [in] */ Boolean shown)
-{
-    return InputMethodService::SetExtractViewShown(shown);
-}
-
-ECode CPinyinIME::IsExtractViewShown(
-    /* [out] */ Boolean* shown)
-{
-    return InputMethodService::IsExtractViewShown(shown);
-}
-
-ECode CPinyinIME::UpdateInputViewShown()
-{
-    return InputMethodService::UpdateInputViewShown();
-}
-
-ECode CPinyinIME::IsShowInputRequested(
-    /* [out] */ Boolean* requested)
-{
-    return InputMethodService::IsShowInputRequested(requested);
-}
-
-ECode CPinyinIME::IsInputViewShown(
-    /* [out] */ Boolean* shown)
-{
-    return InputMethodService::IsInputViewShown(shown);
-}
-
-ECode CPinyinIME::OnEvaluateInputViewShown(
-    /* [out] */ Boolean* shown)
-{
-    return InputMethodService::OnEvaluateInputViewShown(shown);
-}
-
-ECode CPinyinIME::SetCandidatesViewShown(
-    /* [in] */ Boolean shown)
-{
-    return InputMethodService::SetCandidatesViewShown(shown);
-}
-
-ECode CPinyinIME::GetCandidatesHiddenVisibility(
-    /* [out] */ Int32* visibility)
-{
-    return InputMethodService::GetCandidatesHiddenVisibility(visibility);
-}
-
-ECode CPinyinIME::ShowStatusIcon(
-    /* [in] */ Int32 iconResId)
-{
-    return InputMethodService::ShowStatusIcon(iconResId);
-}
-
-ECode CPinyinIME::HideStatusIcon()
-{
-    return InputMethodService::HideStatusIcon();
-}
-
-ECode CPinyinIME::SwitchInputMethod(
-    /* [in] */ const String& id)
-{
-    return InputMethodService::SwitchInputMethod(id);
-}
-
-ECode CPinyinIME::SetExtractView(
-    /* [in] */ IView* view)
-{
-    return InputMethodService::SetExtractView(view);
-}
-
-ECode CPinyinIME::SetCandidatesView(
-    /* [in] */ IView* view)
-{
-    return InputMethodService::SetCandidatesView(view);
-}
-
-ECode CPinyinIME::SetInputView(
-    /* [in] */ IView* view)
-{
-    return InputMethodService::SetInputView(view);
-}
-
-ECode CPinyinIME::OnCreateExtractTextView(
-    /* [out] */ IView** view)
-{
-    return InputMethodService::OnCreateExtractTextView(view);
-}
-
-ECode CPinyinIME::OnStartCandidatesView(
-    /* [in] */ IEditorInfo* info,
-    /* [in] */ Boolean restarting)
-{
-    return InputMethodService::OnStartCandidatesView(info, restarting);
-}
-
-ECode CPinyinIME::OnShowInputRequested(
-    /* [in] */ Int32 flags,
-    /* [in] */ Boolean configChange,
-    /* [out] */ Boolean* requested)
-{
-    return InputMethodService::OnShowInputRequested(flags, configChange, requested);
-}
-
-ECode CPinyinIME::ShowWindow(
-    /* [in] */ Boolean showInput)
-{
-    return InputMethodService::ShowWindow(showInput);
-}
-
-ECode CPinyinIME::HideWindow()
-{
-    return InputMethodService::HideWindow();
-}
-
-ECode CPinyinIME::OnWindowShown()
-{
-    return InputMethodService::OnWindowShown();
-}
-
-ECode CPinyinIME::OnWindowHidden()
-{
-    return InputMethodService::OnWindowHidden();
-}
-
-ECode CPinyinIME::OnBindInput()
-{
-    return InputMethodService::OnBindInput();
-}
-
-ECode CPinyinIME::OnUnbindInput()
-{
-    return InputMethodService::OnUnbindInput();
-}
-
-ECode CPinyinIME::OnUpdateExtractedText(
-    /* [in] */ Int32 token,
-    /* [in] */ IExtractedText* text)
-{
-    return InputMethodService::OnUpdateExtractedText(token, text);
-}
-
-ECode CPinyinIME::OnUpdateSelection(
-    /* [in] */ Int32 oldSelStart,
-    /* [in] */ Int32 oldSelEnd,
-    /* [in] */ Int32 newSelStart,
-    /* [in] */ Int32 newSelEnd,
-    /* [in] */ Int32 candidatesStart,
-    /* [in] */ Int32 candidatesEnd)
-{
-    return InputMethodService::OnUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
-}
-
-ECode CPinyinIME::OnUpdateCursor(
-    /* [in] */ IRect* newCursor)
-{
-    return InputMethodService::OnUpdateCursor(newCursor);
-}
-
-ECode CPinyinIME::OnAppPrivateCommand(
-    /* [in] */ const String& action,
-    /* [in] */ IBundle* data)
-{
-    return InputMethodService::OnAppPrivateCommand(action, data);
-}
-
-ECode CPinyinIME::SendDownUpKeyEvents(
-    /* [in] */ Int32 keyEventCode)
-{
-    return InputMethodService::SendDownUpKeyEvents(keyEventCode);
-}
-
-ECode CPinyinIME::SendDefaultEditorAction(
-    /* [in] */ Boolean fromEnterKey,
-    /* [out] */ Boolean* state)
-{
-    return InputMethodService::SendDefaultEditorAction(fromEnterKey, state);
-}
-
-ECode CPinyinIME::SendKeyChar(
-    /* [in] */ Char32 charCode)
-{
-    return InputMethodService::SendKeyChar(charCode);
-}
-
-ECode CPinyinIME::OnExtractedSelectionChanged(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end)
-{
-    return InputMethodService::OnExtractedSelectionChanged(start, end);
-}
-
-ECode CPinyinIME::OnExtractedTextClicked()
-{
-    return InputMethodService::OnExtractedTextClicked();
-}
-
-ECode CPinyinIME::OnExtractedCursorMovement(
-    /* [in] */ Int32 dx,
-    /* [in] */ Int32 dy)
-{
-    return InputMethodService::OnExtractedCursorMovement(dx, dy);
-}
-
-ECode CPinyinIME::OnExtractTextContextMenuItem(
-    /* [in] */ Int32 id,
-    /* [out] */ Boolean* state)
-{
-    return InputMethodService::OnExtractTextContextMenuItem(id, state);
-}
-
-ECode CPinyinIME::GetTextForImeAction(
-    /* [in] */ Int32 imeOptions,
-    /* [out] */ ICharSequence** text)
-{
-    return InputMethodService::GetTextForImeAction(imeOptions, text);
-}
-
-ECode CPinyinIME::OnUpdateExtractingVisibility(
-    /* [in] */ IEditorInfo* ei)
-{
-    return InputMethodService::OnUpdateExtractingVisibility(ei);
-}
-
-ECode CPinyinIME::OnUpdateExtractingViews(
-    /* [in] */ IEditorInfo* ei)
-{
-    return InputMethodService::OnUpdateExtractingViews(ei);
-}
-
-ECode CPinyinIME::OnExtractingInputChanged(
-    /* [in] */ IEditorInfo* ei)
-{
-    return InputMethodService::OnExtractingInputChanged(ei);
-}
-
-ECode CPinyinIME::OnLowMemory()
-{
-    return InputMethodService::OnLowMemory();
-}
-
-ECode CPinyinIME::OnTrimMemory(
-    /* [in] */ Int32 level)
-{
-    return InputMethodService::OnTrimMemory(level);
-}
-
-ECode CPinyinIME::GetMainLooper(
-    /* [out] */ ILooper** looper)
-{
-    return InputMethodService::GetMainLooper(looper);
-}
-
-ECode CPinyinIME::RegisterComponentCallbacks(
-    /* [in] */ IComponentCallbacks* componentCallback)
-{
-    return InputMethodService::RegisterComponentCallbacks(componentCallback);
-}
-
-ECode CPinyinIME::UnregisterComponentCallbacks(
-    /* [in] */ IComponentCallbacks* componentCallback)
-{
-    return InputMethodService::UnregisterComponentCallbacks(componentCallback);
-}
-
-ECode CPinyinIME::GetString(
-    /* [in] */ Int32 resId,
-    /* [in] */ ArrayOf<IInterface*>* formatArgs,
-    /* [out] */ String* str)
-{
-    return InputMethodService::GetString(resId, formatArgs, str);
-}
-
-ECode CPinyinIME::GetThemeResId(
-    /* [out] */ Int32* resId)
-{
-    return InputMethodService::GetThemeResId(resId);
-}
-
-ECode CPinyinIME::GetPackageCodePath(
-    /* [out] */ String* codePath)
-{
-    return InputMethodService::GetPackageCodePath(codePath);
-}
-
-ECode CPinyinIME::GetSharedPrefsFile(
-    /* [in] */ const String& name,
-    /* [out] */ IFile** file)
-{
-    return InputMethodService::GetSharedPrefsFile(name, file);
-}
-
-ECode CPinyinIME::GetSharedPreferences(
-    /* [in] */ const String& name,
-    /* [in] */ Int32 mode,
-    /* [out] */ ISharedPreferences** prefs)
-{
-    return InputMethodService::GetSharedPreferences(name, mode, prefs);
-}
-
-ECode CPinyinIME::OpenFileOutput(
-    /* [in] */ const String& name,
-    /* [in] */ Int32 mode,
-    /* [out] */IFileOutputStream** fileOutputStream)
-{
-    return InputMethodService::OpenFileOutput(name, mode, fileOutputStream);
-}
-
-ECode CPinyinIME::DeleteFile(
-    /* [in] */ const String& name,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::DeleteFile(name, succeeded);
-}
-
-ECode CPinyinIME::GetFileStreamPath(
-    /* [in] */ const String& name,
-    /* [out] */ IFile** file)
-{
-    return InputMethodService::GetFileStreamPath(name, file);
-}
-
-ECode CPinyinIME::GetFilesDir(
-    /* [out] */ IFile** filesDir)
-{
-    return InputMethodService::GetFilesDir(filesDir);
-}
-
-ECode CPinyinIME::GetObbDir(
-    /* [out] */ IFile** obbDir)
-{
-    return InputMethodService::GetObbDir(obbDir);
-}
-
-ECode CPinyinIME::GetFileList(
-    /* [out, callee] */ ArrayOf<String>** fileList)
-{
-    return InputMethodService::GetFileList(fileList);
-}
-
-ECode CPinyinIME::OpenOrCreateDatabase(
-    /* [in] */ const String& name,
-    /* [in] */ Int32 mode,
-    /* [in] */ ISQLiteDatabaseCursorFactory* factory,
-    /* [out] */ ISQLiteDatabase** sqliteDB)
-{
-    return InputMethodService::OpenOrCreateDatabase(name, mode, factory, sqliteDB);
-}
-
-ECode CPinyinIME::OpenOrCreateDatabase(
-    /* [in] */ const String& name,
-    /* [in] */ Int32 mode,
-    /* [in] */ ISQLiteDatabaseCursorFactory* factory,
-    /* [in] */ IDatabaseErrorHandler* errorHandler,
-    /* [out] */ ISQLiteDatabase** sqliteDB)
-{
-    return InputMethodService::OpenOrCreateDatabase(name, mode, factory, errorHandler, sqliteDB);
-}
-
-ECode CPinyinIME::DeleteDatabase(
-    /* [in] */ const String& name,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::DeleteDatabase(name, succeeded);
-}
-
-ECode CPinyinIME::GetDatabasePath(
-    /* [in] */ const String& name,
-    /* [out] */ IFile** path)
-{
-    return InputMethodService::GetDatabasePath(name, path);
-}
-
-ECode CPinyinIME::GetDatabaseList(
-    /* [out, callee] */ ArrayOf<String>** databaseList)
-{
-    return InputMethodService::GetDatabaseList(databaseList);
-}
-
-ECode CPinyinIME::GetWallpaper(
-    /* [out] */ IDrawable** drawable)
-{
-    return InputMethodService::GetWallpaper(drawable);
-}
-
-ECode CPinyinIME::PeekWallpaper(
-    /* [out] */ IDrawable** drawable)
-{
-    return InputMethodService::PeekWallpaper(drawable);
-}
-
-ECode CPinyinIME::GetWallpaperDesiredMinimumWidth(
-    /* [out] */ Int32* minWidth)
-{
-    return InputMethodService::GetWallpaperDesiredMinimumWidth(minWidth);
-}
-
-ECode CPinyinIME::GetWallpaperDesiredMinimumHeight(
-    /* [out] */ Int32* minHeight)
-{
-    return InputMethodService::GetWallpaperDesiredMinimumHeight(minHeight);
-}
-
-ECode CPinyinIME::SetWallpaper(
-    /* [in] */ IBitmap* bitmap)
-{
-    return InputMethodService::SetWallpaper(bitmap);
-}
-
-ECode CPinyinIME::SetWallpaper(
-    /* [in] */ IInputStream* data)
-{
-    return InputMethodService::SetWallpaper(data);
-}
-
-ECode CPinyinIME::ClearWallpaper()
-{
-    return InputMethodService::ClearWallpaper();
-}
-
-ECode CPinyinIME::StartActivityAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user)
-{
-    return InputMethodService::StartActivityAsUser(intent, user);
-}
-
-ECode CPinyinIME::StartActivityAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IBundle* options,
-    /* [in] */ IUserHandle* user)
-{
-    return InputMethodService::StartActivityAsUser(intent, options, user);
-}
-
-ECode CPinyinIME::StartActivities(
-    /* [in] */ ArrayOf<IIntent*>* intents,
-    /* [in] */ IBundle* options)
-{
-    return InputMethodService::StartActivities(intents, options);
-}
-
-ECode CPinyinIME::StartIntentSender(
-    /* [in] */ IIntentSender* intent,
-    /* [in] */ IIntent* fillInIntent,
-    /* [in] */ Int32 flagsMask,
-    /* [in] */ Int32 flagsValues,
-    /* [in] */ Int32 extraFlags,
-    /* [in] */ IBundle* options)
-{
-    return InputMethodService::StartIntentSender(intent, fillInIntent, flagsMask, flagsValues, extraFlags, options);
-}
-
-ECode CPinyinIME::SendBroadcast(
-    /* [in] */ IIntent* intent,
-    /* [in] */ const String& receiverPermission)
-{
-    return InputMethodService::SendBroadcast(intent, receiverPermission);
-}
-
-ECode CPinyinIME::SendOrderedBroadcast(
-    /* [in] */ IIntent* intent,
-    /* [in] */ const String& receiverPermission)
-{
-    return InputMethodService::SendOrderedBroadcast(intent, receiverPermission);
-}
-
-ECode CPinyinIME::SendOrderedBroadcast(
-    /* [in] */ IIntent* intent,
-    /* [in] */ const String& receiverPermission,
-    /* [in] */ IBroadcastReceiver* resultReceiver,
-    /* [in] */ IHandler* scheduler,
-    /* [in] */ Int32 initialCode,
-    /* [in] */ const String& initialData,
-    /* [in] */ IBundle* initialExtras)
-{
-    return InputMethodService::SendOrderedBroadcast(intent, receiverPermission, resultReceiver, scheduler, initialCode, initialData, initialExtras);
-}
-
-ECode CPinyinIME::SendBroadcastAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user)
-{
-    return InputMethodService::SendBroadcastAsUser(intent, user);
-}
-
-ECode CPinyinIME::SendBroadcastAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user,
-    /* [in] */ const String& receiverPermission)
-{
-    return InputMethodService::SendBroadcastAsUser(intent, user, receiverPermission);
-}
-
-ECode CPinyinIME::SendOrderedBroadcastAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user,
-    /* [in] */ const String& receiverPermission,
-    /* [in] */ IBroadcastReceiver* resultReceiver,
-    /* [in] */ IHandler* scheduler,
-    /* [in] */ Int32 initialCode,
-    /* [in] */ const String& initialData,
-    /* [in] */ IBundle* initialExtras)
-{
-    return InputMethodService::SendOrderedBroadcastAsUser(intent, user, receiverPermission, resultReceiver, scheduler, initialCode, initialData, initialExtras);
-}
-
-ECode CPinyinIME::SendStickyBroadcast(
-    /* [in] */ IIntent* intent)
-{
-    return InputMethodService::SendStickyBroadcast(intent);
-}
-
-ECode CPinyinIME::SendStickyOrderedBroadcast(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IBroadcastReceiver* resultReceiver,
-    /* [in] */ IHandler* scheduler,
-    /* [in] */ Int32 initialCode,
-    /* [in] */ const String& initialData,
-    /* [in] */ IBundle* initialExtras)
-{
-    return InputMethodService::SendStickyOrderedBroadcast(intent, resultReceiver, scheduler, initialCode, initialData, initialExtras);
-}
-
-ECode CPinyinIME::RemoveStickyBroadcast(
-    /* [in] */ IIntent* intent)
-{
-    return InputMethodService::RemoveStickyBroadcast(intent);
-}
-
-ECode CPinyinIME::SendStickyBroadcastAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user)
-{
-    return InputMethodService::SendStickyBroadcastAsUser(intent, user);
-}
-
-ECode CPinyinIME::SendStickyOrderedBroadcastAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user,
-    /* [in] */ IBroadcastReceiver* resultReceiver,
-    /* [in] */ IHandler* scheduler,
-    /* [in] */ Int32 initialCode,
-    /* [in] */ const String& initialData,
-    /* [in] */ IBundle* initialExtras)
-{
-    return InputMethodService::SendStickyOrderedBroadcastAsUser(intent, user, resultReceiver, scheduler, initialCode, initialData, initialExtras);
-}
-
-ECode CPinyinIME::RemoveStickyBroadcastAsUser(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IUserHandle* user)
-{
-    return InputMethodService::RemoveStickyBroadcastAsUser(intent, user);
-}
-
-ECode CPinyinIME::StartInstrumentation(
-    /* [in] */ IComponentName* className,
-    /* [in] */ const String& profileFile,
-    /* [in] */ IBundle* arguments,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::StartInstrumentation(className, profileFile, arguments, succeeded);
-}
-
-ECode CPinyinIME::EnforcePermission(
-    /* [in] */ const String& permission,
-    /* [in] */ Int32 pid,
-    /* [in] */ Int32 uid,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforcePermission(permission, pid, uid, message);
-}
-
-ECode CPinyinIME::EnforceCallingPermission(
-    /* [in] */ const String& permission,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforceCallingPermission(permission, message);
-}
-
-ECode CPinyinIME::IsRestricted(
-    /* [out] */ Boolean* isRestricted)
-{
-    return InputMethodService::IsRestricted(isRestricted);
-}
-
-ECode CPinyinIME::OpenFileInput(
-    /* [in] */ const String& name,
-    /* [out] */ IFileInputStream** fileInputStream)
-{
-    return InputMethodService::OpenFileInput(name, fileInputStream);
-}
-
-ECode CPinyinIME::GetExternalCacheDir(
-    /* [out] */ IFile** externalDir)
-{
-    return InputMethodService::GetExternalCacheDir(externalDir);
-}
-
-ECode CPinyinIME::StartActivity(
-    /* [in] */ IIntent* intent,
-    /* [in] */ IBundle* options)
-{
-    return InputMethodService::StartActivity(intent, options);
-}
-
-ECode CPinyinIME::StartActivities(
-    /* [in] */ ArrayOf<IIntent*>* intents)
-{
-    return InputMethodService::StartActivities(intents);
-}
-
-ECode CPinyinIME::StartActivitiesAsUser(
-    /* [in] */ ArrayOf<IIntent*>* intents,
-    /* [in] */ IBundle* options,
-    /* [in] */ IUserHandle* userHandle)
-{
-    return InputMethodService::StartActivitiesAsUser(intents, options, userHandle);
-}
-
-ECode CPinyinIME::RegisterReceiverAsUser(
-    /* [in] */ IBroadcastReceiver* receiver,
-    /* [in] */ IUserHandle* user,
-    /* [in] */ IIntentFilter* filter,
-    /* [in] */ const String& broadcastPermission,
-    /* [in] */ IHandler* scheduler,
-    /* [out] */ IIntent** stickyIntent)
-{
-    return InputMethodService::RegisterReceiverAsUser(receiver, user, filter, broadcastPermission, scheduler, stickyIntent);
-}
-
-ECode CPinyinIME::StartServiceAsUser(
-    /* [in] */ IIntent* service,
-    /* [in] */ IUserHandle* user,
-    /* [out] */ IComponentName** name)
-{
-    return InputMethodService::StartServiceAsUser(service, user, name);
-}
-
-ECode CPinyinIME::StopServiceAsUser(
-    /* [in] */ IIntent* service,
-    /* [in] */ IUserHandle* user,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::StopServiceAsUser(service, user, succeeded);
-}
-
-ECode CPinyinIME::BindService(
-    /* [in] */ IIntent* service,
-    /* [in] */ Elastos::Droid::Content::IServiceConnection* conn,
-    /* [in] */ Int32 flags,
-    /* [in] */ Int32 userHandle,
-    /* [out] */ Boolean* succeeded)
-{
-    return InputMethodService::BindService(service, conn, flags, userHandle, succeeded);
-}
-
-ECode CPinyinIME::CheckCallingUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 modeFlags,
-    /* [out] */ Int32* result)
-{
-    return InputMethodService::CheckCallingUriPermission(uri, modeFlags, result);
-}
-
-ECode CPinyinIME::CheckCallingOrSelfUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 modeFlags,
-    /* [out] */ Int32* result)
-{
-    return InputMethodService::CheckCallingOrSelfUriPermission(uri, modeFlags, result);
-}
-
-ECode CPinyinIME::EnforceUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 pid,
-    /* [in] */ Int32 uid,
-    /* [in] */ Int32 modeFlags,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforceUriPermission(uri, pid, uid, modeFlags, message);
-}
-
-ECode CPinyinIME::EnforceCallingUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 modeFlags,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforceCallingUriPermission(uri, modeFlags, message);
-}
-
-ECode CPinyinIME::EnforceCallingOrSelfUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 modeFlags,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforceCallingOrSelfUriPermission(uri, modeFlags, message);
-}
-
-ECode CPinyinIME::EnforceUriPermission(
-    /* [in] */ IUri* uri,
-    /* [in] */ const String& readPermission,
-    /* [in] */ const String& writePermission,
-    /* [in] */ Int32 pid,
-    /* [in] */ Int32 uid,
-    /* [in] */ Int32 modeFlags,
-    /* [in] */ const String& message)
-{
-    return InputMethodService::EnforceUriPermission(uri, readPermission, writePermission, pid, uid, modeFlags, message);
-}
-
-ECode CPinyinIME::CreatePackageContextAsUser(
-    /* [in] */ const String& packageName,
-    /* [in] */ Int32 flags,
-    /* [in] */ IUserHandle* user,
-    /* [out] */ IContext** ctx)
-{
-    return InputMethodService::CreatePackageContextAsUser(packageName, flags, user, ctx);
-}
-
-ECode CPinyinIME::CreateConfigurationContext(
-    /* [in] */ IConfiguration* overrideConfiguration,
-    /* [out] */ IContext** ctx)
-{
-    return InputMethodService::CreateConfigurationContext(overrideConfiguration, ctx);
-}
-
-ECode CPinyinIME::CreateDisplayContext(
-    /* [in] */ IDisplay* display,
-    /* [out] */ IContext** ctx)
-{
-    return InputMethodService::CreateDisplayContext(display, ctx);
-}
-
-ECode CPinyinIME::GetCompatibilityInfo(
-    /* [in] */ Int32 displayId,
-    /* [out] */ ICompatibilityInfoHolder** infoHolder)
-{
-    return InputMethodService::GetCompatibilityInfo(displayId, infoHolder);
-}
-
-ECode CPinyinIME::GetApplication(
-    /* [out] */ IApplication** application)
-{
-    return InputMethodService::GetApplication(application);
-}
-
-ECode CPinyinIME::OnTaskRemoved(
-    /* [in] */ IIntent* rootIntent)
-{
-    return InputMethodService::OnTaskRemoved(rootIntent);
-}
-
-ECode CPinyinIME::RegisterReceiver(
-    /* [in] */ IBroadcastReceiver* receiver,
-    /* [in] */ IIntentFilter* filter,
-    /* [out] */ IIntent** intent)
-{
-    return InputMethodService::RegisterReceiver(receiver, filter, intent);
-}
-
-ECode CPinyinIME::RegisterReceiver(
-    /* [in] */ IBroadcastReceiver* receiver,
-    /* [in] */ IIntentFilter* filter,
-    /* [in] */ const String& broadcastPermission,
-    /* [in] */ IHandler* scheduler,
-    /* [out] */ IIntent** intent)
-{
-    return InputMethodService::RegisterReceiver(receiver, filter, broadcastPermission, scheduler, intent);
-}
-
-ECode CPinyinIME::StopSelf()
-{
-    return InputMethodService::StopSelf();
-}
-
-ECode CPinyinIME::StopSelf(
-    /* [in] */ Int32 startId)
-{
-    return InputMethodService::StopSelf(startId);
-}
-
-ECode CPinyinIME::StopSelfResult(
-    /* [in] */ Int32 startId,
-    /* [out] */ Boolean* res)
-{
-    return InputMethodService::StopSelfResult(startId, res);
-}
-
-ECode CPinyinIME::SetForeground(
-    /* [in] */ Boolean isForeground)
-{
-    return InputMethodService::SetForeground(isForeground);
-}
-
-ECode CPinyinIME::StartForeground(
-    /* [in] */ Int32 id,
-    /* [in] */ INotification* notification)
-{
-    return InputMethodService::StartForeground(id, notification);
-}
-
-ECode CPinyinIME::StopForeground(
-    /* [in] */ Boolean removeNotification)
-{
-    return InputMethodService::StopForeground(removeNotification);
-}
-
-ECode CPinyinIME::OnGenericMotionEvent(
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* state)
-{
-    return InputMethodService::OnGenericMotionEvent(event, state);
-}
-
-ECode CPinyinIME::OnViewClicked(
-    /* [in] */ Boolean focusChanged)
-{
-    return InputMethodService::OnViewClicked(focusChanged);
-}
-
-ECode CPinyinIME::EnableHardwareAcceleration(
-    /* [out] */ Boolean* enable)
-{
-    return InputMethodService::EnableHardwareAcceleration(enable);
-}
-
-ECode CPinyinIME::SetBackDisposition(
-    /* [in] */ Int32 disposition)
-{
-    return InputMethodService::SetBackDisposition(disposition);
-}
-
-ECode CPinyinIME::GetBackDisposition(
-    /* [out] */ Int32* pos)
-{
-    return InputMethodService::GetBackDisposition(pos);
-}
-
-ECode CPinyinIME::OnExtractedReplaceText(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end,
-    /* [in] */ ICharSequence* text)
-{
-    return InputMethodService::OnExtractedReplaceText(start, end, text);
-}
-
-ECode CPinyinIME::OnExtractedDeleteText(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end)
-{
-    return InputMethodService::OnExtractedDeleteText(start, end);
-}
-
-ECode CPinyinIME::OnExtractedSetSpan(
-    /* [in] */ IInterface* span,
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end,
-    /* [in] */ Int32 flags)
-{
-    return InputMethodService::OnExtractedSetSpan(span, start, end, flags);
-}
-
-ECode CPinyinIME::OnKeyLongPress(
-    /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event,
-    /* [out] */ Boolean* result)
-{
-    return InputMethodService::OnKeyLongPress(keyCode, event, result);
-}
-
-ECode CPinyinIME::OnKeyMultiple(
-    /* [in] */ Int32 keyCode,
-    /* [in] */ Int32 count,
-    /* [in] */ IKeyEvent* event,
-    /* [out] */ Boolean* result)
-{
-    return InputMethodService::OnKeyMultiple(keyCode, count, event, result);
-}
-
-ECode CPinyinIME::UnregisterReceiver(
-    /* [in] */ IBroadcastReceiver* receiver)
-{
-    return InputMethodService::UnregisterReceiver(receiver);
 }
 
 #endif

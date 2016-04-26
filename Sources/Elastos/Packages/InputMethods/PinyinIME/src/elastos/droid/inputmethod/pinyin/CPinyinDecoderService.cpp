@@ -29,7 +29,7 @@ CAR_OBJECT_IMPL(CPinyinDecoderService);
 
 CPinyinDecoderService::CPinyinDecoderService()
 {
-    CIPinyinDecoderService::New(this, (IPinyinDecoderService**)&mBinder);
+    CIPinyinDecoderService::New(this, (IIPinyinDecoderService**)&mBinder);
 }
 
 ECode CPinyinDecoderService::constructor()

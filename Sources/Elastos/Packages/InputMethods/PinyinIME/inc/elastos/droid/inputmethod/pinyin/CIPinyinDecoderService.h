@@ -21,7 +21,7 @@ class CPinyinDecoderService;
 
 CarClass(CIPinyinDecoderService)
     , public Elastos::Droid::App::Service
-    , public IPinyinDecoderService
+    , public IIPinyinDecoderService
     , public IBinder
 {
 public:
