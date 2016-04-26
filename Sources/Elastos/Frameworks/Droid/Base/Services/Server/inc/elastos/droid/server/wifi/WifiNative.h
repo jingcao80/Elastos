@@ -73,38 +73,6 @@ public:
         AutoPtr<ArrayOf<BucketSettings*> > buckets;
     };
 
-    //class ScanEventHandler : public Object {
-    //public:
-    //    virtual CARAPI OnScanResultsAvailable() = 0;
-
-    //    virtual CARAPI OnFullScanResult(
-    //        /* [in] */ IScanResult* fullScanResult);
-
-    //    virtual CARAPI OnSingleScanComplete() = 0;
-
-    //    virtual CARAPI OnScanPaused() = 0;
-
-    //    virtual CARAPI OnScanRestarted() = 0;
-    //};
-
-    //class HotlistEventHandler : public Object {
-    //public:
-    //    virtual CARAPI OnHotlistApFound(
-    //        /* [in] */ ArrayOf<IScanResult*>* result) = 0;
-    //};
-
-    //class SignificantWifiChangeEventHandler : public Object {
-    //public:
-    //    virtual CARAPI OnChangesFound(
-    //        /* [in] */ ArrayOf<IScanResult*>* result) = 0;
-    //};
-
-    //class RttEventHandler : public Object {
-    //public:
-    //    virtual CARAPI OnRttResults(
-    //        /* [in] */ ArrayOf<IRttManagerRttResult*>* result) = 0;
-    //};
-
 private:
     class MonitorThread : public Thread {
     public:
@@ -152,9 +120,6 @@ public:
     CARAPI_(Boolean) Scan(
         /* [in] */ Int32 type,
         /* [in] */ const String& freqList);
-
-    //CARAPI_(Boolean) SetScanMode(
-    //    /* [in] */ Boolean setActive);
 
     /* Does a graceful shutdown of supplicant. Is a common stop function for both p2p and sta.
      *
@@ -428,9 +393,6 @@ public:
 
     CARAPI_(Boolean) SetPersistentReconnect(
         /* [in] */ Boolean enabled);
-
-    //CARAPI_(Boolean) SetGroupOwnerPsk(
-    //    /* [in] */ const String& name);
 
     CARAPI_(Boolean) SetDeviceName(
         /* [in] */ const String& name);
@@ -856,6 +818,8 @@ private:
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
+
 DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wifi::WifiNative::BucketSettings, IInterface);
 DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wifi::WifiNative::ChannelSettings, IInterface);
+
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFINATIVE_H__

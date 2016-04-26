@@ -122,6 +122,9 @@ const Int32 WifiNative::SCAN_WITH_CONNECTION_SETUP;
 
 static AutoPtr<ILocalLog> InitLocalLog()
 {
+    //base/core/java/android/util/LocalLog.java
+    //AutoPtr<ILocalLog> tmp;
+    //CLocalLog::New(1024, (ILocalLog**)&tmp);
     return NULL;//TODO ILocalLog have not been implemented.
 }
 AutoPtr<ILocalLog> WifiNative::mLocalLog = InitLocalLog();
@@ -406,17 +409,6 @@ Boolean WifiNative::Scan(
     return FALSE;
 }
 
-//Boolean WifiNative::SetScanMode(
-//    /* [in] */ Boolean setActive)
-//{
-//    if (setActive) {
-//        return DoBooleanCommand(String("DRIVER SCAN-ACTIVE"));
-//    }
-//    else {
-//        return DoBooleanCommand(String("DRIVER SCAN-PASSIVE"));
-//    }
-//}
-
 Boolean WifiNative::StopSupplicant()
 {
     return DoBooleanCommand(String("TERMINATE"));
@@ -470,6 +462,7 @@ Boolean WifiNative::RemoveNetwork(
 void WifiNative::LogDbg(
     /* [in] */ const String& debug)
 {
+    assert(0);
     //long now = SystemClock.elapsedRealtimeNanos();
     //String ts = String.format("[%,d us] ", now/1000);
     //Log.e("WifiNative: ", ts+debug+ " stack:"
@@ -912,12 +905,6 @@ Boolean WifiNative::SetPersistentReconnect(
     Int32 value = (enabled == TRUE) ? 1 : 0;
     return DoBooleanCommand(String("SET persistent_reconnect ") + StringUtils::ToString(value));
 }
-
-//Boolean WifiNative::SetGroupOwnerPsk(
-//    /* [in] */ const String& name)
-//{
-//    return DoBooleanCommand(String("SET p2p_go_swpsk ") + name);
-//}
 
 Boolean WifiNative::SetDeviceName(
     /* [in] */ const String& name)
@@ -1446,8 +1433,6 @@ Boolean WifiNative::P2pServiceDel(
      * P2P_SERVICE_DEL bonjour <query hexdump>
      * P2P_SERVICE_DEL upnp <version hex> <service>
      */
-    assert(0);
-
     AutoPtr<ArrayOf<String> > list;
     servInfo->GetSupplicantQueryList((ArrayOf<String>**)&list);
 
@@ -1548,12 +1533,9 @@ Boolean WifiNative::StartHalNative()
     if (halHandle == NULL) {
         wifi_error res = wifi_initialize(&halHandle);
         if (res == WIFI_SUCCESS) {
-            //setStaticLongField(env, cls, WifiHandleVarName, (jlong)halHandle);
             sWifiHalHandle = (Int64)(halHandle);
             Logger::D(TAG, "Did set static halHandle = %p", halHandle);
         }
-        //env->GetJavaVM(&mVM);
-        //mCls = (jclass) env->NewGlobalRef(cls);
         Logger::D(TAG, "halHandle = %p", halHandle);
         return res == WIFI_SUCCESS;
     } else {
@@ -1792,17 +1774,12 @@ Boolean WifiNative::StartScanNative(
     Logger::D(TAG, "Initialized common fields %d, %d, %d", params.base_period,
             params.max_ap_per_scan, params.report_threshold);
 
-    //const char *bucket_array_type = "[Lcom/android/server/wifi/WifiNative$BucketSettings;";
-    //const char *channel_array_type = "[Lcom/android/server/wifi/WifiNative$ChannelSettings;";
-
-    //jobjectArray buckets = (jobjectArray)getObjectField(env, settings, "buckets", bucket_array_type);
     AutoPtr<ArrayOf<BucketSettings*> > buckets = settings->buckets;
     params.num_buckets = settings->num_buckets;
 
     Logger::D(TAG, "Initialized num_buckets to %d", params.num_buckets);
 
     for (int i = 0; i < params.num_buckets; i++) {
-        //jobject bucket = getObjectArrayField(env, settings, "buckets", bucket_array_type, i);
         AutoPtr<BucketSettings> bucket = (*buckets)[i];
 
         params.buckets[i].bucket = bucket->bucket;
@@ -1817,14 +1794,12 @@ Boolean WifiNative::StartScanNative(
 
         Logger::D(TAG, "Initialized report events to %d", params.buckets[i].report_events);
 
-        //jobjectArray channels = (jobjectArray)getObjectField(env, bucket, "channels", channel_array_type);
         AutoPtr<ArrayOf<ChannelSettings*> > channels = bucket->channels;
 
         params.buckets[i].num_channels = bucket->num_channels;
         Logger::D(TAG, "Initialized num_channels to %d", params.buckets[i].num_channels);
 
-        for (int j = 0; j < params.buckets[i].num_channels; j++) {
-            //jobject channel = getObjectArrayField(env, bucket, "channels", channel_array_type, j);
+        for (Int32 j = 0; j < params.buckets[i].num_channels; j++) {
             AutoPtr<ChannelSettings> channel = (*channels)[j];
 
             params.buckets[i].channels[j].channel = channel->frequency;
@@ -2362,9 +2337,6 @@ Boolean WifiNative::TrackSignificantWifiChangeNative(
     settings->GetMinApsBreachingThreshold(&minApsBreachingThreshold);
     params.min_breaching = minApsBreachingThreshold;
 
-    //const char *bssid_info_array_type = "[Landroid/net/wifi/WifiScanner$BssidInfo;";
-    //jobjectArray bssids = (jobjectArray)getObjectField(
-    //        env, settings, "bssidInfos", bssid_info_array_type);
     AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssids;
     settings->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&bssids);
     params.num_ap = bssids->GetLength();
@@ -2378,11 +2350,8 @@ Boolean WifiNative::TrackSignificantWifiChangeNative(
             params.lost_ap_sample_size, params.min_breaching, params.num_ap);
 
     for (Int32 i = 0; i < params.num_ap; i++) {
-        //jobject objAp = env->GetObjectArrayElement(bssids, i);
         AutoPtr<IWifiScannerBssidInfo> objAp = (*bssids)[i];
 
-        //jstring macAddrString = (jstring) getObjectField(
-        //        env, objAp, "bssid", "Ljava/lang/String;");
         String macAddrString;
         objAp->GetBssid(&macAddrString);
         if (macAddrString.IsNull()) {
@@ -2645,7 +2614,6 @@ Boolean WifiNative::RequestRangeNative(
 
     for (Int32 i = 0; i < len; i++) {
 
-        //jobject param = env->GetObjectArrayElement((jobjectArray)params, i);
         AutoPtr<IRttManagerRttParams> param = (*params)[i];
         if (param == NULL) {
             Logger::D("WifiNative", "could not get element %d", i);
@@ -2847,7 +2815,6 @@ void WifiNative::SetWifiHalHandle(
 {
     sWifiHalHandle = handle;
 }
-
 
 } // namespace Wifi
 } // namespace Server

@@ -1,8 +1,20 @@
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/server/wifi/WifiNetworkScoreCache.h"
+#include "elastos/core/CoreUtils.h"
+#include "elastos/core/StringBuilder.h"
+#include "elastos/core/AutoLock.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Net::EIID_IINetworkScoreCache;
+using Elastos::Droid::Net::IRssiCurve;
+using Elastos::Droid::Net::IWifiKey;
+using Elastos::Droid::Net::INetworkKey;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -25,40 +37,39 @@ WifiNetworkScoreCache::WifiNetworkScoreCache()
 ECode WifiNetworkScoreCache::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // mContext = context;
-    // mNetworkCache = new HashMap<String, ScoredNetwork>();
+    mContext = context;
+    CHashMap::New((IMap**)&mNetworkCache);
     return NOERROR;
 }
 
 ECode WifiNetworkScoreCache::UpdateScores(
     /* [in] */ IList* networks)//ScoredNetwork
 {
-    VALIDATE_NOT_NULL(networks);
-    // ==================before translated======================
-    // if (networks == null) {
-    //     return;
-    // }
-    // Log.e(TAG, "updateScores list size=" + networks.size());
-    //
-    // synchronized(mNetworkCache) {
-    //     for (ScoredNetwork network : networks) {
-    //         String networkKey = buildNetworkKey(network);
-    //         if (networkKey == null) continue;
-    //         mNetworkCache.put(networkKey, network);
-    //     }
-    // }
-    assert(0);
+    if (networks == NULL) {
+        return NOERROR;
+    }
+    Int32 size;
+    networks->GetSize(&size);
+    Logger::E(TAG, "updateScores list size=%d", size);
+
+    synchronized(mNetworkCache) {
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            networks->Get(i, (IInterface**)&obj);
+            IScoredNetwork* network = IScoredNetwork::Probe(obj);
+            String networkKey = BuildNetworkKey(network);
+            if (networkKey.IsNull()) continue;
+            mNetworkCache->Put(CoreUtils::Convert(networkKey), network);
+        }
+    }
     return NOERROR;
 }
 
 ECode WifiNetworkScoreCache::ClearScores()
 {
-    // ==================before translated======================
-    // synchronized (mNetworkCache) {
-    //     mNetworkCache.clear();
-    // }
-    assert(0);
+    synchronized (mNetworkCache) {
+         mNetworkCache->Clear();
+    }
     return NOERROR;
 }
 
@@ -66,21 +77,21 @@ ECode WifiNetworkScoreCache::IsScoredNetwork(
     /* [in] */ IScanResult* result,
     /* [out] */ Boolean* isScoreNetwork)
 {
-    VALIDATE_NOT_NULL(result);
     VALIDATE_NOT_NULL(isScoreNetwork);
-    // ==================before translated======================
-    // String key = buildNetworkKey(result);
-    // if (key == null) return false;
-    //
-    // //find it
-    // synchronized(mNetworkCache) {
-    //     ScoredNetwork network = mNetworkCache.get(key);
-    //     if (network != null) {
-    //         return true;
-    //     }
-    // }
-    // return false;
-    assert(0);
+    String key = BuildNetworkKey(result);
+    if (key.IsNull()) return FALSE;
+
+    //find it
+    synchronized(mNetworkCache) {
+        AutoPtr<IInterface> obj;
+        mNetworkCache->Get(CoreUtils::Convert(key), (IInterface**)&obj);
+        IScoredNetwork* network = IScoredNetwork::Probe(obj);
+        if (network != NULL) {
+            *isScoreNetwork = TRUE;
+            return NOERROR;
+        }
+    }
+    *isScoreNetwork = FALSE;
     return NOERROR;
 }
 
@@ -88,29 +99,37 @@ ECode WifiNetworkScoreCache::GetNetworkScore(
     /* [in] */ IScanResult* result,
     /* [out] */ Int32* rValue)
 {
-    VALIDATE_NOT_NULL(result);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //
-    // int score = INVALID_NETWORK_SCORE;
-    //
-    // String key = buildNetworkKey(result);
-    // if (key == null) return score;
-    //
-    // //find it
-    // synchronized(mNetworkCache) {
-    //     ScoredNetwork network = mNetworkCache.get(key);
-    //     if (network != null && network.rssiCurve != null) {
-    //         score = network.rssiCurve.lookupScore(result.level);
-    //         if (DBG) {
-    //             Log.e(TAG, "getNetworkScore found scored network " + key
-    //                     + " score " + Integer.toString(score)
-    //                     + " RSSI " + result.level);
-    //         }
-    //     }
-    // }
-    // return score;
-    assert(0);
+    VALIDATE_NOT_NULL(rValue);
+    Int32 score = INVALID_NETWORK_SCORE;
+
+    String key = BuildNetworkKey(result);
+    if (key.IsNull()) {
+        *rValue = score;
+        return NOERROR;
+    }
+
+    //find it
+    synchronized(mNetworkCache) {
+        AutoPtr<IInterface> obj;
+        mNetworkCache->Get(CoreUtils::Convert(key), (IInterface**)&obj);
+        IScoredNetwork* network = IScoredNetwork::Probe(obj);
+        if (network != NULL) {
+            AutoPtr<IRssiCurve> rssiCurve;
+            network->GetRssiCurve((IRssiCurve**)&rssiCurve);
+            if(rssiCurve != NULL) {
+                Int32 level;
+                result->GetLevel(&level);
+                Byte lookupScore = 0;
+                rssiCurve->LookupScore(level, &lookupScore);
+                score = lookupScore;
+                if (DBG) {
+                    Logger::E(TAG, "getNetworkScore found scored network %s, score: %d, RSSI: %d",
+                            key.string(), score, level);
+                }
+            }
+        }
+    }
+    *rValue = score;
     return NOERROR;
 }
 
@@ -119,30 +138,37 @@ ECode WifiNetworkScoreCache::GetNetworkScore(
     /* [in] */ Int32 rssiBoost,
     /* [out] */ Int32* rValue)
 {
-    VALIDATE_NOT_NULL(result);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //
-    // int score = INVALID_NETWORK_SCORE;
-    //
-    // String key = buildNetworkKey(result);
-    // if (key == null) return score;
-    //
-    // //find it
-    // synchronized(mNetworkCache) {
-    //     ScoredNetwork network = mNetworkCache.get(key);
-    //     if (network != null && network.rssiCurve != null) {
-    //         score = network.rssiCurve.lookupScore(result.level + rssiBoost);
-    //         if (DBG) {
-    //             Log.e(TAG, "getNetworkScore found scored network " + key
-    //                     + " score " + Integer.toString(score)
-    //                     + " RSSI " + result.level
-    //                     + " boost " + rssiBoost);
-    //         }
-    //     }
-    // }
-    // return score;
-    assert(0);
+    VALIDATE_NOT_NULL(rValue);
+    Int32 score = INVALID_NETWORK_SCORE;
+
+    String key = BuildNetworkKey(result);
+    if (key.IsNull()) {
+        *rValue = score;
+        return NOERROR;
+    }
+
+    //find it
+    synchronized(mNetworkCache) {
+        AutoPtr<IInterface> obj;
+        mNetworkCache->Get(CoreUtils::Convert(key), (IInterface**)&obj);
+        IScoredNetwork* network = IScoredNetwork::Probe(obj);
+        if (network != NULL) {
+            AutoPtr<IRssiCurve> rssiCurve;
+            network->GetRssiCurve((IRssiCurve**)&rssiCurve);
+            if(rssiCurve != NULL) {
+                Int32 level;
+                result->GetLevel(&level);
+                Byte lookupScore = 0;
+                rssiCurve->LookupScore(level + rssiBoost, &lookupScore);
+                score = lookupScore;
+                if (DBG) {
+                    Logger::E(TAG, "getNetworkScore found scored network %s, score: %d, RSSI: %d, boost: %d",
+                            key.string(), score, level, rssiBoost);
+                }
+            }
+        }
+    }
+    *rValue = score;
     return NOERROR;
 }
 
@@ -169,43 +195,48 @@ void WifiNetworkScoreCache::Dump(
 String WifiNetworkScoreCache::BuildNetworkKey(
     /* [in] */ IScoredNetwork* network)
 {
-    // ==================before translated======================
-    // if (network.networkKey == null) return null;
-    // if (network.networkKey.wifiKey == null) return null;
-    // if (network.networkKey.type == NetworkKey.TYPE_WIFI) {
-    //     String key = network.networkKey.wifiKey.ssid;
-    //     if (key == null) return null;
-    //     if (network.networkKey.wifiKey.bssid != null) {
-    //         key = key + network.networkKey.wifiKey.bssid;
-    //     }
-    //     return key;
-    // }
-    // return null;
-    assert(0);
-    return String("");
+    AutoPtr<INetworkKey> networkKey;
+    network->GetNetworkKey((INetworkKey**)&networkKey);
+    if (networkKey == NULL) return String(NULL);
+
+    AutoPtr<IWifiKey> wifiKey;
+    networkKey->GetWifiKey((IWifiKey**)&wifiKey);
+    if (wifiKey == NULL) return String(NULL);
+    Int32 type;
+    networkKey->GetType(&type);
+    if (type == INetworkKey::TYPE_WIFI) {
+        String key;
+        wifiKey->GetSsid(&key);
+        if (key.IsNull()) return String(NULL);
+        String bssid;
+        wifiKey->GetBssid(&bssid);
+        if (!bssid.IsNull()) {
+            key = key + bssid;
+        }
+        return key;
+    }
+    return String(NULL);
 }
 
 String WifiNetworkScoreCache::BuildNetworkKey(
     /* [in] */ IScanResult* result)
 {
-    // ==================before translated======================
-    // if (result.SSID == null) {
-    //     return null;
-    // }
-    // StringBuilder key = new StringBuilder("\"");
-    // key.append(result.SSID);
-    // key.append("\"");
-    // if (result.BSSID != null) {
-    //     key.append(result.BSSID);
-    // }
-    // return key.toString();
-    assert(0);
-    return String("");
+    String ssid;
+    result->GetSSID(&ssid);
+    if (ssid.IsNull()) {
+        return String(NULL);
+    }
+    AutoPtr<StringBuilder> key = new StringBuilder("\"");
+    key->Append(ssid);
+    key->Append("\"");
+    result->GetSSID(&ssid);
+    if (!ssid.IsNull()) {
+        key->Append(ssid);
+    }
+    return key->ToString();
 }
 
 } // namespace Wifi
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
-

@@ -86,6 +86,7 @@ public:
     class SimAuthRequestData
         : public Object
     {
+    public:
         Int32 networkId;
         Int32 protocol;
         String ssid;

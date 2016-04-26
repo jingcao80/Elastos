@@ -8,7 +8,6 @@
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Internal::Utility::StateMachine;
-//TODO using Elastos::Droid::Server::Wifi::P2p::WifiP2pServiceImpl::P2pStatus;
 using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Wifi::SupplicantState;
@@ -140,13 +139,6 @@ public:
         /* [in] */ SupplicantState newState);
 
     /**
-     * Sleep for a period of time.
-     * @param secs the number of seconds to sleep
-     */
-    //static CARAPI_(void) Nap(
-    //    /* [in] */ Int32 secs);
-
-    /**
     * Handle all supplicant events except STATE-CHANGE
     * @param event the event type
     * @param remainder the rest of the string following the
@@ -157,7 +149,6 @@ public:
         /* [in] */ const String& remainder);
 
 private:
-    //CARAPI_(Boolean) ConnectToSupplicant();
 
     CARAPI_(void) HandleDriverEvent(
         /* [in] */ const String& state);
@@ -174,11 +165,11 @@ private:
     CARAPI_(void) HandleWpsFailEvent(
         /* [in] */ const String& dataString);
 
-    //TODO CARAPI_(P2pStatus) ValueOf(
+    //CARAPI_(P2pStatus) ValueOf(
     //    /* [in] */ Int32 error);
 
-    /* <event> status=<err> and the special case of <event> reason=FREQ_CONFLICT */
-    //TODO CARAPI_(P2pStatus) P2pError(
+    ///* <event> status=<err> and the special case of <event> reason=FREQ_CONFLICT */
+    //CARAPI_(P2pStatus) P2pError(
     //   /* [in] */ const String& dataString);
 
     /**
@@ -645,23 +636,10 @@ private:
     /* AP-STA-DISCONNECTED 42:fc:89:a8:96:09 */
     static String AP_STA_DISCONNECTED_STR;
 
-    //AutoPtr<StateMachine> mStateMachine;
-    //AutoPtr<WifiNative> mWifiNative;
-
-    /**
-     * This indicates the supplicant connection for the monitor is closed
-     */
-    //static String MONITOR_SOCKET_CLOSED_STR;
-
     /**
      * This indicates a read error on the monitor socket conenction
      */
     static String WPA_RECV_ERROR_STR;
-
-    /**
-     * Tracks consecutive receive errors
-     */
-    //Int32 mRecvErrors;
 
     /**
      * Max errors before we close supplicant connection
