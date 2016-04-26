@@ -21,31 +21,13 @@
 #include <elastos/utility/etl/Vector.h>
 
 using Elastos::Droid::App::IAlertDialog;
-// using Elastos::Droid::App::IActivityThread;
-// using Elastos::Droid::App::IIActivityManager;
-// using Elastos::Droid::App::IActivityManager;
-// using Elastos::Droid::App::INotification;
 using Elastos::Droid::Content::IBroadcastReceiver;
-// using Elastos::Droid::Content::IContentResolver;
-// using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
-// using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
-// using Elastos::Droid::Content::IDialogInterface;
-// using Elastos::Droid::Content::IIntentFilter;
-// using Elastos::Droid::Content::IIntentSender;
 using Elastos::Droid::Content::IServiceConnection;
-// using Elastos::Droid::Content::ISharedPreferences;
-// using Elastos::Droid::Content::Res::IResourcesTheme;
-// using Elastos::Droid::Graphics::IRect;
-// using Elastos::Droid::InputMethodService::InputMethodService;
-// using Elastos::Droid::InputMethodService::IAbstractInputMethodSessionImpl;
-// using Elastos::Droid::Os::Handler;
-// using Elastos::Droid::Os::HandlerRunnable;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::HandlerRunnable;
 using Elastos::Droid::View::GestureDetector;
 using Elastos::Droid::View::IGestureDetector;
 using Elastos::Droid::View::IGestureDetectorOnGestureListener;
-// using Elastos::Droid::View::IWindow;
-// using Elastos::Droid::View::InputMethod::IEditorInfo;
-// using Elastos::Droid::View::InputMethod::IInputConnection;
 using Elastos::Droid::Widget::IPopupWindow;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Core::Object;
@@ -100,7 +82,7 @@ public:
     public:
         OnGestureListener(
             /* [in] */ Boolean reponseGestures,
-            /* [in] */ IPinyinIME* ime);
+            /* [in] */ CPinyinIME* ime);
 
         CARAPI OnDown(
             /* [in] */ IMotionEvent* e,

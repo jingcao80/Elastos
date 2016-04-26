@@ -1,6 +1,7 @@
 
 #include <elastos/droid/ext/frameworkdef.h>
 #include "elastos/droid/inputmethod/pinyin/CPinyinIME.h"
+#include "elastos/droid/inputmethod/pinyin/CCandidatesContainer.h"
 #include "elastos/droid/inputmethod/pinyin/KeyMapDream.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
@@ -23,7 +24,8 @@
 // using Elastos::Droid::Preference::IPreferenceManagerHelper;
 // using Elastos::Droid::Preference::CPreferenceManagerHelper;
 // using Elastos::Droid::View::CGestureDetector;
-// using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IInputEvent;
 // using Elastos::Droid::View::CKeyEvent;
 // using Elastos::Droid::View::IViewGroupLayoutParams;
 // using Elastos::Droid::View::IWindowManagerLayoutParams;
@@ -46,129 +48,106 @@ namespace Pinyin {
 //==========================================================
 CPinyinIME::PopupTimer::PopupTimer(
     /* [in] */ CPinyinIME* host)
+    : mHost(host)
 {
-    AutoPtr<IWeakReferenceSource> source = (IWeakReferenceSource*)host->Probe(EIID_IWeakReferenceSource);
-    assert(source != NULL);
-    source->GetWeakReference((IWeakReference**)&mWeak);
-    mParentLocation[0] = mParentLocation[1] = 0;
+    mParentLocation = ArrayOf<Int32>::Alloc(2);
 }
 
 void CPinyinIME::PopupTimer::PostShowFloatingWindow()
 {
-    AutoPtr<IPinyinIME> host;
-    mWeak->Resolve(EIID_IPinyinIME, (IInterface**)&host);
-    if (host == NULL) {
-        return;
-    }
-    AutoPtr<CPinyinIME> mHost = (CPinyinIME*)host.Get();
-
-    mHost->mFloatingContainer->Measure(IViewGroupLayoutParams::WRAP_CONTENT,
+    IView::Probe(mHost->mFloatingContainer)->Measure(IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT);
 
     Int32 mW = 0, mH = 0;
-    mHost->mFloatingContainer->GetMeasuredWidth(&mW);
-    mHost->mFloatingContainer->GetMeasuredHeight(&mH);
+    IView::Probe(mHost->mFloatingContainer)->GetMeasuredWidth(&mW);
+    IView::Probe(mHost->mFloatingContainer)->GetMeasuredHeight(&mH);
     mHost->mFloatingWindow->SetWidth(mW);
     mHost->mFloatingWindow->SetHeight(mH);
-
     Boolean result = FALSE;
     Post(this, &result);
 }
 
 void CPinyinIME::PopupTimer::CancelShowing()
 {
-    AutoPtr<IPinyinIME> host;
-    mWeak->Resolve(EIID_IPinyinIME, (IInterface**)&host);
-    if (host == NULL) {
-        return;
-    }
-    AutoPtr<CPinyinIME> mHost = (CPinyinIME*)host.Get();
     Boolean showing = FALSE;
     if (mHost->mFloatingWindow->IsShowing(&showing), showing) {
         mHost->mFloatingWindow->Dismiss();
     }
-
     RemoveCallbacks(this);
 }
 
 ECode CPinyinIME::PopupTimer::Run()
 {
-    AutoPtr<IPinyinIME> host;
-    mWeak->Resolve(EIID_IPinyinIME, (IInterface**)&host);
-    if (host == NULL) {
-        return NOERROR;
-    }
-    AutoPtr<CPinyinIME> mHost = (CPinyinIME*)host.Get();
-
-    Int32 x = 0, y = 0;
-    mHost->mCandidatesContainer->GetLocationInWindow(&x, &y);
-    mParentLocation[0] = x;
-    mParentLocation[1] = y;
+    IView::Probe(mHost->mCandidatesContainer)->GetLocationInWindow(mParentLocation);
 
     Int32 height = 0;
     mHost->mFloatingWindow->GetHeight(&height);
     Boolean showing = FALSE;
     mHost->mFloatingWindow->IsShowing(&showing);
     if (!showing) {
-        mHost->mFloatingWindow->ShowAtLocation(mHost->mCandidatesContainer,
-                IGravity::LEFT | IGravity::TOP, mParentLocation[0],
-                mParentLocation[1] - height);
-    } else {
+        mHost->mFloatingWindow->ShowAtLocation(IView::Probe(mHost->mCandidatesContainer),
+                IGravity::LEFT | IGravity::TOP, (*mParentLocation)[0],
+                (*mParentLocation)[1] - height);
+    }
+    else {
         Int32 width = 0;
         mHost->mFloatingWindow->GetWidth(&width);
-        mHost->mFloatingWindow->Update(mParentLocation[0],
-                mParentLocation[1] - height,
-                width,
-                height);
+        mHost->mFloatingWindow->Update((*mParentLocation)[0],
+                (*mParentLocation)[1] - height,
+                width, height);
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(CPinyinIME::BuilderListener, IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener);
+// CAR_INTERFACE_IMPL_2(CPinyinIME::BuilderListener, IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener);
+//
+// CPinyinIME::BuilderListener::BuilderListener(
+//     /* [in] */ CPinyinIME* ime)
+//     : mHost(ime)
+// {
+// }
+//
+// ECode CPinyinIME::BuilderListener::OnClick(
+//     /* [in] */ IDialogInterface* di,
+//     /* [in] */ Int32 position)
+// {
+//     assert(di != NULL);
+//
+//     Logger::D("CPinyinIME", "点击了按钮: %d", position);
+//     switch (position) {
+//         case IDialogInterface::BUTTON_POSITIVE:
+//             mHost->LaunchSettings();
+//             break;
+//
+//         case IDialogInterface::BUTTON_NEUTRAL:
+//         case IDialogInterface::BUTTON_NEGATIVE:
+//             assert(0 && "TODO");
+//             // InputMethodManager.getInstance(PinyinIME.this)
+//             //         .showInputMethodPicker();
+//             break;
+//     }
+//
+//     // di->Dismiss();
+//     return NOERROR;
+// }
+//
+// ECode CPinyinIME::BuilderListener::OnDismiss(
+//     /* [in] */ IDialogInterface* dialog)
+// {
+//     mHost->mOptionsDialog = NULL;
+//     return NOERROR;
+// }
 
-CPinyinIME::BuilderListener::BuilderListener(
-    /* [in] */ CPinyinIME* ime)
-    : mHost(ime)
-{
-}
 
-ECode CPinyinIME::BuilderListener::OnClick(
-    /* [in] */ IDialogInterface* di,
-    /* [in] */ Int32 position)
-{
-    assert(di != NULL);
+//==========================================================
+// CPinyinIME::ChoiceNotifier
+//==========================================================
+CAR_INTERFACE_IMPL(CPinyinIME::ChoiceNotifier, Handler, ICandidateViewListener);
 
-    Logger::D("CPinyinIME", "点击了按钮: %d", position);
-    switch (position) {
-        case IDialogInterface::BUTTON_POSITIVE:
-            mHost->LaunchSettings();
-            break;
-
-        case IDialogInterface::BUTTON_NEUTRAL:
-        case IDialogInterface::BUTTON_NEGATIVE:
-            assert(0 && "TODO");
-            // InputMethodManager.getInstance(PinyinIME.this)
-            //         .showInputMethodPicker();
-            break;
-    }
-
-    // di->Dismiss();
-    return NOERROR;
-}
-
-ECode CPinyinIME::BuilderListener::OnDismiss(
-    /* [in] */ IDialogInterface* dialog)
-{
-    mHost->mOptionsDialog = NULL;
-    return NOERROR;
-}
-
-CAR_INTERFACE_IMPL(CPinyinIME::ChoiceNotifier, ICandidateViewListener);
 CPinyinIME::ChoiceNotifier::ChoiceNotifier(
     /* [in] */ CPinyinIME* ime)
     : mIme(ime)
-{
-}
+{}
 
 ECode CPinyinIME::ChoiceNotifier::OnClickChoice(
     /* [in] */ Int32 choiceId)
@@ -181,21 +160,20 @@ ECode CPinyinIME::ChoiceNotifier::OnClickChoice(
 
 ECode CPinyinIME::ChoiceNotifier::OnToLeftGesture()
 {
-    if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING == mIme->mImeState) {
+    if (STATE_COMPOSING == mIme->mImeState) {
         mIme->ChangeToStateInput(TRUE);
     }
-
-    Boolean result = FALSE;
-    return mIme->mCandidatesContainer->PageForward(TRUE, FALSE, &result);
+    ((CCandidatesContainer*)mIme->mCandidatesContainer.Get())->PageForward(TRUE, FALSE);
+    return NOERROR;
 }
 
 ECode CPinyinIME::ChoiceNotifier::OnToRightGesture()
 {
-    if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING == mIme->mImeState) {
+    if (STATE_COMPOSING == mIme->mImeState) {
         mIme->ChangeToStateInput(TRUE);
     }
-    Boolean result = FALSE;
-    return mIme->mCandidatesContainer->PageBackward(TRUE, FALSE, &result);
+    ((CCandidatesContainer*)mIme->mCandidatesContainer.Get())->PageBackward(TRUE, FALSE);
+    return NOERROR;
 }
 
 ECode CPinyinIME::ChoiceNotifier::OnToTopGesture()
@@ -209,67 +187,37 @@ ECode CPinyinIME::ChoiceNotifier::OnToBottomGesture()
 }
 
 
-const Int32 CPinyinGestureListener::MIN_X_FOR_DRAG = 60;
-const Int32 CPinyinGestureListener::MIN_Y_FOR_DRAG = 40;
-const Float CPinyinGestureListener::VELOCITY_THRESHOLD_X1 = 0.3f;
-const Float CPinyinGestureListener::VELOCITY_THRESHOLD_X2 = 0.7f;
-const Float CPinyinGestureListener::VELOCITY_THRESHOLD_Y1 = 0.2f;
-const Float CPinyinGestureListener::VELOCITY_THRESHOLD_Y2 = 0.45f;
+//==========================================================
+// CPinyinIME::OnGestureListener
+//==========================================================
+const Int32 CPinyinIME::OnGestureListener::MIN_X_FOR_DRAG = 60;
+const Int32 CPinyinIME::OnGestureListener::MIN_Y_FOR_DRAG = 40;
+const Float CPinyinIME::OnGestureListener::VELOCITY_THRESHOLD_X1 = 0.3f;
+const Float CPinyinIME::OnGestureListener::VELOCITY_THRESHOLD_X2 = 0.7f;
+const Float CPinyinIME::OnGestureListener::VELOCITY_THRESHOLD_Y1 = 0.2f;
+const Float CPinyinIME::OnGestureListener::VELOCITY_THRESHOLD_Y2 = 0.45f;
 
-CAR_OBJECT_IMPL(CPinyinGestureListener);
-
-CPinyinGestureListener::CPinyinGestureListener()
-    : mReponseGestures(FALSE)
+CPinyinIME::OnGestureListener::OnGestureListener(
+    /* [in] */ Boolean reponseGestures,
+    /* [in] */ CPinyinIME* ime)
+    : mReponseGestures(reponseGestures)
     , mMinVelocityX(Elastos::Core::Math::FLOAT_MAX_VALUE)
     , mMinVelocityY(Elastos::Core::Math::FLOAT_MAX_VALUE)
     , mTimeDown(0)
     , mTimeLastOnScroll(0)
     , mNotGesture(FALSE)
     , mGestureRecognized(FALSE)
+    , mIme(ime)
 {}
 
-PInterface CPinyinGestureListener::Probe(
-    /* [in] */ REIID riid)
-{
-    return _CPinyinGestureListener::Probe(riid);
-}
-
-ECode CPinyinGestureListener::GetInterfaceID(
-    /* [in] */ IInterface* Object,
-    /* [out] */ InterfaceID* iID)
-{
-    VALIDATE_NOT_NULL(iID);
-    return _CPinyinGestureListener::GetInterfaceID(Object, iID);
-}
-
-UInt32 CPinyinGestureListener::AddRef()
-{
-    return _CPinyinGestureListener::AddRef();
-}
-
-UInt32 CPinyinGestureListener::Release()
-{
-    return _CPinyinGestureListener::Release();
-}
-
-ECode CPinyinGestureListener::constructor(
-    /* [in] */ Boolean reponseGestures,
-    /* [in] */ IPinyinIME* ime)
-{
-    mReponseGestures = reponseGestures;
-    mIme = ime;
-    return NOERROR;
-}
-
-ECode CPinyinGestureListener::OnDown(
+ECode CPinyinIME::OnGestureListener::OnDown(
     /* [in] */ IMotionEvent* e,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    assert(e != NULL);
     mMinVelocityX = Elastos::Core::Math::INT32_MAX_VALUE;
     mMinVelocityY = Elastos::Core::Math::INT32_MAX_VALUE;
-    e->GetEventTime(&mTimeDown);
+    IInputEvent::Probe(e)->GetEventTime(&mTimeDown);
     mTimeLastOnScroll = mTimeDown;
     mNotGesture = FALSE;
     mGestureRecognized = FALSE;
@@ -277,7 +225,7 @@ ECode CPinyinGestureListener::OnDown(
     return NOERROR;
 }
 
-ECode CPinyinGestureListener::OnScroll(
+ECode CPinyinIME::OnGestureListener::OnScroll(
     /* [in] */ IMotionEvent* e1,
     /* [in] */ IMotionEvent* e2,
     /* [in] */ Float distanceX,
@@ -289,26 +237,24 @@ ECode CPinyinGestureListener::OnScroll(
         *res = FALSE;
         return NOERROR;
     }
-
     if (mGestureRecognized) {
         *res = TRUE;
         return NOERROR;
     }
 
-    assert(e1 != NULL && e2 != NULL);
     Float x1 = 0.f, y1 = 0.f, x2 = 0.f, y2 = 0.f;
     e1->GetX(&x1);
     e1->GetY(&y1);
     e2->GetX(&x2);
     e2->GetY(&y2);
-
-    if (Elastos::Core::Math::Abs(x1 - x2) < MIN_X_FOR_DRAG && Elastos::Core::Math::Abs(y1 - y2) < MIN_Y_FOR_DRAG) {
+    if (Elastos::Core::Math::Abs(x1 - x2) < MIN_X_FOR_DRAG
+            && Elastos::Core::Math::Abs(y1 - y2) < MIN_Y_FOR_DRAG) {
         *res = FALSE;
         return NOERROR;
     }
 
     Int64 timeNow = 0;
-    e2->GetEventTime(&timeNow);
+    IInputEvent::Probe(e2)->GetEventTime(&timeNow);
     Int64 spanTotal = timeNow - mTimeDown;
     Int64 spanThis = timeNow - mTimeLastOnScroll;
     if (0 == spanTotal) spanTotal = 1;
@@ -331,7 +277,6 @@ ECode CPinyinGestureListener::OnScroll(
         *res = FALSE;
         return NOERROR;
     }
-
     Float absVXTotal = Elastos::Core::Math::Abs(vXTotal);
     Float absVYTotal = Elastos::Core::Math::Abs(vYTotal);
     if (absVXTotal < mMinVelocityX) {
@@ -352,15 +297,18 @@ ECode CPinyinGestureListener::OnScroll(
             && absVYTotal < VELOCITY_THRESHOLD_Y2) {
         if (mReponseGestures) OnDirectionGesture(IGravity::RIGHT);
         mGestureRecognized = TRUE;
-    } else if (vXTotal < -VELOCITY_THRESHOLD_X2
+    }
+    else if (vXTotal < -VELOCITY_THRESHOLD_X2
             && absVYTotal < VELOCITY_THRESHOLD_Y2) {
         if (mReponseGestures) OnDirectionGesture(IGravity::LEFT);
         mGestureRecognized = TRUE;
-    } else if (vYTotal > VELOCITY_THRESHOLD_Y2
+    }
+    else if (vYTotal > VELOCITY_THRESHOLD_Y2
             && absVXTotal < VELOCITY_THRESHOLD_X2) {
         if (mReponseGestures) OnDirectionGesture(IGravity::BOTTOM);
         mGestureRecognized = TRUE;
-    } else if (vYTotal < -VELOCITY_THRESHOLD_Y2
+    }
+    else if (vYTotal < -VELOCITY_THRESHOLD_Y2
             && absVXTotal < VELOCITY_THRESHOLD_X2) {
         if (mReponseGestures) OnDirectionGesture(IGravity::TOP);
         mGestureRecognized = TRUE;
@@ -371,7 +319,7 @@ ECode CPinyinGestureListener::OnScroll(
     return NOERROR;
 }
 
-ECode CPinyinGestureListener::OnFling(
+ECode CPinyinIME::OnGestureListener::OnFling(
     /* [in] */ IMotionEvent* me1,
     /* [in] */ IMotionEvent* me2,
     /* [in] */ Float velocityX,
@@ -383,7 +331,7 @@ ECode CPinyinGestureListener::OnFling(
     return NOERROR;
 }
 
-void CPinyinGestureListener::OnDirectionGesture(
+void CPinyinIME::OnGestureListener::OnDirectionGesture(
     /* [in] */ Int32 gravity)
 {
     if (IGravity::NO_GRAVITY == gravity) {
@@ -391,16 +339,14 @@ void CPinyinGestureListener::OnDirectionGesture(
     }
 
     if (IGravity::LEFT == gravity || IGravity::RIGHT == gravity) {
+        CCandidatesContainer* container = (CCandidatesContainer*)mIme->mCandidatesContainer.Get();
         Boolean shown = FALSE;
-        AutoPtr<ICandidatesContainer> container;
-        mIme->GetCandidatesContainer((ICandidatesContainer**)&container);
-        assert(container != NULL);
         if (container->IsShown(&shown), shown) {
-            Boolean result;
             if (IGravity::LEFT == gravity) {
-                container->PageForward(TRUE, TRUE, &result);
-            } else {
-                container->PageBackward(TRUE, TRUE, &result);
+                container->PageForward(TRUE, TRUE);
+            }
+            else {
+                container->PageBackward(TRUE, TRUE);
             }
             return;
         }
@@ -408,6 +354,7 @@ void CPinyinGestureListener::OnDirectionGesture(
 }
 
 
+#if 0
 //class PinyinDecoderServiceConnection
 CAR_INTERFACE_IMPL(CPinyinIME::PinyinDecoderServiceConnection, IServiceConnection);
 CPinyinIME::PinyinDecoderServiceConnection::PinyinDecoderServiceConnection(
@@ -4103,6 +4050,8 @@ ECode CPinyinIME::UnregisterReceiver(
 {
     return InputMethodService::UnregisterReceiver(receiver);
 }
+
+#endif
 
 } // namespace Pinyin
 } // namespace InputMethod
