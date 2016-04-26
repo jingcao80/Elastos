@@ -346,7 +346,7 @@ ECode InputEventSender::constructor(
     /*mSenderPtr = NativeInit(new WeakReference<InputEventSender>(this),
             inputChannel, mMessageQueue);*/
 
-    mCloseGuard->Open(String("dispose"));
+    mCloseGuard->Open(String("InputEventSender::Dispose"));
     return NOERROR;
 }
 

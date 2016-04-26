@@ -5455,8 +5455,7 @@ ECode CActivityThread::AcquireProvider(
     AutoPtr<IApplicationThread> appThread;
     GetApplicationThread((IApplicationThread**)&appThread);
     ActivityManagerNative::GetDefault()->GetContentProvider(
-            appThread, auth, userId,
-            stable, (IContentProviderHolder**)&holder);
+        appThread, auth, userId, stable, (IContentProviderHolder**)&holder);
 //     } catch (RemoteException ex) {
 //     }
     if (holder == NULL) {
@@ -5470,8 +5469,8 @@ ECode CActivityThread::AcquireProvider(
     holder->GetNoReleaseNeeded(&noNeeded);
     AutoPtr<IProviderInfo> pInfo;
     holder->GetProviderInfo((IProviderInfo**)&pInfo);
-    AutoPtr<IContentProviderHolder> retholder = InstallProvider(c, holder, pInfo,
-            TRUE /*noisy*/, noNeeded, stable);
+    AutoPtr<IContentProviderHolder> retholder =
+        InstallProvider(c, holder, pInfo, TRUE /*noisy*/, noNeeded, stable);
     if (retholder) {
         retholder->GetContentProvider(pr);
     }

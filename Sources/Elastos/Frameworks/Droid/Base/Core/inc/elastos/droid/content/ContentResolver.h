@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_CONTENT_CONTENTRESOLVER_H__
 
 #include "Elastos.Droid.Content.h"
-//#include "elastos/droid/database/CrossProcessCursorWrapper.h"
+#include "elastos/droid/database/CrossProcessCursorWrapper.h"
 #include "elastos/droid/os/ParcelFileDescriptor.h"
 #include <elastos/core/Object.h>
 
@@ -12,7 +12,7 @@ using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::ICrossProcessCursorWrapper;
-//using Elastos::Droid::Database::CrossProcessCursorWrapper;
+using Elastos::Droid::Database::CrossProcessCursorWrapper;
 using Elastos::Droid::Database::ICharArrayBuffer;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Net::IUri;
@@ -47,22 +47,25 @@ class ContentResolver
 {
 private:
     class CursorWrapperInner
-        : public Object /*CrossProcessCursorWrapper*/
+        : public CrossProcessCursorWrapper
     {
     public:
+        TO_STRING_IMPL("ContentResolver::CursorWrapperInner")
+
         CursorWrapperInner(
-            /* [in] */ ICursor* cursor,
             /* [in] */ IIContentProvider* icp,
             /* [in] */ ContentResolver* contentResolver);
 
         ~CursorWrapperInner();
+
+        CARAPI constructor(
+            /* [in] */ ICursor* cursor);
 
         CARAPI Close();
 
         CARAPI Finalize();
 
     private:
-        static const String TAG;
         AutoPtr<IIContentProvider> mContentProvider;
         AutoPtr<ICloseGuard> mCloseGuard;
         Boolean mProviderReleased;
@@ -1372,8 +1375,6 @@ public:
 
 private:
     static const AutoPtr<ArrayOf<String> > SYNC_ERROR_NAMES;
-
-    static const String TAG;
 
     // Always log queries which take 500ms+; shorter queries are
     // sampled accordingly.

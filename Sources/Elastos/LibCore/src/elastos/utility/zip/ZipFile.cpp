@@ -323,7 +323,7 @@ _EXIT_:
         }
     // }
 
-    return mGuard->Open(String("close"));
+    return mGuard->Open(String("ZipFile::Close"));
 }
 
 

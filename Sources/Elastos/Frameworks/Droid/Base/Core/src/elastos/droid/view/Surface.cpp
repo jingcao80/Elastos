@@ -404,8 +404,9 @@ void Surface::SetNativeObjectLocked(
 {
     if (mNativeObject != ptr) {
         if (mNativeObject == 0 && ptr != 0) {
-            mCloseGuard->Open(String("release"));
-        } else if (mNativeObject != 0 && ptr == 0) {
+            mCloseGuard->Open(String("Surface::Release"));
+        }
+        else if (mNativeObject != 0 && ptr == 0) {
             mCloseGuard->Close();
         }
         mNativeObject = ptr;

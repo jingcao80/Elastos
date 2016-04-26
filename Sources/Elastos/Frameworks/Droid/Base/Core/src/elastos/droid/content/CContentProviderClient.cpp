@@ -91,7 +91,7 @@ ECode CContentProviderClient::constructor(
     //cp->GetPackageName(&mPackageName);
     mStable = stable;
 
-    mGuard->Open(String("release"));
+    mGuard->Open(String("CContentProviderClient::Release"));
     return NOERROR;
 }
 

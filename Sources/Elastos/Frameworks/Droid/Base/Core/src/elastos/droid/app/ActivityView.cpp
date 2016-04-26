@@ -208,7 +208,7 @@ ActivityView::ActivityContainerWrapper::ActivityContainerWrapper(
     AutoPtr<ICloseGuardHelper> helper;
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
     helper->Get((ICloseGuard**)&mGuard);
-    mGuard->Open(String("release"));
+    mGuard->Open(String("ActivityView::Release"));
 }
 
 ActivityView::ActivityContainerWrapper::~ActivityContainerWrapper()

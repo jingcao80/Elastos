@@ -168,17 +168,6 @@ ECode ContentProvider::constructor(
     return CContentProviderTransport::New(this, (IContentProviderTransport**)&mTransport);
 }
 
-ECode ContentProvider::ToString(
-    /* [out] */ String* info)
-{
-    VALIDATE_NOT_NULL(info);
-    StringBuilder sb("ContentProvider:(");
-    sb += StringUtils::ToString((Int32)this);
-    sb += ")";
-    sb.ToString(info);
-    return NOERROR;
-}
-
 ECode ContentProvider::CoerceToLocalContentProvider(
     /* [in] */ IIContentProvider* abstractInterface,
     /* [out] */ IContentProvider** localProvider)

@@ -547,7 +547,7 @@ ECode SystemServer::StartOtherServices()
 
     Slogger::I(TAG, "Content Manager");
     AutoPtr<IIContentService> cs = CContentService::Main(context,
-            mFactoryTestMode == FactoryTest::FACTORY_TEST_LOW_LEVEL);
+        mFactoryTestMode == FactoryTest::FACTORY_TEST_LOW_LEVEL);
     contentService = (CContentService*)cs.Get();
 
     Slogger::I(TAG, "System Content Providers");

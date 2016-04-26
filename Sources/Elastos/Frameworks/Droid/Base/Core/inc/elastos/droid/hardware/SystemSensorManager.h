@@ -17,9 +17,10 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IMessageQueue;
 using Elastos::Droid::Os::MessageQueue;
 using Elastos::Droid::Os::NativeMessageQueue;
+using Elastos::Core::IThread;
+using Elastos::Core::ICloseGuard;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
-using Elastos::Core::IThread;
 using Elastos::Utility::Etl::List;
 
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Hardware::ISensorEventListener);
@@ -142,7 +143,7 @@ private:
         Int64 nSensorEventQueue;
         HashMap<Int32, Boolean> mActiveSensors;// = new SparseBooleanArray();
 
-        //CloseGuard mCloseGuard = CloseGuard.get();
+        AutoPtr<ICloseGuard> mCloseGuard;// = CloseGuard.get();
         AutoPtr<ArrayOf<Float> > mScratch;// = new float[16];
         AutoPtr<ISystemSensorManager> mManager;
     };

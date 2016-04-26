@@ -283,7 +283,12 @@ ECode CThrowable::ToString(
         *info = name;
         return NOERROR;
     }
-    *info = name + ": " + msg;
+
+    StringBuilder sb(name);
+    sb += ": [";
+    sb += msg;
+    sb += "]";
+    *info = sb.ToString();
     return NOERROR;
 }
 

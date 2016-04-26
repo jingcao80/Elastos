@@ -10,6 +10,7 @@
 using Elastos::Droid::Utility::IPrinter;
 using Elastos::Droid::Os::ICancellationSignalOnCancelListener;
 using Elastos::Core::IThread;
+using Elastos::Core::ICloseGuard;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
@@ -351,7 +352,7 @@ private:
     // and logging a message about the connection pool being busy.
     static const Int64 CONNECTION_POOL_BUSY_MILLIS = 30 * 1000; // 30 seconds
 
-    //const CloseGuard mCloseGuard = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuard;
 
     Object mLock;
     AutoPtr<IAtomicBoolean> mConnectionLeaked;

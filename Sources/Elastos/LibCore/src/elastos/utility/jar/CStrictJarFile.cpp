@@ -144,7 +144,7 @@ _EXIT_:
     }
     // }
 
-    mGuard->Open(String("close"));
+    mGuard->Open(String("CStrictJarFile::Close"));
     return NOERROR;
 }
 

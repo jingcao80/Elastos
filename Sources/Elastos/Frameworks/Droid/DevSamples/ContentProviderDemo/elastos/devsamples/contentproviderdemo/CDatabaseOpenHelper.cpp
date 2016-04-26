@@ -29,7 +29,7 @@ ECode CDatabaseOpenHelper::OnCreate(
     Logger::I(TAG, "OnCreate");
     assert(db != NULL && "CDatabaseOpenHelper::OnCreate db is NULL.");
 
-    StringBuilder sb("create table ");
+    StringBuilder sb("create table if not exists ");
     sb += Utils::TABLE_NAME;
     sb += "(";
     sb += Utils::TAG_ID;
@@ -53,7 +53,12 @@ ECode CDatabaseOpenHelper::OnUpgrade(
     /* [in] */ Int32 newVersion)
 {
     Logger::I(TAG, "OnUpgrade");
-    return NOERROR;
+
+    StringBuilder sb("drop table if exists ");
+    sb += Utils::TABLE_NAME;
+    sb += ";";
+    db->ExecSQL(sb.ToString());
+    return OnCreate(db);
 }
 
 ECode CDatabaseOpenHelper::Add(

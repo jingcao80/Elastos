@@ -437,7 +437,7 @@ ECode InputEventReceiver::constructor(
     AutoPtr<ICloseGuardHelper> helper;
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
     helper->Get((ICloseGuard**)&mCloseGuard);
-    mCloseGuard->Open(String("dispose"));
+    mCloseGuard->Open(String("InputEventReceiver::Dispose"));
 
     mInputChannel = inputChannel;
     looper->GetQueue((IMessageQueue**)&mMessageQueue);

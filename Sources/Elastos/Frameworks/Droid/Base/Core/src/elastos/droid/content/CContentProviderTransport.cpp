@@ -11,6 +11,7 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CCancellationSignalHelper.h"
 #include "elastos/droid/app/AppOpsManager.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::Binder;
@@ -22,10 +23,13 @@ using Elastos::Droid::Os::ICancellationSignalHelper;
 using Elastos::Droid::Os::CCancellationSignalHelper;
 using Elastos::Droid::App::AppOpsManager;
 using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Content {
+
+static const String TAG("CContentProviderTransport");
 
 CAR_INTERFACE_IMPL_3(CContentProviderTransport, Object, IContentProviderTransport, IIContentProvider, IBinder)
 
@@ -576,14 +580,6 @@ ECode CContentProviderTransport::Uncanonicalize(
 _Exit_:
     cp->SetCallingPackage(original);
     return ec;
-}
-
-ECode CContentProviderTransport::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    *str = String("CContentProviderTransport");
-    return NOERROR;
 }
 
 ECode CContentProviderTransport::EnforceFilePermission(

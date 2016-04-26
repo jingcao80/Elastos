@@ -56,7 +56,7 @@ ECode FileInputStream::constructor(
     fd->GetDescriptor(&ifd);
     mFd->SetDescriptor(ifd);
     mShouldClose = TRUE;
-    mGuard->Open(String("close"));
+    mGuard->Open(String("FileInputStream::Close"));
     return NOERROR;
 }
 

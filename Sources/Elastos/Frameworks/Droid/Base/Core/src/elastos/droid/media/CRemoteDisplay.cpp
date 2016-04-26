@@ -334,7 +334,7 @@ void CRemoteDisplay::StartListening(
             iface.string());
     }
 
-    mGuard->Open(String("dispose"));
+    mGuard->Open(String("CRemoteDisplay::Dispose"));
 }
 
 void CRemoteDisplay::NotifyDisplayConnected(

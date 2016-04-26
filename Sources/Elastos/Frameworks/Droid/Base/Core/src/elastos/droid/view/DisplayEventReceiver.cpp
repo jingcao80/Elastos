@@ -38,7 +38,7 @@ DisplayEventReceiver::DisplayEventReceiver(
     mMessageQueue = ((Looper*)looper)->GetQueue();
     NativeInit();
 
-    mCloseGuard->Open(String("dispose"));
+    mCloseGuard->Open(String("DisplayEventReceiver::Dispose"));
 }
 
 DisplayEventReceiver::~DisplayEventReceiver()

@@ -13,6 +13,7 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::ICancellationSignal;
 using Elastos::Droid::Utility::IPrinter;
 using Elastos::Droid::Content::IContentValues;
+using Elastos::Core::ICloseGuard;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileFilter;
 using Elastos::Utility::IMap;
@@ -1458,7 +1459,7 @@ private:
 
     // Warns if the database is finalized without being closed properly.
     // INVARIANT: Guarded by mLock.
-    //const CloseGuard mCloseGuardLocked = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuardLocked;
 
     // The database configuration.
     // INVARIANT: Guarded by mLock.

@@ -143,9 +143,6 @@ public:
         /* [in] */ const String& writePermission,
         /* [in] */ ArrayOf<IPathPermission*>* pathPermissions);
 
-    CARAPI ToString(
-        /* [out] */ String* info);
-
     /**
      * Given an IContentProvider, try to coerce it back to the real
      * ContentProvider object if it is running in the local process.  This can

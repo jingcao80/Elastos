@@ -3,8 +3,29 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ImageView android:id="@+id/ImageView"
+
+    <Button android:id="@+id/Add"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </ImageView>
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="Resolver Add" />
+
+    <Button android:id="@+id/Query"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="Resolver Query" />
+
+    <Button android:id="@+id/Update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="Resolver Update" />
+
+    <Button android:id="@+id/Delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="Resolver Delete" />
+
 </LinearLayout>

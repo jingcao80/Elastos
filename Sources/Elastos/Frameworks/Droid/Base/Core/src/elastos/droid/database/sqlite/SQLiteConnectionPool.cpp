@@ -15,6 +15,8 @@ using Elastos::Droid::Os::EIID_ICancellationSignalOnCancelListener;
 using Elastos::Core::Thread;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
@@ -33,6 +35,8 @@ const Int32 SQLiteConnectionPool::CONNECTION_FLAG_INTERACTIVE;
 const String SQLiteConnectionPool::TAG("SQLiteConnectionPool");
 const Int64 SQLiteConnectionPool::CONNECTION_POOL_BUSY_MILLIS;
 
+CAR_INTERFACE_IMPL(SQLiteConnectionPool, Object, ICloseable)
+
 SQLiteConnectionPool::SQLiteConnectionPool(
     /* [in] */ SQLiteDatabaseConfiguration* configuration)
     : mMaxConnectionPoolSize(0)
@@ -42,6 +46,10 @@ SQLiteConnectionPool::SQLiteConnectionPool(
     CAtomicBoolean::New((IAtomicBoolean**)&mConnectionLeaked);
     mConfiguration = new SQLiteDatabaseConfiguration(configuration);
     SetMaxConnectionPoolSizeLocked();
+
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mCloseGuard);
 }
 
 SQLiteConnectionPool::~SQLiteConnectionPool()
@@ -52,8 +60,6 @@ SQLiteConnectionPool::~SQLiteConnectionPool()
     //     super.finalize();
     // }
 }
-
-CAR_INTERFACE_IMPL(SQLiteConnectionPool, Object, ICloseable)
 
 ECode SQLiteConnectionPool::Open(
     /* [in] */ SQLiteDatabaseConfiguration* configuration,
@@ -85,7 +91,7 @@ ECode SQLiteConnectionPool::Open()
     // Mark the pool as being open for business.
     mIsOpen = TRUE;
 
-    //mCloseGuard->Open(String("close"));
+    mCloseGuard->Open(String("SQLiteConnectionPool::Close"));
     return NOERROR;
 }
 
@@ -97,12 +103,12 @@ ECode SQLiteConnectionPool::Close()
 ECode SQLiteConnectionPool::Dispose(
     /* [in] */ Boolean finalized)
 {
-    // if (mCloseGuard != NULL) {
-    //     if (finalized) {
-    //         mCloseGuard->WarnIfOpen();
-    //     }
-    //     mCloseGuard->Close();
-    // }
+    if (mCloseGuard != NULL) {
+        if (finalized) {
+            mCloseGuard->WarnIfOpen();
+        }
+        mCloseGuard->Close();
+    }
 
     if (!finalized) {
         // Close all connections.  We don't need (or want) to do this

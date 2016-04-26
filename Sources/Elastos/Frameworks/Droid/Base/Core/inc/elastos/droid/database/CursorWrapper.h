@@ -15,8 +15,10 @@ using Elastos::IO::ICloseable;
 namespace Elastos {
 namespace Droid {
 namespace Database {
+
 /**
- * Wrapper class for Cursor that delegates all calls to the actual cursor object
+ * Wrapper class for Cursor that delegates all calls to the actual cursor object.  The primary
+ * use for this class is to extend a cursor while overriding only a subset of its methods.
  */
 class CursorWrapper
     : public Object
@@ -26,6 +28,8 @@ class CursorWrapper
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("CursorWrapper")
 
     CARAPI constructor(
         /* [in] */ ICursor* cursor);

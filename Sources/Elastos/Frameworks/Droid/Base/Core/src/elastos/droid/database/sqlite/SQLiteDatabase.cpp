@@ -29,6 +29,8 @@ using Elastos::Droid::Database::DatabaseUtils;
 using Elastos::Droid::Database::CDefaultDatabaseErrorHandler;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::CFile;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::IO::EIID_IFileFilter;
@@ -113,6 +115,10 @@ SQLiteDatabase::SQLiteDatabase(
         CDefaultDatabaseErrorHandler::New((IDatabaseErrorHandler**)&mErrorHandler);
     }
     mConfigurationLocked = new SQLiteDatabaseConfiguration(path, openFlags);
+
+    AutoPtr<ICloseGuardHelper> cgHelper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&cgHelper);
+    cgHelper->Get((ICloseGuard**)&mCloseGuardLocked);
 }
 
 SQLiteDatabase::~SQLiteDatabase()
@@ -134,12 +140,12 @@ void SQLiteDatabase::Dispose(
 {
     AutoPtr<SQLiteConnectionPool> pool;
     synchronized(mLock) {
-        // if (mCloseGuardLocked != NULL) {
-        //     if (finalized) {
-        //         mCloseGuardLocked.warnIfOpen();
-        //     }
-        //     mCloseGuardLocked.close();
-        // }
+        if (mCloseGuardLocked != NULL) {
+            if (finalized) {
+                mCloseGuardLocked->WarnIfOpen();
+            }
+            mCloseGuardLocked->Close();
+        }
 
         pool = mConnectionPoolLocked;
         mConnectionPoolLocked = NULL;
@@ -562,7 +568,7 @@ ECode SQLiteDatabase::OpenInner()
     synchronized(mLock){
         assert(mConnectionPoolLocked == NULL);
         FAIL_RETURN(SQLiteConnectionPool::Open(mConfigurationLocked, (SQLiteConnectionPool**)&mConnectionPoolLocked));
-        // mCloseGuardLocked.Open("close");
+        mCloseGuardLocked->Open(String("SQLiteDatabase::Close"));
     }
 
     synchronized(sActiveDatabasesLock) {
@@ -927,7 +933,7 @@ ECode SQLiteDatabase::Insert(
     //try {
     ECode ec = InsertWithOnConflict(table, nullColumnHack, values, CONFLICT_NONE, rowId);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Error inserting %p, 0x%08x", values, ec);
+        Slogger::E(TAG, "Error inserting %s, 0x%08x", TO_CSTR(values), ec);
         *rowId = -1;
     }
     // } catch (SQLException e) {
@@ -956,7 +962,7 @@ ECode SQLiteDatabase::Replace(
     // try {
     ECode ec = InsertWithOnConflict(table, nullColumnHack, initialValues, CONFLICT_REPLACE, rowId);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Error inserting %p, 0x%08x", initialValues, ec);
+        Slogger::E(TAG, "Error inserting %s, 0x%08x", TO_CSTR(initialValues), ec);
         *rowId = -1;
     }
     // } catch (SQLException e) {
@@ -1032,7 +1038,7 @@ ECode SQLiteDatabase::InsertWithOnConflict(
     AutoPtr<ISQLiteStatement> statement;
     ECode ec = CSQLiteStatement::New(this, sqlStr, bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Failed to create SQLiteStatement with [%s]", sqlStr.string());
+        Slogger::E(TAG, "Failed to insert : [%s]", sqlStr.string());
         goto fail;
     }
     // try {
@@ -1073,6 +1079,7 @@ ECode SQLiteDatabase::Delete(
 
     ECode ec = CSQLiteStatement::New(this, sb.ToString(), bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
+        Slogger::E(TAG, "Failed to delete : [%s]", sb.ToString().string());
         goto fail;
     }
     // try {
@@ -1131,19 +1138,15 @@ ECode SQLiteDatabase::UpdateWithOnConflict(
     AutoPtr<IIterator> it;
     colNames->GetIterator((IIterator**)&it);
     Boolean hasNext = FALSE;
-    String name;
+    String colName;
     while ((it->HasNext(&hasNext), hasNext)) {
-        AutoPtr<IInterface> outface;
-        it->GetNext((IInterface**)&outface);
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe(outface);
-        AutoPtr<IInterface> obj;
-        entry->GetKey((IInterface**)&obj);
-        assert(ICharSequence::Probe(obj) != NULL);
-        ICharSequence::Probe(obj)->ToString(&name);
-
-        String colName = name;
+        AutoPtr<IInterface> keyObj;
+        it->GetNext((IInterface**)&keyObj);
+        assert(ICharSequence::Probe(keyObj) != NULL);
+        ICharSequence::Probe(keyObj)->ToString(&colName);
         sql.Append((i > 0) ? "," : "");
         sql.Append(colName);
+
         AutoPtr<IInterface> temp;
         values->Get(colName, (IInterface**)&temp);
         bindArgs->Set(i++, temp);
@@ -1157,15 +1160,16 @@ ECode SQLiteDatabase::UpdateWithOnConflict(
             bindArgs->Set(i, cs);
         }
     }
-    assert(0 && "TODO TextUtils::IsEmpty");
-    // if (!TextUtils::IsEmpty(whereClause)) {
-    //     sql.Append(" WHERE ");
-    //     sql.Append(whereClause);
-    // }
+
+    if (!TextUtils::IsEmpty(whereClause)) {
+        sql.Append(" WHERE ");
+        sql.Append(whereClause);
+    }
 
     AutoPtr<ISQLiteStatement> statement;
     ECode ec = CSQLiteStatement::New(this, sql.ToString(), bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
+        Slogger::E(TAG, "Failed to insert : [%s], whereClause: [%s]", sql.ToString().string(), whereClause.string());
         goto fail;
     }
     //try {
@@ -1221,6 +1225,7 @@ ECode SQLiteDatabase::ExecuteSql(
     AutoPtr<ISQLiteStatement> statement;
     ECode ec = CSQLiteStatement::New(this, sql, bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
+        Slogger::E(TAG, "Failed to excute : [%s]", sql.string());
         goto fail;
     }
     //try {

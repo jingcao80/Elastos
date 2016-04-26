@@ -31,6 +31,8 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CThread;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::IO::IFlushable;
 
@@ -53,7 +55,11 @@ SystemSensorManager::BaseEventQueue::BaseEventQueue(
     looper->GetQueue((IMessageQueue**)&queue);
     mScratch = ArrayOf<Float>::Alloc(16);
     nSensorEventQueue = NativeInitBaseEventQueue(this, queue, mScratch);
-    //mCloseGuard.open("dispose");
+
+    AutoPtr<ICloseGuardHelper> cgHelper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&cgHelper);
+    cgHelper->Get((ICloseGuard**)&mCloseGuard);
+    mCloseGuard->Open(String("SystemSensorManager::BaseEventQueue::Dispose"));
     mManager = manager;
 }
 
@@ -169,12 +175,12 @@ Boolean SystemSensorManager::BaseEventQueue::HasSensors()
 void SystemSensorManager::BaseEventQueue::Dispose(
     /* [in] */ Boolean finalized)
 {
-    // if (mCloseGuard != null) {
-    //     if (finalized) {
-    //         mCloseGuard.warnIfOpen();
-    //     }
-    //     mCloseGuard.close();
-    // }
+    if (mCloseGuard != NULL) {
+        if (finalized) {
+            mCloseGuard->WarnIfOpen();
+        }
+        mCloseGuard->Close();
+    }
     if (nSensorEventQueue != 0) {
         NativeDestroySensorEventQueue(nSensorEventQueue);
         nSensorEventQueue = 0;

@@ -37,7 +37,7 @@ CInputQueue::CInputQueue()
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
     ASSERT_SUCCEEDED(NativeInit(wr, Looper::GetMyQueue(), &mPtr));
-    mCloseGuard->Open(String("dispose"));
+    mCloseGuard->Open(String("CInputQueue::Dispose"));
 }
 
 CInputQueue::~CInputQueue()

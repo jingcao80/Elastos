@@ -76,7 +76,7 @@ ECode PdfEditor::constructor(
     Int32 iFd = 0;
     FAIL_RETURN(NativeOpen(mInput->GetFd(&iFd), size, &mNativeDocument));
     mPageCount = NativeGetPageCount(mNativeDocument);
-    return mCloseGuard->Open(String("close"));
+    return mCloseGuard->Open(String("PdfEditor::Close"));
 }
 
 PdfEditor::~PdfEditor()

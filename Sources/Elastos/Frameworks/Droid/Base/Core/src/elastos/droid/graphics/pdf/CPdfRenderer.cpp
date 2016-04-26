@@ -59,7 +59,7 @@ ECode CPdfRenderer::Page::constructor(
     FAIL_RETURN(NativeOpenPageAndGetSize(mHost->mNativeDocument, index, size, &mNativePage));
     mIndex = index;
     size->Get(&mWidth, &mHeight);
-    return mCloseGuard->Open(String("close"));
+    return mCloseGuard->Open(String("CPdfRenderer::Close"));
 }
 
 CPdfRenderer::Page::~Page()
@@ -225,7 +225,7 @@ ECode CPdfRenderer::constructor(
     Int32 iFd = 0;
     FAIL_RETURN(NativeCreate((mInput->GetFd(&iFd), iFd), size, &mNativeDocument));
     mPageCount = NativeGetPageCount(mNativeDocument);
-    return mCloseGuard->Open(String("close"));
+    return mCloseGuard->Open(String("CPdfRenderer::Close"));
 }
 
 ECode CPdfRenderer::Close()

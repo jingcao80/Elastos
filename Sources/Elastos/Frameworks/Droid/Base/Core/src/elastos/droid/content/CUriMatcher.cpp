@@ -73,12 +73,9 @@ ECode CUriMatcher::AddURI(
         }
 
         List<AutoPtr<CUriMatcher> >& children = node->mChildren;
-        Int32 numChildren = children.GetSize();
         AutoPtr<CUriMatcher> child;
-        Int32 j = 0;
         List<AutoPtr<CUriMatcher> >::Iterator it;
-
-        for (it = children.Begin(); it != children.End(); it++, j++) {
+        for (it = children.Begin(); it != children.End(); it++) {
             child = *it;
             if (token.Equals(child->mText)) {
                 node = child;
@@ -86,7 +83,7 @@ ECode CUriMatcher::AddURI(
             }
         }
 
-        if (j == numChildren) {
+        if (it == children.End()) {
             // Child not found, create it
             child = new CUriMatcher();
 
@@ -163,7 +160,7 @@ ECode CUriMatcher::Match(
                 chars = u.GetChars();
                 lk = chars->GetLength();
                 for (Int32 k = 0; k < lk; k++) {
-                    c = (*chars)[i];
+                    c = (*chars)[k];
                     if (c < '0' || c > '9') {
                         //break which_switch;
                         goto which_switch;

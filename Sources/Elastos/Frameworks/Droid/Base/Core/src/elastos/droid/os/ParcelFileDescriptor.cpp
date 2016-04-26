@@ -249,7 +249,7 @@ ECode ParcelFileDescriptor::constructor(
     mWrapped = NULL;
     mFd = fd;
     mCommFd = commChannel;
-    mGuard->Open(String("close"));
+    mGuard->Open(String("ParcelFileDescriptor::Close"));
     return NOERROR;
 }
 

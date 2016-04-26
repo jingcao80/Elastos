@@ -1,6 +1,5 @@
 
 #include "CActivityOne.h"
-#include "CDatabaseOpenHelper.h"
 #include "Utils.h"
 #include "R.h"
 #include <Elastos.Droid.App.h>
@@ -8,13 +7,19 @@
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Widget.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentUris;
+using Elastos::Droid::Content::CContentUris;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -42,9 +47,6 @@ ECode CActivityOne::MyListener::OnClick(
     v->GetId(&id);
 
     switch(id) {
-        case R::id::Create:
-            mHost->Create();
-            break;
 
         case R::id::Add:
             mHost->Add();
@@ -86,9 +88,6 @@ ECode CActivityOne::OnCreate(
 
     AutoPtr<MyListener> l = new MyListener(this);
     AutoPtr<IView> view;
-
-    view = FindViewById(R::id::Create);
-    view->SetOnClickListener(l.Get());
 
     view = FindViewById(R::id::Add);
     view->SetOnClickListener(l.Get());
@@ -146,35 +145,71 @@ ECode CActivityOne::OnActivityResult(
 
 //====================================================================================
 
-ECode CActivityOne::Create()
+
+ECode CActivityOne::Add()
 {
-    if (mDBOpenHelper == NULL ) {
-        ECode ec = CDatabaseOpenHelper::New(this, (ISQLiteOpenHelper**)&mDBOpenHelper);
-        Logger::I(TAG, "create CDatabaseOpenHelper, ec=%08x", ec);
-    }
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(Utils::USERNAME, String("kesalin"));
+    values->Put(Utils::SEX, String("男"));
+    values->Put(Utils::EMAIL, String("kesalin@gmail.com"));
+
+    AutoPtr<IContentResolver> contentResolver;
+    GetContentResolver((IContentResolver**)&contentResolver);
+    AutoPtr<IUri> uri;
+    ECode ec = contentResolver->Insert(Utils::CONTENT_URI, values, (IUri**)&uri);
+    Logger::I(TAG, " insert: %s, uri:%s, ec=%08x", TO_CSTR(values), TO_CSTR(uri), ec);
+
+    values = NULL; uri = NULL;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(Utils::USERNAME, String("Elastos"));
+    values->Put(Utils::SEX, String("男"));
+    values->Put(Utils::EMAIL, String("elastos@kortide.com"));
+    contentResolver->Insert(Utils::CONTENT_URI, values, (IUri**)&uri);
+    Logger::I(TAG, " insert: %s, result uri: %s, ec=%08x", TO_CSTR(values), TO_CSTR(uri), ec);
+
+    values = NULL; uri = NULL;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(Utils::USERNAME, String("Google"));
+    values->Put(Utils::SEX, String("男"));
+    values->Put(Utils::EMAIL, String("elastos@gmail.com"));
+    contentResolver->Insert(Utils::CONTENT_URI, values, (IUri**)&uri);
+    Logger::I(TAG, " insert: %s, result uri: %s, ec=%08x", TO_CSTR(values), TO_CSTR(uri), ec);
 
     return NOERROR;
 }
 
-ECode CActivityOne::Add()
+Int64 CActivityOne::QueryRowId()
 {
-    // AutoPtr<IContentValues> values;
-    // CContentValues::New((IContentValues**)&values);
-    // values->Put(Utils::USERNAME, String("kesalin");
-    // values->Put(Utils::SEX, String("男"));
-    // values->Put(Utils::EMAIL, String("kesalin@gmail.com"));
+    Int64 id = -1;
 
-    // AutoPtr<IContentResolver> contentResolver;
-    // GetContentResolver((IContentResolver**)&contentResolver);
-    // AutoPtr<IUri> uri;
-    // contentResolver->Insert(Utils::CONTENT_URI, values, (IUri**)&uri);
+    AutoPtr<IContentResolver> contentResolver;
+    GetContentResolver((IContentResolver**)&contentResolver);
 
-    if (mDBOpenHelper != NULL) {
-        CDatabaseOpenHelper* doh = (CDatabaseOpenHelper*)mDBOpenHelper.Get();
-        doh->Add(String("kesalin"), String("男"), String("kesalin@gmail.com"));
-        doh->Add(String("Elastos"), String("男"), String("elastos@kortide.com"));
+    String nullStr;
+    AutoPtr<ArrayOf<String> > projections = ArrayOf<String>::Alloc(3);
+    (*projections)[0] = Utils::TAG_ID;
+
+    AutoPtr<ICursor> cursor;
+    ECode ec = contentResolver->Query(
+        Utils::CONTENT_URI, projections, nullStr, NULL, nullStr, (ICursor**)&cursor);
+    Logger::I(TAG, " == QueryRowId: cursor: %s, ec=%08x", TO_CSTR(cursor), ec);
+    if (cursor != NULL) {
+        Int32 count = 0, i = 0;
+        cursor->GetCount(&count);
+        Boolean bval;
+        while (cursor->MoveToNext(&bval), bval) {
+            Int32 index;
+            cursor->GetColumnIndex(Utils::TAG_ID, &index);
+            cursor->GetInt64(index, &id);
+            break;
+        }
+
+        StartManagingCursor(cursor);  //查找后关闭游标
     }
-    return NOERROR;
+
+    Logger::I(TAG, " >>>> QueryRowId: %lld", id);
+    return id;
 }
 
 ECode CActivityOne::Query()
@@ -191,7 +226,7 @@ ECode CActivityOne::Query()
     AutoPtr<ICursor> cursor;
     ECode ec = contentResolver->Query(
         Utils::CONTENT_URI, projections, nullStr, NULL, nullStr, (ICursor**)&cursor);
-    Logger::I(TAG, " == Query: %s, ec=%08x", TO_CSTR(cursor), ec);
+    Logger::I(TAG, " == Query: cursor: %s, ec=%08x", TO_CSTR(cursor), ec);
     if (cursor != NULL) {
         Int32 count = 0, i = 0;
         cursor->GetCount(&count);
@@ -210,7 +245,7 @@ ECode CActivityOne::Query()
             cursor->GetColumnIndex(Utils::EMAIL, &index);
             cursor->GetString(index, &email);
 
-            Logger::I(TAG, " >> item %d: [%s, %s, %s]", ++i, name.string(), sex.string(), email.string());
+            Logger::I(TAG, "     >> item %d: [%s, %s, %s]", ++i, name.string(), sex.string(), email.string());
         }
 
         StartManagingCursor(cursor);  //查找后关闭游标
@@ -219,13 +254,97 @@ ECode CActivityOne::Query()
     return NOERROR;
 }
 
+ECode CActivityOne::UpdateByRowId(
+    /* [in] */ Int64 rowId)
+{
+    AutoPtr<IContentUris> contentUris;
+    CContentUris::AcquireSingleton((IContentUris**)&contentUris);
+    AutoPtr<IUri> uri;
+    contentUris->WithAppendedId(Utils::CONTENT_URI, rowId, (IUri**)&uri);
+
+    String where;
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(Utils::USERNAME, String("update_by_rowId"));
+    values->Put(Utils::EMAIL, String("kesalin-rowId@gmail.com"));
+
+    AutoPtr<IContentResolver> contentResolver;
+    GetContentResolver((IContentResolver**)&contentResolver);
+    Int32 rowsAffected;
+    ECode ec = contentResolver->Update(uri, values, where, NULL, &rowsAffected);
+    Logger::I(TAG, " upadte %lld : %s, values: %s, rowsAffected:%d, ec=%08x",
+        rowId, TO_CSTR(uri), TO_CSTR(values), rowsAffected, ec);
+    return NOERROR;
+}
+
+static String GenerateWhereByName(
+    /* [in] */ const String& userName)
+{
+    StringBuilder sb(Utils::USERNAME);
+    sb += "='";
+    sb += userName;
+    sb += "'";
+    return sb.ToString();
+}
+
+ECode CActivityOne::UpdateByName(
+    /* [in] */ const String& userName)
+{
+    String where = GenerateWhereByName(userName);
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(Utils::USERNAME, String("update_by_name"));
+    values->Put(Utils::EMAIL, String("kesalin@gmail.com"));
+
+    AutoPtr<IContentResolver> contentResolver;
+    GetContentResolver((IContentResolver**)&contentResolver);
+    Int32 rowsAffected;
+    ECode ec = contentResolver->Update(Utils::CONTENT_URI, values, where, NULL, &rowsAffected);
+    Logger::I(TAG, " upadte %s, values: %s, rowsAffected:%d, ec=%08x",
+        userName.string(), TO_CSTR(values), rowsAffected, ec);
+    return ec;
+}
+
 ECode CActivityOne::Update()
 {
+    Int64 id = QueryRowId();
+    if (id > 0) {
+        UpdateByRowId(id);
+    }
+
+    UpdateByName(String("kesalin"));
+
+    Query();
     return NOERROR;
+}
+
+ECode CActivityOne::DeleteByName(
+    /* [in] */ const String& userName)
+{
+    AutoPtr<IContentResolver> contentResolver;
+    GetContentResolver((IContentResolver**)&contentResolver);
+    StringBuilder sb(Utils::USERNAME);
+    sb += "='";
+    sb += userName;
+    sb += "'";
+    String where = sb.ToString();
+
+    Int32 rowsAffected;
+    ECode ec = contentResolver->Delete(Utils::CONTENT_URI, where, NULL, &rowsAffected);
+    Logger::I(TAG, " delete: %s, rowsAffected:%d, ec=%08x", where.string(), rowsAffected, ec);
+    return ec;
 }
 
 ECode CActivityOne::Delete()
 {
+    DeleteByName(String("kesalin"));
+    DeleteByName(String("Elastos"));
+    Query();
+
+    DeleteByName(String("update_by_rowId"));
+    DeleteByName(String("update_by_name"));
+    DeleteByName(String("Google"));
+    Query();
     return NOERROR;
 }
 

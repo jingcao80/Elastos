@@ -314,7 +314,7 @@ CPdfDocument::~CPdfDocument()
 ECode CPdfDocument::constructor()
 {
     mNativeDocument = NativeCreateDocument();
-    mCloseGuard->Open(String("close"));
+    mCloseGuard->Open(String("CPdfDocument::Close"));
     return NOERROR;
 }
 

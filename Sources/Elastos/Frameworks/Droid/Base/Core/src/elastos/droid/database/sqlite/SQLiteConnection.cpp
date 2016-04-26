@@ -1056,7 +1056,7 @@ static ECode CopyRow(
                 result = CPR_FULL;
                 break;
             }
-            ALOGW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
+            // ALOGW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
         }
         else if (type == SQLITE_FLOAT) {
             // FLOAT data
@@ -1068,7 +1068,7 @@ static ECode CopyRow(
                 result = CPR_FULL;
                 break;
             }
-            ALOGW("%d,%d is FLOAT %lf", startPos + addedRows, i, value);
+            // ALOGW("%d,%d is FLOAT %lf", startPos + addedRows, i, value);
         }
         else if (type == SQLITE_BLOB) {
             // BLOB data
@@ -1081,7 +1081,7 @@ static ECode CopyRow(
                 result = CPR_FULL;
                 break;
             }
-            ALOGW("%d,%d is Blob with %u bytes", startPos + addedRows, i, size);
+            // ALOGW("%d,%d is Blob with %u bytes", startPos + addedRows, i, size);
         }
         else if (type == SQLITE_NULL) {
             // NULL field
@@ -1092,7 +1092,7 @@ static ECode CopyRow(
                 break;
             }
 
-            ALOGE("%d,%d is NULL", startPos + addedRows, i);
+            // ALOGE("%d,%d is NULL", startPos + addedRows, i);
         }
         else {
             // Unknown data
@@ -1276,7 +1276,7 @@ SQLiteConnection::SQLiteConnection(
     AutoPtr<ICloseGuardHelper> helper;
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
     helper->Get((ICloseGuard**)&mCloseGuard);
-    mCloseGuard->Open(String("close"));
+    mCloseGuard->Open(String("SQLiteConnection::Close"));
 }
 
 SQLiteConnection::~SQLiteConnection()

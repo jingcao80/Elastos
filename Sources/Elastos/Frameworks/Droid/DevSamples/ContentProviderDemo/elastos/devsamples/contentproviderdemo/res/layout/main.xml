@@ -4,12 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button android:id="@+id/Create"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="100dp"
-        android:text="Create" />
-
     <Button android:id="@+id/Add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

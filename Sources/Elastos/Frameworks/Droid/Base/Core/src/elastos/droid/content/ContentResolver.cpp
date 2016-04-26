@@ -54,6 +54,8 @@ using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::IO::IFileInputStream;
@@ -68,20 +70,18 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
+const String TAG("ContentResolver");
+
 //=========================================================================
 // ContentResolver::ParcelFileDescriptorInner
 //=========================================================================
 ContentResolver::CursorWrapperInner::CursorWrapperInner(
-    /* [in] */ ICursor* cursor,
     /* [in] */ IIContentProvider* icp,
     /* [in] */ ContentResolver* contentResolver)
     : mContentProvider(icp)
     , mProviderReleased(FALSE)
     , mContentResolver(contentResolver)
 {
-    assert(0 && "TODO init parent class");
-    //Init(cursor);
-    mCloseGuard->Open(String("close"));
 }
 
 ContentResolver::CursorWrapperInner::~CursorWrapperInner()
@@ -89,9 +89,19 @@ ContentResolver::CursorWrapperInner::~CursorWrapperInner()
     Finalize();
 }
 
+ECode ContentResolver::CursorWrapperInner::constructor(
+    /* [in] */ ICursor* cursor)
+{
+    AutoPtr<ICloseGuardHelper> cgHelper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&cgHelper);
+    cgHelper->Get((ICloseGuard**)&mCloseGuard);
+    mCloseGuard->Open(String("ContentResolver::CursorWrapperInner::Close"));
+    return CrossProcessCursorWrapper::constructor(cursor);
+}
+
 ECode ContentResolver::CursorWrapperInner::Close()
 {
-    //FAIL_RETURN(CrossProcessCursorWrapper::Close())
+    FAIL_RETURN(CrossProcessCursorWrapper::Close())
 
     Boolean result = FALSE;
     mContentResolver->ReleaseProvider(mContentProvider, &result);
@@ -105,6 +115,18 @@ ECode ContentResolver::CursorWrapperInner::Close()
 
 ECode ContentResolver::CursorWrapperInner::Finalize()
 {
+    if (mCloseGuard != NULL) {
+        mCloseGuard->WarnIfOpen();
+    }
+
+    if (!mProviderReleased && mContentProvider != NULL) {
+        // Even though we are using CloseGuard, log this anyway so that
+        // application developers always see the message in the log.
+        Logger::W(TAG, "Cursor finalized without prior close()");
+        Boolean result = FALSE;
+        mContentResolver->ReleaseProvider(mContentProvider, &result);
+    }
+
     return NOERROR;
 }
 
@@ -164,8 +186,6 @@ AutoPtr<IIntent> InitACTION_SYNC_CONN_STATUS_CHANGED()
 const AutoPtr<ArrayOf<String> > ContentResolver::SYNC_ERROR_NAMES = InitSYNC_ERROR_NAMES();
 
 AutoPtr<IIntent> ContentResolver::ACTION_SYNC_CONN_STATUS_CHANGED = InitACTION_SYNC_CONN_STATUS_CHANGED();
-
-const String ContentResolver::TAG("ContentResolver");
 
 // Always log queries which take 500ms+; shorter queries are
 // sampled accordingly.
@@ -356,10 +376,10 @@ ECode ContentResolver::Query(
         cancellationSignal->SetRemote(remoteCancellationSignal);
     }
 
-    AutoPtr<ICursor> qCursor, temp;
+    AutoPtr<ICursor> qCursor;
     // try {
     ECode ec = unstableProvider->Query(mPackageName, uri, projection,
-            selection, selectionArgs, sortOrder, remoteCancellationSignal, (ICursor**)&temp);
+            selection, selectionArgs, sortOrder, remoteCancellationSignal, (ICursor**)&qCursor);
 
     if (ec == (ECode)E_DEAD_OBJECT_EXCEPTION) {
         // The remote process has died...  but we only hold an unstable
@@ -372,9 +392,9 @@ ECode ContentResolver::Query(
             goto __EXIT__;
         }
 
-        temp = NULL;
+        qCursor = NULL;
         ec = stableProvider->Query(mPackageName, uri, projection, selection, selectionArgs,
-            sortOrder, remoteCancellationSignal, (ICursor**)&temp);
+            sortOrder, remoteCancellationSignal, (ICursor**)&qCursor);
         FAIL_GOTO(ec, __EXIT__)
     }
     else if (FAILED(ec)) {
@@ -397,10 +417,10 @@ ECode ContentResolver::Query(
         ec = AcquireProvider(uri, (IIContentProvider**)&stableProvider);
         FAIL_GOTO(ec, __EXIT__)
     }
-    wrapper = new CursorWrapperInner(qCursor, stableProvider, this);
+    wrapper = new CursorWrapperInner(stableProvider, this);
+    wrapper->constructor(qCursor);
     stableProvider = NULL;
     qCursor = NULL;
-    goto __EXIT__;
 
 __EXIT__:
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -1470,6 +1490,7 @@ ECode ContentResolver::RequestSync(
     FAIL_RETURN(ValidateSyncExtrasBundle(extras))
     AutoPtr<IIContentService> contentService;
     FAIL_RETURN(GetContentService((IIContentService**)&contentService))
+    Logger::I(TAG, "RequestSync %s: %s, extras:%s", TO_CSTR(account), authority.string(), TO_CSTR(extras));
     return contentService->RequestSync(account, authority, extras);
 }
 
@@ -1488,7 +1509,7 @@ ECode ContentResolver::RequestSyncAsUser(
     builder->SyncOnce();
     AutoPtr<ISyncRequest> request;
     builder->Build((ISyncRequest**)&request);
-
+    Logger::I(TAG, "RequestSyncAsUser %s: %s, userId:%d", TO_CSTR(request), authority.string(), userId);
     // try {
     AutoPtr<IIContentService> cs;
     GetContentService((IIContentService**)&cs);
@@ -1501,6 +1522,7 @@ ECode ContentResolver::RequestSyncAsUser(
 ECode ContentResolver::RequestSync(
     /* [in] */ ISyncRequest* request)
 {
+    Logger::I(TAG, "RequestSync %s", TO_CSTR(request));
     // try {
     AutoPtr<IIContentService> cs;
     GetContentService((IIContentService**)&cs);

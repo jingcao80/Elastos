@@ -136,20 +136,6 @@ ECode CContentProviderOne::Query(
     /* [in] */ const String& sortOrder,
     /* [out] */ ICursor** cursor)
 {
-    Logger::I(TAG, "Query uri: [%s]", TO_CSTR(uri));
-    Logger::I(TAG, "Query projection: %d items:", projection ? projection->GetLength() : 0);
-    if (projection) {
-        for (Int32 i = 0; i < projection->GetLength(); ++i) {
-            Logger::I(TAG, "                     %d : [%s]", i + 1, (*projection)[i].string());
-        }
-    }
-    Logger::I(TAG, "Query selection: [%s], selectionArgs %d items:", selection.string(), selectionArgs ? selectionArgs->GetLength() : 0);
-    if (projection) {
-        for (Int32 i = 0; i < selectionArgs->GetLength(); ++i) {
-            Logger::I(TAG, "                     %d : [%s]", i + 1, (*selectionArgs)[i].string());
-        }
-    }
-    Logger::I(TAG, "Query sortOrder: [%s]", sortOrder.string());
     VALIDATE_NOT_NULL(cursor)
     *cursor = NULL;
 
@@ -220,10 +206,59 @@ ECode CContentProviderOne::Update(
     /* [in] */ ArrayOf<String>* selectionArgs,
     /* [out] */ Int32* rowsAffected)
 {
-    Logger::I(TAG, "Update");
     VALIDATE_NOT_NULL(rowsAffected)
     *rowsAffected = 0;
-    return NOERROR;
+
+    AutoPtr<ISQLiteDatabase> db;
+    mDBOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
+    assert(db != NULL);
+
+    Int32 matchCode;
+    GetUriMatcher()->Match(uri, &matchCode);
+    Logger::I(TAG, "Update URI %s, values %s, matchCode:%d", TO_CSTR(uri), TO_CSTR(values), matchCode);
+
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+
+    ECode ec = NOERROR;
+    switch(matchCode) {
+        case Utils::ITEM:
+            ec = db->Update(Utils::TABLE_NAME, values, selection, selectionArgs, rowsAffected);
+            Logger::I(TAG, "Update %d rows, ec=%08x", *rowsAffected, ec);
+            if (contentResolver) {
+                contentResolver->NotifyChange(uri, NULL);
+            }
+            return NOERROR;
+
+        case Utils::ITEM_ID: {
+            AutoPtr<IList> segments;
+            uri->GetPathSegments((IList**)&segments);
+            AutoPtr<IInterface> obj;
+            segments->Get(1, (IInterface**)&obj);
+            String id = Object::ToString(obj);
+            StringBuilder sb(Utils::TAG_ID);
+            sb += "=";
+            sb += id;
+            if (!selection.IsNullOrEmpty()) {
+                sb += "AND(";
+                sb += selection;
+                sb += ")";
+            }
+            String sel = sb.ToString();
+
+            ec = db->Update(Utils::TABLE_NAME, values, sel, selectionArgs, rowsAffected);
+            Logger::I(TAG, "Update [%s] %d rows, ec=%08x", sel.string(), *rowsAffected, ec);
+            if (contentResolver) {
+                contentResolver->NotifyChange(uri, NULL);
+            }
+            return NOERROR;
+        }
+    }
+
+    Logger::E(TAG, "Unknown URI %s", TO_CSTR(uri));
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
 ECode CContentProviderOne::Delete(
@@ -232,7 +267,6 @@ ECode CContentProviderOne::Delete(
     /* [in] */ ArrayOf<String>* selectionArgs,
     /* [out] */ Int32* rowsAffected)
 {
-    Logger::I(TAG, "Delete");
     VALIDATE_NOT_NULL(rowsAffected)
     *rowsAffected = 0;
 
@@ -266,6 +300,7 @@ ECode CContentProviderOne::Delete(
             segments->Get(1, (IInterface**)&obj);
             String id = Object::ToString(obj);
             StringBuilder sb(Utils::TAG_ID);
+            sb += "=";
             sb += id;
             if (!selection.IsNullOrEmpty()) {
                 sb += "AND(";

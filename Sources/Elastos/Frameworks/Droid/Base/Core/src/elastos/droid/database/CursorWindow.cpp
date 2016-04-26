@@ -618,7 +618,7 @@ ECode CursorWindow::constructor(
         Slogger::E(STATS_TAG, "Cursor window allocation of %d kb failed. %s", (GetCursorWindowSize() / 1024), PrintStats().string());
         return E_CURSOR_WINDOW_ALLOCATION_EXCEPTION;
     }
-    mCloseGuard->Open(String("close"));
+    mCloseGuard->Open(String("CursorWindow::Close"));
     RecordNewWindow(Binder::GetCallingPid(), mWindowPtr);
     return NOERROR;
 }

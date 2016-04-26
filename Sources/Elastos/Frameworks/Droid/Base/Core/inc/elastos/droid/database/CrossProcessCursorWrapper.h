@@ -26,8 +26,7 @@ class CrossProcessCursorWrapper
 public:
     CAR_INTERFACE_DECL()
 
-    CARAPI constructor(
-        /* [in] */ ICursor* cursor);
+    TO_STRING_IMPL("CrossProcessCursorWrapper")
 
     //@Override
     virtual CARAPI FillWindow(

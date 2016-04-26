@@ -61,7 +61,7 @@ ECode CPlainDatagramSocketImpl::constructor(
     mLocalPort = localPort;
     Boolean flag = FALSE;
     if ((fd->Valid(&flag), flag)) {
-        return mGuard->Open(String("close"));
+        return mGuard->Open(String("CPlainDatagramSocketImpl::Close"));
     }
     return NOERROR;
 }

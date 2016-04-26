@@ -1,6 +1,7 @@
 
 #include "CCloseGuard.h"
 #include "CThrowable.h"
+#include "StringBuilder.h"
 
 namespace Elastos {
 namespace Core {
@@ -9,14 +10,14 @@ CAR_INTERFACE_IMPL(CCloseGuard, Object, ICloseGuard)
 
 CAR_OBJECT_IMPL(CCloseGuard)
 
-static AutoPtr<ICloseGuard> initNOOP()
+static AutoPtr<ICloseGuard> InitNOOP()
 {
     AutoPtr<CCloseGuard> cg;
     CCloseGuard::NewByFriend((CCloseGuard**)&cg);
     return (ICloseGuard*)cg.Get();
 }
 
-static AutoPtr<ICloseGuardReporter> initREPORTER()
+static AutoPtr<ICloseGuardReporter> InitREPORTER()
 {
     AutoPtr<ICloseGuardReporter> report;
     report = new CCloseGuard::DefaultReporter();
@@ -24,8 +25,8 @@ static AutoPtr<ICloseGuardReporter> initREPORTER()
 }
 
 Boolean CCloseGuard::ENABLED = TRUE;
-const AutoPtr<ICloseGuard> CCloseGuard::NOOP = initNOOP();
-AutoPtr<ICloseGuardReporter> CCloseGuard::REPORTER = initREPORTER();
+const AutoPtr<ICloseGuard> CCloseGuard::NOOP = InitNOOP();
+AutoPtr<ICloseGuardReporter> CCloseGuard::REPORTER = InitREPORTER();
 
 CAR_INTERFACE_IMPL(CCloseGuard::DefaultReporter, Object, ICloseGuardReporter)
 
@@ -34,8 +35,10 @@ ECode CCloseGuard::DefaultReporter::Report (
     /* [in] */ IThrowable* allocationSite)
 {
     String str = Object::ToString(allocationSite);
+    StringBuilder sb("CCloseGuard :");
+    sb += str;
     ALOGW(message);
-    ALOGW(str);
+    ALOGW(sb.ToString());
 
     // AutoPtr<ISystem> system;
     // CSystem::AcquireSingleton((ISystem**)&system);
@@ -88,9 +91,13 @@ ECode CCloseGuard::Open(
     if (this == NOOP || !ENABLED) {
         return NOERROR;
     }
-    String message = String("Explicit termination method '") + closer + String("' not called");
+
+    StringBuilder sb("Explicit termination method '");
+    sb += closer;
+    sb += "' not called";
+
     mAllocationSite = NULL;
-    CThrowable::New(message, (IThrowable**)&mAllocationSite);
+    CThrowable::New(sb.ToString(), (IThrowable**)&mAllocationSite);
     return NOERROR;
 }
 
@@ -106,11 +113,9 @@ ECode CCloseGuard::WarnIfOpen()
         return NOERROR;
     }
 
-    String message =
-            String("A resource was acquired at attached stack trace but never released. ")
-             + String("See java.io.Closeable for information on avoiding resource leaks.");
-
-    REPORTER->Report(message, mAllocationSite);
+    StringBuilder sb("CCloseGuard: A resource was acquired but never released.");
+    sb += "See ICloseable for information on avoiding resource leaks.";
+    REPORTER->Report(sb.ToString(), mAllocationSite);
     return NOERROR;
 }
 

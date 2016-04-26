@@ -59,7 +59,7 @@ ECode PlainSocketImpl::constructor(
     Boolean bValid;
     fd->Valid(&bValid);
     if (bValid) {
-       mGuard->Open(String("close"));
+       mGuard->Open(String("PlainSocketImpl::Close"));
     }
     return NOERROR;
 }
@@ -95,7 +95,7 @@ ECode PlainSocketImpl::constructor(
     Boolean bValid;
     fd->Valid(&bValid);
     if (bValid) {
-       mGuard->Open(String("close"));
+       mGuard->Open(String("PlainSocketImpl::Close"));
     }
     return NOERROR;
 }

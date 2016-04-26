@@ -3,11 +3,9 @@
 #define __Elastos_DevSamples_ContentProviderDemo_CActivityOne_H__
 
 #include "_Elastos_DevSamples_ContentProviderDemo_CActivityOne.h"
-#include <Elastos.Droid.Database.h>
 #include <elastos/droid/app/Activity.h>
 
 using Elastos::Droid::App::Activity;
-using Elastos::Droid::Database::Sqlite::ISQLiteOpenHelper;
 using Elastos::Droid::View::IViewOnClickListener;
 
 namespace Elastos {
@@ -61,8 +59,6 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
-    CARAPI Create();
-
     CARAPI Add();
 
     CARAPI Query();
@@ -71,8 +67,16 @@ private:
 
     CARAPI Delete();
 
-private:
-    AutoPtr<ISQLiteOpenHelper> mDBOpenHelper;
+    CARAPI_(Int64) QueryRowId();
+
+    CARAPI UpdateByRowId(
+    /* [in] */ Int64 rowId);
+
+    CARAPI UpdateByName(
+    /* [in] */ const String& userName);
+
+    CARAPI DeleteByName(
+        /* [in] */ const String& name);
 };
 
 } // namespace ContentProviderDemo

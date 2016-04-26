@@ -59,9 +59,24 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
+    CARAPI Add();
+
     CARAPI Query();
 
-private:
+    CARAPI Update();
+
+    CARAPI Delete();
+
+    CARAPI_(Int64) QueryRowId();
+
+    CARAPI UpdateByRowId(
+    /* [in] */ Int64 rowId);
+
+    CARAPI UpdateByName(
+    /* [in] */ const String& userName);
+
+    CARAPI DeleteByName(
+        /* [in] */ const String& name);
 };
 
 } // namespace ContentResolverDemo

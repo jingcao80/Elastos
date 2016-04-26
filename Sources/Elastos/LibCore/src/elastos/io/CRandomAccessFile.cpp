@@ -107,7 +107,7 @@ ECode CRandomAccessFile::constructor(
         mFd->Sync();
     }
 
-    return mGuard->Open(String("close"));
+    return mGuard->Open(String("CRandomAccessFile::Close"));
 }
 
 ECode CRandomAccessFile::constructor(

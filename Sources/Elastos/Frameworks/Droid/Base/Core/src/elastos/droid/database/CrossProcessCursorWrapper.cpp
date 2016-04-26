@@ -8,19 +8,13 @@ namespace Database {
 
 CAR_INTERFACE_IMPL_2(CrossProcessCursorWrapper, CursorWrapper, ICrossProcessCursorWrapper, ICrossProcessCursor)
 
-ECode CrossProcessCursorWrapper::constructor(
-    /* [in] */ ICursor* cursor)
-{
-    return CursorWrapper::constructor(cursor);
-}
-
 ECode CrossProcessCursorWrapper::FillWindow(
     /* [in] */ Int32 position,
     /* [in] */ ICursorWindow* window)
 {
-    if(ICrossProcessCursor::Probe(mCursor) != NULL) {
-        AutoPtr<ICrossProcessCursor> crossProcessCursor = ICrossProcessCursor::Probe(mCursor);
-        return crossProcessCursor->FillWindow(position, window);
+    ICrossProcessCursor* cpc = ICrossProcessCursor::Probe(mCursor);
+    if (cpc != NULL) {
+        return cpc->FillWindow(position, window);
     }
 
     DatabaseUtils::CursorFillWindow(mCursor, position, window);
@@ -31,9 +25,9 @@ ECode CrossProcessCursorWrapper::GetWindow(
     /* [out] */ ICursorWindow** window)
 {
     VALIDATE_NOT_NULL(window)
-    if(ICrossProcessCursor::Probe(mCursor) != NULL) {
-        AutoPtr<ICrossProcessCursor> crossProcessCursor = ICrossProcessCursor::Probe(mCursor);
-        return crossProcessCursor->GetWindow(window);
+    ICrossProcessCursor* cpc = ICrossProcessCursor::Probe(mCursor);
+    if (cpc != NULL) {
+        return cpc->GetWindow(window);
     }
     *window = NULL;
     return NOERROR;
@@ -45,9 +39,9 @@ ECode CrossProcessCursorWrapper::OnMove(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if(ICrossProcessCursor::Probe(mCursor) != NULL) {
-        AutoPtr<ICrossProcessCursor> crossProcessCursor = ICrossProcessCursor::Probe(mCursor);
-        return crossProcessCursor->OnMove(oldPosition, newPosition, result);
+    ICrossProcessCursor* cpc = ICrossProcessCursor::Probe(mCursor);
+    if (cpc != NULL) {
+        return cpc->OnMove(oldPosition, newPosition, result);
     }
     *result = TRUE;
     return NOERROR;

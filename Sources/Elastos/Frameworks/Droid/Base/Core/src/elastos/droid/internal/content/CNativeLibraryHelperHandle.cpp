@@ -103,7 +103,7 @@ ECode CNativeLibraryHelperHandle::constructor(
 {
     mApkHandles = apkHandles;
     mMultiArch = multiArch;
-    mGuard->Open(String("close"));
+    mGuard->Open(String("CNativeLibraryHelperHandle::Close"));
     return NOERROR;
 }
 

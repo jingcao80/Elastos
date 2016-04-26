@@ -713,7 +713,7 @@ ECode SurfaceControl::constructor(
         return E_OUT_OF_RESOURCES_EXCEPTION;
     }
 
-    mCloseGuard->Open(String("release"));
+    mCloseGuard->Open(String("SurfaceControl::Release"));
     return NOERROR;
 }
 

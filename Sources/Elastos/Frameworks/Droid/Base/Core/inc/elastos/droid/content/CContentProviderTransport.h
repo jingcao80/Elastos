@@ -33,6 +33,8 @@ public:
 
     CContentProviderTransport();
 
+    TO_STRING_IMPL("CContentProviderTransport")
+
     CARAPI constructor(
         /* [in] */ IContentProvider* owner);
 
@@ -134,9 +136,6 @@ public:
         /* [in] */ const String& callingPkg,
         /* [in] */ IUri* uri,
         /* [out] */ IUri** result);
-
-    CARAPI ToString(
-        /* [out] */ String* str);
 
 private:
     CARAPI EnforceFilePermission(

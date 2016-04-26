@@ -82,7 +82,7 @@ ECode CMediaMuxer::constructor(
     file->GetFD((IFileDescriptor**)&fd);
     mNativeObject = NativeSetup(fd, format);
     mState = MUXER_STATE_INITIALIZED;
-    mCloseGuard->Open(String("release"));
+    mCloseGuard->Open(String("CMediaMuxer::Release"));
     // } finally {
     if (file != NULL) {
         ICloseable::Probe(file)->Close();
