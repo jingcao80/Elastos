@@ -11,14 +11,14 @@ module
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidateView.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/ComposingView.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/SkbContainer.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyboard.car");
     merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyboardView.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoundManager.car");
+    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyToggle.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     using interface Elastos.Droid.InputMethodService.IInputMethodService;
@@ -141,28 +141,6 @@ module
         interface IAccessibilityEventSource;
     }
 
-    //     [local]
-    //     class CSoundManager {
-    //         constructor(
-    //             [in] IContext* ctx);
-
-    //         interface ISoundManager;
-    //     }
-
-    //     singleton class CSoundManagerHelper {
-    //         interface ISoundManagerHelper;
-    //     }
-
-    //     [local]
-    //     class CPinyinGestureListener {
-    //         constructor(
-    //             [in] Boolean reponseGestures,
-    //             [in] IPinyinIME* ime);
-
-    //         interface IOnGestureListener;
-    //         interface IOnDoubleTapListener;
-    //     }
-
     class CPinyinDecoderService {
         constructor();
 
@@ -190,6 +168,7 @@ module
     class CPinyinIME {
         constructor();
 
+        interface IPinyinIME;
         interface IInputMethodService;
         interface IAbstractInputMethodService;
         interface IService;

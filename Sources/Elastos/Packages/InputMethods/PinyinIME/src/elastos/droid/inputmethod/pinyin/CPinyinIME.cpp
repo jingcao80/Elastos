@@ -1,62 +1,51 @@
 
 #include <elastos/droid/ext/frameworkdef.h>
-#include "CPinyinIME.h"
-#include "KeyMapDream.h"
-#include "CInputModeSwitcher.h"
+#include "elastos/droid/inputmethod/pinyin/CPinyinIME.h"
+#include "elastos/droid/inputmethod/pinyin/KeyMapDream.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
-#include <R.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::Math;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Core::CStringWrapper;
-using Elastos::Core::IStringBuffer;
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::App::CAlertDialogBuilder;
-using Elastos::Droid::App::IAlertDialogBuilder;
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
-using Elastos::Droid::Content::EIID_IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Content::ISharedPreferences;
-using Elastos::Droid::Content::EIID_IServiceConnection;
-using Elastos::Droid::Inputmethods::PinyinIME::EIID_ICandidateViewListener;
-using Elastos::Droid::Inputmethods::PinyinIME::ISettings;
-using Elastos::Droid::Inputmethods::PinyinIME::CPinyinSettings;
-using Elastos::Droid::Inputmethods::PinyinIME::IPinyinEnvironmentHelper;
-using Elastos::Droid::Inputmethods::PinyinIME::CPinyinEnvironmentHelper;
-using Elastos::Droid::Inputmethods::PinyinIME::CDecodingInfo;
-using Elastos::Droid::Inputmethods::PinyinIME::CBalloonHint;
-using Elastos::Droid::Inputmethods::PinyinIME::CPinyinSettings;
-using Elastos::Droid::Inputmethods::PinyinIME::ISettings;
-using Elastos::Droid::Inputmethods::PinyinIME::IPinyinDecoderService;
-using Elastos::Droid::Inputmethods::PinyinIME::CPinyinGestureListener;
-using Elastos::Droid::Inputmethods::PinyinIME::EIID_IPinyinIME;
-using Elastos::Droid::InputMethodService::IInputMethodService;
-using Elastos::Droid::InputMethodService::EIID_IInputMethodService;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Preference::IPreferenceManagerHelper;
-using Elastos::Droid::Preference::CPreferenceManagerHelper;
-using Elastos::Droid::View::CGestureDetector;
-using Elastos::Droid::View::IGravity;
-using Elastos::Droid::View::CKeyEvent;
-using Elastos::Droid::View::IViewGroupLayoutParams;
-using Elastos::Droid::View::IWindowManagerLayoutParams;
-using Elastos::Droid::Widget::CPopupWindow;
+// using Elastos::Droid::App::CAlertDialogBuilder;
+// using Elastos::Droid::App::IAlertDialogBuilder;
+// using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+// using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+// using Elastos::Droid::Content::EIID_IContext;
+// using Elastos::Droid::Content::IIntent;
+// using Elastos::Droid::Content::CIntent;
+// using Elastos::Droid::Content::ISharedPreferences;
+// using Elastos::Droid::Content::EIID_IServiceConnection;
+// using Elastos::Droid::InputMethodService::IInputMethodService;
+// using Elastos::Droid::InputMethodService::EIID_IInputMethodService;
+// using Elastos::Droid::Os::CHandler;
+// using Elastos::Droid::Preference::IPreferenceManagerHelper;
+// using Elastos::Droid::Preference::CPreferenceManagerHelper;
+// using Elastos::Droid::View::CGestureDetector;
+// using Elastos::Droid::View::IGravity;
+// using Elastos::Droid::View::CKeyEvent;
+// using Elastos::Droid::View::IViewGroupLayoutParams;
+// using Elastos::Droid::View::IWindowManagerLayoutParams;
+// using Elastos::Droid::Widget::CPopupWindow;
+// using Elastos::Core::StringUtils;
+// using Elastos::Core::StringBuilder;
+// using Elastos::Core::Math;
+// using Elastos::Core::EIID_IRunnable;
+// using Elastos::Core::CStringWrapper;
+// using Elastos::Core::IStringBuffer;
+// using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+//==========================================================
+// CPinyinIME::PopupTimer
+//==========================================================
 CPinyinIME::PopupTimer::PopupTimer(
-    /* [in] */ IPinyinIME* host)
+    /* [in] */ CPinyinIME* host)
 {
     AutoPtr<IWeakReferenceSource> source = (IWeakReferenceSource*)host->Probe(EIID_IWeakReferenceSource);
     assert(source != NULL);

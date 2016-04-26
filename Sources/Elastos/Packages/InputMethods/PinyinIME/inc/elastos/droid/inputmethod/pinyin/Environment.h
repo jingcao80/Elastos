@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_CPINYINENVIRONMENT_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CPINYINENVIRONMENT_H__
 
-#include "Elastos.Droid.InputMethod.Pinyin.h"
+#include "_Elastos.Droid.InputMethod.Pinyin.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>
 

@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEYTOGGLE_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEYTOGGLE_H__
 
-#include "SoftKey.h"
+#include "_Elastos.Droid.InputMethod.Pinyin.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKey.h"
 
 namespace Elastos {
 namespace Droid {
@@ -22,38 +23,42 @@ class SoftKeyToggle
 public:
     class ToggleState : public Object
     {
+        friend class SoftKeyToggle;
+
     public:
         ToggleState();
 
-        void SetStateId(
+        CARAPI_(void) SetStateId(
             /* [in] */ Int32 stateId);
 
-        void SetStateFlags(
+        CARAPI_(void) SetStateFlags(
             /* [in] */ Boolean repeat,
             /* [in] */ Boolean balloon);
 
     public:
-        // The id should be bigger than 0;
-        Int32 mIdAndFlags;
         AutoPtr<SoftKeyType> mKeyType;
         Int32 mKeyCode;
         AutoPtr<IDrawable> mKeyIcon;
         AutoPtr<IDrawable> mKeyIconPopup;
         String mKeyLabel;
         AutoPtr<ToggleState> mNextState;
+
+    private:
+        // The id should be bigger than 0;
+        Int32 mIdAndFlags;
     };
 
 public:
     CAR_INTERFACE_DECL();
 
-    Int32 GetToggleStateId();
+    CARAPI_(Int32) GetToggleStateId();
 
     // The state id should be valid, and less than 255.
     // If resetIfNotFound is TRUE and there is no such toggle state with the
     // given id, the key state will be reset.
     // If the key state is newly changed (enabled to the given state, or
     // reseted) and needs re-draw, return TRUE.
-    Boolean EnableToggleState(
+    CARAPI_(Boolean) EnableToggleState(
         /* [in] */ Int32 stateId,
         /* [in] */ Boolean resetIfNotFound);
 
@@ -61,59 +66,66 @@ public:
     // If resetIfNotFound is TRUE and there is no such toggle state with the
     // given id, the key state will be reset.
     // If the key state is newly changed and needs re-draw, return TRUE.
-    Boolean DisableToggleState(
+    CARAPI_(Boolean) DisableToggleState(
         /* [in] */ Int32 stateId,
         /* [in] */ Boolean resetIfNotFound);
 
     // Clear any toggle state. If the key needs re-draw, return TRUE.
-    Boolean DisableAllToggleStates();
+    CARAPI_(Boolean) DisableAllToggleStates();
 
-    AutoPtr<IDrawable> GetKeyIcon();
+    // @Override
+    CARAPI_(AutoPtr<IDrawable>) GetKeyIcon();
 
-    AutoPtr<IDrawable> GetKeyIconPopup();
+    // @Override
+    CARAPI_(AutoPtr<IDrawable>) GetKeyIconPopup();
 
-    CARAPI GetKeyCode(
-        /* [out] */ Int32* code);
+    // @Override
+    CARAPI_(Int32) GetKeyCode();
 
-    CARAPI GetKeyLabel(
-        /* [out] */ String* label);
+    // @Override
+    CARAPI_(String) GetKeyLabel();
 
-    AutoPtr<IDrawable> GetKeyBg();
+    // @Override
+    CARAPI_(AutoPtr<IDrawable>) GetKeyBg();
 
-    AutoPtr<IDrawable> GetKeyHlBg();
+    // @Override
+    CARAPI_(AutoPtr<IDrawable>) GetKeyHlBg();
 
-    Int32 GetColor();
+    // @Override
+    CARAPI_(Int32) GetColor();
 
-    Int32 GetColorHl();
+    // @Override
+    CARAPI_(Int32) GetColorHl();
 
-    Int32 GetColorBalloon();
+    // @Override
+    CARAPI_(Int32) GetColorBalloon();
 
-    virtual CARAPI IsKeyCodeKey(
-        /* [out] */ Boolean* result);
+    // @Override
+    CARAPI_(Boolean) IsKeyCodeKey();
 
-    virtual CARAPI IsUserDefKey(
-        /* [out] */ Boolean* result);
+    // @Override
+    CARAPI_(Boolean) IsUserDefKey();
 
-    virtual CARAPI IsUniStrKey(
-        /* [out] */ Boolean* result);
+    // @Override
+    CARAPI_(Boolean) IsUniStrKey();
 
-    Boolean NeedBalloon();
+    // @Override
+    CARAPI_(Boolean) NeedBalloon();
 
-    Boolean Repeatable();
+    // @Override
+    CARAPI_(Boolean) Repeatable();
 
-    void ChangeCase(
+    // @Override
+    CARAPI_(void) ChangeCase(
         /* [in] */ Boolean lowerCase);
 
-    AutoPtr<ToggleState> CreateToggleState();
+    CARAPI_(AutoPtr<ToggleState>) CreateToggleState();
 
-    Boolean SetToggleStates(
+    CARAPI_(Boolean) SetToggleStates(
         /* [in] */ ToggleState* rootState);
 
-    CARAPI ToString(
-        /* [out] */ String* info);
-
 private:
-    AutoPtr<ToggleState> GetToggleState();
+    CARAPI_(AutoPtr<ToggleState>) GetToggleState();
 
 private:
     /**

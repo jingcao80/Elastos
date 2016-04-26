@@ -1,20 +1,19 @@
 
-#include "SoftKeyToggle.h"
-#include "SkbTemplate.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyToggle.h"
+#include "elastos/droid/inputmethod/pinyin/SkbTemplate.h"
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
-const Int32 SoftKeyToggle::KEYMASK_TOGGLE_STATE = 0x000000ff;
-CAR_INTERFACE_IMPL(SoftKeyToggle, SoftKey, ISoftKeyToggle);
-
+//====================================================
+//  SoftKeyToggle::ToggleState
+//====================================================
 SoftKeyToggle::ToggleState::ToggleState()
-    : mIdAndFlags(0)
-    , mKeyCode(0)
-{
-}
+    : mKeyCode(0)
+    , mIdAndFlags(0)
+{}
 
 void SoftKeyToggle::ToggleState::SetStateId(
     /* [in] */ Int32 stateId)
@@ -28,16 +27,26 @@ void SoftKeyToggle::ToggleState::SetStateFlags(
 {
     if (repeat) {
         mIdAndFlags |= KEYMASK_REPEAT;
-    } else {
+    }
+    else {
         mIdAndFlags &= (~KEYMASK_REPEAT);
     }
 
     if (balloon) {
         mIdAndFlags |= KEYMASK_BALLOON;
-    } else {
+    }
+    else {
         mIdAndFlags &= (~KEYMASK_BALLOON);
     }
 }
+
+
+//====================================================
+//  SoftKeyToggle
+//====================================================
+const Int32 SoftKeyToggle::KEYMASK_TOGGLE_STATE = 0x000000ff;
+
+CAR_INTERFACE_IMPL(SoftKeyToggle, SoftKey, ISoftKeyToggle);
 
 Int32 SoftKeyToggle::GetToggleStateId()
 {
@@ -60,10 +69,12 @@ Boolean SoftKeyToggle::EnableToggleState(
                 mKeyMask |= (KEYMASK_TOGGLE_STATE & oldStateId);
             }
             return resetIfNotFound;
-        } else {
+        }
+        else {
             return TRUE;
         }
-    } else {
+    }
+    else {
         return TRUE;
     }
 }
@@ -105,37 +116,26 @@ AutoPtr<IDrawable> SoftKeyToggle::GetKeyIconPopup()
     if (NULL != state) {
         if (NULL != state->mKeyIconPopup) {
             return state->mKeyIconPopup;
-        } else {
+        }
+        else {
             return state->mKeyIcon;
         }
     }
     return SoftKey::GetKeyIconPopup();
 }
 
-ECode SoftKeyToggle::GetKeyCode(
-    /* [out] */ Int32* code)
+Int32 SoftKeyToggle::GetKeyCode()
 {
-    VALIDATE_NOT_NULL(code);
     AutoPtr<ToggleState> state = GetToggleState();
-    if (NULL != state) {
-        *code = state->mKeyCode;
-        return NOERROR;
-    }
-    *code = mKeyCode;
-    return NOERROR;
+    if (NULL != state) return state->mKeyCode;
+    return mKeyCode;
 }
 
-ECode SoftKeyToggle::GetKeyLabel(
-    /* [out] */ String* label)
+String SoftKeyToggle::GetKeyLabel()
 {
-    VALIDATE_NOT_NULL(label);
     AutoPtr<ToggleState> state = GetToggleState();
-    if (NULL != state) {
-        *label = state->mKeyLabel;
-        return NOERROR;
-    }
-    *label = mKeyLabel;
-    return NOERROR;
+    if (NULL != state) return state->mKeyLabel;
+    return mKeyLabel;
 }
 
 AutoPtr<IDrawable> SoftKeyToggle::GetKeyBg()
@@ -183,52 +183,36 @@ Int32 SoftKeyToggle::GetColorBalloon()
     return mKeyType->mColorBalloon;
 }
 
-ECode SoftKeyToggle::IsKeyCodeKey(
-    /* [out] */ Boolean* result)
+Boolean SoftKeyToggle::IsKeyCodeKey()
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<ToggleState> state = GetToggleState();
     if (NULL != state) {
-        if (state->mKeyCode > 0) {
-            *result = TRUE;
-            return NOERROR;
-        }
-        *result = FALSE;
-        return NOERROR;
+        if (state->mKeyCode > 0) return TRUE;
+        return FALSE;
     }
-    return SoftKey::IsKeyCodeKey(result);
+    return SoftKey::IsKeyCodeKey();
 }
 
-ECode SoftKeyToggle::IsUserDefKey(
-    /* [out] */ Boolean* result)
+Boolean SoftKeyToggle::IsUserDefKey()
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<ToggleState> state = GetToggleState();
     if (NULL != state) {
-        if (state->mKeyCode < 0) {
-            *result = TRUE;
-            return NOERROR;
-        }
-        *result = FALSE;
-        return NOERROR;
+        if (state->mKeyCode < 0) return TRUE;
+        return FALSE;
     }
-    return SoftKey::IsUserDefKey(result);
+    return SoftKey::IsUserDefKey();
 }
 
-ECode SoftKeyToggle::IsUniStrKey(
-    /* [out] */ Boolean* result)
+Boolean SoftKeyToggle::IsUniStrKey()
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<ToggleState> state = GetToggleState();
     if (NULL != state) {
         if (NULL != state->mKeyLabel && state->mKeyCode == 0) {
-            *result = TRUE;
-            return NOERROR;
+            return TRUE;
         }
-        *result = FALSE;
-        return NOERROR;
+        return FALSE;
     }
-    return SoftKey::IsUniStrKey(result);
+    return SoftKey::IsUniStrKey();
 }
 
 Boolean SoftKeyToggle::NeedBalloon()
@@ -254,10 +238,12 @@ void SoftKeyToggle::ChangeCase(
 {
     AutoPtr<ToggleState> state = GetToggleState();
     if (NULL != state && NULL != state->mKeyLabel) {
-        if (lowerCase)
+        if (lowerCase) {
             state->mKeyLabel = state->mKeyLabel.ToLowerCase();
-        else
+        }
+        else {
             state->mKeyLabel = state->mKeyLabel.ToUpperCase();
+        }
     }
 }
 
@@ -285,14 +271,6 @@ AutoPtr<SoftKeyToggle::ToggleState> SoftKeyToggle::GetToggleState()
         state = state->mNextState;
     }
     return state;
-}
-
-ECode SoftKeyToggle::ToString(
-    /* [out] */ String* info)
-{
-    VALIDATE_NOT_NULL(info);
-    *info = String("Elastos.Droid.Inputmethods.PinyinIME.SoftKeyToggle");
-    return NOERROR;
 }
 
 } // namespace Pinyin

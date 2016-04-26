@@ -268,10 +268,8 @@ Int32 CCandidatesContainer::GetActiveCandiatePos()
 ECode CCandidatesContainer::UpdateArrowStatus()
 {
     if (mCurrentPage < 0) return NOERROR;
-    Boolean forwardEnabled = FALSE;
-    mDecInfo->PageForwardable(mCurrentPage, &forwardEnabled);
-    Boolean backwardEnabled = FALSE;
-    mDecInfo->PageBackwardable(mCurrentPage, &backwardEnabled);
+    Boolean forwardEnabled = mDecInfo->PageForwardable(mCurrentPage);
+    Boolean backwardEnabled = mDecInfo->PageBackwardable(mCurrentPage);
 
     if (backwardEnabled) {
         EnableArrow(mLeftArrowBtn, TRUE);

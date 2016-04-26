@@ -22,6 +22,7 @@ const Float Environment::NORMAL_KEY_TEXT_SIZE_RATIO = 0.075f;
 const Float Environment::FUNCTION_KEY_TEXT_SIZE_RATIO = 0.055f;
 const Float Environment::NORMAL_BALLOON_TEXT_SIZE_RATIO = 0.14f;
 const Float Environment::FUNCTION_BALLOON_TEXT_SIZE_RATIO = 0.085f;
+AutoPtr<Environment> Environment::sInstance;
 
 Environment::Environment()
     : mScreenWidth(0)
@@ -37,6 +38,14 @@ Environment::Environment()
     , mDebug(FALSE)
 {
     CConfiguration::New((IConfiguration**)&mConfig);
+}
+
+AutoPtr<Environment> Environment::GetInstance()
+{
+    if (NULL == sInstance) {
+        sInstance = new Environment();
+    }
+    return sInstance;
 }
 
 ECode Environment::OnConfigurationChanged(

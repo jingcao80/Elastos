@@ -79,13 +79,11 @@ public:
         /* [in] */ IView* parent,
         /* [in] */ Int32 measureSpecMode);
 
-    CARAPI GetContext(
-        /* [out] */ IContext** ctx);
+    CARAPI_(AutoPtr<IContext>) GetContext();
 
-    CARAPI GetPadding(
-        /* [out] */ IRect** rect);
+    CARAPI_(AutoPtr<IRect>) GetPadding();
 
-    CARAPI SetBalloonBackground(
+    CARAPI_(void) SetBalloonBackground(
         /* [in] */ IDrawable* drawable);
 
     /**
@@ -102,7 +100,7 @@ public:
      *        determined by the desired width and balloon's measuring
      *        specification.
      */
-    CARAPI SetBalloonConfig(
+    CARAPI_(void) SetBalloonConfig(
         /* [in] */ const String& label,
         /* [in] */ Float textSize,
         /* [in] */ Boolean textBold,
@@ -121,40 +119,35 @@ public:
      *        determined by the desired width and balloon's measuring
      *        specification.
      */
-    CARAPI SetBalloonConfig(
+    CARAPI_(void) SetBalloonConfig(
         /* [in] */ IDrawable* icon,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI NeedForceDismiss(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) NeedForceDismiss();
 
-    CARAPI GetPaddingLeft(
-        /* [out] */ Int32* value);
+    CARAPI_(Int32) GetPaddingLeft();
 
-    CARAPI GetPaddingTop(
-        /* [out] */ Int32* value);
+    CARAPI_(Int32) GetPaddingTop();
 
-    CARAPI GetPaddingRight(
-        /* [out] */ Int32* value);
+    CARAPI_(Int32) GetPaddingRight();
 
-    CARAPI GetPaddingBottom(
-        /* [out] */ Int32* value);
+    CARAPI_(Int32) GetPaddingBottom();
 
-    CARAPI DelayedShow(
+    CARAPI_(void) DelayedShow(
         /* [in] */ Int64 delay,
         /* [in] */ ArrayOf<Int32>* locationInParent);
 
-    CARAPI DelayedUpdate(
+    CARAPI_(void) DelayedUpdate(
         /* [in] */ Int64 delay,
         /* [in] */ ArrayOf<Int32>* locationInParent,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI DelayedDismiss(
+    CARAPI_(void) DelayedDismiss(
         /* [in] */ Int64 delay);
 
-    CARAPI RemoveTimer();
+    CARAPI_(void) RemoveTimer();
 
 private:
     CARAPI_(void) SetBalloonSize(

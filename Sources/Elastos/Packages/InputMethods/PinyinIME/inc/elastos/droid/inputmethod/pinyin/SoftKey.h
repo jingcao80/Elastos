@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEY_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEY_H__
 
-#include "Elastos.Droid.InputMethod.Pinyin.h"
+#include "Elastos.Droid.Graphics.h"
+#include "_Elastos.Droid.InputMethod.Pinyin.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::Drawable::IDrawable;
@@ -13,8 +14,29 @@ namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
-class SoftKeyType;
-class SoftKeyboard;
+class SoftKeyType : public Object
+{
+public:
+    SoftKeyType(
+        /* [in] */ Int32 id,
+        /* [in] */ IDrawable* bg,
+        /* [in] */ IDrawable* hlBg);
+
+    CARAPI_(void) SetColors(
+        /* [in] */ Int32 color,
+        /* [in] */ Int32 colorHl,
+        /* [in] */ Int32 colorBalloon);
+
+public:
+    static const Int32 KEYTYPE_ID_NORMAL_KEY = 0;
+
+    Int32 mKeyTypeId;
+    AutoPtr<IDrawable> mKeyBg;
+    AutoPtr<IDrawable> mKeyHlBg;
+    Int32 mColor;
+    Int32 mColorHl;
+    Int32 mColorBalloon;
+};
 
 /**
  * Class for soft keys which defined in the keyboard xml file. A soft key can be
@@ -24,6 +46,10 @@ class SoftKeyboard;
  */
 class SoftKey : public Object
 {
+    friend class CSkbContainer;
+    friend class CSoftKeyboardView;
+    friend class SoftKeyboard;
+
 public:
     SoftKey();
 

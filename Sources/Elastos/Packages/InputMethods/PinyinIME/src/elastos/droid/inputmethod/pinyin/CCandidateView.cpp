@@ -189,8 +189,7 @@ ECode CCandidateView::SetDecodingInfo(
     mDecInfo = decInfo;
     mPageNoCalculated = -1;
 
-    Boolean state = FALSE;
-    if (mDecInfo->CandidatesFromApp(&state), state) {
+    if (mDecInfo->CandidatesFromApp()) {
         mNormalCandidateColor = mRecommendedCandidateColor;
         mCandidateTextSize = mRecommendedCandidateTextSize;
     }

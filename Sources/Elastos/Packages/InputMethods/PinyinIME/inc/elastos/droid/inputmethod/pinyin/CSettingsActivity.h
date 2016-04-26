@@ -32,9 +32,10 @@ public:
 
     CAR_INTERFACE_DECL();
 
-    CARAPI_(Boolean) OnPreferenceChange(
+    CARAPI OnPreferenceChange(
         /* [in] */ IPreference* preference,
-        /* [in] */ IInterface* newValue);
+        /* [in] */ IInterface* newValue,
+        /* [out] */ Boolean* result);
 
     CARAPI_(void) UpdatePreference(
         /* [in] */ IPreferenceGroup* parentPref,

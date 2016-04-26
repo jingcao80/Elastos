@@ -27,10 +27,10 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
-    CARAPI SetIcon(
+    CARAPI_(void) SetIcon(
         /* [in] */ IDrawable* icon);
 
-    CARAPI SetTextConfig(
+    CARAPI_(void) SetTextConfig(
         /* [in] */ const String& label,
         /* [in] */ Float fontSize,
         /* [in] */ Boolean textBold,

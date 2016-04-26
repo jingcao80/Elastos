@@ -2,7 +2,12 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSKBCONTAINER_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSKBCONTAINER_H__
 
+#include "Elastos.Droid.InputMethodService.h"
 #include "_Elastos_Droid_InputMethod_Pinyin_CSkbContainer.h"
+#include "elastos/droid/inputmethod/pinyin/CBalloonHint.h"
+#include "elastos/droid/inputmethod/pinyin/CSoftKeyboardView.h"
+#include "elastos/droid/inputmethod/pinyin/Environment.h"
+#include "elastos/droid/inputmethod/pinyin/InputModeSwitcher.h"
 #include "elastos/droid/inputmethod/pinyin/SoftKey.h"
 #include <elastos/droid/os/HandlerRunnable.h>
 #include <elastos/droid/widget/RelativeLayout.h>
@@ -10,6 +15,8 @@
 using Elastos::Droid::InputMethodService::IInputMethodService;
 using Elastos::Droid::Os::HandlerRunnable;
 using Elastos::Droid::View::IGestureDetector;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::Widget::IViewFlipper;
 using Elastos::Droid::Widget::IPopupWindow;
 using Elastos::Droid::Widget::RelativeLayout;
@@ -112,9 +119,6 @@ public:
         /* [in] */ Boolean realAction);
 
     CARAPI_(void) DismissPopups();
-
-    CARAPI_(void) SetIgnoreGravity(
-        /* [in] */ Int32 viewId);
 
     CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* event,

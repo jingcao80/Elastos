@@ -100,11 +100,14 @@ ECode CSettingsActivity::OnPause()
     return NOERROR;
 }
 
-Boolean CSettingsActivity::OnPreferenceChange(
+ECode CSettingsActivity::OnPreferenceChange(
     /* [in] */ IPreference* preference,
-    /* [in] */ IInterface* newValue)
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* result)
 {
-    return TRUE;
+    VALIDATE_NOT_NULL(result)
+    *result = TRUE;
+    return NOERROR;
 }
 
 void CSettingsActivity::UpdateWidgets()

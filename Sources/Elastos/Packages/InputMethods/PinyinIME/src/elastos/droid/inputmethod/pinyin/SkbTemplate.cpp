@@ -1,6 +1,5 @@
 
-#include "SkbTemplate.h"
-#include "SoftKey.h"
+#include "elastos/droid/inputmethod/pinyin/SkbTemplate.h"
 
 namespace Elastos {
 namespace Droid {
@@ -12,8 +11,7 @@ SkbTemplate::SkbTemplate(
     : mSkbTemplateId(skbTemplateId)
     , mXMargin(0.f)
     , mYMargin(0.f)
-{
-}
+{}
 
 Int32 SkbTemplate::GetSkbTemplateId()
 {
@@ -74,7 +72,6 @@ AutoPtr<SoftKeyType> SkbTemplate::CreateKeyType(
 Boolean SkbTemplate::AddKeyType(
     /* [in] */ SoftKeyType* keyType)
 {
-    assert(keyType != NULL);
     // The newly added item should have the right id.
     if ((Int32)mKeyTypeList.GetSize() != keyType->mKeyTypeId) return FALSE;
     mKeyTypeList.PushBack(keyType);
@@ -100,23 +97,20 @@ void SkbTemplate::AddDefaultKeyIcons(
     iconRecord->mIconPopup = iconPopup;
     iconRecord->mKeyCode = keyCode;
 
-    List<AutoPtr<KeyIconRecord> >::Iterator ator = mKeyIconRecords.Begin();
+    Vector< AutoPtr<KeyIconRecord> >::Iterator ator = mKeyIconRecords.Begin();
     for (; ator != mKeyIconRecords.End(); ++ator) {
         AutoPtr<KeyIconRecord> record = *ator;
-        assert(record != NULL);
         if (record->mKeyCode >= keyCode) break;
     }
-
     mKeyIconRecords.Insert(ator, iconRecord);
 }
 
 AutoPtr<IDrawable> SkbTemplate::GetDefaultKeyIcon(
     /* [in] */ Int32 keyCode)
 {
-    List<AutoPtr<KeyIconRecord> >::Iterator ator = mKeyIconRecords.Begin();
+    Vector< AutoPtr<KeyIconRecord> >::Iterator ator = mKeyIconRecords.Begin();
     while(ator != mKeyIconRecords.End()) {
         AutoPtr<KeyIconRecord> iconRecord = *ator;
-        assert(iconRecord != NULL);
         if (iconRecord->mKeyCode < keyCode) {
             ++ator;
             continue;
@@ -126,17 +120,15 @@ AutoPtr<IDrawable> SkbTemplate::GetDefaultKeyIcon(
         }
         return NULL;
     }
-
     return NULL;
 }
 
 AutoPtr<IDrawable> SkbTemplate::GetDefaultKeyIconPopup(
     /* [in] */ Int32 keyCode)
 {
-    List<AutoPtr<KeyIconRecord> >::Iterator ator = mKeyIconRecords.Begin();
+    Vector< AutoPtr<KeyIconRecord> >::Iterator ator = mKeyIconRecords.Begin();
     while(ator != mKeyIconRecords.End()) {
         AutoPtr<KeyIconRecord> iconRecord = *ator;
-        assert(iconRecord != NULL);
         if (iconRecord->mKeyCode < keyCode) {
             ++ator;
             continue;
@@ -146,7 +138,6 @@ AutoPtr<IDrawable> SkbTemplate::GetDefaultKeyIconPopup(
         }
         return NULL;
     }
-
     return NULL;
 }
 
@@ -160,21 +151,19 @@ void SkbTemplate::AddDefaultKey(
     keyRecord->mKeyId = keyId;
     keyRecord->mSoftKey = softKey;
 
-    List<AutoPtr<KeyRecord> >::Iterator ator = mKeyRecords.Begin();
+    Vector< AutoPtr<KeyRecord> >::Iterator ator = mKeyRecords.Begin();
     while(ator != mKeyRecords.End()) {
         AutoPtr<KeyRecord> record = *ator;
-        assert(record != NULL);
         if (record->mKeyId >= keyId) break;
         ++ator;
     }
-
     mKeyRecords.Insert(ator, keyRecord);
 }
 
 AutoPtr<SoftKey> SkbTemplate::GetDefaultKey(
     /* [in] */ Int32 keyId)
 {
-    List<AutoPtr<KeyRecord> >::Iterator ator = mKeyRecords.Begin();
+    Vector< AutoPtr<KeyRecord> >::Iterator ator = mKeyRecords.Begin();
     while(ator != mKeyRecords.End()) {
         AutoPtr<KeyRecord> keyRecord = *ator;
         if (keyRecord->mKeyId < keyId) {
@@ -186,31 +175,7 @@ AutoPtr<SoftKey> SkbTemplate::GetDefaultKey(
         }
         return NULL;
     }
-
     return NULL;
-}
-
-SoftKeyType::SoftKeyType(
-    /* [in] */ Int32 id,
-    /* [in] */ IDrawable* bg,
-    /* [in] */ IDrawable* hlBg)
-    : mKeyTypeId(id)
-    , mKeyBg(bg)
-    , mKeyHlBg(hlBg)
-    , mColor(0)
-    , mColorHl(0)
-    , mColorBalloon(0)
-{
-}
-
-void SoftKeyType::SetColors(
-    /* [in] */ Int32 color,
-    /* [in] */ Int32 colorHl,
-    /* [in] */ Int32 colorBalloon)
-{
-    mColor = color;
-    mColorHl = colorHl;
-    mColorBalloon = colorBalloon;
 }
 
 } // namespace Pinyin

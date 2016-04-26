@@ -46,7 +46,7 @@ public:
      */
     CARAPI SetDecodingInfo(
         /* [in] */ CPinyinIME::DecodingInfo* decInfo,
-        /* [in] */ ImeState imeStatus);
+        /* [in] */ CPinyinIME::ImeState imeStatus);
 
     CARAPI_(Boolean) MoveCursor(
         /* [in] */ Int32 keyCode);

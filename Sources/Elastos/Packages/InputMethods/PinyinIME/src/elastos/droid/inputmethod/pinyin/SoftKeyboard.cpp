@@ -1,9 +1,9 @@
 
 #include "elastos/droid/ext/frameworkdef.h"
-#include "SoftKeyboard.h"
-#include "elastos/droid/graphics/CRect.h"
-#include "CPinyinEnvironmentHelper.h"
-#include "SoftKeyToggle.h"
+#include "Elastos.Droid.View.h"
+#include "elastos/droid/inputmethod/pinyin/Environment.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyToggle.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Graphics::CRect;
@@ -16,8 +16,6 @@ namespace Pinyin {
 
 const Int32 SoftKeyboard::KeyRow::ALWAYS_SHOW_ROW_ID = -1;
 const Int32 SoftKeyboard::KeyRow::DEFAULT_ROW_ID = 0;
-
-CAR_INTERFACE_IMPL(SoftKeyboard, Object, ISoftKeyboard);
 
 SoftKeyboard::SoftKeyboard(
     /* [in] */ Int32 skbXmlId,
@@ -102,7 +100,7 @@ Int32 SoftKeyboard::GetCacheId()
 
 void SoftKeyboard::Reset()
 {
-    if (mKeyRows.IsEmpty() == FALSE) mKeyRows.Clear();
+    mKeyRows.Clear();
 }
 
 void SoftKeyboard::SetNewlyLoadedFlag(
@@ -130,7 +128,6 @@ void SoftKeyboard::BeginNewRow(
 Boolean SoftKeyboard::AddSoftKey(
     /* [in] */ SoftKey* softKey)
 {
-    assert(softKey != NULL);
     if (mKeyRows.IsEmpty()) return FALSE;
     AutoPtr<KeyRow> keyRow = mKeyRows[mKeyRows.GetSize() - 1];
     if (NULL == keyRow) return FALSE;
@@ -158,11 +155,9 @@ void SoftKeyboard::SetSkbCoreSize(
     if (skbCoreWidth == mSkbCoreWidth && skbCoreHeight == mSkbCoreHeight) {
         return;
     }
-
     List<AutoPtr<KeyRow> >::Iterator ator = mKeyRows.Begin();
     for (; ator != mKeyRows.End(); ++ator) {
         AutoPtr<KeyRow> keyRow = *ator;
-        assert(keyRow != NULL);
         keyRow->mBottom = (Int32) (skbCoreHeight * keyRow->mBottomF);
         keyRow->mTop = (Int32) (skbCoreHeight * keyRow->mTopF);
 
@@ -172,7 +167,6 @@ void SoftKeyboard::SetSkbCoreSize(
             softKey->SetSkbCoreSize(skbCoreWidth, skbCoreHeight);
         }
     }
-
     mSkbCoreWidth = skbCoreWidth;
     mSkbCoreHeight = skbCoreHeight;
 }
@@ -190,7 +184,6 @@ Int32 SoftKeyboard::GetSkbCoreHeight()
 Int32 SoftKeyboard::GetSkbTotalWidth()
 {
     AutoPtr<IRect> padding = GetPadding();
-    assert(padding != NULL);
     Int32 left = 0, right = 0;
     padding->GetLeft(&left);
     padding->GetRight(&right);
@@ -200,7 +193,6 @@ Int32 SoftKeyboard::GetSkbTotalWidth()
 Int32 SoftKeyboard::GetSkbTotalHeight()
 {
     AutoPtr<IRect> padding = GetPadding();
-    assert(padding != NULL);
     Int32 top = 0, bottom = 0;
     padding->GetTop(&top);
     padding->GetBottom(&bottom);
@@ -209,22 +201,16 @@ Int32 SoftKeyboard::GetSkbTotalHeight()
 
 Int32 SoftKeyboard::GetKeyXMargin()
 {
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    AutoPtr<IPinyinEnvironment> env;
-    helper->GetInstance((IPinyinEnvironment**)&env);
+    AutoPtr<Environment> env = Environment::GetInstance();
     Float factor = 0.f;
-    return (Int32) (mKeyXMargin * mSkbCoreWidth * (env->GetKeyXMarginFactor(&factor), factor));
+    return (Int32) (mKeyXMargin * mSkbCoreWidth * env->GetKeyXMarginFactor());
 }
 
 Int32 SoftKeyboard::GetKeyYMargin()
 {
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    AutoPtr<IPinyinEnvironment> env;
-    helper->GetInstance((IPinyinEnvironment**)&env);
+    AutoPtr<Environment> env = Environment::GetInstance();
     Float factor = 0.f;
-    return (Int32) (mKeyYMargin * mSkbCoreHeight * (env->GetKeyYMarginFactor(&factor), factor));
+    return (Int32) (mKeyYMargin * mSkbCoreHeight * env->GetKeyYMarginFactor());
 }
 
 AutoPtr<IDrawable> SoftKeyboard::GetSkbBackground()
@@ -268,8 +254,9 @@ AutoPtr<SoftKey> SoftKeyboard::GetKey(
     /* [in] */ Int32 location)
 {
     if ((Int32)mKeyRows.GetSize() > row) {
-        if ((Int32)mKeyRows[row]->mSoftKeys.GetSize() > location) {
-            return mKeyRows[row]->mSoftKeys[location];
+        List< AutoPtr<SoftKey> >& softkeys = mKeyRows[row]->mSoftKeys;
+        if ((Int32)softkeys.GetSize() > location) {
+            return softkeys[location];
         }
     }
     return NULL;
@@ -321,7 +308,6 @@ AutoPtr<SoftKey> SoftKeyboard::MapToKey(
             }
         }
     }
-
     return nearestKey;
 }
 
@@ -334,11 +320,11 @@ void SoftKeyboard::SwitchQwertyMode(
     List<AutoPtr<KeyRow> >::Iterator ator = mKeyRows.Begin();
     for (; ator != mKeyRows.End(); ++ator) {
         AutoPtr<KeyRow> keyRow = *ator;
-        List<AutoPtr<SoftKey> >::Iterator ator2 = keyRow->mSoftKeys.Begin();
+        List< AutoPtr<SoftKey> >::Iterator ator2 = keyRow->mSoftKeys.Begin();
         for (; ator2 != keyRow->mSoftKeys.End(); ++ator2) {
             AutoPtr<SoftKey> sKey = *ator2;
             if (sKey->Probe(EIID_ISoftKeyToggle) != NULL) {
-                ((SoftKeyToggle*) sKey.Get())->EnableToggleState(toggle_state_id, TRUE);
+                ((SoftKeyToggle*)sKey.Get())->EnableToggleState(toggle_state_id, TRUE);
             }
             if (sKey->mKeyCode >= IKeyEvent::KEYCODE_A
                     && sKey->mKeyCode <= IKeyEvent::KEYCODE_Z) {
@@ -359,7 +345,7 @@ void SoftKeyboard::EnableToggleState(
         for (; ator2 != keyRow->mSoftKeys.End(); ++ator2) {
             AutoPtr<SoftKey> sKey = *ator2;
             if (sKey->Probe(EIID_ISoftKeyToggle) != NULL) {
-                ((SoftKeyToggle*) sKey.Get())->EnableToggleState(toggleStateId, resetIfNotFound);
+                ((SoftKeyToggle*)sKey.Get())->EnableToggleState(toggleStateId, resetIfNotFound);
             }
         }
     }
@@ -376,30 +362,24 @@ void SoftKeyboard::DisableToggleState(
         for (; ator2 != keyRow->mSoftKeys.End(); ++ator2) {
             AutoPtr<SoftKey> sKey = *ator2;
             if (sKey->Probe(EIID_ISoftKeyToggle) != NULL) {
-                ((SoftKeyToggle*) sKey.Get())->DisableToggleState(toggleStateId, resetIfNotFound);
+                ((SoftKeyToggle*)sKey.Get())->DisableToggleState(toggleStateId, resetIfNotFound);
             }
         }
     }
 }
 
 void SoftKeyboard::EnableToggleStates(
-    /* [in] */ IToggleStates* toggleStates)
+    /* [in] */ InputModeSwitcher::ToggleStates* toggleStates)
 {
     if (NULL == toggleStates) return;
 
-    Int32 rowIdToEnable = 0;
-    toggleStates->GetRowIdToEnable(&rowIdToEnable);
-    EnableRow(rowIdToEnable);
+    EnableRow(toggleStates->mRowIdToEnable);
 
-    Boolean isQwerty = FALSE;
-    toggleStates->GetQwerty(&isQwerty);
-    Boolean isQwertyUpperCase = FALSE;
-    toggleStates->GetQwertyUpperCase(&isQwertyUpperCase);
+    Boolean isQwerty = toggleStates->mQwerty;
+    Boolean isQwertyUpperCase = toggleStates->mQwertyUpperCase;
     Boolean needUpdateQwerty = (isQwerty && mIsQwerty && (mIsQwertyUpperCase != isQwertyUpperCase));
-    AutoPtr<ArrayOf<Int32> > states;
-    toggleStates->GetKeyStates((ArrayOf<Int32>**)&states);
-    Int32 statesNum = 0;
-    toggleStates->GetKeyStatesNum(&statesNum);
+    AutoPtr<ArrayOf<Int32> > states = toggleStates->mKeyStates;
+    Int32 statesNum = toggleStates->mKeyStatesNum;
 
     List<AutoPtr<KeyRow> >::Iterator ator = mKeyRows.Begin();
     for (; ator != mKeyRows.End(); ++ator) {
@@ -411,7 +391,6 @@ void SoftKeyboard::EnableToggleStates(
         List<AutoPtr<SoftKey> >::Iterator ator2 = keyRow->mSoftKeys.Begin();
         for (; ator2 != keyRow->mSoftKeys.End(); ++ator2) {
             AutoPtr<SoftKey> sKey = *ator2;
-            assert(sKey != NULL);
             if (sKey->Probe(EIID_ISoftKeyToggle) != NULL) {
                 for (Int32 statePos = 0; statePos < statesNum; statePos++) {
                     ((SoftKeyToggle*) sKey.Get())->EnableToggleState((*states)[statePos], statePos == 0);
@@ -428,7 +407,6 @@ void SoftKeyboard::EnableToggleStates(
             }
         }
     }
-
     mIsQwertyUpperCase = isQwertyUpperCase;
 }
 
@@ -448,7 +426,6 @@ Boolean SoftKeyboard::EnableRow(
     if (KeyRow::ALWAYS_SHOW_ROW_ID == rowId) return FALSE;
 
     Boolean enabled = FALSE;
-
     List<AutoPtr<KeyRow> >::ReverseIterator reAtor = mKeyRows.RBegin();
     for (; reAtor != mKeyRows.REnd(); ++reAtor) {
         AutoPtr<KeyRow> sKey = *reAtor;
@@ -457,11 +434,43 @@ Boolean SoftKeyboard::EnableRow(
             break;
         }
     }
-
     if (enabled) {
         mEnabledRowId = rowId;
     }
     return enabled;
+}
+
+ECode SoftKeyboard::ToString(
+    /* [out] */ String* str)
+{
+    assert(0);
+//    String str = "------------------SkbInfo----------------------\n";
+//    String endStr = "-----------------------------------------------\n";
+//    str += "Width: " + String.valueOf(mSkbCoreWidth) + "\n";
+//    str += "Height: " + String.valueOf(mSkbCoreHeight) + "\n";
+//    str += "KeyRowNum: " + mKeyRows == null ? "0" : String.valueOf(mKeyRows
+//            .size())
+//            + "\n";
+//    if (null == mKeyRows) return str + endStr;
+//    int rowNum = mKeyRows.size();
+//    for (int row = 0; row < rowNum; row++) {
+//        KeyRow keyRow = mKeyRows.get(row);
+//        List<SoftKey> softKeys = keyRow.mSoftKeys;
+//        int keyNum = softKeys.size();
+//        for (int i = 0; i < softKeys.size(); i++) {
+//            str += "-key " + String.valueOf(i) + ":"
+//                    + softKeys.get(i).toString();
+//        }
+//    }
+//    return str + endStr;
+    return NOERROR;
+}
+
+String SoftKeyboard::ToShortString()
+{
+    String str;
+    ToString(&str);
+    return str;
 }
 
 } // namespace Pinyin

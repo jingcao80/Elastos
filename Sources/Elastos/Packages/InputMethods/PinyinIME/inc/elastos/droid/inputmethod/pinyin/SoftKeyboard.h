@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SOFTKEYBOARD_H__
 
 #include "Elastos.Droid.Graphics.h"
+#include "elastos/droid/inputmethod/pinyin/InputModeSwitcher.h"
 #include "elastos/droid/inputmethod/pinyin/SoftKey.h"
 #include "elastos/droid/inputmethod/pinyin/SkbTemplate.h"
 #include <elastos/core/Object.h>
@@ -18,15 +19,12 @@ namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
-class ToggleStates;
-
 /**
  * Class used to represent a soft keyboard definition, including the height, the
  * background image, the image for high light, the keys, etc.
  */
 class SoftKeyboard
     : public Object
-    , public ISoftKeyboard
 {
 public:
     class KeyRow : public Object
@@ -57,8 +55,6 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
-
     SoftKeyboard(
         /* [in] */ Int32 skbXmlId,
         /* [in] */ SkbTemplate* skbTemplate,
@@ -129,7 +125,7 @@ public:
 
     CARAPI_(AutoPtr<IDrawable>) GetSkbBackground();
 
-    CARAPI_(AutoPtr<IDrawable>)  GetBalloonBackground();
+    CARAPI_(AutoPtr<IDrawable>) GetBalloonBackground();
 
     CARAPI_(AutoPtr<IDrawable>) GetPopupBackground();
 
@@ -159,7 +155,12 @@ public:
         /* [in] */ Boolean resetIfNotFound);
 
     CARAPI_(void) EnableToggleStates(
-        /* [in] */ ToggleStates* toggleStates);
+        /* [in] */ InputModeSwitcher::ToggleStates* toggleStates);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    CARAPI_(String) ToShortString();
 
 private:
     CARAPI_(AutoPtr<IRect>) GetPadding();
@@ -173,33 +174,6 @@ private:
      */
     CARAPI_(Boolean) EnableRow(
         /* [in] */ Int32 rowId);
-
-    // @Override
-    // public String toString() {
-    //     String str = "------------------SkbInfo----------------------\n";
-    //     String endStr = "-----------------------------------------------\n";
-    //     str += "Width: " + String.valueOf(mSkbCoreWidth) + "\n";
-    //     str += "Height: " + String.valueOf(mSkbCoreHeight) + "\n";
-    //     str += "KeyRowNum: " + mKeyRows == NULL ? "0" : String.valueOf(mKeyRows
-    //             .size())
-    //             + "\n";
-    //     if (NULL == mKeyRows) return str + endStr;
-    //     Int32 rowNum = mKeyRows.size();
-    //     for (Int32 row = 0; row < rowNum; row++) {
-    //         KeyRow keyRow = mKeyRows.get(row);
-    //         List<SoftKey> softKeys = keyRow.mSoftKeys;
-    //         Int32 keyNum = softKeys.size();
-    //         for (Int32 i = 0; i < softKeys.size(); i++) {
-    //             str += "-key " + String.valueOf(i) + ":"
-    //                     + softKeys.get(i).toString();
-    //         }
-    //     }
-    //     return str + endStr;
-    // }
-
-    // public String toShortString() {
-    //     return super.toString();
-    // }
 
 public:
     /**

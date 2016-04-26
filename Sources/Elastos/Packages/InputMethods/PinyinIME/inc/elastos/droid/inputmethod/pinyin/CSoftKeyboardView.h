@@ -3,16 +3,19 @@
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_CSOFTKEYBOARDVIEW_H__
 
 #include "_Elastos_Droid_InputMethod_Pinyin_CSoftKeyboardView.h"
+#include "elastos/droid/inputmethod/pinyin/CBalloonHint.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKey.h"
 #include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
+#include "elastos/droid/inputmethod/pinyin/SoundManager.h"
+#include <elastos/droid/view/View.h>
 
 using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::View::View;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
-
-class SoftKey;
 
 /**
  * Class used to show a soft keyboard.
@@ -25,6 +28,8 @@ CarClass(CSoftKeyboardView)
     , public Elastos::Droid::View::View
     , public ISoftKeyboardView
 {
+    friend class CSkbContainer;
+
 public:
     CAR_OBJECT_DECL();
 
@@ -32,33 +37,28 @@ public:
 
     CSoftKeyboardView();
 
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
     CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs);
 
-    CARAPI SetSoftKeyboard(
-        /* [in] */ ISoftKeyboard* softSkb,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) SetSoftKeyboard(
+        /* [in] */ SoftKeyboard* softSkb);
 
-    CARAPI GetSoftKeyboard(
-        /* [out] */ ISoftKeyboard** keyboard);
+    CARAPI_(AutoPtr<SoftKeyboard>) GetSoftKeyboard();
 
-    CARAPI ResizeKeyboard(
+    CARAPI_(void) ResizeKeyboard(
         /* [in] */ Int32 skbWidth,
         /* [in] */ Int32 skbHeight);
 
-    CARAPI SetBalloonHint(
-        /* [in] */ IBalloonHint* balloonOnKey,
-        /* [in] */ IBalloonHint* balloonPopup,
+    CARAPI_(void) SetBalloonHint(
+        /* [in] */ CBalloonHint* balloonOnKey,
+        /* [in] */ CBalloonHint* balloonPopup,
         /* [in] */ Boolean movingNeverHidePopup);
 
-    CARAPI SetOffsetToSkbContainer(
+    CARAPI_(void) SetOffsetToSkbContainer(
         /* [in] */ ArrayOf<Int32>* offsetToSkbContainer);
 
-    CARAPI ResetKeyPress(
+    CARAPI_(void) ResetKeyPress(
         /* [in] */ Int64 balloonDelay);
 
     // If movePress is true, means that this function is called because user
@@ -67,41 +67,39 @@ public:
     CARAPI_(AutoPtr<SoftKey>) OnKeyPress(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
-        /* [in] *//* SkbContainer.LongPressTimer*/ IHandler* longPressTimer,
+        /* [in] */ HandlerRunnable* longPressTimer, //SkbContainer.LongPressTimer
         /* [in] */ Boolean movePress);
 
-    CARAPI OnKeyRelease(
+    CARAPI_(AutoPtr<SoftKey>) OnKeyRelease(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y,
-        /* [out] */ ISoftKey** key);
+        /* [in] */ Int32 y);
 
-    CARAPI OnKeyMove(
+    CARAPI_(AutoPtr<SoftKey>) OnKeyMove(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y,
-        /* [out] */ ISoftKey** key);
+        /* [in] */ Int32 y);
 
-    CARAPI DimSoftKeyboard(
+    CARAPI_(void) DimSoftKeyboard(
         /* [in] */ Boolean dimSkb);
 
 protected:
-    void OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    void OnDraw(
+    CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
 private:
-    void ShowBalloon(
-        /* [in] */ IBalloonHint* balloon,
+    CARAPI_(void) ShowBalloon(
+        /* [in] */ CBalloonHint* balloon,
         /* [in] */ ArrayOf<Int32>* balloonLocationToSkb,
         /* [in] */ Boolean movePress);
 
-    void TryVibrate();
+    CARAPI_(void) TryVibrate();
 
-    void TryPlayKeyDown();
+    CARAPI_(void) TryPlayKeyDown();
 
-    void DrawSoftKey(
+    CARAPI_(void) DrawSoftKey(
         /* [in] */ ICanvas* canvas,
         /* [in] */ SoftKey* softKey,
         /* [in] */ Int32 keyXMargin,
@@ -117,16 +115,16 @@ protected:
     /**
      * The popup balloon hint for key press/release.
      */
-    AutoPtr<IBalloonHint> mBalloonPopup;
+    AutoPtr<CBalloonHint> mBalloonPopup;
 
     /**
      * The on-key balloon hint for key press/release. If it is NULL, on-key
      * highlight will be drawn on th soft keyboard view directly.
      */
-    AutoPtr<IBalloonHint> mBalloonOnKey;
+    AutoPtr<CBalloonHint> mBalloonOnKey;
 
     /** Used to play key sounds. */
-    AutoPtr<ISoundManager> mSoundManager;
+    AutoPtr<SoundManager> mSoundManager;
 
     /** The last key pressed. */
     AutoPtr<SoftKey> mSoftKeyDown;
@@ -137,12 +135,12 @@ protected:
     /**
      * The location offset of the view to the keyboard container.
      */
-    Int32 mOffsetToSkbContainer[2];// = new Int32[2];
+    AutoPtr< ArrayOf<Int32> > mOffsetToSkbContainer;
 
     /**
      * The location of the desired hint view to the keyboard container.
      */
-    Int32 mHintLocationToSkbContainer[2];// = new Int32[2];
+    AutoPtr< ArrayOf<Int32> > mHintLocationToSkbContainer;
 
     /**
      * Text size for normal key.
@@ -157,7 +155,7 @@ protected:
     /**
      * Long press timer used to response Int64-press.
      */
-    AutoPtr<SkbContainer::LongPressTimer> mLongPressTimer;
+    AutoPtr<HandlerRunnable> mLongPressTimer; //SkbContainer::LongPressTimer
 
     /**
      * Repeated events for Int64 press
@@ -188,8 +186,6 @@ protected:
     AutoPtr<IPaint> mPaint;
     AutoPtr<IPaintFontMetricsInt> mFmi;
     Boolean mDimSkb;
-
-    friend class SkbContainer;
 };
 
 } // namespace Pinyin
