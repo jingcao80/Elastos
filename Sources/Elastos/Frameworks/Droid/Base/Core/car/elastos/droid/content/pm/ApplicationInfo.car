@@ -589,10 +589,10 @@ module
             [out] Boolean* value);
 
         GetIsThemeable(
-            [out] Int32* isThemeable);
+            [out] Boolean* isThemeable);
 
         SetIsThemeable(
-            [in] Int32 isThemeable);
+            [in] Boolean isThemeable);
 
         GetProtect(
             [out] Boolean* protect);

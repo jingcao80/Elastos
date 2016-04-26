@@ -354,6 +354,12 @@ public:
     CARAPI GetKeyCharacterMap(
         /* [out] */ IKeyCharacterMap** keyCharacterMap);
 
+    CARAPI GetHasVibrator(
+        /* [out] */ Boolean* hasVibrator);
+
+    CARAPI GetHasButtonUnderPad(
+        /* [out] */ Boolean* hasButtonUnderPad);
+
     /**
      * Gets whether the device is capable of producing the list of keycodes.
      * @param keys The list of android keycodes to check for.

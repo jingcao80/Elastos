@@ -450,7 +450,7 @@ ECode CInputMethodSubtype::WriteToParcel(
     dest->WriteBoolean(mOverridesImplicitlyEnabledSubtype);
     dest->WriteInt32(mSubtypeHashCode);
     dest->WriteInt32(mSubtypeId);
-    dest->WriteInt32(mIsAsciiCapable ? 1 : 0);
+    dest->WriteBoolean(mIsAsciiCapable);
     return NOERROR;
 }
 
@@ -470,9 +470,7 @@ ECode CInputMethodSubtype::ReadFromParcel(
     source->ReadBoolean(&mOverridesImplicitlyEnabledSubtype);
     source->ReadInt32(&mSubtypeHashCode);
     source->ReadInt32(&mSubtypeId);
-    Int32 c = 0;
-    source->ReadInt32(&c);
-    mIsAsciiCapable = (c == 1);
+    source->ReadBoolean(&mIsAsciiCapable);
     return NOERROR;
 }
 
