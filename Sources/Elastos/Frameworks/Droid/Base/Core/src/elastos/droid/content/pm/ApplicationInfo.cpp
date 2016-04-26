@@ -924,7 +924,7 @@ ECode ApplicationInfo::GetNativeLibraryRootRequiresIsa(
 }
 
 ECode ApplicationInfo::GetIsThemeable(
-    /* [out] */ Int32* isThemeable)
+    /* [out] */ Boolean* isThemeable)
 {
     VALIDATE_NOT_NULL(isThemeable)
     *isThemeable = mIsThemeable;
@@ -932,7 +932,7 @@ ECode ApplicationInfo::GetIsThemeable(
 }
 
 ECode ApplicationInfo::SetIsThemeable(
-    /* [in] */ Int32 isThemeable)
+    /* [in] */ Boolean isThemeable)
 {
     mIsThemeable = isThemeable;
     return NOERROR;

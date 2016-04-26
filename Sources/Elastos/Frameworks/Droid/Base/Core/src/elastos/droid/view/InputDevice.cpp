@@ -317,6 +317,22 @@ ECode InputDevice::GetKeyCharacterMap(
     return NOERROR;
 }
 
+ECode InputDevice::GetHasVibrator(
+    /* [out] */ Boolean* hasVibrator)
+{
+    VALIDATE_NOT_NULL(hasVibrator)
+    *hasVibrator = mHasVibrator;
+    return NOERROR;
+}
+
+ECode InputDevice::GetHasButtonUnderPad(
+    /* [out] */ Boolean* hasButtonUnderPad)
+{
+    VALIDATE_NOT_NULL(hasButtonUnderPad)
+    *hasButtonUnderPad = mHasButtonUnderPad;
+    return NOERROR;
+}
+
 ECode InputDevice::HasKeys(
     /* [in] */ ArrayOf<Int32>* keys,
     /* [out, calleee] */ ArrayOf<Boolean>** rsts)

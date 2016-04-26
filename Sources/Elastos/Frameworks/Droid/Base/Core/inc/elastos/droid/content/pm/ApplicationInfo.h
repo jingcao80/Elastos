@@ -320,10 +320,10 @@ public:
         /* [out */ Boolean* value);
 
     CARAPI GetIsThemeable(
-        /* [out] */ Int32* isThemeable);
+        /* [out] */ Boolean* isThemeable);
 
     CARAPI SetIsThemeable(
-        /* [in] */ Int32 isThemeable);
+        /* [in] */ Boolean isThemeable);
 
     CARAPI GetProtect(
         /* [out] */ Boolean* protect);

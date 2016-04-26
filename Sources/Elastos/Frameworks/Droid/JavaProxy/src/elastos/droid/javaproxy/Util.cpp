@@ -1,8 +1,9 @@
 
 #include "elastos/droid/javaproxy/Util.h"
-// #include "elastos/droid/javaproxy/CIParcelableNative.h"
-// #include "elastos/droid/javaproxy/CISerializableNative.h"
-// #include "elastos/droid/javaproxy/CIIntentSenderNative.h"
+#include "elastos/droid/javaproxy/CIParcelableNative.h"
+#include "elastos/droid/javaproxy/CISerializableNative.h"
+#include "elastos/droid/javaproxy/CIIntentSenderNative.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <Elastos.Droid.JavaProxy.h>
@@ -91,6 +92,7 @@ using Elastos::Core::IBoolean;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
 using Elastos::IO::CFileDescriptor;
 using Elastos::IO::ISerializable;
 using Elastos::Security::IPublicKey;
@@ -1108,22 +1110,21 @@ jobject Util::ToJavaApplicationInfo(
     env->SetIntField(jAppInfo, f, tempInt);
     Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: uiOptions %d", __LINE__);
 
-    // TODO: CM12
-    // Boolean protect;
-    // appInfo->GetProtect(&protect);
-    // f = env->GetFieldID(appInfoKlass, "protect", "Z");
-    // Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: protect %d", __LINE__);
+    Boolean protect;
+    appInfo->GetProtect(&protect);
+    f = env->GetFieldID(appInfoKlass, "protect", "Z");
+    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: protect %d", __LINE__);
 
-    // env->SetBooleanField(jAppInfo, f, protect);
-    // Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: protect %d", __LINE__);
+    env->SetBooleanField(jAppInfo, f, protect);
+    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: protect %d", __LINE__);
 
-    // Boolean isThemeable;
-    // appInfo->GetIsThemeable(&isThemeable);
-    // f = env->GetFieldID(appInfoKlass, "isThemeable", "Z");
-    // Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: isThemeable %d", __LINE__);
+    Boolean isThemeable;
+    appInfo->GetIsThemeable(&isThemeable);
+    f = env->GetFieldID(appInfoKlass, "isThemeable", "Z");
+    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: isThemeable %d", __LINE__);
 
-    // env->SetBooleanField(jAppInfo, f, isThemeable);
-    // Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: isThemeable %d", __LINE__);
+    env->SetBooleanField(jAppInfo, f, isThemeable);
+    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: isThemeable %d", __LINE__);
 
     // ----------------------------------- PackageItemInfo ---------------------------------------------------
     AutoPtr<IPackageItemInfo> pkgInfo = IPackageItemInfo::Probe(appInfo);
@@ -1698,7 +1699,7 @@ Boolean Util::SetJavaBaseBundle(
                             env->CallBooleanMethod(jlist, mAdd, jitem);
                             CheckErrorAndLog(env, "GetJavaInputDevice Fail CallObjectMethod: mAdd : %d!\n", __LINE__);
                             env->DeleteLocalRef(jitem);
-                        }/* else if (ECLSID_CIParcelableNative == clsid) {
+                        } else if (ECLSID_CIParcelableNative == clsid) {
                             jobject jitem = Util::ToJavaParcelable(env, IParcelable::Probe(item));
                             if (jitem != NULL) {
                                 env->CallBooleanMethod(jlist, mAdd, jitem);
@@ -1709,7 +1710,7 @@ Boolean Util::SetJavaBaseBundle(
                             else {
                                 LOGGERE("ToJavaBundle", "IObjectContainer Unknown type!");
                             }
-                        } */else {
+                        } else {
                             LOGGERE("ToJavaBundle", "IObjectContainer ToJavaParcelable fail!");
                         }
                     }
@@ -1728,7 +1729,7 @@ Boolean Util::SetJavaBaseBundle(
                 ClassID clsid;
                 IObject::Probe(value)->GetClassID(&clsid);
 
-                /*if (ECLSID_CISerializableNative == clsid) {
+                if (ECLSID_CISerializableNative == clsid) {
                     jobject jserializable = Util::ElByteArrayToJavaObject(env, ISerializable::Probe(value));
                     LOGGERD("ToJavaBundle", "ISerializable jserializable: %p");
 
@@ -1740,7 +1741,7 @@ Boolean Util::SetJavaBaseBundle(
 
                     env->DeleteLocalRef(jserializable);
                 }
-                else*/ {
+                else {
                     LOGGERE("ToJavaBundle", "ToJavaBundle() Unknown ISerializable type not implemented! key is:%s\n", keyStr.string());
                     DUMP_CLSID(clsid, "ToJavaBundle");
                 }
@@ -1750,7 +1751,7 @@ Boolean Util::SetJavaBaseBundle(
                 ClassID clsid;
                 object->GetClassID(&clsid);
 
-                /*if (ECLSID_CIParcelableNative == clsid) {
+                if (ECLSID_CIParcelableNative == clsid) {
                     jobject jparcelable = Util::ToJavaParcelable(env, IParcelable::Probe(value));
                     if (jparcelable != NULL) {
                         jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
@@ -1763,7 +1764,7 @@ Boolean Util::SetJavaBaseBundle(
                         LOGGERE("ToJavaBundle", "ToJavaParcelable fail!");
                     }
                 }
-                else*/ {
+                else {
                     LOGGERE("ToJavaBundle", "ToJavaBundle() Unknown IParcelable type not implemented! key is:%s\n", keyStr.string());
                     DUMP_CLSID(clsid, "ToJavaBundle");
                 }
@@ -2413,17 +2414,17 @@ jobject Util::ToJavaProviderInfo(
     Int32 tempInt;
     providerInfo->GetInitOrder(&tempInt);
     f = env->GetFieldID(piKlass, "initOrder", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: initOrder %d", __LINE__);
+    Util::CheckErrorAndLog(env, "ToJavaProviderInfo", "Fail GetFieldID: initOrder %d", __LINE__);
 
     env->SetIntField(jproviderInfo, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: initOrder %d", __LINE__);
+    Util::CheckErrorAndLog(env, "ToJavaProviderInfo", "Fail SetIntField: initOrder %d", __LINE__);
 
-    providerInfo->GetInitOrder(&tempInt);
+    providerInfo->GetFlags(&tempInt);
     f = env->GetFieldID(piKlass, "flags", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: flags %d", __LINE__);
+    Util::CheckErrorAndLog(env, "ToJavaProviderInfo", "Fail GetFieldID: flags %d", __LINE__);
 
     env->SetIntField(jproviderInfo, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: flags %d", __LINE__);
+    Util::CheckErrorAndLog(env, "ToJavaProviderInfo", "Fail SetIntField: flags %d", __LINE__);
 
     providerInfo->GetIsSyncable(&tempBool);
     f = env->GetFieldID(piKlass, "isSyncable", "Z");
@@ -2872,20 +2873,19 @@ Boolean Util::GetElApplicationInfo(
         (*appInfo)->SetBackupAgentName(backupAgentName);
     }
 
-    // TODO: CM12
-    // f = env->GetFieldID(appInfoKlass, "protect", "Z");
-    // Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetFieldID: protect %d", __LINE__);
+    f = env->GetFieldID(appInfoKlass, "protect", "Z");
+    Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetFieldID: protect %d", __LINE__);
 
-    // jboolean jprotect = env->GetBooleanField(jappInfo, f);
-    // Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: protect %d", __LINE__);
-    // (*appInfo)->SetProtect((Boolean)jprotect);
+    jboolean jprotect = env->GetBooleanField(jappInfo, f);
+    Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: protect %d", __LINE__);
+    (*appInfo)->SetProtect((Boolean)jprotect);
 
-    // f = env->GetFieldID(appInfoKlass, "isThemeable", "Z");
-    // Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetFieldID: isThemeable %d", __LINE__);
+    f = env->GetFieldID(appInfoKlass, "isThemeable", "Z");
+    Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetFieldID: isThemeable %d", __LINE__);
 
-    // jboolean jisThemeable = env->GetBooleanField(jappInfo, f);
-    // Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: isThemeable %d", __LINE__);
-    // (*appInfo)->SetIsThemeable((Boolean)jisThemeable);
+    jboolean jisThemeable = env->GetBooleanField(jappInfo, f);
+    Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: isThemeable %d", __LINE__);
+    (*appInfo)->SetIsThemeable((Boolean)jisThemeable);
 
     // ----------------------------------- PackageItemInfo ---------------------------------------------------
 
@@ -2990,13 +2990,12 @@ Boolean Util::GetElApplicationInfo(
     Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: showUserIcon %d", __LINE__);
     pkgInfo->SetShowUserIcon((Int32)jshowUserIcon);
 
-    // TODO:CM12
-    // f = env->GetFieldID(appInfoKlass, "themedIcon", "I");
-    // Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetFieldID: themedIcon %d", __LINE__);
+    f = env->GetFieldID(appInfoKlass, "themedIcon", "I");
+    Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetFieldID: themedIcon %d", __LINE__);
 
-    // jint jthemedIcon = env->GetIntField(jappInfo, f);
-    // Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: themedIcon %d", __LINE__);
-    // pkgInfo->SetThemedIcon((Int32)jthemedIcon);
+    jint jthemedIcon = env->GetIntField(jappInfo, f);
+    Util::CheckErrorAndLog(env, "GetElApplicationInfo", "Fail GetIntField: themedIcon %d", __LINE__);
+    pkgInfo->SetThemedIcon((Int32)jthemedIcon);
 
     env->DeleteLocalRef(appInfoKlass);
     return TRUE;
@@ -3863,18 +3862,18 @@ Boolean Util::GetElProviderInfo(
     (*providerInfo)->SetMultiprocess((Boolean)jmultiprocess);
 
     f = env->GetFieldID(piKlass, "initOrder", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: initOrder %d", __LINE__);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetFieldID: initOrder %d", __LINE__);
 
     jint jinitOrder = env->GetIntField(jproviderInfo, f);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetIntField: initOrder %d", __LINE__);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetIntField: initOrder %d", __LINE__);
     (*providerInfo)->SetInitOrder((Int32)jinitOrder);
 
     f = env->GetFieldID(piKlass, "flags", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: flags %d", __LINE__);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetFieldID: flags %d", __LINE__);
 
     jint jflags = env->GetIntField(jproviderInfo, f);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetIntField: flags %d", __LINE__);
-    (*providerInfo)->SetInitOrder((Int32)jflags);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetIntField: flags %d", __LINE__);
+    (*providerInfo)->SetFlags((Int32)jflags);
 
     f = env->GetFieldID(piKlass, "applicationInfo", "Landroid/content/pm/ApplicationInfo;");
     Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetFieldID: ApplicationInfo %d", __LINE__);
@@ -3906,10 +3905,10 @@ Boolean Util::GetElProviderInfo(
     }
 
     f = env->GetFieldID(piKlass, "descriptionRes", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: descriptionRes %d", __LINE__);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetFieldID: descriptionRes %d", __LINE__);
 
     jint jdescriptionRes = env->GetIntField(jproviderInfo, f);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetIntField: descriptionRes %d", __LINE__);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetIntField: descriptionRes %d", __LINE__);
     comInfo->SetDescriptionRes((Int32)jdescriptionRes);
 
     f = env->GetFieldID(piKlass, "enabled", "Z");
@@ -4028,13 +4027,12 @@ Boolean Util::GetElProviderInfo(
     Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetIntField: showUserIcon %d", __LINE__);
     pkgInfo->SetShowUserIcon((Int32)jshowUserIcon);
 
-    // TODO:CM12
-    // f = env->GetFieldID(piKlass, "themedIcon", "I");
-    // Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetFieldID: themedIcon %d", __LINE__);
+    f = env->GetFieldID(piKlass, "themedIcon", "I");
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetFieldID: themedIcon %d", __LINE__);
 
-    // jint jthemedIcon = env->GetIntField(jproviderInfo, f);
-    // Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetIntField: themedIcon %d", __LINE__);
-    // pkgInfo->SetThemedIcon((Int32)jthemedIcon);
+    jint jthemedIcon = env->GetIntField(jproviderInfo, f);
+    Util::CheckErrorAndLog(env, "GetElProviderInfo", "Fail GetIntField: themedIcon %d", __LINE__);
+    pkgInfo->SetThemedIcon((Int32)jthemedIcon);
 
     env->DeleteLocalRef(piKlass);
 
@@ -4543,6 +4541,7 @@ jobject Util::ToJavaInputBindResult(
     String id;
     Int32 sequence, userActionNotificationSequenceNumber;
     result->GetMethod((IIInputMethodSession**)&method);
+    result->GetChannel((IInputChannel**)&channel);
     result->GetId(&id);
     result->GetSequence(&sequence);
     result->GetUserActionNotificationSequenceNumber(&userActionNotificationSequenceNumber);
@@ -4863,10 +4862,10 @@ void Util::SetPackageItemInfo(
     jstring jname = Util::ToJavaString(env, name);
     if (jname != NULL) {
         jfieldID f = env->GetFieldID(parentClass, "name", "Ljava/lang/String;");
-        Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: name %d", __LINE__);
+        Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: name %d", __LINE__);
 
         env->SetObjectField(jparent, f, jname);
-        Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetIntField: jname %d", __LINE__);
+        Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: jname %d", __LINE__);
         env->DeleteLocalRef(jname);
     }
 
@@ -4875,20 +4874,20 @@ void Util::SetPackageItemInfo(
     jstring jpackageName = Util::ToJavaString(env, packageName);
     if (jpackageName != NULL) {
         jfieldID f = env->GetFieldID(parentClass, "packageName", "Ljava/lang/String;");
-        Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: packageName %d", __LINE__);
+        Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: packageName %d", __LINE__);
 
         env->SetObjectField(jparent, f, jpackageName);
-        Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetIntField: jpackageName %d", __LINE__);
+        Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: jpackageName %d", __LINE__);
         env->DeleteLocalRef(jpackageName);
     }
 
     Int32 tempInt;
     pkgInfo->GetLabelRes(&tempInt);
     jfieldID f = env->GetFieldID(parentClass, "labelRes", "I");
-    Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: labelRes %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: labelRes %d", __LINE__);
 
     env->SetIntField(jparent, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetIntField: labelRes %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: labelRes %d", __LINE__);
 
     AutoPtr<ICharSequence> nonLocalizedLabel;
     pkgInfo->GetNonLocalizedLabel((ICharSequence**)&nonLocalizedLabel);
@@ -4898,26 +4897,26 @@ void Util::SetPackageItemInfo(
         jstring jnonLocalizedLabel = Util::ToJavaString(env, snonLocalizedLabel);
 
         f = env->GetFieldID(parentClass, "nonLocalizedLabel", "Ljava/lang/CharSequence;");
-        Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: CharSequence %d", __LINE__);
+        Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: CharSequence %d", __LINE__);
 
         env->SetObjectField(jparent, f, jnonLocalizedLabel);
-        Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetObjectField: jnonLocalizedLabel %d", __LINE__);
+        Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetObjectField: jnonLocalizedLabel %d", __LINE__);
         env->DeleteLocalRef(jnonLocalizedLabel);
     }
 
     pkgInfo->GetIcon(&tempInt);
     f = env->GetFieldID(parentClass, "icon", "I");
-    Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: icon %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: icon %d", __LINE__);
 
     env->SetIntField(jparent, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetIntField: icon %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: icon %d", __LINE__);
 
     pkgInfo->GetLogo(&tempInt);
     f = env->GetFieldID(parentClass, "logo", "I");
-    Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: logo %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: logo %d", __LINE__);
 
     env->SetIntField(jparent, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetIntField: logo %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: logo %d", __LINE__);
 
     AutoPtr<IBundle> metaData;
     pkgInfo->GetMetaData((IBundle**)&metaData);
@@ -4925,38 +4924,37 @@ void Util::SetPackageItemInfo(
         jobject jmetaData = Util::ToJavaBundle(env, metaData);
         if (jmetaData != NULL) {
             jfieldID f = env->GetFieldID(parentClass, "metaData", "Landroid/os/Bundle;");
-            Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail GetFieldID: metaData %d", __LINE__);
+            Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: metaData %d", __LINE__);
 
             env->SetObjectField(jparent, f, jmetaData);
-            Util::CheckErrorAndLog(env, "ToJavaActivityInfo", "Fail SetObjectField: jmetaData %d", __LINE__);
+            Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetObjectField: jmetaData %d", __LINE__);
             env->DeleteLocalRef(jmetaData);
         }
         else {
-            LOGGERD("ToJavaActivityInfo", "Error: jmetaData is NULL!");
+            LOGGERD("SetPackageItemInfo", "Error: jmetaData is NULL!");
         }
     }
 
     pkgInfo->GetBanner(&tempInt);
     f = env->GetFieldID(parentClass, "banner", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: banner %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: banner %d", __LINE__);
 
     env->SetIntField(jparent, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: banner %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: banner %d", __LINE__);
 
     pkgInfo->GetShowUserIcon(&tempInt);
     f = env->GetFieldID(parentClass, "showUserIcon", "I");
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: showUserIcon %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: showUserIcon %d", __LINE__);
 
     env->SetIntField(jparent, f, tempInt);
-    Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: showUserIcon %d", __LINE__);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: showUserIcon %d", __LINE__);
 
-    // TODO:CM12
-    // pkgInfo->GetThemedIcon(&tempInt);
-    // f = env->GetFieldID(parentClass, "themedIcon", "I");
-    // Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail GetFieldID: themedIcon %d", __LINE__);
+    pkgInfo->GetThemedIcon(&tempInt);
+    f = env->GetFieldID(parentClass, "themedIcon", "I");
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail GetFieldID: themedIcon %d", __LINE__);
 
-    // env->SetIntField(jparent, f, tempInt);
-    // Util::CheckErrorAndLog(env, "ToJavaApplicationInfo", "Fail SetIntField: themedIcon %d", __LINE__);
+    env->SetIntField(jparent, f, tempInt);
+    Util::CheckErrorAndLog(env, "SetPackageItemInfo", "Fail SetIntField: themedIcon %d", __LINE__);
 }
 
 jobject Util::ToJavaServiceInfo(
@@ -5079,14 +5077,13 @@ jobject Util::ToJavaCompatibilityInfo(
     env->SetFloatField(jcInfo, f, tmpFloat);
     Util::CheckErrorAndLog(env, "ToJavaCompatibilityInfo", "SetFloatField: applicationInvertedScale %d", __LINE__);
 
-    //TODO: CM12
-    // Boolean isThemeable;
-    // cInfo->GetIsThemeable(&isThemeable);
-    // f = env->GetFieldID(cInfoKlass, "isThemeable", "Z");
-    // Util::CheckErrorAndLog(env, "ToJavaCompatibilityInfo", "GetFieldID: isThemeable %d", __LINE__);
+    Boolean isThemeable;
+    cInfo->GetIsThemeable(&isThemeable);
+    f = env->GetFieldID(cInfoKlass, "isThemeable", "Z");
+    Util::CheckErrorAndLog(env, "ToJavaCompatibilityInfo", "GetFieldID: isThemeable %d", __LINE__);
 
-    // env->SetBooleanField(jcInfo, f, isThemeable);
-    // Util::CheckErrorAndLog(env, "ToJavaCompatibilityInfo", "SetBooleanField: isThemeable %d", __LINE__);
+    env->SetBooleanField(jcInfo, f, isThemeable);
+    Util::CheckErrorAndLog(env, "ToJavaCompatibilityInfo", "SetBooleanField: isThemeable %d", __LINE__);
 
     env->DeleteLocalRef(cInfoKlass);
     return jcInfo;
@@ -5617,6 +5614,11 @@ jobject Util::ToJavaLocation(
     /* [in] */ JNIEnv* env,
     /* [in] */ ILocation* location)
 {
+    if (env == NULL || location == NULL) {
+        LOGGERE("ToJavaLocation()", "Invalid arguments!");
+        return NULL;
+    }
+
     jclass locationKlass = env->FindClass("android/location/Location");
     CheckErrorAndLog(env, "ToJavaLocation", "Error FindClass: Location : %d!\n", __LINE__);
 
@@ -5639,26 +5641,21 @@ jobject Util::ToJavaLocation(
     AutoPtr<IBundle> mExtras;
     Boolean mIsFromMockProvider = FALSE;
 
-    if (location != NULL){
-        location->GetProvider(&mProvider);
-        location->GetTime(&mTime);
-        location->GetElapsedRealtimeNanos(&mElapsedRealtimeNanos);
-        location->GetLatitude(&mLatitude);
-        location->GetLongitude(&mLongitude);
-        location->HasAltitude(&mHasAltitude);
-        location->GetAltitude(&mAltitude);
-        location->HasSpeed(&mHasSpeed);
-        location->GetSpeed(&mSpeed);
-        location->HasBearing(&mHasBearing);
-        location->GetBearing(&mBearing);
-        location->HasAccuracy(&mHasAccuracy);
-        location->GetAccuracy(&mAccuracy);
-        location->GetExtras((IBundle**)&mExtras);
-        location->IsFromMockProvider(&mIsFromMockProvider);
-    }
-    else {
-        LOGGERE("ToJavaLocation()", "ILocation is null!");
-    }
+    location->GetProvider(&mProvider);
+    location->GetTime(&mTime);
+    location->GetElapsedRealtimeNanos(&mElapsedRealtimeNanos);
+    location->GetLatitude(&mLatitude);
+    location->GetLongitude(&mLongitude);
+    location->HasAltitude(&mHasAltitude);
+    location->GetAltitude(&mAltitude);
+    location->HasSpeed(&mHasSpeed);
+    location->GetSpeed(&mSpeed);
+    location->HasBearing(&mHasBearing);
+    location->GetBearing(&mBearing);
+    location->HasAccuracy(&mHasAccuracy);
+    location->GetAccuracy(&mAccuracy);
+    location->GetExtras((IBundle**)&mExtras);
+    location->IsFromMockProvider(&mIsFromMockProvider);
 
     jstring jprovider = ToJavaString(env, mProvider);
 
@@ -6291,7 +6288,9 @@ jobject Util::ToJavaInetAddress(
 
     jaddress = env->CallStaticObjectMethod(inaddKlass, m, jhostName, jbArray);
     Util::CheckErrorAndLog(env, "ToJavaInetAddress", "CallStaticObjectMethod: getByAddress(): %d!\n", __LINE__);
+
     env->DeleteLocalRef(jbArray);
+    env->DeleteLocalRef(jhostName);
     env->DeleteLocalRef(inaddKlass);
     return jaddress;
 }
@@ -6697,6 +6696,8 @@ jobject Util::ToJavaRouteInfo(
     CheckErrorAndLog(env, "ToJavaRouteInfo", "NewObject: RouteInfo : %d!\n", __LINE__);
 
     env->DeleteLocalRef(riKlass);
+    env->DeleteLocalRef(jiface);
+
     return jinfo;
 }
 
@@ -6717,7 +6718,7 @@ jobject Util::ToJavaIpPrefix(
 
     AutoPtr<ArrayOf<Byte> > address;
     ipPrefix->GetRawAddress((ArrayOf<Byte>**)&address);
-    jobject jaddress = NULL;
+    jbyteArray jaddress = NULL;
     if (address != NULL) {
         jaddress = Util::ToJavaByteArray(env, address);
     }
@@ -6729,6 +6730,7 @@ jobject Util::ToJavaIpPrefix(
     CheckErrorAndLog(env, "ToJavaIpPrefix", "NewObject: IpPrefix : %d!\n", __LINE__);
 
     env->DeleteLocalRef(ipKlass);
+    env->DeleteLocalRef(jaddress);
     return jipPrefix;
 }
 
@@ -6886,16 +6888,14 @@ Boolean Util::GetElPackageInfoLite(
     Int32 recommendedInstallLocation = GetJavaIntField(env, pkgLiteKlass, jpkgLite, "recommendedInstallLocation", tag);
     Int32 installLocation = GetJavaIntField(env, pkgLiteKlass, jpkgLite, "installLocation", tag);
     Boolean multiArch = GetJavaBoolField(env, jpkgLite, "multiArch", tag);
-    // TODO: CM12
-    // Boolean isTheme = GetJavaBoolField(env, pkgLiteKlass, jpkgLite, "isTheme", tag);
+    Boolean isTheme = GetJavaBoolField(env, jpkgLite, "isTheme", tag);
 
     (*pkgLite)->SetPackageName(packageName);
     (*pkgLite)->SetVersionCode(versionCode);
     (*pkgLite)->SetRecommendedInstallLocation(recommendedInstallLocation);
     (*pkgLite)->SetInstallLocation(installLocation);
     (*pkgLite)->SetMultiArch(multiArch);
-    // TODO: CM12
-    // (*pkgLite)->SetIsTheme(isTheme);
+    (*pkgLite)->SetIsTheme(isTheme);
 
     jfieldID m = env->GetFieldID(pkgLiteKlass, "verifiers", "[Landroid/content/pm/VerifierInfo;");
     Util::CheckErrorAndLog(env, "GetElPackageInfoLite", "GetFieldID verifiers  %d", __LINE__);
@@ -8213,7 +8213,7 @@ jobject Util::ToJavaAppWidgetProviderInfo(
     Util::CheckErrorAndLog(env, "ToJavaAppWidgetProviderInfo", "SetObjectField: providerInfo", __LINE__);
 
     env->DeleteLocalRef(klass);
-    env->DeleteLocalRef(jproviderInfo);
+    env->DeleteLocalRef(jaInfo);
     return jproviderInfo;
 }
 
@@ -8246,10 +8246,10 @@ Boolean Util::GetElPendingIntent(
     jobject jInstance = env->NewGlobalRef(jtarget);
 
     AutoPtr<IIIntentSender> iisender;
-    // if (NOERROR != CIIntentSenderNative::New((Handle64)jvm, (Handle64)jInstance, (IIIntentSender**)&iisender)) {
-    //     LOGGERD(TAG, "GetElPendingIntent new CIIntentSenderNative fail!\n");
-    //     return FALSE;
-    // }
+    if (NOERROR != CIIntentSenderNative::New((Handle64)jvm, (Handle64)jInstance, (IIIntentSender**)&iisender)) {
+        LOGGERD(TAG, "GetElPendingIntent new CIIntentSenderNative fail!\n");
+        return FALSE;
+    }
 
     if (NOERROR != CPendingIntent::New(iisender, pintent)) {
         LOGGERD(TAG, "GetElPendingIntent: create CPendingIntent fail!");
@@ -9212,17 +9212,16 @@ jobject Util::ToJavaHashMap(
             ClassID clsid;
             object->GetClassID(&clsid);
 
-            /*if (ECLSID_CISerializableNative == clsid) {
+            if (ECLSID_CISerializableNative == clsid) {
                 jobject jserializable = Util::ElByteArrayToJavaObject(env, ISerializable::Probe(value));
-                LOGGERD("ToJavaHashMap", "ISerializable jserializable: %p, path: %s",
-                    jserializable, snative->mPkgPath.string());
 
                 jobject jresult = env->CallObjectMethod(jmap, m, jkey, jserializable);
                 Util::CheckErrorAndLog(env, "ToJavaHashMap", "CallObjectMethod: put line: %d", __LINE__);
 
                 env->DeleteLocalRef(jserializable);
                 env->DeleteLocalRef(jresult);
-            } else*/ {
+            }
+            else {
                 LOGGERE("ToJavaHashMap", "ToJavaHashMap() Unknown ISerializable value not implemented! key is:%s\n", key.string());
                 DUMP_CLSID(clsid, "ToJavaBundle");
             }
@@ -10452,7 +10451,7 @@ jobject Util::ToJavaWifiEnterpriseConfig(
     m = env->GetMethodID(cKlass, "createFromParcel", "(Landroid/os/Parcel;)Landroid/net/wifi/WifiEnterpriseConfig;");
     Util::CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "GetMethodID: WifiEnterpriseConfig line: %d", __LINE__);
 
-    jobject jconfig = env->CallObjectMethod(cKlass, m, jparcel);
+    jobject jconfig = env->CallObjectMethod(jcreater, m, jparcel);
     Util::CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "NewObject: WifiEnterpriseConfig line: %d", __LINE__);
 
     env->DeleteLocalRef(parcelClass);
@@ -10472,7 +10471,7 @@ jobject Util::ToJavaIpConfiguration(
         return NULL;
     }
 
-    jclass ipaClass = env->FindClass("android/net/wifi/IpConfiguration$IpAssignment");
+    jclass ipaClass = env->FindClass("android/net/IpConfiguration$IpAssignment");
     Util::CheckErrorAndLog(env, "ToJavaWifiConfiguration", "Fail FindClass IpAssignment %d", __LINE__);
 
     Elastos::Droid::Net::IpConfigurationIpAssignment ipAssignment;
@@ -11313,108 +11312,112 @@ jobject Util::ElByteArrayToJavaObject(
         return NULL;
     }
 
-    // CISerializableNative* snative = (CISerializableNative*)serializable;
+    CISerializableNative* snative = (CISerializableNative*)serializable;
 
-    // jclass baisKlass = env->FindClass("java/io/ByteArrayInputStream");
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "FindClass ByteArrayInputStream : %d!\n", __LINE__);
+    jbyteArray jbArray = Util::ToJavaByteArray(env, snative->mObject);
+    if (jbArray == NULL) {
+        LOGGERE("ElByteArrayToJavaObject", "ToJavaByteArray fail!");
+        return NULL;
+    }
 
-    // jmethodID m = env->GetMethodID(baisKlass, "<init>", "([B)V");
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID ByteArrayInputStream : %d!\n", __LINE__);
+    jclass baisKlass = env->FindClass("java/io/ByteArrayInputStream");
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "FindClass ByteArrayInputStream : %d!\n", __LINE__);
 
-    // jobject jbais = env->NewObject(baisKlass, m, jbArray);
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "NewObject ByteArrayInputStream : %d!\n", __LINE__);
+    jmethodID m = env->GetMethodID(baisKlass, "<init>", "([B)V");
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID ByteArrayInputStream : %d!\n", __LINE__);
 
-    // jclass oisKlass = env->FindClass("java/io/ObjectInputStream");
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "FindClass ObjectInputStream : %d!\n", __LINE__);
+    jobject jbais = env->NewObject(baisKlass, m, jbArray);
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "NewObject ByteArrayInputStream : %d!\n", __LINE__);
 
-    // m = env->GetMethodID(oisKlass, "<init>", "(Ljava/io/InputStream;)V");
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID ObjectInputStream : %d!\n", __LINE__);
+    jclass oisKlass = env->FindClass("java/io/ObjectInputStream");
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "FindClass ObjectInputStream : %d!\n", __LINE__);
 
-    // jobject jois = env->NewObject(oisKlass, m, jbais);
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID ObjectInputStream : %d!\n", __LINE__);
+    m = env->GetMethodID(oisKlass, "<init>", "(Ljava/io/InputStream;)V");
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID ObjectInputStream : %d!\n", __LINE__);
 
-    // if (!snative->mPkgPath.IsNullOrEmpty())  {
-    //     jstring jpath = Util::ToJavaString(env, snative->mPkgPath);
-    //     jobject jloader;
-    //     if (snative->mIsDexClassLoader) {
-    //         // jclass dexKlass = env->FindClass("dalvik/system/DexClassLoader");
-    //         // CheckErrorAndLog(env, "FindClass DexClassLoader : %d!\n", __LINE__);
+    jobject jois = env->NewObject(oisKlass, m, jbais);
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID ObjectInputStream : %d!\n", __LINE__);
 
-    //         // jclass klass = env->FindClass("java/lang/Class");
-    //         // CheckErrorAndLog(env, "FindClass Class : %d!\n", __LINE__);
+    if (!snative->mPkgPath.IsNullOrEmpty())  {
+        jstring jpath = Util::ToJavaString(env, snative->mPkgPath);
+        jobject jloader;
+        if (snative->mIsDexClassLoader) {
+            // jclass dexKlass = env->FindClass("dalvik/system/DexClassLoader");
+            // CheckErrorAndLog(env, "FindClass DexClassLoader : %d!\n", __LINE__);
 
-    //         // m = env->GetMethodID(klass, "getClassLoader", "()Ljava/lang/ClassLoader;");
-    //         // CheckErrorAndLog(env, "GetMethodID getClassLoader : %d!\n", __LINE__);
+            // jclass klass = env->FindClass("java/lang/Class");
+            // CheckErrorAndLog(env, "FindClass Class : %d!\n", __LINE__);
 
-    //         // jobject jparent = env->CallObjectMethod(dexKlass, m);
-    //         // CheckErrorAndLog(env, "CallObjectMethod getClassLoader : %d!\n", __LINE__);
+            // m = env->GetMethodID(klass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+            // CheckErrorAndLog(env, "GetMethodID getClassLoader : %d!\n", __LINE__);
 
-    //         // m = env->GetMethodID(dexKlass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)V");
-    //         // CheckErrorAndLog(env, "GetMethodID DexClassLoader : %d!\n", __LINE__);
+            // jobject jparent = env->CallObjectMethod(dexKlass, m);
+            // CheckErrorAndLog(env, "CallObjectMethod getClassLoader : %d!\n", __LINE__);
 
-    //         // jstring jdir = Util::ToJavaString(env, snative->mOptimizedDirectory);
+            // m = env->GetMethodID(dexKlass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)V");
+            // CheckErrorAndLog(env, "GetMethodID DexClassLoader : %d!\n", __LINE__);
 
-    //         // jloader = env->NewObject(dexKlass, m, jpath, jdir, NULL, jparent);
-    //         // CheckErrorAndLog(env, "NewObject DexClassLoader : %d!\n", __LINE__);
+            // jstring jdir = Util::ToJavaString(env, snative->mOptimizedDirectory);
 
-    //         // env->DeleteLocalRef(dexKlass);
-    //         // env->DeleteLocalRef(jdir);
+            // jloader = env->NewObject(dexKlass, m, jpath, jdir, NULL, jparent);
+            // CheckErrorAndLog(env, "NewObject DexClassLoader : %d!\n", __LINE__);
 
-    //         jloader = (jobject)StringUtils::ParseInt32(snative->mOptimizedDirectory);
-    //         snative->mOptimizedDirectory = NULL;
-    //     }
-    //     else {
-    //         jclass alsKlass = env->FindClass("android/app/ApplicationLoaders");
-    //         CheckErrorAndLog(env, "FindClass ApplicationLoaders : %d!\n", __LINE__);
+            // env->DeleteLocalRef(dexKlass);
+            // env->DeleteLocalRef(jdir);
 
-    //         m = env->GetStaticMethodID(alsKlass, "getDefault", "()Landroid/app/ApplicationLoaders;");
-    //         CheckErrorAndLog(env, "GetStaticMethodID getDefault : %d!\n", __LINE__);
+            jloader = (jobject)StringUtils::ParseInt32(snative->mOptimizedDirectory);
+            snative->mOptimizedDirectory = NULL;
+        }
+        else {
+            jclass alsKlass = env->FindClass("android/app/ApplicationLoaders");
+            CheckErrorAndLog(env, "FindClass ApplicationLoaders : %d!\n", __LINE__);
 
-    //         jobject jloaders = env->CallStaticObjectMethod(alsKlass, m);
-    //         CheckErrorAndLog(env, "GetMethodID getDefault : %d!\n", __LINE__);
+            m = env->GetStaticMethodID(alsKlass, "getDefault", "()Landroid/app/ApplicationLoaders;");
+            CheckErrorAndLog(env, "GetStaticMethodID getDefault : %d!\n", __LINE__);
 
-    //         m = env->GetMethodID(alsKlass, "getClassLoader", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/ClassLoader;");
-    //         CheckErrorAndLog(env, "GetMethodID getClassLoader : %d!\n", __LINE__);
+            jobject jloaders = env->CallStaticObjectMethod(alsKlass, m);
+            CheckErrorAndLog(env, "GetMethodID getDefault : %d!\n", __LINE__);
 
-    //         jloader = env->CallObjectMethod(jloaders, m, jpath, NULL, NULL);
-    //         CheckErrorAndLog(env, "CallObjectMethod getClassLoader : %d!\n", __LINE__);
+            m = env->GetMethodID(alsKlass, "getClassLoader", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/ClassLoader;");
+            CheckErrorAndLog(env, "GetMethodID getClassLoader : %d!\n", __LINE__);
 
-    //         env->DeleteLocalRef(alsKlass);
-    //         env->DeleteLocalRef(jloaders);
-    //     }
+            jloader = env->CallObjectMethod(jloaders, m, jpath, NULL, NULL);
+            CheckErrorAndLog(env, "CallObjectMethod getClassLoader : %d!\n", __LINE__);
 
-    //     if (jloader != NULL) {
-    //         jfieldID f = env->GetFieldID(oisKlass, "callerClassLoader", "Ljava/lang/ClassLoader;");
-    //         Util::CheckErrorAndLog(env, "GetFieldID: callerClassLoader %d", __LINE__);
+            env->DeleteLocalRef(alsKlass);
+            env->DeleteLocalRef(jloaders);
+        }
 
-    //         env->SetObjectField(jois, f, jloader);
-    //         Util::CheckErrorAndLog(env, "SetObjectField: callerClassLoader %d", __LINE__);
+        if (jloader != NULL) {
+            jfieldID f = env->GetFieldID(oisKlass, "callerClassLoader", "Ljava/lang/ClassLoader;");
+            Util::CheckErrorAndLog(env, "GetFieldID: callerClassLoader %d", __LINE__);
 
-    //         Util::SetJavaIntField(env, oisKlass, jois, 1, "nestedLevels", "ElByteArrayToJavaObject");
+            env->SetObjectField(jois, f, jloader);
+            Util::CheckErrorAndLog(env, "SetObjectField: callerClassLoader %d", __LINE__);
 
-    //         if (snative->mIsDexClassLoader)
-    //             env->DeleteGlobalRef(jloader);
-    //         else
-    //             env->DeleteLocalRef(jloader);
-    //     }
+            Util::SetJavaIntField(env, oisKlass, jois, 1, "nestedLevels", "ElByteArrayToJavaObject");
 
-    //     env->DeleteLocalRef(jpath);
-    // }
+            if (snative->mIsDexClassLoader)
+                env->DeleteGlobalRef(jloader);
+            else
+                env->DeleteLocalRef(jloader);
+        }
 
-    // m = env->GetMethodID(oisKlass, "readObject", "()Ljava/lang/Object;");
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID readObject : %d!\n", __LINE__);
+        env->DeleteLocalRef(jpath);
+    }
 
-    // jobject jobj = env->CallObjectMethod(jois, m);
-    // CheckErrorAndLog(env, "ElByteArrayToJavaObject", "CallObjectMethod readObject : %d!\n", __LINE__);
+    m = env->GetMethodID(oisKlass, "readObject", "()Ljava/lang/Object;");
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "GetMethodID readObject : %d!\n", __LINE__);
 
-    // env->DeleteLocalRef(baisKlass);
-    // env->DeleteLocalRef(oisKlass);
-    // env->DeleteLocalRef(jbArray);
-    // env->DeleteLocalRef(jbais);
-    // env->DeleteLocalRef(jois);
-    // return jobj;
-    assert(0);
-    return NOERROR;
+    jobject jobj = env->CallObjectMethod(jois, m);
+    CheckErrorAndLog(env, "ElByteArrayToJavaObject", "CallObjectMethod readObject : %d!\n", __LINE__);
+
+    env->DeleteLocalRef(baisKlass);
+    env->DeleteLocalRef(oisKlass);
+    env->DeleteLocalRef(jbArray);
+    env->DeleteLocalRef(jbais);
+    env->DeleteLocalRef(jois);
+    return jobj;
 }
 
 jobject Util::ToJavaParcelable(
@@ -11426,92 +11429,90 @@ jobject Util::ToJavaParcelable(
         return NULL;
     }
 
-    assert(0);
-    return NULL;
-    // jclass parcelClass = env->FindClass("android/os/Parcel");
-    // Util::CheckErrorAndLog(env, "ToJavaParcelable", "FindClass: Parcel : %d", __LINE__);
+    jclass parcelClass = env->FindClass("android/os/Parcel");
+    Util::CheckErrorAndLog(env, "ToJavaParcelable", "FindClass: Parcel : %d", __LINE__);
 
-    // jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
-    // Util::CheckErrorAndLog(env, "ToJavaParcelable", "GetStaticMethodID: obtain : %d", __LINE__);
+    jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
+    Util::CheckErrorAndLog(env, "ToJavaParcelable", "GetStaticMethodID: obtain : %d", __LINE__);
 
-    // jobject jparcel = env->CallStaticObjectMethod(parcelClass, m, 0);
-    // Util::CheckErrorAndLog(env, "ToJavaParcelable", "GetStaticMethodID: obtain : %d", __LINE__);
+    jobject jparcel = env->CallStaticObjectMethod(parcelClass, m, 0);
+    Util::CheckErrorAndLog(env, "ToJavaParcelable", "GetStaticMethodID: obtain : %d", __LINE__);
 
-    // CIParcelableNative* parcelNative = (CIParcelableNative*)parcelable;
-    // AutoPtr<ArrayOf<Byte> > parcelObj;
-    // parcelNative->GetObject((ArrayOf<Byte>**)&parcelObj);
-    // if (parcelObj != NULL) {
-    //     Int32 nativePtr = Util::GetJavaIntField(env, parcelClass, jparcel, "mNativePtr", "ToJavaParcelable");
-    //     android::Parcel* parcel =  reinterpret_cast< android::Parcel*>(nativePtr);
+    CIParcelableNative* parcelNative = (CIParcelableNative*)parcelable;
+    AutoPtr<ArrayOf<Byte> > parcelObj;
+    parcelNative->GetObject((ArrayOf<Byte>**)&parcelObj);
+    if (parcelObj != NULL) {
+        Int32 nativePtr = Util::GetJavaIntField(env, parcelClass, jparcel, "mNativePtr", "ToJavaParcelable");
+        android::Parcel* parcel =  reinterpret_cast< android::Parcel*>(nativePtr);
 
-    //     if (parcel == NULL) {
-    //         LOGGERE("ToJavaParcelable", "ToJavaParcelable() IParcelable parcel is NULL!");
-    //        return NULL;
-    //     }
+        if (parcel == NULL) {
+            LOGGERE("ToJavaParcelable", "ToJavaParcelable() IParcelable parcel is NULL!");
+           return NULL;
+        }
 
-    //     Int32 length = parcelObj->GetLength() * sizeof(Byte);
-    //     parcel->setDataSize(length);
-    //     parcel->setDataPosition(0);
+        Int32 length = parcelObj->GetLength() * sizeof(Byte);
+        parcel->setDataSize(length);
+        parcel->setDataPosition(0);
 
-    //     void* raw = parcel->writeInplace(length);
-    //     memcpy(raw, parcelObj->GetPayload(), length);
-    //     parcel->setDataPosition(0);
-    // }
-    // else {
-    //     LOGGERE("ToJavaParcelable", "ToJavaParcelable() IParcelable parcelObj is NULL!");
-    //     env->DeleteLocalRef(parcelClass);
-    //     env->DeleteLocalRef(jparcel);
-    //     return NULL;
-    // }
+        void* raw = parcel->writeInplace(length);
+        memcpy(raw, parcelObj->GetPayload(), length);
+        parcel->setDataPosition(0);
+    }
+    else {
+        LOGGERE("ToJavaParcelable", "ToJavaParcelable() IParcelable parcelObj is NULL!");
+        env->DeleteLocalRef(parcelClass);
+        env->DeleteLocalRef(jparcel);
+        return NULL;
+    }
 
-    // String pkgPath = parcelNative->GetPackagePath();
+    String pkgPath = parcelNative->GetPackagePath();
 
-    // jobject jloader = NULL;
-    // if (!pkgPath.IsNullOrEmpty())  {
-    //     jclass alsKlass = env->FindClass("android/app/ApplicationLoaders");
-    //     CheckErrorAndLog(env, "FindClass ApplicationLoaders : %d!\n", __LINE__);
+    jobject jloader = NULL;
+    if (!pkgPath.IsNullOrEmpty())  {
+        jclass alsKlass = env->FindClass("android/app/ApplicationLoaders");
+        CheckErrorAndLog(env, "FindClass ApplicationLoaders : %d!\n", __LINE__);
 
-    //     m = env->GetStaticMethodID(alsKlass, "getDefault", "()Landroid/app/ApplicationLoaders;");
-    //     CheckErrorAndLog(env, "GetStaticMethodID getDefault : %d!\n", __LINE__);
+        m = env->GetStaticMethodID(alsKlass, "getDefault", "()Landroid/app/ApplicationLoaders;");
+        CheckErrorAndLog(env, "GetStaticMethodID getDefault : %d!\n", __LINE__);
 
-    //     jobject jloaders = env->CallStaticObjectMethod(alsKlass, m);
-    //     CheckErrorAndLog(env, "GetMethodID getDefault : %d!\n", __LINE__);
+        jobject jloaders = env->CallStaticObjectMethod(alsKlass, m);
+        CheckErrorAndLog(env, "GetMethodID getDefault : %d!\n", __LINE__);
 
-    //     m = env->GetMethodID(alsKlass, "getClassLoader", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/ClassLoader;");
-    //     CheckErrorAndLog(env, "GetMethodID getClassLoader : %d!\n", __LINE__);
+        m = env->GetMethodID(alsKlass, "getClassLoader", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/ClassLoader;");
+        CheckErrorAndLog(env, "GetMethodID getClassLoader : %d!\n", __LINE__);
 
-    //     jstring jpkgPath = Util::ToJavaString(env, pkgPath);
+        jstring jpkgPath = Util::ToJavaString(env, pkgPath);
 
-    //     jloader = env->CallObjectMethod(jloaders, m, jpkgPath, NULL, NULL);
-    //     CheckErrorAndLog(env, "CallObjectMethod getClassLoader : %d!\n", __LINE__);
+        jloader = env->CallObjectMethod(jloaders, m, jpkgPath, NULL, NULL);
+        CheckErrorAndLog(env, "CallObjectMethod getClassLoader : %d!\n", __LINE__);
 
-    //     env->DeleteLocalRef(alsKlass);
-    //     env->DeleteLocalRef(jloaders);
-    //     env->DeleteLocalRef(jpkgPath);
-    // }
-    // else {
-    //     jclass clKlass = env->FindClass("java/lang/ClassLoader");
-    //     CheckErrorAndLog(env, "FindClass ClassLoader : %d!\n", __LINE__);
+        env->DeleteLocalRef(alsKlass);
+        env->DeleteLocalRef(jloaders);
+        env->DeleteLocalRef(jpkgPath);
+    }
+    else {
+        jclass clKlass = env->FindClass("java/lang/ClassLoader");
+        CheckErrorAndLog(env, "FindClass ClassLoader : %d!\n", __LINE__);
 
-    //     m = env->GetStaticMethodID(clKlass, "getSystemClassLoader", "()Ljava/lang/ClassLoader;");
-    //     CheckErrorAndLog(env, "GetStaticMethodID getSystemClassLoader : %d!\n", __LINE__);
+        m = env->GetStaticMethodID(clKlass, "getSystemClassLoader", "()Ljava/lang/ClassLoader;");
+        CheckErrorAndLog(env, "GetStaticMethodID getSystemClassLoader : %d!\n", __LINE__);
 
-    //     jloader = env->CallStaticObjectMethod(clKlass, m);
-    //     CheckErrorAndLog(env, "GetMethodID getSystemClassLoader : %d!\n", __LINE__);
+        jloader = env->CallStaticObjectMethod(clKlass, m);
+        CheckErrorAndLog(env, "GetMethodID getSystemClassLoader : %d!\n", __LINE__);
 
-    //     env->DeleteLocalRef(clKlass);
-    // }
+        env->DeleteLocalRef(clKlass);
+    }
 
-    // m = env->GetMethodID(parcelClass, "readParcelable", "(Ljava/lang/ClassLoader;)Landroid/os/Parcelable;");
-    // CheckErrorAndLog(env, "GetMethodID readParcelable : %d!\n", __LINE__);
+    m = env->GetMethodID(parcelClass, "readParcelable", "(Ljava/lang/ClassLoader;)Landroid/os/Parcelable;");
+    CheckErrorAndLog(env, "GetMethodID readParcelable : %d!\n", __LINE__);
 
-    // jobject jparcelable = env->CallObjectMethod(jparcel, m, jloader);
-    // CheckErrorAndLog(env, "CallObjectMethod readParcelable : %d!\n", __LINE__);
+    jobject jparcelable = env->CallObjectMethod(jparcel, m, jloader);
+    CheckErrorAndLog(env, "CallObjectMethod readParcelable : %d!\n", __LINE__);
 
-    // env->DeleteLocalRef(parcelClass);
-    // env->DeleteLocalRef(jparcel);
-    // env->DeleteLocalRef(jloader);
-    // return jparcelable;
+    env->DeleteLocalRef(parcelClass);
+    env->DeleteLocalRef(jparcel);
+    env->DeleteLocalRef(jloader);
+    return jparcelable;
 }
 
 jobject Util::ToJavaContentProviderOperation(
