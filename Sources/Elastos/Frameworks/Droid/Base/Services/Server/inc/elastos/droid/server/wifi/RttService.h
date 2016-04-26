@@ -42,6 +42,7 @@ namespace Wifi {
 class RttService
     : public SystemService
 {
+    friend class CRttServiceImpl;
 public:
     class RttServiceImpl
         : public Object
@@ -54,9 +55,9 @@ public:
         class RttRequest : public Object
         {
         public:
-            AutoPtr<IInteger32> key;
-            ClientInfo* ci;//avoid crossing-reference
-            AutoPtr<ArrayOf<IRttManagerRttParams*> > params;
+            AutoPtr<IInteger32> mKey;
+            ClientInfo* mCi;//avoid crossing-reference
+            AutoPtr<ArrayOf<IRttManagerRttParams*> > mParams;
         };
 
         class ClientInfo : public Object
@@ -64,7 +65,8 @@ public:
         public:
             ClientInfo(
                 /* [in] */ IAsyncChannel* c,
-                /* [in] */ IMessenger* m);
+                /* [in] */ IMessenger* m,
+                /* [in] */ RttServiceImpl* host);
 
             virtual CARAPI AddRttRequest(
                 /* [in] */ Int32 key,
@@ -95,6 +97,7 @@ public:
 
         public:
             AutoPtr<IHashMap> mRequests;//<Integer, RttRequest>
+            RttServiceImpl* mHost;
 
         private:
             /*const*/ AutoPtr<IAsyncChannel> mChannel;
@@ -109,43 +112,67 @@ public:
                 : public State
             {
             public:
+                DefaultState(
+                    /* [in] */ RttStateMachine* host);
+
                 // @Override
                 CARAPI ProcessMessage(
                     /* [in] */ IMessage* msg,
                     /* [out] */ Boolean* result);
+
+                CARAPI_(String) GetName();
+
+            public:
+                RttStateMachine* mHost;
             };
 
             class EnabledState
                 : public State
             {
             public:
+                EnabledState(
+                    /* [in] */ RttStateMachine* host);
+
                 // @Override
                 CARAPI ProcessMessage(
                     /* [in] */ IMessage* msg,
                     /* [out] */ Boolean* result);
+
+                CARAPI_(String) GetName();
+
+            public:
+                RttStateMachine* mHost;
             };
 
             class RequestPendingState
                 : public State
             {
             public:
+                RequestPendingState(
+                    /* [in] */ RttStateMachine* host);
+
                 // @Override
                 CARAPI ProcessMessage(
                     /* [in] */ IMessage* msg,
                     /* [out] */ Boolean* result);
 
+                CARAPI_(String) GetName();
+
             public:
                 AutoPtr<RttRequest> mOutstandingRequest;
+                RttStateMachine* mHost;
             };
 
         public:
             RttStateMachine(
-                /* [in] */ ILooper* looper);
+                /* [in] */ ILooper* looper,
+                /* [in] */ RttServiceImpl* host);
 
         public:
             AutoPtr<DefaultState> mDefaultState;
             AutoPtr<EnabledState> mEnabledState;
             AutoPtr<RequestPendingState> mRequestPendingState;
+            RttServiceImpl* mHost;
         };
 
     private:
@@ -156,11 +183,15 @@ public:
             TO_STRING_IMPL("RttService::ClientHandler")
 
             ClientHandler(
-                /* [in] */ ILooper* looper);
+                /* [in] */ ILooper* looper,
+                /* [in] */ RttServiceImpl* host);
 
             // @Override
             CARAPI HandleMessage(
                 /* [in] */ IMessage* msg);
+
+        public:
+            RttServiceImpl* mHost;
         };
 
         class InnerBroadcastReceiver1
@@ -213,7 +244,7 @@ public:
                 return Object::ToString(info);
         }
 
-    private:
+    public:
         AutoPtr<IContext> mContext;
         AutoPtr<RttStateMachine> mStateMachine;
         AutoPtr<ClientHandler> mClientHandler;

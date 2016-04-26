@@ -1,10 +1,12 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Wifi.h"
+#include "_Elastos.Droid.Server.h"
 #include "Elastos.Droid.Os.h"
+#include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/server/wifi/SupplicantStateTracker.h"
 #include "elastos/droid/server/wifi/WifiMonitor.h"
-//TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
 #ifdef DROID_CORE
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
@@ -44,7 +46,7 @@ const Int32 SupplicantStateTracker::MAX_RETRIES_ON_AUTHENTICATION_FAILURE;
 //==============================================================
 ECode SupplicantStateTracker::DefaultState::Enter()
 {
-    // if (DBG) Log.d(TAG, getName() + "\n");
+    if (DBG) Logger::D(TAG, GetName() + "\n");
     return NOERROR;
 }
 
@@ -74,9 +76,9 @@ ECode SupplicantStateTracker::DefaultState::ProcessMessage(
             mOwner->TransitionOnSupplicantStateChange(stateChangeResult);
             break;
         }
-        //TODO case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
-        //    mOwner->TransitionTo(mOwner->mUninitializedState);
-        //    break;
+        // case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
+        //     mOwner->TransitionTo(mOwner->mUninitializedState);
+        //     break;
         case IWifiManager::CONNECT_NETWORK:
             if (DBG) Logger::D("SupplicantStateTracker::DefaultState", "ProcessMessage CONNECT_NETWORK");
             mOwner->mNetworksDisabledDuringConnect = TRUE;
@@ -99,7 +101,7 @@ ECode SupplicantStateTracker::DefaultState::ProcessMessage(
 //==============================================================
 ECode SupplicantStateTracker::UninitializedState::Enter()
 {
-    // if (DBG) Log.d(TAG, getName() + "\n");
+    if (DBG) Logger::D(TAG, GetName() + "\n");
     return NOERROR;
 }
 
@@ -109,7 +111,7 @@ ECode SupplicantStateTracker::UninitializedState::Enter()
 //==============================================================
 ECode SupplicantStateTracker::InactiveState::Enter()
 {
-    // if (DBG) Log.d(TAG, getName() + "\n");
+    if (DBG) Logger::D(TAG, GetName() + "\n");
     return NOERROR;
 }
 
@@ -151,7 +153,7 @@ ECode SupplicantStateTracker::DisconnectedState::Enter()
 //==============================================================
 ECode SupplicantStateTracker::ScanState::Enter()
 {
-    // if (DBG) Log.d(TAG, getName() + "\n");
+    if (DBG) Logger::D(TAG, GetName() + "\n");
     return NOERROR;
 }
 
@@ -160,9 +162,10 @@ ECode SupplicantStateTracker::ScanState::Enter()
 // SupplicantStateTracker::HandshakeState
 //==============================================================
 const Int32 SupplicantStateTracker::HandshakeState::MAX_SUPPLICANT_LOOP_ITERATIONS;
+
 ECode SupplicantStateTracker::HandshakeState::Enter()
 {
-    // if (DBG) Log.d(TAG, getName() + "\n");
+    if (DBG) Logger::D(TAG, GetName() + "\n");
     mLoopDetectIndex = 0;
     mLoopDetectCount = 0;
     return NOERROR;
@@ -263,12 +266,13 @@ ECode SupplicantStateTracker::CompletedState::ProcessMessage(
             mOwner->TransitionOnSupplicantStateChange(stateChangeResult);
             break;
         }
-        //TODO case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
-        //    if (DBG) Logger::D("SupplicantStateTracker::CompletedState",
+        // case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE: {
+        //     if (DBG) Logger::D("SupplicantStateTracker::CompletedState",
         //        "ProcessMessage CMD_RESET_SUPPLICANT_STATE");
-        //    mOwner->SendSupplicantStateChangedBroadcast(Elastos::Droid::Wifi::SupplicantState_DISCONNECTED, FALSE);
-        //    mOwner->TransitionTo(mOwner->mUninitializedState);
-        //    break;
+        //     mOwner->SendSupplicantStateChangedBroadcast(Elastos::Droid::Wifi::SupplicantState_DISCONNECTED, FALSE);
+        //     mOwner->TransitionTo(mOwner->mUninitializedState);
+        //     break;
+        // }
         default:
             *result = NOT_HANDLED;
             return NOERROR;
@@ -283,7 +287,7 @@ ECode SupplicantStateTracker::CompletedState::ProcessMessage(
 //==============================================================
 ECode SupplicantStateTracker::DormantState::Enter()
 {
-    // if (DBG) Log.d(TAG, getName() + "\n");
+    if (DBG) Logger::D(TAG, GetName() + "\n");
     return NOERROR;
 }
 
@@ -377,7 +381,7 @@ void SupplicantStateTracker::TransitionOnSupplicantStateChange(
     SupplicantState supState;
     stateChangeResult->GetSupplicantState(&supState);
 
-    // if (DBG) Logger::D(TAG, "Supplicant state: " + supState.toString() + "\n");
+    if (DBG) Logger::D(TAG, "Supplicant state: %d\n", supState);
 
     switch (supState) {
         case Elastos::Droid::Wifi::SupplicantState_DISCONNECTED:
@@ -485,15 +489,15 @@ ECode SupplicantStateTracker::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    //TODO
-    assert(0);
-    /*
-    super.dump(fd, pw, args);
-    pw.println("mAuthenticationFailuresCount " + mAuthenticationFailuresCount);
-    pw.println("mAuthFailureInSupplicantBroadcast " + mAuthFailureInSupplicantBroadcast);
-    pw.println("mNetworksDisabledDuringConnect " + mNetworksDisabledDuringConnect);
-    pw.println();
-    */
+    StateMachine::Dump(fd, pw, args);
+    pw->Println(String("mAuthenticationFailuresCount "));
+    pw->Println(mAuthenticationFailuresCount);
+    pw->Println(String("mAuthFailureInSupplicantBroadcast "));
+    pw->Println(mAuthFailureInSupplicantBroadcast);
+    pw->Println(String("mNetworksDisabledDuringConnect "));
+    pw->Println(mNetworksDisabledDuringConnect);
+    pw->Println();
+
     return NOERROR;
 }
 

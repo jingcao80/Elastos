@@ -4,26 +4,12 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Wifi.h"
+#include "Elastos.Droid.Server.h"
 #include "elastos/droid/ext/frameworkext.h"
 //TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/server/wifi/WifiNative.h"
 #include "elastos/droid/server/wifi/WifiConfigStore.h"
 #include "elastos/droid/server/wifi/WifiNetworkScoreCache.h"
-
-// package com.android.server.wifi;
-// import android.content.Context;
-// import android.net.NetworkKey;
-// import android.net.NetworkScoreManager;
-// import android.net.WifiKey;
-// import android.net.wifi.*;
-// import android.os.SystemClock;
-// import android.os.Process;
-// import android.text.TextUtils;
-// import android.util.Log;
-// import java.util.ArrayList;
-// import java.util.Iterator;
-// import java.util.HashMap;
-// import java.util.List;
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::INetworkScoreManager;
@@ -249,7 +235,7 @@ private:
     AutoPtr<IInterface/*TODO WifiStateMachine*/> mWifiStateMachine;
     AutoPtr<WifiConfigStore> mWifiConfigStore;
     AutoPtr<WifiNative> mWifiNative;
-    AutoPtr<INetworkScoreManager> scoreManager;
+    AutoPtr<INetworkScoreManager> mScoreManager;
     AutoPtr<WifiNetworkScoreCache> mNetworkScoreCache;
     static const String TAG;
     static Boolean DBG;
@@ -259,7 +245,7 @@ private:
     /* milliseconds unit */
     String mCurrentConfigurationKey;
     //used by autojoin
-    AutoPtr<IHashMap> scanResultCache;//<String, ScanResult>
+    AutoPtr<IHashMap> mScanResultCache;//<String, ScanResult>
     AutoPtr<IArrayList> mBlacklistedBssids;//String
     AutoPtr<IWifiConnectionStatistics> mWifiConnectionStatistics;
     // Lose the non-auth failure blacklisting after 8 hours
