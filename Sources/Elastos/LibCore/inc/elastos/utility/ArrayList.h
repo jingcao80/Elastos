@@ -19,21 +19,18 @@ class ECO_PUBLIC ArrayList
     , public ISerializable
     , public IRandomAccess
 {
-private:
+public:
     class ECO_LOCAL ArrayListIterator
         : public Object
         , public IIterator
     {
     public:
-        ArrayListIterator(
-            /* [in] */ ArrayList* owner)
-            : mRemaining(owner->mSize)
-            , mRemovalIndex(-1)
-            , mExpectedModCount(owner->mModCount)
-            , mOwner(owner)
-        {}
-
         CAR_INTERFACE_DECL()
+
+        ArrayListIterator();
+
+        CARAPI constructor(
+            /* [in] */ IArrayList* owner);
 
         CARAPI HasNext(
             /* [out] */ Boolean* result);

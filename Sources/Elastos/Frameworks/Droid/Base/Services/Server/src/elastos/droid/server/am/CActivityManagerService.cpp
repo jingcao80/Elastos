@@ -490,7 +490,7 @@ static pthread_key_t InitSCallerIdentity()
 const String CActivityManagerService::CALLED_PRE_BOOTS_FILENAME("called_pre_boots.dat");
 const String CActivityManagerService::TAG("CActivityManagerService");
 const String CActivityManagerService::TAG_MU("CActivityManagerServiceMU");
-const Boolean CActivityManagerService::DEBUG = TRUE;
+const Boolean CActivityManagerService::DEBUG = FALSE;
 const Boolean CActivityManagerService::localLOGV = DEBUG;
 const Boolean CActivityManagerService::DEBUG_BACKUP = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_BROADCAST = FALSE;//localLOGV || FALSE;

@@ -6353,9 +6353,6 @@ Boolean PackageParser::ParseIntent(
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
-    if (sa == NULL) {
-        Logger::E(TAG, "=== error: FAILED to ParseIntent in %s", mArchiveSourcePath.string());
-    }
 
     Int32 priority = 0;
     sa->GetInt32(
@@ -6403,6 +6400,7 @@ Boolean PackageParser::ParseIntent(
             String value;
             ECode ec = attrs->GetAttributeValue(ANDROID_RESOURCES, String("name"), &value);
             if (FAILED(ec) || value.IsNullOrEmpty()) {
+                Slogger::E(TAG, "No value supplied for <android:name>");
                 (*outError)[0] = "No value supplied for <android:name>";
                 return FALSE;
             }
@@ -6414,6 +6412,7 @@ Boolean PackageParser::ParseIntent(
             String value;
             ECode ec = attrs->GetAttributeValue(ANDROID_RESOURCES, String("name"), &value);
             if (FAILED(ec) || value.IsNullOrEmpty()) {
+                Slogger::E(TAG, "No value supplied for <android:name>");
                 (*outError)[0] = "No value supplied for <android:name>";
                 return FALSE;
             }
@@ -6433,17 +6432,12 @@ Boolean PackageParser::ParseIntent(
             sa->GetNonConfigurationString(
                 R::styleable::AndroidManifestData_mimeType, 0, &str);
             if (!str.IsNull()) {
-                // try {
                 if (FAILED(outInfo->AddDataType(str))) {
+                    Slogger::E(TAG, "MalformedMimeTypeException: failed to add data type:%s", str.string());
                     (*outError)[0] = "E_RUNTIME_EXCEPTION";
                     sa->Recycle();
                     return FALSE;
                 }
-                // } catch (IntentFilter.MalformedMimeTypeException e) {
-                //     (*outError)[0] = "E_RUNTIME_EXCEPTION";
-                //     sa->Recycle();
-                //     return FALSE;
-                // }
             }
 
             sa->GetNonConfigurationString(
@@ -6468,6 +6462,7 @@ Boolean PackageParser::ParseIntent(
                     R::styleable::AndroidManifestData_sspPattern, 0, &str);
             if (!str.IsNull()) {
                 if (!allowGlobs) {
+                    Slogger::E(TAG, "sspPattern not allowed here; ssp must be literal");
                     (*outError)[0] = String("sspPattern not allowed here; ssp must be literal");
                     return FALSE;
                 }
@@ -6500,6 +6495,7 @@ Boolean PackageParser::ParseIntent(
                 R::styleable::AndroidManifestData_pathPattern, 0, &str);
             if (!str.IsNull()) {
                 if (!allowGlobs) {
+                    Slogger::E(TAG, "pathPattern not allowed here; path must be literal");
                     (*outError)[0] = "pathPattern not allowed here; path must be literal";
                     return FALSE;
                 }
@@ -6521,28 +6517,28 @@ Boolean PackageParser::ParseIntent(
         else {
             String name;
             parser->GetName(&name);
-            // (*outError)[0] = (const char*)(
-            //     StringBuffer("Bad element under <intent-filter>: ") + name);
+            Slogger::E(TAG, "Bad element under <intent-filter>: %s", name.string());
             return FALSE;
         }
     }
 
     outInfo->mHasDefault = outInfo->HasCategory(IIntent::CATEGORY_DEFAULT);
 
-    // if (DEBUG_PARSER) {
-    //     StringBuilder cats = new StringBuilder("Intent d=");
-    //     cats.append(outInfo->hasDefault);
-    //     cats.append(", cat=");
+    if (DEBUG_PARSER) {
+        StringBuilder sb("Intent hasDefault=");
+        sb += outInfo->mHasDefault;
+        sb += ", cat={";
 
-    //     Iterator<String> it = outInfo->categoriesIterator();
-    //     if (it != NULL) {
-    //         while (it.hasNext()) {
-    //             cats.append(' ');
-    //             cats.append(it.next());
-    //         }
-    //     }
-    //     Slogger::D(TAG, cats.toString());
-    // }
+        AutoPtr< ArrayOf<String> > cats = outInfo->GetCategories();
+        if (cats != NULL) {
+            for (Int32 i = 0; i < cats->GetLength(); ++i) {
+                sb += " ";
+                sb += (*cats)[i];
+            }
+        }
+        sb += "}";
+        Slogger::D(TAG, sb.ToString());
+    }
 
     return TRUE;
 }

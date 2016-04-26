@@ -43,6 +43,8 @@ public:
         , public ISerializable
     {
     public:
+        CAR_INTERFACE_DECL()
+
         SimpleImmutableEntry(
             /* [in] */ IInterface* theKey,
             /* [in] */ IInterface* theValue);
@@ -52,8 +54,6 @@ public:
          */
         SimpleImmutableEntry(
             /* [in] */ IMapEntry* copyFrom);
-
-        CAR_INTERFACE_DECL();
 
         CARAPI GetKey(
             /* [out] */ PInterface* key);
@@ -95,6 +95,8 @@ public:
         , public ISerializable
     {
     public:
+        CAR_INTERFACE_DECL()
+
         SimpleEntry(
             /* [in] */ IInterface* theKey,
             /* [in] */ IInterface* theValue);
@@ -104,8 +106,6 @@ public:
          */
         SimpleEntry(
             /* [in] */ IMapEntry* copyFrom);
-
-        CAR_INTERFACE_DECL();
 
         CARAPI GetKey(
             /* [out] */ PInterface* key);
@@ -140,10 +140,12 @@ public:
         : public AbstractSet
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("AbstractMap::AbstractMapKeySet")
+
         AbstractMapKeySet(
             /* [in] */ AbstractMap* hm);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI GetSize(
             /* [out] */ Int32* value);
@@ -207,10 +209,12 @@ public:
         , public IIterator
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("AbstractMap::AbstractMapKeySetIterator")
+
         AbstractMapKeySetIterator(
             /* [in] */ AbstractMap* hm);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI HasNext(
             /* [out] */ Boolean* result);
@@ -229,6 +233,8 @@ public:
         : public AbstractCollection
     {
     public:
+        TO_STRING_IMPL("AbstractMap::AbstractMapValues")
+
         AbstractMapValues(
             /* [in] */ AbstractMap* hm);
 
@@ -294,10 +300,12 @@ public:
         , public IIterator
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("AbstractMap::AbstractMapValuesIterator")
+
         AbstractMapValuesIterator(
             /* [in] */ AbstractMap* hm);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI HasNext(
             /* [out] */ Boolean* result);

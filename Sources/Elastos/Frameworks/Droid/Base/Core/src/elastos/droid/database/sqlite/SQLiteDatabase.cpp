@@ -1027,11 +1027,12 @@ ECode SQLiteDatabase::InsertWithOnConflict(
         sql.Append(nullColumnHack + String(") VALUES (NULL"));
     }
     sql.Append(")");
+    String sqlStr(sql.ToString());
 
     AutoPtr<ISQLiteStatement> statement;
-    ECode ec = CSQLiteStatement::New(this, sql.ToString(), bindArgs,
-            (ISQLiteStatement**)&statement);
+    ECode ec = CSQLiteStatement::New(this, sqlStr, bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
+        Slogger::E(TAG, "Failed to create SQLiteStatement with [%s]", sqlStr.string());
         goto fail;
     }
     // try {

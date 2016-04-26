@@ -232,6 +232,13 @@ module
         interface IRandomAccess;
     }
 
+    class CArrayListIterator {
+        constructor(
+            [in] IArrayList* list);
+
+        interface IIterator;
+    }
+
     [deprecated]
     class CBitSet {
         constructor();
@@ -248,7 +255,6 @@ module
     }
 
     singleton class CBitSetHelper {
-
         interface IBitSetHelper;
     }
 

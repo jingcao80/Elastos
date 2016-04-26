@@ -17,15 +17,15 @@
             </intent-filter>
 
             <intent-filter>
-                <data android:mimeType="elastos.kesalin.dir" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.kesalin.users" />
             </intent-filter>
             <intent-filter>
-                <data android:mimeType="elastos.kesalin.item" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.kesalin.users" />
             </intent-filter>
         </activity>
 
         <provider android:name="Elastos.DevSamples.ContentProviderDemo.CContentProviderOne"
-            android:authorities="elastos.kesalin.contentprovider"
+            android:authorities="elastos.kesalin.users"
             android:label="@string/app_name"
             android:exported="true">
         </provider>

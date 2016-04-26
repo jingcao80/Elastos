@@ -1947,6 +1947,8 @@ ECode SQLiteConnection::ExecuteForLastInsertedRowId(
     /* [out] */ Int64* id)
 {
     VALIDATE_NOT_NULL(id)
+    *id = -1;
+
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
         Slogger::E(TAG, "sql must not be null.");
@@ -1982,6 +1984,9 @@ ECode SQLiteConnection::ExecuteForLastInsertedRowId(
     //     mRecentOperations.endOperation(cookie);
     // }
 fail:
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "failed to execute insert with [%s]", sql.string());
+    }
     ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);

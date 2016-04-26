@@ -22,10 +22,13 @@ private:
         , public IIterator
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("AbstractList::SimpleListIterator")
+
         SimpleListIterator(
             /* [in] */ AbstractList* owner);
 
-        CAR_INTERFACE_DECL()
 
         CARAPI HasNext(
             /* [out] */ Boolean* result);
@@ -47,8 +50,9 @@ private:
         , public IListIterator
     {
     public:
+        CAR_INTERFACE_DECL()
 
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("AbstractList::FullListIterator")
 
         FullListIterator(
             /* [in] */ Int32 start,

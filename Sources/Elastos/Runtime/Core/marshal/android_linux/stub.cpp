@@ -745,6 +745,7 @@ ECode CObjectStub::S_CreateObject(
         iObj->ToString(&str);
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                 "Create stub: fail to get object's ClassID. %s\n", str.string()));
+        assert(0 && "TODO");
         goto ErrorExit;
     }
 

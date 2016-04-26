@@ -53,7 +53,7 @@ ECode CContentProviderOne::OnCreate(
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     ECode ec = CDatabaseOpenHelper::New(context, (ISQLiteOpenHelper**)&mDBOpenHelper);
-    Logger::I(TAG, "create CDatabaseOpenHelper, ec=%08x", ec);
+    Logger::I(TAG, "create CDatabaseOpenHelper, mDBOpenHelper:%p, ec=%08x", mDBOpenHelper.Get(), ec);
     *succeeded = mDBOpenHelper != NULL;
     return NOERROR;
 }
@@ -103,7 +103,7 @@ ECode CContentProviderOne::Insert(
     }
 
     Int64 rowId = -1;
-    ECode ec = db->Insert(Utils::TABLE_NAME, Utils::TABLE_ID, values, &rowId);
+    ECode ec = db->Insert(Utils::TABLE_NAME, Utils::TAG_ID, values, &rowId);
     if (rowId > 0) {
         AutoPtr<IContentUris> contentUris;
         CContentUris::AcquireSingleton((IContentUris**)&contentUris);
@@ -136,7 +136,20 @@ ECode CContentProviderOne::Query(
     /* [in] */ const String& sortOrder,
     /* [out] */ ICursor** cursor)
 {
-    Logger::I(TAG, "Query uri:%s", TO_CSTR(uri));
+    Logger::I(TAG, "Query uri: [%s]", TO_CSTR(uri));
+    Logger::I(TAG, "Query projection: %d items:", projection ? projection->GetLength() : 0);
+    if (projection) {
+        for (Int32 i = 0; i < projection->GetLength(); ++i) {
+            Logger::I(TAG, "                     %d : [%s]", i + 1, (*projection)[i].string());
+        }
+    }
+    Logger::I(TAG, "Query selection: [%s], selectionArgs %d items:", selection.string(), selectionArgs ? selectionArgs->GetLength() : 0);
+    if (projection) {
+        for (Int32 i = 0; i < selectionArgs->GetLength(); ++i) {
+            Logger::I(TAG, "                     %d : [%s]", i + 1, (*selectionArgs)[i].string());
+        }
+    }
+    Logger::I(TAG, "Query sortOrder: [%s]", sortOrder.string());
     VALIDATE_NOT_NULL(cursor)
     *cursor = NULL;
 
@@ -147,7 +160,7 @@ ECode CContentProviderOne::Query(
     Int32 matchCode;
     GetUriMatcher()->Match(uri, &matchCode);
 
-    Logger::I(TAG, "Query URI %s, matchCode:%d", TO_CSTR(uri), matchCode);
+    Logger::I(TAG, "Query URI [%s], matchCode:%d", TO_CSTR(uri), matchCode);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
@@ -159,7 +172,7 @@ ECode CContentProviderOne::Query(
     AutoPtr<ICursor> c;
     switch (matchCode) {
         case Utils::ITEM:
-            ec = db->Query(Utils::TABLE_NAME, projection, selection, selectionArgs, nullStr, nullStr, nullStr, (ICursor**)&c);
+            ec = db->Query(Utils::TABLE_NAME, projection, selection, selectionArgs, nullStr, nullStr, sortOrder, (ICursor**)&c);
             if (FAILED(ec)) {
                 Logger::E(TAG, "failed to Query, ec = %08x", ec);
             }
@@ -175,7 +188,7 @@ ECode CContentProviderOne::Query(
             AutoPtr<IInterface> obj;
             segments->Get(1, (IInterface**)&obj);
             String id = Object::ToString(obj);
-            StringBuilder sb(Utils::TABLE_ID);
+            StringBuilder sb(Utils::TAG_ID);
             sb += id;
             if (!selection.IsNullOrEmpty()) {
                 sb += "AND(";
@@ -252,7 +265,7 @@ ECode CContentProviderOne::Delete(
             AutoPtr<IInterface> obj;
             segments->Get(1, (IInterface**)&obj);
             String id = Object::ToString(obj);
-            StringBuilder sb(Utils::TABLE_ID);
+            StringBuilder sb(Utils::TAG_ID);
             sb += id;
             if (!selection.IsNullOrEmpty()) {
                 sb += "AND(";

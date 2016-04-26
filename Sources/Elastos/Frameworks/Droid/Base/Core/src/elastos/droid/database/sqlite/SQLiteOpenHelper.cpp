@@ -126,7 +126,6 @@ ECode SQLiteOpenHelper::GetDatabaseLocked(
         }
     }
     if (mIsInitializing) {
-        //throw new IllegalStateException("getDatabase called recursively");
         Slogger::E(TAG, "getDatabase called recursively");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -189,8 +188,6 @@ ECode SQLiteOpenHelper::GetDatabaseLocked(
     if (db->GetVersion(&version), version != mNewVersion) {
         Boolean isReadOnly;
         if (db->IsReadOnly(&isReadOnly), isReadOnly) {
-            //throw new SQLiteException("Can't upgrade read-only database from version " +
-            //        db.getVersion() + " to " + mNewVersion + ": " + mName);
             Slogger::E(TAG, "Can't upgrade read-only database from version %d to %d: %s",
                     version, mNewVersion, mName.string());
             mIsInitializing = FALSE;

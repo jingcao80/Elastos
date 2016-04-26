@@ -32,14 +32,14 @@ ECode CDatabaseOpenHelper::OnCreate(
     StringBuilder sb("create table ");
     sb += Utils::TABLE_NAME;
     sb += "(";
-    sb += Utils::TABLE_ID;
+    sb += Utils::TAG_ID;
     sb += " integer primary key autoincrement not null,";
     sb += Utils::USERNAME;
     sb += " text not null,";
     sb += Utils::SEX;
     sb += " text not null,";
     sb += Utils::EMAIL;
-    sb += " text not null,";
+    sb += " text not null);";
 
     String sql = sb.ToString();
     ECode ec = db->ExecSQL(sql);
@@ -76,7 +76,7 @@ ECode CDatabaseOpenHelper::Add(
     String nullColumnHack;
     Int64 ival;
     ECode ec = db->Insert(Utils::TABLE_NAME, nullColumnHack, values, &ival);
-    Logger::I(TAG, "db Insert %s, result:%d, ec=%08x", TO_CSTR(values), ival, ec);
+    Logger::I(TAG, "db Insert %s, result:%lld, ec=%08x", TO_CSTR(values), ival, ec);
     return ec;
 }
 

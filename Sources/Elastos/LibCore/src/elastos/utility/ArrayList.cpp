@@ -2,6 +2,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "ArrayList.h"
 #include "CArrayList.h"
+#include "CArrayListIterator.h"
 #include "StringBuilder.h"
 
 using Elastos::Core::EIID_ICloneable;
@@ -23,6 +24,21 @@ CAR_INTERFACE_IMPL_4(ArrayList, AbstractList, IArrayList, ICloneable, ISerializa
 
 CAR_INTERFACE_IMPL(ArrayList::ArrayListIterator, Object, IIterator)
 
+ArrayList::ArrayListIterator::ArrayListIterator()
+    : mRemaining(0)
+    , mRemovalIndex(-1)
+    , mExpectedModCount(0)
+{}
+
+ECode ArrayList::ArrayListIterator::constructor(
+    /* [in] */ IArrayList* owner)
+{
+    mOwner = (ArrayList*)owner;
+    mRemaining = mOwner->mSize;
+    mExpectedModCount = mOwner->mModCount;
+    return NOERROR;
+}
+
 ECode ArrayList::ArrayListIterator::HasNext(
     /* [out] */ Boolean* result)
 {
@@ -35,13 +51,13 @@ ECode ArrayList::ArrayListIterator::GetNext(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
+    *object = NULL;
+
     Int32 rem = mRemaining;
     if (mOwner->mModCount != mExpectedModCount) {
-        *object = NULL;
         return E_CONCURRENT_MODIFICATION_EXCEPTION;
     }
     if (rem == 0) {
-        *object = NULL;
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     mRemaining = rem - 1;
@@ -552,11 +568,7 @@ ECode ArrayList::GetIterator(
     /* [out] */ IIterator** it)
 {
     VALIDATE_NOT_NULL(it)
-
-    AutoPtr<IIterator> outiter = new ArrayListIterator(this);
-    *it = outiter;
-    REFCOUNT_ADD(*it)
-    return NOERROR;
+    return CArrayListIterator::New(this, it);
 }
 
 ECode ArrayList::GetHashCode(

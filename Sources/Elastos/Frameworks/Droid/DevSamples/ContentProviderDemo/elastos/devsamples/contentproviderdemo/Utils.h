@@ -17,7 +17,7 @@ public:
     static const String TABLE_NAME;
     static const Int32 VERSION;
 
-    static const String TABLE_ID;
+    static const String TAG_ID;
     static const String USERNAME;
     static const String SEX;
     static const String EMAIL;

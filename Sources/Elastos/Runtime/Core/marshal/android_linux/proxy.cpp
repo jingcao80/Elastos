@@ -481,7 +481,7 @@ int _DumpCLSID(RClassID rclsid)
 
 void _DumpInterfaceProxy(CInterfaceProxy* ip)
 {
-    ALOGE("  >> interface index:%d, id:", ip->mIndex);
+    ALOGD("  >> interface index:%d, id:", ip->mIndex);
     if (ip->mInfo) {
         _DumpGUID(ip->mInfo->mIID);
     }
@@ -493,7 +493,7 @@ void _DumpInterfaceProxy(CInterfaceProxy* ip)
 void _DumpObjectProxy(CObjectProxy* op)
 {
     if (op->mInfo) {
-        ALOGE(" >>> module: %s, CLSID:", op->mInfo->mUunm, op->mInfo->mInterfaceNum);
+        ALOGD(" >>> module: %s, CLSID:", op->mInfo->mUunm, op->mInfo->mInterfaceNum);
         _DumpGUID(op->mInfo->mCLSID);
     }
 
