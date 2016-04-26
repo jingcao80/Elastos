@@ -254,6 +254,8 @@ module
     interface IBatteryStatsImplUidPkg {
         GetBatteryStats(
             [out] IBatteryStatsImpl** batteryStats);
+
+        IncWakeupsLocked();
     }
 
     /**

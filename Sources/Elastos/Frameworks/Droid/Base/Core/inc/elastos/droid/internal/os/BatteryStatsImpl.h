@@ -6,6 +6,7 @@
 #include "elastos/droid/os/BatteryStats.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -761,8 +762,7 @@ public:
      * The statistics associated with a particular uid.
      */
     class Uid
-        : public Object
-        , public IBatteryStatsUid
+        : public BatteryStatsUid
     {
     public:
         /**
@@ -1095,25 +1095,29 @@ public:
                     /* [in] */ Int64 baseUptime,
                     /* [in] */ Int64 baseRealtime);
 
-                CARAPI_(void) StartLaunchedLocked();
+                CARAPI StartLaunchedLocked();
 
-                CARAPI_(void) StopLaunchedLocked();
+                CARAPI StopLaunchedLocked();
 
-                CARAPI_(void) StartRunningLocked();
+                CARAPI StartRunningLocked();
 
-                CARAPI_(void) StopRunningLocked();
+                CARAPI StopRunningLocked();
 
-                CARAPI_(AutoPtr<BatteryStatsImpl>) GetBatteryStats();
+                CARAPI GetBatteryStats(
+                    /* [out] */ IBatteryStatsImpl** stats);
 
-                CARAPI_(Int32) GetLaunches(
-                    /* [in] */ Int32 which);
+                CARAPI GetLaunches(
+                    /* [in] */ Int32 which,
+                    /* [out] */ Int32* result);
 
-                CARAPI_(Int64) GetStartTime(
+                CARAPI GetStartTime(
                     /* [in] */ Int64 batteryUptime,
-                    /* [in] */ Int32 which);
+                    /* [in] */ Int32 which,
+                    /* [out] */ Int64* value);
 
-                CARAPI_(Int32) GetStarts(
-                    /* [in] */ Int32 which);
+                CARAPI GetStarts(
+                    /* [in] */ Int32 which,
+                    /* [out] */ Int32* starts);
 
             private:
                 CARAPI_(void) Detach();
@@ -1344,8 +1348,6 @@ public:
             /* [in] */ Int32 uid,
             /* [in] */ BatteryStatsImpl* host);
 
-        CAR_INTERFACE_DECL()
-
         CARAPI GetWakelockStats(
             /* [out] */ IMap** stats);
 
@@ -1530,6 +1532,18 @@ public:
         CARAPI_(AutoPtr<Proc>) GetProcessStatsLocked(
             /* [in] */ const String& name);
 
+        CARAPI_(void) UpdateProcessStateLocked(
+            /* [in] */ const String& procName,
+            /* [in] */ Int32 state,
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(void) UpdateRealProcessStateLocked(
+            /* [in] */ const String& procName,
+            /* [in] */ Int32 procState,
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(AutoPtr<ISparseArray>) GetPidStats();
+
         CARAPI_(AutoPtr<Pid>) GetPidStatsLocked(
             /* [in] */ Int32 pid);
 
@@ -1548,14 +1562,37 @@ public:
             /* [in] */ const String& pkg,
             /* [in] */ const String& serv);
 
-        CARAPI GetWakeTimerLocked(
+        CARAPI_(void) ReadSyncSummaryFromParcelLocked(
             /* [in] */ const String& name,
-            /* [in] */ Int32 type,
-            /* [out] */ StopwatchTimer** timer);
+            /* [in] */ IParcel* in);
 
-        CARAPI_(AutoPtr<StopwatchTimer>) GetSensorTimerLocked(
+        CARAPI_(void) ReadJobSummaryFromParcelLocked(
+            /* [in] */ const String& name,
+            /* [in] */ IParcel* in);
+
+        CARAPI_(void) ReadWakeSummaryFromParcelLocked(
+            /* [in] */ const String& wlName,
+            /* [in] */ IParcel* in);
+
+        CARAPI_(AutoPtr<BatteryStatsImpl::StopwatchTimer>) GetSensorTimerLocked(
             /* [in] */ Int32 sensor,
             /* [in] */ Boolean create);
+
+        CARAPI_(void) NoteStartSyncLocked(
+            /* [in] */ const String& name,
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(void) NoteStopSyncLocked(
+            /* [in] */ const String& name,
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(void) NoteStartJobLocked(
+            /* [in] */ const String& name,
+            /* [in] */ Int64 elapsedRealtimeMs);
+
+        CARAPI_(void) NoteStopJobLocked(
+            /* [in] */ const String& name,
+            /* [in] */ Int64 elapsedRealtimeMs);
 
         CARAPI_(void) NoteStartWakeLocked(
             /* [in] */ Int32 pid,
@@ -1566,7 +1603,8 @@ public:
         CARAPI_(void) NoteStopWakeLocked(
             /* [in] */ Int32 pid,
             /* [in] */ const String& name,
-            /* [in] */ Int32 type);
+            /* [in] */ Int32 type,
+            /* [in] */ Int64 elapsedRealtimeMs);
 
         CARAPI_(void) ReportExcessiveWakeLocked(
             /* [in] */ const String& proc,
@@ -1579,14 +1617,18 @@ public:
             /* [in] */ Int64 usedTime);
 
         CARAPI_(void) NoteStartSensor(
-            /* [in] */ Int32 sensor);
+            /* [in] */ Int32 sensor,
+            /* [in] */ Int64 elapsedRealtimeMs);
 
         CARAPI_(void) NoteStopSensor(
-            /* [in] */ Int32 sensor);
+            /* [in] */ Int32 sensor,
+            /* [in] */ Int64 elapsedRealtimeMs);
 
-        CARAPI_(void) NoteStartGps();
+        CARAPI_(void) NoteStartGps(
+            /* [in] */ Int64 elapsedRealtimeMs);
 
-        CARAPI_(void) NoteStopGps();
+        CARAPI_(void) NoteStopGps(
+            /* [in] */ Int64 elapsedRealtimeMs);
 
         CARAPI_(AutoPtr<BatteryStatsImpl>) GetBatteryStats();
 
@@ -1734,22 +1776,34 @@ private:
         Int32 mVersion;
     };
 
+    class SetOnBatteryRunnable : public Runnable
+    {
+    public:
+        SetOnBatteryRunnable(
+            /* [in] */ IParcel* in,
+            /* [in] */ BatteryStatsImpl* host)
+            : mParcel(in)
+            , mHost(host)
+        {}
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<IParcel> mParcel;
+        BatteryStatsImpl* mHost;
+    };
+
 public:
     BatteryStatsImpl();
 
-    BatteryStatsImpl(
-        /* [in] */ const String& filename);
-
-    BatteryStatsImpl(
-    /* [in] */ IParcel* p);
-
     CAR_INTERFACE_DECL()
 
-    CARAPI constructor();
+    CARAPI constructor(
+        /* [in] */ IFile* systemDir,
+        /* [in] */ IHandler* handler);
 
-    CARAPI_(void) Lock();
-
-    CARAPI_(void) Unlock();
+    CARAPI constructor(
+        /* [in] */ IParcel* p);
 
     HashMap<String, AutoPtr<BatteryStatsTimer> >& GetKernelWakelockStats();
 
@@ -2283,29 +2337,55 @@ public:
     CARAPI_(void) SetRadioScanningTimeout(
         /* [in] */ Int64 timeout);
 
-    CARAPI_(Boolean) StartIteratingOldHistoryLocked();
+    CARAPI StartIteratingOldHistoryLocked(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) GetNextOldHistoryLocked(
-        /* [in] */ HistoryItem* out);
+    CARAPI GetNextOldHistoryLocked(
+        /* [in] */ IBatteryStatsHistoryItem* out,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) FinishIteratingOldHistoryLocked();
+    CARAPI FinishIteratingOldHistoryLocked();
 
-    CARAPI_(Boolean) StartIteratingHistoryLocked();
+    CARAPI_(Int32) GetHistoryTotalSize();
 
-    CARAPI_(Boolean) GetNextHistoryLocked(
-        /* [in] */ HistoryItem* out);
+    CARAPI_(Int32) GetHistoryUsedSize();
 
-    CARAPI_(void) FinishIteratingHistoryLocked();
+    CARAPI StartIteratingHistoryLocked(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Int64) GetHistoryBaseTime();
+    CARAPI GetHistoryStringPoolSize(
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) GetStartCount();
+    CARAPI GetHistoryStringPoolBytes(
+        /* [out] */ Int32* result);
+
+    CARAPI GetHistoryTagPoolString(
+        /* [in] */ Int32 index,
+        /* [out] */ String* str);
+
+    CARAPI GetHistoryTagPoolUid(
+        /* [in] */ Int32 index,
+        /* [out] */ Int32* result);
+
+    CARAPI GetNextHistoryLocked(
+        /* [in] */ IBatteryStatsHistoryItem* out,
+        /* [out] */ Boolean* result);
+
+    CARAPI FinishIteratingHistoryLocked();
+
+    CARAPI GetHistoryBaseTime(
+        /* [out] */ Int64* result);
+
+    CARAPI GetStartCount(
+        /* [out] */ Int32* count);
 
     CARAPI_(Boolean) IsOnBattery();
 
     CARAPI_(Boolean) IsScreenOn();
 
-    CARAPI_(void) ResetAllStatsLocked();
+    CARAPI_(void) ResetAllStatsCmdLocked();
+
+    CARAPI_(void) PullPendingStateUpdatesLocked();
 
     CARAPI_(void) SetBatteryState(
         /* [in] */ Int32 status,
@@ -2569,9 +2649,17 @@ private:
 
     CARAPI_(Boolean) GetIsOnBattery();
 
-    CARAPI_(void) InitTimes();
+    CARAPI_(void) InitTimes(
+        /* [in] */ Int64 uptime,
+        /* [in] */ Int64 realtime);
 
     CARAPI_(void) InitDischarge();
+
+    CARAPI_(void) ResetAllStatsLocked();
+
+    CARAPI_(void) InitActiveHistoryEventsLocked(
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs);
 
     CARAPI_(void) UpdateDischargeScreenLevelsLocked(
         /* [in] */ Boolean oldScreenOn,
@@ -2583,9 +2671,33 @@ private:
         /* [in] */ Int32 level);
 
     CARAPI_(void) SetOnBatteryLocked(
+        /* [in] */ Int64 mSecRealtime,
+        /* [in] */ Int64 mSecUptime,
         /* [in] */ Boolean onBattery,
         /* [in] */ Int32 oldStatus,
         /* [in] */ Int32 level);
+
+    CARAPI_(void) StartRecordingHistory(
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs,
+        /* [in] */ Boolean reset);
+
+    CARAPI_(void) RecordCurrentTimeChangeLocked(
+        /* [in] */ Int64 currentTime,
+        /* [in] */ Int64 elapsedRealtimeMs,
+        /* [in] */ Int64 uptimeMs);
+
+    static CARAPI_(Int32) AddLevelSteps(
+        /* [in] */ ArrayOf<Int64>* steps,
+        /* [in] */ Int32 stepCount,
+        /* [in] */ Int64 lastStepTime,
+        /* [in] */ Int32 numStepLevels,
+        /* [in] */ Int64 modeBits,
+        /* [in] */ Int64 elapsedRealtime);
+
+    CARAPI_(void) UpdateNetworkActivityLocked(
+        /* [in] */ Int32 which,
+        /* [in] */ Int64 elapsedRealtimeMs);
 
     CARAPI_(Int64) GetBatteryUptimeLocked(
         /* [in] */ Int64 curTime);
@@ -2672,6 +2784,7 @@ public:
     static const Int32 STATE_BATTERY_PLUG_SHIFT   = 24;
 
     AutoPtr<IAtomicFile> mCheckinFile;
+    Object mCheckinFileLock;
     AutoPtr<IHandler> mHandler;
 
 private:
@@ -2709,6 +2822,10 @@ private:
 
     // This should probably be exposed in the API, though it's not critical
     static const Int32 BATTERY_PLUGGED_NONE = 0;
+
+    static const Int32 NET_UPDATE_MOBILE = 1 << 0;
+    static const Int32 NET_UPDATE_WIFI = 1 << 1;
+    static const Int32 NET_UPDATE_ALL = 0xffff;
 
     AutoPtr<IJournaledFile> mFile;
 
@@ -2982,8 +3099,6 @@ private:
 
     AutoPtr<INetworkStats> mNetworkSummaryCache;
     AutoPtr<INetworkStats> mNetworkDetailCache;
-
-    Object mLock;
 
     friend class OverflowArrayMap;
 };

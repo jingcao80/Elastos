@@ -34,15 +34,13 @@ public:
     /**
      * The statistics associated with a particular uid.
      */
-    class BatteryStatsUidf
+    class BatteryStatsUid
         : public Object
         , public IBatteryStatsUid
     {
     public:
 
-        class Pid
-            : public Object
-            , public IBatteryStatsUidPid
+        class Pid : public Object
         {
         public:
             Int32 mWakeNesting;
