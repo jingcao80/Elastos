@@ -2,7 +2,10 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_XMLKEYBOARDLOADER_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_XMLKEYBOARDLOADER_H__
 
-#include "SoftKeyToggle.h"
+#include "Elastos.Droid.Content.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyToggle.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
+#include "elastos/droid/inputmethod/pinyin/SkbTemplate.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
@@ -12,9 +15,6 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
-
-class SoftKeyboard;
-class SkbTemplate;
 
 /**
  * Class used to load a soft keyboard or a soft keyboard template from xml
@@ -31,7 +31,7 @@ public:
             /* [in] */ XmlKeyboardLoader* host);
 
         // Make sure the default object is not NULL.
-        Boolean GetAttributes(
+        CARAPI_(Boolean) GetAttributes(
             /* [in] */ KeyCommonAttributes* defAttr);
 
     public:
@@ -48,10 +48,10 @@ public:
     XmlKeyboardLoader(
         /* [in] */ IContext* context);
 
-    AutoPtr<SkbTemplate> LoadSkbTemplate(
+    CARAPI_(AutoPtr<SkbTemplate>) LoadSkbTemplate(
         /* [in] */ Int32 resourceId);
 
-    AutoPtr<SoftKeyboard> LoadKeyboard(
+    CARAPI_(AutoPtr<SoftKeyboard>) LoadKeyboard(
         /* [in] */ Int32 resourceId,
         /* [in] */ Int32 skbWidth,
         /* [in] */ Int32 skbHeight);
@@ -66,37 +66,38 @@ private:
         /* [in] */ KeyCommonAttributes* attrKey,
         /* [out] */ SoftKey** key);
 
-    AutoPtr<SoftKeyToggle::ToggleState> GetToggleStates(
+    CARAPI GetToggleStates(
         /* [in] */ KeyCommonAttributes* attrKey,
         /* [in] */ SoftKeyToggle* softKey,
-        /* [in] */ Int32 defKeyCode);
+        /* [in] */ Int32 defKeyCode,
+        /* [out] */ SoftKeyToggle::ToggleState** state);
 
-    Int32 GetInteger(
+    CARAPI_(Int32) GetInteger(
         /* [in] */ IXmlResourceParser* xrp,
         /* [in] */ const String& name,
         /* [in] */ Int32 defValue);
 
-    Int32 GetColor(
+    CARAPI_(Int32) GetColor(
         /* [in] */ IXmlResourceParser* xrp,
         /* [in] */ const String& name,
         /* [in] */ Int32 defValue);
 
-    String GetString(
+    CARAPI_(String) GetString(
         /* [in] */ IXmlResourceParser* xrp,
         /* [in] */ const String& name,
         /* [in] */ const String& defValue);
 
-    Float GetFloat(
+    CARAPI_(Float) GetFloat(
         /* [in] */ IXmlResourceParser* xrp,
         /* [in] */ const String& name,
         /* [in] */ Float defValue);
 
-    Boolean GetBoolean(
+    CARAPI_(Boolean) GetBoolean(
         /* [in] */ IXmlResourceParser* xrp,
         /* [in] */ const String& name,
         /* [in] */ Boolean defValue);
 
-    AutoPtr<IDrawable> GetDrawable(
+    CARAPI_(AutoPtr<IDrawable>) GetDrawable(
         /* [in] */ IXmlResourceParser* xrp,
         /* [in] */ const String& name,
         /* [in] */ IDrawable* defValue);

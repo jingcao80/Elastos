@@ -3,19 +3,23 @@
 #include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
 #include "elastos/droid/inputmethod/pinyin/SkbPool.h"
 #include "elastos/droid/inputmethod/pinyin/CBalloonHint.h"
+#include "elastos/droid/inputmethod/pinyin/CPinyinIME.h"
 #include "elastos/droid/inputmethod/pinyin/CSoftKeyboardView.h"
+#include "elastos/droid/inputmethod/pinyin/InputModeSwitcher.h"
+#include "R.h"
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Os::SystemClock;
-// using Elastos::Droid::Os::ISystemProperties;
-// using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
 // using Elastos::Droid::View::EIID_IView;
-// using Elastos::Droid::View::EIID_IViewOnTouchListener;
-// using Elastos::Droid::View::CMotionEventHelper;
-// using Elastos::Droid::View::IMotionEventHelper;
-// using Elastos::Droid::View::IGravity;
-// using Elastos::Droid::Widget::CPopupWindow;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
+using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::CMotionEventHelper;
+using Elastos::Droid::View::IMotionEventHelper;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::Widget::CPopupWindow;
 
 namespace Elastos {
 namespace Droid {
@@ -40,7 +44,7 @@ CSkbContainer::LongPressTimer::LongPressTimer(
 void CSkbContainer::LongPressTimer::StartTimer()
 {
     Boolean result;
-    postAtTime(this, SystemClock::GetUptimeMillis() + LONG_PRESS_TIMEOUT1, &result);
+    PostAtTime(this, SystemClock::GetUptimeMillis() + LONG_PRESS_TIMEOUT1, &result);
     mResponseTimes = 0;
 }
 
@@ -55,11 +59,9 @@ ECode CSkbContainer::LongPressTimer::Run()
     if (mSkbContainer->mWaitForTouchUp) {
         mResponseTimes++;
         if (mSkbContainer->mSoftKeyDown->Repeatable()) {
-            Boolean result = FALSE;
-            if (mSkbContainer->mSoftKeyDown->IsUserDefKey(&result), result) {
+            if (mSkbContainer->mSoftKeyDown->IsUserDefKey()) {
                 if (1 == mResponseTimes) {
-                    Boolean result = FALSE;
-                    if (mSkbContainer->mInputModeSwitcher->TryHandleLongPressSwitch(mSkbContainer->mSoftKeyDown->mKeyCode, &result), result ) {
+                    if (mSkbContainer->mInputModeSwitcher->TryHandleLongPressSwitch(mSkbContainer->mSoftKeyDown->mKeyCode)) {
                         mSkbContainer->mDiscardEvent = TRUE;
                         mSkbContainer->ResetKeyPress(0);
                     }
@@ -78,7 +80,7 @@ ECode CSkbContainer::LongPressTimer::Run()
                     timeout = LONG_PRESS_TIMEOUT3;
                 }
                 Boolean result;
-                postAtTime(this, SystemClock::GetUptimeMillis() + timeout, &result);
+                PostAtTime(this, SystemClock::GetUptimeMillis() + timeout, &result);
             }
         }
         else {
@@ -140,9 +142,9 @@ ECode CSkbContainer::constructor(
     else {
         mYBiasCorrection = Y_BIAS_CORRECTION;
     }
-    CBalloonHint::New(context, this, MeasureSpec::AT_MOST, (IBalloonHint**)&mBalloonPopup);
+    CBalloonHint::NewByFriend(context, this, MeasureSpec::AT_MOST, (CBalloonHint**)&mBalloonPopup);
     if (POPUPWINDOW_FOR_PRESSED_UI) {
-        CBalloonHint::New(context, this, MeasureSpec::AT_MOST, (IBalloonHint**)&mBalloonOnKey);
+        CBalloonHint::NewByFriend(context, this, MeasureSpec::AT_MOST, (CBalloonHint**)&mBalloonOnKey);
     }
 
     CPopupWindow::New(mContext, (IPopupWindow**)&mPopupSkb);
@@ -183,7 +185,6 @@ Boolean CSkbContainer::IsCurrentSkbSticky()
 void CSkbContainer::ToggleCandidateMode(
     /* [in] */ Boolean candidatesShowing)
 {
-    Boolean result = FALSE;
     if (NULL == mMajorView || !mInputModeSwitcher->IsChineseText()
             || mLastCandidatesShowing == candidatesShowing) return;
     mLastCandidatesShowing = candidatesShowing;
@@ -194,7 +195,7 @@ void CSkbContainer::ToggleCandidateMode(
     Int32 state = mInputModeSwitcher->GetTooggleStateForCnCand();
     if (!candidatesShowing) {
         skb->DisableToggleState(state, FALSE);
-        AutoPtr<ToggleStates> states = mInputModeSwitcher->GetToggleStates();
+        AutoPtr<InputModeSwitcher::ToggleStates> states = mInputModeSwitcher->GetToggleStates();
         skb->EnableToggleStates(states);
     }
     else {
@@ -217,8 +218,8 @@ void CSkbContainer::UpdateInputMode()
     if (NULL == mMajorView) return;
 
     AutoPtr<SoftKeyboard> skb = mMajorView->GetSoftKeyboard();
-    if (NULL == skb) return NOERROR;
-    AutoPtr<ToggleStates> states = mInputModeSwitcher->GetToggleStates();
+    if (NULL == skb) return;
+    AutoPtr<InputModeSwitcher::ToggleStates> states = mInputModeSwitcher->GetToggleStates();
     skb->EnableToggleStates(states);
     Invalidate();
 }
@@ -232,10 +233,12 @@ void CSkbContainer::UpdateSkbLayout()
     AutoPtr<IResources> r;
     mContext->GetResources((IResources**)&r);
     if (NULL == mSkbFlipper) {
-        mSkbFlipper = IViewFlipper::Probe(FindViewById(R::id::alpha_floatable));
+        AutoPtr<IView> view;
+        FindViewById(R::id::alpha_floatable, (IView**)&view);
+        mSkbFlipper = IViewFlipper::Probe(view);
     }
     AutoPtr<IView> view;
-    mSkbFlipper->GetChildAt(0, (IView**)&view);
+    IViewGroup::Probe(mSkbFlipper)->GetChildAt(0, (IView**)&view);
     mMajorView = (CSoftKeyboardView*)ISoftKeyboardView::Probe(view);
 
     AutoPtr<SoftKeyboard> majorSkb;
@@ -270,7 +273,6 @@ void CSkbContainer::UpdateSkbLayout()
         break;
     }
 
-    Boolean result = FALSE;
     if (NULL == majorSkb || !mMajorView->SetSoftKeyboard(majorSkb)) {
         return;
     }
@@ -309,8 +311,10 @@ void CSkbContainer::PopupSymbols()
 {
     Int32 popupResId = mSoftKeyDown->GetPopupResId();
     if (popupResId > 0) {
-        Int32 skbContainerWidth = GetWidth();
-        Int32 skbContainerHeight = GetHeight();
+        Int32 skbContainerWidth;
+        GetWidth(&skbContainerWidth);
+        Int32 skbContainerHeight;
+        GetHeight(&skbContainerHeight);
         // The paddings of the background are not included.
         Int32 miniSkbWidth = (Int32) (skbContainerWidth * 0.8);
         Int32 miniSkbHeight = (Int32) (skbContainerHeight * 0.23);
@@ -401,7 +405,8 @@ void CSkbContainer::OnMeasure(
 {
     AutoPtr<Environment> env = Environment::GetInstance();
     Int32 measuredWidth = env->GetScreenWidth();
-    Int32 measuredHeight = GetPaddingTop();
+    Int32 measuredHeight;
+    GetPaddingTop(&measuredHeight);
     measuredHeight += env->GetSkbHeight();
     widthMeasureSpec = MeasureSpec::MakeMeasureSpec(measuredWidth,
             MeasureSpec::EXACTLY);
@@ -444,8 +449,8 @@ ECode CSkbContainer::OnTouchEvent(
     mYLast = y;
 
     if (!mPopupSkbShow) {
-        Boolean result = FALSE;
-        if (mGestureDetector->OnTouchEvent(event, &result), result) {
+        Boolean res = FALSE;
+        if (mGestureDetector->OnTouchEvent(event, &res), res) {
             ResetKeyPress(0);
             mDiscardEvent = TRUE;
             *result = TRUE;
@@ -471,7 +476,8 @@ ECode CSkbContainer::OnTouchEvent(
         }
 
         case IMotionEvent::ACTION_MOVE: {
-            if (x < 0 || x >= GetWidth() || y < 0 || y >= GetHeight()) {
+            Int32 w, h;
+            if (x < 0 || x >= (GetWidth(&w), w) || y < 0 || y >= (GetHeight(&h), h)) {
                 break;
             }
             if (mDiscardEvent) {
@@ -559,7 +565,7 @@ ECode CSkbContainer::OnTouch(
     Float fv = 0.f;
     helper->Obtain(
             (event->GetDownTime(&tm), tm),
-            (event->GetEventTime(&tm), tm),
+            (IInputEvent::Probe(event)->GetEventTime(&tm), tm),
             (event->GetAction(&value), value),
             (event->GetX(&fv), fv) + mPopupX,
             (event->GetY(&fv), fv) + mPopupY,
@@ -568,7 +574,7 @@ ECode CSkbContainer::OnTouch(
             (event->GetMetaState(&value), value),
             (event->GetXPrecision(&fv), fv),
             (event->GetYPrecision(&fv), fv),
-            (event->GetDeviceId(&value), value),
+            (IInputEvent::Probe(event)->GetDeviceId(&value), value),
             (event->GetEdgeFlags(&value), value),
             (IMotionEvent**)&newEv);
     return OnTouchEvent(newEv, result);

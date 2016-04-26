@@ -1,23 +1,21 @@
 
-#include "SkbPool.h"
-#include "XmlKeyboardLoader.h"
-#include "SoftKeyboard.h"
+#include "elastos/droid/inputmethod/pinyin/SkbPool.h"
+#include "elastos/droid/inputmethod/pinyin/XmlKeyboardLoader.h"
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
-AutoPtr<SkbPool> SkbPool::mInstance;
+AutoPtr<SkbPool> SkbPool::sInstance;
 
 SkbPool::SkbPool()
-{
-}
+{}
 
 AutoPtr<SkbPool> SkbPool::GetInstance()
 {
-    if (NULL == mInstance) mInstance = new SkbPool();
-    return mInstance;
+    if (NULL == sInstance) sInstance = new SkbPool();
+    return sInstance;
 }
 
 void SkbPool::ResetCachedSkb()
@@ -29,7 +27,7 @@ AutoPtr<SkbTemplate> SkbPool::GetSkbTemplate(
     /* [in] */ Int32 skbTemplateId,
     /* [in] */ IContext* context)
 {
-    List<AutoPtr<SkbTemplate> >::Iterator ator = mSkbTemplates.Begin();
+    Vector< AutoPtr<SkbTemplate> >::Iterator ator = mSkbTemplates.Begin();
     for (; ator != mSkbTemplates.End(); ++ator) {
         AutoPtr<SkbTemplate> t = *ator;
         if (t->GetSkbTemplateId() == skbTemplateId) {
@@ -55,7 +53,7 @@ AutoPtr<SoftKeyboard> SkbPool::GetSoftKeyboard(
     /* [in] */ Int32 skbHeight,
     /* [in] */ IContext* context)
 {
-    List<AutoPtr<SoftKeyboard> >::Iterator ator = mSoftKeyboards.Begin();
+    Vector<AutoPtr<SoftKeyboard> >::Iterator ator = mSoftKeyboards.Begin();
     for (; ator != mSoftKeyboards.End(); ++ator) {
         AutoPtr<SoftKeyboard> skb = *ator;
         if (skb->GetCacheId() == skbCacheId && skb->GetSkbXmlId() == skbXmlId) {
@@ -77,14 +75,6 @@ AutoPtr<SoftKeyboard> SkbPool::GetSoftKeyboard(
         return skb;
     }
     return NULL;
-}
-
-ECode SkbPool::ToString(
-    /* [out] */ String* info)
-{
-    VALIDATE_NOT_NULL(info);
-    *info = String("Elastos.Droid.Inputmethods.PinyinIME.SkbPool");
-    return NOERROR;
 }
 
 } // namespace Pinyin

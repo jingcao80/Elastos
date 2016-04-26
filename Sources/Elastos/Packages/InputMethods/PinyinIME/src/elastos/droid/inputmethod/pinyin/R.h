@@ -5,8 +5,8 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Droid_Inputmethods_PinyinIME_R_H__
-#define __Elastos_Droid_Inputmethods_PinyinIME_R_H__
+#ifndef __Elastos_Droid_InputMethod_Pinyin_R_H__
+#define __Elastos_Droid_InputMethod_Pinyin_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace Droid {
@@ -166,7 +166,7 @@ class ECO_PUBLIC R {
         public: static const int setting_others_summary = 0x7f090022;
         public: static const int setting_prediction_key = 0x7f090016;
         public: static const int setting_prediction_title = 0x7f09001c;
-        /**  settings related
+        /**  settings related 
          */
         public: static const int setting_sound_key = 0x7f090014;
         public: static const int setting_sound_key_title = 0x7f09001a;
@@ -194,7 +194,7 @@ class ECO_PUBLIC R {
         public: static const int toggle_row_en = 0x7f090010;
         public: static const int toggle_row_uri = 0x7f090011;
         public: static const int toggle_smiley = 0x7f090009;
-        /**  version = apk(java) + ime engine + sys dict + [hotlist (TBD)]
+        /**  version = apk(java) + ime engine + sys dict + [hotlist (TBD)] 
          */
         public: static const int version = 0x7f090002;
     };
@@ -214,4 +214,4 @@ class ECO_PUBLIC R {
 };
 };
 
-#endif // __Elastos_Droid_Inputmethods_PinyinIME_R_H__
+#endif // __Elastos_Droid_InputMethod_Pinyin_R_H__

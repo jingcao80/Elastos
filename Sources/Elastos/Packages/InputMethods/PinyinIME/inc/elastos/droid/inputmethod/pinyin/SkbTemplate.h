@@ -2,18 +2,19 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_SKBTEMPLATE_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SKBTEMPLATE_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include <elastos/utility/etl/List.h>
+#include "Elastos.Droid.Graphics.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKey.h"
+#include <elastos/core/Object.h>
+#include <elastos/utility/etl/Vector.h>
 
-using Elastos::Utility::Etl::List;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Core::Object;
+using Elastos::Utility::Etl::Vector;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
-
-class SoftKey;
 
 /**
  * Key icon definition. It is defined in soft keyboard template. A soft keyboard
@@ -50,9 +51,6 @@ public:
     AutoPtr<SoftKey> mSoftKey;
 };
 
-
-class SoftKeyType;
-
 /**
  * Soft keyboard template used by soft keyboards to share common resources. In
  * this way, memory cost is reduced.
@@ -63,54 +61,54 @@ public:
     SkbTemplate(
         /* [in] */ Int32 skbTemplateId);
 
-    Int32 GetSkbTemplateId();
+    CARAPI_(Int32) GetSkbTemplateId();
 
-    void SetBackgrounds(
+    CARAPI_(void) SetBackgrounds(
         /* [in] */ IDrawable* skbBg,
         /* [in] */ IDrawable* balloonBg,
         /* [in] */ IDrawable* popupBg);
 
-    AutoPtr<IDrawable> GetSkbBackground();
+    CARAPI_(AutoPtr<IDrawable>) GetSkbBackground();
 
-    AutoPtr<IDrawable> GetBalloonBackground();
+    CARAPI_(AutoPtr<IDrawable>) GetBalloonBackground();
 
-    AutoPtr<IDrawable> GetPopupBackground();
+    CARAPI_(AutoPtr<IDrawable>) GetPopupBackground();
 
-    void SetMargins(
+    CARAPI_(void) SetMargins(
         /* [in] */ Float xMargin,
         /* [in] */ Float yMargin);
 
-    Float GetXMargin();
+    CARAPI_(Float) GetXMargin();
 
-    Float GetYMargin();
+    CARAPI_(Float) GetYMargin();
 
-    AutoPtr<SoftKeyType> CreateKeyType(
+    CARAPI_(AutoPtr<SoftKeyType>) CreateKeyType(
         /* [in] */ Int32 id,
         /* [in] */ IDrawable* bg,
         /* [in] */ IDrawable* hlBg);
 
-    Boolean AddKeyType(
+    CARAPI_(Boolean) AddKeyType(
         /* [in] */ SoftKeyType* keyType);
 
-    AutoPtr<SoftKeyType> GetKeyType(
+    CARAPI_(AutoPtr<SoftKeyType>) GetKeyType(
         /* [in] */ Int32 typeId);
 
-    void AddDefaultKeyIcons(
+    CARAPI_(void) AddDefaultKeyIcons(
         /* [in] */ Int32 keyCode,
         /* [in] */ IDrawable* icon,
         /* [in] */ IDrawable* iconPopup);
 
-    AutoPtr<IDrawable> GetDefaultKeyIcon(
+    CARAPI_(AutoPtr<IDrawable>) GetDefaultKeyIcon(
         /* [in] */ Int32 keyCode);
 
-    AutoPtr<IDrawable> GetDefaultKeyIconPopup(
+    CARAPI_(AutoPtr<IDrawable>) GetDefaultKeyIconPopup(
         /* [in] */ Int32 keyCode);
 
-    void AddDefaultKey(
+    CARAPI_(void) AddDefaultKey(
         /* [in] */ Int32 keyId,
         /* [in] */ SoftKey* softKey);
 
-    AutoPtr<SoftKey> GetDefaultKey(
+    CARAPI_(AutoPtr<SoftKey>) GetDefaultKey(
         /* [in] */ Int32 keyId);
 
 private:
@@ -121,44 +119,18 @@ private:
     Float mXMargin;
     Float mYMargin;
     /** Key type list. */
-    List<AutoPtr<SoftKeyType> > mKeyTypeList;// = new Vector<SoftKeyType>();
+    Vector< AutoPtr<SoftKeyType> > mKeyTypeList;
 
     /**
      * Default key icon list. It is only for keys which do not have popup icons.
      */
-    List<AutoPtr<KeyIconRecord> > mKeyIconRecords;// = new Vector<KeyIconRecord>();
+    Vector< AutoPtr<KeyIconRecord> > mKeyIconRecords;
 
     /**
      * Default key list.
      */
-    List<AutoPtr<KeyRecord> > mKeyRecords;// = new Vector<KeyRecord>();
+    Vector< AutoPtr<KeyRecord> > mKeyRecords;
 };
-
-
-class SoftKeyType : public Object
-{
-public:
-    SoftKeyType(
-        /* [in] */ Int32 id,
-        /* [in] */ IDrawable* bg,
-        /* [in] */ IDrawable* hlBg);
-
-    void SetColors(
-        /* [in] */ Int32 color,
-        /* [in] */ Int32 colorHl,
-        /* [in] */ Int32 colorBalloon);
-
-public:
-    static const Int32 KEYTYPE_ID_NORMAL_KEY = 0;
-
-    Int32 mKeyTypeId;
-    AutoPtr<IDrawable> mKeyBg;
-    AutoPtr<IDrawable> mKeyHlBg;
-    Int32 mColor;
-    Int32 mColorHl;
-    Int32 mColorBalloon;
-};
-
 
 } // namespace Pinyin
 } // namespace InputMethod

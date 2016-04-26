@@ -133,32 +133,24 @@ ECode CBalloonHint::constructor(
     return NOERROR;
 }
 
-ECode CBalloonHint::GetContext(
-    /* [out] */ IContext** ctx)
+AutoPtr<IContext> CBalloonHint::GetContext()
 {
-    VALIDATE_NOT_NULL(ctx);
-    *ctx = mContext;
-    REFCOUNT_ADD(*ctx);
-    return NOERROR;
+    return mContext;
 }
 
-ECode CBalloonHint::GetPadding(
-    /* [out] */ IRect** rect)
+AutoPtr<IRect> CBalloonHint::GetPadding()
 {
-    VALIDATE_NOT_NULL(rect);
-    *rect = mPaddingRect;
-    REFCOUNT_ADD(*rect);
-    return NOERROR;
+    return mPaddingRect;
 }
 
-ECode CBalloonHint::SetBalloonBackground(
+void CBalloonHint::SetBalloonBackground(
     /* [in] */ IDrawable* drawable)
 {
     // We usually pick up a background from a soft keyboard template,
     // and the object may has been set to this balloon before.
     AutoPtr<IDrawable> dr;
     mBalloonView->GetBackground((IDrawable**)&dr);
-    if (dr.Get() == drawable) return NOERROR;
+    if (dr.Get() == drawable) return;
     mBalloonView->SetBackgroundDrawable(drawable);
 
     if (NULL != drawable) {
@@ -168,10 +160,9 @@ ECode CBalloonHint::SetBalloonBackground(
     else {
         mPaddingRect->Set(0, 0, 0, 0);
     }
-    return NOERROR;
 }
 
-ECode CBalloonHint::SetBalloonConfig(
+void CBalloonHint::SetBalloonConfig(
     /* [in] */ const String& label,
     /* [in] */ Float textSize,
     /* [in] */ Boolean textBold,
@@ -181,56 +172,51 @@ ECode CBalloonHint::SetBalloonConfig(
 {
     mBalloonView->SetTextConfig(label, textSize, textBold, textColor);
     SetBalloonSize(width, height);
-    return NOERROR;
 }
 
-ECode CBalloonHint::SetBalloonConfig(
+void CBalloonHint::SetBalloonConfig(
     /* [in] */ IDrawable* icon,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     mBalloonView->SetIcon(icon);
     SetBalloonSize(width, height);
-    return NOERROR;
 }
 
-ECode CBalloonHint::NeedForceDismiss(
-    /* [out] */ Boolean* result)
+Boolean CBalloonHint::NeedForceDismiss()
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mForceDismiss;
-    return NOERROR;
+    return mForceDismiss;
 }
 
-ECode CBalloonHint::GetPaddingLeft(
-    /* [out] */ Int32* value)
+Int32 CBalloonHint::GetPaddingLeft()
 {
-    VALIDATE_NOT_NULL(value)
-    return mPaddingRect->GetLeft(value);
+    Int32 value;
+    mPaddingRect->GetLeft(&value);
+    return value;
 }
 
-ECode CBalloonHint::GetPaddingTop(
-    /* [out] */ Int32* value)
+Int32 CBalloonHint::GetPaddingTop()
 {
-    VALIDATE_NOT_NULL(value)
-    return mPaddingRect->GetTop(value);
+    Int32 value;
+    mPaddingRect->GetTop(&value);
+    return value;
 }
 
-ECode CBalloonHint::GetPaddingRight(
-    /* [out] */ Int32* value)
+Int32 CBalloonHint::GetPaddingRight()
 {
-    VALIDATE_NOT_NULL(value)
-    return mPaddingRect->GetRight(value);
+    Int32 value;
+    mPaddingRect->GetRight(&value);
+    return value;
 }
 
-ECode CBalloonHint::GetPaddingBottom(
-    /* [out] */ Int32* value)
+Int32 CBalloonHint::GetPaddingBottom()
 {
-    VALIDATE_NOT_NULL(value)
-    return mPaddingRect->GetBottom(value);
+    Int32 value;
+    mPaddingRect->GetBottom(&value);
+    return value;
 }
 
-ECode CBalloonHint::DelayedShow(
+void CBalloonHint::DelayedShow(
     /* [in] */ Int64 delay,
     /* [in] */ ArrayOf<Int32>* locationInParent)
 {
@@ -247,10 +233,9 @@ ECode CBalloonHint::DelayedShow(
         mBalloonTimer->StartTimer(delay, BalloonTimer::ACTION_SHOW,
                 locationInParent, -1, -1);
     }
-    return NOERROR;
 }
 
-ECode CBalloonHint::DelayedUpdate(
+void CBalloonHint::DelayedUpdate(
     /* [in] */ Int64 delay,
     /* [in] */ ArrayOf<Int32>* locationInParent,
     /* [in] */ Int32 width,
@@ -269,11 +254,9 @@ ECode CBalloonHint::DelayedUpdate(
         mBalloonTimer->StartTimer(delay, BalloonTimer::ACTION_UPDATE,
                 locationInParent, width, height);
     }
-
-    return NOERROR;
 }
 
-ECode CBalloonHint::DelayedDismiss(
+void CBalloonHint::DelayedDismiss(
     /* [in] */ Int64 delay)
 {
     if (mBalloonTimer->IsPending()) {
@@ -290,16 +273,13 @@ ECode CBalloonHint::DelayedDismiss(
         mBalloonTimer->StartTimer(delay, BalloonTimer::ACTION_HIDE, NULL, -1,
                 -1);
     }
-
-    return NOERROR;
 }
 
-ECode CBalloonHint::RemoveTimer()
+void CBalloonHint::RemoveTimer()
 {
     if (mBalloonTimer->IsPending()) {
         mBalloonTimer->RemoveTimer();
     }
-    return NOERROR;
 }
 
 void CBalloonHint::SetBalloonSize(
@@ -316,11 +296,11 @@ void CBalloonHint::SetBalloonSize(
     GetWidth(&oldWidth);
     Int32 oldHeight = 0;
     GetHeight(&oldHeight);
-    Int32 data1 = 0, data2 = 0, data3 = 0;
-    Int32 newWidth = (mBalloonView->GetMeasuredWidth(&data1), data1) + (GetPaddingLeft(&data2), data2)
-            + (GetPaddingRight(&data3), data3);
-    Int32 newHeight = (mBalloonView->GetMeasuredHeight(&data1), data1) + (GetPaddingTop(&data2), data2)
-            + (GetPaddingBottom(&data3), data3);
+    Int32 data1 = 0;
+    Int32 newWidth = (mBalloonView->GetMeasuredWidth(&data1), data1) + GetPaddingLeft()
+            + GetPaddingRight();
+    Int32 newHeight = (mBalloonView->GetMeasuredHeight(&data1), data1) + GetPaddingTop()
+            + GetPaddingBottom();
     SetWidth(newWidth);
     SetHeight(newHeight);
 

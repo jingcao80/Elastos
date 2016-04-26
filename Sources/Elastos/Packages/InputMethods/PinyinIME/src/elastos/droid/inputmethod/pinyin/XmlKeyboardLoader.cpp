@@ -1,20 +1,57 @@
 
-#include "XmlKeyboardLoader.h"
-#include "SoftKeyboard.h"
-#include "SkbTemplate.h"
-#include "SkbPool.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.CoreLibrary.External.h"
+#include "elastos/droid/inputmethod/pinyin/XmlKeyboardLoader.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
+#include "elastos/droid/inputmethod/pinyin/SkbTemplate.h"
+#include "elastos/droid/inputmethod/pinyin/SkbPool.h"
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Regex::IPatternHelper;
 using Elastos::Utility::Regex::CPatternHelper;
-using Elastos::Droid::Utility::IAttributeSet;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+//============================================================
+// XmlKeyboardLoader::KeyCommonAttributes
+//============================================================
+XmlKeyboardLoader::KeyCommonAttributes::KeyCommonAttributes(
+    /* [in] */ IXmlResourceParser* xrp,
+    /* [in] */ XmlKeyboardLoader* host)
+    : mXrp(xrp)
+    , mKeyType(0)
+    , mKeyWidth(0.f)
+    , mKeyHeight(0.f)
+    , mRepeat(FALSE)
+    , mBalloon(TRUE)
+    , mHost(host)
+{}
+
+Boolean XmlKeyboardLoader::KeyCommonAttributes::GetAttributes(
+    /* [in] */ KeyCommonAttributes* defAttr)
+{
+    mKeyType = mHost->GetInteger(mXrp, XMLATTR_KEY_TYPE, defAttr->mKeyType);
+    mKeyWidth = mHost->GetFloat(mXrp, XMLATTR_KEY_WIDTH, defAttr->mKeyWidth);
+    mKeyHeight = mHost->GetFloat(mXrp, XMLATTR_KEY_HEIGHT, defAttr->mKeyHeight);
+    mRepeat = mHost->GetBoolean(mXrp, XMLATTR_KEY_REPEAT, defAttr->mRepeat);
+    mBalloon = mHost->GetBoolean(mXrp, XMLATTR_KEY_BALLOON, defAttr->mBalloon);
+    if (mKeyType < 0 || mKeyWidth <= 0 || mKeyHeight <= 0) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+//============================================================
+// XmlKeyboardLoader
+//============================================================
 String XmlKeyboardLoader::XMLTAG_SKB_TEMPLATE("skb_template");
 String XmlKeyboardLoader::XMLTAG_KEYTYPE("key_type");
 String XmlKeyboardLoader::XMLTAG_KEYICON("key_icon");
@@ -60,35 +97,6 @@ Boolean XmlKeyboardLoader::DEFAULT_SKB_CACHE_FLAG = TRUE;
 Boolean XmlKeyboardLoader::DEFAULT_SKB_STICKY_FLAG = TRUE;
 const Int32 XmlKeyboardLoader::KEYTYPE_ID_LAST = -1;
 
-
-XmlKeyboardLoader::KeyCommonAttributes::KeyCommonAttributes(
-    /* [in] */ IXmlResourceParser* xrp,
-    /* [in] */ XmlKeyboardLoader* host)
-    : mXrp(xrp)
-    , mKeyType(0)
-    , mKeyWidth(0.f)
-    , mKeyHeight(0.f)
-    , mRepeat(FALSE)
-    , mBalloon(TRUE)
-    , mHost(host)
-{
-}
-
-Boolean XmlKeyboardLoader::KeyCommonAttributes::GetAttributes(
-    /* [in] */ KeyCommonAttributes* defAttr)
-{
-    assert(defAttr != NULL);
-    mKeyType = mHost->GetInteger(mXrp, XMLATTR_KEY_TYPE, defAttr->mKeyType);
-    mKeyWidth = mHost->GetFloat(mXrp, XMLATTR_KEY_WIDTH, defAttr->mKeyWidth);
-    mKeyHeight = mHost->GetFloat(mXrp, XMLATTR_KEY_HEIGHT, defAttr->mKeyHeight);
-    mRepeat = mHost->GetBoolean(mXrp, XMLATTR_KEY_REPEAT, defAttr->mRepeat);
-    mBalloon = mHost->GetBoolean(mXrp, XMLATTR_KEY_BALLOON, defAttr->mBalloon);
-    if (mKeyType < 0 || mKeyWidth <= 0 || mKeyHeight <= 0) {
-        return FALSE;
-    }
-    return TRUE;
-}
-
 XmlKeyboardLoader::XmlKeyboardLoader(
     /* [in] */ IContext* context)
     : mContext(context)
@@ -123,12 +131,12 @@ AutoPtr<SkbTemplate> XmlKeyboardLoader::LoadSkbTemplate(
     Int32 globalColorHl = 0;
     Int32 globalColorBalloon = 0;
     // try {
-    xrp->Next(&mXmlEventType);
-    while (mXmlEventType != IXmlResourceParser::END_DOCUMENT) {
+    IXmlPullParser::Probe(xrp)->Next(&mXmlEventType);
+    while (mXmlEventType != IXmlPullParser::END_DOCUMENT) {
         mNextEventFetched = FALSE;
-        if (mXmlEventType == IXmlResourceParser::START_TAG) {
+        if (mXmlEventType == IXmlPullParser::START_TAG) {
             String attribute;
-            xrp->GetName(&attribute);
+            IXmlPullParser::Probe(xrp)->GetName(&attribute);
             if (XMLTAG_SKB_TEMPLATE.Equals(attribute)) {
                 AutoPtr<IDrawable> skbBg = GetDrawable(xrp, XMLATTR_SKB_BG, NULL);
                 AutoPtr<IDrawable> balloonBg = GetDrawable(xrp,
@@ -151,7 +159,8 @@ AutoPtr<SkbTemplate> XmlKeyboardLoader::LoadSkbTemplate(
                         0xffffffff);
                 globalColorBalloon = GetColor(xrp,
                         XMLATTR_COLOR_BALLOON, 0xffffffff);
-            } else if (XMLTAG_KEYTYPE.Equals(attribute)) {
+            }
+            else if (XMLTAG_KEYTYPE.Equals(attribute)) {
                 Int32 id = GetInteger(xrp, XMLATTR_ID, KEYTYPE_ID_LAST);
                 AutoPtr<IDrawable> bg = GetDrawable(xrp, XMLATTR_KEYTYPE_BG, NULL);
                 AutoPtr<IDrawable> hlBg = GetDrawable(xrp, XMLATTR_KEYTYPE_HLBG,
@@ -171,7 +180,8 @@ AutoPtr<SkbTemplate> XmlKeyboardLoader::LoadSkbTemplate(
                     return NULL;
                 }
                 lastKeyTypeId = id;
-            } else if (XMLTAG_KEYICON.Equals(attribute)) {
+            }
+            else if (XMLTAG_KEYICON.Equals(attribute)) {
                 Int32 keyCode = GetInteger(xrp, XMLATTR_KEY_CODE, 0);
                 AutoPtr<IDrawable> icon = GetDrawable(xrp, XMLATTR_KEY_ICON, NULL);
                 AutoPtr<IDrawable> iconPopup = GetDrawable(xrp,
@@ -180,7 +190,8 @@ AutoPtr<SkbTemplate> XmlKeyboardLoader::LoadSkbTemplate(
                     mSkbTemplate->AddDefaultKeyIcons(keyCode, icon,
                             iconPopup);
                 }
-            } else if (XMLTAG_KEY.Equals(attribute)) {
+            }
+            else if (XMLTAG_KEY.Equals(attribute)) {
                 Int32 keyId = GetInteger(xrp, XMLATTR_ID, -1);
                 if (-1 == keyId) return NULL;
 
@@ -201,7 +212,7 @@ AutoPtr<SkbTemplate> XmlKeyboardLoader::LoadSkbTemplate(
             }
         }
         // Get the next tag.
-        if (!mNextEventFetched) xrp->Next(&mXmlEventType);
+        if (!mNextEventFetched) IXmlPullParser::Probe(xrp)->Next(&mXmlEventType);
     }
     xrp->Close();
     return mSkbTemplate;
@@ -250,12 +261,12 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
     // try {
     mKeyXMargin = 0;
     mKeyYMargin = 0;
-    xrp->Next(&mXmlEventType);
-    while (mXmlEventType != IXmlResourceParser::END_DOCUMENT) {
+    IXmlPullParser::Probe(xrp)->Next(&mXmlEventType);
+    while (mXmlEventType != IXmlPullParser::END_DOCUMENT) {
         mNextEventFetched = FALSE;
-        if (mXmlEventType == IXmlResourceParser::START_TAG) {
+        if (mXmlEventType == IXmlPullParser::START_TAG) {
             String attr;
-            xrp->GetName(&attr);
+            IXmlPullParser::Probe(xrp)->GetName(&attr);
             // 1. Is it the root element, "keyboard"?
             if (XMLTAG_KEYBOARD.Equals(attr)) {
                 // 1.1 Get the keyboard template id.
@@ -306,7 +317,8 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                     softKeyboard->SetKeyBalloonBackground(balloonBg);
                 }
                 softKeyboard->SetKeyMargins(mKeyXMargin, mKeyYMargin);
-            } else if (XMLTAG_ROW.Equals(attr)) {
+            }
+            else if (XMLTAG_ROW.Equals(attr)) {
                 if (!attrRow->GetAttributes(attrSkb)) {
                     return NULL;
                 }
@@ -316,21 +328,22 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                 Int32 rowId = GetInteger(xrp, XMLATTR_ROW_ID,
                         SoftKeyboard::KeyRow::ALWAYS_SHOW_ROW_ID);
                 softKeyboard->BeginNewRow(rowId, mKeyYPos);
-            } else if (XMLTAG_KEYS.Equals(attr)) {
+            }
+            else if (XMLTAG_KEYS.Equals(attr)) {
                 if (NULL == softKeyboard) return NULL;
                 if (!attrKeys->GetAttributes(attrRow)) {
                     return NULL;
                 }
 
                 String splitter;
-                xrp->GetAttributeValue(String(NULL), XMLATTR_KEY_SPLITTER, &splitter);
+                IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), XMLATTR_KEY_SPLITTER, &splitter);
                 AutoPtr<IPatternHelper> helper;
                 CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
                 helper->Quote(splitter, &splitter);
                 String labels;
-                xrp->GetAttributeValue(String(NULL), XMLATTR_KEY_LABELS, &labels);
+                IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), XMLATTR_KEY_LABELS, &labels);
                 String codes;
-                xrp->GetAttributeValue(String(NULL), XMLATTR_KEY_CODES, &codes);
+                IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), XMLATTR_KEY_CODES, &codes);
                 if (NULL == splitter || NULL == labels) {
                     return NULL;
                 }
@@ -350,7 +363,7 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                     softKey = new SoftKey();
                     Int32 keyCode = 0;
                     if (NULL != codeArr) {
-                        StringUtils::ParseInt32((*codeArr)[i], &keyCode);
+                        keyCode = StringUtils::ParseInt32((*codeArr)[i]);
                     }
                     softKey->SetKeyAttribute(keyCode, (*labelArr)[i],
                             attrKeys->mRepeat, attrKeys->mBalloon);
@@ -374,7 +387,8 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                         return NULL;
                     }
                 }
-            } else if (XMLTAG_KEY.Equals(attr)) {
+            }
+            else if (XMLTAG_KEY.Equals(attr)) {
                 if (NULL == softKeyboard) {
                     return NULL;
                 }
@@ -385,7 +399,8 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                 Int32 keyId = GetInteger(xrp, XMLATTR_ID, -1);
                 if (keyId >= 0) {
                     softKey = mSkbTemplate->GetDefaultKey(keyId);
-                } else {
+                }
+                else {
                     softKey = NULL;
                     if (FAILED(GetSoftKey(xrp, attrKey, (SoftKey**)&softKey))) {
                         return NULL;
@@ -403,8 +418,8 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                 // toggling states, and we started a new row. In this
                 // case, the row starting position information should
                 // be updated.
-                if (mXmlEventType == IXmlResourceParser::START_TAG) {
-                    xrp->GetName(&attr);
+                if (mXmlEventType == IXmlPullParser::START_TAG) {
+                    IXmlPullParser::Probe(xrp)->GetName(&attr);
                     if (XMLTAG_ROW.Equals(attr)) {
                         mKeyYPos += attrRow->mKeyHeight;
                         if ((Int32) mKeyYPos * mSkbHeight > mSkbHeight) {
@@ -414,9 +429,10 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
                 }
                 softKeyboard->AddSoftKey(softKey);
             }
-        } else if (mXmlEventType == IXmlResourceParser::END_TAG) {
+        }
+        else if (mXmlEventType == IXmlPullParser::END_TAG) {
             String attr;
-            xrp->GetName(&attr);
+            IXmlPullParser::Probe(xrp)->GetName(&attr);
             if (XMLTAG_ROW.Equals(attr)) {
                 mKeyYPos += attrRow->mKeyHeight;
                 if ((Int32) mKeyYPos * mSkbHeight > mSkbHeight) {
@@ -426,7 +442,7 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
         }
 
         // Get the next tag.
-        if (!mNextEventFetched) xrp->Next(&mXmlEventType);
+        if (!mNextEventFetched) IXmlPullParser::Probe(xrp)->Next(&mXmlEventType);
     }
     xrp->Close();
     softKeyboard->SetSkbCoreSize(mSkbWidth, mSkbHeight);
@@ -443,17 +459,15 @@ AutoPtr<SoftKeyboard> XmlKeyboardLoader::LoadKeyboard(
 ECode XmlKeyboardLoader::GetSoftKey(
     /* [in] */ IXmlResourceParser* xrp,
     /* [in] */ KeyCommonAttributes* attrKey,
-    /* [out] */ SoftKey** key) //throws XmlPullParserException, IOException
+    /* [out] */ SoftKey** key)
 {
     VALIDATE_NOT_NULL(key);
     *key = NULL;
-    assert(xrp != NULL);
     Int32 keyCode = GetInteger(xrp, XMLATTR_KEY_CODE, 0);
     String keyLabel = GetString(xrp, XMLATTR_KEY_LABEL, String(NULL));
     AutoPtr<IDrawable> keyIcon = GetDrawable(xrp, XMLATTR_KEY_ICON, NULL);
     AutoPtr<IDrawable> keyIconPopup = GetDrawable(xrp, XMLATTR_KEY_ICON_POPUP, NULL);
     Int32 popupSkbId = 0;
-    assert(IAttributeSet::Probe(xrp) != NULL);
     FAIL_RETURN(IAttributeSet::Probe(xrp)->GetAttributeResourceValue(String(NULL), XMLATTR_KEY_POPUP_SKBID, 0, &popupSkbId));
 
     if (NULL == keyLabel && NULL == keyIcon) {
@@ -484,23 +498,27 @@ ECode XmlKeyboardLoader::GetSoftKey(
     // {@link #XMLTAG_TOGGLE_STATE_OF_KEY}, if yes, try to
     // create a toggle key.
     Boolean toggleKey = FALSE;
-    FAIL_RETURN(xrp->Next(&mXmlEventType));
+    FAIL_RETURN(IXmlPullParser::Probe(xrp)->Next(&mXmlEventType));
     mNextEventFetched = TRUE;
 
     AutoPtr<SoftKey> softKey;
-    if (mXmlEventType == IXmlResourceParser::START_TAG) {
-        FAIL_RETURN(xrp->GetName(&mAttrTmp));
+    if (mXmlEventType == IXmlPullParser::START_TAG) {
+        FAIL_RETURN(IXmlPullParser::Probe(xrp)->GetName(&mAttrTmp));
         if (mAttrTmp.Equals(XMLTAG_TOGGLE_STATE)) {
             toggleKey = TRUE;
         }
     }
     if (toggleKey) {
         softKey = new SoftKeyToggle();
-        if (!((SoftKeyToggle*) softKey.Get())->SetToggleStates(GetToggleStates(
-                attrKey, (SoftKeyToggle*) softKey.Get(), keyCode))) {
+        AutoPtr<SoftKeyToggle::ToggleState> state;
+        FAIL_RETURN(GetToggleStates(
+                attrKey, (SoftKeyToggle*)softKey.Get(), keyCode,
+                (SoftKeyToggle::ToggleState**)&state));
+        if (!((SoftKeyToggle*)softKey.Get())->SetToggleStates(state)) {
             return NOERROR;
         }
-    } else {
+    }
+    else {
         softKey = new SoftKey();
     }
 
@@ -515,29 +533,31 @@ ECode XmlKeyboardLoader::GetSoftKey(
     return NOERROR;
 }
 
-AutoPtr<SoftKeyToggle::ToggleState> XmlKeyboardLoader::GetToggleStates(
+ECode XmlKeyboardLoader::GetToggleStates(
     /* [in] */ KeyCommonAttributes* attrKey,
     /* [in] */ SoftKeyToggle* softKey,
-    /* [in] */ Int32 defKeyCode) //throws XmlPullParserException, IOException
+    /* [in] */ Int32 defKeyCode,
+    /* [out] */ SoftKeyToggle::ToggleState** state)
 {
-    assert(attrKey != NULL);
+    VALIDATE_NOT_NULL(state);
+    *state = NULL;
     AutoPtr<IXmlResourceParser> xrp = attrKey->mXrp;
-    assert(xrp != NULL);
     Int32 stateId = GetInteger(xrp, XMLATTR_TOGGLE_STATE_ID, 0);
-    if (0 == stateId) return NULL;
+    if (0 == stateId) return NOERROR;
 
     String keyLabel = GetString(xrp, XMLATTR_KEY_LABEL, String(NULL));
     Int32 keyTypeId = GetInteger(xrp, XMLATTR_KEY_TYPE, KEYTYPE_ID_LAST);
     Int32 keyCode;
     if (NULL == keyLabel) {
         keyCode = GetInteger(xrp, XMLATTR_KEY_CODE, defKeyCode);
-    } else {
+    }
+    else {
         keyCode = GetInteger(xrp, XMLATTR_KEY_CODE, 0);
     }
     AutoPtr<IDrawable> icon = GetDrawable(xrp, XMLATTR_KEY_ICON, NULL);
     AutoPtr<IDrawable> iconPopup = GetDrawable(xrp, XMLATTR_KEY_ICON_POPUP, NULL);
     if (NULL == icon && NULL == keyLabel) {
-        return NULL;
+        return NOERROR;
     }
     AutoPtr<SoftKeyToggle::ToggleState> rootState = softKey->CreateToggleState();
     rootState->SetStateId(stateId);
@@ -557,23 +577,26 @@ AutoPtr<SoftKeyToggle::ToggleState> XmlKeyboardLoader::GetToggleStates(
     rootState->mNextState = NULL;
 
     // If there is another toggle state.
-    xrp->Next(&mXmlEventType);
-    while (mXmlEventType != IXmlResourceParser::START_TAG
-            && mXmlEventType != IXmlResourceParser::END_DOCUMENT) {
-        xrp->Next(&mXmlEventType);
+    IXmlPullParser::Probe(xrp)->Next(&mXmlEventType);
+    while (mXmlEventType != IXmlPullParser::START_TAG
+            && mXmlEventType != IXmlPullParser::END_DOCUMENT) {
+        IXmlPullParser::Probe(xrp)->Next(&mXmlEventType);
     }
-    if (mXmlEventType == IXmlResourceParser::START_TAG) {
+    if (mXmlEventType == IXmlPullParser::START_TAG) {
         String attr;
-        xrp->GetName(&attr);
+        IXmlPullParser::Probe(xrp)->GetName(&attr);
         if (attr.Equals(XMLTAG_TOGGLE_STATE)) {
-            AutoPtr<SoftKeyToggle::ToggleState> nextState = GetToggleStates(attrKey,
-                    softKey, defKeyCode);
-            if (NULL == nextState) return NULL;
+            AutoPtr<SoftKeyToggle::ToggleState> nextState;
+            FAIL_RETURN(GetToggleStates(attrKey, softKey, defKeyCode,
+                    (SoftKeyToggle::ToggleState**)&nextState));
+            if (NULL == nextState) return NOERROR;
             rootState->mNextState = nextState;
         }
     }
 
-    return rootState;
+    *state = rootState;
+    REFCOUNT_ADD(*state);
+    return NOERROR;
 }
 
 Int32 XmlKeyboardLoader::GetInteger(
@@ -581,17 +604,15 @@ Int32 XmlKeyboardLoader::GetInteger(
     /* [in] */ const String& name,
     /* [in] */ Int32 defValue)
 {
-    assert(xrp != NULL);
     Int32 resId = 0;
-    assert(IAttributeSet::Probe(xrp) != NULL);
     IAttributeSet::Probe(xrp)->GetAttributeResourceValue(String(NULL), name, 0, &resId);
     String s;
     if (resId == 0) {
-        xrp->GetAttributeValue(String(NULL), name, &s);
-        if (NULL == s) return defValue;
+        IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), name, &s);
+        if (s.IsNull()) return defValue;
         // try {
         Int32 ret = 0;
-        ECode ec = StringUtils::ParseInt32(s, &ret);
+        ECode ec = StringUtils::Parse(s, &ret);
         if (FAILED(ec)) {
             return defValue;
         }
@@ -599,13 +620,13 @@ Int32 XmlKeyboardLoader::GetInteger(
         // } catch (NumberFormatException e) {
         //     return defValue;
         // }
-    } else {
+    }
+    else {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         String str;
         res->GetString(resId, &str);
-        Int32 value = 0;
-        StringUtils::ParseInt32(str, &value);
+        Int32 value = StringUtils::ParseInt32(str);
         return value;
     }
 }
@@ -615,17 +636,15 @@ Int32 XmlKeyboardLoader::GetColor(
     /* [in] */ const String& name,
     /* [in] */ Int32 defValue)
 {
-    assert(xrp != NULL);
     Int32 resId = 0;
-    assert(IAttributeSet::Probe(xrp) != NULL);
     IAttributeSet::Probe(xrp)->GetAttributeResourceValue(String(NULL), name, 0, &resId);
     String s;
     if (resId == 0) {
-        xrp->GetAttributeValue(String(NULL), name, &s);
-        if (NULL == s) return defValue;
+        IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), name, &s);
+        if (s.IsNull()) return defValue;
         // try {
         Int32 ret = 0;
-        ECode ec = StringUtils::ParseInt32(s, &ret);
+        ECode ec = StringUtils::Parse(s, &ret);
         if (FAILED(ec)) {
             return defValue;
         }
@@ -633,7 +652,8 @@ Int32 XmlKeyboardLoader::GetColor(
         // } catch (NumberFormatException e) {
         //     return defValue;
         // }
-    } else {
+    }
+    else {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         Int32 color = 0;
@@ -647,16 +667,14 @@ String XmlKeyboardLoader::GetString(
     /* [in] */ const String& name,
     /* [in] */ const String& defValue)
 {
-    assert(xrp != NULL);
     Int32 resId = 0;
-    assert(IAttributeSet::Probe(xrp) != NULL);
     IAttributeSet::Probe(xrp)->GetAttributeResourceValue(String(NULL), name, 0, &resId);
-
     String retValue;
     if (resId == 0) {
-        xrp->GetAttributeValue(String(NULL), name, &retValue);
+        IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), name, &retValue);
         return retValue;
-    } else {
+    }
+    else {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         res->GetString(resId, &retValue);
@@ -669,25 +687,24 @@ Float XmlKeyboardLoader::GetFloat(
     /* [in] */ const String& name,
     /* [in] */ Float defValue)
 {
-    assert(xrp != NULL);
     Int32 resId = 0;
-    assert(IAttributeSet::Probe(xrp) != NULL);
     IAttributeSet::Probe(xrp)->GetAttributeResourceValue(String(NULL), name, 0, &resId);
     if (resId == 0) {
         String s;
-        xrp->GetAttributeValue(String(NULL), name, &s);
-        if (s.IsNullOrEmpty()) return defValue;
+        IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), name, &s);
+        if (s.IsNull()) return defValue;
         // try {
         Float ret;
         ECode ec = NOERROR;
         if (s.EndWith(String("%p"))) {
-            ec = StringUtils::ParseFloat(s.Substring(0, s.GetLength() - 2), &ret);
+            ec = StringUtils::Parse(s.Substring(0, s.GetLength() - 2), &ret);
             if (FAILED(ec)) {
                 return defValue;
             }
             ret /= 100;
-        } else {
-            ec = StringUtils::ParseFloat(s, &ret);
+        }
+        else {
+            ec = StringUtils::Parse(s, &ret);
             if (FAILED(ec)) {
                 return defValue;
             }
@@ -696,7 +713,8 @@ Float XmlKeyboardLoader::GetFloat(
         // } catch (NumberFormatException e) {
         //     return defValue;
         // }
-    } else {
+    }
+    else {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         Float ret = 0.f;
@@ -710,18 +728,12 @@ Boolean XmlKeyboardLoader::GetBoolean(
     /* [in] */ const String& name,
     /* [in] */ Boolean defValue)
 {
-    assert(xrp != NULL);
     String s;
-    xrp->GetAttributeValue(String(NULL), name, &s);
-    if (NULL == s) return defValue;
-    // try {
-    // TODO
-    // Boolean ret = s.ToBoolean();
-    return s.EqualsIgnoreCase("TRUE");
-    // } catch (NumberFormatException e) {
-           //TODO
-    //     return defValue;
-    // }
+    IXmlPullParser::Probe(xrp)->GetAttributeValue(String(NULL), name, &s);
+    if (s.IsNull()) return defValue;
+    if (s.EqualsIgnoreCase("TRUE")) return TRUE;
+    else if (s.EqualsIgnoreCase("FALSE")) return FALSE;
+    else return defValue;
 }
 
 AutoPtr<IDrawable> XmlKeyboardLoader::GetDrawable(
@@ -729,22 +741,12 @@ AutoPtr<IDrawable> XmlKeyboardLoader::GetDrawable(
     /* [in] */ const String& name,
     /* [in] */ IDrawable* defValue)
 {
-    assert(xrp != NULL);
     Int32 resId = 0;
-    assert(IAttributeSet::Probe(xrp) != NULL);
     IAttributeSet::Probe(xrp)->GetAttributeResourceValue(String(NULL), name, 0, &resId);
     if (0 == resId) return defValue;
     AutoPtr<IDrawable> d;
     mResources->GetDrawable(resId, (IDrawable**)&d);
     return d;
-}
-
-ECode XmlKeyboardLoader::ToString(
-    /* [out] */ String* info)
-{
-    VALIDATE_NOT_NULL(info);
-    *info = String("Elastos.Droid.Inputmethods.PinyinIME.XmlKeyboardLoader");
-    return NOERROR;
 }
 
 } // namespace Pinyin

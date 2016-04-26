@@ -31,14 +31,13 @@ ECode CBalloonView::constructor(
     return mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
 }
 
-ECode CBalloonView::SetIcon(
+void CBalloonView::SetIcon(
     /* [in] */ IDrawable* icon)
 {
     mIcon = icon;
-    return NOERROR;
 }
 
-ECode CBalloonView::SetTextConfig(
+void CBalloonView::SetTextConfig(
     /* [in] */ const String& label,
     /* [in] */ Float fontSize,
     /* [in] */ Boolean textBold,
@@ -53,7 +52,6 @@ ECode CBalloonView::SetTextConfig(
     mFmi = NULL;
     mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
     mPaintLabel->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
-    return NOERROR;
 }
 
 void CBalloonView::OnMeasure(

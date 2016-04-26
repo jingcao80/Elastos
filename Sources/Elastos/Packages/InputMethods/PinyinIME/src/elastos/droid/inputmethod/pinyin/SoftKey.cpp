@@ -1,18 +1,43 @@
 
-#include "SoftKey.h"
-#include "SkbTemplate.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKey.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+SoftKeyType::SoftKeyType(
+    /* [in] */ Int32 id,
+    /* [in] */ IDrawable* bg,
+    /* [in] */ IDrawable* hlBg)
+    : mKeyTypeId(id)
+    , mKeyBg(bg)
+    , mKeyHlBg(hlBg)
+    , mColor(0)
+    , mColorHl(0)
+    , mColorBalloon(0)
+{}
+
+void SoftKeyType::SetColors(
+    /* [in] */ Int32 color,
+    /* [in] */ Int32 colorHl,
+    /* [in] */ Int32 colorBalloon)
+{
+    mColor = color;
+    mColorHl = colorHl;
+    mColorBalloon = colorBalloon;
+}
+
+
 const Int32 SoftKey::MAX_MOVE_TOLERANCE_X = 0;
 const Int32 SoftKey::MAX_MOVE_TOLERANCE_Y = 0;
 const Int32 SoftKey::KEYMASK_REPEAT = 0x10000000;
 const Int32 SoftKey::KEYMASK_BALLOON = 0x20000000;
-
-CAR_INTERFACE_IMPL(SoftKey, Object, ISoftKey);
 
 SoftKey::SoftKey()
     : mPopupSkbId(0)
@@ -61,13 +86,15 @@ void SoftKey::SetKeyAttribute(
 
     if (repeat) {
         mKeyMask |= KEYMASK_REPEAT;
-    } else {
+    }
+    else {
         mKeyMask &= (~KEYMASK_REPEAT);
     }
 
     if (balloon) {
         mKeyMask |= KEYMASK_BALLOON;
-    } else {
+    }
+    else {
         mKeyMask &= (~KEYMASK_BALLOON);
     }
 }
@@ -101,30 +128,26 @@ AutoPtr<IDrawable> SoftKey::GetKeyIconPopup()
     return mKeyIcon;
 }
 
-ECode SoftKey::GetKeyCode(
-    /* [out] */ Int32* code)
+Int32 SoftKey::GetKeyCode()
 {
-    VALIDATE_NOT_NULL(code);
-    *code = mKeyCode;
-    return NOERROR;
+    return mKeyCode;
 }
 
-ECode SoftKey::GetKeyLabel(
-    /* [out] */ String* label)
+String SoftKey::GetKeyLabel()
 {
-    VALIDATE_NOT_NULL(label);
-    *label = mKeyLabel;
-    return NOERROR;
+    return mKeyLabel;
 }
 
 void SoftKey::ChangeCase(
     /* [in] */ Boolean upperCase)
 {
     if (NULL != mKeyLabel) {
-        if (upperCase)
+        if (upperCase) {
             mKeyLabel = mKeyLabel.ToUpperCase();
-        else
+        }
+        else {
             mKeyLabel = mKeyLabel.ToLowerCase();
+        }
     }
 }
 
@@ -153,40 +176,22 @@ Int32 SoftKey::GetColorBalloon()
     return mKeyType->mColorBalloon;
 }
 
-ECode SoftKey::IsKeyCodeKey(
-    /* [out] */ Boolean* result)
+Boolean SoftKey::IsKeyCodeKey()
 {
-    VALIDATE_NOT_NULL(result);
-    if (mKeyCode > 0) {
-        *result = TRUE;
-        return NOERROR;
-    }
-    *result = FALSE;
-    return NOERROR;
+    if (mKeyCode > 0) return TRUE;
+    return FALSE;
 }
 
-ECode SoftKey::IsUserDefKey(
-    /* [out] */ Boolean* result)
+Boolean SoftKey::IsUserDefKey()
 {
-    VALIDATE_NOT_NULL(result);
-    if (mKeyCode < 0) {
-        *result = TRUE;
-        return NOERROR;
-    }
-    *result = FALSE;
-    return NOERROR;
+    if (mKeyCode < 0) return TRUE;
+    return FALSE;
 }
 
-ECode SoftKey::IsUniStrKey(
-    /* [out] */ Boolean* result)
+Boolean SoftKey::IsUniStrKey()
 {
-    VALIDATE_NOT_NULL(result);
-    if (NULL != mKeyLabel && mKeyCode == 0) {
-        *result = TRUE;
-        return NOERROR;
-    }
-    *result = FALSE;
-    return NOERROR;
+    if (NULL != mKeyLabel && mKeyCode == 0) return TRUE;
+    return FALSE;
 }
 
 Boolean SoftKey::NeedBalloon()
@@ -227,20 +232,21 @@ Boolean SoftKey::MoveWithinKey(
     return FALSE;
 }
 
-ECode NodeSet::ToString(
+ECode SoftKey::ToString(
     /* [out] */ String* info)
 {
     VALIDATE_NOT_NULL(info);
-    String str("\n");
-    str += String("  keyCode: ") + StringUtils::ToString(mKeyCode) + String("\n");
-    str += String("  keyMask: ") + StringUtils::ToString(mKeyMask) + String("\n");
-    str += String("  keyLabel: ") + (mKeyLabel == NULL ? String("null") : mKeyLabel) + String("\n");
-    str += String("  popupResId: ") + StringUtils::ToString(mPopupSkbId) + String("\n");
-    str += String("  Position: ") + StringUtils::ToString(mLeftF) + String(", ")
-            + StringUtils::ToString(mTopF) + String(", ") + StringUtils::ToString(mRightF) + String(", ")
-            + StringUtils::ToString(mBottomF) + String("\n");
-
-    *info = str;
+    StringBuilder sb("\n");
+    sb += "  keyCode: "; sb += StringUtils::ToString(mKeyCode); sb += "\n";
+    sb += "  keyMask: "; sb += StringUtils::ToString(mKeyMask); sb += "\n";
+    sb += "  keyLabel: "; sb += mKeyLabel.IsNull()? String("NULL") : mKeyLabel; sb += "\n";
+    sb += "  popupResId: "; sb += StringUtils::ToString(mPopupSkbId); sb += "\n";
+    sb += "  Position: ";
+    sb += StringUtils::ToString(mLeftF); sb += ", ";
+    sb += StringUtils::ToString(mTopF); sb += ", ";
+    sb += StringUtils::ToString(mRightF); sb += ", ";
+    sb += StringUtils::ToString(mBottomF); sb += "\n";
+    *info = sb.ToString();
     return NOERROR;
 }
 

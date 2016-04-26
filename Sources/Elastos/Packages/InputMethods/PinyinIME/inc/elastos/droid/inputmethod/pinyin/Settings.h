@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SETTINGS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.InputMethod.Pinyin.h"
+#include "_Elastos.Droid.InputMethod.Pinyin.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::ISharedPreferences;

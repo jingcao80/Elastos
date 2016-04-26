@@ -1,42 +1,46 @@
 
-#include "CSoundManager.h"
+#include "elastos/droid/inputmethod/pinyin/SoundManager.h"
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
-CAR_OBJECT_IMPL(CSoundManager);
-CAR_INTERFACE_IMPL(CSoundManager, Object, ISoundManager);
+AutoPtr<SoundManager> SoundManager::sInstance;
 
-CSoundManager::CSoundManager()
-    : FX_VOLUME(-1.0f)
+SoundManager::SoundManager(
+    /* [in] */ IContext* ctx)
+    : mContext(ctx)
+    , FX_VOLUME(-1.0f)
     , mSilentMode(FALSE)
 {
+    UpdateRingerMode();
 }
 
-ECode CSoundManager::constructor(
-    /* [in] */ IContext* ctx)
-{
-    mContext = ctx;
-    return UpdateRingerMode();
-}
-
-ECode CSoundManager::UpdateRingerMode()
+void SoundManager::UpdateRingerMode()
 {
     if (mAudioManager == NULL) {
         AutoPtr<IInterface> audioService;
         mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&audioService);
         mAudioManager = IAudioManager::Probe(audioService);
     }
-    assert(mAudioManager != NULL);
     Int32 mode = 0;
     mAudioManager->GetRingerMode(&mode);
     mSilentMode = (mode != IAudioManager::RINGER_MODE_NORMAL);
-    return NOERROR;
 }
 
-ECode CSoundManager::PlayKeyDown()
+AutoPtr<SoundManager> SoundManager::GetInstance(
+    /* [in] */ IContext* context)
+{
+    if (NULL == sInstance) {
+        if (NULL != context) {
+            sInstance = new SoundManager(context);
+        }
+    }
+    return sInstance;
+}
+
+void SoundManager::PlayKeyDown()
 {
     if (mAudioManager == NULL) {
         UpdateRingerMode();
@@ -45,7 +49,6 @@ ECode CSoundManager::PlayKeyDown()
         Int32 sound = IAudioManager::FX_KEYPRESS_STANDARD;
         mAudioManager->PlaySoundEffect(sound, FX_VOLUME);
     }
-    return NOERROR;
 }
 
 } // namespace Pinyin

@@ -6,7 +6,8 @@ module
     namespace InputMethod {
     namespace Pinyin {
 
-    interface ISoftKeyboard {
+    [local]
+    interface ISoftKeyToggle {
     }
 
     } // namespace Pinyin

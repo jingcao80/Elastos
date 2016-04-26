@@ -2,19 +2,20 @@
 #ifndef __ELASTOS_DROID_INPUTMETHOD_PINYIN_SKBPOOL_H__
 #define __ELASTOS_DROID_INPUTMETHOD_PINYIN_SKBPOOL_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
-#include <elastos/utility/etl/List.h>
-#include "SkbTemplate.h"
+#include "_Elastos.Droid.InputMethod.Pinyin.h"
+#include "elastos/droid/inputmethod/pinyin/SkbTemplate.h"
+#include "elastos/droid/inputmethod/pinyin/SoftKeyboard.h"
+#include <elastos/core/Object.h>
+#include <elastos/utility/etl/Vector.h>
 
-using Elastos::Utility::Etl::List;
 using Elastos::Droid::Content::IContext;
+using Elastos::Core::Object;
+using Elastos::Utility::Etl::Vector;
 
 namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
-
-class SoftKeyboard;
 
 /**
  * Class used to cache previously loaded soft keyboard layouts.
@@ -22,34 +23,31 @@ class SoftKeyboard;
 class SkbPool: public Object
 {
 public:
-    static AutoPtr<SkbPool> GetInstance();
+    static CARAPI_(AutoPtr<SkbPool>) GetInstance();
 
-    void ResetCachedSkb();
+    CARAPI_(void) ResetCachedSkb();
 
-    AutoPtr<SkbTemplate> GetSkbTemplate(
+    CARAPI_(AutoPtr<SkbTemplate>) GetSkbTemplate(
         /* [in] */ Int32 skbTemplateId,
         /* [in] */ IContext* context);
 
     // Try to find the keyboard in the pool with the cache id. If there is no
     // keyboard found, try to load it with the given xml id.
-    AutoPtr<SoftKeyboard> GetSoftKeyboard(
+    CARAPI_(AutoPtr<SoftKeyboard>) GetSoftKeyboard(
         /* [in] */ Int32 skbCacheId,
         /* [in] */ Int32 skbXmlId,
         /* [in] */ Int32 skbWidth,
         /* [in] */ Int32 skbHeight,
         /* [in] */ IContext* context);
 
-    CARAPI ToString(
-        /* [out] */ String* info);
-
 private:
     SkbPool();
 
 private:
-    static AutoPtr<SkbPool> mInstance;
+    static AutoPtr<SkbPool> sInstance;
 
-    List<AutoPtr<SkbTemplate> > mSkbTemplates; // = new Vector<SkbTemplate>();
-    List<AutoPtr<SoftKeyboard> > mSoftKeyboards; // = new Vector<SoftKeyboard>();
+    Vector< AutoPtr<SkbTemplate> > mSkbTemplates;
+    Vector< AutoPtr<SoftKeyboard> > mSoftKeyboards;
 };
 
 } // namespace Pinyin

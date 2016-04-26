@@ -57,17 +57,16 @@ ECode CComposingView::Reset()
 
 ECode CComposingView::SetDecodingInfo(
     /* [in] */ CPinyinIME::DecodingInfo* decInfo,
-    /* [in] */ ImeState imeStatus)
+    /* [in] */ CPinyinIME::ImeState imeStatus)
 {
     mDecInfo = decInfo;
 
-    if (ImeState_STATE_INPUT == imeStatus) {
+    if (CPinyinIME::STATE_INPUT == imeStatus) {
         mComposingStatus = ComposingStatus_SHOW_PINYIN;
         mDecInfo->MoveCursorToEdge(FALSE);
     }
     else {
-        Int32 value = 0;
-        if ((decInfo->GetFixedLen(&value), value) != 0
+        if (decInfo->GetFixedLen() != 0
                 || ComposingStatus_EDIT_PINYIN == mComposingStatus) {
             mComposingStatus = ComposingStatus_EDIT_PINYIN;
         }

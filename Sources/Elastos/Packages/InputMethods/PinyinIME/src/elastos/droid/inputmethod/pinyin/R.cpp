@@ -3,7 +3,7 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
-
+ 
 const int R::bool_::im_is_default;
 const int R::color::active_candidate_color;
 const int R::color::balloon_color;
