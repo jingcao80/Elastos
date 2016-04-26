@@ -2,31 +2,43 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/CBlurMaskFilter.h"
+#include <elastos/utility/logging/Slogger.h>
 #include <skia/effects/SkBlurMask.h>
 #include <skia/effects/SkBlurMaskFilter.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CBlurMaskFilter);
+
 CAR_INTERFACE_IMPL(CBlurMaskFilter, MaskFilter, IBlurMaskFilter);
+
 ECode CBlurMaskFilter::constructor(
     /* [in] */ Float radius,
     /* [in] */ Int32 style)
 {
-    mNativeInstance = NativeConstructor(radius, style);
-    return NOERROR;
+    return NativeConstructor(radius, style, &mNativeInstance);
 }
 
-Int64 CBlurMaskFilter::NativeConstructor(
+ECode CBlurMaskFilter::NativeConstructor(
     /* [in] */ Float radius,
-    /* [in] */ Int32 blurStyle)
+    /* [in] */ Int32 blurStyle,
+    /* [out] */ Int64* outfilter)
 {
+    VALIDATE_NOT_NULL(outfilter);
+
     SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
     SkMaskFilter* filter = SkBlurMaskFilter::Create((SkBlurStyle)blurStyle, sigma);
-    assert(filter);
-    return reinterpret_cast<Int64>(filter);
+    if (filter == NULL) {
+        Slogger::E("CBlurMaskFilter", "java/lang/IllegalArgumentException");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    *outfilter = reinterpret_cast<Int64>(filter);
+    return NOERROR;
 }
 
 } // namespace Graphics

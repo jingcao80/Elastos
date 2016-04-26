@@ -36,9 +36,10 @@ public:
         /* [in] */ Int32 style);
 
 private:
-    static CARAPI_(Int64) NativeConstructor(
+    static CARAPI NativeConstructor(
         /* [in] */ Float radius,
-        /* [in] */ Int32 style);
+        /* [in] */ Int32 style,
+        /* [out] */ Int64* outfilter);
 };
 
 } // namespace Graphics

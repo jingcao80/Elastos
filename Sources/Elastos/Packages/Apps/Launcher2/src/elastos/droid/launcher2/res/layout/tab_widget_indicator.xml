@@ -14,6 +14,6 @@
      limitations under the License.
 -->
 
-<com.android.launcher2.AccessibleTabView
+<Elastos.Droid.Launcher2.CAccessibleTabView
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/TabIndicator.AppsCustomize" />

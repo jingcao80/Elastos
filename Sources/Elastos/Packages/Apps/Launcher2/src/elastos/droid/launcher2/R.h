@@ -1390,14 +1390,14 @@ s
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_clingFocusedX com.android.launcher:clingFocusedX}</code></td><td> The x index of the item to be focused in the cling </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_clingFocusedY com.android.launcher:clingFocusedY}</code></td><td> The y index of the item to be focused in the cling </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_maxAppCellCountX com.android.launcher:maxAppCellCountX}</code></td><td> Max number of cells of applications horizontally </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_maxAppCellCountY com.android.launcher:maxAppCellCountY}</code></td><td> Max number of cells of applications vertically </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_widgetCellHeightGap com.android.launcher:widgetCellHeightGap}</code></td><td> Vertical spacing between widgets </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_widgetCellWidthGap com.android.launcher:widgetCellWidthGap}</code></td><td> Horizontal spacing between widgets and wallpapers </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_widgetCountX com.android.launcher:widgetCountX}</code></td><td> Number of widgets horizontally </td></tr>
-           <tr><td><code>{@link #AppsCustomizePagedView_widgetCountY com.android.launcher:widgetCountY}</code></td><td> Number of widgets vertically </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_clingFocusedX Elastos.Droid.Launcher2:clingFocusedX}</code></td><td> The x index of the item to be focused in the cling </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_clingFocusedY Elastos.Droid.Launcher2:clingFocusedY}</code></td><td> The y index of the item to be focused in the cling </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_maxAppCellCountX Elastos.Droid.Launcher2:maxAppCellCountX}</code></td><td> Max number of cells of applications horizontally </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_maxAppCellCountY Elastos.Droid.Launcher2:maxAppCellCountY}</code></td><td> Max number of cells of applications vertically </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_widgetCellHeightGap Elastos.Droid.Launcher2:widgetCellHeightGap}</code></td><td> Vertical spacing between widgets </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_widgetCellWidthGap Elastos.Droid.Launcher2:widgetCellWidthGap}</code></td><td> Horizontal spacing between widgets and wallpapers </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_widgetCountX Elastos.Droid.Launcher2:widgetCountX}</code></td><td> Number of widgets horizontally </td></tr>
+           <tr><td><code>{@link #AppsCustomizePagedView_widgetCountY Elastos.Droid.Launcher2:widgetCountY}</code></td><td> Number of widgets vertically </td></tr>
            </table>
            @see #AppsCustomizePagedView_clingFocusedX
            @see #AppsCustomizePagedView_clingFocusedY
@@ -1548,11 +1548,11 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #CellLayout_cellHeight com.android.launcher:cellHeight}</code></td><td> The height of a single cell </td></tr>
-           <tr><td><code>{@link #CellLayout_cellWidth com.android.launcher:cellWidth}</code></td><td> The width of a single cell </td></tr>
-           <tr><td><code>{@link #CellLayout_heightGap com.android.launcher:heightGap}</code></td><td></td></tr>
-           <tr><td><code>{@link #CellLayout_maxGap com.android.launcher:maxGap}</code></td><td> The max gap size for each dimension </td></tr>
-           <tr><td><code>{@link #CellLayout_widthGap com.android.launcher:widthGap}</code></td><td> An override for the width and height gap to allow users to specify
+           <tr><td><code>{@link #CellLayout_cellHeight Elastos.Droid.Launcher2:cellHeight}</code></td><td> The height of a single cell </td></tr>
+           <tr><td><code>{@link #CellLayout_cellWidth Elastos.Droid.Launcher2:cellWidth}</code></td><td> The width of a single cell </td></tr>
+           <tr><td><code>{@link #CellLayout_heightGap Elastos.Droid.Launcher2:heightGap}</code></td><td></td></tr>
+           <tr><td><code>{@link #CellLayout_maxGap Elastos.Droid.Launcher2:maxGap}</code></td><td> The max gap size for each dimension </td></tr>
+           <tr><td><code>{@link #CellLayout_widthGap Elastos.Droid.Launcher2:widthGap}</code></td><td> An override for the width and height gap to allow users to specify
              a specific size for the page using spacing instead of resolving the
              spacing from the width of the page </td></tr>
            </table>
@@ -1600,7 +1600,7 @@ containing a value of this type.
         */
         public: static const int CellLayout_cellWidth = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#heightGap}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#heightGap}
           attribute's value can be found in the {@link #CellLayout} array.
 
 
@@ -1660,7 +1660,7 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Cling_drawIdentifier com.android.launcher:drawIdentifier}</code></td><td> Used to identify how to draw the cling bg </td></tr>
+           <tr><td><code>{@link #Cling_drawIdentifier Elastos.Droid.Launcher2:drawIdentifier}</code></td><td> Used to identify how to draw the cling bg </td></tr>
            </table>
            @see #Cling_drawIdentifier
          */
@@ -1694,7 +1694,7 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #DrawableStateProxyView_sourceViewId com.android.launcher:sourceViewId}</code></td><td> The source view to delegate touch presses events to.</td></tr>
+           <tr><td><code>{@link #DrawableStateProxyView_sourceViewId Elastos.Droid.Launcher2:sourceViewId}</code></td><td> The source view to delegate touch presses events to.</td></tr>
            </table>
            @see #DrawableStateProxyView_sourceViewId
          */
@@ -1721,15 +1721,15 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Extra_key com.android.launcher:key}</code></td><td></td></tr>
-           <tr><td><code>{@link #Extra_value com.android.launcher:value}</code></td><td></td></tr>
+           <tr><td><code>{@link #Extra_key Elastos.Droid.Launcher2:key}</code></td><td></td></tr>
+           <tr><td><code>{@link #Extra_value Elastos.Droid.Launcher2:value}</code></td><td></td></tr>
            </table>
            @see #Extra_key
            @see #Extra_value
          */
         public: static const int Extra[2];
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#key}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#key}
           attribute's value can be found in the {@link #Extra} array.
 
 
@@ -1743,7 +1743,7 @@ containing a value of this type.
         */
         public: static const int Extra_key = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#value}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#value}
           attribute's value can be found in the {@link #Extra} array.
 
 
@@ -1762,17 +1762,17 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Favorite_className com.android.launcher:className}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_container com.android.launcher:container}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_icon com.android.launcher:icon}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_packageName com.android.launcher:packageName}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_screen com.android.launcher:screen}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_spanX com.android.launcher:spanX}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_spanY com.android.launcher:spanY}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_title com.android.launcher:title}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_uri com.android.launcher:uri}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_x com.android.launcher:x}</code></td><td></td></tr>
-           <tr><td><code>{@link #Favorite_y com.android.launcher:y}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_className Elastos.Droid.Launcher2:className}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_container Elastos.Droid.Launcher2:container}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_icon Elastos.Droid.Launcher2:icon}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_packageName Elastos.Droid.Launcher2:packageName}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_screen Elastos.Droid.Launcher2:screen}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_spanX Elastos.Droid.Launcher2:spanX}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_spanY Elastos.Droid.Launcher2:spanY}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_title Elastos.Droid.Launcher2:title}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_uri Elastos.Droid.Launcher2:uri}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_x Elastos.Droid.Launcher2:x}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorite_y Elastos.Droid.Launcher2:y}</code></td><td></td></tr>
            </table>
            @see #Favorite_className
            @see #Favorite_container
@@ -1788,7 +1788,7 @@ containing a value of this type.
          */
         public: static const int Favorite[11];
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#className}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#className}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1802,7 +1802,7 @@ containing a value of this type.
         */
         public: static const int Favorite_className = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#container}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#container}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1816,7 +1816,7 @@ containing a value of this type.
         */
         public: static const int Favorite_container = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#icon}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#icon}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1826,7 +1826,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int Favorite_icon = 8;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#packageName}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#packageName}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1840,7 +1840,7 @@ containing a value of this type.
         */
         public: static const int Favorite_packageName = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#screen}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#screen}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1854,7 +1854,7 @@ containing a value of this type.
         */
         public: static const int Favorite_screen = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#spanX}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#spanX}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1868,7 +1868,7 @@ containing a value of this type.
         */
         public: static const int Favorite_spanX = 6;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#spanY}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#spanY}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1882,7 +1882,7 @@ containing a value of this type.
         */
         public: static const int Favorite_spanY = 7;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#title}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#title}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1892,7 +1892,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int Favorite_title = 9;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#uri}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#uri}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1906,7 +1906,7 @@ containing a value of this type.
         */
         public: static const int Favorite_uri = 10;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#x}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#x}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1920,7 +1920,7 @@ containing a value of this type.
         */
         public: static const int Favorite_x = 4;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#y}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#y}
           attribute's value can be found in the {@link #Favorite} array.
 
 
@@ -1940,7 +1940,7 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #HandleView_direction com.android.launcher:direction}</code></td><td> Orientation of the handle.</td></tr>
+           <tr><td><code>{@link #HandleView_direction Elastos.Droid.Launcher2:direction}</code></td><td> Orientation of the handle.</td></tr>
            </table>
            @see #HandleView_direction
          */
@@ -1970,7 +1970,7 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #HolographicLinearLayout_sourceImageViewId com.android.launcher:sourceImageViewId}</code></td><td> The source view to generate and apply the drawable states to/from </td></tr>
+           <tr><td><code>{@link #HolographicLinearLayout_sourceImageViewId Elastos.Droid.Launcher2:sourceImageViewId}</code></td><td> The source view to generate and apply the drawable states to/from </td></tr>
            </table>
            @see #HolographicLinearLayout_sourceImageViewId
          */
@@ -1998,8 +1998,8 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Hotseat_cellCountX com.android.launcher:cellCountX}</code></td><td> The number of horizontal cells in the CellLayout </td></tr>
-           <tr><td><code>{@link #Hotseat_cellCountY com.android.launcher:cellCountY}</code></td><td> The number of vertical cells in the CellLayout </td></tr>
+           <tr><td><code>{@link #Hotseat_cellCountX Elastos.Droid.Launcher2:cellCountX}</code></td><td> The number of horizontal cells in the CellLayout </td></tr>
+           <tr><td><code>{@link #Hotseat_cellCountY Elastos.Droid.Launcher2:cellCountY}</code></td><td> The number of vertical cells in the CellLayout </td></tr>
            </table>
            @see #Hotseat_cellCountX
            @see #Hotseat_cellCountY
@@ -2044,15 +2044,15 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #PagedView_pageLayoutHeightGap com.android.launcher:pageLayoutHeightGap}</code></td><td></td></tr>
-           <tr><td><code>{@link #PagedView_pageLayoutPaddingBottom com.android.launcher:pageLayoutPaddingBottom}</code></td><td></td></tr>
-           <tr><td><code>{@link #PagedView_pageLayoutPaddingLeft com.android.launcher:pageLayoutPaddingLeft}</code></td><td></td></tr>
-           <tr><td><code>{@link #PagedView_pageLayoutPaddingRight com.android.launcher:pageLayoutPaddingRight}</code></td><td></td></tr>
-           <tr><td><code>{@link #PagedView_pageLayoutPaddingTop com.android.launcher:pageLayoutPaddingTop}</code></td><td> The padding of the pages that are dynamically created per page </td></tr>
-           <tr><td><code>{@link #PagedView_pageLayoutWidthGap com.android.launcher:pageLayoutWidthGap}</code></td><td> A spacing override for the icons within a page </td></tr>
-           <tr><td><code>{@link #PagedView_pageSpacing com.android.launcher:pageSpacing}</code></td><td> The space between adjacent pages of the PagedView.</td></tr>
-           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingLeft com.android.launcher:scrollIndicatorPaddingLeft}</code></td><td> The padding for the scroll indicator area </td></tr>
-           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingRight com.android.launcher:scrollIndicatorPaddingRight}</code></td><td></td></tr>
+           <tr><td><code>{@link #PagedView_pageLayoutHeightGap Elastos.Droid.Launcher2:pageLayoutHeightGap}</code></td><td></td></tr>
+           <tr><td><code>{@link #PagedView_pageLayoutPaddingBottom Elastos.Droid.Launcher2:pageLayoutPaddingBottom}</code></td><td></td></tr>
+           <tr><td><code>{@link #PagedView_pageLayoutPaddingLeft Elastos.Droid.Launcher2:pageLayoutPaddingLeft}</code></td><td></td></tr>
+           <tr><td><code>{@link #PagedView_pageLayoutPaddingRight Elastos.Droid.Launcher2:pageLayoutPaddingRight}</code></td><td></td></tr>
+           <tr><td><code>{@link #PagedView_pageLayoutPaddingTop Elastos.Droid.Launcher2:pageLayoutPaddingTop}</code></td><td> The padding of the pages that are dynamically created per page </td></tr>
+           <tr><td><code>{@link #PagedView_pageLayoutWidthGap Elastos.Droid.Launcher2:pageLayoutWidthGap}</code></td><td> A spacing override for the icons within a page </td></tr>
+           <tr><td><code>{@link #PagedView_pageSpacing Elastos.Droid.Launcher2:pageSpacing}</code></td><td> The space between adjacent pages of the PagedView.</td></tr>
+           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingLeft Elastos.Droid.Launcher2:scrollIndicatorPaddingLeft}</code></td><td> The padding for the scroll indicator area </td></tr>
+           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingRight Elastos.Droid.Launcher2:scrollIndicatorPaddingRight}</code></td><td></td></tr>
            </table>
            @see #PagedView_pageLayoutHeightGap
            @see #PagedView_pageLayoutPaddingBottom
@@ -2066,7 +2066,7 @@ containing a value of this type.
          */
         public: static const int PagedView[9];
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#pageLayoutHeightGap}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#pageLayoutHeightGap}
           attribute's value can be found in the {@link #PagedView} array.
 
 
@@ -2082,7 +2082,7 @@ containing a value of this type.
         */
         public: static const int PagedView_pageLayoutHeightGap = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#pageLayoutPaddingBottom}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#pageLayoutPaddingBottom}
           attribute's value can be found in the {@link #PagedView} array.
 
 
@@ -2098,7 +2098,7 @@ containing a value of this type.
         */
         public: static const int PagedView_pageLayoutPaddingBottom = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#pageLayoutPaddingLeft}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#pageLayoutPaddingLeft}
           attribute's value can be found in the {@link #PagedView} array.
 
 
@@ -2114,7 +2114,7 @@ containing a value of this type.
         */
         public: static const int PagedView_pageLayoutPaddingLeft = 4;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#pageLayoutPaddingRight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#pageLayoutPaddingRight}
           attribute's value can be found in the {@link #PagedView} array.
 
 
@@ -2202,7 +2202,7 @@ containing a value of this type.
         */
         public: static const int PagedView_scrollIndicatorPaddingLeft = 7;
         /**
-          <p>This symbol is the offset where the {@link com.android.launcher.R.attr#scrollIndicatorPaddingRight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Launcher2.R.attr#scrollIndicatorPaddingRight}
           attribute's value can be found in the {@link #PagedView} array.
 
 
@@ -2223,9 +2223,9 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #StrokedTextView_strokeColor com.android.launcher:strokeColor}</code></td><td> The color of the stroke outline </td></tr>
-           <tr><td><code>{@link #StrokedTextView_strokeTextColor com.android.launcher:strokeTextColor}</code></td><td> The color of the text </td></tr>
-           <tr><td><code>{@link #StrokedTextView_strokeWidth com.android.launcher:strokeWidth}</code></td><td> The width of the stroke </td></tr>
+           <tr><td><code>{@link #StrokedTextView_strokeColor Elastos.Droid.Launcher2:strokeColor}</code></td><td> The color of the stroke outline </td></tr>
+           <tr><td><code>{@link #StrokedTextView_strokeTextColor Elastos.Droid.Launcher2:strokeTextColor}</code></td><td> The color of the text </td></tr>
+           <tr><td><code>{@link #StrokedTextView_strokeWidth Elastos.Droid.Launcher2:strokeWidth}</code></td><td> The width of the stroke </td></tr>
            </table>
            @see #StrokedTextView_strokeColor
            @see #StrokedTextView_strokeTextColor
@@ -2289,9 +2289,9 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Workspace_cellCountX com.android.launcher:cellCountX}</code></td><td> The number of horizontal cells in the CellLayout </td></tr>
-           <tr><td><code>{@link #Workspace_cellCountY com.android.launcher:cellCountY}</code></td><td> The number of vertical cells in the CellLayout </td></tr>
-           <tr><td><code>{@link #Workspace_defaultScreen com.android.launcher:defaultScreen}</code></td><td> The first screen the workspace should display.</td></tr>
+           <tr><td><code>{@link #Workspace_cellCountX Elastos.Droid.Launcher2:cellCountX}</code></td><td> The number of horizontal cells in the CellLayout </td></tr>
+           <tr><td><code>{@link #Workspace_cellCountY Elastos.Droid.Launcher2:cellCountY}</code></td><td> The number of vertical cells in the CellLayout </td></tr>
+           <tr><td><code>{@link #Workspace_defaultScreen Elastos.Droid.Launcher2:defaultScreen}</code></td><td> The first screen the workspace should display.</td></tr>
            </table>
            @see #Workspace_cellCountX
            @see #Workspace_cellCountY

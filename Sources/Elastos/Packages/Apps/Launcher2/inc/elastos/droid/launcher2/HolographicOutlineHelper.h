@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_HOLOGRAPHICOUTLINEHELPER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_HOLOGRAPHICOUTLINEHELPER_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Graphics.h"
 #include <elastos/core/Object.h>

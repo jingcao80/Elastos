@@ -578,6 +578,38 @@ module
         interface IViewOnTouchListener;
     }
 
+    [local]
+    class CLauncherBroadcastReceiver {
+        constructor();
+
+        constructor(
+            [in] ILauncher* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    [local]
+    class CLauncherCloseSystemDialogsIntentReceiver {
+        constructor();
+
+        constructor(
+            [in] ILauncher* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    [local]
+    class CLauncherModel {
+        constructor();
+
+        constructor(
+            [in] ILauncherApplication* app,
+            [in] IIconCache* iconCache);
+
+        interface ILauncherModel;
+        interface IBroadcastReceiver;
+    }
+
     class CLauncherProvider {
         interface IComponentCallbacks2;
         interface IContentProvider;

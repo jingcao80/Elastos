@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_DRAGCONTROLLER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_DRAGCONTROLLER_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/os/Runnable.h"

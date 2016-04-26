@@ -379,7 +379,8 @@ ECode PagedView::GetPageAt(
 {
     VALIDATE_NOT_NULL(page);
 
-    *page = GetPageAt(index);
+    AutoPtr<IView> tmp = GetPageAt(index);
+    *page = tmp;
     REFCOUNT_ADD(*page);
     return NOERROR;
 }

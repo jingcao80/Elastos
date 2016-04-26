@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEW_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEW_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/view/View.h>
 #include <elastos/droid/view/ViewGroup.h>

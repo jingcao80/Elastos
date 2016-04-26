@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHER_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/launcher2/HideFromAccessibilityHelper.h"
@@ -106,6 +106,49 @@ public:
         Int32 mScreen;
         Int32 mCellX;
         Int32 mCellY;
+    };
+
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        MyBroadcastReceiver();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ ILauncher* host);
+
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        AutoPtr<Launcher> mHost;
+    };
+
+    /**
+     * Receives notifications when system dialogs are to be closed.
+     */
+    class CloseSystemDialogsIntentReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        CloseSystemDialogsIntentReceiver();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ ILauncher* host);
+
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        AutoPtr<Launcher> mHost;
     };
 
 private:
@@ -219,22 +262,6 @@ private:
     private:
         AutoPtr<Launcher> mHost;
         Int32 mAppWidgetId;
-    };
-
-    class MyBroadcastReceiver
-        : public BroadcastReceiver
-    {
-    public:
-        MyBroadcastReceiver(
-            /* [in] */ Launcher* host);
-
-        //@Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        AutoPtr<Launcher> mHost;
     };
 
     class MyOnDrawListener
@@ -493,25 +520,6 @@ private:
         AutoPtr<Launcher> mHost;
         Boolean mSuccessfulDrop;
         AutoPtr<IRunnable> mOnCompleteRunnable;
-    };
-
-    /**
-     * Receives notifications when system dialogs are to be closed.
-     */
-    class CloseSystemDialogsIntentReceiver
-        : public BroadcastReceiver
-    {
-    public:
-        CloseSystemDialogsIntentReceiver(
-            /* [in] */ Launcher* host);
-
-        //@Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        AutoPtr<Launcher> mHost;
     };
 
     /**

@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERMODEL_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERMODEL_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/DeferredHandler.h"
 #include "elastos/droid/launcher2/AllAppsList.h"
@@ -730,7 +730,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ ILauncherApplication* app,
-        /* [in] */ IconCache* iconCache);
+        /* [in] */ IIconCache* iconCache);
 
     CARAPI GetFallbackIcon(
         /* [out] */ IBitmap** bitmap);

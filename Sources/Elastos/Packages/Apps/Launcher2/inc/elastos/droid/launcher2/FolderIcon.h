@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_FOLDERICON_H__
 #define  __ELASTOS_DROID_LAUNCHER2_FOLDERICON_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/CheckLongPressHelper.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"

@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_LAUNCHER2_CLAUNCHERPROVIDERHELPER_H__
 #define __ELASTOS_DROID_LAUNCHER2_CLAUNCHERPROVIDERHELPER_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CLauncherProviderHelper.h"
 #include <elastos/core/Singleton.h>
 #include "Elastos.Droid.Net.h"

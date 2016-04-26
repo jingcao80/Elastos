@@ -1,4 +1,4 @@
-TARGET_NAME= Launcher2
+TARGET_NAME= Elastos.Droid.Launcher2
 TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
@@ -8,7 +8,7 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-SOURCES = Launcher2.car
+SOURCES = Elastos.Droid.Launcher2.car
 SOURCES += R.cpp
 SOURCES += WidgetPreviewLoader.cpp
 SOURCES += CAppsCustomizePagedView.cpp
@@ -107,7 +107,7 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 
-APP_PACKAGE_NAME = com.android.launcher
+APP_PACKAGE_NAME = Elastos.Droid.Launcher2
 RES_NAMESPACE = Elastos.Droid.Launcher2
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;

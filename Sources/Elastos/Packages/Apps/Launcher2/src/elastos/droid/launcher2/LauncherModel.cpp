@@ -1217,6 +1217,7 @@ ECode LauncherModel::LoaderTask::Run()
         if (DEBUG_LOADERS) {
             Slogger::D(TAG, "step 2: loading all apps");
         }
+Slogger::D("LauncherModel::LoaderTask::Run", "================  before call LoadAndBindAllApps");
         LoadAndBindAllApps();
 
         // Restore the default thread priority after we are done loading items
@@ -2142,6 +2143,7 @@ void LauncherModel::LoaderTask::LoadAndBindAllApps()
         Slogger::D(TAG, "loadAndBindAllApps mAllAppsLoaded=" + mHost->mAllAppsLoaded);
     }
     if (!mHost->mAllAppsLoaded) {
+Slogger::D("LauncherModel::LoaderTask::LoadAndBindAllApps", "==========call LoadAllAppsByBatch");
         LoadAllAppsByBatch();
         synchronized(this) {
             if (mStopped) {
@@ -2200,6 +2202,8 @@ void LauncherModel::LoaderTask::LoadAllAppsByBatch()
         return;
     }
 
+
+Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====creat IIntent::CATEGORY_LAUNCHER");
     AutoPtr<IIntent> mainIntent;
     CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&mainIntent);
     mainIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
@@ -2281,6 +2285,7 @@ void LauncherModel::LoaderTask::LoadAllAppsByBatch()
                 i++;
             }
 
+Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====call TryGetCallbacks");
             AutoPtr<ILauncherModelCallbacks> callbacks;
             TryGetCallbacks(oldCallbacks, (ILauncherModelCallbacks**)&callbacks);
             AutoPtr<IArrayList> added = mHost->mBgAllAppsList->mAdded;
@@ -2684,15 +2689,16 @@ ECode LauncherModel::constructor()
 
 ECode LauncherModel::constructor(
     /* [in] */ ILauncherApplication* app,
-    /* [in] */ IconCache* iconCache)
+    /* [in] */ IIconCache* iconCache)
 {
     AutoPtr<IEnvironment> en;
     CEnvironment::AcquireSingleton((IEnvironment**)&en);
     en->IsExternalStorageRemovable(&mAppsCanBeOnRemoveableStorage);
 
     mApp = app;
-    mBgAllAppsList = new AllAppsList(iconCache);
-    mIconCache = iconCache;
+    IconCache* _iconCache = (IconCache*)iconCache;
+    mBgAllAppsList = new AllAppsList(_iconCache);
+    mIconCache = _iconCache;
 
     AutoPtr<IBitmap> icon;
     mIconCache->GetFullResDefaultActivityIcon();
@@ -3532,6 +3538,7 @@ ECode LauncherModel::StartLoader(
             else {
                 IThread::Probe(sWorkerThread)->SetPriority(IThread::NORM_PRIORITY);
                 Boolean res;
+Slogger::I("LauncherModel::StartLoader", "===================before call sWorker->Post");
                 sWorker->Post(mLoaderTask, &res);
             }
         }

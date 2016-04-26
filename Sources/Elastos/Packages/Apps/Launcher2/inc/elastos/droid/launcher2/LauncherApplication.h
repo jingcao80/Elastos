@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROI_LAUNCHER2_LAUNCHERAPPLICATION_H__
 #define  __ELASTOS_DROI_LAUNCHER2_LAUNCHERAPPLICATION_H__
 
-#include "_Launcher2.h"
+#include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/launcher2/LauncherModel.h"

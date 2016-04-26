@@ -2,9 +2,11 @@
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/launcher2/WidgetPreviewLoader.h"
+#include "elastos/droid/launcher2/CLauncherModel.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::App::ISearchManager;
@@ -15,6 +17,7 @@ using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -55,6 +58,7 @@ LauncherApplication::LauncherApplication()
 
 ECode LauncherApplication::OnCreate()
 {
+Slogger::E("LauncherApplication", "============================OnCreate()");
     Application::OnCreate();
 
     // set sIsScreenXLarge and sScreenDensity *before* creating icon cache
@@ -69,7 +73,9 @@ ECode LauncherApplication::OnCreate()
     RecreateWidgetPreviewDb();
     mIconCache = new IconCache();
     mIconCache->constructor(ILauncherApplication::Probe(this));
-    mModel = new LauncherModel();
+    AutoPtr<ILauncherModel> _mode;
+    CLauncherModel::New((ILauncherModel**)&_mode);
+    mModel = (LauncherModel*)_mode.Get();
     mModel->constructor(ILauncherApplication::Probe(this), mIconCache);
 
     AutoPtr<IInterface> obj;

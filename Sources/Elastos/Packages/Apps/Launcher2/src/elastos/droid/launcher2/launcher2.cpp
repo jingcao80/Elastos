@@ -12,6 +12,9 @@
 #include "elastos/droid/launcher2/CFolder.h"
 #include "elastos/droid/launcher2/CWorkspace.h"
 #include "elastos/droid/launcher2/CLauncher.h"
+#include "elastos/droid/launcher2/CLauncherModel.h"
+#include "elastos/droid/launcher2/CLauncherBroadcastReceiver.h"
+#include "elastos/droid/launcher2/CLauncherCloseSystemDialogsIntentReceiver.h"
 
 namespace Elastos {
 namespace Droid {
@@ -30,6 +33,9 @@ CAR_OBJECT_IMPL(CLauncherApplication)
 CAR_OBJECT_IMPL(CFolder)
 CAR_OBJECT_IMPL(CWorkspace)
 CAR_OBJECT_IMPL(CLauncher)
+CAR_OBJECT_IMPL(CLauncherModel)
+CAR_OBJECT_IMPL(CLauncherBroadcastReceiver)
+CAR_OBJECT_IMPL(CLauncherCloseSystemDialogsIntentReceiver)
 
 } // namespace Launcher2
 } // namespace Droid

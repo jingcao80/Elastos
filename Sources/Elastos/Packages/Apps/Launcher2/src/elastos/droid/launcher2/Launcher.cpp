@@ -19,6 +19,8 @@
 #include "elastos/droid/launcher2/LauncherViewPropertyAnimator.h"
 #include "elastos/droid/launcher2/Workspace.h"
 #include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/launcher2/CLauncherBroadcastReceiver.h"
+#include "elastos/droid/launcher2/CLauncherCloseSystemDialogsIntentReceiver.h"
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Build.h"
@@ -275,10 +277,20 @@ ECode Launcher::MyThread2::Run()
     return IAppWidgetHost::Probe(mHost->mAppWidgetHost)->DeleteAppWidgetId(mAppWidgetId);
 }
 
-Launcher::MyBroadcastReceiver::MyBroadcastReceiver(
-    /* [in] */ Launcher* host)
-    : mHost(host)
+Launcher::MyBroadcastReceiver::MyBroadcastReceiver()
 {
+}
+
+ECode Launcher::MyBroadcastReceiver::constructor()
+{
+    return NOERROR;
+}
+
+ECode Launcher::MyBroadcastReceiver::constructor(
+    /* [in] */ ILauncher* host)
+{
+    mHost = (Launcher*)host;
+    return NOERROR;
 }
 
 ECode Launcher::MyBroadcastReceiver::OnReceive(
@@ -719,10 +731,20 @@ ECode Launcher::MyRunnable9::Run()
     return NOERROR;
 }
 
-Launcher::CloseSystemDialogsIntentReceiver::CloseSystemDialogsIntentReceiver(
-    /* [in] */ Launcher* host)
-    : mHost(host)
+Launcher::CloseSystemDialogsIntentReceiver::CloseSystemDialogsIntentReceiver()
 {
+}
+
+ECode Launcher::CloseSystemDialogsIntentReceiver::constructor()
+{
+    return NOERROR;
+}
+
+ECode Launcher::CloseSystemDialogsIntentReceiver::constructor(
+    /* [in] */ ILauncher* host)
+{
+    mHost = (Launcher*)host;
+    return NOERROR;
 }
 
 ECode Launcher::CloseSystemDialogsIntentReceiver::OnReceive(
@@ -1138,7 +1160,7 @@ Launcher::Launcher()
     , mRestoreScreenOrientationDelay(500)
     , mNewShortcutAnimatePage(-1)
 {
-    mCloseSystemDialogsReceiver = new CloseSystemDialogsIntentReceiver(this);
+    CLauncherCloseSystemDialogsIntentReceiver::New(this, (IBroadcastReceiver**)&mCloseSystemDialogsReceiver);
     mWidgetObserver = new AppWidgetResetObserver(this);
 
     mPendingAddInfo = new ItemInfo();
@@ -1160,7 +1182,7 @@ Launcher::Launcher()
 
     AutoPtr<IRunnable> mBuildLayersRunnable = new MyRunnable(this);
 
-    mReceiver = new MyBroadcastReceiver(this);
+    CLauncherBroadcastReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
 
     mHandler = new MyHandler(this);
 
@@ -1170,6 +1192,7 @@ Launcher::Launcher()
 ECode Launcher::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+Slogger::E("Launcher", "============================OnCreate()");
     if (DEBUG_STRICT_MODE) {
         AutoPtr<IStrictModeThreadPolicyBuilder> builder;
         CStrictModeThreadPolicyBuilder::New((IStrictModeThreadPolicyBuilder**)&builder);
@@ -1248,7 +1271,7 @@ ECode Launcher::OnCreate(
     // if (PROFILE_STARTUP) {
     //     android.os.Debug.stopMethodTracing();
     // }
-
+Slogger::I("Launcher::OnCreate", "===================before call mModel->StartLoader");
     if (!mRestoring) {
         if (sPausedFromUserAction) {
             // If the user leaves launcher, then we should just load items asynchronously when

@@ -71,11 +71,12 @@ ECode HandleView::FocusSearch(
         IView::Probe(workspace)->DispatchUnhandledMove(NULL, direction, &tmp);
         if (mOrientation == ORIENTATION_HORIZONTAL && direction == FOCUS_DOWN) {
             *view = IView::Probe(this);
+            REFCOUNT_ADD(*view);
         }
         else {
             *view = IView::Probe(workspace);
+            REFCOUNT_ADD(*view);
         }
-        REFCOUNT_ADD(*view);
         return NOERROR;
     }
     *view = newFocus;
