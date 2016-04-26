@@ -215,8 +215,6 @@ module
         AddForegroundTimeLocked(
             [in] Int64 ttime);
 
-        IncStartsLocked();
-
         /* Called by ActivityManagerService when CPU times are updated. */
         AddSpeedStepTimes(
             [in] ArrayOf<Int64>* values);
@@ -256,8 +254,6 @@ module
     interface IBatteryStatsImplUidPkg {
         GetBatteryStats(
             [out] IBatteryStatsImpl** batteryStats);
-
-        IncWakeupsLocked();
     }
 
     /**
