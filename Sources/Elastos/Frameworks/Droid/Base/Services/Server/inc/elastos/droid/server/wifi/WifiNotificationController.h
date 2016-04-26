@@ -48,6 +48,7 @@ private:
     {
     public:
         NotificationEnabledSettingObserver(
+            /* [in] */ WifiNotificationController* owner,
             /* [in] */ IHandler* handler);
 
         virtual CARAPI Register();
@@ -58,6 +59,8 @@ private:
 
     private:
         CARAPI_(Boolean) GetValue();
+    private:
+        WifiNotificationController* mOwner;
     };
 
 public:

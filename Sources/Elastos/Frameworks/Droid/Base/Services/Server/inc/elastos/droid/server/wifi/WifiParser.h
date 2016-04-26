@@ -4,12 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
-// import android.os.Parcelable;
-// import android.os.Parcel;
-// import java.util.BitSet;
-// import java.nio.ByteBuffer;
-// import java.util.Date;
-
 using Elastos::Utility::IBitSet;
 
 namespace Elastos {

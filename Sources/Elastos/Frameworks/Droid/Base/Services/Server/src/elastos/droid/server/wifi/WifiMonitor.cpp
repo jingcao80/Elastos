@@ -1,28 +1,24 @@
-
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/server/wifi/WifiMonitor.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
+#include "elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.h"
 #include "elastos/droid/server/wifi/CStateChangeResult.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <cutils/properties.h>
-//#ifdef DROID_CORE
-//#include "elastos/droid/wifi/CWifiSsidHelper.h"
-//#include "elastos/droid/wifi/CStateChangeResult.h"
-//#include "elastos/droid/wifi/p2p/CWifiP2pDevice.h"
-//#include "elastos/droid/wifi/p2p/CWifiP2pConfig.h"
-//#include "elastos/droid/wifi/p2p/CWifiP2pGroup.h"
-//#include "elastos/droid/wifi/p2p/CWifiP2pProvDiscEvent.h"
-//#include "elastos/droid/wifi/p2p/nsd/CWifiP2pServiceResponse.h"
-//#include "elastos/droid/wifi/p2p/nsd/CWifiP2pServiceResponseHelper.h"
-//#endif
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringToIntegral.h>
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
-//TODO using Elastos::Droid::Wifi::P2p::P2pStatus_UNKNOWN;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Server::Wifi::P2p::WifiP2pServiceImpl;
+using Elastos::Droid::Server::Wifi::WifiStateMachine;
 using Elastos::Droid::Wifi::P2p::IWifiP2pDevice;
 using Elastos::Droid::Wifi::P2p::CWifiP2pDevice;
 using Elastos::Droid::Wifi::P2p::IWifiP2pConfig;
@@ -35,15 +31,16 @@ using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponse;
 using Elastos::Droid::Wifi::P2p::Nsd::CWifiP2pServiceResponse;
 using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponseHelper;
 using Elastos::Droid::Wifi::P2p::Nsd::CWifiP2pServiceResponseHelper;
+using Elastos::Droid::Wifi::IWifiEnterpriseConfigEap;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::IWifiSsidHelper;
 using Elastos::Droid::Wifi::CWifiSsidHelper;
-using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringToIntegral;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Utility::IList;
@@ -60,6 +57,71 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wifi {
+
+static WifiP2pServiceImpl::P2pStatus ValueOf(
+    /* [in] */ Int32 error)
+{
+    switch(error) {
+    case 0 :
+        return WifiP2pServiceImpl::P2pStatus_SUCCESS;
+    case 1:
+        return WifiP2pServiceImpl::P2pStatus_INFORMATION_IS_CURRENTLY_UNAVAILABLE;
+    case 2:
+        return WifiP2pServiceImpl::P2pStatus_INCOMPATIBLE_PARAMETERS;
+    case 3:
+        return WifiP2pServiceImpl::P2pStatus_LIMIT_REACHED;
+    case 4:
+        return WifiP2pServiceImpl::P2pStatus_INVALID_PARAMETER;
+    case 5:
+        return WifiP2pServiceImpl::P2pStatus_UNABLE_TO_ACCOMMODATE_REQUEST;
+    case 6:
+        return WifiP2pServiceImpl::P2pStatus_PREVIOUS_PROTOCOL_ERROR;
+    case 7:
+        return WifiP2pServiceImpl::P2pStatus_NO_COMMON_CHANNEL;
+    case 8:
+        return WifiP2pServiceImpl::P2pStatus_UNKNOWN_P2P_GROUP;
+    case 9:
+        return WifiP2pServiceImpl::P2pStatus_BOTH_GO_INTENT_15;
+    case 10:
+        return WifiP2pServiceImpl::P2pStatus_INCOMPATIBLE_PROVISIONING_METHOD;
+    case 11:
+        return WifiP2pServiceImpl::P2pStatus_REJECTED_BY_USER;
+    default:
+        return WifiP2pServiceImpl::P2pStatus_UNKNOWN;
+    }
+}
+
+static WifiP2pServiceImpl::P2pStatus P2pError(
+   /* [in] */ const String& dataString)
+{
+    WifiP2pServiceImpl::P2pStatus err = WifiP2pServiceImpl::P2pStatus_UNKNOWN;
+    AutoPtr< ArrayOf<String> > tokens;
+    StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&tokens);
+
+    if (tokens == NULL || tokens->GetLength() < 2) return err;
+
+    AutoPtr< ArrayOf<String> > nameValue;
+    StringUtils::Split((*tokens)[1], String("="), (ArrayOf<String>**)&nameValue);
+    if (nameValue == NULL || nameValue->GetLength() < 2) return err;
+
+    /* Handle the special case of reason=FREQ+CONFLICT */
+    if ((*nameValue)[1].Equals("FREQ_CONFLICT")) {
+        return WifiP2pServiceImpl::P2pStatus_NO_COMMON_CHANNEL;
+    }
+    // try {
+    Int32 value;
+    ECode ec = StringToIntegral::Parse((*nameValue)[1], 10, &value);
+    if (SUCCEEDED(ec)) {
+        err = ValueOf(value);
+    }
+    else {
+        Logger::E("WifiMonitor", "NumberFormatException %s", (*nameValue)[1].string());
+    }
+   // } catch (NumberFormatException e) {
+   //     e.printStackTrace();
+   // }
+   return err;
+}
 
 static AutoPtr<IPattern> InitPattern(const String& patternStr)
 {
@@ -211,7 +273,6 @@ const String WifiMonitor::P2P_REMOVE_AND_REFORM_GROUP_STR("P2P-REMOVE-AND-REFORM
 String WifiMonitor::HOST_AP_EVENT_PREFIX_STR("AP");
 String WifiMonitor::AP_STA_CONNECTED_STR("AP-STA-CONNECTED");
 String WifiMonitor::AP_STA_DISCONNECTED_STR("AP-STA-DISCONNECTED");
-//String WifiMonitor::MONITOR_SOCKET_CLOSED_STR("connection closed");
 String WifiMonitor::WPA_RECV_ERROR_STR("recv error");
 
 const Int32 WifiMonitor::MAX_RECV_ERRORS;
@@ -691,23 +752,25 @@ Boolean WifiMonitor::DispatchEvent(
         }
     }
     else if (event == ASSOC_REJECT) {
-        assert(0);
-        /*TODO
-        Matcher match = mAssocRejectEventPattern.matcher(eventData);
-        String BSSID = "";
+        AutoPtr<IMatcher> match;
+        mAssocRejectEventPattern->Matcher(eventData, (IMatcher**)&match);
+        String BSSID("");
         Int32 status = -1;
-        if (!match.find()) {
+        Boolean find;
+        if (!(match->Find(&find), find)) {
             if (DBG) Logger::D(TAG, "Assoc Reject: Could not parse assoc reject string");
         } else {
-            BSSID = match.group(1);
-            try {
-                status = Integer.parseInt(match.group(2));
-            } catch (NumberFormatException e) {
-                status = -1;
-            }
+            IMatchResult* matchResult = IMatchResult::Probe(match);
+            matchResult->Group(1, &BSSID);
+            String g2;
+            matchResult->Group(2, &g2);
+            //try {
+            status = StringUtils::ParseInt32(g2);
+            //} catch (NumberFormatException e) {
+            //    status = -1;
+            //}
         }
-        mStateMachine->SendMessage(ASSOCIATION_REJECTION_EVENT, eventLogCounter, status, BSSID);
-        */
+        mStateMachine->SendMessage(ASSOCIATION_REJECTION_EVENT, eventLogCounter, status, CoreUtils::Convert(BSSID));
     } else if (event == BSS_ADDED && !VDBG) {
         // Ignore that event - it is not handled, and dont log it as it is too verbose
     } else if (event == BSS_REMOVED && !VDBG) {
@@ -719,24 +782,6 @@ Boolean WifiMonitor::DispatchEvent(
     eventLogCounter++;
     return FALSE;
 }
-
-//Boolean WifiMonitor::MonitorThread::ConnectToSupplicant()
-//{
-//    Int32 connectTries = 0;
-//
-//    while (TRUE) {
-//        if (mHost->mWifiNative->ConnectToSupplicant()) {
-//            return TRUE;
-//        }
-//        if (connectTries++ < 5) {
-//            mHost->Nap(1);
-//        }
-//        else {
-//            break;
-//        }
-//    }
-//    return FALSE;
-//}
 
 void WifiMonitor::HandleDriverEvent(
     /* [in] */ const String& state)
@@ -754,19 +799,18 @@ void WifiMonitor::HandleEvent(
     /* [in] */ const String& remainder)
 {
     if (DBG) {
-        //logDbg("handleEvent " + Integer.toString(event) + "  " + remainder);
         Logger::E(TAG, "handleEvent %d %s", event, remainder.string());
     }
     switch (event) {
         case DISCONNECTED:
-            Logger::D(WifiMonitor::TAG, "TODO: should be delete");
-            property_set("net.state", "0");
+            //Logger::D(WifiMonitor::TAG, "TODO: should be delete");
+            //property_set("net.state", "0");
             HandleNetworkStateChange(Elastos::Droid::Net::NetworkInfoDetailedState_DISCONNECTED, remainder);
             break;
 
         case CONNECTED:
-            Logger::D(WifiMonitor::TAG, "TODO: should be delete");
-            property_set("net.state", "1");
+            //Logger::D(WifiMonitor::TAG, "TODO: should be delete");
+            //property_set("net.state", "1");
             HandleNetworkStateChange(Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED, remainder);
             break;
 
@@ -776,7 +820,6 @@ void WifiMonitor::HandleEvent(
 
         case UNKNOWN:
             if (DBG) {
-                //logDbg("handleEvent unknown: " + Integer.toString(event) + "  " + remainder);
                 Logger::E(TAG, "handleEvent unknown: %d, %s", event, remainder.string());
             }
             break;
@@ -788,47 +831,48 @@ void WifiMonitor::HandleEvent(
 void WifiMonitor::HandleTargetSSIDEvent(
     /* [in] */ const String& eventStr)
 {
-    //TODO
-    assert(0);
-    //String SSID = null;
-    //Matcher match = mTargetSSIDPattern.matcher(eventStr);
-    //if (match.find()) {
-    //    SSID = match.group(1);
-    //} else {
-    //    Log.d(TAG, "didn't find SSID " + eventStr);
-    //}
-    //mStateMachine.sendMessage(WifiStateMachine.CMD_TARGET_SSID,
-    //        eventLogCounter, 0, SSID);
+    String SSID(NULL);
+    AutoPtr<IMatcher> match;
+    mTargetSSIDPattern->Matcher(eventStr, (IMatcher**)&match);
+    Boolean find;
+    if (match->Find(&find), find) {
+        IMatchResult::Probe(match)->Group(1, &SSID);
+    } else {
+        Logger::D(TAG, "didn't find SSID %s", eventStr.string());
+    }
+    mStateMachine->SendMessage(WifiStateMachine::CMD_TARGET_SSID,
+            eventLogCounter, 0, CoreUtils::Convert(SSID));
 }
 
 void WifiMonitor::HandleTargetBSSIDEvent(
     /* [in] */ const String& eventStr)
 {
-    //TODO
-    assert(0);
-    //String BSSID = null;
-    //Matcher match = mTargetBSSIDPattern.matcher(eventStr);
-    //if (match.find()) {
-    //    BSSID = match.group(1);
-    //} else {
-    //    Log.d(TAG, "didn't find BSSID " + eventStr);
-    //}
-    //mStateMachine.sendMessage(WifiStateMachine.CMD_TARGET_BSSID, eventLogCounter, 0, BSSID);
+    String BSSID(NULL);
+    AutoPtr<IMatcher> match;
+    mTargetBSSIDPattern->Matcher(eventStr, (IMatcher**)&match);
+    Boolean find;
+    if (match->Find(&find), find) {
+        IMatchResult::Probe(match)->Group(1, &BSSID);
+    } else {
+        Logger::D(TAG, "didn't find BSSID %s", eventStr.string());
+    }
+    mStateMachine->SendMessage(WifiStateMachine::CMD_TARGET_BSSID, eventLogCounter, 0, CoreUtils::Convert(BSSID));
 }
 
 void WifiMonitor::HandleAssociatedBSSIDEvent(
     /* [in] */ const String& eventStr)
 {
-    //TODO
-    assert(0);
-    //String BSSID = null;
-    //Matcher match = mAssociatedPattern.matcher(eventStr);
-    //if (match.find()) {
-    //    BSSID = match.group(1);
-    //} else {
-    //    Log.d(TAG, "handleAssociatedBSSIDEvent: didn't find BSSID " + eventStr);
-    //}
-    //mStateMachine.sendMessage(WifiStateMachine.CMD_ASSOCIATED_BSSID, eventLogCounter, 0, BSSID);
+    String BSSID(NULL);
+    AutoPtr<IMatcher> match;
+    mAssociatedPattern->Matcher(eventStr, (IMatcher**)&match);
+    Boolean find;
+    if (match->Find(&find), find) {
+        IMatchResult* matchResult = IMatchResult::Probe(match);
+        matchResult->Group(1, &BSSID);
+    } else {
+        Logger::D(TAG, "handleAssociatedBSSIDEvent: didn't find BSSID %s", eventStr.string());
+    }
+    mStateMachine->SendMessage(WifiStateMachine::CMD_ASSOCIATED_BSSID, eventLogCounter, 0, CoreUtils::Convert(BSSID));
 }
 
 void WifiMonitor::HandleWpsFailEvent(
@@ -888,72 +932,6 @@ void WifiMonitor::HandleWpsFailEvent(
     mStateMachine->SendMessage(msg);
 }
 
-//P2pStatus WifiMonitor::ValueOf(
-//    /* [in] */ Int32 error)
-//{
-//    using namespace Elastos::Droid::Wifi::P2p;
-//    switch(error) {
-//    case 0 :
-//        return P2pStatus_SUCCESS;
-//    case 1:
-//        return P2pStatus_INFORMATION_IS_CURRENTLY_UNAVAILABLE;
-//    case 2:
-//        return P2pStatus_INCOMPATIBLE_PARAMETERS;
-//    case 3:
-//        return P2pStatus_LIMIT_REACHED;
-//    case 4:
-//        return P2pStatus_INVALID_PARAMETER;
-//    case 5:
-//        return P2pStatus_UNABLE_TO_ACCOMMODATE_REQUEST;
-//    case 6:
-//        return P2pStatus_PREVIOUS_PROTOCOL_ERROR;
-//    case 7:
-//        return P2pStatus_NO_COMMON_CHANNEL;
-//    case 8:
-//        return P2pStatus_UNKNOWN_P2P_GROUP;
-//    case 9:
-//        return P2pStatus_BOTH_GO_INTENT_15;
-//    case 10:
-//        return P2pStatus_INCOMPATIBLE_PROVISIONING_METHOD;
-//    case 11:
-//        return P2pStatus_REJECTED_BY_USER;
-//    default:
-//        return P2pStatus_UNKNOWN;
-//    }
-//}
-//
-//P2pStatus WifiMonitor::P2pError(
-//   /* [in] */ const String& dataString)
-//{
-//    P2pStatus err = P2pStatus_UNKNOWN;
-//    AutoPtr< ArrayOf<String> > tokens;
-//    StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&tokens);
-//
-//    if (tokens == NULL || tokens->GetLength() < 2) return err;
-//
-//    AutoPtr< ArrayOf<String> > nameValue;
-//    StringUtils::Split((*tokens)[1], String("="), (ArrayOf<String>**)&nameValue);
-//    if (nameValue == NULL || nameValue->GetLength() < 2) return err;
-//
-//    /* Handle the special case of reason=FREQ+CONFLICT */
-//    if ((*nameValue)[1].Equals("FREQ_CONFLICT")) {
-//        return Elastos::Droid::Wifi::P2p::P2pStatus_NO_COMMON_CHANNEL;
-//    }
-//    // try {
-//    Int32 value;
-//    ECode ec = StringUtils::ParseInt32((*nameValue)[1], 10, &value);
-//    if (SUCCEEDED(ec)) {
-//        err = ValueOf(value);
-//    }
-//    else {
-//        Logger::E(WifiMonitor::TAG, "NumberFormatException %s", (*nameValue)[1].string());
-//    }
-//   // } catch (NumberFormatException e) {
-//   //     e.printStackTrace();
-//   // }
-//   return err;
-//}
-
 void WifiMonitor::HandleP2pEvents(
     /* [in]*/ const String& dataString)
 {
@@ -983,7 +961,7 @@ void WifiMonitor::HandleP2pEvents(
         mStateMachine->SendMessage(P2P_GO_NEGOTIATION_SUCCESS_EVENT);
     }
     else if (dataString.StartWith(P2P_GO_NEG_FAILURE_STR)) {
-        Int32 value = 0;//TODO = P2pError(dataString);
+        Int32 value = P2pError(dataString);
         AutoPtr<IInteger32> iobj;
         CInteger32::New(value, (IInteger32**)&iobj);
         mStateMachine->SendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT, iobj);
@@ -992,7 +970,7 @@ void WifiMonitor::HandleP2pEvents(
         mStateMachine->SendMessage(P2P_GROUP_FORMATION_SUCCESS_EVENT);
     }
     else if (dataString.StartWith(P2P_GROUP_FORMATION_FAILURE_STR)) {
-        Int32 value = 0;//TODO  = P2pError(dataString);
+        Int32 value = P2pError(dataString);
         AutoPtr<IInteger32> iobj;
         CInteger32::New(value, (IInteger32**)&iobj);
         mStateMachine->SendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT, iobj);
@@ -1013,7 +991,7 @@ void WifiMonitor::HandleP2pEvents(
         mStateMachine->SendMessage(P2P_INVITATION_RECEIVED_EVENT, group);
     }
     else if (dataString.StartWith(P2P_INVITATION_RESULT_STR)) {
-        Int32 value = 0;//TODO  = P2pError(dataString);
+        Int32 value = P2pError(dataString);
         AutoPtr<IInteger32> iobj;
         CInteger32::New(value, (IInteger32**)&iobj);
         mStateMachine->SendMessage(P2P_INVITATION_RESULT_EVENT, iobj);
@@ -1091,34 +1069,35 @@ void WifiMonitor::HandleHostApEvents(
 void WifiMonitor::HandleGasQueryEvents(
     /* [in] */ const String& dataString)
 {
-    //TODO
-    assert(0);
     // hs20
-    //if (mStateMachine2 == null) return;
-    //if (dataString.startsWith(GAS_QUERY_START_STR)) {
-    //    mStateMachine2.sendMessage(GAS_QUERY_START_EVENT);
-    //} else if (dataString.startsWith(GAS_QUERY_DONE_STR)) {
-    //    String[] dataTokens = dataString.split(" ");
-    //    String bssid = null;
-    //    int success = 0;
-    //    for (String token : dataTokens) {
-    //        String[] nameValue = token.split("=");
-    //        if (nameValue.length != 2) {
-    //            continue;
-    //        }
-    //        if (nameValue[0].equals("addr")) {
-    //            bssid = nameValue[1];
-    //            continue;
-    //        }
-    //        if (nameValue[0].equals("result"))  {
-    //            success = nameValue[1].equals("SUCCESS") ? 1 : 0;
-    //            continue;
-    //        }
-    //    }
-    //    mStateMachine2.sendMessage(GAS_QUERY_DONE_EVENT, success, 0, bssid);
-    //} else {
-    //    if (DBG) Log.d(TAG, "Unknown GAS query event: " + dataString);
-    //}
+    if (mStateMachine2 == NULL) return;
+    if (dataString.StartWith(GAS_QUERY_START_STR)) {
+        mStateMachine2->SendMessage(GAS_QUERY_START_EVENT);
+    } else if (dataString.StartWith(GAS_QUERY_DONE_STR)) {
+        AutoPtr< ArrayOf<String> > dataTokens;
+        StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&dataTokens);
+        String bssid(NULL);
+        Int32 success = 0;
+        for (Int32 i = 0; i < dataTokens->GetLength(); ++i) {
+            String token = (*dataTokens)[i];
+            AutoPtr< ArrayOf<String> > nameValue;
+            StringUtils::Split(token, String("="), (ArrayOf<String>**)&nameValue);
+            if (nameValue->GetLength() != 2) {
+                continue;
+            }
+            if ((*nameValue)[0].Equals(String("addr"))) {
+                bssid = (*nameValue)[1];
+                continue;
+            }
+            if ((*nameValue)[0].Equals(String("result")))  {
+                success = (*nameValue)[1].Equals(String("SUCCESS")) ? 1 : 0;
+                continue;
+            }
+        }
+        mStateMachine2->SendMessage(GAS_QUERY_DONE_EVENT, success, 0, CoreUtils::Convert(bssid));
+    } else {
+        if (DBG) Logger::D(TAG, "Unknown GAS query event: %s", dataString.string());
+    }
 }
 
 /**
@@ -1127,34 +1106,34 @@ void WifiMonitor::HandleGasQueryEvents(
 void WifiMonitor::HandleHs20Events(
     /* [in] */ const String& dataString)
 {
-    //TODO
-    assert(0);
-    //if (mStateMachine2 == null) return;
-    //if (dataString.startsWith(HS20_SUB_REM_STR)) {
-    //    // format: HS20-SUBSCRIPTION-REMEDIATION osu_method, url
-    //    String[] dataTokens = dataString.split(" ");
-    //    int method = -1;
-    //    String url = null;
-    //    if (dataTokens.length >= 3) {
-    //        method = Integer.parseInt(dataTokens[1]);
-    //        url = dataTokens[2];
-    //    }
-    //    mStateMachine2.sendMessage(HS20_REMEDIATION_EVENT, method, 0, url);
-    //} else if (dataString.startsWith(HS20_DEAUTH_STR)) {
-    //    // format: HS20-DEAUTH-IMMINENT-NOTICE code, delay, url
-    //    int code = -1;
-    //    int delay = -1;
-    //    String url = null;
-    //    String[] dataTokens = dataString.split(" ");
-    //    if (dataTokens.length >= 4) {
-    //        code = Integer.parseInt(dataTokens[1]);
-    //        delay = Integer.parseInt(dataTokens[2]);
-    //        url = dataTokens[3];
-    //    }
-    //    mStateMachine2.sendMessage(HS20_DEAUTH_EVENT, code, delay, url);
-    //} else {
-    //    if (DBG) Log.d(TAG, "Unknown HS20 event: " + dataString);
-    //}
+    if (mStateMachine2 == NULL) return;
+    if (dataString.StartWith(HS20_SUB_REM_STR)) {
+        // format: HS20-SUBSCRIPTION-REMEDIATION osu_method, url
+        AutoPtr< ArrayOf<String> > dataTokens;
+        StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&dataTokens);
+        Int32 method = -1;
+        String url(NULL);
+        if (dataTokens->GetLength() >= 3) {
+            method = StringUtils::ParseInt32((*dataTokens)[1]);
+            url = (*dataTokens)[2];
+        }
+        mStateMachine2->SendMessage(HS20_REMEDIATION_EVENT, method, 0, CoreUtils::Convert(url));
+    } else if (dataString.StartWith(HS20_DEAUTH_STR)) {
+        // format: HS20-DEAUTH-IMMINENT-NOTICE code, delay, url
+        Int32 code = -1;
+        Int32 delay = -1;
+        String url(NULL);
+        AutoPtr< ArrayOf<String> > dataTokens;
+        StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&dataTokens);
+        if (dataTokens->GetLength() >= 4) {
+            code = StringUtils::ParseInt32((*dataTokens)[1]);
+            delay = StringUtils::ParseInt32((*dataTokens)[2]);
+            url = (*dataTokens)[3];
+        }
+        mStateMachine2->SendMessage(HS20_DEAUTH_EVENT, code, delay, CoreUtils::Convert(url));
+    } else {
+        if (DBG) Logger::D(TAG, "Unknown HS20 event: %s", dataString.string());
+    }
 }
 
 /**
@@ -1163,44 +1142,58 @@ void WifiMonitor::HandleHs20Events(
 void WifiMonitor::HandleRequests(
     /* [in] */ const String& dataString)
 {
-    //TODO
-    assert(0);
-    //String SSID = null;
-    //int reason = -2;
-    //String requestName = dataString.substring(REQUEST_PREFIX_LEN_STR);
-    //if (TextUtils.isEmpty(requestName)) {
-    //    return;
-    //}
-    //if (requestName.startsWith(IDENTITY_STR)) {
-    //    Matcher match = mRequestIdentityPattern.matcher(requestName);
-    //    if (match.find()) {
-    //        SSID = match.group(2);
-    //        try {
-    //            reason = Integer.parseInt(match.group(1));
-    //        } catch (NumberFormatException e) {
-    //            reason = -1;
-    //        }
-    //    } else {
-    //        Log.e(TAG, "didn't find SSID " + requestName);
-    //    }
-    //    mStateMachine.sendMessage(SUP_REQUEST_IDENTITY, eventLogCounter, reason, SSID);
-    //} if (requestName.startsWith(SIM_STR)) {
-    //    Matcher match = mRequestGsmAuthPattern.matcher(requestName);
-    //    if (match.find()) {
-    //        WifiStateMachine.SimAuthRequestData data =
-    //            new WifiStateMachine.SimAuthRequestData();
-    //        data.networkId = Integer.parseInt(match.group(1));
-    //        data.protocol = WifiEnterpriseConfig.Eap.SIM;
-    //        data.ssid = match.group(4);
-    //        data.challenges = match.group(2).split(":");
-    //        mStateMachine.sendMessage(SUP_REQUEST_SIM_AUTH, data);
-    //    } else {
-    //        Log.e(TAG, "couldn't parse SIM auth request - " + requestName);
-    //    }
+    String SSID(NULL);
+    Int32 reason = -2;
+    String requestName = dataString.Substring(REQUEST_PREFIX_LEN_STR);
+    if (TextUtils::IsEmpty(requestName)) {
+        return;
+    }
+    if (requestName.StartWith(IDENTITY_STR)) {
+        AutoPtr<IMatcher> match;
+        mRequestIdentityPattern->Matcher(requestName, (IMatcher**)&match);
+        Boolean find;
+        if (match->Find(&find), find) {
+            IMatchResult* matchResult = IMatchResult::Probe(match);
+            matchResult->Group(2, &SSID);
+            //try {
+            String g1;
+            matchResult->Group(1, &g1);
+            reason = StringUtils::ParseInt32(g1);
+            //} catch (NumberFormatException e) {
+            //    reason = -1;
+            //}
+        } else {
+            Logger::E(TAG, "didn't find SSID %s", requestName.string());
+        }
+        mStateMachine->SendMessage(SUP_REQUEST_IDENTITY, eventLogCounter, reason, CoreUtils::Convert(SSID));
+    } if (requestName.StartWith(SIM_STR)) {
+        AutoPtr<IMatcher> match;
+        mRequestGsmAuthPattern->Matcher(requestName, (IMatcher**)&match);
+        Boolean find;
+        if (match->Find(&find), find) {
+            AutoPtr<WifiStateMachine::SimAuthRequestData> data =
+                new WifiStateMachine::SimAuthRequestData();
+            IMatchResult* matchResult = IMatchResult::Probe(match);
+            String g1;
+            matchResult->Group(1, &g1);
+            data->networkId = StringUtils::ParseInt32(g1);
+            data->protocol = IWifiEnterpriseConfigEap::SIM;
+            String ssid;
+            matchResult->Group(4, &ssid);
+            data->ssid = ssid;
+            AutoPtr<ArrayOf<String> > challenges;
+            String g2;
+            matchResult->Group(2, &g2);
+            StringUtils::Split(g2, String("::"), (ArrayOf<String>**)&challenges);
+            data->challenges = challenges;
+            mStateMachine->SendMessage(SUP_REQUEST_SIM_AUTH, TO_IINTERFACE(data));
+        } else {
+            Logger::E(TAG, "couldn't parse SIM auth request - %s", requestName.string());
+        }
 
-    //} else {
-    //    if (DBG) Log.w(TAG, "couldn't identify request type - " + dataString);
-    //}
+    } else {
+        if (DBG) Logger::W(TAG, "couldn't identify request type - %s", dataString.string());
+    }
 }
 
 void WifiMonitor::HandleSupplicantStateChange(
@@ -1321,7 +1314,6 @@ void WifiMonitor::HandleNetworkStateChange(
     String BSSID;
     Int32 networkId = -1;
     Int32 reason = 0;
-    //Int32 ind = -1;
     Int32 local = 0;
     AutoPtr<IMatcher> match;
     if (newState == Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED) {
@@ -1408,15 +1400,6 @@ void WifiMonitor::NotifySupplicantStateChange(
     mStateMachine->ObtainMessage(SUPPLICANT_STATE_CHANGE_EVENT, eventLogCounter, 0, TO_IINTERFACE(result), (IMessage**)&m);
     mStateMachine->SendMessage(m);
 }
-
-//void WifiMonitor::Nap(
-//    /* [in] */ Int32 secs)
-//{
-//    // try {
-//    Thread::Sleep(secs * 1000);
-//    // } catch (InterruptedException ignore) {
-//    // }
-//}
 
 } // namespace Wifi
 } // namespace Server
