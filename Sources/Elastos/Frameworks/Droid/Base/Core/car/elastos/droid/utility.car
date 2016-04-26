@@ -56,6 +56,9 @@ module
     using interface Elastos.IO.IFilterInputStream;
     using interface Elastos.IO.IOutputStream;
     using interface Elastos.IO.IFilterOutputStream;
+    using interface Elastos.IO.ISerializable;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IMap;
     using interface Elastos.Utility.ISet;
     using interface Elastos.Utility.IIterable;
@@ -356,6 +359,27 @@ module
 
     singleton class CNativeTextHelper {
         interface INativeTextHelper;
+    }
+
+    class CParcelableList {
+        constructor();
+
+        constructor(
+            [in] Int32 capacity);
+
+        constructor(
+            [in] ICollection* c);
+
+        constructor(
+            [in] IList* list);
+
+        interface IArrayList;
+        interface IList;
+        interface ICollection;
+        interface IIterable;
+        interface ICloneable;
+        interface ISerializable;
+        interface IParcelable;
     }
 
     } // namespace Utility
