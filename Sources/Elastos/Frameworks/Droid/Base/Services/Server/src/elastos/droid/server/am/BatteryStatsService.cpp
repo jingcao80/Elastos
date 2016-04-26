@@ -446,9 +446,9 @@ ECode BatteryStatsService::GetStatisticsStream(
     AutoPtr< ArrayOf<Byte> > data;
     out->Marshall((ArrayOf<Byte>**)&data);
     //try {
-        AutoPtr<IParcelFileDescriptorHelper> pfdHelper;
-        CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfdHelper);
-        pfdHelper->FromData(data, String("battery-stats"), pfd);
+    AutoPtr<IParcelFileDescriptorHelper> pfdHelper;
+    CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfdHelper);
+    pfdHelper->FromData(data, String("battery-stats"), pfd);
     //} catch (IOException e) {
     //    Slog.w(TAG, "Unable to create shared memory", e);
     //    return null;

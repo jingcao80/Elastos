@@ -34,7 +34,7 @@ public:
     /**
      * The statistics associated with a particular uid.
      */
-    class BatteryStatsUid
+    class BatteryStatsUidf
         : public Object
         , public IBatteryStatsUid
     {
