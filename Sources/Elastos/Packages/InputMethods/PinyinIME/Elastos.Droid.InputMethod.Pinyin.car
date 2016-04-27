@@ -3,16 +3,16 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/BalloonHint.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidateViewListener.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/IPinyinDecoderService.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidatesContainer.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/PinyinIME.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/CandidateView.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/ComposingView.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SkbContainer.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyboardView.car");
-    merge("../../../../../car/elastos/droid/inputmethod/pinyin/SoftKeyToggle.car");
+    merge("car/elastos/droid/inputmethod/pinyin/BalloonHint.car");
+    merge("car/elastos/droid/inputmethod/pinyin/CandidateViewListener.car");
+    merge("car/elastos/droid/inputmethod/pinyin/IPinyinDecoderService.car");
+    merge("car/elastos/droid/inputmethod/pinyin/CandidatesContainer.car");
+    merge("car/elastos/droid/inputmethod/pinyin/PinyinIME.car");
+    merge("car/elastos/droid/inputmethod/pinyin/CandidateView.car");
+    merge("car/elastos/droid/inputmethod/pinyin/ComposingView.car");
+    merge("car/elastos/droid/inputmethod/pinyin/SkbContainer.car");
+    merge("car/elastos/droid/inputmethod/pinyin/SoftKeyboardView.car");
+    merge("car/elastos/droid/inputmethod/pinyin/SoftKeyToggle.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IService;
