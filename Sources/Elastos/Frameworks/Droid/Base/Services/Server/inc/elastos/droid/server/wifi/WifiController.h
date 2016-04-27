@@ -73,6 +73,7 @@ public:
             , mOwner(owner)
         {
         }
+
         // @Override
         CARAPI Enter();
 
