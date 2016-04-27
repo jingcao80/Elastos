@@ -251,7 +251,7 @@ private:
     /* package */
 //    final WeakReference<ContentResolver> mResolver;
     AutoPtr<IWeakReference> mResolver;
-    AutoPtr<WorkerHandler> mWorkerThreadHandler;
+    AutoPtr<IHandler> mWorkerThreadHandler;
     Object mAsyncQueryHandlerLock;
 };
 

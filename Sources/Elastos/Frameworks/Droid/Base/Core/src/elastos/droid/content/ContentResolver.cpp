@@ -1353,7 +1353,6 @@ ECode ContentResolver::RegisterContentObserver(
     assert(contentService != NULL && "Error: Content Service not started.");
     AutoPtr<IIContentObserver> contentObserver;
     FAIL_RETURN(observer->GetContentObserver((IIContentObserver**)&contentObserver));
-
     return contentService->RegisterContentObserver(uri, notifyForDescendents, contentObserver, userHandle);
 }
 
@@ -1490,7 +1489,6 @@ ECode ContentResolver::RequestSync(
     FAIL_RETURN(ValidateSyncExtrasBundle(extras))
     AutoPtr<IIContentService> contentService;
     FAIL_RETURN(GetContentService((IIContentService**)&contentService))
-    Logger::I(TAG, "RequestSync %s: %s, extras:%s", TO_CSTR(account), authority.string(), TO_CSTR(extras));
     return contentService->RequestSync(account, authority, extras);
 }
 
@@ -1509,7 +1507,6 @@ ECode ContentResolver::RequestSyncAsUser(
     builder->SyncOnce();
     AutoPtr<ISyncRequest> request;
     builder->Build((ISyncRequest**)&request);
-    Logger::I(TAG, "RequestSyncAsUser %s: %s, userId:%d", TO_CSTR(request), authority.string(), userId);
     // try {
     AutoPtr<IIContentService> cs;
     GetContentService((IIContentService**)&cs);
@@ -1522,7 +1519,6 @@ ECode ContentResolver::RequestSyncAsUser(
 ECode ContentResolver::RequestSync(
     /* [in] */ ISyncRequest* request)
 {
-    Logger::I(TAG, "RequestSync %s", TO_CSTR(request));
     // try {
     AutoPtr<IIContentService> cs;
     GetContentService((IIContentService**)&cs);
@@ -1694,13 +1690,14 @@ ECode ContentResolver::AddPeriodicSync(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Boolean value = FALSE;
-    if ((IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_MANUAL, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_DO_NOT_RETRY, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_BACKOFF, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_SETTINGS, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_INITIALIZE, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_FORCE, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_EXPEDITED, FALSE, &value), value)) {
+    IBaseBundle* bundle = IBaseBundle::Probe(extras);
+    if ((bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_MANUAL, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_DO_NOT_RETRY, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_BACKOFF, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_SETTINGS, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_INITIALIZE, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_FORCE, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_EXPEDITED, FALSE, &value), value)) {
         //throw new IllegalArgumentException("illegal extras were set");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1716,14 +1713,15 @@ ECode ContentResolver::InvalidPeriodicExtras(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
+    IBaseBundle* bundle = IBaseBundle::Probe(extras);
     Boolean value;
-    if ((IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_MANUAL, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_DO_NOT_RETRY, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_BACKOFF, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_SETTINGS, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_INITIALIZE, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_FORCE, FALSE, &value), value)
-        || (IBaseBundle::Probe(extras)->GetBoolean(IContentResolver::SYNC_EXTRAS_EXPEDITED, FALSE, &value), value)) {
+    if ((bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_MANUAL, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_DO_NOT_RETRY, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_BACKOFF, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_IGNORE_SETTINGS, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_INITIALIZE, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_FORCE, FALSE, &value), value)
+        || (bundle->GetBoolean(IContentResolver::SYNC_EXTRAS_EXPEDITED, FALSE, &value), value)) {
         *result = TRUE;
     }
 
@@ -2017,7 +2015,7 @@ ECode ContentResolver::AddStatusChangeListener(
 //    } catch (RemoteException e) {
 //        throw new RuntimeException("the ContentService should always be reachable", e);
 //    }
-    assert(0);
+    assert(0 && "TODO: ContentResolver::AddStatusChangeListener");
     return E_NOT_IMPLEMENTED;
 }
 
@@ -2075,18 +2073,12 @@ ECode ContentResolver::MaybeLogQueryToEventLog(
     // ActivityThread.currentPackageName() only returns non-null if the
     // current thread is an application main thread.  This parameter tells
     // us whether an event loop is blocked, and if so, which app it is.
-    // String blockingPackage = AppGlobals::GetInitialPackage();
-
-    // TODO:
-//    EventLog.writeEvent(
-//        EventLogTags.CONTENT_QUERY_SAMPLE,
-//        uri.toString(),
-//        projectionBuffer.toString(),
-//        selection != null ? selection : "",
-//        sortOrder != null ? sortOrder : "",
-//        durationMillis,
-//        blockingPackage != null ? blockingPackage : "",
-//        samplePercent);
+    String blockingPackage = AppGlobals::GetInitialPackage();
+    Logger::I(TAG, "Query: uri:%s, projection:%s, selection:%s, sortOrder:%s, "
+        "durationMillis:%lld, blockingPackage:%s, samplePercent:%d",
+        TO_CSTR(uri), projectionBuffer.ToString().string(),
+        selection.string(), sortOrder.string(),
+        durationMillis, blockingPackage.string(), samplePercent);
     return NOERROR;
 }
 
@@ -2106,17 +2098,10 @@ ECode ContentResolver::MaybeLogUpdateToEventLog(
             return NOERROR;
         }
     }
-    // String blockingPackage = AppGlobals::GetInitialPackage();
 
-    //TODO:
-//    EventLog.writeEvent(
-//        EventLogTags.CONTENT_UPDATE_SAMPLE,
-//        uri.toString(),
-//        operation,
-//        selection != null ? selection : "",
-//        durationMillis,
-//        blockingPackage != null ? blockingPackage : "",
-//        samplePercent);
+    String blockingPackage = AppGlobals::GetInitialPackage();
+    Logger::I(TAG, "Update: uri:%s, operation:%s, selection:%s, durationMillis:%lld",
+        TO_CSTR(uri), operation.string(), selection.string(), durationMillis);
     return NOERROR;
 }
 

@@ -474,20 +474,14 @@ ECode CContentService::RegisterContentObserver(
     /* [in] */ Int32 userHandle)
 {
     if (NULL == observer || NULL == uri) {
-        String uriStr, observerStr;
-        if (uri) uriStr = Object::ToString(uri);
-        if (observer) observerStr = Object::ToString(observer);
         Slogger::E(TAG, "RegisterContentObserver: You must pass a valid uri(%s) and observer(%s)",
-            uriStr.string(), observerStr.string());
+            TO_CSTR(uri), TO_CSTR(observer));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (DBG) {
-        String uriStr, observerStr;
-        if (uri) uriStr = Object::ToString(uri);
-        if (observer) observerStr = Object::ToString(observer);
         Logger::V(TAG, "Registered observer %p : [%s] at [%s] with notifyForDescendants %d",
-            observer, observerStr.string(), uriStr.string(), notifyForDescendants);
+            observer, TO_CSTR(observer), TO_CSTR(uri), notifyForDescendants);
     }
 
     FAIL_RETURN(EnforceCrossUserPermission(userHandle,
@@ -529,9 +523,7 @@ ECode CContentService::UnregisterContentObserver(
     }
 
     if (DBG) {
-        String info;
-        observer->ToString(&info);
-        Slogger::V(TAG, "Unregistered observer %p : [%s]", observer, info.string());
+        Slogger::V(TAG, "Unregistered observer %p : [%s]", observer, TO_CSTR(observer));
     }
 
     AutoLock lock(mRootNode);

@@ -33,6 +33,8 @@ protected:
     public:
         SelfContentObserver();
 
+        TO_STRING_IMPL("AbstractCursor::SelfContentObserver")
+
         CARAPI constructor(
             /* [in] */ IAbstractCursor* cursor);
 

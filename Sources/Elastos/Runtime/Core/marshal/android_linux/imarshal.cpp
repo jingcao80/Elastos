@@ -31,6 +31,14 @@ ECode StdMarshalInterface(
         ec = ex.mIStub->GetInterfaceIndex(object, &interfacePack->mIndex);
         if (ec == E_NO_INTERFACE) {
             ec = E_CONFLICT_WITH_LOCAL_KEYWORD;
+#if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
+            String info;
+            if (IObject::Probe(object) != NULL) {
+                IObject::Probe(object)->ToString(&info);
+            }
+            ALOGE("Object %s with local constructor or interface cannot be created in diff process.",
+                info.string());
+#endif
         }
         pthread_mutex_unlock(&g_marshalLock);
     }
@@ -54,6 +62,14 @@ ECode StdMarshalInterface(
                 ec = stub->GetInterfaceIndex(object, &(interfacePack->mIndex));
                 if (ec == E_NO_INTERFACE) {
                     ec = E_CONFLICT_WITH_LOCAL_KEYWORD;
+#if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
+                    String info;
+                    if (IObject::Probe(object) != NULL) {
+                        IObject::Probe(object)->ToString(&info);
+                    }
+                    ALOGE("Object %s with local constructor or interface cannot be created in diff process.",
+                        info.string());
+#endif
                 }
             }
         }
