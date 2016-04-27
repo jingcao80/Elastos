@@ -16,7 +16,7 @@
 #include "elastos/droid/utility/CInt64SparseArray.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
@@ -43,7 +43,7 @@ using Elastos::Core::StringBuilder;
 using Elastos::Utility::IFormatter;
 using Elastos::Utility::CFormatter;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;
@@ -1062,7 +1062,6 @@ ECode CResources::GetDrawableForDensity(
     else {
         mTmpValue = NULL;
     }
-
     FAIL_RETURN(GetValueForDensity(id, density, value, TRUE, supportComposedIcons))
 
     /*
@@ -1072,15 +1071,16 @@ ECode CResources::GetDrawableForDensity(
      * requested density to actual device density. Drawables that have
      * undefined density or no density don't need to be handled here.
      */
-    if (mTmpValue->mDensity > 0 && mTmpValue->mDensity != ITypedValue::DENSITY_NONE) {
-        if (mTmpValue->mDensity == density) {
-            mTmpValue->mDensity = mMetrics->mDensityDpi;
+    Int32 _density;
+    value->GetDensity(&_density);
+    if (_density > 0 && _density != ITypedValue::DENSITY_NONE) {
+        if (_density == density) {
+            _density = mMetrics->mDensityDpi;
         }
         else {
-            mTmpValue->mDensity = (mTmpValue->mDensity * mMetrics->mDensityDpi) / density;
+            _density = (_density * mMetrics->mDensityDpi) / density;
         }
     }
-
     AutoPtr<IDrawable> res;
     LoadDrawable(value, id, theme, (IDrawable**)&res);
 
