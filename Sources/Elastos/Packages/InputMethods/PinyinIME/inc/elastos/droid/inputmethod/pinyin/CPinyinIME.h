@@ -24,6 +24,8 @@
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::HandlerRunnable;
@@ -476,27 +478,23 @@ private:
             /* [in] */ IIntent* intent);
     };
 
-//    class BuilderListener
-//        : public Object
-//        , public IDialogInterfaceOnClickListener
-//        , public IDialogInterfaceOnDismissListener
-//    {
-//    public:
-//        BuilderListener(
-//            /* [in] */ CPinyinIME* ime);
-//
-//        CAR_INTERFACE_DECL();
-//
-//        CARAPI OnClick(
-//            /* [in] */ IDialogInterface* di,
-//            /* [in] */ Int32 position);
-//
-//        CARAPI OnDismiss(
-//            /* [in] */ IDialogInterface* dialog);
-//
-//    private:
-//        CPinyinIME* mHost;
-//    };
+    class BuilderListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        BuilderListener(
+            /* [in] */ CPinyinIME* ime);
+
+        CAR_INTERFACE_DECL();
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* di,
+            /* [in] */ Int32 position);
+
+    private:
+        CPinyinIME* mHost;
+    };
 
 public:
     CAR_OBJECT_DECL();

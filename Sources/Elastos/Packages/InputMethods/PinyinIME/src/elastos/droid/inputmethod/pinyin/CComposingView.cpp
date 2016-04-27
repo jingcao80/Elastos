@@ -51,7 +51,7 @@ ECode CComposingView::constructor(
 
 ECode CComposingView::Reset()
 {
-    mComposingStatus = ComposingStatus_SHOW_PINYIN;
+    mComposingStatus = SHOW_PINYIN;
     return NOERROR;
 }
 
@@ -62,16 +62,16 @@ ECode CComposingView::SetDecodingInfo(
     mDecInfo = decInfo;
 
     if (CPinyinIME::STATE_INPUT == imeStatus) {
-        mComposingStatus = ComposingStatus_SHOW_PINYIN;
+        mComposingStatus = SHOW_PINYIN;
         mDecInfo->MoveCursorToEdge(FALSE);
     }
     else {
         if (decInfo->GetFixedLen() != 0
-                || ComposingStatus_EDIT_PINYIN == mComposingStatus) {
-            mComposingStatus = ComposingStatus_EDIT_PINYIN;
+                || EDIT_PINYIN == mComposingStatus) {
+            mComposingStatus = EDIT_PINYIN;
         }
         else {
-            mComposingStatus = ComposingStatus_SHOW_STRING_LOWERCASE;
+            mComposingStatus = SHOW_STRING_LOWERCASE;
         }
         mDecInfo->MoveCursor(0);
     }
@@ -89,7 +89,7 @@ Boolean CComposingView::MoveCursor(
         return FALSE;
     }
 
-    if (ComposingStatus_EDIT_PINYIN == mComposingStatus) {
+    if (EDIT_PINYIN == mComposingStatus) {
         Int32 offset = 0;
         if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT) {
             offset = -1;
@@ -97,10 +97,10 @@ Boolean CComposingView::MoveCursor(
         else if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) offset = 1;
         mDecInfo->MoveCursor(offset);
     }
-    else if (ComposingStatus_SHOW_STRING_LOWERCASE == mComposingStatus) {
+    else if (SHOW_STRING_LOWERCASE == mComposingStatus) {
         if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
                 || keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
-            mComposingStatus = ComposingStatus_EDIT_PINYIN;
+            mComposingStatus = EDIT_PINYIN;
 
             Measure(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
             RequestLayout();
@@ -111,7 +111,7 @@ Boolean CComposingView::MoveCursor(
     return TRUE;
 }
 
-ComposingStatus CComposingView::GetComposingStatus()
+CComposingView::ComposingStatus CComposingView::GetComposingStatus()
 {
     return mComposingStatus;
 }
@@ -131,7 +131,7 @@ void CComposingView::OnMeasure(
         width = mPaddingLeft + mPaddingRight + LEFT_RIGHT_MARGIN * 2;
 
         String str;
-        if (ComposingStatus_SHOW_STRING_LOWERCASE == mComposingStatus) {
+        if (SHOW_STRING_LOWERCASE == mComposingStatus) {
             str = mDecInfo->GetOrigianlSplStr()->ToString();
         }
         else {
@@ -147,8 +147,8 @@ void CComposingView::OnMeasure(
 void CComposingView::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    if (ComposingStatus_EDIT_PINYIN == mComposingStatus
-            || ComposingStatus_SHOW_PINYIN == mComposingStatus) {
+    if (EDIT_PINYIN == mComposingStatus
+            || SHOW_PINYIN == mComposingStatus) {
         DrawForPinyin(canvas);
         return;
     }
@@ -200,7 +200,7 @@ void CComposingView::DrawForPinyin(
     canvas->DrawText(cmpsStr, 0, cmpsPos, x, y, mPaint);
     x += (mPaint->MeasureText(cmpsStr, 0, cmpsPos, &value), value);
     if (cursorPos <= activeCmpsLen) {
-        if (ComposingStatus_EDIT_PINYIN == mComposingStatus) {
+        if (EDIT_PINYIN == mComposingStatus) {
             DrawCursor(canvas, x);
         }
         canvas->DrawText(cmpsStr, cmpsPos, activeCmpsLen, x, y, mPaint);
@@ -216,7 +216,7 @@ void CComposingView::DrawForPinyin(
             canvas->DrawText(cmpsStr, oriPos, cursorPos, x, y, mPaint);
             x += (mPaint->MeasureText(cmpsStr, oriPos, cursorPos, &value), value);
 
-            if (ComposingStatus_EDIT_PINYIN == mComposingStatus) {
+            if (EDIT_PINYIN == mComposingStatus) {
                 DrawCursor(canvas, x);
             }
 

@@ -56,9 +56,6 @@ public:
         /* [in] */ Int32 skbWidth,
         /* [in] */ Int32 skbHeight);
 
-    CARAPI ToString(
-        /* [out] */ String* info);
-
 private:
     // Caller makes sure xrp and r are valid.
     CARAPI GetSoftKey(
