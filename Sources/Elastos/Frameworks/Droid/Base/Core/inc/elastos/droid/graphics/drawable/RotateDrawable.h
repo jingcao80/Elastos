@@ -64,10 +64,23 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
+    RotateDrawable();
+
     /**
      * <p>Create a new rotating drawable with an empty state.</p>
      */
-    RotateDrawable();
+    CARAPI constructor();
+
+    /**
+     * <p>Create a new rotating drawable with the specified state. A copy of
+     * this state is used as the internal state for the newly created
+     * drawable.</p>
+     *
+     * @param rotateState the state for this drawable
+     */
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
 
     CARAPI Draw(
         /* [in] */ ICanvas* canvas);
@@ -289,12 +302,6 @@ public:
     CARAPI Mutate();
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ RotateState* rotateState,
-        /* [in] */ IResources* res);
-
     //@Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* state);
@@ -306,18 +313,6 @@ protected:
     //@Override
     CARAPI_(void) OnBoundsChange(
         /* [in] */ IRect* bounds);
-
-private:
-    /**
-     * <p>Create a new rotating drawable with the specified state. A copy of
-     * this state is used as the internal state for the newly created
-     * drawable.</p>
-     *
-     * @param rotateState the state for this drawable
-     */
-    RotateDrawable(
-        /* [in] */ RotateState* rotateState,
-        /* [in] */ IResources* res);
 
 private:
     static const Float MAX_LEVEL;

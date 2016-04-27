@@ -74,12 +74,22 @@ public:
     ShapeDrawable();
 
     /**
+     * ShapeDrawable constructor.
+     */
+    CARAPI constructor();
+
+    /**
      * Creates a ShapeDrawable with a specified Shape.
      *
      * @param s the Shape that this ShapeDrawable should be
      */
-    ShapeDrawable(
+    CARAPI constructor(
         /* [in] */ IShape* s);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res,
+        /* [in] */ IResourcesTheme* theme);
 
     /**
      * Returns the Shape of this ShapeDrawable.
@@ -236,20 +246,6 @@ public:
         /* [in] */ IOutline* outline);
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IShape* s);
-
-    /**
-     * The one constructor to rule them all. This is called by all public
-     * constructors to set the state and initialize local properties.
-     */
-    CARAPI constructor(
-        /* [in] */ ShapeState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
     /**
      * Called from the drawable's draw() method after the canvas has been set
      * to draw the shape at (0,0). Subclasses can override for special effects
@@ -279,11 +275,6 @@ protected:
         /* [in] */ const ArrayOf<Int32>& stateSet);
 
 private:
-    ShapeDrawable(
-        /* [in] */ ShapeState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
     static CARAPI_(Int32) ModulateAlpha(
         /* [in] */ Int32 paintAlpha,
         /* [in] */ Int32 alpha);

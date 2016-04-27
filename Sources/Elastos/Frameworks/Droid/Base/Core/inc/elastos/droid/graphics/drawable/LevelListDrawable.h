@@ -54,6 +54,12 @@ public:
 
     LevelListDrawable();
 
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
+
     virtual CARAPI AddLevel(
         /* [in] */ Int32 low,
         /* [in] */ Int32 high,
@@ -70,20 +76,9 @@ public:
     CARAPI Mutate();
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ LevelListState* state,
-        /* [in] */ IResources* res);
-
     //@Override
     CARAPI_(Boolean) OnLevelChange(
         /* [in] */ Int32 level);
-
-private:
-    LevelListDrawable(
-        /* [in] */ LevelListState* state,
-        /* [in] */ IResources* res);
 
 private:
     AutoPtr<LevelListState> mLevelListState;

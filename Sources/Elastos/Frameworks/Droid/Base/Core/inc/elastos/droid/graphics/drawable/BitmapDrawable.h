@@ -76,29 +76,36 @@ public:
 
     BitmapDrawable();
 
-    BitmapDrawable(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ IResources* res);
 
-    BitmapDrawable(
+    CARAPI constructor(
         /* [in] */ IBitmap* bitmap);
 
-    BitmapDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ IBitmap* bitmap);
 
-    BitmapDrawable(
+    CARAPI constructor(
         /* [in] */ const String& filepath);
 
-    BitmapDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ const String& filepath);
 
-    BitmapDrawable(
+    CARAPI constructor(
         /* [in] */ IInputStream* is);
 
-    BitmapDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ IInputStream* is);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res,
+        /* [in] */ IResourcesTheme* theme);
 
     CARAPI GetPaint(
         /* [out] */ IPaint** paint);
@@ -386,37 +393,6 @@ protected:
 
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* stateSet);
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IResources* res);
-
-    CARAPI constructor(
-        /* [in] */ IBitmap* bitmap);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IBitmap* bitmap);
-
-    CARAPI constructor(
-        /* [in] */ const String& filepath);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ const String& filepath);
-
-    CARAPI constructor(
-        /* [in] */ IInputStream* is);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IInputStream* is);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 
 private:
     CARAPI_(void) ComputeBitmapSize();

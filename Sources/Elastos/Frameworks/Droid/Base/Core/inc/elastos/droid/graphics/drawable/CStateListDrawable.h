@@ -14,15 +14,6 @@ CarClass(CStateListDrawable), public StateListDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state);
 };
 
 } // namespace Drawable

@@ -81,6 +81,23 @@ AnimationDrawable::AnimationDrawable()
 {
 }
 
+ECode AnimationDrawable::constructor()
+{
+    return constructor(NULL, NULL);
+}
+
+ECode AnimationDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
+    /* [in] */ IResources* res)
+{
+    mAnimationState = new AnimationState((AnimationState*)state, this, res);
+    SetConstantState(mAnimationState);
+    if (state != NULL) {
+        SetFrame(0, TRUE, FALSE);
+    }
+    return NOERROR;
+}
+
 ECode AnimationDrawable::SetVisible(
     /* [in] */ Boolean visible,
     /* [in] */ Boolean restart,
@@ -328,25 +345,6 @@ ECode AnimationDrawable::Mutate()
     if (!mMutated) {
         mAnimationState->mDurations = mAnimationState->mDurations->Clone();
         mMutated = TRUE;
-    }
-    return NOERROR;
-}
-
-AnimationDrawable::AnimationDrawable(
-    /* [in] */ AnimationState* state,
-    /* [in] */ IResources* res)
-{
-    ASSERT_SUCCEEDED(constructor(state, res));
-}
-
-ECode AnimationDrawable::constructor(
-    /* [in] */ AnimationState* state,
-    /* [in] */ IResources* res)
-{
-    mAnimationState = new AnimationState(state, this, res);
-    SetConstantState(mAnimationState);
-    if (state != NULL) {
-        SetFrame(0, TRUE, FALSE);
     }
     return NOERROR;
 }

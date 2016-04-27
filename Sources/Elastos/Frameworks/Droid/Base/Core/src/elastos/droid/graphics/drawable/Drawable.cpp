@@ -102,13 +102,14 @@ AutoPtr<IRect> Drawable::ZERO_BOUNDS_RECT = Init_ZERO_BOUNDS_RECT();
 const PorterDuffMode Drawable::DEFAULT_TINT_MODE = PorterDuffMode_SRC_IN;
 
 Drawable::Drawable()
-    : mStateSet(const_cast<ArrayOf<Int32>*>(StateSet::WILD_CARD.Get()))
-    , mLevel(0)
+    : mLevel(0)
     , mChangingConfigurations(0)
     , mBounds(ZERO_BOUNDS_RECT)
     , mVisible(TRUE)
     , mLayoutDirection(0)
-{}
+{
+    mStateSet = StateSet::WILD_CARD;
+}
 
 Drawable::~Drawable()
 {
@@ -124,6 +125,8 @@ ECode Drawable::SetBounds(
     /* [in] */ Int32 bottom)
 {
     AutoPtr<IRect> oldBounds = mBounds;
+
+Logger::D("Drawable::SetBounds", "========Line:%d, this: %s============", __LINE__, TO_CSTR(this));
 
     if (oldBounds == ZERO_BOUNDS_RECT) {
         mBounds = NULL;

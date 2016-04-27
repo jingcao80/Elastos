@@ -97,16 +97,39 @@ Boolean ClipDrawable::ClipState::CanConstantState()
 CAR_INTERFACE_IMPL_2(ClipDrawable, Drawable, IClipDrawable, IDrawableCallback)
 ClipDrawable::ClipDrawable()
 {
-    CRect::New((IRect**)&mTmpRect);
 }
 
-ClipDrawable::ClipDrawable(
+ECode ClipDrawable::constructor()
+{
+    CRect::New((IRect**)&mTmpRect);
+    return constructor(NULL, NULL);
+}
+
+ECode ClipDrawable::constructor(
     /* [in] */ IDrawable* drawable,
     /* [in] */ Int32 gravity,
     /* [in] */ Int32 orientation)
 {
     CRect::New((IRect**)&mTmpRect);
-    ASSERT_SUCCEEDED(constructor(drawable, gravity, orientation));
+    FAIL_RETURN(constructor(NULL, NULL));
+
+    mClipState->mDrawable = drawable;
+    mClipState->mGravity = gravity;
+    mClipState->mOrientation = orientation;
+
+    if (drawable != NULL) {
+        drawable->SetCallback(this);
+    }
+    return NOERROR;
+}
+
+ECode ClipDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
+    /* [in] */ IResources* res)
+{
+    CRect::New((IRect**)&mTmpRect);
+    mClipState = new ClipState((ClipState*)state, this, res);
+    return NOERROR;
 }
 
 ECode ClipDrawable::Inflate(
@@ -376,40 +399,6 @@ ECode ClipDrawable::SetLayoutDirection(
 {
     mClipState->mDrawable->SetLayoutDirection(layoutDirection);
     Drawable::SetLayoutDirection(layoutDirection);
-    return NOERROR;
-}
-
-ClipDrawable::ClipDrawable(
-    /* [in] */ ClipState* state,
-    /* [in] */ IResources* res)
-{
-    CRect::New((IRect**)&mTmpRect);
-    ASSERT_SUCCEEDED(constructor(state, res));
-}
-
-ECode ClipDrawable::constructor(
-    /* [in] */ IDrawable* drawable,
-    /* [in] */ Int32 gravity,
-    /* [in] */ Int32 orientation)
-{
-    FAIL_RETURN(constructor(NULL, NULL));
-
-    mClipState->mDrawable = drawable;
-    mClipState->mGravity = gravity;
-    mClipState->mOrientation = orientation;
-
-    if (drawable != NULL) {
-        drawable->SetCallback(
-                this);
-    }
-    return NOERROR;
-}
-
-ECode ClipDrawable::constructor(
-    /* [in] */ ClipState* state,
-    /* [in] */ IResources* res)
-{
-    mClipState = new ClipState(state, this, res);
     return NOERROR;
 }
 

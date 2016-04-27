@@ -14,18 +14,6 @@ CarClass(CRippleDrawable), public RippleDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ /*@NonNull*/ IColorStateList* color,
-        /* [in] */ /*@Nullable*/ IDrawable* content,
-        /* [in] */ /*@Nullable*/ IDrawable* mask);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

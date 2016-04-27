@@ -13,10 +13,12 @@ CAR_INTERFACE_IMPL(PictureDrawable, Drawable, IPictureDrawable);
 PictureDrawable::PictureDrawable()
 {}
 
-PictureDrawable::PictureDrawable(
+ECode PictureDrawable::constructor(
     /* [in] */ IPicture* picture)
-    : mPicture(picture)
-{}
+{
+    mPicture = picture;
+    return NOERROR;
+}
 
 ECode PictureDrawable::GetPicture(
     /* [out] */ IPicture** picture)
@@ -100,13 +102,6 @@ ECode PictureDrawable::SetColorFilter(
 ECode PictureDrawable::SetAlpha(
     /* [in */ Int32 alpha)
 {
-    return NOERROR;
-}
-
-ECode PictureDrawable::constructor(
-    /* [in] */ IPicture* picture)
-{
-    mPicture = picture;
     return NOERROR;
 }
 

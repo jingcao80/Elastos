@@ -56,17 +56,6 @@ public:
 
     InsetDrawable();
 
-    InsetDrawable(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 inset);
-
-    InsetDrawable(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 insetLeft,
-        /* [in] */ Int32 insetTop,
-        /* [in] */ Int32 insetRight,
-        /* [in] */ Int32 insetBottom);
-
     CARAPI constructor();
 
     CARAPI constructor(

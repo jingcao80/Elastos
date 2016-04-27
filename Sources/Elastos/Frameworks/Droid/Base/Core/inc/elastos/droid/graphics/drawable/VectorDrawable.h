@@ -502,13 +502,10 @@ public:
 
     VectorDrawable();
 
-    VectorDrawable(
-        /* [in] */ VectorDrawableState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
+    CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ VectorDrawableState* state,
+        /* [in] */ IDrawableConstantState* state,
         /* [in] */ IResources* res,
         /* [in] */ IResourcesTheme* theme);
 

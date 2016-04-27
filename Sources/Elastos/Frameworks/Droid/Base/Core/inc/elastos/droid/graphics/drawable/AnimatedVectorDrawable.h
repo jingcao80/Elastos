@@ -59,15 +59,10 @@ public:
 
     AnimatedVectorDrawable();
 
-    AnimatedVectorDrawable(
-        /* [in] */ AnimatedVectorDrawableState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
     CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ AnimatedVectorDrawableState* state,
+        /* [in] */ IDrawableConstantState* state,
         /* [in] */ IResources* res,
         /* [in] */ IResourcesTheme* theme);
 

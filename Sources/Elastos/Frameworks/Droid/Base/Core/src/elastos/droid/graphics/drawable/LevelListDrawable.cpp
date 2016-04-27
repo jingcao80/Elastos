@@ -88,16 +88,21 @@ LevelListDrawable::LevelListDrawable()
 {
 }
 
-LevelListDrawable::LevelListDrawable(
-    /* [in] */ LevelListState* state,
-    /* [in] */ IResources* res)
-    : mMutated(FALSE)
+ECode LevelListDrawable::constructor()
 {
-    mLevelListState = new LevelListState(state, this, res);
+    return constructor(NULL, NULL);
+}
+
+ECode LevelListDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
+    /* [in] */ IResources* res)
+{
+    mLevelListState = new LevelListState((LevelListState*)state, this, res);
     SetConstantState(mLevelListState);
     Int32 level = 0;
     GetLevel(&level);
     OnLevelChange(level);
+    return NOERROR;
 }
 
 ECode LevelListDrawable::AddLevel(
@@ -211,23 +216,6 @@ ECode LevelListDrawable::Mutate()
         mMutated = TRUE;
     }
 
-    return NOERROR;
-}
-
-ECode LevelListDrawable::constructor()
-{
-    return constructor(NULL, NULL);
-}
-
-ECode LevelListDrawable::constructor(
-    /* [in] */ LevelListState* state,
-    /* [in] */ IResources* res)
-{
-    mLevelListState = new LevelListState(state, this, res);
-    SetConstantState(mLevelListState);
-    Int32 level = 0;
-    GetLevel(&level);
-    OnLevelChange(level);
     return NOERROR;
 }
 

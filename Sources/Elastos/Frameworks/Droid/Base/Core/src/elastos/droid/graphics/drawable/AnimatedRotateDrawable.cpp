@@ -102,15 +102,27 @@ Boolean AnimatedRotateDrawable::AnimatedRotateState::CanConstantState()
 }
 
 CAR_INTERFACE_IMPL_4(AnimatedRotateDrawable, Drawable, IAnimatedRotateDrawable, IDrawableCallback, IRunnable, IAnimatable)
-AnimatedRotateDrawable::AnimatedRotateDrawable(
-    /* [in] */ AnimatedRotateState* rotateState,
-    /* [in] */ IResources* res)
+AnimatedRotateDrawable::AnimatedRotateDrawable()
     : mMutated(FALSE)
     , mCurrentDegrees(0)
     , mIncrement(0)
     , mRunning(FALSE)
 {
-    constructor(rotateState, res);
+}
+
+ECode AnimatedRotateDrawable::constructor()
+{
+    return constructor(NULL, NULL);
+}
+
+ECode AnimatedRotateDrawable::constructor(
+    /* [in] */ IDrawableConstantState* rotateState,
+    /* [in] */ IResources* res)
+{
+    mState = new AnimatedRotateState((AnimatedRotateState*)rotateState, this, res);
+    Init();
+
+    return NOERROR;
 }
 
 void AnimatedRotateDrawable::Init()
@@ -482,16 +494,6 @@ ECode AnimatedRotateDrawable::Mutate()
         mState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-
-    return NOERROR;
-}
-
-ECode AnimatedRotateDrawable::constructor(
-    /* [in] */ AnimatedRotateState* rotateState,
-    /* [in] */ IResources* res)
-{
-    mState = new AnimatedRotateState(rotateState, this, res);
-    Init();
 
     return NOERROR;
 }

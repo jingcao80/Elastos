@@ -97,6 +97,13 @@ public:
 
     LayerDrawable();
 
+    virtual ~LayerDrawable();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ ArrayOf<IDrawable*>* layers);
+
     /**
      * Create a new layer drawable with the specified list of layers and the specified
      * constant state.
@@ -104,16 +111,14 @@ public:
      * @param layers The list of layers to add to this drawable.
      * @param state The constant drawable state.
      */
-    LayerDrawable(
+    CARAPI constructor(
         /* [in] */ ArrayOf<IDrawable*>* layers,
-        /* [in] */ LayerState* state = NULL);
+        /* [in] */ IDrawableConstantState* state);
 
-    LayerDrawable(
-        /* [in] */ LayerState* state,
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
         /* [in] */ IResources* res,
         /* [in] */ IResourcesTheme* theme);
-
-    virtual ~LayerDrawable();
 
     CARAPI Inflate(
         /* [in] */ IResources* r,
@@ -395,15 +400,6 @@ protected:
     //@Override
     CARAPI_(void) OnBoundsChange(
         /* [in] */ IRect* bounds);
-
-    CARAPI constructor(
-        /* [in] */ ArrayOf<IDrawable*>* layers,
-        /* [in] */ LayerState* state = NULL);
-
-    CARAPI constructor(
-        /* [in] */ LayerState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 
 protected:
     /**

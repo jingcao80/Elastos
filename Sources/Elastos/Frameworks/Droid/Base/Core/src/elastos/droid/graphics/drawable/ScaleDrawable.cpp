@@ -91,23 +91,36 @@ ScaleDrawable::ScaleDrawable()
     CRect::New((IRect**)&mTmpRect);
 }
 
-ScaleDrawable::ScaleDrawable(
+ECode ScaleDrawable::constructor()
+{
+    return constructor(NULL, NULL);
+}
+
+ECode ScaleDrawable::constructor(
     /* [in] */ IDrawable* drawable,
     /* [in] */ Int32 gravity,
     /* [in] */ Float scaleWidth,
     /* [in] */ Float scaleHeight)
-    : mMutated(FALSE)
 {
-    CRect::New((IRect**)&mTmpRect);
-    ASSERT_SUCCEEDED(constructor(drawable, gravity, scaleWidth, scaleHeight));
+    FAIL_RETURN(constructor(NULL, NULL));
+
+    mScaleState->mDrawable = drawable;
+    mScaleState->mGravity = gravity;
+    mScaleState->mScaleWidth = scaleWidth;
+    mScaleState->mScaleHeight = scaleHeight;
+
+    if (drawable != NULL) {
+        drawable->SetCallback(this);
+    }
+    return NOERROR;
 }
 
-ScaleDrawable::ScaleDrawable(
-    /* [in] */ ScaleState* state,
+ECode ScaleDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res)
-    : mMutated(FALSE)
 {
-    mScaleState = new ScaleState(state, this, res);
+    mScaleState = new ScaleState((ScaleState*)state, this, res);
+    return NOERROR;
 }
 
 ECode ScaleDrawable::GetDrawable(
@@ -404,38 +417,6 @@ ECode ScaleDrawable::Mutate()
         mScaleState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-    return NOERROR;
-}
-
-ECode ScaleDrawable::constructor()
-{
-    return constructor((ScaleState*)NULL, (IResources*)NULL);
-}
-
-ECode ScaleDrawable::constructor(
-    /* [in] */ IDrawable* drawable,
-    /* [in] */ Int32 gravity,
-    /* [in] */ Float scaleWidth,
-    /* [in] */ Float scaleHeight)
-{
-    FAIL_RETURN(constructor((ScaleState*)NULL, (IResources*)NULL));
-
-    mScaleState->mDrawable = drawable;
-    mScaleState->mGravity = gravity;
-    mScaleState->mScaleWidth = scaleWidth;
-    mScaleState->mScaleHeight = scaleHeight;
-
-    if (drawable != NULL) {
-        drawable->SetCallback(this);
-    }
-    return NOERROR;
-}
-
-ECode ScaleDrawable::constructor(
-    /* [in] */ ScaleState* state,
-    /* [in] */ IResources* res)
-{
-    mScaleState = new ScaleState(state, this, res);
     return NOERROR;
 }
 

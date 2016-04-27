@@ -14,13 +14,6 @@ CarClass(CAnimatedVectorDrawable), public AnimatedVectorDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

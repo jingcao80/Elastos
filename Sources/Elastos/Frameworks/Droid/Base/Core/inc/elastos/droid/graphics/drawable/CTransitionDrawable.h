@@ -14,30 +14,6 @@ CarClass(CTransitionDrawable), public TransitionDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    /**
-     * Create a new transition drawable with the specified list of layers. At least
-     * 2 layers are required for this drawable to work properly.
-     */
-    CARAPI constructor(
-        /* [in] */ ArrayOf<IDrawable*>* layers);
-
-    /**
-     * Create a new transition drawable with no layer. To work correctly, at least 2
-     * layers must be added to this drawable.
-     *
-     * @see #TransitionDrawable(Drawable[])
-     */
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ ArrayOf<IDrawable*>* layers);
 };
 
 } // namespace Drawable

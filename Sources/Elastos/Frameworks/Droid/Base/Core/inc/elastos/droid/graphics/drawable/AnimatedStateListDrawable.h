@@ -265,6 +265,12 @@ public:
 
     AnimatedStateListDrawable();
 
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ /*@Nullable*/ IDrawableConstantState* state,
+        /* [in] */ /*@Nullable*/ IResources* res);
+
     // @Override
     CARAPI SetVisible(
         /* [in] */ Boolean visible,
@@ -322,10 +328,6 @@ protected:
     void SetConstantState(
         /* [in] */ /*@NonNull*/ AnimatedStateListState* state);
 
-    CARAPI constructor(
-        /* [in] */ /*@Nullable*/ AnimatedStateListState* state,
-        /* [in] */ /*@Nullable*/ IResources* res);
-
 private:
     CARAPI_(Boolean) SelectTransition(
         /* [in] */ Int32 toIndex);
@@ -343,10 +345,6 @@ private:
         /* [in] */ /*@NonNull*/ IAttributeSet* attrs,
         /* [in] */ /*@Nullable*/ IResourcesTheme* theme,
         /* [out] */ Int32* result) /*throws XmlPullParserException, IOException*/;
-
-    AnimatedStateListDrawable(
-        /* [in] */ /*@Nullable*/ AnimatedStateListState* state,
-        /* [in] */ /*@Nullable*/ IResources* res);
 
 private:
     static const String LOGTAG/* = AnimatedStateListDrawable.class.getSimpleName()*/;

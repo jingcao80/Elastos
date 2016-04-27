@@ -212,33 +212,65 @@ LayerDrawable::LayerDrawable()
     : mOpacityOverride(IPixelFormat::UNKNOWN)
     , mMutated(FALSE)
 {
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
-    constructor((LayerState*)NULL, NULL, NULL);
-}
-
-LayerDrawable::LayerDrawable(
-    /* [in] */ ArrayOf<IDrawable*>* layers,
-    /* [in] */ LayerState* state)
-    : mOpacityOverride(IPixelFormat::UNKNOWN)
-    , mMutated(FALSE)
-{
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
-    constructor(layers, state);
-}
-
-LayerDrawable::LayerDrawable(
-    /* [in] */ LayerState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-    : mOpacityOverride(IPixelFormat::UNKNOWN)
-    , mMutated(FALSE)
-{
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
-    constructor(state, res, theme);
 }
 
 LayerDrawable::~LayerDrawable()
 {}
+
+ECode LayerDrawable::constructor()
+{
+    return constructor(NULL, NULL, NULL);
+}
+
+ECode LayerDrawable::constructor(
+    /* [in] */ ArrayOf<IDrawable*>* layers)
+{
+    return constructor(layers, NULL);
+}
+
+ECode LayerDrawable::constructor(
+    /* [in] */ ArrayOf<IDrawable*>* layers,
+    /* [in] */ IDrawableConstantState* state)
+{
+    constructor(state, NULL, NULL);
+    Int32 length = layers->GetLength();
+    AutoPtr< ArrayOf<ChildDrawable*> > r = ArrayOf<ChildDrawable*>::Alloc(length);
+
+    for (Int32 i = 0; i < length; i++) {
+        AutoPtr<ChildDrawable> cdTemp = new ChildDrawable();
+        r->Set(i, cdTemp);
+        (*r)[i]->mDrawable = (*layers)[i];
+        (*layers)[i]->SetCallback(this);
+        Int32 config;
+        (*layers)[i]->GetChangingConfigurations(&config);
+        mLayerState->mChildrenChangingConfigurations |= config;
+    }
+    mLayerState->mNum = length;
+    mLayerState->mChildren = r;
+
+    EnsurePadding();
+    return NOERROR;
+}
+
+ECode LayerDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
+    /* [in] */ IResources* res,
+    /* [in] */ IResourcesTheme* theme)
+{
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
+    AutoPtr<LayerState> as = CreateConstantState((LayerState*)state, res);
+    mLayerState = as;
+    if (as->mNum > 0) {
+        EnsurePadding();
+    }
+
+    Boolean can = FALSE;
+    if (theme != NULL && (CanApplyTheme(&can), can)) {
+        ApplyTheme(theme);
+    }
+
+    return NOERROR;
+}
 
 AutoPtr<LayerDrawable::LayerState> LayerDrawable::CreateConstantState(
     /* [in] */ LayerState* state,
@@ -1150,49 +1182,6 @@ ECode LayerDrawable::SetLayoutDirection(
         }
     }
     return Drawable::SetLayoutDirection(layoutDirection);
-}
-
-ECode LayerDrawable::constructor(
-    /* [in] */ ArrayOf<IDrawable*>* layers,
-    /* [in] */ LayerState* state)
-{
-    constructor(state, NULL, NULL);
-    Int32 length = layers->GetLength();
-    AutoPtr< ArrayOf<ChildDrawable*> > r = ArrayOf<ChildDrawable*>::Alloc(length);
-
-    for (Int32 i = 0; i < length; i++) {
-        AutoPtr<ChildDrawable> cdTemp = new ChildDrawable();
-        r->Set(i, cdTemp);
-        (*r)[i]->mDrawable = (*layers)[i];
-        (*layers)[i]->SetCallback(this);
-        Int32 config;
-        (*layers)[i]->GetChangingConfigurations(&config);
-        mLayerState->mChildrenChangingConfigurations |= config;
-    }
-    mLayerState->mNum = length;
-    mLayerState->mChildren = r;
-
-    EnsurePadding();
-    return NOERROR;
-}
-
-ECode LayerDrawable::constructor(
-    /* [in] */ LayerState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    AutoPtr<LayerState> as = CreateConstantState(state, res);
-    mLayerState = as;
-    if (as->mNum > 0) {
-        EnsurePadding();
-    }
-
-    Boolean can = FALSE;
-    if (theme != NULL && (CanApplyTheme(&can), can)) {
-        ApplyTheme(theme);
-    }
-
-    return NOERROR;
 }
 
 } // namespace Drawable

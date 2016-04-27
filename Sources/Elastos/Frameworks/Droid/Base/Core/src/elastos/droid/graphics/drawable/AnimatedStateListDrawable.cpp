@@ -292,7 +292,24 @@ AnimatedStateListDrawable::AnimatedStateListDrawable()
     , mTransitionFromIndex(-1)
     , mMutated(FALSE)
 {
-    constructor(NULL, NULL);
+}
+
+ECode AnimatedStateListDrawable::constructor()
+{
+    return constructor(NULL, NULL);
+}
+
+ECode AnimatedStateListDrawable::constructor(
+    /* [in] */ /*@Nullable*/ IDrawableConstantState* state,
+    /* [in] */ /*@Nullable*/ IResources* res)
+{
+    StateListDrawable::constructor(NULL);
+    AutoPtr<AnimatedStateListState> newState = new AnimatedStateListState((AnimatedStateListState*)state, this, res);
+    SetConstantState(newState);
+    AutoPtr<ArrayOf<Int32> > states;
+    GetState((ArrayOf<Int32>**)&states);
+    OnStateChange(states);
+    return JumpToCurrentState();
 }
 
 ECode AnimatedStateListDrawable::SetVisible(
@@ -307,7 +324,8 @@ ECode AnimatedStateListDrawable::SetVisible(
     if (mTransition != NULL && (changed || restart)) {
         if (visible) {
             mTransition->Start();
-        } else {
+        }
+        else {
             // Ensure we're showing the correct state when visible.
             JumpToCurrentState();
         }
@@ -677,29 +695,6 @@ void AnimatedStateListDrawable::SetConstantState(
     StateListDrawable::SetConstantState(state);
 
     mState = state;
-}
-
-AnimatedStateListDrawable::AnimatedStateListDrawable(
-    /* [in] */ /*@Nullable*/ AnimatedStateListState* state,
-    /* [in] */ /*@Nullable*/ IResources* res)
-    : mTransitionToIndex(-1)
-    , mTransitionFromIndex(-1)
-    , mMutated(FALSE)
-{
-    constructor(state, res);
-}
-
-ECode AnimatedStateListDrawable::constructor(
-    /* [in] */ /*@Nullable*/ AnimatedStateListState* state,
-    /* [in] */ /*@Nullable*/ IResources* res)
-{
-    StateListDrawable::constructor(NULL);
-    AutoPtr<AnimatedStateListState> newState = new AnimatedStateListState(state, this, res);
-    SetConstantState(newState);
-    AutoPtr<ArrayOf<Int32> > states;
-    GetState((ArrayOf<Int32>**)&states);
-    OnStateChange(states);
-    return JumpToCurrentState();
 }
 
 } // namespace Drawable

@@ -99,13 +99,15 @@ public:
 
     NinePatchDrawable();
 
-    NinePatchDrawable(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ IBitmap* bitmap,
         /* [in] */ ArrayOf<Byte>* chunk,
         /* [in] */ IRect* padding,
         /* [in] */ const String& srcName);
 
-    NinePatchDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ IBitmap* bitmap,
         /* [in] */ ArrayOf<Byte>* chunk,
@@ -118,23 +120,27 @@ public:
      *
      * @hide
      */
-    NinePatchDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ IBitmap* bitmap,
         /* [in] */ ArrayOf<Byte>* chunk,
         /* [in] */ IRect* padding,
-        /* [in] */ IRect* opticalInsets,
+        /* [in] */ IRect* layoutInsets,
         /* [in] */ const String& srcName);
 
-    NinePatchDrawable(
+    CARAPI constructor(
         /* [in] */ INinePatch* patch);
 
-    NinePatchDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ INinePatch* patch);
 
-    NinePatchDrawable(
-        /* [in] */ NinePatchState* state,
+    /**
+     * The one constructor to rule them all. This is called by all public
+     * constructors to set the state and initialize local properties.
+     */
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
         /* [in] */ IResources* res,
         /* [in] */ IResourcesTheme* theme);
 
@@ -261,43 +267,6 @@ public:
         /* [out] */ Boolean* isStateful);
 
 protected:
-    CARAPI constructor(
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* chunk,
-        /* [in] */ IRect* padding,
-        /* [in] */ const String& srcName);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* chunk,
-        /* [in] */ IRect* padding,
-        /* [in] */ const String& srcName);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* chunk,
-        /* [in] */ IRect* padding,
-        /* [in] */ IRect* opticalInsets,
-        /* [in] */ const String& srcName);
-
-    CARAPI constructor(
-        /* [in] */ INinePatch* patch);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ INinePatch* patch);
-
-    /**
-     * The one constructor to rule them all. This is called by all public
-     * constructors to set the state and initialize local properties.
-     */
-    CARAPI constructor(
-        /* [in] */ NinePatchState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
     // @Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>& stateSet);

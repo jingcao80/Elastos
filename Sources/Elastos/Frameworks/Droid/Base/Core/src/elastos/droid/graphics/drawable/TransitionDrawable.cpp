@@ -53,21 +53,6 @@ const Int32 TransitionDrawable::TRANSITION_STARTING;
 const Int32 TransitionDrawable::TRANSITION_RUNNING;
 const Int32 TransitionDrawable::TRANSITION_NONE;
 CAR_INTERFACE_IMPL(TransitionDrawable, LayerDrawable, ITransitionDrawable);
-TransitionDrawable::TransitionDrawable(
-    /* [in] */ ArrayOf<IDrawable*>* layers)
-    : mTransitionState(TRANSITION_NONE)
-    , mReverse(FALSE)
-    , mStartTimeMillis(0)
-    , mFrom(0)
-    , mTo(0)
-    , mDuration(0)
-    , mOriginalDuration(0)
-    , mAlpha(0)
-    , mCrossFade(FALSE)
-{
-    AutoPtr<TransitionState> state = new TransitionState(NULL, NULL, NULL);
-    ASSERT_SUCCEEDED(constructor(state, layers));
-}
 
 TransitionDrawable::TransitionDrawable()
     : mTransitionState(TRANSITION_NONE)
@@ -82,36 +67,33 @@ TransitionDrawable::TransitionDrawable()
 {
 }
 
-TransitionDrawable::TransitionDrawable(
-    /* [in] */ TransitionState* state,
+ECode TransitionDrawable::constructor(
+    /* [in] */ ArrayOf<IDrawable*>* layers)
+{
+    AutoPtr<TransitionState> state = new TransitionState(NULL, NULL, NULL);
+    return constructor((IDrawableConstantState*)state, layers);
+}
+
+ECode TransitionDrawable::constructor()
+{
+    AutoPtr<TransitionState> state = new TransitionState(NULL, NULL, NULL);
+    return constructor((IDrawableConstantState*)state, NULL, NULL);
+}
+
+ECode TransitionDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
-    : LayerDrawable(state, res, theme)
-    , mTransitionState(TRANSITION_NONE)
-    , mReverse(FALSE)
-    , mStartTimeMillis(0)
-    , mFrom(0)
-    , mTo(0)
-    , mDuration(0)
-    , mOriginalDuration(0)
-    , mAlpha(0)
-    , mCrossFade(FALSE)
-{}
+{
+    return LayerDrawable::constructor(state, res, theme);
+}
 
-TransitionDrawable::TransitionDrawable(
-    /* [in] */ TransitionState* state,
+ECode TransitionDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ ArrayOf<IDrawable*>* layers)
-    : LayerDrawable(layers, state)
-    , mTransitionState(TRANSITION_NONE)
-    , mReverse(FALSE)
-    , mStartTimeMillis(0)
-    , mFrom(0)
-    , mTo(0)
-    , mDuration(0)
-    , mOriginalDuration(0)
-    , mAlpha(0)
-    , mCrossFade(FALSE)
-{}
+{
+    return LayerDrawable::constructor(layers, state);
+}
 
 AutoPtr<LayerDrawable::LayerState> TransitionDrawable::CreateConstantState(
     /* [in] */ LayerState* state,
@@ -249,34 +231,6 @@ ECode TransitionDrawable::IsCrossFadeEnabled(
     VALIDATE_NOT_NULL(enabled);
     *enabled = mCrossFade;
     return NOERROR;
-}
-
-ECode TransitionDrawable::constructor(
-    /* [in] */ ArrayOf<IDrawable*>* layers)
-{
-    AutoPtr<TransitionState> state = new TransitionState(NULL, NULL, NULL);
-    return constructor(state, layers);
-}
-
-ECode TransitionDrawable::constructor()
-{
-    AutoPtr<TransitionState> state = new TransitionState(NULL, NULL, NULL);
-    return constructor(state, NULL, NULL);
-}
-
-ECode TransitionDrawable::constructor(
-    /* [in] */ TransitionState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    return LayerDrawable::constructor(state, res, theme);
-}
-
-ECode TransitionDrawable::constructor(
-    /* [in] */ TransitionState* state,
-    /* [in] */ ArrayOf<IDrawable*>* layers)
-{
-    return LayerDrawable::constructor(layers, state);
 }
 
 } // namespace Drawable

@@ -99,16 +99,12 @@ RippleDrawable::RippleDrawable()
     , mOverrideBounds(FALSE)
     , mNeedsDraw(FALSE)
 {
-    AutoPtr<RippleState> rs = new RippleState(NULL, NULL, NULL);
-    constructor(rs, NULL, NULL);
 }
 
-RippleDrawable::RippleDrawable(
-    /* [in] */ /*@NonNull*/ IColorStateList* color,
-    /* [in] */ /*@Nullable*/ IDrawable* content,
-    /* [in] */ /*@Nullable*/ IDrawable* mask)
+ECode RippleDrawable::constructor()
 {
-    constructor(color, content, mask);
+    AutoPtr<RippleState> rs = new RippleState(NULL, NULL, NULL);
+    return constructor((IDrawableConstantState*)rs, NULL, NULL);
 }
 
 ECode RippleDrawable::constructor(
@@ -118,7 +114,7 @@ ECode RippleDrawable::constructor(
 {
     assert(color != NULL);
     AutoPtr<RippleState> rs = new RippleState(NULL, NULL, NULL);
-    constructor(rs, NULL, NULL);
+    constructor((IDrawableConstantState*)rs, NULL, NULL);
 
     if (color == NULL) {
         // throw new IllegalArgumentException("RippleDrawable requires a non-NULL color");
@@ -140,7 +136,7 @@ ECode RippleDrawable::constructor(
 }
 
 ECode RippleDrawable::constructor(
-    /* [in] */ RippleState* state,
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
@@ -153,16 +149,18 @@ ECode RippleDrawable::constructor(
 
     AutoPtr<RippleState> ns;
     Boolean can = FALSE;
-    if (theme != NULL && state != NULL && (state->CanApplyTheme(&can), can)) {
-        ns = new RippleState(state, this, res);
+    if (theme != NULL && state != NULL && ((RippleState*)state->CanApplyTheme(&can), can)) {
+        ns = new RippleState((RippleState*)state, this, res);
         needsTheme = TRUE;
-    } else if (state == NULL) {
+    }
+    else if (state == NULL) {
         ns = new RippleState(NULL, this, res);
-    } else {
+    }
+    else {
         // We always need a new state since child drawables contain local
         // state but live within the parent's constant state.
         // TODO: Move child drawables into local state.
-        ns = new RippleState(state, this, res);
+        ns = new RippleState((RippleState*)state, this, res);
     }
 
     if (res != NULL) {
@@ -1016,14 +1014,6 @@ ECode RippleDrawable::GetMaxRadius(
     VALIDATE_NOT_NULL(radius);
     *radius = mState->mMaxRadius;
     return NOERROR;
-}
-
-RippleDrawable::RippleDrawable(
-    /* [in] */ RippleState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    constructor(state, res, theme);
 }
 
 void RippleDrawable::InitializeFromState()

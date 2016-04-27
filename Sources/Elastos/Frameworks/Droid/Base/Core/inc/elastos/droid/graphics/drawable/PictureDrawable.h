@@ -20,13 +20,15 @@ class PictureDrawable
 public:
     CAR_INTERFACE_DECL();
 
+    PictureDrawable();
+
     /**
      * Construct a new drawable referencing the specified picture. The picture
      * may be null.
      *
      * @param picture The picture to associate with the drawable. May be null.
      */
-    PictureDrawable(
+    CARAPI constructor(
         /* [in] */ IPicture* picture);
 
     /**
@@ -76,12 +78,6 @@ public:
     //@Override
     CARAPI SetAlpha(
         /* [in] */ Int32 alpha);
-
-protected:
-    PictureDrawable();
-
-    CARAPI constructor(
-        /* [in] */ IPicture* picture);
 
 private:
     AutoPtr<IPicture> mPicture;

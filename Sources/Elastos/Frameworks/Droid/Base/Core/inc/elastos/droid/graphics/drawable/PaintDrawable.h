@@ -22,7 +22,9 @@ public:
 
     PaintDrawable();
 
-    PaintDrawable(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ Int32 color);
 
     /**
@@ -43,11 +45,6 @@ public:
         /* [in] */ ArrayOf<Float>* radii);
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ Int32 color);
-
     //@Override
     CARAPI_(Boolean) InflateTag(
         /* [in] */ const String& name,

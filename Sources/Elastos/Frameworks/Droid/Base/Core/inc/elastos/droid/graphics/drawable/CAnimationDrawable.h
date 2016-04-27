@@ -14,12 +14,6 @@ CarClass(CAnimationDrawable), public AnimationDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res);
 };
 
 } // namespace Drawable

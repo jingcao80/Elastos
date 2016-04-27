@@ -5,7 +5,6 @@
 #include "_Elastos_Droid_Graphics_Drawable_CLayerDrawable.h"
 #include "elastos/droid/graphics/drawable/LayerDrawable.h"
 
-
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
@@ -15,20 +14,6 @@ CarClass(CLayerDrawable), public LayerDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ ArrayOf<IDrawable*>* layers);
-
-    CARAPI constructor(
-        /* [in] */ ArrayOf<IDrawable*>* layers,
-        /* [in] */ IDrawableConstantState* state);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

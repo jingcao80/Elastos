@@ -60,15 +60,18 @@ public:
      */
     ColorDrawable();
 
+
+    CARAPI constructor();
+
     /**
      * Creates a new ColorDrawable with the specified color.
      *
      * @param color The color to draw.
      */
-    ColorDrawable(
+    CARAPI constructor(
         /* [in] */ Int32 color);
 
-    ColorDrawable(
+    CARAPI constructor(
         /* [in] */ IDrawableConstantState* state,
         /* [in] */ IResources* res,
         /* [in] */ IResourcesTheme* theme);
@@ -172,16 +175,6 @@ public:
         /* [out] */ IDrawableConstantState** state);
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ Int32 color);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
     // @Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* stateSet);

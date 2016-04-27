@@ -14,15 +14,6 @@ CarClass(CPictureDrawable), public PictureDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    /**
-     * Construct a new drawable referencing the specified picture. The picture
-     * may be null.
-     *
-     * @param picture The picture to associate with the drawable. May be null.
-     */
-    CARAPI constructor(
-        /* [in] */ IPicture* picture);
 };
 
 } // namespace Drawable

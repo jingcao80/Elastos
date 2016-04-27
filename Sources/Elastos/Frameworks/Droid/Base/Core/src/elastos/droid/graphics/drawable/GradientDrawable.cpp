@@ -268,7 +268,6 @@ void GradientDrawable::GradientState::SetGradientRadius(
     mGradientRadiusType = type;
 }
 
-
 const Int32 GradientDrawable::RADIUS_TYPE_PIXELS = 0;
 const Int32 GradientDrawable::RADIUS_TYPE_FRACTION = 1;
 const Int32 GradientDrawable::RADIUS_TYPE_FRACTION_PARENT = 2;
@@ -287,20 +286,39 @@ GradientDrawable::GradientDrawable()
     CRectF::New((IRectF**)&mRect);
 }
 
-GradientDrawable::GradientDrawable(
+ECode GradientDrawable::constructor()
+{
+    AutoPtr<GradientState> state = new GradientState(GradientDrawableOrientation_TOP_BOTTOM, NULL);
+    return constructor((IDrawableConstantState*)state, NULL);
+}
+
+ECode GradientDrawable::constructor(
     /* [in] */ GradientDrawableOrientation orientation,
     /* [in] */ ArrayOf<Int32>* colors)
-    : mAlpha(0xFF)
-    , mGradientIsDirty(FALSE)
-    , mMutated(FALSE)
-    , mPathIsDirty(TRUE)
-    , mGradientRadius(0)
 {
-    CPaint::New(IPaint::ANTI_ALIAS_FLAG, (IPaint**)&mFillPaint);
-    CPath::New((IPath**)&mPath);
-    CRectF::New((IRectF**)&mRect);
     AutoPtr<GradientState> state = new GradientState(orientation, colors);
-    constructor(state, NULL);
+    return constructor((IDrawableConstantState*)state, NULL);
+}
+
+ECode GradientDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
+    /* [in] */ IResourcesTheme* theme)
+{
+    Boolean can = FALSE;
+    if (theme != NULL && (((GradientState*)state)->CanApplyTheme(&can), can)) {
+        // If we need to apply a theme, implicitly mutate.
+        mGradientState = new GradientState((GradientState*)state);
+        ApplyTheme(theme);
+    }
+    else {
+        mGradientState = (GradientState*)state;
+    }
+
+    InitializeWithState((GradientState*)state);
+
+    mGradientIsDirty = TRUE;
+    mMutated = FALSE;
+    return NOERROR;
 }
 
 ECode GradientDrawable::GetPadding(
@@ -1724,18 +1742,6 @@ ECode GradientDrawable::Mutate()
     return NOERROR;
 }
 
-GradientDrawable::GradientDrawable(
-    /* [in] */ GradientState* state,
-    /* [in] */ IResourcesTheme* theme)
-    : mAlpha(0xFF)
-    , mGradientIsDirty(FALSE)
-    , mMutated(FALSE)
-    , mPathIsDirty(TRUE)
-    , mGradientRadius(0)
-{
-    constructor(state, theme);
-}
-
 void GradientDrawable::InitializeWithState(
     /* [in] */ GradientState* state)
 {
@@ -1780,40 +1786,6 @@ void GradientDrawable::InitializeWithState(
             mStrokePaint->SetPathEffect((IPathEffect*)e.Get());
         }
     }
-}
-
-ECode GradientDrawable::constructor()
-{
-    AutoPtr<GradientState> state = new GradientState(GradientDrawableOrientation_TOP_BOTTOM, NULL);
-    return constructor(state, NULL);
-}
-
-ECode GradientDrawable::constructor(
-    /* [in] */ GradientDrawableOrientation orientation,
-    /* [in] */ ArrayOf<Int32>* colors)
-{
-    AutoPtr<GradientState> state = new GradientState(orientation, colors);
-    return constructor(state, NULL);
-}
-
-ECode GradientDrawable::constructor(
-    /* [in] */ GradientState* state,
-    /* [in] */ IResourcesTheme* theme)
-{
-    Boolean can = FALSE;
-    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
-        // If we need to apply a theme, implicitly mutate.
-        mGradientState = new GradientState(state);
-        ApplyTheme(theme);
-    } else {
-        mGradientState = state;
-    }
-
-    InitializeWithState(state);
-
-    mGradientIsDirty = TRUE;
-    mMutated = FALSE;
-    return NOERROR;
 }
 
 } // namespace Drawable

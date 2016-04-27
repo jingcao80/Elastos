@@ -104,34 +104,45 @@ InsetDrawable::InsetDrawable()
     CRect::New((IRect**)&mTmpRect);
 }
 
-InsetDrawable::InsetDrawable(
-    /* [in] */ IDrawable* drawable,
-    /* [in] */ Int32 inset)
-    : mMutated(FALSE)
+ECode InsetDrawable::constructor()
 {
-    CRect::New((IRect**)&mTmpRect);
-    ASSERT_SUCCEEDED(constructor(drawable, inset, inset, inset, inset));
+    return constructor(NULL, (IResources*)NULL);
 }
 
-InsetDrawable::InsetDrawable(
+ECode InsetDrawable::constructor(
+    /* [in] */ IDrawable* drawable,
+    /* [in] */ Int32 inset)
+{
+    return constructor(drawable, inset, inset, inset, inset);
+}
+
+ECode InsetDrawable::constructor(
     /* [in] */ IDrawable* drawable,
     /* [in] */ Int32 insetLeft,
     /* [in] */ Int32 insetTop,
     /* [in] */ Int32 insetRight,
     /* [in] */ Int32 insetBottom)
-    : mMutated(FALSE)
 {
-    CRect::New((IRect**)&mTmpRect);
-    ASSERT_SUCCEEDED(constructor(drawable, insetLeft, insetTop, insetRight, insetBottom));
+    FAIL_RETURN(constructor(NULL, (IResources*)NULL));
+
+    mInsetState->mDrawable = drawable;
+    mInsetState->mInsetLeft = insetLeft;
+    mInsetState->mInsetTop = insetTop;
+    mInsetState->mInsetRight = insetRight;
+    mInsetState->mInsetBottom = insetBottom;
+
+    if (drawable != NULL) {
+        drawable->SetCallback(this);
+    }
+    return NOERROR;
 }
 
-InsetDrawable::InsetDrawable(
-    /* [in] */ InsetState* state,
+ECode InsetDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res)
-    : mMutated(FALSE)
 {
-    CRect::New((IRect**)&mTmpRect);
-    mInsetState = new InsetState(state, this, res);
+    mInsetState = new InsetState((InsetState*)state, this, res);
+    return NOERROR;
 }
 
 ECode InsetDrawable::Inflate(
@@ -536,47 +547,6 @@ ECode InsetDrawable::GetDrawable(
     VALIDATE_NOT_NULL(drawable);
     *drawable = mInsetState->mDrawable;
     REFCOUNT_ADD(*drawable);
-    return NOERROR;
-}
-
-ECode InsetDrawable::constructor()
-{
-    return constructor((IDrawableConstantState*)NULL, (IResources*)NULL);
-}
-
-ECode InsetDrawable::constructor(
-    /* [in] */ IDrawable* drawable,
-    /* [in] */ Int32 inset)
-{
-    return constructor(drawable, inset, inset, inset, inset);
-}
-
-ECode InsetDrawable::constructor(
-    /* [in] */ IDrawable* drawable,
-    /* [in] */ Int32 insetLeft,
-    /* [in] */ Int32 insetTop,
-    /* [in] */ Int32 insetRight,
-    /* [in] */ Int32 insetBottom)
-{
-    FAIL_RETURN(constructor((IDrawableConstantState*)NULL, (IResources*)NULL));
-
-    mInsetState->mDrawable = drawable;
-    mInsetState->mInsetLeft = insetLeft;
-    mInsetState->mInsetTop = insetTop;
-    mInsetState->mInsetRight = insetRight;
-    mInsetState->mInsetBottom = insetBottom;
-
-    if (drawable != NULL) {
-        drawable->SetCallback(this);
-    }
-    return NOERROR;
-}
-
-ECode InsetDrawable::constructor(
-    /* [in] */ IDrawableConstantState* state,
-    /* [in] */ IResources* res)
-{
-    mInsetState = new InsetState(state, this, res);
     return NOERROR;
 }
 

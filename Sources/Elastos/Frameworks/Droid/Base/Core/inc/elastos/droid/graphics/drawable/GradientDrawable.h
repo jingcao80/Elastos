@@ -176,13 +176,19 @@ public:
 
     GradientDrawable();
 
+    CARAPI constructor();
+
     /**
      * Create a new gradient drawable given an orientation and an array
      * of colors for the gradient.
      */
-    GradientDrawable(
+    CARAPI constructor(
         /* [in] */ GradientDrawableOrientation orientation,
         /* [in] */ ArrayOf<Int32>* colors);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResourcesTheme* theme);
 
     //@Override
     CARAPI GetPadding(
@@ -369,28 +375,10 @@ protected:
     CARAPI_(Boolean) OnLevelChange(
         /* [in] */ Int32 level);
 
-    CARAPI constructor();
-
-    /**
-     * Create a new gradient drawable given an orientation and an array
-     * of colors for the gradient.
-     */
-    CARAPI constructor(
-        /* [in] */ GradientDrawableOrientation orientation,
-        /* [in] */ ArrayOf<Int32>* colors);
-
-    CARAPI constructor(
-        /* [in] */ GradientState* state,
-        /* [in] */ IResourcesTheme* theme);
-
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* stateSet);
 
 private:
-    GradientDrawable(
-        /* [in] */ GradientState* state,
-        /* [in] */ IResourcesTheme* theme);
-
     CARAPI_(Int32) ModulateAlpha(
         /* [in] */ Int32 alpha);
 

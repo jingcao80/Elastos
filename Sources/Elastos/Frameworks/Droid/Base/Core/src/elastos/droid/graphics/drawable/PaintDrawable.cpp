@@ -19,12 +19,19 @@ CAR_INTERFACE_IMPL(PaintDrawable, ShapeDrawable, IPaintDrawable);
 PaintDrawable::PaintDrawable()
 {}
 
-PaintDrawable::PaintDrawable(
+ECode PaintDrawable::constructor()
+{
+    return ShapeDrawable::constructor();
+}
+
+ECode PaintDrawable::constructor(
     /* [in] */ Int32 color)
 {
+    ShapeDrawable::constructor();
+
     AutoPtr<IPaint> paint;
     GetPaint((IPaint**)&paint);
-    paint->SetColor(color);
+    return paint->SetColor(color);
 }
 
 ECode PaintDrawable::SetCornerRadius(
@@ -100,19 +107,6 @@ Boolean PaintDrawable::InflateTag(
         return TRUE;
     }
     return ShapeDrawable::InflateTag(name, r, parser, attrs);
-}
-
-ECode PaintDrawable::constructor()
-{
-    return ShapeDrawable::constructor();
-}
-
-ECode PaintDrawable::constructor(
-    /* [in] */ Int32 color)
-{
-    AutoPtr<IPaint> paint;
-    GetPaint((IPaint**)&paint);
-    return paint->SetColor(color);
 }
 
 } // namespace Drawable

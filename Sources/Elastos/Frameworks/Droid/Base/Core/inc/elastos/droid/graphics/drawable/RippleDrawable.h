@@ -55,10 +55,12 @@ protected:
 public:
     CAR_INTERFACE_DECL();
 
+    RippleDrawable();
+
     /**
      * Constructor used for drawable inflation.
      */
-    RippleDrawable();
+    CARAPI constructor();
 
     /**
      * Creates a new ripple drawable with the specified ripple color and
@@ -68,10 +70,15 @@ public:
      * @param content The content drawable, may be {@code NULL}
      * @param mask The mask drawable, may be {@code NULL}
      */
-    RippleDrawable(
+    CARAPI constructor(
         /* [in] */ /*@NonNull*/ IColorStateList* color,
         /* [in] */ /*@Nullable*/ IDrawable* content,
         /* [in] */ /*@Nullable*/ IDrawable* mask);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res,
+        /* [in] */ IResourcesTheme* theme);
 
     // @Override
     CARAPI JumpToCurrentState();
@@ -226,11 +233,6 @@ public:
     CARAPI GetMaxRadius(
         /* [out] */ Int32* radius);
 
-    RippleDrawable(
-        /* [in] */ RippleState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
 protected:
     // @Override
     CARAPI_(Boolean) OnStateChange(
@@ -239,16 +241,6 @@ protected:
     // @Override
     CARAPI_(void) OnBoundsChange(
         /* [in] */ IRect* bounds);
-
-    CARAPI constructor(
-        /* [in] */ /*@NonNull*/ IColorStateList* color,
-        /* [in] */ /*@Nullable*/ IDrawable* content,
-        /* [in] */ /*@Nullable*/ IDrawable* mask);
-
-    CARAPI constructor(
-        /* [in] */ RippleState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 
 private:
     CARAPI_(Boolean) CancelExitingRipples();

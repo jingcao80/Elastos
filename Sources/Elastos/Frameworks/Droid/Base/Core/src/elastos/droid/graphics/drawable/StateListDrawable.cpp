@@ -30,26 +30,16 @@ StateListDrawable::StateListDrawable()
 {
 }
 
-StateListDrawable::StateListDrawable(
-    /* [in] */ StateListState* state)
-    : mMutated(FALSE)
+ECode StateListDrawable::constructor()
 {
-    constructor(state);
-}
-
-StateListDrawable::StateListDrawable(
-    /* [in] */ StateListState* state,
-    /* [in] */ IResources* res)
-    : mMutated(FALSE)
-{
-    constructor(state, res);
+    return constructor(NULL, NULL);
 }
 
 ECode StateListDrawable::constructor(
-    /* [in] */ StateListState* state,
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res)
 {
-    AutoPtr<StateListState> newState = new StateListState(state, this, res);
+    AutoPtr<StateListState> newState = new StateListState((StateListState*)state, this, res);
     SetConstantState(newState);
 
     AutoPtr<ArrayOf<Int32> > states;
@@ -59,10 +49,10 @@ ECode StateListDrawable::constructor(
 }
 
 ECode StateListDrawable::constructor(
-    /* [in] */ StateListState* state)
+    /* [in] */ IDrawableConstantState* state)
 {
     if (state != NULL) {
-        SetConstantState(state);
+        SetConstantState((StateListState*)state);
     }
     return NOERROR;
 }

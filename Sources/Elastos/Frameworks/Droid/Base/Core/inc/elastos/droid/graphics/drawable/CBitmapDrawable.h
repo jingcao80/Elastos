@@ -14,37 +14,6 @@ CarClass(CBitmapDrawable), public BitmapDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IResources* res);
-
-    CARAPI constructor(
-        /* [in] */ IBitmap* bitmap);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IBitmap* bitmap);
-
-    CARAPI constructor(
-        /* [in] */ const String& filepath);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ const String& filepath);
-
-    CARAPI constructor(
-        /* [in] */ IInputStream* is);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IInputStream* is);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

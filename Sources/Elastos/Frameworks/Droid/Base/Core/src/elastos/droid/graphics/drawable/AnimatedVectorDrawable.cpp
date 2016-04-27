@@ -115,15 +115,6 @@ CAR_INTERFACE_IMPL_2(AnimatedVectorDrawable, Drawable, IAnimatedVectorDrawable, 
 AnimatedVectorDrawable::AnimatedVectorDrawable()
     : mMutated(FALSE)
 {
-    mAnimatedVectorState = new AnimatedVectorDrawableState(NULL);
-}
-
-AnimatedVectorDrawable::AnimatedVectorDrawable(
-    /* [in] */ AnimatedVectorDrawableState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    constructor(state, res, theme);
 }
 
 ECode AnimatedVectorDrawable::constructor()
@@ -133,11 +124,11 @@ ECode AnimatedVectorDrawable::constructor()
 }
 
 ECode AnimatedVectorDrawable::constructor(
-    /* [in] */ AnimatedVectorDrawableState* state,
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
-    mAnimatedVectorState = new AnimatedVectorDrawableState(state);
+    mAnimatedVectorState = new AnimatedVectorDrawableState((AnimatedVectorDrawableState*)state);
     Boolean can = FALSE;
     if (theme != NULL && (CanApplyTheme(&can), can)) {
         ApplyTheme(theme);

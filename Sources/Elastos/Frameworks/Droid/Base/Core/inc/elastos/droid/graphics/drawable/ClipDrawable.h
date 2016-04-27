@@ -68,13 +68,21 @@ protected:
 public:
     CAR_INTERFACE_DECL();
 
+    ClipDrawable();
+
+    CARAPI constructor();
+
     /**
      * @param orientation Bitwise-or of {@link #HORIZONTAL} and/or {@link #VERTICAL}
      */
-    ClipDrawable(
+    CARAPI constructor(
         /* [in] */ IDrawable* drawable,
         /* [in] */ Int32 gravity,
         /* [in] */ Int32 orientation);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
 
     //@Override
     CARAPI Inflate(
@@ -163,8 +171,6 @@ public:
         /* [in] */ Int32 layoutDirection);
 
 protected:
-    ClipDrawable();
-
     //@Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* state);
@@ -176,20 +182,6 @@ protected:
     //@Override
     CARAPI_(void) OnBoundsChange(
         /* [in] */ IRect* bounds);
-
-    CARAPI constructor(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 gravity,
-        /* [in] */ Int32 orientation);
-
-    CARAPI constructor(
-        /* [in] */ ClipState* state = NULL,
-        /* [in] */ IResources* res = NULL);
-
-private:
-    ClipDrawable(
-        /* [in] */ ClipState* state,
-        /* [in] */ IResources* res);
 
 private:
     AutoPtr<ClipState> mClipState;

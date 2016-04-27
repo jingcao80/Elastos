@@ -168,105 +168,94 @@ NinePatchDrawable::NinePatchDrawable()
     , mBitmapHeight(-1)
 {
     mOpticalInsets = Insets::NONE;
+}
+
+ECode NinePatchDrawable::constructor()
+{
     mNinePatchState = new NinePatchState();
-}
-
-NinePatchDrawable::NinePatchDrawable(
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* chunk,
-    /* [in] */ IRect* padding,
-    /* [in] */ const String& srcName)
-    : mMutated(FALSE)
-    , mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mBitmapWidth(-1)
-    , mBitmapHeight(-1)
-{
-    mOpticalInsets = Insets::NONE;
-    constructor(bitmap, chunk, padding, srcName);
-}
-
-NinePatchDrawable::NinePatchDrawable(
-    /* [in] */ IResources* res,
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* chunk,
-    /* [in] */ IRect* padding,
-    /* [in] */ const String& srcName)
-    : mMutated(FALSE)
-    , mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mBitmapWidth(-1)
-    , mBitmapHeight(-1)
-{
-    mOpticalInsets = Insets::NONE;
-    constructor(res, bitmap, chunk, padding, srcName);
-}
-
-NinePatchDrawable::NinePatchDrawable(
-    /* [in] */ IResources* res,
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* chunk,
-    /* [in] */ IRect* padding,
-    /* [in] */ IRect* layoutInsets,
-    /* [in] */ const String& srcName)
-    : mMutated(FALSE)
-    , mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mBitmapWidth(-1)
-    , mBitmapHeight(-1)
-{
-    mOpticalInsets = Insets::NONE;
-    constructor(res, bitmap, chunk, padding, layoutInsets, srcName);
-}
-
-NinePatchDrawable::NinePatchDrawable(
-    /* [in] */ INinePatch* patch)
-    : mMutated(FALSE)
-    , mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mBitmapWidth(-1)
-    , mBitmapHeight(-1)
-{
-    mOpticalInsets = Insets::NONE;
-    constructor(patch);
-}
-
-NinePatchDrawable::NinePatchDrawable(
-    /* [in] */ IResources* res,
-    /* [in] */ INinePatch* patch)
-    : mMutated(FALSE)
-    , mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mBitmapWidth(-1)
-    , mBitmapHeight(-1)
-{
-    mOpticalInsets = Insets::NONE;
-    constructor(res, patch);
-}
-
-NinePatchDrawable::NinePatchDrawable(
-    /* [in] */ NinePatchState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-    : mMutated(FALSE)
-    , mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mBitmapWidth(-1)
-    , mBitmapHeight(-1)
-{
-    mOpticalInsets = Insets::NONE;
-    constructor(state, res, theme);
+    return NOERROR;
 }
 
 ECode NinePatchDrawable::constructor(
-    /* [in] */ NinePatchState* state,
+    /* [in] */ IBitmap* bitmap,
+    /* [in] */ ArrayOf<Byte>* chunk,
+    /* [in] */ IRect* padding,
+    /* [in] */ const String& srcName)
+{
+    AutoPtr<INinePatch> patch;
+    FAIL_RETURN(CNinePatch::New(bitmap, chunk, srcName, (INinePatch**)&patch));
+    AutoPtr<NinePatchState> state = new NinePatchState(patch, padding);
+    return constructor((IDrawableConstantState*)state, NULL, NULL);
+}
+
+ECode NinePatchDrawable::constructor(
+    /* [in] */ IResources* res,
+    /* [in] */ IBitmap* bitmap,
+    /* [in] */ ArrayOf<Byte>* chunk,
+    /* [in] */ IRect* padding,
+    /* [in] */ const String& srcName)
+{
+    AutoPtr<INinePatch> patch;
+    FAIL_RETURN(CNinePatch::New(bitmap, chunk, srcName, (INinePatch**)&patch));
+    AutoPtr<NinePatchState> state = new NinePatchState(patch, padding);
+    FAIL_RETURN(constructor((IDrawableConstantState*)state, res, NULL));
+    mNinePatchState->mTargetDensity = mTargetDensity;
+    return NOERROR;
+}
+
+ECode NinePatchDrawable::constructor(
+    /* [in] */ IResources* res,
+    /* [in] */ IBitmap* bitmap,
+    /* [in] */ ArrayOf<Byte>* chunk,
+    /* [in] */ IRect* padding,
+    /* [in] */ IRect* opticalInsets,
+    /* [in] */ const String& srcName)
+{
+    AutoPtr<INinePatch> ninePatch;
+    FAIL_RETURN(CNinePatch::New(bitmap, chunk, srcName, (INinePatch**)&ninePatch));
+    AutoPtr<NinePatchState> state = new NinePatchState(ninePatch, padding, opticalInsets);
+    FAIL_RETURN(constructor((IDrawableConstantState*)state, res, NULL));
+    mNinePatchState->mTargetDensity = mTargetDensity;
+    return NOERROR;
+}
+
+ECode NinePatchDrawable::constructor(
+    /* [in] */ INinePatch* patch)
+{
+    AutoPtr<IRect> rect;
+    FAIL_RETURN(CRect::New((IRect**)&rect));
+    AutoPtr<NinePatchState> state = new NinePatchState(patch, rect);
+    return constructor((IDrawableConstantState*)state, NULL, NULL);
+}
+
+ECode NinePatchDrawable::constructor(
+    /* [in] */ IResources* res,
+    /* [in] */ INinePatch* patch)
+{
+    AutoPtr<IRect> rect;
+    FAIL_RETURN(CRect::New((IRect**)&rect));
+    AutoPtr<NinePatchState> state = new NinePatchState(patch, rect);
+    FAIL_RETURN(constructor((IDrawableConstantState*)state, res, NULL));
+    mNinePatchState->mTargetDensity = mTargetDensity;
+    return NOERROR;
+}
+
+ECode NinePatchDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
     Boolean can = FALSE;
-    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
+    if (theme != NULL && (((NinePatchState*)state)->CanApplyTheme(&can), can)) {
         // If we need to apply a theme, implicitly mutate.
-        mNinePatchState = new NinePatchState(state);
+        mNinePatchState = new NinePatchState((NinePatchState*)state);
         ApplyTheme(theme);
-    } else {
-        mNinePatchState = state;
+    }
+    else {
+        mNinePatchState = (NinePatchState*)state;
     }
 
-    return InitializeWithState(state, res);
+    return InitializeWithState((NinePatchState*)state, res);
 }
 
 ECode NinePatchDrawable::InitializeWithState(
@@ -862,70 +851,6 @@ ECode NinePatchDrawable::IsStateful(
     AutoPtr<NinePatchState> s = mNinePatchState;
     Boolean tmp = FALSE;
     *isStateful = (Drawable::IsStateful(isStateful), *isStateful) || (s->mTint != NULL && (s->mTint->IsStateful(&tmp), tmp));
-    return NOERROR;
-}
-
-ECode NinePatchDrawable::constructor(
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* chunk,
-    /* [in] */ IRect* padding,
-    /* [in] */ const String& srcName)
-{
-    AutoPtr<INinePatch> patch;
-    FAIL_RETURN(CNinePatch::New(bitmap, chunk, srcName, (INinePatch**)&patch));
-    AutoPtr<NinePatchState> state = new NinePatchState(patch, padding);
-    return constructor(state, NULL, NULL);
-}
-
-ECode NinePatchDrawable::constructor(
-    /* [in] */ IResources* res,
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* chunk,
-    /* [in] */ IRect* padding,
-    /* [in] */ const String& srcName)
-{
-    AutoPtr<INinePatch> patch;
-    FAIL_RETURN(CNinePatch::New(bitmap, chunk, srcName, (INinePatch**)&patch));
-    AutoPtr<NinePatchState> state = new NinePatchState(patch, padding);
-    FAIL_RETURN(constructor(state, res, NULL));
-    mNinePatchState->mTargetDensity = mTargetDensity;
-    return NOERROR;
-}
-
-ECode NinePatchDrawable::constructor(
-    /* [in] */ IResources* res,
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* chunk,
-    /* [in] */ IRect* padding,
-    /* [in] */ IRect* opticalInsets,
-    /* [in] */ const String& srcName)
-{
-    AutoPtr<INinePatch> ninePatch;
-    FAIL_RETURN(CNinePatch::New(bitmap, chunk, srcName, (INinePatch**)&ninePatch));
-    AutoPtr<NinePatchState> state = new NinePatchState(ninePatch, padding, opticalInsets);
-    FAIL_RETURN(constructor(state, res, NULL));
-    mNinePatchState->mTargetDensity = mTargetDensity;
-    return NOERROR;
-}
-
-ECode NinePatchDrawable::constructor(
-    /* [in] */ INinePatch* patch)
-{
-    AutoPtr<IRect> rect;
-    FAIL_RETURN(CRect::New((IRect**)&rect));
-    AutoPtr<NinePatchState> state = new NinePatchState(patch, rect);
-    return constructor(state, NULL, NULL);
-}
-
-ECode NinePatchDrawable::constructor(
-    /* [in] */ IResources* res,
-    /* [in] */ INinePatch* patch)
-{
-    AutoPtr<IRect> rect;
-    FAIL_RETURN(CRect::New((IRect**)&rect));
-    AutoPtr<NinePatchState> state = new NinePatchState(patch, rect);
-    FAIL_RETURN(constructor(state, res, NULL));
-    mNinePatchState->mTargetDensity = mTargetDensity;
     return NOERROR;
 }
 

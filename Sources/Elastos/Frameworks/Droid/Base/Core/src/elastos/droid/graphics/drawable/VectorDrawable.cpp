@@ -1120,34 +1120,31 @@ VectorDrawable::VectorDrawable()
     : mMutated(FALSE)
     , mAllowCaching(TRUE)
 {
-    mVectorState = new VectorDrawableState();
 }
 
-VectorDrawable::VectorDrawable(
-    /* [in] */ VectorDrawableState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-    : mMutated(FALSE)
-    , mAllowCaching(TRUE)
+ECode VectorDrawable::constructor()
 {
-    constructor(state, res, theme);
+    mVectorState = new VectorDrawableState();
+    return NOERROR;
 }
 
 ECode VectorDrawable::constructor(
-    /* [in] */ VectorDrawableState* state,
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
     Boolean can = FALSE;
-    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
+    if (theme != NULL && (((VectorDrawableState*)state)->CanApplyTheme(&can), can)) {
         // If we need to apply a theme, implicitly mutate.
-        mVectorState = new VectorDrawableState(state);
+        mVectorState = new VectorDrawableState((VectorDrawableState*)state);
         ApplyTheme(theme);
-    } else {
-        mVectorState = state;
+    }
+    else {
+        mVectorState = (VectorDrawableState*)state;
     }
 
-    mTintFilter = UpdateTintFilter(mTintFilter, state->mTint, state->mTintMode);
+    mTintFilter = UpdateTintFilter(mTintFilter, ((VectorDrawableState*)state)->mTint,
+            ((VectorDrawableState*)state)->mTintMode);
     return NOERROR;
 }
 

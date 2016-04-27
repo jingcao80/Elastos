@@ -6,7 +6,6 @@
 #include "elastos/droid/graphics/drawable/CShapeDrawable.h"
 #include "elastos/droid/graphics/drawable/ShapeDrawable.h"
 
-
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
@@ -16,24 +15,6 @@ CarClass(CShapeDrawable), public ShapeDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    /**
-     * ShapeDrawable constructor.
-     */
-    CARAPI constructor();
-
-    /**
-     * Creates a ShapeDrawable with a specified Shape.
-     *
-     * @param s the Shape that this ShapeDrawable should be
-     */
-    CARAPI constructor(
-        /* [in] */ IShape* s);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

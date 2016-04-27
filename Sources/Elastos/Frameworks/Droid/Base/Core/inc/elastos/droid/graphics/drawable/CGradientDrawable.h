@@ -14,20 +14,6 @@ CarClass(CGradientDrawable), public GradientDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    /**
-     * Create a new gradient drawable given an orientation and an array
-     * of colors for the gradient.
-     */
-    CARAPI constructor(
-        /* [in] */ GradientDrawableOrientation orientation,
-        /* [in] */ ArrayOf<Int32>* colors);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

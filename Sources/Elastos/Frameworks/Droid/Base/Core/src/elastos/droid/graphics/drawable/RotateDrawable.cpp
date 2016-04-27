@@ -107,12 +107,17 @@ RotateDrawable::RotateDrawable()
 {
 }
 
-RotateDrawable::RotateDrawable(
-    /* [in] */ RotateState* rotateState,
-    /* [in] */ IResources* res)
-    : mMutated(FALSE)
+ECode RotateDrawable::constructor()
 {
-    mState = new RotateState(rotateState, this, res);
+    return constructor(NULL, NULL);
+}
+
+ECode RotateDrawable::constructor(
+    /* [in] */ IDrawableConstantState* rotateState,
+    /* [in] */ IResources* res)
+{
+    mState = new RotateState((RotateState*)rotateState, this, res);
+    return NOERROR;
 }
 
 ECode RotateDrawable::Draw(
@@ -549,19 +554,6 @@ ECode RotateDrawable::Mutate()
         mState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-    return NOERROR;
-}
-
-ECode RotateDrawable::constructor()
-{
-    return constructor(NULL, NULL);
-}
-
-ECode RotateDrawable::constructor(
-    /* [in] */ RotateState* rotateState,
-    /* [in] */ IResources* res)
-{
-    mState = new RotateState(rotateState, this, res);
     return NOERROR;
 }
 

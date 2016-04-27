@@ -143,96 +143,133 @@ BitmapDrawable::BitmapDrawable()
     , mBitmapWidth(0)
     , mBitmapHeight(0)
 {
+}
+
+ECode BitmapDrawable::constructor()
+{
     CRect::New((IRect**)&mDstRect);
     mOpticalInsets = Insets::NONE;
-    constructor();
+    mBitmapState = new BitmapState((IBitmap*)NULL);
+    return NOERROR;
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(res);
+    mOpticalInsets = Insets::NONE;
+    mBitmapState = new BitmapState((IBitmap*)NULL);
+    mBitmapState->mTargetDensity = mTargetDensity;
+    return NOERROR;
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ IBitmap* bitmap)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(bitmap);
+    mOpticalInsets = Insets::NONE;
+    AutoPtr<BitmapState> state = new BitmapState(bitmap);
+    return constructor((IDrawableConstantState*)state, NULL, NULL);
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IBitmap* bitmap)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(res, bitmap);
+    mOpticalInsets = Insets::NONE;
+    AutoPtr<BitmapState> state = new BitmapState(bitmap);
+    constructor(state, res, NULL);
+    mBitmapState->mTargetDensity = mTargetDensity;
+    return NOERROR;
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ const String& filepath)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(filepath);
+    mOpticalInsets = Insets::NONE;
+    AutoPtr<IBitmap> bitmap;
+    FAIL_RETURN(BitmapFactory::DecodeFile(filepath, (IBitmap**)&bitmap));
+
+    AutoPtr<BitmapState> state = new BitmapState(bitmap);
+    constructor(state, NULL, NULL);
+    if (mBitmapState->mBitmap == NULL) {
+        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode %s", filepath.string());
+    }
+    return NOERROR;
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ const String& filepath)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(res, filepath);
+    mOpticalInsets = Insets::NONE;
+    AutoPtr<IBitmap> bitmap;
+    FAIL_RETURN(BitmapFactory::DecodeFile(filepath, (IBitmap**)&bitmap));
+
+    AutoPtr<BitmapState> state = new BitmapState(bitmap);
+    constructor(state, NULL, NULL);
+    mBitmapState->mTargetDensity = mTargetDensity;
+    if (mBitmapState->mBitmap == NULL) {
+        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode %s", filepath.string());
+    }
+    return NOERROR;
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ IInputStream* is)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(is);
+    mOpticalInsets = Insets::NONE;
+    AutoPtr<IBitmap> bitmap;
+    FAIL_RETURN(BitmapFactory::DecodeStream(is, (IBitmap**)&bitmap));
+
+    AutoPtr<BitmapState> state = new BitmapState(bitmap);
+    constructor(state, NULL, NULL);
+    if (mBitmapState->mBitmap == NULL) {
+        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode"/*is*/);
+    }
+    return NOERROR;
 }
 
-BitmapDrawable::BitmapDrawable(
+ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IInputStream* is)
-    : mTargetDensity(IDisplayMetrics::DENSITY_DEFAULT)
-    , mDstRectAndInsetsDirty(TRUE)
-    , mMutated(FALSE)
-    , mBitmapWidth(0)
-    , mBitmapHeight(0)
 {
     CRect::New((IRect**)&mDstRect);
-    constructor(res, is);
+    mOpticalInsets = Insets::NONE;
+    AutoPtr<IBitmap> bitmap;
+    FAIL_RETURN(BitmapFactory::DecodeStream(is, (IBitmap**)&bitmap));
+
+    AutoPtr<BitmapState> state = new BitmapState(bitmap);
+    constructor((IDrawableConstantState*)state, NULL, NULL);
+    mBitmapState->mTargetDensity = mTargetDensity;
+    if (mBitmapState->mBitmap == NULL) {
+        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode"/*is*/);
+    }
+    return NOERROR;
+}
+
+ECode BitmapDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
+    /* [in] */ IResources* res,
+    /* [in] */ IResourcesTheme* theme)
+{
+    CRect::New((IRect**)&mDstRect);
+    mOpticalInsets = Insets::NONE;
+    Boolean can = FALSE;
+    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
+        // If we need to apply a theme, implicitly mutate.
+        mBitmapState = new BitmapState((BitmapState*)state);
+        ApplyTheme(theme);
+    }
+    else {
+        mBitmapState = (BitmapState*)state;
+    }
+
+    return InitializeWithState((BitmapState*)state, res);
 }
 
 ECode BitmapDrawable::GetPaint(
@@ -961,113 +998,6 @@ ECode BitmapDrawable::GetConstantState(
     return NOERROR;
 }
 
-ECode BitmapDrawable::constructor(
-    /* [in] */ IDrawableConstantState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    Boolean can = FALSE;
-    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
-        // If we need to apply a theme, implicitly mutate.
-        mBitmapState = new BitmapState((BitmapState*)state);
-        ApplyTheme(theme);
-    } else {
-        mBitmapState = (BitmapState*)state;
-    }
-
-    return InitializeWithState((BitmapState*)state, res);
-}
-
-ECode BitmapDrawable::constructor()
-{
-    mBitmapState = new BitmapState((IBitmap*)NULL);
-    return NOERROR;
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ IResources* res)
-{
-    mBitmapState = new BitmapState((IBitmap*)NULL);
-    mBitmapState->mTargetDensity = mTargetDensity;
-    return NOERROR;
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ IBitmap* bitmap)
-{
-    AutoPtr<BitmapState> state = new BitmapState(bitmap);
-    return constructor(state, NULL, NULL);
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ IResources* res,
-    /* [in] */ IBitmap* bitmap)
-{
-    AutoPtr<BitmapState> state = new BitmapState(bitmap);
-    constructor(state, res, NULL);
-    mBitmapState->mTargetDensity = mTargetDensity;
-    return NOERROR;
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ const String& filepath)
-{
-    AutoPtr<IBitmap> bitmap;
-    FAIL_RETURN(BitmapFactory::DecodeFile(filepath, (IBitmap**)&bitmap));
-
-    AutoPtr<BitmapState> state = new BitmapState(bitmap);
-    constructor(state, NULL, NULL);
-    if (mBitmapState->mBitmap == NULL) {
-        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode %s", filepath.string());
-    }
-    return NOERROR;
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ IResources* res,
-    /* [in] */ const String& filepath)
-{
-    AutoPtr<IBitmap> bitmap;
-    FAIL_RETURN(BitmapFactory::DecodeFile(filepath, (IBitmap**)&bitmap));
-
-    AutoPtr<BitmapState> state = new BitmapState(bitmap);
-    constructor(state, NULL, NULL);
-    mBitmapState->mTargetDensity = mTargetDensity;
-    if (mBitmapState->mBitmap == NULL) {
-        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode %s", filepath.string());
-    }
-    return NOERROR;
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ IInputStream* is)
-{
-    AutoPtr<IBitmap> bitmap;
-    FAIL_RETURN(BitmapFactory::DecodeStream(is, (IBitmap**)&bitmap));
-
-    AutoPtr<BitmapState> state = new BitmapState(bitmap);
-    constructor(state, NULL, NULL);
-    if (mBitmapState->mBitmap == NULL) {
-        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode"/*is*/);
-    }
-    return NOERROR;
-}
-
-ECode BitmapDrawable::constructor(
-    /* [in] */ IResources* res,
-    /* [in] */ IInputStream* is)
-{
-    AutoPtr<IBitmap> bitmap;
-    FAIL_RETURN(BitmapFactory::DecodeStream(is, (IBitmap**)&bitmap));
-
-    AutoPtr<BitmapState> state = new BitmapState(bitmap);
-    constructor((IDrawableConstantState*)state->Probe(EIID_IDrawableConstantState), NULL, NULL);
-    mBitmapState->mTargetDensity = mTargetDensity;
-    if (mBitmapState->mBitmap == NULL) {
-        Logger::W("BitmapDrawable", "BitmapDrawable cannot decode"/*is*/);
-    }
-    return NOERROR;
-}
 
 ECode BitmapDrawable::InitializeWithState(
     /* [in] */ BitmapState* state,

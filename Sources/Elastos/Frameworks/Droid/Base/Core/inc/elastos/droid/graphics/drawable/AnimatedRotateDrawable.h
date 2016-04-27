@@ -60,9 +60,13 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
-    AnimatedRotateDrawable(
-        /* [in] */ AnimatedRotateState* rotateState = NULL,
-        /* [in] */ IResources* res = NULL);
+    AnimatedRotateDrawable();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
 
     CARAPI Draw(
         /* [in] */ ICanvas* canvas);
@@ -160,10 +164,6 @@ protected:
     // @Override
     virtual CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* state);
-
-    CARAPI constructor(
-        /* [in] */ AnimatedRotateState* rotateState,
-        /* [in] */ IResources*);
 
 private:
     CARAPI_(void) Init();

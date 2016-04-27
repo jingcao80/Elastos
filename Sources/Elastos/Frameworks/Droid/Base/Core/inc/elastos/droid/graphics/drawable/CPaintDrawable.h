@@ -14,11 +14,6 @@ CarClass(CPaintDrawable), public PaintDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ Int32 color);
 };
 
 } // namespace Drawable

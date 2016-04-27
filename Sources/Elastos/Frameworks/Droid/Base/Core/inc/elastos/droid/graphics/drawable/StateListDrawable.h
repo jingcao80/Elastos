@@ -55,16 +55,18 @@ public:
 
     StateListDrawable();
 
-    StateListDrawable(
-        /* [in] */ StateListState* state,
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
         /* [in] */ IResources* res);
 
     /**
      * This constructor exists so subclasses can avoid calling the default
      * constructor and setting up a StateListDrawable-specific constant state.
      */
-    StateListDrawable(
-        /* [in] */ StateListState* state);
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state);
 
     /**
      * Add a new image/string ID to the set of images.
@@ -155,13 +157,6 @@ protected:
     //@Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* stateSet);
-
-    CARAPI constructor(
-        /* [in] */ StateListState* state,
-        /* [in] */ IResources* res);
-
-    CARAPI constructor(
-        /* [in] */ StateListState* state);
 
 private:
     /**

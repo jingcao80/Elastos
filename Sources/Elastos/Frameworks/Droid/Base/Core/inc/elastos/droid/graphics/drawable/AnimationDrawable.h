@@ -106,6 +106,12 @@ public:
 
     AnimationDrawable();
 
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
+
     /**
      * Sets whether this AnimationDrawable is visible.
      * <p>
@@ -223,16 +229,7 @@ public:
     //@Override
     CARAPI Mutate();
 
-protected:
-    CARAPI constructor(
-        /* [in] */ AnimationState* state = NULL,
-        /* [in] */ IResources* res = NULL);
-
 private:
-    AnimationDrawable(
-        /* [in] */ AnimationState* state,
-        /* [in] */ IResources* res);
-
     CARAPI NextFrame(
         /* [in] */ Boolean unschedule);
 

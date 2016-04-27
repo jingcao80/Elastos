@@ -55,11 +55,17 @@ public:
 
     ScaleDrawable();
 
-    ScaleDrawable(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ IDrawable* drawable,
         /* [in] */ Int32 gravity,
         /* [in] */ Float scaleWidth,
         /* [in] */ Float scaleHeight);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
 
     /**
      * Returns the drawable scaled by this ScaleDrawable.
@@ -149,18 +155,6 @@ public:
     CARAPI Mutate();
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 gravity,
-        /* [in] */ Float scaleWidth,
-        /* [in] */ Float scaleHeight);
-
-    CARAPI constructor(
-        /* [in] */ ScaleState* state,
-        /* [in] */ IResources* res);
-
     //@Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* state);
@@ -177,10 +171,6 @@ private:
     static CARAPI_(Float) GetPercent(
         /* [in] */ ITypedArray* a,
         /* [in] */ Int32 name);
-
-    ScaleDrawable(
-        /* [in] */ ScaleState* state,
-        /* [in] */ IResources* res);
 
 private:
     AutoPtr<ScaleState> mScaleState;

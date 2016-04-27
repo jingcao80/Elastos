@@ -86,24 +86,41 @@ ECode ColorDrawable::ColorState::GetChangingConfigurations(
 CAR_INTERFACE_IMPL(ColorDrawable, Drawable, IColorDrawable)
 ColorDrawable::ColorDrawable()
     : mMutated(FALSE)
+{}
+
+ECode ColorDrawable::constructor()
 {
-    constructor();
+    CPaint::New((IPaint**)&mPaint);
+    mColorState = new ColorState();
+    return NOERROR;
 }
 
-ColorDrawable::ColorDrawable(
+ECode ColorDrawable::constructor(
     /* [in] */ Int32 color)
-    : mMutated(FALSE)
 {
-    constructor(color);
+    CPaint::New((IPaint**)&mPaint);
+    mColorState = new ColorState();
+    SetColor(color);
+    return NOERROR;
 }
 
-ColorDrawable::ColorDrawable(
+ECode ColorDrawable::constructor(
     /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
-    : mMutated(FALSE)
 {
-    constructor(state, res, theme);
+    CPaint::New((IPaint**)&mPaint);
+    Boolean can = FALSE;
+    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
+        mColorState = new ColorState((ColorState*)state);
+        ApplyTheme(theme);
+    }
+    else {
+        mColorState = (ColorState*)state;
+    }
+
+    mTintFilter = UpdateTintFilter(mTintFilter, ((ColorState*)state)->mTint, ((ColorState*)state)->mTintMode);
+    return NOERROR;
 }
 
 ECode ColorDrawable::GetChangingConfigurations(
@@ -323,40 +340,6 @@ ECode ColorDrawable::GetConstantState(
     VALIDATE_NOT_NULL(state);
     *state = (IDrawableConstantState*)mColorState->Probe(EIID_IDrawableConstantState);
     REFCOUNT_ADD(*state);
-    return NOERROR;
-}
-
-ECode ColorDrawable::constructor()
-{
-    CPaint::New((IPaint**)&mPaint);
-    mColorState = new ColorState();
-    return NOERROR;
-}
-
-ECode ColorDrawable::constructor(
-    /* [in] */ Int32 color)
-{
-    CPaint::New((IPaint**)&mPaint);
-    mColorState = new ColorState();
-    SetColor(color);
-    return NOERROR;
-}
-
-ECode ColorDrawable::constructor(
-    /* [in] */ IDrawableConstantState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    CPaint::New((IPaint**)&mPaint);
-    Boolean can = FALSE;
-    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
-        mColorState = new ColorState((ColorState*)state);
-        ApplyTheme(theme);
-    } else {
-        mColorState = (ColorState*)state;
-    }
-
-    mTintFilter = UpdateTintFilter(mTintFilter, ((ColorState*)state)->mTint, ((ColorState*)state)->mTintMode);
     return NOERROR;
 }
 

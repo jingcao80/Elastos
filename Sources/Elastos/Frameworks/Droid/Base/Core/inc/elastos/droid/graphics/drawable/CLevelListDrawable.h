@@ -5,7 +5,6 @@
 #include "_Elastos_Droid_Graphics_Drawable_CLevelListDrawable.h"
 #include "elastos/droid/graphics/drawable/LevelListDrawable.h"
 
-
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
@@ -15,12 +14,6 @@ CarClass(CLevelListDrawable), public LevelListDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res);
 };
 
 } // namespace Drawable

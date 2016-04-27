@@ -14,41 +14,6 @@ CarClass(CNinePatchDrawable), public NinePatchDrawable
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* chunk,
-        /* [in] */ IRect* padding,
-        /* [in] */ const String& srcName);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* chunk,
-        /* [in] */ IRect* padding,
-        /* [in] */ const String& srcName);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* chunk,
-        /* [in] */ IRect* padding,
-        /* [in] */ IRect* layoutInsets,
-        /* [in] */ const String& srcName);
-
-    CARAPI constructor(
-        /* [in] */ INinePatch* patch);
-
-    CARAPI constructor(
-        /* [in] */ IResources* res,
-        /* [in] */ INinePatch* patch);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
 };
 
 } // namespace Drawable

@@ -86,20 +86,36 @@ ShapeDrawable::ShapeDrawable()
 {
 }
 
-ShapeDrawable::ShapeDrawable(
-    /* [in] */ IShape* s)
-    : mMutated(FALSE)
+ECode ShapeDrawable::constructor()
 {
-    constructor(s);
+    AutoPtr<ShapeState> state = new ShapeState(NULL);
+    return constructor((IDrawableConstantState*)state, NULL, NULL);
 }
 
-ShapeDrawable::ShapeDrawable(
-    /* [in] */ ShapeState* state,
+ECode ShapeDrawable::constructor(
+    /* [in] */ IShape* s)
+{
+    AutoPtr<ShapeState> state = new ShapeState(NULL);
+    constructor((IDrawableConstantState*)state, NULL, NULL);
+    mShapeState->mShape = s;
+    return NOERROR;
+}
+
+ECode ShapeDrawable::constructor(
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
-    : mMutated(FALSE)
 {
-    constructor(state, res, theme);
+    Boolean can = FALSE;
+    if (theme != NULL && (((ShapeState*)state)->CanApplyTheme(&can), can)) {
+        mShapeState = new ShapeState((ShapeState*)state);
+        ApplyTheme(theme);
+    }
+    else {
+        mShapeState = (ShapeState*)state;
+    }
+
+    return InitializeWithState((ShapeState*)state, res);
 }
 
 ECode ShapeDrawable::InitializeWithState(
@@ -619,35 +635,6 @@ ECode ShapeDrawable::Mutate()
     }
 
     return NOERROR;
-}
-
-ECode ShapeDrawable::constructor()
-{
-    return constructor(new ShapeState(NULL), NULL, NULL);
-}
-
-ECode ShapeDrawable::constructor(
-    /* [in] */ IShape* s)
-{
-    constructor(new ShapeState(NULL), NULL, NULL);
-    mShapeState->mShape = s;
-    return NOERROR;
-}
-
-ECode ShapeDrawable::constructor(
-    /* [in] */ ShapeState* state,
-    /* [in] */ IResources* res,
-    /* [in] */ IResourcesTheme* theme)
-{
-    Boolean can = FALSE;
-    if (theme != NULL && (state->CanApplyTheme(&can), can)) {
-        mShapeState = new ShapeState(state);
-        ApplyTheme(theme);
-    } else {
-        mShapeState = state;
-    }
-
-    return InitializeWithState(state, res);
 }
 
 } // namespace Drawable

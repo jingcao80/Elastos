@@ -46,11 +46,13 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
+    TransitionDrawable();
+
     /**
      * Create a new transition drawable with the specified list of layers. At least
      * 2 layers are required for this drawable to work properly.
      */
-    TransitionDrawable(
+    CARAPI constructor(
         /* [in] */ ArrayOf<IDrawable*>* layers);
 
     /**
@@ -59,7 +61,16 @@ public:
      *
      * @see #TransitionDrawable(Drawable[])
      */
-    TransitionDrawable();
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res,
+        /* [in] */ IResourcesTheme* theme);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ ArrayOf<IDrawable*>* layers);
 
     //@Override
     CARAPI_(AutoPtr<LayerState>) CreateConstantState(
@@ -112,21 +123,6 @@ public:
      */
     virtual CARAPI IsCrossFadeEnabled(
         /* [out] */ Boolean* enabled);
-
-protected:
-    CARAPI constructor(
-        /* [in] */ ArrayOf<IDrawable*>* layers);
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ TransitionState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
-    CARAPI constructor(
-        /* [in] */ TransitionState* state,
-        /* [in] */ ArrayOf<IDrawable*>* layers);
 
 private:
     TransitionDrawable(
