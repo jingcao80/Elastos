@@ -2401,55 +2401,79 @@ public:
 
     CARAPI_(Int64) GetAwakeTimePlugged();
 
-    CARAPI_(Int64) ComputeUptime(
+    CARAPI ComputeUptime(
         /* [in] */ Int64 curTime,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* value);
 
-    CARAPI_(Int64) ComputeRealtime(
+    CARAPI ComputeRealtime(
         /* [in] */ Int64 curTime,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* value);
 
-    CARAPI_(Int64) ComputeBatteryUptime(
+    CARAPI ComputeBatteryUptime(
         /* [in] */ Int64 curTime,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* value);
 
-    CARAPI_(Int64) ComputeBatteryRealtime(
+    CARAPI ComputeBatteryRealtime(
         /* [in] */ Int64 curTime,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* value);
 
-    CARAPI_(Int64) GetBatteryUptime(
-        /* [in] */ Int64 curTime);
+    CARAPI ComputeBatteryScreenOffUptime(
+        /* [in] */ Int64 curTime,
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
-    CARAPI_(Int64) GetBatteryRealtime(
-        /* [in] */ Int64 curTime);
+    CARAPI ComputeBatteryScreenOffRealtime(
+        /* [in] */ Int64 curTime,
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
-    /** Only STATS_UNPLUGGED works properly */
-    CARAPI_(Int64) GetMobileTcpBytesSent(
-        /* [in] */ Int32 which);
+    CARAPI ComputeBatteryTimeRemaining(
+        /* [in] */ Int64 curTime,
+        /* [out] */ Int64* result);
 
-    /** Only STATS_UNPLUGGED works properly */
-    CARAPI_(Int64) GetMobileTcpBytesReceived(
-        /* [in] */ Int32 which);
+    CARAPI_(Int32) GetNumDischargeStepDurations();
 
-    /** Only STATS_UNPLUGGED works properly */
-    CARAPI_(Int64) GetTotalTcpBytesSent(
-        /* [in] */ Int32 which);
+    CARAPI_(AutoPtr<ArrayOf<Int64> >) GetDischargeStepDurationsArray();
 
-    /** Only STATS_UNPLUGGED works properly */
-    CARAPI_(Int64) GetTotalTcpBytesReceived(
-        /* [in] */ Int32 which);
+    CARAPI ComputeChargeTimeRemaining(
+        /* [in] */ Int64 curTime,
+        /* [out] */ Int64* result);
 
-    CARAPI_(Int32) GetDischargeStartLevel();
+    CARAPI_(Int32) GetNumChargeStepDurations();
+
+    CARAPI_(AutoPtr<ArrayOf<Int64> >) GetChargeStepDurationsArray();
+
+    CARAPI GetBatteryUptime(
+        /* [in] */ Int64 curTime,
+        /* [out] */ Int64* result);
+
+    CARAPI GetBatteryRealtime(
+        /* [in] */ Int64 curTime,
+        /* [out] */ Int64* result);
+
+    CARAPI GetDischargeStartLevel(
+        /* [out] */ Int32* level);
 
     CARAPI_(Int32) GetDischargeStartLevelLocked();
 
-    CARAPI_(Int32) GetDischargeCurrentLevel();
+    CARAPI GetDischargeCurrentLevel(
+        /* [out] */ Int32* level);
 
     CARAPI_(Int32) GetDischargeCurrentLevelLocked();
 
-    CARAPI_(Int32) GetLowDischargeAmountSinceCharge();
+    CARAPI GetLowDischargeAmountSinceCharge(
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) GetHighDischargeAmountSinceCharge();
+    CARAPI GetHighDischargeAmountSinceCharge(
+        /* [out] */ Int32* result);
+
+    CARAPI GetDischargeAmount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     CARAPI_(Int32) GetDischargeAmountScreenOn();
 
@@ -2459,7 +2483,8 @@ public:
 
     CARAPI_(Int32) GetDischargeAmountScreenOffSinceCharge();
 
-    CARAPI_(Int32) GetCpuSpeedSteps();
+    CARAPI GetCpuSpeedSteps(
+        /* [out] */ Int32* steps);
 
     /**
      * Retrieve the statistics object for a particular uid, creating if needed.
@@ -2480,16 +2505,6 @@ public:
     CARAPI_(AutoPtr<Uid::Proc>) GetProcessStatsLocked(
         /* [in] */ Int32 uid,
         /* [in] */ const String& name);
-
-    /**
-     * Retrieve the statistics object for a particular process, given
-     * the name of the process.
-     * @param name process name
-     * @return the statistics object for the process
-     */
-    CARAPI_(AutoPtr<Uid::Proc>) GetProcessStatsLocked(
-        /* [in] */ const String& name,
-        /* [in] */ Int32 pid);
 
     /**
      * Retrieve the statistics object for a particular process, creating
@@ -2525,7 +2540,8 @@ public:
 
     CARAPI_(void) ReadLocked();
 
-
+    CARAPI ReadSummaryFromParcel(
+        /* [in] */ IParcel* in);
 
     /**
      * Writes a summary of the statistics to a Parcel, in a format suitable to be written to
@@ -2699,13 +2715,11 @@ private:
         /* [in] */ Int32 which,
         /* [in] */ Int64 elapsedRealtimeMs);
 
-    CARAPI_(Int64) GetBatteryUptimeLocked(
-        /* [in] */ Int64 curTime);
+    CARAPI_(Int64) ComputeTimePerLevel(
+        /* [in] */ ArrayOf<Int64>* steps,
+        /* [in] */ Int32 numSteps);
 
     CARAPI_(Int64) GetBatteryUptimeLocked();
-
-    CARAPI_(Int64) GetBatteryRealtimeLocked(
-        /* [in] */ Int64 curTime);
 
     CARAPI_(Int64) GetTcpBytes(
         /* [in] */ Int64 current,
@@ -2714,10 +2728,6 @@ private:
 
     CARAPI_(void) WriteLocked(
         /* [in] */ Boolean sync);
-
-    static CARAPI ReadFully(
-        /* [in] */ IFileInputStream* stream,
-        /* [out] */ ArrayOf<Byte>** bytes);
 
     CARAPI_(void) ReadHistory(
         /* [in] */ IParcel* in,
@@ -2728,13 +2738,11 @@ private:
 
     CARAPI_(void) WriteHistory(
         /* [in] */ IParcel* out,
+        /* [in] */ Boolean inclData,
         /* [in] */ Boolean andOldHistory);
 
     CARAPI_(void) WriteOldHistory(
         /* [in] */ IParcel* out);
-
-    CARAPI_(void) ReadSummaryFromParcel(
-        /* [in] */ IParcel* in);
 
     CARAPI_(void) WriteToParcelLocked(
         /* [in] */ IParcel* out,
