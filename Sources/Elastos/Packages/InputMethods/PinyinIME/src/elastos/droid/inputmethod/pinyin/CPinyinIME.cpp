@@ -20,31 +20,19 @@
 using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
-// using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
-// using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
-// using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::EIID_IServiceConnection;
-// using Elastos::Droid::InputMethodService::IInputMethodService;
-// using Elastos::Droid::InputMethodService::EIID_IInputMethodService;
-// using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::CKeyEvent;
-// using Elastos::Droid::View::IViewGroupLayoutParams;
-// using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Widget::CPopupWindow;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
-// using Elastos::Core::Math;
-// using Elastos::Core::EIID_IRunnable;
-// using Elastos::Core::CStringWrapper;
-// using Elastos::Core::IStringBuffer;
 using Elastos::Utility::Logging::Logger;
 
 #define TO_CCandidatesContainer(obj) \
