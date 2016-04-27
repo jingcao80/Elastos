@@ -86,7 +86,7 @@ void SystemService::PublishBinderService(
 {
     AutoPtr<IServiceManager> smgr;
     CServiceManager::AcquireSingleton((IServiceManager**)&smgr);
-    smgr->AddService(name, service, allowIsolated);
+    smgr->AddService(name, TO_IINTERFACE(service), allowIsolated);
 }
 
 AutoPtr<IBinder> SystemService::GetBinderService(

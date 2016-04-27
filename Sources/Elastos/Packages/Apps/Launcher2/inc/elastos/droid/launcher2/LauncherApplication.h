@@ -97,7 +97,7 @@ protected:
     static const String TAG;
 
 private:
-    AutoPtr<LauncherModel> mModel;
+    AutoPtr<ILauncherModel> mModel;
     AutoPtr<IconCache> mIconCache;
     AutoPtr<IWidgetPreviewLoaderCacheDb> mWidgetPreviewCacheDb;
     static Boolean sIsScreenLarge;

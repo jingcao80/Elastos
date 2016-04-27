@@ -86,9 +86,8 @@ DeferredHandler::DeferredHandler()
     CLinkedList::New((ILinkedList**)&mQueue);
     AutoPtr<ILooperHelper> looperHelper;
     CLooperHelper::AcquireSingleton((ILooperHelper**)&looperHelper);
-    AutoPtr<IMessageQueue> mMessageQueue;
     looperHelper->GetMyQueue((IMessageQueue**)&mMessageQueue);
-    AutoPtr<Impl> mHandler = new Impl(this);
+    mHandler = new Impl(this);
 }
 
 ECode DeferredHandler::Post(

@@ -16,7 +16,6 @@
 #include "elastos/droid/utility/CInt64SparseArray.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
@@ -43,7 +42,6 @@ using Elastos::Core::StringBuilder;
 using Elastos::Utility::IFormatter;
 using Elastos::Utility::CFormatter;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;

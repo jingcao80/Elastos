@@ -2694,14 +2694,11 @@ ECode LauncherModel::constructor(
     AutoPtr<IEnvironment> en;
     CEnvironment::AcquireSingleton((IEnvironment**)&en);
     en->IsExternalStorageRemovable(&mAppsCanBeOnRemoveableStorage);
-
     mApp = app;
     IconCache* _iconCache = (IconCache*)iconCache;
     mBgAllAppsList = new AllAppsList(_iconCache);
     mIconCache = _iconCache;
-
-    AutoPtr<IBitmap> icon;
-    mIconCache->GetFullResDefaultActivityIcon();
+    AutoPtr<IDrawable> icon = mIconCache->GetFullResDefaultActivityIcon();
     mDefaultIcon = Utilities::CreateIconBitmap(icon, IContext::Probe(app));
     AutoPtr<IResources> res;
     IContext::Probe(app)->GetResources((IResources**)&res);

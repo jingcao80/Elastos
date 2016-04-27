@@ -16,7 +16,7 @@ module
     namespace Content {
     namespace Pm {
 
-    [local]
+    [local, parcelable]
     interface IILauncherApps {
         AddOnAppsChangedListener(
             [in] IOnAppsChangedListener* listener);

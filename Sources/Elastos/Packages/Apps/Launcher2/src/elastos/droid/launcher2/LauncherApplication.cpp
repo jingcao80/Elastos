@@ -73,11 +73,7 @@ Slogger::E("LauncherApplication", "============================OnCreate()");
     RecreateWidgetPreviewDb();
     mIconCache = new IconCache();
     mIconCache->constructor(ILauncherApplication::Probe(this));
-    AutoPtr<ILauncherModel> _mode;
-    CLauncherModel::New((ILauncherModel**)&_mode);
-    mModel = (LauncherModel*)_mode.Get();
-    mModel->constructor(ILauncherApplication::Probe(this), mIconCache);
-
+    CLauncherModel::New(ILauncherApplication::Probe(this), mIconCache, (ILauncherModel**)&mModel);
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
     AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
@@ -86,17 +82,19 @@ Slogger::E("LauncherApplication", "============================OnCreate()");
     launcherApps->RegisterCallback(_callback);
 
     // Register intent receivers
-    AutoPtr<IIntentFilter> filter;
-    CIntentFilter::New((IIntentFilter**)&filter);
-    filter->AddAction(IIntent::ACTION_LOCALE_CHANGED);
-    filter->AddAction(IIntent::ACTION_CONFIGURATION_CHANGED);
+    AutoPtr<IIntentFilter> filter1;
+    CIntentFilter::New((IIntentFilter**)&filter1);
+    filter1->AddAction(IIntent::ACTION_LOCALE_CHANGED);
+    filter1->AddAction(IIntent::ACTION_CONFIGURATION_CHANGED);
     AutoPtr<IIntent> intent1;
-    RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter, (IIntent**)&intent1);
+    RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter1, (IIntent**)&intent1);
+
     AutoPtr<IIntentFilter> filter2;
     CIntentFilter::New((IIntentFilter**)&filter2);
     filter2->AddAction(ISearchManager::INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
     AutoPtr<IIntent> intent2;
     RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter2, (IIntent**)&intent2);
+
     AutoPtr<IIntentFilter> filter3;
     CIntentFilter::New((IIntentFilter**)&filter3);
     filter3->AddAction(ISearchManager::INTENT_ACTION_SEARCHABLES_CHANGED);
@@ -106,6 +104,7 @@ Slogger::E("LauncherApplication", "============================OnCreate()");
     // Register for changes to the favorites
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
+Slogger::E("LauncherApplication", "============================OnCreate() return");
     return resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
             mFavoritesObserver);
 }
@@ -120,7 +119,7 @@ ECode LauncherApplication::OnTerminate()
 {
     Application::OnTerminate();
 
-    UnregisterReceiver(mModel);
+    UnregisterReceiver(IBroadcastReceiver::Probe(mModel));
 
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
@@ -134,7 +133,7 @@ ECode LauncherApplication::SetLauncher(
     VALIDATE_NOT_NULL(mode);
 
     mModel->Initialize(ILauncherModelCallbacks::Probe(launcher));
-    *mode = ILauncherModel::Probe(mModel);
+    *mode = mModel;
     REFCOUNT_ADD(*mode);
     return NOERROR;
 }
@@ -154,7 +153,7 @@ ECode LauncherApplication::GetModel(
 {
     VALIDATE_NOT_NULL(mode);
 
-    *mode = ILauncherModel::Probe(mModel);
+    *mode = mModel;
     REFCOUNT_ADD(*mode);
     return NOERROR;
 }
