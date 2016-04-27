@@ -3,22 +3,27 @@
 #include "Elastos.Droid.Preference.h"
 #include "elastos/droid/inputmethod/pinyin/CPinyinIME.h"
 #include "elastos/droid/inputmethod/pinyin/CCandidatesContainer.h"
+#include "elastos/droid/inputmethod/pinyin/CComposingView.h"
+#include "elastos/droid/inputmethod/pinyin/CSkbContainer.h"
 #include "elastos/droid/inputmethod/pinyin/KeyMapDream.h"
 #include "elastos/droid/inputmethod/pinyin/Settings.h"
 #include "elastos/droid/inputmethod/pinyin/SoundManager.h"
+#include "R.h"
+#include <elastos/droid/view/View.h>
+#include <elastos/droid/R.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
-#include "R.h"
 
-// using Elastos::Droid::App::CAlertDialogBuilder;
-// using Elastos::Droid::App::IAlertDialogBuilder;
-// using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 // using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
 // using Elastos::Droid::Content::EIID_IContext;
-// using Elastos::Droid::Content::IIntent;
-// using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 // using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 // using Elastos::Droid::InputMethodService::IInputMethodService;
@@ -29,17 +34,27 @@ using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IInputEvent;
-// using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::CKeyEvent;
 // using Elastos::Droid::View::IViewGroupLayoutParams;
 // using Elastos::Droid::View::IWindowManagerLayoutParams;
-// using Elastos::Droid::Widget::CPopupWindow;
-// using Elastos::Core::StringUtils;
-// using Elastos::Core::StringBuilder;
+using Elastos::Droid::Widget::CPopupWindow;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 // using Elastos::Core::Math;
 // using Elastos::Core::EIID_IRunnable;
 // using Elastos::Core::CStringWrapper;
 // using Elastos::Core::IStringBuffer;
-// using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Logger;
+
+#define TO_CCandidatesContainer(obj) \
+    ((CCandidatesContainer*)obj.Get())
+
+#define TO_CComposingView(obj) \
+    ((CComposingView*)obj.Get())
+
+#define TO_CSkbContainer(obj) \
+    ((CSkbContainer*)obj.Get())
 
 namespace Elastos {
 namespace Droid {
@@ -166,7 +181,7 @@ ECode CPinyinIME::ChoiceNotifier::OnToLeftGesture()
     if (STATE_COMPOSING == mIme->mImeState) {
         mIme->ChangeToStateInput(TRUE);
     }
-    ((CCandidatesContainer*)mIme->mCandidatesContainer.Get())->PageForward(TRUE, FALSE);
+    TO_CCandidatesContainer(mIme->mCandidatesContainer)->PageForward(TRUE, FALSE);
     return NOERROR;
 }
 
@@ -175,7 +190,7 @@ ECode CPinyinIME::ChoiceNotifier::OnToRightGesture()
     if (STATE_COMPOSING == mIme->mImeState) {
         mIme->ChangeToStateInput(TRUE);
     }
-    ((CCandidatesContainer*)mIme->mCandidatesContainer.Get())->PageBackward(TRUE, FALSE);
+    TO_CCandidatesContainer(mIme->mCandidatesContainer)->PageBackward(TRUE, FALSE);
     return NOERROR;
 }
 
@@ -342,7 +357,7 @@ void CPinyinIME::OnGestureListener::OnDirectionGesture(
     }
 
     if (IGravity::LEFT == gravity || IGravity::RIGHT == gravity) {
-        CCandidatesContainer* container = (CCandidatesContainer*)mIme->mCandidatesContainer.Get();
+        CCandidatesContainer* container = TO_CCandidatesContainer(mIme->mCandidatesContainer);
         Boolean shown = FALSE;
         if (container->IsShown(&shown), shown) {
             if (IGravity::LEFT == gravity) {
@@ -1020,11 +1035,45 @@ ECode CPinyinIME::MyReceiver::OnReceive(
     return NOERROR;
 }
 
+
+//==========================================================
+// CPinyinIME::BuilderListener
+//==========================================================
+CAR_INTERFACE_IMPL(CPinyinIME::BuilderListener, Object, IDialogInterfaceOnClickListener);
+
+CPinyinIME::BuilderListener::BuilderListener(
+    /* [in] */ CPinyinIME* ime)
+    : mHost(ime)
+{}
+
+ECode CPinyinIME::BuilderListener::OnClick(
+    /* [in] */ IDialogInterface* di,
+    /* [in] */ Int32 position)
+{
+    di->Dismiss();
+    switch (position) {
+    case 0:
+        mHost->LaunchSettings();
+        break;
+    case 1:
+        assert(0);
+        // InputMethodManager.getInstance(PinyinIME.this)
+        //         .showInputMethodPicker();
+        break;
+    }
+    return NOERROR;
+}
+
+
 //==========================================================
 // CPinyinIME
 //==========================================================
 const String CPinyinIME::TAG("PinyinIME");
 const Boolean CPinyinIME::SIMULATE_KEY_DELETE = TRUE;
+
+CAR_OBJECT_IMPL(CPinyinIME);
+
+CAR_INTERFACE_IMPL(CPinyinIME, Elastos::Droid::InputMethodService::InputMethodService, IPinyinIME);
 
 CPinyinIME::CPinyinIME()
     : mImeState(STATE_IDLE)
@@ -1045,9 +1094,9 @@ ECode CPinyinIME::constructor()
 ECode CPinyinIME::OnCreate()
 {
     mEnvironment = Environment::GetInstance();
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onCreate.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onCreate.");
+    }
     FAIL_RETURN(InputMethodService::OnCreate());
 
     StartPinyinDecoderService();
@@ -1076,7 +1125,6 @@ ECode CPinyinIME::OnCreate()
     return NOERROR;
 }
 
-#if 0
 //add by kinier for fix the candidate word can not display bug
 ECode CPinyinIME::OnEvaluateFullscreenMode(
     /* [out] */ Boolean* screenMode)
@@ -1088,28 +1136,26 @@ ECode CPinyinIME::OnEvaluateFullscreenMode(
 
 ECode CPinyinIME::OnDestroy()
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onDestroy.");
-    // }
-    InputMethodService::UnbindService(mPinyinDecoderServiceConnection);
-    AutoPtr<ISettings> settings;
-    CPinyinSettings::AcquireSingleton((ISettings**)&settings);
-    settings->ReleaseInstance();
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onDestroy.");
+    }
+    UnbindService(mPinyinDecoderServiceConnection);
+    Settings::ReleaseInstance();
     return InputMethodService::OnDestroy();
 }
 
 ECode CPinyinIME::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    AutoPtr<IPinyinEnvironmentHelper> helper;
-    CPinyinEnvironmentHelper::AcquireSingleton((IPinyinEnvironmentHelper**)&helper);
-    AutoPtr<IPinyinEnvironment> env;
-    helper->GetInstance((IPinyinEnvironment**)&env);
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onConfigurationChanged");
-    //     Log.d(TAG, "--last config: " + env.getConfiguration().toString());
-    //     Log.d(TAG, "---new config: " + newConfig.toString());
-    // }
+    AutoPtr<Environment> env = Environment::GetInstance();
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onConfigurationChanged");
+        String confStr, newConfStr;
+        env->GetConfiguration()->ToString(&confStr);
+        newConfig->ToString(&newConfStr);
+        Logger::D(TAG, "--last config: %s", confStr.string());
+        Logger::D(TAG, "---new config: %s", newConfStr.string());
+    }
     // We need to change the local environment first so that UI components
     // can get the environment instance to handle size issues. When
     // super.onConfigurationChanged() is called, onCreateCandidatesView()
@@ -1118,12 +1164,11 @@ ECode CPinyinIME::OnConfigurationChanged(
 
     // Clear related UI of the previous configuration.
     if (NULL != mSkbContainer) {
-        mSkbContainer->DismissPopups();
+        TO_CSkbContainer(mSkbContainer)->DismissPopups();
     }
     if (NULL != mCandidatesBalloon) {
         mCandidatesBalloon->Dismiss();
     }
-
     InputMethodService::OnConfigurationChanged(newConfig);
     ResetToIdleState(FALSE);
     return NOERROR;
@@ -1141,7 +1186,6 @@ ECode CPinyinIME::OnKeyDown(
         *result = TRUE;
         return NOERROR;
     }
-
     return InputMethodService::OnKeyDown(keyCode, event, result);
 }
 
@@ -1155,7 +1199,6 @@ ECode CPinyinIME::OnKeyUp(
         *result = TRUE;
         return NOERROR;
     }
-
     return InputMethodService::OnKeyUp(keyCode, event, result);
 }
 
@@ -1163,9 +1206,7 @@ Boolean CPinyinIME::ProcessKey(
     /* [in] */ IKeyEvent* event,
     /* [in] */ Boolean realAction)
 {
-    if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_BYPASS == mImeState) {
-        return FALSE;
-    }
+    if (STATE_BYPASS == mImeState) return FALSE;
 
     Int32 keyCode = 0;
     event->GetKeyCode(&keyCode);
@@ -1173,23 +1214,17 @@ Boolean CPinyinIME::ProcessKey(
     // when HKB is on.
     Boolean pressed = FALSE;
     if (IKeyEvent::KEYCODE_SPACE == keyCode && (event->IsShiftPressed(&pressed), pressed)) {
-        if (!realAction) {
-            return TRUE;
-        }
+        if (!realAction) return TRUE;
 
-        Int32 icon = 0;
-        mInputModeSwitcher->SwitchLanguageWithHkb(&icon);
-        UpdateIcon(icon);
+        UpdateIcon(mInputModeSwitcher->SwitchLanguageWithHkb());
         ResetToIdleState(FALSE);
 
         Int32 allMetaState = IKeyEvent::META_ALT_ON | IKeyEvent::META_ALT_LEFT_ON
                 | IKeyEvent::META_ALT_RIGHT_ON | IKeyEvent::META_SHIFT_ON
                 | IKeyEvent::META_SHIFT_LEFT_ON
                 | IKeyEvent::META_SHIFT_RIGHT_ON | IKeyEvent::META_SYM_ON;
-
         AutoPtr<IInputConnection> connection;
-        InputMethodService::GetCurrentInputConnection((IInputConnection**)&connection);
-        assert(connection != NULL);
+        GetCurrentInputConnection((IInputConnection**)&connection);
         Boolean result = FALSE;
         connection->ClearMetaKeyStates(allMetaState, &result);
         return TRUE;
@@ -1197,8 +1232,7 @@ Boolean CPinyinIME::ProcessKey(
 
     // If HKB is on to input English, by-pass the key event so that
     // default key listener will handle it.
-    Boolean res = FALSE;
-    if (mInputModeSwitcher->IsEnglishWithHkb(&res), res) {
+    if (mInputModeSwitcher->IsEnglishWithHkb()) {
         return FALSE;
     }
 
@@ -1209,43 +1243,52 @@ Boolean CPinyinIME::ProcessKey(
     Int32 keyChar = 0;
     if (keyCode >= IKeyEvent::KEYCODE_A && keyCode <= IKeyEvent::KEYCODE_Z) {
         keyChar = keyCode - IKeyEvent::KEYCODE_A + 'a';
-    } else if (keyCode >= IKeyEvent::KEYCODE_0
+    }
+    else if (keyCode >= IKeyEvent::KEYCODE_0
             && keyCode <= IKeyEvent::KEYCODE_9) {
         keyChar = keyCode - IKeyEvent::KEYCODE_0 + '0';
-    } else if (keyCode == IKeyEvent::KEYCODE_COMMA) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_COMMA) {
         keyChar = ',';
-    } else if (keyCode == IKeyEvent::KEYCODE_PERIOD) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_PERIOD) {
         keyChar = '.';
-    } else if (keyCode == IKeyEvent::KEYCODE_SPACE) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_SPACE) {
         keyChar = ' ';
-    } else if (keyCode == IKeyEvent::KEYCODE_APOSTROPHE) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_APOSTROPHE) {
         keyChar = '\'';
     }
 
-    if (mInputModeSwitcher->IsEnglishWithSkb(&res), res) {
+    if (mInputModeSwitcher->IsEnglishWithSkb()) {
         AutoPtr<IInputConnection> connection;
-        InputMethodService::GetCurrentInputConnection((IInputConnection**)&connection);
-        mInputModeSwitcher->IsEnglishUpperCaseWithSkb(&res);
-        return mImEn->ProcessKey(connection, event, res, realAction);
-    } else if (mInputModeSwitcher->IsChineseText(&res), res) {
-        if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE ||
-                mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_APP_COMPLETION) {
-            mImeState = Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE;
+        GetCurrentInputConnection((IInputConnection**)&connection);
+        return mImEn->ProcessKey(connection, event,
+                mInputModeSwitcher->IsEnglishUpperCaseWithSkb(), realAction);
+    }
+    else if (mInputModeSwitcher->IsChineseText()) {
+        if (mImeState == STATE_IDLE ||
+                mImeState == STATE_APP_COMPLETION) {
+            mImeState = STATE_IDLE;
             return ProcessStateIdle(keyChar, keyCode, event, realAction);
-        } else if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_INPUT) {
+        }
+        else if (mImeState == STATE_INPUT) {
             return ProcessStateInput(keyChar, keyCode, event, realAction);
-        } else if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_PREDICT) {
+        }
+        else if (mImeState == STATE_PREDICT) {
             return ProcessStatePredict(keyChar, keyCode, event, realAction);
-        } else if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING) {
+        }
+        else if (mImeState == STATE_COMPOSING) {
             return ProcessStateEditComposing(keyChar, keyCode, event,
                     realAction);
         }
-    } else {
+    }
+    else {
         if (0 != keyChar && realAction) {
-            StringBuilder builder;
-            builder.AppendChar(keyChar);
-            String result = builder.ToString();
-            CommitResultText(result);
+            String str("");
+            str.Append((Char32)keyChar);
+            CommitResultText(str);
         }
     }
 
@@ -1259,19 +1302,19 @@ Boolean CPinyinIME::ProcessFunctionKeys(
     // Back key is used to dismiss all popup UI in a soft keyboard.
     if (keyCode == IKeyEvent::KEYCODE_BACK) {
         Boolean result = FALSE;
-        if (InputMethodService::IsInputViewShown(&result), result) {
-            if (mSkbContainer->HandleBack(realAction, &result), result) return TRUE;
+        if (IsInputViewShown(&result), result) {
+            if (TO_CSkbContainer(mSkbContainer)->HandleBack(realAction)) return TRUE;
         }
     }
 
     // Chinese related input is handle separately.
-    Boolean res = FALSE;
-    if (mInputModeSwitcher->IsChineseText(&res), res) {
+    if (mInputModeSwitcher->IsChineseText()) {
         return FALSE;
     }
 
-    if (NULL != mCandidatesContainer && (mCandidatesContainer->IsShown(&res), res)
-            && !(mDecInfo->IsCandidatesListEmpty(&res), res)) {
+    Boolean res = FALSE;
+    if (NULL != mCandidatesContainer && (IView::Probe(mCandidatesContainer)->IsShown(&res), res)
+            && !mDecInfo->IsCandidatesListEmpty()) {
         if (keyCode == IKeyEvent::KEYCODE_DPAD_CENTER) {
             if (!realAction) return TRUE;
 
@@ -1281,55 +1324,56 @@ Boolean CPinyinIME::ProcessFunctionKeys(
 
         if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT) {
             if (!realAction) return TRUE;
-            mCandidatesContainer->ActiveCurseBackward(&res);
+            TO_CCandidatesContainer(mCandidatesContainer)->ActiveCurseBackward();
             return TRUE;
         }
 
         if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
             if (!realAction) return TRUE;
-            mCandidatesContainer->ActiveCurseForward(&res);
+            TO_CCandidatesContainer(mCandidatesContainer)->ActiveCurseForward();
             return TRUE;
         }
 
         if (keyCode == IKeyEvent::KEYCODE_DPAD_UP) {
             if (!realAction) return TRUE;
-            mCandidatesContainer->PageBackward(FALSE, TRUE, &res);
+            TO_CCandidatesContainer(mCandidatesContainer)->PageBackward(FALSE, TRUE);
             return TRUE;
         }
 
         if (keyCode == IKeyEvent::KEYCODE_DPAD_DOWN) {
             if (!realAction) return TRUE;
-            mCandidatesContainer->PageForward(FALSE, TRUE, &res);
+            TO_CCandidatesContainer(mCandidatesContainer)->PageForward(FALSE, TRUE);
             return TRUE;
         }
 
         if (keyCode == IKeyEvent::KEYCODE_DEL &&
-                Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_PREDICT == mImeState) {
+                STATE_PREDICT == mImeState) {
             if (!realAction) return TRUE;
             ResetToIdleState(FALSE);
             return TRUE;
         }
-    } else {
+    }
+    else {
         if (keyCode == IKeyEvent::KEYCODE_DEL) {
             if (!realAction) return TRUE;
             if (SIMULATE_KEY_DELETE) {
                 SimulateKeyEventDownUp(keyCode);
-            } else {
+            }
+            else {
                 AutoPtr<IInputConnection> connection;
-                InputMethodService::GetCurrentInputConnection((IInputConnection**)&connection);
-                assert(connection != NULL);
+                GetCurrentInputConnection((IInputConnection**)&connection);
                 connection->DeleteSurroundingText(1, 0, &res);
             }
             return TRUE;
         }
         if (keyCode == IKeyEvent::KEYCODE_ENTER) {
             if (!realAction) return TRUE;
-            InputMethodService::SendKeyChar('\n');
+            SendKeyChar('\n');
             return TRUE;
         }
         if (keyCode == IKeyEvent::KEYCODE_SPACE) {
             if (!realAction) return TRUE;
-            InputMethodService::SendKeyChar(' ');
+            SendKeyChar(' ');
             return TRUE;
         }
     }
@@ -1352,49 +1396,57 @@ Boolean CPinyinIME::ProcessStateIdle(
         mDecInfo->AddSplChar((Char32) keyChar, TRUE);
         ChooseAndUpdate(-1);
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_DEL) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DEL) {
         if (!realAction) return TRUE;
         if (SIMULATE_KEY_DELETE) {
             SimulateKeyEventDownUp(keyCode);
-        } else {
+        }
+        else {
             AutoPtr<IInputConnection> connection;
-            InputMethodService::GetCurrentInputConnection((IInputConnection**)&connection);
+            GetCurrentInputConnection((IInputConnection**)&connection);
             Boolean result = FALSE;
             connection->DeleteSurroundingText(1, 0, &result);
         }
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_ENTER) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_ENTER) {
         if (!realAction) return TRUE;
-        InputMethodService::SendKeyChar('\n');
+        SendKeyChar('\n');
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT
             || keyCode == IKeyEvent::KEYCODE_ALT_RIGHT
             || keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT
             || keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
         return TRUE;
-    } else if (pressed) {
+    }
+    else if (pressed) {
         Char32 fullwidth_char = KeyMapDream::GetChineseLabel(keyCode);
         if (0 != fullwidth_char) {
             if (realAction) {
-                String result;
-                result += fullwidth_char;
+                String result("");
+                result.Append(fullwidth_char);
                 CommitResultText(result);
             }
             return TRUE;
-        } else {
+        }
+        else {
             if (keyCode >= IKeyEvent::KEYCODE_A
                     && keyCode <= IKeyEvent::KEYCODE_Z) {
                 return TRUE;
             }
         }
-    } else if (keyChar != 0 && keyChar != '\t') {
+    }
+    else if (keyChar != 0 && keyChar != '\t') {
         if (realAction) {
             if (keyChar == ',' || keyChar == '.') {
-                InputCommaPeriod(String(""), keyChar, FALSE, Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE);
-            } else {
+                InputCommaPeriod(String(""), keyChar, FALSE, STATE_IDLE);
+            }
+            else {
                 if (0 != keyChar) {
-                    String result;
-                    result += keyChar;
+                    String result("");
+                    result.Append(keyChar);
                     CommitResultText(result);
                 }
             }
@@ -1418,101 +1470,102 @@ Boolean CPinyinIME::ProcessStateInput(
     if (pressed) {
         Int32 metaState = 0, unicodeChar = 0;
         event->GetMetaState(&metaState);
-        if ('\'' != (event->GetUnicodeChar(metaState, &unicodeChar), unicodeChar)) {
+        event->GetUnicodeChar(metaState, &unicodeChar);
+        if ('\'' != unicodeChar) {
             if (realAction) {
                 Char32 fullwidth_char = KeyMapDream::GetChineseLabel(keyCode);
                 if (0 != fullwidth_char) {
-                    Int32 pos = 0;
-                    mCandidatesContainer->GetActiveCandiatePos(&pos);
-                    String str;
-                    mDecInfo->GetCurrentFullSent(pos, &str);
+                    Int32 pos = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
+                    String str = mDecInfo->GetCurrentFullSent(pos);
                     CommitResultText(str + fullwidth_char);
                     ResetToIdleState(FALSE);
                 }
             }
             return TRUE;
-        } else {
+        }
+        else {
             keyChar = '\'';
         }
     }
 
-    Boolean state = FALSE;
     if (keyChar >= 'a' && keyChar <= 'z' || keyChar == '\''
-            && !(mDecInfo->CharBeforeCursorIsSeparator(&state), state)
+            && !mDecInfo->CharBeforeCursorIsSeparator()
             || keyCode == IKeyEvent::KEYCODE_DEL) {
         if (!realAction) return TRUE;
         return ProcessSurfaceChange(keyChar, keyCode);
-    } else if (keyChar == ',' || keyChar == '.') {
+    }
+    else if (keyChar == ',' || keyChar == '.') {
         if (!realAction) return TRUE;
-        Int32 pos = 0;
-        mCandidatesContainer->GetActiveCandiatePos(&pos);
-        String str;
-        mDecInfo->GetCurrentFullSent(pos, &str);
-        InputCommaPeriod(str, keyChar, TRUE, Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE);
+        Int32 pos = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
+        String str = mDecInfo->GetCurrentFullSent(pos);
+        InputCommaPeriod(str, keyChar, TRUE, STATE_IDLE);
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_DPAD_UP
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DPAD_UP
             || keyCode == IKeyEvent::KEYCODE_DPAD_DOWN
             || keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
             || keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
         if (!realAction) return TRUE;
 
-        Boolean result = FALSE;
         if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT) {
-            mCandidatesContainer->ActiveCurseBackward(&result);
-        } else if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
-            mCandidatesContainer->ActiveCurseForward(&result);
-        } else if (keyCode == IKeyEvent::KEYCODE_DPAD_UP) {
+            TO_CCandidatesContainer(mCandidatesContainer)->ActiveCurseBackward();
+        }
+        else if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
+            TO_CCandidatesContainer(mCandidatesContainer)->ActiveCurseForward();
+        }
+        else if (keyCode == IKeyEvent::KEYCODE_DPAD_UP) {
             // If it has been the first page, a up key will shift
             // the state to edit composing string.
-            if (!(mCandidatesContainer->PageBackward(FALSE, TRUE, &state), state)) {
-                mCandidatesContainer->EnableActiveHighlight(FALSE);
+            if (!TO_CCandidatesContainer(mCandidatesContainer)->PageBackward(FALSE, TRUE)) {
+                TO_CCandidatesContainer(mCandidatesContainer)->EnableActiveHighlight(FALSE);
                 ChangeToStateComposing(TRUE);
                 UpdateComposingText(TRUE);
             }
-        } else if (keyCode == IKeyEvent::KEYCODE_DPAD_DOWN) {
-            mCandidatesContainer->PageForward(FALSE, TRUE, &result);
+        }
+        else if (keyCode == IKeyEvent::KEYCODE_DPAD_DOWN) {
+            TO_CCandidatesContainer(mCandidatesContainer)->PageForward(FALSE, TRUE);
         }
         return TRUE;
-    } else if (keyCode >= IKeyEvent::KEYCODE_1
+    }
+    else if (keyCode >= IKeyEvent::KEYCODE_1
             && keyCode <= IKeyEvent::KEYCODE_9) {
         if (!realAction) return TRUE;
 
         Int32 activePos = keyCode - IKeyEvent::KEYCODE_1;
-        Int32 currentPage = 0, value = 0;
-        mCandidatesContainer->GetCurrentPage(&currentPage);
-        if (activePos < (mDecInfo->GetCurrentPageSize(currentPage, &value), value)) {
-            activePos = activePos + (mDecInfo->GetCurrentPageStart(currentPage, &value), value);
+        Int32 currentPage = TO_CCandidatesContainer(mCandidatesContainer)->GetCurrentPage();
+        if (activePos < mDecInfo->GetCurrentPageSize(currentPage)) {
+            activePos = activePos + mDecInfo->GetCurrentPageStart(currentPage);
             if (activePos >= 0) {
                 ChooseAndUpdate(activePos);
             }
         }
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_ENTER) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_ENTER) {
         if (!realAction) return TRUE;
 
-        if (mInputModeSwitcher->IsEnterNoramlState(&state), state) {
-            AutoPtr<IStringBuffer> buf;
-            mDecInfo->GetOrigianlSplStr((IStringBuffer**)&buf);
+        if (mInputModeSwitcher->IsEnterNoramlState()) {
             String text;
-            buf->ToString(&text);
+            mDecInfo->GetOrigianlSplStr()->ToString(&text);
             CommitResultText(text);
             ResetToIdleState(FALSE);
-        } else {
-            Int32 pos = 0;
-            mCandidatesContainer->GetActiveCandiatePos(&pos);
-            String str;
-            mDecInfo->GetCurrentFullSent(pos, &str);
+        }
+        else {
+            Int32 pos = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
+            String str = mDecInfo->GetCurrentFullSent(pos);
             CommitResultText(str);
-            InputMethodService::SendKeyChar('\n');
+            SendKeyChar('\n');
             ResetToIdleState(FALSE);
         }
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_DPAD_CENTER
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DPAD_CENTER
             || keyCode == IKeyEvent::KEYCODE_SPACE) {
         if (!realAction) return TRUE;
         ChooseCandidate(-1);
         return TRUE;
-    } else if (keyCode == IKeyEvent::KEYCODE_BACK) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_BACK) {
         if (!realAction) return TRUE;
         ResetToIdleState(FALSE);
         RequestHideSelf(0);
@@ -1535,11 +1588,8 @@ Boolean CPinyinIME::ProcessStatePredict(
     if (pressed) {
         Char32 fullwidth_char = KeyMapDream::GetChineseLabel(keyCode);
         if (0 != fullwidth_char) {
-            Int32 pos = 0;
-            mCandidatesContainer->GetActiveCandiatePos(&pos);
-
-            String str;
-            mDecInfo->GetCandidate(pos, &str);
+            Int32 pos = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
+            String str = mDecInfo->GetCandidate(pos);
             CommitResultText(str + fullwidth_char);
             ResetToIdleState(FALSE);
         }
@@ -1552,45 +1602,49 @@ Boolean CPinyinIME::ProcessStatePredict(
         ChangeToStateInput(TRUE);
         mDecInfo->AddSplChar((Char32) keyChar, TRUE);
         ChooseAndUpdate(-1);
-    } else if (keyChar == ',' || keyChar == '.') {
-        InputCommaPeriod(String(""), keyChar, TRUE, Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE);
-    } else if (keyCode == IKeyEvent::KEYCODE_DPAD_UP
+    }
+    else if (keyChar == ',' || keyChar == '.') {
+        InputCommaPeriod(String(""), keyChar, TRUE, STATE_IDLE);
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DPAD_UP
             || keyCode == IKeyEvent::KEYCODE_DPAD_DOWN
             || keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
             || keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
-        Boolean result = FALSE;
         if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT) {
-            mCandidatesContainer->ActiveCurseBackward(&result);
+            TO_CCandidatesContainer(mCandidatesContainer)->ActiveCurseBackward();
         }
         if (keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
-            mCandidatesContainer->ActiveCurseForward(&result);
+            TO_CCandidatesContainer(mCandidatesContainer)->ActiveCurseForward();
         }
         if (keyCode == IKeyEvent::KEYCODE_DPAD_UP) {
-            mCandidatesContainer->PageBackward(FALSE, TRUE, &result);
+            TO_CCandidatesContainer(mCandidatesContainer)->PageBackward(FALSE, TRUE);
         }
         if (keyCode == IKeyEvent::KEYCODE_DPAD_DOWN) {
-            mCandidatesContainer->PageForward(FALSE, TRUE, &result);
+            TO_CCandidatesContainer(mCandidatesContainer)->PageForward(FALSE, TRUE);
         }
-    } else if (keyCode == IKeyEvent::KEYCODE_DEL) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DEL) {
         ResetToIdleState(FALSE);
-    } else if (keyCode == IKeyEvent::KEYCODE_BACK) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_BACK) {
         ResetToIdleState(FALSE);
         RequestHideSelf(0);
-    } else if (keyCode >= IKeyEvent::KEYCODE_1
+    }
+    else if (keyCode >= IKeyEvent::KEYCODE_1
             && keyCode <= IKeyEvent::KEYCODE_9) {
         Int32 activePos = keyCode - IKeyEvent::KEYCODE_1;
-        Int32 currentPage = 0, value = 0;
-        mCandidatesContainer->GetCurrentPage(&currentPage);
-        if (activePos < (mDecInfo->GetCurrentPageSize(currentPage, &value), value)) {
-            activePos = activePos + (mDecInfo->GetCurrentPageStart(currentPage, &value), value);
+        Int32 currentPage = TO_CCandidatesContainer(mCandidatesContainer)->GetCurrentPage();
+        if (activePos < mDecInfo->GetCurrentPageSize(currentPage)) {
+            activePos = activePos + mDecInfo->GetCurrentPageStart(currentPage);
             if (activePos >= 0) {
                 ChooseAndUpdate(activePos);
             }
         }
     } else if (keyCode == IKeyEvent::KEYCODE_ENTER) {
-        InputMethodService::SendKeyChar('\n');
+        SendKeyChar('\n');
         ResetToIdleState(FALSE);
-    } else if (keyCode == IKeyEvent::KEYCODE_DPAD_CENTER
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DPAD_CENTER
             || keyCode == IKeyEvent::KEYCODE_SPACE) {
         ChooseCandidate(-1);
     }
@@ -1606,8 +1660,8 @@ Boolean CPinyinIME::ProcessStateEditComposing(
 {
     if (!realAction) return TRUE;
 
-    Elastos::Droid::Inputmethods::PinyinIME::ComposingStatus cmpsvStatus;
-    mComposingView->GetComposingStatus(&cmpsvStatus);
+    CComposingView::ComposingStatus cmpsvStatus =
+            TO_CComposingView(mComposingView)->GetComposingStatus();
 
     // If ALT key is pressed, input alternative key. But if the
     // alternative key is quote key, it will be used for input a splitter
@@ -1616,75 +1670,78 @@ Boolean CPinyinIME::ProcessStateEditComposing(
     if (event->IsAltPressed(&pressed), pressed) {
         Int32 metaState = 0, unicodeChar = 0;
         event->GetMetaState(&metaState);
-        if ('\'' != (event->GetUnicodeChar(metaState, &unicodeChar), unicodeChar)) {
+        event->GetUnicodeChar(metaState, &unicodeChar);
+        if ('\'' != unicodeChar) {
             Char32 fullwidth_char = KeyMapDream::GetChineseLabel(keyCode);
             if (0 != fullwidth_char) {
                 String retStr;
-                if (Elastos::Droid::Inputmethods::PinyinIME::ComposingStatus_SHOW_STRING_LOWERCASE == cmpsvStatus) {
-                    AutoPtr<IStringBuffer> buf;
-                    mDecInfo->GetOrigianlSplStr((IStringBuffer**)&buf);
-                    buf->ToString(&retStr);
-                } else {
-                    mDecInfo->GetComposingStr(&retStr);
+                if (CComposingView::SHOW_STRING_LOWERCASE == cmpsvStatus) {
+                    retStr = mDecInfo->GetOrigianlSplStr()->ToString();
+                }
+                else {
+                    retStr = mDecInfo->GetComposingStr();
                 }
                 CommitResultText(retStr + fullwidth_char);
                 ResetToIdleState(FALSE);
             }
             return TRUE;
-        } else {
+        }
+        else {
             keyChar = '\'';
         }
     }
 
-    Boolean state = FALSE;
     if (keyCode == IKeyEvent::KEYCODE_DPAD_DOWN) {
-        if (!(mDecInfo->SelectionFinished(&state), state)) {
+        if (!mDecInfo->SelectionFinished()) {
             ChangeToStateInput(TRUE);
         }
-    } else if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DPAD_LEFT
             || keyCode == IKeyEvent::KEYCODE_DPAD_RIGHT) {
-        mComposingView->MoveCursor(keyCode, &state);
-    } else if ((keyCode == IKeyEvent::KEYCODE_ENTER && (mInputModeSwitcher->IsEnterNoramlState(&state), state))
+        TO_CComposingView(mComposingView)->MoveCursor(keyCode);
+    }
+    else if ((keyCode == IKeyEvent::KEYCODE_ENTER && mInputModeSwitcher->IsEnterNoramlState())
             || keyCode == IKeyEvent::KEYCODE_DPAD_CENTER
             || keyCode == IKeyEvent::KEYCODE_SPACE) {
-        if (Elastos::Droid::Inputmethods::PinyinIME::ComposingStatus_SHOW_STRING_LOWERCASE == cmpsvStatus) {
-            String str;
-            AutoPtr<IStringBuffer> buf;
-            mDecInfo->GetOrigianlSplStr((IStringBuffer**)&buf);
-            buf->ToString(&str);
+        if (CComposingView::SHOW_STRING_LOWERCASE == cmpsvStatus) {
+            String str = mDecInfo->GetOrigianlSplStr()->ToString();
             if (!TryInputRawUnicode(str)) {
                 CommitResultText(str);
             }
-        } else if (Elastos::Droid::Inputmethods::PinyinIME::ComposingStatus_EDIT_PINYIN == cmpsvStatus) {
-            String str;
-            mDecInfo->GetComposingStr(&str);
+        }
+        else if (CComposingView::EDIT_PINYIN == cmpsvStatus) {
+            String str = mDecInfo->GetComposingStr();
             if (!TryInputRawUnicode(str)) {
                 CommitResultText(str);
             }
-        } else {
-            String str;
-            mDecInfo->GetComposingStr(&str);
+        }
+        else {
+            String str = mDecInfo->GetComposingStr();
             CommitResultText(str);
         }
         ResetToIdleState(FALSE);
-    } else if (keyCode == IKeyEvent::KEYCODE_ENTER
-            && !(mInputModeSwitcher->IsEnterNoramlState(&state), state)) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_ENTER
+            && !mInputModeSwitcher->IsEnterNoramlState()) {
         String retStr;
-        if (!(mDecInfo->IsCandidatesListEmpty(&state), state)) {
-            Int32 pos = 0;
-            mCandidatesContainer->GetActiveCandiatePos(&pos);
-            mDecInfo->GetCurrentFullSent(pos, &retStr);
-        } else {
-            mDecInfo->GetComposingStr(&retStr);
+        if (!mDecInfo->IsCandidatesListEmpty()) {
+            Int32 pos =
+                    TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
+            retStr = mDecInfo->GetCurrentFullSent(pos);
+        }
+        else {
+            retStr = mDecInfo->GetComposingStr();
         }
         CommitResultText(retStr);
-        InputMethodService::SendKeyChar('\n');
+        SendKeyChar('\n');
         ResetToIdleState(FALSE);
-    } else if (keyCode == IKeyEvent::KEYCODE_BACK) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_BACK) {
         ResetToIdleState(FALSE);
         RequestHideSelf(0);
         return TRUE;
-    } else {
+    }
+    else {
         return ProcessSurfaceChange(keyChar, keyCode);
     }
     return TRUE;
@@ -1721,7 +1778,8 @@ Boolean CPinyinIME::TryInputRawUnicode(
             // } catch (NumberFormatException e) {
             //     return FALSE;
             // }
-        } else if (str.Substring(str.GetLength() - 7, str.GetLength()).Equals(String("unicode"))) {
+        }
+        else if (str.Substring(str.GetLength() - 7, str.GetLength()).Equals(String("unicode"))) {
             String resultStr = String("");
             AutoPtr<ArrayOf<Char32> > chars = str.GetChars();
             for (Int32 pos = 0; pos < chars->GetLength() - 7; pos++) {
@@ -1729,9 +1787,9 @@ Boolean CPinyinIME::TryInputRawUnicode(
                     resultStr += String(" ");
                 }
 
-                resultStr += String("0x") + StringUtils::Int32ToHexString((*chars)[pos]);
+                resultStr += String("0x") + StringUtils::ToHexString((Int32)(*chars)[pos]);
             }
-            CommitResultText(resultStr/*String.valueOf(resultStr)*/);
+            CommitResultText(resultStr);
             return TRUE;
         }
     }
@@ -1742,18 +1800,18 @@ Boolean CPinyinIME::ProcessSurfaceChange(
     /* [in] */ Int32 keyChar,
     /* [in] */ Int32 keyCode)
 {
-    Boolean state = FALSE;
-    if ((mDecInfo->IsSplStrFull(&state), state) && IKeyEvent::KEYCODE_DEL != keyCode) {
+    if (mDecInfo->IsSplStrFull() && IKeyEvent::KEYCODE_DEL != keyCode) {
         return TRUE;
     }
 
     if ((keyChar >= 'a' && keyChar <= 'z')
-            || (keyChar == '\'' && !(mDecInfo->CharBeforeCursorIsSeparator(&state), state))
+            || (keyChar == '\'' && !mDecInfo->CharBeforeCursorIsSeparator())
             || (((keyChar >= '0' && keyChar <= '9') || keyChar == ' ') &&
-                Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING == mImeState)) {
+                STATE_COMPOSING == mImeState)) {
         mDecInfo->AddSplChar((Char32) keyChar, FALSE);
         ChooseAndUpdate(-1);
-    } else if (keyCode == IKeyEvent::KEYCODE_DEL) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_DEL) {
         mDecInfo->PrepareDeleteBeforeCursor();
         ChooseAndUpdate(-1);
     }
@@ -1763,24 +1821,24 @@ Boolean CPinyinIME::ProcessSurfaceChange(
 void CPinyinIME::ChangeToStateComposing(
     /* [in] */ Boolean updateUi)
 {
-    mImeState = Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING;
+    mImeState = STATE_COMPOSING;
     if (!updateUi) return;
 
     Boolean state = FALSE;
-    if (NULL != mSkbContainer && (mSkbContainer->IsShown(&state), state)) {
-        mSkbContainer->ToggleCandidateMode(TRUE);
+    if (NULL != mSkbContainer && (IView::Probe(mSkbContainer)->IsShown(&state), state)) {
+        TO_CSkbContainer(mSkbContainer)->ToggleCandidateMode(TRUE);
     }
 }
 
 void CPinyinIME::ChangeToStateInput(
     /* [in] */ Boolean updateUi)
 {
-    mImeState = Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_INPUT;
+    mImeState = STATE_INPUT;
     if (!updateUi) return;
 
     Boolean state = FALSE;
-    if (NULL != mSkbContainer && (mSkbContainer->IsShown(&state), state)) {
-        mSkbContainer->ToggleCandidateMode(TRUE);
+    if (NULL != mSkbContainer && (IView::Probe(mSkbContainer)->IsShown(&state), state)) {
+        TO_CSkbContainer(mSkbContainer)->ToggleCandidateMode(TRUE);
     }
     ShowCandidateWindow(TRUE);
 }
@@ -1808,13 +1866,11 @@ void CPinyinIME::CommitResultText(
     InputMethodService::GetCurrentInputConnection((IInputConnection**)&ic);
     if (NULL != ic) {
         Boolean result = FALSE;
-        AutoPtr<ICharSequence> text;
-        CStringWrapper::New(resultText, (ICharSequence**)&text);
-        ic->CommitText(text, 1, &result);
+        ic->CommitText(CoreUtils::Convert(resultText), 1, &result);
     }
     if (NULL != mComposingView) {
-        mComposingView->SetVisibility(IView::INVISIBLE);
-        mComposingView->Invalidate();
+        IView::Probe(mComposingView)->SetVisibility(IView::INVISIBLE);
+        IView::Probe(mComposingView)->Invalidate();
     }
 }
 
@@ -1822,12 +1878,13 @@ void CPinyinIME::UpdateComposingText(
     /* [in] */ Boolean visible)
 {
     if (!visible) {
-        mComposingView->SetVisibility(IView::INVISIBLE);
-    } else {
-        mComposingView->SetDecodingInfo(mDecInfo, mImeState);
-        mComposingView->SetVisibility(IView::VISIBLE);
+        IView::Probe(mComposingView)->SetVisibility(IView::INVISIBLE);
     }
-    mComposingView->Invalidate();
+    else {
+        TO_CComposingView(mComposingView)->SetDecodingInfo(mDecInfo, mImeState);
+        IView::Probe(mComposingView)->SetVisibility(IView::VISIBLE);
+    }
+    IView::Probe(mComposingView)->Invalidate();
 }
 
 void CPinyinIME::InputCommaPeriod(
@@ -1837,12 +1894,15 @@ void CPinyinIME::InputCommaPeriod(
     /* [in] */ ImeState nextState)
 {
     StringBuilder buffer(preEdit);
-    if (keyChar == ',')
+    if (keyChar == ',') {
         buffer.AppendChar(0xff0c/*'\uff0c'*/);
-    else if (keyChar == '.')
+    }
+    else if (keyChar == '.') {
         buffer.AppendChar(0x3002/*'\u3002'*/);
-    else
+    }
+    else {
         return;
+    }
     CommitResultText(buffer.ToString());
     if (dismissCandWindow) ResetCandidateWindow();
     mImeState = nextState;
@@ -1851,12 +1911,12 @@ void CPinyinIME::InputCommaPeriod(
 void CPinyinIME::ResetToIdleState(
     /* [in] */ Boolean resetInlineText)
 {
-    if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE == mImeState) return;
+    if (STATE_IDLE == mImeState) return;
 
-    mImeState = Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE;
+    mImeState = STATE_IDLE;
     mDecInfo->Reset();
 
-    if (NULL != mComposingView) mComposingView->Reset();
+    if (NULL != mComposingView) TO_CComposingView(mComposingView)->Reset();
     if (resetInlineText) CommitResultText(String(""));
     ResetCandidateWindow();
 }
@@ -1864,44 +1924,40 @@ void CPinyinIME::ResetToIdleState(
 void CPinyinIME::ChooseAndUpdate(
     /* [in] */ Int32 candId)
 {
-    Boolean state = FALSE;
-    if (!(mInputModeSwitcher->IsChineseText(&state), state)) {
-        String choice;
-        mDecInfo->GetCandidate(candId, &choice);
-        if (NULL != choice) {
+    if (!mInputModeSwitcher->IsChineseText()) {
+        String choice = mDecInfo->GetCandidate(candId);
+        if (!choice.IsNull()) {
             CommitResultText(choice);
         }
         ResetToIdleState(FALSE);
         return;
     }
 
-    if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_PREDICT != mImeState) {
+    if (STATE_PREDICT != mImeState) {
         // Get result candidate list, if choice_id < 0, do a new decoding.
         // If choice_id >=0, select the candidate, and get the new candidate
         // list.
         mDecInfo->ChooseDecodingCandidate(candId);
-    } else {
+    }
+    else {
         // Choose a prediction item.
         mDecInfo->ChoosePredictChoice(candId);
     }
 
-    String comStr;
-    mDecInfo->GetComposingStr(&comStr);
-    if (!comStr.IsNullOrEmpty()) {
+    if (!mDecInfo->GetComposingStr().IsNullOrEmpty()) {
         String resultStr;
-        mDecInfo->GetComposingStrActivePart(&resultStr);
+        resultStr = mDecInfo->GetComposingStrActivePart();
 
         // choiceId >= 0 means user finishes a choice selection.
-        if (candId >= 0 && (mDecInfo->CanDoPrediction(&state), state)) {
+        if (candId >= 0 && mDecInfo->CanDoPrediction()) {
             CommitResultText(resultStr);
-            mImeState = Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_PREDICT;
-            if (NULL != mSkbContainer && (mSkbContainer->IsShown(&state), state)) {
-                mSkbContainer->ToggleCandidateMode(FALSE);
+            mImeState = STATE_PREDICT;
+            Boolean isShown = FALSE;
+            if (NULL != mSkbContainer && (IView::Probe(mSkbContainer)->IsShown(&isShown), isShown)) {
+                TO_CSkbContainer(mSkbContainer)->ToggleCandidateMode(FALSE);
             }
-            AutoPtr<ISettings> settings;
-            CPinyinSettings::AcquireSingleton((ISettings**)&settings);
             // Try to get the prediction list.
-            if (settings->GetPrediction(&state), state) {
+            if (Settings::GetPrediction()) {
                 AutoPtr<IInputConnection> ic;
                 InputMethodService::GetCurrentInputConnection((IInputConnection**)&ic);
                 if (NULL != ic) {
@@ -1911,34 +1967,36 @@ void CPinyinIME::ChooseAndUpdate(
                         mDecInfo->PreparePredicts(cs);
                     }
                 }
-            } else {
+            }
+            else {
                 mDecInfo->ResetCandidates();
             }
 
-            AutoPtr<ArrayOf<String> > candiList;
-            mDecInfo->GetCandidatesList((ArrayOf<String>**)&candiList);
-            if (candiList != NULL && candiList->GetLength() > 0) {
+            if (mDecInfo->mCandidatesList.GetSize() > 0) {
                 ShowCandidateWindow(FALSE);
-            } else {
+            }
+            else {
                 ResetToIdleState(FALSE);
             }
-        } else {
-            if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE == mImeState) {
-                Int32 value = 0;
-                if ((mDecInfo->GetSplStrDecodedLen(&value), value) == 0) {
+        }
+        else {
+            if (STATE_IDLE == mImeState) {
+                if (mDecInfo->GetSplStrDecodedLen() == 0) {
                     ChangeToStateComposing(TRUE);
-                } else {
+                }
+                else {
                     ChangeToStateInput(TRUE);
                 }
-            } else {
-                Boolean state = FALSE;
-                if ((mDecInfo->SelectionFinished(&state), state)) {
+            }
+            else {
+                if (mDecInfo->SelectionFinished()) {
                     ChangeToStateComposing(TRUE);
                 }
             }
             ShowCandidateWindow(TRUE);
         }
-    } else {
+    }
+    else {
         ResetToIdleState(FALSE);
     }
 }
@@ -1947,7 +2005,7 @@ void CPinyinIME::ChooseCandidate(
     /* [in] */ Int32 activeCandNo)
 {
     if (activeCandNo < 0) {
-        mCandidatesContainer->GetActiveCandiatePos(&activeCandNo);
+        activeCandNo = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
     }
     if (activeCandNo >= 0) {
         ChooseAndUpdate(activeCandNo);
@@ -1956,12 +2014,10 @@ void CPinyinIME::ChooseCandidate(
 
 Boolean CPinyinIME::StartPinyinDecoderService()
 {
-    AutoPtr<IPinyinDecoderService> service;
-    mDecInfo->GetPinyinDecoderService((IPinyinDecoderService**)&service);
-    if (NULL == service) {
+    if (NULL == mDecInfo->mIPinyinDecoderService) {
         AutoPtr<IIntent> serviceIntent;
         CIntent::New((IIntent**)&serviceIntent);
-        serviceIntent->SetClassName(this, String("PinyinIME.CPinyinDecoderService"));
+        serviceIntent->SetClassName(this, String("Elastos.Droid.InputMethod.Pinyin.CPinyinDecoderService"));
 
         if (NULL == mPinyinDecoderServiceConnection) {
             mPinyinDecoderServiceConnection = new PinyinDecoderServiceConnection(this);
@@ -1969,10 +2025,11 @@ Boolean CPinyinIME::StartPinyinDecoderService()
 
         Boolean result = FALSE;
         // Bind service
-        if (InputMethodService::BindService(serviceIntent, mPinyinDecoderServiceConnection,
+        if (BindService(serviceIntent, mPinyinDecoderServiceConnection,
                     IContext::BIND_AUTO_CREATE, &result), result) {
             return TRUE;
-        } else {
+        }
+        else {
             return FALSE;
         }
     }
@@ -1982,12 +2039,12 @@ Boolean CPinyinIME::StartPinyinDecoderService()
 ECode CPinyinIME::OnCreateCandidatesView(
     /* [out] */ IView** retView)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onCreateCandidatesView.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onCreateCandidatesView.");
+    }
 
     AutoPtr<ILayoutInflater> inflater;
-    InputMethodService::GetLayoutInflater((ILayoutInflater**)&inflater);
+    GetLayoutInflater((ILayoutInflater**)&inflater);
     // Inflate the floating container view
     AutoPtr<IView> view;
     inflater->Inflate(R::layout::floating_container, NULL, (IView**)&view);
@@ -1995,7 +2052,7 @@ ECode CPinyinIME::OnCreateCandidatesView(
 
     // The first child is the composing view.
     view = NULL;
-    mFloatingContainer->GetChildAt(0, (IView**)&view);
+    IViewGroup::Probe(mFloatingContainer)->GetChildAt(0, (IView**)&view);
     mComposingView = IComposingView::Probe(view);
 
     view = NULL;
@@ -2003,17 +2060,16 @@ ECode CPinyinIME::OnCreateCandidatesView(
     mCandidatesContainer = ICandidatesContainer::Probe(view);
 
     // Create balloon hint for candidates view.
-    const Int32 MODE_SHIFT = 30;
-    const Int32 UNSPECIFIED = 0 << MODE_SHIFT;
-    CBalloonHint::New(this, mCandidatesContainer, UNSPECIFIED/*MeasureSpec::UNSPECIFIED*/, (IBalloonHint**)&mCandidatesBalloon);
+    CBalloonHint::NewByFriend(this, IView::Probe(mCandidatesContainer),
+            Elastos::Droid::View::View::MeasureSpec::UNSPECIFIED, (CBalloonHint**)&mCandidatesBalloon);
 
     AutoPtr<IResources> res;
-    InputMethodService::GetResources((IResources**)&res);
+    GetResources((IResources**)&res);
     AutoPtr<IDrawable> dr;
     res->GetDrawable(R::drawable::candidate_balloon_bg, (IDrawable**)&dr);
     mCandidatesBalloon->SetBalloonBackground(dr);
-    assert(mCandidatesContainer != NULL);
-    mCandidatesContainer->Initialize(mChoiceNotifier, mCandidatesBalloon, mGestureDetectorCandidates);
+    TO_CCandidatesContainer(mCandidatesContainer)->Initialize(
+            mChoiceNotifier, mCandidatesBalloon, mGestureDetectorCandidates);
 
     // The floating window
     Boolean state = FALSE;
@@ -2021,76 +2077,73 @@ ECode CPinyinIME::OnCreateCandidatesView(
         mFloatingWindowTimer->CancelShowing();
         mFloatingWindow->Dismiss();
     }
+    mFloatingWindow = NULL;
     CPopupWindow::New(this, (IPopupWindow**)&mFloatingWindow);
     mFloatingWindow->SetClippingEnabled(FALSE);
     mFloatingWindow->SetBackgroundDrawable(NULL);
     mFloatingWindow->SetInputMethodMode(IPopupWindow::INPUT_METHOD_NOT_NEEDED);
-    mFloatingWindow->SetContentView(mFloatingContainer);
+    mFloatingWindow->SetContentView(IView::Probe(mFloatingContainer));
 
     InputMethodService::SetCandidatesViewShown(TRUE);
-    *retView = mCandidatesContainer;
+    *retView = IView::Probe(mCandidatesContainer);
     REFCOUNT_ADD(*retView);
     return NOERROR;
 }
 
 ECode CPinyinIME::ResponseSoftKeyEvent(
-    /* [in] */ ISoftKey* sKey)
+    /* [in] */ SoftKey* sKey)
 {
     if (NULL == sKey) return NOERROR;
 
     AutoPtr<IInputConnection> ic;
-    InputMethodService::GetCurrentInputConnection((IInputConnection**)&ic);
+    GetCurrentInputConnection((IInputConnection**)&ic);
     if (ic == NULL) return NOERROR;
 
-    Int32 keyCode = 0;
-    sKey->GetKeyCode(&keyCode);
-    Boolean result = FALSE;
+    Int32 keyCode = sKey->GetKeyCode();
     // Process some general keys, including KEYCODE_DEL, KEYCODE_SPACE,
     // KEYCODE_ENTER and KEYCODE_DPAD_CENTER.
-    if (sKey->IsKeyCodeKey(&result), result) {
+    if (sKey->IsKeyCodeKey()) {
         if (ProcessFunctionKeys(keyCode, TRUE)) return NOERROR;
     }
 
-    if (sKey->IsUserDefKey(&result), result) {
-        Int32 icon = 0;
-        mInputModeSwitcher->SwitchModeForUserKey(keyCode, &icon);
+    if (sKey->IsUserDefKey()) {
+        Int32 icon = mInputModeSwitcher->SwitchModeForUserKey(keyCode);
         UpdateIcon(icon);
         ResetToIdleState(FALSE);
-        mSkbContainer->UpdateInputMode();
-    } else {
-        if (sKey->IsKeyCodeKey(&result), result) {
+        TO_CSkbContainer(mSkbContainer)->UpdateInputMode();
+    }
+    else {
+        if (sKey->IsKeyCodeKey()) {
             AutoPtr<IKeyEvent> eDown;
             AutoPtr<IKeyEvent> eUp;
             CKeyEvent::New(0, 0, IKeyEvent::ACTION_DOWN,
                     keyCode, 0, 0, 0, 0, IKeyEvent::FLAG_SOFT_KEYBOARD, (IKeyEvent**)&eDown);
-
             CKeyEvent::New(0, 0, IKeyEvent::ACTION_UP, keyCode,
                     0, 0, 0, 0, IKeyEvent::FLAG_SOFT_KEYBOARD, (IKeyEvent**)&eUp);
 
+            Boolean result;
             OnKeyDown(keyCode, eDown, &result);
             OnKeyUp(keyCode, eUp, &result);
-        } else if (sKey->IsUniStrKey(&result), result) {
+        }
+        else if (sKey->IsUniStrKey()) {
             Boolean kUsed = FALSE;
-            String keyLabel;
-            sKey->GetKeyLabel(&keyLabel);
-            if ((mInputModeSwitcher->IsChineseTextWithSkb(&result), result)
-                    && (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_INPUT == mImeState
-                        || Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING == mImeState)) {
-                Int32 len = 0;
-                if ((mDecInfo->GetLength(&len), len) > 0 && keyLabel.GetLength() == 1
+            String keyLabel = sKey->GetKeyLabel();
+            if (mInputModeSwitcher->IsChineseTextWithSkb()
+                    && (STATE_INPUT == mImeState || STATE_COMPOSING == mImeState)) {
+                if (mDecInfo->GetLength() > 0 && keyLabel.GetLength() == 1
                         && keyLabel.GetChar(0) == '\'') {
                     ProcessSurfaceChange('\'', 0);
                     kUsed = TRUE;
                 }
             }
             if (!kUsed) {
-                Int32 pos = 0;
-                mCandidatesContainer->GetActiveCandiatePos(&pos);
-                String str;
-                if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_INPUT == mImeState) {
-                    CommitResultText((mDecInfo->GetCurrentFullSent(pos, &str), str));
-                } else if (Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING == mImeState) {
-                    CommitResultText((mDecInfo->GetComposingStr(&str), str));
+                if (STATE_INPUT == mImeState) {
+                    String str = mDecInfo->GetCurrentFullSent(
+                            TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos());
+                    CommitResultText(str);
+                }
+                else if (STATE_COMPOSING == mImeState) {
+                    CommitResultText(mDecInfo->GetComposingStr());
                 }
                 CommitResultText(keyLabel);
                 ResetToIdleState(FALSE);
@@ -2099,13 +2152,10 @@ ECode CPinyinIME::ResponseSoftKeyEvent(
 
         // If the current soft keyboard is not sticky, IME needs to go
         // back to the previous soft keyboard automatically.
-        Boolean sticky = FALSE;
-        if (!(mSkbContainer->IsCurrentSkbSticky(&sticky), sticky)) {
-            Int32 icon = 0;
-            mInputModeSwitcher->RequestBackToPreviousSkb(&icon);
-            UpdateIcon(icon);
+        if (!TO_CSkbContainer(mSkbContainer)->IsCurrentSkbSticky()) {
+            UpdateIcon(mInputModeSwitcher->RequestBackToPreviousSkb());
             ResetToIdleState(FALSE);
-            mSkbContainer->UpdateInputMode();
+            TO_CSkbContainer(mSkbContainer)->UpdateInputMode();
         }
     }
     return NOERROR;
@@ -2114,14 +2164,15 @@ ECode CPinyinIME::ResponseSoftKeyEvent(
 void CPinyinIME::ShowCandidateWindow(
     /* [in] */ Boolean showComposingView)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "Candidates window is shown. Parent = "
-    //             + mCandidatesContainer);
-    // }
+    if (mEnvironment->NeedDebug()) {
+        String str;
+        IObject::Probe(mCandidatesContainer)->ToString(&str);
+        Logger::D(TAG, "Candidates window is shown. Parent = %s", str.string());
+    }
 
-    InputMethodService::SetCandidatesViewShown(TRUE);
+    SetCandidatesViewShown(TRUE);
 
-    if (NULL != mSkbContainer) mSkbContainer->RequestLayout();
+    if (NULL != mSkbContainer) IView::Probe(mSkbContainer)->RequestLayout();
 
     if (NULL == mCandidatesContainer) {
         ResetToIdleState(FALSE);
@@ -2129,15 +2180,15 @@ void CPinyinIME::ShowCandidateWindow(
     }
 
     UpdateComposingText(showComposingView);
-    mCandidatesContainer->ShowCandidates(mDecInfo, Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING != mImeState);
+    TO_CCandidatesContainer(mCandidatesContainer)->ShowCandidates(mDecInfo, STATE_COMPOSING != mImeState);
     mFloatingWindowTimer->PostShowFloatingWindow();
 }
 
 void CPinyinIME::DismissCandidateWindow()
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "Candidates window is to be dismissed");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "Candidates window is to be dismissed");
+    }
     if (NULL == mCandidatesContainer) return;
     // try {
     mFloatingWindowTimer->CancelShowing();
@@ -2145,19 +2196,19 @@ void CPinyinIME::DismissCandidateWindow()
     // } catch (Exception e) {
     //     Log.e(TAG, "Fail to show the PopupWindow.");
     // }
-    InputMethodService::SetCandidatesViewShown(FALSE);
+    SetCandidatesViewShown(FALSE);
 
     Boolean shown = FALSE;
-    if (NULL != mSkbContainer && (mSkbContainer->IsShown(&shown), shown)) {
-        mSkbContainer->ToggleCandidateMode(FALSE);
+    if (NULL != mSkbContainer && (IView::Probe(mSkbContainer)->IsShown(&shown), shown)) {
+        TO_CSkbContainer(mSkbContainer)->ToggleCandidateMode(FALSE);
     }
 }
 
 void CPinyinIME::ResetCandidateWindow()
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "Candidates window is to be reset");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "Candidates window is to be reset");
+    }
     if (NULL == mCandidatesContainer) return;
     // try {
     mFloatingWindowTimer->CancelShowing();
@@ -2167,13 +2218,13 @@ void CPinyinIME::ResetCandidateWindow()
     // }
 
     Boolean shown = FALSE;
-    if (NULL != mSkbContainer && (mSkbContainer->IsShown(&shown), shown)) {
-        mSkbContainer->ToggleCandidateMode(FALSE);
+    if (NULL != mSkbContainer && (IView::Probe(mSkbContainer)->IsShown(&shown), shown)) {
+        TO_CSkbContainer(mSkbContainer)->ToggleCandidateMode(FALSE);
     }
 
     mDecInfo->ResetCandidates();
 
-    if (NULL != mCandidatesContainer && (mCandidatesContainer->IsShown(&shown), shown)) {
+    if (NULL != mCandidatesContainer && (IView::Probe(mCandidatesContainer)->IsShown(&shown), shown)) {
         ShowCandidateWindow(FALSE);
     }
 }
@@ -2182,9 +2233,10 @@ void CPinyinIME::UpdateIcon(
     /* [in] */ Int32 iconId)
 {
     if (iconId > 0) {
-        InputMethodService::ShowStatusIcon(iconId);
-    } else {
-        InputMethodService::HideStatusIcon();
+        ShowStatusIcon(iconId);
+    }
+    else {
+        HideStatusIcon();
     }
 }
 
@@ -2192,18 +2244,18 @@ ECode CPinyinIME::OnCreateInputView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onCreateInputView.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onCreateInputView.");
+    }
     AutoPtr<ILayoutInflater> inflater;
-    InputMethodService::GetLayoutInflater((ILayoutInflater**)&inflater);
-    AutoPtr<IView> view;
-    inflater->Inflate(R::layout::skb_container, NULL, (IView**)&view);
-    mSkbContainer = ISkbContainer::Probe(view);
-    mSkbContainer->SetService(this);
-    mSkbContainer->SetInputModeSwitcher(mInputModeSwitcher);
-    mSkbContainer->SetGestureDetector(mGestureDetectorSkb);
-    *view = mSkbContainer;
+    GetLayoutInflater((ILayoutInflater**)&inflater);
+    AutoPtr<IView> v;
+    inflater->Inflate(R::layout::skb_container, NULL, (IView**)&v);
+    mSkbContainer = ISkbContainer::Probe(v);
+    TO_CSkbContainer(mSkbContainer)->SetService(this);
+    TO_CSkbContainer(mSkbContainer)->SetInputModeSwitcher(mInputModeSwitcher);
+    TO_CSkbContainer(mSkbContainer)->SetGestureDetector(mGestureDetectorSkb);
+    *view = v;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }
@@ -2212,14 +2264,13 @@ ECode CPinyinIME::OnStartInput(
     /* [in] */ IEditorInfo* editorInfo,
     /* [in] */ Boolean restarting)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onStartInput " + " ccontentType: "
-    //             + String.valueOf(editorInfo.inputType) + " Restarting:"
-    //             + String.valueOf(restarting));
-    // }
-    Int32 icon = 0;
-    mInputModeSwitcher->RequestInputWithHkb(editorInfo, &icon);
-    UpdateIcon(icon);
+    if (mEnvironment->NeedDebug()) {
+        Int32 inputType;
+        editorInfo->GetInputType(&inputType);
+        Logger::D(TAG, "onStartInput ccontentType: %d Restarting: %s",
+                inputType, restarting ? "TRUE" : "FALSE");
+    }
+    UpdateIcon(mInputModeSwitcher->RequestInputWithHkb(editorInfo));
     ResetToIdleState(FALSE);
     return NOERROR;
 }
@@ -2228,34 +2279,33 @@ ECode CPinyinIME::OnStartInputView(
     /* [in] */ IEditorInfo* editorInfo,
     /* [in] */ Boolean restarting)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onStartInputView " + " contentType: "
-    //             + String.valueOf(editorInfo.inputType) + " Restarting:"
-    //             + String.valueOf(restarting));
-    // }
-    Int32 icon = 0;
-    mInputModeSwitcher->RequestInputWithSkb(editorInfo, &icon);
-    UpdateIcon(icon);
+    if (mEnvironment->NeedDebug()) {
+        Int32 inputType;
+        editorInfo->GetInputType(&inputType);
+        Logger::D(TAG, "onStartInputView ccontentType: %d Restarting: %s",
+                inputType, restarting ? "TRUE" : "FALSE");
+    }
+    UpdateIcon(mInputModeSwitcher->RequestInputWithSkb(editorInfo));
     ResetToIdleState(FALSE);
-    mSkbContainer->UpdateInputMode();
-    return InputMethodService::SetCandidatesViewShown(FALSE);
+    TO_CSkbContainer(mSkbContainer)->UpdateInputMode();
+    return SetCandidatesViewShown(FALSE);
 }
 
 ECode CPinyinIME::OnFinishInputView(
     /* [in] */ Boolean finishingInput)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onFinishInputView.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onFinishInputView.");
+    }
     ResetToIdleState(FALSE);
     return InputMethodService::OnFinishInputView(finishingInput);
 }
 
 ECode CPinyinIME::OnFinishInput()
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onFinishInput.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onFinishInput.");
+    }
     ResetToIdleState(FALSE);
     return InputMethodService::OnFinishInput();
 }
@@ -2263,9 +2313,9 @@ ECode CPinyinIME::OnFinishInput()
 ECode CPinyinIME::OnFinishCandidatesView(
     /* [in] */ Boolean finishingInput)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "onFinishCandidateView.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "onFinishCandidateView.");
+    }
     ResetToIdleState(FALSE);
     return InputMethodService::OnFinishCandidatesView(finishingInput);
 }
@@ -2274,14 +2324,14 @@ ECode CPinyinIME::OnDisplayCompletions(
     /* [in] */ ArrayOf<ICompletionInfo *>* completions)
 {
     Boolean state = FALSE;
-    if (!(InputMethodService::IsFullscreenMode(&state), state)) return NOERROR;
+    if (IsFullscreenMode(&state), !state) return NOERROR;
     if (NULL == completions || completions->GetLength() <= 0) return NOERROR;
-    if (NULL == mSkbContainer || !(mSkbContainer->IsShown(&state), state)) return NOERROR;
+    if (NULL == mSkbContainer || (IView::Probe(mSkbContainer)->IsShown(&state), !state)) return NOERROR;
 
-    if (!(mInputModeSwitcher->IsChineseText(&state), state) ||
-            Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_IDLE == mImeState ||
-            Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_PREDICT == mImeState) {
-        mImeState = Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_APP_COMPLETION;
+    if (!mInputModeSwitcher->IsChineseText() ||
+            STATE_IDLE == mImeState ||
+            STATE_PREDICT == mImeState) {
+        mImeState = STATE_APP_COMPLETION;
         mDecInfo->PrepareAppCompletions(completions);
         ShowCandidateWindow(FALSE);
     }
@@ -2291,20 +2341,20 @@ ECode CPinyinIME::OnDisplayCompletions(
 void CPinyinIME::OnChoiceTouched(
     /* [in] */ Int32 activeCandNo)
 {
-    if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_COMPOSING) {
+    if (mImeState == STATE_COMPOSING) {
         ChangeToStateInput(TRUE);
-    } else if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_INPUT
-            || mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_PREDICT) {
+    }
+    else if (mImeState == STATE_INPUT
+            || mImeState == STATE_PREDICT) {
         ChooseCandidate(activeCandNo);
-    } else if (mImeState == Elastos::Droid::Inputmethods::PinyinIME::ImeState_STATE_APP_COMPLETION) {
-        AutoPtr<ArrayOf<ICompletionInfo*> > completions;
-        mDecInfo->GetAppCompletions((ArrayOf<ICompletionInfo*>**)&completions);
-        if (NULL != completions && activeCandNo >= 0 &&
-                activeCandNo < completions->GetLength()) {
-            AutoPtr<ICompletionInfo> ci = (*completions)[activeCandNo];
+    }
+    else if (mImeState == STATE_APP_COMPLETION) {
+        if (NULL != mDecInfo->mAppCompletions && activeCandNo >= 0 &&
+                activeCandNo < mDecInfo->mAppCompletions->GetLength()) {
+            AutoPtr<ICompletionInfo> ci = (*mDecInfo->mAppCompletions)[activeCandNo];
             if (NULL != ci) {
                 AutoPtr<IInputConnection> ic;
-                InputMethodService::GetCurrentInputConnection((IInputConnection**)&ic);
+                GetCurrentInputConnection((IInputConnection**)&ic);
                 Boolean result = FALSE;
                 ic->CommitCompletion(ci, &result);
             }
@@ -2316,80 +2366,55 @@ void CPinyinIME::OnChoiceTouched(
 ECode CPinyinIME::RequestHideSelf(
     /* [in] */ Int32 flags)
 {
-    // if (mEnvironment.needDebug()) {
-    //     Log.d(TAG, "DimissSoftInput.");
-    // }
+    if (mEnvironment->NeedDebug()) {
+        Logger::D(TAG, "DimissSoftInput.");
+    }
     DismissCandidateWindow();
     Boolean shown = FALSE;
-    if (NULL != mSkbContainer && (mSkbContainer->IsShown(&shown), shown)) {
-        mSkbContainer->DismissPopups();
+    if (NULL != mSkbContainer && (IView::Probe(mSkbContainer)->IsShown(&shown), shown)) {
+        TO_CSkbContainer(mSkbContainer)->DismissPopups();
     }
     return InputMethodService::RequestHideSelf(flags);
 }
 
 ECode CPinyinIME::ShowOptionsMenu()
 {
-    assert(mOptionsDialog == NULL);
-
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
     builder->SetCancelable(TRUE);
-    builder->SetIcon(Elastos::Droid::Inputmethods::PinyinIME::R::drawable::app_icon);
+    builder->SetIcon(Elastos::Droid::InputMethod::Pinyin::R::drawable::app_icon);
     builder->SetNegativeButton(Elastos::Droid::R::string::cancel, NULL);
 
     String value;
-    InputMethodService::GetString(Elastos::Droid::Inputmethods::PinyinIME::R::string::ime_settings_activity_name, &value);
-    AutoPtr<ICharSequence> itemSettings;
-    CStringWrapper::New(value, (ICharSequence**)&itemSettings);
-
-    AutoPtr<ICharSequence> itemInputMethod;
-    InputMethodService::GetString(Elastos::Droid::R::string::inputMethod, &value);
-    CStringWrapper::New(value, (ICharSequence**)&itemInputMethod);
+    GetString(Elastos::Droid::InputMethod::Pinyin::R::string::ime_settings_activity_name, &value);
+    AutoPtr<ICharSequence> itemSettings = CoreUtils::Convert(value);
+    GetString(Elastos::Droid::R::string::inputMethod, &value);
+    AutoPtr<ICharSequence> itemInputMethod = CoreUtils::Convert(value);
 
     AutoPtr<ArrayOf<ICharSequence*> > items = ArrayOf<ICharSequence*>::Alloc(2);
     items->Set(0, itemSettings);
     items->Set(1, itemInputMethod);
-
     AutoPtr<BuilderListener> listener = new BuilderListener(this);
     builder->SetItems(items, listener);
 
     String name;
-    InputMethodService::GetString(R::string::ime_name, &name);
-    AutoPtr<ICharSequence> csName;
-    CStringWrapper::New(name, (ICharSequence**)&csName);
+    GetString(R::string::ime_name, &name);
+    AutoPtr<ICharSequence> csName = CoreUtils::Convert(name);
     builder->SetTitle(csName);
     builder->Create((IAlertDialog**)&mOptionsDialog);
-    mOptionsDialog->SetOnDismissListener((IDialogInterfaceOnDismissListener*)listener.Get());
 
     AutoPtr<IWindow> window;
-    mOptionsDialog->GetWindow((IWindow**)&window);
+    IDialog::Probe(mOptionsDialog)->GetWindow((IWindow**)&window);
     AutoPtr<IWindowManagerLayoutParams> lp;
     window->GetAttributes((IWindowManagerLayoutParams**)&lp);
 
     AutoPtr<IBinder> token;
-    mSkbContainer->GetWindowToken((IBinder**)&token);
+    IView::Probe(mSkbContainer)->GetWindowToken((IBinder**)&token);
     lp->SetToken(token);
-
     lp->SetType(IWindowManagerLayoutParams::TYPE_APPLICATION_ATTACHED_DIALOG);
     window->SetAttributes(lp);
     window->AddFlags(IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM);
-    return mOptionsDialog->Show();
-}
-
-ECode CPinyinIME::GetImeState(
-    /* [out] */ ImeState* state)
-{
-    VALIDATE_NOT_NULL(state);
-    *state = mImeState;
-    return NOERROR;
-}
-
-ECode CPinyinIME::GetCandidatesContainer(
-    /* [out] */ ICandidatesContainer** container)
-{
-    VALIDATE_NOT_NULL(container);
-    *container = mCandidatesContainer;
-    REFCOUNT_ADD(*container);
+    IDialog::Probe(mOptionsDialog)->Show();
     return NOERROR;
 }
 
@@ -2397,13 +2422,11 @@ void CPinyinIME::LaunchSettings()
 {
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    assert(0 && "TODO: CSettingsActivity Not Implement...");
-    intent->SetClassName(/*PinyinIME.this*/this, String("PinyinIME.CSettingsActivity"));
+    intent->SetClassName(String("Elastos.Droid.InputMethod.Pinyin.CPinyinIME"),
+            String("Elastos.Droid.InputMethod.Pinyin.CSettingsActivity"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-    InputMethodService::StartActivity(intent);
+    StartActivity(intent);
 }
-
-#endif
 
 } // namespace Pinyin
 } // namespace InputMethod
