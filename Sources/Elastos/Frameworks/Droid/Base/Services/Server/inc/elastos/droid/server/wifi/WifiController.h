@@ -9,7 +9,6 @@
 #include "elastos/droid/internal/utility/StateMachine.h"
 #include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/server/wifi/WifiSettingsStore.h"
-//TODO #include "elastos/droid/server/wifi/WifiServiceImpl.h"
 
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
@@ -24,7 +23,6 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IWorkSource;
-//TODO using Elastos::Droid::Server::Wifi::WifiServiceImpl::LockList;//crossing-reference
 using Elastos::Droid::Net::INetworkInfo;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -44,6 +42,12 @@ public:
         : public State
     {
     public:
+        DefaultState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
@@ -52,16 +56,21 @@ public:
         {
             return String("DefaultState");
         }
+
+    private:
+        WifiController* mOwner;
     };
 
     class ApStaDisabledState
         : public State
     {
     public:
-        ApStaDisabledState()
+        ApStaDisabledState(
+            /* [in] */ WifiController* owner)
             : mDeferredEnableSerialNumber(0)
             , mHaveDeferredEnable(FALSE)
             , mDisabledTimestamp(0)
+            , mOwner(owner)
         {
         }
         // @Override
@@ -84,12 +93,19 @@ public:
         Int32 mDeferredEnableSerialNumber;
         Boolean mHaveDeferredEnable;
         Int64 mDisabledTimestamp;
+        WifiController* mOwner;
     };
 
     class StaEnabledState
         : public State
     {
     public:
+        StaEnabledState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -102,16 +118,20 @@ public:
             return String("StaEnabledState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     class StaDisabledWithScanState
         : public State
     {
     public:
-        StaDisabledWithScanState()
+        StaDisabledWithScanState(
+            /* [in] */ WifiController* owner)
             : mDeferredEnableSerialNumber(0)
             , mHaveDeferredEnable(FALSE)
             , mDisabledTimestamp(0)
+            , mOwner(owner)
         {
         }
 
@@ -135,12 +155,19 @@ public:
         Int32 mDeferredEnableSerialNumber;
         Boolean mHaveDeferredEnable;
         Int64 mDisabledTimestamp;
+        WifiController* mOwner;
     };
 
     class ApEnabledState
         : public State
     {
     public:
+        ApEnabledState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
@@ -150,12 +177,20 @@ public:
             return String("ApEnabledState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     class EcmState
         : public State
     {
     public:
+        EcmState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -168,6 +203,8 @@ public:
             return String("EcmState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: StaEnabledState */
@@ -175,6 +212,12 @@ public:
         : public State
     {
     public:
+        DeviceActiveState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -187,6 +230,8 @@ public:
             return String("DeviceActiveState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: DeviceActiveState. Device is active, and an app is holding a high perf lock. */
@@ -194,6 +239,12 @@ public:
         : public State
     {
     public:
+        DeviceActiveHighPerfState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -202,6 +253,8 @@ public:
             return String("DeviceActiveHighPerfState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: StaEnabledState */
@@ -209,6 +262,12 @@ public:
         : public State
     {
     public:
+        DeviceInactiveState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
@@ -218,6 +277,8 @@ public:
             return String("DeviceInactiveState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: DeviceInactiveState. Device is inactive, but an app is holding a scan only lock. */
@@ -225,6 +286,12 @@ public:
         : public State
     {
     public:
+        ScanOnlyLockHeldState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -233,6 +300,8 @@ public:
             return String("ScanOnlyLockHeldState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: DeviceInactiveState. Device is inactive, but an app is holding a full lock. */
@@ -240,6 +309,12 @@ public:
         : public State
     {
     public:
+        FullLockHeldState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -248,6 +323,8 @@ public:
             return String("FullLockHeldState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: DeviceInactiveState. Device is inactive, but an app is holding a high perf lock. */
@@ -255,6 +332,12 @@ public:
         : public State
     {
     public:
+        FullHighPerfLockHeldState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -263,6 +346,8 @@ public:
             return String("FullHighPerfLockHeldState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
     /* Parent: DeviceInactiveState. Device is inactive and no app is holding a wifi lock. */
@@ -270,6 +355,12 @@ public:
         : public State
     {
     public:
+        NoLockHeldState(
+            /* [in] */ WifiController* owner)
+            : mOwner(owner)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
@@ -278,6 +369,8 @@ public:
             return String("NoLockHeldState");
         }
 
+    private:
+        WifiController* mOwner;
     };
 
 private:
@@ -302,7 +395,8 @@ private:
     {
     public:
         InnerContentObserver1(
-            /* [in] */ WifiController* owner);
+            /* [in] */ WifiController* owner,
+            /* [in] */ IHandler* handler);
 
         // @Override
         CARAPI OnChange(
@@ -317,7 +411,8 @@ private:
     {
     public:
         InnerContentObserver3(
-            /* [in] */ WifiController* owner);
+            /* [in] */ WifiController* owner,
+            /* [in] */ IHandler* handler);
 
         // @Override
         CARAPI OnChange(
@@ -332,7 +427,8 @@ private:
     {
     public:
         InnerContentObserver5(
-            /* [in] */ WifiController* owner);
+            /* [in] */ WifiController* owner,
+            /* [in] */ IHandler* handler);
 
         // @Override
         CARAPI OnChange(
@@ -418,7 +514,9 @@ public:
     /* References to values tracked in WifiService */
     AutoPtr<WifiStateMachine> mWifiStateMachine;
     AutoPtr<WifiSettingsStore> mSettingsStore;
-    //TODO AutoPtr<LockList> mLocks;
+    //real type is WifiServiceImpl::LockList
+    //use type Object here, avoid the cross-reference
+    AutoPtr<Object> mLocks;
     static const Int32 BASE = IProtocol::BASE_WIFI_CONTROLLER;
     static const Int32 CMD_EMERGENCY_MODE_CHANGED = BASE + 1;
     static const Int32 CMD_SCREEN_ON = BASE + 2;

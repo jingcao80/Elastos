@@ -1,11 +1,33 @@
-
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/server/wifi/WifiController.h"
+#include "elastos/droid/server/wifi/WifiServiceImpl.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CWorkSource;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Net::CNetworkInfo;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -18,76 +40,87 @@ namespace Wifi {
 Boolean WifiController::DefaultState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case CMD_SCREEN_ON:
-    //         mAlarmManager.cancel(mIdleIntent);
-    //         mScreenOff = false;
-    //         mDeviceIdle = false;
-    //         updateBatteryWorkSource();
-    //         break;
-    //     case CMD_SCREEN_OFF:
-    //         mScreenOff = true;
-    //         /*
-    //         * Set a timer to put Wi-Fi to sleep, but only if the screen is off
-    //         * AND the "stay on while plugged in" setting doesn't match the
-    //         * current power conditions (i.e, not plugged in, plugged in to USB,
-    //         * or plugged in to AC).
-    //         */
-    //         if (!shouldWifiStayAwake(mPluggedType)) {
-    //             //Delayed shutdown if wifi is connected
-    //             if (mNetworkInfo.getDetailedState() ==
-    //                     NetworkInfo.DetailedState.CONNECTED) {
-    //                 if (DBG) Slog.d(TAG, "set idle timer: " + mIdleMillis + " ms");
-    //                 mAlarmManager.set(AlarmManager.RTC_WAKEUP,
-    //                         System.currentTimeMillis() + mIdleMillis, mIdleIntent);
-    //             } else {
-    //                 sendMessage(CMD_DEVICE_IDLE);
-    //             }
-    //         }
-    //         break;
-    //     case CMD_DEVICE_IDLE:
-    //         mDeviceIdle = true;
-    //         updateBatteryWorkSource();
-    //         break;
-    //     case CMD_BATTERY_CHANGED:
-    //         /*
-    //         * Set a timer to put Wi-Fi to sleep, but only if the screen is off
-    //         * AND we are transitioning from a state in which the device was supposed
-    //         * to stay awake to a state in which it is not supposed to stay awake.
-    //         * If "stay awake" state is not changing, we do nothing, to avoid resetting
-    //         * the already-set timer.
-    //         */
-    //         int pluggedType = msg.arg1;
-    //         if (DBG) Slog.d(TAG, "battery changed pluggedType: " + pluggedType);
-    //         if (mScreenOff && shouldWifiStayAwake(mPluggedType) &&
-    //                 !shouldWifiStayAwake(pluggedType)) {
-    //             long triggerTime = System.currentTimeMillis() + mIdleMillis;
-    //             if (DBG) Slog.d(TAG, "set idle timer for " + mIdleMillis + "ms");
-    //             mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
-    //         }
-    //
-    //         mPluggedType = pluggedType;
-    //         break;
-    //     case CMD_SET_AP:
-    //     case CMD_SCAN_ALWAYS_MODE_CHANGED:
-    //     case CMD_LOCKS_CHANGED:
-    //     case CMD_WIFI_TOGGLED:
-    //     case CMD_AIRPLANE_TOGGLED:
-    //     case CMD_EMERGENCY_MODE_CHANGED:
-    //         break;
-    //     case CMD_USER_PRESENT:
-    //         mFirstUserSignOnSeen = true;
-    //         break;
-    //     case CMD_DEFERRED_TOGGLE:
-    //         log("DEFERRED_TOGGLE ignored due to state change");
-    //         break;
-    //     default:
-    //         throw new RuntimeException("WifiController.handleMessage " + msg.what);
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_SCREEN_ON:
+            mOwner->mAlarmManager->Cancel(mOwner->mIdleIntent);
+            mOwner->mScreenOff = FALSE;
+            mOwner->mDeviceIdle = false;
+            mOwner->UpdateBatteryWorkSource();
+            break;
+        case CMD_SCREEN_OFF:
+            mOwner->mScreenOff = TRUE;
+            /*
+            * Set a timer to put Wi-Fi to sleep, but only if the screen is off
+            * AND the "stay on while plugged in" setting doesn't match the
+            * current power conditions (i.e, not plugged in, plugged in to USB,
+            * or plugged in to AC).
+            */
+            if (!mOwner->ShouldWifiStayAwake(mOwner->mPluggedType)) {
+                //Delayed shutdown if wifi is connected
+                NetworkInfoDetailedState nidState;
+                mOwner->mNetworkInfo->GetDetailedState(&nidState);
+                if (nidState == Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED) {
+                    if (DBG) Logger::D(TAG, "set idle timer: %d ms", mOwner->mIdleMillis);
+                    AutoPtr<ISystem> system;
+                    CSystem::AcquireSingleton((ISystem**)&system);
+                    Int64 currentTimeMillis;
+                    system->GetCurrentTimeMillis(&currentTimeMillis);
+                    mOwner->mAlarmManager->Set(IAlarmManager::RTC_WAKEUP,
+                            currentTimeMillis + mOwner->mIdleMillis, mOwner->mIdleIntent);
+                } else {
+                    mOwner->SendMessage(CMD_DEVICE_IDLE);
+                }
+            }
+            break;
+        case CMD_DEVICE_IDLE:
+            mOwner->mDeviceIdle = TRUE;
+            mOwner->UpdateBatteryWorkSource();
+            break;
+        case CMD_BATTERY_CHANGED: {
+            /*
+            * Set a timer to put Wi-Fi to sleep, but only if the screen is off
+            * AND we are transitioning from a state in which the device was supposed
+            * to stay awake to a state in which it is not supposed to stay awake.
+            * If "stay awake" state is not changing, we do nothing, to avoid resetting
+            * the already-set timer.
+            */
+            Int32 pluggedType;
+            msg->GetArg1(&pluggedType);
+            if (DBG) Logger::D(TAG, "battery changed pluggedType: %d", pluggedType);
+            if (mOwner->mScreenOff && mOwner->ShouldWifiStayAwake(mOwner->mPluggedType) &&
+                    !mOwner->ShouldWifiStayAwake(pluggedType)) {
+                AutoPtr<ISystem> system;
+                CSystem::AcquireSingleton((ISystem**)&system);
+                Int64 currentTimeMillis;
+                system->GetCurrentTimeMillis(&currentTimeMillis);
+                Int64 triggerTime = currentTimeMillis + mOwner->mIdleMillis;
+                if (DBG) Logger::D(TAG, "set idle timer for %d ms", mOwner->mIdleMillis);
+                mOwner->mAlarmManager->Set(IAlarmManager::RTC_WAKEUP, triggerTime, mOwner->mIdleIntent);
+            }
+
+            mOwner->mPluggedType = pluggedType;
+            break;
+        }
+        case CMD_SET_AP:
+        case CMD_SCAN_ALWAYS_MODE_CHANGED:
+        case CMD_LOCKS_CHANGED:
+        case CMD_WIFI_TOGGLED:
+        case CMD_AIRPLANE_TOGGLED:
+        case CMD_EMERGENCY_MODE_CHANGED:
+            break;
+        case CMD_USER_PRESENT:
+            mOwner->mFirstUserSignOnSeen = TRUE;
+            break;
+        case CMD_DEFERRED_TOGGLE:
+            Logger::D("WifiController::DefaultState", "DEFERRED_TOGGLE ignored due to state change");
+            break;
+        default:
+            //throw new RuntimeException("WifiController.handleMessage " + msg.what);
+            Logger::E("WifiController::DefaultState", "ProcessMessage: %d", what);
+    }
+    return TRUE;
 }
 
 //=====================================================================
@@ -95,89 +128,105 @@ Boolean WifiController::DefaultState::ProcessMessage(
 //=====================================================================
 ECode WifiController::ApStaDisabledState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setSupplicantRunning(false);
-    // // Supplicant can't restart right away, so not the time we switched off
-    // mDisabledTimestamp = SystemClock.elapsedRealtime();
-    // mDeferredEnableSerialNumber++;
-    // mHaveDeferredEnable = false;
-    assert(0);
+    mOwner->mWifiStateMachine->SetSupplicantRunning(FALSE);
+    // Supplicant can't restart right away, so not the time we switched off
+    mDisabledTimestamp = SystemClock::GetElapsedRealtime();
+    mDeferredEnableSerialNumber++;
+    mHaveDeferredEnable = FALSE;
     return NOERROR;
 }
 
 Boolean WifiController::ApStaDisabledState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case CMD_WIFI_TOGGLED:
-    //     case CMD_AIRPLANE_TOGGLED:
-    //         if (mSettingsStore.isWifiToggleEnabled()) {
-    //             if (doDeferEnable(msg)) {
-    //                 if (mHaveDeferredEnable) {
-    //                     //  have 2 toggles now, inc serial number an ignore both
-    //                     mDeferredEnableSerialNumber++;
-    //                 }
-    //                 mHaveDeferredEnable = !mHaveDeferredEnable;
-    //                 break;
-    //             }
-    //             if (mDeviceIdle == false) {
-    //                 checkLocksAndTransitionWhenDeviceActive();
-    //             } else {
-    //                 checkLocksAndTransitionWhenDeviceIdle();
-    //             }
-    //         } else if (mSettingsStore.isScanAlwaysAvailable()) {
-    //             transitionTo(mStaDisabledWithScanState);
-    //         }
-    //         break;
-    //     case CMD_SCAN_ALWAYS_MODE_CHANGED:
-    //         if (mSettingsStore.isScanAlwaysAvailable()) {
-    //             transitionTo(mStaDisabledWithScanState);
-    //         }
-    //         break;
-    //     case CMD_SET_AP:
-    //         if (msg.arg1 == 1) {
-    //             mWifiStateMachine.setHostApRunning((WifiConfiguration) msg.obj,
-    //                     true);
-    //             transitionTo(mApEnabledState);
-    //         }
-    //         break;
-    //     case CMD_DEFERRED_TOGGLE:
-    //         if (msg.arg1 != mDeferredEnableSerialNumber) {
-    //             log("DEFERRED_TOGGLE ignored due to serial mismatch");
-    //             break;
-    //         }
-    //         log("DEFERRED_TOGGLE handled");
-    //         sendMessage((Message)(msg.obj));
-    //         break;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_WIFI_TOGGLED:
+        case CMD_AIRPLANE_TOGGLED: {
+            Boolean isWifiToggleEnabled;
+            Boolean isScanAlwaysAvailable;
+            if (mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled) {
+                if (DoDeferEnable(msg)) {
+                    if (mHaveDeferredEnable) {
+                        //  have 2 toggles now, inc serial number an ignore both
+                        mDeferredEnableSerialNumber++;
+                    }
+                    mHaveDeferredEnable = !mHaveDeferredEnable;
+                    break;
+                }
+                if (mOwner->mDeviceIdle == FALSE) {
+                    mOwner->CheckLocksAndTransitionWhenDeviceActive();
+                } else {
+                    mOwner->CheckLocksAndTransitionWhenDeviceIdle();
+                }
+            } else if (mOwner->mSettingsStore->IsScanAlwaysAvailable(&isScanAlwaysAvailable), isScanAlwaysAvailable) {
+                mOwner->TransitionTo(mOwner->mStaDisabledWithScanState);
+            }
+            break;
+        }
+        case CMD_SCAN_ALWAYS_MODE_CHANGED: {
+            Boolean isScanAlwaysAvailable;
+            if (mOwner->mSettingsStore->IsScanAlwaysAvailable(&isScanAlwaysAvailable), isScanAlwaysAvailable) {
+                mOwner->TransitionTo(mOwner->mStaDisabledWithScanState);
+            }
+            break;
+        }
+        case CMD_SET_AP: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == 1) {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IWifiConfiguration* wfConfig = IWifiConfiguration::Probe(obj);
+                mOwner->mWifiStateMachine->SetHostApRunning(wfConfig, TRUE);
+                mOwner->TransitionTo(mOwner->mApEnabledState);
+            }
+            break;
+        }
+        case CMD_DEFERRED_TOGGLE: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 != mDeferredEnableSerialNumber) {
+                Logger::D("WifiController::ApStaDisabledState", "DEFERRED_TOGGLE ignored due to serial mismatch");
+                break;
+            }
+            Logger::D("WifiController::ApStaDisabledState", "DEFERRED_TOGGLE handled");
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            IMessage* message = IMessage::Probe(obj);
+            mOwner->SendMessage(message);
+            break;
+        }
+        default:
+            return FALSE;//NOT_HANDLED;
+    }
+    return TRUE;//HANDLED;
 }
 
 Boolean WifiController::ApStaDisabledState::DoDeferEnable(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // long delaySoFar = SystemClock.elapsedRealtime() - mDisabledTimestamp;
-    // if (delaySoFar >= mReEnableDelayMillis) {
-    //     return false;
-    // }
-    //
-    // log("WifiController msg " + msg + " deferred for " +
-    //         (mReEnableDelayMillis - delaySoFar) + "ms");
-    //
-    // // need to defer this action.
-    // Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
-    // deferredMsg.obj = Message.obtain(msg);
-    // deferredMsg.arg1 = ++mDeferredEnableSerialNumber;
-    // sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar + DEFER_MARGIN_MS);
-    // return true;
-    assert(0);
-    return FALSE;
+    Int64 delaySoFar = SystemClock::GetElapsedRealtime() - mDisabledTimestamp;
+    if (delaySoFar >= mOwner->mReEnableDelayMillis) {
+        return FALSE;
+    }
+
+    Logger::D("WifiController::ApStaDisabledState", "WifiController msg xx deferred for %ld ms",
+            (mOwner->mReEnableDelayMillis - delaySoFar));
+
+    // need to defer this action.
+    AutoPtr<IMessage> deferredMsg;
+    mOwner->ObtainMessage(CMD_DEFERRED_TOGGLE, (IMessage**)&deferredMsg);
+    AutoPtr<IMessage> message;
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+    helper->Obtain(msg, (IMessage**)&message);
+
+    deferredMsg->SetObj(message);
+    deferredMsg->SetArg1(++mDeferredEnableSerialNumber);
+    mOwner->SendMessageDelayed(deferredMsg, mOwner->mReEnableDelayMillis - delaySoFar + DEFER_MARGIN_MS);
+    return TRUE;
 }
 
 //=====================================================================
@@ -185,54 +234,60 @@ Boolean WifiController::ApStaDisabledState::DoDeferEnable(
 //=====================================================================
 ECode WifiController::StaEnabledState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setSupplicantRunning(true);
-    assert(0);
+    mOwner->mWifiStateMachine->SetSupplicantRunning(TRUE);
     return NOERROR;
 }
 
 Boolean WifiController::StaEnabledState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case CMD_WIFI_TOGGLED:
-    //         int mWifiState = mWifiStateMachine.syncGetWifiState();
-    //         if (! mSettingsStore.isWifiToggleEnabled()) {
-    //             if (mSettingsStore.isScanAlwaysAvailable()) {
-    //                 transitionTo(mStaDisabledWithScanState);
-    //             } else {
-    //                 transitionTo(mApStaDisabledState);
-    //             }
-    //         }
-    //         if ((mWifiState != WIFI_STATE_ENABLING) &&
-    //             (mWifiState != WIFI_STATE_ENABLED)) {
-    //             if (DBG) {
-    //                 Slog.d(TAG, "Mismatch in the state " + mWifiState);
-    //             }
-    //             mWifiStateMachine.setSupplicantRunning(true);
-    //         }
-    //         break;
-    //     case CMD_AIRPLANE_TOGGLED:
-    //         /* When wi-fi is turned off due to airplane,
-    //         * disable entirely (including scan)
-    //         */
-    //         if (! mSettingsStore.isWifiToggleEnabled()) {
-    //             transitionTo(mApStaDisabledState);
-    //         }
-    //         break;
-    //     case CMD_EMERGENCY_MODE_CHANGED:
-    //         if (msg.arg1 == 1) {
-    //             transitionTo(mEcmState);
-    //             break;
-    //         }
-    //     default:
-    //         return NOT_HANDLED;
-    //
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_WIFI_TOGGLED: {
+            Int32 mWifiState;
+            mOwner->mWifiStateMachine->SyncGetWifiState(&mWifiState);
+            Boolean isWifiToggleEnabled;
+            if (!(mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled)) {
+                Boolean isScanAlwaysAvailable;
+                if (mOwner->mSettingsStore->IsScanAlwaysAvailable(&isScanAlwaysAvailable), isScanAlwaysAvailable) {
+                    mOwner->TransitionTo(mOwner->mStaDisabledWithScanState);
+                } else {
+                    mOwner->TransitionTo(mOwner->mApStaDisabledState);
+                }
+            }
+            if ((mWifiState != IWifiManager::WIFI_STATE_ENABLING) &&
+                (mWifiState != IWifiManager::WIFI_STATE_ENABLED)) {
+                if (DBG) {
+                    Logger::D(TAG, "Mismatch in the state %d", mWifiState);
+                }
+                mOwner->mWifiStateMachine->SetSupplicantRunning(TRUE);
+            }
+            break;
+        }
+        case CMD_AIRPLANE_TOGGLED: {
+            /* When wi-fi is turned off due to airplane,
+            * disable entirely (including scan)
+            */
+            Boolean isWifiToggleEnabled;
+            if (!(mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled)) {
+                mOwner->TransitionTo(mOwner->mApStaDisabledState);
+            }
+            break;
+        }
+        case CMD_EMERGENCY_MODE_CHANGED: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == 1) {
+                mOwner->TransitionTo(mOwner->mEcmState);
+                break;
+            }
+        }
+        default:
+            return FALSE;//NOT_HANDLED;
+
+    }
+    return TRUE;//HANDLED;
 }
 
 //=====================================================================
@@ -240,93 +295,110 @@ Boolean WifiController::StaEnabledState::ProcessMessage(
 //=====================================================================
 ECode WifiController::StaDisabledWithScanState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setSupplicantRunning(true);
-    // mWifiStateMachine.setOperationalMode(WifiStateMachine.SCAN_ONLY_WITH_WIFI_OFF_MODE);
-    // mWifiStateMachine.setDriverStart(true);
-    // // Supplicant can't restart right away, so not the time we switched off
-    // mDisabledTimestamp = SystemClock.elapsedRealtime();
-    // mDeferredEnableSerialNumber++;
-    // mHaveDeferredEnable = false;
-    assert(0);
+    mOwner->mWifiStateMachine->SetSupplicantRunning(TRUE);
+    mOwner->mWifiStateMachine->SetOperationalMode(WifiStateMachine::SCAN_ONLY_WITH_WIFI_OFF_MODE);
+    mOwner->mWifiStateMachine->SetDriverStart(TRUE);
+    // Supplicant can't restart right away, so not the time we switched off
+    mDisabledTimestamp = SystemClock::GetElapsedRealtime();
+    mDeferredEnableSerialNumber++;
+    mHaveDeferredEnable = FALSE;
     return NOERROR;
 }
 
 Boolean WifiController::StaDisabledWithScanState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case CMD_WIFI_TOGGLED:
-    //         if (mSettingsStore.isWifiToggleEnabled()) {
-    //             if (doDeferEnable(msg)) {
-    //                 if (mHaveDeferredEnable) {
-    //                     // have 2 toggles now, inc serial number and ignore both
-    //                     mDeferredEnableSerialNumber++;
-    //                 }
-    //                 mHaveDeferredEnable = !mHaveDeferredEnable;
-    //                 break;
-    //             }
-    //             if (mDeviceIdle == false) {
-    //                 checkLocksAndTransitionWhenDeviceActive();
-    //             } else {
-    //                 checkLocksAndTransitionWhenDeviceIdle();
-    //             }
-    //         }
-    //         break;
-    //     case CMD_AIRPLANE_TOGGLED:
-    //         if (mSettingsStore.isAirplaneModeOn() &&
-    //                 ! mSettingsStore.isWifiToggleEnabled()) {
-    //             transitionTo(mApStaDisabledState);
-    //         }
-    //     case CMD_SCAN_ALWAYS_MODE_CHANGED:
-    //         if (! mSettingsStore.isScanAlwaysAvailable()) {
-    //             transitionTo(mApStaDisabledState);
-    //         }
-    //         break;
-    //     case CMD_SET_AP:
-    //         // Before starting tethering, turn off supplicant for scan mode
-    //         if (msg.arg1 == 1) {
-    //             deferMessage(msg);
-    //             transitionTo(mApStaDisabledState);
-    //         }
-    //         break;
-    //     case CMD_DEFERRED_TOGGLE:
-    //         if (msg.arg1 != mDeferredEnableSerialNumber) {
-    //             log("DEFERRED_TOGGLE ignored due to serial mismatch");
-    //             break;
-    //         }
-    //         logd("DEFERRED_TOGGLE handled");
-    //         sendMessage((Message)(msg.obj));
-    //         break;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_WIFI_TOGGLED: {
+            Boolean isWifiToggleEnabled;
+            if (mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled) {
+                if (DoDeferEnable(msg)) {
+                    if (mHaveDeferredEnable) {
+                        // have 2 toggles now, inc serial number and ignore both
+                        mDeferredEnableSerialNumber++;
+                    }
+                    mHaveDeferredEnable = !mHaveDeferredEnable;
+                    break;
+                }
+                if (mOwner->mDeviceIdle == FALSE) {
+                    mOwner->CheckLocksAndTransitionWhenDeviceActive();
+                } else {
+                    mOwner->CheckLocksAndTransitionWhenDeviceIdle();
+                }
+            }
+            break;
+        }
+        case CMD_AIRPLANE_TOGGLED: {
+            Boolean isAirplaneModeOn;
+            Boolean isWifiToggleEnabled;
+            if ((mOwner->mSettingsStore->IsAirplaneModeOn(&isAirplaneModeOn), isAirplaneModeOn) &&
+                    ! (mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled)) {
+                mOwner->TransitionTo(mOwner->mApStaDisabledState);
+            }
+        }
+        case CMD_SCAN_ALWAYS_MODE_CHANGED: {
+            Boolean isScanAlwaysAvailable;
+            if (! (mOwner->mSettingsStore->IsScanAlwaysAvailable(&isScanAlwaysAvailable), isScanAlwaysAvailable)) {
+                mOwner->TransitionTo(mOwner->mApStaDisabledState);
+            }
+            break;
+        }
+        case CMD_SET_AP: {
+            // Before starting tethering, turn off supplicant for scan mode
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == 1) {
+                mOwner->DeferMessage(msg);
+                mOwner->TransitionTo(mOwner->mApStaDisabledState);
+            }
+            break;
+        }
+        case CMD_DEFERRED_TOGGLE: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 != mDeferredEnableSerialNumber) {
+                Logger::D("WifiController::StaDisabledWithScanState", "DEFERRED_TOGGLE ignored due to serial mismatch");
+                break;
+            }
+            Logger::D("WifiController::StaDisabledWithScanState", "DEFERRED_TOGGLE handled");
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            IMessage* message = IMessage::Probe(obj);
+            mOwner->SendMessage(message);
+            break;
+        }
+        default:
+            return FALSE;//NOT_HANDLED;
+    }
+    return TRUE;//HANDLED;
 }
 
 Boolean WifiController::StaDisabledWithScanState::DoDeferEnable(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // long delaySoFar = SystemClock.elapsedRealtime() - mDisabledTimestamp;
-    // if (delaySoFar >= mReEnableDelayMillis) {
-    //     return false;
-    // }
-    //
-    // log("WifiController msg " + msg + " deferred for " +
-    //         (mReEnableDelayMillis - delaySoFar) + "ms");
-    //
-    // // need to defer this action.
-    // Message deferredMsg = obtainMessage(CMD_DEFERRED_TOGGLE);
-    // deferredMsg.obj = Message.obtain(msg);
-    // deferredMsg.arg1 = ++mDeferredEnableSerialNumber;
-    // sendMessageDelayed(deferredMsg, mReEnableDelayMillis - delaySoFar + DEFER_MARGIN_MS);
-    // return true;
-    assert(0);
-    return FALSE;
+    Int64 delaySoFar = SystemClock::GetElapsedRealtime() - mDisabledTimestamp;
+    if (delaySoFar >= mOwner->mReEnableDelayMillis) {
+        return FALSE;
+    }
+
+    Logger::D("WifiController::StaDisabledWithScanState", "WifiController msg xx deferred for %ld ms",
+            (mOwner->mReEnableDelayMillis - delaySoFar));
+
+    // need to defer this action.
+    AutoPtr<IMessage> deferredMsg;
+    mOwner->ObtainMessage(CMD_DEFERRED_TOGGLE, (IMessage**)&deferredMsg);
+
+    AutoPtr<IMessage> message;
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+    helper->Obtain(msg, (IMessage**)&message);
+
+    deferredMsg->SetObj(message);
+    deferredMsg->SetArg1(++mDeferredEnableSerialNumber);
+    mOwner->SendMessageDelayed(deferredMsg, mOwner->mReEnableDelayMillis - delaySoFar + DEFER_MARGIN_MS);
+    return TRUE;
 }
 
 //=====================================================================
@@ -335,26 +407,30 @@ Boolean WifiController::StaDisabledWithScanState::DoDeferEnable(
 Boolean WifiController::ApEnabledState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case CMD_AIRPLANE_TOGGLED:
-    //         if (mSettingsStore.isAirplaneModeOn()) {
-    //             mWifiStateMachine.setHostApRunning(null, false);
-    //             transitionTo(mApStaDisabledState);
-    //         }
-    //         break;
-    //     case CMD_SET_AP:
-    //         if (msg.arg1 == 0) {
-    //             mWifiStateMachine.setHostApRunning(null, false);
-    //             transitionTo(mApStaDisabledState);
-    //         }
-    //         break;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    // return HANDLED;
-    assert(0);
-    return FALSE;
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_AIRPLANE_TOGGLED: {
+            Boolean isAirplaneModeOn;
+            if (mOwner->mSettingsStore->IsAirplaneModeOn(&isAirplaneModeOn), isAirplaneModeOn) {
+                mOwner->mWifiStateMachine->SetHostApRunning(NULL, FALSE);
+                mOwner->TransitionTo(mOwner->mApStaDisabledState);
+            }
+            break;
+        }
+        case CMD_SET_AP: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == 0) {
+                mOwner->mWifiStateMachine->SetHostApRunning(NULL, FALSE);
+                mOwner->TransitionTo(mOwner->mApStaDisabledState);
+            }
+            break;
+        }
+        default:
+            return FALSE;//NOT_HANDLED;
+    }
+    return TRUE;//HANDLED;
 }
 
 //=====================================================================
@@ -362,33 +438,35 @@ Boolean WifiController::ApEnabledState::ProcessMessage(
 //=====================================================================
 ECode WifiController::EcmState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setSupplicantRunning(false);
-    assert(0);
+    mOwner->mWifiStateMachine->SetSupplicantRunning(FALSE);
     return NOERROR;
 }
 
 Boolean WifiController::EcmState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // if (msg.what == CMD_EMERGENCY_MODE_CHANGED && msg.arg1 == 0) {
-    //     if (mSettingsStore.isWifiToggleEnabled()) {
-    //         if (mDeviceIdle == false) {
-    //             checkLocksAndTransitionWhenDeviceActive();
-    //         } else {
-    //             checkLocksAndTransitionWhenDeviceIdle();
-    //         }
-    //     } else if (mSettingsStore.isScanAlwaysAvailable()) {
-    //         transitionTo(mStaDisabledWithScanState);
-    //     } else {
-    //         transitionTo(mApStaDisabledState);
-    //     }
-    //     return HANDLED;
-    // } else {
-    //     return NOT_HANDLED;
-    // }
-    assert(0);
+    Int32 what;
+    msg->GetWhat(&what);
+    Int32 arg1;
+    msg->GetArg1(&arg1);
+    if (what == CMD_EMERGENCY_MODE_CHANGED && arg1 == 0) {
+        Boolean isWifiToggleEnabled;
+        Boolean isScanAlwaysAvailable;
+        if (mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled) {
+            if (mOwner->mDeviceIdle == FALSE) {
+                mOwner->CheckLocksAndTransitionWhenDeviceActive();
+            } else {
+                mOwner->CheckLocksAndTransitionWhenDeviceIdle();
+            }
+        } else if (mOwner->mSettingsStore->IsScanAlwaysAvailable(&isScanAlwaysAvailable), isScanAlwaysAvailable) {
+            mOwner->TransitionTo(mOwner->mStaDisabledWithScanState);
+        } else {
+            mOwner->TransitionTo(mOwner->mApStaDisabledState);
+        }
+        return TRUE;//HANDLED;
+    } else {
+        return FALSE;//NOT_HANDLED;
+    }
     return FALSE;
 }
 
@@ -397,37 +475,34 @@ Boolean WifiController::EcmState::ProcessMessage(
 //=====================================================================
 ECode WifiController::DeviceActiveState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setOperationalMode(WifiStateMachine.CONNECT_MODE);
-    // mWifiStateMachine.setDriverStart(true);
-    // mWifiStateMachine.setHighPerfModeEnabled(false);
-    assert(0);
+    mOwner->mWifiStateMachine->SetOperationalMode(WifiStateMachine::CONNECT_MODE);
+    mOwner->mWifiStateMachine->SetDriverStart(TRUE);
+    mOwner->mWifiStateMachine->SetHighPerfModeEnabled(FALSE);
     return NOERROR;
 }
 
 Boolean WifiController::DeviceActiveState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // if (msg.what == CMD_DEVICE_IDLE) {
-    //     checkLocksAndTransitionWhenDeviceIdle();
-    //     // We let default state handle the rest of work
-    // } else if (msg.what == CMD_LOCKS_CHANGED) {
-    //     checkLocksAndTransitionWhenDeviceActive();
-    //     return HANDLED;
-    // } else if (msg.what == CMD_USER_PRESENT) {
-    //     // TLS networks can't connect until user unlocks keystore. KeyStore
-    //     // unlocks when the user punches PIN after the reboot. So use this
-    //     // trigger to get those networks connected.
-    //     if (mFirstUserSignOnSeen == false) {
-    //         mWifiStateMachine.reloadTlsNetworksAndReconnect();
-    //     }
-    //     mFirstUserSignOnSeen = true;
-    //     return HANDLED;
-    // }
-    // return NOT_HANDLED;
-    assert(0);
-    return FALSE;
+    Int32 what;
+    msg->GetWhat(&what);
+    if (what == CMD_DEVICE_IDLE) {
+        mOwner->CheckLocksAndTransitionWhenDeviceIdle();
+        // We let default state handle the rest of work
+    } else if (what == CMD_LOCKS_CHANGED) {
+        mOwner->CheckLocksAndTransitionWhenDeviceActive();
+        return HANDLED;
+    } else if (what == CMD_USER_PRESENT) {
+        // TLS networks can't connect until user unlocks keystore. KeyStore
+        // unlocks when the user punches PIN after the reboot. So use this
+        // trigger to get those networks connected.
+        if (mOwner->mFirstUserSignOnSeen == FALSE) {
+            mOwner->mWifiStateMachine->ReloadTlsNetworksAndReconnect();
+        }
+        mOwner->mFirstUserSignOnSeen = TRUE;
+        return TRUE;//HANDLED;
+    }
+    return FALSE;//NOT_HANDLED;
 }
 
 //=====================================================================
@@ -435,11 +510,9 @@ Boolean WifiController::DeviceActiveState::ProcessMessage(
 //=====================================================================
 ECode WifiController::DeviceActiveHighPerfState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setOperationalMode(WifiStateMachine.CONNECT_MODE);
-    // mWifiStateMachine.setDriverStart(true);
-    // mWifiStateMachine.setHighPerfModeEnabled(true);
-    assert(0);
+    mOwner->mWifiStateMachine->SetOperationalMode(WifiStateMachine::CONNECT_MODE);
+    mOwner->mWifiStateMachine->SetDriverStart(TRUE);
+    mOwner->mWifiStateMachine->SetHighPerfModeEnabled(TRUE);
     return NOERROR;
 }
 
@@ -449,20 +522,20 @@ ECode WifiController::DeviceActiveHighPerfState::Enter()
 Boolean WifiController::DeviceInactiveState::ProcessMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // switch (msg.what) {
-    //     case CMD_LOCKS_CHANGED:
-    //         checkLocksAndTransitionWhenDeviceIdle();
-    //         updateBatteryWorkSource();
-    //         return HANDLED;
-    //     case CMD_SCREEN_ON:
-    //         checkLocksAndTransitionWhenDeviceActive();
-    //         // More work in default state
-    //         return NOT_HANDLED;
-    //     default:
-    //         return NOT_HANDLED;
-    // }
-    assert(0);
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case CMD_LOCKS_CHANGED:
+            mOwner->CheckLocksAndTransitionWhenDeviceIdle();
+            mOwner->UpdateBatteryWorkSource();
+            return TRUE;//HANDLED;
+        case CMD_SCREEN_ON:
+            mOwner->CheckLocksAndTransitionWhenDeviceActive();
+            // More work in default state
+            return FALSE;//NOT_HANDLED;
+        default:
+            return FALSE;//NOT_HANDLED;
+    }
     return FALSE;
 }
 
@@ -471,10 +544,8 @@ Boolean WifiController::DeviceInactiveState::ProcessMessage(
 //=====================================================================
 ECode WifiController::ScanOnlyLockHeldState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setOperationalMode(WifiStateMachine.SCAN_ONLY_MODE);
-    // mWifiStateMachine.setDriverStart(true);
-    assert(0);
+    mOwner->mWifiStateMachine->SetOperationalMode(WifiStateMachine::SCAN_ONLY_MODE);
+    mOwner->mWifiStateMachine->SetDriverStart(TRUE);
     return NOERROR;
 }
 
@@ -483,11 +554,9 @@ ECode WifiController::ScanOnlyLockHeldState::Enter()
 //=====================================================================
 ECode WifiController::FullLockHeldState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setOperationalMode(WifiStateMachine.CONNECT_MODE);
-    // mWifiStateMachine.setDriverStart(true);
-    // mWifiStateMachine.setHighPerfModeEnabled(false);
-    assert(0);
+    mOwner->mWifiStateMachine->SetOperationalMode(WifiStateMachine::CONNECT_MODE);
+    mOwner->mWifiStateMachine->SetDriverStart(TRUE);
+    mOwner->mWifiStateMachine->SetHighPerfModeEnabled(FALSE);
     return NOERROR;
 }
 
@@ -496,11 +565,9 @@ ECode WifiController::FullLockHeldState::Enter()
 //=====================================================================
 ECode WifiController::FullHighPerfLockHeldState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setOperationalMode(WifiStateMachine.CONNECT_MODE);
-    // mWifiStateMachine.setDriverStart(true);
-    // mWifiStateMachine.setHighPerfModeEnabled(true);
-    assert(0);
+    mOwner->mWifiStateMachine->SetOperationalMode(WifiStateMachine::CONNECT_MODE);
+    mOwner->mWifiStateMachine->SetDriverStart(TRUE);
+    mOwner->mWifiStateMachine->SetHighPerfModeEnabled(TRUE);
     return NOERROR;
 }
 
@@ -509,9 +576,7 @@ ECode WifiController::FullHighPerfLockHeldState::Enter()
 //=====================================================================
 ECode WifiController::NoLockHeldState::Enter()
 {
-    // ==================before translated======================
-    // mWifiStateMachine.setDriverStart(false);
-    assert(0);
+    mOwner->mWifiStateMachine->SetDriverStart(FALSE);
     return NOERROR;
 }
 
@@ -522,25 +587,21 @@ WifiController::InnerBroadcastReceiver1::InnerBroadcastReceiver1(
     /* [in] */ WifiController* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode WifiController::InnerBroadcastReceiver1::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // String action = intent.getAction();
-    // if (action.equals(ACTION_DEVICE_IDLE)) {
-    //     sendMessage(CMD_DEVICE_IDLE);
-    // } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-    //     mNetworkInfo = (NetworkInfo) intent.getParcelableExtra(
-    //             WifiManager.EXTRA_NETWORK_INFO);
-    // }
-    assert(0);
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals(ACTION_DEVICE_IDLE)) {
+        mOwner->SendMessage(CMD_DEVICE_IDLE);
+    } else if (action.Equals(IWifiManager::NETWORK_STATE_CHANGED_ACTION)) {
+        AutoPtr<IParcelable> obj;
+        intent->GetParcelableExtra(IWifiManager::EXTRA_NETWORK_INFO, (IParcelable**)&obj);
+        mOwner->mNetworkInfo = INetworkInfo::Probe(obj);
+    }
     return NOERROR;
 }
 
@@ -548,19 +609,17 @@ ECode WifiController::InnerBroadcastReceiver1::OnReceive(
 //                WifiController::InnerContentObserver1
 //=====================================================================
 WifiController::InnerContentObserver1::InnerContentObserver1(
-    /* [in] */ WifiController* owner)
+    /* [in] */ WifiController* owner,
+    /* [in] */ IHandler* handler)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
+    ContentObserver::constructor(handler);
 }
 
 ECode WifiController::InnerContentObserver1::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    // ==================before translated======================
-    // readStayAwakeConditions();
-    assert(0);
+    mOwner->ReadStayAwakeConditions();
     return NOERROR;
 }
 
@@ -568,19 +627,17 @@ ECode WifiController::InnerContentObserver1::OnChange(
 //                WifiController::InnerContentObserver3
 //=====================================================================
 WifiController::InnerContentObserver3::InnerContentObserver3(
-    /* [in] */ WifiController* owner)
+    /* [in] */ WifiController* owner,
+    /* [in] */ IHandler* handler)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
+    ContentObserver::constructor(handler);
 }
 
 ECode WifiController::InnerContentObserver3::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    // ==================before translated======================
-    // readWifiIdleTime();
-    assert(0);
+    mOwner->ReadWifiIdleTime();
     return NOERROR;
 }
 
@@ -588,19 +645,17 @@ ECode WifiController::InnerContentObserver3::OnChange(
 //                WifiController::InnerContentObserver5
 //=====================================================================
 WifiController::InnerContentObserver5::InnerContentObserver5(
-    /* [in] */ WifiController* owner)
+    /* [in] */ WifiController* owner,
+    /* [in] */ IHandler* handler)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
+    ContentObserver::constructor(handler);
 }
 
 ECode WifiController::InnerContentObserver5::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    // ==================before translated======================
-    // readWifiSleepPolicy();
-    assert(0);
+    mOwner->ReadWifiSleepPolicy();
     return NOERROR;
 }
 
@@ -632,83 +687,91 @@ WifiController::WifiController(
     /* [in] */ IContext* context,
     /* [in] */ WifiServiceImpl* service,
     /* [in] */ ILooper* looper)
+    : StateMachine(TAG, looper)
+    , mScreenOff(FALSE)
+    , mDeviceIdle(FALSE)
+    , mPluggedType(0)
+    , mStayAwakeConditions(0)
+    , mIdleMillis(0)
+    , mSleepPolicy(0)
+    , mFirstUserSignOnSeen(FALSE)
+    , mReEnableDelayMillis(0)
 {
     CNetworkInfo::New(IConnectivityManager::TYPE_WIFI, 0, String("WIFI"), String(""), (INetworkInfo**)&mNetworkInfo);
     CWorkSource::New((IWorkSource**)&mTmpWorkSource);
-    mDefaultState = new DefaultState();
-    mStaEnabledState = new StaEnabledState();
-    mApStaDisabledState = new ApStaDisabledState();
-    mStaDisabledWithScanState = new StaDisabledWithScanState();
-    mApEnabledState = new ApEnabledState();
-    mDeviceActiveState = new DeviceActiveState();
-    mDeviceActiveHighPerfState = new DeviceActiveHighPerfState();
-    mDeviceInactiveState = new DeviceInactiveState();
-    mScanOnlyLockHeldState = new ScanOnlyLockHeldState();
-    mFullLockHeldState = new FullLockHeldState();
-    mFullHighPerfLockHeldState = new FullHighPerfLockHeldState();
-    mNoLockHeldState = new NoLockHeldState();
-    mEcmState = new EcmState();
-    // ==================before translated======================
-    // super(TAG, looper);
-    // mContext = context;
-    // mWifiStateMachine = service.mWifiStateMachine;
-    // mSettingsStore = service.mSettingsStore;
-    // mLocks = service.mLocks;
-    //
-    // mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-    // Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
-    // mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
-    //
-    // addState(mDefaultState);
-    //     addState(mApStaDisabledState, mDefaultState);
-    //     addState(mStaEnabledState, mDefaultState);
-    //         addState(mDeviceActiveState, mStaEnabledState);
-    //             addState(mDeviceActiveHighPerfState, mDeviceActiveState);
-    //         addState(mDeviceInactiveState, mStaEnabledState);
-    //             addState(mScanOnlyLockHeldState, mDeviceInactiveState);
-    //             addState(mFullLockHeldState, mDeviceInactiveState);
-    //             addState(mFullHighPerfLockHeldState, mDeviceInactiveState);
-    //             addState(mNoLockHeldState, mDeviceInactiveState);
-    //     addState(mStaDisabledWithScanState, mDefaultState);
-    //     addState(mApEnabledState, mDefaultState);
-    //     addState(mEcmState, mDefaultState);
-    //
-    // boolean isAirplaneModeOn = mSettingsStore.isAirplaneModeOn();
-    // boolean isWifiEnabled = mSettingsStore.isWifiToggleEnabled();
-    // boolean isScanningAlwaysAvailable = mSettingsStore.isScanAlwaysAvailable();
-    //
-    // log("isAirplaneModeOn = " + isAirplaneModeOn +
-    //         ", isWifiEnabled = " + isWifiEnabled +
-    //         ", isScanningAvailable = " + isScanningAlwaysAvailable);
-    //
-    // if (isScanningAlwaysAvailable) {
-    //     setInitialState(mStaDisabledWithScanState);
-    // } else {
-    //     setInitialState(mApStaDisabledState);
-    // }
-    //
-    // setLogRecSize(100);
-    // setLogOnlyTransitions(false);
-    //
-    // IntentFilter filter = new IntentFilter();
-    // filter.addAction(ACTION_DEVICE_IDLE);
-    // filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-    // mContext.registerReceiver(
-    //         new BroadcastReceiver() {
-    //             @Override
-    //             public void onReceive(Context context, Intent intent) {
-    //                 String action = intent.getAction();
-    //                 if (action.equals(ACTION_DEVICE_IDLE)) {
-    //                     sendMessage(CMD_DEVICE_IDLE);
-    //                 } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-    //                     mNetworkInfo = (NetworkInfo) intent.getParcelableExtra(
-    //                             WifiManager.EXTRA_NETWORK_INFO);
-    //                 }
-    //             }
-    //         },
-    //         new IntentFilter(filter));
-    //
-    // initializeAndRegisterForSettingsChange(looper);
+    mDefaultState = new DefaultState(this);
+    mStaEnabledState = new StaEnabledState(this);
+    mApStaDisabledState = new ApStaDisabledState(this);
+    mStaDisabledWithScanState = new StaDisabledWithScanState(this);
+    mApEnabledState = new ApEnabledState(this);
+    mDeviceActiveState = new DeviceActiveState(this);
+    mDeviceActiveHighPerfState = new DeviceActiveHighPerfState(this);
+    mDeviceInactiveState = new DeviceInactiveState(this);
+    mScanOnlyLockHeldState = new ScanOnlyLockHeldState(this);
+    mFullLockHeldState = new FullLockHeldState(this);
+    mFullHighPerfLockHeldState = new FullHighPerfLockHeldState(this);
+    mNoLockHeldState = new NoLockHeldState(this);
+    mEcmState = new EcmState(this);
+
+    mContext = context;
+    mWifiStateMachine = service->mWifiStateMachine;
+    mSettingsStore = service->mSettingsStore;
+    mLocks = service->mLocks;
+
+    AutoPtr<IInterface> alarmObj;
+    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&alarmObj);
+    mAlarmManager = IAlarmManager::Probe(alarmObj);
+
+    AutoPtr<IIntent> idleIntent;
+    CIntent::New(ACTION_DEVICE_IDLE, NULL, (IIntent**)&idleIntent);
+    AutoPtr<IPendingIntentHelper> pendingIntentHelper;
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&pendingIntentHelper);
+    pendingIntentHelper->GetBroadcast(mContext, IDLE_REQUEST, idleIntent, 0, (IPendingIntent**)&mIdleIntent);
+
+    AddState(mDefaultState);
+        AddState(mApStaDisabledState, mDefaultState);
+        AddState(mStaEnabledState, mDefaultState);
+            AddState(mDeviceActiveState, mStaEnabledState);
+                AddState(mDeviceActiveHighPerfState, mDeviceActiveState);
+            AddState(mDeviceInactiveState, mStaEnabledState);
+                AddState(mScanOnlyLockHeldState, mDeviceInactiveState);
+                AddState(mFullLockHeldState, mDeviceInactiveState);
+                AddState(mFullHighPerfLockHeldState, mDeviceInactiveState);
+                AddState(mNoLockHeldState, mDeviceInactiveState);
+        AddState(mStaDisabledWithScanState, mDefaultState);
+        AddState(mApEnabledState, mDefaultState);
+        AddState(mEcmState, mDefaultState);
+
+    Boolean isAirplaneModeOn;
+    mSettingsStore->IsAirplaneModeOn(&isAirplaneModeOn);
+    Boolean isWifiEnabled;
+    mSettingsStore->IsWifiToggleEnabled(&isWifiEnabled);
+    Boolean isScanningAlwaysAvailable;
+    mSettingsStore->IsScanAlwaysAvailable(&isScanningAlwaysAvailable);
+
+    Logger::D(TAG, "isAirplaneModeOn = %d, isWifiEnabled = %d, isScanningAvailable = %d",
+            isAirplaneModeOn, isWifiEnabled, isScanningAlwaysAvailable);
+
+    if (isScanningAlwaysAvailable) {
+        SetInitialState(mStaDisabledWithScanState);
+    } else {
+        SetInitialState(mApStaDisabledState);
+    }
+
+    SetLogRecSize(100);
+    SetLogOnlyTransitions(false);
+
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(ACTION_DEVICE_IDLE);
+    filter->AddAction(IWifiManager::NETWORK_STATE_CHANGED_ACTION);
+    AutoPtr<IBroadcastReceiver> br= new InnerBroadcastReceiver1(this);
+    AutoPtr<IIntentFilter> intentFilter;
+    CIntentFilter::New(filter, (IIntentFilter**)&intentFilter);
+    AutoPtr<IIntent> intentTemp;
+    mContext->RegisterReceiver(br, intentFilter, (IIntent**)&intentTemp);
+
+    InitializeAndRegisterForSettingsChange(looper);
 }
 
 ECode WifiController::Dump(
@@ -716,202 +779,185 @@ ECode WifiController::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    VALIDATE_NOT_NULL(fd);
-    VALIDATE_NOT_NULL(pw);
-    VALIDATE_NOT_NULL(args);
-    // ==================before translated======================
-    // super.dump(fd, pw, args);
-    //
-    // pw.println("mScreenOff " + mScreenOff);
-    // pw.println("mDeviceIdle " + mDeviceIdle);
-    // pw.println("mPluggedType " + mPluggedType);
-    // pw.println("mIdleMillis " + mIdleMillis);
-    // pw.println("mSleepPolicy " + mSleepPolicy);
-    assert(0);
+    StateMachine::Dump(fd, pw, args);
+
+    pw->Print(String("mScreenOff "));
+    pw->Println(mScreenOff);
+    pw->Print(String("mDeviceIdle "));
+    pw->Println(mDeviceIdle);
+    pw->Print(String("mPluggedType "));
+    pw->Println(mPluggedType);
+    pw->Print(String("mIdleMillis "));
+    pw->Println(mIdleMillis);
+    pw->Print(String("mSleepPolicy "));
+    pw->Println(mSleepPolicy);
     return NOERROR;
 }
 
 void WifiController::InitializeAndRegisterForSettingsChange(
     /* [in] */ ILooper* looper)
 {
-    // ==================before translated======================
-    // Handler handler = new Handler(looper);
-    // readStayAwakeConditions();
-    // registerForStayAwakeModeChange(handler);
-    // readWifiIdleTime();
-    // registerForWifiIdleTimeChange(handler);
-    // readWifiSleepPolicy();
-    // registerForWifiSleepPolicyChange(handler);
-    // readWifiReEnableDelay();
-    assert(0);
+    AutoPtr<IHandler> handler;
+    CHandler::New(looper, (IHandler**)&handler);
+    ReadStayAwakeConditions();
+    RegisterForStayAwakeModeChange(handler);
+    ReadWifiIdleTime();
+    RegisterForWifiIdleTimeChange(handler);
+    ReadWifiSleepPolicy();
+    RegisterForWifiSleepPolicyChange(handler);
+    ReadWifiReEnableDelay();
 }
 
 void WifiController::ReadStayAwakeConditions()
 {
-    // ==================before translated======================
-    // mStayAwakeConditions = Settings.Global.getInt(mContext.getContentResolver(),
-    //         Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
-    assert(0);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    Settings::Global::GetInt32(cr, ISettingsGlobal::STAY_ON_WHILE_PLUGGED_IN, 0, &mStayAwakeConditions);
 }
 
 void WifiController::ReadWifiIdleTime()
 {
-    // ==================before translated======================
-    // mIdleMillis = Settings.Global.getLong(mContext.getContentResolver(),
-    //         Settings.Global.WIFI_IDLE_MS, DEFAULT_IDLE_MS);
-    assert(0);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    Settings::Global::GetInt64(cr, ISettingsGlobal::WIFI_IDLE_MS, DEFAULT_IDLE_MS, &mIdleMillis);
 }
 
 void WifiController::ReadWifiSleepPolicy()
 {
-    // ==================before translated======================
-    // mSleepPolicy = Settings.Global.getInt(mContext.getContentResolver(),
-    //         Settings.Global.WIFI_SLEEP_POLICY,
-    //         Settings.Global.WIFI_SLEEP_POLICY_NEVER);
-    assert(0);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    Settings::Global::GetInt32(cr, ISettingsGlobal::WIFI_SLEEP_POLICY,
+            ISettingsGlobal::WIFI_SLEEP_POLICY_NEVER, &mSleepPolicy);
 }
 
 void WifiController::ReadWifiReEnableDelay()
 {
-    // ==================before translated======================
-    // mReEnableDelayMillis = Settings.Global.getLong(mContext.getContentResolver(),
-    //         Settings.Global.WIFI_REENABLE_DELAY_MS, DEFAULT_REENABLE_DELAY_MS);
-    assert(0);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    Settings::Global::GetInt64(cr, ISettingsGlobal::WIFI_REENABLE_DELAY_MS, DEFAULT_REENABLE_DELAY_MS, &mReEnableDelayMillis);
 }
 
 void WifiController::RegisterForStayAwakeModeChange(
     /* [in] */ IHandler* handler)
 {
-    // ==================before translated======================
-    // ContentObserver contentObserver = new ContentObserver(handler) {
-    //     @Override
-    //     public void onChange(boolean selfChange) {
-    //         readStayAwakeConditions();
-    //     }
-    // };
-    //
-    // mContext.getContentResolver().registerContentObserver(
-    //         Settings.Global.getUriFor(Settings.Global.STAY_ON_WHILE_PLUGGED_IN),
-    //         false, contentObserver);
-    assert(0);
+    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver1(this, handler);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    AutoPtr<IUri> uri;
+    Settings::Global::GetUriFor(ISettingsGlobal::STAY_ON_WHILE_PLUGGED_IN, (IUri**)&uri);
+
+    cr->RegisterContentObserver(uri, FALSE, contentObserver);
 }
 
 void WifiController::RegisterForWifiIdleTimeChange(
     /* [in] */ IHandler* handler)
 {
-    // ==================before translated======================
-    // ContentObserver contentObserver = new ContentObserver(handler) {
-    //     @Override
-    //     public void onChange(boolean selfChange) {
-    //         readWifiIdleTime();
-    //     }
-    // };
-    //
-    // mContext.getContentResolver().registerContentObserver(
-    //         Settings.Global.getUriFor(Settings.Global.WIFI_IDLE_MS),
-    //         false, contentObserver);
-    assert(0);
+    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver3(this, handler);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    AutoPtr<IUri> uri;
+    Settings::Global::GetUriFor(ISettingsGlobal::WIFI_IDLE_MS, (IUri**)&uri);
+    cr->RegisterContentObserver(uri, FALSE, contentObserver);
 }
 
 void WifiController::RegisterForWifiSleepPolicyChange(
     /* [in] */ IHandler* handler)
 {
-    // ==================before translated======================
-    // ContentObserver contentObserver = new ContentObserver(handler) {
-    //     @Override
-    //     public void onChange(boolean selfChange) {
-    //         readWifiSleepPolicy();
-    //     }
-    // };
-    // mContext.getContentResolver().registerContentObserver(
-    //         Settings.Global.getUriFor(Settings.Global.WIFI_SLEEP_POLICY),
-    //         false, contentObserver);
-    assert(0);
+    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver5(this, handler);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+
+    AutoPtr<IUri> uri;
+    Settings::Global::GetUriFor(ISettingsGlobal::WIFI_SLEEP_POLICY, (IUri**)&uri);
+    cr->RegisterContentObserver(uri, FALSE, contentObserver);
 }
 
 Boolean WifiController::ShouldWifiStayAwake(
     /* [in] */ Int32 pluggedType)
 {
-    // ==================before translated======================
-    // if (mSleepPolicy == Settings.Global.WIFI_SLEEP_POLICY_NEVER) {
-    //     // Never sleep
-    //     return true;
-    // } else if ((mSleepPolicy == Settings.Global.WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED) &&
-    //         (pluggedType != 0)) {
-    //     // Never sleep while plugged, and we're plugged
-    //     return true;
-    // } else {
-    //     // Default
-    //     return shouldDeviceStayAwake(pluggedType);
-    // }
-    assert(0);
+    if (mSleepPolicy == ISettingsGlobal::WIFI_SLEEP_POLICY_NEVER) {
+        // Never sleep
+        return TRUE;
+    } else if ((mSleepPolicy == ISettingsGlobal::WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED) &&
+            (pluggedType != 0)) {
+        // Never sleep while plugged, and we're plugged
+        return TRUE;
+    } else {
+        // Default
+        return ShouldDeviceStayAwake(pluggedType);
+    }
     return FALSE;
 }
 
 Boolean WifiController::ShouldDeviceStayAwake(
     /* [in] */ Int32 pluggedType)
 {
-    // ==================before translated======================
-    // return (mStayAwakeConditions & pluggedType) != 0;
-    assert(0);
-    return FALSE;
+    return (mStayAwakeConditions & pluggedType) != 0;
 }
 
 void WifiController::UpdateBatteryWorkSource()
 {
-    // ==================before translated======================
-    // mTmpWorkSource.clear();
-    // if (mDeviceIdle) {
-    //     mLocks.updateWorkSource(mTmpWorkSource);
-    // }
-    // mWifiStateMachine.updateBatteryWorkSource(mTmpWorkSource);
-    assert(0);
+    mTmpWorkSource->Clear();
+    if (mDeviceIdle) {
+        ((WifiServiceImpl::LockList*)mLocks.Get())->UpdateWorkSource(mTmpWorkSource);
+    }
+    mWifiStateMachine->UpdateBatteryWorkSource(mTmpWorkSource);
 }
 
 void WifiController::CheckLocksAndTransitionWhenDeviceActive()
 {
-    // ==================before translated======================
-    // if (mLocks.hasLocks() && mLocks.getStrongestLockMode() == WIFI_MODE_FULL_HIGH_PERF) {
-    //     // It is possible for the screen to be off while the device is
-    //     // is active (mIdleMillis), so we need the high-perf mode
-    //     // otherwise powersaving mode will be turned on.
-    //     transitionTo(mDeviceActiveHighPerfState);
-    // } else {
-    //     transitionTo(mDeviceActiveState);
-    // }
-    assert(0);
+    WifiServiceImpl::LockList* lockList = (WifiServiceImpl::LockList*)mLocks.Get();
+    Boolean hasLocks;
+    Int32 strongestLockMode;
+    if ((lockList->HasLocks(&hasLocks), hasLocks) &&
+            ((lockList->GetStrongestLockMode(&strongestLockMode), strongestLockMode) == IWifiManager::WIFI_MODE_FULL_HIGH_PERF)) {
+        // It is possible for the screen to be off while the device is
+        // is active (mIdleMillis), so we need the high-perf mode
+        // otherwise powersaving mode will be turned on.
+        TransitionTo(mDeviceActiveHighPerfState);
+    } else {
+        TransitionTo(mDeviceActiveState);
+    }
 }
 
 void WifiController::CheckLocksAndTransitionWhenDeviceIdle()
 {
-    // ==================before translated======================
-    // if (mLocks.hasLocks()) {
-    //     switch (mLocks.getStrongestLockMode()) {
-    //         case WIFI_MODE_FULL:
-    //             transitionTo(mFullLockHeldState);
-    //             break;
-    //         case WIFI_MODE_FULL_HIGH_PERF:
-    //             transitionTo(mFullHighPerfLockHeldState);
-    //             break;
-    //         case WIFI_MODE_SCAN_ONLY:
-    //             transitionTo(mScanOnlyLockHeldState);
-    //             break;
-    //         default:
-    //             loge("Illegal lock " + mLocks.getStrongestLockMode());
-    //     }
-    // } else {
-    //     if (mSettingsStore.isScanAlwaysAvailable()) {
-    //         transitionTo(mScanOnlyLockHeldState);
-    //     } else {
-    //         transitionTo(mNoLockHeldState);
-    //     }
-    // }
-    assert(0);
+    WifiServiceImpl::LockList* lockList = (WifiServiceImpl::LockList*)mLocks.Get();
+    Boolean hasLocks;
+    Int32 strongestLockMode;
+    if (lockList->HasLocks(&hasLocks), hasLocks) {
+        switch (lockList->GetStrongestLockMode(&strongestLockMode), strongestLockMode) {
+            case IWifiManager::WIFI_MODE_FULL:
+                TransitionTo(mFullLockHeldState);
+                break;
+            case IWifiManager::WIFI_MODE_FULL_HIGH_PERF:
+                TransitionTo(mFullHighPerfLockHeldState);
+                break;
+            case IWifiManager::WIFI_MODE_SCAN_ONLY:
+                TransitionTo(mScanOnlyLockHeldState);
+                break;
+            default:
+                Logger::E(TAG, "Illegal lock %d", strongestLockMode);
+        }
+    } else {
+        Boolean isScanningAlwaysAvailable;
+        if (mSettingsStore->IsScanAlwaysAvailable(&isScanningAlwaysAvailable), isScanningAlwaysAvailable) {
+            TransitionTo(mScanOnlyLockHeldState);
+        } else {
+            TransitionTo(mNoLockHeldState);
+        }
+    }
 }
 
 } // namespace Wifi
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
-

@@ -1423,11 +1423,11 @@ public:
 
     /* Wifi state machine modes of operation */
     /* CONNECT_MODE - connect to any 'known' AP when it becomes available */
-    static const Int32 CONNECT_MODE                  ; //= 1;
+    static const Int32 CONNECT_MODE                  = 1;
     /* SCAN_ONLY_MODE - don't connect to any APs; scan, but only while apps hold lock */
-    static const Int32 SCAN_ONLY_MODE                ; //= 2;
+    static const Int32 SCAN_ONLY_MODE                = 2;
     /* SCAN_ONLY_WITH_WIFI_OFF - scan, but don't connect to any APs */
-    static const Int32 SCAN_ONLY_WITH_WIFI_OFF_MODE  ; //= 3;
+    static const Int32 SCAN_ONLY_WITH_WIFI_OFF_MODE  = 3;
 
     Int32 mRunningBeaconCount; //= 0;
 
