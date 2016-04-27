@@ -108,6 +108,7 @@ ECode QSUtils::DeviceSupportsLte(
     tm->GetLteOnCdmaMode(&cdmaMode);
 // TODO: Need ITelephonyManager::GetLteOnGsmMode
     // tm->GetLteOnGsmMode(&gsmMode);
+    assert(0 && "TODO");
     *result = (cdmaMode == IPhoneConstants::LTE_ON_CDMA_TRUE) || gsmMode != 0;
     return NOERROR;
 }
@@ -137,7 +138,6 @@ ECode QSUtils::DeviceSupportsMobileData(
     AutoPtr<IInterface> service;
     ctx->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&service);
     AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(service);
-
     return cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, result);
 }
 

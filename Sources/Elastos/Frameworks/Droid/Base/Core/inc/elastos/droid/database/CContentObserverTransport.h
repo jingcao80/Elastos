@@ -3,8 +3,10 @@
 
 #include "_Elastos_Droid_Database_CContentObserverTransport.h"
 #include <elastos/core/Object.h>
+#include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Database.h>
 
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Database::IIContentObserver;
 
@@ -16,6 +18,7 @@ CarClass(CContentObserverTransport)
     , public Object
     , public IContentObserverTransport
     , public IIContentObserver
+    , public IBinder
 {
 public:
     CAR_INTERFACE_DECL()

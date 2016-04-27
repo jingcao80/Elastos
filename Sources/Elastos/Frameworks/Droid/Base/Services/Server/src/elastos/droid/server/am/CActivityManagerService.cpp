@@ -517,7 +517,7 @@ const Boolean CActivityManagerService::DEBUG_SWITCH = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_TASKS = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_THUMBNAILS = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_TRANSITION = localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_URI_PERMISSION = localLOGV || FALSE;
+const Boolean CActivityManagerService::DEBUG_URI_PERMISSION = localLOGV || TRUE;
 const Boolean CActivityManagerService::DEBUG_USER_LEAVING = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_VISBILITY = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_PSS = localLOGV || FALSE;
@@ -4005,10 +4005,10 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
 
     if (app == NULL) {
         CheckTime(startTime, String("startProcess: creating new process record"));
-        app = NewProcessRecordLocked( info, processName, isolated, isolatedUid);
+        app = NewProcessRecordLocked(info, processName, isolated, isolatedUid);
         if (app == NULL) {
             Slogger::W(TAG, "Failed making new process record for %s / %d isolated=%d",
-                    processName.string(), infoUid, isolated);
+                processName.string(), infoUid, isolated);
             return NULL;
         }
         app->mCrashHandler = crashHandler;
@@ -4269,13 +4269,9 @@ ECode CActivityManagerService::StartProcessLocked(
 
     Int32 pid = 0;
     startResult->GetPid(&pid);
-//    EventLog.writeEvent(EventLogTags.AM_PROC_START, UserHandle::GetUserId(uid), startResult.pid, uid,
-//            app.processName, hostingType,
-//            hostingNameStr != NULL ? hostingNameStr : "");
-
-   if (app->mPersistent) {
+    if (app->mPersistent) {
        Watchdog::GetInstance()->ProcessStarted(app->mProcessName, pid);
-   }
+    }
 
     CheckTime(startTime, String("startProcess: building log message"));
     StringBuilder* buf = mStringBuilder;
@@ -4287,32 +4283,33 @@ ECode CActivityManagerService::StartProcessLocked(
         buf->Append(entryPoint);
         buf->Append("]");
     }
-    buf->Append(String(" for "));
+    buf->Append(" for ");
     buf->Append(hostingType);
     if (!hostingNameStr.IsNull()) {
-        buf->Append(String(" "));
+        buf->Append(" ");
         buf->Append(hostingNameStr);
     }
-    buf->Append(String(": pid="));
+    buf->Append(": pid=");
     buf->Append(pid);
-    buf->Append(String(" uid="));
+    buf->Append(" uid=");
     buf->Append(uid);
-    buf->Append(String(" gids={"));
+    buf->Append(" gids={");
     if (gids != NULL) {
         for (Int32 gi = 0; gi < gids->GetLength(); gi++) {
-            if (gi != 0) buf->Append(String(", "));
+            if (gi != 0) buf->Append(", ");
             buf->Append((*gids)[gi]);
         }
     }
-    buf->Append(String("}"));
+    buf->Append("}");
     if (requiredAbi != NULL) {
         buf->Append(" abi=");
         buf->Append(requiredAbi);
     }
     Slogger::I(TAG, buf->ToString());
-    app->SetPid(pid);
+
     Boolean usingWrapper;
     startResult->GetUsingWrapper(&usingWrapper);
+    app->SetPid(pid);
     app->mUsingWrapper = usingWrapper;
     app->mRemoved = FALSE;
     app->mKilled = FALSE;
@@ -12017,8 +12014,7 @@ void CActivityManagerService::CheckTime(
     Int64 now = SystemClock::GetElapsedRealtime();
     if ((now - startTime) > 1000) {
         // If we are taking more than a second, log about it.
-        Slogger::W(TAG, "Slow operation: %lldms so far, now at %s",
-            (now-startTime), where.string());
+        Slogger::W(TAG, "Slow operation: %lld ms so far, now at %s", (now-startTime), where.string());
     }
 
     // if (DEBUG) {
@@ -12052,7 +12048,7 @@ ECode CActivityManagerService::GetContentProviderImpl(
                 String callerDes;
                 IBinder::Probe(caller)->ToString(&callerDes);
                 Slogger::E(TAG, "Unable to find app for caller %s (pid=%d) when getting content provider %s",
-                        callerDes.string(), Binder::GetCallingPid(), name.string());
+                    callerDes.string(), Binder::GetCallingPid(), name.string());
                 return E_SECURITY_EXCEPTION;
             }
         }
@@ -12158,9 +12154,8 @@ ECode CActivityManagerService::GetContentProviderImpl(
                      // has been killed on us.  We need to wait for a new
                      // process to be started, and make sure its death
                      // doesn't kill our process.
-                     Slogger::I(TAG,
-                             "Existing provider %s is crashing; detaching %s",
-                             cnflattenString.string(), r->ToString().string());
+                     Slogger::I(TAG, "Existing provider %s is crashing; detaching %s",
+                        cnflattenString.string(), r->ToString().string());
                      Boolean lastRef = DecProviderCountLocked(conn, cpr, token, stable);
                      CheckTime(startTime, String("getContentProviderImpl: before appDied"));
                      AppDiedLocked(cpr->mProc);
@@ -12184,21 +12179,23 @@ ECode CActivityManagerService::GetContentProviderImpl(
             cpi = NULL;
             CheckTime(startTime, String("getContentProviderImpl: before resolveContentProvider"));
             AppGlobals::GetPackageManager()->ResolveContentProvider(name,
-                    STOCK_PM_FLAGS | IPackageManager::GET_URI_PERMISSION_PATTERNS, userId,
-                    (IProviderInfo**)&cpi);
+                STOCK_PM_FLAGS | IPackageManager::GET_URI_PERMISSION_PATTERNS, userId,
+                (IProviderInfo**)&cpi);
             CheckTime(startTime, String("getContentProviderImpl: after resolveContentProvider"));
             if (cpi == NULL) {
                 return NOERROR;
             }
 
             String cpiProcName, cpiName, cpiPkgName, cpiAppInfoPkgName;
-            IComponentInfo::Probe(cpi)->GetProcessName(&cpiProcName);
-            IPackageItemInfo::Probe(cpi)->GetPackageName(&cpiPkgName);
-            IPackageItemInfo::Probe(cpi)->GetName(&cpiName);
+            IComponentInfo* ci = IComponentInfo::Probe(cpi);
+            IPackageItemInfo* pi = IPackageItemInfo::Probe(cpi);
+            ci->GetProcessName(&cpiProcName);
+            pi->GetPackageName(&cpiPkgName);
+            pi->GetName(&cpiName);
             Int32 flags, uid;
             cpi->GetFlags(&flags);
             AutoPtr<IApplicationInfo> cpiAppInfo;
-            IComponentInfo::Probe(cpi)->GetApplicationInfo((IApplicationInfo**)&cpiAppInfo);
+            ci->GetApplicationInfo((IApplicationInfo**)&cpiAppInfo);
             IPackageItemInfo::Probe(cpiAppInfo)->GetPackageName(&cpiAppInfoPkgName);
             cpiAppInfo->GetUid(&uid);
 
@@ -12212,7 +12209,7 @@ ECode CActivityManagerService::GetContentProviderImpl(
             if (singleton) {
                 userId = IUserHandle::USER_OWNER;
             }
-            IComponentInfo::Probe(cpi)->SetApplicationInfo(GetAppInfoForUser(cpiAppInfo, userId));
+            ci->SetApplicationInfo(GetAppInfoForUser(cpiAppInfo, userId));
             CheckTime(startTime, String("getContentProviderImpl: got app info for user"));
 
             CheckTime(startTime, String("getContentProviderImpl: before checkContentProviderPermission"));
@@ -12254,8 +12251,7 @@ ECode CActivityManagerService::GetContentProviderImpl(
                         cpiAppInfoPkgName, STOCK_PM_FLAGS, userId, (IApplicationInfo**)&ai);
                 CheckTime(startTime, String("getContentProviderImpl: after getApplicationInfo"));
                 if (ai == NULL) {
-                    Slogger::W(TAG, "No package info for content provider %s",
-                            cpiName.string());
+                    Slogger::W(TAG, "No package info for content provider %s", cpiName.string());
                     Binder::RestoreCallingIdentity(ident);
                     return NOERROR;
                 }
@@ -12282,7 +12278,7 @@ ECode CActivityManagerService::GetContentProviderImpl(
                 cpr->mAppInfo->GetUid(&cprUid);
                 String cprName;
                 IPackageItemInfo::Probe(cpr->mAppInfo)->GetName(&cprName);
-                Slogger::W(TAG, "LAUNCHING REMOTE PROVIDER (myuid %d pruid %d): %s",
+                Slogger::W(TAG, "launching remote provider (myuid %d pruid %d): %s",
                     (r != NULL ? r->mUid : NULL), cprUid, cprName.string());
             }
 
@@ -12322,13 +12318,13 @@ ECode CActivityManagerService::GetContentProviderImpl(
                     CheckTime(startTime, String("getContentProviderImpl: before start process"));
                     AutoPtr<IComponentName> component;
                     CComponentName::New(cpiAppInfoPkgName, cpiName, (IComponentName**)&component);
-                    AutoPtr<ProcessRecord> proc = StartProcessLocked(cpiProcName,
-                            cpr->mAppInfo, FALSE, 0, String("content provider"),
-                            component, FALSE, FALSE, FALSE);
+                    proc = StartProcessLocked(cpiProcName,
+                        cpr->mAppInfo, FALSE, 0, String("content provider"),
+                        component, FALSE, FALSE, FALSE);
                     CheckTime(startTime, String("getContentProviderImpl: after start process"));
                     if (proc == NULL) {
                         Slogger::W(TAG, "Unable to launch app %s/%d for provider %s: process is bad",
-                                cpiAppInfoPkgName.string(), uid, name.string());
+                            cpiAppInfoPkgName.string(), uid, name.string());
                         Binder::RestoreCallingIdentity(origId);
                         return NOERROR;
                     }
@@ -12361,29 +12357,28 @@ ECode CActivityManagerService::GetContentProviderImpl(
         AutoPtr<IThread> thread;
         Thread::Attach((IThread**)&thread);
         cpr->Lock();
+        IComponentInfo* ci = IComponentInfo::Probe(cpi);
+        String pkgName;
+        Int32 uid;
 
         while (cpr->mProvider == NULL) {
             if (cpr->mLaunchingApp == NULL) {
                 cpr->Unlock();
 
                 AutoPtr<IApplicationInfo> cpiAppInfo;
-                IComponentInfo::Probe(cpi)->GetApplicationInfo((IApplicationInfo**)&cpiAppInfo);
-                String pkgName;
+                ci->GetApplicationInfo((IApplicationInfo**)&cpiAppInfo);
                 IPackageItemInfo::Probe(cpiAppInfo)->GetPackageName(&pkgName);
-                Int32 uid;
                 cpiAppInfo->GetUid(&uid);
-                Slogger::W(TAG, "Unable to launch app %s/%d for provider %s: launching app became null",
-                        pkgName.string(), uid, name.string());
-    //            EventLog.writeEvent(EventLogTags.AM_PROVIDER_LOST_PROCESS,
-    //                    UserHandle::GetUserId(cpi.applicationInfo.uid),
-    //                    cpi.applicationInfo.packageName,
-    //                    cpi.applicationInfo.uid, name);
+                String callerDes;
+                IBinder::Probe(caller)->ToString(&callerDes);
+                Slogger::W(TAG, "Unable to launch app %s/%d for provider [%s] caller [%s]: launching app became null",
+                    pkgName.string(), uid, name.string(), callerDes.string());
                 *providerHolder = NULL;
                 return E_LAUNCH_EXCEPTION;
             }
             if (DEBUG_MU) {
                 Slogger::V(TAG_MU, "Waiting to start provider %s launchingApp= %s",
-                        cpr->ToString().string(), cpr->mLaunchingApp->ToString().string());
+                    cpr->ToString().string(), cpr->mLaunchingApp->ToString().string());
             }
             if (conn != NULL) {
                 conn->mWaiting = TRUE;
@@ -12914,16 +12909,12 @@ AutoPtr<ProcessRecord> CActivityManagerService::NewProcessRecordLocked(
         info->GetProcessName(&proc);
     }
 
-    AutoPtr<ProcessRecord> result;
-
-    AutoPtr<IBatteryStatsImplUidProc> ps;
     Int32 uid;
     info->GetUid(&uid);
     if (isolated) {
         if (isolatedUid == 0) {
             Int32 userId = UserHandle::GetUserId(uid);
             Int32 stepsLeft = IProcess::LAST_ISOLATED_UID - IProcess::FIRST_ISOLATED_UID + 1;
-            uid = 0;
 
             while (TRUE) {
                 if (mNextIsolatedProcessUid < IProcess::FIRST_ISOLATED_UID
@@ -12939,7 +12930,8 @@ AutoPtr<ProcessRecord> CActivityManagerService::NewProcessRecordLocked(
                 }
                 stepsLeft--;
                 if (stepsLeft <= 0) {
-                    return result;
+                    Slogger::W(TAG, " NewProcessRecordLocked return null");
+                    return NULL;
                 }
             }
         }
@@ -12951,7 +12943,7 @@ AutoPtr<ProcessRecord> CActivityManagerService::NewProcessRecordLocked(
     }
 
     AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-    result = new ProcessRecord(stats, info, proc, uid);
+    AutoPtr<ProcessRecord> result = new ProcessRecord(stats, info, proc, uid);
     return result;
 }
 

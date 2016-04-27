@@ -268,6 +268,7 @@ module
 
         interface IIContentObserver;
         interface IContentObserverTransport;
+        interface IBinder;
     }
 
     } // namespace Database

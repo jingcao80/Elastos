@@ -19,6 +19,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 
+using Elastos::Droid::Manifest;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Content::Res::CAssetFileDescriptor;
@@ -190,10 +191,10 @@ Boolean ContentProvider::CheckUser(
 {
     Int32 cuid, perm;
     context->GetUserId(&cuid);
-    context->CheckPermission(Elastos::Droid::Manifest::permission::INTERACT_ACROSS_USERS, pid, uid, &perm);
     return UserHandle::GetUserId(uid) == cuid
             || mSingleUser
-            || perm == IPackageManager::PERMISSION_GRANTED;
+            || (context->CheckPermission(Manifest::permission::INTERACT_ACROSS_USERS, pid, uid, &perm), perm)
+                == IPackageManager::PERMISSION_GRANTED;
 }
 
 ECode ContentProvider::EnforceReadPermissionInner(

@@ -28,6 +28,7 @@ namespace Content {
 CarClass(CContentValues)
     , public Object
     , public IContentValues
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

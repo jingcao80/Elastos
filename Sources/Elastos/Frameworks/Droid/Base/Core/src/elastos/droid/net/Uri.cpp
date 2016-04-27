@@ -109,6 +109,7 @@ ECode StringUri::ReadFrom(
 ECode StringUri::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
+    parcel->WriteInt32(1); // id 1
     parcel->WriteString(mUriString);
     return NOERROR;
 }
@@ -607,6 +608,7 @@ ECode OpaqueUri::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     VALIDATE_NOT_NULL(parcel);
+    parcel->WriteInt32(2);
     parcel->WriteString(mScheme);
 
     assert(mSsp != NULL);
@@ -1180,6 +1182,7 @@ ECode HierarchicalUri::ReadFromParcel(
 ECode HierarchicalUri::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
+    parcel->WriteInt32(3);
     parcel->WriteString(mScheme);
     mAuthority->WriteTo(parcel);
     mPath->WriteTo(parcel);
@@ -2476,62 +2479,39 @@ ECode Uri::NormalizeScheme(
     return NOERROR;
 }
 
-ECode Uri::WriteToParcel(
-    /* [in] */ IParcel* parcel,
-    /* [in] */ IUri* data)
+ECode Uri::ReadFromParcel(
+   /* [in] */ IParcel* parcel,
+   /* [out] */ IUri** uri)
 {
-    if (IStringUri::Probe(data) != NULL) {
-        parcel->WriteInt32(1);
-        IParcelable::Probe(data)->WriteToParcel(parcel);
-    }
-    else if (IOpaqueUri::Probe(data) != NULL) {
-        parcel->WriteInt32(2);
-        IParcelable::Probe(data)->WriteToParcel(parcel);
-    }
-    else if (IHierarchicalUri::Probe(data) != NULL) {
-        parcel->WriteInt32(3);
-        IParcelable::Probe(data)->WriteToParcel(parcel);
-    }
-    else {
-        parcel->WriteInt32(0);
-        if (data != NULL) {
-            assert(0 && "Unknown Uri type!");
-        }
-    }
+    VALIDATE_NOT_NULL(uri);
+    *uri = NULL;
 
-    return NOERROR;
+   Int32 type;
+   parcel->ReadInt32(&type);
+
+   switch (type) {
+       case 0: return NOERROR;
+       case 1: return StringUri::ReadFrom(parcel, uri);
+       case 2: return OpaqueUri::ReadFrom(parcel, uri);
+       case 3: return HierarchicalUri::ReadFrom(parcel, uri);
+   }
+
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
-ECode Uri::ReadFromParcel(
-    /* [in] */ IParcel* parcel,
-    /* [out] */ IUri** data)
+ECode Uri::WriteToParcel(
+    /* [in] */ IParcel* out,
+    /* [in] */ IUri* uri)
 {
-    VALIDATE_NOT_NULL(data)
-    *data = NULL;
+    if (uri == NULL) {
+        out->WriteInt32(0);
+    }
+    else {
+        IParcelable* p = IParcelable::Probe(uri);
+        assert(p != NULL);
+        p->WriteToParcel(out);
+    }
 
-    Int32 value;
-    parcel->ReadInt32(&value);
-    if (value == 1) {
-        AutoPtr<IParcelable> obj;
-        CStringUri::New((IParcelable**)&obj);
-        obj->ReadFromParcel(parcel);
-        *data = IUri::Probe(obj);
-        REFCOUNT_ADD(*data)
-    }
-    else if (value == 2) {
-        AutoPtr<IParcelable> obj;
-        COpaqueUri::New((IParcelable**)&obj);
-        obj->ReadFromParcel(parcel);
-        *data = IUri::Probe(obj);
-        REFCOUNT_ADD(*data)
-    }
-    else if (value == 3) {
-        AutoPtr<IParcelable> obj;
-        CHierarchicalUri::New((IParcelable**)&obj);
-        obj->ReadFromParcel(parcel);
-        *data = IUri::Probe(obj);
-        REFCOUNT_ADD(*data)
-    }
     return NOERROR;
 }
 

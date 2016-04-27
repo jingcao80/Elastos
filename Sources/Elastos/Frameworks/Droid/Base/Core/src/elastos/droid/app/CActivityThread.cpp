@@ -5382,8 +5382,8 @@ ECode CActivityThread::InstallContentProviders(
     /* [in] */ IContext* context,
     /* [in] */ IList* providers)
 {
-    AutoPtr<IArrayList> results;
-    CArrayList::New((IArrayList**)&results);
+    AutoPtr<IList> results;
+    CArrayList::New((IList**)&results);
 
     AutoPtr<IIterator> it;
     providers->GetIterator((IIterator**)&it);
@@ -5396,34 +5396,34 @@ ECode CActivityThread::InstallContentProviders(
 
         if (DEBUG_PROVIDER) {
             StringBuilder buf(128);
-            buf.Append("Pub ");
+            buf.Append("Install Provider: authority:[");
             String auth;
             cpi->GetAuthority(&auth);
             buf.Append(auth);
-            buf.Append(": ");
+            buf.Append("], name:[");
             String name;
             IPackageItemInfo::Probe(cpi)->GetName(&name);
             buf.Append(name);
-            Slogger::I(TAG, "%s", buf.ToString().string());
+            Slogger::I(TAG, "%s]", buf.ToString().string());
         }
-        // StringBuffer buf(128);
-        // buf += "Pub ";
-        // buf += cpi->mAuthority;
-        // buf += ": ";
-        // buf += cpi->mName;
-        // Slogger::I(TAG, buf->ToString());
+
         AutoPtr<IContentProviderHolder> cph = InstallProvider(context, NULL, cpi,
                 FALSE /*noisy*/, TRUE /*noReleaseNeeded*/, TRUE /*stable*/);
         if (cph != NULL) {
             cph->SetNoReleaseNeeded(TRUE);
             results->Add(cph.Get());
         }
+        else {
+            String auth;
+            cpi->GetAuthority(&auth);
+            Slogger::E(TAG, "failed to install provider authority:[%s]", auth.string());
+        }
     }
 
     AutoPtr<IApplicationThread> appThread;
     GetApplicationThread((IApplicationThread**)&appThread);
     return ActivityManagerNative::GetDefault()->PublishContentProviders(
-        appThread, IList::Probe(results));
+        appThread, results);
 }
 
 ECode CActivityThread::AcquireProvider(
@@ -5459,7 +5459,7 @@ ECode CActivityThread::AcquireProvider(
 //     } catch (RemoteException ex) {
 //     }
     if (holder == NULL) {
-        Slogger::E(TAG, "Failed to find provider info for %s", auth.string());
+        Slogger::E(TAG, "Failed to find provider info for %s, userId %d", auth.string(), userId);
         return NOERROR;
     }
 
@@ -5475,7 +5475,7 @@ ECode CActivityThread::AcquireProvider(
         retholder->GetContentProvider(pr);
     }
     else {
-        Slogger::E(TAG, "Failed to find provider info for %s, userId %d", auth.string(), userId);
+        Slogger::E(TAG, "Failed to install provider info for %s, userId %d", auth.string(), userId);
     }
     return NOERROR;
 }

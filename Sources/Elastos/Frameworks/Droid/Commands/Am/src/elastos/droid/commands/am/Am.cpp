@@ -1587,7 +1587,7 @@ ECode Am::RunStart()
                     return NOERROR;
                 }
 
-                AutoPtr<IResolveInfo> ri;
+                AutoPtr<IInterface> ri;
                 activities->Get(0, (IInterface**)&ri);
                 ri = IResolveInfo::Probe(ri);
                 AutoPtr<IActivityInfo> activityInfo;

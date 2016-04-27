@@ -52,7 +52,7 @@ ECode AbstractCursor::SelfContentObserver::OnChange(
     return NOERROR;
 }
 
-const String AbstractCursor::TAG("Cursor");
+const String AbstractCursor::TAG("AbstractCursor");
 
 AbstractCursor::AbstractCursor()
     : mPos(-1)
