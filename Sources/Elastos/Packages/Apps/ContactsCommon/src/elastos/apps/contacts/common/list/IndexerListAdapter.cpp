@@ -1,5 +1,5 @@
 
-#include "CIndexerListAdapter.h"
+#include "IndexerListAdapter.h"
 
 namespace Elastos{
 namespace Apps{
@@ -8,40 +8,40 @@ namespace Common {
 namespace List {
 
 //=================================================================
-// CIndexerListAdapter::Placement
+// IndexerListAdapter::Placement
 //=================================================================
 CAR_INTERFACE_IMPL(Placement, object, IIndexerListAdapterPlacement)
 
-CIndexerListAdapter::Placement::Placement()
+IndexerListAdapter::Placement::Placement()
     : mPosition(IListView::INVALID_POSITION)
 {}
 
-ECode CIndexerListAdapter::Placement::Invalidate()
+ECode IndexerListAdapter::Placement::Invalidate()
 {
     mPosition = IListView::INVALID_POSITION;
     return NOERROR;
 }
 
 //=================================================================
-// CIndexerListAdapter
+// IndexerListAdapter
 //=================================================================
-CAR_INTERFACE_IMPL_2(CIndexerListAdapter, CPinnedHeaderListAdapter, IIndexerListAdapter, ISectionIndexer)
+CAR_INTERFACE_IMPL_2(IndexerListAdapter, PinnedHeaderListAdapter, IIndexerListAdapter, ISectionIndexer)
 
-CAR_OBJECT_IMPL(CIndexerListAdapter)
+CAR_OBJECT_IMPL(IndexerListAdapter)
 
-CIndexerListAdapter::CIndexerListAdapter()
+IndexerListAdapter::IndexerListAdapter()
     : mIndexedPartition(0)
 {
     mPlacementCache = new Placement();
 }
 
-ECode CIndexerListAdapter::constructor(
+ECode IndexerListAdapter::constructor(
     /* [in] */ IContext* context)
 {
     return CPinnedHeaderListAdapter::constructor(context);
 }
 
-ECode CIndexerListAdapter::IsSectionHeaderDisplayEnabled(
+ECode IndexerListAdapter::IsSectionHeaderDisplayEnabled(
     /* [out] */ Boolean* result)
 {
     VALUE_NOT_NULL(result);
@@ -49,14 +49,14 @@ ECode CIndexerListAdapter::IsSectionHeaderDisplayEnabled(
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::SetSectionHeaderDisplayEnabled(
+ECode IndexerListAdapter::SetSectionHeaderDisplayEnabled(
     /* [in] */ Boolean flag)
 {
     mSectionHeaderDisplayEnabled = flag;
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::GetIndexedPartition(
+ECode IndexerListAdapter::GetIndexedPartition(
     /* [out] */ Boolean* result)
 {
     VALUE_NOT_NULL(result);
@@ -64,14 +64,14 @@ ECode CIndexerListAdapter::GetIndexedPartition(
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::SetIndexedPartition(
+ECode IndexerListAdapter::SetIndexedPartition(
     /* [in] */ Int32 partition)
 {
     mIndexedPartition = partition;
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::GetIndexer(
+ECode IndexerListAdapter::GetIndexer(
     /* [out] */ ISectionIndexer** indexer)
 {
     VALUE_NOT_NULL(indexer);
@@ -80,7 +80,7 @@ ECode CIndexerListAdapter::GetIndexer(
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::SetIndexer(
+ECode IndexerListAdapter::SetIndexer(
     /* [in] */ ISectionIndexer* indexer)
 {
     mIndexer = indexer;
@@ -88,7 +88,7 @@ ECode CIndexerListAdapter::SetIndexer(
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::GetSections(
+ECode IndexerListAdapter::GetSections(
     /* [out, callee] */ ArrayOf<IInterface*>** sections)
 {
     VALUE_NOT_NULL(sections);
@@ -105,7 +105,7 @@ ECode CIndexerListAdapter::GetSections(
     }
 }
 
-ECode CIndexerListAdapter::GetPositionForSection(
+ECode IndexerListAdapter::GetPositionForSection(
     /* [in] */ Int32 sectionIndex,
     /* [out] */ Int32* result)
 {
@@ -118,7 +118,7 @@ ECode CIndexerListAdapter::GetPositionForSection(
     return mIndexer->GetPositionForSection(sectionIndex, result);
 }
 
-ECode CIndexerListAdapter::GetSectionForPosition(
+ECode IndexerListAdapter::GetSectionForPosition(
     /* [in] */ Int32 position,
     /* [out] */ Int32* result)
 {
@@ -131,7 +131,7 @@ ECode CIndexerListAdapter::GetSectionForPosition(
     return mIndexer->GetSectionForPosition(position, result);
 }
 
-ECode CIndexerListAdapter::GetPinnedHeaderCount(
+ECode IndexerListAdapter::GetPinnedHeaderCount(
     /* [out] */ Int32* count)
 {
     VALUE_NOT_NULL(count);
@@ -148,7 +148,7 @@ ECode CIndexerListAdapter::GetPinnedHeaderCount(
     }
 }
 
-ECode CIndexerListAdapter::GetPinnedHeaderView(
+ECode IndexerListAdapter::GetPinnedHeaderView(
     /* [in] */ Int32 partition,
     /* [in] */ IView* convertView,
     /* [in] */ IViewGroup* parent,
@@ -173,7 +173,7 @@ ECode CIndexerListAdapter::GetPinnedHeaderView(
     }
 }
 
-ECode CIndexerListAdapter::ConfigurePinnedHeaders(
+ECode IndexerListAdapter::ConfigurePinnedHeaders(
     /* [in] */ IPinnedHeaderListView* listView)
 {
     CPinnedHeaderListAdapter::ConfigurePinnedHeaders(listView);
@@ -245,7 +245,7 @@ ECode CIndexerListAdapter::ConfigurePinnedHeaders(
     return NOERROR;
 }
 
-ECode CIndexerListAdapter::GetItemPlacementInSection(
+ECode IndexerListAdapter::GetItemPlacementInSection(
     /* [in] */ Int32 position,
     /* [out] */ IIndexerListAdapterPlacement** placement)
 {

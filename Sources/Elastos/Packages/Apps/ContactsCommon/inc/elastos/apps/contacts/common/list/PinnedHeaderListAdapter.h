@@ -1,7 +1,5 @@
-#ifndef __ELASTOS_APPS_CONTACTS_COMMON_LIST_CPINNEDHEADERLISTADAPTER_H__
-#define __ELASTOS_APPS_CONTACTS_COMMON_LIST_CPINNEDHEADERLISTADAPTER_H__
-
-#include "_Elastos_Apps_Contacts_Common_List_CPinnedHeaderListAdapter.h"
+#ifndef __ELASTOS_APPS_CONTACTS_COMMON_LIST_PINNEDHEADERLISTADAPTER_H__
+#define __ELASTOS_APPS_CONTACTS_COMMON_LIST_PINNEDHEADERLISTADAPTER_H__
 
 
 namespace Elastos{
@@ -13,16 +11,14 @@ namespace List {
 /**
  * A subclass of {@link CompositeCursorAdapter} that manages pinned partition headers.
  */
-CarClass(CPinnedHeaderListAdapter)
-    /*, public CompositeCursorAdapter*/
-    , public Object
+class PinnedHeaderListAdapter
+    /*: public CompositeCursorAdapter*/
+    : public Object
     , public IPinnedHeaderListAdapter
     , public IPinnedHeaderAdapter
 {
 public:
     CAR_INTERFACE_DECL()
-
-    CAR_OBJECT_DECL()
 
     virtual ~CPinnedHeaderListAdapter();
 
@@ -78,4 +74,4 @@ private:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_LIST_CPINNEDHEADERLISTADAPTER_H__
+#endif //__ELASTOS_APPS_CONTACTS_COMMON_LIST_PINNEDHEADERLISTADAPTER_H__

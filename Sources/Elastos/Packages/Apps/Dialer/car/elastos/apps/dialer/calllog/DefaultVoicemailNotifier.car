@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace CallLog {
+
+    interface IDefaultVoicemailNotifier {
+    }
+
+    interface IDefaultVoicemailNotifierHelper {
+        /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
+        GetInstance(
+            [in] IContext* context,
+            [out] IDefaultVoicemailNotifier* notifier);
+
+        /** Create a new instance of {@link NewCallsQuery}. */
+        CreateNewCallsQuery(
+            [in] IContentResolver* contentResolver,
+            [out] IDefaultVoicemailNotifierNewCallsQuery* query);
+
+        /**
+         * Create a new PhoneNumberHelper.
+         * <p>
+         * This will cause some Disk I/O, at least the first time it is created, so it should not be
+         * called from the main thread.
+         */
+        CreatePhoneNumberHelper(
+            [in] IContext* context,
+            [out] IPhoneNumberDisplayHelper* helper);
+    }
+
+    inteface IDefaultVoicemailNotifierNewCall {
+    }
+
+    /** Allows determining the new calls for which a notification should be generated. */
+    interface IDefaultVoicemailNotifierNewCallsQuery {
+        /**
+         * Returns the new calls for which a notification should be generated.
+         */
+        Query(
+            [out, callee] ArrayOf<IDefaultVoicemailNotifierNewCall*>* newCalls);
+    }
+
+    /** Allows determining the name associated with a given phone number. */
+    inteface IDefaultVoicemailNotifierNameLookupQuery {
+        /**
+         * Returns the name associated with the given number in the contacts database, or null if
+         * the number does not correspond to any of the contacts.
+         * <p>
+         * If there are multiple contacts with the same phone number, it will return the name of one
+         * of the matching contacts.
+         */
+        Query(
+            [in] String number,
+            [out] String* str);
+    }
+
+    } //CallLog
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

@@ -1,5 +1,5 @@
 
-#include "CPinnedHeaderListAdapter.h"
+#include "PinnedHeaderListAdapter.h"
 
 namespace Elastos{
 namespace Apps{
@@ -7,14 +7,12 @@ namespace Contacts {
 namespace Common {
 namespace List {
 
-CAR_INTERFACE_IMPL_2(CPinnedHeaderListAdapter, Object, IPinnedHeaderListAdapter, IPinnedHeaderAdapter)
+CAR_INTERFACE_IMPL_2(PinnedHeaderListAdapter, Object, IPinnedHeaderListAdapter, IPinnedHeaderAdapter)
 
-CAR_OBJECT_IMPL(CPinnedHeaderListAdapter)
-
-CPinnedHeaderListAdapter::~CPinnedHeaderListAdapter
+PinnedHeaderListAdapter::~PinnedHeaderListAdapter
 {}
 
-ECode CPinnedHeaderListAdapter::constructor(
+ECode PinnedHeaderListAdapter::constructor(
     /* [in] */ IContext* context)
 {
     assert(0 && "TODO");
@@ -22,7 +20,7 @@ ECode CPinnedHeaderListAdapter::constructor(
     return NOERROR;
 }
 
-ECode CPinnedHeaderListAdapter::constructor(
+ECode PinnedHeaderListAdapter::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 initialCapacity)
 {
@@ -31,7 +29,7 @@ ECode CPinnedHeaderListAdapter::constructor(
     return NOERROR;
 }
 
-ECode CPinnedHeaderListAdapter::GetPinnedPartitionHeadersEnabled(
+ECode PinnedHeaderListAdapter::GetPinnedPartitionHeadersEnabled(
     /* [out] */ Boolean* result)
 {
     VALUE_NOT_NULL(result);
@@ -40,14 +38,14 @@ ECode CPinnedHeaderListAdapter::GetPinnedPartitionHeadersEnabled(
     return NOERROR;
 }
 
-ECode CPinnedHeaderListAdapter::SetPinnedPartitionHeadersEnabled(
+ECode PinnedHeaderListAdapter::SetPinnedPartitionHeadersEnabled(
     /* [in] */ Boolean flag)
 {
     mPinnedPartitionHeadersEnabled = flag;
     return NOERROR;
 }
 
-ECode CPinnedHeaderListAdapter::GetPinnedHeaderCount(
+ECode PinnedHeaderListAdapter::GetPinnedHeaderCount(
     /* [out] */ Int32* count)
 {
     VALUE_NOT_NULL(count);
@@ -62,7 +60,7 @@ ECode CPinnedHeaderListAdapter::GetPinnedHeaderCount(
     return NOERROR;
 }
 
-Boolean CPinnedHeaderListAdapter::IsPinnedPartitionHeaderVisible(
+Boolean PinnedHeaderListAdapter::IsPinnedPartitionHeaderVisible(
     /* [in] */ Int32 partition)
 {
     assert(0 && "TODO");
@@ -73,7 +71,7 @@ Boolean CPinnedHeaderListAdapter::IsPinnedPartitionHeaderVisible(
     return FALSE;
 }
 
-ECode CPinnedHeaderListAdapter::GetPinnedHeaderView(
+ECode PinnedHeaderListAdapter::GetPinnedHeaderView(
     /* [in] */ Int32 partition,
     /* [in] */ IView* convertView,
     /* [in] */ IViewGroup* parent,
@@ -116,7 +114,7 @@ ECode CPinnedHeaderListAdapter::GetPinnedHeaderView(
     return NOERROR;
 }
 
-ECode CPinnedHeaderListAdapter::ConfigurePinnedHeaders(
+ECode PinnedHeaderListAdapter::ConfigurePinnedHeaders(
     /* [in] */ IPinnedHeaderListView* listView)
 {
     Boolean result;
@@ -203,7 +201,7 @@ ECode CPinnedHeaderListAdapter::ConfigurePinnedHeaders(
     return NOERROR;
 }
 
-ECode CPinnedHeaderListAdapter::GetScrollPositionForHeader(
+ECode PinnedHeaderListAdapter::GetScrollPositionForHeader(
     /* [in] */ Int32 viewIndex,
     /* [out] */ Int32* result)
 {

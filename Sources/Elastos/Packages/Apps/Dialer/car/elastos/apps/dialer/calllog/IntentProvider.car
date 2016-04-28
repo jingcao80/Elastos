@@ -1,0 +1,63 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace CallLog {
+
+    /**
+     * Used to create an intent to attach to an action in the call log.
+     * <p>
+     * The intent is constructed lazily with the given information.
+     */
+    interface IIntentProvider {
+        GetIntent(
+            [in] IContext* context,
+            [out] IIntent* intent);
+    }
+
+    interface IIntentProviderHelper {
+        GetReturnCallIntentProvider(
+            [in] String number,
+            [out] IIntentProvider** provider);
+
+        GetReturnCallIntentProvider(
+            [in] String number,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntentProvider** provider);
+
+        GetReturnVideoCallIntentProvider(
+            [in] String number,
+            [out] IIntentProvider** provider);
+
+        GetReturnVideoCallIntentProvider(
+            [in] String number,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntentProvider** provider);
+
+        GetPlayVoicemailIntentProvider(
+            [in] Int64 rowId,
+            [in] String voicemailUri,
+            [out] IIntentProvider** provider);
+
+        /**
+         * Retrieves the call details intent provider for an entry in the call log.
+         *
+         * @param id The call ID of the first call in the call group.
+         * @param extraIds The call ID of the other calls grouped together with the call.
+         * @param voicemailUri If call log entry is for a voicemail, the voicemail URI.
+         * @return The call details intent provider.
+         */
+        GetCallDetailIntentProvider(
+            [in] Int64 id,
+            [in] ArrayOf<Int64>* extraIds,
+            [in] String voicemailUri,
+            [out] IIntentProvider** provider);
+    }
+
+    } //CallLog
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

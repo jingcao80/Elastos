@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace CallLog {
+
+    /**
+     * The query to look up the {@link ContactInfo} for a given number in the Call Log.
+     */
+    interface IPhoneQuery {
+        const Int32 PERSON_ID = 0;
+        const Int32 NAME = 1;
+        const Int32 PHONE_TYPE = 2;
+        const Int32 LABEL = 3;
+        const Int32 MATCHED_NUMBER = 4;
+        const Int32 NORMALIZED_NUMBER = 5;
+        const Int32 PHOTO_ID = 6;
+        const Int32 LOOKUP_KEY = 7;
+        const Int32 PHOTO_URI = 8;
+
+        Get_PROJECTION(
+            [out, callee] ArrayOf<String>* result);
+    }
+
+    } //CallLog
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

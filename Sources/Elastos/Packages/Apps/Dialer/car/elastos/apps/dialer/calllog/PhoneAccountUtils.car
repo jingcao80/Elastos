@@ -1,0 +1,42 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace CallLog {
+
+    /**
+     * Methods to help extract {@code PhoneAccount} information from database and Telecomm sources
+     */
+    interface IPhoneAccountUtils {
+        /**
+         * Generate account info from data in Telecomm database
+         */
+        GetAccount(
+            [in] String componentString,
+            [in] String accountId,
+            [out] IPhoneAccountHandle* handle);
+
+        /**
+         * Generate account icon from data in Telecomm database
+         */
+        GetAccountIcon(
+            [in] IContext* context,
+            [in] IPhoneAccountHandle* phoneAccount,
+            [out] IDrawable** drawable);
+
+        /**
+         * Generate account label from data in Telecomm database
+         */
+        GetAccountLabel(
+            [in] IContext* context,
+            [in] IPhoneAccountHandle* phoneAccount,
+            [out] String* lable);
+    }
+
+    } //CallLog
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

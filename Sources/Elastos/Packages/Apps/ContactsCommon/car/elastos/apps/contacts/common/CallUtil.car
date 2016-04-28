@@ -1,0 +1,132 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+
+    /**
+     * Utilities related to calls.
+     */
+    interface ICallUtil {
+        /**
+         * Return an Intent for making a phone call. Scheme (e.g. tel, sip) will be determined
+         * automatically.
+         */
+        GetCallIntent(
+            [in] String number,
+            [out] IIntent** intent);
+
+        /**
+         * Return an Intent for making a phone call. A given Uri will be used as is (without any
+         * sanity check).
+         */
+        GetCallIntent(
+            [in] IUri* uri,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(String)} but also accept a call origin.
+         * For more information about call origin, see comments in Phone package (PhoneApp).
+         */
+        GetCallIntent(
+            [in] String number,
+            [in] String callOrigin,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(String)} but also include {@code Account}.
+         */
+        GetCallIntent(
+            [in] String number,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(android.net.Uri)} but also include {@code Account}.
+         */
+        GetCallIntent(
+            [in] IUri* uri,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(String, String)} but also include {@code Account}.
+         */
+        GetCallIntent(
+            [in] String number,
+            [in] String callOrigin,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(android.net.Uri)} but also accept a call
+         * origin and {@code Account}.
+         * For more information about call origin, see comments in Phone package (PhoneApp).
+         */
+        GetCallIntent(
+            [in] IUri* uri,
+            [in] String callOrigin,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(String, String)} for starting a video call.
+         */
+        GetVideoCallIntent(
+            [in] String number,
+            [in] String callOrigin,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(String, String, android.telecom.PhoneAccountHandle)} for
+         * starting a video call.
+         */
+        GetVideoCallIntent(
+            [in] String number,
+            [in] String callOrigin,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(String, String, android.telecom.PhoneAccountHandle)} for
+         * starting a video call.
+         */
+        GetVideoCallIntent(
+            [in] String number,
+            [in] IPhoneAccountHandle* accountHandle,
+            [out] IIntent** intent);
+
+        /**
+         * A variant of {@link #getCallIntent(android.net.Uri)} but also accept a call
+         * origin and {@code Account} and {@code VideoCallProfile} state.
+         * For more information about call origin, see comments in Phone package (PhoneApp).
+         */
+        GetCallIntent(
+            [in] IUri* uri,
+            [in] String callOrigin,
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] Int32 videoState,
+            [out] IIntent** intent);
+
+        /**
+         * Return Uri with an appropriate scheme, accepting both SIP and usual phone call
+         * numbers.
+         */
+        GetCallUri(
+            [in] String number,
+            [out] IUri* uri);
+
+        IsVideoEnabled(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

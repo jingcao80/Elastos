@@ -81,6 +81,15 @@ module
         SetContactNameDisplayOrder(
             [in] Int32 displayOrder);
 
+        GetSortOrder(
+            [out] Int32* sortOrder);
+
+        SetSortOrder(
+            [in] Int32 sortOrder);
+
+        SetPhotoLoader(
+            [in] IContactPhotoManager* photoLoader);
+
         GetDisplayPhotos(
             [out] Boolean* displayPhotos);
 
