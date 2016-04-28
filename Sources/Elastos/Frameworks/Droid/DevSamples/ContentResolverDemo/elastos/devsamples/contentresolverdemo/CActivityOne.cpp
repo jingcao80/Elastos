@@ -5,22 +5,24 @@
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.View.h>
-#include <Elastos.Droid.Widget.h>
 #include <Elastos.Droid.Net.h>
+#include <elastos/droid/R.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Graphics::Drawable::CColorDrawable;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::CSimpleCursorAdapter;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
@@ -103,6 +105,21 @@ ECode CActivityOne::OnCreate(
     view = FindViewById(R::id::Delete);
     view->SetOnClickListener(l.Get());
 
+    view = FindViewById(R::id::UsersList);
+    IListView* listView = IListView::Probe(view);
+    AutoPtr<IDrawable> drawable;
+    CColorDrawable::New(0xFF0000FF, (IDrawable**)&drawable);
+    assert(drawable != NULL);
+    listView->SetDivider(drawable);
+    listView->SetDividerHeight(1);
+
+    Logger::I(TAG, "Before InitAdapter...");
+    InitAdapter();
+
+    Logger::I(TAG, "Before SetAdapter...");
+    IAdapterView* adapterView = IAdapterView::Probe(view);
+    adapterView->SetAdapter(mAdapter);
+    Logger::I(TAG, "After SetAdapter...");
     return NOERROR;
 }
 
@@ -146,7 +163,23 @@ ECode CActivityOne::OnActivityResult(
 }
 
 //====================================================================================
+ECode CActivityOne::InitAdapter()
+{
+    Query();
 
+    AutoPtr<ArrayOf<String> > from = ArrayOf<String>::Alloc(2);
+    from->Set(0, Utils::USERNAME);
+    from->Set(1, Utils::EMAIL);
+
+    AutoPtr<ArrayOf<Int32> > to = ArrayOf<Int32>::Alloc(2);
+    to->Set(0, Elastos::Droid::R::id::text1);
+    to->Set(1, Elastos::Droid::R::id::text2);
+
+    Logger::I(TAG, " create CSimpleCursorAdapter ...");
+    return CSimpleCursorAdapter::New(this,
+        Elastos::Droid::R::layout::simple_list_item_2,
+        mCursor, from, to, (IAdapter**)&mAdapter);
+}
 
 ECode CActivityOne::Add()
 {
@@ -197,7 +230,7 @@ Int64 CActivityOne::QueryRowId()
         Utils::CONTENT_URI, projections, nullStr, NULL, nullStr, (ICursor**)&cursor);
     Logger::I(TAG, " == QueryRowId: cursor: %s, ec=%08x", TO_CSTR(cursor), ec);
     if (cursor != NULL) {
-        Int32 count = 0, i = 0;
+        Int32 count = 0;
         cursor->GetCount(&count);
         Boolean bval;
         while (cursor->MoveToNext(&bval), bval) {
@@ -225,35 +258,37 @@ ECode CActivityOne::Query()
     (*projections)[1] = Utils::SEX;
     (*projections)[2] = Utils::EMAIL;
 
-    AutoPtr<ICursor> cursor;
+    mCursor = NULL;
     ECode ec = contentResolver->Query(
-        Utils::CONTENT_URI, projections, nullStr, NULL, nullStr, (ICursor**)&cursor);
-    Logger::I(TAG, " == Query: cursor: %s, ec=%08x", TO_CSTR(cursor), ec);
-    if (cursor != NULL) {
+        Utils::CONTENT_URI, projections, nullStr, NULL, nullStr, (ICursor**)&mCursor);
+    Logger::I(TAG, " == Query: cursor: %s, ec=%08x", TO_CSTR(mCursor), ec);
+    if (mCursor != NULL) {
         Int32 count = 0, i = 0;
-        cursor->GetCount(&count);
+        mCursor->GetCount(&count);
         Logger::I(TAG, " == Query result: %d items:", count);
         Boolean bval;
-        while (cursor->MoveToNext(&bval), bval) {
+        while (mCursor->MoveToNext(&bval), bval) {
             Int32 index;
             String name, sex, email;
 
-            cursor->GetColumnIndex(Utils::USERNAME, &index);
-            cursor->GetString(index, &name);
+            mCursor->GetColumnIndex(Utils::USERNAME, &index);
+            mCursor->GetString(index, &name);
 
-            cursor->GetColumnIndex(Utils::SEX, &index);
-            cursor->GetString(index, &sex);
+            mCursor->GetColumnIndex(Utils::SEX, &index);
+            mCursor->GetString(index, &sex);
 
-            cursor->GetColumnIndex(Utils::EMAIL, &index);
-            cursor->GetString(index, &email);
+            mCursor->GetColumnIndex(Utils::EMAIL, &index);
+            mCursor->GetString(index, &email);
 
             Logger::I(TAG, "     >> item %d: [%s, %s, %s]", ++i, name.string(), sex.string(), email.string());
         }
 
-        StartManagingCursor(cursor);  //查找后关闭游标
+        StartManagingCursor(mCursor);  //查找后关闭游标
     }
-
-    return NOERROR;
+    else {
+        Logger::E(TAG, " failed to query.");
+    }
+    return ec;
 }
 
 ECode CActivityOne::UpdateByRowId(
@@ -343,7 +378,6 @@ ECode CActivityOne::Delete()
     DeleteByName(String("Elastos"));
     Query();
 
-    DeleteByName(String("update_by_rowId"));
     DeleteByName(String("update_by_name"));
     DeleteByName(String("Google"));
     Query();

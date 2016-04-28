@@ -77,6 +77,8 @@ private:
     class SetupObserver: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("ZenModeControllerImpl::SetupObserver")
+
         SetupObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ ZenModeControllerImpl* host);

@@ -15,6 +15,7 @@ namespace Droid {
 namespace Widget {
 
 CAR_INTERFACE_IMPL(SimpleCursorAdapter, ResourceCursorAdapter, ISimpleCursorAdapter);
+
 SimpleCursorAdapter::SimpleCursorAdapter()
     : mStringConversionColumn(-1)
 {
@@ -27,7 +28,7 @@ ECode SimpleCursorAdapter::constructor(
     /* [in] */ ArrayOf<String>* from,
     /* [in] */ ArrayOf<Int32>* to)
 {
-    ResourceCursorAdapter::constructor(context, layout, c);
+    FAIL_RETURN(ResourceCursorAdapter::constructor(context, layout, c));
     return InitImpl(c, from, to);
 }
 
@@ -39,7 +40,7 @@ ECode SimpleCursorAdapter::constructor(
     /* [in] */ ArrayOf<Int32>* to,
     /* [in] */ Int32 flags)
 {
-    ResourceCursorAdapter::constructor(context, layout, c, flags);
+    FAIL_RETURN(ResourceCursorAdapter::constructor(context, layout, c, flags));
     return InitImpl(c, from, to);
 }
 

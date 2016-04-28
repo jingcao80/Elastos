@@ -56,6 +56,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CVolumeUI::MyObserver")
+
         MyObserver(
             /* [in] */ CVolumeUI* host);
 

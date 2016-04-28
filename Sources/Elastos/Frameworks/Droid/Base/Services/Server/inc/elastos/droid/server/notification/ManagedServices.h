@@ -153,6 +153,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("ManagedServices::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ ManagedServices* host,
             /* [in] */ IHandler* handler);

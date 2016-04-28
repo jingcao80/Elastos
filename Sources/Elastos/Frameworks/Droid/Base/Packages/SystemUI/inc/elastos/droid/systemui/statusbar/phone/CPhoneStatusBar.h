@@ -106,6 +106,8 @@ private:
     class UserSetupObserver: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::UserSetupObserver")
+
         UserSetupObserver(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IHandler* handler);
@@ -121,6 +123,8 @@ private:
     class HeadsUpObserver: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::HeadsUpObserver")
+
         HeadsUpObserver(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IHandler* handler);

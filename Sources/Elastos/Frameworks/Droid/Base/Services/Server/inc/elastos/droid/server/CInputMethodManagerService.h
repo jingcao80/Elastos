@@ -191,6 +191,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CInputMethodManagerService::SettingsObserver")
+
         SettingsObserver();
 
         CARAPI constructor(
@@ -210,6 +212,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CInputMethodManagerService::UpdateFromSettingsLockObserver")
+
         UpdateFromSettingsLockObserver();
 
         CARAPI constructor(

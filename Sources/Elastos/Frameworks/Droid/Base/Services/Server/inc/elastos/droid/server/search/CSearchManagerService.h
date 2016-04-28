@@ -152,6 +152,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CSearchManagerService::GlobalSearchProviderObserver")
+
         GlobalSearchProviderObserver(
             /* [in] */ IContentResolver* resolver,
             /* [in] */ CSearchManagerService* host);

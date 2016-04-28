@@ -239,14 +239,8 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("::UserIntentReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CConnectivityService::UserIntentReceiver: ")
+
     private:
          CConnectivityService* mHost;
     };
@@ -345,6 +339,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CConnectivityService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* observerHandler,
             /* [in] */ Int32 what,

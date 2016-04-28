@@ -88,6 +88,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CLocationManagerService::MyContentObserver")
+
         MyContentObserver(
             /* [in] */ CLocationManagerService* host);
 

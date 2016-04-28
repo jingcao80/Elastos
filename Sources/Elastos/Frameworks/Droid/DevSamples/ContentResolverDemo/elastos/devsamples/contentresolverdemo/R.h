@@ -25,6 +25,7 @@ class ECO_PUBLIC R {
         public: static const int Delete = 0x7f050003;
         public: static const int Query = 0x7f050001;
         public: static const int Update = 0x7f050002;
+        public: static const int UsersList = 0x7f050004;
     };
     public: class layout {
         public: static const int main = 0x7f030000;

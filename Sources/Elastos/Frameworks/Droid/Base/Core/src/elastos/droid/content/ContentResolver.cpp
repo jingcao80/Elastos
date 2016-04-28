@@ -70,7 +70,8 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
-const String TAG("ContentResolver");
+static const String TAG("ContentResolver");
+static const Boolean DEBUG = FALSE;
 
 //=========================================================================
 // ContentResolver::ParcelFileDescriptorInner
@@ -1399,8 +1400,12 @@ ECode ContentResolver::NotifyChange(
         FAIL_RETURN(observer->GetContentObserver((IIContentObserver**)&contentObserver));
         FAIL_RETURN(observer->DeliverSelfNotifications(&deliverSelfNotification));
     }
+    if (DEBUG) {
+        Logger::I(TAG, "NotifyChange: uri:%s, observer:%s, contentObserver:%s",
+            TO_CSTR(uri), TO_CSTR(observer), TO_CSTR(contentObserver));
+    }
     return contentService->NotifyChange(uri, contentObserver,
-        (observer != NULL && deliverSelfNotification), syncToNetwork, userHandle);
+        deliverSelfNotification, syncToNetwork, userHandle);
 }
 
 ECode ContentResolver::TakePersistableUriPermission(

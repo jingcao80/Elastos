@@ -31,6 +31,8 @@ private:
     class ContentObserverProxy : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("ContentObserverProxy")
+
         ContentObserverProxy();
 
         CARAPI constructor(

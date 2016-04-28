@@ -37,6 +37,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("DigitalClock::DigitalClock")
+
         FormatChangeObserver(
             /* [in] */ DigitalClock* host);
 

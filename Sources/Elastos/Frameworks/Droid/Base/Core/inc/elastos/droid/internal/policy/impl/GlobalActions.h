@@ -578,6 +578,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("GlobalActions::AirplaneModeObserver")
+
         AirplaneModeObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ GlobalActions* host);

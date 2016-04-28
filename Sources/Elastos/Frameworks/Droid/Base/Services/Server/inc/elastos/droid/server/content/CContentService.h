@@ -459,7 +459,7 @@ private:
     }
 private:
     static const String TAG;
-    static const Boolean DBG;
+    static const Boolean DEBUG;
 
 private:
     AutoPtr<IContext> mContext;

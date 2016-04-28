@@ -524,6 +524,8 @@ protected:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("NotificationManagerService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ NotificationManagerService* host,
             /* [in] */ IHandler* handler);

@@ -46,9 +46,13 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("ContentObserver")
+
     ContentObserver();
 
     virtual ~ContentObserver();
+
+    CARAPI constructor();
 
     /**
      * Creates a content observer.

@@ -8,6 +8,7 @@ namespace Droid {
 namespace Widget {
 
 CAR_INTERFACE_IMPL(ResourceCursorAdapter, CursorAdapter, IResourceCursorAdapter);
+
 ResourceCursorAdapter::ResourceCursorAdapter()
     : mLayout(0)
     , mDropDownLayout(0)
@@ -18,7 +19,7 @@ ECode ResourceCursorAdapter::constructor(
     /* [in] */ Int32 layout,
     /* [in] */ ICursor* c)
 {
-    CursorAdapter::constructor(context, c);
+    FAIL_RETURN(CursorAdapter::constructor(context, c));
     return InitImpl(context, layout);
 }
 
@@ -28,7 +29,7 @@ ECode ResourceCursorAdapter::constructor(
     /* [in] */ ICursor* c,
     /* [in] */ Boolean autoRequery)
 {
-    CursorAdapter::constructor(context, c, autoRequery);
+    FAIL_RETURN(CursorAdapter::constructor(context, c, autoRequery));
     return InitImpl(context, layout);
 }
 
@@ -38,7 +39,7 @@ ECode ResourceCursorAdapter::constructor(
     /* [in] */ ICursor* c,
     /* [in] */ Int32 flags)
 {
-    CursorAdapter::constructor(context, c, flags);
+    FAIL_RETURN(CursorAdapter::constructor(context, c, flags));
     return InitImpl(context, layout);
 }
 

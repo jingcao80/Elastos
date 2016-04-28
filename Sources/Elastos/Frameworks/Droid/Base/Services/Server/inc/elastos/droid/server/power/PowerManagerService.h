@@ -454,6 +454,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("PowerManagerService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ PowerManagerService* host);

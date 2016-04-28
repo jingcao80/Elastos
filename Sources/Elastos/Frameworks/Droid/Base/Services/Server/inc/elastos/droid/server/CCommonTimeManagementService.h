@@ -124,14 +124,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CCommonTimeManagementService::ConnectivityMangerObserver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CCommonTimeManagementService::ConnectivityMangerObserver: ")
     private:
         AutoPtr<CCommonTimeManagementService> mHost;
     };

@@ -99,6 +99,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("ValidateNotificationPeople::MyContentObserver")
+
         MyContentObserver(
             /* [in] */ IHandler* handle,
             /* [in] */ ValidateNotificationPeople* host);

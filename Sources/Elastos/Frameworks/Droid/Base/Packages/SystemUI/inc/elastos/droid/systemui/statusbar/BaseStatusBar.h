@@ -95,6 +95,8 @@ protected:
     class SettingsObserver: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("BaseStatusBar::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ BaseStatusBar* host);
@@ -169,6 +171,8 @@ private:
     class LockscreenSettingsObserver: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("BaseStatusBar::LockscreenSettingsObserver")
+
         LockscreenSettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ BaseStatusBar* host);

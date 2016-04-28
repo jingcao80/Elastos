@@ -27,6 +27,8 @@ class CoreSettingsObserver
     : public ContentObserver
 {
 public:
+    TO_STRING_IMPL("CoreSettingsObserver")
+
     CoreSettingsObserver();
 
     CARAPI constructor(

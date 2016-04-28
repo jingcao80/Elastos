@@ -134,6 +134,8 @@ public:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("AudioManagerElastos::InnerContentObserver").
+
         InnerContentObserver(
             /* [in] */ AudioManagerElastos* owner);
 

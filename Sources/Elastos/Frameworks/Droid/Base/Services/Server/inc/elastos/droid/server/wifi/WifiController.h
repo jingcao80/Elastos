@@ -379,6 +379,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiController::InnerBroadcastReceiver1")
+
         InnerBroadcastReceiver1(
             /* [in] */ WifiController* owner);
 
@@ -395,6 +397,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("WifiController::InnerContentObserver1")
+
         InnerContentObserver1(
             /* [in] */ WifiController* owner,
             /* [in] */ IHandler* handler);
@@ -411,6 +415,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("WifiController::InnerContentObserver3")
+
         InnerContentObserver3(
             /* [in] */ WifiController* owner,
             /* [in] */ IHandler* handler);
@@ -427,6 +433,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("WifiController::InnerContentObserver5")
+
         InnerContentObserver5(
             /* [in] */ WifiController* owner,
             /* [in] */ IHandler* handler);

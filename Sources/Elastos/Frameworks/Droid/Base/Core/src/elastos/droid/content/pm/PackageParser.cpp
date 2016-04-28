@@ -104,9 +104,9 @@ namespace Droid {
 namespace Content {
 namespace Pm {
 
-const Boolean PackageParser::DEBUG_JAR = TRUE;
-const Boolean PackageParser::DEBUG_PARSER = TRUE;
-const Boolean PackageParser::DEBUG_BACKUP = TRUE;
+const Boolean PackageParser::DEBUG_JAR = FALSE;
+const Boolean PackageParser::DEBUG_PARSER = FALSE;
+const Boolean PackageParser::DEBUG_BACKUP = FALSE;
 
 const String PackageParser::TAG("PackageParser");
 

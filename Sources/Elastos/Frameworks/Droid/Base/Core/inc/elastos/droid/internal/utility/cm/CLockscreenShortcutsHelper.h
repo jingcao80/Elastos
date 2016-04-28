@@ -75,6 +75,8 @@ public:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CLockscreenShortcutsHelper::MyContentObserver")
+
         MyContentObserver(
             /* [in] */ CLockscreenShortcutsHelper* host)
             : mHost(host)

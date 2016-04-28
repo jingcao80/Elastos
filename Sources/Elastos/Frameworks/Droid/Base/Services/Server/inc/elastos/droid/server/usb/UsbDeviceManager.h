@@ -44,6 +44,8 @@ private:
     class AdbSettingsObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("UsbDeviceManager::AdbSettingsObserver")
+
         AdbSettingsObserver(
             /* [in] */ UsbDeviceManager* host);
 

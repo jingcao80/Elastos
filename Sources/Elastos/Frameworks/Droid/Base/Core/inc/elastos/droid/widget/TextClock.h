@@ -64,6 +64,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("TextClock::TextClockContentObserver")
+
         TextClockContentObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ TextClock* host);

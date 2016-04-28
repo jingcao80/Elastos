@@ -56,6 +56,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("NetworkTimeUpdateService::ConnectivityReceiver")
+
         ConnectivityReceiver(
             /* [in] */ NetworkTimeUpdateService* owner);
 
@@ -64,14 +66,6 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("NetworkTimeUpdateService::ConnectivityReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
     private:
         NetworkTimeUpdateService* mHost;
     };
@@ -81,6 +75,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("NetworkTimeUpdateService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ Int32 msg,
@@ -103,6 +99,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("NetworkTimeUpdateService::MyReceiver")
+
         MyReceiver(
             /* [in] */ NetworkTimeUpdateService* owner);
 
@@ -110,14 +108,6 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("NetworkTimeUpdateService::MyReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
     private:
         NetworkTimeUpdateService* mHost;
     };

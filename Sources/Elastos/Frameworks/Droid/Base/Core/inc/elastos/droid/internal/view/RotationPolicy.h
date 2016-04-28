@@ -30,6 +30,8 @@ public:
             : public ContentObserver
         {
         public:
+            TO_STRING_IMPL("RotationPolicy::RotationPolicyListener::RotationContentObserver")
+
             RotationContentObserver(
                 /* [in] */ RotationPolicyListener* owner);
 

@@ -343,6 +343,8 @@ private:
     class DefaultApnObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("GpsLocationProvider::DefaultApnObserver")
+
         DefaultApnObserver(
             /* [in] */ GpsLocationProvider* host);
 

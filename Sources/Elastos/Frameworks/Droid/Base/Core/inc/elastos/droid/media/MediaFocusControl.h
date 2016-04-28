@@ -51,6 +51,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("MediaFocusControl::NotificationListenerObserver")
+
         NotificationListenerObserver(
             /* [in] */ MediaFocusControl* host);
 

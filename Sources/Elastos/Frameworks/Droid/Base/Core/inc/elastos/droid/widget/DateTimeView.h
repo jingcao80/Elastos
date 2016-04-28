@@ -60,6 +60,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("DateTimeView::DateTimeViewObserver")
+
         DateTimeViewObserver(
             /* [in] */ DateTimeView* host);
 

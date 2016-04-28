@@ -189,6 +189,8 @@ private:
     class SettingsObserver: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("UserSwitcherController::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ UserSwitcherController* host);
 

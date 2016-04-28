@@ -26,6 +26,8 @@ class SecureSetting
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("SecureSetting")
+
     SecureSetting(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler,

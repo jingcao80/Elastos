@@ -480,6 +480,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("WifiWatchdogStateMachine::LocalContentObserver")
+
         LocalContentObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ Int32 msg,

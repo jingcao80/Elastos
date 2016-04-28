@@ -11,7 +11,7 @@ const String Utils::DB_NAME("usersdb");
 const String Utils::TABLE_NAME("user");
 const Int32 Utils::VERSION = 1;
 
-const String Utils::TAG_ID("tid");
+const String Utils::TAG_ID("_id");
 const String Utils::USERNAME("username");
 const String Utils::SEX("sex");
 const String Utils::EMAIL("email");

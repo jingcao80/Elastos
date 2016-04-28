@@ -103,6 +103,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("PhoneWindow::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ PhoneWindow* host);
 

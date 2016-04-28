@@ -33,6 +33,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CSamplingProfilerService::SamplingProfilerSettingsObserver")
+
         SamplingProfilerSettingsObserver(
             /* [in] */ IContentResolver *contentResolver);
 

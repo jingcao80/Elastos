@@ -41,6 +41,8 @@ class AppWidgetProvider
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("AppWidgetProvider")
+
     /**
      * Constructor to initialize AppWidgetProvider.
      */
@@ -59,15 +61,6 @@ public:
     CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
-
-    CARAPI ToString(
-        /* [out] */ String* info)
-    {
-        VALIDATE_NOT_NULL(info);
-        *info = String("AppWidgetProvider:");
-        (*info).AppendFormat("%p", this);
-        return NOERROR;
-    }
 
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} and

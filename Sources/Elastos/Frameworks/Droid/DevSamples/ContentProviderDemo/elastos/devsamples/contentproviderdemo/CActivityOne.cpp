@@ -10,9 +10,6 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Content::IContentValues;

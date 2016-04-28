@@ -649,6 +649,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CAudioService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ CAudioService* host);
 

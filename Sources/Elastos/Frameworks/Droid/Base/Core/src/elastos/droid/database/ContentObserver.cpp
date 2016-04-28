@@ -43,6 +43,11 @@ ContentObserver::ContentObserver()
 ContentObserver::~ContentObserver()
 {}
 
+ECode ContentObserver::constructor()
+{
+    return NOERROR;
+}
+
 ECode ContentObserver::constructor(
     /* [in]  */ IHandler* handler)
 {

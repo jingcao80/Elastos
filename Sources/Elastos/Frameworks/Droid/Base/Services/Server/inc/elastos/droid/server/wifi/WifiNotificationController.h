@@ -31,6 +31,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiNotificationController::InnerBroadcastReceiver1")
+
         InnerBroadcastReceiver1(
             /* [in] */ WifiNotificationController* owner);
 
@@ -47,6 +49,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("WifiNotificationController::NotificationEnabledSettingObserver")
+
         NotificationEnabledSettingObserver(
             /* [in] */ WifiNotificationController* owner,
             /* [in] */ IHandler* handler);

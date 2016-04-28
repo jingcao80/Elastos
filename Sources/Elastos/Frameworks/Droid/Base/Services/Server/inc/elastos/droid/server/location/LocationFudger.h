@@ -40,6 +40,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("LocationFudger::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ LocationFudger* host);

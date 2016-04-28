@@ -313,11 +313,12 @@ static void draw(
     /* [in] */ Int32 srcDensity)
 {
     if (destDensity == srcDensity || destDensity == 0 || srcDensity == 0) {
-        Logger::V(TAG, String("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)"),
-                SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-                SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom));
+        // Logger::V(TAG, String("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)"),
+        //         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
+        //         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom));
         NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
-    } else {
+    }
+    else {
         canvas->save();
 
         SkScalar scale = destDensity / (float)srcDensity;
@@ -328,10 +329,10 @@ static void draw(
         bounds.fBottom = SkScalarDiv(bounds.fBottom-bounds.fTop, scale);
         bounds.fLeft = bounds.fTop = 0;
 
-        Logger::V(TAG, String("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d"),
-                SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-                SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom),
-                srcDensity, destDensity);
+        // Logger::V(TAG, String("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d"),
+        //         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
+        //         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom),
+        //         srcDensity, destDensity);
 
         NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
 

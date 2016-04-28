@@ -28,6 +28,8 @@ class GlobalSetting
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("GlobalSetting")
+
     GlobalSetting(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler,

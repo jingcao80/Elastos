@@ -268,6 +268,8 @@ protected:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ PhoneWindowManager* host);

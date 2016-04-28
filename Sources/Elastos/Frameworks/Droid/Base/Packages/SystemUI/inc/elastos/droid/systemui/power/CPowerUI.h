@@ -54,6 +54,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CPowerUI::MyObs")
+
         MyObs(
             /* [in] */ CPowerUI* host);
 
