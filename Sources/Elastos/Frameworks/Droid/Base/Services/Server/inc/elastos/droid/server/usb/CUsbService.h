@@ -38,14 +38,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CUsbService::UserChangedReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CUsbService::UserChangedReceiver: ")
     private:
         CUsbService* mHost;
     };

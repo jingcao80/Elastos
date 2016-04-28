@@ -48,14 +48,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("LockdownVpnTracker::TrackerBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("LockdownVpnTracker::TrackerBroadcastReceiver: ")
     private:
         LockdownVpnTracker* mOwner;
     };

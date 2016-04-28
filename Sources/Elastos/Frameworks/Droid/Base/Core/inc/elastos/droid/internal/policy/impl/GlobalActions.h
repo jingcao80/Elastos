@@ -526,14 +526,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("GlobalActions::MyBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("GlobalActions::MyBroadcastReceiver: ")
     private:
         GlobalActions* mHost;
     };
@@ -562,14 +555,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("GlobalActions::RingerModeReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("GlobalActions::RingerModeReceiver: ")
     private:
         GlobalActions* mHost;
     };

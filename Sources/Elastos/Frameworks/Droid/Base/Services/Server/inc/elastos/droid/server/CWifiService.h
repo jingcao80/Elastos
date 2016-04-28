@@ -231,14 +231,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CWifiService::StateChangedBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CWifiService::StateChangedBroadcastReceiver: ")
     private:
         CWifiService* mWifiService;
     };
@@ -254,14 +247,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CWifiService::WifiServiceBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CWifiService::WifiServiceBroadcastReceiver: ")
 
         /**
          * Determines whether the Wi-Fi chipset should stay awake or be put to

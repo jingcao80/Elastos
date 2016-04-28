@@ -28,14 +28,7 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
 
-    CARAPI ToString(
-        /* [out] */ String* info)
-    {
-        VALIDATE_NOT_NULL(info);
-        *info = String("CActionBroadCast");
-        (*info).AppendFormat("%p", this);
-        return NOERROR;
-    }
+    TO_STRING_IMPL("CActionBroadCast")
 private:
     static Int32 mNum;
 };

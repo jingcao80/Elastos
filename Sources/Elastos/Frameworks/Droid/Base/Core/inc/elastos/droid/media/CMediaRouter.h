@@ -359,14 +359,7 @@ public:
           /* [in] */ IContext* context,
           /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-          /* [out] */ String* info)
-        {
-          VALIDATE_NOT_NULL(info);
-          *info = String("CMediaRouter::VolumeChangeReceiver: ");
-          (*info).AppendFormat("%p", this);
-          return NOERROR;
-        }
+        TO_STRING_IMPL("CMediaRouter::VolumeChangeReceiver: ")
 
       private:
         CMediaRouter* mHost;
@@ -381,14 +374,7 @@ public:
           /* [in] */ IContext* context,
           /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-         /* [out] */ String* info)
-        {
-          VALIDATE_NOT_NULL(info);
-          *info = String("CMediaRouter::WifiDisplayStatusChangedReceiver: ");
-          (*info).AppendFormat("%p", this);
-          return NOERROR;
-        }
+        TO_STRING_IMPL("CMediaRouter::WifiDisplayStatusChangedReceiver: ")
     };
 
 public:

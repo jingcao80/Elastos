@@ -87,14 +87,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("UiModeManagerService::ResultReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("UiModeManagerService::ResultReceiver: ")
     private:
         AutoPtr<UiModeManagerService> mHost;
     };
@@ -111,14 +104,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("UiModeManagerService::DockModeReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("UiModeManagerService::DockModeReceiver: ")
     private:
         AutoPtr<UiModeManagerService> mHost;
     };
@@ -135,14 +121,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("UiModeManagerService::BatteryReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("UiModeManagerService::BatteryReceiver: ")
     private:
         AutoPtr<UiModeManagerService> mHost;
     };

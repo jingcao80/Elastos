@@ -380,14 +380,7 @@ protected:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("PhoneWindowManager::DockBroadReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("PhoneWindowManager::DockBroadReceiver: ")
     private:
         PhoneWindowManager* mHost;
     };
@@ -404,14 +397,7 @@ protected:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("PhoneWindowManager::DreamBroadReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("PhoneWindowManager::DreamBroadReceiver: ")
     private:
         PhoneWindowManager* mHost;
     };
@@ -428,14 +414,7 @@ protected:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("PhoneWindowManager::MultiuserBroadReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("PhoneWindowManager::MultiuserBroadReceiver: ")
     private:
         PhoneWindowManager* mHost;
     };
