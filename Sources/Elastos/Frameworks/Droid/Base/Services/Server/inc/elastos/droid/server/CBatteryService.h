@@ -110,6 +110,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CBatteryService::BootPhaseContentObserver")
+
         BootPhaseContentObserver(
             /* [in] */ CBatteryService* host);
 
@@ -300,6 +302,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CBatteryService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ CBatteryService* host);
 

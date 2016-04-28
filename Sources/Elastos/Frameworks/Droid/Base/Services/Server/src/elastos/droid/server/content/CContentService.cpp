@@ -39,7 +39,7 @@ namespace Server {
 namespace Content {
 
 const String CContentService::TAG("CContentService");
-const Boolean CContentService::DBG = FALSE;
+const Boolean CContentService::DEBUG = FALSE;
 
 //===================================================================================
 // CContentService::ObserverCall
@@ -479,7 +479,7 @@ ECode CContentService::RegisterContentObserver(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    if (DBG) {
+    if (DEBUG) {
         Logger::V(TAG, "Registered observer %p : [%s] at [%s] with notifyForDescendants %d",
             observer, TO_CSTR(observer), TO_CSTR(uri), notifyForDescendants);
     }
@@ -522,7 +522,7 @@ ECode CContentService::UnregisterContentObserver(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    if (DBG) {
+    if (DEBUG) {
         Slogger::V(TAG, "Unregistered observer %p : [%s]", observer, TO_CSTR(observer));
     }
 
@@ -538,7 +538,7 @@ ECode CContentService::NotifyChange(
     /* [in] */ Boolean syncToNetwork,
     /* [in] */ Int32 userHandle)
 {
-    if (DBG) {
+    if (DEBUG) {
         Logger::V(TAG, "Notifying update of %s for user %d from observer %s, syncToNetwork %d",
             TO_CSTR(uri), userHandle, TO_CSTR(observer), syncToNetwork);
     }
@@ -580,6 +580,9 @@ ECode CContentService::NotifyChange(
     List<AutoPtr<ObserverCall> >::Iterator it = calls.Begin();
     for (; it != calls.End(); ++it) {
         AutoPtr<ObserverCall> oc = *it;
+        if (DEBUG) {
+            Slogger::I(TAG, "NotifyChange %s, OnChange: %s", TO_CSTR(oc->mObserver), TO_CSTR(uri));
+        }
         // try {
         if (FAILED(oc->mObserver->OnChange(oc->mSelfChange, uri, userHandle))) {
             AutoLock lock(mRootNode);

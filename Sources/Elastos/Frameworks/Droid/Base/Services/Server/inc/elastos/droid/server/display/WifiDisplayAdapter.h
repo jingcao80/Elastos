@@ -49,6 +49,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiDisplayAdapter::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ WifiDisplayAdapter* owner);
 
@@ -57,14 +59,6 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("WifiDisplayAdapter::MyBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
     private:
         WifiDisplayAdapter* mHost;
     };

@@ -865,6 +865,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("AccessibilityManagerService::AccessibilityContentObserver")
+
         AccessibilityContentObserver(
             /* [in] */ AccessibilityManagerService* host);
 

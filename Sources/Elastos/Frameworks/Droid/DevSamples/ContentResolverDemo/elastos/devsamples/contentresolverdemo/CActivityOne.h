@@ -3,10 +3,12 @@
 #define __Elastos_DevSamples_ContentResolverDemo_CActivityOne_H__
 
 #include <elastos/droid/app/Activity.h>
+#include <Elastos.Droid.Widget.h>
 #include "_Elastos_DevSamples_ContentResolverDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::IAdapter;
 
 namespace Elastos {
 namespace DevSamples {
@@ -59,6 +61,8 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
+    CARAPI InitAdapter();
+
     CARAPI Add();
 
     CARAPI Query();
@@ -77,6 +81,10 @@ private:
 
     CARAPI DeleteByName(
         /* [in] */ const String& name);
+
+private:
+    AutoPtr<IAdapter> mAdapter;
+    AutoPtr<ICursor> mCursor;
 };
 
 } // namespace ContentResolverDemo

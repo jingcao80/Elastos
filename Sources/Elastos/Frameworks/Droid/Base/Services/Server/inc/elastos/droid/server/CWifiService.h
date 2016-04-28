@@ -184,6 +184,8 @@ private:
     class NotificationEnabledSettingObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CWifiService::NotificationEnabledSettingObserver")
+
         NotificationEnabledSettingObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ CWifiService* owner)
@@ -204,6 +206,8 @@ private:
     class AirplaneModeChangedBroadcastReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CWifiService::AirplaneModeChangedBroadcastReceiver")
+
         AirplaneModeChangedBroadcastReceiver(
             /* [in] */ CWifiService* owner);
 
@@ -212,14 +216,6 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CWifiService::AirplaneModeChangedBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
     private:
         CWifiService* mWifiService;
     };

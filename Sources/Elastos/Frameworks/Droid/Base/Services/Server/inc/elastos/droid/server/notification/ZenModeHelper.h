@@ -60,6 +60,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("ZenModeHelper::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handle,
             /* [in] */ ZenModeHelper* host);

@@ -19,7 +19,11 @@ namespace Elastos {
 namespace Droid {
 namespace Database {
 
-CAR_INTERFACE_IMPL_4(AbstractCursor, Object, IAbstractCursor, ICrossProcessCursor, ICursor, ICloseable);
+const String AbstractCursor::TAG("AbstractCursor");
+
+//=========================================================================================
+// AbstractCursor::SelfContentObserver
+//=========================================================================================
 
 AbstractCursor::SelfContentObserver::SelfContentObserver()
 {}
@@ -52,7 +56,11 @@ ECode AbstractCursor::SelfContentObserver::OnChange(
     return NOERROR;
 }
 
-const String AbstractCursor::TAG("AbstractCursor");
+//=========================================================================================
+// AbstractCursor
+//=========================================================================================
+
+CAR_INTERFACE_IMPL_4(AbstractCursor, Object, IAbstractCursor, ICrossProcessCursor, ICursor, ICloseable);
 
 AbstractCursor::AbstractCursor()
     : mPos(-1)
@@ -378,6 +386,8 @@ ECode AbstractCursor::GetColumnIndexOrThrow(
     /* [out] */ Int32* i)
 {
     VALIDATE_NOT_NULL(i)
+    *i = -1;
+
     Int32 index;
     GetColumnIndex(columnName, &index);
     if (index < 0) {

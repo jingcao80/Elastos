@@ -2,6 +2,8 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/widget/CursorAdapter.h"
 #include "elastos/droid/widget/CCursorFilter.h"
+#include "elastos/droid/widget/CCursorAdapterChangeObserver.h"
+#include "elastos/droid/widget/CCursorAdapterDataSetObserver.h"
 #include "elastos/droid/os/CHandler.h"
 #include <elastos/utility/logging/Slogger.h>
 
@@ -16,7 +18,14 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+static const String TAG("CursorAdapter");
+static const Boolean DEBUG = FALSE;
+
+//===============================================================================
+// CursorAdapter
+//===============================================================================
 CAR_INTERFACE_IMPL_3(CursorAdapter, BaseAdapter, ICursorAdapter, IFilterable, ICursorFilterClient);
+
 CursorAdapter::CursorAdapter()
     : mDataValid(FALSE)
     , mAutoRequery(FALSE)
@@ -36,7 +45,8 @@ ECode CursorAdapter::constructor(
     /* [in] */ ICursor* c,
     /* [in] */ Boolean autoRequery)
 {
-    return Init(context, c, autoRequery ? ICursorAdapter::FLAG_AUTO_REQUERY : ICursorAdapter::FLAG_REGISTER_CONTENT_OBSERVER);
+    return Init(context, c, autoRequery
+        ? ICursorAdapter::FLAG_AUTO_REQUERY : ICursorAdapter::FLAG_REGISTER_CONTENT_OBSERVER);
 }
 
 ECode CursorAdapter::constructor(
@@ -52,7 +62,8 @@ ECode CursorAdapter::Init(
     /* [in] */ ICursor* c,
     /* [in] */ Boolean autoRequery)
 {
-    return Init(context, c, autoRequery ? ICursorAdapter::FLAG_AUTO_REQUERY : ICursorAdapter::FLAG_REGISTER_CONTENT_OBSERVER);
+    return Init(context, c, autoRequery
+        ? ICursorAdapter::FLAG_AUTO_REQUERY : ICursorAdapter::FLAG_REGISTER_CONTENT_OBSERVER);
 }
 
 ECode CursorAdapter::Init(
@@ -72,21 +83,16 @@ ECode CursorAdapter::Init(
     mDataValid = cursorPresent;
 
     assert(context);
-    mContext = context;
-    // AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(context);
-    // assert(wrs != NULL && "Error: Invalid context, IWeakReferenceSource not implemented!");
-    // wrs->GetWeakReference((IWeakReference**)&mWeakContext);
+    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(context);
+    assert(wrs != NULL && "Error: Invalid context, IWeakReferenceSource not implemented!");
+    wrs->GetWeakReference((IWeakReference**)&mWeakContext);
 
     Int32 index;
     c->GetColumnIndexOrThrow(String("_id"), &index);
     mRowIDColumn = cursorPresent ? index : -1;
     if ((flags & ICursorAdapter::FLAG_REGISTER_CONTENT_OBSERVER) == ICursorAdapter::FLAG_REGISTER_CONTENT_OBSERVER) {
-        mChangeObserver = new ChangeObserver(this);
-        mDataSetObserver = new MyDataSetObserver(this);
-    }
-    else {
-        mChangeObserver = NULL;
-        mDataSetObserver = NULL;
+        CCursorAdapterChangeObserver::New(this, (IContentObserver**)&mChangeObserver);
+        CCursorAdapterDataSetObserver::New(this, (IDataSetObserver**)&mDataSetObserver);
     }
 
     if (cursorPresent) {
@@ -180,8 +186,12 @@ ECode CursorAdapter::GetView(
         //throw new IllegalStateException("couldn't move cursor to position " + position);
     }
 
-    AutoPtr<IContext> context = mContext;
-    // mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+    AutoPtr<IContext> context;
+    mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+    if (context == NULL) {
+        Slogger::E("CursorAdapter::GetView", "context has been destoried!");
+        return NOERROR;
+    }
 
     AutoPtr<IView> v;
     if (convertView == NULL) {
@@ -208,8 +218,13 @@ ECode CursorAdapter::GetDropDownView(
         Boolean res = FALSE;
         mCursor->MoveToPosition(position, &res);
 
-        AutoPtr<IContext> context = mContext;
-        // mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+        AutoPtr<IContext> context;
+        mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+        if (context == NULL) {
+            Slogger::E("CursorAdapter::GetDropDownView", "context has been destoried!");
+            return NOERROR;
+        }
+
         if (convertView == NULL) {
             NewDropDownView(context, mCursor, parent, (IView**)&v);
         }
@@ -310,9 +325,7 @@ ECode CursorAdapter::GetFilter(
 {
     VALIDATE_NOT_NULL(filter);
     if(mCursorFilter == NULL) {
-        CCursorFilter::New(
-                this,
-                (ICursorFilter**)&mCursorFilter);
+        CCursorFilter::New(this, (ICursorFilter**)&mCursorFilter);
     }
     *filter = IFilter::Probe(mCursorFilter);
     REFCOUNT_ADD(*filter);
@@ -335,22 +348,32 @@ ECode CursorAdapter::SetFilterQueryProvider(
     return NOERROR;
 }
 
-void CursorAdapter::OnContentChanged()
+ECode CursorAdapter::OnContentChanged()
 {
     Boolean closed;
     if (mAutoRequery && mCursor != NULL && !(mCursor->IsClosed(&closed), closed)) {
-        //if (FALSE) Log.v("Cursor", "Auto requerying " + mCursor + " due to update");
-        mCursor->Requery(&mDataValid);
+        if (DEBUG) Logger::V(TAG, "Auto requerying %s due to update", TO_CSTR(mCursor));
+        return mCursor->Requery(&mDataValid);
     }
+    return NOERROR;
 }
 
-CursorAdapter::ChangeObserver::ChangeObserver(
-    /* [in] */ CursorAdapter* host)
-    : mHost(host)
+//===============================================================================
+// CursorAdapter::ChangeObserver
+//===============================================================================
+CursorAdapter::ChangeObserver::ChangeObserver()
 {
+}
+
+ECode CursorAdapter::ChangeObserver::constructor(
+    /* [in] */ ICursorAdapter* host)
+{
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(host);
+    wrs->GetWeakReference((IWeakReference**)&mWeakHost);
+
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    ContentObserver::constructor(handler);
+    return ContentObserver::constructor(handler);
 }
 
 ECode CursorAdapter::ChangeObserver::DeliverSelfNotifications(
@@ -364,29 +387,60 @@ ECode CursorAdapter::ChangeObserver::DeliverSelfNotifications(
 ECode CursorAdapter::ChangeObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    mHost->OnContentChanged();
+    AutoPtr<ICursorAdapter> hostObj;
+    mWeakHost->Resolve(EIID_ICursorAdapter, (IInterface**)&hostObj);
+    if (hostObj == NULL) {
+        // tell content service to remove this observer.
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
+    CursorAdapter* host = (CursorAdapter*)hostObj.Get();
+
+    return host->OnContentChanged();
+}
+
+//===============================================================================
+// CursorAdapter::ChangeObserver
+//===============================================================================
+CAR_INTERFACE_IMPL(CursorAdapter::DataSetObserver, Object, IDataSetObserver)
+
+CursorAdapter::DataSetObserver::DataSetObserver()
+{
+}
+
+ECode CursorAdapter::DataSetObserver::constructor(
+    /* [in] */ ICursorAdapter* host)
+{
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(host);
+    wrs->GetWeakReference((IWeakReference**)&mWeakHost);
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CursorAdapter::MyDataSetObserver, Object, IDataSetObserver)
-CursorAdapter::MyDataSetObserver::MyDataSetObserver(
-    /* [in] */ CursorAdapter* host)
-    : mHost(host)
-{}
-
-ECode CursorAdapter::MyDataSetObserver::OnChanged()
+ECode CursorAdapter::DataSetObserver::OnChanged()
 {
-    mHost->mDataValid = TRUE;
-    mHost->NotifyDataSetChanged();
-    return NOERROR;
+    AutoPtr<ICursorAdapter> hostObj;
+    mWeakHost->Resolve(EIID_ICursorAdapter, (IInterface**)&hostObj);
+    if (hostObj == NULL) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    CursorAdapter* host = (CursorAdapter*)hostObj.Get();
+    host->mDataValid = TRUE;
+    return host->NotifyDataSetChanged();
 }
 
-ECode CursorAdapter::MyDataSetObserver::OnInvalidated()
+ECode CursorAdapter::DataSetObserver::OnInvalidated()
 {
-    mHost->mDataValid = FALSE;
-    mHost->NotifyDataSetInvalidated();
-    return NOERROR;
+    AutoPtr<ICursorAdapter> hostObj;
+    mWeakHost->Resolve(EIID_ICursorAdapter, (IInterface**)&hostObj);
+    if (hostObj == NULL) {
+        // tell content service to remove this observer.
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    CursorAdapter* host = (CursorAdapter*)hostObj.Get();
+    host->mDataValid = FALSE;
+    return host->NotifyDataSetInvalidated();
 }
 
 }// namespace Elastos

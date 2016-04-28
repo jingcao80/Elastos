@@ -33,6 +33,8 @@ private:
     class SettingsObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("LiveDisplayController::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ LiveDisplayController* host);
 

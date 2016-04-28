@@ -31,6 +31,8 @@ class ShortcutManager
     : public ContentObserver
 {
 public:
+    TO_STRING_IMPL("ShortcutManager")
+
     ShortcutManager(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);

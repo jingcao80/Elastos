@@ -44,6 +44,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("OverlayDisplayAdapter::OverlayDisplayContentObserver")
+
         OverlayDisplayContentObserver(
             /* [in] */ OverlayDisplayAdapter* host);
 

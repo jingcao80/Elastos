@@ -28,4 +28,10 @@
         android:textSize="100dp"
         android:text="Resolver Delete" />
 
+    <ListView
+        android:id="@+id/UsersList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
+
 </LinearLayout>

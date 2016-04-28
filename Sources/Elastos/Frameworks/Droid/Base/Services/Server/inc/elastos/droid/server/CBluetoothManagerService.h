@@ -117,6 +117,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CBluetoothManagerService::MyBroadcastReceiver: ")
+
         MyBroadcastReceiver(
             /* [in] */ CBluetoothManagerService* host);
 
@@ -124,15 +126,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CBluetoothManagerService::MyBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
     private:
         CBluetoothManagerService* mHost;
     };

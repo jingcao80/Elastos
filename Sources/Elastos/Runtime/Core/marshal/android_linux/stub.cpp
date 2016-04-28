@@ -127,27 +127,30 @@
 
 #define E_INVALID_PARCEL_DATA 0x81ff0000
 
-#define DUMP_ITFID(intf) \
-    do { \
-        InterfaceID iid; \
-        intf->GetInterfaceID(intf, &iid); \
-        printf("======== DUMP_ITFID ========\n"); \
-        printf("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n", \
-                iid.mData1, iid.mData2, iid.mData3, \
-                iid.mData4[0], iid.mData4[1], \
-                iid.mData4[2], iid.mData4[3], \
-                iid.mData4[4], iid.mData4[5], \
-                iid.mData4[6], iid.mData4[7]); \
-        printf("============================\n"); \
-        ALOGD("======== DUMP_ITFID ========\n"); \
-        ALOGD("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n", \
-                iid.mData1, iid.mData2, iid.mData3, \
-                iid.mData4[0], iid.mData4[1], \
-                iid.mData4[2], iid.mData4[3], \
-                iid.mData4[4], iid.mData4[5], \
-                iid.mData4[6], iid.mData4[7]); \
-        ALOGD("============================\n"); \
+
+void DUMP_ITFID(IInterface* intf)
+{
+    do {
+        InterfaceID iid;
+        intf->GetInterfaceID(intf, &iid);
+        printf("======== DUMP_ITFID ========\n");
+        printf("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
+                iid.mData1, iid.mData2, iid.mData3,
+                iid.mData4[0], iid.mData4[1],
+                iid.mData4[2], iid.mData4[3],
+                iid.mData4[4], iid.mData4[5],
+                iid.mData4[6], iid.mData4[7]);
+        printf("============================\n");
+        ALOGD("======== DUMP_ITFID ========\n");
+        ALOGD("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
+                iid.mData1, iid.mData2, iid.mData3,
+                iid.mData4[0], iid.mData4[1],
+                iid.mData4[2], iid.mData4[3],
+                iid.mData4[4], iid.mData4[5],
+                iid.mData4[6], iid.mData4[7]);
+        ALOGD("============================\n");
     } while(0);
+}
 
 void __DumpGUID(REIID riid)
 {
@@ -732,9 +735,9 @@ ECode CObjectStub::S_CreateObject(
 
     iObj = (IObject*)object->Probe(EIID_IObject);
     if (!iObj) {
-        // DUMP_ITFID(object);
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                 "Create stub: interface do not support EIID_IObject QI.\n"));
+        MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
         ec = E_INVALID_ARGUMENT;
         goto ErrorExit;
     }
@@ -745,6 +748,7 @@ ECode CObjectStub::S_CreateObject(
         iObj->ToString(&str);
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                 "Create stub: fail to get object's ClassID. %s\n", str.string()));
+        MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
         assert(0 && "TODO");
         goto ErrorExit;
     }
@@ -757,6 +761,7 @@ ECode CObjectStub::S_CreateObject(
     if (FAILED(ec)) {
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                 "Create stub: interface does not have InterfaceID.\n"));
+        MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
         goto ErrorExit;
     }
     MARSHAL_DBGOUT(MSHDBG_NORMAL, ALOGD(
@@ -769,6 +774,7 @@ ECode CObjectStub::S_CreateObject(
         if (FAILED(ec)) {
             MARSHAL_DBGOUT(MSHDBG_ERROR,
                     ALOGE("Create Stub: get class info fail, the ec = 0x%08x\n", ec));
+            MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
             goto ErrorExit;
         }
     }
@@ -781,6 +787,7 @@ ECode CObjectStub::S_CreateObject(
     interfaces = new CInterfaceStub[(*classInfo)->mInterfaceNum];
     if (!interfaces) {
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Create stub: out of memory.\n"));
+        MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
         ec = E_OUT_OF_MEMORY;
         goto ErrorExit;
     }
@@ -813,6 +820,7 @@ ECode CObjectStub::S_CreateObject(
         object->Release();
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                 "Create stub: register export object failed, ec(%x)\n", ec));
+        MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
         goto ErrorExit;
     }
 

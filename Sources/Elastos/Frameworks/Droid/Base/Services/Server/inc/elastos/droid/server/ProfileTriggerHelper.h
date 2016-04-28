@@ -25,6 +25,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("ProfileTriggerHelper::MyContentObserver")
+
         MyContentObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ ProfileTriggerHelper* host);
@@ -38,6 +40,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("ProfileTriggerHelper")
+
     ProfileTriggerHelper(
         /* [in] */ IContext* context,
         /* [in] */ IIProfileManager* service);

@@ -48,6 +48,8 @@ private:
     class Observer: public ContentObserver
     {
     public:
+        TO_STRING_IMPL("QSTileHost::Observer")
+
         Observer(
             /* [in] */ QSTileHost* host);
 

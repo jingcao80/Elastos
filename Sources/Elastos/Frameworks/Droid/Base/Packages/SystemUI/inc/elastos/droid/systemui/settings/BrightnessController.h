@@ -34,6 +34,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("BrightnessController::BrightnessObserver")
+
         BrightnessObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ BrightnessController* host);

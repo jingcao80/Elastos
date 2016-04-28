@@ -332,6 +332,8 @@ protected:
         class MyContentObserver : public ContentObserver
         {
         public:
+            TO_STRING_IMPL("CursorTreeAdapter::MyCursorHelper::MyContentObserver")
+
             MyContentObserver(
                 /* [in] */ MyCursorHelper* owner);
 

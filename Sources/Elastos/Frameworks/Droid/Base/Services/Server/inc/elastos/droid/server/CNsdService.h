@@ -215,6 +215,8 @@ private:
             : public ContentObserver
         {
         public:
+            TO_STRING_IMPL("NsdStateMachine::MyContentObserver")
+
             MyContentObserver();
 
             CARAPI constructor(

@@ -323,7 +323,7 @@ void CProcessStatsService::WriteStateLocked(
     synchronized (mPendingWriteLock) {
         Int64 now = SystemClock::GetUptimeMillis();
         if (mPendingWrite == NULL || !mPendingWriteCommitted) {
-            // mPendingWrite = Parcel.obtain();
+            mPendingWrite = NULL;
             CParcel::New((IParcel**)&mPendingWrite);
             mProcessStats->SetTimePeriodEndRealtime(SystemClock::GetElapsedRealtime());
             mProcessStats->SetTimePeriodEndUptime(now);

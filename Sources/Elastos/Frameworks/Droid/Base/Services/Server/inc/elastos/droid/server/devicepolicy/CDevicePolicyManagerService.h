@@ -410,6 +410,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CDevicePolicyManagerService::SetupContentObserver")
+
         SetupContentObserver(
             /* [in] */ CDevicePolicyManagerService* host);
 

@@ -57,6 +57,8 @@ private:
     class WifiP2pReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiDisplayController::BroadcastReceiver")
+
         WifiP2pReceiver(
             /* [in] */ WifiDisplayController* host);
 
@@ -64,14 +66,6 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("WifiDisplayController::WifiP2pReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
     private:
         WifiDisplayController* mHost;
     };
@@ -79,6 +73,8 @@ private:
     class MyContentObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("WifiDisplayController::MyContentObserver")
+
         MyContentObserver(
             /* [in] */ WifiDisplayController* host);
 

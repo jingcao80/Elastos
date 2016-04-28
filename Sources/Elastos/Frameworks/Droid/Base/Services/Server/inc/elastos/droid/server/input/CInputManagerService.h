@@ -446,6 +446,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver")
+
         ContentObserverInRegisterPointerSpeedSettingObserver(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
@@ -461,6 +463,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver")
+
         ContentObserverInRegisterShowTouchesSettingObserver(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
@@ -476,6 +480,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver")
+
         ContentObserverInRegisterStylusIconEnabledSettingObserver(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
@@ -491,6 +497,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver")
+
         ContentObserverInRegisterVolumeKeysRotationSettingObserver(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);

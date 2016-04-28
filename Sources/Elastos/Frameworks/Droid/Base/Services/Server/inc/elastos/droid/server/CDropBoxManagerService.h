@@ -183,6 +183,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CDropBoxManagerService::MyContentObserver")
+
         MyContentObserver(
             /* [in] */ CDropBoxManagerService* owner,
             /* [in] */ IContext* context)

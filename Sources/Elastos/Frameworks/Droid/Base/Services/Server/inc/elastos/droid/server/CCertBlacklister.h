@@ -41,6 +41,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("CCertBlacklister::BlacklistObserver")
+
         BlacklistObserver(
             /* [in] */ const String& key,
             /* [in] */ const String& name,

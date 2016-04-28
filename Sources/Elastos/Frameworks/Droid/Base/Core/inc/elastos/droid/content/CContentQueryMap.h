@@ -4,11 +4,11 @@
 
 #include "_Elastos_Droid_Content_CContentQueryMap.h"
 #include <elastos/utility/Observable.h>
-//#include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/database/ContentObserver.h"
 
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::IContentObserver;
-//using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Utility::IObserver;
 using Elastos::Utility::IMap;
@@ -75,10 +75,11 @@ public:
 
 public:
     class KeepUpdatedContentObserver
-        : public Object
-        //: public ContentObserver
+        : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("KeepUpdatedContentObserver::KeepUpdatedContentObserver")
+
         KeepUpdatedContentObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ IWeakReference* host);

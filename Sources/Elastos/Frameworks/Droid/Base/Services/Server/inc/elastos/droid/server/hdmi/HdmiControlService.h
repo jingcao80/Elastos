@@ -274,6 +274,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("HdmiControlService::HdmiControlBroadcastReceiver")
+
         HdmiControlBroadcastReceiver(
             /* [in] */ HdmiControlService* host);
 
@@ -291,6 +293,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("HdmiControlService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ HdmiControlService* host,
             /* [in] */ IHandler* handler);

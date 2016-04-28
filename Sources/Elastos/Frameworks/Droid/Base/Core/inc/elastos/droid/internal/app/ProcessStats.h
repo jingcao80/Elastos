@@ -738,9 +738,9 @@ private:
     };
 
 public:
-    ProcessStats();
-
     CAR_INTERFACE_DECL()
+
+    ProcessStats();
 
     CARAPI constructor();
 

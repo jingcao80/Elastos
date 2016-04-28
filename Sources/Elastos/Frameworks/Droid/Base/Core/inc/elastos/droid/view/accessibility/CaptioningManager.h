@@ -251,6 +251,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CaptioningManager::MyContentObserver")
+
         MyContentObserver(
             /* [in ] */ CaptioningManager* host);
 

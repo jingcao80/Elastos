@@ -126,6 +126,8 @@ public:
     class SettingsObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("MediaSessionService::SettingsObserver")
+
         CARAPI OnChange(
             /* [in] */ Boolean selfChange,
             /* [in] */ IUri* uri);

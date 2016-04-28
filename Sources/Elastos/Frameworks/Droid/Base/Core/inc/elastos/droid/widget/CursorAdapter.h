@@ -32,6 +32,45 @@ class CursorAdapter
     , public ICursorFilterClient
 {
 public:
+    class ChangeObserver : public ContentObserver
+    {
+    public:
+        ChangeObserver();
+
+        CARAPI constructor(
+            /* [in] */ ICursorAdapter* host);
+
+        virtual CARAPI DeliverSelfNotifications(
+            /* [out] */ Boolean* result);
+
+        virtual CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    protected:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
+    class DataSetObserver
+        : public Object
+        , public IDataSetObserver
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        DataSetObserver();
+
+        CARAPI constructor(
+            /* [in] */ ICursorAdapter* host);
+
+        virtual CARAPI OnChanged();
+
+        virtual CARAPI OnInvalidated();
+
+    protected:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
+public:
     CAR_INTERFACE_DECL();
 
     CursorAdapter();
@@ -258,42 +297,7 @@ protected:
      *
      * @see ContentObserver#onChange(Boolean)
      */
-    virtual CARAPI_(void) OnContentChanged();
-
-private:
-    class ChangeObserver : public ContentObserver
-    {
-    public:
-        ChangeObserver(
-            /* [in] */ CursorAdapter* host);
-
-        virtual CARAPI DeliverSelfNotifications(
-            /* [out] */ Boolean* result);
-
-        virtual CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    protected:
-        CursorAdapter* mHost;
-    };
-
-    class MyDataSetObserver
-        : public Object
-        , public IDataSetObserver
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        MyDataSetObserver(
-            /* [in] */ CursorAdapter* host);
-
-        virtual CARAPI OnChanged();
-
-        virtual CARAPI OnInvalidated();
-
-    protected:
-        CursorAdapter* mHost;
-    };
+    virtual CARAPI OnContentChanged();
 
 protected:
     /**
@@ -316,8 +320,7 @@ protected:
      * {@hide}
      */
     // context usually holds adapter, we use weak-reference here.
-    // AutoPtr<IWeakReference> mWeakContext;
-    AutoPtr<IContext> mContext;
+    AutoPtr<IWeakReference> mWeakContext;
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -327,12 +330,12 @@ protected:
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
-    AutoPtr<ChangeObserver> mChangeObserver;
+    AutoPtr<IContentObserver> mChangeObserver;
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
-    AutoPtr<IDataSetObserver> mDataSetObserver;// = new MyDataSetObserver();
+    AutoPtr<IDataSetObserver> mDataSetObserver;// = new DataSetObserver();
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}

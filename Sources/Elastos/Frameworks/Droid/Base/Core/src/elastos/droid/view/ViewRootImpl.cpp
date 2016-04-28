@@ -1206,7 +1206,7 @@ ECode ViewRootImpl::RenderProfileRunnable::Run()
 
 const char* ViewRootImpl::TAG = "ViewRootImpl";
 const Boolean ViewRootImpl::DBG = TRUE;
-const Boolean ViewRootImpl::LOCAL_LOGV = TRUE;
+const Boolean ViewRootImpl::LOCAL_LOGV = FALSE;
 const Boolean ViewRootImpl::DEBUG_DRAW = FALSE || LOCAL_LOGV;
 const Boolean ViewRootImpl::DEBUG_LAYOUT = FALSE || LOCAL_LOGV;
 const Boolean ViewRootImpl::DEBUG_DIALOG = FALSE || LOCAL_LOGV;

@@ -149,6 +149,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CThemeService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ CThemeService* host);
 

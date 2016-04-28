@@ -144,6 +144,7 @@ module
     interface Elastos.Droid.Content.Pm.IApplicationInfo;
     interface Elastos.Droid.Database.ICursor;
     interface Elastos.Droid.Database.IDataSetObserver;
+    interface Elastos.Droid.Database.IContentObserver;
     interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
     interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
@@ -2014,6 +2015,22 @@ module
 
         interface ICursorFilter;
         interface IFilter;
+    }
+
+    [local]
+    class CCursorAdapterChangeObserver {
+        constructor(
+            [in] ICursorAdapter* host);
+
+        interface IContentObserver;
+    }
+
+    [local]
+    class CCursorAdapterDataSetObserver {
+        constructor(
+            [in] ICursorAdapter* host);
+
+        interface IDataSetObserver;
     }
 
     class CAlphabetIndexer {

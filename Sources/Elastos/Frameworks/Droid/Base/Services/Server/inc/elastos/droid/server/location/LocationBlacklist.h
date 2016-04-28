@@ -29,6 +29,8 @@ class LocationBlacklist
     : public ContentObserver
 {
 public:
+    TO_STRING_IMPL("LocationBlacklist")
+
     LocationBlacklist(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);

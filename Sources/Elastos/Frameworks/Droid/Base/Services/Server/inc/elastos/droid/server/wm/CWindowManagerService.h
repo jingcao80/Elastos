@@ -308,6 +308,8 @@ private:
     class SettingsObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CWindowManagerService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ CWindowManagerService* host);
 

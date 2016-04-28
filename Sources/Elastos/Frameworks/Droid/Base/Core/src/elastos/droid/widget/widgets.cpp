@@ -25,6 +25,8 @@
 #include "elastos/droid/widget/CCompoundButton.h"
 #include "elastos/droid/widget/CCompoundButtonSavedState.h"
 #include "elastos/droid/widget/CCursorFilter.h"
+#include "elastos/droid/widget/CCursorAdapterChangeObserver.h"
+#include "elastos/droid/widget/CCursorAdapterDataSetObserver.h"
 #include "elastos/droid/widget/CDatePicker.h"
 #include "elastos/droid/widget/CDateTimeView.h"
 #include "elastos/droid/widget/CDayPickerView.h"
@@ -154,6 +156,8 @@ CAR_OBJECT_IMPL(CChronometer)
 CAR_OBJECT_IMPL(CCompoundButton)
 CAR_OBJECT_IMPL(CCompoundButtonSavedState)
 CAR_OBJECT_IMPL(CCursorFilter)
+CAR_OBJECT_IMPL(CCursorAdapterChangeObserver)
+CAR_OBJECT_IMPL(CCursorAdapterDataSetObserver)
 CAR_OBJECT_IMPL(CDatePicker)
 CAR_OBJECT_IMPL(CDateTimeView)
 CAR_OBJECT_IMPL(CDayPickerView)

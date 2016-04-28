@@ -106,6 +106,8 @@ public:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CVibratorService::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ CVibratorService* owner);

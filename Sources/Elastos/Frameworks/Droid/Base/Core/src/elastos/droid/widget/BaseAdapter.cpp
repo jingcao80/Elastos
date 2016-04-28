@@ -14,6 +14,7 @@ namespace Droid {
 namespace Widget {
 
 CAR_INTERFACE_IMPL_4(BaseAdapter, Object, IBaseAdapter, IListAdapter, ISpinnerAdapter, IAdapter);
+
 BaseAdapter::BaseAdapter()
 {
     CDataSetObservable::New((IDataSetObservable**)&mDataSetObservable);
@@ -74,7 +75,6 @@ ECode BaseAdapter::GetDropDownView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
     return GetView(position, convertView, parent, view);
 }
 
@@ -100,7 +100,8 @@ ECode BaseAdapter::IsEmpty(
 {
     VALIDATE_NOT_NULL(empty);
     Int32 count = 0;
-    *empty = (GetCount(&count), count) == 0;
+    GetCount(&count);
+    *empty = count == 0;
     return NOERROR;
 }
 

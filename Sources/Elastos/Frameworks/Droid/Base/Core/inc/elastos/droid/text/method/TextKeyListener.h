@@ -70,6 +70,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("TextKeyListener::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ TextKeyListener* host);
 
