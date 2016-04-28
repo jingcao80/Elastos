@@ -1,8 +1,5 @@
-#ifndef __ELASTOS_APPS_CONTACTS_COMMON_LIST_CINDEXERLISTADAPTER_H__
-#define __ELASTOS_APPS_CONTACTS_COMMON_LIST_CINDEXERLISTADAPTER_H__
-
-#include "_Elastos_Apps_Contacts_Common_List_CIndexerListAdapter.h"
-
+#ifndef __ELASTOS_APPS_CONTACTS_COMMON_LIST_INDEXERLISTADAPTER_H__
+#define __ELASTOS_APPS_CONTACTS_COMMON_LIST_INDEXERLISTADAPTER_H__
 
 namespace Elastos{
 namespace Apps{
@@ -13,8 +10,8 @@ namespace List {
 /**
  * A list adapter that supports section indexer and a pinned header.
  */
-CarClass(CIndexerListAdapter)
-    , public CPinnedHeaderListAdapter
+class IndexerListAdapter
+    : public PinnedHeaderListAdapter
     , public IIndexerListAdapter
     , public ISectionIndexer
 {
@@ -46,8 +43,6 @@ public:
 
 public:
     CAR_INTERFACE_DECL()
-
-    CAR_OBJECT_DECL()
 
     CIndexerListAdapter();
 
@@ -149,4 +144,4 @@ private:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_LIST_CINDEXERLISTADAPTER_H__
+#endif //__ELASTOS_APPS_CONTACTS_COMMON_LIST_INDEXERLISTADAPTER_H__
