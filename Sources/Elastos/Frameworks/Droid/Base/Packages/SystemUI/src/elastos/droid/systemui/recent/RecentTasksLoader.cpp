@@ -398,7 +398,8 @@ RecentTasksLoader::RecentTasksLoader(
     Int32 dpi;
     dm->GetDensityDpi(&dpi);
     Int32 iconSize = (Int32)(defaultIconSize * mIconDpi / dpi);
-    mDefaultIconBackground = new ColorDrawableWithDimensions(0x00000000, iconSize, iconSize);
+    mDefaultIconBackground = new ColorDrawableWithDimensions();
+    mDefaultIconBackground->constructor(0x00000000, iconSize, iconSize);
 
     // Render the default thumbnail background
     Int32 thumbnailWidth;
@@ -408,8 +409,8 @@ RecentTasksLoader::RecentTasksLoader(
     Int32 color;
     res->GetColor(R::drawable::status_bar_recents_app_thumbnail_background, &color);
 
-    mDefaultThumbnailBackground =
-            new ColorDrawableWithDimensions(color, thumbnailWidth, thumbnailHeight);
+    mDefaultThumbnailBackground = new ColorDrawableWithDimensions();
+    mDefaultThumbnailBackground->constructor(color, thumbnailWidth, thumbnailHeight);
 }
 
 AutoPtr<RecentTasksLoader> RecentTasksLoader::GetInstance(

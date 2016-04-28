@@ -5,14 +5,21 @@ namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-ColorDrawableWithDimensions::ColorDrawableWithDimensions(
+ColorDrawableWithDimensions::ColorDrawableWithDimensions()
+    : mWidth(0)
+    , mHeight(0)
+{}
+
+ECode ColorDrawableWithDimensions::constructor(
     /* [in] */ Int32 color,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
-    : ColorDrawable(color)
-    , mWidth(width)
-    , mHeight(height)
-{}
+{
+    FAIL_RETURN(ColorDrawable::constructor(color));
+    mWidth = width;
+    mHeight = height;
+    return NOERROR;
+}
 
 ECode ColorDrawableWithDimensions::GetIntrinsicWidth(
     /* [out] */ Int32* width)

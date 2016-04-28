@@ -16,7 +16,9 @@ class ColorDrawableWithDimensions
     : public ColorDrawable
 {
 public:
-    ColorDrawableWithDimensions(
+    ColorDrawableWithDimensions();
+
+    CARAPI constructor(
         /* [in] */ Int32 color,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
