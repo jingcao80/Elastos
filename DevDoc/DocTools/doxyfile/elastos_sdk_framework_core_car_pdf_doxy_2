@@ -58,7 +58,7 @@ PROJECT_LOGO           = ../Pictures/elastos_logo_blue.png
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = /home/xilong/swap/ElastosDocWork/output
+OUTPUT_DIRECTORY       = ../../../../swap/ElastosDocWork/output
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -753,7 +753,29 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../../../Elastos5/Sources/Elastos/LibCore/car
+INPUT                  = ../../../../Elastos5/Sources/Elastos/LibCore/car \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/accessibilityservice \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/os \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/preference \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/privacy \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/provider \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/sax \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/security \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/server \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/service \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/speech \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/swextend \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/telecomm \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/telephony \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/text \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/transition \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/utility \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/view \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/webkit \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/widget \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/wifi \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/wifidisplay
+
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -779,7 +801,7 @@ FILE_PATTERNS          = *.car
 # be searched for input files as well.
 # The default value is: NO.
 
-RECURSIVE              = YES
+RECURSIVE              = NO
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -858,7 +880,7 @@ IMAGE_PATH             =
 # code is scanned, but not when the output code is generated. If lines are added
 # or removed, the anchors will not be placed correctly.
 
-INPUT_FILTER           = /home/xilong/swap/ElastosDocWork/doxy_filters/car_filter.py
+INPUT_FILTER           = ../../../../swap/ElastosDocWork/doxy_filters/car_filter.py
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
@@ -1045,7 +1067,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/header.html
+HTML_HEADER            = ../../../../swap/ElastosDocWork/doxyfile/doxy_css/header.html
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1055,7 +1077,7 @@ HTML_HEADER            = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/head
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/footer.html
+HTML_FOOTER            = ../../../../swap/ElastosDocWork/doxyfile/doxy_css/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1078,7 +1100,7 @@ HTML_STYLESHEET        =
 # see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/mycss.css
+HTML_EXTRA_STYLESHEET  = ../../../../swap/ElastosDocWork/doxyfile/doxy_css/mycss.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1707,7 +1729,7 @@ GENERATE_RTF           = YES
 # The default directory is: rtf.
 # This tag requires that the tag GENERATE_RTF is set to YES.
 
-RTF_OUTPUT             = /home/xilong/swap/ElastosDocWork/rtf
+RTF_OUTPUT             = ../../../../swap/ElastosDocWork/rtf
 
 # If the COMPACT_RTF tag is set to YES doxygen generates more compact RTF
 # documents. This may be useful for small projects and may help to save some

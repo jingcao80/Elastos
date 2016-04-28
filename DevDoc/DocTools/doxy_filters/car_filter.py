@@ -8,23 +8,50 @@ import re              # for regular expressions
 #stream to write output to
 outfile = sys.stdout
 
+interfaces = []
+class_name = ""
+
 #regular expression
+re_class = re.compile(r"(\s*)(class)(\s*)(\S*)")
+re_singleton = re.compile(r"(\s*)(singleton)(\s*)(class)(\s*)(\S*)")
 re_interface = re.compile(r"(\s*)(interface)([^;]*)(?=;)")
 re_module = re.compile(r"(\s*)(module)(\s*)((?={)|(?=\s*$))")
-re_semicolon = re.compile(r"(.*)(})(.*)")
+re_semicolon = re.compile(r"(\s*)(})(\s*)")
 #filters .car-files
 
 def semicolonAdd(s):
     global re_semicolon
+    global class_name
+    global interfaces
+
     match_semicolon = re_semicolon.match(s)
     if match_semicolon is not None:
         #found '}'
-        return re_semicolon.sub(r"\1\2;\3",s)
+        if class_name.strip():
+            if not interfaces:
+                class_name = ""
+                return re_semicolon.sub(r"\1\2;\3",s)
+            else:
+                s2 = re_semicolon.sub(r"\1\2;\3",s)
+                s2 = s2 + "\n/**\n* @class " + class_name + "\n* This class implements these interfaces:\n"
+                for k in interfaces:
+                    s2 = s2 + "*" + k
+                s2 = s2 + "*/\n"
+                class_name = ""
+                interfaces = []
+                return s2
+        else:
+            interfaces = []
+            return re_semicolon.sub(r"\1\2;\3",s)
     else: return s
 def filterCAR(filename):
     global outfile
+    global class_name
     global re_interface
     global re_module
+    global re_class
+    global re_singleton
+    global interfaces
     f = open(filename)
     r = f.readlines()
     f.close()
@@ -32,16 +59,29 @@ def filterCAR(filename):
     for s in r:
         #outfile.write(s+"\n")
         s = semicolonAdd(s)
-        match_intface = re_interface.match(s)
+        match_interface = re_interface.match(s)
         match_module = re_module.match(s)
-        if match_intface is not None:
+        match_class = re_class.match(s)
+        match_singleton = re_singleton.match(s)
+        if match_interface is not None:
             #found interface
             #outfile.write(re_interface.sub(r"\1\3 \2",s))
+            if class_name.strip():
+                interfaces.append(s)
+
             outfile.write(s)
         elif match_module is not None:
             #found module
             #outfile.write(match_module.group(0)+" com.elastos {\n")
             outfile.write(re_module.sub(r"\1\2 _",s))
+        elif match_class is not None:
+            class_name = match_class.group(4)
+            #outfile.write("\n[" + match_class.group(0) + "|" + match_class.group(1) + "|" + match_class.group(2) + "]\n")
+            outfile.write(s)
+        elif match_singleton is not None:
+            class_name = match_singleton.group(6)
+            #outfile.write("\n[" + match_class.group(0) + "|" + match_class.group(1) + "|" + match_class.group(2) + "]\n")
+            outfile.write(s)
         else:
             #if it's no match just output
             outfile.write(s)
