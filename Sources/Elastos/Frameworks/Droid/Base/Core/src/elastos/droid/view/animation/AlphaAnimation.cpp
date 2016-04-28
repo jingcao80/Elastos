@@ -49,7 +49,7 @@ ECode AlphaAnimation::constructor(
     /* [in] */ Float fromAlpha,
     /* [in] */ Float toAlpha)
 {
-FAIL_RETURN(Animation::constructor());
+    FAIL_RETURN(Animation::constructor());
     mFromAlpha = fromAlpha;
     mToAlpha = toAlpha;
     return NOERROR;

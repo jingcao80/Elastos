@@ -27,7 +27,7 @@ ECode PaintDrawable::constructor()
 ECode PaintDrawable::constructor(
     /* [in] */ Int32 color)
 {
-    ShapeDrawable::constructor();
+    FAIL_RETURN(ShapeDrawable::constructor());
 
     AutoPtr<IPaint> paint;
     GetPaint((IPaint**)&paint);

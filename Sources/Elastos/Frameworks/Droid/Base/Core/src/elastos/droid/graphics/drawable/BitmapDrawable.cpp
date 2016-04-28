@@ -143,12 +143,12 @@ BitmapDrawable::BitmapDrawable()
     , mBitmapWidth(0)
     , mBitmapHeight(0)
 {
+    CRect::New((IRect**)&mDstRect);
+    mOpticalInsets = Insets::NONE;
 }
 
 ECode BitmapDrawable::constructor()
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     mBitmapState = new BitmapState((IBitmap*)NULL);
     return NOERROR;
 }
@@ -156,8 +156,6 @@ ECode BitmapDrawable::constructor()
 ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     mBitmapState = new BitmapState((IBitmap*)NULL);
     mBitmapState->mTargetDensity = mTargetDensity;
     return NOERROR;
@@ -166,8 +164,6 @@ ECode BitmapDrawable::constructor(
 ECode BitmapDrawable::constructor(
     /* [in] */ IBitmap* bitmap)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     AutoPtr<BitmapState> state = new BitmapState(bitmap);
     return constructor((IDrawableConstantState*)state, NULL, NULL);
 }
@@ -176,8 +172,6 @@ ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IBitmap* bitmap)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     AutoPtr<BitmapState> state = new BitmapState(bitmap);
     constructor(state, res, NULL);
     mBitmapState->mTargetDensity = mTargetDensity;
@@ -187,8 +181,6 @@ ECode BitmapDrawable::constructor(
 ECode BitmapDrawable::constructor(
     /* [in] */ const String& filepath)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     AutoPtr<IBitmap> bitmap;
     FAIL_RETURN(BitmapFactory::DecodeFile(filepath, (IBitmap**)&bitmap));
 
@@ -204,8 +196,6 @@ ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ const String& filepath)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     AutoPtr<IBitmap> bitmap;
     FAIL_RETURN(BitmapFactory::DecodeFile(filepath, (IBitmap**)&bitmap));
 
@@ -221,8 +211,6 @@ ECode BitmapDrawable::constructor(
 ECode BitmapDrawable::constructor(
     /* [in] */ IInputStream* is)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     AutoPtr<IBitmap> bitmap;
     FAIL_RETURN(BitmapFactory::DecodeStream(is, (IBitmap**)&bitmap));
 
@@ -238,8 +226,6 @@ ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IInputStream* is)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     AutoPtr<IBitmap> bitmap;
     FAIL_RETURN(BitmapFactory::DecodeStream(is, (IBitmap**)&bitmap));
 
@@ -257,8 +243,6 @@ ECode BitmapDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
-    CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
     Boolean can = FALSE;
     if (theme != NULL && (state->CanApplyTheme(&can), can)) {
         // If we need to apply a theme, implicitly mutate.

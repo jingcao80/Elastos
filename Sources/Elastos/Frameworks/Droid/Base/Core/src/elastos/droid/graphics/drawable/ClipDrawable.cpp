@@ -97,11 +97,11 @@ Boolean ClipDrawable::ClipState::CanConstantState()
 CAR_INTERFACE_IMPL_2(ClipDrawable, Drawable, IClipDrawable, IDrawableCallback)
 ClipDrawable::ClipDrawable()
 {
+    CRect::New((IRect**)&mTmpRect);
 }
 
 ECode ClipDrawable::constructor()
 {
-    CRect::New((IRect**)&mTmpRect);
     return constructor(NULL, NULL);
 }
 
@@ -110,7 +110,6 @@ ECode ClipDrawable::constructor(
     /* [in] */ Int32 gravity,
     /* [in] */ Int32 orientation)
 {
-    CRect::New((IRect**)&mTmpRect);
     FAIL_RETURN(constructor(NULL, NULL));
 
     mClipState->mDrawable = drawable;
@@ -127,7 +126,6 @@ ECode ClipDrawable::constructor(
     /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res)
 {
-    CRect::New((IRect**)&mTmpRect);
     mClipState = new ClipState((ClipState*)state, this, res);
     return NOERROR;
 }

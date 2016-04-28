@@ -446,33 +446,29 @@ void CompoundButton::OnDraw(
 
         Int32 top = 0;
         switch (verticalGravity) {
-                case IGravity::BOTTOM: {
-                    Int32 height;
-                    GetHeight(&height);
-                    top = height - drawableHeight;
-                    break;
-                }
-                case IGravity::CENTER_VERTICAL: {
-                    Int32 height;
-                    GetHeight(&height);
-                    top = (height - drawableHeight) / 2;
-                    break;
-                }
-                default:
-                    top = 0;
+            case IGravity::BOTTOM: {
+                Int32 height;
+                GetHeight(&height);
+                top = height - drawableHeight;
+                break;
+            }
+            case IGravity::CENTER_VERTICAL: {
+                Int32 height;
+                GetHeight(&height);
+                top = (height - drawableHeight) / 2;
+                break;
+            }
+            default:
+                top = 0;
         }
         Int32 bottom = top + drawableHeight;
-        Int32 left = 0;
-        Int32 right = drawableWidth;
         Boolean isLayoutRtl;
-        if (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) {
-            Int32 width;
-            GetWidth(&width);
-            left = width - drawableWidth;
-            right = width;
-        }
+        Int32 width;
+        Int32 left = (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) ? (GetWidth(&width), (width - drawableWidth)) : 0;
+        Int32 right = (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) ? (GetWidth(&width), width) : drawableWidth;
 
         buttonDrawable->SetBounds(left, top, right, bottom);
+
         AutoPtr<IDrawable> background;
         GetBackground((IDrawable**)&background);
         if (background != NULL) {

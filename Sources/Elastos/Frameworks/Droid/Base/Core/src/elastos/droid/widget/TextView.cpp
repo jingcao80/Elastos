@@ -6206,12 +6206,14 @@ void TextView::OnDraw(
     RestartMarqueeIfNeeded();
     // Draw the background for this view
     View::OnDraw(canvas);
-    Int32 compoundPaddingTop, compoundPaddingBottom;
-    GetCompoundPaddingTop(&compoundPaddingTop);
-    GetCompoundPaddingBottom(&compoundPaddingBottom);
-    Int32 compoundPaddingLeft, compoundPaddingRight;
+    Int32 compoundPaddingLeft = 0;
     GetCompoundPaddingLeft(&compoundPaddingLeft);
+    Int32 compoundPaddingTop = 0;
+    GetCompoundPaddingTop(&compoundPaddingTop);
+    Int32 compoundPaddingRight = 0;
     GetCompoundPaddingRight(&compoundPaddingRight);
+    Int32 compoundPaddingBottom = 0;
+    GetCompoundPaddingBottom(&compoundPaddingBottom);
     Int32 scrollX = mScrollX;
     Int32 scrollY = mScrollY;
     Int32 right = mRight;
@@ -6226,7 +6228,9 @@ void TextView::OnDraw(
     GetHorizontalOffsetForDrawables(&offset);
     Int32 leftOffset = isLayoutRtl ? 0 : offset;
     Int32 rightOffset = isLayoutRtl ? offset : 0 ;
+
     AutoPtr<Drawables> dr = mDrawables;
+
     if (dr != NULL) {
         /*
          * Compound, not extended, because the icon is not clipped
@@ -6241,8 +6245,8 @@ void TextView::OnDraw(
         if (dr->mDrawableLeft != NULL) {
             canvas->Save(&state);
             canvas->Translate(scrollX + mPaddingLeft + leftOffset,
-                                scrollY + compoundPaddingTop +
-                                (vspace - dr->mDrawableHeightLeft) / 2);
+                    scrollY + compoundPaddingTop +
+                    (vspace - dr->mDrawableHeightLeft) / 2);
             dr->mDrawableLeft->Draw(canvas);
             canvas->Restore();
         }
@@ -6251,8 +6255,9 @@ void TextView::OnDraw(
         // Make sure to update invalidateDrawable() when changing this code.
         if (dr->mDrawableRight != NULL) {
             canvas->Save(&state);
-            canvas->Translate(scrollX + right - left - mPaddingRight - dr->mDrawableSizeRight - rightOffset,
-                        scrollY + compoundPaddingTop + (vspace - dr->mDrawableHeightRight) / 2);
+            canvas->Translate(scrollX + right - left - mPaddingRight -
+                    dr->mDrawableSizeRight - rightOffset,
+                    scrollY + compoundPaddingTop + (vspace - dr->mDrawableHeightRight) / 2);
             dr->mDrawableRight->Draw(canvas);
             canvas->Restore();
         }
@@ -6273,7 +6278,7 @@ void TextView::OnDraw(
             canvas->Save(&state);
             canvas->Translate(scrollX + compoundPaddingLeft +
                     (hspace - dr->mDrawableWidthBottom) / 2,
-                        scrollY + bottom - top - mPaddingBottom - dr->mDrawableSizeBottom);
+                    scrollY + bottom - top - mPaddingBottom - dr->mDrawableSizeBottom);
             dr->mDrawableBottom->Draw(canvas);
             canvas->Restore();
         }
@@ -6319,14 +6324,16 @@ void TextView::OnDraw(
     Float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
     Float clipRight = right - left - compoundPaddingRight + scrollX;
     Float clipBottom = bottom - top + scrollY -
-        ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
+            ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
+
+    using Elastos::Core::Math;
 
     if (mShadowRadius != 0) {
-        clipLeft += Elastos::Core::Math::Min(0.f, mShadowDx - mShadowRadius);
-        clipRight += Elastos::Core::Math::Max(0.f, mShadowDx + mShadowRadius);
+        clipLeft += Math::Min(0.f, mShadowDx - mShadowRadius);
+        clipRight += Math::Max(0.f, mShadowDx + mShadowRadius);
 
-        clipTop += Elastos::Core::Math::Min(0.f, mShadowDy - mShadowRadius);
-        clipBottom += Elastos::Core::Math::Max(0.f, mShadowDy + mShadowRadius);
+        clipTop += Math::Min(0.f, mShadowDy - mShadowRadius);
+        clipBottom += Math::Max(0.f, mShadowDy + mShadowRadius);
     }
 
     Boolean isNonEmpty;
@@ -6347,21 +6354,21 @@ void TextView::OnDraw(
     GetLayoutDirection(&layoutDirection);
     Int32 absoluteGravity = Gravity::GetAbsoluteGravity(mGravity, layoutDirection);
     if (mEllipsize == TextUtilsTruncateAt_MARQUEE &&
-        mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
+            mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
         Int32 linecount;
         if (!mSingleLine && (GetLineCount(&linecount), linecount) == 1 && CanMarquee() &&
-            (absoluteGravity & IGravity::HORIZONTAL_GRAVITY_MASK) != IGravity::LEFT) {
-                Int32 width = mRight - mLeft;
-                Int32 padding, compoundPaddingRight;
-                GetCompoundPaddingLeft(&padding);
-                GetCompoundPaddingRight(&compoundPaddingRight);
-                padding += compoundPaddingRight;
-                Float dx;
-                mLayout->GetLineRight(0, &dx);
-                dx = dx - (width - padding);
-                Int32 direction;
-                layout->GetParagraphDirection(0, &direction);
-                canvas->Translate(direction * dx, 0.0f);
+                (absoluteGravity & IGravity::HORIZONTAL_GRAVITY_MASK) != IGravity::LEFT) {
+            Int32 width = mRight - mLeft;
+            Int32 padding, compoundPaddingRight;
+            GetCompoundPaddingLeft(&padding);
+            GetCompoundPaddingRight(&compoundPaddingRight);
+            padding += compoundPaddingRight;
+            Float dx;
+            mLayout->GetLineRight(0, &dx);
+            dx = dx - (width - padding);
+            Int32 direction;
+            layout->GetParagraphDirection(0, &direction);
+            canvas->Translate(direction * dx, 0.0f);
         }
 
         if (mMarquee != NULL && mMarquee->IsRunning()) {
@@ -6383,7 +6390,7 @@ void TextView::OnDraw(
     }
 
     if (mMarquee != NULL && mMarquee->ShouldDrawGhost()) {
-        Float dx = (Int32) mMarquee->GetGhostOffset();
+        Float dx = mMarquee->GetGhostOffset();
         Int32 direction;
         layout->GetParagraphDirection(0, &direction);
         canvas->Translate(direction * dx, 0.0f);

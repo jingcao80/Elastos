@@ -12613,12 +12613,11 @@ Boolean View::Draw(
 
     Boolean isNotIntersect = FALSE;
     if (!concatMatrix
-        && (flags & (ViewGroup::FLAG_SUPPORT_STATIC_TRANSFORMATIONS | ViewGroup::FLAG_CLIP_CHILDREN))
-            == ViewGroup::FLAG_CLIP_CHILDREN
-        && (canvas->QuickReject(mLeft, mTop, mRight, mBottom,
-            CanvasEdgeType_BW, &isNotIntersect), isNotIntersect)
-        && (mPrivateFlags & PFLAG_DRAW_ANIMATION) == 0)
-    {
+            && (flags & (ViewGroup::FLAG_SUPPORT_STATIC_TRANSFORMATIONS | ViewGroup::FLAG_CLIP_CHILDREN))
+                == ViewGroup::FLAG_CLIP_CHILDREN
+            && (canvas->QuickReject(mLeft, mTop, mRight, mBottom,
+                CanvasEdgeType_BW, &isNotIntersect), isNotIntersect)
+            && (mPrivateFlags & PFLAG_DRAW_ANIMATION) == 0) {
         mPrivateFlags2 |= PFLAG2_VIEW_QUICK_REJECTED;
         return more;
     }
@@ -12726,9 +12725,7 @@ Boolean View::Draw(
     }
 
     Float tempAlpha, transitionAlpha;
-    GetAlpha(&tempAlpha);
-    GetTransitionAlpha(&transitionAlpha);
-    Float alpha = usingRenderNodeProperties ? 1 : (tempAlpha * transitionAlpha);
+    Float alpha = usingRenderNodeProperties ? 1 : ((GetAlpha(&tempAlpha), tempAlpha) * (GetTransitionAlpha(&transitionAlpha), transitionAlpha));
     if (transformToApply != NULL || alpha < 1 || !HasIdentityMatrix() ||
             (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
         if (transformToApply != NULL || !childHasIdentityMatrix) {
@@ -12801,13 +12798,13 @@ Boolean View::Draw(
                         Boolean res;
                         renderNode->SetAlpha(alpha * tempAlpha * transitionAlpha, &res);
                     }
-                    else  if (layerType == IView::LAYER_TYPE_NONE) {
+                    else if (layerType == IView::LAYER_TYPE_NONE) {
                         const Int32 scrollX = hasDisplayList ? 0 : sx;
                         const Int32 scrollY = hasDisplayList ? 0 : sy;
                         Int32 result;
                         canvas->SaveLayerAlpha(
-                            (Float)scrollX, (Float)scrollY, scrollX + (mRight - mLeft),
-                            scrollY + (mBottom - mTop), multipliedAlpha, layerFlags, &result);
+                                (Float)scrollX, (Float)scrollY, scrollX + (mRight - mLeft),
+                                scrollY + (mBottom - mTop), multipliedAlpha, layerFlags, &result);
                     }
                 }
                 else {
@@ -12825,7 +12822,7 @@ Boolean View::Draw(
     if (!usingRenderNodeProperties) {
         // apply clips directly, since RenderNode won't do it for this draw
         if ((flags & ViewGroup::FLAG_CLIP_CHILDREN) == ViewGroup::FLAG_CLIP_CHILDREN
-             && cache == NULL) {
+                && cache == NULL) {
             Boolean res;
             if (offsetForScroll) {
                 canvas->ClipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop), &res);
@@ -12870,20 +12867,20 @@ Boolean View::Draw(
             AutoPtr<IHardwareLayer> layer = GetHardwareLayer();
             Boolean valid = FALSE;
             if (layer != NULL && (layer->IsValid(&valid), valid)) {
-               Int32 restoreAlpha;
-               mLayerPaint->GetAlpha(&restoreAlpha);
-               mLayerPaint->SetAlpha((Int32) (alpha * 255));
-               IHardwareCanvas::Probe(canvas)->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
-               mLayerPaint->SetAlpha(restoreAlpha);
-               layerRendered = TRUE;
+                Int32 restoreAlpha;
+                mLayerPaint->GetAlpha(&restoreAlpha);
+                mLayerPaint->SetAlpha((Int32) (alpha * 255));
+                IHardwareCanvas::Probe(canvas)->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
+                mLayerPaint->SetAlpha(restoreAlpha);
+                layerRendered = TRUE;
             }
             else {
                 const Int32 scrollX = hasDisplayList ? 0 : sx;
                 const Int32 scrollY = hasDisplayList ? 0 : sy;
                 Int32 result;
                 canvas->SaveLayer(scrollX, scrollY,
-                    scrollX + mRight - mLeft, scrollY + mBottom - mTop, mLayerPaint,
-                    ICanvas::HAS_ALPHA_LAYER_SAVE_FLAG | ICanvas::CLIP_TO_LAYER_SAVE_FLAG, &result);
+                        scrollX + mRight - mLeft, scrollY + mBottom - mTop, mLayerPaint,
+                        ICanvas::HAS_ALPHA_LAYER_SAVE_FLAG | ICanvas::CLIP_TO_LAYER_SAVE_FLAG, &result);
             }
         }
 
@@ -12957,7 +12954,6 @@ Boolean View::Draw(
     }
 
     mRecreateDisplayList = FALSE;
-
     return more;
 }
 
@@ -13050,7 +13046,7 @@ ECode View::Draw(
 
     Int32 left = mScrollX + paddingLeft;
     Int32 right = left + mRight - mLeft - mPaddingRight - paddingLeft;
-    Int32 top = mScrollY + GetFadeTop(offsetRequired);;
+    Int32 top = mScrollY + GetFadeTop(offsetRequired);
     Int32 bottom = top + GetFadeHeight(offsetRequired);
 
     if (offsetRequired) {
@@ -13221,8 +13217,9 @@ void View::DrawAccessibilityFocus(
     if (virtualView != NULL) {
         virtualView->GetBoundsInScreen(bounds);
         GetLocationOnScreen((ArrayOf<Int32>**)&(mAttachInfo->mTmpLocation));
-        bounds->Offset((*mAttachInfo->mTmpLocation)[0], (*mAttachInfo->mTmpLocation)[1]);
-    } else {
+        bounds->Offset(-(*mAttachInfo->mTmpLocation)[0], -(*mAttachInfo->mTmpLocation)[1]);
+    }
+    else {
         bounds->Set(0, 0, mRight - mLeft, mBottom - mTop);
     }
     Int32 save;
@@ -13249,7 +13246,7 @@ void View::DrawBackground(
     }
 
     if (mBackgroundSizeChanged) {
-        background->SetBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+        background->SetBounds(0, 0, mRight - mLeft, mBottom - mTop);
         mBackgroundSizeChanged = FALSE;
         mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
     }
@@ -13328,7 +13325,11 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     //}
 
     // Set up drawable properties that are view-independent.
-    Boolean isProjected, res;
+    CRect* boundsObj = (CRect*)bounds.Get();
+    Boolean res;
+    renderNode->SetLeftTopRightBottom(boundsObj->mLeft, boundsObj->mTop,
+            boundsObj->mRight, boundsObj->mBottom, &res);
+    Boolean isProjected;
     drawable->IsProjected(&isProjected);
     renderNode->SetProjectBackwards(isProjected, &res);
     renderNode->SetProjectionReceiver(TRUE, &res);

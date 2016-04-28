@@ -212,6 +212,7 @@ LayerDrawable::LayerDrawable()
     : mOpacityOverride(IPixelFormat::UNKNOWN)
     , mMutated(FALSE)
 {
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
 }
 
 LayerDrawable::~LayerDrawable()
@@ -257,7 +258,6 @@ ECode LayerDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
     AutoPtr<LayerState> as = CreateConstantState((LayerState*)state, res);
     mLayerState = as;
     if (as->mNum > 0) {

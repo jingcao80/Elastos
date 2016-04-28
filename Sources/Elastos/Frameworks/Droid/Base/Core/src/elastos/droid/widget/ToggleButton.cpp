@@ -47,8 +47,8 @@ ECode ToggleButton::constructor(
     CompoundButton::constructor(context, attrs, defStyleAttr, defStyleRes);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ToggleButton),
-        ArraySize(R::styleable::ToggleButton));
+            const_cast<Int32 *>(R::styleable::ToggleButton),
+            ArraySize(R::styleable::ToggleButton));
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
@@ -143,7 +143,7 @@ void ToggleButton::UpdateReferenceToIndicatorDrawable(
     AutoPtr<ILayerDrawable> layerDrawable = ILayerDrawable::Probe(backgroundDrawable);
     if (layerDrawable) {
         layerDrawable->FindDrawableByLayerId(
-            R::id::toggle, (IDrawable**)&mIndicatorDrawable);
+                R::id::toggle, (IDrawable**)&mIndicatorDrawable);
     }
     else {
         mIndicatorDrawable = NULL;
@@ -182,7 +182,6 @@ ECode ToggleButton::OnInitializeAccessibilityNodeInfo(
     info->SetClassName(s);
     return NOERROR;
 }
-
 
 } // namespace Widget
 } // namespace Droid

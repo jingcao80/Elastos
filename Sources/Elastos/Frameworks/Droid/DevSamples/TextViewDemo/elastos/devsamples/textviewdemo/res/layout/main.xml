@@ -70,7 +70,8 @@
             android:id="@+id/toggleButton1"
             android:layout_width="150px"
             android:layout_height="wrap_content"
-            android:text="ToggleButton"/>
+            android:text="ToggleButton"
+            android:layout_gravity="center_horizontal"/>
 
         <ToggleButton
             android:id="@+id/toggleButton2"
@@ -78,7 +79,8 @@
             android:layout_height="wrap_content"
             android:textOn="Turn On"
             android:textOff="Turn Off"
-            android:checked="true"/>
+            android:checked="true"
+            android:layout_gravity="center_horizontal"/>
     </LinearLayout>
 
     <LinearLayout

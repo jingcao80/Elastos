@@ -84,8 +84,8 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI OnCheckedChanged(
-            /* [in] */  IRadioGroup* group,
-            /* [in] */  Int32 checkedId);
+            /* [in] */ IRadioGroup* group,
+            /* [in] */ Int32 checkedId);
 
     private:
         AutoPtr<CActivityOne> mHost;

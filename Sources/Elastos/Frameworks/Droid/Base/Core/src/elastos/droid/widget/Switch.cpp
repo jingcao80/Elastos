@@ -1250,7 +1250,7 @@ ECode Switch::OnInitializeAccessibilityEvent(
 {
     CompoundButton::OnInitializeAccessibilityEvent(event);
     AutoPtr<ICharSequence> seq;
-    CString::New(String("Switch"), (ICharSequence**)&seq);
+    CString::New(String("CSwitch"), (ICharSequence**)&seq);
     return IAccessibilityRecord::Probe(event)->SetClassName(seq);
 }
 
@@ -1259,7 +1259,7 @@ ECode Switch::OnInitializeAccessibilityNodeInfo(
 {
     CompoundButton::OnInitializeAccessibilityNodeInfo(info);
     AutoPtr<ICharSequence> seq;
-    CString::New(String("Switch"), (ICharSequence**)&seq);
+    CString::New(String("CSwitch"), (ICharSequence**)&seq);
     info->SetClassName(seq);
 
     Boolean res;

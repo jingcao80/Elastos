@@ -303,7 +303,7 @@ ECode AnimatedStateListDrawable::constructor(
     /* [in] */ /*@Nullable*/ IDrawableConstantState* state,
     /* [in] */ /*@Nullable*/ IResources* res)
 {
-    StateListDrawable::constructor(NULL);
+    FAIL_RETURN(StateListDrawable::constructor(NULL))
     AutoPtr<AnimatedStateListState> newState = new AnimatedStateListState((AnimatedStateListState*)state, this, res);
     SetConstantState(newState);
     AutoPtr<ArrayOf<Int32> > states;

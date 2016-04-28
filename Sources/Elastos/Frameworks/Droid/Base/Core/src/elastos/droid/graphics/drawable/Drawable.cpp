@@ -126,8 +126,6 @@ ECode Drawable::SetBounds(
 {
     AutoPtr<IRect> oldBounds = mBounds;
 
-Logger::D("Drawable::SetBounds", "========Line:%d, this: %s============", __LINE__, TO_CSTR(this));
-
     if (oldBounds == ZERO_BOUNDS_RECT) {
         mBounds = NULL;
         FAIL_RETURN(CRect::New((IRect**)&mBounds));

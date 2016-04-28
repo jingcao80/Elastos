@@ -86,11 +86,12 @@ ECode ColorDrawable::ColorState::GetChangingConfigurations(
 CAR_INTERFACE_IMPL(ColorDrawable, Drawable, IColorDrawable)
 ColorDrawable::ColorDrawable()
     : mMutated(FALSE)
-{}
+{
+    CPaint::New((IPaint**)&mPaint);
+}
 
 ECode ColorDrawable::constructor()
 {
-    CPaint::New((IPaint**)&mPaint);
     mColorState = new ColorState();
     return NOERROR;
 }
@@ -98,7 +99,6 @@ ECode ColorDrawable::constructor()
 ECode ColorDrawable::constructor(
     /* [in] */ Int32 color)
 {
-    CPaint::New((IPaint**)&mPaint);
     mColorState = new ColorState();
     SetColor(color);
     return NOERROR;
@@ -109,7 +109,6 @@ ECode ColorDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
-    CPaint::New((IPaint**)&mPaint);
     Boolean can = FALSE;
     if (theme != NULL && (state->CanApplyTheme(&can), can)) {
         mColorState = new ColorState((ColorState*)state);
