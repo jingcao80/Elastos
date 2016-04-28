@@ -54,13 +54,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            VALIDATE_NOT_NULL(str)
-            *str = String("PermissionMonitor::IntentReceiver");
-            return NOERROR;
-        }
+        TO_STRING_IMPL("PermissionMonitor::IntentReceiver")
     private:
         PermissionMonitor* mHost;
     };

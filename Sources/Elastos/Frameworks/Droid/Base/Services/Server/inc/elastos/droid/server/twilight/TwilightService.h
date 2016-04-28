@@ -157,14 +157,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("TwilightService::UpdateLocationReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("TwilightService::UpdateLocationReceiver: ")
     private:
         AutoPtr<TwilightService> mHost;
     };

@@ -1,11 +1,13 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/widget/SimpleCursorAdapter.h"
-#include <elastos/core/StringUtils.h>
 #include "elastos/droid/net/CUriHelper.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Core::CString;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUri;
@@ -66,7 +68,8 @@ ECode SimpleCursorAdapter::BindView(
     Int32 count = mTo->GetLength();
     AutoPtr<ArrayOf<Int32> > from = mFrom;
     AutoPtr<ArrayOf<Int32> > to = mTo;
-
+    ITextView* tv;
+    IImageView* iv;
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> v;
         view->FindViewById((*to)[i], (IView**)&v);
@@ -83,15 +86,15 @@ ECode SimpleCursorAdapter::BindView(
                     text = String("");
                 }
 
-                if (ITextView::Probe(v.Get())) {
-                    SetViewText(ITextView::Probe(v.Get()), text);
+                if (tv = ITextView::Probe(v), tv) {
+                    SetViewText(tv, text);
                 }
-                else if (IImageView::Probe(v.Get())) {
-                    SetViewImage(IImageView::Probe(v.Get()), text);
+                else if (iv = IImageView::Probe(v), iv) {
+                    SetViewImage(iv, text);
                 }
                 else {
-                    // throw new IllegalStateException(v.getClass().getName() + " is not a " +
-                    //         " view that can be bounds by this SimpleCursorAdapter");
+                    Logger::E("SimpleCursorAdapter",
+                        "%s is not a view that can be bounds by this SimpleCursorAdapter.", TO_CSTR(v));
                     return E_ILLEGAL_STATE_EXCEPTION;
                 }
             }
@@ -143,7 +146,6 @@ ECode SimpleCursorAdapter::SetViewText(
     /* [in] */ const String& text)
 {
     VALIDATE_NOT_NULL(v);
-
     AutoPtr<ICharSequence> seq;
     CString::New(text, (ICharSequence**)&seq);
     return v->SetText(seq);
@@ -184,6 +186,7 @@ ECode SimpleCursorAdapter::ConvertToString(
     /* [in] */ ICursor* cursor,
     /* [out] */ ICharSequence** seq)
 {
+    VALIDATE_NOT_NULL(seq)
     if (mCursorToStringConverter != NULL) {
         return mCursorToStringConverter->ConvertToString(cursor, seq);
     }

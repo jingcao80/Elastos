@@ -107,13 +107,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            VALIDATE_NOT_NULL(str)
-            *str = String("PacManager::PacRefreshIntentReceiver");
-            return NOERROR;
-        }
+        TO_STRING_IMPL("PacManager::PacRefreshIntentReceiver")
     private:
         PacManager* mHost;
     };

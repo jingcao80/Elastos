@@ -75,13 +75,7 @@ public:
         /* [in] */ const String& authority,
         /* [in] */ Int32 userId);
 
-    CARAPI ToString(
-        /* [out] */ String* description)
-    {
-        VALIDATE_NOT_NULL(description)
-        *description = String("CActivityThread::ProviderKey");
-        return NOERROR;
-    }
+    TO_STRING_IMPL("CActivityThread::ProviderKey")
 
     //@Override
     CARAPI Equals(
@@ -263,13 +257,7 @@ public:
             /* [in] */ IContentProvider* localProvider,
             /* [in] */ IContentProviderHolder* holder);
 
-        CARAPI ToString(
-            /* [out] */ String* description)
-        {
-            VALIDATE_NOT_NULL(description)
-            *description = String("CActivityThread::ProviderClientRecord");
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CActivityThread::ProviderClientRecord")
     public:
         AutoPtr< ArrayOf<String> > mNames;
         AutoPtr<IIContentProvider> mProvider;
@@ -285,13 +273,7 @@ public:
             : mToken(NULL)
         {}
 
-        CARAPI ToString(
-            /* [out] */ String* description)
-        {
-            VALIDATE_NOT_NULL(description)
-            *description = String("CActivityThread::NewIntentData");
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CActivityThread::NewIntentData")
     public:
         AutoPtr<IList> mIntents;
         AutoPtr<IBinder> mToken;
@@ -311,13 +293,7 @@ public:
             /* [in] */ IBinder* token,
             /* [in] */ Int32 sendingUser);
 
-        CARAPI ToString(
-            /* [out] */ String* description)
-        {
-            VALIDATE_NOT_NULL(description)
-            *description = String("CActivityThread::ReceiverData");
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CActivityThread::ReceiverData")
 
         /**
          * Version of {@link BroadcastReceiver#setResultCode(int)

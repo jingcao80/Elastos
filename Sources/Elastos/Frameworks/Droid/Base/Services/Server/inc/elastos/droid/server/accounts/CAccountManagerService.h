@@ -636,14 +636,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CAccountManagerService::PurgeOldGrantsAllBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CAccountManagerService::PurgeOldGrantsAllBroadcastReceiver: ")
     private:
         AutoPtr<CAccountManagerService> mHost;
     };
@@ -659,14 +652,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CAccountManagerService::OnUserRemovedBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CAccountManagerService::OnUserRemovedBroadcastReceiver: ")
     private:
         AutoPtr<CAccountManagerService> mHost;
     };

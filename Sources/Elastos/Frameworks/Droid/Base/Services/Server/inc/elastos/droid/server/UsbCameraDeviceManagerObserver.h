@@ -35,14 +35,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("UsbCameraDeviceManagerObserver::BootCompletedReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("UsbCameraDeviceManagerObserver::BootCompletedReceiver: ")
     private:
         UsbCameraDeviceManagerObserver* mHost;
     };

@@ -240,14 +240,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CInputMethodManagerService::ImmsBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CInputMethodManagerService::ImmsBroadcastReceiver: ")
     private:
         CARAPI_(void) UpdateActive();
 
@@ -312,14 +305,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CInputMethodManagerService::CheckReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CInputMethodManagerService::CheckReceiver: ")
     private:
         CInputMethodManagerService* mHost;
     };

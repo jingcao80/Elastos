@@ -113,13 +113,10 @@ ECode CActivityOne::OnCreate(
     listView->SetDivider(drawable);
     listView->SetDividerHeight(1);
 
-    Logger::I(TAG, "Before InitAdapter...");
     InitAdapter();
 
-    Logger::I(TAG, "Before SetAdapter...");
     IAdapterView* adapterView = IAdapterView::Probe(view);
     adapterView->SetAdapter(mAdapter);
-    Logger::I(TAG, "After SetAdapter...");
     return NOERROR;
 }
 
@@ -253,10 +250,9 @@ ECode CActivityOne::Query()
     GetContentResolver((IContentResolver**)&contentResolver);
 
     String nullStr;
-    AutoPtr<ArrayOf<String> > projections = ArrayOf<String>::Alloc(3);
+    AutoPtr<ArrayOf<String> > projections = ArrayOf<String>::Alloc(2);
     (*projections)[0] = Utils::USERNAME;
-    (*projections)[1] = Utils::SEX;
-    (*projections)[2] = Utils::EMAIL;
+    (*projections)[1] = Utils::EMAIL;
 
     mCursor = NULL;
     ECode ec = contentResolver->Query(
@@ -269,18 +265,15 @@ ECode CActivityOne::Query()
         Boolean bval;
         while (mCursor->MoveToNext(&bval), bval) {
             Int32 index;
-            String name, sex, email;
+            String name, email;
 
             mCursor->GetColumnIndex(Utils::USERNAME, &index);
             mCursor->GetString(index, &name);
 
-            mCursor->GetColumnIndex(Utils::SEX, &index);
-            mCursor->GetString(index, &sex);
-
             mCursor->GetColumnIndex(Utils::EMAIL, &index);
             mCursor->GetString(index, &email);
 
-            Logger::I(TAG, "     >> item %d: [%s, %s, %s]", ++i, name.string(), sex.string(), email.string());
+            Logger::I(TAG, "     >> item %d: [%s, %s]", ++i, name.string(), email.string());
         }
 
         StartManagingCursor(mCursor);  //查找后关闭游标

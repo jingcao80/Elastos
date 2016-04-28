@@ -49,14 +49,7 @@ public:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("WifiWatchdogStateMachine::NetworkBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("WifiWatchdogStateMachine::NetworkBroadcastReceiver: ")
     private:
         WifiWatchdogStateMachine* mOwner;
     };

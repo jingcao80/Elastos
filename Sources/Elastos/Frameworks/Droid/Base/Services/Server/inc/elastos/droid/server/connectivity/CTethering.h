@@ -544,14 +544,7 @@ private:
             /* [in] */ IContext *content,
             /* [in] */ IIntent *intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CTethering::StateReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CTethering::StateReceiver: ")
     private:
         CTethering* mHost;
     };

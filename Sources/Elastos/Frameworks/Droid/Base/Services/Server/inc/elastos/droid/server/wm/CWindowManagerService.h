@@ -212,14 +212,7 @@ public:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CWindowManagerService::LocalBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CWindowManagerService::LocalBroadcastReceiver: ")
     private:
         CWindowManagerService* mHost;
     };

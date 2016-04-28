@@ -176,14 +176,7 @@ private:
             /* [in] */ IContext* ctx,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("DhcpStateMachine::MyBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("DhcpStateMachine::MyBroadcastReceiver: ")
 
     private:
         DhcpStateMachine* mOwner;

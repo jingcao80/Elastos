@@ -115,14 +115,7 @@ public:
             /* [in] */IContext* context,
             /* [in] */IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("MediaScannerReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("MediaScannerReceiver: ")
     };
 
 protected:

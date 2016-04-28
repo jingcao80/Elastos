@@ -123,14 +123,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("RegisteredServicesCache::PackageReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("RegisteredServicesCache::PackageReceiver: ")
     private:
         RegisteredServicesCache* mParent;
     };
@@ -146,14 +139,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("RegisteredServicesCache::ExternalReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("RegisteredServicesCache::ExternalReceiver: ")
     private:
         RegisteredServicesCache* mParent;
     };

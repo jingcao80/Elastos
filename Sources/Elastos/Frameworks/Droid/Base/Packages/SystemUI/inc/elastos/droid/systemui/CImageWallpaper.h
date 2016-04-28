@@ -33,14 +33,7 @@ private:
                 /* [in] */ IContext* context,
                 /* [in] */ IIntent* intent);
 
-            CARAPI ToString(
-                /* [out] */ String* info)
-            {
-                VALIDATE_NOT_NULL(info);
-                *info = String("CImageWallpaper::DrawableEngine::WallpaperObserver");
-                (*info).AppendFormat("%p", this);
-                return NOERROR;
-            }
+            TO_STRING_IMPL("CImageWallpaper::DrawableEngine::WallpaperObserver")
         private:
             DrawableEngine* mOwner;
         };

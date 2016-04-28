@@ -86,14 +86,7 @@ private:
                 /* [in] */ IContext* context,
                 /* [in] */ IIntent* intent);
 
-            CARAPI ToString(
-                /* [out] */ String* info)
-            {
-                VALIDATE_NOT_NULL(info);
-                *info = String("UsbHandler::BootCompletedReceiver: ");
-                (*info).AppendFormat("%p", this);
-                return NOERROR;
-            }
+            TO_STRING_IMPL("UsbHandler::BootCompletedReceiver: ")
         private:
             UsbHandler* mHost;
         };
@@ -108,14 +101,7 @@ private:
                 /* [in] */ IContext* context,
                 /* [in] */ IIntent* intent);
 
-            CARAPI ToString(
-                /* [out] */ String* info)
-            {
-                VALIDATE_NOT_NULL(info);
-                *info = String("UsbHandler::UserSwitchedReceiver: ");
-                (*info).AppendFormat("%p", this);
-                return NOERROR;
-            }
+            TO_STRING_IMPL("UsbHandler::UserSwitchedReceiver: ")
         private:
             UsbHandler* mHost;
         };
@@ -130,14 +116,7 @@ private:
                 /* [in] */ IContext* context,
                 /* [in] */ IIntent* intent);
 
-            CARAPI ToString(
-                /* [out] */ String* info)
-            {
-                VALIDATE_NOT_NULL(info);
-                *info = String("UsbHandler::BootFastReceiver: ");
-                (*info).AppendFormat("%p", this);
-                return NOERROR;
-            }
+            TO_STRING_IMPL("UsbHandler::BootFastReceiver: ")
         private:
             UsbHandler* mHost;
         };

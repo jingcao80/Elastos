@@ -115,14 +115,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::PackageReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::PackageReceiver: ")
 
     private:
         CNetworkPolicyManagerService* mOwner;
@@ -140,14 +133,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::UidRemovedReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::UidRemovedReceiver: ")
 
     private:
         CNetworkPolicyManagerService* mOwner;
@@ -165,14 +151,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::UserReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::UserReceiver: ")
 
     private:
         CNetworkPolicyManagerService* mOwner;
@@ -194,14 +173,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::StatsReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::StatsReceiver: ")
     private:
         CNetworkPolicyManagerService* mOwner;
     };
@@ -222,14 +194,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::AllowReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::AllowReceiver: ")
     private:
         CNetworkPolicyManagerService* mOwner;
     };
@@ -250,14 +215,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::SnoozeWarningReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::SnoozeWarningReceiver: ")
     private:
         CNetworkPolicyManagerService* mOwner;
 
@@ -278,14 +236,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::WifiConfigReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::WifiConfigReceiver: ")
     private:
         CNetworkPolicyManagerService* mOwner;
     };
@@ -306,14 +257,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::WifiStateReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::WifiStateReceiver: ")
     private:
         CNetworkPolicyManagerService* mOwner;
     };
@@ -334,14 +278,7 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CNetworkPolicyManagerService::ConnReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+        TO_STRING_IMPL("CNetworkPolicyManagerService::ConnReceiver: ")
     private:
         CNetworkPolicyManagerService* mOwner;
     };
