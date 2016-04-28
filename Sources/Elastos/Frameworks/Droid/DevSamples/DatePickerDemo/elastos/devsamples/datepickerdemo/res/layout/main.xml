@@ -4,14 +4,14 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <!-- <DatePicker android:id="@+id/DatePicker"
+    <DatePicker android:id="@+id/DatePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:focusable="true"
         android:focusableInTouchMode="true">
-    </DatePicker> -->
+    </DatePicker>
 
-    <!-- <ProgressBar
+    <ProgressBar
         android:id="@+id/ProgressBar"
         android:layout_width="fill_parent"
         android:layout_height="20px"
@@ -159,24 +159,24 @@
                     android:layout_width="80dp"
                     android:layout_height="40dp"/>
             </LinearLayout>
-        </LinearLayout> -->
+        </LinearLayout>
 
-        <!-- <Switch
+        <Switch
         android:id="@+id/demo_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView"
         android:textOn="开"
-        android:textOff="关"/> -->
+        android:textOff="关"/>
 
-        <!-- <CalendarView
+        <CalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" /> -->
+        android:layout_height="match_parent" />
 
 
 
-        <!-- <HorizontalScrollView android:id="@+id/ScrollView"
+        <HorizontalScrollView android:id="@+id/ScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
@@ -243,10 +243,10 @@
 
             </LinearLayout>
 
-        </HorizontalScrollView> -->
+        </HorizontalScrollView>
 
 
-    <!-- <TabHost android:id="@+id/tabhost"
+    <TabHost android:id="@+id/tabhost"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
 
@@ -279,7 +279,7 @@
 
          </LinearLayout>
 
-    </TabHost> -->
+    </TabHost>
 
     <DatePicker android:id="@+id/DatePicker"
             android:layout_width="wrap_content"

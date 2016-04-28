@@ -1251,9 +1251,8 @@ ECode ImageView::IsOpaque(
     VALIDATE_NOT_NULL(opaque);
     View::IsOpaque(opaque);
     Int32 opacity = 0;
-    mDrawable->GetOpacity(&opacity);
     *opaque = (*opaque) || (mDrawable != NULL && mXfermode == NULL
-        && opacity == IPixelFormat::OPAQUE
+        && (mDrawable->GetOpacity(&opacity), opacity) == IPixelFormat::OPAQUE
         && mAlpha * mViewAlphaScale >> 8 == 255
         && IsFilledByImage());
     return NOERROR;
