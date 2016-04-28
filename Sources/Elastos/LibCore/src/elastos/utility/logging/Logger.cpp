@@ -86,6 +86,9 @@ ECode __PrintlnImpl(Int32 bufID, Int32 priority, const char * tag, const char *m
 #endif // _openkode
 }
 
+//=============================================================================
+// Logger
+//=============================================================================
 const Int32 Logger::VERBOSE;
 const Int32 Logger::___DEBUG;
 const Int32 Logger::INFO;

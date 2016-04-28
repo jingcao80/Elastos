@@ -46,6 +46,7 @@
 #include <elastos/droid/os/Process.h>
 #include <elastos/droid/internal/os/BinderInternal.h>
 #include <elastos/droid/app/ActivityManagerNative.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
 #include <SensorService.h>
@@ -105,8 +106,8 @@ using Elastos::Droid::Server::Wm::InputMonitor;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
-
 
 namespace Elastos {
 namespace Droid {
@@ -814,13 +815,14 @@ ECode SystemServer::StartOtherServices()
             if (FAILED(ec)) ReportWtf("making Content Service ready", ec);
         }
 
-        Slogger::I(TAG, "Notification Manager Service todo");
-        // systemService = NULL;
-        // ec = CNotificationManagerService::New(context, (ISystemService**)&systemService);
-        // if (FAILED(ec)) ReportWtf("making Notification Manager Service ready", ec);
-        // mSystemServiceManager->StartService(systemService.Get());
-        // service = ServiceManager::GetService(IContext::NOTIFICATION_SERVICE);
-        // notification = IINotificationManager::Probe(service);
+        systemService = NULL;
+        ec = CNotificationManagerService::New(context, (ISystemService**)&systemService);
+        if (FAILED(ec)) {
+            ReportWtf("making Notification Manager Service ready %d", ec);
+        }
+        mSystemServiceManager->StartService(systemService.Get());
+        service = ServiceManager::GetService(IContext::NOTIFICATION_SERVICE);
+        notification = IINotificationManager::Probe(service);
         // networkPolicy->BindNotificationManager(notification);
 
     //     mSystemServiceManager->StartService(DeviceStorageMonitorService.class);

@@ -34,6 +34,20 @@ public:
 
     CARAPI constructor();
 
+    /**
+     * Constructs a Bundle whose data is stored as a Parcel.  The data
+     * will be unparcelled on first contact, using the assigned ClassLoader.
+     *
+     * @param parcelledData a Parcel containing a Bundle
+     */
+    CARAPI constructor(
+        /* [in] */ IParcel* parcelledData);
+
+    /* package */
+    CARAPI constructor(
+        /* [in] */ IParcel* parcelledData,
+        /* [in] */ Int32 length);
+
     CARAPI constructor(
         /* [in] */ IClassLoader* loader);
 

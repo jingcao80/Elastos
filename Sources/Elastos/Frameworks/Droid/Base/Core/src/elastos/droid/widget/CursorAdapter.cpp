@@ -5,6 +5,7 @@
 #include "elastos/droid/widget/CCursorAdapterChangeObserver.h"
 #include "elastos/droid/widget/CCursorAdapterDataSetObserver.h"
 #include "elastos/droid/os/CHandler.h"
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::EIID_IContext;
@@ -12,6 +13,7 @@ using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Core::CString;
 using Elastos::IO::ICloseable;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {

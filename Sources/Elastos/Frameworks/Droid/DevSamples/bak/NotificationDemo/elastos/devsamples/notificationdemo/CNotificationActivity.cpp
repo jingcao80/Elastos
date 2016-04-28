@@ -1,20 +1,25 @@
+
 #include "CNotificationActivity.h"
 #include "R.h"
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace NotificationDemo {
 
+const String CNotificationActivity::TAG("NotificationDemo::CNotificationActivity");
+
+CAR_OBJECT_IMPL(CNotificationActivity)
 
 ECode CNotificationActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Activity::OnCreate(savedInstanceState);
-    Slogger::D("CNotificationActivity", " >>> OnCreate");
+    Slogger::D(TAG, " >>> OnCreate");
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::notification);
 
@@ -23,32 +28,32 @@ ECode CNotificationActivity::OnCreate(
 
 ECode CNotificationActivity::OnStart()
 {
-    Slogger::D("CNotificationActivity", " >>> OnStart");
-    return NOERROR;
+    Slogger::D(TAG, " >>> OnStart");
+    return Activity::OnStart();
 }
 
 ECode CNotificationActivity::OnResume()
 {
-    Slogger::D("CNotificationActivity", " >>> OnResume");
-    return NOERROR;
+    Slogger::D(TAG, " >>> OnResume");
+    return Activity::OnResume();
 }
 
 ECode CNotificationActivity::OnPause()
 {
-    Slogger::D("CNotificationActivity", " >>> OnPause");
-    return NOERROR;
+    Slogger::D(TAG, " >>> OnPause");
+    return Activity::OnPause();
 }
 
 ECode CNotificationActivity::OnStop()
 {
-    Slogger::D("CNotificationActivity", " >>> OnStop");
-    return NOERROR;
+    Slogger::D(TAG, " >>> OnStop");
+    return Activity::OnStop();
 }
 
 ECode CNotificationActivity::OnDestroy()
 {
-    Slogger::D("CNotificationActivity", " >>> OnDestroy");
-    return NOERROR;
+    Slogger::D(TAG, " >>> OnDestroy");
+    return Activity::OnDestroy();
 }
 
 ECode CNotificationActivity::OnActivityResult(
@@ -56,11 +61,10 @@ ECode CNotificationActivity::OnActivityResult(
     /* [in] */ Int32 resultCode,
     /* [in] */ IIntent *data)
 {
-    return NOERROR;
+    Slogger::D(TAG, " >> OnActivityResult()");
+    return Activity::OnActivityResult(requestCode, resultCode, data);
 }
-
 
 } // namespace NotificationDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos

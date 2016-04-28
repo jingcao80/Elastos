@@ -4,6 +4,7 @@
 #include "CArrayList.h"
 #include "CArrayListIterator.h"
 #include "StringBuilder.h"
+#include "elastos/utility/logging/Logger.h"
 
 using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::StringBuilder;
@@ -11,6 +12,7 @@ using Elastos::IO::IObjectOutputStreamPutField;
 using Elastos::IO::EIID_ISerializable;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IInputStream;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Utility {

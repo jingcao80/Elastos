@@ -6,6 +6,7 @@
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <_Elastos.Droid.Server.h>
 #include "elastos/droid/database/ContentObserver.h"
 
 using Elastos::Droid::Content::IContext;
@@ -66,6 +67,7 @@ public:
  */
 class ManagedServices
     : public Object
+    , public IManagedServices
 {
     friend class ManagedServiceInfo;
 public:
@@ -211,6 +213,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     ManagedServices();
 
     ~ManagedServices();
@@ -237,11 +241,11 @@ public:
         /* [in] */ IInterface* service,
         /* [out] */ ManagedServiceInfo** info);
 
-    CARAPI_(void) UnregisterService(
+    CARAPI UnregisterService(
         /* [in] */ IInterface* service,
         /* [in] */ Int32 userid);
 
-    CARAPI_(void) RegisterService(
+    CARAPI RegisterService(
         /* [in] */ IInterface* service,
         /* [in] */ IComponentName* component,
         /* [in] */ Int32 userid);

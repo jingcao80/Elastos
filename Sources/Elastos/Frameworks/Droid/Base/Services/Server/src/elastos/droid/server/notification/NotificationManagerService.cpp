@@ -5,6 +5,8 @@
 #include <Elastos.Droid.Widget.h>
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "elastos/droid/server/notification/NotificationManagerService.h"
+#include "elastos/droid/server/notification/CConditionProviders.h"
+#include "elastos/droid/server/notification/CNotificationListeners.h"
 #include "elastos/droid/server/notification/CNotificationManagerBinderService.h"
 #include "elastos/droid/server/notification/CStatusBarNotificationHolder.h"
 #include "elastos/droid/server/notification/RankingReconsideration.h"
@@ -95,7 +97,10 @@ using Elastos::Droid::Service::Notification::CStatusBarNotification;
 using Elastos::Droid::Service::Notification::EIID_IIStatusBarNotificationHolder;
 using Elastos::Droid::Service::Notification::INotificationListenerService;
 using Elastos::Droid::Service::Notification::INotificationListenerServiceRanking;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::IPhoneStateListener;
 using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CArrayMap;
@@ -250,8 +255,8 @@ AutoPtr<IUri> NotificationManagerService::UPDATE_MSG_URI = InitUpdateUri();
 NotificationManagerService::SpamExecutorRunnable::SpamExecutorRunnable(
     /* [in] */ Int32 notifId,
     /* [in] */ NotificationManagerService* host)
-    : mNotifId(notifId)
-    , mHost(host)
+    : mHost(host)
+    , mNotifId(notifId)
 {}
 
 ECode NotificationManagerService::SpamExecutorRunnable::Run()
@@ -1027,17 +1032,16 @@ ECode NotificationManagerService::BinderService::ToString(
 //===============================================================================
 //                  NotificationManagerService::NotificationListeners
 //===============================================================================
-NotificationManagerService::NotificationListeners::NotificationListeners(
-    /* [in] */ NotificationManagerService* host)
-    : mHost(host)
-{
-}
+NotificationManagerService::NotificationListeners::NotificationListeners()
+{}
 
 NotificationManagerService::NotificationListeners::~NotificationListeners()
 {}
 
-ECode NotificationManagerService::NotificationListeners::constructor()
+ECode NotificationManagerService::NotificationListeners::constructor(
+    /* [in] */ IInterface* host)
 {
+    mHost = (NotificationManagerService*) IObject::Probe(host);
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     ManagedServices::constructor(context, mHost->mHandler,
@@ -2238,7 +2242,8 @@ ECode NotificationManagerService::MyBroadcastReceiver::OnReceive(
     else if (action.Equals(IIntent::ACTION_USER_PRESENT)) {
         // turn off LED when user passes through lock screen
         mHost->mNotificationLight->TurnOff();
-        mHost->mStatusBar->NotificationLightOff();
+        if (mHost->mStatusBar != NULL)
+            mHost->mStatusBar->NotificationLightOff();
     }
     else if (action.Equals(IIntent::ACTION_USER_SWITCHED)) {
         // reload per-user settings
@@ -2269,7 +2274,9 @@ NotificationManagerService::MyRunnable::~MyRunnable()
 
 ECode NotificationManagerService::MyRunnable::Run()
 {
-    return mHost->mStatusBar->BuzzBeepBlinked();
+    if (mHost->mStatusBar != NULL)
+        return mHost->mStatusBar->BuzzBeepBlinked();
+    return NOERROR;
 }
 
 //===============================================================================
@@ -2741,6 +2748,26 @@ void NotificationManagerService::ZenModeHelperCallback::OnZenModeChanged()
 }
 
 //===============================================================================
+//                  NotificationManagerService::InnerSub_PhoneStateListener
+//===============================================================================
+const String NotificationManagerService::InnerSub_PhoneStateListener::TAG("NotificationManagerService::InnerSub_PhoneStateListener");
+
+NotificationManagerService::InnerSub_PhoneStateListener::InnerSub_PhoneStateListener(
+    /* [in] */ NotificationManagerService* host)
+    : mHost(host)
+{}
+
+ECode NotificationManagerService::InnerSub_PhoneStateListener::OnCallStateChanged(
+    /* [in] */ Int32 state,
+    /* [in] */ const String& incomingNumber)
+{
+    if (mHost->mCallState == state) return NOERROR;
+    if (DBG) Slogger::D(TAG, (String("Call state changed: ") + CallStateToString(state)).string());
+    mHost->mCallState = state;
+    return NOERROR;
+}
+
+//===============================================================================
 //                  NotificationManagerService
 //===============================================================================
 
@@ -2801,56 +2828,83 @@ void NotificationManagerService::LoadPolicyFile()
 
         // try {
         AutoPtr<IFileInputStream> infile;
-        mPolicyFile->OpenRead((IFileInputStream**)&infile);
+        ECode ec;
+        do {
+            ec = mPolicyFile->OpenRead((IFileInputStream**)&infile);
+            if (FAILED(ec)) break;
 
-        AutoPtr<IXmlPullParser> parser;
-        Xml::NewPullParser((IXmlPullParser**)&parser);
-        parser->SetInput(IInputStream::Probe(infile), String(NULL));
+            AutoPtr<IXmlPullParser> parser;
+            ec = Xml::NewPullParser((IXmlPullParser**)&parser);
+            if (FAILED(ec)) break;
+            ec = parser->SetInput(IInputStream::Probe(infile), String(NULL));
+            if (FAILED(ec)) break;
 
-        Int32 type;
-        String tag;
-        Int32 version = DB_VERSION;
+            Int32 type;
+            String tag;
+            Int32 version = DB_VERSION;
 
-        while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT) {
-            if (type != IXmlPullParser::START_TAG) {
-                continue;
-            }
-
-            parser->GetName(&tag);
-
-            if (TAG_BODY.Equals(tag)) {
-                String value;
-                parser->GetAttributeValue(String(NULL), ATTR_VERSION, &value);
-                version = StringUtils::ParseInt32(value);
-            }
-            else if (TAG_BLOCKED_PKGS.Equals(tag)) {
-                parser->Next(&type);
-
-                while (type != IXmlPullParser::END_DOCUMENT) {
-                    parser->GetName(&tag);
-
-                    if (TAG_PACKAGE.Equals(tag)) {
-                        String value;
-                        parser->GetAttributeValue(String(NULL), ATTR_NAME, &value);
-                        mBlockedPackages->Add(CoreUtils::Convert(value));
-                    }
-                    else if (TAG_BLOCKED_PKGS.Equals(tag) && type == IXmlPullParser::END_TAG) {
-                        break;
-                    }
+            while (TRUE) {
+                ec = parser->Next(&type);
+                if (FAILED(ec)) break;
+                if (type == IXmlPullParser::END_DOCUMENT)
+                    break;
+                if (type != IXmlPullParser::START_TAG) {
+                    continue;
                 }
-            }
-            mZenModeHelper->ReadXml(parser);
-            mRankingHelper->ReadXml(parser);
-        }
 
+                ec = parser->GetName(&tag);
+                if (FAILED(ec)) break;
+
+                if (TAG_BODY.Equals(tag)) {
+                    String value;
+                    ec = parser->GetAttributeValue(String(NULL), ATTR_VERSION, &value);
+                    if (FAILED(ec)) break;
+                    version = StringUtils::ParseInt32(value);
+                }
+                else if (TAG_BLOCKED_PKGS.Equals(tag)) {
+                    ec = parser->Next(&type);
+                    if (FAILED(ec)) break;
+
+                    while (type != IXmlPullParser::END_DOCUMENT) {
+                        ec = parser->GetName(&tag);
+                        if (FAILED(ec)) break;
+
+                        if (TAG_PACKAGE.Equals(tag)) {
+                            String value;
+                            ec = parser->GetAttributeValue(String(NULL), ATTR_NAME, &value);
+                            if (FAILED(ec)) break;
+                            mBlockedPackages->Add(CoreUtils::Convert(value));
+                        }
+                        else if (TAG_BLOCKED_PKGS.Equals(tag) && type == IXmlPullParser::END_TAG) {
+                            break;
+                        }
+                    }
+                    if (FAILED(ec)) break;
+                }
+                ec = mZenModeHelper->ReadXml(parser);
+                if (FAILED(ec)) break;
+                ec = mRankingHelper->ReadXml(parser);
+                if (FAILED(ec)) break;
+            }
+        } while(FALSE);
+        if (FAILED(ec)) {
         // } catch (FileNotFoundException e) {
-        //     // No data yet
+            if ((ECode) E_FILE_NOT_FOUND_EXCEPTION == ec) {
+                // No data yet
+            }
         // } catch (IOException e) {
-        //     Log.wtf(TAG, "Unable to read notification policy", e);
+            else if ((ECode) E_IO_EXCEPTION == ec) {
+                Logger::W(TAG, "Unable to read notification policy %d", ec);
+            }
         // } catch (NumberFormatException e) {
-        //     Log.wtf(TAG, "Unable to parse notification policy", e);
+            else if ((ECode) E_NUMBER_FORMAT_EXCEPTION == ec) {
+                Logger::W(TAG, "Unable to parse notification policy %d", ec);
+            }
         // } catch (XmlPullParserException e) {
-        //     Log.wtf(TAG, "Unable to parse notification policy", e);
+            else if ((ECode) E_XML_PULL_PARSER_EXCEPTION == ec) {
+                Logger::W(TAG, "Unable to parse notification policy %d", ec);
+            }
+        }
         // } finally {
         AutoPtr<IIoUtils> ioUtils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
@@ -3017,14 +3071,16 @@ ECode NotificationManagerService::OnStart()
 
     ImportOldBlockDb();
 
-    mListeners = new NotificationListeners(this);
-    mListeners->constructor();
-    mConditionProviders = new ConditionProviders();
-    mConditionProviders->constructor(context,
-            mHandler, mUserProfiles, mZenModeHelper);
+    AutoPtr<IManagedServices> managedServices;
+    CNotificationListeners::New(TO_IINTERFACE(this), (IManagedServices**)&managedServices);
+    mListeners = (NotificationListeners*) managedServices.Get();
+    managedServices = NULL;
+    CConditionProviders::New(context, mHandler, TO_IINTERFACE(mUserProfiles), TO_IINTERFACE(mZenModeHelper), (IManagedServices**)&managedServices);
+    mConditionProviders = (ConditionProviders*) managedServices.Get();
     obj = GetLocalService(EIID_IStatusBarManagerInternal);
     mStatusBar = IStatusBarManagerInternal::Probe(obj);
-    mStatusBar->SetNotificationDelegate(mNotificationDelegate);
+    if (mStatusBar != NULL)
+        mStatusBar->SetNotificationDelegate(mNotificationDelegate);
 
     obj = GetLocalService(EIID_ILightsManager);
     AutoPtr<LightsManager> lights = (LightsManager*)ILightsManager::Probe(obj);
@@ -4624,7 +4680,8 @@ void NotificationManagerService::UpdateLightsLocked()
 
     if (!enableLed) {
         mNotificationLight->TurnOff();
-        mStatusBar->NotificationLightOff();
+        if (mStatusBar != NULL)
+            mStatusBar->NotificationLightOff();
     }
     else {
         AutoPtr<INotification> ledno;
@@ -4658,7 +4715,8 @@ void NotificationManagerService::UpdateLightsLocked()
         }
 
         // let SystemUI make an independent decision
-        mStatusBar->NotificationLightPulse(ledARGB, ledOnMS, ledOffMS);
+        if (mStatusBar != NULL)
+            mStatusBar->NotificationLightPulse(ledARGB, ledOnMS, ledOffMS);
     }
 }
 
@@ -4879,15 +4937,14 @@ String NotificationManagerService::CallStateToString(
 
 void NotificationManagerService::ListenForCallState()
 {
-    assert(0 && "TODO");
-    // TelephonyManager.from(getContext()).listen(new PhoneStateListener() {
-    //     @Override
-    //     public void onCallStateChanged(int state, String incomingNumber) {
-    //         if (mCallState == state) return;
-    //         if (DBG) Slog.d(TAG, "Call state changed: " + callStateToString(state));
-    //         mCallState = state;
-    //     }
-    // }, IPhoneStateListener::LISTEN_CALL_STATE);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<ITelephonyManagerHelper> helper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    AutoPtr<ITelephonyManager> manager;
+    helper->From(context, (ITelephonyManager**)&manager);
+    if (manager != NULL)
+        manager->Listen(new InnerSub_PhoneStateListener(this), IPhoneStateListener::LISTEN_CALL_STATE);
 }
 
 AutoPtr<INotificationRankingUpdate> NotificationManagerService::MakeRankingUpdateLocked(

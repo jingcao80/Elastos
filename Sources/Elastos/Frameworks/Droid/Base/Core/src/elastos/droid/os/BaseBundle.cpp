@@ -38,7 +38,7 @@ AutoPtr<IParcel> InitEMPTY_PARCEL()
 
 CAR_INTERFACE_IMPL(BaseBundle, Object, IBaseBundle)
 
-const String BaseBundle::TAG("Bundle");
+const String BaseBundle::TAG("BaseBundle");
 const Boolean BaseBundle::DEBUG = FALSE;
 
 const Int32 BaseBundle::BUNDLE_MAGIC = 0x4C444E42; // 'B' 'N' 'D' 'L'
@@ -829,7 +829,7 @@ ECode BaseBundle::GetString(
     /* [out] */ String* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = NULL;
+    *value = String(NULL);
 
     Unparcel();
     AutoPtr<IInterface> obj = GetValue(key);
@@ -1661,7 +1661,6 @@ ECode BaseBundle::WriteArrayMapInternal(
         outset->GetIterator((IIterator**)&it);
         Boolean hasNext = FALSE;
         String key;
-        Int32 i = 0;
         while ((it->HasNext(&hasNext), hasNext)) {
             AutoPtr<IInterface> outface;
             it->GetNext((IInterface**)&outface);
@@ -1746,10 +1745,6 @@ ECode BaseBundle::ReadFromParcelInner(
         return E_RUNTIME_EXCEPTION;
     }
     FAIL_RETURN(ReadFromParcelInner(parcel, length));
-    parcel->ReadInt32(&length);
-    if (length > 0) {
-        parcel->ReadArrayOf((Handle32*)&mJavaData);
-    }
     return NOERROR;
 }
 
@@ -1787,6 +1782,10 @@ ECode BaseBundle::ReadFromParcelInner(
     mParcelledData->AppendFrom(source, offset, length);
     mParcelledData->SetDataPosition(0);
 
+    source->ReadInt32(&length);
+    if (length > 0) {
+        source->ReadArrayOf((Handle32*)&mJavaData);
+    }
     return NOERROR;
 }
 

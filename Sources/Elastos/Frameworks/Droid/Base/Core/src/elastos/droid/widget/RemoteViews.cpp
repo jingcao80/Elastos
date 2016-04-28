@@ -2502,127 +2502,127 @@ ECode RemoteViews::constructor(
     /* [in] */ IParcel* parcel,
     /* [in] */ IBitmapCache* bitmapCache)
 {
-        Int32 mode;
-        parcel->ReadInt32(&mode);
+    Int32 mode;
+    parcel->ReadInt32(&mode);
 
-        // We only store a bitmap cache in the root of the RemoteViews.
-        if (bitmapCache == NULL) {
-            mBitmapCache = new BitmapCache(parcel);
-        } else {
-            SetBitmapCache(bitmapCache);
-            SetNotRoot();
-        }
+    // We only store a bitmap cache in the root of the RemoteViews.
+    if (bitmapCache == NULL) {
+        mBitmapCache = new BitmapCache(parcel);
+    } else {
+        SetBitmapCache(bitmapCache);
+        SetNotRoot();
+    }
 
-        if (mode == MODE_NORMAL) {
-            parcel->ReadInterfacePtr((Handle32*)&mApplication);
-            parcel->ReadInt32(&mLayoutId);
-            Int32 tmp;
-            parcel->ReadInt32(&tmp);
-            mIsWidgetCollectionChild = tmp == 1;
+    if (mode == MODE_NORMAL) {
+        parcel->ReadInterfacePtr((Handle32*)&mApplication);
+        parcel->ReadInt32(&mLayoutId);
+        Int32 tmp;
+        parcel->ReadInt32(&tmp);
+        mIsWidgetCollectionChild = tmp == 1;
 
-            Int32 count;
-            parcel->ReadInt32(&count);
-            if (count > 0) {
-                for (int i=0; i<count; i++) {
-                    Int32 tag;
-                    parcel->ReadInt32(&tag);
-                    AutoPtr<IRemoteViewsAction> actionImpl;
-                    switch (tag) {
-                        case _SetOnClickPendingIntent::TAG:
-                            actionImpl = new _SetOnClickPendingIntent(this);
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case _SetDrawableParameters::TAG:
-                            actionImpl = new _SetDrawableParameters();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case ReflectionAction::TAG:
-                            actionImpl = new ReflectionAction();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case ViewGroupAction::TAG:
-                            actionImpl = new ViewGroupAction(this);
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case ReflectionActionWithoutParams::TAG:
-                            actionImpl = new ReflectionActionWithoutParams(this);
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case _SetEmptyView::TAG:
-                            actionImpl = new _SetEmptyView();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case _SetPendingIntentTemplate::TAG:
-                            actionImpl = new _SetPendingIntentTemplate(this);
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case _SetOnClickFillInIntent::TAG:
-                            actionImpl = new _SetOnClickFillInIntent(this);
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case SetRemoteViewsAdapterIntent::TAG:
-                            actionImpl = new SetRemoteViewsAdapterIntent();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case TextViewDrawableAction::TAG:
-                            actionImpl = new TextViewDrawableAction();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case TextViewSizeAction::TAG:
-                            actionImpl = new TextViewDrawableAction();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case ViewPaddingAction::TAG:
-                            actionImpl = new ViewPaddingAction();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case BitmapReflectionAction::TAG:
-                            actionImpl = new BitmapReflectionAction(this);
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case SetRemoteViewsAdapterList::TAG:
-                            actionImpl = new SetRemoteViewsAdapterList();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        case TextViewDrawableColorFilterAction::TAG:
-                            actionImpl = new TextViewDrawableColorFilterAction();
-                            IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
-                            mActions.PushBack(actionImpl);
-                            break;
-                        default:
-                            SLOGGERE(TAG, String("tag not found: ") + StringUtils::ToString(tag))
-                            return E_RUNTIME_EXCEPTION;
-                    }
+        Int32 count;
+        parcel->ReadInt32(&count);
+        if (count > 0) {
+            for (int i=0; i<count; i++) {
+                Int32 tag;
+                parcel->ReadInt32(&tag);
+                AutoPtr<IRemoteViewsAction> actionImpl;
+                switch (tag) {
+                    case _SetOnClickPendingIntent::TAG:
+                        actionImpl = new _SetOnClickPendingIntent(this);
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case _SetDrawableParameters::TAG:
+                        actionImpl = new _SetDrawableParameters();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case ReflectionAction::TAG:
+                        actionImpl = new ReflectionAction();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case ViewGroupAction::TAG:
+                        actionImpl = new ViewGroupAction(this);
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case ReflectionActionWithoutParams::TAG:
+                        actionImpl = new ReflectionActionWithoutParams(this);
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case _SetEmptyView::TAG:
+                        actionImpl = new _SetEmptyView();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case _SetPendingIntentTemplate::TAG:
+                        actionImpl = new _SetPendingIntentTemplate(this);
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case _SetOnClickFillInIntent::TAG:
+                        actionImpl = new _SetOnClickFillInIntent(this);
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case SetRemoteViewsAdapterIntent::TAG:
+                        actionImpl = new SetRemoteViewsAdapterIntent();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case TextViewDrawableAction::TAG:
+                        actionImpl = new TextViewDrawableAction();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case TextViewSizeAction::TAG:
+                        actionImpl = new TextViewDrawableAction();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case ViewPaddingAction::TAG:
+                        actionImpl = new ViewPaddingAction();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case BitmapReflectionAction::TAG:
+                        actionImpl = new BitmapReflectionAction(this);
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case SetRemoteViewsAdapterList::TAG:
+                        actionImpl = new SetRemoteViewsAdapterList();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    case TextViewDrawableColorFilterAction::TAG:
+                        actionImpl = new TextViewDrawableColorFilterAction();
+                        IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
+                        mActions.PushBack(actionImpl);
+                        break;
+                    default:
+                        SLOGGERE(TAG, String("tag not found: ") + StringUtils::ToString(tag))
+                        return E_RUNTIME_EXCEPTION;
                 }
             }
-        } else {
-            // MODE_HAS_LANDSCAPE_AND_PORTRAIT
-            CRemoteViews::New((IRemoteViews**)&mLandscape);
-            CRemoteViews::New((IRemoteViews**)&mPortrait);
-            ((RemoteViews*)mLandscape.Get())->constructor(parcel, mBitmapCache);
-            ((RemoteViews*)mLandscape.Get())->constructor(parcel, mBitmapCache);
-            mApplication = ((RemoteViews*)mPortrait.Get())->mApplication;
-            mPortrait->GetLayoutId(&mLayoutId);
         }
+    } else {
+        // MODE_HAS_LANDSCAPE_AND_PORTRAIT
+        CRemoteViews::New((IRemoteViews**)&mLandscape);
+        CRemoteViews::New((IRemoteViews**)&mPortrait);
+        ((RemoteViews*)mLandscape.Get())->constructor(parcel, mBitmapCache);
+        ((RemoteViews*)mLandscape.Get())->constructor(parcel, mBitmapCache);
+        mApplication = ((RemoteViews*)mPortrait.Get())->mApplication;
+        mPortrait->GetLayoutId(&mLayoutId);
+    }
 
-        // setup the memory usage statistics
-        mMemoryUsageCounter = new MemoryUsageCounter();
-        RecalculateMemoryUsage();
-        return NOERROR;
+    // setup the memory usage statistics
+    mMemoryUsageCounter = new MemoryUsageCounter();
+    RecalculateMemoryUsage();
+    return NOERROR;
 }
 
 ECode RemoteViews::ReadFromParcel(
@@ -2634,33 +2634,33 @@ ECode RemoteViews::ReadFromParcel(
 ECode RemoteViews::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-        if (!HasLandscapeAndPortraitLayouts()) {
-            dest->WriteInt32(MODE_NORMAL);
-            // We only write the bitmap cache if we are the root RemoteViews, as this cache
-            // is shared by all children.
-            if (mIsRoot) {
-                mBitmapCache->WriteBitmapsToParcel(dest);
-            }
-            IParcelable::Probe(mApplication)->WriteToParcel(dest);
-            dest->WriteInt32(mLayoutId);
-            dest->WriteInt32(mIsWidgetCollectionChild ? 1 : 0);
-            Int32 count = mActions.GetSize();
-            dest->WriteInt32(count);
-            for (int i=0; i<count; i++) {
-                AutoPtr<IRemoteViewsAction> a = mActions[i];
-                IParcelable::Probe(a)->WriteToParcel(dest);
-            }
-        } else {
-            dest->WriteInt32(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
-            // We only write the bitmap cache if we are the root RemoteViews, as this cache
-            // is shared by all children.
-            if (mIsRoot) {
-                mBitmapCache->WriteBitmapsToParcel(dest);
-            }
-            IParcelable::Probe(mLandscape)->WriteToParcel(dest);
-            IParcelable::Probe(mLandscape)->WriteToParcel(dest);
+    if (!HasLandscapeAndPortraitLayouts()) {
+        dest->WriteInt32(MODE_NORMAL);
+        // We only write the bitmap cache if we are the root RemoteViews, as this cache
+        // is shared by all children.
+        if (mIsRoot) {
+            mBitmapCache->WriteBitmapsToParcel(dest);
         }
-        return NOERROR;
+        IParcelable::Probe(mApplication)->WriteToParcel(dest);
+        dest->WriteInt32(mLayoutId);
+        dest->WriteInt32(mIsWidgetCollectionChild ? 1 : 0);
+        Int32 count = mActions.GetSize();
+        dest->WriteInt32(count);
+        for (int i=0; i<count; i++) {
+            AutoPtr<IRemoteViewsAction> a = mActions[i];
+            IParcelable::Probe(a)->WriteToParcel(dest);
+        }
+    } else {
+        dest->WriteInt32(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
+        // We only write the bitmap cache if we are the root RemoteViews, as this cache
+        // is shared by all children.
+        if (mIsRoot) {
+            mBitmapCache->WriteBitmapsToParcel(dest);
+        }
+        IParcelable::Probe(mLandscape)->WriteToParcel(dest);
+        IParcelable::Probe(mLandscape)->WriteToParcel(dest);
+    }
+    return NOERROR;
 }
 
 ECode RemoteViews::SetNotRoot()
@@ -2806,8 +2806,7 @@ ECode RemoteViews::Clone(
     CParcel::New((IParcel**)&source);
     WriteToParcel(source);
     source->SetDataPosition(0);
-    CRemoteViews::New(remoteViews);
-    IParcelable::Probe(*remoteViews)->ReadFromParcel(source);
+    CRemoteViews::New(source, NULL, remoteViews);
     // source->Recycle();
     return NOERROR;
 }

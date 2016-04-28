@@ -177,6 +177,13 @@ module
         constructor();
 
         constructor(
+            [in] IParcel* parcelledData);
+
+        constructor(
+            [in] IParcel* parcelledData,
+            [in] Int32 length);
+
+        constructor(
             [in] IClassLoader* loader);
 
         constructor(

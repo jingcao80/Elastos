@@ -1,15 +1,14 @@
 
 #include "CActivityOne.h"
-#include <elastos/System.h>
-#include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
-#include <R.h>
 #include "R.h"
+#include <elastos/droid/R.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::System;
-using Elastos::Core::CStringWrapper;
-using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Slogger;
+#include <Elastos.Droid.Widget.h>
+#include <Elastos.Droid.Os.h>
+
 using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IComponentName;
@@ -28,56 +27,30 @@ using Elastos::Droid::App::ITaskStackBuilderHelper;
 using Elastos::Droid::App::CTaskStackBuilderHelper;
 using Elastos::Droid::App::EIID_INotificationManager;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Core::CString;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::App::IIActivityManager;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace NotificationDemo {
+
+//=============================================================================
+// CActivityOne::MyListener
+//=============================================================================
+CAR_INTERFACE_IMPL(CActivityOne::MyListener, Object, IViewOnClickListener)
 
 CActivityOne::MyListener::MyListener(
     /* [in] */ CActivityOne* host)
     : mHost(host)
 {
-}
-
-PInterface CActivityOne::MyListener::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnClickListener*)this;
-    }
-    else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
-    }
-
-    return NULL;
-}
-
-UInt32 CActivityOne::MyListener::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CActivityOne::MyListener::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CActivityOne::MyListener::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    if (pIID == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
-
-    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
-        *pIID = EIID_IViewOnClickListener;
-    }
-    else {
-        return E_INVALID_ARGUMENT;
-    }
-    return NOERROR;
 }
 
 ECode CActivityOne::MyListener::OnClick(
@@ -101,7 +74,12 @@ ECode CActivityOne::MyListener::OnClick(
     return NOERROR;
 }
 
-//=============================================================================================
+//=============================================================================
+// CActivityOne
+//=============================================================================
+CAR_OBJECT_IMPL(CActivityOne)
+
+const String CActivityOne::TAG("NotificationDemo::CActivityOne");
 
 CActivityOne::CActivityOne()
     : mNotificationID(100)
@@ -109,9 +87,15 @@ CActivityOne::CActivityOne()
 {
 }
 
+ECode CActivityOne::constructor()
+{
+    Logger::I(TAG, " >> constructor()");
+    return Activity::constructor();
+}
+
 ECode CActivityOne::StartStatusBarNotification()
 {
-    Slogger::D("CActivityOne", " >> Start StatusBarNotification...");
+    Slogger::D(TAG, " >> Start StatusBarNotification...");
 
     String title("Title: Meeting with Business");
     String message("Msg: Kesalin 10:00 AM EST ");
@@ -137,11 +121,11 @@ ECode CActivityOne::StartStatusBarNotification()
     helper->GetActivity(this, 0, intent, 0, (IPendingIntent**)&pendingIntent);
 
     AutoPtr<ICharSequence> tickerText;
-    CStringWrapper::New(ticker, (ICharSequence**)&tickerText);
+    CString::New(ticker, (ICharSequence**)&tickerText);
 
     AutoPtr<ICharSequence> titleSeq, msgSeq;
-    CStringWrapper::New(title, (ICharSequence**)&titleSeq);
-    CStringWrapper::New(message, (ICharSequence**)&msgSeq);
+    CString::New(title, (ICharSequence**)&titleSeq);
+    CString::New(message, (ICharSequence**)&msgSeq);
 
     // Create notifcation
     //
@@ -164,8 +148,8 @@ ECode CActivityOne::StartStatusBarNotification()
         this, titleSeq, msgSeq, pendingIntent));
 
     String notificationStr;
-    notification->ToString(&notificationStr);
-    Slogger::D("CActivityOne::StartStatusBarNotification", " >> notify (%s)", notificationStr.string());
+    IObject::Probe(notification)->ToString(&notificationStr);
+    Slogger::D(TAG, " >> notify (%s)", notificationStr.string());
 
     // Notify notification
     //
@@ -182,7 +166,7 @@ ECode CActivityOne::StartNotification()
 
 ECode CActivityOne::UpdateNotification()
 {
-    Slogger::D("CActivityOne", " >> UpdateNotification...");
+    Slogger::D(TAG, " >> UpdateNotification...");
     return NotifyNotification(TRUE);
 }
 
@@ -205,9 +189,9 @@ ECode CActivityOne::NotifyNotification(
     CNotificationBuilder::New(context, (INotificationBuilder**)&builder);
 
     AutoPtr<ICharSequence> tickerSeq, titleSeq, contentSeq;
-    CStringWrapper::New(ticker, (ICharSequence**)&tickerSeq);
-    CStringWrapper::New(title, (ICharSequence**)&titleSeq);
-    CStringWrapper::New(content, (ICharSequence**)&contentSeq);
+    CString::New(ticker, (ICharSequence**)&tickerSeq);
+    CString::New(title, (ICharSequence**)&titleSeq);
+    CString::New(content, (ICharSequence**)&contentSeq);
 
     builder->SetContentTitle(titleSeq);
     builder->SetContentText(contentSeq);
@@ -252,8 +236,8 @@ ECode CActivityOne::NotifyNotification(
     ASSERT_SUCCEEDED(notification->SetLatestEventInfo(this, titleSeq, contentSeq, resultPendingIntent));
 
     String notificationStr;
-    notification->ToString(&notificationStr);
-    Slogger::D("CActivityOne::NotifyNotification", " >> notify (%s)", notificationStr.string());
+    IObject::Probe(notification)->ToString(&notificationStr);
+    Slogger::D(TAG, " >> notify (%s)", notificationStr.string());
 
     ASSERT_SUCCEEDED(notificationManager->Notify(mNotificationID, notification));
 
@@ -262,7 +246,7 @@ ECode CActivityOne::NotifyNotification(
 
 ECode CActivityOne::CancelNotification()
 {
-    Slogger::D("CActivityOne", " CancelNotification...");
+    Slogger::D(TAG, " CancelNotification...");
 
     AutoPtr<INotificationManager> notificationManager;
     AutoPtr<IInterface> svTemp;
@@ -277,13 +261,27 @@ ECode CActivityOne::CancelNotification()
 ECode CActivityOne::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Logger::I(TAG, " >> OnCreate()");
+
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::main);
 
     AutoPtr<MyListener> l = new MyListener(this);
-    IViewOnClickListener* clickListener = (IViewOnClickListener*)(l->Probe(EIID_IViewOnClickListener));
+    AutoPtr<IViewOnClickListener> clickListener = IViewOnClickListener::Probe(l);
 
     AutoPtr<IView> temp;
+
+#if 1 // TODO: temp codes to resolve default theme working incorrectly
+    Boolean isNoTitle;
+    GetWindow()->HasFeature(IWindow::FEATURE_NO_TITLE, &isNoTitle);
+    if (!isNoTitle) {
+        temp = FindViewById(Elastos::Droid::R::id::content);
+        assert(temp != NULL);
+        AutoPtr<IViewGroupLayoutParams> params;
+        IView::Probe(temp)->GetLayoutParams((IViewGroupLayoutParams**)&params);
+        params->SetHeight(IViewGroupLayoutParams::MATCH_PARENT);
+    }
+#endif
 
     temp = FindViewById(R::id::statusBarNotificationButton);
     assert(temp != NULL);
@@ -329,11 +327,11 @@ ECode CActivityOne::SendNotification(
     helper->GetActivity(this, 0, intent, 0, (IPendingIntent**)&pendingIntent);
 
     AutoPtr<ICharSequence> tickerText;
-    CStringWrapper::New(String("New Message"), (ICharSequence**)&tickerText);
+    CString::New(String("New Message"), (ICharSequence**)&tickerText);
 
     AutoPtr<ICharSequence> titleSeq, msgSeq;
-    CStringWrapper::New(title, (ICharSequence**)&titleSeq);
-    CStringWrapper::New(message, (ICharSequence**)&msgSeq);
+    CString::New(title, (ICharSequence**)&titleSeq);
+    CString::New(message, (ICharSequence**)&msgSeq);
 
     // Create notifcation
     //
@@ -343,7 +341,7 @@ ECode CActivityOne::SendNotification(
     system->GetCurrentTimeMillis(&now);
     AutoPtr<INotification> notification;
     ASSERT_SUCCEEDED(CNotification::New(
-        Elastos::Droid::R::drawable::ic_launcher_android,
+        Elastos::Droid::R::drawable::emo_im_kissing/* ic_launcher_android */,
         tickerText,
         now,
         (INotification**)&notification));
@@ -359,32 +357,32 @@ ECode CActivityOne::SendNotification(
 
 ECode CActivityOne::OnStart()
 {
-    // TODO: Add your code here
-    return NOERROR;
+    Logger::I(TAG, " >> OnStart()");
+    return Activity::OnStart();
 }
 
 ECode CActivityOne::OnResume()
 {
-    // TODO: Add your code here
-    return NOERROR;
+    Logger::I(TAG, " >> OnResume()");
+    return Activity::OnResume();
 }
 
 ECode CActivityOne::OnPause()
 {
-    // TODO: Add your code here
-    return NOERROR;
+    Logger::I(TAG, " >> OnPause()");
+    return Activity::OnPause();
 }
 
 ECode CActivityOne::OnStop()
 {
-    // TODO: Add your code here
-    return NOERROR;
+    Logger::I(TAG, " >> OnStop()");
+    return Activity::OnStop();
 }
 
 ECode CActivityOne::OnDestroy()
 {
-    // TODO: Add your code here
-    return NOERROR;
+    Logger::I(TAG, " >> OnDestroy()");
+    return Activity::OnDestroy();
 }
 
 ECode CActivityOne::OnActivityResult(
@@ -392,10 +390,10 @@ ECode CActivityOne::OnActivityResult(
     /* [in] */ Int32 resultCode,
     /* [in] */ IIntent *data)
 {
-    return NOERROR;
+    Logger::I(TAG, " >> OnActivityResult()");
+    return Activity::OnActivityResult(requestCode, resultCode, data);
 }
 
 } // namespace NotificationDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos

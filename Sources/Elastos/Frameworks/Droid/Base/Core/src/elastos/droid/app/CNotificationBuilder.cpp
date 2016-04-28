@@ -24,6 +24,7 @@
 #include "elastos/droid/internal/utility/NotificationColorUtil.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/core/ClassLoader.h>
 
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Build;
@@ -45,6 +46,7 @@ using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::Internal::Utility::NotificationColorUtil;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::ClassLoader;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Text::INumberFormatHelper;
@@ -89,6 +91,7 @@ CNotificationBuilder::CNotificationBuilder()
     , mOriginatingUserId(0)
     , mHasThreeLines(FALSE)
 {
+    CBundle::New((IBundle**)&mRebuildBundle);
 }
 
 CNotificationBuilder::~CNotificationBuilder()
@@ -1312,38 +1315,41 @@ ECode CNotificationBuilder::StripForDelivery(
     n->GetContentView((IRemoteViews**)&contentView);
     Int32 vac, sn;
     extras->GetInt32(INotificationBuilder::EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT, -1, &vac);
-    contentView->GetSequenceNumber(&sn);
-    if (stripViews && IBuilderRemoteViews::Probe(contentView)
-        && vac == sn) {
-        n->SetContentView(NULL);
-        extras->PutBoolean(INotificationBuilder::EXTRA_REBUILD_CONTENT_VIEW, TRUE);
-        extras->Remove(INotificationBuilder::EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT);
-        isStripped = TRUE;
+    if (stripViews && IBuilderRemoteViews::Probe(contentView)) {
+        contentView->GetSequenceNumber(&sn);
+        if (vac == sn) {
+            n->SetContentView(NULL);
+            extras->PutBoolean(INotificationBuilder::EXTRA_REBUILD_CONTENT_VIEW, TRUE);
+            extras->Remove(INotificationBuilder::EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT);
+            isStripped = TRUE;
+        }
     }
 
     AutoPtr<IRemoteViews> bigContentView;
     n->GetBigContentView((IRemoteViews**)&bigContentView);
     extras->GetInt32(INotificationBuilder::EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT, -1, &vac);
-    bigContentView->GetSequenceNumber(&sn);
-    if (stripViews && IBuilderRemoteViews::Probe(bigContentView)
-         && vac == sn) {
-        n->SetBigContentView(NULL);
-        extras->PutBoolean(INotificationBuilder::EXTRA_REBUILD_BIG_CONTENT_VIEW, TRUE);
-        extras->Remove(INotificationBuilder::EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT);
-        isStripped = TRUE;
+    if (stripViews && IBuilderRemoteViews::Probe(bigContentView)) {
+        bigContentView->GetSequenceNumber(&sn);
+        if (vac == sn) {
+            n->SetBigContentView(NULL);
+            extras->PutBoolean(INotificationBuilder::EXTRA_REBUILD_BIG_CONTENT_VIEW, TRUE);
+            extras->Remove(INotificationBuilder::EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT);
+            isStripped = TRUE;
+        }
     }
 
 
     AutoPtr<IRemoteViews> headsUpContentView;
     n->GetHeadsUpContentView((IRemoteViews**)&headsUpContentView);
     extras->GetInt32(INotificationBuilder::EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT, -1, &vac);
-    headsUpContentView->GetSequenceNumber(&sn);
-    if (stripViews && IBuilderRemoteViews::Probe(headsUpContentView)
-        && vac == sn) {
-        n->SetHeadsUpContentView(NULL);
-        extras->PutBoolean(INotificationBuilder::EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW, TRUE);
-        extras->Remove(INotificationBuilder::EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
-        isStripped = TRUE;
+    if (stripViews && IBuilderRemoteViews::Probe(headsUpContentView)) {
+        headsUpContentView->GetSequenceNumber(&sn);
+        if (vac == sn) {
+            n->SetHeadsUpContentView(NULL);
+            extras->PutBoolean(INotificationBuilder::EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW, TRUE);
+            extras->Remove(INotificationBuilder::EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
+            isStripped = TRUE;
+        }
     }
 
     if (isStripped) {
@@ -1444,14 +1450,19 @@ ECode CNotificationBuilder::Rebuild(
 AutoPtr<IClassInfo> CNotificationBuilder::GetNotificationStyleClass(
     /* [in] */ const String& templateClass)
 {
-    assert(0 && "TODO");
-//     Class<? extends Style>[] classes = new Class[]{
-//             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class};
-//     for (Class<? extends Style> innerClass : classes) {
-//         if (templateClass.equals(innerClass->GetName())) {
-//             return innerClass;
-//         }
-//     }
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+    AutoPtr<ArrayOf<String> > classes = ArrayOf<String>::Alloc(4);
+    classes->Set(0, String("Elastos.Droid.App.CNotificationBigTextStyle"));
+    classes->Set(1, String("Elastos.Droid.App.CNotificationBigPictureStyle"));
+    classes->Set(2, String("Elastos.Droid.App.CNotificationInboxStyle"));
+    classes->Set(3, String("Elastos.Droid.App.CNotificationMediaStyle"));
+    for (Int32 i = 0; i < classes->GetLength(); ++i) {
+        if (templateClass.Equals((*classes)[i])) {
+            AutoPtr<IClassInfo> ci;
+            cl->LoadClass(templateClass, (IClassInfo**)&ci);
+            return ci;
+        }
+    }
     return NULL;
 }
 

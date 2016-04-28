@@ -52,6 +52,27 @@ ECode CBundle::constructor()
 }
 
 ECode CBundle::constructor(
+    /* [in] */ IParcel* parcelledData)
+{
+    BaseBundle::constructor(parcelledData);
+
+    mParcelledData->HasFileDescriptors(&mHasFds);
+    mFdsKnown = TRUE;
+    return NOERROR;
+}
+
+ECode CBundle::constructor(
+    /* [in] */ IParcel* parcelledData,
+    /* [in] */ Int32 length)
+{
+    BaseBundle::constructor(parcelledData, length);
+
+    mParcelledData->HasFileDescriptors(&mHasFds);
+    mFdsKnown = TRUE;
+    return NOERROR;
+}
+
+ECode CBundle::constructor(
     /* [in] */ IClassLoader* loader)
 {
     return BaseBundle::constructor(loader);
@@ -556,7 +577,7 @@ ECode CBundle::GetIBinder(
 ECode CBundle::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
-    BaseBundle::ReadFromParcelInner(parcel);
+    FAIL_RETURN(BaseBundle::ReadFromParcelInner(parcel))
     mParcelledData->HasFileDescriptors(&mHasFds);
     mFdsKnown = TRUE;
     return NOERROR;

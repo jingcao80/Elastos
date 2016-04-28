@@ -12,6 +12,7 @@
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/utility/LruCache.h"
+#include <elastos/droid/telephony/PhoneStateListener.h>
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::IITransientNotification;
@@ -40,6 +41,7 @@ using Elastos::Droid::Service::Notification::IINotificationListener;
 using Elastos::Droid::Service::Notification::IIStatusBarNotificationHolder;
 using Elastos::Droid::Service::Notification::INotificationRankingUpdate;
 using Elastos::Droid::Service::Notification::IStatusBarNotification;
+using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::IArraySet;
 using Elastos::Droid::Utility::IAtomicFile;
@@ -382,12 +384,12 @@ public:
     {
         friend class NotificationManagerService;
     public:
-        NotificationListeners(
-            /* [in] */ NotificationManagerService* host);
+        NotificationListeners();
 
         ~NotificationListeners();
 
-        CARAPI constructor();
+        CARAPI constructor(
+            /* [in] */ IInterface* host);
 
         // @Override
         CARAPI_(AutoPtr<ManagedServices::Config>) GetConfig();
@@ -973,6 +975,23 @@ private:
 
     private:
         NotificationManagerService* mHost;
+    };
+
+    class InnerSub_PhoneStateListener
+        : public PhoneStateListener
+    {
+    public:
+        InnerSub_PhoneStateListener(
+            /* [in] */ NotificationManagerService* host);
+
+        // @Override
+        CARAPI OnCallStateChanged(
+            /* [in] */ Int32 state,
+            /* [in] */ const String& incomingNumber);
+
+    private:
+        NotificationManagerService* mHost;
+        const static String TAG;
     };
 
 public:

@@ -457,7 +457,6 @@ public:
     AutoPtr<IArrayMap> mMap;//ArrayMap<String, Object> mMap = null;
 
 protected:
-    static const String TAG;// = "Bundle";
     static const Boolean DEBUG;// = false;
 
     static const Int32 BUNDLE_MAGIC;// = 0x4C444E42; // 'B' 'N' 'D' 'L'
@@ -511,6 +510,8 @@ protected:
     static const Int32 VAL_ARRAYOF;// = 26;
 
 private:
+    static const String TAG;// = "Bundle";
+
     // add for java compatible
     AutoPtr<ArrayOf<Byte> > mJavaData;
 };

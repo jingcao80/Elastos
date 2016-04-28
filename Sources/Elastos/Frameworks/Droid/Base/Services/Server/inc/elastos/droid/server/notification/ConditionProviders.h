@@ -98,8 +98,8 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler,
-        /* [in] */ ManagedServices::UserProfiles* userProfiles,
-        /* [in] */ ZenModeHelper* zenModeHelper);
+        /* [in] */ IInterface* userProfiles,
+        /* [in] */ IInterface* zenModeHelper);
 
     // @Override
     CARAPI_(void) Dump(

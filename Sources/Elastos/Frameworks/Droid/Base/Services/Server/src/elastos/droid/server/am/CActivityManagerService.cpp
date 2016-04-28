@@ -14020,7 +14020,8 @@ ECode CActivityManagerService::NoteWakeupAlarm(
             stats->GetPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                 sourcePkg != NULL ? sourcePkg : rec->mKey->mPackageName,
                 (IBatteryStatsImplUidPkg**)&pkg);
-            pkg->IncWakeupsLocked();
+            assert(0 && "TODO");
+            // pkg->IncWakeupsLocked();
         }
     }
     return NOERROR;

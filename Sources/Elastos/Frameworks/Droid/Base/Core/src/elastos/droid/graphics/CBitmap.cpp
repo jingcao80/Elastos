@@ -15,8 +15,8 @@
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
-
 // #include "Paint.h"
 // #include "GraphicsJNI.h"
 
@@ -32,6 +32,7 @@
 
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Core::AutoLock;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {

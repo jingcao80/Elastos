@@ -67,6 +67,7 @@ module
     merge("location/RemoteListenerHelper.car");
 
     merge("notification/DowntimeConditionProvider.car");
+    merge("notification/ManagedServices.car");
     merge("notification/NotificationDelegate.car");
     merge("notification/NotificationManagerInternal.car");
     merge("notification/NotificationRecord.car");
@@ -1979,11 +1980,29 @@ module
     namespace Notification {
 
     [local]
+    class CConditionProviders {
+        constructor(
+            [in] IContext* context,
+            [in] IHandler* handler,
+            [in] IInterface* userProfiles,
+            [in] IInterface* zenModeHelper);
+
+        interface IManagedServices;
+    }
+
+    [local]
     class CNotificationManagerService {
         constructor(
             [in] IContext* ctx);
 
         interface ISystemService;
+    }
+
+    class CNotificationListeners {
+        constructor(
+            [in] IInterface* host);
+
+        interface IManagedServices;
     }
 
     [local]

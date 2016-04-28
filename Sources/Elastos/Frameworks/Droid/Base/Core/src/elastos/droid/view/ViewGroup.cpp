@@ -1167,7 +1167,9 @@ Boolean ViewGroup::DebugDraw()
 void ViewGroup::InitViewGroup()
 {
     // ViewGroup doesn't draw by default
-    SetFlags(WILL_NOT_DRAW, DRAW_MASK);
+    if (!DebugDraw()) {
+        SetFlags(WILL_NOT_DRAW, DRAW_MASK);
+    }
     mGroupFlags |= FLAG_CLIP_CHILDREN;
     mGroupFlags |= FLAG_CLIP_TO_PADDING;
     mGroupFlags |= FLAG_ANIMATION_DONE;

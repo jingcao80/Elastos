@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="NotificationDemo"
+      package="Elastos.DevSamples.NotificationDemo"
       android:versionCode="1"
       android:versionName="1.0">
     <uses-sdk
@@ -8,16 +8,17 @@
         android:targetSdkVersion="17" />
     <application android:icon="@null" android:label="@string/app_name">
 
-        <activity android:name="CActivityOne"
+        <activity android:name="Elastos.DevSamples.NotificationDemo.CActivityOne"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="CNotificationActivity"
+        <activity android:name="Elastos.DevSamples.NotificationDemo.CNotificationActivity"
                 android:label="Details of notification"
                 android:parentActivityName="CActivityOne">
             <intent-filter>
@@ -27,4 +28,8 @@
         </activity>
 
     </application>
+
+  <!-- "android:name" need a classname that extends Instrumentation
+    <instrumentation android:targetPackage="NotificationDemo" android:name="elastos.droid.devsamples.notificationdemo.ins" />
+  -->
 </manifest>

@@ -1,41 +1,29 @@
 
-#ifndef __CACTIVITYONE_H__
-#define __CACTIVITYONE_H__
+#ifndef __Elastos_DevSamples_NotificationDemo_CACTIVITYONE_H__
+#define __Elastos_DevSamples_NotificationDemo_CACTIVITYONE_H__
 
 #include "elastos/droid/app/Activity.h"
-#include "_CActivityOne.h"
+#include "_Elastos_DevSamples_NotificationDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace NotificationDemo {
 
 class CActivityOne : public Activity
 {
 public:
-    CActivityOne();
-
     class MyListener
-        : public ElRefBase
+        : public Object
         , public IViewOnClickListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
         MyListener(
             /* [in] */ CActivityOne* host);
-
-        CARAPI_(PInterface) Probe(
-            /* [in]  */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -44,6 +32,13 @@ public:
         AutoPtr<CActivityOne> mHost;
         Int32 mRef;
     };
+
+public:
+    CAR_OBJECT_DECL()
+
+    CActivityOne();
+
+    CARAPI constructor();
 
 protected:
     CARAPI OnCreate(
@@ -68,7 +63,7 @@ private:
 
     CARAPI NotifyNotification(
         /* [in] */ Boolean isUpdate);
-private:
+
     CARAPI OnActivityResult(
         /* [in] */ Int32 requestCode,
         /* [in] */ Int32 resultCode,
@@ -81,13 +76,13 @@ private:
 private:
     friend class MyListener;
 
+    static const String TAG;
     Int32 mNotificationID;
     Int32 mNumMessages;
 };
 
 } // namespace NotificationDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos
 
-#endif // __CACTIVITYONE_H__
+#endif // __Elastos_DevSamples_NotificationDemo_CACTIVITYONE_H__

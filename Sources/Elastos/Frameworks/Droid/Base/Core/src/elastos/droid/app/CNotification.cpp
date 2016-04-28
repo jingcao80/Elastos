@@ -137,6 +137,7 @@ CNotification::CNotification()
     , mPriority(0)
 {
     mAudioAttributes = AUDIO_ATTRIBUTES_DEFAULT;
+    CBundle::New((IBundle**)&mExtras);
 }
 
 CNotification::~CNotification()
@@ -149,7 +150,7 @@ ECode CNotification::constructor()
     system->GetCurrentTimeMillis(&mWhen);
     mPriority = INotification::PRIORITY_DEFAULT;
 
-    return CBundle::New((IBundle**)&mExtras);
+    return NOERROR;
 }
 
 ECode CNotification::constructor(
@@ -164,7 +165,6 @@ ECode CNotification::constructor(
     mWhen = when;
     mIcon = icon;
     mTickerText = tickerText;
-    CBundle::New((IBundle**)&mExtras);
 
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
@@ -182,7 +182,7 @@ ECode CNotification::constructor(
     mTickerText = tickerText;
     mWhen = when;
 
-    return CBundle::New((IBundle**)&mExtras);
+    return NOERROR;
 }
 
 ECode CNotification::GetWhen(

@@ -185,10 +185,10 @@ protected:
      */
     /** @hide */
     Int64 mSubId;
+    static const Boolean DBG; // STOPSHIP if true
 
 private:
     static const String TAG;;
-    static const Boolean DBG; // STOPSHIP if true
 
     AutoPtr<MyHandler> mHandler;
     AutoPtr<IIPhoneStateListener> callback;

@@ -1172,7 +1172,7 @@ ECode CAppOpsService::SetAudioRestriction(
         AutoPtr<IInterface> obj;
         mAudioRestrictions->Get(code, (IInterface**)&obj);
         AutoPtr<ISparseArray> usageRestrictions = ISparseArray::Probe(obj);
-        if (usageRestrictions != NULL) {
+        if (usageRestrictions == NULL) {
             CSparseArray::New((ISparseArray**)&usageRestrictions);
             mAudioRestrictions->Put(code, usageRestrictions.Get());
         }

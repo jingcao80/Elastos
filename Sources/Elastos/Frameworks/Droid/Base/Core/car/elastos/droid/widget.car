@@ -2566,6 +2566,10 @@ module
             [in] IRemoteViews* landscape,
             [in] IRemoteViews* portrait);
 
+        constructor(
+            [in] IParcel* parcel,
+            [in] IBitmapCache* bitmapCache);
+
         interface IRemoteViews;
         interface IParcelable;
         interface ILayoutInflaterFilter;

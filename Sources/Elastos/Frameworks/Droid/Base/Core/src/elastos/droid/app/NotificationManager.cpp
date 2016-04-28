@@ -5,8 +5,10 @@
 #include "elastos/droid/app/CNotificationBuilder.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/UserHandle.h"
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::UserHandle;
 
@@ -62,8 +64,7 @@ ECode NotificationManager::Notify(
     /* [in] */ Int32 id,
     /* [in] */ INotification* notification)
 {
-    String nullStr;
-    return Notify(nullStr, id, notification);
+    return Notify(String(NULL), id, notification);
 }
 
 ECode NotificationManager::Notify(
@@ -103,13 +104,24 @@ ECode NotificationManager::Notify(
 
     AutoPtr<ArrayOf<Int32> > idIn = ArrayOf<Int32>::Alloc(1);
     AutoPtr<ArrayOf<Int32> > idOut;
-    FAIL_RETURN(service->EnqueueNotificationWithTag(
-        pkgName, pkgName, tag, id, stripped, idIn, userId, (ArrayOf<Int32>**)&idOut));
-    if (idOut == NULL || idOut->GetLength() == 0 || id != (*idOut)[0]) {
-        Slogger::W(TAG, "notify: id corrupted: sent %d, got back %d",
-            id, (idOut && idOut->GetLength() > 0) ? (*idOut)[0] : -1);
+    // try {
+    ECode ec;
+    do {
+        ec = service->EnqueueNotificationWithTag(
+            pkgName, pkgName, tag, id, stripped, idIn, userId, (ArrayOf<Int32>**)&idOut);
+        if (FAILED(ec)) break;
+        if (idOut == NULL || idOut->GetLength() == 0 || id != (*idOut)[0]) {
+            Slogger::W(TAG, "notify: id corrupted: sent %d, got back %d",
+                id, (idOut && idOut->GetLength() > 0) ? (*idOut)[0] : -1);
+        }
+    } while(FALSE);
+    // } catch (RemoteException e) {
+    if (FAILED(ec)) {
+        if ((ECode) E_REMOTE_EXCEPTION == ec)
+            ec = NOERROR;
     }
-    return NOERROR;
+    // }
+    return ec;
 }
 
 ECode NotificationManager::NotifyAsUser(

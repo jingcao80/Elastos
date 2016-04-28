@@ -3354,9 +3354,9 @@ ECode CActivityThread::HandleResumeActivity(
 
         if (localLOGV) {
             Activity*  activity = (Activity*)r->mActivity.Get();
-            Slogger::V(TAG, "Resume %s started activity: %d, hideForNow: %d, finished: "
+            Slogger::V(TAG, "Resume %s started activity: %d, hideForNow: %d, finished: %s"
                 , TO_CSTR(r), activity->mStartedActivity
-                , r->mHideForNow, activity->mFinished);
+                , r->mHideForNow, StringUtils::BooleanToString(activity->mFinished).string());
         }
 
         Int32 forwardBit = isForward ?

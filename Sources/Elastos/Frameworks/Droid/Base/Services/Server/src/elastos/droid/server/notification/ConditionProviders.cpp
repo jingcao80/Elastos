@@ -174,17 +174,18 @@ AutoPtr<ManagedServices::Config> ConditionProviders::GetConfig()
 ECode ConditionProviders::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
-    /* [in] */ ManagedServices::UserProfiles* userProfiles,
-    /* [in] */ ZenModeHelper* zenModeHelper)
+    /* [in] */ IInterface* userProfiles, // ManagedServices::UserProfiles*
+    /* [in] */ IInterface* zenModeHelper) // ZenModeHelper*
 {
-    ManagedServices::constructor(context, handler, (IObject*)new Object(), userProfiles);
+    AutoPtr<ManagedServices::UserProfiles> _userProfiles = (ManagedServices::UserProfiles*) IObject::Probe(userProfiles);
+    ManagedServices::constructor(context, handler, (IObject*)new Object(), _userProfiles);
 
     CArrayMap::New((IArrayMap**)&mListeners);
     CArrayList::New((IArrayList**)&mRecords);
     mCountdown = new CountdownConditionProvider();
     mDowntime = new DowntimeConditionProvider();
 
-    mZenModeHelper = zenModeHelper;
+    mZenModeHelper = (ZenModeHelper*) IObject::Probe(zenModeHelper);
     AutoPtr<ZenModeHelperCallback> callback = new ZenModeHelperCallback(this);
     mZenModeHelper->AddCallback((ZenModeHelper::Callback*)callback.Get());
     LoadZenConfig();
@@ -315,11 +316,12 @@ ECode ConditionProviders::OnServiceRemovedLocked(
 AutoPtr<ManagedServices::ManagedServiceInfo> ConditionProviders::CheckServiceToken(
     /* [in] */ IIConditionProvider* provider)
 {
+    AutoPtr<ManagedServiceInfo> info;
     synchronized(mMutex) {
-        AutoPtr<ManagedServiceInfo> info;
         CheckServiceTokenLocked(provider, (ManagedServiceInfo**)&info);
         return info;
     }
+    return info;
 }
 
 void ConditionProviders::RequestZenModeConditions(
@@ -633,8 +635,11 @@ void ConditionProviders::SetAutomaticZenModeConditions(
     }
 
     synchronized(mMutex) {
-        AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(conditionIds->GetLength());
-        for (Int32 i = 0; i < conditionIds->GetLength(); ++i) {
+        Int32 size = 0;
+        if (conditionIds != NULL)
+            size = conditionIds->GetLength();
+        AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(size);
+        for (Int32 i = 0; i < size; ++i) {
             args->Set(i, TO_IINTERFACE((*conditionIds)[i]));
         }
         AutoPtr<IArraySet> newIds = SafeSet(args);
@@ -711,7 +716,7 @@ ECode ConditionProviders::UnsubscribeLocked(
     ECode ec;
     if (provider != NULL) {
         // try {
-        ECode ec = provider->OnUnsubscribe(r->mId);
+        ec = provider->OnUnsubscribe(r->mId);
         if (FAILED(ec)) {
             Slogger::W(TAG, "Error unsubscribing to %p", r);
         }

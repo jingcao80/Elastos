@@ -398,6 +398,7 @@ ECode ManagedServices::MyServiceConnection::OnServiceDisconnected(
 //===============================================================================
 //                  ManagedServices
 //===============================================================================
+CAR_INTERFACE_IMPL(ManagedServices, Object, IManagedServices)
 
 ManagedServices::ManagedServices()
 {
@@ -571,7 +572,7 @@ ECode ManagedServices::CheckServiceTokenLocked(
     VALIDATE_NOT_NULL(_info);
     *_info = NULL;
 
-    CheckNotNull(service);
+    FAIL_RETURN(CheckNotNull(service))
     AutoPtr<IBinder> token = IBinder::Probe(service);
     Int32 N;
     mServices->GetSize(&N);
@@ -591,27 +592,29 @@ ECode ManagedServices::CheckServiceTokenLocked(
     //         + service);
 }
 
-void ManagedServices::UnregisterService(
+ECode ManagedServices::UnregisterService(
     /* [in] */ IInterface* service,
     /* [in] */ Int32 userid)
 {
-    CheckNotNull(service);
+    FAIL_RETURN(CheckNotNull(service))
     // no need to check permissions; if your service binder is in the list,
     // that's proof that you had permission to add it in the first place
     UnregisterServiceImpl(service, userid);
+    return NOERROR;
 }
 
-void ManagedServices::RegisterService(
+ECode ManagedServices::RegisterService(
     /* [in] */ IInterface* service,
     /* [in] */ IComponentName* component,
     /* [in] */ Int32 userid)
 {
-    CheckNotNull(service);
+    FAIL_RETURN(CheckNotNull(service))
     AutoPtr<ManagedServiceInfo> info;
     RegisterServiceImpl(service, component, userid, (ManagedServiceInfo**)&info);
     if (info != NULL) {
         OnServiceAdded(info);
     }
+    return NOERROR;
 }
 
 void ManagedServices::DisableNonexistentServices()
@@ -764,8 +767,9 @@ ECode ManagedServices::RebindServices()
             // decode the list of components
             AutoPtr<IInterface> obj;
             flat->Get((*userIds)[i], (IInterface**)&obj);
-            String toDecode;
-            ICharSequence::Probe(obj)->ToString(&toDecode);
+            String toDecode(NULL);
+            if (ICharSequence::Probe(obj) != NULL)
+                ICharSequence::Probe(obj)->ToString(&toDecode);
             if (!toDecode.IsNull()) {
                 AutoPtr< ArrayOf<String> > components;
                 StringUtils::Split(toDecode, ENABLED_SERVICES_SEPARATOR, (ArrayOf<String>**)&components);
