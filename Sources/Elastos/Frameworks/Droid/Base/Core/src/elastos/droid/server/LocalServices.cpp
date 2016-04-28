@@ -1,10 +1,8 @@
 
 #include "elastos/droid/server/LocalServices.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {

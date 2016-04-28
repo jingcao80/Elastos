@@ -142,9 +142,9 @@ BitmapDrawable::BitmapDrawable()
     , mMutated(FALSE)
     , mBitmapWidth(0)
     , mBitmapHeight(0)
+    , mOpticalInsets(Insets::NONE)
 {
     CRect::New((IRect**)&mDstRect);
-    mOpticalInsets = Insets::NONE;
 }
 
 ECode BitmapDrawable::constructor()

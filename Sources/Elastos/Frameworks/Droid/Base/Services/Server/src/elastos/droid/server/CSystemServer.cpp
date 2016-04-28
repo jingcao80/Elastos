@@ -46,7 +46,6 @@
 #include <elastos/droid/os/Process.h>
 #include <elastos/droid/internal/os/BinderInternal.h>
 #include <elastos/droid/app/ActivityManagerNative.h>
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
 #include <SensorService.h>
@@ -106,7 +105,6 @@ using Elastos::Droid::Server::Wm::InputMonitor;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {

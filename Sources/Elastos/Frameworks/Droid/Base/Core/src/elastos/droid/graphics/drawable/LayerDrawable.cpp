@@ -212,7 +212,7 @@ LayerDrawable::LayerDrawable()
     : mOpacityOverride(IPixelFormat::UNKNOWN)
     , mMutated(FALSE)
 {
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpRect));
+    CRect::New((IRect**)&mTmpRect);
 }
 
 LayerDrawable::~LayerDrawable()

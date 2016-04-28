@@ -9,7 +9,6 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include "elastos/droid/R.h"
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -22,7 +21,6 @@ using Elastos::Droid::Utility::ISparseInt32Array;
 using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {

@@ -1,12 +1,10 @@
 #include "elastos/droid/server/SystemServiceManager.h"
 #include "elastos/core/StringBuilder.h"
-#include "elastos/utility/logging/Logger.h"
 #include "elastos/utility/logging/Slogger.h"
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::CPathClassLoader;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {

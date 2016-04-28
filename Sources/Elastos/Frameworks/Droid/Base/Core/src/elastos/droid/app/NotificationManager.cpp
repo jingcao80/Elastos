@@ -5,10 +5,8 @@
 #include "elastos/droid/app/CNotificationBuilder.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/UserHandle.h"
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::UserHandle;
 

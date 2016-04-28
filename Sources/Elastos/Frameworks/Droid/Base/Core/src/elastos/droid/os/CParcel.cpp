@@ -6,7 +6,6 @@
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/os/CBundle.h"
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -15,7 +14,6 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::IO::CFileDescriptor;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
