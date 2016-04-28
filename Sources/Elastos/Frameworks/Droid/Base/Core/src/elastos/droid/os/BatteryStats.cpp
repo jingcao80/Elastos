@@ -1,5 +1,7 @@
 
 #include "elastos/droid/os/BatteryStats.h"
+#include "elastos/droid/internal/os/BatteryStatsHelper.h"
+#include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/utility/TimeUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -10,19 +12,41 @@ using Elastos::Core::IFloat;
 using Elastos::Core::CFloat;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
+using Elastos::Core::CString;
+using Elastos::Core::ICharSequence;
 using Elastos::Utility::CFormatter;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Internal::Os::BatteryStatsHelper;
+using Elastos::Droid::Telephony::CSignalStrength;
 using Elastos::Droid::Utility::TimeUtils;
+using Elastos::Droid::Utility::ISparseInt32Array;
+using Elastos::Droid::Utility::CSparseInt32Array;
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
 
+//==============================================================================
+// BatteryStats::BatteryStatsUid::ExcessivePower
+//==============================================================================
 
-const Int32 BatteryStats::BatteryStatsUid::BatteryStatsSensor::GPS;
-const Int32 BatteryStats::BatteryStatsUid::BatteryStatsProc::ExcessivePower::TYPE_WAKE;
-const Int32 BatteryStats::BatteryStatsUid::BatteryStatsProc::ExcessivePower::TYPE_CPU;
+CAR_INTERFACE_IMPL(BatteryStats::BatteryStatsUid::ExcessivePower, Object, IBatteryStatsProcExcessivePower)
 
+
+//==============================================================================
+// BatteryStats::BatteryStatsUid
+//==============================================================================
+
+static AutoPtr<ArrayOf<String> > InitPROCESS_STATE_NAMES()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(3);
+    (*names)[0] = String("Foreground");
+    (*names)[1] = String("Active");
+    (*names)[2] = String("Running");
+    return names;
+}
+const AutoPtr<ArrayOf<String> > BatteryStats::BatteryStatsUid::PROCESS_STATE_NAMES = InitPROCESS_STATE_NAMES();
 
 static AutoPtr< ArrayOf<String> > InitUserActivityTypes()
 {
@@ -33,81 +57,136 @@ static AutoPtr< ArrayOf<String> > InitUserActivityTypes()
     return types;
 }
 const AutoPtr<ArrayOf<String> > BatteryStats::BatteryStatsUid::USER_ACTIVITY_TYPES = InitUserActivityTypes();
-const Int32 BatteryStats::BatteryStatsUid::NUM_USER_ACTIVITY_TYPES;
 
-static AutoPtr<ArrayOf<String> > InitPROCESS_STATE_NAMES()
+
+//==============================================================================
+// BatteryStats::HistoryTag
+//==============================================================================
+
+void BatteryStats::HistoryTag::SetTo(
+    /* [in] */ HistoryTag* o)
 {
-    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(3);
-    (*names)[0] = String("Foreground");
-    (*names)[1] = String("Active");
-    (*names)[2] = String("Running");
-    return types;
+    mString = o->mString;
+    mUid = o->mUid;
+    mPoolIdx = o->mPoolIdx;
 }
-const AutoPtr<ArrayOf<String> > BatteryStats::BatteryStatsUid::PROCESS_STATE_NAMES = InitPROCESS_STATE_NAMES();
 
-const String BatteryStats::HistoryItem::TAG("HistoryItem");
-const Boolean BatteryStats::HistoryItem::DEBUG;
-const Byte BatteryStats::HistoryItem::CMD_NULL;
-const Byte BatteryStats::HistoryItem::CMD_UPDATE;
-const Byte BatteryStats::HistoryItem::CMD_START;
-const Byte BatteryStats::HistoryItem::CMD_OVERFLOW;
-const Int32 BatteryStats::HistoryItem::STATE_BRIGHTNESS_MASK;
-const Int32 BatteryStats::HistoryItem::STATE_BRIGHTNESS_SHIFT;
-const Int32 BatteryStats::HistoryItem::STATE_SIGNAL_STRENGTH_MASK;
-const Int32 BatteryStats::HistoryItem::STATE_SIGNAL_STRENGTH_SHIFT;
-const Int32 BatteryStats::HistoryItem::STATE_PHONE_STATE_MASK;
-const Int32 BatteryStats::HistoryItem::STATE_PHONE_STATE_SHIFT;
-const Int32 BatteryStats::HistoryItem::STATE_DATA_CONNECTION_MASK;
-const Int32 BatteryStats::HistoryItem::STATE_DATA_CONNECTION_SHIFT;
-const Int32 BatteryStats::HistoryItem::STATE_WAKE_LOCK_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_SENSOR_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_GPS_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_PHONE_SCANNING_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_WIFI_RUNNING_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_WIFI_FULL_LOCK_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_WIFI_SCAN_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_WIFI_MULTICAST_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_AUDIO_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_VIDEO_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_SCREEN_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_BATTERY_PLUGGED_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_PHONE_IN_CALL_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_WIFI_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::STATE_BLUETOOTH_ON_FLAG;
-const Int32 BatteryStats::HistoryItem::MOST_INTERESTING_STATES;
-const Int32 BatteryStats::HistoryItem::DELTA_TIME_MASK;
-const Int32 BatteryStats::HistoryItem::DELTA_TIME_ABS;
-const Int32 BatteryStats::HistoryItem::DELTA_TIME_INT;
-const Int32 BatteryStats::HistoryItem::DELTA_TIME_LONG;
-const Int32 BatteryStats::HistoryItem::DELTA_CMD_MASK;
-const Int32 BatteryStats::HistoryItem::DELTA_CMD_SHIFT;
-const Int32 BatteryStats::HistoryItem::DELTA_BATTERY_LEVEL_FLAG;
-const Int32 BatteryStats::HistoryItem::DELTA_STATE_FLAG;
-const Int32 BatteryStats::HistoryItem::DELTA_STATE_MASK;
+void BatteryStats::HistoryTag::SetTo(
+    /* [in] */ const String& _string,
+    /* [in] */ Int32 _uid)
+{
+    mString = _string;
+    mUid = _uid;
+    mPoolIdx = -1;
+}
 
-CAR_INTERFACE_IMPL(BatteryStats::HistoryItem, Object, IParcelable)
+void BatteryStats::HistoryTag::WriteToParcel(
+    /* [in] */ IParcel* dest,
+    /* [in] */ Int32 flags)
+{
+    dest->WriteString(string);
+    dest->WriteInt32(uid);
+}
 
-BatteryStats::HistoryItem::HistoryItem(
-    /* [in] */ Int64 time,
+void BatteryStats::HistoryTag::ReadFromParcel(
     /* [in] */ IParcel* src)
-    : mTime(time)
 {
-    mNumReadInts = 2;
-    ReadFromParcel(src);
+    src->ReadString(&mString);
+    src->ReadInt32(&mUid);
+    mPoolIdx = -1;
 }
 
-ECode BatteryStats::HistoryItem::IsDeltaData(
+ECode BatteryStats::HistoryTag::Equals(
+    /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = cmd == CMD_UPDATE;
+    if ((IObject*)this == o) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (o == NULL/* || getClass() != o.getClass()*/) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    AutoPtr<HistoryTag> that = (HistoryTag*)(IObject*)o;
+
+    if (mUid != that->mUid) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    if (!mString.Equals(that->mString)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    *result = TRUE;
     return NOERROR;
 }
 
-ECode BatteryStats::HistoryItem::WriteToParcel(
+ECode BatteryStats::HistoryTag::GetHashCode(
+    /* [out] */ Int32* hashCode)
+{
+    VALIDATE_NOT_NULL(hashCode)
+    Int32 result = mString.GetHashCode();
+    result = 31 * result + uid;
+    *hashCode = result;
+    return NOERROR;
+}
+
+
+//==============================================================================
+// IBatteryStatsHistoryItem
+//==============================================================================
+
+CAR_INTERFACE_IMPL_2(IBatteryStatsHistoryItem, Object, IBatteryStatsHistoryItem, IParcelable)
+
+IBatteryStatsHistoryItem::HistoryItem()
+    : mTime(0)
+    , mCmd(CMD_NULL)
+    , mBatteryLevel(0)
+    , mBatteryStatus(0)
+    , mBatteryHealth(0)
+    , mBatteryPlugType(0)
+    , mBatteryTemperature(0)
+    , mStates(0)
+    , mStates2(0)
+    , mEventCode(0)
+    , mCurrentTime(0)
+    , mNumReadInts(0)
+{
+    mLocalWakelockTag = new HistoryTag();
+    mLocalWakeReasonTag = new HistoryTag();
+    mLocalEventTag = new HistoryTag();
+}
+
+IBatteryStatsHistoryItem::HistoryItem(
+    /* [in] */ Int64 time,
+    /* [in] */ IParcel* src)
+    : mTime(time)
+    , mCmd(CMD_NULL)
+    , mBatteryLevel(0)
+    , mBatteryStatus(0)
+    , mBatteryHealth(0)
+    , mBatteryPlugType(0)
+    , mBatteryTemperature(0)
+    , mStates(0)
+    , mStates2(0)
+    , mEventCode(0)
+    , mCurrentTime(0)
+    , mNumReadInts(2)
+{
+    mLocalWakelockTag = new HistoryTag();
+    mLocalWakeReasonTag = new HistoryTag();
+    mLocalEventTag = new HistoryTag();
+    ReadFromParcel(src);
+}
+
+ECode IBatteryStatsHistoryItem::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteInt64(mTime);
+    dest->WriteInt64(time);
     Int32 bat = (((Int32)mCmd) & 0xff)
             | ((((Int32)mBatteryLevel) << 8) & 0xff00)
             | ((((Int32)mBatteryStatus) << 16) & 0xf0000)
@@ -115,33 +194,34 @@ ECode BatteryStats::HistoryItem::WriteToParcel(
             | ((((Int32)mBatteryPlugType) << 24) & 0xf000000)
             | (mWakelockTag != NULL ? 0x10000000 : 0)
             | (mWakeReasonTag != NULL ? 0x20000000 : 0)
-            | (mEventCode != EVENT_NONE ? 0x40000000 : 0);
+            | (eventCode != EVENT_NONE ? 0x40000000 : 0);
     dest->WriteInt32(bat);
     bat = (((Int32)mBatteryTemperature) & 0xffff)
             | ((((Int32)mBatteryVoltage) << 16) & 0xffff0000);
     dest->WriteInt32(bat);
-    dest->WriteInt32(mStates);
-    dest.writeInt(states2);
-    if (wakelockTag != null) {
-        wakelockTag.writeToParcel(dest, flags);
+    dest->WriteInt32(states);
+    dest->WriteInt32(states2);
+    if (mWakelockTag != NULL) {
+        mWakelockTag->WriteToParcel(dest, flags);
     }
-    if (wakeReasonTag != null) {
-        wakeReasonTag.writeToParcel(dest, flags);
+    if (mWakeReasonTag != NULL) {
+        mWakeReasonTag->WriteToParcel(dest, flags);
     }
-    if (eventCode != EVENT_NONE) {
-        dest.writeInt(eventCode);
-        eventTag.writeToParcel(dest, flags);
+    if (mEventCode != EVENT_NONE) {
+        dest->WriteInt32(mEventCode);
+        mEventTag->WriteToParcel(dest, flags);
     }
-    if (cmd == CMD_CURRENT_TIME || cmd == CMD_RESET) {
-        dest.writeLong(currentTime);
+    if (mCmd == CMD_CURRENT_TIME || mCmd == CMD_RESET) {
+        dest->WriteInt64(mCurrentTime);
     }
     return NOERROR;
 }
 
-ECode BatteryStats::HistoryItem::ReadFromParcel(
-    /* [in] */ IParcel* src)
+ECode IBatteryStatsHistoryItem::ReadFromParcel(
+    /* [in] */ IParcel* source)
 {
-    int start = src.dataPosition();
+    Int32 start;
+    src->GetDataPosition(&start);
     Int32 bat;
     src->ReadInt32(&bat);
     mCmd = (Byte)(bat & 0xff);
@@ -149,227 +229,53 @@ ECode BatteryStats::HistoryItem::ReadFromParcel(
     mBatteryStatus = (Byte)((bat >> 16) & 0xf);
     mBatteryHealth = (Byte)((bat >> 20) & 0xf);
     mBatteryPlugType = (Byte)((bat >> 24) & 0xf);
-
     Int32 bat2;
     src->ReadInt32(&bat2);
-    batteryTemperature = (Int16)(bat2&0xffff);
-    batteryVoltage = (Char32)((bat2>>16)&0xffff);
-    states = src.readInt();
-    states2 = src.readInt();
-    if ((bat&0x10000000) != 0) {
-        wakelockTag = localWakelockTag;
-        wakelockTag.readFromParcel(src);
-    } else {
-        wakelockTag = null;
+    batteryTemperature = (Int16)(bat2 & 0xffff);
+    batteryVoltage = (Char32)((bat2 >> 16) & 0xffff);
+    src->ReadInt32(&mStates);
+    src->ReadInt32(&mStates2);
+    if ((bat & 0x10000000) != 0) {
+        mWakelockTag = mLocalWakelockTag;
+        mWakelockTag->ReadFromParcel(src);
     }
-    if ((bat&0x20000000) != 0) {
-        wakeReasonTag = localWakeReasonTag;
-        wakeReasonTag.readFromParcel(src);
-    } else {
-        wakeReasonTag = null;
+    else {
+        mWakelockTag = NULL;
     }
-    if ((bat&0x40000000) != 0) {
-        eventCode = src.readInt();
-        eventTag = localEventTag;
-        eventTag.readFromParcel(src);
-    } else {
-        eventCode = EVENT_NONE;
-        eventTag = null;
+    if ((bat & 0x20000000) != 0) {
+        mWakeReasonTag = mLocalWakeReasonTag;
+        mWakeReasonTag->ReadFromParcel(src);
     }
-    if (cmd == CMD_CURRENT_TIME || cmd == CMD_RESET) {
-        currentTime = src.readLong();
-    } else {
-        currentTime = 0;
+    else {
+        mWakeReasonTag = NULL;
     }
-    numReadInts += (src.dataPosition()-start)/4;
+    if ((bat & 0x40000000) != 0) {
+        src->ReadInt32(&mEventCode);
+        mEventTag = mLocalEventTag;
+        mEventTag->ReadFromParcel(src);
+    }
+    else {
+        mEventCode = EVENT_NONE;
+        mEventTag = NULL;
+    }
+    if (mCmd == CMD_CURRENT_TIME || mCmd == CMD_RESET) {
+        src->ReadInt64(&mCurrentTime);
+    }
+    else {
+        mCurrentTime = 0;
+    }
+    Int32 pos;
+    src->GetDataPosition(&pos);
+    mNumReadInts += (pos - start)/4;
     return NOERROR;
 }
 
-void BatteryStats::HistoryItem::WriteDelta(
-    /* [in] */ IParcel* dest,
-    /* [in] */ HistoryItem* last)
+Boolean IBatteryStatsHistoryItem::IsDeltaData()
 {
-    if (last == NULL || last->mCmd != CMD_UPDATE) {
-        dest->WriteInt32(DELTA_TIME_ABS);
-        WriteToParcel(dest);
-        return;
-    }
-
-    Int64 deltaTime = mTime - last->mTime;
-    Int32 lastBatteryLevelInt = last->BuildBatteryLevelInt();
-    Int32 lastStateInt = last->BuildStateInt();
-
-    Int32 deltaTimeToken;
-    if (deltaTime < 0 || deltaTime > Elastos::Core::Math::INT32_MAX_VALUE) {
-        deltaTimeToken = DELTA_TIME_LONG;
-    }
-    else if (deltaTime >= DELTA_TIME_ABS) {
-        deltaTimeToken = DELTA_TIME_INT;
-    }
-    else {
-        deltaTimeToken = (Int32)deltaTime;
-    }
-    Int32 firstToken = deltaTimeToken
-            | (mCmd << DELTA_CMD_SHIFT)
-            | (mStates & DELTA_STATE_MASK);
-    Int32 batteryLevelInt = BuildBatteryLevelInt();
-    Boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
-    if (batteryLevelIntChanged) {
-        firstToken |= DELTA_BATTERY_LEVEL_FLAG;
-    }
-    Int32 stateInt = BuildStateInt();
-    Boolean stateIntChanged = stateInt != lastStateInt;
-    if (stateIntChanged) {
-        firstToken |= DELTA_STATE_FLAG;
-    }
-    dest->WriteInt32(firstToken);
-    if (DEBUG) {
-        StringBuilder sb("WRITE DELTA: firstToken=0x");
-        sb += StringUtils::Int32ToHexString(firstToken);
-        sb += " deltaTime=";
-        sb += deltaTime;
-        Slogger::I(TAG, sb.ToString());
-    }
-
-    if (deltaTimeToken >= DELTA_TIME_INT) {
-        if (deltaTimeToken == DELTA_TIME_INT) {
-            if (DEBUG) Slogger::I(TAG, "WRITE DELTA: int deltaTime=%d", (Int32)deltaTime);
-            dest->WriteInt32((Int32)deltaTime);
-        }
-        else {
-            if (DEBUG) Slogger::I(TAG, "WRITE DELTA: long deltaTime=%d", deltaTime);
-            dest->WriteInt64(deltaTime);
-        }
-    }
-    if (batteryLevelIntChanged) {
-        dest->WriteInt32(batteryLevelInt);
-        if (DEBUG) {
-            StringBuilder sb("WRITE DELTA: batteryToken=0x");
-            sb += StringUtils::Int32ToHexString(batteryLevelInt);
-            sb += " batteryLevel=";
-            sb += mBatteryLevel;
-            sb += " batteryTemp=";
-            sb += (Int32)mBatteryTemperature;
-            sb += " batteryVolt=";
-            sb += (Int32)mBatteryVoltage;
-            Slogger::I(TAG, sb.ToString());
-        }
-    }
-    if (stateIntChanged) {
-        dest->WriteInt32(stateInt);
-        if (DEBUG) {
-            StringBuilder sb("WRITE DELTA: stateToken=0x");
-            sb += StringUtils::Int32ToHexString(stateInt);
-            sb += " batteryStatus=";
-            sb += mBatteryStatus;
-            sb += " batteryHealth=";
-            sb += mBatteryHealth;
-            sb += " batteryPlugType=";
-            sb += mBatteryPlugType;
-            sb += " states=0x";
-            sb += StringUtils::Int32ToHexString(mStates);
-            Slogger::I(TAG, sb.ToString());
-        }
-    }
+    return mCmd == CMD_UPDATE;
 }
 
-Int32 BatteryStats::HistoryItem::BuildBatteryLevelInt()
-{
-    return ((((Int32)mBatteryLevel) << 24) & 0xff000000)
-            | ((((Int32)mBatteryTemperature) << 14) & 0x00ffc000)
-            | (((Int32)mBatteryVoltage) & 0x00003fff);
-}
-
-Int32 BatteryStats::HistoryItem::BuildStateInt()
-{
-    return ((((Int32)mBatteryStatus) << 28) & 0xf0000000)
-            | ((((Int32)mBatteryHealth) << 24) & 0x0f000000)
-            | ((((Int32)mBatteryPlugType) << 22) & 0x00c00000)
-            | (mStates & (~DELTA_STATE_MASK));
-}
-
-void BatteryStats::HistoryItem::ReadDelta(
-    /* [in] */ IParcel* src)
-{
-    Int32 firstToken;
-    src->ReadInt32(&firstToken);
-    Int32 deltaTimeToken = firstToken & DELTA_TIME_MASK;
-    mCmd = (Byte)((firstToken>>DELTA_CMD_SHIFT)&DELTA_CMD_MASK);
-    if (DEBUG) {
-        StringBuilder sb("READ DELTA: firstToken=0x");
-        sb += StringUtils::Int32ToHexString(firstToken);
-        sb += " deltaTimeToken=";
-        sb += deltaTimeToken;
-        Slogger::I(TAG, sb.ToString());
-    }
-
-    if (deltaTimeToken < DELTA_TIME_ABS) {
-        mTime += deltaTimeToken;
-    }
-    else if (deltaTimeToken == DELTA_TIME_ABS) {
-        src->ReadInt64(&mTime);
-        ReadFromParcel(src);
-        return;
-    }
-    else if (deltaTimeToken == DELTA_TIME_INT) {
-        Int32 delta;
-        src->ReadInt32(&delta);
-        mTime += delta;
-        if (DEBUG) Slogger::I(TAG, "READ DELTA: time delta=%d new time=%d", delta, mTime);
-    }
-    else {
-        Int64 delta;
-        src->ReadInt64(&delta);
-        if (DEBUG) Slogger::I(TAG, "READ DELTA: time delta=%d new time=%d", delta, time);
-        mTime += delta;
-    }
-
-    if ((firstToken & DELTA_BATTERY_LEVEL_FLAG) != 0) {
-        Int32 batteryLevelInt;
-        src->ReadInt32(&batteryLevelInt);
-        mBatteryLevel = (Byte)((batteryLevelInt >> 24) & 0xff);
-        mBatteryTemperature = (Char32)((batteryLevelInt >> 14) & 0x3ff);
-        mBatteryVoltage = (Char32)(batteryLevelInt & 0x3fff);
-        if (DEBUG) {
-            StringBuilder sb("READ DELTA: batteryToken=0x");
-            sb += StringUtils::Int32ToHexString(batteryLevelInt);
-            sb += " batteryLevel=";
-            sb += mBatteryLevel;
-            sb += " batteryTemp=";
-            sb += (Int32)mBatteryTemperature;
-            sb += " batteryVolt=";
-            sb += (Int32)mBatteryVoltage;
-            Slogger::I(TAG, sb.ToString());
-        }
-    }
-
-    if ((firstToken&DELTA_STATE_FLAG) != 0) {
-        Int32 stateInt;
-        src->ReadInt32(&stateInt);
-        mStates = (firstToken & DELTA_STATE_MASK) | (stateInt & (~DELTA_STATE_MASK));
-        mBatteryStatus = (Byte)((stateInt >> 28) & 0xf);
-        mBatteryHealth = (Byte)((stateInt >> 24) & 0xf);
-        mBatteryPlugType = (Byte)((stateInt >> 22) & 0x3);
-        if (DEBUG) {
-            StringBuilder sb("READ DELTA: stateToken=0x");
-            sb += StringUtils::Int32ToHexString(stateInt);
-            sb += " batteryStatus=";
-            sb += mBatteryStatus;
-            sb += " batteryHealth=";
-            sb += mBatteryHealth;
-            sb += " batteryPlugType=";
-            sb += mBatteryPlugType;
-            sb += " states=0x";
-            sb += StringUtils::Int32ToHexString(mStates);
-            Slogger::I(TAG, sb.ToString());
-        }
-    }
-    else {
-        mStates = (firstToken & DELTA_STATE_MASK) | (mStates & (~DELTA_STATE_MASK));
-    }
-}
-
-void BatteryStats::HistoryItem::Clear()
+void IBatteryStatsHistoryItem::Clear()
 {
     mTime = 0;
     mCmd = CMD_NULL;
@@ -380,35 +286,34 @@ void BatteryStats::HistoryItem::Clear()
     mBatteryTemperature = 0;
     mBatteryVoltage = 0;
     mStates = 0;
-    states2 = 0;
-    wakelockTag = null;
-    wakeReasonTag = null;
-    eventCode = EVENT_NONE;
-    eventTag = null;
+    mStates2 = 0;
+    mWakelockTag = NULL;
+    mWakeReasonTag = NULL;
+    mEventCode = EVENT_NONE;
+    mEventTag = NULL;
 }
 
-void BatteryStats::HistoryItem::SetTo(
+void IBatteryStatsHistoryItem::SetTo(
     /* [in] */ HistoryItem* o)
 {
     mTime = o->mTime;
     mCmd = o->mCmd;
-    mBatteryLevel = o->mBatteryLevel;
-    mBatteryStatus = o->mBatteryStatus;
-    mBatteryHealth = o->mBatteryHealth;
-    mBatteryPlugType = o->mBatteryPlugType;
-    mBatteryTemperature = o->mBatteryTemperature;
-    mBatteryVoltage = o->mBatteryVoltage;
-    mStates = o->mStates;
     SetToCommon(o);
 }
 
-void BatteryStats::HistoryItem::SetTo(
+void IBatteryStatsHistoryItem::SetTo(
     /* [in] */ Int64 time,
     /* [in] */ Byte cmd,
     /* [in] */ HistoryItem* o)
 {
     mTime = time;
     mCmd = cmd;
+    SetToCommon(o);
+}
+
+void IBatteryStatsHistoryItem::SetToCommon(
+    /* [in] */ HistoryItem* o)
+{
     mBatteryLevel = o->mBatteryLevel;
     mBatteryStatus = o->mBatteryStatus;
     mBatteryHealth = o->mBatteryHealth;
@@ -416,258 +321,159 @@ void BatteryStats::HistoryItem::SetTo(
     mBatteryTemperature = o->mBatteryTemperature;
     mBatteryVoltage = o->mBatteryVoltage;
     mStates = o->mStates;
-    SetToCommon(o);
-}
-
-private void SetToCommon(HistoryItem o) {
-    batteryLevel = o.batteryLevel;
-    batteryStatus = o.batteryStatus;
-    batteryHealth = o.batteryHealth;
-    batteryPlugType = o.batteryPlugType;
-    batteryTemperature = o.batteryTemperature;
-    batteryVoltage = o.batteryVoltage;
-    states = o.states;
-    states2 = o.states2;
-    if (o.wakelockTag != null) {
-        wakelockTag = localWakelockTag;
-        wakelockTag.setTo(o.wakelockTag);
-    } else {
-        wakelockTag = null;
-    }
-    if (o.wakeReasonTag != null) {
-        wakeReasonTag = localWakeReasonTag;
-        wakeReasonTag.setTo(o.wakeReasonTag);
-    } else {
-        wakeReasonTag = null;
-    }
-    eventCode = o.eventCode;
-    if (o.eventTag != null) {
-        eventTag = localEventTag;
-        eventTag.setTo(o.eventTag);
-    } else {
-        eventTag = null;
-    }
-    currentTime = o.currentTime;
-}
-
-public boolean sameNonEvent(HistoryItem o) {
-    return batteryLevel == o.batteryLevel
-            && batteryStatus == o.batteryStatus
-            && batteryHealth == o.batteryHealth
-            && batteryPlugType == o.batteryPlugType
-            && batteryTemperature == o.batteryTemperature
-            && batteryVoltage == o.batteryVoltage
-            && states == o.states
-            && states2 == o.states2
-            && currentTime == o.currentTime;
-}
-
-public boolean same(
-    /* [in] */ HistoryItem* o)
-{
-    if (!sameNonEvent(o) || eventCode != o.eventCode) {
-        return false;
-    }
-    if (wakelockTag != o.wakelockTag) {
-        if (wakelockTag == null || o.wakelockTag == null) {
-            return false;
-        }
-        if (!wakelockTag.equals(o.wakelockTag)) {
-            return false;
-        }
-    }
-    if (wakeReasonTag != o.wakeReasonTag) {
-        if (wakeReasonTag == null || o.wakeReasonTag == null) {
-            return false;
-        }
-        if (!wakeReasonTag.equals(o.wakeReasonTag)) {
-            return false;
-        }
-    }
-    if (eventTag != o.eventTag) {
-        if (eventTag == null || o.eventTag == null) {
-            return false;
-        }
-        if (!eventTag.equals(o.eventTag)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-public final static class HistoryEventTracker {
-    private final HashMap<String, SparseIntArray>[] mActiveEvents
-            = (HashMap<String, SparseIntArray>[]) new HashMap[HistoryItem.EVENT_COUNT];
-
-    public boolean updateState(int code, String name, int uid, int poolIdx) {
-        if ((code&HistoryItem.EVENT_FLAG_START) != 0) {
-            int idx = code&HistoryItem.EVENT_TYPE_MASK;
-            HashMap<String, SparseIntArray> active = mActiveEvents[idx];
-            if (active == null) {
-                active = new HashMap<String, SparseIntArray>();
-                mActiveEvents[idx] = active;
-            }
-            SparseIntArray uids = active.get(name);
-            if (uids == null) {
-                uids = new SparseIntArray();
-                active.put(name, uids);
-            }
-            if (uids.indexOfKey(uid) >= 0) {
-                // Already set, nothing to do!
-                return false;
-            }
-            uids.put(uid, poolIdx);
-        } else if ((code&HistoryItem.EVENT_FLAG_FINISH) != 0) {
-            int idx = code&HistoryItem.EVENT_TYPE_MASK;
-            HashMap<String, SparseIntArray> active = mActiveEvents[idx];
-            if (active == null) {
-                // not currently active, nothing to do.
-                return false;
-            }
-            SparseIntArray uids = active.get(name);
-            if (uids == null) {
-                // not currently active, nothing to do.
-                return false;
-            }
-            idx = uids.indexOfKey(uid);
-            if (idx < 0) {
-                // not currently active, nothing to do.
-                return false;
-            }
-            uids.removeAt(idx);
-            if (uids.size() <= 0) {
-                active.remove(name);
-            }
-        }
-        return true;
-    }
-
-    public void removeEvents(int code) {
-        int idx = code&HistoryItem.EVENT_TYPE_MASK;
-        mActiveEvents[idx] = null;
-    }
-
-    public HashMap<String, SparseIntArray> getStateForEvent(int code) {
-        return mActiveEvents[code];
-    }
-};
-
-void BatteryStats::HistoryPrinter::PrintNextItem(
-    /* [in] */ IPrintWriter* pw,
-    /* [in] */ HistoryItem* rec,
-    /* [in] */ Int64 now)
-{
-    pw->PrintString(String("  "));
-    TimeUtils::FormatDuration(rec->mTime-now, pw, TimeUtils::HUNDRED_DAY_FIELD_LEN);
-    pw->PrintString(String(" "));
-    if (rec->mCmd == HistoryItem::CMD_START) {
-        pw->PrintString(String(" START"));
-    }
-    else if (rec->mCmd == HistoryItem::CMD_OVERFLOW) {
-        pw->PrintString(String(" *OVERFLOW*"));
+    mStates2 = o->mStates2;
+    if (o->mWakelockTag != NULL) {
+        mWakelockTag = mLocalWakelockTag;
+        mWakelockTag->SetTo(o->mWakelockTag);
     }
     else {
-        if (rec->mBatteryLevel < 10) pw->PrintString(String("00"));
-        else if (rec->mBatteryLevel < 100) pw->PrintString(String("0"));
-        pw->PrintInt32(rec->mBatteryLevel);
-        pw->PrintString(String(" "));
-        if (rec->mStates < 0x10) pw->PrintString(String("0000000"));
-        else if (rec->mStates < 0x100) pw->PrintString(String("000000"));
-        else if (rec->mStates < 0x1000) pw->PrintString(String("00000"));
-        else if (rec->mStates < 0x10000) pw->PrintString(String("0000"));
-        else if (rec->mStates < 0x100000) pw->PrintString(String("000"));
-        else if (rec->mStates < 0x1000000) pw->PrintString(String("00"));
-        else if (rec->mStates < 0x10000000) pw->PrintString(String("0"));
-        pw->PrintString(StringUtils::Int32ToHexString(rec->mStates));
-        if (mOldStatus != rec->mBatteryStatus) {
-            mOldStatus = rec->mBatteryStatus;
-            pw->PrintString(String(" status="));
-            switch (mOldStatus) {
-                case IBatteryManager::BATTERY_STATUS_UNKNOWN:
-                    pw->PrintString(String("unknown"));
-                    break;
-                case IBatteryManager::BATTERY_STATUS_CHARGING:
-                    pw->PrintString(String("charging"));
-                    break;
-                case IBatteryManager::BATTERY_STATUS_DISCHARGING:
-                    pw->PrintString(String("discharging"));
-                    break;
-                case IBatteryManager::BATTERY_STATUS_NOT_CHARGING:
-                    pw->PrintString(String("not-charging"));
-                    break;
-                case IBatteryManager::BATTERY_STATUS_FULL:
-                    pw->PrintString(String("full"));
-                    break;
-                default:
-                    pw->PrintInt32(mOldStatus);
-                    break;
-            }
-        }
-        if (mOldHealth != rec->mBatteryHealth) {
-            mOldHealth = rec->mBatteryHealth;
-            pw->PrintString(String(" health="));
-            switch (mOldHealth) {
-                case IBatteryManager::BATTERY_HEALTH_UNKNOWN:
-                    pw->PrintString(String("unknown"));
-                    break;
-                case IBatteryManager::BATTERY_HEALTH_GOOD:
-                    pw->PrintString(String("good"));
-                    break;
-                case IBatteryManager::BATTERY_HEALTH_OVERHEAT:
-                    pw->PrintString(String("overheat"));
-                    break;
-                case IBatteryManager::BATTERY_HEALTH_DEAD:
-                    pw->PrintString(String("dead"));
-                    break;
-                case IBatteryManager::BATTERY_HEALTH_OVER_VOLTAGE:
-                    pw->PrintString(String("over-voltage"));
-                    break;
-                case IBatteryManager::BATTERY_HEALTH_UNSPECIFIED_FAILURE:
-                    pw->PrintString(String("failure"));
-                    break;
-                default:
-                    pw->PrintInt32(mOldHealth);
-                    break;
-            }
-        }
-        if (mOldPlug != rec->mBatteryPlugType) {
-            mOldPlug = rec->mBatteryPlugType;
-            pw->PrintString(String(" plug="));
-            switch (mOldPlug) {
-                case 0:
-                    pw->PrintString(String("none"));
-                    break;
-                case IBatteryManager::BATTERY_PLUGGED_AC:
-                    pw->PrintString(String("ac"));
-                    break;
-                case IBatteryManager::BATTERY_PLUGGED_USB:
-                    pw->PrintString(String("usb"));
-                    break;
-                case IBatteryManager::BATTERY_PLUGGED_WIRELESS:
-                    pw->PrintString(String("wireless"));
-                    break;
-                default:
-                    pw->PrintInt32(mOldPlug);
-                    break;
-            }
-        }
-        if (mOldTemp != rec->mBatteryTemperature) {
-            mOldTemp = rec->mBatteryTemperature;
-            pw->PrintString(String(" temp="));
-            pw->PrintInt32(mOldTemp);
-        }
-        if (mOldVolt != rec->mBatteryVoltage) {
-            mOldVolt = rec->mBatteryVoltage;
-            pw->PrintString(String(" volt="));
-            pw->PrintInt32(mOldVolt);
-        }
-        BatteryStats::PrintBitDescriptions(pw, mOldState, rec->mStates,
-                HISTORY_STATE_DESCRIPTIONS);
-        pw->Println();
+        mWakelockTag = NULL;
     }
-    mOldState = rec->mStates;
+    if (o->mWakeReasonTag != NULL) {
+        mWakeReasonTag = mLocalWakeReasonTag;
+        mWakeReasonTag->SetTo(o->mWakeReasonTag);
+    }
+    else {
+        mWakeReasonTag = NULL;
+    }
+    mEventCode = o->mEventCode;
+    if (o->mEventTag != NULL) {
+        mEventTag = mLocalEventTag;
+        mEventTag->SetTo(o->mEventTag);
+    }
+    else {
+        mEventTag = NULL;
+    }
+    mCurrentTime = o->mCurrentTime;
 }
 
+Boolean IBatteryStatsHistoryItem::SameNonEvent(
+    /* [in] */ HistoryItem* o) {
+    return mBatteryLevel == o->mBatteryLevel
+            && mBatteryStatus == o->mBatteryStatus
+            && mBatteryHealth == o->mBatteryHealth
+            && mBatteryPlugType == o->mBatteryPlugType
+            && mBatteryTemperature == o->mBatteryTemperature
+            && mBatteryVoltage == o->mBatteryVoltage
+            && mStates == o->mStates
+            && mStates2 == o->mStates2
+            && mCurrentTime == o->mCurrentTime;
+}
+
+Boolean IBatteryStatsHistoryItem::Same(
+    /* [in] */ HistoryItem* o)
+{
+    if (!SameNonEvent(o) || mEventCode != o->mEventCode) {
+        return FALSE;
+    }
+    if (mWakelockTag != o->mWakelockTag) {
+        if (mWakelockTag == NULL || o->mWakelockTag == NULL) {
+            return FALSE;
+        }
+        if (!mWakelockTag.Equals(o->mWakelockTag)) {
+            return FALSE;
+        }
+    }
+    if (mWakeReasonTag != o->mWakeReasonTag) {
+        if (mWakeReasonTag == NULL || o->mWakeReasonTag == NULL) {
+            return FALSE;
+        }
+        if (!mWakeReasonTag.equals(o->mWakeReasonTag)) {
+            return FALSE;
+        }
+    }
+    if (mEventTag != o->mEventTag) {
+        if (mEventTag == NULL || o->mEventTag == NULL) {
+            return FALSE;
+        }
+        if (!mEventTag.Equals(o->mEventTag)) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+
+//==============================================================================
+// BatteryStats::HistoryEventTracker
+//==============================================================================
+
+BatteryStats::HistoryEventTracker::HistoryEventTracker()
+{
+    mActiveEvents = ArrayOf<IHashMap*>::Alloc(IBatteryStatsHistoryItem::EVENT_COUNT);
+}
+
+Boolean BatteryStats::HistoryEventTracker::UpdateState(
+    /* [in] */ Int32 code,
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 poolIdx)
+{
+    if ((code & IBatteryStatsHistoryItem::EVENT_FLAG_START) != 0) {
+        Int32 idx = code & IBatteryStatsHistoryItem::EVENT_TYPE_MASK;
+        AutoPtr<IHashMap> active = (*mActiveEvents)[idx];
+        if (active == NULL) {
+            CHashMap::New((IHashMap**)&active);
+            mActiveEvents->Set(idx, active);
+        }
+        AutoPtr<ICharSequence> cs;
+        CString::New(name, (ICharSequence**)&cs);
+        AutoPtr<IInterface> value;
+        active->Get(cs, (IInterface**)&value);
+        AutoPtr<ISparseInt32Array> uids = ISparseInt32Array::Probe(value);
+        if (uids == NULL) {
+            CSparseInt32Array::New((ISparseInt32Array**)&uids);
+            active->Put(cs, uids);
+        }
+        Int32 index;
+        if (uids->IndexOfKey(uid, &index), index >= 0) {
+            // Already set, nothing to do!
+            return FALSE;
+        }
+
+        uids->Put(uid, poolIdx);
+    }
+    else if ((code & IBatteryStatsHistoryItem::EVENT_FLAG_FINISH) != 0) {
+        Int32 idx = code & IBatteryStatsHistoryItem::EVENT_TYPE_MASK;
+        AutoPtr<IHashMap> active = (*mActiveEvents)[idx];
+        if (active == NULL) {
+            // not currently active, nothing to do.
+            return FALSE;
+        }
+        AutoPtr<ICharSequence> cs;
+        CString::New(name, (ICharSequence**)&cs);
+        AutoPtr<IInterface> value;
+        active->Get(cs, (IInterface**)&value);
+        AutoPtr<ISparseInt32Array> uids = ISparseInt32Array::Probe(value);
+        if (uids == NULL) {
+            // not currently active, nothing to do.
+            return FALSE;
+        }
+        if (uids->IndexOfKey(uid, &idx), idx < 0) {
+            // not currently active, nothing to do.
+            return FALSE;
+        }
+        uids->RemoveAt(idx);
+        Int32 size;
+        if (uids->GetSize(&size), size <= 0) {
+            active->Remove(cs);
+        }
+    }
+    return TRUE;
+}
+
+void BatteryStats::HistoryEventTracker::RemoveEvents(
+    /* [in] */ Int32 code)
+{
+    Int32 idx = code & IBatteryStatsHistoryItem::EVENT_TYPE_MASK;
+    mActiveEvents->Set(idx, NULL);
+}
+
+AutoPtr<IHashMap> BatteryStats::HistoryEventTracker::GetStateForEvent(
+    /* [in] */ Int32 code)
+{
+    return (*mActiveEvents)[code];
+}
 
 
 const Boolean BatteryStats::LOCAL_LOGV;
@@ -759,23 +565,18 @@ AutoPtr< ArrayOf<String> > InitScreenBrightnessNames()
     return names;
 }
 const AutoPtr< ArrayOf<String> > BatteryStats::SCREEN_BRIGHTNESS_NAMES = InitScreenBrightnessNames();
-const Int32 BatteryStats::NUM_SCREEN_BRIGHTNESS_BINS;
-const Int32 BatteryStats::DATA_CONNECTION_NONE;
-const Int32 BatteryStats::DATA_CONNECTION_GPRS;
-const Int32 BatteryStats::DATA_CONNECTION_EDGE;
-const Int32 BatteryStats::DATA_CONNECTION_UMTS;
-const Int32 BatteryStats::DATA_CONNECTION_CDMA;
-const Int32 BatteryStats::DATA_CONNECTION_EVDO_0;
-const Int32 BatteryStats::DATA_CONNECTION_EVDO_A;
-const Int32 BatteryStats::DATA_CONNECTION_1xRTT;
-const Int32 BatteryStats::DATA_CONNECTION_HSDPA;
-const Int32 BatteryStats::DATA_CONNECTION_HSUPA;
-const Int32 BatteryStats::DATA_CONNECTION_HSPA;
-const Int32 BatteryStats::DATA_CONNECTION_IDEN;
-const Int32 BatteryStats::DATA_CONNECTION_EVDO_B;
-const Int32 BatteryStats::DATA_CONNECTION_LTE;
-const Int32 BatteryStats::DATA_CONNECTION_EHRPD;
-const Int32 BatteryStats::DATA_CONNECTION_OTHER;
+
+AutoPtr< ArrayOf<String> > InitScreenBrightnessShortNames()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(5);
+    (*names)[0] = String("0");
+    (*names)[1] = String("1");
+    (*names)[2] = String("2");
+    (*names)[3] = String("3");
+    (*names)[4] = String("4");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::SCREEN_BRIGHTNESS_SHORT_NAMES = InitScreenBrightnessShortNames();
 
 AutoPtr< ArrayOf<String> > InitDataConnectionNames()
 {
@@ -799,116 +600,245 @@ AutoPtr< ArrayOf<String> > InitDataConnectionNames()
     return names;
 }
 const AutoPtr< ArrayOf<String> > BatteryStats::DATA_CONNECTION_NAMES = InitDataConnectionNames();
-const Int32 BatteryStats::NUM_DATA_CONNECTION_TYPES;
+
+AutoPtr< ArrayOf<String> > InitWifiStateNames()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(13);
+    (*names)[0] = String("invalid");
+    (*names)[1] = String("disconn");
+    (*names)[2] = String("disabled");
+    (*names)[3] = String("inactive");
+    (*names)[4] = String("scanning");
+    (*names)[5] = String("authenticating");
+    (*names)[6] = String("associating");
+    (*names)[7] = String("associated");
+    (*names)[8] = String("4-way-handshake");
+    (*names)[9] = String("group-handshake");
+    (*names)[10] = String("completed");
+    (*names)[11] = String("dormant");
+    (*names)[12] = String("uninit");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::WIFI_SUPPL_STATE_NAMES = InitWifiStateNames();
+
+AutoPtr< ArrayOf<String> > InitWifiStateShortNames()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(13);
+    (*names)[0] = String("inv");
+    (*names)[1] = String("dsc");
+    (*names)[2] = String("dis");
+    (*names)[3] = String("inact");
+    (*names)[4] = String("scan");
+    (*names)[5] = String("auth");
+    (*names)[6] = String("ascing");
+    (*names)[7] = String("asced");
+    (*names)[8] = String("4-way");
+    (*names)[9] = String("group");
+    (*names)[10] = String("compl");
+    (*names)[11] = String("dorm");
+    (*names)[12] = String("uninit");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::WIFI_SUPPL_STATE_SHORT_NAMES = InitWifiStateShortNames();
 
 AutoPtr< ArrayOf<BatteryStats::BitDescription*> > BatteryStats::InitHistoryStateDescriptions()
 {
-    AutoPtr< ArrayOf<BatteryStats::BitDescription*> > descriptions = ArrayOf<BatteryStats::BitDescription*>::Alloc(19);
-    AutoPtr<BatteryStats::BitDescription> bd1 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_BATTERY_PLUGGED_FLAG, String("plugged"));
-    descriptions->Set(0, bd1);
+    AutoPtr< ArrayOf<BatteryStats::BitDescription*> > descriptions = ArrayOf<BatteryStats::BitDescription*>::Alloc(18);
+    AutoPtr<BatteryStats::BitDescription> desc0 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_CPU_RUNNING_FLAG, String("running"), String("r"));
+    descriptions->Set(0, desc0);
+    AutoPtr<BatteryStats::BitDescription> desc1 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_WAKE_LOCK_FLAG, String("wake_lock"), String("w"));
+    descriptions->Set(1, desc1);
+    AutoPtr<BatteryStats::BitDescription> desc2 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_SENSOR_ON_FLAG, String("sensor"), String("s"));
+    descriptions->Set(2, desc2);
+    AutoPtr<BatteryStats::BitDescription> desc3 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_GPS_ON_FLAG, String("gps"), String("g"));
+    descriptions->Set(3, desc3);
+    AutoPtr<BatteryStats::BitDescription> desc4 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_WIFI_FULL_LOCK_FLAG, String("wifi_full_lock"), String("Wl"));
+    descriptions->Set(4, desc4);
+    AutoPtr<BatteryStats::BitDescription> desc5 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_WIFI_SCAN_FLAG, String("wifi_scan"), String("Ws"));
+    descriptions->Set(5, desc5);
+    AutoPtr<BatteryStats::BitDescription> desc6 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_WIFI_MULTICAST_ON_FLAG, String("wifi_multicast"), String("Wm"));
+    descriptions->Set(6, desc6);
+    AutoPtr<BatteryStats::BitDescription> desc7 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_MOBILE_RADIO_ACTIVE_FLAG, String("mobile_radio"), String("Pr"));
+    descriptions->Set(7, desc7);
+    AutoPtr<BatteryStats::BitDescription> desc8 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_PHONE_SCANNING_FLAG, String("phone_scanning"), String("Psc"));
+    descriptions->Set(8, desc8);
+    AutoPtr<BatteryStats::BitDescription> desc9 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_AUDIO_ON_FLAG, String("audio"), String("a"));
+    descriptions->Set(9, desc9);
+    AutoPtr<BatteryStats::BitDescription> desc10 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_SCREEN_ON_FLAG, String("screen"), String("S"));
+    descriptions->Set(10, desc10);
+    AutoPtr<BatteryStats::BitDescription> desc11 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_BATTERY_PLUGGED_FLAG, String("plugged"), String("BP"));
+    descriptions->Set(11, desc11);
+    AutoPtr<BatteryStats::BitDescription> desc12 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_PHONE_IN_CALL_FLAG, String("phone_in_call"), String("Pcl"));
+    descriptions->Set(12, desc12);
+    AutoPtr<BatteryStats::BitDescription> desc13 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_BLUETOOTH_ON_FLAG, String("bluetooth"), String("b"));
+    descriptions->Set(13, desc13);
+    AutoPtr<BatteryStats::BitDescription> desc14 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_DATA_CONNECTION_MASK,
+            HistoryItem.STATE_DATA_CONNECTION_SHIFT, String("data_conn"), String("Pcn"),
+            BatteryStats::DATA_CONNECTION_NAMES, BatteryStats::DATA_CONNECTION_NAMES);
+    descriptions->Set(14, desc14);
 
-    AutoPtr<BatteryStats::BitDescription> bd2 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_SCREEN_ON_FLAG, String("screen"));
-    descriptions->Set(1, bd2);
-
-    AutoPtr<BatteryStats::BitDescription> bd3 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_GPS_ON_FLAG, String("gps"));
-    descriptions->Set(2, bd3);
-
-    AutoPtr<BatteryStats::BitDescription> bd4 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_PHONE_IN_CALL_FLAG, String("phone_in_call"));
-    descriptions->Set(3, bd4);
-
-    AutoPtr<BatteryStats::BitDescription> bd5 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_PHONE_SCANNING_FLAG, String("phone_scanning"));
-    descriptions->Set(4, bd5);
-
-    AutoPtr<BatteryStats::BitDescription> bd6 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_WIFI_ON_FLAG, String("wifi"));
-    descriptions->Set(5, bd6);
-
-    AutoPtr<BatteryStats::BitDescription> bd7 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_WIFI_RUNNING_FLAG, String("wifi_running"));
-    descriptions->Set(6, bd7);
-
-    AutoPtr<BatteryStats::BitDescription> bd8 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_WIFI_FULL_LOCK_FLAG, String("wifi_full_lock"));
-    descriptions->Set(7, bd8);
-
-    AutoPtr<BatteryStats::BitDescription> bd9 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_WIFI_SCAN_FLAG, String("wifi_scan"));
-    descriptions->Set(8, bd9);
-
-    AutoPtr<BatteryStats::BitDescription> bd10 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_WIFI_MULTICAST_ON_FLAG, String("wifi_multicast"));
-    descriptions->Set(9, bd10);
-
-    AutoPtr<BatteryStats::BitDescription> bd11 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_BLUETOOTH_ON_FLAG, String("bluetooth"));
-    descriptions->Set(10, bd11);
-
-    AutoPtr<BatteryStats::BitDescription> bd12 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_AUDIO_ON_FLAG, String("audio"));
-    descriptions->Set(11, bd12);
-
-    AutoPtr<BatteryStats::BitDescription> bd13 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_VIDEO_ON_FLAG, String("video"));
-    descriptions->Set(12, bd13);
-
-    AutoPtr<BatteryStats::BitDescription> bd14 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_WAKE_LOCK_FLAG, String("wake_lock"));
-    descriptions->Set(13, bd14);
-
-    AutoPtr<BatteryStats::BitDescription> bd15 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_SENSOR_ON_FLAG, String("sensor"));
-    descriptions->Set(14, bd15);
-
-    AutoPtr<BatteryStats::BitDescription> bd16 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_BRIGHTNESS_MASK,
-            BatteryStats::HistoryItem::STATE_BRIGHTNESS_SHIFT, String("brightness"), BatteryStats::SCREEN_BRIGHTNESS_NAMES);
-    descriptions->Set(15, bd16);
-
-    /*SignalStrength.SIGNAL_STRENGTH_NAMES*/
-    AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(5);
-    (*args)[0] = String("none");
-    (*args)[1] = String("poor");
-    (*args)[2] = String("moderate");
-    (*args)[3] = String("good");
-    (*args)[4] = String("great");
-    AutoPtr<BatteryStats::BitDescription> bd17 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_SIGNAL_STRENGTH_MASK,
-            BatteryStats::HistoryItem::STATE_SIGNAL_STRENGTH_SHIFT, String("signal_strength"), args/*SignalStrength.SIGNAL_STRENGTH_NAMES*/);
-    descriptions->Set(16, bd17);
-
-    AutoPtr< ArrayOf<String> > args1 = ArrayOf<String>::Alloc(4);
+    AutoPtr<ArrayOf<String> > args1 = ArrayOf<String>::Alloc(4);
     (*args1)[0] = String("in");
-    (*args1)[1] = String("out");
+    (*args1)[1] = String("oug");
     (*args1)[2] = String("emergency");
     (*args1)[3] = String("off");
-    AutoPtr<BatteryStats::BitDescription> bd18 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_PHONE_STATE_MASK,
-            BatteryStats::HistoryItem::STATE_PHONE_STATE_SHIFT, String("phone_state"), args1);
-    descriptions->Set(17, bd18);
+    AutoPtr<ArrayOf<String> > args2 = ArrayOf<String>::Alloc(4);
+    (*args2)[0] = String("in");
+    (*args2)[1] = String("oug");
+    (*args2)[2] = String("em");
+    (*args2)[3] = String("off");
+    AutoPtr<BatteryStats::BitDescription> desc15 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_PHONE_STATE_MASK,
+            IBatteryStatsHistoryItem::STATE_PHONE_STATE_SHIFT, String("phone_state"), String("Pst"),
+            args1; args2);
+    descriptions->Set(15, desc15);
 
-    AutoPtr<BatteryStats::BitDescription> bd19 = new BatteryStats::BitDescription(
-            BatteryStats::HistoryItem::STATE_DATA_CONNECTION_MASK,
-            BatteryStats::HistoryItem::STATE_DATA_CONNECTION_SHIFT, String("data_conn"), DATA_CONNECTION_NAMES);
-    descriptions->Set(18, bd19);
+    AutoPtr<ArrayOf<String> > args3 = ArrayOf<String>::Alloc(5);
+    (*args1)[0] = String("0");
+    (*args1)[1] = String("1");
+    (*args1)[2] = String("2");
+    (*args1)[3] = String("3");
+    (*args1)[3] = String("4");
+    AutoPtr<BatteryStats::BitDescription> desc16 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_PHONE_SIGNAL_STRENGTH_MASK,
+            IBatteryStatsHistoryItem::STATE_PHONE_SIGNAL_STRENGTH_SHIFT, String("phone_signal_strength"), String("Pss"),
+            CSignalStrength::SIGNAL_STRENGTH_NAMES, args3);
+    descriptions->Set(16, desc16);
+
+
+    AutoPtr<BatteryStats::BitDescription> desc17 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE_BRIGHTNESS_MASK,
+            IBatteryStatsHistoryItem::STATE_BRIGHTNESS_SHIFT, String("brightness"), String("Sb"),
+            BatteryStats::SCREEN_BRIGHTNESS_NAMES, BatteryStats::SCREEN_BRIGHTNESS_SHORT_NAMES);
+    descriptions->Set(17, desc17);
 
     return descriptions;
 }
 const AutoPtr< ArrayOf<BatteryStats::BitDescription*> > BatteryStats::HISTORY_STATE_DESCRIPTIONS = InitHistoryStateDescriptions();
 
+AutoPtr< ArrayOf<BatteryStats::BitDescription*> > BatteryStats::InitHistoryState2Descriptions()
+{
+    AutoPtr< ArrayOf<BatteryStats::BitDescription*> > descriptions = ArrayOf<BatteryStats::BitDescription*>::Alloc(7);
+    AutoPtr<BatteryStats::BitDescription> desc0 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_LOW_POWER_FLAG, String("low_power"), String("lp"));
+    descriptions->Set(0, desc0);
+    AutoPtr<BatteryStats::BitDescription> desc1 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_VIDEO_ON_FLAG, String("video"), String("v"));
+    descriptions->Set(1, desc1);
+    AutoPtr<BatteryStats::BitDescription> desc2 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_WIFI_RUNNING_FLAG, String("wifi_running"), String("Wr"));
+    descriptions->Set(2, desc2);
+    AutoPtr<BatteryStats::BitDescription> desc3 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_WIFI_ON_FLAG, String("wifi"), String("W"));
+    descriptions->Set(3, desc3);
+    AutoPtr<BatteryStats::BitDescription> desc4 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_FLASHLIGHT_FLAG, String("flashlight"), String("fl"));
+    descriptions->Set(4, desc4);
+
+    AutoPtr<ArrayOf<String> > args1 = ArrayOf<String>::Alloc(5);
+    (*args1)[0] = String("0");
+    (*args1)[1] = String("1");
+    (*args1)[2] = String("2");
+    (*args1)[3] = String("3");
+    (*args1)[4] = String("4");
+    AutoPtr<ArrayOf<String> > args2 = ArrayOf<String>::Alloc(5);
+    (*args2)[0] = String("0");
+    (*args2)[1] = String("1");
+    (*args2)[2] = String("2");
+    (*args2)[3] = String("3");
+    (*args2)[4] = String("4");
+    AutoPtr<BatteryStats::BitDescription> desc5 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_WIFI_SIGNAL_STRENGTH_MASK, String("wifi_signal_strength"),
+            String("Wss"), args1, args2);
+    descriptions->Set(5, desc5);
+
+    AutoPtr<BatteryStats::BitDescription> desc6 = new BitDescription(
+            IBatteryStatsHistoryItem::STATE2_WIFI_SUPPL_STATE_MASK,
+            IBatteryStatsHistoryItem::STATE2_WIFI_SUPPL_STATE_SHIFT, String("wifi_suppl"), String("Wsp"),
+            WIFI_SUPPL_STATE_NAMES, WIFI_SUPPL_STATE_SHORT_NAMES);
+    descriptions->Set(6, desc6);
+    return descriptions;
+}
+const AutoPtr< ArrayOf<BitDescription*> > BatteryStats::HISTORY_STATE2_DESCRIPTIONS = InitHistoryState2Descriptions();
+
+AutoPtr< ArrayOf<String> > InitHistoryEventNames()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(9);
+    (*names)[0] = String("null");
+    (*names)[1] = String("proc");
+    (*names)[2] = String("fg");
+    (*names)[3] = String("top");
+    (*names)[4] = String("sync");
+    (*names)[5] = String("wake_lock_in");
+    (*names)[6] = String("job");
+    (*names)[7] = String("user");
+    (*names)[8] = String("userfg");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::HISTORY_EVENT_NAMES = InitHistoryEventNames();
+
+AutoPtr< ArrayOf<String> > InitHistoryEventCheckinNames()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(9);
+    (*names)[0] = String("Enl");
+    (*names)[1] = String("Epr");
+    (*names)[2] = String("Efg");
+    (*names)[3] = String("Etp");
+    (*names)[4] = String("Esy");
+    (*names)[5] = String("Ewl");
+    (*names)[6] = String("Ejb");
+    (*names)[7] = String("Eur");
+    (*names)[8] = String("Euf");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::HISTORY_EVENT_CHECKIN_NAMES = InitHistoryEventCheckinNames();
+
+AutoPtr< ArrayOf<String> > InitHistoryEventCheckinNames()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(9);
+    (*names)[0] = String("off");
+    (*names)[1] = String("scanning");
+    (*names)[2] = String("no_net");
+    (*names)[3] = String("disconn");
+    (*names)[4] = String("sta");
+    (*names)[5] = String("p2p");
+    (*names)[6] = String("sta_p2p");
+    (*names)[7] = String("soft_ap");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::HISTORY_EVENT_CHECKIN_NAMES = InitWifiStateNames();
+
+AutoPtr< ArrayOf<String> > InitBluetoothStateNames()
+{
+    "inactive", "low", "med", "high"
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(4);
+    (*names)[0] = String("inactive");
+    (*names)[1] = String("low");
+    (*names)[2] = String("med");
+    (*names)[3] = String("high");
+    return names;
+}
+const AutoPtr< ArrayOf<String> > BatteryStats::HISTORY_EVENT_CHECKIN_NAMES = InitBluetoothStateNames();
+
 BatteryStats::BatteryStats()
 {
     mFormatBuilder = new StringBuilder(32);
     CFormatter::New(mFormatBuilder->ToString(), (IFormatter**)&mFormatter);
-}
-
-Int64 BatteryStats::GetRadioDataUptimeMs()
-{
-    return GetRadioDataUptime() / 1000;
 }
 
 void BatteryStats::FormatTimeRaw(
@@ -962,6 +892,16 @@ void BatteryStats::FormatTimeMs(
     sb += "ms ";
 }
 
+void BatteryStats::FormatTimeMsNoSpace(
+    /* [in ]*/ StringBuilder& out,
+    /* [in] */ Int64 seconds)
+{
+    Int64 sec = time / 1000;
+    FormatTimeRaw(sb, sec);
+    sb.Append(time - (sec * 1000));
+    sb.Append("ms");
+}
+
 String BatteryStats::FormatRatioLocked(
     /* [in] */ Int64 num,
     /* [in] */ Int64 den)
@@ -970,7 +910,7 @@ String BatteryStats::FormatRatioLocked(
         return String("---%");
     }
     Float perc = ((Float)num) / ((Float)den) * 100;
-    mFormatBuilder->Reset();
+    mFormatBuilder->SetLength(0);
     AutoPtr<IFloat> f;
     CFloat::New(perc, (IFloat**)&f);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
@@ -982,7 +922,7 @@ String BatteryStats::FormatRatioLocked(
 String BatteryStats::FormatBytesLocked(
     /* [in] */ Int64 bytes)
 {
-    mFormatBuilder->Reset();
+    mFormatBuilder->SetLength(0);
 
     if (bytes < BYTES_PER_KB) {
         StringBuilder sb;
@@ -992,7 +932,7 @@ String BatteryStats::FormatBytesLocked(
     }
     else if (bytes < BYTES_PER_MB) {
         AutoPtr<IInteger64> integer64;
-        CInteger64::New(bytes / (double) BYTES_PER_KB, (IInteger64**)&integer64);
+        CInteger64::New(bytes / (Double) BYTES_PER_KB, (IInteger64**)&integer64);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, (IInterface*)integer64);
         mFormatter->Format(String("%.2fKB"), args);
@@ -1000,7 +940,7 @@ String BatteryStats::FormatBytesLocked(
     }
     else if (bytes < BYTES_PER_GB){
         AutoPtr<IInteger64> integer64;
-        CInteger64::New(bytes / (double) BYTES_PER_MB, (IInteger64**)&integer64);
+        CInteger64::New(bytes / (Double) BYTES_PER_MB, (IInteger64**)&integer64);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, (IInterface*)integer64);
         mFormatter->Format(String("%.2fMB"), args);
@@ -1008,7 +948,7 @@ String BatteryStats::FormatBytesLocked(
     }
     else {
         AutoPtr<IInteger64> integer64;
-        CInteger64::New(bytes / (double) BYTES_PER_GB, (IInteger64**)&integer64);
+        CInteger64::New(bytes / (Double) BYTES_PER_GB, (IInteger64**)&integer64);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, (IInterface*)integer64);
         mFormatter->Format(String("%.2fGB"), args);
@@ -1033,13 +973,13 @@ Int64 BatteryStats::ComputeWakeLock(
 String BatteryStats::PrintWakeLock(
     /* [in] */ StringBuilder& sb,
     /* [in] */ BatteryStatsTimer* timer,
-    /* [in] */ Int64 batteryRealtime,
+    /* [in] */ Int64 elapsedRealtimeUs,
     /* [in] */ const String& name,
     /* [in] */ Int32 which,
     /* [in] */ const String& linePrefix)
 {
     if (timer != NULL) {
-        Int64 totalTimeMillis = ComputeWakeLock(timer, batteryRealtime, which);
+        Int64 totalTimeMillis = ComputeWakeLock(timer, elapsedRealtimeUs, which);
 
         Int32 count = timer->GetCountLocked(which);
         if (totalTimeMillis != 0) {
@@ -1061,7 +1001,7 @@ String BatteryStats::PrintWakeLock(
 String BatteryStats::PrintWakeLockCheckin(
     /* [in] */ StringBuilder& sb,
     /* [in] */ BatteryStatsTimer* timer,
-    /* [in] */ Int64 now,
+    /* [in] */ Int64 elapsedRealtimeUs,
     /* [in] */ const String& name,
     /* [in] */ Int32 which,
     /* [in] */ const String& linePrefix)
@@ -1080,19 +1020,474 @@ String BatteryStats::PrintWakeLockCheckin(
     return String(",");
 }
 
-void BatteryStats::DumpLine(
-    /* [in] */ IPrintWriter* pw,
-    /* [in] */ Int32 uid,
-    /* [in] */ const String& category,
-    /* [in] */ const String& type
-    /* Object... args */)
-{}
+void BatteryStats::DumpCheckinLocked(
+    /* [in]*/ IContext* context,
+    /* [in]*/ IPrintWriter* pw,
+    /* [in]*/ Int32 which,
+    /* [in]*/ Int32 reqUid)
+{
+    DumpCheckinLocked(context, pw, which, reqUid, BatteryStatsHelper::CheckWifiOnly(context));
+}
 
 void BatteryStats::DumpCheckinLocked(
-    /* [in] */ IPrintWriter* pw,
-    /* [in] */ Int32 which,
-    /* [in] */ Int32 reqUid)
-{}
+    /* [in]*/ IContext* context,
+    /* [in]*/ IPrintWriter* pw,
+    /* [in]*/ Int32 which,
+    /* [in]*/ Int32 reqUid,
+    /* [in] */ Boolean wifiOnly)
+{
+    // begin from this
+    final long rawUptime = SystemClock.uptimeMillis() * 1000;
+    final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
+    final long batteryUptime = getBatteryUptime(rawUptime);
+    final long whichBatteryUptime = computeBatteryUptime(rawUptime, which);
+    final long whichBatteryRealtime = computeBatteryRealtime(rawRealtime, which);
+    final long whichBatteryScreenOffUptime = computeBatteryScreenOffUptime(rawUptime, which);
+    final long whichBatteryScreenOffRealtime = computeBatteryScreenOffRealtime(rawRealtime,
+            which);
+    final long totalRealtime = computeRealtime(rawRealtime, which);
+    final long totalUptime = computeUptime(rawUptime, which);
+    final long screenOnTime = getScreenOnTime(rawRealtime, which);
+    final long interactiveTime = getInteractiveTime(rawRealtime, which);
+    final long lowPowerModeEnabledTime = getLowPowerModeEnabledTime(rawRealtime, which);
+    final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
+    final long wifiOnTime = getWifiOnTime(rawRealtime, which);
+    final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
+    final long bluetoothOnTime = getBluetoothOnTime(rawRealtime, which);
+
+    StringBuilder sb = new StringBuilder(128);
+
+    SparseArray<? extends Uid> uidStats = getUidStats();
+    final int NU = uidStats.size();
+
+    String category = STAT_NAMES[which];
+
+    // Dump "battery" stat
+    dumpLine(pw, 0 /* uid */, category, BATTERY_DATA,
+            which == STATS_SINCE_CHARGED ? getStartCount() : "N/A",
+            whichBatteryRealtime / 1000, whichBatteryUptime / 1000,
+            totalRealtime / 1000, totalUptime / 1000,
+            getStartClockTime(),
+            whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000);
+
+    // Calculate wakelock times across all uids.
+    long fullWakeLockTimeTotal = 0;
+    long partialWakeLockTimeTotal = 0;
+
+    for (int iu = 0; iu < NU; iu++) {
+        Uid u = uidStats.valueAt(iu);
+
+        Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
+        if (wakelocks.size() > 0) {
+            for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent
+                    : wakelocks.entrySet()) {
+                Uid.Wakelock wl = ent.getValue();
+
+                Timer fullWakeTimer = wl.getWakeTime(WAKE_TYPE_FULL);
+                if (fullWakeTimer != null) {
+                    fullWakeLockTimeTotal += fullWakeTimer.getTotalTimeLocked(rawRealtime,
+                            which);
+                }
+
+                Timer partialWakeTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                if (partialWakeTimer != null) {
+                    partialWakeLockTimeTotal += partialWakeTimer.getTotalTimeLocked(
+                        rawRealtime, which);
+                }
+            }
+        }
+    }
+
+    long mobileRxTotalBytes = getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which);
+    long mobileTxTotalBytes = getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which);
+    long wifiRxTotalBytes = getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which);
+    long wifiTxTotalBytes = getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which);
+    long mobileRxTotalPackets = getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which);
+    long mobileTxTotalPackets = getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
+    long wifiRxTotalPackets = getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
+    long wifiTxTotalPackets = getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+
+    // Dump network stats
+    dumpLine(pw, 0 /* uid */, category, GLOBAL_NETWORK_DATA,
+            mobileRxTotalBytes, mobileTxTotalBytes, wifiRxTotalBytes, wifiTxTotalBytes,
+            mobileRxTotalPackets, mobileTxTotalPackets, wifiRxTotalPackets, wifiTxTotalPackets);
+
+    // Dump misc stats
+    dumpLine(pw, 0 /* uid */, category, MISC_DATA,
+            screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000,
+            wifiRunningTime / 1000, bluetoothOnTime / 1000,
+            mobileRxTotalBytes, mobileTxTotalBytes, wifiRxTotalBytes, wifiTxTotalBytes,
+            fullWakeLockTimeTotal / 1000, partialWakeLockTimeTotal / 1000,
+            0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which) / 1000,
+            getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
+            lowPowerModeEnabledTime / 1000);
+
+    // Dump screen brightness stats
+    Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
+    for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+        args[i] = getScreenBrightnessTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, SCREEN_BRIGHTNESS_DATA, args);
+
+    // Dump signal strength stats
+    args = new Object[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+    for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        args[i] = getPhoneSignalStrengthTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_TIME_DATA, args);
+    dumpLine(pw, 0 /* uid */, category, SIGNAL_SCANNING_TIME_DATA,
+            getPhoneSignalScanningTime(rawRealtime, which) / 1000);
+    for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        args[i] = getPhoneSignalStrengthCount(i, which);
+    }
+    dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_COUNT_DATA, args);
+
+    // Dump network type stats
+    args = new Object[NUM_DATA_CONNECTION_TYPES];
+    for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+        args[i] = getPhoneDataConnectionTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_TIME_DATA, args);
+    for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+        args[i] = getPhoneDataConnectionCount(i, which);
+    }
+    dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_COUNT_DATA, args);
+
+    // Dump wifi state stats
+    args = new Object[NUM_WIFI_STATES];
+    for (int i=0; i<NUM_WIFI_STATES; i++) {
+        args[i] = getWifiStateTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, WIFI_STATE_TIME_DATA, args);
+    for (int i=0; i<NUM_WIFI_STATES; i++) {
+        args[i] = getWifiStateCount(i, which);
+    }
+    dumpLine(pw, 0 /* uid */, category, WIFI_STATE_COUNT_DATA, args);
+
+    // Dump wifi suppl state stats
+    args = new Object[NUM_WIFI_SUPPL_STATES];
+    for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+        args[i] = getWifiSupplStateTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, WIFI_SUPPL_STATE_TIME_DATA, args);
+    for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+        args[i] = getWifiSupplStateCount(i, which);
+    }
+    dumpLine(pw, 0 /* uid */, category, WIFI_SUPPL_STATE_COUNT_DATA, args);
+
+    // Dump wifi signal strength stats
+    args = new Object[NUM_WIFI_SIGNAL_STRENGTH_BINS];
+    for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+        args[i] = getWifiSignalStrengthTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, WIFI_SIGNAL_STRENGTH_TIME_DATA, args);
+    for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+        args[i] = getWifiSignalStrengthCount(i, which);
+    }
+    dumpLine(pw, 0 /* uid */, category, WIFI_SIGNAL_STRENGTH_COUNT_DATA, args);
+
+    // Dump bluetooth state stats
+    args = new Object[NUM_BLUETOOTH_STATES];
+    for (int i=0; i<NUM_BLUETOOTH_STATES; i++) {
+        args[i] = getBluetoothStateTime(i, rawRealtime, which) / 1000;
+    }
+    dumpLine(pw, 0 /* uid */, category, BLUETOOTH_STATE_TIME_DATA, args);
+    for (int i=0; i<NUM_BLUETOOTH_STATES; i++) {
+        args[i] = getBluetoothStateCount(i, which);
+    }
+    dumpLine(pw, 0 /* uid */, category, BLUETOOTH_STATE_COUNT_DATA, args);
+
+    if (which == STATS_SINCE_UNPLUGGED) {
+        dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(),
+                getDischargeCurrentLevel());
+    }
+
+    if (which == STATS_SINCE_UNPLUGGED) {
+        dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
+                getDischargeStartLevel()-getDischargeCurrentLevel(),
+                getDischargeStartLevel()-getDischargeCurrentLevel(),
+                getDischargeAmountScreenOn(), getDischargeAmountScreenOff());
+    } else {
+        dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
+                getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
+                getDischargeAmountScreenOnSinceCharge(),
+                getDischargeAmountScreenOffSinceCharge());
+    }
+
+    if (reqUid < 0) {
+        Map<String, ? extends Timer> kernelWakelocks = getKernelWakelockStats();
+        if (kernelWakelocks.size() > 0) {
+            for (Map.Entry<String, ? extends Timer> ent : kernelWakelocks.entrySet()) {
+                sb.setLength(0);
+                printWakeLockCheckin(sb, ent.getValue(), rawRealtime, null, which, "");
+                dumpLine(pw, 0 /* uid */, category, KERNEL_WAKELOCK_DATA, ent.getKey(),
+                        sb.toString());
+            }
+        }
+        Map<String, ? extends Timer> wakeupReasons = getWakeupReasonStats();
+        if (wakeupReasons.size() > 0) {
+            for (Map.Entry<String, ? extends Timer> ent : wakeupReasons.entrySet()) {
+                // Not doing the regular wake lock formatting to remain compatible
+                // with the old checkin format.
+                long totalTimeMicros = ent.getValue().getTotalTimeLocked(rawRealtime, which);
+                int count = ent.getValue().getCountLocked(which);
+                dumpLine(pw, 0 /* uid */, category, WAKEUP_REASON_DATA,
+                        "\"" + ent.getKey() + "\"", (totalTimeMicros + 500) / 1000, count);
+            }
+        }
+    }
+
+    BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
+    helper.create(this);
+    helper.refreshStats(which, UserHandle.USER_ALL);
+    List<BatterySipper> sippers = helper.getUsageList();
+    if (sippers != null && sippers.size() > 0) {
+        dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
+                BatteryStatsHelper.makemAh(helper.getPowerProfile().getBatteryCapacity()),
+                BatteryStatsHelper.makemAh(helper.getComputedPower()),
+                BatteryStatsHelper.makemAh(helper.getMinDrainedPower()),
+                BatteryStatsHelper.makemAh(helper.getMaxDrainedPower()));
+        for (int i=0; i<sippers.size(); i++) {
+            BatterySipper bs = sippers.get(i);
+            int uid = 0;
+            String label;
+            switch (bs.drainType) {
+                case IDLE:
+                    label="idle";
+                    break;
+                case CELL:
+                    label="cell";
+                    break;
+                case PHONE:
+                    label="phone";
+                    break;
+                case WIFI:
+                    label="wifi";
+                    break;
+                case BLUETOOTH:
+                    label="blue";
+                    break;
+                case SCREEN:
+                    label="scrn";
+                    break;
+                case FLASHLIGHT:
+                    label="flashlight";
+                    break;
+                case APP:
+                    uid = bs.uidObj.getUid();
+                    label = "uid";
+                    break;
+                case USER:
+                    uid = UserHandle.getUid(bs.userId, 0);
+                    label = "user";
+                    break;
+                case UNACCOUNTED:
+                    label = "unacc";
+                    break;
+                case OVERCOUNTED:
+                    label = "over";
+                    break;
+                default:
+                    label = "???";
+            }
+            dumpLine(pw, uid, category, POWER_USE_ITEM_DATA, label,
+                    BatteryStatsHelper.makemAh(bs.value));
+        }
+    }
+
+    for (int iu = 0; iu < NU; iu++) {
+        final int uid = uidStats.keyAt(iu);
+        if (reqUid >= 0 && uid != reqUid) {
+            continue;
+        }
+        Uid u = uidStats.valueAt(iu);
+        // Dump Network stats per uid, if any
+        long mobileBytesRx = u.getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which);
+        long mobileBytesTx = u.getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which);
+        long wifiBytesRx = u.getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which);
+        long wifiBytesTx = u.getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which);
+        long mobilePacketsRx = u.getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which);
+        long mobilePacketsTx = u.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
+        long mobileActiveTime = u.getMobileRadioActiveTime(which);
+        int mobileActiveCount = u.getMobileRadioActiveCount(which);
+        long wifiPacketsRx = u.getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
+        long wifiPacketsTx = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+        long fullWifiLockOnTime = u.getFullWifiLockTime(rawRealtime, which);
+        long wifiScanTime = u.getWifiScanTime(rawRealtime, which);
+        long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
+
+        if (mobileBytesRx > 0 || mobileBytesTx > 0 || wifiBytesRx > 0 || wifiBytesTx > 0
+                || mobilePacketsRx > 0 || mobilePacketsTx > 0 || wifiPacketsRx > 0
+                || wifiPacketsTx > 0 || mobileActiveTime > 0 || mobileActiveCount > 0) {
+            dumpLine(pw, uid, category, NETWORK_DATA, mobileBytesRx, mobileBytesTx,
+                    wifiBytesRx, wifiBytesTx,
+                    mobilePacketsRx, mobilePacketsTx,
+                    wifiPacketsRx, wifiPacketsTx,
+                    mobileActiveTime, mobileActiveCount);
+        }
+
+        if (fullWifiLockOnTime != 0 || wifiScanTime != 0
+                || uidWifiRunningTime != 0) {
+            dumpLine(pw, uid, category, WIFI_DATA,
+                    fullWifiLockOnTime, wifiScanTime, uidWifiRunningTime);
+        }
+
+        if (u.hasUserActivity()) {
+            args = new Object[Uid.NUM_USER_ACTIVITY_TYPES];
+            boolean hasData = false;
+            for (int i=0; i<Uid.NUM_USER_ACTIVITY_TYPES; i++) {
+                int val = u.getUserActivityCount(i, which);
+                args[i] = val;
+                if (val != 0) hasData = true;
+            }
+            if (hasData) {
+                dumpLine(pw, uid /* uid */, category, USER_ACTIVITY_DATA, args);
+            }
+        }
+
+        Map<String, ? extends Uid.Wakelock> wakelocks = u.getWakelockStats();
+        if (wakelocks.size() > 0) {
+            for (Map.Entry<String, ? extends Uid.Wakelock> ent : wakelocks.entrySet()) {
+                Uid.Wakelock wl = ent.getValue();
+                String linePrefix = "";
+                sb.setLength(0);
+                linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_FULL),
+                        rawRealtime, "f", which, linePrefix);
+                linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL),
+                        rawRealtime, "p", which, linePrefix);
+                linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_WINDOW),
+                        rawRealtime, "w", which, linePrefix);
+
+                // Only log if we had at lease one wakelock...
+                if (sb.length() > 0) {
+                    String name = ent.getKey();
+                    if (name.indexOf(',') >= 0) {
+                        name = name.replace(',', '_');
+                    }
+                    dumpLine(pw, uid, category, WAKELOCK_DATA, name, sb.toString());
+                }
+            }
+        }
+
+        Map<String, ? extends Timer> syncs = u.getSyncStats();
+        if (syncs.size() > 0) {
+            for (Map.Entry<String, ? extends Timer> ent : syncs.entrySet()) {
+                Timer timer = ent.getValue();
+                // Convert from microseconds to milliseconds with rounding
+                long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                int count = timer.getCountLocked(which);
+                if (totalTime != 0) {
+                    dumpLine(pw, uid, category, SYNC_DATA, ent.getKey(), totalTime, count);
+                }
+            }
+        }
+
+        Map<String, ? extends Timer> jobs = u.getJobStats();
+        if (jobs.size() > 0) {
+            for (Map.Entry<String, ? extends Timer> ent : jobs.entrySet()) {
+                Timer timer = ent.getValue();
+                // Convert from microseconds to milliseconds with rounding
+                long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                int count = timer.getCountLocked(which);
+                if (totalTime != 0) {
+                    dumpLine(pw, uid, category, JOB_DATA, ent.getKey(), totalTime, count);
+                }
+            }
+        }
+
+        SparseArray<? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
+        int NSE = sensors.size();
+        for (int ise=0; ise<NSE; ise++) {
+            Uid.Sensor se = sensors.valueAt(ise);
+            int sensorNumber = sensors.keyAt(ise);
+            Timer timer = se.getSensorTime();
+            if (timer != null) {
+                // Convert from microseconds to milliseconds with rounding
+                long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                int count = timer.getCountLocked(which);
+                if (totalTime != 0) {
+                    dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count);
+                }
+            }
+        }
+
+        Timer vibTimer = u.getVibratorOnTimer();
+        if (vibTimer != null) {
+            // Convert from microseconds to milliseconds with rounding
+            long totalTime = (vibTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+            int count = vibTimer.getCountLocked(which);
+            if (totalTime != 0) {
+                dumpLine(pw, uid, category, VIBRATOR_DATA, totalTime, count);
+            }
+        }
+
+        Timer fgTimer = u.getForegroundActivityTimer();
+        if (fgTimer != null) {
+            // Convert from microseconds to milliseconds with rounding
+            long totalTime = (fgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+            int count = fgTimer.getCountLocked(which);
+            if (totalTime != 0) {
+                dumpLine(pw, uid, category, FOREGROUND_DATA, totalTime, count);
+            }
+        }
+
+        Object[] stateTimes = new Object[Uid.NUM_PROCESS_STATE];
+        long totalStateTime = 0;
+        for (int ips=0; ips<Uid.NUM_PROCESS_STATE; ips++) {
+            totalStateTime += u.getProcessStateTime(ips, rawRealtime, which);
+            stateTimes[ips] = (totalStateTime + 500) / 1000;
+        }
+        if (totalStateTime > 0) {
+            dumpLine(pw, uid, category, STATE_TIME_DATA, stateTimes);
+        }
+
+        Map<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
+        if (processStats.size() > 0) {
+            for (Map.Entry<String, ? extends BatteryStats.Uid.Proc> ent
+                    : processStats.entrySet()) {
+                Uid.Proc ps = ent.getValue();
+
+                final long userMillis = ps.getUserTime(which) * 10;
+                final long systemMillis = ps.getSystemTime(which) * 10;
+                final long foregroundMillis = ps.getForegroundTime(which) * 10;
+                final long starts = ps.getStarts(which);
+
+                if (userMillis != 0 || systemMillis != 0 || foregroundMillis != 0
+                        || starts != 0) {
+                    dumpLine(pw, uid, category, PROCESS_DATA, ent.getKey(), userMillis,
+                            systemMillis, foregroundMillis, starts);
+                }
+            }
+        }
+
+        Map<String, ? extends BatteryStats.Uid.Pkg> packageStats = u.getPackageStats();
+        if (packageStats.size() > 0) {
+            for (Map.Entry<String, ? extends BatteryStats.Uid.Pkg> ent
+                    : packageStats.entrySet()) {
+
+                Uid.Pkg ps = ent.getValue();
+                int wakeups = ps.getWakeups(which);
+                Map<String, ? extends  Uid.Pkg.Serv> serviceStats = ps.getServiceStats();
+                for (Map.Entry<String, ? extends BatteryStats.Uid.Pkg.Serv> sent
+                        : serviceStats.entrySet()) {
+                    BatteryStats.Uid.Pkg.Serv ss = sent.getValue();
+                    long startTime = ss.getStartTime(batteryUptime, which);
+                    int starts = ss.getStarts(which);
+                    int launches = ss.getLaunches(which);
+                    if (startTime != 0 || starts != 0 || launches != 0) {
+                        dumpLine(pw, uid, category, APK_DATA,
+                                wakeups, // wakeup alarms
+                                ent.getKey(), // Apk
+                                sent.getKey(), // service
+                                startTime / 1000, // time spent started, in ms
+                                starts,
+                                launches);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void BatteryStats::DumpLocked(
     /* [in] */ IPrintWriter* pw,

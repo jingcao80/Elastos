@@ -133,6 +133,11 @@ BatteryStatsImpl::TimeBase::TimeBase()
     , mUnpluggedRealtime(0)
 {}
 
+void BatteryStatsImpl::TimeBase::Dump(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ const String& prefix)
+{}
+
 void BatteryStatsImpl::TimeBase::Add(
     /* [in] */ ITimeBaseObs* observer)
 {
@@ -1752,13 +1757,17 @@ Int32 BatteryStatsImpl::Uid::Proc::CountExcessivePowers()
     return mExcessivePower != NULL ? mExcessivePower->GetSize() : 0;
 }
 
-AutoPtr<BatteryStatsImpl::Uid::Proc::ExcessivePower> BatteryStatsImpl::Uid::Proc::GetExcessivePower(
-    /* [in] */ Int32 i)
+ECode BatteryStatsImpl::Uid::Proc::GetExcessivePower(
+    /* [in] */ Int32 i,
+    /* [out] */ IBatteryStatsUidProcExcessivePower** excessivePower)
 {
+    VALIDATE_NOT_NULL(excessivePower)
+    *excessivePower = NULL;
     if (mExcessivePower != NULL) {
-        return (*mExcessivePower)[i];
+        *excessivePower = (IBatteryStatsUidProcExcessivePower*)(*mExcessivePower)[i];
+        REFCOUNT_ADD(*excessivePower)
     }
-    return NULL;
+    return NOERROR;
 }
 
 void BatteryStatsImpl::Uid::Proc::AddExcessiveWake(
@@ -9906,8 +9915,8 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
     mScreenState = IDisplay::STATE_UNKNOWN;
     mScreenOnTimer = new StopwatchTimer(NULL, -1, NULL, mOnBatteryTimeBase, in);
     for (Int32 i = 0; i < IBatteryStats::NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-        // begin from this
-        (*mScreenBrightnessTimer)[i] = new StopwatchTimer(NULL, -100-i, NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -100 - i, NULL, mOnBatteryTimeBase, in);
+        mScreenBrightnessTimer->Set(i, timer);
     }
     mInteractive = FALSE;
     mInteractiveTimer = new StopwatchTimer(NULL, -9, NULL, mOnBatteryTimeBase, in);
@@ -9915,17 +9924,19 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
     mLowPowerModeEnabledTimer = new StopwatchTimer(NULL, -2, NULL, mOnBatteryTimeBase, in);
     mPhoneOnTimer = new StopwatchTimer(NULL, -3, NULL, mOnBatteryTimeBase, in);
     for (Int32 i = 0; i < ISignalStrength::NUM_SIGNAL_STRENGTH_BINS; i++) {
-        (*mPhoneSignalStrengthsTimer)[i] = new StopwatchTimer(NULL, -200 - i,
-                NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -200 - i, NULL, mOnBatteryTimeBase, in);
+        mPhoneSignalStrengthsTimer->Set(i, timer);
     }
     mPhoneSignalScanningTimer = new StopwatchTimer(NULL, -200 + 1, NULL, mOnBatteryTimeBase, in);
     for (Int32 i = 0; i < IBatteryStats::NUM_DATA_CONNECTION_TYPES; i++) {
-        (*mPhoneDataConnectionsTimer)[i] = new StopwatchTimer(NULL, -300 - i,
-                NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -300 - i, NULL, mOnBatteryTimeBase, in);
+        mPhoneDataConnectionsTimer->Set(i, timer);
     }
     for (Int32 i = 0; i < IBatteryStats::NUM_NETWORK_ACTIVITY_TYPES; i++) {
-        (*mNetworkByteActivityCounters)[i] = new Int64SamplingCounter(mOnBatteryTimeBase, in);
-        (*mNetworkPacketActivityCounters)[i] = new Int64SamplingCounter(mOnBatteryTimeBase, in);
+        AutoPtr<Int64SamplingCounter> counter1 = new Int64SamplingCounter(mOnBatteryTimeBase, in);
+        mNetworkByteActivityCounters->Set(i, counter1);
+        AutoPtr<Int64SamplingCounter> counter2 = new Int64SamplingCounter(mOnBatteryTimeBase, in);
+        mNetworkPacketActivityCounters->Set(i, counter2);
     }
     mMobileRadioPowerState = IDataConnectionRealTimeInfo::DC_POWER_STATE_LOW;
     mMobileRadioActiveTimer = new StopwatchTimer(NULL, -400, NULL, mOnBatteryTimeBase, in);
@@ -9938,162 +9949,46 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
     mGlobalWifiRunning = FALSE;
     mGlobalWifiRunningTimer = new StopwatchTimer(NULL, -5, NULL, mOnBatteryTimeBase, in);
     for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_STATES; i++) {
-        (*mWifiStateTimer)[i] = new StopwatchTimer(NULL, -600-i,
-                NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -600 - i, NULL, mOnBatteryTimeBase, in);
+        mWifiStateTimer->Set(i, timer);
     }
     for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_SUPPL_STATES; i++) {
-        (*mWifiSupplStateTimer)[i] = new StopwatchTimer(NULL, -700 - i,
-                NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -700 - i, NULL, mOnBatteryTimeBase, in);
+        mWifiSupplStateTimer->Set(i, timer);
     }
     for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
-        (*mWifiSignalStrengthsTimer)[i] = new StopwatchTimer(NULL, -800 - i,
-                NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -800 - i, NULL, mOnBatteryTimeBase, in);
+        mWifiSignalStrengthsTimer->Set(i, timer);
     }
     mBluetoothOn = FALSE;
     mBluetoothOnTimer = new StopwatchTimer(NULL, -6, NULL, mOnBatteryTimeBase, in);
     for (Int32 i = 0; i < IBatteryStats::NUM_BLUETOOTH_STATES; i++) {
-        (*mBluetoothStateTimer)[i] = new StopwatchTimer(NULL, -500 - i,
-                NULL, mOnBatteryTimeBase, in);
+        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -500 - i, NULL, mOnBatteryTimeBase, in);
+        mBluetoothStateTimer->Set(i, timer);
     }
     mAudioOnNesting = 0;
     mAudioOnTimer = new StopwatchTimer(NULL, -7, NULL, mOnBatteryTimeBase);
     mVideoOnNesting = 0;
     mVideoOnTimer = new StopwatchTimer(NULL, -8, NULL, mOnBatteryTimeBase);
-    mFlashlightOn = false;
+    mFlashlightOn = FALSE;
     mFlashlightOnTimer = new StopwatchTimer(NULL, -9, NULL, mOnBatteryTimeBase, in);
-    mDischargeUnplugLevel = in.readInt();
-    mDischargePlugLevel = in.readInt();
-    mDischargeCurrentLevel = in.readInt();
-    mCurrentBatteryLevel = in.readInt();
-    mLowDischargeAmountSinceCharge = in.readInt();
-    mHighDischargeAmountSinceCharge = in.readInt();
-    mDischargeAmountScreenOn = in.readInt();
-    mDischargeAmountScreenOnSinceCharge = in.readInt();
-    mDischargeAmountScreenOff = in.readInt();
-    mDischargeAmountScreenOffSinceCharge = in.readInt();
-    mNumDischargeStepDurations = in.readInt();
-    in.readLongArray(mDischargeStepDurations);
-    mNumChargeStepDurations = in.readInt();
-    in.readLongArray(mChargeStepDurations);
-    mLastWriteTime = in->ReadInt64(&);
-
-    mBluetoothPingCount = in.readInt();
-    mBluetoothPingStart = -1;
-
-    mKernelWakelockStats.clear();
-    int NKW = in.readInt();
-    for (int ikw = 0; ikw < NKW; ikw++) {
-        if (in.readInt() != 0) {
-            String wakelockName = in->ReadString(&);
-            SamplingTimer kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, in);
-            mKernelWakelockStats.put(wakelockName, kwlt);
-        }
-    }
-
-    mWakeupReasonStats.clear();
-    int NWR = in.readInt();
-    for (int iwr = 0; iwr < NWR; iwr++) {
-        if (in.readInt() != 0) {
-            String reasonName = in->ReadString(&);
-            SamplingTimer timer = new SamplingTimer(mOnBatteryTimeBase, in);
-            mWakeupReasonStats.put(reasonName, timer);
-        }
-    }
-
-    mPartialTimers.clear();
-    mFullTimers.clear();
-    mWindowTimers.clear();
-    mWifiRunningTimers.clear();
-    mFullWifiLockTimers.clear();
-    mWifiScanTimers.clear();
-    mWifiBatchedScanTimers.clear();
-    mWifiMulticastTimers.clear();
-    mAudioTurnedOnTimers.clear();
-    mVideoTurnedOnTimers.clear();
-
-    sNumSpeedSteps = in.readInt();
-
-    int numUids = in.readInt();
-    mUidStats.clear();
-    for (int i = 0; i < numUids; i++) {
-        int uid = in.readInt();
-        Uid u = new Uid(uid);
-        u.readFromParcelLocked(mOnBatteryTimeBase, mOnBatteryScreenOffTimeBase, in);
-        mUidStats.append(uid, u);
-    }
-
-
-
-
-
-
-
-    in->ReadInt64(&mBatteryUptime);
-    mBatteryLastUptime = 0;
-    in->ReadInt64(&mBatteryRealtime);
-    mBatteryLastRealtime = 0;
-    mScreenOn = FALSE;
-    mScreenOnTimer = new StopwatchTimer(NULL, -1, NULL, &mUnpluggables, in);
-    for (Int32 i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -100 - i,
-                NULL, &mUnpluggables, in);
-        mScreenBrightnessTimer->Set(i, timer);
-    }
-    mInputEventCounter = new Counter(&mUnpluggables, in);
-    mPhoneOn = FALSE;
-    mPhoneOnTimer = new StopwatchTimer(NULL, -2, NULL, &mUnpluggables, in);
-    for (Int32 i = 0; i < ISignalStrength::NUM_SIGNAL_STRENGTH_BINS; i++) {
-        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -200 - i,
-                NULL, &mUnpluggables, in);
-        mPhoneSignalStrengthsTimer->Set(i, timer);
-    }
-    mPhoneSignalScanningTimer = new StopwatchTimer(NULL, -200 + 1, NULL, &mUnpluggables, in);
-    for (Int32 i = 0; i < NUM_DATA_CONNECTION_TYPES; i++) {
-        AutoPtr<StopwatchTimer> timer = new StopwatchTimer(NULL, -300-i,
-                NULL, &mUnpluggables, in);
-        mPhoneDataConnectionsTimer->Set(i, timer);
-    }
-    mWifiOn = FALSE;
-    mWifiOnTimer = new StopwatchTimer(NULL, -2, NULL, &mUnpluggables, in);
-    mGlobalWifiRunning = FALSE;
-    mGlobalWifiRunningTimer = new StopwatchTimer(NULL, -2, NULL, &mUnpluggables, in);
-    mBluetoothOn = FALSE;
-    mBluetoothOnTimer = new StopwatchTimer(NULL, -2, NULL, &mUnpluggables, in);
-    in->ReadInt64(&mUptime);
-    in->ReadInt64(&mUptimeStart);
-    mLastUptime = 0;
-    in->ReadInt64(&mRealtime);
-    in->ReadInt64(&mRealtimeStart);
-    mLastRealtime = 0;
-    in->ReadBoolean(&mOnBattery);
-    mOnBatteryInternal = FALSE; // we are no longer really running.
-    in->ReadInt64(&mTrackBatteryPastUptime);
-    in->ReadInt64(&mTrackBatteryUptimeStart);
-    in->ReadInt64(&mTrackBatteryPastRealtime);
-    in->ReadInt64(&mTrackBatteryRealtimeStart);
-    in->ReadInt64(&mUnpluggedBatteryUptime);
-    in->ReadInt64(&mUnpluggedBatteryRealtime);
     in->ReadInt32(&mDischargeUnplugLevel);
+    in->ReadInt32(&mDischargePlugLevel);
     in->ReadInt32(&mDischargeCurrentLevel);
+    in->ReadInt32(&mCurrentBatteryLevel);
     in->ReadInt32(&mLowDischargeAmountSinceCharge);
     in->ReadInt32(&mHighDischargeAmountSinceCharge);
     in->ReadInt32(&mDischargeAmountScreenOn);
     in->ReadInt32(&mDischargeAmountScreenOnSinceCharge);
     in->ReadInt32(&mDischargeAmountScreenOff);
     in->ReadInt32(&mDischargeAmountScreenOffSinceCharge);
+    in->ReadInt32(&mNumDischargeStepDurations);
+    mDischargeStepDurations = NULL;
+    in->ReadArrayOf((Handle32*)&mDischargeStepDurations);
+    in->ReadInt32(&mNumChargeStepDurations);
+    mChargeStepDurations = NULL;
+    in->ReadArrayOf((Handle32*)&mChargeStepDurations);
     in->ReadInt64(&mLastWriteTime);
-
-    in->ReadInt64(&(*mMobileDataRx)[STATS_LAST]);
-    (*mMobileDataRx)[STATS_SINCE_UNPLUGGED] = -1;
-    in->ReadInt64(&(*mMobileDataTx)[STATS_LAST]);
-    (*mMobileDataTx)[STATS_SINCE_UNPLUGGED] = -1;
-    in->ReadInt64(&(*mTotalDataRx)[STATS_LAST]);
-    (*mTotalDataRx)[STATS_SINCE_UNPLUGGED] = -1;
-    in->ReadInt64(&(*mTotalDataTx)[STATS_LAST]);
-    (*mTotalDataTx)[STATS_SINCE_UNPLUGGED] = -1;
-
-    in->ReadInt64(&mRadioDataUptime);
-    mRadioDataStart = -1;
 
     in->ReadInt32(&mBluetoothPingCount);
     mBluetoothPingStart = -1;
@@ -10106,9 +10001,21 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
         if (in->ReadInt32(&value), value != 0) {
             String wakelockName;
             in->ReadString(&wakelockName);
-            in->ReadInt32(&value); // Extra 0/1 written by Timer.writeTimerToParcel
-            AutoPtr<SamplingTimer> kwlt = new SamplingTimer(&mUnpluggables, mOnBattery, in);
+            AutoPtr<SamplingTimer> kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, in);
             mKernelWakelockStats[wakelockName] = kwlt;
+        }
+    }
+
+    mWakeupReasonStats.Clear();
+    Int32 NWR;
+    in->ReadInt32(&NWR);
+    for (Int32 iwr = 0; iwr < NWR; iwr++) {
+        Int32 value;
+        if (in->ReadInt32(&value), value != 0) {
+            String reasonName;
+            in->ReadString(&reasonName);
+            AutoPtr<SamplingTimer> timer = new SamplingTimer(mOnBatteryTimeBase, in);
+            mWakeupReasonStats[reasonName] = timer;
         }
     }
 
@@ -10118,7 +10025,10 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
     mWifiRunningTimers.Clear();
     mFullWifiLockTimers.Clear();
     mWifiScanTimers.Clear();
+    mWifiBatchedScanTimers.Clear();
     mWifiMulticastTimers.Clear();
+    mAudioTurnedOnTimers.Clear();
+    mVideoTurnedOnTimers.Clear();
 
     in->ReadInt32(&sNumSpeedSteps);
 
@@ -10129,8 +10039,8 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
         Int32 uid;
         in->ReadInt32(&uid);
         AutoPtr<Uid> u = new Uid(uid, this);
-        u->ReadFromParcelLocked(&mUnpluggables, in);
-        mUidStats[uid] = u;
+        u->ReadFromParcelLocked(mOnBatteryTimeBase, mOnBatteryScreenOffTimeBase, in);
+        mUidStats->Append(uid, (IObject*)u.Get());
     }
     return NOERROR;
 }
@@ -10153,76 +10063,112 @@ void BatteryStatsImpl::WriteToParcelLocked(
     /* [in] */ Boolean inclUids)
 {
     // Need to update with current kernel wake lock counts.
-    UpdateKernelWakelocksLocked();
+    PullPendingStateUpdatesLocked();
+
+    // Pull the clock time.  This may update the time and make a new history entry
+    // if we had originally pulled a time before the RTC was set.
+    Int64 startClockTime = GetStartClockTime();
 
     Int64 uSecUptime = SystemClock::GetUptimeMillis() * 1000;
     Int64 uSecRealtime = SystemClock::GetElapsedRealtime() * 1000;
-    Int64 batteryUptime = GetBatteryUptimeLocked(uSecUptime);
-    Int64 batteryRealtime = GetBatteryRealtimeLocked(uSecRealtime);
+    Int64 batteryRealtime = mOnBatteryTimeBase->GetRealtime(uSecRealtime);
+    Int64 batteryScreenOffRealtime = mOnBatteryScreenOffTimeBase->GetRealtime(uSecRealtime);
 
     out->WriteInt32(MAGIC);
 
-    WriteHistory(out, FALSE);
+    WriteHistory(out, TRUE, FALSE);
 
     out->WriteInt32(mStartCount);
-    out->WriteInt64(mBatteryUptime);
-    out->WriteInt64(mBatteryRealtime);
-    mScreenOnTimer->WriteToParcel(out, batteryRealtime);
-    for (Int32 i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-        (*mScreenBrightnessTimer)[i]->WriteToParcel(out, batteryRealtime);
-    }
-    mInputEventCounter->WriteToParcel(out);
-    mPhoneOnTimer->WriteToParcel(out, batteryRealtime);
-    for (Int32 i = 0; i < ISignalStrength::NUM_SIGNAL_STRENGTH_BINS; i++) {
-        (*mPhoneSignalStrengthsTimer)[i]->WriteToParcel(out, batteryRealtime);
-    }
-    mPhoneSignalScanningTimer->WriteToParcel(out, batteryRealtime);
-    for (Int32 i = 0; i < NUM_DATA_CONNECTION_TYPES; i++) {
-        (*mPhoneDataConnectionsTimer)[i]->WriteToParcel(out, batteryRealtime);
-    }
-    mWifiOnTimer->WriteToParcel(out, batteryRealtime);
-    mGlobalWifiRunningTimer->WriteToParcel(out, batteryRealtime);
-    mBluetoothOnTimer->WriteToParcel(out, batteryRealtime);
+    out->WriteInt64(startClockTime);
+    out->WriteString(mStartPlatformVersion);
+    out->WriteString(mEndPlatformVersion);
     out->WriteInt64(mUptime);
     out->WriteInt64(mUptimeStart);
     out->WriteInt64(mRealtime);
     out->WriteInt64(mRealtimeStart);
     out->WriteBoolean(mOnBattery);
-    out->WriteInt64(batteryUptime);
-    out->WriteInt64(mTrackBatteryUptimeStart);
-    out->WriteInt64(batteryRealtime);
-    out->WriteInt64(mTrackBatteryRealtimeStart);
-    out->WriteInt64(mUnpluggedBatteryUptime);
-    out->WriteInt64(mUnpluggedBatteryRealtime);
+    mOnBatteryTimeBase->WriteToParcel(out, uSecUptime, uSecRealtime);
+    mOnBatteryScreenOffTimeBase->WriteToParcel(out, uSecUptime, uSecRealtime);
+
+    mScreenOnTimer->WriteToParcel(out, uSecRealtime);
+    for (Int32 i = 0; i < IBatteryStats::NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+        (*mScreenBrightnessTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    mInteractiveTimer->WriteToParcel(out, uSecRealtime);
+    mLowPowerModeEnabledTimer->WriteToParcel(out, uSecRealtime);
+    mPhoneOnTimer->WriteToParcel(out, uSecRealtime);
+    for (Int32 i = 0; i < ISignalStrength::NUM_SIGNAL_STRENGTH_BINS; i++) {
+        (*mPhoneSignalStrengthsTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    mPhoneSignalScanningTimer->WriteToParcel(out, uSecRealtime);
+    for (Int32 i = 0; i < IBatteryStats::NUM_DATA_CONNECTION_TYPES; i++) {
+        (*mPhoneDataConnectionsTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
+        (*mNetworkByteActivityCounters)[i]->WriteToParcel(out);
+        (*mNetworkPacketActivityCounters)[i]->WriteToParcel(out);
+    }
+    mMobileRadioActiveTimer->WriteToParcel(out, uSecRealtime);
+    mMobileRadioActivePerAppTimer->WriteToParcel(out, uSecRealtime);
+    mMobileRadioActiveAdjustedTime->WriteToParcel(out);
+    mMobileRadioActiveUnknownTime->WriteToParcel(out);
+    mMobileRadioActiveUnknownCount->WriteToParcel(out);
+    mWifiOnTimer->WriteToParcel(out, uSecRealtime);
+    mGlobalWifiRunningTimer->WriteToParcel(out, uSecRealtime);
+    for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_STATES; i++) {
+        (*mWifiStateTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_SUPPL_STATES; i++) {
+        (*mWifiSupplStateTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+        (*mWifiSignalStrengthsTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    mBluetoothOnTimer.writeToParcel(out, uSecRealtime);
+    for (Int32 i = 0; i < IBatteryStats:: NUM_BLUETOOTH_STATES; i++) {
+        (*mBluetoothStateTimer)[i]->WriteToParcel(out, uSecRealtime);
+    }
+    mFlashlightOnTimer->WriteToParcel(out, uSecRealtime);
     out->WriteInt32(mDischargeUnplugLevel);
+    out->WriteInt32(mDischargePlugLevel);
     out->WriteInt32(mDischargeCurrentLevel);
+    out->WriteInt32(mCurrentBatteryLevel);
     out->WriteInt32(mLowDischargeAmountSinceCharge);
     out->WriteInt32(mHighDischargeAmountSinceCharge);
     out->WriteInt32(mDischargeAmountScreenOn);
     out->WriteInt32(mDischargeAmountScreenOnSinceCharge);
     out->WriteInt32(mDischargeAmountScreenOff);
     out->WriteInt32(mDischargeAmountScreenOffSinceCharge);
+    out->WriteInt32(mNumDischargeStepDurations);
+    out->WriteArrayOf((Handle32)mDischargeStepDurations);
+    out->WriteInt32(mNumChargeStepDurations);
+    out->WriteArrayOf((Handle32)mChargeStepDurations);
     out->WriteInt64(mLastWriteTime);
-
-    out->WriteInt64(GetMobileTcpBytesReceived(STATS_SINCE_UNPLUGGED));
-    out->WriteInt64(GetMobileTcpBytesSent(STATS_SINCE_UNPLUGGED));
-    out->WriteInt64(GetTotalTcpBytesReceived(STATS_SINCE_UNPLUGGED));
-    out->WriteInt64(GetTotalTcpBytesSent(STATS_SINCE_UNPLUGGED));
-
-    // Write radio uptime for data
-    out->WriteInt64(GetRadioDataUptime());
 
     out->WriteInt32(GetBluetoothPingCount());
 
     if (inclUids) {
         out->WriteInt32(mKernelWakelockStats.GetSize());
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator it = mKernelWakelockStats.Begin();
-        for (; it != mKernelWakelockStats.End(); ++it) {
-            AutoPtr<SamplingTimer> kwlt = it->mSecond;
+        HashMap<String, AutoPtr<SamplingTimer> >::Iterator wlIt = mKernelWakelockStats.Begin();
+        for (; wlIt != mKernelWakelockStats.End(); ++wlIt) {
+            AutoPtr<SamplingTimer> kwlt = wlIt->mSecond;
             if (kwlt != NULL) {
                 out->WriteInt32(1);
-                out->WriteString(it->mFirst);
-                Timer::WriteTimerToParcel(out, kwlt, batteryRealtime);
+                out->WriteString(wlIt->mFirst);
+                kwlt->WriteToParcel(out, uSecRealtime);
+            }
+            else {
+                out->WriteInt32(0);
+            }
+        }
+        out->WriteInt32(mWakeupReasonStats.GetSize());
+        HashMap<String, AutoPtr<SamplingTimer> >::Iterator wuIt = mWakeupReasonStats.Begin();
+        for (; wuIt != mWakeupReasonStats.End(); ++wuIt) {
+            AutoPtr<SamplingTimer> timer = wuIt->mSecond;
+            if (timer != NULL) {
+                out->WriteInt32(1);
+                out->WriteString(wuIt->mFirst);
+                timer->WriteToParcel(out, uSecRealtime);
             }
             else {
                 out->WriteInt32(0);
@@ -10236,13 +10182,18 @@ void BatteryStatsImpl::WriteToParcelLocked(
     out->WriteInt32(sNumSpeedSteps);
 
     if (inclUids) {
-        Int32 size = mUidStats.GetSize();
+        Int32 size;
+        mUidStats->GetSize(&size);
         out->WriteInt32(size);
-        HashMap<Int32, AutoPtr<Uid> >::Iterator it = mUidStats.Begin();
-        for (; it != mUidStats.End(); ++it) {
-            out->WriteInt32(it->mFirst);
+        for (Int32 i = 0; i < size; i++) {
+            Int32 key;
+            mUidStats->KeyAt(i, &key);
+            out->WriteInt32(key);
+            AutoPtr<IInterface> value;
+            mUidStats->ValueAt(i, (IInterface**)&value);
+            AutoPtr<Uid> uid = (Uid*)(IObject*)value.Get();
 
-            it->mSecond->WriteToParcelLocked(out, batteryRealtime);
+            uid->WriteToParcelLocked(out, uSecRealtime);
         }
     }
     else {
@@ -10253,13 +10204,21 @@ void BatteryStatsImpl::WriteToParcelLocked(
 void BatteryStatsImpl::PrepareForDumpLocked()
 {
     // Need to retrieve current kernel wake lock stats before printing.
-    UpdateKernelWakelocksLocked();
+    PullPendingStateUpdatesLocked();
+
+    // Pull the clock time.  This may update the time and make a new history entry
+    // if we had originally pulled a time before the RTC was set.
+    GetStartClockTime();
 }
 
 void BatteryStatsImpl::DumpLocked(
     /* [in] */ IPrintWriter* pw)
 {
     if (DEBUG) {
+        pw->Println(String("mOnBatteryTimeBase:"));
+        mOnBatteryTimeBase->Dump(pw, String("  "));
+        pw->Println(String("mOnBatteryScreenOffTimeBase:"));
+        mOnBatteryScreenOffTimeBase->Dump(pw, String("  "));
         AutoPtr<IPrinter> pr;
         assert(0);
         // CPrintWriterPrinter::New(pw, (IPrinter**)&pr);
@@ -10272,12 +10231,14 @@ void BatteryStatsImpl::DumpLocked(
             pr->Println(sb.ToString());
             (*mScreenBrightnessTimer)[i]->LogState(pr, String("  "));
         }
-        pr->Println(String("*** Input event counter:"));
-        mInputEventCounter->LogState(pr, String("  "));
+        pr->Println(String("*** Interactive timer:"));
+        mInteractiveTimer->LogState(pr, String("  "));
+        pr->Println(String("*** Low power mode timer:"));
+        mLowPowerModeEnabledTimer->LogState(pr, "  ");
         pr->Println(String("*** Phone timer:"));
         mPhoneOnTimer->LogState(pr, String("  "));
         for (Int32 i = 0; i < ISignalStrength::NUM_SIGNAL_STRENGTH_BINS; i++) {
-            StringBuilder sb("*** Signal strength #");
+            StringBuilder sb("*** Phone signal strength #");
             sb += i;
             sb += ":";
             pr->Println(sb.ToString());
@@ -10292,16 +10253,37 @@ void BatteryStatsImpl::DumpLocked(
             pr->Println(sb.ToString());
             (*mPhoneDataConnectionsTimer)[i]->LogState(pr, String("  "));
         }
+        pr->Println(String("*** mMobileRadioPowerState=") + StringUtils::ToString(mMobileRadioPowerState));
+        pr->Println(String("*** Mobile network active timer:"));
+        mMobileRadioActiveTimer->LogState(pr, String("  "));
+        pr->Println(String("*** Mobile network active adjusted timer:"));
+        mMobileRadioActiveAdjustedTime->LogState(pr, String("  "));
         pr->Println(String("*** Wifi timer:"));
         mWifiOnTimer->LogState(pr, String("  "));
         pr->Println(String("*** WifiRunning timer:"));
         mGlobalWifiRunningTimer->LogState(pr, String("  "));
+        for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_STATES; i++) {
+            pr->Println(String("*** Wifi state #") + StringUtils::ToString(i) + ":");
+            (*mWifiStateTimer)[i]->LogState(pr, String("  "));
+        }
+        for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_SUPPL_STATES; i++) {
+            pr->Println(String("*** Wifi suppl state #") + StringUtils::ToString(i) + ":");
+            (*mWifiSupplStateTimer)[i]->LogState(pr, String("  "));
+        }
+        for (Int32 i = 0; i < IBatteryStats::NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            pr->Println(String("*** Wifi signal strength #") + StringUtils::ToString(i) + ":");
+            (*mWifiSignalStrengthsTimer)[i]->LogState(pr, String("  "));
+        }
         pr->Println(String("*** Bluetooth timer:"));
         mBluetoothOnTimer->LogState(pr, String("  "));
-        pr->Println(String("*** Mobile ifaces:"));
-        // pr->Println(mMobileIfaces.toString());
+        for (Int32 i = 0; i < IBatteryStats:: NUM_BLUETOOTH_STATES; i++) {
+            pr->Println(String("*** Bluetooth active type #") + StringUtils::ToString(i) + ":");
+            (*mBluetoothStateTimer)[i]->LogState(pr, String("  "));
+        }
+        pr->Println(String("*** Flashlight timer:"));
+        mFlashlightOnTimer->LogState(pr, String("  "));
     }
-    BatteryStats::DumpLocked(pw);
+    BatteryStats::DumpLocked(context, pw, flags, reqUid, histStart);
 }
 
 AutoPtr<INetworkStats> BatteryStatsImpl::GetNetworkStatsSummary()

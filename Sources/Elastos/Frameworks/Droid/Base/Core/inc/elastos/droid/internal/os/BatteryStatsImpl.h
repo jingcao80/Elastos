@@ -75,7 +75,9 @@ public:
     public:
         TimeBase();
 
-        // CARAPI_(void) dump(PrintWriter pw, String prefix);
+        CARAPI_(void) Dump(
+            /* [in] */ IPrintWriter* pw,
+            /* [in] */ const String& prefix);
 
         CARAPI_(void) Add(
             /* [in] */ ITimeBaseObs* observer);
@@ -899,8 +901,9 @@ public:
 
             CARAPI_(Int32) CountExcessivePowers();
 
-            CARAPI_(AutoPtr<ExcessivePower>) GetExcessivePower(
-                /* [in] */ Int32 i);
+            CARAPI GetExcessivePower(
+                /* [in] */ Int32 i,
+                /* [out] */ IBatteryStatsUidProcExcessivePower* excessivePower);
 
             CARAPI_(void) AddExcessiveWake(
                 /* [in] */ Int64 overTime,
@@ -2993,7 +2996,7 @@ private:
     Int32 mBluetoothState;
     AutoPtr< ArrayOf<StopwatchTimer*> > mBluetoothStateTimer;
 
-    Int32 mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+    Int32 mMobileRadioPowerState;
     Int64 mMobileRadioActiveStartTime;
     AutoPtr<StopwatchTimer> mMobileRadioActiveTimer;
     AutoPtr<StopwatchTimer> mMobileRadioActivePerAppTimer;
