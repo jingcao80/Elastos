@@ -1115,14 +1115,6 @@ module
         interface IParcelable;
     }
 
-    //     class CEmptyAbsSavedState {
-
-    //         constructor();
-
-    //         interface IAbsSavedState;
-    //         interface IParcelable;
-    //     }
-
     singleton class CAbsSavedStateHelper {
         interface IAbsSavedStateHelper;
     }

@@ -338,7 +338,9 @@ void SwitchBar::OnRestoreInstanceState(
 {
     AutoPtr<ISwitchBarSavedState> is = ISwitchBarSavedState::Probe(state);
     AutoPtr<SavedState> ss = (SavedState*)is.Get();
-    LinearLayout::OnRestoreInstanceState(ss->GetSuperState());
+    AutoPtr<IParcelable> p;
+    ss->GetSuperState((IParcelable**)&p);
+    LinearLayout::OnRestoreInstanceState(p);
 
     ((ToggleSwitch*)mSwitch.Get())->SetCheckedInternal(ss->mChecked);
     SetTextViewLabel(ss->mChecked);

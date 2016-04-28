@@ -1154,7 +1154,9 @@ void ExpandableListView::OnRestoreInstanceState(
 
     AutoPtr<IExpandableListView> view = IExpandableListView::Probe(state);
     AutoPtr<SavedState> ss = (SavedState*)view.Get();
-    ListView::OnRestoreInstanceState(ss->GetSuperState());
+    AutoPtr<IParcelable> p;
+    ss->GetSuperState((IParcelable**)&p);
+    ListView::OnRestoreInstanceState(p);
 
     if (mConnector.Get() != NULL && ss->mExpandedGroupMetadataList != NULL) {
         ((ExpandableListConnector*)mConnector.Get())->SetExpandedGroupMetadataList(IList::Probe(ss->mExpandedGroupMetadataList));

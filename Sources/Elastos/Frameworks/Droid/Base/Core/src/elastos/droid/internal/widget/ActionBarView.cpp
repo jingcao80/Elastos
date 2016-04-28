@@ -2465,7 +2465,9 @@ void ActionBarView::OnRestoreInstanceState(
 
     assert(0);
     SavedState* state = (SavedState*)p;
-    View::OnRestoreInstanceState(state->GetSuperState());
+    AutoPtr<IParcelable> ss;
+    state->GetSuperState((IParcelable**)&ss);
+    View::OnRestoreInstanceState(ss);
     if (state->expandedMenuItemId != 0 && mExpandedMenuPresenter != NULL && mOptionsMenu != NULL) {
         AutoPtr<IMenuItem> item;
         IMenu::Probe(mOptionsMenu)->FindItem(state->expandedMenuItemId, (IMenuItem**)&item);

@@ -30,9 +30,6 @@ public:
     CARAPI GetSuperState(
         /* [out] */ IParcelable** p);
 
-public:
-    CARAPI_(AutoPtr<IParcelable>) GetSuperState();
-
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 

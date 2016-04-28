@@ -1894,7 +1894,9 @@ void HorizontalScrollView::OnRestoreInstanceState(
         return;
     }
     AutoPtr<SavedState> ss = (SavedState*) IViewBaseSavedState::Probe(state);
-    FrameLayout::OnRestoreInstanceState(ss->GetSuperState());
+    AutoPtr<IParcelable> p;
+    ss->GetSuperState((IParcelable**)&p);
+    FrameLayout::OnRestoreInstanceState(p);
     mSavedState = ss;
     RequestLayout();
 }

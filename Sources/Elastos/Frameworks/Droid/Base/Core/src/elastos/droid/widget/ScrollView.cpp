@@ -2154,7 +2154,9 @@ void ScrollView::OnRestoreInstanceState(
         return;
     }
     AutoPtr<SavedState> ss = (SavedState*) state;
-    FrameLayout::OnRestoreInstanceState(ss->GetSuperState());
+    AutoPtr<IParcelable> p;
+    ss->GetSuperState((IParcelable**)&p);
+    FrameLayout::OnRestoreInstanceState(p);
     mSavedState = ss;
     RequestLayout();
 }
