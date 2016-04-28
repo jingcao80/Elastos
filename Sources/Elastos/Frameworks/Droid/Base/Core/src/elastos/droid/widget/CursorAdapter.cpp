@@ -352,7 +352,7 @@ ECode CursorAdapter::OnContentChanged()
 {
     Boolean closed;
     if (mAutoRequery && mCursor != NULL && !(mCursor->IsClosed(&closed), closed)) {
-        if (DEBUG) Logger::V(TAG, "Auto requerying %s due to update", TO_CSTR(mCursor));
+        if (DEBUG) Slogger::V(TAG, "Auto requerying %s due to update", TO_CSTR(mCursor));
         return mCursor->Requery(&mDataValid);
     }
     return NOERROR;
