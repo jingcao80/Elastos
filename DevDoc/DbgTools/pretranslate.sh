@@ -4,7 +4,7 @@
 # usages:
 # chmod u+x pretranslate.sh
 # ./pretranslate.sh srcFilename targetFilename
-# or ./pretranslate.sh targetFilename
+# or ./pretranslate.sh targetDir
 
 pre_translate () {
     target_file=$1
@@ -115,16 +115,30 @@ pre_translate () {
 
 process_dir () {
     path=$1
-    echo " > process dir $path"
+    echo "> process dir $path"
+    postfix=".java"
+    declare -i postfixLen=${#postfix}
 
-    for file in ${path}/*.java; do
-        filename=$(basename "$file")
-        echo " > process $filename"
-        pre_translate $file
+    for file in $path/*; do
+        if [ -d $file ]; then
+            #echo "  > process sub dir $file"
+            process_dir $file
+        elif [ -f "$file" ]; then
+            filename=$(basename "$file")
+            len=${#filename}
+            if [ $len -ge $postfixLen ]; then
+                start=$len-$postfixLen
+                sub=${filename:$start:$len}
+                if [ $sub == $postfix ]; then
+                    echo "  > prcess file $filename"
+                    pre_translate $file
 
-        tgt=$(echo $file | sed -e "s@.java@.h@")
-        echo " > result $tgt"
-        mv $file $tgt
+                    tgt=$(echo $file | sed -e "s@.java@.cpp@")
+                    echo "  > result $tgt"
+                    mv $file $tgt
+                fi
+            fi
+        fi
     done
 }
 
@@ -140,14 +154,6 @@ if [ $count -eq 1 ]; then
     elif [ -d "$path" ]; then
         echo " > process root dir $path"
         process_dir $path
-
-        for file in ${path}/*; do
-            if [ -d $file ]; then
-                echo " >> process sub dir $file"
-                process_dir $file
-            fi
-        done
-
     else
         echo "file does not exist. $path"
     fi
