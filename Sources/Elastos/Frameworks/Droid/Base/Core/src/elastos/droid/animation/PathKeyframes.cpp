@@ -150,13 +150,11 @@ ECode PathKeyframes::Int32KeyframesBase2::GetInt32Value(
     return NOERROR;
 }
 
-
 const Int32 PathKeyframes::FRACTION_OFFSET = 0;
 const Int32 PathKeyframes::X_OFFSET = 1;
 const Int32 PathKeyframes::Y_OFFSET = 2;
 const Int32 PathKeyframes::NUM_COMPONENTS = 3;
-AutoPtr<ArrayOf<IKeyframe*> > PathKeyframes::EMPTY_KEYFRAMES;
-Boolean PathKeyframes::sInit = svInit();
+AutoPtr<ArrayOf<IKeyframe*> > PathKeyframes::EMPTY_KEYFRAMES = ArrayOf<IKeyframe*>::Alloc(0);
 
 CAR_INTERFACE_IMPL_3(PathKeyframes, Object, IKeyframes, IPathKeyframes, ICloneable);
 PathKeyframes::PathKeyframes(
@@ -354,12 +352,6 @@ AutoPtr<IInt32Keyframes> PathKeyframes::CreateXInt32Keyframes()
 AutoPtr<IInt32Keyframes> PathKeyframes::CreateYInt32Keyframes()
 {
     return new Int32KeyframesBase2();
-}
-
-Boolean PathKeyframes::svInit()
-{
-    EMPTY_KEYFRAMES = ArrayOf<IKeyframe*>::Alloc(0);
-    return TRUE;
 }
 
 }   //namespace Animation

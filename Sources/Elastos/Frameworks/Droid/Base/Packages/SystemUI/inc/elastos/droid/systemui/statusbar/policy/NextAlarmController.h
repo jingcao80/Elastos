@@ -2,17 +2,17 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_NEXTALARMCONTROLLER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_NEXTALARMCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.App.h"
-#include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IAlarmClockInfo;
 using Elastos::Droid::App::IAlarmManager;
-using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
 using Elastos::Core::Object;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -24,8 +24,9 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
+class CNextAlarmControllerBroadcastReceiver;
 class NextAlarmController
-    : public BroadcastReceiver
+    : public Object
     , public INextAlarmController
 {
 public:
@@ -44,6 +45,7 @@ public:
 
     CARAPI RemoveStateChangedCallback(
         /* [in] */ INextAlarmChangeCallback* cb);
+
     CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
@@ -58,6 +60,7 @@ private:
 
     AutoPtr<IAlarmManager> mAlarmManager;
     AutoPtr<IAlarmClockInfo> mNextAlarm;
+    friend class CNextAlarmControllerBroadcastReceiver;
 };
 
 } // namespace Policy

@@ -42,7 +42,6 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::SystemUI::Recents::Constants;
 using Elastos::Droid::SystemUI::Recents::RecentsAppWidgetHost;
 using Elastos::Droid::SystemUI::Recents::Misc::Console;
-using Elastos::Droid::SystemUI::Recents::Model::ITask;
 using Elastos::Droid::SystemUI::Recents::Model::ITaskKey;
 using Elastos::Droid::SystemUI::Recents::Model::ITaskStack;
 using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
@@ -50,7 +49,7 @@ using Elastos::Droid::SystemUI::Recents::Model::Task;
 using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
 using Elastos::Droid::SystemUI::Recents::Model::TaskStack;
 using Elastos::Droid::SystemUI::Recents::Views::CTaskStackView;
-using Elastos::Droid::SystemUI::Recents::Views::ITaskStackView;
+using Elastos::Droid::SystemUI::Recents::Views::TaskStackView;
 using Elastos::Droid::SystemUI::Recents::Views::TaskStackViewLayoutAlgorithm;
 using Elastos::Droid::SystemUI::Recents::Views::TaskStackViewScroller;
 using Elastos::Droid::Utility::IPair;
@@ -391,7 +390,7 @@ ECode AlternateRecentsComponent::ReloadHeaderBarLayout()
     // Inflate the header bar layout so that we can rebind and draw it for the transition
     AutoPtr<TaskStack> stack = new TaskStack();
     CTaskStackView::New(mContext, stack, (ITaskStackView**)&mDummyStackView);
-    AutoPtr<TaskStackViewLayoutAlgorithm> algo = mDummyStackView->GetStackAlgorithm();
+    AutoPtr<TaskStackViewLayoutAlgorithm> algo = ((CTaskStackView*)mDummyStackView.Get())->GetStackAlgorithm();
     AutoPtr<IRect> taskStackBounds;
     CRect::New(mTaskStackBounds, (IRect**)&taskStackBounds);
     Int32 bottom1, bottom2;
@@ -685,10 +684,11 @@ ECode AlternateRecentsComponent::GetThumbnailTransitionTransform(
     }
 
     // Get the transform for the running task
-    mDummyStackView->UpdateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
-    AutoPtr<TaskStackViewScroller> scroller = mDummyStackView->GetScroller();
+    ((CTaskStackView*)mDummyStackView.Get())->UpdateMinMaxScrollForStack(stack,
+            mTriggeredFromAltTab, isTopTaskHome);
+    AutoPtr<TaskStackViewScroller> scroller = ((CTaskStackView*)mDummyStackView.Get())->GetScroller();
     scroller->SetStackScrollToInitialState();
-    AutoPtr<TaskStackViewLayoutAlgorithm> va = mDummyStackView->GetStackAlgorithm();
+    AutoPtr<TaskStackViewLayoutAlgorithm> va = ((CTaskStackView*)mDummyStackView.Get())->GetStackAlgorithm();
     mTmpTransform = va->GetStackTransform(task,
         scroller->GetStackScroll(), mTmpTransform, NULL);
     *ttt = mTmpTransform;

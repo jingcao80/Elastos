@@ -16,6 +16,7 @@ namespace StatusBar {
 CarClass(CStatusBarIcon)
     , public Object
     , public IStatusBarIcon
+    , public IParcelable
 {
 public:
     CStatusBarIcon();

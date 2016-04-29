@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_USB_USBSTORAGEACTIVITY_H__
 #define __ELASTOS_DROID_SYSTEMUI_USB_USBSTORAGEACTIVITY_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -58,6 +58,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("UsbStorageActivity.MyStorageListener");
+            return NOERROR;
+        }
 
     private:
         UsbStorageActivity* mHost;

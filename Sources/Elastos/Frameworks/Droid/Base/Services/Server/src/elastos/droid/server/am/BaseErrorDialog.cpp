@@ -17,6 +17,13 @@ namespace Am {
 const Int32 BaseErrorDialog::ENABLE_BUTTONS = 0;
 const Int32 BaseErrorDialog::DISABLE_BUTTONS= 0;
 
+BaseErrorDialog::MyHandler::MyHandler(
+    /* [in] */ BaseErrorDialog* service)
+    : mHost(service)
+{
+    Handler::constructor();
+}
+
 ECode BaseErrorDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {

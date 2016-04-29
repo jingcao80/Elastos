@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STACK_CNOTICICATIONSTACKSCROLLLAYOUT_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Stack_CNotificationStackScrollLayout.h"
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"

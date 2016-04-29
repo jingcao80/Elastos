@@ -209,6 +209,13 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("CKeyguardViewMediator.MyBroadcastReceiver");
+            return NOERROR;
+        }
+
     private:
         CKeyguardViewMediator* mHost;
     };

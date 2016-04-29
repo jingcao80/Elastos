@@ -393,7 +393,6 @@ CNotificationStackScrollLayout::CNotificationStackScrollLayout()
     , mDisallowScrollingInThisMotion(FALSE)
     , mGoToFullShadeDelay(0)
 {
-    mCurrentStackScrollState = new StackScrollState(this);
     mAmbientState = new AmbientState();
     CArrayList::New((IArrayList**)&mChildrenToAddAnimated);
     CArrayList::New((IArrayList**)&mChildrenToRemoveAnimated);
@@ -403,8 +402,6 @@ CNotificationStackScrollLayout::CNotificationStackScrollLayout()
     CHashSet::New((IHashSet**)&mFromMoreCardAdditions);
     CArrayList::New((IArrayList**)&mAnimationEvents);
     CArrayList::New((IArrayList**)&mSwipedOutViews);
-    mStateAnimator = new StackStateAnimator(this);
-    mChildrenUpdater = new ChildrenUpdater(this);
 }
 
 ECode CNotificationStackScrollLayout::constructor(
@@ -435,6 +432,10 @@ ECode CNotificationStackScrollLayout::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
+    mCurrentStackScrollState = new StackScrollState(this);
+    mStateAnimator = new StackStateAnimator(this);
+    mChildrenUpdater = new ChildrenUpdater(this);
+
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 minHeight = 0;
@@ -950,7 +951,7 @@ ECode CNotificationStackScrollLayout::GetChildAtPosition(
 
         if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
             *view = slidingChild;
-            REFCOUNT_ADD(*view)
+            REFCOUNT_ADD(*view);
             return NOERROR;
         }
     }
@@ -1748,7 +1749,7 @@ ECode CNotificationStackScrollLayout::GetLastChildNotGone(
         Int32 v = 0;
         if ((child->GetVisibility(&v), v) != IView::GONE) {
             *view = child;
-            REFCOUNT_ADD(*view)
+            REFCOUNT_ADD(*view);
             return NOERROR;
         }
     }

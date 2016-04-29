@@ -5,17 +5,17 @@
 #include "_Elastos_Droid_SystemUI_CSystemUIApplication.h"
 // #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/app/Application.h>
-#include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::App::Application;
-using Elastos::Droid::Content::BroadcastReceiver;
 // using Elastos::Utility::IMap;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
+
+class CSystemUIBroadcastReceiver;
 
 /**
  * Application class for SystemUI.
@@ -24,28 +24,14 @@ CarClass(CSystemUIApplication)
     , public Application
     , public ISystemUIApplication
 {
-private:
-    class UIBroadcastReceiver : public BroadcastReceiver
-    {
-    public:
-        UIBroadcastReceiver(
-            /* [in] */ CSystemUIApplication* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        CSystemUIApplication* mHost;
-    };
-
 public:
     CAR_OBJECT_DECL();
 
     CAR_INTERFACE_DECL();
 
     CSystemUIApplication();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI OnCreate();
@@ -65,7 +51,7 @@ public:
 
     // @SuppressWarnings("unchecked")
     CARAPI GetComponent(
-        /* [in] */ const InterfaceID& interfaceType,
+        /* [in] */ const String& interfaceType,
         /* [out] */ IInterface** obj);
 
     CARAPI GetServices(
@@ -96,7 +82,8 @@ private:
     Boolean mServicesStarted;
     Boolean mBootCompleted;
     // AutoPtr<IMap> mComponents;  /*<Class<?>, Object*/
-    AutoPtr<HashMap<InterfaceID, AutoPtr<IInterface> > > mComponents;
+    AutoPtr<HashMap<String, AutoPtr<IInterface> > > mComponents;
+    friend class CSystemUIBroadcastReceiver;
 };
 
 } // namespace SystemUI

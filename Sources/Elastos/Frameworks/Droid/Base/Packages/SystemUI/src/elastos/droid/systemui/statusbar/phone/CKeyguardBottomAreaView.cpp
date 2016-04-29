@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CKeyguardBottomAreaView.h"
+#include "elastos/droid/systemui/statusbar/phone/CTrustDrawable.h"
 #include "elastos/droid/systemui/statusbar/phone/KeyguardTouchDelegate.h"
 #include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
 #include "../../R.h"
@@ -200,10 +201,25 @@ ECode CKeyguardBottomAreaView::TaskRunnable::Run()
 }
 
 const String CKeyguardBottomAreaView::TAG("PhoneStatusBar/KeyguardBottomAreaView");
-Boolean CKeyguardBottomAreaView::sInit = InitStatics();
-AutoPtr<IIntent> CKeyguardBottomAreaView::SECURE_CAMERA_INTENT;
-AutoPtr<IIntent> CKeyguardBottomAreaView::INSECURE_CAMERA_INTENT;
-AutoPtr<IIntent> CKeyguardBottomAreaView::PHONE_INTENT;
+
+static AutoPtr<IIntent> InitIntent(
+    /* [in] */ const String& info,
+    /* [in] */ Int32 flag)
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(info, (IIntent**)&intent);
+    if (flag != -1) {
+        intent->AddFlags(flag);
+    }
+    return intent;
+}
+
+AutoPtr<IIntent> CKeyguardBottomAreaView::SECURE_CAMERA_INTENT = InitIntent(
+    IMediaStore::INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE, IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+AutoPtr<IIntent> CKeyguardBottomAreaView::INSECURE_CAMERA_INTENT = InitIntent(
+    IMediaStore::INTENT_ACTION_STILL_IMAGE_CAMERA, -1);
+AutoPtr<IIntent> CKeyguardBottomAreaView::PHONE_INTENT = InitIntent(
+    IIntent::ACTION_DIAL, -1);
 
 CAR_OBJECT_IMPL(CKeyguardBottomAreaView);
 CAR_INTERFACE_IMPL_5(CKeyguardBottomAreaView, FrameLayout, IKeyguardBottomAreaView, IViewOnClickListener \
@@ -213,15 +229,6 @@ CKeyguardBottomAreaView::CKeyguardBottomAreaView()
 {
     mAccessibilityDelegate = new KBAAccessibilityDelegate(this);
     mDevicePolicyReceiver = new DevicePolicyReceiver(this);
-}
-
-Boolean CKeyguardBottomAreaView::InitStatics()
-{
-    CIntent::New(IMediaStore::INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE, (IIntent**)&SECURE_CAMERA_INTENT);
-    SECURE_CAMERA_INTENT->AddFlags(IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-    CIntent::New(IMediaStore::INTENT_ACTION_STILL_IMAGE_CAMERA, (IIntent**)&INSECURE_CAMERA_INTENT);
-    CIntent::New(IIntent::ACTION_DIAL, (IIntent**)&PHONE_INTENT);
-    return TRUE;
 }
 
 ECode CKeyguardBottomAreaView::constructor(
@@ -252,7 +259,7 @@ ECode CKeyguardBottomAreaView::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
-    mTrustDrawable = new TrustDrawable(mContext);
+    CTrustDrawable::New(mContext, (IDrawable**)&mTrustDrawable);
     return NOERROR;
 }
 
@@ -373,13 +380,15 @@ ECode CKeyguardBottomAreaView::SetPhoneStatusBar(
 
 AutoPtr<IIntent> CKeyguardBottomAreaView::GetCameraIntent()
 {
-    assert(0 && "TODO: need the app Keyguard.");
+    Logger::D(TAG, "TODO: need the app Keyguard.");
     // KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-    // Boolean currentUserHasTrust = updateMonitor.getUserHasTrust(
+    Boolean currentUserHasTrust = TRUE;
+    // currentUserHasTrust = updateMonitor.getUserHasTrust(
     //         mLockPatternUtils.getCurrentUser());
-    // return mLockPatternUtils.isSecure() && !currentUserHasTrust
-    //         ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
-    return NULL;
+
+    Boolean tmp = FALSE;
+    return (mLockPatternUtils->IsSecure(&tmp), tmp) && !currentUserHasTrust
+             ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
 }
 
 void CKeyguardBottomAreaView::UpdateCameraVisibility()
@@ -389,7 +398,8 @@ void CKeyguardBottomAreaView::UpdateCameraVisibility()
     mContext->GetPackageManager((IPackageManager**)&pm);
     Int32 user = 0;
     mLockPatternUtils->GetCurrentUser(&user);
-    pm->ResolveActivityAsUser(GetCameraIntent(),
+    AutoPtr<IIntent> i = GetCameraIntent();
+    pm->ResolveActivityAsUser(i,
             IPackageManager::MATCH_DEFAULT_ONLY,
             user, (IResolveInfo**)&resolved);
 
@@ -422,7 +432,8 @@ Boolean CKeyguardBottomAreaView::IsCameraDisabledByDpm()
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     AutoPtr<IInterface> obj;
-    ctx->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
+    // ctx->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     AutoPtr<IDevicePolicyManager> dpm = IDevicePolicyManager::Probe(obj);
     if (dpm != NULL) {
         ECode ec = NOERROR;
@@ -478,7 +489,7 @@ void CKeyguardBottomAreaView::WatchForCameraPolicyChanges()
 
     AutoPtr<IIntent> i;
     ctx->RegisterReceiverAsUser(mDevicePolicyReceiver, ALL, filter, String(NULL), NULL, (IIntent**)&i);
-    assert(0 && "TODO: need the app Keyguard.");
+    Logger::D(TAG, "TODO: need the app Keyguard.");
     // KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
 }
 
@@ -577,10 +588,10 @@ ECode CKeyguardBottomAreaView::LaunchCamera()
 
 ECode CKeyguardBottomAreaView::LaunchPhone()
 {
-    assert(0 && "TODO: Not implement TelecomManager::From.");
+    Logger::D(TAG, "TODO: Not implement TelecomManager::From.");
     AutoPtr<ITelecomManager> tm/* = TelecomManager::From(mContext)*/;
     Boolean call = FALSE;
-    if (tm->IsInCall(&call), call) {
+    if (tm != NULL && (tm->IsInCall(&call), call)) {
         AutoPtr<TaskRunnable> run = new TaskRunnable(tm);
         AsyncTask::Execute(run);
     }
@@ -597,10 +608,10 @@ ECode CKeyguardBottomAreaView::OnVisibilityChanged(
     FrameLayout::OnVisibilityChanged(changedView, visibility);
     Boolean shown = FALSE;
     if (IsShown(&shown), shown) {
-        mTrustDrawable->Start();
+        ((CTrustDrawable*)mTrustDrawable.Get())->Start();
     }
     else {
-        mTrustDrawable->Stop();
+        ((CTrustDrawable*)mTrustDrawable.Get())->Stop();
     }
     if (changedView == this && visibility == IView::VISIBLE) {
         UpdateLockIcon();
@@ -612,7 +623,7 @@ ECode CKeyguardBottomAreaView::OnVisibilityChanged(
 ECode CKeyguardBottomAreaView::OnDetachedFromWindow()
 {
     FrameLayout::OnDetachedFromWindow();
-    mTrustDrawable->Stop();
+    ((CTrustDrawable*)mTrustDrawable.Get())->Stop();
     return NOERROR;
 }
 
@@ -620,13 +631,13 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
 {
     Boolean shown = FALSE;
     IsShown(&shown);
-    assert(0 && "TODO: need the app Keyguard.");
+    Logger::D(TAG, "TODO: need the app Keyguard.");
     Boolean visible = shown/* && KeyguardUpdateMonitor.getInstance(mContext).isScreenOn()*/;
     if (visible) {
-        mTrustDrawable->Start();
+        ((CTrustDrawable*)mTrustDrawable.Get())->Start();
     }
     else {
-        mTrustDrawable->Stop();
+        ((CTrustDrawable*)mTrustDrawable.Get())->Stop();
     }
     if (!visible) {
         return;
@@ -653,7 +664,7 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
         IImageView::Probe(mLockIcon)->SetImageDrawable(icon);
     }
     Boolean trustManaged = mUnlockMethodCache->IsTrustManaged();
-    mTrustDrawable->SetTrustManaged(trustManaged);
+    ((CTrustDrawable*)mTrustDrawable.Get())->SetTrustManaged(trustManaged);
     UpdateLockIconClickability();
 }
 

@@ -2,7 +2,6 @@
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CKEYGUARDBOTTOMAREAVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Phone_CKeyguardBottomAreaView.h"
-#include "elastos/droid/systemui/statusbar/phone/TrustDrawable.h"
 #include "elastos/droid/systemui/statusbar/phone/UnlockMethodCache.h"
 #include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
 #include "Elastos.Droid.Telecomm.h"
@@ -113,6 +112,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("CKeyguardBottomAreaView.DevicePolicyReceiver");
+            return NOERROR;
+        }
 
     private:
         CKeyguardBottomAreaView* mHost;
@@ -324,11 +330,8 @@ private:
 
     CARAPI_(void) InflatePreviews();
 
-    static CARAPI_(Boolean) InitStatics();
-
 private:
     static const String TAG;
-    static Boolean sInit;
 
     static AutoPtr<IIntent> SECURE_CAMERA_INTENT;;
     static AutoPtr<IIntent> INSECURE_CAMERA_INTENT;
@@ -352,7 +355,7 @@ private:
     AutoPtr<IAccessibilityController> mAccessibilityController;
     AutoPtr<IPhoneStatusBar> mPhoneStatusBar;
 
-    AutoPtr<TrustDrawable> mTrustDrawable;
+    AutoPtr<IDrawable> mTrustDrawable;
 
     Int32 mLastUnlockIconRes;
     AutoPtr<IAccessibilityDelegate> mAccessibilityDelegate;

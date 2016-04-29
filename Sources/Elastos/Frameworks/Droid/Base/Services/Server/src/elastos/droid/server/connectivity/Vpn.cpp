@@ -1575,7 +1575,7 @@ ECode Vpn::EnforceControlPermission()
 
     // SystemUI dialogs are also allowed to control VPN.
     AutoPtr<IApplicationInfo> sysUiApp;
-    pm->GetApplicationInfo(String("com.android.systemui"), 0, (IApplicationInfo**)&sysUiApp);
+    pm->GetApplicationInfo(String("Elastos.Droid.SystemUI"), 0, (IApplicationInfo**)&sysUiApp);
     app->GetFlags(&flags);
     app->GetUid(&uid);
     if (((flags & IApplicationInfo::FLAG_SYSTEM) != 0) && (appId == uid)) {

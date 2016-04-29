@@ -624,7 +624,7 @@ static AutoPtr<ArrayOf<AutoPtr<ArrayOf<Int32> > > > InitSKIES()
     (*(*skies)[0])[0] = 0xFFc0c0FF;
     (*(*skies)[0])[1] = 0xFFa0a0FF; // DAY
     (*(*skies)[1])[0] = 0xFF000010;
-    (*(*skies)[1])[2] = 0xFF000000; // NIGHT
+    (*(*skies)[1])[1] = 0xFF000000; // NIGHT
     (*(*skies)[2])[0] = 0xFF000040;
     (*(*skies)[2])[1] = 0xFF000010; // TWILIGHT
     (*(*skies)[3])[0] = 0xFFa08020;

@@ -1,7 +1,9 @@
 
 #include "elastos/droid/systemui/statusbar/policy/NextAlarmController.h"
+#include "elastos/droid/systemui/statusbar/policy/CNextAlarmControllerBroadcastReceiver.h"
 #include "Elastos.Droid.Os.h"
 
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::IUserHandle;
@@ -13,7 +15,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(NextAlarmController, BroadcastReceiver, INextAlarmController);
+CAR_INTERFACE_IMPL(NextAlarmController, Object, INextAlarmController);
 NextAlarmController::NextAlarmController(
     /* [in] */ IContext* context)
 {
@@ -25,8 +27,10 @@ NextAlarmController::NextAlarmController(
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_USER_SWITCHED);
     filter->AddAction(IAlarmManager::ACTION_NEXT_ALARM_CLOCK_CHANGED);
+    AutoPtr<IBroadcastReceiver> b;
+    CNextAlarmControllerBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
     AutoPtr<IIntent> i;
-    context->RegisterReceiver(this, filter, (IIntent**)&i);
+    context->RegisterReceiver(b, filter, (IIntent**)&i);
     UpdateNextAlarm();
 }
 
@@ -53,19 +57,6 @@ ECode NextAlarmController::RemoveStateChangedCallback(
     /* [in] */ INextAlarmChangeCallback* cb)
 {
     mChangeCallbacks->Remove(cb);
-    return NOERROR;
-}
-
-ECode NextAlarmController::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (action.Equals(IIntent::ACTION_USER_SWITCHED)
-            || action.Equals(IAlarmManager::ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
-        UpdateNextAlarm();
-    }
     return NOERROR;
 }
 

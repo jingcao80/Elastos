@@ -127,7 +127,7 @@ ECode CastTile::CastDetailAdapter::CreateDetailView(
     UpdateItems(devices);
     mHost->mController->SetDiscovering(TRUE);
     *result = IView::Probe(mItems);
-    REFCOUNT_ADD(*result)
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -226,8 +226,8 @@ ECode CastTile::CastDetailAdapter::OnDetailItemDisconnect(
 AutoPtr<IIntent> CastTile::CAST_SETTINGS = InitStatic();
 CastTile::CastTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mCallback = new Callback(this);
     host->GetCastController((ICastController**)&mController);
     mDetailAdapter = new CastDetailAdapter(this);

@@ -6,8 +6,8 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-SOURCES = ToggleSlider.cpp
+SOURCES = CToggleSlider.cpp
 SOURCES += BrightnessController.cpp
-SOURCES += ToggleSeekBar.cpp
+SOURCES += CToggleSeekBar.cpp
 SOURCES += CurrentUserTracker.cpp
-SOURCES += BrightnessDialog.cpp
+SOURCES += CBrightnessDialog.cpp

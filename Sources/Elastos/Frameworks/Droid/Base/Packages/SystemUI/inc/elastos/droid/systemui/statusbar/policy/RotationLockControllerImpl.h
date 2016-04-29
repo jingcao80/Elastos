@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_PAIREDDEVICE_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_PAIREDDEVICE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"

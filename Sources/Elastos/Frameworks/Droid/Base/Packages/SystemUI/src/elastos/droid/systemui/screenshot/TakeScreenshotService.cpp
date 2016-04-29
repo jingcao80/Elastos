@@ -36,7 +36,9 @@ ECode TakeScreenshotService::MyRunnable::Run()
 TakeScreenshotService::MyHandler::MyHandler(
     /* [in] */ TakeScreenshotService* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode TakeScreenshotService::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)

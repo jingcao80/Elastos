@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_SERVICEMONITOR_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_SERVICEMONITOR_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/database/ContentObserver.h>
@@ -99,6 +99,13 @@ public:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("ServiceMonitor.MonitorBroadcastReceiver");
+            return NOERROR;
+        }
 
     private:
         ServiceMonitor* mHost;

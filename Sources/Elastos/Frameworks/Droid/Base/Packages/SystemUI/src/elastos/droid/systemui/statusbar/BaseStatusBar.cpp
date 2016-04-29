@@ -2,6 +2,8 @@
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "elastos/droid/systemui/statusbar/CCommandQueue.h"
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
+#include "elastos/droid/systemui/statusbar/CSettingsObserver.h"
+#include "elastos/droid/systemui/statusbar/CLockscreenSettingsObserver.h"
 #include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
@@ -61,6 +63,7 @@ using Elastos::Droid::Internal::Utility::INotificationColorUtilHelper;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -69,6 +72,7 @@ using Elastos::Droid::R;
 using Elastos::Droid::Service::Dreams::IDreamService;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CDisplayMetrics;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::CSparseBooleanArray;
 using Elastos::Droid::View::Animation::CAnimationUtils;
@@ -141,17 +145,19 @@ const String BaseStatusBar::BANNER_ACTION_CANCEL("com.android.systemui.statusbar
 const String BaseStatusBar::BANNER_ACTION_SETUP("com.android.systemui.statusbar.banner_action_setup");
 
 //==============================================================================
-//                  BaseStatusBar::SettingsObserver
+//                  CSettingsObserver
 //==============================================================================
-BaseStatusBar::SettingsObserver::SettingsObserver(
+CAR_OBJECT_IMPL(CSettingsObserver);
+ECode CSettingsObserver::constructor(
     /* [in] */ IHandler* handler,
-    /* [in] */ BaseStatusBar* host)
-    : mHost(host)
+    /* [in] */ IBaseStatusBar* host)
 {
     ContentObserver::constructor(handler);
+    mHost = (BaseStatusBar*)host;
+    return NOERROR;
 }
 
-ECode BaseStatusBar::SettingsObserver::OnChange(
+ECode CSettingsObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     AutoPtr<IContentResolver> cr;
@@ -174,17 +180,19 @@ ECode BaseStatusBar::SettingsObserver::OnChange(
 }
 
 //==============================================================================
-//                  BaseStatusBar::LockscreenSettingsObserver
+//                  CLockscreenSettingsObserver
 //==============================================================================
-BaseStatusBar::LockscreenSettingsObserver::LockscreenSettingsObserver(
+CAR_OBJECT_IMPL(CLockscreenSettingsObserver);
+ECode CLockscreenSettingsObserver::constructor(
     /* [in] */ IHandler* handler,
-    /* [in] */ BaseStatusBar* host)
-    : mHost(host)
+    /* [in] */ IBaseStatusBar* host)
 {
     ContentObserver::constructor(handler);
+    mHost = (BaseStatusBar*)host;
+    return NOERROR;
 }
 
-ECode BaseStatusBar::LockscreenSettingsObserver::OnChange(
+ECode CLockscreenSettingsObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     // We don't know which user changed LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
@@ -523,7 +531,9 @@ ECode BaseStatusBar::RecentsPreloadOnTouchListener::OnTouch(
 BaseStatusBar::H::H(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode BaseStatusBar::H::HandleMessage(
     /* [in] */ IMessage* m)
@@ -899,13 +909,17 @@ BaseStatusBar::BaseStatusBar()
     , mFontScale(0)
     , mDeviceProvisioned(FALSE)
 {
-    mSettingsObserver = new SettingsObserver(mHandler, this);
-    mLockscreenSettingsObserver = new LockscreenSettingsObserver(mHandler, this);
     mOnClickHandler = new _RemoteViewsOnClickHandler(this);
     mBroadcastReceiver = new BaseBroadcastReceiver(this);
     mNotificationListener = new _NotificationListenerService(this);
     mRecentsPreloadOnTouchListener = new RecentsPreloadOnTouchListener(this);
     mHandler = CreateHandler();
+
+    CSettingsObserver::New((IHandler*)mHandler->Probe(EIID_IHandler),
+        (IBaseStatusBar*)this->Probe(EIID_IBaseStatusBar), (IContentObserver**)&mSettingsObserver);
+    CLockscreenSettingsObserver::New((IHandler*)mHandler->Probe(EIID_IHandler),
+        (IBaseStatusBar*)this->Probe(EIID_IBaseStatusBar), (IContentObserver**)&mLockscreenSettingsObserver);
+
     CSparseArray::New((ISparseArray**)&mCurrentProfiles);
     CSparseBooleanArray::New((ISparseBooleanArray**)&mUsersAllowingPrivateNotifications);
 }
@@ -920,7 +934,7 @@ ECode BaseStatusBar::IsDeviceProvisioned(
 
 void BaseStatusBar::UpdateCurrentProfilesCache()
 {
-    synchronized (IObject::Probe(mCurrentProfiles))
+    synchronized(mCurrentProfiles)
     {
         mCurrentProfiles->Clear();
         if (mUserManager != NULL) {
@@ -954,7 +968,8 @@ ECode BaseStatusBar::Start()
     mWindowManager->GetDefaultDisplay((IDisplay**)&mDisplay);
 
     obj = NULL;
-    mContext->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
+    // mContext->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
 
     AutoPtr<INotificationColorUtilHelper> ncuHelper;
@@ -997,8 +1012,7 @@ ECode BaseStatusBar::Start()
     obj = ServiceManager::GetService(IContext::STATUS_BAR_SERVICE);
     mBarService = IIStatusBarService::Probe(obj);
 
-    //TODO
-    obj = GetComponent(EIID_IRecentsComponent/*.class*/);
+    obj = GetComponent(String("EIID_IRecentsComponent")/*.class*/);
     mRecents = IRecentsComponent::Probe(obj);
 
     AutoPtr<RecentsComponentCallbacks> c = new RecentsComponentCallbacks(this);
@@ -1035,9 +1049,22 @@ ECode BaseStatusBar::Start()
 
     AutoPtr<ArrayOf<Int32> > switches = ArrayOf<Int32>::Alloc(8);
     AutoPtr<IList> binders;
-    CArrayList::New((IList**)&binders);
+    CParcelableList::New((IList**)&binders);
     // try {
-    mBarService->RegisterStatusBar(IIStatusBar::Probe(mCommandQueue), iconList, switches, binders);
+    if (mBarService != NULL) {
+        assert(iconList != NULL);
+        AutoPtr<IStatusBarIconList> outIconList;
+        AutoPtr<ArrayOf<Int32> > outSwitches;
+        AutoPtr<IList> outBinders;
+        mBarService->RegisterStatusBar(IIStatusBar::Probe(mCommandQueue)
+                , iconList, switches, binders,
+                (IStatusBarIconList**)&outIconList,
+                (ArrayOf<Int32>**)&outSwitches,
+                (IList**)&outBinders);
+        iconList = outIconList;
+        switches = outSwitches;
+        binders = outBinders;
+    }
     // } catch (RemoteException ex) {
     //     // If the system process isn't there we're doomed anyway.
     // }
@@ -1073,8 +1100,7 @@ ECode BaseStatusBar::Start()
     String pn;
     mContext->GetPackageName(&pn);
     String name;
-    assert(0 && "TODO");
-    // name = GetClass().getCanonicalName();
+    name = GetClass()/*.getCanonicalName()*/;
     CComponentName::New(pn, name, (IComponentName**)&cn);
     if (FAILED(mNotificationListener->RegisterAsSystemService(mContext, cn, IUserHandle::USER_ALL))) {
         Logger::E(TAG, "Unable to register notification listener");
@@ -1691,6 +1717,7 @@ void BaseStatusBar::UpdateSearchPanel()
     AutoPtr<IView> view;
     inflater->Inflate(R::layout::status_bar_search_panel, IViewGroup::Probe(tmpRoot), FALSE, (IView**)&view);
     mSearchPanelView = ISearchPanelView::Probe(view);
+    assert(IView::Probe(mSearchPanelView) != NULL);
     IView::Probe(mSearchPanelView)->SetOnTouchListener(
         new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, IStatusBarPanel::Probe(mSearchPanelView), this));
     IView::Probe(mSearchPanelView)->SetVisibility(IView::GONE);
@@ -1824,7 +1851,9 @@ ECode BaseStatusBar::UserAllowsPrivateNotificationsInPublic(
         Boolean allowed = 0 != value;
 
         Int32 dpmFlags = 0;
-        mDevicePolicyManager->GetKeyguardDisabledFeatures(NULL /* admin */, userHandle, &dpmFlags);
+        if (mDevicePolicyManager != NULL) {
+            mDevicePolicyManager->GetKeyguardDisabledFeatures(NULL /* admin */, userHandle, &dpmFlags);
+        }
         Boolean allowedByDpm = (dpmFlags
                 & IDevicePolicyManager::KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS) == 0;
         mUsersAllowingPrivateNotifications->Append(userHandle, allowed && allowedByDpm);
@@ -2495,8 +2524,9 @@ void BaseStatusBar::UpdateLockscreenNotificationSetting()
             mCurrentUserId, &value);
     Boolean show = value != 0;
     Int32 dpmFlags = 0;
-    mDevicePolicyManager->GetKeyguardDisabledFeatures(
-            NULL /* admin */, mCurrentUserId, &dpmFlags);
+    if (mDevicePolicyManager != NULL) {
+        mDevicePolicyManager->GetKeyguardDisabledFeatures(NULL /* admin */, mCurrentUserId, &dpmFlags);
+    }
     Boolean allowedByDpm = (dpmFlags
             & IDevicePolicyManager::KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
     SetShowLockscreenNotifications(show && allowedByDpm);

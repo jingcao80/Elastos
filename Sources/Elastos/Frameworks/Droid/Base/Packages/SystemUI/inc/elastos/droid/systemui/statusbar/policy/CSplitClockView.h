@@ -38,6 +38,13 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("CSplitClockView.IntentReceiver");
+            return NOERROR;
+        }
+
     private:
         CSplitClockView* mHost;
     };

@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_QS_QSTILE_H__
 #define __ELASTOS_DROID_SYSTEMUI_QS_QSTILE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include <elastos/droid/os/Handler.h>
@@ -142,7 +142,9 @@ protected:
 public:
     CAR_INTERFACE_DECL();
 
-    QSTile(
+    QSTile();
+
+    CARAPI constructor(
         /* [in] */ IQSTileHost* host);
 
     CARAPI SupportsDualTargets(

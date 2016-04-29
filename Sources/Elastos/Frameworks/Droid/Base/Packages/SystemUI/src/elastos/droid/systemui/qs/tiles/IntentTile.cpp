@@ -42,9 +42,9 @@ const String IntentTile::PREFIX("intent(");
 IntentTile::IntentTile(
     /* [in] */ IQSTileHost* host,
     /* [in] */ const String& action)
-    : QSTile(host)
-    , mCurrentUserId(0)
+    : mCurrentUserId(0)
 {
+    QSTile::constructor(host);
     mReceiver = new Receiver(this);
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(action, (IIntentFilter**)&filter);

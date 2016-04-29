@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_USERSWITCHERCONTROLLER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_USERSWITCHERCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/phone/SystemUIDialog.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
@@ -181,6 +181,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("UserSwitcherController.Receiver");
+            return NOERROR;
+        }
 
     private:
         UserSwitcherController* mHost;

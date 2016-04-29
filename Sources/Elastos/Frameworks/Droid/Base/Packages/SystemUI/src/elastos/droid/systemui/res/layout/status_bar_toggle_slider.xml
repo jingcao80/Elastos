@@ -31,7 +31,7 @@
         android:background="@*android:drawable/switch_track_material"
         android:visibility="gone"
         />
-    <com.android.systemui.settings.ToggleSeekBar
+    <Elastos.Droid.SystemUI.Settings.CToggleSeekBar
         android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 
-<com.android.systemui.statusbar.ExpandableNotificationRow
+<Elastos.Droid.SystemUI.StatusBar.CExpandableNotificationRow
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -23,21 +23,21 @@
     android:clickable="true"
     >
 
-    <com.android.systemui.statusbar.NotificationBackgroundView
+    <Elastos.Droid.SystemUI.StatusBar.CNotificationBackgroundView
         android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.android.systemui.statusbar.NotificationBackgroundView
+    <Elastos.Droid.SystemUI.StatusBar.CNotificationBackgroundView
         android:id="@+id/backgroundDimmed"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.android.systemui.statusbar.NotificationContentView android:id="@+id/expanded"
+    <Elastos.Droid.SystemUI.StatusBar.CNotificationContentView android:id="@+id/expanded"
        android:layout_width="match_parent"
        android:layout_height="wrap_content" />
 
-    <com.android.systemui.statusbar.NotificationContentView android:id="@+id/expandedPublic"
+    <Elastos.Droid.SystemUI.StatusBar.CNotificationContentView android:id="@+id/expandedPublic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -60,4 +60,4 @@
         android:layout_height="match_parent"
         />
 
-</com.android.systemui.statusbar.ExpandableNotificationRow>
+</Elastos.Droid.SystemUI.StatusBar.CExpandableNotificationRow>

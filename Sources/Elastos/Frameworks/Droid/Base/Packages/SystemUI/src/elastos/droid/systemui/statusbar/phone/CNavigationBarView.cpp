@@ -130,7 +130,9 @@ ECode CNavigationBarView::NavTransitionListener::OnBackAltCleared()
 CNavigationBarView::H::H(
     /* [in] */ CNavigationBarView* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode CNavigationBarView::H::HandleMessage(
     /* [in] */ IMessage* m)

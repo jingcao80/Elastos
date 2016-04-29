@@ -597,13 +597,16 @@ ECode CStatusBarManagerService::EnforceStatusBarService()
 
 ECode CStatusBarManagerService::RegisterStatusBar(
     /* [in] */ IIStatusBar* bar,
-    /* [in, out] */ IStatusBarIconList* iconList,
-    /* [in, out] */ ArrayOf<Int32>* switches,
-    /* [in, out] */ IList* binders)/*List<IBinder*>*/
+    /* [in] */ IStatusBarIconList* inIconList,
+    /* [in] */ ArrayOf<Int32>* inSwitches,
+    /* [in] */ IList* inBinders,
+    /* [out] */ IStatusBarIconList** outIconList,
+    /* [out, callee] */ ArrayOf<Int32>** outSwitches,
+    /* [out] */ IList** outBinders)/*List<IBinder*>*/
 {
-    VALIDATE_NOT_NULL(binders);
-    VALIDATE_NOT_NULL(iconList);
-    VALIDATE_NOT_NULL(switches);
+    VALIDATE_NOT_NULL(outIconList);
+    VALIDATE_NOT_NULL(outSwitches);
+    VALIDATE_NOT_NULL(outBinders);
 
     FAIL_RETURN(EnforceStatusBarService());
 
@@ -612,18 +615,25 @@ ECode CStatusBarManagerService::RegisterStatusBar(
 
     {
         AutoLock Lock(mIconsLock);
-        iconList->CopyFrom(mIcons);
+        inIconList->CopyFrom(mIcons);
+        *outIconList = inIconList;
+        REFCOUNT_ADD(*outIconList);
     }
 
     {
         AutoLock lock(this);
-        GatherDisableActionsLocked(mCurrentUserId, &((*switches)[0]));
-        (*switches)[1] = mSystemUiVisibility;
-        (*switches)[2] = mMenuVisible ? 1 : 0;
-        (*switches)[3] = mImeWindowVis;
-        (*switches)[4] = mImeBackDisposition;
-        (*switches)[5] = mShowImeSwitcher ? 1 : 0;
-        binders->Add(mImeToken);
+        GatherDisableActionsLocked(mCurrentUserId, &((*inSwitches)[0]));
+        (*inSwitches)[1] = mSystemUiVisibility;
+        (*inSwitches)[2] = mMenuVisible ? 1 : 0;
+        (*inSwitches)[3] = mImeWindowVis;
+        (*inSwitches)[4] = mImeBackDisposition;
+        (*inSwitches)[5] = mShowImeSwitcher ? 1 : 0;
+        *outSwitches = inSwitches;
+        REFCOUNT_ADD(*outSwitches);
+
+        inBinders->Add(mImeToken);
+        *outBinders = inBinders;
+        REFCOUNT_ADD(*outBinders);
     }
 
     return NOERROR;

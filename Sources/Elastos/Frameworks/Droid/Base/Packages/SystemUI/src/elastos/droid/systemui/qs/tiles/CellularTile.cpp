@@ -22,6 +22,7 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
+AutoPtr<IIntent> CellularTile::CELLULAR_SETTINGS = InitStatic();
 CellularTile::CallbackInfo::CallbackInfo()
     : mEnabled(FALSE)
     , mWifiEnabled(FALSE)
@@ -188,11 +189,10 @@ ECode CellularTile::CellularDetailAdapter::SetMobileDataEnabled(
     return NOERROR;
 }
 
-
 CellularTile::CellularTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mCallback = new NetworkSignalChangedCallback(this);
     host->GetNetworkController((INetworkController**)&mController);
     mDetailAdapter = new CellularDetailAdapter(this);

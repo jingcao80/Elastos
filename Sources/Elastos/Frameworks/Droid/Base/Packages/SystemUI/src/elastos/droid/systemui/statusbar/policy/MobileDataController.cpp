@@ -14,6 +14,8 @@ using Elastos::Droid::Net::INetworkPolicyManagerHelper;
 using Elastos::Droid::Net::INetworkStatsHistory;
 using Elastos::Droid::Net::INetworkTemplateHelper;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Text::Format::CDateUtils;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Text::Format::IDateUtils;
@@ -49,8 +51,9 @@ MobileDataController::MobileDataController(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    assert(0 && "TODO");
-    // mTelephonyManager = TelephonyManager.from(context);
+    AutoPtr<ITelephonyManagerHelper> tHelper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tHelper);
+    tHelper->From(context, (ITelephonyManager**)&mTelephonyManager);
     AutoPtr<IConnectivityManagerHelper> helper;
     CConnectivityManagerHelper::AcquireSingleton((IConnectivityManagerHelper**)&helper);
     helper->From(context, (IConnectivityManager**)&mConnectivityManager);
@@ -60,7 +63,8 @@ MobileDataController::MobileDataController(
 
     AutoPtr<INetworkPolicyManagerHelper> nHelper;
     CNetworkPolicyManagerHelper::AcquireSingleton((INetworkPolicyManagerHelper**)&nHelper);
-    nHelper->From(mContext, (INetworkPolicyManager**)&mPolicyManager);
+    Logger::D(TAG, "TODO: Need NetworkPolicyManager.");
+    // nHelper->From(mContext, (INetworkPolicyManager**)&mPolicyManager);
 }
 
 Boolean MobileDataController::InitStatic()
@@ -339,9 +343,11 @@ ECode MobileDataController::IsMobileDataEnabled(
 String MobileDataController::GetActiveSubscriberId(
     /* [in] */ IContext* context)
 {
-    assert(0 && "TODO");
     AutoPtr<ITelephonyManager> tele;
-    // tele = TelephonyManager::From(context);
+    AutoPtr<ITelephonyManagerHelper> helper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    helper->From(context, (ITelephonyManager**)&tele);
+
     String actualSubscriberId;
     tele->GetSubscriberId(&actualSubscriberId);
     return actualSubscriberId;

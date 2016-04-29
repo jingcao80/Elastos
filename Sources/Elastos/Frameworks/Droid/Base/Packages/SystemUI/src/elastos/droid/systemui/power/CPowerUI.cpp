@@ -105,35 +105,36 @@ ECode CPowerUI::Receiver::OnReceive(
             Slogger::D(TAG, "plugged        %d --> %d", oldPlugged, plugged);
         }
 
-        Boolean isInvalidChargerWarningShowing;
-        mHost->mWarnings->IsInvalidChargerWarningShowing(&isInvalidChargerWarningShowing);
-        mHost->mWarnings->Update(mHost->mBatteryLevel, bucket, mHost->mScreenOffTime);
-        if (oldInvalidCharger == 0 && mHost->mInvalidCharger != 0) {
-            Slogger::D(TAG, "showing invalid charger warning");
-            mHost->mWarnings->ShowInvalidChargerWarning();
-            return E_NULL_POINTER_EXCEPTION;
-        }
-        else if (oldInvalidCharger != 0 && mHost->mInvalidCharger == 0) {
-            mHost->mWarnings->DismissInvalidChargerWarning();
-        }
-        else if (isInvalidChargerWarningShowing) {
-            // if invalid charger is showing, don't show low battery
-            return E_NULL_POINTER_EXCEPTION;
-        }
+        Slogger::W(TAG, "TODO: Not Implement [Warnings].");
+        // Boolean isInvalidChargerWarningShowing;
+        // mHost->mWarnings->IsInvalidChargerWarningShowing(&isInvalidChargerWarningShowing);
+        // mHost->mWarnings->Update(mHost->mBatteryLevel, bucket, mHost->mScreenOffTime);
+        // if (oldInvalidCharger == 0 && mHost->mInvalidCharger != 0) {
+        //     Slogger::D(TAG, "showing invalid charger warning");
+        //     mHost->mWarnings->ShowInvalidChargerWarning();
+        //     return E_NULL_POINTER_EXCEPTION;
+        // }
+        // else if (oldInvalidCharger != 0 && mHost->mInvalidCharger == 0) {
+        //     mHost->mWarnings->DismissInvalidChargerWarning();
+        // }
+        // else if (isInvalidChargerWarningShowing) {
+        //     // if invalid charger is showing, don't show low battery
+        //     return E_NULL_POINTER_EXCEPTION;
+        // }
 
-        if (!plugged
-                && (bucket < oldBucket || oldPlugged)
-                && mHost->mBatteryStatus != IBatteryManager::BATTERY_STATUS_UNKNOWN
-                && bucket < 0) {
-            // only play SFX when the dialog comes up or the bucket changes
-            const Boolean playSound = bucket != oldBucket || oldPlugged;
-            mHost->mWarnings->ShowLowBatteryWarning(playSound);
-        }
-        else if (plugged || (bucket > oldBucket && bucket > 0)) {
-            mHost->mWarnings->DismissLowBatteryWarning();
-        } else {
-            mHost->mWarnings->UpdateLowBatteryWarning();
-        }
+        // if (!plugged
+        //         && (bucket < oldBucket || oldPlugged)
+        //         && mHost->mBatteryStatus != IBatteryManager::BATTERY_STATUS_UNKNOWN
+        //         && bucket < 0) {
+        //     // only play SFX when the dialog comes up or the bucket changes
+        //     const Boolean playSound = bucket != oldBucket || oldPlugged;
+        //     mHost->mWarnings->ShowLowBatteryWarning(playSound);
+        // }
+        // else if (plugged || (bucket > oldBucket && bucket > 0)) {
+        //     mHost->mWarnings->DismissLowBatteryWarning();
+        // } else {
+        //     mHost->mWarnings->UpdateLowBatteryWarning();
+        // }
     }
     else if (IIntent::ACTION_SCREEN_OFF.Equals(action)) {
         mHost->mScreenOffTime = SystemClock::GetElapsedRealtime();
@@ -200,6 +201,7 @@ ECode CPowerUI::Start()
     Boolean isScreenOn;
     mPowerManager->IsScreenOn(&isScreenOn);
     mScreenOffTime = isScreenOn ? -1 : SystemClock::GetElapsedRealtime();
+    Slogger::W(TAG, "TODO: Not Implement [Warnings].");
     // mWarnings = new PowerNotificationWarnings(mContext, SystemUI::GetComponent(EIID_IPhoneStatusBar));
 
     AutoPtr<MyObs> obs = new MyObs(this);
@@ -221,7 +223,9 @@ ECode CPowerUI::Start()
 ECode CPowerUI::SetSaverMode(
     /* [in] */ Boolean mode)
 {
-    return mWarnings->ShowSaverMode(mode);
+    Slogger::W(TAG, "TODO: Not Implement [Warnings].");
+    // return mWarnings->ShowSaverMode(mode);
+    return NOERROR;
 }
 
 ECode CPowerUI::UpdateBatteryWarningLevels()

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/HotspotControllerImpl.h"
+#include "elastos/droid/systemui/statusbar/policy/CHotspotControllerReceiver.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
@@ -28,62 +29,22 @@ namespace Policy {
 const String HotspotControllerImpl::TAG("HotspotController");
 const Boolean HotspotControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
 
-HotspotControllerImpl::Receiver::Receiver(
-    /* [in] */ HotspotControllerImpl* host)
-    : mRegistered(FALSE)
-    , mHost(host)
-{}
-
-ECode HotspotControllerImpl::Receiver::SetListening(
-    /* [in] */ Boolean listening)
-{
-    if (listening && !mRegistered) {
-        if (DEBUG) Logger::D(TAG, "Registering receiver");
-        AutoPtr<IIntentFilter> filter;
-        CIntentFilter::New((IIntentFilter**)&filter);
-        filter->AddAction(IWifiManager::WIFI_AP_STATE_CHANGED_ACTION);
-
-        AutoPtr<IIntent> i;
-        mHost->mContext->RegisterReceiver(this, filter, (IIntent**)&i);
-        mRegistered = TRUE;
-    }
-    else if (!listening && mRegistered) {
-        if (DEBUG) Logger::D(TAG, "Unregistering receiver");
-        mHost->mContext->UnregisterReceiver(this);
-        mRegistered = FALSE;
-    }
-    return NOERROR;
-}
-
-ECode HotspotControllerImpl::Receiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    if (DEBUG) {
-        String action;
-        intent->GetAction(&action);
-        Logger::D(TAG, "onReceive %s", action.string());
-    }
-    Boolean value = FALSE;
-    mHost->FireCallback((mHost->IsHotspotEnabled(&value), value));
-    return NOERROR;
-}
-
-
 CAR_INTERFACE_IMPL(HotspotControllerImpl, Object, IHotspotController);
 HotspotControllerImpl::HotspotControllerImpl(
     /* [in] */ IContext* context)
 {
     CArrayList/*<IHotspotControllerCallback>*/::New((IArrayList**)&mCallbacks);
-    mReceiver = new Receiver(this);
+    CHotspotControllerReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
     mContext = context;
 
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: WIFI_SERVICE not ready.");
+    // mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
 
     obj = NULL;
-    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
+    // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
     mConnectivityManager = IConnectivityManager::Probe(obj);
 }
 
@@ -99,7 +60,7 @@ ECode HotspotControllerImpl::AddCallback(
     mCallbacks->Add(callback);
 
     mCallbacks->IsEmpty(&value);
-    mReceiver->SetListening(!value);
+    ((CHotspotControllerReceiver*)mReceiver.Get())->SetListening(!value);
     return NOERROR;
 }
 
@@ -112,7 +73,7 @@ ECode HotspotControllerImpl::RemoveCallback(
 
     Boolean value = FALSE;
     mCallbacks->IsEmpty(&value);
-    mReceiver->SetListening(!value);
+    ((CHotspotControllerReceiver*)mReceiver.Get())->SetListening(!value);
     return NOERROR;
 }
 
@@ -121,7 +82,9 @@ ECode HotspotControllerImpl::IsHotspotEnabled(
 {
     VALIDATE_NOT_NULL(result);
     Int32 value = 0;
-    mWifiManager->GetWifiApState(&value);
+    if (mWifiManager != NULL) {
+        mWifiManager->GetWifiApState(&value);
+    }
     *result = value == IWifiManager::WIFI_AP_STATE_ENABLED;
     return NOERROR;
 }
@@ -137,7 +100,9 @@ ECode HotspotControllerImpl::IsHotspotSupported(
     helper->GetCurrentUser(&value);
     const Boolean isSecondaryUser = value != IUserHandle::USER_OWNER;
     Boolean tmp = FALSE;
-    *result = !isSecondaryUser && (mConnectivityManager->IsTetheringSupported(&tmp), tmp);
+    Logger::D(TAG, "TODO: need ConnectivityManager.");
+    // *result = !isSecondaryUser && (mConnectivityManager->IsTetheringSupported(&tmp), tmp);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -174,21 +139,25 @@ ECode HotspotControllerImpl::SetHotspotEnabled(
     // This needs to be kept up to date with Settings (WifiApEnabler.setSoftapEnabled)
     // in case it is turned on in settings and off in qs (or vice versa).
     // Disable Wifi if enabling tethering.
-    Int32 wifiState = 0;
-    mWifiManager->GetWifiState(&wifiState);
     Boolean tmp = FALSE;
-    if (enabled && ((wifiState == IWifiManager::WIFI_STATE_ENABLING) ||
-                (wifiState == IWifiManager::WIFI_STATE_ENABLED))) {
-        mWifiManager->SetWifiEnabled(FALSE, &tmp);
-        Elastos::Droid::Provider::Settings::Global::PutInt32(cr, ISettingsGlobal::WIFI_SAVED_STATE, 1, &tmp);
-    }
+    if (mWifiManager) {
+        Int32 wifiState = 0;
+        mWifiManager->GetWifiState(&wifiState);
+        if (enabled && ((wifiState == IWifiManager::WIFI_STATE_ENABLING) ||
+                    (wifiState == IWifiManager::WIFI_STATE_ENABLED))) {
+            mWifiManager->SetWifiEnabled(FALSE, &tmp);
+            Elastos::Droid::Provider::Settings::Global::PutInt32(cr, ISettingsGlobal::WIFI_SAVED_STATE, 1, &tmp);
+        }
 
-    mWifiManager->SetWifiApEnabled(NULL, enabled, &tmp);
+        mWifiManager->SetWifiApEnabled(NULL, enabled, &tmp);
+    }
 
     // If needed, restore Wifi on tether disable.
     if (!enabled) {
         if (Elastos::Droid::Provider::Settings::Global::GetInt32(cr, ISettingsGlobal::WIFI_SAVED_STATE, 0) == 1) {
-            mWifiManager->SetWifiEnabled(TRUE, &tmp);
+            if (mWifiManager) {
+                mWifiManager->SetWifiEnabled(TRUE, &tmp);
+            }
             Elastos::Droid::Provider::Settings::Global::PutInt32(cr, ISettingsGlobal::WIFI_SAVED_STATE, 0, &tmp);
         }
     }

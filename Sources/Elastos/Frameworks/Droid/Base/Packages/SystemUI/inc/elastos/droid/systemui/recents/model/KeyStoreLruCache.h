@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_KEYSTORELRUCACHE_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_KEYSTORELRUCACHE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/recents/model/Task.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.Core.h"

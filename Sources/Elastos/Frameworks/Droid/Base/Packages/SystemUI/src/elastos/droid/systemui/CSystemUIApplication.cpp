@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/CSystemUIApplication.h"
+#include "elastos/droid/systemui/CSystemUIBroadcastReceiver.h"
 #include "elastos/droid/systemui/SystemUI.h"
 #include "elastos/droid/systemui/Utils.h"
 #include "Elastos.Droid.Os.h"
@@ -22,30 +23,6 @@ namespace SystemUI {
 const String CSystemUIApplication::TAG("SystemUIService");
 const Boolean CSystemUIApplication::DEBUG = FALSE;
 
-CSystemUIApplication::UIBroadcastReceiver::UIBroadcastReceiver(
-    /* [in] */ CSystemUIApplication* host)
-    : mHost(host)
-{}
-
-ECode CSystemUIApplication::UIBroadcastReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    if (mHost->mBootCompleted) return NOERROR;
-
-    if (DEBUG) Logger::V(TAG, "BOOT_COMPLETED received");
-    mHost->UnregisterReceiver(this);
-    mHost->mBootCompleted = TRUE;
-    if (mHost->mServicesStarted) {
-        Int32 N = mHost->mServices->GetLength();
-        for (Int32 i = 0; i < N; i++) {
-            (*mHost->mServices)[i]->OnBootCompleted();
-        }
-    }
-
-    return NOERROR;
-}
-
 CAR_OBJECT_IMPL(CSystemUIApplication);
 CAR_INTERFACE_IMPL(CSystemUIApplication, Application, ISystemUIApplication);
 CSystemUIApplication::CSystemUIApplication()
@@ -53,24 +30,29 @@ CSystemUIApplication::CSystemUIApplication()
     , mBootCompleted(FALSE)
 {
     SERVICES = ArrayOf<IClassInfo*>::Alloc(7);
-    AutoPtr<IClassInfo> clsInfo = Utils::GetClassInfo(String("CKeyguardViewMediator"));
+    AutoPtr<IClassInfo> clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Keyguard.CKeyguardViewMediator"));
     SERVICES->Set(0, clsInfo);
-    clsInfo = Utils::GetClassInfo(String("CRecents"));
+    clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Recent.CRecents"));
     SERVICES->Set(1, clsInfo);
-    clsInfo = Utils::GetClassInfo(String("CVolumeUI"));
+    clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Volume.CVolumeUI"));
     SERVICES->Set(2, clsInfo);
-    clsInfo = Utils::GetClassInfo(String("CSystemBars"));
+    clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.StatusBar.CSystemBars"));
     SERVICES->Set(3, clsInfo);
-    clsInfo = Utils::GetClassInfo(String("CStorageNotification"));
+    clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Usb.CStorageNotification"));
     SERVICES->Set(4, clsInfo);
-    clsInfo = Utils::GetClassInfo(String("CPowerUI"));
+    clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Power.CPowerUI"));
     SERVICES->Set(5, clsInfo);
-    clsInfo = Utils::GetClassInfo(String("CRingtonePlayer"));
+    clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Media.CRingtonePlayer"));
     SERVICES->Set(6, clsInfo);
 
     mServices = ArrayOf<ISystemUI*>::Alloc(SERVICES->GetLength());
     // CHashMap::New((IMap**)&mComponents);
-    mComponents = new HashMap<InterfaceID, AutoPtr<IInterface> >();
+    mComponents = new HashMap<String, AutoPtr<IInterface> >();
+}
+
+ECode CSystemUIApplication::constructor()
+{
+    return NOERROR;
 }
 
 ECode CSystemUIApplication::OnCreate()
@@ -84,7 +66,8 @@ ECode CSystemUIApplication::OnCreate()
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&filter);
     filter->SetPriority(IIntentFilter::SYSTEM_HIGH_PRIORITY);
-    AutoPtr<IBroadcastReceiver> receiver = new UIBroadcastReceiver(this);
+    AutoPtr<IBroadcastReceiver> receiver;
+    CSystemUIBroadcastReceiver::New(this, (IBroadcastReceiver**)&receiver);
     AutoPtr<IIntent> intent;
     RegisterReceiver(receiver, filter, (IIntent**)&intent);
     return NOERROR;
@@ -148,7 +131,7 @@ ECode CSystemUIApplication::OnConfigurationChanged(
 }
 
 ECode CSystemUIApplication::GetComponent(
-    /* [in] */ const InterfaceID& interfaceType,
+    /* [in] */ const String& interfaceType,
     /* [out] */ IInterface** obj)
 {
     VALIDATE_NOT_NULL(obj);

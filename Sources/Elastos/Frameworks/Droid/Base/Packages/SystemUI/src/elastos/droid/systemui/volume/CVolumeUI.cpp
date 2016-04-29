@@ -1,6 +1,6 @@
 #include "elastos/droid/systemui/volume/CVolumeUI.h"
 #include "elastos/droid/systemui/statusbar/policy/ZenModeControllerImpl.h"
-// #include "elastos/droid/systemui/volume/CVolumePanel.h"
+#include "elastos/droid/systemui/volume/CVolumePanel.h"
 #include "elastos/droid/systemui/volume/ZenModePanel.h"
 #include "Elastos.Droid.Provider.h"
 #include "../R.h"
@@ -22,7 +22,6 @@ using Elastos::Droid::SystemUI::Keyguard::IKeyguardViewMediator;
 using Elastos::Droid::SystemUI::StatusBar::Phone::EIID_IPhoneStatusBar;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneStatusBar;
 using Elastos::Droid::SystemUI::StatusBar::Policy::ZenModeControllerImpl;
-// using Elastos::Droid::SystemUI::Volume::CVolumePanel;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -65,7 +64,7 @@ CVolumeUI::MyRunnable::MyRunnable(
 
 ECode CVolumeUI::MyRunnable::Run()
 {
-    AutoPtr<IInterface> obj = mHost->GetComponent(EIID_IPhoneStatusBar);
+    AutoPtr<IInterface> obj = mHost->GetComponent(String("EIID_IPhoneStatusBar"));
     AutoPtr<IPhoneStatusBar> component = IPhoneStatusBar::Probe(obj);
     component->StartActivityDismissingKeyguard(ZenModePanel::ZEN_SETTINGS,
         TRUE /* onlyProvisioned */, TRUE /* dismissShade */);
@@ -240,7 +239,7 @@ ECode CVolumeUI::MyVolumePanelCallback::OnZenSettings()
 
 ECode CVolumeUI::MyVolumePanelCallback::OnInteraction()
 {
-    AutoPtr<IInterface> obj = mHost->GetComponent(EIID_IKeyguardViewMediator);
+    AutoPtr<IInterface> obj = mHost->GetComponent(String("EIID_IKeyguardViewMediator"));
     AutoPtr<IKeyguardViewMediator> kvm = IKeyguardViewMediator::Probe(obj);
     if (kvm != NULL) {
         kvm->UserActivity();
@@ -251,9 +250,10 @@ ECode CVolumeUI::MyVolumePanelCallback::OnInteraction()
 ECode CVolumeUI::MyVolumePanelCallback::OnVisible(
     /* [in] */ Boolean visible)
 {
-    if (mHost->mAudioManager != NULL && mHost->mVolumeController != NULL) {
-        mHost->mAudioManager->NotifyVolumeControllerVisible(mHost->mVolumeController, visible);
-    }
+    Logger::W(TAG, "TODO: OnVisible Need debug AUDIO_SERVICE.");
+    // if (mHost->mAudioManager != NULL && mHost->mVolumeController != NULL) {
+    //     mHost->mAudioManager->NotifyVolumeControllerVisible(mHost->mVolumeController, visible);
+    // }
     return NOERROR;
 }
 
@@ -287,7 +287,8 @@ CVolumeUI::CVolumeUI()
 ECode CVolumeUI::Start()
 {
     AutoPtr<IInterface> amObj;
-    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&amObj);
+    Logger::W(TAG, "TODO: GetSystemService Need debug AUDIO_SERVICE.");
+    // mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&amObj);
     mAudioManager = IAudioManager::Probe(amObj);
 
     AutoPtr<IInterface> msmObj;
@@ -297,7 +298,7 @@ ECode CVolumeUI::Start()
     InitPanel();
     mVolumeController = new VolumeController(this);
     mRemoteVolumeController = new RemoteVolumeController(this);
-    PutComponent(EIID_IVolumeComponent, (IIVolumeController*)mVolumeController);
+    PutComponent(String("EIID_IVolumeComponent"), (IIVolumeController*)mVolumeController);
     UpdateController();
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
@@ -323,16 +324,17 @@ void CVolumeUI::UpdateController()
     mContext->GetContentResolver((IContentResolver**)&resolver);
     Int32 i;
     ss->GetInt32(resolver, SETTING, DEFAULT, &i);
-    if (i != 0) {
-        Logger::D(TAG, "Registering volume controller");
-        mAudioManager->SetVolumeController(mVolumeController);
-        mMediaSessionManager->SetRemoteVolumeController(mRemoteVolumeController);
-    }
-    else {
-        Logger::D(TAG, "Unregistering volume controller");
-        mAudioManager->SetVolumeController(NULL);
-        mMediaSessionManager->SetRemoteVolumeController(NULL);
-    }
+    Logger::W(TAG, "TODO: UpdateController Need debug AUDIO_SERVICE.");
+    // if (i != 0) {
+    //     Logger::D(TAG, "Registering volume controller");
+    //     mAudioManager->SetVolumeController(mVolumeController);
+    //     mMediaSessionManager->SetRemoteVolumeController(mRemoteVolumeController);
+    // }
+    // else {
+    //     Logger::D(TAG, "Unregistering volume controller");
+    //     mAudioManager->SetVolumeController(NULL);
+    //     mMediaSessionManager->SetRemoteVolumeController(NULL);
+    // }
 }
 
 void CVolumeUI::InitPanel()
@@ -342,11 +344,10 @@ void CVolumeUI::InitPanel()
     res->GetInteger(R::integer::volume_panel_dismiss_delay, &mDismissDelay);
 
     AutoPtr<ZenModeControllerImpl> zmc = new ZenModeControllerImpl(mContext, mHandler);
-    //TODO
-    // CVolumePanel::New(mContext, zmc, (IVolumePanel**)&mPanel);
+    CVolumePanel::New(mContext, zmc, (IVolumePanel**)&mPanel);
 
-    // AutoPtr<MyVolumePanelCallback> vpc = new MyVolumePanelCallback(this);
-    // mPanel->SetCallback(vpc);
+    AutoPtr<MyVolumePanelCallback> vpc = new MyVolumePanelCallback(this);
+    mPanel->SetCallback(vpc);
 }
 
 } // namespace Volume

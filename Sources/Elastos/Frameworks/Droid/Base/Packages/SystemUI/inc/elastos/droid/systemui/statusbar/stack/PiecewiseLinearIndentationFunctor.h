@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STACK_PIECEWISELINEARINDETATIONFUNCTOR_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STACK_PIECEWISELINEARINDETATIONFUNCTOR_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/stack/StackIndentationFunctor.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/ext/frameworkext.h>

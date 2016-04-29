@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_BITMAPLRUCACHE_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_BITMAPLRUCACHE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/systemui/recents/model/KeyStoreLruCache.h"
 

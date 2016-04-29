@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_STRINGLRUCACHE_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_STRINGLRUCACHE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/recents/model/KeyStoreLruCache.h"
 
 using Elastos::Droid::SystemUI::Recents::Model::KeyStoreLruCache;

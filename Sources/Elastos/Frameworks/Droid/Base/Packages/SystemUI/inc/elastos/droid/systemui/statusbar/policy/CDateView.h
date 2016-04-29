@@ -28,13 +28,19 @@ private:
         : public BroadcastReceiver
     {
     public:
-         DateViewBroadcastReceiver(
+        DateViewBroadcastReceiver(
             /* [in] */ CDateView* bar);
 
-    protected:
-        virtual CARAPI OnReceive(
+        CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("CDateView.DateViewBroadcastReceiver");
+            return NOERROR;
+        }
 
     private:
         CDateView* mHost;

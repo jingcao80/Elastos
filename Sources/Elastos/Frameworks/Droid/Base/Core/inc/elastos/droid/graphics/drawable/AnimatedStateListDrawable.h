@@ -6,10 +6,12 @@
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/graphics/drawable/StateListDrawable.h"
 #include "elastos/droid/graphics/drawable/AnimationDrawable.h"
+#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Utility::ISparseInt32Array;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -222,6 +224,7 @@ protected:
         static const Int32 REVERSE_MASK;
 
         // final LongSparseLongArray mTransitions;
+        HashMap<Int64, Int64> mTransitions;
         AutoPtr<ISparseInt32Array> mStateIds;
     };
 

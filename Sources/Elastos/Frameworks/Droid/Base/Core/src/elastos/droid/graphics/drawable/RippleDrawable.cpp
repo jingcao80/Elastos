@@ -140,6 +140,7 @@ ECode RippleDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
+    LayerDrawable::constructor();
     CRect::New((IRect**)&mTempRect);
     CRect::New((IRect**)&mHotspotBounds);
     CRect::New((IRect**)&mDrawingBounds);

@@ -660,7 +660,7 @@ Boolean NotificationData::IsSystemNotification(
 {
     String sbnPackage;
     sbn->GetPackageName(&sbnPackage);
-    return String("android").Equals(sbnPackage) || String("com.android.systemui").Equals(sbnPackage);
+    return String("android").Equals(sbnPackage) || String("Elastos.Droid.SystemUI").Equals(sbnPackage);
 }
 
 } // namespace StatusBar

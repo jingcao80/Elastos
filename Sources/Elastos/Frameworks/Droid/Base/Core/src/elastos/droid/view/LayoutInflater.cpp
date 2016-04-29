@@ -575,14 +575,6 @@ ECode LayoutInflater::Inflate(
 
     String name;
     parser->GetName(&name);
-    Int32 tmpIndex = name.LastIndexOf('.');
-    if (tmpIndex >= 0) {
-        //Get the last word.
-        Int32 tmpLen = name.GetLength() - tmpIndex + 1;
-
-        assert(tmpLen > 0);
-        name = name.Substring(tmpIndex + 1, name.GetLength());
-    }
 
     if (DEBUG) {
         Slogger::D(TAG, "**************************");

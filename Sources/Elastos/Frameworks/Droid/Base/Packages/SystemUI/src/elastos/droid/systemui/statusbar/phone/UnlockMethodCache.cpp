@@ -1,9 +1,11 @@
 
 #include "elastos/droid/systemui/statusbar/phone/UnlockMethodCache.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +19,7 @@ UnlockMethodCache::UnlockMethodCache(
 {
     CArrayList::New((IArrayList**)&mListeners);
     CLockPatternUtils::New(ctx, (ILockPatternUtils**)&mLockPatternUtils);
-    assert(0 && "TODO: Not implement");
+    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
     // KeyguardUpdateMonitor.getInstance(ctx).registerCallback(mCallback);
     UpdateMethodSecure(TRUE /* updateAlways */);
@@ -57,14 +59,14 @@ void UnlockMethodCache::UpdateMethodSecure(
     Boolean secure = FALSE;
     mLockPatternUtils->IsSecure(&secure);
     Boolean hasTrust = TRUE;
-    assert(0 && "TODO");
+    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor->GetUserHasTrust(user, &hasTrust);
     Boolean methodInsecure = !secure || hasTrust;
     Boolean trustManaged = TRUE;
-    assert(0 && "TODO");
+    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor->GetUserTrustIsManaged(user, &trustManaged);
     Boolean running = FALSE;
-    assert(0 && "TODO");
+    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor->IsFaceUnlockRunning(user, &running);
     Boolean faceUnlockRunning = running && trustManaged;
     Boolean changed = methodInsecure != mMethodInsecure || trustManaged != mTrustManaged

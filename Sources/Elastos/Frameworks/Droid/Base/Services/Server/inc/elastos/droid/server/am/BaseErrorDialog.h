@@ -24,9 +24,7 @@ private:
         TO_STRING_IMPL("BaseErrorDialog::MyHandler")
 
         MyHandler(
-            /* [in] */ BaseErrorDialog* service)
-            : mHost(service)
-        {}
+            /* [in] */ BaseErrorDialog* service);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);

@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDSERVICE_H__
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDSERVICE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"

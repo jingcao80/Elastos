@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/qs/UsageTracker.h"
+#include "elastos/droid/systemui/qs/CUsageTrackerReceiver.h"
 #include "../R.h"
 
 using Elastos::Droid::Content::CIntentFilter;
@@ -14,12 +15,15 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-UsageTracker::Receiver::Receiver(
-    /* [in] */ UsageTracker* host)
-    : mHost(host)
-{}
+CAR_OBJECT_IMPL(CUsageTrackerReceiver);
+ECode CUsageTrackerReceiver::constructor(
+    /* [in] */ IListenable* host)
+{
+    mHost = (UsageTracker*)host;
+    return BroadcastReceiver::constructor();
+}
 
-ECode UsageTracker::Receiver::OnReceive(
+ECode CUsageTrackerReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -37,7 +41,7 @@ UsageTracker::UsageTracker(
     /* [in] */ IContext* context,
     /* [in] */ QSTile/*Class<?>*/* tile)
 {
-    mReceiver = new Receiver(this);
+    CUsageTrackerReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
     mContext = context;
     mPrefKey = tile->GetSimpleName() + String("LastUsed");
     AutoPtr<IResources> res;

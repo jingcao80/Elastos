@@ -18,9 +18,9 @@
 */
 -->
 
-<com.android.systemui.recent.RecentsPanelView
+<Elastos.Droid.SystemUI.recent.RecentsPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    xmlns:systemui="http://schemas.android.com/apk/res/Elastos.Droid.SystemUI"
     android:id="@+id/recents_root"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
@@ -34,7 +34,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true">
 
-        <com.android.systemui.recent.RecentsVerticalScrollView
+        <Elastos.Droid.SystemUI.recent.RecentsVerticalScrollView
             android:id="@+id/recents_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:clipChildren="false">
             </LinearLayout>
 
-        </com.android.systemui.recent.RecentsVerticalScrollView>
+        </Elastos.Droid.SystemUI.recent.RecentsVerticalScrollView>
 
     </FrameLayout>
 
@@ -67,4 +67,4 @@
         android:layout_height="match_parent"
         android:visibility="invisible" />
 
-</com.android.systemui.recent.RecentsPanelView>
+</Elastos.Droid.SystemUI.recent.RecentsPanelView>

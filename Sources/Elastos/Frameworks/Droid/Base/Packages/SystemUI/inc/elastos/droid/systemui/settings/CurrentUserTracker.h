@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_SETTINGS_CURRENTUSERTRACKER_H__
 #define __ELASTOS_DROID_SYSTEMUI_SETTINGS_CURRENTUSERTRACKER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 
@@ -37,6 +37,13 @@ public:
         /* [in] */ Int32 newUserId) = 0;
 
     CARAPI_(Boolean) IsCurrentUserOwner();
+
+    CARAPI ToString(
+        /* [out] */ String* str)
+    {
+        *str = String("CurrentUserTracker");
+        return NOERROR;
+    }
 
 private:
     AutoPtr<IContext> mContext;

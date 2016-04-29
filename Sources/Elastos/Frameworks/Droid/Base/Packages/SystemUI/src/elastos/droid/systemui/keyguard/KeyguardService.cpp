@@ -261,7 +261,7 @@ ECode KeyguardService::OnCreate()
     AutoPtr<ISystemUIApplication> sa = ISystemUIApplication::Probe(application);
     sa->StartServicesIfNeeded();
     AutoPtr<IInterface> obj;
-    sa->GetComponent(EIID_IKeyguardViewMediator, (IInterface**)&obj);
+    sa->GetComponent(String("EIID_IKeyguardViewMediator"), (IInterface**)&obj);
 
     mKeyguardViewMediator = (CKeyguardViewMediator*)(IKeyguardViewMediator::Probe(obj));
     return NOERROR;

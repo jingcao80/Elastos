@@ -14,11 +14,12 @@ namespace StatusBar {
 CarClass(CStatusBarIconList)
     , public Object
     , public IStatusBarIconList
+    , public IParcelable
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 
     CARAPI constructor();
 

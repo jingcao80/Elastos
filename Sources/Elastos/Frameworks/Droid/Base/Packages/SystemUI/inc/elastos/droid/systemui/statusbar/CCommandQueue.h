@@ -29,9 +29,9 @@ private:
     {
     public:
         MyHandler(
-            /* [in] */ CCommandQueue* host)
-            : mHost(host)
-        {}
+            /* [in] */ CCommandQueue* host);
+
+        CARAPI constructor();
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);

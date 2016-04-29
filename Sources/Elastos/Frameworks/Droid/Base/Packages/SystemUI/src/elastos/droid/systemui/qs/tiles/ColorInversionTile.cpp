@@ -36,9 +36,9 @@ void ColorInversionTile::ColorSettings::HandleValueChanged(
 CAR_INTERFACE_IMPL(ColorInversionTile, QSTile, IColorInversionTile);
 ColorInversionTile::ColorInversionTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
-    , mListening(FALSE)
+    : mListening(FALSE)
 {
+    QSTile::constructor(host);
     mSetting = new ColorSettings(mContext, mHandler,
             ISettingsSecure::ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, this);
 

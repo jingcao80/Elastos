@@ -56,9 +56,12 @@ module
 
         RegisterStatusBar(
             [in] IIStatusBar* cb,
-            [in /*out*/] IStatusBarIconList* iconList,
-            [in /*out*/] ArrayOf<Int32>* switches,
-            [in /*out*/] IList* binders);
+            [in] IStatusBarIconList* inIconList,
+            [in] ArrayOf<Int32>* inSwitches,
+            [in] IList* inBinders,
+            [out] IStatusBarIconList** outIconList,
+            [out, callee] ArrayOf<Int32>* outSwitches,
+            [out] IList** outBinders);
 
         OnPanelRevealed();
 

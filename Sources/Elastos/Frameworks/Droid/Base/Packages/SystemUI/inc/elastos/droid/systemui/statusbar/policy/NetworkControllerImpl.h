@@ -2,20 +2,19 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_NETWORKCONTROLLERIMPL_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_NETWORKCONTROLLERIMPL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Telephony.h"
-#include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/droid/telephony/PhoneStateListener.h>
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
@@ -28,6 +27,7 @@ using Elastos::Droid::Telephony::IPhoneStateListener;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;
 using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiManager;
@@ -44,9 +44,11 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
+class CNetworkControllerBroadcastReceiver;
+
 /** Platform implementation of the network controller. **/
 class NetworkControllerImpl
-    : public BroadcastReceiver
+    : public Object
     , public INetworkControllerImpl
     , public INetworkController
     , public IDemoMode
@@ -54,7 +56,7 @@ class NetworkControllerImpl
 private:
     // ===== Telephony ==============================================================
     class NCPhoneStateListener
-        : public Object //PhoneStateListener
+        : public PhoneStateListener
     {
     public:
         NCPhoneStateListener(
@@ -414,6 +416,7 @@ private:
     Int32 mDemoQSDataTypeIconId;
     Int32 mDemoMobileLevel;
     AutoPtr<IPhoneStateListener> mPhoneStateListener;
+    friend class CNetworkControllerBroadcastReceiver;
 };
 
 } // namespace Policy

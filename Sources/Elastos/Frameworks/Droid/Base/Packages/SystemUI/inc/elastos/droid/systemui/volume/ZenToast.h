@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_ZENTOAST_H__
 #define __ELASTOS_DROID_SYSTEMUI_VOLUME_ZENTOAST_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
 #include "Elastos.Droid.Content.h"
@@ -53,6 +53,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("ZenToast.MyReceiver");
+            return NOERROR;
+        }
 
     private:
         ZenToast* mHost;

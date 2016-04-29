@@ -5,6 +5,7 @@
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/R.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -23,6 +24,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -149,7 +151,8 @@ ECode CKeyguardStatusBarView::OnFinishInflate()
     mBatteryLevel = ITextView::Probe(view);
 
     view = NULL;
-    FindViewById(R::id::keyguard_carrier_text, (IView**)&view);
+    Logger::D("CKeyguardStatusBarView", "TODO : Not Implement com.android.keyguard.CarrierText");
+    // FindViewById(R::id::keyguard_carrier_text, (IView**)&view);
     mCarrierLabel = ITextView::Probe(view);
     LoadDimens();
 
@@ -171,7 +174,9 @@ void CKeyguardStatusBarView::OnConfigurationChanged(
     GetResources((IResources**)&res);
     Int32 size = 0;
     res->GetDimensionPixelSize(Elastos::Droid::R::dimen::text_size_small_material, &size);
-    mCarrierLabel->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, size);
+    if (mCarrierLabel != NULL) {
+        mCarrierLabel->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, size);
+    }
 
     res->GetDimensionPixelSize(R::dimen::battery_level_text_size, &size);
     mBatteryLevel->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, size);

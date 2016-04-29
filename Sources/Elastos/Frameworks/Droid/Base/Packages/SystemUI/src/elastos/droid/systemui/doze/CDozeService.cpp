@@ -26,7 +26,6 @@ using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::SystemUI::StatusBar::Phone::IPulseSchedule;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Core::CSystem;
 using Elastos::Core::EIID_IRunnable;
@@ -223,8 +222,7 @@ ECode CDozeService::TriggerSensor::OnTrigger(
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
     system->GetCurrentTimeMillis(&timeSinceNotification);
     timeSinceNotification -= mHost->mNotificationPulseTime;
-    Int32 tmp = 0;
-    mHost->mDozeParameters->GetPickupVibrationThreshold(&tmp);
+    Int32 tmp = mHost->mDozeParameters->GetPickupVibrationThreshold();
     Boolean withinVibrationThreshold = timeSinceNotification < tmp;
     if (withinVibrationThreshold) {
        if (DEBUG) Logger::D(mHost->mTag, "Not resetting schedule, recent notification");
@@ -411,8 +409,7 @@ CDozeService::CDozeService()
     value.AppendFormat(".%08x", hc);
     mTag = TAG + value;
     mContext = this;
-    assert(0 && "TODO");
-    // mDozeParameters = new DozeParameters(mContext);
+    mDozeParameters = new DozeParameters(mContext);
     CHandler::New((IHandler**)&mHandler);
     mBroadcastReceiver = new DozeBroadcastReceiver(this);
     mHostCallback = new DozeHostCallback(this);
@@ -473,7 +470,7 @@ ECode CDozeService::OnCreate()
     if (ISystemUIApplication::Probe(a)) {
         AutoPtr<ISystemUIApplication> app = ISystemUIApplication::Probe(a);
         AutoPtr<IInterface> obj;
-        app->GetComponent(EIID_IDozeHost/*.class*/, (IInterface**)&obj);
+        app->GetComponent(String("EIID_IDozeHost")/*.class*/, (IInterface**)&obj);
         mHost = IDozeHost::Probe(obj);
     }
     if (mHost == NULL) Logger::W(TAG, "No doze service host found.");
@@ -483,13 +480,12 @@ ECode CDozeService::OnCreate()
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::SENSOR_SERVICE, (IInterface**)&obj);
     mSensors = ISensorManager::Probe(obj);
-    Boolean tmp1 = FALSE, tmp2 = FALSE;
-    mDozeParameters->GetPulseOnSigMotion(&tmp1);
-    mDozeParameters->GetVibrateOnSigMotion(&tmp2);
+    Boolean tmp1 = mDozeParameters->GetPulseOnSigMotion();
+    Boolean tmp2 = mDozeParameters->GetVibrateOnSigMotion();
     mSigMotionSensor = new TriggerSensor(ISensor::TYPE_SIGNIFICANT_MOTION, tmp1, tmp2, this);
 
-    mDozeParameters->GetPulseOnPickup(&tmp1);
-    mDozeParameters->GetVibrateOnPickup(&tmp2);
+    tmp1 = mDozeParameters->GetPulseOnPickup();
+    tmp2 = mDozeParameters->GetVibrateOnPickup();
     mPickupSensor = new TriggerSensor(ISensor::TYPE_PICK_UP_GESTURE, tmp1, tmp2, this);
 
     obj = NULL;
@@ -502,7 +498,7 @@ ECode CDozeService::OnCreate()
     obj = NULL;
     mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
     mAlarmManager = IAlarmManager::Probe(obj);
-    mDozeParameters->GetDisplayStateSupported(&mDisplayStateSupported);
+    mDisplayStateSupported = mDozeParameters->GetDisplayStateSupported();
 
     obj = NULL;
     mContext->GetSystemService(IContext::UI_MODE_SERVICE, (IInterface**)&obj);
@@ -657,14 +653,13 @@ void CDozeService::ListenForNotifications(
 void CDozeService::ResetNotificationResets()
 {
     if (DEBUG) Logger::D(mTag, "ResetNotificationResets");
-    mDozeParameters->GetPulseScheduleResets(&mScheduleResetsRemaining);
+    mScheduleResetsRemaining = mDozeParameters->GetPulseScheduleResets();
 }
 
 void CDozeService::UpdateNotificationPulse()
 {
     if (DEBUG) Logger::D(mTag, "UpdateNotificationPulse");
-    Boolean tmp = FALSE;
-    if (mDozeParameters->GetPulseOnNotifications(&tmp), !tmp) return;
+    if (!mDozeParameters->GetPulseOnNotifications()) return;
     if (mScheduleResetsRemaining <= 0) {
         if (DEBUG) Logger::D(mTag, "No more schedule resets remaining");
         return;
@@ -673,8 +668,7 @@ void CDozeService::UpdateNotificationPulse()
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
     Int64 now = 0;
     system->GetCurrentTimeMillis(&now);
-    Int32 value = 0;
-    if ((now - mNotificationPulseTime) < (mDozeParameters->GetPulseDuration(&value), value)) {
+    if ((now - mNotificationPulseTime) < mDozeParameters->GetPulseDuration()) {
         if (DEBUG) Logger::D(mTag, "Recently updated, not resetting schedule");
         return;
     }
@@ -712,8 +706,7 @@ void CDozeService::RescheduleNotificationPulse(
         if (DEBUG) Logger::D(mTag, "  don't reschedule: predicate is FALSE");
         return;
     }
-    AutoPtr<IPulseSchedule> schedule;
-    mDozeParameters->GetPulseSchedule((IPulseSchedule**)&schedule);
+    AutoPtr<DozeParameters::PulseSchedule> schedule = mDozeParameters->GetPulseSchedule();
     if (schedule == NULL) {
         if (DEBUG) Logger::D(mTag, "  don't reschedule: schedule is NULL");
         return;
@@ -722,8 +715,7 @@ void CDozeService::RescheduleNotificationPulse(
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
     Int64 now = 0;
     system->GetCurrentTimeMillis(&now);
-    Int64 time = 0;
-    schedule->GetNextTime(now, mNotificationPulseTime, &time);
+    Int64 time = schedule->GetNextTime(now, mNotificationPulseTime);
     if (time <= 0) {
         if (DEBUG) Logger::D(mTag, "  don't reschedule: time is %lld", time);
         return;

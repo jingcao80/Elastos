@@ -2,14 +2,14 @@
 #ifndef __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_POLICY_BATTERYCONTROLLER_H__
 #define __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_POLICY_BATTERYCONTROLLER_H__
 
-#include "_SystemUI.h"
-#include <elastos/droid/content/BroadcastReceiver.h>
+#include "_Elastos.Droid.SystemUI.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
+using Elastos::Core::Object;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {
@@ -19,7 +19,7 @@ namespace StatusBar {
 namespace Policy {
 
 class BatteryController
-    : public BroadcastReceiver
+    : public Object
     , public IBatteryController
 {
 public:
@@ -39,22 +39,24 @@ public:
     CARAPI RemoveStateChangedCallback(
         /* [in] */ IBatteryStateChangeCallback* cb);
 
-    CARAPI OnReceive(
-        /* [in] */ IContext* context,
-        /* [in] */ IIntent* intent);
-
     CARAPI IsPowerSave(
         /* [out] */ Boolean* result);
-
-private:
-    CARAPI_(void) UpdatePowerSave();
 
     CARAPI_(void) SetPowerSave(
         /* [in] */ Boolean powerSave);
 
     CARAPI_(void) FireBatteryLevelChanged();
 
+    CARAPI_(void) UpdatePowerSave();
+
+private:
     CARAPI_(void) FirePowerSaveChanged();
+
+public:
+    Int32 mLevel;
+    Boolean mCharging;
+    Boolean mCharged;
+    Boolean mPluggedIn;
 
 private:
     static const String TAG;
@@ -63,10 +65,6 @@ private:
     AutoPtr<IArrayList> mChangeCallbacks;  /*<BatteryStateChangeCallback*/
     AutoPtr<IPowerManager> mPowerManager;
 
-    Int32 mLevel;
-    Boolean mPluggedIn;
-    Boolean mCharging;
-    Boolean mCharged;
     Boolean mPowerSave;
 };
 

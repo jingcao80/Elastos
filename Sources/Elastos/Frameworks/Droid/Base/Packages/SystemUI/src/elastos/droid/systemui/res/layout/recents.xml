@@ -15,7 +15,7 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" 
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!-- Status Bar Scrim View -->
     <ImageView
@@ -27,9 +27,9 @@
         android:src="@drawable/recents_status_gradient" />
 
     <!-- Recents View -->
-    <com.android.systemui.recents.views.RecentsView
+    <Elastos.Droid.SystemUI.Recents.Views.CRecentsView
         android:id="@+id/recents_view"
-        android:layout_width="match_parent" 
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="true" />
 

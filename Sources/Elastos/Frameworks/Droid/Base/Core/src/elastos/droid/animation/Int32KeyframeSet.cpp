@@ -1,5 +1,7 @@
 
 #include "elastos/droid/animation/Int32KeyframeSet.h"
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Core::INumber;
 using Elastos::Core::EIID_IInteger32;
@@ -13,12 +15,18 @@ namespace Animation {
 CAR_INTERFACE_IMPL_2(Int32KeyframeSet, KeyframeSet, IInt32KeyframeSet, IInt32Keyframes)
 Int32KeyframeSet::Int32KeyframeSet(
     /* [in] */ ArrayOf<IInt32Keyframe*>* keyframes)
-    : KeyframeSet((ArrayOf<IKeyframe*>*)keyframes)
-    , mFirstValue(0)
+    : mFirstValue(0)
     , mLastValue(0)
     , mDeltaValue(0)
     , mFirstTime(TRUE)
-{}
+{
+    Int32 len = keyframes->GetLength();
+    AutoPtr<ArrayOf<IKeyframe*> > objs = ArrayOf<IKeyframe*>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        objs->Set(i, IKeyframe::Probe((*keyframes)[i]));
+    }
+    KeyframeSet::constructor(objs);
+}
 
 ECode Int32KeyframeSet::GetValue(
     /* [in] */ Float fraction,

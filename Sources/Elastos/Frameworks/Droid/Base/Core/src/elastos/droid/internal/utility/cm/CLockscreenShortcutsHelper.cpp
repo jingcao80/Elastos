@@ -96,7 +96,7 @@ CAR_INTERFACE_IMPL(CLockscreenShortcutsHelper, Object, ILockscreenShortcutsHelpe
 CAR_OBJECT_IMPL(CLockscreenShortcutsHelper)
 
 const String CLockscreenShortcutsHelper::DELIMITER("|");
-const String CLockscreenShortcutsHelper::SYSTEM_UI_PKGNAME("com.android.systemui");
+const String CLockscreenShortcutsHelper::SYSTEM_UI_PKGNAME("Elastos.Droid.SystemUI");
 const String CLockscreenShortcutsHelper::PHONE_DEFAULT_ICON("ic_phone_24dp");
 const String CLockscreenShortcutsHelper::CAMERA_DEFAULT_ICON("ic_camera_alt_24dp");
 

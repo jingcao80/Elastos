@@ -355,15 +355,14 @@ ECode CResourcesManager::GetTopLevelResources(
         config->GetThemeConfig((IThemeConfig**)&tc);
         if (tc == NULL) {
             // try {
-            Logger::W(TAG, " >> TODO needs settings provider.");
-            // AutoPtr<IContentResolver> resolver;
-            // context->GetContentResolver((IContentResolver**)&resolver);
-            // ECode ec = CThemeConfig::GetBootTheme(resolver, (IThemeConfig**)&tc);
-            // if (FAILED(ec)) {
-            //     Logger::D(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme");
-            //     tc = CThemeConfig::GetSystemTheme();
-            // }
-            // config->SetThemeConfig(tc);
+            AutoPtr<IContentResolver> resolver;
+            context->GetContentResolver((IContentResolver**)&resolver);
+            ECode ec = CThemeConfig::GetBootTheme(resolver, (IThemeConfig**)&tc);
+            if (FAILED(ec)) {
+                Logger::D(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme");
+                tc = CThemeConfig::GetSystemTheme();
+            }
+            config->SetThemeConfig(tc);
 
             // } catch (Exception e) {
             //     Slog.d(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme", e);

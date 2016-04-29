@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_STATUSBARKEYGUARDVIEWMANAGER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_STATUSBARKEYGUARDVIEWMANAGER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/phone/KeyguardBouncer.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/os/Runnable.h>

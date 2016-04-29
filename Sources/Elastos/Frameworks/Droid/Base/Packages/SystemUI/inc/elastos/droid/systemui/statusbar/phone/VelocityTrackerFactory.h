@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_VELOCITYTRACKERFACTOR_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_VELOCITYTRACKERFACTOR_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;

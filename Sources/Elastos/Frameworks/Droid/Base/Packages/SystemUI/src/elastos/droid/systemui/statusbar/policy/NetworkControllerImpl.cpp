@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/NetworkControllerImpl.h"
+#include "elastos/droid/systemui/statusbar/policy/CNetworkControllerBroadcastReceiver.h"
 #include "elastos/droid/systemui/statusbar/policy/AccessibilityContentDescriptions.h"
 #include "elastos/droid/systemui/statusbar/policy/MobileDataController.h"
 #include "elastos/droid/systemui/statusbar/policy/TelephonyIcons.h"
@@ -19,6 +20,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Internal::Telephony::IIccCardConstants;
@@ -37,6 +39,8 @@ using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Wifi::CWifiManagerHelper;
 using Elastos::Droid::Wifi::IWifiManagerHelper;
@@ -65,8 +69,7 @@ NetworkControllerImpl::NCPhoneStateListener::NCPhoneStateListener(
     /* [in] */ NetworkControllerImpl* host)
     : mHost(host)
 {
-    assert(0 && "TODO");
-    // PhoneStateListener::constructor();
+    PhoneStateListener::constructor();
 }
 
 ECode NetworkControllerImpl::NCPhoneStateListener::OnSignalStrengthsChanged(
@@ -74,12 +77,12 @@ ECode NetworkControllerImpl::NCPhoneStateListener::OnSignalStrengthsChanged(
 {
     if (DEBUG) {
         if (signalStrength == NULL) {
-            Logger::D(TAG, "onSignalStrengthsChanged signalStrength=NULL");
+            Logger::D(mHost->TAG, "onSignalStrengthsChanged signalStrength=NULL");
         }
         else {
             Int32 level = 0;
             signalStrength->GetLevel(&level);
-            Logger::D(TAG, "onSignalStrengthsChanged signalStrength=%p level=%d", signalStrength, level);
+            Logger::D(mHost->TAG, "onSignalStrengthsChanged signalStrength=%p level=%d", signalStrength, level);
         }
     }
     mHost->mSignalStrength = signalStrength;
@@ -95,7 +98,7 @@ ECode NetworkControllerImpl::NCPhoneStateListener::OnServiceStateChanged(
         Int32 s1 = 0, s2 = 0;
         state->GetVoiceRegState(&s1);
         state->GetDataRegState(&s2);
-        Logger::D(TAG, "onServiceStateChanged voiceState=%d dataState=%d", s1, s2);
+        Logger::D(mHost->TAG, "onServiceStateChanged voiceState=%d dataState=%d", s1, s2);
     }
     mHost->mServiceState = state;
     mHost->UpdateTelephonySignalStrength();
@@ -110,7 +113,7 @@ ECode NetworkControllerImpl::NCPhoneStateListener::OnCallStateChanged(
     /* [in] */ const String& incomingNumber)
 {
     if (DEBUG) {
-        Logger::D(TAG, "onCallStateChanged state=%d", state);
+        Logger::D(mHost->TAG, "onCallStateChanged state=%d", state);
     }
     // In cdma, if a voice call is made, RSSI should switch to 1x.
     if (mHost->IsCdma()) {
@@ -125,7 +128,7 @@ ECode NetworkControllerImpl::NCPhoneStateListener::OnDataConnectionStateChanged(
     /* [in] */ Int32 networkType)
 {
     if (DEBUG) {
-        Logger::D(TAG, "onDataConnectionStateChanged: state=%d, type=%d", state, networkType);
+        Logger::D(mHost->TAG, "onDataConnectionStateChanged: state=%d, type=%d", state, networkType);
     }
     mHost->mDataState = state;
     mHost->mDataNetType = networkType;
@@ -139,7 +142,7 @@ ECode NetworkControllerImpl::NCPhoneStateListener::OnDataActivity(
     /* [in] */ Int32 direction)
 {
     if (DEBUG) {
-        Logger::D(TAG, "onDataActivity: direction=%d", direction);
+        Logger::D(mHost->TAG, "onDataActivity: direction=%d", direction);
     }
     mHost->mDataActivity = direction;
     mHost->UpdateDataIcon();
@@ -150,7 +153,9 @@ ECode NetworkControllerImpl::NCPhoneStateListener::OnDataActivity(
 NetworkControllerImpl::WifiHandler::WifiHandler(
     /* [in] */ NetworkControllerImpl* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode NetworkControllerImpl::WifiHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -169,7 +174,7 @@ ECode NetworkControllerImpl::WifiHandler::HandleMessage(
                 mHost->mWifiChannel->SendMessage(m);
             }
             else {
-                Logger::E(TAG, "Failed to connect to wifi");
+                Logger::E(mHost->TAG, "Failed to connect to wifi");
             }
             break;
         }
@@ -215,20 +220,23 @@ ECode NetworkControllerImpl::NCIAsyncTask::DoInBackground(
 {
     VALIDATE_NOT_NULL(result);
     // Disable tethering if enabling Wifi
-    Boolean tmp = FALSE;
-    Int32 wifiApState = 0;
-    mHost->mWifiManager->GetWifiApState(&wifiApState);
-    if (mEnabled && ((wifiApState == IWifiManager::WIFI_AP_STATE_ENABLING) ||
-                   (wifiApState == IWifiManager::WIFI_AP_STATE_ENABLED))) {
-        mHost->mWifiManager->SetWifiApEnabled(NULL, FALSE, &tmp);
+    if (mHost->mWifiManager != NULL) {
+        Boolean tmp = FALSE;
+        Int32 wifiApState = 0;
+        mHost->mWifiManager->GetWifiApState(&wifiApState);
+        if (mEnabled && ((wifiApState == IWifiManager::WIFI_AP_STATE_ENABLING) ||
+                       (wifiApState == IWifiManager::WIFI_AP_STATE_ENABLED))) {
+            mHost->mWifiManager->SetWifiApEnabled(NULL, FALSE, &tmp);
+        }
+
+        mHost->mWifiManager->SetWifiEnabled(mEnabled, &tmp);
     }
 
-    mHost->mWifiManager->SetWifiEnabled(mEnabled, &tmp);
     *result = NULL;
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_3(NetworkControllerImpl, BroadcastReceiver, INetworkControllerImpl, INetworkController, IDemoMode);
+CAR_INTERFACE_IMPL_3(NetworkControllerImpl, Object, INetworkControllerImpl, INetworkController, IDemoMode);
 NetworkControllerImpl::NetworkControllerImpl(
     /* [in] */ IContext* context)
     : mHspaDataDistinguishable(FALSE)
@@ -298,17 +306,17 @@ NetworkControllerImpl::NetworkControllerImpl(
     CArrayList::New((IArrayList**)&mEmergencyViews);
     CArrayList::New((IArrayList**)&mSignalClusters);
     CArrayList::New((IArrayList**)&mSignalsChangedCallbacks);
-    assert(0 && "TODO");
-    // mPhoneStateListener = new NCPhoneStateListener(this);
+    mPhoneStateListener = new NCPhoneStateListener(this);
 
     mContext = context;
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
-    cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &mHasMobileDataFeature);
+    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
+    // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    // AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    // cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &mHasMobileDataFeature);
 
     res->GetBoolean(R::bool_::config_showPhoneRSSIForData, &mShowPhoneRSSIForData);
     res->GetBoolean(R::bool_::config_showMin3G, &mShowAtLeastThreeGees);
@@ -322,7 +330,7 @@ NetworkControllerImpl::NetworkControllerImpl(
     obj = NULL;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     mPhone = ITelephonyManager::Probe(obj);
-    assert(0 && "TODO");
+    Logger::D(TAG, "TODO: TELEPHONY_SERVICE not ready.");
     // mPhone->Listen(mPhoneStateListener,
     //                   IPhoneStateListener::LISTEN_SERVICE_STATE
     //                 | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
@@ -337,12 +345,15 @@ NetworkControllerImpl::NetworkControllerImpl(
 
     // wifi
     obj = NULL;
-    context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: WIFI_SERVICE not ready.");
+    // context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
     AutoPtr<IHandler> handler = new WifiHandler(this);
     CAsyncChannel::New((IAsyncChannel**)&mWifiChannel);
     AutoPtr<IMessenger> wifiMessenger;
-    mWifiManager->GetWifiServiceMessenger((IMessenger**)&wifiMessenger);
+    if (mWifiManager != NULL) {
+        mWifiManager->GetWifiServiceMessenger((IMessenger**)&wifiMessenger);
+    }
     if (wifiMessenger != NULL) {
         mWifiChannel->Connect(mContext, handler, wifiMessenger);
     }
@@ -367,7 +378,9 @@ NetworkControllerImpl::NetworkControllerImpl(
     }
 
     AutoPtr<IIntent> i;
-    context->RegisterReceiver(this, filter, (IIntent**)&i);
+    AutoPtr<IBroadcastReceiver> b;
+    CNetworkControllerBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
+    context->RegisterReceiver(b, filter, (IIntent**)&i);
 
     // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
     UpdateAirplaneMode();
@@ -407,7 +420,10 @@ ECode NetworkControllerImpl::HasVoiceCallingFeature(
 {
     VALIDATE_NOT_NULL(has);
     Int32 type = 0;
-    *has = (mPhone->GetPhoneType(&type), type) != ITelephonyManager::PHONE_TYPE_NONE;
+    if (mPhone != NULL) {
+        mPhone->GetPhoneType(&type);
+    }
+    *has = type != ITelephonyManager::PHONE_TYPE_NONE;
     return NOERROR;
 }
 
@@ -641,56 +657,6 @@ ECode NetworkControllerImpl::SetStackedMode(
     /* [in] */ Boolean stacked)
 {
     mDataAndWifiStacked = TRUE;
-    return NOERROR;
-}
-
-ECode NetworkControllerImpl::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (action.Equals(IWifiManager::RSSI_CHANGED_ACTION)
-            || action.Equals(IWifiManager::WIFI_STATE_CHANGED_ACTION)
-            || action.Equals(IWifiManager::NETWORK_STATE_CHANGED_ACTION)) {
-        UpdateWifiState(intent);
-        RefreshViews();
-    }
-    else if (action.Equals(ITelephonyIntents::ACTION_SIM_STATE_CHANGED)) {
-        UpdateSimState(intent);
-        UpdateDataIcon();
-        RefreshViews();
-    }
-    else if (action.Equals(ITelephonyIntents::SPN_STRINGS_UPDATED_ACTION)) {
-        Boolean b1 = FALSE, b2 = FALSE;
-        intent->GetBooleanExtra(ITelephonyIntents::EXTRA_SHOW_SPN, FALSE, &b1);
-        intent->GetBooleanExtra(ITelephonyIntents::EXTRA_SHOW_PLMN, FALSE, &b2);
-        String s1, s2;
-        intent->GetStringExtra(ITelephonyIntents::EXTRA_SPN, &s1);
-        intent->GetStringExtra(ITelephonyIntents::EXTRA_PLMN, &s2);
-        UpdateNetworkName(b1, s1, b2, s2);
-        RefreshViews();
-    }
-    else if (action.Equals(IConnectivityManager::CONNECTIVITY_ACTION_IMMEDIATE) ||
-             action.Equals(IConnectivityManager::INET_CONDITION_ACTION)) {
-        UpdateConnectivity(intent);
-        RefreshViews();
-    }
-    else if (action.Equals(IIntent::ACTION_CONFIGURATION_CHANGED)) {
-        RefreshLocale();
-        RefreshViews();
-    }
-    else if (action.Equals(IIntent::ACTION_AIRPLANE_MODE_CHANGED)) {
-        RefreshLocale();
-        UpdateAirplaneMode();
-        RefreshViews();
-    }
-    else if (action.Equals(IWimaxManagerConstants::NET_4G_STATE_CHANGED_ACTION) ||
-            action.Equals(IWimaxManagerConstants::SIGNAL_LEVEL_CHANGED_ACTION) ||
-            action.Equals(IWimaxManagerConstants::WIMAX_NETWORK_STATE_CHANGED_ACTION)) {
-        UpdateWimaxState(intent);
-        RefreshViews();
-    }
     return NOERROR;
 }
 
@@ -1132,7 +1098,9 @@ void NetworkControllerImpl::UpdateWifiState(
             intent->GetParcelableExtra(IWifiManager::EXTRA_WIFI_INFO, (IParcelable**)&p);
             AutoPtr<IWifiInfo> info = IWifiInfo::Probe(p);
             if (info == NULL) {
-                mWifiManager->GetConnectionInfo((IWifiInfo**)&info);
+                if (mWifiManager != NULL) {
+                    mWifiManager->GetConnectionInfo((IWifiInfo**)&info);
+                }
             }
             if (info != NULL) {
                 mWifiSsid = HuntForSsid(info);
@@ -1188,20 +1156,22 @@ String NetworkControllerImpl::HuntForSsid(
     }
     // OK, it's not in the connectionInfo; we have to go hunting for it
     AutoPtr<IList> networks;  /*<WifiConfiguration*/
-    mWifiManager->GetConfiguredNetworks((IList**)&networks);
+    if (mWifiManager != NULL) {
+        mWifiManager->GetConfiguredNetworks((IList**)&networks);
 
-    AutoPtr<IIterator> ator;
-    networks->GetIterator((IIterator**)&ator);
-    Boolean has = FALSE;
-    while (ator->HasNext(&has), has) {
-        AutoPtr<IInterface> obj;
-        ator->GetNext((IInterface**)&obj);
-        AutoPtr<IWifiConfiguration> net = IWifiConfiguration::Probe(obj);
-        Int32 networkId = 0, id = 0;
-        net->GetNetworkId(&networkId);
-        if (networkId == (info->GetNetworkId(&id), id)) {
-            net->GetSSID(&ssid);
-            return ssid;
+        AutoPtr<IIterator> ator;
+        networks->GetIterator((IIterator**)&ator);
+        Boolean has = FALSE;
+        while (ator->HasNext(&has), has) {
+            AutoPtr<IInterface> obj;
+            ator->GetNext((IInterface**)&obj);
+            AutoPtr<IWifiConfiguration> net = IWifiConfiguration::Probe(obj);
+            Int32 networkId = 0, id = 0;
+            net->GetNetworkId(&networkId);
+            if (networkId == (info->GetNetworkId(&id), id)) {
+                net->GetSSID(&ssid);
+                return ssid;
+            }
         }
     }
 
@@ -1273,49 +1243,50 @@ void NetworkControllerImpl::UpdateConnectivity(
         Logger::D(TAG, "updateConnectivity: intent=%p", intent);
     }
 
-    AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(obj);
+    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
+    // AutoPtr<IInterface> obj;
+    // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    // AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(obj);
 
-    AutoPtr<INetworkInfo> info;
-    connManager->GetActiveNetworkInfo((INetworkInfo**)&info);
+    // AutoPtr<INetworkInfo> info;
+    // connManager->GetActiveNetworkInfo((INetworkInfo**)&info);
 
-    // Are we connected at all, by any interface?
-    Boolean tmp = FALSE;
-    mConnected = info != NULL && (info->IsConnected(&tmp), tmp);
-    if (mConnected) {
-        info->GetType(&mConnectedNetworkType);
-        info->GetTypeName(&mConnectedNetworkTypeName);
-    }
-    else {
-        mConnectedNetworkType = IConnectivityManager::TYPE_NONE;
-        mConnectedNetworkTypeName = NULL;
-    }
+    // // Are we connected at all, by any interface?
+    // Boolean tmp = FALSE;
+    // mConnected = info != NULL && (info->IsConnected(&tmp), tmp);
+    // if (mConnected) {
+    //     info->GetType(&mConnectedNetworkType);
+    //     info->GetTypeName(&mConnectedNetworkTypeName);
+    // }
+    // else {
+    //     mConnectedNetworkType = IConnectivityManager::TYPE_NONE;
+    //     mConnectedNetworkTypeName = NULL;
+    // }
 
-    Int32 connectionStatus = 0;
-    intent->GetInt32Extra(IConnectivityManager::EXTRA_INET_CONDITION, 0, &connectionStatus);
+    // Int32 connectionStatus = 0;
+    // intent->GetInt32Extra(IConnectivityManager::EXTRA_INET_CONDITION, 0, &connectionStatus);
 
-    if (CHATTY) {
-        Logger::D(TAG, "updateConnectivity: networkInfo=%p", info.Get());
-        Logger::D(TAG, "updateConnectivity: connectionStatus=%d", connectionStatus);
-    }
+    // if (CHATTY) {
+    //     Logger::D(TAG, "updateConnectivity: networkInfo=%p", info.Get());
+    //     Logger::D(TAG, "updateConnectivity: connectionStatus=%d", connectionStatus);
+    // }
 
-    mInetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
+    // mInetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
 
-    Int32 type = 0;
-    if (info != NULL && (info->GetType(&type), type) == IConnectivityManager::TYPE_BLUETOOTH) {
-        info->IsConnected(&mBluetoothTethered);
-    }
-    else {
-        mBluetoothTethered = FALSE;
-    }
+    // Int32 type = 0;
+    // if (info != NULL && (info->GetType(&type), type) == IConnectivityManager::TYPE_BLUETOOTH) {
+    //     info->IsConnected(&mBluetoothTethered);
+    // }
+    // else {
+    //     mBluetoothTethered = FALSE;
+    // }
 
-    // We want to update all the icons, all at once, for any condition change
-    UpdateDataNetType();
-    UpdateWimaxIcons();
-    UpdateDataIcon();
-    UpdateTelephonySignalStrength();
-    UpdateWifiIcons();
+    // // We want to update all the icons, all at once, for any condition change
+    // UpdateDataNetType();
+    // UpdateWimaxIcons();
+    // UpdateDataIcon();
+    // UpdateTelephonySignalStrength();
+    // UpdateWifiIcons();
 }
 
 
@@ -1659,8 +1630,12 @@ ECode NetworkControllerImpl::Dump(
     pw->Print(String("  mDataNetType="));
     pw->Print(mDataNetType);
     pw->Print(String("/"));
-    assert(0 && "TODO");
-    // pw->Println(TelephonyManager.getNetworkTypeName(mDataNetType));
+
+    String value;
+    AutoPtr<ITelephonyManagerHelper> helper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    helper->GetNetworkTypeName(mDataNetType, &value);
+    pw->Println(value);
     pw->Print(String("  mServiceState="));
     pw->Println(mServiceState);
     pw->Print(String("  mSignalStrength="));
@@ -1673,7 +1648,6 @@ ECode NetworkControllerImpl::Dump(
     pw->Println(mNetworkNameDefault);
     pw->Print(String("  mNetworkNameSeparator="));
 
-    String value;
     StringUtils::Replace(mNetworkNameSeparator, "\n","\\n", &value);
     pw->Println(value);
     pw->Print(String("  mPhoneSignalIconId=0x"));

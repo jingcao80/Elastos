@@ -196,7 +196,7 @@ ECode ZenModeConfig::ReadFromParcel(
         // source.readTypedArray(conditionIds, Uri.CREATOR);
     }
     source->ReadInt32(&mAllowFrom);
-    assert(0);
+    Logger::D("ZenModeConfig", "[ReadFromParcel] TODO: Not implement.");
     // exitCondition = source.readParcelable(null);
     // exitConditionComponent = source.readParcelable(null);
     return NOERROR;
@@ -233,7 +233,7 @@ ECode ZenModeConfig::WriteToParcel(
         dest->WriteInt32(0);
     }
     dest->WriteInt32(mAllowFrom);
-    assert(0);
+    Logger::D("ZenModeConfig", "[WriteToParcel] TODO: Not implement.");
     // dest.writeParcelable(exitCondition, 0);
     // dest.writeParcelable(exitConditionComponent, 0);
     return NOERROR;

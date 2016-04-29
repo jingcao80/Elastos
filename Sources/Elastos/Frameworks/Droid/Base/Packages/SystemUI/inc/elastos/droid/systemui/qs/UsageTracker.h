@@ -2,8 +2,9 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_QS_USAGETRACKER_H__
 #define __ELASTOS_DROID_SYSTEMUI_QS_USAGETRACKER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/qs/QSTile.h"
+#include "_Elastos_Droid_SystemUI_Qs_CUsageTrackerReceiver.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/core/Object.h>
@@ -22,26 +23,12 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
+class CUsageTrackerReceiver;
+
 class UsageTracker
     : public Object
     , public IListenable
 {
-private:
-    class Receiver: public BroadcastReceiver
-    {
-    public:
-        Receiver(
-            /* [in] */ UsageTracker* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        UsageTracker* mHost;
-    };
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -72,6 +59,7 @@ private:
 
     Boolean mRegistered;
     AutoPtr<IBroadcastReceiver> mReceiver;
+    friend class CUsageTrackerReceiver;
 };
 
 } // namespace Qs

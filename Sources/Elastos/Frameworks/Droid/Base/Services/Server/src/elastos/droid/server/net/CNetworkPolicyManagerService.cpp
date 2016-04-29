@@ -2986,8 +2986,8 @@ AutoPtr<IIntent> CNetworkPolicyManagerService::BuildNetworkOverLimitIntent(
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
     AutoPtr<IComponentName> component;
-    CComponentName::New(String("com.android.systemui"),
-            String("com.android.systemui.net.NetworkOverLimitActivity"), (IComponentName**)&component);
+    CComponentName::New(String("Elastos.Droid.SystemUI"),
+            String("Elastos.Droid.SystemUI.Net.CNetworkOverLimitActivity"), (IComponentName**)&component);
     intent->SetComponent(component);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     intent->PutExtra(INetworkPolicyManager::EXTRA_NETWORK_TEMPLATE, IParcelable::Probe(templ));

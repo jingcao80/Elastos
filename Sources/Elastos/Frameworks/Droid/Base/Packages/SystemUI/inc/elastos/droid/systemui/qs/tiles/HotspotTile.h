@@ -4,9 +4,7 @@
 
 #include "elastos/droid/systemui/qs/QSTile.h"
 #include "elastos/droid/systemui/qs/UsageTracker.h"
-#include <elastos/droid/content/BroadcastReceiver.h>
 
-using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IHotspotController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IHotspotControllerCallback;
 
@@ -19,27 +17,6 @@ namespace Tiles {
 /** Quick settings tile: Hotspot **/
 class HotspotTile: public QSTile
 {
-public:
-    /**
-     * This will catch broadcasts for changes in hotspot state so we can show
-     * the hotspot tile for a number of days after use.
-     */
-    class APChangedReceiver: public BroadcastReceiver
-    {
-    public:
-        APChangedReceiver(
-            /* [in] */ HotspotTile* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        HotspotTile* mHost;
-        AutoPtr<UsageTracker> mUsageTracker;
-    };
-
 private:
     class Callback
         : public Object

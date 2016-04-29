@@ -1,5 +1,17 @@
 
 #include "elastos/droid/systemui/statusbar/phone/QSTileHost.h"
+#include "elastos/droid/systemui/qs/QSTile.h"
+#include "elastos/droid/systemui/qs/tiles/AirplaneModeTile.h"
+#include "elastos/droid/systemui/qs/tiles/BluetoothTile.h"
+#include "elastos/droid/systemui/qs/tiles/CastTile.h"
+#include "elastos/droid/systemui/qs/tiles/CellularTile.h"
+#include "elastos/droid/systemui/qs/tiles/ColorInversionTile.h"
+#include "elastos/droid/systemui/qs/tiles/FlashlightTile.h"
+#include "elastos/droid/systemui/qs/tiles/HotspotTile.h"
+#include "elastos/droid/systemui/qs/tiles/IntentTile.h"
+#include "elastos/droid/systemui/qs/tiles/LocationTile.h"
+#include "elastos/droid/systemui/qs/tiles/RotationLockTile.h"
+#include "elastos/droid/systemui/qs/tiles/WifiTile.h"
 #include "../../R.h"
 #include <elastos/droid/os/Looper.h>
 #include <elastos/droid/provider/Settings.h>
@@ -13,6 +25,20 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::SystemUI::Qs::EIID_IQSTileHost;
+using Elastos::Droid::SystemUI::Qs::EIID_IQSTile;
+using Elastos::Droid::SystemUI::Qs::QSTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::AirplaneModeTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::BluetoothTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::CastTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::CellularTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::ColorInversionTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::FlashlightTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::HotspotTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::IIntentTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::IntentTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::LocationTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::RotationLockTile;
+using Elastos::Droid::SystemUI::Qs::Tiles::WifiTile;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
@@ -360,44 +386,49 @@ ECode QSTileHost::CreateTile(
     /* [out] */ IQSTile** values)
 {
     VALIDATE_NOT_NULL(values);
-    assert(0 && "TODO");
-    // if (tileSpec.Equals("wifi")) {
-    //     return new WifiTile(this);
-    // }
-    // else if (tileSpec.Equals("bt")) {
-    //     return new BluetoothTile(this);
-    // }
-    // else if (tileSpec.Equals("inversion")) {
-    //     return new ColorInversionTile(this);
-    // }
-    // else if (tileSpec.Equals("cell")) {
-    //     return new CellularTile(this);
-    // }
-    // else if (tileSpec.Equals("airplane")) {
-    //     return new AirplaneModeTile(this);
-    // }
-    // else if (tileSpec.Equals("rotation")) {
-    //     return new RotationLockTile(this);
-    // }
-    // else if (tileSpec.Equals("flashlight")) {
-    //     return new FlashlightTile(this);
-    // }
-    // else if (tileSpec.Equals("location")) {
-    //     return new LocationTile(this);
-    // }
-    // else if (tileSpec.Equals("cast")) {
-    //     return new CastTile(this);
-    // }
-    // else if (tileSpec.Equals("hotspot")) {
-    //     return new HotspotTile(this);
-    // }
-    // else if (tileSpec.EtartsWith(IIntentTile::PREFIX)) {
-    //     return IntentTile.create(this,tileSpec);
-    // }
-    // else {
-    //     // throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
-    //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    // }
+    *values = NULL;
+
+    AutoPtr<QSTile> qs;
+    if (tileSpec.Equals("wifi")) {
+        qs = new WifiTile(this);
+    }
+    else if (tileSpec.Equals("bt")) {
+        qs = new BluetoothTile(this);
+    }
+    else if (tileSpec.Equals("inversion")) {
+        qs = new ColorInversionTile(this);
+    }
+    else if (tileSpec.Equals("cell")) {
+        qs = new CellularTile(this);
+    }
+    else if (tileSpec.Equals("airplane")) {
+        qs = new AirplaneModeTile(this);
+    }
+    else if (tileSpec.Equals("rotation")) {
+        qs = new RotationLockTile(this);
+    }
+    else if (tileSpec.Equals("flashlight")) {
+        qs = new FlashlightTile(this);
+    }
+    else if (tileSpec.Equals("location")) {
+        qs = new LocationTile(this);
+    }
+    else if (tileSpec.Equals("cast")) {
+        qs = new CastTile(this);
+    }
+    else if (tileSpec.Equals("hotspot")) {
+        qs = new HotspotTile(this);
+    }
+    else if (tileSpec.StartWith(IIntentTile::PREFIX)) {
+        return IntentTile::Create(this, tileSpec, values);
+    }
+    else {
+        // throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    *values = (IQSTile*)qs->Probe(EIID_IQSTile);
+    REFCOUNT_ADD(*values);
     return NOERROR;
 }
 

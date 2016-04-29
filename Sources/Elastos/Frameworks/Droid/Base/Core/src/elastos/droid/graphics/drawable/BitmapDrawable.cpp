@@ -763,7 +763,7 @@ ECode BitmapDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme)
 {
-    FAIL_RETURN(Drawable::Inflate(r, parser, attrs));
+    FAIL_RETURN(Drawable::Inflate(r, parser, attrs, theme));
 
     Int32 size = ArraySize(R::styleable::BitmapDrawable);
     AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);

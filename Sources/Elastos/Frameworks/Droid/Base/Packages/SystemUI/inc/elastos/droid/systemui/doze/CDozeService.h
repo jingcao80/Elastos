@@ -3,6 +3,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_DOZE_CDOZESERVICE_H__
 
 #include "_Elastos_Droid_SystemUI_Doze_CDozeService.h"
+#include "elastos/droid/systemui/statusbar/phone/DozeParameters.h"
 #include "Elastos.Droid.Hardware.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/service/dreams/DreamService.h>
@@ -21,7 +22,7 @@ using Elastos::Droid::Hardware::ITriggerEventListener;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::SystemUI::StatusBar::Phone::IDozeParameters;
+using Elastos::Droid::SystemUI::StatusBar::Phone::DozeParameters;
 using Elastos::Droid::Service::Dreams::DreamService;
 
 namespace Elastos {
@@ -45,6 +46,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("CDozeService.DozeBroadcastReceiver");
+            return NOERROR;
+        }
 
     private:
         CDozeService* mHost;
@@ -290,7 +298,7 @@ private:
 
     String mTag;
     AutoPtr<IContext> mContext;
-    AutoPtr<IDozeParameters> mDozeParameters;
+    AutoPtr<DozeParameters> mDozeParameters;
     AutoPtr<IHandler> mHandler;
 
     AutoPtr<IDozeHost> mHost;

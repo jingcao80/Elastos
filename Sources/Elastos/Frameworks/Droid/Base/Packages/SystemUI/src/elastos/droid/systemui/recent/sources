@@ -6,15 +6,15 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-SOURCES = ColorDrawableWithDimensions.cpp
+SOURCES = CColorDrawableWithDimensions.cpp
 SOURCES += TaskDescription.cpp
 SOURCES += FadedEdgeDrawHelper.cpp
 SOURCES += FirstFrameAnimatorHelper.cpp
 SOURCES += RecentTasksLoader.cpp
 SOURCES += RecentsPanelView.cpp
-SOURCES += RecentsPreloadReceiver.cpp
 SOURCES += RecentsActivity.cpp
 SOURCES += RecentsHorizontalScrollView.cpp
 SOURCES += RecentsVerticalScrollView.cpp
 SOURCES += CRecents.cpp
 SOURCES += CRecentsActivity.cpp
+SOURCES += CRecentsPreloadReceiver.cpp

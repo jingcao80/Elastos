@@ -6,6 +6,7 @@
 #include "elastos/droid/graphics/drawable/AnimatedStateListDrawable.h"
 #include "elastos/droid/graphics/drawable/CAnimatedStateListDrawable.h"
 #include "elastos/droid/animation/ObjectAnimator.h"
+#include "elastos/droid/utility/CSparseInt32Array.h"
 #include "elastos/droid/utility/StateSet.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
@@ -14,6 +15,7 @@ using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::R;
+using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Droid::Utility::StateSet;
 using Elastos::Utility::Logging::Logger;
 
@@ -108,14 +110,18 @@ AnimatedStateListDrawable::AnimatedStateListState::AnimatedStateListState(
     /* [in] */ /*@Nullable*/ IResources* res)
     : StateListState(orig, owner, res)
 {
-    assert(0 && "TODO");
-    // if (orig != NULL) {
-    //     mTransitions = orig->mTransitions.clone();
-    //     mStateIds = orig->mStateIds.clone();
-    // } else {
-    //     mTransitions = new LongSparseLongArray();
-    //     mStateIds = new SparseIntArray();
-    // }
+    if (orig != NULL) {
+        HashMap<Int64, Int64>::Iterator it = orig->mTransitions.Begin();
+        for (; it != orig->mTransitions.End(); ++it) {
+            mTransitions[it->mFirst] = it->mSecond;
+        }
+        AutoPtr<IInterface> obj;
+        ICloneable::Probe(orig->mStateIds)->Clone((IInterface**)&obj);
+        mStateIds = ISparseInt32Array::Probe(obj);
+    }
+    else {
+        CSparseInt32Array::New((ISparseInt32Array**)&mStateIds);
+    }
 }
 
 Int32 AnimatedStateListDrawable::AnimatedStateListState::AddTransition(
@@ -124,15 +130,14 @@ Int32 AnimatedStateListDrawable::AnimatedStateListState::AddTransition(
     /* [in] */ /*@NonNull*/ IDrawable* anim,
     /* [in] */ Boolean reversible)
 {
-    assert(0 && "TODO");
-    // Int32 pos = super.addChild(anim);
-    // Int64 keyFromTo = generateTransitionKey(fromId, toId);
-    // mTransitions.append(keyFromTo, pos);
+    Int32 pos = StateListState::AddChild(anim);
+    Int64 keyFromTo = GenerateTransitionKey(fromId, toId);
+    mTransitions[keyFromTo] = pos;
 
-    // if (reversible) {
-    //     Int64 keyToFrom = generateTransitionKey(toId, fromId);
-    //     mTransitions.append(keyToFrom, pos | (1L << REVERSE_SHIFT));
-    // }
+    if (reversible) {
+        Int64 keyToFrom = GenerateTransitionKey(toId, fromId);
+        mTransitions[keyToFrom] = pos | (1L << REVERSE_SHIFT);
+    }
 
     return AddChild(anim);
 }
@@ -143,8 +148,7 @@ Int32 AnimatedStateListDrawable::AnimatedStateListState::AddStateSet(
     /* [in] */ Int32 id)
 {
     Int32 index = StateListState::AddStateSet(stateSet, drawable);
-    assert(0 && "TODO");
-    // mStateIds.put(index, id);
+    mStateIds->Put(index, id);
     return index;
 }
 
@@ -162,9 +166,8 @@ Int32 AnimatedStateListDrawable::AnimatedStateListState::IndexOfKeyframe(
 Int32 AnimatedStateListDrawable::AnimatedStateListState::GetKeyframeIdAt(
     /* [in] */ Int32 index)
 {
-    assert(0 && "TODO");
-    // return index < 0 ? 0 : mStateIds.get(index, 0);
-    return -1;
+    Int32 v = 0;
+    return index < 0 ? 0 : (mStateIds->Get(index, 0, &v), v);
 }
 
 Int32 AnimatedStateListDrawable::AnimatedStateListState::IndexOfTransition(
@@ -172,8 +175,10 @@ Int32 AnimatedStateListDrawable::AnimatedStateListState::IndexOfTransition(
     /* [in] */ Int32 toId)
 {
     Int64 keyFromTo = GenerateTransitionKey(fromId, toId);
-    assert(0 && "TODO");
-    // return (Int32) mTransitions.get(keyFromTo, -1);
+    HashMap<Int64, Int64>::Iterator it = mTransitions.Find(keyFromTo);
+    if (it != mTransitions.End()) {
+        return (Int32) it->mSecond;
+    }
     return -1;
 }
 
@@ -182,9 +187,13 @@ Boolean AnimatedStateListDrawable::AnimatedStateListState::IsTransitionReversed(
     /* [in] */ Int32 toId)
 {
     Int64 keyFromTo = GenerateTransitionKey(fromId, toId);
-    assert(0 && "TODO");
-    // return (mTransitions.get(keyFromTo, -1) >> REVERSE_SHIFT & REVERSE_MASK) == 1;
-    return FALSE;
+
+    HashMap<Int64, Int64>::Iterator it = mTransitions.Find(keyFromTo);
+    if (it != mTransitions.End()) {
+        return (it->mSecond >> REVERSE_SHIFT & REVERSE_MASK) == 1;
+    }
+
+    return (-1 >> REVERSE_SHIFT & REVERSE_MASK) == 1;
 }
 
 ECode AnimatedStateListDrawable::AnimatedStateListState::NewDrawable(

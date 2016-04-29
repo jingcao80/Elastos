@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/CNotificationPanelView.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "elastos/droid/systemui/statusbar/phone/ScrimController.h"
+#include "elastos/droid/systemui/statusbar/phone/SecureCameraLaunchManager.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "../../R.h"
@@ -9,6 +10,7 @@
 #include <elastos/droid/utility/MathUtils.h>
 #include <elastos/droid/R.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
@@ -39,6 +41,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::IFloat;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -54,7 +57,7 @@ CNotificationPanelView::Runnable1::Runnable1(
 ECode CNotificationPanelView::Runnable1::Run()
 {
     mHost->mKeyguardStatusViewAnimating = FALSE;
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // mHost->mKeyguardStatusView->SetVisibility(IView::GONE);
     return NOERROR;
 }
@@ -337,7 +340,7 @@ ECode CNotificationPanelView::OnPreDrawListener2::OnPreDraw(
 
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // helper->OfFloat(mHost->mKeyguardStatusView, View::Y, fvs
     //         , (IObjectAnimator**)&mHost->mClockAnimator);
     IAnimator::Probe(mHost->mClockAnimator)->SetInterpolator(ITimeInterpolator::Probe(mHost->mFastOutSlowInInterpolator));
@@ -568,7 +571,7 @@ ECode CNotificationPanelView::OnFinishInflate()
 
     view = NULL;
     FindViewById(R::id::keyguard_status_view, (IView**)&view);
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // mKeyguardStatusView = IKeyguardStatusView::Probe(view);
     FindViewById(R::id::quick_settings_container, (IView**)&mQsContainer);
 
@@ -614,8 +617,7 @@ ECode CNotificationPanelView::OnFinishInflate()
     FindViewById(R::id::qs_navbar_scrim, (IView**)&mQsNavbarScrim);
     mAfforanceHelper = new KeyguardAffordanceHelper(this, ctx);
 
-    assert(0 && "TODO");
-    // mSecureCameraLaunchManager = new SecureCameraLaunchManager(ctx, mKeyguardBottomArea);
+    mSecureCameraLaunchManager = new SecureCameraLaunchManager(ctx, mKeyguardBottomArea);
 
     // recompute internal state when qspanel height changes
     AutoPtr<OnLayoutChangeListener2> lcl = new OnLayoutChangeListener2(this);
@@ -695,11 +697,11 @@ ECode CNotificationPanelView::OnLayout(
     // Update Clock Pivot
     Int32 w = 0;
     GetWidth(&w);
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // mKeyguardStatusView->SetPivotX(w / 2);
     Float size = 0;
     mClockView->GetTextSize(&size);
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // mKeyguardStatusView->SetPivotY((FONT_HEIGHT - CAP_HEIGHT) / 2048.f * size);
 
     // Calculate quick setting heights.
@@ -754,7 +756,7 @@ void CNotificationPanelView::PositionClockAndNotifications()
         Int32 value = 0, h = 0, h2 = 0;
         mNotificationStackScroller->GetNotGoneChildCount(&value);
         GetHeight(&h);
-        assert(0 && "TODO: need Keyguard app.");
+        Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
         // mKeyguardStatusView->GetHeight(&h2);
         Float fv = 0;
         mClockPositionAlgorithm->Setup(
@@ -770,7 +772,7 @@ void CNotificationPanelView::PositionClockAndNotifications()
             StartClockAnimation(mClockPositionResult->mClockY);
         }
         else {
-            assert(0 && "TODO: need Keyguard app.");
+            Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
             // mKeyguardStatusView->SetY(mClockPositionResult.clockY);
         }
         UpdateClock(mClockPositionResult->mClockAlpha, mClockPositionResult->mClockScale);
@@ -798,7 +800,7 @@ void CNotificationPanelView::UpdateClock(
     /* [in] */ Float alpha,
     /* [in] */ Float scale)
 {
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // if (!mKeyguardStatusViewAnimating) {
     //     mKeyguardStatusView->SetAlpha(alpha);
     // }
@@ -1445,7 +1447,7 @@ void CNotificationPanelView::SetKeyguardStatusViewVisibility(
     /* [in] */ Boolean keyguardFadingAway,
     /* [in] */ Boolean goingToFullShade)
 {
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // AutoPtr<IViewPropertyAnimator> vpa;
     // if ((!keyguardFadingAway && mStatusBarState == IStatusBarState::KEYGUARD
     //         && statusBarState != IStatusBarState::KEYGUARD) || goingToFullShade) {
@@ -2589,7 +2591,7 @@ ECode CNotificationPanelView::SetKeyguardUserSwitcher(
 
 ECode CNotificationPanelView::OnScreenTurnedOn()
 {
-    assert(0 && "TODO: need Keyguard app.");
+    Logger::D("CNotificationPanelView", "TODO: need Keyguard app.");
     // mKeyguardStatusView->RefreshTime();
     return NOERROR;
 }

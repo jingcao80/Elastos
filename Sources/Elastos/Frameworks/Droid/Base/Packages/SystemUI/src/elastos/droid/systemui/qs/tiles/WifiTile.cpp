@@ -244,8 +244,8 @@ ECode WifiTile::Callback::OnMobileDataEnabled(
 AutoPtr<IIntent> WifiTile::WIFI_SETTINGS = InitStatic();
 WifiTile::WifiTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mStateBeforeClick = NewTileState();
     mCallback = new Callback(this);
     host->GetNetworkController((INetworkController**)&mController);

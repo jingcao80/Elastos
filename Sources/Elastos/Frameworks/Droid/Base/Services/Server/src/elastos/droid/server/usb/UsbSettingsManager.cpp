@@ -1051,7 +1051,7 @@ void UsbSettingsManager::ResolveActivity(
                 // start UsbResolverActivity so user can choose an activity
                 AutoPtr<IIntent> dialogIntent;
                 CIntent::New((IIntent**)&dialogIntent);
-                dialogIntent->SetClassName(String("com.android.systemui"), String("com.android.systemui.usb.UsbAccessoryUriActivity"));
+                dialogIntent->SetClassName(String("Elastos.Droid.SystemUI"), String("Elastos.Droid.SystemUI.Usb.CUsbAccessoryUriActivity"));
                 dialogIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
                 dialogIntent->PutExtra(IUsbManager::EXTRA_ACCESSORY, IParcelable::Probe(accessory));
                 dialogIntent->PutExtra(String("uri"), uri);
@@ -1154,7 +1154,7 @@ void UsbSettingsManager::ResolveActivity(
 
         if (count == 1) {
             // start UsbConfirmActivity if there is only one choice
-            resolverIntent->SetClassName(String("com.android.systemui"), String("com.android.systemui.usb.UsbConfirmActivity"));
+            resolverIntent->SetClassName(String("Elastos.Droid.SystemUI"), String("Elastos.Droid.SystemUI.Usb.CUsbConfirmActivity"));
 
             AutoPtr<IResolveInfo> info = *matches->Begin();
             resolverIntent->PutExtra(String("rinfo"), IParcelable::Probe(info));\
@@ -1168,7 +1168,7 @@ void UsbSettingsManager::ResolveActivity(
         }
         else {
             // start UsbResolverActivity so user can choose an activity
-            resolverIntent->SetClassName(String("com.android.systemui"), String("com.android.systemui.usb.UsbResolverActivity"));
+            resolverIntent->SetClassName(String("Elastos.Droid.SystemUI"), String("Elastos.Droid.SystemUI.Usb.CUsbResolverActivity"));
             AutoPtr< ArrayOf<IParcelable*> > matchesArray = ArrayOf<IParcelable*>::Alloc(count);
             List<AutoPtr<IResolveInfo> >::Iterator it = matches->Begin();
             for (Int32 i = 0; it != matches->End(); ++it, ++i) {
@@ -1449,7 +1449,7 @@ ECode UsbSettingsManager::RequestPermissionDialog(
     // }
 
     Int64 identity = Binder::ClearCallingIdentity();
-    intent->SetClassName(String("com.android.systemui"), String("com.android.systemui.usb.UsbPermissionActivity"));
+    intent->SetClassName(String("Elastos.Droid.SystemUI"), String("Elastos.Droid.SystemUI.Usb.CUsbPermissionActivity"));
     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     intent->PutExtra(IIntent::EXTRA_INTENT, IParcelable::Probe(pi));
     intent->PutExtra(String("package"), packageName);

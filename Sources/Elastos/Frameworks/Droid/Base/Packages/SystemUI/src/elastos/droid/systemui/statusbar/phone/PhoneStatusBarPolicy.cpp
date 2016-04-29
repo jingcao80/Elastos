@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/PhoneStatusBarPolicy.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBarPolicyIntentReceiver.h"
 #include "../../R.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Bluetooth.h"
@@ -42,12 +43,15 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-PhoneStatusBarPolicy::IntentReceiver::IntentReceiver(
-    /* [in] */ PhoneStatusBarPolicy* host)
-    : mHost(host)
-{}
+CAR_OBJECT_IMPL(CPhoneStatusBarPolicyIntentReceiver);
+ECode CPhoneStatusBarPolicyIntentReceiver::constructor(
+    /* [in] */ IInterface* host)
+{
+    mHost = (PhoneStatusBarPolicy*)IObject::Probe(host);
+    return BroadcastReceiver::constructor();
+}
 
-ECode PhoneStatusBarPolicy::IntentReceiver::OnReceive(
+ECode CPhoneStatusBarPolicyIntentReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -110,7 +114,8 @@ PhoneStatusBarPolicy::PhoneStatusBarPolicy(
     , mZen(0)
     , mBluetoothEnabled(FALSE)
 {
-    mIntentReceiver = new IntentReceiver(this);
+    CPhoneStatusBarPolicyIntentReceiver::New(this->Probe(EIID_IInterface)
+            , (IBroadcastReceiver**)&mIntentReceiver);
     mCastCallback = new CastCallback(this);
     CHandler::New((IHandler**)&mHandler);
     mContext = context;

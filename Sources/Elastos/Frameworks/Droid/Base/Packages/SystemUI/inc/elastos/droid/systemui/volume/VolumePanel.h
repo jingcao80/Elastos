@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_VOLUMEPANEL_H__
 #define __ELASTOS_DROID_SYSTEMUI_VOLUME_VOLUMEPANEL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
@@ -22,6 +22,7 @@ using Elastos::Droid::App::Dialog;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
@@ -67,6 +68,9 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Volume {
+
+class CVolumePanelBroadcastReceiver1;
+class CVolumePanelBroadcastReceiver2;
 
 /**
  * Handles the user interface for the volume keys.
@@ -138,23 +142,6 @@ private:
         , public IDialogInterfaceOnDismissListener
         , public IDialogInterfaceOnClickListener
     {
-    private:
-        class MyReceiver
-            : public BroadcastReceiver
-        {
-        public:
-            MyReceiver(
-                /* [in] */ SafetyWarning* host);
-
-            // @Override
-            CARAPI OnReceive(
-                /* [in] */ IContext* context,
-                /* [in] */ IIntent* intent);
-
-        private:
-            SafetyWarning* mHost;
-        };
-
     public:
         CAR_INTERFACE_DECL()
 
@@ -184,7 +171,6 @@ private:
         CARAPI OnDismiss(
             /* [in] */ IDialogInterface* unused);
 
-    private:
         CARAPI CleanUp();
 
     private:
@@ -192,7 +178,7 @@ private:
         VolumePanel* mVolumePanel;
         AutoPtr<IAudioManager> mAudioManager;
         Boolean mNewVolumeUp;
-        AutoPtr<MyReceiver> mReceiver;
+        AutoPtr<IBroadcastReceiver> mReceiver;
     };
 
     class MySeekListener
@@ -345,22 +331,6 @@ private:
         VolumePanel* mHost;
     };
 
-    class BR
-        : public BroadcastReceiver
-    {
-    public:
-        BR(
-            /* [in] */ VolumePanel* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        VolumePanel* mHost;
-    };
-
     class MyOnClickListener
         : public Object
         , public IViewOnClickListener
@@ -408,8 +378,10 @@ private:
     friend class MyDialog;
     friend class InteractionCallback;
     friend class ZMPCallback;
-    friend class BR;
+    friend class CVolumePanelBroadcastReceiver1;
+    friend class CVolumePanelBroadcastReceiver2;
     friend class MyOnTouchListener;
+
 public:
     CAR_INTERFACE_DECL()
 

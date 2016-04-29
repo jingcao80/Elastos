@@ -255,7 +255,9 @@ ECode ZenModeControllerImpl::RequestConditions(
 {
     mRequesting = request;
     // try {
-    mNoMan->RequestZenModeConditions(mListener, request ? ICondition::FLAG_RELEVANT_NOW : 0);
+    if (mNoMan != NULL) {
+        mNoMan->RequestZenModeConditions(mListener, request ? ICondition::FLAG_RELEVANT_NOW : 0);
+    }
     // } catch (RemoteException e) {
     //     // noop
     // }
@@ -269,7 +271,9 @@ ECode ZenModeControllerImpl::SetExitCondition(
     /* [in] */ ICondition* exitCondition)
 {
     // try {
-    mNoMan->SetZenModeCondition(exitCondition);
+    if (mNoMan != NULL) {
+        mNoMan->SetZenModeCondition(exitCondition);
+    }
     // } catch (RemoteException e) {
     //     // noop
     // }
@@ -283,7 +287,9 @@ ECode ZenModeControllerImpl::GetExitCondition(
     *c = NULL;
     // try {
     AutoPtr<IZenModeConfig> config;
-    FAIL_RETURN(mNoMan->GetZenModeConfig((IZenModeConfig**)&config));
+    if (mNoMan != NULL) {
+        FAIL_RETURN(mNoMan->GetZenModeConfig((IZenModeConfig**)&config));
+    }
     if (config != NULL) {
         return config->GetExitCondition(c);
     }

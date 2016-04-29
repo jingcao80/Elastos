@@ -2,7 +2,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__
 
 #include <elastos/droid/ext/frameworkext.h>
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/core/Object.h>

@@ -364,7 +364,7 @@
 # >  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium
 
 # ==== buid SystemUI ====
-- Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui SystemUI.car
+- Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui Elastos.Droid.SystemUI.car
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/doze
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/egg
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/keyguard

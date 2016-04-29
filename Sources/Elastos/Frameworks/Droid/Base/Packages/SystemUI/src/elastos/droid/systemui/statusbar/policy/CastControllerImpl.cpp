@@ -124,16 +124,18 @@ CastControllerImpl::CastControllerImpl(
     mProjectionCallback = new MediaProjectionManagerCallback(this);
     mContext = context;
     AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: Need MEDIA_ROUTER_SERVICE.");
+    // context->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);
     mMediaRouter = IMediaRouter::Probe(obj);
 
-    obj = NULL;
-    context->GetSystemService(IContext::MEDIA_PROJECTION_SERVICE ,(IInterface**)&obj);
-    mProjectionManager = IMediaProjectionManager::Probe(obj);
-    mProjectionManager->GetActiveProjectionInfo((IMediaProjectionInfo**)&mProjection);
-    AutoPtr<IHandler> handler;
-    CHandler::New((IHandler**)&handler);
-    mProjectionManager->AddCallback(mProjectionCallback, handler);
+    Logger::D(TAG, "TODO: Need MEDIA_PROJECTION_SERVICE.");
+    // obj = NULL;
+    // context->GetSystemService(IContext::MEDIA_PROJECTION_SERVICE ,(IInterface**)&obj);
+    // mProjectionManager = IMediaProjectionManager::Probe(obj);
+    // mProjectionManager->GetActiveProjectionInfo((IMediaProjectionInfo**)&mProjection);
+    // AutoPtr<IHandler> handler;
+    // CHandler::New((IHandler**)&handler);
+    // mProjectionManager->AddCallback(mProjectionCallback, handler);
     if (DEBUG) Logger::D(TAG, "new CastController()");
 }
 
@@ -201,6 +203,9 @@ ECode CastControllerImpl::SetDiscovering(
 
 void CastControllerImpl::HandleDiscoveryChangeLocked()
 {
+    if (mMediaRouter == NULL) {
+        return;
+    }
     if (mCallbackRegistered) {
         mMediaRouter->RemoveCallback(IMediaRouterCallback::Probe(mMediaCallback));
         mCallbackRegistered = FALSE;
@@ -225,7 +230,9 @@ void CastControllerImpl::HandleDiscoveryChangeLocked()
 ECode CastControllerImpl::SetCurrentUserId(
     /* [in] */ Int32 currentUserId)
 {
-    mMediaRouter->RebindAsUser(currentUserId);
+    if (mMediaRouter != NULL) {
+        mMediaRouter->RebindAsUser(currentUserId);
+    }
     return NOERROR;
 }
 
@@ -318,7 +325,9 @@ ECode CastControllerImpl::StartCasting(
     if (device == NULL || (device->GetTag((IInterface**)&tag), tag) == NULL) return NOERROR;
     AutoPtr<IMediaRouterRouteInfo> route = IMediaRouterRouteInfo::Probe(tag);
     if (DEBUG) Logger::D(TAG, "startCasting: %s", RouteToString(route).string());
-    mMediaRouter->SelectRoute(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY, route);
+    if (mMediaRouter != NULL) {
+        mMediaRouter->SelectRoute(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY, route);
+    }
     return NOERROR;
 }
 
@@ -330,21 +339,24 @@ ECode CastControllerImpl::StopCasting(
     Boolean isProjection = IMediaProjectionInfo::Probe(tag) != NULL;
     if (DEBUG) Logger::D(TAG, "stopCasting isProjection=%d", isProjection);
     if (isProjection) {
-        AutoPtr<IMediaProjectionInfo> projection = IMediaProjectionInfo::Probe(tag);
-        AutoPtr<IMediaProjectionInfo> pv;
-        mProjectionManager->GetActiveProjectionInfo((IMediaProjectionInfo**)&pv);
-        Boolean tmp = FALSE;
-        if (IObject::Probe(pv)->Equals(projection, &tmp), tmp) {
-            mProjectionManager->StopActiveProjection();
-        }
-        else {
-            Logger::W(TAG, "Projection is no longer active: %p", projection.Get());
-        }
+        Logger::D(TAG, "TODO: Need MEDIA_PROJECTION_SERVICE.");
+        // AutoPtr<IMediaProjectionInfo> projection = IMediaProjectionInfo::Probe(tag);
+        // AutoPtr<IMediaProjectionInfo> pv;
+        // mProjectionManager->GetActiveProjectionInfo((IMediaProjectionInfo**)&pv);
+        // Boolean tmp = FALSE;
+        // if (IObject::Probe(pv)->Equals(projection, &tmp), tmp) {
+        //     mProjectionManager->StopActiveProjection();
+        // }
+        // else {
+        //     Logger::W(TAG, "Projection is no longer active: %p", projection.Get());
+        // }
     }
     else {
-        AutoPtr<IMediaRouterRouteInfo> info;
-        mMediaRouter->GetDefaultRoute((IMediaRouterRouteInfo**)&info);
-        info->Select();
+        if (mMediaRouter != NULL) {
+            AutoPtr<IMediaRouterRouteInfo> info;
+            mMediaRouter->GetDefaultRoute((IMediaRouterRouteInfo**)&info);
+            info->Select();
+        }
     }
     return NOERROR;
 }
@@ -401,6 +413,10 @@ String CastControllerImpl::GetAppName(
 
 void CastControllerImpl::UpdateRemoteDisplays()
 {
+    if (mMediaRouter == NULL) {
+        return;
+    }
+
     synchronized(mRoutes) {
         mRoutes->Clear();
         Int32 n = 0;

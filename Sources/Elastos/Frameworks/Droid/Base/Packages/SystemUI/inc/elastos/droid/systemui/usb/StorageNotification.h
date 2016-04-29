@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_USB_STORAGENOTIFICATION_H__
 #define __ELASTOS_DROID_SYSTEMUI_USB_STORAGENOTIFICATION_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/os/Runnable.h"

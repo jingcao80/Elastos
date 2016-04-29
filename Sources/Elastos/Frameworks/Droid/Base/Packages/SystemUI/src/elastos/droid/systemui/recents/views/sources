@@ -8,7 +8,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
 SOURCES += AnimateableViewBounds.cpp
 SOURCES += DebugOverlayView.cpp
-SOURCES += FakeShadowDrawable.cpp
+SOURCES += CFakeShadowDrawable.cpp
 SOURCES += FixedSizeImageView.cpp
 SOURCES += RecentsView.cpp
 SOURCES += SwipeHelper.cpp

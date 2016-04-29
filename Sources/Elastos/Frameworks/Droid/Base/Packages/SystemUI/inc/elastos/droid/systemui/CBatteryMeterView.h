@@ -3,11 +3,11 @@
 #define __ELASTOS_DROID_SYSTEMUI_CBATTERYMETERVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_CBatteryMeterView.h"
+#include "Elastos.Droid.Content.h"
 #include <elastos/droid/view/View.h>
-#include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/os/Runnable.h>
 
-using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Res::IResources;
@@ -25,40 +25,15 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
+class CBatteryMeterViewBatteryTracker;
+
 CarClass(CBatteryMeterView)
     , public Elastos::Droid::View::View
+    , public IBatteryMeterView
     , public IDemoMode
     , public IBatteryStateChangeCallback
 {
 private:
-    class BatteryTracker
-        : public BroadcastReceiver
-    {
-    public:
-        BatteryTracker(
-            /* [in] */ CBatteryMeterView* host);
-
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    public:
-        static Int32 UNKNOWN_LEVEL;
-
-        // current battery status
-        Int32 mLevel;
-        String mPercentStr;
-        Int32 mPlugType;
-        Boolean mPlugged;
-        Int32 mHealth;
-        Int32 mStatus;
-        String mTechnology;
-        Int32 mVoltage;
-        Int32 mTemperature;
-        Boolean mTestmode;
-        CBatteryMeterView* mHost;
-    };
-
     class Runnable_1
         : public Runnable
     {
@@ -138,7 +113,7 @@ private:
         /* [in] */ Int32 percent);
 
 public:
-    AutoPtr<BatteryTracker> mTracker;
+    AutoPtr<IBroadcastReceiver> mTracker;
 
     static String TAG;
     static String ACTION_LEVEL_TEST;
@@ -182,7 +157,8 @@ private:
     Boolean mPowerSaveEnabled;
 
     Boolean mDemoMode;
-    AutoPtr<BatteryTracker> mDemoTracker;
+    AutoPtr<IBroadcastReceiver> mDemoTracker;
+    friend class CBatteryMeterViewBatteryTracker;
 };
 
 } // SystemUI

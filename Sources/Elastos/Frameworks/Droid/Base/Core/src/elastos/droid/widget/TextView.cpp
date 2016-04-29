@@ -1249,7 +1249,7 @@ void TextView::InitStatic()
 
 void TextView::InitFields()
 {
-    mHighlightColor = (0xCC475925);
+    mHighlightColor = 0xCC475925;
     mCursorDrawableRes = 0;
 
     mTextSelectHandleLeftRes = 0;
@@ -1257,11 +1257,11 @@ void TextView::InitFields()
     mTextSelectHandleRes = 0;
     mTextEditSuggestionItemLayout = 0;
 
-    mCurTextColor = (0);
+    mCurTextColor = 0;
     mCurHintTextColor = 0;
-    mFreezesText = (FALSE);
-    mTemporaryDetach = (FALSE);
-    mDispatchTemporaryDetach = (FALSE);
+    mFreezesText = FALSE;
+    mTemporaryDetach = FALSE;
+    mDispatchTemporaryDetach = FALSE;
 
     mShadowRadius = 0;
     mShadowDx = 0;
@@ -1271,19 +1271,19 @@ void TextView::InitFields()
 
     mEllipsize = TextUtilsTruncateAt_NONE;
 
-    mRestartMarquee = (FALSE);
+    mRestartMarquee = FALSE;
 
-    mMarqueeRepeatLimit = (3);
+    mMarqueeRepeatLimit = 3;
 
     mLastLayoutDirection = -1;
 
     mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
 
-    mBufferType = (BufferType_NORMAL);
+    mBufferType = BufferType_NORMAL;
     mAllowTransformationLengthChange = FALSE;
     mUserSetTextScaleX = FALSE;
 
-    mGravity = (IGravity::TOP | IGravity::START);
+    mGravity = IGravity::TOP | IGravity::START;
     mHorizontallyScrolling = FALSE;
 
     mAutoLinkMask = 0;
@@ -1317,10 +1317,8 @@ void TextView::InitFields()
     mFilters = NO_FILTERS;
 
     ASSERT_SUCCEEDED(CString::New(String(""), (ICharSequence**)&mText));
-    ASSERT_SUCCEEDED(CSpannableFactory::AcquireSingleton(
-       (ISpannableFactory**)&mSpannableFactory));
-    ASSERT_SUCCEEDED(CEditableFactory::AcquireSingleton(
-       (IEditableFactory**)&mEditableFactory));
+    ASSERT_SUCCEEDED(CSpannableFactory::AcquireSingleton((ISpannableFactory**)&mSpannableFactory));
+    ASSERT_SUCCEEDED(CEditableFactory::AcquireSingleton((IEditableFactory**)&mEditableFactory));
 }
 
 TextView::TextView()
@@ -1358,7 +1356,6 @@ ECode TextView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    InitFields();
     ASSERT_SUCCEEDED(View::constructor(context, attrs, defStyleAttr, defStyleRes));
     ASSERT_SUCCEEDED(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
     return NOERROR;

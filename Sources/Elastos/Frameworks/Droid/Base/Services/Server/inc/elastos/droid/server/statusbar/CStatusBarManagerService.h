@@ -261,10 +261,13 @@ public:
     // Callbacks from the status bar service.
     // ================================================================================
     CARAPI RegisterStatusBar(
-        /* [in] */ IIStatusBar* bar,
-        /* [in, out] */ IStatusBarIconList* iconList,
-        /* [in, out] */ ArrayOf<Int32>* switches,
-        /* [in, out] */ IList* binders);/*List<IBinder*>*/
+        /* [in] */ IIStatusBar* cb,
+        /* [in] */ IStatusBarIconList* inIconList,
+        /* [in] */ ArrayOf<Int32>* inSwitches,
+        /* [in] */ IList* inBinders,
+        /* [out] */ IStatusBarIconList** outIconList,
+        /* [out, callee] */ ArrayOf<Int32>** outSwitches,
+        /* [out] */ IList** outBinders);/*List<IBinder*>*/
 
     /**
      * The status bar service should call this each time the user brings the panel from

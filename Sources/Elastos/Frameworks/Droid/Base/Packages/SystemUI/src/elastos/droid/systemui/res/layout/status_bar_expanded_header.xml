@@ -2,23 +2,23 @@
 <!--
 ** Copyright 2012, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 -->
 
 <!-- Extends RelativeLayout -->
-<com.android.systemui.statusbar.phone.StatusBarHeaderView
+<Elastos.Droid.SystemUI.StatusBar.Phone.CStatusBarHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    xmlns:systemui="http://schemas.android.com/apk/res/Elastos.Droid.SystemUI"
     android:id="@+id/header"
     android:layout_width="@dimen/notification_panel_width"
     android:layout_height="@dimen/status_bar_header_height"
@@ -32,7 +32,7 @@
     android:focusable="true"
     >
 
-    <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+    <Elastos.Droid.SystemUI.StatusBar.Phone.CMultiUserSwitch android:id="@+id/multi_user_switch"
         android:layout_width="@dimen/multi_user_switch_width_collapsed"
         android:layout_height="@dimen/status_bar_header_height"
         android:layout_alignParentEnd="true"
@@ -42,9 +42,9 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:scaleType="centerInside"/>
-    </com.android.systemui.statusbar.phone.MultiUserSwitch>
+    </Elastos.Droid.SystemUI.StatusBar.Phone.CMultiUserSwitch>
 
-    <com.android.keyguard.AlphaOptimizedImageButton android:id="@+id/settings_button"
+    <Elastos.Droid.SystemUI.Keyguard.CAlphaOptimizedImageButton android:id="@+id/settings_button"
         style="@android:style/Widget.Material.Button.Borderless"
         android:layout_toStartOf="@id/multi_user_switch"
         android:layout_width="48dp"
@@ -99,7 +99,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin"
         android:layout_alignParentBottom="true">
-        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
+        <Elastos.Droid.SystemUI.StatusBar.Policy.CDateView android:id="@+id/date_collapsed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -109,7 +109,7 @@
             systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
             />
 
-        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_expanded"
+        <Elastos.Droid.SystemUI.StatusBar.Policy.CDateView android:id="@+id/date_expanded"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -177,4 +177,4 @@
         android:padding="2dp"
         />
 
-</com.android.systemui.statusbar.phone.StatusBarHeaderView>
+</Elastos.Droid.SystemUI.StatusBar.Phone.CStatusBarHeaderView>

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/CSystemBars.h"
+#include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "../R.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/utility/logging/Logger.h>
@@ -78,6 +79,7 @@ void CSystemBars::CreateStatusBarFromConfig()
     if (clsName == NULL || clsName.GetLength() == 0) {
         Logger::D(TAG, "No status bar component configured");
     }
+
     AutoPtr<IClassInfo> cls = Utils::GetClassInfo(clsName);
     if (cls == NULL) {
         Logger::D(TAG, "Error loading status bar component: %s", clsName.string());
@@ -90,9 +92,8 @@ void CSystemBars::CreateStatusBarFromConfig()
         return;
     }
     mStatusBar = IBaseStatusBar::Probe(object);
-    assert(0 && "TODO");
-    // mStatusBar->mContext = mContext;
-    // mStatusBar->mComponents = mComponents;
+    ((BaseStatusBar*)mStatusBar.Get())->mContext = mContext;
+    ((BaseStatusBar*)mStatusBar.Get())->mComponents = mComponents;
     mStatusBar->Start();
     // if (DEBUG) Logger::D(TAG, "started " + mStatusBar.getClass().GetSimpleName());
 }

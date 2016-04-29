@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_SYSTEMUI_H__
 #define  __ELASTOS_DROID_SYSTEMUI_SYSTEMUI_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/Utils.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
@@ -44,10 +44,10 @@ public:
 
     // @SuppressWarnings("unchecked")
     virtual CARAPI_(AutoPtr<IInterface>) GetComponent(
-        /* [in] */ InterfaceID interfaceType);
+        /* [in] */ const String& interfaceType);
 
     virtual CARAPI PutComponent(
-        /* [in] */ InterfaceID interfaceType,
+        /* [in] */ const String& interfaceType,
         /* [in] */ IInterface* component);
 
     virtual CARAPI SetContext(
@@ -57,13 +57,13 @@ public:
         /* [out] */ IContext** context);
 
     virtual CARAPI SetComponents(
-        /* [in] */ HashMap<InterfaceID, AutoPtr<IInterface> >* components);
+        /* [in] */ HashMap<String, AutoPtr<IInterface> >* components);
 
-    virtual AutoPtr<HashMap<InterfaceID, AutoPtr<IInterface> > > GetComponents();
+    virtual AutoPtr<HashMap<String, AutoPtr<IInterface> > > GetComponents();
 
 public:
     AutoPtr<IContext> mContext;
-    AutoPtr<HashMap<InterfaceID, AutoPtr<IInterface> > > mComponents;
+    AutoPtr<HashMap<String, AutoPtr<IInterface> > > mComponents;
 };
 
 } // namespace SystemUI

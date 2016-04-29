@@ -184,7 +184,7 @@ CAR_INTERFACE_IMPL(BrightnessController, Object, IToggleSliderListener)
 BrightnessController::BrightnessController(
     /* [in] */ IContext* context,
     /* [in] */ IImageView* icon,
-    /* [in] */ ToggleSlider* control)
+    /* [in] */ CToggleSlider* control)
     : mContext(context)
     , mIcon(icon)
     , mControl(control)

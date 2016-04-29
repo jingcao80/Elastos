@@ -18,6 +18,7 @@
 
 using Elastos::Droid::Graphics::EIID_IPointF;
 using Elastos::Core::EIID_IArrayOf;
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IDouble;
@@ -170,7 +171,7 @@ String GetSignature(
     return String(NULL);
 }
 
-CAR_INTERFACE_IMPL(PropertyValuesHolder, Object, IPropertyValuesHolder);
+CAR_INTERFACE_IMPL_2(PropertyValuesHolder, Object, IPropertyValuesHolder, ICloneable);
 PropertyValuesHolder::PropertyValuesHolder(
     /* [in] */ const String& propertyName)
     : mPropertyName(propertyName)
@@ -494,7 +495,10 @@ ECode PropertyValuesHolder::SetKeyframes(
     for (Int32 i = 0; i < numKeyframes; ++i) {
         keyframes->Set(i, (*values)[i]);
     }
-    mKeyframes = new KeyframeSet(keyframes);
+
+    AutoPtr<KeyframeSet> set = new KeyframeSet();
+    set->constructor(keyframes);
+    mKeyframes = set;
     return NOERROR;
 }
 

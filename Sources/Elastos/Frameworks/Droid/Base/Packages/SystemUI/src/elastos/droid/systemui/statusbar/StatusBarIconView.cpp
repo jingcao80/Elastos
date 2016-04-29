@@ -137,9 +137,8 @@ ECode StatusBarIconView::Set(
     AutoPtr<ICharSequence> oc;
     icon->GetContentDescription((ICharSequence**)&oc);
 
-    AutoPtr<IInterface> obj;
-    ICloneable::Probe(icon)->Clone((IInterface**)&obj);
-    mIcon = IStatusBarIcon::Probe(obj);
+    mIcon = NULL;
+    icon->Clone((IStatusBarIcon**)&mIcon);
     String pkg;
     mIcon->GetIconPackage(&pkg);
     iconEquals = StrEQ(pkg, opkg);

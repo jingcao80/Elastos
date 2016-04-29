@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONE_TICKER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONE_TICKER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>

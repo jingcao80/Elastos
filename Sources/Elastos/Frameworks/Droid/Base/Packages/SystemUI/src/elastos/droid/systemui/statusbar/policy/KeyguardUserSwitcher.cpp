@@ -1,11 +1,12 @@
 
 #include "elastos/droid/systemui/statusbar/policy/KeyguardUserSwitcher.h"
-#include "elastos/droid/systemui/statusbar/policy/KeyguardUserSwitcherScrim.h"
+#include "elastos/droid/systemui/statusbar/policy/CKeyguardUserSwitcherScrim.h"
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::IAnimator;
@@ -17,6 +18,7 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -141,7 +143,7 @@ KeyguardUserSwitcher::KeyguardUserSwitcher(
         AutoPtr<IView> view;
         userSwitcher->Inflate((IView**)&view);
         mUserSwitcher = IViewGroup::Probe(view);
-        mBackground = new KeyguardUserSwitcherScrim(IView::Probe(mUserSwitcher));
+        CKeyguardUserSwitcherScrim::New(IView::Probe(mUserSwitcher), (IKeyguardUserSwitcherScrim**)&mBackground);
         IView::Probe(mUserSwitcher)->SetBackground(IDrawable::Probe(mBackground));
         mStatusBarView = statusBarView;
         mStatusBarView->SetKeyguardUserSwitcher(this);
@@ -149,7 +151,7 @@ KeyguardUserSwitcher::KeyguardUserSwitcher(
         mAdapter = new Adapter(context, userSwitcherController, this);
         mAdapter->RegisterDataSetObserver(mDataSetObserver);
         mUserSwitcherController = userSwitcherController;
-        assert(0 && "TODO: Need keyguard");
+        Logger::D("KeyguardUserSwitcher", "TODO: Need keyguard");
         // mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
         //         AnimationUtils.loadInterpolator(
         //                 context, Elastos::Droid::R::interpolator::fast_out_slow_in));
@@ -158,7 +160,7 @@ KeyguardUserSwitcher::KeyguardUserSwitcher(
         mUserSwitcher = NULL;
         mStatusBarView = NULL;
         mAdapter = NULL;
-        assert(0 && "TODO: Need keyguard");
+        Logger::D("KeyguardUserSwitcher", "TODO: Need keyguard");
         // mAppearAnimationUtils = NULL;
         mBackground = NULL;
     }
@@ -249,7 +251,7 @@ void KeyguardUserSwitcher::StartAppearAnimation()
     }
     mUserSwitcher->SetClipChildren(FALSE);
     mUserSwitcher->SetClipToPadding(FALSE);
-    assert(0 && "TODO: Need keyguard");
+    Logger::D("KeyguardUserSwitcher", "TODO: Need keyguard");
     // mAppearAnimationUtils->StartAppearAnimation(objects, new Runnable() {
     //     // @Override
     //     ECode KeyguardUserSwitcher::Run()

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/CQSPanel.h"
-#include "elastos/droid/systemui/settings/ToggleSlider.h"
+#include "elastos/droid/systemui/settings/CToggleSlider.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
 #include "../R.h"
 #include <elastos/droid/R.h>
@@ -8,7 +8,7 @@
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::SystemUI::Settings::IToggleSlider;
-using Elastos::Droid::SystemUI::Settings::ToggleSlider;
+using Elastos::Droid::SystemUI::Settings::CToggleSlider;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::LayoutInflater;
@@ -25,7 +25,9 @@ const Int32 CQSPanel::H::SET_TILE_VISIBILITY = 2;
 CQSPanel::H::H(
     /* [in] */ CQSPanel* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode CQSPanel::H::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -271,7 +273,7 @@ ECode CQSPanel::constructor(
     AutoPtr<IView> v;
     FindViewById(R::id::brightness_slider, (IView**)&v);
     mBrightnessController = new BrightnessController(ctx, IImageView::Probe(view),
-            (ToggleSlider*)IToggleSlider::Probe(v));
+            (CToggleSlider*)IToggleSlider::Probe(v));
 
     AutoPtr<DetailDoneButtonOnClickListener> cl = new DetailDoneButtonOnClickListener(this);
     IView::Probe(mDetailDoneButton)->SetOnClickListener(cl);

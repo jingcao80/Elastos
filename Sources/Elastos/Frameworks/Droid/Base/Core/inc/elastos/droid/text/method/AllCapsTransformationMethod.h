@@ -24,13 +24,15 @@ namespace Method {
 class AllCapsTransformationMethod
     : public Object
     , public IAllCapsTransformationMethod
+    , public ITransformationMethod2
+    , public ITransformationMethod
 {
 public:
+    CAR_INTERFACE_DECL();
+
     AllCapsTransformationMethod();
 
     virtual ~AllCapsTransformationMethod();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -52,7 +54,6 @@ public:
     //@Override
     CARAPI SetLengthChangesAllowed(
         /* [in] */ Boolean allowLengthChanges);
-
 
 private:
     static const String TAG;

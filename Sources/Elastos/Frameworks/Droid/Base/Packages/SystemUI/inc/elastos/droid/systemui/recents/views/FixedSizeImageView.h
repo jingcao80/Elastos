@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_FIXEDSIZEIMAGEVIEW_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_FIXEDSIZEIMAGEVIEW_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/droid/widget/ImageView.h>
 
 using Elastos::Droid::Widget::ImageView;

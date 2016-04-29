@@ -52,7 +52,7 @@ ECode CRecents::MyOnAnimationStartedListener::OnAnimationStarted()
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IRecentsActivity::WINDOW_ANIMATION_START_INTENT, (IIntent**)&intent);
-    intent->SetPackage(String("com.android.systemui"));
+    intent->SetPackage(String("Elastos.Droid.SystemUI"));
     mHost->SendBroadcastSafely(intent);
     return NOERROR;
 }
@@ -72,6 +72,7 @@ CRecents::CRecents()
 
 ECode CRecents::Start()
 {
+    Logger::D(TAG, "TODO: Not Implement == [AlternateRecentsComponent].");
     if (mUseAlternateRecents) {
         if (mAlternateRecents == NULL) {
             // mAlternateRecents = new AlternateRecentsComponent(mContext);
@@ -79,7 +80,7 @@ ECode CRecents::Start()
         // mAlternateRecents->OnStart();
     }
 
-    PutComponent(EIID_IRecentsComponent, (IRecentsComponent*)this);
+    PutComponent(String("EIID_IRecentsComponent"), (IRecentsComponent*)this);
     return NOERROR;
 }
 
@@ -99,7 +100,9 @@ ECode CRecents::ShowRecents(
     /* [in] */ IView* statusBarView)
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnShowRecents(triggeredFromAltTab, statusBarView);
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnShowRecents(triggeredFromAltTab, statusBarView);
+        }
     }
     return NOERROR;
 }
@@ -109,13 +112,15 @@ ECode CRecents::HideRecents(
     /* [in] */ Boolean triggeredFromHomeKey)
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnHideRecents(triggeredFromAltTab, triggeredFromHomeKey);
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnHideRecents(triggeredFromAltTab, triggeredFromHomeKey);
+        }
     }
     else {
         AutoPtr<IIntent> intent;
         CIntent::New(IRecentsActivity::CLOSE_RECENTS_INTENT, (IIntent**)&intent);
 
-        intent->SetPackage(String("com.android.systemui"));
+        intent->SetPackage(String("Elastos.Droid.SystemUI"));
         SendBroadcastSafely(intent);
 
         AutoPtr<RecentTasksLoader> rtl = RecentTasksLoader::GetInstance(mContext);
@@ -131,7 +136,9 @@ ECode CRecents::ToggleRecents(
 {
     if (mUseAlternateRecents) {
         // Launch the alternate recents if required
-        mAlternateRecents->OnToggleRecents(statusBarView);
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnToggleRecents(statusBarView);
+        }
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -143,8 +150,8 @@ ECode CRecents::ToggleRecents(
 
     AutoPtr<IIntent> intent;
     CIntent::New(IRecentsActivity::TOGGLE_RECENTS_INTENT, (IIntent**)&intent);
-    intent->SetClassName(String("com.android.systemui"),
-        String("com.android.systemui.recent.RecentsActivity"));
+    intent->SetClassName(String("Elastos.Droid.SystemUI"),
+        String("Elastos.Droid.SystemUI.Recent.CRecentsActivity"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
         | IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
@@ -346,7 +353,9 @@ ECode CRecents::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnConfigurationChanged(newConfig);
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnConfigurationChanged(newConfig);
+        }
     }
     return NOERROR;
 }
@@ -354,13 +363,15 @@ ECode CRecents::OnConfigurationChanged(
 ECode CRecents::PreloadRecents()
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnPreloadRecents();
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnPreloadRecents();
+        }
     }
     else {
         AutoPtr<IIntent> intent;
         CIntent::New(IRecentsActivity::PRELOAD_INTENT, (IIntent**)&intent);
-        intent->SetClassName(String("com.android.systemui"),
-            String("com.android.systemui.recent.RecentsPreloadReceiver"));
+        intent->SetClassName(String("Elastos.Droid.SystemUI"),
+            String("Elastos.Droid.SystemUI.Recent.CRecentsPreloadReceiver"));
         SendBroadcastSafely(intent);
 
         AutoPtr<RecentTasksLoader> rtl = RecentTasksLoader::GetInstance(mContext);
@@ -372,13 +383,15 @@ ECode CRecents::PreloadRecents()
 ECode CRecents::CancelPreloadingRecents()
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnCancelPreloadingRecents();
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnCancelPreloadingRecents();
+        }
     }
     else {
         AutoPtr<IIntent> intent;
         CIntent::New(IRecentsActivity::CANCEL_PRELOAD_INTENT, (IIntent**)&intent);
-        intent->SetClassName(String("com.android.systemui"),
-            String("com.android.systemui.recent.RecentsPreloadReceiver"));
+        intent->SetClassName(String("Elastos.Droid.SystemUI"),
+            String("Elastos.Droid.SystemUI.Recent.CRecentsPreloadReceiver"));
         SendBroadcastSafely(intent);
 
         AutoPtr<RecentTasksLoader> rtl = RecentTasksLoader::GetInstance(mContext);
@@ -390,7 +403,9 @@ ECode CRecents::CancelPreloadingRecents()
 ECode CRecents::ShowNextAffiliatedTask()
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnShowNextAffiliatedTask();
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnShowNextAffiliatedTask();
+        }
     }
     return NOERROR;
 }
@@ -398,7 +413,9 @@ ECode CRecents::ShowNextAffiliatedTask()
 ECode CRecents::ShowPrevAffiliatedTask()
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->OnShowPrevAffiliatedTask();
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->OnShowPrevAffiliatedTask();
+        }
     }
     return NOERROR;
 }
@@ -407,7 +424,9 @@ ECode CRecents::SetCallback(
     /* [in] */ IRecentsComponentCallbacks* cb)
 {
     if (mUseAlternateRecents) {
-        mAlternateRecents->SetRecentsComponentCallback(cb);
+        if (mAlternateRecents != NULL) {
+            mAlternateRecents->SetRecentsComponentCallback(cb);
+        }
     }
     return NOERROR;
 }

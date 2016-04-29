@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_QS_QSTILEVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_QS_QSTILEVIEW_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/os/Handler.h>

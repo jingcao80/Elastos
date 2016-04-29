@@ -1,6 +1,10 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBarHeadsUpObserver.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBarUserSetupObserver.h"
+#include "elastos/droid/systemui/statusbar/phone/CFastColorDrawable.h"
 #include "elastos/droid/systemui/statusbar/phone/CNotificationPanelView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBarReceiver.h"
 #include "elastos/droid/systemui/statusbar/phone/BarTransitions.h"
 #include "elastos/droid/systemui/statusbar/phone/CStatusBarWindowView.h"
 #include "elastos/droid/systemui/statusbar/phone/QSTileHost.h"
@@ -32,6 +36,7 @@ using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::IStatusBarManagerHelper;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Graphics::CPorterDuffXfermode;
@@ -44,6 +49,7 @@ using Elastos::Droid::InputMethodService::IInputMethodService;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
@@ -143,15 +149,16 @@ const Int32 CPhoneStatusBar::VISIBLE_LOCATIONS = StackScrollState::ViewState::LO
             | StackScrollState::ViewState::LOCATION_MAIN_AREA
             | StackScrollState::ViewState::LOCATION_BOTTOM_STACK_PEEKING;
 
-CPhoneStatusBar::UserSetupObserver::UserSetupObserver(
-    /* [in] */ CPhoneStatusBar* host,
+CAR_OBJECT_IMPL(CPhoneStatusBarUserSetupObserver);
+ECode CPhoneStatusBarUserSetupObserver::constructor(
+    /* [in] */ IPhoneStatusBar* host,
     /* [in] */ IHandler* handler)
-    : mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mHost = (CPhoneStatusBar*)host;
+    return ContentObserver::constructor(handler);
 }
 
-ECode CPhoneStatusBar::UserSetupObserver::OnChange(
+ECode CPhoneStatusBarUserSetupObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     AutoPtr<IContentResolver> cr;
@@ -162,8 +169,10 @@ ECode CPhoneStatusBar::UserSetupObserver::OnChange(
             0 /*default */,
             mHost->mCurrentUserId, &v);
     const Boolean userSetup = 0 != v;
-    if (MULTIUSER_DEBUG) Logger::D(TAG, "User setup changed: selfChange=%d userSetup=%d mUserSetup=%d",
+    if (CPhoneStatusBar::MULTIUSER_DEBUG) {
+        Logger::D(CPhoneStatusBar::TAG, "User setup changed: selfChange=%d userSetup=%d mUserSetup=%d",
             selfChange, userSetup, mHost->mUserSetup);
+    }
 
     if (userSetup != mHost->mUserSetup) {
         mHost->mUserSetup = userSetup;
@@ -174,15 +183,16 @@ ECode CPhoneStatusBar::UserSetupObserver::OnChange(
     return NOERROR;
 }
 
-CPhoneStatusBar::HeadsUpObserver::HeadsUpObserver(
-    /* [in] */ CPhoneStatusBar* host,
+CAR_OBJECT_IMPL(CPhoneStatusBarHeadsUpObserver);
+ECode CPhoneStatusBarHeadsUpObserver::constructor(
+    /* [in] */ IPhoneStatusBar* host,
     /* [in] */ IHandler* handler)
-    : mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mHost = (CPhoneStatusBar*)host;
+    return ContentObserver::constructor(handler);
 }
 
-ECode CPhoneStatusBar::HeadsUpObserver::OnChange(
+ECode CPhoneStatusBarHeadsUpObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     Boolean wasUsing = mHost->mUseHeadsUp;
@@ -192,16 +202,16 @@ ECode CPhoneStatusBar::HeadsUpObserver::OnChange(
     Elastos::Droid::Provider::Settings::Global::GetInt32(
             cr, ISettingsGlobal::HEADS_UP_NOTIFICATIONS_ENABLED,
             ISettingsGlobal::HEADS_UP_OFF, &v);
-    mHost->mUseHeadsUp = ENABLE_HEADS_UP && !mHost->mDisableNotificationAlerts
+    mHost->mUseHeadsUp = CPhoneStatusBar::ENABLE_HEADS_UP && !mHost->mDisableNotificationAlerts
             && ISettingsGlobal::HEADS_UP_OFF != v;
 
     Elastos::Droid::Provider::Settings::Global::GetInt32(
-            cr, SETTING_HEADS_UP_TICKER, 0, &v);
+            cr, CPhoneStatusBar::SETTING_HEADS_UP_TICKER, 0, &v);
     mHost->mHeadsUpTicker = mHost->mUseHeadsUp && 0 != v;
-    Logger::D(TAG, "heads up is %s", (mHost->mUseHeadsUp ? "enabled" : "disabled"));
+    Logger::D(CPhoneStatusBar::TAG, "heads up is %s", (mHost->mUseHeadsUp ? "enabled" : "disabled"));
     if (wasUsing != mHost->mUseHeadsUp) {
         if (!mHost->mUseHeadsUp) {
-            Logger::D(TAG, "dismissing any existing heads up notification on disable event");
+            Logger::D(CPhoneStatusBar::TAG, "dismissing any existing heads up notification on disable event");
             mHost->SetHeadsUpVisibility(FALSE);
             mHost->mHeadsUpNotificationView->ReleaseResources();
             mHost->RemoveHeadsUpView();
@@ -606,64 +616,6 @@ ECode CPhoneStatusBar::TickingDoneListener::OnAnimationStart(
     return NOERROR;
 }
 
-CPhoneStatusBar::InnerReceiver::InnerReceiver(
-    /* [in] */ CPhoneStatusBar* host)
-    : mHost(host)
-{}
-
-ECode CPhoneStatusBar::InnerReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    if (DEBUG) Logger::V(TAG, "onReceive: %s", TO_CSTR(intent));
-    String action;
-    intent->GetAction(&action);
-    if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS.Equals(action)) {
-        Int32 flags = ICommandQueue::FLAG_EXCLUDE_NONE;
-        String reason;
-        intent->GetStringExtra(String("reason"), &reason);
-        if (reason != NULL && reason.Equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
-            flags |= ICommandQueue::FLAG_EXCLUDE_RECENTS_PANEL;
-        }
-        mHost->AnimateCollapsePanels(flags);
-    }
-    else if (IIntent::ACTION_SCREEN_OFF.Equals(action)) {
-        mHost->mScreenOn = FALSE;
-        mHost->NotifyNavigationBarScreenOn(FALSE);
-        mHost->NotifyHeadsUpScreenOn(FALSE);
-        mHost->FinishBarAnimations();
-        mHost->StopNotificationLogging();
-        mHost->ResetUserExpandedStates();
-    }
-    else if (IIntent::ACTION_SCREEN_ON.Equals(action)) {
-        mHost->mScreenOn = TRUE;
-        // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
-        mHost->RepositionNavigationBar();
-        mHost->NotifyNavigationBarScreenOn(TRUE);
-        mHost->StartNotificationLoggingIfScreenOnAndVisible();
-    }
-    else if (ACTION_DEMO.Equals(action)) {
-        AutoPtr<IBundle> bundle;
-        intent->GetExtras((IBundle**)&bundle);
-        if (bundle != NULL) {
-            String str;
-            bundle->GetString(String("command"), String(""), &str);
-            String command = str.Trim().ToLowerCase();
-            if (command.GetLength() > 0) {
-                if (FAILED(mHost->DispatchDemoCommand(command, bundle))) {
-                    Logger::W(TAG, "Error running demo command, intent=%s", TO_CSTR(intent));
-                }
-            }
-        }
-    }
-    else if (String("fake_artwork").Equals(action)) {
-        if (DEBUG_MEDIA_FAKE_ARTWORK) {
-            mHost->UpdateMediaMetaData(TRUE);
-        }
-    }
-    return NOERROR;
-}
-
 CPhoneStatusBar::StartTracing::StartTracing(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -692,54 +644,6 @@ ECode CPhoneStatusBar::StopTracing::Run()
     // android.os.Debug.stopMethodTracing();
     Logger::D(TAG, "stopTracing");
     mHost->Vibrate();
-    return NOERROR;
-}
-
-CPhoneStatusBar::FastColorDrawable::FastColorDrawable(
-    /* [in] */ Int32 color)
-{
-    mColor = 0xff000000 | color;
-}
-
-ECode CPhoneStatusBar::FastColorDrawable::Draw(
-    /* [in] */ ICanvas* canvas)
-{
-    canvas->DrawColor(mColor, PorterDuffMode_SRC);
-    return NOERROR;
-}
-
-ECode CPhoneStatusBar::FastColorDrawable::SetAlpha(
-    /* [in] */ Int32 alpha)
-{
-    return NOERROR;
-}
-
-ECode CPhoneStatusBar::FastColorDrawable::SetColorFilter(
-    /* [in] */ IColorFilter* cf)
-{
-    return NOERROR;
-}
-
-ECode CPhoneStatusBar::FastColorDrawable::GetOpacity(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = IPixelFormat::OPAQUE;
-    return NOERROR;
-}
-
-ECode CPhoneStatusBar::FastColorDrawable::SetBounds(
-    /* [in] */ Int32 left,
-    /* [in] */ Int32 top,
-    /* [in] */ Int32 right,
-    /* [in] */ Int32 bottom)
-{
-    return NOERROR;
-}
-
-ECode CPhoneStatusBar::FastColorDrawable::SetBounds(
-    /* [in] */ IRect* bounds)
-{
     return NOERROR;
 }
 
@@ -799,7 +703,9 @@ const Int32 CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_STOP_D
 CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::DozeServiceHostHandler(
     /* [in] */ DozeServiceHost* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -1138,7 +1044,7 @@ ECode CPhoneStatusBar::OnPreDrawListener::OnPreDraw(
         AutoPtr<IViewTreeObserver> vto;
         IView::Probe(mHost->mStatusBarView)->GetViewTreeObserver((IViewTreeObserver**)&vto);
         vto->RemoveOnPreDrawListener(this);
-        assert(0 && "TODO");
+        Logger::D("CPhoneStatusBar::OnPreDrawListener", "TODO: Need HardwareCanvas.");
         // HardwareCanvas.SetProperty("extraRasterBucket",
         //         Float.toString(StackScrollAlgorithm.DIMMED_SCALE));
         // HardwareCanvas.setProperty("extraRasterBucket", Float.toString(
@@ -1399,8 +1305,8 @@ CPhoneStatusBar::CPhoneStatusBar()
             : NULL;
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    mUserSetupObserver = new UserSetupObserver(this, handler);
-    mHeadsUpObserver = new HeadsUpObserver(this, mHandler);
+    CPhoneStatusBarUserSetupObserver::New(this, handler, (IContentObserver**)&mUserSetupObserver);
+    CPhoneStatusBarHeadsUpObserver::New(this, handler, (IContentObserver**)&mHeadsUpObserver);
     mAutohide = new Autohide(this);
     CLinearInterpolator::New((IInterpolator**)&mLinearInterpolator);
     CAccelerateDecelerateInterpolator::New((IInterpolator**)&mBackdropInterpolator);
@@ -1424,7 +1330,7 @@ CPhoneStatusBar::CPhoneStatusBar()
     CDecelerateInterpolator::New((ITimeInterpolator**)&mDecelerateInterpolator);
     mCheckBarModes = new CheckBarModesRunnable(this);
     mTickingDoneListener = new TickingDoneListener(this);
-    mBroadcastReceiver = new InnerReceiver(this);
+    CPhoneStatusBarReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
     mStartTracing = new StartTracing(this);
     mStopTracing = new StopTracing(this);
 }
@@ -1483,8 +1389,8 @@ ECode CPhoneStatusBar::Start()
     StartKeyguard();
 
     mDozeServiceHost = new DozeServiceHost(this);
-    PutComponent(EIID_IDozeHost, mDozeServiceHost->Probe(EIID_IInterface));
-    PutComponent(EIID_IPhoneStatusBar, TO_IINTERFACE(this));
+    PutComponent(String("EIID_IDozeHost"), mDozeServiceHost->Probe(EIID_IInterface));
+    PutComponent(String("EIID_IPhoneStatusBar"), TO_IINTERFACE(this));
 
     SetControllerUsers();
 
@@ -1538,7 +1444,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
 
         Int32 c = 0;
         res->GetColor(R::color::notification_panel_solid_background, &c);
-        AutoPtr<IDrawable> d = new FastColorDrawable(c);
+        AutoPtr<IDrawable> d;
+        CFastColorDrawable::New(c, (IDrawable**)&d);
         IView::Probe(mNotificationPanel)->SetBackground(d);
     }
     if (ENABLE_HEADS_UP) {
@@ -1711,7 +1618,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     SetAreThereNotifications();
 
     // Other icons
-    mLocationController = new LocationControllerImpl(mContext); // will post a notification
+    mLocationController = new LocationControllerImpl(); // will post a notification
+    mLocationController->constructor(mContext);
     mBatteryController = new BatteryController(mContext);
 
     AutoPtr<BatteryStateChangeCallback> bcc = new BatteryStateChangeCallback(this);
@@ -1724,7 +1632,7 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
         mRotationLockController = new RotationLockControllerImpl(mContext);
     }
     mUserInfoController = new UserInfoController(mContext);
-    mVolumeComponent = IVolumeComponent::Probe(GetComponent(EIID_IVolumeComponent/*.class*/));
+    mVolumeComponent = IVolumeComponent::Probe(GetComponent(String("EIID_IVolumeComponent")/*.class*/));
     mVolumeComponent->GetZenController((IZenModeController**)&mZenModeController);
     mCastController = new CastControllerImpl(mContext);
 
@@ -1791,31 +1699,34 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
 
     view = NULL;
     IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_user_switcher, (IView**)&view);
-    mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext, IViewStub::Probe(view),
-            mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
+    Logger::D(TAG, "TODO : ============== mKeyguardUserSwitcher.");
+    // mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext, IViewStub::Probe(view),
+    //         mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
 
     // Set up the quick settings tile panel
     view = NULL;
     IView::Probe(mStatusBarWindow)->FindViewById(R::id::quick_settings_panel, (IView**)&view);
     mQSPanel = IQSPanel::Probe(view);
     if (mQSPanel != NULL) {
-        AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
-                mBluetoothController, mLocationController, mRotationLockController,
-                mNetworkController, mZenModeController, mHotspotController,
-                mCastController, mFlashlightController,
-                mUserSwitcherController, mKeyguardMonitor,
-                mSecurityController);
-        mQSPanel->SetHost((IPhoneQSTileHost*)qsh->Probe(EIID_IPhoneQSTileHost));
+         Logger::D(TAG, "TODO :the codes will make an error-commented.");
+//         AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
+//                 mBluetoothController, mLocationController, mRotationLockController,
+//                 mNetworkController, mZenModeController, mHotspotController,
+//                 mCastController, mFlashlightController,
+//                 mUserSwitcherController, mKeyguardMonitor,
+//                 mSecurityController);
+//         mQSPanel->SetHost((IPhoneQSTileHost*)qsh->Probe(EIID_IPhoneQSTileHost));
 
-        AutoPtr<ICollection> c;
-        qsh->GetTiles((ICollection**)&c);
-        mQSPanel->SetTiles(c);
-        mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
-        mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
-        mHeader->SetQSPanel(mQSPanel);
+//         AutoPtr<ICollection> c;
+//         qsh->GetTiles((ICollection**)&c);
+//         mQSPanel->SetTiles(c);
 
-        AutoPtr<HostCallback> hc = new HostCallback(this, qsh);
-        qsh->SetCallback(hc);
+//         mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
+//         mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
+//         mHeader->SetQSPanel(mQSPanel);
+
+//         AutoPtr<HostCallback> hc = new HostCallback(this, qsh);
+//         qsh->SetCallback(hc);
     }
 
     // User info. Trigger first load.
@@ -1944,7 +1855,7 @@ void CPhoneStatusBar::SetZenMode(
 void CPhoneStatusBar::StartKeyguard()
 {
     AutoPtr<IKeyguardViewMediator> keyguardViewMediator =
-        IKeyguardViewMediator::Probe(GetComponent(EIID_IKeyguardViewMediator));
+        IKeyguardViewMediator::Probe(GetComponent(String("EIID_IKeyguardViewMediator")));
     keyguardViewMediator->RegisterStatusBar(this,
             IViewGroup::Probe(mStatusBarWindow), mStatusBarWindowManager, mScrimController,
             (IStatusBarKeyguardViewManager**)&mStatusBarKeyguardViewManager);
@@ -5102,12 +5013,16 @@ void CPhoneStatusBar::UpdateKeyguardState(
     if (mState == IStatusBarState::KEYGUARD) {
         mKeyguardIndicationController->SetVisible(TRUE);
         IPanelView::Probe(mNotificationPanel)->ResetViews();
-        mKeyguardUserSwitcher->SetKeyguard(TRUE, fromShadeLocked);
+        if (mKeyguardUserSwitcher != NULL) {
+            mKeyguardUserSwitcher->SetKeyguard(TRUE, fromShadeLocked);
+        }
     }
     else {
         mKeyguardIndicationController->SetVisible(FALSE);
-        mKeyguardUserSwitcher->SetKeyguard(FALSE,
-                goingToFullShade || mState == IStatusBarState::SHADE_LOCKED || fromShadeLocked);
+        if (mKeyguardUserSwitcher != NULL) {
+            mKeyguardUserSwitcher->SetKeyguard(FALSE,
+                    goingToFullShade || mState == IStatusBarState::SHADE_LOCKED || fromShadeLocked);
+        }
     }
     if (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED) {
         mScrimController->SetKeyguardShowing(TRUE);
@@ -5617,6 +5532,11 @@ void CPhoneStatusBar::ToggleRecents()
     mSystemUiVisibility ^= IView::RECENT_APPS_VISIBLE;
     NotifyUiVisibilityChanged(mSystemUiVisibility);
     BaseStatusBar::ToggleRecents();
+}
+
+String CPhoneStatusBar::GetClass()
+{
+    return String("Elastos.Droid.SystemUI.StatusBar.Phone.CPhoneStatusBar");
 }
 
 ECode CPhoneStatusBar::OnVisibilityChanged(

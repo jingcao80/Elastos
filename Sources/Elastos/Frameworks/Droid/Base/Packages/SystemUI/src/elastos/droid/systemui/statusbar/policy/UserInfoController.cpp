@@ -1,5 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/policy/UserInfoController.h"
+#include "elastos/droid/systemui/statusbar/policy/CProfileReceiverBroadcastReceiver.h"
+#include "elastos/droid/systemui/statusbar/policy/CUserInfoControllerReceiver.h"
 #include "elastos/droid/systemui/BitmapHelper.h"
 #include "../../R.h"
 #include "Elastos.CoreLibrary.IO.h"
@@ -54,65 +56,6 @@ namespace Policy {
 
 const String UserInfoController::TAG("UserInfoController");
 
-UserInfoController::Receiver::Receiver(
-    /* [in] */ UserInfoController* host)
-    : mHost(host)
-{}
-
-ECode UserInfoController::Receiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
-        mHost->ReloadUserInfo();
-    }
-    else if (IIntent::ACTION_CONFIGURATION_CHANGED.Equals(action)) {
-        if (mHost->mUseDefaultAvatar) {
-            mHost->ReloadUserInfo();
-        }
-    }
-    return NOERROR;
-}
-
-UserInfoController::ProfileReceiver::ProfileReceiver(
-    /* [in] */ UserInfoController* host)
-    : mHost(host)
-{}
-
-ECode UserInfoController::ProfileReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (IContactsContractIntents::ACTION_PROFILE_CHANGED.Equals(action) ||
-            IIntent::ACTION_USER_INFO_CHANGED.Equals(action)) {
-        ECode ec = NOERROR;
-        do {
-            Int32 currentUser = 0;
-            AutoPtr<IUserInfo> info;
-            ec = ActivityManagerNative::GetDefault()->GetCurrentUser((IUserInfo**)&info);
-            if (FAILED(ec)) break;
-
-            info->GetId(&currentUser);
-            Int32 changedUser = 0, id = 0;
-            GetSendingUserId(&id);
-            ec = intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, id, &changedUser);
-            if (FAILED(ec)) break;
-            if (changedUser == currentUser) {
-                mHost->ReloadUserInfo();
-            }
-        } while (/*RemoteException e*/0);
-
-        if (FAILED(ec)) {
-            Logger::E(TAG, "Couldn't get current user id for profile change");
-        }
-    }
-    return NOERROR;
-}
-
 UserInfoController::UserInfoTask::UserInfoTask(
     /* [in] */ UserInfoController* host,
     /* [in] */ Int32 userId,
@@ -162,7 +105,7 @@ ECode UserInfoController::UserInfoTask::DoInBackground(
     AutoPtr<IList> users;
     um->GetUsers((IList**)&users);
     Int32 size = 0;
-    if ((users->GetSize(&size), size) <= 1) {
+    if (users != NULL && ((users->GetSize(&size), size) <= 1)) {
         // Try and read the display name from the local profile
         AutoPtr<ICursor> cursor;
         AutoPtr<IContentResolver> cr;
@@ -219,8 +162,8 @@ UserInfoController::UserInfoController(
     /* [in] */ IContext* context)
     : mUseDefaultAvatar(FALSE)
 {
-    mReceiver = new Receiver(this);
-    mProfileReceiver = new ProfileReceiver(this);
+    CUserInfoControllerReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
+    CProfileReceiverBroadcastReceiver::New(this, (IBroadcastReceiver**)&mProfileReceiver);
     CArrayList::New((IArrayList**)&mCallbacks);
     mContext = context;
     AutoPtr<IIntentFilter> filter;

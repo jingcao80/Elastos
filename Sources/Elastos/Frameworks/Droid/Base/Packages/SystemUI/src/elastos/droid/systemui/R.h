@@ -1908,37 +1908,37 @@ containing a value of this type.
         public: static const int keyguard_clock_y_fraction_min = 0x7f0d0001;
     };
     public: class id {
-        public: static const int activity_description = 0x7f0e00c4;
-        public: static const int airplane = 0x7f0e00cf;
+        public: static const int activity_description = 0x7f0e00c3;
+        public: static const int airplane = 0x7f0e00ce;
         public: static const int alarm_status = 0x7f0e007f;
         public: static const int alpha_animator_end_value_tag = 0x7f0e0009;
         public: static const int alpha_animator_start_value_tag = 0x7f0e000f;
         public: static const int alpha_animator_tag = 0x7f0e0003;
-        public: static const int am_pm_view = 0x7f0e00d1;
-        public: static const int app_description = 0x7f0e00ff;
-        public: static const int app_icon = 0x7f0e00fb;
-        public: static const int app_label = 0x7f0e00fa;
-        public: static const int app_thumbnail = 0x7f0e00fc;
-        public: static const int app_thumbnail_image = 0x7f0e00fd;
+        public: static const int am_pm_view = 0x7f0e00d0;
+        public: static const int app_description = 0x7f0e00fe;
+        public: static const int app_icon = 0x7f0e00fa;
+        public: static const int app_label = 0x7f0e00f9;
+        public: static const int app_thumbnail = 0x7f0e00fb;
+        public: static const int app_thumbnail_image = 0x7f0e00fc;
         public: static const int app_widget_container = 0x7f0e0051;
-        public: static const int application_icon = 0x7f0e00c3;
-        public: static const int artist_album = 0x7f0e008f;
-        public: static const int back = 0x7f0e009f;
-        public: static const int backdrop = 0x7f0e010e;
-        public: static const int backdrop_back = 0x7f0e010f;
-        public: static const int backdrop_front = 0x7f0e0110;
-        public: static const int backgroundDimmed = 0x7f0e00f0;
-        public: static const int backgroundNormal = 0x7f0e00ef;
-        public: static const int badge = 0x7f0e008b;
-        public: static const int battery = 0x7f0e0118;
+        public: static const int application_icon = 0x7f0e00c2;
+        public: static const int artist_album = 0x7f0e008e;
+        public: static const int back = 0x7f0e009e;
+        public: static const int backdrop = 0x7f0e010d;
+        public: static const int backdrop_back = 0x7f0e010e;
+        public: static const int backdrop_front = 0x7f0e010f;
+        public: static const int backgroundDimmed = 0x7f0e00ef;
+        public: static const int backgroundNormal = 0x7f0e00ee;
+        public: static const int badge = 0x7f0e008a;
+        public: static const int battery = 0x7f0e0117;
         public: static const int battery_level = 0x7f0e0085;
         public: static const int bottom = 0x7f0e0018;
-        public: static const int brightness_icon = 0x7f0e00b4;
-        public: static const int brightness_mirror = 0x7f0e0112;
-        public: static const int brightness_slider = 0x7f0e00b5;
-        public: static const int btn_next = 0x7f0e0096;
-        public: static const int btn_play = 0x7f0e0095;
-        public: static const int btn_prev = 0x7f0e0094;
+        public: static const int brightness_icon = 0x7f0e00b3;
+        public: static const int brightness_mirror = 0x7f0e0111;
+        public: static const int brightness_slider = 0x7f0e00b4;
+        public: static const int btn_next = 0x7f0e0095;
+        public: static const int btn_play = 0x7f0e0094;
+        public: static const int btn_prev = 0x7f0e0093;
         public: static const int camera_button = 0x7f0e0042;
         public: static const int carrier_label = 0x7f0e002e;
         public: static const int carrier_text = 0x7f0e0045;
@@ -1951,52 +1951,52 @@ containing a value of this type.
         public: static const int clock = 0x7f0e0076;
         public: static const int clock_view = 0x7f0e0077;
         public: static const int content_holder = 0x7f0e0038;
-        public: static const int date_collapsed = 0x7f0e00e8;
-        public: static const int date_expanded = 0x7f0e00e9;
-        public: static const int date_group = 0x7f0e00e7;
+        public: static const int date_collapsed = 0x7f0e00e7;
+        public: static const int date_expanded = 0x7f0e00e8;
+        public: static const int date_group = 0x7f0e00e6;
         public: static const int date_view = 0x7f0e007e;
-        public: static const int deadzone = 0x7f0e00a5;
-        public: static const int debug_info = 0x7f0e00aa;
-        public: static const int debug_overlay_stub = 0x7f0e00bb;
-        public: static const int debug_seek_bar_1 = 0x7f0e00bd;
-        public: static const int debug_seek_bar_2 = 0x7f0e00be;
+        public: static const int deadzone = 0x7f0e00a4;
+        public: static const int debug_info = 0x7f0e00a9;
+        public: static const int debug_overlay_stub = 0x7f0e00ba;
+        public: static const int debug_seek_bar_1 = 0x7f0e00bc;
+        public: static const int debug_seek_bar_2 = 0x7f0e00bd;
         public: static const int delete_button = 0x7f0e0064;
         public: static const int digit_text = 0x7f0e005a;
-        public: static const int dismiss_task = 0x7f0e00c5;
-        public: static const int dismiss_text = 0x7f0e00ee;
+        public: static const int dismiss_task = 0x7f0e00c4;
+        public: static const int dismiss_text = 0x7f0e00ed;
         public: static const int divider = 0x7f0e0065;
         public: static const int doze_saved_filter_tag = 0x7f0e0012;
         public: static const int emergency_call_button = 0x7f0e0046;
-        public: static const int emergency_calls_only = 0x7f0e00de;
-        public: static const int empty_time_view = 0x7f0e00d2;
-        public: static const int empty_view_stub = 0x7f0e00ba;
+        public: static const int emergency_calls_only = 0x7f0e00dd;
+        public: static const int empty_time_view = 0x7f0e00d1;
+        public: static const int empty_view_stub = 0x7f0e00b9;
         public: static const int end = 0x7f0e001e;
         public: static const int expandChallengeHandle = 0x7f0e0027;
-        public: static const int expanded = 0x7f0e00f4;
-        public: static const int expandedPublic = 0x7f0e00f5;
+        public: static const int expanded = 0x7f0e00f3;
+        public: static const int expandedPublic = 0x7f0e00f4;
         public: static const int face_unlock_area_view = 0x7f0e0049;
         public: static const int face_unlock_cancel_button = 0x7f0e004b;
         public: static const int fill = 0x7f0e001f;
         public: static const int fill_horizontal = 0x7f0e0020;
         public: static const int fill_vertical = 0x7f0e0021;
-        public: static const int footer_icon = 0x7f0e00b7;
-        public: static const int footer_text = 0x7f0e00b6;
+        public: static const int footer_icon = 0x7f0e00b6;
+        public: static const int footer_text = 0x7f0e00b5;
         public: static const int global_screenshot = 0x7f0e0036;
         public: static const int global_screenshot_background = 0x7f0e0035;
         public: static const int global_screenshot_flash = 0x7f0e0037;
         public: static const int glow_pad_view = 0x7f0e004d;
         public: static const int gone = 0x7f0e0013;
-        public: static const int header = 0x7f0e00e4;
-        public: static const int header_debug_info = 0x7f0e00ec;
-        public: static const int header_emergency_calls_only = 0x7f0e00e6;
+        public: static const int header = 0x7f0e00e3;
+        public: static const int header_debug_info = 0x7f0e00eb;
+        public: static const int header_emergency_calls_only = 0x7f0e00e5;
         public: static const int height_animator_end_value_tag = 0x7f0e000b;
         public: static const int height_animator_start_value_tag = 0x7f0e0011;
         public: static const int height_animator_tag = 0x7f0e0005;
-        public: static const int home = 0x7f0e00a0;
+        public: static const int home = 0x7f0e009f;
         public: static const int horizontal = 0x7f0e0016;
-        public: static const int icon = 0x7f0e00ae;
-        public: static const int ime_switcher = 0x7f0e00a3;
-        public: static const int info_container = 0x7f0e008c;
+        public: static const int icon = 0x7f0e00ad;
+        public: static const int ime_switcher = 0x7f0e00a2;
+        public: static const int info_container = 0x7f0e008b;
         public: static const int key0 = 0x7f0e0073;
         public: static const int key1 = 0x7f0e0067;
         public: static const int key2 = 0x7f0e0068;
@@ -2013,8 +2013,7 @@ containing a value of this type.
         public: static const int keyguard_add_widget_view = 0x7f0e003e;
         public: static const int keyguard_bottom_area = 0x7f0e003f;
         public: static const int keyguard_bouncer_frame = 0x7f0e0048;
-        public: static const int keyguard_carrier_text = 0x7f0e0086;
-        public: static const int keyguard_clock_container = 0x7f0e0088;
+        public: static const int keyguard_clock_container = 0x7f0e0087;
         public: static const int keyguard_face_unlock_view = 0x7f0e0047;
         public: static const int keyguard_header = 0x7f0e0080;
         public: static const int keyguard_host_view = 0x7f0e004e;
@@ -2029,84 +2028,84 @@ containing a value of this type.
         public: static const int keyguard_selector_view_frame = 0x7f0e0079;
         public: static const int keyguard_sim_pin_view = 0x7f0e007a;
         public: static const int keyguard_sim_puk_view = 0x7f0e007c;
-        public: static const int keyguard_status_view = 0x7f0e0087;
-        public: static const int keyguard_transport_control = 0x7f0e008a;
+        public: static const int keyguard_status_view = 0x7f0e0086;
+        public: static const int keyguard_transport_control = 0x7f0e0089;
         public: static const int keyguard_user_avatar = 0x7f0e0056;
         public: static const int keyguard_user_name = 0x7f0e0057;
         public: static const int keyguard_user_selector = 0x7f0e0058;
-        public: static const int keyguard_user_switcher = 0x7f0e0097;
+        public: static const int keyguard_user_switcher = 0x7f0e0096;
         public: static const int keyguard_users_grid = 0x7f0e0059;
         public: static const int keyguard_widget_pager_delete_target = 0x7f0e0050;
         public: static const int klondike_text = 0x7f0e005b;
-        public: static const int label = 0x7f0e010d;
+        public: static const int label = 0x7f0e010c;
         public: static const int left = 0x7f0e0022;
-        public: static const int lights_out = 0x7f0e00a4;
+        public: static const int lights_out = 0x7f0e00a3;
         public: static const int lockPatternView = 0x7f0e0060;
         public: static const int lock_icon = 0x7f0e0044;
-        public: static const int lock_to_app_fab = 0x7f0e00c1;
+        public: static const int lock_to_app_fab = 0x7f0e00c0;
         public: static const int login = 0x7f0e003a;
-        public: static const int menu = 0x7f0e00a2;
-        public: static const int metadata_container = 0x7f0e008d;
-        public: static const int mobile_combo = 0x7f0e00cb;
-        public: static const int mobile_signal = 0x7f0e00cc;
-        public: static const int mobile_type = 0x7f0e00cd;
-        public: static const int moreIcon = 0x7f0e00d8;
-        public: static const int more_icon_overflow = 0x7f0e00f2;
-        public: static const int more_text = 0x7f0e00f1;
+        public: static const int menu = 0x7f0e00a1;
+        public: static const int metadata_container = 0x7f0e008c;
+        public: static const int mobile_combo = 0x7f0e00ca;
+        public: static const int mobile_signal = 0x7f0e00cb;
+        public: static const int mobile_type = 0x7f0e00cc;
+        public: static const int moreIcon = 0x7f0e00d7;
+        public: static const int more_icon_overflow = 0x7f0e00f1;
+        public: static const int more_text = 0x7f0e00f0;
         public: static const int multi_pane_challenge = 0x7f0e0054;
         public: static const int multi_user_avatar = 0x7f0e0082;
         public: static const int multi_user_switch = 0x7f0e0081;
-        public: static const int nav_bar_scrim = 0x7f0e00bc;
-        public: static const int nav_buttons = 0x7f0e009e;
-        public: static const int no_notifications = 0x7f0e00ed;
+        public: static const int nav_bar_scrim = 0x7f0e00bb;
+        public: static const int nav_buttons = 0x7f0e009d;
+        public: static const int no_notifications = 0x7f0e00ec;
         public: static const int none = 0x7f0e0028;
         public: static const int normal = 0x7f0e0014;
-        public: static const int notificationIcons = 0x7f0e00d9;
-        public: static const int notification_container_parent = 0x7f0e00df;
-        public: static const int notification_guts = 0x7f0e00a7;
-        public: static const int notification_guts_stub = 0x7f0e00f7;
-        public: static const int notification_icon_area = 0x7f0e00d6;
-        public: static const int notification_icon_area_inner = 0x7f0e00d7;
-        public: static const int notification_inspect_app_provided_settings = 0x7f0e00ab;
-        public: static const int notification_inspect_item = 0x7f0e00ac;
-        public: static const int notification_lights_out = 0x7f0e00d4;
-        public: static const int notification_panel = 0x7f0e00dd;
-        public: static const int notification_stack_scroller = 0x7f0e00e2;
+        public: static const int notificationIcons = 0x7f0e00d8;
+        public: static const int notification_container_parent = 0x7f0e00de;
+        public: static const int notification_guts = 0x7f0e00a6;
+        public: static const int notification_guts_stub = 0x7f0e00f6;
+        public: static const int notification_icon_area = 0x7f0e00d5;
+        public: static const int notification_icon_area_inner = 0x7f0e00d6;
+        public: static const int notification_inspect_app_provided_settings = 0x7f0e00aa;
+        public: static const int notification_inspect_item = 0x7f0e00ab;
+        public: static const int notification_lights_out = 0x7f0e00d3;
+        public: static const int notification_panel = 0x7f0e00dc;
+        public: static const int notification_stack_scroller = 0x7f0e00e1;
         public: static const int ok = 0x7f0e003c;
-        public: static const int overflow_icons_view = 0x7f0e00f3;
-        public: static const int owner_info = 0x7f0e0089;
+        public: static const int overflow_icons_view = 0x7f0e00f2;
+        public: static const int owner_info = 0x7f0e0088;
         public: static const int pageDeleteDropTarget = 0x7f0e0029;
-        public: static const int panel_holder = 0x7f0e0113;
+        public: static const int panel_holder = 0x7f0e0112;
         public: static const int password = 0x7f0e003b;
         public: static const int passwordEntry = 0x7f0e005d;
         public: static const int phone_button = 0x7f0e0043;
         public: static const int pinEntry = 0x7f0e0063;
-        public: static const int pkgname = 0x7f0e00a8;
+        public: static const int pkgname = 0x7f0e00a7;
         public: static const int presentation = 0x7f0e0075;
         public: static const int preview_container = 0x7f0e0041;
-        public: static const int profile_badge_line3 = 0x7f0e00b0;
+        public: static const int profile_badge_line3 = 0x7f0e00af;
         public: static const int pukEntry = 0x7f0e007d;
-        public: static const int qs_detail_header = 0x7f0e00ea;
-        public: static const int qs_detail_header_progress = 0x7f0e00eb;
-        public: static const int qs_navbar_scrim = 0x7f0e00e3;
-        public: static const int quick_settings_container = 0x7f0e00b2;
-        public: static const int quick_settings_panel = 0x7f0e00b3;
-        public: static const int recent_apps = 0x7f0e00a1;
-        public: static const int recent_inspect_item = 0x7f0e0126;
-        public: static const int recent_item = 0x7f0e00f9;
-        public: static const int recent_remove_item = 0x7f0e0125;
-        public: static const int recents_bg_protect = 0x7f0e0101;
-        public: static const int recents_callout_line = 0x7f0e00fe;
-        public: static const int recents_container = 0x7f0e0102;
-        public: static const int recents_linear_layout = 0x7f0e0103;
-        public: static const int recents_no_apps = 0x7f0e0104;
-        public: static const int recents_root = 0x7f0e0100;
-        public: static const int recents_view = 0x7f0e00b9;
-        public: static const int remember = 0x7f0e00c6;
-        public: static const int reserve_notification_space = 0x7f0e00e1;
+        public: static const int qs_detail_header = 0x7f0e00e9;
+        public: static const int qs_detail_header_progress = 0x7f0e00ea;
+        public: static const int qs_navbar_scrim = 0x7f0e00e2;
+        public: static const int quick_settings_container = 0x7f0e00b1;
+        public: static const int quick_settings_panel = 0x7f0e00b2;
+        public: static const int recent_apps = 0x7f0e00a0;
+        public: static const int recent_inspect_item = 0x7f0e0125;
+        public: static const int recent_item = 0x7f0e00f8;
+        public: static const int recent_remove_item = 0x7f0e0124;
+        public: static const int recents_bg_protect = 0x7f0e0100;
+        public: static const int recents_callout_line = 0x7f0e00fd;
+        public: static const int recents_container = 0x7f0e0101;
+        public: static const int recents_linear_layout = 0x7f0e0102;
+        public: static const int recents_no_apps = 0x7f0e0103;
+        public: static const int recents_root = 0x7f0e00ff;
+        public: static const int recents_view = 0x7f0e00b8;
+        public: static const int remember = 0x7f0e00c5;
+        public: static const int reserve_notification_space = 0x7f0e00e0;
         public: static const int right = 0x7f0e0023;
-        public: static const int rot0 = 0x7f0e009d;
-        public: static const int rot90 = 0x7f0e00a6;
+        public: static const int rot0 = 0x7f0e009c;
+        public: static const int rot90 = 0x7f0e00a5;
         public: static const int row0 = 0x7f0e0062;
         public: static const int row1 = 0x7f0e0066;
         public: static const int row2 = 0x7f0e006a;
@@ -2115,59 +2114,59 @@ containing a value of this type.
         public: static const int scale_animator_end_value_tag = 0x7f0e0008;
         public: static const int scale_animator_start_value_tag = 0x7f0e000e;
         public: static const int scale_animator_tag = 0x7f0e0002;
-        public: static const int score = 0x7f0e009b;
+        public: static const int score = 0x7f0e009a;
         public: static const int scrim = 0x7f0e002a;
-        public: static const int scrim_behind = 0x7f0e0111;
-        public: static const int scrim_in_front = 0x7f0e0114;
-        public: static const int scroll_view = 0x7f0e00e0;
-        public: static const int search_logo = 0x7f0e0108;
-        public: static const int search_panel_circle = 0x7f0e0107;
-        public: static const int search_panel_container = 0x7f0e0105;
-        public: static const int search_panel_scrim = 0x7f0e0106;
-        public: static const int seekbar = 0x7f0e011d;
-        public: static const int settings_button = 0x7f0e00e5;
-        public: static const int signal_cluster = 0x7f0e0117;
+        public: static const int scrim_behind = 0x7f0e0110;
+        public: static const int scrim_in_front = 0x7f0e0113;
+        public: static const int scroll_view = 0x7f0e00df;
+        public: static const int search_logo = 0x7f0e0107;
+        public: static const int search_panel_circle = 0x7f0e0106;
+        public: static const int search_panel_container = 0x7f0e0104;
+        public: static const int search_panel_scrim = 0x7f0e0105;
+        public: static const int seekbar = 0x7f0e011c;
+        public: static const int settings_button = 0x7f0e00e4;
+        public: static const int signal_cluster = 0x7f0e0116;
         public: static const int simPinEntry = 0x7f0e007b;
-        public: static const int slider = 0x7f0e010c;
-        public: static const int slider_panel = 0x7f0e011a;
+        public: static const int slider = 0x7f0e010b;
+        public: static const int slider_panel = 0x7f0e0119;
         public: static const int sliding_layout = 0x7f0e004f;
         public: static const int small = 0x7f0e0015;
-        public: static const int speedbump_line = 0x7f0e00f8;
+        public: static const int speedbump_line = 0x7f0e00f7;
         public: static const int spotlightMask = 0x7f0e004a;
         public: static const int start = 0x7f0e0024;
-        public: static const int statusIcons = 0x7f0e0116;
-        public: static const int status_bar = 0x7f0e00d3;
-        public: static const int status_bar_contents = 0x7f0e00d5;
-        public: static const int status_bar_latest_event_content = 0x7f0e00ad;
-        public: static const int status_bar_scrim = 0x7f0e00b8;
-        public: static const int stream_icon = 0x7f0e011b;
-        public: static const int suppressor = 0x7f0e011c;
+        public: static const int statusIcons = 0x7f0e0115;
+        public: static const int status_bar = 0x7f0e00d2;
+        public: static const int status_bar_contents = 0x7f0e00d4;
+        public: static const int status_bar_latest_event_content = 0x7f0e00ac;
+        public: static const int status_bar_scrim = 0x7f0e00b7;
+        public: static const int stream_icon = 0x7f0e011a;
+        public: static const int suppressor = 0x7f0e011b;
         public: static const int switch_ime_button = 0x7f0e005e;
-        public: static const int system_icon_area = 0x7f0e00da;
-        public: static const int system_icons = 0x7f0e0115;
+        public: static const int system_icon_area = 0x7f0e00d9;
+        public: static const int system_icons = 0x7f0e0114;
         public: static const int system_icons_container = 0x7f0e0084;
         public: static const int system_icons_super_container = 0x7f0e0083;
-        public: static const int task_view_bar = 0x7f0e00c2;
-        public: static const int task_view_content = 0x7f0e00bf;
-        public: static const int task_view_thumbnail = 0x7f0e00c0;
-        public: static const int text = 0x7f0e00b1;
-        public: static const int ticker = 0x7f0e00dc;
-        public: static const int tickerIcon = 0x7f0e0109;
-        public: static const int tickerText = 0x7f0e010a;
-        public: static const int ticker_stub = 0x7f0e00db;
-        public: static const int time = 0x7f0e00af;
-        public: static const int time_view = 0x7f0e00d0;
-        public: static const int timestamp = 0x7f0e00a9;
-        public: static const int title = 0x7f0e008e;
-        public: static const int toggle = 0x7f0e010b;
+        public: static const int task_view_bar = 0x7f0e00c1;
+        public: static const int task_view_content = 0x7f0e00be;
+        public: static const int task_view_thumbnail = 0x7f0e00bf;
+        public: static const int text = 0x7f0e00b0;
+        public: static const int ticker = 0x7f0e00db;
+        public: static const int tickerIcon = 0x7f0e0108;
+        public: static const int tickerText = 0x7f0e0109;
+        public: static const int ticker_stub = 0x7f0e00da;
+        public: static const int time = 0x7f0e00ae;
+        public: static const int time_view = 0x7f0e00cf;
+        public: static const int timestamp = 0x7f0e00a8;
+        public: static const int title = 0x7f0e008d;
+        public: static const int toggle = 0x7f0e010a;
         public: static const int top = 0x7f0e0025;
         public: static const int top_inset_animator_end_value_tag = 0x7f0e000a;
         public: static const int top_inset_animator_start_value_tag = 0x7f0e0010;
         public: static const int top_inset_animator_tag = 0x7f0e0004;
-        public: static const int transient_seek = 0x7f0e0090;
-        public: static const int transient_seek_bar = 0x7f0e0091;
-        public: static const int transient_seek_time_elapsed = 0x7f0e0092;
-        public: static const int transient_seek_time_remaining = 0x7f0e0093;
+        public: static const int transient_seek = 0x7f0e008f;
+        public: static const int transient_seek_bar = 0x7f0e0090;
+        public: static const int transient_seek_time_elapsed = 0x7f0e0091;
+        public: static const int transient_seek_time_remaining = 0x7f0e0092;
         public: static const int translation_y_animator_end_value_tag = 0x7f0e0006;
         public: static const int translation_y_animator_start_value_tag = 0x7f0e000c;
         public: static const int translation_y_animator_tag = 0x7f0e0000;
@@ -2181,28 +2180,28 @@ containing a value of this type.
         public: static const int usage_period_text = 0x7f0e0033;
         public: static const int usage_text = 0x7f0e002f;
         public: static const int userSwitcher = 0x7f0e002b;
-        public: static const int user_name = 0x7f0e0098;
-        public: static const int user_picture = 0x7f0e0099;
+        public: static const int user_name = 0x7f0e0097;
+        public: static const int user_picture = 0x7f0e0098;
         public: static const int vertical = 0x7f0e0017;
-        public: static const int veto = 0x7f0e00f6;
+        public: static const int veto = 0x7f0e00f5;
         public: static const int view_flipper = 0x7f0e0053;
-        public: static const int visible_panel = 0x7f0e0119;
-        public: static const int vpn = 0x7f0e00c7;
-        public: static const int welcome = 0x7f0e009c;
+        public: static const int visible_panel = 0x7f0e0118;
+        public: static const int vpn = 0x7f0e00c6;
+        public: static const int welcome = 0x7f0e009b;
         public: static const int widget = 0x7f0e002c;
         public: static const int widgets = 0x7f0e002d;
-        public: static const int wifi_airplane_spacer = 0x7f0e00ce;
-        public: static const int wifi_combo = 0x7f0e00c8;
-        public: static const int wifi_signal = 0x7f0e00c9;
-        public: static const int wifi_signal_spacer = 0x7f0e00ca;
-        public: static const int world = 0x7f0e009a;
-        public: static const int zen_buttons = 0x7f0e011f;
-        public: static const int zen_conditions = 0x7f0e0124;
-        public: static const int zen_mode_panel = 0x7f0e011e;
-        public: static const int zen_more_settings = 0x7f0e0123;
-        public: static const int zen_subhead = 0x7f0e0120;
-        public: static const int zen_subhead_collapsed = 0x7f0e0121;
-        public: static const int zen_subhead_expanded = 0x7f0e0122;
+        public: static const int wifi_airplane_spacer = 0x7f0e00cd;
+        public: static const int wifi_combo = 0x7f0e00c7;
+        public: static const int wifi_signal = 0x7f0e00c8;
+        public: static const int wifi_signal_spacer = 0x7f0e00c9;
+        public: static const int world = 0x7f0e0099;
+        public: static const int zen_buttons = 0x7f0e011e;
+        public: static const int zen_conditions = 0x7f0e0123;
+        public: static const int zen_mode_panel = 0x7f0e011d;
+        public: static const int zen_more_settings = 0x7f0e0122;
+        public: static const int zen_subhead = 0x7f0e011f;
+        public: static const int zen_subhead_collapsed = 0x7f0e0120;
+        public: static const int zen_subhead_expanded = 0x7f0e0121;
     };
     public: class integer {
         public: static const int blinds_pop_duration_ms = 0x7f090011;
@@ -4093,13 +4092,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #BatteryMeterView_frameColor com.android.systemui:frameColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #BatteryMeterView_frameColor Elastos.Droid.SystemUI:frameColor}</code></td><td></td></tr>
            </table>
            @see #BatteryMeterView_frameColor
          */
         public: static const int BatteryMeterView[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#frameColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#frameColor}
           attribute's value can be found in the {@link #BatteryMeterView} array.
 
 
@@ -4119,13 +4118,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #CarrierText_allCaps com.android.systemui:allCaps}</code></td><td></td></tr>
+           <tr><td><code>{@link #CarrierText_allCaps Elastos.Droid.SystemUI:allCaps}</code></td><td></td></tr>
            </table>
            @see #CarrierText_allCaps
          */
         public: static const int CarrierText[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#allCaps}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#allCaps}
           attribute's value can be found in the {@link #CarrierText} array.
 
 
@@ -4144,13 +4143,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Clock_amPmStyle com.android.systemui:amPmStyle}</code></td><td></td></tr>
+           <tr><td><code>{@link #Clock_amPmStyle Elastos.Droid.SystemUI:amPmStyle}</code></td><td></td></tr>
            </table>
            @see #Clock_amPmStyle
          */
         public: static const int Clock[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#amPmStyle}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#amPmStyle}
           attribute's value can be found in the {@link #Clock} array.
 
 
@@ -4173,13 +4172,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #DateView_datePattern com.android.systemui:datePattern}</code></td><td></td></tr>
+           <tr><td><code>{@link #DateView_datePattern Elastos.Droid.SystemUI:datePattern}</code></td><td></td></tr>
            </table>
            @see #DateView_datePattern
          */
         public: static const int DateView[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#datePattern}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#datePattern}
           attribute's value can be found in the {@link #DateView} array.
 
 
@@ -4198,11 +4197,11 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #DeadZone_decayTime com.android.systemui:decayTime}</code></td><td></td></tr>
-           <tr><td><code>{@link #DeadZone_holdTime com.android.systemui:holdTime}</code></td><td></td></tr>
-           <tr><td><code>{@link #DeadZone_maxSize com.android.systemui:maxSize}</code></td><td></td></tr>
-           <tr><td><code>{@link #DeadZone_minSize com.android.systemui:minSize}</code></td><td></td></tr>
-           <tr><td><code>{@link #DeadZone_orientation com.android.systemui:orientation}</code></td><td></td></tr>
+           <tr><td><code>{@link #DeadZone_decayTime Elastos.Droid.SystemUI:decayTime}</code></td><td></td></tr>
+           <tr><td><code>{@link #DeadZone_holdTime Elastos.Droid.SystemUI:holdTime}</code></td><td></td></tr>
+           <tr><td><code>{@link #DeadZone_maxSize Elastos.Droid.SystemUI:maxSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #DeadZone_minSize Elastos.Droid.SystemUI:minSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #DeadZone_orientation Elastos.Droid.SystemUI:orientation}</code></td><td></td></tr>
            </table>
            @see #DeadZone_decayTime
            @see #DeadZone_holdTime
@@ -4212,7 +4211,7 @@ containing a value of this type.
          */
         public: static const int DeadZone[5];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#decayTime}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#decayTime}
           attribute's value can be found in the {@link #DeadZone} array.
 
 
@@ -4226,7 +4225,7 @@ containing a value of this type.
         */
         public: static const int DeadZone_decayTime = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#holdTime}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#holdTime}
           attribute's value can be found in the {@link #DeadZone} array.
 
 
@@ -4240,7 +4239,7 @@ containing a value of this type.
         */
         public: static const int DeadZone_holdTime = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#maxSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#maxSize}
           attribute's value can be found in the {@link #DeadZone} array.
 
 
@@ -4256,7 +4255,7 @@ containing a value of this type.
         */
         public: static const int DeadZone_maxSize = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#minSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#minSize}
           attribute's value can be found in the {@link #DeadZone} array.
 
 
@@ -4272,7 +4271,7 @@ containing a value of this type.
         */
         public: static const int DeadZone_minSize = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#orientation}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#orientation}
           attribute's value can be found in the {@link #DeadZone} array.
 
 
@@ -4294,8 +4293,8 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #KeyButtonView_keyCode com.android.systemui:keyCode}</code></td><td> key code to send when pressed; if absent or 0, no key is sent </td></tr>
-           <tr><td><code>{@link #KeyButtonView_keyRepeat com.android.systemui:keyRepeat}</code></td><td> does this button generate longpress / repeat events? </td></tr>
+           <tr><td><code>{@link #KeyButtonView_keyCode Elastos.Droid.SystemUI:keyCode}</code></td><td> key code to send when pressed; if absent or 0, no key is sent </td></tr>
+           <tr><td><code>{@link #KeyButtonView_keyRepeat Elastos.Droid.SystemUI:keyRepeat}</code></td><td> does this button generate longpress / repeat events? </td></tr>
            </table>
            @see #KeyButtonView_keyCode
            @see #KeyButtonView_keyRepeat
@@ -4339,10 +4338,10 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #KeyguardGlowStripView_dotSize com.android.systemui:dotSize}</code></td><td></td></tr>
-           <tr><td><code>{@link #KeyguardGlowStripView_glowDot com.android.systemui:glowDot}</code></td><td></td></tr>
-           <tr><td><code>{@link #KeyguardGlowStripView_leftToRight com.android.systemui:leftToRight}</code></td><td></td></tr>
-           <tr><td><code>{@link #KeyguardGlowStripView_numDots com.android.systemui:numDots}</code></td><td></td></tr>
+           <tr><td><code>{@link #KeyguardGlowStripView_dotSize Elastos.Droid.SystemUI:dotSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #KeyguardGlowStripView_glowDot Elastos.Droid.SystemUI:glowDot}</code></td><td></td></tr>
+           <tr><td><code>{@link #KeyguardGlowStripView_leftToRight Elastos.Droid.SystemUI:leftToRight}</code></td><td></td></tr>
+           <tr><td><code>{@link #KeyguardGlowStripView_numDots Elastos.Droid.SystemUI:numDots}</code></td><td></td></tr>
            </table>
            @see #KeyguardGlowStripView_dotSize
            @see #KeyguardGlowStripView_glowDot
@@ -4351,7 +4350,7 @@ containing a value of this type.
          */
         public: static const int KeyguardGlowStripView[4];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#dotSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#dotSize}
           attribute's value can be found in the {@link #KeyguardGlowStripView} array.
 
 
@@ -4367,7 +4366,7 @@ containing a value of this type.
         */
         public: static const int KeyguardGlowStripView_dotSize = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#glowDot}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#glowDot}
           attribute's value can be found in the {@link #KeyguardGlowStripView} array.
 
 
@@ -4377,7 +4376,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int KeyguardGlowStripView_glowDot = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#leftToRight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#leftToRight}
           attribute's value can be found in the {@link #KeyguardGlowStripView} array.
 
 
@@ -4391,7 +4390,7 @@ containing a value of this type.
         */
         public: static const int KeyguardGlowStripView_leftToRight = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#numDots}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#numDots}
           attribute's value can be found in the {@link #KeyguardGlowStripView} array.
 
 
@@ -4410,15 +4409,15 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #KeyguardSecurityViewFlipper_Layout_layout_maxHeight com.android.systemui:layout_maxHeight}</code></td><td></td></tr>
-           <tr><td><code>{@link #KeyguardSecurityViewFlipper_Layout_layout_maxWidth com.android.systemui:layout_maxWidth}</code></td><td></td></tr>
+           <tr><td><code>{@link #KeyguardSecurityViewFlipper_Layout_layout_maxHeight Elastos.Droid.SystemUI:layout_maxHeight}</code></td><td></td></tr>
+           <tr><td><code>{@link #KeyguardSecurityViewFlipper_Layout_layout_maxWidth Elastos.Droid.SystemUI:layout_maxWidth}</code></td><td></td></tr>
            </table>
            @see #KeyguardSecurityViewFlipper_Layout_layout_maxHeight
            @see #KeyguardSecurityViewFlipper_Layout_layout_maxWidth
          */
         public: static const int KeyguardSecurityViewFlipper_Layout[2];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#layout_maxHeight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#layout_maxHeight}
           attribute's value can be found in the {@link #KeyguardSecurityViewFlipper_Layout} array.
 
 
@@ -4434,7 +4433,7 @@ containing a value of this type.
         */
         public: static const int KeyguardSecurityViewFlipper_Layout_layout_maxHeight = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#layout_maxWidth}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#layout_maxWidth}
           attribute's value can be found in the {@link #KeyguardSecurityViewFlipper_Layout} array.
 
 
@@ -4455,7 +4454,7 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #MultiPaneChallengeLayout_android_orientation com.android.systemui:android_orientation}</code></td><td> Influences how layout_centerWithinArea behaves </td></tr>
+           <tr><td><code>{@link #MultiPaneChallengeLayout_android_orientation Elastos.Droid.SystemUI:android_orientation}</code></td><td> Influences how layout_centerWithinArea behaves </td></tr>
            </table>
            @see #MultiPaneChallengeLayout_android_orientation
          */
@@ -4464,7 +4463,7 @@ containing a value of this type.
           <p>
           @attr description
            Influences how layout_centerWithinArea behaves 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.systemui.R.attr#android_orientation}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.SystemUI.R.attr#android_orientation}.
           @attr name android:android_orientation
         */
         public: static const int MultiPaneChallengeLayout_android_orientation = 0;
@@ -4474,11 +4473,11 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_centerWithinArea com.android.systemui:layout_centerWithinArea}</code></td><td> Percentage of the screen this child should consume or center within.</td></tr>
-           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_childType com.android.systemui:layout_childType}</code></td><td> Some child types have special behavior.</td></tr>
-           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_gravity com.android.systemui:layout_gravity}</code></td><td> Standard gravity constant that a child supplies to its parent.</td></tr>
-           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_maxHeight com.android.systemui:layout_maxHeight}</code></td><td></td></tr>
-           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_maxWidth com.android.systemui:layout_maxWidth}</code></td><td></td></tr>
+           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_centerWithinArea Elastos.Droid.SystemUI:layout_centerWithinArea}</code></td><td> Percentage of the screen this child should consume or center within.</td></tr>
+           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_childType Elastos.Droid.SystemUI:layout_childType}</code></td><td> Some child types have special behavior.</td></tr>
+           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_gravity Elastos.Droid.SystemUI:layout_gravity}</code></td><td> Standard gravity constant that a child supplies to its parent.</td></tr>
+           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_maxHeight Elastos.Droid.SystemUI:layout_maxHeight}</code></td><td></td></tr>
+           <tr><td><code>{@link #MultiPaneChallengeLayout_Layout_layout_maxWidth Elastos.Droid.SystemUI:layout_maxWidth}</code></td><td></td></tr>
            </table>
            @see #MultiPaneChallengeLayout_Layout_layout_centerWithinArea
            @see #MultiPaneChallengeLayout_Layout_layout_childType
@@ -4575,7 +4574,7 @@ containing a value of this type.
         */
         public: static const int MultiPaneChallengeLayout_Layout_layout_gravity = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#layout_maxHeight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#layout_maxHeight}
           attribute's value can be found in the {@link #MultiPaneChallengeLayout_Layout} array.
 
 
@@ -4591,7 +4590,7 @@ containing a value of this type.
         */
         public: static const int MultiPaneChallengeLayout_Layout_layout_maxHeight = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#layout_maxWidth}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#layout_maxWidth}
           attribute's value can be found in the {@link #MultiPaneChallengeLayout_Layout} array.
 
 
@@ -4612,13 +4611,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #NotificationLinearLayout_insetLeft com.android.systemui:insetLeft}</code></td><td></td></tr>
+           <tr><td><code>{@link #NotificationLinearLayout_insetLeft Elastos.Droid.SystemUI:insetLeft}</code></td><td></td></tr>
            </table>
            @see #NotificationLinearLayout_insetLeft
          */
         public: static const int NotificationLinearLayout[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#insetLeft}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#insetLeft}
           attribute's value can be found in the {@link #NotificationLinearLayout} array.
 
 
@@ -4639,13 +4638,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #NotificationRowLayout_rowHeight com.android.systemui:rowHeight}</code></td><td></td></tr>
+           <tr><td><code>{@link #NotificationRowLayout_rowHeight Elastos.Droid.SystemUI:rowHeight}</code></td><td></td></tr>
            </table>
            @see #NotificationRowLayout_rowHeight
          */
         public: static const int NotificationRowLayout[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#rowHeight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#rowHeight}
           attribute's value can be found in the {@link #NotificationRowLayout} array.
 
 
@@ -4666,15 +4665,15 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #NumPadKey_digit com.android.systemui:digit}</code></td><td></td></tr>
-           <tr><td><code>{@link #NumPadKey_textView com.android.systemui:textView}</code></td><td></td></tr>
+           <tr><td><code>{@link #NumPadKey_digit Elastos.Droid.SystemUI:digit}</code></td><td></td></tr>
+           <tr><td><code>{@link #NumPadKey_textView Elastos.Droid.SystemUI:textView}</code></td><td></td></tr>
            </table>
            @see #NumPadKey_digit
            @see #NumPadKey_textView
          */
         public: static const int NumPadKey[2];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#digit}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#digit}
           attribute's value can be found in the {@link #NumPadKey} array.
 
 
@@ -4688,7 +4687,7 @@ containing a value of this type.
         */
         public: static const int NumPadKey_digit = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#textView}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#textView}
           attribute's value can be found in the {@link #NumPadKey} array.
 
 
@@ -4704,9 +4703,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #PagedView_pageSpacing com.android.systemui:pageSpacing}</code></td><td> The space between adjacent pages of the PagedView.</td></tr>
-           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingLeft com.android.systemui:scrollIndicatorPaddingLeft}</code></td><td> The padding for the scroll indicator area </td></tr>
-           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingRight com.android.systemui:scrollIndicatorPaddingRight}</code></td><td></td></tr>
+           <tr><td><code>{@link #PagedView_pageSpacing Elastos.Droid.SystemUI:pageSpacing}</code></td><td> The space between adjacent pages of the PagedView.</td></tr>
+           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingLeft Elastos.Droid.SystemUI:scrollIndicatorPaddingLeft}</code></td><td> The padding for the scroll indicator area </td></tr>
+           <tr><td><code>{@link #PagedView_scrollIndicatorPaddingRight Elastos.Droid.SystemUI:scrollIndicatorPaddingRight}</code></td><td></td></tr>
            </table>
            @see #PagedView_pageSpacing
            @see #PagedView_scrollIndicatorPaddingLeft
@@ -4750,7 +4749,7 @@ containing a value of this type.
         */
         public: static const int PagedView_scrollIndicatorPaddingLeft = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#scrollIndicatorPaddingRight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#scrollIndicatorPaddingRight}
           attribute's value can be found in the {@link #PagedView} array.
 
 
@@ -4771,13 +4770,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #PasswordTextView_scaledTextSize com.android.systemui:scaledTextSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #PasswordTextView_scaledTextSize Elastos.Droid.SystemUI:scaledTextSize}</code></td><td></td></tr>
            </table>
            @see #PasswordTextView_scaledTextSize
          */
         public: static const int PasswordTextView[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#scaledTextSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#scaledTextSize}
           attribute's value can be found in the {@link #PasswordTextView} array.
 
 
@@ -4796,9 +4795,9 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #PseudoGridView_horizontalSpacing com.android.systemui:horizontalSpacing}</code></td><td></td></tr>
-           <tr><td><code>{@link #PseudoGridView_numColumns com.android.systemui:numColumns}</code></td><td></td></tr>
-           <tr><td><code>{@link #PseudoGridView_verticalSpacing com.android.systemui:verticalSpacing}</code></td><td></td></tr>
+           <tr><td><code>{@link #PseudoGridView_horizontalSpacing Elastos.Droid.SystemUI:horizontalSpacing}</code></td><td></td></tr>
+           <tr><td><code>{@link #PseudoGridView_numColumns Elastos.Droid.SystemUI:numColumns}</code></td><td></td></tr>
+           <tr><td><code>{@link #PseudoGridView_verticalSpacing Elastos.Droid.SystemUI:verticalSpacing}</code></td><td></td></tr>
            </table>
            @see #PseudoGridView_horizontalSpacing
            @see #PseudoGridView_numColumns
@@ -4806,7 +4805,7 @@ containing a value of this type.
          */
         public: static const int PseudoGridView[3];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#horizontalSpacing}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#horizontalSpacing}
           attribute's value can be found in the {@link #PseudoGridView} array.
 
 
@@ -4822,7 +4821,7 @@ containing a value of this type.
         */
         public: static const int PseudoGridView_horizontalSpacing = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#numColumns}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#numColumns}
           attribute's value can be found in the {@link #PseudoGridView} array.
 
 
@@ -4836,7 +4835,7 @@ containing a value of this type.
         */
         public: static const int PseudoGridView_numColumns = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#verticalSpacing}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#verticalSpacing}
           attribute's value can be found in the {@link #PseudoGridView} array.
 
 
@@ -4857,13 +4856,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #RecentsPanelView_recentItemLayout com.android.systemui:recentItemLayout}</code></td><td></td></tr>
+           <tr><td><code>{@link #RecentsPanelView_recentItemLayout Elastos.Droid.SystemUI:recentItemLayout}</code></td><td></td></tr>
            </table>
            @see #RecentsPanelView_recentItemLayout
          */
         public: static const int RecentsPanelView[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#recentItemLayout}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#recentItemLayout}
           attribute's value can be found in the {@link #RecentsPanelView} array.
 
 
@@ -4878,8 +4877,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #SlidingChallengeLayout_Layout_layout_childType com.android.systemui:layout_childType}</code></td><td> Some child types have special behavior.</td></tr>
-           <tr><td><code>{@link #SlidingChallengeLayout_Layout_layout_maxHeight com.android.systemui:layout_maxHeight}</code></td><td></td></tr>
+           <tr><td><code>{@link #SlidingChallengeLayout_Layout_layout_childType Elastos.Droid.SystemUI:layout_childType}</code></td><td> Some child types have special behavior.</td></tr>
+           <tr><td><code>{@link #SlidingChallengeLayout_Layout_layout_maxHeight Elastos.Droid.SystemUI:layout_maxHeight}</code></td><td></td></tr>
            </table>
            @see #SlidingChallengeLayout_Layout_layout_childType
            @see #SlidingChallengeLayout_Layout_layout_maxHeight
@@ -4917,7 +4916,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int SlidingChallengeLayout_Layout_layout_childType = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#layout_maxHeight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#layout_maxHeight}
           attribute's value can be found in the {@link #SlidingChallengeLayout_Layout} array.
 
 
@@ -4938,13 +4937,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ToggleSlider_text com.android.systemui:text}</code></td><td></td></tr>
+           <tr><td><code>{@link #ToggleSlider_text Elastos.Droid.SystemUI:text}</code></td><td></td></tr>
            </table>
            @see #ToggleSlider_text
          */
         public: static const int ToggleSlider[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#text}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#text}
           attribute's value can be found in the {@link #ToggleSlider} array.
 
 
@@ -4963,10 +4962,10 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #UserAvatarView_activeFrameColor com.android.systemui:activeFrameColor}</code></td><td></td></tr>
-           <tr><td><code>{@link #UserAvatarView_frameColor com.android.systemui:frameColor}</code></td><td></td></tr>
-           <tr><td><code>{@link #UserAvatarView_framePadding com.android.systemui:framePadding}</code></td><td></td></tr>
-           <tr><td><code>{@link #UserAvatarView_frameWidth com.android.systemui:frameWidth}</code></td><td></td></tr>
+           <tr><td><code>{@link #UserAvatarView_activeFrameColor Elastos.Droid.SystemUI:activeFrameColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #UserAvatarView_frameColor Elastos.Droid.SystemUI:frameColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #UserAvatarView_framePadding Elastos.Droid.SystemUI:framePadding}</code></td><td></td></tr>
+           <tr><td><code>{@link #UserAvatarView_frameWidth Elastos.Droid.SystemUI:frameWidth}</code></td><td></td></tr>
            </table>
            @see #UserAvatarView_activeFrameColor
            @see #UserAvatarView_frameColor
@@ -4975,7 +4974,7 @@ containing a value of this type.
          */
         public: static const int UserAvatarView[4];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#activeFrameColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#activeFrameColor}
           attribute's value can be found in the {@link #UserAvatarView} array.
 
 
@@ -4990,7 +4989,7 @@ containing a value of this type.
         */
         public: static const int UserAvatarView_activeFrameColor = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#frameColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#frameColor}
           attribute's value can be found in the {@link #UserAvatarView} array.
 
 
@@ -5005,7 +5004,7 @@ containing a value of this type.
         */
         public: static const int UserAvatarView_frameColor = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#framePadding}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#framePadding}
           attribute's value can be found in the {@link #UserAvatarView} array.
 
 
@@ -5021,7 +5020,7 @@ containing a value of this type.
         */
         public: static const int UserAvatarView_framePadding = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#frameWidth}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#frameWidth}
           attribute's value can be found in the {@link #UserAvatarView} array.
 
 
@@ -5042,15 +5041,15 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #UserDetailItemView_activatedFontFamily com.android.systemui:activatedFontFamily}</code></td><td></td></tr>
-           <tr><td><code>{@link #UserDetailItemView_regularFontFamily com.android.systemui:regularFontFamily}</code></td><td></td></tr>
+           <tr><td><code>{@link #UserDetailItemView_activatedFontFamily Elastos.Droid.SystemUI:activatedFontFamily}</code></td><td></td></tr>
+           <tr><td><code>{@link #UserDetailItemView_regularFontFamily Elastos.Droid.SystemUI:regularFontFamily}</code></td><td></td></tr>
            </table>
            @see #UserDetailItemView_activatedFontFamily
            @see #UserDetailItemView_regularFontFamily
          */
         public: static const int UserDetailItemView[2];
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#activatedFontFamily}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#activatedFontFamily}
           attribute's value can be found in the {@link #UserDetailItemView} array.
 
 
@@ -5064,7 +5063,7 @@ containing a value of this type.
         */
         public: static const int UserDetailItemView_activatedFontFamily = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.systemui.R.attr#regularFontFamily}
+          <p>This symbol is the offset where the {@link Elastos.Droid.SystemUI.R.attr#regularFontFamily}
           attribute's value can be found in the {@link #UserDetailItemView} array.
 
 

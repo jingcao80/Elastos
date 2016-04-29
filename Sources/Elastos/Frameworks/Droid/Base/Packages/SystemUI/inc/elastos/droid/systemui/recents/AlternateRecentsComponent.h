@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_ALTERNATERECENTSCOMPONENT_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_ALTERNATERECENTSCOMPONENT_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -13,7 +13,6 @@
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
-#include "elastos/droid/systemui/recents/views/TaskStackView.h"
 #include "elastos/droid/systemui/recents/views/TaskViewTransform.h"
 
 using Elastos::Droid::App::IActivityManagerRunningTaskInfo;
@@ -22,6 +21,7 @@ using Elastos::Droid::App::IActivityOptionsOnAnimationStartedListener;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Os::IHandler;
@@ -29,8 +29,9 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::SystemUI::IRecentsComponentCallbacks;
 using Elastos::Droid::SystemUI::Recents::RecentsConfiguration;
 using Elastos::Droid::SystemUI::Recents::Misc::SystemServicesProxy;
+using Elastos::Droid::SystemUI::Recents::Model::ITask;
 using Elastos::Droid::SystemUI::Recents::Views::ITaskViewHeader;
-using Elastos::Droid::SystemUI::Recents::Views::TaskStackView;
+using Elastos::Droid::SystemUI::Recents::Views::ITaskStackView;
 using Elastos::Droid::SystemUI::Recents::Views::TaskViewTransform;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
@@ -71,6 +72,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("AlternateRecentsComponent.BR");
+            return NOERROR;
+        }
 
     private:
         AlternateRecentsComponent* mHost;
@@ -234,7 +242,7 @@ public:
 
     // Header (for transition)
     AutoPtr<ITaskViewHeader> mHeaderBar;
-    AutoPtr<TaskStackView> mDummyStackView;
+    AutoPtr<ITaskStackView> mDummyStackView;
 
     // Variables to keep track of if we need to start recents after binding
     AutoPtr<IView> mStatusBarView;

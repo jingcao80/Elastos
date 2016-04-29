@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_KEYGUARDUSERSWITCHER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_KEYGUARDUSERSWITCHER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
 #include "Elastos.Droid.Animation.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>

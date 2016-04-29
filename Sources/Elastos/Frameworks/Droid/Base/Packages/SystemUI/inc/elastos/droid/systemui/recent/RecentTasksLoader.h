@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTTASKSLOADER_H__
 #define __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTTASKSLOADER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
@@ -10,7 +10,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/os/AsyncTask.h"
-#include "elastos/droid/systemui/recent/ColorDrawableWithDimensions.h"
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include <elastos/core/Thread.h>
 
@@ -25,7 +24,6 @@ using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::SystemUI::Recent::ColorDrawableWithDimensions;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnTouchListener;
@@ -232,8 +230,8 @@ private:
     AutoPtr<IHandler> mHandler;
 
     Int32 mIconDpi;
-    AutoPtr<ColorDrawableWithDimensions> mDefaultThumbnailBackground;
-    AutoPtr<ColorDrawableWithDimensions> mDefaultIconBackground;
+    AutoPtr<IDrawable> mDefaultThumbnailBackground;
+    AutoPtr<IDrawable> mDefaultIconBackground;
     Int32 mNumTasksInFirstScreenful;
 
     Boolean mFirstScreenful;

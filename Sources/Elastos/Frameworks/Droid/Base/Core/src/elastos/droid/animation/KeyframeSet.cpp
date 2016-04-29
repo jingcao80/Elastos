@@ -15,7 +15,11 @@ namespace Droid {
 namespace Animation {
 
 CAR_INTERFACE_IMPL_3(KeyframeSet, Object, IKeyframeSet, IKeyframes, ICloneable)
-KeyframeSet::KeyframeSet(
+KeyframeSet::KeyframeSet()
+{
+}
+
+ECode KeyframeSet::constructor(
     /* [in] */ ArrayOf<IKeyframe*>* keyframes)
 {
     assert(keyframes != NULL);
@@ -25,6 +29,7 @@ KeyframeSet::KeyframeSet(
     mFirstKeyframe = (*mKeyframes)[0];
     mLastKeyframe = (*mKeyframes)[mNumKeyframes - 1];
     mLastKeyframe->GetInterpolator((ITimeInterpolator**)&mInterpolator);
+    return NOERROR;
 }
 
 KeyframeSet::~KeyframeSet()
@@ -138,8 +143,11 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfKeyframe(
         }
 
         return new Int32KeyframeSet(intKeyframes);
-    } else {
-        return new KeyframeSet(keyframes);
+    }
+    else {
+        AutoPtr<KeyframeSet> set = new KeyframeSet();
+        set->constructor(keyframes);
+        return set;
     }
 }
 
@@ -171,7 +179,15 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfObject(
         }
     }
 
-    return new KeyframeSet((ArrayOf<IKeyframe*>*)(keyframes.Get()));
+    AutoPtr<KeyframeSet> set = new KeyframeSet();
+    Int32 len = keyframes->GetLength();
+    AutoPtr<ArrayOf<IKeyframe*> > objs = ArrayOf<IKeyframe*>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        objs->Set(i, IKeyframe::Probe((*keyframes)[i]));
+    }
+    set->constructor(objs);
+
+    return set;
 }
 
 AutoPtr<IPathKeyframes> KeyframeSet::OfPath(
@@ -305,8 +321,9 @@ ECode KeyframeSet::Clone(
         ICloneable::Probe((*mKeyframes)[i])->Clone((IInterface**)&temp);
         newKeyframes->Set(i, IKeyframe::Probe(temp));
     }
-    AutoPtr<IKeyframeSet> newSet = new KeyframeSet(newKeyframes);
-    *object = newSet;
+    AutoPtr<KeyframeSet> set = new KeyframeSet();
+    set->constructor(newKeyframes);
+    *object = (IKeyframeSet*)set->Probe(EIID_IKeyframeSet);
     REFCOUNT_ADD(*object)
     return NOERROR;
 }

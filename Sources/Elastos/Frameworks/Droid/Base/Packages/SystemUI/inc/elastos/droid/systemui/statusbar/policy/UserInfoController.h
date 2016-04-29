@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_USERINFOCONTROLLER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_USERINFOCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -26,41 +26,14 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
+class CUserInfoControllerReceiver;
+class CProfileReceiverBroadcastReceiver;
+
 class UserInfoController
     : public Object
     , public IUserInfoController
 {
 private:
-    class Receiver: public BroadcastReceiver
-    {
-    public:
-        Receiver(
-            /* [in] */ UserInfoController* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        UserInfoController* mHost;
-    };
-
-    class ProfileReceiver: public BroadcastReceiver
-    {
-    public:
-        ProfileReceiver(
-            /* [in] */ UserInfoController* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        UserInfoController* mHost;
-    };
-
     class UserInfoTask: public AsyncTask
     {
     public:
@@ -119,6 +92,9 @@ private:
     AutoPtr<IDrawable> mUserDrawable;
     AutoPtr<IBroadcastReceiver> mReceiver;
     AutoPtr<IBroadcastReceiver> mProfileReceiver;
+
+    friend class CUserInfoControllerReceiver;
+    friend class CProfileReceiverBroadcastReceiver;
 };
 
 } // namespace Policy

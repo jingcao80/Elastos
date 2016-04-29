@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_ZENMODECONTROLLERIMPL_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_ZENMODECONTROLLERIMPL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -69,6 +69,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("ZenModeControllerImpl.Receiver");
+            return NOERROR;
+        }
 
     private:
         ZenModeControllerImpl* mHost;

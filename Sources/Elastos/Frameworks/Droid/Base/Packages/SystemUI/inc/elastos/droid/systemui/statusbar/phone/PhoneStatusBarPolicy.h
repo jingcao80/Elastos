@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONESTATUSBARPOLICY_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONESTATUSBARPOLICY_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -25,6 +25,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+class CPhoneStatusBarPolicyIntentReceiver;
+
 /**
  * This class contains all of the policy about which icons are installed in the status
  * bar at boot time.  It goes through the normal API for icons, even though it probably
@@ -33,21 +35,6 @@ namespace Phone {
 class PhoneStatusBarPolicy: public Object
 {
 private:
-    class IntentReceiver: public BroadcastReceiver
-    {
-    public:
-        IntentReceiver(
-            /* [in] */ PhoneStatusBarPolicy* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        PhoneStatusBarPolicy* mHost;
-    };
-
     class CastCallback
         : public Object
         , public ICastControllerCallback
@@ -123,6 +110,8 @@ private:
     Boolean mBluetoothEnabled;
     AutoPtr<IBroadcastReceiver> mIntentReceiver;
     AutoPtr<ICastControllerCallback> mCastCallback;
+
+    friend class CPhoneStatusBarPolicyIntentReceiver;
 };
 
 } // namespace Phone

@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_INTERACTION_H__
 #define __ELASTOS_DROID_SYSTEMUI_VOLUME_INTERACTION_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/core/Object.h>
 #include "Elastos.Droid.View.h"
 

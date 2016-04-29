@@ -1,21 +1,15 @@
 
 #include "elastos/droid/systemui/statusbar/phone/BarTransitions.h"
+#include "elastos/droid/systemui/statusbar/phone/CBarBackgroundDrawable.h"
 #include "../../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
-#include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/R.h>
-#include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
-using Elastos::Droid::Graphics::CColor;
-using Elastos::Droid::Graphics::IColor;
-using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -38,172 +32,6 @@ const Boolean BarTransitions::DEBUG = FALSE;
 const Boolean BarTransitions::DEBUG_COLORS = FALSE;
 const Boolean BarTransitions::HIGH_END = InitStatic();
 
-BarTransitions::BarBackgroundDrawable::BarBackgroundDrawable(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 gradientResourceId)
-    : mOpaque(0)
-    , mSemiTransparent(0)
-    , mTransparent(0)
-    , mWarning(0)
-    , mMode(-1)
-    , mAnimating(FALSE)
-    , mStartTime(0)
-    , mEndTime(0)
-    , mGradientAlpha(0)
-    , mColor(0)
-    , mGradientAlphaStart(0)
-    , mColorStart(0)
-{
-    AutoPtr<IResources> res;
-    context->GetResources((IResources**)&res);
-    if (DEBUG_COLORS) {
-        mOpaque = 0xff0000ff;
-        mSemiTransparent = 0x7f0000ff;
-        mTransparent = 0x2f0000ff;
-        mWarning = 0xffff0000;
-    }
-    else {
-        res->GetColor(R::color::system_bar_background_opaque, &mOpaque);
-        res->GetColor(R::color::system_bar_background_semi_transparent, &mSemiTransparent);
-        res->GetColor(R::color::system_bar_background_transparent, &mTransparent);
-        res->GetColor(Elastos::Droid::R::color::battery_saver_mode_color, &mWarning);
-    }
-    res->GetDrawable(gradientResourceId, (IDrawable**)&mGradient);
-    CLinearInterpolator::New((ITimeInterpolator**)&mInterpolator);
-}
-
-ECode BarTransitions::BarBackgroundDrawable::SetAlpha(
-    /* [in] */ Int32 alpha)
-{
-    // noop
-    return NOERROR;
-}
-
-ECode BarTransitions::BarBackgroundDrawable::SetColorFilter(
-    /* [in] */ IColorFilter* cf)
-{
-    // noop
-    return NOERROR;
-}
-
-void BarTransitions::BarBackgroundDrawable::OnBoundsChange(
-    /* [in] */ IRect* bounds)
-{
-    Drawable::OnBoundsChange(bounds);
-    mGradient->SetBounds(bounds);
-}
-
-ECode BarTransitions::BarBackgroundDrawable::ApplyModeBackground(
-    /* [in] */ Int32 oldMode,
-    /* [in] */ Int32 newMode,
-    /* [in] */ Boolean animate)
-{
-    if (mMode == newMode) return NOERROR;
-    mMode = newMode;
-    mAnimating = animate;
-    if (animate) {
-        Int64 now = SystemClock::GetElapsedRealtime();
-        mStartTime = now;
-        mEndTime = now + BACKGROUND_DURATION;
-        mGradientAlphaStart = mGradientAlpha;
-        mColorStart = mColor;
-    }
-    InvalidateSelf();
-    return NOERROR;
-}
-
-ECode BarTransitions::BarBackgroundDrawable::GetOpacity(
-    /* [out] */ Int32* opacity)
-{
-    VALIDATE_NOT_NULL(opacity);
-    *opacity = IPixelFormat::TRANSLUCENT;
-    return NOERROR;
-}
-
-ECode BarTransitions::BarBackgroundDrawable::FinishAnimation()
-{
-    if (mAnimating) {
-        mAnimating = FALSE;
-        InvalidateSelf();
-    }
-    return NOERROR;
-}
-
-ECode BarTransitions::BarBackgroundDrawable::Draw(
-    /* [in] */ ICanvas* canvas)
-{
-    Int32 targetGradientAlpha = 0, targetColor = 0;
-    AutoPtr<IColor> color;
-    CColor::AcquireSingleton((IColor**)&color);
-    if (mMode == MODE_WARNING) {
-        targetColor = mWarning;
-    }
-    else if (mMode == MODE_TRANSLUCENT) {
-        targetColor = mSemiTransparent;
-    }
-    else if (mMode == MODE_SEMI_TRANSPARENT) {
-        targetColor = mSemiTransparent;
-    }
-    else if (mMode == MODE_TRANSPARENT) {
-        targetColor = mTransparent;
-    }
-    else {
-        targetColor = mOpaque;
-    }
-    if (!mAnimating) {
-        mColor = targetColor;
-        mGradientAlpha = targetGradientAlpha;
-    }
-    else {
-        const Int64 now = SystemClock::GetElapsedRealtime();
-        if (now >= mEndTime) {
-            mAnimating = FALSE;
-            mColor = targetColor;
-            mGradientAlpha = targetGradientAlpha;
-        }
-        else {
-            const Float t = (now - mStartTime) / (Float)(mEndTime - mStartTime);
-            Float fv = 0;
-            mInterpolator->GetInterpolation(t, &fv);
-            const Float v = Elastos::Core::Math::Max((Float)0,
-                    Elastos::Core::Math::Min(fv, (Float)1));
-            mGradientAlpha = (Int32)(v * targetGradientAlpha + mGradientAlphaStart * (1 - v));
-
-            Int32 alpha1 = 0, alpha2 = 0;
-            color->Alpha(targetColor, &alpha1);
-            color->Alpha(mColorStart, &alpha2);
-            Int32 red1 = 0, red2 = 0;
-            color->Red(targetColor, &red1);
-            color->Red(mColorStart, &red2);
-            Int32 green1 = 0, green2 = 0;
-            color->Green(targetColor, &green1);
-            color->Green(mColorStart, &green2);
-            Int32 blue1 = 0, blue2 = 0;
-            color->Blue(targetColor, &blue1);
-            color->Blue(mColorStart, &blue2);
-            color->Argb(
-                  (Int32)(v * alpha1 + alpha2 * (1 - v)),
-                  (Int32)(v * red1 + red2 * (1 - v)),
-                  (Int32)(v * green1 + green2 * (1 - v)),
-                  (Int32)(v * blue1 + blue2 * (1 - v)), &mColor);
-        }
-    }
-    if (mGradientAlpha > 0) {
-        mGradient->SetAlpha(mGradientAlpha);
-        mGradient->Draw(canvas);
-    }
-
-    Int32 alpha = 0;
-    color->Alpha(mColor, &alpha);
-    if (alpha > 0) {
-        canvas->DrawColor(mColor);
-    }
-    if (mAnimating) {
-        InvalidateSelf();  // keep going
-    }
-    return NOERROR;
-}
-
 CAR_INTERFACE_IMPL(BarTransitions, Object, IBarTransitions);
 BarTransitions::BarTransitions(
     /* [in] */ IView* view,
@@ -214,7 +42,7 @@ BarTransitions::BarTransitions(
     mView = view;
     AutoPtr<IContext> ctx;
     mView->GetContext((IContext**)&ctx);
-    mBarBackground = new BarBackgroundDrawable(ctx, gradientResourceId);
+    CBarBackgroundDrawable::New(ctx, gradientResourceId, (IDrawable**)&mBarBackground);
     if (HIGH_END) {
         mView->SetBackground(mBarBackground);
     }
@@ -272,7 +100,7 @@ void BarTransitions::ApplyModeBackground(
 {
     if (DEBUG) Logger::D(mTag, "applyModeBackground oldMode=%s newMode=%s animate=%d",
             ModeToString(oldMode).string(), ModeToString(newMode).string(), animate);
-    mBarBackground->ApplyModeBackground(oldMode, newMode, animate);
+    ((CBarBackgroundDrawable*)mBarBackground.Get())->ApplyModeBackground(oldMode, newMode, animate);
 }
 
 String BarTransitions::ModeToString(
@@ -290,7 +118,7 @@ String BarTransitions::ModeToString(
 
 ECode BarTransitions::FinishAnimations()
 {
-    mBarBackground->FinishAnimation();
+    ((CBarBackgroundDrawable*)mBarBackground.Get())->FinishAnimation();
     return NOERROR;
 }
 
