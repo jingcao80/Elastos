@@ -64,6 +64,13 @@ module
         TabClosed();
     }
 
+    /**
+     * @Involve
+     * interface ITabHostIndicatorStrategy
+     */
+    interface ITabHostViewIndicatorStrategy {
+    }
+
     [local]
     interface ITabSpec {
         SetIndicator(

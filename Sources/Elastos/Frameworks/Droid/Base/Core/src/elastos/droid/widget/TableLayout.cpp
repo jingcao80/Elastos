@@ -1,27 +1,27 @@
 
 #include "elastos/droid/widget/TableLayout.h"
-// #include "elastos/droid/widget/CTableLayoutLayoutParams.h"
-// #include "elastos/droid/widget/TableRow.h" zhangjingcheng
-
+#include "elastos/droid/widget/CTableLayoutLayoutParams.h"
+#include "elastos/droid/widget/TableRow.h"
+#include "elastos/droid/utility/CSparseBooleanArray.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
-#include "elastos/droid/R.h"
 
+using Elastos::Droid::Utility::CSparseBooleanArray;
+using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::R;
+using Elastos::Core::StringUtils;
+using Elastos::Core::ICharSequence;
 using Elastos::Utility::Regex::IPattern;
 using Elastos::Utility::Regex::IPatternHelper;
 using Elastos::Utility::Regex::CPatternHelper;
 using Elastos::Utility::Regex::IMatcher;
-using Elastos::Core::StringUtils;
-using Elastos::Core::ICharSequence;
-using Elastos::Droid::R;
-using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
-using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
-
 
 CAR_INTERFACE_IMPL(TableLayout::LayoutParams, LinearLayout::LayoutParams, ITableLayoutLayoutParams)
 
@@ -134,9 +134,7 @@ TableLayout::TableLayout()
     : mShrinkAllColumns(FALSE)
     , mStretchAllColumns(FALSE)
     , mInitialized(FALSE)
-{
-    InitTableLayout();
-}
+{}
 
 /**
  * <p>Creates a new TableLayout for the given context.</p>
@@ -169,19 +167,15 @@ ECode TableLayout::constructor(
 }
 
 TableLayout::~TableLayout()
-{
-    mStretchableColumns = NULL;
-    mShrinkableColumns = NULL;
-    mCollapsedColumns = NULL;
-}
+{}
 
 ECode TableLayout::InitFromAttributes(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::TableLayout),
-        ArraySize(R::styleable::TableLayout));
+            const_cast<Int32 *>(R::styleable::TableLayout),
+            ArraySize(R::styleable::TableLayout));
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
@@ -232,10 +226,11 @@ ECode TableLayout::InitFromAttributes(
  * @return a sparse array of Boolean mapping column indexes to the columns
  *         collapse state
  */
-AutoPtr< HashMap<Int32, Boolean> > TableLayout::ParseColumns(
+AutoPtr<ISparseBooleanArray> TableLayout::ParseColumns(
     /* [in] */ const String& sequence)
 {
-    AutoPtr< HashMap<Int32, Boolean> > columns = new HashMap<Int32, Boolean>(5);
+    AutoPtr<ISparseBooleanArray> columns;
+    CSparseBooleanArray::New((ISparseBooleanArray**)&columns);
     const String str("\\s*,\\s*");
     AutoPtr<IPatternHelper> helper;
     CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
@@ -251,7 +246,7 @@ AutoPtr< HashMap<Int32, Boolean> > TableLayout::ParseColumns(
             if (columnIndex >= 0) {
                 // putting TRUE in this sparse array indicates that the
                 // column index was defined in the XML file
-                (*columns)[columnIndex] = TRUE;
+                columns->Put(columnIndex, TRUE);
             }
         }
     }
@@ -265,14 +260,14 @@ AutoPtr< HashMap<Int32, Boolean> > TableLayout::ParseColumns(
  */
 void TableLayout::InitTableLayout()
 {
+    if (mCollapsedColumns == NULL) {
+        CSparseBooleanArray::New((ISparseBooleanArray**)&mCollapsedColumns);
+    }
     if (mStretchableColumns == NULL) {
-        mStretchableColumns = new HashMap<Int32, Boolean>();
+        CSparseBooleanArray::New((ISparseBooleanArray**)&mStretchableColumns);
     }
     if (mShrinkableColumns == NULL) {
-        mShrinkableColumns = new HashMap<Int32, Boolean>();
-    }
-    if (mCollapsedColumns == NULL) {
-        mCollapsedColumns = new HashMap<Int32, Boolean>();
+        CSparseBooleanArray::New((ISparseBooleanArray**)&mShrinkableColumns);
     }
 
     // TableLayouts are always in vertical orientation; keep this tracked
@@ -403,7 +398,7 @@ ECode TableLayout::SetColumnCollapsed(
     /* [in] */ Boolean isCollapsed)
 {
     // update the collapse status of the column
-    (*mCollapsedColumns)[columnIndex] = isCollapsed;
+    mCollapsedColumns->Put(columnIndex, isCollapsed);
 
     Int32 count;
     GetChildCount(&count);
@@ -411,7 +406,8 @@ ECode TableLayout::SetColumnCollapsed(
         AutoPtr<IView> view;
         GetChildAt(i, (IView**)&view);
         if (ITableRow::Probe(view) != NULL) {
-            // ((TableRow*)view)->SetColumnCollapsed(columnIndex, isCollapsed);
+            TableRow* tr = (TableRow*)ITableRow::Probe(view);
+            tr->SetColumnCollapsed(columnIndex, isCollapsed);
         }
     }
 
@@ -428,10 +424,10 @@ ECode TableLayout::SetColumnCollapsed(
  */
 ECode TableLayout::IsColumnCollapsed(
     /* [in] */ Int32 columnIndex,
-    /* [in] */ Boolean* result)
+    /* [out] */ Boolean* result)
 {
-    *result = mCollapsedColumns && (*mCollapsedColumns)[columnIndex];
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    return mCollapsedColumns->Get(columnIndex, result);
 }
 
 /**
@@ -450,7 +446,7 @@ ECode TableLayout::SetColumnStretchable(
     /* [in] */ Int32 columnIndex,
     /* [in] */ Boolean isStretchable)
 {
-    (*mStretchableColumns)[columnIndex] = isStretchable;
+    mStretchableColumns->Put(columnIndex, isStretchable);
     RequestRowsLayout();
 
     return NOERROR;
@@ -466,7 +462,12 @@ ECode TableLayout::IsColumnStretchable(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Boolean* isColumnStretchable)
 {
-    *isColumnStretchable = mStretchAllColumns || (mStretchableColumns && (*mStretchableColumns)[columnIndex]);
+    VALIDATE_NOT_NULL(isColumnStretchable)
+    Boolean res = FALSE;
+    if (mStretchableColumns) {
+        mStretchableColumns->Get(columnIndex, &res);
+    }
+    *isColumnStretchable = mStretchAllColumns || res;
     return NOERROR;
 }
 
@@ -486,7 +487,7 @@ ECode TableLayout::SetColumnShrinkable(
     /* [in] */ Int32 columnIndex,
     /* [in] */ Boolean isShrinkable)
 {
-    (*mShrinkableColumns)[columnIndex] = isShrinkable;
+    mShrinkableColumns->Put(columnIndex, isShrinkable);
     RequestRowsLayout();
 
     return NOERROR;
@@ -502,7 +503,12 @@ ECode TableLayout::IsColumnShrinkable(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Boolean* isColumnShrinkable)
 {
-    *isColumnShrinkable = mShrinkAllColumns || (mShrinkableColumns && (*mShrinkableColumns)[columnIndex]);
+    VALIDATE_NOT_NULL(isColumnShrinkable)
+    Boolean res = FALSE;
+    if (mShrinkableColumns) {
+        mShrinkableColumns->Get(columnIndex, &res);
+    }
+    *isColumnShrinkable = mShrinkAllColumns || res;
     return NOERROR;
 }
 
@@ -520,17 +526,21 @@ void TableLayout::TrackCollapsedColumns(
     /* [in] */ IView* child)
 {
     if (ITableRow::Probe(child) != NULL) {
-        // TableRow* row = (TableRow*)child;
-        HashMap<Int32, Boolean>::Iterator it = mCollapsedColumns->Begin();
-        for (; it != mCollapsedColumns->End(); ++it) {
-            Int32 columnIndex = it->mFirst;
-            Boolean isCollapsed = it->mSecond;
+        TableRow* row = (TableRow*)child;
+        AutoPtr<ISparseBooleanArray> collapsedColumns = mCollapsedColumns;
+
+        Int32 count;
+        collapsedColumns->GetSize(&count);
+        for (Int32 i = 0; i < count; i++) {
+            Int32 columnIndex;
+            collapsedColumns->KeyAt(i, &columnIndex);
+            Boolean isCollapsed;
+            collapsedColumns->ValueAt(i, &isCollapsed);
             // the collapse status is set only when the column should be
             // collapsed; otherwise, this might affect the default
             // visibility of the row's children
             if (isCollapsed) {
-                // TODO
-                // row->SetColumnCollapsed(columnIndex, isCollapsed);
+                row->SetColumnCollapsed(columnIndex, isCollapsed);
             }
         }
     }
@@ -632,7 +642,7 @@ void TableLayout::MeasureChildBeforeLayout(
     // when the measured child is a table row, we force the width of its
     // children with the widths computed in findLargestCells()
     if (ITableRow::Probe(child) != NULL) {
-        // ((TableRow*)child)->SetColumnsWidthConstraints(mMaxWidths);
+        ((TableRow*)child)->SetColumnsWidthConstraints(mMaxWidths);
     }
 
     LinearLayout::MeasureChildBeforeLayout(child, childIndex,
@@ -683,13 +693,13 @@ void TableLayout::FindLargestCells(
         }
 
         if (ITableRow::Probe(child) != NULL) {
-            // TableRow* row = (TableRow*)child;
+            TableRow* row = (TableRow*)ITableRow::Probe(child);
             // forces the row's height
-            assert(0 && "TODO");
-            AutoPtr<IViewGroupLayoutParams> layoutParams;// = row->GetLayoutParams();
+            AutoPtr<IViewGroupLayoutParams> layoutParams;
+            row->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
             layoutParams->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
 
-            AutoPtr<ArrayOf<Int32> > widths;// = row->GetColumnsWidths(widthMeasureSpec);
+            AutoPtr<ArrayOf<Int32> > widths = row->GetColumnsWidths(widthMeasureSpec);
             Int32 newLength = widths->GetLength();
             // this is the first row, we just need to copy the values
             if (firstRow) {
@@ -715,9 +725,10 @@ void TableLayout::FindLargestCells(
                 // rows, so we find the maximum width for each column
                 // if the row is narrower than the previous ones,
                 // difference will be negative
-                length = Elastos::Core::Math::Min(length, newLength);
+                using Elastos::Core::Math;
+                length = Math::Min(length, newLength);
                 for (Int32 j = 0; j < length; j++) {
-                    (*mMaxWidths)[j] = Elastos::Core::Math::Max((*mMaxWidths)[j], (*widths)[j]);
+                    (*mMaxWidths)[j] = Math::Max((*mMaxWidths)[j], (*widths)[j]);
                 }
             }
         }
@@ -750,14 +761,15 @@ void TableLayout::ShrinkAndStretchColumns(
 
     Int32 size = MeasureSpec::GetSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
 
+    Int32 count;
     if ((totalWidth > size) && (mShrinkAllColumns ||
-            mShrinkableColumns->Begin() != mShrinkableColumns->End())) {
+            (mShrinkableColumns->GetSize(&count), count) > 0)) {
         // oops, the largest columns are wider than the row itself
         // fairly redistribute the row's widh among the columns
         MutateColumnsWidth(mShrinkableColumns, mShrinkAllColumns, size, totalWidth);
     }
     else if ((totalWidth < size) && (mStretchAllColumns ||
-            mStretchableColumns->Begin() != mStretchableColumns->End())) {
+            (mStretchableColumns->GetSize(&count), count) > 0)) {
         // if we have some space left, we distribute it among the
         // expandable columns
         MutateColumnsWidth(mStretchableColumns, mStretchAllColumns, size, totalWidth);
@@ -765,7 +777,7 @@ void TableLayout::ShrinkAndStretchColumns(
 }
 
 void TableLayout::MutateColumnsWidth(
-    /* [in] */ HashMap<Int32, Boolean>* columns,
+    /* [in] */ ISparseBooleanArray* columns,
     /* [in] */ Boolean allColumns,
     /* [in] */ Int32 size,
     /* [in] */ Int32 totalWidth)
@@ -773,7 +785,10 @@ void TableLayout::MutateColumnsWidth(
     Int32 skipped = 0;
     ArrayOf<Int32>* maxWidths = mMaxWidths;
     Int32 length = maxWidths->GetLength();
-    Int32 count = allColumns ? length : columns->GetSize();
+    Int32 count = length;
+    if (!allColumns) {
+        columns->GetSize(&count);
+    }
     Int32 totalExtraSpace = size - totalWidth;
     Int32 extraSpace = totalExtraSpace / count;
 
@@ -790,10 +805,12 @@ void TableLayout::MutateColumnsWidth(
     }
 
     if (!allColumns) {
-        HashMap<Int32, Boolean>::Iterator it = columns->Begin();
-        for (; it != columns->End(); ++it) {
-            Int32 column = it->mFirst;
-            if (it->mSecond) {
+        for (Int32 i = 0; i < count; i++) {
+            Int32 column;
+            columns->KeyAt(i, &column);
+            Boolean value;
+            columns->ValueAt(i, &value);
+            if (value) {
                 if (column < length) {
                     (*maxWidths)[column] += extraSpace;
                 }
@@ -815,10 +832,12 @@ void TableLayout::MutateColumnsWidth(
     if (skipped > 0 && skipped < count) {
         // reclaim any extra space we left to columns that don't exist
         extraSpace = skipped * extraSpace / (count - skipped);
-        HashMap<Int32, Boolean>::Iterator it = columns->Begin();
-        for (; it != columns->End(); ++it) {
-            Int32 column = it->mFirst;
-            if (it->mSecond && column < length) {
+        for (Int32 i = 0; i < count; i++) {
+            Int32 column;
+            columns->KeyAt(i, &column);
+            Boolean value;
+            columns->ValueAt(i, &value);
+            if (value && column < length) {
                 if (extraSpace > (*maxWidths)[column]) {
                     (*maxWidths)[column] = 0;
                 }
@@ -842,9 +861,9 @@ ECode TableLayout::GenerateLayoutParams(
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     AutoPtr<ITableLayoutLayoutParams> lp;
-    // FAIL_RETURN(CTableLayoutLayoutParams::New(ctx, attrs, (ITableLayoutLayoutParams**)&lp));
-    // *params = IViewGroupLayoutParams::Probe(lp);
-    // REFCOUNT_ADD(*params);
+    FAIL_RETURN(CTableLayoutLayoutParams::New(ctx, attrs, (ITableLayoutLayoutParams**)&lp));
+    *params = IViewGroupLayoutParams::Probe(lp);
+    REFCOUNT_ADD(*params);
     return NOERROR;
 }
 
@@ -859,9 +878,9 @@ ECode TableLayout::GenerateDefaultLayoutParams(
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<ITableLayoutLayoutParams> lp;
-    // CTableLayoutLayoutParams::New((ITableLayoutLayoutParams**)&lp);
-    // *result = IViewGroupLayoutParams::Probe(lp);
-    // REFCOUNT_ADD(*result)
+    CTableLayoutLayoutParams::New((ITableLayoutLayoutParams**)&lp);
+    *result = IViewGroupLayoutParams::Probe(lp);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -880,28 +899,24 @@ Boolean TableLayout::CheckLayoutParams(
 AutoPtr<IViewGroupLayoutParams> TableLayout::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    AutoPtr<ITableLayoutLayoutParams> lp;
-    // CTableLayoutLayoutParams::New(p, (ITableLayoutLayoutParams**)&lp);
-    // return lp;
-    return NULL;
+    AutoPtr<IViewGroupLayoutParams> lp;
+    CTableLayoutLayoutParams::New(p, (IViewGroupLayoutParams**)&lp);
+    return lp;
 }
 
 ECode TableLayout::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     LinearLayout::OnInitializeAccessibilityEvent(event);
-    AutoPtr<ICharSequence> seq = CoreUtils::Convert(String("CTableLayout"));
-    return IAccessibilityRecord::Probe(event)->SetClassName(seq);
+    return IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert(String("CTableLayout")));
 }
 
 ECode TableLayout::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     LinearLayout::OnInitializeAccessibilityNodeInfo(info);
-    AutoPtr<ICharSequence> seq = CoreUtils::Convert(String("CTableLayout"));
-    return info->SetClassName(seq);
+    return info->SetClassName(CoreUtils::Convert(String("CTableLayout")));
 }
-
 
 } // namespace Widget
 } // namespace Droid

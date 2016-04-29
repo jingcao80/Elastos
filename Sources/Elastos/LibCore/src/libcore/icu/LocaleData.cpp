@@ -318,6 +318,94 @@ ECode LocaleData::GetTomorrow(
     return NOERROR;
 }
 
+ECode LocaleData::GetFullTimeFormat(
+    /* [out] */ String* fullTimeFormat)
+{
+    VALIDATE_NOT_NULL(fullTimeFormat)
+    *fullTimeFormat = mFullTimeFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetLongTimeFormat(
+    /* [out] */ String* longTimeFormat)
+{
+    VALIDATE_NOT_NULL(longTimeFormat)
+    *longTimeFormat = mLongTimeFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetMediumTimeFormat(
+    /* [out] */ String* mediumTimeFormat)
+{
+    VALIDATE_NOT_NULL(mediumTimeFormat)
+    *mediumTimeFormat = mMediumTimeFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetShortTimeFormat(
+    /* [out] */ String* shortTimeFormat)
+{
+    VALIDATE_NOT_NULL(shortTimeFormat)
+    *shortTimeFormat = mShortTimeFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetFullDateFormat(
+    /* [out] */ String* fullDateFormat)
+{
+    VALIDATE_NOT_NULL(fullDateFormat)
+    *fullDateFormat = mFullDateFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetLongDateFormat(
+    /* [out] */ String* longDateFormat)
+{
+    VALIDATE_NOT_NULL(longDateFormat)
+    *longDateFormat = mLongDateFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetMediumDateFormat(
+    /* [out] */ String* mediumDateFormat)
+{
+    VALIDATE_NOT_NULL(mediumDateFormat)
+    *mediumDateFormat = mMediumDateFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetShortDateFormat(
+    /* [out] */ String* shortDateFormat)
+{
+    VALIDATE_NOT_NULL(shortDateFormat)
+    *shortDateFormat = mShortDateFormat;
+    return NOERROR;
+}
+
+ECode LocaleData::GetNarrowAm(
+    /* [out] */ String* narrowAm)
+{
+    VALIDATE_NOT_NULL(narrowAm)
+    *narrowAm = mNarrowAm;
+    return NOERROR;
+}
+
+ECode LocaleData::GetNarrowPm(
+    /* [out] */ String* narrowPm)
+{
+    VALIDATE_NOT_NULL(narrowPm)
+    *narrowPm = mNarrowPm;
+    return NOERROR;
+}
+
+ECode LocaleData::GetShortDateFormat4(
+    /* [out] */ String* shortDateFormat4)
+{
+    VALIDATE_NOT_NULL(shortDateFormat4)
+    *shortDateFormat4 = mShortDateFormat4;
+    return NOERROR;
+}
+
 ECode LocaleData::GetZeroDigit(
     /* [out] */ Char32* zeroDigit)
 {
@@ -473,7 +561,6 @@ ECode LocaleData::GetPercentPattern(
 AutoPtr<ILocaleData> LocaleData::InitLocaleData(
     /* [in] */ ILocale* locale)
 {
-
     AutoPtr<CLocaleData> localeObj;
     CLocaleData::NewByFriend((CLocaleData**)&localeObj);
     LocaleData* localeData = (LocaleData*)localeObj.Get();

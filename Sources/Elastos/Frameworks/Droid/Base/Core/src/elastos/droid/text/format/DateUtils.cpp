@@ -6,17 +6,14 @@
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Res::IResourcesHelper;
-using Libcore::ICU::ILocaleData;
-using Libcore::ICU::ILocaleDataHelper;
-using Libcore::ICU::CLocaleDataHelper;
-using Libcore::ICU::IDateIntervalFormat;
-using Libcore::ICU::CDateIntervalFormat;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -41,7 +38,11 @@ using Elastos::Utility::ICalendarHelper;
 using Elastos::Utility::CTimeZoneHelper;
 using Elastos::Utility::ITimeZoneHelper;
 using Elastos::Utility::ITimeZone;
-
+using Libcore::ICU::ILocaleData;
+using Libcore::ICU::ILocaleDataHelper;
+using Libcore::ICU::CLocaleDataHelper;
+using Libcore::ICU::IDateIntervalFormat;
+using Libcore::ICU::CDateIntervalFormat;
 
 namespace Elastos {
 namespace Droid {
@@ -177,8 +178,7 @@ String DateUtils::GetMonthString(
             break;
         }
     }
-    if(names != NULL)
-    {
+    if(names != NULL) {
         Int32 namesLen = names->GetLength();
         if( 0 <= month && month < namesLen ) {
             return (*names)[month];
@@ -239,7 +239,7 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
     /* [in] */ Int64 startTime)
 {
     AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    CSystem::AcquireSingleton((ISystem**)&system);
     Int64 millis;
     system->GetCurrentTimeMillis(&millis);
     return GetRelativeTimeSpanString(startTime, millis, IDateUtils::MINUTE_IN_MILLIS);
@@ -330,7 +330,8 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
         String rdret = GetRelativeDayString(r, time, now);
         CString::New(rdret, (ICharSequence**)&cs);
         return cs;
-    } else {
+    }
+    else {
         // We know that we won't be showing the time, so it is safe to pass
         // in a null context.
         String fdrRet = FormatDateRange(NULL, time, time, flags);
@@ -357,7 +358,7 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeDateTimeString(
 {
     AutoPtr<IResources> r = CResources::GetSystem();
     AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    CSystem::AcquireSingleton((ISystem**)&system);
 
     Int64 now;
     system->GetCurrentTimeMillis(&now);
@@ -380,22 +381,19 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeDateTimeString(
     String result;
     if (duration < transitionResolution) {
         AutoPtr<ICharSequence> relativeClause = GetRelativeTimeSpanString(time, now, minResolution, flags);
-        String raw;
-        r->GetString(R::string::relative_time, &raw);
-        String strRelativeClause, strTimeClause;
-        relativeClause->ToString(&strRelativeClause);
-        timeClause->ToString(&strTimeClause);
-        assert(0 && "TODO");
-//        result = String.format(raw, strRelativeClause, strTimeClause);
+        AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
+        (*formatArgs)[0] = relativeClause;
+        (*formatArgs)[1] = timeClause;
+
+        r->GetString(R::string::relative_time, formatArgs, &result);
     }
     else {
         AutoPtr<ICharSequence> dateClause = GetRelativeTimeSpanString(c, time, FALSE);
-        String raw;
-        r->GetString(R::string::date_time, &raw);
-        String strDateClause, strTimeClause;
-        dateClause->ToString(&strDateClause);
-        timeClause->ToString(&strTimeClause);
-//        result = String.format(raw, strDateClause, strTimeClause);
+        AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
+        (*formatArgs)[0] = dateClause;
+        (*formatArgs)[1] = timeClause;
+
+        r->GetString(R::string::date_time, formatArgs, &result);
     }
 
     AutoPtr<ICharSequence> cs;
@@ -470,8 +468,8 @@ String DateUtils::GetRelativeDayString(
     String format;
     r->GetQuantityString(resId, days, &format);
 
-    String retVal;
-   // retVal = String.format(format, days);
+    String retVal("");
+    retVal.AppendFormat(format, days);
     return retVal;
 }
 
@@ -509,11 +507,13 @@ AutoPtr<ICharSequence> DateUtils::FormatDuration(
         Int32 hours = (Int32) ((millis + 1800000) / IDateUtils::HOUR_IN_MILLIS);
         res->GetQuantityString(
                 R::plurals::duration_hours, hours, &rStr);
-    } else if (millis >= IDateUtils::MINUTE_IN_MILLIS) {
+    }
+    else if (millis >= IDateUtils::MINUTE_IN_MILLIS) {
         Int32 minutes = (Int32) ((millis + 30000) / IDateUtils::MINUTE_IN_MILLIS);
         res->GetQuantityString(
                 R::plurals::duration_minutes, minutes, &rStr);
-    } else {
+    }
+    else {
         Int32 seconds = (Int32) ((millis + 500) / IDateUtils::SECOND_IN_MILLIS);
         res->GetQuantityString(
                 R::plurals::duration_seconds, seconds, &rStr);
@@ -554,7 +554,8 @@ String DateUtils::FormatElapsedTime(
     sb->GetLength(&sbLen);
     if (sbLen == 0) {
         sb = new StringBuilder(8);
-    } else {
+    }
+    else {
         sb->SetLength(0);
     }
 
@@ -587,7 +588,8 @@ String DateUtils::FormatElapsedTime(
         f->Format(sElapsedFormatHMMSS, args);
         f->ToString(&ret);
         return ret;
-    } else {
+    }
+    else {
         f->Format(sElapsedFormatMMSS, args_);
         f->ToString(&ret);
         return ret;
@@ -648,7 +650,7 @@ Boolean DateUtils::IsToday(
     time->GetMonthDay(&thenMonthDay);
 
     AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    CSystem::AcquireSingleton((ISystem**)&system);
     Int64 millis;
     system->GetCurrentTimeMillis(&millis);
 
@@ -674,6 +676,7 @@ String DateUtils::FormatDateRange(
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelp);
     AutoPtr<ILocale> locale;
     localeHelp->GetDefault((ILocale**)&locale);
+    using Elastos::Utility::IFormatter;
     AutoPtr<Elastos::Utility::IFormatter> f;
     CFormatter::New((IAppendable*)s, locale, (Elastos::Utility::IFormatter**)&f);
     AutoPtr<Elastos::Utility::IFormatter> fRet = FormatDateRange(context, f, startMillis, endMillis, flags);
@@ -719,9 +722,7 @@ AutoPtr<Elastos::Utility::IFormatter> DateUtils::FormatDateRange(
     // try {
         AutoPtr<IAppendable> appendable;
         formatter->GetOut((IAppendable**)&appendable);
-        AutoPtr<ICharSequence> cs;
-        CString::New(range, (ICharSequence**)&cs);
-        appendable->Append(cs);
+        appendable->Append(CoreUtils::Convert(range));
     // } catch () {
         // throw new AssertionError(impossible);
         // return E_ASSERTION_ERROR;
@@ -743,7 +744,7 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
     /* [in] */ Boolean withPreposition)
 {
     AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    CSystem::AcquireSingleton((ISystem**)&system);
 
     String result;
     Int64 now;
@@ -752,11 +753,11 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
 
     synchronized(sLockDateUtilsClass) {
         if (sNowTime == NULL) {
-            CTime::New( (ITime**)&sNowTime );
+            CTime::New( (ITime**)&sNowTime);
         }
 
         if (sThenTime == NULL) {
-            CTime::New( (ITime**)&sThenTime );
+            CTime::New( (ITime**)&sThenTime);
         }
 
         sNowTime->Set(now);
@@ -773,7 +774,6 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
             // Same day
             Int32 flags = IDateUtils::FORMAT_SHOW_TIME;
             result = FormatDateRange(c, millis, millis, flags);
-            assert(0 && "TODO");
             prepositionId = R::string::preposition_for_time;
         }
         else if (nowYear != thenYear) {
@@ -793,8 +793,10 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
         if (withPreposition) {
             AutoPtr<IResources> res;
             c->GetResources((IResources**)&res);
+            AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+            (*formatArgs)[0] = CoreUtils::Convert(result);
             String raw;
-            res->GetString(prepositionId, &raw);
+            res->GetString(prepositionId, formatArgs, &raw);
             result = raw;
         }
     }

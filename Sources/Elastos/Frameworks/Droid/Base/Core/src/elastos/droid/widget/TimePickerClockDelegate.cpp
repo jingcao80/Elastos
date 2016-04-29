@@ -566,7 +566,7 @@ ECode TimePickerClockDelegate::OnSaveInstanceState(
     GetCurrentMinute(&minute);
 
     AutoPtr<ITimePickerClockDelegateSavedState> ss;
-    ASSERT_SUCCEEDED(CTimePickerClockDelegateSavedState::New(
+    FAIL_RETURN(CTimePickerClockDelegateSavedState::New(
             superState, hour, minute, (ITimePickerClockDelegateSavedState**)&ss));
 
     *result = IParcelable::Probe(ss);
@@ -688,9 +688,10 @@ AutoPtr< ArrayOf<String> > TimePickerClockDelegate::GetAmPmStrings(
 
     AutoPtr< ArrayOf<String> > amPm;
     d->GetAmPm((ArrayOf<String>**)&amPm);
-    assert(0);
-    String narrowAm;// = (LocaleData*)d->mNarrowAm;
-    String narrowPm;// = (LocaleData*)d->mNarrowPm;
+    String narrowAm;
+    d->GetNarrowAm(&narrowAm);
+    String narrowPm;
+    d->GetNarrowPm(&narrowPm);
 
     Int32 len1 = (*amPm)[0].GetLength();
     Int32 len2 = (*amPm)[1].GetLength();

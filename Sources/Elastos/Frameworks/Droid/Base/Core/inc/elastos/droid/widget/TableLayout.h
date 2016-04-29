@@ -4,15 +4,13 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/LinearLayout.h"
-#include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::HashMap;
+using Elastos::Droid::Utility::ISparseBooleanArray;
 using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
-
 
 /**
  * <p>A layout that arranges its children into rows and columns.
@@ -417,7 +415,7 @@ private:
      * @return a sparse array of Boolean mapping column indexes to the columns
      *         collapse state
      */
-    static AutoPtr< HashMap<Int32, Boolean> > ParseColumns(
+    static AutoPtr<ISparseBooleanArray> ParseColumns(
         /* [in] */ const String& sequence);
 
     /**
@@ -464,7 +462,7 @@ private:
         /* [in] */ Int32 widthMeasureSpec);
 
     CARAPI_(void) MutateColumnsWidth(
-        /* [in] */ HashMap<Int32, Boolean>* columns,
+        /* [in] */ ISparseBooleanArray* columns,
         /* [in] */ Boolean allColumns,
         /* [in] */ Int32 size,
         /* [in] */ Int32 totalWidth);
@@ -475,9 +473,9 @@ private:
 
 private:
     AutoPtr<ArrayOf<Int32> > mMaxWidths;
-    AutoPtr< HashMap<Int32, Boolean> > mStretchableColumns;
-    AutoPtr< HashMap<Int32, Boolean> > mShrinkableColumns;
-    AutoPtr< HashMap<Int32, Boolean> > mCollapsedColumns;
+    AutoPtr<ISparseBooleanArray> mStretchableColumns;
+    AutoPtr<ISparseBooleanArray> mShrinkableColumns;
+    AutoPtr<ISparseBooleanArray> mCollapsedColumns;
 
     Boolean mShrinkAllColumns;
     Boolean mStretchAllColumns;

@@ -114,6 +114,42 @@ module
         GetTomorrow(
             [out] String* tomorrow);
 
+        GetFullTimeFormat(
+            [out] String* fullTimeFormat);
+
+        GetLongTimeFormat(
+            [out] String* longTimeFormat);
+
+        GetMediumTimeFormat(
+            [out] String* mediumTimeFormat);
+
+        GetShortTimeFormat(
+            [out] String* shortTimeFormat);
+
+        GetFullDateFormat(
+            [out] String* fullDateFormat);
+
+        GetLongDateFormat(
+            [out] String* longDateFormat);
+
+        GetMediumDateFormat(
+            [out] String* mediumDateFormat);
+
+        GetShortDateFormat(
+            [out] String* shortDateFormat);
+
+        // Used by TimePicker. Not currently used by UTS#35.
+        GetNarrowAm(
+            [out] String* narrowAm); // "a".
+
+        GetNarrowPm(
+            [out] String* narrowPm); // "p".
+
+        // shortDateFormat, but guaranteed to have 4-digit years.
+        // Used by android.text.format.DateFormat.getDateFormatStringForSetting.
+        GetShortDateFormat4(
+            [out] String* shortDateFormat4);
+
         //
         // Used by DecimalFormatSymbols.
         //

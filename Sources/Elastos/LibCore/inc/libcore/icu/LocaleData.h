@@ -115,6 +115,39 @@ public:
     CARAPI GetTomorrow(
         /* [out] */ String* tomorrow);
 
+    CARAPI GetFullTimeFormat(
+        /* [out] */ String* fullTimeFormat);
+
+    CARAPI GetLongTimeFormat(
+        /* [out] */ String* longTimeFormat);
+
+    CARAPI GetMediumTimeFormat(
+        /* [out] */ String* mediumTimeFormat);
+
+    CARAPI GetShortTimeFormat(
+        /* [out] */ String* shortTimeFormat);
+
+    CARAPI GetFullDateFormat(
+        /* [out] */ String* fullDateFormat);
+
+    CARAPI GetLongDateFormat(
+        /* [out] */ String* longDateFormat);
+
+    CARAPI GetMediumDateFormat(
+        /* [out] */ String* mediumDateFormat);
+
+    CARAPI GetShortDateFormat(
+        /* [out] */ String* shortDateFormat);
+
+    CARAPI GetNarrowAm(
+        /* [out] */ String* narrowAm);
+
+    CARAPI GetNarrowPm(
+        /* [out] */ String* narrowPm);
+
+    CARAPI GetShortDateFormat4(
+        /* [out] */ String* shortDateFormat4);
+
     CARAPI GetZeroDigit(
         /* [out] */ Char32* zeroDigit);
 

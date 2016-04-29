@@ -2,20 +2,19 @@
 #ifndef __ELASTOS_DROID_WIDGET_TABHOST_H__
 #define __ELASTOS_DROID_WIDGET_TABHOST_H__
 
-#include "elastos/droid/widget/FrameLayout.h"
 #include "Elastos.Droid.App.h"
-#include "elastos/droid/R.h"
+#include "elastos/droid/widget/FrameLayout.h"
 
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::App::ILocalActivityManager;
+using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::IOnTouchModeChangeListener;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
-
 
 /**
  * Container for a tabbed window view. This object holds two children: a set of tab labels that the
@@ -168,6 +167,7 @@ private:
      */
     class ViewIndicatorStrategy
         : public Object
+        , public ITabHostViewIndicatorStrategy
         , public ITabHostIndicatorStrategy
     {
     public:
@@ -209,7 +209,6 @@ private:
         friend class TabSpec;
 
         ViewIdContentStrategy();
-
 
     private:
         AutoPtr<IView> mView;
@@ -315,14 +314,23 @@ public:
 
     TabHost();
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    constructor(
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs);
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyleAttr = R::attr::tabWidgetStyle,
-        /* [in] */ Int32 defStyleRes = 0);
+        /* [in] */ Int32 defStyleAttr);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr,
+        /* [in] */ Int32 defStyleRes);
 
     /**
      * Get a new {@link TabSpec} associated with this tab host.
@@ -432,12 +440,6 @@ protected:
     //@Override
     virtual CARAPI OnDetachedFromWindow();
 
-    CARAPI InitFromAttributes(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyleAttr,
-        /* [in] */ Int32 defStyleRes);
-
 private:
     CARAPI_(void) InitTabHost();
 
@@ -471,7 +473,7 @@ private:
 
     AutoPtr<ITabWidget> mTabWidget;
     AutoPtr<IFrameLayout> mTabContent;
-    List< AutoPtr<TabSpec> > mTabSpecs;
+    AutoPtr<IList> mTabSpecs; // List< AutoPtr<TabSpec> > mTabSpecs;
 
     AutoPtr<IView> mCurrentView;
 
@@ -480,7 +482,6 @@ private:
 
     Int32 mTabLayoutId;
 };
-
 
 } // namespace Widget
 } // namespace Droid

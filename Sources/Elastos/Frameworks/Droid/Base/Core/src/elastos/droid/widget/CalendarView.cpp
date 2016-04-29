@@ -34,20 +34,19 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
 using Elastos::Core::ICloneable;
 using Elastos::Core::ISystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Text::ISimpleDateFormat;
+using Elastos::Text::CSimpleDateFormat;
 using Elastos::Utility::IDate;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ICalendarHelper;
 using Elastos::Utility::CCalendarHelper;
 using Elastos::Utility::ITimeZone;
-using Elastos::Text::ISimpleDateFormat;
-using Elastos::Text::CSimpleDateFormat;
 using Libcore::ICU::ILocaleDataHelper;
 using Libcore::ICU::CLocaleDataHelper;
 using Libcore::ICU::ILocaleData;
@@ -1318,6 +1317,7 @@ CalendarView::LegacyCalendarViewDelegate::WeekView::WeekView(
     , mNumCells(0)
     , mSelectedLeft(-1)
     , mSelectedRight(-1)
+    , mHost(host)
 {
     View::constructor(context);
 
@@ -1329,8 +1329,6 @@ CalendarView::LegacyCalendarViewDelegate::WeekView::WeekView(
 
     // Sets up any standard paints that will be used
     InitilaizePaints();
-
-    mHost = host;
 }
 
 void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
@@ -1362,10 +1360,8 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
         hlp->GetDefault((ILocale**)&loc);
         Int32 wy = 0;
         mHost->mTempDate->Get(ICalendar::WEEK_OF_YEAR, &wy);
-        AutoPtr<IInteger32> pWy;
-        CInteger32::New(wy, (IInteger32**)&pWy);
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-        (*arr)[0] = pWy;
+        (*arr)[0] = CoreUtils::Convert(wy);
         (*mDayNumbers)[0] = StringUtils::Format(loc, String("%d"), arr);
         i++;
     }
@@ -1402,10 +1398,8 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
             hlp->GetDefault((ILocale**)&loc);
             Int32 m = 0;
             mHost->mTempDate->Get(ICalendar::DAY_OF_MONTH, &m);
-            AutoPtr<IInteger32> pM;
-            CInteger32::New(m, (IInteger32**)&pM);
             AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-            (*arr)[0] = pM;
+            (*arr)[0] = CoreUtils::Convert(m);
             (*mDayNumbers)[i] = StringUtils::Format(loc, String("%d"), arr);
         }
         mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, 1);
@@ -1432,7 +1426,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::InitilaizePaints()
     mMonthNumDrawPaint->SetAntiAlias(TRUE);
     mMonthNumDrawPaint->SetStyle(PaintStyle_FILL);
     mMonthNumDrawPaint->SetTextAlign(PaintAlign_CENTER);
-    mMonthNumDrawPaint->SetTextSize(mHost->mDateTextSize);
+    mMonthNumDrawPaint->SetTextSize((Float)(mHost->mDateTextSize));
 }
 
 Int32 CalendarView::LegacyCalendarViewDelegate::WeekView::GetMonthOfFirstWeekDay()
