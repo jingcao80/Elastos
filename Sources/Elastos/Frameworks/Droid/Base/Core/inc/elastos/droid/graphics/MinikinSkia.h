@@ -29,7 +29,8 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-class MinikinFontSkia : public MinikinFont {
+class MinikinFontSkia : public MinikinFont
+{
 public:
     // Note: this takes ownership of the reference (will unref on dtor)
     explicit MinikinFontSkia(SkTypeface *typeface);
@@ -56,6 +57,7 @@ public:
 
     // set typeface and fake bold/italic parameters
     static void populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery);
+
 private:
     SkTypeface *mTypeface;
 };

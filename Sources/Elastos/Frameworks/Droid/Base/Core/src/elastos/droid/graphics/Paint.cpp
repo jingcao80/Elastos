@@ -908,7 +908,7 @@ ECode Paint::Descent(
 }
 
 static SkScalar getMetricsInternal(
-    /* [in] */ IPaint* epaint,
+    /* [in] */ Paint* epaint,
     /* [in] */ NativePaint::FontMetrics *metrics)
 {
     const int kElegantTop = 2500;
@@ -916,8 +916,8 @@ static SkScalar getMetricsInternal(
     const int kElegantAscent = 1900;
     const int kElegantDescent = -500;
     const int kElegantLeading = 0;
-    NativePaint* paint = GraphicsNative::GetNativePaint(epaint);
-    TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(epaint);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(epaint->mNativePaint);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(epaint->mNativeTypeface);
     typeface = TypefaceImpl_resolveDefault(typeface);
     android::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
     float saveSkewX = paint->getTextSkewX();
