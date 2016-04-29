@@ -259,9 +259,10 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     AutoPtr<IINfcAdapter> nfc = IINfcAdapter::Probe(obj);
 
     obj = NULL;
-    serviceManager->CheckService(String("phone"), (IInterface**)&obj);
+    serviceManager->CheckService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<IITelephony> phone = IITelephony::Probe(obj);
 
+    // TODO
     // obj = NULL;
     // serviceManager->CheckService(IBluetoothAdapter::BLUETOOTH_MANAGER_SERVICE, (IInterface**)&obj);
     // AutoPtr<IIBluetoothManager> bluetooth = IIBluetoothManager::Probe(obj);

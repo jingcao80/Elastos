@@ -288,17 +288,6 @@ AbsListView::SavedState::~SavedState()
     mCheckIdState = NULL;
 }
 
-ECode AbsListView::SavedState::constructor()
-{
-    return View::BaseSavedState::constructor();
-}
-
-ECode AbsListView::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return View::BaseSavedState::constructor(superState);
-}
-
 ECode AbsListView::SavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {

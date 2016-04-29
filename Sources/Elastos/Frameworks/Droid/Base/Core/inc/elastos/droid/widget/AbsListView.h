@@ -198,12 +198,6 @@ public:
 
         ~SavedState();
 
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
-
-        CARAPI constructor();
-
-    public:
         // @Override
         CARAPI WriteToParcel(
             /* [in] */ IParcel* dest);

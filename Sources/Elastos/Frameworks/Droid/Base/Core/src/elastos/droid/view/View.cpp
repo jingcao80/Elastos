@@ -18493,34 +18493,6 @@ Boolean View::InLiveRegion()
 
 CAR_INTERFACE_IMPL(View::BaseSavedState, AbsSavedState, IViewBaseSavedState)
 
-View::BaseSavedState::BaseSavedState()
-{}
-
-ECode View::BaseSavedState::constructor()
-{
-    return AbsSavedState::constructor();
-}
-
-ECode View::BaseSavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return AbsSavedState::constructor(superState);
-}
-
-ECode View::BaseSavedState::WriteToParcel(
-    /* [in] */ IParcel* dest)
-{
-    AbsSavedState::WriteToParcel(dest);
-    return NOERROR;
-}
-
-ECode View::BaseSavedState::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    AbsSavedState::ReadFromParcel(source);
-    return NOERROR;
-}
-
 /////////////////////////////////////////////////////////
 //              View::AlpahFloatProperty
 /////////////////////////////////////////////////////////

@@ -490,7 +490,7 @@ ECode MobileDataStateTracker::GetPhoneService(
     /* [in] */ Boolean forceRefresh)
 {
     if ((mPhoneService == NULL) || forceRefresh) {
-        AutoPtr<IInterface> service = ServiceManager::GetService(String("phone"));
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::TELEPHONY_SERVICE);
         mPhoneService = IITelephony::Probe(service);
     }
     return NOERROR;

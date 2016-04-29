@@ -36,10 +36,11 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
-public:
-    static const AutoPtr<IAbsSavedState> EMPTY_STATE;
+    CARAPI_(AutoPtr<IAbsSavedState>) GetEMPTY_STATE();
 
 private:
+    static const AutoPtr<IAbsSavedState> EMPTY_STATE;
+
     AutoPtr<IParcelable> mSuperState;
 };
 
