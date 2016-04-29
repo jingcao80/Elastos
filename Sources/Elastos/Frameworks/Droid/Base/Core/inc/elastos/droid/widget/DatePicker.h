@@ -2,12 +2,9 @@
 #ifndef __ELASTOS_DROID_WIDGET_DATEPICKER_H__
 #define __ELASTOS_DROID_WIDGET_DATEPICKER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.CoreLibrary.h>
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/view/View.h"
-#include "elastos/droid/R.h"
-
-#include <Elastos.CoreLibrary.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
@@ -16,10 +13,9 @@ using Elastos::Droid::View::View;
 using Elastos::Droid::View::EIID_IViewBaseSavedState;
 using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::INumberPickerOnValueChangeListener;
-
+using Elastos::Text::IDateFormat;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ICalendar;
-using Elastos::Text::IDateFormat;
 
 namespace Elastos {
 namespace Droid {

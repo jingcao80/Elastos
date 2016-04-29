@@ -2,12 +2,15 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Text.h"
 #include <Elastos.CoreLibrary.Libcore.h>
-#include "elastos/droid/R.h"
+#include "elastos/droid/widget/TimePickerClockDelegate.h"
+#include "elastos/droid/widget/CTimePickerClockDelegateSavedState.h"
+#include "elastos/droid/widget/CNumberPickerHelper.h"
 #include "elastos/droid/text/format/CDateFormat.h"
 #include "elastos/droid/text/format/CDateUtils.h"
+#include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "elastos/droid/widget/CNumberPickerHelper.h"
-#include "elastos/droid/widget/TimePickerClockDelegate.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/StringBuilder.h>
 //#include "libcore/icu/LocaleData.h"
 
 using Elastos::Droid::Text::Format::CDateFormat;
@@ -17,10 +20,12 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::View::InputMethod::CInputMethodManager;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::Widget::CNumberPickerHelper;
 using Elastos::Core::CString;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::CCalendarHelper;
 using Elastos::Utility::ICalendar;
 using Elastos::Utility::ICalendarHelper;
@@ -36,137 +41,76 @@ namespace Widget {
 //=====================================================================
 //                 TimePickerClockDelegate::SavedState
 //=====================================================================
-const AutoPtr<IParcelable> TimePickerClockDelegate::SavedState::CREATOR = TimePickerClockDelegate::SavedState::InitCreator();
 
-ECode TimePickerClockDelegate::SavedState::GetHour(
-    /* [out] */ Int32* result)
+CAR_INTERFACE_IMPL(TimePickerClockDelegate::SavedState, Elastos::Droid::View::View::BaseSavedState, ITimePickerClockDelegateSavedState)
+
+TimePickerClockDelegate::SavedState::SavedState()
+    : mHour(0)
+    , mMinute(0)
+{}
+
+TimePickerClockDelegate::SavedState::~SavedState()
+{}
+
+ECode TimePickerClockDelegate::SavedState::constructor()
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mHour;
+    return Elastos::Droid::View::View::BaseSavedState::constructor();
+}
 
-    *result = mHour;
+ECode TimePickerClockDelegate::SavedState::constructor(
+    /* [in] */ IParcelable* superState,
+    /* [in] */ Int32 hour,
+    /* [in] */ Int32 minute)
+{
+    FAIL_RETURN(Elastos::Droid::View::View::BaseSavedState::constructor(superState))
+
+    mHour = hour;
+    mMinute = minute;
     return NOERROR;
 }
 
-ECode TimePickerClockDelegate::SavedState::GetMinute(
-    /* [out] */ Int32* result)
+Int32 TimePickerClockDelegate::SavedState::GetHour()
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMinute;
+    return mHour;
+}
 
-    *result = mMinute;
-    return NOERROR;
+Int32 TimePickerClockDelegate::SavedState::GetMinute()
+{
+    return mMinute;
 }
 
 ECode TimePickerClockDelegate::SavedState::WriteToParcel(
-    /* [in] */ IParcel* dest,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* dest)
 {
-    VALIDATE_NOT_NULL(dest);
-    // ==================before translated======================
-    // super.writeToParcel(dest, flags);
-    // dest.writeInt(mHour);
-    // dest.writeInt(mMinute);
-
-    assert(0);
-    Elastos::Droid::View::View::BaseSavedState::WriteToParcel(dest/*, flags*/);
+    FAIL_RETURN(Elastos::Droid::View::View::BaseSavedState::WriteToParcel(dest));
     dest->WriteInt32(mHour);
     dest->WriteInt32(mMinute);
     return NOERROR;
 }
 
-TimePickerClockDelegate::SavedState::SavedState(
-    /* [in] */ IParcelable* superState,
-    /* [in] */ Int32 hour,
-    /* [in] */ Int32 minute)
-    : mHour(hour)
-    , mMinute(minute)
+ECode TimePickerClockDelegate::SavedState::ReadFromParcel(
+    /* [in] */ IParcel* source)
 {
-    // ==================before translated======================
-    // super(superState);
-    // mHour = hour;
-    // mMinute = minute;
-
-    BaseSavedState::constructor(superState);
-}
-
-TimePickerClockDelegate::SavedState::SavedState(
-    /* [in] */ IParcel* in)
-{
-    // ==================before translated======================
-    // super(in);
-    // mHour = in.readInt();
-    // mMinute = in.readInt();
-
-    assert(0);
-    //BaseSavedState::constructor(in);
-    in->ReadInt32(&mHour);
-    in->ReadInt32(&mMinute);
-}
-
-TimePickerClockDelegate::SavedState::SavedState()
-    : mHour(0)
-    , mMinute(0)
-{
-}
-
-AutoPtr<IParcelable> TimePickerClockDelegate::SavedState::InitCreator()
-{
-    AutoPtr<IParcelable> result = new InnerCreator();
-    return result;
-}
-
-//=====================================================================
-//                TimePickerClockDelegate::InnerCreator
-//=====================================================================
-CAR_INTERFACE_IMPL(TimePickerClockDelegate::InnerCreator, Object, IParcelable)
-
-TimePickerClockDelegate::InnerCreator::InnerCreator()
-{
-}
-
-ECode TimePickerClockDelegate::InnerCreator::CreateFromParcel(
-    /* [in] */ IParcel* in,
-    /* [out] */ SavedState** result)
-{
-    VALIDATE_NOT_NULL(in);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new SavedState(in);
-
-    *result = new SavedState(in);
-    REFCOUNT_ADD(*result);
+    FAIL_RETURN(Elastos::Droid::View::View::BaseSavedState::ReadFromParcel(source));
+    source->ReadInt32(&mHour);
+    source->ReadInt32(&mMinute);
     return NOERROR;
 }
 
-ECode TimePickerClockDelegate::InnerCreator::NewArray(
-    /* [in] */ Int32 size,
-    /* [out] */ ArrayOf<SavedState*>** result)
+ECode TimePickerClockDelegate::SavedState::ToString(
+    /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new SavedState[size];
+    VALIDATE_NOT_NULL(str);
+    StringBuilder buider;
+    buider += "TimePickerClockDelegate.SavedState{";
 
-    *result = ArrayOf<SavedState*>::Alloc(size);
-    for (Int32 idx=0; idx<size; ++idx) {
-        AutoPtr<SavedState> item = new SavedState();
-        (*result)->Set(idx, item);
-    }
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
+    buider += " mHour=";
+    buider += mHour;
+    buider += " mMinute=";
+    buider += mMinute;
+    buider += "}";
 
-ECode TimePickerClockDelegate::InnerCreator::ReadFromParcel(
-    /* [in] */ IParcel* parcel)
-{
-    return NOERROR;
-}
-
-ECode TimePickerClockDelegate::InnerCreator::WriteToParcel(
-    /* [in] */ IParcel* parcel)
-{
+    *str = buider.ToString();
     return NOERROR;
 }
 
@@ -187,17 +131,6 @@ ECode TimePickerClockDelegate::InnerOnValueChangeListener::OnValueChange(
     /* [in] */ Int32 oldVal,
     /* [in] */ Int32 newVal)
 {
-    // ==================before translated======================
-    // updateInputState();
-    // if (!is24HourView()) {
-    //     if ((oldVal == HOURS_IN_HALF_DAY - 1 && newVal == HOURS_IN_HALF_DAY) ||
-    //             (oldVal == HOURS_IN_HALF_DAY && newVal == HOURS_IN_HALF_DAY - 1)) {
-    //         mIsAm = !mIsAm;
-    //         updateAmPmControl();
-    //     }
-    // }
-    // onTimeChanged();
-
     mOwner->UpdateInputState();
     Boolean is24Hour = FALSE;
     mOwner->Is24HourView(&is24Hour);
@@ -229,27 +162,6 @@ ECode TimePickerClockDelegate::InnerOnValueChangeListener1::OnValueChange(
     /* [in] */ Int32 oldVal,
     /* [in] */ Int32 newVal)
 {
-    // ==================before translated======================
-    // updateInputState();
-    // int minValue = mMinuteSpinner.getMinValue();
-    // int maxValue = mMinuteSpinner.getMaxValue();
-    // if (oldVal == maxValue && newVal == minValue) {
-    //     int newHour = mHourSpinner.getValue() + 1;
-    //     if (!is24HourView() && newHour == HOURS_IN_HALF_DAY) {
-    //         mIsAm = !mIsAm;
-    //         updateAmPmControl();
-    //     }
-    //     mHourSpinner.setValue(newHour);
-    // } else if (oldVal == minValue && newVal == maxValue) {
-    //     int newHour = mHourSpinner.getValue() - 1;
-    //     if (!is24HourView() && newHour == HOURS_IN_HALF_DAY - 1) {
-    //         mIsAm = !mIsAm;
-    //         updateAmPmControl();
-    //     }
-    //     mHourSpinner.setValue(newHour);
-    // }
-    // onTimeChanged();
-
     mOwner->UpdateInputState();
     Int32 minValue = 0, maxValue = 0;
     mOwner->mMinuteSpinner->GetMinValue(&minValue);
@@ -300,16 +212,10 @@ ECode TimePickerClockDelegate::InnerOnValueChangeListener2::OnValueChange(
     /* [in] */ Int32 oldVal,
     /* [in] */ Int32 newVal)
 {
-    // ==================before translated======================
-    // updateInputState();
-    // picker.requestFocus();
-    // mIsAm = !mIsAm;
-    // updateAmPmControl();
-    // onTimeChanged();
 
     mOwner->UpdateInputState();
     Boolean resTmp;
-    (IView::Probe(picker))->RequestFocus(&resTmp);
+    IView::Probe(picker)->RequestFocus(&resTmp);
     mOwner->mIsAm = !mOwner->mIsAm;
     mOwner->UpdateAmPmControl();
     mOwner->OnTimeChanged();
@@ -332,14 +238,9 @@ ECode TimePickerClockDelegate::InnerOnClickListener::OnClick(
     /* [in] */ IView* button)
 {
     VALIDATE_NOT_NULL(button);
-    // ==================before translated======================
-    // button.requestFocus();
-    // mIsAm = !mIsAm;
-    // updateAmPmControl();
-    // onTimeChanged();
 
     Boolean resTmp;
-    (IView::Probe(button))->RequestFocus(&resTmp);
+    IView::Probe(button)->RequestFocus(&resTmp);
     mOwner->mIsAm = !mOwner->mIsAm;
     mOwner->UpdateAmPmControl();
     mOwner->OnTimeChanged();
@@ -370,155 +271,12 @@ ECode TimePickerClockDelegate::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    // ==================before translated======================
-    // super(delegator, context);
-    //
-    // // process style attributes
-    // final TypedArray a = mContext.obtainStyledAttributes(
-    //         attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
-    // final int layoutResourceId = a.getResourceId(
-    //         R.styleable.TimePicker_legacyLayout, R.layout.time_picker_legacy);
-    // a.recycle();
-    //
-    // final LayoutInflater inflater = LayoutInflater.from(mContext);
-    // inflater.inflate(layoutResourceId, mDelegator, true);
-    //
-    // // hour
-    // mHourSpinner = (NumberPicker) delegator.findViewById(R.id.hour);
-    // mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-    //     public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
-    //         updateInputState();
-    //         if (!is24HourView()) {
-    //             if ((oldVal == HOURS_IN_HALF_DAY - 1 && newVal == HOURS_IN_HALF_DAY) ||
-    //                     (oldVal == HOURS_IN_HALF_DAY && newVal == HOURS_IN_HALF_DAY - 1)) {
-    //                 mIsAm = !mIsAm;
-    //                 updateAmPmControl();
-    //             }
-    //         }
-    //         onTimeChanged();
-    //     }
-    // });
-    // mHourSpinnerInput = (EditText) mHourSpinner.findViewById(R.id.numberpicker_input);
-    // mHourSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-    //
-    // // divider (only for the new widget style)
-    // mDivider = (TextView) mDelegator.findViewById(R.id.divider);
-    // if (mDivider != null) {
-    //     setDividerText();
-    // }
-    //
-    // // minute
-    // mMinuteSpinner = (NumberPicker) mDelegator.findViewById(R.id.minute);
-    // mMinuteSpinner.setMinValue(0);
-    // mMinuteSpinner.setMaxValue(59);
-    // mMinuteSpinner.setOnLongPressUpdateInterval(100);
-    // mMinuteSpinner.setFormatter(NumberPicker.getTwoDigitFormatter());
-    // mMinuteSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-    //     public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
-    //         updateInputState();
-    //         int minValue = mMinuteSpinner.getMinValue();
-    //         int maxValue = mMinuteSpinner.getMaxValue();
-    //         if (oldVal == maxValue && newVal == minValue) {
-    //             int newHour = mHourSpinner.getValue() + 1;
-    //             if (!is24HourView() && newHour == HOURS_IN_HALF_DAY) {
-    //                 mIsAm = !mIsAm;
-    //                 updateAmPmControl();
-    //             }
-    //             mHourSpinner.setValue(newHour);
-    //         } else if (oldVal == minValue && newVal == maxValue) {
-    //             int newHour = mHourSpinner.getValue() - 1;
-    //             if (!is24HourView() && newHour == HOURS_IN_HALF_DAY - 1) {
-    //                 mIsAm = !mIsAm;
-    //                 updateAmPmControl();
-    //             }
-    //             mHourSpinner.setValue(newHour);
-    //         }
-    //         onTimeChanged();
-    //     }
-    // });
-    // mMinuteSpinnerInput = (EditText) mMinuteSpinner.findViewById(R.id.numberpicker_input);
-    // mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-    //
-    // // Get the localized am/pm strings and use them in the spinner.
-    // mAmPmStrings = getAmPmStrings(context);
-    //
-    // // am/pm
-    // final View amPmView = mDelegator.findViewById(R.id.amPm);
-    // if (amPmView instanceof Button) {
-    //     mAmPmSpinner = null;
-    //     mAmPmSpinnerInput = null;
-    //     mAmPmButton = (Button) amPmView;
-    //     mAmPmButton.setOnClickListener(new View.OnClickListener() {
-    //         public void onClick(View button) {
-    //             button.requestFocus();
-    //             mIsAm = !mIsAm;
-    //             updateAmPmControl();
-    //             onTimeChanged();
-    //         }
-    //     });
-    // } else {
-    //     mAmPmButton = null;
-    //     mAmPmSpinner = (NumberPicker) amPmView;
-    //     mAmPmSpinner.setMinValue(0);
-    //     mAmPmSpinner.setMaxValue(1);
-    //     mAmPmSpinner.setDisplayedValues(mAmPmStrings);
-    //     mAmPmSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-    //         public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-    //             updateInputState();
-    //             picker.requestFocus();
-    //             mIsAm = !mIsAm;
-    //             updateAmPmControl();
-    //             onTimeChanged();
-    //         }
-    //     });
-    //     mAmPmSpinnerInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
-    //     mAmPmSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
-    // }
-    //
-    // if (isAmPmAtStart()) {
-    //     // Move the am/pm view to the beginning
-    //     ViewGroup amPmParent = (ViewGroup) delegator.findViewById(R.id.timePickerLayout);
-    //     amPmParent.removeView(amPmView);
-    //     amPmParent.addView(amPmView, 0);
-    //     // Swap layout margins if needed. They may be not symmetrical (Old Standard Theme
-    //     // for example and not for Holo Theme)
-    //     ViewGroup.MarginLayoutParams lp =
-    //             (ViewGroup.MarginLayoutParams) amPmView.getLayoutParams();
-    //     final int startMargin = lp.getMarginStart();
-    //     final int endMargin = lp.getMarginEnd();
-    //     if (startMargin != endMargin) {
-    //         lp.setMarginStart(endMargin);
-    //         lp.setMarginEnd(startMargin);
-    //     }
-    // }
-    //
-    // getHourFormatData();
-    //
-    // // update controls to initial state
-    // updateHourControl();
-    // updateMinuteControl();
-    // updateAmPmControl();
-    //
-    // // set to current time
-    // setCurrentHour(mTempCalendar.get(Calendar.HOUR_OF_DAY));
-    // setCurrentMinute(mTempCalendar.get(Calendar.MINUTE));
-    //
-    // if (!isEnabled()) {
-    //     setEnabled(false);
-    // }
-    //
-    // // set the content descriptions
-    // setContentDescriptions();
-    //
-    // // If not explicitly specified this view is important for accessibility.
-    // if (mDelegator.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-    //     mDelegator.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-    // }
-
-    assert(0);
     TimePicker::AbstractTimePickerDelegate::constructor(delegator, context);
-    AutoPtr< ArrayOf<Int32> > styleAttrs = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::TimePicker),
-        ArraySize(R::styleable::TimePicker));
+
+    // process style attributes
+    AutoPtr< ArrayOf<Int32> > styleAttrs =
+            ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::TimePicker),
+            ArraySize(R::styleable::TimePicker));
     AutoPtr<ITypedArray> a;
     mContext->ObtainStyledAttributes(attrs, styleAttrs, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     Int32 layoutResourceId = 0;
@@ -530,27 +288,31 @@ ECode TimePickerClockDelegate::constructor(
     AutoPtr<IView> viewTmp;
     inflater->Inflate(layoutResourceId, IViewGroup::Probe(mDelegator), TRUE, (IView**)&viewTmp);
 
+    // hour
     AutoPtr<IView> viewTmp1;
-    (IView::Probe(delegator))->FindViewById(R::id::hour, (IView**)&viewTmp1);
+    IView::Probe(delegator)->FindViewById(R::id::hour, (IView**)&viewTmp1);
     mHourSpinner = INumberPicker::Probe(viewTmp1);
 
     AutoPtr<INumberPickerOnValueChangeListener> valueChangeListener = new InnerOnValueChangeListener(this);
     mHourSpinner->SetOnValueChangedListener(valueChangeListener);
 
     AutoPtr<IView> viewTmp2;
-    (IView::Probe(mHourSpinner))->FindViewById(R::id::numberpicker_input, (IView**)&viewTmp2);
+    IView::Probe(mHourSpinner)->FindViewById(R::id::numberpicker_input, (IView**)&viewTmp2);
     mHourSpinnerInput = IEditText::Probe(viewTmp2);
-    (ITextView::Probe(mHourSpinnerInput))->SetImeOptions(IEditorInfo::IME_ACTION_NEXT);
+    ITextView::Probe(mHourSpinnerInput)->SetImeOptions(IEditorInfo::IME_ACTION_NEXT);
 
+    AutoPtr<IView> viewDelegator = IView::Probe(mDelegator);
+    // divider (only for the new widget style)
     AutoPtr<IView> viewTmp3;
-    (IView::Probe(mDelegator))->FindViewById(R::id::divider, (IView**)&viewTmp3);
+    viewDelegator->FindViewById(R::id::divider, (IView**)&viewTmp3);
     mDivider = ITextView::Probe(viewTmp3);
     if (mDivider != NULL) {
         SetDividerText();
     }
 
+    // minute
     AutoPtr<IView> viewTmp4;
-    (IView::Probe(mDelegator))->FindViewById(R::id::minute, (IView**)&viewTmp4);
+    viewDelegator->FindViewById(R::id::minute, (IView**)&viewTmp4);
     mMinuteSpinner = INumberPicker::Probe(viewTmp4);
     mMinuteSpinner->SetMinValue(0);
     mMinuteSpinner->SetMaxValue(59);
@@ -566,14 +328,16 @@ ECode TimePickerClockDelegate::constructor(
     mMinuteSpinner->SetOnValueChangedListener(valueChangeListener1);
 
     AutoPtr<IView> viewTmp5;
-    (IView::Probe(mMinuteSpinner))->FindViewById(R::id::numberpicker_input, (IView**)&viewTmp5);
+    IView::Probe(mMinuteSpinner)->FindViewById(R::id::numberpicker_input, (IView**)&viewTmp5);
     mMinuteSpinnerInput = IEditText::Probe(viewTmp5);
-    (ITextView::Probe(mMinuteSpinnerInput))->SetImeOptions(IEditorInfo::IME_ACTION_NEXT);
+    ITextView::Probe(mMinuteSpinnerInput)->SetImeOptions(IEditorInfo::IME_ACTION_NEXT);
 
+    // Get the localized am/pm strings and use them in the spinner.
     mAmPmStrings = GetAmPmStrings(context);
 
+    // am/pm
     AutoPtr<IView> amPmView;
-    (IView::Probe(mDelegator))->FindViewById(R::id::amPm, (IView**)&amPmView);
+    viewDelegator->FindViewById(R::id::amPm, (IView**)&amPmView);
     IButton* buttonTmp = IButton::Probe(amPmView);
     if (buttonTmp) {
         mAmPmSpinner = NULL;
@@ -581,7 +345,7 @@ ECode TimePickerClockDelegate::constructor(
         mAmPmButton = buttonTmp;
 
         AutoPtr<IViewOnClickListener> onClickListener = new InnerOnClickListener(this);
-        (IView::Probe(mAmPmButton))->SetOnClickListener(onClickListener);
+        IView::Probe(mAmPmButton)->SetOnClickListener(onClickListener);
     }
     else {
         mAmPmButton = NULL;
@@ -590,21 +354,22 @@ ECode TimePickerClockDelegate::constructor(
         mAmPmSpinner->SetMaxValue(1);
         mAmPmSpinner->SetDisplayedValues(mAmPmStrings);
 
-        AutoPtr<INumberPickerOnValueChangeListener> valueChangeListener2 = new InnerOnValueChangeListener1(this);
+        AutoPtr<INumberPickerOnValueChangeListener> valueChangeListener2 = new InnerOnValueChangeListener2(this);
         mAmPmSpinner->SetOnValueChangedListener(valueChangeListener2);
 
         AutoPtr<IView> viewTmp6;
-        (IView::Probe(mAmPmSpinner))->FindViewById(R::id::numberpicker_input, (IView**)&viewTmp6);
+        IView::Probe(mAmPmSpinner)->FindViewById(R::id::numberpicker_input, (IView**)&viewTmp6);
         mAmPmSpinnerInput = IEditText::Probe(viewTmp6);
-        (ITextView::Probe(mAmPmSpinnerInput))->SetImeOptions(IEditorInfo::IME_ACTION_DONE);
+        ITextView::Probe(mAmPmSpinnerInput)->SetImeOptions(IEditorInfo::IME_ACTION_DONE);
     }
 
     if (IsAmPmAtStart()) {
+        // Move the am/pm view to the beginning
         AutoPtr<IView> viewTmp7;
-        (IView::Probe(delegator))->FindViewById(R::id::timePickerLayout, (IView**)&viewTmp7);
+        IView::Probe(delegator)->FindViewById(R::id::timePickerLayout, (IView**)&viewTmp7);
         IViewGroup* amPmParent = IViewGroup::Probe(viewTmp7);
-        (IViewGroup::Probe(amPmParent))->RemoveView(amPmView);
-        (IViewGroup::Probe(amPmParent))->AddView(amPmView, 0);
+        amPmParent->RemoveView(amPmView);
+        amPmParent->AddView(amPmView, 0);
         // Swap layout margins if needed. They may be not symmetrical (Old Standard Theme
         // for example and not for Holo Theme)
 
@@ -646,9 +411,9 @@ ECode TimePickerClockDelegate::constructor(
 
     // If not explicitly specified this view is important for accessibility.
     Int32 accessibility = 0;
-    (IView::Probe(mDelegator))->GetImportantForAccessibility(&accessibility);
+    viewDelegator->GetImportantForAccessibility(&accessibility);
     if (accessibility == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-        (IView::Probe(mDelegator))->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
+        viewDelegator->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
     return NOERROR;
 }
@@ -657,8 +422,6 @@ ECode TimePickerClockDelegate::SetCurrentHour(
     /* [in] */ Int32 currentHour)
 {
     VALIDATE_NOT_NULL(currentHour);
-    // ==================before translated======================
-    // setCurrentHour(currentHour, true);
 
     SetCurrentHour(currentHour, TRUE);
     return NOERROR;
@@ -668,15 +431,6 @@ ECode TimePickerClockDelegate::GetCurrentHour(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int currentHour = mHourSpinner.getValue();
-    // if (is24HourView()) {
-    //     return currentHour;
-    // } else if (mIsAm) {
-    //     return currentHour % HOURS_IN_HALF_DAY;
-    // } else {
-    //     return (currentHour % HOURS_IN_HALF_DAY) + HOURS_IN_HALF_DAY;
-    // }
 
     Int32 currentHour = 0;
     mHourSpinner->GetValue(&currentHour);
@@ -697,12 +451,6 @@ ECode TimePickerClockDelegate::GetCurrentHour(
 ECode TimePickerClockDelegate::SetCurrentMinute(
     /* [in] */ Int32 currentMinute)
 {
-    // ==================before translated======================
-    // if (currentMinute == getCurrentMinute()) {
-    //     return;
-    // }
-    // mMinuteSpinner.setValue(currentMinute);
-    // onTimeChanged();
 
     Int32 minute = 0;
     GetCurrentMinute(&minute);
@@ -718,8 +466,6 @@ ECode TimePickerClockDelegate::GetCurrentMinute(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMinuteSpinner.getValue();
 
     mMinuteSpinner->GetValue(result);
     return NOERROR;
@@ -728,20 +474,6 @@ ECode TimePickerClockDelegate::GetCurrentMinute(
 ECode TimePickerClockDelegate::SetIs24HourView(
     /* [in] */ Boolean is24HourView)
 {
-    // ==================before translated======================
-    // if (mIs24HourView == is24HourView) {
-    //     return;
-    // }
-    // // cache the current hour since spinner range changes and BEFORE changing mIs24HourView!!
-    // int currentHour = getCurrentHour();
-    // // Order is important here.
-    // mIs24HourView = is24HourView;
-    // getHourFormatData();
-    // updateHourControl();
-    // // set value after spinner range is updated
-    // setCurrentHour(currentHour, false);
-    // updateMinuteControl();
-    // updateAmPmControl();
 
     if (mIs24HourView == is24HourView) {
         return NOERROR;
@@ -764,9 +496,6 @@ ECode TimePickerClockDelegate::Is24HourView(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIs24HourView;
-
     *result = mIs24HourView;
     return NOERROR;
 }
@@ -774,9 +503,6 @@ ECode TimePickerClockDelegate::Is24HourView(
 ECode TimePickerClockDelegate::SetOnTimeChangedListener(
     /* [in] */ ITimePickerOnTimeChangedListener* onTimeChangedListener)
 {
-    // ==================before translated======================
-    // mOnTimeChangedListener = onTimeChangedListener;
-
     mOnTimeChangedListener = onTimeChangedListener;
     return NOERROR;
 }
@@ -784,19 +510,6 @@ ECode TimePickerClockDelegate::SetOnTimeChangedListener(
 ECode TimePickerClockDelegate::SetEnabled(
     /* [in] */ Boolean enabled)
 {
-    // ==================before translated======================
-    // mMinuteSpinner.setEnabled(enabled);
-    // if (mDivider != null) {
-    //     mDivider.setEnabled(enabled);
-    // }
-    // mHourSpinner.setEnabled(enabled);
-    // if (mAmPmSpinner != null) {
-    //     mAmPmSpinner.setEnabled(enabled);
-    // } else {
-    //     mAmPmButton.setEnabled(enabled);
-    // }
-    // mIsEnabled = enabled;
-
     (IView::Probe(mMinuteSpinner))->SetEnabled(enabled);
     if (mDivider != NULL) {
         (IView::Probe(mDivider))->SetEnabled(enabled);
@@ -816,8 +529,6 @@ ECode TimePickerClockDelegate::IsEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsEnabled;
 
     *result = mIsEnabled;
     return NOERROR;
@@ -827,8 +538,6 @@ ECode TimePickerClockDelegate::GetBaseline(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mHourSpinner.getBaseline();
 
     (IView::Probe(mHourSpinner))->GetBaseline(result);
     return NOERROR;
@@ -838,8 +547,6 @@ ECode TimePickerClockDelegate::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     VALIDATE_NOT_NULL(newConfig);
-    // ==================before translated======================
-    // setCurrentLocale(newConfig.locale);
 
     AutoPtr<ILocale> locale;
     newConfig->GetLocale((ILocale**)&locale);
@@ -853,13 +560,16 @@ ECode TimePickerClockDelegate::OnSaveInstanceState(
 {
     VALIDATE_NOT_NULL(superState);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new SavedState(superState, getCurrentHour(), getCurrentMinute());
 
     Int32 hour = 0, minute = 0;
     GetCurrentHour(&hour);
     GetCurrentMinute(&minute);
-    *result = new SavedState(superState, hour, minute);
+
+    AutoPtr<ITimePickerClockDelegateSavedState> ss;
+    ASSERT_SUCCEEDED(CTimePickerClockDelegateSavedState::New(
+            superState, hour, minute, (ITimePickerClockDelegateSavedState**)&ss));
+
+    *result = IParcelable::Probe(ss);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -868,17 +578,14 @@ ECode TimePickerClockDelegate::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     VALIDATE_NOT_NULL(state);
-    // ==================before translated======================
-    // SavedState ss = (SavedState) state;
-    // setCurrentHour(ss.getHour());
-    // setCurrentMinute(ss.getMinute());
 
-    SavedState* ss = (SavedState*)state;
-    Int32 hour = 0, minute = 0;
-    ss->GetHour(&hour);
-    ss->GetMinute(&minute);
-    SetCurrentHour(hour);
-    SetCurrentMinute(minute);
+    AutoPtr<CTimePickerClockDelegateSavedState> ss =
+            (CTimePickerClockDelegateSavedState*)ITimePickerClockDelegateSavedState::Probe(state);
+    if (!ss) return NOERROR;
+
+    SetCurrentHour(ss->GetHour());
+    SetCurrentMinute(ss->GetMinute());
+
     return NOERROR;
 }
 
@@ -888,9 +595,6 @@ ECode TimePickerClockDelegate::DispatchPopulateAccessibilityEvent(
 {
     VALIDATE_NOT_NULL(event);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // onPopulateAccessibilityEvent(event);
-    // return true;
 
     OnPopulateAccessibilityEvent(event);
     *result = TRUE;
@@ -901,18 +605,6 @@ ECode TimePickerClockDelegate::OnPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     VALIDATE_NOT_NULL(event);
-    // ==================before translated======================
-    // int flags = DateUtils.FORMAT_SHOW_TIME;
-    // if (mIs24HourView) {
-    //     flags |= DateUtils.FORMAT_24HOUR;
-    // } else {
-    //     flags |= DateUtils.FORMAT_12HOUR;
-    // }
-    // mTempCalendar.set(Calendar.HOUR_OF_DAY, getCurrentHour());
-    // mTempCalendar.set(Calendar.MINUTE, getCurrentMinute());
-    // String selectedDateUtterance = DateUtils.formatDateTime(mContext,
-    //         mTempCalendar.getTimeInMillis(), flags);
-    // event.getText().add(selectedDateUtterance);
 
     Int32 flags = IDateUtils::FORMAT_SHOW_TIME;
     if (mIs24HourView) {
@@ -948,8 +640,6 @@ ECode TimePickerClockDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     VALIDATE_NOT_NULL(event);
-    // ==================before translated======================
-    // event.setClassName(TimePicker.class.getName());
 
     AutoPtr<ICharSequence> charSequence;
     CString::New(String("TimePicker"), (ICharSequence**)&charSequence);
@@ -961,8 +651,6 @@ ECode TimePickerClockDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     VALIDATE_NOT_NULL(info);
-    // ==================before translated======================
-    // info.setClassName(TimePicker.class.getName());
 
     AutoPtr<ICharSequence> charSequence;
     CString::New(String("TimePicker"), (ICharSequence**)&charSequence);
@@ -974,9 +662,6 @@ ECode TimePickerClockDelegate::SetCurrentLocale(
     /* [in] */ ILocale* locale)
 {
     VALIDATE_NOT_NULL(locale);
-    // ==================before translated======================
-    // super.setCurrentLocale(locale);
-    // mTempCalendar = Calendar.getInstance(locale);
 
     TimePicker::AbstractTimePickerDelegate::SetCurrentLocale(locale);
     AutoPtr<ICalendarHelper> helper;
@@ -988,14 +673,6 @@ ECode TimePickerClockDelegate::SetCurrentLocale(
 AutoPtr< ArrayOf<String> > TimePickerClockDelegate::GetAmPmStrings(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // String[] result = new String[2];
-    // LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-    // result[0] = d.amPm[0].length() > 2 ? d.narrowAm : d.amPm[0];
-    // result[1] = d.amPm[1].length() > 2 ? d.narrowPm : d.amPm[1];
-    // return result;
-
-    assert(0);
     AutoPtr< ArrayOf<String> > result = ArrayOf<String>::Alloc(2);
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
@@ -1011,41 +688,25 @@ AutoPtr< ArrayOf<String> > TimePickerClockDelegate::GetAmPmStrings(
 
     AutoPtr< ArrayOf<String> > amPm;
     d->GetAmPm((ArrayOf<String>**)&amPm);
+    assert(0);
     String narrowAm;// = (LocaleData*)d->mNarrowAm;
     String narrowPm;// = (LocaleData*)d->mNarrowPm;
 
-    Int32 len = (*amPm)[0].GetLength();
-    result->Set(0, len > 2 ? narrowAm : (*amPm)[0]);
-    result->Set(1, len > 2 ? narrowPm : (*amPm)[1]);
+    Int32 len1 = (*amPm)[0].GetLength();
+    Int32 len2 = (*amPm)[1].GetLength();
+    result->Set(0, len1 > 2 ? narrowAm : (*amPm)[0]);
+    result->Set(1, len2 > 2 ? narrowPm : (*amPm)[1]);
     return result;
 }
 
 void TimePickerClockDelegate::GetHourFormatData()
 {
-    // ==================before translated======================
-    // final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
-    //         (mIs24HourView) ? "Hm" : "hm");
-    // final int lengthPattern = bestDateTimePattern.length();
-    // mHourWithTwoDigit = false;
-    // char hourFormat = '\0';
-    // // Check if the returned pattern is single or double 'H', 'h', 'K', 'k'. We also save
-    // // the hour format that we found.
-    // for (int i = 0; i < lengthPattern; i++) {
-    //     final char c = bestDateTimePattern.charAt(i);
-    //     if (c == 'H' || c == 'h' || c == 'K' || c == 'k') {
-    //         mHourFormat = c;
-    //         if (i + 1 < lengthPattern && c == bestDateTimePattern.charAt(i + 1)) {
-    //             mHourWithTwoDigit = true;
-    //         }
-    //         break;
-    //     }
-    // }
-
     using Elastos::Droid::Text::Format::IDateFormat;
     AutoPtr<IDateFormat> dateFormat;
     CDateFormat::AcquireSingleton((IDateFormat**)&dateFormat);
     String bestDateTimePattern;
-    dateFormat->GetBestDateTimePattern(mCurrentLocale, (mIs24HourView) ? String("Hm") : String("hm"), &bestDateTimePattern);
+    dateFormat->GetBestDateTimePattern(mCurrentLocale,
+            (mIs24HourView) ? String("Hm") : String("hm"), &bestDateTimePattern);
     Int32 lengthPattern = bestDateTimePattern.GetLength();
     mHourWithTwoDigit = FALSE;
     // Check if the returned pattern is single or double 'H', 'h', 'K', 'k'. We also save
@@ -1065,12 +726,6 @@ void TimePickerClockDelegate::GetHourFormatData()
 
 Boolean TimePickerClockDelegate::IsAmPmAtStart()
 {
-    // ==================before translated======================
-    // final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
-    //         "hm" /* skeleton */);
-    //
-    // return bestDateTimePattern.startsWith("a");
-
     using Elastos::Droid::Text::Format::IDateFormat;
     AutoPtr<IDateFormat> dateFormat;
     CDateFormat::AcquireSingleton((IDateFormat**)&dateFormat);
@@ -1081,28 +736,6 @@ Boolean TimePickerClockDelegate::IsAmPmAtStart()
 
 void TimePickerClockDelegate::SetDividerText()
 {
-    // ==================before translated======================
-    // final String skeleton = (mIs24HourView) ? "Hm" : "hm";
-    // final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
-    //         skeleton);
-    // final String separatorText;
-    // int hourIndex = bestDateTimePattern.lastIndexOf('H');
-    // if (hourIndex == -1) {
-    //     hourIndex = bestDateTimePattern.lastIndexOf('h');
-    // }
-    // if (hourIndex == -1) {
-    //     // Default case
-    //     separatorText = ":";
-    // } else {
-    //     int minuteIndex = bestDateTimePattern.indexOf('m', hourIndex + 1);
-    //     if  (minuteIndex == -1) {
-    //         separatorText = Character.toString(bestDateTimePattern.charAt(hourIndex + 1));
-    //     } else {
-    //         separatorText = bestDateTimePattern.substring(hourIndex + 1, minuteIndex);
-    //     }
-    // }
-    // mDivider.setText(separatorText);
-
     using Elastos::Droid::Text::Format::IDateFormat;
     String skeleton = (mIs24HourView) ? String("Hm") : String("hm");
     AutoPtr<IDateFormat> dateFormat;
@@ -1139,31 +772,6 @@ void TimePickerClockDelegate::SetCurrentHour(
     /* [in] */ Int32 currentHour,
     /* [in] */ Boolean notifyTimeChanged)
 {
-    // ==================before translated======================
-    // // why was Integer used in the first place?
-    // if (currentHour == null || currentHour == getCurrentHour()) {
-    //     return;
-    // }
-    // if (!is24HourView()) {
-    //     // convert [0,23] ordinal to wall clock display
-    //     if (currentHour >= HOURS_IN_HALF_DAY) {
-    //         mIsAm = false;
-    //         if (currentHour > HOURS_IN_HALF_DAY) {
-    //             currentHour = currentHour - HOURS_IN_HALF_DAY;
-    //         }
-    //     } else {
-    //         mIsAm = true;
-    //         if (currentHour == 0) {
-    //             currentHour = HOURS_IN_HALF_DAY;
-    //         }
-    //     }
-    //     updateAmPmControl();
-    // }
-    // mHourSpinner.setValue(currentHour);
-    // if (notifyTimeChanged) {
-    //     onTimeChanged();
-    // }
-
     Int32 currHour = 0;
     GetCurrentHour(&currHour);
     if (currentHour == currHour) {
@@ -1196,31 +804,7 @@ void TimePickerClockDelegate::SetCurrentHour(
 
 void TimePickerClockDelegate::UpdateInputState()
 {
-    // ==================before translated======================
-    // // Make sure that if the user changes the value and the IME is active
-    // // for one of the inputs if this widget, the IME is closed. If the user
-    // // changed the value via the IME and there is a next input the IME will
-    // // be shown, otherwise the user chose another means of changing the
-    // // value and having the IME up makes no sense.
-    // InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
-    // if (inputMethodManager != null) {
-    //     if (inputMethodManager.isActive(mHourSpinnerInput)) {
-    //         mHourSpinnerInput.clearFocus();
-    //         inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-    //     } else if (inputMethodManager.isActive(mMinuteSpinnerInput)) {
-    //         mMinuteSpinnerInput.clearFocus();
-    //         inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-    //     } else if (inputMethodManager.isActive(mAmPmSpinnerInput)) {
-    //         mAmPmSpinnerInput.clearFocus();
-    //         inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-    //     }
-    // }
-
-    assert(0);
-    //-- has no this interface but need have: AutoPtr<IInputMethodManagerHelper> helper;
-    //CInputMethodManagerHelper::AcquireSingleton((IInputMethodManagerHelper**)&helper);
-    AutoPtr<IInputMethodManager> inputMethodManager;
-    //helper->PeekInstance((IInputMethodManager**)&inputMethodManager);
+    AutoPtr<IInputMethodManager> inputMethodManager = CInputMethodManager::PeekInstance();
     if (inputMethodManager != NULL) {
         Boolean isHourSpinnerActive = FALSE;
         inputMethodManager->IsActive(IView::Probe(mHourSpinnerInput), &isHourSpinnerActive);
@@ -1251,25 +835,6 @@ void TimePickerClockDelegate::UpdateInputState()
 
 void TimePickerClockDelegate::UpdateAmPmControl()
 {
-    // ==================before translated======================
-    // if (is24HourView()) {
-    //     if (mAmPmSpinner != null) {
-    //         mAmPmSpinner.setVisibility(View.GONE);
-    //     } else {
-    //         mAmPmButton.setVisibility(View.GONE);
-    //     }
-    // } else {
-    //     int index = mIsAm ? Calendar.AM : Calendar.PM;
-    //     if (mAmPmSpinner != null) {
-    //         mAmPmSpinner.setValue(index);
-    //         mAmPmSpinner.setVisibility(View.VISIBLE);
-    //     } else {
-    //         mAmPmButton.setText(mAmPmStrings[index]);
-    //         mAmPmButton.setVisibility(View.VISIBLE);
-    //     }
-    // }
-    // mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-
     Boolean is24Hour = FALSE;
     Is24HourView(&is24Hour);
     if (is24Hour) {
@@ -1298,13 +863,6 @@ void TimePickerClockDelegate::UpdateAmPmControl()
 
 void TimePickerClockDelegate::OnTimeChanged()
 {
-    // ==================before translated======================
-    // mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-    // if (mOnTimeChangedListener != null) {
-    //     mOnTimeChangedListener.onTimeChanged(mDelegator, getCurrentHour(),
-    //             getCurrentMinute());
-    // }
-
     IView::Probe(mDelegator)->SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_SELECTED);
     if (mOnTimeChangedListener != NULL) {
         Int32 hour = 0, minute = 0;
@@ -1316,29 +874,6 @@ void TimePickerClockDelegate::OnTimeChanged()
 
 void TimePickerClockDelegate::UpdateHourControl()
 {
-    // ==================before translated======================
-    // if (is24HourView()) {
-    //     // 'k' means 1-24 hour
-    //     if (mHourFormat == 'k') {
-    //         mHourSpinner.setMinValue(1);
-    //         mHourSpinner.setMaxValue(24);
-    //     } else {
-    //         mHourSpinner.setMinValue(0);
-    //         mHourSpinner.setMaxValue(23);
-    //     }
-    // } else {
-    //     // 'K' means 0-11 hour
-    //     if (mHourFormat == 'K') {
-    //         mHourSpinner.setMinValue(0);
-    //         mHourSpinner.setMaxValue(11);
-    //     } else {
-    //         mHourSpinner.setMinValue(1);
-    //         mHourSpinner.setMaxValue(12);
-    //     }
-    // }
-    // mHourSpinner.setFormatter(mHourWithTwoDigit ? NumberPicker.getTwoDigitFormatter() : null);
-
-    assert(0);
     Boolean is24Hour = FALSE;
     Is24HourView(&is24Hour);
     if (is24Hour) {
@@ -1373,13 +908,6 @@ void TimePickerClockDelegate::UpdateHourControl()
 
 void TimePickerClockDelegate::UpdateMinuteControl()
 {
-    // ==================before translated======================
-    // if (is24HourView()) {
-    //     mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
-    // } else {
-    //     mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-    // }
-
     Boolean is24Hour = FALSE;
     Is24HourView(&is24Hour);
     if (is24Hour) {
@@ -1392,34 +920,24 @@ void TimePickerClockDelegate::UpdateMinuteControl()
 
 void TimePickerClockDelegate::SetContentDescriptions()
 {
-    // ==================before translated======================
-    // // Minute
-    // trySetContentDescription(mMinuteSpinner, R.id.increment,
-    //         R.string.time_picker_increment_minute_button);
-    // trySetContentDescription(mMinuteSpinner, R.id.decrement,
-    //         R.string.time_picker_decrement_minute_button);
-    // // Hour
-    // trySetContentDescription(mHourSpinner, R.id.increment,
-    //         R.string.time_picker_increment_hour_button);
-    // trySetContentDescription(mHourSpinner, R.id.decrement,
-    //         R.string.time_picker_decrement_hour_button);
-    // // AM/PM
-    // if (mAmPmSpinner != null) {
-    //     trySetContentDescription(mAmPmSpinner, R.id.increment,
-    //             R.string.time_picker_increment_set_pm_button);
-    //     trySetContentDescription(mAmPmSpinner, R.id.decrement,
-    //             R.string.time_picker_decrement_set_am_button);
-    // }
-
-    TrySetContentDescription(IView::Probe(mMinuteSpinner), R::id::increment, R::string::time_picker_increment_minute_button);
-    TrySetContentDescription(IView::Probe(mMinuteSpinner), R::id::decrement, R::string::time_picker_decrement_minute_button);
+    IView* viewMinuteSpinner = IView::Probe(mMinuteSpinner);
+    TrySetContentDescription(viewMinuteSpinner, R::id::increment,
+            R::string::time_picker_increment_minute_button);
+    TrySetContentDescription(viewMinuteSpinner, R::id::decrement,
+            R::string::time_picker_decrement_minute_button);
     // Hour
-    TrySetContentDescription(IView::Probe(mHourSpinner), R::id::increment, R::string::time_picker_increment_hour_button);
-    TrySetContentDescription(IView::Probe(mHourSpinner), R::id::decrement, R::string::time_picker_decrement_hour_button);
+    IView* viewHourSpinner = IView::Probe(mHourSpinner);
+    TrySetContentDescription(viewHourSpinner, R::id::increment,
+            R::string::time_picker_increment_hour_button);
+    TrySetContentDescription(viewHourSpinner, R::id::decrement,
+            R::string::time_picker_decrement_hour_button);
     // AM/PM
     if (mAmPmSpinner != NULL) {
-        TrySetContentDescription(IView::Probe(mAmPmSpinner), R::id::increment, R::string::time_picker_increment_set_pm_button);
-        TrySetContentDescription(IView::Probe(mAmPmSpinner), R::id::decrement, R::string::time_picker_decrement_set_am_button);
+        IView* viewAmPmSpinner = IView::Probe(mAmPmSpinner);
+        TrySetContentDescription(viewAmPmSpinner, R::id::increment,
+                R::string::time_picker_increment_set_pm_button);
+        TrySetContentDescription(viewAmPmSpinner, R::id::decrement,
+                R::string::time_picker_decrement_set_am_button);
     }
 }
 
@@ -1428,12 +946,6 @@ void TimePickerClockDelegate::TrySetContentDescription(
     /* [in] */ Int32 viewId,
     /* [in] */ Int32 contDescResId)
 {
-    // ==================before translated======================
-    // View target = root.findViewById(viewId);
-    // if (target != null) {
-    //     target.setContentDescription(mContext.getString(contDescResId));
-    // }
-
     AutoPtr<IView> target;
     root->FindViewById(viewId, (IView**)&target);
     if (target != NULL) {
@@ -1448,5 +960,3 @@ void TimePickerClockDelegate::TrySetContentDescription(
 } // namespace Widget
 } // namespace Droid
 } // namespace Elastos
-
-

@@ -1,17 +1,16 @@
-#include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.CoreLibrary.Libcore.h>
+#include "elastos/droid/widget/DatePicker.h"
+#include "elastos/droid/widget/CNumberPickerHelper.h"
+#include "elastos/droid/widget/DatePickerCalendarDelegate.h"
+#include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/text/format/DateUtils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/format/DateUtils.h"
 #include "elastos/droid/text/format/CDateFormat.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
-#include "elastos/droid/widget/CNumberPickerHelper.h"
-#include "elastos/droid/widget/DatePicker.h"
-#include "elastos/droid/widget/DatePickerCalendarDelegate.h"
-#include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/core/Character.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 
@@ -30,14 +29,10 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Widget::INumberPickerHelper;
 using Elastos::Droid::Widget::CNumberPickerHelper;
 using Elastos::Droid::Widget::DatePickerCalendarDelegate;
-
+using Elastos::Core::CoreUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
 using Elastos::Core::Character;
 using Elastos::Text::CSimpleDateFormat;
 using Elastos::Text::ISimpleDateFormat;
@@ -692,27 +687,21 @@ ECode DatePicker::DatePickerSpinnerDelegate::OnPopulateAccessibilityEvent(
     String selectedDateUtterance = DateUtils::FormatDateTime(mContext, timeInMillis, flags);
     AutoPtr<IList> container;
     IAccessibilityRecord::Probe(event)->GetText((IList**)&container);
-    AutoPtr<ICharSequence> seq;
-    FAIL_RETURN(CString::New(selectedDateUtterance, (ICharSequence**)&seq));
-    container->Add(seq);
+    container->Add(CoreUtils::Convert(selectedDateUtterance));
     return NOERROR;
 }
 
 ECode DatePicker::DatePickerSpinnerDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    AutoPtr<ICharSequence> seq;
-    FAIL_RETURN(CString::New(String("DatePicker"), (ICharSequence**)&seq));
-    IAccessibilityRecord::Probe(event)->SetClassName(seq);
+    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CDatePicker"));
     return NOERROR;
 }
 
 ECode DatePicker::DatePickerSpinnerDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    AutoPtr<ICharSequence> seq;
-    FAIL_RETURN(CString::New(String("DatePicker"), (ICharSequence**)&seq));
-    info->SetClassName(seq);
+    info->SetClassName(CoreUtils::Convert("CDatePicker"));
     return NOERROR;
 }
 
@@ -737,9 +726,9 @@ ECode DatePicker::DatePickerSpinnerDelegate::SetCurrentLocale(
         // All-text would require custom NumberPicker formatters for day and year.
         mShortMonths = ArrayOf<String>::Alloc(mNumberOfMonths);
         for(Int32 i = 0; i < mNumberOfMonths; i++) {
-            AutoPtr<IInteger32> pI;
-            CInteger32::New(i + 1, (IInteger32**)&pI);
             AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
+            (*arr)[0] = CoreUtils::Convert(i + 1);
+
             (*mShortMonths)[i] = StringUtils::Format(String("%d"), arr);
         }
     }
@@ -790,23 +779,23 @@ ECode DatePicker::DatePickerSpinnerDelegate::ReorderSpinners()
     AutoPtr<ArrayOf<Char32> > order;
     icuHelper->GetDateFormatOrder(pattern, (ArrayOf<Char32>**)&order);
     const Int32 spinnerCount = order->GetLength();
-    for(Int32 i = 0; i < spinnerCount; i++) {
+    for (Int32 i = 0; i < spinnerCount; i++) {
         switch ((Int32)((*order)[i])) {
-        case 'd':
-            IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mDaySpinner));
-            SetImeOptions(mDaySpinner, spinnerCount, i);
-            break;
-        case 'M':
-            IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mMonthSpinner));
-            SetImeOptions(mMonthSpinner, spinnerCount, i);
-            break;
-        case 'y':
-            IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mYearSpinner));
-            SetImeOptions(mYearSpinner, spinnerCount, i);
-            break;
-        default:
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-            break;
+            case 'd':
+                IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mDaySpinner));
+                SetImeOptions(mDaySpinner, spinnerCount, i);
+                break;
+            case 'M':
+                IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mMonthSpinner));
+                SetImeOptions(mMonthSpinner, spinnerCount, i);
+                break;
+            case 'y':
+                IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mYearSpinner));
+                SetImeOptions(mYearSpinner, spinnerCount, i);
+                break;
+            default:
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                break;
         }
     }
     return NOERROR;
@@ -1005,13 +994,9 @@ ECode DatePicker::DatePickerSpinnerDelegate::TrySetContentDescription(
     AutoPtr<IView> target;
     root->FindViewById(viewId, (IView**)&target);
     if(target != NULL) {
-        AutoPtr<IContext> context;
-        IView::Probe(this)->GetContext((IContext**)&context);
         String res;
-        context->GetString(contDescResId, &res);
-        AutoPtr<ICharSequence> seq;
-        FAIL_RETURN(CString::New(res, (ICharSequence**)&seq));
-        target->SetContentDescription(seq);
+        mContext->GetString(contDescResId, &res);
+        target->SetContentDescription(CoreUtils::Convert(res));
     }
     return NOERROR;
 }

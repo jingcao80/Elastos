@@ -669,14 +669,13 @@ String DateUtils::FormatDateRange(
     /* [in] */ Int64 endMillis,
     /* [in] */ Int32 flags)
 {
-    StringBuilder s(50);
+    AutoPtr<StringBuilder> s = new StringBuilder(50);
     AutoPtr<ILocaleHelper> localeHelp;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelp);
     AutoPtr<ILocale> locale;
     localeHelp->GetDefault((ILocale**)&locale);
     AutoPtr<Elastos::Utility::IFormatter> f;
-    AutoPtr<IAppendable> appendable = (IAppendable*)s.Probe(EIID_IAppendable);
-    CFormatter::New(appendable.Get(), locale.Get(), (Elastos::Utility::IFormatter**)&f);
+    CFormatter::New((IAppendable*)s, locale, (Elastos::Utility::IFormatter**)&f);
     AutoPtr<Elastos::Utility::IFormatter> fRet = FormatDateRange(context, f, startMillis, endMillis, flags);
     String ret;
     fRet->ToString(&ret);

@@ -1,20 +1,17 @@
 #ifndef __ELASTOS_DROID_WIDGET_CALENDARVIEW_H__
 #define __ELASTOS_DROID_WIDGET_CALENDARVIEW_H__
 
-//#include "elastos/droid/Database/DataSetObserver.h"
+#include "elastos/droid/database/DataSetObserver.h"
+#include "elastos/droid/view/GestureDetector.h"
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/widget/BaseAdapter.h"
-#include "elastos/droid/view/GestureDetector.h"
-
 #include <elastos/core/Object.h>
 
-//using Elastos::Droid::Database::DataSetObserver;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::GestureDetector;
 using Elastos::Droid::View::IGestureDetector;
-
-using Elastos::Core::Object;
 using Elastos::Text::IDateFormat;
 using Elastos::Utility::ICalendar;
 
@@ -396,13 +393,9 @@ private:
         };
 
         class _DataSetObserver
-            : public Object
-            , public IDataSetObserver
-//            : public DataSetObserver
+            : public DataSetObserver
         {
         public:
-            CAR_INTERFACE_DECL()
-
             _DataSetObserver(
                 /* [in] */ LegacyCalendarViewDelegate* host);
 

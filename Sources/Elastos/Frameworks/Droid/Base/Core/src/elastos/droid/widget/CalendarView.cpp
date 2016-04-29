@@ -9,9 +9,10 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/format/CDateUtils.h"
 #include "elastos/droid/utility/CTypedValueHelper.h"
+#include "elastos/droid/view/CGestureDetector.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
 
-using Elastos::Droid::R;
 using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Database::EIID_IDataSetObserver;
@@ -26,14 +27,17 @@ using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::ITypedValueHelper;
 using Elastos::Droid::Utility::CTypedValueHelper;
 using Elastos::Droid::Utility::ITypedValue;
+using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
-
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::R;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
+using Elastos::Core::ICloneable;
 using Elastos::Core::ISystem;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::IDate;
@@ -197,8 +201,8 @@ CalendarView::LegacyCalendarViewDelegate::LegacyCalendarViewDelegate(
     SetCurrentLocale(loc);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::CalendarView),
-        ArraySize(R::styleable::CalendarView));
+            const_cast<Int32*>(R::styleable::CalendarView),
+            ArraySize(R::styleable::CalendarView));
     AutoPtr<ITypedArray> attributesArray;
     context->ObtainStyledAttributes(attrs,
             attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&attributesArray);
@@ -696,24 +700,21 @@ ECode CalendarView::LegacyCalendarViewDelegate::OnConfigurationChanged(
 ECode CalendarView::LegacyCalendarViewDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    assert(0 && "TODO");
-//    event->SetClassName(CalendarView.class.getName());
+    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CCalendarView"));
     return NOERROR;
 }
 
 ECode CalendarView::LegacyCalendarViewDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    assert(0 && "TODO");
-//    info->SetClassName(CalendarView.class.getName());
+   info->SetClassName(CoreUtils::Convert("CCalendarView"));
     return NOERROR;
 }
 
 ECode CalendarView::LegacyCalendarViewDelegate::SetCurrentLocale(
     /* [in] */ ILocale* locale)
 {
-    assert(0 && "TODO");
-//    FrameLayout::SetCurrentLocale(locale);
+    AbstractCalendarViewDelegate::SetCurrentLocale(locale);
 
     mTempDate = GetCalendarForLocale(mTempDate, locale);
     mFirstDayOfMonth = GetCalendarForLocale(mFirstDayOfMonth, locale);
@@ -827,9 +828,7 @@ void CalendarView::LegacyCalendarViewDelegate::SetUpHeader()
             label->SetTextAppearance(mContext, mWeekDayTextAppearanceResId);
         }
         if (i < mDaysPerWeek + 1) {
-            AutoPtr<ICharSequence> cs;
-            CString::New((*mDayLabels)[i - 1], (ICharSequence**)&cs);
-            label->SetText(cs);
+            label->SetText(CoreUtils::Convert((*mDayLabels)[i - 1]));
             IView::Probe(label)->SetVisibility(IView::VISIBLE);
         }
         else {
@@ -1036,9 +1035,7 @@ void CalendarView::LegacyCalendarViewDelegate::SetMonthDisplayed(
     CDateUtils::AcquireSingleton((IDateUtils**)&du);
     String newMonthName;
     du->FormatDateRange(mContext, millis, millis, flags, &newMonthName);
-    AutoPtr<ICharSequence> cs;
-    CString::New(newMonthName, (ICharSequence**)&cs);
-    mMonthName->SetText(cs);
+    mMonthName->SetText(CoreUtils::Convert(newMonthName));
     IView::Probe(mMonthName)->Invalidate();
 }
 
@@ -1085,9 +1082,10 @@ void CalendarView::LegacyCalendarViewDelegate::ScrollStateRunnable::DoScrollStat
 {
     mView = view;
     mNewState = scrollState;
-    assert(0 && "TODO");
-    // mDelegator->RemoveCallbacks(this);
-    // mDelegator->PostDelayed(this, SCROLL_CHANGE_DELAY);
+    IView* delegator = IView::Probe(mHost->mDelegator);
+    Boolean res;
+    delegator->RemoveCallbacks(this, &res);
+    delegator->PostDelayed(this, SCROLL_CHANGE_DELAY, &res);
 }
 
 ECode CalendarView::LegacyCalendarViewDelegate::ScrollStateRunnable::Run()
@@ -1132,17 +1130,15 @@ CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::WeeksAdapter(
     : mSelectedWeek(0)
     , mFocusedMonth(0)
     , mTotalWeekCount(0)
+    , mHost(host)
 {
     AutoPtr<ICalendarHelper> hlp;
     CCalendarHelper::AcquireSingleton((ICalendarHelper**)&hlp);
     hlp->GetInstance((ICalendar**)&mSelectedDate);
-    assert(0 && "TODO");
-//    mContext = context;
+    mHost->mContext = context;
     AutoPtr<CalendarGestureListener> p = new CalendarGestureListener();
-    assert(0 && "TODO");
-//    CGestureDetector::New(mContext, p, (IGestureDetector**)&mGestureDetector);
+    CGestureDetector::New(mHost->mContext, p, (IGestureDetector**)&mGestureDetector);
     Init();
-    mHost = host;
 }
 
 void CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::Init()
@@ -1221,8 +1217,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::GetView(
         weekView = (WeekView*)convertView;
     }
     else {
-        assert(0 && "TODO");
-        // weekView = new WeekView(mContext);
+        weekView = new WeekView(mHost->mContext, mHost);
         AutoPtr<AbsListView::LayoutParams> params = new AbsListView::LayoutParams();
         params->constructor(IViewGroupLayoutParams::WRAP_CONTENT,
                 IViewGroupLayoutParams::WRAP_CONTENT);
@@ -1381,8 +1376,9 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
     Int32 diff = mHost->mFirstDayOfWeek - dw;
     mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, diff);
 
-    assert(0 && "TODO");
-//    mFirstDay = mHost->mTempDate->Clone();
+    AutoPtr<IInterface> obj;
+    ICloneable::Probe(mHost->mTempDate)->Clone((IInterface**)&obj);
+    mFirstDay = ICalendar::Probe(obj);
     mHost->mTempDate->Get(ICalendar::MONTH, &mMonthOfFirstWeekDay);
 
     mHasUnfocusedDay = TRUE;
@@ -1396,7 +1392,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
         // do not draw dates outside the valid range to avoid user confusion
         Boolean bIsBf = FALSE, bIsAf = FALSE;
         if ((mHost->mTempDate->IsBefore(mHost->mMinDate, &bIsBf), bIsBf) ||
-             (mHost->mTempDate->IsAfter(mHost->mMaxDate, &bIsAf), bIsAf)) {
+                (mHost->mTempDate->IsAfter(mHost->mMaxDate, &bIsAf), bIsAf)) {
             (*mDayNumbers)[i] = "";
         }
         else {
@@ -1679,15 +1675,13 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::OnMeasure(
 }
 
 //========================================================================================
-//              CalendarView::LegacyCalendarViewDelegate::_DataSetObserver::
+//              CalendarView::LegacyCalendarViewDelegate::_DataSetObserver
 //========================================================================================
-CAR_INTERFACE_IMPL(CalendarView::LegacyCalendarViewDelegate::_DataSetObserver, Object, IDataSetObserver)
 
 CalendarView::LegacyCalendarViewDelegate::_DataSetObserver::_DataSetObserver(
     /* [in] */ LegacyCalendarViewDelegate* host)
-{
-    mHost = host;
-}
+    : mHost(host)
+{}
 
 ECode CalendarView::LegacyCalendarViewDelegate::_DataSetObserver::OnChanged()
 {
@@ -1697,8 +1691,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::_DataSetObserver::OnChanged()
         selectedDay->Get(ICalendar::YEAR, &y);
         selectedDay->Get(ICalendar::MONTH, &m);
         selectedDay->Get(ICalendar::DAY_OF_MONTH, &d);
-        assert(0 && "TODO");
-        // mHost->mOnDateChangeListener->OnSelectedDayChange(mDelegator, y, m, d);
+        mHost->mOnDateChangeListener->OnSelectedDayChange(mHost->mDelegator, y, m, d);
     }
     return NOERROR;
 }

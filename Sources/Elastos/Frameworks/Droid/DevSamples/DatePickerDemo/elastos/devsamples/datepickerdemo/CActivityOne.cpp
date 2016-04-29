@@ -1,9 +1,4 @@
 
-// #include <Elastos.Droid.App.h>
-// #include <Elastos.Droid.Content.h>
-// #include <Elastos.Droid.Net.h>
-// #include <Elastos.Droid.Os.h>
-// #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Graphics.h>
 #include "CActivityOne.h"
 #include "R.h"
@@ -81,7 +76,7 @@ ECode CActivityOne::ActivityListener::OnClick(
     if (v == IView::Probe(mHost->mPrev)) {
         va->ShowPrevious();
     }
-    else if ( v == IView::Probe(mHost->mNext)) {
+    else if (v == IView::Probe(mHost->mNext)) {
         va->ShowNext();
     }
     return NOERROR;

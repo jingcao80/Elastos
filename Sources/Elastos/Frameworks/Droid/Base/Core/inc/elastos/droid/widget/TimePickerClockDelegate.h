@@ -14,12 +14,12 @@ using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::View;
+using Elastos::Droid::Widget::IAbsListViewSavedState;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::INumberPicker;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::TimePicker;
-using Elastos::Core::IInteger32;
 using Elastos::Utility::ICalendar;
 using Elastos::Utility::ILocale;
 
@@ -34,75 +34,51 @@ class TimePickerClockDelegate
     : public TimePicker::AbstractTimePickerDelegate
     , public ITimePickerClockDelegate
 {
-private:
+public:
     /**
       * Used to save / restore state of time picker
       */
     class SavedState
         : public Elastos::Droid::View::View::BaseSavedState
+        , public ITimePickerClockDelegateSavedState
     {
         friend class TimePickerClockDelegate;
-
     public:
-        virtual CARAPI GetHour(
-            /* [out] */ Int32* result);
+        CAR_INTERFACE_DECL()
 
-        virtual CARAPI GetMinute(
-            /* [out] */ Int32* result);
+        SavedState();
 
-        // @Override
-        CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest,
-            /* [in] */ Int32 flags);
+        ~SavedState();
 
-    private:
-        SavedState(
+        CARAPI constructor(
             /* [in] */ IParcelable* superState,
             /* [in] */ Int32 hour,
             /* [in] */ Int32 minute);
 
-        SavedState(
-            /* [in] */ IParcel* in);
+        CARAPI constructor();
 
-        SavedState();
+        virtual CARAPI_(Int32) GetHour();
 
-        static AutoPtr<IParcelable> InitCreator();
+        virtual CARAPI_(Int32) GetMinute();
 
-    public:
-        // @SuppressWarnings({"unused", "hiding"})
-        static const AutoPtr<IParcelable> CREATOR;
+        // @Override
+        CARAPI WriteToParcel(
+            /* [in] */ IParcel* dest);
+
+        // @Override
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* source);
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
-        /*const*/ Int32 mHour;
-        /*const*/ Int32 mMinute;
+        Int32 mHour;
+        Int32 mMinute;
     };
 
-    class InnerCreator
-        : public Object
-        , public IParcelable
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerCreator();
-
-        virtual CARAPI CreateFromParcel(
-            /* [in] */ IParcel* in,
-            /* [out] */ SavedState** result);
-
-        virtual CARAPI NewArray(
-            /* [in] */ Int32 size,
-            /* [out] */ ArrayOf<SavedState*>** result);
-
-        // override for compile
-        virtual CARAPI ReadFromParcel(
-            /* [in] */ IParcel* parcel);
-
-        // override for compile
-        virtual CARAPI WriteToParcel(
-            /* [in] */ IParcel* parcel);
-    };
-
+private:
     class InnerOnValueChangeListener
         : public Object
         , public INumberPickerOnValueChangeListener
