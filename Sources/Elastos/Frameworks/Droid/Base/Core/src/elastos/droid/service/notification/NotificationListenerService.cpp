@@ -375,7 +375,9 @@ ECode NotificationListenerService::RegisterAsSystemService(
     }
     AutoPtr<IINotificationManager> noMan;
     GetNotificationInterface((IINotificationManager**)&noMan);
-    noMan->RegisterListener(mWrapper, componentName, currentUser);
+    if (noMan != NULL) {
+        noMan->RegisterListener(mWrapper, componentName, currentUser);
+    }
     mCurrentUser = currentUser;
     return NOERROR;
 }
@@ -385,7 +387,9 @@ ECode NotificationListenerService::UnregisterAsSystemService()
     if (mWrapper != NULL) {
         AutoPtr<IINotificationManager> noMan;
         GetNotificationInterface((IINotificationManager**)&noMan);
-        noMan->UnregisterListener(mWrapper, mCurrentUser);
+        if (noMan != NULL) {
+            noMan->UnregisterListener(mWrapper, mCurrentUser);
+        }
     }
     return NOERROR;
 }

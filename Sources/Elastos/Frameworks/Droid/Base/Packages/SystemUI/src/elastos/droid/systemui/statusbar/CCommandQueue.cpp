@@ -7,6 +7,7 @@ using Elastos::Droid::Internal::StatusBar::CStatusBarIcon;
 using Elastos::Droid::Internal::StatusBar::EIID_IIStatusBar;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -55,6 +56,7 @@ ECode CCommandQueue::constructor(
     mCallbacks = callbacks;
     mList = list;
     mHandler = new MyHandler(this);
+    ((MyHandler*)mHandler.Get())->constructor();
     return NOERROR;
 }
 
@@ -304,6 +306,16 @@ ECode CCommandQueue::ToString(
 }
 
 //=============================================================================
+CCommandQueue::MyHandler::MyHandler(
+    /* [in] */ CCommandQueue* host)
+    : mHost(host)
+{}
+
+CCommandQueue::MyHandler::constructor()
+{
+    return Handler::constructor((IHandlerCallback*)NULL, FALSE);
+}
+
 ECode CCommandQueue::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {

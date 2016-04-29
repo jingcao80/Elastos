@@ -7,6 +7,7 @@
 #include <elastos/droid/os/ServiceManager.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/text/format/Formatter.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
@@ -21,6 +22,7 @@ using Elastos::Droid::Text::Format::Formatter;
 using Elastos::Droid::View::IView;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -76,7 +78,7 @@ KeyguardIndicationController::KeyguardIndicationController(
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(IBatteryStats::SERVICE_NAME);
     mBatteryInfo = IIBatteryStats::Probe(obj);
-    assert(0 && "TODO");
+    Logger::D("KeyguardIndicationController", "TODO: need the app Keyguard.");
     // KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);

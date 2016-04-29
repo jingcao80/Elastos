@@ -143,18 +143,23 @@ BluetoothControllerImpl::BluetoothControllerImpl(
     CArrayMap::New((IArrayMap**)&mDeviceInfo);
     mContext = context;
     AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::BLUETOOTH_SERVICE, (IInterface**)&obj);
-    AutoPtr<IBluetoothManager> bluetoothManager = IBluetoothManager::Probe(obj);
-    bluetoothManager->GetAdapter((IBluetoothAdapter**)&mAdapter);
-    if (mAdapter == NULL) {
-        Logger::W(TAG, "Default BT adapter not found");
-        assert(0);
-        // return;
+    Logger::D(TAG, "TODO: need BLUETOOTH_SERVICE.");
+    // context->GetSystemService(IContext::BLUETOOTH_SERVICE, (IInterface**)&obj);
+    if (obj != NULL) {
+        AutoPtr<IBluetoothManager> bluetoothManager = IBluetoothManager::Probe(obj);
+        bluetoothManager->GetAdapter((IBluetoothAdapter**)&mAdapter);
+        if (mAdapter == NULL) {
+            Logger::W(TAG, "Default BT adapter not found");
+            assert(0);
+            // return;
+        }
     }
 
     mReceiver->Register();
     Int32 state = 0;
-    mAdapter->GetState(&state);
+    if (mAdapter != NULL) {
+        mAdapter->GetState(&state);
+    }
     SetAdapterState(state);
     UpdateBondedBluetoothDevices();
 }
@@ -275,7 +280,7 @@ ECode BluetoothControllerImpl::IsBluetoothSupported(
     /* [out] */ Boolean* supported)
 {
     VALIDATE_NOT_NULL(supported);
-    *supported = mAdapter.Get() != NULL;
+    *supported = mAdapter != NULL;
     return NOERROR;
 }
 

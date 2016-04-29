@@ -42,6 +42,13 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("CClock.IntentReceiver");
+            return NOERROR;
+        }
+
     private:
         CClock* mHost;
     };

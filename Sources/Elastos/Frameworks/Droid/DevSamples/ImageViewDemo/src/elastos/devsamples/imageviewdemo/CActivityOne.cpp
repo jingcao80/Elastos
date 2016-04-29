@@ -9,6 +9,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::View::EIID_IViewOnClickListener;

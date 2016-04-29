@@ -907,33 +907,6 @@ ECode Paint::Descent(
     return NOERROR;
 }
 
-ECode Paint::GetFontMetrics(
-    /* [in] */ IPaintFontMetrics* metrics,
-    /* [out] */ Float* spacing)
-{
-    VALIDATE_NOT_NULL(spacing)
-    SkPaint::FontMetrics metrics_;
-    SkScalar spacing_ = ((SkPaint*)mNativePaint)->getFontMetrics(&metrics_);
-
-    if (metrics) {
-        metrics->SetTop(SkScalarToFloat(metrics_.fTop));
-        metrics->SetAscent(SkScalarToFloat(metrics_.fAscent));
-        metrics->SetDescent(SkScalarToFloat(metrics_.fDescent));
-        metrics->SetBottom(SkScalarToFloat(metrics_.fBottom));
-        metrics->SetLeading(SkScalarToFloat(metrics_.fLeading));
-    }
-    *spacing = SkScalarToFloat(spacing_);
-    return NOERROR;
-}
-
-ECode Paint::GetFontMetrics(
-    /* [out] */ IPaintFontMetrics** metrics)
-{
-    CPaintFontMetrics::New(metrics);
-    Float spacing;
-    return GetFontMetrics(*metrics, &spacing);
-}
-
 static SkScalar getMetricsInternal(
     /* [in] */ IPaint* epaint,
     /* [in] */ NativePaint::FontMetrics *metrics)
@@ -966,6 +939,33 @@ static SkScalar getMetricsInternal(
         spacing = metrics->fDescent - metrics->fAscent + metrics->fLeading;
     }
     return spacing;
+}
+
+ECode Paint::GetFontMetrics(
+    /* [in] */ IPaintFontMetrics* metrics,
+    /* [out] */ Float* spacing)
+{
+    VALIDATE_NOT_NULL(spacing)
+    SkPaint::FontMetrics metrics_;
+    SkScalar spacing_ = getMetricsInternal(this, &metrics_);
+
+    if (metrics) {
+        metrics->SetTop(SkScalarToFloat(metrics_.fTop));
+        metrics->SetAscent(SkScalarToFloat(metrics_.fAscent));
+        metrics->SetDescent(SkScalarToFloat(metrics_.fDescent));
+        metrics->SetBottom(SkScalarToFloat(metrics_.fBottom));
+        metrics->SetLeading(SkScalarToFloat(metrics_.fLeading));
+    }
+    *spacing = SkScalarToFloat(spacing_);
+    return NOERROR;
+}
+
+ECode Paint::GetFontMetrics(
+    /* [out] */ IPaintFontMetrics** metrics)
+{
+    CPaintFontMetrics::New(metrics);
+    Float spacing;
+    return GetFontMetrics(*metrics, &spacing);
 }
 
 ECode Paint::GetFontMetricsInt(

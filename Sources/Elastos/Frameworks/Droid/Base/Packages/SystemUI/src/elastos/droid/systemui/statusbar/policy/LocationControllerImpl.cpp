@@ -1,16 +1,22 @@
 
 #include "elastos/droid/systemui/statusbar/policy/LocationControllerImpl.h"
+#include "elastos/droid/systemui/statusbar/policy/CLocationControllerBroadcastReceiver.h"
+#include "elastos/droid/systemui/statusbar/policy/CLocationControllerLocalBroadcastReceiver.h"
 #include "../../R.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/provider/Settings.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "elastos/droid/os/Binder.h"
+using Elastos::Droid::Os::Binder;
 
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::IAppOpsManagerOpEntry;
 using Elastos::Droid::App::IAppOpsManagerPackageOps;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::EIID_IBroadcastReceiver;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Location::ILocationManager;
@@ -25,6 +31,7 @@ using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -36,28 +43,14 @@ const String LocationControllerImpl::LOCATION_STATUS_ICON_PLACEHOLDER("location"
 const Int32 LocationControllerImpl::LOCATION_STATUS_ICON_ID = R::drawable::stat_sys_location;
 AutoPtr<ArrayOf<Int32> > LocationControllerImpl::mHighPowerRequestAppOpArray = InitStatic();
 
-LocationControllerImpl::_BroadcastReceiver::_BroadcastReceiver(
-    /* [in] */ LocationControllerImpl* host)
-    : mHost(host)
-{}
-
-ECode LocationControllerImpl::_BroadcastReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
+CAR_INTERFACE_IMPL(LocationControllerImpl, Object, ILocationController);
+LocationControllerImpl::LocationControllerImpl()
+    : mAreActiveLocationRequests(FALSE)
 {
-    String action;
-    intent->GetAction(&action);
-    if (ILocationManager::MODE_CHANGED_ACTION.Equals(action)) {
-        mHost->LocationSettingsChanged();
-    }
-    return NOERROR;
 }
 
-
-CAR_INTERFACE_IMPL(LocationControllerImpl, BroadcastReceiver, ILocationController);
-LocationControllerImpl::LocationControllerImpl(
+ECode LocationControllerImpl::constructor(
     /* [in] */ IContext* context)
-    : mAreActiveLocationRequests(FALSE)
 {
     CArrayList::New((IArrayList**)&mSettingsChangeCallbacks);
     mContext = context;
@@ -70,8 +63,11 @@ LocationControllerImpl::LocationControllerImpl(
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     AutoPtr<IUserHandle> ALL;
     helper->GetALL((IUserHandle**)&ALL);
+    AutoPtr<IBroadcastReceiver> b;
+    CLocationControllerBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
+
     AutoPtr<IIntent> i;
-    context->RegisterReceiverAsUser(this, ALL, filter, String(NULL), NULL, (IIntent**)&i);
+    context->RegisterReceiverAsUser(b, ALL, filter, String(NULL), NULL, (IIntent**)&i);
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
@@ -88,12 +84,14 @@ LocationControllerImpl::LocationControllerImpl(
     intentFilter->AddAction(ILocationManager::MODE_CHANGED_ACTION);
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    AutoPtr<_BroadcastReceiver> b = new _BroadcastReceiver(this);
+    b = NULL;
+    CLocationControllerLocalBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
     context->RegisterReceiverAsUser(b, ALL, intentFilter, String(NULL), handler, (IIntent**)&i);
 
     // Examine the current location state and initialize the status view.
     UpdateActiveLocationRequests();
     RefreshViews();
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<Int32> > LocationControllerImpl::InitStatic()
@@ -257,18 +255,6 @@ void LocationControllerImpl::LocationSettingsChanged(
     Boolean tmp = FALSE;
     IsLocationEnabled(&tmp);
     cb->OnLocationSettingsChanged(tmp);
-}
-
-ECode LocationControllerImpl::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (ILocationManager::HIGH_POWER_REQUEST_CHANGE_ACTION.Equals(action)) {
-        UpdateActiveLocationRequests();
-    }
-    return NOERROR;
 }
 
 } // namespace Policy

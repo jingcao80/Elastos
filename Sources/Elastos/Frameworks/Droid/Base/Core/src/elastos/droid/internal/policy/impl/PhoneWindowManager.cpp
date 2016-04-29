@@ -5723,8 +5723,8 @@ void PhoneWindowManager::TakeScreenshot()
         return;
     }
     AutoPtr<IComponentName> cn;
-    CComponentName::New(String("com.android.systemui"),
-        String("com.android.systemui.screenshot.TakeScreenshotService"),
+    CComponentName::New(String("Elastos.Droid.SystemUI"),
+        String("Elastos.Droid.SystemUI.Screenshot.CTakeScreenshotService"),
         (IComponentName**)&cn);
 
     AutoPtr<IIntent> intent;

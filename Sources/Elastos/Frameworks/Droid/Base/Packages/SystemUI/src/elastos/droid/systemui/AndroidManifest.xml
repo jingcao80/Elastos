@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-      package="com.android.systemui"
+      package="Elastos.Droid.SystemUI"
       android:sharedUserId="android.uid.systemui"
       coreApp="true">
 
@@ -98,7 +98,7 @@
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
     <application
-        android:name=".SystemUIApplication"
+        android:name="Elastos.Droid.SystemUI.CSystemUIApplication"
         android:persistent="true"
         android:allowClearUserData="false"
         android:allowBackup="false"
@@ -116,46 +116,46 @@
              up everything else.
              TODO: Should have an android:permission attribute
              -->
-        <service android:name="CSystemUIService"
+        <service android:name="Elastos.Droid.SystemUI.CSystemUIService"
             android:exported="true"
             />
 
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
-        <service android:name=".screenshot.TakeScreenshotService"
+        <service android:name="Elastos.Droid.SystemUI.Screenshot.CTakeScreenshotService"
             android:process=":screenshot"
             android:exported="false" />
 
-        <service android:name=".LoadAverageService"
+        <service android:name="Elastos.Droid.SystemUI.CLoadAverageService"
                 android:exported="true" />
 
-        <service android:name=".ImageWallpaper"
+        <service android:name="Elastos.Droid.SystemUI.CImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
-        <receiver android:name=".BootReceiver" androidprv:primaryUserOnly="true">
+        <receiver android:name="Elastos.Droid.SystemUI.CBootReceiver" androidprv:primaryUserOnly="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".qs.tiles.HotspotTile$APChangedReceiver"
+        <receiver android:name="Elastos.Droid.SystemUI.Qs.Tiles.CHotspotTileAPChangedReceiver"
                 androidprv:primaryUserOnly="true">
             <intent-filter>
                 <action android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".usb.UsbStorageActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Usb.CUsbStorageActivity"
                   android:label="@*android:string/usb_storage_activity_title"
                   android:excludeFromRecents="true">
         </activity>
-        <activity android:name="com.android.internal.app.ExternalMediaFormatActivity"
+        <activity android:name="Elastos.Droid.Internal.App.CExternalMediaFormatActivity"
                 android:theme="@*android:style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true">
         </activity>
 
-        <activity android:name=".recent.RecentsActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Recent.CRecentsActivity"
                 android:label="@string/accessibility_desc_recent_apps"
                 android:theme="@style/RecentsStyle"
                 android:excludeFromRecents="true"
@@ -168,7 +168,7 @@
         </activity>
 
         <receiver
-            android:name=".recent.RecentsPreloadReceiver"
+            android:name="Elastos.Droid.SystemUI.Recent.CRecentsPreloadReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.android.systemui.recent.action.PRELOAD" />
@@ -177,7 +177,7 @@
         </receiver>
 
         <!-- Alternate Recents -->
-        <activity android:name=".recents.RecentsActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Recents.CRecentsActivity"
                   android:label="@string/accessibility_desc_recent_apps"
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
@@ -190,7 +190,7 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.UsbConfirmActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Usb.CUsbConfirmActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
@@ -199,7 +199,7 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.UsbPermissionActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Usb.CUsbPermissionActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
@@ -208,7 +208,7 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.UsbResolverActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Usb.CUsbResolverActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
@@ -217,7 +217,7 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.UsbAccessoryUriActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Usb.CUsbAccessoryUriActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
@@ -226,7 +226,7 @@
         </activity>
 
         <!-- started from UsbDebuggingManager -->
-        <activity android:name=".usb.UsbDebuggingActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Usb.CUsbDebuggingActivity"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
@@ -235,7 +235,7 @@
 
         <!-- started from NetworkPolicyManagerService -->
         <activity
-            android:name=".net.NetworkOverLimitActivity"
+            android:name="Elastos.Droid.SystemUI.Net.CNetworkOverLimitActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_NETWORK_POLICY"
             android:theme="@android:style/Theme.DeviceDefault.Light.Panel"
@@ -246,7 +246,7 @@
 
         <!-- started from MediaProjectionManager -->
         <activity
-            android:name=".media.MediaProjectionPermissionActivity"
+            android:name="Elastos.Droid.SystemUI.Media.CMediaProjectionPermissionActivity"
             android:exported="true"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
@@ -255,7 +255,7 @@
 
         <!-- platform logo easter egg activity -->
         <activity
-            android:name=".DessertCase"
+            android:name="Elastos.Droid.SystemUI.CDessertCase"
             android:exported="true"
             android:label="@string/dessert_case"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
@@ -270,7 +270,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".egg.LLandActivity"
+        <activity android:name="Elastos.Droid.SystemUI.Egg.CLLandActivity"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
                   android:exported="true"
                   android:label="@string/lland"
@@ -288,7 +288,7 @@
 
         <!-- a gallery of delicious treats -->
         <service
-            android:name=".DessertCaseDream"
+            android:name="Elastos.Droid.SystemUI.CDessertCaseDream"
             android:exported="true"
             android:label="@string/dessert_case"
             android:permission="android.permission.BIND_DREAM_SERVICE"
@@ -302,11 +302,11 @@
         </service>
 
         <service
-            android:name=".keyguard.KeyguardService"
+            android:name="Elastos.Droid.SystemUI.Keyguard.CKeyguardService"
             android:exported="true"
             android:enabled="@bool/config_enableKeyguardService" />
 
-        <activity android:name=".Somnambulator"
+        <activity android:name="Elastos.Droid.SystemUI.CSomnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"
             android:theme="@android:style/Theme.Wallpaper.NoTitleBar"
@@ -327,7 +327,7 @@
         </activity>
 
         <activity
-            android:name=".settings.BrightnessDialog"
+            android:name="Elastos.Droid.SystemUI.Settings.CBrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
             android:theme="@android:style/Theme.DeviceDefault.Dialog"
             android:finishOnCloseSystemDialogs="true"
@@ -342,7 +342,7 @@
 
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
-            android:name=".doze.DozeService"
+            android:name="Elastos.Droid.SystemUI.Doze.CDozeService"
             android:exported="true"
             android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />

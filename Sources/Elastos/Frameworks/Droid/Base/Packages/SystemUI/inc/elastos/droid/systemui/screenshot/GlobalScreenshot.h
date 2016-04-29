@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_SCREENSHOT_GLOBALSCREENSHOT_H__
 #define __ELASTOS_DROID_SYSTEMUI_SCREENSHOT_GLOBALSCREENSHOT_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"

@@ -20,8 +20,8 @@ namespace Phone {
 
 const Boolean KeyguardTouchDelegate::DEBUG = FALSE;
 const String KeyguardTouchDelegate::TAG("KeyguardTouchDelegate");
-const String KeyguardTouchDelegate::KEYGUARD_PACKAGE("com.android.systemui");
-const String KeyguardTouchDelegate::KEYGUARD_CLASS("com.android.systemui.keyguard.KeyguardService");
+const String KeyguardTouchDelegate::KEYGUARD_PACKAGE("Elastos.Droid.SystemUI");
+const String KeyguardTouchDelegate::KEYGUARD_CLASS("Elastos.Droid.SystemUI.Keyguard.CKeyguardService");
 AutoPtr<KeyguardTouchDelegate> KeyguardTouchDelegate::sInstance;
 AutoPtr<IList> KeyguardTouchDelegate::sConnectionListeners = InitList();
 

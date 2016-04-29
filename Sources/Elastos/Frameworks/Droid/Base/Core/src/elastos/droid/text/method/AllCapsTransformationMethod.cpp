@@ -15,14 +15,14 @@ namespace Method {
 
 const String AllCapsTransformationMethod::TAG("AllCapsTransformationMethod");
 
+CAR_INTERFACE_IMPL_3(AllCapsTransformationMethod, Object, IAllCapsTransformationMethod \
+        , ITransformationMethod2, ITransformationMethod);
 AllCapsTransformationMethod::AllCapsTransformationMethod()
     : mEnabled(FALSE)
 {}
 
 AllCapsTransformationMethod::~AllCapsTransformationMethod()
 {}
-
-CAR_INTERFACE_IMPL_3(AllCapsTransformationMethod, Object, IAllCapsTransformationMethod, ITransformationMethod2, ITransformationMethod)
 
 ECode AllCapsTransformationMethod::constructor(
     /* [in] */ IContext* context)
@@ -79,8 +79,6 @@ ECode AllCapsTransformationMethod::SetLengthChangesAllowed(
     mEnabled = allowLengthChanges;
     return NOERROR;
 }
-
-
 
 } // namespace Method
 } // namespace Text

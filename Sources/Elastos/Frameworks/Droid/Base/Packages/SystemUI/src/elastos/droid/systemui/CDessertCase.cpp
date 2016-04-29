@@ -27,7 +27,7 @@ ECode CDessertCase::OnStart()
     GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IComponentName> cn;
 
-    AutoPtr<IClassInfo> classInfo = Utils::GetClassInfo(String("CDessertCaseDream"));
+    AutoPtr<IClassInfo> classInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.CDessertCaseDream"));
     CComponentName::New(this, classInfo, (IComponentName**)&cn);
     Int32 value = 0;
     pm->GetComponentEnabledSetting(cn, &value);

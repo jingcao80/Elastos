@@ -38,7 +38,9 @@ namespace Volume {
 ZenToast::MyHandler::MyHandler(
     /* [in] */ ZenToast* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode ZenToast::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)

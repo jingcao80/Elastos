@@ -53,8 +53,8 @@ ECode AirplaneModeTile::Receiver::OnReceive(
 
 AirplaneModeTile::AirplaneModeTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mSetting = new Setting(mContext, mHandler, ISettingsGlobal::AIRPLANE_MODE_ON, this);
     mReceiver = new Receiver(this);
 }

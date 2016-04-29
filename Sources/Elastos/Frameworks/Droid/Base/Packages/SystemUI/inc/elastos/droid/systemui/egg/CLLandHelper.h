@@ -3,7 +3,7 @@
 
 #include "_Elastos_Droid_SystemUI_Egg_CLLandHelper.h"
 #include <elastos/core/Singleton.h>
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 
 namespace Elastos {
 namespace Droid {

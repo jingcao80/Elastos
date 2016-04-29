@@ -23,6 +23,7 @@ namespace Animation {
 class PropertyValuesHolder
     : public Object
     , public IPropertyValuesHolder
+    , public ICloneable
 {
 private:
     /**

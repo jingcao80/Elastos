@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_NAVIGATIONBARTRANSITIONS_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_NAVIGATIONBARTRANSITIONS_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/phone/BarTransitions.h"
 #include "Elastos.Droid.Internal.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>

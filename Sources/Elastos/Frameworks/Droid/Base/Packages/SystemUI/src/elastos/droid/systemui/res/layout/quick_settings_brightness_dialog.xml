@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    xmlns:systemui="http://schemas.android.com/apk/res/Elastos.Droid.SystemUI"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     style="@style/BrightnessDialogContainer">
@@ -29,7 +29,7 @@
         android:contentDescription="@null"
         android:visibility="gone" />
 
-    <com.android.systemui.settings.ToggleSlider
+    <Elastos.Droid.SystemUI.Settings.CToggleSlider
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

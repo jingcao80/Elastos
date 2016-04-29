@@ -1,7 +1,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/droid/graphics/drawable/Drawable.h>
 #include <elastos/droid/widget/FrameLayout.h>
 
@@ -24,33 +24,6 @@ class KeyguardPreviewContainer
     : public FrameLayout
     , public IKeyguardPreviewContainer
 {
-private:
-    class BlackBarDrawable: public Drawable
-    {
-    public:
-        BlackBarDrawable(
-            /* [in] */ KeyguardPreviewContainer* host);
-
-        // @Override
-        CARAPI Draw(
-            /* [in] */ ICanvas* canvas);
-
-        // @Override
-        CARAPI SetAlpha(
-            /* [in] */ Int32 alpha);
-
-        // @Override
-        CARAPI SetColorFilter(
-            /* [in] */ IColorFilter* cf);
-
-        // @Override
-        CARAPI GetOpacity(
-            /* [out] */ Int32* opacity);
-
-    private:
-        KeyguardPreviewContainer* mHost;
-    };
-
 public:
     CAR_INTERFACE_DECL();
 

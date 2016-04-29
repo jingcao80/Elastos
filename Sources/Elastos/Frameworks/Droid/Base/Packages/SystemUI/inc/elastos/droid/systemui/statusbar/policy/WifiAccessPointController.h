@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_WIFIACCESSPOINTCONTROLLER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_WIFIACCESSPOINTCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Utility.h"
@@ -44,6 +44,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("WifiAccessPointController.Receiver");
+            return NOERROR;
+        }
 
     private:
         Boolean mRegistered;

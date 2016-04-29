@@ -2,7 +2,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_CSEARCHPANELVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_CSearchPanelView.h"
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Os.h"

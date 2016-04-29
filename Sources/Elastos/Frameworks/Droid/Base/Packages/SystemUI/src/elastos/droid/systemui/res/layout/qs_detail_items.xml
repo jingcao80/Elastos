@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <!-- extends FrameLayout -->
-<com.android.systemui.qs.QSDetailItems xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.SystemUI.Qs.CQSDetailItems xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="16dp"
@@ -49,4 +49,4 @@
             android:textAppearance="@style/TextAppearance.QS.DetailEmpty" />
     </LinearLayout>
 
-</com.android.systemui.qs.QSDetailItems>
+</Elastos.Droid.SystemUI.Qs.CQSDetailItems>

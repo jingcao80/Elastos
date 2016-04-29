@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <!-- extends FrameLayout -->
-<com.android.systemui.statusbar.policy.HeadsUpNotificationView
+<Elastos.Droid.SystemUI.StatusBar.Policy.CHeadsUpNotificationView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -30,4 +30,4 @@
                 android:elevation="8dp"
                 android:id="@+id/content_holder" />
 
-</com.android.systemui.statusbar.policy.HeadsUpNotificationView>
+</Elastos.Droid.SystemUI.StatusBar.Policy.CHeadsUpNotificationView>

@@ -1,11 +1,13 @@
 
 #include "elastos/droid/systemui/statusbar/policy/BatteryController.h"
+#include "elastos/droid/systemui/statusbar/policy/CBatteryControllerBroadcastReceiver.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Utility::CArrayList;
@@ -19,7 +21,7 @@ namespace Policy {
 
 const String BatteryController::TAG("BatteryController");
 const Boolean BatteryController::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-CAR_INTERFACE_IMPL(BatteryController, BroadcastReceiver, IBatteryController);
+CAR_INTERFACE_IMPL(BatteryController, Object, IBatteryController);
 BatteryController::BatteryController(
     /* [in] */ IContext* context)
 {
@@ -33,8 +35,11 @@ BatteryController::BatteryController(
     filter->AddAction(IIntent::ACTION_BATTERY_CHANGED);
     filter->AddAction(IPowerManager::ACTION_POWER_SAVE_MODE_CHANGED);
     filter->AddAction(IPowerManager::ACTION_POWER_SAVE_MODE_CHANGING);
+
+    AutoPtr<IBroadcastReceiver> b;
+    CBatteryControllerBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiver(this, filter, (IIntent**)&intent);
+    context->RegisterReceiver(b, filter, (IIntent**)&intent);
 
     UpdatePowerSave();
 }
@@ -70,38 +75,6 @@ ECode BatteryController::RemoveStateChangedCallback(
     /* [in] */ IBatteryStateChangeCallback* cb)
 {
     mChangeCallbacks->Remove(cb);
-    return NOERROR;
-}
-
-ECode BatteryController::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (action.Equals(IIntent::ACTION_BATTERY_CHANGED)) {
-        Int32 v1 = 0, v2 = 0;
-        mLevel = (Int32)(100.f
-                * (intent->GetInt32Extra(IBatteryManager::EXTRA_LEVEL, 0, &v1), v1)
-                / (intent->GetInt32Extra(IBatteryManager::EXTRA_SCALE, 100, &v2), v2));
-        mPluggedIn = (intent->GetInt32Extra(IBatteryManager::EXTRA_PLUGGED, 0, &v1), v1) != 0;
-
-        Int32 status = 0;
-        intent->GetInt32Extra(IBatteryManager::EXTRA_STATUS,
-                IBatteryManager::BATTERY_STATUS_UNKNOWN, &status);
-        mCharged = status == IBatteryManager::BATTERY_STATUS_FULL;
-        mCharging = mCharged || status == IBatteryManager::BATTERY_STATUS_CHARGING;
-
-        FireBatteryLevelChanged();
-    }
-    else if (action.Equals(IPowerManager::ACTION_POWER_SAVE_MODE_CHANGED)) {
-        UpdatePowerSave();
-    }
-    else if (action.Equals(IPowerManager::ACTION_POWER_SAVE_MODE_CHANGING)) {
-        Boolean tmp = FALSE;
-        intent->GetBooleanExtra(IPowerManager::EXTRA_POWER_SAVE_MODE, FALSE, &tmp);
-        SetPowerSave(tmp);
-    }
     return NOERROR;
 }
 

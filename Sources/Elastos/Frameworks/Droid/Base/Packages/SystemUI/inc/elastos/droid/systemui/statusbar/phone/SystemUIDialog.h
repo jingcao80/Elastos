@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_SYSTEMUIDIALOG_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_SYSTEMUIDIALOG_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/droid/app/AlertDialog.h>
 #include "Elastos.Droid.Content.h"
 

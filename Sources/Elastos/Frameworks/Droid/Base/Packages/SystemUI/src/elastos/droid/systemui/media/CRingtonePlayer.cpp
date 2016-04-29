@@ -48,7 +48,6 @@ ECode CRingtonePlayer::Client::ProxyDied()
 //-------------------------------------------
 const String CRingtonePlayer::TAG("CRingtonePlayer");
 const Boolean CRingtonePlayer::LOGD = FALSE;
-
 CRingtonePlayer::CRingtonePlayer()
 {
     mAsyncPlayer = new NotificationPlayer(TAG);
@@ -58,14 +57,14 @@ CRingtonePlayer::CRingtonePlayer()
 ECode CRingtonePlayer::Start()
 {
     mAsyncPlayer->SetUsesWakeLock(mContext);
+    Slogger::I(TAG, "TODO: Not Debug: AudioService");
+    // mAudioService = IIAudioService::Probe(ServiceManager::GetService(IContext::AUDIO_SERVICE));
 
-    mAudioService = IIAudioService::Probe(ServiceManager::GetService(IContext::AUDIO_SERVICE));
-
-    ECode ec = mAudioService->SetRingtonePlayer(mCallback);
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "Problem registering RingtonePlayer: %08x", ec);
-        return E_REMOTE_EXCEPTION;
-    }
+    // ECode ec = mAudioService->SetRingtonePlayer(mCallback);
+    // if (FAILED(ec)) {
+    //     Slogger::E(TAG, "Problem registering RingtonePlayer: %08x", ec);
+    //     return E_REMOTE_EXCEPTION;
+    // }
     return NOERROR;
 }
 

@@ -140,6 +140,7 @@ ECode Settings::NameValueCache::LazyGetProvider(
     /* [in] */ IContentResolver* cr,
     /* [out] */ IIContentProvider** provider)
 {
+    VALIDATE_NOT_NULL(cr);
     VALIDATE_NOT_NULL(provider);
     AutoPtr<IIContentProvider> cp;
 
@@ -235,9 +236,10 @@ ECode Settings::NameValueCache::GetStringForUser(
     }
 
     AutoPtr<IIContentProvider> cp;
-    if (FAILED(LazyGetProvider(cr, (IIContentProvider**)&cp)) || cp == NULL) {
+    ECode ec = LazyGetProvider(cr, (IIContentProvider**)&cp);
+    if (FAILED(ec) || cp == NULL) {
         *value = String(NULL);
-        return NOERROR;
+        return ec;
     }
 
     // Try the fast path first, not using query().  If this

@@ -1,5 +1,7 @@
 
 #include "elastos/droid/animation/FloatKeyframeSet.h"
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Core::EIID_IFloat;
 using Elastos::Core::IFloat;
@@ -12,12 +14,17 @@ namespace Animation {
 CAR_INTERFACE_IMPL_2(FloatKeyframeSet, KeyframeSet, IFloatKeyframeSet, IFloatKeyframes)
 FloatKeyframeSet::FloatKeyframeSet(
     /* [in] */ ArrayOf<IFloatKeyframe*>* keyframes)
-    : KeyframeSet((ArrayOf<IKeyframe*>*)keyframes)
-    , mFirstValue(0.0f)
+    : mFirstValue(0.0f)
     , mLastValue(0.0f)
     , mDeltaValue(0.0f)
     , mFirstTime(TRUE)
 {
+    Int32 len = keyframes->GetLength();
+    AutoPtr<ArrayOf<IKeyframe*> > objs = ArrayOf<IKeyframe*>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        objs->Set(i, IKeyframe::Probe((*keyframes)[i]));
+    }
+    KeyframeSet::constructor(objs);
 }
 
 ECode FloatKeyframeSet::GetValue(

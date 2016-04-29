@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_QS_SECURESETTING_H__
 #define __ELASTOS_DROID_SYSTEMUI_QS_SECURESETTING_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/database/ContentObserver.h>
 #include <elastos/core/Object.h>

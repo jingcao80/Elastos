@@ -32,8 +32,8 @@ ECode LocationTile::Callback::OnKeyguardChanged()
 
 LocationTile::LocationTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mCallback = new Callback(this);
     host->GetLocationController((ILocationController**)&mController);
     host->GetKeyguardMonitor((IKeyguardMonitor**)&mKeyguard);

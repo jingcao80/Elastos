@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_LOCATIONCONTROLLERIMPL_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_LOCATIONCONTROLLERIMPL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/ext/frameworkext.h>
@@ -26,29 +26,15 @@ namespace Policy {
  * A controller to manage changes of location related states and update the views accordingly.
  */
 class LocationControllerImpl
-    : public BroadcastReceiver
+    : public Object
     , public ILocationController
 {
-private:
-    class _BroadcastReceiver: public BroadcastReceiver
-    {
-    public:
-        _BroadcastReceiver(
-            /* [in] */ LocationControllerImpl* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        LocationControllerImpl* mHost;
-    };
-
 public:
     CAR_INTERFACE_DECL();
 
-    LocationControllerImpl(
+    LocationControllerImpl();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     /**
@@ -81,10 +67,10 @@ public:
     CARAPI IsLocationEnabled(
         /* [out] */ Boolean* result);
 
-    // @Override
-    CARAPI OnReceive(
-        /* [in] */ IContext* context,
-        /* [in] */ IIntent* intent);
+    // Reads the active location requests and updates the status view if necessary.
+    CARAPI_(void) UpdateActiveLocationRequests();
+
+    CARAPI_(void) LocationSettingsChanged();
 
 private:
     /**
@@ -100,11 +86,6 @@ private:
 
     // Updates the status view based on the current state of location requests.
     CARAPI_(void) RefreshViews();
-
-    // Reads the active location requests and updates the status view if necessary.
-    CARAPI_(void) UpdateActiveLocationRequests();
-
-    CARAPI_(void) LocationSettingsChanged();
 
     CARAPI_(void) LocationSettingsChanged(
         /* [in] */ ILocationSettingsChangeCallback* cb);

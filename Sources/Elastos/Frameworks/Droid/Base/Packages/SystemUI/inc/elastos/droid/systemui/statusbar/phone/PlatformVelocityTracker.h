@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PLATFORMVELOCITYTRACKER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PLATFORMVELOCITYTRACKER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/utility/Pools.h>
 #include <elastos/core/Object.h>

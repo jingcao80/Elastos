@@ -32,7 +32,7 @@ module
             [out, callee] ArrayOf<ISystemUI*>* services);
 
         GetComponent(
-            [in] InterfaceID interfaceType,
+            [in] String interfaceType,
             [out] IInterface** obj);
     }
 

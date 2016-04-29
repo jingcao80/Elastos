@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSACTIVITY_H__
 #define __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSACTIVITY_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -43,6 +43,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("RecentsActivity.IntentReceiver");
+            return NOERROR;
+        }
 
     private:
         RecentsActivity* mHost;

@@ -15,16 +15,16 @@
   -->
 
 <!-- Extends FrameLayout -->
-<com.android.systemui.statusbar.SpeedBumpView
+<Elastos.Droid.SystemUI.StatusBar.CSpeedBumpView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/speed_bump_height"
     android:visibility="gone"
     >
-    <com.android.systemui.statusbar.AlphaOptimizedView
+    <Elastos.Droid.SystemUI.StatusBar.CAlphaOptimizedView
         android:id="@+id/speedbump_line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#6fdddddd"
         android:layout_gravity="center_vertical"/>
-</com.android.systemui.statusbar.SpeedBumpView>
+</Elastos.Droid.SystemUI.StatusBar.CSpeedBumpView>

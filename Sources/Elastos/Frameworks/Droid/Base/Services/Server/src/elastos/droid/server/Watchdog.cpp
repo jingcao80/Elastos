@@ -370,7 +370,7 @@ ECode Watchdog::ProcessStarted(
 {
     Slogger::D(TAG, "ProcessStarted: %s, pid: %d", name.string(), pid);
     synchronized(this) {
-        assert(0 && "TODO check namespace");
+        // assert(0 && "TODO check namespace");
         if (name.Equals("com.android.phone")) {
             mPhonePid = pid;
         }

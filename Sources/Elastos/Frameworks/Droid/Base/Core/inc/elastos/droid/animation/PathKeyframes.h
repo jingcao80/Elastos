@@ -214,15 +214,12 @@ private:
         /* [in] */ Float startValue,
         /* [in] */ Float endValue);
 
-    static CARAPI_(Boolean) svInit();
-
 private:
     static const Int32 FRACTION_OFFSET;
     static const Int32 X_OFFSET;
     static const Int32 Y_OFFSET;
     static const Int32 NUM_COMPONENTS;
     static AutoPtr<ArrayOf<IKeyframe*> > EMPTY_KEYFRAMES;
-    static Boolean sInit;
 
     AutoPtr<IPointF> mTempPointF;
     AutoPtr<ArrayOf<Float> > mKeyframeData;

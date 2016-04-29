@@ -10,22 +10,6 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-HotspotTile::APChangedReceiver::APChangedReceiver(
-    /* [in] */ HotspotTile* host)
-    : mHost(host)
-{}
-
-ECode HotspotTile::APChangedReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    if (mUsageTracker == NULL) {
-        mUsageTracker = new UsageTracker(context, mHost/*HotspotTile.class*/);
-    }
-    mUsageTracker->TrackUsage();
-    return NOERROR;
-}
-
 CAR_INTERFACE_IMPL(HotspotTile::Callback, Object, IHotspotControllerCallback);
 HotspotTile::Callback::Callback(
     /* [in] */ HotspotTile* host)
@@ -41,8 +25,8 @@ ECode HotspotTile::Callback::OnHotspotChanged(
 
 HotspotTile::HotspotTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mCallback = new Callback(this);
     host->GetHotspotController((IHotspotController**)&mController);
     AutoPtr<IContext> ctx;

@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_SIGNALCLUSTERVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_SIGNALCLUSTERVIEW_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/widget/LinearLayout.h>
 

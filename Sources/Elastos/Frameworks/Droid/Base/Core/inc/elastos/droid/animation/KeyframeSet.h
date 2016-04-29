@@ -27,7 +27,9 @@ class KeyframeSet
 public:
     CAR_INTERFACE_DECL();
 
-    KeyframeSet(
+    KeyframeSet();
+
+    CARAPI constructor(
         /* [in] */ ArrayOf<IKeyframe*>* keyframes);
 
     virtual ~KeyframeSet();

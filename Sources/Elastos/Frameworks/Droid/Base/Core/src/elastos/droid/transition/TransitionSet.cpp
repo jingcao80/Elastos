@@ -21,6 +21,10 @@ namespace Transition {
 // TransitionSet::
 //===============================================================
 CAR_INTERFACE_IMPL(TransitionSet, Transition, ITransitionSet)
+TransitionSet::TransitionSet()
+{
+    CArrayList::New((IArrayList**)&mTransitions);
+}
 
 ECode TransitionSet::constructor()
 {

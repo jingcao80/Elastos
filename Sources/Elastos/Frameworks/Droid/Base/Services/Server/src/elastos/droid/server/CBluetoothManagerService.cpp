@@ -807,7 +807,7 @@ ECode CBluetoothManagerService::constructor(
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
     Int32 sysUiUid = -1;
-    ECode ec = pm->GetPackageUid(String("com.android.systemui"), UserHandle::USER_OWNER, &sysUiUid);
+    ECode ec = pm->GetPackageUid(String("Elastos.Droid.SystemUI"), UserHandle::USER_OWNER, &sysUiUid);
     if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         Slogger::E(TAG, "Unable to resolve SystemUI's UID.");
     }

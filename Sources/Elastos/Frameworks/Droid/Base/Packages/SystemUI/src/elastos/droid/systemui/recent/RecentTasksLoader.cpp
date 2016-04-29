@@ -1,6 +1,6 @@
 #include "elastos/droid/app/AppGlobals.h"
 #include "Elastos.Droid.App.h"
-#include "elastos/droid/systemui/recent/ColorDrawableWithDimensions.h"
+#include "elastos/droid/systemui/recent/CColorDrawableWithDimensions.h"
 #include "elastos/droid/systemui/recent/RecentTasksLoader.h"
 #include "elastos/droid/systemui/recent/TaskDescription.h"
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
@@ -398,8 +398,8 @@ RecentTasksLoader::RecentTasksLoader(
     Int32 dpi;
     dm->GetDensityDpi(&dpi);
     Int32 iconSize = (Int32)(defaultIconSize * mIconDpi / dpi);
-    mDefaultIconBackground = new ColorDrawableWithDimensions();
-    mDefaultIconBackground->constructor(0x00000000, iconSize, iconSize);
+    CColorDrawableWithDimensions::New(0x00000000, iconSize, iconSize
+            , (IDrawable**)&mDefaultIconBackground);
 
     // Render the default thumbnail background
     Int32 thumbnailWidth;
@@ -409,8 +409,8 @@ RecentTasksLoader::RecentTasksLoader(
     Int32 color;
     res->GetColor(R::drawable::status_bar_recents_app_thumbnail_background, &color);
 
-    mDefaultThumbnailBackground = new ColorDrawableWithDimensions();
-    mDefaultThumbnailBackground->constructor(color, thumbnailWidth, thumbnailHeight);
+    CColorDrawableWithDimensions::New(color, thumbnailWidth, thumbnailHeight
+            , (IDrawable**)&mDefaultThumbnailBackground);
 }
 
 AutoPtr<RecentTasksLoader> RecentTasksLoader::GetInstance(

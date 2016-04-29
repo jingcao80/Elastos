@@ -875,7 +875,7 @@ ECode PhoneWindow::_DecorView::DispatchStylusAction(
     mContext->GetContentResolver((IContentResolver**)&resolver);
     String pkgName;
     mContext->GetPackageName(&pkgName);
-    Boolean isSystemUI = pkgName.Equals("com.android.systemui");
+    Boolean isSystemUI = pkgName.Equals("Elastos.Droid.SystemUI");
     assert(0 && "TODO");
 
     String setting;
@@ -4100,9 +4100,8 @@ AutoPtr<ITransition> PhoneWindow::GetTransition(
         tifHelper->From(context, (ITransitionInflater**)&inflater);
         inflater->InflateTransition(transitionId, (ITransition**)&transition);
         ITransitionSet* ts = ITransitionSet::Probe(transition);
-        Int32 count;
-        ts->GetTransitionCount(&count);
-        if (transition != NULL && (count == 0)) {
+        Int32 count = 0;
+        if (ts != NULL && (ts->GetTransitionCount(&count), (count == 0))) {
             transition = NULL;
         }
     }

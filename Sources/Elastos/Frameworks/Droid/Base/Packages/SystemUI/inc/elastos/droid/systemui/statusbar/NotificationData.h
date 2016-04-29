@@ -3,7 +3,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__
 
 #include <elastos/droid/ext/frameworkext.h>
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Object.h>
 

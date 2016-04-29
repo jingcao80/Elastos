@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_BLUETOOTHCONTROLLERIMPL_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_BLUETOOTHCONTROLLERIMPL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include "Elastos.Droid.Utility.h"
 #include <elastos/droid/ext/frameworkext.h>
@@ -44,6 +44,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("BluetoothControllerImpl.Receiver");
+            return NOERROR;
+        }
 
     private:
         BluetoothControllerImpl* mHost;

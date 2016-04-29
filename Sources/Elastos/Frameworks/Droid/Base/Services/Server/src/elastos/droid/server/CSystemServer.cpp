@@ -699,6 +699,11 @@ ECode SystemServer::StartOtherServices()
             //     (CStatusBarManagerService**)&statusBar);
             // if (FAILED(ec)) ReportWtf("starting CStatusBarManagerService", ec);
             // ServiceManager::AddService(IContext::STATUS_BAR_SERVICE, TO_IINTERFACE(statusBar));
+            Slogger::I(TAG, "Add the service StatusBarManagerService.");
+            ec = CStatusBarManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
+                (CStatusBarManagerService**)&statusBar);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start CStatusBarManagerService");
+            ServiceManager::AddService(IContext::STATUS_BAR_SERVICE, TO_IINTERFACE(statusBar));
         }
 
         if (!disableNonCoreServices) {
@@ -1174,8 +1179,8 @@ ECode SystemServer::StartSystemUi(
     CIntent::New((IIntent**)&intent);
     AutoPtr<IComponentName> name;
     CComponentName::New(
-        String("com.android.systemui"),
-        String("com.android.systemui.SystemUIService"),
+        String("Elastos.Droid.SystemUI"),
+        String("Elastos.Droid.SystemUI.CSystemUIService"),
         (IComponentName**)&name);
     intent->SetComponent(name);
     //Slog.d(TAG, "Starting service: " + intent);
@@ -1213,8 +1218,10 @@ ECode SystemServer::SystemReadyRunnable::Run()
     webViewFactory->PrepareWebViewInSystemServer();
 
     Slogger::I(SystemServer::TAG, "start system ui　todo");
-    // ec = StartSystemUi(mHost->mSystemContext);
-    // if (FAILED(ec)) mHost->ReportWtf("starting System UI", ec);
+    ec = StartSystemUi(mHost->mSystemContext);
+    if (FAILED(ec)) {
+        mHost->ReportWtf("starting System UI", ec);
+    }
 
     if (mServiceBundle->mMountServiceF != NULL) {
         mServiceBundle->mMountServiceF->SystemReady();

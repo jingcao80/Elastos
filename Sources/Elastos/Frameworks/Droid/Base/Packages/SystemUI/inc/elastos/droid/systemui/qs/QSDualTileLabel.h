@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_QS_QSDUALTILELABEL_H__
 #define __ELASTOS_DROID_SYSTEMUI_QS_QSDUALTILELABEL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/widget/LinearLayout.h>
 #include <elastos/core/Object.h>

@@ -15,13 +15,13 @@
   -->
 
 <!-- Extends Framelayout -->
-<com.android.systemui.statusbar.DismissView
+<Elastos.Droid.SystemUI.StatusBar.CDismissView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
         >
-    <com.android.systemui.statusbar.DismissViewImageButton
+    <Elastos.Droid.SystemUI.StatusBar.CDismissViewImageButton
             android:id="@+id/dismiss_text"
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -29,4 +29,4 @@
             android:src="@drawable/ic_dismiss_all"
             android:background="@drawable/ripple_drawable"
             android:contentDescription="@string/accessibility_clear_all" />
-</com.android.systemui.statusbar.DismissView>
+</Elastos.Droid.SystemUI.StatusBar.CDismissView>

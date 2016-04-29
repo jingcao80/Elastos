@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/recents/views/TaskView.h"
-#include "elastos/droid/systemui/recents/views/FakeShadowDrawable.h"
+#include "elastos/droid/systemui/recents/views/CFakeShadowDrawable.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/core/Math.h>
 #include "../../R.h"
@@ -305,7 +305,8 @@ ECode TaskView::constructor(
     if (mConfig->mFakeShadows) {
         AutoPtr<IResources> res;
         context->GetResources((IResources**)&res);
-        AutoPtr<FakeShadowDrawable> drawable = new FakeShadowDrawable(res, mConfig);
+        AutoPtr<IDrawable> drawable;
+        CFakeShadowDrawable::New(res, mConfig->Probe(EIID_IInterface), (IDrawable**)&drawable);
         SetBackground(drawable);
     }
     SetOutlineProvider(mViewBounds);

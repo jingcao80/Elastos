@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_BLUETOOTHUTIL_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_BLUETOOTHUTIL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>

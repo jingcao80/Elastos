@@ -7,15 +7,14 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
+#include "elastos/droid/graphics/CPath.h"
 #include "elastos/droid/utility/PathParser.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 
-// #include "graphics.CPath.h"
-
-// using Elastos::Droid::Graphics::CPath;
+using Elastos::Droid::Graphics::CPath;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::CArrayList;
@@ -445,7 +444,7 @@ AutoPtr<IPath> PathParser::CreatePathFromPathData(
     /* [in] */ const String& pathData)
 {
     AutoPtr<IPath> path;
-    //CPath::New((IPath**)&path);
+    CPath::New((IPath**)&path);
     AutoPtr<ArrayOf<PathDataNode*> > nodes = CreateNodesFromPathData(pathData);
     if (nodes != NULL) {
         PathDataNode::NodesToPath(nodes, path);
@@ -550,7 +549,7 @@ Int32 PathParser::NextStart(
 
     while (end < s.GetLength()) {
         c = s.GetChar(end);
-        if (((c - 'A') * (c - 'Z') <= 0) || (((c - 'a') * (c - 'z') <= 0))) {
+        if ((Int32((c - 'A') * (c - 'Z')) <= 0) || (Int32((c - 'a') * (c - 'z')) <= 0)) {
             return end;
         }
         end++;

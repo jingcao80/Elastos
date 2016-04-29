@@ -34,7 +34,7 @@ namespace Cm {
 
 const Boolean ActionUtils::DEBUG = FALSE;
 const String ActionUtils::TAG("ActionUtils"); // = ActionUtils.class.getSimpleName();
-const String ActionUtils::SYSTEMUI_PACKAGE("com.android.systemui");
+const String ActionUtils::SYSTEMUI_PACKAGE("Elastos.Droid.SystemUI");
 
 ECode ActionUtils::KillForegroundApp(
     /* [in] */ IContext* context,
@@ -113,7 +113,7 @@ Boolean ActionUtils::KillForegroundAppInternal(
                 if (pkgList->GetLength() > 0) {
                     for (Int32 i = 0; i < pkgList->GetLength(); i++) {
                         String pkg = (*pkgList)[i];
-                        if (!pkg.Equals("com.android.systemui")
+                        if (!pkg.Equals("Elastos.Droid.SystemUI")
                                 && !pkg.Equals(defaultHomePackage)) {
                             am->ForceStopPackage(pkg, IUserHandle::USER_CURRENT);
                             return TRUE;

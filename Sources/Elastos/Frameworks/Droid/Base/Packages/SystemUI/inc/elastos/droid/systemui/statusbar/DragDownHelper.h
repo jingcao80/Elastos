@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_DRAGDOWNHELPER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_DRAGDOWNHELPER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/core/Object.h>

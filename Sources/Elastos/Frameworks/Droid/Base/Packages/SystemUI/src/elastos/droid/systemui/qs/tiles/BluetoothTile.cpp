@@ -192,8 +192,8 @@ ECode BluetoothTile::BluetoothDetailAdapter::OnDetailItemDisconnect(
 AutoPtr<IIntent> BluetoothTile::BLUETOOTH_SETTINGS = InitStatic();
 BluetoothTile::BluetoothTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mCallback = new Callback(this);
     host->GetBluetoothController((IBluetoothController**)&mController);
     mDetailAdapter = new BluetoothDetailAdapter(this);

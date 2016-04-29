@@ -15,18 +15,18 @@
   -->
 
 <!-- Extends FrameLayout -->
-<com.android.systemui.statusbar.NotificationOverflowContainer
+<Elastos.Droid.SystemUI.StatusBar.CNotificationOverflowContainer
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/notification_summary_height"
     android:focusable="true"
     android:clickable="true"
     >
-    <com.android.systemui.statusbar.NotificationBackgroundView android:id="@+id/backgroundNormal"
+    <Elastos.Droid.SystemUI.StatusBar.CNotificationBackgroundView android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-    <com.android.systemui.statusbar.NotificationBackgroundView android:id="@+id/backgroundDimmed"
+    <Elastos.Droid.SystemUI.StatusBar.CNotificationBackgroundView android:id="@+id/backgroundDimmed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
@@ -47,7 +47,7 @@
             android:textStyle="bold"
             android:textSize="14dp"
             />
-        <com.android.systemui.statusbar.StatusBarIconView
+        <Elastos.Droid.SystemUI.StatusBar.CStatusBarIconView
             android:id="@+id/more_icon_overflow"
             android:layout_width="@dimen/status_bar_icon_size"
             android:layout_height="match_parent"
@@ -55,7 +55,7 @@
             android:tint="@color/keyguard_overflow_content_color"
             android:visibility="gone"
             />
-        <com.android.systemui.statusbar.NotificationOverflowIconsView
+        <Elastos.Droid.SystemUI.StatusBar.CNotificationOverflowIconsView
             android:id="@+id/overflow_icons_view"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
@@ -64,4 +64,4 @@
             />
     </LinearLayout>
 
-</com.android.systemui.statusbar.NotificationOverflowContainer>
+</Elastos.Droid.SystemUI.StatusBar.CNotificationOverflowContainer>

@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_SCRIMCONTROLLER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_SCRIMCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/phone/DozeParameters.h"
 #include "elastos/droid/systemui/statusbar/phone/UnlockMethodCache.h"
 #include "Elastos.Droid.Animation.h"

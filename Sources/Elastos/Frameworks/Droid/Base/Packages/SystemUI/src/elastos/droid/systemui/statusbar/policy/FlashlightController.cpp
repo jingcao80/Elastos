@@ -311,7 +311,7 @@ ECode FlashlightController::GetSmallestSize(
 
     assert(IStreamConfigurationMap::Probe(values));
     AutoPtr<ArrayOf<ISize*> > outputSizes;
-    AutoPtr<IClassInfo> cs = Utils::GetClassInfo(String("CSurfaceTexture"), Utils::ELASTOS_DROID_CORE_ECO_FALG);
+    AutoPtr<IClassInfo> cs = Utils::GetClassInfo(String("Elastos.Droid.Graphics.CSurfaceTexture"), Utils::ELASTOS_DROID_CORE_ECO_FALG);
     FAIL_RETURN(IStreamConfigurationMap::Probe(values)->GetOutputSizes(cs, (ArrayOf<ISize*>**)&outputSizes));
     if (outputSizes == NULL || outputSizes->GetLength() == 0) {
         // throw new IllegalStateException(

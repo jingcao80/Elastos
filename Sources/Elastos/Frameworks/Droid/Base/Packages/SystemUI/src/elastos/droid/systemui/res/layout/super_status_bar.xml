@@ -18,7 +18,7 @@
 -->
 
 <!-- This is the combined status bar / notification panel window. -->
-<com.android.systemui.statusbar.phone.StatusBarWindowView
+<Elastos.Droid.SystemUI.StatusBar.Phone.CStatusBarWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,7 +26,7 @@
     android:fitsSystemWindows="true"
     android:descendantFocusability="afterDescendants">
 
-    <com.android.systemui.statusbar.BackDropView
+    <Elastos.Droid.SystemUI.StatusBar.CBackDropView
             android:id="@+id/backdrop"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -41,9 +41,9 @@
                    android:layout_height="match_parent"
                    android:scaleType="centerCrop"
                    android:visibility="invisible" />
-    </com.android.systemui.statusbar.BackDropView>
+    </Elastos.Droid.SystemUI.StatusBar.CBackDropView>
 
-    <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_behind"
+    <Elastos.Droid.SystemUI.StatusBar.CScrimView android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -69,7 +69,7 @@
         </FrameLayout>
     </FrameLayout>
 
-    <com.android.systemui.statusbar.phone.PanelHolder
+    <Elastos.Droid.SystemUI.StatusBar.Phone.CPanelHolder
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -78,10 +78,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone" />
-    </com.android.systemui.statusbar.phone.PanelHolder>
+    </Elastos.Droid.SystemUI.StatusBar.Phone.CPanelHolder>
 
-    <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_in_front"
+    <Elastos.Droid.SystemUI.StatusBar.CScrimView android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</com.android.systemui.statusbar.phone.StatusBarWindowView>
+</Elastos.Droid.SystemUI.StatusBar.Phone.CStatusBarWindowView>

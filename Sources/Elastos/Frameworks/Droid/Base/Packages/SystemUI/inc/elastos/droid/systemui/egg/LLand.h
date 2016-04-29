@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_EGG_LLAND_H__
 #define __ELASTOS_DROID_SYSTEMUI_EGG_LLAND_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"

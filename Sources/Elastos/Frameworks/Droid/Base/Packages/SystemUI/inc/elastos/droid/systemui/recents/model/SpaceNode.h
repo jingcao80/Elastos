@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_SPACENODE_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_MODEL_SPACENODE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/systemui/recents/model/TaskStack.h"
 #include <elastos/core/Object.h>

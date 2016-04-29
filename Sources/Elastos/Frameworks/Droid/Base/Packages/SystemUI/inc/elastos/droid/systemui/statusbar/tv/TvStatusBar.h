@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_TV_TVSTATUSBAR_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_TV_TVSTATUSBAR_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "Elastos.Droid.Internal.h"
 

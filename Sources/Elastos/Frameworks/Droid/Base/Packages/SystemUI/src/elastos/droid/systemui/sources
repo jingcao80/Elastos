@@ -1,4 +1,4 @@
-TARGET_NAME= SystemUI
+TARGET_NAME= Elastos.Droid.SystemUI
 TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
@@ -11,11 +11,12 @@ LUBE_FLAGS += -n -u
 
 IMPORTS += Elastos.CoreLibrary.eco
 
-SOURCES = SystemUI.car
+SOURCES = Elastos.Droid.SystemUI.car
 
 SOURCES += R.cpp
 SOURCES += Utils.cpp
 SOURCES += CBatteryMeterView.cpp
+SOURCES += CBatteryMeterViewBatteryTracker.cpp
 SOURCES += BitmapHelper.cpp
 SOURCES += CBootReceiver.cpp
 SOURCES += CDessertCase.cpp
@@ -28,12 +29,13 @@ SOURCES += CGuestResumeSessionReceiver.cpp
 SOURCES += CSwipeHelper.cpp
 SOURCES += SystemUI.cpp
 SOURCES += CSystemUIApplication.cpp
+SOURCES += CSystemUIBroadcastReceiver.cpp
 SOURCES += CSearchPanelView.cpp
 SOURCES += CImageWallpaper.cpp
 SOURCES += CLoadAverageService.cpp
 SOURCES += CSomnambulator.cpp
 SOURCES += CSystemUIService.cpp
-SOURCES += SearchPanelCircleView.cpp
+SOURCES += CSearchPanelCircleView.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 
@@ -60,7 +62,7 @@ LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 
 APPPACK = 1
-APP_PACKAGE_NAME = com.android.systemui
+APP_PACKAGE_NAME = Elastos.Droid.SystemUI
 RES_NAMESPACE = Elastos.Droid.SystemUI
 EXTRA_RES_DIR = $(MAKEDIR)/../../../../../Keyguard/res
 AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.keyguard

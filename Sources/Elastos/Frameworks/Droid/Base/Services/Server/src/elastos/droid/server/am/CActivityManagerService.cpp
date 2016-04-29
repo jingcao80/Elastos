@@ -7969,10 +7969,10 @@ Boolean CActivityManagerService::AttachApplicationLocked(
                 pid, TO_CSTR(thread));
         //EventLog.writeEvent(EventLogTags.AM_DROP_PROCESS, pid);
         if (pid > 0 && pid != MY_PID) {
-            Int32 uid;
-            app->mInfo->GetUid(&uid);
+            // Int32 uid;
+            // app->mInfo->GetUid(&uid);
             Process::KillProcessQuiet(pid);
-            Process::KillProcessGroup(uid, pid);
+            // Process::KillProcessGroup(uid, pid);
         }
         else {
             thread->ScheduleExit();
@@ -14586,7 +14586,7 @@ ECode CActivityManagerService::SystemReady(
             Slogger::I(TAG, " >> TODO SystemReady(): DeliverPreBootCompleted");
             AutoPtr<List<AutoPtr<IComponentName> > > doneReceivers = new List<AutoPtr<IComponentName> >();
             AutoPtr<IRunnable> runnable = new OnFinishCallback(this, doneReceivers.Get(), goingCallback);
-            // mWaitingUpdate = DeliverPreBootCompleted(runnable, doneReceivers, IUserHandle::USER_OWNER);
+            mWaitingUpdate = DeliverPreBootCompleted(runnable, doneReceivers, IUserHandle::USER_OWNER);
 
             if (mWaitingUpdate) {
                 return NOERROR;

@@ -3,6 +3,7 @@
 #include "elastos/droid/animation/CValueAnimator.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewPropertyAnimator.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CValueAnimator;
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
@@ -14,6 +15,7 @@ using Elastos::Droid::View::EIID_IViewPropertyAnimator;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ISet;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -748,9 +750,8 @@ ECode ViewPropertyAnimator::HasActions(
 
 ECode ViewPropertyAnimator::StartAnimation()
 {
-    assert(0);
-    //-- has no this car:
-    if (mRTBackend != NULL && -1/*mRTBackend->StartAnimation(this)*/) {
+    Logger::D("ViewPropertyAnimator", "TODO: Not have the class ViewPropertyAnimatorRT.");
+    if (mRTBackend != NULL && FALSE/*mRTBackend->StartAnimation(this)*/) {
         return NOERROR;
     }
 

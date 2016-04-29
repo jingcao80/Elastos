@@ -95,6 +95,10 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+class CPhoneStatusBarReceiver;
+class CPhoneStatusBarHeadsUpObserver;
+class CPhoneStatusBarUserSetupObserver;
+
 CarClass(CPhoneStatusBar)
     , public BaseStatusBar
     , public IPhoneStatusBar
@@ -103,23 +107,6 @@ CarClass(CPhoneStatusBar)
     , public IActivityStarter
 {
 private:
-    class UserSetupObserver: public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CPhoneStatusBar::UserSetupObserver")
-
-        UserSetupObserver(
-            /* [in] */ CPhoneStatusBar* host,
-            /* [in] */ IHandler* handler);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        CPhoneStatusBar* mHost;
-    };
-
     class HeadsUpObserver: public ContentObserver
     {
     public:
@@ -414,20 +401,6 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class InnerReceiver: public BroadcastReceiver
-    {
-    public:
-        InnerReceiver(
-            /* [in] */ CPhoneStatusBar* host);
-
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        CPhoneStatusBar* mHost;
-    };
-
     class StartTracing: public Runnable
     {
     public:
@@ -450,43 +423,6 @@ private:
 
     private:
         CPhoneStatusBar* mHost;
-    };
-
-    class FastColorDrawable: public Drawable
-    {
-    public:
-        FastColorDrawable(
-            /* [in] */ Int32 color);
-
-        // @Override
-        CARAPI Draw(
-            /* [in] */ ICanvas* canvas);
-
-        // @Override
-        CARAPI SetAlpha(
-            /* [in] */ Int32 alpha);
-
-        // @Override
-        CARAPI SetColorFilter(
-            /* [in] */ IColorFilter* cf);
-
-        // @Override
-        CARAPI GetOpacity(
-            /* [out] */ Int32* result);
-
-        // @Override
-        CARAPI SetBounds(
-            /* [in] */ Int32 left,
-            /* [in] */ Int32 top,
-            /* [in] */ Int32 right,
-            /* [in] */ Int32 bottom);
-
-        // @Override
-        CARAPI SetBounds(
-            /* [in] */ IRect* bounds);
-
-    private:
-        Int32 mColor;
     };
 
     class ShadeUpdates: public Object
@@ -1475,6 +1411,7 @@ protected:
     // @Override
     CARAPI_(void) ToggleRecents();
 
+    CARAPI_(String) GetClass();
 
 private:
     CARAPI_(void) ClearAllNotifications();
@@ -1955,6 +1892,10 @@ private:
     Boolean mDemoModeAllowed;
     Boolean mDemoMode;
     AutoPtr<DemoStatusIcons> mDemoStatusIcons;
+
+    friend class CPhoneStatusBarReceiver;
+    friend class CPhoneStatusBarHeadsUpObserver;
+    friend class CPhoneStatusBarUserSetupObserver;
 };
 
 }// namespace Phone

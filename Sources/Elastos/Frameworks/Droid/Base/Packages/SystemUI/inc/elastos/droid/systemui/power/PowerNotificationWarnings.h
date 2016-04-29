@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_POWER_POWERNOTIFICATIONWARNINGS_H__
 #define __ELASTOS_DROID_SYSTEMUI_POWER_POWERNOTIFICATIONWARNINGS_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
@@ -50,6 +50,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("PowerNotificationWarnings.Receiver");
+            return NOERROR;
+        }
 
     private:
         PowerNotificationWarnings* mHost;

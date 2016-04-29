@@ -42,11 +42,11 @@ ECode AbsSavedState::constructor(
     /* [in] */ IParcelable* superState)
 {
     if (superState == NULL) {
-        Logger::E("AbsSavedState", "superState must not be null")
+        Logger::E("AbsSavedState", "superState must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    mSuperState = superState != GetEMPTY_STATE().Get() ? superState : NULL;
+    mSuperState = superState != IParcelable::Probe(GetEMPTY_STATE()) ? superState : NULL;
     return NOERROR;
 }
 
@@ -72,8 +72,8 @@ ECode AbsSavedState::ReadFromParcel(
     AutoPtr<IInterface> obj;
     source->ReadInterfacePtr((Handle32*)&obj);
     mSuperState = IParcelable::Probe(obj);
-    if (superState == NULL) {
-        mSuperState = GetEMPTY_STATE();
+    if (mSuperState == NULL) {
+        mSuperState = IParcelable::Probe(GetEMPTY_STATE());
     }
 
     return NOERROR;

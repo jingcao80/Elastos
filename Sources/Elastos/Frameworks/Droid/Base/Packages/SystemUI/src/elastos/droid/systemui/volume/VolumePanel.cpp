@@ -1,4 +1,6 @@
 #include "elastos/droid/systemui/volume/VolumePanel.h"
+#include "elastos/droid/systemui/volume/CVolumePanelBroadcastReceiver1.h"
+#include "elastos/droid/systemui/volume/CVolumePanelBroadcastReceiver2.h"
 #include "elastos/droid/systemui/volume/Interaction.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Core.h"
@@ -34,6 +36,7 @@ using Elastos::Droid::Media::IRingtoneManager;
 using Elastos::Droid::Media::IRingtoneManagerHelper;
 using Elastos::Droid::Media::IVolumeProvider;
 using Elastos::Droid::Media::Session::EIID_IMediaControllerCallback;
+using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IZenModeControllerCallback;
 using Elastos::Droid::Utility::CSparseArray;
@@ -183,22 +186,26 @@ const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::R
 CAR_INTERFACE_IMPL(VolumePanel::StreamControl, Object, IVolumePanelStreamControl)
 
 //------------------------------------------------------------------------------------
-// VolumePanel::SafetyWarning::MyReceiver
+// CVolumePanelBroadcastReceiver2
 //------------------------------------------------------------------------------------
+CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver2);
+ECode CVolumePanelBroadcastReceiver2::constructor(
+    /* [in] */ ISystemUIDialog* host)
+{
+    mHost = (VolumePanel::SafetyWarning*)host;
+    return BroadcastReceiver::constructor();
+}
 
-VolumePanel::SafetyWarning::MyReceiver::MyReceiver(
-    /* [in] */ SafetyWarning* host)
-    : mHost(host)
-{}
-
-ECode VolumePanel::SafetyWarning::MyReceiver::OnReceive(
+ECode CVolumePanelBroadcastReceiver2::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
     String action;
     intent->GetAction(&action);
     if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS.Equals(action)) {
-        if (LOGD) Logger::D(VolumePanel::TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
+        if (VolumePanel::LOGD) {
+            Logger::D(VolumePanel::TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
+        }
         mHost->Cancel();
         mHost->CleanUp();
     }
@@ -237,8 +244,7 @@ VolumePanel::SafetyWarning::SafetyWarning(
     AlertDialog::SetButton(IDialogInterface::BUTTON_NEGATIVE, cs2, (IMessage*)NULL);
     Dialog::SetOnDismissListener(this);
 
-    mReceiver = new MyReceiver(this);
-
+    CVolumePanelBroadcastReceiver2::New(this, (IBroadcastReceiver**)&mReceiver);
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter);
     AutoPtr<IIntent> intent;
@@ -514,15 +520,17 @@ ECode VolumePanel::ZMPCallback::OnExpanded(
 }
 
 //------------------------------------------------------------------------------------
-// VolumePanel::BR
+// CVolumePanelBroadcastReceiver1
 //------------------------------------------------------------------------------------
+CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver1);
+ECode CVolumePanelBroadcastReceiver1::constructor(
+    /* [in] */ IVolumePanel* host)
+{
+    mHost = (VolumePanel*)host;
+    return BroadcastReceiver::constructor();
+}
 
-VolumePanel::BR::BR(
-    /* [in] */ VolumePanel* host)
-    : mHost(host)
-{}
-
-ECode VolumePanel::BR::OnReceive(
+ECode CVolumePanelBroadcastReceiver1::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -655,7 +663,6 @@ AutoPtr<IAlertDialog> VolumePanel::sSafetyWarning;
 AutoPtr<IInterface> VolumePanel::sSafetyWarningLock;
 
 CAR_INTERFACE_IMPL(VolumePanel, Handler, IVolumePanel)
-
 VolumePanel::VolumePanel()
     : mRingIsSilent(FALSE)
     , mVoiceCapable(FALSE)
@@ -673,6 +680,10 @@ ECode VolumePanel::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IZenModeController* zenController)
 {
+    mSeekListener = new MySeekListener(this);
+    mZenCallback = new MyZenCallback(this);
+    mMediaControllerCb = new MyMediaControllerCb(this);
+
     mContext = context;
     mZenController = zenController;
     Int32 hashCode;
@@ -787,10 +798,7 @@ ECode VolumePanel::constructor(
 
     RegisterReceiver();
 
-    mSeekListener = new MySeekListener(this);
-    mZenCallback = new MyZenCallback(this);
-    mMediaControllerCb = new MyMediaControllerCb(this);
-    return NOERROR;
+    return Handler::constructor((IHandlerCallback*)NULL, FALSE);
 }
 
 ECode VolumePanel::OnConfigurationChanged(
@@ -840,7 +848,8 @@ void VolumePanel::RegisterReceiver()
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IAudioManager::RINGER_MODE_CHANGED_ACTION);
     filter->AddAction(IIntent::ACTION_SCREEN_OFF);
-    AutoPtr<BR> br = new BR(this);
+    AutoPtr<IBroadcastReceiver> br;
+    CVolumePanelBroadcastReceiver1::New(this, (IBroadcastReceiver**)&br);
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(br, filter, (IIntent**)&intent);
 }
@@ -1973,7 +1982,7 @@ void VolumePanel::ResetTimeout()
     CSystem::AcquireSingleton((ISystem**)&sys);
     Int64 tm;
     sys->GetCurrentTimeMillis(&tm);
-    if (LOGD) Logger::D(mTag, "resetTimeout at %ld delay=%d touchExploration=%s",
+    if (LOGD) Logger::D(mTag, "resetTimeout at %lld delay=%d touchExploration=%s",
         tm, mTimeoutDelay, touchExploration ? "TRUE" : "FALSE");
     if (sSafetyWarning == NULL || !touchExploration) {
         RemoveMessages(MSG_TIMEOUT);

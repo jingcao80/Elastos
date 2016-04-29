@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PANELVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PANELVIEW_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/FlingAnimationUtils.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Animation.h"

@@ -51,6 +51,13 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("AirplaneModeTile.Receiver");
+            return NOERROR;
+        }
+
     private:
         AirplaneModeTile* mHost;
     };

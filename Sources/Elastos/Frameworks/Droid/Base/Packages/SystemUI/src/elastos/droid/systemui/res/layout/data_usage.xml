@@ -14,7 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.qs.tiles.DataUsageDetailView xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.SystemUI.Qs.Tiles.CDataUsageDetailView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingTop="16dp"
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.QS.DataUsage.Usage" />
 
-    <com.android.systemui.qs.DataUsageGraph
+    <Elastos.Droid.SystemUI.Qs.CDataUsageGraph
         android:id="@+id/usage_graph"
         android:layout_width="match_parent"
         android:layout_height="8dp"
@@ -82,4 +82,4 @@
             android:textAppearance="@style/TextAppearance.QS.DataUsage.Secondary" />
     </LinearLayout>
 
-</com.android.systemui.qs.tiles.DataUsageDetailView>
+</Elastos.Droid.SystemUI.Qs.Tiles.CDataUsageDetailView>

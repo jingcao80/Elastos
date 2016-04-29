@@ -33,7 +33,7 @@ namespace Dreams {
 static AutoPtr<IComponentName> InitStatic()
 {
     AutoPtr<CComponentName> cc;
-    CComponentName::NewByFriend(String("com.android.systemui"), String("com.android.systemui.Somnambulator"), (CComponentName**)&cc);
+    CComponentName::NewByFriend(String("Elastos.Droid.SystemUI"), String("Elastos.Droid.SystemUI.CSomnambulator"), (CComponentName**)&cc);
     return (IComponentName*)(cc.Get());
 }
 

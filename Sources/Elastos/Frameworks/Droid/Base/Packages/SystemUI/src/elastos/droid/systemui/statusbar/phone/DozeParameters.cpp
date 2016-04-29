@@ -92,6 +92,8 @@ AutoPtr<IPattern> DozeParameters::PulseSchedule::InitStatic()
     return p;
 }
 
+
+AutoPtr<DozeParameters::PulseSchedule> DozeParameters::sPulseSchedule;
 DozeParameters::DozeParameters(
     /* [in] */ IContext* context)
 {

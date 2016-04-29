@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_HOTSPOTCONTROLLERIMPL_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_HOTSPOTCONTROLLERIMPL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
@@ -11,7 +11,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Net::IConnectivityManager;
@@ -25,30 +25,12 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
+class CHotspotControllerReceiver;
+
 class HotspotControllerImpl
     : public Object
     , public IHotspotController
 {
-private:
-    class Receiver: public BroadcastReceiver
-    {
-    public:
-        Receiver(
-            /* [in] */ HotspotControllerImpl* host);
-
-        CARAPI SetListening(
-            /* [in] */ Boolean listening);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        Boolean mRegistered;
-        HotspotControllerImpl* mHost;
-    };
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -86,10 +68,11 @@ private:
     static const Boolean DEBUG;
 
     AutoPtr<IArrayList> mCallbacks;  /*<IHotspotControllerCallback*/
-    AutoPtr<Receiver> mReceiver;
+    AutoPtr<IBroadcastReceiver> mReceiver;
     AutoPtr<IContext> mContext;
     AutoPtr<IWifiManager> mWifiManager;
     AutoPtr<IConnectivityManager> mConnectivityManager;
+    friend class CHotspotControllerReceiver;
 };
 
 } // namespace Policy

@@ -75,8 +75,7 @@ AutoPtr<ArrayOf<Int32> > CDessertCaseView::PASTRIES;
 AutoPtr<ArrayOf<Int32> > CDessertCaseView::RARE_PASTRIES;
 AutoPtr<ArrayOf<Int32> > CDessertCaseView::XRARE_PASTRIES;
 AutoPtr<ArrayOf<Int32> > CDessertCaseView::XXRARE_PASTRIES;
-Int32 CDessertCaseView::NUM_PASTRIES = PASTRIES->GetLength() + RARE_PASTRIES->GetLength()
-        + XRARE_PASTRIES->GetLength() + XXRARE_PASTRIES->GetLength();
+Int32 CDessertCaseView::NUM_PASTRIES;
 
 AutoPtr<ArrayOf<Float> > CDessertCaseView::MASK;
 AutoPtr<ArrayOf<Float> > CDessertCaseView::ALPHA_MASK;
@@ -197,6 +196,9 @@ Boolean CDessertCaseView::InitStatic()
     (*XXRARE_PASTRIES)[0] = R::drawable::dessert_zombiegingerbread; // thx hackbod
     (*XXRARE_PASTRIES)[1] = R::drawable::dessert_dandroid;    // thx morrildl
     (*XXRARE_PASTRIES)[2] = R::drawable::dessert_jandycane;   // thx nes
+
+    NUM_PASTRIES = PASTRIES->GetLength() + RARE_PASTRIES->GetLength()
+        + XRARE_PASTRIES->GetLength() + XXRARE_PASTRIES->GetLength();
 
     Float array_MASK[] = {
             0.f,  0.f,  0.f,  0.f, 255.f,

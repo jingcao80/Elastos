@@ -84,8 +84,8 @@ ECode CMediaProjectionManager::CreateScreenCaptureIntent(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IIntent> i;
     CIntent::New((IIntent**)&i);
-    i->SetClassName(String("com.android.systemui"),
-            String("com.android.systemui.media.MediaProjectionPermissionActivity"));
+    i->SetClassName(String("Elastos.Droid.SystemUI"),
+            String("Elastos.Droid.SystemUI.Media.CMediaProjectionPermissionActivity"));
     *result = i;
     REFCOUNT_ADD(*result)
     return NOERROR;

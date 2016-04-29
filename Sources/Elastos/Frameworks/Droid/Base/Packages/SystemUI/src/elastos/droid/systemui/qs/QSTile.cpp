@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/qs/QSTile.h"
+#include "elastos/droid/systemui/qs/QSTileView.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/os/Looper.h>
 #include <elastos/core/StringUtils.h>
@@ -256,7 +257,11 @@ ECode QSTile::H::HandleMessage(
 
 const Boolean QSTile::DEBUG = Logger::IsLoggable("QSTile", Logger::___DEBUG);
 CAR_INTERFACE_IMPL_2(QSTile, Object, IQSTile, IListenable);
-QSTile::QSTile(
+QSTile::QSTile()
+{
+}
+
+ECode QSTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
     TAG = String("QSTile. + getClass().getSimpleName()");
@@ -269,6 +274,7 @@ QSTile::QSTile(
     AutoPtr<ILooper> looper;
     host->GetLooper((ILooper**)&looper);
     mHandler = new H(this, looper);
+    return NOERROR;
 }
 
 ECode QSTile::SupportsDualTargets(
@@ -293,9 +299,9 @@ ECode QSTile::CreateTileView(
     /* [out] */ IQSTileView** view)
 {
     VALIDATE_NOT_NULL(view);
-    assert(0 && "TODO");
-    // *view = new QSTileView();
-    // (*view)->constructor(context);
+    AutoPtr<QSTileView> qv = new QSTileView();
+    qv->constructor(context);
+    *view = qv;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }

@@ -58,6 +58,9 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
+class CSettingsObserver;
+class CLockscreenSettingsObserver;
+
 class BaseStatusBar
     : public SystemUI
     , public IBaseStatusBar
@@ -92,23 +95,6 @@ public:
     };
 
 protected:
-    class SettingsObserver: public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("BaseStatusBar::SettingsObserver")
-
-        SettingsObserver(
-            /* [in] */ IHandler* handler,
-            /* [in] */ BaseStatusBar* host);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        BaseStatusBar* mHost;
-    };
-
     class RecentsPreloadOnTouchListener
         : public Object
         , public IViewOnTouchListener
@@ -168,23 +154,6 @@ protected:
     };
 
 private:
-    class LockscreenSettingsObserver: public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("BaseStatusBar::LockscreenSettingsObserver")
-
-        LockscreenSettingsObserver(
-            /* [in] */ IHandler* handler,
-            /* [in] */ BaseStatusBar* host);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        BaseStatusBar* mHost;
-    };
-
     class _RemoteViewsOnClickHandler
         : public RemoteViews::RemoteViewsOnClickHandler
     {
@@ -219,6 +188,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("BaseStatusBar.BaseBroadcastReceiver");
+            return NOERROR;
+        }
 
     private:
         BaseStatusBar* mHost;
@@ -748,6 +724,8 @@ protected:
     virtual CARAPI_(AutoPtr<IPackageManager>) GetPackageManagerForUser(
         /* [in] */ Int32 userId);
 
+    virtual CARAPI_(String) GetClass() = 0;
+
 private:
     CARAPI_(void) UpdateCurrentProfilesCache();
 
@@ -908,6 +886,9 @@ private:
     AutoPtr<IRemoteViewsOnClickHandler> mOnClickHandler;
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
     AutoPtr<INotificationListenerService> mNotificationListener;
+
+    friend class CSettingsObserver;
+    friend class CLockscreenSettingsObserver;
 };
 
 } // namespace StatusBar

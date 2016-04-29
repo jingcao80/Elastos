@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_VIEWPOOL_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_VIEWPOOL_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>

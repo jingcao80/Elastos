@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/CBatteryMeterView.h"
+#include "elastos/droid/systemui/CBatteryMeterViewBatteryTracker.h"
 #include "Elastos.Droid.Os.h"
 #include "R.h"
 #include <elastos/droid/provider/Settings.h>
@@ -36,71 +37,6 @@ using Elastos::Core::StringUtils;
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
-
-//===============================================================
-// CBatteryMeterView::BatteryTracker
-//===============================================================
-Int32 CBatteryMeterView::BatteryTracker::UNKNOWN_LEVEL = -1;
-CBatteryMeterView::BatteryTracker::BatteryTracker(
-    /* [in] */ CBatteryMeterView* host)
-    : mLevel(UNKNOWN_LEVEL)
-    , mPlugType(0)
-    , mPlugged(FALSE)
-    , mHealth(0)
-    , mStatus(0)
-    , mVoltage(0)
-    , mTemperature(0)
-    , mTestmode(FALSE)
-    , mHost(host)
-{
-}
-
-ECode CBatteryMeterView::BatteryTracker::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (action.Equals(IIntent::ACTION_BATTERY_CHANGED)) {
-        Boolean bExt = FALSE;
-        if (mTestmode && ! (intent->GetBooleanExtra(String("testmode"), FALSE, &bExt), bExt))
-            return NOERROR;
-
-        Int32 ext1 = 0, ext2 = 0;
-        intent->GetInt32Extra(IBatteryManager::EXTRA_LEVEL, 0, &ext1);
-        intent->GetInt32Extra(IBatteryManager::EXTRA_SCALE, 100, &ext2);
-        mLevel = (Int32)(100.0 * ext1 / ext2);
-
-        intent->GetInt32Extra(IBatteryManager::EXTRA_PLUGGED, 0, &mPlugType);
-        mPlugged = mPlugType != 0;
-        intent->GetInt32Extra(IBatteryManager::EXTRA_HEALTH,
-                IBatteryManager::BATTERY_HEALTH_UNKNOWN, &mHealth);
-        intent->GetInt32Extra(IBatteryManager::EXTRA_STATUS,
-                IBatteryManager::BATTERY_STATUS_UNKNOWN, &mStatus);
-        intent->GetStringExtra(IBatteryManager::EXTRA_TECHNOLOGY, &mTechnology);
-        intent->GetInt32Extra(IBatteryManager::EXTRA_VOLTAGE, 0, &mVoltage);
-        intent->GetInt32Extra(IBatteryManager::EXTRA_TEMPERATURE, 0, &mTemperature);
-
-        AutoPtr<IInteger32> obj;
-        CInteger32::New(mLevel, (IInteger32**)&obj);
-        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        args->Set(0, obj);
-
-        String str;
-        context->GetString(R::string::accessibility_battery_level, args, &str);
-        AutoPtr<ICharSequence> des;
-        CString::New(str, (ICharSequence**)&des);
-        mHost->SetContentDescription(des);
-        mHost->PostInvalidate();
-    }
-    else if (action.Equals(ACTION_LEVEL_TEST)) {
-        mTestmode = TRUE;
-        AutoPtr<IRunnable> r = new Runnable_1(mLevel, mPlugType, mTestmode, mHost);
-        Boolean result = FALSE;
-        mHost->Post(r, &result);
-    }
-    return NOERROR;
-}
 
 //===============================================================
 // CBatteryMeterView::Runnable_1
@@ -160,7 +96,7 @@ Int32 CBatteryMeterView::FULL = 96;
 Float CBatteryMeterView::BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
 CAR_OBJECT_IMPL(CBatteryMeterView);
-CAR_INTERFACE_IMPL_2(CBatteryMeterView, View, IDemoMode, IBatteryStateChangeCallback);
+CAR_INTERFACE_IMPL_3(CBatteryMeterView, View, IBatteryMeterView, IDemoMode, IBatteryStateChangeCallback);
 CBatteryMeterView::CBatteryMeterView()
     : mShowPercent(TRUE)
     , mButtonHeightFraction(0)
@@ -183,8 +119,8 @@ CBatteryMeterView::CBatteryMeterView()
     CPath::New((IPath**)&mClipPath);
     CPath::New((IPath**)&mTextPath);
 
-    mTracker = new BatteryTracker(this);
-    mDemoTracker = new BatteryTracker(this);
+    CBatteryMeterViewBatteryTracker::New(this, (IBroadcastReceiver**)&mTracker);
+    CBatteryMeterViewBatteryTracker::New(this, (IBroadcastReceiver**)&mDemoTracker);
 }
 
 ECode CBatteryMeterView::OnAttachedToWindow()
@@ -395,10 +331,11 @@ Int32 CBatteryMeterView::GetColorForLevel(
 ECode CBatteryMeterView::Draw(
     /* [in] */ ICanvas* c)
 {
-    AutoPtr<BatteryTracker> tracker = mDemoMode ? mDemoTracker : mTracker;
+    AutoPtr<IBroadcastReceiver> _tracker = mDemoMode ? mDemoTracker : mTracker;
+    CBatteryMeterViewBatteryTracker* tracker = (CBatteryMeterViewBatteryTracker*)_tracker.Get();
     Int32 level = tracker->mLevel;
 
-    if (level == BatteryTracker::UNKNOWN_LEVEL) return NOERROR;
+    if (level == CBatteryMeterViewBatteryTracker::UNKNOWN_LEVEL) return NOERROR;
 
     Float drawFrac = (float) level / 100.0f;
     Int32 pt = 0;
@@ -580,8 +517,9 @@ ECode CBatteryMeterView::DispatchDemoCommand(
 {
     if (!mDemoMode && command.Equals(COMMAND_ENTER)) {
         mDemoMode = TRUE;
-        mDemoTracker->mLevel = mTracker->mLevel;
-        mDemoTracker->mPlugged = mTracker->mPlugged;
+        CBatteryMeterViewBatteryTracker* demoTracker = (CBatteryMeterViewBatteryTracker*)mDemoTracker.Get();
+        demoTracker->mLevel = ((CBatteryMeterViewBatteryTracker*)mTracker.Get())->mLevel;
+        demoTracker->mPlugged = ((CBatteryMeterViewBatteryTracker*)mTracker.Get())->mPlugged;
     }
     else if (mDemoMode && command.Equals(COMMAND_EXIT)) {
         mDemoMode = FALSE;
@@ -593,10 +531,11 @@ ECode CBatteryMeterView::DispatchDemoCommand(
        String plugged;
        args->GetString(String("plugged"), &plugged);
        if (level != NULL) {
-           mDemoTracker->mLevel = Elastos::Core::Math::Min(Elastos::Core::Math::Max(StringUtils::ParseInt32(level), 0), 100);
+           ((CBatteryMeterViewBatteryTracker*)mDemoTracker.Get())->mLevel =
+                Elastos::Core::Math::Min(Elastos::Core::Math::Max(StringUtils::ParseInt32(level), 0), 100);
        }
        if (plugged != NULL) {
-           mDemoTracker->mPlugged = StringUtils::ParseBoolean(plugged);
+           ((CBatteryMeterViewBatteryTracker*)mDemoTracker.Get())->mPlugged = StringUtils::ParseBoolean(plugged);
        }
        PostInvalidate();
     }

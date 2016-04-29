@@ -32,8 +32,8 @@ const Int64 FlashlightTile::RECENTLY_ON_DURATION_MILLIS = 500;
 CAR_INTERFACE_IMPL(FlashlightTile, QSTile, IFlashlightListener);
 FlashlightTile::FlashlightTile(
     /* [in] */ IQSTileHost* host)
-    : QSTile(host)
 {
+    QSTile::constructor(host);
     mRecentlyOnTimeout = new RecentlyOnTimeout(this);
     host->GetFlashlightController((IFlashlightController**)&mFlashlightController);
     mFlashlightController->AddListener(this);

@@ -141,7 +141,8 @@ WifiAccessPointController::WifiAccessPointController(
     mByStrength = new WifiComparator();
     mContext = context;
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO: WIFI_SERVICE not ready.");
+    // mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
 }
 
@@ -171,7 +172,9 @@ ECode WifiAccessPointController::Scan()
 {
     if (mScanning) return NOERROR;
     if (DEBUG) Logger::D(TAG, "scan!");
-    mWifiManager->StartScan(&mScanning);
+    if (mWifiManager != NULL) {
+        mWifiManager->StartScan(&mScanning);
+    }
     return NOERROR;
 }
 
@@ -183,7 +186,9 @@ ECode WifiAccessPointController::Connect(
     ap->GetNetworkId(&networkId);
     if (DEBUG) Logger::D(TAG, "connect networkId=%d", networkId);
     AutoPtr<Listener> l = new Listener();
-    mWifiManager->Connect(networkId, l);
+    if (mWifiManager != NULL) {
+        mWifiManager->Connect(networkId, l);
+    }
     return NOERROR;
 }
 
@@ -217,7 +222,9 @@ String WifiAccessPointController::TrimDoubleQuotes(
 Int32 WifiAccessPointController::GetConnectedNetworkId()
 {
     AutoPtr<IWifiInfo> wifiInfo;
-    mWifiManager->GetConnectionInfo((IWifiInfo**)&wifiInfo);
+    if (mWifiManager != NULL) {
+        mWifiManager->GetConnectionInfo((IWifiInfo**)&wifiInfo);
+    }
     Int32 id = 0;
     return wifiInfo != NULL ? (wifiInfo->GetNetworkId(&id), id) : INetworkControllerAccessPoint::NO_NETWORK;
 }
@@ -225,7 +232,9 @@ Int32 WifiAccessPointController::GetConnectedNetworkId()
 AutoPtr<IArrayMap/*<String, WifiConfiguration*/> WifiAccessPointController::GetConfiguredNetworksBySsid()
 {
     AutoPtr<IList> configs;  /*<WifiConfiguration*/
-    mWifiManager->GetConfiguredNetworks((IList**)&configs);
+    if (mWifiManager != NULL) {
+        mWifiManager->GetConfiguredNetworks((IList**)&configs);
+    }
 
     Int32 size = 0;
     if (configs == NULL || (configs->GetSize(&size), size) == 0) {
@@ -258,7 +267,9 @@ void WifiAccessPointController::UpdateAccessPoints()
     const Int32 connectedNetworkId = GetConnectedNetworkId();
     if (DEBUG) Logger::D(TAG, "connectedNetworkId: %d", connectedNetworkId);
     AutoPtr<IList> scanResults;  /*<ScanResult*/
-    mWifiManager->GetScanResults((IList**)&scanResults);
+    if (mWifiManager != NULL) {
+        mWifiManager->GetScanResults((IList**)&scanResults);
+    }
     AutoPtr<IArrayMap> configured = GetConfiguredNetworksBySsid();  /*<String, WifiConfiguration*/
     if (DEBUG) Logger::D(TAG, "scanResults: %p", scanResults.Get());
     AutoPtr<IList> aps;  /*<AccessPoint*/

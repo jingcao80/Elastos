@@ -32,7 +32,7 @@ ECode CSomnambulator::OnStart()
     launchIntent->GetAction(&action);
     if (IIntent::ACTION_CREATE_SHORTCUT.Equals(action)) {
         AutoPtr<IIntent> shortcutIntent;
-        AutoPtr<IClassInfo> info = Utils::GetClassInfo(String("CSomnambulator"));
+        AutoPtr<IClassInfo> info = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.CSomnambulator"));
         assert(info != NULL);
         ClassID id;
         info->GetId(&id);

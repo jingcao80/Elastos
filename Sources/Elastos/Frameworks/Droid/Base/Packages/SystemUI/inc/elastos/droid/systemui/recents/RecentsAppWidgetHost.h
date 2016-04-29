@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_RECENTSAPPWIDGETHOST_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_RECENTSAPPWIDGETHOST_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/appwidget/AppWidgetHost.h"

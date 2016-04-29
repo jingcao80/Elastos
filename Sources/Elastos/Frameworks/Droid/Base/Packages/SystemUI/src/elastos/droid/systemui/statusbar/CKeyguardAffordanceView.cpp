@@ -4,6 +4,7 @@
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CArgbEvaluator;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
@@ -25,6 +26,7 @@ using Elastos::Droid::View::IViewAnimationUtilsHelper;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IFloat;
 using Elastos::Core::IInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -165,7 +167,10 @@ ECode CKeyguardAffordanceView::AnimatorUpdateListener2::OnAnimationUpdate(
 {
     AutoPtr<IInterface> obj;
     animation->GetAnimatedValue((IInterface**)&obj);
-    IFloat::Probe(obj)->GetValue(&mHost->mImageScale);
+    Logger::D("CKeyguardAffordanceView::AnimatorUpdateListener2", "TODO: NULL?????");
+    if (IFloat::Probe(obj) != NULL) {
+        IFloat::Probe(obj)->GetValue(&mHost->mImageScale);
+    }
     mHost->Invalidate();
     return NOERROR;
 }

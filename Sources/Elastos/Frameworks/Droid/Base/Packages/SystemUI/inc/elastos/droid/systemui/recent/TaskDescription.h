@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_RECENT_TASKDESCRIPTION_H__
 #define __ELASTOS_DROID_SYSTEMUI_RECENT_TASKDESCRIPTION_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Core.h"

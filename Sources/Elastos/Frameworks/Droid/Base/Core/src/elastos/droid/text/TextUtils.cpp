@@ -621,7 +621,7 @@ AutoPtr<ICharSequence> TextUtils::StringOrSpannedString(
     }
     else if (ISpanned::Probe(source)) {
         AutoPtr<ISpannedString> ss;
-        // CSpannedString::New(source, (ISpannedString**)&ss);
+        CSpannedString::New(source, (ISpannedString**)&ss);
         AutoPtr<ICharSequence> result = ICharSequence::Probe(ss.Get());
         return result;
     }

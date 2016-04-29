@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_MISC_DEBUGTRIGGER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_MISC_DEBUGTRIGGER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/droid/os/SystemClock.h>

@@ -1,4 +1,5 @@
 #include "elastos/droid/systemui/keyguard/CKeyguardViewMediator.h"
+#include "elastos/droid/systemui/statusbar/phone/StatusBarKeyguardViewManager.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
@@ -53,6 +54,7 @@ using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::SystemUI::StatusBar::Phone::StatusBarKeyguardViewManager;
 using Elastos::Droid::SystemUI::Keyguard::EIID_IKeyguardViewMediator;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::View::CWindowManagerGlobalHelper;
@@ -631,37 +633,37 @@ void CKeyguardViewMediator::Setup()
     // mLockPatternUtils->IsLockScreenDisabled(&isLockScreenDisabled);
     // mShowing = isDeviceProvisioned || isSecure && (!isLockScreenDisabled);
 
-    //TODO
-    // mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
-    //         mViewMediatorCallback, mLockPatternUtils);
+    mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
+            mViewMediatorCallback, mLockPatternUtils);
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
     const AutoPtr<IContentResolver> cr = resolver;
 
     mPM->IsScreenOn(&mScreenOn);
 
-    CSoundPool::New(1, IAudioManager::STREAM_SYSTEM, 0, (ISoundPool**)&mLockSounds);
+    // CSoundPool::New(1, IAudioManager::STREAM_SYSTEM, 0, (ISoundPool**)&mLockSounds);
     AutoPtr<ISettingsGlobal> sg;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
     String soundPath;
     sg->GetString(cr, ISettingsGlobal::LOCK_SOUND, &soundPath);
-    if (!soundPath.IsNull()) {
-        mLockSounds->Load(soundPath, 1, &mLockSoundId);
-    }
-    if (soundPath.IsNull() || mLockSoundId == 0) {
-        Logger::W(TAG, "failed to load lock sound from %s", soundPath.string());
-    }
-    sg->GetString(cr, ISettingsGlobal::UNLOCK_SOUND, &soundPath);
-    if (!soundPath.IsNull()) {
-        mLockSounds->Load(soundPath, 1, &mUnlockSoundId);
-    }
-    if (soundPath.IsNull() || mUnlockSoundId == 0) {
-        Logger::W(TAG, "failed to load unlock sound from %s", soundPath.string());
-    }
-    sg->GetString(cr, ISettingsGlobal::TRUSTED_SOUND, &soundPath);
-    if (!soundPath.IsNull()) {
-        mLockSounds->Load(soundPath, 1, &mTrustedSoundId);
-    }
+    Logger::W(TAG, "TODO: Need debug SoundPool.");
+    // if (!soundPath.IsNull()) {
+    //     mLockSounds->Load(soundPath, 1, &mLockSoundId);
+    // }
+    // if (soundPath.IsNull() || mLockSoundId == 0) {
+    //     Logger::W(TAG, "failed to load lock sound from %s", soundPath.string());
+    // }
+    // sg->GetString(cr, ISettingsGlobal::UNLOCK_SOUND, &soundPath);
+    // if (!soundPath.IsNull()) {
+    //     mLockSounds->Load(soundPath, 1, &mUnlockSoundId);
+    // }
+    // if (soundPath.IsNull() || mUnlockSoundId == 0) {
+    //     Logger::W(TAG, "failed to load unlock sound from %s", soundPath.string());
+    // }
+    // sg->GetString(cr, ISettingsGlobal::TRUSTED_SOUND, &soundPath);
+    // if (!soundPath.IsNull()) {
+    //     mLockSounds->Load(soundPath, 1, &mTrustedSoundId);
+    // }
     if (soundPath.IsNull() || mTrustedSoundId == 0) {
         Logger::W(TAG, "failed to load trusted sound from %s", soundPath.string());
     }
@@ -680,7 +682,7 @@ void CKeyguardViewMediator::Setup()
 ECode CKeyguardViewMediator::Start()
 {
     Setup();
-    SystemUI::PutComponent(EIID_IKeyguardViewMediator, TO_IINTERFACE(this));
+    SystemUI::PutComponent(String("EIID_IKeyguardViewMediator"), TO_IINTERFACE(this));
     return NOERROR;
 }
 
@@ -1359,26 +1361,26 @@ void CKeyguardViewMediator::PlaySound(
     Int32 v;
     ss->GetInt32(cr, ISettingsSystem::LOCKSCREEN_SOUNDS_ENABLED, 1, &v);
 
-    if (v == 1) {
+    Logger::W(TAG, "TODO: Need debug SoundPool.");
+    // if (v == 1) {
+    //     mLockSounds->Stop(mLockSoundStreamId);
+    //     // Init mAudioManager
+    //     if (mAudioManager == NULL) {
+    //         AutoPtr<IInterface> obj;
+    //         mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+    //         mAudioManager = IAudioManager::Probe(obj);
 
-        mLockSounds->Stop(mLockSoundStreamId);
-        // Init mAudioManager
-        if (mAudioManager == NULL) {
-            AutoPtr<IInterface> obj;
-            mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
-            mAudioManager = IAudioManager::Probe(obj);
+    //         if (mAudioManager == NULL) return;
+    //         mAudioManager->GetMasterStreamType(&mMasterStreamType);
+    //     }
+    //     // If the stream is muted, don't play the sound
+    //     Boolean b;
+    //     mAudioManager->IsStreamMute(mMasterStreamType, &b);
+    //     if (b) return;
 
-            if (mAudioManager == NULL) return;
-            mAudioManager->GetMasterStreamType(&mMasterStreamType);
-        }
-        // If the stream is muted, don't play the sound
-        Boolean b;
-        mAudioManager->IsStreamMute(mMasterStreamType, &b);
-        if (b) return;
-
-        mLockSounds->Play(soundId, mLockSoundVolume, mLockSoundVolume,
-            1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/, &mLockSoundStreamId);
-    }
+    //     mLockSounds->Play(soundId, mLockSoundVolume, mLockSoundVolume,
+    //         1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/, &mLockSoundStreamId);
+    // }
 }
 
 void CKeyguardViewMediator::PlayTrustedSound()
@@ -1601,7 +1603,7 @@ ECode CKeyguardViewMediator::RegisterStatusBar(
     /* [in] */ IScrimController* scrimController,
     /* [out] */ IStatusBarKeyguardViewManager** result)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(result);
     mStatusBarKeyguardViewManager->RegisterStatusBar(phoneStatusBar, container,
             statusBarWindowManager, scrimController);
     *result = mStatusBarKeyguardViewManager;
@@ -1634,7 +1636,7 @@ ECode CKeyguardViewMediator::GetViewMediatorCallback(
 {
     VALIDATE_NOT_NULL(cb)
     *cb = mViewMediatorCallback;
-    REFCOUNT_ADD(*cb)
+    REFCOUNT_ADD(*cb);
     return NOERROR;
 }
 

@@ -34,8 +34,9 @@ ECode SystemUI::OnBootCompleted()
 }
 
 AutoPtr<IInterface> SystemUI::GetComponent(
-    /* [in] */ InterfaceID interfaceType)
+    /* [in] */ const String& interfaceType)
 {
+    assert(mComponents != NULL);
     if (mComponents == NULL) {
         return NULL;
     }
@@ -43,9 +44,10 @@ AutoPtr<IInterface> SystemUI::GetComponent(
 }
 
 ECode SystemUI::PutComponent(
-    /* [in] */ InterfaceID interfaceType,
+    /* [in] */ const String& interfaceType,
     /* [in] */ IInterface* component)
 {
+    assert(mComponents != NULL);
     if (mComponents != NULL) {
         (*mComponents)[interfaceType] = component;
     }
@@ -69,13 +71,13 @@ ECode SystemUI::GetContext(
 }
 
 ECode SystemUI::SetComponents(
-    /* [in] */ HashMap<InterfaceID, AutoPtr<IInterface> >* components)
+    /* [in] */ HashMap<String, AutoPtr<IInterface> >* components)
 {
     mComponents = components;
     return NOERROR;
 }
 
-AutoPtr<HashMap<InterfaceID, AutoPtr<IInterface> > > SystemUI::GetComponents()
+AutoPtr<HashMap<String, AutoPtr<IInterface> > > SystemUI::GetComponents()
 {
     return mComponents;
 }

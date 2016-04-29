@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.phone.KeyguardBottomAreaView
+<Elastos.Droid.SystemUI.StatusBar.Phone.CKeyguardBottomAreaView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/keyguard_bottom_area"
@@ -23,7 +23,7 @@
     android:layout_width="match_parent"
     >
 
-    <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+    <Elastos.Droid.SystemUI.StatusBar.Phone.CKeyguardIndicationTextView
         android:id="@+id/keyguard_indication_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         android:layout_height="match_parent">
     </FrameLayout>
 
-    <com.android.systemui.statusbar.KeyguardAffordanceView
+    <Elastos.Droid.SystemUI.StatusBar.CKeyguardAffordanceView
         android:id="@+id/camera_button"
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
@@ -49,7 +49,7 @@
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button" />
 
-    <com.android.systemui.statusbar.KeyguardAffordanceView
+    <Elastos.Droid.SystemUI.StatusBar.CKeyguardAffordanceView
         android:id="@+id/phone_button"
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
@@ -59,7 +59,7 @@
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button" />
 
-    <com.android.systemui.statusbar.KeyguardAffordanceView
+    <Elastos.Droid.SystemUI.StatusBar.CKeyguardAffordanceView
         android:id="@+id/lock_icon"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_height="@dimen/keyguard_affordance_height"
@@ -69,4 +69,4 @@
         android:tint="#ffffffff"
         android:contentDescription="@string/accessibility_unlock_button" />
 
-</com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
+</Elastos.Droid.SystemUI.StatusBar.Phone.CKeyguardBottomAreaView>

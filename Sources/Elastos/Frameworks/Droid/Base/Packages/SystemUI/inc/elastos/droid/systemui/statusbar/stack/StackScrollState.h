@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STACK_STACKSCROLLSTATE_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STACK_STACKSCROLLSTATE_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"

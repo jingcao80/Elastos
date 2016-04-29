@@ -1,6 +1,6 @@
 
-#ifndef __ELASTOS_DROID_SYSTEMUI_QS_TILES_AIRPLANEMODETILE_H__
-#define __ELASTOS_DROID_SYSTEMUI_QS_TILES_AIRPLANEMODETILE_H__
+#ifndef __ELASTOS_DROID_SYSTEMUI_QS_TILES_BLUETOOTHTILE_H__
+#define __ELASTOS_DROID_SYSTEMUI_QS_TILES_BLUETOOTHTILE_H__
 
 #include "elastos/droid/systemui/qs/QSTile.h"
 #include <elastos/droid/os/Runnable.h>
@@ -163,4 +163,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_SYSTEMUI_QS_TILES_AIRPLANEMODETILE_H__
+#endif // __ELASTOS_DROID_SYSTEMUI_QS_TILES_BLUETOOTHTILE_H__

@@ -28,18 +28,18 @@
         android:layout_height="@dimen/status_bar_icon_size"
         android:layout_marginEnd="4dip"
         >
-        <com.android.systemui.statusbar.AnimatedImageView
+        <Elastos.Droid.SystemUI.StatusBar.CAnimatedImageView
             android:layout_width="@dimen/status_bar_icon_size"
             android:layout_height="@dimen/status_bar_icon_size"
             android:scaleType="center"
             />
-        <com.android.systemui.statusbar.AnimatedImageView
+        <Elastos.Droid.SystemUI.StatusBar.CAnimatedImageView
             android:layout_width="@dimen/status_bar_icon_size"
             android:layout_height="@dimen/status_bar_icon_size"
             android:scaleType="center"
             />
     </ImageSwitcher>
-    <com.android.systemui.statusbar.phone.TickerView android:id="@+id/tickerText"
+    <Elastos.Droid.SystemUI.StatusBar.Phone.CTickerView android:id="@+id/tickerText"
         android:layout_width="0dip"
         android:layout_weight="1"
         android:layout_height="wrap_content"
@@ -57,6 +57,6 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             />
-    </com.android.systemui.statusbar.phone.TickerView>
+    </Elastos.Droid.SystemUI.StatusBar.Phone.CTickerView>
 </LinearLayout>
 

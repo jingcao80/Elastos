@@ -764,7 +764,7 @@ AutoPtr<IContext> ThemeUtils::CreateUiContext(
     // begin from this
     // try {
     AutoPtr<IContext> uiContext;
-    if (FAILED(context->CreatePackageContext(String("com.android.systemui"),
+    if (FAILED(context->CreatePackageContext(String("Elastos.Droid.SystemUI"),
             IContext::CONTEXT_RESTRICTED, (IContext**)&uiContext))) {
         return NOERROR;
     }

@@ -2,14 +2,14 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_SETTINGS_BRIGHTNESSCONTROLLER_H__
 #define __ELASTOS_DROID_SYSTEMUI_SETTINGS_BRIGHTNESSCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/database/ContentObserver.h>
 #include "elastos/droid/systemui/settings/CurrentUserTracker.h"
-#include "elastos/droid/systemui/settings/ToggleSlider.h"
+#include "elastos/droid/systemui/settings/CToggleSlider.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ContentObserver;
@@ -112,7 +112,7 @@ public:
     BrightnessController(
         /* [in] */ IContext* context,
         /* [in] */ IImageView* icon,
-        /* [in] */ ToggleSlider* control);
+        /* [in] */ CToggleSlider* control);
 
     CARAPI_(void) AddStateChangedCallback(
         /* [in] */ IBrightnessStateChangeCallback* cb);
@@ -170,7 +170,7 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<IImageView> mIcon;
-    AutoPtr<ToggleSlider> mControl;
+    AutoPtr<CToggleSlider> mControl;
     Boolean mAutomaticAvailable;
     AutoPtr<IIPowerManager> mPower;
     AutoPtr<CurrentUserTracker> mUserTracker;

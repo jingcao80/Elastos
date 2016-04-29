@@ -49,7 +49,9 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
+
+    TransitionSet();
 
     /**
      * Constructs an empty transition set. Add child transitions to the

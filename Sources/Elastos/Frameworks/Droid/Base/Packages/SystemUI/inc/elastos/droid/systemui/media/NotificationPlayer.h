@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_MEDIA_NOTIFICATIONPLAYER_H__
 #define __ELASTOS_DROID_SYSTEMUI_MEDIA_NOTIFICATIONPLAYER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Net.h"

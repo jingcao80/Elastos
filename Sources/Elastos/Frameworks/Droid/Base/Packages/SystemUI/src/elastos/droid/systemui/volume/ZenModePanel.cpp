@@ -774,12 +774,19 @@ Boolean ZenModePanel::SameConditionId(
     /* [in] */ ICondition* lhs,
     /* [in] */ ICondition* rhs)
 {
-    AutoPtr<IUri> id1, id2;
-    lhs->GetId((IUri**)&id1);
-    rhs->GetId((IUri**)&id2);
-    Boolean b;
-    IObject::Probe(id1)->Equals(id2, &b);
-    return lhs == NULL ? rhs == NULL : rhs != NULL && b;
+    if (lhs == NULL) {
+        return rhs == NULL;
+    }
+
+    if (rhs != NULL) {
+        AutoPtr<IUri> id1, id2;
+        lhs->GetId((IUri**)&id1);
+        rhs->GetId((IUri**)&id2);
+        Boolean e;
+        IObject::Probe(id1)->Equals(id2, &e);
+        return e;
+    }
+    return FALSE;
 }
 
 AutoPtr<ICondition> ZenModePanel::Copy(
@@ -795,25 +802,27 @@ void ZenModePanel::RefreshExitConditionText()
     String forever;
     mContext->GetString(Elastos::Droid::R::string::zen_mode_forever, &forever);
 
-    AutoPtr<IZenModeConfigHelper> zmc;
-    CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&zmc);
-    AutoPtr<IUri> id;
-    mExitCondition->GetId((IUri**)&id);
-    Boolean isValid;
-    zmc->IsValidCountdownConditionId(id, &isValid);
     if (mExitCondition == NULL) {
         mExitConditionText = forever;
     }
-    else if (isValid) {
-        AutoPtr<ICondition> condition = ParseExistingTimeCondition(mExitCondition);
-        String summary;
-        condition->GetSummary(&summary);
-        mExitConditionText = condition != NULL ? summary : forever;
-    }
     else {
-        String summary;
-        mExitCondition->GetSummary(&summary);
-        mExitConditionText = summary;
+        AutoPtr<IZenModeConfigHelper> zmc;
+        CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&zmc);
+        AutoPtr<IUri> id;
+        mExitCondition->GetId((IUri**)&id);
+        Boolean isValid;
+        zmc->IsValidCountdownConditionId(id, &isValid);
+        if (isValid) {
+            AutoPtr<ICondition> condition = ParseExistingTimeCondition(mExitCondition);
+            String summary;
+            condition->GetSummary(&summary);
+            mExitConditionText = condition != NULL ? summary : forever;
+        }
+        else {
+            String summary;
+            mExitCondition->GetSummary(&summary);
+            mExitConditionText = summary;
+        }
     }
 }
 

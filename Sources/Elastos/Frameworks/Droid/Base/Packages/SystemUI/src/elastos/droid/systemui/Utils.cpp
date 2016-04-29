@@ -10,7 +10,7 @@ namespace SystemUI {
 
 static const String TAG("Elastos.Droid.SystemUI.Utils");
 
-const String Utils::sModulePath("SystemUI.eco");
+const String Utils::sModulePath("Elastos.Droid.SystemUI.eco");
 const Int32 Utils::ELASTOS_DROID_CORE_ECO_FALG = 1;
 AutoPtr<IModuleInfo> Utils::sModuleInfo;
 AutoPtr<IClassInfo> Utils::GetClassInfo(
@@ -31,8 +31,7 @@ AutoPtr<IClassInfo> Utils::GetClassInfo(
         assert(sModuleInfo != NULL);
     }
 
-    String name = String("C") + className.Substring(className.LastIndexOf('.'));
-    Logger::D(TAG, "the class name is [%s]", name.string());
+    Logger::D(TAG, "the class className is [%s]", className.string());
     AutoPtr<IClassInfo> classInfo;
     sModuleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
     assert(classInfo != NULL);

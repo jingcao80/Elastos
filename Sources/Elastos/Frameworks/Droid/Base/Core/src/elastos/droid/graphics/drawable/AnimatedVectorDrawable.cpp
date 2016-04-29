@@ -318,8 +318,8 @@ ECode AnimatedVectorDrawable::Inflate(
                 if (drawableRes != 0) {
                     AutoPtr<IDrawable> dr;
                     res->GetDrawable(drawableRes, theme, (IDrawable**)&dr);
-                    AutoPtr<IVectorDrawable> vectorDrawable;
                     dr->Mutate();
+                    AutoPtr<IVectorDrawable> vectorDrawable = IVectorDrawable::Probe(dr);
                     ((VectorDrawable*)vectorDrawable.Get())->SetAllowCaching(FALSE);
                     vectorDrawable->GetPixelSize(&pathErrorScale);
                     mAnimatedVectorState->mVectorDrawable = vectorDrawable;

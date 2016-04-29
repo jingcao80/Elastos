@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CKeyButtonView.h"
-#include "elastos/droid/systemui/statusbar/policy/KeyButtonRipple.h"
+#include "elastos/droid/systemui/statusbar/policy/CKeyButtonRipple.h"
 #include "../../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Hardware.h"
@@ -121,7 +121,8 @@ ECode CKeyButtonView::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
-    AutoPtr<IDrawable> d = new KeyButtonRipple(context, this);
+    AutoPtr<IDrawable> d;
+    CKeyButtonRipple::New(context, this, (IDrawable**)&d);
     SetBackground(d);
     return NOERROR;
 }

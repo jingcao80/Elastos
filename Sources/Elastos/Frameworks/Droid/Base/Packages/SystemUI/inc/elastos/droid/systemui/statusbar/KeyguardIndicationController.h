@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_KEYGUARDINDICATIONCONTROLLER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_KEYGUARDINDICATIONCONTROLLER_H__
 
-#include "_SystemUI.h"
+#include "_Elastos.Droid.SystemUI.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/core/Object.h>
@@ -38,6 +38,13 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            *str = String("KeyguardIndicationController.ControllerBroadcastReceiver");
+            return NOERROR;
+        }
 
     private:
         KeyguardIndicationController* mHost;
