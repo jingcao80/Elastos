@@ -1,4 +1,3 @@
-
 #include "Elastos.Droid.Accounts.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -18,18 +17,16 @@ namespace View {
 
 CAR_INTERFACE_IMPL_2(AbsSavedState, Object, IAbsSavedState, IParcelable)
 
-static AutoPtr<IAbsSavedState> InitEMPTY_STATE()
+const AutoPtr<IAbsSavedState> AbsSavedState::EMPTY_STATE;
+
+AutoPtr<IAbsSavedState> AbsSavedState::GetEMPTY_STATE()
 {
-    AutoPtr<IAbsSavedState> state;
-    CAbsSavedState::New((IAbsSavedState**)&state);
-    return state;
+    if (EMPTY_STATE.Get() == NULL) {
+        CAbsSavedState::New((IAbsSavedState**)&EMPTY_STATE);
+    }
+    return EMPTY_STATE;
 }
 
-const AutoPtr<IAbsSavedState> AbsSavedState::EMPTY_STATE = InitEMPTY_STATE();
-
-/**
- * Constructor used to make the EMPTY_STATE singleton
- */
 AbsSavedState::AbsSavedState()
 {}
 
@@ -45,13 +42,13 @@ ECode AbsSavedState::constructor(
     /* [in] */ IParcelable* superState)
 {
     if (superState == NULL) {
-        Logger::E("AbsSavedState", "superState must not be null");
+        Logger::E("AbsSavedState", "superState must not be null")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    mSuperState = superState != IParcelable::Probe(EMPTY_STATE) ? superState : NULL;
+
+    mSuperState = superState != GetEMPTY_STATE().Get() ? superState : NULL;
     return NOERROR;
 }
-
 
 ECode AbsSavedState::GetSuperState(
     /* [out] */ IParcelable** p)
@@ -72,13 +69,13 @@ ECode AbsSavedState::WriteToParcel(
 ECode AbsSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    AutoPtr<IInterface> superState;
-    source->ReadInterfacePtr((Handle32*)&superState);
-    if (IParcelable::Probe(superState) != NULL) {
-        Logger::E("AbsSavedState", "superState must be null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    AutoPtr<IInterface> obj;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mSuperState = IParcelable::Probe(obj);
+    if (superState == NULL) {
+        mSuperState = GetEMPTY_STATE();
     }
-    mSuperState = IParcelable::Probe(EMPTY_STATE);
+
     return NOERROR;
 }
 

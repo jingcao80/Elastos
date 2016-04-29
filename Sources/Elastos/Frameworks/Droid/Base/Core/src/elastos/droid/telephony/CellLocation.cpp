@@ -34,7 +34,7 @@ ECode CellLocation::IsEmpty(
 ECode CellLocation::RequestLocationUpdate()
 {
     //try {
-    AutoPtr<IITelephony> phone = IITelephony::Probe(ServiceManager::GetService(String("phone")));
+    AutoPtr<IITelephony> phone = IITelephony::Probe(ServiceManager::GetService(IContext::TELEPHONY_SERVICE));
     if (phone != NULL) {
         phone->UpdateServiceLocation();
     }

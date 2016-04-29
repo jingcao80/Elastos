@@ -1319,20 +1319,7 @@ public:
         , public IViewBaseSavedState
     {
     public:
-        BaseSavedState();
-
         CAR_INTERFACE_DECL()
-
-        CARAPI constructor();
-
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
-
-        CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest);
-
-        CARAPI ReadFromParcel(
-            /* [in] */ IParcel* source);
     };
 
     class AlpahFloatProperty
