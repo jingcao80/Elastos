@@ -130,23 +130,23 @@ const Int32 WifiP2pServiceImpl::GROUP_IDLE_TIME_S = 10;
 
 const Int32 WifiP2pServiceImpl::BASE = IProtocol::BASE_WIFI_P2P_SERVICE;
 
-const Int32 WifiP2pServiceImpl::GROUP_CREATING_TIMED_OUT = IProtocol::BASE_WIFI_P2P_SERVICE + 1;
+const Int32 WifiP2pServiceImpl::GROUP_CREATING_TIMED_OUT; // = IProtocol::BASE_WIFI_P2P_SERVICE + 1;
 /* User accepted a peer request */
-const Int32 WifiP2pServiceImpl::PEER_CONNECTION_USER_ACCEPT    = IProtocol::BASE_WIFI_P2P_SERVICE + 2;
+const Int32 WifiP2pServiceImpl::PEER_CONNECTION_USER_ACCEPT    ; // = IProtocol::BASE_WIFI_P2P_SERVICE + 2;
 /* User rejected a peer request */
-const Int32 WifiP2pServiceImpl::PEER_CONNECTION_USER_REJECT    = IProtocol::BASE_WIFI_P2P_SERVICE + 3;
+const Int32 WifiP2pServiceImpl::PEER_CONNECTION_USER_REJECT    ; //= IProtocol::BASE_WIFI_P2P_SERVICE + 3;
 /* User wants to disconnect wifi in favour of p2p */
-const Int32 WifiP2pServiceImpl::DROP_WIFI_USER_ACCEPT          = IProtocol::BASE_WIFI_P2P_SERVICE + 4;
+const Int32 WifiP2pServiceImpl::DROP_WIFI_USER_ACCEPT          ; //= IProtocol::BASE_WIFI_P2P_SERVICE + 4;
 /* User wants to keep his wifi connection and drop p2p */
-const Int32 WifiP2pServiceImpl::DROP_WIFI_USER_REJECT          = IProtocol::BASE_WIFI_P2P_SERVICE + 5;
-const Int32 WifiP2pServiceImpl::DISABLE_P2P_TIMED_OUT = IProtocol::BASE_WIFI_P2P_SERVICE + 6;
-const Int32 WifiP2pServiceImpl::P2P_CONNECTION_CHANGED = IProtocol::BASE_WIFI_P2P_SERVICE + 11;
-const Int32 WifiP2pServiceImpl::DISCONNECT_WIFI_REQUEST = IProtocol::BASE_WIFI_P2P_SERVICE + 12;
-const Int32 WifiP2pServiceImpl::DISCONNECT_WIFI_RESPONSE = IProtocol::BASE_WIFI_P2P_SERVICE + 13;
-const Int32 WifiP2pServiceImpl::SET_MIRACAST_MODE = IProtocol::BASE_WIFI_P2P_SERVICE + 14;
-const Int32 WifiP2pServiceImpl::BLOCK_DISCOVERY = IProtocol::BASE_WIFI_P2P_SERVICE + 15;
-const Int32 WifiP2pServiceImpl::SET_COUNTRY_CODE = IProtocol::BASE_WIFI_P2P_SERVICE + 16;
-const Int32 WifiP2pServiceImpl::P2P_MIRACAST_MODE_CHANGED = IProtocol::BASE_WIFI_P2P_SERVICE + 17;
+const Int32 WifiP2pServiceImpl::DROP_WIFI_USER_REJECT          ; //= IProtocol::BASE_WIFI_P2P_SERVICE + 5;
+const Int32 WifiP2pServiceImpl::DISABLE_P2P_TIMED_OUT; // = IProtocol::BASE_WIFI_P2P_SERVICE + 6;
+const Int32 WifiP2pServiceImpl::P2P_CONNECTION_CHANGED; // = IProtocol::BASE_WIFI_P2P_SERVICE + 11;
+const Int32 WifiP2pServiceImpl::DISCONNECT_WIFI_REQUEST; // = IProtocol::BASE_WIFI_P2P_SERVICE + 12;
+const Int32 WifiP2pServiceImpl::DISCONNECT_WIFI_RESPONSE; // = IProtocol::BASE_WIFI_P2P_SERVICE + 13;
+const Int32 WifiP2pServiceImpl::SET_MIRACAST_MODE; // = IProtocol::BASE_WIFI_P2P_SERVICE + 14;
+const Int32 WifiP2pServiceImpl::BLOCK_DISCOVERY; // = IProtocol::BASE_WIFI_P2P_SERVICE + 15;
+const Int32 WifiP2pServiceImpl::SET_COUNTRY_CODE; // = IProtocol::BASE_WIFI_P2P_SERVICE + 16;
+const Int32 WifiP2pServiceImpl::P2P_MIRACAST_MODE_CHANGED; // = IProtocol::BASE_WIFI_P2P_SERVICE + 17;
 const Int32 WifiP2pServiceImpl::ENABLED = 1;
 const Int32 WifiP2pServiceImpl::DISABLED = 0;
 

@@ -12,6 +12,7 @@
 #include "elastos/droid/server/wifi/CStateChangeResult.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Wifi::SupplicantState;
 using Elastos::Droid::Internal::App::IIBatteryStats;
@@ -228,7 +229,7 @@ public:
         /* [in] */ IContext* c,
         /* [in] */ WifiStateMachine* wsm,
         /* [in] */ WifiConfigStore* wcs,
-        /* [in] */ ILooper* l);
+        /* [in] */ IHandler* l);
 
     CARAPI_(void) EnableVerboseLogging(
         /* [in] */ Int32 verbose);

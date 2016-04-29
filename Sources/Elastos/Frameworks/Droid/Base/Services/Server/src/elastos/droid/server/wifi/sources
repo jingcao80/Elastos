@@ -33,8 +33,8 @@ SOURCES += WifiScanningServiceImpl.cpp
 SOURCES += WifiService.cpp
 SOURCES += WifiServiceImpl.cpp
 SOURCES += WifiSettingsStore.cpp
-#SOURCES += WifiStateMachine.cpp
-SOURCES += WifiStateMachineDummy.cpp
+SOURCES += WifiStateMachine.cpp
+#SOURCES += WifiStateMachineDummy.cpp
 SOURCES += WifiTrafficPoller.cpp
 SOURCES += WifiWatchdogStateMachine.cpp
 

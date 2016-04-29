@@ -79,7 +79,9 @@ ECode NetlinkTracker::AddressUpdated(
             mLinkProperties->AddLinkAddress(address, &changed);
         }
         if (changed) {
-            mCallback->Update();
+            AutoPtr<ILinkProperties> lp;
+            CLinkProperties::New(mLinkProperties, (ILinkProperties**)&lp);
+            mCallback->Update(lp);
         }
     }
     return NOERROR;
@@ -96,7 +98,9 @@ ECode NetlinkTracker::AddressRemoved(
             mLinkProperties->RemoveLinkAddress(address, &changed);
         }
         if (changed) {
-            mCallback->Update();
+            AutoPtr<ILinkProperties> lp;
+            CLinkProperties::New(mLinkProperties, (ILinkProperties**)&lp);
+            mCallback->Update(lp);
         }
     }
     return NOERROR;
@@ -114,7 +118,9 @@ ECode NetlinkTracker::RouteUpdated(
             mLinkProperties->AddRoute(route, &changed);
         }
         if (changed) {
-            mCallback->Update();
+            AutoPtr<ILinkProperties> lp;
+            CLinkProperties::New(mLinkProperties, (ILinkProperties**)&lp);
+            mCallback->Update(lp);
         }
     }
     return NOERROR;
@@ -132,7 +138,9 @@ ECode NetlinkTracker::RouteRemoved(
             mLinkProperties->RemoveRoute(route, &changed);
         }
         if (changed) {
-            mCallback->Update();
+            AutoPtr<ILinkProperties> lp;
+            CLinkProperties::New(mLinkProperties, (ILinkProperties**)&lp);
+            mCallback->Update(lp);
         }
     }
     return NOERROR;
@@ -154,7 +162,9 @@ ECode NetlinkTracker::InterfaceDnsServerInfo(
             synchronized(this) {
                 mDnsServerRepository->SetDnsServersOn(mLinkProperties);
             }
-            mCallback->Update();
+            AutoPtr<ILinkProperties> lp;
+            CLinkProperties::New(mLinkProperties, (ILinkProperties**)&lp);
+            mCallback->Update(lp);
         }
     }
     return NOERROR;

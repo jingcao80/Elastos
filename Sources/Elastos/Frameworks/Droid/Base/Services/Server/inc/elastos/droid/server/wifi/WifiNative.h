@@ -644,6 +644,9 @@ public:
     static CARAPI_(void) SetWifiHalHandle(
         /* [in] */ Int64 handle);
 
+    CARAPI_(void) EnableVerboseLogging(
+        /* [in] */ Int32 verbose);
+
 private:
     static CARAPI_(Int32) GetNewCmdIdLocked();
 
@@ -680,9 +683,6 @@ private:
 
     CARAPI_(String) DoStringCommandWithoutLogging(
         /* [in] */ const String& command);
-
-    CARAPI_(void) EnableVerboseLogging(
-        /* [in] */ Int32 verbose);
 
     CARAPI_(void) LogDbg(
         /* [in] */ const String& debug);

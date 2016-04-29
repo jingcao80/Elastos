@@ -16,8 +16,10 @@ module
         ClearLinkProperties();
     }
 
+    [deprecated]
     interface INetlinkTrackerCallback {
-        Update();
+        Update(
+            [in] ILinkProperties* lp);
     }
 
     interface IDnsServerEntry {

@@ -1098,20 +1098,20 @@ public:
     static const Int32 BASE;
 
     /* Delayed message to timeout group creation */
-    static const Int32 GROUP_CREATING_TIMED_OUT;
+    static const Int32 GROUP_CREATING_TIMED_OUT = IProtocol::BASE_WIFI_P2P_SERVICE + 1;
     /* User accepted a peer request */
-    static const Int32 PEER_CONNECTION_USER_ACCEPT;
+    static const Int32 PEER_CONNECTION_USER_ACCEPT = IProtocol::BASE_WIFI_P2P_SERVICE + 2;
     /* User rejected a peer request */
-    static const Int32 PEER_CONNECTION_USER_REJECT;
+    static const Int32 PEER_CONNECTION_USER_REJECT = IProtocol::BASE_WIFI_P2P_SERVICE + 3;
     /* User wants to disconnect wifi in favour of p2p */
-    static const Int32 DROP_WIFI_USER_ACCEPT;
+    static const Int32 DROP_WIFI_USER_ACCEPT = IProtocol::BASE_WIFI_P2P_SERVICE + 4;
     /* User wants to keep his wifi connection and drop p2p */
-    static const Int32 DROP_WIFI_USER_REJECT;
+    static const Int32 DROP_WIFI_USER_REJECT = IProtocol::BASE_WIFI_P2P_SERVICE + 5;
     /* Delayed message to timeout p2p disable */
-    static const Int32 DISABLE_P2P_TIMED_OUT;
+    static const Int32 DISABLE_P2P_TIMED_OUT = IProtocol::BASE_WIFI_P2P_SERVICE + 6;
 
     /* Commands to the WifiStateMachine */
-    static const Int32 P2P_CONNECTION_CHANGED;
+    static const Int32 P2P_CONNECTION_CHANGED = IProtocol::BASE_WIFI_P2P_SERVICE + 11;
 
     /* These commands are used to temporarily disconnect wifi when we detect
      * a frequency conflict which would make it impossible to have with p2p
@@ -1124,21 +1124,21 @@ public:
      * DISCONNECT_WIFI_REQUEST
      *      msg.arg1 = 1 enables temporary disconnect and 0 disables it.
      */
-    static const Int32 DISCONNECT_WIFI_REQUEST;
-    static const Int32 DISCONNECT_WIFI_RESPONSE;
+    static const Int32 DISCONNECT_WIFI_REQUEST = IProtocol::BASE_WIFI_P2P_SERVICE + 12;
+    static const Int32 DISCONNECT_WIFI_RESPONSE = IProtocol::BASE_WIFI_P2P_SERVICE + 13;
 
-    static const Int32 SET_MIRACAST_MODE;
+    static const Int32 SET_MIRACAST_MODE = IProtocol::BASE_WIFI_P2P_SERVICE + 14;
 
     // During dhcp (and perhaps other times) we can't afford to drop packets
     // but Discovery will switch our channel enough we will.
     //   msg.arg1 = ENABLED for blocking, DISABLED for resumed.
     //   msg.arg2 = msg to send when blocked
     //   msg.obj  = StateMachine to send to when blocked
-    static const Int32 BLOCK_DISCOVERY;
+    static const Int32 BLOCK_DISCOVERY = IProtocol::BASE_WIFI_P2P_SERVICE + 15;
 
     // set country code
-    static const Int32 SET_COUNTRY_CODE;
-    static const Int32 P2P_MIRACAST_MODE_CHANGED;
+    static const Int32 SET_COUNTRY_CODE = IProtocol::BASE_WIFI_P2P_SERVICE + 16;
+    static const Int32 P2P_MIRACAST_MODE_CHANGED = IProtocol::BASE_WIFI_P2P_SERVICE + 17;
 
     static const Int32 ENABLED;
     static const Int32 DISABLED;

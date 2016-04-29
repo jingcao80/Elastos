@@ -1,24 +1,44 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFISTATEMACHINE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFISTATEMACHINE_H__
 
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Net.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Core.Server.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Wifi.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/utility/State.h"
 #include "elastos/droid/internal/utility/StateMachine.h"
 #include "elastos/droid/net/NetworkAgent.h"
 #include "elastos/droid/net/NetworkFactory.h"
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.h"
 #include "elastos/droid/server/wifi/SupplicantStateTracker.h"
 #include "elastos/droid/server/wifi/WifiTrafficPoller.h"
 #include "elastos/droid/server/wifi/WifiAutoJoinController.h"
 #include "elastos/droid/server/wifi/WifiConfigStore.h"
-#include "elastos/droid/server//wifi/WifiMonitor.h"
+#include "elastos/droid/server/wifi/WifiMonitor.h"
 #include "elastos/droid/server/wifi/WifiNative.h"
 #include "elastos/droid/utility/LruCache.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Internal::Utility::IAsyncChannel;
@@ -35,16 +55,18 @@ using Elastos::Droid::Net::NetworkAgent;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Net::NetworkFactory;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IWorkSource;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Server::Net::INetlinkTracker;
+using Elastos::Droid::Server::Net::INetlinkTrackerCallback;
+using Elastos::Droid::Server::Wifi::P2p::WifiP2pServiceImpl;
 using Elastos::Droid::Server::Wifi::WifiTrafficPoller;
-// TODO: Need IWifiP2pServiceImpl
-// using Elastos::Droid::Server::Wifi::P2p::IWifiP2pServiceImpl;
 using Elastos::Droid::Wifi::IBatchedScanSettings;
 using Elastos::Droid::Wifi::IRssiPacketCountInfo;
 using Elastos::Droid::Wifi::IScanSettings;
@@ -96,6 +118,7 @@ public:
     class SimAuthResponseData
         : public Object
     {
+    public:
         Int32 id;
         String Kc1;
         String SRES1;
@@ -109,37 +132,73 @@ public:
         : public State
     {
     public:
+        DefaultState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class InitialState
         : public State
     {
     public:
+        InitialState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class SupplicantStartingState
         : public State
     {
     public:
-        void initializeWpsDetails();
+        SupplicantStartingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        CARAPI_(void) InitializeWpsDetails();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class SupplicantStartedState
         : public State
     {
     public:
+        SupplicantStartedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -147,34 +206,65 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI Exit();
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class SupplicantStoppingState
         : public State
     {
     public:
+        SupplicantStoppingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class DriverStartingState
         : public State
     {
     public:
+        DriverStartingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
+        Int32 mTries;
     };
 
     class DriverStartedState
         : public State
     {
     public:
+        DriverStartedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -182,19 +272,32 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI Exit();
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class WaitForP2pDisableState
         : public State
     {
     public:
+        WaitForP2pDisableState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
+        WifiStateMachine* mHost;
         AutoPtr<IState> mTransitionToState;
     };
 
@@ -202,31 +305,59 @@ public:
         : public State
     {
     public:
+        DriverStoppingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class DriverStoppedState
         : public State
     {
     public:
+        DriverStoppedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class ScanModeState
         : public State
     {
     public:
+        ScanModeState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
+        WifiStateMachine* mHost;
         Int32 mLastOperationMode;
     };
 
@@ -234,15 +365,30 @@ public:
         : public State
     {
     public:
+        ConnectModeState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class L2ConnectedState
         : public State
     {
     public:
+        L2ConnectedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -250,34 +396,64 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI Exit();
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class ObtainingIpState
         : public State
     {
     public:
+        ObtainingIpState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class VerifyingLinkState
         : public State
     {
     public:
+        VerifyingLinkState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class RoamingState
         : public State
     {
     public:
+        RoamingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -286,7 +462,10 @@ public:
 
         CARAPI Exit();
 
+        CARAPI_(String) GetName();
+
     private:
+        WifiStateMachine* mHost;
         Boolean mAssociated;
     };
 
@@ -294,6 +473,11 @@ public:
         : public State
     {
     public:
+        ConnectedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -301,12 +485,22 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI Exit();
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class DisconnectingState
         : public State
     {
     public:
+        DisconnectingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -314,12 +508,22 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI Exit();
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class DisconnectedState
         : public State
     {
     public:
+        DisconnectedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -327,12 +531,22 @@ public:
             /* [out] */ Boolean* result);
 
         CARAPI Exit();
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class WpsRunningState
         : public State
     {
     public:
+        WpsRunningState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
@@ -341,7 +555,10 @@ public:
 
         CARAPI Exit();
 
+        CARAPI_(String) GetName();
+
     private:
+        WifiStateMachine* mHost;
         // Tracks the source to provide a reply
         AutoPtr<IMessage> mSourceMessage;
     };
@@ -350,51 +567,101 @@ public:
         : public State
     {
     public:
+        SoftApStartingState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class SoftApStartedState
         : public State
     {
     public:
+        SoftApStartedState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class TetheringState
         : public State
     {
     public:
+        TetheringState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class TetheredState
         : public State
     {
     public:
+        TetheredState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
     class UntetheringState
         : public State
     {
     public:
+        UntetheringState(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
         CARAPI Enter();
 
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
+
+    private:
+        WifiStateMachine* mHost;
     };
 
 private:
@@ -418,7 +685,7 @@ private:
         WifiNetworkFactory(
             /* [in] */ ILooper* l,
             /* [in] */ IContext* c,
-            /* [in] */ const String* TAG,
+            /* [in] */ const String& TAG,
             /* [in] */ INetworkCapabilities* f);
 
     protected:
@@ -438,16 +705,162 @@ private:
             /* [in] */ INetworkInfo* ni,
             /* [in] */ INetworkCapabilities* nc,
             /* [in] */ ILinkProperties* lp,
-            /* [in] */ Int32 score);
+            /* [in] */ Int32 score,
+            /* [in] */ WifiStateMachine* host);
 
     protected:
         CARAPI Unwanted();
 
         CARAPI_(void) NetworkStatus(
             /* [in] */ Int32 status);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class StartSoftApWithConfigRunnable
+        : public Runnable
+    {
+    public:
+        StartSoftApWithConfigRunnable(
+            /* [in] */ WifiStateMachine* host,
+            /* [in] */ IWifiConfiguration* config)
+            : mHost(host)
+            , mConfig(config)
+        {}
+
+        CARAPI Run();
+
+    private:
+        WifiStateMachine* mHost;
+        AutoPtr<IWifiConfiguration> mConfig;
+    };
+
+    class NetlinkTrackerCallback
+        : public Object
+        , public INetlinkTrackerCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        NetlinkTrackerCallback(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
+        CARAPI Update(
+            /* [in] */ ILinkProperties* lp);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class TetherStateChangedBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        TetherStateChangedBroadcastReceiver(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class StartScanBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        StartScanBroadcastReceiver(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        MyBroadcastReceiver(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class DelayedDriverStopBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        DelayedDriverStopBroadcastReceiver(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class BootCompletedBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        BootCompletedBroadcastReceiver(
+            /* [in] */ WifiStateMachine* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        WifiStateMachine* mHost;
+    };
+
+    class RegisterContentObserver
+        : public ContentObserver
+    {
+    public:
+        RegisterContentObserver();
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler,
+            /* [in] */ WifiStateMachine* host);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        WifiStateMachine* mHost;
     };
 
 public:
+    friend class WifiNetworkAgent;
+    friend class StartSoftApWithConfigRunnable;
+
     WifiStateMachine(
         /* [in] */ IContext* context,
         /* [in] */ const String& wlanInterface,
@@ -897,6 +1310,9 @@ protected:
     CARAPI_(void) Loge(
         /* [in] */ const String& s);
 
+    CARAPI_(void) Logd(
+        /* [in] */ const String& s);
+
     CARAPI_(void) Log(
         /* [in] */ const String& s);
 
@@ -1183,11 +1599,13 @@ private:
     CARAPI_(AutoPtr<IMessage>) ObtainMessageWithArg2(
         /* [in] */ IMessage* srcMsg);
 
-    static CARAPI_(Int32) ParseHex(
-        /* [in] */ Byte ch);
+    static CARAPI ParseHex(
+        /* [in] */ Byte ch,
+        /* [out] */ Int32* result);
 
-    CARAPI_(AutoPtr<ArrayOf<Byte> >) ParseHex(
-        /* [in] */ const String& hex);
+    CARAPI ParseHex(
+        /* [in] */ const String& hex,
+        /* [out] */ ArrayOf<Byte>** result);
 
     static CARAPI_(String) MakeHex(
         /* [in] */ ArrayOf<Byte>* bytes);
@@ -1326,8 +1744,8 @@ public:
     static const Int32 CMD_TEST_NETWORK_DISCONNECT         = BASE + 89;
 
     /* arg1 values to CMD_STOP_PACKET_FILTERING and CMD_START_PACKET_FILTERING */
-    static const Int32 MULTICAST_V6 ; //= 1;
-    static const Int32 MULTICAST_V4 ; //= 0;
+    static const Int32 MULTICAST_V6 = 1;
+    static const Int32 MULTICAST_V4 = 0;
 
    /* Set the frequency band */
     static const Int32 CMD_SET_FREQUENCY_BAND              = BASE + 90;
@@ -1344,7 +1762,7 @@ public:
      * In no valid case, the WiFiStateMachine should remain stuck in ObtainingIpAddress
      * for more than 30 seconds.
      */
-    static const Int32 OBTAINING_IP_ADDRESS_GUARD_TIMER_MSEC; //= 40000;
+    static const Int32 OBTAINING_IP_ADDRESS_GUARD_TIMER_MSEC = 40000;
 
     Int32 obtainingIpWatchdogCount; //= 0;
 
@@ -1356,7 +1774,7 @@ public:
      * Watchdog for protecting against b/16823537
      * Leave time for 4-ways handshake to succeed
      */
-    static const Int32 ROAM_GUARD_TIMER_MSEC; //= 15000;
+    static const Int32 ROAM_GUARD_TIMER_MSEC = 15000;
 
     Int32 roamWatchdogCount; //= 0;
     /* Roam state watchdog */
@@ -1365,7 +1783,7 @@ public:
     static const Int32 CMD_SCREEN_STATE_CHANGED             = BASE + 95;
 
     Int32 disconnectingWatchdogCount; //= 0;
-    static const Int32 DISCONNECTING_GUARD_TIMER_MSEC; //= 5000;
+    static const Int32 DISCONNECTING_GUARD_TIMER_MSEC = 5000;
 
     /* Disconnecting state watchdog */
     static const Int32 CMD_DISCONNECTING_WATCHDOG_TIMER    = BASE + 96;
@@ -1485,7 +1903,7 @@ private:
     String mPrimaryDeviceType;
 
     /* Scan results handling */
-    AutoPtr<IList> mScanResults; //= new ArrayList<ScanResult>();
+    AutoPtr<IArrayList> mScanResults; //= new ArrayList<ScanResult>();
     static AutoPtr<IPattern> scanResultPattern; //= Pattern.compile("\t+");
     static const Int32 SCAN_RESULT_CACHE_SIZE; //= 160;
     AutoPtr<LruCache<String, IScanResult*> > mScanResultCache;
@@ -1673,8 +2091,7 @@ private:
     // Channel for sending replies.
     AutoPtr<IAsyncChannel> mReplyChannel; //= new AsyncChannel();
 
-// TODO: Need IWifiP2pServiceImpl
-    // AutoPtr<IWifiP2pServiceImpl> mWifiP2pServiceImpl;
+    AutoPtr<WifiP2pServiceImpl> mWifiP2pServiceImpl;
 
     // Used to initiate a connection with WifiP2pService
     AutoPtr<IAsyncChannel> mWifiP2pChannel;
@@ -1764,66 +2181,66 @@ private:
 
     // sometimes telephony gives us this data before boot is complete and we can't store it
     // until after, so the write is deferred
-    volatile String mPersistedCountryCode;
+    /*volatile*/ String mPersistedCountryCode;
 
     // Supplicant doesn't like setting the same country code multiple times (it may drop
     // currently connected network), so we save the country code here to avoid redundency
     String mLastSetCountryCode;
 
     /* Default parent state */
-    AutoPtr<IState> mDefaultState; //= new DefaultState();
+    AutoPtr<State> mDefaultState; //= new DefaultState();
     /* Temporary initial state */
-    AutoPtr<IState> mInitialState; //= new InitialState();
+    AutoPtr<State> mInitialState; //= new InitialState();
     /* Driver loaded, waiting for supplicant to start */
-    AutoPtr<IState> mSupplicantStartingState; //= new SupplicantStartingState();
+    AutoPtr<State> mSupplicantStartingState; //= new SupplicantStartingState();
     /* Driver loaded and supplicant ready */
-    AutoPtr<IState> mSupplicantStartedState; //= new SupplicantStartedState();
+    AutoPtr<State> mSupplicantStartedState; //= new SupplicantStartedState();
     /* Waiting for supplicant to stop and monitor to exit */
-    AutoPtr<IState> mSupplicantStoppingState; //= new SupplicantStoppingState();
+    AutoPtr<State> mSupplicantStoppingState; //= new SupplicantStoppingState();
     /* Driver start issued, waiting for completed event */
-    AutoPtr<IState> mDriverStartingState; //= new DriverStartingState();
+    AutoPtr<State> mDriverStartingState; //= new DriverStartingState();
     /* Driver started */
-    AutoPtr<IState> mDriverStartedState; //= new DriverStartedState();
+    AutoPtr<State> mDriverStartedState; //= new DriverStartedState();
     /* Wait until p2p is disabled
      * This is a special state which is entered right after we exit out of DriverStartedState
      * before transitioning to another state.
      */
-    AutoPtr<IState> mWaitForP2pDisableState; //= new WaitForP2pDisableState();
+    AutoPtr<State> mWaitForP2pDisableState; //= new WaitForP2pDisableState();
     /* Driver stopping */
-    AutoPtr<IState> mDriverStoppingState; //= new DriverStoppingState();
+    AutoPtr<State> mDriverStoppingState; //= new DriverStoppingState();
     /* Driver stopped */
-    AutoPtr<IState> mDriverStoppedState; //= new DriverStoppedState();
+    AutoPtr<State> mDriverStoppedState; //= new DriverStoppedState();
     /* Scan for networks, no connection will be established */
-    AutoPtr<IState> mScanModeState; //= new ScanModeState();
+    AutoPtr<State> mScanModeState; //= new ScanModeState();
     /* Connecting to an access point */
-    AutoPtr<IState> mConnectModeState; //= new ConnectModeState();
+    AutoPtr<State> mConnectModeState; //= new ConnectModeState();
     /* Connected at 802.11 (L2) level */
-    AutoPtr<IState> mL2ConnectedState; //= new L2ConnectedState();
+    AutoPtr<State> mL2ConnectedState; //= new L2ConnectedState();
     /* fetching IP after connection to access point (assoc+auth complete) */
-    AutoPtr<IState> mObtainingIpState; //= new ObtainingIpState();
+    AutoPtr<State> mObtainingIpState; //= new ObtainingIpState();
     /* Waiting for link quality verification to be complete */
-    AutoPtr<IState> mVerifyingLinkState; //= new VerifyingLinkState();
+    AutoPtr<State> mVerifyingLinkState; //= new VerifyingLinkState();
     /* Connected with IP addr */
-    AutoPtr<IState> mConnectedState; //= new ConnectedState();
+    AutoPtr<State> mConnectedState; //= new ConnectedState();
     /* Roaming */
-    AutoPtr<IState> mRoamingState; //= new RoamingState();
+    AutoPtr<State> mRoamingState; //= new RoamingState();
     /* disconnect issued, waiting for network disconnect confirmation */
-    AutoPtr<IState> mDisconnectingState; //= new DisconnectingState();
+    AutoPtr<State> mDisconnectingState; //= new DisconnectingState();
     /* Network is not connected, supplicant assoc+auth is not complete */
-    AutoPtr<IState> mDisconnectedState; //= new DisconnectedState();
+    AutoPtr<State> mDisconnectedState; //= new DisconnectedState();
     /* Waiting for WPS to be completed*/
-    AutoPtr<IState> mWpsRunningState; //= new WpsRunningState();
+    AutoPtr<State> mWpsRunningState; //= new WpsRunningState();
 
     /* Soft ap is starting up */
-    AutoPtr<IState> mSoftApStartingState; //= new SoftApStartingState();
+    AutoPtr<State> mSoftApStartingState; //= new SoftApStartingState();
     /* Soft ap is running */
-    AutoPtr<IState> mSoftApStartedState; //= new SoftApStartedState();
+    AutoPtr<State> mSoftApStartedState; //= new SoftApStartedState();
     /* Soft ap is running and we are waiting for tether notification */
-    AutoPtr<IState> mTetheringState; //= new TetheringState();
+    AutoPtr<State> mTetheringState; //= new TetheringState();
     /* Soft ap is running and we are tethered through connectivity service */
-    AutoPtr<IState> mTetheredState; //= new TetheredState();
+    AutoPtr<State> mTetheredState; //= new TetheredState();
     /* Waiting for untether confirmation before stopping soft Ap */
-    AutoPtr<IState> mUntetheringState; //= new UntetheringState();
+    AutoPtr<State> mUntetheringState; //= new UntetheringState();
 
     /**
      * One of  {@link WifiManager#WIFI_STATE_DISABLED},

@@ -299,9 +299,8 @@ SupplicantStateTracker::SupplicantStateTracker(
     /* [in] */ IContext* c,
     /* [in] */ WifiStateMachine* wsm,
     /* [in] */ WifiConfigStore* wcs,
-    /* [in] */ ILooper* l)
-    : StateMachine(TAG, l)
-    , mWifiStateMachine(wsm)
+    /* [in] */ IHandler* l)
+    : mWifiStateMachine(wsm)
     , mWifiConfigStore(wcs)
     , mAuthenticationFailuresCount(0)
     , mAssociationRejectCount(0)
@@ -317,6 +316,11 @@ SupplicantStateTracker::SupplicantStateTracker(
     , mCompletedState(new CompletedState(this))
     , mDormantState(new DormantState(this))
 {
+    AutoPtr<ILooper> looper;
+    l->GetLooper((ILooper**)&looper);
+	assert(0);
+// TODO:
+    // StateMachine(TAG, looper);
     AutoPtr<IInterface> service;
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);

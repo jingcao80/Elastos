@@ -635,7 +635,7 @@ ECode WifiConfigStore::SaveWifiConfigBSSID(
 
 ECode WifiConfigStore::UpdateStatus(
     /* [in] */ Int32 netId,
-    /* [in] */ NetworkInfoDetailedState* state)
+    /* [in] */ NetworkInfoDetailedState state)
 {
     VALIDATE_NOT_NULL(state);
     // ==================before translated======================

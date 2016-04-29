@@ -221,7 +221,7 @@ public:
 
     virtual CARAPI UpdateStatus(
         /* [in] */ Int32 netId,
-        /* [in] */ NetworkInfoDetailedState* state);
+        /* [in] */ NetworkInfoDetailedState state);
 
     /**
       * Forget the specified network and save config
