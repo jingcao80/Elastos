@@ -119,6 +119,8 @@ ECode CWifiConfiguration::constructor()
     mNetworkId = IWifiConfiguration::INVALID_NETWORK_ID;
     mPriority = 0;
     mHiddenSSID = FALSE;
+    mIsIBSS = FALSE;
+    mFrequency = 0;
     mDisableReason = IWifiConfiguration::DISABLED_UNKNOWN_REASON;
     CBitSet::New((IBitSet**)&mAllowedKeyManagement);
     CBitSet::New((IBitSet**)&mAllowedProtocols);
@@ -172,6 +174,7 @@ ECode CWifiConfiguration::constructor()
     mNumTicksAtBadRSSI = 0;
     mNumTicksAtNotHighRSSI = 0;
     mNumUserTriggeredJoinAttempts = 0;
+    mDuplicateNetwork = FALSE;
 
     return CIpConfiguration::New((IIpConfiguration**)&mIpConfiguration);
 }
@@ -199,6 +202,8 @@ ECode CWifiConfiguration::constructor(
         source->GetWepTxKeyIndex(&mWepTxKeyIndex);
         source->GetPriority(&mPriority);
         source->GetHiddenSSID(&mHiddenSSID);
+        source->GetIsIBSS(&mIsIBSS);
+        source->GetFrequency(&mFrequency);
         AutoPtr<IBitSet> allowedKeyManagement;
         AutoPtr<IBitSet> allowedProtocols;
         AutoPtr<IBitSet> allowedAuthAlgorithms;
@@ -299,6 +304,7 @@ ECode CWifiConfiguration::constructor(
         source->GetAutoJoinUseAggressiveJoinAttemptThreshold(&mAutoJoinUseAggressiveJoinAttemptThreshold);
         source->GetAutoJoinBailedDueToLowRssi(&mAutoJoinBailedDueToLowRssi);
         source->GetDirty(&mDirty);
+        source->GetDuplicateNetwork(&mDuplicateNetwork);
     }
 
     return NOERROR;
@@ -830,6 +836,8 @@ ECode CWifiConfiguration::ReadFromParcel(
     source->ReadInt32(&mWepTxKeyIndex);
     source->ReadInt32(&mPriority);
     source->ReadBoolean(&mHiddenSSID);
+    source->ReadBoolean(&mIsIBSS);
+    source->ReadInt32(&mFrequency);
 
     mAllowedKeyManagement = ReadBitSet(source);
     mAllowedProtocols = ReadBitSet(source);
@@ -869,6 +877,8 @@ ECode CWifiConfiguration::WriteToParcel(
     dest->WriteInt32(mWepTxKeyIndex);
     dest->WriteInt32(mPriority);
     dest->WriteInt32(mHiddenSSID ? 1 : 0);
+    dest->WriteInt32(mIsIBSS ? 1 : 0);
+    dest->WriteInt32(mFrequency);
     dest->WriteInt32(mRequirePMF ? 1 : 0);
     dest->WriteString(mUpdateIdentifier);
 
@@ -1183,6 +1193,36 @@ ECode CWifiConfiguration::SetUpdateIdentifier(
     /* [in] */ const String& updateIdentifier)
 {
     mUpdateIdentifier = updateIdentifier;
+    return NOERROR;
+}
+
+ECode CWifiConfiguration::GetIsIBSS(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mIsIBSS;
+    return NOERROR;
+}
+
+ECode CWifiConfiguration::SetIsIBSS(
+    /* [in] */ Boolean isIBSS)
+{
+    mIsIBSS = isIBSS;
+    return NOERROR;
+}
+
+ECode CWifiConfiguration::GetFrequency(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mFrequency;
+    return NOERROR;
+}
+
+ECode CWifiConfiguration::SetFrequency(
+    /* [in] */ Int32 frequency)
+{
+    mFrequency = frequency;
     return NOERROR;
 }
 
@@ -1816,6 +1856,21 @@ ECode CWifiConfiguration::SetLinkedConfigurations(
     /* [in] */ IHashMap* linkedConfigurations)
 {
     mLinkedConfigurations = linkedConfigurations;
+    return NOERROR;
+}
+
+ECode CWifiConfiguration::GetDuplicateNetwork(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mDuplicateNetwork;
+    return NOERROR;
+}
+
+ECode CWifiConfiguration::SetDuplicateNetwork(
+    /* [in] */ Boolean duplicateNetwork)
+{
+    mDuplicateNetwork = duplicateNetwork;
     return NOERROR;
 }
 

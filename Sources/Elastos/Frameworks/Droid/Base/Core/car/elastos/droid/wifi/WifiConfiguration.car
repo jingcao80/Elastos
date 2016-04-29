@@ -43,6 +43,10 @@ module
         /** {@hide} */
         const String updateIdentiferVarName = "update_identifier";
         /** {@hide} */
+        const String modeVarName = "mode";
+        /** {@hide} */
+        const String frequencyVarName = "frequency";
+        /** {@hide} */
         const Int32 INVALID_NETWORK_ID = -1;
 
         /** @hide */
@@ -336,6 +340,18 @@ module
 
         SetUpdateIdentifier(
             [in] String updateIdentifier);
+
+        GetIsIBSS(
+            [out] Boolean* result);
+
+        SetIsIBSS(
+            [in] Boolean isIBSS);
+
+        GetFrequency(
+            [out] Int32* result);
+
+        SetFrequency(
+            [in] Int32 frequency);
 
         /**
          * The set of key management protocols supported by this configuration.
@@ -795,6 +811,12 @@ module
 
         SetLinkedConfigurations(
             [in] IHashMap* linkedConfigurations);
+
+        GetDuplicateNetwork(
+            [out] Boolean* result);
+
+        SetDuplicateNetwork(
+            [in] Boolean duplicateNetwork);
 
         /** {@hide} */
         GetWepKeyVarNames(

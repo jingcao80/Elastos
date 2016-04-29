@@ -151,6 +151,18 @@ public:
     CARAPI SetUpdateIdentifier(
         /* [in] */ const String& updateIdentifier);
 
+    CARAPI GetIsIBSS(
+        /* [out] */ Boolean* result);
+
+    CARAPI SetIsIBSS(
+        /* [in] */ Boolean isIBSS);
+
+    CARAPI GetFrequency(
+        /* [out] */ Int32* result);
+
+    CARAPI SetFrequency(
+        /* [in] */ Int32 frequency);
+
     CARAPI GetAllowedKeyManagement(
         /* [out] */ IBitSet** allowedKeyManagement);
 
@@ -400,6 +412,12 @@ public:
     CARAPI SetLinkedConfigurations(
         /* [in] */ IHashMap* linkedConfigurations);
 
+    CARAPI GetDuplicateNetwork(
+        /* [out] */ Boolean* result);
+
+    CARAPI SetDuplicateNetwork(
+        /* [in] */ Boolean duplicateNetwork);
+
     CARAPI GetWepKeyVarNames(
         /* [out, callee] */ ArrayOf<String>** result);
 
@@ -517,6 +535,17 @@ private:
     Boolean mHiddenSSID;
     Boolean mRequirePMF;
     String mUpdateIdentifier;
+    /**
+     * This is an Ad-Hoc (IBSS) network
+     * {@hide}
+     */
+    Boolean mIsIBSS;
+
+    /**
+     * Frequency of the Ad-Hoc (IBSS) network, if newly created
+     * {@hide}
+     */
+    Int32 mFrequency;
 
     AutoPtr<IBitSet> mAllowedKeyManagement;
     AutoPtr<IBitSet> mAllowedProtocols;
@@ -570,6 +599,11 @@ private:
     Int32 mNumUserTriggeredJoinAttempts;
     AutoPtr<IHashMap> mConnectChoices;
     AutoPtr<IHashMap>  mLinkedConfigurations;
+    /**
+     * @hide
+     * Duplicate Wifi Configuration
+     */
+    Boolean mDuplicateNetwork;
     String mCachedConfigKey;
 };
 
