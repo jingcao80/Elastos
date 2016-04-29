@@ -584,9 +584,10 @@ void AbsSeekBar::OnMeasure(
         Int32 dw = 0;
         Int32 dh = 0;
         if (d != NULL) {
-            dw = Elastos::Core::Math::Max(mMinWidth, Elastos::Core::Math::Min(mMaxWidth, (d->GetIntrinsicWidth(&dw), dw)));
-            dh = Elastos::Core::Math::Max(mMinHeight, Elastos::Core::Math::Min(mMaxHeight, (d->GetIntrinsicHeight(&dh), dh)));
-            dh = Elastos::Core::Math::Max(thumbHeight, dh);
+            using Elastos::Core::Math;
+            dw = Math::Max(mMinWidth, Math::Min(mMaxWidth, (d->GetIntrinsicWidth(&dw), dw)));
+            dh = Math::Max(mMinHeight, Math::Min(mMaxHeight, (d->GetIntrinsicHeight(&dh), dh)));
+            dh = Math::Max(thumbHeight, dh);
         }
         dw += mPaddingLeft + mPaddingRight;
         dh += mPaddingTop + mPaddingBottom;
@@ -797,8 +798,7 @@ ECode AbsSeekBar::OnKeyDown(
 Boolean AbsSeekBar::IsAnimationRunning()
 {
     Boolean res;
-    IAnimator::Probe(mPositionAnimator)->IsRunning(&res);
-    return mPositionAnimator != NULL && res;
+    return mPositionAnimator != NULL && (IAnimator::Probe(mPositionAnimator)->IsRunning(&res), res);
 }
 
 ECode AbsSeekBar::SetProgress(

@@ -1,7 +1,7 @@
 
 module
 {
-	interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {
@@ -10,11 +10,20 @@ module
     interface ITimePickerClockDelegate {
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface ITimePickerClockDelegateSavedState {
+    }
+
     [local]
     interface ITimePickerClockDelegateHelper {
-    	GetAmPmStrings(
-    		[in] IContext* ctx,
-    		[out, callee] ArrayOf<String>* result);
+        GetAmPmStrings(
+            [in] IContext* ctx,
+            [out, callee] ArrayOf<String>* result);
     }
 
     } // namespace Widget

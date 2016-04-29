@@ -1973,7 +1973,7 @@ ECode NumberPicker::GetWrapSelectorWheel(
 ECode NumberPicker::SetWrapSelectorWheel(
     /* [in] */ Boolean wrapSelectorWheel)
 {
-    Boolean wrappingAllowed = (mMaxValue - mMinValue) >= (*mSelectorIndices).GetLength();
+    Boolean wrappingAllowed = (mMaxValue - mMinValue) >= mSelectorIndices->GetLength();
     if ((!wrapSelectorWheel || wrappingAllowed) && wrapSelectorWheel != mWrapSelectorWheel) {
         mWrapSelectorWheel = wrapSelectorWheel;
     }
@@ -2017,7 +2017,7 @@ ECode NumberPicker::SetMinValue(
         mValue = mMinValue;
     }
 
-    Boolean wrapSelectorWheel = mMaxValue - mMinValue > (*mSelectorIndices).GetLength();
+    Boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices->GetLength();
     SetWrapSelectorWheel(wrapSelectorWheel);
     InitializeSelectorWheelIndices();
     UpdateInputTextView();
@@ -2048,7 +2048,7 @@ ECode NumberPicker::SetMaxValue(
         mValue = mMaxValue;
     }
 
-    Boolean wrapSelectorWheel = mMaxValue - mMinValue > (*mSelectorIndices).GetLength();
+    Boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices->GetLength();
     SetWrapSelectorWheel(wrapSelectorWheel);
     InitializeSelectorWheelIndices();
     UpdateInputTextView();
@@ -2412,7 +2412,7 @@ void NumberPicker::InitializeSelectorWheelIndices()
     AutoPtr<ArrayOf<Int32> > selectorIndices = mSelectorIndices;
     Int32 current;
     GetValue(&current);
-    for (Int32 i = 0; i < (*mSelectorIndices).GetLength(); i++) {
+    for (Int32 i = 0; i < mSelectorIndices->GetLength(); i++) {
         Int32 selectorIndex = current + (i - SELECTOR_MIDDLE_ITEM_INDEX);
         if (mWrapSelectorWheel) {
             selectorIndex = GetWrappedSelectorIndex(selectorIndex);
@@ -2479,7 +2479,7 @@ void NumberPicker::InitializeSelectorWheel()
     AutoPtr<ArrayOf<Int32> > selectorIndices = mSelectorIndices;
     Int32 totalTextHeight = (selectorIndices->GetLength()) * mTextSize;
     Float totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
-    Float TextGapCount = (*selectorIndices).GetLength();
+    Float TextGapCount = selectorIndices->GetLength();
     mSelectorTextGapHeight = (Int32)(totalTextGapHeight / TextGapCount + 0.5f);
     mSelectorElementHeight = mTextSize + mSelectorTextGapHeight;
     Int32 baseLine = 0;
@@ -2587,13 +2587,15 @@ void NumberPicker::EnsureCachedScrollSelectorValue(
     cache->Get(selectorIndex, (IInterface**)&obj);
     AutoPtr<ICharSequence> seq = ICharSequence::Probe(obj);
     String scrollSelectorValue;
-    seq->ToString(&scrollSelectorValue);
+    if (seq != NULL) {
+        seq->ToString(&scrollSelectorValue);
+    }
 
-    if (scrollSelectorValue) {
+    if (!scrollSelectorValue.IsNull()) {
         return;
     }
     if (selectorIndex < mMinValue || selectorIndex > mMaxValue) {
-        scrollSelectorValue = String("");
+        scrollSelectorValue = "";
     }
     else {
         if (mDisplayedValues) {
@@ -2737,7 +2739,7 @@ Int32 NumberPicker::GetSelectedPos(
     }
     else {
         String str;
-        for (Int32 i = 0; i < (*mDisplayedValues).GetLength(); i++) {
+        for (Int32 i = 0; i < mDisplayedValues->GetLength(); i++) {
             str = (*mDisplayedValues)[i];
             if (str.StartWithIgnoreCase(value)) {
                 return mMinValue + i;

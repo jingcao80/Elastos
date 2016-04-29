@@ -3019,6 +3019,20 @@ module
         interface ITimePickerClockDelegateHelper;
     }
 
+    class CTimePickerClockDelegateSavedState {
+        constructor(
+            [in] IParcelable* superState,
+            [in] Int32 hour,
+            [in] Int32 minute);
+
+        constructor();
+
+        interface ITimePickerClockDelegateSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
     [local]
     class CTimePickerSpinnerDelegate {
         constructor(

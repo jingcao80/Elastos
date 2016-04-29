@@ -23,7 +23,7 @@ module
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface ITimePicker {
-		/**
+        /**
          * Set the current hour.
          */
         SetCurrentHour(
@@ -61,13 +61,13 @@ module
         Is24HourView(
             [out] Boolean* res);
 
-		/**
-	     * Set the callback that indicates the time has been adjusted by the user.
-	     *
-	     * @param onTimeChangedListener the callback, should not be null.
-	     */
-		SetOnTimeChangedListener(
-			[in] ITimePickerOnTimeChangedListener* onTimeChangedListener);
+        /**
+         * Set the callback that indicates the time has been adjusted by the user.
+         *
+         * @param onTimeChangedListener the callback, should not be null.
+         */
+        SetOnTimeChangedListener(
+            [in] ITimePickerOnTimeChangedListener* onTimeChangedListener);
 
         SetValidationCallback(
             [in] ITimePickerValidationCallback* validationCallback);
@@ -96,7 +96,7 @@ module
      */
     interface ITimePickerValidationCallback {
         OnValidationChanged(
-        	[in] Boolean valid);
+            [in] Boolean valid);
     }
 
     /**
@@ -104,7 +104,7 @@ module
      */
     interface ITimePickerAbstractTimePickerDelegate {
         SetCurrentLocale(
-        	[in] ILocale* locale);
+            [in] ILocale* locale);
     }
 
     } // namespace Widget
