@@ -65,6 +65,8 @@ namespace Net {
 //============================================================================
 // IpConfigStore::InnerSub_Writer
 //============================================================================
+CAR_INTERFACE_IMPL(IpConfigStore::InnerSub_Writer, Object, IDelayedDiskWriteWriter);
+
 IpConfigStore::InnerSub_Writer::InnerSub_Writer(
     /* [in] */ IpConfigStore* host,
     /* [in] */ ISparseArray* networks)

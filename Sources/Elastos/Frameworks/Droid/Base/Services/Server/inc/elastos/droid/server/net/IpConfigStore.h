@@ -23,9 +23,12 @@ class IpConfigStore
 
 private:
     class InnerSub_Writer
-        : public DelayedDiskWrite::Writer
+        : public Object
+        , public IDelayedDiskWriteWriter
     {
     public:
+        CAR_INTERFACE_DECL();
+
         InnerSub_Writer(
             /* [in] */ IpConfigStore* host,
             /* [in] */ ISparseArray* networks);

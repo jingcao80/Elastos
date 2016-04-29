@@ -1,17 +1,112 @@
 
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Wifi.h"
+#include "Elastos.Droid.Utility.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/R.h"
 #include "elastos/droid/server/wifi/WifiConfigStore.h"
+#include "elastos/droid/server/wifi/WifiAutoJoinController.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/core/AutoLock.h"
+#include "elastos/core/StringBuffer.h"
+#include "elastos/core/StringBuilder.h"
+#include "elastos/core/StringUtils.h"
+#include "elastos/core/StringToIntegral.h"
+#include "elastos/core/CoreUtils.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Net::IpConfigurationIpAssignment;
+using Elastos::Droid::Net::CIpConfiguration;
+using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::IFileObserver;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::R;
+using Elastos::Droid::Server::Net::EIID_IDelayedDiskWriteWriter;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Wifi::CScanResult;
+using Elastos::Droid::Wifi::CWifiEnterpriseConfig;
+using Elastos::Droid::Wifi::IWifiConfigurationVisibility;
+using Elastos::Droid::Wifi::CWifiConfiguration;
+using Elastos::Droid::Wifi::IWifiConfigurationStatus;
+using Elastos::Droid::Wifi::IScanResultHelper;
+using Elastos::Droid::Wifi::CScanResultHelper;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::IWpsResult;
+using Elastos::Droid::Wifi::CWpsResult;
+using Elastos::Droid::Wifi::IWifiConfigurationKeyMgmt;
+using Elastos::Droid::Wifi::CWifiConfigurationKeyMgmt;
+using Elastos::Droid::Wifi::IWifiConfigurationHelper;
+using Elastos::Droid::Wifi::CWifiConfigurationHelper;
+using Elastos::Droid::Wifi::IWifiConfigurationAuthAlgorithm;
+using Elastos::Droid::Wifi::CWifiConfigurationAuthAlgorithm;
+using Elastos::Droid::Wifi::IWifiConfigurationPairwiseCipher;
+using Elastos::Droid::Wifi::IWifiConfigurationGroupCipher;
+using Elastos::Droid::Wifi::CWifiConfigurationGroupCipher;
+using Elastos::Droid::Wifi::CWifiConfigurationPairwiseCipher;
+using Elastos::Droid::Wifi::IWifiSsidHelper;
+using Elastos::Droid::Wifi::CWifiSsidHelper;
+using Elastos::Droid::Wifi::IWifiSsid;
+using Elastos::Droid::Wifi::IWifiConfigurationProtocol;
+using Elastos::Droid::Wifi::CWifiConfigurationProtocol;
+using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Core::StringBuffer;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringToIntegral;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Math::IBigInteger;
+using Elastos::Math::CBigInteger;
+using Elastos::IO::ICloseable;
 using Elastos::IO::IFile;
+using Elastos::IO::CFile;
+using Elastos::IO::IReader;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IFileReader;
+using Elastos::IO::CFileReader;
+using Elastos::IO::IBufferedReader;
+using Elastos::IO::CBufferedReader;
+using Elastos::IO::IDataInputStream;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::IBufferedInputStream;
+using Elastos::IO::CBufferedInputStream;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::IDataInput;
+using Elastos::Security::IKey;
+//TODO using Elastos::Security::ICredentials;
+//TODO using Elastos::Security::IKeyChain;
+using Elastos::Security::IPublicKey;
+using Elastos::Security::IKeyStoreHelper;
+//TODO using Elastos::Security::KeyStoreState;
+using Elastos::Security::Cert::IX509Certificate;
+//TODO using Elastos::Security::CKeyStoreHelper;
+using Elastos::Utility::IBitSet;
+using Elastos::Utility::Regex::IMatcher;
+using Elastos::Utility::Regex::IMatchResult;
 using Elastos::Utility::Regex::IPatternHelper;
 using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::ISet;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashMap;
-using Elastos::Security::IKeyStoreHelper;
-//TODO using Elastos::Security::CKeyStoreHelper;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -22,21 +117,276 @@ namespace Wifi {
 //                WifiConfigStore::WpaConfigFileObserver
 //=====================================================================
 WifiConfigStore::WpaConfigFileObserver::WpaConfigFileObserver()
+    : FileObserver(SUPPLICANT_CONFIG_FILE, IFileObserver::CLOSE_WRITE)
 {
-    // ==================before translated======================
-    // super(SUPPLICANT_CONFIG_FILE, CLOSE_WRITE);
 }
 
 ECode WifiConfigStore::WpaConfigFileObserver::OnEvent(
     /* [in] */ Int32 event,
     /* [in] */ const String& path)
 {
-    // ==================before translated======================
-    // if (event == CLOSE_WRITE) {
-    //     File file = new File(SUPPLICANT_CONFIG_FILE);
-    //     if (VDBG) localLog("wpa_supplicant.conf changed; new size = " + file.length());
-    // }
-    assert(0);
+    if (event == IFileObserver::CLOSE_WRITE) {
+        AutoPtr<IFile> file;
+        CFile::New(SUPPLICANT_CONFIG_FILE, (IFile**)&file);
+        Int64 length;
+        file->GetLength(&length);
+        //if (VDBG) LocalLog(String("wpa_supplicant.conf changed; new size = ") + StringUtils::ToString(length));
+        if (VDBG) Logger::D("WifiConfigStore::WpaConfigFileObserver",
+                "wpa_supplicant.conf changed; new size = %ld", length);
+    }
+    return NOERROR;
+}
+
+//====================================================================
+//                    WifiConfigStore::InnerDelayedDiskWriteWriter
+//===================================================================
+CAR_INTERFACE_IMPL(WifiConfigStore::InnerDelayedDiskWriteWriter, Object, IDelayedDiskWriteWriter);
+
+WifiConfigStore::InnerDelayedDiskWriteWriter::InnerDelayedDiskWriteWriter(
+    /* [in] */ WifiConfigStore* owner,
+    /* [in] */ IList* networks)
+    : mOwner(owner)
+    , mNetworks(networks)
+{
+}
+
+ECode WifiConfigStore::InnerDelayedDiskWriteWriter::OnWriteCalled(
+    /* [in] */ IDataOutputStream* out)
+{
+    Int32 size;
+    mNetworks->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mNetworks->Get(i, (IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+        //loge("onWriteCalled write SSID: " + config.SSID);
+        /* if (config.getLinkProperties() != null)
+           loge(" lp " + config.getLinkProperties().toString());
+           else
+           loge("attempt config w/o lp");
+         */
+
+        if (VDBG) {
+            Int32 num = 0;
+            Int32 numlink = 0;
+            AutoPtr<IHashMap> connectChoices;
+            config->GetConnectChoices((IHashMap**)&connectChoices);
+            if (connectChoices != NULL) {
+                connectChoices->GetSize(&num);
+            }
+            AutoPtr<IHashMap> linkedConfigurations;
+            config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
+            if (linkedConfigurations != NULL) {
+                linkedConfigurations->GetSize(&numlink);
+            }
+            mOwner->Loge(String("saving network history: "));
+                    //+ config.configKey()  + " gw: " +
+                    //config.defaultGwMacAddress + " autojoin-status: " +
+                    //config.autoJoinStatus + " ephemeral=" + config.ephemeral
+                    //+ " choices:" + Integer.toString(num)
+                    //+ " link:" + Integer.toString(numlink)
+                    //+ " status:" + Integer.toString(config.status)
+                    //+ " nid:" + Integer.toString(config.networkId));
+        }
+
+        Boolean isValid;
+        if ((config->IsValid(&isValid), isValid) == FALSE)
+            continue;
+
+        String ssid;
+        config->GetSSID(&ssid);
+        if (ssid.IsNull()) {
+            if (VDBG) {
+                mOwner->Loge(String("writeKnownNetworkHistory trying to write config with null SSID"));
+            }
+            continue;
+        }
+        if (VDBG) {
+            mOwner->Loge(String("writeKnownNetworkHistory write config "));// + config.configKey());
+        }
+        String configKey;
+        config->ConfigKey(&configKey);
+        out->WriteUTF(CONFIG_KEY + configKey + SEPARATOR_KEY);
+
+        String SSID, FQDN;
+        config->GetSSID(&SSID);
+        config->GetFQDN(&FQDN);
+        out->WriteUTF(SSID_KEY + SSID + SEPARATOR_KEY);
+        out->WriteUTF(FQDN_KEY + FQDN + SEPARATOR_KEY);
+
+        Int32 priority, autoJoinStatus, status, disableReason, networkId;
+        config->GetPriority(&priority);
+        config->GetAutoJoinStatus(&autoJoinStatus);
+        config->GetStatus(&status);
+        config->GetDisableReason(&disableReason);
+        config->GetNetworkId(&networkId);
+        out->WriteUTF(PRIORITY_KEY + StringUtils::ToString(priority) + SEPARATOR_KEY);
+        out->WriteUTF(STATUS_KEY + StringUtils::ToString(autoJoinStatus) + SEPARATOR_KEY);
+        out->WriteUTF(SUPPLICANT_STATUS_KEY + StringUtils::ToString(status) + SEPARATOR_KEY);
+        out->WriteUTF(SUPPLICANT_DISABLE_REASON_KEY + StringUtils::ToString(disableReason) + SEPARATOR_KEY);
+        out->WriteUTF(NETWORK_ID_KEY + StringUtils::ToString(networkId) + SEPARATOR_KEY);
+
+        Boolean selfAdded, didSelfAdd, noInternetAccess, ephemeral;
+        config->GetSelfAdded(&selfAdded);
+        config->GetDidSelfAdd(&didSelfAdd);
+        config->GetNoInternetAccess(&noInternetAccess);
+        config->GetEphemeral(&ephemeral);
+        out->WriteUTF(SELF_ADDED_KEY + StringUtils::BooleanToString(selfAdded) + SEPARATOR_KEY);
+        out->WriteUTF(DID_SELF_ADD_KEY + StringUtils::BooleanToString(didSelfAdd) + SEPARATOR_KEY);
+        out->WriteUTF(NO_INTERNET_ACCESS_KEY + StringUtils::BooleanToString(noInternetAccess) + SEPARATOR_KEY);
+        out->WriteUTF(EPHEMERAL_KEY + StringUtils::BooleanToString(ephemeral) + SEPARATOR_KEY);
+
+        String peerWifiConfiguration;
+        config->GetPeerWifiConfiguration(&peerWifiConfiguration);
+        if (!peerWifiConfiguration.IsNull()) {
+            out->WriteUTF(PEER_CONFIGURATION_KEY + peerWifiConfiguration + SEPARATOR_KEY);
+        }
+
+        Int32 numConnectionFailures, numAuthFailures, numIpConfigFailures;
+        Int32 numScorerOverride, numScorerOverrideAndSwitchedNetwork, numAssociation;
+        Int32 autoJoinUseAggressiveJoinAttemptThreshold;
+        config->GetNumConnectionFailures(&numConnectionFailures);
+        config->GetNumAuthFailures(&numAuthFailures);
+        config->GetNumIpConfigFailures(&numIpConfigFailures);
+        config->GetNumScorerOverride(&numScorerOverride);
+        config->GetNumScorerOverrideAndSwitchedNetwork(&numScorerOverrideAndSwitchedNetwork);
+        config->GetNumAssociation(&numAssociation);
+        config->GetAutoJoinUseAggressiveJoinAttemptThreshold(&autoJoinUseAggressiveJoinAttemptThreshold);
+
+        out->WriteUTF(NUM_CONNECTION_FAILURES_KEY
+                + StringUtils::ToString(numConnectionFailures)
+                + SEPARATOR_KEY);
+        out->WriteUTF(NUM_AUTH_FAILURES_KEY
+                + StringUtils::ToString(numAuthFailures)
+                + SEPARATOR_KEY);
+        out->WriteUTF(NUM_IP_CONFIG_FAILURES_KEY
+                + StringUtils::ToString(numIpConfigFailures)
+                + SEPARATOR_KEY);
+        out->WriteUTF(SCORER_OVERRIDE_KEY + StringUtils::ToString(numScorerOverride)
+                + SEPARATOR_KEY);
+        out->WriteUTF(SCORER_OVERRIDE_AND_SWITCH_KEY
+                + StringUtils::ToString(numScorerOverrideAndSwitchedNetwork)
+                + SEPARATOR_KEY);
+        out->WriteUTF(NUM_ASSOCIATION_KEY
+                + StringUtils::ToString(numAssociation)
+                + SEPARATOR_KEY);
+        out->WriteUTF(JOIN_ATTEMPT_BOOST_KEY
+                + StringUtils::ToString(autoJoinUseAggressiveJoinAttemptThreshold)
+                + SEPARATOR_KEY);
+        //out->WriteUTF(BLACKLIST_MILLI_KEY + Long.toString(config.blackListTimestamp)
+        //        + SEPARATOR_KEY);
+        Int32 creatorUid, lastConnectUid, lastUpdateUid;
+        config->GetCreatorUid(&creatorUid);
+        config->GetLastConnectUid(&lastConnectUid);
+        config->GetLastUpdateUid(&lastUpdateUid);
+        out->WriteUTF(CREATOR_UID_KEY + StringUtils::ToString(creatorUid)
+                + SEPARATOR_KEY);
+        out->WriteUTF(CONNECT_UID_KEY + StringUtils::ToString(lastConnectUid)
+                + SEPARATOR_KEY);
+        out->WriteUTF(UPDATE_UID_KEY + StringUtils::ToString(lastUpdateUid)
+                + SEPARATOR_KEY);
+
+        AutoPtr<IBitSet> allowedKeyManagement;
+        config->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
+        AutoPtr<IWifiConfigurationKeyMgmt> wfcKeyMgmt;
+        CWifiConfigurationKeyMgmt::AcquireSingleton((IWifiConfigurationKeyMgmt**)&wfcKeyMgmt);
+        AutoPtr<ArrayOf<String> > strings;
+        wfcKeyMgmt->GetStrings((ArrayOf<String>**)&strings);
+        String allowedKeyManagementString =
+            MakeString(allowedKeyManagement, strings);
+        out->WriteUTF(AUTH_KEY + allowedKeyManagementString + SEPARATOR_KEY);
+
+        AutoPtr<IHashMap> connectChoices;
+        config->GetConnectChoices((IHashMap**)&connectChoices);
+        if (connectChoices != NULL) {
+            AutoPtr<ISet> keySet;
+            connectChoices->GetKeySet((ISet**)&keySet);
+            AutoPtr<IIterator> keyIter;
+            keySet->GetIterator((IIterator**)&keyIter);
+            Boolean isflag = FALSE;
+            while ((keyIter->HasNext(&isflag), isflag)) {
+                AutoPtr<IInterface> keyObj;
+                keyIter->GetNext((IInterface**)&keyObj);
+                AutoPtr<IInterface> valueObj;
+                connectChoices->Get(keyObj, (IInterface**)&valueObj);
+                IInteger32* i32 = IInteger32::Probe(valueObj);
+                Int32 choice;
+                i32->GetValue(&choice);
+                String key;
+                ICharSequence::Probe(keyObj)->ToString(&key);
+                out->WriteUTF(CHOICE_KEY + key + "="
+                        + StringUtils::ToString(choice) + SEPARATOR_KEY);
+            }
+        }
+
+        AutoPtr<IHashMap> linkedConfigurations;
+        config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
+        if (linkedConfigurations != NULL) {
+            mOwner->Loge(String("writeKnownNetworkHistory write linked "));
+                    //+ config.linkedConfigurations.size());
+
+            AutoPtr<ISet> keySet;
+            connectChoices->GetKeySet((ISet**)&keySet);
+            AutoPtr<IIterator> keyIter;
+            keySet->GetIterator((IIterator**)&keyIter);
+            Boolean isflag = FALSE;
+            while ((keyIter->HasNext(&isflag), isflag)) {
+                AutoPtr<IInterface> keyObj;
+                keyIter->GetNext((IInterface**)&keyObj);
+                String key;
+                ICharSequence::Probe(keyObj)->ToString(&key);
+                out->WriteUTF(LINK_KEY + key + SEPARATOR_KEY);
+            }
+        }
+
+        String macAddress;
+        config->GetDefaultGwMacAddress(&macAddress);
+        if (!macAddress.IsNull()) {
+            out->WriteUTF(DEFAULT_GW_KEY + macAddress + SEPARATOR_KEY);
+        }
+
+        AutoPtr<IHashMap> scanResultCache;
+        config->GetScanResultCache((IHashMap**)&scanResultCache);
+        if (scanResultCache != NULL) {
+            AutoPtr<ICollection> values;
+            scanResultCache->GetValues((ICollection**)&values);
+            AutoPtr<IIterator> iter;
+            values->GetIterator((IIterator**)&iter);
+            Boolean bNext;
+            iter->HasNext(&bNext);
+            for (; bNext; iter->HasNext(&bNext)) {
+                AutoPtr<IInterface> obj;
+                iter->GetNext((IInterface**)&obj);
+                IScanResult* result = IScanResult::Probe(obj);
+
+                String bssid;
+                result->GetBSSID(&bssid);
+                out->WriteUTF(BSSID_KEY + bssid + SEPARATOR_KEY);
+                Int32 frequency, level, autoJoinStatus;
+                result->GetFrequency(&frequency);
+                out->WriteUTF(FREQ_KEY + StringUtils::ToString(frequency) + SEPARATOR_KEY);
+                result->GetLevel(&level);
+                out->WriteUTF(RSSI_KEY + StringUtils::ToString(level) + SEPARATOR_KEY);
+                result->GetAutoJoinStatus(&autoJoinStatus);
+                out->WriteUTF(BSSID_STATUS_KEY + StringUtils::ToString(autoJoinStatus) + SEPARATOR_KEY);
+                //if (result.seen != 0) {
+                //    out->WriteUTF(MILLI_KEY + Long.toString(result.seen)
+                //            + SEPARATOR_KEY);
+                //}
+                out->WriteUTF(BSSID_KEY_END + SEPARATOR_KEY);
+            }
+        }
+
+        String lastFailure;
+        config->GetLastFailure(&lastFailure);
+        if (!lastFailure.IsNull()) {
+            out->WriteUTF(FAILURE_KEY + lastFailure + SEPARATOR_KEY);
+        }
+        out->WriteUTF(SEPARATOR_KEY);
+        // Add extra blank lines for clarity
+        out->WriteUTF(SEPARATOR_KEY);
+        out->WriteUTF(SEPARATOR_KEY);
+    }
     return NOERROR;
 }
 
@@ -154,6 +504,58 @@ const Int32 WifiConfigStore::DEFAULT_MAX_DHCP_RETRIES;
 WifiConfigStore::WifiConfigStore(
     /* [in] */ IContext* c,
     /* [in] */ WifiNative* wn)
+    : enableAutoJoinScanWhenAssociated(TRUE)
+    , enableAutoJoinWhenAssociated(TRUE)
+    , enableChipWakeUpWhenAssociated(TRUE)
+    , enableRssiPollWhenAssociated(TRUE)
+    , maxTxPacketForNetworkSwitching(40)
+    , maxRxPacketForNetworkSwitching(80)
+    , maxTxPacketForFullScans(8)
+    , maxRxPacketForFullScans(16)
+    , maxTxPacketForPartialScans(40)
+    , maxRxPacketForPartialScans(80)
+    , enableFullBandScanWhenAssociated(TRUE)
+    , thresholdInitialAutoJoinAttemptMin5RSSI(IWifiConfiguration::INITIAL_AUTO_JOIN_ATTEMPT_MIN_5)
+    , thresholdInitialAutoJoinAttemptMin24RSSI(IWifiConfiguration::INITIAL_AUTO_JOIN_ATTEMPT_MIN_24)
+    , thresholdBadRssi5(IWifiConfiguration::BAD_RSSI_5)
+    , thresholdLowRssi5(IWifiConfiguration::LOW_RSSI_5)
+    , thresholdGoodRssi5(IWifiConfiguration::GOOD_RSSI_5)
+    , thresholdBadRssi24(IWifiConfiguration::BAD_RSSI_24)
+    , thresholdLowRssi24(IWifiConfiguration::LOW_RSSI_24)
+    , thresholdGoodRssi24(IWifiConfiguration::GOOD_RSSI_24)
+    , associatedFullScanBackoff(12)
+    , associatedFullScanMaxIntervalMilli(300000)
+    , associatedPartialScanPeriodMilli(0)
+    , bandPreferenceBoostFactor5(5)
+    , bandPreferencePenaltyFactor5(2)
+    , bandPreferencePenaltyThreshold5(IWifiConfiguration::G_BAND_PREFERENCE_RSSI_THRESHOLD)
+    , bandPreferenceBoostThreshold5(IWifiConfiguration::A_BAND_PREFERENCE_RSSI_THRESHOLD)
+    , badLinkSpeed24(6)
+    , badLinkSpeed5(12)
+    , goodLinkSpeed24(24)
+    , goodLinkSpeed5(36)
+    , maxAuthErrorsToBlacklist(4)
+    , maxConnectionErrorsToBlacklist(4)
+    , wifiConfigBlacklistMinTimeMilli(1000 * 60 * 5)
+    , associatedHysteresisHigh(+14)
+    , associatedHysteresisLow(+8)
+    , thresholdUnblacklistThreshold5Hard(IWifiConfiguration::UNBLACKLIST_THRESHOLD_5_HARD)
+    , thresholdUnblacklistThreshold5Soft(IWifiConfiguration::UNBLACKLIST_THRESHOLD_5_SOFT)
+    , thresholdUnblacklistThreshold24Hard(IWifiConfiguration::UNBLACKLIST_THRESHOLD_24_HARD)
+    , thresholdUnblacklistThreshold24Soft(IWifiConfiguration::UNBLACKLIST_THRESHOLD_24_SOFT)
+    , enableVerboseLogging(0)
+    , showNetworks(TRUE)
+    , alwaysEnableScansWhileAssociated(0)
+    , autoJoinScanIntervalWhenP2pConnected(300000)
+    , maxNumActiveChannelsForPartialScans(6)
+    , maxNumPassiveChannelsForPartialScans(2)
+    , roamOnAny(FALSE)
+    , onlyLinkSameCredentialConfigurations(TRUE)
+    , enableLinkDebouncing(TRUE)
+    , enable5GHzPreference(TRUE)
+    , enableWifiCellularHandoverUserTriggeredAdjustment(TRUE)
+    , lastUnwantedNetworkDisconnectTimestamp(0)
+    , mLastPriority(-1)
 {
     CHashMap::New((IHashMap**)&mConfiguredNetworks);
     CHashMap::New((IHashMap**)&mNetworkIds);
@@ -163,121 +565,103 @@ WifiConfigStore::WifiConfigStore(
     keyStoreHelper->GetDefaultType(&type);
     keyStoreHelper->GetInstance(type, (IKeyStore**)&mKeyStore);
 
-    // ==================before translated======================
-    // mContext = c;
-    // mWifiNative = wn;
-    //
-    // if (showNetworks) {
-    //     mLocalLog = mWifiNative.getLocalLog();
-    //     mFileObserver = new WpaConfigFileObserver();
-    //     mFileObserver.startWatching();
-    // } else {
-    //     mLocalLog = null;
-    //     mFileObserver = null;
-    // }
-    //
-    // associatedPartialScanPeriodMilli = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_associated_scan_interval);
-    // loge("associatedPartialScanPeriodMilli set to " + associatedPartialScanPeriodMilli);
-    //
-    // onlyLinkSameCredentialConfigurations = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_only_link_same_credential_configurations);
-    // maxNumActiveChannelsForPartialScans = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_associated_partial_scan_max_num_active_channels);
-    // maxNumPassiveChannelsForPartialScans = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_associated_partial_scan_max_num_passive_channels);
-    // associatedFullScanMaxIntervalMilli = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_associated_full_scan_max_interval);
-    // associatedFullScanBackoff = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_associated_full_scan_backoff);
-    // enableLinkDebouncing = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_enable_disconnection_debounce);
-    //
-    // enable5GHzPreference = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_enable_5GHz_preference);
-    //
-    // bandPreferenceBoostFactor5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_5GHz_preference_boost_factor);
-    // bandPreferencePenaltyFactor5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_5GHz_preference_penalty_factor);
-    //
-    // bandPreferencePenaltyThreshold5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_5GHz_preference_penalty_threshold);
-    // bandPreferenceBoostThreshold5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_5GHz_preference_boost_threshold);
-    //
-    // associatedHysteresisHigh = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_current_association_hysteresis_high);
-    // associatedHysteresisLow = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_current_association_hysteresis_low);
-    //
-    // thresholdBadRssi5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz);
-    // thresholdLowRssi5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_low_rssi_threshold_5GHz);
-    // thresholdGoodRssi5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_good_rssi_threshold_5GHz);
-    // thresholdBadRssi24 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz);
-    // thresholdLowRssi24 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_low_rssi_threshold_24GHz);
-    // thresholdGoodRssi24 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_good_rssi_threshold_24GHz);
-    //
-    // enableWifiCellularHandoverUserTriggeredAdjustment = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_framework_cellular_handover_enable_user_triggered_adjustment);
-    //
-    // badLinkSpeed24 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_bad_link_speed_24);
-    // badLinkSpeed5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_bad_link_speed_5);
-    // goodLinkSpeed24 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_good_link_speed_24);
-    // goodLinkSpeed5 = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_wifi_score_good_link_speed_5);
-    //
-    // maxAuthErrorsToBlacklist = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_max_auth_errors_to_blacklist);
-    // maxConnectionErrorsToBlacklist = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_max_connection_errors_to_blacklist);
-    // wifiConfigBlacklistMinTimeMilli = mContext.getResources().getInteger(
-    //         R.integer.config_wifi_framework_network_black_list_min_time_milli);
-    //
-    //
-    // enableAutoJoinScanWhenAssociated = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_framework_enable_associated_autojoin_scan);
-    //
-    // enableAutoJoinWhenAssociated = mContext.getResources().getBoolean(
-    //         R.bool.config_wifi_framework_enable_associated_network_selection);
+    mContext = c;
+    mWifiNative = wn;
+
+    if (showNetworks) {
+        mLocalLog = mWifiNative->GetLocalLog();
+        mFileObserver = new WpaConfigFileObserver();
+        mFileObserver->StartWatching();
+    } else {
+        mLocalLog = NULL;
+        mFileObserver = NULL;
+    }
+
+    AutoPtr<IResources> resources;
+    mContext->GetResources((IResources**)&resources);
+    resources->GetInteger(R::integer::config_wifi_framework_associated_scan_interval, &associatedPartialScanPeriodMilli);
+    Loge(String("associatedPartialScanPeriodMilli set to ") + StringUtils::ToString(associatedPartialScanPeriodMilli));
+
+    resources->GetBoolean(R::bool_::config_wifi_only_link_same_credential_configurations,
+            &onlyLinkSameCredentialConfigurations);
+    resources->GetInteger(R::integer::config_wifi_framework_associated_partial_scan_max_num_active_channels,
+            &maxNumActiveChannelsForPartialScans);
+    resources->GetInteger(R::integer::config_wifi_framework_associated_partial_scan_max_num_passive_channels,
+            &maxNumPassiveChannelsForPartialScans);
+    resources->GetInteger(R::integer::config_wifi_framework_associated_full_scan_max_interval,
+            &associatedFullScanMaxIntervalMilli);
+    resources->GetInteger(R::integer::config_wifi_framework_associated_full_scan_backoff,
+            &associatedFullScanBackoff);
+    resources->GetBoolean(R::bool_::config_wifi_enable_disconnection_debounce,
+            &enableLinkDebouncing);
+
+    resources->GetBoolean(R::bool_::config_wifi_enable_5GHz_preference,
+            &enable5GHzPreference);
+
+    resources->GetInteger(R::integer::config_wifi_framework_5GHz_preference_boost_factor,
+            &bandPreferenceBoostFactor5);
+    resources->GetInteger(R::integer::config_wifi_framework_5GHz_preference_penalty_factor,
+            &bandPreferencePenaltyFactor5);
+
+    resources->GetInteger(R::integer::config_wifi_framework_5GHz_preference_penalty_threshold,
+            &bandPreferencePenaltyThreshold5);
+    resources->GetInteger(R::integer::config_wifi_framework_5GHz_preference_boost_threshold,
+            &bandPreferenceBoostThreshold5);
+
+    resources->GetInteger(R::integer::config_wifi_framework_current_association_hysteresis_high,
+            &associatedHysteresisHigh);
+    resources->GetInteger(R::integer::config_wifi_framework_current_association_hysteresis_low,
+            &associatedHysteresisLow);
+
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz, &thresholdBadRssi5);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_low_rssi_threshold_5GHz, &thresholdLowRssi5);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_good_rssi_threshold_5GHz, &thresholdGoodRssi5);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz, &thresholdBadRssi24);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_low_rssi_threshold_24GHz, &thresholdLowRssi24);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_good_rssi_threshold_24GHz, &thresholdGoodRssi24);
+
+    resources->GetBoolean(R::bool_::config_wifi_framework_cellular_handover_enable_user_triggered_adjustment,
+            &enableWifiCellularHandoverUserTriggeredAdjustment);
+
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_bad_link_speed_24,
+            &badLinkSpeed24);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_bad_link_speed_5, &badLinkSpeed5);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_good_link_speed_24, &goodLinkSpeed24);
+    resources->GetInteger(R::integer::config_wifi_framework_wifi_score_good_link_speed_5, &goodLinkSpeed5);
+
+    resources->GetInteger(R::integer::config_wifi_framework_max_auth_errors_to_blacklist, &maxAuthErrorsToBlacklist);
+    resources->GetInteger(R::integer::config_wifi_framework_max_connection_errors_to_blacklist, &maxConnectionErrorsToBlacklist);
+    resources->GetInteger(R::integer::config_wifi_framework_network_black_list_min_time_milli, &wifiConfigBlacklistMinTimeMilli);
+
+
+    resources->GetBoolean(R::bool_::config_wifi_framework_enable_associated_autojoin_scan, &enableAutoJoinScanWhenAssociated);
+
+    resources->GetBoolean(R::bool_::config_wifi_framework_enable_associated_network_selection, &enableAutoJoinWhenAssociated);
 }
 
 ECode WifiConfigStore::EnableVerboseLogging(
     /* [in] */ Int32 verbose)
 {
-    // ==================before translated======================
-    // enableVerboseLogging = verbose;
-    // if (verbose > 0) {
-    //     VDBG = true;
-    //     showNetworks = true;
-    // } else {
-    //     VDBG = false;
-    // }
-    // if (verbose > 1) {
-    //     VVDBG = true;
-    // } else {
-    //     VVDBG = false;
-    // }
-    assert(0);
+    enableVerboseLogging = verbose;
+    if (verbose > 0) {
+        VDBG = TRUE;
+        showNetworks = TRUE;
+    } else {
+        VDBG = FALSE;
+    }
+    if (verbose > 1) {
+        VVDBG = TRUE;
+    } else {
+        VVDBG = FALSE;
+    }
     return NOERROR;
 }
 
 ECode WifiConfigStore::LoadAndEnableAllNetworks()
 {
-    // ==================before translated======================
-    // if (DBG) log("Loading config and enabling all networks ");
-    // loadConfiguredNetworks();
-    // enableAllNetworks();
-    assert(0);
+    if (DBG) Log(String("Loading config and enabling all networks "));
+    LoadConfiguredNetworks();
+    EnableAllNetworks();
     return NOERROR;
 }
 
@@ -285,19 +669,16 @@ ECode WifiConfigStore::GetConfiguredNetworksSize(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mConfiguredNetworks.size();
-    assert(0);
-    return NOERROR;
+    return mConfiguredNetworks->GetSize(result);
 }
 
 ECode WifiConfigStore::GetConfiguredNetworks(
     /* [out] */ IList** result)//WifiConfiguration
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getConfiguredNetworks(null);
-    assert(0);
+    AutoPtr<IList> networks = GetConfiguredNetworks((IMap*)NULL);
+    *result = networks;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -305,10 +686,10 @@ ECode WifiConfigStore::GetPrivilegedConfiguredNetworks(
     /* [out] */ IList** result)//WifiConfiguration
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Map<String, String> pskMap = getCredentialsBySsidMap();
-    // return getConfiguredNetworks(pskMap);
-    assert(0);
+    AutoPtr<IMap> pskMap = GetCredentialsBySsidMap();//String, String
+    AutoPtr<IList> networks = GetConfiguredNetworks(pskMap);
+    *result = networks;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -316,12 +697,11 @@ ECode WifiConfigStore::GetconfiguredNetworkSize(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mConfiguredNetworks == null)
-    //     return 0;
-    // return mConfiguredNetworks.size();
-    assert(0);
-    return NOERROR;
+    if (mConfiguredNetworks == NULL) {
+        *result = 0;
+        return NOERROR;
+    }
+    return mConfiguredNetworks->GetSize(result);
 }
 
 ECode WifiConfigStore::GetRecentConfiguredNetworks(
@@ -330,67 +710,96 @@ ECode WifiConfigStore::GetRecentConfiguredNetworks(
     /* [out] */ IList** result)//WifiConfiguration
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // List<WifiConfiguration> networks = null;
-    //
-    // for (WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     if (config.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DELETED) {
-    //         // Do not enumerate and return this configuration to any one,
-    //         // instead treat it as unknown. the configuration can still be retrieved
-    //         // directly by the key or networkId
-    //         continue;
-    //     }
-    //
-    //     // Calculate the RSSI for scan results that are more recent than milli
-    //     config.setVisibility(milli);
-    //     if (config.visibility == null) {
-    //         continue;
-    //     }
-    //     if (config.visibility.rssi5 == WifiConfiguration.INVALID_RSSI &&
-    //             config.visibility.rssi24 == WifiConfiguration.INVALID_RSSI) {
-    //         continue;
-    //     }
-    //     if (networks == null)
-    //         networks = new ArrayList<WifiConfiguration>();
-    //     if (copy) {
-    //         networks.add(new WifiConfiguration(config));
-    //     } else {
-    //         networks.add(config);
-    //     }
-    // }
-    // return networks;
-    assert(0);
+    AutoPtr<IList> networks;//WifiConfiguration
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<ArrayOf<IInterface*> > array;
+    values->ToArray((ArrayOf<IInterface*>**)&array);
+    for (Int32 i = 0; i < array->GetLength(); ++i) {
+        AutoPtr<IInterface> obj = (*array)[i];
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+        Int32 autoJoinStatus;
+        config->GetAutoJoinStatus(&autoJoinStatus);
+        if (autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
+            // Do not enumerate and return this configuration to any one,
+            // instead treat it as unknown. the configuration can still be retrieved
+            // directly by the key or networkId
+            continue;
+        }
+
+        // Calculate the RSSI for scan results that are more recent than milli
+        AutoPtr<IWifiConfigurationVisibility> wfcVisibility;
+        config->SetVisibility(milli, (IWifiConfigurationVisibility**)&wfcVisibility);
+        config->GetVisibility((IWifiConfigurationVisibility**)&wfcVisibility);
+        if (wfcVisibility == NULL) {
+            continue;
+        }
+        Int32 rssi5;
+        wfcVisibility->GetRssi5(&rssi5);
+        Int32 rssi24;
+        wfcVisibility->GetRssi24(&rssi24);
+        if (rssi5 == IWifiConfiguration::INVALID_RSSI &&
+                rssi24 == IWifiConfiguration::INVALID_RSSI) {
+            continue;
+        }
+        if (networks == NULL)
+            CArrayList::New((IList**)&networks);
+        if (copy) {
+            AutoPtr<IWifiConfiguration> config2;
+            CWifiConfiguration::New(config, (IWifiConfiguration**)&config2);
+            networks->Add(config2);
+        } else {
+            networks->Add(config);
+        }
+    }
+    *result = networks;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode WifiConfigStore::UpdateConfiguration(
     /* [in] */ IWifiInfo* info)
 {
-    VALIDATE_NOT_NULL(info);
-    // ==================before translated======================
-    // WifiConfiguration config = getWifiConfiguration(info.getNetworkId());
-    // if (config != null && config.scanResultCache != null) {
-    //     ScanResult result = config.scanResultCache.get(info.getBSSID());
-    //     if (result != null) {
-    //         long previousSeen = result.seen;
-    //         int previousRssi = result.level;
-    //
-    //         // Update the scan result
-    //         result.seen = System.currentTimeMillis();
-    //         result.level = info.getRssi();
-    //
-    //         // Average the RSSI value
-    //         result.averageRssi(previousRssi, previousSeen,
-    //                 WifiAutoJoinController.mScanResultMaximumAge);
-    //         if (VDBG) {
-    //             loge("updateConfiguration freq=" + result.frequency
-    //                 + " BSSID=" + result.BSSID
-    //                 + " RSSI=" + result.level
-    //                 + " " + config.configKey());
-    //         }
-    //     }
-    // }
-    assert(0);
+    AutoPtr<IWifiConfiguration> config;
+    Int32 networkId;
+    info->GetNetworkId(&networkId);
+    GetWifiConfiguration(networkId, (IWifiConfiguration**)&config);
+
+    AutoPtr<IHashMap> scanResultCache;
+    if (config != NULL && (config->GetScanResultCache((IHashMap**)&scanResultCache), scanResultCache) != NULL) {
+        String bssid;
+        info->GetBSSID(&bssid);
+        AutoPtr<IInterface> obj;
+        scanResultCache->Get(CoreUtils::Convert(bssid), (IInterface**)&obj);
+        IScanResult* result = IScanResult::Probe(obj);
+        if (result != NULL) {
+            Int64 previousSeen;
+            result->GetSeen(&previousSeen);;
+            Int32 previousRssi;
+            result->GetLevel(&previousRssi);
+
+            // Update the scan result
+            AutoPtr<ISystem> system;
+            CSystem::AcquireSingleton((ISystem**)&system);
+            Int64 currentTimeMillis;
+            system->GetCurrentTimeMillis(&currentTimeMillis);
+            result->SetSeen(currentTimeMillis);
+            Int32 rssi;
+            info->GetRssi(&rssi);
+            result->SetLevel(rssi);;
+
+            // Average the RSSI value
+            result->AverageRssi(previousRssi, previousSeen,
+                    WifiAutoJoinController::mScanResultMaximumAge);
+            if (VDBG) {
+                Loge(String("updateConfiguration freq= xxxTODO "));// + result.frequency
+                    //+ " BSSID=" + result.BSSID
+                    //+ " RSSI=" + result.level
+                    //+ " " + config.configKey());
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -399,11 +808,15 @@ ECode WifiConfigStore::GetWifiConfiguration(
     /* [out] */ IWifiConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mConfiguredNetworks == null)
-    //     return null;
-    // return mConfiguredNetworks.get(netId);
-    assert(0);
+    if (mConfiguredNetworks == NULL) {
+         *result = NULL;
+         return NOERROR;
+    }
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(obj);
+    *result = config;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -412,67 +825,90 @@ ECode WifiConfigStore::GetWifiConfiguration(
     /* [out] */ IWifiConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (key == null)
-    //     return null;
-    // int hash = key.hashCode();
-    // if (mNetworkIds == null)
-    //     return null;
-    // Integer n = mNetworkIds.get(hash);
-    // if (n == null)
-    //     return null;
-    // int netId = n.intValue();
-    // return getWifiConfiguration(netId);
-    assert(0);
-    return NOERROR;
+    if (key.IsNull()) {
+        *result = NULL;
+        return NOERROR;
+    }
+    Int32 hash = key.GetHashCode();
+    if (mNetworkIds == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<IInterface> obj;
+    mNetworkIds->Get(CoreUtils::Convert(hash), (IInterface**)&obj);
+    AutoPtr<IInteger32> n = IInteger32::Probe(obj);
+    if (n == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    Int32 netId;
+    n->GetValue(&netId);
+    return GetWifiConfiguration(netId, result);
 }
 
 ECode WifiConfigStore::EnableAllNetworks()
 {
-    // ==================before translated======================
-    // long now = System.currentTimeMillis();
-    // boolean networkEnabledStateChanged = false;
-    //
-    // for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //
-    //     if(config != null && config.status == Status.DISABLED
-    //             && (config.autoJoinStatus
-    //             <= WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE)) {
-    //
-    //         // Wait for 20 minutes before reenabling config that have known, repeated connection
-    //         // or DHCP failures
-    //         if (config.disableReason == WifiConfiguration.DISABLED_DHCP_FAILURE
-    //                 || config.disableReason == WifiConfiguration.DISABLED_ASSOCIATION_REJECT
-    //                 || config.disableReason == WifiConfiguration.DISABLED_AUTH_FAILURE) {
-    //             if (config.blackListTimestamp != 0
-    //                    && now > config.blackListTimestamp
-    //                    && (now - config.blackListTimestamp) < wifiConfigBlacklistMinTimeMilli) {
-    //                 continue;
-    //             }
-    //         }
-    //
-    //         if(mWifiNative.enableNetwork(config.networkId, false)) {
-    //             networkEnabledStateChanged = true;
-    //             config.status = Status.ENABLED;
-    //
-    //             // Reset the blacklist condition
-    //             config.numConnectionFailures = 0;
-    //             config.numIpConfigFailures = 0;
-    //             config.numAuthFailures = 0;
-    //
-    //             // Reenable the wifi configuration
-    //             config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //         } else {
-    //             loge("Enable network failed on " + config.networkId);
-    //         }
-    //     }
-    // }
-    //
-    // if (networkEnabledStateChanged) {
-    //     mWifiNative.saveConfig();
-    //     sendConfiguredNetworksChangedBroadcast();
-    // }
-    assert(0);
+    Int64 now;
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&now);
+    Boolean networkEnabledStateChanged = FALSE;
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+        Int32 status, autoJoinStatus;
+        if(config != NULL && (config->GetStatus(&status), status) == IWifiConfigurationStatus::DISABLED
+                && ((config->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus)
+                <= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE)) {
+
+            // Wait for 20 minutes before reenabling config that have known, repeated connection
+            // or DHCP failures
+            Int32 disableReason;
+            config->GetDisableReason(&disableReason);
+            if (disableReason == IWifiConfiguration::DISABLED_DHCP_FAILURE
+                    || disableReason == IWifiConfiguration::DISABLED_ASSOCIATION_REJECT
+                    || disableReason == IWifiConfiguration::DISABLED_AUTH_FAILURE) {
+                Int64 blackListTimestamp;
+                config->GetBlackListTimestamp(&blackListTimestamp);
+                if (blackListTimestamp != 0
+                       && now > blackListTimestamp
+                       && (now - blackListTimestamp) < wifiConfigBlacklistMinTimeMilli) {
+                    continue;
+                }
+            }
+
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            if(mWifiNative->EnableNetwork(networkId, FALSE)) {
+                networkEnabledStateChanged = TRUE;
+                config->SetStatus(IWifiConfigurationStatus::ENABLED);
+
+                // Reset the blacklist condition
+                config->SetNumConnectionFailures(0);
+                config->SetNumIpConfigFailures(0);
+                config->SetNumAuthFailures(0);
+
+                // Reenable the wifi configuration
+                config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+            } else {
+                Loge(String("Enable network failed on ") + StringUtils::ToString(networkId));
+            }
+        }
+    }
+
+    if (networkEnabledStateChanged) {
+        mWifiNative->SaveConfig();
+        SendConfiguredNetworksChangedBroadcast();
+    }
     return NOERROR;
 }
 
@@ -481,36 +917,51 @@ ECode WifiConfigStore::SelectNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //  if (VDBG) localLog("selectNetwork", netId);
-    //  if (netId == INVALID_NETWORK_ID) return false;
-    //
-    //  // Reset the priority of each network at start or if it goes too high.
-    //  if (mLastPriority == -1 || mLastPriority > 1000000) {
-    //      for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //          if (config.networkId != INVALID_NETWORK_ID) {
-    //              config.priority = 0;
-    //              addOrUpdateNetworkNative(config, -1);
-    //          }
-    //      }
-    //      mLastPriority = 0;
-    //  }
-    //
-    //  // Set to the highest priority and save the configuration.
-    //  WifiConfiguration config = new WifiConfiguration();
-    //  config.networkId = netId;
-    //  config.priority = ++mLastPriority;
-    //
-    //  addOrUpdateNetworkNative(config, -1);
-    //  mWifiNative.saveConfig();
-    //
-    //  /* Enable the given network while disabling all other networks */
-    //  enableNetworkWithoutBroadcast(netId, true);
-    //
-    // /* Avoid saving the config & sending a broadcast to prevent settings
-    //  * from displaying a disabled list of networks */
-    //  return true;
-    assert(0);
+    if (VDBG) LocalLog(String("selectNetwork"), netId);
+    if (netId == IWifiConfiguration::INVALID_NETWORK_ID) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    // Reset the priority of each network at start or if it goes too high.
+    if (mLastPriority == -1 || mLastPriority > 1000000) {
+        AutoPtr<ICollection> values;
+        mConfiguredNetworks->GetValues((ICollection**)&values);
+        AutoPtr<IIterator> iter;
+        values->GetIterator((IIterator**)&iter);
+        Boolean bNext;
+        iter->HasNext(&bNext);
+        for (; bNext; iter->HasNext(&bNext)) {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            if (networkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+                config->SetPriority(0);
+                AddOrUpdateNetworkNative(config, -1);
+            }
+        }
+        mLastPriority = 0;
+    }
+
+    // Set to the highest priority and save the configuration.
+    AutoPtr<IWifiConfiguration> config;
+    CWifiConfiguration::New((IWifiConfiguration**)&config);
+    config->SetNetworkId(netId);
+    config->SetPriority(++mLastPriority);
+
+    AddOrUpdateNetworkNative(config, -1);
+    mWifiNative->SaveConfig();
+
+    /* Enable the given network while disabling all other networks */
+    Boolean bTemp;
+    EnableNetworkWithoutBroadcast(netId, TRUE, &bTemp);
+
+    /* Avoid saving the config & sending a broadcast to prevent settings
+    * from displaying a disabled list of networks */
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -519,60 +970,80 @@ ECode WifiConfigStore::SaveNetwork(
     /* [in] */ Int32 uid,
     /* [out] */ NetworkUpdateResult** result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WifiConfiguration conf;
-    //
-    // // A new network cannot have null SSID
-    // if (config == null || (config.networkId == INVALID_NETWORK_ID &&
-    //         config.SSID == null)) {
-    //     return new NetworkUpdateResult(INVALID_NETWORK_ID);
-    // }
-    // if (VDBG) localLog("WifiConfigStore: saveNetwork netId", config.networkId);
-    // if (VDBG) {
-    //     loge("WifiConfigStore saveNetwork, size=" + mConfiguredNetworks.size()
-    //             + " SSID=" + config.SSID
-    //             + " Uid=" + Integer.toString(config.creatorUid)
-    //             + "/" + Integer.toString(config.lastUpdateUid));
-    // }
-    // boolean newNetwork = (config.networkId == INVALID_NETWORK_ID);
-    // NetworkUpdateResult result = addOrUpdateNetworkNative(config, uid);
-    // int netId = result.getNetworkId();
-    //
-    // if (VDBG) localLog("WifiConfigStore: saveNetwork got it back netId=", netId);
-    //
-    // /* enable a new network */
-    // if (newNetwork && netId != INVALID_NETWORK_ID) {
-    //     if (VDBG) localLog("WifiConfigStore: will enable netId=", netId);
-    //
-    //     mWifiNative.enableNetwork(netId, false);
-    //     conf = mConfiguredNetworks.get(netId);
-    //     if (conf != null)
-    //         conf.status = Status.ENABLED;
-    // }
-    //
-    // conf = mConfiguredNetworks.get(netId);
-    // if (conf != null) {
-    //     if (conf.autoJoinStatus != WifiConfiguration.AUTO_JOIN_ENABLED) {
-    //         if (VDBG) localLog("WifiConfigStore: re-enabling: " + conf.SSID);
-    //
-    //         // reenable autojoin, since new information has been provided
-    //         conf.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //         enableNetworkWithoutBroadcast(conf.networkId, false);
-    //     }
-    //     if (VDBG) {
-    //         loge("WifiConfigStore: saveNetwork got config back netId="
-    //                 + Integer.toString(netId)
-    //                 + " uid=" + Integer.toString(config.creatorUid));
-    //     }
-    // }
-    //
-    // mWifiNative.saveConfig();
-    // sendConfiguredNetworksChangedBroadcast(conf, result.isNewNetwork() ?
-    //         WifiManager.CHANGE_REASON_ADDED : WifiManager.CHANGE_REASON_CONFIG_CHANGE);
-    // return result;
-    assert(0);
+    AutoPtr<IWifiConfiguration> conf;
+
+    // A new network cannot have null SSID
+    Int32 networkId;
+    String ssid;
+    if (config == NULL || ((config->GetNetworkId(&networkId), networkId) == IWifiConfiguration::INVALID_NETWORK_ID &&
+            (config->GetSSID(&ssid), ssid).IsNull())) {
+        AutoPtr<NetworkUpdateResult> nur = new NetworkUpdateResult(IWifiConfiguration::INVALID_NETWORK_ID);
+        *result = nur;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    if (VDBG) LocalLog(String("WifiConfigStore: saveNetwork netId"), networkId);
+    if (VDBG) {
+        Int32 size;
+        mConfiguredNetworks->GetSize(&size);
+        Int32 creatorUid;
+        config->GetCreatorUid(&creatorUid);
+        Int32 lastUpdateUid;
+        config->GetLastUpdateUid(&lastUpdateUid);
+        Loge(String("WifiConfigStore saveNetwork, size=") + StringUtils::ToString(size)
+                + String(" SSID=") + ssid
+                + String(" Uid=") + StringUtils::ToString(creatorUid)
+                + String("/") + StringUtils::ToString(lastUpdateUid));
+    }
+    Boolean newNetwork = (networkId == IWifiConfiguration::INVALID_NETWORK_ID);
+    AutoPtr<NetworkUpdateResult> nwuresult = AddOrUpdateNetworkNative(config, uid);
+    Int32 netId = nwuresult->GetNetworkId();
+
+    if (VDBG) LocalLog(String("WifiConfigStore: saveNetwork got it back netId="), netId);
+
+    /* enable a new network */
+    if (newNetwork && netId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        if (VDBG) LocalLog(String("WifiConfigStore: will enable netId="), netId);
+
+        mWifiNative->EnableNetwork(netId, FALSE);
+        AutoPtr<IInterface> configObj;
+        mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&configObj);
+        conf = IWifiConfiguration::Probe(configObj);
+        if (conf != NULL)
+            conf->SetStatus(IWifiConfigurationStatus::ENABLED);
+    }
+
+    AutoPtr<IInterface> configObj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&configObj);
+    conf = IWifiConfiguration::Probe(configObj);
+    if (conf != NULL) {
+        Int32 autoJoinStatus;
+        String ssid;
+        config->GetSSID(&ssid);
+        if ((conf->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus) != IWifiConfiguration::AUTO_JOIN_ENABLED) {
+            if (VDBG) LocalLog(String("WifiConfigStore: re-enabling: ") + ssid);
+
+            // reenable autojoin, since new information has been provided
+            conf->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+            Boolean bTemp;
+            EnableNetworkWithoutBroadcast(networkId, FALSE, &bTemp);
+        }
+        if (VDBG) {
+            Int32 creatorUid;
+            config->GetCreatorUid(&creatorUid);
+            Loge(String("WifiConfigStore: saveNetwork got config back netId=")
+                    + StringUtils::ToString(netId)
+                    + String(" uid=")
+                    + StringUtils::ToString(creatorUid));
+        }
+    }
+
+    mWifiNative->SaveConfig();
+    SendConfiguredNetworksChangedBroadcast(conf, nwuresult->IsNewNetwork() ?
+            IWifiManager::CHANGE_REASON_ADDED : IWifiManager::CHANGE_REASON_CONFIG_CHANGE);
+    *result = nwuresult;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -580,56 +1051,73 @@ ECode WifiConfigStore::DriverRoamedFrom(
     /* [in] */ IWifiInfo* info)
 {
     VALIDATE_NOT_NULL(info);
-    // ==================before translated======================
-    // if (info != null
-    //     && info.getBSSID() != null
-    //     && ScanResult.is5GHz(info.getFrequency())
-    //     && info.getRssi() > (bandPreferenceBoostThreshold5 + 3)) {
-    //     WifiConfiguration config = getWifiConfiguration(info.getNetworkId());
-    //     if (config != null) {
-    //         if (config.scanResultCache != null) {
-    //             ScanResult result = config.scanResultCache.get(info.getBSSID());
-    //             if (result != null) {
-    //                 result.setAutoJoinStatus(ScanResult.AUTO_ROAM_DISABLED + 1);
-    //             }
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (info != NULL) {
+        String bssid;
+        Int32 frequency;
+        info->GetFrequency(&frequency);
+        Int32 rssi;
+        info->GetRssi(&rssi);
+        AutoPtr<IScanResultHelper> scanResultHelper;
+        CScanResultHelper::AcquireSingleton((IScanResultHelper**)&scanResultHelper);
+        Boolean bTemp;
+        if (!((info->GetBSSID(&bssid), bssid).IsNull())
+                && (scanResultHelper->Is5GHz(frequency, &bTemp), bTemp)
+                && rssi > (bandPreferenceBoostThreshold5 + 3)) {
+            Int32 networkId;
+            info->GetNetworkId(&networkId);
+            AutoPtr<IWifiConfiguration> config;
+            GetWifiConfiguration(networkId, (IWifiConfiguration**)&config);
+            if (config != NULL) {
+                AutoPtr<IHashMap> scanResultCache;
+                config->GetScanResultCache((IHashMap**)&scanResultCache);
+                if (scanResultCache != NULL) {
+                    AutoPtr<IInterface> obj;
+                    scanResultCache->Get(CoreUtils::Convert(bssid), (IInterface**)&obj);
+                    IScanResult* result = IScanResult::Probe(obj);
+                    if (result != NULL) {
+                        result->SetAutoJoinStatus(IScanResult::AUTO_ROAM_DISABLED + 1);
+                    }
+                }
+            }
+        }
+    }
     return NOERROR;
 }
 
 ECode WifiConfigStore::SaveWifiConfigBSSID(
     /* [in] */ IWifiConfiguration* config)
 {
-    VALIDATE_NOT_NULL(config);
-    // ==================before translated======================
-    // // Sanity check the config is valid
-    // if (config == null || (config.networkId == INVALID_NETWORK_ID &&
-    //         config.SSID == null)) {
-    //     return;
-    // }
-    //
-    // // If an app specified a BSSID then dont over-write it
-    // if (config.BSSID != null && config.BSSID != "any") {
-    //     return;
-    // }
-    //
-    // // If autojoin specified a BSSID then write it in the network block
-    // if (config.autoJoinBSSID != null) {
-    //     loge("saveWifiConfigBSSID Setting BSSID for " + config.configKey()
-    //             + " to " + config.autoJoinBSSID);
-    //     if (!mWifiNative.setNetworkVariable(
-    //             config.networkId,
-    //             WifiConfiguration.bssidVarName,
-    //             config.autoJoinBSSID)) {
-    //         loge("failed to set BSSID: " + config.autoJoinBSSID);
-    //     } else if (config.autoJoinBSSID.equals("any")) {
-    //         // Paranoia, we just want to make sure that we restore the config to normal
-    //         mWifiNative.saveConfig();
-    //     }
-    // }
-    assert(0);
+    // Sanity check the config is valid
+    Int32 networkId;
+    String ssid;
+    if (config == NULL || ((config->GetNetworkId(&networkId), networkId) == IWifiConfiguration::INVALID_NETWORK_ID &&
+            (config->GetSSID(&ssid), ssid).IsNull())) {
+        return NOERROR;
+    }
+
+    // If an app specified a BSSID then dont over-write it
+    String bssid;
+    if (!((config->GetBSSID(&bssid), bssid).IsNull()) && !bssid.Equals(String("any"))) {
+        return NOERROR;
+    }
+
+    // If autojoin specified a BSSID then write it in the network block
+    String autoJoinBSSID;
+    if (!((config->GetAutoJoinBSSID(&autoJoinBSSID), autoJoinBSSID).IsNull())) {
+        String configKey;
+        config->ConfigKey(&configKey);
+        Loge(String("saveWifiConfigBSSID Setting BSSID for ") + configKey
+                + String(" to ") + autoJoinBSSID);
+        if (!mWifiNative->SetNetworkVariable(
+                networkId,
+                IWifiConfiguration::bssidVarName,
+                autoJoinBSSID)) {
+            Loge(String("failed to set BSSID: ") + autoJoinBSSID);
+        } else if (autoJoinBSSID.Equals(String("any"))) {
+            // Paranoia, we just want to make sure that we restore the config to normal
+            mWifiNative->SaveConfig();
+        }
+    }
     return NOERROR;
 }
 
@@ -637,29 +1125,31 @@ ECode WifiConfigStore::UpdateStatus(
     /* [in] */ Int32 netId,
     /* [in] */ NetworkInfoDetailedState state)
 {
-    VALIDATE_NOT_NULL(state);
-    // ==================before translated======================
-    // if (netId != INVALID_NETWORK_ID) {
-    //     WifiConfiguration config = mConfiguredNetworks.get(netId);
-    //     if (config == null) return;
-    //     switch (state) {
-    //         case CONNECTED:
-    //             config.status = Status.CURRENT;
-    //             //we successfully connected, hence remove the blacklist
-    //             config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //             break;
-    //         case DISCONNECTED:
-    //             //If network is already disabled, keep the status
-    //             if (config.status == Status.CURRENT) {
-    //                 config.status = Status.ENABLED;
-    //             }
-    //             break;
-    //         default:
-    //             //do nothing, retain the existing state
-    //             break;
-    //     }
-    // }
-    assert(0);
+    if (netId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        AutoPtr<IInterface> obj;
+        mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+        if (config == NULL) return NOERROR;
+        switch (state) {
+            case Elastos::Droid::Net::NetworkInfoState_CONNECTED:
+                config->SetStatus(IWifiConfigurationStatus::CURRENT);
+                //we successfully connected, hence remove the blacklist
+                config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+                break;
+            case Elastos::Droid::Net::NetworkInfoState_DISCONNECTED: {
+                //If network is already disabled, keep the status
+                Int32 status;
+                config->GetStatus(&status);
+                if (status == IWifiConfigurationStatus::CURRENT) {
+                    config->SetStatus(IWifiConfigurationStatus::ENABLED);
+                }
+                break;
+            }
+            default:
+                //do nothing, retain the existing state
+                break;
+        }
+    }
     return NOERROR;
 }
 
@@ -668,22 +1158,23 @@ ECode WifiConfigStore::ForgetNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (showNetworks) localLog("forgetNetwork", netId);
-    //
-    // boolean remove = removeConfigAndSendBroadcastIfNeeded(netId);
-    // if (!remove) {
-    //     //success but we dont want to remove the network from supplicant conf file
-    //     return true;
-    // }
-    // if (mWifiNative.removeNetwork(netId)) {
-    //     mWifiNative.saveConfig();
-    //     return true;
-    // } else {
-    //     loge("Failed to remove network " + netId);
-    //     return false;
-    // }
-    assert(0);
+    if (showNetworks) LocalLog(String("forgetNetwork"), netId);
+
+    Boolean remove = RemoveConfigAndSendBroadcastIfNeeded(netId);
+    if (!remove) {
+        //success but we dont want to remove the network from supplicant conf file
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (mWifiNative->RemoveNetwork(netId)) {
+        mWifiNative->SaveConfig();
+        *result = TRUE;
+        return NOERROR;
+    } else {
+        Loge(String("Failed to remove network ") + StringUtils::ToString(netId));
+        *result = FALSE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -692,25 +1183,28 @@ ECode WifiConfigStore::AddOrUpdateNetwork(
     /* [in] */ Int32 uid,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (showNetworks) localLog("addOrUpdateNetwork id=", config.networkId);
-    // //adding unconditional message to chase b/15111865
-    // Log.e(TAG, " key=" + config.configKey() + " netId=" + Integer.toString(config.networkId)
-    //         + " uid=" + Integer.toString(config.creatorUid)
-    //         + "/" + Integer.toString(config.lastUpdateUid));
-    // NetworkUpdateResult result = addOrUpdateNetworkNative(config, uid);
-    // if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
-    //     WifiConfiguration conf = mConfiguredNetworks.get(result.getNetworkId());
-    //     if (conf != null) {
-    //         sendConfiguredNetworksChangedBroadcast(conf,
-    //             result.isNewNetwork ? WifiManager.CHANGE_REASON_ADDED :
-    //                     WifiManager.CHANGE_REASON_CONFIG_CHANGE);
-    //     }
-    // }
-    // return result.getNetworkId();
-    assert(0);
+    Int32 networkId;
+    config->GetNetworkId(&networkId);
+    if (showNetworks) LocalLog(String("addOrUpdateNetwork id="), networkId);
+    //adding unconditional message to chase b/15111865
+    //Log.e(TAG, " key=" + config.configKey() + " netId=" + Integer.toString(config.networkId)
+    //        + " uid=" + Integer.toString(config.creatorUid)
+    //        + "/" + Integer.toString(config.lastUpdateUid));
+    AutoPtr<NetworkUpdateResult> res= AddOrUpdateNetworkNative(config, uid);
+    Int32 resultNetworkId = res->GetNetworkId();
+
+    if (resultNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        AutoPtr<IInterface> obj;
+        mConfiguredNetworks->Get(CoreUtils::Convert(resultNetworkId), (IInterface**)&obj);
+        IWifiConfiguration* conf = IWifiConfiguration::Probe(obj);
+        if (conf != NULL) {
+            SendConfiguredNetworksChangedBroadcast(conf,
+                res->IsNewNetwork() ? IWifiManager::CHANGE_REASON_ADDED :
+                        IWifiManager::CHANGE_REASON_CONFIG_CHANGE);
+        }
+    }
+    *result = resultNetworkId;
     return NOERROR;
 }
 
@@ -719,14 +1213,12 @@ ECode WifiConfigStore::RemoveNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (showNetworks) localLog("removeNetwork", netId);
-    // boolean ret = mWifiNative.removeNetwork(netId);
-    // if (ret) {
-    //     removeConfigAndSendBroadcastIfNeeded(netId);
-    // }
-    // return ret;
-    assert(0);
+    if (showNetworks) LocalLog(String("removeNetwork"), netId);
+    Boolean ret = mWifiNative->RemoveNetwork(netId);
+    if (ret) {
+        RemoveConfigAndSendBroadcastIfNeeded(netId);
+    }
+    *result = ret;
     return NOERROR;
 }
 
@@ -736,25 +1228,26 @@ ECode WifiConfigStore::EnableNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
-    // if (disableOthers) {
-    //     if (VDBG) localLog("enableNetwork(disableOthers=true) ", netId);
-    //     sendConfiguredNetworksChangedBroadcast();
-    // } else {
-    //     if (VDBG) localLog("enableNetwork(disableOthers=false) ", netId);
-    //     WifiConfiguration enabledNetwork = null;
-    //     synchronized(mConfiguredNetworks) {
-    //         enabledNetwork = mConfiguredNetworks.get(netId);
-    //     }
-    //     // check just in case the network was removed by someone else.
-    //     if (enabledNetwork != null) {
-    //         sendConfiguredNetworksChangedBroadcast(enabledNetwork,
-    //                 WifiManager.CHANGE_REASON_CONFIG_CHANGE);
-    //     }
-    // }
-    // return ret;
-    assert(0);
+    Boolean ret;
+    EnableNetworkWithoutBroadcast(netId, disableOthers, &ret);
+    if (disableOthers) {
+        if (VDBG) LocalLog(String("enableNetwork(disableOthers=true) "), netId);
+        SendConfiguredNetworksChangedBroadcast();
+    } else {
+        if (VDBG) LocalLog(String("enableNetwork(disableOthers=false) "), netId);
+        AutoPtr<IWifiConfiguration> enabledNetwork;
+        synchronized(mConfiguredNetworks) {
+            AutoPtr<IInterface> obj;
+            mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+            enabledNetwork = IWifiConfiguration::Probe(obj);
+        }
+        // check just in case the network was removed by someone else.
+        if (enabledNetwork != NULL) {
+            SendConfiguredNetworksChangedBroadcast(enabledNetwork,
+                    IWifiManager::CHANGE_REASON_CONFIG_CHANGE);
+        }
+    }
+    *result = ret;
     return NOERROR;
 }
 
@@ -764,40 +1257,52 @@ ECode WifiConfigStore::EnableNetworkWithoutBroadcast(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean ret = mWifiNative.enableNetwork(netId, disableOthers);
-    //
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) config.status = Status.ENABLED;
-    //
-    // if (disableOthers) {
-    //     markAllNetworksDisabledExcept(netId);
-    // }
-    // return ret;
-    assert(0);
+    Boolean ret = mWifiNative->EnableNetwork(netId, disableOthers);
+
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) config->SetStatus(IWifiConfigurationStatus::ENABLED);
+
+    if (disableOthers) {
+        MarkAllNetworksDisabledExcept(netId);
+    }
+    *result = ret;
     return NOERROR;
 }
 
 ECode WifiConfigStore::DisableAllNetworks()
 {
-    // ==================before translated======================
-    // if (VDBG) localLog("disableAllNetworks");
-    // boolean networkDisabled = false;
-    // for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     if(config != null && config.status != Status.DISABLED) {
-    //         if(mWifiNative.disableNetwork(config.networkId)) {
-    //             networkDisabled = true;
-    //             config.status = Status.DISABLED;
-    //         } else {
-    //             loge("Disable network failed on " + config.networkId);
-    //         }
-    //     }
-    // }
-    //
-    // if (networkDisabled) {
-    //     sendConfiguredNetworksChangedBroadcast();
-    // }
-    assert(0);
+    if (VDBG) LocalLog(String("disableAllNetworks"));
+    Boolean networkDisabled = FALSE;
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+        Int32 status;
+        config->GetStatus(&status);
+        if(config != NULL && status != IWifiConfigurationStatus::DISABLED) {
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            if(mWifiNative->DisableNetwork(networkId)) {
+                networkDisabled = TRUE;
+                config->SetStatus(IWifiConfigurationStatus::DISABLED);
+            } else {
+                Loge(String("Disable network failed on ") + StringUtils::ToString(networkId));
+            }
+        }
+    }
+
+    if (networkDisabled) {
+        SendConfiguredNetworksChangedBroadcast();
+    }
     return NOERROR;
 }
 
@@ -805,11 +1310,7 @@ ECode WifiConfigStore::DisableNetwork(
     /* [in] */ Int32 netId,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return disableNetwork(netId, WifiConfiguration.DISABLED_UNKNOWN_REASON);
-    assert(0);
-    return NOERROR;
+    return DisableNetwork(netId, IWifiConfiguration::DISABLED_UNKNOWN_REASON, result);
 }
 
 ECode WifiConfigStore::DisableNetwork(
@@ -818,41 +1319,46 @@ ECode WifiConfigStore::DisableNetwork(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) localLog("disableNetwork", netId);
-    // boolean ret = mWifiNative.disableNetwork(netId);
-    // WifiConfiguration network = null;
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    //
-    // if (VDBG) {
-    //     if (config != null) {
-    //         loge("disableNetwork netId=" + Integer.toString(netId)
-    //                 + " SSID=" + config.SSID
-    //                 + " disabled=" + (config.status == Status.DISABLED)
-    //                 + " reason=" + Integer.toString(config.disableReason));
-    //     }
-    // }
-    // /* Only change the reason if the network was not previously disabled
-    // /* and the reason is not DISABLED_BY_WIFI_MANAGER, that is, if a 3rd party
-    //  * set its configuration as disabled, then leave it disabled */
-    // if (config != null && config.status != Status.DISABLED
-    //         && config.disableReason != WifiConfiguration.DISABLED_BY_WIFI_MANAGER) {
-    //     config.status = Status.DISABLED;
-    //     config.disableReason = reason;
-    //     network = config;
-    // }
-    // if (reason == WifiConfiguration.DISABLED_BY_WIFI_MANAGER) {
-    //     // Make sure autojoin wont reenable this configuration without further user
-    //     // intervention
-    //     config.status = Status.DISABLED;
-    //     config.autoJoinStatus = WifiConfiguration.AUTO_JOIN_DISABLED_USER_ACTION;
-    // }
-    // if (network != null) {
-    //     sendConfiguredNetworksChangedBroadcast(network,
-    //             WifiManager.CHANGE_REASON_CONFIG_CHANGE);
-    // }
-    // return ret;
-    assert(0);
+    if (VDBG) LocalLog(String("disableNetwork"), netId);
+    Boolean ret = mWifiNative->DisableNetwork(netId);
+    AutoPtr<IWifiConfiguration> network;
+
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+    if (VDBG) {
+        if (config != NULL) {
+            Loge(String("disableNetwork netId=") + StringUtils::ToString(netId));
+                    //+ " SSID=" + config.SSID
+                    //+ " disabled=" + (config.status == Status.DISABLED)
+                    //+ " reason=" + Integer.toString(config.disableReason));
+        }
+    }
+    /* Only change the reason if the network was not previously disabled
+     * and the reason is not DISABLED_BY_WIFI_MANAGER, that is, if a 3rd party
+     * set its configuration as disabled, then leave it disabled */
+    Int32 status;
+    config->GetStatus(&status);
+    Int32 disableReason;
+    config->GetDisableReason(&disableReason);
+    if (config != NULL && status != IWifiConfigurationStatus::DISABLED
+            && disableReason != IWifiConfiguration::DISABLED_BY_WIFI_MANAGER) {
+        config->SetStatus(IWifiConfigurationStatus::DISABLED);
+        config->SetDisableReason(reason);
+        network = config;
+    }
+    if (reason == IWifiConfiguration::DISABLED_BY_WIFI_MANAGER) {
+        // Make sure autojoin wont reenable this configuration without further user
+        // intervention
+        config->SetStatus(IWifiConfigurationStatus::DISABLED);
+        config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_DISABLED_USER_ACTION);
+    }
+    if (network != NULL) {
+        SendConfiguredNetworksChangedBroadcast(network,
+                IWifiManager::CHANGE_REASON_CONFIG_CHANGE);
+    }
+    *result = ret;
     return NOERROR;
 }
 
@@ -860,9 +1366,7 @@ ECode WifiConfigStore::SaveConfig(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mWifiNative.saveConfig();
-    assert(0);
+    *result = mWifiNative->SaveConfig();
     return NOERROR;
 }
 
@@ -870,20 +1374,23 @@ ECode WifiConfigStore::StartWpsWithPinFromAccessPoint(
     /* [in] */ IWpsInfo* config,
     /* [out] */ IWpsResult** result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WpsResult result = new WpsResult();
-    // if (mWifiNative.startWpsRegistrar(config.BSSID, config.pin)) {
-    //     /* WPS leaves all networks disabled */
-    //     markAllNetworksDisabled();
-    //     result.status = WpsResult.Status.SUCCESS;
-    // } else {
-    //     loge("Failed to start WPS pin method configuration");
-    //     result.status = WpsResult.Status.FAILURE;
-    // }
-    // return result;
-    assert(0);
+    AutoPtr<IWpsResult> res;
+    CWpsResult::New((IWpsResult**)&res);
+    String bssid;
+    config->GetBSSID(&bssid);
+    String pin;
+    config->GetPin(&pin);
+    if (mWifiNative->StartWpsRegistrar(bssid, pin)) {
+        /* WPS leaves all networks disabled */
+        MarkAllNetworksDisabled();
+        res->SetStatus(Elastos::Droid::Wifi::WpsResultStatus_SUCCESS);
+    } else {
+        Loge(String("Failed to start WPS pin method configuration"));
+        res->SetStatus(Elastos::Droid::Wifi::WpsResultStatus_FAILURE);
+    }
+    *result = res;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -891,21 +1398,23 @@ ECode WifiConfigStore::StartWpsWithPinFromDevice(
     /* [in] */ IWpsInfo* config,
     /* [out] */ IWpsResult** result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WpsResult result = new WpsResult();
-    // result.pin = mWifiNative.startWpsPinDisplay(config.BSSID);
-    // /* WPS leaves all networks disabled */
-    // if (!TextUtils.isEmpty(result.pin)) {
-    //     markAllNetworksDisabled();
-    //     result.status = WpsResult.Status.SUCCESS;
-    // } else {
-    //     loge("Failed to start WPS pin method configuration");
-    //     result.status = WpsResult.Status.FAILURE;
-    // }
-    // return result;
-    assert(0);
+    AutoPtr<IWpsResult> res;
+    CWpsResult::New((IWpsResult**)&res);
+    String bssid;
+    config->GetBSSID(&bssid);
+    String pin = mWifiNative->StartWpsPinDisplay(bssid);
+    res->SetPin(pin);
+    /* WPS leaves all networks disabled */
+    if (!TextUtils::IsEmpty(pin)) {
+        MarkAllNetworksDisabled();
+        res->SetStatus(Elastos::Droid::Wifi::WpsResultStatus_SUCCESS);
+    } else {
+        Loge(String("Failed to start WPS pin method configuration"));
+        res->SetStatus(Elastos::Droid::Wifi::WpsResultStatus_FAILURE);
+    }
+    *result = res;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -913,20 +1422,22 @@ ECode WifiConfigStore::StartWpsPbc(
     /* [in] */ IWpsInfo* config,
     /* [out] */ IWpsResult** result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WpsResult result = new WpsResult();
-    // if (mWifiNative.startWpsPbc(config.BSSID)) {
-    //     /* WPS leaves all networks disabled */
-    //     markAllNetworksDisabled();
-    //     result.status = WpsResult.Status.SUCCESS;
-    // } else {
-    //     loge("Failed to start WPS push button configuration");
-    //     result.status = WpsResult.Status.FAILURE;
-    // }
-    // return result;
-    assert(0);
+    AutoPtr<IWpsResult> res;
+    CWpsResult::New((IWpsResult**)&res);
+    String bssid;
+    config->GetBSSID(&bssid);
+    if (mWifiNative->StartWpsPbc(bssid)) {
+        /* WPS leaves all networks disabled */
+        MarkAllNetworksDisabled();
+        res->SetStatus(Elastos::Droid::Wifi::WpsResultStatus_SUCCESS);
+    } else {
+        Loge(String("Failed to start WPS push button configuration"));
+        res->SetStatus(Elastos::Droid::Wifi::WpsResultStatus_FAILURE);
+    }
+
+    *result = res;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -935,13 +1446,13 @@ ECode WifiConfigStore::GetStaticIpConfiguration(
     /* [out] */ IStaticIpConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     return config.getStaticIpConfiguration();
-    // }
-    // return null;
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        return config->GetStaticIpConfiguration(result);
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -949,13 +1460,12 @@ ECode WifiConfigStore::SetStaticIpConfiguration(
     /* [in] */ Int32 netId,
     /* [in] */ IStaticIpConfiguration* staticIpConfiguration)
 {
-    VALIDATE_NOT_NULL(staticIpConfiguration);
-    // ==================before translated======================
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     config.setStaticIpConfiguration(staticIpConfiguration);
-    // }
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        return config->SetStaticIpConfiguration(staticIpConfiguration);
+    }
     return NOERROR;
 }
 
@@ -963,13 +1473,13 @@ ECode WifiConfigStore::SetDefaultGwMacAddress(
     /* [in] */ Int32 netId,
     /* [in] */ const String& macAddress)
 {
-    // ==================before translated======================
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     //update defaultGwMacAddress
-    //     config.defaultGwMacAddress = macAddress;
-    // }
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        //update defaultGwMacAddress
+        return config->SetDefaultGwMacAddress(macAddress);
+    }
     return NOERROR;
 }
 
@@ -978,13 +1488,13 @@ ECode WifiConfigStore::GetProxyProperties(
     /* [out] */ IProxyInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     return config.getHttpProxy();
-    // }
-    // return null;
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        return config->GetHttpProxy(result);
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -993,150 +1503,190 @@ ECode WifiConfigStore::IsUsingStaticIp(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null && config.getIpAssignment() == IpAssignment.STATIC) {
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        IpConfigurationIpAssignment ipcia;
+        config->GetIpAssignment(&ipcia);
+        if (ipcia == Elastos::Droid::Net::STATIC_IpAssignment) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode WifiConfigStore::LoadConfiguredNetworks()
 {
-    // ==================before translated======================
-    // String listStr = mWifiNative.listNetworks();
-    // mLastPriority = 0;
-    //
-    // mConfiguredNetworks.clear();
-    // mNetworkIds.clear();
-    //
-    // if (listStr == null)
-    //     return;
-    //
-    // String[] lines = listStr.split("\n");
-    //
-    // if (showNetworks) {
-    //     localLog("WifiConfigStore: loadConfiguredNetworks:  ");
-    //     for (String net : lines) {
-    //         localLog(net);
-    //     }
-    // }
-    //
-    // // Skip the first line, which is a header
-    // for (int i = 1; i < lines.length; i++) {
-    //     String[] result = lines[i].split("\t");
-    //     // network-id | ssid | bssid | flags
-    //     WifiConfiguration config = new WifiConfiguration();
-    //     try {
-    //         config.networkId = Integer.parseInt(result[0]);
-    //     } catch(NumberFormatException e) {
-    //         loge("Failed to read network-id '" + result[0] + "'");
-    //         continue;
-    //     }
-    //     if (result.length > 3) {
-    //         if (result[3].indexOf("[CURRENT]") != -1)
-    //             config.status = WifiConfiguration.Status.CURRENT;
-    //         else if (result[3].indexOf("[DISABLED]") != -1)
-    //             config.status = WifiConfiguration.Status.DISABLED;
-    //         else
-    //             config.status = WifiConfiguration.Status.ENABLED;
-    //     } else {
-    //         config.status = WifiConfiguration.Status.ENABLED;
-    //     }
-    //
-    //     readNetworkVariables(config);
-    //
-    //     String psk = readNetworkVariableFromSupplicantFile(config.SSID, "psk");
-    //     if (psk!= null && psk.equals(DELETED_CONFIG_PSK)) {
-    //         // This is a config we previously deleted, ignore it
-    //         if (showNetworks) {
-    //             localLog("found deleted network " + config.SSID + " ", config.networkId);
-    //         }
-    //         config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_DELETED);
-    //         config.priority = 0;
-    //     }
-    //
-    //     if (config.priority > mLastPriority) {
-    //         mLastPriority = config.priority;
-    //     }
-    //
-    //     config.setIpAssignment(IpAssignment.DHCP);
-    //     config.setProxySettings(ProxySettings.NONE);
-    //
-    //     if (mNetworkIds.containsKey(configKey(config))) {
-    //         // That SSID is already known, just ignore this duplicate entry
-    //         if (showNetworks)
-    //             localLog("Duplicate network found ", config.networkId);
-    //
-    //         Integer n = mNetworkIds.get(configKey(config));
-    //         WifiConfiguration tempCfg = mConfiguredNetworks.get(n);
-    //
-    //         if ( (tempCfg != null &&
-    //               tempCfg.status != WifiConfiguration.Status.CURRENT) &&
-    //               config.status == WifiConfiguration.Status.CURRENT) {
-    //
-    //             // Clear the existing entry, we don't need it
-    //             mConfiguredNetworks.remove(tempCfg.networkId);
-    //             mNetworkIds.remove(configKey(tempCfg));
-    //
-    //             // Add current entry to the list
-    //             mConfiguredNetworks.put(config.networkId, config);
-    //             mNetworkIds.put(configKey(config), config.networkId);
-    //
-    //             // Enable AutoJoin status and indicate the network as
-    //             // duplicate The duplicateNetwork flag will be used
-    //             // to decide whether to restore network configurations
-    //             // in readNetworkHistory() along with IP and proxy settings
-    //             config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //             config.duplicateNetwork = true;
-    //         }
-    //     } else if (config.isValid()) {
-    //         mConfiguredNetworks.put(config.networkId, config);
-    //         mNetworkIds.put(configKey(config), config.networkId);
-    //         if (showNetworks) localLog("loaded configured network", config.networkId);
-    //     } else {
-    //         if (showNetworks) log("Ignoring loaded configured for network " + config.networkId
-    //             + " because config are not valid");
-    //     }
-    // }
-    //
-    // readIpAndProxyConfigurations();
-    // readNetworkHistory();
-    // readAutoJoinConfig();
-    //
-    // sendConfiguredNetworksChangedBroadcast();
-    //
-    // if (showNetworks) localLog("loadConfiguredNetworks loaded " + mNetworkIds.size() + " networks");
-    //
-    // if (mNetworkIds.size() == 0) {
-    //     // no networks? Lets log if the wpa_supplicant.conf file contents
-    //     BufferedReader reader = null;
-    //     try {
-    //         reader = new BufferedReader(new FileReader(SUPPLICANT_CONFIG_FILE));
-    //         if (DBG) {
-    //             localLog("--- Begin wpa_supplicant.conf Contents ---", true);
-    //             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-    //                 localLog(line, true);
-    //             }
-    //             localLog("--- End wpa_supplicant.conf Contents ---", true);
-    //         }
-    //     } catch (FileNotFoundException e) {
-    //         localLog("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e, true);
-    //     } catch (IOException e) {
-    //         localLog("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e, true);
-    //     } finally {
-    //         try {
-    //             if (reader != null) {
-    //                 reader.close();
-    //             }
-    //         } catch (IOException e) {
-    //             // Just ignore the fact that we couldn't close
-    //         }
-    //     }
-    // }
-    assert(0);
+    String listStr = mWifiNative->ListNetworks();
+    mLastPriority = 0;
+
+    mConfiguredNetworks->Clear();
+    mNetworkIds->Clear();
+
+    if (listStr.IsNull())
+        return NOERROR;
+
+    AutoPtr<ArrayOf<String> > lines;
+    StringUtils::Split(listStr, String("\n"), (ArrayOf<String>**)&lines);
+
+    if (showNetworks) {
+        LocalLog(String("WifiConfigStore: loadConfiguredNetworks:  "));
+        for (Int32 i = 0; i < lines->GetLength(); ++i) {
+            String net = (*lines)[i];
+            LocalLog(net);
+        }
+    }
+
+    // Skip the first line, which is a header
+    for (Int32 i = 1; i < lines->GetLength(); i++) {
+        AutoPtr<ArrayOf<String> > result;
+        StringUtils::Split((*lines)[i], String("\t"), (ArrayOf<String>**)&result);
+        // network-id | ssid | bssid | flags
+        AutoPtr<IWifiConfiguration> config;
+        CWifiConfiguration::New((IWifiConfiguration**)&config);
+        //try {
+        Int32 networkId;
+        ECode ec = StringToIntegral::Parse((*result)[0], 10, &networkId);
+        if (FAILED(ec)) {
+            Loge(String("Failed to read network-id '") + (*result)[0] + String("'"));
+            continue;
+        }
+        config->SetNetworkId(networkId);
+        //} catch(NumberFormatException e) {
+        //    loge("Failed to read network-id '" + result[0] + "'");
+        //    continue;
+        //}
+        if (result->GetLength() > 3) {
+            if ((*result)[3].IndexOf("[CURRENT]") != -1)
+                config->SetStatus(IWifiConfigurationStatus::CURRENT);
+            else if ((*result)[3].IndexOf("[DISABLED]") != -1)
+                config->SetStatus(IWifiConfigurationStatus::DISABLED);
+            else
+                config->SetStatus(IWifiConfigurationStatus::ENABLED);
+        } else {
+            config->SetStatus(IWifiConfigurationStatus::ENABLED);
+        }
+
+        ReadNetworkVariables(config);
+
+        String ssid;
+        config->GetSSID(&ssid);
+        String psk = ReadNetworkVariableFromSupplicantFile(ssid, String("psk"));
+        if (!psk.IsNull() && psk.Equals(DELETED_CONFIG_PSK)) {
+            // This is a config we previously deleted, ignore it
+            if (showNetworks) {
+                LocalLog(String("found deleted network ") + ssid);// + " ", config.networkId);
+            }
+            config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_DELETED);
+            config->SetPriority(0);
+        }
+
+        Int32 priority;
+        config->GetPriority(&priority);
+        if (priority > mLastPriority) {
+            mLastPriority = priority;
+        }
+
+        config->SetIpAssignment(Elastos::Droid::Net::DHCP_IpAssignment);
+        config->SetProxySettings(Elastos::Droid::Net::NONE_ProxySettings);
+
+        Boolean containsKey;
+        Int32 key = ConfigKey(config);
+        Boolean isValid;
+        if (mNetworkIds->ContainsKey(CoreUtils::Convert(key), &containsKey), containsKey) {
+            // That SSID is already known, just ignore this duplicate entry
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            if (showNetworks)
+                LocalLog(String("Duplicate network found "), networkId);
+
+            AutoPtr<IInterface> valueObj;
+            mNetworkIds->Get(CoreUtils::Convert(key), (IInterface**)&valueObj);
+            IInteger32* n = IInteger32::Probe(valueObj);
+            AutoPtr<IInterface> obj;
+            mConfiguredNetworks->Get(n, (IInterface**)&obj);
+            IWifiConfiguration* tempCfg = IWifiConfiguration::Probe(obj);
+
+            Int32 tempStatus, status;
+            if ((tempCfg != NULL &&
+                  (tempCfg->GetStatus(&tempStatus), tempStatus) != IWifiConfigurationStatus::CURRENT) &&
+                  (config->GetStatus(&status), status) == IWifiConfigurationStatus::CURRENT) {
+
+                // Clear the existing entry, we don't need it
+                Int32 tempNetworkId;
+                tempCfg->GetNetworkId(&tempNetworkId);
+                mConfiguredNetworks->Remove(CoreUtils::Convert(tempNetworkId));
+                Int32 tempkey = ConfigKey(tempCfg);
+                mNetworkIds->Remove(CoreUtils::Convert(tempkey));
+
+                // Add current entry to the list
+                mConfiguredNetworks->Put(CoreUtils::Convert(networkId), config);
+                mNetworkIds->Put(CoreUtils::Convert(ConfigKey(config)), CoreUtils::Convert(networkId));
+
+                // Enable AutoJoin status and indicate the network as
+                // duplicate The duplicateNetwork flag will be used
+                // to decide whether to restore network configurations
+                // in readNetworkHistory() along with IP and proxy settings
+                config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+                //TODO config->SetDuplicateNetwork(TRUE);
+            }
+        } else if (config->IsValid(&isValid), isValid) {
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            mConfiguredNetworks->Put(CoreUtils::Convert(networkId), config);
+            mNetworkIds->Put(CoreUtils::Convert(ConfigKey(config)), CoreUtils::Convert(networkId));
+            if (showNetworks) LocalLog(String("loaded configured network"), networkId);
+        } else {
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            if (showNetworks) Log(String("Ignoring loaded configured for network ") + StringUtils::ToString(networkId)
+                + String(" because config are not valid"));
+        }
+    }
+
+    ReadIpAndProxyConfigurations();
+    ReadNetworkHistory();
+    ReadAutoJoinConfig();
+
+    SendConfiguredNetworksChangedBroadcast();
+
+    Int32 networksIdsSize;
+    mNetworkIds->GetSize(&networksIdsSize);
+    if (showNetworks) LocalLog(String("loadConfiguredNetworks loaded ") +
+            StringUtils::ToString(networksIdsSize) + String(" networks"));
+
+    if (networksIdsSize == 0) {
+        // no networks? Lets log if the wpa_supplicant.conf file contents
+        AutoPtr<IBufferedReader> reader;
+        //try {
+        AutoPtr<IFileReader> fileReader;
+        CFileReader::New(SUPPLICANT_CONFIG_FILE, (IFileReader**)&fileReader);
+        CBufferedReader::New(IReader::Probe(fileReader), (IBufferedReader**)&reader);
+            if (DBG) {
+                LocalLog(String("--- Begin wpa_supplicant.conf Contents ---"), TRUE);
+                String line;
+                for (reader->ReadLine(&line); !line.IsNull(); reader->ReadLine(&line)) {
+                    LocalLog(line, TRUE);
+                }
+                LocalLog(String("--- End wpa_supplicant.conf Contents ---"), TRUE);
+            }
+        //} catch (FileNotFoundException e) {
+        //    localLog("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e, true);
+        //} catch (IOException e) {
+        //    localLog("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e, true);
+        //} finally {
+        //    try {
+                if (reader != NULL) {
+                    ICloseable::Probe(reader)->Close();
+                }
+        //    } catch (IOException e) {
+                // Just ignore the fact that we couldn't close
+        //    }
+        //}
+    }
     return NOERROR;
 }
 
@@ -1145,34 +1695,40 @@ ECode WifiConfigStore::GetNetworkIdFromSsid(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int networkId = 0;
-    // int ret = -1;
-    // String listStr = mWifiNative.listNetworks();
-    // if (VDBG) loge("getNetworkIdFromSsid " + ssid);
-    // if (listStr == null)
-    //     return -1;
-    // String[] lines = listStr.split("\n");
-    //
-    // /* Skip the first line, which is a header */
-    // for (int i = 1; i < lines.length; i++) {
-    //     String[] result = lines[i].split("\t");
-    //     if (VDBG) loge("getNetworkIdFromSsid " + result[1]);
-    //     /* network-id | ssid | bssid | flags */
-    //
-    //     if (result[1].equals(ssid)) {
-    //         try {
-    //             networkId = Integer.parseInt(result[0]);
-    //             if (VDBG) loge("getNetworkIdFromSsid " + networkId);
-    //             return networkId;
-    //         } catch(NumberFormatException e) {
-    //             loge("Failed to read network-id '" + result[0] + "'");
-    //             continue;
-    //         }
-    //     }
-    // }
-    // return -1;
-    assert(0);
+    Int32 networkId = 0;
+    String listStr = mWifiNative->ListNetworks();
+    if (VDBG) Loge(String("getNetworkIdFromSsid ") + ssid);
+    if (listStr.IsNull()) {
+        *result = -1;
+        return NOERROR;
+    }
+    AutoPtr<ArrayOf<String> > lines;
+    StringUtils::Split(listStr, String("\n"), (ArrayOf<String>**)&lines);
+
+    /* Skip the first line, which is a header */
+    for (Int32 i = 1; i < lines->GetLength(); i++) {
+        AutoPtr<ArrayOf<String> > line;
+        StringUtils::Split((*lines)[i], String("\t"), (ArrayOf<String>**)&line);
+        if (VDBG) Loge(String("getNetworkIdFromSsid ") + (*line)[1]);
+        /* network-id | ssid | bssid | flags */
+
+        if ((*line)[1].Equals(ssid)) {
+            //try {
+            ECode ec = StringToIntegral::Parse((*line)[0], 10, &networkId);
+            if (FAILED(ec)) {
+                Loge(String("Failed to read network-id '") + (*line)[0] + String("'"));
+                continue;
+            }
+            if (VDBG) Loge(String("getNetworkIdFromSsid ") + StringUtils::ToString(networkId));
+            *result = networkId;
+            return NOERROR;
+            //} catch(NumberFormatException e) {
+            //    loge("Failed to read network-id '" + line[0] + "'");
+            //    continue;
+            //}
+        }
+    }
+    *result = -1;
     return NOERROR;
 }
 
@@ -1180,232 +1736,106 @@ ECode WifiConfigStore::NeedsUnlockedKeyStore(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //
-    // // Any network using certificates to authenticate access requires
-    // // unlocked key store; unless the certificates can be stored with
-    // // hardware encryption
-    //
-    // for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //
-    //     if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP)
-    //             && config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
-    //
-    //         if (needsSoftwareBackedKeyStore(config.enterpriseConfig)) {
-    //             return true;
-    //         }
-    //     }
-    // }
-    //
-    // return false;
-    assert(0);
+
+    // Any network using certificates to authenticate access requires
+    // unlocked key store; unless the certificates can be stored with
+    // hardware encryption
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+        AutoPtr<IBitSet> allowedKeyManagement;
+        config->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
+        Boolean wpa_eap, ieee80211x;
+        if ((allowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_EAP, &wpa_eap), wpa_eap)
+                && (allowedKeyManagement->Get(IWifiConfigurationKeyMgmt::IEEE8021X, &ieee80211x), ieee80211x)) {
+
+            AutoPtr<IWifiEnterpriseConfig> econfig;
+            config->GetEnterpriseConfig((IWifiEnterpriseConfig**)&econfig);
+            if (NeedsSoftwareBackedKeyStore(econfig)) {
+                *result = TRUE;
+                return NOERROR;
+            }
+        }
+    }
+
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode WifiConfigStore::WriteKnownNetworkHistory()
 {
-    // ==================before translated======================
-    // boolean needUpdate = false;
-    //
-    // /* Make a copy */
-    // final List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
-    // for (WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     networks.add(new WifiConfiguration(config));
-    //     if (config.dirty == true) {
-    //         config.dirty = false;
-    //         needUpdate = true;
-    //     }
-    // }
-    // if (VDBG) {
-    //     loge(" writeKnownNetworkHistory() num networks:" +
-    //             mConfiguredNetworks.size() + " needWrite=" + needUpdate);
-    // }
-    // if (needUpdate == false) {
-    //     return;
-    // }
-    // mWriter.write(networkHistoryConfigFile, new DelayedDiskWrite.Writer() {
-    //     public void onWriteCalled(DataOutputStream out) throws IOException {
-    //         for (WifiConfiguration config : networks) {
-    //             //loge("onWriteCalled write SSID: " + config.SSID);
-    //            /* if (config.getLinkProperties() != null)
-    //                 loge(" lp " + config.getLinkProperties().toString());
-    //             else
-    //                 loge("attempt config w/o lp");
-    //             */
-    //
-    //             if (VDBG) {
-    //                 int num = 0;
-    //                 int numlink = 0;
-    //                 if (config.connectChoices != null) {
-    //                     num = config.connectChoices.size();
-    //                 }
-    //                 if (config.linkedConfigurations != null) {
-    //                     numlink = config.linkedConfigurations.size();
-    //                 }
-    //                 loge("saving network history: " + config.configKey()  + " gw: " +
-    //                         config.defaultGwMacAddress + " autojoin-status: " +
-    //                         config.autoJoinStatus + " ephemeral=" + config.ephemeral
-    //                         + " choices:" + Integer.toString(num)
-    //                         + " link:" + Integer.toString(numlink)
-    //                         + " status:" + Integer.toString(config.status)
-    //                         + " nid:" + Integer.toString(config.networkId));
-    //             }
-    //
-    //             if (config.isValid() == false)
-    //                 continue;
-    //
-    //             if (config.SSID == null) {
-    //                 if (VDBG) {
-    //                     loge("writeKnownNetworkHistory trying to write config with null SSID");
-    //                 }
-    //                 continue;
-    //             }
-    //             if (VDBG) {
-    //                 loge("writeKnownNetworkHistory write config " + config.configKey());
-    //             }
-    //             out.writeUTF(CONFIG_KEY + config.configKey() + SEPARATOR_KEY);
-    //
-    //             out.writeUTF(SSID_KEY + config.SSID + SEPARATOR_KEY);
-    //             out.writeUTF(FQDN_KEY + config.FQDN + SEPARATOR_KEY);
-    //
-    //             out.writeUTF(PRIORITY_KEY + Integer.toString(config.priority) + SEPARATOR_KEY);
-    //             out.writeUTF(STATUS_KEY + Integer.toString(config.autoJoinStatus)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(SUPPLICANT_STATUS_KEY + Integer.toString(config.status)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(SUPPLICANT_DISABLE_REASON_KEY
-    //                     + Integer.toString(config.disableReason)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(NETWORK_ID_KEY + Integer.toString(config.networkId)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(SELF_ADDED_KEY + Boolean.toString(config.selfAdded)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(DID_SELF_ADD_KEY + Boolean.toString(config.didSelfAdd)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(NO_INTERNET_ACCESS_KEY
-    //                     + Boolean.toString(config.noInternetAccess)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(EPHEMERAL_KEY
-    //                     + Boolean.toString(config.ephemeral)
-    //                     + SEPARATOR_KEY);
-    //             if (config.peerWifiConfiguration != null) {
-    //                 out.writeUTF(PEER_CONFIGURATION_KEY + config.peerWifiConfiguration
-    //                         + SEPARATOR_KEY);
-    //             }
-    //             out.writeUTF(NUM_CONNECTION_FAILURES_KEY
-    //                     + Integer.toString(config.numConnectionFailures)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(NUM_AUTH_FAILURES_KEY
-    //                     + Integer.toString(config.numAuthFailures)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(NUM_IP_CONFIG_FAILURES_KEY
-    //                     + Integer.toString(config.numIpConfigFailures)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(SCORER_OVERRIDE_KEY + Integer.toString(config.numScorerOverride)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(SCORER_OVERRIDE_AND_SWITCH_KEY
-    //                     + Integer.toString(config.numScorerOverrideAndSwitchedNetwork)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(NUM_ASSOCIATION_KEY
-    //                     + Integer.toString(config.numAssociation)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(JOIN_ATTEMPT_BOOST_KEY
-    //                     + Integer.toString(config.autoJoinUseAggressiveJoinAttemptThreshold)
-    //                     + SEPARATOR_KEY);
-    //             //out.writeUTF(BLACKLIST_MILLI_KEY + Long.toString(config.blackListTimestamp)
-    //             //        + SEPARATOR_KEY);
-    //             out.writeUTF(CREATOR_UID_KEY + Integer.toString(config.creatorUid)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(CONNECT_UID_KEY + Integer.toString(config.lastConnectUid)
-    //                     + SEPARATOR_KEY);
-    //             out.writeUTF(UPDATE_UID_KEY + Integer.toString(config.lastUpdateUid)
-    //                     + SEPARATOR_KEY);
-    //             String allowedKeyManagementString =
-    //                     makeString(config.allowedKeyManagement,
-    //                             WifiConfiguration.KeyMgmt.strings);
-    //             out.writeUTF(AUTH_KEY + allowedKeyManagementString + SEPARATOR_KEY);
-    //
-    //             if (config.connectChoices != null) {
-    //                 for (String key : config.connectChoices.keySet()) {
-    //                     Integer choice = config.connectChoices.get(key);
-    //                     out.writeUTF(CHOICE_KEY + key + "="
-    //                             + choice.toString() + SEPARATOR_KEY);
-    //                 }
-    //             }
-    //             if (config.linkedConfigurations != null) {
-    //                 loge("writeKnownNetworkHistory write linked "
-    //                         + config.linkedConfigurations.size());
-    //
-    //                 for (String key : config.linkedConfigurations.keySet()) {
-    //                     out.writeUTF(LINK_KEY + key + SEPARATOR_KEY);
-    //                 }
-    //             }
-    //
-    //             String macAddress = config.defaultGwMacAddress;
-    //             if (macAddress != null) {
-    //                 out.writeUTF(DEFAULT_GW_KEY + macAddress + SEPARATOR_KEY);
-    //             }
-    //
-    //             if (config.scanResultCache != null) {
-    //                 for (ScanResult result : config.scanResultCache.values()) {
-    //                     out.writeUTF(BSSID_KEY + result.BSSID + SEPARATOR_KEY);
-    //
-    //                     out.writeUTF(FREQ_KEY + Integer.toString(result.frequency)
-    //                             + SEPARATOR_KEY);
-    //
-    //                     out.writeUTF(RSSI_KEY + Integer.toString(result.level)
-    //                             + SEPARATOR_KEY);
-    //
-    //                     out.writeUTF(BSSID_STATUS_KEY
-    //                             + Integer.toString(result.autoJoinStatus)
-    //                             + SEPARATOR_KEY);
-    //
-    //                     //if (result.seen != 0) {
-    //                     //    out.writeUTF(MILLI_KEY + Long.toString(result.seen)
-    //                     //            + SEPARATOR_KEY);
-    //                     //}
-    //                     out.writeUTF(BSSID_KEY_END + SEPARATOR_KEY);
-    //                 }
-    //             }
-    //             if (config.lastFailure != null) {
-    //                 out.writeUTF(FAILURE_KEY + config.lastFailure + SEPARATOR_KEY);
-    //             }
-    //             out.writeUTF(SEPARATOR_KEY);
-    //             // Add extra blank lines for clarity
-    //             out.writeUTF(SEPARATOR_KEY);
-    //             out.writeUTF(SEPARATOR_KEY);
-    //         }
-    //     }
-    //
-    // });
-    assert(0);
+    Boolean needUpdate = FALSE;
+
+    /* Make a copy */
+    //final List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
+    AutoPtr<IList> networks;
+    CArrayList::New((IList**)&networks);
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+        AutoPtr<IWifiConfiguration> newConfig;
+        CWifiConfiguration::New(config, (IWifiConfiguration**)&newConfig);
+        networks->Add(newConfig);
+        Boolean dirty;
+        config->GetDirty(&dirty);
+        if (dirty == TRUE) {
+            config->SetDirty(FALSE);
+            needUpdate = TRUE;
+        }
+    }
+    if (VDBG) {
+        Loge(String(" writeKnownNetworkHistory() num networks:"));
+                //mConfiguredNetworks.size() + " needWrite=" + needUpdate);
+    }
+    if (needUpdate == FALSE) {
+        return NOERROR;
+    }
+
+    AutoPtr<IDelayedDiskWriteWriter> ddww = new InnerDelayedDiskWriteWriter(this, networks);
+    mWriter->Write(networkHistoryConfigFile, ddww);
     return NOERROR;
 }
 
 ECode WifiConfigStore::SetLastSelectedConfiguration(
     /* [in] */ Int32 netId)
 {
-    // ==================before translated======================
-    // if (DBG) {
-    //     loge("setLastSelectedConfiguration " + Integer.toString(netId));
-    // }
-    // if (netId == WifiConfiguration.INVALID_NETWORK_ID) {
-    //     lastSelectedConfiguration = null;
-    // } else {
-    //     WifiConfiguration selected = getWifiConfiguration(netId);
-    //     if (selected == null) {
-    //         lastSelectedConfiguration = null;
-    //     } else {
-    //         lastSelectedConfiguration = selected.configKey();
-    //         selected.numConnectionFailures = 0;
-    //         selected.numIpConfigFailures = 0;
-    //         selected.numAuthFailures = 0;
-    //         if (VDBG) {
-    //             loge("setLastSelectedConfiguration now: " + lastSelectedConfiguration);
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (DBG) {
+        Loge(String("setLastSelectedConfiguration ") + StringUtils::ToString(netId));
+    }
+    if (netId == IWifiConfiguration::INVALID_NETWORK_ID) {
+        lastSelectedConfiguration = String(NULL);
+    } else {
+        AutoPtr<IWifiConfiguration> selected;
+        GetWifiConfiguration(netId, (IWifiConfiguration**)&selected);
+        if (selected == NULL) {
+            lastSelectedConfiguration = String(NULL);
+        } else {
+            selected->ConfigKey(&lastSelectedConfiguration);
+            selected->SetNumConnectionFailures(0);
+            selected->SetNumIpConfigFailures(0);
+            selected->SetNumAuthFailures(0);
+            if (VDBG) {
+                Loge(String("setLastSelectedConfiguration now: ") + lastSelectedConfiguration);
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -1413,9 +1843,7 @@ ECode WifiConfigStore::GetLastSelectedConfiguration(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return lastSelectedConfiguration;
-    assert(0);
+    *result = lastSelectedConfiguration;
     return NOERROR;
 }
 
@@ -1423,138 +1851,216 @@ ECode WifiConfigStore::IsLastSelectedConfiguration(
     /* [in] */ IWifiConfiguration* config,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (lastSelectedConfiguration != null
-    //         && config != null
-    //         && lastSelectedConfiguration.equals(config.configKey()));
-    assert(0);
+    String configKey;
+    *result = (!lastSelectedConfiguration.IsNull()
+            && config != NULL
+            && lastSelectedConfiguration.Equals((config->ConfigKey(&configKey), configKey)));
     return NOERROR;
 }
 
 ECode WifiConfigStore::LinkConfiguration(
     /* [in] */ IWifiConfiguration* config)
 {
-    VALIDATE_NOT_NULL(config);
-    // ==================before translated======================
-    //
-    // if (config.scanResultCache != null && config.scanResultCache.size() > 6) {
-    //     // Ignore configurations with large number of BSSIDs
-    //     return;
-    // }
-    // if (!config.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-    //     // Only link WPA_PSK config
-    //     return;
-    // }
-    // for (WifiConfiguration link : mConfiguredNetworks.values()) {
-    //     boolean doLink = false;
-    //
-    //     if (link.configKey().equals(config.configKey())) {
-    //         continue;
-    //     }
-    //
-    //     if (link.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DELETED) {
-    //         continue;
-    //     }
-    //
-    //     // Autojoin will be allowed to dynamically jump from a linked configuration
-    //     // to another, hence only link configurations that have equivalent level of security
-    //     if (!link.allowedKeyManagement.equals(config.allowedKeyManagement)) {
-    //         continue;
-    //     }
-    //
-    //     if (link.scanResultCache != null && link.scanResultCache.size() > 6) {
-    //         // Ignore configurations with large number of BSSIDs
-    //         continue;
-    //     }
-    //
-    //     if (config.defaultGwMacAddress != null && link.defaultGwMacAddress != null) {
-    //         // If both default GW are known, link only if they are equal
-    //         if (config.defaultGwMacAddress.equals(link.defaultGwMacAddress)) {
-    //             if (VDBG) {
-    //                 loge("linkConfiguration link due to same gw " + link.SSID +
-    //                         " and " + config.SSID + " GW " + config.defaultGwMacAddress);
-    //             }
-    //             doLink = true;
-    //         }
-    //     } else {
-    //         // We do not know BOTH default gateways hence we will try to link
-    //         // hoping that WifiConfigurations are indeed behind the same gateway.
-    //         // once both WifiConfiguration have been tried and thus once both efault gateways
-    //         // are known we will revisit the choice of linking them
-    //         if ((config.scanResultCache != null) && (config.scanResultCache.size() <= 6)
-    //                 && (link.scanResultCache != null) && (link.scanResultCache.size() <= 6)) {
-    //             for (String abssid : config.scanResultCache.keySet()) {
-    //                 for (String bbssid : link.scanResultCache.keySet()) {
-    //                     if (VVDBG) {
-    //                         loge("linkConfiguration try to link due to DBDC BSSID match "
-    //                                 + link.SSID +
-    //                                 " and " + config.SSID + " bssida " + abssid
-    //                                 + " bssidb " + bbssid);
-    //                     }
-    //                     if (abssid.regionMatches(true, 0, bbssid, 0, 16)) {
-    //                         // If first 16 ascii characters of BSSID matches,
-    //                         // we assume this is a DBDC
-    //                         doLink = true;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     if (doLink == true && onlyLinkSameCredentialConfigurations) {
-    //         String apsk = readNetworkVariableFromSupplicantFile(link.SSID, "psk");
-    //         String bpsk = readNetworkVariableFromSupplicantFile(config.SSID, "psk");
-    //         if (apsk == null || bpsk == null
-    //                 || TextUtils.isEmpty(apsk) || TextUtils.isEmpty(apsk)
-    //                 || apsk.equals("*") || apsk.equals(DELETED_CONFIG_PSK)
-    //                 || !apsk.equals(bpsk)) {
-    //             doLink = false;
-    //         }
-    //     }
-    //
-    //     if (doLink) {
-    //         if (VDBG) {
-    //            loge("linkConfiguration: will link " + link.configKey()
-    //                    + " and " + config.configKey());
-    //         }
-    //         if (link.linkedConfigurations == null) {
-    //             link.linkedConfigurations = new HashMap<String, Integer>();
-    //         }
-    //         if (config.linkedConfigurations == null) {
-    //             config.linkedConfigurations = new HashMap<String, Integer>();
-    //         }
-    //         if (link.linkedConfigurations.get(config.configKey()) == null) {
-    //             link.linkedConfigurations.put(config.configKey(), Integer.valueOf(1));
-    //             link.dirty = true;
-    //         }
-    //         if (config.linkedConfigurations.get(link.configKey()) == null) {
-    //             config.linkedConfigurations.put(link.configKey(), Integer.valueOf(1));
-    //             config.dirty = true;
-    //         }
-    //     } else {
-    //         if (link.linkedConfigurations != null
-    //                 && (link.linkedConfigurations.get(config.configKey()) != null)) {
-    //             if (VDBG) {
-    //                 loge("linkConfiguration: un-link " + config.configKey()
-    //                         + " from " + link.configKey());
-    //             }
-    //             link.dirty = true;
-    //             link.linkedConfigurations.remove(config.configKey());
-    //         }
-    //         if (config.linkedConfigurations != null
-    //                 && (config.linkedConfigurations.get(link.configKey()) != null)) {
-    //             if (VDBG) {
-    //                 loge("linkConfiguration: un-link " + link.configKey()
-    //                         + " from " + config.configKey());
-    //             }
-    //             config.dirty = true;
-    //             config.linkedConfigurations.remove(link.configKey());
-    //         }
-    //     }
-    // }
-    assert(0);
+    AutoPtr<IHashMap> scanResultCache;
+    config->GetScanResultCache((IHashMap**)&scanResultCache);
+    Int32 size;
+    if (scanResultCache != NULL && (scanResultCache->GetSize(&size), size) > 6) {
+        // Ignore configurations with large number of BSSIDs
+        return NOERROR;
+    }
+    AutoPtr<IBitSet> allowedKeyManagement;
+    config->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
+    Boolean wpa_psk;
+    if (!(allowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_PSK, &wpa_psk), wpa_psk)) {
+        // Only link WPA_PSK config
+        return NOERROR;
+    }
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* link = IWifiConfiguration::Probe(obj);
+
+        Boolean doLink = FALSE;
+
+        String linkConfigKey, configConfigKey;
+        link->ConfigKey(&linkConfigKey);
+        config->ConfigKey(&configConfigKey);
+        if (linkConfigKey.Equals(configConfigKey)) {
+            continue;
+        }
+
+        Int32 autoJoinStatus;
+        link->GetAutoJoinStatus(&autoJoinStatus);
+        if (autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
+            continue;
+        }
+
+        // Autojoin will be allowed to dynamically jump from a linked configuration
+        // to another, hence only link configurations that have equivalent level of security
+        AutoPtr<IBitSet> linkAllowedKeyManagement;
+        link->GetAllowedKeyManagement((IBitSet**)&linkAllowedKeyManagement);
+        Boolean eq;
+        if (!(linkAllowedKeyManagement->Equals(allowedKeyManagement, &eq), eq)) {
+            continue;
+        }
+
+        AutoPtr<IHashMap> linkScanResultCache;
+        link->GetScanResultCache((IHashMap**)&linkScanResultCache);
+        Int32 linkSize;
+        if (linkScanResultCache != NULL && (linkScanResultCache->GetSize(&linkSize), linkSize) > 6) {
+            // Ignore configurations with large number of BSSIDs
+            continue;
+        }
+
+        String configDefaultGwMacAddress, linkDefaultGwMacAddress;
+        config->GetDefaultGwMacAddress(&configDefaultGwMacAddress);
+        link->GetDefaultGwMacAddress(&linkDefaultGwMacAddress);
+        if (!configDefaultGwMacAddress.IsNull() && !linkDefaultGwMacAddress.IsNull()) {
+            // If both default GW are known, link only if they are equal
+            if (configDefaultGwMacAddress.Equals(linkDefaultGwMacAddress)) {
+                if (VDBG) {
+                    String linkSSID;
+                    link->GetSSID(&linkSSID);
+                    String configSSID;
+                    config->GetSSID(&configSSID);
+                    Loge(String("linkConfiguration link due to same gw ") + linkSSID +
+                            String(" and ") + configSSID + String(" GW ") + configDefaultGwMacAddress);
+                }
+                doLink = TRUE;
+            }
+        } else {
+            // We do not know BOTH default gateways hence we will try to link
+            // hoping that WifiConfigurations are indeed behind the same gateway.
+            // once both WifiConfiguration have been tried and thus once both efault gateways
+            // are known we will revisit the choice of linking them
+            if ((scanResultCache != NULL) && ((scanResultCache->GetSize(&size), size) <= 6)
+                    && (linkScanResultCache != NULL) && ((linkScanResultCache->GetSize(&linkSize), linkSize) <= 6)) {
+                AutoPtr<ISet> keySet;
+                scanResultCache->GetKeySet((ISet**)&keySet);
+                AutoPtr<IIterator> keyIter;
+                keySet->GetIterator((IIterator**)&keyIter);
+                Boolean isflag = FALSE;
+                while ((keyIter->HasNext(&isflag), isflag)) {
+                    AutoPtr<IInterface> keyObj;
+                    keyIter->GetNext((IInterface**)&keyObj);
+                    String abssid;
+                    ICharSequence::Probe(keyObj)->ToString(&abssid);
+
+                    AutoPtr<ISet> keySet2;
+                    linkScanResultCache->GetKeySet((ISet**)&keySet2);
+                    AutoPtr<IIterator> keyIter2;
+                    keySet2->GetIterator((IIterator**)&keyIter2);
+                    Boolean isflag2 = FALSE;
+                    while ((keyIter2->HasNext(&isflag2), isflag2)) {
+                        AutoPtr<IInterface> keyObj2;
+                        keyIter2->GetNext((IInterface**)&keyObj2);
+                        String bbssid;
+                        ICharSequence::Probe(keyObj2)->ToString(&bbssid);
+                        if (VVDBG) {
+                            Loge(String("linkConfiguration try to link due to DBDC BSSID match "));
+                                    //+ link.SSID +
+                                    //" and " + config.SSID + " bssida " + abssid
+                                    //+ " bssidb " + bbssid);
+                        }
+                        if (abssid.RegionMatches(/*TODO TRUE,*/ 0, bbssid, 0, 16)) {
+                            // If first 16 ascii characters of BSSID matches,
+                            // we assume this is a DBDC
+                            doLink = TRUE;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (doLink == TRUE && onlyLinkSameCredentialConfigurations) {
+            String linkSSID, configSSID;
+            link->GetSSID(&linkSSID);
+            config->GetSSID(&configSSID);
+            String apsk = ReadNetworkVariableFromSupplicantFile(linkSSID, String("psk"));
+            String bpsk = ReadNetworkVariableFromSupplicantFile(configSSID, String("psk"));
+            if (apsk.IsNull() || bpsk.IsNull()
+                    || TextUtils::IsEmpty(apsk) || TextUtils::IsEmpty(apsk)
+                    || apsk.Equals(String("*")) || apsk.Equals(DELETED_CONFIG_PSK)
+                    || !apsk.Equals(bpsk)) {
+                doLink = FALSE;
+            }
+        }
+
+        if (doLink) {
+            if (VDBG) {
+               Loge(String("linkConfiguration: will link "));
+                       //+ link.configKey()
+                       //+ " and " + config.configKey());
+            }
+            AutoPtr<IHashMap> linkLinkedConfigurations;
+            link->GetLinkedConfigurations((IHashMap**)&linkLinkedConfigurations);
+            if (linkLinkedConfigurations == NULL) {
+                CHashMap::New((IHashMap**)&linkLinkedConfigurations);
+                link->SetLinkedConfigurations(linkLinkedConfigurations);
+            }
+            AutoPtr<IHashMap> configLinkedConfigurations;
+            config->GetLinkedConfigurations((IHashMap**)&configLinkedConfigurations);
+            if (configLinkedConfigurations == NULL) {
+                CHashMap::New((IHashMap**)&configLinkedConfigurations);
+                config->SetLinkedConfigurations(configLinkedConfigurations);
+            }
+            String configConfigKey;
+            config->ConfigKey(&configConfigKey);
+            AutoPtr<IInterface> lcObj;
+            linkLinkedConfigurations->Get(CoreUtils::Convert(configConfigKey), (IInterface**)&lcObj);
+            if (lcObj == NULL) {
+                linkLinkedConfigurations->Put(CoreUtils::Convert(configConfigKey), CoreUtils::Convert(1));
+                link->SetDirty(TRUE);
+            }
+
+            String linkConfigKey;
+            link->ConfigKey(&linkConfigKey);
+            AutoPtr<IInterface> lcObj2;
+            configLinkedConfigurations->Get(CoreUtils::Convert(linkConfigKey), (IInterface**)&lcObj2);
+            if (lcObj2 == NULL) {
+                configLinkedConfigurations->Put(CoreUtils::Convert(linkConfigKey), CoreUtils::Convert(1));
+                config->SetDirty(TRUE);
+            }
+        } else {
+            String configConfigKey;
+            config->ConfigKey(&configConfigKey);
+            String linkConfigKey;
+            link->ConfigKey(&linkConfigKey);
+            AutoPtr<IHashMap> linkLinkedConfigurations;
+            link->GetLinkedConfigurations((IHashMap**)&linkLinkedConfigurations);
+            AutoPtr<IInterface> lcObj1;
+            if (linkLinkedConfigurations != NULL
+                    && ((linkLinkedConfigurations->Get(CoreUtils::Convert(configConfigKey), (IInterface**)&lcObj1), lcObj1) != NULL)) {
+                if (VDBG) {
+                    Loge(String("linkConfiguration: un-link ") + configConfigKey
+                            + String(" from ") + linkConfigKey);
+                }
+                link->SetDirty(TRUE);
+                linkLinkedConfigurations->Remove(CoreUtils::Convert(configConfigKey));
+            }
+
+            AutoPtr<IHashMap> configLinkedConfigurations;
+            config->GetLinkedConfigurations((IHashMap**)&configLinkedConfigurations);
+            AutoPtr<IInterface> lcObj2;
+            if (configLinkedConfigurations != NULL
+                    && ((configLinkedConfigurations->Get(CoreUtils::Convert(linkConfigKey), (IInterface**)&lcObj2), lcObj2) != NULL)) {
+                if (VDBG) {
+                    Loge(String("linkConfiguration: un-link ") + linkConfigKey
+                            + String(" from ") + configConfigKey);
+                }
+                config->SetDirty(TRUE);
+                configLinkedConfigurations->Remove(CoreUtils::Convert(linkConfigKey));
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -1562,105 +2068,166 @@ ECode WifiConfigStore::AssociateWithConfiguration(
     /* [in] */ IScanResult* result,
     /* [out] */ IWifiConfiguration** wifiConfig)
 {
-    VALIDATE_NOT_NULL(result);
     VALIDATE_NOT_NULL(wifiConfig);
-    // ==================before translated======================
-    // String configKey = WifiConfiguration.configKey(result);
-    // if (configKey == null) {
-    //     if (DBG) loge("associateWithConfiguration(): no config key " );
-    //     return null;
-    // }
-    //
-    // // Need to compare with quoted string
-    // String SSID = "\"" + result.SSID + "\"";
-    //
-    // if (VVDBG) {
-    //     loge("associateWithConfiguration(): try " + configKey);
-    // }
-    //
-    // WifiConfiguration config = null;
-    // for (WifiConfiguration link : mConfiguredNetworks.values()) {
-    //     boolean doLink = false;
-    //
-    //     if (link.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DELETED || link.selfAdded) {
-    //         if (VVDBG) loge("associateWithConfiguration(): skip selfadd " + link.configKey() );
-    //         // Make sure we dont associate the scan result to a deleted config
-    //         continue;
-    //     }
-    //
-    //     if (!link.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-    //         if (VVDBG) loge("associateWithConfiguration(): skip non-PSK " + link.configKey() );
-    //         // Make sure we dont associate the scan result to a non-PSK config
-    //         continue;
-    //     }
-    //
-    //     if (configKey.equals(link.configKey())) {
-    //         if (VVDBG) loge("associateWithConfiguration(): found it!!! " + configKey );
-    //         return link; // Found it exactly
-    //     }
-    //
-    //     if ((link.scanResultCache != null) && (link.scanResultCache.size() <= 6)) {
-    //         for (String bssid : link.scanResultCache.keySet()) {
-    //             if (result.BSSID.regionMatches(true, 0, bssid, 0, 16)
-    //                     && SSID.regionMatches(false, 0, link.SSID, 0, 4)) {
-    //                 // If first 16 ascii characters of BSSID matches, and first 3
-    //                 // characters of SSID match, we assume this is a home setup
-    //                 // and thus we will try to transfer the password from the known
-    //                 // BSSID/SSID to the recently found BSSID/SSID
-    //
-    //                 // If (VDBG)
-    //                 //    loge("associateWithConfiguration OK " );
-    //                 doLink = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //
-    //     if (doLink) {
-    //         // Try to make a non verified WifiConfiguration, but only if the original
-    //         // configuration was not self already added
-    //         if (VDBG) {
-    //             loge("associateWithConfiguration: will create " +
-    //                     result.SSID + " and associate it with: " + link.SSID);
-    //         }
-    //         config = wifiConfigurationFromScanResult(result);
-    //         if (config != null) {
-    //             config.selfAdded = true;
-    //             config.didSelfAdd = true;
-    //             config.dirty = true;
-    //             config.peerWifiConfiguration = link.configKey();
-    //             if (config.allowedKeyManagement.equals(link.allowedKeyManagement) &&
-    //                     config.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-    //                 // Transfer the credentials from the configuration we are linking from
-    //                 String psk = readNetworkVariableFromSupplicantFile(link.SSID, "psk");
-    //                 if (psk != null) {
-    //                     config.preSharedKey = psk;
-    //                     if (VDBG) {
-    //                         if (config.preSharedKey != null)
-    //                             loge(" transfer PSK : " + config.preSharedKey);
-    //                     }
-    //
-    //                     // Link configurations
-    //                     if (link.linkedConfigurations == null) {
-    //                         link.linkedConfigurations = new HashMap<String, Integer>();
-    //                     }
-    //                     if (config.linkedConfigurations == null) {
-    //                         config.linkedConfigurations = new HashMap<String, Integer>();
-    //                     }
-    //                     link.linkedConfigurations.put(config.configKey(), Integer.valueOf(1));
-    //                     config.linkedConfigurations.put(link.configKey(), Integer.valueOf(1));
-    //                 } else {
-    //                     config = null;
-    //                 }
-    //             } else {
-    //                 config = null;
-    //             }
-    //             if (config != null) break;
-    //         }
-    //     }
-    // }
-    // return config;
-    assert(0);
+    AutoPtr<IWifiConfigurationHelper> wcHelper;
+    CWifiConfigurationHelper::AcquireSingleton((IWifiConfigurationHelper**)&wcHelper);
+    String configKey;
+    wcHelper->ConfigKey(result, &configKey);
+    if (configKey.IsNull()) {
+        if (DBG) Loge(String("associateWithConfiguration(): no config key " ));
+        *wifiConfig = NULL;
+        return NOERROR;
+    }
+
+    // Need to compare with quoted string
+    String ssid;
+    result->GetSSID(&ssid);
+    String SSID = String("\"") + ssid + String("\"");
+
+    if (VVDBG) {
+        Loge(String("associateWithConfiguration(): try ") + configKey);
+    }
+
+    AutoPtr<IWifiConfiguration> config;
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* link = IWifiConfiguration::Probe(obj);
+
+        Boolean doLink = FALSE;
+
+        Int32 autoJoinStatus;
+        link->GetAutoJoinStatus(&autoJoinStatus);
+        Boolean selfAdded;
+        link->GetSelfAdded(&selfAdded);
+
+        String linkConfigKey;
+        link->ConfigKey(&linkConfigKey);
+        if (autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED || selfAdded) {
+            if (VVDBG) Loge(String("associateWithConfiguration(): skip selfadd ") + linkConfigKey);
+            // Make sure we dont associate the scan result to a deleted config
+            continue;
+        }
+
+        AutoPtr<IBitSet> linkAllowedKeyManagement;
+        link->GetAllowedKeyManagement((IBitSet**)&linkAllowedKeyManagement);
+        Boolean eq;
+        if (!(linkAllowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_PSK, &eq), eq)) {
+            if (VVDBG) Loge(String("associateWithConfiguration(): skip non-PSK ") + linkConfigKey);
+            // Make sure we dont associate the scan result to a non-PSK config
+            continue;
+        }
+
+        if (configKey.Equals(linkConfigKey)) {
+            if (VVDBG) Loge(String("associateWithConfiguration(): found it!!! ") + configKey );
+            *wifiConfig = link; // Found it exactly
+            REFCOUNT_ADD(*wifiConfig);
+            return NOERROR;
+        }
+
+        AutoPtr<IHashMap> scanResultCache;
+        link->GetScanResultCache((IHashMap**)&scanResultCache);
+        Int32 size;
+        if ((scanResultCache != NULL) && ((scanResultCache->GetSize(&size), size) <= 6)) {
+            AutoPtr<ISet> keySet;
+            scanResultCache->GetKeySet((ISet**)&keySet);
+            AutoPtr<IIterator> keyIter;
+            keySet->GetIterator((IIterator**)&keyIter);
+            Boolean isflag = FALSE;
+            while ((keyIter->HasNext(&isflag), isflag)) {
+                AutoPtr<IInterface> keyObj;
+                keyIter->GetNext((IInterface**)&keyObj);
+                String bssid;
+                ICharSequence::Probe(keyObj)->ToString(&bssid);
+
+                String resultBssid;
+                result->GetBSSID(&resultBssid);
+                String linkSSID;
+                link->GetSSID(&linkSSID);
+                if (resultBssid.RegionMatches(/*TODO TRUE, */0, bssid, 0, 16)
+                        && SSID.RegionMatches(/*TODO false, */0, linkSSID, 0, 4)) {
+                    // If first 16 ascii characters of BSSID matches, and first 3
+                    // characters of SSID match, we assume this is a home setup
+                    // and thus we will try to transfer the password from the known
+                    // BSSID/SSID to the recently found BSSID/SSID
+
+                    // If (VDBG)
+                    //    loge("associateWithConfiguration OK " );
+                    doLink = TRUE;
+                    break;
+                }
+            }
+        }
+
+        if (doLink) {
+            // Try to make a non verified WifiConfiguration, but only if the original
+            // configuration was not self already added
+            if (VDBG) {
+                Loge(String("associateWithConfiguration: will create "));
+                        //+ result.SSID + " and associate it with: " + link.SSID);
+            }
+            WifiConfigurationFromScanResult(result, (IWifiConfiguration**)&config);
+            if (config != NULL) {
+                config->SetSelfAdded(TRUE);
+                config->SetDidSelfAdd(TRUE);
+                config->SetDirty(TRUE);
+                String linkConfigKey;
+                link->ConfigKey(&linkConfigKey);
+                config->SetPeerWifiConfiguration(linkConfigKey);
+
+                AutoPtr<IBitSet> configAllowedKeyManagement;
+                config->GetAllowedKeyManagement((IBitSet**)&configAllowedKeyManagement);
+                Boolean eq1, eq2;
+                if ((configAllowedKeyManagement->Equals(linkAllowedKeyManagement, &eq1), eq1) &&
+                        (configAllowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_PSK, &eq2), eq2)) {
+                    // Transfer the credentials from the configuration we are linking from
+                    String linkSSID;
+                    link->GetSSID(&linkSSID);
+                    String psk = ReadNetworkVariableFromSupplicantFile(linkSSID, String("psk"));
+                    if (!psk.IsNull()) {
+                        config->SetPreSharedKey(psk);
+                        if (VDBG) {
+                            //if (config.preSharedKey != null)
+                            Loge(String(" transfer PSK : ") + psk);//config.preSharedKey);
+                        }
+
+                        // Link configurations
+                        AutoPtr<IHashMap> linkLinkedConfigurations;
+                        link->GetLinkedConfigurations((IHashMap**)&linkLinkedConfigurations);
+                        if (linkLinkedConfigurations == NULL) {
+                            CHashMap::New((IHashMap**)&linkLinkedConfigurations);
+                            link->SetLinkedConfigurations(linkLinkedConfigurations);
+                        }
+                        AutoPtr<IHashMap> configLinkedConfigurations;
+                        config->GetLinkedConfigurations((IHashMap**)&configLinkedConfigurations);
+                        if (configLinkedConfigurations == NULL) {
+                            CHashMap::New((IHashMap**)&configLinkedConfigurations);
+                            config->SetLinkedConfigurations(configLinkedConfigurations);
+                        }
+
+                        String configConfigKey;
+                        config->ConfigKey(&configConfigKey);
+                        linkLinkedConfigurations->Put(CoreUtils::Convert(configConfigKey), CoreUtils::Convert(1));
+                        configLinkedConfigurations->Put(CoreUtils::Convert(linkConfigKey), CoreUtils::Convert(1));
+                    } else {
+                        config = NULL;
+                    }
+                } else {
+                    config = NULL;
+                }
+                if (config != NULL) break;
+            }
+        }
+    }
+    *wifiConfig = config;
+    REFCOUNT_ADD(*wifiConfig);
     return NOERROR;
 }
 
@@ -1670,80 +2237,141 @@ ECode WifiConfigStore::MakeChannelList(
     /* [in] */ Boolean _restrict,
     /* [out] */ IHashSet** result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (config == null)
-    //     return null;
-    // long now_ms = System.currentTimeMillis();
-    //
-    // HashSet<Integer> channels = new HashSet<Integer>();
-    //
-    // //get channels for this configuration, if there are at least 2 BSSIDs
-    // if (config.scanResultCache == null && config.linkedConfigurations == null) {
-    //     return null;
-    // }
-    //
-    // if (VDBG) {
-    //     StringBuilder dbg = new StringBuilder();
-    //     dbg.append("makeChannelList age=" + Integer.toString(age)
-    //             + " for " + config.configKey()
-    //             + " max=" + maxNumActiveChannelsForPartialScans);
-    //     if (config.scanResultCache != null) {
-    //         dbg.append(" bssids=" + config.scanResultCache.size());
-    //     }
-    //     if (config.linkedConfigurations != null) {
-    //         dbg.append(" linked=" + config.linkedConfigurations.size());
-    //     }
-    //     loge(dbg.toString());
-    // }
-    //
-    // int numChannels = 0;
-    // if (config.scanResultCache != null && config.scanResultCache.size() > 0) {
-    //     for (ScanResult result : config.scanResultCache.values()) {
-    //         //TODO : cout active and passive channels separately
-    //         if (numChannels > maxNumActiveChannelsForPartialScans) {
-    //             break;
-    //         }
-    //         if (VDBG) {
-    //             boolean test = (now_ms - result.seen) < age;
-    //             loge("has " + result.BSSID + " freq=" + Integer.toString(result.frequency)
-    //                     + " age=" + Long.toString(now_ms - result.seen) + " ?=" + test);
-    //         }
-    //         if (((now_ms - result.seen) < age)/*||(!_restrict || result.is24GHz())*/) {
-    //             channels.add(result.frequency);
-    //             numChannels++;
-    //         }
-    //     }
-    // }
-    //
-    // //get channels for linked configurations
-    // if (config.linkedConfigurations != null) {
-    //     for (String key : config.linkedConfigurations.keySet()) {
-    //         WifiConfiguration linked = getWifiConfiguration(key);
-    //         if (linked == null)
-    //             continue;
-    //         if (linked.scanResultCache == null) {
-    //             continue;
-    //         }
-    //         for (ScanResult result : linked.scanResultCache.values()) {
-    //             if (VDBG) {
-    //                 loge("has link: " + result.BSSID
-    //                         + " freq=" + Integer.toString(result.frequency)
-    //                         + " age=" + Long.toString(now_ms - result.seen));
-    //             }
-    //             if (numChannels > maxNumActiveChannelsForPartialScans) {
-    //                 break;
-    //             }
-    //             if (((now_ms - result.seen) < age)/*||(!_restrict || result.is24GHz())*/) {
-    //                 channels.add(result.frequency);
-    //                 numChannels++;
-    //             }
-    //         }
-    //     }
-    // }
-    // return channels;
-    assert(0);
+    if (config == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    Int64 now_ms;
+    system->GetCurrentTimeMillis(&now_ms);
+
+    //HashSet<Integer> channels = new HashSet<Integer>();
+    AutoPtr<IHashSet> channels;
+    CHashSet::New((IHashSet**)&channels);
+
+    //get channels for this configuration, if there are at least 2 BSSIDs
+    AutoPtr<IHashMap> scanResultCache;
+    config->GetScanResultCache((IHashMap**)&scanResultCache);
+    AutoPtr<IHashMap> linkedConfigurations;
+    config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
+    if (scanResultCache == NULL && linkedConfigurations == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+
+    String configKey;
+    config->ConfigKey(&configKey);
+    Int32 cacheSize;
+    scanResultCache->GetSize(&cacheSize);
+    Int32 configurationSize;
+    linkedConfigurations->GetSize(&configurationSize);
+    if (VDBG) {
+        AutoPtr<StringBuilder> dbg = new StringBuilder();
+        dbg->Append("makeChannelList age=");
+        dbg->Append(age);
+        dbg->Append(" for ");
+        dbg->Append(configKey);
+        dbg->Append(" max=");
+        dbg->Append(maxNumActiveChannelsForPartialScans);
+        if (scanResultCache != NULL) {
+            dbg->Append(" bssids=");
+            dbg->Append(cacheSize);
+        }
+        if (linkedConfigurations != NULL) {
+            dbg->Append(" linked=");
+            dbg->Append(configurationSize);
+        }
+        Loge(dbg->ToString());
+    }
+
+    Int32 numChannels = 0;
+    if (scanResultCache != NULL && cacheSize > 0) {
+        AutoPtr<ICollection> values;
+        scanResultCache->GetValues((ICollection**)&values);
+        AutoPtr<IIterator> iter;
+        values->GetIterator((IIterator**)&iter);
+        Boolean bNext;
+        iter->HasNext(&bNext);
+        for (; bNext; iter->HasNext(&bNext)) {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            IScanResult* result = IScanResult::Probe(obj);
+            //TODO : cout active and passive channels separately
+            if (numChannels > maxNumActiveChannelsForPartialScans) {
+                break;
+            }
+            Int64 seen;
+            result->GetSeen(&seen);
+            if (VDBG) {
+                //Boolean test = (now_ms - seen) < age;
+                Loge(String("has freq= age= ?= TODO"));
+                        //+ result.BSSID + " freq=" + Integer.toString(result.frequency)
+                        //+ " age=" + Long.toString(now_ms - result.seen) + " ?=" + test);
+            } if (((now_ms - seen) < age)/*||(!_restrict || result.is24GHz())*/) {
+                Int32 frequency;
+                result->GetFrequency(&frequency);
+                channels->Add(CoreUtils::Convert(frequency));
+                numChannels++;
+            }
+        }
+    }
+
+    //get channels for linked configurations
+    if (linkedConfigurations != NULL) {
+        AutoPtr<ISet> keySet;
+        linkedConfigurations->GetKeySet((ISet**)&keySet);
+        AutoPtr<IIterator> keyIter;
+        keySet->GetIterator((IIterator**)&keyIter);
+        Boolean isflag = FALSE;
+        while ((keyIter->HasNext(&isflag), isflag)) {
+            AutoPtr<IInterface> keyObj;
+            keyIter->GetNext((IInterface**)&keyObj);
+            String key;
+            ICharSequence::Probe(keyObj)->ToString(&key);
+            AutoPtr<IWifiConfiguration> linked;
+            GetWifiConfiguration(key, (IWifiConfiguration**)&linked);
+            if (linked == NULL)
+                continue;
+
+            AutoPtr<IHashMap> linkedScanResultCache;
+            linked->GetScanResultCache((IHashMap**)&linkedScanResultCache);
+            if (linkedScanResultCache == NULL) {
+                continue;
+            }
+            AutoPtr<ICollection> values;
+            linkedScanResultCache->GetValues((ICollection**)&values);
+            AutoPtr<IIterator> iter;
+            values->GetIterator((IIterator**)&iter);
+            Boolean bNext;
+            iter->HasNext(&bNext);
+            for (; bNext; iter->HasNext(&bNext)) {
+                AutoPtr<IInterface> obj;
+                iter->GetNext((IInterface**)&obj);
+                IScanResult* result = IScanResult::Probe(obj);
+                if (VDBG) {
+                    Loge(String("has link: "));
+                            //+ result.BSSID
+                            //+ " freq=" + Integer.toString(result.frequency)
+                            //+ " age=" + Long.toString(now_ms - result.seen));
+                }
+                if (numChannels > maxNumActiveChannelsForPartialScans) {
+                    break;
+                }
+                Int64 seen;
+                result->GetSeen(&seen);
+                Int32 frequency;
+                result->GetFrequency(&frequency);
+                if (((now_ms - seen) < age)/*||(!_restrict || result.is24GHz())*/) {
+                    channels->Add(CoreUtils::Convert(frequency));
+                    numChannels++;
+                }
+            }
+        }
+    }
+    *result = channels;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -1751,104 +2379,142 @@ ECode WifiConfigStore::UpdateSavedNetworkHistory(
     /* [in] */ IScanResult* scanResult,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(scanResult);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int numConfigFound = 0;
-    // if (scanResult == null)
-    //     return false;
-    //
-    // String SSID = "\"" + scanResult.SSID + "\"";
-    //
-    // for (WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     boolean found = false;
-    //
-    //     if (config.SSID == null || !config.SSID.equals(SSID)) {
-    //         // SSID mismatch
-    //         if (VVDBG) {
-    //             loge("updateSavedNetworkHistory(): SSID mismatch " + config.configKey()
-    //                     + " SSID=" + config.SSID + " " + SSID);
-    //         }
-    //         continue;
-    //     }
-    //     if (VDBG) {
-    //         loge("updateSavedNetworkHistory(): try " + config.configKey()
-    //                 + " SSID=" + config.SSID + " " + scanResult.SSID
-    //                 + " " + scanResult.capabilities
-    //                 + " ajst=" + config.autoJoinStatus);
-    //     }
-    //     if (scanResult.capabilities.contains("WEP")
-    //             && config.configKey().contains("WEP")) {
-    //         found = true;
-    //     } else if (scanResult.capabilities.contains("PSK")
-    //             && config.configKey().contains("PSK")) {
-    //         found = true;
-    //     } else if (scanResult.capabilities.contains("EAP")
-    //             && config.configKey().contains("EAP")) {
-    //         found = true;
-    //     } else if (!scanResult.capabilities.contains("WEP")
-    //         && !scanResult.capabilities.contains("PSK")
-    //         && !scanResult.capabilities.contains("EAP")
-    //         && !config.configKey().contains("WEP")
-    //             && !config.configKey().contains("PSK")
-    //             && !config.configKey().contains("EAP")) {
-    //         found = true;
-    //     }
-    //
-    //     if (found) {
-    //         numConfigFound ++;
-    //
-    //         if (config.autoJoinStatus >= WifiConfiguration.AUTO_JOIN_DELETED) {
-    //             if (VVDBG) {
-    //                 loge("updateSavedNetworkHistory(): found a deleted, skip it...  "
-    //                         + config.configKey());
-    //             }
-    //             // The scan result belongs to a deleted config:
-    //             //   - increment numConfigFound to remember that we found a config
-    //             //            matching for this scan result
-    //             //   - dont do anything since the config was deleted, just skip...
-    //             continue;
-    //         }
-    //
-    //         if (config.scanResultCache == null) {
-    //             config.scanResultCache = new HashMap<String, ScanResult>();
-    //         }
-    //
-    //         // Adding a new BSSID
-    //         ScanResult result = config.scanResultCache.get(scanResult.BSSID);
-    //         if (result == null) {
-    //             config.dirty = true;
-    //         } else {
-    //             // transfer the black list status
-    //             scanResult.autoJoinStatus = result.autoJoinStatus;
-    //             scanResult.blackListTimestamp = result.blackListTimestamp;
-    //             scanResult.numIpConfigFailures = result.numIpConfigFailures;
-    //             scanResult.numConnection = result.numConnection;
-    //             scanResult.isAutoJoinCandidate = result.isAutoJoinCandidate;
-    //         }
-    //
-    //         // Add the scan result to this WifiConfiguration
-    //         config.scanResultCache.put(scanResult.BSSID, scanResult);
-    //         // Since we added a scan result to this configuration, re-attempt linking
-    //         linkConfiguration(config);
-    //     }
-    //
-    //     if (VDBG && found) {
-    //         String status = "";
-    //         if (scanResult.autoJoinStatus > 0) {
-    //             status = " status=" + Integer.toString(scanResult.autoJoinStatus);
-    //         }
-    //         loge("        got known scan result " +
-    //                 scanResult.BSSID + " key : "
-    //                 + config.configKey() + " num: " +
-    //                 Integer.toString(config.scanResultCache.size())
-    //                 + " rssi=" + Integer.toString(scanResult.level)
-    //                 + " freq=" + Integer.toString(scanResult.frequency)
-    //                 + status);
-    //     }
-    // }
-    // return numConfigFound != 0;
-    assert(0);
+    Int32 numConfigFound = 0;
+    if (scanResult == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    String ssid;
+    scanResult->GetSSID(&ssid);
+    String SSID = String("\"") + ssid + String("\"");
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+        Boolean found = FALSE;
+
+        String configSSID;
+        config->GetSSID(&configSSID);
+        if (configSSID.IsNull() || !configSSID.Equals(SSID)) {
+            // SSID mismatch
+            if (VVDBG) {
+                Loge(String("updateSavedNetworkHistory(): SSID mismatch "));
+                        //+ config.configKey()
+                        //+ " SSID=" + config.SSID + " " + SSID);
+            }
+            continue;
+        }
+        if (VDBG) {
+            Loge(String("updateSavedNetworkHistory(): try "));
+                    //+ config.configKey()
+                    //+ " SSID=" + config.SSID + " " + scanResult.SSID
+                    //+ " " + scanResult.capabilities
+                    //+ " ajst=" + config.autoJoinStatus);
+        }
+        String capabilities;
+        scanResult->GetCapabilities(&capabilities);
+        String configConfigKey;
+        config->ConfigKey(&configConfigKey);
+        if (capabilities.Contains("WEP")
+                && configConfigKey.Contains("WEP")) {
+            found = TRUE;
+        } else if (capabilities.Contains("PSK")
+                && configConfigKey.Contains("PSK")) {
+            found = TRUE;
+        } else if (capabilities.Contains("EAP")
+                && configConfigKey.Contains("EAP")) {
+            found = TRUE;
+        } else if (!capabilities.Contains("WEP")
+            && !capabilities.Contains("PSK")
+            && !capabilities.Contains("EAP")
+            && !configConfigKey.Contains("WEP")
+                && !configConfigKey.Contains("PSK")
+                && !configConfigKey.Contains("EAP")) {
+            found = TRUE;
+        }
+
+        if (found) {
+            numConfigFound ++;
+
+            Int32 autoJoinStatus;
+            config->GetAutoJoinStatus(&autoJoinStatus);
+            if (autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DELETED) {
+                if (VVDBG) {
+                    Loge(String("updateSavedNetworkHistory(): found a deleted, skip it...  "));
+                            //+ configConfigKey);
+                }
+                // The scan result belongs to a deleted config:
+                //   - increment numConfigFound to remember that we found a config
+                //            matching for this scan result
+                //   - dont do anything since the config was deleted, just skip...
+                continue;
+            }
+
+            AutoPtr<IHashMap> scanResultCache;
+            config->GetScanResultCache((IHashMap**)&scanResultCache);
+            if (scanResultCache == NULL) {
+                CHashMap::New((IHashMap**)&scanResultCache);
+                config->SetScanResultCache(scanResultCache);
+            }
+
+            // Adding a new BSSID
+            String bssid;
+            scanResult->GetBSSID(&bssid);
+            AutoPtr<IInterface> obj;
+            scanResultCache->Get(CoreUtils::Convert(bssid), (IInterface**)&obj);
+            IScanResult* sresult = IScanResult::Probe(obj);
+            if (sresult == NULL) {
+                config->SetDirty(TRUE);
+            } else {
+                // transfer the black list status
+                Int32 autoJoinStatus;
+                sresult->GetAutoJoinStatus(&autoJoinStatus);
+                scanResult->SetAutoJoinStatus(autoJoinStatus);
+                Int64 blackListTimestamp;
+                sresult->GetBlackListTimestamp(&blackListTimestamp);
+                scanResult->SetBlackListTimestamp(blackListTimestamp);
+                Int32 numIpConfigFailures;
+                sresult->GetNumIpConfigFailures(&numIpConfigFailures);
+                scanResult->SetNumIpConfigFailures(numIpConfigFailures);
+                Int32 numConnection;
+                sresult->GetNumConnection(&numConnection);
+                scanResult->SetNumConnection(numConnection);
+                Int32 isAutoJoinCandidate;
+                sresult->GetIsAutoJoinCandidate(&isAutoJoinCandidate);
+                scanResult->SetIsAutoJoinCandidate(isAutoJoinCandidate);
+            }
+
+            // Add the scan result to this WifiConfiguration
+            scanResultCache->Put(CoreUtils::Convert(bssid), scanResult);
+            // Since we added a scan result to this configuration, re-attempt linking
+            LinkConfiguration(config);
+        }
+
+        if (VDBG && found) {
+            //String status("");
+            //if (scanResult.autoJoinStatus > 0) {
+            //    status = " status=" + Integer.toString(scanResult.autoJoinStatus);
+            //}
+            Loge(String("        got known scan result "));
+                    //+ scanResult.BSSID + " key : "
+                    //+ config.configKey() + " num: " +
+                    //Integer.toString(config.scanResultCache.size())
+                    //+ " rssi=" + Integer.toString(scanResult.level)
+                    //+ " freq=" + Integer.toString(scanResult.frequency)
+                    //+ status);
+        }
+    }
+    *result = numConfigFound != 0;
     return NOERROR;
 }
 
@@ -1856,40 +2522,54 @@ ECode WifiConfigStore::WifiConfigurationFromScanResult(
     /* [in] */ IScanResult* result,
     /* [out] */ IWifiConfiguration** wifiConfig)
 {
-    VALIDATE_NOT_NULL(result);
     VALIDATE_NOT_NULL(wifiConfig);
-    // ==================before translated======================
-    // WifiConfiguration config = new WifiConfiguration();
-    //
-    // config.SSID = "\"" + result.SSID + "\"";
-    //
-    // if (VDBG) {
-    //     loge("WifiConfiguration from scan results " +
-    //             config.SSID + " cap " + result.capabilities);
-    // }
-    // if (result.capabilities.contains("WEP")) {
-    //     config.allowedKeyManagement.set(KeyMgmt.NONE);
-    //     config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN); //?
-    //     config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
-    // }
-    //
-    // if (result.capabilities.contains("PSK")) {
-    //     config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
-    // }
-    //
-    // if (result.capabilities.contains("EAP")) {
-    //     //this is probably wrong, as we don't have a way to enter the enterprise config
-    //     config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
-    //     config.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
-    // }
-    //
-    // config.scanResultCache = new HashMap<String, ScanResult>();
-    // if (config.scanResultCache == null)
-    //     return null;
-    // config.scanResultCache.put(result.BSSID, result);
-    //
-    // return config;
-    assert(0);
+    AutoPtr<IWifiConfiguration> config;
+    CWifiConfiguration::New((IWifiConfiguration**)&config);
+
+    String ssid;
+    result->GetSSID(&ssid);
+    config->SetSSID(String("\"") + ssid + String("\""));
+
+    if (VDBG) {
+        Loge(String("WifiConfiguration from scan results "));
+                //+ config.SSID + " cap " + result.capabilities);
+    }
+    String capabilities;
+    result->GetCapabilities(&capabilities);
+    AutoPtr<IBitSet> allowedKeyManagement;
+    config->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
+    AutoPtr<IBitSet> allowedAuthAlgorithms;
+    config->GetAllowedAuthAlgorithms((IBitSet**)&allowedAuthAlgorithms);
+    if (capabilities.Contains("WEP")) {
+        allowedKeyManagement->Set(IWifiConfigurationKeyMgmt::NONE);
+        allowedAuthAlgorithms->Set(IWifiConfigurationAuthAlgorithm::OPEN); //?
+        allowedAuthAlgorithms->Set(IWifiConfigurationAuthAlgorithm::SHARED);
+    }
+
+    if (capabilities.Contains("PSK")) {
+        allowedKeyManagement->Set(IWifiConfigurationKeyMgmt::WPA_PSK);
+    }
+
+    if (capabilities.Contains("EAP")) {
+        //this is probably wrong, as we don't have a way to enter the enterprise config
+        allowedKeyManagement->Set(IWifiConfigurationKeyMgmt::WPA_EAP);
+        allowedKeyManagement->Set(IWifiConfigurationKeyMgmt::IEEE8021X);
+    }
+
+    AutoPtr<IHashMap> src;
+    CHashMap::New((IHashMap**)&src);
+    config->SetScanResultCache(src);
+    if (src == NULL) {
+        *wifiConfig = NULL;
+        return NOERROR;
+    }
+
+    String bssid;
+    result->GetBSSID(&bssid);
+    src->Put(CoreUtils::Convert(bssid), result);
+
+    *wifiConfig = config;
+    REFCOUNT_ADD(*wifiConfig);
     return NOERROR;
 }
 
@@ -1923,101 +2603,107 @@ ECode WifiConfigStore::GetConfigFile(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ipConfigFile;
-    assert(0);
+    *result = ipConfigFile;
     return NOERROR;
 }
 
 Boolean WifiConfigStore::NeedsKeyStore(
     /* [in] */ IWifiEnterpriseConfig* config)
 {
-    // ==================before translated======================
-    // // Has no keys to be installed
-    // if (config.getClientCertificate() == null && config.getCaCertificate() == null)
-    //     return false;
-    // return true;
-    assert(0);
-    return FALSE;
+    // Has no keys to be installed
+    AutoPtr<IX509Certificate> client;
+    config->GetClientCertificate((IX509Certificate**)&client);
+    AutoPtr<IX509Certificate> ca;
+    config->GetCaCertificate((IX509Certificate**)&ca);
+    if (client == NULL && ca == NULL)
+        return FALSE;
+    return TRUE;
 }
 
 Boolean WifiConfigStore::IsHardwareBackedKey(
     /* [in] */ IPrivateKey* key)
 {
-    // ==================before translated======================
-    // return KeyChain.isBoundKeyAlgorithm(key.getAlgorithm());
+    //TODO AutoPtr<IKeyChain> keyChain;
     assert(0);
-    return FALSE;
+    //TODO CKeyChain::AcquireSingleton((IKeyChain**)&keyChain);
+    String algorithm;
+    IKey::Probe(key)->GetAlgorithm(&algorithm);
+    Boolean bTemp = FALSE;
+    //TODO KeyChain->IsBoundKeyAlgorithm(algorithm, &bTemp);
+    return bTemp;
 }
 
 Boolean WifiConfigStore::HasHardwareBackedKey(
     /* [in] */ ICertificate* certificate)
 {
-    // ==================before translated======================
-    // return KeyChain.isBoundKeyAlgorithm(certificate.getPublicKey().getAlgorithm());
+    //TODO AutoPtr<IKeyChain> keyChain;
     assert(0);
-    return FALSE;
+    //TODO CKeyChain::AcquireSingleton((IKeyChain**)&keyChain);
+    AutoPtr<IPublicKey> publickKey;
+    certificate->GetPublicKey((IPublicKey**)&publickKey);
+    String algorithm;
+    IKey::Probe(publickKey)->GetAlgorithm(&algorithm);
+    Boolean bTemp = FALSE;
+    //TODO KeyChain->IsBoundKeyAlgorithm(algorithm, &bTemp);
+    return bTemp;
 }
 
 Boolean WifiConfigStore::NeedsSoftwareBackedKeyStore(
     /* [in] */ IWifiEnterpriseConfig* config)
 {
-    // ==================before translated======================
-    // String client = config.getClientCertificateAlias();
-    // if (!TextUtils.isEmpty(client)) {
-    //     // a valid client certificate is configured
-    //
-    //     // BUGBUG: keyStore.get() never returns certBytes; because it is not
-    //     // taking WIFI_UID as a parameter. It always looks for certificate
-    //     // with SYSTEM_UID, and never finds any Wifi certificates. Assuming that
-    //     // all certificates need software keystore until we get the get() API
-    //     // fixed.
-    //
-    //     return true;
-    // }
-    //
-    // /*
-    // try {
-    //
-    //     if (DBG) Slog.d(TAG, "Loading client certificate " + Credentials
-    //             .USER_CERTIFICATE + client);
-    //
-    //     CertificateFactory factory = CertificateFactory.getInstance("X.509");
-    //     if (factory == null) {
-    //         Slog.e(TAG, "Error getting certificate factory");
-    //         return;
-    //     }
-    //
-    //     byte[] certBytes = keyStore.get(Credentials.USER_CERTIFICATE + client);
-    //     if (certBytes != null) {
-    //         Certificate cert = (X509Certificate) factory.generateCertificate(
-    //                 new ByteArrayInputStream(certBytes));
-    //
-    //         if (cert != null) {
-    //             mNeedsSoftwareKeystore = hasHardwareBackedKey(cert);
-    //
-    //             if (DBG) Slog.d(TAG, "Loaded client certificate " + Credentials
-    //                     .USER_CERTIFICATE + client);
-    //             if (DBG) Slog.d(TAG, "It " + (mNeedsSoftwareKeystore ? "needs" :
-    //                     "does not need" ) + " software key store");
-    //         } else {
-    //             Slog.d(TAG, "could not generate certificate");
-    //         }
-    //     } else {
-    //         Slog.e(TAG, "Could not load client certificate " + Credentials
-    //                 .USER_CERTIFICATE + client);
-    //         mNeedsSoftwareKeystore = true;
-    //     }
-    //
-    // } catch(CertificateException e) {
-    //     Slog.e(TAG, "Could not read certificates");
-    //     mCaCert = null;
-    //     mClientCertificate = null;
-    // }
-    // */
-    //
-    // return false;
-    assert(0);
+    String client;
+    config->GetClientCertificateAlias(&client);
+    if (!TextUtils::IsEmpty(client)) {
+        // a valid client certificate is configured
+
+        // BUGBUG: keyStore.get() never returns certBytes; because it is not
+        // taking WIFI_UID as a parameter. It always looks for certificate
+        // with SYSTEM_UID, and never finds any Wifi certificates. Assuming that
+        // all certificates need software keystore until we get the get() API
+        // fixed.
+
+        return TRUE;
+    }
+
+    /*
+    try {
+
+        if (DBG) Slog.d(TAG, "Loading client certificate " + Credentials
+                .USER_CERTIFICATE + client);
+
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        if (factory == null) {
+            Slog.e(TAG, "Error getting certificate factory");
+            return;
+        }
+
+        byte[] certBytes = keyStore.get(Credentials.USER_CERTIFICATE + client);
+        if (certBytes != null) {
+            Certificate cert = (X509Certificate) factory.generateCertificate(
+                    new ByteArrayInputStream(certBytes));
+
+            if (cert != null) {
+                mNeedsSoftwareKeystore = hasHardwareBackedKey(cert);
+
+                if (DBG) Slog.d(TAG, "Loaded client certificate " + Credentials
+                        .USER_CERTIFICATE + client);
+                if (DBG) Slog.d(TAG, "It " + (mNeedsSoftwareKeystore ? "needs" :
+                        "does not need" ) + " software key store");
+            } else {
+                Slog.d(TAG, "could not generate certificate");
+            }
+        } else {
+            Slog.e(TAG, "Could not load client certificate " + Credentials
+                    .USER_CERTIFICATE + client);
+            mNeedsSoftwareKeystore = true;
+        }
+
+    } catch(CertificateException e) {
+        Slog.e(TAG, "Could not read certificates");
+        mCaCert = null;
+        mClientCertificate = null;
+    }
+    */
     return FALSE;
 }
 
@@ -2025,30 +2711,37 @@ ECode WifiConfigStore::HandleBadNetworkDisconnectReport(
     /* [in] */ Int32 netId,
     /* [in] */ IWifiInfo* info)
 {
-    VALIDATE_NOT_NULL(info);
-    // ==================before translated======================
-    // /* TODO verify the bad network is current */
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     if ((info.getRssi() < WifiConfiguration.UNWANTED_BLACKLIST_SOFT_RSSI_24
-    //             && info.is24GHz()) || (info.getRssi() <
-    //                     WifiConfiguration.UNWANTED_BLACKLIST_SOFT_RSSI_5 && info.is5GHz())) {
-    //         // We got disconnected and RSSI was bad, so disable light
-    //         config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_TEMPORARY_DISABLED
-    //                 + WifiConfiguration.UNWANTED_BLACKLIST_SOFT_BUMP);
-    //         loge("handleBadNetworkDisconnectReport (+4) "
-    //                 + Integer.toString(netId) + " " + info);
-    //     } else {
-    //         // We got disabled but RSSI is good, so disable hard
-    //         config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_TEMPORARY_DISABLED
-    //                 + WifiConfiguration.UNWANTED_BLACKLIST_HARD_BUMP);
-    //         loge("handleBadNetworkDisconnectReport (+8) "
-    //                 + Integer.toString(netId) + " " + info);
-    //     }
-    // }
-    // // Record last time Connectivity Service switched us away from WiFi and onto Cell
-    // lastUnwantedNetworkDisconnectTimestamp = System.currentTimeMillis();
-    assert(0);
+    /* TODO verify the bad network is current */
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        Int32 rssi;
+        info->GetRssi(&rssi);
+        Boolean is24GHz;
+        info->Is24GHz(&is24GHz);
+        Boolean is5GHz;
+        info->Is5GHz(&is5GHz);
+        if ((rssi < IWifiConfiguration::UNWANTED_BLACKLIST_SOFT_RSSI_24
+                && is24GHz) || (rssi <
+                        IWifiConfiguration::UNWANTED_BLACKLIST_SOFT_RSSI_5 && is5GHz)) {
+            // We got disconnected and RSSI was bad, so disable light
+            config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_TEMPORARY_DISABLED
+                    + IWifiConfiguration::UNWANTED_BLACKLIST_SOFT_BUMP);
+            Loge(String("handleBadNetworkDisconnectReport (+4) "));
+                    //+ Integer.toString(netId) + " " + info);
+        } else {
+            // We got disabled but RSSI is good, so disable hard
+            config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_TEMPORARY_DISABLED
+                    + IWifiConfiguration::UNWANTED_BLACKLIST_HARD_BUMP);
+            Loge(String("handleBadNetworkDisconnectReport (+8) "));
+                    //+ Integer.toString(netId) + " " + info);
+        }
+    }
+    // Record last time Connectivity Service switched us away from WiFi and onto Cell
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&lastUnwantedNetworkDisconnectTimestamp);
     return NOERROR;
 }
 
@@ -2059,31 +2752,53 @@ ECode WifiConfigStore::HandleBSSIDBlackList(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean found = false;
-    // if (BSSID == null)
-    //     return found;
-    //
-    // // Look for the BSSID in our config store
-    // for (WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     if (config.scanResultCache != null) {
-    //         for (ScanResult result: config.scanResultCache.values()) {
-    //             if (result.BSSID.equals(BSSID)) {
-    //                 if (enable) {
-    //                     result.setAutoJoinStatus(ScanResult.ENABLED);
-    //                 } else {
-    //                     // Black list the BSSID we were trying to join
-    //                     // so as the Roam state machine
-    //                     // doesn't pick it up over and over
-    //                     result.setAutoJoinStatus(ScanResult.AUTO_ROAM_DISABLED);
-    //                     found = true;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // return found;
-    assert(0);
+    Boolean found = FALSE;
+    if (BSSID.IsNull()) {
+        *result = found;
+        return NOERROR;
+    }
+
+    // Look for the BSSID in our config store
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+        AutoPtr<IHashMap> scanResultCache;
+        config->GetScanResultCache((IHashMap**)&scanResultCache);
+        if (scanResultCache != NULL) {
+            AutoPtr<ICollection> cacheValues;
+            scanResultCache->GetValues((ICollection**)&cacheValues);
+            AutoPtr<IIterator> cacheIter;
+            cacheValues->GetIterator((IIterator**)&cacheIter);
+            Boolean bCacheNext;
+            cacheIter->HasNext(&bCacheNext);
+            for (; bCacheNext; cacheIter->HasNext(&bCacheNext)) {
+                AutoPtr<IInterface> cacheObj;
+                cacheIter->GetNext((IInterface**)&cacheObj);
+                IScanResult* sresult = IScanResult::Probe(cacheObj);
+                String bssid;
+                sresult->GetBSSID(&bssid);
+                if (bssid.Equals(BSSID)) {
+                    if (enable) {
+                        sresult->SetAutoJoinStatus(IScanResult::ENABLED);
+                    } else {
+                        // Black list the BSSID we were trying to join
+                        // so as the Roam state machine
+                        // doesn't pick it up over and over
+                        sresult->SetAutoJoinStatus(IScanResult::AUTO_ROAM_DISABLED);
+                        found = TRUE;
+                    }
+                }
+            }
+        }
+    }
+    *result = found;
     return NOERROR;
 }
 
@@ -2092,41 +2807,61 @@ ECode WifiConfigStore::HandleDisabledAPs(
     /* [in] */ const String& BSSID,
     /* [in] */ Int32 reason)
 {
-    // ==================before translated======================
-    // if (BSSID == null)
-    //     return;
-    // for (WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     if (config.scanResultCache != null) {
-    //         for (ScanResult result: config.scanResultCache.values()) {
-    //             if (result.BSSID.equals(BSSID)) {
-    //                 if (enable) {
-    //                     config.BSSID = "any";
-    //                     result.setAutoJoinStatus(ScanResult.ENABLED);
-    //                     // enable auto join for the blacklisted BSSID
-    //                     config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //                 } else {
-    //                     result.setAutoJoinStatus(ScanResult.AUTO_ROAM_DISABLED);
-    //                     config.BSSID = BSSID;
-    //                     config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_TEMPORARY_DISABLED);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (BSSID.IsNull())
+        return NOERROR;
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+        AutoPtr<IHashMap> scanResultCache;
+        config->GetScanResultCache((IHashMap**)&scanResultCache);
+
+        if (scanResultCache != NULL) {
+            AutoPtr<ICollection> cacheValues;
+            scanResultCache->GetValues((ICollection**)&cacheValues);
+            AutoPtr<IIterator> cacheIter;
+            cacheValues->GetIterator((IIterator**)&cacheIter);
+            Boolean bCacheNext;
+            cacheIter->HasNext(&bCacheNext);
+            for (; bCacheNext; cacheIter->HasNext(&bCacheNext)) {
+                AutoPtr<IInterface> cacheObj;
+                cacheIter->GetNext((IInterface**)&cacheObj);
+                IScanResult* sresult = IScanResult::Probe(cacheObj);
+
+                String bssid;
+                sresult->GetBSSID(&bssid);
+                if (bssid.Equals(BSSID)) {
+                    if (enable) {
+                        config->SetBSSID(String("any"));
+                        sresult->SetAutoJoinStatus(IScanResult::ENABLED);
+                        // enable auto join for the blacklisted BSSID
+                        config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+                    } else {
+                        sresult->SetAutoJoinStatus(IScanResult::AUTO_ROAM_DISABLED);
+                        config->SetBSSID(BSSID);
+                        config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_TEMPORARY_DISABLED);
+                    }
+                }
+            }
+        }
+    }
     return NOERROR;
 }
 
 ECode WifiConfigStore::GetMaxDhcpRetries(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return Settings.Global.getInt(mContext.getContentResolver(),
-    //         Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
-    //         DEFAULT_MAX_DHCP_RETRIES);
-    assert(0);
-    return NOERROR;
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    return Settings::Global::GetInt32(cr,
+             ISettingsGlobal::WIFI_MAX_DHCP_RETRY_COUNT,
+             DEFAULT_MAX_DHCP_RETRIES, result);
 }
 
 ECode WifiConfigStore::HandleSSIDStateChange(
@@ -2135,119 +2870,152 @@ ECode WifiConfigStore::HandleSSIDStateChange(
     /* [in] */ const String& message,
     /* [in] */ const String& BSSID)
 {
-    // ==================before translated======================
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     if (enabled) {
-    //         loge("SSID re-enabled for  " + config.configKey() +
-    //                 " had autoJoinStatus=" + Integer.toString(config.autoJoinStatus)
-    //                 + " self added " + config.selfAdded + " ephemeral " + config.ephemeral);
-    //         //TODO: http://b/16381983 Fix Wifi Network Blacklisting
-    //         //TODO: really I don't know if re-enabling is right but we
-    //         //TODO: should err on the side of trying to connect
-    //         //TODO: even if the attempt will fail
-    //         if (config.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE) {
-    //             config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //         }
-    //     } else {
-    //         loge("SSID temp disabled for  " + config.configKey() +
-    //                 " had autoJoinStatus=" + Integer.toString(config.autoJoinStatus)
-    //                 + " self added " + config.selfAdded + " ephemeral " + config.ephemeral);
-    //         if (message != null) {
-    //             loge(" message=" + message);
-    //         }
-    //         if (config.selfAdded && config.lastConnected == 0) {
-    //             // This is a network we self added, and we never succeeded,
-    //             // the user did not create this network and never entered its credentials,
-    //             // so we want to be very aggressive in disabling it completely.
-    //             removeConfigAndSendBroadcastIfNeeded(config.networkId);
-    //         } else {
-    //             if (message != null) {
-    //                 if (message.contains("no identity")) {
-    //                     config.setAutoJoinStatus(
-    //                             WifiConfiguration.AUTO_JOIN_DISABLED_NO_CREDENTIALS);
-    //                     if (DBG) {
-    //                         loge("no identity blacklisted " + config.configKey() + " to "
-    //                                 + Integer.toString(config.autoJoinStatus));
-    //                     }
-    //                 } else if (message.contains("WRONG_KEY")
-    //                         || message.contains("AUTH_FAILED")) {
-    //                     // This configuration has received an auth failure, so disable it
-    //                     // temporarily because we don't want auto-join to try it out.
-    //                     // this network may be re-enabled by the "usual"
-    //                     // enableAllNetwork function
-    //                     config.numAuthFailures++;
-    //                     if (config.numAuthFailures > maxAuthErrorsToBlacklist) {
-    //                         config.setAutoJoinStatus
-    //                                 (WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE);
-    //                         disableNetwork(netId,
-    //                                 WifiConfiguration.DISABLED_AUTH_FAILURE);
-    //                         loge("Authentication failure, blacklist " + config.configKey() + " "
-    //                                     + Integer.toString(config.networkId)
-    //                                     + " num failures " + config.numAuthFailures);
-    //                     }
-    //                 } else if (message.contains("DHCP FAILURE")) {
-    //                     config.numIpConfigFailures++;
-    //                     config.lastConnectionFailure = System.currentTimeMillis();
-    //                     int maxRetries = getMaxDhcpRetries();
-    //                     // maxRetries == 0 means keep trying forever
-    //                     if (maxRetries > 0 && config.numIpConfigFailures > maxRetries) {
-    //                         /**
-    //                          * If we've exceeded the maximum number of retries for DHCP
-    //                          * to a given network, disable the network
-    //                          */
-    //                         config.setAutoJoinStatus
-    //                                 (WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE);
-    //                         disableNetwork(netId, WifiConfiguration.DISABLED_DHCP_FAILURE);
-    //                         loge("DHCP failure, blacklist " + config.configKey() + " "
-    //                                 + Integer.toString(config.networkId)
-    //                                 + " num failures " + config.numIpConfigFailures);
-    //                     }
-    //
-    //                     // Also blacklist the BSSId if we find it
-    //                     ScanResult result = null;
-    //                     String bssidDbg = "";
-    //                     if (config.scanResultCache != null && BSSID != null) {
-    //                         result = config.scanResultCache.get(BSSID);
-    //                     }
-    //                     if (result != null) {
-    //                         result.numIpConfigFailures ++;
-    //                         bssidDbg = BSSID + " ipfail=" + result.numIpConfigFailures;
-    //                         if (result.numIpConfigFailures > 3) {
-    //                             // Tell supplicant to stop trying this BSSID
-    //                             mWifiNative.addToBlacklist(BSSID);
-    //                             result.setAutoJoinStatus(ScanResult.AUTO_JOIN_DISABLED);
-    //                         }
-    //                     }
-    //
-    //                     if (DBG) {
-    //                         loge("blacklisted " + config.configKey() + " to "
-    //                                 + config.autoJoinStatus
-    //                                 + " due to IP config failures, count="
-    //                                 + config.numIpConfigFailures
-    //                                 + " disableReason=" + config.disableReason
-    //                                 + " " + bssidDbg);
-    //                     }
-    //                 } else if (message.contains("CONN_FAILED")) {
-    //                     config.numConnectionFailures++;
-    //                     if (config.numConnectionFailures > maxConnectionErrorsToBlacklist) {
-    //                         config.setAutoJoinStatus
-    //                                 (WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE);
-    //                         disableNetwork(netId,
-    //                                 WifiConfiguration.DISABLED_ASSOCIATION_REJECT);
-    //                         loge("Connection failure, blacklist " + config.configKey() + " "
-    //                                 + config.networkId
-    //                                 + " num failures " + config.numConnectionFailures);
-    //                     }
-    //                 }
-    //                 message.replace("\n", "");
-    //                 message.replace("\r", "");
-    //                 config.lastFailure = message;
-    //             }
-    //         }
-    //     }
-    // }
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        if (enabled) {
+            Loge(String("SSID re-enabled for  "));
+                    //+ config.configKey() +
+                    //" had autoJoinStatus=" + Integer.toString(config.autoJoinStatus)
+                    //+ " self added " + config.selfAdded + " ephemeral " + config.ephemeral);
+            //TODO: http://b/16381983 Fix Wifi Network Blacklisting
+            //TODO: really I don't know if re-enabling is right but we
+            //TODO: should err on the side of trying to connect
+            //TODO: even if the attempt will fail
+            Int32 autoJoinStatus;
+            config->GetAutoJoinStatus(&autoJoinStatus);
+            if (autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE) {
+                config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+            }
+        } else {
+            Loge(String("SSID temp disabled for  "));
+                    //+ config.configKey() +
+                    //" had autoJoinStatus=" + Integer.toString(config.autoJoinStatus)
+                    //+ " self added " + config.selfAdded + " ephemeral " + config.ephemeral);
+            if (!message.IsNull()) {
+                Loge(String(" message=") + message);
+            }
+            Boolean selfAdded;
+            config->GetSelfAdded(&selfAdded);
+            Int64 lastConnected;
+            config->GetLastConnected(&lastConnected);
+            if (selfAdded && lastConnected == 0) {
+                // This is a network we self added, and we never succeeded,
+                // the user did not create this network and never entered its credentials,
+                // so we want to be very aggressive in disabling it completely.
+                Int32 networkId;
+                config->GetNetworkId(&networkId);
+                RemoveConfigAndSendBroadcastIfNeeded(networkId);
+            } else {
+                if (!message.IsNull()) {
+                    if (message.Contains("no identity")) {
+                        config->SetAutoJoinStatus(
+                                IWifiConfiguration::AUTO_JOIN_DISABLED_NO_CREDENTIALS);
+                        if (DBG) {
+                            Loge(String("no identity blacklisted "));
+                                    //+ config.configKey() + " to "
+                                    //+ Integer.toString(config.autoJoinStatus));
+                        }
+                    } else if (message.Contains("WRONG_KEY")
+                            || message.Contains("AUTH_FAILED")) {
+                        // This configuration has received an auth failure, so disable it
+                        // temporarily because we don't want auto-join to try it out.
+                        // this network may be re-enabled by the "usual"
+                        // enableAllNetwork function
+                        Int32 numAuthFailures;
+                        config->GetNumAuthFailures(&numAuthFailures);
+                        config->SetNumAuthFailures(++numAuthFailures);
+                        if (numAuthFailures > maxAuthErrorsToBlacklist) {
+                            config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE);
+                            Boolean bTemp;
+                            DisableNetwork(netId, IWifiConfiguration::DISABLED_AUTH_FAILURE, &bTemp);
+                            Loge(String("Authentication failure, blacklist "));
+                                        //+ config.configKey() + " "
+                                        //+ Integer.toString(config.networkId)
+                                        //+ " num failures " + config.numAuthFailures);
+                        }
+                    } else if (message.Contains("DHCP FAILURE")) {
+                        Int32 numIpConfigFailures;
+                        config->GetNumIpConfigFailures(&numIpConfigFailures);
+                        config->SetNumIpConfigFailures(++numIpConfigFailures);;
+                        AutoPtr<ISystem> system;
+                        CSystem::AcquireSingleton((ISystem**)&system);
+                        Int64 currentTimeMillis;
+                        system->GetCurrentTimeMillis(&currentTimeMillis);
+                        config->SetLastConnectionFailure(currentTimeMillis);
+                        Int32 maxRetries;
+                        GetMaxDhcpRetries(&maxRetries);
+                        // maxRetries == 0 means keep trying forever
+                        if (maxRetries > 0 && numIpConfigFailures > maxRetries) {
+                            /**
+                             * If we've exceeded the maximum number of retries for DHCP
+                             * to a given network, disable the network
+                             */
+                            config->SetAutoJoinStatus
+                                    (IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE);
+                            Boolean bTemp;
+                            DisableNetwork(netId, IWifiConfiguration::DISABLED_DHCP_FAILURE, &bTemp);
+                            Loge(String("DHCP failure, blacklist "));
+                                    // + config.configKey() + " "
+                                    //+ Integer.toString(config.networkId)
+                                    //+ " num failures " + config.numIpConfigFailures);
+                        }
+
+                        // Also blacklist the BSSId if we find it
+                        AutoPtr<IScanResult> result;
+                        String bssidDbg("");
+                        AutoPtr<IHashMap> scanResultCache;
+                        config->GetScanResultCache((IHashMap**)&scanResultCache);
+                        if (scanResultCache != NULL && !BSSID.IsNull()) {
+                            AutoPtr<IInterface> obj;
+                            scanResultCache->Get(CoreUtils::Convert(BSSID), (IInterface**)&obj);
+                            result = IScanResult::Probe(obj);
+                        }
+                        if (result != NULL) {
+                            Int32 numIpConfigFailures;
+                            result->GetNumIpConfigFailures(&numIpConfigFailures);
+                            result->SetNumIpConfigFailures(++numIpConfigFailures);;
+                            bssidDbg = BSSID + String(" ipfail=") + StringUtils::ToString(numIpConfigFailures);
+                            if (numIpConfigFailures > 3) {
+                                // Tell supplicant to stop trying this BSSID
+                                mWifiNative->AddToBlacklist(BSSID);
+                                result->SetAutoJoinStatus(IScanResult::AUTO_JOIN_DISABLED);
+                            }
+                        }
+
+                        if (DBG) {
+                            Loge(String("blacklisted ")
+                                    //+ config.configKey() + " to "
+                                    //+ config.autoJoinStatus
+                                    //+ " due to IP config failures, count="
+                                    //+ config.numIpConfigFailures
+                                    //+ " disableReason=" + config.disableReason
+                                    + String(" ") + bssidDbg);
+                        }
+                    } else if (message.Contains("CONN_FAILED")) {
+                        Int32 numConnectionFailures;
+                        config->GetNumConnectionFailures(&numConnectionFailures);
+                        config->SetNumConnectionFailures(++numConnectionFailures);
+                        if (numConnectionFailures > maxConnectionErrorsToBlacklist) {
+                            config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE);
+                            Boolean bTemp;
+                            DisableNetwork(netId, IWifiConfiguration::DISABLED_ASSOCIATION_REJECT, &bTemp);
+                            Loge(String("Connection failure, blacklist "));
+                                    //+ config.configKey() + " "
+                                    //+ config.networkId
+                                    //+ " num failures " + config.numConnectionFailures);
+                        }
+                    }
+                    String newMessage1;
+                    StringUtils::Replace(message,"\n", "", &newMessage1);
+                    String newMessage2;
+                    StringUtils::Replace(newMessage1,"\r", "", &newMessage2);
+                    config->SetLastFailure(newMessage2);
+                }
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -2256,90 +3024,99 @@ ECode WifiConfigStore::InstallKeys(
     /* [in] */ const String& name,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean ret = true;
-    // String privKeyName = Credentials.USER_PRIVATE_KEY + name;
-    // String userCertName = Credentials.USER_CERTIFICATE + name;
-    // String caCertName = Credentials.CA_CERTIFICATE + name;
-    // if (config.getClientCertificate() != null) {
-    //     byte[] privKeyData = config.getClientPrivateKey().getEncoded();
-    //     if (isHardwareBackedKey(config.getClientPrivateKey())) {
-    //         // Hardware backed key store is secure enough to store keys un-encrypted, this
-    //         // removes the need for user to punch a PIN to get access to these keys
-    //         if (DBG) Log.d(TAG, "importing keys " + name + " in hardware backed store");
-    //         ret = mKeyStore.importKey(privKeyName, privKeyData, android.os.Process.WIFI_UID,
-    //                 KeyStore.FLAG_NONE);
-    //     } else {
-    //         // Software backed key store is NOT secure enough to store keys un-encrypted.
-    //         // Save keys encrypted so they are protected with user's PIN. User will
-    //         // have to unlock phone before being able to use these keys and connect to
-    //         // networks.
-    //         if (DBG) Log.d(TAG, "importing keys " + name + " in software backed store");
-    //         ret = mKeyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
-    //                 KeyStore.FLAG_ENCRYPTED);
-    //     }
-    //     if (ret == false) {
-    //         return ret;
-    //     }
-    //
-    //     ret = putCertInKeyStore(userCertName, config.getClientCertificate());
-    //     if (ret == false) {
-    //         // Remove private key installed
-    //         mKeyStore.delKey(privKeyName, Process.WIFI_UID);
-    //         return ret;
-    //     }
-    // }
-    //
-    // if (config.getCaCertificate() != null) {
-    //     ret = putCertInKeyStore(caCertName, config.getCaCertificate());
-    //     if (ret == false) {
-    //         if (config.getClientCertificate() != null) {
-    //             // Remove client key+cert
-    //             mKeyStore.delKey(privKeyName, Process.WIFI_UID);
-    //             mKeyStore.delete(userCertName, Process.WIFI_UID);
-    //         }
-    //         return ret;
-    //     }
-    // }
-    //
-    // // Set alias names
-    // if (config.getClientCertificate() != null) {
-    //     config.setClientCertificateAlias(name);
-    //     config.resetClientKeyEntry();
-    // }
-    //
-    // if (config.getCaCertificate() != null) {
-    //     config.setCaCertificateAlias(name);
-    //     config.resetCaCertificate();
-    // }
-    //
-    // return ret;
-    assert(0);
+    Boolean ret = TRUE;
+
+    String privKeyName = /*TODO ICredentials::USER_PRIVATE_KEY*/ String("USRPKEY_") + name;
+    String userCertName = /*TODO ICredentials::USER_CERTIFICATE*/ String("USRCERT_") + name;
+    String caCertName = /*TODO ICredentials::CA_CERTIFICATE*/ String("CACERT_") + name;
+
+    assert(0);//TODO
+    AutoPtr<IX509Certificate> clientCert;
+    config->GetClientCertificate((IX509Certificate**)&clientCert);
+    if (clientCert != NULL) {
+        AutoPtr<IPrivateKey> clientPriavateKey;
+        config->GetClientPrivateKey((IPrivateKey**)&clientPriavateKey);
+        AutoPtr<ArrayOf<Byte> > privKeyData;
+        IKey::Probe(clientPriavateKey)->GetEncoded((ArrayOf<Byte>**)&privKeyData);
+        if (IsHardwareBackedKey(clientPriavateKey)) {
+            // Hardware backed key store is secure enough to store keys un-encrypted, this
+            // removes the need for user to punch a PIN to get access to these keys
+            if (DBG) Logger::D(TAG, "importing keys %s in hardware backed store", name.string());
+            //TODO ret = mKeyStore->ImportKey(privKeyName, privKeyData, IProcess::WIFI_UID, IKeyStore::FLAG_NONE);
+        } else {
+            // Software backed key store is NOT secure enough to store keys un-encrypted.
+            // Save keys encrypted so they are protected with user's PIN. User will
+            // have to unlock phone before being able to use these keys and connect to
+            // networks.
+            if (DBG) Logger::D(TAG, "importing keys %s in software backed store", name.string());
+            //TODO ret = mKeyStore->ImportKey(privKeyName, privKeyData, IProcess::WIFI_UID, IKeyStore::FLAG_ENCRYPTED);
+        }
+        if (ret == FALSE) {
+            *result = ret;
+            return NOERROR;
+        }
+
+        ret = PutCertInKeyStore(userCertName, ICertificate::Probe(clientCert));
+        if (ret == FALSE) {
+            // Remove private key installed
+            //TODO mKeyStore->DelKey(privKeyName, IProcess::WIFI_UID);
+            *result = ret;
+            return NOERROR;
+        }
+    }
+
+    AutoPtr<IX509Certificate> caCert;
+    config->GetCaCertificate((IX509Certificate**)&caCert);
+    if (caCert != NULL) {
+        ret = PutCertInKeyStore(caCertName, ICertificate::Probe(caCert));
+        if (ret == FALSE) {
+            if (clientCert != NULL) {
+                // Remove client key+cert
+                //TODO mKeyStore->DelKey(privKeyName, IProcess::WIFI_UID);
+                //TODO mKeyStore->Delete(userCertName, IProcess::WIFI_UID);
+            }
+            *result = ret;
+            return NOERROR;
+        }
+    }
+
+    // Set alias names
+    if (clientCert != NULL) {
+        config->SetClientCertificateAlias(name);
+        config->ResetClientKeyEntry();
+    }
+
+    if (caCert != NULL) {
+        config->SetCaCertificateAlias(name);
+        config->ResetCaCertificate();
+    }
+
+    *result = ret;
     return NOERROR;
 }
 
 ECode WifiConfigStore::RemoveKeys(
     /* [in] */ IWifiEnterpriseConfig* config)
 {
+    assert(0);//TODO
     VALIDATE_NOT_NULL(config);
-    // ==================before translated======================
-    // String client = config.getClientCertificateAlias();
-    // // a valid client certificate is configured
-    // if (!TextUtils.isEmpty(client)) {
-    //     if (DBG) Log.d(TAG, "removing client private key and user cert");
-    //     mKeyStore.delKey(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
-    //     mKeyStore.delete(Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
-    // }
-    //
-    // String ca = config.getCaCertificateAlias();
-    // // a valid ca certificate is configured
-    // if (!TextUtils.isEmpty(ca)) {
-    //     if (DBG) Log.d(TAG, "removing CA cert");
-    //     mKeyStore.delete(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
-    // }
-    assert(0);
+    String client;
+    config->GetClientCertificateAlias(&client);
+    // a valid client certificate is configured
+    if (!TextUtils::IsEmpty(client)) {
+        if (DBG) Logger::D(TAG, "removing client private key and user cert");
+        //TODO mKeyStore->DelKey(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID);
+        //TODO mKeyStore->Delete(ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID);
+    }
+
+    String ca;
+    config->GetCaCertificateAlias(&ca);
+    // a valid ca certificate is configured
+    if (!TextUtils::IsEmpty(ca)) {
+        if (DBG) Logger::D(TAG, "removing CA cert");
+        //TODO mKeyStore->Delete(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID);
+    }
     return NOERROR;
 }
 
@@ -2348,55 +3125,55 @@ ECode WifiConfigStore::MigrateOldEapTlsNative(
     /* [in] */ Int32 netId,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String oldPrivateKey = mWifiNative.getNetworkVariable(netId, OLD_PRIVATE_KEY_NAME);
-    // /*
-    //  * If the old configuration value is not present, then there is nothing
-    //  * to do.
-    //  */
-    // if (TextUtils.isEmpty(oldPrivateKey)) {
-    //     return false;
-    // } else {
-    //     // Also ignore it if it's empty quotes.
-    //     oldPrivateKey = removeDoubleQuotes(oldPrivateKey);
-    //     if (TextUtils.isEmpty(oldPrivateKey)) {
-    //         return false;
-    //     }
-    // }
-    //
-    // config.setFieldValue(WifiEnterpriseConfig.ENGINE_KEY, WifiEnterpriseConfig.ENGINE_ENABLE);
-    // config.setFieldValue(WifiEnterpriseConfig.ENGINE_ID_KEY,
-    //         WifiEnterpriseConfig.ENGINE_ID_KEYSTORE);
-    //
-    // /*
-    // * The old key started with the keystore:// URI prefix, but we don't
-    // * need that anymore. Trim it off if it exists.
-    // */
-    // final String keyName;
-    // if (oldPrivateKey.startsWith(WifiEnterpriseConfig.KEYSTORE_URI)) {
-    //     keyName = new String(
-    //             oldPrivateKey.substring(WifiEnterpriseConfig.KEYSTORE_URI.length()));
-    // } else {
-    //     keyName = oldPrivateKey;
-    // }
-    // config.setFieldValue(WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY, keyName);
-    //
-    // mWifiNative.setNetworkVariable(netId, WifiEnterpriseConfig.ENGINE_KEY,
-    //         config.getFieldValue(WifiEnterpriseConfig.ENGINE_KEY, ""));
-    //
-    // mWifiNative.setNetworkVariable(netId, WifiEnterpriseConfig.ENGINE_ID_KEY,
-    //         config.getFieldValue(WifiEnterpriseConfig.ENGINE_ID_KEY, ""));
-    //
-    // mWifiNative.setNetworkVariable(netId, WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY,
-    //         config.getFieldValue(WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY, ""));
-    //
-    // // Remove old private_key string so we don't run this again.
-    // mWifiNative.setNetworkVariable(netId, OLD_PRIVATE_KEY_NAME, EMPTY_VALUE);
-    //
-    // return true;
-    assert(0);
+    String oldPrivateKey = mWifiNative->GetNetworkVariable(netId, OLD_PRIVATE_KEY_NAME);
+    /*
+     * If the old configuration value is not present, then there is nothing
+     * to do.
+     */
+    if (TextUtils::IsEmpty(oldPrivateKey)) {
+        *result = FALSE;
+        return NOERROR;
+    } else {
+        // Also ignore it if it's empty quotes.
+        oldPrivateKey = RemoveDoubleQuotes(oldPrivateKey);
+        if (TextUtils::IsEmpty(oldPrivateKey)) {
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+
+    config->SetFieldValue(IWifiEnterpriseConfig::ENGINE_KEY, IWifiEnterpriseConfig::ENGINE_ENABLE);
+    config->SetFieldValue(IWifiEnterpriseConfig::ENGINE_ID_KEY, IWifiEnterpriseConfig::ENGINE_ID_KEYSTORE);
+
+    /*
+    * The old key started with the keystore:// URI prefix, but we don't
+    * need that anymore. Trim it off if it exists.
+    */
+    String keyName;
+    if (oldPrivateKey.StartWith(IWifiEnterpriseConfig::KEYSTORE_URI)) {
+        keyName = oldPrivateKey.Substring(IWifiEnterpriseConfig::KEYSTORE_URI.GetLength());
+    } else {
+        keyName = oldPrivateKey;
+    }
+    config->SetFieldValue(IWifiEnterpriseConfig::PRIVATE_KEY_ID_KEY, keyName);
+
+    String engineKey;
+    config->GetFieldValue(IWifiEnterpriseConfig::ENGINE_KEY, String(""), &engineKey);
+    mWifiNative->SetNetworkVariable(netId, IWifiEnterpriseConfig::ENGINE_KEY, engineKey);
+
+    String engineIDKey;
+    config->GetFieldValue(IWifiEnterpriseConfig::ENGINE_ID_KEY, String(""), &engineIDKey);
+    mWifiNative->SetNetworkVariable(netId, IWifiEnterpriseConfig::ENGINE_ID_KEY, engineIDKey);
+
+    String privatekeyIDKey;
+    config->GetFieldValue(IWifiEnterpriseConfig::PRIVATE_KEY_ID_KEY, String(""), &privatekeyIDKey);
+    mWifiNative->SetNetworkVariable(netId, IWifiEnterpriseConfig::PRIVATE_KEY_ID_KEY, privatekeyIDKey);
+
+    // Remove old private_key string so we don't run this again.
+    mWifiNative->SetNetworkVariable(netId, OLD_PRIVATE_KEY_NAME, EMPTY_VALUE);
+
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -2404,60 +3181,57 @@ ECode WifiConfigStore::MigrateCerts(
     /* [in] */ IWifiEnterpriseConfig* config)
 {
     VALIDATE_NOT_NULL(config);
-    // ==================before translated======================
-    // String client = config.getClientCertificateAlias();
-    // // a valid client certificate is configured
-    // if (!TextUtils.isEmpty(client)) {
-    //     if (!mKeyStore.contains(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID)) {
-    //         mKeyStore.duplicate(Credentials.USER_PRIVATE_KEY + client, -1,
-    //                 Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
-    //         mKeyStore.duplicate(Credentials.USER_CERTIFICATE + client, -1,
-    //                 Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
-    //     }
-    // }
-    //
-    // String ca = config.getCaCertificateAlias();
-    // // a valid ca certificate is configured
-    // if (!TextUtils.isEmpty(ca)) {
-    //     if (!mKeyStore.contains(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID)) {
-    //         mKeyStore.duplicate(Credentials.CA_CERTIFICATE + ca, -1,
-    //                 Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
-    //     }
-    // }
-    assert(0);
+    String client;
+    config->GetClientCertificateAlias(&client);
+    assert(0);//TODO
+    // a valid client certificate is configured
+    if (!TextUtils::IsEmpty(client)) {
+        Boolean contains = TRUE;
+        //TODO mKeyStore->Contains(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID, &contains);
+        if (!contains) {
+            //TODO mKeyStore->Duplicate(ICredentials::USER_PRIVATE_KEY + client, -1, ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID);
+            //TODO mKeyStore->Duplicate(ICredentials::USER_CERTIFICATE + client, -1, ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID);
+        }
+    }
+
+    String ca;
+    config->GetCaCertificateAlias(&ca);
+    // a valid ca certificate is configured
+    if (!TextUtils::IsEmpty(ca)) {
+        Boolean contains = TRUE;
+        //TODO mKeyStore->Contains(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID))
+        if (!contains) {
+            //TODO mKeyStore->Duplicate(ICredentials::CA_CERTIFICATE + ca, -1, ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID);
+        }
+    }
     return NOERROR;
 }
 
 void WifiConfigStore::Loge(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // loge(s, false);
-    assert(0);
+    Loge(s, FALSE);
 }
 
 void WifiConfigStore::Loge(
     /* [in] */ const String& s,
     /* [in] */ Boolean stack)
 {
-    // ==================before translated======================
-    // if (stack) {
-    //     Log.e(TAG, s + " stack:" + Thread.currentThread().getStackTrace()[2].getMethodName()
-    //             + " - " + Thread.currentThread().getStackTrace()[3].getMethodName()
-    //             + " - " + Thread.currentThread().getStackTrace()[4].getMethodName()
-    //             + " - " + Thread.currentThread().getStackTrace()[5].getMethodName());
-    // } else {
-    //     Log.e(TAG, s);
-    // }
-    assert(0);
+    if (stack) {
+        //Log.e(TAG, s + " stack:" + Thread.currentThread().getStackTrace()[2].getMethodName()
+        //        + " - " + Thread.currentThread().getStackTrace()[3].getMethodName()
+        //        + " - " + Thread.currentThread().getStackTrace()[4].getMethodName()
+        //        + " - " + Thread.currentThread().getStackTrace()[5].getMethodName());
+        Logger::E(TAG, s);
+    } else {
+        Logger::E(TAG, s);
+    }
 }
 
 void WifiConfigStore::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Log.d(TAG, s);
-    assert(0);
+    Logger::D(TAG, s);
 }
 
 AutoPtr<ArrayOf<String> > WifiConfigStore::MiddleInitEnterpriseConfigSupplicantKeys()
@@ -2482,1822 +3256,2329 @@ AutoPtr<ArrayOf<String> > WifiConfigStore::MiddleInitEnterpriseConfigSupplicantK
 AutoPtr<IList> WifiConfigStore::GetConfiguredNetworks(
     /* [in] */ IMap* pskMap)//String, String
 {
-    // ==================before translated======================
-    // List<WifiConfiguration> networks = new ArrayList<>();
-    // for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     WifiConfiguration newConfig = new WifiConfiguration(config);
-    //     if (config.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DELETED) {
-    //         // Do not enumerate and return this configuration to any one,
-    //         // for instance WiFi Picker.
-    //         // instead treat it as unknown. the configuration can still be retrieved
-    //         // directly by the key or networkId
-    //         continue;
-    //     }
-    //
-    //     if (pskMap != null && config.allowedKeyManagement != null
-    //             && config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK)
-    //             && pskMap.containsKey(config.SSID)) {
-    //         newConfig.preSharedKey = pskMap.get(config.SSID);
-    //     }
-    //     networks.add(newConfig);
-    // }
-    // return networks;
-    assert(0);
-    AutoPtr<IList> empty;//IWifiConfiguration
-    return empty;
+    AutoPtr<IList> networks;
+    CArrayList::New((IList**)&networks);//WifiConfiguration
+
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+        AutoPtr<IWifiConfiguration> newConfig;
+        CWifiConfiguration::New(config, (IWifiConfiguration**)&newConfig);
+        Int32 autoJoinStatus;
+        config->GetAutoJoinStatus(&autoJoinStatus);
+        if (autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
+            // Do not enumerate and return this configuration to any one,
+            // for instance WiFi Picker.
+            // instead treat it as unknown. the configuration can still be retrieved
+            // directly by the key or networkId
+            continue;
+        }
+
+        if (pskMap != NULL) {
+            AutoPtr<IBitSet> allowedKeyManagement;
+            config->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
+            Boolean wpa_psk;
+            String ssid;
+            config->GetSSID(&ssid);
+            Boolean containsKey;
+            if(allowedKeyManagement != NULL
+                    && allowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_PSK, &wpa_psk)
+                    && (pskMap->ContainsKey(CoreUtils::Convert(ssid), &containsKey), containsKey)) {
+                AutoPtr<IInterface> value;
+                pskMap->Get(CoreUtils::Convert(ssid), (IInterface**)&value);
+                String pskey;
+                ICharSequence::Probe(value)->ToString(&pskey);
+                newConfig->SetPreSharedKey(pskey);
+            }
+        }
+        networks->Add(newConfig);
+    }
+    return networks;
 }
 
 //String, String
 AutoPtr<IMap> WifiConfigStore::GetCredentialsBySsidMap()
 {
-    // ==================before translated======================
-    // return readNetworkVariablesFromSupplicantFile("psk");
-    assert(0);
-    AutoPtr<IMap> empty;//String,String
-    return empty;
+    return ReadNetworkVariablesFromSupplicantFile(String("psk"));
 }
 
 Boolean WifiConfigStore::RemoveConfigAndSendBroadcastIfNeeded(
     /* [in] */ Int32 netId)
 {
-    // ==================before translated======================
-    // boolean remove = true;
-    // WifiConfiguration config = mConfiguredNetworks.get(netId);
-    // if (config != null) {
-    //     if (VDBG) {
-    //         loge("removeNetwork " + Integer.toString(netId) + " key=" +
-    //                 config.configKey() + " config.id=" + Integer.toString(config.networkId));
-    //     }
-    //
-    //     // cancel the last user choice
-    //     if (config.configKey().equals(lastSelectedConfiguration)) {
-    //         lastSelectedConfiguration = null;
-    //     }
-    //
-    //     // Remove any associated keys
-    //     if (config.enterpriseConfig != null) {
-    //         removeKeys(config.enterpriseConfig);
-    //     }
-    //
-    //     if (config.selfAdded || config.linkedConfigurations != null
-    //             || config.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-    //         remove = false;
-    //         loge("removeNetwork " + Integer.toString(netId)
-    //                 + " key=" + config.configKey()
-    //                 + " config.id=" + Integer.toString(config.networkId)
-    //                 + " -> mark as deleted");
-    //     }
-    //
-    //     if (remove) {
-    //         mConfiguredNetworks.remove(netId);
-    //         mNetworkIds.remove(configKey(config));
-    //     } else {
-    //         /**
-    //          * We can't directly remove the configuration since we could re-add it ourselves,
-    //          * and that would look weird to the user.
-    //          * Instead mark it as deleted and completely hide it from the rest of the system.
-    //          */
-    //         config.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_DELETED);
-    //         // Disable
-    //         mWifiNative.disableNetwork(config.networkId);
-    //         config.status = WifiConfiguration.Status.DISABLED;
-    //         // Since we don't delete the configuration, clean it up and loose the history
-    //         config.linkedConfigurations = null;
-    //         config.scanResultCache = null;
-    //         config.connectChoices = null;
-    //         config.defaultGwMacAddress = null;
-    //         config.setIpConfiguration(new IpConfiguration());
-    //         // Loose the PSK
-    //         if (!mWifiNative.setNetworkVariable(
-    //                 config.networkId,
-    //                 WifiConfiguration.pskVarName,
-    //                 "\"" + DELETED_CONFIG_PSK + "\"")) {
-    //             loge("removeNetwork, failed to clear PSK, nid=" + config.networkId);
-    //         }
-    //         // Loose the BSSID
-    //         config.BSSID = null;
-    //         config.autoJoinBSSID = null;
-    //         if (!mWifiNative.setNetworkVariable(
-    //                 config.networkId,
-    //                 WifiConfiguration.bssidVarName,
-    //                 "any")) {
-    //             loge("removeNetwork, failed to remove BSSID");
-    //         }
-    //         // Loose the hiddenSSID flag
-    //         config.hiddenSSID = false;
-    //         if (!mWifiNative.setNetworkVariable(
-    //                 config.networkId,
-    //                 WifiConfiguration.hiddenSSIDVarName,
-    //                 Integer.toString(0))) {
-    //             loge("removeNetwork, failed to remove hiddenSSID");
-    //         }
-    //
-    //         mWifiNative.saveConfig();
-    //     }
-    //
-    //     writeIpAndProxyConfigurations();
-    //     sendConfiguredNetworksChangedBroadcast(config, WifiManager.CHANGE_REASON_REMOVED);
-    //     writeKnownNetworkHistory();
-    // }
-    // return remove;
-    assert(0);
-    return FALSE;
+    Boolean remove = TRUE;
+    AutoPtr<IInterface> obj;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
+    IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+    if (config != NULL) {
+        if (VDBG) {
+            Loge(String("removeNetwork "));
+                    //+ Integer.toString(netId) + " key=" +
+                    //config.configKey() + " config.id=" + Integer.toString(config.networkId));
+        }
+
+        // cancel the last user choice
+        String configKey;
+        config->ConfigKey(&configKey);
+        if (configKey.Equals(lastSelectedConfiguration)) {
+            lastSelectedConfiguration = String(NULL);
+        }
+
+        // Remove any associated keys
+        AutoPtr<IWifiEnterpriseConfig> eConfig;
+        config->GetEnterpriseConfig((IWifiEnterpriseConfig**)&eConfig);
+        if (eConfig != NULL) {
+            RemoveKeys(eConfig);
+        }
+
+        Boolean selfAdded;
+        config->GetSelfAdded(&selfAdded);
+        AutoPtr<IHashMap> linkedConfigurations;
+        config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
+        AutoPtr<IBitSet> allowedKeyManagement;
+        config->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
+        Boolean wpa_psk;
+        allowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_PSK, &wpa_psk);
+        if (selfAdded || linkedConfigurations != NULL || wpa_psk) {
+            remove = FALSE;
+            Loge(String("removeNetwork "));
+                    //+ Integer.toString(netId)
+                    //+ " key=" + config.configKey()
+                    //+ " config.id=" + Integer.toString(config.networkId)
+                    //+ " -> mark as deleted");
+        }
+
+        if (remove) {
+            mConfiguredNetworks->Remove(CoreUtils::Convert(netId));
+            mNetworkIds->Remove(CoreUtils::Convert(ConfigKey(config)));
+        } else {
+            /**
+             * We can't directly remove the configuration since we could re-add it ourselves,
+             * and that would look weird to the user.
+             * Instead mark it as deleted and completely hide it from the rest of the system.
+             */
+            config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_DELETED);
+            // Disable
+            Int32 networkId;
+            config->GetNetworkId(&networkId);
+            mWifiNative->DisableNetwork(networkId);
+            config->SetStatus(IWifiConfigurationStatus::DISABLED);
+            // Since we don't delete the configuration, clean it up and loose the history
+            config->SetLinkedConfigurations(NULL);
+            config->SetScanResultCache(NULL);
+            config->SetConnectChoices(NULL);
+            config->SetDefaultGwMacAddress(String(NULL));
+            AutoPtr<IIpConfiguration> ipconfig;
+            CIpConfiguration::New((IIpConfiguration**)&ipconfig);
+            config->SetIpConfiguration(ipconfig);
+            // Loose the PSK
+            if (!mWifiNative->SetNetworkVariable(
+                    networkId,
+                    IWifiConfiguration::pskVarName,
+                    String("\"") + DELETED_CONFIG_PSK + String("\""))) {
+                Loge(String("removeNetwork, failed to clear PSK, nid="));// + config.networkId);
+            }
+            // Loose the BSSID
+            config->SetBSSID(String(NULL));
+            config->SetAutoJoinBSSID(String(NULL));
+            if (!mWifiNative->SetNetworkVariable(
+                    networkId,
+                    IWifiConfiguration::bssidVarName,
+                    String("any"))) {
+                Loge(String("removeNetwork, failed to remove BSSID"));
+            }
+            // Loose the hiddenSSID flag
+            config->SetHiddenSSID(FALSE);
+            if (!mWifiNative->SetNetworkVariable(
+                    networkId,
+                    IWifiConfiguration::hiddenSSIDVarName,
+                    StringUtils::ToString(0))) {
+                Loge(String("removeNetwork, failed to remove hiddenSSID"));
+            }
+
+            mWifiNative->SaveConfig();
+        }
+
+        WriteIpAndProxyConfigurations();
+        SendConfiguredNetworksChangedBroadcast(config, IWifiManager::CHANGE_REASON_REMOVED);
+        WriteKnownNetworkHistory();
+    }
+    return remove;
 }
 
 void WifiConfigStore::SendConfiguredNetworksChangedBroadcast(
     /* [in] */ IWifiConfiguration* network,
     /* [in] */ Int32 reason)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
-    // intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-    // intent.putExtra(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, false);
-    // intent.putExtra(WifiManager.EXTRA_WIFI_CONFIGURATION, network);
-    // intent.putExtra(WifiManager.EXTRA_CHANGE_REASON, reason);
-    // mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-    assert(0);
+    AutoPtr<IIntent> intent;
+    CIntent::New(IWifiManager::CONFIGURED_NETWORKS_CHANGED_ACTION, (IIntent**)&intent);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    intent->PutExtra(IWifiManager::EXTRA_MULTIPLE_NETWORKS_CHANGED, FALSE);
+    intent->PutExtra(IWifiManager::EXTRA_WIFI_CONFIGURATION, IParcelable::Probe(network));
+    intent->PutExtra(IWifiManager::EXTRA_CHANGE_REASON, reason);
+    AutoPtr<IUserHandleHelper> uhHelper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
+    AutoPtr<IUserHandle> uh;
+    uhHelper->GetALL((IUserHandle**)&uh);
+
+    mContext->SendBroadcastAsUser(intent, uh);
 }
 
 void WifiConfigStore::SendConfiguredNetworksChangedBroadcast()
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
-    // intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-    // intent.putExtra(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, true);
-    // mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-    assert(0);
+    AutoPtr<IIntent> intent;
+    CIntent::New(IWifiManager::CONFIGURED_NETWORKS_CHANGED_ACTION, (IIntent**)&intent);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    intent->PutExtra(IWifiManager::EXTRA_MULTIPLE_NETWORKS_CHANGED, TRUE);
+
+    AutoPtr<IUserHandleHelper> uhHelper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
+    AutoPtr<IUserHandle> uh;
+    uhHelper->GetALL((IUserHandle**)&uh);
+    mContext->SendBroadcastAsUser(intent, uh);
 }
 
 AutoPtr<IMap> WifiConfigStore::ReadNetworkVariablesFromSupplicantFile(
     /* [in] */ const String& key)
 {
-    // ==================before translated======================
-    // Map<String, String> result = new HashMap<>();
-    // BufferedReader reader = null;
-    // if (VDBG) loge("readNetworkVariablesFromSupplicantFile key=" + key);
-    //
-    // try {
-    //     reader = new BufferedReader(new FileReader(SUPPLICANT_CONFIG_FILE));
-    //     boolean found = false;
-    //     String networkSsid = null;
-    //     String value = null;
-    //
-    //     for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-    //
-    //         if (line.matches("[ \\t]*network=\\{")) {
-    //             found = true;
-    //             networkSsid = null;
-    //             value = null;
-    //         } else if (line.matches("[ \\t]*\\}")) {
-    //             found = false;
-    //             networkSsid = null;
-    //             value = null;
-    //         }
-    //
-    //         if (found) {
-    //             String trimmedLine = line.trim();
-    //             if (trimmedLine.startsWith("ssid=")) {
-    //                 networkSsid = trimmedLine.substring(5);
-    //             } else if (trimmedLine.startsWith(key + "=")) {
-    //                 value = trimmedLine.substring(key.length() + 1);
-    //             }
-    //
-    //             if (networkSsid != null && value != null) {
-    //                 result.put(networkSsid, value);
-    //             }
-    //         }
-    //     }
-    // } catch (FileNotFoundException e) {
-    //     if (VDBG) loge("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e);
-    // } catch (IOException e) {
-    //     if (VDBG) loge("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e);
-    // } finally {
-    //     try {
-    //         if (reader != null) {
-    //             reader.close();
-    //         }
-    //     } catch (IOException e) {
-    //         // Just ignore the fact that we couldn't close
-    //     }
-    // }
-    //
-    // return result;
-    assert(0);
-    AutoPtr<IMap> empty;
-    return empty;
+    AutoPtr<IMap> result;
+    CHashMap::New((IMap**)&result);
+    AutoPtr<IBufferedReader> reader;
+    if (VDBG) Loge(String("readNetworkVariablesFromSupplicantFile key=") + key);
+
+    //try {
+        AutoPtr<IFileReader> fileReader;
+        ECode ec = CFileReader::New(String(SUPPLICANT_CONFIG_FILE), (IFileReader**)&fileReader);
+        if (FAILED(ec)) {
+            if (VDBG) Loge(String("Could not open ") + SUPPLICANT_CONFIG_FILE);
+            return result;
+        }
+
+        ec = CBufferedReader::New(IReader::Probe(fileReader), (IBufferedReader**)&reader);
+        if (FAILED(ec)) {
+            if (VDBG) Loge(String("Could not open ") + SUPPLICANT_CONFIG_FILE);
+            if (fileReader != NULL)
+                ICloseable::Probe(fileReader)->Close();
+            return result;
+        }
+        Boolean found = FALSE;
+        String networkSsid;
+        String value;
+
+        String line;
+        for (reader->ReadLine(&line); !line.IsNull(); reader->ReadLine(&line)) {
+
+            Boolean match;
+            if (StringUtils::Matches(line, String("[ \\t]*network=\\{"), &match), match) {
+                found = TRUE;
+                networkSsid = String(NULL);
+                value = String(NULL);
+            } else if (StringUtils::Matches(line, String("[ \\t]*\\}"), &match), match) {
+                found = FALSE;
+                networkSsid = String(NULL);
+                value = String(NULL);
+            }
+
+            if (found) {
+                String trimmedLine = line.Trim();
+                if (trimmedLine.StartWith(String("ssid="))) {
+                    networkSsid = trimmedLine.Substring(5);
+                } else if (trimmedLine.StartWith(key + String("="))) {
+                    value = trimmedLine.Substring(key.GetLength() + 1);
+                }
+
+                if (!networkSsid.IsNull() && !value.IsNull()) {
+                    result->Put(CoreUtils::Convert(networkSsid), CoreUtils::Convert(value));
+                }
+            }
+        }
+    //} catch (FileNotFoundException e) {
+    //    if (VDBG) loge("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e);
+    //} catch (IOException e) {
+    //    if (VDBG) loge("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e);
+    //} finally {
+    //    try {
+            if (reader != NULL) {
+                ICloseable::Probe(reader)->Close();
+            }
+    //    } catch (IOException e) {
+    //        // Just ignore the fact that we couldn't close
+    //    }
+    //}
+
+    return result;
 }
 
 String WifiConfigStore::ReadNetworkVariableFromSupplicantFile(
     /* [in] */ const String& ssid,
     /* [in] */ const String& key)
 {
-    // ==================before translated======================
-    // Map<String, String> data = readNetworkVariablesFromSupplicantFile(key);
-    // if (VDBG) loge("readNetworkVariableFromSupplicantFile ssid=[" + ssid + "] key=" + key);
-    // return data.get(ssid);
-    assert(0);
-    return String("");
+    AutoPtr<IMap> data = ReadNetworkVariablesFromSupplicantFile(key);
+    if (VDBG) Loge(String("readNetworkVariableFromSupplicantFile ssid=[") + ssid + String("] key=") + key);
+    AutoPtr<IInterface> obj;
+    data->Get(CoreUtils::Convert(ssid), (IInterface**)&obj);
+    String result;
+    ICharSequence::Probe(obj)->ToString(&result);
+    return result;
 }
 
 void WifiConfigStore::MarkAllNetworksDisabledExcept(
     /* [in] */ Int32 netId)
 {
-    // ==================before translated======================
-    // for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     if(config != null && config.networkId != netId) {
-    //         if (config.status != Status.DISABLED) {
-    //             config.status = Status.DISABLED;
-    //             config.disableReason = WifiConfiguration.DISABLED_UNKNOWN_REASON;
-    //         }
-    //     }
-    // }
-    assert(0);
+    AutoPtr<ICollection> values;
+    mConfiguredNetworks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> iter;
+    values->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
+
+        Int32 networkId;
+        config->GetNetworkId(&networkId);
+        if(config != NULL && networkId != netId) {
+            Int32 status;
+            config->GetStatus(&status);
+            if (status != IWifiConfigurationStatus::DISABLED) {
+                config->SetStatus(IWifiConfigurationStatus::DISABLED);
+                config->SetDisableReason(IWifiConfiguration::DISABLED_UNKNOWN_REASON);
+            }
+        }
+    }
 }
 
 void WifiConfigStore::MarkAllNetworksDisabled()
 {
-    // ==================before translated======================
-    // markAllNetworksDisabledExcept(INVALID_NETWORK_ID);
-    assert(0);
+    MarkAllNetworksDisabledExcept(IWifiConfiguration::INVALID_NETWORK_ID);
 }
 
 void WifiConfigStore::ReadNetworkHistory()
 {
-    // ==================before translated======================
-    // if (showNetworks) {
-    //     localLog("readNetworkHistory() path:" + networkHistoryConfigFile);
-    // }
-    // DataInputStream in = null;
-    // try {
-    //     in = new DataInputStream(new BufferedInputStream(new FileInputStream(
-    //             networkHistoryConfigFile)));
-    //     WifiConfiguration config = null;
-    //     while (true) {
-    //         int id = -1;
-    //         String key = in.readUTF();
-    //         String bssid = null;
-    //         String ssid = null;
-    //
-    //         int freq = 0;
-    //         int status = 0;
-    //         long seen = 0;
-    //         int rssi = WifiConfiguration.INVALID_RSSI;
-    //         String caps = null;
-    //         if (key.startsWith(CONFIG_KEY)) {
-    //
-    //             if (config != null) {
-    //                 config = null;
-    //             }
-    //             String configKey = key.replace(CONFIG_KEY, "");
-    //             configKey = configKey.replace(SEPARATOR_KEY, "");
-    //             // get the networkId for that config Key
-    //             Integer n = mNetworkIds.get(configKey.hashCode());
-    //             // skip reading that configuration data
-    //             // since we don't have a corresponding network ID
-    //             if (n == null) {
-    //                 localLog("readNetworkHistory didnt find netid for hash="
-    //                         + Integer.toString(configKey.hashCode())
-    //                         + " key: " + configKey);
-    //                 continue;
-    //             }
-    //             config = mConfiguredNetworks.get(n);
-    //             if (config == null) {
-    //                 localLog("readNetworkHistory didnt find config for netid="
-    //                         + n.toString()
-    //                         + " key: " + configKey);
-    //             }
-    //             status = 0;
-    //             ssid = null;
-    //             bssid = null;
-    //             freq = 0;
-    //             seen = 0;
-    //             rssi = WifiConfiguration.INVALID_RSSI;
-    //             caps = null;
-    //
-    //         } else if (config != null && config.duplicateNetwork == false) {
-    //             if (key.startsWith(SSID_KEY)) {
-    //                 ssid = key.replace(SSID_KEY, "");
-    //                 ssid = ssid.replace(SEPARATOR_KEY, "");
-    //                 if (config.SSID != null && !config.SSID.equals(ssid)) {
-    //                     loge("Error parsing network history file, mismatched SSIDs");
-    //                     config = null; //error
-    //                     ssid = null;
-    //                 } else {
-    //                     config.SSID = ssid;
-    //                 }
-    //             }
-    //
-    //             if (key.startsWith(FQDN_KEY)) {
-    //                 String fqdn = key.replace(FQDN_KEY, "");
-    //                 fqdn = fqdn.replace(SEPARATOR_KEY, "");
-    //                 config.FQDN = fqdn;
-    //             }
-    //
-    //             if (key.startsWith(DEFAULT_GW_KEY)) {
-    //                 String gateway = key.replace(DEFAULT_GW_KEY, "");
-    //                 gateway = gateway.replace(SEPARATOR_KEY, "");
-    //                 config.defaultGwMacAddress = gateway;
-    //             }
-    //
-    //             if (key.startsWith(STATUS_KEY)) {
-    //                 String st = key.replace(STATUS_KEY, "");
-    //                 st = st.replace(SEPARATOR_KEY, "");
-    //                 config.autoJoinStatus = Integer.parseInt(st);
-    //             }
-    //
-    //             if (key.startsWith(SUPPLICANT_DISABLE_REASON_KEY)) {
-    //                 String reason = key.replace(SUPPLICANT_DISABLE_REASON_KEY, "");
-    //                 reason = reason.replace(SEPARATOR_KEY, "");
-    //                 config.disableReason = Integer.parseInt(reason);
-    //             }
-    //
-    //             if (key.startsWith(SELF_ADDED_KEY)) {
-    //                 String selfAdded = key.replace(SELF_ADDED_KEY, "");
-    //                 selfAdded = selfAdded.replace(SEPARATOR_KEY, "");
-    //                 config.selfAdded = Boolean.parseBoolean(selfAdded);
-    //             }
-    //
-    //             if (key.startsWith(DID_SELF_ADD_KEY)) {
-    //                 String didSelfAdd = key.replace(DID_SELF_ADD_KEY, "");
-    //                 didSelfAdd = didSelfAdd.replace(SEPARATOR_KEY, "");
-    //                 config.didSelfAdd = Boolean.parseBoolean(didSelfAdd);
-    //             }
-    //
-    //             if (key.startsWith(NO_INTERNET_ACCESS_KEY)) {
-    //                 String access = key.replace(NO_INTERNET_ACCESS_KEY, "");
-    //                 access = access.replace(SEPARATOR_KEY, "");
-    //                 config.noInternetAccess = Boolean.parseBoolean(access);
-    //             }
-    //
-    //             if (key.startsWith(EPHEMERAL_KEY)) {
-    //                 String access = key.replace(EPHEMERAL_KEY, "");
-    //                 access = access.replace(SEPARATOR_KEY, "");
-    //                 config.ephemeral = Boolean.parseBoolean(access);
-    //             }
-    //
-    //             if (key.startsWith(CREATOR_UID_KEY)) {
-    //                 String uid = key.replace(CREATOR_UID_KEY, "");
-    //                 uid = uid.replace(SEPARATOR_KEY, "");
-    //                 config.creatorUid = Integer.parseInt(uid);
-    //             }
-    //
-    //             if (key.startsWith(BLACKLIST_MILLI_KEY)) {
-    //                 String milli = key.replace(BLACKLIST_MILLI_KEY, "");
-    //                 milli = milli.replace(SEPARATOR_KEY, "");
-    //                 config.blackListTimestamp = Long.parseLong(milli);
-    //             }
-    //
-    //             if (key.startsWith(NUM_CONNECTION_FAILURES_KEY)) {
-    //                 String num = key.replace(NUM_CONNECTION_FAILURES_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.numConnectionFailures = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(NUM_IP_CONFIG_FAILURES_KEY)) {
-    //                 String num = key.replace(NUM_IP_CONFIG_FAILURES_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.numIpConfigFailures = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(NUM_AUTH_FAILURES_KEY)) {
-    //                 String num = key.replace(NUM_AUTH_FAILURES_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.numIpConfigFailures = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(SCORER_OVERRIDE_KEY)) {
-    //                 String num = key.replace(SCORER_OVERRIDE_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.numScorerOverride = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(SCORER_OVERRIDE_AND_SWITCH_KEY)) {
-    //                 String num = key.replace(SCORER_OVERRIDE_AND_SWITCH_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.numScorerOverrideAndSwitchedNetwork = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(NUM_ASSOCIATION_KEY)) {
-    //                 String num = key.replace(NUM_ASSOCIATION_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.numAssociation = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(JOIN_ATTEMPT_BOOST_KEY)) {
-    //                 String num = key.replace(JOIN_ATTEMPT_BOOST_KEY, "");
-    //                 num = num.replace(SEPARATOR_KEY, "");
-    //                 config.autoJoinUseAggressiveJoinAttemptThreshold = Integer.parseInt(num);
-    //             }
-    //
-    //             if (key.startsWith(CONNECT_UID_KEY)) {
-    //                 String uid = key.replace(CONNECT_UID_KEY, "");
-    //                 uid = uid.replace(SEPARATOR_KEY, "");
-    //                 config.lastConnectUid = Integer.parseInt(uid);
-    //             }
-    //
-    //             if (key.startsWith(UPDATE_UID_KEY)) {
-    //                 String uid = key.replace(UPDATE_UID_KEY, "");
-    //                 uid = uid.replace(SEPARATOR_KEY, "");
-    //                 config.lastUpdateUid = Integer.parseInt(uid);
-    //             }
-    //
-    //             if (key.startsWith(FAILURE_KEY)) {
-    //                 config.lastFailure = key.replace(FAILURE_KEY, "");
-    //                 config.lastFailure = config.lastFailure.replace(SEPARATOR_KEY, "");
-    //             }
-    //
-    //             if (key.startsWith(PEER_CONFIGURATION_KEY)) {
-    //                 config.peerWifiConfiguration = key.replace(PEER_CONFIGURATION_KEY, "");
-    //                 config.peerWifiConfiguration =
-    //                         config.peerWifiConfiguration.replace(SEPARATOR_KEY, "");
-    //             }
-    //
-    //             if (key.startsWith(CHOICE_KEY)) {
-    //                 String choiceStr = key.replace(CHOICE_KEY, "");
-    //                 choiceStr = choiceStr.replace(SEPARATOR_KEY, "");
-    //                 String configKey = "";
-    //                 int choice = 0;
-    //                 Matcher match = mConnectChoice.matcher(choiceStr);
-    //                 if (!match.find()) {
-    //                     if (DBG) Log.d(TAG, "WifiConfigStore: connectChoice: " +
-    //                             " Couldnt match pattern : " + choiceStr);
-    //                 } else {
-    //                     configKey = match.group(1);
-    //                     try {
-    //                         choice = Integer.parseInt(match.group(2));
-    //                     } catch (NumberFormatException e) {
-    //                         choice = 0;
-    //                     }
-    //                     if (choice > 0) {
-    //                         if (config.connectChoices == null) {
-    //                             config.connectChoices = new HashMap<String, Integer>();
-    //                         }
-    //                         config.connectChoices.put(configKey, choice);
-    //                     }
-    //                 }
-    //             }
-    //
-    //             if (key.startsWith(LINK_KEY)) {
-    //                 String configKey = key.replace(LINK_KEY, "");
-    //                 configKey = configKey.replace(SEPARATOR_KEY, "");
-    //                 if (config.linkedConfigurations == null) {
-    //                     config.linkedConfigurations = new HashMap<String, Integer>();
-    //                 }
-    //                 if (config.linkedConfigurations != null) {
-    //                     config.linkedConfigurations.put(configKey, -1);
-    //                 }
-    //             }
-    //
-    //             if (key.startsWith(BSSID_KEY)) {
-    //                 if (key.startsWith(BSSID_KEY)) {
-    //                     bssid = key.replace(BSSID_KEY, "");
-    //                     bssid = bssid.replace(SEPARATOR_KEY, "");
-    //                     freq = 0;
-    //                     seen = 0;
-    //                     rssi = WifiConfiguration.INVALID_RSSI;
-    //                     caps = "";
-    //                     status = 0;
-    //                 }
-    //
-    //                 if (key.startsWith(RSSI_KEY)) {
-    //                     String lvl = key.replace(RSSI_KEY, "");
-    //                     lvl = lvl.replace(SEPARATOR_KEY, "");
-    //                     rssi = Integer.parseInt(lvl);
-    //                 }
-    //
-    //                 if (key.startsWith(BSSID_STATUS_KEY)) {
-    //                     String st = key.replace(BSSID_STATUS_KEY, "");
-    //                     st = st.replace(SEPARATOR_KEY, "");
-    //                     status = Integer.parseInt(st);
-    //                 }
-    //
-    //                 if (key.startsWith(FREQ_KEY)) {
-    //                     String channel = key.replace(FREQ_KEY, "");
-    //                     channel = channel.replace(SEPARATOR_KEY, "");
-    //                     freq = Integer.parseInt(channel);
-    //                 }
-    //
-    //                 if (key.startsWith(DATE_KEY)) {
-    //                 /*
-    //                  * when reading the configuration from file we don't update the date
-    //                  * so as to avoid reading back stale or non-sensical data that would
-    //                  * depend on network time.
-    //                  * The date of a WifiConfiguration should only come from actual scan result.
-    //                  *
-    //                 String s = key.replace(FREQ_KEY, "");
-    //                 seen = Integer.getInteger(s);
-    //                 */
-    //                 }
-    //
-    //                 if (key.startsWith(BSSID_KEY_END)) {
-    //
-    //                     if ((bssid != null) && (ssid != null)) {
-    //
-    //                         if (config.scanResultCache == null) {
-    //                             config.scanResultCache = new HashMap<String, ScanResult>();
-    //                         }
-    //                         WifiSsid wssid = WifiSsid.createFromAsciiEncoded(ssid);
-    //                         ScanResult result = new ScanResult(wssid, bssid,
-    //                                 caps, rssi, freq, (long) 0);
-    //                         result.seen = seen;
-    //                         config.scanResultCache.put(bssid, result);
-    //                         result.autoJoinStatus = status;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // } catch (EOFException ignore) {
-    //     if (in != null) {
-    //         try {
-    //             in.close();
-    //         } catch (Exception e) {
-    //             loge("readNetworkHistory: Error reading file" + e);
-    //         }
-    //     }
-    // } catch (IOException e) {
-    //     loge("readNetworkHistory: No config file, revert to default" + e);
-    // }
-    //
-    // if(in!=null) {
-    //     try {
-    //         in.close();
-    //     } catch (Exception e) {
-    //         loge("readNetworkHistory: Error closing file" + e);
-    //     }
-    // }
-    assert(0);
+    if (showNetworks) {
+        LocalLog(String("readNetworkHistory() path:") + networkHistoryConfigFile);
+    }
+    AutoPtr<IDataInputStream> in;
+    //try {
+    AutoPtr<IFileInputStream> ifs;
+    CFileInputStream::New(networkHistoryConfigFile, (IFileInputStream**)&ifs);
+    AutoPtr<IBufferedInputStream> bis;
+    CBufferedInputStream::New(IInputStream::Probe(ifs), (IBufferedInputStream**)&bis);
+    CDataInputStream::New(IInputStream::Probe(bis), (IDataInputStream**)&in);
+
+    AutoPtr<IWifiConfiguration> config;
+    while (TRUE) {
+        IDataInput* di = IDataInput::Probe(in);
+        //Int32 id = -1;
+        String key;
+        di->ReadUTF(&key);
+        String bssid;
+        String ssid;
+
+        Int32 freq = 0;
+        Int32 status = 0;
+        Int64 seen = 0;
+        Int32 rssi = IWifiConfiguration::INVALID_RSSI;
+        String caps;
+        Boolean duplicateNetwork = FALSE;
+        if (key.StartWith(CONFIG_KEY)) {
+
+            if (config != NULL) {
+                config = NULL;
+            }
+            String configKey1;
+            StringUtils::Replace(key, CONFIG_KEY, String(""), &configKey1);
+            String configKey;
+            StringUtils::Replace(configKey1, SEPARATOR_KEY, String(""), &configKey);
+            // get the networkId for that config Key
+            AutoPtr<IInterface> obj;
+            mNetworkIds->Get(CoreUtils::Convert(configKey.GetHashCode()), (IInterface**)&obj);
+            IInteger32* n = IInteger32::Probe(obj);
+            // skip reading that configuration data
+            // since we don't have a corresponding network ID
+            if (n == NULL) {
+                LocalLog(String("readNetworkHistory didnt find netid for hash="));
+                        //+ Integer.toString(configKey.hashCode())
+                        //+ " key: " + configKey);
+                continue;
+            }
+            AutoPtr<IInterface> configObj;
+            mConfiguredNetworks->Get(n, (IInterface**)&configObj);
+            config = IWifiConfiguration::Probe(configObj);;
+            if (config == NULL) {
+                LocalLog(String("readNetworkHistory didnt find config for netid="));
+                        //+ n.toString()
+                        //+ " key: " + configKey);
+            }
+            status = 0;
+            ssid = String(NULL);
+            bssid = String(NULL);
+            freq = 0;
+            seen = 0;
+            rssi = IWifiConfiguration::INVALID_RSSI;
+            caps = String(NULL);
+
+        } else if (config != NULL && (/*TODO config->GetDuplicateNetwork(&duplicateNetwork), */duplicateNetwork) ==  FALSE) {
+            if (key.StartWith(SSID_KEY)) {
+                String key1;
+                StringUtils::Replace(key, SSID_KEY, String(""), &key1);
+                StringUtils::Replace(key1, SEPARATOR_KEY, String(""), &ssid);
+                String SSID;
+                config->GetSSID(&SSID);
+                if (!SSID.IsNull() && !SSID.Equals(ssid)) {
+                    Loge(String("Error parsing network history file, mismatched SSIDs"));
+                    config = NULL; //error
+                    ssid = String(NULL);
+                } else {
+                    config->SetSSID(ssid);
+                }
+            }
+
+            if (key.StartWith(FQDN_KEY)) {
+                String fqdn1;
+                StringUtils::Replace(key, FQDN_KEY, String(""), &fqdn1);
+                String fqdn;
+                StringUtils::Replace(fqdn1, SEPARATOR_KEY, String(""), &fqdn);
+                config->SetFQDN(fqdn);
+            }
+
+            if (key.StartWith(DEFAULT_GW_KEY)) {
+                String gateway1;
+                StringUtils::Replace(key, DEFAULT_GW_KEY, String(""), &gateway1);
+                String gateway;
+                StringUtils::Replace(gateway1, SEPARATOR_KEY, String(""), &gateway);
+                config->SetDefaultGwMacAddress(gateway);
+            }
+
+            if (key.StartWith(STATUS_KEY)) {
+                String st1;
+                StringUtils::Replace(key, STATUS_KEY, String(""), &st1);
+                String st;
+                StringUtils::Replace(st1, SEPARATOR_KEY, String(""), &st);
+                config->SetAutoJoinStatus(StringUtils::ParseInt32(st));
+            }
+
+            if (key.StartWith(SUPPLICANT_DISABLE_REASON_KEY)) {
+                String reason1;
+                StringUtils::Replace(key, SUPPLICANT_DISABLE_REASON_KEY, String(""), &reason1);
+                String reason;
+                StringUtils::Replace(reason1, SEPARATOR_KEY, String(""), &reason);
+                config->SetDisableReason(StringUtils::ParseInt32(reason));
+            }
+
+            if (key.StartWith(SELF_ADDED_KEY)) {
+                String selfAdded1;
+                StringUtils::Replace(key, SELF_ADDED_KEY, String(""), &selfAdded1);
+                String selfAdded;
+                StringUtils::Replace(selfAdded1, SEPARATOR_KEY, String(""), &selfAdded);
+                config->SetSelfAdded(StringUtils::ParseBoolean(selfAdded));
+            }
+
+            if (key.StartWith(DID_SELF_ADD_KEY)) {
+                String didSelfAdd1;
+                StringUtils::Replace(key, DID_SELF_ADD_KEY, String(""), &didSelfAdd1);
+                String didSelfAdd;
+                StringUtils::Replace(didSelfAdd1, SEPARATOR_KEY, String(""), &didSelfAdd);
+                config->SetDidSelfAdd(StringUtils::ParseBoolean(didSelfAdd));
+            }
+
+            if (key.StartWith(NO_INTERNET_ACCESS_KEY)) {
+                String access1;
+                StringUtils::Replace(key, NO_INTERNET_ACCESS_KEY, String(""), &access1);
+                String access;
+                StringUtils::Replace(access1, SEPARATOR_KEY, String(""), &access);
+                config->SetNoInternetAccess(StringUtils::ParseBoolean(access));
+            }
+
+            if (key.StartWith(EPHEMERAL_KEY)) {
+                String temp;
+                StringUtils::Replace(key, EPHEMERAL_KEY, String(""), &temp);
+                String access;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &access);
+                config->SetEphemeral(StringUtils::ParseBoolean(access));
+            }
+
+            if (key.StartWith(CREATOR_UID_KEY)) {
+                String temp;
+                StringUtils::Replace(key, CREATOR_UID_KEY, String(""), &temp);
+                String uid;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &uid);
+                config->SetCreatorUid(StringUtils::ParseInt32(uid));
+            }
+
+            if (key.StartWith(BLACKLIST_MILLI_KEY)) {
+                String temp;
+                StringUtils::Replace(key, BLACKLIST_MILLI_KEY, String(""), &temp);
+                String milli;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &milli);
+                config->SetBlackListTimestamp(StringUtils::ParseInt64(milli));
+            }
+
+            if (key.StartWith(NUM_CONNECTION_FAILURES_KEY)) {
+                String temp;
+                StringUtils::Replace(key, NUM_CONNECTION_FAILURES_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetNumConnectionFailures(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(NUM_IP_CONFIG_FAILURES_KEY)) {
+                String temp;
+                StringUtils::Replace(key, NUM_IP_CONFIG_FAILURES_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetNumIpConfigFailures(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(NUM_AUTH_FAILURES_KEY)) {
+                String temp;
+                StringUtils::Replace(key, NUM_AUTH_FAILURES_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetNumIpConfigFailures(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(SCORER_OVERRIDE_KEY)) {
+                String temp;
+                StringUtils::Replace(key, SCORER_OVERRIDE_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetNumScorerOverride(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(SCORER_OVERRIDE_AND_SWITCH_KEY)) {
+                String temp;
+                StringUtils::Replace(key, SCORER_OVERRIDE_AND_SWITCH_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetNumScorerOverrideAndSwitchedNetwork(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(NUM_ASSOCIATION_KEY)) {
+                String temp;
+                StringUtils::Replace(key, NUM_ASSOCIATION_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetNumAssociation(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(JOIN_ATTEMPT_BOOST_KEY)) {
+                String temp;
+                StringUtils::Replace(key, JOIN_ATTEMPT_BOOST_KEY, String(""), &temp);
+                String num;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &num);
+                config->SetAutoJoinUseAggressiveJoinAttemptThreshold(StringUtils::ParseInt32(num));
+            }
+
+            if (key.StartWith(CONNECT_UID_KEY)) {
+                String temp;
+                StringUtils::Replace(key, CONNECT_UID_KEY, String(""), &temp);
+                String uid;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &uid);
+                config->SetLastConnectUid(StringUtils::ParseInt32(uid));
+            }
+
+            if (key.StartWith(UPDATE_UID_KEY)) {
+                String temp;
+                StringUtils::Replace(key, UPDATE_UID_KEY, String(""), &temp);
+                String uid;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &uid);
+                config->SetLastUpdateUid(StringUtils::ParseInt32(uid));
+            }
+
+            if (key.StartWith(FAILURE_KEY)) {
+                String temp;
+                StringUtils::Replace(key, FAILURE_KEY, String(""), &temp);
+                String temp2;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &temp2);
+                config->SetLastFailure(temp2);
+            }
+
+            if (key.StartWith(PEER_CONFIGURATION_KEY)) {
+                String temp;
+                StringUtils::Replace(key, PEER_CONFIGURATION_KEY, String(""), &temp);
+                String temp2;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &temp2);
+                config->SetPeerWifiConfiguration(temp2);
+            }
+
+            if (key.StartWith(CHOICE_KEY)) {
+                String temp;
+                StringUtils::Replace(key, CHOICE_KEY, String(""), &temp);
+                String choiceStr;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &choiceStr);
+                String configKey("");
+                Int32 choice = 0;
+                AutoPtr<IMatcher> match;
+                mConnectChoice->Matcher(choiceStr, (IMatcher**)&match);
+                Boolean matchFound;
+                if (!(match->Find(&matchFound), matchFound)) {
+                    if (DBG) Logger::D(TAG, "WifiConfigStore: connectChoice:  Couldnt match pattern : %s", choiceStr.string());
+                } else {
+                    IMatchResult* matchResult = IMatchResult::Probe(match);
+                    matchResult->Group(1, &configKey);
+                    //try {
+                    String g2;
+                    matchResult->Group(2, &g2);
+                    ECode ec = StringToIntegral::Parse(g2, 10, &choice);
+                    if (FAILED(ec)) {
+                        choice = 0;
+                    }
+                    //} catch (NumberFormatException e) {
+                    //    choice = 0;
+                    //}
+                    if (choice > 0) {
+                        AutoPtr<IHashMap> connectChoices;
+                        config->GetConnectChoices((IHashMap**)&connectChoices);
+                        if (connectChoices == NULL) {
+                            CHashMap::New((IHashMap**)&connectChoices);
+                            config->SetConnectChoices(connectChoices);
+                        }
+                        connectChoices->Put(CoreUtils::Convert(configKey), CoreUtils::Convert(choice));
+                    }
+                }
+            }
+
+            if (key.StartWith(LINK_KEY)) {
+                String temp;
+                StringUtils::Replace(key, LINK_KEY, String(""), &temp);
+                String configKey;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &configKey);
+                AutoPtr<IHashMap> linkedConfigurations;
+                config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
+                if (linkedConfigurations == NULL) {
+                    CHashMap::New((IHashMap**)&linkedConfigurations);
+                    config->SetLinkedConfigurations(linkedConfigurations);
+                }
+                if (linkedConfigurations != NULL) {
+                    linkedConfigurations->Put(CoreUtils::Convert(configKey), CoreUtils::Convert(-1));
+                }
+            }
+
+            if (key.StartWith(BSSID_KEY)) {
+                if (key.StartWith(BSSID_KEY)) {
+                    String temp;
+                    StringUtils::Replace(key, BSSID_KEY, String(""), &temp);
+                    StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &bssid);
+                    freq = 0;
+                    seen = 0;
+                    rssi = IWifiConfiguration::INVALID_RSSI;
+                    caps = String("");
+                    status = 0;
+                }
+
+                if (key.StartWith(RSSI_KEY)) {
+                    String temp;
+                    StringUtils::Replace(key, RSSI_KEY, String(""), &temp);
+                    String lvl;
+                    StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &lvl);
+                    rssi = StringUtils::ParseInt32(lvl);
+                }
+
+                if (key.StartWith(BSSID_STATUS_KEY)) {
+                    String temp;
+                    StringUtils::Replace(key, BSSID_STATUS_KEY, String(""), &temp);
+                    String st;
+                    StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                    status = StringUtils::ParseInt32(st);
+                }
+
+                if (key.StartWith(FREQ_KEY)) {
+                    String temp;
+                    StringUtils::Replace(key, FREQ_KEY, String(""), &temp);
+                    String channel;
+                    StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &channel);
+                    freq = StringUtils::ParseInt32(channel);
+                }
+
+                if (key.StartWith(DATE_KEY)) {
+                    /*
+                     * when reading the configuration from file we don't update the date
+                     * so as to avoid reading back stale or non-sensical data that would
+                     * depend on network time.
+                     * The date of a WifiConfiguration should only come from actual scan result.
+                     *
+                     String s = key.replace(FREQ_KEY, "");
+                     seen = Integer.getInteger(s);
+                     */
+                }
+
+                if (key.StartWith(BSSID_KEY_END)) {
+
+                    if ((!bssid.IsNull()) && (!ssid.IsNull())) {
+
+                        AutoPtr<IHashMap> scanResultCache;
+                        config->GetScanResultCache((IHashMap**)&scanResultCache);
+                        if (scanResultCache == NULL) {
+                            CHashMap::New((IHashMap**)&scanResultCache);
+                            config->SetScanResultCache(scanResultCache);
+                        }
+                        AutoPtr<IWifiSsidHelper> wssidHelper;
+                        CWifiSsidHelper::AcquireSingleton((IWifiSsidHelper**)&wssidHelper);
+                        AutoPtr<IWifiSsid> wssid;
+                        wssidHelper->CreateFromAsciiEncoded(ssid, (IWifiSsid**)&wssid);
+                        AutoPtr<IScanResult> result;
+                        CScanResult::New(wssid, bssid,
+                                caps, rssi, freq, (Int64) 0, (IScanResult**)&result);
+                        result->SetSeen(seen);
+                        scanResultCache->Put(CoreUtils::Convert(bssid), result);
+                        result->SetAutoJoinStatus(status);
+                    }
+                }
+            }
+        }
+    }
+    //} catch (EOFException ignore) {
+    //    if (in != null) {
+    //        try {
+    //            in.close();
+    //        } catch (Exception e) {
+    //            loge("readNetworkHistory: Error reading file" + e);
+    //        }
+    //    }
+    //} catch (IOException e) {
+    //    loge("readNetworkHistory: No config file, revert to default" + e);
+    //}
+
+    if(in!=NULL) {
+        //try {
+        ICloseable::Probe(in)->Close();
+        //} catch (Exception e) {
+        //    loge("readNetworkHistory: Error closing file" + e);
+        //}
+    }
 }
 
 void WifiConfigStore::ReadAutoJoinConfig()
 {
-    // ==================before translated======================
-    // BufferedReader reader = null;
+    AutoPtr<IBufferedReader> reader;
     // try {
-    //
-    //     reader = new BufferedReader(new FileReader(autoJoinConfigFile));
-    //
-    //     for (String key = reader.readLine(); key != null; key = reader.readLine()) {
-    //         if (key != null) {
-    //             Log.d(TAG, "readAutoJoinConfig line: " + key);
-    //         }
-    //         if (key.startsWith(ENABLE_AUTO_JOIN_WHILE_ASSOCIATED_KEY)) {
-    //             String st = key.replace(ENABLE_AUTO_JOIN_WHILE_ASSOCIATED_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 enableAutoJoinWhenAssociated = Integer.parseInt(st) != 0;
-    //                 Log.d(TAG,"readAutoJoinConfig: enabled = " + enableAutoJoinWhenAssociated);
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(ENABLE_FULL_BAND_SCAN_WHEN_ASSOCIATED_KEY)) {
-    //             String st = key.replace(ENABLE_FULL_BAND_SCAN_WHEN_ASSOCIATED_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 enableFullBandScanWhenAssociated = Integer.parseInt(st) != 0;
-    //                 Log.d(TAG,"readAutoJoinConfig: enableFullBandScanWhenAssociated = "
-    //                         + enableFullBandScanWhenAssociated);
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(ENABLE_AUTO_JOIN_SCAN_WHILE_ASSOCIATED_KEY)) {
-    //             String st = key.replace(ENABLE_AUTO_JOIN_SCAN_WHILE_ASSOCIATED_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 enableAutoJoinScanWhenAssociated = Integer.parseInt(st) != 0;
-    //                 Log.d(TAG,"readAutoJoinConfig: enabled = "
-    //                         + enableAutoJoinScanWhenAssociated);
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(ENABLE_CHIP_WAKE_UP_WHILE_ASSOCIATED_KEY)) {
-    //             String st = key.replace(ENABLE_CHIP_WAKE_UP_WHILE_ASSOCIATED_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 enableChipWakeUpWhenAssociated = Integer.parseInt(st) != 0;
-    //                 Log.d(TAG,"readAutoJoinConfig: enabled = "
-    //                         + enableChipWakeUpWhenAssociated);
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(ENABLE_RSSI_POLL_WHILE_ASSOCIATED_KEY)) {
-    //             String st = key.replace(ENABLE_RSSI_POLL_WHILE_ASSOCIATED_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 enableRssiPollWhenAssociated = Integer.parseInt(st) != 0;
-    //                 Log.d(TAG,"readAutoJoinConfig: enabled = "
-    //                         + enableRssiPollWhenAssociated);
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_5G_KEY)) {
-    //             String st =
-    //                     key.replace(THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_5G_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdInitialAutoJoinAttemptMin5RSSI = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdInitialAutoJoinAttemptMin5RSSI = "
-    //                         + Integer.toString(thresholdInitialAutoJoinAttemptMin5RSSI));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_24G_KEY)) {
-    //             String st =
-    //                     key.replace(THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_24G_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdInitialAutoJoinAttemptMin24RSSI = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdInitialAutoJoinAttemptMin24RSSI = "
-    //                         + Integer.toString(thresholdInitialAutoJoinAttemptMin24RSSI));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_UNBLACKLIST_HARD_5G_KEY)) {
-    //             String st = key.replace(THRESHOLD_UNBLACKLIST_HARD_5G_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdUnblacklistThreshold5Hard = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdUnblacklistThreshold5Hard = "
-    //                     + Integer.toString(thresholdUnblacklistThreshold5Hard));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_UNBLACKLIST_SOFT_5G_KEY)) {
-    //             String st = key.replace(THRESHOLD_UNBLACKLIST_SOFT_5G_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdUnblacklistThreshold5Soft = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdUnblacklistThreshold5Soft = "
-    //                     + Integer.toString(thresholdUnblacklistThreshold5Soft));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_UNBLACKLIST_HARD_24G_KEY)) {
-    //             String st = key.replace(THRESHOLD_UNBLACKLIST_HARD_24G_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdUnblacklistThreshold24Hard = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdUnblacklistThreshold24Hard = "
-    //                     + Integer.toString(thresholdUnblacklistThreshold24Hard));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_UNBLACKLIST_SOFT_24G_KEY)) {
-    //             String st = key.replace(THRESHOLD_UNBLACKLIST_SOFT_24G_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdUnblacklistThreshold24Soft = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdUnblacklistThreshold24Soft = "
-    //                     + Integer.toString(thresholdUnblacklistThreshold24Soft));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_GOOD_RSSI_5_KEY)) {
-    //             String st = key.replace(THRESHOLD_GOOD_RSSI_5_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdGoodRssi5 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdGoodRssi5 = "
-    //                     + Integer.toString(thresholdGoodRssi5));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_LOW_RSSI_5_KEY)) {
-    //             String st = key.replace(THRESHOLD_LOW_RSSI_5_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdLowRssi5 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdLowRssi5 = "
-    //                     + Integer.toString(thresholdLowRssi5));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_BAD_RSSI_5_KEY)) {
-    //             String st = key.replace(THRESHOLD_BAD_RSSI_5_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdBadRssi5 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdBadRssi5 = "
-    //                     + Integer.toString(thresholdBadRssi5));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_GOOD_RSSI_24_KEY)) {
-    //             String st = key.replace(THRESHOLD_GOOD_RSSI_24_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdGoodRssi24 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdGoodRssi24 = "
-    //                     + Integer.toString(thresholdGoodRssi24));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_LOW_RSSI_24_KEY)) {
-    //             String st = key.replace(THRESHOLD_LOW_RSSI_24_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdLowRssi24 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdLowRssi24 = "
-    //                     + Integer.toString(thresholdLowRssi24));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_BAD_RSSI_24_KEY)) {
-    //             String st = key.replace(THRESHOLD_BAD_RSSI_24_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 thresholdBadRssi24 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: thresholdBadRssi24 = "
-    //                     + Integer.toString(thresholdBadRssi24));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_MAX_TX_PACKETS_FOR_NETWORK_SWITCHING_KEY)) {
-    //             String st = key.replace(THRESHOLD_MAX_TX_PACKETS_FOR_NETWORK_SWITCHING_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxTxPacketForNetworkSwitching = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxTxPacketForNetworkSwitching = "
-    //                     + Integer.toString(maxTxPacketForNetworkSwitching));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_MAX_RX_PACKETS_FOR_NETWORK_SWITCHING_KEY)) {
-    //             String st = key.replace(THRESHOLD_MAX_RX_PACKETS_FOR_NETWORK_SWITCHING_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxRxPacketForNetworkSwitching = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxRxPacketForNetworkSwitching = "
-    //                     + Integer.toString(maxRxPacketForNetworkSwitching));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_MAX_TX_PACKETS_FOR_FULL_SCANS_KEY)) {
-    //             String st = key.replace(THRESHOLD_MAX_TX_PACKETS_FOR_FULL_SCANS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxTxPacketForNetworkSwitching = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxTxPacketForFullScans = "
-    //                         + Integer.toString(maxTxPacketForFullScans));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_MAX_RX_PACKETS_FOR_FULL_SCANS_KEY)) {
-    //             String st = key.replace(THRESHOLD_MAX_RX_PACKETS_FOR_FULL_SCANS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxRxPacketForNetworkSwitching = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxRxPacketForFullScans = "
-    //                         + Integer.toString(maxRxPacketForFullScans));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(THRESHOLD_MAX_TX_PACKETS_FOR_PARTIAL_SCANS_KEY)) {
-    //             String st = key.replace(THRESHOLD_MAX_TX_PACKETS_FOR_PARTIAL_SCANS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxTxPacketForNetworkSwitching = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxTxPacketForPartialScans = "
-    //                         + Integer.toString(maxTxPacketForPartialScans));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(THRESHOLD_MAX_RX_PACKETS_FOR_PARTIAL_SCANS_KEY)) {
-    //             String st = key.replace(THRESHOLD_MAX_RX_PACKETS_FOR_PARTIAL_SCANS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxRxPacketForNetworkSwitching = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxRxPacketForPartialScans = "
-    //                         + Integer.toString(maxRxPacketForPartialScans));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //
-    //         if (key.startsWith(WIFI_VERBOSE_LOGS_KEY)) {
-    //             String st = key.replace(WIFI_VERBOSE_LOGS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 enableVerboseLogging = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: enable verbose logs = "
-    //                         + Integer.toString(enableVerboseLogging));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(A_BAND_PREFERENCE_RSSI_THRESHOLD_KEY)) {
-    //             String st = key.replace(A_BAND_PREFERENCE_RSSI_THRESHOLD_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 bandPreferenceBoostThreshold5 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: bandPreferenceBoostThreshold5 = "
-    //                     + Integer.toString(bandPreferenceBoostThreshold5));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(ASSOCIATED_PARTIAL_SCAN_PERIOD_KEY)) {
-    //             String st = key.replace(ASSOCIATED_PARTIAL_SCAN_PERIOD_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 associatedPartialScanPeriodMilli = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: associatedScanPeriod = "
-    //                         + Integer.toString(associatedPartialScanPeriodMilli));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(ASSOCIATED_FULL_SCAN_BACKOFF_KEY)) {
-    //             String st = key.replace(ASSOCIATED_FULL_SCAN_BACKOFF_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 associatedFullScanBackoff = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: associatedFullScanBackoff = "
-    //                         + Integer.toString(associatedFullScanBackoff));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(G_BAND_PREFERENCE_RSSI_THRESHOLD_KEY)) {
-    //             String st = key.replace(G_BAND_PREFERENCE_RSSI_THRESHOLD_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 bandPreferencePenaltyThreshold5 = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: bandPreferencePenaltyThreshold5 = "
-    //                     + Integer.toString(bandPreferencePenaltyThreshold5));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(ALWAYS_ENABLE_SCAN_WHILE_ASSOCIATED_KEY)) {
-    //             String st = key.replace(ALWAYS_ENABLE_SCAN_WHILE_ASSOCIATED_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 alwaysEnableScansWhileAssociated = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: alwaysEnableScansWhileAssociated = "
-    //                         + Integer.toString(alwaysEnableScansWhileAssociated));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(MAX_NUM_PASSIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY)) {
-    //             String st = key.replace(MAX_NUM_PASSIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxNumPassiveChannelsForPartialScans = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxNumPassiveChannelsForPartialScans = "
-    //                         + Integer.toString(maxNumPassiveChannelsForPartialScans));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(MAX_NUM_ACTIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY)) {
-    //             String st = key.replace(MAX_NUM_ACTIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY, "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 maxNumActiveChannelsForPartialScans = Integer.parseInt(st);
-    //                 Log.d(TAG,"readAutoJoinConfig: maxNumActiveChannelsForPartialScans = "
-    //                         + Integer.toString(maxNumActiveChannelsForPartialScans));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
-    //             }
-    //         }
-    //         if (key.startsWith(
-    //             AUTO_JOIN_SCAN_INTERVAL_WHEN_P2P_CONNECTED_KEY)) {
-    //             int scanInterval;
-    //             String st = key.replace(
-    //                         AUTO_JOIN_SCAN_INTERVAL_WHEN_P2P_CONNECTED_KEY,
-    //                         "");
-    //             st = st.replace(SEPARATOR_KEY, "");
-    //             try {
-    //                 scanInterval = Integer.parseInt(st);
-    //                 if (scanInterval >= 10000) {
-    //                     autoJoinScanIntervalWhenP2pConnected = scanInterval;
-    //                 } else {
-    //                     Log.d(TAG,
-    //                           "Cfg value is less then 10sec, Using default="
-    //                           + autoJoinScanIntervalWhenP2pConnected);
-    //                 }
-    //                 Log.d(TAG, "readAutoJoinConfig: " +
-    //                       "autoJoinScanIntervalWhenP2pConnected = "
-    //                       + Integer.toString(
-    //                       autoJoinScanIntervalWhenP2pConnected));
-    //             } catch (NumberFormatException e) {
-    //                 Log.d(TAG, "readAutoJoinConfig: incorrect format :" +
-    //                       key);
-    //             }
-    //         }
-    //     }
+
+        AutoPtr<IFileReader> fr;
+        CFileReader::New(autoJoinConfigFile, (IFileReader**)&fr);
+        CBufferedReader::New(IReader::Probe(fr), (IBufferedReader**)&reader);
+        String key;
+        for (reader->ReadLine(&key); !(key.IsNull()); reader->ReadLine(&key)) {
+            if (!(key.IsNull())) {
+                Logger::D(TAG, "readAutoJoinConfig line: %s", key.string());
+            }
+            if (key.StartWith(ENABLE_AUTO_JOIN_WHILE_ASSOCIATED_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ENABLE_AUTO_JOIN_WHILE_ASSOCIATED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                enableAutoJoinWhenAssociated = StringUtils::ParseInt32(st) != 0;
+                Logger::D(TAG, "readAutoJoinConfig: enabled = %b", enableAutoJoinWhenAssociated);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG,"readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(ENABLE_FULL_BAND_SCAN_WHEN_ASSOCIATED_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ENABLE_FULL_BAND_SCAN_WHEN_ASSOCIATED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                enableFullBandScanWhenAssociated = StringUtils::ParseInt32(st) != 0;
+                Logger::D(TAG, "readAutoJoinConfig: enableFullBandScanWhenAssociated = %b",
+                        enableFullBandScanWhenAssociated);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(ENABLE_AUTO_JOIN_SCAN_WHILE_ASSOCIATED_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ENABLE_AUTO_JOIN_SCAN_WHILE_ASSOCIATED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                enableAutoJoinScanWhenAssociated = StringUtils::ParseInt32(st) != 0;
+                Logger::D(TAG, "readAutoJoinConfig: enabled = %b",
+                        enableAutoJoinScanWhenAssociated);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(ENABLE_CHIP_WAKE_UP_WHILE_ASSOCIATED_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ENABLE_CHIP_WAKE_UP_WHILE_ASSOCIATED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                enableChipWakeUpWhenAssociated = StringUtils::ParseInt32(st) != 0;
+                Logger::D(TAG, "readAutoJoinConfig: enabled = %b", enableChipWakeUpWhenAssociated);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(ENABLE_RSSI_POLL_WHILE_ASSOCIATED_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ENABLE_RSSI_POLL_WHILE_ASSOCIATED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    enableRssiPollWhenAssociated = StringUtils::ParseInt32(st) != 0;
+                    Logger::D(TAG, "readAutoJoinConfig: enabled = %b",
+                            enableRssiPollWhenAssociated);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_5G_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_5G_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdInitialAutoJoinAttemptMin5RSSI = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdInitialAutoJoinAttemptMin5RSSI = %d",
+                            thresholdInitialAutoJoinAttemptMin5RSSI);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_24G_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_INITIAL_AUTO_JOIN_ATTEMPT_RSSI_MIN_24G_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdInitialAutoJoinAttemptMin24RSSI = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdInitialAutoJoinAttemptMin24RSSI = %d",
+                            thresholdInitialAutoJoinAttemptMin24RSSI);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_UNBLACKLIST_HARD_5G_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_UNBLACKLIST_HARD_5G_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdUnblacklistThreshold5Hard = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdUnblacklistThreshold5Hard = %d",
+                        thresholdUnblacklistThreshold5Hard);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_UNBLACKLIST_SOFT_5G_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_UNBLACKLIST_SOFT_5G_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdUnblacklistThreshold5Soft = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdUnblacklistThreshold5Soft = %d",
+                        thresholdUnblacklistThreshold5Soft);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_UNBLACKLIST_HARD_24G_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_UNBLACKLIST_HARD_24G_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdUnblacklistThreshold24Hard = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdUnblacklistThreshold24Hard = %d",
+                        thresholdUnblacklistThreshold24Hard);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_UNBLACKLIST_SOFT_24G_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_UNBLACKLIST_SOFT_24G_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdUnblacklistThreshold24Soft = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdUnblacklistThreshold24Soft = %d",
+                        thresholdUnblacklistThreshold24Soft);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_GOOD_RSSI_5_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_GOOD_RSSI_5_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdGoodRssi5 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdGoodRssi5 = %d",
+                        thresholdGoodRssi5);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_LOW_RSSI_5_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_LOW_RSSI_5_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdLowRssi5 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdLowRssi5 = %d",
+                        thresholdLowRssi5);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_BAD_RSSI_5_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_BAD_RSSI_5_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdBadRssi5 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdBadRssi5 = %d",
+                        thresholdBadRssi5);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_GOOD_RSSI_24_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_GOOD_RSSI_24_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdGoodRssi24 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdGoodRssi24 = %d",
+                        thresholdGoodRssi24);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_LOW_RSSI_24_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_LOW_RSSI_24_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdLowRssi24 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdLowRssi24 = %d",
+                        thresholdLowRssi24);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_BAD_RSSI_24_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_BAD_RSSI_24_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    thresholdBadRssi24 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: thresholdBadRssi24 = %d",
+                        thresholdBadRssi24);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_MAX_TX_PACKETS_FOR_NETWORK_SWITCHING_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_MAX_TX_PACKETS_FOR_NETWORK_SWITCHING_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxTxPacketForNetworkSwitching = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxTxPacketForNetworkSwitching = %d",
+                        maxTxPacketForNetworkSwitching);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_MAX_RX_PACKETS_FOR_NETWORK_SWITCHING_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_MAX_RX_PACKETS_FOR_NETWORK_SWITCHING_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxRxPacketForNetworkSwitching = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxRxPacketForNetworkSwitching = %d",
+                        maxRxPacketForNetworkSwitching);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_MAX_TX_PACKETS_FOR_FULL_SCANS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_MAX_TX_PACKETS_FOR_FULL_SCANS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxTxPacketForNetworkSwitching = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxTxPacketForFullScans = %d",
+                            maxTxPacketForFullScans);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_MAX_RX_PACKETS_FOR_FULL_SCANS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_MAX_RX_PACKETS_FOR_FULL_SCANS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxRxPacketForNetworkSwitching = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxRxPacketForFullScans = %d",
+                            maxRxPacketForFullScans);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(THRESHOLD_MAX_TX_PACKETS_FOR_PARTIAL_SCANS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_MAX_TX_PACKETS_FOR_PARTIAL_SCANS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxTxPacketForNetworkSwitching = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxTxPacketForPartialScans = %d",
+                            maxTxPacketForPartialScans);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(THRESHOLD_MAX_RX_PACKETS_FOR_PARTIAL_SCANS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, THRESHOLD_MAX_RX_PACKETS_FOR_PARTIAL_SCANS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxRxPacketForNetworkSwitching = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxRxPacketForPartialScans = %d",
+                            maxRxPacketForPartialScans);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+
+            if (key.StartWith(WIFI_VERBOSE_LOGS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, WIFI_VERBOSE_LOGS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    enableVerboseLogging = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: enable verbose logs = %d",
+                            enableVerboseLogging);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(A_BAND_PREFERENCE_RSSI_THRESHOLD_KEY)) {
+                String temp;
+                StringUtils::Replace(key, A_BAND_PREFERENCE_RSSI_THRESHOLD_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    bandPreferenceBoostThreshold5 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: bandPreferenceBoostThreshold5 = %d",
+                        bandPreferenceBoostThreshold5);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(ASSOCIATED_PARTIAL_SCAN_PERIOD_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ASSOCIATED_PARTIAL_SCAN_PERIOD_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    associatedPartialScanPeriodMilli = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: associatedScanPeriod = %d",
+                            associatedPartialScanPeriodMilli);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(ASSOCIATED_FULL_SCAN_BACKOFF_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ASSOCIATED_FULL_SCAN_BACKOFF_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    associatedFullScanBackoff = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: associatedFullScanBackoff = %d",
+                            associatedFullScanBackoff);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(G_BAND_PREFERENCE_RSSI_THRESHOLD_KEY)) {
+                String temp;
+                StringUtils::Replace(key, G_BAND_PREFERENCE_RSSI_THRESHOLD_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    bandPreferencePenaltyThreshold5 = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: bandPreferencePenaltyThreshold5 = %d",
+                        bandPreferencePenaltyThreshold5);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(ALWAYS_ENABLE_SCAN_WHILE_ASSOCIATED_KEY)) {
+                String temp;
+                StringUtils::Replace(key, ALWAYS_ENABLE_SCAN_WHILE_ASSOCIATED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    alwaysEnableScansWhileAssociated = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: alwaysEnableScansWhileAssociated = %d",
+                            alwaysEnableScansWhileAssociated);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(MAX_NUM_PASSIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, MAX_NUM_PASSIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxNumPassiveChannelsForPartialScans = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxNumPassiveChannelsForPartialScans = %d",
+                            maxNumPassiveChannelsForPartialScans);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(MAX_NUM_ACTIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY)) {
+                String temp;
+                StringUtils::Replace(key, MAX_NUM_ACTIVE_CHANNELS_FOR_PARTIAL_SCANS_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    maxNumActiveChannelsForPartialScans = StringUtils::ParseInt32(st);
+                    Logger::D(TAG, "readAutoJoinConfig: maxNumActiveChannelsForPartialScans = %d",
+                            maxNumActiveChannelsForPartialScans);
+                // } catch (NumberFormatException e) {
+                //     Log.d(TAG, "readAutoJoinConfig: incorrect format :" + key);
+                // }
+            }
+            if (key.StartWith(
+                AUTO_JOIN_SCAN_INTERVAL_WHEN_P2P_CONNECTED_KEY)) {
+                Int32 scanInterval = 0;
+                String temp;
+                StringUtils::Replace(key, AUTO_JOIN_SCAN_INTERVAL_WHEN_P2P_CONNECTED_KEY, String(""), &temp);
+                String st;
+                StringUtils::Replace(temp, SEPARATOR_KEY, String(""), &st);
+                // try {
+                    scanInterval = StringUtils::ParseInt32(st);
+                    if (scanInterval >= 10000) {
+                        autoJoinScanIntervalWhenP2pConnected = scanInterval;
+                    }
+                    else {
+                        Logger::D(TAG,
+                                "Cfg value is less then 10sec, Using default=%d",
+                                autoJoinScanIntervalWhenP2pConnected);
+                    }
+                    Logger::D(TAG, "readAutoJoinConfig: autoJoinScanIntervalWhenP2pConnected = %d",
+                            autoJoinScanIntervalWhenP2pConnected);
+                // } catch (NumberFormatException e) {
+                //     Logger::D(TAG, "readAutoJoinConfig: incorrect format :" +
+                //           key);
+                // }
+            }
+        }
     // } catch (EOFException ignore) {
-    //     if (reader != null) {
-    //         try {
-    //             reader.close();
-    //             reader = null;
-    //         } catch (Exception e) {
-    //             loge("readAutoJoinStatus: Error closing file" + e);
-    //         }
+    //     if (reader != NULL) {
+    //         // try {
+    //             reader->Close();
+    //             reader = NULL;
+    //         // } catch (Exception e) {
+    //         //     loge("readAutoJoinStatus: Error closing file" + e);
+    //         // }
     //     }
     // } catch (FileNotFoundException ignore) {
-    //     if (reader != null) {
-    //         try {
-    //             reader.close();
-    //             reader = null;
-    //         } catch (Exception e) {
-    //             loge("readAutoJoinStatus: Error closing file" + e);
-    //         }
+    //     if (reader != NULL) {
+    //         // try {
+    //             reader->Close();
+    //             reader = NULL;
+    //         // } catch (Exception e) {
+    //         //     loge("readAutoJoinStatus: Error closing file" + e);
+    //         // }
     //     }
     // } catch (IOException e) {
     //     loge("readAutoJoinStatus: Error parsing configuration" + e);
     // }
-    //
-    // if (reader!=null) {
-    //    try {
-    //        reader.close();
-    //    } catch (Exception e) {
-    //        loge("readAutoJoinStatus: Error closing file" + e);
-    //    }
-    // }
-    assert(0);
+
+    if (reader != NULL) {
+       // try {
+        ICloseable::Probe(reader)->Close();
+       // } catch (Exception e) {
+       //     loge("readAutoJoinStatus: Error closing file" + e);
+       // }
+    }
 }
 
 void WifiConfigStore::WriteIpAndProxyConfigurations()
 {
-    // ==================before translated======================
-    // final SparseArray<IpConfiguration> networks = new SparseArray<IpConfiguration>();
-    // for(WifiConfiguration config : mConfiguredNetworks.values()) {
-    //     if (!config.ephemeral && config.autoJoinStatus != WifiConfiguration.AUTO_JOIN_DELETED) {
-    //         networks.put(configKey(config), config.getIpConfiguration());
-    //     }
-    // }
-    //
-    // super.writeIpAndProxyConfigurations(ipConfigFile, networks);
-    assert(0);
+    AutoPtr<ISparseArray> networks;
+    CSparseArray::New((ISparseArray**)&networks);
+    AutoPtr<ICollection> clt;
+    mConfiguredNetworks->GetValues((ICollection**)&clt);
+    AutoPtr<IIterator> it;
+    clt->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(p);
+        Boolean ephemeral = FALSE;
+        config->GetEphemeral(&ephemeral);
+        Int32 autoJoinStatus = 0;
+        config->GetAutoJoinStatus(&autoJoinStatus);
+        if (!ephemeral && autoJoinStatus != IWifiConfiguration::AUTO_JOIN_DELETED) {
+            Int32 ck = ConfigKey(config);
+            AutoPtr<IIpConfiguration> ipc;
+            config->GetIpConfiguration((IIpConfiguration**)&ipc);
+            networks->Put(ck, ipc);
+        }
+    }
+
+    IpConfigStore::WriteIpAndProxyConfigurations(ipConfigFile, networks);
 }
 
 void WifiConfigStore::ReadIpAndProxyConfigurations()
 {
-    // ==================before translated======================
-    // SparseArray<IpConfiguration> networks = super.readIpAndProxyConfigurations(ipConfigFile);
-    //
-    // if (networks.size() == 0) {
-    //     // IpConfigStore.readIpAndProxyConfigurations has already logged an error.
-    //     return;
-    // }
-    //
-    // for (int i = 0; i < networks.size(); i++) {
-    //     int id = networks.keyAt(i);
-    //     WifiConfiguration config = mConfiguredNetworks.get(mNetworkIds.get(id));
-    //
-    //     if (config == null || config.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DELETED) {
-    //         loge("configuration found for missing network, nid=" + id
-    //                 +", ignored, networks.size=" + Integer.toString(networks.size()));
-    //     } else if (config != null && config.duplicateNetwork == true) {
-    //         if (VDBG)
-    //             loge("Network configuration is not updated for duplicate network id="
-    //                   + config.networkId + " SSID=" + config.SSID);
-    //     } else {
-    //         config.setIpConfiguration(networks.valueAt(i));
-    //     }
-    // }
-    assert(0);
+    AutoPtr<ISparseArray> networks;
+    IpConfigStore::ReadIpAndProxyConfigurations(ipConfigFile, (ISparseArray**)&networks);
+
+    Int32 size = 0;
+    networks->GetSize(&size);
+    if (size == 0) {
+        // IpConfigStore.readIpAndProxyConfigurations has already logged an error.
+        return;
+    }
+
+    for (Int32 i = 0; i < size; i++) {
+        Int32 id = 0;
+        networks->KeyAt(i, &id);
+        AutoPtr<IInterface> obj;
+        mNetworkIds->Get(CoreUtils::Convert(id), (IInterface**)&obj);
+        AutoPtr<IInterface> p;
+        mConfiguredNetworks->Get(obj, (IInterface**)&p);
+        AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(p);
+
+        Int32 autoJoinStatus = 0;
+        config->GetAutoJoinStatus(&autoJoinStatus);
+        if (config == NULL || autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
+            String str("configuration found for missing network, nid=");
+            str += id; str += ", ignored, networks.size=";
+            str += size;
+            Loge(str);
+        }
+        else if (config != NULL && /*TODO config.duplicateNetwork ==*/ TRUE) {
+            assert(0);//TODO
+            if (VDBG) {
+                Int32 networkId = 0;
+                config->GetNetworkId(&networkId);
+                String ssid;
+                config->GetSSID(&ssid);
+                String str("Network configuration is not updated for duplicate network id=");
+                str += networkId; str += " SSID="; str += ssid;
+                Loge(str);
+            }
+        }
+        else {
+            AutoPtr<IInterface> p;
+            networks->ValueAt(i, (IInterface**)&p);
+            config->SetIpConfiguration(IIpConfiguration::Probe(p));
+        }
+    }
 }
 
 String WifiConfigStore::EncodeSSID(
     /* [in] */ const String& str)
 {
-    // ==================before translated======================
-    // String tmp = removeDoubleQuotes(str);
+    String tmp = RemoveDoubleQuotes(str);
     // return String.format("%x", new BigInteger(1, tmp.getBytes(Charset.forName("UTF-8"))));
-    assert(0);
-    return String("");
+    AutoPtr<ArrayOf<Byte> > bytes = tmp.GetBytes(/*Charset.forName("UTF-8")*/);
+    AutoPtr<IBigInteger> bigInteger;
+    CBigInteger::New(1, (*bytes), (IBigInteger**)&bigInteger);
+    Int64 value;
+    assert(0);//TODO
+    //TODO bigInteger->Int64Value(&value);
+    return StringUtils::ToHexString(value);
 }
 
 AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
     /* [in] */ IWifiConfiguration* config,
     /* [in] */ Int32 uid)
 {
-    // ==================before translated======================
-    // /*
-    //  * If the supplied networkId is INVALID_NETWORK_ID, we create a new empty
-    //  * network configuration. Otherwise, the networkId should
-    //  * refer to an existing configuration.
-    //  */
-    //
-    // if (VDBG) localLog("addOrUpdateNetworkNative " + config.getPrintableSsid());
-    //
-    // int netId = config.networkId;
-    // boolean newNetwork = false;
-    // // networkId of INVALID_NETWORK_ID means we want to create a new network
-    // if (netId == INVALID_NETWORK_ID) {
-    //     Integer savedNetId = mNetworkIds.get(configKey(config));
-    //     // Check if either we have a network Id or a WifiConfiguration
-    //     // matching the one we are trying to add.
-    //     if (savedNetId == null) {
-    //         for (WifiConfiguration test : mConfiguredNetworks.values()) {
-    //             if (test.configKey().equals(config.configKey())) {
-    //                 savedNetId = test.networkId;
-    //                 loge("addOrUpdateNetworkNative " + config.configKey()
-    //                         + " was found, but no network Id");
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     if (savedNetId != null) {
-    //         netId = savedNetId;
-    //     } else {
-    //         newNetwork = true;
-    //         netId = mWifiNative.addNetwork();
-    //         if (netId < 0) {
-    //             loge("Failed to add a network!");
-    //             return new NetworkUpdateResult(INVALID_NETWORK_ID);
-    //         } else {
-    //             loge("addOrUpdateNetworkNative created netId=" + netId);
-    //         }
-    //     }
-    // }
-    //
-    // boolean updateFailed = true;
-    //
-    // setVariables: {
-    //
-    //     if (config.SSID != null &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.ssidVarName,
-    //                 encodeSSID(config.SSID))) {
-    //         loge("failed to set SSID: "+config.SSID);
-    //         break setVariables;
-    //     }
-    //
-    //     if (config.BSSID != null) {
-    //         loge("Setting BSSID for " + config.configKey() + " to " + config.BSSID);
-    //         if (!mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.bssidVarName,
-    //                 config.BSSID)) {
-    //             loge("failed to set BSSID: " + config.BSSID);
-    //             break setVariables;
-    //         }
-    //     }
-    //
-    //     if (config.isIBSS) {
-    //         if(!mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.modeVarName,
-    //                 "1")) {
-    //             loge("failed to set adhoc mode");
-    //             break setVariables;
-    //         }
-    //         if(!mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.frequencyVarName,
-    //                 Integer.toString(config.frequency))) {
-    //             loge("failed to set frequency");
-    //             break setVariables;
-    //         }
-    //     }
-    //
-    //     String allowedKeyManagementString =
-    //         makeString(config.allowedKeyManagement, WifiConfiguration.KeyMgmt.strings);
-    //     if (config.allowedKeyManagement.cardinality() != 0 &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.KeyMgmt.varName,
-    //                 allowedKeyManagementString)) {
-    //         loge("failed to set key_mgmt: "+
-    //                 allowedKeyManagementString);
-    //         break setVariables;
-    //     }
-    //
-    //     String allowedProtocolsString =
-    //         makeString(config.allowedProtocols, WifiConfiguration.Protocol.strings);
-    //     if (config.allowedProtocols.cardinality() != 0 &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.Protocol.varName,
-    //                 allowedProtocolsString)) {
-    //         loge("failed to set proto: "+
-    //                 allowedProtocolsString);
-    //         break setVariables;
-    //     }
-    //
-    //     String allowedAuthAlgorithmsString =
-    //         makeString(config.allowedAuthAlgorithms, WifiConfiguration.AuthAlgorithm.strings);
-    //     if (config.allowedAuthAlgorithms.cardinality() != 0 &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.AuthAlgorithm.varName,
-    //                 allowedAuthAlgorithmsString)) {
-    //         loge("failed to set auth_alg: "+
-    //                 allowedAuthAlgorithmsString);
-    //         break setVariables;
-    //     }
-    //
-    //     String allowedPairwiseCiphersString =
-    //             makeString(config.allowedPairwiseCiphers,
-    //             WifiConfiguration.PairwiseCipher.strings);
-    //     if (config.allowedPairwiseCiphers.cardinality() != 0 &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.PairwiseCipher.varName,
-    //                 allowedPairwiseCiphersString)) {
-    //         loge("failed to set pairwise: "+
-    //                 allowedPairwiseCiphersString);
-    //         break setVariables;
-    //     }
-    //
-    //     String allowedGroupCiphersString =
-    //         makeString(config.allowedGroupCiphers, WifiConfiguration.GroupCipher.strings);
-    //     if (config.allowedGroupCiphers.cardinality() != 0 &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.GroupCipher.varName,
-    //                 allowedGroupCiphersString)) {
-    //         loge("failed to set group: "+
-    //                 allowedGroupCiphersString);
-    //         break setVariables;
-    //     }
-    //
-    //     // Prevent client screw-up by passing in a WifiConfiguration we gave it
-    //     // by preventing "*" as a key.
-    //     if (config.preSharedKey != null && !config.preSharedKey.equals("*") &&
-    //             !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.pskVarName,
-    //                 config.preSharedKey)) {
-    //         loge("failed to set psk");
-    //         break setVariables;
-    //     }
-    //
-    //     boolean hasSetKey = false;
-    //     if (config.wepKeys != null) {
-    //         for (int i = 0; i < config.wepKeys.length; i++) {
-    //             // Prevent client screw-up by passing in a WifiConfiguration we gave it
-    //             // by preventing "*" as a key.
-    //             if (config.wepKeys[i] != null && !config.wepKeys[i].equals("*")) {
-    //                 if (!mWifiNative.setNetworkVariable(
-    //                             netId,
-    //                             WifiConfiguration.wepKeyVarNames[i],
-    //                             config.wepKeys[i])) {
-    //                     loge("failed to set wep_key" + i + ": " + config.wepKeys[i]);
-    //                     break setVariables;
-    //                 }
-    //                 hasSetKey = true;
-    //             }
-    //         }
-    //     }
-    //
-    //     if (hasSetKey) {
-    //         if (!mWifiNative.setNetworkVariable(
-    //                     netId,
-    //                     WifiConfiguration.wepTxKeyIdxVarName,
-    //                     Integer.toString(config.wepTxKeyIndex))) {
-    //             loge("failed to set wep_tx_keyidx: " + config.wepTxKeyIndex);
-    //             break setVariables;
-    //         }
-    //     }
-    //
-    //     if (!mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.priorityVarName,
-    //                 Integer.toString(config.priority))) {
-    //         loge(config.SSID + ": failed to set priority: "
-    //                 +config.priority);
-    //         break setVariables;
-    //     }
-    //
-    //     if (config.hiddenSSID && !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.hiddenSSIDVarName,
-    //                 Integer.toString(config.hiddenSSID ? 1 : 0))) {
-    //         loge(config.SSID + ": failed to set hiddenSSID: "+
-    //                 config.hiddenSSID);
-    //         break setVariables;
-    //     }
-    //
-    //     if (config.requirePMF && !mWifiNative.setNetworkVariable(
-    //                 netId,
-    //                 WifiConfiguration.pmfVarName,
-    //                 "2")) {
-    //         loge(config.SSID + ": failed to set requirePMF: "+
-    //                 config.requirePMF);
-    //         break setVariables;
-    //     }
-    //
-    //     if (config.updateIdentifier != null && !mWifiNative.setNetworkVariable(
-    //             netId,
-    //             WifiConfiguration.updateIdentiferVarName,
-    //             config.updateIdentifier)) {
-    //         loge(config.SSID + ": failed to set updateIdentifier: "+
-    //                 config.updateIdentifier);
-    //         break setVariables;
-    //     }
-    //
-    //     if (config.enterpriseConfig != null &&
-    //             config.enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE) {
-    //
-    //         WifiEnterpriseConfig enterpriseConfig = config.enterpriseConfig;
-    //
-    //         if (needsKeyStore(enterpriseConfig)) {
-    //             /**
-    //              * Keyguard settings may eventually be controlled by device policy.
-    //              * We check here if keystore is unlocked before installing
-    //              * credentials.
-    //              * TODO: Do we need a dialog here ?
-    //              */
-    //             if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
-    //                 loge(config.SSID + ": key store is locked");
-    //                 break setVariables;
-    //             }
-    //
-    //             try {
-    //                 /* config passed may include only fields being updated.
-    //                  * In order to generate the key id, fetch uninitialized
-    //                  * fields from the currently tracked configuration
-    //                  */
-    //                 WifiConfiguration currentConfig = mConfiguredNetworks.get(netId);
-    //                 String keyId = config.getKeyIdForCredentials(currentConfig);
-    //
-    //                 if (!installKeys(enterpriseConfig, keyId)) {
-    //                     loge(config.SSID + ": failed to install keys");
-    //                     break setVariables;
-    //                 }
-    //             } catch (IllegalStateException e) {
-    //                 loge(config.SSID + " invalid config for key installation");
-    //                 break setVariables;
-    //             }
-    //         }
-    //
-    //         HashMap<String, String> enterpriseFields = enterpriseConfig.getFields();
-    //         for (String key : enterpriseFields.keySet()) {
-    //                 String value = enterpriseFields.get(key);
-    //                 if (key.equals("password") && value != null && value.equals("*")) {
-    //                     // No need to try to set an obfuscated password, which will fail
-    //                     continue;
-    //                 }
-    //                 if (!mWifiNative.setNetworkVariable(
-    //                             netId,
-    //                             key,
-    //                             value)) {
-    //                     removeKeys(enterpriseConfig);
-    //                     loge(config.SSID + ": failed to set " + key +
-    //                             ": " + value);
-    //                     break setVariables;
-    //                 }
-    //         }
-    //     }
-    //     updateFailed = false;
-    // } // End of setVariables
-    //
-    // if (updateFailed) {
-    //     if (newNetwork) {
-    //         mWifiNative.removeNetwork(netId);
-    //         loge("Failed to set a network variable, removed network: " + netId);
-    //     }
-    //     return new NetworkUpdateResult(INVALID_NETWORK_ID);
-    // }
-    //
-    // /* An update of the network variables requires reading them
-    //  * back from the supplicant to update mConfiguredNetworks.
-    //  * This is because some of the variables (SSID, wep keys &
-    //  * passphrases) reflect different values when read back than
-    //  * when written. For example, wep key is stored as * irrespective
-    //  * of the value sent to the supplicant
-    //  */
-    // WifiConfiguration currentConfig = mConfiguredNetworks.get(netId);
-    // if (currentConfig == null) {
-    //     currentConfig = new WifiConfiguration();
-    //     currentConfig.setIpAssignment(IpAssignment.DHCP);
-    //     currentConfig.setProxySettings(ProxySettings.NONE);
-    //     currentConfig.networkId = netId;
-    //     if (config != null) {
-    //         // Carry over the creation parameters
-    //         currentConfig.selfAdded = config.selfAdded;
-    //         currentConfig.didSelfAdd = config.didSelfAdd;
-    //         currentConfig.ephemeral = config.ephemeral;
-    //         currentConfig.autoJoinUseAggressiveJoinAttemptThreshold
-    //                 = config.autoJoinUseAggressiveJoinAttemptThreshold;
-    //         currentConfig.lastConnectUid = config.lastConnectUid;
-    //         currentConfig.lastUpdateUid = config.lastUpdateUid;
-    //         currentConfig.creatorUid = config.creatorUid;
-    //         currentConfig.peerWifiConfiguration = config.peerWifiConfiguration;
-    //     }
-    //     if (DBG) {
-    //         loge("created new config netId=" + Integer.toString(netId)
-    //                 + " uid=" + Integer.toString(currentConfig.creatorUid));
-    //     }
-    // }
-    //
-    // if (uid >= 0) {
-    //     if (newNetwork) {
-    //         currentConfig.creatorUid = uid;
-    //     } else {
-    //         currentConfig.lastUpdateUid = uid;
-    //     }
-    // }
-    //
-    // if (newNetwork) {
-    //     currentConfig.dirty = true;
-    // }
-    //
-    // if (currentConfig.autoJoinStatus == WifiConfiguration.AUTO_JOIN_DELETED) {
-    //     // Make sure the configuration is not deleted anymore since we just
-    //     // added or modified it.
-    //     currentConfig.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    //     currentConfig.selfAdded = false;
-    //     currentConfig.didSelfAdd = false;
-    //     if (DBG) {
-    //         loge("remove deleted status netId=" + Integer.toString(netId)
-    //                 + " " + currentConfig.configKey());
-    //     }
-    // }
-    //
-    // if (currentConfig.status == WifiConfiguration.Status.ENABLED) {
-    //     // Make sure autojoin remain in sync with user modifying the configuration
-    //     currentConfig.setAutoJoinStatus(WifiConfiguration.AUTO_JOIN_ENABLED);
-    // }
-    //
-    // if (DBG) loge("will read network variables netId=" + Integer.toString(netId));
-    //
-    // readNetworkVariables(currentConfig);
-    //
-    // mConfiguredNetworks.put(netId, currentConfig);
-    // mNetworkIds.put(configKey(currentConfig), netId);
-    //
-    // NetworkUpdateResult result = writeIpAndProxyConfigurationsOnChange(currentConfig, config);
-    // result.setIsNewNetwork(newNetwork);
-    // result.setNetworkId(netId);
-    //
-    // writeKnownNetworkHistory();
-    //
-    // return result;
-    assert(0);
-    AutoPtr<NetworkUpdateResult> empty;
-    return empty;
+    /*
+     * If the supplied networkId is INVALID_NETWORK_ID, we create a new empty
+     * network configuration. Otherwise, the networkId should
+     * refer to an existing configuration.
+     */
+
+    if (VDBG) {
+        String str;
+        config->GetPrintableSsid(&str);
+        LocalLog(String("addOrUpdateNetworkNative ") +  str);
+    }
+
+    Int32 netId = 0;
+    config->GetNetworkId(&netId);
+    Boolean newNetwork = FALSE;
+    // networkId of INVALID_NETWORK_ID means we want to create a new network
+    if (netId == IWifiConfiguration::INVALID_NETWORK_ID) {
+        AutoPtr<IInterface> _savedNetId;
+        mNetworkIds->Get(CoreUtils::Convert(ConfigKey(config)), (IInterface**)&_savedNetId);
+        AutoPtr<IInteger32> savedNetId = IInteger32::Probe(_savedNetId);
+        // Check if either we have a network Id or a WifiConfiguration
+        // matching the one we are trying to add.
+        if (savedNetId == NULL) {
+            AutoPtr<ICollection> clt;
+            mConfiguredNetworks->GetValues((ICollection**)&clt);
+            AutoPtr<IIterator> it;
+            clt->GetIterator((IIterator**)&it);
+            Boolean bHasNxt = FALSE;
+            while ((it->HasNext(&bHasNxt), bHasNxt)) {
+                AutoPtr<IInterface> p;
+                it->GetNext((IInterface**)&p);
+                AutoPtr<IWifiConfiguration> test = IWifiConfiguration::Probe(p);
+                String ck, cfck;
+                test->ConfigKey(&ck);
+                config->ConfigKey(&cfck);
+                if (ck.Equals(cfck)) {
+                    Int32 nid;
+                    test->GetNetworkId(&nid);
+                    CInteger32::New(nid, (IInteger32**)&savedNetId);
+                    String str("addOrUpdateNetworkNative ");
+                    str += cfck; str += " was found, but no network Id";
+                    Loge(str);
+                    break;
+                }
+            }
+        }
+        if (savedNetId != NULL) {
+            savedNetId->GetValue(&netId);
+        }
+        else {
+            newNetwork = TRUE;
+            netId = mWifiNative->AddNetwork();
+            if (netId < 0) {
+                Loge(String("Failed to add a network!"));
+                return new NetworkUpdateResult(IWifiConfiguration::INVALID_NETWORK_ID);
+            }
+            else {
+                String str("addOrUpdateNetworkNative created netId=");
+                str += netId;
+                Loge(str);
+            }
+        }
+    }
+
+    Boolean updateFailed = TRUE;
+
+    setVariables: {
+
+        String ssid;
+        config->GetSSID(&ssid);
+        if (!ssid.IsNull() &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::ssidVarName,
+                    EncodeSSID(ssid))) {
+            String str("failed to set SSID: ");
+            str += ssid;
+            Loge(str);
+            goto setVariables;
+        }
+
+        String bssid;
+        config->GetBSSID(&bssid);
+        if (!bssid.IsNull()) {
+            String ck;
+            config->ConfigKey(&ck);
+            String str("Setting BSSID for ");
+            str += ck; str += " to ";
+            str += bssid;
+            Loge(str);
+            if (!mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::bssidVarName,
+                    bssid)) {
+                String str("failed to set BSSID: ");
+                str += bssid;
+                Loge(str);
+                goto setVariables;
+            }
+        }
+
+        Boolean isIBSS = FALSE;
+        //TODO config->GetIsIBSS(&isIBSS);
+        if (isIBSS) {
+            if(!mWifiNative->SetNetworkVariable(
+                    netId,
+                    String("mode"),//TODO IWifiConfiguration::modeVarName,
+                    String("1"))) {
+                Loge(String("failed to set adhoc mode"));
+                goto setVariables;
+            }
+            // if(!mWifiNative->SetNetworkVariable(
+            //         netId,
+            //         IWifiConfiguration::frequencyVarName,
+            //         Integer.toString(config.frequency))) {
+            //     Loge("failed to set frequency");
+            //     break setVariables;
+            // }
+        }
+
+        AutoPtr<IWifiConfigurationKeyMgmt> mgmt;
+        CWifiConfigurationKeyMgmt::AcquireSingleton((IWifiConfigurationKeyMgmt**)&mgmt);
+        AutoPtr<ArrayOf<String> > strs;
+        mgmt->GetStrings((ArrayOf<String>**)&strs);
+        AutoPtr<IBitSet> bs;
+        config->GetAllowedKeyManagement((IBitSet**)&bs);
+        String allowedKeyManagementString = MakeString(bs, strs);
+        Int32 card = 0;
+        bs->Cardinality(&card);
+        if (card != 0 &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfigurationKeyMgmt::VAR_NAME,
+                    allowedKeyManagementString)) {
+            String str("failed to set key_mgmt: ");
+            str += allowedKeyManagementString;
+            Loge(str);
+            goto setVariables;
+        }
+
+        AutoPtr<IBitSet> bsp;
+        config->GetAllowedProtocols((IBitSet**)&bsp);
+        AutoPtr<IWifiConfigurationProtocol> prot;
+        CWifiConfigurationProtocol::AcquireSingleton((IWifiConfigurationProtocol**)&prot);
+        AutoPtr<ArrayOf<String> > strprot;
+        prot->GetStrings((ArrayOf<String>**)&strprot);
+        String allowedProtocolsString = MakeString(bsp, strprot);
+        bsp->Cardinality(&card);
+        if (card != 0 &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfigurationProtocol::VAR_NAME,
+                    allowedProtocolsString)) {
+            String str("failed to set proto: ");
+            str += allowedProtocolsString;
+            Loge(str);
+            goto setVariables;
+        }
+
+        AutoPtr<IBitSet> bsa;
+        config->GetAllowedAuthAlgorithms((IBitSet**)&bsa);
+        AutoPtr<IWifiConfigurationAuthAlgorithm> algo;
+        CWifiConfigurationAuthAlgorithm::AcquireSingleton((IWifiConfigurationAuthAlgorithm**)&algo);
+        AutoPtr<ArrayOf<String> > stralgo;
+        algo->GetStrings((ArrayOf<String>**)&stralgo);
+        String allowedAuthAlgorithmsString = MakeString(bsa, stralgo);
+        bsa->Cardinality(&card);
+        if (card != 0 &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfigurationAuthAlgorithm::VAR_NAME,
+                    allowedAuthAlgorithmsString)) {
+            String str("failed to set auth_alg: ");
+            str += allowedAuthAlgorithmsString;
+            Loge(str);
+            goto setVariables;
+        }
+
+        AutoPtr<IBitSet> bsc;
+        config->GetAllowedPairwiseCiphers((IBitSet**)&bsc);
+        AutoPtr<IWifiConfigurationPairwiseCipher> paci;
+        CWifiConfigurationPairwiseCipher::AcquireSingleton((IWifiConfigurationPairwiseCipher**)&paci);
+        AutoPtr<ArrayOf<String> > strpaci;
+        paci->GetStrings((ArrayOf<String>**)&strpaci);
+        String allowedPairwiseCiphersString = MakeString(bsc, strpaci);
+        bsc->Cardinality(&card);
+        if (card != 0 &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfigurationPairwiseCipher::VAR_NAME,
+                    allowedPairwiseCiphersString)) {
+            String str("failed to set pairwise: ");
+            str += allowedPairwiseCiphersString;
+            Loge(str);
+            goto setVariables;
+        }
+
+        AutoPtr<IBitSet> bsgc;
+        config->GetAllowedGroupCiphers((IBitSet**)&bsgc);
+        AutoPtr<IWifiConfigurationGroupCipher> guci;
+        CWifiConfigurationGroupCipher::AcquireSingleton((IWifiConfigurationGroupCipher**)&guci);
+        AutoPtr<ArrayOf<String> > strguci;
+        guci->GetStrings((ArrayOf<String>**)&strguci);
+        String allowedGroupCiphersString = MakeString(bsgc, strguci);
+        bsgc->Cardinality(&card);
+        if (card != 0 &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfigurationGroupCipher::VAR_NAME,
+                    allowedGroupCiphersString)) {
+            String str("failed to set group: ");
+            str += allowedGroupCiphersString;
+            Loge(str);
+            goto setVariables;
+        }
+
+        // Prevent client screw-up by passing in a WifiConfiguration we gave it
+        // by preventing "*" as a key.
+        String preSharedKey;
+        config->GetPreSharedKey(&preSharedKey);
+        if (!preSharedKey.IsNull() && !preSharedKey.Equals("*") &&
+                !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::pskVarName,
+                    preSharedKey)) {
+            Loge(String("failed to set psk"));
+            goto setVariables;
+        }
+
+        Boolean hasSetKey = FALSE;
+        AutoPtr<ArrayOf<String> > wepKeys;
+        config->GetWepKeys((ArrayOf<String>**)&wepKeys);
+        if (wepKeys != NULL) {
+            AutoPtr<ArrayOf<String> > wepKeyVarNames;
+            config->GetWepKeyVarNames((ArrayOf<String>**)&wepKeyVarNames);
+            for (Int32 i = 0; i < wepKeys->GetLength(); i++) {
+                // Prevent client screw-up by passing in a WifiConfiguration we gave it
+                // by preventing "*" as a key.
+                if (!((*wepKeys)[i]).IsNull() && !(*wepKeys)[i].Equals("*")) {
+                    if (!mWifiNative->SetNetworkVariable(
+                                netId,
+                                (*wepKeyVarNames)[i],
+                                (*wepKeys)[i])) {
+                        String str("failed to set wep_key");
+                        str += i; str += ": ";
+                        str += (*wepKeys)[i];
+                        Loge(str);
+                        goto setVariables;
+                    }
+                    hasSetKey = TRUE;
+                }
+            }
+        }
+
+        if (hasSetKey) {
+            Int32 wepTxKeyIndex = 0;
+            config->GetWepTxKeyIndex(&wepTxKeyIndex);
+            if (!mWifiNative->SetNetworkVariable(
+                        netId,
+                        IWifiConfiguration::wepTxKeyIdxVarName,
+                        StringUtils::ToString(wepTxKeyIndex))) {
+                String str("failed to set wep_tx_keyidx: ");
+                str += wepTxKeyIndex;
+                Loge(str);
+                goto setVariables;
+            }
+        }
+
+        Int32 priority = 0;
+        config->GetPriority(&priority);
+        if (!mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::priorityVarName,
+                    StringUtils::ToString(priority))) {
+            String str(ssid);
+            str += ": failed to set priority: ";
+            str += priority;
+            Loge(str);
+            goto setVariables;
+        }
+
+        Boolean hiddenSSID = FALSE;
+        config->GetHiddenSSID(&hiddenSSID);
+        if (hiddenSSID && !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::hiddenSSIDVarName,
+                    StringUtils::ToString(hiddenSSID ? 1 : 0))) {
+            String str(ssid);
+            str += ": failed to set hiddenSSID: ";
+            str += hiddenSSID;
+            Loge(str);
+            goto setVariables;
+        }
+
+        Boolean requirePMF = FALSE;
+        config->GetRequirePMF(&requirePMF);
+        if (requirePMF && !mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::pmfVarName,
+                    String("2"))) {
+            String str(ssid);
+            str += ": failed to set requirePMF: ";
+            str += requirePMF;
+            Loge(str);
+            goto setVariables;
+        }
+
+        String updateIdentifier;
+        config->GetUpdateIdentifier(&updateIdentifier);
+        if (!updateIdentifier.IsNull() && !mWifiNative->SetNetworkVariable(
+                netId,
+                IWifiConfiguration::updateIdentiferVarName,
+                updateIdentifier)) {
+            String str(ssid);
+            str += ": failed to set updateIdentifier: ";
+            str += updateIdentifier;
+            Loge(str);
+            goto setVariables;
+        }
+
+        AutoPtr<IWifiEnterpriseConfig> enterpriseConfig;
+        config->GetEnterpriseConfig((IWifiEnterpriseConfig**)&enterpriseConfig);
+        Int32 eapmd = 0;
+        if (enterpriseConfig != NULL &&
+                (enterpriseConfig->GetEapMethod(&eapmd), eapmd) != Elastos::Droid::Wifi::IWifiEnterpriseConfigEap::NONE) {
+
+            if (NeedsKeyStore(enterpriseConfig)) {
+                /**
+                 * Keyguard settings may eventually be controlled by device policy.
+                 * We check here if keystore is unlocked before installing
+                 * credentials.
+                 * TODO: Do we need a dialog here ?
+                 */
+                assert(0);//TODO
+                //TODO KeyStoreState st;
+                //TODO mKeyStore->State(&st);
+                //TODO if (st != Elastos::Security::KeyStoreState_UNLOCKED) {
+                //TODO     String str(ssid);
+                //TODO    str += ": key store is locked";
+                //TODO    Loge(str);
+                //TODO    goto setVariables;
+                //TODO }
+
+                // try {
+                    /* config passed may include only fields being updated.
+                     * In order to generate the key id, fetch uninitialized
+                     * fields from the currently tracked configuration
+                     */
+                    AutoPtr<IInterface> _currentConfig;
+                    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&_currentConfig);
+                    AutoPtr<IWifiConfiguration> currentConfig = IWifiConfiguration::Probe(_currentConfig);
+                    String keyId;
+                    config->GetKeyIdForCredentials(currentConfig, &keyId);
+
+                    Boolean installKeys;
+                    if (!(InstallKeys(enterpriseConfig, keyId, &installKeys), installKeys)) {
+                        String str(ssid);
+                        str += ": failed to install keys";
+                        Loge(str);
+                        goto setVariables;
+                    }
+                // } catch (IllegalStateException e) {
+                //     Loge("%s invalid config for key installation", ssid.string());
+                //     break setVariables;
+                // }
+            }
+
+            AutoPtr<IHashMap> enterpriseFields;
+            enterpriseConfig->GetFields((IHashMap**)&enterpriseFields);
+            AutoPtr<ISet> st;
+            enterpriseFields->GetKeySet((ISet**)&st);
+            AutoPtr<IIterator> itSt;
+            st->GetIterator((IIterator**)&itSt);
+            Boolean bHasNxt = FALSE;
+            while ((itSt->HasNext(&bHasNxt), bHasNxt)) {
+                AutoPtr<IInterface> p;
+                itSt->GetNext((IInterface**)&p);
+                String key;
+                ICharSequence::Probe(p)->ToString(&key);
+                AutoPtr<IInterface> val;
+                enterpriseFields->Get(p, (IInterface**)&val);
+                String value;
+                ICharSequence::Probe(val)->ToString(&value);
+                if (key.Equals("password") && !value.IsNull() && value.Equals("*")) {
+                    // No need to try to set an obfuscated password, which will fail
+                    continue;
+                }
+                if (!mWifiNative->SetNetworkVariable(
+                            netId,
+                            key,
+                            value)) {
+                    RemoveKeys(enterpriseConfig);
+                    String str(ssid);
+                    str += ": failed to set ";
+                    str += key; str += ": "; str += value;
+                    Loge(str);
+                    goto setVariables;
+                }
+            }
+        }
+        updateFailed = FALSE;
+    } // End of setVariables
+
+    if (updateFailed) {
+        if (newNetwork) {
+            mWifiNative->RemoveNetwork(netId);
+            String str("Failed to set a network variable, removed network: ");
+            str += netId;
+            Loge(str);
+        }
+        return new NetworkUpdateResult(IWifiConfiguration::INVALID_NETWORK_ID);
+    }
+
+    /* An update of the network variables requires reading them
+     * back from the supplicant to update mConfiguredNetworks.
+     * This is because some of the variables (SSID, wep keys &
+     * passphrases) reflect different values when read back than
+     * when written. For example, wep key is stored as * irrespective
+     * of the value sent to the supplicant
+     */
+    AutoPtr<IInterface> _currentConfig;
+    mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&_currentConfig);
+    AutoPtr<IWifiConfiguration> currentConfig = IWifiConfiguration::Probe(_currentConfig);
+    if (currentConfig == NULL) {
+        CWifiConfiguration::New((IWifiConfiguration**)&currentConfig);
+        currentConfig->SetIpAssignment(Elastos::Droid::Net::DHCP_IpAssignment);
+        currentConfig->SetProxySettings(Elastos::Droid::Net::NONE_ProxySettings);
+        currentConfig->SetNetworkId(netId);
+        if (config != NULL) {
+            // Carry over the creation parameters
+            Boolean selfAdded = FALSE;
+            config->GetSelfAdded(&selfAdded);
+            currentConfig->SetSelfAdded(selfAdded);
+            Boolean didSelfAdd = FALSE;
+            config->GetDidSelfAdd(&didSelfAdd);
+            currentConfig->SetDidSelfAdd(didSelfAdd);
+            Boolean ephemeral = FALSE;
+            config->GetEphemeral(&ephemeral);
+            currentConfig->SetEphemeral(ephemeral);
+            Int32 autoJoinUseAggressiveJoinAttemptThreshold = 0;
+            config->GetAutoJoinUseAggressiveJoinAttemptThreshold(&autoJoinUseAggressiveJoinAttemptThreshold);
+            currentConfig->SetAutoJoinUseAggressiveJoinAttemptThreshold(autoJoinUseAggressiveJoinAttemptThreshold);
+            Int32 lastConnectUid = 0;
+            config->GetLastConnectUid(&lastConnectUid);
+            currentConfig->SetLastConnectUid(lastConnectUid);
+            Int32 lastUpdateUid = 0;
+            config->GetLastUpdateUid(&lastUpdateUid);
+            currentConfig->SetLastUpdateUid(lastUpdateUid);
+            Int32 creatorUid = 0;
+            config->GetCreatorUid(&creatorUid);
+            currentConfig->SetCreatorUid(creatorUid);
+            String peerWifiConfiguration;
+            config->GetPeerWifiConfiguration(&peerWifiConfiguration);
+            currentConfig->SetPeerWifiConfiguration(peerWifiConfiguration);
+        }
+        if (DBG) {
+            Int32 creatorUid = 0;
+            config->GetCreatorUid(&creatorUid);
+            String str("created new config netId=");
+            str += netId; str += " uid=";
+            str += creatorUid;
+            Loge(str);
+        }
+    }
+
+    if (uid >= 0) {
+        if (newNetwork) {
+            currentConfig->SetCreatorUid(uid);
+        }
+        else {
+            currentConfig->SetLastUpdateUid(uid);
+        }
+    }
+
+    if (newNetwork) {
+        currentConfig->SetDirty(TRUE);
+    }
+
+    Int32 autoJoinStatus = 0;
+    currentConfig->GetAutoJoinStatus(&autoJoinStatus);
+    if (autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
+        // Make sure the configuration is not deleted anymore since we just
+        // added or modified it.
+        currentConfig->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+        currentConfig->SetSelfAdded(FALSE);
+        currentConfig->SetDidSelfAdd(FALSE);
+        if (DBG) {
+            String ck;
+            currentConfig->ConfigKey(&ck);
+            String str("remove deleted status netId=");
+            str += netId; str += " ";
+            str += ck;
+            Loge(str);
+        }
+    }
+
+    Int32 status = 0;
+    currentConfig->GetStatus(&status);
+    if (status == IWifiConfigurationStatus::ENABLED) {
+        // Make sure autojoin remain in sync with user modifying the configuration
+        currentConfig->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
+    }
+
+    if (DBG) {
+        String str("will read network variables netId=");
+        str += netId;
+        Loge(str);
+    }
+
+    ReadNetworkVariables(currentConfig);
+
+    mConfiguredNetworks->Put(CoreUtils::Convert(netId), currentConfig);
+    mNetworkIds->Put(CoreUtils::Convert(ConfigKey(currentConfig)), CoreUtils::Convert(netId));
+
+    AutoPtr<NetworkUpdateResult> result = WriteIpAndProxyConfigurationsOnChange(currentConfig, config);
+    result->SetIsNewNetwork(newNetwork);
+    result->SetNetworkId(netId);
+
+    WriteKnownNetworkHistory();
+
+    return result;
 }
 
 AutoPtr<NetworkUpdateResult> WifiConfigStore::WriteIpAndProxyConfigurationsOnChange(
     /* [in] */ IWifiConfiguration* currentConfig,
     /* [in] */ IWifiConfiguration* newConfig)
 {
-    // ==================before translated======================
-    // boolean ipChanged = false;
-    // boolean proxyChanged = false;
-    //
-    // if (VDBG) {
-    //     loge("writeIpAndProxyConfigurationsOnChange: " + currentConfig.SSID + " -> " +
-    //             newConfig.SSID + " path: " + ipConfigFile);
-    // }
-    //
-    //
-    // switch (newConfig.getIpAssignment()) {
-    //     case STATIC:
-    //         if (currentConfig.getIpAssignment() != newConfig.getIpAssignment()) {
-    //             ipChanged = true;
-    //         } else {
-    //             ipChanged = !Objects.equals(
-    //                     currentConfig.getStaticIpConfiguration(),
-    //                     newConfig.getStaticIpConfiguration());
-    //         }
-    //         break;
-    //     case DHCP:
-    //         if (currentConfig.getIpAssignment() != newConfig.getIpAssignment()) {
-    //             ipChanged = true;
-    //         }
-    //         break;
-    //     case UNASSIGNED:
-    //         /* Ignore */
-    //         break;
-    //     default:
-    //         loge("Ignore invalid ip assignment during write");
-    //         break;
-    // }
-    //
-    // switch (newConfig.getProxySettings()) {
-    //     case STATIC:
-    //     case PAC:
-    //         ProxyInfo newHttpProxy = newConfig.getHttpProxy();
-    //         ProxyInfo currentHttpProxy = currentConfig.getHttpProxy();
-    //
-    //         if (newHttpProxy != null) {
-    //             proxyChanged = !newHttpProxy.equals(currentHttpProxy);
-    //         } else {
-    //             proxyChanged = (currentHttpProxy != null);
-    //         }
-    //         break;
-    //     case NONE:
-    //         if (currentConfig.getProxySettings() != newConfig.getProxySettings()) {
-    //             proxyChanged = true;
-    //         }
-    //         break;
-    //     case UNASSIGNED:
-    //         /* Ignore */
-    //         break;
-    //     default:
-    //         loge("Ignore invalid proxy configuration during write");
-    //         break;
-    // }
-    //
-    // if (ipChanged) {
-    //     currentConfig.setIpAssignment(newConfig.getIpAssignment());
-    //     currentConfig.setStaticIpConfiguration(newConfig.getStaticIpConfiguration());
-    //     log("IP config changed SSID = " + currentConfig.SSID);
-    //     if (currentConfig.getStaticIpConfiguration() != null) {
-    //         log(" static configuration: " +
-    //             currentConfig.getStaticIpConfiguration().toString());
-    //     }
-    // }
-    //
-    // if (proxyChanged) {
-    //     currentConfig.setProxySettings(newConfig.getProxySettings());
-    //     currentConfig.setHttpProxy(newConfig.getHttpProxy());
-    //     log("proxy changed SSID = " + currentConfig.SSID);
-    //     if (currentConfig.getHttpProxy() != null) {
-    //         log(" proxyProperties: " + currentConfig.getHttpProxy().toString());
-    //     }
-    // }
-    //
-    // if (ipChanged || proxyChanged) {
-    //     writeIpAndProxyConfigurations();
-    //     sendConfiguredNetworksChangedBroadcast(currentConfig,
-    //             WifiManager.CHANGE_REASON_CONFIG_CHANGE);
-    // }
-    // return new NetworkUpdateResult(ipChanged, proxyChanged);
-    assert(0);
-    AutoPtr<NetworkUpdateResult> empty;
-    return empty;
+    Boolean ipChanged = FALSE;
+    Boolean proxyChanged = FALSE;
+
+    String ssid;
+    currentConfig->GetSSID(&ssid);
+    String nssid;
+    newConfig->GetSSID(&nssid);
+    if (VDBG) {
+        String str("writeIpAndProxyConfigurationsOnChange: ");
+        str += ssid;
+        str += " -> ";
+        str += nssid;
+        str += " path: ";
+        str += ipConfigFile;
+        Loge(str);
+    }
+
+    IpConfigurationIpAssignment newAssi;
+    newConfig->GetIpAssignment(&newAssi);
+    IpConfigurationIpAssignment assi;
+    currentConfig->GetIpAssignment(&assi);
+    AutoPtr<IStaticIpConfiguration> newIpcon, ipcon;
+    currentConfig->GetStaticIpConfiguration((IStaticIpConfiguration**)&newIpcon);
+    newConfig->GetStaticIpConfiguration((IStaticIpConfiguration**)&ipcon);
+    switch (newAssi) {
+        case Elastos::Droid::Net::STATIC_IpAssignment:
+            if (assi != newAssi) {
+                ipChanged = TRUE;
+            }
+            else {
+                ipChanged = !Object::Equals(newIpcon, ipcon);
+            }
+            break;
+        case Elastos::Droid::Net::DHCP_IpAssignment:
+            if (assi != newAssi) {
+                ipChanged = TRUE;
+            }
+            break;
+        case Elastos::Droid::Net::UNASSIGNED_IpAssignment:
+            /* Ignore */
+            break;
+        default:
+            Loge(String("Ignore invalid ip assignment during write"));
+            break;
+    }
+
+    Elastos::Droid::Net::IpConfigurationProxySettings newsettings, settings;
+    newConfig->GetProxySettings(&newsettings);
+    currentConfig->GetProxySettings(&settings);
+    AutoPtr<IProxyInfo> newHttpProxy;
+    newConfig->GetHttpProxy((IProxyInfo**)&newHttpProxy);
+    AutoPtr<IProxyInfo> currentHttpProxy;
+    currentConfig->GetHttpProxy((IProxyInfo**)&currentHttpProxy);
+    switch (newsettings) {
+        case Elastos::Droid::Net::STATIC_ProxySettings:
+        case Elastos::Droid::Net::PAC_ProxySettings:
+            if (newHttpProxy != NULL) {
+                proxyChanged = !Object::Equals(newHttpProxy, currentHttpProxy);
+            }
+            else {
+                proxyChanged = (currentHttpProxy != NULL);
+            }
+            break;
+        case Elastos::Droid::Net::NONE_ProxySettings:
+            if (settings != newsettings) {
+                proxyChanged = TRUE;
+            }
+            break;
+        case Elastos::Droid::Net::UNASSIGNED_ProxySettings:
+            /* Ignore */
+            break;
+        default:
+            Loge(String("Ignore invalid proxy configuration during write"));
+            break;
+    }
+
+    if (ipChanged) {
+        currentConfig->SetIpAssignment(assi);
+        currentConfig->SetStaticIpConfiguration(newIpcon);
+        String str("IP config changed SSID = ");
+        str += ssid;
+        Loge(str);
+        if (ipcon != NULL) {
+            String str;
+            IObject::Probe(ipcon)->ToString(&str);
+            String er(" static configuration: ");
+            er += str;
+            Loge(er);
+        }
+    }
+
+    if (proxyChanged) {
+        currentConfig->SetProxySettings(newsettings);
+        currentConfig->SetHttpProxy(newHttpProxy);
+        String er("proxy changed SSID = ");
+        er += ssid;
+        Loge(er);
+        if (currentHttpProxy != NULL) {
+            String str;
+            IObject::Probe(currentHttpProxy)->ToString(&str);
+            er = " proxyProperties: ";
+            er += str;
+            Loge(er);
+        }
+    }
+
+    if (ipChanged || proxyChanged) {
+        WriteIpAndProxyConfigurations();
+        SendConfiguredNetworksChangedBroadcast(currentConfig,
+                IWifiManager::CHANGE_REASON_CONFIG_CHANGE);
+    }
+    return new NetworkUpdateResult(ipChanged, proxyChanged);
 }
 
 Boolean WifiConfigStore::EnterpriseConfigKeyShouldBeQuoted(
     /* [in] */ const String& key)
 {
-    // ==================before translated======================
-    // switch (key) {
-    //     case WifiEnterpriseConfig.EAP_KEY:
-    //     case WifiEnterpriseConfig.ENGINE_KEY:
-    //         return false;
-    //     default:
-    //         return true;
-    // }
-    assert(0);
-    return FALSE;
+    //switch (key) {
+    //    case IWifiEnterpriseConfig::EAP_KEY:
+    //    case IWifiEnterpriseConfig::ENGINE_KEY:
+    //        return FALSE;
+    //    default:
+    //        return TRUE;
+    //}
+    if ( key.Equals(IWifiEnterpriseConfig::EAP_KEY)
+        || key.Equals(IWifiEnterpriseConfig::ENGINE_KEY)) {
+        return FALSE;
+    }
+    else {
+        return TRUE;
+    }
 }
 
 void WifiConfigStore::ReadNetworkVariables(
     /* [in] */ IWifiConfiguration* config)
 {
-    // ==================before translated======================
-    //
-    // int netId = config.networkId;
-    // if (netId < 0)
-    //     return;
-    //
-    // /*
-    //  * TODO: maybe should have a native method that takes an array of
-    //  * variable names and returns an array of values. But we'd still
-    //  * be doing a round trip to the supplicant daemon for each variable.
-    //  */
-    // String value;
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.ssidVarName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     if (value.charAt(0) != '"') {
-    //         config.SSID = "\"" + WifiSsid.createFromHex(value).toString() + "\"";
-    //         //TODO: convert a hex string that is not UTF-8 decodable to a P-formatted
-    //         //supplicant string
-    //     } else {
-    //         config.SSID = value;
-    //     }
-    // } else {
-    //     config.SSID = null;
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.bssidVarName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     config.BSSID = value;
-    // } else {
-    //     config.BSSID = null;
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.priorityVarName);
-    // config.priority = -1;
-    // if (!TextUtils.isEmpty(value)) {
-    //     try {
-    //         config.priority = Integer.parseInt(value);
-    //     } catch (NumberFormatException ignore) {
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.hiddenSSIDVarName);
-    // config.hiddenSSID = false;
-    // if (!TextUtils.isEmpty(value)) {
-    //     try {
-    //         config.hiddenSSID = Integer.parseInt(value) != 0;
-    //     } catch (NumberFormatException ignore) {
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.modeVarName);
-    // config.isIBSS = false;
-    // if (!TextUtils.isEmpty(value)) {
-    //     try {
-    //         config.isIBSS = Integer.parseInt(value) != 0;
-    //     } catch (NumberFormatException ignore) {
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.frequencyVarName);
-    // config.frequency = 0;
-    // if (!TextUtils.isEmpty(value)) {
-    //     try {
-    //         config.frequency = Integer.parseInt(value);
-    //     } catch (NumberFormatException ignore) {
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.wepTxKeyIdxVarName);
-    // config.wepTxKeyIndex = -1;
-    // if (!TextUtils.isEmpty(value)) {
-    //     try {
-    //         config.wepTxKeyIndex = Integer.parseInt(value);
-    //     } catch (NumberFormatException ignore) {
-    //     }
-    // }
-    //
-    // for (int i = 0; i < 4; i++) {
-    //     value = mWifiNative.getNetworkVariable(netId,
-    //             WifiConfiguration.wepKeyVarNames[i]);
-    //     if (!TextUtils.isEmpty(value)) {
-    //         config.wepKeys[i] = value;
-    //     } else {
-    //         config.wepKeys[i] = null;
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.pskVarName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     config.preSharedKey = value;
-    // } else {
-    //     config.preSharedKey = null;
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(config.networkId,
-    //         WifiConfiguration.Protocol.varName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     String vals[] = value.split(" ");
-    //     for (String val : vals) {
-    //         int index =
-    //             lookupString(val, WifiConfiguration.Protocol.strings);
-    //         if (0 <= index) {
-    //             config.allowedProtocols.set(index);
-    //         }
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(config.networkId,
-    //         WifiConfiguration.KeyMgmt.varName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     String vals[] = value.split(" ");
-    //     for (String val : vals) {
-    //         int index =
-    //             lookupString(val, WifiConfiguration.KeyMgmt.strings);
-    //         if (0 <= index) {
-    //             config.allowedKeyManagement.set(index);
-    //         }
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(config.networkId,
-    //         WifiConfiguration.AuthAlgorithm.varName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     String vals[] = value.split(" ");
-    //     for (String val : vals) {
-    //         int index =
-    //             lookupString(val, WifiConfiguration.AuthAlgorithm.strings);
-    //         if (0 <= index) {
-    //             config.allowedAuthAlgorithms.set(index);
-    //         }
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(config.networkId,
-    //         WifiConfiguration.PairwiseCipher.varName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     String vals[] = value.split(" ");
-    //     for (String val : vals) {
-    //         int index =
-    //             lookupString(val, WifiConfiguration.PairwiseCipher.strings);
-    //         if (0 <= index) {
-    //             config.allowedPairwiseCiphers.set(index);
-    //         }
-    //     }
-    // }
-    //
-    // value = mWifiNative.getNetworkVariable(config.networkId,
-    //         WifiConfiguration.GroupCipher.varName);
-    // if (!TextUtils.isEmpty(value)) {
-    //     String vals[] = value.split(" ");
-    //     for (String val : vals) {
-    //         int index =
-    //             lookupString(val, WifiConfiguration.GroupCipher.strings);
-    //         if (0 <= index) {
-    //             config.allowedGroupCiphers.set(index);
-    //         }
-    //     }
-    // }
-    //
-    // if (config.enterpriseConfig == null) {
-    //     config.enterpriseConfig = new WifiEnterpriseConfig();
-    // }
-    // HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
-    // for (String key : ENTERPRISE_CONFIG_SUPPLICANT_KEYS) {
-    //     value = mWifiNative.getNetworkVariable(netId, key);
-    //     if (!TextUtils.isEmpty(value)) {
-    //         if (!enterpriseConfigKeyShouldBeQuoted(key)) {
-    //             value = removeDoubleQuotes(value);
-    //         }
-    //         enterpriseFields.put(key, value);
-    //     } else {
-    //         enterpriseFields.put(key, EMPTY_VALUE);
-    //     }
-    // }
-    //
-    // if (migrateOldEapTlsNative(config.enterpriseConfig, netId)) {
-    //     saveConfig();
-    // }
-    //
-    // migrateCerts(config.enterpriseConfig);
-    // // initializeSoftwareKeystoreFlag(config.enterpriseConfig, mKeyStore);
-    assert(0);
+
+    Int32 netId = 0;
+    config->GetNetworkId(&netId);
+    if (netId < 0)
+        return;
+
+    /*
+     * TODO: maybe should have a native method that takes an array of
+     * variable names and returns an array of values. But we'd still
+     * be doing a round trip to the supplicant daemon for each variable.
+     */
+    String value;
+
+    value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::ssidVarName);
+    if (!TextUtils::IsEmpty(value)) {
+        if (value.GetChar(0) != '"') {
+            AutoPtr<IWifiSsidHelper> hlp;
+            CWifiSsidHelper::AcquireSingleton((IWifiSsidHelper**)&hlp);
+            AutoPtr<IWifiSsid> ssid;
+            hlp->CreateFromHex(value, (IWifiSsid**)&ssid);
+            String str;
+            IObject::Probe(ssid)->ToString(&str);
+            String res("\"");
+            res += str;
+            res += "\"";
+            config->SetSSID(res);
+            //TODO: convert a hex string that is not UTF-8 decodable to a P-formatted
+            //supplicant string
+        }
+        else {
+            config->SetSSID(value);
+        }
+    }
+    else {
+        config->SetSSID(String(NULL));
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::bssidVarName);
+    if (!TextUtils::IsEmpty(value)) {
+        config->SetBSSID(value);
+    }
+    else {
+        config->SetBSSID(String(NULL));
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::priorityVarName);
+    config->SetPriority(-1);
+    if (!TextUtils::IsEmpty(value)) {
+        config->SetPriority(StringUtils::ParseInt32(value));
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::hiddenSSIDVarName);
+    config->SetHiddenSSID(FALSE);
+    if (!TextUtils::IsEmpty(value)) {
+        config->SetHiddenSSID(StringUtils::ParseInt32(value) != 0);
+    }
+
+    assert(0);//TODO
+    value = mWifiNative->GetNetworkVariable(netId, String("mode")/*TODO IWifiConfiguration::modeVarName*/);
+    //TODO config->SetIsIBSS(FALSE);
+    if (!TextUtils::IsEmpty(value)) {
+        //TODO config->SetIsIBSS(StringUtils::ParseInt32(value) != 0);
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId, String("frequency")/*TODO IWifiConfiguration::frequencyVarName*/);
+    //TODO config->SetFrequency(0);
+    if (!TextUtils::IsEmpty(value)) {
+        //TODO config->SetFrequency(StringUtils::ParseInt32(value));
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::wepTxKeyIdxVarName);
+    config->SetWepTxKeyIndex(-1);
+    if (!TextUtils::IsEmpty(value)) {
+        config->SetWepTxKeyIndex(StringUtils::ParseInt32(value));
+    }
+
+    for (Int32 i = 0; i < 4; i++) {
+        AutoPtr<ArrayOf<String> > wepKeyVarNames;
+        config->GetWepKeyVarNames((ArrayOf<String>**)&wepKeyVarNames);
+        value = mWifiNative->GetNetworkVariable(netId, (*wepKeyVarNames)[i]);
+        AutoPtr<ArrayOf<String> > wepKeys;
+        config->GetWepKeys((ArrayOf<String>**)&wepKeys);
+        if (!TextUtils::IsEmpty(value)) {
+            wepKeys->Set(i, value);
+        }
+        else {
+            wepKeys->Set(i, String(NULL));
+        }
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::pskVarName);
+    if (!TextUtils::IsEmpty(value)) {
+        config->SetPreSharedKey(value);
+    }
+    else {
+        config->SetPreSharedKey(String(NULL));
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId,
+            IWifiConfigurationProtocol::VAR_NAME);
+    if (!TextUtils::IsEmpty(value)) {
+        AutoPtr<ArrayOf<String> > vals;
+        StringUtils::Split(value, String(" "), (ArrayOf<String>**)&vals);
+        for (Int32 i = 0; i < vals->GetLength(); i++) {
+            String val = (*vals)[i];
+            AutoPtr<IWifiConfigurationProtocol> prot;
+            CWifiConfigurationProtocol::AcquireSingleton((IWifiConfigurationProtocol**)&prot);
+            AutoPtr<ArrayOf<String> > arr;
+            prot->GetStrings((ArrayOf<String>**)&arr);
+            Int32 index = LookupString(val, arr);
+            if (0 <= index) {
+                AutoPtr<IBitSet> bs;
+                config->GetAllowedProtocols((IBitSet**)&bs);
+                bs->Set(index);
+            }
+        }
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId,
+            IWifiConfigurationKeyMgmt::VAR_NAME);
+    if (!TextUtils::IsEmpty(value)) {
+        AutoPtr<ArrayOf<String> > vals;
+        StringUtils::Split(value, String(" "), (ArrayOf<String>**)&vals);
+        for (Int32 i = 0; i < vals->GetLength(); i++) {
+            String val = (*vals)[i];
+            AutoPtr<IWifiConfigurationKeyMgmt> mgmt;
+            CWifiConfigurationKeyMgmt::AcquireSingleton((IWifiConfigurationKeyMgmt**)&mgmt);
+            AutoPtr<ArrayOf<String> > arr;
+            mgmt->GetStrings((ArrayOf<String>**)&arr);
+            Int32 index = LookupString(val, arr);
+            if (0 <= index) {
+                AutoPtr<IBitSet> bs;
+                config->GetAllowedKeyManagement((IBitSet**)&bs);
+                bs->Set(index);
+            }
+        }
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId,
+            IWifiConfigurationAuthAlgorithm::VAR_NAME);
+    if (!TextUtils::IsEmpty(value)) {
+        AutoPtr<ArrayOf<String> > vals;
+        StringUtils::Split(value, String(" "), (ArrayOf<String>**)&vals);
+        for (Int32 i = 0; i < vals->GetLength(); i++) {
+            String val = (*vals)[i];
+            AutoPtr<IWifiConfigurationAuthAlgorithm> algo;
+            CWifiConfigurationAuthAlgorithm::AcquireSingleton((IWifiConfigurationAuthAlgorithm**)&algo);
+            AutoPtr<ArrayOf<String> > arr;
+            algo->GetStrings((ArrayOf<String>**)&arr);
+            Int32 index = LookupString(val, arr);
+            if (0 <= index) {
+                AutoPtr<IBitSet> bs;
+                config->GetAllowedAuthAlgorithms((IBitSet**)&bs);
+                bs->Set(index);
+            }
+        }
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId,
+            IWifiConfigurationPairwiseCipher::VAR_NAME);
+    if (!TextUtils::IsEmpty(value)) {
+        AutoPtr<ArrayOf<String> > vals;
+        StringUtils::Split(value, String(" "), (ArrayOf<String>**)&vals);
+        for (Int32 i = 0; i < vals->GetLength(); i++) {
+            String val = (*vals)[i];
+            AutoPtr<IWifiConfigurationPairwiseCipher> paci;
+            CWifiConfigurationPairwiseCipher::AcquireSingleton((IWifiConfigurationPairwiseCipher**)&paci);
+            AutoPtr<ArrayOf<String> > arr;
+            paci->GetStrings((ArrayOf<String>**)&arr);
+            Int32 index = LookupString(val, arr);
+            if (0 <= index) {
+                AutoPtr<IBitSet> bs;
+                config->GetAllowedPairwiseCiphers((IBitSet**)&bs);
+                bs->Set(index);
+            }
+        }
+    }
+
+    value = mWifiNative->GetNetworkVariable(netId,
+            IWifiConfigurationGroupCipher::VAR_NAME);
+    if (!TextUtils::IsEmpty(value)) {
+        AutoPtr<ArrayOf<String> > vals;
+        StringUtils::Split(value, String(" "), (ArrayOf<String>**)&vals);
+        for (Int32 i = 0; i < vals->GetLength(); i++) {
+            String val = (*vals)[i];
+            AutoPtr<IWifiConfigurationGroupCipher> grci;
+            CWifiConfigurationGroupCipher::AcquireSingleton((IWifiConfigurationGroupCipher**)&grci);
+            AutoPtr<ArrayOf<String> > arr;
+            grci->GetStrings((ArrayOf<String>**)&arr);
+            Int32 index = LookupString(val, arr);
+            if (0 <= index) {
+                AutoPtr<IBitSet> bs;
+                config->GetAllowedGroupCiphers((IBitSet**)&bs);
+                bs->Set(index);
+            }
+        }
+    }
+
+    AutoPtr<IWifiEnterpriseConfig> enterpriseConfig;
+    config->GetEnterpriseConfig((IWifiEnterpriseConfig**)&enterpriseConfig);
+    if (enterpriseConfig == NULL) {
+        CWifiEnterpriseConfig::New((IWifiEnterpriseConfig**)&enterpriseConfig);
+    }
+    AutoPtr<IHashMap> enterpriseFields;
+    enterpriseConfig->GetFields((IHashMap**)&enterpriseFields);
+    for (Int32 i = 0; i < ENTERPRISE_CONFIG_SUPPLICANT_KEYS->GetLength(); i++) {
+        String key = (*ENTERPRISE_CONFIG_SUPPLICANT_KEYS)[i];
+        value = mWifiNative->GetNetworkVariable(netId, key);
+        if (!TextUtils::IsEmpty(value)) {
+            if (!EnterpriseConfigKeyShouldBeQuoted(key)) {
+                value = RemoveDoubleQuotes(value);
+            }
+            enterpriseFields->Put(CoreUtils::Convert(key), CoreUtils::Convert(value));
+        }
+        else {
+            enterpriseFields->Put(CoreUtils::Convert(key), CoreUtils::Convert(EMPTY_VALUE));
+        }
+    }
+
+    Boolean bTemp;
+    if (MigrateOldEapTlsNative(enterpriseConfig, netId, &bTemp), bTemp) {
+        Boolean bRes;
+        SaveConfig(&bRes);
+    }
+
+    MigrateCerts(enterpriseConfig);
+    // initializeSoftwareKeystoreFlag(config.enterpriseConfig, mKeyStore);
 }
 
 String WifiConfigStore::RemoveDoubleQuotes(
     /* [in] */ const String& string)
 {
-    // ==================before translated======================
-    // int length = string.length();
-    // if ((length > 1) && (string.charAt(0) == '"')
-    //         && (string.charAt(length - 1) == '"')) {
-    //     return string.substring(1, length - 1);
-    // }
-    // return string;
-    assert(0);
-    return String("");
+    Int32 length = string.GetLength();
+    if ((length > 1) && (string.GetChar(0) == '"')
+            && (string.GetChar(length - 1) == '"')) {
+        return string.Substring(1, length - 1);
+    }
+    return string;
 }
 
 String WifiConfigStore::MakeString(
     /* [in] */ IBitSet* set,
     /* [in] */ ArrayOf<String>* strings)
 {
-    // ==================before translated======================
-    // StringBuffer buf = new StringBuffer();
-    // int nextSetBit = -1;
-    //
-    // /* Make sure all set bits are in [0, strings.length) to avoid
-    //  * going out of bounds on strings.  (Shouldn't happen, but...) */
-    // set = set.get(0, strings.length);
-    //
-    // while ((nextSetBit = set.nextSetBit(nextSetBit + 1)) != -1) {
-    //     buf.append(strings[nextSetBit].replace('_', '-')).append(' ');
-    // }
-    //
-    // // remove trailing space
-    // if (set.cardinality() > 0) {
-    //     buf.setLength(buf.length() - 1);
-    // }
-    //
-    // return buf.toString();
-    assert(0);
-    return String("");
+    AutoPtr<StringBuffer> buf;
+    Int32 nextSetBit = -1;
+
+    /* Make sure all set bits are in [0, strings.length) to avoid
+     * going out of bounds on strings.  (Shouldn't happen, but...) */
+    set->Get(0, strings->GetLength(), (IBitSet**)&set);
+
+    while ((set->NextSetBit(nextSetBit + 1, &nextSetBit), nextSetBit) != -1) {
+        String str = (*strings)[nextSetBit].Replace('_', '-');
+        buf->Append(str);
+        buf->Append(' ');
+    }
+
+    // remove trailing space
+    Int32 num = 0;
+    set->Cardinality(&num);
+    Int32 len = 0;
+    buf->GetLength(&len);
+    if (num > 0) {
+        //buf->SetLength(len - 1);
+        len -= 1;
+    }
+
+    String result;
+    buf->Substring(0, len, &result);
+    return result;
 }
 
 Int32 WifiConfigStore::LookupString(
-    /* [in] */ const String& string,
+    /* [in] */ const String& _string,
     /* [in] */ ArrayOf<String>* strings)
 {
-    // ==================before translated======================
-    // int size = strings.length;
-    //
-    // string = string.replace('-', '_');
-    //
-    // for (int i = 0; i < size; i++)
-    //     if (string.equals(strings[i]))
-    //         return i;
-    //
-    // // if we ever get here, we should probably add the
-    // // value to WifiConfiguration to reflect that it's
-    // // supported by the WPA supplicant
-    // loge("Failed to look-up a string: " + string);
-    //
-    // return -1;
-    assert(0);
-    return 0;
+    Int32 size = _string.GetLength();
+
+    String string = _string.Replace('-', '_');
+
+    for (Int32 i = 0; i < size; i++)
+        if (string.Equals((*strings)[i]))
+            return i;
+
+    // if we ever get here, we should probably add the
+    // value to WifiConfiguration to reflect that it's
+    // supported by the WPA supplicant
+    String er("Failed to look-up a string: ");
+    er += string;
+    Loge(er);
+
+    return -1;
 }
 
 Int32 WifiConfigStore::ConfigKey(
     /* [in] */ IWifiConfiguration* config)
 {
-    // ==================before translated======================
-    // String key = config.configKey();
-    // return key.hashCode();
-    assert(0);
-    return 0;
+    String key;
+    config->ConfigKey(&key);
+    return key.GetHashCode();
 }
 
 void WifiConfigStore::LocalLog(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // if (mLocalLog != null) {
-    //     mLocalLog.log(s);
-    // }
-    assert(0);
+    if (mLocalLog != NULL) {
+        mLocalLog->Log(s);
+    }
 }
 
 void WifiConfigStore::LocalLog(
     /* [in] */ const String& s,
     /* [in] */ Boolean force)
 {
-    // ==================before translated======================
-    // localLog(s);
-    // if (force) loge(s);
-    assert(0);
+    LocalLog(s);
+    if (force) Loge(s);
 }
 
 void WifiConfigStore::LocalLog(
     /* [in] */ const String& s,
     /* [in] */ Int32 netId)
 {
-    // ==================before translated======================
-    // if (mLocalLog == null) {
-    //     return;
-    // }
-    //
-    // WifiConfiguration config;
-    // synchronized(mConfiguredNetworks) {
-    //     config = mConfiguredNetworks.get(netId);
-    // }
-    //
-    // if (config != null) {
-    //     mLocalLog.log(s + " " + config.getPrintableSsid() + " " + netId
-    //             + " status=" + config.status
-    //             + " key=" + config.configKey());
-    // } else {
-    //     mLocalLog.log(s + " " + netId);
-    // }
-    assert(0);
+    if (mLocalLog == NULL) {
+        return;
+    }
+
+    AutoPtr<IWifiConfiguration> config;
+    synchronized(mConfiguredNetworks) {
+        AutoPtr<IInterface> p;
+        mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&p);
+        config = IWifiConfiguration::Probe(p);
+    }
+
+    if (config != NULL) {
+        String str(s);
+        str += " ";
+        String ss;
+        config->GetPrintableSsid(&ss);
+        str += ss;
+        str += " "; str += netId;
+        str += " status=";
+        Int32 status = 0;
+        config->GetStatus(&status);
+        str += status;
+        str += " key=";
+        String ck;
+        config->ConfigKey(&ck);
+        str += ck;
+        mLocalLog->Log(str);
+    }
+    else {
+        String str(s);
+        str += " ";
+        str += netId;
+        mLocalLog->Log(str);
+    }
 }
 
 Boolean WifiConfigStore::PutCertInKeyStore(
     /* [in] */ const String& name,
     /* [in] */ ICertificate* cert)
 {
-    // ==================before translated======================
     // try {
-    //     byte[] certData = Credentials.convertToPem(cert);
-    //     if (DBG) Log.d(TAG, "putting certificate " + name + " in keystore");
-    //     return mKeyStore.put(name, certData, Process.WIFI_UID, KeyStore.FLAG_NONE);
-    //
+    assert(0);//TODO
+    //TODO AutoPtr<ICredentialsHelper> hlp;
+    //TODO CCredentialsHelper::AcquireSingleton((ICredentialsHelper**)&hlp);
+    //TODO AutoPtr<ArrayOf<Byte> > certData;
+    //TODO hlp->ConvertToPem(cert, (ArrayOf<Byte>**)&certData);
+    //TODO if (DBG) {
+    //TODO     String str("putting certificate ");
+    //TODO     str += name;
+    //TODO     str += " in keystore";
+    //TODO     Logger::D(TAG, str);
+    //TODO }
+    //TODO return mKeyStore->Put(name, certData, IProcess::WIFI_UID, IKeyStore::FLAG_NONE);
+
     // } catch (IOException e1) {
     //     return false;
     // } catch (CertificateException e2) {
     //     return false;
     // }
-    assert(0);
     return FALSE;
 }
 
@@ -4305,5 +5586,3 @@ Boolean WifiConfigStore::PutCertInKeyStore(
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
-

@@ -30,7 +30,7 @@ namespace Net {
 DelayedDiskWrite::InnerSub_Runnable::InnerSub_Runnable(
     /* [in] */ DelayedDiskWrite* host,
     /* [in] */ const String& filePath,
-    /* [in] */ Writer* w)
+    /* [in] */ IDelayedDiskWriteWriter* w)
     : mHost(host)
     , mFilePath(filePath)
     , mWriter(w)
@@ -51,7 +51,7 @@ DelayedDiskWrite::DelayedDiskWrite()
 
 ECode DelayedDiskWrite::Write(
     /* [in] */ const String& filePath,
-    /* [in] */ Writer* w)
+    /* [in] */ IDelayedDiskWriteWriter* w)
 {
     if (TextUtils::IsEmpty(filePath)) {
         Logger::E(TAG, "empty file path");
@@ -74,7 +74,7 @@ ECode DelayedDiskWrite::Write(
 
 ECode DelayedDiskWrite::DoWrite(
     /* [in] */ const String& filePath,
-    /* [in] */ Writer* w)
+    /* [in] */ IDelayedDiskWriteWriter* w)
 {
     AutoPtr<IDataOutputStream> out;
     ECode ec;

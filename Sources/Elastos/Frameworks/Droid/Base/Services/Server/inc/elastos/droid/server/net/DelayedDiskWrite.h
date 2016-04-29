@@ -24,13 +24,13 @@ class DelayedDiskWrite
 {
     friend class InnerSub_Runnable;
 
-public:
-    class Writer
-    {
-    public:
-        virtual CARAPI OnWriteCalled(
-            /* [in] */ IDataOutputStream* out) = 0;
-    };
+//public:
+//    class Writer
+//    {
+//    public:
+//        virtual CARAPI OnWriteCalled(
+//            /* [in] */ IDataOutputStream* out) = 0;
+//    };
 
 private:
     class InnerSub_Runnable
@@ -40,7 +40,7 @@ private:
         InnerSub_Runnable(
             /* [in] */ DelayedDiskWrite* host,
             /* [in] */ const String& filePath,
-            /* [in] */ Writer* w);
+            /* [in] */ IDelayedDiskWriteWriter* w);
 
         // @Override
         CARAPI Run();
@@ -48,7 +48,7 @@ private:
     private:
         DelayedDiskWrite* mHost;
         const String& mFilePath;
-        Writer* mWriter;
+        AutoPtr<IDelayedDiskWriteWriter> mWriter;
     };
 
 public:
@@ -56,12 +56,12 @@ public:
 
     CARAPI Write(
         /* [in] */ const String& filePath,
-        /* [in] */ Writer* w);
+        /* [in] */ IDelayedDiskWriteWriter* w);
 
 private:
     CARAPI DoWrite(
         /* [in] */ const String& filePath,
-        /* [in] */ Writer* w);
+        /* [in] */ IDelayedDiskWriteWriter* w);
 
     CARAPI Loge(
         /* [in] */ const String& s);

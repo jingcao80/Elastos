@@ -80,6 +80,7 @@ module
     merge("notification/ValidateNotificationPeople.car");
 
     merge("net/NetworkStatsService.car");
+    merge("net/DelayedDiskWriteWriter.car");
 
     merge("power/SuspendBlocker.car");
     merge("power/ScreenOnBlocker.car");

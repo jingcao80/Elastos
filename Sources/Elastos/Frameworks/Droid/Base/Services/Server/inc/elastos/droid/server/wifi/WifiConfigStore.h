@@ -17,6 +17,7 @@ using Elastos::Droid::Net::NetworkInfoDetailedState;//enum
 using Elastos::Droid::Net::IProxyInfo;
 using Elastos::Droid::Os::FileObserver;
 using Elastos::Droid::Server::Net::IpConfigStore;
+using Elastos::Droid::Server::Net::IDelayedDiskWriteWriter;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Droid::Wifi::IWpsInfo;
@@ -27,6 +28,7 @@ using Elastos::Droid::Utility::ILocalLog;
 using Elastos::Core::IInteger32;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
+using Elastos::IO::IDataOutputStream;
 using Elastos::Security::IKeyStore;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::Cert::ICertificate;
@@ -101,6 +103,25 @@ public:
         CARAPI OnEvent(
             /* [in] */ Int32 event,
             /* [in] */ const String& path);
+    };
+
+    class InnerDelayedDiskWriteWriter
+        : public Object
+        , public IDelayedDiskWriteWriter
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        InnerDelayedDiskWriteWriter(
+            /* [in] */ WifiConfigStore* owner,
+            /* [in] */ IList* networks);
+
+        CARAPI OnWriteCalled(
+            /* [in] */ IDataOutputStream* out);
+
+    private:
+        WifiConfigStore* mOwner;
+        AutoPtr<IList> mNetworks;
     };
 
 public:

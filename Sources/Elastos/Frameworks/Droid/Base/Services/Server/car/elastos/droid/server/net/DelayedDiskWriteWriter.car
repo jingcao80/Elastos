@@ -1,0 +1,19 @@
+module
+{
+    using interface Elastos.IO.IDataOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Net {
+
+        interface IDelayedDiskWriteWriter {
+            OnWriteCalled(
+                [in] IDataOutputStream* dops);
+        }
+
+    } // Net
+    } // Server
+    } // Droid
+    } // Elastos
+}
