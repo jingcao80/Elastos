@@ -245,7 +245,7 @@ Boolean NativePrepMainThread()
     Thread* _t = (Thread*)threadObj.Get();
     assert(_t != NULL);
     _t->mNativeThread = thread;
-    thread->mThreadObj = reinterpret_cast<Int32>(_t);
+    thread->mThreadObj = reinterpret_cast<Int64>(_t);
     REFCOUNT_ADD(threadObj);
 
     /*
@@ -679,7 +679,7 @@ static void SetThreadName(
  * from moving it around (e.g. added to the tracked allocation list).
  */
 Boolean NativeCreateThread(
-    /* [in] */ Int32 threadObj,
+    /* [in] */ Int64 threadObj,
     /* [in] */ Int32 reqStackSize)
 {
     pthread_attr_t threadAttr;
@@ -1026,7 +1026,7 @@ Boolean NativeCreateInternalThread(
     args->mFunc = func;
     args->mFuncArg = funcArg;
     args->mName = strdup(name);     // storage will be owned by new thread
-    args->mGroup = reinterpret_cast<Int32>(systemGroup.Get());
+    args->mGroup = reinterpret_cast<Int64>(systemGroup.Get());
     args->mIsDaemon = TRUE;
     args->mThread = &newThread;
     args->mCreateStatus = &createStatus;
@@ -1279,7 +1279,7 @@ ECode NativeAttachCurrentThread(
      * This makes threadObj visible to the GC.  We still have it in the
      * tracked allocation table, so it can't move around on us.
      */
-    self->mThreadObj = reinterpret_cast<Int32>((Thread*)threadObj.Get());
+    self->mThreadObj = reinterpret_cast<Int64>((Thread*)threadObj.Get());
 
     /*
      * Set the VMThread field, which tells interpreted code that we're alive.
@@ -1712,7 +1712,7 @@ AutoPtr<IThreadGroup> NativeGetMainThreadGroup()
  * before calling this.
  */
 NativeThread* NativeGetThreadFromThreadObject(
-    /* [in] */ Int32 threadObj)
+    /* [in] */ Int64 threadObj)
 {
     // Int32 vmData;
 

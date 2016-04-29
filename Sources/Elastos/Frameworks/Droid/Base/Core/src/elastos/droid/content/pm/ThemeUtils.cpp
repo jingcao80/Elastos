@@ -953,6 +953,7 @@ AutoPtr<IThemeConfig> ThemeUtils::GetBootThemeDirty()
 {
     AutoPtr<IThemeConfig> config;
     AutoPtr<ISQLiteDatabase> db;
+    String nullStr;
     // try {
     AutoPtr<ISQLiteDatabaseHelper> helper;
     CSQLiteDatabaseHelper::AcquireSingleton((ISQLiteDatabaseHelper**)&helper);
@@ -969,12 +970,12 @@ AutoPtr<IThemeConfig> ThemeUtils::GetBootThemeDirty()
         AutoPtr<ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
         (*selectionArgs)[0] = IConfiguration::THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY;
         AutoPtr<ArrayOf<String> > columns = ArrayOf<String>::Alloc(1);
-        (*columns)[0] = String("value");
+        (*columns)[0] = "value";
         AutoPtr<ICursor> c;
         ec = db->Query(SETTINGS_SECURE_TABLE, columns, selection, selectionArgs,
-                String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+            nullStr, nullStr, nullStr, (ICursor**)&c);
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Unable to open %s, ox%08x", SETTINGS_DB.string(), ec);
+            Slogger::W(TAG, "Unable to open %s, 0x%08x", SETTINGS_DB.string(), ec);
             if (db != NULL) {
                 ICloseable::Probe(db)->Close();
             }
@@ -988,19 +989,14 @@ AutoPtr<IThemeConfig> ThemeUtils::GetBootThemeDirty()
                 String json;
                 c->GetString(0, &json);
                 if (!json.IsNull()) {
+                    Slogger::I(TAG, " >> create theme config: [%s]", json.string());
                     config = ThemeConfig::FromJson(json);
                 }
             }
             ICloseable::Probe(c)->Close();
         }
     }
-    // } catch (Exception e) {
-    //     Log.w(TAG, "Unable to open " + SETTINGS_DB, e);
-    // } finally {
-    //     if (db != null) {
-    //         db.close();
-    //     }
-    // }
+
     if (db != NULL) {
         ICloseable::Probe(db)->Close();
     }

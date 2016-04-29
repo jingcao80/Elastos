@@ -11331,7 +11331,7 @@ ECode View::DispatchSaveInstanceState(
 AutoPtr<IParcelable> View::OnSaveInstanceState()
 {
     mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
-    return IParcelable::Probe(BaseSavedState::EMPTY_STATE);
+    return IParcelable::Probe(BaseSavedState::GetEMPTY_STATE());
 }
 
 /**

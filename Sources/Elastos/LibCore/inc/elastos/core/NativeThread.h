@@ -15,7 +15,7 @@ typedef struct NativeObject
      * the comments in Sync.c for a description of its layout.
      */
     UInt32      mLock;
-    Int32       mObjectObj;
+    Int64       mObjectObj;
 } NativeObject;
 
 struct Monitor;
@@ -66,7 +66,7 @@ struct NativeAttachArgs
 {
     Int32        mVersion;    /* must be >= JNI_VERSION_1_2 */
     String       mName;       /* NULL or name of thread as modified UTF-8 str */
-    Int32        mGroup;      /* global ref of a ThreadGroup object, or NULL */
+    Int64        mGroup;      /* global ref of a ThreadGroup object, or NULL */
 };
 typedef struct NativeAttachArgs NativeAttachArgs;
 
@@ -132,7 +132,7 @@ typedef struct NativeThread
     // Object*     exception;
 
     /* the java/lang/Thread that we are associated with */
-    Int32 mThreadObj;
+    Int64 mThreadObj;
 
     /* the JNIEnv pointer associated with this thread */
     // JNIEnv*     jniEnv;
@@ -347,7 +347,7 @@ inline void NativeUnlockMutex(
  * Create a thread as a result of java.lang.Thread.start().
  */
 ELAPI_(Boolean) NativeCreateThread(
-    /* [in] */ Int32 threadObj,
+    /* [in] */ Int64 threadObj,
     /* [in] */ Int32 reqStackSize);
 
 /*
@@ -385,7 +385,7 @@ ELAPI_(AutoPtr<IThreadGroup>) NativeGetSystemThreadGroup();
  * before calling this.
  */
 ELAPI_(NativeThread*) NativeGetThreadFromThreadObject(
-    /* [in] */ Int32 threadObj);
+    /* [in] */ Int64 threadObj);
 
 /*
  * Update the priority value of the underlying pthread.

@@ -501,18 +501,6 @@ public:
         /* [in] */ Int32 col,
         /* [out] */ Boolean* succeeded);
 
-/*
-    public static final Parcelable.Creator<CursorWindow> CREATOR
-            = new Parcelable.Creator<CursorWindow>() {
-        public CursorWindow createFromParcel(Parcel source) {
-            return new CursorWindow(source);
-        }
-
-        public CursorWindow[] newArray(int size) {
-            return new CursorWindow[size];
-        }
-    };*/
-
     static CARAPI NewFromParcel(
         /* [in] */ IParcel* p,
         /* [out] */ ICursorWindow** cw);
@@ -629,7 +617,7 @@ private:
     CARAPI_(String) NativeGetName(
         /* [in] */ Int64 windowPtr);
 
-    CARAPI Dispose();
+    virtual CARAPI Dispose();
 
     CARAPI_(void) RecordNewWindow(
         /* [in] */ Int32 pid,

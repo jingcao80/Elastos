@@ -17,7 +17,7 @@ namespace Database {
 namespace Sqlite {
 
 static const String TAG("SQLiteOpenHelper");
-const Boolean SQLiteOpenHelper::DEBUG_STRICT_READONLY;
+const Boolean SQLiteOpenHelper::DEBUG_STRICT_READONLY = FALSE;
 
 CAR_INTERFACE_IMPL(SQLiteOpenHelper, Object, ISQLiteOpenHelper)
 
@@ -90,6 +90,7 @@ ECode SQLiteOpenHelper::SetWriteAheadLoggingEnabled(
 ECode SQLiteOpenHelper::GetWritableDatabase(
     /* [out] */ ISQLiteDatabase** database)
 {
+    VALIDATE_NOT_NULL(database)
     ECode ec = NOERROR;
     synchronized(mLock) {
         ec = GetDatabaseLocked(TRUE, database);
@@ -100,6 +101,7 @@ ECode SQLiteOpenHelper::GetWritableDatabase(
 ECode SQLiteOpenHelper::GetReadableDatabase(
         /* [out] */ ISQLiteDatabase** database)
 {
+    VALIDATE_NOT_NULL(database)
     ECode ec = NOERROR;
     synchronized(mLock) {
         ec =  GetDatabaseLocked(FALSE, database);
@@ -132,15 +134,18 @@ ECode SQLiteOpenHelper::GetDatabaseLocked(
 
     ECode ec = NOERROR;
     AutoPtr<ISQLiteDatabase> db = mDatabase;
+    Slogger::I(TAG, " %d: database %s, %s", __LINE__, TO_CSTR(db), mName.string());
     //try {
     mIsInitializing = TRUE;
     if (db != NULL) {
         Boolean isReadOnly;
         if (writable && (db->IsReadOnly(&isReadOnly), isReadOnly)) {
+    Slogger::I(TAG, " %d: database %s", __LINE__, "ReopenReadWrite");
             ASSERT_SUCCEEDED(db->ReopenReadWrite())
         }
     }
     else if (mName.IsNull()) {
+    Slogger::I(TAG, " %d: database %s", __LINE__, "Create");
         AutoPtr<ISQLiteDatabaseHelper> helper;
         CSQLiteDatabaseHelper::AcquireSingleton((ISQLiteDatabaseHelper**)&helper);
         ASSERT_SUCCEEDED(helper->Create(NULL, (ISQLiteDatabase**)&db))
@@ -157,6 +162,7 @@ ECode SQLiteOpenHelper::GetDatabaseLocked(
             ec = helper->OpenDatabase(path, mFactory, ISQLiteDatabase::OPEN_READONLY, (ISQLiteDatabase**)&db);
         }
         else {
+            Slogger::I(TAG, " %d: database %s", __LINE__, "OpenOrCreateDatabase");
             ec = mContext->OpenOrCreateDatabase(mName, mEnableWriteAheadLogging ?
                 IContext::MODE_ENABLE_WRITE_AHEAD_LOGGING : 0, mFactory, (ISQLiteDatabase**)&db);
         }
@@ -181,15 +187,18 @@ ECode SQLiteOpenHelper::GetDatabaseLocked(
         }
         //}
     }
-
+Slogger::I(TAG, " %d: database %s", __LINE__, TO_CSTR(db));
     OnConfigure(db);
-
+Slogger::I(TAG, " %d: database %s", __LINE__, "before GetVersion");
     Int32 version;
-    if (db->GetVersion(&version), version != mNewVersion) {
+    db->GetVersion(&version);
+Slogger::I(TAG, " %d: database version %d", __LINE__, version);
+
+    if (version != mNewVersion) {
         Boolean isReadOnly;
         if (db->IsReadOnly(&isReadOnly), isReadOnly) {
             Slogger::E(TAG, "Can't upgrade read-only database from version %d to %d: %s",
-                    version, mNewVersion, mName.string());
+                version, mNewVersion, mName.string());
             mIsInitializing = FALSE;
             if (db != NULL && db != mDatabase) {
                 ICloseable::Probe(db)->Close();

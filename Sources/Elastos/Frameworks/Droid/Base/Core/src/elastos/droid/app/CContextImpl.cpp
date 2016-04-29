@@ -1177,17 +1177,23 @@ ECode CContextImpl::OpenOrCreateDatabase(
     /* [out] */ ISQLiteDatabase** sqliteDB)
 {
     VALIDATE_NOT_NULL(sqliteDB);
+    *sqliteDB = NULL;
 
     AutoPtr<IFile> f = ValidateFilePath(name, TRUE);
     assert(f != NULL);
+    if (f == NULL) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     Int32 flags = ISQLiteDatabase::CREATE_IF_NECESSARY;
     if ((mode & IContext::MODE_ENABLE_WRITE_AHEAD_LOGGING) != 0) {
         flags |= ISQLiteDatabase::ENABLE_WRITE_AHEAD_LOGGING;
     }
     String path;
     f->GetPath(&path);
+    Logger::E(TAG, "OpenOrCreateDatabase: [%s]", path.string());
     AutoPtr<ISQLiteDatabase> db;
-    SQLiteDatabase::OpenDatabase(path, factory, flags, errorHandler, (ISQLiteDatabase**)&db);
+    FAIL_RETURN(SQLiteDatabase::OpenDatabase(path, factory, flags, errorHandler, (ISQLiteDatabase**)&db))
     SetFilePermissionsFromMode(path, mode, 0);
     *sqliteDB = db;
     REFCOUNT_ADD(*sqliteDB);

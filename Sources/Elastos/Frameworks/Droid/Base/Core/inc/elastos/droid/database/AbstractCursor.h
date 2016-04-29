@@ -249,7 +249,7 @@ public:
 
 protected:
     /** @hide */
-    CARAPI OnDeactivateOrClose();
+    virtual CARAPI OnDeactivateOrClose();
 
     /**
      * Subclasses must call this method when they finish committing updates to notify all
@@ -257,21 +257,21 @@ protected:
      *
      * @param selfChange
      */
-    CARAPI OnChange(
+    virtual CARAPI OnChange(
         /* [in] */ Boolean selfChange);
 
     /**
      * @deprecated Always returns false since Cursors do not support updating rows
      */
     //@Deprecated
-    CARAPI_(Boolean) IsFieldUpdated(
+    virtual CARAPI_(Boolean) IsFieldUpdated(
         /* [in] */ Int32 columnIndex);
 
     /**
      * @deprecated Always returns null since Cursors do not support updating rows
      */
     //@Deprecated
-    CARAPI_(AutoPtr<IInterface>) GetUpdatedField(
+    virtual CARAPI_(AutoPtr<IInterface>) GetUpdatedField(
         /* [in] */ Int32 columnIndex);
 
     /**
@@ -282,7 +282,7 @@ protected:
      *
      * @throws CursorIndexOutOfBoundsException
      */
-    CARAPI CheckPosition();
+    virtual CARAPI CheckPosition();
 
 protected:
     /**

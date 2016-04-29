@@ -97,13 +97,13 @@ public:
 
 protected:
     //@Override
-    CARAPI CheckPosition();
+    virtual CARAPI CheckPosition();
 
     /**
      * Closes the cursor window and sets {@link #mWindow} to null.
      * @hide
      */
-    CARAPI CloseWindow();
+    virtual CARAPI CloseWindow();
 
     /**
      * If there is a window, clear it.
@@ -112,12 +112,12 @@ protected:
      * @param name The window name.
      * @hide
      */
-    CARAPI ClearOrCreateWindow(
+    virtual CARAPI ClearOrCreateWindow(
         /* [in] */ const String& name);
 
     /** @hide */
     //@Override
-    CARAPI OnDeactivateOrClose();
+    virtual CARAPI OnDeactivateOrClose();
 
 protected:
     /**

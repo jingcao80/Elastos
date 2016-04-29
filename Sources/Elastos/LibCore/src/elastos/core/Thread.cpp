@@ -374,7 +374,7 @@ Int32 Thread::NativeGetState()
     Int32 result;
 
     NativeLockThreadList(NULL);
-    thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
+    thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int64>(this));
     if (thread != NULL) {
         result = thread->mStatus;
     }
@@ -438,7 +438,7 @@ void Thread::NativeInterrupt()
     NativeThread* thread;
 
     NativeLockThreadList(NULL);
-    thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
+    thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int64>(this));
     if (thread != NULL) {
         NativeThreadInterrupt(thread);
     }
@@ -485,7 +485,7 @@ Boolean Thread::NativeIsInterrupted()
     Boolean interrupted;
 
     NativeLockThreadList(NULL);
-    NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
+    NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int64>(this));
     if (thread != NULL) {
         interrupted = thread->mInterrupted;
     }
@@ -651,7 +651,7 @@ void Thread::NativeNameChanged(
 
     /* get the thread's ID */
     NativeLockThreadList(NULL);
-    NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
+    NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int64>(this));
     if (thread != NULL) {
         // threadId = thread->mThreadId;
     }
@@ -692,7 +692,7 @@ void Thread::NativeSetPriority(
     /* [in] */ Int32 priority)
 {
     NativeLockThreadList(NULL);
-    NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
+    NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int64>(this));
     if (thread != NULL)
         NativeChangeThreadPriority(thread, priority);
     //dvmDumpAllThreads(false);
@@ -738,7 +738,7 @@ ECode Thread::Start()
     mHasBeenStarted = TRUE;
 
     /* copying collector will pin threadObj for us since it was an argument */
-    return NativeCreateThread(reinterpret_cast<Int32>(this), (Int32)mStackSize) ? NOERROR : E_RUNTIME_EXCEPTION;
+    return NativeCreateThread(reinterpret_cast<Int64>(this), (Int32)mStackSize) ? NOERROR : E_RUNTIME_EXCEPTION;
 }
 
 ECode Thread::Stop()
@@ -952,7 +952,7 @@ Boolean Thread::NativeHoldsLock(
     }
 
     assert(0 && "TODO");
-    // NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
+    // NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int64>(this));
     // return object->GetLockOwnerThreadId() == GetThreadId();
     return TRUE;
 }
@@ -1031,7 +1031,7 @@ ECode Thread::Attach(
     // }
     AutoPtr<IThreadGroup> threadGroup = NativeGetMainThreadGroup();
     argsCopy.mName = name;
-    argsCopy.mGroup = reinterpret_cast<Int32>(threadGroup.Get());
+    argsCopy.mGroup = reinterpret_cast<Int64>(threadGroup.Get());
     ECode ec = NativeAttachCurrentThread(&argsCopy, FALSE, thread);
 
     /* restore the count */

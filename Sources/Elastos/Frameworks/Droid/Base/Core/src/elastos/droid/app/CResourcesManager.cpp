@@ -363,11 +363,6 @@ ECode CResourcesManager::GetTopLevelResources(
                 tc = CThemeConfig::GetSystemTheme();
             }
             config->SetThemeConfig(tc);
-
-            // } catch (Exception e) {
-            //     Slog.d(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme", e);
-            //     config.themeConfig = ThemeConfig.getSystemTheme();
-            // }
         }
 
         if (tc != NULL) {

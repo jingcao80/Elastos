@@ -6049,14 +6049,6 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
             Slogger::E(TAG, "Unable to get provider %s, ec=%08x", name.string(), ec);
             return NULL;
         }
-//         } catch (java.lang.Exception e) {
-//             if (!mInstrumentation.onException(NULL, e)) {
-//                 throw new RuntimeException(
-//                         "Unable to get provider " + info.name
-//                         + ": " + e.toString(), e);
-//             }
-//             return NULL;
-//         }
     }
     else {
         provider = holderProvider;

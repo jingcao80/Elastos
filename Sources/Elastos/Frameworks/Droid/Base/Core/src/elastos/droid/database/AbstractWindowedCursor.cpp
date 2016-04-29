@@ -152,8 +152,7 @@ ECode AbstractWindowedCursor::CheckPosition()
     FAIL_RETURN(AbstractCursor::CheckPosition());
 
     if (mWindow == NULL) {
-//        throw new StaleDataException("Access closed cursor");
-        Slogger::E(String("AbstractWindowedCursor"), "Access closed cursor");
+        Slogger::E("AbstractWindowedCursor", "Access closed cursor");
         return E_STALE_DATA_EXCEPTION;
     }
     return NOERROR;

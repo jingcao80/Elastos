@@ -1116,11 +1116,11 @@ Int64 DatabaseUtils::QueryNumEntries(
     /* [in] */ const String& selection,
     /* [in] */ ArrayOf<String>* selectionArgs)
 {
-    assert(0 && "TODO TextUtils::IsEmpty");
-    String s ;//= (!TextUtils::IsEmpty(selection)) ? String(" where ") + selection : String("");
     StringBuilder sb("select count(*) from ");
     sb += table;
-    sb += s;
+    if (!TextUtils::IsEmpty(selection)) {
+        sb += selection;
+    }
     return Int64ForQuery(db, sb.ToString(), selectionArgs);
 }
 
@@ -1137,13 +1137,17 @@ Int64 DatabaseUtils::Int64ForQuery(
     /* [in] */ const String& query,
     /* [in] */ ArrayOf<String>* selectionArgs)
 {
+    Int64 value = 0;
     AutoPtr<ISQLiteStatement> prog;
-    db->CompileStatement(query, (ISQLiteStatement**)&prog);
-    //try {
-    Int64 value = Int64ForQuery(prog, selectionArgs);
-    //} finally {
+    ECode ec = db->CompileStatement(query, (ISQLiteStatement**)&prog);
+    if (FAILED(ec) || prog == NULL) {
+        Slogger::E(TAG, "failed to query Int64 with [%s]", query.string());
+    }
+    else {
+        value = Int64ForQuery(prog, selectionArgs);
+    }
+
     ICloseable::Probe(prog)->Close();
-    //}
     return value;
 }
 

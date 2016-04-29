@@ -52,6 +52,9 @@ namespace Droid {
 namespace Database {
 namespace Sqlite {
 
+static const String TAG("SQLiteConnection");
+static const Boolean DEBUG = TRUE;
+
 SQLiteConnection::PreparedStatement::PreparedStatement()
     : mStatementPtr(0)
     , mNumParameters(0)
@@ -440,8 +443,9 @@ struct SQLiteConnectionNative {
         db(db), openFlags(openFlags), path(path), label(label), canceled(false) { }
 };
 
-const String SQLiteConnection::TAG("SQLiteConnection");
-const Boolean SQLiteConnection::DEBUG = FALSE;
+//=====================================================================================
+// SQLiteConnection
+//=====================================================================================
 const AutoPtr< ArrayOf<String> > SQLiteConnection::EMPTY_STRING_ARRAY = ArrayOf<String>::Alloc(0);
 
 static AutoPtr<IArrayOf> InitEmptyByteArray()
@@ -563,11 +567,12 @@ ECode SQLiteConnection::NativeClose(
     SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
 
     if (connection) {
-        ALOGV("Closing connection %p", connection->db);
+        Slogger::V(TAG, "Closing connection %p", connection->db);
         int err = sqlite3_close(connection->db);
         if (err != SQLITE_OK) {
             // This can happen if sub-objects aren't closed first.  Make sure the caller knows.
-            ALOGE("sqlite3_close(%p) failed: %d", connection->db, err);
+            Slogger::E(TAG, "sqlite3_close(%p) failed: %s", connection->db, sqlite3_errstr(err));
+            assert(0 && "TODO");
             return throw_sqlite3_exception(connection->db, "Count not close db.");
         }
 
@@ -590,7 +595,7 @@ static void sqliteCustomFunctionCallback(sqlite3_context *context,
         for (int i = 0; i < argc; i++) {
             const char* arg = static_cast<const char*>(sqlite3_value_text16(argv[i]));
             if (!arg) {
-                ALOGW("NULL argument in custom_function_callback.  This should not happen.");
+                Slogger::W(TAG, "NULL argument in custom_function_callback.  This should not happen.");
             }
             else {
                 size_t argLen = sqlite3_value_bytes16(argv[i]) / sizeof(char);
@@ -615,8 +620,8 @@ ECode SQLiteConnection::NativeRegisterCustomFunction(
             &sqliteCustomFunctionCallback, NULL, NULL, NULL);
 
     if (err != SQLITE_OK) {
-        ALOGE("sqlite3_create_function returned %d", err);
-        return throw_sqlite3_exception(connection->db);
+        Slogger::E(TAG, "sqlite3_create_function returned %d, %s", err, sqlite3_errstr(err));
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
     return NOERROR;
 }
@@ -630,7 +635,7 @@ ECode SQLiteConnection::NativeRegisterLocalizedCollators(
     Int32 err = register_localized_collators(connection->db, locale, UTF16_STORAGE);
 
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
     return NOERROR;
 }
@@ -655,14 +660,15 @@ ECode SQLiteConnection::NativePrepareStatement(
             strcpy(message, ", while compiling: "); // less than 50 chars
             strcat(message, sql.string());
         }
+        Slogger::E(TAG, "%s, while compiling: %s", sqlite3_errstr(err), sql.string());
         ECode ec = throw_sqlite3_exception(connection->db, message);
         free(message);
         *result = 0;
         return ec;
     }
 
-    // ALOGV("Prepared statement %p on connection %p", statement, connection->db);
-    *result = reinterpret_cast<Int32>(statement);
+    Slogger::V(TAG, "Prepared statement %p on connection %p", statement, connection->db);
+    *result = reinterpret_cast<Int64>(statement);
     return NOERROR;
 }
 
@@ -670,13 +676,12 @@ void SQLiteConnection::NativeFinalizeStatement(
     /* [in] */ Int64 connectionPtr,
     /* [in] */ Int64 statementPtr)
 {
-    // SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     // We ignore the result of sqlite3_finalize because it is really telling us about
     // whether any errors occurred while executing the statement.  The statement itself
     // is always finalized regardless.
-    // ALOGV("Finalized statement %p on connection %p", statement, connection->db);
+    Slogger::V(TAG, "Finalized statement %p on connection %p", statement, connection->db);
     sqlite3_finalize(statement);
 }
 
@@ -684,9 +689,7 @@ Int32 SQLiteConnection::NativeGetParameterCount(
     /* [in] */ Int64 connectionPtr,
     /* [in] */ Int64 statementPtr)
 {
-    // SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
-
     return sqlite3_bind_parameter_count(statement);
 }
 
@@ -694,9 +697,7 @@ Boolean SQLiteConnection::NativeIsReadOnly(
     /* [in] */ Int64 connectionPtr,
     /* [in] */ Int64 statementPtr)
 {
-    // SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
-
     return sqlite3_stmt_readonly(statement) != 0;
 }
 
@@ -704,9 +705,7 @@ Int32 SQLiteConnection::NativeGetColumnCount(
     /* [in] */ Int64 connectionPtr,
     /* [in] */ Int64 statementPtr)
 {
-    // SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
-
     return sqlite3_column_count(statement);
 }
 
@@ -715,7 +714,6 @@ String SQLiteConnection::NativeGetColumnName(
     /* [in] */ Int64 statementPtr,
     /* [in] */ Int32 index)
 {
-    // SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
     const char* name = static_cast<const char*>(sqlite3_column_name(statement, index));
     return String(name);
@@ -731,7 +729,7 @@ ECode SQLiteConnection::NativeBindNull(
 
     Int32 err = sqlite3_bind_null(statement, index);
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db, NULL);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
     return NOERROR;
 }
@@ -747,7 +745,7 @@ ECode SQLiteConnection::NativeBindInt64(
 
     Int32 err = sqlite3_bind_int64(statement, index, value);
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db, NULL);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
     return NOERROR;
 }
@@ -763,7 +761,7 @@ ECode SQLiteConnection::NativeBindDouble(
 
     Int32 err = sqlite3_bind_double(statement, index, value);
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db, NULL);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
     return NOERROR;
 }
@@ -781,7 +779,7 @@ ECode SQLiteConnection::NativeBindString(
     Int32 err = sqlite3_bind_text(statement, index, value, valueLength * sizeof(char),
             SQLITE_TRANSIENT);
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db, NULL);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
     return NOERROR;
 }
@@ -799,7 +797,7 @@ ECode SQLiteConnection::NativeBindBlob(
     //jbyte* value = static_cast<jbyte*>(env->GetPrimitiveArrayCritical(valueArray, NULL));
     int err = sqlite3_bind_blob(statement, index, value, valueLength, SQLITE_TRANSIENT);
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db, NULL);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
 
     return NOERROR;
@@ -817,7 +815,7 @@ ECode SQLiteConnection::NativeResetStatementAndClearBindings(
         err = sqlite3_clear_bindings(statement);
     }
     if (err != SQLITE_OK) {
-        return throw_sqlite3_exception(connection->db, NULL);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }
 
     return NOERROR;
@@ -892,7 +890,7 @@ static ECode ExecuteOneRowQuery(
     VALIDATE_NOT_NULL(err)
     *err = sqlite3_step(statement);
     if (*err != SQLITE_ROW) {
-        return throw_sqlite3_exception(connection->db);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(*err));
     }
     return NOERROR;
 }
@@ -944,14 +942,14 @@ Int32 SQLiteConnection::CreateAshmemRegionWithData(
     Int32 fd = ashmem_create_region(NULL, length);
     if (fd < 0) {
         error = errno;
-        ALOGE("ashmem_create_region failed: %s", strerror(error));
+        Slogger::E(TAG, "ashmem_create_region failed: %s", strerror(error));
     }
     else {
         if (length > 0) {
             void* ptr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
             if (ptr == MAP_FAILED) {
                 error = errno;
-                ALOGE("mmap failed: %s", strerror(error));
+                Slogger::E(TAG, "mmap failed: %s", strerror(error));
             }
             else {
                 memcpy(ptr, data, length);
@@ -962,7 +960,7 @@ Int32 SQLiteConnection::CreateAshmemRegionWithData(
         if (!error) {
             if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
                 error = errno;
-                ALOGE("ashmem_set_prot_region failed: %s", strerror(errno));
+                Slogger::E(TAG, "ashmem_set_prot_region failed: %s", strerror(errno));
             }
             else {
                 return fd;
@@ -1020,7 +1018,7 @@ static ECode CopyRow(
     ECode ec = NOERROR;
     android::status_t status = window->allocRow();
     if (status) {
-        ALOGE("Failed allocating fieldDir at startPos %d row %d, error=%d",
+        Slogger::E(TAG, "Failed allocating fieldDir at startPos %d row %d, error=%d",
                 startPos, addedRows, status);
         *rowResult = CPR_FULL;
         return ec;
@@ -1040,35 +1038,35 @@ static ECode CopyRow(
             size_t sizeIncludingNull = sqlite3_column_bytes(statement, i) + 1;
             status = window->putString(addedRows, i, text, sizeIncludingNull);
             if (status) {
-                ALOGE("Failed allocating %u bytes for text at %d,%d, error=%d",
+                Slogger::E(TAG, "Failed allocating %u bytes for text at %d,%d, error=%d",
                         sizeIncludingNull, startPos + addedRows, i, status);
                 result = CPR_FULL;
                 break;
             }
-            // ALOGW("%d,%d is TEXT with %u bytes", startPos + addedRows, i, sizeIncludingNull);
+            // Slogger::W(TAG, "%d,%d is TEXT with %u bytes", startPos + addedRows, i, sizeIncludingNull);
         }
         else if (type == SQLITE_INTEGER) {
             // INTEGER data
             int64_t value = sqlite3_column_int64(statement, i);
             status = window->putLong(addedRows, i, value);
             if (status) {
-                ALOGE("Failed allocating space for a long in column %d, error=%d", i, status);
+                Slogger::E(TAG, "Failed allocating space for a long in column %d, error=%d", i, status);
                 result = CPR_FULL;
                 break;
             }
-            // ALOGW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
+            // Slogger::W(TAG, "%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
         }
         else if (type == SQLITE_FLOAT) {
             // FLOAT data
             double value = sqlite3_column_double(statement, i);
             status = window->putDouble(addedRows, i, value);
             if (status) {
-                ALOGE("Failed allocating space for a double in column %d, error=%d",
+                Slogger::E(TAG, "Failed allocating space for a double in column %d, error=%d",
                         i, status);
                 result = CPR_FULL;
                 break;
             }
-            // ALOGW("%d,%d is FLOAT %lf", startPos + addedRows, i, value);
+            // Slogger::W(TAG, "%d,%d is FLOAT %lf", startPos + addedRows, i, value);
         }
         else if (type == SQLITE_BLOB) {
             // BLOB data
@@ -1076,27 +1074,27 @@ static ECode CopyRow(
             size_t size = sqlite3_column_bytes(statement, i);
             status = window->putBlob(addedRows, i, blob, size);
             if (status) {
-                ALOGE("Failed allocating %u bytes for blob at %d,%d, error=%d",
+                Slogger::E(TAG, "Failed allocating %u bytes for blob at %d,%d, error=%d",
                         size, startPos + addedRows, i, status);
                 result = CPR_FULL;
                 break;
             }
-            // ALOGW("%d,%d is Blob with %u bytes", startPos + addedRows, i, size);
+            // Slogger::W(TAG, "%d,%d is Blob with %u bytes", startPos + addedRows, i, size);
         }
         else if (type == SQLITE_NULL) {
             // NULL field
             status = window->putNull(addedRows, i);
             if (status) {
-                ALOGE("Failed allocating space for a null in column %d, error=%d", i, status);
+                Slogger::E(TAG, "Failed allocating space for a null in column %d, error=%d", i, status);
                 result = CPR_FULL;
                 break;
             }
 
-            // ALOGE("%d,%d is NULL", startPos + addedRows, i);
+            // Slogger::E(TAG, "%d,%d is NULL", startPos + addedRows, i);
         }
         else {
             // Unknown data
-            ALOGE("Unknown column type when filling database window");
+            Slogger::E(TAG, "Unknown column type when filling database window");
             result = CPR_ERROR;
             ec = throw_sqlite3_exception("Unknown column type when filling window");
         }
@@ -1151,7 +1149,7 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
     while (!gotException && (!windowFull || countAllRows)) {
         Int32 err = sqlite3_step(statement);
         if (err == SQLITE_ROW) {
-            // ALOGW("Stepped statement %p to row %d", statement, totalRows);
+            // Slogger::W(TAG, "Stepped statement %p to row %d", statement, totalRows);
             retryCount = 0;
             totalRows += 1;
 
@@ -1184,14 +1182,14 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
         }
         else if (err == SQLITE_DONE) {
             // All rows processed, bail
-            ALOGW("Processed all rows");
+            Slogger::W(TAG, "Processed all rows");
             break;
         }
         else if (err == SQLITE_LOCKED || err == SQLITE_BUSY) {
             // The table is locked, retry
-            ALOGW("Database locked, retrying");
+            Slogger::W(TAG, "Database locked, retrying");
             if (retryCount > 50) {
-                ALOGE("Bailing on database busy retry");
+                Slogger::E(TAG, "Bailing on database busy retry");
                 ec = throw_sqlite3_exception(connection->db, "retrycount exceeded");
                 gotException = TRUE;
             }
@@ -1207,14 +1205,14 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
         }
     }
 
-    ALOGW("Resetting statement %p after fetching %d rows and adding %d rows"
+    Slogger::W(TAG, "Resetting statement %p after fetching %d rows and adding %d rows"
            "to the window in %d bytes",
            statement, totalRows, addedRows, window->size() - window->freeSpace());
     sqlite3_reset(statement);
 
     // Report the total number of rows on request.
     if (startPos > totalRows) {
-       ALOGE("startPos %d > actual rows %d", startPos, totalRows);
+       Slogger::E(TAG, "startPos %d > actual rows %d", startPos, totalRows);
     }
     *result = Int64(startPos) << 32 | Int64(totalRows);
     return ec;
@@ -1301,6 +1299,11 @@ ECode SQLiteConnection::Open(
     /* [in] */ Boolean primaryConnection,
     /* [out] */ SQLiteConnection** connect)
 {
+    VALIDATE_NOT_NULL(connect)
+    *connect = NULL;
+
+Slogger::I(TAG, " >>> SQLiteConnection::Open() %d", connectionId);
+
     AutoPtr<SQLiteConnection> connection = new SQLiteConnection(pool, configuration, connectionId, primaryConnection);
     // try {
     ECode ec = connection->Open();
@@ -1311,11 +1314,8 @@ ECode SQLiteConnection::Open(
     }
     *connect = connection;
     REFCOUNT_ADD(*connect);
+Slogger::I(TAG, " <<< SQLiteConnection::Open() %d", connectionId);
     return NOERROR;
-    // } catch (SQLiteException ex) {
-    //     connection.dispose(false);
-    //     throw ex;
-    // }
 }
 
 void SQLiteConnection::Close()
@@ -1325,6 +1325,7 @@ void SQLiteConnection::Close()
 
 ECode SQLiteConnection::Open()
 {
+Slogger::I(TAG, " >>>> SQLiteConnection::Open()");
     assert(mConnectionPtr == 0);
     AutoPtr<SQLiteDatabaseConfiguration> sdc = mConfiguration;
     ECode ec = NativeOpen(mConfiguration->mPath, mConfiguration->mOpenFlags, mConfiguration->mLabel,
@@ -1335,11 +1336,17 @@ ECode SQLiteConnection::Open()
         return ec;
     }
     FAIL_RETURN(SetPageSize())
+Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetForeignKeyModeFromConfiguration())
+Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetWalModeFromConfiguration())
+Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetJournalSizeLimit())
+Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetAutoCheckpointInterval())
+Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetLocaleFromConfiguration())
+Slogger::I(TAG, " <<<< SQLiteConnection::Open()");
     return NOERROR;
 }
 
@@ -1660,6 +1667,8 @@ ECode SQLiteConnection::Prepare(
             }
         }
     }
+
+fail:
     //} finally {
     ReleasePreparedStatement(statement);
     //}
@@ -1669,7 +1678,7 @@ ECode SQLiteConnection::Prepare(
     //} finally {
     // mRecentOperations.endOperation(cookie);s
     //}
-fail:
+
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
@@ -2110,7 +2119,11 @@ ECode SQLiteConnection::AcquirePreparedStatement(
     }
 
     Int64 statementPtr;
-    FAIL_RETURN(NativePrepareStatement(mConnectionPtr, sql, &statementPtr))
+    ECode ec = NativePrepareStatement(mConnectionPtr, sql, &statementPtr);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "AcquirePreparedStatement %s faield.", sql.string());
+        return NOERROR;
+    }
     //try {
     Int32 numParameters = NativeGetParameterCount(mConnectionPtr, statementPtr);
     Int32 type = DatabaseUtils::GetSqlStatementType(sql);
@@ -2137,11 +2150,14 @@ ECode SQLiteConnection::AcquirePreparedStatement(
 void SQLiteConnection::ReleasePreparedStatement(
     /* [in] */ PreparedStatement* statement)
 {
+    Slogger::I(TAG, " ReleasePreparedStatement %s", TO_CSTR(statement));
     if (statement == NULL)
         return;
 
     statement->mInUse = FALSE;
     if (statement->mInCache) {
+        Slogger::I(TAG, " ReleasePreparedStatement %s", "mInCache");
+
         //try {
         ECode ec = NativeResetStatementAndClearBindings(mConnectionPtr, statement->mStatementPtr);
         //} catch (SQLiteException ex) {
@@ -2151,8 +2167,8 @@ void SQLiteConnection::ReleasePreparedStatement(
         // recycle the statement.
         if (ec == (ECode)E_SQLITE_EXCEPTION) {
             if (DEBUG) {
-                Slogger::D(TAG, "Could not reset prepared statement due to an exception.  Removing it from the cache.  SQL: %d, 0x%08x"
-                        , TrimSqlForDisplay(statement->mSql).string(), ec);
+                Slogger::D(TAG, "Could not reset prepared statement due to an exception.  Removing it from the cache."
+                    " SQL: %d, 0x%08x", TrimSqlForDisplay(statement->mSql).string(), ec);
             }
 
             mPreparedStatementCache->Remove(statement->mSql);
@@ -2160,6 +2176,7 @@ void SQLiteConnection::ReleasePreparedStatement(
         //}
     }
     else {
+        Slogger::I(TAG, " ReleasePreparedStatement %s", "FinalizePreparedStatement");
         FinalizePreparedStatement(statement);
     }
 }

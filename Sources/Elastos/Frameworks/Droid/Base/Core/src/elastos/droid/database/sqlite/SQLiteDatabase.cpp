@@ -544,27 +544,27 @@ ECode SQLiteDatabase::ReopenReadWrite()
 
 ECode SQLiteDatabase::Open()
 {
-    //try {
-    //try {
+    Slogger::I(TAG, " >>> SQLiteDatabase::Open()");
     ECode ec = OpenInner();
-    //} catch (SQLiteDatabaseCorruptException ex) {
     if (ec == (ECode)E_SQLITE_DATABASE_CORRUPT_EXCEPTION) {
         OnCorruption();
         ec = OpenInner();
     }
-    else if (ec == (ECode)E_SQLITE_EXCEPTION) {
-        Slogger::E(TAG, "Failed to open database '%s'.0x%08x", GetLabel().string(), ec);
+
+    if (ec == (ECode)E_SQLITE_EXCEPTION) {
+        Slogger::E(TAG, "Failed to open database '%s'. E_SQLITE_EXCEPTION", GetLabel().string());
         Close();
-        return ec;
     }
-    //}
-    //} catch (SQLiteException ex) {
-    //}
-    return NOERROR;
+    else if (FAILED(ec)) {
+        Slogger::E(TAG, "Failed to open database '%s'.0x%08x", GetLabel().string(), ec);
+    }
+    Slogger::I(TAG, " <<< SQLiteDatabase::Open()");
+    return ec;
 }
 
 ECode SQLiteDatabase::OpenInner()
 {
+    Slogger::I(TAG, " >>> SQLiteDatabase::OpenInner()");
     synchronized(mLock){
         assert(mConnectionPoolLocked == NULL);
         FAIL_RETURN(SQLiteConnectionPool::Open(mConfigurationLocked, (SQLiteConnectionPool**)&mConnectionPoolLocked));
@@ -574,6 +574,7 @@ ECode SQLiteDatabase::OpenInner()
     synchronized(sActiveDatabasesLock) {
         sActiveDatabases[this] = NULL;
     }
+    Slogger::I(TAG, " <<< SQLiteDatabase::OpenInner()");
     return NOERROR;
 }
 

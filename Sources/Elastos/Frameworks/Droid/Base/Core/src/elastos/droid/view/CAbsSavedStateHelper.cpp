@@ -14,7 +14,8 @@ ECode CAbsSavedStateHelper::GetEMPTY_STATE(
     /* [out] */ IAbsSavedState** emptyState)
 {
     VALIDATE_NOT_NULL(emptyState)
-    *emptyState = AbsSavedState::EMPTY_STATE;
+    AutoPtr<IAbsSavedState> empty = AbsSavedState::GetEMPTY_STATE();
+    *emptyState = empty;
     REFCOUNT_ADD(*emptyState)
     return NOERROR;
 }

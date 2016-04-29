@@ -840,7 +840,7 @@ ECode ContentProvider::AttachInfo(
     AsyncTask::Init();
 
     mNoPerms = testing;
-
+    ECode ec = NOERROR;
     /*
      * Only allow it to be set once, so after the content service gives
      * this to us clients can't change it.
@@ -873,9 +873,11 @@ ECode ContentProvider::AttachInfo(
             SetAuthorities(authorities);
         }
         Boolean result = FALSE;
-        return OnCreate(&result);
+Logger::I(TAG, "=========================AttachInfo before OnCreate");
+        ec = OnCreate(&result);
+Logger::I(TAG, "=========================AttachInfo after OnCreate");
     }
-    return NOERROR;
+    return ec;
 }
 
 ECode ContentProvider::ApplyBatch(

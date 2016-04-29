@@ -238,7 +238,7 @@ private:
     // many applications.  For debugging purposes it can be useful to turn on strict
     // read-only semantics to catch applications that call getReadableDatabase when they really
     // wanted getWritableDatabase.
-    ECO_LOCAL static const Boolean DEBUG_STRICT_READONLY = FALSE;
+    ECO_LOCAL static const Boolean DEBUG_STRICT_READONLY;
 
     AutoPtr<IContext> mContext;
     String mName;

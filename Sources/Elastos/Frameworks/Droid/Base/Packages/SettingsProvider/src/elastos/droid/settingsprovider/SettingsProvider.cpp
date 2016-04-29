@@ -738,6 +738,7 @@ ECode SettingsProvider::CheckUserRestrictions(
 ECode SettingsProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
+    Slogger::I(TAG, " ================== Enter OnCreate ====================");
     VALIDATE_NOT_NULL(result)
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
@@ -758,6 +759,7 @@ ECode SettingsProvider::OnCreate(
     context->RegisterReceiver(receiver, userFilter, (IIntent**)&intent);
     OnProfilesChanged();
     *result = TRUE;
+    Slogger::I(TAG, " ================== Leave OnCreate ====================");
     return NOERROR;
 }
 

@@ -692,8 +692,6 @@ private:
         /* [in] */ const String& sql);
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
 
     static const AutoPtr< ArrayOf<String> > EMPTY_STRING_ARRAY;
     static const AutoPtr<IArrayOf> EMPTY_BYTE_ARRAY;

@@ -89,7 +89,7 @@ Int64 CursorWindow::NativeCreate(
     }
 
     LOG_WINDOW("nativeInitializeEmpty: window = %p", window);
-    return reinterpret_cast<Int32>(window);
+    return reinterpret_cast<Int64>(window);
 }
 
 Int64 CursorWindow::NativeCreateFromParcel(
@@ -104,7 +104,7 @@ Int64 CursorWindow::NativeCreateFromParcel(
 
     LOG_WINDOW("nativeInitializeFromBinder: numRows = %d, numColumns = %d, window = %p",
            window->getNumRows(), window->getNumColumns(), window);
-    return reinterpret_cast<Int32>(window);
+    return reinterpret_cast<Int64>(window);
 }
 
 void CursorWindow::NativeDispose(
@@ -631,10 +631,9 @@ ECode CursorWindow::constructor(
 
 ECode CursorWindow::Dispose()
 {
-    /*
     if (mCloseGuard != NULL) {
         mCloseGuard->Close();
-    }*/
+    }
     if (mWindowPtr != 0) {
         RecordClosingOfWindow(mWindowPtr);
         NativeDispose(mWindowPtr);
@@ -1015,7 +1014,13 @@ ECode CursorWindow::NewFromParcel(
 ECode CursorWindow::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0 && "TODO");
+    source->ReadInt32(&mStartPos);
+    mWindowPtr = NativeCreateFromParcel(source);
+    if (mWindowPtr == 0) {
+        Slogger::E("CursorWindow", "Cursor window could not be created from binder.");
+        return E_CURSOR_WINDOW_ALLOCATION_EXCEPTION;
+    }
+    mName = NativeGetName(mWindowPtr);
     return NOERROR;
 }
 
@@ -1030,9 +1035,10 @@ ECode CursorWindow::WriteToParcel(
     ReleaseReference();
     //}
 
-    //if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
-    //    ReleaseReference();
-    //}
+    Slogger::E("CursorWindow", "WriteToParcel TODO no flags!");
+    // if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
+    //     ReleaseReference();
+    // }
     return ec;
 }
 

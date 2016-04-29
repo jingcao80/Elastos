@@ -65,10 +65,10 @@ ECode SQLiteConnectionPool::Open(
     /* [in] */ SQLiteDatabaseConfiguration* configuration,
     /* [out] */ SQLiteConnectionPool** result)
 {
+    Slogger::I(TAG, " >>> SQLiteConnectionPool::Open(");
     VALIDATE_NOT_NULL(result)
     *result = NULL;
     if (configuration == NULL) {
-        //throw new IllegalArgumentException("configuration must not be null.");
         Slogger::E(TAG, "configuration must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -78,11 +78,13 @@ ECode SQLiteConnectionPool::Open(
     FAIL_RETURN(pool->Open()) // might throw
     *result = pool;
     REFCOUNT_ADD(*result)
+    Slogger::I(TAG, " <<< SQLiteConnectionPool::Open(");
     return NOERROR;
 }
 
 ECode SQLiteConnectionPool::Open()
 {
+    Slogger::I(TAG, " >>> SQLiteConnectionPool::Open()");
     mAvailablePrimaryConnection = NULL;
     // Open the primary connection.
     // This might throw if the database is corrupt.
@@ -92,6 +94,7 @@ ECode SQLiteConnectionPool::Open()
     mIsOpen = TRUE;
 
     mCloseGuard->Open(String("SQLiteConnectionPool::Close"));
+    Slogger::I(TAG, " <<< SQLiteConnectionPool::Open()");
     return NOERROR;
 }
 
@@ -347,7 +350,10 @@ ECode SQLiteConnectionPool::OpenConnectionLocked(
 {
     VALIDATE_NOT_NULL(result)
     Int32 connectionId = mNextConnectionId++;
-    return SQLiteConnection::Open(this, configuration, connectionId, primaryConnection, result);
+Slogger::I(TAG, " >>> SQLiteConnectionPool::OpenConnectionLocked() %d", connectionId);
+    ECode ec = SQLiteConnection::Open(this, configuration, connectionId, primaryConnection, result);
+Slogger::I(TAG, " >>> SQLiteConnectionPool::OpenConnectionLocked() ec=%d", ec);
+    return ec;
 }
 
 void SQLiteConnectionPool::OnConnectionLeaked()
@@ -963,9 +969,8 @@ void SQLiteConnectionPool::SetMaxConnectionPoolSizeLocked()
 ECode SQLiteConnectionPool::ThrowIfClosedLocked()
 {
     if (!mIsOpen) {
-        //throw new IllegalStateException("Cannot perform this operation "
-        //        + "because the connection pool has been closed.");
         Slogger::E(TAG, "Cannot perform this operation because the connection pool has been closed.");
+        assert(0 && "TODO");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;

@@ -27,25 +27,11 @@ INIT_PROI_4 HashMap< String, AutoPtr<ILocaleData> > LocaleData::sLocaleDataCache
 INIT_PROI_4 Object LocaleData::sLocaleDataCacheLock;
 INIT_PROI_4 LocaleData::StaticInitializer LocaleData::sInitializer;
 
+CAR_INTERFACE_IMPL(LocaleData, Object, ILocaleData)
+
 LocaleData::LocaleData()
-    : mAmPm(NULL)
-    , mEras(NULL)
-    , mLongMonthNames(NULL)
-    , mShortMonthNames(NULL)
-    , mTinyMonthNames(NULL)
-    , mLongStandAloneMonthNames(NULL)
-    , mShortStandAloneMonthNames(NULL)
-    , mTinyStandAloneMonthNames(NULL)
-    , mLongWeekdayNames(NULL)
-    , mShortWeekdayNames(NULL)
-    , mTinyWeekdayNames(NULL)
-    , mLongStandAloneWeekdayNames(NULL)
-    , mShortStandAloneWeekdayNames(NULL)
-    , mTinyStandAloneWeekdayNames(NULL)
 {
 }
-
-CAR_INTERFACE_IMPL(LocaleData, Object, ILocaleData)
 
 AutoPtr<ILocale> LocaleData::MapInvalidAndNullLocales(
         /* [in] */ ILocale* locale)

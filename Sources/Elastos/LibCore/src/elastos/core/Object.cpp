@@ -15,7 +15,7 @@ Object::Object()
 {
     IncrementDllLockCount();
     mNativeObject = NativeCreateObject();
-    mNativeObject->mObjectObj = reinterpret_cast<Int32>(this);
+    mNativeObject->mObjectObj = reinterpret_cast<Int64>(this);
 }
 
 Object::~Object()

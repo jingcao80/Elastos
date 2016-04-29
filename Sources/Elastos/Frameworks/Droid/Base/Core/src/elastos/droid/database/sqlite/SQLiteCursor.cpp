@@ -172,6 +172,8 @@ ECode SQLiteCursor::GetColumnIndex(
     /* [out] */ Int32* columnIndex)
 {
     VALIDATE_NOT_NULL(columnIndex);
+    *columnIndex = -1;
+
     // Create mColumnNameMap on demand
     if (mColumnNameMap == NULL) {
         AutoPtr< ArrayOf<String> > columns = mColumns;
@@ -196,9 +198,6 @@ ECode SQLiteCursor::GetColumnIndex(
     if (it != mColumnNameMap->End()) {
         *columnIndex = it->mSecond;
     }
-    else {
-        *columnIndex = -1;
-    }
     return NOERROR;
 }
 
@@ -219,32 +218,40 @@ ECode SQLiteCursor::Deactivate()
 
 ECode SQLiteCursor::Close()
 {
+    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     AbstractWindowedCursor::Close();
 
+    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    synchronized(this) {
+    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
         ICloseable::Probe(mQuery)->Close();
+    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
         ec = mDriver->CursorClosed();
+    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     }
+    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     return ec;
 }
 
 ECode SQLiteCursor::Requery(
     /* [out] */ Boolean* succeeded)
 {
+    Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
     VALIDATE_NOT_NULL(succeeded);
+    *succeeded = FALSE;
 
     Boolean isclose;
     if ((IsClosed(&isclose), isclose)) {
-        *succeeded = FALSE;
+        Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
         return NOERROR;
     }
-
-    synchronized(mLock){
+    Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
+    synchronized(this){
+        Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
         AutoPtr<ISQLiteDatabase> database = ((CSQLiteQuery*)mQuery.Get())->GetDatabase();
         Boolean isOpened;
         if (database->IsOpen(&isOpened), !isOpened) {
-            *succeeded = FALSE;
             return NOERROR;
         }
 
@@ -256,13 +263,14 @@ ECode SQLiteCursor::Requery(
 
         mDriver->CursorRequeried(this);
     }
-
+    Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
     Boolean result;
     ECode ec = AbstractWindowedCursor::Requery(&result);
     if (FAILED(ec)) {
-        *succeeded = FALSE;
         return ec;
     }
+
+    *succeeded = result;
     return NOERROR;
 }
 
