@@ -39,6 +39,13 @@ public:
     CARAPI SetIsDFS(
         /* [in] */ Boolean isDFS);
 
+    /** is IBSS allowed? */
+    CARAPI GetIbssAllowed(
+        /* [out] */ Boolean* result);
+
+    CARAPI SetIbssAllowed(
+        /* [in] */ Boolean ibssAllowed);
+
     /** check for validity */
     CARAPI IsValid(
         /* [out] */ Boolean* result);
@@ -94,6 +101,9 @@ private:
 
     /** is it a DFS channel? */
     Boolean mIsDFS;
+
+    /** is IBSS allowed? */
+    Boolean mIbssAllowed;
 };
 
 } // namespace Wifi

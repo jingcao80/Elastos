@@ -8,7 +8,7 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-SOURCES += BatchedScanResult.cpp
+SOURCES += CBatchedScanResult.cpp
 SOURCES += CWifiSsid.cpp
 SOURCES += CWifiSsidHelper.cpp
 SOURCES += CScanResult.cpp
