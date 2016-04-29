@@ -62,6 +62,21 @@ ECode CWifiChannel::SetIsDFS(
     return NOERROR;
 }
 
+ECode CWifiChannel::GetIbssAllowed(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mIbssAllowed;
+    return NOERROR;
+}
+
+ECode CWifiChannel::SetIbssAllowed(
+    /* [in] */ Boolean ibssAllowed)
+{
+    mIbssAllowed = ibssAllowed;
+    return NOERROR;
+}
+
 /** check for validity */
 ECode CWifiChannel::IsValid(
     /* [out] */ Boolean* result)

@@ -38,6 +38,13 @@ module
         SetIsDFS(
             [in] Boolean isDFS);
 
+        /** is IBSS allowed? */
+        GetIbssAllowed(
+            [out] Boolean* result);
+
+        SetIbssAllowed(
+            [in] Boolean ibssAllowed);
+
         /** check for validity */
         IsValid(
             [out] Boolean* result);

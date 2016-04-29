@@ -1,0 +1,38 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Describes the Results of a batched set of wifi scans where the firmware performs many
+     * scans and stores the timestamped results without waking the main processor each time.
+     * @hide pending review
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IBatchedScanResult {
+        /** Inidcates this scan was interrupted and may only have partial results. */
+        GetTruncated(
+            [out] Boolean* result);
+
+        SetTruncated(
+            [in] Boolean truncated);
+
+        /** The result of this particular scan. */
+        GetScanResults(
+            [out] IList** result);
+
+        SetScanResults(
+            [in] IList* scanResults);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -67,8 +67,7 @@ using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::R;
 using Elastos::Droid::Server::Net::EIID_INetlinkTrackerCallback;
 using Elastos::Droid::Telephony::ITelephonyManager;
-// TODO: Need IBatchedScanResult
-// using Elastos::Droid::Wifi::BatchedScanResult;
+using Elastos::Droid::Wifi::CBatchedScanResult;
 using Elastos::Droid::Wifi::CScanResult;
 using Elastos::Droid::Wifi::CScanResultHelper;
 using Elastos::Droid::Wifi::CSupplicantState;
@@ -84,6 +83,7 @@ using Elastos::Droid::Wifi::CWifiSsid;
 using Elastos::Droid::Wifi::CWifiSsidHelper;
 using Elastos::Droid::Wifi::CWpsResult;
 using Elastos::Droid::Wifi::CRssiPacketCountInfo;
+using Elastos::Droid::Wifi::IBatchedScanResult;
 using Elastos::Droid::Wifi::IScanResultHelper;
 using Elastos::Droid::Wifi::ISupplicantState;
 using Elastos::Droid::Wifi::ISupplicantStateHelper;
@@ -421,7 +421,7 @@ ECode WifiStateMachine::DefaultState::ProcessMessage(
             mHost->ReplyToMessage(message, what, FAILURE);
             break;
         case CMD_GET_CAPABILITY_FREQ:
-            mHost->ReplyToMessage(message, what, NULL);
+            mHost->ReplyToMessage(message, what, (IInterface*)NULL);
             break;
         case CMD_GET_CONFIGURED_NETWORKS:
             mHost->ReplyToMessage(message, what, (IList*)NULL);
@@ -622,7 +622,7 @@ ECode WifiStateMachine::DefaultState::ProcessMessage(
             break;
         case CMD_GET_LINK_LAYER_STATS:
             // Not supported hence reply with error message
-            mHost->ReplyToMessage(message, what, NULL);
+            mHost->ReplyToMessage(message, what, (IInterface*)NULL);
             break;
         case WifiP2pServiceImpl::P2P_CONNECTION_CHANGED: {
             AutoPtr<IInterface> obj;
@@ -4799,7 +4799,8 @@ WifiStateMachine::WifiStateMachine(
     /* [in] */ IContext* context,
     /* [in] */ const String& wlanInterface,
     /* [in] */ WifiTrafficPoller* trafficPoller)
-    : obtainingIpWatchdogCount(0)
+    : StateMachine(String("WifiStateMachine"))
+    , obtainingIpWatchdogCount(0)
     , roamWatchdogCount(0)
     , disconnectingWatchdogCount(0)
     , mRunningBeaconCount(0)
@@ -4888,7 +4889,6 @@ WifiStateMachine::WifiStateMachine(
     , mTxTimeLastReport(0)
     , mRxTimeLastReport(0)
     , lastLinkLayerStatsUpdate(0)
-    , StateMachine(String("WifiStateMachine"))
 {
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mP2pConnected);
     CArrayList::New((IArrayList**)&mScanResults);
@@ -5311,8 +5311,7 @@ ECode WifiStateMachine::SyncGetChannelList(
                 c->SetFreqMHz(StringUtils::ParseInt32((*prop)[3]));
                 // } catch (NumberFormatException e) { }
                 c->SetIsDFS(line.Contains("(DFS)"));
-// TODO: Need WifiChannel::SetIbssAllowed
-                // c->SetIbssAllowed(!line.Contains("(NO_IBSS)"));
+                c->SetIbssAllowed(!line.Contains("(NO_IBSS)"));
                 list->Add(c);
             }
             else if (line.Contains("Mode[B] Channels:")) {
@@ -5373,10 +5372,10 @@ ECode WifiStateMachine::SyncGetBatchedScanResultsList(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mBatchedScanResults->Get(i, (IInterface**)&obj);
-// TODO: Need IBatchedScanResult
-            // AutoPtr<BatchedScanResult> bsr = (BatchedScanResult*)(IObject*)obj.Get();
-            // AutoPtr<BatchedScanResult> b = new BatchedScanResult(bsr);
-            // batchedScanList->Add((IInterface*)(IObject*)b.Get());
+            AutoPtr<IBatchedScanResult> bsr = IBatchedScanResult::Probe(obj);
+            AutoPtr<IBatchedScanResult> b;
+            CBatchedScanResult::New(bsr, (IBatchedScanResult**)&b);
+            batchedScanList->Add(b);
         }
         *result = IList::Probe(batchedScanList);
         REFCOUNT_ADD(*result)
@@ -5709,7 +5708,6 @@ ECode WifiStateMachine::SyncAddOrUpdateNetwork(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMessage> resultMsg;
     channel->SendMessageSynchronously(CMD_ADD_OR_UPDATE_NETWORK, config, (IMessage**)&resultMsg);
-    Int32 arg1;
     resultMsg->GetArg1(result);
     resultMsg->Recycle();
     return NOERROR;
@@ -5926,7 +5924,6 @@ ECode WifiStateMachine::SyncIsIbssSupported(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMessage> resultMsg;
     channel->SendMessageSynchronously(CMD_GET_IBSS_SUPPORTED, (IMessage**)&resultMsg);
-    Int32 v;
     resultMsg->GetArg1(result);
     resultMsg->Recycle();
     return NOERROR;
@@ -6911,6 +6908,7 @@ ECode WifiStateMachine::HandleGsmAuthRequest(
     else {
         Loge(String("could not get telephony manager"));
     }
+    return NOERROR;
 }
 
 ECode WifiStateMachine::Handle3GAuthRequest(
@@ -7745,9 +7743,9 @@ void WifiStateMachine::SetScanAlarm(
     /* [in] */ Int32 delayMilli)
 {
     if (PDBG) {
-        Loge(String("setScanAlarm ") + enabled
-                + " period " + mCurrentScanAlarmMs
-                + " initial delay " + delayMilli);
+        Loge(String("setScanAlarm ") + StringUtils::BooleanToString(enabled)
+                + " period " + StringUtils::ToString(mCurrentScanAlarmMs)
+                + " initial delay " + StringUtils::ToString(delayMilli));
     }
     if (mCurrentScanAlarmMs <= 0) enabled = FALSE;
     if (enabled == mAlarmEnabled) return;
@@ -7992,8 +7990,8 @@ void WifiStateMachine::RetrieveBatchedScanData()
 
     synchronized (mBatchedScanResults) {
         mBatchedScanResults->Clear();
-// TODO: Need IBatchedScanResult
-        // AutoPtr<BatchedScanResult> batchedScanResult = new BatchedScanResult();
+        AutoPtr<IBatchedScanResult> batchedScanResult;
+        CBatchedScanResult::New((IBatchedScanResult**)&batchedScanResult);
 
         String bssid;
         AutoPtr<IWifiSsid> wifiSsid;
@@ -8019,12 +8017,13 @@ void WifiStateMachine::RetrieveBatchedScanData()
                     Logd(String("retrieveBatchedScanResults X"));
                     return;
                 }
+                AutoPtr<IList> list;
+                batchedScanResult->GetScanResults((IList**)&list);
                 if (((*splitData)[n].Equals(END_STR)) || (*splitData)[n].Equals(DELIMITER_STR)) {
                     if (bssid != NULL) {
                         AutoPtr<IScanResult> sr;
                         CScanResult::New(wifiSsid, bssid, String(""), level, freq, tsf, dist, distSd, (IScanResult**)&sr);
-// TODO: Need IBatchedScanResult
-                        // batchedScanResult->scanResults->Add(sr);
+                        list->Add(sr);
                         wifiSsid = NULL;
                         bssid = NULL;
                         level = 0;
@@ -8034,12 +8033,10 @@ void WifiStateMachine::RetrieveBatchedScanData()
                     }
                     if ((*splitData)[n].Equals(END_STR)) {
                         Int32 size;
-// TODO: Need IBatchedScanResult
-                        // batchedScanResult->scanResults->GetSize(&size);
+                        list->GetSize(&size);
                         if (size != 0) {
-// TODO: Need IBatchedScanResult
-                            // mBatchedScanResults->Add(batchedScanResult);
-                            // batchedScanResult = new BatchedScanResult();
+                            mBatchedScanResults->Add(batchedScanResult);
+                            CBatchedScanResult::New((IBatchedScanResult**)&batchedScanResult);
                         }
                         else {
                             Logd(String("Found empty batch"));
@@ -8047,8 +8044,7 @@ void WifiStateMachine::RetrieveBatchedScanData()
                     }
                 }
                 else if ((*splitData)[n].Equals(TRUNCATED)) {
-// TODO: Need IBatchedScanResult
-                    // batchedScanResult->truncated = TRUE;
+                    batchedScanResult->SetTruncated(TRUE);
                 }
                 else if ((*splitData)[n].StartWith(BSSID_STR)) {
                     bssid = String(*(*splitData)[n].GetBytes(), bssidStrLen,
@@ -8144,7 +8140,7 @@ Boolean WifiStateMachine::IsScanAllowed(
                      lastScanDuringP2p +
                      " CurrentTime=" + now +
                      " autoJoinScanIntervalWhenP2pConnected=" +
-                     mWifiConfigStore->autoJoinScanIntervalWhenP2pConnected);
+                     StringUtils::ToString(mWifiConfigStore->autoJoinScanIntervalWhenP2pConnected));
             }
 
             if (lastScanDuringP2p == 0 || (now - lastScanDuringP2p)
@@ -8152,7 +8148,7 @@ Boolean WifiStateMachine::IsScanAllowed(
                 if (lastScanDuringP2p == 0) lastScanDuringP2p = now;
                 if (VDBG) {
                     Logd(String("P2P connected, discard scan within ") +
-                         mWifiConfigStore->autoJoinScanIntervalWhenP2pConnected
+                        StringUtils::ToString(mWifiConfigStore->autoJoinScanIntervalWhenP2pConnected)
                          + " milliseconds");
                 }
                 return FALSE;
@@ -8412,7 +8408,9 @@ void WifiStateMachine::HandleBSSIDBlacklist(
     /* [in] */ const String& bssid,
     /* [in] */ Int32 reason)
 {
-    Log(String("Blacklisting BSSID: ") + bssid + ",reason:" + reason + ",enable:" + enable );
+    Log(String("Blacklisting BSSID: ") + bssid + ",reason:"
+            + StringUtils::ToString(reason) + ",enable:"
+            + StringUtils::BooleanToString(enable));
     if (bssid != NULL) {
         // Tell configStore to black list it
         synchronized(mScanResultCache) {
@@ -8426,7 +8424,7 @@ void WifiStateMachine::HandleStateChange(
     /* [in] */ Int32 state)
 {
     Int32 offset;
-    Log(String("handle state change: ") + state);
+    Log(String("handle state change: ") + StringUtils::ToString(state));
     if(state == 0) {
         // wifi is not good, reduce the score
         mWifiInfo->SetScore(1);
@@ -8447,7 +8445,7 @@ void WifiStateMachine::HandlePrefChange(
     /* [in] */ Int32 featureParam,
     /* [in] */ Int32 value)
 {
-    Log(String("handle pref change : featurevalue: ") + value);
+    Log(String("handle pref change : featurevalue: ") + StringUtils::ToString(value));
     if(featureId == FEATURE_ID && featureParam == FEATURE_PARAM) {
         if(value == FEATURE_ON) {
             DEFAULT_SCORE = 1;
@@ -8469,10 +8467,10 @@ void WifiStateMachine::HandleScreenStateChanged(
     mUserWantsSuspendOpt->Get(&b);
     if (PDBG) {
         String name;
-        Boolean b;
-        Loge(String(" handleScreenStateChanged Enter: screenOn=") + screenOn
+        Loge(String(" handleScreenStateChanged Enter: screenOn=")
+                + StringUtils::BooleanToString(screenOn)
                 + " mCurrentScanAlarmMs = " + StringUtils::ToString(mCurrentScanAlarmMs)
-                + " mUserWantsSuspendOpt=" + b
+                + " mUserWantsSuspendOpt=" + StringUtils::BooleanToString(b)
                 + " state " + (GetCurrentState()->GetName(&name), name)
                 + " suppState:" + mSupplicantStateTracker->GetSupplicantStateName());
     }
@@ -8537,8 +8535,10 @@ void WifiStateMachine::HandleScreenStateChanged(
         mEnableBackgroundScan = (screenOn == FALSE);
     }
 
-    if (DBG) Logd(String("backgroundScan enabled=") + mEnableBackgroundScan
-            + " startBackgroundScanIfNeeded:" + startBackgroundScanIfNeeded);
+    if (DBG) Logd(String("backgroundScan enabled=")
+            + StringUtils::BooleanToString(mEnableBackgroundScan)
+            + " startBackgroundScanIfNeeded:"
+            + StringUtils::BooleanToString(startBackgroundScanIfNeeded));
 
     if (startBackgroundScanIfNeeded) {
         if (mEnableBackgroundScan) {
@@ -8550,7 +8550,8 @@ void WifiStateMachine::HandleScreenStateChanged(
         }
     }
 
-    if (DBG) Log(String("handleScreenStateChanged Exit: ") + screenOn);
+    if (DBG) Log(String("handleScreenStateChanged Exit: ")
+            + StringUtils::BooleanToString(screenOn));
 }
 
 void WifiStateMachine::CheckAndSetConnectivityInstance()
@@ -8740,14 +8741,17 @@ void WifiStateMachine::SetSuspendOptimizations(
     /* [in] */ Int32 reason,
     /* [in] */ Boolean enabled)
 {
-    if (DBG) Log(String("setSuspendOptimizations: ") + reason + " " + enabled);
+    if (DBG) Log(String("setSuspendOptimizations: ") +
+            StringUtils::ToString(reason) + " " +
+            StringUtils::BooleanToString(enabled));
     if (enabled) {
         mSuspendOptNeedsDisabled &= ~reason;
     }
     else {
         mSuspendOptNeedsDisabled |= reason;
     }
-    if (DBG) Log(String("mSuspendOptNeedsDisabled ") + mSuspendOptNeedsDisabled);
+    if (DBG) Log(String("mSuspendOptNeedsDisabled ")
+            + StringUtils::ToString(mSuspendOptNeedsDisabled));
 }
 
 void WifiStateMachine::SetWifiState(
@@ -9374,7 +9378,8 @@ void WifiStateMachine::CalculateWifiScore(
     if (isBadLinkspeed) {
         score -= 4 ;
         if (PDBG) {
-            Loge(String(" isBadLinkspeed   ---> count=") + mBadLinkspeedcount
+            Loge(String(" isBadLinkspeed   ---> count=")
+                    + StringUtils::ToString(mBadLinkspeedcount)
                     + " score=" + StringUtils::ToString(score));
         }
     }
@@ -9604,8 +9609,9 @@ void WifiStateMachine::UpdateLinkProperties(
 
     if (DBG) {
         StringBuilder sb;
-        sb.Append(String("updateLinkProperties nid: ") + mLastNetworkId);
-        sb.Append(String(" state: ") + detailedState);
+        sb.Append(String("updateLinkProperties nid: ")
+                + StringUtils::ToString(mLastNetworkId));
+        sb.Append(String(" state: ") + StringUtils::ToString(detailedState));
         String str;
         SmToString(reason, &str);
         sb.Append(String(" reason: ") + str);
@@ -9876,8 +9882,9 @@ Boolean WifiStateMachine::SetNetworkDetailedState(
     mNetworkInfo->GetDetailedState(&nidState);
     if (DBG) {
         Log(String("setDetailed state, old =")
-                + nidState + " and new state=" + state
-                + " hidden=" + hidden);
+                + StringUtils::ToString(nidState) +
+                " and new state=" + StringUtils::ToString(state) +
+                " hidden=" + StringUtils::BooleanToString(hidden));
     }
     String eInfo;
     mNetworkInfo->GetExtraInfo(&eInfo);
