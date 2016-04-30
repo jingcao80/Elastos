@@ -142,12 +142,13 @@ ECode FloatPropertyValuesHolder::SetAnimatedValue(
         paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
         CarDataType carType;
         dataTypeInfo->GetDataType(&carType);
-        if(carType == CarDataType_Float)
-        {
+        if (carType == CarDataType_Float) {
             args->SetInputArgumentOfFloat(0, mFloatAnimatedValue);
-        } else if(carType == CarDataType_Interface){
+        }
+        else if(carType == CarDataType_Interface){
             args->SetInputArgumentOfObjectPtr(0, animatedValue);
-        } else {
+        }
+        else {
             assert(0);
         }
         mSetter->Invoke(target, args);
@@ -173,25 +174,25 @@ ECode FloatPropertyValuesHolder::SetupSetter(
         free(id.mUunm);
         ClassMethodMapIterator exit = sJNISetterPropertyMap.Find(clInfo);
         AutoPtr<MethodMap> propertyMap;
-        if(exit != sJNISetterPropertyMap.End()) {
+        if (exit != sJNISetterPropertyMap.End()) {
             propertyMap = exit->mSecond;
-            if(propertyMap != NULL) {
+            if (propertyMap != NULL) {
                 MethodMapIterator it = propertyMap->Find(mPropertyName);
-                if(it != propertyMap->End()) {
+                if (it != propertyMap->End()) {
                     AutoPtr<IMethodInfo> mtInfo = it->mSecond;
-                    if(mtInfo != NULL) {
+                    if (mtInfo != NULL) {
                         mJniSetter = mtInfo;
                     }
                 }
             }
         }
 
-        if(mJniSetter == NULL) {
+        if (mJniSetter == NULL) {
             String methodName = GetMethodName(String("Set"), mPropertyName);
             // clInfo->GetMethodInfo(methodName, (IMethodInfo**)&mJniSetter);
             mJniSetter = nGetFloatMethod(target, methodName);
-            if(mJniSetter != NULL) {
-                if(propertyMap == NULL) {
+            if (mJniSetter != NULL) {
+                if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
                     sJNISetterPropertyMap[clInfo] = propertyMap;
                 }

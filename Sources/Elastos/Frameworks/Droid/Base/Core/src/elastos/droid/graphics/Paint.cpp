@@ -1793,7 +1793,8 @@ Int64 Paint::NativeSetTypeface(
     /* [in] */ Int64 nObj,
     /* [in] */ Int64 typeface)
 {
-    return (Int64)((SkPaint*)nObj)->setTypeface((SkTypeface*)typeface);
+    // TODO: in Paint refactoring, set typeface on android Paint, not Paint
+    return 0;
 }
 
 Int64 Paint::NativeSetRasterizer(
@@ -1873,7 +1874,7 @@ void Paint::NativeSetTextLocale(
     char langTag[ULOC_FULLNAME_CAPACITY];
     ToLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locale.string());
 
-    obj->setTextLocale(langTag);
+    obj->setTextLocale(String(langTag));
 }
 
 Float Paint::NativeMeasureText(
@@ -2454,10 +2455,11 @@ void Paint::NativeSetFontFeatureSettings(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     if (settings.IsNull()) {
-        paint->setFontFeatureSettings(std::string());
-    } else {
+        paint->setFontFeatureSettings(String(NULL));
+    }
+    else {
         // ScopedUtfChars settingsChars(env, settings);
-        paint->setFontFeatureSettings(std::string(settings.string(), settings.GetLength()));
+        paint->setFontFeatureSettings(settings);
     }
 }
 

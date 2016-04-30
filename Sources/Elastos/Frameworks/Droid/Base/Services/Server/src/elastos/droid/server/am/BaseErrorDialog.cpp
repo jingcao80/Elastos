@@ -1,5 +1,4 @@
 
-//#include "Elastos.Droid.Core.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/server/am/BaseErrorDialog.h"
 #include "elastos/droid/R.h"

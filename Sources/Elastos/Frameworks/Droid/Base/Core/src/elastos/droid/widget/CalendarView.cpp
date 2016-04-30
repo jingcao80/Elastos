@@ -261,16 +261,22 @@ CalendarView::LegacyCalendarViewDelegate::LegacyCalendarViewDelegate(
     res->GetDisplayMetrics((IDisplayMetrics**)&displayMetrics);
     AutoPtr<ITypedValueHelper> hlpType;
     CTypedValueHelper::AcquireSingleton((ITypedValueHelper**)&hlpType);
+    Float fvalue;
     hlpType->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            UNSCALED_WEEK_MIN_VISIBLE_HEIGHT, displayMetrics, (Float*)&mWeekMinVisibleHeight);
+            UNSCALED_WEEK_MIN_VISIBLE_HEIGHT, displayMetrics, &fvalue);
+    mWeekMinVisibleHeight = (Int32)fvalue;
     hlpType->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            UNSCALED_LIST_SCROLL_TOP_OFFSET, displayMetrics, (Float*)&mListScrollTopOffset);
+            UNSCALED_LIST_SCROLL_TOP_OFFSET, displayMetrics, &fvalue);
+    mListScrollTopOffset = (Int32)fvalue;
     hlpType->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            UNSCALED_BOTTOM_BUFFER, displayMetrics, (Float*)&mBottomBuffer);
+            UNSCALED_BOTTOM_BUFFER, displayMetrics, &fvalue);
+    mBottomBuffer = (Int32)fvalue;
     hlpType->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            UNSCALED_SELECTED_DATE_VERTICAL_BAR_WIDTH, displayMetrics, (Float*)&mSelectedDateVerticalBarWidth);
+            UNSCALED_SELECTED_DATE_VERTICAL_BAR_WIDTH, displayMetrics, &fvalue);
+    mSelectedDateVerticalBarWidth = (Int32)fvalue;
     hlpType->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            UNSCALED_WEEK_SEPARATOR_LINE_WIDTH, displayMetrics, (Float*)&mWeekSeperatorLineWidth);
+            UNSCALED_WEEK_SEPARATOR_LINE_WIDTH, displayMetrics, &fvalue);
+    mWeekSeperatorLineWidth = (Int32)fvalue;
 
     AutoPtr<IInterface> sv;
     mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&sv);

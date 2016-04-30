@@ -2,8 +2,8 @@
 #define __ELASTOS_DROID_GRAPHICS_NATIVEPAINT_H__
 
 #include <SkPaint.h>
-#include <string>
 #include <minikin/FontFamily.h>
+#include <elastos.h>
 
 using android::FontVariant;
 
@@ -33,19 +33,19 @@ public:
         return mLetterSpacing;
     }
 
-    void setFontFeatureSettings(const std::string &fontFeatureSettings) {
+    void setFontFeatureSettings(const String &fontFeatureSettings) {
         mFontFeatureSettings = fontFeatureSettings;
     }
 
-    std::string getFontFeatureSettings() const {
+    String getFontFeatureSettings() const {
         return mFontFeatureSettings;
     }
 
-    void setTextLocale(const std::string &textLocale) {
+    void setTextLocale(const String &textLocale) {
         mTextLocale = textLocale;
     }
 
-    std::string getTextLocale() const {
+    String getTextLocale() const {
         return mTextLocale;
     }
 
@@ -59,8 +59,8 @@ public:
 
 private:
     float mLetterSpacing;
-    std::string mFontFeatureSettings;
-    std::string mTextLocale;
+    String mFontFeatureSettings;
+    String mTextLocale;
     FontVariant mFontVariant;
 };
 

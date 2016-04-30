@@ -16,7 +16,6 @@
 
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
-#include <string.h>
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -53,8 +52,8 @@ void MinikinUtils::doLayout(Layout* layout, const NativePaint* paint, int bidiFl
     FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
-    std::string lang = paint->getTextLocale();
-    FontLanguage minikinLang(lang.c_str(), lang.size());
+    String lang = paint->getTextLocale();
+    FontLanguage minikinLang(lang.string(), lang.GetByteLength());
     FontVariant minikinVariant = (paint->getFontVariant() == VARIANT_ELEGANT) ? VARIANT_ELEGANT
             : VARIANT_COMPACT;
     FontStyle minikinStyle(minikinLang, minikinVariant, resolved.getWeight(), resolved.getItalic());
@@ -66,7 +65,8 @@ void MinikinUtils::doLayout(Layout* layout, const NativePaint* paint, int bidiFl
     minikinPaint.skewX = paint->getTextSkewX();
     minikinPaint.letterSpacing = paint->getLetterSpacing();
     minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
-    minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+    String settings = paint->getFontFeatureSettings();
+    minikinPaint.fontFeatureSettings = std::string(settings.string(), settings.GetByteLength());
 
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }

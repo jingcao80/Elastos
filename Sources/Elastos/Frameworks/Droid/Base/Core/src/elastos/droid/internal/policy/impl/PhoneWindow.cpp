@@ -1741,10 +1741,16 @@ void PhoneWindow::_DecorView::OnMeasure(
         if (tvw != NULL && (tvw->GetType(&type), type) != ITypedValue::TYPE_NULL) {
             Int32 w = 0;
             if (type == ITypedValue::TYPE_DIMENSION) {
-                tvw->GetDimension(metrics, (Float*)&w);
-            } else if (type == ITypedValue::TYPE_FRACTION) {
-                tvw->GetFraction(widthPixels, widthPixels, (Float*)&w);
-            } else {
+                Float fw;
+                tvw->GetDimension(metrics, &fw);
+                w = (Int32)fw;
+            }
+            else if (type == ITypedValue::TYPE_FRACTION) {
+                Float fw;
+                tvw->GetFraction(widthPixels, widthPixels, &fw);
+                w = (Int32)fw;
+            }
+            else {
                 w = 0;
             }
 
@@ -1763,10 +1769,16 @@ void PhoneWindow::_DecorView::OnMeasure(
         if (tvh != NULL && (tvh->GetType(&type), type) != ITypedValue::TYPE_NULL) {
             Int32 h = 0;
             if (type == ITypedValue::TYPE_DIMENSION) {
-                tvh->GetDimension(metrics, (Float*)&h);
-            } else if (type == ITypedValue::TYPE_FRACTION) {
-                tvh->GetFraction(heightPixels, heightPixels, (Float*)&h);
-            } else {
+                Float fh;
+                tvh->GetDimension(metrics, &fh);
+                h = (Int32)fh;
+            }
+            else if (type == ITypedValue::TYPE_FRACTION) {
+                Float fh;
+                tvh->GetFraction(heightPixels, heightPixels, &fh);
+                h = (Int32)fh;
+            }
+            else {
                 h = 0;
             }
 
@@ -1803,10 +1815,16 @@ void PhoneWindow::_DecorView::OnMeasure(
         if ((tv->GetType(&type), type) != ITypedValue::TYPE_NULL) {
             Int32 min = 0;
             if (type == ITypedValue::TYPE_DIMENSION) {
-                tv->GetDimension(metrics, (Float*)&min);
-            } else if (type == ITypedValue::TYPE_FRACTION) {
-                tv->GetFraction(widthPixels, widthPixels, (Float*)&min);
-            } else {
+                Float fmin;
+                tv->GetDimension(metrics, &fmin);
+                min = (Int32)fmin;
+            }
+            else if (type == ITypedValue::TYPE_FRACTION) {
+                Float fmin;
+                tv->GetFraction(widthPixels, widthPixels, &fmin);
+                min = (Int32)fmin;
+            }
+            else {
                 min = 0;
             }
 

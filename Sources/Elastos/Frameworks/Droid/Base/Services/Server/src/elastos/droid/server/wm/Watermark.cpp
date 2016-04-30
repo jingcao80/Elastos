@@ -95,7 +95,9 @@ Watermark::Watermark(
 
     AutoPtr<IPaintFontMetricsInt> fm;
     mTextPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&fm);
-    mTextPaint->MeasureText(mText, (Float*)&mTextWidth);
+    Float fwidth;
+    mTextPaint->MeasureText(mText, &fwidth);
+    mTextWidth = (Int32)fwidth;
     Int32 descent, ascent;
     fm->GetDescent(&descent);
     fm->GetAscent(&ascent);

@@ -7,9 +7,8 @@
 #include "elastos/droid/text/TextLine.h"
 #include <elastos/core/Math.h>
 
-using Elastos::Core::CString;
-using Elastos::Core::ECLSID_CString;
 using Elastos::Droid::Text::Style::EIID_IParagraphStyle;
+using Elastos::Core::IString;
 
 namespace Elastos {
 namespace Droid {
@@ -213,14 +212,8 @@ ECode BoringLayout::Init(
 
     mDirect = String(NULL);
 
-    IObject* obj = IObject::Probe(source);
-    if (obj != NULL) {
-        ClassID clsid;
-        obj->GetClassID(&clsid);
-
-        if (clsid == ECLSID_CString && align == Elastos::Droid::Text::ALIGN_NORMAL) {
-            source->ToString(&mDirect);
-        }
+    if (IString::Probe(source) != NULL && align == Elastos::Droid::Text::ALIGN_NORMAL) {
+        source->ToString(&mDirect);
     }
 
     mPaint = IPaint::Probe(paint);

@@ -2866,7 +2866,7 @@ Boolean CLocationManagerService::ShouldBroadcastSafe(
     minDistance = distanceTemp;
     if (minDistance > 0.0) {
         Float dis;
-        loc->DistanceTo(lastLoc, (Float*)&dis);
+        loc->DistanceTo(lastLoc, &dis);
         if (dis <= minDistance) {
             return FALSE;
         }

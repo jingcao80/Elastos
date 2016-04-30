@@ -181,8 +181,8 @@ void CCandidateView::OnDraw(
     Boolean scrolled = mScrolled;
     Boolean typedWordValid = mTypedWordValid;
     Float textSize = 0, ascent = 0;
-    mPaint->GetTextSize((Float*)&textSize);
-    mPaint->Ascent((Float*)&ascent);
+    mPaint->GetTextSize(&textSize);
+    mPaint->Ascent(&ascent);
     Int32 y = (Int32) (((height - textSize) / 2) - ascent);
 
     Int32 top = 0;
