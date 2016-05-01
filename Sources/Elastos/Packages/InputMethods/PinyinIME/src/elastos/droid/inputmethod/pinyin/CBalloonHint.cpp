@@ -125,7 +125,7 @@ ECode CBalloonHint::constructor(
     CColorDrawable::New(0, (IColorDrawable**)&colorDr);
     SetBackgroundDrawable(IDrawable::Probe(colorDr));
 
-    CBalloonView::New(context, (IBalloonView**)&mBalloonView);
+    CBalloonView::NewByFriend(context, (CBalloonView**)&mBalloonView);
     mBalloonView->SetClickable(FALSE);
     SetContentView(mBalloonView);
 

@@ -166,11 +166,6 @@ public:
         /* [out] */ Boolean* e);
 
 private:
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ IResolveInfo* service,
-        /* [in] */ IMap* additionalSubtypesMap);
-
     static AutoPtr<IResolveInfo> BuildDummyResolveInfo(
         /* [in] */ const String& packageName,
         /* [in] */ const String& className,

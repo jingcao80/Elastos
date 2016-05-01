@@ -17,15 +17,14 @@ namespace View {
 
 CAR_INTERFACE_IMPL_2(AbsSavedState, Object, IAbsSavedState, IParcelable)
 
-const AutoPtr<IAbsSavedState> AbsSavedState::EMPTY_STATE;
-
-AutoPtr<IAbsSavedState> AbsSavedState::GetEMPTY_STATE()
+static AutoPtr<IAbsSavedState> InitEMPTY_STATE()
 {
-    if (EMPTY_STATE.Get() == NULL) {
-        CAbsSavedState::New((IAbsSavedState**)&EMPTY_STATE);
-    }
-    return EMPTY_STATE;
+    AutoPtr<IAbsSavedState> state;
+    CAbsSavedState::New((IAbsSavedState**)&state);
+    return state;
 }
+
+const AutoPtr<IAbsSavedState> AbsSavedState::EMPTY_STATE = InitEMPTY_STATE();
 
 AbsSavedState::AbsSavedState()
 {}
@@ -46,7 +45,7 @@ ECode AbsSavedState::constructor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    mSuperState = superState != IParcelable::Probe(GetEMPTY_STATE()) ? superState : NULL;
+    mSuperState = superState != IParcelable::Probe(EMPTY_STATE) ? superState : NULL;
     return NOERROR;
 }
 
@@ -73,7 +72,7 @@ ECode AbsSavedState::ReadFromParcel(
     source->ReadInterfacePtr((Handle32*)&obj);
     mSuperState = IParcelable::Probe(obj);
     if (mSuperState == NULL) {
-        mSuperState = IParcelable::Probe(GetEMPTY_STATE());
+        mSuperState = IParcelable::Probe(EMPTY_STATE);
     }
 
     return NOERROR;

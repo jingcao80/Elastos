@@ -85,8 +85,8 @@ namespace Droid {
 namespace SettingsProvider {
 
 const String SettingsProvider::TAG("SettingsProvider");
-const Boolean SettingsProvider::LOCAL_LOGV;
-const Boolean SettingsProvider::USER_CHECK_THROWS;
+const Boolean SettingsProvider::LOCAL_LOGV = FALSE;
+const Boolean SettingsProvider::USER_CHECK_THROWS = TRUE;
 const String SettingsProvider::TABLE_SYSTEM("system");
 const String SettingsProvider::TABLE_SECURE("secure");
 const String SettingsProvider::TABLE_GLOBAL("global");

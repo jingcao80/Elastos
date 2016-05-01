@@ -423,9 +423,9 @@ protected:
 
 private:
     static const String TAG;
-    static const Boolean LOCAL_LOGV = FALSE;
+    static const Boolean LOCAL_LOGV;
 
-    static const Boolean USER_CHECK_THROWS = TRUE;
+    static const Boolean USER_CHECK_THROWS;
 
     static const String TABLE_SYSTEM;
     static const String TABLE_SECURE;

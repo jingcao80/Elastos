@@ -832,20 +832,22 @@ Boolean CInputMethodManager::StartInputInner(
             String id;
             res->GetId(&id);
             if (!id.IsNull()) {
-                assert(0 && "TODO");
-                // AutoPtr<CInputBindResult> mRes = (CInputBindResult*)res.Get();
-                // SetInputChannelLocked(mRes->mChannel);
+                AutoPtr<IInputChannel> channel;
+                res->GetChannel((IInputChannel**)&channel);
+                SetInputChannelLocked(channel);
                 res->GetSequence(&mBindSequence);
                 mCurMethod = NULL;
-                // res->GetIIMSession((IIInputMethodSession**)&mCurMethod);
-                mCurId = id;
-                // mNextUserActionNotificationSequenceNumber =
-                //                 mRes->mUserActionNotificationSequenceNumber;
+                res->GetMethod((IIInputMethodSession**)&mCurMethod);
+                res->GetId(&mCurId);
+                res->GetUserActionNotificationSequenceNumber(
+                        &mNextUserActionNotificationSequenceNumber);
             }
             else {
-                // if (mRes->mChannel != NULL && mRes->mChannel != mCurChannel) {
-                //     mRes->mChannel->Dispose();
-                // }
+                AutoPtr<IInputChannel> channel;
+                res->GetChannel((IInputChannel**)&channel);
+                if (channel != NULL && channel != mCurChannel) {
+                    channel->Dispose();
+                }
                 if (mCurMethod == NULL) {
                     // This means there is no input method available.
                     if (DEBUG) Logger::V(TAG, "ABORT input: no input method!");

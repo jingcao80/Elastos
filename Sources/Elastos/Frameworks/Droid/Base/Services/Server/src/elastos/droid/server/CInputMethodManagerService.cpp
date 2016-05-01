@@ -635,9 +635,9 @@ ECode CInputMethodManagerService::HardKeyboardListener::OnHardKeyboardStatusChan
 ECode CInputMethodManagerService::HardKeyboardListener::HandleHardKeyboardStatusChange(
     /* [in] */ Boolean available)
 {
-    // if (DEBUG) {
-    //     Slogger::W(TAG, "HardKeyboardStatusChanged: available = " + available);
-    // }
+    if (DEBUG) {
+        Slogger::W(TAG, "HardKeyboardStatusChanged: available = %d", available);
+    }
     {
         AutoLock lock(mHost->mMethodMap.Get());
 
@@ -1229,8 +1229,7 @@ ECode CInputMethodManagerService::constructor(
         BuildInputMethodListLocked(mMethodList, mMethodMap,
             !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
     }
-    // mSettings->EnableAllIMEsIfThereIsNoEnabledIME();
-    Slogger::W(TAG, " >>> TODO setting provider not implemented.");
+    mSettings->EnableAllIMEsIfThereIsNoEnabledIME();
 
    if (!mImeSelectedOnBoot) {
         Slogger::W(TAG, "No IME selected. Choose the most applicable IME.");
@@ -1296,8 +1295,8 @@ void CInputMethodManagerService::ResetDefaultImeLocked(
         AutoPtr<IList> list;
         mSettings->GetEnabledInputMethodListLocked((IList**)&list);
         imUtils->GetMostApplicableDefaultIME(list, (IInputMethodInfo**)&defIm);
-        String id ;
-        defIm->GetId(&id);
+        String id;
+        if (defIm != NULL) defIm->GetId(&id);
         Slogger::I(TAG, "No default found, using %s", id.string());
     }
     if (defIm != NULL) {
@@ -1326,9 +1325,11 @@ void CInputMethodManagerService::ResetAllInternalStateLocked(
             mCurMethodId = NULL;
             UnbindCurrentMethodLocked(TRUE, FALSE);
         }
-        // if (DEBUG) {
-        //     Slog.i(TAG, "Locale has been changed to " + newLocale);
-        // }
+        if (DEBUG) {
+            String str;
+            IObject::Probe(newLocale)->ToString(&str);
+            Slogger::I(TAG, "Locale has been changed to %s", str.string());
+        }
         // InputMethodAndSubtypeListManager should be reset when the locale is changed.
         BuildInputMethodListLocked(mMethodList, mMethodMap, resetDefaultEnabledIme);
         if (!updateOnlyWhenLocaleChanged) {
@@ -2393,9 +2394,8 @@ AutoPtr<IInputMethodInfo> CInputMethodManagerService::GetMethodInfoFromMethodMap
     /* [in] */ const String& inputMethodId)
 {
     AutoPtr<ICharSequence> csq = CoreUtils::Convert(inputMethodId);
-    AutoPtr<IInterface> key = TO_IINTERFACE(key);
     AutoPtr<IInterface> valueObj;
-    mMethodMap->Get(key, (IInterface**)&valueObj);
+    mMethodMap->Get(csq, (IInterface**)&valueObj);
     AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(valueObj);
     return imi;
 }
@@ -2808,7 +2808,7 @@ ECode CInputMethodManagerService::ShowSoftInput(
             // }
         }
 
-        // if (DEBUG) Slogger::V(TAG, "Client requesting input be shown");
+        if (DEBUG) Slogger::V(TAG, "Client requesting input be shown");
         *state = ShowCurrentInputLocked(flags, resultReceiver);
     }
     Binder::RestoreCallingIdentity(ident);
@@ -2864,10 +2864,10 @@ Boolean CInputMethodManagerService::ShowCurrentInputLocked(
                     | IContext::BIND_NOT_VISIBLE);
     }
     else {
-        // if (DEBUG) {
-        //     Slogger::D(TAG, "Can't show input: connection = " + mHaveConnection + ", time = "
-        //             + ((mLastBindTime+TIME_TO_RECONNECT) - SystemClock.uptimeMillis()));
-        // }
+        if (DEBUG) {
+            Slogger::D(TAG, "Can't show input: connection = %d, time = %lld", mHaveConnection,
+                    ((mLastBindTime + TIME_TO_RECONNECT) - SystemClock::GetUptimeMillis()));
+        }
     }
 
     return res;
@@ -2885,7 +2885,7 @@ ECode CInputMethodManagerService::HideSoftInput(
         *state = FALSE;
         return NOERROR;
     }
-    // Int32 uid = Binder::GetCallingUid();
+    Int32 uid = Binder::GetCallingUid();
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
     {
@@ -2900,8 +2900,8 @@ ECode CInputMethodManagerService::HideSoftInput(
             Boolean ret = FALSE;
             mIWindowManager->InputMethodClientHasFocus(client, &ret);
             if (!ret) {
-                // if (DEBUG) Slogger::W(TAG, "Ignoring hideSoftInput of uid "
-                //         + uid + ": " + client);
+                if (DEBUG) Slogger::W(TAG, "Ignoring hideSoftInput of uid %d: 0x%08x",
+                        uid, client);
                 SetImeWindowVisibilityStatusHiddenLocked();
                 *state = FALSE;
                 Binder::RestoreCallingIdentity(ident);
@@ -2913,7 +2913,7 @@ ECode CInputMethodManagerService::HideSoftInput(
             // }
         }
 
-        // if (DEBUG) Slogger::V(TAG, "Client requesting input be hidden");
+        if (DEBUG) Slogger::V(TAG, "Client requesting input be hidden");
         *state = HideCurrentInputLocked(flags, resultReceiver);
     }
     // } finally {
@@ -2980,10 +2980,9 @@ ECode CInputMethodManagerService::WindowGainedFocus(
     // try {
     {
         AutoLock lock(mMethodMap.Get());
-        // if (DEBUG) Slogger::V(TAG, "windowGainedFocus: " + client.asBinder()
-        //         + " controlFlags=#" + Integer.toHexString(controlFlags)
-        //         + " softInputMode=#" + Integer.toHexString(softInputMode)
-        //         + " windowFlags=#" + Integer.toHexString(windowFlags));
+        if (DEBUG) Slogger::V(TAG, "windowGainedFocus: 0x%08x  controlFlags=#%s  softInputMode=#%s windowFlags=#",
+                client, StringUtils::ToHexString(controlFlags).string(), StringUtils::ToHexString(softInputMode).string(),
+                StringUtils::ToHexString(windowFlags).string());
 
         AutoPtr<ClientState> cs;
         HashMap<AutoPtr<IBinder>, AutoPtr<ClientState> >::Iterator it =
@@ -3073,7 +3072,7 @@ ECode CInputMethodManagerService::WindowGainedFocus(
                         // There is no focus view, and this window will
                         // be behind any soft input window, so hide the
                         // soft input window if it is shown.
-                        // if (DEBUG) Slogger::V(TAG, "Unspecified window will hide input");
+                        if (DEBUG) Slogger::V(TAG, "Unspecified window will hide input");
                         HideCurrentInputLocked(IInputMethodManager::HIDE_NOT_ALWAYS, NULL);
                     }
                 }
@@ -3086,7 +3085,7 @@ ECode CInputMethodManagerService::WindowGainedFocus(
                     // them good context without input information being obscured
                     // by the IME) or if running on a large screen where there
                     // is more room for the target window + IME.
-                    // if (DEBUG) Slogger::V(TAG, "Unspecified window will show input");
+                    if (DEBUG) Slogger::V(TAG, "Unspecified window will show input");
                     if (attribute != NULL) {
                         StartInputUncheckedLocked(cs, inputContext, attribute,
                                 controlFlags, result);
@@ -3101,18 +3100,18 @@ ECode CInputMethodManagerService::WindowGainedFocus(
             case IWindowManagerLayoutParams::SOFT_INPUT_STATE_HIDDEN:
                 if ((softInputMode &
                         IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                    // if (DEBUG) Slogger::V(TAG, "Window asks to hide input going forward");
+                    if (DEBUG) Slogger::V(TAG, "Window asks to hide input going forward");
                     HideCurrentInputLocked(0, NULL);
                 }
                 break;
             case IWindowManagerLayoutParams::SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                // if (DEBUG) Slogger::V(TAG, "Window asks to hide input");
+                if (DEBUG) Slogger::V(TAG, "Window asks to hide input");
                 HideCurrentInputLocked(0, NULL);
                 break;
             case IWindowManagerLayoutParams::SOFT_INPUT_STATE_VISIBLE:
                 if ((softInputMode &
                         IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                    // if (DEBUG) Slogger::V(TAG, "Window asks to show input going forward");
+                    if (DEBUG) Slogger::V(TAG, "Window asks to show input going forward");
                     if (attribute != NULL) {
                         StartInputUncheckedLocked(cs, inputContext, attribute,
                                 controlFlags, result);
@@ -3122,7 +3121,7 @@ ECode CInputMethodManagerService::WindowGainedFocus(
                 }
                 break;
             case IWindowManagerLayoutParams::SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-                // if (DEBUG) Slogger::V(TAG, "Window asks to always show input");
+                if (DEBUG) Slogger::V(TAG, "Window asks to always show input");
                 if (attribute != NULL) {
                     StartInputUncheckedLocked(cs, inputContext, attribute,
                             controlFlags, result);
@@ -4010,7 +4009,7 @@ void CInputMethodManagerService::HideInputMethodMenu()
 
 void CInputMethodManagerService::HideInputMethodMenuLocked()
 {
-    // if (DEBUG) Slogger::V(TAG, "Hide switching menu");
+    if (DEBUG) Slogger::V(TAG, "Hide switching menu");
 
     if (mSwitchingDialog != NULL) {
         IDialogInterface::Probe(mSwitchingDialog)->Dismiss();
@@ -4143,7 +4142,8 @@ void CInputMethodManagerService::SetSelectedInputMethodAndSubtypeLocked(
     if (imi == NULL || subtypeId < 0) {
         mSettings->PutSelectedSubtype(NOT_A_SUBTYPE_ID);
         mCurrentSubtype = NULL;
-    } else {
+    }
+    else {
         Int32 count = 0;
         if (subtypeId < (imi->GetSubtypeCount(&count), count)) {
             AutoPtr<IInputMethodSubtype> subtype;
@@ -4152,7 +4152,8 @@ void CInputMethodManagerService::SetSelectedInputMethodAndSubtypeLocked(
             Int32 hashCode = Object::GetHashCode(subtype);
             mSettings->PutSelectedSubtype(hashCode);
             mCurrentSubtype = subtype;
-        } else {
+        }
+        else {
             mSettings->PutSelectedSubtype(NOT_A_SUBTYPE_ID);
             // If the subtype is not specified, choose the most applicable one
             mCurrentSubtype = GetCurrentInputMethodSubtypeLocked();

@@ -5,13 +5,13 @@
 
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Droid::Internal::View::EIID_IIInputMethodManager;
+using Elastos::Droid::Internal::View::EIID_IIInputSessionCallback;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
-CAR_INTERFACE_IMPL_2(CInputMethodManagerServiceMethodCallback, Object, IIInputMethodManager, IBinder)
+CAR_INTERFACE_IMPL_2(CInputMethodManagerServiceMethodCallback, Object, IIInputSessionCallback, IBinder)
 
 CAR_OBJECT_IMPL(CInputMethodManagerServiceMethodCallback)
 

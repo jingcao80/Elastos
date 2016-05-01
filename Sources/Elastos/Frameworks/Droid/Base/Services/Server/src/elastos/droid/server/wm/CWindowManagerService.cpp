@@ -1739,7 +1739,7 @@ void CWindowManagerService::ReAddWindowToListInOrderLocked(
     List<AutoPtr<WindowState> >::Iterator it = Find(*windows, win);
     if (it != windows->End()) {
         if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "ReAdd removing from : %p", win);
-        windows->Erase(it);
+        it = windows->Erase(it);
         mWindowsChanged = TRUE;
         ReAddWindowLocked(it, win);
     }
@@ -1813,7 +1813,7 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
     /* [in] */ Boolean needAssignLayers)
 {
     AutoPtr<WindowState> imWin = mInputMethodWindow;
-    if (imWin == NULL && mInputMethodDialogs.Begin() == mInputMethodDialogs.End()) {
+    if (imWin == NULL && mInputMethodDialogs.IsEmpty()) {
         return FALSE;
     }
 
@@ -1832,7 +1832,7 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
         // at the bottom of their stack.
         AutoPtr<WindowState> baseImWin = imWin != NULL
                 ? imWin : *(mInputMethodDialogs.Begin());
-        if (baseImWin->mChildWindows.Begin() != baseImWin->mChildWindows.End()) {
+        if (!baseImWin->mChildWindows.IsEmpty()) {
             AutoPtr<WindowState> cw = *baseImWin->mChildWindows.Begin();
             if (cw->mSubLayer < 0) baseImWin = cw;
         }
@@ -1841,23 +1841,21 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
             // The windows haven't moved...  but are they still contiguous?
             // First find the top IM window.
             List< AutoPtr<WindowState> >::Iterator posIt = imPosIt;
-            if (++posIt != windows->End()) {
-                for (; posIt != windows->End(); ++posIt) {
-                    if (!(*posIt)->mIsImWindow) {
-                        break;
-                    }
+            ++posIt;
+            while (posIt != windows->End()) {
+                if (!(*posIt)->mIsImWindow) {
+                    break;
                 }
-
-                if (posIt != windows->End()) ++posIt;
-
-                // Now there should be no more input method windows above.
-                for (; posIt != windows->End(); ++posIt) {
-                    if ((*posIt)->mIsImWindow) {
-                        break;
-                    }
-                }
+                ++posIt;
             }
-
+            ++posIt;
+            // Now there should be no more input method windows above.
+            while (posIt != windows->End()) {
+                if ((*posIt)->mIsImWindow) {
+                    break;
+                }
+                ++posIt;
+            }
             if (posIt == windows->End()) {
                 // Z order is good.
                 // The IM target window may be changed, so update the mTargetAppToken.
@@ -1869,10 +1867,10 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
         }
 
         if (imWin != NULL) {
-            // if (DEBUG_INPUT_METHOD) {
-            //     Slogger::V(TAG, "Moving IM from " + imPos);
-            //     logWindowList(windows, "  ");
-            // }
+            if (DEBUG_INPUT_METHOD) {
+                Slogger::V(TAG, "Moving IM");
+                LogWindowList(*windows, String("  "));
+            }
             imPosIt = TmpRemoveWindowLocked(imPosIt, imWin);
             // if (DEBUG_INPUT_METHOD) {
             //     Slogger::V(TAG, "List after removing with new pos " + imPos + ":");
@@ -1912,7 +1910,6 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
         else {
             MoveInputMethodDialogsLocked(windows->End());
         }
-
     }
 
     if (needAssignLayers) {

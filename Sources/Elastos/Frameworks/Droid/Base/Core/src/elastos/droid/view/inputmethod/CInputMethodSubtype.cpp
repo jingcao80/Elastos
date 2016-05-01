@@ -8,16 +8,17 @@
 #include "elastos/droid/view/inputmethod/CInputMethodSubtype.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Text::TextUtils;
-
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
-using Elastos::Core::IBoolean;
-using Elastos::Core::CBoolean;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::CLocale;
 using Elastos::Utility::CHashSet;
@@ -345,16 +346,12 @@ AutoPtr< HashMap<String, String> > CInputMethodSubtype::GetExtraValueHashMap()
         synchronized(this) {
             if (mExtraValueHashMapCache == NULL) {
                 mExtraValueHashMapCache = new HashMap<String, String>(10);
-                assert(0);
-                //TODO
-                // final String[] pairs = mSubtypeExtraValue.split(EXTRA_VALUE_PAIR_SEPARATOR);
                 AutoPtr< ArrayOf<String> > pairs;
+                StringUtils::Split(mSubtypeExtraValue, EXTRA_VALUE_PAIR_SEPARATOR, (ArrayOf<String>**)&pairs);
                 const Int32 N = pairs->GetLength();
                 for (Int32 i = 0; i < N; ++i) {
-                    assert(0);
-                    //TODO
-                    //final String[] pair = pairs[i].split(EXTRA_VALUE_KEY_VALUE_SEPARATOR);
                     AutoPtr< ArrayOf<String> > pair;
+                    StringUtils::Split((*pairs)[i], EXTRA_VALUE_KEY_VALUE_SEPARATOR, (ArrayOf<String>**)&pair);
                     Int32 len = pair->GetLength();
                     if (len == 1) {
                         (*mExtraValueHashMapCache)[(*pair)[0]] = NULL;
@@ -513,38 +510,24 @@ Int32 CInputMethodSubtype::HashCodeInternal(
 {
     // CAVEAT: Must revisit how to compute needsToCalculateCompatibleHashCode when a new
     // attribute is added in order to avoid enabled subtypes being unexpectedly disabled.
-    AutoPtr<ICharSequence> pLoc;
-    CString::New(locale, (ICharSequence**)&pLoc);
-    AutoPtr<ICharSequence> pMod;
-    CString::New(mode, (ICharSequence**)&pMod);
-    AutoPtr<ICharSequence> pExt;
-    CString::New(extraValue, (ICharSequence**)&pExt);
-    AutoPtr<IBoolean> pAux;
-    CBoolean::New(isAuxiliary, (IBoolean**)&pAux);
-    AutoPtr<IBoolean> pSub;
-    CBoolean::New(overridesImplicitlyEnabledSubtype, (IBoolean**)&pSub);
-    AutoPtr<IBoolean> pAsc;
-    CBoolean::New(isAsciiCapable, (IBoolean**)&pAsc);
-
     Boolean needsToCalculateCompatibleHashCode = !isAsciiCapable;
     if (needsToCalculateCompatibleHashCode) {
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(5);
-        (*arr)[0] = pLoc;
-        (*arr)[1] = pMod;
-        (*arr)[2] = pExt;
-        (*arr)[3] = pAux;
-        (*arr)[4] = pSub;
+        arr->Set(0, CoreUtils::Convert(locale));
+        arr->Set(1, CoreUtils::Convert(mode));
+        arr->Set(2, CoreUtils::Convert(extraValue));
+        arr->Set(3, CoreUtils::Convert(isAuxiliary));
+        arr->Set(4, CoreUtils::Convert(overridesImplicitlyEnabledSubtype));
         return Arrays::GetHashCode(arr);
     }
-
-    AutoPtr<ArrayOf<IInterface*> > arr_1 = ArrayOf<IInterface*>::Alloc(6);
-    (*arr_1)[0] = pLoc;
-    (*arr_1)[1] = pMod;
-    (*arr_1)[2] = pExt;
-    (*arr_1)[3] = pAux;
-    (*arr_1)[4] = pSub;
-    (*arr_1)[5] = pAsc;
-    return Arrays::GetHashCode(arr_1);
+    AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(6);
+    arr->Set(0, CoreUtils::Convert(locale));
+    arr->Set(1, CoreUtils::Convert(mode));
+    arr->Set(2, CoreUtils::Convert(extraValue));
+    arr->Set(3, CoreUtils::Convert(isAuxiliary));
+    arr->Set(4, CoreUtils::Convert(overridesImplicitlyEnabledSubtype));
+    arr->Set(5, CoreUtils::Convert(isAsciiCapable));
+    return Arrays::GetHashCode(arr);
 }
 
 AutoPtr<IList> CInputMethodSubtype::Sort(

@@ -52,4 +52,4 @@ AAPT_FLAGS = -0 .dat
 RES_NAMESPACE = Elastos.Droid.InputMethod.Pinyin
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
-APP_PACKAGE_NAME = PinyinIME
+APP_PACKAGE_NAME = Elastos.Droid.InputMethod.Pinyin

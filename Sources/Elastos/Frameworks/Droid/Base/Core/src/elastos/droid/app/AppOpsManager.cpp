@@ -1519,13 +1519,14 @@ ECode AppOpsManager::NoteOp(
 
     Int32 mode;
     ECode ec = mService->NoteOperation(op, uid, packageName, &mode);
-    if (FAILED(ec) || mode == MODE_ERRORED) {
+    if (FAILED(ec)) return NOERROR;
+    *result = mode;
+    if (mode == MODE_ERRORED) {
         String msg = BuildSecurityExceptionMsg(op, uid, packageName);
         Logger::E(TAG, "E_SECURITY_EXCEPTION: %s", msg.string());
         return E_SECURITY_EXCEPTION;
     }
-
-    return MODE_IGNORED;
+    return NOERROR;
 }
 
 ECode AppOpsManager::NoteOpNoThrow(

@@ -28,7 +28,8 @@ ECode CBalloonView::constructor(
     mPaintLabel->SetColor(mLabeColor);
     mPaintLabel->SetAntiAlias(TRUE);
     mPaintLabel->SetFakeBoldText(TRUE);
-    return mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
+    mPaintLabel->GetFontMetricsInt((IPaintFontMetricsInt**)&mFmi);
+    return NOERROR;
 }
 
 void CBalloonView::SetIcon(

@@ -2628,14 +2628,16 @@ ECode ActiveServices::KillServicesLocked(
     AutoPtr<ServiceMap> smap = GetServiceMap(app->mUserId);
 
     // Now do remaining service cleanup.
-    for (it = app->mServices.Begin(); it != app->mServices.End(); ++it) {
+    it = app->mServices.Begin();
+    while (it != app->mServices.End()) {
         AutoPtr<CServiceRecord> sr = *it;
 
         // Unless the process is persistent, this process record is going away,
         // so make sure the service is cleaned out of it.
         if (!app->mPersistent) {
-            app->mServices.Erase(it);
+            app->mServices.Erase(it++);
         }
+        else ++it;
 
         // Sanity check: if the service listed for the app is not one
         // we actually are maintaining, just let it drop.

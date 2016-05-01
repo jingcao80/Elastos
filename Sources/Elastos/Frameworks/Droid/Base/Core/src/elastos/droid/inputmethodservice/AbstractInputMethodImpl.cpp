@@ -36,8 +36,7 @@ ECode AbstractInputMethodImpl::CreateSession(
     assert(mHost != NULL);
     AutoPtr<IAbstractInputMethodSessionImpl> impl;
     mHost->OnCreateInputMethodSessionInterface((IAbstractInputMethodSessionImpl**)&impl);
-    return callback->SessionCreated(
-            (IInputMethodSession*)impl->Probe(EIID_IInputMethodSession));
+    return callback->SessionCreated(IInputMethodSession::Probe(impl));
 }
 
 ECode AbstractInputMethodImpl::SetSessionEnabled(

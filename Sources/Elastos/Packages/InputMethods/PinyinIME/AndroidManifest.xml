@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="PinyinIME">
+    package="Elastos.Droid.InputMethod.Pinyin">
         <!-- <original-package android:name="com.android.inputmethod.pinyin" /> -->
 
         <uses-permission android:name="android.permission.VIBRATE"/>

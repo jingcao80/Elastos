@@ -616,12 +616,11 @@ void InputMethodService::InitViews()
 
     view = NULL;
     mRootView->FindViewById(R::id::candidatesArea, (IView**)&view);
-    mExtractFrame = IFrameLayout::Probe(view);
+    mCandidatesFrame = IFrameLayout::Probe(view);
 
     view = NULL;
     mRootView->FindViewById(R::id::inputArea, (IView**)&view);
-    mExtractFrame = IFrameLayout::Probe(view);
-
+    mInputFrame = IFrameLayout::Probe(view);
     mInputView = NULL;
     mIsInputViewShown = FALSE;
 

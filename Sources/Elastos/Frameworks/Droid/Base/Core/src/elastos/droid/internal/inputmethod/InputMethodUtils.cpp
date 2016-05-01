@@ -741,7 +741,6 @@ ECode InputMethodUtils::InputMethodSettings::PutSelectedInputMethod(
     Boolean res;
     return Settings::Secure::PutStringForUser(
         mResolver, ISettingsSecure::DEFAULT_INPUT_METHOD, imeId, mCurrentUserId, &res);
-    return NOERROR;
 }
 
 ECode InputMethodUtils::InputMethodSettings::PutSelectedSubtype(
@@ -1169,23 +1168,24 @@ Boolean InputMethodUtils::IsValidSystemDefaultIme(
     Int32 id;
     imi->GetIsDefaultResourceId(&id);
     if (id != 0) {
-        do {
-            Boolean isDefault;
-            imi->IsDefault(context, &isDefault);
+        // try {
+        Boolean isDefault;
+        imi->IsDefault(context, &isDefault);
+        if (isDefault) {
             AutoPtr<IResources> r;
             context->GetResources((IResources**)&r);
             AutoPtr<IConfiguration> c;
             r->GetConfiguration((IConfiguration**)&c);
             AutoPtr<ILocale> locale;
-            if (FAILED(c->GetLocale((ILocale**)&locale)))
-                break;
-
+            c->GetLocale((ILocale**)&locale);
             String language;
             locale->GetLanguage(&language);
-            if (isDefault && ContainsSubtypeOf(imi, language, SUBTYPE_MODE_ANY)) {
+            if (ContainsSubtypeOf(imi, language, SUBTYPE_MODE_ANY)) {
                 return TRUE;
             }
-        } while (0);
+        }
+        // } catch (Resources.NotFoundException ex) {
+        // }
     }
     Int32 count;
     imi->GetSubtypeCount(&count);

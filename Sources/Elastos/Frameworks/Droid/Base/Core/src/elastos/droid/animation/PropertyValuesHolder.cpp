@@ -1187,7 +1187,7 @@ AutoPtr<IClassInfo> PropertyValuesHolder::TransformClassInfo(
     AutoPtr<IObject> obj = IObject::Probe(o);
     assert(obj != NULL);
     ClassID objId;
-    obj->GetClassID(&objId);
+    ASSERT_SUCCEEDED(obj->GetClassID(&objId));
     AutoPtr<IModuleInfo> moduleInfo;
     String path(objId.mUunm);
     ASSERT_SUCCEEDED(_CReflector_AcquireModuleInfo(

@@ -623,10 +623,12 @@ ECode Watchdog::Run()
             CFile::New(tracesPath, (IFile**)&traceRenameFile);
             String newTracesPath;
             Int32 lpos = tracesPath.LastIndexOf(String("."));
-            if (-1 != lpos)
+            if (-1 != lpos) {
                 newTracesPath = tracesPath.Substring (0, lpos) + traceFileNameAmendment + tracesPath.Substring(lpos);
-            else
+            }
+            else {
                 newTracesPath = tracesPath + traceFileNameAmendment;
+            }
             AutoPtr<IFile> file;
             CFile::New(newTracesPath, (IFile**)&file);
             Boolean flag = FALSE;

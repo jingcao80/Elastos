@@ -15,8 +15,6 @@
 #include "elastos/droid/view/inputmethod/CInputMethodSubtypeArray.h"
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/R.h"
-
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::R;
@@ -29,11 +27,9 @@ using Elastos::Droid::View::InputMethod::CInputMethodSubtype;
 using Elastos::Droid::View::InputMethod::CInputMethodSubtypeArray;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::Xml;
-
 using Elastos::Core::CString;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -63,7 +59,7 @@ ECode CInputMethodInfo::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IResolveInfo* service)
 {
-    return Init(context, service, NULL);
+    return constructor(context, service, NULL);
 }
 
 ECode CInputMethodInfo::constructor(
@@ -71,7 +67,171 @@ ECode CInputMethodInfo::constructor(
     /* [in] */ IResolveInfo* service,
     /* [in] */ IMap* additionalSubtypesMap)
 {
-    return Init(context, service, additionalSubtypesMap);
+    mService = (CResolveInfo*)service;
+    CServiceInfo* si = (CServiceInfo*)mService->mServiceInfo.Get();
+    AutoPtr<CComponentName> componentName;
+    CComponentName::NewByFriend(si->mPackageName, si->mName, (CComponentName**)&componentName);
+    componentName->FlattenToShortString(&mId);
+    Boolean isAuxIme = TRUE;
+    Boolean supportsSwitchingToNextInputMethod = FALSE; // false as default
+    mForceDefault = FALSE;
+
+    AutoPtr<IPackageManager> pm;
+    context->GetPackageManager((IPackageManager**)&pm);
+    String settingsActivityComponent;
+    Int32 isDefaultResId = 0;
+
+    AutoPtr<IXmlResourceParser> xmlParser;
+    AutoPtr<IArrayList> subtypes;
+    CArrayList::New((IArrayList**)&subtypes);
+    //try {
+    si->LoadXmlMetaData(pm, IInputMethod::SERVICE_META_DATA, (IXmlResourceParser**)&xmlParser);
+    if (xmlParser == NULL) {
+        Logger::E(TAG, "No %s meta-data", (const char*)IInputMethod::SERVICE_META_DATA);
+        return E_XML_PULL_PARSER_EXCEPTION;
+    }
+
+    AutoPtr<IResources> res;
+    pm->GetResourcesForApplication(si->mApplicationInfo, (IResources**)&res);
+
+    IXmlPullParser* parser = IXmlPullParser::Probe(xmlParser);
+    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
+
+    Int32 type = 0;
+    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+            && type != IXmlPullParser::START_TAG) {
+    }
+
+    String nodeName;
+    parser->GetName(&nodeName);
+    if (!nodeName.Equals("input-method")) {
+        Logger::E(TAG, "Meta-data does not start with input-method tag");
+        return E_XML_PULL_PARSER_EXCEPTION;
+    }
+
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+        const_cast<Int32 *>(R::styleable::InputMethod),
+        ArraySize(R::styleable::InputMethod));
+
+    AutoPtr<ITypedArray> sa;
+    FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
+    sa->GetString(R::styleable::InputMethod_settingsActivity, &settingsActivityComponent);
+    sa->GetResourceId(R::styleable::InputMethod_isDefault, 0, &isDefaultResId);
+    sa->GetBoolean(R::styleable::InputMethod_supportsSwitchingToNextInputMethod,
+                    FALSE, &supportsSwitchingToNextInputMethod);
+    sa->Recycle();
+
+    Int32 depth = 0, tmpDepth = 0;
+    parser->GetDepth(&depth);
+    // Parse all subtypes
+    while (((parser->Next(&type), type) != IXmlPullParser::END_TAG || (parser->GetDepth(&tmpDepth), tmpDepth) > depth)
+            && type != IXmlPullParser::END_DOCUMENT) {
+        if (type == IXmlPullParser::START_TAG) {
+            parser->GetName(&nodeName);
+            if (!nodeName.Equals("subtype")) {
+                xmlParser->Close();
+                Logger::E(TAG, "Meta-data in input-method does not start with subtype tag");
+                return E_XML_PULL_PARSER_EXCEPTION;
+            }
+            layout = ArrayOf<Int32>::Alloc(
+                    const_cast<Int32 *>(R::styleable::InputMethod_Subtype),
+                    ArraySize(R::styleable::InputMethod_Subtype));
+
+            AutoPtr<ITypedArray> a;
+            res->ObtainAttributes(attrs, layout, (ITypedArray**)&a);
+
+            AutoPtr<IInputMethodSubtypeBuilder> builder = new CInputMethodSubtype::InputMethodSubtypeBuilder();
+            Int32 label = 0;
+            a->GetResourceId(R::styleable::InputMethod_Subtype_label, 0, &label);
+            builder->SetSubtypeNameResId(label);
+
+            Int32 icon = 0;
+            a->GetResourceId(R::styleable::InputMethod_Subtype_icon, 0, &icon);
+            builder->SetSubtypeIconResId(icon);
+
+            String imeSubtypeLocale;
+            a->GetString(R::styleable::InputMethod_Subtype_imeSubtypeLocale, &imeSubtypeLocale);
+            builder->SetSubtypeLocale(imeSubtypeLocale);
+
+            String imeSubtypeMode;
+            a->GetString(R::styleable::InputMethod_Subtype_imeSubtypeMode, &imeSubtypeMode);
+            builder->SetSubtypeMode(imeSubtypeMode);
+
+            String imeSubtypeExtraValue;
+            a->GetString(R::styleable::InputMethod_Subtype_imeSubtypeExtraValue, &imeSubtypeExtraValue);
+            builder->SetSubtypeExtraValue(imeSubtypeExtraValue);
+
+            Boolean isAuxiliary = FALSE;
+            a->GetBoolean(R::styleable::InputMethod_Subtype_isAuxiliary, FALSE, &isAuxiliary);
+            builder->SetIsAuxiliary(isAuxiliary);
+
+            Boolean overridesImplicitlyEnabledSubtype = FALSE;
+            a->GetBoolean(R::styleable::InputMethod_Subtype_overridesImplicitlyEnabledSubtype, FALSE, &overridesImplicitlyEnabledSubtype);
+            builder->SetOverridesImplicitlyEnabledSubtype(overridesImplicitlyEnabledSubtype);
+
+            Int32 subtypeId = 0;
+            a->GetInt32(R::styleable::InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */, &subtypeId);
+            builder->SetSubtypeId(subtypeId);
+
+            Boolean isAsciiCapable = FALSE;
+            a->GetBoolean(R::styleable::InputMethod_Subtype_isAsciiCapable, FALSE, &isAsciiCapable);
+            builder->SetIsAsciiCapable(isAsciiCapable);
+
+            AutoPtr<IInputMethodSubtype> subtype;
+            builder->Build((IInputMethodSubtype**)&subtype);
+
+            Boolean auxiliary = FALSE;
+            if (!(subtype->IsAuxiliary(&auxiliary), auxiliary)) {
+                isAuxIme = FALSE;
+            }
+            subtypes->Add(subtype);
+        }
+    }
+    // } catch (NameNotFoundException e) {
+    //     throw new XmlPullParserException(
+    //             "Unable to create context for: " + si.packageName);
+    // } finally {
+    //     if (parser != null) parser.close();
+    // }
+    if (xmlParser != NULL) {
+        xmlParser->Close();
+    }
+
+    Boolean bIsEmp = FALSE;
+    if ((subtypes->IsEmpty(&bIsEmp), bIsEmp)) {
+        isAuxIme = FALSE;
+    }
+    AutoPtr<ICharSequence> cs;
+    CString::New(mId, (ICharSequence**)&cs);
+    Boolean contains = FALSE;
+    if (additionalSubtypesMap != NULL && (additionalSubtypesMap->ContainsKey(cs, &contains), contains)) {
+        AutoPtr<IInterface> obj;
+        additionalSubtypesMap->Get(cs, (IInterface**)&obj);
+        IList* additionalSubtypes = IList::Probe(obj);
+        Int32 N = 0;
+        additionalSubtypes->GetSize(&N);
+        for (Int32 i = 0; i < N; ++i) {
+            AutoPtr<IInterface> node;
+            additionalSubtypes->Get(i, (IInterface**)&node);
+            AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(node);
+            if (!(subtypes->Contains(subtype, &contains), contains)) {
+                subtypes->Add(subtype);
+            }
+            else {
+                String loc, mod;
+                subtype->GetLocale(&loc);
+                subtype->GetMode(&mod);
+                Logger::W(TAG, "Duplicated subtype definition found: %s, %s", (const char*)loc, (const char*)mod);
+            }
+        }
+    }
+
+    CInputMethodSubtypeArray::New(IList::Probe(subtypes), (IInputMethodSubtypeArray**)&mSubtypes);
+    mSettingsActivityName = settingsActivityComponent;
+    mIsDefaultResId = isDefaultResId;
+    mIsAuxIme = isAuxIme;
+    mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
+    return NOERROR;
 }
 
 ECode CInputMethodInfo::constructor(
@@ -356,177 +516,6 @@ ECode CInputMethodInfo::Equals(
     VALIDATE_NOT_NULL(other);
 
     return Equals(IInputMethodInfo::Probe(other), result);
-}
-
-ECode CInputMethodInfo::Init(
-    /* [in] */ IContext* context,
-    /* [in] */ IResolveInfo* service,
-    /* [in] */ IMap* additionalSubtypesMap)
-{
-    mService = (CResolveInfo*)service;
-    CServiceInfo* si = (CServiceInfo*)mService->mServiceInfo.Get();
-    AutoPtr<CComponentName> componentName;
-    CComponentName::NewByFriend(si->mPackageName, si->mName, (CComponentName**)&componentName);
-    componentName->FlattenToShortString(&mId);
-    Boolean isAuxIme = TRUE;
-    Boolean supportsSwitchingToNextInputMethod = FALSE; // false as default
-    mForceDefault = FALSE;
-
-    AutoPtr<IPackageManager> pm;
-    context->GetPackageManager((IPackageManager**)&pm);
-    String settingsActivityComponent;
-    Int32 isDefaultResId = 0;
-
-    AutoPtr<IXmlResourceParser> xmlParser;
-    AutoPtr<IArrayList> subtypes;
-    CArrayList::New((IArrayList**)&subtypes);
-    //try {
-    si->LoadXmlMetaData(pm, IInputMethod::SERVICE_META_DATA, (IXmlResourceParser**)&xmlParser);
-    if (xmlParser == NULL) {
-        Logger::E(TAG, "No %s meta-data", (const char*)IInputMethod::SERVICE_META_DATA);
-        return E_XML_PULL_PARSER_EXCEPTION;
-    }
-
-    AutoPtr<IResources> res;
-    pm->GetResourcesForApplication(si->mApplicationInfo, (IResources**)&res);
-
-    IXmlPullParser* parser = IXmlPullParser::Probe(xmlParser);
-    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
-
-    Int32 type = 0;
-    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
-            && type != IXmlPullParser::START_TAG) {
-    }
-    String nodeName;
-    parser->GetName(&nodeName);
-    if (!nodeName.Equals("input-method")) {
-        Logger::E(TAG, "Meta-data does not start with input-method tag");
-        return E_XML_PULL_PARSER_EXCEPTION;
-    }
-
-    Int32 size = ArraySize(R::styleable::InputMethod);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::InputMethod, size);
-
-    AutoPtr<ITypedArray> sa;
-    res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
-    sa->GetString(R::styleable::InputMethod_settingsActivity, &settingsActivityComponent);
-    sa->GetResourceId(R::styleable::InputMethod_isDefault, 0, &isDefaultResId);
-    sa->GetBoolean(R::styleable::InputMethod_supportsSwitchingToNextInputMethod,
-                    FALSE, &supportsSwitchingToNextInputMethod);
-    sa->Recycle();
-
-    Int32 depth = 0, tmpDepth = 0;
-    parser->GetDepth(&depth);
-    // Parse all subtypes
-    while (((parser->Next(&type), type) != IXmlPullParser::END_TAG || (parser->GetDepth(&tmpDepth), tmpDepth) > depth)
-            && type != IXmlPullParser::END_DOCUMENT) {
-        if (type == IXmlPullParser::START_TAG) {
-            parser->GetName(&nodeName);
-            if (!nodeName.Equals("subtype")) {
-                xmlParser->Close();
-                Logger::E(TAG, "Meta-data in input-method does not start with subtype tag");
-                return E_XML_PULL_PARSER_EXCEPTION;
-            }
-            size = ArraySize(R::styleable::InputMethod_Subtype);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::InputMethod_Subtype, size);
-
-            AutoPtr<ITypedArray> a;
-            res->ObtainAttributes(attrs, layout, (ITypedArray**)&a);
-
-            AutoPtr<IInputMethodSubtypeBuilder> builder = new CInputMethodSubtype::InputMethodSubtypeBuilder();
-            Int32 label = 0;
-            a->GetResourceId(R::styleable::InputMethod_Subtype_label, 0, &label);
-            builder->SetSubtypeNameResId(label);
-
-            Int32 icon = 0;
-            a->GetResourceId(R::styleable::InputMethod_Subtype_icon, 0, &icon);
-            builder->SetSubtypeIconResId(icon);
-
-            String imeSubtypeLocale;
-            a->GetString(R::styleable::InputMethod_Subtype_imeSubtypeLocale, &imeSubtypeLocale);
-            builder->SetSubtypeLocale(imeSubtypeLocale);
-
-            String imeSubtypeMode;
-            a->GetString(R::styleable::InputMethod_Subtype_imeSubtypeMode, &imeSubtypeMode);
-            builder->SetSubtypeMode(imeSubtypeMode);
-
-            String imeSubtypeExtraValue;
-            a->GetString(R::styleable::InputMethod_Subtype_imeSubtypeExtraValue, &imeSubtypeExtraValue);
-            builder->SetSubtypeExtraValue(imeSubtypeExtraValue);
-
-            Boolean isAuxiliary = FALSE;
-            a->GetBoolean(R::styleable::InputMethod_Subtype_isAuxiliary, FALSE, &isAuxiliary);
-            builder->SetIsAuxiliary(isAuxiliary);
-
-            Boolean overridesImplicitlyEnabledSubtype = FALSE;
-            a->GetBoolean(R::styleable::InputMethod_Subtype_overridesImplicitlyEnabledSubtype, FALSE, &overridesImplicitlyEnabledSubtype);
-            builder->SetOverridesImplicitlyEnabledSubtype(overridesImplicitlyEnabledSubtype);
-
-            Int32 subtypeId = 0;
-            a->GetInt32(R::styleable::InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */, &subtypeId);
-            builder->SetSubtypeId(subtypeId);
-
-            Boolean isAsciiCapable = FALSE;
-            a->GetBoolean(R::styleable::InputMethod_Subtype_isAsciiCapable, FALSE, &isAsciiCapable);
-            builder->SetIsAsciiCapable(isAsciiCapable);
-
-            AutoPtr<IInputMethodSubtype> subtype;
-            builder->Build((IInputMethodSubtype**)&subtype);
-
-            Boolean auxiliary = FALSE;
-            if (!(subtype->IsAuxiliary(&auxiliary), auxiliary)) {
-                isAuxIme = FALSE;
-            }
-            subtypes->Add(subtype);
-        }
-    }
-    // } catch (NameNotFoundException e) {
-    //     throw new XmlPullParserException(
-    //             "Unable to create context for: " + si.packageName);
-    // } finally {
-    //     if (parser != null) parser.close();
-    // }
-    if (xmlParser != NULL) {
-        xmlParser->Close();
-    }
-
-    Boolean bIsEmp = FALSE;
-    if ((subtypes->IsEmpty(&bIsEmp), bIsEmp)) {
-        isAuxIme = FALSE;
-    }
-    AutoPtr<ICharSequence> cs;
-    CString::New(mId, (ICharSequence**)&cs);
-    Boolean contains = FALSE;
-    if (additionalSubtypesMap != NULL && (additionalSubtypesMap->ContainsKey(cs, &contains), contains)) {
-        AutoPtr<IInterface> obj;
-        additionalSubtypesMap->Get(cs, (IInterface**)&obj);
-        IList* additionalSubtypes = IList::Probe(obj);
-        Int32 N = 0;
-        additionalSubtypes->GetSize(&N);
-        for (Int32 i = 0; i < N; ++i) {
-            AutoPtr<IInterface> node;
-            additionalSubtypes->Get(i, (IInterface**)&node);
-            AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(node);
-            if (!(subtypes->Contains(subtype, &contains), contains)) {
-                subtypes->Add(subtype);
-            }
-            else {
-                String loc, mod;
-                subtype->GetLocale(&loc);
-                subtype->GetMode(&mod);
-                Slogger::W(TAG, "Duplicated subtype definition found: %s, %s", (const char*)loc, (const char*)mod);
-            }
-        }
-    }
-
-    CInputMethodSubtypeArray::New(IList::Probe(subtypes), (IInputMethodSubtypeArray**)&mSubtypes);
-    mSettingsActivityName = settingsActivityComponent;
-    mIsDefaultResId = isDefaultResId;
-    mIsAuxIme = isAuxIme;
-    mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
-    return NOERROR;
 }
 
 } // namespace InputMethod
