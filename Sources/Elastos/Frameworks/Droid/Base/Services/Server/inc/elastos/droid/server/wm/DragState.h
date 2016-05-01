@@ -1,10 +1,9 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_DRAGSTATE_H__
 #define __ELASTOS_DROID_SERVER_WM_DRAGSTATE_H__
 
-// #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "Elastos.CoreLibrary.h"
 #include "elastos/droid/server/input/InputApplicationHandle.h"
 #include "elastos/droid/server/input/InputWindowHandle.h"
-#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::ISurfaceControl;
@@ -16,7 +15,9 @@ using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Graphics::IRegion;
 using Elastos::Droid::Server::Input::InputApplicationHandle;
 using Elastos::Droid::Server::Input::InputWindowHandle;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IArrayList;
+
+typedef IArrayList WindowList;
 
 namespace Elastos {
 namespace Droid {
@@ -126,7 +127,7 @@ public:
     AutoPtr<InputApplicationHandle> mDragApplicationHandle;
     AutoPtr<InputWindowHandle> mDragWindowHandle;
     AutoPtr<WindowState> mTargetWindow;
-    List< AutoPtr<WindowState> > mNotifiedWindows;
+    AutoPtr<WindowList> mNotifiedWindows;
     Boolean mDragInProgress;
     AutoPtr<IDisplay> mDisplay;
 

@@ -64,9 +64,12 @@ ECode AppWindowToken::Init()
 
 void AppWindowToken::SendAppVisibilityToClients()
 {
-    List<AutoPtr<WindowState> >::Iterator it;
-    for (it = mAllAppWindows.Begin(); it != mAllAppWindows.End(); ++it) {
-        AutoPtr<WindowState> win = *it;
+    Int32 N;
+    mAllAppWindows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mAllAppWindows->Get(i, (IInterface**)&obj);
+        WindowState* win = To_WindowState(obj);
         if (win == mStartingWindow && mClientHidden) {
             // Don't hide the starting window.
             continue;
@@ -96,9 +99,12 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
     if (CWindowManagerService::DEBUG_VISIBILITY) {
         Slogger::V(CWindowManagerService::TAG, "Update reported visibility: %s", TO_CSTR(this));
     }
-    List<AutoPtr<WindowState> >::Iterator it;
-    for (it = mAllAppWindows.Begin(); it != mAllAppWindows.End(); ++it) {
-        AutoPtr<WindowState> win = *it;
+    Int32 N;
+    mAllAppWindows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mAllAppWindows->Get(i, (IInterface**)&obj);
+        WindowState* win = To_WindowState(obj);
         Int32 winType;
         win->mAttrs->GetType(&winType);
         if (win == mStartingWindow || win->mAppFreezing
@@ -173,25 +179,31 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
 
 AutoPtr<WindowState> AppWindowToken::FindMainWindow()
 {
-    List<AutoPtr<WindowState> >::ReverseIterator rit = mWindows.RBegin();
-    while (rit != mWindows.REnd()) {
-        AutoPtr<WindowState> win = *rit;
+    Int32 j;
+    mWindows->GetSize(&j);
+    while (j > 0) {
+        j--;
+        AutoPtr<IInterface> obj;
+        mWindows->Get(j, (IInterface**)&obj);
+        WindowState* win = To_WindowState(obj);
         Int32 winType;
         win->mAttrs->GetType(&winType);
         if (winType == IWindowManagerLayoutParams::TYPE_BASE_APPLICATION
             || winType == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING) {
             return win;
         }
-        ++rit;
     }
     return NULL;
 }
 
 Boolean AppWindowToken::IsVisible()
 {
-    WindowList::Iterator it = mAllAppWindows.Begin();
-    for (; it != mAllAppWindows.End(); ++it) {
-        AutoPtr<WindowState> win = *it;
+    Int32 N;
+    mAllAppWindows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mAllAppWindows->Get(i, (IInterface**)&obj);
+        WindowState* win = To_WindowState(obj);
         if (!win->mAppFreezing
                 && (win->mViewVisibility == IView::VISIBLE ||
                     (win->mWinAnimator->IsAnimating() &&
@@ -205,10 +217,13 @@ Boolean AppWindowToken::IsVisible()
 
 void AppWindowToken::RemoveAllWindows()
 {
-    WindowList::ReverseIterator rit = mAllAppWindows.RBegin();
-    for (; rit != mAllAppWindows.REnd(); ++rit) {
+    Int32 N;
+    mAllAppWindows->GetSize(&N);
+    for (Int32 winNdx = N - 1; winNdx >= 0; --winNdx) {
         // try {
-        AutoPtr<WindowState> win = *rit;
+        AutoPtr<IInterface> obj;
+        mAllAppWindows->Get(winNdx, (IInterface**)&obj);
+        WindowState* win = To_WindowState(obj);
         if (CWindowManagerService::DEBUG_WINDOW_MOVEMENT) {
             Slogger::W(CWindowManagerService::TAG, "removeAllWindows: removing win=%s", TO_CSTR(win));
         }

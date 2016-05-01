@@ -3,11 +3,14 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos.Droid.Server.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+
+typedef IArrayList WindowList;
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +19,6 @@ namespace Wm {
 
 class AppWindowToken;
 class CWindowManagerService;
-class WindowState;
 
 class WindowToken
     : public Object
@@ -39,7 +41,9 @@ public:
         , mWaitingToHide(FALSE)
         , mSendingToBottom(FALSE)
         , mSendingToTop(FALSE)
-    {}
+    {
+        CArrayList::New((IArrayList**)&mWindows);
+    }
 
     CARAPI ToString(
         /* [out] */ String* str)
@@ -50,7 +54,7 @@ public:
     }
 public:
     // The window manager!
-    AutoPtr<CWindowManagerService> mService;
+    CWindowManagerService* mService;
 
     // The actual token.
     AutoPtr<IBinder> mToken;
@@ -69,7 +73,7 @@ public:
     AppWindowToken* mAppWindowToken;
 
     // All of the windows associated with this token.
-    List< AutoPtr<WindowState> > mWindows;
+    AutoPtr<WindowList> mWindows;
 
     // Is key dispatching paused for this token?
     Boolean mPaused;
@@ -95,7 +99,6 @@ public:
     // Set to true when this token is in a pending transaction where its
     // windows will be put to the top of the list.
     Boolean mSendingToTop;
-
 };
 
 } // Wm

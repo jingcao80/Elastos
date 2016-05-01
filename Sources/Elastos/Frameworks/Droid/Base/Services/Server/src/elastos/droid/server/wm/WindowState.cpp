@@ -25,6 +25,7 @@ using Elastos::Droid::View::EIID_IWindowState;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -189,6 +190,8 @@ WindowState::WindowState(
     , mShowToOwnerOnly(FALSE)
 {
     CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mAttrs);
+    CArrayList::New((IArrayList**)&mChildWindows);
+
     Int32 result;
     mAttrs->CopyFrom(attrs, &result);
 
@@ -264,26 +267,30 @@ WindowState::WindowState(
             mAttachedWindow = attachedWindow;
             if (CWindowManagerService::DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %p to %p", this, mAttachedWindow.Get());
 
-            if (mAttachedWindow->mChildWindows.Begin() == mAttachedWindow->mChildWindows.End()) {
-                mAttachedWindow->mChildWindows.PushBack(this);
+            AutoPtr<WindowList> childWindows = mAttachedWindow->mChildWindows;
+            Int32 numChildWindows;
+            childWindows->GetSize(&numChildWindows);
+            if (numChildWindows == 0) {
+                childWindows->Add((IWindowState*)this);
             }
             else {
-                WindowList::Iterator it = mAttachedWindow->mChildWindows.Begin();
                 Boolean added = FALSE;
-                for (; it != mAttachedWindow->mChildWindows.End(); ++it) {
-                    Int32 childSubLayer = (*it)->mSubLayer;
+                for (Int32 i = 0; i < numChildWindows; i++) {
+                    AutoPtr<IInterface> obj;
+                    childWindows->Get(i, (IInterface**)&obj);
+                    Int32 childSubLayer = To_WindowState(obj)->mSubLayer;
                     if (mSubLayer < childSubLayer
                             || (mSubLayer == childSubLayer && childSubLayer < 0)) {
                         // We insert the child window into the list ordered by the sub-layer. For
                         // same sub-layers, the negative one should go below others; the positive
                         // one should go above others.
-                        mAttachedWindow->mChildWindows.Insert(it, this);
+                        childWindows->Add(i, (IWindowState*)this);
                         added = TRUE;
                         break;
                     }
                 }
                 if (!added) {
-                    mAttachedWindow->mChildWindows.PushBack(this);
+                    childWindows->Add((IWindowState*)this);
                 }
             }
 
@@ -691,9 +698,9 @@ ECode WindowState::GetNeedsMenuLw(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    Int32 index = -1;
     AutoPtr<WindowState> ws = this;
     AutoPtr<WindowList> windows = GetWindowList();
-    WindowList::ReverseIterator indexRIt = windows->REnd();
     while (TRUE) {
         Int32 flags;
         ws->mAttrs->GetPrivateFlags(&flags);
@@ -704,28 +711,24 @@ ECode WindowState::GetNeedsMenuLw(
         }
         // If we reached the bottom of the range of windows we are considering,
         // assume no menu is needed.
-        if (ws.Get() == bottom) {
+        if ((IWindowState*)ws.Get() == bottom) {
             *result = FALSE;
             return NOERROR;
         }
         // The current window hasn't specified whether menu key is needed;
         // look behind it.
         // First, we may need to determine the starting position.
-        WindowList::ReverseIterator rit;
-        if (indexRIt == windows->REnd()) {
-            for (rit = windows->RBegin(); rit != windows->REnd(); ++rit) {
-                if (*rit == ws) {
-                    indexRIt = rit;
-                    break;
-                }
-            }
+        if (index < 0) {
+            windows->IndexOf((IWindowState*)ws.Get(), &index);
         }
-        indexRIt++;
-        if (indexRIt == windows->REnd()) {
+        index--;
+        if (index < 0) {
             *result = FALSE;
             return NOERROR;
         }
-        ws = *indexRIt;
+        AutoPtr<IInterface> obj;
+        windows->Get(index, (IInterface**)&obj);
+        ws = To_WindowState(obj);
     }
 }
 
@@ -1086,7 +1089,7 @@ void WindowState::RemoveLocked()
 
     if (mAttachedWindow != NULL) {
         // if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
-        mAttachedWindow->mChildWindows.Remove(this);
+        mAttachedWindow->mChildWindows->Remove((IWindowState*)this);
     }
     mWinAnimator->DestroyDeferredSurfaceLocked();
     mWinAnimator->DestroySurfaceLocked();
@@ -1395,7 +1398,7 @@ void WindowState::GetTouchableRegion(
     }
 }
 
-AutoPtr<List<AutoPtr<WindowState> > > WindowState::GetWindowList()
+AutoPtr<WindowList> WindowState::GetWindowList()
 {
     AutoPtr<DisplayContent> displayContent = GetDisplayContent();
     return displayContent == NULL ? NULL : displayContent->GetWindowList();

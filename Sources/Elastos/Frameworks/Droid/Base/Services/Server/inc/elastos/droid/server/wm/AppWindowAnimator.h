@@ -68,7 +68,7 @@ public:
 
     CARAPI_(Boolean) ShowAllWindowsLocked();
 
-    AutoPtr<AppWindowToken> GetAppToken();
+    CARAPI_(AutoPtr<AppWindowToken>) GetAppToken();
 
 private:
     CARAPI_(void) StepThumbnailAnimation(

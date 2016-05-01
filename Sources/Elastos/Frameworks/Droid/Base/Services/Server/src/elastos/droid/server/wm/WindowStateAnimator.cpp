@@ -373,9 +373,12 @@ void WindowStateAnimator::FinishExit()
     //         + " remove=" + mWin.mRemoveOnExit
     //         + " windowAnimating=" + isWindowAnimating());
 
-    List<AutoPtr<WindowState> >::Iterator it = mWin->mChildWindows.Begin();
-    for (; it != mWin->mChildWindows.End(); ++it) {
-        (*it)->mWinAnimator->FinishExit();
+    Int32 N;
+    mWin->mChildWindows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mWin->mChildWindows->Get(i, (IInterface**)&obj);
+        To_WindowState(obj)->mWinAnimator->FinishExit();
     }
 
     if (!mWin->mExiting) {
@@ -390,7 +393,7 @@ void WindowStateAnimator::FinishExit()
     //         TAG, "Exit animation finished in " + this
     //         + ": remove=" + mWin.mRemoveOnExit);
     if (mSurfaceControl != NULL) {
-        mService->mDestroySurface.PushBack(mWin);
+        mService->mDestroySurface->Add((IWindowState*)mWin);
         mWin->mDestroying = TRUE;
         // if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(
         //     mWin, "HIDE (finishExit)", null);
@@ -398,7 +401,7 @@ void WindowStateAnimator::FinishExit()
     }
     mWin->mExiting = FALSE;
     if (mWin->mRemoveOnExit) {
-        mService->mPendingRemove.PushBack(mWin);
+        mService->mPendingRemove->Add((IWindowState*)mWin);
         mWin->mRemoveOnExit = FALSE;
     }
     mAnimator->HideWallpapersLocked(mWin);
@@ -696,11 +699,14 @@ void WindowStateAnimator::DestroySurfaceLocked()
     }
 
     if (mSurfaceControl != NULL) {
-        List<AutoPtr<WindowState> >::ReverseIterator rit = mWin->mChildWindows.RBegin();
-        while (rit != mWin->mChildWindows.REnd()) {
-            AutoPtr<WindowState> c = *rit;
+        Int32 i;
+        mWin->mChildWindows->GetSize(&i);
+        while (i > 0) {
+            i--;
+            AutoPtr<IInterface> obj;
+            mWin->mChildWindows->Get(i, (IInterface**)&obj);
+            WindowState* c = To_WindowState(obj);
             c->mAttachedHidden = TRUE;
-            ++rit;
         }
 
         // try {
@@ -1731,9 +1737,13 @@ Boolean WindowStateAnimator::PerformShowLocked()
         mDrawState = HAS_DRAWN;
         mService->ScheduleAnimationLocked();
 
-        List<AutoPtr<WindowState> >::ReverseIterator rit = mWin->mChildWindows.RBegin();
-        for (; rit != mWin->mChildWindows.REnd(); ++rit) {
-            AutoPtr<WindowState> c = *rit;
+        Int32 i;
+        mWin->mChildWindows->GetSize(&i);
+        while (i > 0) {
+            i--;
+            AutoPtr<IInterface> obj;
+            mWin->mChildWindows->Get(i, (IInterface**)&obj);
+            WindowState* c = To_WindowState(obj);
             if (c->mAttachedHidden) {
                 c->mAttachedHidden = FALSE;
                 if (c->mWinAnimator->mSurfaceControl != NULL) {

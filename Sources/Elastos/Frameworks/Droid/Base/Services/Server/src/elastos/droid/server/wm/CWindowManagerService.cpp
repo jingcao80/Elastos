@@ -732,7 +732,7 @@ const Boolean CWindowManagerService::DEBUG_LAYOUT = FALSE;
 const Boolean CWindowManagerService::DEBUG_RESIZE = FALSE;
 const Boolean CWindowManagerService::DEBUG_LAYERS = FALSE;
 const Boolean CWindowManagerService::DEBUG_INPUT = FALSE;
-const Boolean CWindowManagerService::DEBUG_INPUT_METHOD = FALSE;
+const Boolean CWindowManagerService::DEBUG_INPUT_METHOD = TRUE;
 const Boolean CWindowManagerService::DEBUG_VISIBILITY = FALSE;
 const Boolean CWindowManagerService::DEBUG_WINDOW_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_TOKEN_MOVEMENT = FALSE;
@@ -883,6 +883,12 @@ CWindowManagerService::CWindowManagerService()
     , mInLayout(FALSE)
     , mForceDisableHardwareKeyboard(FALSE)
 {
+    CArrayList::New((IArrayList**)&mResizingWindows);
+    CArrayList::New((IArrayList**)&mPendingRemove);
+    CArrayList::New((IArrayList**)&mDestroySurface);
+    CArrayList::New((IArrayList**)&mLosingFocus);
+    CArrayList::New((IArrayList**)&mWaitingForDrawn);
+    CArrayList::New((IArrayList**)&mRelayoutWhileAnimating);
     mWindowMapLock = new Object();
 }
 
@@ -1708,8 +1714,8 @@ List< AutoPtr<WindowState> >::Iterator CWindowManagerService::TmpRemoveWindowLoc
     /* [in] */ List< AutoPtr<WindowState> >::Iterator interestingPosIt,
     /* [in] */ WindowState* win)
 {
-    AutoPtr<WindowState> aWin = win;
     AutoPtr<WindowList> windows = win->GetWindowList();
+    AutoPtr<WindowState> aWin = win;
     List<AutoPtr<WindowState> >::Iterator wposIt = Find(*windows, aWin);
     if (wposIt != windows->End()) {
         if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Temp removing : %p", win);
@@ -1872,17 +1878,17 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
                 LogWindowList(*windows, String("  "));
             }
             imPosIt = TmpRemoveWindowLocked(imPosIt, imWin);
-            // if (DEBUG_INPUT_METHOD) {
-            //     Slogger::V(TAG, "List after removing with new pos " + imPos + ":");
-            //     logWindowList(windows, "  ");
-            // }
+            if (DEBUG_INPUT_METHOD) {
+                Slogger::V(TAG, "List after removing with new pos");
+                LogWindowList(*windows, String("  "));
+            }
             imWin->mTargetAppToken = mInputMethodTarget->mAppToken;
             ReAddWindowLocked(imPosIt, imWin);
-            // if (DEBUG_INPUT_METHOD) {
-            //     Slogger::V(TAG, "List after moving IM to " + imPos + ":");
-            //     logWindowList(windows, "  ");
-            // }
-            if (mInputMethodDialogs.Begin() != mInputMethodDialogs.End()) {
+            if (DEBUG_INPUT_METHOD) {
+                Slogger::V(TAG, "List after moving IM to " + imPos + ":");
+                LogWindowList(*windows, String("  "));
+            }
+            if (!mInputMethodDialogs.IsEmpty()) {
                 List< AutoPtr<WindowState> >::Iterator temp = imPosIt;
                 MoveInputMethodDialogsLocked(++temp);
             }
@@ -5882,52 +5888,61 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::FindAppWindowInsert
     return windows->Begin();
 }
 
-List<AutoPtr<WindowState> >::Iterator CWindowManagerService::ReAddWindowLocked(
-    /* [in] */ List< AutoPtr<WindowState> >::Iterator indexIt,
+Int32 CWindowManagerService::ReAddWindowLocked(
+    /* [in] */ Int32 index,
     /* [in] */ WindowState* win)
 {
     AutoPtr<WindowList> windows = win->GetWindowList();
+    Int32 NCW;
+    win->mChildWindows->GetSize(&NCW);
     Boolean added = FALSE;
-    WindowList::Iterator cwIt = win->mChildWindows.Begin();
-    for (; cwIt != win->mChildWindows.End(); cwIt++) {
-        AutoPtr<WindowState> cwin = *cwIt;
+    for (Int32 j = 0; j < NCW; j++) {
+        AutoPtr<IInterface> obj;
+        win->mChildWindows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> cwin = To_WindowState(obj);
         if (!added && cwin->mSubLayer >= 0) {
             // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Re-adding child window at "
             //         + index + ": " + cwin);
             win->mRebuilding = FALSE;
-            windows->Insert(indexIt, win);
+            windows->Add(index, (IWindowState*)win);
+            index++;
             added = TRUE;
         }
         // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Re-adding window at "
         //         + index + ": " + cwin);
         cwin->mRebuilding = FALSE;
-        windows->Insert(indexIt, cwin);
+        windows->Add(index, (IWindowState*)cwin);
+        index++;
     }
     if (!added) {
         // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Re-adding window at "
         //         + index + ": " + win);
         win->mRebuilding = FALSE;
-        windows->Insert(indexIt, win);
+        windows->Add(index, (IWindowState*)win);
+        index++;
     }
     mWindowsChanged = TRUE;
-    return indexIt;
+    return index;
 }
 
-List<AutoPtr<WindowState> >::Iterator CWindowManagerService::ReAddAppWindowsLocked(
+Int32 CWindowManagerService::ReAddAppWindowsLocked(
     /* [in] */ DisplayContent* displayContent,
-    /* [in] */ List< AutoPtr<WindowState> >::Iterator indexIt,
+    /* [in] */ Int32 index,
     /* [in] */ WindowToken* token)
 {
-    WindowList::Iterator it = token->mWindows.Begin();
-    for (; it != token->mWindows.End(); ++it) {
-        AutoPtr<WindowState> win = *it;
+    Int32 NW;
+    token->mWindows->GetSize(&NW);
+    for (Int32 i = 0; i < NW; i++) {
+        AutoPtr<IInterface> obj;
+        token->mWindows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
         AutoPtr<DisplayContent> winDisplayContent = win->GetDisplayContent();
         if (win->mDisplayContent.Get() == displayContent || winDisplayContent == NULL) {
             win->mDisplayContent = displayContent;
-            indexIt = ReAddWindowLocked(indexIt, *it);
+            index = ReAddWindowLocked(index, win);
         }
     }
-    return indexIt;
+    return index;
 }
 
 void CWindowManagerService::TmpRemoveTaskWindowsLocked(
@@ -10370,8 +10385,10 @@ void CWindowManagerService::RebuildAppWindowListLocked(
     /* [in] */ DisplayContent* displayContent)
 {
     AutoPtr<WindowList> windows = displayContent->GetWindowList();
-    Int32 NW = windows->GetSize();
-    WindowList::Iterator lastBelow = windows->End();
+    Int32 NW;
+    windows->GetSize(&NW);
+    Int32 i;
+    Int32 lastBelow = -1;
     Int32 numRemoved = 0;
 
     if (mRebuildTmp->GetLength() < NW) {
@@ -10379,37 +10396,38 @@ void CWindowManagerService::RebuildAppWindowListLocked(
     }
 
     // First remove all existing app windows.
-    Int32 indexOfIt = 0;
-    Int32 indexofLastBelow;
-    WindowList::Iterator it = windows->Begin();
-    while (it != windows->End()) {
-        AutoPtr<WindowState> w = *it;
+    i = 0;
+    while (i < NW) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> w = To_WindowState(obj);
         if (w->mAppToken != NULL) {
-            w->mRebuilding = TRUE;
-            mRebuildTmp->Set(numRemoved, w);
-            it = windows->Erase(it);
+            AutoPtr<IInterface> obj1;
+            windows->Remove(i, (IInterface**)&obj1);
+            WindowState* win = To_WindowState(obj1);
+            win->mRebuilding = TRUE;
+            mRebuildTmp->Set(numRemoved, win);
             mWindowsChanged = TRUE;
             if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Rebuild removing window: %s", TO_CSTR(w));
+            NW--;
             numRemoved++;
             continue;
         }
-        else if (lastBelow == --WindowList::Iterator(it)) {
+        else if (lastBelow == i - 1) {
             Int32 type;
             w->mAttrs->GetType(&type);
             if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER
                     || type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND) {
-                lastBelow = it;
-                indexofLastBelow = indexOfIt;
+                lastBelow = i;
             }
         }
-        ++it;
-        ++indexOfIt;
+        i++;
     }
 
     // The wallpaper window(s) typically live at the bottom of the stack,
     // so skip them before adding app tokens.
     lastBelow++;
-    it = lastBelow;
+    i = lastBelow;
 
     // First add all of the exiting app tokens...  these are no longer
     // in the main app list, but still have windows shown.  We put them
@@ -10421,7 +10439,7 @@ void CWindowManagerService::RebuildAppWindowListLocked(
         AppTokenList& exitingAppTokens = (*stackIt)->mExitingAppTokens;
         AppTokenList::Iterator tokenIt = exitingAppTokens.Begin();
         for (; tokenIt != exitingAppTokens.End(); ++tokenIt) {
-            it = ReAddAppWindowsLocked(displayContent, it, *tokenIt);
+            i = ReAddAppWindowsLocked(displayContent, i, *tokenIt);
         }
     }
 
@@ -10437,16 +10455,16 @@ void CWindowManagerService::RebuildAppWindowListLocked(
                 if (wtoken->mDeferRemoval) {
                     continue;
                 }
-                it = ReAddAppWindowsLocked(displayContent, it, wtoken);
+                i = ReAddAppWindowsLocked(displayContent, i, wtoken);
             }
         }
     }
 
-    indexOfIt -= indexofLastBelow;
-    if (indexOfIt != numRemoved) {
+    i -= lastBelow;
+    if (i != numRemoved) {
         Slogger::W(TAG, "On display=%d Rebuild removed %d windows but added %d",
-            displayContent->GetDisplayId(),numRemoved, indexOfIt);
-        for (Int32 i = 0; i < numRemoved; i++) {
+            displayContent->GetDisplayId(), numRemoved, i);
+        for (i = 0; i < numRemoved; i++) {
             AutoPtr<WindowState> ws = (*mRebuildTmp)[i];
             if (ws->mRebuilding) {
                 AutoPtr<IStringWriter> sw;
@@ -10471,22 +10489,26 @@ void CWindowManagerService::RebuildAppWindowListLocked(
 void CWindowManagerService::AssignLayersLocked(
     /* [in] */ WindowList* windows)
 {
+    Int32 N;
+    windows->GetSize(&N);
     Int32 curBaseLayer = 0;
     Int32 curLayer = 0;
-    WindowList::Iterator it;
+    Int32 i;
 
     // if (DEBUG_LAYERS) Slogger::V(TAG, "Assigning layers based on windows=" + windows,
     //             new RuntimeException("here").fillInStackTrace());
 
     Boolean anyLayerChanged = FALSE;
 
-    for (it = windows->Begin(); it != windows->End(); it++) {
-        AutoPtr<WindowState> w = *it;
+    for (i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> w = To_WindowState(obj);
         AutoPtr<WindowStateAnimator> winAnimator = w->mWinAnimator;
         Boolean layerChanged = FALSE;
         Int32 oldLayer = w->mLayer;
         if (w->mBaseLayer == curBaseLayer || w->mIsImWindow
-                || (it != windows->Begin() && w->mIsWallpaper)) {
+                || (i > 0 && w->mIsWallpaper)) {
             curLayer += WINDOW_LAYER_MULTIPLIER;
             w->mLayer = curLayer;
         }
@@ -10540,9 +10562,13 @@ void CWindowManagerService::AssignLayersLocked(
     }
 
     //TODO (multidisplay): Magnification is supported only for the default display.
-    if (mAccessibilityController != NULL && anyLayerChanged
-            && (*(windows->RBegin()))->GetDisplayId() == IDisplay::DEFAULT_DISPLAY) {
-        mAccessibilityController->OnWindowLayersChangedLocked();
+    if (mAccessibilityController != NULL && anyLayerChanged) {
+        windows->GetSize(&N);
+        AutoPtr<IInterface> obj;
+        windows->Get(N - 1, (IInterface**)&obj);
+        if (To_WindowState(obj)->GetDisplayId() == IDisplay::DEFAULT_DISPLAY) {
+            mAccessibilityController->OnWindowLayersChangedLocked();
+        }
     }
 }
 
@@ -10591,10 +10617,13 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedLoop()
     if (mForceRemoves != NULL) {
         recoveringMemory = TRUE;
         // Wait a little it for things to settle down, and off we go.
-        List< AutoPtr<WindowState> >::Iterator it;
-        for (it = mForceRemoves->Begin(); it != mForceRemoves->End(); ++it) {
-            AutoPtr<WindowState> ws = *it;
-            Slogger::I(TAG, "Force removing: %p", ws.Get());
+        Int32 N;
+        mForceRemoves->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            mForceRemoves->Get(i, (IInterface**)&obj);
+            WindowState* ws = To_WindowState(obj);
+            Slogger::I(TAG, "Force removing: %p", ws);
             RemoveWindowInnerLocked(ws->mSession, ws);
         }
         mForceRemoves = NULL;
@@ -10664,6 +10693,10 @@ void CWindowManagerService::PerformLayoutLockedInner(
         (*fwIt)->Layout(dw, dh);
     }
 
+    Int32 N;
+    windows->GetSize(&N);
+    Int32 i;
+
     if (DEBUG_LAYOUT) {
         Slogger::V(TAG, "----------------------------------------------------");
         Slogger::V(TAG, "performLayout: initial=%d needed=%d, dw=%d dh=%d", initial, displayContent->mLayoutNeeded, dw, dh);
@@ -10689,10 +10722,11 @@ void CWindowManagerService::PerformLayoutLockedInner(
 
     // First perform layout of any root windows (not attached
     // to another window).
-    WindowList::ReverseIterator topAttached = windows->REnd();
-    WindowList::ReverseIterator wRIt;
-    for (wRIt = windows->RBegin(); wRIt != windows->REnd(); ++wRIt) {
-        AutoPtr<WindowState> win = *wRIt;
+    Int32 topAttached = -1;
+    for (i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
 
         // Don't do layout of a window if it is not visible, or
         // soon won't be visible, to avoid wasting time and funky
@@ -10743,7 +10777,7 @@ void CWindowManagerService::PerformLayoutLockedInner(
                 }
             }
             else {
-                if (topAttached == windows->REnd()) topAttached = wRIt;
+                if (topAttached < 0) topAttached = i;
             }
         }
         if (win->mViewVisibility == IView::VISIBLE
@@ -10764,8 +10798,11 @@ void CWindowManagerService::PerformLayoutLockedInner(
     // depend on the position of the window they are attached to.
     // XXX does not deal with windows that are attached to windows
     // that are themselves attached.
-    for (wRIt = topAttached; wRIt != windows->REnd(); ++wRIt) {
-        AutoPtr<WindowState> win = *wRIt;
+    for (i = topAttached; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
+
         if (win->mLayoutAttached) {
             if (DEBUG_LAYOUT) {
                 Slogger::V(TAG, "2ND PASS %s mHaveFrame=%d mViewVisibility=%d mRelayoutCalled=%d",
@@ -10852,9 +10889,10 @@ void CWindowManagerService::MakeWindowFreezingScreenIfNeededLocked(
 }
 
 Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
-    /* [in] */ List<AutoPtr<WindowState> >* windows)
+    /* [in] */ WindowList* windows)
 {
     Int32 changes = 0;
+    Int32 i = 0;
     Boolean goodToGo = true;
 
     if (DEBUG_APP_TRANSITIONS) {
@@ -11056,17 +11094,22 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
             wtoken->mWaitingToShow = FALSE;
 
             appAnimator->mAllAppWinAnimators.Clear();
-            List< AutoPtr<WindowState> >::Iterator appWIt = wtoken->mAllAppWindows.Begin();
-            for (; appWIt != wtoken->mAllAppWindows.End(); ++appWIt) {
-                appAnimator->mAllAppWinAnimators.PushBack((*appWIt)->mWinAnimator);
+            Int32 N;
+            wtoken->mAllAppWindows->GetSize(&N);
+            for (Int32 j = 0; j < N; j++) {
+                AutoPtr<IInterface> obj;
+                wtoken->mAllAppWindows->Get(i, (IInterface**)&obj);
+                appAnimator->mAllAppWinAnimators.PushBack(To_WindowState(obj)->mWinAnimator);
             }
             mAnimator->mAnimating |= appAnimator->ShowAllWindowsLocked();
 
             if (animLp != NULL) {
                 Int32 layer = -1;
-                List< AutoPtr<WindowState> >::Iterator tokenWIt = wtoken->mWindows.Begin();
-                for (; tokenWIt != wtoken->mWindows.End(); ++tokenWIt) {
-                    AutoPtr<WindowState> win = *tokenWIt;
+                wtoken->mWindows->GetSize(&N);
+                for (Int32 j = 0; j < N; j++) {
+                    AutoPtr<IInterface> obj;
+                    wtoken->mWindows->Get(i, (IInterface**)&obj);
+                    WindowState* win = To_WindowState(obj);
                     if (win->mWinAnimator->mAnimLayer > layer) {
                         layer = win->mWinAnimator->mAnimLayer;
                     }
@@ -11101,9 +11144,12 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
 
             if (animLp != NULL) {
                 Int32 layer = -1;
-                WindowList::Iterator winIt = wtoken->mWindows.Begin();
-                for (; winIt != wtoken->mWindows.End(); ++winIt) {
-                    AutoPtr<WindowState> win = *winIt;
+                Int32 N;
+                wtoken->mWindows->GetSize(&N);
+                for (Int32 j = 0; j < N; j++) {
+                    AutoPtr<IInterface> obj;
+                    wtoken->mWindows->Get(j, (IInterface**)&obj);
+                    AutoPtr<WindowState> win = To_WindowState(obj);
                     if (win->mWinAnimator->mAnimLayer > layer) {
                         layer = win->mWinAnimator->mAnimLayer;
                     }
@@ -11216,7 +11262,7 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
         GetDefaultDisplayContentLocked()->mLayoutNeeded = TRUE;
 
         // TODO(multidisplay): IMEs are only supported on the default display.
-        if (windows == GetDefaultWindowListLocked()
+        if (windows == GetDefaultWindowListLocked().Get()
                 && !MoveInputMethodWindowsIfNeededLocked(TRUE)) {
             AssignLayersLocked(windows);
         }
@@ -11311,16 +11357,13 @@ void CWindowManagerService::UpdateResizingWindows(
                     w->mAppToken->mDeferClearAllDrawn = FALSE;
                 }
             }
-            WindowList::Iterator it;
-            for (it = mResizingWindows.Begin(); it != mResizingWindows.End(); ++it) {
-                if ((*it).Get() == w) break;
-            }
-            if (it == mResizingWindows.End()) {
+            Boolean result;
+            if (mResizingWindows->Contains((IWindowState*)w, &result), !result) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                     Slogger::V(TAG, "Resizing window %p to (%.2f x %.2f)",
                         TO_CSTR(w), winAnimator->mSurfaceW, winAnimator->mSurfaceH);
                 }
-                mResizingWindows.PushBack(w);
+                mResizingWindows->Add((IWindowState*)w);
             }
         }
         else if (w->mOrientationChanging) {
@@ -11521,6 +11564,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
 
     Int64 currentTime = SystemClock::GetUptimeMillis();
 
+    Int32 i = 0;
     Boolean updateInputWindowsNeeded = FALSE;
 
     if (mFocusMayChange) {
@@ -11663,9 +11707,12 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
 
             if (isDefaultDisplay) {
                 mPolicy->BeginPostLayoutPolicyLw(dw, dh);
-                List< AutoPtr<WindowState> >::ReverseIterator winRIt = windows->RBegin();
-                for (; winRIt != windows->REnd(); ++winRIt) {
-                    AutoPtr<WindowState> w = *winRIt;
+                Int32 N;
+                windows->GetSize(&N);
+                for (i = N - 1; i >= 0; i--) {
+                    AutoPtr<IInterface> obj;
+                    windows->Get(i, (IInterface**)&obj);
+                    WindowState* w = To_WindowState(obj);
                     if (w->mHasSurface) {
                         mPolicy->ApplyPostLayoutPolicyLw(w, w->mAttrs);
                     }
@@ -11685,11 +11732,15 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         displayContent->ResetBlurring();
 
         // Only used if default window
-        Boolean someoneLosingFocus = !mLosingFocus.IsEmpty();
+        Boolean isEmpty;
+        Boolean someoneLosingFocus = (mLosingFocus->IsEmpty(&isEmpty), !isEmpty);
 
-        List< AutoPtr<WindowState> >::ReverseIterator winRIt = windows->RBegin();
-        for (; winRIt != windows->REnd(); ++winRIt) {
-            AutoPtr<WindowState> w = *winRIt;
+        Int32 N;
+        windows->GetSize(&N);
+        for (i = N - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            windows->Get(i, (IInterface**)&obj);
+            AutoPtr<WindowState> w = To_WindowState(obj);
             AutoPtr<TaskStack> stack = w->GetStack();
             Int32 type;
             if (stack == NULL) {
@@ -11946,17 +11997,18 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 defaultDisplay->mPendingLayoutChanges);
     }
 
-    List< AutoPtr<WindowState> >::ReverseIterator resizingWinRIt = mResizingWindows.RBegin();
-    while (resizingWinRIt != mResizingWindows.REnd()) {
-        AutoPtr<WindowState> win = *resizingWinRIt;
+    Int32 N;
+    mResizingWindows->GetSize(&N);
+    for (i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        mResizingWindows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
         if (win->mAppFreezing) {
             // Don't remove this window until rotation has completed.
-            ++resizingWinRIt;
             continue;
         }
         win->ReportResized();
-        resizingWinRIt = List< AutoPtr<WindowState> >::ReverseIterator(
-                mResizingWindows.Erase(--(resizingWinRIt.GetBase())));
+        mResizingWindows->Remove(i);
         // } catch (RemoteException e) {
         //     win.mOrientationChanging = false;
         // }
@@ -11976,10 +12028,13 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
 
     // Destroy the surface of any windows that are no longer visible.
     Boolean wallpaperDestroyed = FALSE;
-    if (!mDestroySurface.IsEmpty()) {
-        List< AutoPtr<WindowState> >::ReverseIterator destroyWinRit;
-        for (destroyWinRit = mDestroySurface.RBegin(); destroyWinRit != mDestroySurface.REnd(); ++destroyWinRit) {
-            AutoPtr<WindowState> win = *destroyWinRit;
+    mDestroySurface->GetSize(&i);
+    if (i > 0) {
+        do {
+            i--;
+            AutoPtr<IInterface> obj;
+            mDestroySurface->Get(i, (IInterface**)&obj);
+            AutoPtr<WindowState> win = To_WindowState(obj);
             win->mDestroying = FALSE;
             if (mInputMethodWindow == win) {
                 mInputMethodWindow = NULL;
@@ -11988,8 +12043,8 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 wallpaperDestroyed = TRUE;
             }
             win->mWinAnimator->DestroySurfaceLocked();
-        }
-        mDestroySurface.Clear();
+        } while (i > 0);
+        mDestroySurface->Clear();
     }
 
     // Time to remove any exiting tokens?
@@ -12043,16 +12098,16 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         }
     }
 
-    if (!mAnimator->mAnimating &&
-            mRelayoutWhileAnimating.Begin() != mRelayoutWhileAnimating.End()) {
-        WindowList::ReverseIterator rit = mRelayoutWhileAnimating.RBegin();
-        for (; rit != mRelayoutWhileAnimating.REnd(); ++rit) {
+    if (!mAnimator->mAnimating && (mRelayoutWhileAnimating->GetSize(&N), N > 0)) {
+        for (Int32 j = N - 1; j >= 0; j--) {
             // try {
-            (*rit)->mClient->DoneAnimating();
+            AutoPtr<IInterface> obj;
+            mRelayoutWhileAnimating->Get(j, (IInterface**)&obj);
+            To_WindowState(obj)->mClient->DoneAnimating();
             // } catch (RemoteException e) {
             // }
         }
-        mRelayoutWhileAnimating.Clear();
+        mRelayoutWhileAnimating->Clear();
     }
 
     if (wallpaperDestroyed) {
@@ -12115,17 +12170,17 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         CheckDrawnWindowsLocked();
     }
 
-    Int32 N = mPendingRemove.GetSize();
+    mPendingRemove->GetSize(&N);
     if (N > 0) {
         if (mPendingRemoveTmp->GetLength() < N) {
             mPendingRemoveTmp = ArrayOf<WindowState*>::Alloc(N + 10);
         }
-        List< AutoPtr<WindowState> >::Iterator winIt = mPendingRemove.Begin();
-        Int32 i = 0;
-        for (; winIt != mPendingRemove.End(); ++winIt, ++i) {
-            mPendingRemoveTmp->Set(i, *winIt);
+        for (Int32 j = 0; j < N; j++) {
+            AutoPtr<IInterface> obj;
+            mPendingRemove->Get(j, (IInterface**)&obj);
+            mPendingRemoveTmp->Set(j, To_WindowState(obj));
         }
-        mPendingRemove.Clear();
+        mPendingRemove->Clear();
         List< AutoPtr<DisplayContent> > displayList;
         List< AutoPtr<DisplayContent> >::Iterator dcit;
         for (i = 0; i < N; i++) {
@@ -12178,12 +12233,16 @@ Int32 CWindowManagerService::ToBrightnessOverride(
 
 void CWindowManagerService::CheckDrawnWindowsLocked()
 {
-    if (mWaitingForDrawn.Begin() == mWaitingForDrawn.End() || mWaitingForDrawnCallback == NULL) {
+    Boolean isEmpty;
+    if ((mWaitingForDrawn->IsEmpty(&isEmpty), isEmpty) || mWaitingForDrawnCallback == NULL) {
         return;
     }
-    WindowList::ReverseIterator rit = mWaitingForDrawn.RBegin();
-    while (rit != mWaitingForDrawn.REnd()) {
-        AutoPtr<WindowState> win = *rit;
+    Int32 N;
+    mWaitingForDrawn->GetSize(&N);
+    for (Int32 j = N - 1; j >= 0; j--) {
+        AutoPtr<IInterface> obj;
+        mWaitingForDrawn->Get(j, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
         if (DEBUG_SCREEN_ON) {
             Boolean isVisible;
             win->IsVisibleLw(&isVisible);
@@ -12194,18 +12253,17 @@ void CWindowManagerService::CheckDrawnWindowsLocked()
         if (win->mRemoved || !win->mHasSurface) {
             // Window has been removed; no draw will now happen, so stop waiting.
             if (DEBUG_SCREEN_ON) Slogger::W(TAG, "Aborted waiting for drawn: %p", win.Get());
-            rit = WindowList::ReverseIterator(mWaitingForDrawn.Erase(--(rit.GetBase())));
+            mWaitingForDrawn->Remove(obj);
             continue;
         }
         else if (win->HasDrawnLw(&hasDrawn), hasDrawn) {
             // Window is now drawn (and shown).
             if (DEBUG_SCREEN_ON) Slogger::D(TAG, "Window drawn win=%p", win.Get());
-            rit = WindowList::ReverseIterator(mWaitingForDrawn.Erase(--(rit.GetBase())));
+            mWaitingForDrawn->Remove(obj);
             continue;
         }
-        ++rit;
     }
-    if (mWaitingForDrawn.Begin() == mWaitingForDrawn.End()) {
+    if (mWaitingForDrawn->IsEmpty(&isEmpty), isEmpty) {
         if (DEBUG_SCREEN_ON) Slogger::D(TAG, "All windows drawn!");
         mH->RemoveMessages(H::WAITING_FOR_DRAWN_TIMEOUT);
         Boolean result;
@@ -12320,9 +12378,12 @@ Int32 CWindowManagerService::AdjustAnimationBackground(
     /* [in] */ WindowStateAnimator* winAnimator)
 {
     AutoPtr<WindowList> windows = winAnimator->mWin->GetWindowList();
-    WindowList::ReverseIterator rit = windows->RBegin();
-    for (; rit != windows->REnd(); ++rit) {
-        AutoPtr<WindowState> testWin = *rit;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; --i) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> testWin = To_WindowState(obj);
         if (testWin->mIsWallpaper && testWin->IsVisibleNow()) {
             return testWin->mWinAnimator->mAnimLayer;
         }
@@ -12343,7 +12404,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
     //         winAnimator.mSession.mPid, operation);
 
     if (mForceRemoves == NULL) {
-        mForceRemoves = new List< AutoPtr<WindowState> >();
+        CArrayList::New((IArrayList**)&mForceRemoves);
     }
 
     Int64 callingIdentity = Binder::ClearCallingIdentity();
@@ -12360,9 +12421,12 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
         mDisplayContents->ValueAt(displayNdx, (IInterface**)&value);
         AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);
         AutoPtr<WindowList> windows = displayContent->GetWindowList();
-        WindowList::Iterator winIt = windows->Begin();
-        for (; winIt != windows->End(); ++winIt) {
-            AutoPtr<WindowState> ws = *winIt;
+        Int32 numWindows;
+        windows->GetSize(&numWindows);
+        for (Int32 winNdx = 0; winNdx < numWindows; ++winNdx) {
+            AutoPtr<IInterface> obj;
+            windows->Get(winNdx, (IInterface**)&obj);
+            AutoPtr<WindowState> ws = To_WindowState(obj);
             AutoPtr<WindowStateAnimator> wsa = ws->mWinAnimator;
             if (wsa->mSurfaceControl != NULL) {
                 Boolean contains;
@@ -12375,7 +12439,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
                     wsa->mSurfaceShown = FALSE;
                     wsa->mSurfaceControl = NULL;
                     ws->mHasSurface = FALSE;
-                    mForceRemoves->PushBack(ws);
+                    mForceRemoves->Add(obj);
                     leakedSurface = TRUE;
                 }
                 else if (ws->mAppToken != NULL && ws->mAppToken->mClientHidden) {
@@ -12401,10 +12465,14 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
             mDisplayContents->ValueAt(displayNdx, (IInterface**)&value);
             AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);
             AutoPtr<WindowList> windows = displayContent->GetWindowList();
-            WindowList::Iterator winIt = windows->Begin();
-            for (; winIt != windows->End(); ++winIt) {
-                AutoPtr<WindowState> ws = *winIt;
-                if (Find(mForceRemoves->Begin(), mForceRemoves->End(), ws) != mForceRemoves->End()) {
+            Int32 numWindows;
+            windows->GetSize(&numWindows);
+            for (Int32 winNdx = 0; winNdx < numWindows; ++winNdx) {
+                AutoPtr<IInterface> obj;
+                windows->Get(winNdx, (IInterface**)&obj);
+                AutoPtr<WindowState> ws = To_WindowState(obj);
+                Boolean result;
+                if (mForceRemoves->Contains(obj, &result), result) {
                     continue;
                 }
                 AutoPtr<WindowStateAnimator> wsa = ws->mWinAnimator;
@@ -12439,6 +12507,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
             // if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC)
             //     LogSurface(winAnimator->mWin, String("RECOVER DESTROY"), 0);
             surface->Destroy();
+            winAnimator->mSurfaceShown = FALSE;
             winAnimator->mSurfaceShown = FALSE;
             winAnimator->mSurfaceControl = NULL;
             winAnimator->mWin->mHasSurface = FALSE;
@@ -12486,7 +12555,7 @@ Boolean CWindowManagerService::UpdateFocusedWindowLocked(
         }
         AutoPtr<WindowState> oldFocus = mCurrentFocus;
         mCurrentFocus = newFocus;
-        mLosingFocus.Remove(newFocus);
+        mLosingFocus->Remove((IWindowState*)newFocus.Get());
 
         // TODO(multidisplay): Accessibilty supported only of default desiplay.
         if (mAccessibilityController != NULL
@@ -12555,9 +12624,12 @@ AutoPtr<WindowState> CWindowManagerService::FindFocusedWindowLocked(
     /* [in] */ DisplayContent* displayContent)
 {
     AutoPtr<WindowList> windows = displayContent->GetWindowList();
-    WindowList::ReverseIterator rit;
-    for (rit = windows->RBegin(); rit != windows->REnd(); ++rit) {
-        AutoPtr<WindowState> win = *rit;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
 
         // if (localLOGV || DEBUG_FOCUS) Slogger::V(
         //     TAG, "Looking for focus: " + i
@@ -12667,9 +12739,12 @@ void CWindowManagerService::StartFreezingDisplayLocked(
         // Check whether the current screen contains any secure content.
         Boolean isSecure = FALSE;
         AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
-        WindowList::Iterator winIt = windows->Begin();
-        for (; winIt != windows->End(); ++winIt) {
-            AutoPtr<WindowState> ws = *winIt;
+        Int32 N;
+        windows->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            windows->Get(i, (IInterface**)&obj);
+            AutoPtr<WindowState> ws = To_WindowState(obj);
             Int32 flags;
             if (ws->IsOnScreen() && (ws->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_SECURE) != 0)) {
                 isSecure = TRUE;
@@ -12899,9 +12974,12 @@ void CWindowManagerService::UpdateStatusBarVisibilityLocked(
 {
     mInputManager->SetSystemUiVisibility(visibility);
     AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
-    WindowList::Iterator it = windows->Begin();
-    for (; it != windows->End(); ++it) {
-        AutoPtr<WindowState> ws = *it;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> ws = To_WindowState(obj);
         // try {
         Int32 curValue = ws->mSystemUiVisibility;
         Int32 diff = curValue ^ visibility;
@@ -13227,7 +13305,7 @@ AutoPtr<DisplayContent> CWindowManagerService::GetDefaultDisplayContentLocked()
     return GetDisplayContentLocked(IDisplay::DEFAULT_DISPLAY);
 }
 
-AutoPtr<List<AutoPtr<WindowState> > > CWindowManagerService::GetDefaultWindowListLocked()
+AutoPtr<WindowList> CWindowManagerService::GetDefaultWindowListLocked()
 {
     return GetDefaultDisplayContentLocked()->GetWindowList();
 }
@@ -13237,7 +13315,7 @@ AutoPtr<IDisplayInfo> CWindowManagerService::GetDefaultDisplayInfoLocked()
     return GetDefaultDisplayContentLocked()->GetDisplayInfo();
 }
 
-AutoPtr<List<AutoPtr<WindowState> > > CWindowManagerService::GetWindowListLocked(
+AutoPtr<WindowList> CWindowManagerService::GetWindowListLocked(
     /* [in] */ IDisplay* display)
 {
     Int32 id;
@@ -13245,7 +13323,7 @@ AutoPtr<List<AutoPtr<WindowState> > > CWindowManagerService::GetWindowListLocked
     return GetWindowListLocked(id);
 }
 
-AutoPtr<List<AutoPtr<WindowState> > > CWindowManagerService::GetWindowListLocked(
+AutoPtr<WindowList> CWindowManagerService::GetWindowListLocked(
     /* [in] */ Int32 displayId)
 {
     AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);

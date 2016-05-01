@@ -8,6 +8,7 @@
 #include "_Elastos_Droid_Server_Wm_CWindowManagerService.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Internal.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/InputEventReceiver.h"
@@ -104,9 +105,12 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::ISynchronize;
 using Elastos::Core::IInteger32;
 using Elastos::Net::ISocket;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::Pair;
+
+typedef IArrayList WindowList;
 
 namespace Elastos {
 namespace Droid {
@@ -454,7 +458,6 @@ private:
     };
 
 public:
-    typedef List<AutoPtr<WindowState> > WindowList;
     typedef List<AutoPtr<AppWindowToken> > AppTokenList;
 
     CWindowManagerService();
@@ -1446,7 +1449,7 @@ public:
      * @return bitmap indicating if another pass through layout must be made.
      */
     CARAPI_(Int32) HandleAppTransitionReadyLocked(
-        /* [in] */ List<AutoPtr<WindowState> >* windows);
+        /* [in] */ WindowList* windows);
 
     CARAPI_(void) CheckDrawnWindowsLocked();
 
@@ -1606,7 +1609,7 @@ public:
     // There is an inherent assumption that this will never return null.
     CARAPI_(AutoPtr<DisplayContent>) GetDefaultDisplayContentLocked();
 
-    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetDefaultWindowListLocked();
+    CARAPI_(AutoPtr<WindowList>) GetDefaultWindowListLocked();
 
     CARAPI_(AutoPtr<IDisplayInfo>) GetDefaultDisplayInfoLocked();
 
@@ -1615,10 +1618,10 @@ public:
      * @param display The screen to return windows from.
      * @return The list of WindowStates on the screen, or null if the there is no screen.
      */
-    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetWindowListLocked(
+    CARAPI_(AutoPtr<WindowList>) GetWindowListLocked(
         /* [in] */ IDisplay* display);
 
-    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetWindowListLocked(
+    CARAPI_(AutoPtr<WindowList>) GetWindowListLocked(
         /* [in] */ Int32 displayId);
 
     CARAPI OnDisplayAdded(
@@ -1710,16 +1713,16 @@ private:
     CARAPI_(Boolean) TmpRemoveAppWindowsLocked(
         /* [in] */ WindowToken* token);
 
-    CARAPI_(WindowList::Iterator) FindAppWindowInsertionPointLocked(
+    CARAPI_(Int32) FindAppWindowInsertionPointLocked(
         /* [in] */ AppWindowToken* target);
 
-    CARAPI_(WindowList::Iterator) ReAddWindowLocked(
-        /* [in] */ List< AutoPtr<WindowState> >::Iterator it,
+    CARAPI_(Int32) ReAddWindowLocked(
+        /* [in] */ Int32 index,
         /* [in] */ WindowState* win);
 
-    CARAPI_(WindowList::Iterator) ReAddAppWindowsLocked(
+    CARAPI_(Int32) ReAddAppWindowsLocked(
         /* [in] */ DisplayContent* displayContent,
-        /* [in] */ List< AutoPtr<WindowState> >::Iterator it,
+        /* [in] */ Int32 index,
         /* [in] */ WindowToken* token);
 
     CARAPI_(void) SetAnimatorDurationScale(
@@ -2161,12 +2164,12 @@ public:
      * the resize after closing the transaction in which we resized the
      * underlying surface.
      */
-    List< AutoPtr<WindowState> > mResizingWindows;
+    AutoPtr<WindowList> mResizingWindows;
 
     /**
      * Windows whose animations have ended and now must be removed.
      */
-    List< AutoPtr<WindowState> > mPendingRemove;
+    AutoPtr<WindowList> mPendingRemove;
 
     /**
      * Stacks whose animations have ended and whose tasks, apps, selves may now be removed.
@@ -2181,24 +2184,24 @@ public:
     /**
      * Windows whose surface should be destroyed.
      */
-    List< AutoPtr<WindowState> > mDestroySurface;
+    AutoPtr<WindowList> mDestroySurface;
 
     /**
      * Windows that have lost input focus and are waiting for the new
      * focus window to be displayed before they are told about this.
      */
-    List< AutoPtr<WindowState> > mLosingFocus;
+    AutoPtr<WindowList> mLosingFocus;
 
     /**
      * This is set when we have run out of memory, and will either be an empty
      * list or contain windows that need to be force removed.
      */
-    AutoPtr< List< AutoPtr<WindowState> > > mForceRemoves;
+    AutoPtr<WindowList> mForceRemoves;
 
     /**
      * Windows that clients are waiting to have drawn.
      */
-    List< AutoPtr<WindowState> > mWaitingForDrawn;
+    AutoPtr<WindowList> mWaitingForDrawn;
     /**
      * And the callback to make when they've all been drawn.
      */
@@ -2208,7 +2211,7 @@ public:
      * Windows that have called relayout() while we were running animations,
      * so we need to tell when the animation is done.
      */
-    List< AutoPtr<WindowState> > mRelayoutWhileAnimating;
+    AutoPtr<WindowList> mRelayoutWhileAnimating;
 
     /**
      * Used when rebuilding window list to keep track of windows that have

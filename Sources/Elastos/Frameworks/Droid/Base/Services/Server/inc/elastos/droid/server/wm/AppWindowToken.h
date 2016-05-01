@@ -1,13 +1,19 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_APPWINDOWTOKEN_H__
 #define __ELASTOS_DROID_SERVER_WM_APPWINDOWTOKEN_H__
 
+#include "Elastos.CoreLibrary.h"
 #include "elastos/droid/server/wm/WindowToken.h"
 #include "elastos/droid/server/wm/StartingData.h"
 #include "elastos/droid/server/input/InputApplicationHandle.h"
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::View::IApplicationToken;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Server::Input::InputApplicationHandle;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::Etl::List;
+
+typedef IArrayList WindowList;
 
 namespace Elastos {
 namespace Droid {
@@ -16,6 +22,7 @@ namespace Wm {
 
 class AppWindowAnimator;
 class WindowAnimator;
+class WindowState;
 
 class AppWindowToken : public WindowToken
 {
@@ -45,8 +52,7 @@ public:
 
     // All of the windows and child windows that are included in this
     // application token.  Note this list is NOT sorted!
-    typedef List<AutoPtr<WindowState> > WindowList;
-    WindowList mAllAppWindows;
+    AutoPtr<WindowList> mAllAppWindows;
     AutoPtr<AppWindowAnimator> mAppAnimator;
 
     AutoPtr<WindowAnimator> mAnimator;

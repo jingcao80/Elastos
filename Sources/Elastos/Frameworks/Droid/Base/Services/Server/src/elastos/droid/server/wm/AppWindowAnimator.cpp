@@ -177,13 +177,14 @@ void AppWindowAnimator::ClearDeferredThumbnail()
 void AppWindowAnimator::UpdateLayers()
 {
     AutoPtr<AppWindowToken> appToken = GetAppToken();
-    if (appToken == NULL) return;
-
-    List<AutoPtr<WindowState> >::Iterator it = appToken->mAllAppWindows.Begin();
+    Int32 N;
+    appToken->mAllAppWindows->GetSize(&N);
     Int32 adj = mAnimLayerAdjustment;
     mThumbnailLayer = -1;
-    for (; it != appToken->mAllAppWindows.End(); ++it) {
-        AutoPtr<WindowState> w = *it;
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        appToken->mAllAppWindows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> w = To_WindowState(obj);
         AutoPtr<WindowStateAnimator> winAnimator = w->mWinAnimator;
         winAnimator->mAnimLayer = w->mLayer + adj;
         if (winAnimator->mAnimLayer > mThumbnailLayer) {

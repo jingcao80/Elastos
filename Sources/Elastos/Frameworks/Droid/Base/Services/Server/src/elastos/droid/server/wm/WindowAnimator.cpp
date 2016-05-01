@@ -125,9 +125,12 @@ void WindowAnimator::HideWallpapersLocked(
         List<AutoPtr<WindowToken> >::ReverseIterator rit = wallpaperTokens.RBegin();
         for (; rit != wallpaperTokens.REnd(); ++rit) {
             AutoPtr<WindowToken> token = *rit;
-            List<AutoPtr<WindowState> >::ReverseIterator winRIt = token->mWindows.RBegin();
-            for (; winRIt != token->mWindows.REnd(); ++winRIt) {
-                AutoPtr<WindowState> wallpaper = *winRIt;
+            Int32 numWindows;
+            token->mWindows->GetSize(&numWindows);
+            for (Int32 j = numWindows - 1; j >= 0; j--) {
+                AutoPtr<IInterface> obj;
+                token->mWindows->Get(j, (IInterface**)&obj);
+                AutoPtr<WindowState> wallpaper = To_WindowState(obj);
                 AutoPtr<WindowStateAnimator> winAnimator = wallpaper->mWinAnimator;
                 if (!winAnimator->mLastHidden) {
                     winAnimator->Hide();
@@ -213,9 +216,12 @@ void WindowAnimator::UpdateWindowsLocked(
     AutoPtr<WindowState> wallpaper;
 
     if (mKeyguardGoingAway) {
-        WindowList::ReverseIterator winRit = windows->RBegin();
-        for (; winRit != windows->REnd(); ++winRit) {
-            AutoPtr<WindowState> win = *winRit;
+        Int32 N;
+        windows->GetSize(&N);
+        for (Int32 i = N - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            windows->Get(i, (IInterface**)&obj);
+            WindowState* win = To_WindowState(obj);
             Boolean isKeyguardHostWindow;
             if (mPolicy->IsKeyguardHostWindow(win->mAttrs, &isKeyguardHostWindow), !isKeyguardHostWindow) {
                 continue;
@@ -254,9 +260,12 @@ void WindowAnimator::UpdateWindowsLocked(
     AutoPtr<WindowState> winShowWhenLocked = (WindowState*)ws.Get();
     AutoPtr<AppWindowToken> appShowWhenLocked = winShowWhenLocked == NULL ? NULL : winShowWhenLocked->mAppToken;
 
-    WindowList::ReverseIterator winRit = windows->RBegin();
-    for (; winRit != windows->REnd(); ++winRit) {
-        AutoPtr<WindowState> win = *winRit;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
         AutoPtr<WindowStateAnimator> winAnimator = win->mWinAnimator;
         Int32 flags;
         win->mAttrs->GetFlags(&flags);
@@ -453,9 +462,12 @@ void WindowAnimator::UpdateWallpaperLocked(
     AutoPtr<WindowList> windows = mService->GetWindowListLocked(displayId);
     AutoPtr<WindowState> detachedWallpaper;
 
-    WindowList::ReverseIterator rit = windows->RBegin();
-    for (; rit != windows->REnd(); ++rit) {
-        AutoPtr<WindowState> win = *rit;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        WindowState* win = To_WindowState(obj);
         AutoPtr<WindowStateAnimator> winAnimator = win->mWinAnimator;
         if (winAnimator->mSurfaceControl == NULL) {
             continue;
@@ -630,9 +642,12 @@ void WindowAnimator::AnimateLocked()
         UpdateWallpaperLocked(displayId);
 
         AutoPtr<WindowList> windows = mService->GetWindowListLocked(displayId);
-        WindowList::Iterator winIt = windows->Begin();
-        for (; winIt != windows->End(); ++winIt) {
-            (*winIt)->mWinAnimator->PrepareSurfaceLocked(TRUE);
+        Int32 N;
+        windows->GetSize(&N);
+        for (Int32 j = 0; j < N; j++) {
+            AutoPtr<IInterface> obj;
+            windows->Get(j, (IInterface**)&obj);
+            To_WindowState(obj)->mWinAnimator->PrepareSurfaceLocked(TRUE);
         }
     }
 
@@ -759,10 +774,13 @@ void WindowAnimator::SetAppLayoutChanges(
     CSparseInt32Array::New(2, (ISparseInt32Array**)&displays);
     AutoPtr<IInterface> obj;
     appAnimator->mWeakAppToken->Resolve(EIID_IInterface, (IInterface**)&obj);
-    WindowList windows = ((AppWindowToken*)(IObject*)obj.Get())->mAllAppWindows;
-    WindowList::ReverseIterator rit = windows.RBegin();
-    for (; rit != windows.REnd(); ++rit) {
-        Int32 displayId = (*rit)->GetDisplayId();
+    AutoPtr<WindowList> windows = ((AppWindowToken*)(IObject*)obj.Get())->mAllAppWindows;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        Int32 displayId = To_WindowState(obj)->GetDisplayId();
         Int32 key;
         if (displayId >= 0 && (displays->IndexOfKey(displayId, (Int32*)&key), key < 0)) {
             SetPendingLayoutChanges(displayId, changes);

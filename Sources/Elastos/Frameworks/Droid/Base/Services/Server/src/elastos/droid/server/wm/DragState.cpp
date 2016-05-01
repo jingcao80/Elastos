@@ -7,7 +7,6 @@
 #include "elastos/droid/os/Handler.h"
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Graphics::CRegion;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::View::IInputChannelHelper;
@@ -19,6 +18,8 @@ using Elastos::Droid::View::CDragEventHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
 using Elastos::Droid::View::ISurfaceHelper;
 using Elastos::Droid::Os::Process;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -38,6 +39,7 @@ DragState::DragState(
     , mLocalWin(localWin)
 {
     ASSERT_SUCCEEDED(CRegion::New((IRegion**)&mTmpRegion));
+    CArrayList::New((IArrayList**)&mNotifiedWindows);
 }
 
 void DragState::Reset()
@@ -51,7 +53,7 @@ void DragState::Reset()
     mToken = NULL;
     mData = NULL;
     mThumbOffsetX = mThumbOffsetY = 0;
-    mNotifiedWindows.Clear();
+    mNotifiedWindows = NULL;
 }
 
 void DragState::Register(
@@ -167,7 +169,7 @@ void DragState::BroadcastDragStartedLw(
     if (mData != NULL) {
         mData->GetDescription((IClipDescription**)&mDataDescription);
     }
-    mNotifiedWindows.Clear();
+    mNotifiedWindows->Clear();
     mDragInProgress = TRUE;
 
     // if (WindowManagerService.DEBUG_DRAG) {
@@ -178,10 +180,13 @@ void DragState::BroadcastDragStartedLw(
     mDisplay->GetDisplayId(&id);
     AutoPtr<DisplayContent> displayContent = mService->GetDisplayContentLocked(id);
     if (displayContent != NULL) {
-        AutoPtr<List<AutoPtr<WindowState> > > windows = displayContent->GetWindowList();
-        List<AutoPtr<WindowState> >::Iterator it = windows->Begin();
-        for (; it != windows->End(); ++it) {
-            SendDragStartedLw(*it, touchX, touchY, mDataDescription);
+        AutoPtr<WindowList> windows = displayContent->GetWindowList();
+        Int32 N;
+        windows->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            windows->Get(i, (IInterface**)&obj);
+            SendDragStartedLw(To_WindowState(obj), touchX, touchY, mDataDescription);
         }
     }
 }
@@ -215,7 +220,7 @@ void DragState::SendDragStartedLw(
             return;
         }
         // track each window that we've notified that the drag is starting
-        mNotifiedWindows.PushBack(newWin);
+        mNotifiedWindows->Add((IWindowState*)newWin);
         // } catch (RemoteException e) {
         //     Slog.w(WindowManagerService.TAG, "Unable to drag-start window " + newWin);
         // } finally {
@@ -235,9 +240,13 @@ void DragState::SendDragStartedIfNeededLw(
 {
     if (mDragInProgress) {
         // If we have sent the drag-started, we needn't do so again
-        List<AutoPtr<WindowState> >::Iterator it = mNotifiedWindows.Begin();
-        for (; it != mNotifiedWindows.End(); ++it) {
-            if ((*it).Get() == newWin) {
+        Int32 N;
+        mNotifiedWindows->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            mNotifiedWindows->Get(i, (IInterface**)&obj);
+            WindowState* ws = To_WindowState(obj);
+            if (ws == newWin) {
                 return;
             }
         }
@@ -258,16 +267,19 @@ void DragState::BroadcastDragEndedLw()
     AutoPtr<IDragEvent> evt;
     ASSERT_SUCCEEDED(dragEventHelper->Obtain(IDragEvent::ACTION_DRAG_ENDED,
             0, 0, NULL, NULL, NULL, mDragResult, (IDragEvent**)&evt));
-    List<AutoPtr<WindowState> >::Iterator it = mNotifiedWindows.Begin();
-    for (; it != mNotifiedWindows.End(); ++it) {
-        AutoPtr<WindowState> ws = *it;
+    Int32 N;
+    mNotifiedWindows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mNotifiedWindows->Get(i, (IInterface**)&obj);
+        WindowState* ws = To_WindowState(obj);
         // try {
         ws->mClient->DispatchDragEvent(evt);
         // } catch (RemoteException e) {
         //     Slog.w(WindowManagerService.TAG, "Unable to drag-end window " + ws);
         // }
     }
-    mNotifiedWindows.Clear();
+    mNotifiedWindows->Clear();
     mDragInProgress = FALSE;
     evt->Recycle();
 }
@@ -419,17 +431,16 @@ AutoPtr<WindowState> DragState::GetTouchedWinAtPointLw(
     Int32 x = (Int32) xf;
     Int32 y = (Int32) yf;
 
-    Int32 id;
-    mDisplay->GetDisplayId(&id);
-    AutoPtr<DisplayContent> displayContent = mService->GetDisplayContentLocked(id);
-    if (displayContent == NULL) {
+    AutoPtr<WindowList> windows = mService->GetWindowListLocked(mDisplay);
+    if (windows == NULL) {
         return NULL;
     }
-
-    AutoPtr<List<AutoPtr<WindowState> > > windows = displayContent->GetWindowList();
-    List<AutoPtr<WindowState> >::ReverseIterator rit = windows->RBegin();
-    for (; rit != windows->REnd(); ++rit) {
-        AutoPtr<WindowState> child = *rit;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> child = To_WindowState(obj);
         Int32 flags;
         child->mAttrs->GetFlags(&flags);
         Boolean isVisible;

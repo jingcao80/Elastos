@@ -31,7 +31,7 @@ class StackTapPointerEventListener;
 class DisplayContent : public Object
 {
 public:
-    typedef List<AutoPtr<WindowState> > WindowList;
+    typedef IArrayList WindowList;
     /**
      * @param display May not be null.
      */
@@ -180,7 +180,7 @@ private:
 
     /** Z-ordered (bottom-most first) list of all Window objects. Assigned to an element
      * from mDisplayWindows; */
-    AutoPtr<WindowList> mWindows;
+    AutoPtr<WindowList> mWindows; //ArrayList<WindowState>
 
     AutoPtr<IDisplayInfo> mDisplayInfo;
     AutoPtr<IDisplay> mDisplay;

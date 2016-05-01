@@ -9,11 +9,11 @@
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::View::IWindowManagerPolicy;
 
 namespace Elastos {
 namespace Droid {
@@ -175,7 +175,6 @@ private:
 
     friend class AnimationRunnable;
     typedef List<AutoPtr<AppWindowToken> > AppTokenList;
-    typedef List<AutoPtr<WindowState> > WindowList;
 };
 
 } // Wm

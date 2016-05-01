@@ -6,13 +6,14 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::View::CDisplayInfo;
-using Elastos::Droid::Graphics::RegionOp_DIFFERENCE;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CRegion;
+using Elastos::Droid::Graphics::RegionOp_DIFFERENCE;
+using Elastos::Droid::View::CDisplayInfo;
 using Elastos::Droid::Server::Am::ActivityStackSupervisor;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -40,14 +41,13 @@ DisplayContent::DisplayContent(
     CRegion::New((IRegion**)&mTouchExcludeRegion);
     CRect::New((IRect**)&mTmpRect);
 
+    CArrayList::New((IArrayList**)&mWindows);
     CDisplayInfo::New((IDisplayInfo**)&mDisplayInfo);
 
     display->GetDisplayId(&mDisplayId);
     Boolean result;
     display->GetDisplayInfo(mDisplayInfo, &result);
     mIsDefaultDisplay = mDisplayId == IDisplay::DEFAULT_DISPLAY;
-
-    mWindows = new WindowList();
 }
 
 Int32 DisplayContent::GetDisplayId()
@@ -55,7 +55,7 @@ Int32 DisplayContent::GetDisplayId()
     return mDisplayId;
 }
 
-AutoPtr<List<AutoPtr<WindowState> > > DisplayContent::GetWindowList()
+AutoPtr<WindowList> DisplayContent::GetWindowList()
 {
     return mWindows;
 }
@@ -203,9 +203,12 @@ void DisplayContent::SetTouchExcludeRegion(
     mTouchExcludeRegion->Set(0, 0, width, height, &result);
 
     AutoPtr<WindowList> windows = GetWindowList();
-    WindowList::ReverseIterator rit = windows->RBegin();
-    for (; rit != windows->REnd(); ++rit) {
-        AutoPtr<WindowState> win = *rit;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; --i) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
         AutoPtr<TaskStack> stack = win->GetStack();
         Boolean isVisible;
         if ((win->IsVisibleLw(&isVisible), isVisible) && stack != NULL && stack.Get() != focusedStack) {
@@ -221,9 +224,12 @@ void DisplayContent::SwitchUserStacks(
     /* [in] */ Int32 newUserId)
 {
     AutoPtr<WindowList> windows = GetWindowList();
-    WindowList::Iterator it = windows->Begin();
-    for (; it != windows->End(); ++it) {
-        AutoPtr<WindowState> win = *it;
+    Int32 N;
+    windows->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        windows->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> win = To_WindowState(obj);
         if (win->IsHiddenFromUserLocked()) {
             if (CWindowManagerService::DEBUG_VISIBILITY) {
                 Int32 type;

@@ -1,13 +1,12 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_WINDOWSTATE_H__
 #define __ELASTOS_DROID_SERVER_WM_WINDOWSTATE_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/server/wm/CSession.h"
 #include "elastos/droid/server/wm/WindowToken.h"
 #include "elastos/droid/server/input/InputWindowHandle.h"
 #include "elastos/droid/os/Runnable.h"
-#include <elastos/utility/etl/List.h>
 
-using Elastos::Core::ICharSequence;
 using Elastos::Droid::View::IWindowState;
 using Elastos::Droid::View::IIWindowId;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
@@ -26,7 +25,10 @@ using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Os::IRemoteCallbackList;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Server::Input::InputWindowHandle;
-using Elastos::Utility::Etl::List;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IArrayList;
+
+typedef IArrayList WindowList;
 
 namespace Elastos {
 namespace Droid {
@@ -86,8 +88,6 @@ private:
     };
 
 public:
-    typedef List<AutoPtr<WindowState> > WindowList;
-
     WindowState(
         /* [in] */ CWindowManagerService* service,
         /* [in] */ CSession* s,
@@ -383,7 +383,7 @@ public:
     CARAPI_(void) GetTouchableRegion(
         /* [in] */ IRegion* outRegion);
 
-    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetWindowList();
+    CARAPI_(AutoPtr<WindowList>) GetWindowList();
 
     /**
      * Report a focus change.  Must be called with no locks held, and consistently
@@ -446,7 +446,7 @@ public:
     AutoPtr<IWindowManagerLayoutParams> mAttrs;
     AutoPtr<DeathRecipient> mDeathRecipient;
     AutoPtr<WindowState> mAttachedWindow;
-    WindowList mChildWindows;
+    AutoPtr<WindowList> mChildWindows;
     Int32 mBaseLayer;
     Int32 mSubLayer;
     Boolean mLayoutAttached;
@@ -683,6 +683,9 @@ private:
 } // Server
 } // Droid
 } // Elastos
+
+#define To_WindowState(obj) \
+    ((WindowState*)IWindowState::Probe(obj))
 
 template <>
 struct Conversion<Elastos::Droid::Server::Wm::WindowState*, IInterface*>
