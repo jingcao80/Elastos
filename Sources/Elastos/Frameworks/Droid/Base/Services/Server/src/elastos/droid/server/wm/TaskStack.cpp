@@ -1,4 +1,5 @@
 
+#include <elastos/droid/ext/frameworkdef.h>
 #include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.Utility.h>
 #include "elastos/droid/server/wm/TaskStack.h"
@@ -9,12 +10,12 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::StringUtils;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::CTypedValue;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -55,21 +56,24 @@ void TaskStack::ResizeWindows()
     mBounds->GetTop(&top);
     Boolean underStatusBar = top == 0;
 
-    List<AutoPtr<WindowState> > resizingWindows = mService->mResizingWindows;
+    AutoPtr<WindowList> resizingWindows = mService->mResizingWindows;
     List<AutoPtr<Task> >::ReverseIterator rit = mTasks.RBegin();
     for (; rit != mTasks.REnd(); ++rit) {
         AppTokenList activities = (*rit)->mAppTokens;
         AppTokenList::ReverseIterator activityRit = activities.RBegin();
         for (; activityRit != activities.REnd(); ++activityRit) {
-            List<AutoPtr<WindowState> > windows = (*activityRit)->mAllAppWindows;
-            List<AutoPtr<WindowState> >::ReverseIterator winRit = windows.RBegin();
-            for (; winRit != windows.REnd(); ++winRit) {
-                AutoPtr<WindowState> win = *winRit;
-                List<AutoPtr<WindowState> >::Iterator it = Find(resizingWindows.Begin(), resizingWindows.End(), win);
-                if (it == resizingWindows.End()) {
+            AutoPtr<WindowList> windows = (*activityRit)->mAllAppWindows;
+            Int32 N;
+            windows->GetSize(&N);
+            for (Int32 winNdx = N - 1; winNdx >= 0; --winNdx) {
+                AutoPtr<IInterface> obj;
+                windows->Get(winNdx, (IInterface**)&obj);
+                AutoPtr<WindowState> win = To_WindowState(obj);
+                Boolean result;
+                if (resizingWindows->Contains((IWindowState*)win.Get(), &result), !result) {
                     if (CWindowManagerService::DEBUG_RESIZE)
-                        Slogger::D(CWindowManagerService::TAG, "setBounds: Resizing %p", win.Get());
-                    resizingWindows.PushBack(win);
+                        Slogger::D(CWindowManagerService::TAG, "setBounds: Resizing %s", TO_CSTR(win));
+                    resizingWindows->Add((IWindowState*)win.Get());
                 }
                 win->mUnderStatusBar = underStatusBar;
             }
@@ -125,10 +129,13 @@ Boolean TaskStack::IsAnimating()
         AppTokenList activities = (*taskRit)->mAppTokens;
         AppTokenList::ReverseIterator activityRit = activities.RBegin();
         for (; activityRit != activities.REnd(); ++activityRit) {
-            List<AutoPtr<WindowState> > windows = (*activityRit)->mAllAppWindows;
-            List<AutoPtr<WindowState> >::ReverseIterator winRit = windows.RBegin();
-            for (; winRit != windows.REnd(); ++winRit) {
-                AutoPtr<WindowStateAnimator> winAnimator = (*winRit)->mWinAnimator;
+            AutoPtr<WindowList> windows = (*activityRit)->mAllAppWindows;
+            Int32 N;
+            windows->GetSize(&N);
+            for (Int32 winNdx = N - 1; winNdx >= 0; --winNdx) {
+                AutoPtr<IInterface> obj;
+                windows->Get(winNdx, (IInterface**)&obj);
+                AutoPtr<WindowStateAnimator> winAnimator = To_WindowState(obj)->mWinAnimator;
                 if (winAnimator->IsAnimating() || winAnimator->mWin->mExiting) {
                     return TRUE;
                 }
@@ -227,10 +234,13 @@ void TaskStack::DetachDisplay()
         AppTokenList appWindowTokens = (*taskRit)->mAppTokens;
         AppTokenList::ReverseIterator tokenRit = appWindowTokens.RBegin();
         for (; tokenRit != appWindowTokens.REnd(); ++tokenRit) {
-            List<AutoPtr<WindowState> > appWindows = (*tokenRit)->mAllAppWindows;
-            List<AutoPtr<WindowState> >::ReverseIterator winRit = appWindows.RBegin();
-            for (; winRit != appWindows.REnd(); ++winRit) {
-                mService->RemoveWindowInnerLocked(NULL, *winRit);
+            AutoPtr<WindowList> appWindows = (*tokenRit)->mAllAppWindows;
+            Int32 N;
+            appWindows->GetSize(&N);
+            for (Int32 winNdx = N -1; winNdx >= 0; --winNdx) {
+                AutoPtr<IInterface> obj;
+                appWindows->Get(winNdx, (IInterface**)&obj);
+                mService->RemoveWindowInnerLocked(NULL, To_WindowState(obj));
                 doAnotherLayoutPass = TRUE;
             }
         }

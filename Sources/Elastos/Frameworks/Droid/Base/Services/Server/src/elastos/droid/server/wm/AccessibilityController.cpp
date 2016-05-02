@@ -626,10 +626,13 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::PopulateWindo
     /* [in] */ ISparseArray* outWindows)
 {
     AutoPtr<DisplayContent> displayContent = mHost->mWindowManagerService->GetDefaultDisplayContentLocked();
-    AutoPtr<List<AutoPtr<WindowState> > > windowList = displayContent->GetWindowList();
-    List<AutoPtr<WindowState> >::Iterator it = windowList->Begin();
-    for (; it != windowList->End(); ++it) {
-        AutoPtr<WindowState> windowState = *it;
+    AutoPtr<WindowList> windowList = displayContent->GetWindowList();
+    Int32 windowCount;
+    windowList->GetSize(&windowCount);
+    for (Int32 i = 0; i < windowCount; i++) {
+        AutoPtr<IInterface> obj;
+        windowList->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> windowState = To_WindowState(obj);
         Int32 type;
         if ((windowState->IsOnScreen() ||
                 (windowState->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND))
@@ -1268,16 +1271,19 @@ AutoPtr<IWindowInfo> AccessibilityController::WindowsForAccessibilityObserver::O
     window->GetBoundsInScreen((IRect**)&winBoundsInScreen);
     winBoundsInScreen->Set(boundsInScreen);
 
-    if (windowState->mChildWindows.Begin() != windowState->mChildWindows.End()) {
+    Int32 childCount;
+    windowState->mChildWindows->GetSize(&childCount);
+    if (childCount > 0) {
         AutoPtr<IList> childTokens;
         window->GetChildTokens((IList**)&childTokens);
         if (childTokens == NULL) {
             CArrayList::New((IList**)&childTokens);
             window->SetChildTokens(childTokens);
         }
-        List<AutoPtr<WindowState> >::Iterator it = windowState->mChildWindows.Begin();
-        for (; it != windowState->mChildWindows.End(); ++it) {
-            AutoPtr<WindowState> child = *it;
+        for (Int32 j = 0; j < childCount; j++) {
+            AutoPtr<IInterface> obj;
+            windowState->mChildWindows->Get(j, (IInterface**)&obj);
+            AutoPtr<WindowState> child = To_WindowState(obj);
             childTokens->Add(IBinder::Probe(child->mClient));
         }
     }
@@ -1410,10 +1416,13 @@ void AccessibilityController::WindowsForAccessibilityObserver::PopulateVisibleWi
     /* [in] */ ISparseArray* outWindows)
 {
     AutoPtr<DisplayContent> displayContent = mWindowManagerService->GetDefaultDisplayContentLocked();
-    AutoPtr<List<AutoPtr<WindowState> > > windowList = displayContent->GetWindowList();
-    List<AutoPtr<WindowState> >::Iterator it = windowList->Begin();
-    for (; it != windowList->End(); ++it) {
-        AutoPtr<WindowState> windowState = *it;
+    AutoPtr<WindowList> windowList = displayContent->GetWindowList();
+    Int32 windowCount;
+    windowList->GetSize(&windowCount);
+    for (Int32 i = 0; i < windowCount; i++) {
+        AutoPtr<IInterface> obj;
+        windowList->Get(i, (IInterface**)&obj);
+        AutoPtr<WindowState> windowState = To_WindowState(obj);
         Boolean isVisible;
         if (windowState->IsVisibleLw(&isVisible), isVisible) {
             outWindows->Put(windowState->mLayer, (IWindowState*)windowState.Get());

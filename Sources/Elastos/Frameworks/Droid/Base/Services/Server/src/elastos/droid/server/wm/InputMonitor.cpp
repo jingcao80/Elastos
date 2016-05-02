@@ -275,10 +275,13 @@ void InputMonitor::UpdateInputWindowsLw(
         AutoPtr<IInterface> value;
         mService->mDisplayContents->ValueAt(displayNdx, (IInterface**)&value);
         AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);;
-        AutoPtr<List<AutoPtr<WindowState> > > windows = displayContent->GetWindowList();
-        List<AutoPtr<WindowState> >::ReverseIterator winRit = windows->RBegin();
-        for (; winRit != windows->REnd(); ++winRit) {
-            AutoPtr<WindowState> child = *winRit;
+        AutoPtr<WindowList> windows = displayContent->GetWindowList();
+        Int32 N;
+        windows->GetSize(&N);
+        for (Int32 winNdx = N - 1; winNdx >= 0; --winNdx) {
+            AutoPtr<IInterface> obj;
+            windows->Get(winNdx, (IInterface**)&obj);
+            AutoPtr<WindowState> child = To_WindowState(obj);
             AutoPtr<IInputChannel> inputChannel = child->mInputChannel;
             AutoPtr<InputWindowHandle> inputWindowHandle = child->mInputWindowHandle;
             if (inputChannel == NULL || inputWindowHandle == NULL || child->mRemoved) {

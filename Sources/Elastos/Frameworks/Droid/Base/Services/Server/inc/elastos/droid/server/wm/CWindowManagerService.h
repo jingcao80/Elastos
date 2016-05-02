@@ -501,7 +501,7 @@ public:
      * @param willMove
      * @return The index+1 in mWindows of the discovered target.
      */
-    CARAPI_(List< AutoPtr<WindowState> >::Iterator) FindDesiredInputMethodWindowItLocked(
+    CARAPI_(Int32) FindDesiredInputMethodWindowIndexLocked(
         /* [in] */ Boolean willMove);
 
     CARAPI_(void) AddInputMethodWindowToListLocked(
@@ -511,11 +511,11 @@ public:
         /* [in] */ Int32 adj);
 
     CARAPI_(void) LogWindowList(
-        /* [in] */ List< AutoPtr<WindowState> >& windows,
+        /* [in] */ WindowList* windows,
         /* [in] */ const String& prefix);
 
     CARAPI_(void) MoveInputMethodDialogsLocked(
-        /* [in] */ List< AutoPtr<WindowState> >::Iterator posIt);
+        /* [in] */ Int32 pos);
 
     CARAPI_(Boolean) MoveInputMethodWindowsIfNeededLocked(
         /* [in] */ Boolean needAssignLayers);
@@ -1655,7 +1655,7 @@ private:
 
     //This method finds out the index of a window that has the same app token as
     //win. used for z ordering the windows in mWindows
-    CARAPI_(List< AutoPtr<WindowState> >::Iterator) FindIteratorBasedOnAppTokens(
+    CARAPI_(Int32) FindIdxBasedOnAppTokens(
         /* [in] */ WindowState* win);
 
     /**
@@ -1664,11 +1664,11 @@ private:
      * @param windows The list to search.
      * @return The index of win in windows or of the window that is an ancestor of win.
      */
-    CARAPI_(List<AutoPtr<WindowState> >::Iterator) IndexOfWinInWindowList(
+    CARAPI_(Int32) IndexOfWinInWindowList(
         /* [in] */ WindowState* win,
-        /* [in] */ List<AutoPtr<WindowState> >& windows);
+        /* [in] */ WindowList* windows);
 
-    CARAPI_(List<AutoPtr<WindowState> >::Iterator) AddAppWindowToListLocked(
+    CARAPI_(Int32) AddAppWindowToListLocked(
         /* [in] */ WindowState* targetWin);
 
     CARAPI_(void) AddFreeWindowToListLocked(
@@ -1682,8 +1682,8 @@ private:
         /* [in] */ WindowState* win,
         /* [in] */ Boolean addToToken);
 
-    CARAPI_(List< AutoPtr<WindowState> >::Iterator) TmpRemoveWindowLocked(
-        /* [in] */ List< AutoPtr<WindowState> >::Iterator interestingPosIt,
+    CARAPI_(Int32) TmpRemoveWindowLocked(
+        /* [in] */ Int32 interestingPos,
         /* [in] */ WindowState* win);
 
     CARAPI_(void) ReAddWindowToListInOrderLocked(
@@ -2313,7 +2313,7 @@ public:
     Int32 mInputMethodAnimLayerAdjustment;
 
     AutoPtr<WindowState> mInputMethodWindow;
-    List< AutoPtr<WindowState> > mInputMethodDialogs;
+    AutoPtr<WindowList> mInputMethodDialogs;
 
     Boolean mHardKeyboardAvailable;
     Boolean mShowImeWithHardKeyboard;
