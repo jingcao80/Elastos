@@ -1540,7 +1540,7 @@ Boolean CWindowManagerService::CanBeImeTarget(
         || fl == (IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM)
         || (w->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING)) {
         if (DEBUG_INPUT_METHOD) {
-            Slogger::I(TAG, "isVisibleOrAdding %p: %d", w, w->IsVisibleOrAdding());
+            Slogger::I(TAG, "isVisibleOrAdding %s: %d", TO_CSTR(w), w->IsVisibleOrAdding());
             if (!w->IsVisibleOrAdding()) {
                 Slogger::I(TAG, "  mSurface=%p relayoutCalled=%d viewVis=%d policyVis=%d policyVisAfterAnim=%d"
                     " attachHid=%d exiting=%d destroying=%d",
@@ -1575,8 +1575,12 @@ Int32 CWindowManagerService::FindDesiredInputMethodWindowIndexLocked(
         windows->Get(i, (IInterface**)&obj);
         AutoPtr<WindowState> win = To_WindowState(obj);
 
-        // if (DEBUG_INPUT_METHOD && willMove) Slogger::I(TAG, "Checking window @" + i
-        //         + " " + win + " fl=0x" + Integer.toHexString(w.mAttrs.flags));
+        if (DEBUG_INPUT_METHOD && willMove) {
+            Int32 flags;
+            win->mAttrs->GetFlags(&flags);
+            Slogger::I(TAG, "Checking window @%d %s fl=0x%s", i, TO_CSTR(win),
+                    StringUtils::ToHexString(flags).string());
+        }
         if (CanBeImeTarget(win)) {
             w = win;
             // Slogger::I(TAG, "Putting input method here!");
@@ -1604,7 +1608,7 @@ Int32 CWindowManagerService::FindDesiredInputMethodWindowIndexLocked(
 
     // Now w is either mWindows[0] or an IME (or null if mWindows is empty).
 
-    if (DEBUG_INPUT_METHOD && willMove) Slogger::V(TAG, "Proposed new IME target: %p", w.Get());
+    if (DEBUG_INPUT_METHOD && willMove) Slogger::V(TAG, "Proposed new IME target: %s", TO_CSTR(w));
 
     // Now, a special case -- if the last target's window is in the
     // process of exiting, and is above the new target, keep on the
@@ -1624,8 +1628,10 @@ Int32 CWindowManagerService::FindDesiredInputMethodWindowIndexLocked(
         return index + 1;
     }
 
-    if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Desired input method target=%p willMove=%d",
-            w.Get(), willMove);
+    if (DEBUG_INPUT_METHOD) {
+        Slogger::V(TAG, "Desired input method target=%s willMove=%d",
+                TO_CSTR(w), willMove);
+    }
 
     if (willMove && w != NULL) {
         AutoPtr<AppWindowToken> token = curTarget == NULL ? NULL : curTarget->mAppToken;
@@ -1660,11 +1666,13 @@ Int32 CWindowManagerService::FindDesiredInputMethodWindowIndexLocked(
             }
 
             if (highestTarget != NULL) {
-                if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "%p %p animating=%d,  layer=%d new layer=%d"
-                        , mAppTransition.Get(), highestTarget.Get()
-                        , highestTarget->mWinAnimator->IsAnimating()
-                        , highestTarget->mWinAnimator->mAnimLayer
-                        , w->mWinAnimator->mAnimLayer);
+                if (DEBUG_INPUT_METHOD) {
+                    Slogger::V(TAG, "%p %p animating=%d,  layer=%d new layer=%d"
+                            , mAppTransition.Get(), TO_CSTR(highestTarget)
+                            , highestTarget->mWinAnimator->IsAnimating()
+                            , highestTarget->mWinAnimator->mAnimLayer
+                            , w->mWinAnimator->mAnimLayer);
+                }
 
                 if (mAppTransition->IsTransitionSet()) {
                     // If we are currently setting up for an animation,
@@ -1690,8 +1698,10 @@ Int32 CWindowManagerService::FindDesiredInputMethodWindowIndexLocked(
     // Slogger::I(TAG, "Placing input method @" + (i+1));
     if (w != NULL) {
         if (willMove) {
-            // if (DEBUG_INPUT_METHOD) Slog.w(TAG, "Moving IM target from " + curTarget + " to "
-            //         + w + (HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4)));
+            if (DEBUG_INPUT_METHOD) {
+                Slogger::W(TAG, "Moving IM target from %s to %s", TO_CSTR(curTarget),
+                        TO_CSTR(w)/*, (HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4))*/);
+            }
             mInputMethodTarget = w;
             mInputMethodTargetWaitingAnim = FALSE;
             if (w->mAppToken != NULL) {
@@ -1704,8 +1714,10 @@ Int32 CWindowManagerService::FindDesiredInputMethodWindowIndexLocked(
         return i + 1;
     }
     if (willMove) {
-        // if (DEBUG_INPUT_METHOD) Slog.w(TAG, "Moving IM target from " + curTarget + " to null."
-        //             + (HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4)));
+        if (DEBUG_INPUT_METHOD) {
+            Slogger::W(TAG, "Moving IM target from %s to NULL.",
+                    TO_CSTR(curTarget)/*,(HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4))*/);
+        }
         mInputMethodTarget = NULL;
         SetInputMethodAnimLayerAdjustment(0);
     }
@@ -1826,7 +1838,7 @@ void CWindowManagerService::LogWindowList(
         N--;
         AutoPtr<IInterface> obj;
         windows->Get(N, (IInterface**)&obj);
-        Slogger::V(TAG, "%s#: %d, %p", prefix.string(), N, TO_CSTR(obj));
+        Slogger::V(TAG, "%s#: %d, %s", prefix.string(), N, TO_CSTR(obj));
     }
 }
 
@@ -1839,16 +1851,16 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
     AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
     Int32 N;
     dialogs->GetSize(&N);
-    // if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Removing " + N + " dialogs w/pos=" + pos);
+    if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Removing %d dialogs w/pos=%d", N, pos);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         dialogs->Get(i, (IInterface**)&obj);
         pos = TmpRemoveWindowLocked(pos, To_WindowState(obj));
     }
-    // if (DEBUG_INPUT_METHOD) {
-    //     Slogger::V(TAG, "Window list w/pos=" + pos);
-    //     logWindowList("  ");
-    // }
+    if (DEBUG_INPUT_METHOD) {
+        Slogger::V(TAG, "Window list w/pos=%d", pos);
+        LogWindowList(windows, String("  "));
+    }
 
     if (pos >= 0) {
         AutoPtr<AppWindowToken> targetAppToken = mInputMethodTarget->mAppToken;
@@ -1866,7 +1878,7 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
                 break;
             }
         }
-        // if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Adding " + N + " dialogs at pos=" + pos);
+        if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Adding %d dialogs at pos=%d", N, pos);
         for (Int32 i = 0; i < N; i++) {
             AutoPtr<IInterface> obj;
             dialogs->Get(i, (IInterface**)&obj);
@@ -1874,10 +1886,10 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
             win->mTargetAppToken = targetAppToken;
             pos = ReAddWindowLocked(pos, win);
         }
-        // if (DEBUG_INPUT_METHOD) {
-        //     Slogger::V(TAG, "Final window list:");
-        //     logWindowList(windows, "  ");
-        // }
+        if (DEBUG_INPUT_METHOD) {
+            Slogger::V(TAG, "Final window list:");
+            LogWindowList(windows, String("  "));
+        }
         return;
     }
     for (Int32 i = 0; i < N; i++) {
@@ -1886,10 +1898,10 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
         WindowState* win = To_WindowState(obj);
         win->mTargetAppToken = NULL;
         ReAddWindowToListInOrderLocked(win);
-//        if (DEBUG_INPUT_METHOD) {
-//            Slogger::V(TAG, "No IM target, final list:");
-//            logWindowList("  ");
-//        }
+        if (DEBUG_INPUT_METHOD) {
+            Slogger::V(TAG, "No IM target, final list:");
+            LogWindowList(windows, String("  "));
+        }
     }
 }
 
@@ -2001,14 +2013,14 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
         // In this case, the input method windows go in a fixed layer,
         // because they aren't currently associated with a focus window.
         if (imWin != NULL) {
-            // if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Moving IM from " + imPos);
+            if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Moving IM from %d", imPos);
             TmpRemoveWindowLocked(0, imWin);
             imWin->mTargetAppToken = NULL;
             ReAddWindowToListInOrderLocked(imWin);
-            // if (DEBUG_INPUT_METHOD) {
-            //     Slogger::V(TAG, "List with no IM target:");
-            //     logWindowList("  ");
-            // }
+            if (DEBUG_INPUT_METHOD) {
+                Slogger::V(TAG, "List with no IM target:");
+                LogWindowList(windows, String("  "));
+            }
             if (DN > 0) {
                 MoveInputMethodDialogsLocked(-1);
             }
@@ -10074,11 +10086,11 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
             AutoPtr<IInterface> obj;
             GetDefaultWindowListLocked()->Get(idx - 1, (IInterface**)&obj);
             AutoPtr<WindowState> imFocus = To_WindowState(obj);
-            // if (DEBUG_INPUT_METHOD) {
-            //     Slogger::I(TAG, "Desired input method target: " + imFocus);
-            //     Slogger::I(TAG, "Current focus: " + mCurrentFocus);
-            //     Slogger::I(TAG, "Last focus: " + mLastFocus);
-            // }
+            if (DEBUG_INPUT_METHOD) {
+                Slogger::I(TAG, "Desired input method target: %s", TO_CSTR(imFocus));
+                Slogger::I(TAG, "Current focus: %s", TO_CSTR(mCurrentFocus));
+                Slogger::I(TAG, "Last focus: %s", TO_CSTR(mLastFocus));
+            }
             if (imFocus != NULL) {
                 // This may be a starting window, in which case we still want
                 // to count it as okay.
@@ -10101,14 +10113,14 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
                         }
                     }
                 }
-                // if (DEBUG_INPUT_METHOD) {
-                //     Slogger::I(TAG, "IM target client: " + imFocus.mSession.mClient);
-                //     if (imFocus.mSession.mClient != null) {
-                //         Slogger::I(TAG, "IM target client binder: "
-                //                 + imFocus.mSession.mClient.asBinder());
-                //         Slogger::I(TAG, "Requesting client binder: " + client.asBinder());
-                //     }
-                // }
+                if (DEBUG_INPUT_METHOD) {
+                    Slogger::I(TAG, "IM target client: %p", imFocus->mSession->mClient.Get());
+                    if (imFocus->mSession->mClient != NULL) {
+                        Slogger::I(TAG, "IM target client binder: %p",
+                                IBinder::Probe(imFocus->mSession->mClient));
+                        Slogger::I(TAG, "Requesting client binder: %p", IBinder::Probe(client));
+                    }
+                }
                 if (imFocus->mSession->mClient != NULL &&
                         IBinder::Probe(imFocus->mSession->mClient) == IBinder::Probe(client)) {
                     *result = TRUE;
