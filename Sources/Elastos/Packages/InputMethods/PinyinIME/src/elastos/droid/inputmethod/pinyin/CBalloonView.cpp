@@ -13,7 +13,7 @@ String CBalloonView::SUSPENSION_POINTS("...");
 
 CAR_OBJECT_IMPL(CBalloonView);
 
-CAR_INTERFACE_IMPL(CBalloonView, View, ICandidateView);
+CAR_INTERFACE_IMPL(CBalloonView, View, IBalloonView);
 
 CBalloonView::CBalloonView()
     : mLabeColor(0xff000000)

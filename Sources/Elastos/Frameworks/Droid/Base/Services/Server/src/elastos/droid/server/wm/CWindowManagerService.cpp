@@ -732,10 +732,10 @@ const Boolean CWindowManagerService::DEBUG_FOCUS_LIGHT = DEBUG_FOCUS;
 const Boolean CWindowManagerService::DEBUG_ANIM = FALSE;
 const Boolean CWindowManagerService::DEBUG_LAYOUT = FALSE;
 const Boolean CWindowManagerService::DEBUG_RESIZE = FALSE;
-const Boolean CWindowManagerService::DEBUG_LAYERS = FALSE;
+const Boolean CWindowManagerService::DEBUG_LAYERS = TRUE;
 const Boolean CWindowManagerService::DEBUG_INPUT = FALSE;
 const Boolean CWindowManagerService::DEBUG_INPUT_METHOD = TRUE;
-const Boolean CWindowManagerService::DEBUG_VISIBILITY = FALSE;
+const Boolean CWindowManagerService::DEBUG_VISIBILITY = TRUE;
 const Boolean CWindowManagerService::DEBUG_WINDOW_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_TOKEN_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_ORIENTATION = FALSE;
@@ -1751,7 +1751,7 @@ void CWindowManagerService::SetInputMethodAnimLayerAdjustment(
     List<AutoPtr<WindowState> >::ReverseIterator rit;
     if (imw != NULL) {
         imw->mWinAnimator->mAnimLayer = imw->mLayer + adj;
-        if (DEBUG_LAYERS) Slogger::V(TAG, "IM win %p anim layer: %d", imw.Get(),
+        if (DEBUG_LAYERS) Slogger::V(TAG, "IM win %s anim layer: %d", TO_CSTR(imw),
                 imw->mWinAnimator->mAnimLayer);
         Int32 wi;
         imw->mChildWindows->GetSize(&wi);
@@ -2673,9 +2673,10 @@ void CWindowManagerService::DispatchWallpaperVisibility(
     if (wallpaper->mWallpaperVisible != visible) {
         wallpaper->mWallpaperVisible = visible;
         //try {
-        // if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
-        //         "Updating vis of wallpaper " + wallpaper
-        //         + ": " + visible + " from:\n" + Debug.getCallers(4, "  "));
+        if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) {
+            Slogger::V(TAG, "Updating vis of wallpaper %s: %d", TO_CSTR(wallpaper),
+                    visible/* + " from:\n" + Debug.getCallers(4, "  ")*/);
+        }
         wallpaper->mClient->DispatchAppVisibility(visible);
         // } catch (RemoteException e) {
         // }
@@ -3878,8 +3879,10 @@ Int32 CWindowManagerService::RelayoutWindow(
         else {
             winAnimator->mEnterAnimationPending = FALSE;
             if (winAnimator->mSurfaceControl != NULL) {
-                // if (DEBUG_VISIBILITY) Slogger::I(TAG, "Relayout invis " + win
-                //         + ": mExiting=" + win.mExiting);
+                if (DEBUG_VISIBILITY) {
+                    Slogger::I(TAG, "Relayout invis %s: mExiting=%d", TO_CSTR(win),
+                            win->mExiting);
+                }
                 // If we are not currently running the exit animation, we
                 // need to see about starting one.
                 if (!win->mExiting) {
@@ -9841,8 +9844,9 @@ ECode CWindowManagerService::HandleReportApplicationTokenDrawn(
     /* [in] */ AppWindowToken* wtoken)
 {
     // try {
-    // if (DEBUG_VISIBILITY) Slogger::V(
-    //         TAG, "Reporting drawn in " + wtoken);
+    if (DEBUG_VISIBILITY) {
+        Slogger::V(TAG, "Reporting drawn in %s", TO_CSTR(wtoken));
+    }
     ECode ec = wtoken->mAppToken->WindowsDrawn();
     // } catch (RemoteException ex) {
     // }
@@ -9855,10 +9859,10 @@ ECode CWindowManagerService::HandleReportApplicationTokenWindows(
     /* [in] */ AppWindowToken* wtoken)
 {
     // try {
-    // if (DEBUG_VISIBILITY) Slogger::V(
-    //         TAG, "Reporting visible in " + wtoken
-    //         + " visible=" + nowVisible
-    //         + " gone=" + nowGone);
+    if (DEBUG_VISIBILITY) {
+        Slogger::V(TAG, "Reporting visible in %s visible=%d gone=%d",
+                TO_CSTR(wtoken), nowVisible, nowGone);
+    }
     ECode ec = NOERROR;
     if (nowVisible) {
         ec = wtoken->mAppToken->WindowsVisible();
