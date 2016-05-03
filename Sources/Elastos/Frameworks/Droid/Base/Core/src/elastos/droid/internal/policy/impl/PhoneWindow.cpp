@@ -41,6 +41,7 @@
 #include "elastos/droid/internal/view/menu/CListMenuPresenter.h"
 #include "elastos/droid/internal/view/menu/CIconMenuPresenter.h"
 #include "elastos/droid/internal/widget/CActionBarContextView.h"
+#include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
 #include "elastos/droid/widget/CPopupWindow.h"
 #include "elastos/droid/widget/Toast.h"
 #include "elastos/droid/provider/Settings.h"
@@ -158,6 +159,7 @@ using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewStub;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IListAdapter;
@@ -1292,19 +1294,19 @@ AutoPtr<IView> PhoneWindow::_DecorView::UpdateColorViewInt(
 
     if (view == NULL) {
         if (show) {
-            //view = new View(mContext);
             AutoPtr<IView> tmpView;
             CView::New(mContext, (IView**)&tmpView);
             view = tmpView;
             view->SetBackgroundColor(color);
             view->SetTransitionName(transitionName);
             view->SetId(id);
-            AutoPtr<IWindowManagerLayoutParams> wmlParam;
-            CWindowManagerLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, height,
-                    IGravity::START | verticalGravity, (IWindowManagerLayoutParams**)&wmlParam);
-            AddView(view, IViewGroupLayoutParams::Probe(wmlParam));
+            AutoPtr<IViewGroupLayoutParams> vglParams;
+            CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, height,
+                    IGravity::START | verticalGravity, (IViewGroupLayoutParams**)&vglParams);
+            AddView(view, vglParams);
         }
-    } else {
+    }
+    else {
         Int32 vis = show ? VISIBLE : INVISIBLE;
         view->SetVisibility(vis);
         if (show) {
@@ -1350,8 +1352,7 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateStatusGuard(
                 Int32 t;
                 rect->GetTop(&t);
                 Int32 newMargin = 0;
-                if (t == 0 )
-                {
+                if (t == 0) {
                     insets->GetSystemWindowInsetTop(&newMargin);
                 }
                 Int32 topMargin;
@@ -1369,13 +1370,14 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateStatusGuard(
                         Int32 color;
                         resources->GetColor(R::color::input_method_navigation_guard, &color);
                         mStatusGuard->SetBackgroundColor(color);
-                        AutoPtr<IWindowManagerLayoutParams> wmlParam;
-                        CWindowManagerLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, tm, IGravity::START | IGravity::TOP,
-                                (IWindowManagerLayoutParams**)&wmlParam);
+                        AutoPtr<IViewGroupLayoutParams> vglParams;
+                        CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, tm, IGravity::START | IGravity::TOP,
+                                (IViewGroupLayoutParams**)&vglParams);
                         Int32 index;
                         IndexOfChild(mStatusColorView, &index);
-                        AddView(mStatusGuard, index, IViewGroupLayoutParams::Probe(wmlParam));
-                    } else {
+                        AddView(mStatusGuard, index, vglParams);
+                    }
+                    else {
                         AutoPtr<IViewGroupLayoutParams> lp;
                         mStatusGuard->GetLayoutParams((IViewGroupLayoutParams**)&vglParams);
                         Int32 lpheight;
@@ -1401,7 +1403,8 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateStatusGuard(
                 AutoPtr<IWindowInsets> witmp;
                 insets->ConsumeSystemWindowInsets(false, nonOverlay && showStatusGuard /* top */, false, false, (IWindowInsets**)&witmp);
                 insets = witmp;
-            } else {
+            }
+            else {
                 // reset top margin
                 Int32 mlpTop;
                 mlp->GetTopMargin(&mlpTop);
@@ -1435,16 +1438,13 @@ void PhoneWindow::_DecorView::UpdateNavigationGuard(
             AutoPtr<IViewGroupLayoutParams> vglParams;
             IView::Probe(mHost->mContentParent)->GetLayoutParams((IViewGroupLayoutParams**)&vglParams);
             IViewGroupMarginLayoutParams* mlp = IViewGroupMarginLayoutParams::Probe(vglParams);
-            if (mlp != NULL) {
-                Int32 bot;
-                insets->GetSystemWindowInsetBottom(&bot);
-                mlp->SetBottomMargin(bot);
-                IView::Probe(mHost->mContentParent)->SetLayoutParams(IViewGroupLayoutParams::Probe(mlp));
-            }
+            Int32 bot;
+            insets->GetSystemWindowInsetBottom(&bot);
+            mlp->SetBottomMargin(bot);
+            IView::Probe(mHost->mContentParent)->SetLayoutParams(IViewGroupLayoutParams::Probe(mlp));
         }
         // position the navigation guard view, creating it if necessary
         if (mNavigationGuard == NULL) {
-            //mNavigationGuard = new View(mContext);
             CView::New(mContext, (IView**)&mNavigationGuard);
             AutoPtr<IResources> resources;
             mContext->GetResources((IResources**)&resources);
@@ -1453,13 +1453,15 @@ void PhoneWindow::_DecorView::UpdateNavigationGuard(
             mNavigationGuard->SetBackgroundColor(color);
             Int32 swiBot;
             insets->GetSystemWindowInsetBottom(&swiBot);
-            AutoPtr<IWindowManagerLayoutParams> wmlParam;
-            CWindowManagerLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, swiBot, IGravity::START | IGravity::BOTTOM,
-                    (IWindowManagerLayoutParams**)&wmlParam);
+            AutoPtr<IViewGroupLayoutParams> vglParams;
+            CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, swiBot,
+                    IGravity::START | IGravity::BOTTOM,
+                    (IViewGroupLayoutParams**)&vglParams);
             Int32 index;
             IndexOfChild(mNavigationColorView, &index);
-            AddView(mNavigationGuard, index, IViewGroupLayoutParams::Probe(wmlParam));
-        } else {
+            AddView(mNavigationGuard, index, vglParams);
+        }
+        else {
             AutoPtr<IViewGroupLayoutParams> lp;
             mNavigationGuard->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 swiBot;
