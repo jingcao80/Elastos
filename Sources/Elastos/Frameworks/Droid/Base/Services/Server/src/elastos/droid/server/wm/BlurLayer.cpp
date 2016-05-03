@@ -132,8 +132,11 @@ void BlurLayer::AdjustSurface(
     if (!mStack->IsFullscreen()) {
         mBounds->GetWidth(&dw);
         mBounds->GetHeight(&dh);
-        mBounds->GetLeft((Int32*)&xPos);
-        mBounds->GetTop((Int32*)&yPos);
+        Int32 value;
+        mBounds->GetLeft(&value);
+        xPos = (Float)value;
+        mBounds->GetTop(&value);
+        yPos = (Float)value;
     }
     else {
         // Set surface size to screen size.

@@ -113,7 +113,7 @@ ECode PreferenceScreen::ShowDialog(
     AutoPtr<ICharSequence> title;
     GetTitle((ICharSequence**)&title);
     Int32 resID;
-    context->GetThemeResId((Int32*)&resID);
+    context->GetThemeResId(&resID);
     AutoPtr<IDialog> dialog;
     CDialog::New(context, resID, (IDialog**)&dialog);
     mDialog = dialog;

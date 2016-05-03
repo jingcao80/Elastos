@@ -378,10 +378,13 @@ AutomaticBrightnessController::AutomaticBrightnessController(
     mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
     mLiveDisplay = ldc;
 
+    Int32 value;
     resources->GetInteger(
-            Elastos::Droid::R::integer::config_brighteningLightDebounce, (Int32*)&mBrighteningLightDebounceConfig);
+            Elastos::Droid::R::integer::config_brighteningLightDebounce, &value);
+    mBrighteningLightDebounceConfig = value;
     resources->GetInteger(
-            Elastos::Droid::R::integer::config_darkeningLightDebounce, (Int32*)&mDarkeningLightDebounceConfig);
+            Elastos::Droid::R::integer::config_darkeningLightDebounce, &value);
+    mDarkeningLightDebounceConfig = value;
 
     mLightSensorListener = new MySensorEventListener(this);
     mTwilightListener = new MyTwilightListener(this);

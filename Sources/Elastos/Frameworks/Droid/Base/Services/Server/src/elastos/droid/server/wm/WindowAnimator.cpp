@@ -782,7 +782,7 @@ void WindowAnimator::SetAppLayoutChanges(
         windows->Get(i, (IInterface**)&obj);
         Int32 displayId = To_WindowState(obj)->GetDisplayId();
         Int32 key;
-        if (displayId >= 0 && (displays->IndexOfKey(displayId, (Int32*)&key), key < 0)) {
+        if (displayId >= 0 && (displays->IndexOfKey(displayId, &key), key < 0)) {
             SetPendingLayoutChanges(displayId, changes);
             if (CWindowManagerService::DEBUG_LAYOUT_REPEATS) {
                 mService->DebugLayoutRepeats(s, GetPendingLayoutChanges(displayId));

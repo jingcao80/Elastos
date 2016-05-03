@@ -597,9 +597,9 @@ void RecentsVerticalScrollView::OnConfigurationChanged(
     GetContext((IContext**)&ctx);
     AutoPtr<IViewConfiguration> vc;
     helper->Get(ctx, (IViewConfiguration**)&vc);
-    Float pagingTouchSlop;
-    vc->GetScaledPagingTouchSlop((Int32*)&pagingTouchSlop);
-    mSwipeHelper->SetPagingTouchSlop(pagingTouchSlop);
+    Int32 pagingTouchSlop;
+    vc->GetScaledPagingTouchSlop(&pagingTouchSlop);
+    mSwipeHelper->SetPagingTouchSlop((Float)pagingTouchSlop);
 }
 
 void RecentsVerticalScrollView::SetOverScrollEffectPadding(

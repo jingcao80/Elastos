@@ -180,9 +180,11 @@ ECode CAccessibilityServiceInfo::constructor(
         asAttributes->GetInt32(
                 R::styleable::AccessibilityService_accessibilityFeedbackType,
                 0, &mFeedbackType);
+        Int32 value;
         asAttributes->GetInt32(
                 R::styleable::AccessibilityService_notificationTimeout,
-                0, (Int32*)&mNotificationTimeout);
+                0, &value);
+        mNotificationTimeout = value;
         asAttributes->GetInt32(
                 R::styleable::AccessibilityService_accessibilityFlags, 0, &mFlags);
         asAttributes->GetString(

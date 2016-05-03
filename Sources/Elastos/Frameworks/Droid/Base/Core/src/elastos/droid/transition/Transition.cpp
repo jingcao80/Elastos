@@ -123,15 +123,15 @@ ECode Transition::constructor(
         ArraySize(R::styleable::Transition));
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
-    Int64 duration = 0;
-    a->GetInt32(R::styleable::Transition_duration, -1, (Int32*)&duration);
+    Int32 duration = 0;
+    a->GetInt32(R::styleable::Transition_duration, -1, &duration);
     if (duration >= 0) {
-        SetDuration(duration);
+        SetDuration((Int64)duration);
     }
-    Int64 startDelay = 0;
-    a->GetInt32(R::styleable::Transition_startDelay, -1, (Int32*)&startDelay);
+    Int32 startDelay = 0;
+    a->GetInt32(R::styleable::Transition_startDelay, -1, &startDelay);
     if (startDelay > 0) {
-        SetStartDelay(startDelay);
+        SetStartDelay((Int64)startDelay);
     }
     Int32 resID = 0;
     a->GetResourceId(R::styleable::Animator_interpolator, 0, &resID);

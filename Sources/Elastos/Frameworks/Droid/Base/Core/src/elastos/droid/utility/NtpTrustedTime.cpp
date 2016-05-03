@@ -74,8 +74,9 @@ ECode NtpTrustedTime::GetInstance(
 
         String defaultServer;
         res->GetString(R::string::config_ntpServer, &defaultServer);
-        Int64 defaultTimeout;
-        res->GetInteger(R::integer::config_ntpTimeout, (Int32*)&defaultTimeout);
+        Int32 value;
+        res->GetInteger(R::integer::config_ntpTimeout, &value);
+        Int64 defaultTimeout = (Int64)value;
 
         String secureServer;
         FAIL_RETURN(Settings::Global::GetString(resolver, ISettingsGlobal::NTP_SERVER, &secureServer))

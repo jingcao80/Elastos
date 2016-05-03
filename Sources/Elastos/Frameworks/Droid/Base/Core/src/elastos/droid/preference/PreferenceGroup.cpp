@@ -114,7 +114,7 @@ ECode PreferenceGroup::AddPreference(
     }
 
     Int32 order;
-    if (preference->GetOrder((Int32*)&order), order == IPreference::DEFAULT_ORDER) {
+    if (preference->GetOrder(&order), order == IPreference::DEFAULT_ORDER) {
         if (mOrderingAsAdded) {
             preference->SetOrder(mCurrentPreferenceOrder++);
         }
