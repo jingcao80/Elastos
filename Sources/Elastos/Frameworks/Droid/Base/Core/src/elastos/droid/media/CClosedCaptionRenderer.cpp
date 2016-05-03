@@ -223,9 +223,13 @@ CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::CCLineBox(
     ctx->GetResources((IResources**)&res);
 
     // get the default (will be updated later during measure)
-    res->GetDimensionPixelSize(R::dimen::subtitle_outline_width, (Int32*)&mOutlineWidth);
-    res->GetDimensionPixelSize(R::dimen::subtitle_shadow_radius, (Int32*)&mShadowRadius);
-    res->GetDimensionPixelSize(R::dimen::subtitle_shadow_offset, (Int32*)&mShadowOffset);
+    Int32 value;
+    res->GetDimensionPixelSize(R::dimen::subtitle_outline_width, &value);
+    mOutlineWidth = (Float)value;
+    res->GetDimensionPixelSize(R::dimen::subtitle_shadow_radius, &value);
+    mShadowRadius = (Float)value;
+    res->GetDimensionPixelSize(R::dimen::subtitle_shadow_offset, &value);
+    mShadowOffset = (Float)value;
 }
 
 ECode CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::SetCaptionStyle(

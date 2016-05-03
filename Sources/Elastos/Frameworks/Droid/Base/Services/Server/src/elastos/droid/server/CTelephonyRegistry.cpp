@@ -201,7 +201,7 @@ ECode CTelephonyRegistry::MyBroadcastReceiver::OnReceive(
         Slogger::D("CTelephonyRegistry", "mBroadcastReceiver: action=%s", action.string());
     if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
         Int32 userHandle;
-        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, (Int32*)&userHandle);
+        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &userHandle);
         if (CTelephonyRegistry::DBG)
             Slogger::D("CTelephonyRegistry", "OnReceive: userHandle=%d", userHandle);
         AutoPtr<IMessage> msg;

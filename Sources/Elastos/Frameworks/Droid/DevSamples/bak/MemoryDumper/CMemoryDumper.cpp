@@ -131,9 +131,9 @@ ECode CMemoryDumper::Print(
 {
     List<String>::Iterator it = list->Begin();
     for (Int32 cnt = 0; it != list->End() && cnt < MAX_BACKTRACE_DEPTH; ++it, ++cnt) {
-        unsigned pc, rpc;
+        unsigned int pc, rpc;
         Slogger::V(TAG, "pc = %s", it->string());
-        StringUtils::ParseInt32(*it, 16, (Int32*)&pc);
+        StringUtils::ParseInt32(*it, 16, &pc);
         AutoPtr<MapInfoManager> mapInfo = new MapInfoManager(pid);
         const MapInfoManager::MapInfo* mi = mapInfo->Pc2Mapinfo(pc, &rpc);
         Slogger::V(TAG, "\t#%02d  pc %08x  %s", cnt,

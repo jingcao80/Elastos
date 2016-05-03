@@ -28,7 +28,7 @@ ECode MonkeyRotationEvent::Init(
     /* [in] */ Int32 degree,
     /* [in] */ Boolean persist)
 {
-    Int32 *pDegree = (Int32*)&mRotationDegree;
+    Int32 *pDegree = &mRotationDegree;
     *pDegree = degree;
     Boolean *pPersist = (Boolean*)&mPersist;
     *pPersist = persist;

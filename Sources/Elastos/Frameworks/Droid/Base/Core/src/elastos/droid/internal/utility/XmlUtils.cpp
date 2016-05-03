@@ -322,7 +322,7 @@ ECode XmlUtils::WriteListXml(
     }
 
     Int32 N;
-    val->GetSize((Int32*)&N);
+    val->GetSize(&N);
     Int32 i = 0;
     while (i < N) {
         AutoPtr<IInterface> value;

@@ -552,9 +552,9 @@ void RecentsHorizontalScrollView::OnConfigurationChanged(
     GetContext((IContext**)&context);
     AutoPtr<IViewConfiguration> vc;
     helper->Get(context, (IViewConfiguration**)&vc);
-    Float pagingTouchSlop;
-    vc->GetScaledPagingTouchSlop((Int32*)&pagingTouchSlop);
-    mSwipeHelper->SetPagingTouchSlop(pagingTouchSlop);
+    Int32 pagingTouchSlop;
+    vc->GetScaledPagingTouchSlop(&pagingTouchSlop);
+    mSwipeHelper->SetPagingTouchSlop((Float)pagingTouchSlop);
 }
 
 void RecentsHorizontalScrollView::SetOverScrollEffectPadding(

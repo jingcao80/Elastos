@@ -216,7 +216,9 @@ ECode ResolverDrawerLayout::constructor(
     AutoPtr<IViewConfiguration> vc;
     chlp->Get(context, (IViewConfiguration**)&vc);
     vc->GetScaledTouchSlop(&mTouchSlop);
-    vc->GetScaledMinimumFlingVelocity((Int32*)&mMinFlingVelocity);
+    Int32 value;
+    vc->GetScaledMinimumFlingVelocity(&value);
+    mMinFlingVelocity = (Float)value;
     return NOERROR;
 }
 

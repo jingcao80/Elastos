@@ -691,7 +691,9 @@ ECode CContentProviderOperation::BackRefToValue(
         FAIL_RETURN(contentUris->ParseId(uri, &tmpBackRefValue))
     }
     else {
-        FAIL_RETURN(backRef->GetCount((Int32*)&tmpBackRefValue))
+        Int32 value;
+        FAIL_RETURN(backRef->GetCount(&value))
+        tmpBackRefValue = value;
     }
 
     *backRefValue = tmpBackRefValue;
