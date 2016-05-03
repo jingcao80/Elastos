@@ -4892,8 +4892,8 @@ WifiStateMachine::WifiStateMachine(
 {
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mP2pConnected);
     CArrayList::New((IArrayList**)&mScanResults);
-    CArrayList::New((IArrayList**)&mBatchedScanResults);
-    CLinkedList::New((ILinkedList**)&mBufferedScanMsg);
+    CArrayList::New((IList**)&mBatchedScanResults);
+    CLinkedList::New((IQueue**)&mBufferedScanMsg);
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mScreenBroadcastReceived);
     CAtomicInteger32::New((IAtomicInteger32**)&mCountryCodeSequence);
     mTargetRoamBSSID = String("any");
@@ -5623,7 +5623,7 @@ ECode WifiStateMachine::SyncGetDhcpResults(
 {
     VALIDATE_NOT_NULL(result)
     synchronized (mDhcpResultsLock) {
-        CDhcpResults::New(mDhcpResults, (IDhcpResults**)&result);
+        CDhcpResults::New(mDhcpResults, result);
     }
     return NOERROR;
 }

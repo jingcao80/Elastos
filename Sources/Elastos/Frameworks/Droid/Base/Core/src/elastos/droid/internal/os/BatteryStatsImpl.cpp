@@ -3608,7 +3608,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
         AutoPtr<Proc> proc = new Proc(processName);
         proc->ReadFromParcelLocked(in);
         AutoPtr<ICharSequence> cs;
-        CString::New(processName, (ICharSequence**)&processName);
+        CString::New(processName, (ICharSequence**)&cs);
         mProcessStats->Put(cs, (IObject*)proc.Get());
     }
 
@@ -3621,7 +3621,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
         AutoPtr<Pkg> pkg = new Pkg(this);
         pkg->ReadFromParcelLocked(in);
         AutoPtr<ICharSequence> cs;
-        CString::New(packageName, (ICharSequence**)&processName);
+        CString::New(packageName, (ICharSequence**)&cs);
         mPackageStats->Put(cs, (IObject*)pkg.Get());
     }
 
@@ -8440,9 +8440,9 @@ void BatteryStatsImpl::UpdateNetworkActivityLocked(
 
         if (mOnBatteryInternal) {
             AutoPtr<INetworkStatsHelper> helper;
-            CNetworkStatsHelper::AcquireSingleton((INetworkStatsHelper**)&helepr);
+            CNetworkStatsHelper::AcquireSingleton((INetworkStatsHelper**)&helper);
             AutoPtr<INetworkStats> delta;
-            helepr->Subtract(snapshot, last, NULL, NULL, mTmpNetworkStats, (INetworkStats**)&delta);
+            helper->Subtract(snapshot, last, NULL, NULL, mTmpNetworkStats, (INetworkStats**)&delta);
             mTmpNetworkStats = delta;
 
             Int64 radioTime = mMobileRadioActivePerAppTimer->CheckpointRunningLocked(
@@ -8519,8 +8519,8 @@ void BatteryStatsImpl::UpdateNetworkActivityLocked(
         if (mOnBatteryInternal) {
             AutoPtr<INetworkStats> delta;
             AutoPtr<INetworkStatsHelper> helper;
-            CNetworkStatsHelper::AcquireSingleton((INetworkStatsHelper**)&helepr);
-            helepr->Subtract(snapshot, last, NULL, NULL, mTmpNetworkStats, (INetworkStats**)&delta);
+            CNetworkStatsHelper::AcquireSingleton((INetworkStatsHelper**)&helper);
+            helper->Subtract(snapshot, last, NULL, NULL, mTmpNetworkStats, (INetworkStats**)&delta);
             mTmpNetworkStats = delta;
 
             Int32 size;
@@ -9173,7 +9173,7 @@ void BatteryStatsImpl::ReadLocked()
         return;
     }
     AutoPtr<IFileInputStream> stream;
-    CFileInputStream::New(file, (IFileOutputStream**)&stream);
+    CFileInputStream::New(file, (IFileInputStream**)&stream);
 
     AutoPtr<ArrayOf<byte> > raw = BatteryStatsHelper::ReadFully(stream);
     AutoPtr<IParcel> in;// = Parcel.obtain();

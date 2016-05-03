@@ -171,11 +171,13 @@ ECode CMtpPropertyGroup::GetPropertyList(
         CMtpPropertyList::New(count * mProperties->GetLength(), IMtpConstants::RESPONSE_OK, (IMtpPropertyList**)&result);
 
         // iterate over all objects in the query
+        Int64 lval;
         for (Int32 objectIndex = 0; objectIndex < count; objectIndex++) {
             if (c != NULL) {
                 Boolean b;
                 c->MoveToNext(&b);
-                c->GetInt64(0, (Int64*)&handle);
+                c->GetInt64(0, (Int64*)&lval);
+                handle = lval;
             }
 
             // iterate over all properties in the query for the given object

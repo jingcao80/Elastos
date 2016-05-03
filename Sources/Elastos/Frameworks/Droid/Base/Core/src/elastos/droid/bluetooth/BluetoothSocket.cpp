@@ -509,8 +509,9 @@ ECode BluetoothSocket::WaitSocketSignal(
     ByteOrder nativeOrder;
     helper->GetNativeOrder(&nativeOrder);
     bb->SetOrder(nativeOrder);
-    Int32 size;
-    bb->GetInt16((Int16*)&size);
+    Int16 tmp;
+    bb->GetInt16((Int16*)&tmp);
+    Int32 size = tmp;
     if(size != SOCK_SIGNAL_SIZE) {
         // throw new IOException("Connection failure, wrong signal size: " + size);
         Slogger::E(TAG, "Connection failure, wrong signal size: %d", size);

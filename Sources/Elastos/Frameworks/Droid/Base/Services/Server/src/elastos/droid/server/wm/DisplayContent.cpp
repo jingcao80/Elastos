@@ -41,7 +41,7 @@ DisplayContent::DisplayContent(
     CRegion::New((IRegion**)&mTouchExcludeRegion);
     CRect::New((IRect**)&mTmpRect);
 
-    CArrayList::New((IArrayList**)&mWindows);
+    CArrayList::New((WindowList**)&mWindows);
     CDisplayInfo::New((IDisplayInfo**)&mDisplayInfo);
 
     display->GetDisplayId(&mDisplayId);
