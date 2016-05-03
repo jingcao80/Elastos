@@ -17,14 +17,15 @@ namespace View {
 
 CAR_INTERFACE_IMPL_2(AbsSavedState, Object, IAbsSavedState, IParcelable)
 
-static AutoPtr<IAbsSavedState> InitEMPTY_STATE()
-{
-    AutoPtr<IAbsSavedState> state;
-    CAbsSavedState::New((IAbsSavedState**)&state);
-    return state;
-}
+const AutoPtr<IAbsSavedState> AbsSavedState::EMPTY_STATE;
 
-const AutoPtr<IAbsSavedState> AbsSavedState::EMPTY_STATE = InitEMPTY_STATE();
+AutoPtr<IAbsSavedState> AbsSavedState::GetEMPTY_STATE()
+{
+    if (EMPTY_STATE == NULL) {
+        CAbsSavedState::New((IAbsSavedState**)&EMPTY_STATE);
+    }
+    return EMPTY_STATE;
+}
 
 AbsSavedState::AbsSavedState()
 {}

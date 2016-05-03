@@ -39,7 +39,7 @@ DragState::DragState(
     , mLocalWin(localWin)
 {
     ASSERT_SUCCEEDED(CRegion::New((IRegion**)&mTmpRegion));
-    CArrayList::New((IArrayList**)&mNotifiedWindows);
+    CArrayList::New((WindowList**)&mNotifiedWindows);
 }
 
 void DragState::Reset()

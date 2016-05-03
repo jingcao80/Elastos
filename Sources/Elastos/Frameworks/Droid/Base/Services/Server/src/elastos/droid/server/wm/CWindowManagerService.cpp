@@ -885,13 +885,13 @@ CWindowManagerService::CWindowManagerService()
     , mInLayout(FALSE)
     , mForceDisableHardwareKeyboard(FALSE)
 {
-    CArrayList::New((IArrayList**)&mResizingWindows);
-    CArrayList::New((IArrayList**)&mPendingRemove);
-    CArrayList::New((IArrayList**)&mDestroySurface);
-    CArrayList::New((IArrayList**)&mLosingFocus);
-    CArrayList::New((IArrayList**)&mWaitingForDrawn);
-    CArrayList::New((IArrayList**)&mRelayoutWhileAnimating);
-    CArrayList::New((IArrayList**)&mInputMethodDialogs);
+    CArrayList::New((WindowList**)&mResizingWindows);
+    CArrayList::New((WindowList**)&mPendingRemove);
+    CArrayList::New((WindowList**)&mDestroySurface);
+    CArrayList::New((WindowList**)&mLosingFocus);
+    CArrayList::New((WindowList**)&mWaitingForDrawn);
+    CArrayList::New((WindowList**)&mRelayoutWhileAnimating);
+    CArrayList::New((WindowList**)&mInputMethodDialogs);
     mWindowMapLock = new Object();
 }
 
@@ -1157,7 +1157,7 @@ AutoPtr<WindowList> CWindowManagerService::GetTokenWindowsOnDisplay(
     /* [in] */ DisplayContent* displayContent)
 {
     AutoPtr<WindowList> windowList;
-    CArrayList::New((IArrayList**)&windowList);
+    CArrayList::New((WindowList**)&windowList);
     Int32 count;
     token->mWindows->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
@@ -8267,7 +8267,7 @@ Boolean CWindowManagerService::ViewServerListWindows(
     Boolean result = TRUE;
 
     AutoPtr<WindowList> windows;
-    CArrayList::New((IArrayList**)&windows);
+    CArrayList::New((WindowList**)&windows);
     synchronized(mWindowMapLock) {
         //noinspection unchecked
         Int32 numDisplays;
@@ -9684,7 +9684,7 @@ ECode CWindowManagerService::HandleReportLosingFocus()
     synchronized(mWindowMapLock) {
         losers = mLosingFocus;
         mLosingFocus = NULL;
-        CArrayList::New((IArrayList**)&mLosingFocus);
+        CArrayList::New((WindowList**)&mLosingFocus);
     }
 
     Int32 N;
@@ -12629,7 +12629,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
     //         winAnimator.mSession.mPid, operation);
 
     if (mForceRemoves == NULL) {
-        CArrayList::New((IArrayList**)&mForceRemoves);
+        CArrayList::New((WindowList**)&mForceRemoves);
     }
 
     Int64 callingIdentity = Binder::ClearCallingIdentity();

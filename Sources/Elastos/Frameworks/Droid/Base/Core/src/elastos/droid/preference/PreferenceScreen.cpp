@@ -121,7 +121,7 @@ ECode PreferenceScreen::ShowDialog(
         AutoPtr<IWindow> window;
         dialog->GetWindow((IWindow**)&window);
         Boolean result;
-        window->RequestFeature(IWindow::FEATURE_NO_TITLE, (Boolean*)&result);
+        window->RequestFeature(IWindow::FEATURE_NO_TITLE, &result);
     }
     else {
         dialog->SetTitle(title);

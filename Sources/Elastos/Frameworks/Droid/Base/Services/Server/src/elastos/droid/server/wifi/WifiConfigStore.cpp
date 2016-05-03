@@ -5447,7 +5447,7 @@ String WifiConfigStore::MakeString(
 
     /* Make sure all set bits are in [0, strings.length) to avoid
      * going out of bounds on strings.  (Shouldn't happen, but...) */
-    set->Get(0, strings->GetLength(), (IBitSet**)&set);
+    set->Get(0, strings->GetLength());
 
     while ((set->NextSetBit(nextSetBit + 1, &nextSetBit), nextSetBit) != -1) {
         String str = (*strings)[nextSetBit].Replace('_', '-');

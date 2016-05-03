@@ -290,7 +290,7 @@ public:
 
 public:
     static const Boolean DBG;
-    AutoPtr<RttServiceImpl> mImpl;
+    AutoPtr<IIRttManager> mImpl;
 
 private:
     static const String TAG;

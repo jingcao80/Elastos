@@ -27,7 +27,8 @@ ECode CBatteryStatsHelperHelper::StatsFromFile(
     /* [out] */ IBatteryStats** stats)
 {
     VALIDATE_NOT_NULL(stats)
-    *stats = BatteryStatsHelper::StatsFromFile(context, fname);
+    AutoPtr<IBatteryStats> bs = BatteryStatsHelper::StatsFromFile(context, fname);
+    *stats = bs;
     REFCOUNT_ADD(*stats)
     return NOERROR;
 }

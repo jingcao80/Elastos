@@ -190,7 +190,7 @@ WindowState::WindowState(
     , mShowToOwnerOnly(FALSE)
 {
     CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mAttrs);
-    CArrayList::New((IArrayList**)&mChildWindows);
+    CArrayList::New((WindowList**)&mChildWindows);
 
     Int32 result;
     mAttrs->CopyFrom(attrs, &result);

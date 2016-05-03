@@ -51,7 +51,7 @@ AppWindowToken::AppWindowToken(
     , mLaunchTaskBehind(FALSE)
     , mEnteringAnimation(FALSE)
 {
-    CArrayList::New((IArrayList**)&mAllAppWindows);
+    CArrayList::New((WindowList**)&mAllAppWindows);
     mAppWindowToken = this;
     mInputApplicationHandle = new InputApplicationHandle(this);
     mAnimator = service->mAnimator;

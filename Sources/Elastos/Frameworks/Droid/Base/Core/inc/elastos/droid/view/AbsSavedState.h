@@ -38,10 +38,9 @@ public:
 
     static CARAPI_(AutoPtr<IAbsSavedState>) GetEMPTY_STATE();
 
-public:
+private:
     static const AutoPtr<IAbsSavedState> EMPTY_STATE;
 
-private:
     AutoPtr<IParcelable> mSuperState;
 };
 

@@ -114,8 +114,10 @@ HandleView::HandleView(
     context->GetResources((IResources**)&res);
     AutoPtr<IDisplayMetrics> metrics;
     res->GetDisplayMetrics((IDisplayMetrics**)&metrics);
+    Float offsetY;
     helper->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            LINE_OFFSET_Y_DIP, metrics, (Float*)&mLineOffsetY);
+            LINE_OFFSET_Y_DIP, metrics, (Float*)&offsetY);
+    mLineOffsetY = (Int32)offsetY;
 
     mAlpha = 1.f;
 
