@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = Elastos-SDK-Libcore
+PROJECT_NAME           = Elastos-SDK-External
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -58,7 +58,7 @@ PROJECT_LOGO           = ../Pictures/elastos_logo_blue.png
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = /home/xilong/swap/ElastosDocWork/output
+OUTPUT_DIRECTORY       = ../GeneratedDocs
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -858,7 +858,7 @@ IMAGE_PATH             =
 # code is scanned, but not when the output code is generated. If lines are added
 # or removed, the anchors will not be placed correctly.
 
-INPUT_FILTER           = /home/xilong/swap/ElastosDocWork/doxy_filters/car_filter.py
+INPUT_FILTER           = ../doxy_filters/car_filter.py
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
@@ -1045,7 +1045,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/header.html
+HTML_HEADER            = ./doxy_css/header.html
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1055,7 +1055,7 @@ HTML_HEADER            = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/head
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/footer.html
+HTML_FOOTER            = ./doxy_css/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1078,7 +1078,7 @@ HTML_STYLESHEET        =
 # see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = /home/xilong/swap/ElastosDocWork/doxyfile/doxy_css/mycss.css
+HTML_EXTRA_STYLESHEET  = ./doxy_css/mycss.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1707,7 +1707,7 @@ GENERATE_RTF           = YES
 # The default directory is: rtf.
 # This tag requires that the tag GENERATE_RTF is set to YES.
 
-RTF_OUTPUT             = /home/xilong/swap/ElastosDocWork/rtf
+RTF_OUTPUT             = ../GeneratedDocs/rtf
 
 # If the COMPACT_RTF tag is set to YES doxygen generates more compact RTF
 # documents. This may be useful for small projects and may help to save some

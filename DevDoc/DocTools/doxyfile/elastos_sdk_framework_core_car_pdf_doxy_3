@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = Elastos-SDK-Framework-1
+PROJECT_NAME           = Elastos-SDK-Framework-3
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -753,16 +753,18 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/accounts \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/animation \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/app \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/appwidget \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/bluetooth \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/content \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/database \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/emoji \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/gesture \
-                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/graphics
+INPUT                  = ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/hardware \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/ims \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/Inputmethods \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/inputmethodservice \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/internal \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/keystore \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/location \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/media \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/mtp \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/net \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/nfc \
+                         ../../../../Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/car/elastos/droid/opengl
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
