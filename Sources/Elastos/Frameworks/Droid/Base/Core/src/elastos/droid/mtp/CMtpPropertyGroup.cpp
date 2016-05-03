@@ -176,7 +176,7 @@ ECode CMtpPropertyGroup::GetPropertyList(
             if (c != NULL) {
                 Boolean b;
                 c->MoveToNext(&b);
-                c->GetInt64(0, (Int64*)&lval);
+                c->GetInt64(0, &lval);
                 handle = lval;
             }
 

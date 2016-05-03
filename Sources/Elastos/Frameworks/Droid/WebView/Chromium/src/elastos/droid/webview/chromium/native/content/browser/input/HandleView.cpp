@@ -116,7 +116,7 @@ HandleView::HandleView(
     res->GetDisplayMetrics((IDisplayMetrics**)&metrics);
     Float offsetY;
     helper->ApplyDimension(ITypedValue::COMPLEX_UNIT_DIP,
-            LINE_OFFSET_Y_DIP, metrics, (Float*)&offsetY);
+            LINE_OFFSET_Y_DIP, metrics, &offsetY);
     mLineOffsetY = (Int32)offsetY;
 
     mAlpha = 1.f;

@@ -230,8 +230,8 @@ ECode JDBCStatement::ExecuteQuery(
                     }
                 }
             }
-            Int64 lval;
-            ((CJDBCConnection *)&conn)->mDb->Changes((Int64 *)&lval);
+            Int64 lval = 0;
+            ((CJDBCConnection *)&conn)->mDb->Changes(&lval);
             updcnt = (Int32)lval;
         // }
         // catch (SQLite.Exception e) {

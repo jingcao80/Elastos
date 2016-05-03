@@ -668,7 +668,7 @@ ECode RttService::OnStart()
     CRttServiceImpl::New(cxt, (IIRttManager**)&mImpl);
 
     Logger::I(TAG, "Starting %s", IContext::WIFI_RTT_SERVICE.string());
-    PublishBinderService(IContext::WIFI_RTT_SERVICE, mImpl);
+    PublishBinderService(IContext::WIFI_RTT_SERVICE, IBinder::Probe(mImpl));
     return NOERROR;
 }
 
@@ -682,7 +682,7 @@ ECode RttService::OnBootPhase(
         if (mImpl == NULL) {
             CRttServiceImpl::New(cxt, (IIRttManager**)&mImpl);
         }
-        mImpl->StartService(cxt);
+        ((RttServiceImpl*)mImpl.Get())->StartService(cxt);
     }
     return NOERROR;
 }

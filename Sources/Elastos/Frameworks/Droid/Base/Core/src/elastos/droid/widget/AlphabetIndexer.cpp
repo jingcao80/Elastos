@@ -172,7 +172,7 @@ ECode AlphabetIndexer::GetPositionForSection(
     // Do we have the position of the previous section?
     if (sectionIndex > 0) {
         Char32 prevLetter = 0;
-        mAlphabet->GetCharAt(sectionIndex - 1, (Char32*)&prevLetter);
+        mAlphabet->GetCharAt(sectionIndex - 1, &prevLetter);
         Int32 prevLetterPos = 0;
         alphaMap->Get((Int32)prevLetter, Elastos::Core::Math::INT32_MIN_VALUE, &prevLetterPos);
         if (prevLetterPos != Elastos::Core::Math::INT32_MIN_VALUE) {

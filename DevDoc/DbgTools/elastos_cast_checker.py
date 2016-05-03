@@ -44,6 +44,13 @@ def find_declare_line(param, lines, lineIndex):
                 return i;
     return -1
 
+def log_fine_info(logFile, firstLog, path):
+    if firstLog:
+        firstLog = False
+        logInfo ='\n>> process file: ' + path + '\n'
+        logFile.write(logInfo)
+        print logInfo
+    return firstLog
 
 def check_match(firstLog, logFile, cppFilepath, usedMatch, usedLineNum, declLine, declLineNum, isHeader = True):
     usedType = usedMatch.group(2)
@@ -52,12 +59,7 @@ def check_match(firstLog, logFile, cppFilepath, usedMatch, usedLineNum, declLine
 
     match = check_declare_match(usedType, param, declLine)
     if match == None:
-        if firstLog:
-            firstLog = False
-            logInfo ='\n>> process file: ' + cppFilepath + '\n'
-            logFile.write(logInfo)
-            print logInfo
-
+        firstLog = log_fine_info(logFile, firstLog, cppFilepath)
         fileInfo = ''
         if isHeader:
             fileInfo = 'in .h file'
@@ -83,13 +85,8 @@ def process_declare_line_in_header(logFile, firstLog, cppFilepath, match, lines,
     elif len(param) >= 2 and param.startswith('m') and param[1].isupper():
         pass
     else:
+        firstLog = log_fine_info(logFile, firstLog, cppFilepath)
         logInfo = ''
-        if firstLog:
-            firstLog = False
-            logInfo ='\n>> process file: ' + cppFilepath + '\n'
-            logFile.write(logInfo)
-            print logInfo
-
         if param.startswith('m'):
             logInfo = "   = warning: declaration for {0} at line {1:d} not found! is it declared in super class's .h file?\n".format(matchInfo, lineNum + 1)
         else:
@@ -130,6 +127,20 @@ def process_file(path, logFile):
                     else:
                         headerFilepath = path.replace("/src/", "/inc/").replace(".cpp", ".h")
                         firstLog = process_declare_line_in_header(logFile, firstLog, path, match, lines, lineNum, headerFilepath)
+
+            # check (Int32*)&XX), (Int64*)&XX) ...
+            index = eachLine.rfind('*)&');
+            if index != -1:
+                primitives = ["Boolean", "Int16", "Int32", "Int64", "Float", "Double", "Char32", "Char16"]
+                for primitive in primitives:
+                    pattern = re.compile(r'(\()('+primitive+')(\s*\*\s*\)\s*&\s*)([a-zA-Z]\w*)(\s*\))')
+                    match = pattern.search(eachLine)
+                    if (match):
+                        firstLog = log_fine_info(logFile, firstLog, path)
+                        logInfo = "   = warning: cast primitive type ({0}*)& at line {1:d}!\n".format(primitive, lineNum + 1)
+                        logFile.write(logInfo)
+                        print logInfo
+
         lineNum = lineNum +1
 
 

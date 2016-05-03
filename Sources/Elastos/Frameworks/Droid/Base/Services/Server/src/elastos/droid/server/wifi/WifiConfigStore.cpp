@@ -5439,7 +5439,7 @@ String WifiConfigStore::RemoveDoubleQuotes(
 }
 
 String WifiConfigStore::MakeString(
-    /* [in] */ IBitSet* set,
+    /* [in] */ IBitSet* inSet,
     /* [in] */ ArrayOf<String>* strings)
 {
     AutoPtr<StringBuffer> buf;
@@ -5447,7 +5447,8 @@ String WifiConfigStore::MakeString(
 
     /* Make sure all set bits are in [0, strings.length) to avoid
      * going out of bounds on strings.  (Shouldn't happen, but...) */
-    set->Get(0, strings->GetLength());
+    AutoPtr<IBitSet> set;
+    inSet->Get(0, strings->GetLength(), (IBitSet**)&set);
 
     while ((set->NextSetBit(nextSetBit + 1, &nextSetBit), nextSetBit) != -1) {
         String str = (*strings)[nextSetBit].Replace('_', '-');
