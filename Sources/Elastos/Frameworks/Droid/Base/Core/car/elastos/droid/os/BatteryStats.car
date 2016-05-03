@@ -1,11 +1,7 @@
 module
 {
-    using interface Elastos.Core.IStringBuilder;
     using interface Elastos.IO.IPrintWriter;
-    using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IMap;
-    using interface Elastos.Utility.IHashMap;
-    interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Utility.IPrinter;
     interface Elastos.Droid.Utility.ISparseArray;
 
@@ -147,24 +143,6 @@ module
     interface IBatteryStatsUidProcExcessivePower {
         const Int32 TYPE_WAKE = 1;
         const Int32 TYPE_CPU = 2;
-
-        GetType(
-            [out] Int32* type);
-
-        SetType(
-            [in] Int32 type);
-
-        GetOverTime(
-            [out] Int64* overTime);
-
-        SetOverTime(
-            [in] Int64 overTime);
-
-        GetUsedTime(
-            [out] Int64* usedTime);
-
-        SetUsedTime(
-            [in] Int64 usedTime);
     }
 
     /**
@@ -488,41 +466,6 @@ module
             [out] Int32* result);
     }
 
-    [local]
-    interface IBatteryStatsHistoryTag {
-        SetTo(
-            [in] IBatteryStatsHistoryTag* o);
-
-        SetTo(
-            [in] String _string,
-            [in] Int32 _uid);
-
-        WriteToParcel(
-            [in] IParcel* dest,
-            [in] Int32 flags);
-
-        ReadFromParcel(
-            [in] IParcel* src);
-
-        GetString(
-            [out] String* string);
-
-        SetString(
-            [in] String string);
-
-        GetUid(
-            [out] Int32* uid);
-
-        SetUid(
-            [in] Int32 uid);
-
-        GetPoolIdx(
-            [out] Int32* poolIdx);
-
-        SetPoolIdx(
-            [in] Int32 poolIdx);
-    }
-
     /**
      * @Involve
      * interface IParcelable
@@ -634,61 +577,6 @@ module
                 EVENT_USER_FOREGROUND | EVENT_FLAG_START;
         const Int32 EVENT_USER_FOREGROUND_FINISH =
                 EVENT_USER_FOREGROUND | EVENT_FLAG_FINISH;
-
-        /**
-         * Return whether the command code is a delta data update.
-         */
-        IsDeltaData(
-            [out] Boolean* result);
-
-        Clear();
-
-        SetTo(
-            [in] IBatteryStatsHistoryItem* o);
-
-        SetTo(
-            [in] Int64 time,
-            [in] Byte cmd,
-            [in] IBatteryStatsHistoryItem* o);
-
-        SameNonEvent(
-            [in] IBatteryStatsHistoryItem* o,
-            [out] Boolean* result);
-
-        Same(
-            [in] IBatteryStatsHistoryItem* o,
-            [out] Boolean* result);
-    }
-
-    [local]
-    interface IBatteryStatsHistoryEventTracker {
-        UpdateState(
-            [in] Int32 code,
-            [in] String name,
-            [in] Int32 uid,
-            [in] Int32 poolIdx,
-            [out] Boolean* result);
-
-        RemoveEvents(
-            [in] Int32 code);
-
-        GetStateForEvent(
-            [in] Int32 code,
-            [out] IHashMap** hashMap);
-    }
-
-    [local]
-    interface IBatteryStatsBitDescription {
-    }
-
-    [local]
-    interface IBatteryStatsHistoryPrinter {
-        PrintNextItem(
-            [in] IPrintWriter* pw,
-            [in] IBatteryStatsHistoryItem* rec,
-            [in] Int64 baseTime,
-            [in] Boolean checkin,
-            [in] Boolean verbose);
     }
 
     /**
@@ -1540,85 +1428,6 @@ module
         WriteToParcelWithoutUids(
             [in] IParcel* outParcel,
             [in] Int32 flags);
-
-        FormatRatioLocked(
-            [in] Int64 num,
-            [in] Int64 den,
-            [out] String* result);
-
-        /**
-         * Temporary for settings.
-         */
-        DumpCheckinLocked(
-            [in] IContext* ctx,
-            [in] IPrintWriter* pw,
-            [in] Int32 which,
-            [in] Int32 reqUid);
-
-        /**
-         * Checkin server version of dump to produce more compact, computer-readable log.
-         *
-         * NOTE: all times are expressed in 'ms'.
-         */
-        DumpCheckinLocked(
-            [in] IContext* ctx,
-            [in] IPrintWriter* pw,
-            [in] Int32 which,
-            [in] Int32 reqUid,
-            [in] Boolean wifiOnly);
-
-        /**
-         * Temporary for settings.
-         */
-        DumpLocked(
-            [in] IContext* ctx,
-            [in] IPrintWriter* pw,
-            [in] String prefix,
-            [in] Int32 which,
-            [in] Int32 reqUid);
-
-        DumpLocked(
-            [in] IContext* ctx,
-            [in] IPrintWriter* pw,
-            [in] String prefix,
-            [in] Int32 which,
-            [in] Int32 reqUid,
-            [in] Boolean wifiOnly);
-
-        PrepareForDumpLocked();
-
-        /**
-         * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
-         *
-         * @param pw a Printer to receive the dump output.
-         */
-        DumpLocked(
-            [in] IContext* ctx,
-            [in] IPrintWriter* pw,
-            [in] Int32 flags,
-            [in] Int32 reqUid,
-            [in] Int64 histStart);
-
-        DumpCheckinLocked(
-            [in] IContext* ctx,
-            [in] IPrintWriter* pw,
-            [in] IList* apps,
-            [in] Int32 flags,
-            [in] Int64 histStart);
-    }
-
-    interface IBatteryStatsHelper {
-        FormatTime(
-            [in] IStringBuilder* sb,
-            [in] Int64 time);
-
-        FormatTimeMs(
-            [in] IStringBuilder* sb,
-            [in] Int64 time);
-
-        FormatTimeMsNoSpace(
-            [in] IStringBuilder* sb,
-            [in] Int64 time);
     }
 
     } // namespace Os

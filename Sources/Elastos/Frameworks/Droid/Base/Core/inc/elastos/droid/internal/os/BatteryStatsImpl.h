@@ -7,7 +7,8 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/etl/HashSet.h>
+#include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
@@ -32,7 +33,8 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::IO::IFileInputStream;
 using Elastos::Utility::IMap;
-using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -1808,9 +1810,11 @@ public:
     CARAPI constructor(
         /* [in] */ IParcel* p);
 
-    HashMap<String, AutoPtr<BatteryStatsTimer> >& GetKernelWakelockStats();
+    CARAPI GetKernelWakelockStats(
+        /* [out] */ IMap** stats);
 
-    HashMap<String, AutoPtr<SamplingTimer> >& GetWakeupReasonStats();
+    CARAPI GetWakeupReasonStats(
+        /* [out] */ IMap** stats);
 
     /*
      * Get the KernelWakelockTimer associated with name, and create a new one if one
@@ -1819,7 +1823,8 @@ public:
     CARAPI_(AutoPtr<SamplingTimer>) GetKernelWakelockTimerLocked(
         /* [in] */ const String& name);
 
-    CARAPI_(Int32) GetBluetoothPingCount();
+    CARAPI GetBluetoothPingCount(
+        /* [out] */ Int32* count);
 
     CARAPI_(void) SetBtHeadset(
         /* [in] */ IBluetoothHeadset* headset);
@@ -1833,7 +1838,7 @@ public:
         /* [in] */ IParcel* src,
         /* [in] */ HistoryItem* cur);
 
-    CARAPI_(void) CommitCurrentHistoryBatchLocked();
+    CARAPI CommitCurrentHistoryBatchLocked();
 
     CARAPI_(void) UpdateTimeBasesLocked(
         /* [in] */ Boolean unplugged,
@@ -2146,190 +2151,223 @@ public:
     CARAPI_(void) NoteNetworkStatsEnabledLocked();
 
     // @Override
-    CARAPI_(Int64) GetScreenOnTime(
+    CARAPI GetScreenOnTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetScreenOnCount(
-        /* [in] */ Int32 which);
+    CARAPI GetScreenOnCount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetScreenOnTime(
-        /* [in] */ Int64 batteryRealtime,
-        /* [in] */ Int32 which);
-
-    // @Override
-    CARAPI_(Int64) GetScreenBrightnessTime(
+    CARAPI GetScreenBrightnessTime(
         /* [in] */ Int32 brightnessBin,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetInteractiveTime(
+    CARAPI GetInteractiveTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetLowPowerModeEnabledTime(
+    CARAPI GetLowPowerModeEnabledTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetLowPowerModeEnabledCount(
-        /* [in] */ Int32 which);
+    CARAPI GetLowPowerModeEnabledCount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetPhoneOnTime(
+    CARAPI GetPhoneOnTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetPhoneOnCount(
-        /* [in] */ Int32 which);
+    CARAPI GetPhoneOnCount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetPhoneSignalStrengthTime(
+    CARAPI GetPhoneSignalStrengthTime(
         /* [in] */ Int32 strengthBin,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetPhoneSignalScanningTime(
+    CARAPI GetPhoneSignalScanningTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetPhoneSignalStrengthCount(
+    CARAPI GetPhoneSignalStrengthCount(
         /* [in] */ Int32 strengthBin,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetPhoneDataConnectionTime(
+    CARAPI GetPhoneDataConnectionTime(
         /* [in] */ Int32 dataType,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetPhoneDataConnectionCount(
+    CARAPI GetPhoneDataConnectionCount(
         /* [in] */ Int32 dataType,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetMobileRadioActiveTime(
+    CARAPI GetMobileRadioActiveTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetMobileRadioActiveCount(
-        /* [in] */ Int32 which);
+    CARAPI GetMobileRadioActiveCount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetMobileRadioActiveAdjustedTime(
-        /* [in] */ Int32 which);
+    CARAPI GetMobileRadioActiveAdjustedTime(
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetMobileRadioActiveUnknownTime(
-        /* [in] */ Int32 which);
+    CARAPI GetMobileRadioActiveUnknownTime(
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetMobileRadioActiveUnknownCount(
-        /* [in] */ Int32 which);
+    CARAPI GetMobileRadioActiveUnknownCount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetWifiOnTime(
+    CARAPI GetWifiOnTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetGlobalWifiRunningTime(
+    CARAPI GetGlobalWifiRunningTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetWifiStateTime(
+    CARAPI GetWifiStateTime(
         /* [in] */ Int32 wifiState,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetWifiStateCount(
+    CARAPI GetWifiStateCount(
         /* [in] */ Int32 wifiState,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetWifiSupplStateTime(
+    CARAPI GetWifiSupplStateTime(
         /* [in] */ Int32 state,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetWifiSupplStateCount(
+    CARAPI GetWifiSupplStateCount(
         /* [in] */ Int32 state,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetWifiSignalStrengthTime(
+    CARAPI GetWifiSignalStrengthTime(
         /* [in] */ Int32 strengthBin,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetWifiSignalStrengthCount(
+    CARAPI GetWifiSignalStrengthCount(
         /* [in] */ Int32 strengthBin,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetBluetoothOnTime(
+    CARAPI GetBluetoothOnTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetBluetoothStateTime(
+    CARAPI GetBluetoothStateTime(
         /* [in] */ Int32 bluetoothState,
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int32) GetBluetoothStateCount(
+    CARAPI GetBluetoothStateCount(
         /* [in] */ Int32 bluetoothState,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(Int64) GetFlashlightOnTime(
+    CARAPI GetFlashlightOnTime(
         /* [in] */ Int64 elapsedRealtimeUs,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetFlashlightOnCount(
-        /* [in] */ Int32 which);
+    CARAPI GetFlashlightOnCount(
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetNetworkActivityBytes(
+    CARAPI GetNetworkActivityBytes(
         /* [in] */ Int32 type,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(Int64) GetNetworkActivityPackets(
+    CARAPI GetNetworkActivityPackets(
         /* [in] */ Int32 type,
-        /* [in] */ Int32 which);
+        /* [in] */ Int32 which,
+        /* [out] */ Int64* result);
 
     CARAPI_(Boolean) IsStartClockTimeValid();
 
     // @Override
-    CARAPI_(Int64) GetStartClockTime();
+    CARAPI GetStartClockTime(
+        /* [out] */ Int64* result);
 
     // @Override
-    CARAPI_(String) GetStartPlatformVersion();
+    CARAPI GetStartPlatformVersion(
+        /* [out] */ String* version);
 
     // @Override
-    CARAPI_(String) GetEndPlatformVersion();
+    CARAPI GetEndPlatformVersion(
+        /* [out] */ String* version);
 
     // @Override
-    CARAPI_(Int32) GetParcelVersion();
+    CARAPI GetParcelVersion(
+        /* [out] */ Int32* result);
 
     // @Override
-    CARAPI_(AutoPtr<ISparseArray>) GetUidStats();
+    CARAPI GetUidStats(
+        /* [out] */ ISparseArray** stats);
 
     CARAPI_(void) SetCallback(
         /* [in] */ BatteryCallback* cb);
@@ -2349,9 +2387,11 @@ public:
 
     CARAPI FinishIteratingOldHistoryLocked();
 
-    CARAPI_(Int32) GetHistoryTotalSize();
+    CARAPI GetHistoryTotalSize(
+        /* [out] */ Int32* size);
 
-    CARAPI_(Int32) GetHistoryUsedSize();
+    CARAPI GetHistoryUsedSize(
+        /* [out] */ Int32* size);
 
     CARAPI StartIteratingHistoryLocked(
         /* [out] */ Boolean* result);
@@ -2438,17 +2478,21 @@ public:
         /* [in] */ Int64 curTime,
         /* [out] */ Int64* result);
 
-    CARAPI_(Int32) GetNumDischargeStepDurations();
+    CARAPI GetNumDischargeStepDurations(
+        /* [out] */ Int32* result);
 
-    CARAPI_(AutoPtr<ArrayOf<Int64> >) GetDischargeStepDurationsArray();
+    CARAPI GetDischargeStepDurationsArray(
+        /* [out, callee] */ ArrayOf<Int64>** array);
 
     CARAPI ComputeChargeTimeRemaining(
         /* [in] */ Int64 curTime,
         /* [out] */ Int64* result);
 
-    CARAPI_(Int32) GetNumChargeStepDurations();
+    CARAPI GetNumChargeStepDurations(
+        /* [out] */ Int32* result);
 
-    CARAPI_(AutoPtr<ArrayOf<Int64> >) GetChargeStepDurationsArray();
+    CARAPI GetChargeStepDurationsArray(
+        /* [out, callee] */ ArrayOf<Int64>** array);
 
     CARAPI GetBatteryUptime(
         /* [in] */ Int64 curTime,
@@ -2478,13 +2522,17 @@ public:
         /* [in] */ Int32 which,
         /* [out] */ Int32* result);
 
-    CARAPI_(Int32) GetDischargeAmountScreenOn();
+    CARAPI GetDischargeAmountScreenOn(
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) GetDischargeAmountScreenOnSinceCharge();
+    CARAPI GetDischargeAmountScreenOnSinceCharge(
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) GetDischargeAmountScreenOff();
+    CARAPI GetDischargeAmountScreenOff(
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) GetDischargeAmountScreenOffSinceCharge();
+    CARAPI GetDischargeAmountScreenOffSinceCharge(
+        /* [out] */ Int32* result);
 
     CARAPI GetCpuSpeedSteps(
         /* [out] */ Int32* steps);
@@ -2564,7 +2612,7 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* out);
 
-    CARAPI_(void) WriteToParcelWithoutUids(
+    CARAPI WriteToParcelWithoutUids(
         /* [in] */ IParcel* out);
 
     CARAPI_(void) PrepareForDumpLocked();
@@ -2578,9 +2626,9 @@ private:
     CARAPI_(void) HandleReportPowerChange(
         /* [in] */ Boolean onBattery);
 
-    HashMap<String, AutoPtr<KernelWakelockStats> >& ReadKernelWakelockStats();
+    HashMap<String, AutoPtr<BatteryStatsImpl::KernelWakelockStats> >* ReadKernelWakelockStats();
 
-    HashMap<String, AutoPtr<KernelWakelockStats> >& ParseProcWakelocks(
+    HashMap<String, AutoPtr<KernelWakelockStats> >* ParseProcWakelocks(
         /* [in] */ ArrayOf<Byte>* wlBuffer,
         /* [in] */ Int32 len,
         /* [in] */ Boolean wakeup_sources);
@@ -2666,7 +2714,8 @@ private:
         /* [in] */ ArrayOf<String>* array,
         /* [in] */ const String& str);
 
-    CARAPI_(Boolean) GetIsOnBattery();
+    CARAPI GetIsOnBattery(
+        /* [out] */ Boolean* isOnBattery);
 
     CARAPI_(void) InitTimes(
         /* [in] */ Int64 uptime,
@@ -3059,11 +3108,11 @@ private:
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
      */
-    HashMap<String, AutoPtr<SamplingTimer> > mKernelWakelockStats;
+    AutoPtr<IHashMap> mKernelWakelockStats;
 
     String mLastWakeupReason;
     Int64 mLastWakeupUptimeMs;
-    HashMap<String, AutoPtr<SamplingTimer> > mWakeupReasonStats;
+    AutoPtr<IHashMap> mWakeupReasonStats;
 
     AutoPtr< ArrayOf<String> > mProcWakelocksName;
     AutoPtr< ArrayOf<Int64> > mProcWakelocksData;

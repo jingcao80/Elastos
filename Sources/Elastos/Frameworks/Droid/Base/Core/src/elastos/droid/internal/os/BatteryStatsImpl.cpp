@@ -76,6 +76,7 @@ using Elastos::Utility::CHashMap;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IMapEntry;
+using Elastos::Utility::ICollection;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Logging::Logger;
@@ -4350,6 +4351,9 @@ BatteryStatsImpl::BatteryStatsImpl()
     mWifiIfaces = ArrayOf<String>::Alloc(0);
 
     CReentrantLock::New((IReentrantLock**)&mWriteLock);
+
+    CHashMap::New((IHashMap**)&mKernelWakelockStats);
+    CHashMap::New((IHashMap**)&mWakeupReasonStats);
 }
 
 ECode BatteryStatsImpl::constructor(
@@ -4469,17 +4473,25 @@ void BatteryStatsImpl::HandleReportPowerChange(
     }
 }
 
-HashMap<String, AutoPtr<BatteryStatsImpl::BatteryStatsTimer> >& BatteryStatsImpl::GetKernelWakelockStats()
+ECode BatteryStatsImpl::GetKernelWakelockStats(
+    /* [out] */ IMap** stats)
 {
-    return mKernelWakelockStats;
+    VALIDATE_NOT_NULL(stats)
+    *stats = IMap::Probe(mKernelWakelockStats);
+    REFCOUNT_ADD(*stats)
+    return NOERROR;
 }
 
-HashMap<String, AutoPtr<BatteryStatsImpl::SamplingTimer> >& BatteryStatsImpl::GetWakeupReasonStats()
+ECode BatteryStatsImpl::GetWakeupReasonStats(
+    /* [out] */ IMap** stats)
 {
-    return mWakeupReasonStats;
+    VALIDATE_NOT_NULL(stats)
+    *stats = IMap::Probe(mWakeupReasonStats);
+    REFCOUNT_ADD(*stats)
+    return NOERROR;
 }
 
-HashMap<String, AutoPtr<Elastos::Droid::Os::BatteryStatsImpl::KernelWakelockStats> >& BatteryStatsImpl::ReadKernelWakelockStats()
+HashMap<String, AutoPtr<BatteryStatsImpl::KernelWakelockStats> >* BatteryStatsImpl::ReadKernelWakelockStats()
 {
     AutoPtr<IFileInputStream> is;
     AutoPtr< ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(8192);
@@ -4523,7 +4535,7 @@ HashMap<String, AutoPtr<Elastos::Droid::Os::BatteryStatsImpl::KernelWakelockStat
     return ParseProcWakelocks(buffer, len, wakeup_sources);
 }
 
-HashMap<String, AutoPtr<Elastos::Droid::Os::BatteryStatsImpl::KernelWakelockStats> >& BatteryStatsImpl::ParseProcWakelocks(
+HashMap<String, AutoPtr<BatteryStatsImpl::KernelWakelockStats> >* BatteryStatsImpl::ParseProcWakelocks(
     /* [in] */ ArrayOf<Byte>* wlBuffer,
     /* [in] */ Int32 len,
     /* [in] */ Boolean wakeup_sources)
@@ -4598,7 +4610,7 @@ HashMap<String, AutoPtr<Elastos::Droid::Os::BatteryStatsImpl::KernelWakelockStat
                     break;
                 }
             }
-            if (it == m.End()) {
+            if (it == m->End()) {
                 m[name] = new KernelWakelockStats(count, totalTime,
                         sKernelWakelockUpdateVersion);
                 numUpdatedWlNames++;
@@ -4618,20 +4630,23 @@ HashMap<String, AutoPtr<Elastos::Droid::Os::BatteryStatsImpl::KernelWakelockStat
             ++it;
         }
     }
-    return m;
+    return &m;
 }
 
 AutoPtr<BatteryStatsImpl::SamplingTimer> BatteryStatsImpl::GetKernelWakelockTimerLocked(
     /* [in] */ const String& name)
 {
+    AutoPtr<ICharSequence> cs;
+    CString::New(name, (ICharSequence**)&cs);
+    AutoPtr<IInterface> value;
+    mKernelWakelockStats->Get(cs, (IInterface**)&value);
     AutoPtr<SamplingTimer> kwlt;
-    HashMap<String, AutoPtr<SamplingTimer> >::Iterator it = mKernelWakelockStats.Find(name);
-    if (it != mKernelWakelockStats.End()) {
-        kwlt = it->mSecond;
+    if (value == NULL) {
+        kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, TRUE /* track reported values */);
+        mKernelWakelockStats->Put(cs, kwlt);
     }
-    if (kwlt == NULL) {
-        kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, mOnBatteryInternal, TRUE /* track reported values */);
-        mKernelWakelockStats[name] = kwlt;
+    else {
+        kwlt = (SamplingTimer*)(IObject*)value.Get();
     }
     return kwlt;
 }
@@ -4650,15 +4665,18 @@ Int32 BatteryStatsImpl::GetCurrentBluetoothPingCount()
     return -1;
 }
 
-Int32 BatteryStatsImpl::GetBluetoothPingCount()
+ECode BatteryStatsImpl::GetBluetoothPingCount(
+    /* [out] */ Int32* count)
 {
+    VALIDATE_NOT_NULL(count)
+    *count = 0;
     if (mBluetoothPingStart == -1) {
-        return mBluetoothPingCount;
+        *count = mBluetoothPingCount;
     }
     else if (mBtHeadset != NULL) {
-        return GetCurrentBluetoothPingCount() - mBluetoothPingStart;
+        *count = GetCurrentBluetoothPingCount() - mBluetoothPingStart;
     }
-    return 0;
+    return NOERROR;
 }
 
 void BatteryStatsImpl::SetBtHeadset(
@@ -4982,9 +5000,10 @@ void BatteryStatsImpl::ReadHistoryDelta(
     }
 }
 
-void BatteryStatsImpl::CommitCurrentHistoryBatchLocked()
+ECode BatteryStatsImpl::CommitCurrentHistoryBatchLocked()
 {
     mHistoryLastWritten->mCmd = HistoryItem::CMD_NULL;
+    return NOERROR;
 }
 
 void BatteryStatsImpl::AddHistoryBufferLocked(
@@ -7148,259 +7167,347 @@ void BatteryStatsImpl::NoteNetworkStatsEnabledLocked()
     UpdateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock::GetElapsedRealtime());
 }
 
-Int64 BatteryStatsImpl::GetScreenOnTime(
+ECode BatteryStatsImpl::GetScreenOnTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mScreenOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mScreenOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetScreenOnCount(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetScreenOnCount(
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return mScreenOnTimer->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = mScreenOnTimer->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetScreenOnTime(
-    /* [in] */ Int64 batteryRealtime,
-    /* [in] */ Int32 which)
-{
-    return mScreenOnTimer->GetTotalTimeLocked(batteryRealtime, which);
-}
-
-Int64 BatteryStatsImpl::GetScreenBrightnessTime(
+ECode BatteryStatsImpl::GetScreenBrightnessTime(
     /* [in] */ Int32 brightnessBin,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mScreenBrightnessTimer)[brightnessBin]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mScreenBrightnessTimer)[brightnessBin]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetInteractiveTime(
+ECode BatteryStatsImpl::GetInteractiveTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mInteractiveTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mInteractiveTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetLowPowerModeEnabledTime(
+ECode BatteryStatsImpl::GetLowPowerModeEnabledTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mLowPowerModeEnabledTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mLowPowerModeEnabledTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetLowPowerModeEnabledCount(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetLowPowerModeEnabledCount(
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return mLowPowerModeEnabledTimer->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = mLowPowerModeEnabledTimer->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetPhoneOnTime(
+ECode BatteryStatsImpl::GetPhoneOnTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mPhoneOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mPhoneOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetPhoneOnCount(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetPhoneOnCount(
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return mPhoneOnTimer->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = mPhoneOnTimer->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetPhoneSignalStrengthTime(
+ECode BatteryStatsImpl::GetPhoneSignalStrengthTime(
     /* [in] */ Int32 strengthBin,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mPhoneSignalStrengthsTimer)[strengthBin]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mPhoneSignalStrengthsTimer)[strengthBin]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetPhoneSignalScanningTime(
+ECode BatteryStatsImpl::GetPhoneSignalScanningTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mPhoneSignalScanningTimer->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result mPhoneSignalScanningTimer->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetPhoneSignalStrengthCount(
+ECode BatteryStatsImpl::GetPhoneSignalStrengthCount(
     /* [in] */ Int32 strengthBin,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (*mPhoneSignalStrengthsTimer)[strengthBin]->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (*mPhoneSignalStrengthsTimer)[strengthBin]->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetPhoneDataConnectionTime(
+ECode BatteryStatsImpl::GetPhoneDataConnectionTime(
     /* [in] */ Int32 dataType,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mPhoneDataConnectionsTimer)[dataType]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mPhoneDataConnectionsTimer)[dataType]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetPhoneDataConnectionCount(
+ECode BatteryStatsImpl::GetPhoneDataConnectionCount(
     /* [in] */ Int32 dataType,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (*mPhoneDataConnectionsTimer)[dataType]->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (*mPhoneDataConnectionsTimer)[dataType]->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetMobileRadioActiveTime(
+ECode BatteryStatsImpl::GetMobileRadioActiveTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mMobileRadioActiveTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mMobileRadioActiveTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetMobileRadioActiveCount(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetMobileRadioActiveCount(
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return mMobileRadioActiveTimer->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result mMobileRadioActiveTimer->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetMobileRadioActiveAdjustedTime(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetMobileRadioActiveAdjustedTime(
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mMobileRadioActiveAdjustedTime->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = mMobileRadioActiveAdjustedTime->GetCountLocked(which);
+    return NOERROR
 }
 
-Int64 BatteryStatsImpl::GetMobileRadioActiveUnknownTime(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetMobileRadioActiveUnknownTime(
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mMobileRadioActiveUnknownTime->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = mMobileRadioActiveUnknownTime->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetMobileRadioActiveUnknownCount(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetMobileRadioActiveUnknownCount(
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (Int32)mMobileRadioActiveUnknownCount->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (Int32)mMobileRadioActiveUnknownCount->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetWifiOnTime(
+ECode BatteryStatsImpl::GetWifiOnTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mWifiOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mWifiOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetGlobalWifiRunningTime(
+ECode BatteryStatsImpl::GetGlobalWifiRunningTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mGlobalWifiRunningTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mGlobalWifiRunningTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetWifiStateTime(
+ECode BatteryStatsImpl::GetWifiStateTime(
     /* [in] */ Int32 wifiState,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mWifiStateTimer)[wifiState]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mWifiStateTimer)[wifiState]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetWifiStateCount(
+ECode BatteryStatsImpl::GetWifiStateCount(
     /* [in] */ Int32 wifiState,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (*mWifiStateTimer)[wifiState]->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (*mWifiStateTimer)[wifiState]->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetWifiSupplStateTime(
+ECode BatteryStatsImpl::GetWifiSupplStateTime(
     /* [in] */ Int32 state,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mWifiSupplStateTimer)[state]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mWifiSupplStateTimer)[state]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetWifiSupplStateCount(
+ECode BatteryStatsImpl::GetWifiSupplStateCount(
     /* [in] */ Int32 state,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (*mWifiSupplStateTimer)[state]->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (*mWifiSupplStateTimer)[state]->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetWifiSignalStrengthTime(
+ECode BatteryStatsImpl::GetWifiSignalStrengthTime(
     /* [in] */ Int32 strengthBin,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mWifiSignalStrengthsTimer)[strengthBin]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mWifiSignalStrengthsTimer)[strengthBin]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR
 }
 
-Int32 BatteryStatsImpl::GetWifiSignalStrengthCount(
+ECode BatteryStatsImpl::GetWifiSignalStrengthCount(
     /* [in] */ Int32 strengthBin,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (*mWifiSignalStrengthsTimer)[strengthBin]->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (*mWifiSignalStrengthsTimer)[strengthBin]->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetBluetoothOnTime(
+ECode BatteryStatsImpl::GetBluetoothOnTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mBluetoothOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mBluetoothOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetBluetoothStateTime(
+ECode BatteryStatsImpl::GetBluetoothStateTime(
     /* [in] */ Int32 bluetoothState,
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return (*mBluetoothStateTimer)[bluetoothState]->GetTotalTimeLocked(
+    VALIDATE_NOT_NULL(result)
+    *result = (*mBluetoothStateTimer)[bluetoothState]->GetTotalTimeLocked(
             elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetBluetoothStateCount(
+ECode BatteryStatsImpl::GetBluetoothStateCount(
     /* [in] */ Int32 bluetoothState,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return (*mBluetoothStateTimer)[bluetoothState]->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = (*mBluetoothStateTimer)[bluetoothState]->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetFlashlightOnTime(
+ECode BatteryStatsImpl::GetFlashlightOnTime(
     /* [in] */ Int64 elapsedRealtimeUs,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
-    return mFlashlightOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    VALIDATE_NOT_NULL(result)
+    *result = mFlashlightOnTimer->GetTotalTimeLocked(elapsedRealtimeUs, which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetFlashlightOnCount(
-    /* [in] */ Int32 which)
+ECode BatteryStatsImpl::GetFlashlightOnCount(
+    /* [in] */ Int32 which,
+    /* [out] */ Int32* result)
 {
-    return mFlashlightOnTimer->GetCountLocked(which);
+    VALIDATE_NOT_NULL(result)
+    *result = mFlashlightOnTimer->GetCountLocked(which);
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetNetworkActivityBytes(
+ECode BatteryStatsImpl::GetNetworkActivityBytes(
     /* [in] */ Int32 type,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
     if (type >= 0 && type < mNetworkByteActivityCounters->GetLength()) {
-        return (*mNetworkByteActivityCounters)[type]->GetCountLocked(which);
+        *result =  (*mNetworkByteActivityCounters)[type]->GetCountLocked(which);
     }
-    else {
-        return 0;
-    }
+    return NOERROR;
 }
 
-Int64 BatteryStatsImpl::GetNetworkActivityPackets(
+ECode BatteryStatsImpl::GetNetworkActivityPackets(
     /* [in] */ Int32 type,
-    /* [in] */ Int32 which)
+    /* [in] */ Int32 which,
+    /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
     if (type >= 0 && type < mNetworkPacketActivityCounters->GetLength()) {
-        return (*mNetworkByteActivityCounters)[type]->GetCountLocked(which);
+        *result = (*mNetworkByteActivityCounters)[type]->GetCountLocked(which);
     }
-    else {
-        return 0;
-    }
+    return NOERROR;
 }
 
 Boolean BatteryStatsImpl::IsStartClockTimeValid()
@@ -7408,8 +7515,10 @@ Boolean BatteryStatsImpl::IsStartClockTimeValid()
     return mStartClockTime > 365 * 24 * 60 * 60 * 1000L;
 }
 
-Int64 BatteryStatsImpl::GetStartClockTime()
+ECode BatteryStatsImpl::GetStartClockTime(
+    /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (!OsStartClockTimeValid()) {
         // If the last clock time we got was very small, then we hadn't had a real
         // time yet, so try to get it again.
@@ -7421,32 +7530,49 @@ Int64 BatteryStatsImpl::GetStartClockTime()
                     SystemClock::GetUptimeMillis());
         }
     }
-    return mStartClockTime;
+    *result = mStartClockTime;
+    return NOERROR;
 }
 
-String BatteryStatsImpl::GetStartPlatformVersion()
+ECode BatteryStatsImpl::GetStartPlatformVersion(
+    /* [out] */ String* version)
 {
-    return mStartPlatformVersion;
+    VALIDATE_NOT_NULL(version)
+    *version = mStartPlatformVersion;
+    return NOERROR;
 }
 
-String BatteryStatsImpl::GetEndPlatformVersion()
+ECode BatteryStatsImpl::GetEndPlatformVersion(
+    /* [out] */ String* version)
 {
-    return mEndPlatformVersion;
+    VALIDATE_NOT_NULL(version)
+    *version = mEndPlatformVersion;
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetParcelVersion()
+ECode BatteryStatsImpl::GetParcelVersion(
+    /* [out] */ Int32* result)
 {
-    return VERSION;
+    VALIDATE_NOT_NULL(result)
+    *result = VERSION;
+    return NOERROR;
 }
 
-Boolean BatteryStatsImpl::GetIsOnBattery()
+ECode BatteryStatsImpl::GetIsOnBattery(
+    /* [out] */ Boolean* isOnBattery)
 {
-    return mOnBattery;
+    VALIDATE_NOT_NULL(isOnBattery)
+    *isOnBattery = mOnBattery;
+    return NOERROR;
 }
 
-AutoPtr<ISparseArray> BatteryStatsImpl::GetUidStats()
+ECode BatteryStatsImpl::GetUidStats(
+    /* [out] */ ISparseArray** stats)
 {
-    return mUidStats;
+    VALIDATE_NOT_NULL(stats)
+    *stats = mUidStats;
+    REFCOUNT_ADD(*stats)
+    return NOERROR;
 }
 
 void BatteryStatsImpl::SetCallback(
@@ -7537,16 +7663,20 @@ ECode BatteryStatsImpl::GetNextOldHistoryLocked(
     return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetHistoryTotalSize()
+ECode BatteryStatsImpl::GetHistoryTotalSize(
+    /* [out] */ Int32* size)
 {
-    return MAX_HISTORY_BUFFER;
+    VALIDATE_NOT_NULL(size)
+    *size = MAX_HISTORY_BUFFER;
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetHistoryUsedSize()
+ECode BatteryStatsImpl::GetHistoryUsedSize(
+    /* [out] */ Int32* size)
 {
-    Int32 size;
-    mHistoryBuffer->GetElementSize(&size);
-    return size;
+    VALIDATE_NOT_NULL(size)
+    mHistoryBuffer->GetElementSize(size);
+    return NOERROR;
 }
 
 ECode BatteryStatsImpl::FinishIteratingOldHistoryLocked()
@@ -7811,21 +7941,35 @@ void BatteryStatsImpl::ResetAllStatsLocked()
             i--;
         }
     }
-
-    if (mKernelWakelockStats.Begin() != mKernelWakelockStats.End()) {
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator it = mKernelWakelockStats.Begin();
-        for (; it != mKernelWakelockStats.End(); ++it) {
-            mOnBatteryScreenOffTimeBase->Remove((ITimeBaseObs*)(it->mSecond));
+    Int32 size;
+    if (mKernelWakelockStats->GetSize(&size), size > 0) {
+        AutoPtr<ICollection> col;
+        mKernelWakelockStats->GetValues((ICollection**)&col);
+        AutoPtr<IIterator> it;
+        col->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> value;
+            it->GetNext((IInterface**)&value);
+            AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
+            mOnBatteryScreenOffTimeBase->Remove((ITimeBaseObs*)timer);
         }
-        mKernelWakelockStats.Clear();
+        mKernelWakelockStats->Clear();
     }
 
-    if (mWakeupReasonStats.Begin() != mWakeupReasonStats.End()) {
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator it = mWakeupReasonStats.Begin();
-        for (; it != mWakeupReasonStats.End(); ++it) {
-            mOnBatteryTimeBase.remove((ITimeBaseObs*)(it->mSecond));
+    if (mWakeupReasonStats->GetSize(&size), size > 0) {
+        AutoPtr<ICollection> col;
+        mWakeupReasonStats->GetValues((ICollection**)&col);
+        AutoPtr<IIterator> it;
+        col->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> value;
+            it->GetNext((IInterface**)&value);
+            AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
+            mOnBatteryTimeBase->Remove((ITimeBaseObs*)timer);
         }
-        mWakeupReasonStats.Clear();
+        mWakeupReasonStats->Clear();
     }
 
     InitDischarge();
@@ -8214,38 +8358,52 @@ void BatteryStatsImpl::SetBatteryState(
 
 void BatteryStatsImpl::UpdateKernelWakelocksLocked()
 {
-    HashMap<String, AutoPtr<KernelWakelockStats> >& m = ReadKernelWakelockStats();
+    HashMap<String, AutoPtr<KernelWakelockStats> >* m = ReadKernelWakelockStats();
 
-    // if (m == NULL) {
-    //     // Not crashing might make board bringup easier.
-    //     Logger::W(TAG, "Couldn't get kernel wake lock stats");
-    //     return;
-    // }
+    if (m == NULL) {
+        // Not crashing might make board bringup easier.
+        Slogger::W(TAG, "Couldn't get kernel wake lock stats");
+        return;
+    }
 
-    HashMap<String, AutoPtr<KernelWakelockStats> >::Iterator it = m.Begin();
-    for (; it != m.End(); ++it) {
+    HashMap<String, AutoPtr<KernelWakelockStats> >::Iterator it = m->Begin();
+    for (; it != m->End(); ++it) {
         String name = it->mFirst;
         AutoPtr<KernelWakelockStats> kws = it->mSecond;
 
-        AutoPtr<SamplingTimer> kwlt;
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator timerIt = mKernelWakelockStats.Find(name);
-        if (timerIt != mKernelWakelockStats.End()) {
-            kwlt = timerIt->mSecond;
+        AutoPtr<ICharSequence> cs;
+        CString::New(name, (ICharSequence**)&cs);
+        AutoPtr<IInterface> value;
+        mKernelWakelockStats->Get(cs, (IInterface**)&value);
+        AutoPtr<SamplingTimer> kwlt
+        if (value = NULL) {
+            kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase,
+                    TRUE /* track reported val */);
+            mKernelWakelockStats->Put(cs, kwlt);
         }
-        if (kwlt == NULL) {
-            kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, TRUE /* track reported values */);
-            mKernelWakelockStats[name] = kwlt;
+        else {
+            kwlt = (SamplingTimer*)(IObject*)value.Get();
         }
         kwlt->UpdateCurrentReportedCount(kws->mCount);
         kwlt->UpdateCurrentReportedTotalTime(kws->mTotalTime);
         kwlt->SetUpdateVersion(sKernelWakelockUpdateVersion);
     }
 
-    if (m.GetSize() != mKernelWakelockStats.GetSize()) {
+    Int32 size;
+    if (mKernelWakelockStats->GetSize(&size), m->GetSize() != size) {
         // Set timers to stale if they didn't appear in /proc/wakelocks this time.
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator timerIt = mKernelWakelockStats.Begin();
-        for (; timerIt!= mKernelWakelockStats.End(); ++timerIt) {
-            AutoPtr<SamplingTimer> st = timerIt->mSecond;
+        AutoPtr<ISet> set;
+        mKernelWakelockStats->GetEntrySet((ISet**)&set);
+        AutoPtr<IIterator> it;
+        set->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> next;
+            it->GetNext((IInterface**)&next);
+            AutoPtr<IMapEntry> ent = IMapEntry::Probe(next);
+            AutoPtr<IInterface> value;
+            ent->GetValue((IInterface**)&value);
+            AutoPtr<SamplingTimer> st = (SamplingTimer*)(IObject*)value.Get();
             if (st->GetUpdateVersion() != sKernelWakelockUpdateVersion) {
                 st->SetStale();
             }
@@ -8564,14 +8722,21 @@ ECode BatteryStatsImpl::ComputeBatteryTimeRemaining(
     return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetNumDischargeStepDurations()
+ECode BatteryStatsImpl::GetNumDischargeStepDurations(
+    /* [out] */ Int32* result)
 {
-    return mNumDischargeStepDurations;
+    VALIDATE_NOT_NULL(result)
+    *result = mNumDischargeStepDurations;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Int64> > BatteryStatsImpl::GetDischargeStepDurationsArray()
+ECode BatteryStatsImpl::GetDischargeStepDurationsArray(
+    /* [out, callee] */ ArrayOf<Int64>** array)
 {
-    return mDischargeStepDurations;
+    VALIDATE_NOT_NULL(array)
+    *array = mDischargeStepDurations;
+    REFCOUNT_ADD(*array)
+    return NOERROR;
 }
 
 ECode BatteryStatsImpl::ComputeChargeTimeRemaining(
@@ -8609,14 +8774,21 @@ ECode BatteryStatsImpl::ComputeChargeTimeRemaining(
     return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetNumChargeStepDurations()
+ECode BatteryStatsImpl::GetNumChargeStepDurations(
+    /* [out] */ Int32* result)
 {
-    return mNumChargeStepDurations;
+    VALIDATE_NOT_NULL(result)
+    *result = mNumChargeStepDurations;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Int64> > BatteryStatsImpl::GetChargeStepDurationsArray()
+ECode BatteryStatsImpl::GetChargeStepDurationsArray(
+    /* [out, callee] */ ArrayOf<Int64>** array)
 {
-    return mChargeStepDurations;
+    VALIDATE_NOT_NULL(array)
+    *array = mNumChargeStepDurations;
+    REFCOUNT_ADD(*array)
+    return NOERROR;
 }
 
 Int64 BatteryStatsImpl::GetBatteryUptimeLocked()
@@ -8718,48 +8890,60 @@ ECode BatteryStatsImpl::GetDischargeAmount(
     return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetDischargeAmountScreenOn()
+ECode BatteryStatsImpl::GetDischargeAmountScreenOn(
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoLock lock(this);
     int val = mDischargeAmountScreenOn;
     if (mOnBattery && mScreenState == IDisplay::STATE_ON
             && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
         val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
     }
-    return val;
+    *result = val;
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetDischargeAmountScreenOnSinceCharge()
+ECode BatteryStatsImpl::GetDischargeAmountScreenOnSinceCharge(
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoLock lock(this);
     Int32 val = mDischargeAmountScreenOnSinceCharge;
     if (mOnBattery && mScreenState == IDisplay::STATE_ON
             && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
         val += mDischargeScreenOnUnplugLevel - mDischargeCurrentLevel;
     }
-    return val;
+    *result = val;
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetDischargeAmountScreenOff()
+ECode BatteryStatsImpl::GetDischargeAmountScreenOff(
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoLock lock(this);
     Int32 val = mDischargeAmountScreenOff;
     if (mOnBattery && mScreenState != IDisplay::STATE_ON
             && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
         val += mDischargeScreenOffUnplugLevel - mDischargeCurrentLevel;
     }
-    return val;
+    *result = val;
+    return NOERROR;
 }
 
-Int32 BatteryStatsImpl::GetDischargeAmountScreenOffSinceCharge()
+ECode BatteryStatsImpl::GetDischargeAmountScreenOffSinceCharge(
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoLock lock(this);
     Int32 val = mDischargeAmountScreenOffSinceCharge;
     if (mOnBattery && mScreenState != IDisplay::STATE_ON
             && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
         val += mDischargeScreenOffUnplugLevel - mDischargeCurrentLevel;
     }
-    return val;
+    *result = val;
+    return NOERROR;
 }
 
 ECode BatteryStatsImpl::GetCpuSpeedSteps(
@@ -9573,13 +9757,28 @@ void BatteryStatsImpl::WriteSummaryToParcel(
     }
     mFlashlightOnTimer->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
 
-    out->WriteInt32(mKernelWakelockStats.GetSize());
-    HashMap<String, AutoPtr<SamplingTimer> >::Iterator it = mKernelWakelockStats.Begin();
-    for (; it != mKernelWakelockStats.End(); ++it) {
-        AutoPtr<SamplingTimer> kwlt = it->mSecond;
-        if (kwlt != NULL) {
+    Int32 size;
+    mKernelWakelockStats->GetSize(&size);
+    out->WriteInt32(size);
+    AutoPtr<ISet> set;
+    mKernelWakelockStats->GetEntrySet((ISet**)&set);
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> next;
+        it->GetNext((IInterface**)&next);
+        AutoPtr<IMapEntry> ent = IMapEntry::Probe(next);
+        AutoPtr<IInterface> value;
+        ent->GetValue((IInterface**)&value);
+        if (value != NULL) {
+            AutoPtr<SamplingTimer> kwlt = (SamplingTimer*)(IObject*)value.Get();
             out->WriteInt32(1);
-            out->WriteString(it->mFirst);
+            AutoPtr<IInterface> ki;
+            ent->GetKey((IInterface**)&ki);
+            String key;
+            ICharSequence::Probe(ki)->ToString(&key);
+            out->WriteString(key);
             kwlt->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         else {
@@ -9587,13 +9786,27 @@ void BatteryStatsImpl::WriteSummaryToParcel(
         }
     }
 
-    out->WriteInt32(mWakeupReasonStats.GetSize());
-    HashMap<String, AutoPtr<SamplingTimer> >::Iterator reasonStatsIt = mWakeupReasonStats.Begin();
-    for (; it != mWakeupReasonStats.End(); ++it) {
-        AutoPtr<SamplingTimer> timer = it->mSecond;
-        if (timer != NULL) {
+    mWakeupReasonStats->GetSize(&size);
+    out->WriteInt32(size);
+    AutoPtr<ISet> statsSet;
+    mWakeupReasonStats->GetEntrySet((ISet**)&statsSet);
+    AutoPtr<IIterator> statsIt;
+    statsSet->GetIterator((IIterator**)&statsIt);
+    Boolean hasNext;
+    while (statsIt->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> next;
+        statsIt->GetNext((IInterface**)&next);
+        AutoPtr<IMapEntry> ent = IMapEntry::Probe(next);
+        AutoPtr<IInterface> value;
+        ent->GetValue((IInterface**)&value);
+        if (value == NULL) {
+            AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
             out->WriteInt32(1);
-            out->WriteString(it->mFirst);
+            AutoPtr<IInterface> ki;
+            ent->GetKey((IInterface**)&ki);
+            String key;
+            ICharSequence::Probe(ki)->ToString(&key);
+            out->WriteString(key);
             timer->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         else {
@@ -9993,7 +10206,7 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
     in->ReadInt32(&mBluetoothPingCount);
     mBluetoothPingStart = -1;
 
-    mKernelWakelockStats.Clear();
+    mKernelWakelockStats->Clear();
     Int32 NKW;
     in->ReadInt32(&NKW);
     for (Int32 ikw = 0; ikw < NKW; ikw++) {
@@ -10002,11 +10215,13 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
             String wakelockName;
             in->ReadString(&wakelockName);
             AutoPtr<SamplingTimer> kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, in);
-            mKernelWakelockStats[wakelockName] = kwlt;
+            AutoPtr<ICharSequence> cs;
+            CString::New(wakelockName, (ICharSequence**)&cs);
+            mKernelWakelockStats->Put(cs, kwlt);
         }
     }
 
-    mWakeupReasonStats.Clear();
+    mWakeupReasonStats->Clear();
     Int32 NWR;
     in->ReadInt32(&NWR);
     for (Int32 iwr = 0; iwr < NWR; iwr++) {
@@ -10015,7 +10230,9 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
             String reasonName;
             in->ReadString(&reasonName);
             AutoPtr<SamplingTimer> timer = new SamplingTimer(mOnBatteryTimeBase, in);
-            mWakeupReasonStats[reasonName] = timer;
+            AutoPtr<ICharSequence> cs;
+            CString::New(reasonName, (ICharSequence**)&cs);
+            mWakeupReasonStats->Put(cs, timer);
         }
     }
 
@@ -10052,10 +10269,11 @@ ECode BatteryStatsImpl::WriteToParcel(
     return NOERROR;
 }
 
-void BatteryStatsImpl::WriteToParcelWithoutUids(
+ECode BatteryStatsImpl::WriteToParcelWithoutUids(
     /* [in] */ IParcel* out)
 {
     WriteToParcelLocked(out, FALSE);
+    return NOERROR;
 }
 
 void BatteryStatsImpl::WriteToParcelLocked(
@@ -10104,7 +10322,7 @@ void BatteryStatsImpl::WriteToParcelLocked(
     for (Int32 i = 0; i < IBatteryStats::NUM_DATA_CONNECTION_TYPES; i++) {
         (*mPhoneDataConnectionsTimer)[i]->WriteToParcel(out, uSecRealtime);
     }
-    for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
+    for (Int32 i = 0; i < IBatteryStats::NUM_NETWORK_ACTIVITY_TYPES; i++) {
         (*mNetworkByteActivityCounters)[i]->WriteToParcel(out);
         (*mNetworkPacketActivityCounters)[i]->WriteToParcel(out);
     }
@@ -10148,26 +10366,56 @@ void BatteryStatsImpl::WriteToParcelLocked(
     out->WriteInt32(GetBluetoothPingCount());
 
     if (inclUids) {
-        out->WriteInt32(mKernelWakelockStats.GetSize());
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator wlIt = mKernelWakelockStats.Begin();
-        for (; wlIt != mKernelWakelockStats.End(); ++wlIt) {
-            AutoPtr<SamplingTimer> kwlt = wlIt->mSecond;
-            if (kwlt != NULL) {
+        Int32 size;
+        mKernelWakelockStats->GetSize(&size);
+        out->WriteInt32(size);
+        AutoPtr<ISet> set;
+        mKernelWakelockStats->GetEntrySet((ISet**)&set);
+        AutoPtr<IIterator> it;
+        set->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> next;
+            it->GetNext((IInterface**)&next);
+            AutoPtr<IMapEntry> ent = IMapEntry::Probe(next);
+            AutoPtr<IInterface> value;
+            ent->GetValue((IInterface**)&value);
+            if (value != NULL) {
+                AutoPtr<SamplingTimer> kwlt = (SamplingTimer*)(IObject*)value.Get();
                 out->WriteInt32(1);
-                out->WriteString(wlIt->mFirst);
+                AutoPtr<IInterface> ki;
+                ent->GetKey((IInterface**)&ki);
+                String key;
+                ICharSequence::Probe(ki)->ToString(&key);
+                out->WriteString(key);
                 kwlt->WriteToParcel(out, uSecRealtime);
             }
             else {
                 out->WriteInt32(0);
             }
         }
-        out->WriteInt32(mWakeupReasonStats.GetSize());
-        HashMap<String, AutoPtr<SamplingTimer> >::Iterator wuIt = mWakeupReasonStats.Begin();
-        for (; wuIt != mWakeupReasonStats.End(); ++wuIt) {
-            AutoPtr<SamplingTimer> timer = wuIt->mSecond;
-            if (timer != NULL) {
+
+        mWakeupReasonStats->GetSize(&size);
+        out->WriteInt32(size);
+        AutoPtr<ISet> statsSet;
+        mWakeupReasonStats->GetEntrySet((ISet**)&statsSet);
+        AutoPtr<IIterator> statsIt;
+        statsSet->GetIterator((IIterator**)&statsIt);
+        Boolean hasNext;
+        while (statsIt->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> next;
+            statsIt->GetNext((IInterface**)&next);
+            AutoPtr<IMapEntry> ent = IMapEntry::Probe(next);
+            AutoPtr<IInterface> value;
+            ent->GetValue((IInterface**)&value);
+            if (value != NULL) {
+                AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
                 out->WriteInt32(1);
-                out->WriteString(wuIt->mFirst);
+                AutoPtr<IInterface> ki;
+                ent->GetKey((IInterface**)&ki);
+                String key;
+                ICharSequence::Probe(ki)->ToString(&key);
+                out->WriteString(key);
                 timer->WriteToParcel(out, uSecRealtime);
             }
             else {

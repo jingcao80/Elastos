@@ -3,14 +3,11 @@
 #define __ELASTOS_DROID_OS_BATTERYSTATS_H__
 
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/utility/etl/List.h>
 
 using Elastos::Core::StringBuilder;
-using Elastos::Core::IInteger32;
 using Elastos::IO::IPrintWriter;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IList;
+using Elastos::Utility::IHashMap;
 using Elastos::Utility::IFormatter;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Utility::IPrinter;
@@ -288,29 +285,37 @@ public:
         Int64 mTime;
     };
 
-    class HistoryPrinter
-        : public Object
-        , public IBatteryStatsHistoryPrinter
+    class HistoryPrinter : public Object
     {
     public:
-        CAR_INTERFACE_DECL()
+        HistoryPrinter()
+            : mOldState(0)
+            , mOldState2(0)
+            , mOldLevel(-1)
+            , mOldStatus(-1)
+            , mOldHealth(-1)
+            , mOldPlug(-1)
+            , mOldTemp(-1)
+            , mOldVolt(-1)
+        {}
 
-        HistoryPrinter();
-
-        CARAPI PrintNextItem(
+        CARAPI_(void) PrintNextItem(
             /* [in] */ IPrintWriter* pw,
             /* [in] */ HistoryItem* rec,
             /* [in] */ Int64 now);
 
+    private:
+        CARAPI_(void) Reset();
+
     public:
-        Int32 mOldState = 0;
-        Int32 mOldState2 = 0;
-        Int32 mOldLevel = -1;
-        Int32 mOldStatus = -1;
-        Int32 mOldHealth = -1;
-        Int32 mOldPlug = -1;
-        Int32 mOldTemp = -1;
-        Int32 mOldVolt = -1;
+        Int32 mOldState;
+        Int32 mOldState2;
+        Int32 mOldLevel;
+        Int32 mOldStatus;
+        Int32 mOldHealth;
+        Int32 mOldPlug;
+        Int32 mOldTemp;
+        Int32 mOldVolt;
     };
 
 public:
@@ -319,19 +324,19 @@ public:
     BatteryStats();
 
     static CARAPI_(void) FormatTime(
-        /* [in ]*/ StringBuilder* out,
+        /* [in] */ StringBuilder* out,
         /* [in] */ Int64 seconds);
 
     static CARAPI_(void) FormatTimeMs(
-        /* [in ]*/ StringBuilder* out,
+        /* [in] */ StringBuilder* out,
         /* [in] */ Int64 seconds);
 
     static CARAPI_(void) FormatTimeMsNoSpace(
-        /* [in ]*/ StringBuilder& out,
+        /* [in] */ StringBuilder& out,
         /* [in] */ Int64 seconds);
 
     CARAPI_(String) FormatRatioLocked(
-        /* [in]*/ Int32 num,
+        /* [in] */ Int32 num,
         /* [in] */ Int64 seconds);
 
     CARAPI_(String) FormatBytesLocked(
@@ -341,10 +346,10 @@ public:
      * Temporary for settings.
      */
     CARAPI_(void) DumpCheckinLocked(
-        /* [in]*/ IContext* context,
-        /* [in]*/ IPrintWriter* pw,
-        /* [in]*/ Int32 which,
-        /* [in]*/ Int32 reqUid);
+        /* [in] */ IContext* context,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int32 which,
+        /* [in] */ Int32 reqUid);
 
     /**
      * Checkin server version of dump to produce more compact, computer-readable log.
@@ -352,15 +357,57 @@ public:
      * NOTE: all times are expressed in 'ms'.
      */
     CARAPI_(void) DumpCheckinLocked(
-        /* [in]*/ IContext* context,
-        /* [in]*/ IPrintWriter* pw,
-        /* [in]*/ Int32 which,
-        /* [in]*/ Int32 reqUid,
+        /* [in] */ IContext* context,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int32 which,
+        /* [in] */ Int32 reqUid,
         /* [in] */ Boolean wifiOnly);
+
+    /**
+     * Temporary for settings.
+     */
+    CARAPI_(void) DumpLocked(
+        /* [in] */ IContext* context,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ const String& prefix,
+        /* [in] */ Int32 which,
+        /* [in] */ Int32 reqUid);
+
+    // @SuppressWarnings("unused")
+    CARAPI_(void) DumpLocked(
+        /* [in] */ IContext* context,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ const String& prefix,
+        /* [in] */ Int32 which,
+        /* [in] */ Int32 reqUid,
+        /* [in] */ Boolean wifiOnly);
+
+    CARAPI_(void) PrepareForDumpLocked();
+
+    /**
+     * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
+     *
+     * @param pw a Printer to receive the dump output.
+     */
+    // @SuppressWarnings("unused")
+    CARAPI_(void) DumpLocked(
+        /* [in] */ IContext* context,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 reqUid,
+        /* [in] */ Int64 histStart);
+
+    // @SuppressWarnings("unused")
+    CARAPI_(void) DumpCheckinLocked(
+        /* [in] */ IContext* context,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ IList* apps,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int64 histStart);
 
 private:
     static CARAPI_(void) FormatTimeRaw(
-        /* [in ]*/ StringBuilder& out,
+        /* [in] */ StringBuilder& out,
         /* [in] */ Int64 seconds);
 
     static CARAPI_(Int64) ComputeWakeLock(
@@ -379,8 +426,8 @@ private:
      * @return the line prefix
      */
     static CARAPI_(String) PrintWakeLock(
-        /* [in ]*/ StringBuilder& sb,
-        /* [in ]*/ Timer* timer,
+        /* [in] */ StringBuilder& sb,
+        /* [in] */ Timer* timer,
         /* [in] */ Int64 elapsedRealtimeUs,
         /* [in] */ const String& name,
         /* [in] */ Int32 which,
@@ -402,8 +449,41 @@ private:
      * @param type type of data (e.g. "wakelock", "sensor", "process", "apk" ,  "process", "network")
      * @param args type-dependent data arguments
      */
-    // private static final void dumpLine(PrintWriter pw, int uid, String category, String type,
-    //        Object... args )
+    static CARAPI_(void) DumpLine(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& category,
+        /* [in] */ const String& type,
+        /* [in] */ ArrayOf<IInterface*>* args);
+
+    CARAPI_(void) PrintmAh(
+        /* [in] */ IPrintWriter* printer,
+        /* [in] */ Double power);
+
+    static CARAPI_(void) PrintBitDescriptions(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int32 oldval,
+        /* [in] */ Int32 newval,
+        /* [in] */ HistoryTag* wakelockTag,
+        /* [in] */ ArrayOf<BitDescription*> descriptions,
+        /* [in] */ Boolean longNames);
+
+    CARAPI_(void) PrintSizeValue(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int64 size);
+
+    static CARAPI_(Boolean) DumpDurationSteps(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ const String& header,
+        /* [in] */ ArrayOf<Int64>* steps,
+        /* [in] */ Int32 count,
+        /* [in] */ Boolean checkin);
+
+    CARAPI_(void) DumpHistoryLocked(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int64 histStart,
+        /* [in] */ Boolean checkin);
 
 private:
     static const Boolean LOCAL_LOGV = FALSE;

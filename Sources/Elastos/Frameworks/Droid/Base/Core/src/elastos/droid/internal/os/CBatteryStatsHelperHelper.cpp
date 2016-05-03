@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/internal/os/CBatteryStatsHelperHelper.h"
-#include "elastos/droid/internal/os/CBatteryStatsHelper.h"
+#include "elastos/droid/internal/os/BatteryStatsHelper.h"
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +17,7 @@ ECode CBatteryStatsHelperHelper::CheckWifiOnly(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = CBatteryStatsHelper::CheckWifiOnly(context);
+    *result = BatteryStatsHelper::CheckWifiOnly(context);
     return NOERROR;
 }
 
@@ -27,8 +27,7 @@ ECode CBatteryStatsHelperHelper::StatsFromFile(
     /* [out] */ IBatteryStats** stats)
 {
     VALIDATE_NOT_NULL(stats)
-    AutoPtr<IBatteryStats> temp = CBatteryStatsHelper::StatsFromFile(context, fname);
-    *stats = temp;
+    *stats = BatteryStatsHelper::StatsFromFile(context, fname);
     REFCOUNT_ADD(*stats)
     return NOERROR;
 }
@@ -37,7 +36,8 @@ ECode CBatteryStatsHelperHelper::DropFile(
     /* [in] */ IContext* context,
     /* [in] */ const String& fname)
 {
-    return CBatteryStatsHelper::DropFile(context, fname);
+    BatteryStatsHelper::DropFile(context, fname);
+    return NOERROR;
 }
 
 ECode CBatteryStatsHelperHelper::MakemAh(
@@ -45,7 +45,7 @@ ECode CBatteryStatsHelperHelper::MakemAh(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = CBatteryStatsHelper::MakemAh(power);
+    *result = BatteryStatsHelper::MakemAh(power);
     return NOERROR;
 }
 
@@ -53,7 +53,10 @@ ECode CBatteryStatsHelperHelper::ReadFully(
     /* [in] */ IFileInputStream* stream,
     /* [out, callee] */ ArrayOf<Byte>** bytes)
 {
-    return CBatteryStatsHelper::ReadFully(stream, bytes);
+    VALIDATE_NOT_NULL(bytes)
+    *bytes = BatteryStatsHelper::ReadFully(stream);
+    REFCOUNT_ADD(*bytes)
+    return NOERROR;
 }
 
 ECode CBatteryStatsHelperHelper::ReadFully(
@@ -61,7 +64,10 @@ ECode CBatteryStatsHelperHelper::ReadFully(
     /* [in] */ Int32 avail,
     /* [out, callee] */ ArrayOf<Byte>** bytes)
 {
-    return CBatteryStatsHelper::ReadFully(stream, avail, bytes);
+    VALIDATE_NOT_NULL(bytes)
+    *bytes = BatteryStatsHelper::ReadFully(stream, avail);
+    REFCOUNT_ADD(*bytes)
+    return NOERROR;
 }
 
 } // namespace Os
