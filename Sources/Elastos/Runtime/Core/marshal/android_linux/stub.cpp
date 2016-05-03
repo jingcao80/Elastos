@@ -749,7 +749,7 @@ ECode CObjectStub::S_CreateObject(
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                 "Create stub: fail to get object's ClassID. %s\n", str.string()));
         MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
-        // assert(0 && "TODO");
+        assert(0 && "TODO");
         goto ErrorExit;
     }
 
