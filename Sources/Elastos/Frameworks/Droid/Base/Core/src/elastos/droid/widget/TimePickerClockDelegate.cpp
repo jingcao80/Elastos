@@ -566,8 +566,8 @@ ECode TimePickerClockDelegate::OnSaveInstanceState(
     GetCurrentMinute(&minute);
 
     AutoPtr<ITimePickerClockDelegateSavedState> ss;
-    FAIL_RETURN(CTimePickerClockDelegateSavedState::New(
-            superState, hour, minute, (ITimePickerClockDelegateSavedState**)&ss));
+    CTimePickerClockDelegateSavedState::New(
+            superState, hour, minute, (ITimePickerClockDelegateSavedState**)&ss);
 
     *result = IParcelable::Probe(ss);
     REFCOUNT_ADD(*result);

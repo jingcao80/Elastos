@@ -11,7 +11,6 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Text::IDateFormat;
 using Elastos::Utility::ICalendar;
-using Elastos::Utility::IFormatter;
 
 namespace Elastos {
 namespace Droid {

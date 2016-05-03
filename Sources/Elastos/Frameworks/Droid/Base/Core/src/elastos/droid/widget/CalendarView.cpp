@@ -1367,7 +1367,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
         Int32 wy = 0;
         mHost->mTempDate->Get(ICalendar::WEEK_OF_YEAR, &wy);
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-        (*arr)[0] = CoreUtils::Convert(wy);
+        arr->Set(0, CoreUtils::Convert(wy));
         (*mDayNumbers)[0] = StringUtils::Format(loc, String("%d"), arr);
         i++;
     }
@@ -1405,7 +1405,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::Init(
             Int32 m = 0;
             mHost->mTempDate->Get(ICalendar::DAY_OF_MONTH, &m);
             AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-            (*arr)[0] = CoreUtils::Convert(m);
+            arr->Set(0, CoreUtils::Convert(m));
             (*mDayNumbers)[i] = StringUtils::Format(loc, String("%d"), arr);
         }
         mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, 1);

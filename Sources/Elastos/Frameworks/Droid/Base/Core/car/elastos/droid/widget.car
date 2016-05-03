@@ -1048,7 +1048,13 @@ module
         constructor(
             [in] IContext* ctx,
             [in] IAttributeSet* attrs,
-            [in] Int32 defStyle);
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
         interface IDatePicker;
         interface IFrameLayout;

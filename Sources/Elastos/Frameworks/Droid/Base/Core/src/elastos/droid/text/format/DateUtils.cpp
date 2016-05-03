@@ -28,7 +28,6 @@ using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocale;
 using Elastos::Utility::CLocaleHelper;
-using Elastos::Utility::IFormatter;
 using Elastos::Utility::CFormatter;   //java.util.Formatter
 using Elastos::Utility::CGregorianCalendar;
 using Elastos::Utility::IGregorianCalendar;
@@ -76,8 +75,8 @@ AutoPtr<ITime> DateUtils::sThenTime = NULL;
 Object DateUtils::sLockDateUtilsClass;
 
 String DateUtils::GetDayOfWeekString(
-/* [in] */ Int32 dayOfWeek,
-/* [in] */ Int32 abbrev)
+    /* [in] */ Int32 dayOfWeek,
+    /* [in] */ Int32 abbrev)
 {
     AutoPtr<ILocaleHelper> localeHelp;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelp);
@@ -120,7 +119,7 @@ String DateUtils::GetDayOfWeekString(
 }
 
 String DateUtils::GetAMPMString(
-        /* [in] */ Int32 ampm)
+    /* [in] */ Int32 ampm)
 {
     AutoPtr<ILocaleHelper> localeHelp;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelp);
@@ -178,7 +177,7 @@ String DateUtils::GetMonthString(
             break;
         }
     }
-    if(names != NULL) {
+    if (names != NULL) {
         Int32 namesLen = names->GetLength();
         if( 0 <= month && month < namesLen ) {
             return (*names)[month];
@@ -382,16 +381,16 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeDateTimeString(
     if (duration < transitionResolution) {
         AutoPtr<ICharSequence> relativeClause = GetRelativeTimeSpanString(time, now, minResolution, flags);
         AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
-        (*formatArgs)[0] = relativeClause;
-        (*formatArgs)[1] = timeClause;
+        formatArgs->Set(0, relativeClause);
+        formatArgs->Set(1, timeClause);
 
         r->GetString(R::string::relative_time, formatArgs, &result);
     }
     else {
         AutoPtr<ICharSequence> dateClause = GetRelativeTimeSpanString(c, time, FALSE);
         AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
-        (*formatArgs)[0] = dateClause;
-        (*formatArgs)[1] = timeClause;
+        formatArgs->Set(0, dateClause);
+        formatArgs->Set(1, timeClause);
 
         r->GetString(R::string::date_time, formatArgs, &result);
     }
@@ -677,9 +676,9 @@ String DateUtils::FormatDateRange(
     AutoPtr<ILocale> locale;
     localeHelp->GetDefault((ILocale**)&locale);
     using Elastos::Utility::IFormatter;
-    AutoPtr<Elastos::Utility::IFormatter> f;
-    CFormatter::New((IAppendable*)s, locale, (Elastos::Utility::IFormatter**)&f);
-    AutoPtr<Elastos::Utility::IFormatter> fRet = FormatDateRange(context, f, startMillis, endMillis, flags);
+    AutoPtr<IFormatter> f;
+    CFormatter::New((IAppendable*)s, locale, (IFormatter**)&f);
+    AutoPtr<IFormatter> fRet = FormatDateRange(context, f, startMillis, endMillis, flags);
     String ret;
     fRet->ToString(&ret);
     return ret;
@@ -753,11 +752,11 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
 
     synchronized(sLockDateUtilsClass) {
         if (sNowTime == NULL) {
-            CTime::New( (ITime**)&sNowTime);
+            CTime::New((ITime**)&sNowTime);
         }
 
         if (sThenTime == NULL) {
-            CTime::New( (ITime**)&sThenTime);
+            CTime::New((ITime**)&sThenTime);
         }
 
         sNowTime->Set(now);
@@ -794,7 +793,7 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
             AutoPtr<IResources> res;
             c->GetResources((IResources**)&res);
             AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
-            (*formatArgs)[0] = CoreUtils::Convert(result);
+            formatArgs->Set(0, CoreUtils::Convert(result));
             String raw;
             res->GetString(prepositionId, formatArgs, &raw);
             result = raw;

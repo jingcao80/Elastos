@@ -15,6 +15,7 @@
 #include <elastos/utility/Arrays.h>
 
 using Elastos::Droid::Content::Res::CConfiguration;
+using Elastos::Droid::Text::IInputType;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Text::Format::DateUtils;
@@ -103,7 +104,6 @@ ECode DatePicker::DatePickerOnChangeListener::OnValueChange(
     }
     else if (picker == mHost->mYearSpinner) {
         mHost->mTempDate->Set(ICalendar::YEAR, newVal);
-
     }
     else {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -256,7 +256,9 @@ const Boolean DatePicker::DatePickerSpinnerDelegate::DEFAULT_ENABLED_STATE = TRU
 
 DatePicker::DatePickerSpinnerDelegate::DatePickerSpinnerDelegate()
     : mIsEnabled(DEFAULT_ENABLED_STATE)
-{}
+{
+    CSimpleDateFormat::New(DATE_FORMAT, (IDateFormat**)&mDateFormat);
+}
 
 ECode DatePicker::DatePickerSpinnerDelegate::constructor(
     /* [in] */ IDatePicker* delegator,
@@ -265,9 +267,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    AbstractDatePickerDelegate::constructor(delegator, context);
-
-    CSimpleDateFormat::New(DATE_FORMAT, (IDateFormat**)&mDateFormat);
+    FAIL_RETURN(AbstractDatePickerDelegate::constructor(delegator, context))
 
     mDelegator = delegator;
     mContext = context;
@@ -727,7 +727,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::SetCurrentLocale(
         mShortMonths = ArrayOf<String>::Alloc(mNumberOfMonths);
         for(Int32 i = 0; i < mNumberOfMonths; i++) {
             AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-            (*arr)[0] = CoreUtils::Convert(i + 1);
+            arr->Set(0, CoreUtils::Convert(i + 1));
 
             (*mShortMonths)[i] = StringUtils::Format(String("%d"), arr);
         }
@@ -766,8 +766,9 @@ ECode DatePicker::DatePickerSpinnerDelegate::ReorderSpinners()
     IViewGroup::Probe(mSpinners)->RemoveAllViews();
     // We use numeric spinners for year and day, but textual months. Ask icu4c what
     // order the user's locale uses for that combination. http://b/7207103.
-    AutoPtr<Elastos::Droid::Text::Format::IDateFormat> df;
-    CDateFormat::AcquireSingleton((Elastos::Droid::Text::Format::IDateFormat**)&df);
+    using Elastos::Droid::Text::Format::IDateFormat;
+    AutoPtr<IDateFormat> df;
+    CDateFormat::AcquireSingleton((IDateFormat**)&df);
     AutoPtr<ILocaleHelper> hlp;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&hlp);
     AutoPtr<ILocale> loc;
@@ -832,12 +833,12 @@ ECode DatePicker::DatePickerSpinnerDelegate::SetDate(
     Boolean beforeMin = FALSE, afterMax = FALSE;
     mCurrentDate->IsBefore(mMinDate, &beforeMin);
     mCurrentDate->IsAfter(mMaxDate, &afterMax);
-    if(beforeMin) {
+    if (beforeMin) {
         Int64 min = 0;
         mMinDate->GetTimeInMillis(&min);
         mCurrentDate->SetTimeInMillis(min);
     }
-    else if(afterMax) {
+    else if (afterMax) {
         Int64 max = 0;
         mMaxDate->GetTimeInMillis(&max);
         mCurrentDate->SetTimeInMillis(max);
@@ -852,7 +853,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::UpdateSpinners()
     mCurrentDate->Equals(mMinDate, &min);
     mCurrentDate->Equals(mMaxDate, &max);
     Int32 minDayValue = 0, maxDayValue = 0, minMonthValue = 0, maxMonthValue = 0;
-    if(min) {
+    if (min) {
         mCurrentDate->Get(ICalendar::DAY_OF_MONTH, &minDayValue);
         mCurrentDate->GetActualMaximum(ICalendar::DAY_OF_MONTH, &maxDayValue);
         mDaySpinner->SetMinValue(minDayValue);
@@ -865,7 +866,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::UpdateSpinners()
         mMonthSpinner->SetMaxValue(maxMonthValue);
         mMonthSpinner->SetWrapSelectorWheel(FALSE);
     }
-    else if(max) {
+    else if (max) {
         mCurrentDate->GetActualMinimum(ICalendar::DAY_OF_MONTH, &minDayValue);
         mCurrentDate->Get(ICalendar::DAY_OF_MONTH, &maxDayValue);
         mDaySpinner->SetMinValue(minDayValue);
@@ -908,20 +909,18 @@ ECode DatePicker::DatePickerSpinnerDelegate::UpdateSpinners()
     mYearSpinner->SetMaxValue(maxY);
     mYearSpinner->SetWrapSelectorWheel(FALSE);
 
-    Int32 yearValue = 0, monthValue = 0, dayVelue = 0, minYearValue = 0, maxYearValue = 0;
-    mMinDate->Get(ICalendar::YEAR, &minYearValue);
-    mMaxDate->Get(ICalendar::YEAR, &maxYearValue);
-    mYearSpinner->SetMinValue(minYearValue);
-    mYearSpinner->SetMaxValue(maxYearValue);
-    mYearSpinner->SetWrapSelectorWheel(FALSE);
-
     // set the spinner values
+    Int32 yearValue = 0, monthValue = 0, dayVelue = 0;
     mCurrentDate->Get(ICalendar::YEAR, &yearValue);
     mCurrentDate->Get(ICalendar::MONTH, &monthValue);
     mCurrentDate->Get(ICalendar::DAY_OF_MONTH, &dayVelue);
     mYearSpinner->SetValue(yearValue);
     mMonthSpinner->SetValue(monthValue);
     mDaySpinner->SetValue(dayVelue);
+
+    if (UsingNumericMonths()) {
+        ITextView::Probe(mMonthSpinnerInput)->SetRawInputType(IInputType::TYPE_CLASS_NUMBER);
+    }
 
     return NOERROR;
 }
@@ -961,7 +960,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::SetImeOptions(
         imeOptions = IEditorInfo::IME_ACTION_DONE;
     }
     AutoPtr<IView> view;
-    IView::Probe(this)->FindViewById(R::id::numberpicker_input, (IView**)&view);
+    IView::Probe(spinner)->FindViewById(R::id::numberpicker_input, (IView**)&view);
     AutoPtr<ITextView> input = ITextView::Probe(view);
     if(input != NULL) {
         input->SetImeOptions(imeOptions);
@@ -972,16 +971,19 @@ ECode DatePicker::DatePickerSpinnerDelegate::SetImeOptions(
 ECode DatePicker::DatePickerSpinnerDelegate::SetContentDescriptions()
 {
     // Day
-    TrySetContentDescription(IView::Probe(mDaySpinner), R::id::increment, R::string::date_picker_increment_day_button);
-    TrySetContentDescription(IView::Probe(mDaySpinner), R::id::decrement, R::string::date_picker_decrement_day_button);
+    AutoPtr<IView> view = IView::Probe(mDaySpinner);
+    TrySetContentDescription(view, R::id::increment, R::string::date_picker_increment_day_button);
+    TrySetContentDescription(view, R::id::decrement, R::string::date_picker_decrement_day_button);
 
     // Month
-    TrySetContentDescription(IView::Probe(mDaySpinner), R::id::increment, R::string::date_picker_increment_month_button);
-    TrySetContentDescription(IView::Probe(mDaySpinner), R::id::decrement, R::string::date_picker_decrement_month_button);
+    AutoPtr<IView> view1 = IView::Probe(mMonthSpinner);
+    TrySetContentDescription(view1, R::id::increment, R::string::date_picker_increment_month_button);
+    TrySetContentDescription(view1, R::id::decrement, R::string::date_picker_decrement_month_button);
 
     // Year
-    TrySetContentDescription(IView::Probe(mDaySpinner), R::id::increment, R::string::date_picker_increment_year_button);
-    TrySetContentDescription(IView::Probe(mDaySpinner), R::id::decrement, R::string::date_picker_decrement_year_button);
+    AutoPtr<IView> view2 = IView::Probe(mYearSpinner);
+    TrySetContentDescription(view2, R::id::increment, R::string::date_picker_increment_year_button);
+    TrySetContentDescription(view2, R::id::decrement, R::string::date_picker_decrement_year_button);
 
     return NOERROR;
 }
@@ -1307,7 +1309,7 @@ ECode DatePicker::SetSpinnersShown(
 ECode DatePicker::DispatchRestoreInstanceState(
     /* [in] */ ISparseArray* container)
 {
-    return ViewGroup::DispatchThawSelfOnly(container);
+    return DispatchThawSelfOnly(container);
 }
 
 AutoPtr<IParcelable> DatePicker::OnSaveInstanceState()
@@ -1324,7 +1326,7 @@ void DatePicker::OnRestoreInstanceState(
     AutoPtr<BaseSavedState> ss = (BaseSavedState*) state;
     AutoPtr<IParcelable> pcl;
     ss->GetSuperState((IParcelable**)&pcl);
-    View::OnRestoreInstanceState(pcl);
+    FrameLayout::OnRestoreInstanceState(pcl);
     mDelegate->OnRestoreInstanceState(ss);
 }
 
