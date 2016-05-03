@@ -218,37 +218,28 @@ ECode SQLiteCursor::Deactivate()
 
 ECode SQLiteCursor::Close()
 {
-    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     AbstractWindowedCursor::Close();
 
-    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     ECode ec = NOERROR;
     synchronized(this) {
-    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
         ICloseable::Probe(mQuery)->Close();
-    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
         ec = mDriver->CursorClosed();
-    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     }
-    Slogger::I(TAG, " >>> SQLiteCursor::Close() %d", __LINE__);
     return ec;
 }
 
 ECode SQLiteCursor::Requery(
     /* [out] */ Boolean* succeeded)
 {
-    Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
     VALIDATE_NOT_NULL(succeeded);
     *succeeded = FALSE;
 
     Boolean isclose;
     if ((IsClosed(&isclose), isclose)) {
-        Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
         return NOERROR;
     }
-    Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
+
     synchronized(this){
-        Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
         AutoPtr<ISQLiteDatabase> database = ((CSQLiteQuery*)mQuery.Get())->GetDatabase();
         Boolean isOpened;
         if (database->IsOpen(&isOpened), !isOpened) {
@@ -263,7 +254,7 @@ ECode SQLiteCursor::Requery(
 
         mDriver->CursorRequeried(this);
     }
-    Slogger::I(TAG, " >>> SQLiteCursor::Requery() %d", __LINE__);
+
     Boolean result;
     ECode ec = AbstractWindowedCursor::Requery(&result);
     if (FAILED(ec)) {

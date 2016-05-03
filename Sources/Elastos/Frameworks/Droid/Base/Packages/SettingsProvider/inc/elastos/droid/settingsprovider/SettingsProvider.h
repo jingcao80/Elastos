@@ -157,9 +157,9 @@ private:
     protected:
         CARAPI_(void) EntryRemoved(
             /* [in] */ Boolean evicted,
-            /* [in] */ const String& key,
-            /* [in] */ IBundle* oldValue,
-            /* [in] */ IBundle* newValue);
+            /* [in] */ String key,
+            /* [in] */ AutoPtr<IBundle> oldValue,
+            /* [in] */ AutoPtr<IBundle> newValue);
 
     private:
         String mCacheName;

@@ -873,9 +873,7 @@ ECode ContentProvider::AttachInfo(
             SetAuthorities(authorities);
         }
         Boolean result = FALSE;
-Logger::I(TAG, "=========================AttachInfo before OnCreate");
         ec = OnCreate(&result);
-Logger::I(TAG, "=========================AttachInfo after OnCreate");
     }
     return ec;
 }

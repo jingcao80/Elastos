@@ -46,21 +46,6 @@ namespace Sqlite {
 #define SQLITE_SOFT_HEAP_LIMIT (4 * 1024 * 1024)
 #define ANDROID_TABLE "android_metadata"
 
-pthread_key_t SQLiteDatabase::sKeyThreadSession;
-pthread_once_t SQLiteDatabase::sKeyOnce = PTHREAD_ONCE_INIT;
-
-static void ReleaseSqliteSessionAfter(void* param)
-{
-    SQLiteSession* sqliteSession = (SQLiteSession*)param;
-    sqliteSession->Release();
-    sqliteSession = NULL;
-}
-
-static void MakeKey()
-{
-    ASSERT_TRUE(pthread_key_create(&SQLiteDatabase::sKeyThreadSession, ReleaseSqliteSessionAfter) == 0);
-}
-
 CAR_INTERFACE_IMPL(SQLiteDatabase::MyFileFilter, Object, IFileFilter)
 
 SQLiteDatabase::MyFileFilter::MyFileFilter(
@@ -98,6 +83,14 @@ const Int32 SQLiteDatabase::OPEN_READ_MASK;
 HashMap<AutoPtr<SQLiteDatabase>, AutoPtr<IInterface> > SQLiteDatabase::sActiveDatabases;
 Object SQLiteDatabase::sActiveDatabasesLock;
 
+
+static void ReleaseSqliteSessionAfter(void* param)
+{
+    SQLiteSession* sqliteSession = (SQLiteSession*)param;
+    sqliteSession->Release();
+    sqliteSession = NULL;
+}
+
 CAR_INTERFACE_IMPL(SQLiteDatabase, SQLiteClosable, ISQLiteDatabase);
 
 SQLiteDatabase::SQLiteDatabase(
@@ -107,6 +100,7 @@ SQLiteDatabase::SQLiteDatabase(
     /* [in] */ IDatabaseErrorHandler* errorHandler)
     : mCursorFactory(cursorFactory)
     , mHasAttachedDbsLocked(FALSE)
+    , mKeyThreadSessionInitialized(FALSE)
 {
     if (errorHandler != NULL) {
         mErrorHandler = errorHandler;
@@ -191,20 +185,21 @@ ECode SQLiteDatabase::GetThreadSession(
     /* [out] */ SQLiteSession** session)
 {
     VALIDATE_NOT_NULL(session);
-    *session = NULL;
-
-    pthread_once(&sKeyOnce, MakeKey);
-
-    AutoPtr<SQLiteSession> sqliteSession = (SQLiteSession*)pthread_getspecific(sKeyThreadSession);
+    if (!mKeyThreadSessionInitialized) {
+        pthread_key_create(&mKeyThreadSession, ReleaseSqliteSessionAfter);
+        mKeyThreadSessionInitialized = TRUE;
+    }
+    AutoPtr<SQLiteSession> sqliteSession = (SQLiteSession*)pthread_getspecific(mKeyThreadSession);
     if (sqliteSession == NULL) {
         FAIL_RETURN(CreateSession((SQLiteSession**)&sqliteSession));
-        pthread_setspecific(sKeyThreadSession, sqliteSession.Get());
+        pthread_setspecific(mKeyThreadSession, sqliteSession.Get());
         sqliteSession->AddRef();
     }
     *session = sqliteSession;
     REFCOUNT_ADD(*session);
     return NOERROR;
 }
+
 
 ECode SQLiteDatabase::CreateSession(
     /* [out] */ SQLiteSession** session)
@@ -544,7 +539,6 @@ ECode SQLiteDatabase::ReopenReadWrite()
 
 ECode SQLiteDatabase::Open()
 {
-    Slogger::I(TAG, " >>> SQLiteDatabase::Open()");
     ECode ec = OpenInner();
     if (ec == (ECode)E_SQLITE_DATABASE_CORRUPT_EXCEPTION) {
         OnCorruption();
@@ -558,13 +552,11 @@ ECode SQLiteDatabase::Open()
     else if (FAILED(ec)) {
         Slogger::E(TAG, "Failed to open database '%s'.0x%08x", GetLabel().string(), ec);
     }
-    Slogger::I(TAG, " <<< SQLiteDatabase::Open()");
     return ec;
 }
 
 ECode SQLiteDatabase::OpenInner()
 {
-    Slogger::I(TAG, " >>> SQLiteDatabase::OpenInner()");
     synchronized(mLock){
         assert(mConnectionPoolLocked == NULL);
         FAIL_RETURN(SQLiteConnectionPool::Open(mConfigurationLocked, (SQLiteConnectionPool**)&mConnectionPoolLocked));
@@ -574,7 +566,6 @@ ECode SQLiteDatabase::OpenInner()
     synchronized(sActiveDatabasesLock) {
         sActiveDatabases[this] = NULL;
     }
-    Slogger::I(TAG, " <<< SQLiteDatabase::OpenInner()");
     return NOERROR;
 }
 
@@ -1693,7 +1684,13 @@ ECode SQLiteDatabase::ToString(
     VALIDATE_NOT_NULL(str)
     String path;
     GetPath(&path);
-    *str = String("SQLiteDatabase: ") + path;
+
+    StringBuilder sb("SQLiteDatabase{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", path:";
+    sb += path;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

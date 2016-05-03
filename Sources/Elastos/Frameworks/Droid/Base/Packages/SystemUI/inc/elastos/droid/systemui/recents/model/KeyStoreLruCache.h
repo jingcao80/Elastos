@@ -48,7 +48,7 @@ private:
 
         CARAPI_(void) EntryRemoved(
             /* [in] */ Boolean evicted,
-            /* [in] */ IInteger32* taskId,
+            /* [in] */ AutoPtr<IInteger32> taskId,
             /* [in] */ V oldV,
             /* [in] */ V newV)
         {

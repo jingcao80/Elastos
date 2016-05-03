@@ -1191,7 +1191,6 @@ ECode CContextImpl::OpenOrCreateDatabase(
     }
     String path;
     f->GetPath(&path);
-    Logger::E(TAG, "OpenOrCreateDatabase: [%s]", path.string());
     AutoPtr<ISQLiteDatabase> db;
     FAIL_RETURN(SQLiteDatabase::OpenDatabase(path, factory, flags, errorHandler, (ISQLiteDatabase**)&db))
     SetFilePermissionsFromMode(path, mode, 0);
@@ -3610,6 +3609,9 @@ ECode CContextImpl::constructor(
     mDisplay = display;
     mOverrideConfiguration = overrideConfiguration;
 
+    mContentResolver = new ApplicationContentResolver();
+    mContentResolver->constructor(this, mMainThread, mUser);
+
     IContext* ctxContainer = IContext::Probe(container);
     Int32 displayId = GetDisplayId();
     AutoPtr<ICompatibilityInfo> compatInfo;
@@ -3697,8 +3699,7 @@ ECode CContextImpl::constructor(
         }
     }
 
-    mContentResolver = new ApplicationContentResolver();
-    return mContentResolver->constructor(this, mMainThread, mUser);
+    return NOERROR;
 }
 
 ECode CContextImpl::InstallSystemApplicationInfo(

@@ -223,11 +223,8 @@ ECode SQLiteProgram::Bind(
     /* [in] */ IInterface* value)
 {
     if (index < 1 || index > mNumParameters) {
-        //throw new IllegalArgumentException("Cannot bind argument at index "
-        //        + index + " because the index is out of range.  "
-        //        + "The statement has " + mNumParameters + " parameters.");
-        Slogger::E(String("SQLiteProgram"), "Cannot bind argument at index %d because the index is out of range.  The statement has %d parameters."
-                , index, mNumParameters);
+        Slogger::E(String("SQLiteProgram"), "Cannot bind argument at index %d because the index is out of range."
+            "  The statement has %d parameters." , index, mNumParameters);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mBindArgs->Set(index - 1, value);

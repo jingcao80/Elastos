@@ -22,13 +22,16 @@ SQLiteSession::SQLiteSession(
     : mConnectionPool(connectionPool)
     , mConnectionFlags(0)
     , mConnectionUseCount(0)
-
 {
     if (connectionPool == NULL) {
         //throw new IllegalArgumentException("connectionPool must not be null");
-        Slogger::E(String("SQLiteSession"), "connectionPool must not be null");
+        Slogger::E("SQLiteSession", "connectionPool must not be null");
         assert(0);
     }
+}
+
+SQLiteSession::~SQLiteSession()
+{
 }
 
 Boolean SQLiteSession::HasTransaction()
@@ -109,11 +112,7 @@ ECode SQLiteSession::BeginTransactionUnchecked(
     transaction = ObtainTransaction(transactionMode, transactionListener);
     transaction->mParent = mTransactionStack;
     mTransactionStack = transaction;
-    //} finally {
-        // if (mTransactionStack == null) {
-        //     releaseConnection(); // might throw
-        // }
-    //}
+
 fail:
     if (mTransactionStack == NULL) {
         FAIL_RETURN(ReleaseConnection()) // might throw
@@ -267,7 +266,7 @@ ECode SQLiteSession::Prepare(
 {
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -303,7 +302,7 @@ ECode SQLiteSession::Execute(
 {
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -334,7 +333,7 @@ ECode SQLiteSession::ExecuteForInt64(
 
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -365,7 +364,7 @@ ECode SQLiteSession::ExecuteForString(
 
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -397,7 +396,7 @@ ECode SQLiteSession::ExecuteForBlobFileDescriptor(
 
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -428,7 +427,7 @@ ECode SQLiteSession::ExecuteForChangedRowCount(
 
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -459,7 +458,7 @@ ECode SQLiteSession::ExecuteForLastInsertedRowId(
 
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -495,12 +494,12 @@ ECode SQLiteSession::ExecuteForCursorWindow(
 
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
-        Slogger::E(String("SQLiteSession"), "sql must not be null.");
+        Slogger::E("SQLiteSession", "sql must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (window == NULL) {
         //throw new IllegalArgumentException("window must not be null.");
-        Slogger::E(String("SQLiteSession"), "window must not be null.");
+        Slogger::E("SQLiteSession", "window must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -562,7 +561,8 @@ ECode SQLiteSession::AcquireConnection(
 {
     if (mConnection == NULL) {
         assert(mConnectionUseCount == 0);
-        FAIL_RETURN(mConnectionPool->AcquireConnection(sql, connectionFlags, cancellationSignal, (SQLiteConnection**)&mConnection)); // might throw
+        FAIL_RETURN(mConnectionPool->AcquireConnection(
+            sql, connectionFlags, cancellationSignal, (SQLiteConnection**)&mConnection)); // might throw
         mConnectionFlags = connectionFlags;
     }
     mConnectionUseCount += 1;
@@ -587,9 +587,7 @@ ECode SQLiteSession::ReleaseConnection()
 ECode SQLiteSession::ThrowIfNoTransaction()
 {
     if (mTransactionStack == NULL) {
-        //throw new IllegalStateException("Cannot perform this operation because "
-        //        + "there is no current transaction.");
-        Slogger::E(String("SQLiteSession"), "Cannot perform this operation because there is no current transaction.");
+        Slogger::E("SQLiteSession", "Cannot perform this operation because there is no current transaction.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -601,7 +599,8 @@ ECode SQLiteSession::ThrowIfTransactionMarkedSuccessful()
         //throw new IllegalStateException("Cannot perform this operation because "
         //        + "the transaction has already been marked successful.  The only "
         //        + "thing you can do now is call endTransaction().");
-        Slogger::E(String("SQLiteSession"), "Cannot perform this operation because the transaction has already been marked successful.  The only thing you can do now is call endTransaction().");
+        Slogger::E("SQLiteSession", "Cannot perform this operation because the transaction"
+            " has already been marked successful.  The only thing you can do now is call endTransaction().");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -612,7 +611,7 @@ ECode SQLiteSession::ThrowIfNestedTransaction()
     if (HasNestedTransaction()) {
         //throw new IllegalStateException("Cannot perform this operation because "
         //        + "a nested transaction is in progress.");
-        Slogger::E(String("SQLiteSession"), "Cannot perform this operation because a nested transaction is in progress.");
+        Slogger::E("SQLiteSession", "Cannot perform this operation because a nested transaction is in progress.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;

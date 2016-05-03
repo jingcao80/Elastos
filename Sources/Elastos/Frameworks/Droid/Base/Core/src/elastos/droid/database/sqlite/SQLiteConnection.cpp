@@ -53,8 +53,11 @@ namespace Database {
 namespace Sqlite {
 
 static const String TAG("SQLiteConnection");
-static const Boolean DEBUG = TRUE;
+static const Boolean DEBUG = FALSE;
 
+//==========================================================
+// SQLiteConnection::PreparedStatement
+//==========================================================
 SQLiteConnection::PreparedStatement::PreparedStatement()
     : mStatementPtr(0)
     , mNumParameters(0)
@@ -73,9 +76,9 @@ SQLiteConnection::PreparedStatementCache::PreparedStatementCache(
 
 void SQLiteConnection::PreparedStatementCache::EntryRemoved(
     /* [in] */ Boolean evicted,
-    /* [in] */ const String& key,
-    /* [in] */ PreparedStatement* oldValue,
-    /* [in] */ PreparedStatement* newValue)
+    /* [in] */ String key,
+    /* [in] */ AutoPtr<PreparedStatement> oldValue,
+    /* [in] */ AutoPtr<PreparedStatement> newValue)
 {
     oldValue->mInCache = FALSE;
     if (!oldValue->mInUse) {
@@ -108,7 +111,9 @@ void SQLiteConnection::PreparedStatementCache::Dump(
     // }
 }
 
-
+//==========================================================
+// SQLiteConnection::Operation
+//==========================================================
 AutoPtr<ISimpleDateFormat> SQLiteConnection::Operation::sDateFormat;
 
 AutoPtr<ISimpleDateFormat> SQLiteConnection::Operation::GetDateFormat()
@@ -208,7 +213,9 @@ String SQLiteConnection::Operation::GetFormattedStartTime()
     return str;
 }
 
-
+//==========================================================
+// SQLiteConnection::OperationLog
+//==========================================================
 const Int32 SQLiteConnection::OperationLog::MAX_RECENT_OPERATIONS;
 const Int32 SQLiteConnection::OperationLog::COOKIE_GENERATION_SHIFT;
 const Int32 SQLiteConnection::OperationLog::COOKIE_INDEX_MASK;
@@ -404,6 +411,9 @@ void SQLiteConnection::OperationLog::Dump(
 }
 
 
+//==========================================================
+//  navtive code
+//==========================================================
 // Set to 1 to use UTF16 storage for localized indexes.
 #define UTF16_STORAGE 0
 
@@ -556,7 +566,6 @@ ECode SQLiteConnection::NativeOpen(
         sqlite3_profile(db, &SqliteProfileCallback, connection);
     }
 
-    Slogger::I(TAG, "Opened connection %s: %p with label '%s'", path.string(), db, label.string());
     *result = reinterpret_cast<Int64>(connection);
     return NOERROR;
 }
@@ -572,7 +581,6 @@ ECode SQLiteConnection::NativeClose(
         if (err != SQLITE_OK) {
             // This can happen if sub-objects aren't closed first.  Make sure the caller knows.
             Slogger::E(TAG, "sqlite3_close(%p) failed: %s", connection->db, sqlite3_errstr(err));
-            assert(0 && "TODO");
             return throw_sqlite3_exception(connection->db, "Count not close db.");
         }
 
@@ -667,7 +675,7 @@ ECode SQLiteConnection::NativePrepareStatement(
         return ec;
     }
 
-    Slogger::V(TAG, "Prepared statement %p on connection %p", statement, connection->db);
+    // Slogger::V(TAG, "Prepared statement %p on connection %p", statement, connection->db);
     *result = reinterpret_cast<Int64>(statement);
     return NOERROR;
 }
@@ -676,6 +684,7 @@ void SQLiteConnection::NativeFinalizeStatement(
     /* [in] */ Int64 connectionPtr,
     /* [in] */ Int64 statementPtr)
 {
+    SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     // We ignore the result of sqlite3_finalize because it is really telling us about
@@ -834,7 +843,7 @@ static ECode ExecuteNonQuery(
                "Queries can be performed using SQLiteDatabase query or rawQuery methods only.");
     }
     else if (*err != SQLITE_DONE) {
-        return throw_sqlite3_exception(connection->db);
+        return throw_sqlite3_exception(connection->db, sqlite3_errstr(*err));
     }
     return NOERROR;
 }
@@ -1252,6 +1261,9 @@ void SQLiteConnection::NativeResetCancel(
     }
 }
 
+
+CAR_INTERFACE_IMPL(SQLiteConnection, Object, ICancellationSignalOnCancelListener);
+
 SQLiteConnection::SQLiteConnection(
     /* [in] */ SQLiteConnectionPool* pool,
     /* [in] */ SQLiteDatabaseConfiguration* configuration,
@@ -1290,8 +1302,6 @@ SQLiteConnection::~SQLiteConnection()
     //}
 }
 
-CAR_INTERFACE_IMPL(SQLiteConnection, Object, ICancellationSignalOnCancelListener);
-
 ECode SQLiteConnection::Open(
     /* [in] */ SQLiteConnectionPool* pool,
     /* [in] */ SQLiteDatabaseConfiguration* configuration,
@@ -1301,8 +1311,6 @@ ECode SQLiteConnection::Open(
 {
     VALIDATE_NOT_NULL(connect)
     *connect = NULL;
-
-Slogger::I(TAG, " >>> SQLiteConnection::Open() %d", connectionId);
 
     AutoPtr<SQLiteConnection> connection = new SQLiteConnection(pool, configuration, connectionId, primaryConnection);
     // try {
@@ -1314,18 +1322,17 @@ Slogger::I(TAG, " >>> SQLiteConnection::Open() %d", connectionId);
     }
     *connect = connection;
     REFCOUNT_ADD(*connect);
-Slogger::I(TAG, " <<< SQLiteConnection::Open() %d", connectionId);
     return NOERROR;
 }
 
-void SQLiteConnection::Close()
+ECode SQLiteConnection::Close()
 {
     Dispose(FALSE);
+    return NOERROR;
 }
 
 ECode SQLiteConnection::Open()
 {
-Slogger::I(TAG, " >>>> SQLiteConnection::Open()");
     assert(mConnectionPtr == 0);
     AutoPtr<SQLiteDatabaseConfiguration> sdc = mConfiguration;
     ECode ec = NativeOpen(mConfiguration->mPath, mConfiguration->mOpenFlags, mConfiguration->mLabel,
@@ -1336,17 +1343,11 @@ Slogger::I(TAG, " >>>> SQLiteConnection::Open()");
         return ec;
     }
     FAIL_RETURN(SetPageSize())
-Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetForeignKeyModeFromConfiguration())
-Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetWalModeFromConfiguration())
-Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetJournalSizeLimit())
-Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetAutoCheckpointInterval())
-Slogger::I(TAG, "  SQLiteConnection::Open() %d", __LINE__);
     FAIL_RETURN(SetLocaleFromConfiguration())
-Slogger::I(TAG, " <<<< SQLiteConnection::Open()");
     return NOERROR;
 }
 
@@ -1505,8 +1506,11 @@ ECode SQLiteConnection::SetJournalMode(
         // If we don't change the journal mode, nothing really bad happens.
         // In the worst case, an application that enables WAL might not actually
         // get it, although it can still use connection pooling.
-        Slogger::W(TAG, "Could not change the database journal mode of '%s' from '%s' to '%s' because the database is locked.  This usually means that the database from enabling or disabling write-ahead logging mode.  Proceeding without changing the journal mode."
-                , mConfiguration->mLabel.string(), value.string(), newValue.string());
+        Slogger::W(TAG, "Could not change the database journal mode of '%s' from '%s' to '%s'"
+            " because the database is locked.  This usually means that the database"
+            " from enabling or disabling write-ahead logging mode."
+            " Proceeding without changing the journal mode.",
+            mConfiguration->mLabel.string(), value.string(), newValue.string());
     }
     return NOERROR;
 }
@@ -1669,19 +1673,10 @@ ECode SQLiteConnection::Prepare(
     }
 
 fail:
-    //} finally {
-    ReleasePreparedStatement(statement);
-    //}
-    //} catch (RuntimeException ex) {
-        // mRecentOperations.failOperation(cookie, ex);
-        // throw ex;
-    //} finally {
-    // mRecentOperations.endOperation(cookie);s
-    //}
-
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+    ReleasePreparedStatement(statement);
     mRecentOperations->EndOperation(cookie);
     return ec;
 }
@@ -1715,21 +1710,12 @@ ECode SQLiteConnection::Execute(
     ec = NativeExecute(mConnectionPtr, statement->mStatementPtr);
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    // } finally {
-    //     releasePreparedStatement(statement);
-    // }
-    // } catch (RuntimeException ex) {
-    //     mRecentOperations.failOperation(cookie, ex);
-    //     throw ex;
-    // } finally {
-    //     mRecentOperations.endOperation(cookie);
-    // }
+
 fail:
-    ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+    ReleasePreparedStatement(statement);
     mRecentOperations->EndOperation(cookie);
     return ec;
 }
@@ -1741,6 +1727,8 @@ ECode SQLiteConnection::ExecuteForInt64(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
         Slogger::E(TAG, "sql must not be null.");
@@ -1766,22 +1754,12 @@ ECode SQLiteConnection::ExecuteForInt64(
     ec = NativeExecuteForInt64(mConnectionPtr, statement->mStatementPtr, result);
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    //} finally {
-    // ReleasePreparedStatement(statement);
-    //}
-    //} catch (RuntimeException ex) {
-        //mRecentOperations.failOperation(cookie, ex);
-        //throw ex;
-    //}
-    //} finally {
-    // mRecentOperations->EndOperation(cookie);
-    //}
+
 fail:
-    ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+    ReleasePreparedStatement(statement);
     mRecentOperations->EndOperation(cookie);
     return ec;
 }
@@ -1793,6 +1771,8 @@ ECode SQLiteConnection::ExecuteForString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
+
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
         Slogger::E(TAG, "sql must not be null.");
@@ -1817,21 +1797,12 @@ ECode SQLiteConnection::ExecuteForString(
     ec = NativeExecuteForString(mConnectionPtr, statement->mStatementPtr, str);
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    // } finally {
-    //     releasePreparedStatement(statement);
-    // }
-    // } catch (RuntimeException ex) {
-    //     mRecentOperations.failOperation(cookie, ex);
-    //     throw ex;
-    // } finally {
-    //     mRecentOperations.endOperation(cookie);
-    // }
+
 fail:
-    ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+    ReleasePreparedStatement(statement);
     mRecentOperations->EndOperation(cookie);
     return ec;
 }
@@ -1843,6 +1814,8 @@ ECode SQLiteConnection::ExecuteForBlobFileDescriptor(
     /* [out] */ IParcelFileDescriptor** descriptor)
 {
     VALIDATE_NOT_NULL(descriptor)
+    *descriptor = NULL;
+
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
         Slogger::E(TAG, "sql must not be null.");
@@ -1869,26 +1842,14 @@ ECode SQLiteConnection::ExecuteForBlobFileDescriptor(
     if (fd >= 0) {
         CParcelFileDescriptor::AdoptFd(fd, descriptor);
     }
-    else {
-        *descriptor = NULL;
-    }
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    // } finally {
-    //     releasePreparedStatement(statement);
-    // }
-    // } catch (RuntimeException ex) {
-    //     mRecentOperations.failOperation(cookie, ex);
-    //     throw ex;
-    // } finally {
-    //     mRecentOperations.endOperation(cookie);
-    // }
+
 fail:
-    ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+    ReleasePreparedStatement(statement);
     mRecentOperations->EndOperation(cookie);
     return ec;
 }
@@ -1900,6 +1861,8 @@ ECode SQLiteConnection::ExecuteForChangedRowCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count);
+    *count = 0;
+
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
         Slogger::E(TAG, "sql must not be null.");
@@ -1924,23 +1887,13 @@ ECode SQLiteConnection::ExecuteForChangedRowCount(
     ec = NativeExecuteForChangedRowCount(mConnectionPtr, statement->mStatementPtr, count);
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    // } finally {
-    //     releasePreparedStatement(statement);
-    // }
-    // } catch (RuntimeException ex) {
-    //     mRecentOperations.failOperation(cookie, ex);
-    //     throw ex;
-    // } finally {
-    //     if (mRecentOperations.endOperationDeferLog(cookie)) {
-    //         mRecentOperations.logOperation(cookie, "changedRows=" + changedRows);
-    //     }
-    // }
+
 fail:
-    ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+
+    ReleasePreparedStatement(statement);
     if (mRecentOperations->EndOperationDeferLog(cookie)) {
         StringBuilder sb("changedRows=");
         sb += *count;
@@ -1982,24 +1935,15 @@ ECode SQLiteConnection::ExecuteForLastInsertedRowId(
     ec = NativeExecuteForLastInsertedRowId(mConnectionPtr, statement->mStatementPtr, id);
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    // } finally {
-    //     releasePreparedStatement(statement);
-    // }
-    // } catch (RuntimeException ex) {
-    //     mRecentOperations.failOperation(cookie, ex);
-    //     throw ex;
-    // } finally {
-    //     mRecentOperations.endOperation(cookie);
-    // }
+
 fail:
     if (FAILED(ec)) {
         Slogger::E(TAG, "failed to execute insert with [%s]", sql.string());
     }
-    ReleasePreparedStatement(statement);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+    ReleasePreparedStatement(statement);
     mRecentOperations->EndOperation(cookie);
     return ec;
 }
@@ -2015,6 +1959,8 @@ ECode SQLiteConnection::ExecuteForCursorWindow(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = 0;
+
     if (sql.IsNullOrEmpty()) {
         //throw new IllegalArgumentException("sql must not be null.");
         Slogger::E(TAG, "sql must not be null.");
@@ -2060,27 +2006,14 @@ ECode SQLiteConnection::ExecuteForCursorWindow(
     *result = countedRows;
     //} finally {
     DetachCancellationSignal(cancellationSignal);
-    //}
-    // } finally {
-    //     releasePreparedStatement(statement);
-    // }
-    // } catch (RuntimeException ex) {
-    //     mRecentOperations.failOperation(cookie, ex);
-    //     throw ex;
-    // } finally {
-    //     if (mRecentOperations.endOperationDeferLog(cookie)) {
-    //         mRecentOperations.logOperation(cookie, "window='" + window
-    //                 + "', startPos=" + startPos
-    //                 + ", actualPos=" + actualPos
-    //                 + ", filledRows=" + filledRows
-    //                 + ", countedRows=" + countedRows);
-    //     }
-    // }
+
 fail:
-    ReleasePreparedStatement(statement);
+
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         mRecentOperations->FailOperation(cookie, ec);
     }
+
+    ReleasePreparedStatement(statement);
     if (mRecentOperations->EndOperationDeferLog(cookie)) {
         StringBuilder sb("window='");
         sb.Append(window);
@@ -2100,16 +2033,16 @@ fail:
 
 ECode SQLiteConnection::AcquirePreparedStatement(
     /* [in] */ const String& sql,
-    /* [out] */ SQLiteConnection::PreparedStatement** _statement)
+    /* [out] */ SQLiteConnection::PreparedStatement** result)
 {
-    VALIDATE_NOT_NULL(_statement)
-    *_statement = NULL;
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
     AutoPtr<PreparedStatement> statement = mPreparedStatementCache->Get(sql);
     Boolean skipCache = FALSE;
     if (statement != NULL) {
         if (!statement->mInUse) {
-            *_statement = statement;
-            REFCOUNT_ADD(*_statement)
+            *result = statement;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
         // The statement is already in the cache but is in use (this statement appears
@@ -2142,22 +2075,19 @@ ECode SQLiteConnection::AcquirePreparedStatement(
         //throw ex;
     // }
     statement->mInUse = TRUE;
-    *_statement = statement;
-    REFCOUNT_ADD(*_statement)
+    *result = statement;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 void SQLiteConnection::ReleasePreparedStatement(
     /* [in] */ PreparedStatement* statement)
 {
-    Slogger::I(TAG, " ReleasePreparedStatement %s", TO_CSTR(statement));
     if (statement == NULL)
         return;
 
     statement->mInUse = FALSE;
     if (statement->mInCache) {
-        Slogger::I(TAG, " ReleasePreparedStatement %s", "mInCache");
-
         //try {
         ECode ec = NativeResetStatementAndClearBindings(mConnectionPtr, statement->mStatementPtr);
         //} catch (SQLiteException ex) {
@@ -2176,7 +2106,6 @@ void SQLiteConnection::ReleasePreparedStatement(
         //}
     }
     else {
-        Slogger::I(TAG, " ReleasePreparedStatement %s", "FinalizePreparedStatement");
         FinalizePreparedStatement(statement);
     }
 }

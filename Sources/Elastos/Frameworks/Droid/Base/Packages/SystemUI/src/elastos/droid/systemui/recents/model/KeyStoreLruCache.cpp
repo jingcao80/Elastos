@@ -25,7 +25,7 @@ KeyStoreLruCache<V>::MyLruCache<V>::MyLruCache(
 template<typename V>
 void KeyStoreLruCache<V>::MyLruCache<V>::EntryRemoved(
     /* [in] */ Boolean evicted,
-    /* [in] */ IInteger32* taskId,
+    /* [in] */ AutoPtr<IInteger32> taskId,
     /* [in] */ V oldV,
     /* [in] */ V newV)
 {

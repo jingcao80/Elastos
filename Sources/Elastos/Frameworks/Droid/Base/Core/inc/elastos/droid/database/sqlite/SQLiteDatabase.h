@@ -1404,19 +1404,6 @@ private:
 
     CARAPI ThrowIfNotOpenLocked();
 
-public:
-    // Thread-local for database sessions that belong to this database.
-    // Each thread has its own database session.
-    // INVARIANT: Immutable.
-    //private final ThreadLocal<SQLiteSession> mThreadSession = new ThreadLocal<SQLiteSession>() {
-    //    @Override
-    //    protected SQLiteSession initialValue() {
-    //        return createSession();
-    //    }
-    //};
-    static pthread_key_t sKeyThreadSession;
-    static pthread_once_t sKeyOnce;
-
 private:
     const static String TAG;
 
@@ -1474,6 +1461,18 @@ private:
     // True if the database has attached databases.
     // INVARIANT: Guarded by mLock.
     Boolean mHasAttachedDbsLocked;
+
+    // Thread-local for database sessions that belong to this database.
+    // Each thread has its own database session.
+    // INVARIANT: Immutable.
+    //private final ThreadLocal<SQLiteSession> mThreadSession = new ThreadLocal<SQLiteSession>() {
+    //    @Override
+    //    protected SQLiteSession initialValue() {
+    //        return createSession();
+    //    }
+    //};
+    pthread_key_t mKeyThreadSession;
+    Boolean mKeyThreadSessionInitialized;
 };
 
 

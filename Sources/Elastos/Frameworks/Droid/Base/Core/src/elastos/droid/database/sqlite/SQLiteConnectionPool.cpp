@@ -65,7 +65,6 @@ ECode SQLiteConnectionPool::Open(
     /* [in] */ SQLiteDatabaseConfiguration* configuration,
     /* [out] */ SQLiteConnectionPool** result)
 {
-    Slogger::I(TAG, " >>> SQLiteConnectionPool::Open(");
     VALIDATE_NOT_NULL(result)
     *result = NULL;
     if (configuration == NULL) {
@@ -78,13 +77,11 @@ ECode SQLiteConnectionPool::Open(
     FAIL_RETURN(pool->Open()) // might throw
     *result = pool;
     REFCOUNT_ADD(*result)
-    Slogger::I(TAG, " <<< SQLiteConnectionPool::Open(");
     return NOERROR;
 }
 
 ECode SQLiteConnectionPool::Open()
 {
-    Slogger::I(TAG, " >>> SQLiteConnectionPool::Open()");
     mAvailablePrimaryConnection = NULL;
     // Open the primary connection.
     // This might throw if the database is corrupt.
@@ -94,7 +91,6 @@ ECode SQLiteConnectionPool::Open()
     mIsOpen = TRUE;
 
     mCloseGuard->Open(String("SQLiteConnectionPool::Close"));
-    Slogger::I(TAG, " <<< SQLiteConnectionPool::Open()");
     return NOERROR;
 }
 
@@ -155,11 +151,9 @@ ECode SQLiteConnectionPool::Reconfigure(
             // WAL mode can only be changed if there are no acquired connections
             // because we need to close all but the primary connection first.
             if (!mAcquiredConnections.IsEmpty()) {
-                //throw new IllegalStateException("Write Ahead Logging (WAL) mode cannot "
-                //        + "be enabled or disabled while there are transactions in "
-                //        + "progress.  Finish all transactions and release all active "
-                //        + "database connections first.");
-                Slogger::E(TAG, "Write Ahead Logging (WAL) mode cannot be enabled or disabled while there are transactions in progress.  Finish all transactions and release all active database connections first.");
+                Slogger::E(TAG, "Write Ahead Logging (WAL) mode cannot be enabled or disabled"
+                    " while there are transactions in progress.  Finish all transactions"
+                    " and release all active database connections first.");
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
 
@@ -169,17 +163,16 @@ ECode SQLiteConnectionPool::Reconfigure(
             assert (mAvailableNonPrimaryConnections.IsEmpty());
         }
 
-        Boolean foreignKeyModeChanged = configuration->mForeignKeyConstraintsEnabled != mConfiguration->mForeignKeyConstraintsEnabled;
+        Boolean foreignKeyModeChanged = configuration->mForeignKeyConstraintsEnabled
+            != mConfiguration->mForeignKeyConstraintsEnabled;
         if (foreignKeyModeChanged) {
             // Foreign key constraints can only be changed if there are no transactions
             // in progress.  To make this clear, we throw an exception if there are
             // any acquired connections.
             if (!mAcquiredConnections.IsEmpty()) {
-                //throw new IllegalStateException("Foreign Key Constraints cannot "
-                //        + "be enabled or disabled while there are transactions in "
-                //        + "progress.  Finish all transactions and release all active "
-                //        + "database connections first.");
-                Slogger::E(TAG, "Foreign Key Constraints cannot be enabled or disabled while there are transactions in progress.  Finish all transactions and release all active database connections first.");
+                Slogger::E(TAG, "Foreign Key Constraints cannot be enabled or disabled"
+                    " while there are transactions in progress.  Finish all transactions"
+                    " and release all active database connections first.");
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
         }
@@ -226,7 +219,6 @@ ECode SQLiteConnectionPool::AcquireConnection(
     /* [in] */ ICancellationSignal* cancellationSignal,
     /* [out] */ SQLiteConnection** result)
 {
-    VALIDATE_NOT_NULL(result)
     return WaitForConnection(sql, connectionFlags, cancellationSignal, result);
 }
 
@@ -240,7 +232,8 @@ ECode SQLiteConnectionPool::ReleaseConnection(
             //throw new IllegalStateException("Cannot perform this operation "
             //        + "because the specified connection was not acquired "
             //        + "from this pool or has already been released.");
-            Slogger::E(TAG, "Cannot perform this operation because the specified connection was not acquired from this pool or has already been released.");
+            Slogger::E(TAG, "Cannot perform this operation because the specified connection"
+                " was not acquired from this pool or has already been released.");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         else {
@@ -298,7 +291,8 @@ ECode SQLiteConnectionPool::ShouldYieldConnection(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {
+        AutoLock lock(mLock);
         HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it;
         for (it = mAcquiredConnections.Begin(); it != mAcquiredConnections.End(); it++) {
             if (it->mFirst.Get() == connection) {
@@ -309,7 +303,8 @@ ECode SQLiteConnectionPool::ShouldYieldConnection(
             //throw new IllegalStateException("Cannot perform this operation "
             //        + "because the specified connection was not acquired "
             //        + "from this pool or has already been released.");
-            Slogger::E(TAG, "Cannot perform this operation because the specified connection was not acquired from this pool or has already been released.");
+            Slogger::E(TAG, "Cannot perform this operation because the specified connection"
+                " was not acquired from this pool or has already been released.");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -318,7 +313,8 @@ ECode SQLiteConnectionPool::ShouldYieldConnection(
             return NOERROR;
         }
 
-        *result = IsSessionBlockingImportantConnectionWaitersLocked(connection->IsPrimaryConnection(), connectionFlags);
+        *result = IsSessionBlockingImportantConnectionWaitersLocked(
+            connection->IsPrimaryConnection(), connectionFlags);
     }
     return NOERROR;
 }
@@ -336,7 +332,8 @@ void SQLiteConnectionPool::CollectDbStats(
             (*it)->CollectDbStats(dbStatsList);
         }
 
-        HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it1 = mAcquiredConnections.Begin();
+        HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it1;
+        it1 = mAcquiredConnections.Begin();
         for (; it1 != mAcquiredConnections.End(); ++it1) {
             it1->mFirst->CollectDbStatsUnsafe(dbStatsList);
         }
@@ -350,10 +347,7 @@ ECode SQLiteConnectionPool::OpenConnectionLocked(
 {
     VALIDATE_NOT_NULL(result)
     Int32 connectionId = mNextConnectionId++;
-Slogger::I(TAG, " >>> SQLiteConnectionPool::OpenConnectionLocked() %d", connectionId);
-    ECode ec = SQLiteConnection::Open(this, configuration, connectionId, primaryConnection, result);
-Slogger::I(TAG, " >>> SQLiteConnectionPool::OpenConnectionLocked() ec=%d", ec);
-    return ec;
+    return SQLiteConnection::Open(this, configuration, connectionId, primaryConnection, result);
 }
 
 void SQLiteConnectionPool::OnConnectionLeaked()
@@ -378,8 +372,10 @@ void SQLiteConnectionPool::OnConnectionLeaked()
     // several seconds while waiting for a leaked connection to be detected and recreated,
     // then perhaps its authors will have added incentive to fix the problem!
 
-    Slogger::W(TAG, "A SQLiteConnection object for database '%s' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed."
-            , mConfiguration->mLabel.string());
+    Slogger::W(TAG, "A SQLiteConnection object for database '%s' was leaked!"
+        " Please fix your application to end transactions in progress properly"
+        " and to close the database when it is no longer needed.",
+        mConfiguration->mLabel.string());
 
     mConnectionLeaked->Set(TRUE);
 }
@@ -409,7 +405,8 @@ void SQLiteConnectionPool::CloseExcessConnectionsAndLogExceptionsLocked()
     List<AutoPtr<SQLiteConnection> >::ReverseIterator rit = mAvailableNonPrimaryConnections.RBegin();
     while (availableCount-- > mMaxConnectionPoolSize - 1) {
         AutoPtr<SQLiteConnection> connection = *rit;
-        rit = List<AutoPtr<SQLiteConnection> >::ReverseIterator(mAvailableNonPrimaryConnections.Erase(--(rit.GetBase())));
+        rit = List<AutoPtr<SQLiteConnection> >::ReverseIterator(
+            mAvailableNonPrimaryConnections.Erase(--(rit.GetBase())));
         CloseConnectionAndLogExceptionsLocked(connection);
     }
 }
@@ -538,10 +535,12 @@ ECode SQLiteConnectionPool::WaitForConnection(
         // Try to acquire a connection.
         AutoPtr<SQLiteConnection> connection;
         if (!wantPrimaryConnection) {
-            FAIL_RETURN(TryAcquireNonPrimaryConnectionLocked(sql, connectionFlags, (SQLiteConnection**)&connection)) // might throw
+            FAIL_RETURN(TryAcquireNonPrimaryConnectionLocked(
+                sql, connectionFlags, (SQLiteConnection**)&connection)) // might throw
         }
         if (connection == NULL) {
-            FAIL_RETURN(TryAcquirePrimaryConnectionLocked(connectionFlags, (SQLiteConnection**)&connection)) // might throw
+            FAIL_RETURN(TryAcquirePrimaryConnectionLocked(
+                connectionFlags, (SQLiteConnection**)&connection)) // might throw
         }
         if (connection != NULL) {
             *result = connection;
@@ -552,7 +551,8 @@ ECode SQLiteConnectionPool::WaitForConnection(
         // No connections available.  Enqueue a waiter in priority order.
         Int32 priority = GetPriority(connectionFlags);
         Int64 startTime = SystemClock::GetUptimeMillis();
-        waiter = ObtainConnectionWaiterLocked(Thread::GetCurrentThread(), startTime, priority, wantPrimaryConnection, sql, connectionFlags);
+        waiter = ObtainConnectionWaiterLocked(
+            Thread::GetCurrentThread(), startTime, priority, wantPrimaryConnection, sql, connectionFlags);
         AutoPtr<ConnectionWaiter> predecessor;
         AutoPtr<ConnectionWaiter> successor = mConnectionWaiterQueue;
         while (successor != NULL) {
@@ -575,8 +575,8 @@ ECode SQLiteConnectionPool::WaitForConnection(
 
     // Set up the cancellation listener.
     if (cancellationSignal != NULL) {
-        AutoPtr<ICancellationSignalOnCancelListener> listener = (ICancellationSignalOnCancelListener*)new OnCancelListener(
-                waiter, nonce, this);
+        AutoPtr<ICancellationSignalOnCancelListener> listener;
+        listener = new OnCancelListener(waiter, nonce, this);
         cancellationSignal->SetOnCancelListener(listener);
     }
     //try {
@@ -590,9 +590,8 @@ ECode SQLiteConnectionPool::WaitForConnection(
         // Detect and recover from connection leaks.
         Boolean value;
         if (mConnectionLeaked->CompareAndSet(TRUE, FALSE, &value), value) {
-            synchronized(mLock) {
-                WakeConnectionWaitersLocked();
-            }
+            AutoLock lock(mLock);
+            WakeConnectionWaitersLocked();
         }
 
         // Wait to be unparked (may already have happened), a timeout, or interruption.
@@ -602,7 +601,8 @@ ECode SQLiteConnectionPool::WaitForConnection(
         Thread::Interrupted();
 
         // Check whether we are done waiting yet.
-        synchronized(mLock) {
+        {
+            AutoLock lock(mLock);
             ec = ThrowIfClosedLocked();
             FAIL_GOTO(ec, fail)
             AutoPtr<SQLiteConnection> connection = waiter->mAssignedConnection;
@@ -628,12 +628,7 @@ ECode SQLiteConnectionPool::WaitForConnection(
             }
         }
     }
-    //} finally {
-        // Remove the cancellation listener.
-        //if (cancellationSignal != null) {
-        //    cancellationSignal.setOnCancelListener(null);
-        //}
-    //}
+
 fail:
     // Remove the cancellation listener.
     if (cancellationSignal != NULL) {
@@ -843,7 +838,8 @@ ECode SQLiteConnectionPool::TryAcquirePrimaryConnectionLocked(
 
     // Uhoh.  No primary connection!  Either this is the first time we asked
     // for it, or maybe it leaked?
-    FAIL_RETURN(OpenConnectionLocked(mConfiguration, TRUE /*primaryConnection*/, (SQLiteConnection**)&connection)) // might throw
+    FAIL_RETURN(OpenConnectionLocked(mConfiguration,
+        TRUE /*primaryConnection*/, (SQLiteConnection**)&connection)) // might throw
     FinishAcquireConnectionLocked(connection, connectionFlags); // might throw
     *_connection = connection;
     REFCOUNT_ADD(*_connection)
@@ -895,7 +891,8 @@ ECode SQLiteConnectionPool::TryAcquireNonPrimaryConnectionLocked(
         *_connection = NULL;
         return NOERROR;
     }
-    FAIL_RETURN(OpenConnectionLocked(mConfiguration, FALSE /*primaryConnection*/, (SQLiteConnection**)&connection)) // might throw
+    FAIL_RETURN(OpenConnectionLocked(mConfiguration,
+        FALSE /*primaryConnection*/, (SQLiteConnection**)&connection)) // might throw
     FinishAcquireConnectionLocked(connection, connectionFlags); // might throw
     *_connection = connection;
     REFCOUNT_ADD(*_connection)
@@ -969,7 +966,7 @@ void SQLiteConnectionPool::SetMaxConnectionPoolSizeLocked()
 ECode SQLiteConnectionPool::ThrowIfClosedLocked()
 {
     if (!mIsOpen) {
-        Slogger::E(TAG, "Cannot perform this operation because the connection pool has been closed.");
+        Slogger::E(TAG, "Cannot perform this operation because the connection pool has been closed. %p", this);
         assert(0 && "TODO");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1019,7 +1016,8 @@ void SQLiteConnectionPool::Dump(
 {
     AutoPtr<IPrinter> indentedPrinter;
     //indentedPrinter = PrefixPrinter->Create(printer, "    ");
-    synchronized(mLock) {
+    {
+        AutoLock lock(mLock);
         printer->Println(String("Connection pool for ") + mConfiguration->mPath + String(":"));
         printer->Println(String("  Open: ") + StringUtils::ToString((Int32)mIsOpen));
         printer->Println(String("  Max connections: ") + StringUtils::ToString(mMaxConnectionPoolSize));
@@ -1045,7 +1043,8 @@ void SQLiteConnectionPool::Dump(
 
         printer->Println(String("  Acquired connections:"));
         if (!mAcquiredConnections.IsEmpty()) {
-            HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it = mAcquiredConnections.Begin();
+            HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it;
+            it = mAcquiredConnections.Begin();
             for (; it != mAcquiredConnections.End(); ++it) {
                 it->mFirst->DumpUnsafe(indentedPrinter, verbose);
                 indentedPrinter->Println(String("  Status: ") + StringUtils::ToString(it->mSecond));

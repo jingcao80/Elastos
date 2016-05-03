@@ -180,6 +180,8 @@ public:
     SQLiteSession(
         /* [in] */ SQLiteConnectionPool* connectionPool);
 
+    ~SQLiteSession();
+
     /**
      * Returns true if the session has a transaction in progress.
      *

@@ -384,7 +384,7 @@ void LruCache<K, V>::TrimToSize(
                 break;
             }
 
-            Slogger::W("LruCache", " >> TODO find the eldest record!");
+            Slogger::W("LruCache", " >> TODO find the eldest record! size: %d", Size());
             //TODO Map.Entry<K, V> toEvict = map.eldest();
             typename HashMap<K, V>::Iterator toEvict = mMap.Begin();
             if (toEvict == mMap.End()) {
@@ -437,7 +437,9 @@ void LruCache<K, V>::EntryRemoved(
     /* [in] */ K key,
     /* [in] */ V oldValue,
     /* [in] */ V newValue)
-{}
+{
+    Slogger::W("LruCache", " >> base's EntryRemoved() is called. please check para-type of sub's EntryRemoved.");
+}
 
 template<typename K, typename V>
 V LruCache<K, V>::Create(

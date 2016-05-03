@@ -50,6 +50,8 @@ private:
     public:
         PreparedStatement();
 
+        TO_STRING_IMPL("SQLiteConnection::PreparedStatement")
+
     public:
         // Next item in pool.
         AutoPtr<PreparedStatement> mPoolNext;
@@ -80,7 +82,8 @@ private:
         Boolean mInUse;
     };
 
-    class PreparedStatementCache : public LruCache<String, AutoPtr<PreparedStatement> >
+    class PreparedStatementCache
+        : public LruCache<String, AutoPtr<PreparedStatement> >
     {
     public:
         PreparedStatementCache(
@@ -93,9 +96,9 @@ private:
     protected:
         CARAPI_(void) EntryRemoved(
             /* [in] */ Boolean evicted,
-            /* [in] */ const String& key,
-            /* [in] */ PreparedStatement* oldValue,
-            /* [in] */ PreparedStatement* newValue);
+            /* [in] */ String key,
+            /* [in] */ AutoPtr<PreparedStatement> oldValue,
+            /* [in] */ AutoPtr<PreparedStatement> newValue);
 
     private:
         SQLiteConnection* mHost;
@@ -192,9 +195,17 @@ private:
     };
 
 public:
-    ~SQLiteConnection();
-
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("SQLiteConnection")
+
+    SQLiteConnection(
+        /* [in] */ SQLiteConnectionPool* pool,
+        /* [in] */ SQLiteDatabaseConfiguration* configuration,
+        /* [in] */ Int32 connectionId,
+        /* [in] */ Boolean primaryConnection);
+
+    ~SQLiteConnection();
 
     // Called by SQLiteConnectionPool only.
     static CARAPI Open(
@@ -207,7 +218,7 @@ public:
     // Called by SQLiteConnectionPool only.
     // Closes the database closes and releases all of its associated resources.
     // Do not call methods on the connection after it is closed.  It will probably crash.
-    CARAPI_(void) Close();
+    CARAPI Close();
 
     // Called by SQLiteConnectionPool only.
     CARAPI Reconfigure(
@@ -611,12 +622,6 @@ private:
     static CARAPI_(void) NativeResetCancel(
         /* [in] */ Int64 connectionPtr,
         /* [in] */ Boolean cancelable);
-
-    SQLiteConnection(
-        /* [in] */ SQLiteConnectionPool* pool,
-        /* [in] */ SQLiteDatabaseConfiguration* configuration,
-        /* [in] */ Int32 connectionId,
-        /* [in] */ Boolean primaryConnection);
 
     CARAPI Open();
 
