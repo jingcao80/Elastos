@@ -1310,12 +1310,11 @@ ECode SQLiteConnection::Open(
     /* [out] */ SQLiteConnection** connect)
 {
     VALIDATE_NOT_NULL(connect)
-    *connect = NULL;
 
     AutoPtr<SQLiteConnection> connection = new SQLiteConnection(pool, configuration, connectionId, primaryConnection);
     // try {
     ECode ec = connection->Open();
-    if (ec == (ECode)E_SQLITE_EXCEPTION) {
+    if (FAILED(ec)) {
         connection->Dispose(FALSE);
         *connect = NULL;
         return ec;
