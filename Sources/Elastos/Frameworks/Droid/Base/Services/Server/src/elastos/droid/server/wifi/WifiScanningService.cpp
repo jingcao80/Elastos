@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/wifi/WifiScanningService.h"
+#include "elastos/droid/server/wifi/CWifiScanningServiceImpl.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -14,19 +15,25 @@ namespace Wifi {
 //=====================================================================
 const String WifiScanningService::TAG("WifiScanningService");
 
-WifiScanningService::WifiScanningService(
+WifiScanningService::WifiScanningService()
+{
+}
+
+ECode WifiScanningService::constructor(
     /* [in] */ IContext* context)
 {
     SystemService::constructor(context);
     Logger::I(TAG, "Creating %s", IContext::WIFI_SCANNING_SERVICE.string());
+    return NOERROR;
 }
 
 ECode WifiScanningService::OnStart()
 {
-    mImpl = new WifiScanningServiceImpl();
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    mImpl->constructor(context);
+    AutoPtr<IIWifiScanner> wifiScanner;
+    CWifiScanningServiceImpl::New(context, (IIWifiScanner**)&wifiScanner);
+    mImpl = (WifiScanningServiceImpl*)wifiScanner.Get();
 
     Logger::I(TAG, "Starting %s", IContext::WIFI_SCANNING_SERVICE.string());
     PublishBinderService(IContext::WIFI_SCANNING_SERVICE, mImpl);
@@ -41,8 +48,9 @@ ECode WifiScanningService::OnBootPhase(
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         if (mImpl == NULL) {
-            mImpl = new WifiScanningServiceImpl();
-            mImpl->constructor(context);
+            AutoPtr<IIWifiScanner> wifiScanner;
+            CWifiScanningServiceImpl::New(context, (IIWifiScanner**)&wifiScanner);
+            mImpl = (WifiScanningServiceImpl*)wifiScanner.Get();
         }
         mImpl->StartService(context);
     }

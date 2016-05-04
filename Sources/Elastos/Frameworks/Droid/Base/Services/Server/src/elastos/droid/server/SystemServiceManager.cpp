@@ -30,7 +30,7 @@ namespace Server {
     } while(0);
 
 const String SystemServiceManager::TAG("SystemServiceManager");
-const String SystemServiceManager::sConstructorSignature("Ctx");
+const String SystemServiceManager::sConstructorSignature("Ctx(LElastos/Droid/Content/IContext;*LIInterface;**)E");
 
 CAR_INTERFACE_IMPL(SystemServiceManager, Object, ISystemServiceManager)
 

@@ -662,11 +662,13 @@ void AsyncChannel::ReplyHalfConnected(
         AutoPtr<IBinder> binder;
         mDstMessenger->GetBinder((IBinder**)&binder);
         AutoPtr<IProxy> proxy = (IProxy*)binder->Probe(EIID_IProxy);
-        assert(proxy != NULL);
-        if (FAILED(proxy->LinkToDeath(mDeathMonitor, 0))) {
-            mDeathMonitor = NULL;
-            // Override status to indicate failure
-            msg->SetArg1(STATUS_BINDING_UNSUCCESSFUL);
+        //only when the dst is not local
+        if (proxy != NULL) {
+            if (FAILED(proxy->LinkToDeath(mDeathMonitor, 0))) {
+                mDeathMonitor = NULL;
+                // Override status to indicate failure
+                msg->SetArg1(STATUS_BINDING_UNSUCCESSFUL);
+            }
         }
     }
 

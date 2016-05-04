@@ -278,7 +278,9 @@ private:
     };
 
 public:
-    RttService(
+    RttService();
+
+    ECode constructor(
         /* [in] */ IContext* context);
 
     // @Override
@@ -290,7 +292,7 @@ public:
 
 public:
     static const Boolean DBG;
-    AutoPtr<IIRttManager> mImpl;
+    AutoPtr<RttServiceImpl> mImpl;
 
 private:
     static const String TAG;

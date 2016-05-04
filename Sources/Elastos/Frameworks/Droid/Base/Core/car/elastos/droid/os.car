@@ -292,6 +292,7 @@ module
             [in] IHandler* handler);
 
         interface IIMessenger;
+        interface IBinder;
     }
 
     singleton class CMessageHelper {

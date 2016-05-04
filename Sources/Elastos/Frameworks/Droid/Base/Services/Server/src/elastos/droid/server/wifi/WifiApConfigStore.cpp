@@ -365,7 +365,7 @@ void WifiApConfigStore::SetDefaultApConfiguration()
         AutoPtr<IUUIDHelper> helper;
         CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
         AutoPtr<IUUID> uuid;
-        helper->RandomUUID((IUUID**)&uuid);
+        //TODO helper->RandomUUID((IUUID**)&uuid);
 
         String randomUUID("3290c984-e86b-4e1a-y7fb-a51b99b815e0");
         if (uuid) uuid->ToString(&randomUUID);

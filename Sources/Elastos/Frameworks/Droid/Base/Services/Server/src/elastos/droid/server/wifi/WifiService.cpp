@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/wifi/WifiService.h"
+#include "elastos/droid/server/wifi/CWifiServiceImpl.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -14,12 +15,18 @@ namespace Wifi {
 //=====================================================================
 const String WifiService::TAG("WifiService");
 
-WifiService::WifiService(
+WifiService::WifiService()
+{
+}
+
+ECode WifiService::constructor(
     /* [in] */ IContext* context)
 {
     SystemService::constructor(context);
-    mImpl = new WifiServiceImpl();
-    mImpl->constructor(context);
+    AutoPtr<IIWifiManager> wifiManager;
+    CWifiServiceImpl::New(context, (IIWifiManager**)&wifiManager);
+    mImpl = (WifiServiceImpl*)wifiManager.Get();
+    return NOERROR;
 }
 
 ECode WifiService::OnStart()

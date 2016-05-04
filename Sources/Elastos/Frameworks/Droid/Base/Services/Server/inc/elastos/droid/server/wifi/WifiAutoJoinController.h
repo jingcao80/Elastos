@@ -6,7 +6,6 @@
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Server.h"
 #include "elastos/droid/ext/frameworkext.h"
-//TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/server/wifi/WifiNative.h"
 #include "elastos/droid/server/wifi/WifiConfigStore.h"
 #include "elastos/droid/server/wifi/WifiNetworkScoreCache.h"
@@ -232,7 +231,7 @@ public:
 
 private:
     AutoPtr<IContext> mContext;
-    AutoPtr<IInterface/*TODO WifiStateMachine*/> mWifiStateMachine;
+    WifiStateMachine* mWifiStateMachine;
     AutoPtr<WifiConfigStore> mWifiConfigStore;
     AutoPtr<WifiNative> mWifiNative;
     AutoPtr<INetworkScoreManager> mScoreManager;

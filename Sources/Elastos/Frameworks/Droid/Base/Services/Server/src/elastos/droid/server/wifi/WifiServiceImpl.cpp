@@ -789,7 +789,7 @@ ECode WifiServiceImpl::constructor(
     syspro->Get(String("wifi.interface"), String("wlan0"), &mInterfaceName);
 
     mTrafficPoller = new WifiTrafficPoller(mContext, mInterfaceName);
-    //TODO mWifiStateMachine = new WifiStateMachine(mContext, mInterfaceName, mTrafficPoller);
+    mWifiStateMachine = new WifiStateMachine(mContext, mInterfaceName, mTrafficPoller);
     mWifiStateMachine->EnableRssiPolling(TRUE);
     mBatteryStats = BatteryStatsService::GetService();
 

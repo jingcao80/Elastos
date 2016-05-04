@@ -12,6 +12,7 @@ namespace Os {
 CarClass(CMessengerImpl)
     , public Object
     , public IIMessenger
+    , public IBinder
 {
 public:
     CAR_INTERFACE_DECL()
@@ -24,6 +25,7 @@ public:
     CARAPI Send(
         /* [in] */ IMessage* message);
 
+    TO_STRING_IMPL("Elastos::Droid::Os::CMessengerImpl");
 private:
     IHandler* mOwner;
 };

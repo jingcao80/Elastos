@@ -2309,6 +2309,14 @@ module
         constructor(
             [in] IContext* ctx);
 
+        interface ISystemService;
+    }
+
+    [local]
+    class CWifiP2pServiceImpl {
+        constructor(
+            [in] IContext* ctx);
+
         interface IIWifiP2pManager;
         interface IBinder;
     }
@@ -2324,25 +2332,13 @@ module
     namespace Server {
     namespace Wifi {
 
-    //[local]
-    //class CWifiScanningService {
-    //    constructor(
-    //        [in] IContext* ctx);
+    [local]
+    class CRttService {
+        constructor(
+            [in] IContext* ctx);
 
-    //    interface IWifiScanningService;
-    //    interface ISystemService;
-    //    interface IBinder;
-    //}
-
-    //[local]
-    //class CWifiService {
-    //    constructor(
-    //        [in] IContext* ctx);
-
-    //    interface IWifiService;
-    //    interface ISystemService;
-    //    interface IBinder;
-    //}
+        interface ISystemService;
+    }
 
     [local]
     class CRttServiceImpl {
@@ -2367,12 +2363,28 @@ module
         constructor(
             [in] IContext* ctx);
 
+        interface ISystemService;
+    }
+
+    [local]
+    class CWifiScanningServiceImpl {
+        constructor(
+            [in] IContext* ctx);
+
         interface IIWifiScanner;
         interface IBinder;
     }
 
     [local]
     class CWifiService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface ISystemService;
+    }
+
+    [local]
+    class CWifiServiceImpl {
         constructor(
             [in] IContext* ctx);
 

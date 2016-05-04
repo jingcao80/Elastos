@@ -209,9 +209,9 @@ WifiP2pServiceImpl::~WifiP2pServiceImpl()
 }
 
 ECode WifiP2pServiceImpl::constructor(
-    /* [in] */ IContext *context)
+    /* [in] */ IContext *ctx)
 {
-    mContext = context;
+    mContext = ctx;
 
     //STOPSHIP: get this from native side
     mInterface = String("p2p0");

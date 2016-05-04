@@ -11,11 +11,14 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 
 C_DEFINES += -DDROID_SERVER
 
-SOURCES = CRttServiceImpl.cpp
+SOURCES = CRttService.cpp
+SOURCES += CRttServiceImpl.cpp
 SOURCES += CStateChangeResult.cpp
 SOURCES += CWifiNetworkScoreCache.cpp
 SOURCES += CWifiScanningService.cpp
+SOURCES += CWifiScanningServiceImpl.cpp
 SOURCES += CWifiService.cpp
+SOURCES += CWifiServiceImpl.cpp
 SOURCES += NetworkUpdateResult.cpp
 SOURCES += RttService.cpp
 SOURCES += SupplicantStateTracker.cpp

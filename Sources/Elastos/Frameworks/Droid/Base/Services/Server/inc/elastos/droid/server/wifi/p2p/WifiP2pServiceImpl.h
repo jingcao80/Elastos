@@ -1016,7 +1016,7 @@ public:
     ~WifiP2pServiceImpl();
 
     CARAPI constructor(
-        /* [in] */ IContext * context);
+        /* [in] */ IContext * ctx);
 
     CARAPI ConnectivityServiceReady();
 

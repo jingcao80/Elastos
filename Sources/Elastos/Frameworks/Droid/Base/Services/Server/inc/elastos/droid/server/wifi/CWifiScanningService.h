@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SERVER_WIFI_CWIFISCANNINGSERVICE_H__
 
 #include "_Elastos_Droid_Server_Wifi_CWifiScanningService.h"
-#include "elastos/droid/server/wifi/WifiScanningServiceImpl.h"
+#include "elastos/droid/server/wifi/WifiScanningService.h"
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +10,7 @@ namespace Server {
 namespace Wifi {
 
 CarClass(CWifiScanningService)
-    , public WifiScanningServiceImpl
+    , public WifiScanningService
 {
 public:
     CAR_OBJECT_DECL()

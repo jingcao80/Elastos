@@ -4548,8 +4548,8 @@ ECode CConnectivityService::RegisterNetworkFactory(
     FAIL_RETURN(EnforceConnectivityInternalPermission())
     Boolean bval;
     AutoPtr<IAsyncChannel> channel;
-    AutoPtr<NetworkFactoryInfo> nfi = new NetworkFactoryInfo(name, messenger, channel);
     CAsyncChannel::New((IAsyncChannel**)&channel);
+    AutoPtr<NetworkFactoryInfo> nfi = new NetworkFactoryInfo(name, messenger, channel);
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(EVENT_REGISTER_NETWORK_FACTORY, TO_IINTERFACE(nfi), (IMessage**)&msg);
     mHandler->SendMessage(msg, &bval);

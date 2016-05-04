@@ -36,16 +36,18 @@ const Int32 NetworkFactory::BASE = IProtocol::BASE_NETWORK_FACTORY;
 const Int32 NetworkFactory::CMD_SET_SCORE = BASE + 2;
 const Int32 NetworkFactory::CMD_SET_FILTER = BASE + 3;
 
-NetworkFactory::NetworkFactory()
-    : mRefCount(0)
-    , mMessenger(NULL)
-{}
-
 AutoPtr<ISparseArray> NetworkFactory::CreateSparseArray()
 {
     AutoPtr<ISparseArray> rev;
     CSparseArray::New((ISparseArray**)&rev);
     return rev;
+}
+
+NetworkFactory::NetworkFactory()
+    : mRefCount(0)
+    , mMessenger(NULL)
+{
+    mNetworkRequests = CreateSparseArray();
 }
 
 ECode NetworkFactory::constructor(

@@ -55,6 +55,7 @@ private:
             /* [in] */ WifiTrafficPoller* owner)
             : mOwner(owner)
         {
+            Handler::constructor();
         }
 
         virtual CARAPI HandleMessage(

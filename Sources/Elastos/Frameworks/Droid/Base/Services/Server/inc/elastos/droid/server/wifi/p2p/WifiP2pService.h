@@ -18,7 +18,9 @@ class WifiP2pService
     : public SystemService
 {
 public:
-    WifiP2pService(
+    WifiP2pService();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // @Override

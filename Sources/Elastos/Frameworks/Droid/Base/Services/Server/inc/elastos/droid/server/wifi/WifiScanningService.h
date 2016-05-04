@@ -17,7 +17,9 @@ class WifiScanningService
     : public SystemService
 {
 public:
-    WifiScanningService(
+    WifiScanningService();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // @Override

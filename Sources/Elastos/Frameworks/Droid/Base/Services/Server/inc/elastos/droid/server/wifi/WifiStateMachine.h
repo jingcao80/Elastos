@@ -844,7 +844,9 @@ private:
         : public ContentObserver
     {
     public:
-        RegisterContentObserver();
+        RegisterContentObserver()
+        {
+        }
 
         CARAPI constructor(
             /* [in] */ IHandler* handler,

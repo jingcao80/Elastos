@@ -12,6 +12,7 @@
 #include "elastos/droid/net/CLinkProperties.h"
 #include "elastos/droid/net/CIpConfiguration.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Net::CLinkProperties;
@@ -25,6 +26,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::IString;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CBitSet;
 using Elastos::Utility::CCollections;
@@ -131,15 +133,7 @@ ECode CWifiConfiguration::constructor()
     for (Int32 i = 0; i < mWepKeys->GetLength(); i++) {
         (*mWepKeys)[i] = NULL;
     }
-    assert(0);
-    // TODO
-    // for (Int32 j = 0; j < mEnterpriseFields->GetLength(); ++j) {
-    //     (*mEnterpriseFields)[j]->SetValue(String(NULL));
-    // }
 
-    // mIpAssignment = IpAssignment_UNASSIGNED;
-    // mProxySettings = ProxySettings_UNASSIGNED;
-    CLinkProperties::New((ILinkProperties**)&mLinkProperties);
     CWifiEnterpriseConfig::New((IWifiEnterpriseConfig**)&mEnterpriseConfig);
     mAutoJoinStatus = AUTO_JOIN_ENABLED;
     mSelfAdded = FALSE;
@@ -497,9 +491,7 @@ ECode CWifiConfiguration::ToString(
 
     sbuf.Append("IP config:\n");
     String ipConfigurationStr;
-    assert(0);
-    // TODO
-    // mIpConfiguration->ToString(&ipConfigurationStr);
+    IObject::Probe(mIpConfiguration)->ToString(&ipConfigurationStr);
     sbuf.Append(ipConfigurationStr);
 
     if (mCreatorUid != 0)  {
@@ -722,10 +714,7 @@ ECode CWifiConfiguration::GetPrintableSsid(
         AutoPtr<IWifiSsid> wifiSsid;
         CWifiSsid::CreateFromAsciiEncoded(mSSID.Substring(2, length - 1),
             (IWifiSsid**)&wifiSsid);
-        assert(0);
-        // TODO
-        // return wifiSsid->ToString(ssid);
-        return E_NOT_IMPLEMENTED;
+        return IObject::Probe(wifiSsid)->ToString(ssid);
     }
     *ssid = mSSID;
     return NOERROR;
@@ -784,10 +773,12 @@ String CWifiConfiguration::TrimStringForKeyId(
     /* [in] */ const String& string)
 {
     // Remove quotes and spaces
-    assert(0);
-    // TODO
-    // return string.Replace("\"", "").Replace(" ", "");
-    return String(NULL);
+    String temp;
+    StringUtils::Replace(string, "\"", "", &temp);
+    String temp2;
+    StringUtils::Replace(temp, " ", "", &temp2);
+    //return string.Replace("\"", "").Replace(" ", "");
+    return temp2;
 }
 
 ECode CWifiConfiguration::GetAuthType(

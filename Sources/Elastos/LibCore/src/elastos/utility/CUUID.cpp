@@ -102,7 +102,8 @@ ECode CUUID::RandomUUID(
     // lock on the class to protect lazy init
     synchronized (sRngLock) {
         if (sRng == NULL) {
-            // CSecureRandom::New((ISecureRandom**)&sRng);
+            assert(0);
+            //TODO CSecureRandom::New((ISecureRandom**)&sRng);
         }
     }
 

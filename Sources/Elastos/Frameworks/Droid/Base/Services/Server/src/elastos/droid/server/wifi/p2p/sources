@@ -13,3 +13,4 @@ C_DEFINES += -DDROID_SERVER
 SOURCES = CWifiP2pService.cpp
 SOURCES += WifiP2pService.cpp
 SOURCES += WifiP2pServiceImpl.cpp
+SOURCES += CWifiP2pServiceImpl.cpp

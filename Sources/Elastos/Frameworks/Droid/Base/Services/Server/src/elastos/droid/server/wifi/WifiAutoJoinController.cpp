@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/wifi/WifiAutoJoinController.h"
 #include "elastos/droid/server/wifi/WifiParser.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringUtils.h>
@@ -63,8 +64,7 @@ WifiAutoJoinController::WifiAutoJoinController(
     CHashMap::New((IHashMap**)&mScanResultCache);
 
     mContext = c;
-    assert(0 && "TODO");
-    // mWifiStateMachine = w;
+    mWifiStateMachine = w;
     mWifiConfigStore = s;
     mWifiNative = n;
     mNetworkScoreCache = NULL;
@@ -234,9 +234,8 @@ ECode WifiAutoJoinController::AddToScanCache(
                     str += sid;
                     LogDbg(str);
                 }
-                assert(0 && "TODO");
-                // mWifiStateMachine->SendMessage(
-                //         WifiStateMachine::CMD_AUTO_SAVE_NETWORK, associatedConfig);
+                mWifiStateMachine->SendMessage(
+                         WifiStateMachine::CMD_AUTO_SAVE_NETWORK, associatedConfig);
                 didAssociate = TRUE;
             }
         }
@@ -264,11 +263,15 @@ ECode WifiAutoJoinController::AddToScanCache(
     Int32 size = 0;
     unknownScanResults->GetSize(&size);
     if (size != 0) {
-        AutoPtr<ArrayOf<INetworkKey*> > p = ArrayOf<INetworkKey*>::Alloc(size);
-        AutoPtr<ArrayOf<INetworkKey*> > newKeys;
-        assert(0 && "TODO");
-        // unknownScanResults->ToArray(p.Get(), (ArrayOf<INetworkKey*>**)&newKeys);
+        AutoPtr<ArrayOf<IInterface*> > p = ArrayOf<IInterface*>::Alloc(size);
+        AutoPtr<ArrayOf<IInterface*> > newInterfaceKeys;
+        unknownScanResults->ToArray(p.Get(), (ArrayOf<IInterface*>**)&newInterfaceKeys);
         // Kick the score manager, we will get updated scores asynchronously
+        AutoPtr<ArrayOf<INetworkKey*> > newKeys = ArrayOf<INetworkKey*>::Alloc(newInterfaceKeys->GetLength());
+        for(Int32 i = 0; i < newInterfaceKeys->GetLength(); ++i) {
+            AutoPtr<INetworkKey> nwk = INetworkKey::Probe((*newInterfaceKeys)[i]);
+            newKeys->Set(i, nwk);
+        }
         Boolean b = FALSE;
         mScoreManager->RequestScores(newKeys, &b);
     }
@@ -287,7 +290,7 @@ ECode WifiAutoJoinController::LogDbg(
     /* [in] */ const String& message,
     /* [in] */ Boolean stackTrace)
 {
-    Int64 now = SystemClock::GetElapsedRealtimeNanos();
+    //Int64 now = SystemClock::GetElapsedRealtimeNanos();
     if (stackTrace) {
         AutoPtr<IThread> th = Thread::GetCurrentThread();
         // Logger::E(TAG, message + " stack:"
@@ -309,8 +312,7 @@ ECode WifiAutoJoinController::NewSupplicantResults(
     VALIDATE_NOT_NULL(result);
     Int32 numScanResultsKnown = 0;
     AutoPtr<IList> scanList;
-    assert(0 && "TODO");
-    // mWifiStateMachine->GetScanResultsListNoCopyUnsync((IList**)&scanList);
+    mWifiStateMachine->GetScanResultsListNoCopyUnsync((IList**)&scanList);
     AddToScanCache(scanList, &numScanResultsKnown);
     AgeScanResultsOut(mScanResultMaximumAge);
     if (DBG) {
@@ -1512,8 +1514,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
     // supplicant agree
     mCurrentConfigurationKey = NULL;
     AutoPtr<IWifiConfiguration> currentConfiguration;
-    assert(0 && "TODO");
-    // mWifiStateMachine->GetCurrentWifiConfiguration((IWifiConfiguration**)&currentConfiguration);
+    mWifiStateMachine->GetCurrentWifiConfiguration((IWifiConfiguration**)&currentConfiguration);
 
     AutoPtr<IWifiConfiguration> candidate;
 
@@ -1627,8 +1628,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             str += " WifiStateMachine=";
             str += networkId;
             LogDbg(str);
-            assert(0 && "TODO");
-            // mWifiStateMachine->DisconnectCommand();
+            mWifiStateMachine->DisconnectCommand();
             return NOERROR;
         }
         else {
@@ -2113,8 +2113,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
      * then we should not be allowed to switch regardless of the delta
      */
     Boolean b = FALSE;
-    assert(0 && "TODO");
-    // mWifiStateMachine->ShouldSwitchNetwork(networkDelta, &b);
+    mWifiStateMachine->ShouldSwitchNetwork(networkDelta, &b);
     if (b) {
         if (mStaStaSupported) {
             LogDbg(String("mStaStaSupported --> error do nothing now "));
@@ -2157,8 +2156,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                 // Second step: Look for the best Scan result for this configuration
                 // TODO this algorithm should really be done in one step
                 String currentBSSID;
-                assert(0 && "TODO");
-                // mWifiStateMachine->GetCurrentBSSID(&currentBSSID);
+                mWifiStateMachine->GetCurrentBSSID(&currentBSSID);
                 AutoPtr<IScanResult> roamCandidate;
                 AttemptRoam(NULL, candidate, 3000, String(NULL), (IScanResult**)&roamCandidate);
                 if (roamCandidate != NULL && !currentBSSID.IsNull()) {
@@ -2195,16 +2193,14 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             }
             Int32 networkId = 0;
             candidate->GetNetworkId(&networkId);
-            assert(0 && "TODO");
-            // mWifiStateMachine->SendMessage(WifiStateMachine::CMD_AUTO_CONNECT,
-            //             networkId, networkSwitchType, candidate);
+            mWifiStateMachine->SendMessage(WifiStateMachine::CMD_AUTO_CONNECT,
+                         networkId, networkSwitchType, candidate);
         }
     }
 
     if (networkSwitchType == AUTO_JOIN_IDLE) {
         String currentBSSID;
-        assert(0 && "TODO");
-        // mWifiStateMachine->GetCurrentBSSID(&currentBSSID);
+        mWifiStateMachine->GetCurrentBSSID(&currentBSSID);
         // Attempt same WifiConfiguration roaming
         AutoPtr<IScanResult> roamCandidate;
         AttemptRoam(NULL, currentConfiguration, 3000,
@@ -2241,10 +2237,10 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
         b = FALSE;
         // mWifiStateMachine->ShouldSwitchNetwork(999, &b);
         if (roamCandidate != NULL && b) {
+            Int32 networkId = 0;
+            currentConfiguration->GetNetworkId(&networkId);
             if (DBG) {
                 String str("AutoJoin auto roam with netId ");
-                Int32 networkId = 0;
-                currentConfiguration->GetNetworkId(&networkId);
                 str += networkId;
                 str += " ";
                 String ck;
@@ -2266,9 +2262,8 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             mWifiConnectionStatistics->GetNumAutoRoamAttempt(&numAutoRoamAttempt);
             mWifiConnectionStatistics->SetNumAutoRoamAttempt(++numAutoRoamAttempt);
 
-            assert(0 && "TODO");
-            // mWifiStateMachine->SendMessage(WifiStateMachine::CMD_AUTO_ROAM,
-            //             networkId, 1, roamCandidate);
+            mWifiStateMachine->SendMessage(WifiStateMachine::CMD_AUTO_ROAM,
+                         networkId, 1, roamCandidate);
         }
     }
     if (VDBG) {
@@ -2331,8 +2326,7 @@ Int32 WifiAutoJoinController::CompareNetwork(
     }
 
     AutoPtr<IWifiConfiguration> currentNetwork;
-    assert(0 && "TODO");
-    // mWifiStateMachine->GetCurrentWifiConfiguration((IWifiConfiguration**)&currentNetwork);
+    mWifiStateMachine->GetCurrentWifiConfiguration((IWifiConfiguration**)&currentNetwork);
     if (currentNetwork == NULL) {
         // Return any absurdly high score, if we are not connected there is no current
         // network to...

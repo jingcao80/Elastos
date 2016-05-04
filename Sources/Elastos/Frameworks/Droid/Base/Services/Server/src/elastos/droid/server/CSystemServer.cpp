@@ -129,9 +129,8 @@ const String SystemServer::PRINT_MANAGER_SERVICE_CLASS(
     "com.android.server.print.PrintManagerService");
 const String SystemServer::USB_SERVICE_CLASS(
     "com.android.server.usb.UsbService$Lifecycle");
-const String SystemServer::WIFI_SERVICE_CLASS(
-    "com.android.server.wifi.WifiService");
-const String SystemServer::WIFI_P2P_SERVICE_CLASS("Elastos.Droid.Net.Wifi.P2p.CWifiP2pService");
+const String SystemServer::WIFI_SERVICE_CLASS("Elastos.Droid.Server.Wifi.CWifiService");
+const String SystemServer::WIFI_P2P_SERVICE_CLASS("Elastos.Droid.Server.Wifi.P2p.CWifiP2pService");
     //"com.android.server.wifi.p2p.WifiP2pService";
 const String SystemServer::ETHERNET_SERVICE_CLASS(
     "com.android.server.ethernet.EthernetService");
@@ -756,16 +755,23 @@ ECode SystemServer::StartOtherServices()
             if (FAILED(ec)) ReportWtf("Add NetworkPolicy Service", ec);
 
 
-            Slogger::I(TAG, "leliang_debug CWifiP2pService not ok ????????");
-            //mSystemServiceManager->StartService(WIFI_P2P_SERVICE_CLASS);
-            Slogger::I(TAG, "leliang_debug WifiService not ok ????????");
-            //mSystemServiceManager->StartService(WIFI_SERVICE_CLASS);
-            Slogger::I(TAG, "leliang_debug WifiScanningService not ok ????????");
-            //mSystemServiceManager->StartService(
-            //             "com.android.server.wifi.WifiScanningService");
+            Slogger::I(TAG, "wifiP2pService");
+            AutoPtr<ISystemService> wifiP2pService;
+            ec = mSystemServiceManager->StartService(WIFI_P2P_SERVICE_CLASS, (ISystemService**)&wifiP2pService);
+            if (FAILED(ec)) Slogger::I(TAG, "WifiP2pService start fail");
+            Slogger::I(TAG, "wifiService");
+            AutoPtr<ISystemService> wifiService;
+            ec = mSystemServiceManager->StartService(WIFI_SERVICE_CLASS, (ISystemService**)&wifiService);
+            if (FAILED(ec)) Slogger::I(TAG, "WifiService start fail");
+            Slogger::I(TAG, "wifiScanningService");
+            AutoPtr<ISystemService> wifiScanningService;
+            ec = mSystemServiceManager->StartService(String("Elastos.Droid.Server.Wifi.CWifiScanningService"), (ISystemService**)&wifiScanningService);
+            if (FAILED(ec)) Slogger::I(TAG, "WifiScanningService start fail");
 
-            Slogger::I(TAG, "leliang_debug RttService not ok ????????");
-            //mSystemServiceManager->StartService("com.android.server.wifi.RttService");
+            Slogger::I(TAG, "RttService");
+            AutoPtr<ISystemService> rttService;
+            ec = mSystemServiceManager->StartService(String("Elastos.Droid.Server.Wifi.CRttService"), (ISystemService**)&rttService);
+            if (FAILED(ec)) Slogger::I(TAG, "RttService start fail");
 
             bval = FALSE;
             if (mPackageManager->HasSystemFeature(IPackageManager::FEATURE_ETHERNET, &bval), bval) {

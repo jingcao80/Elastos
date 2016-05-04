@@ -1,5 +1,6 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/server/wifi/p2p/WifiP2pService.h"
+#include "elastos/droid/server/wifi/p2p/CWifiP2pServiceImpl.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -15,17 +16,23 @@ namespace P2p {
 //=====================================================================
 const String WifiP2pService::TAG("WifiP2pService");
 
-WifiP2pService::WifiP2pService(
+WifiP2pService::WifiP2pService()
+{
+}
+
+ECode WifiP2pService::constructor(
     /* [in] */ IContext* context)
 {
     SystemService::constructor(context);
-    mImpl = new WifiP2pServiceImpl();
-    mImpl->constructor(context);
+    AutoPtr<IIWifiP2pManager> wifip2pm;
+    CWifiP2pServiceImpl::New(context, (IIWifiP2pManager**)&wifip2pm);
+    mImpl = (WifiP2pServiceImpl*)wifip2pm.Get();
+    return NOERROR;
 }
 
 ECode WifiP2pService::OnStart()
 {
-    Logger::I(TAG, "Registering %s", IContext::WIFI_P2P_SERVICE.string());
+    Logger::I(TAG, "Registering %s, mImpl: %p, Interface: %p", IContext::WIFI_P2P_SERVICE.string(), mImpl.Get(), TO_IINTERFACE(mImpl));
     PublishBinderService(IContext::WIFI_P2P_SERVICE, mImpl);
     return NOERROR;
 }

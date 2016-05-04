@@ -14,7 +14,6 @@ using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::Server::Wifi::CRttServiceImpl;
 using Elastos::Droid::Wifi::EIID_IIRttManager;
 using Elastos::Droid::Wifi::IRttManager;
 using Elastos::Droid::Wifi::IWifiManager;
@@ -539,8 +538,8 @@ ECode RttService::RttServiceImpl::StartService(
     AutoPtr<IIntentFilter> ifl;
     CIntentFilter::New(IWifiManager::WIFI_SCAN_AVAILABLE, (IIntentFilter**)&ifl);
     AutoPtr<IIntent> res;
-    mContext->RegisterReceiver(
-            new InnerBroadcastReceiver1(this), ifl, (IIntent**)&res);
+    AutoPtr<IBroadcastReceiver> br = new InnerBroadcastReceiver1(this);
+    mContext->RegisterReceiver(br, ifl, (IIntent**)&res);
 
     mStateMachine->Start();
     return NOERROR;
@@ -654,18 +653,25 @@ ECode RttService::InnerWifiNativeRttEventHandler::OnRttResults(
 const Boolean RttService::DBG = TRUE;
 const String RttService::TAG("RttService");
 
-RttService::RttService(
+RttService::RttService()
+{
+}
+
+ECode RttService::constructor(
     /* [in] */ IContext* context)
 {
-    // SystemService(context)
+    SystemService::constructor(context);
     Logger::I(TAG, "Creating %s", IContext::WIFI_RTT_SERVICE.string());
+    return NOERROR;
 }
 
 ECode RttService::OnStart()
 {
-    AutoPtr<IContext> cxt;
-    GetContext((IContext**)&cxt);
-    CRttServiceImpl::New(cxt, (IIRttManager**)&mImpl);
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<IIRttManager> rttManager;
+    CRttServiceImpl::New(ctx, (IIRttManager**)&rttManager);
+    mImpl = (RttService::RttServiceImpl*)rttManager.Get();
 
     Logger::I(TAG, "Starting %s", IContext::WIFI_RTT_SERVICE.string());
     PublishBinderService(IContext::WIFI_RTT_SERVICE, IBinder::Probe(mImpl));
@@ -677,12 +683,14 @@ ECode RttService::OnBootPhase(
 {
     if (phase == ISystemService::PHASE_SYSTEM_SERVICES_READY) {
         Logger::I(TAG, "Registering %s", IContext::WIFI_RTT_SERVICE.string());
-        AutoPtr<IContext> cxt;
-        GetContext((IContext**)&cxt);
+        AutoPtr<IContext> ctx;
+        GetContext((IContext**)&ctx);
         if (mImpl == NULL) {
-            CRttServiceImpl::New(cxt, (IIRttManager**)&mImpl);
+            AutoPtr<IIRttManager> rttManager;
+            CRttServiceImpl::New(ctx, (IIRttManager**)&rttManager);
+            mImpl = (RttService::RttServiceImpl*)rttManager.Get();
         }
-        ((RttServiceImpl*)mImpl.Get())->StartService(cxt);
+        mImpl->StartService(ctx);
     }
     return NOERROR;
 }

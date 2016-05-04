@@ -448,7 +448,7 @@ ECode WifiStateMachine::DefaultState::ProcessMessage(
         }
         case CMD_BOOT_COMPLETED: {
             String countryCode = mHost->mPersistedCountryCode;
-            if (countryCode.IsEmpty() == FALSE) {
+            if (!countryCode.IsNull() && countryCode.IsEmpty() == FALSE) {
                 AutoPtr<IContentResolver> cr;
                 mHost->mContext->GetContentResolver((IContentResolver**)&cr);
                 Boolean b;
@@ -833,8 +833,8 @@ ECode WifiStateMachine::SupplicantStartingState::ProcessMessage(
                 mHost->SendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
             }
             else {
-                mHost->Loge(String("Failed ") + mHost->mSupplicantRestartCount +
-                        " times to start supplicant, unload driver");
+                mHost->Loge(String("Failed ") + StringUtils::ToString(mHost->mSupplicantRestartCount) +
+                        String(" times to start supplicant, unload driver"));
                 mHost->mSupplicantRestartCount = 0;
                 mHost->SetWifiState(IWifiManager::WIFI_STATE_UNKNOWN);
                 mHost->TransitionTo(mHost->mInitialState);
@@ -1171,7 +1171,7 @@ ECode WifiStateMachine::DriverStartingState::ProcessMessage(
             message->GetArg1(&arg1);
             if (arg1 == mHost->mDriverStartToken) {
                 if (mTries >= 2) {
-                    mHost->Loge(String("Failed to start driver after ") + mTries);
+                    mHost->Loge(String("Failed to start driver after ") + StringUtils::ToString(mTries));
                     mHost->TransitionTo(mHost->mDriverStoppedState);
                 }
                 else {
@@ -1405,10 +1405,10 @@ ECode WifiStateMachine::DriverStartedState::ProcessMessage(
             Int32 arg1;
             message->GetArg1(&arg1);
             Int32 band =  arg1;
-            if (DBG) mHost->Log(String("set frequency band ") + band);
+            if (DBG) mHost->Log(String("set frequency band ") + StringUtils::ToString(band));
             if (mHost->mWifiNative->SetBand(band)) {
 
-                if (PDBG)  mHost->Loge(String("did set frequency band ") + band);
+                if (PDBG)  mHost->Loge(String("did set frequency band ") + StringUtils::ToString(band));
 
                 mHost->mFrequencyBand->Set(band);
                 // Flush old data - like scan results
@@ -1427,11 +1427,11 @@ ECode WifiStateMachine::DriverStartedState::ProcessMessage(
                 // Fetch the latest scan results when frequency band is set
                 mHost->StartScanNative(WifiNative::SCAN_WITHOUT_CONNECTION_SETUP, String(NULL));
 
-                if (PDBG) mHost->Loge(String("done set frequency band ") + band);
+                if (PDBG) mHost->Loge(String("done set frequency band ") + StringUtils::ToString(band));
 
             }
             else {
-                mHost->Loge(String("Failed to set frequency band ") + band);
+                mHost->Loge(String("Failed to set frequency band ") + StringUtils::ToString(band));
             }
             break;
         }
@@ -1446,7 +1446,7 @@ ECode WifiStateMachine::DriverStartedState::ProcessMessage(
         case CMD_STOP_DRIVER: {
             Int32 arg1;
             message->GetArg1(&arg1);
-            Int32 mode = arg1;
+            //Int32 mode = arg1;
 
             /* Already doing a delayed stop */
             if (mHost->mInDelayedStop) {
@@ -1458,7 +1458,7 @@ ECode WifiStateMachine::DriverStartedState::ProcessMessage(
 
             mHost->mInDelayedStop = TRUE;
             mHost->mDelayedStopCounter++;
-            if (DBG) mHost->Log(String("Delayed stop message ") + mHost->mDelayedStopCounter);
+            if (DBG) mHost->Log(String("Delayed stop message ") + StringUtils::ToString(mHost->mDelayedStopCounter));
 
             /* send regular delayed shut down */
             AutoPtr<IIntent> driverStopIntent;
@@ -1494,7 +1494,7 @@ ECode WifiStateMachine::DriverStartedState::ProcessMessage(
         case CMD_DELAYED_STOP_DRIVER: {
             Int32 arg1;
             message->GetArg1(&arg1);
-            if (DBG) mHost->Log(String("delayed stop ") + arg1 + " " + mHost->mDelayedStopCounter);
+            if (DBG) mHost->Log(String("delayed stop ") + StringUtils::ToString(arg1) + String(" ") + StringUtils::ToString(mHost->mDelayedStopCounter));
             if (arg1 != mHost->mDelayedStopCounter) break;
             AutoPtr<IState> state = mHost->GetCurrentState();
             if (state != mHost->mDisconnectedState) {
@@ -2079,7 +2079,7 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
         case CMD_SAVE_CONFIG: {
             mHost->mWifiConfigStore->SaveConfig(&ok);
 
-            if (DBG) mHost->Loge(String("wifistatemachine did save config ") + ok);
+            if (DBG) mHost->Loge(String("wifistatemachine did save config ") + StringUtils::BooleanToString(ok));
             mHost->ReplyToMessage(message, CMD_SAVE_CONFIG, ok ? SUCCESS : FAILURE);
 
             // Inform the backup manager about a data change
@@ -2270,7 +2270,7 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             else {
                 String str;
                 IObject::Probe(config)->ToString(&str);
-                mHost->Loge(String("Failed to connect config: ") + str + " netId: " + netId);
+                mHost->Loge(String("Failed to connect config: ") + str + String(" netId: ") + StringUtils::ToString(netId));
                 mHost->ReplyToMessage(message, IWifiManager::CONNECT_NETWORK_FAILED,
                         IWifiManager::ERROR);
                 break;
@@ -2320,11 +2320,11 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
                 Int32 networkId;
                 config->GetNetworkId(&networkId);
                 mHost->Loge(String("CONNECT_NETWORK id=") + StringUtils::ToString(netId)
-                        + " config=" + SSID
-                        + " cnid=" + networkId
-                        + " supstate=" + mHost->mSupplicantStateTracker->GetSupplicantStateName()
-                        + " my state " + name
-                        + " uid = " + sendingUid
+                        + String(" config=") + SSID
+                        + String(" cnid=") + StringUtils::ToString(networkId)
+                        + String(" supstate=") + mHost->mSupplicantStateTracker->GetSupplicantStateName()
+                        + String(" my state ") + name
+                        + String(" uid = ") + StringUtils::ToString(sendingUid)
                         + wasSkipped);
             }
 
@@ -2387,7 +2387,7 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             else {
                 String str;
                 IObject::Probe(config)->ToString(&str);
-                mHost->Loge(String("Failed to connect config: ") + str + " netId: " + netId);
+                mHost->Loge(String("Failed to connect config: ") + str + String(" netId: ") + StringUtils::ToString(netId));
                 mHost->ReplyToMessage(message, IWifiManager::CONNECT_NETWORK_FAILED,
                         IWifiManager::ERROR);
                 break;
@@ -2422,10 +2422,10 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             String ssid;
             config->GetSSID(&ssid);
             mHost->Loge(String("SAVE_NETWORK id=") + StringUtils::ToString(nid)
-                        + " config=" + ssid
-                        + " nid=" + nid
-                        + " supstate=" + mHost->mSupplicantStateTracker->GetSupplicantStateName()
-                        + " my state " + name);
+                        + String(" config=") + ssid
+                        + String(" nid=") + StringUtils::ToString(nid)
+                        + String(" supstate=") + mHost->mSupplicantStateTracker->GetSupplicantStateName()
+                        + String(" my state ") + name);
 
             mHost->mWifiConfigStore->SaveNetwork(config, -1, (NetworkUpdateResult**)&networkUpdateResult);
             if (networkUpdateResult->GetNetworkId() != IWifiConfiguration::INVALID_NETWORK_ID) {
@@ -2645,7 +2645,7 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
                     if (config != NULL) {
                         config->GetNumConnectionFailures(&count);
                     }
-                    mHost->Log(String("WifiStateMachine DHCP failure count=") + count);
+                    mHost->Log(String("WifiStateMachine DHCP failure count=") + StringUtils::ToString(count));
                 }
                 mHost->HandleIPv4Failure(IDhcpStateMachine::DHCP_FAILURE);
                 // As above, we transition to mHost->mDisconnectingState via updateLinkProperties.
@@ -2773,7 +2773,7 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
                 mHost->GetCurrentWifiConfiguration((IWifiConfiguration**)&currentConfiguration);
                 if (DBG) {
                     mHost->Loge(String("WifiStateMachine CMD_START_SCAN full=") +
-                            tryFullBandScan);
+                            StringUtils::BooleanToString(tryFullBandScan));
                 }
                 if (currentConfiguration != NULL) {
                     if (mHost->fullBandConnectedTimeIntervalMilli
@@ -2858,7 +2858,7 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
             message->GetArg1(&arg1);
             if (arg1 == mHost->mRssiPollToken) {
                 if (mHost->mWifiConfigStore->enableChipWakeUpWhenAssociated) {
-                    if (VVDBG) mHost->Log(String(" get link layer stats ") + mHost->mWifiLinkLayerStatsSupported);
+                    if (VVDBG) mHost->Log(String(" get link layer stats ") + StringUtils::ToString(mHost->mWifiLinkLayerStatsSupported));
                     AutoPtr<IWifiLinkLayerStats> stats;
                     mHost->GetWifiLinkLayerStats(VDBG, (IWifiLinkLayerStats**)&stats);
                     if (stats != NULL) {
@@ -2932,12 +2932,12 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
 
                 // Ignore if we are not debouncing
                 mHost->Loge(String("CMD_DELAYED_NETWORK_DISCONNECT and not debouncing - ignore ")
-                        + arg1);
+                        + StringUtils::ToString(arg1));
                 return HANDLED;
             }
             else {
                 mHost->Loge(String("CMD_DELAYED_NETWORK_DISCONNECT and debouncing - disconnect ")
-                        + arg1);
+                        + StringUtils::ToString(arg1));
 
                 mHost->linkDebouncing = FALSE;
                 // If we are still debouncing while this message comes,
@@ -3013,10 +3013,10 @@ ECode WifiStateMachine::ObtainingIpState::Enter()
             wc->ConfigKey(&key);
         }
         mHost->Log(String("enter ObtainingIpState netId=") + StringUtils::ToString(mHost->mLastNetworkId)
-                + " " + key + " "
-                + " roam=" + mHost->mAutoRoaming
-                + " static=" + b
-                + " watchdog= " + mHost->obtainingIpWatchdogCount);
+                + String(" ") + key + String(" ")
+                + String(" roam=") + StringUtils::ToString(mHost->mAutoRoaming)
+                + String(" static=") + StringUtils::BooleanToString(b)
+                + String(" watchdog= ") + StringUtils::ToString(mHost->obtainingIpWatchdogCount));
     }
 
     // Reset link Debouncing, indicating we have successfully re-connected to the AP
@@ -3047,7 +3047,7 @@ ECode WifiStateMachine::ObtainingIpState::Enter()
             mHost->StartDhcp();
         }
         mHost->obtainingIpWatchdogCount++;
-        mHost->Loge(String("Start Dhcp Watchdog ") + mHost->obtainingIpWatchdogCount);
+        mHost->Loge(String("Start Dhcp Watchdog ") + StringUtils::ToString(mHost->obtainingIpWatchdogCount));
         AutoPtr<IMessage> msg;
         mHost->ObtainMessage(CMD_OBTAINING_IP_ADDRESS_WATCHDOG_TIMER,
                 mHost->obtainingIpWatchdogCount, 0, (IMessage**)&msg);
@@ -3131,7 +3131,7 @@ ECode WifiStateMachine::ObtainingIpState::ProcessMessage(
             message->GetArg1(&arg1);
             if (arg1 == mHost->obtainingIpWatchdogCount) {
                 mHost->Loge(String("ObtainingIpAddress: Watchdog Triggered, count=")
-                        + mHost->obtainingIpWatchdogCount);
+                        + StringUtils::ToString(mHost->obtainingIpWatchdogCount));
                 mHost->HandleIpConfigurationLost();
                 mHost->TransitionTo(mHost->mDisconnectingState);
                 break;
@@ -3193,7 +3193,7 @@ ECode WifiStateMachine::VerifyingLinkState::ProcessMessage(
             mHost->TransitionTo(mHost->mConnectedState);
             break;
         default:
-            if (DBG) mHost->Log(name + " what=" + what + " NOT_HANDLED");
+            if (DBG) mHost->Log(name + String(" what=") + StringUtils::ToString(what) + String(" NOT_HANDLED"));
             *result = NOT_HANDLED;
             return NOERROR;
     }
@@ -3214,13 +3214,13 @@ ECode WifiStateMachine::RoamingState::Enter()
 {
     if (DBG) {
         mHost->Log(String("RoamingState Enter")
-                + " mScreenOn=" + mHost->mScreenOn );
+                + String(" mScreenOn=") + StringUtils::BooleanToString(mHost->mScreenOn));
     }
     mHost->SetScanAlarm(FALSE, 0);
 
     // Make sure we disconnect if roaming fails
     mHost->roamWatchdogCount++;
-    mHost->Loge(String("Start Roam Watchdog ") + mHost->roamWatchdogCount);
+    mHost->Loge(String("Start Roam Watchdog ") + StringUtils::ToString(mHost->roamWatchdogCount));
     AutoPtr<IMessage> msg;
     mHost->ObtainMessage(CMD_ROAM_WATCHDOG_TIMER,
             mHost->roamWatchdogCount, 0, (IMessage**)&msg);
@@ -3353,9 +3353,9 @@ ECode WifiStateMachine::RoamingState::ProcessMessage(
             message->GetArg1(&arg1);
             Boolean b;
             mHost->Loge(String("SSID_TEMP_DISABLED nid=") + StringUtils::ToString(mHost->mLastNetworkId)
-                    + " id=" + StringUtils::ToString(arg1)
-                    + " isRoaming=" + (mHost->IsRoaming(&b), b)
-                    + " roam=" + StringUtils::ToString(mHost->mAutoRoaming));
+                    + String(" id=") + StringUtils::ToString(arg1)
+                    + String(" isRoaming=") + StringUtils::BooleanToString((mHost->IsRoaming(&b), b))
+                    + String(" roam=") + StringUtils::ToString(mHost->mAutoRoaming));
             if (arg1 == mHost->mLastNetworkId) {
                 mHost->HandleNetworkDisconnect();
                 mHost->TransitionTo(mHost->mDisconnectingState);
@@ -3395,8 +3395,8 @@ ECode WifiStateMachine::ConnectedState::Enter()
     mHost->UpdateDefaultRouteMacAddress(1000);
     if (DBG) {
         mHost->Log(String("ConnectedState Enter ")
-                + " mScreenOn=" + mHost->mScreenOn
-                + " scanperiod="
+                + String(" mScreenOn=") + StringUtils::BooleanToString(mHost->mScreenOn)
+                + String(" scanperiod=")
                 + StringUtils::ToString(mHost->mWifiConfigStore->associatedPartialScanPeriodMilli) );
     }
     if (mHost->mScreenOn
@@ -3420,7 +3420,7 @@ ECode WifiStateMachine::ConnectedState::Enter()
     if (mHost->testNetworkDisconnect) {
         mHost->testNetworkDisconnectCounter++;
         mHost->Loge(String("ConnectedState Enter start disconnect test ") +
-                mHost->testNetworkDisconnectCounter);
+                StringUtils::ToString(mHost->testNetworkDisconnectCounter));
         AutoPtr<IMessage> msg;
         mHost->ObtainMessage(CMD_TEST_NETWORK_DISCONNECT,
                 mHost->testNetworkDisconnectCounter, 0, (IMessage**)&msg);
@@ -3549,11 +3549,11 @@ ECode WifiStateMachine::ConnectedState::ProcessMessage(
                 mHost->SendMessageDelayed(msg, LINK_FLAPPING_DEBOUNCE_MSEC);
                 if (DBG) {
                     mHost->Log(String("NETWORK_DISCONNECTION_EVENT in connected state")
-                            + " BSSID=" + (mHost->mWifiInfo->GetBSSID(&bssid), bssid)
-                            + " RSSI=" + (mHost->mWifiInfo->GetRssi(&rssi), rssi)
-                            + " freq=" + (mHost->mWifiInfo->GetFrequency(&freq), freq)
-                            + " reason=" + arg2
-                            + " -> debounce");
+                            + String(" BSSID=") + (mHost->mWifiInfo->GetBSSID(&bssid), bssid)
+                            + String(" RSSI=") + StringUtils::ToString((mHost->mWifiInfo->GetRssi(&rssi), rssi))
+                            + String(" freq=") + StringUtils::ToString((mHost->mWifiInfo->GetFrequency(&freq), freq))
+                            + String(" reason=") + StringUtils::ToString(arg2)
+                            + String(" -> debounce"));
                 }
                 *result = HANDLED;
                 return NOERROR;
@@ -3563,12 +3563,12 @@ ECode WifiStateMachine::ConnectedState::ProcessMessage(
                     Int32 ajst = -1;
                     if (config != NULL) config->GetAutoJoinStatus(&ajst);
                     mHost->Log(String("NETWORK_DISCONNECTION_EVENT in connected state")
-                            + " BSSID=" + (mHost->mWifiInfo->GetBSSID(&bssid), bssid)
-                            + " RSSI=" + (mHost->mWifiInfo->GetRssi(&rssi), rssi)
-                            + " freq=" + (mHost->mWifiInfo->GetFrequency(&freq), freq)
-                            + " was debouncing=" + mHost->linkDebouncing
-                            + " reason=" + arg2
-                            + " ajst=" + ajst);
+                            + String(" BSSID=") + (mHost->mWifiInfo->GetBSSID(&bssid), bssid)
+                            + String(" RSSI=") + StringUtils::ToString(mHost->mWifiInfo->GetRssi(&rssi), rssi)
+                            + String(" freq=") + StringUtils::ToString(mHost->mWifiInfo->GetFrequency(&freq), freq)
+                            + String(" was debouncing=") + StringUtils::BooleanToString(mHost->linkDebouncing)
+                            + String(" reason=") + StringUtils::ToString(arg2)
+                            + String(" ajst=") + StringUtils::ToString(ajst));
                 }
             }
             break;
@@ -3644,7 +3644,7 @@ ECode WifiStateMachine::ConnectedState::ProcessMessage(
             else {
                 String str;
                 IObject::Probe(config)->ToString(&str);
-                mHost->Loge(String("Failed to connect config: ") + str + " netId: " + netId);
+                mHost->Loge(String("Failed to connect config: ") + str + String(" netId: ") + StringUtils::ToString(netId));
                 mHost->ReplyToMessage(message, IWifiManager::CONNECT_NETWORK_FAILED,
                         IWifiManager::ERROR);
                 mHost->messageHandlingStatus = MESSAGE_HANDLING_STATUS_FAIL;
@@ -3682,9 +3682,9 @@ ECode WifiStateMachine::DisconnectingState::Enter()
     mHost->mCurrentScanAlarmMs = mHost->mDisconnectedScanPeriodMs;
 
     if (PDBG) {
-        mHost->Loge(String(" Enter DisconnectingState State scan interval ") + mHost->mFrameworkScanIntervalMs
-                + " mEnableBackgroundScan= " + mHost->mEnableBackgroundScan
-                + " screenOn=" + mHost->mScreenOn);
+        mHost->Loge(String(" Enter DisconnectingState State scan interval ") + StringUtils::ToString(mHost->mFrameworkScanIntervalMs)
+                + String(" mEnableBackgroundScan= ") + StringUtils::BooleanToString(mHost->mEnableBackgroundScan)
+                + String(" screenOn=") + StringUtils::BooleanToString(mHost->mScreenOn));
     }
 
     // Make sure we disconnect: we enter this state prior connecting to a new
@@ -3694,7 +3694,7 @@ ECode WifiStateMachine::DisconnectingState::Enter()
     // find the target SSID in its cache),
     // Therefore we end up stuck that state, hence the need for the watchdog.
     mHost->disconnectingWatchdogCount++;
-    mHost->Loge(String("Start Disconnecting Watchdog ") + mHost->disconnectingWatchdogCount);
+    mHost->Loge(String("Start Disconnecting Watchdog ") + StringUtils::ToString(mHost->disconnectingWatchdogCount));
     AutoPtr<IMessage> msg;
     mHost->ObtainMessage(CMD_DISCONNECTING_WATCHDOG_TIMER,
             mHost->disconnectingWatchdogCount, 0, (IMessage**)&msg);
@@ -3802,9 +3802,9 @@ ECode WifiStateMachine::DisconnectedState::Enter()
         }
     }
     if (PDBG) {
-        mHost->Loge(String(" Enter disconnected State scan interval ") + mHost->mFrameworkScanIntervalMs
-                + " mEnableBackgroundScan= " + mHost->mEnableBackgroundScan
-                + " screenOn=" + mHost->mScreenOn);
+        mHost->Loge(String(" Enter disconnected State scan interval ") + StringUtils::ToString(mHost->mFrameworkScanIntervalMs)
+                + String(" mEnableBackgroundScan= ") + StringUtils::BooleanToString(mHost->mEnableBackgroundScan)
+                + String(" screenOn=") + StringUtils::BooleanToString(mHost->mScreenOn));
     }
 
     /** clear the roaming state, if we were roaming, we failed */
@@ -3937,9 +3937,9 @@ ECode WifiStateMachine::DisconnectedState::ProcessMessage(
             NetworkInfoDetailedState nidState;
             helper->GetDetailedStateOf(s, &nidState);
             if (DBG) {
-                mHost->Loge(String("SUPPLICANT_STATE_CHANGE_EVENT state=") + state +
-                        " -> state= " + nidState
-                        + " debouncing=" + mHost->linkDebouncing);
+                mHost->Loge(String("SUPPLICANT_STATE_CHANGE_EVENT state=") + StringUtils::ToString(state) +
+                        String(" -> state= ") + StringUtils::ToString(nidState)
+                        + String(" debouncing=") + StringUtils::BooleanToString(mHost->linkDebouncing));
             }
             mHost->SetNetworkDetailedState(nidState);
             /* ConnectModeState does the rest of the handling */
@@ -4171,7 +4171,7 @@ ECode WifiStateMachine::WpsRunningState::ProcessMessage(
             message->GetArg2(&arg2);
             if (DBG) {
                 mHost->Loge(String("Network connection lost reason = ")
-                      + arg2);
+                      + StringUtils::ToString(arg2));
             }
             mHost->HandleNetworkDisconnect();
             if (mHost->mWpsNetworkId >= 0 && arg2 != mHost->reason3) {
@@ -4961,7 +4961,8 @@ WifiStateMachine::WifiStateMachine(
 
     temp = NULL;
     temp = ServiceManager::GetService(IContext::WIFI_P2P_SERVICE);
-    mWifiP2pServiceImpl = (WifiP2pServiceImpl*)(IObject*)temp.Get();
+    //Logger::E("leliang", "tmp: %p, wifip2pServiceImpl:%p", temp.Get(), (WifiP2pServiceImpl*)(IObject*)temp.Get());
+    mWifiP2pServiceImpl = (WifiP2pServiceImpl*)(IObject::Probe(temp));
 
     mNetworkInfo->SetIsAvailable(FALSE);
     mLastBssid = NULL;
@@ -5708,6 +5709,7 @@ ECode WifiStateMachine::SyncAddOrUpdateNetwork(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMessage> resultMsg;
     channel->SendMessageSynchronously(CMD_ADD_OR_UPDATE_NETWORK, config, (IMessage**)&resultMsg);
+
     resultMsg->GetArg1(result);
     resultMsg->Recycle();
     return NOERROR;
@@ -5924,6 +5926,7 @@ ECode WifiStateMachine::SyncIsIbssSupported(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMessage> resultMsg;
     channel->SendMessageSynchronously(CMD_GET_IBSS_SUPPORTED, (IMessage**)&resultMsg);
+
     resultMsg->GetArg1(result);
     resultMsg->Recycle();
     return NOERROR;
@@ -6040,16 +6043,16 @@ ECode WifiStateMachine::Dump(
     pw->Println(String("mWifiInfo ") + (IObject::Probe(mWifiInfo)->ToString(&str), str));
     pw->Println(String("mDhcpResults ") + (IObject::Probe(mDhcpResults)->ToString(&str), str));
     pw->Println(String("mNetworkInfo ") + (IObject::Probe(mNetworkInfo)->ToString(&str), str));
-    pw->Println(String("mLastSignalLevel ") + mLastSignalLevel);
+    pw->Println(String("mLastSignalLevel ") + StringUtils::ToString(mLastSignalLevel));
     pw->Println(String("mLastBssid ") + mLastBssid);
-    pw->Println(String("mLastNetworkId ") + mLastNetworkId);
-    pw->Println(String("mOperationalMode ") + mOperationalMode);
+    pw->Println(String("mLastNetworkId ") + StringUtils::ToString(mLastNetworkId));
+    pw->Println(String("mOperationalMode ") + StringUtils::ToString(mOperationalMode));
     Boolean b;
     mUserWantsSuspendOpt->Get(&b);
-    pw->Println(String("mUserWantsSuspendOpt ") + b);
-    pw->Println(String("mSuspendOptNeedsDisabled ") + mSuspendOptNeedsDisabled);
+    pw->Println(String("mUserWantsSuspendOpt ") + StringUtils::BooleanToString(b));
+    pw->Println(String("mSuspendOptNeedsDisabled ") + StringUtils::BooleanToString(mSuspendOptNeedsDisabled));
     pw->Println(String("Supplicant status ") + mWifiNative->Status(TRUE));
-    pw->Println(String("mEnableBackgroundScan ") + mEnableBackgroundScan);
+    pw->Println(String("mEnableBackgroundScan ") + StringUtils::ToString(mEnableBackgroundScan));
     pw->Println(String("mLastSetCountryCode ") + mLastSetCountryCode);
     pw->Println(String("mPersistedCountryCode ") + mPersistedCountryCode);
     pw->Println();
@@ -6092,14 +6095,14 @@ ECode WifiStateMachine::ShouldSwitchNetwork(
                 delta -= 6;
             }
             Loge(String("WifiStateMachine shouldSwitchNetwork ")
-                    + " txSuccessRate=" + StringUtils::ToString(txSuccessRate)
-                    + " rxSuccessRate=" + StringUtils::ToString(rxSuccessRate)
-                    + " delta " + networkDelta + " -> " + delta);
+                    + String(" txSuccessRate=") + StringUtils::ToString(txSuccessRate)
+                    + String(" rxSuccessRate=") + StringUtils::ToString(rxSuccessRate)
+                    + String(" delta ") + StringUtils::ToString(networkDelta) + String(" -> ") + StringUtils::ToString(delta));
         }
     }
     else {
         Loge(String("WifiStateMachine shouldSwitchNetwork ")
-                + " delta " + networkDelta + " -> " + delta);
+                + " delta " + StringUtils::ToString(networkDelta) + " -> " + StringUtils::ToString(delta));
     }
     if (delta > 0) {
         *result = TRUE;
@@ -7502,7 +7505,7 @@ String WifiStateMachine::GetLogRecString(
                         sb.Append(" current=");
                         sb.Append(curCk);
                         sb.Append(" prio=");
-                        Int32 value;
+                        //Int32 value;
                         sb.Append((curConfig->GetPriority(&val), val));
                         sb.Append(" status=");
                         sb.Append((curConfig->GetStatus(&val), val));
@@ -7594,15 +7597,15 @@ String WifiStateMachine::GetLogRecString(
             sb.Append(StringUtils::ToString(arg2));
             if (obj != NULL) {
                 AutoPtr<INetworkInfo> info = INetworkInfo::Probe(obj);
-                NetworkInfoState state;
+                NetworkInfoState state = -1;
                 info->GetState(&state);
                 NetworkInfoDetailedState detailedState;
                 info->GetDetailedState(&detailedState);
-                if (state != NULL) {
+                if (state != -1) {
                     sb.Append(" st=");
                     sb.Append(state);
                 }
-                if (detailedState != NULL) {
+                if (detailedState != -1) {
                     sb.Append("/");
                     sb.Append(detailedState);
                 }
@@ -8008,7 +8011,7 @@ void WifiStateMachine::RetrieveBatchedScanData()
                 if (DEBUG_PARSE) Logd(String("parsing ") + (*splitData)[n]);
                 if ((*splitData)[n].Equals(END_OF_BATCHES)) {
                     if (n + 1 != splitData->GetLength()) {
-                        Loge(String("didn't consume ") + (splitData->GetLength() - n));
+                        Loge(String("didn't consume ") + StringUtils::ToString(splitData->GetLength() - n));
                     }
                     Int32 size;
                     if ((mBatchedScanResults->GetSize(&size), size) > 0) {
@@ -8032,7 +8035,7 @@ void WifiStateMachine::RetrieveBatchedScanData()
                         dist = distSd = IScanResult::UNSPECIFIED;
                     }
                     if ((*splitData)[n].Equals(END_STR)) {
-                        Int32 size;
+                        Int32 size = 0;
                         list->GetSize(&size);
                         if (size != 0) {
                             mBatchedScanResults->Add(batchedScanResult);
@@ -8137,8 +8140,8 @@ Boolean WifiStateMachine::IsScanAllowed(
         if (scanSource == SCAN_ALARM_SOURCE) {
             if (VDBG) {
                 Logd(String("P2P connected: lastScanDuringP2p=") +
-                     lastScanDuringP2p +
-                     " CurrentTime=" + now +
+                     StringUtils::ToString(lastScanDuringP2p) +
+                     " CurrentTime=" + StringUtils::ToString(now) +
                      " autoJoinScanIntervalWhenP2pConnected=" +
                      StringUtils::ToString(mWifiConfigStore->autoJoinScanIntervalWhenP2pConnected));
             }
@@ -8423,7 +8426,7 @@ void WifiStateMachine::HandleBSSIDBlacklist(
 void WifiStateMachine::HandleStateChange(
     /* [in] */ Int32 state)
 {
-    Int32 offset;
+    //Int32 offset;
     Log(String("handle state change: ") + StringUtils::ToString(state));
     if(state == 0) {
         // wifi is not good, reduce the score
@@ -8463,7 +8466,7 @@ void WifiStateMachine::HandleScreenStateChanged(
     /* [in] */ Boolean startBackgroundScanIfNeeded)
 {
     mScreenOn = screenOn;
-    Boolean b;
+    Boolean b = FALSE;
     mUserWantsSuspendOpt->Get(&b);
     if (PDBG) {
         String name;
@@ -8566,7 +8569,7 @@ void WifiStateMachine::CheckAndSetConnectivityInstance()
 Boolean WifiStateMachine::StartTethering(
     /* [in] */ IArrayList* available)
 {
-    Boolean wifiAvailable = FALSE;
+    //Boolean wifiAvailable = FALSE;
 
     CheckAndSetConnectivityInstance();
 
@@ -9323,7 +9326,7 @@ void WifiStateMachine::CalculateWifiScore(
         else if (isHighRSSI) rssiStatus += " highRSSI ";
         else if (isLowRSSI) rssiStatus += " lowRSSI ";
         if (isBadLinkspeed) rssiStatus += " lowSpeed ";
-        // Loge(String("calculateWifiScore freq=") + StringUtils::ToString(mWifiInfo.getFrequency())
+        Loge(String("calculateWifiScore freq=") //+ StringUtils::ToString(mWifiInfo.getFrequency())
         //                 + " speed=" + StringUtils::ToString(mWifiInfo.getLinkSpeed())
         //                 + " score=" + StringUtils::ToString(mWifiInfo.score)
         //                 + rssiStatus
@@ -9331,7 +9334,7 @@ void WifiStateMachine::CalculateWifiScore(
         //                 + " txgoodrate=" + String.format("%.2f", mWifiInfo.txSuccessRate)
         //                 + " txretriesrate=" + String.format("%.2f", mWifiInfo.txRetriesRate)
         //                 + " rxrate=" + String.format("%.2f", mWifiInfo.rxSuccessRate)
-        //                 + " userTriggerdPenalty" + penalizedDueToUserTriggeredDisconnect);
+                         + " userTriggerdPenalty" + StringUtils::ToString(penalizedDueToUserTriggeredDisconnect));
     }
 
     Double txBadRate, txSuccessRate;

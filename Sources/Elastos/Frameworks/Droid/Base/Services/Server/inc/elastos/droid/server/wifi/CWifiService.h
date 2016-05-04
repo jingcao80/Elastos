@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SERVER_WIFI_CWIFISERVICE_H__
 
 #include "_Elastos_Droid_Server_Wifi_CWifiService.h"
-#include "elastos/droid/server/wifi/WifiServiceImpl.h"
+#include "elastos/droid/server/wifi/WifiService.h"
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +10,7 @@ namespace Server {
 namespace Wifi {
 
 CarClass(CWifiService)
-    , public WifiServiceImpl
+    , public WifiService
 {
 public:
     CAR_OBJECT_DECL()

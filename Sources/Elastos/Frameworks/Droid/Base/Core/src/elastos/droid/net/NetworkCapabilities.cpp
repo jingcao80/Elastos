@@ -75,7 +75,10 @@ ECode NetworkCapabilities::GetCapabilities(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(EnumerateBits(mNetworkCapabilities))
+    AutoPtr<ArrayOf<Int32> > array = EnumerateBits(mNetworkCapabilities);
+    *result = array;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::HasCapability(
@@ -155,7 +158,10 @@ ECode NetworkCapabilities::GetTransportTypes(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(EnumerateBits(mTransportTypes))
+    AutoPtr<ArrayOf<Int32> > array = EnumerateBits(mTransportTypes);
+    *result = array;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::HasTransport(
@@ -396,6 +402,7 @@ ECode NetworkCapabilities::ToString(
         }
         if (++i < types->GetLength()) transports += "|";
     }
+    types = NULL;
     GetCapabilities((ArrayOf<Int32>**)&types);
     String capabilities = (types->GetLength() > 0 ? String(" Capabilities: ") : String(""));
     for (Int32 i = 0; i < types->GetLength(); ) {

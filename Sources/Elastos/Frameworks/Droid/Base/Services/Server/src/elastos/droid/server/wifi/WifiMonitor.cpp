@@ -43,6 +43,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::StringToIntegral;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IList;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
@@ -303,6 +304,7 @@ AutoPtr<WifiMonitor::WifiMonitorSingleton> WifiMonitor::WifiMonitorSingleton::sI
 WifiMonitor::WifiMonitorSingleton::WifiMonitorSingleton()
 {
     mConnected = FALSE;
+    CHashMap::New((IHashMap**)&mIfaceMap);
 }
 
 void WifiMonitor::WifiMonitorSingleton::StartMonitoring(

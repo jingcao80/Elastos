@@ -561,9 +561,9 @@ WifiConfigStore::WifiConfigStore(
     CHashMap::New((IHashMap**)&mNetworkIds);
     AutoPtr<IKeyStoreHelper> keyStoreHelper;
     //TODO CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&keyStoreHelper);
-    String type;
-    keyStoreHelper->GetDefaultType(&type);
-    keyStoreHelper->GetInstance(type, (IKeyStore**)&mKeyStore);
+    //TODO String type;
+    //TODO keyStoreHelper->GetDefaultType(&type);
+    //TODO keyStoreHelper->GetInstance(type, (IKeyStore**)&mKeyStore);
 
     mContext = c;
     mWifiNative = wn;
@@ -5447,10 +5447,10 @@ String WifiConfigStore::MakeString(
 
     /* Make sure all set bits are in [0, strings.length) to avoid
      * going out of bounds on strings.  (Shouldn't happen, but...) */
-    AutoPtr<IBitSet> set;
-    inSet->Get(0, strings->GetLength(), (IBitSet**)&set);
+    AutoPtr<IBitSet> newSet;
+    inSet->Get(0, strings->GetLength(), (IBitSet**)&newSet);
 
-    while ((set->NextSetBit(nextSetBit + 1, &nextSetBit), nextSetBit) != -1) {
+    while ((newSet->NextSetBit(nextSetBit + 1, &nextSetBit), nextSetBit) != -1) {
         String str = (*strings)[nextSetBit].Replace('_', '-');
         buf->Append(str);
         buf->Append(' ');
@@ -5458,7 +5458,7 @@ String WifiConfigStore::MakeString(
 
     // remove trailing space
     Int32 num = 0;
-    set->Cardinality(&num);
+    newSet->Cardinality(&num);
     Int32 len = 0;
     buf->GetLength(&len);
     if (num > 0) {

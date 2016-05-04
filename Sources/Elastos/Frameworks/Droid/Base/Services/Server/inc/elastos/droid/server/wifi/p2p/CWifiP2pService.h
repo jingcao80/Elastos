@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SERVER_WIFI_P2P_CWIFIP2PSERVICE_H__
 
 #include "_Elastos_Droid_Server_Wifi_P2p_CWifiP2pService.h"
-#include "elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.h"
+#include "elastos/droid/server/wifi/p2p/WifiP2pService.h"
 
 namespace Elastos {
 namespace Droid {
@@ -11,7 +11,7 @@ namespace Wifi {
 namespace P2p {
 
 CarClass(CWifiP2pService)
-    , public WifiP2pServiceImpl
+    , public WifiP2pService
 {
 public:
     CAR_OBJECT_DECL()
