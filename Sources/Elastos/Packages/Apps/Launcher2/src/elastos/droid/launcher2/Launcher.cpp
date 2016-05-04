@@ -5328,7 +5328,8 @@ ECode Launcher::BindItems(
                 workspace->AddInScreen(shortcut, _item->mContainer, _item->mScreen, _item->mCellX,
                         _item->mCellY, 1, 1, false);
                 Boolean animateIconUp = FALSE;
-                synchronized(newApps) {
+                {
+                    AutoLock lock(newApps);
                     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(uri);
                     Boolean res;
                     newApps->Contains(TO_IINTERFACE(cchar), &res);

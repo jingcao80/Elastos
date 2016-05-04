@@ -2543,7 +2543,8 @@ ECode ActiveServices::KillServicesLocked(
         if (sr->mStats != NULL) {
             sr->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
             if (stats) {
-                synchronized (stats) {
+                {
+                    AutoLock lock(stats);
                     sr->mStats->StopLaunchedLocked();
                 }
             }

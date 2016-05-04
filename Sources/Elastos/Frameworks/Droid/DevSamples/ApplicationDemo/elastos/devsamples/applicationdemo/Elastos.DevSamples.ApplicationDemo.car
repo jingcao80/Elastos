@@ -4,6 +4,7 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;

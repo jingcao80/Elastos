@@ -1095,7 +1095,8 @@ Boolean MediaFocusControl::CheckUpdateRemoteStateIfActive(
                     && (prse->mPlaybackStream == streamType)) {
                 if (DEBUG_RC) Logger::D(TAG, "remote playback active on stream %d, vol =%d",
                     streamType, prse->mPlaybackVolume);
-                synchronized(mMainRemote) {
+                {
+                    AutoLock lock(mMainRemote);
                     AutoPtr<CPlayerRecordRemotePlaybackState> rps =
                             (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
                     prse->GetRccId(&rps->mRccId);

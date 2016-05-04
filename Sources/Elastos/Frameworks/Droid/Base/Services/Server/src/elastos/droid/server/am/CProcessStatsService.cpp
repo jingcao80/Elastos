@@ -1090,7 +1090,8 @@ void CProcessStatsService::DumpInner(
                 currentOnly = TRUE;
             }
             else if (arg.Equals("--commit")) {
-                synchronized (mAm) {
+                {
+                    AutoLock lock(mAm);
                     Int32 flags;
                     mProcessStats->GetFlags(&flags);
                     flags |= IProcessStats::FLAG_COMPLETE;
@@ -1101,14 +1102,16 @@ void CProcessStatsService::DumpInner(
                 return;
             }
             else if (arg.Equals("--reset")) {
-                synchronized (mAm) {
+                {
+                    AutoLock lock(mAm);
                     mProcessStats->ResetSafely();
                     pw->Println(String("Process stats reset."));
                 }
                 return;
             }
             else if (arg.Equals("--clear")) {
-                synchronized (mAm) {
+                {
+                    AutoLock lock(mAm);
                     mProcessStats->ResetSafely();
                     AutoPtr<List<String> > files = GetCommittedFiles(0, TRUE, TRUE);
                     if (files != NULL) {
@@ -1124,14 +1127,16 @@ void CProcessStatsService::DumpInner(
                 return;
             }
             else if (arg.Equals("--write")) {
-                synchronized (mAm) {
+                {
+                    AutoLock lock(mAm);
                     WriteStateSyncLocked();
                     pw->Println(String("Process stats written."));
                 }
                 return;
             }
             else if (arg.Equals("--read")) {
-                synchronized (mAm) {
+                {
+                    AutoLock lock(mAm);
                     ReadLocked(mProcessStats, mFile);
                     pw->Println(String("Process stats read."));
                 }

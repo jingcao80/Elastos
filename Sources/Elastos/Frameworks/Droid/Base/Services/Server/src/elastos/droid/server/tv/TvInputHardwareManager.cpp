@@ -889,15 +889,14 @@ TvInputHardwareManager::HdmiSystemAudioModeChangeListener::HdmiSystemAudioModeCh
 ECode TvInputHardwareManager::HdmiSystemAudioModeChangeListener::OnStatusChanged(
     /* [in] */ Boolean enabled)
 {
-    synchronized(mHost->mLock) {
-        for (Int32 i = 0; i < Ptr(mHost->mConnections)->Func(ISparseArray::GetSize); ++i) {
-            AutoPtr<IInterface> obj;
-            mHost->mConnections->ValueAt(i, (IInterface**)&obj);
-            AutoPtr<TvInputHardwareImpl> impl;
-            ((Connection*)IProxyDeathRecipient::Probe(obj))->GetHardwareImplLocked((TvInputHardwareImpl**)&impl);
-            if (impl != NULL) {
-                impl->HandleAudioSinkUpdated();
-            }
+    AutoLock lock(mHost->mLock);
+    for (Int32 i = 0; i < Ptr(mHost->mConnections)->Func(ISparseArray::GetSize); ++i) {
+        AutoPtr<IInterface> obj;
+        mHost->mConnections->ValueAt(i, (IInterface**)&obj);
+        AutoPtr<TvInputHardwareImpl> impl;
+        ((Connection*)IProxyDeathRecipient::Probe(obj))->GetHardwareImplLocked((TvInputHardwareImpl**)&impl);
+        if (impl != NULL) {
+            impl->HandleAudioSinkUpdated();
         }
     }
     return NOERROR;

@@ -2360,7 +2360,8 @@ ECode CActivityManagerService::MyPackageMonitor::OnHandleForceStop(
     if (packages != NULL) {
         for (Int32 i = 0; i < packages->GetLength(); i++) {
             String pkg = (*packages)[i];
-            synchronized(mHost) {
+            {
+                AutoLock lock(mHost);
                 if (mHost->ForceStopPackageLocked(pkg, -1, FALSE, FALSE, FALSE, FALSE, FALSE,
                         userId, String("finished booting"))) {
                     *result = TRUE;
@@ -7374,8 +7375,10 @@ ECode CActivityManagerService::GetProcessMemoryInfo(
     for (Int32 i = length - 1; i >= 0; i--) {
         AutoPtr<ProcessRecord> proc;
         Int32 oomAdj = 0;
-        synchronized(this) {
-            synchronized(mPidsSelfLockedLock) {
+        {
+            AutoLock lock(this);
+            {
+                AutoLock innerLock(mPidsSelfLockedLock);
                 HashMap<Int32, AutoPtr<ProcessRecord> >::Iterator it =
                     mPidsSelfLocked.Find(Binder::GetCallingPid());
                 if (it != mPidsSelfLocked.End()) {
@@ -7390,7 +7393,8 @@ ECode CActivityManagerService::GetProcessMemoryInfo(
         infos->Set(i, info);
         dbg->GetMemoryInfo((*pids)[i], (IDebugMemoryInfo**)&info);
         if (proc != NULL) {
-            synchronized(this) {
+            {
+                AutoLock lock(this);
                 if (proc->mThread != NULL && proc->mSetAdj == oomAdj) {
                     // Record this for posterity if the process has been stable.
                     Int32 pss, uss;
@@ -7421,8 +7425,10 @@ ECode CActivityManagerService::GetProcessPss(
     for (Int32 i = length - 1; i >= 0; i--) {
         AutoPtr<ProcessRecord> proc;
         Int32 oomAdj = 0;
-        synchronized(this) {
-            synchronized(mPidsSelfLockedLock) {
+        {
+            AutoLock lock(this);
+            {
+                AutoLock innerLock(mPidsSelfLockedLock);
                 HashMap<Int32, AutoPtr<ProcessRecord> >::Iterator it =
                     mPidsSelfLocked.Find((*pids)[i]);
                 if (it != mPidsSelfLocked.End()) {
@@ -7435,7 +7441,8 @@ ECode CActivityManagerService::GetProcessPss(
         assert(0);
         // dbg->GetPss((*pids)[i], tmpUss, &(*pss)[i]);
         if (proc != NULL) {
-            synchronized(this) {
+            {
+                AutoLock lock(this);
                 if (proc->mThread != NULL && proc->mSetAdj == oomAdj) {
                     // Record this for posterity if the process has been stable.
                     proc->mBaseProcessTracker->AddPss((*pss)[i], (*tmpUss)[0], FALSE, proc->mPkgList);
@@ -17958,7 +17965,8 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
         Int32 pid = 0;
         Int32 oomAdj = 0;
         Boolean hasActivities = FALSE;
-        synchronized(this) {
+        {
+            AutoLock lock(this);
             thread = r->mThread;
             pid = r->mPid;
             oomAdj = r->GetSetAdjWithServices();
@@ -18012,7 +18020,8 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
             Int32 myTotalUss;
             mi->GetTotalUss(&myTotalUss);
 
-            synchronized(this) {
+            {
+                AutoLock lock(this);
                 if (r->mThread != NULL && oomAdj == r->GetSetAdjWithServices()) {
                     // Record this for posterity if the process has been stable.
                     r->mBaseProcessTracker->AddPss(myTotalPss, myTotalUss, TRUE, r->mPkgList);
@@ -22258,7 +22267,8 @@ ECode CActivityManagerService::CheckExcessivePowerUsageLocked(
         AutoPtr<ProcessRecord> app = *rit;
         if (app->mSetProcState >= IActivityManager::PROCESS_STATE_HOME) {
             Int64 wtime;
-            synchronized(stats) {
+            {
+                AutoLock lock(stats);
                 Int32 uid;
                 app->mInfo->GetUid(&uid);
                 stats->GetProcessWakeTime(uid, app->mPid, curRealtime, &wtime);
@@ -22294,7 +22304,8 @@ ECode CActivityManagerService::CheckExcessivePowerUsageLocked(
             // that sounds bad.  Kill!
             if (doWakeKills && realtimeSince > 0
                     && ((wtimeUsed*100)/realtimeSince) >= 50) {
-                synchronized(stats) {
+                {
+                    AutoLock lock(stats);
                     Int32 uid;
                     app->mInfo->GetUid(&uid);
                     stats->ReportExcessiveWakeLocked(uid, app->mProcessName,
@@ -22309,7 +22320,8 @@ ECode CActivityManagerService::CheckExcessivePowerUsageLocked(
             }
             else if (doCpuKills && uptimeSince > 0
                     && ((cputimeUsed*100)/uptimeSince) >= 50) {
-                synchronized(stats) {
+                {
+                    AutoLock lock(stats);
                     Int32 uid;
                     app->mInfo->GetUid(&uid);
                     stats->ReportExcessiveCpuLocked(uid, app->mProcessName,
@@ -24974,7 +24986,8 @@ void CActivityManagerService::HandleCollectPssBgMsg()
                     // This is definitely an application process; skip it.
                     continue;
                 }
-                synchronized(mPidsSelfLockedLock) {
+                {
+                    AutoLock lock(mPidsSelfLockedLock);
                     Int32 pid;
                     st->GetPid(&pid);
                     if (mPidsSelfLocked.Find(pid) != mPidsSelfLocked.End()) {

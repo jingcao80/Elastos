@@ -206,14 +206,13 @@ ECode ValidateNotificationPeople::PeopleRankingReconsideration::Work()
         CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&con);
         AutoPtr<IUri> lookupUri;
         con->GetCONTENT_LOOKUP_URI((IUri**)&lookupUri);
-        String str;
-        IObject::Probe(lookupUri)->ToString(&str);
+        String str = Object::ToString(lookupUri);
 
-        if (String("tel").Equals(scheme)) {
+        if (scheme.Equals("tel")) {
             if (DEBUG) Slogger::D(TAG, "checking telephone URI: %s", handle.string());
             lookupResult = mHost->ResolvePhoneContact(mContext, part);
         }
-        else if (String("mailto").Equals(scheme)) {
+        else if (scheme.Equals("mailto")) {
             if (DEBUG) Slogger::D(TAG, "checking mailto URI: %s", handle.string());
             lookupResult = mHost->ResolveEmailContact(mContext, part);
         }
@@ -226,7 +225,8 @@ ECode ValidateNotificationPeople::PeopleRankingReconsideration::Work()
             Slogger::W(TAG, "unsupported URI %s", handle.string());
         }
         if (lookupResult != NULL) {
-            synchronized(mHost->mPeopleCache) {
+            {
+                AutoLock lock(mHost->mPeopleCache);
                 Int32 userId;
                 mContext->GetUserId(&userId);
                 const String cacheKey = mHost->GetCacheKey(userId, handle);
@@ -563,7 +563,8 @@ ECode ValidateNotificationPeople::ValidatePeople(
         String handle = (*people)[personIdx];
         if (TextUtils::IsEmpty(handle)) continue;
 
-        synchronized(mPeopleCache) {
+        {
+            AutoLock lock(mPeopleCache);
             Int32 userId;
             context->GetUserId(&userId);
             const String cacheKey = GetCacheKey(userId, handle);

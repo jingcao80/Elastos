@@ -238,7 +238,8 @@ AutoPtr<IInterface> CConcurrentHashMap::PutVal(
             tab = HelpTransfer(tab, f);
         else {
             AutoPtr<IInterface> oldVal;
-            synchronized (f) {
+            {
+                AutoLock lock(f);
                 if (TabAt(tab, i) == f) {
                     if (fh >= 0) {
                         binCount = 1;
@@ -302,7 +303,8 @@ AutoPtr<IInterface> CConcurrentHashMap::ReplaceNode(
         else {
             AutoPtr<IInterface> oldVal = NULL;
             Boolean validated = FALSE;
-            synchronized (f) {
+            {
+                AutoLock lock(f);
                 if (TabAt(tab, i) == f) {
                     if (fh >= 0) {
                         validated = TRUE;

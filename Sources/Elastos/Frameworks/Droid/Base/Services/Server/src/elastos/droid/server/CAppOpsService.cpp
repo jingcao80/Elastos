@@ -1958,7 +1958,8 @@ ECode CAppOpsService::WriteState()
                 pkg->GetUid(&uid);
                 FAIL_GOTO(out->WriteAttribute(nullStr, String("n"), StringUtils::ToString(uid)), _ERROR_)
 
-                synchronized(this) {
+                {
+                    AutoLock lock(this);
                     AutoPtr<Ops> op = GetOpsLocked(uid, pkgName, FALSE);
                     // Should always be present as the list of PackageOps is generated
                     // from Ops.

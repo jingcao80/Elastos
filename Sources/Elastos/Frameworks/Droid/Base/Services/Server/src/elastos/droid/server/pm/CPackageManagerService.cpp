@@ -8952,7 +8952,8 @@ ECode CPackageManagerService::ScanDirLI(
             // } catch (PackageParserException e) {
             //     throw PackageManagerException.from(e);
             // }
-            synchronized (mPackagesLock) {
+            {
+                AutoLock lock(mPackagesLock);
                 mSettings->MarkPrebundledPackageInstalledLPr(pkg->mPackageName);
             }
         }
@@ -9907,7 +9908,8 @@ void CPackageManagerService::PerformDexOptLibsLI(
     for (; libIt != libs->End(); ++libIt) {
         AutoPtr<PackageParser::Package> libPkg;
         String libName;
-        synchronized (mPackagesLock) {
+        {
+            AutoLock lock(mPackagesLock);
             libName = *libIt;
             AutoPtr<SharedLibraryEntry> lib;
             HashMap<String, AutoPtr<SharedLibraryEntry> >::Iterator it = mSharedLibraries.Find(libName);
@@ -16482,7 +16484,8 @@ void CPackageManagerService::ClearExternalStorageDataSync(
         for (Int32 i = 0; i < users->GetLength(); i++) {
             Int32 curUser = (*users)[i];
             Int64 timeout = SystemClock::GetUptimeMillis() + 5000;
-            synchronized (conn) {
+            {
+                AutoLock lock(conn);
                 Int64 now = SystemClock::GetUptimeMillis();
                 while (conn->mContainerService == NULL && now < timeout) {
                     // try {
@@ -18018,7 +18021,8 @@ void CPackageManagerService::LoadMediaPackages(
             parseFlags |= PackageParser::PARSE_FORWARD_LOCK;
         }
 
-        synchronized (mInstallLock) {
+        {
+            AutoLock lock(mInstallLock);
             AutoPtr<PackageParser::Package> pkg;
             // try {
             AutoPtr<IFile> f;
@@ -18037,7 +18041,8 @@ void CPackageManagerService::LoadMediaPackages(
                  * to be straightened out.
                  */
                 // writer
-                synchronized (mPackagesLock) {
+                {
+                    AutoLock innerLock(mPackagesLock);
                     retCode = IPackageManager::INSTALL_SUCCEEDED;
                     pkgList.PushBack(pkg->mPackageName);
                     // Post process args
@@ -18140,7 +18145,8 @@ ECode CPackageManagerService::UnloadMediaPackages(
         }
         // Delete package internally
         AutoPtr<PackageRemovedInfo> outInfo = new PackageRemovedInfo(this);
-        synchronized (mInstallLock) {
+        {
+            AutoLock lock(mInstallLock);
             Boolean res = DeletePackageLI(pkgName, NULL, FALSE, NULL, NULL,
                     IPackageManager::DELETE_KEEP_DATA, outInfo, FALSE, readBuffer);
             if (res) {

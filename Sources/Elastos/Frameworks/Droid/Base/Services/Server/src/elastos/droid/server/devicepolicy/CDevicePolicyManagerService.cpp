@@ -8346,7 +8346,8 @@ ECode CDevicePolicyManagerService::UpdateUserSetupComplete()
             AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
             if (!policy->mUserSetupComplete) {
                 policy->mUserSetupComplete = TRUE;
-                synchronized(this) {
+                {
+                    AutoLock lock(this);
                     SaveSettingsLocked(userHandle);
                 }
             }

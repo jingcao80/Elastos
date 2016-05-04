@@ -2815,7 +2815,8 @@ Boolean MediaProvider::QueryThumbnail(
                 mtq = NULL;
                 mtq = IMediaThumbRequest::Probe(obj);
                 if (MatchThumbRequest((MediaThumbRequest*)(mtq.Get()), pid, id, gid, isVideo)) {
-                   synchronized(mtq) {
+                    {
+                        AutoLock lock(mtq)
                        ((MediaThumbRequest*)(mtq.Get()))->mState = CANCEL;
                        assert(0 && "TODO");
                        // mtq->NotifyAll();

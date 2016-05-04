@@ -4368,7 +4368,8 @@ ECode CAccountManagerService::GetAccounts(
         Int32 userId = userIds[i];
         AutoPtr<UserAccounts> userAccounts = GetUserAccounts(userId);
         if (userAccounts == NULL) continue;
-        synchronized(userAccounts->mCacheLock) {
+        {
+            AutoLock lock(userAccounts->mCacheLock);
             AutoPtr<ArrayOf<IAccount*> > accounts;
             GetAccountsFromCacheLocked(userAccounts, String(NULL),
                             Binder::GetCallingUid(), String(NULL), (ArrayOf<IAccount*>**)&accounts);

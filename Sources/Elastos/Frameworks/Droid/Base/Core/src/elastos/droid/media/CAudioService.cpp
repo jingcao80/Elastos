@@ -5644,7 +5644,8 @@ void CAudioService::SetRingerModeInt(
                 if (IsPlatformVoice() &&
                         (*mStreamVolumeAlias)[streamType] == IAudioSystem::STREAM_RING) {
                     AutoPtr<VolumeStreamState> vss = (*mStreamStates)[streamType];
-                    synchronized(vss) {
+                    {
+                        AutoLock vsslock(vss);
                         //TODO: delete this lock when mIndex is IConcurrentHashMap
                         AutoLock lock((*mStreamStates)[streamType]->mIndex);
                         AutoPtr<ISet> set;
@@ -5934,7 +5935,8 @@ void CAudioService::ReadAudioSettings(
             continue;
         }
 
-        synchronized(streamState) {
+        {
+            AutoLock lock(streamState);
             streamState->ReadSettings();
 
             // unmute stream that was muted but is not affect by mute anymore

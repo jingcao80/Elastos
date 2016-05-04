@@ -524,8 +524,8 @@ ECode AbstractPreferences::NodeImpl(
     AutoPtr<AbstractPreferences> temp;
     for (Int32 i = 0; i < names->GetLength(); i++) {
         String name = (*names)[i];
-        AutoPtr<Object> lock = &currentNode->mLock;
-        synchronized (lock) {
+        {
+            AutoLock lock(currentNode->mLock);
             temp = currentNode->mCachedNode[name];
             if (temp == NULL) {
                 FAIL_RETURN(GetNodeFromBackend(createNew, currentNode, name, (AbstractPreferences**)&temp));

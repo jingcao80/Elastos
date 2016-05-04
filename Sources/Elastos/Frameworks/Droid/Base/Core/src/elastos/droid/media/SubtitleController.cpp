@@ -384,7 +384,8 @@ ECode SubtitleController::AddTrack(
                 AutoPtr<ISubtitleTrack> track;
                 renderer->CreateTrack(format, (ISubtitleTrack**)&track);
                 if (track != NULL) {
-                    synchronized(mTracks) {
+                    {
+                        AutoLock lock(mTracks);
                         Int32 length;
                         mTracks->GetSize(&length);
 
