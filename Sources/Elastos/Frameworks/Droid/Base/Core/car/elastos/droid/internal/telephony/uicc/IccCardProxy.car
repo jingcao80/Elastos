@@ -10,63 +10,113 @@ module {
     interface IIccCardProxy {
         Dispose();
 
-        SetVoiceRadioTech(Int32 radioTech);
+        SetVoiceRadioTech(
+            [in] Int32 radioTech);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
         ResetProperties();
 
-        Boolean GetIccRecordsLoaded();
+        GetIccRecordsLoaded(
+            [out] Boolean* result);
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        IccRecords GetIccRecords();
+        GetIccRecords(
+            [out] IccRecords* result);
 
-        IccFileHandler GetIccFileHandler();
+        GetIccFileHandler(
+            [out] IccFileHandler* result);
 
-        RegisterForAbsent(Handler h, Int32 what, Object obj);
+        RegisterForAbsent(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForAbsent(Handler h);
+        UnregisterForAbsent(
+            [in] Handler h);
 
-        RegisterForPersoLocked(Handler h, Int32 what, Object obj);
+        RegisterForPersoLocked(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForPersoLocked(Handler h);
+        UnregisterForPersoLocked(
+            [in] Handler h);
 
-        RegisterForLocked(Handler h, Int32 what, Object obj);
+        RegisterForLocked(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForLocked(Handler h);
+        UnregisterForLocked(
+            [in] Handler h);
 
-        SupplyPin(String pin, Message onComplete);
+        SupplyPin(
+            [in] String pin, 
+            [in] Message onComplete);
 
-        SupplyPuk(String puk, String newPin, Message onComplete);
+        SupplyPuk(
+            [in] String puk, 
+            [in] String newPin, 
+            [in] Message onComplete);
 
-        SupplyPin2(String pin2, Message onComplete);
+        SupplyPin2(
+            [in] String pin2, 
+            [in] Message onComplete);
 
-        SupplyPuk2(String puk2, String newPin2, Message onComplete);
+        SupplyPuk2(
+            [in] String puk2, 
+            [in] String newPin2, 
+            [in] Message onComplete);
 
-        SupplyDepersonalization(String pin, String type, Message onComplete);
+        SupplyDepersonalization(
+            [in] String pin, 
+            [in] String type, 
+            [in] Message onComplete);
 
-        Boolean GetIccLockEnabled();
+        GetIccLockEnabled(
+            [out] Boolean* result);
 
-        Boolean GetIccFdnEnabled();
+        GetIccFdnEnabled(
+            [out] Boolean* result);
 
-        Boolean GetIccFdnAvailable();
+        GetIccFdnAvailable(
+            [out] Boolean* result);
 
-        Boolean GetIccPin2Blocked();
+        GetIccPin2Blocked(
+            [out] Boolean* result);
 
-        Boolean GetIccPuk2Blocked();
+        GetIccPuk2Blocked(
+            [out] Boolean* result);
 
-        SetIccLockEnabled(Boolean enabled, String password, Message onComplete);
+        SetIccLockEnabled(
+            [in] Boolean enabled, 
+            [in] String password, 
+            [in] Message onComplete);
 
-        SetIccFdnEnabled(Boolean enabled, String password, Message onComplete);
+        SetIccFdnEnabled(
+            [in] Boolean enabled, 
+            [in] String password, 
+            [in] Message onComplete);
 
-        ChangeIccLockPassword(String oldPassword, String newPassword, Message onComplete);
+        ChangeIccLockPassword(
+            [in] String oldPassword, 
+            [in] String newPassword, 
+            [in] Message onComplete);
 
-        ChangeIccFdnPassword(String oldPassword, String newPassword, Message onComplete);
+        ChangeIccFdnPassword(
+            [in] String oldPassword, 
+            [in] String newPassword, 
+            [in] Message onComplete);
 
-        String GetServiceProviderName();
+        GetServiceProviderName(
+            [out] String* result);
 
-        Boolean HasIccCard();
+        HasIccCard(
+            [out] Boolean* result);
 
     }
 

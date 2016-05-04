@@ -8,19 +8,26 @@ module {
     namespace Cat {
 
     interface ICatResponseMessage {
-        SetResultCode(ResultCode resCode);
+        SetResultCode(
+            [in] ResultCode resCode);
 
-        SetMenuSelection(Int32 selection);
+        SetMenuSelection(
+            [in] Int32 selection);
 
-        SetInput(String input);
+        SetInput(
+            [in] String input);
 
-        SetYesNo(Boolean yesNo);
+        SetYesNo(
+            [in] Boolean yesNo);
 
-        SetConfirmation(Boolean confirm);
+        SetConfirmation(
+            [in] Boolean confirm);
 
-        SetAdditionalInfo(Int32 info);
+        SetAdditionalInfo(
+            [in] Int32 info);
 
-        CommandDetails GetCmdDetails();
+        GetCmdDetails(
+            [out] CommandDetails* result);
 
     }
 

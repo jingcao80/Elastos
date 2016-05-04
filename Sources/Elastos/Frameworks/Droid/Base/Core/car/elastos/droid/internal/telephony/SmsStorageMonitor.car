@@ -9,9 +9,11 @@ module {
     interface ISmsStorageMonitor {
         Dispose();
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        Boolean IsStorageAvailable();
+        IsStorageAvailable(
+            [out] Boolean* result);
 
     }
 

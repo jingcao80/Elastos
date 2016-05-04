@@ -8,7 +8,8 @@ module {
     namespace Pdu {
 
     interface IAcknowledgeInd {
-        Int32 GetReportAllowed();
+        GetReportAllowed(
+            [out] Int32* result);
 
         GetTransactionId();
 

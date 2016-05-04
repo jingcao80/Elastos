@@ -8,9 +8,12 @@ module {
     namespace Cat {
 
     interface ICatServiceFactory {
-        CatService GetCatService(Int32 slotId);
+        GetCatService(
+            [in] Int32 slotId,
+            [out] CatService* result);
 
-        DisposeCatService (Int32 slotId);
+        DisposeCatService(
+            [in] Int32 slotId);
 
     }
 

@@ -7,59 +7,104 @@ module {
     namespace Telephony {
 
     interface ISubscriptionController {
-        Int32 SetColor(Int32 color, Int64 subId);
+        SetColor(
+            [in] Int32 color, 
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 SetDisplayName(String displayName, Int64 subId);
+        SetDisplayName(
+            [in] String displayName, 
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 SetDisplayNameUsingSrc(String displayName, Int64 subId, Int64 nameSource);
+        SetDisplayNameUsingSrc(
+            [in] String displayName, 
+            [in] Int64 subId, 
+            [in] Int64 nameSource,
+            [out] Int32* result);
 
-        Int32 SetDisplayNumber(String number, Int64 subId);
+        SetDisplayNumber(
+            [in] String number, 
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 SetDisplayNumberFormat(Int32 format, Int64 subId);
+        SetDisplayNumberFormat(
+            [in] Int32 format, 
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 SetDataRoaming(Int32 roaming, Int64 subId);
+        SetDataRoaming(
+            [in] Int32 roaming, 
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 SetMccMnc(String mccMnc, Int64 subId);
+        SetMccMnc(
+            [in] String mccMnc, 
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 GetSlotId(Int64 subId);
+        GetSlotId(
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        GetSubId(Int32 slotId);
+        GetSubId(
+            [in] Int32 slotId);
 
-        Int32 GetPhoneId(Int64 subId);
+        GetPhoneId(
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Int32 ClearSubInfo();
+        ClearSubInfo(
+            [out] Int32* result);
 
-        Int64 GetDefaultSubId();
+        GetDefaultSubId(
+            [out] Int64* result);
 
-        SetDefaultSmsSubId(Int64 subId);
+        SetDefaultSmsSubId(
+            [in] Int64 subId);
 
-        Int64 GetDefaultSmsSubId();
+        GetDefaultSmsSubId(
+            [out] Int64* result);
 
-        SetDefaultVoiceSubId(Int64 subId);
+        SetDefaultVoiceSubId(
+            [in] Int64 subId);
 
-        Int64 GetDefaultVoiceSubId();
+        GetDefaultVoiceSubId(
+            [out] Int64* result);
 
-        Boolean IsSMSPromptEnabled();
+        IsSMSPromptEnabled(
+            [out] Boolean* result);
 
-        SetSMSPromptEnabled(Boolean enabled);
+        SetSMSPromptEnabled(
+            [in] Boolean enabled);
 
-        Int64 GetDefaultDataSubId();
+        GetDefaultDataSubId(
+            [out] Int64* result);
 
-        SetDefaultDataSubId(Int64 subId);
+        SetDefaultDataSubId(
+            [in] Int64 subId);
 
-        Int64 GetCurrentDds();
+        GetCurrentDds(
+            [out] Int64* result);
 
-        SetDataSubId(Int64 subId);
+        SetDataSubId(
+            [in] Int64 subId);
 
-        SetDefaultSubId(Int64 subId);
+        SetDefaultSubId(
+            [in] Int64 subId);
 
         ClearDefaultsForInactiveSubIds();
 
-        Int64 GetSubIdUsingPhoneId(Int32 phoneId);
+        GetSubIdUsingPhoneId(
+            [in] Int32 phoneId,
+            [out] Int64* result);
 
-        GetSubIdUsingSlotId(Int32 slotId);
+        GetSubIdUsingSlotId(
+            [in] Int32 slotId);
 
-        GetSubInfoUsingSlotIdWithCheck(Int32 slotId, Boolean needCheck);
+        GetSubInfoUsingSlotIdWithCheck(
+            [in] Int32 slotId, 
+            [in] Boolean needCheck);
 
     }
 

@@ -8,37 +8,57 @@ module {
     namespace DataConnection {
 
     interface IApnProfileOmh {
-        Int32 Getid();
+        Getid(
+            [out] Int32* result);
 
-        String GetDataServiceType();
+        GetDataServiceType(
+            [out] String* result);
 
-        ApnProfileTypeModem GetApnProfileTypeModem(String serviceType);
+        GetApnProfileTypeModem(
+            [in] String serviceType,
+            [out] ApnProfileTypeModem* result);
 
-        Boolean CanHandleType(String serviceType);
+        CanHandleType(
+            [in] String serviceType,
+            [out] Boolean* result);
 
-        ApnProfileType GetApnProfileType();
+        GetApnProfileType(
+            [out] ApnProfileType* result);
 
-        String ToShortString();
+        ToShortString(
+            [out] String* result);
 
-        String ToHash();
+        ToHash(
+            [out] String* result);
 
-        SetApnProfileTypeModem(ApnProfileTypeModem modemProfile);
+        SetApnProfileTypeModem(
+            [in] ApnProfileTypeModem modemProfile);
 
-        ApnProfileTypeModem GetApnProfileTypeModem();
+        GetApnProfileTypeModem(
+            [out] ApnProfileTypeModem* result);
 
-        SetPriority(Int32 priority);
+        SetPriority(
+            [in] Int32 priority);
 
-        Boolean IsPriorityHigher(Int32 priority);
+        IsPriorityHigher(
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-        Boolean IsPriorityLower(Int32 priority);
+        IsPriorityLower(
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-        Boolean IsValidPriority();
+        IsValidPriority(
+            [out] Boolean* result);
 
-        Int32 GetProfileId();
+        GetProfileId(
+            [out] Int32* result);
 
-        Int32 GetPriority();
+        GetPriority(
+            [out] Int32* result);
 
-        AddServiceType(ApnProfileTypeModem modemProfile);
+        AddServiceType(
+            [in] ApnProfileTypeModem modemProfile);
 
     }
 

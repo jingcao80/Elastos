@@ -7,13 +7,17 @@ module {
     namespace Telephony {
 
     interface ISmsAddress {
-        String GetAddressString();
+        GetAddressString(
+            [out] String* result);
 
-        Boolean IsAlphanumeric();
+        IsAlphanumeric(
+            [out] Boolean* result);
 
-        Boolean IsNetworkSpecific();
+        IsNetworkSpecific(
+            [out] Boolean* result);
 
-        Boolean CouldBeEmailGateway();
+        CouldBeEmailGateway(
+            [out] Boolean* result);
 
     }
 

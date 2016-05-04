@@ -7,11 +7,15 @@ module {
     namespace Gsm {
 
     interface ISmsManager {
-        SmsManager GetDefault();
+        GetDefault(
+            [out] SmsManager* result);
 
-        DivideMessage(String text);
+        DivideMessage(
+            [in] String text);
 
-        Boolean DeleteMessageFromSim(Int32 messageIndex);
+        DeleteMessageFromSim(
+            [in] Int32 messageIndex,
+            [out] Boolean* result);
 
         GetAllMessagesFromSim();
 

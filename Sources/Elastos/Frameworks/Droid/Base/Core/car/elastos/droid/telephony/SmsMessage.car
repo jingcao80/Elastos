@@ -6,76 +6,112 @@ module {
     namespace Telephony {
 
     interface ISmsMessage {
-        SetSubId(Int64 subId);
+        SetSubId(
+            [in] Int64 subId);
 
-        Int64 GetSubId();
+        GetSubId(
+            [out] Int64* result);
 
         interface ISmsMessageSubmitPdu {
         }
 
-        SmsMessage NewFromParcel(Parcel p);
+        NewFromParcel(
+            [in] Parcel p,
+            [out] SmsMessage* result);
 
-        Int32 GetTPLayerLengthForPDU(String pdu);
+        GetTPLayerLengthForPDU(
+            [in] String pdu,
+            [out] Int32* result);
 
-        CalculateLength(CharSequence msgBody, Boolean use7bitOnly);
+        CalculateLength(
+            [in] CharSequence msgBody, 
+            [in] Boolean use7bitOnly);
 
-        FragmentText(String text);
+        FragmentText(
+            [in] String text);
 
-        CalculateLength(String messageBody, Boolean use7bitOnly);
+        CalculateLength(
+            [in] String messageBody, 
+            [in] Boolean use7bitOnly);
 
-        String GetServiceCenterAddress();
+        GetServiceCenterAddress(
+            [out] String* result);
 
-        String GetOriginatingAddress();
+        GetOriginatingAddress(
+            [out] String* result);
 
-        String GetDisplayOriginatingAddress();
+        GetDisplayOriginatingAddress(
+            [out] String* result);
 
-        String GetMessageBody();
+        GetMessageBody(
+            [out] String* result);
 
-        MessageClass GetMessageClass();
+        GetMessageClass(
+            [out] MessageClass* result);
 
-        String GetDisplayMessageBody();
+        GetDisplayMessageBody(
+            [out] String* result);
 
-        String GetPseudoSubject();
+        GetPseudoSubject(
+            [out] String* result);
 
-        Int64 GetTimestampMillis();
+        GetTimestampMillis(
+            [out] Int64* result);
 
-        Boolean IsEmail();
+        IsEmail(
+            [out] Boolean* result);
 
-        String GetEmailBody();
+        GetEmailBody(
+            [out] String* result);
 
-        String GetEmailFrom();
+        GetEmailFrom(
+            [out] String* result);
 
-        Int32 GetProtocolIdentifier();
+        GetProtocolIdentifier(
+            [out] Int32* result);
 
-        Boolean IsReplace();
+        IsReplace(
+            [out] Boolean* result);
 
-        Boolean IsCphsMwiMessage();
+        IsCphsMwiMessage(
+            [out] Boolean* result);
 
-        Boolean IsMWIClearMessage();
+        IsMWIClearMessage(
+            [out] Boolean* result);
 
-        Boolean IsMWISetMessage();
+        IsMWISetMessage(
+            [out] Boolean* result);
 
-        Boolean IsMwiDontStore();
+        IsMwiDontStore(
+            [out] Boolean* result);
 
         GetUserData();
 
         GetPdu();
 
-        Int32 GetStatusOnIcc();
+        GetStatusOnIcc(
+            [out] Int32* result);
 
-        Int32 GetIndexOnIcc();
+        GetIndexOnIcc(
+            [out] Int32* result);
 
-        Int32 GetStatus();
+        GetStatus(
+            [out] Int32* result);
 
-        Boolean IsStatusReportMessage();
+        IsStatusReportMessage(
+            [out] Boolean* result);
 
-        Boolean IsReplyPathPresent();
+        IsReplyPathPresent(
+            [out] Boolean* result);
 
-        Boolean HasEmsSupport();
+        HasEmsSupport(
+            [out] Boolean* result);
 
-        Boolean ShouldAppendPageNumberAsPrefix();
+        ShouldAppendPageNumberAsPrefix(
+            [out] Boolean* result);
 
-        String GetRecipientAddress();
+        GetRecipientAddress(
+            [out] String* result);
 
     }
 

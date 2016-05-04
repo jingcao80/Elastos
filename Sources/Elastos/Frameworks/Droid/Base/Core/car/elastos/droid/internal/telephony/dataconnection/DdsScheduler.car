@@ -8,37 +8,55 @@ module {
     namespace DataConnection {
 
     interface IDdsScheduler {
-        DdsScheduler GetInstance();
+        GetInstance(
+            [out] DdsScheduler* result);
 
         Init();
 
-        AddRequest(NetworkRequest req);
+        AddRequest(
+            [in] NetworkRequest req);
 
-        RemoveRequest(NetworkRequest req);
+        RemoveRequest(
+            [in] NetworkRequest req);
 
-        MarkAccepted(NetworkRequest req);
+        MarkAccepted(
+            [in] NetworkRequest req);
 
-        Boolean IsAlreadyAccepted(NetworkRequest nr);
+        IsAlreadyAccepted(
+            [in] NetworkRequest nr,
+            [out] Boolean* result);
 
-        NetworkRequest GetFirstWaitingRequest();
+        GetFirstWaitingRequest(
+            [out] NetworkRequest* result);
 
-        Boolean AcceptWaitingRequest();
+        AcceptWaitingRequest(
+            [out] Boolean* result);
 
-        NotifyRequestAccepted(NetworkRequest nr);
+        NotifyRequestAccepted(
+            [in] NetworkRequest nr);
 
-        Boolean IsDdsSwitchRequired(NetworkRequest n);
+        IsDdsSwitchRequired(
+            [in] NetworkRequest n,
+            [out] Boolean* result);
 
-        Int64 GetCurrentDds();
+        GetCurrentDds(
+            [out] Int64* result);
 
-        UpdateCurrentDds(NetworkRequest n);
+        UpdateCurrentDds(
+            [in] NetworkRequest n);
 
-        Int64 GetSubIdFromNetworkRequest(NetworkRequest n);
+        GetSubIdFromNetworkRequest(
+            [in] NetworkRequest n,
+            [out] Int64* result);
 
-        TriggerSwitch(NetworkRequest n);
+        TriggerSwitch(
+            [in] NetworkRequest n);
 
-        Boolean IsMultiDataSupported();
+        IsMultiDataSupported(
+            [out] Boolean* result);
 
-        Boolean IsAnyRequestWaiting();
+        IsAnyRequestWaiting(
+            [out] Boolean* result);
 
     }
 

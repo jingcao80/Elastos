@@ -7,7 +7,8 @@ module {
     namespace Telephony {
 
     interface ICommandException {
-        Error GetCommandError();
+        GetCommandError(
+            [out] Error* result);
 
     }
 

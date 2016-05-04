@@ -6,25 +6,37 @@ module {
     namespace Telephony {
 
     interface ISmsCbCmasInfo {
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        Int32 GetMessageClass();
+        GetMessageClass(
+            [out] Int32* result);
 
-        Int32 GetCategory();
+        GetCategory(
+            [out] Int32* result);
 
-        Int32 GetResponseType();
+        GetResponseType(
+            [out] Int32* result);
 
-        Int32 GetSeverity();
+        GetSeverity(
+            [out] Int32* result);
 
-        Int32 GetUrgency();
+        GetUrgency(
+            [out] Int32* result);
 
-        Int32 GetCertainty();
+        GetCertainty(
+            [out] Int32* result);
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
-        SmsCbCmasInfo CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] SmsCbCmasInfo* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
     }
 

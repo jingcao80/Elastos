@@ -19,35 +19,55 @@ module {
 
         Dispose();
 
-        Activity GetActivity();
+        GetActivity(
+            [out] Activity* result);
 
-        Boolean IsApnTypeActive(String type);
+        IsApnTypeActive(
+            [in] String type,
+            [out] Boolean* result);
 
         GetActiveApnTypes();
 
-        String GetActiveApnString(String apnType);
+        GetActiveApnString(
+            [in] String apnType,
+            [out] String* result);
 
-        SetDataOnRoamingEnabled(Boolean enabled);
+        SetDataOnRoamingEnabled(
+            [in] Boolean enabled);
 
-        Boolean GetDataOnRoamingEnabled();
+        GetDataOnRoamingEnabled(
+            [out] Boolean* result);
 
-        SetDataEnabled(Boolean enable);
+        SetDataEnabled(
+            [in] Boolean enable);
 
-        Boolean GetDataEnabled();
+        GetDataEnabled(
+            [out] Boolean* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        Boolean GetAnyDataEnabled();
+        GetAnyDataEnabled(
+            [out] Boolean* result);
 
-        LinkProperties GetLinkProperties(String apnType);
+        GetLinkProperties(
+            [in] String apnType,
+            [out] LinkProperties* result);
 
-        NetworkCapabilities GetNetworkCapabilities(String apnType);
+        GetNetworkCapabilities(
+            [in] String apnType,
+            [out] NetworkCapabilities* result);
 
-        Boolean IsApnTypeEnabled(String apnType);
+        IsApnTypeEnabled(
+            [in] String apnType,
+            [out] Boolean* result);
 
-        Boolean SetInternalDataEnabled(Boolean enable);
+        SetInternalDataEnabled(
+            [in] Boolean enable,
+            [out] Boolean* result);
 
-        CleanUpAllConnections(String cause);
+        CleanUpAllConnections(
+            [in] String cause);
 
         StartNetStatPoll();
 
@@ -55,9 +75,11 @@ module {
 
         UpdateDataActivity();
 
-        Int32 GetRecoveryAction();
+        GetRecoveryAction(
+            [out] Int32* result);
 
-        PutRecoveryAction(Int32 action);
+        PutRecoveryAction(
+            [in] Int32 action);
 
     }
 

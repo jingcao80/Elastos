@@ -6,60 +6,97 @@ module {
     namespace Internal {
     namespace Telephony {
 
-        RILRequest Obtain(Int32 request, Message result);
+        Obtain(
+            [in] Int32 request, 
+            [in] Message result,
+            [out] RILRequest* result);
 
         Release();
 
     interface IRIL {
-        OnDisplayAdded(Int32 displayId);
+        OnDisplayAdded(
+            [in] Int32 displayId);
 
 
         interface IRILUnsolOemHookBuffer {
-            Int32 GetRilInstance();
+        GetRilInstance(
+            [out] Int32* result);
 
             GetUnsolOemHookBuffer();
 
         }
 
-        Boolean NeedsOldRilFeature(String feature);
+        NeedsOldRilFeature(
+            [in] String feature,
+            [out] Boolean* result);
 
-        SetPhoneType(Int32 phoneType);
+        SetPhoneType(
+            [in] Int32 phoneType);
 
-        SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response);
+        SetCdmaRoamingPreference(
+            [in] Int32 cdmaRoamingType, 
+            [in] Message response);
 
-        SetCdmaSubscriptionSource(Int32 cdmaSubscription , Message response);
+        SetCdmaSubscriptionSource(
+            [in] Int32 cdmaSubscription , 
+            [in] Message response);
 
-        GetCdmaSubscriptionSource(Message response);
+        GetCdmaSubscriptionSource(
+            [in] Message response);
 
-        QueryTTYMode(Message response);
+        QueryTTYMode(
+            [in] Message response);
 
-        SetTTYMode(Int32 ttyMode, Message response);
+        SetTTYMode(
+            [in] Int32 ttyMode, 
+            [in] Message response);
 
-        GetCdmaBroadcastConfig(Message response);
+        GetCdmaBroadcastConfig(
+            [in] Message response);
 
-        SetCdmaBroadcastActivation(Boolean activate, Message response);
+        SetCdmaBroadcastActivation(
+            [in] Boolean activate, 
+            [in] Message response);
 
-        ExitEmergencyCallbackMode(Message response);
+        ExitEmergencyCallbackMode(
+            [in] Message response);
 
-        RequestIsimAuthentication(String nonce, Message response);
+        RequestIsimAuthentication(
+            [in] String nonce, 
+            [in] Message response);
 
-        GetCellInfoList(Message result);
+        GetCellInfoList(
+            [in] Message result);
 
-        SetCellInfoListRate(Int32 rateInMillis, Message response);
+        SetCellInfoListRate(
+            [in] Int32 rateInMillis, 
+            [in] Message response);
 
         TestingEmergencyCall();
 
-        IccOpenLogicalChannel(String AID, Message response);
+        IccOpenLogicalChannel(
+            [in] String AID, 
+            [in] Message response);
 
-        IccCloseLogicalChannel(Int32 channel, Message response);
+        IccCloseLogicalChannel(
+            [in] Int32 channel, 
+            [in] Message response);
 
-        GetAtr(Message response);
+        GetAtr(
+            [in] Message response);
 
-        NvReadItem(Int32 itemID, Message response);
+        NvReadItem(
+            [in] Int32 itemID, 
+            [in] Message response);
 
-        NvWriteItem(Int32 itemID, String itemValue, Message response);
+        NvWriteItem(
+            [in] Int32 itemID, 
+            [in] String itemValue, 
+            [in] Message response);
 
-        NvResetConfig(Int32 resetType, Message response);
+        NvResetConfig(
+            [in] Int32 resetType, 
+            [in] Message response);
 
     }
 

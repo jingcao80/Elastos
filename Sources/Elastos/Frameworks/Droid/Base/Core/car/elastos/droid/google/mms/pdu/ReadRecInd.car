@@ -8,15 +8,18 @@ module {
     namespace Pdu {
 
     interface IReadRecInd {
-        Int64 GetDate();
+        GetDate(
+            [out] Int64* result);
 
-        SetDate(Int64 value);
+        SetDate(
+            [in] Int64 value);
 
         GetMessageId();
 
         GetTo();
 
-        Int32 GetReadStatus();
+        GetReadStatus(
+            [out] Int32* result);
 
     }
 

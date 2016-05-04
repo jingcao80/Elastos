@@ -7,25 +7,45 @@ module {
     namespace Telephony {
 
     interface ITelephonyCapabilities {
-        Boolean SupportsEcm(Phone phone);
+        SupportsEcm(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Boolean SupportsOtasp(Phone phone);
+        SupportsOtasp(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Boolean SupportsVoiceMessageCount(Phone phone);
+        SupportsVoiceMessageCount(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Boolean SupportsNetworkSelection(Phone phone);
+        SupportsNetworkSelection(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Int32 GetDeviceIdLabel(Phone phone);
+        GetDeviceIdLabel(
+            [in] Phone phone,
+            [out] Int32* result);
 
-        Boolean SupportsConferenceCallManagement(Phone phone);
+        SupportsConferenceCallManagement(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Boolean SupportsHoldAndUnhold(Phone phone);
+        SupportsHoldAndUnhold(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Boolean SupportsAnswerAndHold(Phone phone);
+        SupportsAnswerAndHold(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        Boolean SupportsAdn(Int32 phoneType);
+        SupportsAdn(
+            [in] Int32 phoneType,
+            [out] Boolean* result);
 
-        Boolean CanDistinguishDialingAndConnected(Int32 phoneType);
+        CanDistinguishDialingAndConnected(
+            [in] Int32 phoneType,
+            [out] Boolean* result);
 
     }
 

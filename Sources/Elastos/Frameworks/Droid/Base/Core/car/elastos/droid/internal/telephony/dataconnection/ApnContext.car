@@ -8,53 +8,75 @@ module {
     namespace DataConnection {
 
     interface IApnContext {
-        String GetApnType();
+        GetApnType(
+            [out] String* result);
 
-        DcAsyncChannel GetDcAc();
+        GetDcAc(
+            [out] DcAsyncChannel* result);
 
-        SetDataConnectionAc(DcAsyncChannel dcac);
+        SetDataConnectionAc(
+            [in] DcAsyncChannel dcac);
 
-        PendingIntent GetReconnectIntent();
+        GetReconnectIntent(
+            [out] PendingIntent* result);
 
-        SetReconnectIntent(PendingIntent intent);
+        SetReconnectIntent(
+            [in] PendingIntent intent);
 
-        ApnSetting GetApnSetting();
+        GetApnSetting(
+            [out] ApnSetting* result);
 
-        SetApnSetting(ApnSetting apnSetting);
+        SetApnSetting(
+            [in] ApnSetting apnSetting);
 
-        Int32 GetWaitingApnsPermFailCount();
+        GetWaitingApnsPermFailCount(
+            [out] Int32* result);
 
         DecWaitingApnsPermFailCount();
 
-        ApnSetting GetNextWaitingApn();
+        GetNextWaitingApn(
+            [out] ApnSetting* result);
 
-        RemoveWaitingApn(ApnSetting apn);
+        RemoveWaitingApn(
+            [in] ApnSetting apn);
 
         GetWaitingApns();
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        Boolean IsDisconnected();
+        IsDisconnected(
+            [out] Boolean* result);
 
-        SetReason(String reason);
+        SetReason(
+            [in] String reason);
 
-        String GetReason();
+        GetReason(
+            [out] String* result);
 
-        Boolean IsReady();
+        IsReady(
+            [out] Boolean* result);
 
-        Boolean IsConnectable();
+        IsConnectable(
+            [out] Boolean* result);
 
-        Boolean IsConnectedOrConnecting();
+        IsConnectedOrConnecting(
+            [out] Boolean* result);
 
-        SetEnabled(Boolean enabled);
+        SetEnabled(
+            [in] Boolean enabled);
 
-        Boolean IsEnabled();
+        IsEnabled(
+            [out] Boolean* result);
 
-        SetDependencyMet(Boolean met);
+        SetDependencyMet(
+            [in] Boolean met);
 
-        Boolean GetDependencyMet();
+        GetDependencyMet(
+            [out] Boolean* result);
 
-        Boolean IsProvisioningApn();
+        IsProvisioningApn(
+            [out] Boolean* result);
 
         IncRefCount();
 

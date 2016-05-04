@@ -8,25 +8,39 @@ module {
     namespace Uicc {
 
     interface IIccCardApplicationStatus {
-        Boolean IsPinRequired();
+        IsPinRequired(
+            [out] Boolean* result);
 
-        Boolean IsPukRequired();
+        IsPukRequired(
+            [out] Boolean* result);
 
-        Boolean IsSubscriptionPersoEnabled();
+        IsSubscriptionPersoEnabled(
+            [out] Boolean* result);
 
-        Boolean IsAppReady();
+        IsAppReady(
+            [out] Boolean* result);
 
-        Boolean IsAppNotReady();
+        IsAppNotReady(
+            [out] Boolean* result);
 
-        Boolean IsPersoSubStateUnknown();
+        IsPersoSubStateUnknown(
+            [out] Boolean* result);
 
-        AppType AppTypeFromRILInt(Int32 type);
+        AppTypeFromRILInt(
+            [in] Int32 type,
+            [out] AppType* result);
 
-        AppState AppStateFromRILInt(Int32 state);
+        AppStateFromRILInt(
+            [in] Int32 state,
+            [out] AppState* result);
 
-        PersoSubState PersoSubstateFromRILInt(Int32 substate);
+        PersoSubstateFromRILInt(
+            [in] Int32 substate,
+            [out] PersoSubState* result);
 
-        PinState PinStateFromRILInt(Int32 state);
+        PinStateFromRILInt(
+            [in] Int32 state,
+            [out] PinState* result);
 
     }
 

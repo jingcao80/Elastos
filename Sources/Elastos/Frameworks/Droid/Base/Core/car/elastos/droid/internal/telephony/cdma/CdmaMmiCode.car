@@ -8,15 +8,21 @@ module {
     namespace Cdma {
 
     interface ICdmaMmiCode {
-        CdmaMmiCode (CDMAPhone phone, UiccCardApplication app);
+        CdmaMmiCode(
+            [in] CDMAPhone phone, 
+            [in] UiccCardApplication app);
 
-        Boolean IsCancelable();
+        IsCancelable(
+            [out] Boolean* result);
 
-        Boolean IsPinPukCommand();
+        IsPinPukCommand(
+            [out] Boolean* result);
 
-        Boolean IsRegister();
+        IsRegister(
+            [out] Boolean* result);
 
-        Boolean IsUssdRequest();
+        IsUssdRequest(
+            [out] Boolean* result);
 
     }
 

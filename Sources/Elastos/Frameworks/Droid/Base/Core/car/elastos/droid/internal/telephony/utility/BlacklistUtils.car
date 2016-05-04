@@ -8,19 +8,40 @@ module {
     namespace Utility {
 
     interface IBlacklistUtils {
-        Boolean AddOrUpdate(Context context, String number, Int32 flags, Int32 valid);
+        AddOrUpdate(
+            [in] Context context, 
+            [in] String number, 
+            [in] Int32 flags, 
+            [in] Int32 valid,
+            [out] Boolean* result);
 
-        Int32 IsListed(Context context, String number, Int32 mode);
+        IsListed(
+            [in] Context context, 
+            [in] String number, 
+            [in] Int32 mode,
+            [out] Int32* result);
 
-        Boolean IsBlacklistEnabled(Context context);
+        IsBlacklistEnabled(
+            [in] Context context,
+            [out] Boolean* result);
 
-        Boolean IsBlacklistNotifyEnabled(Context context);
+        IsBlacklistNotifyEnabled(
+            [in] Context context,
+            [out] Boolean* result);
 
-        Boolean IsBlacklistPrivateNumberEnabled(Context context, Int32 mode);
+        IsBlacklistPrivateNumberEnabled(
+            [in] Context context, 
+            [in] Int32 mode,
+            [out] Boolean* result);
 
-        Boolean IsBlacklistUnknownNumberEnabled(Context context, Int32 mode);
+        IsBlacklistUnknownNumberEnabled(
+            [in] Context context, 
+            [in] Int32 mode,
+            [out] Boolean* result);
 
-        Boolean IsBlacklistRegexEnabled(Context context);
+        IsBlacklistRegexEnabled(
+            [in] Context context,
+            [out] Boolean* result);
 
     }
 

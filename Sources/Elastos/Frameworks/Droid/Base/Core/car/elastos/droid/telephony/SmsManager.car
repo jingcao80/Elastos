@@ -10,19 +10,27 @@ module {
 
 
 
-        SmsManager GetDefault();
+        GetDefault(
+            [out] SmsManager* result);
 
-        SmsManager GetSmsManagerForSubscriber(Int64 subId);
+        GetSmsManagerForSubscriber(
+            [in] Int64 subId,
+            [out] SmsManager* result);
 
-        Int64 GetSubId();
+        GetSubId(
+            [out] Int64* result);
 
-        Boolean IsImsSmsSupported();
+        IsImsSmsSupported(
+            [out] Boolean* result);
 
-        String GetImsSmsFormat();
+        GetImsSmsFormat(
+            [out] String* result);
 
-        Int64 GetDefaultSmsSubId();
+        GetDefaultSmsSubId(
+            [out] Int64* result);
 
-        Int32 GetSmsCapacityOnIcc();
+        GetSmsCapacityOnIcc(
+            [out] Int32* result);
 
 
 

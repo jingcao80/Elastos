@@ -10,35 +10,52 @@ module {
     interface ISIMRecords {
         Dispose();
 
-        String GetIMSI();
+        GetIMSI(
+            [out] String* result);
 
-        String GetMsisdnNumber();
+        GetMsisdnNumber(
+            [out] String* result);
 
-        String GetGid1();
+        GetGid1(
+            [out] String* result);
 
-        UsimServiceTable GetUsimServiceTable();
+        GetUsimServiceTable(
+            [out] UsimServiceTable* result);
 
-        String GetMsisdnAlphaTag();
+        GetMsisdnAlphaTag(
+            [out] String* result);
 
-        String GetVoiceMailNumber();
+        GetVoiceMailNumber(
+            [out] String* result);
 
-        Boolean IsCallForwardStatusStored();
+        IsCallForwardStatusStored(
+            [out] Boolean* result);
 
-        Boolean GetVoiceCallForwardingFlag();
+        GetVoiceCallForwardingFlag(
+            [out] Boolean* result);
 
-        SetVoiceCallForwardingFlag(Int32 line, Boolean enable, String dialNumber);
+        SetVoiceCallForwardingFlag(
+            [in] Int32 line, 
+            [in] Boolean enable, 
+            [in] String dialNumber);
 
-        String GetOperatorNumeric();
+        GetOperatorNumeric(
+            [out] String* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        HandleSmsOnIcc(AsyncResult ar);
+        HandleSmsOnIcc(
+            [in] AsyncResult ar);
 
         OnReady();
 
-        Int32 GetDisplayRule(String plmn);
+        GetDisplayRule(
+            [in] String plmn,
+            [out] Int32* result);
 
-        Boolean IsCspPlmnEnabled();
+        IsCspPlmnEnabled(
+            [out] Boolean* result);
 
     }
 

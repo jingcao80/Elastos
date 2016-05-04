@@ -8,27 +8,46 @@ module {
     namespace Pdu {
 
     interface IPduBody {
-        Boolean AddPart(PduPart part);
+        AddPart(
+            [in] PduPart part,
+            [out] Boolean* result);
 
-        AddPart(Int32 index, PduPart part);
+        AddPart(
+            [in] Int32 index, 
+            [in] PduPart part);
 
-        PduPart RemovePart(Int32 index);
+        RemovePart(
+            [in] Int32 index,
+            [out] PduPart* result);
 
         RemoveAll();
 
-        PduPart GetPart(Int32 index);
+        GetPart(
+            [in] Int32 index,
+            [out] PduPart* result);
 
-        Int32 GetPartIndex(PduPart part);
+        GetPartIndex(
+            [in] PduPart part,
+            [out] Int32* result);
 
-        Int32 GetPartsNum();
+        GetPartsNum(
+            [out] Int32* result);
 
-        PduPart GetPartByContentId(String cid);
+        GetPartByContentId(
+            [in] String cid,
+            [out] PduPart* result);
 
-        PduPart GetPartByContentLocation(String contentLocation);
+        GetPartByContentLocation(
+            [in] String contentLocation,
+            [out] PduPart* result);
 
-        PduPart GetPartByName(String name);
+        GetPartByName(
+            [in] String name,
+            [out] PduPart* result);
 
-        PduPart GetPartByFileName(String filename);
+        GetPartByFileName(
+            [in] String filename,
+            [out] PduPart* result);
 
     }
 

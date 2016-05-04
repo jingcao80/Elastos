@@ -8,31 +8,41 @@ module {
     namespace Pdu {
 
     interface INotificationInd {
-        Int32 GetContentClass();
+        GetContentClass(
+            [out] Int32* result);
 
         GetContentLocation();
 
-        Int64 GetExpiry();
+        GetExpiry(
+            [out] Int64* result);
 
-        SetExpiry(Int64 value);
+        SetExpiry(
+            [in] Int64 value);
 
-        EncodedStringValue GetFrom();
+        GetFrom(
+            [out] EncodedStringValue* result);
 
-        SetFrom(EncodedStringValue value);
+        SetFrom(
+            [in] EncodedStringValue value);
 
         GetMessageClass();
 
-        Int64 GetMessageSize();
+        GetMessageSize(
+            [out] Int64* result);
 
-        SetMessageSize(Int64 value);
+        SetMessageSize(
+            [in] Int64 value);
 
-        EncodedStringValue GetSubject();
+        GetSubject(
+            [out] EncodedStringValue* result);
 
-        SetSubject(EncodedStringValue value);
+        SetSubject(
+            [in] EncodedStringValue value);
 
         GetTransactionId();
 
-        Int32 GetDeliveryReport();
+        GetDeliveryReport(
+            [out] Int32* result);
 
     }
 

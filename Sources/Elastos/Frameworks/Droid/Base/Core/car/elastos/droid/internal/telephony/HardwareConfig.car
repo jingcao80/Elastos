@@ -7,9 +7,14 @@ module {
     namespace Telephony {
 
     interface IHardwareConfig {
-        AssignSim(String id, Int32 state, String link);
+        AssignSim(
+            [in] String id, 
+            [in] Int32 state, 
+            [in] String link);
 
-        Int32 CompareTo(HardwareConfig hw);
+        CompareTo(
+            [in] HardwareConfig hw,
+            [out] Int32* result);
 
     }
 

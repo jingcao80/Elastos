@@ -8,19 +8,25 @@ module {
     namespace Pdu {
 
     interface IEncodedStringValue {
-        Int32 GetCharacterSet();
+        GetCharacterSet(
+            [out] Int32* result);
 
-        SetCharacterSet(Int32 charset);
+        SetCharacterSet(
+            [in] Int32 charset);
 
         GetTextString();
 
-        String GetString();
+        GetString(
+            [out] String* result);
 
 
 
-        Extract(String src);
+        Extract(
+            [in] String src);
 
-        EncodedStringValue Copy(EncodedStringValue value);
+        Copy(
+            [in] EncodedStringValue value,
+            [out] EncodedStringValue* result);
 
     }
 

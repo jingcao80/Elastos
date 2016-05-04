@@ -7,73 +7,106 @@ module {
     namespace Telephony {
 
     interface IConnection {
-        OnLocalVideoCapabilityChanged(Boolean capable);
+        OnLocalVideoCapabilityChanged(
+            [in] Boolean capable);
 
-        String GetCnapName();
+        GetCnapName(
+            [out] String* result);
 
-        String GetOrigDialString();
+        GetOrigDialString(
+            [out] String* result);
 
-        Int32 GetCnapNamePresentation();
+        GetCnapNamePresentation(
+            [out] Int32* result);
 
-        Int64 GetCreateTime();
+        GetCreateTime(
+            [out] Int64* result);
 
-        Int64 GetConnectTime();
+        GetConnectTime(
+            [out] Int64* result);
 
-        Int64 GetConnectTimeReal();
+        GetConnectTimeReal(
+            [out] Int64* result);
 
-        Int64 GetDurationMillis();
+        GetDurationMillis(
+            [out] Int64* result);
 
-        Int64 GetHoldingStartTime();
+        GetHoldingStartTime(
+            [out] Int64* result);
 
-        Boolean IsIncoming();
+        IsIncoming(
+            [out] Boolean* result);
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        State GetStateBeforeHandover();
+        GetStateBeforeHandover(
+            [out] State* result);
 
-        Bundle GetExtras();
+        GetExtras(
+            [out] Bundle* result);
 
-        Object GetUserData();
+        GetUserData(
+            [out] Object* result);
 
-        SetUserData(Object userdata);
+        SetUserData(
+            [in] Object userdata);
 
         ClearUserData();
 
-        AddPostDialListener(PostDialListener listener);
+        AddPostDialListener(
+            [in] PostDialListener listener);
 
-        Connection GetOrigConnection();
+        GetOrigConnection(
+            [out] Connection* result);
 
-        MigrateFrom(Connection c);
+        MigrateFrom(
+            [in] Connection c);
 
-        AddListener(Listener listener);
+        AddListener(
+            [in] Listener listener);
 
-        RemoveListener(Listener listener);
+        RemoveListener(
+            [in] Listener listener);
 
-        Int32 GetVideoState();
+        GetVideoState(
+            [out] Int32* result);
 
-        Boolean IsLocalVideoCapable();
+        IsLocalVideoCapable(
+            [out] Boolean* result);
 
-        Boolean IsRemoteVideoCapable();
+        IsRemoteVideoCapable(
+            [out] Boolean* result);
 
-        VideoProvider GetVideoProvider();
+        GetVideoProvider(
+            [out] VideoProvider* result);
 
-        Int32 GetAudioQuality();
+        GetAudioQuality(
+            [out] Int32* result);
 
-        Int32 GetCallSubstate();
+        GetCallSubstate(
+            [out] Int32* result);
 
-        SetVideoState(Int32 videoState);
+        SetVideoState(
+            [in] Int32 videoState);
 
-        SetLocalVideoCapable(Boolean capable);
+        SetLocalVideoCapable(
+            [in] Boolean capable);
 
-        SetRemoteVideoCapable(Boolean capable);
+        SetRemoteVideoCapable(
+            [in] Boolean capable);
 
-        SetAudioQuality(Int32 audioQuality);
+        SetAudioQuality(
+            [in] Int32 audioQuality);
 
-        SetCallSubstate(Int32 callSubstate);
+        SetCallSubstate(
+            [in] Int32 callSubstate);
 
-        SetConverted(String oriNumber);
+        SetConverted(
+            [in] String oriNumber);
 
-        OnDisconnectConferenceParticipant(Uri endpoint);
+        OnDisconnectConferenceParticipant(
+            [in] Uri endpoint);
 
     }
 

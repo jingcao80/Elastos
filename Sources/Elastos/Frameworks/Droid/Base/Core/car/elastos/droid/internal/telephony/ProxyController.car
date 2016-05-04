@@ -7,19 +7,31 @@ module {
     namespace Telephony {
 
     interface IProxyController {
-        ProxyController GetInstance();
+        GetInstance(
+            [out] ProxyController* result);
 
-        UpdateDataConnectionTracker(Int32 sub);
+        UpdateDataConnectionTracker(
+            [in] Int32 sub);
 
-        EnableDataConnectivity(Int32 sub);
+        EnableDataConnectivity(
+            [in] Int32 sub);
 
-        UpdateCurrentCarrierInProvider(Int32 sub);
+        UpdateCurrentCarrierInProvider(
+            [in] Int32 sub);
 
-        RegisterForAllDataDisconnected(Int64 subId, Handler h, Int32 what, Object obj);
+        RegisterForAllDataDisconnected(
+            [in] Int64 subId, 
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForAllDataDisconnected(Int64 subId, Handler h);
+        UnregisterForAllDataDisconnected(
+            [in] Int64 subId, 
+            [in] Handler h);
 
-        Boolean IsDataDisconnected(Int64 subId);
+        IsDataDisconnected(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
     }
 

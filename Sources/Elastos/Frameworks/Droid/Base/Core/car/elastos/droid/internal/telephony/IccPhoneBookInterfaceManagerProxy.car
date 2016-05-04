@@ -7,19 +7,26 @@ module {
     namespace Telephony {
 
     interface IIccPhoneBookInterfaceManagerProxy {
-        GetAdnRecordsSize(Int32 efid);
+        GetAdnRecordsSize(
+            [in] Int32 efid);
 
-        GetAdnRecordsInEf(Int32 efid);
+        GetAdnRecordsInEf(
+            [in] Int32 efid);
 
-        Int32 GetAdnCount();
+        GetAdnCount(
+            [out] Int32* result);
 
-        Int32 GetAnrCount();
+        GetAnrCount(
+            [out] Int32* result);
 
-        Int32 GetEmailCount();
+        GetEmailCount(
+            [out] Int32* result);
 
-        Int32 GetSpareAnrCount();
+        GetSpareAnrCount(
+            [out] Int32* result);
 
-        Int32 GetSpareEmailCount();
+        GetSpareEmailCount(
+            [out] Int32* result);
 
     }
 

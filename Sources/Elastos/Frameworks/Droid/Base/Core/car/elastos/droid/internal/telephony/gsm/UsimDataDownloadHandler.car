@@ -8,11 +8,17 @@ module {
     namespace Gsm {
 
     interface IUsimDataDownloadHandler {
-        Int32 HandleUsimDataDownload(UsimServiceTable ust, SmsMessage smsMessage);
+        HandleUsimDataDownload(
+            [in] UsimServiceTable ust, 
+            [in] SmsMessage smsMessage,
+            [out] Int32* result);
 
-        Int32 StartDataDownload(SmsMessage smsMessage);
+        StartDataDownload(
+            [in] SmsMessage smsMessage,
+            [out] Int32* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
     }
 

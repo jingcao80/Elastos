@@ -8,37 +8,54 @@ module {
     namespace DataConnection {
 
     interface IDataConnection {
-        String CmdToString(Int32 cmd);
+        CmdToString(
+            [in] Int32 cmd,
+            [out] String* result);
 
         Dispose();
 
-        NetworkCapabilities GetCopyNetworkCapabilities();
+        GetCopyNetworkCapabilities(
+            [out] NetworkCapabilities* result);
 
-        LinkProperties GetCopyLinkProperties();
+        GetCopyLinkProperties(
+            [out] LinkProperties* result);
 
-        Boolean GetIsInactive();
+        GetIsInactive(
+            [out] Boolean* result);
 
-        Int32 GetCid();
+        GetCid(
+            [out] Int32* result);
 
-        ApnSetting GetApnSetting();
+        GetApnSetting(
+            [out] ApnSetting* result);
 
-        SetLinkPropertiesHttpProxy(ProxyInfo proxy);
+        SetLinkPropertiesHttpProxy(
+            [in] ProxyInfo proxy);
 
-        Boolean IsIpv4Connected();
+        IsIpv4Connected(
+            [out] Boolean* result);
 
-        Boolean IsIpv6Connected();
+        IsIpv6Connected(
+            [out] Boolean* result);
 
-        UpdateLinkPropertyResult UpdateLinkProperty(DataCallResponse newState);
+        UpdateLinkProperty(
+            [in] DataCallResponse newState,
+            [out] UpdateLinkPropertyResult* result);
 
-        Int32 GetDataConnectionId();
+        GetDataConnectionId(
+            [out] Int32* result);
 
         Exit();
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
-        Slog(String s);
+        Slog(
+            [in] String s);
 
-        String ToStringSimple();
+        ToStringSimple(
+            [out] String* result);
 
     }
 

@@ -12,19 +12,32 @@ module {
 
         LoadEriFile();
 
-        Int32 GetEriFileVersion();
+        GetEriFileVersion(
+            [out] Int32* result);
 
-        Int32 GetEriNumberOfEntries();
+        GetEriNumberOfEntries(
+            [out] Int32* result);
 
-        Int32 GetEriFileType();
+        GetEriFileType(
+            [out] Int32* result);
 
-        Boolean IsEriFileLoaded();
+        IsEriFileLoaded(
+            [out] Boolean* result);
 
-        Int32 GetCdmaEriIconIndex(Int32 roamInd, Int32 defRoamInd);
+        GetCdmaEriIconIndex(
+            [in] Int32 roamInd, 
+            [in] Int32 defRoamInd,
+            [out] Int32* result);
 
-        Int32 GetCdmaEriIconMode(Int32 roamInd, Int32 defRoamInd);
+        GetCdmaEriIconMode(
+            [in] Int32 roamInd, 
+            [in] Int32 defRoamInd,
+            [out] Int32* result);
 
-        String GetCdmaEriText(Int32 roamInd, Int32 defRoamInd);
+        GetCdmaEriText(
+            [in] Int32 roamInd, 
+            [in] Int32 defRoamInd,
+            [out] String* result);
 
     }
 

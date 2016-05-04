@@ -8,15 +8,25 @@ module {
     namespace Utility {
 
     interface IPduCache {
-        PduCache GetInstance();
+        GetInstance(
+            [out] PduCache* result);
 
-        Boolean Put(Uri uri, PduCacheEntry entry);
+        Put(
+            [in] Uri uri, 
+            [in] PduCacheEntry entry,
+            [out] Boolean* result);
 
-        SetUpdating(Uri uri, Boolean updating);
+        SetUpdating(
+            [in] Uri uri, 
+            [in] Boolean updating);
 
-        Boolean IsUpdating(Uri uri);
+        IsUpdating(
+            [in] Uri uri,
+            [out] Boolean* result);
 
-        PduCacheEntry Purge(Uri uri);
+        Purge(
+            [in] Uri uri,
+            [out] PduCacheEntry* result);
 
         PurgeAll();
 

@@ -8,25 +8,35 @@ module {
     namespace Gsm {
 
     interface ISmsBroadcastConfigInfo {
-        SetFromServiceId(Int32 fromServiceId);
+        SetFromServiceId(
+            [in] Int32 fromServiceId);
 
-        Int32 GetFromServiceId();
+        GetFromServiceId(
+            [out] Int32* result);
 
-        SetToServiceId(Int32 toServiceId);
+        SetToServiceId(
+            [in] Int32 toServiceId);
 
-        Int32 GetToServiceId();
+        GetToServiceId(
+            [out] Int32* result);
 
-        SetFromCodeScheme(Int32 fromCodeScheme);
+        SetFromCodeScheme(
+            [in] Int32 fromCodeScheme);
 
-        Int32 GetFromCodeScheme();
+        GetFromCodeScheme(
+            [out] Int32* result);
 
-        SetToCodeScheme(Int32 toCodeScheme);
+        SetToCodeScheme(
+            [in] Int32 toCodeScheme);
 
-        Int32 GetToCodeScheme();
+        GetToCodeScheme(
+            [out] Int32* result);
 
-        SetSelected(Boolean selected);
+        SetSelected(
+            [in] Boolean selected);
 
-        Boolean IsSelected();
+        IsSelected(
+            [out] Boolean* result);
 
     }
 

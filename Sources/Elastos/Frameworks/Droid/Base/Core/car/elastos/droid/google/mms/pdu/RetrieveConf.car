@@ -10,27 +10,35 @@ module {
     interface IRetrieveConf {
         GetCc();
 
-        AddCc(EncodedStringValue value);
+        AddCc(
+            [in] EncodedStringValue value);
 
         GetContentType();
 
-        Int32 GetDeliveryReport();
+        GetDeliveryReport(
+            [out] Int32* result);
 
-        EncodedStringValue GetFrom();
+        GetFrom(
+            [out] EncodedStringValue* result);
 
-        SetFrom(EncodedStringValue value);
+        SetFrom(
+            [in] EncodedStringValue value);
 
         GetMessageClass();
 
         GetMessageId();
 
-        Int32 GetReadReport();
+        GetReadReport(
+            [out] Int32* result);
 
-        Int32 GetRetrieveStatus();
+        GetRetrieveStatus(
+            [out] Int32* result);
 
-        EncodedStringValue GetRetrieveText();
+        GetRetrieveText(
+            [out] EncodedStringValue* result);
 
-        SetRetrieveText(EncodedStringValue value);
+        SetRetrieveText(
+            [in] EncodedStringValue value);
 
         GetTransactionId();
 

@@ -11,10 +11,12 @@ module {
         interface IBearerDataTimeStamp {
         }
 
-        String GetLanguage();
+        GetLanguage(
+            [out] String* result);
 
 
-        Encode(BearerData bData);
+        Encode(
+            [in] BearerData bData);
 
 
     }

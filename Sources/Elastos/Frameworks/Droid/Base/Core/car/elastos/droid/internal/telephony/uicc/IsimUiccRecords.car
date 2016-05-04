@@ -10,27 +10,38 @@ module {
     interface IIsimUiccRecords {
         Dispose();
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        String GetIsimImpi();
+        GetIsimImpi(
+            [out] String* result);
 
-        String GetIsimDomain();
+        GetIsimDomain(
+            [out] String* result);
 
         GetIsimImpu();
 
-        String GetIsimIst();
+        GetIsimIst(
+            [out] String* result);
 
         GetIsimPcscf();
 
-        String GetIsimChallengeResponse(String nonce);
+        GetIsimChallengeResponse(
+            [in] String nonce,
+            [out] String* result);
 
-        Int32 GetDisplayRule(String plmn);
+        GetDisplayRule(
+            [in] String plmn,
+            [out] Int32* result);
 
         OnReady();
 
-        SetVoiceMessageWaiting(Int32 line, Int32 countWaiting);
+        SetVoiceMessageWaiting(
+            [in] Int32 line, 
+            [in] Int32 countWaiting);
 
-        Int32 GetVoiceMessageCount();
+        GetVoiceMessageCount(
+            [out] Int32* result);
 
     }
 

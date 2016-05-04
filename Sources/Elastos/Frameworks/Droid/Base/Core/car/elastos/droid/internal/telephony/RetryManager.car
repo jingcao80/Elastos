@@ -7,31 +7,44 @@ module {
     namespace Telephony {
 
     interface IRetryManager {
-        Boolean Configure(Int32 maxRetryCount, Int32 retryTime, Int32 randomizationTime);
+        Configure(
+            [in] Int32 maxRetryCount, 
+            [in] Int32 retryTime, 
+            [in] Int32 randomizationTime,
+            [out] Boolean* result);
 
-        Boolean Configure(String configStr);
+        Configure(
+            [in] String configStr,
+            [out] Boolean* result);
 
-        Boolean IsRetryNeeded();
+        IsRetryNeeded(
+            [out] Boolean* result);
 
-        Int32 GetRetryTimer();
+        GetRetryTimer(
+            [out] Int32* result);
 
-        Int32 GetRetryCount();
+        GetRetryCount(
+            [out] Int32* result);
 
         IncreaseRetryCount();
 
-        SetRetryCount(Int32 count);
+        SetRetryCount(
+            [in] Int32 count);
 
-        SetCurMaxRetryCount(Int32 count);
+        SetCurMaxRetryCount(
+            [in] Int32 count);
 
         RestoreCurMaxRetryCount();
 
-        SetRetryForever(Boolean retryForever);
+        SetRetryForever(
+            [in] Boolean retryForever);
 
         ResetRetryCount();
 
         RetryForeverUsingLastTimeout();
 
-        Boolean IsRetryForever();
+        IsRetryForever(
+            [out] Boolean* result);
 
     }
 

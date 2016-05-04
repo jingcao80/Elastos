@@ -10,9 +10,13 @@ module {
     interface ISpnOverride {
         SpnOverride ();
 
-        Boolean ContainsCarrier(String carrier);
+        ContainsCarrier(
+            [in] String carrier,
+            [out] Boolean* result);
 
-        String GetSpn(String carrier);
+        GetSpn(
+            [in] String carrier,
+            [out] String* result);
 
     }
 

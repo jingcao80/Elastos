@@ -10,37 +10,60 @@ module {
     interface IDcTracker {
         Dispose();
 
-        Boolean GetAnyDataEnabled();
+        GetAnyDataEnabled(
+            [out] Boolean* result);
 
-        Boolean GetAnyDataEnabled(Boolean checkUserDataEnabled);
+        GetAnyDataEnabled(
+            [in] Boolean checkUserDataEnabled,
+            [out] Boolean* result);
 
-        Boolean IsDisconnected();
+        IsDisconnected(
+            [out] Boolean* result);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
         Update();
 
-        CleanUpAllConnections(String cause);
+        CleanUpAllConnections(
+            [in] String cause);
 
         UpdateRecords();
 
-        CleanUpAllConnections(String cause, Message disconnectAllCompleteMsg);
+        CleanUpAllConnections(
+            [in] String cause, 
+            [in] Message disconnectAllCompleteMsg);
 
-        RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj);
+        RegisterForAllDataDisconnected(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForAllDataDisconnected(Handler h);
+        UnregisterForAllDataDisconnected(
+            [in] Handler h);
 
-        Boolean SetInternalDataEnabledFlag(Boolean enable);
+        SetInternalDataEnabledFlag(
+            [in] Boolean enable,
+            [out] Boolean* result);
 
-        Boolean SetInternalDataEnabled(Boolean enable);
+        SetInternalDataEnabled(
+            [in] Boolean enable,
+            [out] Boolean* result);
 
-        Boolean SetInternalDataEnabled(Boolean enable, Message onCompleteMsg);
+        SetInternalDataEnabled(
+            [in] Boolean enable, 
+            [in] Message onCompleteMsg,
+            [out] Boolean* result);
 
-        SetDataAllowed(Boolean enable, Message response);
+        SetDataAllowed(
+            [in] Boolean enable, 
+            [in] Message response);
 
-        GetPcscfAddress(String apnType);
+        GetPcscfAddress(
+            [in] String apnType);
 
-        SetImsRegistrationState(Boolean registered);
+        SetImsRegistrationState(
+            [in] Boolean registered);
 
     }
 

@@ -8,17 +8,23 @@ module {
     namespace Uicc {
 
     interface IIccCardStatus {
-        Boolean IsCardPresent();
+        IsCardPresent(
+            [out] Boolean* result);
 
-        Boolean IsPermBlocked();
+        IsPermBlocked(
+            [out] Boolean* result);
 
-        Boolean IsPinRequired();
+        IsPinRequired(
+            [out] Boolean* result);
 
-        Boolean IsPukRequired();
+        IsPukRequired(
+            [out] Boolean* result);
 
-        SetCardState(Int32 state);
+        SetCardState(
+            [in] Int32 state);
 
-        SetUniversalPinState(Int32 state);
+        SetUniversalPinState(
+            [in] Int32 state);
 
     }
 

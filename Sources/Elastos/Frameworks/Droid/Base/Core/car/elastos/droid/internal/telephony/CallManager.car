@@ -7,165 +7,310 @@ module {
     namespace Telephony {
 
     interface ICallManager {
-        CallManager GetInstance();
+        GetInstance(
+            [out] CallManager* result);
 
-        Boolean IsSamePhone(Phone p1, Phone p2);
+        IsSamePhone(
+            [in] Phone p1, 
+            [in] Phone p2,
+            [out] Boolean* result);
 
         GetAllPhones();
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        State GetState(Int64 subId);
+        GetState(
+            [in] Int64 subId,
+            [out] State* result);
 
-        Int32 GetServiceState();
+        GetServiceState(
+            [out] Int32* result);
 
-        Int32 GetServiceState(Int64 subId);
+        GetServiceState(
+            [in] Int64 subId,
+            [out] Int32* result);
 
-        Phone GetPhoneInCall();
+        GetPhoneInCall(
+            [out] Phone* result);
 
-        Phone GetPhoneInCall(Int64 subId);
+        GetPhoneInCall(
+            [in] Int64 subId,
+            [out] Phone* result);
 
-        Boolean RegisterPhone(Phone phone);
+        RegisterPhone(
+            [in] Phone phone,
+            [out] Boolean* result);
 
-        UnregisterPhone(Phone phone);
+        UnregisterPhone(
+            [in] Phone phone);
 
-        Phone GetDefaultPhone();
+        GetDefaultPhone(
+            [out] Phone* result);
 
-        Phone GetFgPhone();
+        GetFgPhone(
+            [out] Phone* result);
 
-        Phone GetFgPhone(Int64 subId);
+        GetFgPhone(
+            [in] Int64 subId,
+            [out] Phone* result);
 
-        Phone GetBgPhone();
+        GetBgPhone(
+            [out] Phone* result);
 
-        Phone GetBgPhone(Int64 subId);
+        GetBgPhone(
+            [in] Int64 subId,
+            [out] Phone* result);
 
-        Phone GetRingingPhone();
+        GetRingingPhone(
+            [out] Phone* result);
 
-        Phone GetRingingPhone(Int64 subId);
+        GetRingingPhone(
+            [in] Int64 subId,
+            [out] Phone* result);
 
-        Boolean CanConference(Call heldCall);
+        CanConference(
+            [in] Call heldCall,
+            [out] Boolean* result);
 
-        Boolean CanConference(Call heldCall, Int64 subId);
+        CanConference(
+            [in] Call heldCall, 
+            [in] Int64 subId,
+            [out] Boolean* result);
 
         ClearDisconnected();
 
-        ClearDisconnected(Int64 subId);
+        ClearDisconnected(
+            [in] Int64 subId);
 
-        Boolean CanTransfer(Call heldCall);
+        CanTransfer(
+            [in] Call heldCall,
+            [out] Boolean* result);
 
-        Boolean CanTransfer(Call heldCall, Int64 subId);
+        CanTransfer(
+            [in] Call heldCall, 
+            [in] Int64 subId,
+            [out] Boolean* result);
 
-        GetPendingMmiCodes(Phone phone);
+        GetPendingMmiCodes(
+            [in] Phone phone);
 
-        Boolean SendUssdResponse(Phone phone, String ussdMessge);
+        SendUssdResponse(
+            [in] Phone phone, 
+            [in] String ussdMessge,
+            [out] Boolean* result);
 
-        SetMute(Boolean muted);
+        SetMute(
+            [in] Boolean muted);
 
-        Boolean GetMute();
+        GetMute(
+            [out] Boolean* result);
 
         SetEchoSuppressionEnabled();
 
-        Boolean SendDtmf(Char32 c);
+        SendDtmf(
+            [in] Char32 c,
+            [out] Boolean* result);
 
-        Boolean StartDtmf(Char32 c);
+        StartDtmf(
+            [in] Char32 c,
+            [out] Boolean* result);
 
         StopDtmf();
 
-        Boolean SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message onComplete);
+        SendBurstDtmf(
+            [in] String dtmfString, 
+            [in] Int32 on, 
+            [in] Int32 off, 
+            [in] Message onComplete,
+            [out] Boolean* result);
 
-        RegisterForDisconnect(Handler h, Int32 what, Object obj);
+        RegisterForDisconnect(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDisconnect(Handler h);
+        UnregisterForDisconnect(
+            [in] Handler h);
 
-        RegisterForPreciseCallStateChanged(Handler h, Int32 what, Object obj);
+        RegisterForPreciseCallStateChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForPreciseCallStateChanged(Handler h);
+        UnregisterForPreciseCallStateChanged(
+            [in] Handler h);
 
-        RegisterForUnknownConnection(Handler h, Int32 what, Object obj);
+        RegisterForUnknownConnection(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForUnknownConnection(Handler h);
+        UnregisterForUnknownConnection(
+            [in] Handler h);
 
-        RegisterForNewRingingConnection(Handler h, Int32 what, Object obj);
+        RegisterForNewRingingConnection(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForNewRingingConnection(Handler h);
+        UnregisterForNewRingingConnection(
+            [in] Handler h);
 
-        RegisterForIncomingRing(Handler h, Int32 what, Object obj);
+        RegisterForIncomingRing(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForIncomingRing(Handler h);
+        UnregisterForIncomingRing(
+            [in] Handler h);
 
-        RegisterForRingbackTone(Handler h, Int32 what, Object obj);
+        RegisterForRingbackTone(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForRingbackTone(Handler h);
+        UnregisterForRingbackTone(
+            [in] Handler h);
 
-        RegisterForOnHoldTone(Handler h, Int32 what, Object obj);
+        RegisterForOnHoldTone(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForOnHoldTone(Handler h);
+        UnregisterForOnHoldTone(
+            [in] Handler h);
 
-        RegisterForResendIncallMute(Handler h, Int32 what, Object obj);
+        RegisterForResendIncallMute(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForResendIncallMute(Handler h);
+        UnregisterForResendIncallMute(
+            [in] Handler h);
 
-        RegisterForMmiInitiate(Handler h, Int32 what, Object obj);
+        RegisterForMmiInitiate(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForMmiInitiate(Handler h);
+        UnregisterForMmiInitiate(
+            [in] Handler h);
 
-        RegisterForMmiComplete(Handler h, Int32 what, Object obj);
+        RegisterForMmiComplete(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForMmiComplete(Handler h);
+        UnregisterForMmiComplete(
+            [in] Handler h);
 
-        RegisterForEcmTimerReset(Handler h, Int32 what, Object obj);
+        RegisterForEcmTimerReset(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForEcmTimerReset(Handler h);
+        UnregisterForEcmTimerReset(
+            [in] Handler h);
 
-        RegisterForServiceStateChanged(Handler h, Int32 what, Object obj);
+        RegisterForServiceStateChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForServiceStateChanged(Handler h);
+        UnregisterForServiceStateChanged(
+            [in] Handler h);
 
-        RegisterForSuppServiceNotification(Handler h, Int32 what, Object obj);
+        RegisterForSuppServiceNotification(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSuppServiceNotification(Handler h);
+        UnregisterForSuppServiceNotification(
+            [in] Handler h);
 
-        RegisterForSuppServiceFailed(Handler h, Int32 what, Object obj);
+        RegisterForSuppServiceFailed(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSuppServiceFailed(Handler h);
+        UnregisterForSuppServiceFailed(
+            [in] Handler h);
 
-        RegisterForInCallVoicePrivacyOn(Handler h, Int32 what, Object obj);
+        RegisterForInCallVoicePrivacyOn(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForInCallVoicePrivacyOn(Handler h);
+        UnregisterForInCallVoicePrivacyOn(
+            [in] Handler h);
 
-        RegisterForInCallVoicePrivacyOff(Handler h, Int32 what, Object obj);
+        RegisterForInCallVoicePrivacyOff(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForInCallVoicePrivacyOff(Handler h);
+        UnregisterForInCallVoicePrivacyOff(
+            [in] Handler h);
 
-        RegisterForCallWaiting(Handler h, Int32 what, Object obj);
+        RegisterForCallWaiting(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForCallWaiting(Handler h);
+        UnregisterForCallWaiting(
+            [in] Handler h);
 
-        RegisterForSignalInfo(Handler h, Int32 what, Object obj);
+        RegisterForSignalInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSignalInfo(Handler h);
+        UnregisterForSignalInfo(
+            [in] Handler h);
 
-        RegisterForDisplayInfo(Handler h, Int32 what, Object obj);
+        RegisterForDisplayInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDisplayInfo(Handler h);
+        UnregisterForDisplayInfo(
+            [in] Handler h);
 
-        RegisterForCdmaOtaStatusChange(Handler h, Int32 what, Object obj);
+        RegisterForCdmaOtaStatusChange(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForCdmaOtaStatusChange(Handler h);
+        UnregisterForCdmaOtaStatusChange(
+            [in] Handler h);
 
-        RegisterForSubscriptionInfoReady(Handler h, Int32 what, Object obj);
+        RegisterForSubscriptionInfoReady(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSubscriptionInfoReady(Handler h);
+        UnregisterForSubscriptionInfoReady(
+            [in] Handler h);
 
-        RegisterForSubscriptionChange(Handler h, Int32 what, Object obj);
+        RegisterForSubscriptionChange(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSubscriptionChange(Handler h);
+        UnregisterForSubscriptionChange(
+            [in] Handler h);
 
-        SetActiveSubscription(Int64 subscription);
+        SetActiveSubscription(
+            [in] Int64 subscription);
 
-        RegisterForPostDialCharacter(Handler h, Int32 what, Object obj);
+        RegisterForPostDialCharacter(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForPostDialCharacter(Handler h);
+        UnregisterForPostDialCharacter(
+            [in] Handler h);
 
         GetRingingCalls();
 
@@ -173,53 +318,85 @@ module {
 
         GetBackgroundCalls();
 
-        Boolean HasActiveFgCall();
+        HasActiveFgCall(
+            [out] Boolean* result);
 
-        Boolean HasActiveFgCall(Int64 subId);
+        HasActiveFgCall(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
-        Boolean HasActiveBgCall();
+        HasActiveBgCall(
+            [out] Boolean* result);
 
-        Boolean HasActiveBgCall(Int64 subId);
+        HasActiveBgCall(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
-        Boolean HasActiveRingingCall();
+        HasActiveRingingCall(
+            [out] Boolean* result);
 
-        Boolean HasActiveRingingCall(Int64 subId);
+        HasActiveRingingCall(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
-        Call GetActiveFgCall();
+        GetActiveFgCall(
+            [out] Call* result);
 
-        Call GetActiveFgCall(Int64 subId);
+        GetActiveFgCall(
+            [in] Int64 subId,
+            [out] Call* result);
 
-        Call GetFirstActiveBgCall();
+        GetFirstActiveBgCall(
+            [out] Call* result);
 
-        Call GetFirstActiveBgCall(Int64 subId);
+        GetFirstActiveBgCall(
+            [in] Int64 subId,
+            [out] Call* result);
 
-        Call GetFirstActiveRingingCall();
+        GetFirstActiveRingingCall(
+            [out] Call* result);
 
-        Call GetFirstActiveRingingCall(Int64 subId);
+        GetFirstActiveRingingCall(
+            [in] Int64 subId,
+            [out] Call* result);
 
-        State GetActiveFgCallState();
+        GetActiveFgCallState(
+            [out] State* result);
 
-        State GetActiveFgCallState(Int64 subId);
+        GetActiveFgCallState(
+            [in] Int64 subId,
+            [out] State* result);
 
         GetFgCallConnections();
 
-        GetFgCallConnections(Int64 subId);
+        GetFgCallConnections(
+            [in] Int64 subId);
 
         GetBgCallConnections();
 
-        GetBgCallConnections(Int64 subId);
+        GetBgCallConnections(
+            [in] Int64 subId);
 
-        Connection GetFgCallLatestConnection();
+        GetFgCallLatestConnection(
+            [out] Connection* result);
 
-        Connection GetFgCallLatestConnection(Int64 subId);
+        GetFgCallLatestConnection(
+            [in] Int64 subId,
+            [out] Connection* result);
 
-        Boolean HasDisconnectedFgCall();
+        HasDisconnectedFgCall(
+            [out] Boolean* result);
 
-        Boolean HasDisconnectedFgCall(Int64 subId);
+        HasDisconnectedFgCall(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
-        Boolean HasDisconnectedBgCall();
+        HasDisconnectedBgCall(
+            [out] Boolean* result);
 
-        Boolean HasDisconnectedBgCall(Int64 subId);
+        HasDisconnectedBgCall(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
     }
 

@@ -7,59 +7,94 @@ module {
     namespace Telephony {
 
     interface IPhoneFactory {
-        MakeDefaultPhones(Context context);
+        MakeDefaultPhones(
+            [in] Context context);
 
-        MakeDefaultPhone(Context context);
+        MakeDefaultPhone(
+            [in] Context context);
 
-        Phone GetCdmaPhone(Int32 phoneId);
+        GetCdmaPhone(
+            [in] Int32 phoneId,
+            [out] Phone* result);
 
-        Phone GetGsmPhone(Int32 phoneId);
+        GetGsmPhone(
+            [in] Int32 phoneId,
+            [out] Phone* result);
 
-        Phone GetDefaultPhone();
+        GetDefaultPhone(
+            [out] Phone* result);
 
-        Phone GetPhone(Int32 phoneId);
+        GetPhone(
+            [in] Int32 phoneId,
+            [out] Phone* result);
 
         GetPhones();
 
-        Phone GetCdmaPhone();
+        GetCdmaPhone(
+            [out] Phone* result);
 
-        Phone GetGsmPhone();
+        GetGsmPhone(
+            [out] Phone* result);
 
-        Context GetContext();
+        GetContext(
+            [out] Context* result);
 
-        SipPhone MakeSipPhone(String sipUri);
+        MakeSipPhone(
+            [in] String sipUri,
+            [out] SipPhone* result);
 
-        SetDefaultSubscription(Int32 subId);
+        SetDefaultSubscription(
+            [in] Int32 subId);
 
-        Int32 CalculatePreferredNetworkType(Context context);
+        CalculatePreferredNetworkType(
+            [in] Context context,
+            [out] Int32* result);
 
-        Int32 CalculatePreferredNetworkType(Context context, Int32 phoneId);
+        CalculatePreferredNetworkType(
+            [in] Context context, 
+            [in] Int32 phoneId,
+            [out] Int32* result);
 
-        Int64 GetDefaultSubscription();
+        GetDefaultSubscription(
+            [out] Int64* result);
 
-        Int32 GetVoiceSubscription();
+        GetVoiceSubscription(
+            [out] Int32* result);
 
-        Boolean IsPromptEnabled();
+        IsPromptEnabled(
+            [out] Boolean* result);
 
-        SetPromptEnabled(Boolean enabled);
+        SetPromptEnabled(
+            [in] Boolean enabled);
 
-        Boolean IsSMSPromptEnabled();
+        IsSMSPromptEnabled(
+            [out] Boolean* result);
 
-        SetSMSPromptEnabled(Boolean enabled);
+        SetSMSPromptEnabled(
+            [in] Boolean enabled);
 
-        Int64 GetDataSubscription();
+        GetDataSubscription(
+            [out] Int64* result);
 
-        Int32 GetSMSSubscription();
+        GetSMSSubscription(
+            [out] Int32* result);
 
-        SetVoiceSubscription(Int32 subId);
+        SetVoiceSubscription(
+            [in] Int32 subId);
 
-        SetDataSubscription(Int64 subId);
+        SetDataSubscription(
+            [in] Int64 subId);
 
-        SetSMSSubscription(Int32 subId);
+        SetSMSSubscription(
+            [in] Int32 subId);
 
-        ImsPhone MakeImsPhone(PhoneNotifier phoneNotifier, Phone defaultPhone);
+        MakeImsPhone(
+            [in] PhoneNotifier phoneNotifier, 
+            [in] Phone defaultPhone,
+            [out] ImsPhone* result);
 
-        SubInfoRecordUpdater GetSubInfoRecordUpdater();
+        GetSubInfoRecordUpdater(
+            [out] SubInfoRecordUpdater* result);
 
     }
 

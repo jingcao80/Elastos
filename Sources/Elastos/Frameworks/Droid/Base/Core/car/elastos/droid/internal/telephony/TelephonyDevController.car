@@ -7,27 +7,41 @@ module {
     namespace Telephony {
 
     interface ITelephonyDevController {
-        TelephonyDevController Create();
+        Create(
+            [out] TelephonyDevController* result);
 
-        TelephonyDevController GetInstance();
+        GetInstance(
+            [out] TelephonyDevController* result);
 
-        RegisterRIL(CommandsInterface cmdsIf);
+        RegisterRIL(
+            [in] CommandsInterface cmdsIf);
 
-        UnregisterRIL(CommandsInterface cmdsIf);
+        UnregisterRIL(
+            [in] CommandsInterface cmdsIf);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        Int32 GetModemCount();
+        GetModemCount(
+            [out] Int32* result);
 
-        HardwareConfig GetModem(Int32 index);
+        GetModem(
+            [in] Int32 index,
+            [out] HardwareConfig* result);
 
-        Int32 GetSimCount();
+        GetSimCount(
+            [out] Int32* result);
 
-        HardwareConfig GetSim(Int32 index);
+        GetSim(
+            [in] Int32 index,
+            [out] HardwareConfig* result);
 
-        HardwareConfig GetModemForSim(Int32 simIndex);
+        GetModemForSim(
+            [in] Int32 simIndex,
+            [out] HardwareConfig* result);
 
-        GetAllSimsForModem(Int32 modemIndex);
+        GetAllSimsForModem(
+            [in] Int32 modemIndex);
 
         GetAllModems();
 

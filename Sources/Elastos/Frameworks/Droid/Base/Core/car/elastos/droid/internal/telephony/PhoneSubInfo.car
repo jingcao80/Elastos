@@ -9,43 +9,64 @@ module {
     interface IPhoneSubInfo {
         Dispose();
 
-        String GetDeviceId();
+        GetDeviceId(
+            [out] String* result);
 
-        String GetImei();
+        GetImei(
+            [out] String* result);
 
-        String GetDeviceSvn();
+        GetDeviceSvn(
+            [out] String* result);
 
-        String GetSubscriberId();
+        GetSubscriberId(
+            [out] String* result);
 
-        String GetGroupIdLevel1();
+        GetGroupIdLevel1(
+            [out] String* result);
 
-        String GetIccSerialNumber();
+        GetIccSerialNumber(
+            [out] String* result);
 
-        String GetLine1Number();
+        GetLine1Number(
+            [out] String* result);
 
-        String GetLine1AlphaTag();
+        GetLine1AlphaTag(
+            [out] String* result);
 
-        String GetMsisdn();
+        GetMsisdn(
+            [out] String* result);
 
-        String GetVoiceMailNumber();
+        GetVoiceMailNumber(
+            [out] String* result);
 
-        String GetCompleteVoiceMailNumber();
+        GetCompleteVoiceMailNumber(
+            [out] String* result);
 
-        String GetVoiceMailAlphaTag();
+        GetVoiceMailAlphaTag(
+            [out] String* result);
 
-        String GetIsimImpi();
+        GetIsimImpi(
+            [out] String* result);
 
-        String GetIsimDomain();
+        GetIsimDomain(
+            [out] String* result);
 
         GetIsimImpu();
 
-        String GetIsimIst();
+        GetIsimIst(
+            [out] String* result);
 
         GetIsimPcscf();
 
-        String GetIsimChallengeResponse(String nonce);
+        GetIsimChallengeResponse(
+            [in] String nonce,
+            [out] String* result);
 
-        String GetIccSimChallengeResponse(Int64 subId, Int32 appType, String data);
+        GetIccSimChallengeResponse(
+            [in] Int64 subId, 
+            [in] Int32 appType, 
+            [in] String data,
+            [out] String* result);
 
     }
 

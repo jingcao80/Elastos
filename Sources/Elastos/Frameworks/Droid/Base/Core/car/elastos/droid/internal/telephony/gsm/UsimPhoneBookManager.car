@@ -14,19 +14,38 @@ module {
 
         InvalidateCache();
 
-        Boolean UpdateEmailFile(Int32 adnRecNum, String oldEmail, String newEmail, Int32 efidIndex);
+        UpdateEmailFile(
+            [in] Int32 adnRecNum, 
+            [in] String oldEmail, 
+            [in] String newEmail, 
+            [in] Int32 efidIndex,
+            [out] Boolean* result);
 
-        Boolean UpdateAnrFile(Int32 adnRecNum, String oldAnr, String newAnr, Int32 efidIndex);
+        UpdateAnrFile(
+            [in] Int32 adnRecNum, 
+            [in] String oldAnr, 
+            [in] String newAnr, 
+            [in] Int32 efidIndex,
+            [out] Boolean* result);
 
-        Int32 GetPbrIndexBy(Int32 adnIndex);
+        GetPbrIndexBy(
+            [in] Int32 adnIndex,
+            [out] Int32* result);
 
-        ParseType1EmailFile(Int32 numRecs, Int32 pbrIndex);
+        ParseType1EmailFile(
+            [in] Int32 numRecs, 
+            [in] Int32 pbrIndex);
 
-        ParseType1AnrFile(Int32 numRecs, Int32 pbrIndex);
+        ParseType1AnrFile(
+            [in] Int32 numRecs, 
+            [in] Int32 pbrIndex);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        ParseTag(SimTlv tlv, Int32 recNum);
+        ParseTag(
+            [in] SimTlv tlv, 
+            [in] Int32 recNum);
 
     }
 

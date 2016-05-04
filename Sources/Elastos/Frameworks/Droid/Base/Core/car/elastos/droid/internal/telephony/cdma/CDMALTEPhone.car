@@ -12,9 +12,12 @@ module {
 
         RemoveReferences();
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        DataState GetDataConnectionState(String apnType);
+        GetDataConnectionState(
+            [in] String apnType,
+            [out] DataState* result);
 
     }
 

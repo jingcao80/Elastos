@@ -7,21 +7,29 @@ module {
     namespace Telephony {
 
     interface IWakeLockStateMachine {
-        UpdatePhoneObject(PhoneBase phone);
+        UpdatePhoneObject(
+            [in] PhoneBase phone);
 
         Dispose();
 
-        DispatchSmsMessage(Object obj);
+        DispatchSmsMessage(
+            [in] Object obj);
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
         Enter();
 
         Exit();
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
     }
 

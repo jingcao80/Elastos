@@ -10,29 +10,50 @@ module {
         interface IModemStackControllerModemCapabilityInfo {
         }
 
-        Int32 GetStackId();
+        GetStackId(
+            [out] Int32* result);
 
-        OnReceive(Context context, Intent intent);
+        OnReceive(
+            [in] Context context, 
+            [in] Intent intent);
 
-        ModemStackController GetInstance();
+        GetInstance(
+            [out] ModemStackController* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        Boolean IsStackReady();
+        IsStackReady(
+            [out] Boolean* result);
 
-        Int32 GetMaxDataAllowed();
+        GetMaxDataAllowed(
+            [out] Int32* result);
 
-        Int32 GetCurrentStackIdForPhoneId(Int32 phoneId);
+        GetCurrentStackIdForPhoneId(
+            [in] Int32 phoneId,
+            [out] Int32* result);
 
-        Int32 GetPrimarySub();
+        GetPrimarySub(
+            [out] Int32* result);
 
-        ModemCapabilityInfo GetModemRatCapsForPhoneId(Int32 phoneId);
+        GetModemRatCapsForPhoneId(
+            [in] Int32 phoneId,
+            [out] ModemCapabilityInfo* result);
 
-        RegisterForStackReady(Handler h, Int32 what, Object obj);
+        RegisterForStackReady(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        RegisterForModemRatCapsAvailable(Handler h, Int32 what, Object obj);
+        RegisterForModemRatCapsAvailable(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        RegisterForModemDataCapsUpdate(Handler h, Int32 what, Object obj);
+        RegisterForModemDataCapsUpdate(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
     }
 

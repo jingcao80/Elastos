@@ -10,25 +10,36 @@ module {
     interface IRuimRecords {
         Dispose();
 
-        String GetIMSI();
+        GetIMSI(
+            [out] String* result);
 
-        String GetMdnNumber();
+        GetMdnNumber(
+            [out] String* result);
 
-        String GetCdmaMin();
+        GetCdmaMin(
+            [out] String* result);
 
-        String GetPrlVersion();
+        GetPrlVersion(
+            [out] String* result);
 
-        SetVoiceMailNumber(String alphaTag, String voiceNumber, Message onComplete);
+        SetVoiceMailNumber(
+            [in] String alphaTag, 
+            [in] String voiceNumber, 
+            [in] Message onComplete);
 
-        String GetOperatorNumeric();
+        GetOperatorNumeric(
+            [out] String* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
         OnReady();
 
         RecordsRequired();
 
-        Int32 GetDisplayRule(String plmnNumeric);
+        GetDisplayRule(
+            [in] String plmnNumeric,
+            [out] Int32* result);
 
     }
 

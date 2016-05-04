@@ -10,19 +10,28 @@ module {
     interface ICdmaApnProfileTracker {
         LoadProfiles();
 
-        RegisterForModemProfileReady(Handler h, Int32 what, Object obj);
+        RegisterForModemProfileReady(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForModemProfileReady(Handler h);
+        UnregisterForModemProfileReady(
+            [in] Handler h);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        ApnSetting GetApnProfile(String serviceType);
+        GetApnProfile(
+            [in] String serviceType,
+            [out] ApnSetting* result);
 
         GetOmhApnProfilesList();
 
         ClearActiveApnProfile();
 
-        Boolean IsApnTypeActive(String type);
+        IsApnTypeActive(
+            [in] String type,
+            [out] Boolean* result);
 
     }
 

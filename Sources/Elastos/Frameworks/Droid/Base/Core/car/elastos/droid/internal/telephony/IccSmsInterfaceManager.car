@@ -7,29 +7,56 @@ module {
     namespace Telephony {
 
     interface IIccSmsInterfaceManager {
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
 
 
-        Int32 GetPremiumSmsPermission(String packageName);
+        GetPremiumSmsPermission(
+            [in] String packageName,
+            [out] Int32* result);
 
-        SetPremiumSmsPermission(String packageName, Int32 permission);
+        SetPremiumSmsPermission(
+            [in] String packageName, 
+            [in] Int32 permission);
 
-        Boolean EnableCellBroadcast(Int32 messageIdentifier);
+        EnableCellBroadcast(
+            [in] Int32 messageIdentifier,
+            [out] Boolean* result);
 
-        Boolean DisableCellBroadcast(Int32 messageIdentifier);
+        DisableCellBroadcast(
+            [in] Int32 messageIdentifier,
+            [out] Boolean* result);
 
-        Boolean EnableCellBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+        EnableCellBroadcastRange(
+            [in] Int32 startMessageId, 
+            [in] Int32 endMessageId,
+            [out] Boolean* result);
 
-        Boolean DisableCellBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+        DisableCellBroadcastRange(
+            [in] Int32 startMessageId, 
+            [in] Int32 endMessageId,
+            [out] Boolean* result);
 
-        Boolean EnableGsmBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+        EnableGsmBroadcastRange(
+            [in] Int32 startMessageId, 
+            [in] Int32 endMessageId,
+            [out] Boolean* result);
 
-        Boolean DisableGsmBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+        DisableGsmBroadcastRange(
+            [in] Int32 startMessageId, 
+            [in] Int32 endMessageId,
+            [out] Boolean* result);
 
-        Boolean EnableCdmaBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+        EnableCdmaBroadcastRange(
+            [in] Int32 startMessageId, 
+            [in] Int32 endMessageId,
+            [out] Boolean* result);
 
-        Boolean DisableCdmaBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+        DisableCdmaBroadcastRange(
+            [in] Int32 startMessageId, 
+            [in] Int32 endMessageId,
+            [out] Boolean* result);
 
 
     }

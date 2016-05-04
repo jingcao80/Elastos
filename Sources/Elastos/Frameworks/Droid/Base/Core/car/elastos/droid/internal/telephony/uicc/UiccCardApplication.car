@@ -8,7 +8,10 @@ module {
     namespace Uicc {
 
     interface IUiccCardApplication {
-        Update (IccCardApplicationStatus as, Context c, CommandsInterface ci);
+        Update(
+            [in] IccCardApplicationStatus as, 
+            [in] Context c, 
+            [in] CommandsInterface ci);
 
         Dispose();
 
