@@ -1,0 +1,45 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IInboundSmsTracker {
+        ContentValues GetContentValues();
+
+        Int32 GetRealDestPort(Int32 destPort);
+
+        GetPdu();
+
+        Int64 GetTimestamp();
+
+        Int32 GetDestPort();
+
+        Boolean Is3gpp2();
+
+        String GetFormat();
+
+        Int32 GetIndexOffset();
+
+        String GetAddress();
+
+        Int32 GetReferenceNumber();
+
+        Int32 GetSequenceNumber();
+
+        Int32 GetMessageCount();
+
+        String GetDeleteWhere();
+
+        GetDeleteWhereArgs();
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

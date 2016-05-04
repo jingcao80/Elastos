@@ -1,0 +1,37 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Cdma {
+
+    interface IEriManager {
+        Dispose();
+
+        LoadEriFile();
+
+        Int32 GetEriFileVersion();
+
+        Int32 GetEriNumberOfEntries();
+
+        Int32 GetEriFileType();
+
+        Boolean IsEriFileLoaded();
+
+        Int32 GetCdmaEriIconIndex(Int32 roamInd, Int32 defRoamInd);
+
+        Int32 GetCdmaEriIconMode(Int32 roamInd, Int32 defRoamInd);
+
+        String GetCdmaEriText(Int32 roamInd, Int32 defRoamInd);
+
+    }
+
+    }//Cdma
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

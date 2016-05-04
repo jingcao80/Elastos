@@ -1,0 +1,45 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IIccSmsInterfaceManager {
+        HandleMessage(Message msg);
+
+        Catch (InterruptedException e);
+
+        Catch (InterruptedException e);
+
+        Int32 GetPremiumSmsPermission(String packageName);
+
+        SetPremiumSmsPermission(String packageName, Int32 permission);
+
+        Boolean EnableCellBroadcast(Int32 messageIdentifier);
+
+        Boolean DisableCellBroadcast(Int32 messageIdentifier);
+
+        Boolean EnableCellBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+
+        Boolean DisableCellBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+
+        Boolean EnableGsmBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+
+        Boolean DisableGsmBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+
+        Boolean EnableCdmaBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+
+        Boolean DisableCdmaBroadcastRange(Int32 startMessageId, Int32 endMessageId);
+
+        Catch (InterruptedException e);
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

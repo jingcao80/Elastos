@@ -1,0 +1,47 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    interface IGsmConnection {
+        GsmConnection (Context context, DriverCall dc, GsmCallTracker ct, Int32 index);
+
+        GsmConnection (Context context, String dialString, GsmCallTracker ct, GsmCall parent);
+
+        Dispose();
+
+        GsmCall GetCall();
+
+        Int64 GetDisconnectTime();
+
+        Int64 GetHoldDurationMillis();
+
+        Int32 GetDisconnectCause();
+
+        State GetState();
+
+        PostDialState GetPostDialState();
+
+        ProceedAfterWaitChar();
+
+        ProceedAfterWildChar(String str);
+
+        CancelPostDial();
+
+        Int32 DisconnectCauseFromCode(Int32 causeCode);
+
+        Update (DriverCall dc);
+
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

@@ -1,0 +1,84 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+        RILRequest Obtain(Int32 request, Message result);
+
+        Release();
+
+    interface IRIL {
+        OnDisplayAdded(Int32 displayId);
+
+        Catch (IOException ex);
+
+        Catch (RuntimeException exc);
+
+        Catch (IOException ex2);
+
+        Catch (Throwable tr);
+
+        Catch (Throwable tr);
+
+        Catch (Throwable tr);
+
+        Catch (ClassCastException e);
+
+        interface IRILUnsolOemHookBuffer {
+            Int32 GetRilInstance();
+
+            GetUnsolOemHookBuffer();
+
+        }
+
+        Boolean NeedsOldRilFeature(String feature);
+
+        SetPhoneType(Int32 phoneType);
+
+        SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response);
+
+        SetCdmaSubscriptionSource(Int32 cdmaSubscription , Message response);
+
+        GetCdmaSubscriptionSource(Message response);
+
+        QueryTTYMode(Message response);
+
+        SetTTYMode(Int32 ttyMode, Message response);
+
+        GetCdmaBroadcastConfig(Message response);
+
+        SetCdmaBroadcastActivation(Boolean activate, Message response);
+
+        ExitEmergencyCallbackMode(Message response);
+
+        RequestIsimAuthentication(String nonce, Message response);
+
+        GetCellInfoList(Message result);
+
+        SetCellInfoListRate(Int32 rateInMillis, Message response);
+
+        TestingEmergencyCall();
+
+        IccOpenLogicalChannel(String AID, Message response);
+
+        IccCloseLogicalChannel(Int32 channel, Message response);
+
+        GetAtr(Message response);
+
+        NvReadItem(Int32 itemID, Message response);
+
+        NvWriteItem(Int32 itemID, String itemValue, Message response);
+
+        NvResetConfig(Int32 resetType, Message response);
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

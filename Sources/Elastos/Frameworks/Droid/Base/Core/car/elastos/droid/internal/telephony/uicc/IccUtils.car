@@ -1,0 +1,21 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Uicc {
+
+    interface IIccUtils {
+        Catch (UnsupportedEncodingException ex);
+
+    }
+
+    }//Uicc
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

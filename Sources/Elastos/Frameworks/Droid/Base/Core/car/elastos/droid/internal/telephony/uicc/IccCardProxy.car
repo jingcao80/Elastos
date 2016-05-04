@@ -1,0 +1,79 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Uicc {
+
+    interface IIccCardProxy {
+        Dispose();
+
+        SetVoiceRadioTech(Int32 radioTech);
+
+        HandleMessage(Message msg);
+
+        ResetProperties();
+
+        Boolean GetIccRecordsLoaded();
+
+        State GetState();
+
+        IccRecords GetIccRecords();
+
+        IccFileHandler GetIccFileHandler();
+
+        RegisterForAbsent(Handler h, Int32 what, Object obj);
+
+        UnregisterForAbsent(Handler h);
+
+        RegisterForPersoLocked(Handler h, Int32 what, Object obj);
+
+        UnregisterForPersoLocked(Handler h);
+
+        RegisterForLocked(Handler h, Int32 what, Object obj);
+
+        UnregisterForLocked(Handler h);
+
+        SupplyPin(String pin, Message onComplete);
+
+        SupplyPuk(String puk, String newPin, Message onComplete);
+
+        SupplyPin2(String pin2, Message onComplete);
+
+        SupplyPuk2(String puk2, String newPin2, Message onComplete);
+
+        SupplyDepersonalization(String pin, String type, Message onComplete);
+
+        Boolean GetIccLockEnabled();
+
+        Boolean GetIccFdnEnabled();
+
+        Boolean GetIccFdnAvailable();
+
+        Boolean GetIccPin2Blocked();
+
+        Boolean GetIccPuk2Blocked();
+
+        SetIccLockEnabled(Boolean enabled, String password, Message onComplete);
+
+        SetIccFdnEnabled(Boolean enabled, String password, Message onComplete);
+
+        ChangeIccLockPassword(String oldPassword, String newPassword, Message onComplete);
+
+        ChangeIccFdnPassword(String oldPassword, String newPassword, Message onComplete);
+
+        String GetServiceProviderName();
+
+        Boolean HasIccCard();
+
+    }
+
+    }//Uicc
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

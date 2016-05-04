@@ -1,0 +1,39 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Uicc {
+
+    interface IIccCardApplicationStatus {
+        Boolean IsPinRequired();
+
+        Boolean IsPukRequired();
+
+        Boolean IsSubscriptionPersoEnabled();
+
+        Boolean IsAppReady();
+
+        Boolean IsAppNotReady();
+
+        Boolean IsPersoSubStateUnknown();
+
+        AppType AppTypeFromRILInt(Int32 type);
+
+        AppState AppStateFromRILInt(Int32 state);
+
+        PersoSubState PersoSubstateFromRILInt(Int32 substate);
+
+        PinState PinStateFromRILInt(Int32 state);
+
+    }
+
+    }//Uicc
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

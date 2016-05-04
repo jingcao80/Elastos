@@ -1,0 +1,49 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    interface ISmsCbMessage {
+        WriteToParcel(Parcel dest, Int32 flags);
+
+        SmsCbMessage CreateFromParcel(Parcel in);
+
+        NewArray(Int32 size);
+
+        Int32 GetGeographicalScope();
+
+        Int32 GetSerialNumber();
+
+        SmsCbLocation GetLocation();
+
+        Int32 GetServiceCategory();
+
+        String GetLanguageCode();
+
+        String GetMessageBody();
+
+        Int32 GetMessageFormat();
+
+        Int32 GetMessagePriority();
+
+        SmsCbEtwsInfo GetEtwsWarningInfo();
+
+        SmsCbCmasInfo GetCmasWarningInfo();
+
+        Boolean IsEmergencyMessage();
+
+        Boolean IsEtwsMessage();
+
+        Boolean IsCmasMessage();
+
+        Int32 DescribeContents();
+
+    }
+
+    }//Telephony
+    }//Droid
+    }//Elastos
+
+}

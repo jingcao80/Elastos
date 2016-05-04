@@ -1,0 +1,27 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Cat {
+
+    interface ICatLog {
+        D(Object caller, String msg);
+
+        D(String caller, String msg);
+
+        E(Object caller, String msg);
+
+        E(String caller, String msg);
+
+    }
+
+    }//Cat
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

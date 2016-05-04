@@ -1,0 +1,423 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IPhoneProxy {
+        HandleMessage(Message msg);
+
+        IccSmsInterfaceManager GetIccSmsInterfaceManager();
+
+        PhoneSubInfoProxy GetPhoneSubInfoProxy();
+
+        IccPhoneBookInterfaceManagerProxy GetIccPhoneBookInterfaceManagerProxy();
+
+        IccFileHandler GetIccFileHandler();
+
+        Boolean IsImsVtCallPresent();
+
+        UpdatePhoneObject(Int32 voiceRadioTech);
+
+        ServiceState GetServiceState();
+
+        CellLocation GetCellLocation();
+
+        GetAllCellInfo();
+
+        SetCellInfoListRate(Int32 rateInMillis);
+
+        DataState GetDataConnectionState();
+
+        DataState GetDataConnectionState(String apnType);
+
+        DataActivityState GetDataActivityState();
+
+        Context GetContext();
+
+        DisableDnsCheck(Boolean b);
+
+        Boolean IsDnsCheckDisabled();
+
+        State GetState();
+
+        String GetPhoneName();
+
+        Int32 GetPhoneType();
+
+        GetActiveApnTypes();
+
+        String GetActiveApnHost(String apnType);
+
+        LinkProperties GetLinkProperties(String apnType);
+
+        NetworkCapabilities GetNetworkCapabilities(String apnType);
+
+        SignalStrength GetSignalStrength();
+
+        RegisterForUnknownConnection(Handler h, Int32 what, Object obj);
+
+        UnregisterForUnknownConnection(Handler h);
+
+        RegisterForHandoverStateChanged(Handler h, Int32 what, Object obj);
+
+        UnregisterForHandoverStateChanged(Handler h);
+
+        RegisterForPreciseCallStateChanged(Handler h, Int32 what, Object obj);
+
+        UnregisterForPreciseCallStateChanged(Handler h);
+
+        RegisterForNewRingingConnection(Handler h, Int32 what, Object obj);
+
+        UnregisterForNewRingingConnection(Handler h);
+
+        UnregisterForVideoCapabilityChanged(Handler h);
+
+        RegisterForIncomingRing(Handler h, Int32 what, Object obj);
+
+        UnregisterForIncomingRing(Handler h);
+
+        RegisterForDisconnect(Handler h, Int32 what, Object obj);
+
+        UnregisterForDisconnect(Handler h);
+
+        RegisterForMmiInitiate(Handler h, Int32 what, Object obj);
+
+        UnregisterForMmiInitiate(Handler h);
+
+        RegisterForMmiComplete(Handler h, Int32 what, Object obj);
+
+        UnregisterForMmiComplete(Handler h);
+
+        GetPendingMmiCodes();
+
+        SendUssdResponse(String ussdMessge);
+
+        RegisterForServiceStateChanged(Handler h, Int32 what, Object obj);
+
+        UnregisterForServiceStateChanged(Handler h);
+
+        RegisterForSuppServiceNotification(Handler h, Int32 what, Object obj);
+
+        UnregisterForSuppServiceNotification(Handler h);
+
+        RegisterForSuppServiceFailed(Handler h, Int32 what, Object obj);
+
+        UnregisterForSuppServiceFailed(Handler h);
+
+        RegisterForInCallVoicePrivacyOn(Handler h, Int32 what, Object obj);
+
+        UnregisterForInCallVoicePrivacyOn(Handler h);
+
+        RegisterForInCallVoicePrivacyOff(Handler h, Int32 what, Object obj);
+
+        UnregisterForInCallVoicePrivacyOff(Handler h);
+
+        RegisterForCdmaOtaStatusChange(Handler h, Int32 what, Object obj);
+
+        UnregisterForCdmaOtaStatusChange(Handler h);
+
+        RegisterForSubscriptionInfoReady(Handler h, Int32 what, Object obj);
+
+        UnregisterForSubscriptionInfoReady(Handler h);
+
+        RegisterForEcmTimerReset(Handler h, Int32 what, Object obj);
+
+        UnregisterForEcmTimerReset(Handler h);
+
+        RegisterForRingbackTone(Handler h, Int32 what, Object obj);
+
+        UnregisterForRingbackTone(Handler h);
+
+        RegisterForOnHoldTone(Handler h, Int32 what, Object obj);
+
+        UnregisterForOnHoldTone(Handler h);
+
+        RegisterForResendIncallMute(Handler h, Int32 what, Object obj);
+
+        UnregisterForResendIncallMute(Handler h);
+
+        RegisterForSimRecordsLoaded(Handler h, Int32 what, Object obj);
+
+        UnregisterForSimRecordsLoaded(Handler h);
+
+        Boolean GetIccRecordsLoaded();
+
+        IccCard GetIccCard();
+
+        Boolean CanConference();
+
+        EnableEnhancedVoicePrivacy(Boolean enable, Message onComplete);
+
+        GetEnhancedVoicePrivacy(Message onComplete);
+
+        Boolean CanTransfer();
+
+        ClearDisconnected();
+
+        Call GetForegroundCall();
+
+        Call GetBackgroundCall();
+
+        Call GetRingingCall();
+
+        Boolean HandlePinMmi(String dialString);
+
+        SendDtmf(Char32 c);
+
+        StartDtmf(Char32 c);
+
+        StopDtmf();
+
+        SetRadioPower(Boolean power);
+
+        Boolean GetMessageWaitingIndicator();
+
+        Boolean GetCallForwardingIndicator();
+
+        String GetLine1Number();
+
+        String GetCdmaMin();
+
+        Boolean IsMinInfoReady();
+
+        String GetCdmaPrlVersion();
+
+        String GetLine1AlphaTag();
+
+        SetLine1Number(String alphaTag, String number, Message onComplete);
+
+        String GetVoiceMailNumber();
+
+        Int32 GetVoiceMessageCount();
+
+        String GetVoiceMailAlphaTag();
+
+        GetOutgoingCallerIdDisplay(Message onComplete);
+
+        GetCallWaiting(Message onComplete);
+
+        SetCallWaiting(Boolean enable, Message onComplete);
+
+        GetAvailableNetworks(Message response);
+
+        SetNetworkSelectionModeAutomatic(Message response);
+
+        SelectNetworkManually(OperatorInfo network, Message response);
+
+        SetPreferredNetworkType(Int32 networkType, Message response);
+
+        GetPreferredNetworkType(Message response);
+
+        GetNeighboringCids(Message response);
+
+        SetOnPostDialCharacter(Handler h, Int32 what, Object obj);
+
+        SetMute(Boolean muted);
+
+        Boolean GetMute();
+
+        SetEchoSuppressionEnabled();
+
+        GetDataCallList(Message response);
+
+        UpdateServiceLocation();
+
+        EnableLocationUpdates();
+
+        DisableLocationUpdates();
+
+        SetUnitTestMode(Boolean f);
+
+        Boolean GetUnitTestMode();
+
+        SetBandMode(Int32 bandMode, Message response);
+
+        QueryAvailableBandMode(Message response);
+
+        Boolean GetDataRoamingEnabled();
+
+        SetDataRoamingEnabled(Boolean enable);
+
+        Boolean GetDataEnabled();
+
+        SetDataEnabled(Boolean enable);
+
+        QueryCdmaRoamingPreference(Message response);
+
+        SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response);
+
+        SetCdmaSubscription(Int32 cdmaSubscriptionType, Message response);
+
+        SimulatedRadioControl GetSimulatedRadioControl();
+
+        Boolean IsDataConnectivityPossible();
+
+        Boolean IsOnDemandDataPossible(String apnType);
+
+        Boolean IsDataConnectivityPossible(String apnType);
+
+        String GetDeviceId();
+
+        String GetDeviceSvn();
+
+        String GetSubscriberId();
+
+        String GetGroupIdLevel1();
+
+        String GetIccSerialNumber();
+
+        String GetEsn();
+
+        String GetMeid();
+
+        String GetMsisdn();
+
+        String GetImei();
+
+        PhoneSubInfo GetPhoneSubInfo();
+
+        IccPhoneBookInterfaceManager GetIccPhoneBookInterfaceManager();
+
+        SetUiTTYMode(Int32 uiTtyMode, Message onComplete);
+
+        SetTTYMode(Int32 ttyMode, Message onComplete);
+
+        QueryTTYMode(Message onComplete);
+
+        ActivateCellBroadcastSms(Int32 activate, Message response);
+
+        GetCellBroadcastSmsConfig(Message response);
+
+        NotifyDataActivity();
+
+        GetSmscAddress(Message result);
+
+        SetSmscAddress(String address, Message result);
+
+        Int32 GetCdmaEriIconIndex();
+
+        String GetCdmaEriText();
+
+        Int32 GetCdmaEriIconMode();
+
+        Phone GetActivePhone();
+
+        SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message onComplete);
+
+        ExitEmergencyCallbackMode();
+
+        Boolean NeedsOtaServiceProvisioning();
+
+        Boolean IsOtaSpNumber(String dialStr);
+
+        RegisterForCallWaiting(Handler h, Int32 what, Object obj);
+
+        UnregisterForCallWaiting(Handler h);
+
+        RegisterForSignalInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForSignalInfo(Handler h);
+
+        RegisterForDisplayInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForDisplayInfo(Handler h);
+
+        RegisterForNumberInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForNumberInfo(Handler h);
+
+        RegisterForRedirectedNumberInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForRedirectedNumberInfo(Handler h);
+
+        RegisterForLineControlInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForLineControlInfo(Handler h);
+
+        RegisterFoT53ClirlInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForT53ClirInfo(Handler h);
+
+        RegisterForT53AudioControlInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForT53AudioControlInfo(Handler h);
+
+        SetOnEcbModeExitResponse(Handler h, Int32 what, Object obj);
+
+        UnsetOnEcbModeExitResponse(Handler h);
+
+        Boolean IsManualNetSelAllowed();
+
+        Boolean IsCspPlmnEnabled();
+
+        IsimRecords GetIsimRecords();
+
+        Int32 GetLteOnCdmaMode();
+
+        Int32 GetLteOnGsmMode();
+
+        SetVoiceMessageWaiting(Int32 line, Int32 countWaiting);
+
+        UsimServiceTable GetUsimServiceTable();
+
+        UiccCard GetUiccCard();
+
+        NvReadItem(Int32 itemID, Message response);
+
+        NvWriteItem(Int32 itemID, String itemValue, Message response);
+
+        NvResetConfig(Int32 resetType, Message response);
+
+        Dispose();
+
+        RemoveReferences();
+
+        Boolean UpdateCurrentCarrierInProvider();
+
+        UpdateDataConnectionTracker();
+
+        SetInternalDataEnabled(Boolean enable);
+
+        Boolean SetInternalDataEnabledFlag(Boolean enable);
+
+        SetInternalDataEnabled(Boolean enable, Message onCompleteMsg);
+
+        RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj);
+
+        UnregisterForAllDataDisconnected(Handler h);
+
+        Int64 GetSubId();
+
+        Int32 GetPhoneId();
+
+        GetPcscfAddress(String apnType);
+
+        SetImsRegistrationState(Boolean registered);
+
+        Phone GetImsPhone();
+
+        ImsPhone RelinquishOwnershipOfImsPhone();
+
+        Boolean SetOperatorBrandOverride(String brand);
+
+        Boolean IsRadioAvailable();
+
+        ShutdownRadio();
+
+        GetCallBarringOption(String facility, String password, Message onComplete);
+
+        RequestChangeCbPsw(String facility, String oldPwd, String newPwd, Message result);
+
+        SetLocalCallHold(Int32 lchStatus);
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

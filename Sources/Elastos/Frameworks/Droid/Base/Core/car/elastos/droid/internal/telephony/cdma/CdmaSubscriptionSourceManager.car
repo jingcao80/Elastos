@@ -1,0 +1,27 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Cdma {
+
+    interface ICdmaSubscriptionSourceManager {
+        Dispose(Handler h);
+
+        HandleMessage(Message msg);
+
+        Int32 GetCdmaSubscriptionSource();
+
+        Int32 GetDefault(Context context);
+
+    }
+
+    }//Cdma
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

@@ -1,0 +1,183 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    interface IGSMPhone {
+        If (ci instanceof SimulatedRadioControl);
+
+        If (ci instanceof SimulatedRadioControl);
+
+        Dispose();
+
+        RemoveReferences();
+
+        CellLocation GetCellLocation();
+
+        State GetState();
+
+        Int32 GetPhoneType();
+
+        ServiceStateTracker GetServiceStateTracker();
+
+        CallTracker GetCallTracker();
+
+        Boolean GetCallForwardingIndicator();
+
+        DataState GetDataConnectionState(String apnType);
+
+        NotifyNewRingingConnection(Connection c);
+
+        NotifyUnknownConnection(Connection cn);
+
+        NotifySuppServiceFailed(SuppService code);
+
+        NotifyLocationChanged();
+
+        UnregisterForSuppServiceNotification(Handler h);
+
+        RegisterForSimRecordsLoaded(Handler h, Int32 what, Object obj);
+
+        UnregisterForSimRecordsLoaded(Handler h);
+
+        Boolean CanConference();
+
+        Boolean CanDial();
+
+        Conference();
+
+        ClearDisconnected();
+
+        Boolean CanTransfer();
+
+        ExplicitCallTransfer();
+
+        Call GetRingingCall();
+
+        Catch (CallStateException e);
+
+        Boolean IsInCall();
+
+        Catch (CallStateException e);
+
+        String GetVoiceMailAlphaTag();
+
+        String GetDeviceId();
+
+        String GetDeviceSvn();
+
+        IsimRecords GetIsimRecords();
+
+        String GetImei();
+
+        String GetEsn();
+
+        String GetMeid();
+
+        String GetSubscriberId();
+
+        String GetGroupIdLevel1();
+
+        String GetLine1Number();
+
+        String GetMsisdn();
+
+        String GetLine1AlphaTag();
+
+        SetLine1Number(String alphaTag, String number, Message onComplete);
+
+        String GetSystemProperty(String property, String defValue);
+
+        UpdateDataConnectionTracker();
+
+        GetCallForwardingOption(Int32 commandInterfaceCFReason, Message onComplete);
+
+        GetOutgoingCallerIdDisplay(Message onComplete);
+
+        GetCallWaiting(Message onComplete);
+
+        SetCallWaiting(Boolean enable, Message onComplete);
+
+        SetOnPostDialCharacter(Handler h, Int32 what, Object obj);
+
+        SetUiTTYMode(Int32 uiTtyMode, Message onComplete);
+
+        SetMute(Boolean muted);
+
+        Boolean GetMute();
+
+        GetDataCallList(Message response);
+
+        UpdateServiceLocation();
+
+        EnableLocationUpdates();
+
+        DisableLocationUpdates();
+
+        Boolean GetDataRoamingEnabled();
+
+        SetDataRoamingEnabled(Boolean enable);
+
+        Boolean GetDataEnabled();
+
+        SetDataEnabled(Boolean enable);
+
+        HandleMessage (Message msg);
+
+        Boolean UpdateCurrentCarrierInProvider();
+
+        SaveClirSetting(Int32 commandInterfaceCLIRMode);
+
+        PhoneSubInfo GetPhoneSubInfo();
+
+        IccPhoneBookInterfaceManager GetIccPhoneBookInterfaceManager();
+
+        ActivateCellBroadcastSms(Int32 activate, Message response);
+
+        GetCellBroadcastSmsConfig(Message response);
+
+        Boolean IsCspPlmnEnabled();
+
+        Boolean IsManualNetSelAllowed();
+
+        ExitEmergencyCallbackMode();
+
+        Boolean SetOperatorBrandOverride(String brand);
+
+        String GetOperatorNumeric();
+
+        RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj);
+
+        UnregisterForAllDataDisconnected(Handler h);
+
+        SetInternalDataEnabled(Boolean enable, Message onCompleteMsg);
+
+        Boolean SetInternalDataEnabledFlag(Boolean enable);
+
+        NotifyEcbmTimerReset(Boolean flag);
+
+        RegisterForEcmTimerReset(Handler h, Int32 what, Object obj);
+
+        UnregisterForEcmTimerReset(Handler h);
+
+        ResetSubSpecifics();
+
+        SetVoiceMessageWaiting(Int32 line, Int32 countWaiting);
+
+        GetCallBarringOption(String facility, String password, Message onComplete);
+
+        RequestChangeCbPsw(String facility, String oldPwd, String newPwd, Message result);
+
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

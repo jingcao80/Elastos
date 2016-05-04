@@ -1,0 +1,53 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace DataConnection {
+
+    interface IDcTracker {
+        Dispose();
+
+        Boolean GetAnyDataEnabled();
+
+        Boolean GetAnyDataEnabled(Boolean checkUserDataEnabled);
+
+        Boolean IsDisconnected();
+
+        HandleMessage (Message msg);
+
+        Update();
+
+        CleanUpAllConnections(String cause);
+
+        UpdateRecords();
+
+        CleanUpAllConnections(String cause, Message disconnectAllCompleteMsg);
+
+        RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj);
+
+        UnregisterForAllDataDisconnected(Handler h);
+
+        Boolean SetInternalDataEnabledFlag(Boolean enable);
+
+        Boolean SetInternalDataEnabled(Boolean enable);
+
+        Boolean SetInternalDataEnabled(Boolean enable, Message onCompleteMsg);
+
+        SetDataAllowed(Boolean enable, Message response);
+
+        GetPcscfAddress(String apnType);
+
+        SetImsRegistrationState(Boolean registered);
+
+    }
+
+    }//DataConnection
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

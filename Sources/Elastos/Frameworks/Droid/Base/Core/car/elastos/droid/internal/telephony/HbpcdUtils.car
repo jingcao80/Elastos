@@ -1,0 +1,21 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IHbpcdUtils {
+        Int32 GetMcc(Int32 sid, Int32 tz, Int32 DSTflag, Boolean isNitzTimeZone);
+
+        String GetIddByMcc(Int32 mcc);
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}
