@@ -2756,7 +2756,7 @@ ECode CNetworkManagementService::SetFirewallEnabled(
     args->Set(0, CoreUtils::Convert(enabled ? String("enable") : String("disable")));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
-    assert(0);
+    // assert(0 && "TODO");
     // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     mFirewallEnabled = enabled;
     return NOERROR;

@@ -792,7 +792,7 @@ void BackStackRecord::BumpBackStackNesting(
         return;
     }
     if (FragmentManagerImpl::DEBUG) {
-        Logger::V(TAG, "Bump nesting in %p by %d", this, amt);
+        Logger::V(TAG, "Bump nesting in %s by %d", TO_CSTR(this), amt);
     }
     AutoPtr<Op> op = mHead;
     while (op != NULL) {
@@ -802,7 +802,7 @@ void BackStackRecord::BumpBackStackNesting(
             newNesting += amt;
             op->mFragment->SetBackStackNesting(newNesting);
             if (FragmentManagerImpl::DEBUG) {
-                Logger::V(TAG, "Bump nesting of %p to %d", op->mFragment.Get(), newNesting);
+                Logger::V(TAG, "Bump nesting of %s to %d", TO_CSTR(op->mFragment), newNesting);
             }
         }
 
@@ -849,7 +849,7 @@ Int32 BackStackRecord::CommitInternal(
     if (mCommitted) return E_ILLEGAL_STATE_EXCEPTION;//throw new IllegalStateException("commit already called");
 
     if (FragmentManagerImpl::DEBUG) {
-        Logger::V(TAG, "Commit: %p", this);
+        Logger::V(TAG, "Commit: %s", TO_CSTR(this));
 //        LogWriter logw/* = new LogWriter(Logger::VERBOSE, TAG)*/;
 //        AutoPtr<IPrintWriter> pw;
 //        FastPrintWriter::New(logw, FALSE, 1024, (IPrintWriter**)&pw);
@@ -869,7 +869,7 @@ Int32 BackStackRecord::CommitInternal(
 
 ECode BackStackRecord::Run()
 {
-    if (FragmentManagerImpl::DEBUG) Logger::V(TAG, "Run: %p", this);
+    if (FragmentManagerImpl::DEBUG) Logger::V(TAG, "Run: %s", TO_CSTR(this));
 
     if (mAddToBackStack) {
         if (mIndex < 0) {
@@ -899,11 +899,13 @@ ECode BackStackRecord::Run()
 
             case OP_REPLACE: {
                 AutoPtr<IFragment> f = op->mFragment;
+                // must make a copy, because mManager->RemoveFragment modifies mManager->mAdded when iterate.
+                List<AutoPtr<IFragment> > addedCopy(mManager->mAdded);
                 List<AutoPtr<IFragment> >::Iterator it;
-                for (it = mManager->mAdded.Begin(); it != mManager->mAdded.End(); ++it) {
+                for (it = addedCopy.Begin(); it != addedCopy.End(); ++it) {
                     AutoPtr<IFragment> old = *it;
                     if (FragmentManagerImpl::DEBUG) {
-                        Logger::V(TAG, "OP_REPLACE: adding=%p old=%p", f.Get(), old.Get());
+                        Logger::V(TAG, "OP_REPLACE: adding=%s old=%s", TO_CSTR(f), TO_CSTR(old));
                     }
                     Int32 oldId, fId;
                     if (f == NULL || (old->GetContainerId(&oldId), oldId) == (f->GetContainerId(&fId), fId)) {
@@ -923,7 +925,7 @@ ECode BackStackRecord::Run()
                                 oldNesting += 1;
                                 old->SetBackStackNesting(oldNesting);
                                 if (FragmentManagerImpl::DEBUG) {
-                                    Logger::V(TAG, "Bump nesting of %p to %d", old.Get(), oldNesting);
+                                    Logger::V(TAG, "Bump nesting of %s to %d", TO_CSTR(old), oldNesting);
                                 }
                             }
                             mManager->RemoveFragment(old, mTransition, mTransitionStyle);
@@ -1973,7 +1975,7 @@ ECode BackStackRecord::PopFromBackStack(
     *result = NULL;
 
     if (FragmentManagerImpl::DEBUG) {
-        Logger::V(TAG, "PopFromBackStack: %p", this);
+        Logger::V(TAG, "PopFromBackStack: %s", TO_CSTR(this));
 //        LogWriter logw/* = new LogWriter(Logger::VERBOSE, TAG)*/;
        //  AutoPtr<IPrintWriter> pw;
        //  FastPrintWriter::New(logw, FALSE, 1024, (IPrintWriter**)&pw);

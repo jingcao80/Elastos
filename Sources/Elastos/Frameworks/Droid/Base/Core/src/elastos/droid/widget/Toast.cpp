@@ -111,14 +111,6 @@ ECode Toast::TN::Hide()
     return mHandler->Post(mHide, &result);
 }
 
-ECode Toast::TN::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = String("ToastTransientNotification");
-    return NOERROR;
-}
-
 ECode Toast::TN::HandleShow()
 {
     if (localLOGV) {
@@ -371,7 +363,9 @@ ECode Toast::constructor(
 {
     mContext = context;
 
-    mTN = new TN();
+    AutoPtr<IITransientNotification> obj;
+    CToastTransientNotification::New((IITransientNotification**)&obj);
+    mTN = (TN*)obj.Get();
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);

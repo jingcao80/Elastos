@@ -145,14 +145,12 @@ const String FragmentManagerImpl::TAG("FragmentManagerImpl");
 CAR_INTERFACE_IMPL_3(FragmentManagerImpl, FragmentManager, IFragmentManagerImpl, ILayoutInflaterFactory, ILayoutInflaterFactory2)
 
 FragmentManagerImpl::FragmentManagerImpl()
-    : mTmpActions(NULL)
-    , mExecutingActions(FALSE)
+    : mExecutingActions(FALSE)
     , mCurState(IFragment::INITIALIZING)
     , mActivity(NULL)
     , mNeedMenuInvalidate(FALSE)
     , mStateSaved(FALSE)
     , mDestroyed(FALSE)
-    , mNoTransactionsBecause(String(NULL))
     , mHavePendingDeferredStart(FALSE)
 {
     mExecCommit = new ExecCommitRunnable(this);
@@ -1095,12 +1093,12 @@ ECode FragmentManagerImpl::AddFragment(
             Logger::E(TAG, "Fragment already added: %s", TO_CSTR(fragment));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
+        Logger::I(TAG, " >> AddFragment: %d: %s", mAdded.GetSize(), TO_CSTR(f));
         mAdded.PushBack(f);
         fragment->SetAdded(TRUE);
         fragment->SetRemoving(FALSE);
-        Boolean hasMenu;
+        Boolean hasMenu, menuVisible;
         fragment->GetHasMenu(&hasMenu);
-        Boolean menuVisible;
         fragment->GetMenuVisible(&menuVisible);
         if (hasMenu && menuVisible) {
             mNeedMenuInvalidate = TRUE;
@@ -1489,11 +1487,10 @@ ECode FragmentManagerImpl::SetBackStackIndex(
 ECode FragmentManagerImpl::FreeBackStackIndex(
     /* [in] */ Int32 index)
 {
-    AutoLock look(this);
-//TODO:
-//    (*mBackStackIndices)[index] = NULL;
-
     if (DEBUG) Logger::V(TAG, "Freeing back stack index %d", index);
+
+    AutoLock look(this);
+    mBackStackIndices[index] = NULL;
     mAvailBackStackIndices.PushBack(index);
     return NOERROR;
 }
@@ -1502,6 +1499,8 @@ ECode FragmentManagerImpl::ExecPendingActions(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
     if (mExecutingActions) {
 //         throw new IllegalStateException("Recursive entry to executePendingTransactions");
         return E_ILLEGAL_STATE_EXCEPTION;

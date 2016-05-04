@@ -59,14 +59,18 @@ ECode CActivityOne::OnCreate(
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::main);
 
+    Logger::I(TAG, " >> GetFragmentManager()");
     AutoPtr<IFragmentManager> fm;
     GetFragmentManager((IFragmentManager**)&fm);
+    Logger::I(TAG, " >> BeginTransaction()");
     AutoPtr<IFragmentTransaction> trans;
     fm->BeginTransaction((IFragmentTransaction**)&trans);
 
+    Logger::I(TAG, " >> create CFragmentOne");
     AutoPtr<IFragment> fragment;
     CFragmentOne::New((IFragment**)&fragment);
     trans->Add(R::id::id_content, fragment, String("ONE"));
+    Logger::I(TAG, " >> Commit");
     Int32 ival;
     trans->Commit(&ival);
 

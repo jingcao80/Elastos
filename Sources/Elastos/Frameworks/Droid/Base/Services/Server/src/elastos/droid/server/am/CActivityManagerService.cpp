@@ -9074,8 +9074,10 @@ ECode CActivityManagerService::SetProcessForeground(
             AutoPtr<ForegroundToken> oldToken = mForegroundProcesses[pid];
             if (oldToken != NULL) {
                 AutoPtr< ::IProxy> proxy = (::IProxy*)oldToken->mToken->Probe(EIID_IProxy);
-                Boolean result;
-                proxy->UnlinkToDeath(oldToken, 0, &result);
+                if (proxy) {
+                    Boolean result;
+                    proxy->UnlinkToDeath(oldToken, 0, &result);
+                }
                 mForegroundProcesses.Erase(pid);
                 if (pr != NULL) {
                     pr->mForcingToForeground = NULL;
@@ -9088,7 +9090,9 @@ ECode CActivityManagerService::SetProcessForeground(
                 newToken->mToken = token;
                 // try {
                 AutoPtr< ::IProxy> proxy = (::IProxy*)token->Probe(EIID_IProxy);
-                proxy->LinkToDeath(newToken, 0);
+                if (proxy) {
+                    proxy->LinkToDeath(newToken, 0);
+                }
                 mForegroundProcesses[pid] = newToken;
                 pr->mForcingToForeground = token;
                 changed = TRUE;

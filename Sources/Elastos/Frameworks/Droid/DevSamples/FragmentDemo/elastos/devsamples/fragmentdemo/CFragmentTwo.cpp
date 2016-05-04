@@ -69,6 +69,7 @@ ECode CFragmentTwo::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** result)
 {
+    Logger::I(TAG, " >> OnCreateView");
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<IView> view;

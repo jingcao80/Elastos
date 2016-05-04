@@ -87,6 +87,8 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
+        TO_STRING_IMPL("Toast::TN::TransientNotification")
+
         TN();
 
         ~TN();
@@ -130,8 +132,6 @@ public:
         CARAPI GetVerticalMargin(
             /* [out] */ Float* verticalMargin);
 
-        CARAPI ToString(
-            /* [out] */ String* str);
     private:
         CARAPI HandleShow();
 

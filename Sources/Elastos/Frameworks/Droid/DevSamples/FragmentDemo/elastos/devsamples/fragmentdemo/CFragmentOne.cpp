@@ -43,9 +43,12 @@ ECode CFragmentOne::MyListener::OnClick(
 
     AutoPtr<IFragment> fragment;
     CFragmentTwo::New((IFragment**)&fragment);
+    Logger::I(TAG, " >> Replace");
     trans->Replace(R::id::id_content, fragment, String("TWO"));
+    Logger::I(TAG, " >> AddToBackStack");
     trans->AddToBackStack(String(NULL));
     Int32 ival;
+    Logger::I(TAG, " >> Commit");
     trans->Commit(&ival);
     return NOERROR;
 }
@@ -66,6 +69,7 @@ ECode CFragmentOne::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** result)
 {
+    Logger::I(TAG, " >> OnCreateView");
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<IView> view;

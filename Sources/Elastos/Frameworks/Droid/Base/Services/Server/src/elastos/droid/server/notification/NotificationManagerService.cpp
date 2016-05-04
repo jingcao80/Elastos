@@ -3040,6 +3040,7 @@ ECode NotificationManagerService::OnStart()
     mKeyguardManager = IKeyguardManager::Probe(obj);
 
     mHandler = new WorkerHandler(this);
+    mHandler->constructor();
     IThread::Probe(mRankingThread)->Start();
     AutoPtr< ArrayOf<String> > extractorNames;
     // try {
@@ -4031,8 +4032,10 @@ void NotificationManagerService::HandleRankingReconsideration(
 {
     AutoPtr<IInterface> obj;
     message->GetObj((IInterface**)&obj);
-    if (IRankingReconsideration::Probe(obj) != NULL) return;
-    AutoPtr<RankingReconsideration> recon = (RankingReconsideration*)IRankingReconsideration::Probe(obj);
+    IRankingReconsideration* rr = IRankingReconsideration::Probe(obj);
+    if (rr == NULL) return;
+
+    AutoPtr<RankingReconsideration> recon = (RankingReconsideration*)rr;
     recon->Run();
     Boolean changed;
     synchronized(mNotificationList) {

@@ -96,6 +96,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("BackStackRecord::AddTargetsOnPreDrawListener")
+
         AddTargetsOnPreDrawListener(
             /* [in] */ BackStackRecord* host,
             /* [in] */ IBackStackRecordTransitionState* state,
@@ -135,6 +137,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("BackStackRecord::RemoveTargetsOnPreDrawListener")
+
         RemoveTargetsOnPreDrawListener(
             /* [in] */ BackStackRecord* host,
             /* [in] */ IViewGroup* sceneRoot,
@@ -172,6 +176,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("BackStackRecord::EpicenterCallback")
+
         EpicenterCallback(
             /* [in] */ IRect* epicenter);
 
@@ -190,6 +196,8 @@ private:
     {
     public:
         CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("BackStackRecord::SharedElementEpicenterCallback")
 
         SharedElementEpicenterCallback(
             /* [in] */ IBackStackRecordTransitionState* state);

@@ -690,7 +690,7 @@ void SQLiteConnection::NativeFinalizeStatement(
     // We ignore the result of sqlite3_finalize because it is really telling us about
     // whether any errors occurred while executing the statement.  The statement itself
     // is always finalized regardless.
-    Slogger::V(TAG, "Finalized statement %p on connection %p", statement, connection->db);
+    // Slogger::V(TAG, "Finalized statement %p on connection %p", statement, connection->db);
     sqlite3_finalize(statement);
 }
 

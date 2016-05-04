@@ -1510,7 +1510,7 @@ ECode Activity::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >> OnTouchEvent %s", TO_CSTR(event));
+    // Logger::I(TAG, " >> OnTouchEvent %s", TO_CSTR(event));
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 

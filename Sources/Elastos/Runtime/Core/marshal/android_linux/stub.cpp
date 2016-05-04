@@ -130,35 +130,35 @@
 
 void DUMP_ITFID(IInterface* intf)
 {
-    do {
-        InterfaceID iid;
-        intf->GetInterfaceID(intf, &iid);
-        printf("======== DUMP_ITFID ========\n");
-        printf("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
-                iid.mData1, iid.mData2, iid.mData3,
-                iid.mData4[0], iid.mData4[1],
-                iid.mData4[2], iid.mData4[3],
-                iid.mData4[4], iid.mData4[5],
-                iid.mData4[6], iid.mData4[7]);
-        printf("============================\n");
-        ALOGD("======== DUMP_ITFID ========\n");
-        ALOGD("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
-                iid.mData1, iid.mData2, iid.mData3,
-                iid.mData4[0], iid.mData4[1],
-                iid.mData4[2], iid.mData4[3],
-                iid.mData4[4], iid.mData4[5],
-                iid.mData4[6], iid.mData4[7]);
-        ALOGD("============================\n");
-    } while(0);
+    InterfaceID iid;
+    intf->GetInterfaceID(intf, &iid);
+    printf("======== DUMP_InterfaceID ========\n");
+    printf("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
+            iid.mData1, iid.mData2, iid.mData3,
+            iid.mData4[0], iid.mData4[1],
+            iid.mData4[2], iid.mData4[3],
+            iid.mData4[4], iid.mData4[5],
+            iid.mData4[6], iid.mData4[7]);
+    printf("============================\n");
+    ALOGD("======== DUMP_InterfaceID ========\n");
+    ALOGD("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
+            iid.mData1, iid.mData2, iid.mData3,
+            iid.mData4[0], iid.mData4[1],
+            iid.mData4[2], iid.mData4[3],
+            iid.mData4[4], iid.mData4[5],
+            iid.mData4[6], iid.mData4[7]);
+    ALOGD("============================\n");
 }
 
 void __DumpGUID(REIID riid)
 {
+    PFL_EX("======== DUMP_GUID ========\n");
     PFL_EX("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X\n",
         riid.mData1, riid.mData2, riid.mData3,
         riid.mData4[0], riid.mData4[1], riid.mData4[2],
         riid.mData4[3], riid.mData4[4], riid.mData4[5],
         riid.mData4[6], riid.mData4[7]);
+    ALOGD("======== DUMP_GUID ========\n");
     ALOGD("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X\n",
         riid.mData1, riid.mData2, riid.mData3,
         riid.mData4[0], riid.mData4[1], riid.mData4[2],
@@ -774,7 +774,7 @@ ECode CObjectStub::S_CreateObject(
         if (FAILED(ec)) {
             MARSHAL_DBGOUT(MSHDBG_ERROR,
                     ALOGE("Create Stub: get class info fail, the ec = 0x%08x\n", ec));
-            MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, DUMP_ITFID(object));
             goto ErrorExit;
         }
     }
@@ -787,7 +787,7 @@ ECode CObjectStub::S_CreateObject(
     interfaces = new CInterfaceStub[(*classInfo)->mInterfaceNum];
     if (!interfaces) {
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Create stub: out of memory.\n"));
-        MARSHAL_DBGOUT(MSHDBG_ERROR,  DUMP_ITFID(object));
+        MARSHAL_DBGOUT(MSHDBG_ERROR, DUMP_ITFID(object));
         ec = E_OUT_OF_MEMORY;
         goto ErrorExit;
     }

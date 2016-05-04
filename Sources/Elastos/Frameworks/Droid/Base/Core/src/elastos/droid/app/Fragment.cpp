@@ -930,7 +930,16 @@ ECode Fragment::ToString(
     VALIDATE_NOT_NULL(string)
 
     StringBuilder sb(128);
-//     DebugUtils.buildShortClassTag(this, sb);
+
+    AutoPtr<IClassInfo> classInfo;
+    _CObject_ReflectClassInfo(TO_IINTERFACE(this), (IClassInfo**)&classInfo);
+    String className("Fragment");
+    if (classInfo != NULL) {
+        classInfo->GetName(&className);
+    }
+    sb += className;
+    sb += "{0x";
+    sb += StringUtils::ToHexString((Int32)(IFragment*)this);
     if (mIndex >= 0) {
         sb.Append(" #");
         sb.Append(mIndex);
@@ -940,7 +949,7 @@ ECode Fragment::ToString(
         sb.Append(StringUtils::ToHexString(mFragmentId));
     }
     if (mTag != NULL) {
-        sb.Append(" ");
+        sb.Append(" tag=");
         sb.Append(mTag);
     }
     sb.Append("}");
