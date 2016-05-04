@@ -6611,8 +6611,7 @@ void AppWidgetServiceImpl::LoadGroupWidgetProvidersLocked(
     }
 
     Int32 receiversSize = 0;
-    allReceivers->GetSize(&receiversSize);
-    Int32 N = (allReceivers == NULL) ? 0 : receiversSize;
+    Int32 N = (allReceivers == NULL) ? 0 : (allReceivers->GetSize(&receiversSize), receiversSize);
     for (Int32 i = 0; i < N; ++i) {
         AutoPtr<IInterface> interfaceTmp;
         allReceivers->Get(i, (IInterface**)&interfaceTmp);
@@ -8119,346 +8118,189 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
     /* [in] */ Int32 userId,
     /* [in] */ IList* outLoadedWidgets)
 {
-    // ==================before translated======================
-    // int version = -1;
-    // try {
-    //     XmlPullParser parser = Xml.newPullParser();
-    //     parser.setInput(stream, null);
-    //
-    //     int legacyProviderIndex = -1;
-    //     int legacyHostIndex = -1;
-    //     int type;
-    //     do {
-    //         type = parser.next();
-    //         if (type == XmlPullParser.START_TAG) {
-    //             String tag = parser.getName();
-    //             if ("gs".equals(tag)) {
-    //                 String attributeValue = parser.getAttributeValue(null, "version");
-    //                 try {
-    //                     version = Integer.parseInt(attributeValue);
-    //                 } catch (NumberFormatException e) {
-    //                     version = 0;
-    //                 }
-    //             } else if ("p".equals(tag)) {
-    //                 legacyProviderIndex++;
-    //                 // TODO: do we need to check that this package has the same signature
-    //                 // as before?
-    //                 String pkg = parser.getAttributeValue(null, "pkg");
-    //                 String cl = parser.getAttributeValue(null, "cl");
-    //
-    //                 pkg = getCanonicalPackageName(pkg, cl, userId);
-    //                 if (pkg == null) {
-    //                     continue;
-    //                 }
-    //
-    //                 final int uid = getUidForPackage(pkg, userId);
-    //                 if (uid < 0) {
-    //                     continue;
-    //                 }
-    //
-    //                 ComponentName componentName = new ComponentName(pkg, cl);
-    //
-    //                 ActivityInfo providerInfo = getProviderInfo(componentName, userId);
-    //                 if (providerInfo == null) {
-    //                     continue;
-    //                 }
-    //
-    //                 ProviderId providerId = new ProviderId(uid, componentName);
-    //                 Provider provider = lookupProviderLocked(providerId);
-    //
-    //                 if (provider == null && mSafeMode) {
-    //                     // if we're in safe mode, make a temporary one
-    //                     provider = new Provider();
-    //                     provider.info = new AppWidgetProviderInfo();
-    //                     provider.info.provider = providerId.componentName;
-    //                     provider.info.providerInfo = providerInfo;
-    //                     provider.zombie = true;
-    //                     provider.id = providerId;
-    //                     mProviders.add(provider);
-    //                 }
-    //
-    //                 String tagAttribute = parser.getAttributeValue(null, "tag");
-    //                 final int providerTag = !TextUtils.isEmpty(tagAttribute)
-    //                         ? Integer.parseInt(tagAttribute, 16) : legacyProviderIndex;
-    //                 provider.tag = providerTag;
-    //             } else if ("h".equals(tag)) {
-    //                 legacyHostIndex++;
-    //                 Host host = new Host();
-    //                 // TODO: do we need to check that this package has the same signature
-    //                 // as before?
-    //                 String pkg = parser.getAttributeValue(null, "pkg");
-    //
-    //                 final int uid = getUidForPackage(pkg, userId);
-    //                 if (uid < 0) {
-    //                     host.zombie = true;
-    //                 }
-    //
-    //                 if (!host.zombie || mSafeMode) {
-    //                     // In safe mode, we don't discard the hosts we don't recognize
-    //                     // so that they're not pruned from our list. Otherwise, we do.
-    //                     final int hostId = Integer.parseInt(parser.getAttributeValue(
-    //                             null, "id"), 16);
-    //
-    //                     String tagAttribute = parser.getAttributeValue(null, "tag");
-    //                     final int hostTag = !TextUtils.isEmpty(tagAttribute)
-    //                             ? Integer.parseInt(tagAttribute, 16) : legacyHostIndex;
-    //
-    //                     host.tag = hostTag;
-    //                     host.id = new HostId(uid, hostId, pkg);
-    //                     mHosts.add(host);
-    //                 }
-    //             } else if ("b".equals(tag)) {
-    //                 String packageName = parser.getAttributeValue(null, "packageName");
-    //                 final int uid = getUidForPackage(packageName, userId);
-    //                 if (uid >= 0) {
-    //                     Pair<Integer, String> packageId = Pair.create(userId, packageName);
-    //                     mPackagesWithBindWidgetPermission.add(packageId);
-    //                 }
-    //             } else if ("g".equals(tag)) {
-    //                 Widget widget = new Widget();
-    //                 widget.appWidgetId = Integer.parseInt(parser.getAttributeValue(
-    //                         null, "id"), 16);
-    //                 setMinAppWidgetIdLocked(userId, widget.appWidgetId + 1);
-    //
-    //                 // restored ID is allowed to be absent
-    //                 String restoredIdString = parser.getAttributeValue(null, "rid");
-    //                 widget.restoredId = (restoredIdString == null) ? 0
-    //                         : Integer.parseInt(restoredIdString, 16);
-    //
-    //                 Bundle options = new Bundle();
-    //                 String minWidthString = parser.getAttributeValue(null, "min_width");
-    //                 if (minWidthString != null) {
-    //                     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-    //                             Integer.parseInt(minWidthString, 16));
-    //                 }
-    //                 String minHeightString = parser.getAttributeValue(null, "min_height");
-    //                 if (minHeightString != null) {
-    //                     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-    //                             Integer.parseInt(minHeightString, 16));
-    //                 }
-    //                 String maxWidthString = parser.getAttributeValue(null, "max_width");
-    //                 if (maxWidthString != null) {
-    //                     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-    //                             Integer.parseInt(maxWidthString, 16));
-    //                 }
-    //                 String maxHeightString = parser.getAttributeValue(null, "max_height");
-    //                 if (maxHeightString != null) {
-    //                     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-    //                             Integer.parseInt(maxHeightString, 16));
-    //                 }
-    //                 String categoryString = parser.getAttributeValue(null, "host_category");
-    //                 if (categoryString != null) {
-    //                     options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-    //                             Integer.parseInt(categoryString, 16));
-    //                 }
-    //                 widget.options = options;
-    //
-    //                 final int hostTag = Integer.parseInt(parser.getAttributeValue(
-    //                         null, "h"), 16);
-    //                 String providerString = parser.getAttributeValue(null, "p");
-    //                 final int providerTag = (providerString != null) ? Integer.parseInt(
-    //                         parser.getAttributeValue(null, "p"), 16) : TAG_UNDEFINED;
-    //
-    //                 // We can match widgets with hosts and providers only after hosts
-    //                 // and providers for all users have been loaded since the widget
-    //                 // host and provider can be in different user profiles.
-    //                 LoadedWidgetState loadedWidgets = new LoadedWidgetState(widget,
-    //                         hostTag, providerTag);
-    //                 outLoadedWidgets.add(loadedWidgets);
-    //             }
-    //         }
-    //     } while (type != XmlPullParser.END_DOCUMENT);
-    // } catch (NullPointerException
-    //         | NumberFormatException
-    //         | XmlPullParserException
-    //         | IOException
-    //         | IndexOutOfBoundsException e) {
-    //     Slog.w(TAG, "failed parsing " + e);
-    //     return -1;
-    // }
-    //
-    // return version;
-
     Int32 version = -1;
+    String nullStr;
     //try {
-        AutoPtr<IXmlPullParser> parser;
-        Xml::NewPullParser((IXmlPullParser**)&parser);
-        parser->SetInput(IInputStream::Probe(stream), String(""));
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(IInputStream::Probe(stream), nullStr);
 
-        Int32 legacyProviderIndex = -1;
-        Int32 legacyHostIndex = -1;
-        Int32 type = 0;
-        do {
-            parser->Next(&type);
-            if (type == IXmlPullParser::START_TAG) {
-                String tag;
-                parser->GetName(&tag);
-                if (String("gs").Equals(tag)) {
-                    String attributeValue;
-                    parser->GetAttributeValue(String(""), String("version"), &attributeValue);
-                    //try {
-                        version = StringUtils::ParseInt32(attributeValue);
-                    //} catch (NumberFormatException e) {
-                    //    version = 0;
-                    //}
+    Int32 legacyProviderIndex = -1;
+    Int32 legacyHostIndex = -1;
+    Int32 type = 0;
+    do {
+        ECode ec = parser->Next(&type);
+        if (FAILED(ec)) {
+            Slogger::W(TAG, "Failed parsing ec = 0x%08x", ec);
+            return -1;
+        }
+        if (type == IXmlPullParser::START_TAG) {
+            String tag;
+            ec = parser->GetName(&tag);
+            if (String("gs").Equals(tag)) {
+                String attributeValue;
+                parser->GetAttributeValue(nullStr, String("version"), &attributeValue);
+                //try {
+                ECode ec = StringUtils::Parse(attributeValue, &version);
+                if (FAILED(ec)) version = 0;
+                //} catch (NumberFormatException e) {
+                //    version = 0;
+                //}
+            }
+            else if (String("p").Equals(tag)) {
+                legacyProviderIndex++;
+                String pkg;
+                parser->GetAttributeValue(nullStr, String("pkg"), &pkg);
+                String cl;
+                parser->GetAttributeValue(nullStr, String("cl"), &cl);
+
+                pkg = GetCanonicalPackageName(pkg, cl, userId);
+                if (pkg.IsNull()) {
+                    continue;
                 }
-                else if (String("p").Equals(tag)) {
-                    ++legacyProviderIndex;
-                    String pkg;
-                    parser->GetAttributeValue(String(""), String("pkg"), &pkg);
-                    String cl;
-                    parser->GetAttributeValue(String(""), String("cl"), &cl);
 
-                    pkg = GetCanonicalPackageName(pkg, cl, userId);
-                    if (pkg.IsEmpty()) {
-                        continue;
-                    }
+                Int32 uid = GetUidForPackage(pkg, userId);
+                if (uid < 0) {
+                    continue;
+                }
 
-                    Int32 uid = GetUidForPackage(pkg, userId);
-                    if (uid < 0) {
-                        continue;
-                    }
+                AutoPtr<IComponentName> componentName;
+                CComponentName::New(pkg, cl, (IComponentName**)&componentName);
 
-                    AutoPtr<IComponentName> componentName;
-                    CComponentName::New(pkg, cl, (IComponentName**)&componentName);
+                AutoPtr<IActivityInfo> providerInfo = GetProviderInfo(componentName, userId);
+                if (providerInfo == NULL) {
+                    continue;
+                }
 
-                    AutoPtr<IActivityInfo> providerInfo = GetProviderInfo(componentName, userId);
-                    if (providerInfo == NULL) {
-                        continue;
-                    }
+                AutoPtr<ProviderId> providerId = new ProviderId(uid, componentName);
+                AutoPtr<Provider> provider = LookupProviderLocked(providerId);
 
-                    AutoPtr<ProviderId> providerId = new ProviderId(uid, componentName);
-                    AutoPtr<Provider> provider = LookupProviderLocked(providerId);
+                if (provider == NULL && mSafeMode) {
+                    // if we're in safe mode, make a temporary one
+                    provider = new Provider();
+                    CAppWidgetProviderInfo::New((IAppWidgetProviderInfo**)&provider->mInfo);
+                    provider->mInfo->SetProvider(providerId->mComponentName);
+                    provider->mInfo->SetProviderInfo(providerInfo);
+                    provider->mZombie = TRUE;
+                    provider->mId = providerId;
+                    mProviders->Add(TO_IINTERFACE(provider));
+                }
 
-                    if (provider == NULL && mSafeMode) {
-                        // if we're in safe mode, make a temporary one
-                        provider = new Provider();
-                        CAppWidgetProviderInfo::New((IAppWidgetProviderInfo**)&provider->mInfo);
-                        provider->mInfo->SetProvider(providerId->mComponentName);
-                        provider->mInfo->SetProviderInfo(providerInfo);
-                        provider->mZombie = TRUE;
-                        provider->mId = providerId;
-                        mProviders->Add(TO_IINTERFACE(provider));
-                    }
+                String tagAttribute;
+                parser->GetAttributeValue(nullStr, String("tag"), &tagAttribute);
+                Int32 providerTag = !TextUtils::IsEmpty(tagAttribute)
+                        ? StringUtils::ParseInt32(tagAttribute, 16) : legacyProviderIndex;
+                provider->mTag = providerTag;
+            }
+            else if (String("h").Equals(tag)) {
+                legacyHostIndex++;
+                AutoPtr<Host> host = new Host();
+                // TODO: do we need to check that this package has the same signature
+                // as before?
+                String pkg;
+                parser->GetAttributeValue(nullStr, String("pkg"), &pkg);
+
+                Int32 uid = GetUidForPackage(pkg, userId);
+                if (uid < 0) {
+                    host->mZombie = TRUE;
+                }
+
+                if (!host->mZombie || mSafeMode) {
+                    // In safe mode, we don't discard the hosts we don't recognize
+                    // so that they're not pruned from our list. Otherwise, we do.
+                    String attrValue;
+                    parser->GetAttributeValue(nullStr, String("id"), &attrValue);
+                    Int32 hostId = StringUtils::ParseInt32(attrValue, 16);
 
                     String tagAttribute;
-                    parser->GetAttributeValue(String(""), String("tag"), &tagAttribute);
-                    Int32 providerTag = !TextUtils::IsEmpty(tagAttribute)
-                            ? StringUtils::ParseInt32(tagAttribute, 16) : legacyProviderIndex;
-                    provider->mTag = providerTag;
-                }
-                else if (String("h").Equals(tag)) {
-                    ++legacyHostIndex;
-                    AutoPtr<Host> host = new Host();
-                    // TODO: do we need to check that this package has the same signature
-                    // as before?
-                    String pkg;
-                    parser->GetAttributeValue(String(""), String("pkg"), &pkg);
+                    parser->GetAttributeValue(nullStr, String("tag"), &tagAttribute);
+                    Int32 hostTag = !TextUtils::IsEmpty(tagAttribute)
+                            ? StringUtils::ParseInt32(tagAttribute, 16) : legacyHostIndex;
 
-                    Int32 uid = GetUidForPackage(pkg, userId);
-                    if (uid < 0) {
-                        host->mZombie = TRUE;
-                    }
-
-                    if (!host->mZombie || mSafeMode) {
-                        // In safe mode, we don't discard the hosts we don't recognize
-                        // so that they're not pruned from our list. Otherwise, we do.
-                        String attrValue;
-                        parser->GetAttributeValue(String(""), String("id"), &attrValue);
-                        Int32 hostId = StringUtils::ParseInt32(attrValue, 16);
-
-                        String tagAttribute;
-                        parser->GetAttributeValue(String(""), String("tag"), &tagAttribute);
-                        Int32 hostTag = !TextUtils::IsEmpty(tagAttribute)
-                                ? StringUtils::ParseInt32(tagAttribute, 16) : legacyHostIndex;
-
-                        host->mTag = hostTag;
-                        host->mId = new HostId(uid, hostId, pkg);
-                        mHosts->Add(TO_IINTERFACE(host));
-                    }
-                }
-                else if (String("b").Equals(tag)) {
-                    String packageName;
-                    parser->GetAttributeValue(String(""), String("packageName"), &packageName);
-                    Int32 uid = GetUidForPackage(packageName, userId);
-                    if (uid >= 0) {
-                        AutoPtr<IInteger32> firstTmp = CoreUtils::Convert(userId);
-                        AutoPtr<ICharSequence> secondTmp;
-                        CString::New(packageName, (ICharSequence**)&secondTmp);
-                        AutoPtr<IPairHelper> pairHelper;
-                        CPairHelper::AcquireSingleton((IPairHelper**)&pairHelper);
-                        AutoPtr<IPair> packageId;
-                        pairHelper->Create(TO_IINTERFACE(firstTmp), TO_IINTERFACE(secondTmp), (IPair**)&packageId);
-                        ICollection::Probe(mPackagesWithBindWidgetPermission)->Add(TO_IINTERFACE(packageId));
-                    }
-                }
-                else if (String("g").Equals(tag)) {
-                    AutoPtr<Widget> widget = new Widget();
-                    String attrValue;
-                    parser->GetAttributeValue(String(""), String("id"), &attrValue);
-                    widget->mAppWidgetId = StringUtils::ParseInt32(attrValue, 16);
-                    SetMinAppWidgetIdLocked(userId, widget->mAppWidgetId + 1);
-
-                    // restored ID is allowed to be absent
-                    String restoredIdString;
-                    parser->GetAttributeValue(String(""), String("rid"), &restoredIdString);
-                    widget->mRestoredId = (restoredIdString == String("")) ? 0
-                            : StringUtils::ParseInt32(restoredIdString, 16);
-
-                    AutoPtr<IBundle> options;
-                    CBundle::New((IBundle**)&options);
-                    String minWidthString;
-                    parser->GetAttributeValue(String(""), String("min_width"), &minWidthString);
-                    if (!minWidthString.IsEmpty()) {
-                        options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_WIDTH,
-                                StringUtils::ParseInt32(minWidthString, 16));
-                    }
-
-                    String minHeightString;
-                    parser->GetAttributeValue(String(""), String("min_height"), &minHeightString);
-                    if (!minHeightString.IsEmpty()) {
-                        options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_HEIGHT,
-                                StringUtils::ParseInt32(minHeightString, 16));
-                    }
-
-                    String maxWidthString;
-                    parser->GetAttributeValue(String(""), String("max_width"), &maxWidthString);
-                    if (!maxWidthString.IsEmpty()) {
-                        options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_WIDTH,
-                                StringUtils::ParseInt32(maxWidthString, 16));
-                    }
-
-                    String maxHeightString;
-                    parser->GetAttributeValue(String(""), String("max_height"), &maxHeightString);
-                    if (!maxHeightString.IsEmpty()) {
-                        options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_HEIGHT,
-                                StringUtils::ParseInt32(maxHeightString, 16));
-                    }
-
-                    String categoryString;
-                    parser->GetAttributeValue(String(""), String("host_category"), &categoryString);
-                    if (!categoryString.IsEmpty()) {
-                        options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_HOST_CATEGORY,
-                                StringUtils::ParseInt32(categoryString, 16));
-                    }
-                    widget->mOptions = options;
-
-                    parser->GetAttributeValue(String(""), String("h"), &attrValue);
-                    Int32 hostTag = StringUtils::ParseInt32(attrValue, 16);
-                    String providerString;
-                    parser->GetAttributeValue(String(""), String("p"), &attrValue);
-                    Int32 providerTag = (providerString != String("")) ? StringUtils::ParseInt32(
-                            attrValue, 16) : TAG_UNDEFINED;
-
-                    // We can match widgets with hosts and providers only after hosts
-                    // and providers for all users have been loaded since the widget
-                    // host and provider can be in different user profiles.
-                    AutoPtr<LoadedWidgetState> loadedWidgets = new LoadedWidgetState(widget,
-                            hostTag, providerTag);
-                    outLoadedWidgets->Add(TO_IINTERFACE(loadedWidgets));
+                    host->mTag = hostTag;
+                    host->mId = new HostId(uid, hostId, pkg);
+                    mHosts->Add(TO_IINTERFACE(host));
                 }
             }
-        } while (type != IXmlPullParser::END_DOCUMENT);
+            else if (String("b").Equals(tag)) {
+                String packageName;
+                parser->GetAttributeValue(nullStr, String("packageName"), &packageName);
+                Int32 uid = GetUidForPackage(packageName, userId);
+                if (uid >= 0) {
+                    AutoPtr<IPairHelper> pairHelper;
+                    CPairHelper::AcquireSingleton((IPairHelper**)&pairHelper);
+                    AutoPtr<IPair> packageId;
+                    pairHelper->Create(CoreUtils::Convert(userId), CoreUtils::Convert(packageName), (IPair**)&packageId);
+                    ICollection::Probe(mPackagesWithBindWidgetPermission)->Add(packageId);
+                }
+            }
+            else if (String("g").Equals(tag)) {
+                AutoPtr<Widget> widget = new Widget();
+                String attrValue;
+                parser->GetAttributeValue(nullStr, String("id"), &attrValue);
+                widget->mAppWidgetId = StringUtils::ParseInt32(attrValue, 16);
+                SetMinAppWidgetIdLocked(userId, widget->mAppWidgetId + 1);
+
+                // restored ID is allowed to be absent
+                String restoredIdString;
+                parser->GetAttributeValue(nullStr, String("rid"), &restoredIdString);
+                widget->mRestoredId = (restoredIdString.IsNull()) ? 0
+                        : StringUtils::ParseInt32(restoredIdString, 16);
+
+                AutoPtr<IBundle> options;
+                CBundle::New((IBundle**)&options);
+                String minWidthString;
+                parser->GetAttributeValue(nullStr, String("min_width"), &minWidthString);
+                if (!minWidthString.IsNull()) {
+                    options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_WIDTH,
+                            StringUtils::ParseInt32(minWidthString, 16));
+                }
+
+                String minHeightString;
+                parser->GetAttributeValue(nullStr, String("min_height"), &minHeightString);
+                if (!minHeightString.IsNull()) {
+                    options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_HEIGHT,
+                            StringUtils::ParseInt32(minHeightString, 16));
+                }
+
+                String maxWidthString;
+                parser->GetAttributeValue(nullStr, String("max_width"), &maxWidthString);
+                if (!maxWidthString.IsNull()) {
+                    options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_WIDTH,
+                            StringUtils::ParseInt32(maxWidthString, 16));
+                }
+
+                String maxHeightString;
+                parser->GetAttributeValue(nullStr, String("max_height"), &maxHeightString);
+                if (!maxHeightString.IsNull()) {
+                    options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_HEIGHT,
+                            StringUtils::ParseInt32(maxHeightString, 16));
+                }
+
+                String categoryString;
+                parser->GetAttributeValue(nullStr, String("host_category"), &categoryString);
+                if (!categoryString.IsNull()) {
+                    options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_HOST_CATEGORY,
+                            StringUtils::ParseInt32(categoryString, 16));
+                }
+                widget->mOptions = options;
+
+                parser->GetAttributeValue(nullStr, String("h"), &attrValue);
+                Int32 hostTag = StringUtils::ParseInt32(attrValue, 16);
+                String providerString;
+                parser->GetAttributeValue(nullStr, String("p"), &attrValue);
+                Int32 providerTag = (!providerString.IsNull()) ? StringUtils::ParseInt32(
+                        attrValue, 16) : TAG_UNDEFINED;
+
+                // We can match widgets with hosts and providers only after hosts
+                // and providers for all users have been loaded since the widget
+                // host and provider can be in different user profiles.
+                AutoPtr<LoadedWidgetState> loadedWidgets = new LoadedWidgetState(widget,
+                        hostTag, providerTag);
+                outLoadedWidgets->Add(TO_IINTERFACE(loadedWidgets));
+            }
+        }
+    } while (type != IXmlPullParser::END_DOCUMENT);
     //} catch (NullPointerException
     //        | NumberFormatException
     //        | XmlPullParserException
