@@ -8,12 +8,18 @@ module {
     namespace Cdma {
 
     interface ICdmaInformationRecords {
-        String IdToString(Int32 id);
+        IdToString(
+            [in] Int32 id,
+            [out] String* result);
 
         interface ICdmaInformationRecordsCdmaSignalInfoRec {
         }
 
-        CdmaSignalInfoRec(Int32 isPresent, Int32 signalType, Int32 alertPitch, Int32 signal);
+        CdmaSignalInfoRec(
+            [in] Int32 isPresent, 
+            [in] Int32 signalType, 
+            [in] Int32 alertPitch, 
+            [in] Int32 signal);
 
         interface ICdmaInformationRecordsCdmaDisplayInfoRec {
         }

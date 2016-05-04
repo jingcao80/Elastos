@@ -8,7 +8,8 @@ module {
     namespace Test {
 
     interface ITestConferenceEventPackageParser {
-        ImsConferenceState Parse();
+        Parse(
+            [out] ImsConferenceState* result);
 
     }
 

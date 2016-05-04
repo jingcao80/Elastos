@@ -8,13 +8,17 @@ module {
     namespace Cdma {
 
     interface ICdmaSmsBroadcastConfigInfo {
-        Int32 GetFromServiceCategory();
+        GetFromServiceCategory(
+            [out] Int32* result);
 
-        Int32 GetToServiceCategory();
+        GetToServiceCategory(
+            [out] Int32* result);
 
-        Int32 GetLanguage();
+        GetLanguage(
+            [out] Int32* result);
 
-        Boolean IsSelected();
+        IsSelected(
+            [out] Boolean* result);
 
     }
 

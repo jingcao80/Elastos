@@ -10,20 +10,33 @@ module {
     interface ICdmaCallTracker {
         Dispose();
 
-        RegisterForVoiceCallStarted(Handler h, Int32 what, Object obj);
+        RegisterForVoiceCallStarted(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForVoiceCallStarted(Handler h);
+        UnregisterForVoiceCallStarted(
+            [in] Handler h);
 
-        RegisterForVoiceCallEnded(Handler h, Int32 what, Object obj);
+        RegisterForVoiceCallEnded(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForVoiceCallEnded(Handler h);
+        UnregisterForVoiceCallEnded(
+            [in] Handler h);
 
-        RegisterForCallWaiting(Handler h, Int32 what, Object obj);
+        RegisterForCallWaiting(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForCallWaiting(Handler h);
+        UnregisterForCallWaiting(
+            [in] Handler h);
 
 
-        Boolean IsInEmergencyCall();
+        IsInEmergencyCall(
+            [out] Boolean* result);
 
     }
 

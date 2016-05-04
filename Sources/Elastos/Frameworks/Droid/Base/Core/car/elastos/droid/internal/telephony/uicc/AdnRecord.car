@@ -8,33 +8,51 @@ module {
     namespace Uicc {
 
     interface IAdnRecord {
-        AdnRecord CreateFromParcel(Parcel source);
+        CreateFromParcel(
+            [in] Parcel source,
+            [out] AdnRecord* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
-        AdnRecord (String alphaTag, String number);
+        AdnRecord(
+            [in] String alphaTag, 
+            [in] String number);
 
-        String GetAlphaTag();
+        GetAlphaTag(
+            [out] String* result);
 
-        String GetNumber();
+        GetNumber(
+            [out] String* result);
 
         GetEmails();
 
         GetAdditionalNumbers();
 
-        Boolean IsEmpty();
+        IsEmpty(
+            [out] Boolean* result);
 
-        Boolean HasExtendedRecord();
+        HasExtendedRecord(
+            [out] Boolean* result);
 
-        Boolean IsEqual(AdnRecord adn);
+        IsEqual(
+            [in] AdnRecord adn,
+            [out] Boolean* result);
 
-        UpdateAnrEmailArray(AdnRecord adn, Int32 emailFileNum, Int32 anrFileNum);
+        UpdateAnrEmailArray(
+            [in] AdnRecord adn, 
+            [in] Int32 emailFileNum, 
+            [in] Int32 anrFileNum);
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        BuildAdnString(Int32 recordSize);
+        BuildAdnString(
+            [in] Int32 recordSize);
 
     }
 

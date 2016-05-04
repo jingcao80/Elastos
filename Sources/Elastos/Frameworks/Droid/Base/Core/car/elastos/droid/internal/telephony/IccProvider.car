@@ -7,11 +7,17 @@ module {
     namespace Telephony {
 
     interface IIccProvider {
-        Boolean OnCreate();
+        OnCreate(
+            [out] Boolean* result);
 
-        String GetType(Uri url);
+        GetType(
+            [in] Uri url,
+            [out] String* result);
 
-        Uri Insert(Uri url, ContentValues initialValues);
+        Insert(
+            [in] Uri url, 
+            [in] ContentValues initialValues,
+            [out] Uri* result);
 
 
     }

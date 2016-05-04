@@ -23,33 +23,49 @@ module {
         interface ICatCmdMessageBrowserTerminationCauses {
         }
 
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        CatCmdMessage CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] CatCmdMessage* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
-        CommandType GetCmdType();
+        GetCmdType(
+            [out] CommandType* result);
 
-        Menu GetMenu();
+        GetMenu(
+            [out] Menu* result);
 
-        Input GeInput();
+        GeInput(
+            [out] Input* result);
 
-        TextMessage GeTextMessage();
+        GeTextMessage(
+            [out] TextMessage* result);
 
-        BrowserSettings GetBrowserSettings();
+        GetBrowserSettings(
+            [out] BrowserSettings* result);
 
-        ToneSettings GetToneSettings();
+        GetToneSettings(
+            [out] ToneSettings* result);
 
-        CallSettings GetCallSettings();
+        GetCallSettings(
+            [out] CallSettings* result);
 
-        Boolean HasIconLoadFailed();
+        HasIconLoadFailed(
+            [out] Boolean* result);
 
-        Boolean IsRefreshResetOrInit();
+        IsRefreshResetOrInit(
+            [out] Boolean* result);
 
-        SetupEventListSettings GetSetEventList();
+        GetSetEventList(
+            [out] SetupEventListSettings* result);
 
     }
 

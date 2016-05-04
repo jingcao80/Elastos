@@ -8,7 +8,9 @@ module {
     namespace DataConnection {
 
     interface IDataProfile {
-        Boolean Equals(Object o);
+        Equals(
+            [in] Object o,
+            [out] Boolean* result);
 
     }
 

@@ -8,25 +8,38 @@ module {
     namespace DataConnection {
 
     interface IApnSetting {
-        Int32 Getid();
+        Getid(
+            [out] Int32* result);
 
-        ApnSetting FromString(String data);
+        FromString(
+            [in] String data,
+            [out] ApnSetting* result);
 
-        ArrayFromString(String data);
+        ArrayFromString(
+            [in] String data);
 
-        Boolean HasMvnoParams();
+        HasMvnoParams(
+            [out] Boolean* result);
 
-        Boolean CanHandleType(String type);
+        CanHandleType(
+            [in] String type,
+            [out] Boolean* result);
 
-        Boolean Equals(Object o);
+        Equals(
+            [in] Object o,
+            [out] Boolean* result);
 
-        ApnProfileType GetApnProfileType();
+        GetApnProfileType(
+            [out] ApnProfileType* result);
 
-        Int32 GetProfileId();
+        GetProfileId(
+            [out] Int32* result);
 
-        String ToShortString();
+        ToShortString(
+            [out] String* result);
 
-        String ToHash();
+        ToHash(
+            [out] String* result);
 
     }
 

@@ -7,36 +7,58 @@ module {
     namespace Telephony {
 
     interface IDefaultPhoneNotifier {
-        NotifyPhoneState(Phone sender);
+        NotifyPhoneState(
+            [in] Phone sender);
 
-        NotifyServiceState(Phone sender);
+        NotifyServiceState(
+            [in] Phone sender);
 
-        NotifySignalStrength(Phone sender);
+        NotifySignalStrength(
+            [in] Phone sender);
 
-        NotifyMessageWaitingChanged(Phone sender);
+        NotifyMessageWaitingChanged(
+            [in] Phone sender);
 
-        NotifyCallForwardingChanged(Phone sender);
+        NotifyCallForwardingChanged(
+            [in] Phone sender);
 
-        NotifyDataActivity(Phone sender);
+        NotifyDataActivity(
+            [in] Phone sender);
 
-        NotifyDataConnectionFailed(Phone sender, String reason, String apnType);
+        NotifyDataConnectionFailed(
+            [in] Phone sender, 
+            [in] String reason, 
+            [in] String apnType);
 
-        NotifyCellLocation(Phone sender);
+        NotifyCellLocation(
+            [in] Phone sender);
 
 
 
-        NotifyDisconnectCause(Int32 cause, Int32 preciseCause);
+        NotifyDisconnectCause(
+            [in] Int32 cause, 
+            [in] Int32 preciseCause);
 
 
-        NotifyVoLteServiceStateChanged(Phone sender, VoLteServiceState lteState);
+        NotifyVoLteServiceStateChanged(
+            [in] Phone sender, 
+            [in] VoLteServiceState lteState);
 
-        State ConvertCallState(Int32 state);
+        ConvertCallState(
+            [in] Int32 state,
+            [out] State* result);
 
-        DataState ConvertDataState(Int32 state);
+        ConvertDataState(
+            [in] Int32 state,
+            [out] DataState* result);
 
-        DataActivityState ConvertDataActivityState(Int32 state);
+        ConvertDataActivityState(
+            [in] Int32 state,
+            [out] DataActivityState* result);
 
-        State ConvertPreciseCallState(Int32 state);
+        ConvertPreciseCallState(
+            [in] Int32 state,
+            [out] State* result);
 
     }
 

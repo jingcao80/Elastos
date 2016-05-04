@@ -8,9 +8,11 @@ module {
     namespace Pdu {
 
     interface INotifyRespInd {
-        Int32 GetReportAllowed();
+        GetReportAllowed(
+            [out] Int32* result);
 
-        Int32 GetStatus();
+        GetStatus(
+            [out] Int32* result);
 
         GetTransactionId();
 

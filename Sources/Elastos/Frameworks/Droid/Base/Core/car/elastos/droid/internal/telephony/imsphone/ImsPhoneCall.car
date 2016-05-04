@@ -10,12 +10,17 @@ module {
     interface IImsPhoneCall {
         Dispose();
 
-        Bundle GetExtras();
+        GetExtras(
+            [out] Bundle* result);
 
 
-        Update (ImsPhoneConnection conn, ImsCall imsCall, State state);
+        Update(
+            [in] ImsPhoneConnection conn, 
+            [in] ImsCall imsCall, 
+            [in] State state);
 
-        SwitchWith(ImsPhoneCall that);
+        SwitchWith(
+            [in] ImsPhoneCall that);
 
     }
 

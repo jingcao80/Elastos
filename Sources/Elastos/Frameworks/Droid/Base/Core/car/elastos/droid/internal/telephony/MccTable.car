@@ -7,9 +7,13 @@ module {
     namespace Telephony {
 
     interface IMccTable {
-        String DefaultTimeZoneForMcc(Int32 mcc);
+        DefaultTimeZoneForMcc(
+            [in] Int32 mcc,
+            [out] String* result);
 
-        String DefaultLanguageForMcc(Int32 mcc);
+        DefaultLanguageForMcc(
+            [in] Int32 mcc,
+            [out] String* result);
 
 
 

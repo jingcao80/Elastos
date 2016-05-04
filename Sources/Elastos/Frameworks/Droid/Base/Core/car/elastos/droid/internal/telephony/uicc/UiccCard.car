@@ -10,19 +10,33 @@ module {
     interface IUiccCard {
         Dispose();
 
-        Update(Context c, CommandsInterface ci, IccCardStatus ics);
+        Update(
+            [in] Context c, 
+            [in] CommandsInterface ci, 
+            [in] IccCardStatus ics);
 
-        CatService GetCatService();
+        GetCatService(
+            [out] CatService* result);
 
-        RegisterForAbsent(Handler h, Int32 what, Object obj);
+        RegisterForAbsent(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForAbsent(Handler h);
+        UnregisterForAbsent(
+            [in] Handler h);
 
-        RegisterForCarrierPrivilegeRulesLoaded(Handler h, Int32 what, Object obj);
+        RegisterForCarrierPrivilegeRulesLoaded(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForCarrierPrivilegeRulesLoaded(Handler h);
+        UnregisterForCarrierPrivilegeRulesLoaded(
+            [in] Handler h);
 
-        OnClick(DialogInterface dialog, Int32 which);
+        OnClick(
+            [in] DialogInterface dialog, 
+            [in] Int32 which);
 
     }
 

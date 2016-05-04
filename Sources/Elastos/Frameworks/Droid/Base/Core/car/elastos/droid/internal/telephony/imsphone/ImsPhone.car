@@ -8,63 +8,91 @@ module {
     namespace ImsPhone {
 
     interface IImsPhone {
-        CallTracker GetCallTracker();
+        GetCallTracker(
+            [out] CallTracker* result);
 
-        Boolean CanConference();
+        CanConference(
+            [out] Boolean* result);
 
-        Boolean CanDial();
+        CanDial(
+            [out] Boolean* result);
 
         Conference();
 
         ClearDisconnected();
 
-        Boolean CanTransfer();
+        CanTransfer(
+            [out] Boolean* result);
 
         ExplicitCallTransfer();
 
-        NotifySuppSvcNotification(SuppServiceNotification suppSvc);
+        NotifySuppSvcNotification(
+            [in] SuppServiceNotification suppSvc);
 
-        Boolean HandleInCallMmiCommands(String dialString);
+        HandleInCallMmiCommands(
+            [in] String dialString,
+            [out] Boolean* result);
 
-        Boolean IsInCall();
+        IsInCall(
+            [out] Boolean* result);
 
-        NotifyNewRingingConnection(Connection c);
+        NotifyNewRingingConnection(
+            [in] Connection c);
 
-        NotifyForVideoCapabilityChanged(Boolean isVideoCapable);
+        NotifyForVideoCapabilityChanged(
+            [in] Boolean isVideoCapable);
 
-        SetOnPostDialCharacter(Handler h, Int32 what, Object obj);
+        SetOnPostDialCharacter(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        SetMute(Boolean muted);
+        SetMute(
+            [in] Boolean muted);
 
-        SetUiTTYMode(Int32 uiTtyMode, Message onComplete);
+        SetUiTTYMode(
+            [in] Int32 uiTtyMode, 
+            [in] Message onComplete);
 
-        Boolean GetMute();
+        GetMute(
+            [out] Boolean* result);
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
         OnECBMEntered();
 
         OnECBMExited();
 
-        Boolean IsInEmergencyCall();
+        IsInEmergencyCall(
+            [out] Boolean* result);
 
-        Boolean IsInEcm();
+        IsInEcm(
+            [out] Boolean* result);
 
         SendEmergencyCallbackModeChange();
 
         ExitEmergencyCallbackMode();
 
-        HandleTimerInEmergencyCallbackMode(Int32 action);
+        HandleTimerInEmergencyCallbackMode(
+            [in] Int32 action);
 
-        SetOnEcbModeExitResponse(Handler h, Int32 what, Object obj);
+        SetOnEcbModeExitResponse(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnsetOnEcbModeExitResponse(Handler h);
+        UnsetOnEcbModeExitResponse(
+            [in] Handler h);
 
-        Boolean IsVolteEnabled();
+        IsVolteEnabled(
+            [out] Boolean* result);
 
-        Boolean IsVtEnabled();
+        IsVtEnabled(
+            [out] Boolean* result);
 
     }
 

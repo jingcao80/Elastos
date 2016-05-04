@@ -7,13 +7,17 @@ module {
     namespace Telephony {
 
     interface IUUSInfo {
-        Int32 GetDcs();
+        GetDcs(
+            [out] Int32* result);
 
-        SetDcs(Int32 uusDcs);
+        SetDcs(
+            [in] Int32 uusDcs);
 
-        Int32 GetType();
+        GetType(
+            [out] Int32* result);
 
-        SetType(Int32 uusType);
+        SetType(
+            [in] Int32 uusType);
 
         GetUserData();
 

@@ -6,39 +6,58 @@ module {
     namespace Telephony {
 
     interface ISmsCbMessage {
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        SmsCbMessage CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] SmsCbMessage* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
-        Int32 GetGeographicalScope();
+        GetGeographicalScope(
+            [out] Int32* result);
 
-        Int32 GetSerialNumber();
+        GetSerialNumber(
+            [out] Int32* result);
 
-        SmsCbLocation GetLocation();
+        GetLocation(
+            [out] SmsCbLocation* result);
 
-        Int32 GetServiceCategory();
+        GetServiceCategory(
+            [out] Int32* result);
 
-        String GetLanguageCode();
+        GetLanguageCode(
+            [out] String* result);
 
-        String GetMessageBody();
+        GetMessageBody(
+            [out] String* result);
 
-        Int32 GetMessageFormat();
+        GetMessageFormat(
+            [out] Int32* result);
 
-        Int32 GetMessagePriority();
+        GetMessagePriority(
+            [out] Int32* result);
 
-        SmsCbEtwsInfo GetEtwsWarningInfo();
+        GetEtwsWarningInfo(
+            [out] SmsCbEtwsInfo* result);
 
-        SmsCbCmasInfo GetCmasWarningInfo();
+        GetCmasWarningInfo(
+            [out] SmsCbCmasInfo* result);
 
-        Boolean IsEmergencyMessage();
+        IsEmergencyMessage(
+            [out] Boolean* result);
 
-        Boolean IsEtwsMessage();
+        IsEtwsMessage(
+            [out] Boolean* result);
 
-        Boolean IsCmasMessage();
+        IsCmasMessage(
+            [out] Boolean* result);
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
     }
 

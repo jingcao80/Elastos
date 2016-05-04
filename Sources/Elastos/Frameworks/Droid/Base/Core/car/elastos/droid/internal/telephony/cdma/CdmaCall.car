@@ -8,13 +8,17 @@ module {
     namespace Cdma {
 
     interface ICdmaCall {
-        CdmaCall (CdmaCallTracker owner);
+        CdmaCall(
+            [in] CdmaCallTracker owner);
 
         Dispose();
 
-        Boolean IsMultiparty();
+        IsMultiparty(
+            [out] Boolean* result);
 
-        Update (CdmaConnection conn, DriverCall dc);
+        Update(
+            [in] CdmaConnection conn, 
+            [in] DriverCall dc);
 
         ClearDisconnected();
 

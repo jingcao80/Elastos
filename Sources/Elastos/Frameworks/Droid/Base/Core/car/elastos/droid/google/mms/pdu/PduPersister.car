@@ -8,21 +8,31 @@ module {
     namespace Pdu {
 
     interface IPduPersister {
-        PduPersister GetPduPersister(Context context);
+        GetPduPersister(
+            [in] Context context,
+            [out] PduPersister* result);
 
 
 
 
-        String ConvertUriToPath(Context context, Uri uri);
+        ConvertUriToPath(
+            [in] Context context, 
+            [in] Uri uri,
+            [out] String* result);
 
-        UpdateHeaders(Uri uri, SendReq sendReq);
+        UpdateHeaders(
+            [in] Uri uri, 
+            [in] SendReq sendReq);
 
 
-        GetBytes(String data);
+        GetBytes(
+            [in] String data);
 
         Release();
 
-        Cursor GetPendingMessages(Int64 dueTime);
+        GetPendingMessages(
+            [in] Int64 dueTime,
+            [out] Cursor* result);
 
     }
 

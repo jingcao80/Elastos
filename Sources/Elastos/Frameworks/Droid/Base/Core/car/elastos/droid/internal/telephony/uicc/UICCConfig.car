@@ -8,13 +8,17 @@ module {
     namespace Uicc {
 
     interface IUICCConfig {
-        String GetImsi();
+        GetImsi(
+            [out] String* result);
 
-        SetImsi(String lImsi);
+        SetImsi(
+            [in] String lImsi);
 
-        Int32 GetMncLength();
+        GetMncLength(
+            [out] Int32* result);
 
-        SetMncLength(Int32 lMncLength);
+        SetMncLength(
+            [in] Int32 lMncLength);
 
     }
 

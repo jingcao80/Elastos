@@ -6,59 +6,91 @@ module {
     namespace Telephony {
 
     interface ICellBroadcastMessage {
-        SetSubId(Int64 subId);
+        SetSubId(
+            [in] Int64 subId);
 
-        Int64 GetSubId();
+        GetSubId(
+            [out] Int64* result);
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
-        WriteToParcel(Parcel out, Int32 flags);
+        WriteToParcel(
+            [in] Parcel out, 
+            [in] Int32 flags);
 
-        CellBroadcastMessage CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] CellBroadcastMessage* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
-        CellBroadcastMessage CreateFromCursor(Cursor cursor);
+        CreateFromCursor(
+            [in] Cursor cursor,
+            [out] CellBroadcastMessage* result);
 
-        ContentValues GetContentValues();
+        GetContentValues(
+            [out] ContentValues* result);
 
-        SetIsRead(Boolean isRead);
+        SetIsRead(
+            [in] Boolean isRead);
 
-        String GetLanguageCode();
+        GetLanguageCode(
+            [out] String* result);
 
-        Int32 GetServiceCategory();
+        GetServiceCategory(
+            [out] Int32* result);
 
-        Int64 GetDeliveryTime();
+        GetDeliveryTime(
+            [out] Int64* result);
 
-        String GetMessageBody();
+        GetMessageBody(
+            [out] String* result);
 
-        Boolean IsRead();
+        IsRead(
+            [out] Boolean* result);
 
-        Int32 GetSerialNumber();
+        GetSerialNumber(
+            [out] Int32* result);
 
-        SmsCbCmasInfo GetCmasWarningInfo();
+        GetCmasWarningInfo(
+            [out] SmsCbCmasInfo* result);
 
-        SmsCbEtwsInfo GetEtwsWarningInfo();
+        GetEtwsWarningInfo(
+            [out] SmsCbEtwsInfo* result);
 
-        Boolean IsPublicAlertMessage();
+        IsPublicAlertMessage(
+            [out] Boolean* result);
 
-        Boolean IsEmergencyAlertMessage();
+        IsEmergencyAlertMessage(
+            [out] Boolean* result);
 
-        Boolean IsEtwsMessage();
+        IsEtwsMessage(
+            [out] Boolean* result);
 
-        Boolean IsCmasMessage();
+        IsCmasMessage(
+            [out] Boolean* result);
 
-        Int32 GetCmasMessageClass();
+        GetCmasMessageClass(
+            [out] Int32* result);
 
-        Boolean IsEtwsPopupAlert();
+        IsEtwsPopupAlert(
+            [out] Boolean* result);
 
-        Boolean IsEtwsEmergencyUserAlert();
+        IsEtwsEmergencyUserAlert(
+            [out] Boolean* result);
 
-        Boolean IsEtwsTestMessage();
+        IsEtwsTestMessage(
+            [out] Boolean* result);
 
-        String GetDateString(Context context);
+        GetDateString(
+            [in] Context context,
+            [out] String* result);
 
-        String GetSpokenDateString(Context context);
+        GetSpokenDateString(
+            [in] Context context,
+            [out] String* result);
 
     }
 

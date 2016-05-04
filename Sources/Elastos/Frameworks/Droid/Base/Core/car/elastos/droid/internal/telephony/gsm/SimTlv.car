@@ -8,11 +8,14 @@ module {
     namespace Gsm {
 
     interface ISimTlv {
-        Boolean NextObject();
+        NextObject(
+            [out] Boolean* result);
 
-        Boolean IsValidObject();
+        IsValidObject(
+            [out] Boolean* result);
 
-        Int32 GetTag();
+        GetTag(
+            [out] Int32* result);
 
         GetData();
 

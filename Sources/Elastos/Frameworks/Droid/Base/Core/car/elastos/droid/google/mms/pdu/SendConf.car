@@ -10,7 +10,8 @@ module {
     interface ISendConf {
         GetMessageId();
 
-        Int32 GetResponseStatus();
+        GetResponseStatus(
+            [out] Int32* result);
 
         GetTransactionId();
 

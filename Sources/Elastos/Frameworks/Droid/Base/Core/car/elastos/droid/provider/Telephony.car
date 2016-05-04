@@ -7,9 +7,13 @@ module {
 
     interface ITelephony {
         interface ITelephonySms {
-            String GetDefaultSmsPackage(Context context);
+        GetDefaultSmsPackage(
+            [in] Context context,
+            [out] String* result);
 
-            Boolean IsOutgoingFolder(Int32 messageType);
+        IsOutgoingFolder(
+            [in] Int32 messageType,
+            [out] Boolean* result);
 
         interface ITelephonySmsInbox {
         }
@@ -17,16 +21,25 @@ module {
         }
 
         interface ITelephonyThreads {
-            Int64 GetOrCreateThreadId(Context context, String recipient);
+        GetOrCreateThreadId(
+            [in] Context context, 
+            [in] String recipient,
+            [out] Int64* result);
 
         }
 
         interface ITelephonyMms {
-            String ExtractAddrSpec(String address);
+        ExtractAddrSpec(
+            [in] String address,
+            [out] String* result);
 
-            Boolean IsEmailAddress(String address);
+        IsEmailAddress(
+            [in] String address,
+            [out] Boolean* result);
 
-            Boolean IsPhoneNumber(String number);
+        IsPhoneNumber(
+            [in] String number,
+            [out] Boolean* result);
 
         interface ITelephonyMmsInbox {
         }

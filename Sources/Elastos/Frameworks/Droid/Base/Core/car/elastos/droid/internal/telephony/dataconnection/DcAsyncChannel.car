@@ -8,49 +8,74 @@ module {
     namespace DataConnection {
 
     interface IDcAsyncChannel {
-        LinkPropertyChangeAction FromInt(Int32 value);
+        FromInt(
+            [in] Int32 value,
+            [out] LinkPropertyChangeAction* result);
 
         ReqIsInactive();
 
-        Boolean RspIsInactive(Message response);
+        RspIsInactive(
+            [in] Message response,
+            [out] Boolean* result);
 
-        Boolean IsInactiveSync();
+        IsInactiveSync(
+            [out] Boolean* result);
 
         ReqCid();
 
-        Int32 RspCid(Message response);
+        RspCid(
+            [in] Message response,
+            [out] Int32* result);
 
-        Int32 GetCidSync();
+        GetCidSync(
+            [out] Int32* result);
 
         ReqApnSetting();
 
-        ApnSetting RspApnSetting(Message response);
+        RspApnSetting(
+            [in] Message response,
+            [out] ApnSetting* result);
 
-        ApnSetting GetApnSettingSync();
+        GetApnSettingSync(
+            [out] ApnSetting* result);
 
         ReqLinkProperties();
 
-        LinkProperties RspLinkProperties(Message response);
+        RspLinkProperties(
+            [in] Message response,
+            [out] LinkProperties* result);
 
-        LinkProperties GetLinkPropertiesSync();
+        GetLinkPropertiesSync(
+            [out] LinkProperties* result);
 
-        ReqSetLinkPropertiesHttpProxy(ProxyInfo proxy);
+        ReqSetLinkPropertiesHttpProxy(
+            [in] ProxyInfo proxy);
 
-        SetLinkPropertiesHttpProxySync(ProxyInfo proxy);
+        SetLinkPropertiesHttpProxySync(
+            [in] ProxyInfo proxy);
 
         ReqNetworkCapabilities();
 
-        NetworkCapabilities RspNetworkCapabilities(Message response);
+        RspNetworkCapabilities(
+            [in] Message response,
+            [out] NetworkCapabilities* result);
 
-        NetworkCapabilities GetNetworkCapabilitiesSync();
+        GetNetworkCapabilitiesSync(
+            [out] NetworkCapabilities* result);
 
         ReqReset();
 
-        TearDown(ApnContext apnContext, String reason, Message onCompletedMsg);
+        TearDown(
+            [in] ApnContext apnContext, 
+            [in] String reason, 
+            [in] Message onCompletedMsg);
 
-        TearDownAll(String reason, Message onCompletedMsg);
+        TearDownAll(
+            [in] String reason, 
+            [in] Message onCompletedMsg);
 
-        Int32 GetDataConnectionIdSync();
+        GetDataConnectionIdSync(
+            [out] Int32* result);
 
         GetPcscfAddr();
 

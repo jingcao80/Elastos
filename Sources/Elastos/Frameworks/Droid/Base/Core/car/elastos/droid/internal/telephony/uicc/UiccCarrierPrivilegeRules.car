@@ -8,15 +8,25 @@ module {
     namespace Uicc {
 
     interface IUiccCarrierPrivilegeRules {
-        Boolean AreCarrierPriviligeRulesLoaded();
+        AreCarrierPriviligeRulesLoaded(
+            [out] Boolean* result);
 
-        Int32 GetCarrierPrivilegeStatus(Signature signature, String packageName);
+        GetCarrierPrivilegeStatus(
+            [in] Signature signature, 
+            [in] String packageName,
+            [out] Int32* result);
 
-        Int32 GetCarrierPrivilegeStatus(PackageManager packageManager, String packageName);
+        GetCarrierPrivilegeStatus(
+            [in] PackageManager packageManager, 
+            [in] String packageName,
+            [out] Int32* result);
 
-        Int32 GetCarrierPrivilegeStatusForCurrentTransaction(PackageManager packageManager);
+        GetCarrierPrivilegeStatusForCurrentTransaction(
+            [in] PackageManager packageManager,
+            [out] Int32* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
     }
 

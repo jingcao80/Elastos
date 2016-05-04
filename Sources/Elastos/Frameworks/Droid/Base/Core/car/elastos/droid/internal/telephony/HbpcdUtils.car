@@ -7,9 +7,16 @@ module {
     namespace Telephony {
 
     interface IHbpcdUtils {
-        Int32 GetMcc(Int32 sid, Int32 tz, Int32 DSTflag, Boolean isNitzTimeZone);
+        GetMcc(
+            [in] Int32 sid, 
+            [in] Int32 tz, 
+            [in] Int32 DSTflag, 
+            [in] Boolean isNitzTimeZone,
+            [out] Int32* result);
 
-        String GetIddByMcc(Int32 mcc);
+        GetIddByMcc(
+            [in] Int32 mcc,
+            [out] String* result);
 
     }
 

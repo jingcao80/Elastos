@@ -7,37 +7,51 @@ module {
     namespace Telephony {
 
     interface ISmsMessageBase {
-        String GetServiceCenterAddress();
+        GetServiceCenterAddress(
+            [out] String* result);
 
-        String GetOriginatingAddress();
+        GetOriginatingAddress(
+            [out] String* result);
 
-        String GetDisplayOriginatingAddress();
+        GetDisplayOriginatingAddress(
+            [out] String* result);
 
-        String GetMessageBody();
+        GetMessageBody(
+            [out] String* result);
 
-        String GetDisplayMessageBody();
+        GetDisplayMessageBody(
+            [out] String* result);
 
-        String GetPseudoSubject();
+        GetPseudoSubject(
+            [out] String* result);
 
-        Int64 GetTimestampMillis();
+        GetTimestampMillis(
+            [out] Int64* result);
 
-        Boolean IsEmail();
+        IsEmail(
+            [out] Boolean* result);
 
-        String GetEmailBody();
+        GetEmailBody(
+            [out] String* result);
 
-        String GetEmailFrom();
+        GetEmailFrom(
+            [out] String* result);
 
         GetUserData();
 
-        SmsHeader GetUserDataHeader();
+        GetUserDataHeader(
+            [out] SmsHeader* result);
 
         GetPdu();
 
-        Int32 GetStatusOnIcc();
+        GetStatusOnIcc(
+            [out] Int32* result);
 
-        Int32 GetIndexOnIcc();
+        GetIndexOnIcc(
+            [out] Int32* result);
 
-        String GetRecipientAddress();
+        GetRecipientAddress(
+            [out] String* result);
 
     }
 

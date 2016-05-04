@@ -6,27 +6,45 @@ module {
     namespace Telephony {
 
     interface ISmsCbLocation {
-        String GetPlmn();
+        GetPlmn(
+            [out] String* result);
 
-        Int32 GetLac();
+        GetLac(
+            [out] Int32* result);
 
-        Int32 GetCid();
+        GetCid(
+            [out] Int32* result);
 
-        Int32 HashCode();
+        HashCode(
+            [out] Int32* result);
 
-        Boolean Equals(Object o);
+        Equals(
+            [in] Object o,
+            [out] Boolean* result);
 
-        Boolean IsInLocationArea(SmsCbLocation area);
+        IsInLocationArea(
+            [in] SmsCbLocation area,
+            [out] Boolean* result);
 
-        Boolean IsInLocationArea(String plmn, Int32 lac, Int32 cid);
+        IsInLocationArea(
+            [in] String plmn, 
+            [in] Int32 lac, 
+            [in] Int32 cid,
+            [out] Boolean* result);
 
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        SmsCbLocation CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] SmsCbLocation* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
     }
 

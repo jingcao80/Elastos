@@ -10,27 +10,35 @@ module {
     interface ISendReq {
         GetBcc();
 
-        AddBcc(EncodedStringValue value);
+        AddBcc(
+            [in] EncodedStringValue value);
 
         GetCc();
 
-        AddCc(EncodedStringValue value);
+        AddCc(
+            [in] EncodedStringValue value);
 
         GetContentType();
 
-        Int32 GetDeliveryReport();
+        GetDeliveryReport(
+            [out] Int32* result);
 
-        Int64 GetExpiry();
+        GetExpiry(
+            [out] Int64* result);
 
-        SetExpiry(Int64 value);
+        SetExpiry(
+            [in] Int64 value);
 
-        Int64 GetMessageSize();
+        GetMessageSize(
+            [out] Int64* result);
 
-        SetMessageSize(Int64 value);
+        SetMessageSize(
+            [in] Int64 value);
 
         GetMessageClass();
 
-        Int32 GetReadReport();
+        GetReadReport(
+            [out] Int32* result);
 
         GetTransactionId();
 

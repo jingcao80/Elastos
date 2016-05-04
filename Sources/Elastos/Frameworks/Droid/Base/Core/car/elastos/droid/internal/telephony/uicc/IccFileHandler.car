@@ -10,25 +10,50 @@ module {
     interface IIccFileHandler {
         Dispose();
 
-        LoadEFLinearFixed(Int32 fileid, String path, Int32 recordNum, Message onLoaded);
+        LoadEFLinearFixed(
+            [in] Int32 fileid, 
+            [in] String path, 
+            [in] Int32 recordNum, 
+            [in] Message onLoaded);
 
-        LoadEFLinearFixed(Int32 fileid, Int32 recordNum, Message onLoaded);
+        LoadEFLinearFixed(
+            [in] Int32 fileid, 
+            [in] Int32 recordNum, 
+            [in] Message onLoaded);
 
-        LoadEFImgLinearFixed(Int32 recordNum, Message onLoaded);
+        LoadEFImgLinearFixed(
+            [in] Int32 recordNum, 
+            [in] Message onLoaded);
 
-        GetEFLinearRecordSize(Int32 fileid, String path, Message onLoaded);
+        GetEFLinearRecordSize(
+            [in] Int32 fileid, 
+            [in] String path, 
+            [in] Message onLoaded);
 
-        GetEFLinearRecordSize(Int32 fileid, Message onLoaded);
+        GetEFLinearRecordSize(
+            [in] Int32 fileid, 
+            [in] Message onLoaded);
 
-        LoadEFLinearFixedAll(Int32 fileid, Message onLoaded);
+        LoadEFLinearFixedAll(
+            [in] Int32 fileid, 
+            [in] Message onLoaded);
 
-        LoadEFLinearFixedAll(Int32 fileid, String path, Message onLoaded);
+        LoadEFLinearFixedAll(
+            [in] Int32 fileid, 
+            [in] String path, 
+            [in] Message onLoaded);
 
-        LoadEFTransparent(Int32 fileid, Message onLoaded);
+        LoadEFTransparent(
+            [in] Int32 fileid, 
+            [in] Message onLoaded);
 
-        LoadEFTransparent(Int32 fileid, Int32 size, Message onLoaded);
+        LoadEFTransparent(
+            [in] Int32 fileid, 
+            [in] Int32 size, 
+            [in] Message onLoaded);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
     }
 
     }//Uicc

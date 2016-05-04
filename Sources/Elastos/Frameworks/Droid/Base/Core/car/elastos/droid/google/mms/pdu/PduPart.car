@@ -10,17 +10,22 @@ module {
     interface IPduPart {
         GetData();
 
-        Int32 GetDataLength();
+        GetDataLength(
+            [out] Int32* result);
 
-        SetDataUri(Uri uri);
+        SetDataUri(
+            [in] Uri uri);
 
-        Uri GetDataUri();
+        GetDataUri(
+            [out] Uri* result);
 
         GetContentId();
 
-        SetCharset(Int32 charset);
+        SetCharset(
+            [in] Int32 charset);
 
-        Int32 GetCharset();
+        GetCharset(
+            [out] Int32* result);
 
         GetContentLocation();
 
@@ -34,7 +39,8 @@ module {
 
         GetFilename();
 
-        String GenerateLocation();
+        GenerateLocation(
+            [out] String* result);
 
     }
 

@@ -7,9 +7,11 @@ module {
     namespace Telephony {
 
     interface IModemBindingPolicyHandler {
-        ModemBindingPolicyHandler GetInstance();
+        GetInstance(
+            [out] ModemBindingPolicyHandler* result);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
         UpdatePrefNwTypeIfRequired();
 

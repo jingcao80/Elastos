@@ -8,207 +8,391 @@ module {
     namespace Test {
 
     interface ISimulatedCommands {
-        GetIccCardStatus(Message result);
+        GetIccCardStatus(
+            [in] Message result);
 
-        SupplyIccPin(String pin, Message result);
+        SupplyIccPin(
+            [in] String pin, 
+            [in] Message result);
 
-        SupplyIccPuk(String puk, String newPin, Message result);
+        SupplyIccPuk(
+            [in] String puk, 
+            [in] String newPin, 
+            [in] Message result);
 
-        SupplyIccPin2(String pin2, Message result);
+        SupplyIccPin2(
+            [in] String pin2, 
+            [in] Message result);
 
-        SupplyIccPuk2(String puk2, String newPin2, Message result);
+        SupplyIccPuk2(
+            [in] String puk2, 
+            [in] String newPin2, 
+            [in] Message result);
 
-        ChangeIccPin(String oldPin, String newPin, Message result);
+        ChangeIccPin(
+            [in] String oldPin, 
+            [in] String newPin, 
+            [in] Message result);
 
-        ChangeIccPin2(String oldPin2, String newPin2, Message result);
+        ChangeIccPin2(
+            [in] String oldPin2, 
+            [in] String newPin2, 
+            [in] Message result);
 
-        SupplyDepersonalization(String netpin, String type, Message result);
+        SupplyDepersonalization(
+            [in] String netpin, 
+            [in] String type, 
+            [in] Message result);
 
-        GetCurrentCalls (Message result);
+        GetCurrentCalls(
+            [in] Message result);
 
-        GetPDPContextList(Message result);
+        GetPDPContextList(
+            [in] Message result);
 
-        GetDataCallList(Message result);
+        GetDataCallList(
+            [in] Message result);
 
-        Dial (String address, Int32 clirMode, Message result);
+        Dial(
+            [in] String address, 
+            [in] Int32 clirMode, 
+            [in] Message result);
 
-        Dial(String address, Int32 clirMode, UUSInfo uusInfo, Message result);
+        Dial(
+            [in] String address, 
+            [in] Int32 clirMode, 
+            [in] UUSInfo uusInfo, 
+            [in] Message result);
 
-        GetIMSI(Message result);
+        GetIMSI(
+            [in] Message result);
 
-        GetIMSIForApp(String aid, Message result);
+        GetIMSIForApp(
+            [in] String aid, 
+            [in] Message result);
 
-        GetIMEI(Message result);
+        GetIMEI(
+            [in] Message result);
 
-        GetIMEISV(Message result);
+        GetIMEISV(
+            [in] Message result);
 
-        HangupConnection (Int32 gsmIndex, Message result);
+        HangupConnection(
+            [in] Int32 gsmIndex, 
+            [in] Message result);
 
-        HangupWaitingOrBackground (Message result);
+        HangupWaitingOrBackground(
+            [in] Message result);
 
-        HangupForegroundResumeBackground (Message result);
+        HangupForegroundResumeBackground(
+            [in] Message result);
 
-        SwitchWaitingOrHoldingAndActive (Message result);
+        SwitchWaitingOrHoldingAndActive(
+            [in] Message result);
 
-        Conference (Message result);
+        Conference(
+            [in] Message result);
 
-        ExplicitCallTransfer (Message result);
+        ExplicitCallTransfer(
+            [in] Message result);
 
-        SeparateConnection (Int32 gsmIndex, Message result);
+        SeparateConnection(
+            [in] Int32 gsmIndex, 
+            [in] Message result);
 
-        AcceptCall (Message result);
+        AcceptCall(
+            [in] Message result);
 
-        RejectCall (Message result);
+        RejectCall(
+            [in] Message result);
 
-        GetLastCallFailCause (Message result);
+        GetLastCallFailCause(
+            [in] Message result);
 
-        GetLastPdpFailCause (Message result);
+        GetLastPdpFailCause(
+            [in] Message result);
 
-        GetLastDataCallFailCause(Message result);
+        GetLastDataCallFailCause(
+            [in] Message result);
 
-        SetMute (Boolean enableMute, Message result);
+        SetMute(
+            [in] Boolean enableMute, 
+            [in] Message result);
 
-        SetBandMode (Int32 bandMode, Message result);
+        SetBandMode(
+            [in] Int32 bandMode, 
+            [in] Message result);
 
-        QueryAvailableBandMode (Message result);
+        QueryAvailableBandMode(
+            [in] Message result);
 
-        SendTerminalResponse(String contents, Message response);
+        SendTerminalResponse(
+            [in] String contents, 
+            [in] Message response);
 
-        SendEnvelope(String contents, Message response);
+        SendEnvelope(
+            [in] String contents, 
+            [in] Message response);
 
-        SendEnvelopeWithStatus(String contents, Message response);
+        SendEnvelopeWithStatus(
+            [in] String contents, 
+            [in] Message response);
 
-        GetVoiceRegistrationState (Message result);
+        GetVoiceRegistrationState(
+            [in] Message result);
 
-        GetDataRegistrationState (Message result);
+        GetDataRegistrationState(
+            [in] Message result);
 
-        GetOperator(Message result);
+        GetOperator(
+            [in] Message result);
 
-        SendDtmf(Char32 c, Message result);
+        SendDtmf(
+            [in] Char32 c, 
+            [in] Message result);
 
-        StartDtmf(Char32 c, Message result);
+        StartDtmf(
+            [in] Char32 c, 
+            [in] Message result);
 
-        StopDtmf(Message result);
+        StopDtmf(
+            [in] Message result);
 
-        SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message result);
+        SendBurstDtmf(
+            [in] String dtmfString, 
+            [in] Int32 on, 
+            [in] Int32 off, 
+            [in] Message result);
 
-        SendSMS (String smscPDU, String pdu, Message result);
+        SendSMS(
+            [in] String smscPDU, 
+            [in] String pdu, 
+            [in] Message result);
 
-        DeleteSmsOnSim(Int32 index, Message response);
+        DeleteSmsOnSim(
+            [in] Int32 index, 
+            [in] Message response);
 
-        DeleteSmsOnRuim(Int32 index, Message response);
+        DeleteSmsOnRuim(
+            [in] Int32 index, 
+            [in] Message response);
 
-        WriteSmsToSim(Int32 status, String smsc, String pdu, Message response);
+        WriteSmsToSim(
+            [in] Int32 status, 
+            [in] String smsc, 
+            [in] String pdu, 
+            [in] Message response);
 
-        WriteSmsToRuim(Int32 status, String pdu, Message response);
+        WriteSmsToRuim(
+            [in] Int32 status, 
+            [in] String pdu, 
+            [in] Message response);
 
-        DeactivateDataCall(Int32 cid, Int32 reason, Message result);
+        DeactivateDataCall(
+            [in] Int32 cid, 
+            [in] Int32 reason, 
+            [in] Message result);
 
-        GetPreferredNetworkType(Message result);
+        GetPreferredNetworkType(
+            [in] Message result);
 
-        GetNeighboringCids(Message result);
+        GetNeighboringCids(
+            [in] Message result);
 
-        SetLocationUpdates(Boolean enable, Message response);
+        SetLocationUpdates(
+            [in] Boolean enable, 
+            [in] Message response);
 
-        GetSmscAddress(Message result);
+        GetSmscAddress(
+            [in] Message result);
 
-        SetSmscAddress(String address, Message result);
+        SetSmscAddress(
+            [in] String address, 
+            [in] Message result);
 
-        ReportSmsMemoryStatus(Boolean available, Message result);
+        ReportSmsMemoryStatus(
+            [in] Boolean available, 
+            [in] Message result);
 
-        ReportStkServiceIsRunning(Message result);
+        ReportStkServiceIsRunning(
+            [in] Message result);
 
-        GetCdmaSubscriptionSource(Message result);
+        GetCdmaSubscriptionSource(
+            [in] Message result);
 
-        SetRadioPower(Boolean on, Message result);
+        SetRadioPower(
+            [in] Boolean on, 
+            [in] Message result);
 
-        AcknowledgeLastIncomingGsmSms(Boolean success, Int32 cause, Message result);
+        AcknowledgeLastIncomingGsmSms(
+            [in] Boolean success, 
+            [in] Int32 cause, 
+            [in] Message result);
 
-        AcknowledgeLastIncomingCdmaSms(Boolean success, Int32 cause, Message result);
+        AcknowledgeLastIncomingCdmaSms(
+            [in] Boolean success, 
+            [in] Int32 cause, 
+            [in] Message result);
 
-        QueryCLIP(Message response);
+        QueryCLIP(
+            [in] Message response);
 
-        SetNetworkSelectionModeAutomatic(Message result);
+        SetNetworkSelectionModeAutomatic(
+            [in] Message result);
 
-        GetAvailableNetworks(Message result);
+        GetAvailableNetworks(
+            [in] Message result);
 
-        TriggerIncomingStkCcAlpha(String alphaString);
+        TriggerIncomingStkCcAlpha(
+            [in] String alphaString);
 
-        SendStkCcAplha(String alphaString);
+        SendStkCcAplha(
+            [in] String alphaString);
 
-        TriggerIncomingUssd(String statusCode, String message);
+        TriggerIncomingUssd(
+            [in] String statusCode, 
+            [in] String message);
 
-        SendUSSD (String ussdString, Message result);
+        SendUSSD(
+            [in] String ussdString, 
+            [in] Message result);
 
-        CancelPendingUssd (Message response);
+        CancelPendingUssd(
+            [in] Message response);
 
-        ResetRadio(Message result);
+        ResetRadio(
+            [in] Message result);
 
-        TriggerSsn(Int32 type, Int32 code);
+        TriggerSsn(
+            [in] Int32 type, 
+            [in] Int32 code);
 
-        QueryCdmaRoamingPreference(Message response);
+        QueryCdmaRoamingPreference(
+            [in] Message response);
 
-        SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response);
+        SetCdmaRoamingPreference(
+            [in] Int32 cdmaRoamingType, 
+            [in] Message response);
 
-        GetPreferredVoicePrivacy(Message result);
+        GetPreferredVoicePrivacy(
+            [in] Message result);
 
-        SetPreferredVoicePrivacy(Boolean enable, Message result);
+        SetPreferredVoicePrivacy(
+            [in] Boolean enable, 
+            [in] Message result);
 
-        SetTTYMode(Int32 ttyMode, Message response);
+        SetTTYMode(
+            [in] Int32 ttyMode, 
+            [in] Message response);
 
-        QueryTTYMode(Message response);
+        QueryTTYMode(
+            [in] Message response);
 
-        SendCDMAFeatureCode(String FeatureCode, Message response);
+        SendCDMAFeatureCode(
+            [in] String FeatureCode, 
+            [in] Message response);
 
-        SetCdmaBroadcastActivation(Boolean activate, Message response);
+        SetCdmaBroadcastActivation(
+            [in] Boolean activate, 
+            [in] Message response);
 
-        GetCdmaBroadcastConfig(Message response);
+        GetCdmaBroadcastConfig(
+            [in] Message response);
 
-        ForceDataDormancy(Message response);
+        ForceDataDormancy(
+            [in] Message response);
 
-        SetGsmBroadcastActivation(Boolean activate, Message response);
+        SetGsmBroadcastActivation(
+            [in] Boolean activate, 
+            [in] Message response);
 
-        GetGsmBroadcastConfig(Message response);
+        GetGsmBroadcastConfig(
+            [in] Message response);
 
-        SupplyIccPinForApp(String pin, String aid, Message response);
+        SupplyIccPinForApp(
+            [in] String pin, 
+            [in] String aid, 
+            [in] Message response);
 
-        SupplyIccPukForApp(String puk, String newPin, String aid, Message response);
+        SupplyIccPukForApp(
+            [in] String puk, 
+            [in] String newPin, 
+            [in] String aid, 
+            [in] Message response);
 
-        SupplyIccPin2ForApp(String pin2, String aid, Message response);
+        SupplyIccPin2ForApp(
+            [in] String pin2, 
+            [in] String aid, 
+            [in] Message response);
 
-        SupplyIccPuk2ForApp(String puk2, String newPin2, String aid, Message response);
+        SupplyIccPuk2ForApp(
+            [in] String puk2, 
+            [in] String newPin2, 
+            [in] String aid, 
+            [in] Message response);
 
-        ChangeIccPinForApp(String oldPin, String newPin, String aidPtr, Message response);
+        ChangeIccPinForApp(
+            [in] String oldPin, 
+            [in] String newPin, 
+            [in] String aidPtr, 
+            [in] Message response);
 
-        RequestIsimAuthentication(String nonce, Message response);
+        RequestIsimAuthentication(
+            [in] String nonce, 
+            [in] Message response);
 
-        RequestIccSimAuthentication(Int32 authContext, String data, String aid, Message response);
+        RequestIccSimAuthentication(
+            [in] Int32 authContext, 
+            [in] String data, 
+            [in] String aid, 
+            [in] Message response);
 
-        GetVoiceRadioTechnology(Message response);
+        GetVoiceRadioTechnology(
+            [in] Message response);
 
-        GetCellInfoList(Message response);
+        GetCellInfoList(
+            [in] Message response);
 
-        SetCellInfoListRate(Int32 rateInMillis, Message response);
+        SetCellInfoListRate(
+            [in] Int32 rateInMillis, 
+            [in] Message response);
 
-        GetImsRegistrationState(Message response);
+        GetImsRegistrationState(
+            [in] Message response);
 
-        IccOpenLogicalChannel(String AID, Message response);
+        IccOpenLogicalChannel(
+            [in] String AID, 
+            [in] Message response);
 
-        IccCloseLogicalChannel(Int32 channel, Message response);
+        IccCloseLogicalChannel(
+            [in] Int32 channel, 
+            [in] Message response);
 
-        GetAtr(Message response);
+        GetAtr(
+            [in] Message response);
 
-        NvReadItem(Int32 itemID, Message response);
+        NvReadItem(
+            [in] Int32 itemID, 
+            [in] Message response);
 
-        NvWriteItem(Int32 itemID, String itemValue, Message response);
+        NvWriteItem(
+            [in] Int32 itemID, 
+            [in] String itemValue, 
+            [in] Message response);
 
-        NvResetConfig(Int32 resetType, Message response);
+        NvResetConfig(
+            [in] Int32 resetType, 
+            [in] Message response);
 
-        GetHardwareConfig(Message result);
+        GetHardwareConfig(
+            [in] Message result);
 
-        RequestShutdown(Message result);
+        RequestShutdown(
+            [in] Message result);
 
-        Boolean NeedsOldRilFeature(String feature);
+        NeedsOldRilFeature(
+            [in] String feature,
+            [out] Boolean* result);
 
     }
 

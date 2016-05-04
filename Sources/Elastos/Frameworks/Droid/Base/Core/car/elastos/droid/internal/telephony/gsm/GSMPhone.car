@@ -13,99 +13,152 @@ module {
 
         RemoveReferences();
 
-        CellLocation GetCellLocation();
+        GetCellLocation(
+            [out] CellLocation* result);
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        Int32 GetPhoneType();
+        GetPhoneType(
+            [out] Int32* result);
 
-        ServiceStateTracker GetServiceStateTracker();
+        GetServiceStateTracker(
+            [out] ServiceStateTracker* result);
 
-        CallTracker GetCallTracker();
+        GetCallTracker(
+            [out] CallTracker* result);
 
-        Boolean GetCallForwardingIndicator();
+        GetCallForwardingIndicator(
+            [out] Boolean* result);
 
-        DataState GetDataConnectionState(String apnType);
+        GetDataConnectionState(
+            [in] String apnType,
+            [out] DataState* result);
 
-        NotifyNewRingingConnection(Connection c);
+        NotifyNewRingingConnection(
+            [in] Connection c);
 
-        NotifyUnknownConnection(Connection cn);
+        NotifyUnknownConnection(
+            [in] Connection cn);
 
-        NotifySuppServiceFailed(SuppService code);
+        NotifySuppServiceFailed(
+            [in] SuppService code);
 
         NotifyLocationChanged();
 
-        UnregisterForSuppServiceNotification(Handler h);
+        UnregisterForSuppServiceNotification(
+            [in] Handler h);
 
-        RegisterForSimRecordsLoaded(Handler h, Int32 what, Object obj);
+        RegisterForSimRecordsLoaded(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSimRecordsLoaded(Handler h);
+        UnregisterForSimRecordsLoaded(
+            [in] Handler h);
 
-        Boolean CanConference();
+        CanConference(
+            [out] Boolean* result);
 
-        Boolean CanDial();
+        CanDial(
+            [out] Boolean* result);
 
         Conference();
 
         ClearDisconnected();
 
-        Boolean CanTransfer();
+        CanTransfer(
+            [out] Boolean* result);
 
         ExplicitCallTransfer();
 
-        Call GetRingingCall();
+        GetRingingCall(
+            [out] Call* result);
 
 
-        Boolean IsInCall();
+        IsInCall(
+            [out] Boolean* result);
 
 
-        String GetVoiceMailAlphaTag();
+        GetVoiceMailAlphaTag(
+            [out] String* result);
 
-        String GetDeviceId();
+        GetDeviceId(
+            [out] String* result);
 
-        String GetDeviceSvn();
+        GetDeviceSvn(
+            [out] String* result);
 
-        IsimRecords GetIsimRecords();
+        GetIsimRecords(
+            [out] IsimRecords* result);
 
-        String GetImei();
+        GetImei(
+            [out] String* result);
 
-        String GetEsn();
+        GetEsn(
+            [out] String* result);
 
-        String GetMeid();
+        GetMeid(
+            [out] String* result);
 
-        String GetSubscriberId();
+        GetSubscriberId(
+            [out] String* result);
 
-        String GetGroupIdLevel1();
+        GetGroupIdLevel1(
+            [out] String* result);
 
-        String GetLine1Number();
+        GetLine1Number(
+            [out] String* result);
 
-        String GetMsisdn();
+        GetMsisdn(
+            [out] String* result);
 
-        String GetLine1AlphaTag();
+        GetLine1AlphaTag(
+            [out] String* result);
 
-        SetLine1Number(String alphaTag, String number, Message onComplete);
+        SetLine1Number(
+            [in] String alphaTag, 
+            [in] String number, 
+            [in] Message onComplete);
 
-        String GetSystemProperty(String property, String defValue);
+        GetSystemProperty(
+            [in] String property, 
+            [in] String defValue,
+            [out] String* result);
 
         UpdateDataConnectionTracker();
 
-        GetCallForwardingOption(Int32 commandInterfaceCFReason, Message onComplete);
+        GetCallForwardingOption(
+            [in] Int32 commandInterfaceCFReason, 
+            [in] Message onComplete);
 
-        GetOutgoingCallerIdDisplay(Message onComplete);
+        GetOutgoingCallerIdDisplay(
+            [in] Message onComplete);
 
-        GetCallWaiting(Message onComplete);
+        GetCallWaiting(
+            [in] Message onComplete);
 
-        SetCallWaiting(Boolean enable, Message onComplete);
+        SetCallWaiting(
+            [in] Boolean enable, 
+            [in] Message onComplete);
 
-        SetOnPostDialCharacter(Handler h, Int32 what, Object obj);
+        SetOnPostDialCharacter(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        SetUiTTYMode(Int32 uiTtyMode, Message onComplete);
+        SetUiTTYMode(
+            [in] Int32 uiTtyMode, 
+            [in] Message onComplete);
 
-        SetMute(Boolean muted);
+        SetMute(
+            [in] Boolean muted);
 
-        Boolean GetMute();
+        GetMute(
+            [out] Boolean* result);
 
-        GetDataCallList(Message response);
+        GetDataCallList(
+            [in] Message response);
 
         UpdateServiceLocation();
 
@@ -113,59 +166,98 @@ module {
 
         DisableLocationUpdates();
 
-        Boolean GetDataRoamingEnabled();
+        GetDataRoamingEnabled(
+            [out] Boolean* result);
 
-        SetDataRoamingEnabled(Boolean enable);
+        SetDataRoamingEnabled(
+            [in] Boolean enable);
 
-        Boolean GetDataEnabled();
+        GetDataEnabled(
+            [out] Boolean* result);
 
-        SetDataEnabled(Boolean enable);
+        SetDataEnabled(
+            [in] Boolean enable);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        Boolean UpdateCurrentCarrierInProvider();
+        UpdateCurrentCarrierInProvider(
+            [out] Boolean* result);
 
-        SaveClirSetting(Int32 commandInterfaceCLIRMode);
+        SaveClirSetting(
+            [in] Int32 commandInterfaceCLIRMode);
 
-        PhoneSubInfo GetPhoneSubInfo();
+        GetPhoneSubInfo(
+            [out] PhoneSubInfo* result);
 
-        IccPhoneBookInterfaceManager GetIccPhoneBookInterfaceManager();
+        GetIccPhoneBookInterfaceManager(
+            [out] IccPhoneBookInterfaceManager* result);
 
-        ActivateCellBroadcastSms(Int32 activate, Message response);
+        ActivateCellBroadcastSms(
+            [in] Int32 activate, 
+            [in] Message response);
 
-        GetCellBroadcastSmsConfig(Message response);
+        GetCellBroadcastSmsConfig(
+            [in] Message response);
 
-        Boolean IsCspPlmnEnabled();
+        IsCspPlmnEnabled(
+            [out] Boolean* result);
 
-        Boolean IsManualNetSelAllowed();
+        IsManualNetSelAllowed(
+            [out] Boolean* result);
 
         ExitEmergencyCallbackMode();
 
-        Boolean SetOperatorBrandOverride(String brand);
+        SetOperatorBrandOverride(
+            [in] String brand,
+            [out] Boolean* result);
 
-        String GetOperatorNumeric();
+        GetOperatorNumeric(
+            [out] String* result);
 
-        RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj);
+        RegisterForAllDataDisconnected(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForAllDataDisconnected(Handler h);
+        UnregisterForAllDataDisconnected(
+            [in] Handler h);
 
-        SetInternalDataEnabled(Boolean enable, Message onCompleteMsg);
+        SetInternalDataEnabled(
+            [in] Boolean enable, 
+            [in] Message onCompleteMsg);
 
-        Boolean SetInternalDataEnabledFlag(Boolean enable);
+        SetInternalDataEnabledFlag(
+            [in] Boolean enable,
+            [out] Boolean* result);
 
-        NotifyEcbmTimerReset(Boolean flag);
+        NotifyEcbmTimerReset(
+            [in] Boolean flag);
 
-        RegisterForEcmTimerReset(Handler h, Int32 what, Object obj);
+        RegisterForEcmTimerReset(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForEcmTimerReset(Handler h);
+        UnregisterForEcmTimerReset(
+            [in] Handler h);
 
         ResetSubSpecifics();
 
-        SetVoiceMessageWaiting(Int32 line, Int32 countWaiting);
+        SetVoiceMessageWaiting(
+            [in] Int32 line, 
+            [in] Int32 countWaiting);
 
-        GetCallBarringOption(String facility, String password, Message onComplete);
+        GetCallBarringOption(
+            [in] String facility, 
+            [in] String password, 
+            [in] Message onComplete);
 
-        RequestChangeCbPsw(String facility, String oldPwd, String newPwd, Message result);
+        RequestChangeCbPsw(
+            [in] String facility, 
+            [in] String oldPwd, 
+            [in] String newPwd, 
+            [in] Message result);
 
     }
 

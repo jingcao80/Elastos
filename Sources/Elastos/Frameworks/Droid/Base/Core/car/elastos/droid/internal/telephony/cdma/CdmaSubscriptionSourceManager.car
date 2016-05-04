@@ -8,13 +8,18 @@ module {
     namespace Cdma {
 
     interface ICdmaSubscriptionSourceManager {
-        Dispose(Handler h);
+        Dispose(
+            [in] Handler h);
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        Int32 GetCdmaSubscriptionSource();
+        GetCdmaSubscriptionSource(
+            [out] Int32* result);
 
-        Int32 GetDefault(Context context);
+        GetDefault(
+            [in] Context context,
+            [out] Int32* result);
 
     }
 

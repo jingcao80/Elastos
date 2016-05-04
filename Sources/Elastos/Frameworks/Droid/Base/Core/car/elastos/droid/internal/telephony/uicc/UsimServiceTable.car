@@ -8,7 +8,9 @@ module {
     namespace Uicc {
 
     interface IUsimServiceTable {
-        Boolean IsAvailable(UsimService service);
+        IsAvailable(
+            [in] UsimService service,
+            [out] Boolean* result);
 
     }
 

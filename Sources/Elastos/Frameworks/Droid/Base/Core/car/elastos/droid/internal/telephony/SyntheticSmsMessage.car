@@ -8,25 +8,35 @@ module {
 
     interface ISyntheticSmsMessage {
 
-        MessageClass GetMessageClass();
+        GetMessageClass(
+            [out] MessageClass* result);
 
-        Int32 GetProtocolIdentifier();
+        GetProtocolIdentifier(
+            [out] Int32* result);
 
-        Boolean IsReplace();
+        IsReplace(
+            [out] Boolean* result);
 
-        Boolean IsCphsMwiMessage();
+        IsCphsMwiMessage(
+            [out] Boolean* result);
 
-        Boolean IsMWIClearMessage();
+        IsMWIClearMessage(
+            [out] Boolean* result);
 
-        Boolean IsMWISetMessage();
+        IsMWISetMessage(
+            [out] Boolean* result);
 
-        Boolean IsMwiDontStore();
+        IsMwiDontStore(
+            [out] Boolean* result);
 
-        Int32 GetStatus();
+        GetStatus(
+            [out] Int32* result);
 
-        Boolean IsStatusReportMessage();
+        IsStatusReportMessage(
+            [out] Boolean* result);
 
-        Boolean IsReplyPathPresent();
+        IsReplyPathPresent(
+            [out] Boolean* result);
 
     }
 

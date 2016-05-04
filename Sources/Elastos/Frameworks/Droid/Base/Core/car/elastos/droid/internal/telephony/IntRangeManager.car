@@ -7,11 +7,17 @@ module {
     namespace Telephony {
 
     interface IIntRangeManager {
-        Boolean DisableRange(Int32 startId, Int32 endId, String client);
+        DisableRange(
+            [in] Int32 startId, 
+            [in] Int32 endId, 
+            [in] String client,
+            [out] Boolean* result);
 
-        Boolean UpdateRanges();
+        UpdateRanges(
+            [out] Boolean* result);
 
-        Boolean IsEmpty();
+        IsEmpty(
+            [out] Boolean* result);
 
     }
 

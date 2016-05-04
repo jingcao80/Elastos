@@ -8,49 +8,73 @@ module {
     namespace Sip {
 
     interface ISipPhone {
-        SipPhone (Context context, PhoneNotifier notifier, SipProfile profile);
+        SipPhone(
+            [in] Context context, 
+            [in] PhoneNotifier notifier, 
+            [in] SipProfile profile);
 
-        Boolean Equals(Object o);
+        Equals(
+            [in] Object o,
+            [out] Boolean* result);
 
-        String GetSipUri();
+        GetSipUri(
+            [out] String* result);
 
-        Boolean Equals(SipPhone phone);
+        Equals(
+            [in] SipPhone phone,
+            [out] Boolean* result);
 
-        Connection TakeIncomingCall(Object incomingCall);
+        TakeIncomingCall(
+            [in] Object incomingCall,
+            [out] Connection* result);
 
-        Boolean CanTransfer();
+        CanTransfer(
+            [out] Boolean* result);
 
         ExplicitCallTransfer();
 
         ClearDisconnected();
 
-        SendDtmf(Char32 c);
+        SendDtmf(
+            [in] Char32 c);
 
-        StartDtmf(Char32 c);
+        StartDtmf(
+            [in] Char32 c);
 
         StopDtmf();
 
-        SendBurstDtmf(String dtmfString);
+        SendBurstDtmf(
+            [in] String dtmfString);
 
-        GetOutgoingCallerIdDisplay(Message onComplete);
+        GetOutgoingCallerIdDisplay(
+            [in] Message onComplete);
 
-        GetCallWaiting(Message onComplete);
+        GetCallWaiting(
+            [in] Message onComplete);
 
-        SetCallWaiting(Boolean enable, Message onComplete);
+        SetCallWaiting(
+            [in] Boolean enable, 
+            [in] Message onComplete);
 
         SetEchoSuppressionEnabled();
 
-        SetMute(Boolean muted);
+        SetMute(
+            [in] Boolean muted);
 
-        Boolean GetMute();
+        GetMute(
+            [out] Boolean* result);
 
-        Call GetForegroundCall();
+        GetForegroundCall(
+            [out] Call* result);
 
-        Call GetBackgroundCall();
+        GetBackgroundCall(
+            [out] Call* result);
 
-        Call GetRingingCall();
+        GetRingingCall(
+            [out] Call* result);
 
-        ServiceState GetServiceState();
+        GetServiceState(
+            [out] ServiceState* result);
 
     }
 

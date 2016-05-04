@@ -8,17 +8,22 @@ module {
     namespace Pdu {
 
     interface IReadOrigInd {
-        Int64 GetDate();
+        GetDate(
+            [out] Int64* result);
 
-        SetDate(Int64 value);
+        SetDate(
+            [in] Int64 value);
 
-        EncodedStringValue GetFrom();
+        GetFrom(
+            [out] EncodedStringValue* result);
 
-        SetFrom(EncodedStringValue value);
+        SetFrom(
+            [in] EncodedStringValue value);
 
         GetMessageId();
 
-        Int32 GetReadStatus();
+        GetReadStatus(
+            [out] Int32* result);
 
         GetTo();
 

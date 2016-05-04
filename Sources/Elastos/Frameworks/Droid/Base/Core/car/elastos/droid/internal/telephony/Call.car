@@ -7,25 +7,36 @@ module {
     namespace Telephony {
 
     interface ICall {
-        Boolean IsAlive();
+        IsAlive(
+            [out] Boolean* result);
 
-        Boolean IsRinging();
+        IsRinging(
+            [out] Boolean* result);
 
-        Boolean IsDialing();
+        IsDialing(
+            [out] Boolean* result);
 
-        Boolean HasConnection(Connection c);
+        HasConnection(
+            [in] Connection c,
+            [out] Boolean* result);
 
-        Boolean HasConnections();
+        HasConnections(
+            [out] Boolean* result);
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        Bundle GetExtras();
+        GetExtras(
+            [out] Bundle* result);
 
-        Boolean IsIdle();
+        IsIdle(
+            [out] Boolean* result);
 
-        Boolean IsGeneric();
+        IsGeneric(
+            [out] Boolean* result);
 
-        SetGeneric(Boolean generic);
+        SetGeneric(
+            [in] Boolean generic);
 
         HangupIfAlive();
 

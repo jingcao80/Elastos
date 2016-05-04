@@ -9,20 +9,27 @@ module {
     interface IImsSMSDispatcher {
         Dispose();
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
 
-        SendRetrySms(SmsTracker tracker);
+        SendRetrySms(
+            [in] SmsTracker tracker);
 
-        Boolean IsIms();
+        IsIms(
+            [out] Boolean* result);
 
-        String GetImsSmsFormat();
+        GetImsSmsFormat(
+            [out] String* result);
 
-        EnableSendSmsOverIms(Boolean enable);
+        EnableSendSmsOverIms(
+            [in] Boolean enable);
 
-        Boolean IsImsSmsEnabled();
+        IsImsSmsEnabled(
+            [out] Boolean* result);
 
-        Boolean ShouldSendSmsOverIms();
+        ShouldSendSmsOverIms(
+            [out] Boolean* result);
 
     }
 

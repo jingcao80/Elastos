@@ -7,13 +7,19 @@ module {
     namespace Telephony {
 
     interface IOperatorInfo {
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        OperatorInfo CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] OperatorInfo* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
     }
 

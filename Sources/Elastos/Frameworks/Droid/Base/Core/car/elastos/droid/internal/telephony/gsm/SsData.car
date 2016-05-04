@@ -8,25 +8,38 @@ module {
     namespace Gsm {
 
     interface ISsData {
-        Boolean IsTypeCF();
+        IsTypeCF(
+            [out] Boolean* result);
 
-        Boolean IsTypeUnConditional();
+        IsTypeUnConditional(
+            [out] Boolean* result);
 
-        Boolean IsTypeCW();
+        IsTypeCW(
+            [out] Boolean* result);
 
-        Boolean IsTypeClip();
+        IsTypeClip(
+            [out] Boolean* result);
 
-        Boolean IsTypeClir();
+        IsTypeClir(
+            [out] Boolean* result);
 
-        Boolean IsTypeBarring();
+        IsTypeBarring(
+            [out] Boolean* result);
 
-        Boolean IsTypeInterrogation();
+        IsTypeInterrogation(
+            [out] Boolean* result);
 
-        ServiceType ServiceTypeFromRILInt(Int32 type);
+        ServiceTypeFromRILInt(
+            [in] Int32 type,
+            [out] ServiceType* result);
 
-        RequestType RequestTypeFromRILInt(Int32 type);
+        RequestTypeFromRILInt(
+            [in] Int32 type,
+            [out] RequestType* result);
 
-        TeleserviceType TeleserviceTypeFromRILInt(Int32 type);
+        TeleserviceTypeFromRILInt(
+            [in] Int32 type,
+            [out] TeleserviceType* result);
 
     }
 

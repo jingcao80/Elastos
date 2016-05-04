@@ -7,21 +7,29 @@ module {
     namespace Telephony {
 
     interface IRestrictedState {
-        SetCsEmergencyRestricted(Boolean csEmergencyRestricted);
+        SetCsEmergencyRestricted(
+            [in] Boolean csEmergencyRestricted);
 
-        Boolean IsCsEmergencyRestricted();
+        IsCsEmergencyRestricted(
+            [out] Boolean* result);
 
-        SetCsNormalRestricted(Boolean csNormalRestricted);
+        SetCsNormalRestricted(
+            [in] Boolean csNormalRestricted);
 
-        Boolean IsCsNormalRestricted();
+        IsCsNormalRestricted(
+            [out] Boolean* result);
 
-        SetPsRestricted(Boolean psRestricted);
+        SetPsRestricted(
+            [in] Boolean psRestricted);
 
-        Boolean IsPsRestricted();
+        IsPsRestricted(
+            [out] Boolean* result);
 
-        Boolean IsCsRestricted();
+        IsCsRestricted(
+            [out] Boolean* result);
 
-        Equals (Object o);
+        Equals(
+            [in] Object o);
 
     }
 

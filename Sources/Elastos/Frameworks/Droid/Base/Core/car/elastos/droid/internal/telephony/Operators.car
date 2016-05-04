@@ -7,9 +7,13 @@ module {
     namespace Telephony {
 
     interface IOperators {
-        String OperatorReplace(String response);
+        OperatorReplace(
+            [in] String response,
+            [out] String* result);
 
-        String UnOptimizedOperatorReplace(String response);
+        UnOptimizedOperatorReplace(
+            [in] String response,
+            [out] String* result);
 
     }
 

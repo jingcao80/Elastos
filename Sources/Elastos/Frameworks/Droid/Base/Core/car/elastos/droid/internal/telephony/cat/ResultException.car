@@ -8,13 +8,17 @@ module {
     namespace Cat {
 
     interface IResultException {
-        ResultCode Result();
+        Result(
+            [out] ResultCode* result);
 
-        Boolean HasAdditionalInfo();
+        HasAdditionalInfo(
+            [out] Boolean* result);
 
-        Int32 AdditionalInfo();
+        AdditionalInfo(
+            [out] Int32* result);
 
-        String Explanation();
+        Explanation(
+            [out] String* result);
 
     }
 

@@ -8,45 +8,77 @@ module {
     namespace DataConnection {
 
     interface IDctController {
-        Boolean IsActiveSubId(Int64 subId);
+        IsActiveSubId(
+            [in] Int64 subId,
+            [out] Boolean* result);
 
-        IDataStateChangedCallback GetDataStateChangedCallback();
+        GetDataStateChangedCallback(
+            [out] IDataStateChangedCallback* result);
 
-        DctController GetInstance();
+        GetInstance(
+            [out] DctController* result);
 
-        Int32 EnableApnType(Int64 subId, String type);
+        EnableApnType(
+            [in] Int64 subId, 
+            [in] String type,
+            [out] Int32* result);
 
-        Int32 DisableApnType(Int64 subId, String type);
+        DisableApnType(
+            [in] Int64 subId, 
+            [in] String type,
+            [out] Int32* result);
 
-        Boolean IsDataConnectivityPossible(String type, Int32 phoneId);
+        IsDataConnectivityPossible(
+            [in] String type, 
+            [in] Int32 phoneId,
+            [out] Boolean* result);
 
-        Boolean IsIdleOrDeacting(Int32 phoneId);
+        IsIdleOrDeacting(
+            [in] Int32 phoneId,
+            [out] Boolean* result);
 
-        SetDefaultDataSubId(Int64 reqSubId);
+        SetDefaultDataSubId(
+            [in] Int64 reqSubId);
 
-        DoPsAttach(NetworkRequest n);
+        DoPsAttach(
+            [in] NetworkRequest n);
 
         DoPsDetach();
 
-        SetOnDemandDataSubId(NetworkRequest n);
+        SetOnDemandDataSubId(
+            [in] NetworkRequest n);
 
-        RegisterForDefaultDataSwitchInfo(Handler h, Int32 what, Object obj);
+        RegisterForDefaultDataSwitchInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        RegisterForOnDemandDataSwitchInfo(Handler h, Int32 what, Object obj);
+        RegisterForOnDemandDataSwitchInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        RegisterForOnDemandPsAttach(Handler h, Int32 what, Object obj);
+        RegisterForOnDemandPsAttach(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        RegisterDdsSwitchPropService(Messenger messenger);
+        RegisterDdsSwitchPropService(
+            [in] Messenger messenger);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        DdsSwitchSerializerHandler(Looper looper);
+        DdsSwitchSerializerHandler(
+            [in] Looper looper);
 
         UnLock();
 
-        Boolean IsLocked();
+        IsLocked(
+            [out] Boolean* result);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
     }
 

@@ -8,35 +8,64 @@ module {
     namespace Uicc {
 
     interface IUiccController {
-        UiccController Make(Context c, CommandsInterface ci);
+        Make(
+            [in] Context c, 
+            [in] CommandsInterface ci,
+            [out] UiccController* result);
 
-        UiccController GetInstance();
+        GetInstance(
+            [out] UiccController* result);
 
-        UiccCard GetUiccCard();
+        GetUiccCard(
+            [out] UiccCard* result);
 
-        UiccCard GetUiccCard(Int32 slotId);
+        GetUiccCard(
+            [in] Int32 slotId,
+            [out] UiccCard* result);
 
         GetUiccCards();
 
-        UiccCardApplication GetUiccCardApplication(Int32 family);
+        GetUiccCardApplication(
+            [in] Int32 family,
+            [out] UiccCardApplication* result);
 
-        IccRecords GetIccRecords(Int32 family);
+        GetIccRecords(
+            [in] Int32 family,
+            [out] IccRecords* result);
 
-        IccRecords GetIccRecords(Int32 slotId, Int32 family);
+        GetIccRecords(
+            [in] Int32 slotId, 
+            [in] Int32 family,
+            [out] IccRecords* result);
 
-        IccFileHandler GetIccFileHandler(Int32 family);
+        GetIccFileHandler(
+            [in] Int32 family,
+            [out] IccFileHandler* result);
 
-        IccFileHandler GetIccFileHandler(Int32 slotId, Int32 family);
+        GetIccFileHandler(
+            [in] Int32 slotId, 
+            [in] Int32 family,
+            [out] IccFileHandler* result);
 
-        Int32 GetFamilyFromRadioTechnology(Int32 radioTechnology);
+        GetFamilyFromRadioTechnology(
+            [in] Int32 radioTechnology,
+            [out] Int32* result);
 
-        RegisterForIccChanged(Handler h, Int32 what, Object obj);
+        RegisterForIccChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForIccChanged(Handler h);
+        UnregisterForIccChanged(
+            [in] Handler h);
 
-        HandleMessage (Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        UiccCardApplication GetUiccCardApplication(Int32 slotId, Int32 family);
+        GetUiccCardApplication(
+            [in] Int32 slotId, 
+            [in] Int32 family,
+            [out] UiccCardApplication* result);
 
     }
 

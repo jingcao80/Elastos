@@ -7,7 +7,6 @@ module
     namespace Droid {
     namespace Telephony {
     namespace Gsm {
-    namespace Gsm {
 
     /**
      * @Involve

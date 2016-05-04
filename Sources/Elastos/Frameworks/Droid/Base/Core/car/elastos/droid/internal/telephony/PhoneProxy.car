@@ -7,221 +7,376 @@ module {
     namespace Telephony {
 
     interface IPhoneProxy {
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
-        IccSmsInterfaceManager GetIccSmsInterfaceManager();
+        GetIccSmsInterfaceManager(
+            [out] IccSmsInterfaceManager* result);
 
-        PhoneSubInfoProxy GetPhoneSubInfoProxy();
+        GetPhoneSubInfoProxy(
+            [out] PhoneSubInfoProxy* result);
 
-        IccPhoneBookInterfaceManagerProxy GetIccPhoneBookInterfaceManagerProxy();
+        GetIccPhoneBookInterfaceManagerProxy(
+            [out] IccPhoneBookInterfaceManagerProxy* result);
 
-        IccFileHandler GetIccFileHandler();
+        GetIccFileHandler(
+            [out] IccFileHandler* result);
 
-        Boolean IsImsVtCallPresent();
+        IsImsVtCallPresent(
+            [out] Boolean* result);
 
-        UpdatePhoneObject(Int32 voiceRadioTech);
+        UpdatePhoneObject(
+            [in] Int32 voiceRadioTech);
 
-        ServiceState GetServiceState();
+        GetServiceState(
+            [out] ServiceState* result);
 
-        CellLocation GetCellLocation();
+        GetCellLocation(
+            [out] CellLocation* result);
 
         GetAllCellInfo();
 
-        SetCellInfoListRate(Int32 rateInMillis);
+        SetCellInfoListRate(
+            [in] Int32 rateInMillis);
 
-        DataState GetDataConnectionState();
+        GetDataConnectionState(
+            [out] DataState* result);
 
-        DataState GetDataConnectionState(String apnType);
+        GetDataConnectionState(
+            [in] String apnType,
+            [out] DataState* result);
 
-        DataActivityState GetDataActivityState();
+        GetDataActivityState(
+            [out] DataActivityState* result);
 
-        Context GetContext();
+        GetContext(
+            [out] Context* result);
 
-        DisableDnsCheck(Boolean b);
+        DisableDnsCheck(
+            [in] Boolean b);
 
-        Boolean IsDnsCheckDisabled();
+        IsDnsCheckDisabled(
+            [out] Boolean* result);
 
-        State GetState();
+        GetState(
+            [out] State* result);
 
-        String GetPhoneName();
+        GetPhoneName(
+            [out] String* result);
 
-        Int32 GetPhoneType();
+        GetPhoneType(
+            [out] Int32* result);
 
         GetActiveApnTypes();
 
-        String GetActiveApnHost(String apnType);
+        GetActiveApnHost(
+            [in] String apnType,
+            [out] String* result);
 
-        LinkProperties GetLinkProperties(String apnType);
+        GetLinkProperties(
+            [in] String apnType,
+            [out] LinkProperties* result);
 
-        NetworkCapabilities GetNetworkCapabilities(String apnType);
+        GetNetworkCapabilities(
+            [in] String apnType,
+            [out] NetworkCapabilities* result);
 
-        SignalStrength GetSignalStrength();
+        GetSignalStrength(
+            [out] SignalStrength* result);
 
-        RegisterForUnknownConnection(Handler h, Int32 what, Object obj);
+        RegisterForUnknownConnection(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForUnknownConnection(Handler h);
+        UnregisterForUnknownConnection(
+            [in] Handler h);
 
-        RegisterForHandoverStateChanged(Handler h, Int32 what, Object obj);
+        RegisterForHandoverStateChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForHandoverStateChanged(Handler h);
+        UnregisterForHandoverStateChanged(
+            [in] Handler h);
 
-        RegisterForPreciseCallStateChanged(Handler h, Int32 what, Object obj);
+        RegisterForPreciseCallStateChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForPreciseCallStateChanged(Handler h);
+        UnregisterForPreciseCallStateChanged(
+            [in] Handler h);
 
-        RegisterForNewRingingConnection(Handler h, Int32 what, Object obj);
+        RegisterForNewRingingConnection(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForNewRingingConnection(Handler h);
+        UnregisterForNewRingingConnection(
+            [in] Handler h);
 
-        UnregisterForVideoCapabilityChanged(Handler h);
+        UnregisterForVideoCapabilityChanged(
+            [in] Handler h);
 
-        RegisterForIncomingRing(Handler h, Int32 what, Object obj);
+        RegisterForIncomingRing(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForIncomingRing(Handler h);
+        UnregisterForIncomingRing(
+            [in] Handler h);
 
-        RegisterForDisconnect(Handler h, Int32 what, Object obj);
+        RegisterForDisconnect(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDisconnect(Handler h);
+        UnregisterForDisconnect(
+            [in] Handler h);
 
-        RegisterForMmiInitiate(Handler h, Int32 what, Object obj);
+        RegisterForMmiInitiate(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForMmiInitiate(Handler h);
+        UnregisterForMmiInitiate(
+            [in] Handler h);
 
-        RegisterForMmiComplete(Handler h, Int32 what, Object obj);
+        RegisterForMmiComplete(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForMmiComplete(Handler h);
+        UnregisterForMmiComplete(
+            [in] Handler h);
 
         GetPendingMmiCodes();
 
-        SendUssdResponse(String ussdMessge);
+        SendUssdResponse(
+            [in] String ussdMessge);
 
-        RegisterForServiceStateChanged(Handler h, Int32 what, Object obj);
+        RegisterForServiceStateChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForServiceStateChanged(Handler h);
+        UnregisterForServiceStateChanged(
+            [in] Handler h);
 
-        RegisterForSuppServiceNotification(Handler h, Int32 what, Object obj);
+        RegisterForSuppServiceNotification(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSuppServiceNotification(Handler h);
+        UnregisterForSuppServiceNotification(
+            [in] Handler h);
 
-        RegisterForSuppServiceFailed(Handler h, Int32 what, Object obj);
+        RegisterForSuppServiceFailed(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSuppServiceFailed(Handler h);
+        UnregisterForSuppServiceFailed(
+            [in] Handler h);
 
-        RegisterForInCallVoicePrivacyOn(Handler h, Int32 what, Object obj);
+        RegisterForInCallVoicePrivacyOn(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForInCallVoicePrivacyOn(Handler h);
+        UnregisterForInCallVoicePrivacyOn(
+            [in] Handler h);
 
-        RegisterForInCallVoicePrivacyOff(Handler h, Int32 what, Object obj);
+        RegisterForInCallVoicePrivacyOff(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForInCallVoicePrivacyOff(Handler h);
+        UnregisterForInCallVoicePrivacyOff(
+            [in] Handler h);
 
-        RegisterForCdmaOtaStatusChange(Handler h, Int32 what, Object obj);
+        RegisterForCdmaOtaStatusChange(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForCdmaOtaStatusChange(Handler h);
+        UnregisterForCdmaOtaStatusChange(
+            [in] Handler h);
 
-        RegisterForSubscriptionInfoReady(Handler h, Int32 what, Object obj);
+        RegisterForSubscriptionInfoReady(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSubscriptionInfoReady(Handler h);
+        UnregisterForSubscriptionInfoReady(
+            [in] Handler h);
 
-        RegisterForEcmTimerReset(Handler h, Int32 what, Object obj);
+        RegisterForEcmTimerReset(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForEcmTimerReset(Handler h);
+        UnregisterForEcmTimerReset(
+            [in] Handler h);
 
-        RegisterForRingbackTone(Handler h, Int32 what, Object obj);
+        RegisterForRingbackTone(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForRingbackTone(Handler h);
+        UnregisterForRingbackTone(
+            [in] Handler h);
 
-        RegisterForOnHoldTone(Handler h, Int32 what, Object obj);
+        RegisterForOnHoldTone(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForOnHoldTone(Handler h);
+        UnregisterForOnHoldTone(
+            [in] Handler h);
 
-        RegisterForResendIncallMute(Handler h, Int32 what, Object obj);
+        RegisterForResendIncallMute(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForResendIncallMute(Handler h);
+        UnregisterForResendIncallMute(
+            [in] Handler h);
 
-        RegisterForSimRecordsLoaded(Handler h, Int32 what, Object obj);
+        RegisterForSimRecordsLoaded(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSimRecordsLoaded(Handler h);
+        UnregisterForSimRecordsLoaded(
+            [in] Handler h);
 
-        Boolean GetIccRecordsLoaded();
+        GetIccRecordsLoaded(
+            [out] Boolean* result);
 
-        IccCard GetIccCard();
+        GetIccCard(
+            [out] IccCard* result);
 
-        Boolean CanConference();
+        CanConference(
+            [out] Boolean* result);
 
-        EnableEnhancedVoicePrivacy(Boolean enable, Message onComplete);
+        EnableEnhancedVoicePrivacy(
+            [in] Boolean enable, 
+            [in] Message onComplete);
 
-        GetEnhancedVoicePrivacy(Message onComplete);
+        GetEnhancedVoicePrivacy(
+            [in] Message onComplete);
 
-        Boolean CanTransfer();
+        CanTransfer(
+            [out] Boolean* result);
 
         ClearDisconnected();
 
-        Call GetForegroundCall();
+        GetForegroundCall(
+            [out] Call* result);
 
-        Call GetBackgroundCall();
+        GetBackgroundCall(
+            [out] Call* result);
 
-        Call GetRingingCall();
+        GetRingingCall(
+            [out] Call* result);
 
-        Boolean HandlePinMmi(String dialString);
+        HandlePinMmi(
+            [in] String dialString,
+            [out] Boolean* result);
 
-        SendDtmf(Char32 c);
+        SendDtmf(
+            [in] Char32 c);
 
-        StartDtmf(Char32 c);
+        StartDtmf(
+            [in] Char32 c);
 
         StopDtmf();
 
-        SetRadioPower(Boolean power);
+        SetRadioPower(
+            [in] Boolean power);
 
-        Boolean GetMessageWaitingIndicator();
+        GetMessageWaitingIndicator(
+            [out] Boolean* result);
 
-        Boolean GetCallForwardingIndicator();
+        GetCallForwardingIndicator(
+            [out] Boolean* result);
 
-        String GetLine1Number();
+        GetLine1Number(
+            [out] String* result);
 
-        String GetCdmaMin();
+        GetCdmaMin(
+            [out] String* result);
 
-        Boolean IsMinInfoReady();
+        IsMinInfoReady(
+            [out] Boolean* result);
 
-        String GetCdmaPrlVersion();
+        GetCdmaPrlVersion(
+            [out] String* result);
 
-        String GetLine1AlphaTag();
+        GetLine1AlphaTag(
+            [out] String* result);
 
-        SetLine1Number(String alphaTag, String number, Message onComplete);
+        SetLine1Number(
+            [in] String alphaTag, 
+            [in] String number, 
+            [in] Message onComplete);
 
-        String GetVoiceMailNumber();
+        GetVoiceMailNumber(
+            [out] String* result);
 
-        Int32 GetVoiceMessageCount();
+        GetVoiceMessageCount(
+            [out] Int32* result);
 
-        String GetVoiceMailAlphaTag();
+        GetVoiceMailAlphaTag(
+            [out] String* result);
 
-        GetOutgoingCallerIdDisplay(Message onComplete);
+        GetOutgoingCallerIdDisplay(
+            [in] Message onComplete);
 
-        GetCallWaiting(Message onComplete);
+        GetCallWaiting(
+            [in] Message onComplete);
 
-        SetCallWaiting(Boolean enable, Message onComplete);
+        SetCallWaiting(
+            [in] Boolean enable, 
+            [in] Message onComplete);
 
-        GetAvailableNetworks(Message response);
+        GetAvailableNetworks(
+            [in] Message response);
 
-        SetNetworkSelectionModeAutomatic(Message response);
+        SetNetworkSelectionModeAutomatic(
+            [in] Message response);
 
-        SelectNetworkManually(OperatorInfo network, Message response);
+        SelectNetworkManually(
+            [in] OperatorInfo network, 
+            [in] Message response);
 
-        SetPreferredNetworkType(Int32 networkType, Message response);
+        SetPreferredNetworkType(
+            [in] Int32 networkType, 
+            [in] Message response);
 
-        GetPreferredNetworkType(Message response);
+        GetPreferredNetworkType(
+            [in] Message response);
 
-        GetNeighboringCids(Message response);
+        GetNeighboringCids(
+            [in] Message response);
 
-        SetOnPostDialCharacter(Handler h, Int32 what, Object obj);
+        SetOnPostDialCharacter(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        SetMute(Boolean muted);
+        SetMute(
+            [in] Boolean muted);
 
-        Boolean GetMute();
+        GetMute(
+            [out] Boolean* result);
 
         SetEchoSuppressionEnabled();
 
-        GetDataCallList(Message response);
+        GetDataCallList(
+            [in] Message response);
 
         UpdateServiceLocation();
 
@@ -229,189 +384,321 @@ module {
 
         DisableLocationUpdates();
 
-        SetUnitTestMode(Boolean f);
+        SetUnitTestMode(
+            [in] Boolean f);
 
-        Boolean GetUnitTestMode();
+        GetUnitTestMode(
+            [out] Boolean* result);
 
-        SetBandMode(Int32 bandMode, Message response);
+        SetBandMode(
+            [in] Int32 bandMode, 
+            [in] Message response);
 
-        QueryAvailableBandMode(Message response);
+        QueryAvailableBandMode(
+            [in] Message response);
 
-        Boolean GetDataRoamingEnabled();
+        GetDataRoamingEnabled(
+            [out] Boolean* result);
 
-        SetDataRoamingEnabled(Boolean enable);
+        SetDataRoamingEnabled(
+            [in] Boolean enable);
 
-        Boolean GetDataEnabled();
+        GetDataEnabled(
+            [out] Boolean* result);
 
-        SetDataEnabled(Boolean enable);
+        SetDataEnabled(
+            [in] Boolean enable);
 
-        QueryCdmaRoamingPreference(Message response);
+        QueryCdmaRoamingPreference(
+            [in] Message response);
 
-        SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response);
+        SetCdmaRoamingPreference(
+            [in] Int32 cdmaRoamingType, 
+            [in] Message response);
 
-        SetCdmaSubscription(Int32 cdmaSubscriptionType, Message response);
+        SetCdmaSubscription(
+            [in] Int32 cdmaSubscriptionType, 
+            [in] Message response);
 
-        SimulatedRadioControl GetSimulatedRadioControl();
+        GetSimulatedRadioControl(
+            [out] SimulatedRadioControl* result);
 
-        Boolean IsDataConnectivityPossible();
+        IsDataConnectivityPossible(
+            [out] Boolean* result);
 
-        Boolean IsOnDemandDataPossible(String apnType);
+        IsOnDemandDataPossible(
+            [in] String apnType,
+            [out] Boolean* result);
 
-        Boolean IsDataConnectivityPossible(String apnType);
+        IsDataConnectivityPossible(
+            [in] String apnType,
+            [out] Boolean* result);
 
-        String GetDeviceId();
+        GetDeviceId(
+            [out] String* result);
 
-        String GetDeviceSvn();
+        GetDeviceSvn(
+            [out] String* result);
 
-        String GetSubscriberId();
+        GetSubscriberId(
+            [out] String* result);
 
-        String GetGroupIdLevel1();
+        GetGroupIdLevel1(
+            [out] String* result);
 
-        String GetIccSerialNumber();
+        GetIccSerialNumber(
+            [out] String* result);
 
-        String GetEsn();
+        GetEsn(
+            [out] String* result);
 
-        String GetMeid();
+        GetMeid(
+            [out] String* result);
 
-        String GetMsisdn();
+        GetMsisdn(
+            [out] String* result);
 
-        String GetImei();
+        GetImei(
+            [out] String* result);
 
-        PhoneSubInfo GetPhoneSubInfo();
+        GetPhoneSubInfo(
+            [out] PhoneSubInfo* result);
 
-        IccPhoneBookInterfaceManager GetIccPhoneBookInterfaceManager();
+        GetIccPhoneBookInterfaceManager(
+            [out] IccPhoneBookInterfaceManager* result);
 
-        SetUiTTYMode(Int32 uiTtyMode, Message onComplete);
+        SetUiTTYMode(
+            [in] Int32 uiTtyMode, 
+            [in] Message onComplete);
 
-        SetTTYMode(Int32 ttyMode, Message onComplete);
+        SetTTYMode(
+            [in] Int32 ttyMode, 
+            [in] Message onComplete);
 
-        QueryTTYMode(Message onComplete);
+        QueryTTYMode(
+            [in] Message onComplete);
 
-        ActivateCellBroadcastSms(Int32 activate, Message response);
+        ActivateCellBroadcastSms(
+            [in] Int32 activate, 
+            [in] Message response);
 
-        GetCellBroadcastSmsConfig(Message response);
+        GetCellBroadcastSmsConfig(
+            [in] Message response);
 
         NotifyDataActivity();
 
-        GetSmscAddress(Message result);
+        GetSmscAddress(
+            [in] Message result);
 
-        SetSmscAddress(String address, Message result);
+        SetSmscAddress(
+            [in] String address, 
+            [in] Message result);
 
-        Int32 GetCdmaEriIconIndex();
+        GetCdmaEriIconIndex(
+            [out] Int32* result);
 
-        String GetCdmaEriText();
+        GetCdmaEriText(
+            [out] String* result);
 
-        Int32 GetCdmaEriIconMode();
+        GetCdmaEriIconMode(
+            [out] Int32* result);
 
-        Phone GetActivePhone();
+        GetActivePhone(
+            [out] Phone* result);
 
-        SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message onComplete);
+        SendBurstDtmf(
+            [in] String dtmfString, 
+            [in] Int32 on, 
+            [in] Int32 off, 
+            [in] Message onComplete);
 
         ExitEmergencyCallbackMode();
 
-        Boolean NeedsOtaServiceProvisioning();
+        NeedsOtaServiceProvisioning(
+            [out] Boolean* result);
 
-        Boolean IsOtaSpNumber(String dialStr);
+        IsOtaSpNumber(
+            [in] String dialStr,
+            [out] Boolean* result);
 
-        RegisterForCallWaiting(Handler h, Int32 what, Object obj);
+        RegisterForCallWaiting(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForCallWaiting(Handler h);
+        UnregisterForCallWaiting(
+            [in] Handler h);
 
-        RegisterForSignalInfo(Handler h, Int32 what, Object obj);
+        RegisterForSignalInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForSignalInfo(Handler h);
+        UnregisterForSignalInfo(
+            [in] Handler h);
 
-        RegisterForDisplayInfo(Handler h, Int32 what, Object obj);
+        RegisterForDisplayInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDisplayInfo(Handler h);
+        UnregisterForDisplayInfo(
+            [in] Handler h);
 
-        RegisterForNumberInfo(Handler h, Int32 what, Object obj);
+        RegisterForNumberInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForNumberInfo(Handler h);
+        UnregisterForNumberInfo(
+            [in] Handler h);
 
-        RegisterForRedirectedNumberInfo(Handler h, Int32 what, Object obj);
+        RegisterForRedirectedNumberInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForRedirectedNumberInfo(Handler h);
+        UnregisterForRedirectedNumberInfo(
+            [in] Handler h);
 
-        RegisterForLineControlInfo(Handler h, Int32 what, Object obj);
+        RegisterForLineControlInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForLineControlInfo(Handler h);
+        UnregisterForLineControlInfo(
+            [in] Handler h);
 
-        RegisterFoT53ClirlInfo(Handler h, Int32 what, Object obj);
+        RegisterFoT53ClirlInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForT53ClirInfo(Handler h);
+        UnregisterForT53ClirInfo(
+            [in] Handler h);
 
-        RegisterForT53AudioControlInfo(Handler h, Int32 what, Object obj);
+        RegisterForT53AudioControlInfo(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForT53AudioControlInfo(Handler h);
+        UnregisterForT53AudioControlInfo(
+            [in] Handler h);
 
-        SetOnEcbModeExitResponse(Handler h, Int32 what, Object obj);
+        SetOnEcbModeExitResponse(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnsetOnEcbModeExitResponse(Handler h);
+        UnsetOnEcbModeExitResponse(
+            [in] Handler h);
 
-        Boolean IsManualNetSelAllowed();
+        IsManualNetSelAllowed(
+            [out] Boolean* result);
 
-        Boolean IsCspPlmnEnabled();
+        IsCspPlmnEnabled(
+            [out] Boolean* result);
 
-        IsimRecords GetIsimRecords();
+        GetIsimRecords(
+            [out] IsimRecords* result);
 
-        Int32 GetLteOnCdmaMode();
+        GetLteOnCdmaMode(
+            [out] Int32* result);
 
-        Int32 GetLteOnGsmMode();
+        GetLteOnGsmMode(
+            [out] Int32* result);
 
-        SetVoiceMessageWaiting(Int32 line, Int32 countWaiting);
+        SetVoiceMessageWaiting(
+            [in] Int32 line, 
+            [in] Int32 countWaiting);
 
-        UsimServiceTable GetUsimServiceTable();
+        GetUsimServiceTable(
+            [out] UsimServiceTable* result);
 
-        UiccCard GetUiccCard();
+        GetUiccCard(
+            [out] UiccCard* result);
 
-        NvReadItem(Int32 itemID, Message response);
+        NvReadItem(
+            [in] Int32 itemID, 
+            [in] Message response);
 
-        NvWriteItem(Int32 itemID, String itemValue, Message response);
+        NvWriteItem(
+            [in] Int32 itemID, 
+            [in] String itemValue, 
+            [in] Message response);
 
-        NvResetConfig(Int32 resetType, Message response);
+        NvResetConfig(
+            [in] Int32 resetType, 
+            [in] Message response);
 
         Dispose();
 
         RemoveReferences();
 
-        Boolean UpdateCurrentCarrierInProvider();
+        UpdateCurrentCarrierInProvider(
+            [out] Boolean* result);
 
         UpdateDataConnectionTracker();
 
-        SetInternalDataEnabled(Boolean enable);
+        SetInternalDataEnabled(
+            [in] Boolean enable);
 
-        Boolean SetInternalDataEnabledFlag(Boolean enable);
+        SetInternalDataEnabledFlag(
+            [in] Boolean enable,
+            [out] Boolean* result);
 
-        SetInternalDataEnabled(Boolean enable, Message onCompleteMsg);
+        SetInternalDataEnabled(
+            [in] Boolean enable, 
+            [in] Message onCompleteMsg);
 
-        RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj);
+        RegisterForAllDataDisconnected(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForAllDataDisconnected(Handler h);
+        UnregisterForAllDataDisconnected(
+            [in] Handler h);
 
-        Int64 GetSubId();
+        GetSubId(
+            [out] Int64* result);
 
-        Int32 GetPhoneId();
+        GetPhoneId(
+            [out] Int32* result);
 
-        GetPcscfAddress(String apnType);
+        GetPcscfAddress(
+            [in] String apnType);
 
-        SetImsRegistrationState(Boolean registered);
+        SetImsRegistrationState(
+            [in] Boolean registered);
 
-        Phone GetImsPhone();
+        GetImsPhone(
+            [out] Phone* result);
 
-        ImsPhone RelinquishOwnershipOfImsPhone();
+        RelinquishOwnershipOfImsPhone(
+            [out] ImsPhone* result);
 
-        Boolean SetOperatorBrandOverride(String brand);
+        SetOperatorBrandOverride(
+            [in] String brand,
+            [out] Boolean* result);
 
-        Boolean IsRadioAvailable();
+        IsRadioAvailable(
+            [out] Boolean* result);
 
         ShutdownRadio();
 
-        GetCallBarringOption(String facility, String password, Message onComplete);
+        GetCallBarringOption(
+            [in] String facility, 
+            [in] String password, 
+            [in] Message onComplete);
 
-        RequestChangeCbPsw(String facility, String oldPwd, String newPwd, Message result);
+        RequestChangeCbPsw(
+            [in] String facility, 
+            [in] String oldPwd, 
+            [in] String newPwd, 
+            [in] Message result);
 
-        SetLocalCallHold(Int32 lchStatus);
+        SetLocalCallHold(
+            [in] Int32 lchStatus);
 
     }
 

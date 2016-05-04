@@ -9,39 +9,60 @@ module {
     interface IInboundSmsHandler {
         Dispose();
 
-        UpdatePhoneObject(PhoneBase phone);
+        UpdatePhoneObject(
+            [in] PhoneBase phone);
 
-        PhoneBase GetPhone();
+        GetPhone(
+            [out] PhoneBase* result);
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
         Enter();
 
         Exit();
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
         Enter();
 
         Exit();
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
-        Boolean ProcessMessage(Message msg);
+        ProcessMessage(
+            [in] Message msg,
+            [out] Boolean* result);
 
-        HandleNewSms(AsyncResult ar);
+        HandleNewSms(
+            [in] AsyncResult ar);
 
-        HandleInjectSms(AsyncResult ar);
+        HandleInjectSms(
+            [in] AsyncResult ar);
 
-        Int32 DispatchMessage(SmsMessageBase smsb);
+        DispatchMessage(
+            [in] SmsMessageBase smsb,
+            [out] Int32* result);
 
-        Boolean ProcessMessagePart(InboundSmsTracker tracker);
+        ProcessMessagePart(
+            [in] InboundSmsTracker tracker,
+            [out] Boolean* result);
 
-        SetAndDirectIntent(Intent intent, Int32 destPort);
+        SetAndDirectIntent(
+            [in] Intent intent, 
+            [in] Int32 destPort);
 
-        Boolean IsCurrentFormat3gpp2();
+        IsCurrentFormat3gpp2(
+            [out] Boolean* result);
 
     }
 

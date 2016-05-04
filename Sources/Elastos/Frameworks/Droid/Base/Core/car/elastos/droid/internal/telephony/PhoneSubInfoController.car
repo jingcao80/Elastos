@@ -7,55 +7,90 @@ module {
     namespace Telephony {
 
     interface IPhoneSubInfoController {
-        String GetDeviceId();
+        GetDeviceId(
+            [out] String* result);
 
-        String GetDeviceIdForSubscriber(Int64 subId);
+        GetDeviceIdForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetImeiForSubscriber(Int64 subId);
+        GetImeiForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetDeviceSvn();
+        GetDeviceSvn(
+            [out] String* result);
 
-        String GetSubscriberId();
+        GetSubscriberId(
+            [out] String* result);
 
-        String GetSubscriberIdForSubscriber(Int64 subId);
+        GetSubscriberIdForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetIccSerialNumber();
+        GetIccSerialNumber(
+            [out] String* result);
 
-        String GetIccSerialNumberForSubscriber(Int64 subId);
+        GetIccSerialNumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetLine1Number();
+        GetLine1Number(
+            [out] String* result);
 
-        String GetLine1NumberForSubscriber(Int64 subId);
+        GetLine1NumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetLine1AlphaTag();
+        GetLine1AlphaTag(
+            [out] String* result);
 
-        String GetLine1AlphaTagForSubscriber(Int64 subId);
+        GetLine1AlphaTagForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetMsisdn();
+        GetMsisdn(
+            [out] String* result);
 
-        String GetMsisdnForSubscriber(Int64 subId);
+        GetMsisdnForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetVoiceMailNumber();
+        GetVoiceMailNumber(
+            [out] String* result);
 
-        String GetVoiceMailNumberForSubscriber(Int64 subId);
+        GetVoiceMailNumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetCompleteVoiceMailNumber();
+        GetCompleteVoiceMailNumber(
+            [out] String* result);
 
-        String GetCompleteVoiceMailNumberForSubscriber(Int64 subId);
+        GetCompleteVoiceMailNumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetVoiceMailAlphaTag();
+        GetVoiceMailAlphaTag(
+            [out] String* result);
 
-        String GetVoiceMailAlphaTagForSubscriber(Int64 subId);
+        GetVoiceMailAlphaTagForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
-        String GetIsimImpi();
+        GetIsimImpi(
+            [out] String* result);
 
-        String GetIsimDomain();
+        GetIsimDomain(
+            [out] String* result);
 
         GetIsimImpu();
 
-        String GetGroupIdLevel1();
+        GetGroupIdLevel1(
+            [out] String* result);
 
-        String GetGroupIdLevel1ForSubscriber(Int64 subId);
+        GetGroupIdLevel1ForSubscriber(
+            [in] Int64 subId,
+            [out] String* result);
 
     }
 

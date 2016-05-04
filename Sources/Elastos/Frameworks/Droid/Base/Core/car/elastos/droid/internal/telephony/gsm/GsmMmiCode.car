@@ -8,29 +8,42 @@ module {
     namespace Gsm {
 
     interface IGsmMmiCode {
-        GsmMmiCode (GSMPhone phone, UiccCardApplication app);
+        GsmMmiCode(
+            [in] GSMPhone phone, 
+            [in] UiccCardApplication app);
 
-        Boolean IsCancelable();
+        IsCancelable(
+            [out] Boolean* result);
 
-        Boolean IsPinPukCommand();
+        IsPinPukCommand(
+            [out] Boolean* result);
 
-        Boolean IsActivate();
+        IsActivate(
+            [out] Boolean* result);
 
-        Boolean IsDeactivate();
+        IsDeactivate(
+            [out] Boolean* result);
 
-        Boolean IsInterrogate();
+        IsInterrogate(
+            [out] Boolean* result);
 
-        Boolean IsRegister();
+        IsRegister(
+            [out] Boolean* result);
 
-        Boolean IsErasure();
+        IsErasure(
+            [out] Boolean* result);
 
-        Boolean IsPendingUSSD();
+        IsPendingUSSD(
+            [out] Boolean* result);
 
-        Boolean IsUssdRequest();
+        IsUssdRequest(
+            [out] Boolean* result);
 
-        Boolean IsSsInfo();
+        IsSsInfo(
+            [out] Boolean* result);
 
-        SendUssd(String ussdMessage);
+        SendUssd(
+            [in] String ussdMessage);
 
     }
 

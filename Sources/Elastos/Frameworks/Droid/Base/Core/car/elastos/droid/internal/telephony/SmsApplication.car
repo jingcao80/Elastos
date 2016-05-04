@@ -8,24 +8,41 @@ module {
 
     interface ISmsApplication {
         interface ISmsApplicationSmsApplicationData {
-            Boolean IsComplete();
+        IsComplete(
+            [out] Boolean* result);
 
         }
 
-        GetApplicationCollection(Context context);
+        GetApplicationCollection(
+            [in] Context context);
 
-        SetDefaultApplication(String packageName, Context context);
+        SetDefaultApplication(
+            [in] String packageName, 
+            [in] Context context);
 
 
-        InitSmsPackageMonitor(Context context);
+        InitSmsPackageMonitor(
+            [in] Context context);
 
-        SmsApplicationData GetSmsApplicationData(String packageName, Context context);
+        GetSmsApplicationData(
+            [in] String packageName, 
+            [in] Context context,
+            [out] SmsApplicationData* result);
 
-        ComponentName GetDefaultSmsApplication(Context context, Boolean updateIfNeeded);
+        GetDefaultSmsApplication(
+            [in] Context context, 
+            [in] Boolean updateIfNeeded,
+            [out] ComponentName* result);
 
-        ComponentName GetDefaultMmsApplication(Context context, Boolean updateIfNeeded);
+        GetDefaultMmsApplication(
+            [in] Context context, 
+            [in] Boolean updateIfNeeded,
+            [out] ComponentName* result);
 
-        Boolean ShouldWriteMessageForPackage(String packageName, Context context);
+        ShouldWriteMessageForPackage(
+            [in] String packageName, 
+            [in] Context context,
+            [out] Boolean* result);
 
     }
 

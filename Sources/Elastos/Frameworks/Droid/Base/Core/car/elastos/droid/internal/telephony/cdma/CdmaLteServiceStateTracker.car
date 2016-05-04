@@ -10,15 +10,18 @@ module {
     interface ICdmaLteServiceStateTracker {
         Dispose();
 
-        HandleMessage(Message msg);
+        HandleMessage(
+            [in] Message msg);
 
         PollState();
 
-        Boolean IsConcurrentVoiceAndDataAllowed();
+        IsConcurrentVoiceAndDataAllowed(
+            [out] Boolean* result);
 
         GetAllCellInfo();
 
-        PowerOffRadioSafely(DcTrackerBase dcTracker);
+        PowerOffRadioSafely(
+            [in] DcTrackerBase dcTracker);
 
     }
 

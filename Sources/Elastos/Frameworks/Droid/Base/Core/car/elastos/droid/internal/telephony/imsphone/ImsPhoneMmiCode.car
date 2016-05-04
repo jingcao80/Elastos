@@ -8,35 +8,53 @@ module {
     namespace ImsPhone {
 
     interface IImsPhoneMmiCode {
-        Boolean IsScMatchesSuppServType(String dialString);
+        IsScMatchesSuppServType(
+            [in] String dialString,
+            [out] Boolean* result);
 
-        Boolean IsServiceCodeUncondCallFwdTimer(String sc);
+        IsServiceCodeUncondCallFwdTimer(
+            [in] String sc,
+            [out] Boolean* result);
 
-        Phone GetPhone();
+        GetPhone(
+            [out] Phone* result);
 
-        Boolean IsCancelable();
+        IsCancelable(
+            [out] Boolean* result);
 
-        String GetDialingNumber();
+        GetDialingNumber(
+            [out] String* result);
 
-        Boolean IsPinPukCommand();
+        IsPinPukCommand(
+            [out] Boolean* result);
 
-        Boolean IsActivate();
+        IsActivate(
+            [out] Boolean* result);
 
-        Boolean IsDeactivate();
+        IsDeactivate(
+            [out] Boolean* result);
 
-        Boolean IsInterrogate();
+        IsInterrogate(
+            [out] Boolean* result);
 
-        Boolean IsRegister();
+        IsRegister(
+            [out] Boolean* result);
 
-        Boolean IsErasure();
+        IsErasure(
+            [out] Boolean* result);
 
-        Boolean IsPendingUSSD();
+        IsPendingUSSD(
+            [out] Boolean* result);
 
-        Boolean IsUssdRequest();
+        IsUssdRequest(
+            [out] Boolean* result);
 
-        CalForwardAction (String dialingNumber);
+        CalForwardAction(
+            [in] String dialingNumber);
 
-        Int32 CallBarrAction(String dialingNumber);
+        CallBarrAction(
+            [in] String dialingNumber,
+            [out] Int32* result);
 
 
 

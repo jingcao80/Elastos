@@ -8,17 +8,23 @@ module {
     namespace Gsm {
 
     interface IGsmSmsAddress {
-        String GetAddressString();
+        GetAddressString(
+            [out] String* result);
 
-        Boolean IsAlphanumeric();
+        IsAlphanumeric(
+            [out] Boolean* result);
 
-        Boolean IsNetworkSpecific();
+        IsNetworkSpecific(
+            [out] Boolean* result);
 
-        Boolean IsCphsVoiceMessageIndicatorAddress();
+        IsCphsVoiceMessageIndicatorAddress(
+            [out] Boolean* result);
 
-        Boolean IsCphsVoiceMessageSet();
+        IsCphsVoiceMessageSet(
+            [out] Boolean* result);
 
-        Boolean IsCphsVoiceMessageClear();
+        IsCphsVoiceMessageClear(
+            [out] Boolean* result);
 
     }
 

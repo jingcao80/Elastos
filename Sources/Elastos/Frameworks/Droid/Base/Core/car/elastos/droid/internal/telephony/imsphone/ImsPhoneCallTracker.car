@@ -8,56 +8,92 @@ module {
     namespace ImsPhone {
 
     interface IImsPhoneCallTracker {
-        OnReceive(Context context, Intent intent);
+        OnReceive(
+            [in] Context context, 
+            [in] Intent intent);
 
-        new Thread();
+        Thread(
+            [out] new* result);
 
         Dispose();
 
-        RegisterForVoiceCallStarted(Handler h, Int32 what, Object obj);
+        RegisterForVoiceCallStarted(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForVoiceCallStarted(Handler h);
+        UnregisterForVoiceCallStarted(
+            [in] Handler h);
 
-        RegisterForVoiceCallEnded(Handler h, Int32 what, Object obj);
+        RegisterForVoiceCallEnded(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForVoiceCallEnded(Handler h);
+        UnregisterForVoiceCallEnded(
+            [in] Handler h);
 
 
-        SendUSSD (String ussdString, Message response);
+        SendUSSD(
+            [in] String ussdString, 
+            [in] Message response);
 
         CancelUSSD();
 
-        OnCallProgressing(ImsCall imsCall);
+        OnCallProgressing(
+            [in] ImsCall imsCall);
 
-        OnCallStarted(ImsCall imsCall);
+        OnCallStarted(
+            [in] ImsCall imsCall);
 
-        OnCallUpdated(ImsCall imsCall);
+        OnCallUpdated(
+            [in] ImsCall imsCall);
 
-        OnCallStartFailed(ImsCall imsCall, ImsReasonInfo reasonInfo);
+        OnCallStartFailed(
+            [in] ImsCall imsCall, 
+            [in] ImsReasonInfo reasonInfo);
 
-        OnCallTerminated(ImsCall imsCall, ImsReasonInfo reasonInfo);
+        OnCallTerminated(
+            [in] ImsCall imsCall, 
+            [in] ImsReasonInfo reasonInfo);
 
-        OnCallHeld(ImsCall imsCall);
+        OnCallHeld(
+            [in] ImsCall imsCall);
 
-        OnCallHoldFailed(ImsCall imsCall, ImsReasonInfo reasonInfo);
+        OnCallHoldFailed(
+            [in] ImsCall imsCall, 
+            [in] ImsReasonInfo reasonInfo);
 
-        OnCallResumed(ImsCall imsCall);
+        OnCallResumed(
+            [in] ImsCall imsCall);
 
-        OnCallResumeFailed(ImsCall imsCall, ImsReasonInfo reasonInfo);
+        OnCallResumeFailed(
+            [in] ImsCall imsCall, 
+            [in] ImsReasonInfo reasonInfo);
 
-        OnCallResumeReceived(ImsCall imsCall);
+        OnCallResumeReceived(
+            [in] ImsCall imsCall);
 
-        OnCallHoldReceived(ImsCall imsCall);
+        OnCallHoldReceived(
+            [in] ImsCall imsCall);
 
-        OnCallMerged(ImsCall call);
+        OnCallMerged(
+            [in] ImsCall call);
 
-        OnCallMergeFailed(ImsCall call, ImsReasonInfo reasonInfo);
+        OnCallMergeFailed(
+            [in] ImsCall call, 
+            [in] ImsReasonInfo reasonInfo);
 
-        OnCallStarted(ImsCall imsCall);
+        OnCallStarted(
+            [in] ImsCall imsCall);
 
-        OnCallStartFailed(ImsCall imsCall, ImsReasonInfo reasonInfo);
+        OnCallStartFailed(
+            [in] ImsCall imsCall, 
+            [in] ImsReasonInfo reasonInfo);
 
-        OnCallTerminated(ImsCall imsCall, ImsReasonInfo reasonInfo);
+        OnCallTerminated(
+            [in] ImsCall imsCall, 
+            [in] ImsReasonInfo reasonInfo);
 
         OnImsConnected();
 
@@ -67,14 +103,18 @@ module {
 
         OnImsSuspended();
 
-        OnVoiceMessageCountChanged(Int32 count);
+        OnVoiceMessageCountChanged(
+            [in] Int32 count);
 
 
-        Boolean IsInEmergencyCall();
+        IsInEmergencyCall(
+            [out] Boolean* result);
 
-        Boolean IsVolteEnabled();
+        IsVolteEnabled(
+            [out] Boolean* result);
 
-        Boolean IsVtEnabled();
+        IsVtEnabled(
+            [out] Boolean* result);
 
     }
 

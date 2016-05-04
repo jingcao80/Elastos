@@ -11,42 +11,73 @@ module {
 
         Dispose();
 
-        Boolean GetDesiredPowerState();
+        GetDesiredPowerState(
+            [out] Boolean* result);
 
 
-        RegisterForDataConnectionAttached(Handler h, Int32 what, Object obj);
+        RegisterForDataConnectionAttached(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDataConnectionAttached(Handler h);
+        UnregisterForDataConnectionAttached(
+            [in] Handler h);
 
-        RegisterForDataConnectionDetached(Handler h, Int32 what, Object obj);
+        RegisterForDataConnectionDetached(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDataConnectionDetached(Handler h);
+        UnregisterForDataConnectionDetached(
+            [in] Handler h);
 
-        RegisterForDataRegStateOrRatChanged(Handler h, Int32 what, Object obj);
+        RegisterForDataRegStateOrRatChanged(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForDataRegStateOrRatChanged(Handler h);
+        UnregisterForDataRegStateOrRatChanged(
+            [in] Handler h);
 
-        RegisterForNetworkAttached(Handler h, Int32 what, Object obj);
+        RegisterForNetworkAttached(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForNetworkAttached(Handler h);
+        UnregisterForNetworkAttached(
+            [in] Handler h);
 
-        RegisterForPsRestrictedEnabled(Handler h, Int32 what, Object obj);
+        RegisterForPsRestrictedEnabled(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForPsRestrictedEnabled(Handler h);
+        UnregisterForPsRestrictedEnabled(
+            [in] Handler h);
 
-        RegisterForPsRestrictedDisabled(Handler h, Int32 what, Object obj);
+        RegisterForPsRestrictedDisabled(
+            [in] Handler h, 
+            [in] Int32 what, 
+            [in] Object obj);
 
-        UnregisterForPsRestrictedDisabled(Handler h);
+        UnregisterForPsRestrictedDisabled(
+            [in] Handler h);
 
-        PowerOffRadioSafely(DcTrackerBase dcTracker);
+        PowerOffRadioSafely(
+            [in] DcTrackerBase dcTracker);
 
-        Boolean ProcessPendingRadioPowerOffAfterDataOff();
+        ProcessPendingRadioPowerOffAfterDataOff(
+            [out] Boolean* result);
 
-        String GetSystemProperty(String property, String defValue);
+        GetSystemProperty(
+            [in] String property, 
+            [in] String defValue,
+            [out] String* result);
 
         GetAllCellInfo();
 
-        SignalStrength GetSignalStrength();
+        GetSignalStrength(
+            [out] SignalStrength* result);
 
     }
 

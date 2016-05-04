@@ -8,29 +8,45 @@ module {
     namespace DataConnection {
 
     interface IDcSwitchAsyncChannel {
-        ReqConnect(String type);
+        ReqConnect(
+            [in] String type);
 
-        Int32 RspConnect(Message response);
+        RspConnect(
+            [in] Message response,
+            [out] Int32* result);
 
-        Int32 ConnectSync(String type);
+        ConnectSync(
+            [in] String type,
+            [out] Int32* result);
 
-        ReqDisconnect(String type);
+        ReqDisconnect(
+            [in] String type);
 
-        Int32 RspDisconnect(Message response);
+        RspDisconnect(
+            [in] Message response,
+            [out] Int32* result);
 
-        Int32 DisconnectSync(String type);
+        DisconnectSync(
+            [in] String type,
+            [out] Int32* result);
 
         ReqIsIdle();
 
-        Boolean RspIsIdle(Message response);
+        RspIsIdle(
+            [in] Message response,
+            [out] Boolean* result);
 
-        Boolean IsIdleSync();
+        IsIdleSync(
+            [out] Boolean* result);
 
         ReqIsIdleOrDeacting();
 
-        Boolean RspIsIdleOrDeacting(Message response);
+        RspIsIdleOrDeacting(
+            [in] Message response,
+            [out] Boolean* result);
 
-        Boolean IsIdleOrDeactingSync();
+        IsIdleOrDeactingSync(
+            [out] Boolean* result);
 
     }
 

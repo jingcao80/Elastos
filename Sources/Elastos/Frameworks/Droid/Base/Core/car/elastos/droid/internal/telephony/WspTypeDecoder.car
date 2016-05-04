@@ -7,43 +7,79 @@ module {
     namespace Telephony {
 
     interface IWspTypeDecoder {
-        Boolean DecodeTextString(Int32 startIndex);
+        DecodeTextString(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeTokenText(Int32 startIndex);
+        DecodeTokenText(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeShortInteger(Int32 startIndex);
+        DecodeShortInteger(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeLongInteger(Int32 startIndex);
+        DecodeLongInteger(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeIntegerValue(Int32 startIndex);
+        DecodeIntegerValue(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeUintvarInteger(Int32 startIndex);
+        DecodeUintvarInteger(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeValueLength(Int32 startIndex);
+        DecodeValueLength(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeExtensionMedia(Int32 startIndex);
+        DecodeExtensionMedia(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeConstrainedEncoding(Int32 startIndex);
+        DecodeConstrainedEncoding(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeContentType(Int32 startIndex);
+        DecodeContentType(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeContentLength(Int32 startIndex);
+        DecodeContentLength(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeContentLocation(Int32 startIndex);
+        DecodeContentLocation(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeXWapApplicationId(Int32 startIndex);
+        DecodeXWapApplicationId(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean SeekXWapApplicationId(Int32 startIndex, Int32 endIndex);
+        SeekXWapApplicationId(
+            [in] Int32 startIndex, 
+            [in] Int32 endIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeXWapContentURI(Int32 startIndex);
+        DecodeXWapContentURI(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Boolean DecodeXWapInitiatorURI(Int32 startIndex);
+        DecodeXWapInitiatorURI(
+            [in] Int32 startIndex,
+            [out] Boolean* result);
 
-        Int32 GetDecodedDataLength();
+        GetDecodedDataLength(
+            [out] Int32* result);
 
-        Int64 GetValue32();
+        GetValue32(
+            [out] Int64* result);
 
-        String GetValueString();
+        GetValueString(
+            [out] String* result);
 
         GetContentParameters();
 

@@ -14,11 +14,14 @@ module {
 
 
 
-        MessageClass GetMessageClass();
+        GetMessageClass(
+            [out] MessageClass* result);
 
-        Boolean IsUsimDataDownload();
+        IsUsimDataDownload(
+            [out] Boolean* result);
 
-        Int32 GetNumOfVoicemails();
+        GetNumOfVoicemails(
+            [out] Int32* result);
 
     }
 

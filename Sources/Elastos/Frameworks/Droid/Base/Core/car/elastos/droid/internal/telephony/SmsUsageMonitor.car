@@ -7,14 +7,24 @@ module {
     namespace Telephony {
 
     interface ISmsUsageMonitor {
-        Int32 MergeShortCodeCategories(Int32 type1, Int32 type2);
+        MergeShortCodeCategories(
+            [in] Int32 type1, 
+            [in] Int32 type2,
+            [out] Int32* result);
 
 
-        Int32 CheckDestination(String destAddress, String countryIso);
+        CheckDestination(
+            [in] String destAddress, 
+            [in] String countryIso,
+            [out] Int32* result);
 
-        Int32 GetPremiumSmsPermission(String packageName);
+        GetPremiumSmsPermission(
+            [in] String packageName,
+            [out] Int32* result);
 
-        SetPremiumSmsPermission(String packageName, Int32 permission);
+        SetPremiumSmsPermission(
+            [in] String packageName, 
+            [in] Int32 permission);
 
     }
 

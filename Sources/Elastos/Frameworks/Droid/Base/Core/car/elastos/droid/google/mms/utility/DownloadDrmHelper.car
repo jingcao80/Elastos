@@ -8,13 +8,24 @@ module {
     namespace Utility {
 
     interface IDownloadDrmHelper {
-        Boolean IsDrmMimeType(Context context, String mimetype);
+        IsDrmMimeType(
+            [in] Context context, 
+            [in] String mimetype,
+            [out] Boolean* result);
 
-        Boolean IsDrmConvertNeeded(String mimetype);
+        IsDrmConvertNeeded(
+            [in] String mimetype,
+            [out] Boolean* result);
 
-        String ModifyDrmFwLockFileExtension(String filename);
+        ModifyDrmFwLockFileExtension(
+            [in] String filename,
+            [out] String* result);
 
-        String GetOriginalMimeType(Context context, String path, String containingMime);
+        GetOriginalMimeType(
+            [in] Context context, 
+            [in] String path, 
+            [in] String containingMime,
+            [out] String* result);
 
     }
 

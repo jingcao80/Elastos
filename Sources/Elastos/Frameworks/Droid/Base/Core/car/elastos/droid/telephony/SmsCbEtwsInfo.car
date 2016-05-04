@@ -6,23 +6,33 @@ module {
     namespace Telephony {
 
     interface ISmsCbEtwsInfo {
-        WriteToParcel(Parcel dest, Int32 flags);
+        WriteToParcel(
+            [in] Parcel dest, 
+            [in] Int32 flags);
 
-        Int32 GetWarningType();
+        GetWarningType(
+            [out] Int32* result);
 
-        Boolean IsEmergencyUserAlert();
+        IsEmergencyUserAlert(
+            [out] Boolean* result);
 
-        Boolean IsPopupAlert();
+        IsPopupAlert(
+            [out] Boolean* result);
 
-        Int64 GetPrimaryNotificationTimestamp();
+        GetPrimaryNotificationTimestamp(
+            [out] Int64* result);
 
         GetPrimaryNotificationSignature();
 
-        Int32 DescribeContents();
+        DescribeContents(
+            [out] Int32* result);
 
-        SmsCbEtwsInfo CreateFromParcel(Parcel in);
+        CreateFromParcel(
+            [in] Parcel in,
+            [out] SmsCbEtwsInfo* result);
 
-        NewArray(Int32 size);
+        NewArray(
+            [in] Int32 size);
 
     }
 

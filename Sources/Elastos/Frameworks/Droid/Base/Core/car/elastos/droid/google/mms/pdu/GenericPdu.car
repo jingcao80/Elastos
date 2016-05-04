@@ -8,15 +8,20 @@ module {
     namespace Pdu {
 
     interface IGenericPdu {
-        PduHeaders GetPduHeaders();
+        GetPduHeaders(
+            [out] PduHeaders* result);
 
-        Int32 GetMessageType();
+        GetMessageType(
+            [out] Int32* result);
 
-        Int32 GetMmsVersion();
+        GetMmsVersion(
+            [out] Int32* result);
 
-        EncodedStringValue GetFrom();
+        GetFrom(
+            [out] EncodedStringValue* result);
 
-        SetFrom(EncodedStringValue value);
+        SetFrom(
+            [in] EncodedStringValue value);
 
     }
 

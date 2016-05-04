@@ -7,25 +7,45 @@ module {
     namespace Mms {
 
     interface IContentType {
-        Boolean IsSupportedType(String contentType);
+        IsSupportedType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsSupportedImageType(String contentType);
+        IsSupportedImageType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsSupportedAudioType(String contentType);
+        IsSupportedAudioType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsSupportedVideoType(String contentType);
+        IsSupportedVideoType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsTextType(String contentType);
+        IsTextType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsImageType(String contentType);
+        IsImageType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsAudioType(String contentType);
+        IsAudioType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsVideoType(String contentType);
+        IsVideoType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsDrmType(String contentType);
+        IsDrmType(
+            [in] String contentType,
+            [out] Boolean* result);
 
-        Boolean IsUnspecified(String contentType);
+        IsUnspecified(
+            [in] String contentType,
+            [out] Boolean* result);
 
     }
 

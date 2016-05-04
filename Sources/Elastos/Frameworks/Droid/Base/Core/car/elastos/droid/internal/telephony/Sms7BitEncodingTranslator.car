@@ -7,7 +7,9 @@ module {
     namespace Telephony {
 
     interface ISms7BitEncodingTranslator {
-        String Translate(CharSequence message);
+        Translate(
+            [in] CharSequence message,
+            [out] String* result);
 
     }
 
