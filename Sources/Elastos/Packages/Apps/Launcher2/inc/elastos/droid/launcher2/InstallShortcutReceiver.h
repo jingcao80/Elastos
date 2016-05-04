@@ -70,6 +70,10 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    InstallShortcutReceiver();
+
+    CARAPI constructor();
+
     //@Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,

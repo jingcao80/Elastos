@@ -223,6 +223,8 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    LauncherProvider();
+
     static CARAPI GetCONTENT_APPWIDGET_RESET_URI(
         /* [out] */ IUri** uri);
 

@@ -327,15 +327,18 @@ ECode WallpaperChooserDialogFragment::NewInstance(
 ECode WallpaperChooserDialogFragment::OnCreate(
      /* [in] */ IBundle* savedInstanceState)
 {
+Slogger::E("WallpaperChooserDialogFragment", "=================WallpaperChooserDialogFragment::OnCreate()1");
     DialogFragment::OnCreate(savedInstanceState);
     if (savedInstanceState != NULL) {
         Boolean res;
         savedInstanceState->ContainsKey(EMBEDDED_KEY, &res);
         if (res) {
+Slogger::E("WallpaperChooserDialogFragment", "=================WallpaperChooserDialogFragment::OnCreate return");
             return savedInstanceState->GetBoolean(EMBEDDED_KEY, &mEmbedded);
         }
     }
     else {
+Slogger::E("WallpaperChooserDialogFragment", "=================WallpaperChooserDialogFragment::OnCreate return");
         return IsInLayout(&mEmbedded);
     }
 

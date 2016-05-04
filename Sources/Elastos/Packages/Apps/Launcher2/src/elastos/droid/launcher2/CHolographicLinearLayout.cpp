@@ -41,7 +41,6 @@ ECode CHolographicLinearLayout::constructor(
 {
     LinearLayout::constructor(context, attrs, defStyle);
 
-
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::HolographicLinearLayout),
             ArraySize(Elastos::Droid::Launcher2::R::styleable::HolographicLinearLayout));

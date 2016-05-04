@@ -2684,13 +2684,15 @@ LauncherModel::LauncherModel()
 
 ECode LauncherModel::constructor()
 {
-    return NOERROR;
+    return BroadcastReceiver::constructor();
 }
 
 ECode LauncherModel::constructor(
     /* [in] */ ILauncherApplication* app,
     /* [in] */ IIconCache* iconCache)
 {
+    BroadcastReceiver::constructor();
+
     AutoPtr<IEnvironment> en;
     CEnvironment::AcquireSingleton((IEnvironment**)&en);
     en->IsExternalStorageRemovable(&mAppsCanBeOnRemoveableStorage);

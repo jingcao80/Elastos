@@ -114,6 +114,7 @@ ECode LauncherProvider::DatabaseHelper::SendAppWidgetResetNotify()
 ECode LauncherProvider::DatabaseHelper::OnCreate(
     /* [in] */ ISQLiteDatabase* db)
 {
+Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::OnCreate 1");
     if (LOGD) Slogger::D(LauncherProvider::TAG, "creating new launcher database");
 
     mMaxId = 1;
@@ -164,6 +165,7 @@ ECode LauncherProvider::DatabaseHelper::OnCreate(
         // Set a shared pref so that we know we need to load the default workspace later
         SetFlagToLoadDefaultWorkspaceLater();
     }
+Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::OnCreate return");
     return NOERROR;
 }
 
@@ -1779,17 +1781,25 @@ ECode LauncherProvider::GetCONTENT_APPWIDGET_RESET_URI(
     return NOERROR;
 }
 
+LauncherProvider::LauncherProvider()
+{
+    Slogger::E("LauncherProvider", "============================LauncherProvider::LauncherProvider()");
+}
+
 ECode LauncherProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
+Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 1");
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
+Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 2");
     mOpenHelper = new DatabaseHelper();
     mOpenHelper->constructor(context);
+Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 3");
     ILauncherApplication::Probe(context)->SetLauncherProvider(this);
     *result = TRUE;
+Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 4");
     return NOERROR;
 }
 

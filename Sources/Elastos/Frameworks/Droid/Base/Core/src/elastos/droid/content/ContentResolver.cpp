@@ -2116,7 +2116,8 @@ ECode ContentResolver::GetContentService(
     VALIDATE_NOT_NULL(contentService)
 
     if (NULL == sContentService) {
-        sContentService = IIContentService::Probe(ServiceManager::GetService(IContentResolver::CONTENT_SERVICE_NAME));
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContentResolver::CONTENT_SERVICE_NAME);
+        sContentService = IIContentService::Probe(service);
     }
 
     // if (false) Log.v("ContentService", "default service binder = " + b);

@@ -1,6 +1,6 @@
 
-#ifndef __ELASTOS_DROID_CONTENT_PM_CLAUNCHER_APPS_INFO_H__
-#define __ELASTOS_DROID_CONTENT_PM_CLAUNCHER_APPS_INFO_H__
+#ifndef __ELASTOS_DROID_CONTENT_PM_CLAUNCHERAPPS_H__
+#define __ELASTOS_DROID_CONTENT_PM_CLAUNCHERAPPS_H__
 
 #include "_Elastos_Droid_Content_Pm_CLauncherApps.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -37,8 +37,54 @@ CarClass(CLauncherApps)
     , public Object
     , public ILauncherApps
 {
+public:
+    class MyOnAppsChangedListener
+        : public Object
+        , public IOnAppsChangedListener
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        MyOnAppsChangedListener();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ IWeakReference* weakHost);
+
+        CARAPI OnPackageRemoved(
+            /* [in] */ IUserHandle* user,
+            /* [in] */ const String& packageName);
+
+        CARAPI OnPackageAdded(
+            /* [in] */ IUserHandle* user,
+            /* [in] */ const String& packageName);
+
+        CARAPI OnPackageChanged(
+            /* [in] */ IUserHandle* user,
+            /* [in] */ const String& packageName);
+
+        CARAPI OnPackagesAvailable(
+            /* [in] */ IUserHandle* user,
+            /* [in] */ ArrayOf<String>* packageNames,
+            /* [in] */ Boolean replacing);
+
+        CARAPI OnPackagesUnavailable(
+            /* [in] */ IUserHandle* user,
+            /* [in] */ ArrayOf<String>* packageNames,
+            /* [in] */ Boolean replacing);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
 private:
-    class CallbackInfo : public Object {
+    class CallbackInfo : public Object
+    {
     public:
         CallbackInfo() : mReplacing(FALSE) {}
 
@@ -48,7 +94,8 @@ private:
         AutoPtr<IUserHandle> mUser;
     };
 
-    class CallbackMessageHandler : public Handler {
+    class CallbackMessageHandler : public Handler
+    {
     public:
         TO_STRING_IMPL("CLauncherApps::CallbackMessageHandler")
 
@@ -93,46 +140,6 @@ private:
         static const Int32 MSG_UNAVAILABLE;// = 5;
 
         AutoPtr<ILauncherAppsCallback> mCallback;
-    };
-
-    class MyOnAppsChangedListener
-        : public Object
-        , public IOnAppsChangedListener
-        , public IBinder
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        MyOnAppsChangedListener(
-            /* [in] */ IWeakReference* weakHost);
-
-        CARAPI OnPackageRemoved(
-            /* [in] */ IUserHandle* user,
-            /* [in] */ const String& packageName);
-
-        CARAPI OnPackageAdded(
-            /* [in] */ IUserHandle* user,
-            /* [in] */ const String& packageName);
-
-        CARAPI OnPackageChanged(
-            /* [in] */ IUserHandle* user,
-            /* [in] */ const String& packageName);
-
-        CARAPI OnPackagesAvailable(
-            /* [in] */ IUserHandle* user,
-            /* [in] */ ArrayOf<String>* packageNames,
-            /* [in] */ Boolean replacing);
-
-        CARAPI OnPackagesUnavailable(
-            /* [in] */ IUserHandle* user,
-            /* [in] */ ArrayOf<String>* packageNames,
-            /* [in] */ Boolean replacing);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-    private:
-        AutoPtr<IWeakReference> mWeakHost;
     };
 
 public:
@@ -305,4 +312,4 @@ private:
 }
 }
 
-#endif // __ELASTOS_DROID_CONTENT_PM_CLAUNCHER_APPS_INFO_H__
+#endif // __ELASTOS_DROID_CONTENT_PM_CLAUNCHERAPPS_H__

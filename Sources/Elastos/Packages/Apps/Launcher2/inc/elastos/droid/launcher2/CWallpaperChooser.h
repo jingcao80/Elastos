@@ -17,6 +17,8 @@ CarClass(CWallpaperChooser)
 public:
     CAR_OBJECT_DECL();
 
+    CWallpaperChooser();
+
     // @Override
     CARAPI OnCreate(
         /* [in] */ IBundle* icicle);

@@ -25,6 +25,12 @@ CarClass(CUserInitializeReceiver)
     , public BroadcastReceiver
 {
 public:
+    CAR_OBJECT_DECL();
+
+    CUserInitializeReceiver();
+
+    CARAPI constructor();
+
     //@Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,

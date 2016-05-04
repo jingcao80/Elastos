@@ -265,8 +265,8 @@ const String CLauncherAppsImpl::TAG("LauncherAppsService");
 
 CLauncherAppsImpl::CLauncherAppsImpl()
 {
-    AutoPtr<PackageCallbackList> mListeners = new PackageCallbackList(this);
-    AutoPtr<MyPackageMonitor> mPackageMonitor = new MyPackageMonitor(this);
+    mListeners = new PackageCallbackList(this);
+    mPackageMonitor = new MyPackageMonitor(this);
 }
 
 CAR_INTERFACE_IMPL_2(CLauncherAppsImpl, Object, IILauncherApps, IBinder)

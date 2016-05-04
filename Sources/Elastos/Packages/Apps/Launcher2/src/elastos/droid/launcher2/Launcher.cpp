@@ -21,6 +21,7 @@
 #include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/launcher2/CLauncherBroadcastReceiver.h"
 #include "elastos/droid/launcher2/CLauncherCloseSystemDialogsIntentReceiver.h"
+#include "elastos/droid/launcher2/CLauncherAppWidgetResetObserver.h"
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Build.h"
@@ -188,6 +189,7 @@ ECode Launcher::MyAsyncTask::DoInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
+Logger::E("Launcher::MyAsyncTask", "============================MyAsyncTask::DoInBackground 1");
 
     AutoPtr<LocaleConfiguration> localeConfiguration = new LocaleConfiguration();
     mHost->ReadConfiguration(mHost, localeConfiguration);
@@ -199,6 +201,8 @@ ECode Launcher::MyAsyncTask::DoInBackground(
 ECode Launcher::MyAsyncTask::OnPostExecute(
     /* [in] */ IInterface* result)
 {
+Logger::E("Launcher::MyAsyncTask", "============================MyAsyncTask::OnPostExecute");
+
     mHost->sLocaleConfiguration = (LocaleConfiguration*)IObject::Probe(result);
     mHost->CheckForLocaleChange();  // recursive, but now with a locale configuration
     return NOERROR;
@@ -283,14 +287,14 @@ Launcher::MyBroadcastReceiver::MyBroadcastReceiver()
 
 ECode Launcher::MyBroadcastReceiver::constructor()
 {
-    return NOERROR;
+    return BroadcastReceiver::constructor();
 }
 
 ECode Launcher::MyBroadcastReceiver::constructor(
     /* [in] */ ILauncher* host)
 {
     mHost = (Launcher*)host;
-    return NOERROR;
+    return BroadcastReceiver::constructor();
 }
 
 ECode Launcher::MyBroadcastReceiver::OnReceive(
@@ -737,14 +741,14 @@ Launcher::CloseSystemDialogsIntentReceiver::CloseSystemDialogsIntentReceiver()
 
 ECode Launcher::CloseSystemDialogsIntentReceiver::constructor()
 {
-    return NOERROR;
+    return BroadcastReceiver::constructor();
 }
 
 ECode Launcher::CloseSystemDialogsIntentReceiver::constructor(
     /* [in] */ ILauncher* host)
 {
     mHost = (Launcher*)host;
-    return NOERROR;
+    return BroadcastReceiver::constructor();
 }
 
 ECode Launcher::CloseSystemDialogsIntentReceiver::OnReceive(
@@ -754,13 +758,23 @@ ECode Launcher::CloseSystemDialogsIntentReceiver::OnReceive(
     return mHost->CloseSystemDialogs();
 }
 
-Launcher::AppWidgetResetObserver::AppWidgetResetObserver(
-    /* [in] */ Launcher* host)
-    : mHost(host)
+Launcher::AppWidgetResetObserver::AppWidgetResetObserver()
 {
+}
+
+ECode Launcher::AppWidgetResetObserver::constructor()
+{
+    return NOERROR;//ContentObserver::constructor();
+}
+
+ECode Launcher::AppWidgetResetObserver::constructor(
+    /* [in] */ ILauncher* host)
+
+{
+    mHost = (Launcher*)host;
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    ContentObserver::constructor(handler);
+    return ContentObserver::constructor(handler);
 }
 
 ECode Launcher::AppWidgetResetObserver::OnChange(
@@ -1160,8 +1174,11 @@ Launcher::Launcher()
     , mRestoreScreenOrientationDelay(500)
     , mNewShortcutAnimatePage(-1)
 {
+Slogger::E("Launcher", "============================Launcher::Launcher() 1");
+    Activity::constructor();
+
     CLauncherCloseSystemDialogsIntentReceiver::New(this, (IBroadcastReceiver**)&mCloseSystemDialogsReceiver);
-    mWidgetObserver = new AppWidgetResetObserver(this);
+    CLauncherAppWidgetResetObserver::New(this, (IContentObserver**)&mWidgetObserver);
 
     mPendingAddInfo = new ItemInfo();
     mPendingAddInfo->constructor();
@@ -1187,12 +1204,13 @@ Launcher::Launcher()
     mHandler = new MyHandler(this);
 
     mBindPackagesUpdatedRunnable = new MyRunnable19(this);
+Slogger::E("Launcher", "============================Launcher::Launcher() return");
 }
 
 ECode Launcher::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-Slogger::E("Launcher", "============================OnCreate()");
+Slogger::E("Launcher", "============================Launcher::OnCreate 1");
     if (DEBUG_STRICT_MODE) {
         AutoPtr<IStrictModeThreadPolicyBuilder> builder;
         CStrictModeThreadPolicyBuilder::New((IStrictModeThreadPolicyBuilder**)&builder);
@@ -1226,17 +1244,17 @@ Slogger::E("Launcher", "============================OnCreate()");
     GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&mSharedPrefs);
     app->SetLauncher(this, (ILauncherModel**)&mModel);
     app->GetIconCache((IIconCache**)&mIconCache);
+
     mDragController = new DragController();
     ((DragController*)mDragController.Get())->constructor(ILauncher::Probe(this));
+
     GetLayoutInflater((ILayoutInflater**)&mInflater);
 
     AutoPtr<IAppWidgetManagerHelper> helper;
     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
     helper->GetInstance(IContext::Probe(this), (IAppWidgetManager**)&mAppWidgetManager);
-
     mAppWidgetHost = new LauncherAppWidgetHost(ILauncher::Probe(this), APPWIDGET_HOST_ID);
     IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
-
     // If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,
     // this also ensures that any synchronous binding below doesn't re-trigger another
     // LauncherModel load.
@@ -1246,17 +1264,18 @@ Slogger::E("Launcher", "============================OnCreate()");
     //     android.os.Debug.startMethodTracing(
     //             Environment.getExternalStorageDirectory() + "/launcher");
     // }
-
     CheckForLocaleChange();
-    SetContentView(
-            Elastos::Droid::Launcher2::R::layout::launcher);
+Slogger::E("Launcher", "============================Launcher::OnCreate 9");
+    SetContentView(R::layout::launcher);
+Slogger::E("Launcher", "============================Launcher::OnCreate 10");
     SetupViews();
+Slogger::E("Launcher", "============================Launcher::OnCreate 11");
     ShowFirstRunWorkspaceCling();
-
+Slogger::E("Launcher", "============================Launcher::OnCreate 12");
     RegisterContentObservers();
-
+Slogger::E("Launcher", "============================Launcher::OnCreate 13");
     LockAllApps();
-
+Slogger::E("Launcher", "============================Launcher::OnCreate 14");
     mSavedState = savedInstanceState;
     RestoreState(mSavedState);
 
@@ -1267,7 +1286,7 @@ Slogger::E("Launcher", "============================OnCreate()");
                 (IArrayList**)&list);
         mAppsCustomizeContent->OnPackagesUpdated(list);
     }
-
+Slogger::E("Launcher", "============================Launcher::OnCreate 15");
     // if (PROFILE_STARTUP) {
     //     android.os.Debug.stopMethodTracing();
     // }
@@ -1283,10 +1302,12 @@ Slogger::I("Launcher::OnCreate", "===================before call mModel->StartLo
             // configuration change) while launcher is in the foreground
             Int32 page;
             IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
+Slogger::E("Launcher", "============================Launcher::OnCreate 16");
             mModel->StartLoader(TRUE, page);
+Slogger::E("Launcher", "============================Launcher::OnCreate 17");
         }
     }
-
+Slogger::E("Launcher", "============================Launcher::OnCreate 18");
     Boolean res;
     mModel->IsAllAppsLoaded(&res);
     if (!res) {
@@ -1298,7 +1319,7 @@ Slogger::I("Launcher::OnCreate", "===================before call mModel->StartLo
                 Elastos::Droid::Launcher2::R::layout::apps_customize_progressbar,
                 appsCustomizeContentParent, (IView**)&tmp);
     }
-
+Slogger::E("Launcher", "============================Launcher::OnCreate 19");
     // For handling default keys
     CSpannableStringBuilder::New((ISpannableStringBuilder**)&mDefaultKeySsb);
     AutoPtr<ISelection> helper2;
@@ -1311,7 +1332,7 @@ Slogger::I("Launcher::OnCreate", "===================before call mModel->StartLo
     RegisterReceiver(mCloseSystemDialogsReceiver, filter, (IIntent**)&tmp);
 
     UpdateGlobalIcons();
-
+Slogger::E("Launcher", "============================Launcher::OnCreate return");
     // On large interfaces, we want the screen to auto-rotate based on the current orientation
     return UnlockScreenOrientation(TRUE);
 }
@@ -1358,6 +1379,7 @@ void Launcher::CheckForLocaleChange()
         AutoPtr<MyAsyncTask> task = new MyAsyncTask(this);
         AutoPtr<ArrayOf<IInterface*> > null;
         task->Execute(null);
+        return;
     }
 
     AutoPtr<IResources> resources;
@@ -1365,6 +1387,7 @@ void Launcher::CheckForLocaleChange()
     AutoPtr<IConfiguration> configuration;
     resources->GetConfiguration((IConfiguration**)&configuration);
 
+Logger::E("Launcher", "============================Launcher::CheckForLocaleChange sLocaleConfiguration=%p", sLocaleConfiguration.Get());
     String previousLocale = sLocaleConfiguration->mLocale;
     AutoPtr<ILocale> _locale;
     configuration->GetLocale((ILocale**)&_locale);
@@ -1967,17 +1990,22 @@ void Launcher::RestoreState(
 void Launcher::SetupViews()
 {
     AutoPtr<IDragController> dragController = mDragController;
-
-    FindViewById(Elastos::Droid::Launcher2::R::id::launcher, (IView**)&mLauncherView);
-    AutoPtr<IView> view;
-    FindViewById(Elastos::Droid::Launcher2::R::id::drag_layer, (IView**)&view);
+Slogger::E("Launcher", "============================Launcher::SetupViews 1");
+    mLauncherView = FindViewById(R::id::launcher);
+Slogger::E("Launcher", "============================Launcher::SetupViews 2 mLauncherView=%p",mLauncherView.Get());
+    AutoPtr<IView> view = FindViewById(R::id::drag_layer);
+Slogger::E("Launcher", "============================Launcher::SetupViews 2 view=%p",view.Get());
     mDragLayer = IDragLayer::Probe(view);
+Slogger::E("Launcher", "============================Launcher::SetupViews 2 mDragLayer=%p",mDragLayer.Get());
     AutoPtr<IView> view2;
-    IView::Probe(mDragLayer)->FindViewById(Elastos::Droid::Launcher2::R::id::workspace, (IView**)&view2);
+Slogger::E("Launcher", "============================Launcher::SetupViews 2 IView::Probe(mDragLayer)=%p",IView::Probe(mDragLayer));
+    IView::Probe(mDragLayer)->FindViewById(R::id::workspace, (IView**)&view2);
+Slogger::E("Launcher", "============================Launcher::SetupViews 3");
     mWorkspace = IWorkspace::Probe(view2);
-    FindViewById(Elastos::Droid::Launcher2::R::id::qsb_divider, (IView**)&mQsbDivider);
-    FindViewById(Elastos::Droid::Launcher2::R::id::dock_divider, (IView**)&mDockDivider);
-
+Slogger::E("Launcher", "============================Launcher::SetupViews 4");
+    mQsbDivider = FindViewById(R::id::qsb_divider);
+    mDockDivider = FindViewById(R::id::dock_divider);
+Slogger::E("Launcher", "============================Launcher::SetupViews 5");
     mLauncherView->SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
@@ -1988,8 +2016,7 @@ void Launcher::SetupViews()
     mDragLayer->Setup(this, dragController);
 
     // Setup the hotseat
-    AutoPtr<IView> view3;
-    FindViewById(Elastos::Droid::Launcher2::R::id::hotseat, (IView**)&view3);
+    AutoPtr<IView> view3 = FindViewById(Elastos::Droid::Launcher2::R::id::hotseat);
     mHotseat = IHotseat::Probe(view3);
     if (mHotseat != NULL) {
         mHotseat->Setup(this);
@@ -2007,8 +2034,7 @@ void Launcher::SetupViews()
     mSearchDropTargetBar = ISearchDropTargetBar::Probe(view4);
 
     // Setup AppsCustomize
-    AutoPtr<IView> view5;
-    FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane, (IView**)&view5);
+    AutoPtr<IView> view5 = FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane);
     mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view5);
     AutoPtr<IView> view6;
     IView::Probe(mAppsCustomizeTabHost)->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,

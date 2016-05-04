@@ -73,6 +73,8 @@ module
     using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Database.IContentObserver;
+    using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IViewGroup;
@@ -186,14 +188,14 @@ module
     [local]
     class CBubbleTextView {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -211,14 +213,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -239,14 +241,14 @@ module
     [local]
     class CCling {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -266,7 +268,7 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface IView;
@@ -284,14 +286,14 @@ module
     [local]
     class CDrawableStateProxyView {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -310,11 +312,11 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -341,7 +343,7 @@ module
          * @param attrs The attribtues set containing the Workspace's customization values.
          */
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface IView;
@@ -371,14 +373,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -397,11 +399,11 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         interface IView;
         interface IViewGroup;
@@ -423,14 +425,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -452,14 +454,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -476,14 +478,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -503,14 +505,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -530,11 +532,11 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -551,6 +553,8 @@ module
     }
 
     class CInstallShortcutReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
         interface IInstallShortcutReceiver;
     }
@@ -599,6 +603,16 @@ module
     }
 
     [local]
+    class CLauncherAppWidgetResetObserver {
+        constructor();
+
+        constructor(
+            [in] ILauncher* host);
+
+        interface IContentObserver;
+    }
+
+    [local]
     class CLauncherModel {
         constructor();
 
@@ -629,6 +643,17 @@ module
         interface ILauncherApplication;
     }
 
+    [local]
+    class CLauncherApplicationContentObserver {
+        constructor();
+
+        constructor(
+            [in] IHandler* handler,
+            [in] ILauncherApplication* host);
+
+        interface IContentObserver;
+    }
+
     singleton class CLauncherApplicationHelper {
         interface ILauncherApplicationHelper;
     }
@@ -636,14 +661,14 @@ module
     [local]
     class CPagedViewWidget {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -659,6 +684,8 @@ module
     }
 
     class CPackageChangedReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
     }
 
@@ -669,7 +696,7 @@ module
     [local]
     class CPagedViewWidgetImageView {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface IView;
@@ -681,6 +708,8 @@ module
     }
 
     class CPreloadReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
         interface IPreloadReceiver;
     }
@@ -690,14 +719,14 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -712,11 +741,11 @@ module
     [local]
     class CSearchDropTargetBar {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -736,6 +765,8 @@ module
     }
 
     class CUninstallShortcutReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
         interface IUninstallShortcutReceiver;
     }
@@ -745,6 +776,8 @@ module
     }
 
     class CUserInitializeReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
     }
 
@@ -767,11 +800,11 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 

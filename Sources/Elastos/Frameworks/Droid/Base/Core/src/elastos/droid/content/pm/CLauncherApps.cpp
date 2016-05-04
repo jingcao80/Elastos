@@ -1,5 +1,6 @@
 #include "elastos/droid/content/pm/CLauncherApps.h"
 #include "elastos/droid/content/pm/CLauncherActivityInfo.h"
+#include "elastos/droid/content/pm/CLauncherAppsOnAppsChangedListener.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/os/CHandler.h"
 #include <elastos/core/AutoLock.h>
@@ -146,10 +147,20 @@ ECode CLauncherApps::CallbackMessageHandler::PostOnPackagesUnavailable(
 
 CAR_INTERFACE_IMPL_2(CLauncherApps::MyOnAppsChangedListener, Object, IOnAppsChangedListener, IBinder)
 
-CLauncherApps::MyOnAppsChangedListener::MyOnAppsChangedListener(
-    /* [in] */ IWeakReference* weakHost)
-    : mWeakHost(weakHost)
+CLauncherApps::MyOnAppsChangedListener::MyOnAppsChangedListener()
 {
+}
+
+CLauncherApps::MyOnAppsChangedListener::constructor()
+{
+    return NOERROR;
+}
+
+CLauncherApps::MyOnAppsChangedListener::constructor(
+    /* [in] */ IWeakReference* weakHost)
+{
+    mWeakHost = weakHost;
+    return NOERROR;
 }
 
 ECode CLauncherApps::MyOnAppsChangedListener::OnPackageRemoved(
@@ -328,7 +339,11 @@ CAR_INTERFACE_IMPL(CLauncherApps, Object, ILauncherApps)
 CAR_OBJECT_IMPL(CLauncherApps)
 
 CLauncherApps::CLauncherApps()
-{}
+{
+    CArrayList::New((IList**)&mCallbacks);
+    CLauncherAppsOnAppsChangedListener::New(IWeakReference::Probe(TO_IINTERFACE(this)),
+            (IOnAppsChangedListener**)&mAppsChangedListener);
+}
 
 CLauncherApps::~CLauncherApps()
 {}
@@ -337,7 +352,6 @@ ECode CLauncherApps::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IILauncherApps* service)
 {
-    CArrayList::New((IList**)&mCallbacks);
     mContext = context;
     mService = service;
     context->GetPackageManager((IPackageManager**)&mPm);

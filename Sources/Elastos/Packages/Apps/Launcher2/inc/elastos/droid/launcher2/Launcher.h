@@ -151,6 +151,28 @@ public:
         AutoPtr<Launcher> mHost;
     };
 
+    /**
+     * Receives notifications whenever the appwidgets are reset.
+     */
+    class AppWidgetResetObserver
+        : public ContentObserver
+    {
+    public:
+        AppWidgetResetObserver();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ ILauncher* host);
+
+        //@Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        AutoPtr<Launcher> mHost;
+    };
+
 private:
     class MyRunnable
         : public Runnable
@@ -520,24 +542,6 @@ private:
         AutoPtr<Launcher> mHost;
         Boolean mSuccessfulDrop;
         AutoPtr<IRunnable> mOnCompleteRunnable;
-    };
-
-    /**
-     * Receives notifications whenever the appwidgets are reset.
-     */
-    class AppWidgetResetObserver
-        : public ContentObserver
-    {
-    public:
-        AppWidgetResetObserver(
-            /* [in] */ Launcher* host);
-
-        //@Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        AutoPtr<Launcher> mHost;
     };
 
     class MyRunnable10

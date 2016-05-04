@@ -7,6 +7,7 @@ using Elastos::Droid::Server::AppWidget::CAppWidgetServiceImpl;
 using Elastos::Droid::Server::CAppWidgetBackupBridge;
 using Elastos::Droid::Server::IAppWidgetBackupBridge;
 using Elastos::Droid::Server::IWidgetBackupProvider;
+using Elastos::Droid::Server::ISystemService;
 
 namespace Elastos {
 namespace Droid {
@@ -21,16 +22,15 @@ ECode AppWidgetService::constructor(
     /* [in] */ IContext* context)
 {
     VALIDATE_NOT_NULL(context);
-    // SystemService::constructor(context);
-    mImpl = new AppWidgetServiceImpl();
-    mImpl->constructor(context);
+    FAIL_RETURN(SystemService::constructor(context));
+    CAppWidgetServiceImpl::New(context, (IIAppWidgetService**)&mImpl);
     return NOERROR;
 }
 
 // @Override
 ECode AppWidgetService::OnStart()
 {
-    //PublishBinderService(IContext::APPWIDGET_SERVICE, mImpl);
+    PublishBinderService(IContext::APPWIDGET_SERVICE, IBinder::Probe(mImpl));
     AutoPtr<IAppWidgetBackupBridge> bridge;
     CAppWidgetBackupBridge::AcquireSingleton((IAppWidgetBackupBridge**)&bridge);
     bridge->Register(IWidgetBackupProvider::Probe(mImpl));
@@ -41,8 +41,8 @@ ECode AppWidgetService::OnStart()
 ECode AppWidgetService::OnBootPhase(
     /* [in] */ Int32 phase)
 {
-    if (phase == -1/*PHASE_THIRD_PARTY_APPS_CAN_START*/) {
-        mImpl->SetSafeMode(FALSE/*IsSafeMode()*/);
+    if (phase == ISystemService::PHASE_THIRD_PARTY_APPS_CAN_START) {
+        ((CAppWidgetServiceImpl*)mImpl.Get())->SetSafeMode(FALSE/*IsSafeMode()*/);
     }
     return NOERROR;
 }

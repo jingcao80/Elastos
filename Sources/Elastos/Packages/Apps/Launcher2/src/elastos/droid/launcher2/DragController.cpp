@@ -118,7 +118,7 @@ ECode DragController::constructor(
     /* [in] */ ILauncher* launcher)
 {
     AutoPtr<IResources> r;
-    IView::Probe(launcher)->GetResources((IResources**)&r);
+    IContext::Probe(launcher)->GetResources((IResources**)&r);
     mLauncher = launcher;
     CHandler::New((IHandler**)&mHandler);
     r->GetDimensionPixelSize(

@@ -1221,11 +1221,11 @@ ECode Workspace::OnChildViewAdded(
     GetChildCount(&count);
 
     AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
-    (*array)[0] = TO_IINTERFACE(CoreUtils::Convert(count));
+    array->Set(0, TO_IINTERFACE(CoreUtils::Convert(count)));
     String str;
-    context->GetString(
-            Elastos::Droid::Launcher2::R::string::workspace_description_format,
-            array, &str);
+Slogger::E("Workspace", "============================Workspace::OnChildViewAdded 1 context=%p", context.Get());
+    context->GetString(R::string::workspace_description_format, array, &str);
+Slogger::E("Workspace", "============================Workspace::OnChildViewAdded 1 str=%s",str.string());
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     return IView::Probe(cl)->SetContentDescription(cchar);
 }

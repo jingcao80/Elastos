@@ -3,6 +3,7 @@
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/launcher2/WidgetPreviewLoader.h"
 #include "elastos/droid/launcher2/CLauncherModel.h"
+#include "elastos/droid/launcher2/CLauncherApplicationContentObserver.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Service.h"
@@ -23,12 +24,21 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-LauncherApplication::MyContentObserver::MyContentObserver(
-    /* [in] */ IHandler* handler,
-    /* [in] */ LauncherApplication* host)
-    : mHost(host)
+LauncherApplication::MyContentObserver::MyContentObserver()
 {
-    ContentObserver::constructor(handler);
+}
+
+LauncherApplication::MyContentObserver::constructor()
+{
+    return NOERROR;//ContentObserver::constructor();
+}
+
+LauncherApplication::MyContentObserver::constructor(
+    /* [in] */ IHandler* handler,
+    /* [in] */ ILauncherApplication* host)
+{
+    mHost = (LauncherApplication*)host;
+    return ContentObserver::constructor(handler);
 }
 
 ECode LauncherApplication::MyContentObserver::OnChange(
@@ -51,14 +61,16 @@ const String LauncherApplication::sSharedPreferencesKey("com.android.launcher2.p
 
 LauncherApplication::LauncherApplication()
 {
+Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication 1");
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    mFavoritesObserver = new MyContentObserver(handler, this);
+    CLauncherApplicationContentObserver::New(handler, this, (IContentObserver**)&mFavoritesObserver);
+Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication 2");
 }
 
 ECode LauncherApplication::OnCreate()
 {
-Slogger::E("LauncherApplication", "============================OnCreate()");
+Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate 1");
     Application::OnCreate();
 
     // set sIsScreenXLarge and sScreenDensity *before* creating icon cache
@@ -104,7 +116,7 @@ Slogger::E("LauncherApplication", "============================OnCreate()");
     // Register for changes to the favorites
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-Slogger::E("LauncherApplication", "============================OnCreate() return");
+Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate return");
     return resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
             mFavoritesObserver);
 }

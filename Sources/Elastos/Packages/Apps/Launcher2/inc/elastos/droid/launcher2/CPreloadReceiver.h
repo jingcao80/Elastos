@@ -44,6 +44,10 @@ public:
 
     CAR_OBJECT_DECL();
 
+    CPreloadReceiver();
+
+    CARAPI constructor();
+
     //@Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,
