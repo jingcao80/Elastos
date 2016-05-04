@@ -1,0 +1,233 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface ICallManager {
+        CallManager GetInstance();
+
+        Boolean IsSamePhone(Phone p1, Phone p2);
+
+        GetAllPhones();
+
+        State GetState();
+
+        State GetState(Int64 subId);
+
+        Int32 GetServiceState();
+
+        Int32 GetServiceState(Int64 subId);
+
+        Phone GetPhoneInCall();
+
+        Phone GetPhoneInCall(Int64 subId);
+
+        Boolean RegisterPhone(Phone phone);
+
+        UnregisterPhone(Phone phone);
+
+        Phone GetDefaultPhone();
+
+        Phone GetFgPhone();
+
+        Phone GetFgPhone(Int64 subId);
+
+        Phone GetBgPhone();
+
+        Phone GetBgPhone(Int64 subId);
+
+        Phone GetRingingPhone();
+
+        Phone GetRingingPhone(Int64 subId);
+
+        Boolean CanConference(Call heldCall);
+
+        Boolean CanConference(Call heldCall, Int64 subId);
+
+        If (fgPhone instanceof SipPhone);
+
+        ClearDisconnected();
+
+        ClearDisconnected(Int64 subId);
+
+        Boolean CanTransfer(Call heldCall);
+
+        Boolean CanTransfer(Call heldCall, Int64 subId);
+
+        GetPendingMmiCodes(Phone phone);
+
+        Boolean SendUssdResponse(Phone phone, String ussdMessge);
+
+        SetMute(Boolean muted);
+
+        Boolean GetMute();
+
+        SetEchoSuppressionEnabled();
+
+        Boolean SendDtmf(Char32 c);
+
+        Boolean StartDtmf(Char32 c);
+
+        StopDtmf();
+
+        Boolean SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message onComplete);
+
+        RegisterForDisconnect(Handler h, Int32 what, Object obj);
+
+        UnregisterForDisconnect(Handler h);
+
+        RegisterForPreciseCallStateChanged(Handler h, Int32 what, Object obj);
+
+        UnregisterForPreciseCallStateChanged(Handler h);
+
+        RegisterForUnknownConnection(Handler h, Int32 what, Object obj);
+
+        UnregisterForUnknownConnection(Handler h);
+
+        RegisterForNewRingingConnection(Handler h, Int32 what, Object obj);
+
+        UnregisterForNewRingingConnection(Handler h);
+
+        RegisterForIncomingRing(Handler h, Int32 what, Object obj);
+
+        UnregisterForIncomingRing(Handler h);
+
+        RegisterForRingbackTone(Handler h, Int32 what, Object obj);
+
+        UnregisterForRingbackTone(Handler h);
+
+        RegisterForOnHoldTone(Handler h, Int32 what, Object obj);
+
+        UnregisterForOnHoldTone(Handler h);
+
+        RegisterForResendIncallMute(Handler h, Int32 what, Object obj);
+
+        UnregisterForResendIncallMute(Handler h);
+
+        RegisterForMmiInitiate(Handler h, Int32 what, Object obj);
+
+        UnregisterForMmiInitiate(Handler h);
+
+        RegisterForMmiComplete(Handler h, Int32 what, Object obj);
+
+        UnregisterForMmiComplete(Handler h);
+
+        RegisterForEcmTimerReset(Handler h, Int32 what, Object obj);
+
+        UnregisterForEcmTimerReset(Handler h);
+
+        RegisterForServiceStateChanged(Handler h, Int32 what, Object obj);
+
+        UnregisterForServiceStateChanged(Handler h);
+
+        RegisterForSuppServiceNotification(Handler h, Int32 what, Object obj);
+
+        UnregisterForSuppServiceNotification(Handler h);
+
+        RegisterForSuppServiceFailed(Handler h, Int32 what, Object obj);
+
+        UnregisterForSuppServiceFailed(Handler h);
+
+        RegisterForInCallVoicePrivacyOn(Handler h, Int32 what, Object obj);
+
+        UnregisterForInCallVoicePrivacyOn(Handler h);
+
+        RegisterForInCallVoicePrivacyOff(Handler h, Int32 what, Object obj);
+
+        UnregisterForInCallVoicePrivacyOff(Handler h);
+
+        RegisterForCallWaiting(Handler h, Int32 what, Object obj);
+
+        UnregisterForCallWaiting(Handler h);
+
+        RegisterForSignalInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForSignalInfo(Handler h);
+
+        RegisterForDisplayInfo(Handler h, Int32 what, Object obj);
+
+        UnregisterForDisplayInfo(Handler h);
+
+        RegisterForCdmaOtaStatusChange(Handler h, Int32 what, Object obj);
+
+        UnregisterForCdmaOtaStatusChange(Handler h);
+
+        RegisterForSubscriptionInfoReady(Handler h, Int32 what, Object obj);
+
+        UnregisterForSubscriptionInfoReady(Handler h);
+
+        RegisterForSubscriptionChange(Handler h, Int32 what, Object obj);
+
+        UnregisterForSubscriptionChange(Handler h);
+
+        SetActiveSubscription(Int64 subscription);
+
+        RegisterForPostDialCharacter(Handler h, Int32 what, Object obj);
+
+        UnregisterForPostDialCharacter(Handler h);
+
+        GetRingingCalls();
+
+        GetForegroundCalls();
+
+        GetBackgroundCalls();
+
+        Boolean HasActiveFgCall();
+
+        Boolean HasActiveFgCall(Int64 subId);
+
+        Boolean HasActiveBgCall();
+
+        Boolean HasActiveBgCall(Int64 subId);
+
+        Boolean HasActiveRingingCall();
+
+        Boolean HasActiveRingingCall(Int64 subId);
+
+        Call GetActiveFgCall();
+
+        Call GetActiveFgCall(Int64 subId);
+
+        Call GetFirstActiveBgCall();
+
+        Call GetFirstActiveBgCall(Int64 subId);
+
+        Call GetFirstActiveRingingCall();
+
+        Call GetFirstActiveRingingCall(Int64 subId);
+
+        State GetActiveFgCallState();
+
+        State GetActiveFgCallState(Int64 subId);
+
+        GetFgCallConnections();
+
+        GetFgCallConnections(Int64 subId);
+
+        GetBgCallConnections();
+
+        GetBgCallConnections(Int64 subId);
+
+        Connection GetFgCallLatestConnection();
+
+        Connection GetFgCallLatestConnection(Int64 subId);
+
+        Boolean HasDisconnectedFgCall();
+
+        Boolean HasDisconnectedFgCall(Int64 subId);
+
+        Boolean HasDisconnectedBgCall();
+
+        Boolean HasDisconnectedBgCall(Int64 subId);
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

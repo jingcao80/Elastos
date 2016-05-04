@@ -1,0 +1,67 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IPhoneSubInfoController {
+        String GetDeviceId();
+
+        String GetDeviceIdForSubscriber(Int64 subId);
+
+        String GetImeiForSubscriber(Int64 subId);
+
+        String GetDeviceSvn();
+
+        String GetSubscriberId();
+
+        String GetSubscriberIdForSubscriber(Int64 subId);
+
+        String GetIccSerialNumber();
+
+        String GetIccSerialNumberForSubscriber(Int64 subId);
+
+        String GetLine1Number();
+
+        String GetLine1NumberForSubscriber(Int64 subId);
+
+        String GetLine1AlphaTag();
+
+        String GetLine1AlphaTagForSubscriber(Int64 subId);
+
+        String GetMsisdn();
+
+        String GetMsisdnForSubscriber(Int64 subId);
+
+        String GetVoiceMailNumber();
+
+        String GetVoiceMailNumberForSubscriber(Int64 subId);
+
+        String GetCompleteVoiceMailNumber();
+
+        String GetCompleteVoiceMailNumberForSubscriber(Int64 subId);
+
+        String GetVoiceMailAlphaTag();
+
+        String GetVoiceMailAlphaTagForSubscriber(Int64 subId);
+
+        String GetIsimImpi();
+
+        String GetIsimDomain();
+
+        GetIsimImpu();
+
+        String GetGroupIdLevel1();
+
+        String GetGroupIdLevel1ForSubscriber(Int64 subId);
+
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

@@ -1,0 +1,37 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    interface IPduBody {
+        Boolean AddPart(PduPart part);
+
+        AddPart(Int32 index, PduPart part);
+
+        PduPart RemovePart(Int32 index);
+
+        RemoveAll();
+
+        PduPart GetPart(Int32 index);
+
+        Int32 GetPartIndex(PduPart part);
+
+        Int32 GetPartsNum();
+
+        PduPart GetPartByContentId(String cid);
+
+        PduPart GetPartByContentLocation(String contentLocation);
+
+        PduPart GetPartByName(String name);
+
+        PduPart GetPartByFileName(String filename);
+
+    }
+
+}//Telephony
+}//Droid
+}//Elastos
+
+}

@@ -1,0 +1,39 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    interface IUsimPhoneBookManager {
+        Reset();
+
+        LoadEfFilesFromUsim();
+
+        InvalidateCache();
+
+        Boolean UpdateEmailFile(Int32 adnRecNum, String oldEmail, String newEmail, Int32 efidIndex);
+
+        Boolean UpdateAnrFile(Int32 adnRecNum, String oldAnr, String newAnr, Int32 efidIndex);
+
+        Int32 GetPbrIndexBy(Int32 adnIndex);
+
+        ParseType1EmailFile(Int32 numRecs, Int32 pbrIndex);
+
+        ParseType1AnrFile(Int32 numRecs, Int32 pbrIndex);
+
+        HandleMessage(Message msg);
+
+        ParseTag(SimTlv tlv, Int32 recNum);
+
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

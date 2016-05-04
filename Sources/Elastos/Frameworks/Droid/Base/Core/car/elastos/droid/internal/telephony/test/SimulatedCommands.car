@@ -1,0 +1,221 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Test {
+
+    interface ISimulatedCommands {
+        GetIccCardStatus(Message result);
+
+        SupplyIccPin(String pin, Message result);
+
+        SupplyIccPuk(String puk, String newPin, Message result);
+
+        SupplyIccPin2(String pin2, Message result);
+
+        SupplyIccPuk2(String puk2, String newPin2, Message result);
+
+        ChangeIccPin(String oldPin, String newPin, Message result);
+
+        ChangeIccPin2(String oldPin2, String newPin2, Message result);
+
+        SupplyDepersonalization(String netpin, String type, Message result);
+
+        GetCurrentCalls (Message result);
+
+        GetPDPContextList(Message result);
+
+        GetDataCallList(Message result);
+
+        Dial (String address, Int32 clirMode, Message result);
+
+        Dial(String address, Int32 clirMode, UUSInfo uusInfo, Message result);
+
+        GetIMSI(Message result);
+
+        GetIMSIForApp(String aid, Message result);
+
+        GetIMEI(Message result);
+
+        GetIMEISV(Message result);
+
+        HangupConnection (Int32 gsmIndex, Message result);
+
+        HangupWaitingOrBackground (Message result);
+
+        HangupForegroundResumeBackground (Message result);
+
+        SwitchWaitingOrHoldingAndActive (Message result);
+
+        Conference (Message result);
+
+        ExplicitCallTransfer (Message result);
+
+        SeparateConnection (Int32 gsmIndex, Message result);
+
+        AcceptCall (Message result);
+
+        RejectCall (Message result);
+
+        GetLastCallFailCause (Message result);
+
+        GetLastPdpFailCause (Message result);
+
+        GetLastDataCallFailCause(Message result);
+
+        SetMute (Boolean enableMute, Message result);
+
+        SetBandMode (Int32 bandMode, Message result);
+
+        QueryAvailableBandMode (Message result);
+
+        SendTerminalResponse(String contents, Message response);
+
+        SendEnvelope(String contents, Message response);
+
+        SendEnvelopeWithStatus(String contents, Message response);
+
+        GetVoiceRegistrationState (Message result);
+
+        GetDataRegistrationState (Message result);
+
+        GetOperator(Message result);
+
+        SendDtmf(Char32 c, Message result);
+
+        StartDtmf(Char32 c, Message result);
+
+        StopDtmf(Message result);
+
+        SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message result);
+
+        SendSMS (String smscPDU, String pdu, Message result);
+
+        DeleteSmsOnSim(Int32 index, Message response);
+
+        DeleteSmsOnRuim(Int32 index, Message response);
+
+        WriteSmsToSim(Int32 status, String smsc, String pdu, Message response);
+
+        WriteSmsToRuim(Int32 status, String pdu, Message response);
+
+        DeactivateDataCall(Int32 cid, Int32 reason, Message result);
+
+        GetPreferredNetworkType(Message result);
+
+        GetNeighboringCids(Message result);
+
+        SetLocationUpdates(Boolean enable, Message response);
+
+        GetSmscAddress(Message result);
+
+        SetSmscAddress(String address, Message result);
+
+        ReportSmsMemoryStatus(Boolean available, Message result);
+
+        ReportStkServiceIsRunning(Message result);
+
+        GetCdmaSubscriptionSource(Message result);
+
+        SetRadioPower(Boolean on, Message result);
+
+        AcknowledgeLastIncomingGsmSms(Boolean success, Int32 cause, Message result);
+
+        AcknowledgeLastIncomingCdmaSms(Boolean success, Int32 cause, Message result);
+
+        QueryCLIP(Message response);
+
+        SetNetworkSelectionModeAutomatic(Message result);
+
+        GetAvailableNetworks(Message result);
+
+        TriggerIncomingStkCcAlpha(String alphaString);
+
+        SendStkCcAplha(String alphaString);
+
+        TriggerIncomingUssd(String statusCode, String message);
+
+        SendUSSD (String ussdString, Message result);
+
+        CancelPendingUssd (Message response);
+
+        ResetRadio(Message result);
+
+        TriggerSsn(Int32 type, Int32 code);
+
+        QueryCdmaRoamingPreference(Message response);
+
+        SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response);
+
+        GetPreferredVoicePrivacy(Message result);
+
+        SetPreferredVoicePrivacy(Boolean enable, Message result);
+
+        SetTTYMode(Int32 ttyMode, Message response);
+
+        QueryTTYMode(Message response);
+
+        SendCDMAFeatureCode(String FeatureCode, Message response);
+
+        SetCdmaBroadcastActivation(Boolean activate, Message response);
+
+        GetCdmaBroadcastConfig(Message response);
+
+        ForceDataDormancy(Message response);
+
+        SetGsmBroadcastActivation(Boolean activate, Message response);
+
+        GetGsmBroadcastConfig(Message response);
+
+        SupplyIccPinForApp(String pin, String aid, Message response);
+
+        SupplyIccPukForApp(String puk, String newPin, String aid, Message response);
+
+        SupplyIccPin2ForApp(String pin2, String aid, Message response);
+
+        SupplyIccPuk2ForApp(String puk2, String newPin2, String aid, Message response);
+
+        ChangeIccPinForApp(String oldPin, String newPin, String aidPtr, Message response);
+
+        RequestIsimAuthentication(String nonce, Message response);
+
+        RequestIccSimAuthentication(Int32 authContext, String data, String aid, Message response);
+
+        GetVoiceRadioTechnology(Message response);
+
+        GetCellInfoList(Message response);
+
+        SetCellInfoListRate(Int32 rateInMillis, Message response);
+
+        GetImsRegistrationState(Message response);
+
+        IccOpenLogicalChannel(String AID, Message response);
+
+        IccCloseLogicalChannel(Int32 channel, Message response);
+
+        GetAtr(Message response);
+
+        NvReadItem(Int32 itemID, Message response);
+
+        NvWriteItem(Int32 itemID, String itemValue, Message response);
+
+        NvResetConfig(Int32 resetType, Message response);
+
+        GetHardwareConfig(Message result);
+
+        RequestShutdown(Message result);
+
+        Boolean NeedsOldRilFeature(String feature);
+
+    }
+
+    }//Test
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

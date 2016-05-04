@@ -1,0 +1,21 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Cdma {
+
+    interface ISignalToneUtil {
+        Int32 GetAudioToneFromSignalInfo(Int32 signalType, Int32 alertPitch, Int32 signal);
+
+    }
+
+    }//Cdma
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

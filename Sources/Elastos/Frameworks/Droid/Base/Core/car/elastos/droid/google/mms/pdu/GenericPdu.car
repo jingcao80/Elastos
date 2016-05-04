@@ -1,0 +1,25 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    interface IGenericPdu {
+        PduHeaders GetPduHeaders();
+
+        Int32 GetMessageType();
+
+        Int32 GetMmsVersion();
+
+        EncodedStringValue GetFrom();
+
+        SetFrom(EncodedStringValue value);
+
+    }
+
+}//Telephony
+}//Droid
+}//Elastos
+
+}

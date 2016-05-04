@@ -1,0 +1,41 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    interface IGsmCallTracker {
+        GsmCallTracker (GSMPhone phone);
+
+        Dispose();
+
+        RegisterForVoiceCallStarted(Handler h, Int32 what, Object obj);
+
+        UnregisterForVoiceCallStarted(Handler h);
+
+        RegisterForVoiceCallEnded(Handler h, Int32 what, Object obj);
+
+        UnregisterForVoiceCallEnded(Handler h);
+
+        Catch (CallStateException ex);
+
+        Catch (CallStateException ex);
+
+        HangupWaitingOrBackground();
+
+        HangupForegroundResumeBackground();
+
+        HangupAllConnections(GsmCall call);
+
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}
