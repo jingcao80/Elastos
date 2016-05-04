@@ -260,9 +260,6 @@ protected:
 
         CARAPI_(String) GetVirtualIncrementButtonText();
 
-        static CARAPI_(String) FormatNumberWithLocale(
-            /* [in] */ Int32 value);
-
     private:
         const static Int32 UNDEFINED; // = Math::INT32_MIN_VALUE;
         const static Int32 VIRTUAL_VIEW_ID_INCREMENT = 1;
@@ -644,6 +641,9 @@ private:
         /* [in] */ Int64 selectionEnd);
 
     CARAPI_(Boolean) EnsureScrollWheelAdjusted();
+
+    static CARAPI_(String) FormatNumberWithLocale(
+        /* [in] */ Int32 value);
 
 private:
     friend class InputTextFilter;

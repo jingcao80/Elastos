@@ -1097,14 +1097,6 @@ String NumberPicker::AccessibilityNodeProviderImpl::GetVirtualIncrementButtonTex
     return String(NULL);
 }
 
-String NumberPicker::AccessibilityNodeProviderImpl::FormatNumberWithLocale(
-    /* [in] */ Int32 value)
-{
-    String result("");
-    result.AppendFormat("%d", value);
-    return result;
-}
-
 //==============================================================================================
 //          NumberPicker::TwoDigitFormatter
 //==============================================================================================
@@ -2332,7 +2324,7 @@ void NumberPicker::TryComputeMaxWidth()
         Float maxDigitWidth = 0;
         for (Int32 i = 0; i <= 9; i++) {
             Float digitWidth = 0;
-            mSelectorWheelPaint->MeasureText(mAccessibilityNodeProvider->FormatNumberWithLocale(i), &digitWidth);
+            mSelectorWheelPaint->MeasureText(FormatNumberWithLocale(i), &digitWidth);
             if (digitWidth > maxDigitWidth) {
                 maxDigitWidth = digitWidth;
             }
@@ -2618,7 +2610,7 @@ String NumberPicker::FormatNumber(
         return str;
     }
     else {
-        return mAccessibilityNodeProvider->FormatNumberWithLocale(value);
+        return FormatNumberWithLocale(value);
     }
 }
 
@@ -2626,7 +2618,7 @@ void NumberPicker::ValidateInputTextView(
     /* [in] */ IView* v)
 {
     AutoPtr<ICharSequence> charSeq;
-    (ITextView::Probe(v))->GetText((ICharSequence**)&charSeq);
+    ITextView::Probe(v)->GetText((ICharSequence**)&charSeq);
     String str = String(NULL);
     charSeq->ToString(&str);
     if (str.IsEmpty()) {
@@ -2783,6 +2775,19 @@ Boolean NumberPicker::EnsureScrollWheelAdjusted()
         return TRUE;
     }
     return FALSE;
+}
+
+String NumberPicker::FormatNumberWithLocale(
+    /* [in] */ Int32 value)
+{
+    AutoPtr<ILocaleHelper> helper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+    AutoPtr<ILocale> locale;
+    helper->GetDefault((ILocale**)&locale);
+
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, CoreUtils::Convert(value));
+    return StringUtils::Format(locale, String("%d"), args);
 }
 
 }// namespace Widget
