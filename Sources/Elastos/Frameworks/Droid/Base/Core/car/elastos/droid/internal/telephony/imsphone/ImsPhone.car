@@ -22,8 +22,6 @@ module {
 
         ExplicitCallTransfer();
 
-        Catch (CallStateException e);
-
         NotifySuppSvcNotification(SuppServiceNotification suppSvc);
 
         Boolean HandleInCallMmiCommands(String dialString);
@@ -43,10 +41,6 @@ module {
         Boolean GetMute();
 
         State GetState();
-
-        Catch (ImsException e);
-
-        If (e instanceof ImsException);
 
         HandleMessage (Message msg);
 

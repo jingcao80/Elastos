@@ -13,19 +13,6 @@ module {
     interface IRIL {
         OnDisplayAdded(Int32 displayId);
 
-        Catch (IOException ex);
-
-        Catch (RuntimeException exc);
-
-        Catch (IOException ex2);
-
-        Catch (Throwable tr);
-
-        Catch (Throwable tr);
-
-        Catch (Throwable tr);
-
-        Catch (ClassCastException e);
 
         interface IRILUnsolOemHookBuffer {
             Int32 GetRilInstance();

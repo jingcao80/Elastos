@@ -8,11 +8,8 @@ module {
     namespace DataConnection {
 
     interface IDataCallResponse {
-        Catch (IllegalArgumentException e);
 
-        Catch (IllegalArgumentException e);
 
-        Catch (IllegalArgumentException e);
 
     }
 

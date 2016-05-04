@@ -20,9 +20,7 @@ module {
 
         UnregisterForVoiceCallEnded(Handler h);
 
-        Catch (CallStateException ex);
 
-        Catch (CallStateException ex);
 
         HangupWaitingOrBackground();
 

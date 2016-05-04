@@ -7,17 +7,11 @@ module {
     namespace Telephony {
 
     interface IDebugService {
-        Catch (Exception e);
 
-        Catch (Exception e);
 
-        Catch (Exception e);
 
-        Catch (Exception e);
 
-        Catch (Exception e);
 
-        Catch (Exception e);
 
     }
 

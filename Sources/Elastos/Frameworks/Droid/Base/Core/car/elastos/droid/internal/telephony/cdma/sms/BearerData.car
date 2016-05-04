@@ -13,11 +13,9 @@ module {
 
         String GetLanguage();
 
-        Catch (CodingException ex);
 
         Encode(BearerData bData);
 
-        Catch (CodingException ex);
 
     }
 

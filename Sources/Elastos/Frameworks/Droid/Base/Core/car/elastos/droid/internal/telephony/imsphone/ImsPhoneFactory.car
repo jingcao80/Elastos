@@ -8,7 +8,6 @@ module {
     namespace ImsPhone {
 
     interface IImsPhoneFactory {
-        Catch (Exception e);
 
     }
 

@@ -8,9 +8,6 @@ module {
     namespace Gsm {
 
     interface IGSMPhone {
-        If (ci instanceof SimulatedRadioControl);
-
-        If (ci instanceof SimulatedRadioControl);
 
         Dispose();
 
@@ -58,11 +55,9 @@ module {
 
         Call GetRingingCall();
 
-        Catch (CallStateException e);
 
         Boolean IsInCall();
 
-        Catch (CallStateException e);
 
         String GetVoiceMailAlphaTag();
 

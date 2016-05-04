@@ -9,7 +9,6 @@ module {
     interface ISmsUsageMonitor {
         Int32 MergeShortCodeCategories(Int32 type1, Int32 type2);
 
-        Catch (XmlPullParserException e);
 
         Int32 CheckDestination(String destAddress, String countryIso);
 

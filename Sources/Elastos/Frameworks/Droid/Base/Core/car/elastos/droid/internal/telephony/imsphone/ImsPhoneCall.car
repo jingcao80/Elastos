@@ -12,7 +12,6 @@ module {
 
         Bundle GetExtras();
 
-        Catch (ImsException e);
 
         Update (ImsPhoneConnection conn, ImsCall imsCall, State state);
 

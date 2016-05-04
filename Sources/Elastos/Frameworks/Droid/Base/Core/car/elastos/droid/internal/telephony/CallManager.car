@@ -47,8 +47,6 @@ module {
 
         Boolean CanConference(Call heldCall, Int64 subId);
 
-        If (fgPhone instanceof SipPhone);
-
         ClearDisconnected();
 
         ClearDisconnected(Int64 subId);

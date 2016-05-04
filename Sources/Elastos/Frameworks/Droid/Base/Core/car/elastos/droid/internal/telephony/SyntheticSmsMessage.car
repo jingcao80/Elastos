@@ -7,7 +7,6 @@ module {
     namespace Telephony {
 
     interface ISyntheticSmsMessage {
-        Catch (Exception e);
 
         MessageClass GetMessageClass();
 

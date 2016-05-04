@@ -11,9 +11,7 @@ module {
 
         String DefaultLanguageForMcc(Int32 mcc);
 
-        Catch (RemoteException e);
 
-        Catch (Exception e);
 
     }
 

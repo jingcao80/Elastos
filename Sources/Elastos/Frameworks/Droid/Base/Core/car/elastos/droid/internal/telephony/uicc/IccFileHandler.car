@@ -29,9 +29,6 @@ module {
         LoadEFTransparent(Int32 fileid, Int32 size, Message onLoaded);
 
         HandleMessage(Message msg);
-
-        Catch (Exception exc);
-
     }
 
     }//Uicc
