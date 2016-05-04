@@ -1281,10 +1281,10 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
                 IPackageItemInfo::Probe(appInfo)->GetPackageName(&appInfoPackageName);
                 Int32 appInfoUid;
                 appInfo->GetUid(&appInfoUid);
-                Int32 infoUid;
-                mService->mHeavyWeightProcess->mInfo->GetUid(&infoUid);
                 if (infoProcessName.Equals(appInfoPackageName)) {
                     if (mService->mHeavyWeightProcess != NULL) {
+                        Int32 infoUid;
+                        mService->mHeavyWeightProcess->mInfo->GetUid(&infoUid);
                         if ((infoUid != appInfoUid ||
                                     !mService->mHeavyWeightProcess->mProcessName.Equals(infoProcessName))) {
                             Int32 appCallingUid = callingUid;

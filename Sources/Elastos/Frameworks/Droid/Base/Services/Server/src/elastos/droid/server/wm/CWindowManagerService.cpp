@@ -9807,7 +9807,9 @@ ECode CWindowManagerService::HandleFinishedStarting()
     AutoPtr<IBinder> token;
     AutoPtr<IView> view;
     while (TRUE) {
-        synchronized(mWindowMapLock) {
+        {
+            AutoLock lock(mWindowMapLock);
+
             if (mFinishedStarting.IsEmpty()) {
                 break;
             }
