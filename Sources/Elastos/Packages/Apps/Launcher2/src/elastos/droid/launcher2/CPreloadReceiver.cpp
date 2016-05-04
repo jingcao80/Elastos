@@ -40,6 +40,16 @@ CAR_INTERFACE_IMPL(CPreloadReceiver, BroadcastReceiver, IPreloadReceiver);
 
 CAR_OBJECT_IMPL(CPreloadReceiver);
 
+CPreloadReceiver::CPreloadReceiver()
+{
+    Slogger::E("CPreloadReceiver", "============================CPreloadReceiver::CPreloadReceiver()");
+}
+
+ECode CPreloadReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
+
 ECode CPreloadReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)

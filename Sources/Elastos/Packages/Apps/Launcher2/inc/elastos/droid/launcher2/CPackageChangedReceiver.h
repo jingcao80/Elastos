@@ -19,6 +19,12 @@ CarClass(CPackageChangedReceiver)
     , public BroadcastReceiver
 {
 public:
+    CAR_OBJECT_DECL();
+
+    CPackageChangedReceiver();
+
+    CARAPI constructor();
+
     //@Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,

@@ -4,18 +4,32 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::App::IWallpaperManager;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CARAPI CUserInitializeReceiver::OnReceive(
+CAR_OBJECT_IMPL(CUserInitializeReceiver);
+
+CUserInitializeReceiver::CUserInitializeReceiver()
+{
+    Slogger::E("CUserInitializeReceiver", "=========CUserInitializeReceiver::CUserInitializeReceiver()");
+}
+
+ECode CUserInitializeReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
+
+ECode CUserInitializeReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {

@@ -9,6 +9,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::App::IActivityManager;
@@ -26,6 +27,7 @@ using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Os::Process;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -76,22 +78,25 @@ CAR_INTERFACE_IMPL(IconCache, Object, IIconCache);
 IconCache::IconCache()
     : mIconDpi(0)
 {
+Slogger::E("IconCache", "============================IconCache::IconCache()");
 }
 
 ECode IconCache::constructor(
     /* [in] */ ILauncherApplication* context)
 {
+Slogger::E("IconCache", "============================IconCache::constructor 1");
     CHashMap::New(INITIAL_ICON_CACHE_CAPACITY, (IHashMap**)&mCache);
 
     AutoPtr<IInterface> obj;
     IContext::Probe(context)->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IActivityManager> activityManager = IActivityManager::Probe(obj);
-
+Slogger::E("IconCache", "============================IconCache::constructor 2");
     mContext = context;
     IContext::Probe(context)->GetPackageManager((IPackageManager**)&mPackageManager);
     activityManager->GetLauncherLargeIconDensity(&mIconDpi);
     // need to set mIconDpi before getting default icon
     mDefaultIcon = MakeDefaultIcon();
+Slogger::E("IconCache", "============================IconCache::constructor return");
     return NOERROR;
 }
 

@@ -15,6 +15,8 @@
 #include "elastos/droid/launcher2/CLauncherModel.h"
 #include "elastos/droid/launcher2/CLauncherBroadcastReceiver.h"
 #include "elastos/droid/launcher2/CLauncherCloseSystemDialogsIntentReceiver.h"
+#include "elastos/droid/launcher2/CLauncherAppWidgetResetObserver.h"
+#include "elastos/droid/launcher2/CLauncherApplicationContentObserver.h"
 
 namespace Elastos {
 namespace Droid {
@@ -36,6 +38,8 @@ CAR_OBJECT_IMPL(CLauncher)
 CAR_OBJECT_IMPL(CLauncherModel)
 CAR_OBJECT_IMPL(CLauncherBroadcastReceiver)
 CAR_OBJECT_IMPL(CLauncherCloseSystemDialogsIntentReceiver)
+CAR_OBJECT_IMPL(CLauncherAppWidgetResetObserver)
+CAR_OBJECT_IMPL(CLauncherApplicationContentObserver)
 
 } // namespace Launcher2
 } // namespace Droid

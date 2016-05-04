@@ -4,13 +4,27 @@
 #include "elastos/droid/launcher2/WidgetPreviewLoader.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Net::IUri;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
+
+CAR_OBJECT_IMPL(CPackageChangedReceiver);
+
+CPackageChangedReceiver::CPackageChangedReceiver()
+{
+    Slogger::E("CPackageChangedReceiver", "=========CPackageChangedReceiver::CPackageChangedReceiver()");
+}
+
+ECode CPackageChangedReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
 
 ECode CPackageChangedReceiver::OnReceive(
     /* [in] */ IContext* context,

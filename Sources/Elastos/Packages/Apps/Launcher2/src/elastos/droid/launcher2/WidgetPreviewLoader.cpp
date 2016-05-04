@@ -159,6 +159,7 @@ WidgetPreviewLoader::CacheDb::CacheDb(
 ECode WidgetPreviewLoader::CacheDb::OnCreate(
     /* [in] */ ISQLiteDatabase* database)
 {
+Slogger::E("WidgetPreviewLoader::CacheDb", "============================CacheDb::OnCreate 1");
     StringBuilder sb;
     sb += "CREATE TABLE IF NOT EXISTS ";
     sb += TABLE_NAME;
@@ -175,6 +176,7 @@ ECode WidgetPreviewLoader::CacheDb::OnCreate(
     sb += COLUMN_SIZE;
     sb += ") ";
     sb += ");";
+Slogger::E("WidgetPreviewLoader::CacheDb", "============================CacheDb::OnCreate return");
     return database->ExecSQL(sb.ToString());
 }
 

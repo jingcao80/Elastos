@@ -9,6 +9,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Content::IContentResolver;
@@ -27,6 +28,7 @@ using Elastos::IO::ICloseable;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashSet;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -77,6 +79,16 @@ AutoPtr<IArrayList> UninstallShortcutReceiver::mUninstallQueue = InitUninstallQu
 Boolean UninstallShortcutReceiver::mUseUninstallQueue = FALSE;
 
 CAR_INTERFACE_IMPL(UninstallShortcutReceiver, BroadcastReceiver, IUninstallShortcutReceiver);
+
+UninstallShortcutReceiver::UninstallShortcutReceiver()
+{
+    Slogger::E("UninstallShortcutReceiver", "=========UninstallShortcutReceiver::UninstallShortcutReceiver()");
+}
+
+ECode UninstallShortcutReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
 
 ECode UninstallShortcutReceiver::OnReceive(
     /* [in] */ IContext* context,

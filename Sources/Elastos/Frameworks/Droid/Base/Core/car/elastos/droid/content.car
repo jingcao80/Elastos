@@ -1133,11 +1133,21 @@ module
 
     [local]
     class CLauncherApps {
-         constructor(
-             [in] IContext* ctx,
-             [in] IILauncherApps* service);
+        constructor(
+            [in] IContext* ctx,
+            [in] IILauncherApps* service);
 
         interface ILauncherApps;
+    }
+
+    class CLauncherAppsOnAppsChangedListener {
+        constructor();
+
+        constructor(
+            [in] IWeakReference* weakHost);
+
+        interface IOnAppsChangedListener;
+        interface IBinder;
     }
 
     class CLimitedLengthInputStream {

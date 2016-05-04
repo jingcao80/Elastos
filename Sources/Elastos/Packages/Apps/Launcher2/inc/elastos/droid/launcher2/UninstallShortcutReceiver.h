@@ -56,6 +56,10 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    UninstallShortcutReceiver();
+
+    CARAPI constructor();
+
     CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* data);

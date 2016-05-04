@@ -25,14 +25,18 @@ class LauncherApplication
     : public Application
     , public ILauncherApplication
 {
-private:
+public:
     class MyContentObserver
         : public ContentObserver
     {
     public:
-        MyContentObserver(
+        MyContentObserver();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
-            /* [in] */ LauncherApplication* host);
+            /* [in] */ ILauncherApplication* host);
 
         //@Override
         CARAPI OnChange(

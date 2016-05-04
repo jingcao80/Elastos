@@ -280,6 +280,16 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
     return NULL;
 }
 
+InstallShortcutReceiver::InstallShortcutReceiver()
+{
+    Slogger::E("InstallShortcutReceiver", "==============InstallShortcutReceiver::InstallShortcutReceiver()");
+}
+
+ECode InstallShortcutReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
+
 ECode InstallShortcutReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* data)

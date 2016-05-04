@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/CWallpaperChooser.h"
 #include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Launcher2::IWallpaperChooserDialogFragment;
@@ -9,6 +10,7 @@ using Elastos::Droid::Launcher2::WallpaperChooserDialogFragment;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::App::IDialogFragment;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +20,15 @@ const String CWallpaperChooser::TAG("Launcher.WallpaperChooser");
 
 CAR_OBJECT_IMPL(CWallpaperChooser);
 
+CWallpaperChooser::CWallpaperChooser()
+{
+    Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::CWallpaperChooser()");
+}
+
 ECode CWallpaperChooser::OnCreate(
     /* [in] */ IBundle* icicle)
 {
+Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::OnCreate 1");
     Activity::OnCreate(icicle);
     SetContentView(Elastos::Droid::Launcher2::R::layout::wallpaper_chooser_base);
 
@@ -43,7 +51,7 @@ ECode CWallpaperChooser::OnCreate(
         GetFragmentManager((IFragmentManager**)&_fmanager);
         fragment->Show(_fmanager, String("dialog"));
     }
-
+Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::OnCreate return");
     return NOERROR;
 }
 

@@ -6,12 +6,14 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/server/appwidget/AppWidgetServiceImpl.h"
+#include "elastos/droid/server/appwidget/CAppWidgetServiceImplBroadcastReceiver.h"
 #include "elastos/droid/server/LocalServices.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/Xml.h"
 #include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.Net.h>
 #include <Elastos.Droid.View.h>
+#include <elastos/core/AutoLock.h>
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/StringUtils.h"
 #include "elastos/utility/logging/Slogger.h"
@@ -68,6 +70,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Server::EIID_IWidgetBackupProvider;
 using Elastos::Droid::Server::LocalServices;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::CPairHelper;
 using Elastos::Droid::Utility::CSparseInt32Array;
@@ -75,6 +78,7 @@ using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::IPairHelper;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
 //using Elastos::Core::AutoLock;
@@ -89,6 +93,7 @@ using Elastos::IO::CFile;
 using Elastos::IO::IOutputStream;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
@@ -400,9 +405,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::EnforceModifyAppWidgetBindPermission
 ECode AppWidgetServiceImpl::SecurityPolicy::EnforceCallFromPackage(
     /* [in] */ const String& packageName)
 {
-    // ==================before translated======================
-    // mAppOpsManager.checkPackage(Binder.getCallingUid(), packageName);
-
     mOwner->mAppOpsManager->CheckPackage(Binder::GetCallingUid(), packageName);
     return NOERROR;
 }
@@ -997,12 +999,18 @@ ECode AppWidgetServiceImpl::Provider::ToString(
 //=====================================================================
 //                      AppWidgetServiceImpl::Host
 //=====================================================================
+
+AppWidgetServiceImpl::Host::Host()
+    : mZombie(FALSE)
+{
+    CArrayList::New((IList**)&mWidgets);
+    mTag = TAG_UNDEFINED; // for use while saving state (the index)
+}
+
 ECode AppWidgetServiceImpl::Host::GetUserId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return UserHandle.getUserId(id.uid);
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -2666,42 +2674,26 @@ Int32 AppWidgetServiceImpl::BackupRestoreController::CountPendingUpdates(
 //=====================================================================
 //             AppWidgetServiceImpl::InnerBroadcastReceiver
 //=====================================================================
-AppWidgetServiceImpl::InnerBroadcastReceiver::InnerBroadcastReceiver(
-    /* [in] */ AppWidgetServiceImpl* owner)
-    : mOwner(owner)
+AppWidgetServiceImpl::InnerBroadcastReceiver::InnerBroadcastReceiver()
 {
-    // ==================before translated======================
-    // mOwner = owner;
+}
 
-    assert(NULL != mOwner);
+ECode AppWidgetServiceImpl::InnerBroadcastReceiver::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
+
+AppWidgetServiceImpl::InnerBroadcastReceiver::constructor(
+    /* [in] */ IInterface* owner)
+{
+    mOwner = (AppWidgetServiceImpl*)IObject::Probe(owner);
+    return BroadcastReceiver::constructor();
 }
 
 ECode AppWidgetServiceImpl::InnerBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // String action = intent.getAction();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "Received broadcast: " + action);
-    // }
-    //
-    // if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-    //     onConfigurationChanged();
-    // } else if (Intent.ACTION_USER_STARTED.equals(action)) {
-    //     onUserStarted(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-    //             UserHandle.USER_NULL));
-    // } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-    //     onUserStopped(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-    //             UserHandle.USER_NULL));
-    // } else {
-    //     onPackageBroadcastReceived(intent, intent.getIntExtra(
-    //             Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
-    // }
-
     String action;
     intent->GetAction(&action);
 
@@ -2873,6 +2865,18 @@ AppWidgetServiceImpl::AppWidgetServiceImpl()
     : mSafeMode(FALSE)
     , mMaxWidgetBitmapMemory(0)
 {
+    CAppWidgetServiceImplBroadcastReceiver::New(TO_IINTERFACE(this), (IBroadcastReceiver**)&mBroadcastReceiver);
+
+    CHashMap::New((IHashMap**)&mBoundRemoteViewsServices);
+    CHashMap::New((IHashMap**)&mRemoteViewsServicesAppWidgets);
+    CArrayList::New((IArrayList**)&mWidgets);
+    CArrayList::New((IArrayList**)&mHosts);
+    CArrayList::New((IArrayList**)&mProviders);
+
+    CArraySet::New((IArraySet**)&mPackagesWithBindWidgetPermission);
+
+    CSparseInt32Array::New((ISparseInt32Array**)&mLoadedUserIds);
+    CSparseInt32Array::New((ISparseInt32Array**)&mNextAppWidgetIds);
 }
 
 ECode AppWidgetServiceImpl::constructor(
@@ -3024,39 +3028,9 @@ ECode AppWidgetServiceImpl::StartListening(
     VALIDATE_NOT_NULL(callbacks);
     VALIDATE_NOT_NULL(updatedViews);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "startListening() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // synchronized (mLock) {
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access hosts it owns.
-    //     HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
-    //     Host host = lookupOrAddHostLocked(id);
-    //
-    //     host.callbacks = callbacks;
-    //
-    //     updatedViews.clear();
-    //
-    //     ArrayList<Widget> instances = host.widgets;
-    //     int N = instances.size();
-    //     int[] updatedIds = new int[N];
-    //     for (int i = 0; i < N; i++) {
-    //         Widget widget = instances.get(i);
-    //         updatedIds[i] = widget.appWidgetId;
-    //         updatedViews.add(cloneIfLocalBinder(widget.views));
-    //     }
-    //
-    //     return updatedIds;
-    // }
+
+    AutoPtr<IList> newUpdatedViews;
+    CParcelableList::New((IList**)&newUpdatedViews);
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -3069,29 +3043,29 @@ ECode AppWidgetServiceImpl::StartListening(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    synchronized(mLock) {
         EnsureGroupStateLoadedLocked(userId);
         AutoPtr<HostId> id = new HostId(Binder::GetCallingUid(), hostId, callingPackage);
         AutoPtr<Host> host = LookupOrAddHostLocked(id);
         host->mCallbacks = callbacks;
-        (*updatedViews)->Clear();
-
+        newUpdatedViews->Clear();
         AutoPtr<IList> instances = host->mWidgets;
         Int32 N = 0;
         instances->GetSize(&N);
-        *result = ArrayOf<Int32>::Alloc(N);
+        AutoPtr<ArrayOf<Int32> > updatedIds = ArrayOf<Int32>::Alloc(N);
         for (Int32 i = 0; i < N; ++i) {
             AutoPtr<IInterface> interfaceTmp;
             instances->Get(i, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Widget* widget = (Widget*)objTmp;
-
-            (*result)->Set(i, widget->mAppWidgetId);
+            Widget* widget = (Widget*)IObject::Probe(interfaceTmp);
+            (*updatedIds)[i] = widget->mAppWidgetId;
             AutoPtr<IRemoteViews> viewTmp = CloneIfLocalBinder(widget->mViews);
-            (*updatedViews)->Add(TO_IINTERFACE(viewTmp));
+            newUpdatedViews->Add(TO_IINTERFACE(viewTmp));
         }
+        *result = updatedIds;
         REFCOUNT_ADD(*result);
-    //}
+    }
+    *updatedViews = newUpdatedViews;
+    REFCOUNT_ADD(*updatedViews);
     return NOERROR;
 }
 
@@ -5232,8 +5206,12 @@ void AppWidgetServiceImpl::OnConfigurationChanged()
     AutoPtr<ILocale> revised;
     helper->GetDefault((ILocale**)&revised);
     String strReviseTmp, strLocaleTmp;
-    revised->ToString(&strReviseTmp);
-    mLocale->ToString(&strLocaleTmp);
+    if (revised != NULL) {
+        revised->ToString(&strReviseTmp);
+    }
+    if (mLocale != NULL) {
+        mLocale->ToString(&strLocaleTmp);
+    }
     if (revised == NULL || mLocale == NULL || !strReviseTmp.Equals(strLocaleTmp)) {
         mLocale = NULL;
         mLocale = revised;
@@ -5492,44 +5470,7 @@ void AppWidgetServiceImpl::ResolveHostUidLocked(
 void AppWidgetServiceImpl::EnsureGroupStateLoadedLocked(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
-    //
-    // // Careful lad, we may have already loaded the state for some
-    // // group members, so check before loading and read only the
-    // // state for the new member(s).
-    // int newMemberCount = 0;
-    // final int profileIdCount = profileIds.length;
-    // for (int i = 0; i < profileIdCount; i++) {
-    //     final int profileId = profileIds[i];
-    //     if (mLoadedUserIds.indexOfKey(profileId) >= 0) {
-    //         profileIds[i] = LOADED_PROFILE_ID;
-    //     } else {
-    //         newMemberCount++;
-    //     }
-    // }
-    //
-    // if (newMemberCount <= 0) {
-    //     return;
-    // }
-    //
-    // int newMemberIndex = 0;
-    // final int[] newProfileIds = new int[newMemberCount];
-    // for (int i = 0; i < profileIdCount; i++) {
-    //     final int profileId = profileIds[i];
-    //     if (profileId != LOADED_PROFILE_ID) {
-    //         mLoadedUserIds.put(profileId, profileId);
-    //         newProfileIds[newMemberIndex] = profileId;
-    //         newMemberIndex++;
-    //     }
-    // }
-    //
-    // clearProvidersAndHostsTagsLocked();
-    //
-    // loadGroupWidgetProvidersLocked(newProfileIds);
-    // loadGroupStateLocked(newProfileIds);
-
-    AutoPtr< ArrayOf<Int32> > profileIds;
+    AutoPtr<ArrayOf<Int32> > profileIds;
     mSecurityPolicy->GetEnabledGroupProfileIds(userId, (ArrayOf<Int32>**)&profileIds);
 
     // Careful lad, we may have already loaded the state for some
@@ -5555,7 +5496,7 @@ void AppWidgetServiceImpl::EnsureGroupStateLoadedLocked(
     }
 
     Int32 newMemberIndex = 0;
-    AutoPtr< ArrayOf<Int32> > newProfileIds = ArrayOf<Int32>::Alloc(newMemberCount);
+    AutoPtr<ArrayOf<Int32> > newProfileIds = ArrayOf<Int32>::Alloc(newMemberCount);
     for (Int32 i = 0; i < profileIdCount; ++i) {
         profileId = (*profileIds)[i];
         if (profileId != LOADED_PROFILE_ID) {
@@ -6652,29 +6593,6 @@ void AppWidgetServiceImpl::PruneHostLocked(
 void AppWidgetServiceImpl::LoadGroupWidgetProvidersLocked(
     /* [in] */ ArrayOf<Int32>* profileIds)
 {
-    // ==================before translated======================
-    // List<ResolveInfo> allReceivers = null;
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-    //
-    // final int profileCount = profileIds.length;
-    // for (int i = 0; i < profileCount; i++) {
-    //     final int profileId = profileIds[i];
-    //
-    //     List<ResolveInfo> receivers = queryIntentReceivers(intent, profileId);
-    //     if (receivers != null && !receivers.isEmpty()) {
-    //         if (allReceivers == null) {
-    //             allReceivers = new ArrayList<>();
-    //         }
-    //         allReceivers.addAll(receivers);
-    //     }
-    // }
-    //
-    // final int N = (allReceivers == null) ? 0 : allReceivers.size();
-    // for (int i = 0; i < N; i++) {
-    //     ResolveInfo receiver = allReceivers.get(i);
-    //     addProviderLocked(receiver);
-    // }
-
     AutoPtr<IList> allReceivers;
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_UPDATE, (IIntent**)&intent);
@@ -7757,46 +7675,6 @@ void AppWidgetServiceImpl::OnUserStarted(
 void AppWidgetServiceImpl::LoadGroupStateLocked(
     /* [in] */ ArrayOf<Int32>* profileIds)
 {
-    // ==================before translated======================
-    // // We can bind the widgets to host and providers only after
-    // // reading the host and providers for all users since a widget
-    // // can have a host and a provider in different users.
-    // List<LoadedWidgetState> loadedWidgets = new ArrayList<>();
-    //
-    // int version = 0;
-    //
-    // final int profileIdCount = profileIds.length;
-    // for (int i = 0; i < profileIdCount; i++) {
-    //     final int profileId = profileIds[i];
-    //
-    //     // No file written for this user - nothing to do.
-    //     AtomicFile file = getSavedStateFile(profileId);
-    //     try {
-    //         FileInputStream stream = file.openRead();
-    //         version = readProfileStateFromFileLocked(stream, profileId, loadedWidgets);
-    //         IoUtils.closeQuietly(stream);
-    //     } catch (FileNotFoundException e) {
-    //         Slog.w(TAG, "Failed to read state: " + e);
-    //     }
-    // }
-    //
-    // if (version >= 0) {
-    //     // Hooke'm up...
-    //     bindLoadedWidgets(loadedWidgets);
-    //
-    //     // upgrade the database if needed
-    //     performUpgradeLocked(version);
-    // } else {
-    //     // failed reading, clean up
-    //     Slog.w(TAG, "Failed to read state, clearing widgets and hosts.");
-    //     mWidgets.clear();
-    //     mHosts.clear();
-    //     final int N = mProviders.size();
-    //     for (int i = 0; i < N; i++) {
-    //         mProviders.get(i).widgets.clear();
-    //     }
-    // }
-
     // We can bind the widgets to host and providers only after
     // reading the host and providers for all users since a widget
     // can have a host and a provider in different users.
@@ -7833,8 +7711,7 @@ void AppWidgetServiceImpl::LoadGroupStateLocked(
         for (Int32 i = 0; i < N; ++i) {
             AutoPtr<IInterface> interfaceTmp;
             mProviders->Get(i, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Provider* provider = (Provider*)objTmp;
+            Provider* provider = (Provider*)IObject::Probe(interfaceTmp);
             provider->mWidgets->Clear();
         }
     }

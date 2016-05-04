@@ -2070,12 +2070,21 @@ module
 
     [local]
     class CAppWidgetServiceImpl {
-         constructor(
-             [in] IContext* ctx);
+        constructor(
+            [in] IContext* ctx);
 
-         interface IIAppWidgetService;
-         interface IWidgetBackupProvider;
-         interface IBinder;
+        interface IIAppWidgetService;
+        interface IWidgetBackupProvider;
+        interface IBinder;
+    }
+
+    class CAppWidgetServiceImplBroadcastReceiver {
+        constructor();
+
+        constructor(
+            [in] IInterface* owner);
+
+        interface IBroadcastReceiver;
     }
 
     } // namespace AppWidget

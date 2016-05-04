@@ -39,7 +39,7 @@ public:
         /* [in] */ Int32 phase);
 
 private:
-    AutoPtr<AppWidgetServiceImpl> mImpl;
+    AutoPtr<IIAppWidgetService> mImpl;
 };
 
 } // namespace AppWidget

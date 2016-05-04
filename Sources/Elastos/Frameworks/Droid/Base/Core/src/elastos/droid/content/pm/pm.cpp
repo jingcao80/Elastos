@@ -11,6 +11,7 @@
 #include "elastos/droid/content/pm/CRegisteredServicesCacheServiceInfo.h"
 #include "elastos/droid/content/pm/CResolveInfo.h"
 #include "elastos/droid/content/pm/CServiceInfo.h"
+#include "elastos/droid/content/pm/CLauncherAppsOnAppsChangedListener.h"
 
 namespace Elastos {
 namespace Droid {
@@ -29,6 +30,7 @@ CAR_OBJECT_IMPL(CProviderInfo)
 CAR_OBJECT_IMPL(CRegisteredServicesCacheServiceInfo)
 CAR_OBJECT_IMPL(CResolveInfo)
 CAR_OBJECT_IMPL(CServiceInfo)
+CAR_OBJECT_IMPL(CLauncherAppsOnAppsChangedListener)
 
 } // namespace Pm
 } // namespace Content

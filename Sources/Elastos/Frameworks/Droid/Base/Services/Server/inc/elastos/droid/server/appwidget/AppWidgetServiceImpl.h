@@ -77,6 +77,25 @@ class AppWidgetServiceImpl
     // no file , public DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener
 {
 public:
+    class InnerBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        InnerBroadcastReceiver();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ IInterface* owner);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        AppWidgetServiceImpl* mOwner;
+    };
+
     class CallbackHandler
         : public Handler
     {
@@ -257,6 +276,8 @@ public:
         : public Object
     {
     public:
+        Host();
+
         // for use while saving state (the index)
         virtual CARAPI GetUserId(
             /* [out] */ Int32* result);
@@ -498,21 +519,6 @@ public:
     };
 
 private:
-    class InnerBroadcastReceiver
-        : public BroadcastReceiver
-    {
-    public:
-        InnerBroadcastReceiver(
-            /* [in] */ AppWidgetServiceImpl* owner);
-
-        virtual CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-    private:
-        AppWidgetServiceImpl* mOwner;
-    };
-
     class InnerServiceConnection
         : public Object
         , public IServiceConnection
@@ -1078,7 +1084,7 @@ private:
     /*const*/ AutoPtr<IHashMap> mBoundRemoteViewsServices;
     // Manages persistent references to RemoteViewsServices from different App Widgets.
     /*const*/ AutoPtr<IHashMap> mRemoteViewsServicesAppWidgets;
-    /*const*/ AutoPtr<Object> mLock;
+    /*const*/ Object mLock;
     /*const*/ AutoPtr<IArrayList> mWidgets;
     /*const*/ AutoPtr<IArrayList> mHosts;
     /*const*/ AutoPtr<IArrayList> mProviders;
