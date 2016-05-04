@@ -13,7 +13,6 @@ module {
 
         Boolean GetDesiredPowerState();
 
-        Catch (NullPointerException ex);
 
         RegisterForDataConnectionAttached(Handler h, Int32 what, Object obj);
 

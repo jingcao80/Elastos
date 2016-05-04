@@ -9,9 +9,7 @@ module {
     interface IIccSmsInterfaceManager {
         HandleMessage(Message msg);
 
-        Catch (InterruptedException e);
 
-        Catch (InterruptedException e);
 
         Int32 GetPremiumSmsPermission(String packageName);
 
@@ -33,7 +31,6 @@ module {
 
         Boolean DisableCdmaBroadcastRange(Int32 startMessageId, Int32 endMessageId);
 
-        Catch (InterruptedException e);
 
     }
 

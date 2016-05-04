@@ -16,7 +16,6 @@ module {
 
         SetDefaultApplication(String packageName, Context context);
 
-        Catch (NameNotFoundException e);
 
         InitSmsPackageMonitor(Context context);
 

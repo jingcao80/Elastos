@@ -11,11 +11,8 @@ module {
         interface ISmsMessageSubmitPdu {
         }
 
-        Catch (OutOfMemoryError e);
 
-        Catch (RuntimeException ex);
 
-        Catch(UnsupportedEncodingException uex);
 
         MessageClass GetMessageClass();
 

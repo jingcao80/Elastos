@@ -22,8 +22,6 @@ module {
 
         String GetVoiceMailNumber();
 
-        Catch (ArrayIndexOutOfBoundsException ex);
-
         Boolean IsCallForwardStatusStored();
 
         Boolean GetVoiceCallForwardingFlag();

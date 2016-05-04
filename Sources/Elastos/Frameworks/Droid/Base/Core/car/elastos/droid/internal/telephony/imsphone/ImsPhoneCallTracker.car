@@ -22,7 +22,6 @@ module {
 
         UnregisterForVoiceCallEnded(Handler h);
 
-        Catch (ImsException e);
 
         SendUSSD (String ussdString, Message response);
 
@@ -70,7 +69,6 @@ module {
 
         OnVoiceMessageCountChanged(Int32 count);
 
-        Catch (CallStateException e);
 
         Boolean IsInEmergencyCall();
 

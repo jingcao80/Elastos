@@ -12,8 +12,6 @@ module {
 
         Int32 ExtensionEfForEf(Int32 efid);
 
-        Catch (RuntimeException e);
-
         Int32 GetAnrCount();
 
         Int32 GetEmailCount();

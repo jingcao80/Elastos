@@ -7,7 +7,6 @@ module {
     namespace Telephony {
 
     interface IIccUtils {
-        Catch (UnsupportedEncodingException ex);
 
     }
 

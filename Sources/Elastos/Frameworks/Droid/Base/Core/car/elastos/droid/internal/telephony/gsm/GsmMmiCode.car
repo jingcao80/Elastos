@@ -8,8 +8,6 @@ module {
     namespace Gsm {
 
     interface IGsmMmiCode {
-        Catch (ClassCastException ex);
-
         GsmMmiCode (GSMPhone phone, UiccCardApplication app);
 
         Boolean IsCancelable();
@@ -31,8 +29,6 @@ module {
         Boolean IsUssdRequest();
 
         Boolean IsSsInfo();
-
-        Catch (RuntimeException exc);
 
         SendUssd(String ussdMessage);
 

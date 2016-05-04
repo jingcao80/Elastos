@@ -38,9 +38,7 @@ module {
 
         Int32 CallBarrAction(String dialingNumber);
 
-        Catch (ImsException e);
 
-        Catch (ImsException e);
 
     }
 

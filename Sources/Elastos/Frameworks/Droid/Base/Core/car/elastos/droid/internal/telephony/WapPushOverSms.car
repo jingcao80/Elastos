@@ -12,13 +12,6 @@ module {
         OnServiceDisconnected(ComponentName name);
 
         Dispose();
-
-        Catch (RemoteException e);
-
-        If (pdu instanceof DeliveryInd);
-
-        Catch (SQLiteException e);
-
     }
 
     }//Telephony

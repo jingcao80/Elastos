@@ -8,7 +8,6 @@ module {
     namespace Uicc {
 
     interface IIccUtils {
-        Catch (UnsupportedEncodingException ex);
 
     }
 

@@ -23,13 +23,10 @@ module {
 
         NotifyCellLocation(Phone sender);
 
-        Catch (RemoteException ex);
 
-        Catch (RemoteException ex);
 
         NotifyDisconnectCause(Int32 cause, Int32 preciseCause);
 
-        Catch (RemoteException ex);
 
         NotifyVoLteServiceStateChanged(Phone sender, VoLteServiceState lteState);
 

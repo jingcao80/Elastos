@@ -13,7 +13,6 @@ module {
 
         Uri Insert(Uri url, ContentValues initialValues);
 
-        Catch (RemoteException ex);
 
     }
 

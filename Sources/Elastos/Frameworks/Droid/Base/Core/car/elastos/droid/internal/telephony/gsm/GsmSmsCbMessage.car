@@ -8,8 +8,6 @@ module {
     namespace Gsm {
 
     interface IGsmSmsCbMessage {
-        Catch (UnsupportedEncodingException e);
-
     }
 
     }//Gsm

@@ -22,7 +22,6 @@ module {
 
         UnregisterForCallWaiting(Handler h);
 
-        Catch (CallStateException ex);
 
         Boolean IsInEmergencyCall();
 
