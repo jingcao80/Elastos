@@ -53,6 +53,7 @@ pre_translate () {
     # process comments
     #
     sed -i "s:    @Override:    //@Override:g" $target_file
+    sed -i "s:    @Deprecated:    //@Deprecated:g" $target_file
 
     # Log.d or Slog.d => Logger::D( or Slogger::D(
     #
@@ -91,7 +92,7 @@ pre_translate () {
 
     # fun(  => Fun(
     #
-    sed -i 's:\([a-zA-Z]\w*\)\((\):\u\1\2:g' $target_file
+    sed -i 's:\([a-zA-Z]\w*\s*\)\((\):\u\1\2:g' $target_file
 
     # synchronized ( => synchronized(
     #
@@ -132,8 +133,7 @@ process_dir () {
                 if [ $sub == $postfix ]; then
                     echo "  > prcess file $filename"
                     pre_translate $file
-
-                    tgt=$(echo $file | sed -e "s@.java@.cpp@")
+                    tgt=$(echo $file | sed 's/\(.*\)java/\1cpp/')
                     echo "  > result $tgt"
                     mv $file $tgt
                 fi
