@@ -2176,10 +2176,13 @@ ECode CActivityManagerService::MainHandler::HandleMessage(
                 notification->SetLatestEventInfo(mHost->mContext, CoreUtils::Convert(title),
                     CoreUtils::Convert(text), pendingIntent);
 
-                AutoPtr<ArrayOf<Int32> > outId;
-                if (FAILED(inm->EnqueueNotificationWithTag(String("android"), String("android"), String(NULL),
+                AutoPtr<ArrayOf<Int32> > outId = ArrayOf<Int32>::Alloc(1);
+                AutoPtr<ArrayOf<Int32> > outIdTmp;
+                ECode ec = inm->EnqueueNotificationWithTag(String("android"), String("android"), String(NULL),
                     R::string::privacy_guard_notification,
-                    notification, NULL, root->mUserId, (ArrayOf<Int32>**)&outId))) {
+                    notification, outId, root->mUserId, (ArrayOf<Int32>**)&outIdTmp);
+                outId = outIdTmp;
+                if (FAILED(ec)) {
                     Slogger::W(TAG, "Error showing notification for privacy guard");
                 }
             }
@@ -24872,10 +24875,13 @@ void CActivityManagerService::HandlePostHeavyNotificationMsg(
 
     notification->SetLatestEventInfo(GetUiContext(), textCs, ctext, pendingIntent);
 
-    AutoPtr<ArrayOf<Int32> > outId;
-    if (FAILED(inm->EnqueueNotificationWithTag(String("android"), String("android"), String(NULL),
+    AutoPtr<ArrayOf<Int32> > outId = ArrayOf<Int32>::Alloc(1);
+    AutoPtr<ArrayOf<Int32> > outIdTmp;
+    ECode ec = inm->EnqueueNotificationWithTag(String("android"), String("android"), String(NULL),
         R::string::heavy_weight_notification,
-        notification, NULL, root->mUserId, (ArrayOf<Int32>**)&outId))) {
+        notification, outId, root->mUserId, (ArrayOf<Int32>**)&outIdTmp);
+    outId = outIdTmp;
+    if (FAILED(ec)) {
         Slogger::W(TAG, "Error showing notification for heavy-weight app");
     }
 }

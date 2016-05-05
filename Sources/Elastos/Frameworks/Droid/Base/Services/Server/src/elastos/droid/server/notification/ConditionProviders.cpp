@@ -636,8 +636,9 @@ void ConditionProviders::SetAutomaticZenModeConditions(
 
     synchronized(mMutex) {
         Int32 size = 0;
-        if (conditionIds != NULL)
+        if (conditionIds != NULL) {
             size = conditionIds->GetLength();
+        }
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(size);
         for (Int32 i = 0; i < size; ++i) {
             args->Set(i, TO_IINTERFACE((*conditionIds)[i]));

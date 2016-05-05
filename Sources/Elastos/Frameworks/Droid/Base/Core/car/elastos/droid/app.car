@@ -203,6 +203,7 @@ module
     interface Elastos.Droid.View.IContextThemeWrapper;
     interface Elastos.Droid.View.ILayoutInflaterFactory;
     interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    interface Elastos.Droid.View.ILayoutInflaterFilter;
     interface Elastos.Droid.View.IWindowCallback;
     interface Elastos.Droid.View.IKeyEventCallback;
     interface Elastos.Droid.View.IViewGroupLayoutParams;
@@ -217,6 +218,7 @@ module
     interface Elastos.Droid.Widget.IExpandableListViewOnGroupCollapseListener;
     interface Elastos.Droid.Widget.IExpandableListViewOnGroupExpandListener;
     interface Elastos.Droid.Widget.IDatePickerOnDateChangedListener;
+    interface Elastos.Droid.Widget.IRemoteViews;
     interface Elastos.Droid.Widget.ITimePickerOnTimeChangedListener;
     interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceClient;
     interface Elastos.Droid.Utility.IAttributeSet;
@@ -1243,6 +1245,28 @@ module
         interface IParcelable;
     }
 
+    class CNotificationActionBuilder {
+        constructor(
+            [in] Int32 icon,
+            [in] ICharSequence* title,
+            [in] IPendingIntent* intent);
+
+        constructor(
+            [in] INotificationAction* action);
+
+        interface INotificationActionBuilder;
+    }
+
+    class CNotificationActionWearableExtender {
+        constructor();
+
+        constructor(
+            [in] INotificationAction* action);
+
+        interface INotificationActionExtender;
+        interface INotificationActionWearableExtender;
+    }
+
     [local]
     class CNotificationBuilder {
         constructor(
@@ -1364,6 +1388,19 @@ module
         interface INotificationWearableExtender;
         interface INotificationExtender;
         interface ICloneable;
+    }
+
+    class CNotificationBuilderRemoteViews {
+        constructor();
+
+        constructor(
+            [in] IApplicationInfo* appInfo,
+            [in] Int32 layoutId);
+
+        interface INotificationBuilderRemoteViews;
+        interface IRemoteViews;
+        interface IParcelable;
+        interface ILayoutInflaterFilter;
     }
 
     [local]
@@ -2144,20 +2181,6 @@ module
             [in] String resultKey);
 
         interface IRemoteInputBuilder;
-    }
-
-    class CBuilderRemoteViews {
-        constructor();
-
-        constructor(
-            [in] IApplicationInfo* appInfo,
-            [in] Int32 layoutId);
-
-        interface IBuilderRemoteViews;
-        //assert(0 && "TODO");
-        //interface IRemoteViews;
-        //interface IParcelable;
-        //interface IFilter;
     }
 
     /** @hide */

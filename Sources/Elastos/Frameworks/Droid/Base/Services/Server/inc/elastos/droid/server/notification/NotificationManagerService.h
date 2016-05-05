@@ -13,6 +13,8 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/utility/LruCache.h"
 #include <elastos/droid/telephony/PhoneStateListener.h>
+#define HASH_FOR_CORE
+#include <elastos/corehash.h>
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::IITransientNotification;
@@ -47,6 +49,7 @@ using Elastos::Droid::Utility::IArraySet;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Utility::LruCache;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger32;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IArrayDeque;
 using Elastos::Utility::IHashSet;
@@ -804,7 +807,8 @@ private:
             /* [in] */ Int32 id,
             /* [in] */ INotification* notification,
             /* [in] */ ArrayOf<Int32>* idReceived,
-            /* [in] */ Int32 userId);
+            /* [in] */ Int32 userId,
+            /* [out, callee] */ ArrayOf<Int32>** out);
 
         // @Override
         CARAPI RemoveForegroundServiceFlagFromNotification(
@@ -1033,9 +1037,9 @@ protected:
         /* [in] */ const String& tag,
         /* [in] */ Int32 id,
         /* [in] */ INotification* notification,
-        /* [in] */ ArrayOf<Int32>* idOut,
+        /* [in] */ ArrayOf<Int32>* idIn,
         /* [in] */ Int32 incomingUserId,
-        /* [out, callee] */ ArrayOf<Int32>** outIdReceived);
+        /* [out] */ ArrayOf<Int32>** idOut);
 
     CARAPI ShowNextToastLocked();
 
@@ -1383,7 +1387,7 @@ public:
     Boolean mUseAttentionLight;
     Boolean mSystemReady;
 
-    AutoPtr<LruCache<Int32, AutoPtr<FilterCacheInfo> > > mSpamCache;
+    AutoPtr<LruCache<AutoPtr<IInteger32>, AutoPtr<FilterCacheInfo> > > mSpamCache;
     AutoPtr<IExecutorService> mSpamExecutor;
 
     Boolean mDisableNotificationEffects;

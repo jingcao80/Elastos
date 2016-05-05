@@ -52,8 +52,10 @@ ECode CNotificationAction::constructor(
     mIcon = icon;
     mTitle = title;
     mActionIntent = intent;
-    mExtras = extras;
-    if (mExtras == NULL) {
+    if (extras != NULL) {
+        mExtras = extras;
+    }
+    else {
         CBundle::New((IBundle**)&mExtras);
     }
     mRemoteInputs = remoteInputs;
@@ -177,6 +179,13 @@ ECode CNotificationAction::GetIcon(
     return NOERROR;
 }
 
+ECode CNotificationAction::SetIcon(
+    /* [in] */ Int32 icon)
+{
+    mIcon = icon;
+    return NOERROR;
+}
+
 ECode CNotificationAction::GetTitle(
     /* [out] */ ICharSequence** title)
 {
@@ -186,12 +195,26 @@ ECode CNotificationAction::GetTitle(
     return NOERROR;
 }
 
+ECode CNotificationAction::SetTitle(
+    /* [in] */ ICharSequence* title)
+{
+    mTitle = title;
+    return NOERROR;
+}
+
 ECode CNotificationAction::GetActionIntent(
     /* [out] */ IPendingIntent** actionIntent)
 {
     VALIDATE_NOT_NULL(actionIntent);
     *actionIntent = mActionIntent;
     REFCOUNT_ADD(*actionIntent);
+    return NOERROR;
+}
+
+ECode CNotificationAction::SetActionIntent(
+    /* [in] */ IPendingIntent* actionIntent)
+{
+    mActionIntent = actionIntent;
     return NOERROR;
 }
 

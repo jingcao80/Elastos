@@ -425,12 +425,7 @@ ECode CNotificationBuilder::AddExtras(
     /* [in] */ IBundle * extras)
 {
     if (extras != NULL) {
-        if (mExtras == NULL) {
-            CBundle::New(extras, (IBundle**)&mExtras);
-        }
-        else {
-            mExtras->PutAll(extras);
-        }
+        mExtras->PutAll(extras);
     }
     return NOERROR;
 }
@@ -1315,7 +1310,7 @@ ECode CNotificationBuilder::StripForDelivery(
     n->GetContentView((IRemoteViews**)&contentView);
     Int32 vac, sn;
     extras->GetInt32(INotificationBuilder::EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT, -1, &vac);
-    if (stripViews && IBuilderRemoteViews::Probe(contentView)) {
+    if (stripViews && INotificationBuilderRemoteViews::Probe(contentView)) {
         contentView->GetSequenceNumber(&sn);
         if (vac == sn) {
             n->SetContentView(NULL);
@@ -1328,7 +1323,7 @@ ECode CNotificationBuilder::StripForDelivery(
     AutoPtr<IRemoteViews> bigContentView;
     n->GetBigContentView((IRemoteViews**)&bigContentView);
     extras->GetInt32(INotificationBuilder::EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT, -1, &vac);
-    if (stripViews && IBuilderRemoteViews::Probe(bigContentView)) {
+    if (stripViews && INotificationBuilderRemoteViews::Probe(bigContentView)) {
         bigContentView->GetSequenceNumber(&sn);
         if (vac == sn) {
             n->SetBigContentView(NULL);
@@ -1342,7 +1337,7 @@ ECode CNotificationBuilder::StripForDelivery(
     AutoPtr<IRemoteViews> headsUpContentView;
     n->GetHeadsUpContentView((IRemoteViews**)&headsUpContentView);
     extras->GetInt32(INotificationBuilder::EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT, -1, &vac);
-    if (stripViews && IBuilderRemoteViews::Probe(headsUpContentView)) {
+    if (stripViews && INotificationBuilderRemoteViews::Probe(headsUpContentView)) {
         headsUpContentView->GetSequenceNumber(&sn);
         if (vac == sn) {
             n->SetHeadsUpContentView(NULL);
@@ -1452,10 +1447,10 @@ AutoPtr<IClassInfo> CNotificationBuilder::GetNotificationStyleClass(
 {
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<ArrayOf<String> > classes = ArrayOf<String>::Alloc(4);
-    classes->Set(0, String("Elastos.Droid.App.CNotificationBigTextStyle"));
-    classes->Set(1, String("Elastos.Droid.App.CNotificationBigPictureStyle"));
-    classes->Set(2, String("Elastos.Droid.App.CNotificationInboxStyle"));
-    classes->Set(3, String("Elastos.Droid.App.CNotificationMediaStyle"));
+    (*classes)[0] = String("Elastos.Droid.App.CNotificationBigTextStyle");
+    (*classes)[1] = String("Elastos.Droid.App.CNotificationBigPictureStyle");
+    (*classes)[2] = String("Elastos.Droid.App.CNotificationInboxStyle");
+    (*classes)[3] = String("Elastos.Droid.App.CNotificationMediaStyle");
     for (Int32 i = 0; i < classes->GetLength(); ++i) {
         if (templateClass.Equals((*classes)[i])) {
             AutoPtr<IClassInfo> ci;
@@ -1471,7 +1466,7 @@ ECode CNotificationBuilder::SetBuilderContentView(
     /* [in] */ IRemoteViews* contentView)
 {
     n->SetContentView(contentView);
-    if (IBuilderRemoteViews::Probe(contentView) != NULL) {
+    if (INotificationBuilderRemoteViews::Probe(contentView) != NULL) {
         Int32 ival;
         contentView->GetSequenceNumber(&ival);
         mRebuildBundle->PutInt32(
@@ -1485,7 +1480,7 @@ ECode CNotificationBuilder::SetBuilderBigContentView(
     /* [in] */ IRemoteViews* bigContentView)
 {
     n->SetBigContentView(bigContentView);
-    if (IBuilderRemoteViews::Probe(bigContentView) != NULL) {
+    if (INotificationBuilderRemoteViews::Probe(bigContentView) != NULL) {
         Int32 ival;
         bigContentView->GetSequenceNumber(&ival);
         mRebuildBundle->PutInt32(
@@ -1499,7 +1494,7 @@ ECode CNotificationBuilder::SetBuilderHeadsUpContentView(
     /* [in] */ IRemoteViews* headsUpContentView)
 {
     n->SetHeadsUpContentView(headsUpContentView);
-    if (IBuilderRemoteViews::Probe(headsUpContentView) != NULL) {
+    if (INotificationBuilderRemoteViews::Probe(headsUpContentView) != NULL) {
         Int32 ival;
         headsUpContentView->GetSequenceNumber(&ival);
         mRebuildBundle->PutInt32(

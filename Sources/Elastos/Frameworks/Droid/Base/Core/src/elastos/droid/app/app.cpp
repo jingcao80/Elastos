@@ -30,10 +30,12 @@
 #include "elastos/droid/app/CLocalActivityManager.h"
 #include "elastos/droid/app/CLocalActivityRecord.h"
 #include "elastos/droid/app/CMediaRouteButton.h"
+#include "elastos/droid/app/CNotificationActionBuilder.h"
 #include "elastos/droid/app/CNotificationManager.h"
 #include "elastos/droid/app/CNativeActivity.h"
 #include "elastos/droid/app/CNativeContentView.h"
-#include "elastos/droid/app/CBuilderRemoteViews.h"
+#include "elastos/droid/app/CNotificationActionWearableExtender.h"
+#include "elastos/droid/app/CNotificationBuilderRemoteViews.h"
 #include "elastos/droid/app/CPresentation.h"
 #include "elastos/droid/app/CProfile.h"
 #include "elastos/droid/app/CProfileManager.h"
@@ -92,8 +94,10 @@ CAR_OBJECT_IMPL(CLocalActivityRecord)
 CAR_OBJECT_IMPL(CMediaRouteButton)
 CAR_OBJECT_IMPL(CNativeActivity)
 CAR_OBJECT_IMPL(CNativeContentView)
+CAR_OBJECT_IMPL(CNotificationActionBuilder)
+CAR_OBJECT_IMPL(CNotificationActionWearableExtender)
 CAR_OBJECT_IMPL(CNotificationManager)
-CAR_OBJECT_IMPL(CBuilderRemoteViews)
+CAR_OBJECT_IMPL(CNotificationBuilderRemoteViews)
 CAR_OBJECT_IMPL(CPresentation)
 CAR_OBJECT_IMPL(CProfile)
 CAR_OBJECT_IMPL(CProfileManager)

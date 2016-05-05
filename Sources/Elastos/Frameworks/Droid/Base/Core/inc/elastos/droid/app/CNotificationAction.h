@@ -3,6 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.App.h"
+#include "elastos/droid/app/CNotification.h"
 #include <elastos/core/Object.h>
 #include "_Elastos_Droid_App_CNotificationAction.h"
 
@@ -77,11 +78,20 @@ public:
     CARAPI GetIcon(
         /* [out] */ Int32* icon);
 
+    CARAPI SetIcon(
+        /* [in] */ Int32 icon);
+
     CARAPI GetTitle(
         /* [out] */ ICharSequence** title);
 
+    CARAPI SetTitle(
+        /* [in] */ ICharSequence* title);
+
     CARAPI GetActionIntent(
         /* [out] */ IPendingIntent** actionIntent);
+
+    CARAPI SetActionIntent(
+        /* [in] */ IPendingIntent* actionIntent);
 
     CARAPI WriteToParcel(
         /* [in] */ IParcel* out);

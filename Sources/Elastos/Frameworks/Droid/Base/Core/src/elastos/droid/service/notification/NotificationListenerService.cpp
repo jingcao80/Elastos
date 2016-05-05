@@ -1,4 +1,6 @@
+
 #include "elastos/droid/app/CNotificationBuilder.h"
+#include "elastos/droid/service/notification/CINotificationListenerWrapper.h"
 #include "elastos/droid/service/notification/CNotificationListenerServiceRankingMap.h"
 #include "elastos/droid/service/notification/NotificationListenerService.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -348,7 +350,9 @@ ECode NotificationListenerService::OnBind(
 {
     VALIDATE_NOT_NULL(b)
     if (mWrapper == NULL) {
-        mWrapper = new INotificationListenerWrapper(this);
+        AutoPtr<IINotificationListener> listener;
+        CINotificationListenerWrapper::New(this, (IINotificationListener**)&listener);
+        mWrapper = (INotificationListenerWrapper*) listener.Get();
     }
     *b = mWrapper;
     REFCOUNT_ADD(*b)
@@ -371,7 +375,9 @@ ECode NotificationListenerService::RegisterAsSystemService(
 {
     mSystemContext = context;
     if (mWrapper == NULL) {
-        mWrapper = new INotificationListenerWrapper(this);
+        AutoPtr<IINotificationListener> listener;
+        CINotificationListenerWrapper::New(this, (IINotificationListener**)&listener);
+        mWrapper = (INotificationListenerWrapper*) listener.Get();
     }
     AutoPtr<IINotificationManager> noMan;
     GetNotificationInterface((IINotificationManager**)&noMan);
@@ -425,10 +431,11 @@ ECode NotificationListenerService::GetContext(
 
 CAR_INTERFACE_IMPL_2(NotificationListenerService::INotificationListenerWrapper, Object, IINotificationListener, IBinder)
 
-NotificationListenerService::INotificationListenerWrapper::INotificationListenerWrapper(
-    /* [in] */ NotificationListenerService* host)
-    : mHost(host)
+ECode NotificationListenerService::INotificationListenerWrapper::constructor(
+    /* [in] */ INotificationListenerService* host)
 {
+    mHost = (NotificationListenerService*) host;
+    return NOERROR;
 }
 
 ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationPosted(

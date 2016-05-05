@@ -54,7 +54,7 @@ ECode CBundle::constructor()
 ECode CBundle::constructor(
     /* [in] */ IParcel* parcelledData)
 {
-    BaseBundle::constructor(parcelledData);
+    FAIL_RETURN(BaseBundle::constructor(parcelledData))
 
     mParcelledData->HasFileDescriptors(&mHasFds);
     mFdsKnown = TRUE;
@@ -65,7 +65,7 @@ ECode CBundle::constructor(
     /* [in] */ IParcel* parcelledData,
     /* [in] */ Int32 length)
 {
-    BaseBundle::constructor(parcelledData, length);
+    FAIL_RETURN(BaseBundle::constructor(parcelledData, length))
 
     mParcelledData->HasFileDescriptors(&mHasFds);
     mFdsKnown = TRUE;

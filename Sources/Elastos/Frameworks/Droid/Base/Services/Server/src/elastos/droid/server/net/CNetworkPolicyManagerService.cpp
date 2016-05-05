@@ -1252,9 +1252,8 @@ void CNetworkPolicyManagerService::EnqueueNotification(
     AutoPtr< ArrayOf<Int32> > idReceived;
     AutoPtr<INotification> notification;
     builder->GetNotification((INotification**)&notification);
-    AutoPtr<ArrayOf<Int32> > outIdReceived;
     mNotifManager->EnqueueNotificationWithTag(packageName, packageName, tag,
-            0x0, notification, idReceived, IUserHandle::USER_OWNER, (ArrayOf<Int32>**)&outIdReceived);
+            0x0, notification, NULL, IUserHandle::USER_OWNER, (ArrayOf<Int32>**)&idReceived);
     ISet::Probe(mActiveNotifs)->Add(StringUtils::ParseCharSequence(tag));
 }
 
@@ -1294,9 +1293,8 @@ void CNetworkPolicyManagerService::EnqueueRestrictedNotification(
     AutoPtr<ArrayOf<Int32> > idReceived;
     AutoPtr<INotification> notification;
     builder->GetNotification((INotification**)&notification);
-    AutoPtr<ArrayOf<Int32> > outIdReceived;
     mNotifManager->EnqueueNotificationWithTag(packageName, packageName, tag,
-            0x0, notification, idReceived, IUserHandle::USER_OWNER, (ArrayOf<Int32>**)&outIdReceived);
+            0x0, notification, NULL, IUserHandle::USER_OWNER, (ArrayOf<Int32>**)&idReceived);
     ISet::Probe(mActiveNotifs)->Add(StringUtils::ParseCharSequence(tag));
 }
 

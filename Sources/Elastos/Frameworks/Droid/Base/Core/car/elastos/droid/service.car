@@ -375,6 +375,15 @@ module
             interface INotificationListenerServiceRankingMap;
         }
 
+        [local]
+        class CINotificationListenerWrapper {
+            constructor(
+                [in] INotificationListenerService* host);
+
+            interface IINotificationListener;
+            interface IBinder;
+        }
+
         class CCondition {
             constructor(
                 [in] IUri* id,

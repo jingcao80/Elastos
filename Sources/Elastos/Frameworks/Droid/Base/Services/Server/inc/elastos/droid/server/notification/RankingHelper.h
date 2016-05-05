@@ -108,6 +108,9 @@ private:
         /* [in] */ Int32 defValue,
         /* [out] */ Int32* result);
 
+    static CARAPI_(String) GetElastosClassName(
+        /* [in] */ const String& className);
+
 private:
     static const String TAG;
     static const Boolean DEBUG;

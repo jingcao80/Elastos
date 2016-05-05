@@ -2,14 +2,14 @@
 #ifndef __ELASTOS_DROID_APP_CBUILDER_REMOTE_VIEWS_H__
 #define __ELASTOS_DROID_APP_CBUILDER_REMOTE_VIEWS_H__
 
-#include "_Elastos_Droid_App_CBuilderRemoteViews.h"
+#include "_Elastos_Droid_App_CNotificationBuilderRemoteViews.h"
 #include "elastos/droid/app/CNotification.h"
 
 namespace Elastos {
 namespace Droid {
 namespace App {
 
-CarClass(CBuilderRemoteViews)
+CarClass(CNotificationBuilderRemoteViews)
     , public CNotification::BuilderRemoteViews
 {
 public:

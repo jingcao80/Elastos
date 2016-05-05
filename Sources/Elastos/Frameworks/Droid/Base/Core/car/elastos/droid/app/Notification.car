@@ -3,6 +3,7 @@ module
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.Utility.IList;
 
+    interface Elastos.Droid.App.IRemoteInput;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Graphics.IBitmap;
@@ -18,22 +19,7 @@ module
     interface INotificationStyle;
     interface INotificationAction;
     interface INotificationExtender;
-    interface INotificationAction;
-
-     /**
-      * @Involve
-      * interface IRemoteViews
-      */
-    interface IBuilderRemoteViews {
-    }
-
-    /**
-     * The default value of {@link #audioAttributes}.
-     */
-    interface INotificationHelper {
-        GetAUDIO_ATTRIBUTES_DEFAULT(
-            [out] IAudioAttributes** attr);
-    }
+    interface INotificationActionExtender;
 
     /**
      * A class that represents how a persistent notification is to be presented to the user using the NotificationManager.
@@ -857,16 +843,176 @@ module
             [out] Boolean* result);
     }
 
-    interface INotificationAction {
+    /**
+     * The default value of {@link #audioAttributes}.
+     */
+    interface INotificationHelper {
+        GetAUDIO_ATTRIBUTES_DEFAULT(
+            [out] IAudioAttributes** attr);
+    }
 
+    /**
+     * Structure to encapsulate a named action that can be shown as part of this notification.
+     * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
+     * selected by the user.
+     * <p>
+     * Apps should use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}
+     * or {@link Notification.Builder#addAction(Notification.Action)}
+     * to attach actions.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface INotificationAction {
+        /**
+         * Small icon representing the action.
+         */
         GetIcon(
             [out] Int32* icon);
 
+        SetIcon(
+            [in] Int32 icon);
+
+        /**
+         * Title of the action.
+         */
         GetTitle(
             [out] ICharSequence** title);
 
+        SetTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Intent to send when the user invokes this action. May be null, in which case the action
+         * may be rendered in a disabled presentation by the system UI.
+         */
         GetActionIntent(
             [out] IPendingIntent** actionIntent);
+
+        SetActionIntent(
+            [in] IPendingIntent* actionIntent);
+
+        /**
+         * Get additional metadata carried around with this Action.
+         */
+        GetExtras(
+            [out] IBundle** result);
+
+        /**
+         * Get the list of inputs to be collected from the user when this action is sent.
+         * May return null if no remote inputs were added.
+         */
+        GetRemoteInputs(
+            [out, callee] ArrayOf<IRemoteInput*>* result);
+    }
+
+    /**
+     * Builder class for {@link Action} objects.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface INotificationActionBuilder {
+        /**
+         * Merge additional metadata into this builder.
+         *
+         * <p>Values within the Bundle will replace existing extras values in this Builder.
+         *
+         * @see Notification.Action#extras
+         */
+        AddExtras(
+            [in] IBundle* extras);
+
+        /**
+         * Get the metadata Bundle used by this Builder.
+         *
+         * <p>The returned Bundle is shared with this Builder.
+         */
+        GetExtras(
+            [out] IBundle** result);
+
+        /**
+         * Add an input to be collected from the user when this action is sent.
+         * Response values can be retrieved from the fired intent by using the
+         * {@link RemoteInput#getResultsFromIntent} function.
+         * @param remoteInput a {@link RemoteInput} to add to the action
+         * @return this object for method chaining
+         */
+        AddRemoteInput(
+            [in] IRemoteInput* remoteInput);
+
+        /**
+         * Apply an extender to this action builder. Extenders may be used to add
+         * metadata or change options on this builder.
+         */
+        Extend(
+            [in] INotificationActionExtender* extender);
+
+        /**
+         * Combine all of the options that have been set and return a new {@link Action}
+         * object.
+         * @return the built action
+         */
+        Build(
+            [out] INotificationAction** result);
+    }
+
+    /**
+     * Extender interface for use with {@link Builder#extend}. Extenders may be used to add
+     * metadata or change options on an action builder.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface INotificationActionExtender {
+        /**
+         * Apply this extender to a notification action builder.
+         * @param builder the builder to be modified.
+         * @return the build object for chaining.
+         */
+        Extend(
+            [in] INotificationActionBuilder* builder);
+    }
+
+    /**
+     * Wearable extender for notification actions. To add extensions to an action,
+     * create a new {@link android.app.Notification.Action.WearableExtender} object using
+     * the {@code WearableExtender()} constructor and apply it to a
+     * {@link android.app.Notification.Action.Builder} using
+     * {@link android.app.Notification.Action.Builder#extend}.
+     *
+     * <pre class="prettyprint">
+     * Notification.Action action = new Notification.Action.Builder(
+     *         R.drawable.archive_all, "Archive all", actionIntent)
+     *         .extend(new Notification.Action.WearableExtender()
+     *                 .setAvailableOffline(false))
+     *         .build();</pre>
+     */
+    /**
+     * @Involved
+     * interface INotificationActionExtender;
+     */
+    interface INotificationActionWearableExtender {
+        /**
+         * Set whether this action is available when the wearable device is not connected to
+         * a companion device. The user can still trigger this action when the wearable device is
+         * offline, but a visual hint will indicate that the action may not be available.
+         * Defaults to true.
+         */
+        SetAvailableOffline(
+            [in] Boolean availableOffline);
+
+        /**
+         * Get whether this action is available when the wearable device is not connected to
+         * a companion device. The user can still trigger this action when the wearable device is
+         * offline, but a visual hint will indicate that the action may not be available.
+         * Defaults to true.
+         */
+        IsAvailableOffline(
+            [out] Boolean* result);
     }
 
     /**
@@ -2227,6 +2373,12 @@ module
             [out] Boolean* result);
     }
 
+    /**
+     * @Involve
+     * interface IRemoteViews
+     */
+    interface INotificationBuilderRemoteViews {
+    }
 
     } // namespace App
     } // namespace Droid

@@ -22,6 +22,7 @@ using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Utility::ISparseInt32Array;
 using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
@@ -74,23 +75,25 @@ RankingHelper::RankingHelper(
     CArrayMap::New((IArrayMap**)&mPackageVisibilities);
     CArrayMap::New((IArrayMap**)&mPackageOnKeyguard);
 
+    AutoPtr<IClassLoader> loader;
+    CPathClassLoader::New(String("/system/lib/Elastos.Droid.Server.eco"), NULL, (IClassLoader**)&loader);
+
     const Int32 N = extractorNames->GetLength();
     mSignalExtractors = ArrayOf<INotificationSignalExtractor*>::Alloc(N);
     for (Int32 i = 0; i < N; i++) {
         // try {
-        AutoPtr<IClassLoader> loader;
-        mContext->GetClassLoader((IClassLoader**)&loader);
         AutoPtr<IClassInfo> extractorClass;
-        ECode ec = loader->LoadClass((*extractorNames)[i], (IClassInfo**)&extractorClass);
+        String className = GetElastosClassName((*extractorNames)[i]);
+        ECode ec = loader->LoadClass(className, (IClassInfo**)&extractorClass);
         if (FAILED(ec)) {
             if (ec == (ECode)E_CLASS_NOT_FOUND_EXCEPTION){
-                Slogger::W(TAG, "Couldn't find extractor %s. 0x%08X", (*extractorNames)[i].string(), ec);
+                Slogger::W(TAG, "Couldn't find extractor %s. 0x%08X", className.string(), ec);
             }
             if (ec == (ECode)E_INSTANTIATION_EXCEPTION){
-                Slogger::W(TAG, "Couldn't instantiate extractor %s. 0x%08X", (*extractorNames)[i].string(), ec);
+                Slogger::W(TAG, "Couldn't instantiate extractor %s. 0x%08X", className.string(), ec);
             }
             if (ec == (ECode)E_ILLEGAL_ACCESS_EXCEPTION){
-                Slogger::W(TAG, "Couldn't accessing extractor %s. 0x%08X", (*extractorNames)[i].string(), ec);
+                Slogger::W(TAG, "Couldn't accessing extractor %s. 0x%08X", className.string(), ec);
             }
             continue;
         }
@@ -688,6 +691,37 @@ void RankingHelper::Dump(
             }
         }
     }
+}
+
+String RankingHelper::GetElastosClassName(
+    /* [in] */ const String& className)
+{
+    // String className(androidClassName);
+    // if (className.IndexOf("$") >= 0) {
+    //     // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
+    //     // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
+    //     className = Replace(className, "\\$", "");
+    // }
+
+    HashMap<String, String> classNameMap;
+    classNameMap[String("android.opengl.")]                     = String("Elastos.Droid.Opengl.C");
+    classNameMap[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
+    classNameMap[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
+    classNameMap[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");
+    classNameMap[String("com.android.server.notification.")]    = String("Elastos.Droid.Server.Notification.C");
+
+    Int32 lastIndex = className.LastIndexOf(".");
+    if (lastIndex != -1) {
+        String ns = className.Substring(0, lastIndex + 1);
+        HashMap<String, String>::Iterator it = classNameMap.Find(ns);
+        if (it != classNameMap.End()) {
+            StringBuilder sb(it->mSecond);
+            sb += className.Substring(lastIndex + 1);
+            return sb.ToString();
+        }
+    }
+
+    return className;
 }
 
 } // Notification

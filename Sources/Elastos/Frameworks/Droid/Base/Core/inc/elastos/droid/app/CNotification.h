@@ -26,6 +26,20 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
+/**
+ * A class that represents how a persistent notification is to be presented to
+ * the user using the {@link android.app.NotificationManager}.
+ *
+ * <p>The {@link Notification.Builder Notification.Builder} has been added to make it
+ * easier to construct Notifications.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For a guide to creating notifications, read the
+ * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>
+ * developer guide.</p>
+ * </div>
+ */
 CarClass(CNotification)
     , public Object
     , public INotification
@@ -34,7 +48,7 @@ CarClass(CNotification)
 public:
     class BuilderRemoteViews
         : public RemoteViews
-        , public IBuilderRemoteViews
+        , public INotificationBuilderRemoteViews
     {
     public:
         CAR_INTERFACE_DECL()

@@ -72,14 +72,10 @@ ECode NotificationManager::Notify(
 {
     VALIDATE_NOT_NULL(notification);
 
+    AutoPtr<ArrayOf<Int32> > idOut = ArrayOf<Int32>::Alloc(1);
     AutoPtr<IINotificationManager> service = GetService();
     String pkgName;
     mContext->GetPackageName(&pkgName);
-
-    if (localLOGV) {
-        String notificationStr = Object::ToString(notification);
-        Slogger::V(TAG, "%s: notify(%d, %s)", pkgName.string(), id, notificationStr.string());
-    }
 
     AutoPtr<IUri> sound;
     notification->GetSound((IUri**)&sound);
@@ -93,20 +89,24 @@ ECode NotificationManager::Notify(
         // }
     }
 
+    if (localLOGV) {
+        String notificationStr = Object::ToString(notification);
+        Slogger::V(TAG, "%s: notify(%d, %s)", pkgName.string(), id, notificationStr.string());
+    }
+
     AutoPtr<IInterface> tmp;
     notification->Clone((IInterface**)&tmp);
     AutoPtr<INotification> stripped = INotification::Probe(tmp);
     CNotificationBuilder::StripForDelivery(stripped);
 
-    Int32 userId = UserHandle::GetMyUserId();
-
-    AutoPtr<ArrayOf<Int32> > idIn = ArrayOf<Int32>::Alloc(1);
-    AutoPtr<ArrayOf<Int32> > idOut;
     // try {
     ECode ec;
     do {
+        Int32 userId = UserHandle::GetMyUserId();
+        AutoPtr<ArrayOf<Int32> > idOutTmp;
         ec = service->EnqueueNotificationWithTag(
-            pkgName, pkgName, tag, id, stripped, idIn, userId, (ArrayOf<Int32>**)&idOut);
+            pkgName, pkgName, tag, id, stripped, idOut, userId, (ArrayOf<Int32>**)&idOutTmp);
+        idOut = idOutTmp;
         if (FAILED(ec)) break;
         if (idOut == NULL || idOut->GetLength() == 0 || id != (*idOut)[0]) {
             Slogger::W(TAG, "notify: id corrupted: sent %d, got back %d",
@@ -115,8 +115,9 @@ ECode NotificationManager::Notify(
     } while(FALSE);
     // } catch (RemoteException e) {
     if (FAILED(ec)) {
-        if ((ECode) E_REMOTE_EXCEPTION == ec)
+        if ((ECode) E_REMOTE_EXCEPTION == ec) {
             ec = NOERROR;
+        }
     }
     // }
     return ec;
@@ -128,6 +129,7 @@ ECode NotificationManager::NotifyAsUser(
     /* [in] */ INotification* notification,
     /* [in] */ IUserHandle* user)
 {
+    AutoPtr<ArrayOf<Int32> > idOut = ArrayOf<Int32>::Alloc(1);
     AutoPtr<IINotificationManager> service = GetService();
     String pkgName;
     mContext->GetPackageName(&pkgName);
@@ -156,10 +158,11 @@ ECode NotificationManager::NotifyAsUser(
     Int32 identifier;
     user->GetIdentifier(&identifier);
 
-    AutoPtr<ArrayOf<Int32> > idOut;
-    AutoPtr<ArrayOf<Int32> > idIn = ArrayOf<Int32>::Alloc(1);
-    FAIL_RETURN(service->EnqueueNotificationWithTag(
-        pkgName, pkgName, tag, id, stripped, idIn, identifier, (ArrayOf<Int32>**)&idOut));
+    AutoPtr<ArrayOf<Int32> > idOutTmp;
+    ECode ec = service->EnqueueNotificationWithTag(
+        pkgName, pkgName, tag, id, stripped, idOut, identifier, (ArrayOf<Int32>**)&idOutTmp);
+    idOut = idOutTmp;
+    if (FAILED(ec)) return ec;
     if (idOut == NULL || idOut->GetLength() == 0 || id != (*idOut)[0]) {
         Slogger::W(TAG, "notify: id corrupted: sent %d, got back %d",
             id, (idOut && idOut->GetLength() > 0) ? (*idOut)[0] : -1);

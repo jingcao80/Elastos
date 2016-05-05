@@ -117,6 +117,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityEventHelper;
 using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::R;
+using Elastos::Core::CInteger32;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::CString;
@@ -427,9 +428,6 @@ ECode NotificationManagerService::BinderService::EnqueueNotificationWithTag(
     /* [in] */ Int32 userId,
     /* [out, callee] */ ArrayOf<Int32>** outIdReceived)
 {
-    VALIDATE_NOT_NULL(outIdReceived);
-    *outIdReceived = NULL;
-
     return mHost->EnqueueNotificationInternal(pkg, opPkg,
             Binder::GetCallingUid(),
             Binder::GetCallingPid(),
@@ -2242,8 +2240,8 @@ ECode NotificationManagerService::MyBroadcastReceiver::OnReceive(
     else if (action.Equals(IIntent::ACTION_USER_PRESENT)) {
         // turn off LED when user passes through lock screen
         mHost->mNotificationLight->TurnOff();
-        if (mHost->mStatusBar != NULL)
-            mHost->mStatusBar->NotificationLightOff();
+        Slogger::I(TAG, "TODO: StatusBar");
+        // mHost->mStatusBar->NotificationLightOff();
     }
     else if (action.Equals(IIntent::ACTION_USER_SWITCHED)) {
         // reload per-user settings
@@ -2274,8 +2272,8 @@ NotificationManagerService::MyRunnable::~MyRunnable()
 
 ECode NotificationManagerService::MyRunnable::Run()
 {
-    if (mHost->mStatusBar != NULL)
-        return mHost->mStatusBar->BuzzBeepBlinked();
+    Slogger::I(TAG, "TODO: StatusBar");
+    // return mHost->mStatusBar->BuzzBeepBlinked();
     return NOERROR;
 }
 
@@ -2302,11 +2300,11 @@ ECode NotificationManagerService::MyNotificationManagerInternal::EnqueueNotifica
     /* [in] */ Int32 id,
     /* [in] */ INotification* notification,
     /* [in] */ ArrayOf<Int32>* idReceived,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 userId,
+    /* [out, callee] */ ArrayOf<Int32>** out)
 {
-    AutoPtr< ArrayOf<Int32> > out;
     return mHost->EnqueueNotificationInternal(pkg, opPkg, callingUid, callingPid,
-            tag, id, notification, idReceived, userId, (ArrayOf<Int32>**)&out);
+            tag, id, notification, idReceived, userId, out);
 }
 
 ECode NotificationManagerService::MyNotificationManagerInternal::RemoveForegroundServiceFlagFromNotification(
@@ -2785,7 +2783,7 @@ NotificationManagerService::NotificationManagerService()
     , mInCall(FALSE)
     , mNotificationPulseEnabled(FALSE)
 {
-    mSpamCache = new LruCache<Int32, AutoPtr<FilterCacheInfo> >(100);
+    mSpamCache = new LruCache<AutoPtr<IInteger32>, AutoPtr<FilterCacheInfo> >(100);
 }
 
 ECode NotificationManagerService::constructor(
@@ -2843,11 +2841,8 @@ void NotificationManagerService::LoadPolicyFile()
             String tag;
             Int32 version = DB_VERSION;
 
-            while (TRUE) {
-                ec = parser->Next(&type);
+            while (ec = parser->Next(&type), type == IXmlPullParser::END_DOCUMENT) {
                 if (FAILED(ec)) break;
-                if (type == IXmlPullParser::END_DOCUMENT)
-                    break;
                 if (type != IXmlPullParser::START_TAG) {
                     continue;
                 }
@@ -3080,8 +3075,8 @@ ECode NotificationManagerService::OnStart()
     mConditionProviders = (ConditionProviders*) managedServices.Get();
     obj = GetLocalService(EIID_IStatusBarManagerInternal);
     mStatusBar = IStatusBarManagerInternal::Probe(obj);
-    if (mStatusBar != NULL)
-        mStatusBar->SetNotificationDelegate(mNotificationDelegate);
+    Slogger::I(TAG, "TODO: StatusBar");
+    // mStatusBar->SetNotificationDelegate(mNotificationDelegate);
 
     obj = GetLocalService(EIID_ILightsManager);
     AutoPtr<LightsManager> lights = (LightsManager*)ILightsManager::Probe(obj);
@@ -3509,18 +3504,17 @@ ECode NotificationManagerService::EnqueueNotificationInternal(
     /* [in] */ const String& tag,
     /* [in] */ Int32 id,
     /* [in] */ INotification* notification,
-    /* [in] */ ArrayOf<Int32>* idOut,
+    /* [in] */ ArrayOf<Int32>* idIn,
     /* [in] */ Int32 incomingUserId,
-    /* [out, callee] */ ArrayOf<Int32>** outIdReceived)
+    /* [out] */ ArrayOf<Int32>** idOut)
 {
-    VALIDATE_NOT_NULL(outIdReceived);
+    VALIDATE_NOT_NULL(idOut)
 
-    AutoPtr< ArrayOf<Int32> > cloneIdout;
-    if (idOut != NULL) {
-        cloneIdout = idOut->Clone();
+    if (NULL == idIn) {
+        *idOut = ArrayOf<Int32>::Alloc(1);
     }
     else {
-        cloneIdout = ArrayOf<Int32>::Alloc(1);
+        *idOut = idIn->Clone();
     }
 
     if (DBG) {
@@ -3605,9 +3599,7 @@ ECode NotificationManagerService::EnqueueNotificationInternal(
             this, pkg, opPkg, callingUid, callingPid, tag, id, notification, user, isSystemNotification);
     mHandler->Post(runnable, &res);
 
-    (*cloneIdout)[0] = id;
-    *outIdReceived = cloneIdout;
-    REFCOUNT_ADD(*outIdReceived);
+    (**idOut)[0] = id;
     return NOERROR;
 }
 
@@ -4034,7 +4026,6 @@ void NotificationManagerService::HandleRankingReconsideration(
     message->GetObj((IInterface**)&obj);
     IRankingReconsideration* rr = IRankingReconsideration::Probe(obj);
     if (rr == NULL) return;
-
     AutoPtr<RankingReconsideration> recon = (RankingReconsideration*)rr;
     recon->Run();
     Boolean changed;
@@ -4211,8 +4202,10 @@ Boolean NotificationManagerService::IsNotificationSpam(
     /* [in] */ const String& basePkg)
 {
     Int32 notificationHash = GetNotificationHash(notification, basePkg);
+    AutoPtr<IInteger32> iNotificationHash;
+    CInteger32::New(notificationHash, (IInteger32**)&iNotificationHash);
     Boolean isSpam = FALSE;
-    if (mSpamCache->Get(notificationHash) != NULL) {
+    if (mSpamCache->Get(iNotificationHash) != NULL) {
         isSpam = TRUE;
     }
     else {
@@ -4237,14 +4230,14 @@ Boolean NotificationManagerService::IsNotificationSpam(
                 Int32 notifId = 0;
                 c->GetInt32(ci, &notifId);
                 info->mNotificationId = notifId;
-                mSpamCache->Put(notificationHash, info);
+                mSpamCache->Put(iNotificationHash, info);
                 isSpam = TRUE;
             }
             ICloseable::Probe(c)->Close();
         }
     }
     if (isSpam) {
-        AutoPtr<FilterCacheInfo> info = mSpamCache->Get(notificationHash);
+        AutoPtr<FilterCacheInfo> info = mSpamCache->Get(iNotificationHash);
         Int32 notifId = info->mNotificationId;
         AutoPtr<SpamExecutorRunnable> r = new SpamExecutorRunnable(notifId, this);
         AutoPtr<IFuture> fut;
@@ -4683,8 +4676,8 @@ void NotificationManagerService::UpdateLightsLocked()
 
     if (!enableLed) {
         mNotificationLight->TurnOff();
-        if (mStatusBar != NULL)
-            mStatusBar->NotificationLightOff();
+        Slogger::I(TAG, "TODO: StatusBar");
+        // mStatusBar->NotificationLightOff();
     }
     else {
         AutoPtr<INotification> ledno;
@@ -4718,8 +4711,8 @@ void NotificationManagerService::UpdateLightsLocked()
         }
 
         // let SystemUI make an independent decision
-        if (mStatusBar != NULL)
-            mStatusBar->NotificationLightPulse(ledARGB, ledOnMS, ledOffMS);
+        Slogger::I(TAG, "TODO: StatusBar");
+        // mStatusBar->NotificationLightPulse(ledARGB, ledOnMS, ledOffMS);
     }
 }
 
@@ -4946,8 +4939,8 @@ void NotificationManagerService::ListenForCallState()
     CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
     AutoPtr<ITelephonyManager> manager;
     helper->From(context, (ITelephonyManager**)&manager);
-    if (manager != NULL)
-        manager->Listen(new InnerSub_PhoneStateListener(this), IPhoneStateListener::LISTEN_CALL_STATE);
+    Slogger::I(TAG, "TODO: ITelephonyManager");
+    // manager->Listen(new InnerSub_PhoneStateListener(this), IPhoneStateListener::LISTEN_CALL_STATE);
 }
 
 AutoPtr<INotificationRankingUpdate> NotificationManagerService::MakeRankingUpdateLocked(

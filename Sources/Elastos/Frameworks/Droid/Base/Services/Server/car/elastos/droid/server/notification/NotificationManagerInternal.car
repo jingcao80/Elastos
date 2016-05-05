@@ -18,7 +18,8 @@ module
             [in] Int32 id,
             [in] INotification* notification,
             [in] ArrayOf<Int32>* idReceived,
-            [in] Int32 userId);
+            [in] Int32 userId,
+            [out, callee] ArrayOf<Int32>* outIdReceived);
 
         RemoveForegroundServiceFlagFromNotification(
             [in] String pkg,

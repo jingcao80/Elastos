@@ -202,7 +202,6 @@ public:
         Int32 mVisibilityOverride;
     };
 
-private:
     class ECO_LOCAL INotificationListenerWrapper
         : public Object
         , public IINotificationListener
@@ -211,8 +210,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        INotificationListenerWrapper(
-            /* [in] */ NotificationListenerService* host);
+        CARAPI constructor(
+            /* [in] */ INotificationListenerService* host);
 
         // @Override
         CARAPI OnNotificationPosted(

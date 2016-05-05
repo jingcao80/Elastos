@@ -1,5 +1,6 @@
 
 EXPORT_HEADERS = elastos/coredef.h
+EXPORT_HEADERS += elastos/corehash.h
 
 EXPORT_HEADERS += elastos/core/UniquePtr.h
 EXPORT_HEADERS += elastos/core/NativeThread.h

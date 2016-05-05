@@ -8,7 +8,7 @@
 #include "elastos/droid/app/CPendingIntent.h"
 #include "elastos/droid/app/CNotificationAction.h"
 #include "elastos/droid/app/CNotificationBuilder.h"
-#include "elastos/droid/app/CBuilderRemoteViews.h"
+#include "elastos/droid/app/CNotificationBuilderRemoteViews.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/os/CBundle.h"
@@ -49,7 +49,7 @@ namespace App {
 //==========================================================================
 // CNotification::BuilderRemoteViews
 //==========================================================================
-CAR_INTERFACE_IMPL(CNotification::BuilderRemoteViews, Object, IBuilderRemoteViews)
+CAR_INTERFACE_IMPL(CNotification::BuilderRemoteViews, Object, INotificationBuilderRemoteViews)
 
 CNotification::BuilderRemoteViews::BuilderRemoteViews()
 {}
@@ -88,8 +88,8 @@ ECode CNotification::BuilderRemoteViews::Clone(
     WriteToParcel(parcel);
     parcel->SetDataPosition(0);
 
-    AutoPtr<IBuilderRemoteViews> brv;
-    CBuilderRemoteViews::New((IBuilderRemoteViews**)&brv);
+    AutoPtr<INotificationBuilderRemoteViews> brv;
+    CNotificationBuilderRemoteViews::New((INotificationBuilderRemoteViews**)&brv);
     IParcelable::Probe(brv)->ReadFromParcel(parcel);
     *obj = brv.Get();
     REFCOUNT_ADD(*obj)

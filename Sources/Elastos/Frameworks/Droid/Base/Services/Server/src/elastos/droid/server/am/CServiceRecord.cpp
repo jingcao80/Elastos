@@ -196,8 +196,10 @@ ECode CServiceRecord::PostNotificationRunnable::Run()
     }
 
     AutoPtr<ArrayOf<Int32> > outId = ArrayOf<Int32>::Alloc(1);
+    AutoPtr<ArrayOf<Int32> > outIdTmp;
     ECode ec = nm->EnqueueNotification(mLocalPackageName, mLocalPackageName, mAppUid, mAppPid,
-           String(NULL), mLocalForegroundId, mLocalForegroundNoti, outId, mHost->mUserId);
+           String(NULL), mLocalForegroundId, mLocalForegroundNoti, outId, mHost->mUserId, (ArrayOf<Int32>**)&outIdTmp);
+    outId = outIdTmp;
     if (FAILED(ec)) {
     // } catch (RuntimeException e) {
         Slogger::W(CActivityManagerService::TAG,

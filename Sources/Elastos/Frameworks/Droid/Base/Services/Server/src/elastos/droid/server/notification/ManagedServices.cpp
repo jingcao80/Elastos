@@ -277,6 +277,7 @@ AutoPtr< ArrayOf<Int32> > ManagedServices::UserProfiles::GetCurrentProfileIds()
         }
         return users;
     }
+    return NULL;
 }
 
 Boolean ManagedServices::UserProfiles::IsCurrentProfile(
@@ -768,8 +769,9 @@ ECode ManagedServices::RebindServices()
             AutoPtr<IInterface> obj;
             flat->Get((*userIds)[i], (IInterface**)&obj);
             String toDecode(NULL);
-            if (ICharSequence::Probe(obj) != NULL)
+            if (ICharSequence::Probe(obj) != NULL) {
                 ICharSequence::Probe(obj)->ToString(&toDecode);
+            }
             if (!toDecode.IsNull()) {
                 AutoPtr< ArrayOf<String> > components;
                 StringUtils::Split(toDecode, ENABLED_SERVICES_SEPARATOR, (ArrayOf<String>**)&components);
