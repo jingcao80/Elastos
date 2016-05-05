@@ -2,6 +2,8 @@
 #ifndef __ELASTOS_DROID_OS_BATTERYSTATS_H__
 #define __ELASTOS_DROID_OS_BATTERYSTATS_H__
 
+#include "elastos/droid/ext/frameworkhash.h"
+#include "Elastos.Droid.Os.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
@@ -9,6 +11,7 @@ using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IList;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IFormatter;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Utility::IPrinter;
 
@@ -74,6 +77,9 @@ public:
         };
 
     public:
+        CAR_INTERFACE_DECL()
+
+    public:
         static const AutoPtr<ArrayOf<String> > PROCESS_STATE_NAMES;
 
         /**
@@ -89,7 +95,7 @@ public:
     public:
         HistoryTag()
             : mUid(0)
-            , mPoolIndex()
+            , mPoolIdx(0)
         {}
 
         CARAPI_(void) SetTo(
@@ -100,8 +106,7 @@ public:
             /* [in] */ Int32 _uid);
 
         CARAPI_(void) WriteToParcel(
-            /* [in] */ IParcel* dest,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* dest);
 
         CARAPI_(void) ReadFromParcel(
             /* [in] */ IParcel* src);
@@ -118,7 +123,7 @@ public:
     public:
         String mString;
         Int32 mUid;
-        Int32 mPoolIndex;
+        Int32 mPoolIdx;
     };
 
     class HistoryItem
@@ -157,10 +162,10 @@ public:
             /* [in] */ HistoryItem* o);
 
         CARAPI_(Boolean) SameNonEvent(
-            /* [in] */ IBatteryStatsHistoryItem* o);
+            /* [in] */ HistoryItem* o);
 
         CARAPI_(Boolean) Same(
-            /* [in] */ IBatteryStatsHistoryItem* o);
+            /* [in] */ HistoryItem* o);
 
     private:
         CARAPI_(void) SetToCommon(
@@ -244,7 +249,7 @@ public:
             /* [in] */ Int32 mask,
             /* [in] */ Int32 shift,
             /* [in] */ const String& name,
-            /* [in] */ const String& shortName
+            /* [in] */ const String& shortName,
             /* [in] */ ArrayOf<String>* values,
             /* [in] */ ArrayOf<String>* shortValues)
             : mMask(mask)
@@ -270,7 +275,7 @@ public:
         TimerEntry(
             /* [in] */ const String& name,
             /* [in] */ Int32 id,
-            /* [in] */ BatteryStatsTimer* timer,
+            /* [in] */ IBatteryStatsTimer* timer,
             /* [in] */ Int64 time)
             : mName(name)
             , mId(id)
@@ -281,7 +286,7 @@ public:
     public:
         String mName;
         Int32 mId;
-        AutoPtr<BatteryStatsTimer> mTimer;
+        AutoPtr<IBatteryStatsTimer> mTimer;
         Int64 mTime;
     };
 
@@ -324,11 +329,11 @@ public:
     BatteryStats();
 
     static CARAPI_(void) FormatTime(
-        /* [in] */ StringBuilder* out,
+        /* [in] */ StringBuilder& out,
         /* [in] */ Int64 seconds);
 
     static CARAPI_(void) FormatTimeMs(
-        /* [in] */ StringBuilder* out,
+        /* [in] */ StringBuilder& out,
         /* [in] */ Int64 seconds);
 
     static CARAPI_(void) FormatTimeMsNoSpace(
@@ -336,7 +341,7 @@ public:
         /* [in] */ Int64 seconds);
 
     CARAPI_(String) FormatRatioLocked(
-        /* [in] */ Int32 num,
+        /* [in] */ Int64 num,
         /* [in] */ Int64 seconds);
 
     CARAPI_(String) FormatBytesLocked(
@@ -406,12 +411,16 @@ public:
         /* [in] */ Int64 histStart);
 
 private:
+    static CARAPI_(AutoPtr< ArrayOf<BitDescription*> >) InitHistoryStateDescriptions();
+
+    static CARAPI_(AutoPtr< ArrayOf<BitDescription*> >) InitHistoryState2Descriptions();
+
     static CARAPI_(void) FormatTimeRaw(
         /* [in] */ StringBuilder& out,
         /* [in] */ Int64 seconds);
 
     static CARAPI_(Int64) ComputeWakeLock(
-        /* [in] */ Timer* timer,
+        /* [in] */ IBatteryStatsTimer* timer,
         /* [in] */ Int64 elapsedRealtimeUs,
         /* [in] */ Int32 which);
 
@@ -427,7 +436,7 @@ private:
      */
     static CARAPI_(String) PrintWakeLock(
         /* [in] */ StringBuilder& sb,
-        /* [in] */ Timer* timer,
+        /* [in] */ IBatteryStatsTimer* timer,
         /* [in] */ Int64 elapsedRealtimeUs,
         /* [in] */ const String& name,
         /* [in] */ Int32 which,
@@ -435,7 +444,7 @@ private:
 
     static CARAPI_(String) PrintWakeLockCheckin(
         /* [in] */ StringBuilder& sb,
-        /* [in] */ BatteryStatsTimer* timer,
+        /* [in] */ IBatteryStatsTimer* timer,
         /* [in] */ Int64 elapsedRealtimeUs,
         /* [in] */ const String& name,
         /* [in] */ Int32 which,
@@ -575,5 +584,13 @@ private:
 } // namespace Os
 } // namespace Droid
 } // namespace Elastos
+
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Os::BatteryStats::HistoryTag)
+
+template <>
+struct Conversion<Elastos::Droid::Os::BatteryStats::BitDescription*, IInterface*>
+{
+    enum { exists = TRUE, exists2Way = FALSE, sameType = FALSE };
+};
 
 #endif //__ELASTOS_DROID_OS_BATTERYSTATS_H__

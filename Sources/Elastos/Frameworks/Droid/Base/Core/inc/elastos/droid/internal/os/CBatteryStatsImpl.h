@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_OS_CBATTERYSTATSIMPL_H__
 #define __ELASTOS_DROID_INTERNAL_OS_CBATTERYSTATSIMPL_H__
 
-#include "_Elastos_Droid_Internal_Os_CProcessCpuTracker.h"
+#include "_Elastos_Droid_Internal_Os_CBatteryStatsImpl.h"
 #include "elastos/droid/internal/os/BatteryStatsImpl.h"
 
 namespace Elastos {

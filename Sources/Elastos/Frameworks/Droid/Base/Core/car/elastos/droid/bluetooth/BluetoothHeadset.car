@@ -2,6 +2,8 @@
 module
 {
 
+    using interface Elastos.Utility.IList;
+
     namespace Elastos {
     namespace Droid {
     namespace Bluetooth {
@@ -26,7 +28,7 @@ module
     * @Involve
     * interface IBluetoothProfile
     */
-    [local]
+    [local, deprecated]
     interface IBluetoothHeadset {
         /**
          * Intent used to broadcast the change in the Audio Connection state of the
@@ -322,6 +324,20 @@ module
         Disconnect(
             [in] IBluetoothDevice* device,
             [out] Boolean* result);
+
+        /**
+         * {@inheritDoc}
+         */
+        GetConnectedDevices(
+            [out] IList** devices);
+
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
+
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
 
         /**
          * Set priority of the profile

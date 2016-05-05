@@ -2817,10 +2817,10 @@ Boolean MediaProvider::QueryThumbnail(
                 if (MatchThumbRequest((MediaThumbRequest*)(mtq.Get()), pid, id, gid, isVideo)) {
                     {
                         AutoLock lock(mtq);
-                       ((MediaThumbRequest*)(mtq.Get()))->mState = CANCEL;
-                       assert(0 && "TODO");
-                       // mtq->NotifyAll();
-                   }
+                        ((MediaThumbRequest*)mtq.Get())->mState = CANCEL;
+                        assert(0 && "TODO");
+                        // mtq->NotifyAll();
+                    }
                    Boolean flag = FALSE;
                    mMediaThumbQueue->Remove(mtq.Get(), &flag);
                 }

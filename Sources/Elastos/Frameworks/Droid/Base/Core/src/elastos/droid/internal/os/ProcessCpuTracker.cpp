@@ -1,7 +1,6 @@
 
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/internal/os/ProcessCpuTracker.h"
-#include "elastos/droid/internal/os/CProcessCpuTracker.h"
 #include "elastos/droid/internal/utility/CFastPrintWriter.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/FileUtils.h"
@@ -38,8 +37,6 @@ namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Os {
-
-CAR_OBJECT_IMPL(CProcessCpuTracker)
 
 //========================================================================
 // ProcessCpuTracker::Stats

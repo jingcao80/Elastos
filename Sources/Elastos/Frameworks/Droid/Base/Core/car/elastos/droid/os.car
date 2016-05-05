@@ -4,7 +4,6 @@ module
     merge("os/BatteryProperties.car");
     merge("os/BatteryManager.car");
     merge("os/BatteryManagerInternal.car");
-    merge("os/BatteryStats.car");
     merge("os/Binder.car");
     merge("os/Bundle.car");
     merge("os/CancellationSignal.car");

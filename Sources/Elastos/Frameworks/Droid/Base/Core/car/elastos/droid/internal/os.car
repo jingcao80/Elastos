@@ -25,8 +25,9 @@ module
     using interface Elastos.Core.IComparable;
     using interface Elastos.Core.IRunnable;
     interface Elastos.Droid.Content.IContext;
-    interface Elastos.Droid.Os.IBatteryStatsUid;
     interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBatteryStats;
 
     namespace Elastos {
     namespace Droid {
@@ -39,6 +40,18 @@ module
 
     singleton class CBatteryStatsHelperHelper {
         interface IBatteryStatsHelperHelper;
+    }
+
+    class CBatteryStatsImpl {
+        constructor();
+
+        constructor(
+            [in] IFile* systemDir,
+            [in] IHandler* handler);
+
+        interface IBatteryStatsImpl;
+        interface IBatteryStats;
+        interface IParcelable;
     }
 
     [local]

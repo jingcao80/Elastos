@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/os/BatteryStatsHelper.h"
 #include "elastos/droid/internal/os/CPowerProfile.h"
+#include "elastos/droid/internal/os/CBatteryStatsImpl.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/os/CUserHandle.h"
@@ -223,7 +224,7 @@ void BatteryStatsHelper::StoreStatsHistoryInFile(
     CFileOutputStream::New(path, (IFileOutputStream**)&fout);
     AutoPtr<IParcel> hist;
     CParcel::New((IParcel**)&hist);// CParcel.obtain();
-    GetStats()->WriteToParcelWithoutUids(hist, 0);
+    GetStats()->WriteToParcelWithoutUids(hist);
     AutoPtr<ArrayOf<Byte> > histData;
     hist->Marshall((ArrayOf<Byte>**)&histData);
     IOutputStream::Probe(fout)->Write(histData);
@@ -262,7 +263,8 @@ AutoPtr<IBatteryStats> BatteryStatsHelper::StatsFromFile(
         CParcel::New((IParcel**)&parcel);// Parcel.obtain();
         parcel->Unmarshall(data, 0, data->GetLength());
         parcel->SetDataPosition(0);
-        // CBatteryStatsImpl::New(parcel, (IBatteryStats**)&stats);
+        CBatteryStatsImpl::New((IBatteryStats**)&stats);
+        IParcelable::Probe(stats)->ReadFromParcel(parcel);
         if (fin != NULL) {
             ICloseable::Probe(fin)->Close();
         }
@@ -1342,10 +1344,11 @@ AutoPtr<IBatteryStatsImpl> BatteryStatsHelper::GetStats(
         CParcel::New((IParcel**)&parcel);
         parcel->Unmarshall(data, 0, data->GetLength());
         parcel->SetDataPosition(0);
-        AutoPtr<IBatteryStatsImpl> stats;
-        // CBatteryStatsImpl::New(parcel, (IBatteryStatsImpl**)&stats);
+        AutoPtr<CBatteryStatsImpl> stats;
+        CBatteryStatsImpl::NewByFriend((CBatteryStatsImpl**)&stats);
+        IParcelable::Probe(stats)->ReadFromParcel(parcel);
         stats->DistributeWorkLocked(IBatteryStats::STATS_SINCE_CHARGED);
-        return stats;
+        return IBatteryStatsImpl::Probe(stats);
         // } catch (IOException e) {
         //     Log.w(TAG, "Unable to read statistics stream", e);
         // }
@@ -1358,7 +1361,7 @@ fail:
         Logger::W(TAG, "RemoteException: 0x%08x", ec);
     }
     AutoPtr<IBatteryStatsImpl> stats;
-    // CBatteryStatsImpl::New((IBatteryStatsImpl**)&stats);
+    CBatteryStatsImpl::New((IBatteryStatsImpl**)&stats);
     return stats;
 }
 

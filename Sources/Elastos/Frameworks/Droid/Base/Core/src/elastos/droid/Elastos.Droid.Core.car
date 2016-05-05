@@ -14,6 +14,10 @@ module
     merge("../../../car/elastos/droid/graphics.car");
     }
 
+    submodule Elastos.Droid.Os {
+    merge("../../../car/elastos/droid/os2.car");
+    }
+
     submodule Elastos.Droid.Internal {
     merge("../../../car/elastos/droid/internal/app.car");
     merge("../../../car/elastos/droid/internal/appwidget.car");

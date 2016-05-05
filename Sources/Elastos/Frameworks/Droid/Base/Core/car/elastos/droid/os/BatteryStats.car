@@ -1426,8 +1426,7 @@ module
             [out] Int32* result);
 
         WriteToParcelWithoutUids(
-            [in] IParcel* outParcel,
-            [in] Int32 flags);
+            [in] IParcel* outParcel);
     }
 
     } // namespace Os
