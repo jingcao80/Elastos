@@ -449,7 +449,9 @@ CAppsCustomizePagedView::CAppsCustomizePagedView()
 
     CRect::New((IRect**)&mTmpRect);
 
-    assert(0);
+    //assert(0);
+Slogger::E("CAppsCustomizePagedView", "====TODO===========CAppsCustomizePagedView::CAppsCustomizePagedView()");
+
     // CBitmapCache::New((IBitmapCache**)&mCachedShortcutPreviewBitmap);
     // CPaintCache::New((IPaintCache**)&mCachedShortcutPreviewPaint);
     // CCanvasCache::New((ICanvasCache**)&mCachedShortcutPreviewCanvas);

@@ -14,6 +14,7 @@
 #include "elastos/droid/server/accounts/CTestFeaturesSession.h"
 #include "elastos/droid/server/accounts/CUpdateCredentialsSession.h"
 #include "elastos/droid/server/accounts/GrantCredentialsPermissionActivity.h"
+#include "elastos/droid/server/FgThread.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <Elastos.CoreLibrary.Utility.h>
@@ -103,6 +104,7 @@ using Elastos::Droid::R;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CInteger64;
@@ -143,7 +145,13 @@ CAccountManagerService::UserAccounts::UserAccounts(
     /* [in] */ Int32 userId)
     : mUserId(userId)
 {
+    CHashMap::New((IHashMap**)&mCredentialsPermissionNotificationIds);
+    CHashMap::New((IHashMap**)&mSigninRequiredNotificationIds);
+    CHashMap::New((IHashMap**)&mAccountCache);
+    CHashMap::New((IHashMap**)&mUserDataCache);
+    CHashMap::New((IHashMap**)&mAuthTokenCache);
     CHashMap::New((IHashMap**)&mPreviousNameCache);
+
     synchronized(mCacheLock) {
         String name;
         CAccountManagerService::GetDatabaseName(userId, &name);
@@ -1712,6 +1720,8 @@ CAccountManagerService::CAccountManagerService()
     CHashMap::New((IHashMap**)&mSessions);
 
     CAtomicInteger32::New(1, (IAtomicInteger32**)&mNotificationIds);
+
+    CSparseArray::New((ISparseArray**)&mUsers);
 }
 
 AutoPtr<CAccountManagerService> CAccountManagerService::GetSingleton()
@@ -1741,8 +1751,9 @@ ECode CAccountManagerService::constructor(
     mContext = context;
     mPackageManager = packageManager;
 
-    AutoPtr<ILooper> looper;
-    mMessageThread->GetLooper((ILooper**)&looper);
+    // AutoPtr<ILooper> looper;
+    // mMessageThread->GetLooper((ILooper**)&looper);
+Slogger::E("CAccountManagerService", "=====================================???");
     mMessageHandler = new MessageHandler(this);
 
     mAuthenticatorCache = (IIAccountAuthenticatorCache*)authenticatorCache;
@@ -1792,7 +1803,7 @@ AutoPtr<CAccountManagerService::UserAccounts> CAccountManagerService::InitUserLo
 {
     AutoPtr<IInterface> obj;
     mUsers->Get(userId, (IInterface**)&obj);
-    AutoPtr<UserAccounts> accounts = (UserAccounts*) IObject::Probe(obj);
+    AutoPtr<UserAccounts> accounts = (UserAccounts*)IObject::Probe(obj);
     if (accounts == NULL) {
         accounts = new UserAccounts(mContext, userId);
         mUsers->Append(userId, TO_IINTERFACE(accounts));
@@ -1901,7 +1912,7 @@ ECode CAccountManagerService::ValidateAccountsInternal(
         // try {
         ECode ec;
         do {
-            accounts->mAccountCache.Clear();
+            accounts->mAccountCache->Clear();
             AutoPtr<IHashMap> accountNamesByType;
             Boolean result = FALSE;
             while (cursor->MoveToNext(&result), result) {
@@ -2012,7 +2023,7 @@ AutoPtr<CAccountManagerService::UserAccounts> CAccountManagerService::GetUserAcc
     synchronized(mUsers) {
         AutoPtr<IInterface> obj;
         mUsers->Get(userId, (IInterface**)&obj);
-        AutoPtr<UserAccounts> accounts = (UserAccounts*) IObject::Probe(obj);
+        AutoPtr<UserAccounts> accounts = (UserAccounts*)IObject::Probe(obj);
         if (accounts == NULL) {
             accounts = InitUserLocked(userId);
             mUsers->Append(userId, TO_IINTERFACE(accounts));
@@ -5665,7 +5676,7 @@ ECode CAccountManagerService::GetAccountsFromCacheLocked(
     /* [in] */ const String& accountType,
     /* [in] */ Int32 callingUid,
     /* [in] */ const String& callingPackage,
-    /* [out] */ ArrayOf<IAccount*>** result)
+    /* [out, callee] */ ArrayOf<IAccount*>** result)
 {
     VALIDATE_NOT_NULL(result)
 

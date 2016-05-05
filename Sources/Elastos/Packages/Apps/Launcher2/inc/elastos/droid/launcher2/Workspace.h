@@ -62,6 +62,7 @@ namespace Launcher2 {
  */
 class Workspace
     : public SmoothPagedView
+    , public IWorkspace
     , public IDropTarget
     , public IDragSource
     , public IDragScroller

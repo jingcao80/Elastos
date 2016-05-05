@@ -73,7 +73,7 @@
 #include "elastos/droid/media/projection/CMediaProjectionManager.h"
 #include "elastos/droid/service/persistentdata/CPersistentDataBlockManager.h"
 #include "elastos/droid/database/sqlite/SQLiteDatabase.h"
-// #include "elastos/droid/accounts/CAccountManager.h"
+#include "elastos/droid/accounts/CAccountManager.h"
 // #include "elastos/droid/privacy/CPrivacySettingsManager.h"
 // #include "elastos/droid/privacy/surrogate/CPrivacyLocationManager.h"
 #include "elastos/droid/utility/CArrayMap.h"
@@ -88,6 +88,7 @@ using Elastos::Droid::R;
 // using Elastos::Droid::Accounts::CAccountManager;
 using Elastos::Droid::Accounts::IIAccountManager;
 using Elastos::Droid::Accounts::IAccountManager;
+using Elastos::Droid::Accounts::CAccountManager;
 using Elastos::Droid::Accounts::EIID_IIAccountManager;
 using Elastos::Droid::App::CUiModeManager;
 using Elastos::Droid::App::NotificationManager;
@@ -2339,8 +2340,7 @@ ECode CContextImpl::GetSystemService(
         AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ACCOUNT_SERVICE);
         AutoPtr<IIAccountManager> accountService = IIAccountManager::Probe(service);
         AutoPtr<IAccountManager> accountManager;
-        assert(0 && "TODO");
-        // CAccountManager::New(this, accountService, (IAccountManager**)&accountManager);
+        CAccountManager::New((IContext*)this, accountService, (IAccountManager**)&accountManager);
         *object = accountManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;

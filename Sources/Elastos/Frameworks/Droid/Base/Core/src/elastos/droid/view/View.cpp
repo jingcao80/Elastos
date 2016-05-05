@@ -18132,7 +18132,7 @@ ECode View::constructor(
                 break;
             case R::styleable::View_onClick:
                 //assert(0 && "TODO");
-                Logger::E("View","TODO: case R::styleable::View_onClick:");
+                Logger::E("View","===============================TODO: case R::styleable::View_onClick:");
 //                if (context.isRestricted()) {
 //                    throw new IllegalStateException("The android:onClick attribute cannot "
 //                            + "be used within a restricted context");

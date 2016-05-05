@@ -850,7 +850,7 @@ const Int32 Workspace::DRAG_MODE_CREATE_FOLDER = 1;
 const Int32 Workspace::DRAG_MODE_ADD_TO_FOLDER = 2;
 const Int32 Workspace::DRAG_MODE_REORDER = 3;
 
-CAR_INTERFACE_IMPL_7(Workspace, SmoothPagedView, IDropTarget, IDragSource, IDragScroller,
+CAR_INTERFACE_IMPL_8(Workspace, SmoothPagedView, IWorkspace, IDropTarget, IDragSource, IDragScroller,
         IViewOnTouchListener, IDragControllerDragListener, ILauncherTransitionable,
         IViewGroupOnHierarchyChangeListener);
 
@@ -897,6 +897,7 @@ Workspace::Workspace()
     , mCurrentTranslationY(0)
     , mTransitionProgress(0)
 {
+Slogger::E("Workspace", "============================Workspace::Workspace() 1");
     mTargetCell = ArrayOf<Int32>::Alloc(2);
 
     mTempCell = ArrayOf<Int32>::Alloc(2);
@@ -924,6 +925,7 @@ Workspace::Workspace()
     mBindPages = new MyRunnable(this);
 
     mZoomInInterpolator = new ZoomInInterpolator();
+Slogger::E("Workspace", "============================Workspace::Workspace() return");
 }
 
 ECode Workspace::constructor()
@@ -943,6 +945,7 @@ ECode Workspace::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
+Slogger::E("Workspace", "============================Workspace::constructor 1");
     SmoothPagedView::constructor(context, attrs, defStyle);
     mContentIsRefreshable = FALSE;
     mOriginalPageSpacing = mPageSpacing;
@@ -1057,6 +1060,7 @@ ECode Workspace::constructor(
     if (accessibility == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
         SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
+Slogger::E("Workspace", "============================Workspace::constructor return");
     return NOERROR;
 }
 

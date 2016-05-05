@@ -81,7 +81,7 @@ public:
         AutoPtr<DatabaseHelper> mOpenHelper;
         AutoPtr<IHashMap> mCredentialsPermissionNotificationIds;
         AutoPtr<IHashMap> mSigninRequiredNotificationIds;
-        AutoPtr<IObject> mCacheLock;
+        Object mCacheLock;
         /** protected by the {@link #cacheLock} */
         AutoPtr<IHashMap> mAccountCache;
         /** protected by the {@link #cacheLock} */
@@ -944,7 +944,7 @@ protected:
         /* [in] */ const String& accountType,
         /* [in] */ Int32 callingUid,
         /* [in] */ const String& callingPackage,
-        /* [out] */ ArrayOf<IAccount*>** result);
+        /* [out, callee] */ ArrayOf<IAccount*>** result);
 
     CARAPI_(void) WriteUserDataIntoCacheLocked(
         /* [in] */ UserAccounts* accounts,

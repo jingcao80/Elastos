@@ -310,8 +310,7 @@ ECode CKXmlParser::Next(
     *token = -1;
 
     if (mReader == NULL) {
-        //Logger::E("CKXmlParser", "setInput() must be called first.");
-        //assert(0 && "TODO");
+        Logger::E("CKXmlParser", "setInput() must be called first.");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 

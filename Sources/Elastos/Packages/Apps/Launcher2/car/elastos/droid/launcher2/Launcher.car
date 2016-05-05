@@ -63,7 +63,7 @@ module
      * interface IOnWindowDismissedCallback
      * interface Activity
      * interface IViewOnClickListener
-     * interface IOnLongClickListener
+     * interface IViewOnLongClickListener
      * interface ILauncherModelCallbacks
      * interface IViewOnTouchListener
      */

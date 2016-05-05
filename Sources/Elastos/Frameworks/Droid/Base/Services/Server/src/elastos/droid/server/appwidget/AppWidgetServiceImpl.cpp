@@ -2865,7 +2865,7 @@ AppWidgetServiceImpl::AppWidgetServiceImpl()
     : mSafeMode(FALSE)
     , mMaxWidgetBitmapMemory(0)
 {
-    CAppWidgetServiceImplBroadcastReceiver::New(TO_IINTERFACE(this), (IBroadcastReceiver**)&mBroadcastReceiver);
+    CAppWidgetServiceImplBroadcastReceiver::New((IObject*)this, (IBroadcastReceiver**)&mBroadcastReceiver);
 
     CHashMap::New((IHashMap**)&mBoundRemoteViewsServices);
     CHashMap::New((IHashMap**)&mRemoteViewsServicesAppWidgets);
@@ -3059,7 +3059,7 @@ ECode AppWidgetServiceImpl::StartListening(
             Widget* widget = (Widget*)IObject::Probe(interfaceTmp);
             (*updatedIds)[i] = widget->mAppWidgetId;
             AutoPtr<IRemoteViews> viewTmp = CloneIfLocalBinder(widget->mViews);
-            newUpdatedViews->Add(TO_IINTERFACE(viewTmp));
+            newUpdatedViews->Add(viewTmp);
         }
         *result = updatedIds;
         REFCOUNT_ADD(*result);

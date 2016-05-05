@@ -390,7 +390,7 @@ AutoPtr<IView> PagedView::GetPageAt(
 {
     AutoPtr<IView> view;
     GetChildAt(index, (IView**)&view);
-    return NOERROR;
+    return view;
 }
 
 ECode PagedView::IndexToPage(
@@ -504,8 +504,12 @@ ECode PagedView::SetOnLongClickListener(
 {
     mLongClickListener = l;
     Int32 count = GetPageCount();
+Logger::E("PagedView", "============================PagedView::SetOnLongClickListener count=%d", count);
     for (Int32 i = 0; i < count; i++) {
-        GetPageAt(i)->SetOnLongClickListener(l);
+        AutoPtr<IView> view = GetPageAt(i);
+Logger::E("PagedView", "============================PagedView::SetOnLongClickListener view=%p",view.Get());
+        view->SetOnLongClickListener(l);
+Logger::E("PagedView", "============================PagedView::SetOnLongClickListener return");
     }
     return NOERROR;
 }

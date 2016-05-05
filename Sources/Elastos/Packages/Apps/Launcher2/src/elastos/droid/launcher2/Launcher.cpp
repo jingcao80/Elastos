@@ -1265,17 +1265,11 @@ Slogger::E("Launcher", "============================Launcher::OnCreate 1");
     //             Environment.getExternalStorageDirectory() + "/launcher");
     // }
     CheckForLocaleChange();
-Slogger::E("Launcher", "============================Launcher::OnCreate 9");
     SetContentView(R::layout::launcher);
-Slogger::E("Launcher", "============================Launcher::OnCreate 10");
     SetupViews();
-Slogger::E("Launcher", "============================Launcher::OnCreate 11");
     ShowFirstRunWorkspaceCling();
-Slogger::E("Launcher", "============================Launcher::OnCreate 12");
     RegisterContentObservers();
-Slogger::E("Launcher", "============================Launcher::OnCreate 13");
     LockAllApps();
-Slogger::E("Launcher", "============================Launcher::OnCreate 14");
     mSavedState = savedInstanceState;
     RestoreState(mSavedState);
 
@@ -1286,11 +1280,9 @@ Slogger::E("Launcher", "============================Launcher::OnCreate 14");
                 (IArrayList**)&list);
         mAppsCustomizeContent->OnPackagesUpdated(list);
     }
-Slogger::E("Launcher", "============================Launcher::OnCreate 15");
     // if (PROFILE_STARTUP) {
     //     android.os.Debug.stopMethodTracing();
     // }
-Slogger::I("Launcher::OnCreate", "===================before call mModel->StartLoader");
     if (!mRestoring) {
         if (sPausedFromUserAction) {
             // If the user leaves launcher, then we should just load items asynchronously when
@@ -2000,57 +1992,66 @@ Slogger::E("Launcher", "============================Launcher::SetupViews 2 mDrag
     AutoPtr<IView> view2;
 Slogger::E("Launcher", "============================Launcher::SetupViews 2 IView::Probe(mDragLayer)=%p",IView::Probe(mDragLayer));
     IView::Probe(mDragLayer)->FindViewById(R::id::workspace, (IView**)&view2);
-Slogger::E("Launcher", "============================Launcher::SetupViews 3");
+Slogger::E("Launcher", "============================Launcher::SetupViews 3 view2=%p",view2.Get());
     mWorkspace = IWorkspace::Probe(view2);
-Slogger::E("Launcher", "============================Launcher::SetupViews 4");
+Slogger::E("Launcher", "============================Launcher::SetupViews 4 mWorkspace=%p", mWorkspace.Get());
     mQsbDivider = FindViewById(R::id::qsb_divider);
+Slogger::E("Launcher", "============================Launcher::SetupViews 4 mQsbDivider=%p=========================", mQsbDivider.Get());
     mDockDivider = FindViewById(R::id::dock_divider);
-Slogger::E("Launcher", "============================Launcher::SetupViews 5");
+Slogger::E("Launcher", "============================Launcher::SetupViews 4 mDockDivider=%p", mDockDivider.Get());
     mLauncherView->SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     resources->GetDrawable(Elastos::Droid::Launcher2::R::drawable::workspace_bg,
             (IDrawable**)&mWorkspaceBackgroundDrawable);
-
+Slogger::E("Launcher", "============================Launcher::SetupViews 5");
     // Setup the drag layer
     mDragLayer->Setup(this, dragController);
-
+Slogger::E("Launcher", "============================Launcher::SetupViews 6");
     // Setup the hotseat
     AutoPtr<IView> view3 = FindViewById(Elastos::Droid::Launcher2::R::id::hotseat);
     mHotseat = IHotseat::Probe(view3);
     if (mHotseat != NULL) {
         mHotseat->Setup(this);
     }
-
+Slogger::E("Launcher", "============================Launcher::SetupViews 7");
     // Setup the workspace
     IView::Probe(mWorkspace)->SetHapticFeedbackEnabled(FALSE);
-    IView::Probe(mWorkspace)->SetOnLongClickListener(this);
+Slogger::E("Launcher", "============================Launcher::SetupViews 8");
+    IView::Probe(mWorkspace)->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));
+Slogger::E("Launcher", "============================Launcher::SetupViews 9");
     mWorkspace->Setup(dragController);
+Slogger::E("Launcher", "============================Launcher::SetupViews 10");
     dragController->AddDragListener(IDragControllerDragListener::Probe(mWorkspace));
-
+Slogger::E("Launcher", "============================Launcher::SetupViews 11");
     // Get the search/delete bar
     AutoPtr<IView> view4;
+Slogger::E("Launcher", "============================Launcher::SetupViews 12");
     IView::Probe(mDragLayer)->FindViewById(Elastos::Droid::Launcher2::R::id::qsb_bar, (IView**)&view4);
     mSearchDropTargetBar = ISearchDropTargetBar::Probe(view4);
-
+Slogger::E("Launcher", "============================Launcher::SetupViews mSearchDropTargetBar=%p",mSearchDropTargetBar.Get());
     // Setup AppsCustomize
     AutoPtr<IView> view5 = FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane);
+Slogger::E("Launcher", "============================Launcher::SetupViews view5=%p",view5.Get());
     mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view5);
+Slogger::E("Launcher", "============================Launcher::SetupViews mAppsCustomizeTabHost=%p",mAppsCustomizeTabHost.Get());
     AutoPtr<IView> view6;
     IView::Probe(mAppsCustomizeTabHost)->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,
             (IView**)&view6);
     mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view6);
-
+Slogger::E("Launcher", "============================Launcher::SetupViews mAppsCustomizeContent=%p",mAppsCustomizeContent.Get());
     mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
-
+Slogger::E("Launcher", "============================Launcher::SetupViews 13");
     // Setup the drag controller (drop targets have to be added in reverse order in priority)
     dragController->SetDragScoller(IDragScroller::Probe(mWorkspace));
     dragController->SetScrollView(IView::Probe(mDragLayer));
     dragController->SetMoveTarget(IView::Probe(mWorkspace));
     dragController->AddDropTarget(IDropTarget::Probe(mWorkspace));
+Slogger::E("Launcher", "============================Launcher::SetupViews 14");
     if (mSearchDropTargetBar != NULL) {
         mSearchDropTargetBar->Setup(this, dragController);
     }
+Slogger::E("Launcher", "============================Launcher::SetupViews 15");
 }
 
 ECode Launcher::CreateShortcut(
@@ -5984,6 +5985,7 @@ Boolean Launcher::SkipCustomClingIfNoAccounts()
 
 ECode Launcher::ShowFirstRunWorkspaceCling()
 {
+Slogger::E("Launcher", "============================Launcher::ShowFirstRunWorkspaceCling 1");
     // Enable the clings only if they have not been dismissed before
     Boolean res;
     mSharedPrefs->GetBoolean(ICling::WORKSPACE_CLING_DISMISSED_KEY, FALSE, &res);
@@ -6023,6 +6025,7 @@ ECode Launcher::ShowFirstRunWorkspaceCling()
     else {
         RemoveCling(Elastos::Droid::Launcher2::R::id::workspace_cling);
     }
+Slogger::E("Launcher", "============================Launcher::ShowFirstRunWorkspaceCling return");
     return NOERROR;
 }
 

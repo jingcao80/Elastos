@@ -18,6 +18,7 @@
 #include "elastos/droid/server/CNsdService.h"
 #include "elastos/droid/server/CBatteryService.h"
 
+#include "elastos/droid/server/accounts/CAccountManagerService.h"
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
 #include "elastos/droid/server/clipboard/CClipboardService.h"
 #include "elastos/droid/server/content/CContentService.h"
@@ -91,6 +92,7 @@ using Elastos::Droid::Webkit::IWebViewFactory;
 using Elastos::Droid::Webkit::CWebViewFactory;
 using Elastos::Droid::Utility::CDisplayMetrics;
 
+using Elastos::Droid::Server::Accounts::CAccountManagerService;
 using Elastos::Droid::Server::AppWidget::CAppWidgetService;
 using Elastos::Droid::Server::Clipboard::CClipboardService;
 using Elastos::Droid::Server::Content::CContentService;
@@ -459,7 +461,7 @@ ECode SystemServer::StartOtherServices()
     ECode ec = NOERROR;
     Boolean bval;
     AutoPtr<IContext> context = mSystemContext;
-    // AutoPtr<CAccountManagerService> accountManager;
+    AutoPtr<CAccountManagerService> accountManager;
     AutoPtr<CContentService> contentService;
     AutoPtr<CVibratorService> vibrator;
     AutoPtr<IIAlarmManager> alarm;
@@ -537,11 +539,12 @@ ECode SystemServer::StartOtherServices()
 
     // The AccountManager must come before the ContentService
     // TODO: seems like this should be disable-able, but req'd by ContentService
-    Slogger::I(TAG, "Account Manager todo");
-    // AutoPtr<IIAccountManager> accountManager;
-    // ec = CAccountManagerService::New(context, (IIAccountManager**)&accountManager);
-    // if (FAILED(ec)) ReportWtf("starting Account Manager service", ec);
-    // ServiceManager::AddService(IContext::ACCOUNT_SERVICE, accountManager.Get());
+    Slogger::I(TAG, "Account Service");
+    AutoPtr<IIAccountManager> am;
+    ec = CAccountManagerService::New(context, (IIAccountManager**)&am);
+    if (FAILED(ec)) ReportWtf("starting Account Manager service", ec);
+    ServiceManager::AddService(IContext::ACCOUNT_SERVICE, am.Get());
+    accountManager = (CAccountManagerService*)am.Get();
 
     Slogger::I(TAG, "Content Manager");
     AutoPtr<IIContentService> cs = CContentService::Main(context,
@@ -814,10 +817,10 @@ ECode SystemServer::StartOtherServices()
             mountService->WaitForAsecScan();
         }
 
-        // if (accountManager != NULL) {
-        //     ec = accountManager->SystemReady();
-        //     if (FAILED(ec)) ReportWtf("making Account Manager Service ready", ec);
-        // }
+        if (accountManager != NULL) {
+            accountManager->SystemReady();
+            //if (FAILED(ec)) ReportWtf("making Account Manager Service ready", ec);
+        }
 
         if (contentService != NULL) {
             ec = contentService->SystemReady();

@@ -440,8 +440,13 @@ ECode ChooseTypeAndAccountActivity::Run(
         AutoPtr<IAccountManager> accountManager;
         ASSERT_SUCCEEDED(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
         mExistingAccounts = NULL;
+        AutoPtr<ArrayOf<IAccount*> > array;
         accountManager->GetAccountsForPackage(mCallingPackage,
-                        mCallingUid, (ArrayOf<IAccount*>**)&mExistingAccounts);
+                        mCallingUid, (ArrayOf<IAccount*>**)&array);
+        mExistingAccounts = ArrayOf<IParcelable*>::Alloc(array->GetLength());
+        for (Int32 i = 0; i < array->GetLength(); i++) {
+            mExistingAccounts->Set(i, IParcelable::Probe((*array)[i]));
+        }
         Int32 flags;
         intent->GetFlags(&flags);
         intent->SetFlags(flags & ~IIntent::FLAG_ACTIVITY_NEW_TASK);
