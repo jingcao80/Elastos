@@ -208,14 +208,17 @@ public:
         /* [in] */ Boolean enabled);
 
     // @Override
-    CARAPI_(Boolean) IsEnabled();
+    CARAPI IsEnabled(
+        /* [out] */ Boolean* res);
 
     // @Override
-    CARAPI_(Int32) GetBaseline();
+    CARAPI GetBaseline(
+        /* [out] */ Int32* baseline);
 
     // @Override
-    CARAPI_(Boolean) DispatchPopulateAccessibilityEvent(
-        /* [in] */ IAccessibilityEvent* event);
+    CARAPI DispatchPopulateAccessibilityEvent(
+        /* [in] */ IAccessibilityEvent* event,
+        /* [out] */ Boolean* res);
 
     // @Override
     CARAPI OnPopulateAccessibilityEvent(

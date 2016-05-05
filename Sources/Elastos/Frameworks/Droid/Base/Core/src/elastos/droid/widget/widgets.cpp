@@ -113,6 +113,7 @@
 #include "elastos/droid/widget/CTimePickerClockDelegate.h"
 #include "elastos/droid/widget/CTimePickerClockDelegateSavedState.h"
 #include "elastos/droid/widget/CTimePickerSpinnerDelegate.h"
+#include "elastos/droid/widget/CTimePickerSpinnerDelegateSavedState.h"
 #include "elastos/droid/widget/CToast.h"
 #include "elastos/droid/widget/CToastTransientNotification.h"
 #include "elastos/droid/widget/CToggleButton.h"
@@ -245,6 +246,7 @@ CAR_OBJECT_IMPL(CTimePicker)
 CAR_OBJECT_IMPL(CTimePickerClockDelegate)
 CAR_OBJECT_IMPL(CTimePickerClockDelegateSavedState)
 CAR_OBJECT_IMPL(CTimePickerSpinnerDelegate)
+CAR_OBJECT_IMPL(CTimePickerSpinnerDelegateSavedState)
 CAR_OBJECT_IMPL(CToast)
 CAR_OBJECT_IMPL(CToastTransientNotification)
 CAR_OBJECT_IMPL(CToggleButton)

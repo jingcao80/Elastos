@@ -8,6 +8,16 @@ module
     interface ITimePickerSpinnerDelegate {
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface ITimePickerSpinnerDelegateSavedState {
+    }
+
+
     } // namespace Widget
     } // namespace Droid
     } // namespace Elastos

@@ -1133,6 +1133,9 @@ module
             [in] Int32 defStyleRes);
 
         interface ITimePicker;
+        interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -1654,9 +1657,9 @@ module
             [in] Int32 defStyleRes);
 
         interface ICalendarView;
-        interface IView;
-        interface IViewGroup;
         interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -3051,6 +3054,24 @@ module
         interface ITimePickerSpinnerDelegate;
         interface ITimePickerAbstractTimePickerDelegate;
         //interface IOnValueSelectedListener;
+    }
+
+    class CTimePickerSpinnerDelegateSavedState {
+        constructor(
+            [in] IParcelable* superState,
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Boolean is24HourMode,
+            [in] Boolean isKbMode,
+            [in] IArrayList* typedTimes,
+            [in] Int32 currentItemShowing);
+
+        constructor();
+
+        interface ITimePickerSpinnerDelegateSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
     }
 
     [local]

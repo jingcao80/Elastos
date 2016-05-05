@@ -212,7 +212,6 @@ ECode TimePickerClockDelegate::InnerOnValueChangeListener2::OnValueChange(
     /* [in] */ Int32 oldVal,
     /* [in] */ Int32 newVal)
 {
-
     mOwner->UpdateInputState();
     Boolean resTmp;
     IView::Probe(picker)->RequestFocus(&resTmp);
@@ -451,7 +450,6 @@ ECode TimePickerClockDelegate::GetCurrentHour(
 ECode TimePickerClockDelegate::SetCurrentMinute(
     /* [in] */ Int32 currentMinute)
 {
-
     Int32 minute = 0;
     GetCurrentMinute(&minute);
     if (currentMinute == minute) {
@@ -467,14 +465,12 @@ ECode TimePickerClockDelegate::GetCurrentMinute(
 {
     VALIDATE_NOT_NULL(result);
 
-    mMinuteSpinner->GetValue(result);
-    return NOERROR;
+    return mMinuteSpinner->GetValue(result);
 }
 
 ECode TimePickerClockDelegate::SetIs24HourView(
     /* [in] */ Boolean is24HourView)
 {
-
     if (mIs24HourView == is24HourView) {
         return NOERROR;
     }
@@ -510,16 +506,16 @@ ECode TimePickerClockDelegate::SetOnTimeChangedListener(
 ECode TimePickerClockDelegate::SetEnabled(
     /* [in] */ Boolean enabled)
 {
-    (IView::Probe(mMinuteSpinner))->SetEnabled(enabled);
+    IView::Probe(mMinuteSpinner)->SetEnabled(enabled);
     if (mDivider != NULL) {
-        (IView::Probe(mDivider))->SetEnabled(enabled);
+        IView::Probe(mDivider)->SetEnabled(enabled);
     }
-    (IView::Probe(mHourSpinner))->SetEnabled(enabled);
+    IView::Probe(mHourSpinner)->SetEnabled(enabled);
     if (mAmPmSpinner != NULL) {
-        (IView::Probe(mAmPmSpinner))->SetEnabled(enabled);
+        IView::Probe(mAmPmSpinner)->SetEnabled(enabled);
     }
     else {
-        (IView::Probe(mAmPmButton))->SetEnabled(enabled);
+        IView::Probe(mAmPmButton)->SetEnabled(enabled);
     }
     mIsEnabled = enabled;
     return NOERROR;
@@ -539,8 +535,7 @@ ECode TimePickerClockDelegate::GetBaseline(
 {
     VALIDATE_NOT_NULL(result);
 
-    (IView::Probe(mHourSpinner))->GetBaseline(result);
-    return NOERROR;
+    return IView::Probe(mHourSpinner)->GetBaseline(result);
 }
 
 ECode TimePickerClockDelegate::OnConfigurationChanged(
@@ -628,7 +623,7 @@ ECode TimePickerClockDelegate::OnPopulateAccessibilityEvent(
     dateUtils->FormatDateTime(mContext, timeInMillis, flags, &selectedDateUtterance);
 
     AutoPtr<IList> textList;
-    (IAccessibilityRecord::Probe(event))->GetText((IList**)&textList);
+    IAccessibilityRecord::Probe(event)->GetText((IList**)&textList);
 
     AutoPtr<ICharSequence> charSequenceTmp;
     CString::New(selectedDateUtterance, (ICharSequence**)&charSequenceTmp);
@@ -642,7 +637,7 @@ ECode TimePickerClockDelegate::OnInitializeAccessibilityEvent(
     VALIDATE_NOT_NULL(event);
 
     AutoPtr<ICharSequence> charSequence;
-    CString::New(String("TimePicker"), (ICharSequence**)&charSequence);
+    CString::New(String("CTimePicker"), (ICharSequence**)&charSequence);
     (IAccessibilityRecord::Probe(event))->SetClassName(charSequence);
     return NOERROR;
 }
@@ -653,7 +648,7 @@ ECode TimePickerClockDelegate::OnInitializeAccessibilityNodeInfo(
     VALIDATE_NOT_NULL(info);
 
     AutoPtr<ICharSequence> charSequence;
-    CString::New(String("TimePicker"), (ICharSequence**)&charSequence);
+    CString::New(String("CTimePicker"), (ICharSequence**)&charSequence);
     info->SetClassName(charSequence);
     return NOERROR;
 }
@@ -817,7 +812,7 @@ void TimePickerClockDelegate::UpdateInputState()
         inputMethodManager->IsActive(IView::Probe(mAmPmSpinnerInput), &isAmpmSpinnerActive);
 
         AutoPtr<IBinder> binder;
-        (IView::Probe(mDelegator))->GetWindowToken((IBinder**)&binder);
+        IView::Probe(mDelegator)->GetWindowToken((IBinder**)&binder);
         Boolean resTmp;
         if (isHourSpinnerActive) {
             IView::Probe(mHourSpinnerInput)->ClearFocus();
@@ -855,7 +850,7 @@ void TimePickerClockDelegate::UpdateAmPmControl()
         else {
             AutoPtr<ICharSequence> charSequence;
             CString::New((*mAmPmStrings)[index], (ICharSequence**)&charSequence);
-            (ITextView::Probe(mAmPmButton))->SetText(charSequence);
+            ITextView::Probe(mAmPmButton)->SetText(charSequence);
             IView::Probe(mAmPmButton)->SetVisibility(IView::VISIBLE);
         }
     }
