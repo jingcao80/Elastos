@@ -6,7 +6,6 @@
 #include "_Elastos_DevSamples_ApplicationDemo_CApplicationOne.h"
 
 using Elastos::Droid::App::Application;
-using Elastos::Droid::View::IViewOnClickListener;
 
 namespace Elastos {
 namespace DevSamples {
@@ -14,6 +13,7 @@ namespace ApplicationDemo {
 
 CarClass(CApplicationOne)
     , public Application
+    , public IApplicationOne
 {
 public:
     CAR_INTERFACE_DECL()
@@ -31,7 +31,7 @@ public:
         /* [out] */ String* value);
 
 private:
-    String mValue
+    String mValue;
 };
 
 } // namespace ApplicationDemo

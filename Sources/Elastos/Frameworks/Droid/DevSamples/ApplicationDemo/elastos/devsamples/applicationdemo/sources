@@ -12,6 +12,7 @@ SOURCES = Elastos.DevSamples.ApplicationDemo.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
+SOURCES += CApplicationOne.cpp
 SOURCES += CActivityOne.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib

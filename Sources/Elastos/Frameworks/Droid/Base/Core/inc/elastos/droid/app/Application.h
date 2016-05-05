@@ -144,8 +144,6 @@ public:
     AutoPtr<ILoadedPkg> mLoadedPkg;
 
 private:
-    static const String TAG;
-
     List< AutoPtr<IComponentCallbacks> > mComponentCallbacks;
     Object mComponentCallbacksLock;
     List< AutoPtr<IActivityLifecycleCallbacks> > mActivityLifecycleCallbacks;

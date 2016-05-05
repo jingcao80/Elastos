@@ -25,7 +25,6 @@ class ECO_PUBLIC R {
     };
     public: class layout {
         public: static const int main = 0x7f030000;
-        public: static const int test_item = 0x7f030001;
     };
     public: class string {
         public: static const int app_name = 0x7f040000;

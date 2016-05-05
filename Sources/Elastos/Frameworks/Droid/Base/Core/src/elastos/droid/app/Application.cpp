@@ -11,7 +11,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-const String Application::TAG("Application");
+static const String TAG("Application");
 
 CAR_INTERFACE_IMPL_3(Application, ContextWrapper, IApplication, IComponentCallbacks, IComponentCallbacks2)
 

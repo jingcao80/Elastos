@@ -8,6 +8,7 @@
 #include <Elastos.Droid.Widget.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::IApplication;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -62,13 +63,13 @@ ECode CActivityOne::OnCreate(
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::main);
 
-    AutoPtr<IAppcalition> app;
-    GetApplication((IAppcalition**)&app);
-    IAppcalitionOne* appOne = IAppcalitionOne::Probe(app);
+    AutoPtr<IApplication> app;
+    GetApplication((IApplication**)&app);
+    IApplicationOne* appOne = IApplicationOne::Probe(app);
     assert(appOne != NULL);
     String value;
     appOne->GetValue(&value);
-    Logger::I(TAG, " >> GetValue from IAppcalitionOne: %s", value.string());
+    Logger::I(TAG, " >> GetValue from IApplicationOne: %s", value.string());
 
     AutoPtr<IView> view = FindViewById(R::id::ImageView);
     IImageView* imageView = IImageView::Probe(view);

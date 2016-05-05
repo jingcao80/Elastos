@@ -26,7 +26,7 @@ module
             [in] String value);
 
         GetValue(
-            [out] String value);
+            [out] String* value);
     }
 
     class CApplicationOne {

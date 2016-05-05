@@ -1,8 +1,13 @@
 #include "CApplicationOne.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace DevSamples {
 namespace ApplicationDemo {
+
+static const String TAG("ApplicationDemo::CApplicationOne");
 
 CAR_INTERFACE_IMPL(CApplicationOne, Application, IApplicationOne)
 
@@ -10,7 +15,8 @@ CAR_OBJECT_IMPL(CApplicationOne)
 
 ECode CApplicationOne::constructor()
 {
-    return NOERROR;
+    Logger::I(TAG, " >>> create CApplicationOne: %s", TO_CSTR(this));
+    return Application::constructor();
 }
 
 ECode CApplicationOne::OnCreate()

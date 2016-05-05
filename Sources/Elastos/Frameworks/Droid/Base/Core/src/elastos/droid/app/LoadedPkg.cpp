@@ -1091,69 +1091,37 @@ ECode LoadedPkg::MakeApplication(
     AutoPtr<IApplication> app;
     String appClass;
     FAIL_RETURN(mApplicationInfo->GetClassName(&appClass));
-    if (forceDefaultAppClass || (appClass.IsNull())) {
-        appClass = String("Elastos.Droid.App.CApplication");/* "android.app.Application" */;
-
-        Slogger::I(TAG, " >> MakeApplication: mPackageName %s, appClass %s",
-            mPackageName.string(), appClass.string());
-
-        //    try {
-        AutoPtr<IClassLoader> cl;
-        GetClassLoader((IClassLoader**)&cl);
-        if (!mPackageName.Equals("android")) {
-            InitializeJavaContextClassLoader();
-        }
-
-        AutoPtr<IContextImpl> appContext;
-        CContextImpl::CreateAppContext(mActivityThread, this, (IContextImpl**)&appContext);
-        IContext* ctx = IContext::Probe(appContext);
-        ECode ec = activityThread->mInstrumentation->NewApplication(
-                cl, appClass, ctx, (IApplication**)&app);
-        if (FAILED(ec)) {
-            Boolean bval;
-            activityThread->mInstrumentation->OnException(app, ec, &bval);
-            if (!bval) {
-                Slogger::E(TAG, "Unable to instantiate application %s, ec: 0x%08x", appClass.string(), ec);
-                *result = NULL;
-                return E_RUNTIME_EXCEPTION;
-            }
-        }
-
-        ((CContextImpl*)appContext.Get())->SetOuterContext(IContext::Probe(app));
+    if (forceDefaultAppClass || appClass.IsNull()) {
+        appClass = "Elastos.Droid.App.CApplication";
     }
-    else {
-        //    try {
-        AutoPtr<IClassLoader> cl;
-        GetClassLoader((IClassLoader**)&cl);
 
-        Slogger::I(TAG, " >> MakeApplication: packageName %s, appClass %s, classLoader:%s",
-            mPackageName.string(), appClass.string(), TO_CSTR(cl));
+    //    try {
+    AutoPtr<IClassLoader> cl;
+    GetClassLoader((IClassLoader**)&cl);
+    if (!mPackageName.Equals("android")) {
+        InitializeJavaContextClassLoader();
+    }
 
-        AutoPtr<IClassInfo> classInfo;
-        ECode ec = cl->LoadClass(appClass, (IClassInfo**)&classInfo);
-        if (FAILED(ec)) {
-            Slogger::E(TAG, "HandleBindApplication: LoadClass %s in failed.", appClass.string(), TO_CSTR(cl));
+    Slogger::I(TAG, " >> MakeApplication: packageName %s, appClass %s, classLoader:%s",
+        mPackageName.string(), appClass.string(), TO_CSTR(cl));
+
+    AutoPtr<IContextImpl> appContext;
+    CContextImpl::CreateAppContext(mActivityThread, this, (IContextImpl**)&appContext);
+    IContext* ctx = IContext::Probe(appContext);
+    ECode ec = activityThread->mInstrumentation->NewApplication(
+        cl, appClass, ctx, (IApplication**)&app);
+    if (FAILED(ec)) {
+        Boolean bval;
+        activityThread->mInstrumentation->OnException(app, ec, &bval);
+        if (!bval) {
+            Slogger::E(TAG, "Unable to instantiate application %s with classLoad %s, ec: 0x%08x",
+                appClass.string(), TO_CSTR(cl), ec);
+            *result = NULL;
             return E_RUNTIME_EXCEPTION;
         }
-
-        AutoPtr<IContextImpl> appContext;
-        CContextImpl::CreateAppContext(mActivityThread, this, (IContextImpl**)&appContext);
-        IContext* ctx = IContext::Probe(appContext);
-        AutoPtr<IInstrumentationHelper> helper;
-        CInstrumentationHelper::AcquireSingleton((IInstrumentationHelper**)&helper);
-        ec = helper->NewApplication(classInfo, ctx, (IApplication**)&app);
-        if (FAILED(ec)) {
-            Boolean bval;
-            activityThread->mInstrumentation->OnException(app, ec, &bval);
-            if (!bval) {
-                Slogger::E(TAG, "Unable to instantiate application %s, ec: 0x%08x", appClass.string(), ec);
-                *result = NULL;
-                return E_RUNTIME_EXCEPTION;
-            }
-        }
-
-        ((CContextImpl*)appContext.Get())->SetOuterContext(IContext::Probe(app));
     }
+
+    ((CContextImpl*)appContext.Get())->SetOuterContext(IContext::Probe(app));
 
     activityThread->mAllApplications.PushBack(app);
     mApplication = app;
@@ -1177,8 +1145,6 @@ ECode LoadedPkg::MakeApplication(
     ((CAssetManager*)assetMgr.Get())->GetAssignedPackageIdentifiers((ISparseArray**)&packageIdentifiers);
     Int32 N;
     packageIdentifiers->GetSize(&N);
-    AutoPtr<IClassLoader> cl;
-    GetClassLoader((IClassLoader**)&cl);
     for (Int32 i = 0; i < N; i++) {
         Int32 id;
         packageIdentifiers->KeyAt(i, &id);

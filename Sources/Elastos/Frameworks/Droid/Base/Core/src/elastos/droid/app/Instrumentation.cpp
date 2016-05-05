@@ -927,9 +927,9 @@ ECode Instrumentation::NewApplication(
 
     AutoPtr<IInterface> obj;
     FAIL_RETURN(clazz->CreateObject((IInterface**)&obj))
-    IApplication* _app = IApplication::Probe(obj);
-    if (_app) FAIL_RETURN(_app->Attach(context))
-    *app = _app;
+    IApplication* appObj = IApplication::Probe(obj);
+    if (appObj) FAIL_RETURN(appObj->Attach(context))
+    *app = appObj;
     REFCOUNT_ADD(*app)
     return NOERROR;
 }
