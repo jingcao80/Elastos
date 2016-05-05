@@ -376,7 +376,7 @@ BatteryStatsImpl::Counter::Counter(
     in->ReadInt32(&mLoadedCount);
     mLastCount = 0;
     in->ReadInt32(&mUnpluggedCount);
-    timeBase->Add((ITimeBaseObs*)this);
+    timeBase->Add(this);
 }
 
 BatteryStatsImpl::Counter::Counter(
@@ -388,7 +388,7 @@ BatteryStatsImpl::Counter::Counter(
 {
     CAtomicInteger32::New((IAtomicInteger32**)&mCount);
     mTimeBase = timeBase;
-    timeBase->Add((ITimeBaseObs*)this);
+    timeBase->Add(this);
 }
 
 CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Counter, Object, IBatteryStatsCounter, ITimeBaseObs)
@@ -491,7 +491,7 @@ void BatteryStatsImpl::Counter::Reset(
 
 void BatteryStatsImpl::Counter::Detach()
 {
-    mTimeBase->Remove((ITimeBaseObs*)this);
+    mTimeBase->Remove(this);
 }
 
 void BatteryStatsImpl::Counter::WriteSummaryFromParcelLocked(
@@ -553,7 +553,7 @@ BatteryStatsImpl::Int64SamplingCounter::Int64SamplingCounter(
     mCount = mPluggedCount;
     in->ReadInt64(&mLoadedCount);
     in->ReadInt64(&mUnpluggedCount);
-    timeBase->Add((ITimeBaseObs*)this);
+    timeBase->Add(this);
 }
 
 BatteryStatsImpl::Int64SamplingCounter::Int64SamplingCounter(
@@ -565,7 +565,7 @@ BatteryStatsImpl::Int64SamplingCounter::Int64SamplingCounter(
     , mUnpluggedCount(0)
     , mPluggedCount(0)
 {
-    timeBase->Add((ITimeBaseObs*)this);
+    timeBase->Add(this);
 }
 
 CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Int64SamplingCounter, Object, IBatteryStatsInt64Counter, ITimeBaseObs)
@@ -649,7 +649,7 @@ void BatteryStatsImpl::Int64SamplingCounter::Reset(
 
 void BatteryStatsImpl::Int64SamplingCounter::Detach()
 {
-    mTimeBase->Remove((ITimeBaseObs*)this);
+    mTimeBase->Remove(this);
 }
 
 void BatteryStatsImpl::Int64SamplingCounter::WriteSummaryFromParcelLocked(
@@ -693,7 +693,7 @@ BatteryStatsImpl::Timer::Timer(
     in->ReadInt64(&mTotalTime);
     in->ReadInt64(&mLoadedTime);
     in->ReadInt64(&mUnpluggedTime);
-    timeBase->Add((ITimeBaseObs*)this);
+    timeBase->Add(this);
     if (DEBUG) Logger::I(TAG, "**** READ TIMER #%d: mTotalTim=%d", mType, mTotalTime);
 }
 
@@ -711,7 +711,7 @@ BatteryStatsImpl::Timer::Timer(
     , mLastTime(0)
     , mUnpluggedTime(0)
 {
-    timeBase->Add((ITimeBaseObs*)this);
+    timeBase->Add(this);
 }
 
 CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Timer, Object, IBatteryStatsTimer, ITimeBaseObs)
@@ -729,7 +729,7 @@ Boolean BatteryStatsImpl::Timer::Reset(
 
 void BatteryStatsImpl::Timer::Detach()
 {
-    mTimeBase->Remove((ITimeBaseObs*)this);
+    mTimeBase->Remove(this);
 }
 
 void BatteryStatsImpl::Timer::WriteToParcel(
@@ -1728,7 +1728,7 @@ BatteryStatsImpl::Uid::Proc::Proc(
     , mProcessState(PROCESS_STATE_NONE)
     , mHost(host)
 {
-    mHost->mOnBatteryTimeBase->Add((ITimeBaseObs*)this);
+    mHost->mOnBatteryTimeBase->Add(this);
     Int32 steps;
     mHost->GetCpuSpeedSteps(&steps);
     mSpeedBins = ArrayOf<SamplingCounter*>::Alloc(steps);
@@ -1778,7 +1778,7 @@ void BatteryStatsImpl::Uid::Proc::Reset()
 void BatteryStatsImpl::Uid::Proc::Detach()
 {
     mActive = FALSE;
-    mHost->mOnBatteryTimeBase->Remove((ITimeBaseObs*)this);
+    mHost->mOnBatteryTimeBase->Remove(this);
     for (Int32 i = 0; i < mSpeedBins->GetLength(); i++) {
         AutoPtr<SamplingCounter> c = (*mSpeedBins)[i];
         if (c != NULL) {
@@ -2110,7 +2110,7 @@ BatteryStatsImpl::Uid::Pkg::Serv::Serv(
     , mUnpluggedLaunches(0)
     , mHost(host)
 {
-   mHost->mOnBatteryTimeBase->Add((ITimeBaseObs*)this);
+   mHost->mOnBatteryTimeBase->Add(this);
 }
 
 CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg::Serv, Object, IBatteryStatsUidPkgServ, IBatteryStatsImplUidPkgServ, ITimeBaseObs)
@@ -2317,7 +2317,7 @@ BatteryStatsImpl::Uid::Pkg::Pkg(
     , mHost(host)
 {
     CHashMap::New((IHashMap**)&mServiceStats);
-    mHost->mOnBatteryScreenOffTimeBase->Add((ITimeBaseObs*)this);
+    mHost->mOnBatteryScreenOffTimeBase->Add(this);
 }
 
 CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg, Object, IBatteryStatsUidPkg, IBatteryStatsImplUidPkg, ITimeBaseObs)
@@ -2341,7 +2341,7 @@ ECode BatteryStatsImpl::Uid::Pkg::OnTimeStopped(
 
 void BatteryStatsImpl::Uid::Pkg::Detach()
 {
-    mHost->mOnBatteryScreenOffTimeBase->Remove((ITimeBaseObs*)this);
+    mHost->mOnBatteryScreenOffTimeBase->Remove(this);
 }
 
 void BatteryStatsImpl::Uid::Pkg::ReadFromParcelLocked(
@@ -8186,8 +8186,9 @@ void BatteryStatsImpl::SetOnBatteryLocked(
                 AutoPtr<IBackgroundThreadHelper> helper;
                 CBackgroundThreadHelper::AcquireSingleton((IBackgroundThreadHelper**)&helper);
                 AutoPtr<IHandler> h;
-                helper->GetHandler((IHandler**)&h);
-                AutoPtr<IRunnable> runnable = (IRunnable*)new SetOnBatteryRunnable(parcel, this);
+                helper->GetHandle((IHandler**)&h);
+                AutoPtr<IRunnable> runnable = new SetOnBatteryRunnable(parcel, this);
+
                 Boolean result;
                 h->Post(runnable, &result);
             }

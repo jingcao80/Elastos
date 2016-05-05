@@ -287,12 +287,11 @@ ECode CChannels::NewWriter(
 ECode CChannels::CheckBlocking(
     /* [in] */ IChannel* channel)
 {
-    if(ISelectableChannel::Probe(channel) != NULL)
-    {
+    ISelectableChannel* sc = ISelectableChannel::Probe(channel);
+    if (sc != NULL) {
         Boolean ret;
-        ((ISelectableChannel*)channel)->IsBlocking(&ret);
-        if(ret)
-        {
+        sc->IsBlocking(&ret);
+        if(ret) {
             return E_ILLEGAL_BLOCKING_MODE_EXCEPTION;
         }
     }

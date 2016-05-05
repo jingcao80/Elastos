@@ -133,7 +133,7 @@ AutoPtr<ArrayOf<Float> > Instance::TemporalSampler(
     strokes->Get(0, (IInterface**)&obj);
     IGestureStroke* stroke = IGestureStroke::Probe(obj);
 
-    AutoPtr<ArrayOf<Float> > pts = GestureUtils::TemporalSampling((IGestureStroke *)stroke,
+    AutoPtr<ArrayOf<Float> > pts = GestureUtils::TemporalSampling(stroke,
             SEQUENCE_SAMPLE_SIZE);
     AutoPtr<ArrayOf<Float> > center = GestureUtils::ComputeCentroid(pts);
     Float orientation = (Float)Elastos::Core::Math::Atan2((*pts)[1] - (*center)[1], (*pts)[0] - (*center)[0]);

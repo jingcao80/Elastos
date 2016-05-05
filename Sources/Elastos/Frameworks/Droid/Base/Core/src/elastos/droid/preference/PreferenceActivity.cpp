@@ -95,7 +95,7 @@ ECode PreferenceActivity::MHandler::HandleMessage(
         case MSG_BUILD_HEADERS: {
             AutoPtr<IArrayList> oldHeaders;
             AutoPtr<ICollection> coll = ICollection::Probe(mHost->mHeaders);
-            CArrayList::New((ICollection*)coll, (IArrayList**)&oldHeaders);
+            CArrayList::New(coll, (IArrayList**)&oldHeaders);
             mHost->mHeaders->Clear();
             mHost->OnBuildHeaders(mHost->mHeaders);
             AutoPtr<IBaseAdapter> baseAdapter = IBaseAdapter::Probe(mHost->mAdapter);
@@ -107,14 +107,14 @@ ECode PreferenceActivity::MHandler::HandleMessage(
             String fragment;
             if (header != NULL && (header->GetFragment(&fragment), !fragment.IsNull())) {
                 AutoPtr<IPreferenceActivityHeader> mappedHeader;
-                mHost->FindBestMatchingHeader((IPreferenceActivityHeader*)header, IList::Probe(oldHeaders), (IPreferenceActivityHeader**)&mappedHeader);
+                mHost->FindBestMatchingHeader(header, IList::Probe(oldHeaders), (IPreferenceActivityHeader**)&mappedHeader);
                 if (mappedHeader == NULL || mHost->mCurHeader != mappedHeader) {
                     mHost->SwitchToHeader(header);
                 }
             }
             else if (mHost->mCurHeader != NULL) {
                 AutoPtr<IPreferenceActivityHeader> mappedHeader;
-                mHost->FindBestMatchingHeader((IPreferenceActivityHeader*)(mHost->mCurHeader), (IList*)(mHost->mHeaders), (IPreferenceActivityHeader**)&mappedHeader);
+                mHost->FindBestMatchingHeader(mHost->mCurHeader, (IList*)(mHost->mHeaders), (IPreferenceActivityHeader**)&mappedHeader);
                 if (mappedHeader != NULL) {
                     mHost->SetSelectedHeader(mappedHeader);
                 }

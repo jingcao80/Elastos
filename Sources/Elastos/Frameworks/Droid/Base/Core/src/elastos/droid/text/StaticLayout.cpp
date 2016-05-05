@@ -187,10 +187,10 @@ ECode StaticLayout::constructor(
     VALIDATE_NOT_NULL(source)
     AutoPtr<ICharSequence> tempCS;
     if (source->Probe(EIID_ISpanned)) {
-        tempCS = (ICharSequence*)new SpannedEllipsizer(source);
+        tempCS = new SpannedEllipsizer(source);
     }
     else {
-        tempCS = (ICharSequence*)new Ellipsizer(source);
+        tempCS = new Ellipsizer(source);
     }
     AutoPtr<ICharSequence> initCS;
     if (ellipsize == TextUtilsTruncateAt_NONE) {

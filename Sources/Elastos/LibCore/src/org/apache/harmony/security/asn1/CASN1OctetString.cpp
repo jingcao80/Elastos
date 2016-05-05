@@ -22,9 +22,9 @@ const AutoPtr<IASN1OctetString> CASN1OctetString::ASN1;// = InitASN1();
 
 AutoPtr<IASN1OctetString> CASN1OctetString::InitASN1()
 {
-    AutoPtr<CASN1OctetString> asn1Obj;
-    CASN1OctetString::NewByFriend((CASN1OctetString**)&asn1Obj);
-    return (IASN1OctetString*)asn1Obj.Get();
+    AutoPtr<IASN1OctetString> asn1Obj;
+    CASN1OctetString::New((IASN1OctetString**)&asn1Obj);
+    return asn1Obj;
 }
 
 ECode CASN1OctetString::constructor()

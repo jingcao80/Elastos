@@ -183,7 +183,7 @@ AutoPtr<IINetworkStatsService> TrafficStats::GetStatsService()
         if (sStatsService!=NULL)
             return sStatsService;
 
-        sStatsService =(IINetworkStatsService*)ServiceManager::GetService(IContext::NETWORK_STATS_SERVICE).Get();
+        sStatsService = IINetworkStatsService::Probe(ServiceManager::GetService(IContext::NETWORK_STATS_SERVICE));
     }
     return sStatsService;
 }

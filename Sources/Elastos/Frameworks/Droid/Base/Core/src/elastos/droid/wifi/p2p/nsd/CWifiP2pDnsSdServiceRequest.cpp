@@ -52,13 +52,7 @@ ECode CWifiP2pDnsSdServiceRequest::NewInstance(
     /* [out] */ IWifiP2pDnsSdServiceRequest** instance)
 {
     VALIDATE_NOT_NULL(instance);
-    *instance = NULL;
-
-    AutoPtr<CWifiP2pDnsSdServiceRequest> obj;
-    CWifiP2pDnsSdServiceRequest::NewByFriend((CWifiP2pDnsSdServiceRequest**)&obj);
-    *instance = (IWifiP2pDnsSdServiceRequest*)obj.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+    return CWifiP2pDnsSdServiceRequest::New(instance);
 }
 
 ECode CWifiP2pDnsSdServiceRequest::NewInstance(
@@ -73,15 +67,11 @@ ECode CWifiP2pDnsSdServiceRequest::NewInstance(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<CWifiP2pDnsSdServiceRequest> obj;
-    CWifiP2pDnsSdServiceRequest::NewByFriend(
+    return CWifiP2pDnsSdServiceRequest::New(
         serviceType + String(".local."),
         IWifiP2pDnsSdServiceInfo::DNS_TYPE_PTR,
         IWifiP2pDnsSdServiceInfo::VERSION_1,
-        (CWifiP2pDnsSdServiceRequest**)&obj);
-    *instance = (IWifiP2pDnsSdServiceRequest*)obj.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+        instance);
 }
 
 ECode CWifiP2pDnsSdServiceRequest::NewInstance(
@@ -100,15 +90,11 @@ ECode CWifiP2pDnsSdServiceRequest::NewInstance(
     String fullDomainName =
         instanceName + String(".") + serviceType + String(".local.");
 
-    AutoPtr<CWifiP2pDnsSdServiceRequest> obj;
-    CWifiP2pDnsSdServiceRequest::NewByFriend(
+    return CWifiP2pDnsSdServiceRequest::New(
         fullDomainName,
         IWifiP2pDnsSdServiceInfo::DNS_TYPE_TXT,
         IWifiP2pDnsSdServiceInfo::VERSION_1,
-        (CWifiP2pDnsSdServiceRequest**)&obj);
-    *instance = (IWifiP2pDnsSdServiceRequest*)obj.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+        instance);
 }
 
 ECode CWifiP2pDnsSdServiceRequest::GetTransactionId(

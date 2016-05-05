@@ -406,10 +406,10 @@ ECode CGregorianCalendar::ComputeFields()
     AutoPtr<ITimeZone> timeZone;
     GetTimeZone((ITimeZone**)&timeZone);
 
-    AutoPtr<CDate> date;
-    CDate::NewByFriend(mTime, (CDate**)&date);
+    AutoPtr<IDate> date;
+    CDate::New(mTime, (IDate**)&date);
     Boolean isInDaylightTime(FALSE);
-    timeZone->InDaylightTime((IDate *)date.Get(), &isInDaylightTime);
+    timeZone->InDaylightTime(date, &isInDaylightTime);
     Int32 savings = 0;
     timeZone->GetDSTSavings(&savings);
     Int32 dstOffset =  isInDaylightTime ? savings : 0;

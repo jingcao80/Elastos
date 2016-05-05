@@ -440,7 +440,7 @@ ECode DialogPreference::OnSaveInstanceState(
     AutoPtr<IBundle> bundle;
     mDialog->OnSaveInstanceState((IBundle**)&bundle);
     myState->SetDialogBundle(bundle);
-    *parcel = (IParcelable*)myState->Probe(EIID_IParcelable);
+    *parcel = IParcelable::Probe(myState);
     REFCOUNT_ADD(*parcel)
     return NOERROR;
 }

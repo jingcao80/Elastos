@@ -143,7 +143,7 @@ ECode AbsSpinner::InitFromAttributes(
         AutoPtr<IArrayAdapter> adapter;
         CArrayAdapter::New(context, R::layout::simple_spinner_item, e, (IArrayAdapter**)&adapter);
         adapter->SetDropDownViewResource(R::layout::simple_spinner_dropdown_item);
-        SetAdapter((IAdapter*)adapter->Probe(EIID_IAdapter));
+        SetAdapter(IAdapter::Probe(adapter));
     }
 
     a->Recycle();
@@ -467,7 +467,7 @@ AutoPtr<IParcelable> AbsSpinner::OnSaveInstanceState()
     else {
         ss->mPosition = IAdapterView::INVALID_POSITION;
     }
-    return (IParcelable*)ss->Probe(EIID_IParcelable);
+    return IParcelable::Probe(ss);
 }
 
 void AbsSpinner::OnRestoreInstanceState(

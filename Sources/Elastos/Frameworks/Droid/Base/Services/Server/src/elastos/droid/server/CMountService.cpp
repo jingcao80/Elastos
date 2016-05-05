@@ -1322,8 +1322,8 @@ CMountService::CMountService()
 
     mDefContainerConn = new DefaultContainerConnection(this);
 
-    mUserReceiver = (IBroadcastReceiver*)new UserBroadcastReceiver(this);
-    mUsbReceiver = (IBroadcastReceiver*)new UsbBroadcastReceiver(this);
+    mUserReceiver = new UserBroadcastReceiver(this);
+    mUsbReceiver = new UsbBroadcastReceiver(this);
 }
 
 CMountService::~CMountService()

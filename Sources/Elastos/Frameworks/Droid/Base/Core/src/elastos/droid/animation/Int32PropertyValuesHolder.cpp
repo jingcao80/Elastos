@@ -87,7 +87,7 @@ ECode Int32PropertyValuesHolder::Clone(
     v->mJniSetter = mJniSetter;
     v->mInt32Keyframes = mInt32Keyframes;
     v->mInt32AnimatedValue = mInt32AnimatedValue;
-    *holder = (IInt32PropertyValuesHolder*)v->Probe(EIID_IInt32PropertyValuesHolder);
+    *holder = (IInt32PropertyValuesHolder*)v.Get();
     REFCOUNT_ADD(*holder);
 
     return NOERROR;

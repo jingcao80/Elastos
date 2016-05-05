@@ -21,7 +21,7 @@ ECode CConsumerIrManager::constructor(
     /* [in] */ IContext* context)
 {
     FAIL_RETURN(context->GetPackageName(&mPackageName))
-    mService = (IIConsumerIrService*)ServiceManager::GetService(IContext::CONSUMER_IR_SERVICE).Get();
+    mService = IIConsumerIrService::Probe(ServiceManager::GetService(IContext::CONSUMER_IR_SERVICE));
     return NOERROR;
 }
 

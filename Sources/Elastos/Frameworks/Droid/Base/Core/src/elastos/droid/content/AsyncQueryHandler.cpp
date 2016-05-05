@@ -59,7 +59,7 @@ ECode AsyncQueryHandler::WorkerHandler::HandleMessage(
     AutoPtr<IInterface> resolverObj;
     context->mResolver->Resolve(EIID_IInterface, (IInterface**)&resolverObj);
     if (NULL == resolverObj) return NOERROR;
-    AutoPtr<IContentResolver> resolver = (IContentResolver*)resolverObj->Probe(EIID_IContentResolver);
+    AutoPtr<IContentResolver> resolver = IContentResolver::Probe(resolverObj);
     if (NULL == resolver) return NOERROR;
 
     Int32 what, arg1;
@@ -154,7 +154,7 @@ ECode AsyncQueryHandler::constructor(
 {
     FAIL_RETURN(Handler::constructor(FALSE))
 
-    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)cr->Probe(EIID_IWeakReferenceSource);
+    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(cr);
     assert(wrs != NULL);
     wrs->GetWeakReference((IWeakReference**)&mResolver);
 

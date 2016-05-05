@@ -39,7 +39,7 @@ ECode HdmiRecordListener::TimerStatusData::ParseFrom(
 
     // The last byte is used for extra error.
     data->mExtraError = result & 0xFF;
-    *_result = (IHdmiRecordListenerTimerStatusData*)data.Get();
+    *_result = data.Get();
     REFCOUNT_ADD(*_result);
     return NOERROR;
 }

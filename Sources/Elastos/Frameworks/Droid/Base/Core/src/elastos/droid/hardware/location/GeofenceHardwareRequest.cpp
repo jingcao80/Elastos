@@ -44,7 +44,7 @@ ECode GeofenceHardwareRequest::CreateCircularGeofence(
 {
     AutoPtr<GeofenceHardwareRequest> geofenceRequest = new GeofenceHardwareRequest();
     geofenceRequest->SetCircularGeofence(latitude, longitude, radius);
-    *geofence = (IGeofenceHardwareRequest*)geofenceRequest.Get();
+    *geofence = geofenceRequest.Get();
     REFCOUNT_ADD(*geofence);
     return NOERROR;
 }

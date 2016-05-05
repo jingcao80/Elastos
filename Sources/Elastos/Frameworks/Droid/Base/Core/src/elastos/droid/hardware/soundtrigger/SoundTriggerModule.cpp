@@ -779,7 +779,7 @@ ECode SoundTriggerModule::PostEventFromNative(
     /* [in] */ Int32 arg2,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<ISoundTriggerModule> module = (ISoundTriggerModule*)ISoundTriggerModule::Probe(module_ref);
+    AutoPtr<ISoundTriggerModule> module = ISoundTriggerModule::Probe(module_ref);
     if (module == NULL) {
         return NOERROR;
     }

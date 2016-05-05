@@ -1935,7 +1935,7 @@ ECode FragmentManagerImpl::SaveAllState(
     fms->mActive = active;
     fms->mAdded = added;
     fms->mBackStack = backStack;
-    *state = (IParcelable*)fms->Probe(EIID_IParcelable);
+    *state = IParcelable::Probe(fms);
     REFCOUNT_ADD(*state);
     return NOERROR;
 }

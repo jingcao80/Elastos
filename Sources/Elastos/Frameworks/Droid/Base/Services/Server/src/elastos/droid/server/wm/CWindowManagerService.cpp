@@ -9596,7 +9596,7 @@ ECode CWindowManagerService::H::HandleMessage(
                 {
                     AutoLock lock(mHost->mWindowMapLock);
                     Int32 size;
-                    ISet::Probe(mHost->mSessions)->GetSize(&size);
+                    mHost->mSessions->GetSize(&size);
                     for (Int32 i = 0; i < size; i++) {
                         AutoPtr<IInterface> value;
                         mHost->mSessions->GetValueAt(i, (IInterface**)&value);
@@ -12657,7 +12657,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
             AutoPtr<WindowStateAnimator> wsa = ws->mWinAnimator;
             if (wsa->mSurfaceControl != NULL) {
                 Boolean contains;
-                if (ISet::Probe(mSessions)->Contains((IWindowSession*)wsa->mSession.Get(), &contains), !contains) {
+                if (mSessions->Contains((IWindowSession*)wsa->mSession.Get(), &contains), !contains) {
                     Slogger::W(TAG, "LEAKED SURFACE (session doesn't exist): %p surface=%p token=%p pid=%d uid=%d"
                             , ws.Get(), wsa->mSurfaceControl.Get(), ws->mToken.Get()
                             , ws->mSession->mPid, ws->mSession->mUid);

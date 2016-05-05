@@ -37,7 +37,9 @@ private:
         , public IDependencyListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("AnimatorSet::DependencyListener")
 
         DependencyListener(
             /* [in] */ AnimatorSet* animatorset,
@@ -91,6 +93,8 @@ private:
     {
     public:
         CAR_INTERFACE_DECL();
+
+        TO_STRING_IMPL("AnimatorSet::AnimatorSetListener")
 
         AnimatorSetListener(
             /* [in] */ AnimatorSet* animatorSet);
@@ -213,6 +217,8 @@ private:
     class AnimatorListenerAdapterIMPL : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("AnimatorSet::AnimatorListenerAdapterIMPL")
+
         AnimatorListenerAdapterIMPL(
             /* [in] */ AnimatorSet* host,
             /* [in] */ List<AutoPtr<Node> >* node);

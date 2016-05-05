@@ -24,11 +24,11 @@ AutoPtr<ICharacterStyle> CharacterStyle::Wrap(
 {
     AutoPtr<IMetricAffectingSpan> mas = IMetricAffectingSpan::Probe(cs);
     if (mas != NULL) {
-        AutoPtr<ICharacterStyle> ret = (ICharacterStyle*)new MetricAffectingSpanPassthrough(mas);
+        AutoPtr<ICharacterStyle> ret = new MetricAffectingSpanPassthrough(mas);
         return ret;
     }
     else {
-        AutoPtr<ICharacterStyle> ret = (ICharacterStyle*)new CharacterStylePassthrough(cs);
+        AutoPtr<ICharacterStyle> ret = new CharacterStylePassthrough(cs);
         return ret;
     }
 }

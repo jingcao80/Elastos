@@ -729,13 +729,13 @@ void GridLayout::OnSetLayoutParams(
 Boolean GridLayout::CheckLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    if (!IGridLayoutLayoutParams::Probe(p)) {
+    IGridLayoutLayoutParams* gllp = IGridLayoutLayoutParams::Probe(p);
+    if (!gllp) {
         return FALSE;
     }
-    AutoPtr<IGridLayoutLayoutParams> lp = (IGridLayoutLayoutParams*)p;
 
-    CheckLayoutParams(lp, TRUE);
-    CheckLayoutParams(lp, FALSE);
+    CheckLayoutParams(gllp, TRUE);
+    CheckLayoutParams(gllp, FALSE);
     return TRUE;
 }
 

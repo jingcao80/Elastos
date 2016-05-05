@@ -234,7 +234,7 @@ ECode CResourcesManager::GetTopLevelResources(
     Boolean isThemeable;
     compatInfo->GetIsThemeable(&isThemeable);
     AutoPtr<IThemeConfig> themeConfig = GetThemeConfig();
-    AutoPtr<IResourcesKey> key = (IResourcesKey*)new ResourcesKey(resDir, displayId,
+    AutoPtr<IResourcesKey> key = new ResourcesKey(resDir, displayId,
             overrideConfiguration, scale, isThemeable, themeConfig, token);
 
     AutoPtr<IResources> r;

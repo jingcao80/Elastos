@@ -105,7 +105,7 @@ ECode CTimeFormatter::Format(
       // StringBuilder stringBuilder = new StringBuilder();
 
       // outputBuilder = stringBuilder;
-      StringBuilder stringBuilder;
+      AutoPtr<StringBuilder> stringBuilder = new StringBuilder();
 
       // This uses the US locale because number localization is handled separately (see below)
       // and locale sensitive strings are output directly using outputBuilder.
@@ -113,10 +113,10 @@ ECode CTimeFormatter::Format(
       CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelper);
       AutoPtr<ILocale> us;
       localeHelper->GetUS((ILocale**)&us);
-      CFormatter::New((IAppendable*)stringBuilder.Probe(EIID_IAppendable), us.Get(), (Elastos::Utility::IFormatter**)&mNumberFormatter);
+      CFormatter::New((IAppendable*)stringBuilder.Get(), us.Get(), (Elastos::Utility::IFormatter**)&mNumberFormatter);
       FormatInternal(pattern, wallTime, zoneInfo);
       String result;
-      stringBuilder.ToString(&result);
+      stringBuilder->ToString(&result);
       // This behavior is the source of a bug since some formats are defined as being
       // in ASCII and not localized.
       Char32 digit;

@@ -33,9 +33,9 @@ static AutoPtr<ILocale> CreateLocale(
     /* [in] */ const String& language,
     /* [in] */ const String& country)
 {
-    AutoPtr<CLocale> l;
-    ASSERT_SUCCEEDED(CLocale::NewByFriend(TRUE, language, country, (CLocale**)&l));
-    return (ILocale*)l.Get();
+    AutoPtr<ILocale> l;
+    ASSERT_SUCCEEDED(CLocale::New(TRUE, language, country, (ILocale**)&l));
+    return l;
 }
 
 INIT_PROI_3 const AutoPtr<ILocale> Locale::CANADA = CreateLocale(String("en"), String("CA"));

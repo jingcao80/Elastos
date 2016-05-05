@@ -689,7 +689,7 @@ ECode DrawableContainer::GetConstantState(
     VALIDATE_NOT_NULL(state);
     if (mDrawableContainerState->CanConstantState()) {
         GetChangingConfigurations(&mDrawableContainerState->mChangingConfigurations);
-        *state = (IDrawableConstantState*)mDrawableContainerState->Probe(EIID_IDrawableConstantState);
+        *state = IDrawableConstantState::Probe(mDrawableContainerState);
         REFCOUNT_ADD(*state);
         return NOERROR;
     }
@@ -842,7 +842,7 @@ Int32 DrawableContainer::DrawableContainerState::AddChild(
 
     Boolean isDifferent;
     dr->SetVisible(FALSE, TRUE, &isDifferent);
-    dr->SetCallback(mOwner != NULL ? (IDrawableCallback*)mOwner->Probe(EIID_IDrawableCallback) : NULL);
+    dr->SetCallback(IDrawableCallback::Probe(mOwner));
 
     mDrawables->Set(pos, dr);
     mNumChildren++;

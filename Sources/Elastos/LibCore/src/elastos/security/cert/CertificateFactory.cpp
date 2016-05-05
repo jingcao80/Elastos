@@ -21,9 +21,9 @@ const AutoPtr<IEngine> CertificateFactory::ENGINE = InitENGINE();
 
 AutoPtr<IEngine> CertificateFactory::InitENGINE()
 {
-    AutoPtr<CEngine> engine;
-    CEngine::NewByFriend(SERVICE, (CEngine**)&engine);
-    return (IEngine*)engine.Get();
+    AutoPtr<IEngine> engine;
+    CEngine::New(SERVICE, (IEngine**)&engine);
+    return engine;
 }
 
 CertificateFactory::CertificateFactory(

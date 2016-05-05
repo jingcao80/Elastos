@@ -939,7 +939,7 @@ ECode Fragment::ToString(
     }
     sb += className;
     sb += "{0x";
-    sb += StringUtils::ToHexString((Int32)(IFragment*)this);
+    sb += StringUtils::ToHexString((Int32)this);
     if (mIndex >= 0) {
         sb.Append(" #");
         sb.Append(mIndex);
@@ -1908,23 +1908,23 @@ ECode Fragment::Dump(
     }
     if (mActivity != NULL) {
         writer->Print(prefix); writer->Print(String("mActivity="));
-                writer->Println((IInterface*)mActivity);
+                writer->Println(mActivity.Get());
     }
     if (mParentFragment != NULL) {
         writer->Print(prefix); writer->Print(String("mParentFragment="));
-                writer->Println((IInterface*)mParentFragment);
+                writer->Println(mParentFragment.Get());
     }
     if (mArguments != NULL) {
         writer->Print(prefix); writer->Print(String("mArguments="));
-        writer->Println((IInterface*)mArguments);
+        writer->Println(mArguments.Get());
     }
     if (mSavedFragmentState != NULL) {
         writer->Print(prefix); writer->Print(String("mSavedFragmentState="));
-                writer->Println((IInterface*)mSavedFragmentState);
+                writer->Println(mSavedFragmentState.Get());
     }
     if (mSavedViewState != NULL) {
         writer->Print(prefix); writer->Print(String("mSavedViewState="));
-                writer->Println((IInterface*)mSavedViewState);
+                writer->Println(mSavedViewState.Get());
     }
     if (mTarget != NULL) {
         writer->Print(prefix); writer->Print(String("mTarget="));
@@ -1938,15 +1938,15 @@ ECode Fragment::Dump(
     }
     if (mContainer != NULL) {
         writer->Print(prefix); writer->Print(String("mContainer="));
-        writer->Println((IInterface*)mContainer);
+        writer->Println(mContainer.Get());
     }
     if (mView != NULL) {
         writer->Print(prefix); writer->Print(String("mView="));
-        writer->Println((IInterface*)mView);
+        writer->Println(mView.Get());
     }
     if (mAnimatingAway != NULL) {
         writer->Print(prefix); writer->Print(String("mAnimatingAway="));
-        writer->Println((IInterface*)mAnimatingAway);
+        writer->Println(mAnimatingAway.Get());
         writer->Print(prefix); writer->Print(String("mStateAfterAnimating="));
             writer->Println(mStateAfterAnimating);
     }

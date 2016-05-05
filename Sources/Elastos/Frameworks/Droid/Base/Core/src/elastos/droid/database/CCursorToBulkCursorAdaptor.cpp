@@ -266,7 +266,7 @@ ECode CCursorToBulkCursorAdaptor::CreateAndRegisterObserverProxyLocked(
     }
     mObserver = new ContentObserverProxy();
     mObserver->constructor(observer, this);
-    return ICursor::Probe(mCursor)->RegisterContentObserver((IContentObserver*)mObserver);
+    return ICursor::Probe(mCursor)->RegisterContentObserver(mObserver);
 }
 
 ECode CCursorToBulkCursorAdaptor::UnregisterObserverProxyLocked()

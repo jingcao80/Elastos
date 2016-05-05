@@ -177,7 +177,7 @@ Boolean LinkMovementMethod::Action(
             if (link->GetLength() != 1)
                 return FALSE;
 
-            (*link)[0]->OnClick((IView*)widget);
+            (*link)[0]->OnClick(IView::Probe(widget));
             break;
         }
 

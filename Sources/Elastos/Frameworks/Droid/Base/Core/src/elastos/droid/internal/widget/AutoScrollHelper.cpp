@@ -220,10 +220,7 @@ AutoScrollHelper::AutoScrollHelper()
 {
     mScroller = new ClampedScroller(this);
 
-    AutoPtr<CAccelerateInterpolator> object;
-    CAccelerateInterpolator::NewByFriend((CAccelerateInterpolator**)&object);
-    mEdgeInterpolator = (IInterpolator*)object.Get();
-
+    CAccelerateInterpolator::New((IInterpolator**)&mEdgeInterpolator);
 
     mRelativeEdges = ArrayOf<Float>::Alloc(2);
     (*mRelativeEdges)[0] = RELATIVE_UNSPECIFIED;

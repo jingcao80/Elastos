@@ -33,9 +33,9 @@ namespace Jar {
 
 static AutoPtr<IName> InitNAME_ATTRIBUTE()
 {
-    AutoPtr<CName> attrib;
-    CName::NewByFriend(String("Name"), (CName**)&attrib);
-    return (IName*)attrib.Get();
+    AutoPtr<IName> attrib;
+    CName::New(String("Name"), (IName**)&attrib);
+    return attrib;
 }
 
 static AutoPtr<ArrayOf<Byte> > InitLINE_SEPARATOR()

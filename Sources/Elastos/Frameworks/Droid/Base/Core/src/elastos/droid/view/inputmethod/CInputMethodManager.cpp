@@ -244,7 +244,7 @@ AutoPtr<IInputMethodManager> CInputMethodManager::GetInstance()
 
     if (sInstance == NULL) {
         AutoPtr<IIInputMethodManager> service =
-                (IIInputMethodManager*)ServiceManager::GetService(IContext::INPUT_METHOD_SERVICE).Get();
+            IIInputMethodManager::Probe(ServiceManager::GetService(IContext::INPUT_METHOD_SERVICE));
         ASSERT_SUCCEEDED(CInputMethodManager::New(service, Looper::GetMainLooper(), (IInputMethodManager**)&sInstance));
     }
     return sInstance;

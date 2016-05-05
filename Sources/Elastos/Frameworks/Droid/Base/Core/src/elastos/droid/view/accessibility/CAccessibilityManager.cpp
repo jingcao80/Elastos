@@ -151,9 +151,7 @@ ECode CAccessibilityManager::GetInstance(
             }
             AutoPtr<IInterface> iBinder = ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE);
             AutoPtr<IIAccessibilityManager> service = IIAccessibilityManager::Probe(iBinder);
-            AutoPtr<CAccessibilityManager> caManager;
-            CAccessibilityManager::NewByFriend(context, service, userId, (CAccessibilityManager**)&caManager);
-            sInstance = (IAccessibilityManager*)caManager.Get();
+            CAccessibilityManager::New(context, service, userId, (IAccessibilityManager**)&sInstance);
         }
     }
     *manager = sInstance;

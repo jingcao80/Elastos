@@ -208,20 +208,10 @@ ECode CWifiP2pUpnpServiceResponse::NewInstance(
     VALIDATE_NOT_NULL(instance);
 
     if (status != IWifiP2pServiceResponseStatus::SUCCESS) {
-        AutoPtr<CWifiP2pUpnpServiceResponse> resp;
-        CWifiP2pUpnpServiceResponse::NewByFriend(
-            status, transId, dev, NULL, (CWifiP2pUpnpServiceResponse**)&resp);
-        *instance = (IWifiP2pUpnpServiceResponse*)resp.Get();
-        REFCOUNT_ADD(*instance);
-        return NOERROR;
+        return CWifiP2pUpnpServiceResponse::New(status, transId, dev, NULL, instance);
     }
 
-    AutoPtr<CWifiP2pUpnpServiceResponse> resp;
-    FAIL_RETURN(CWifiP2pUpnpServiceResponse::NewByFriend(
-        status, transId, dev, data, (CWifiP2pUpnpServiceResponse**)&resp));
-    *instance = (IWifiP2pUpnpServiceResponse*)resp.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+    return CWifiP2pUpnpServiceResponse::New(status, transId, dev, data, instance);
 }
 
 } // namespace Nsd

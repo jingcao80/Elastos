@@ -503,7 +503,7 @@ ECode BackStackRecord::DoAddOp(
     /* [in] */ const String& tag,
     /* [in] */ Int32 opcmd)
 {
-    fragment->SetFragmentManager((IFragmentManagerImpl*)mManager.Get());
+    fragment->SetFragmentManager(mManager.Get());
 
     if (!tag.IsNull()) {
         String memTag;

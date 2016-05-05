@@ -49,9 +49,8 @@ CAR_OBJECT_IMPL(CAccessibilityServiceInfo)
 
 static AutoPtr<ISparseArray> InitsAvailableCapabilityInfos()
 {
-    AutoPtr<CSparseArray> infos;
-    CSparseArray::NewByFriend((CSparseArray**)&infos);
-    AutoPtr<ISparseArray> availableCapabilityInfos = (ISparseArray*)infos.Get();
+    AutoPtr<ISparseArray> availableCapabilityInfos;
+    CSparseArray::New((ISparseArray**)&availableCapabilityInfos);
 
     AutoPtr<IAccessibilityServiceInfoCapabilityInfo> info;
     CAccessibilityServiceInfoCapabilityInfo::New(

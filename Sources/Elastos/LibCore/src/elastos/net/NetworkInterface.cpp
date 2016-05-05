@@ -29,9 +29,9 @@ namespace Net {
 
 static AutoPtr<IFile> InitSYS_CLASS_NET()
 {
-    AutoPtr<CFile> file;
-    CFile::NewByFriend(String("/sys/class/net"), (CFile**)&file);
-    return (IFile*)file.Get();
+    AutoPtr<IFile> file;
+    CFile::New(String("/sys/class/net"), (IFile**)&file);
+    return file;
 }
 
 const AutoPtr<IFile> NetworkInterface::SYS_CLASS_NET = InitSYS_CLASS_NET();

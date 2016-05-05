@@ -55,25 +55,25 @@ Object CAccessibilityInteractionClient::sStaticLock;
 
 static AutoPtr<IInt64SparseArray> InitsClients()
 {
-    AutoPtr<CInt64SparseArray> array;
-    CInt64SparseArray::NewByFriend((CInt64SparseArray**)&array);
-    return (IInt64SparseArray*)array.Get();
+    AutoPtr<IInt64SparseArray> array;
+    CInt64SparseArray::New((IInt64SparseArray**)&array);
+    return array;
 }
 const AutoPtr<IInt64SparseArray> CAccessibilityInteractionClient::sClients = InitsClients();
 
 static AutoPtr<ISparseArray> InitsConnectionCache()
 {
-    AutoPtr<CSparseArray> array;
-    CSparseArray::NewByFriend((CSparseArray**)&array);
-    return (ISparseArray*)array.Get();
+    AutoPtr<ISparseArray> array;
+    CSparseArray::New((ISparseArray**)&array);
+    return array;
 }
 const AutoPtr<ISparseArray> CAccessibilityInteractionClient::sConnectionCache = InitsConnectionCache();
 
 static AutoPtr<IAccessibilityCache> InitsAccessibilityCache()
 {
-    AutoPtr<CAccessibilityCache> cache;
-    CAccessibilityCache::NewByFriend((CAccessibilityCache**)&cache);
-    return (IAccessibilityCache*)cache.Get();
+    AutoPtr<IAccessibilityCache> cache;
+    CAccessibilityCache::New((IAccessibilityCache**)&cache);
+    return cache;
 }
 const AutoPtr<IAccessibilityCache> CAccessibilityInteractionClient::sAccessibilityCache = InitsAccessibilityCache();
 
@@ -125,9 +125,7 @@ AutoPtr<IAccessibilityInteractionClient> CAccessibilityInteractionClient::GetIns
         sClients->Get(threadId, (IInterface**)&obj);
         client = IAccessibilityInteractionClient::Probe(obj);
         if (client == NULL) {
-            AutoPtr<CAccessibilityInteractionClient> _client;
-            CAccessibilityInteractionClient::NewByFriend((CAccessibilityInteractionClient**)&_client);
-            client = (IAccessibilityInteractionClient*)_client.Get();
+            CAccessibilityInteractionClient::New((IAccessibilityInteractionClient**)&client);
             sClients->Put(threadId, client);
         }
     }

@@ -367,8 +367,8 @@ ECode KeyboardView::_SimpleOnGestureListener::OnFling(
     Float deltaY = tm2 - tm1;
 
     Int32 tmpI = 0;
-    Int32 travelX = (((IView*)mHost->Probe(EIID_IView))->GetWidth(&tmpI), tmpI) / 2; // Half the keyboard width
-    Int32 travelY = (((IView*)mHost->Probe(EIID_IView))->GetHeight(&tmpI), tmpI) / 2; // Half the keyboard height
+    Int32 travelX = (mHost->GetWidth(&tmpI), tmpI) / 2; // Half the keyboard width
+    Int32 travelY = (mHost->GetHeight(&tmpI), tmpI) / 2; // Half the keyboard height
 
     mHost->mSwipeTracker->ComputeCurrentVelocity(1000);
     const Float endingVelocityX = mHost->mSwipeTracker->GetXVelocity();

@@ -31,14 +31,14 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class ToolBar
+class Toolbar
     : public ViewGroup
-    , public IToolBar
+    , public IToolbar
 {
 public:
     class LayoutParams
         : public ActionBarLayoutParams
-        , public IToolBarLayoutParams
+        , public IToolbarLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
@@ -62,7 +62,7 @@ public:
             /* [in] */ Int32 gravity);
 
         CARAPI constructor(
-            /* [in] */ IToolBarLayoutParams* source);
+            /* [in] */ IToolbarLayoutParams* source);
 
         CARAPI constructor(
             /* [in] */ IActionBarLayoutParams* source);
@@ -89,7 +89,7 @@ public:
 
     class SavedState
         : public View::BaseSavedState
-        , public IToolBarSavedState
+        , public IToolbarSavedState
     {
     public:
         CAR_INTERFACE_DECL()
@@ -121,13 +121,13 @@ private:
         CAR_INTERFACE_DECL()
 
         MenuItemClickListener(
-            /* [in] */ ToolBar* host);
+            /* [in] */ Toolbar* host);
 
         CARAPI OnMenuItemClick(
             /* [in] */ IMenuItem* item,
             /* [out] */ Boolean* rst);
     private:
-        ToolBar* mHost;
+        Toolbar* mHost;
     };
 
     class ExpandedActionViewMenuPresenter
@@ -138,7 +138,7 @@ private:
         CAR_INTERFACE_DECL()
 
         ExpandedActionViewMenuPresenter(
-            /* [in] */ ToolBar* host);
+            /* [in] */ Toolbar* host);
 
         CARAPI InitForMenu(
             /* [in] */ IContext* ctx,
@@ -185,23 +185,23 @@ private:
             /* [in] */ IParcelable* state);
 
     private:
-        friend class ToolBar;
-        ToolBar* mHost;
+        friend class Toolbar;
+        Toolbar* mHost;
         AutoPtr<IMenuBuilder> mMenu;
         AutoPtr<IMenuItemImpl> mCurrentExpandedItem;
     };
 
-    class ToolBarRunnable
+    class ToolbarRunnable
         : public Runnable
     {
     public:
-        ToolBarRunnable(
-            /* [in] */ ToolBar* host);
+        ToolbarRunnable(
+            /* [in] */ Toolbar* host);
 
         CARAPI Run();
 
     private:
-        ToolBar* mHost;
+        Toolbar* mHost;
     };
 
     class CollapseOnClickListener
@@ -212,19 +212,19 @@ private:
         CAR_INTERFACE_DECL()
 
         CollapseOnClickListener(
-            /* [in] */ ToolBar* host);
+            /* [in] */ Toolbar* host);
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<ToolBar> mHost;
+        AutoPtr<Toolbar> mHost;
     };
 
 public:
     CAR_INTERFACE_DECL()
 
-    ToolBar();
+    Toolbar();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -348,7 +348,7 @@ public:
         /* [in] */ Int32 resId);
 
     CARAPI SetOnMenuItemClickListener(
-        /* [in] */ IToolBarOnMenuItemClickListener* listener);
+        /* [in] */ IToolbarOnMenuItemClickListener* listener);
 
     CARAPI SetContentInsetsRelative(
         /* [in] */ Int32 contentInsetStart,
@@ -380,11 +380,11 @@ public:
 
     CARAPI GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
-        /* [out] */ IToolBarLayoutParams** layoutParams);
+        /* [out] */ IToolbarLayoutParams** layoutParams);
 
     CARAPI GenerateLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IToolBarLayoutParams** layoutParams);
+        /* [out] */ IToolbarLayoutParams** layoutParams);
 
     CARAPI GetWrapper(
         /* [out] */ IDecorToolbar** bar);
@@ -416,7 +416,7 @@ protected:
         /* [in] */ Int32 b);
 
     CARAPI GenerateDefaultLayoutParams(
-        /* [out] */ IToolBarLayoutParams** params);
+        /* [out] */ IToolbarLayoutParams** params);
 
     CARAPI_(Boolean) CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p);
@@ -554,7 +554,7 @@ private:
 
     AutoPtr< ArrayOf<Int32> > mTempMargins;// = new int[2];
 
-    AutoPtr<IToolBarOnMenuItemClickListener> mOnMenuItemClickListener;
+    AutoPtr<IToolbarOnMenuItemClickListener> mOnMenuItemClickListener;
 
     AutoPtr<IActionMenuViewOnMenuItemClickListener> mMenuViewItemClickListener;//
 

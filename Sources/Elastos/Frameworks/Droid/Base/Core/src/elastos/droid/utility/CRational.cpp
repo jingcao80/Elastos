@@ -16,9 +16,9 @@ static AutoPtr<IRational> CreateRational(
     /* [in] */ Int32 numerator,
     /* [in] */ Int32 denominator)
 {
-    AutoPtr<CRational> r;
-    CRational::NewByFriend(numerator, denominator, (CRational**)&r);
-    return (IRational*)r.Get();
+    AutoPtr<IRational> r;
+    CRational::New(numerator, denominator, (IRational**)&r);
+    return r;
 }
 
 const AutoPtr<IRational> CRational::NaN = CreateRational(0, 0);// = new Rational(0, 0);

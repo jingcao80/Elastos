@@ -46,9 +46,9 @@ namespace Text {
 
 static AutoPtr<IMessageFormatField> InitARGUMENT(const String& name)
 {
-    AutoPtr<CMessageFormatField> field;
-    CMessageFormatField::NewByFriend(name, (CMessageFormatField**)&field);
-    return (IMessageFormatField*)field.Get();
+    AutoPtr<IMessageFormatField> field;
+    CMessageFormatField::New(name, (IMessageFormatField**)&field);
+    return field;
 }
 
 const AutoPtr<IMessageFormatField> MessageFormat::MessageFormatField::ARGUMENT
@@ -80,7 +80,7 @@ ECode MessageFormat::constructor(
     /* [in] */ const String& tem)
 {
     AutoPtr<ILocale> pLocale = CLocale::GetDefault();
-    return constructor(tem, (ILocale*)pLocale);
+    return constructor(tem, pLocale);
 }
 
 ECode MessageFormat::ApplyPattern(

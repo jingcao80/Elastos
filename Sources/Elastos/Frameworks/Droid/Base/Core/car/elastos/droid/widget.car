@@ -129,7 +129,6 @@ module
     merge("widget/DayPickerView.car");
     merge("widget/TimePickerClockDelegate.car");
     merge("widget/TimePickerSpinnerDelegate.car");
-    merge("widget/ToolBar.car");
     merge("internal/widget/IRemoteViewsFactory.car");
 
     using interface Elastos.Core.ICharSequence;
@@ -321,7 +320,7 @@ module
     }
 
     [local]
-    class CToolBar {
+    class CToolbar {
         constructor(
             [in] IContext* ctx);
 
@@ -340,7 +339,7 @@ module
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
 
-        interface IToolBar;
+        interface IToolbar;
         interface IViewGroup;
         interface IView;
         interface IViewParent;

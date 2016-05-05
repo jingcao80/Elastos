@@ -337,7 +337,7 @@ ECode ColorDrawable::GetConstantState(
     /* [out] */ IDrawableConstantState** state)
 {
     VALIDATE_NOT_NULL(state);
-    *state = (IDrawableConstantState*)mColorState->Probe(EIID_IDrawableConstantState);
+    *state = IDrawableConstantState::Probe(mColorState);
     REFCOUNT_ADD(*state);
     return NOERROR;
 }

@@ -1,6 +1,7 @@
 
 #include "elastos/droid/media/CMediaScannerConnection.h"
 #include "elastos/droid/content/CComponentName.h"
+#include <Elastos.Droid.Os.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/content/CIntent.h"
 #include <elastos/core/AutoLock.h>
@@ -212,9 +213,11 @@ ECode CMediaScannerConnection::OnServiceConnected(
     }
 
     synchronized(this) {
-        mService = IIMediaScannerService::Probe((IObject*)service);
-        if (mService != NULL && mClient != NULL) {
-            mClient->OnMediaScannerConnected();
+        if (service != NULL) {
+            mService = (IIMediaScannerService*)service->Probe(EIID_IIMediaScannerService);
+            if (mService != NULL && mClient != NULL) {
+                mClient->OnMediaScannerConnected();
+            }
         }
     }
 
@@ -243,9 +246,9 @@ ECode CMediaScannerConnection::ScanFile(
     /* [in] */ IOnScanCompletedListener* cb)
 {
     AutoPtr<ClientProxy> client = new ClientProxy(paths, mimeTypes, cb);
-    AutoPtr<CMediaScannerConnection> connection;
-    CMediaScannerConnection::NewByFriend(context, client, (CMediaScannerConnection**)&connection);
-    client->mConnection = (IMediaScannerConnection*)connection.Get();
+    AutoPtr<IMediaScannerConnection> connection;
+    CMediaScannerConnection::New(context, client, (IMediaScannerConnection**)&connection);
+    client->mConnection = connection;
     connection->Connect();
     return NOERROR;
 }

@@ -40,9 +40,9 @@ ECode CParcelUuid::FromString(
     CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
     AutoPtr<IUUID> uuidObj;
     helper->FromString(uuid, (IUUID**)&uuidObj);
-    AutoPtr<CParcelUuid> cpu;
-    CParcelUuid::NewByFriend(uuidObj, (CParcelUuid**)&cpu);
-    *id = (IParcelUuid*)cpu.Get();
+    AutoPtr<IParcelUuid> cpu;
+    CParcelUuid::New(uuidObj, (IParcelUuid**)&cpu);
+    *id = cpu;
     REFCOUNT_ADD(*id);
     return NOERROR;
 }

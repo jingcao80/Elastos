@@ -343,13 +343,8 @@ ECode Calendar::GetInstance(
     /* [out] */ ICalendar** calendar)
 {
     VALIDATE_NOT_NULL(calendar);
-    *calendar = NULL;
     AutoLock lock(sLock);
-    AutoPtr<CGregorianCalendar> cc;
-    FAIL_RETURN(CGregorianCalendar::NewByFriend((CGregorianCalendar**)&cc));
-    *calendar = (ICalendar*)cc->Probe(EIID_ICalendar);
-    REFCOUNT_ADD(*calendar);
-    return NOERROR;
+    return CGregorianCalendar::New(calendar);
 }
 
 ECode Calendar::GetInstance(
@@ -357,13 +352,8 @@ ECode Calendar::GetInstance(
     /* [out] */ ICalendar** calendar)
 {
     VALIDATE_NOT_NULL(calendar);
-    *calendar = NULL;
     AutoLock lock(sLock);
-    AutoPtr<CGregorianCalendar> cc;
-    FAIL_RETURN(CGregorianCalendar::NewByFriend(locale, (CGregorianCalendar**)&cc));
-    *calendar = (ICalendar*)cc->Probe(EIID_ICalendar);
-    REFCOUNT_ADD(*calendar);
-    return NOERROR;
+    return CGregorianCalendar::New(locale, calendar);
 }
 
 ECode Calendar::GetInstance(
@@ -371,13 +361,8 @@ ECode Calendar::GetInstance(
     /* [out] */ ICalendar** calendar)
 {
     VALIDATE_NOT_NULL(calendar);
-    *calendar = NULL;
     AutoLock lock(sLock);
-    AutoPtr<CGregorianCalendar> cc;
-    FAIL_RETURN(CGregorianCalendar::NewByFriend(timezone, (CGregorianCalendar**)&cc));
-    *calendar = (ICalendar*)cc->Probe(EIID_ICalendar);
-    REFCOUNT_ADD(*calendar);
-    return NOERROR;
+    return CGregorianCalendar::New(timezone, calendar);
 }
 
 ECode Calendar::GetInstance(
@@ -386,13 +371,8 @@ ECode Calendar::GetInstance(
     /* [out] */ ICalendar** calendar)
 {
     VALIDATE_NOT_NULL(calendar);
-    *calendar = NULL;
     AutoLock lock(sLock);
-    AutoPtr<CGregorianCalendar> cc;
-    FAIL_RETURN(CGregorianCalendar::NewByFriend(timezone, locale, (CGregorianCalendar**)&cc));
-    *calendar = (ICalendar*)cc->Probe(EIID_ICalendar);
-    REFCOUNT_ADD(*calendar);
-    return NOERROR;
+    return CGregorianCalendar::New(timezone, locale, calendar);
 }
 
 ECode Calendar::GetMinimalDaysInFirstWeek(

@@ -690,7 +690,7 @@ void DatabaseUtils::AppendEscapedSQLString(
 String DatabaseUtils::SqlEscapeString(
     /* [in] */ const String& value)
 {
-    AutoPtr<IStringBuilder> escaper = (IStringBuilder*)new StringBuilder();
+    AutoPtr<IStringBuilder> escaper = new StringBuilder();
     AppendEscapedSQLString(escaper, value);
     String str;
     ICharSequence::Probe(escaper)->ToString(&str);
@@ -860,7 +860,7 @@ void DatabaseUtils::DumpCursor(
 String DatabaseUtils::DumpCursorToString(
     /* [in] */ ICursor* cursor)
 {
-    AutoPtr<IStringBuilder> sb = (IStringBuilder*)new StringBuilder();
+    AutoPtr<IStringBuilder> sb = new StringBuilder();
     DumpCursor(cursor, sb);
     String str;
     ICharSequence::Probe(sb)->ToString(&str);
@@ -942,7 +942,7 @@ void DatabaseUtils::DumpCurrentRow(
 String DatabaseUtils::DumpCurrentRowToString(
     /* [in] */ ICursor* cursor)
 {
-    AutoPtr<IStringBuilder> sb = (IStringBuilder*)new StringBuilder();
+    AutoPtr<IStringBuilder> sb = new StringBuilder();
     DumpCurrentRow(cursor, sb);
     String str;
     ICharSequence::Probe(sb)->ToString(&str);

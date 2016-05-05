@@ -856,7 +856,7 @@ ECode RemoteController::SetSynchronizationMode(
         *result = FALSE;
         return NOERROR;
     }
-    mAudioManager->RemoteControlDisplayWantsPlaybackPositionSync((IIRemoteControlDisplay*)mRcd,
+    mAudioManager->RemoteControlDisplayWantsPlaybackPositionSync(mRcd.Get(),
             POSITION_SYNCHRONIZATION_CHECK == sync);
     *result = TRUE;
     return NOERROR;

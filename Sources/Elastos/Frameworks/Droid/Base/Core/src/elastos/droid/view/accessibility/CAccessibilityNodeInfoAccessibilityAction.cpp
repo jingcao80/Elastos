@@ -25,9 +25,9 @@ namespace Accessibility {
 static CARAPI_(AutoPtr<IAccessibilityNodeInfoAccessibilityAction>) InitACTION(
     /*[in] */ Int32 value)
 {
-    AutoPtr<CAccessibilityNodeInfoAccessibilityAction> action;
-    CAccessibilityNodeInfoAccessibilityAction::NewByFriend(value, NULL, (CAccessibilityNodeInfoAccessibilityAction**)&action);
-    return (IAccessibilityNodeInfoAccessibilityAction*)action.Get();
+    AutoPtr<IAccessibilityNodeInfoAccessibilityAction> action;
+    CAccessibilityNodeInfoAccessibilityAction::New(value, NULL, (IAccessibilityNodeInfoAccessibilityAction**)&action);
+    return action;
 }
 
 const AutoPtr<IAccessibilityNodeInfoAccessibilityAction> CAccessibilityNodeInfoAccessibilityAction::ACTION_FOCUS = InitACTION(IAccessibilityNodeInfo::ACTION_FOCUS);
@@ -55,9 +55,8 @@ const AutoPtr<IAccessibilityNodeInfoAccessibilityAction> CAccessibilityNodeInfoA
 
 static AutoPtr<IArraySet> InitsStandardActions()
 {
-    AutoPtr<CArraySet> carraySet;
-    CArraySet::NewByFriend((CArraySet**)&carraySet);
-    AutoPtr<IArraySet> set = (IArraySet*)carraySet.Get();
+    AutoPtr<IArraySet> set;
+    CArraySet::New((IArraySet**)&set);
     AutoPtr<ICollection> coll = ICollection::Probe(set);
 
     coll->Add((CAccessibilityNodeInfoAccessibilityAction::ACTION_FOCUS));

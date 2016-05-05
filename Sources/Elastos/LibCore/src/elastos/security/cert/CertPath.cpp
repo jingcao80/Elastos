@@ -125,7 +125,7 @@ ECode CertPath::WriteReplace(
         return E_NOT_SERIALIZABLE_EXCEPTION;
     }
     ret = new CertPathRep(mType, encode);
-    *object = (PInterface)(ISerializable*)ret.Get();
+    *object = (ISerializable*)ret.Get();
     REFCOUNT_ADD(*object)
     return NOERROR;
 }

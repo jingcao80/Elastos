@@ -164,11 +164,10 @@ ECode CWifiP2pServiceResponse::NewInstance(
 
         if (length == 0) {
             if (status == IWifiP2pServiceResponseStatus::SUCCESS) {
-                AutoPtr<CWifiP2pServiceResponse> resp;
-                FAIL_GOTO(CWifiP2pServiceResponse::NewByFriend(
-                    type, status, (Int32)transId, dev, NULL, (CWifiP2pServiceResponse**)&resp), L_ERR_EXIT);
-                AutoPtr<IWifiP2pServiceResponse> rsp = (IWifiP2pServiceResponse*)resp.Get();
-                respList.PushBack(rsp);
+                AutoPtr<IWifiP2pServiceResponse> resp;
+                FAIL_GOTO(CWifiP2pServiceResponse::New(
+                    type, status, (Int32)transId, dev, NULL, (IWifiP2pServiceResponse**)&resp), L_ERR_EXIT);
+                respList.PushBack(resp);
             }
             continue;
         }
@@ -184,23 +183,18 @@ ECode CWifiP2pServiceResponse::NewInstance(
         FAIL_GOTO(idi->ReadFully((ArrayOf<Byte>*)data), L_ERR_EXIT);
 
         AutoPtr<IWifiP2pServiceResponse> resp;
-        if (type ==  IWifiP2pServiceInfo::SERVICE_TYPE_BONJOUR) {
-            AutoPtr<CWifiP2pUpnpServiceResponse> rsp;
-            FAIL_GOTO(CWifiP2pDnsSdServiceResponse::NewByFriend(
-                status, (Int32)transId, dev, data, (CWifiP2pDnsSdServiceResponse**)&rsp), L_ERR_EXIT);
-            resp = IWifiP2pServiceResponse::Probe(rsp);
+        if (type == IWifiP2pServiceInfo::SERVICE_TYPE_BONJOUR) {
+            FAIL_GOTO(CWifiP2pDnsSdServiceResponse::New(
+                status, (Int32)transId, dev, data, (IWifiP2pServiceResponse**)&resp), L_ERR_EXIT);
         }
         else if (type == IWifiP2pServiceInfo::SERVICE_TYPE_UPNP) {
-            AutoPtr<CWifiP2pUpnpServiceResponse> rsp;
-            FAIL_GOTO(CWifiP2pUpnpServiceResponse::NewByFriend(
-                status, (Int32)transId, dev, data, (CWifiP2pUpnpServiceResponse**)&rsp), L_ERR_EXIT);
-            resp = IWifiP2pServiceResponse::Probe(rsp);
+            FAIL_GOTO(CWifiP2pUpnpServiceResponse::New(
+                status, (Int32)transId, dev, data, (IWifiP2pServiceResponse**)&resp), L_ERR_EXIT);
         }
         else {
             AutoPtr<CWifiP2pServiceResponse> rsp;
-            FAIL_GOTO(CWifiP2pServiceResponse::NewByFriend(
-                type, status, (Int32)transId, dev, data, (CWifiP2pServiceResponse**)&rsp), L_ERR_EXIT);
-            resp = (IWifiP2pServiceResponse*)rsp.Get();
+            FAIL_GOTO(CWifiP2pServiceResponse::New(
+                type, status, (Int32)transId, dev, data, (IWifiP2pServiceResponse**)&resp), L_ERR_EXIT);
         }
 
         if (resp != NULL) {

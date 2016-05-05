@@ -640,10 +640,10 @@ ECode TableRow::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params)
-    AutoPtr<ITableRowLayoutParams> lp;
+    AutoPtr<IViewGroupLayoutParams> lp;
     assert(0);
-    //CTableRowLayoutParams::New((ITableRowLayoutParams**)&lp);
-    *params = (IViewGroupLayoutParams*)lp.Get();
+    //CTableRowLayoutParams::New((IViewGroupLayoutParams**)&lp);
+    *params = lp;
     REFCOUNT_ADD(*params);
     return NOERROR;
 }

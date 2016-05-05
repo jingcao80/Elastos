@@ -1061,7 +1061,7 @@ ECode SimpleDateFormat::Parse(
             }
             last = -1;
             if (offset >= length || (*strCharArray)[offset] != (Char32)next) {
-                return Error(position, offset, (ITimeZone*)zone, date);
+                return Error(position, offset, zone, date);
             }
             offset++;
         }
@@ -1070,14 +1070,14 @@ ECode SimpleDateFormat::Parse(
         Int32 v;
         Parse(string, offset, last, count, &v);
         if ((offset = v) < 0) {
-            return Error(position, -offset - 1, (ITimeZone*)zone, date);
+            return Error(position, -offset - 1, zone, date);
         }
     }
     AutoPtr<IDate> d;
     ECode ec = mCalendar->GetTime((IDate**)&d);
     if (ec != NOERROR)
     {
-        return Error(position, offset, (ITimeZone *)zone ,date);
+        return Error(position, offset, zone ,date);
     }
     position->SetIndex(offset);
     mCalendar->SetTimeZone(zone);
@@ -1367,7 +1367,7 @@ ECode SimpleDateFormat::Set2DigitYearStart(
     mDefaultCenturyStart = IDate::Probe(clone);
     AutoPtr<ICalendar> cal;
     CGregorianCalendar::New((ICalendar**)&cal);
-    cal->SetTime((IDate*)mDefaultCenturyStart);
+    cal->SetTime(mDefaultCenturyStart);
     mCreationYear = 0;
     cal->Get(ICalendar::YEAR, &mCreationYear);
     return NOERROR;

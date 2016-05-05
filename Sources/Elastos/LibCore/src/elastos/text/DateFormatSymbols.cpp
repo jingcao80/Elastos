@@ -93,7 +93,7 @@ ECode DateFormatSymbols::GetInstance(
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&pLocaleHelper);
     AutoPtr<ILocale> pLocale;
     pLocaleHelper->GetDefault((ILocale**)&pLocale);
-    return GetInstance((ILocale*)pLocale, instance);
+    return GetInstance(pLocale, instance);
 }
 
 ECode DateFormatSymbols::GetInstance(

@@ -1,4 +1,4 @@
-#include "elastos/droid/widget/ToolBar.h"
+#include "elastos/droid/widget/Toolbar.h"
 #include "elastos/droid/widget/CImageView.h"
 #include "elastos/droid/widget/CImageButton.h"
 #include "elastos/droid/widget/CTextView.h"
@@ -36,27 +36,27 @@ namespace Droid {
 namespace Widget {
 
 /////////////////////////////////////////////////////////////
-//              ToolBar::LayoutParams
+//              Toolbar::LayoutParams
 /////////////////////////////////////////////////////////////
 
-const Int32 ToolBar::LayoutParams::CUSTOM;
-const Int32 ToolBar::LayoutParams::SYSTEM;
-const Int32 ToolBar::LayoutParams::EXPANDED;
+const Int32 Toolbar::LayoutParams::CUSTOM;
+const Int32 Toolbar::LayoutParams::SYSTEM;
+const Int32 Toolbar::LayoutParams::EXPANDED;
 
-CAR_INTERFACE_IMPL(ToolBar::LayoutParams, ActionBarLayoutParams, IToolBarLayoutParams)
+CAR_INTERFACE_IMPL(Toolbar::LayoutParams, ActionBarLayoutParams, IToolbarLayoutParams)
 
-ToolBar::LayoutParams::LayoutParams()
+Toolbar::LayoutParams::LayoutParams()
     : mViewType(CUSTOM)
 {}
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
 /* [in] */ IContext* ctx,
 /* [in] */ IAttributeSet* attrs)
 {
     return ActionBarLayoutParams::constructor(ctx, attrs);
 }
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -65,7 +65,7 @@ ECode ToolBar::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 gravity)
@@ -75,15 +75,15 @@ ECode ToolBar::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
     /* [in] */ Int32 gravity)
 {
     return constructor(IViewGroupLayoutParams::WRAP_CONTENT,
         IViewGroupLayoutParams::MATCH_PARENT, gravity);
 }
 
-ECode ToolBar::LayoutParams::constructor(
-    /* [in] */ IToolBarLayoutParams* source)
+ECode Toolbar::LayoutParams::constructor(
+    /* [in] */ IToolbarLayoutParams* source)
 {
     ActionBarLayoutParams::constructor(IActionBarLayoutParams::Probe(source));
     Int32 viewTpye;
@@ -93,13 +93,13 @@ ECode ToolBar::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
     /* [in] */ IActionBarLayoutParams* source)
 {
     return ActionBarLayoutParams::constructor(source);
 }
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
     ActionBarLayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
@@ -109,20 +109,20 @@ ECode ToolBar::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode ToolBar::LayoutParams::constructor(
+ECode Toolbar::LayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ActionBarLayoutParams::constructor(source);
 }
 
-ECode ToolBar::LayoutParams::SetViewType(
+ECode Toolbar::LayoutParams::SetViewType(
     /* [in] */ Int32 type)
 {
     mViewType = type;
     return  NOERROR;
 }
 
-ECode ToolBar::LayoutParams::GetViewType(
+ECode Toolbar::LayoutParams::GetViewType(
     /* [out] */ Int32* type)
 {
     VALIDATE_NOT_NULL(type)
@@ -131,28 +131,28 @@ ECode ToolBar::LayoutParams::GetViewType(
 }
 
 /////////////////////////////////////////////////////////////
-//              ToolBar::SavedState
+//              Toolbar::SavedState
 /////////////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL(ToolBar::SavedState, View::BaseSavedState, IToolBarSavedState)
+CAR_INTERFACE_IMPL(Toolbar::SavedState, View::BaseSavedState, IToolbarSavedState)
 
-ToolBar::SavedState::SavedState()
+Toolbar::SavedState::SavedState()
     : mExpandedMenuItemId(0)
     , mIsOverflowOpen(FALSE)
 {}
 
-ECode ToolBar::SavedState::constructor()
+ECode Toolbar::SavedState::constructor()
 {
     return NOERROR;
 }
 
-ECode ToolBar::SavedState::constructor(
+ECode Toolbar::SavedState::constructor(
     /* [in] */ IParcelable* superState)
 {
     return BaseSavedState::constructor(superState);
 }
 
-ECode ToolBar::SavedState::WriteToParcel(
+ECode Toolbar::SavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     BaseSavedState::WriteToParcel(dest);
@@ -161,7 +161,7 @@ ECode ToolBar::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode ToolBar::SavedState::ReadFromParcel(
+ECode Toolbar::SavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);
@@ -173,17 +173,17 @@ ECode ToolBar::SavedState::ReadFromParcel(
 }
 
 /////////////////////////////////////////////////////////////
-//              ToolBar::MenuItemClickListener
+//              Toolbar::MenuItemClickListener
 /////////////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL(ToolBar::MenuItemClickListener, Object, IActionMenuViewOnMenuItemClickListener)
+CAR_INTERFACE_IMPL(Toolbar::MenuItemClickListener, Object, IActionMenuViewOnMenuItemClickListener)
 
-ToolBar::MenuItemClickListener::MenuItemClickListener(
-    /* [in] */ ToolBar* host)
+Toolbar::MenuItemClickListener::MenuItemClickListener(
+    /* [in] */ Toolbar* host)
     : mHost(host)
 {}
 
-ECode ToolBar::MenuItemClickListener::OnMenuItemClick(
+ECode Toolbar::MenuItemClickListener::OnMenuItemClick(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* rst)
 {
@@ -196,17 +196,17 @@ ECode ToolBar::MenuItemClickListener::OnMenuItemClick(
 }
 
 /////////////////////////////////////////////////////////////
-//       ToolBar::ExpandedActionViewMenuPresenter
+//       Toolbar::ExpandedActionViewMenuPresenter
 /////////////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL(ToolBar::ExpandedActionViewMenuPresenter, Object, IMenuPresenter)
+CAR_INTERFACE_IMPL(Toolbar::ExpandedActionViewMenuPresenter, Object, IMenuPresenter)
 
-ToolBar::ExpandedActionViewMenuPresenter::ExpandedActionViewMenuPresenter(
-    /* [in] */ ToolBar* host)
+Toolbar::ExpandedActionViewMenuPresenter::ExpandedActionViewMenuPresenter(
+    /* [in] */ Toolbar* host)
     : mHost(host)
 {}
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::InitForMenu(
+ECode Toolbar::ExpandedActionViewMenuPresenter::InitForMenu(
     /* [in] */ IContext* ctx,
     /* [in] */ IMenuBuilder* menu)
 {
@@ -218,7 +218,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::InitForMenu(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::GetMenuView(
+ECode Toolbar::ExpandedActionViewMenuPresenter::GetMenuView(
     /* [in] */ IViewGroup* root,
     /* [out] */ IMenuView** view)
 {
@@ -227,7 +227,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::GetMenuView(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::UpdateMenuView(
+ECode Toolbar::ExpandedActionViewMenuPresenter::UpdateMenuView(
     /* [in] */ Boolean cleared)
 {
     if (mCurrentExpandedItem != NULL) {
@@ -255,13 +255,13 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::UpdateMenuView(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::SetCallback(
+ECode Toolbar::ExpandedActionViewMenuPresenter::SetCallback(
     /* [in] */ IMenuPresenterCallback* cb)
 {
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::OnSubMenuSelected(
+ECode Toolbar::ExpandedActionViewMenuPresenter::OnSubMenuSelected(
     /* [in] */ ISubMenuBuilder* subMenu,
     /* [out] */ Boolean* handled)
 {
@@ -270,14 +270,14 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::OnSubMenuSelected(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::OnCloseMenu(
+ECode Toolbar::ExpandedActionViewMenuPresenter::OnCloseMenu(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ Boolean allMenusAreClosing)
 {
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::FlagActionItems(
+ECode Toolbar::ExpandedActionViewMenuPresenter::FlagActionItems(
     /* [out] */ Boolean* shown)
 {
     VALIDATE_NOT_NULL(shown)
@@ -285,7 +285,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::FlagActionItems(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
+ECode Toolbar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ IMenuItemImpl* item,
     /* [out] */ Boolean* expanded)
@@ -294,7 +294,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
     mHost->EnsureCollapseButtonView();
     AutoPtr<IViewParent> parent;
     IView::Probe(mHost->mCollapseButtonView)->GetParent((IViewParent**)&parent);
-    if (IView::Probe(parent) != (IView*)mHost->Probe(EIID_IView)) {
+    if (IView::Probe(parent) != (IView*)mHost) {
         mHost->AddView(IView::Probe(mHost->mCollapseButtonView));
     }
     item->GetActionView((IView**)&mHost->mExpandedActionView);
@@ -302,9 +302,9 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
 
     parent = NULL;
     mHost->mExpandedActionView->GetParent((IViewParent**)&parent);
-    if (IView::Probe(parent) != (IView*)mHost->Probe(EIID_IView)) {
-        AutoPtr<IToolBarLayoutParams> lp;
-        mHost->GenerateDefaultLayoutParams((IToolBarLayoutParams**)&lp);
+    if (IView::Probe(parent) != (IView*)mHost) {
+        AutoPtr<IToolbarLayoutParams> lp;
+        mHost->GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mHost->mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
         assert(0);
@@ -325,7 +325,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::CollapseItemActionView(
+ECode Toolbar::ExpandedActionViewMenuPresenter::CollapseItemActionView(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ IMenuItemImpl* item,
     /* [out] */ Boolean* collapsed)
@@ -350,7 +350,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::CollapseItemActionView(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::GetId(
+ECode Toolbar::ExpandedActionViewMenuPresenter::GetId(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id)
@@ -358,7 +358,7 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::GetId(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::OnSaveInstanceState(
+ECode Toolbar::ExpandedActionViewMenuPresenter::OnSaveInstanceState(
     /* [out] */ IParcelable** pa)
 {
     VALIDATE_NOT_NULL(pa)
@@ -366,22 +366,22 @@ ECode ToolBar::ExpandedActionViewMenuPresenter::OnSaveInstanceState(
     return NOERROR;
 }
 
-ECode ToolBar::ExpandedActionViewMenuPresenter::OnRestoreInstanceState(
+ECode Toolbar::ExpandedActionViewMenuPresenter::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     return NOERROR;
 }
 
 /////////////////////////////////////////////////////////////
-//              ToolBar::ToolBarRunnable
+//              Toolbar::ToolbarRunnable
 /////////////////////////////////////////////////////////////
 
-ToolBar::ToolBarRunnable::ToolBarRunnable(
-            /* [in] */ ToolBar* host)
+Toolbar::ToolbarRunnable::ToolbarRunnable(
+            /* [in] */ Toolbar* host)
     : mHost(host)
 {}
 
-ECode ToolBar::ToolBarRunnable::Run()
+ECode Toolbar::ToolbarRunnable::Run()
 {
     Boolean isRun;
     mHost->ShowOverflowMenu(&isRun);
@@ -389,17 +389,17 @@ ECode ToolBar::ToolBarRunnable::Run()
 }
 
 /////////////////////////////////////////////////////////////
-//             ToolBar::CollapseOnClickListener
+//             Toolbar::CollapseOnClickListener
 /////////////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL(ToolBar::CollapseOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(Toolbar::CollapseOnClickListener, Object, IViewOnClickListener)
 
-ToolBar::CollapseOnClickListener::CollapseOnClickListener(
-    /* [in] */ ToolBar* host)
+Toolbar::CollapseOnClickListener::CollapseOnClickListener(
+    /* [in] */ Toolbar* host)
     : mHost(host)
 {}
 
-ECode ToolBar::CollapseOnClickListener::OnClick(
+ECode Toolbar::CollapseOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->CollapseActionView();
@@ -407,13 +407,13 @@ ECode ToolBar::CollapseOnClickListener::OnClick(
 }
 
 /////////////////////////////////////////////////////////////
-//                      ToolBar
+//                      Toolbar
 /////////////////////////////////////////////////////////////
-CAR_INTERFACE_IMPL(ToolBar, ViewGroup, IToolBar)
+CAR_INTERFACE_IMPL(Toolbar, ViewGroup, IToolbar)
 
-const String ToolBar::TAG("Toolbar");
+const String Toolbar::TAG("Toolbar");
 
-ToolBar::ToolBar()
+Toolbar::Toolbar()
     : ViewGroup()
     , mPopupTheme(0)
     , mTitleTextAppearance(0)
@@ -436,7 +436,7 @@ ToolBar::ToolBar()
     mTempMargins = ArrayOf<Int32>::Alloc(2);
 }
 
-ECode ToolBar::constructor(
+ECode Toolbar::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr,
@@ -524,7 +524,7 @@ ECode ToolBar::constructor(
     return NOERROR;
 }
 
-ECode ToolBar::SetPopupTheme(
+ECode Toolbar::SetPopupTheme(
     /* [in] */ Int32 resId)
 {
     if (mPopupTheme != resId) {
@@ -538,7 +538,7 @@ ECode ToolBar::SetPopupTheme(
     return NOERROR;
 }
 
-ECode ToolBar::GetPopupTheme(
+ECode Toolbar::GetPopupTheme(
     /* [out] */ Int32* theme)
 {
     VALIDATE_NOT_NULL(theme)
@@ -546,7 +546,7 @@ ECode ToolBar::GetPopupTheme(
     return NOERROR;
 }
 
-ECode ToolBar::OnRtlPropertiesChanged(
+ECode Toolbar::OnRtlPropertiesChanged(
     /* [in] */ Int32 layoutDirection)
 {
     ViewGroup::OnRtlPropertiesChanged(layoutDirection);
@@ -554,7 +554,7 @@ ECode ToolBar::OnRtlPropertiesChanged(
     return NOERROR;
 }
 
-ECode ToolBar::SetLogo(
+ECode Toolbar::SetLogo(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IContext> ctx;
@@ -565,7 +565,7 @@ ECode ToolBar::SetLogo(
     return NOERROR;
 }
 
-ECode ToolBar::CanShowOverflowMenu(
+ECode Toolbar::CanShowOverflowMenu(
     /* [out] */ Boolean* menu)
 {
     VALIDATE_NOT_NULL(menu)
@@ -577,7 +577,7 @@ ECode ToolBar::CanShowOverflowMenu(
     return NOERROR;
 }
 
-ECode ToolBar::IsOverflowMenuShowing(
+ECode Toolbar::IsOverflowMenuShowing(
     /* [out] */ Boolean* isShowing)
 {
     VALIDATE_NOT_NULL(isShowing)
@@ -587,7 +587,7 @@ ECode ToolBar::IsOverflowMenuShowing(
     return NOERROR;
 }
 
-ECode ToolBar::IsOverflowMenuShowPending(
+ECode Toolbar::IsOverflowMenuShowPending(
     /* [out] */ Boolean* is)
 {
     VALIDATE_NOT_NULL(is)
@@ -597,7 +597,7 @@ ECode ToolBar::IsOverflowMenuShowPending(
     return NOERROR;
 }
 
-ECode ToolBar::ShowOverflowMenu(
+ECode Toolbar::ShowOverflowMenu(
     /* [out] */ Boolean* isShowing)
 {
     VALIDATE_NOT_NULL(isShowing)
@@ -607,7 +607,7 @@ ECode ToolBar::ShowOverflowMenu(
     return NOERROR;
 }
 
-ECode ToolBar::HideOverflowMenu(
+ECode Toolbar::HideOverflowMenu(
     /* [out] */ Boolean* isHide)
 {
     VALIDATE_NOT_NULL(isHide)
@@ -617,7 +617,7 @@ ECode ToolBar::HideOverflowMenu(
     return NOERROR;
 }
 
-ECode ToolBar::SetMenu(
+ECode Toolbar::SetMenu(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ IActionMenuPresenter* outerPresenter)
 {
@@ -657,7 +657,7 @@ ECode ToolBar::SetMenu(
     return NOERROR;
 }
 
-ECode ToolBar::DismissPopupMenus()
+ECode Toolbar::DismissPopupMenus()
 {
     if (mMenuView != NULL) {
         mMenuView->DismissPopupMenus();
@@ -665,7 +665,7 @@ ECode ToolBar::DismissPopupMenus()
     return NOERROR;
 }
 
-ECode ToolBar::IsTitleTruncated(
+ECode Toolbar::IsTitleTruncated(
     /* [out] */ Boolean* is)
 {
     VALIDATE_NOT_NULL(is)
@@ -695,7 +695,7 @@ ECode ToolBar::IsTitleTruncated(
     return NOERROR;
 }
 
-ECode ToolBar::SetLogo(
+ECode Toolbar::SetLogo(
     /* [in] */ IDrawable* drawable)
 {
     AutoPtr<IViewParent> parent;
@@ -716,7 +716,7 @@ ECode ToolBar::SetLogo(
     return NOERROR;
 }
 
-ECode ToolBar::GetLogo(
+ECode Toolbar::GetLogo(
     /* [out] */ IDrawable** logo)
 {
     VALIDATE_NOT_NULL(logo)
@@ -729,7 +729,7 @@ ECode ToolBar::GetLogo(
     return NOERROR;
 }
 
-ECode ToolBar::SetLogoDescription(
+ECode Toolbar::SetLogoDescription(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IContext> ctx;
@@ -739,7 +739,7 @@ ECode ToolBar::SetLogoDescription(
     return SetLogoDescription(text);
 }
 
-ECode ToolBar::SetLogoDescription(
+ECode Toolbar::SetLogoDescription(
     /* [in] */ ICharSequence* description)
 {
     if (!TextUtils::IsEmpty(description)) {
@@ -751,7 +751,7 @@ ECode ToolBar::SetLogoDescription(
     return NOERROR;
 }
 
-ECode ToolBar::GetLogoDescription(
+ECode Toolbar::GetLogoDescription(
     /* [out] */ ICharSequence** description)
 {
     VALIDATE_NOT_NULL(description)
@@ -764,7 +764,7 @@ ECode ToolBar::GetLogoDescription(
     return NOERROR;
 }
 
-ECode ToolBar::HasExpandedActionView(
+ECode Toolbar::HasExpandedActionView(
     /* [out] */ Boolean* has)
 {
     VALIDATE_NOT_NULL(has)
@@ -773,7 +773,7 @@ ECode ToolBar::HasExpandedActionView(
     return NOERROR;
 }
 
-ECode ToolBar::CollapseActionView()
+ECode Toolbar::CollapseActionView()
 {
     AutoPtr<IMenuItemImpl> item = mExpandedMenuPresenter == NULL ? NULL :
             mExpandedMenuPresenter->mCurrentExpandedItem;
@@ -784,7 +784,7 @@ ECode ToolBar::CollapseActionView()
     return NOERROR;
 }
 
-ECode ToolBar::GetTitle(
+ECode Toolbar::GetTitle(
     /* [out] */ ICharSequence** title)
 {
     VALIDATE_NOT_NULL(title)
@@ -793,7 +793,7 @@ ECode ToolBar::GetTitle(
     return NOERROR;
 }
 
-ECode ToolBar::SetTitle(
+ECode Toolbar::SetTitle(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IContext> ctx;
@@ -803,7 +803,7 @@ ECode ToolBar::SetTitle(
     return SetTitle(title);
 }
 
-ECode ToolBar::SetTitle(
+ECode Toolbar::SetTitle(
     /* [in] */ ICharSequence* title)
 {
     AutoPtr<IViewParent> pView;
@@ -840,7 +840,7 @@ ECode ToolBar::SetTitle(
     return NOERROR;
 }
 
-ECode ToolBar::GetSubtitle(
+ECode Toolbar::GetSubtitle(
     /* [out] */ ICharSequence** description)
 {
     VALIDATE_NOT_NULL(description)
@@ -849,7 +849,7 @@ ECode ToolBar::GetSubtitle(
     return NOERROR;
 }
 
-ECode ToolBar::SetSubtitle(
+ECode Toolbar::SetSubtitle(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IContext> ctx;
@@ -859,7 +859,7 @@ ECode ToolBar::SetSubtitle(
     return SetSubtitle(title);
 }
 
-ECode ToolBar::SetSubtitle(
+ECode Toolbar::SetSubtitle(
     /* [in] */ ICharSequence* title)
 {
     AutoPtr<IViewParent> pView;
@@ -895,7 +895,7 @@ ECode ToolBar::SetSubtitle(
     return NOERROR;
 }
 
-ECode ToolBar::SetTitleTextAppearance(
+ECode Toolbar::SetTitleTextAppearance(
     /* [in] */ IContext* context,
     /* [in] */ Int32 resId)
 {
@@ -906,7 +906,7 @@ ECode ToolBar::SetTitleTextAppearance(
     return NOERROR;
 }
 
-ECode ToolBar::SetSubtitleTextAppearance(
+ECode Toolbar::SetSubtitleTextAppearance(
     /* [in] */ IContext* context,
     /* [in] */ Int32 resId)
 {
@@ -917,7 +917,7 @@ ECode ToolBar::SetSubtitleTextAppearance(
     return NOERROR;
 }
 
-ECode ToolBar::SetTitleTextColor(
+ECode Toolbar::SetTitleTextColor(
     /* [in] */ Int32 color)
 {
     mTitleTextColor = color;
@@ -927,7 +927,7 @@ ECode ToolBar::SetTitleTextColor(
     return NOERROR;
 }
 
-ECode ToolBar::SetSubtitleTextColor(
+ECode Toolbar::SetSubtitleTextColor(
     /* [in] */ Int32 color)
 {
     mSubtitleTextColor = color;
@@ -937,7 +937,7 @@ ECode ToolBar::SetSubtitleTextColor(
     return NOERROR;
 }
 
-ECode ToolBar::GetNavigationContentDescription(
+ECode Toolbar::GetNavigationContentDescription(
     /* [out] */ ICharSequence** description)
 {
     VALIDATE_NOT_NULL(description)
@@ -950,7 +950,7 @@ ECode ToolBar::GetNavigationContentDescription(
     return NOERROR;
 }
 
-ECode ToolBar::SetNavigationContentDescription(
+ECode Toolbar::SetNavigationContentDescription(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IContext> ctx;
@@ -965,7 +965,7 @@ ECode ToolBar::SetNavigationContentDescription(
     return NOERROR;
 }
 
-ECode ToolBar::SetNavigationContentDescription(
+ECode Toolbar::SetNavigationContentDescription(
     /* [in] */ ICharSequence* description)
 {
     if (!TextUtils::IsEmpty(description)) {
@@ -977,7 +977,7 @@ ECode ToolBar::SetNavigationContentDescription(
     return NOERROR;
 }
 
-ECode ToolBar::SetNavigationIcon(
+ECode Toolbar::SetNavigationIcon(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IContext> ctx;
@@ -988,7 +988,7 @@ ECode ToolBar::SetNavigationIcon(
     return NOERROR;
 }
 
-ECode ToolBar::SetNavigationIcon(
+ECode Toolbar::SetNavigationIcon(
     /* [in] */ IDrawable* icon)
 {
     AutoPtr<IViewParent> pView;
@@ -1011,7 +1011,7 @@ ECode ToolBar::SetNavigationIcon(
     return NOERROR;
 }
 
-ECode ToolBar::GetNavigationIcon(
+ECode Toolbar::GetNavigationIcon(
     /* [out] */ IDrawable** icon)
 {
     VALIDATE_NOT_NULL(icon)
@@ -1024,7 +1024,7 @@ ECode ToolBar::GetNavigationIcon(
     return NOERROR;
 }
 
-ECode ToolBar::SetNavigationOnClickListener(
+ECode Toolbar::SetNavigationOnClickListener(
     /* [in] */ IViewOnClickListener* listener)
 {
     EnsureNavButtonView();
@@ -1032,7 +1032,7 @@ ECode ToolBar::SetNavigationOnClickListener(
     return NOERROR;
 }
 
-ECode ToolBar::GetMenu(
+ECode Toolbar::GetMenu(
     /* [out] */ IMenu** menu)
 {
     VALIDATE_NOT_NULL(menu)
@@ -1040,7 +1040,7 @@ ECode ToolBar::GetMenu(
     return mMenuView->GetMenu(menu);
 }
 
-ECode ToolBar::InflateMenu(
+ECode Toolbar::InflateMenu(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IMenu> menu;
@@ -1049,14 +1049,14 @@ ECode ToolBar::InflateMenu(
     return NOERROR;
 }
 
-ECode ToolBar::SetOnMenuItemClickListener(
-    /* [in] */ IToolBarOnMenuItemClickListener* listener)
+ECode Toolbar::SetOnMenuItemClickListener(
+    /* [in] */ IToolbarOnMenuItemClickListener* listener)
 {
     mOnMenuItemClickListener = listener;
     return NOERROR;
 }
 
-ECode ToolBar::SetContentInsetsRelative(
+ECode Toolbar::SetContentInsetsRelative(
     /* [in] */ Int32 contentInsetStart,
     /* [in] */ Int32 contentInsetEnd)
 {
@@ -1064,7 +1064,7 @@ ECode ToolBar::SetContentInsetsRelative(
     return NOERROR;
 }
 
-ECode ToolBar::GetContentInsetStart(
+ECode Toolbar::GetContentInsetStart(
     /* [out] */ Int32* start)
 {
     VALIDATE_NOT_NULL(start)
@@ -1072,7 +1072,7 @@ ECode ToolBar::GetContentInsetStart(
     return NOERROR;
 }
 
-ECode ToolBar::GetContentInsetEnd(
+ECode Toolbar::GetContentInsetEnd(
     /* [out] */ Int32* end)
 {
     VALIDATE_NOT_NULL(end)
@@ -1080,7 +1080,7 @@ ECode ToolBar::GetContentInsetEnd(
     return NOERROR;
 }
 
-ECode ToolBar::SetContentInsetsAbsolute(
+ECode Toolbar::SetContentInsetsAbsolute(
     /* [in] */ Int32 contentInsetLeft,
     /* [in] */ Int32 contentInsetRight)
 {
@@ -1088,7 +1088,7 @@ ECode ToolBar::SetContentInsetsAbsolute(
     return NOERROR;
 }
 
-ECode ToolBar::GetContentInsetLeft(
+ECode Toolbar::GetContentInsetLeft(
     /* [out] */ Int32* left)
 {
     VALIDATE_NOT_NULL(left)
@@ -1096,7 +1096,7 @@ ECode ToolBar::GetContentInsetLeft(
     return NOERROR;
 }
 
-ECode ToolBar::GetContentInsetRight(
+ECode Toolbar::GetContentInsetRight(
     /* [out] */ Int32* right)
 {
     VALIDATE_NOT_NULL(right)
@@ -1104,7 +1104,7 @@ ECode ToolBar::GetContentInsetRight(
     return NOERROR;
 }
 
-ECode ToolBar::OnTouchEvent(
+ECode Toolbar::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
@@ -1135,7 +1135,7 @@ ECode ToolBar::OnTouchEvent(
     return NOERROR;
 }
 
-void ToolBar::OnSetLayoutParams(
+void Toolbar::OnSetLayoutParams(
     /* [in] */ IView* child,
     /* [in] */ IViewGroupLayoutParams* layoutParams)
 {
@@ -1148,75 +1148,74 @@ void ToolBar::OnSetLayoutParams(
      * be reflected in the final results.
      */
     if (!CheckLayoutParams(layoutParams)) {
-        AutoPtr<IToolBarLayoutParams> lp;
-        GenerateLayoutParams(layoutParams, (IToolBarLayoutParams**)&lp);
+        AutoPtr<IToolbarLayoutParams> lp;
+        GenerateLayoutParams(layoutParams, (IToolbarLayoutParams**)&lp);
         child->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
     }
 }
 
-ECode ToolBar::GenerateLayoutParams(
+ECode Toolbar::GenerateLayoutParams(
     /* [in] */ IAttributeSet* attrs,
-    /* [out] */ IToolBarLayoutParams** layoutParams)
+    /* [out] */ IToolbarLayoutParams** layoutParams)
 {
     VALIDATE_NOT_NULL(layoutParams)
     AutoPtr<LayoutParams> result = new LayoutParams();
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     result->constructor(ctx, attrs);
-    *layoutParams = IToolBarLayoutParams::Probe(result);
+    *layoutParams = IToolbarLayoutParams::Probe(result);
     REFCOUNT_ADD(*layoutParams)
     return NOERROR;
 }
 
-ECode ToolBar::GenerateLayoutParams(
+ECode Toolbar::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IToolBarLayoutParams** layoutParams)
+    /* [out] */ IToolbarLayoutParams** layoutParams)
 {
     VALIDATE_NOT_NULL(layoutParams)
-    if (IToolBarLayoutParams::Probe(p)) {
+    if (IToolbarLayoutParams::Probe(p)) {
             AutoPtr<LayoutParams> result = new LayoutParams();
-            result->constructor(IToolBarLayoutParams::Probe(p));
-            *layoutParams = (IToolBarLayoutParams*)result.Get();
+            result->constructor(IToolbarLayoutParams::Probe(p));
+            *layoutParams = (IToolbarLayoutParams*)result.Get();
             REFCOUNT_ADD(*layoutParams)
             return NOERROR;
     }
     else if (IActionBarLayoutParams::Probe(p)) {
         AutoPtr<LayoutParams> result = new LayoutParams();
         result->constructor(IActionBarLayoutParams::Probe(p));
-        *layoutParams = (IToolBarLayoutParams*)result.Get();
+        *layoutParams = (IToolbarLayoutParams*)result.Get();
         REFCOUNT_ADD(*layoutParams)
         return NOERROR;
     }
     else if (IViewGroupMarginLayoutParams::Probe(p)) {
         AutoPtr<LayoutParams> result = new LayoutParams();
         result->constructor(IViewGroupMarginLayoutParams::Probe(p));
-        *layoutParams = (IToolBarLayoutParams*)result.Get();
+        *layoutParams = (IToolbarLayoutParams*)result.Get();
         REFCOUNT_ADD(*layoutParams)
         return NOERROR;
     }
     else {
         AutoPtr<LayoutParams> result = new LayoutParams();
         result->constructor(p);
-        *layoutParams = (IToolBarLayoutParams*)result.Get();
+        *layoutParams = (IToolbarLayoutParams*)result.Get();
         REFCOUNT_ADD(*layoutParams)
         return NOERROR;
     }
 }
 
-ECode ToolBar::GetWrapper(
+ECode Toolbar::GetWrapper(
     /* [out] */ IDecorToolbar** bar)
 {
     VALIDATE_NOT_NULL(bar)
     if (mWrapper == NULL) {
-        CToolbarWidgetWrapper::New((IToolbar*)this, TRUE,
-                (IToolbarWidgetWrapper**)&mWrapper);
+        CToolbarWidgetWrapper::New((IToolbar*)this, TRUE, (IToolbarWidgetWrapper**)&mWrapper);
     }
     *bar = IDecorToolbar::Probe(mWrapper);
     REFCOUNT_ADD(*bar)
     return NOERROR;
 }
 
-ECode ToolBar::SetCollapsible(
+ECode Toolbar::SetCollapsible(
     /* [in] */ Boolean collapsible)
 {
     mCollapsible = collapsible;
@@ -1224,7 +1223,7 @@ ECode ToolBar::SetCollapsible(
     return NOERROR;
 }
 
-ECode ToolBar::SetMenuCallbacks(
+ECode Toolbar::SetMenuCallbacks(
     /* [in] */ IMenuPresenterCallback* pcb,
     /* [in] */ IMenuBuilderCallback* mcb)
 {
@@ -1233,7 +1232,7 @@ ECode ToolBar::SetMenuCallbacks(
     return NOERROR;
 }
 
-AutoPtr<IParcelable> ToolBar::OnSaveInstanceState()
+AutoPtr<IParcelable> Toolbar::OnSaveInstanceState()
 {
     assert(0);
     /*SavedState state = new SavedState(super.onSaveInstanceState());
@@ -1248,7 +1247,7 @@ AutoPtr<IParcelable> ToolBar::OnSaveInstanceState()
     return NULL;
 }
 
-void ToolBar::OnRestoreInstanceState(
+void Toolbar::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     assert(0);
@@ -1268,7 +1267,7 @@ void ToolBar::OnRestoreInstanceState(
     }*/
 }
 
-ECode ToolBar::OnDetachedFromWindow()
+ECode Toolbar::OnDetachedFromWindow()
 {
     Boolean res;
     ViewGroup::OnDetachedFromWindow();
@@ -1276,7 +1275,7 @@ ECode ToolBar::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void ToolBar::OnMeasure(
+void Toolbar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1375,7 +1374,7 @@ void ToolBar::OnMeasure(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> temp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
-        AutoPtr<IToolBarLayoutParams> lp = IToolBarLayoutParams::Probe(temp);
+        AutoPtr<IToolbarLayoutParams> lp = IToolbarLayoutParams::Probe(temp);
         Int32 viewTpye;
         assert(0);
         //lp->GetViewType(&viewTpye);
@@ -1442,7 +1441,7 @@ void ToolBar::OnMeasure(
     SetMeasuredDimension(measuredWidth, ShouldCollapse() ? 0 : measuredHeight);
 }
 
-ECode ToolBar::OnLayout(
+ECode Toolbar::OnLayout(
     /* [in] */ Boolean changed,
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
@@ -1747,25 +1746,25 @@ ECode ToolBar::OnLayout(
     return NOERROR;
 }
 
-ECode ToolBar::GenerateDefaultLayoutParams(
-    /* [out] */ IToolBarLayoutParams** params)
+ECode Toolbar::GenerateDefaultLayoutParams(
+    /* [out] */ IToolbarLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params)
     AutoPtr<LayoutParams> obj = new LayoutParams();
     obj->constructor(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
-    *params = (IToolBarLayoutParams*)obj.Get();
+    *params = (IToolbarLayoutParams*)obj.Get();
     REFCOUNT_ADD(*params)
     return NOERROR;
 }
 
-Boolean ToolBar::CheckLayoutParams(
+Boolean Toolbar::CheckLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
     return ViewGroup::CheckLayoutParams(p)
-        && IToolBarLayoutParams::Probe(p);
+        && IToolbarLayoutParams::Probe(p);
 }
 
-ECode ToolBar::EnsureLogoView()
+ECode Toolbar::EnsureLogoView()
 {
     if (mLogoView == NULL) {
         AutoPtr<IContext> ctx;
@@ -1775,7 +1774,7 @@ ECode ToolBar::EnsureLogoView()
     return NOERROR;
 }
 
-ECode ToolBar::EnsureMenu()
+ECode Toolbar::EnsureMenu()
 {
     EnsureMenuView();
     AutoPtr<IMenuBuilder> menu;
@@ -1794,7 +1793,7 @@ ECode ToolBar::EnsureMenu()
     return NOERROR;
 }
 
-ECode ToolBar::EnsureMenuView()
+ECode Toolbar::EnsureMenuView()
 {
     if (mMenuView == NULL) {
         AutoPtr<IContext> ctx;
@@ -1804,8 +1803,8 @@ ECode ToolBar::EnsureMenuView()
         mMenuView->SetPopupTheme(mPopupTheme);
         mMenuView->SetOnMenuItemClickListener(mMenuViewItemClickListener);
         mMenuView->SetMenuCallbacks(mActionMenuPresenterCallback, mMenuBuilderCallback);
-        AutoPtr<IToolBarLayoutParams> lp;
-        GenerateDefaultLayoutParams((IToolBarLayoutParams**)&lp);
+        AutoPtr<IToolbarLayoutParams> lp;
+        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::END | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
         IView::Probe(mMenuView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
@@ -1814,7 +1813,7 @@ ECode ToolBar::EnsureMenuView()
     return NOERROR;
 }
 
-AutoPtr<IMenuInflater> ToolBar::GetMenuInflater()
+AutoPtr<IMenuInflater> Toolbar::GetMenuInflater()
 {
     AutoPtr<IMenuInflater> temp;
     AutoPtr<IContext> ctx;
@@ -1823,15 +1822,15 @@ AutoPtr<IMenuInflater> ToolBar::GetMenuInflater()
     return temp;
 }
 
-ECode ToolBar::EnsureNavButtonView()
+ECode Toolbar::EnsureNavButtonView()
 {
     if (mNavButtonView == NULL) {
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         assert(0);
         //CImageButton::New(ctx, NULL, 0, mNavButtonStyle, (IImageButton**)&mNavButtonView);
-        AutoPtr<IToolBarLayoutParams> lp;
-        GenerateDefaultLayoutParams((IToolBarLayoutParams**)&lp);
+        AutoPtr<IToolbarLayoutParams> lp;
+        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
         IView::Probe(mNavButtonView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
@@ -1839,7 +1838,7 @@ ECode ToolBar::EnsureNavButtonView()
     return NOERROR;
 }
 
-ECode ToolBar::EnsureCollapseButtonView()
+ECode Toolbar::EnsureCollapseButtonView()
 {
     if (mCollapseButtonView == NULL) {
         AutoPtr<IContext> ctx;
@@ -1847,8 +1846,8 @@ ECode ToolBar::EnsureCollapseButtonView()
         assert(0);
         //CImageButton::New(ctx, NULL, 0, mNavButtonStyle, (IImageButton**)&mCollapseButtonView);
         IImageView::Probe(mCollapseButtonView)->SetImageDrawable(mCollapseIcon);
-        AutoPtr<IToolBarLayoutParams> lp;
-        GenerateDefaultLayoutParams((IToolBarLayoutParams**)&lp);
+        AutoPtr<IToolbarLayoutParams> lp;
+        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
         //lp->SetViewType(LayoutParams::EXPANDED);
@@ -1859,21 +1858,21 @@ ECode ToolBar::EnsureCollapseButtonView()
     return NOERROR;
 }
 
-ECode ToolBar::AddSystemView(
+ECode Toolbar::AddSystemView(
     /* [in] */ IView* v)
 {
     AutoPtr<IViewGroupLayoutParams> vlp;
     v->GetLayoutParams((IViewGroupLayoutParams**)&vlp);
 
-    AutoPtr<IToolBarLayoutParams> lp;
+    AutoPtr<IToolbarLayoutParams> lp;
     if (vlp == NULL) {
-        GenerateDefaultLayoutParams((IToolBarLayoutParams**)&lp);
+        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
     }
     else if (!CheckLayoutParams(vlp)) {
-        GenerateLayoutParams(vlp, (IToolBarLayoutParams**)&lp);
+        GenerateLayoutParams(vlp, (IToolbarLayoutParams**)&lp);
     }
     else {
-        lp = IToolBarLayoutParams::Probe(vlp);
+        lp = IToolbarLayoutParams::Probe(vlp);
     }
     assert(0);
     //lp->SetViewType(LayoutParams::SYSTEM);
@@ -1881,7 +1880,7 @@ ECode ToolBar::AddSystemView(
     return NOERROR;
 }
 
-ECode ToolBar::PostShowOverflowMenu()
+ECode Toolbar::PostShowOverflowMenu()
 {
     Boolean res;
     RemoveCallbacks(mShowOverflowMenuRunnable, &res);
@@ -1889,7 +1888,7 @@ ECode ToolBar::PostShowOverflowMenu()
     return NOERROR;
 }
 
-ECode ToolBar::MeasureChildConstrained(
+ECode Toolbar::MeasureChildConstrained(
     /* [in] */ IView* child,
     /* [in] */ Int32 parentWidthSpec,
     /* [in] */ Int32 widthUsed,
@@ -1925,7 +1924,7 @@ ECode ToolBar::MeasureChildConstrained(
     return NOERROR;
 }
 
-Int32 ToolBar::MeasureChildCollapseMargins(
+Int32 Toolbar::MeasureChildCollapseMargins(
     /* [in] */ IView* child,
     /* [in] */ Int32 parentWidthMeasureSpec,
     /* [in] */ Int32 widthUsed,
@@ -1965,7 +1964,7 @@ Int32 ToolBar::MeasureChildCollapseMargins(
     return childWidth + hMargins;
 }
 
-Boolean ToolBar::ShouldCollapse()
+Boolean Toolbar::ShouldCollapse()
 {
     if (!mCollapsible) return FALSE;
 
@@ -1985,7 +1984,7 @@ Boolean ToolBar::ShouldCollapse()
     return TRUE;
 }
 
-Int32 ToolBar::GetViewListMeasuredWidth(
+Int32 Toolbar::GetViewListMeasuredWidth(
     /* [in] */ IList* views,
     /* [in] */ ArrayOf<Int32> * collapsingMargins)
 {
@@ -2018,7 +2017,7 @@ Int32 ToolBar::GetViewListMeasuredWidth(
     return width;
 }
 
-Int32 ToolBar::LayoutChildLeft(
+Int32 Toolbar::LayoutChildLeft(
     /* [in] */IView* child,
     /* [in] */ Int32 left,
     /* [in] */ ArrayOf<Int32> * collapsingMargins,
@@ -2042,7 +2041,7 @@ Int32 ToolBar::LayoutChildLeft(
     return left;
 }
 
-Int32 ToolBar::LayoutChildRight(
+Int32 Toolbar::LayoutChildRight(
     /* [in] */ IView* child,
     /* [in] */ Int32 right,
     /* [in] */ ArrayOf<Int32> * collapsingMargins,
@@ -2067,7 +2066,7 @@ Int32 ToolBar::LayoutChildRight(
     return right;
 }
 
-Int32 ToolBar::GetChildTop(
+Int32 Toolbar::GetChildTop(
     /* [in] */ IView* child,
     /* [in] */ Int32 alignmentHeight)
 {
@@ -2122,7 +2121,7 @@ Int32 ToolBar::GetChildTop(
     }
 }
 
-Int32 ToolBar::GetChildVerticalGravity(
+Int32 Toolbar::GetChildVerticalGravity(
     /* [in] */ Int32 gravity)
 {
     Int32 vgrav = gravity & IGravity::VERTICAL_GRAVITY_MASK;
@@ -2136,7 +2135,7 @@ Int32 ToolBar::GetChildVerticalGravity(
     }
 }
 
-void ToolBar::AddCustomViewsWithGravity(
+void Toolbar::AddCustomViewsWithGravity(
     /* [in] */ IList* views,
     /* [in] */ Int32 gravity)
 {
@@ -2157,7 +2156,7 @@ void ToolBar::AddCustomViewsWithGravity(
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 viewTpye, gravity;
             assert(0);
-            //IToolBarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
+            //IToolbarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
             IActionBarLayoutParams::Probe(lp)->GetGravity(&gravity);
             if (viewTpye == LayoutParams::CUSTOM && ShouldLayout(child) &&
                     GetChildHorizontalGravity(gravity) == absGrav) {
@@ -2173,7 +2172,7 @@ void ToolBar::AddCustomViewsWithGravity(
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 viewTpye, gravity;
             assert(0);
-            //IToolBarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
+            //IToolbarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
             IActionBarLayoutParams::Probe(lp)->GetGravity(&gravity);
             if (viewTpye == LayoutParams::CUSTOM && ShouldLayout(child) &&
                     GetChildHorizontalGravity(gravity) == absGrav) {
@@ -2183,7 +2182,7 @@ void ToolBar::AddCustomViewsWithGravity(
     }
 }
 
-Int32 ToolBar::GetChildHorizontalGravity(
+Int32 Toolbar::GetChildHorizontalGravity(
     /* [in] */ Int32 gravity)
 {
     Int32 ld;
@@ -2201,7 +2200,7 @@ Int32 ToolBar::GetChildHorizontalGravity(
     }
 }
 
-Boolean ToolBar::ShouldLayout(
+Boolean Toolbar::ShouldLayout(
     /* [in] */ IView* view)
 {
     AutoPtr<IViewParent> parent;
@@ -2212,7 +2211,7 @@ Boolean ToolBar::ShouldLayout(
         && (view->GetVisibility(&visibility), visibility) != IView::GONE;
 }
 
-Int32 ToolBar::GetHorizontalMargins(
+Int32 Toolbar::GetHorizontalMargins(
     /* [in] */ IView* v)
 {
     AutoPtr<IViewGroupLayoutParams> temp;
@@ -2224,7 +2223,7 @@ Int32 ToolBar::GetHorizontalMargins(
     return start + end;
 }
 
-Int32 ToolBar::GetVerticalMargins(
+Int32 Toolbar::GetVerticalMargins(
     /* [in] */ IView* v)
 {
     AutoPtr<IViewGroupLayoutParams> temp;
@@ -2236,18 +2235,18 @@ Int32 ToolBar::GetVerticalMargins(
     return top + bottom;
 }
 
-Boolean ToolBar::IsCustomView(
+Boolean Toolbar::IsCustomView(
     /* [in] */ IView* child)
 {
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
     Int32 viewTpye;
     assert(0);
-    //IToolBarLayoutParams::Probe(params)->GetViewType(&viewTpye);
+    //IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
     return viewTpye == LayoutParams::CUSTOM;
 }
 
-ECode ToolBar::SetChildVisibilityForExpandedActionView(
+ECode Toolbar::SetChildVisibilityForExpandedActionView(
     /* [in] */ Boolean expand)
 {
     Int32 childCount;
@@ -2259,7 +2258,7 @@ ECode ToolBar::SetChildVisibilityForExpandedActionView(
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
         Int32 viewTpye;
         assert(0);
-        //IToolBarLayoutParams::Probe(params)->GetViewType(&viewTpye);
+        //IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
         if (viewTpye != LayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
             child->SetVisibility(expand ? IView::GONE : IView::VISIBLE);
         }
@@ -2267,14 +2266,14 @@ ECode ToolBar::SetChildVisibilityForExpandedActionView(
     return NOERROR;
 }
 
-ECode ToolBar::UpdateChildVisibilityForExpandedActionView(
+ECode Toolbar::UpdateChildVisibilityForExpandedActionView(
     /* [in] */ IView* child)
 {
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
     Int32 viewTpye;
     assert(0);
-    //IToolBarLayoutParams::Probe(params)->GetViewType(&viewTpye);
+    //IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
     if (viewTpye != LayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
         child->SetVisibility(mExpandedActionView != NULL ? IView::GONE : IView::VISIBLE);
     }

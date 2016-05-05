@@ -128,7 +128,7 @@ ECode Currency::GetAvailableCurrencies(
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<ICurrency> currency;
         FAIL_RETURN(GetInstance((*currencyCodes)[i], (ICurrency**)&currency));
-        ICollection::Probe(*currencies)->Add((IInterface*)currency);
+        ICollection::Probe(*currencies)->Add(currency);
     }
     return NOERROR;
 }

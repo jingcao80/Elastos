@@ -11,9 +11,9 @@ static AutoPtr<IHttpVersion> InitHttpVersion(
     /* [in] */ Int32 major,
     /* [in] */ Int32 minor)
 {
-    AutoPtr<CHttpVersion> ver;
-    CHttpVersion::NewByFriend(major, minor, (CHttpVersion**)&ver);
-    return (IHttpVersion*)ver.Get();
+    AutoPtr<IHttpVersion> ver;
+    CHttpVersion::New(major, minor, (IHttpVersion**)&ver);
+    return ver;
 }
 const AutoPtr<IHttpVersion> CHttpVersion::HTTP_0_9 = InitHttpVersion(0, 9);
 const AutoPtr<IHttpVersion> CHttpVersion::HTTP_1_0 = InitHttpVersion(1, 0);

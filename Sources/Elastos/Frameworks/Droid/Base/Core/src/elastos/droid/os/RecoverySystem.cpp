@@ -95,8 +95,8 @@ const AutoPtr<IFile> RecoverySystem::DEFAULT_KEYSTORE = CreateFile(NULL, String(
 const Int64 RecoverySystem::PUBLISH_PROGRESS_INTERVAL_MS = 500;
 
 AutoPtr<IFile> RecoverySystem::RECOVERY_DIR = CreateFile(NULL, String("/cache/recovery"));
-AutoPtr<IFile> RecoverySystem::COMMAND_FILE = CreateFile((IFile*)RECOVERY_DIR, String("command"));
-AutoPtr<IFile> RecoverySystem::LOG_FILE = CreateFile((IFile*)RECOVERY_DIR, String("log"));
+AutoPtr<IFile> RecoverySystem::COMMAND_FILE = CreateFile(RECOVERY_DIR, String("command"));
+AutoPtr<IFile> RecoverySystem::LOG_FILE = CreateFile(RECOVERY_DIR, String("log"));
 String RecoverySystem::LAST_PREFIX("last_");
 
 Int32 RecoverySystem::LOG_FILE_MAX_LENGTH = 64 * 1024;
@@ -112,7 +112,7 @@ AutoPtr<IHashSet> RecoverySystem::GetTrustedCerts(
     }
 
     AutoPtr<IZipFile> zip;
-    CZipFile::New((IFile*)tempFile, (IZipFile**)&zip);
+    CZipFile::New(tempFile, (IZipFile**)&zip);
 
     AutoPtr<ICertificateFactory> cf;
     AutoPtr<ICertificateFactoryHelper> helper;

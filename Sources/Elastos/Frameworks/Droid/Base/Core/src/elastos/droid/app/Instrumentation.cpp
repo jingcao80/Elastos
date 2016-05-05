@@ -317,7 +317,7 @@ ECode Instrumentation::Start()
     String name;
     clsInfo->GetName(&name);
     sb += name;
-    mRunner = (IThread*)new InstrumentationThread(sb.ToString(), this);
+    mRunner = new InstrumentationThread(sb.ToString(), this);
     mRunner->Start();
     return NOERROR;
 }
@@ -474,7 +474,7 @@ ECode Instrumentation::SetInTouchMode(
     /* [in] */ Boolean inTouch)
 {
     // try {
-    AutoPtr<IIWindowManager> wm = (IIWindowManager*)ServiceManager::GetService(IContext::WINDOW_SERVICE).Get();
+    AutoPtr<IIWindowManager> wm = IIWindowManager::Probe(ServiceManager::GetService(IContext::WINDOW_SERVICE));
     return wm->SetInTouchMode(inTouch);
     // } catch (RemoteException e) {
     //     // Shouldn't happen!
@@ -484,7 +484,7 @@ ECode Instrumentation::SetInTouchMode(
 ECode Instrumentation::WaitForIdle(
     /* [in] */ IRunnable* recipient)
 {
-    AutoPtr<IIdleHandler> idleH = (IIdleHandler*)new Idler(recipient);
+    AutoPtr<IIdleHandler> idleH = new Idler(recipient);
     mMessageQueue->AddIdleHandler(idleH);
     AutoPtr<IHandler> h;
     mThread->GetHandler((IHandler**)&h);

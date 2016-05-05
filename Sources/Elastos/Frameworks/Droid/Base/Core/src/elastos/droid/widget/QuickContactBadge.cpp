@@ -131,7 +131,7 @@ ECode QuickContactBadge::QueryHandler::OnQueryComplete(
         CContactsContractQuickContact::AcquireSingleton((IContactsContractQuickContact**)&quickContact);
         AutoPtr<IContext> context;
         mHost->GetContext((IContext**)&context);
-        quickContact->ShowQuickContact(context, (IView*)mHost->Probe(EIID_IView), lookupUri,
+        quickContact->ShowQuickContact(context, (IView*)mHost, lookupUri,
                 IContactsContractQuickContact::MODE_LARGE, mHost->mExcludeMimes);
     }
     else if (createUri != NULL) {

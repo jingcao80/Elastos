@@ -38,10 +38,8 @@ NativeBreakIterator::NativeBreakIterator(
     : mAddress(address)
     , mType(type)
 {
-    AutoPtr<IStringCharacterIterator> stringCharIter;
     ASSERT_SUCCEEDED(CStringCharacterIterator::New(String(""),
-            (IStringCharacterIterator**)&stringCharIter));
-    mCharIterator = (ICharacterIterator*)stringCharIter->Probe(EIID_ICharacterIterator);
+            (ICharacterIterator**)&mCharIterator));
 }
 
 NativeBreakIterator::~NativeBreakIterator()
@@ -208,9 +206,9 @@ ECode NativeBreakIterator::SetText(
 ECode NativeBreakIterator::SetText(
     /* [in] */ const String& newText)
 {
-    AutoPtr<IStringCharacterIterator> stringCharIter;
-    ASSERT_SUCCEEDED(CStringCharacterIterator::New(newText, (IStringCharacterIterator**)&stringCharIter));
-    SetText(newText, (ICharacterIterator*)stringCharIter->Probe(EIID_ICharacterIterator));
+    AutoPtr<ICharacterIterator> stringCharIter;
+    ASSERT_SUCCEEDED(CStringCharacterIterator::New(newText, (ICharacterIterator**)&stringCharIter));
+    SetText(newText, stringCharIter);
     return NOERROR;
 }
 

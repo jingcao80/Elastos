@@ -810,9 +810,9 @@ void NumberPicker::AccessibilityNodeProviderImpl::SendAccessibilityEventForVirtu
         CAccessibilityEvent::Obtain(eventType, (IAccessibilityEvent**)&event);
         IView::Probe(mHost->mInputText)->OnInitializeAccessibilityEvent(event);
         IView::Probe(mHost->mInputText)->OnPopulateAccessibilityEvent(event);
-        IAccessibilityRecord::Probe(event)->SetSource((IView*)mHost, VIRTUAL_VIEW_ID_INPUT);
+        IAccessibilityRecord::Probe(event)->SetSource(mHost, VIRTUAL_VIEW_ID_INPUT);
         Boolean res;
-        mHost->RequestSendAccessibilityEvent((IView*)mHost, event, &res);
+        mHost->RequestSendAccessibilityEvent(mHost, event, &res);
     }
 }
 
@@ -840,9 +840,9 @@ void NumberPicker::AccessibilityNodeProviderImpl::SendAccessibilityEventForVirtu
         Boolean result;
         mHost->IsEnabled(&result);
         eventProbe->SetEnabled(result);
-        eventProbe->SetSource((IView*)mHost, virtualViewId);
+        eventProbe->SetSource(mHost, virtualViewId);
         Boolean res;
-        mHost->RequestSendAccessibilityEvent((IView*)mHost, event, &res);
+        mHost->RequestSendAccessibilityEvent(mHost, event, &res);
     }
 }
 
@@ -905,7 +905,7 @@ AutoPtr<IAccessibilityNodeInfo> NumberPicker::AccessibilityNodeProviderImpl::Cre
 {
     AutoPtr<IAccessibilityNodeInfo> info;
     IView::Probe(mHost->mInputText)->CreateAccessibilityNodeInfo((IAccessibilityNodeInfo**)&info);
-    info->SetSource((IView*)mHost, VIRTUAL_VIEW_ID_INPUT);
+    info->SetSource(mHost, VIRTUAL_VIEW_ID_INPUT);
     if (mAccessibilityFocusedView != VIRTUAL_VIEW_ID_INPUT) {
         info->AddAction(IAccessibilityNodeInfo::ACTION_ACCESSIBILITY_FOCUS);
     }
@@ -940,8 +940,8 @@ AutoPtr<IAccessibilityNodeInfo> NumberPicker::AccessibilityNodeProviderImpl::Cre
     String packageName;
     mHost->mContext->GetPackageName(&packageName);
     info->SetPackageName(CoreUtils::Convert(packageName));
-    info->SetSource((IView*)mHost, virtualViewId);
-    info->SetParent((IView*)mHost);
+    info->SetSource(mHost, virtualViewId);
+    info->SetParent(mHost);
     info->SetText(CoreUtils::Convert(text));
     info->SetClickable(TRUE);
     info->SetLongClickable(TRUE);
@@ -987,14 +987,14 @@ AutoPtr<IAccessibilityNodeInfo> NumberPicker::AccessibilityNodeProviderImpl::Cre
     String packageName;
     mHost->mContext->GetPackageName(&packageName);
     info->SetPackageName(CoreUtils::Convert(packageName));
-    info->SetSource((IView*)mHost);
+    info->SetSource(mHost);
 
     if (HasVirtualDecrementButton()) {
-        info->AddChild((IView*)mHost, VIRTUAL_VIEW_ID_DECREMENT);
+        info->AddChild(mHost, VIRTUAL_VIEW_ID_DECREMENT);
     }
-    info->AddChild((IView*)mHost, VIRTUAL_VIEW_ID_INPUT);
+    info->AddChild(mHost, VIRTUAL_VIEW_ID_INPUT);
     if (HasVirtualIncrementButton()) {
-        info->AddChild((IView*)mHost, VIRTUAL_VIEW_ID_INCREMENT);
+        info->AddChild(mHost, VIRTUAL_VIEW_ID_INCREMENT);
     }
 
     AutoPtr<IViewParent> parent;

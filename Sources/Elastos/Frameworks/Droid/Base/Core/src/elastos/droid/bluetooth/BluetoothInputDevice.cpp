@@ -40,7 +40,7 @@ ECode BluetoothInputDevice::ServiceConnection::OnServiceConnected(
     mHost->mService = IIBluetoothInputDevice::Probe(service);
 
     if (mHost->mServiceListener != NULL) {
-        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::INPUT_DEVICE, (IBluetoothProfile*)mHost);
+        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::INPUT_DEVICE, mHost);
     }
     return NOERROR;
 }

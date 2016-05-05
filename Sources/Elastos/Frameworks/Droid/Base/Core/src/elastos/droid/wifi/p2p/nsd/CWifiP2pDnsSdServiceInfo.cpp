@@ -79,11 +79,7 @@ ECode CWifiP2pDnsSdServiceInfo::NewInstance(
     queries->Set(0, ptrQ);
     queries->Set(1, txtQ);
 
-    AutoPtr<CWifiP2pDnsSdServiceInfo> info;
-    CWifiP2pDnsSdServiceInfo::NewByFriend(queries, (CWifiP2pDnsSdServiceInfo**)&info);
-    *instance = (IWifiP2pDnsSdServiceInfo*)info.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+    return CWifiP2pDnsSdServiceInfo::New(queries, instance);
 }
 
 ECode CWifiP2pDnsSdServiceInfo::CreatePtrServiceQuery(

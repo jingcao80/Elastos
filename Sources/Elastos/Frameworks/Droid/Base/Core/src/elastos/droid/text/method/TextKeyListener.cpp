@@ -111,7 +111,7 @@ ECode TextKeyListener::SettingsObserver::OnChange(
             mHost->mPrefsInited = FALSE;
         }
         else {
-            AutoPtr<IContentResolver> resolver = (IContentResolver*)obj->Probe(EIID_IContentResolver);
+            AutoPtr<IContentResolver> resolver = IContentResolver::Probe(obj);
             mHost->UpdatePrefs(resolver);
         }
     }
@@ -426,8 +426,8 @@ ECode TextKeyListener::ReleaseListener()
         AutoPtr<IInterface> obj;
         mResolver->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj != NULL) {
-            AutoPtr<IContentResolver> resolver = (IContentResolver*)IContentResolver::Probe(obj);/*(IContentResolver*)obj->Probe(EIID_IContentResolver)*/
-            resolver->UnregisterContentObserver(IContentObserver::Probe(obj)/*(IContentObserver*)(mObserver->Probe(EIID_IContentObserver))*/);
+            AutoPtr<IContentResolver> resolver = IContentResolver::Probe(obj);
+            resolver->UnregisterContentObserver((IContentObserver*)mObserver);
         }
 
         mObserver = NULL;
@@ -445,14 +445,14 @@ void TextKeyListener::InitPrefs(
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
     if (contentResolver != NULL) {
-        IWeakReferenceSource* wrs = (IWeakReferenceSource*)contentResolver->Probe(EIID_IWeakReferenceSource);
+        IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(contentResolver);
         assert(wrs != NULL);
         wrs->GetWeakReference((IWeakReference**)&mResolver);
     }
 
     if (mObserver == NULL) {
         mObserver = new SettingsObserver(this);
-        contentResolver->RegisterContentObserver(Settings::System::CONTENT_URI.Get(), TRUE, IContentObserver::Probe(mObserver));
+        contentResolver->RegisterContentObserver(Settings::System::CONTENT_URI.Get(), TRUE, (IContentObserver*)mObserver);
     }
 
     UpdatePrefs(contentResolver);

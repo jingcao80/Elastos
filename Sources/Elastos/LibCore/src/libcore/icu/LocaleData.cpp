@@ -64,7 +64,7 @@ AutoPtr<ILocaleData> LocaleData::Get(
         HashMap< String, AutoPtr<ILocaleData> >::Iterator it =
                 sLocaleDataCache.Find(languageTag);
         if (it != sLocaleDataCache.End()) {
-            return (ILocaleData*)it->mSecond.Get();
+            return it->mSecond;
         }
     }
 

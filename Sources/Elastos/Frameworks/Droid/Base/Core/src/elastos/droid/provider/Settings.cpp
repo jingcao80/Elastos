@@ -1455,7 +1455,7 @@ ECode Settings::Secure::GetStringForUser(
     if (flag) {
         synchronized(sSecureLock) {
             if (sLockSettings == NULL) {
-                sLockSettings = (IILockSettings*)ServiceManager::GetService(String("lock_settings")).Get();
+                sLockSettings = IILockSettings::Probe(ServiceManager::GetService(String("lock_settings")));
                 sIsSystemProcess = Process::MyUid() == IProcess::SYSTEM_UID;
             }
         }

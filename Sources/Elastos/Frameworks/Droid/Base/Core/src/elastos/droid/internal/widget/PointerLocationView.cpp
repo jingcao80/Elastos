@@ -290,7 +290,7 @@ ECode PointerLocationView::constructor(
     mPaint->SetStrokeWidth(1);
 
     AutoPtr<PointerState> ps = new PointerState();
-    mPointers->Add(IInterface::Probe((IObject*)ps));
+    mPointers->Add((IObject*)ps.Get());
     mActivePointerId = 0;
 
     mVelocity = VelocityTracker::Obtain();

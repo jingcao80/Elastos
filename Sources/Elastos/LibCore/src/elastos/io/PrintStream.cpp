@@ -82,18 +82,18 @@ ECode PrintStream::constructor(
 ECode PrintStream::constructor(
     /* [in] */ IFile* file)
 {
-    AutoPtr<IFileOutputStream> fos;
-    FAIL_RETURN(CFileOutputStream::New(file, (IFileOutputStream**)&fos));
-    return FilterOutputStream::constructor((IOutputStream*)fos.Get());
+    AutoPtr<IOutputStream> fos;
+    FAIL_RETURN(CFileOutputStream::New(file, (IOutputStream**)&fos));
+    return FilterOutputStream::constructor(fos);
 }
 
 ECode PrintStream::constructor(
     /* [in] */ IFile* file,
     /* [in] */ const String& csn)
 {
-    AutoPtr<IFileOutputStream> fos;
-    FAIL_RETURN(CFileOutputStream::New(file, (IFileOutputStream**)&fos));
-    FAIL_RETURN(FilterOutputStream::constructor((IOutputStream*)fos.Get()));
+    AutoPtr<IOutputStream> fos;
+    FAIL_RETURN(CFileOutputStream::New(file, (IOutputStream**)&fos));
+    FAIL_RETURN(FilterOutputStream::constructor(fos));
 
     if (csn.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;

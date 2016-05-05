@@ -30,7 +30,7 @@ ECode CPrivacyLocationManager::constructor(
 {
     LocationManager::Init(context, service);
     mContext = context;
-    AutoPtr<IIPrivacySettingsManager> mgr = (IIPrivacySettingsManager*)ServiceManager::GetService(String("privacy")).Get();
+    AutoPtr<IIPrivacySettingsManager> mgr = IIPrivacySettingsManager::Probe(ServiceManager::GetService(String("privacy")));
     return CPrivacySettingsManager::New(context, mgr, (IPrivacySettingsManager**)&mPrivacySetMan);
 }
 

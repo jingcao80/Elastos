@@ -46,9 +46,9 @@ CAR_INTERFACE_IMPL(DecimalFormat, NumberFormat, IDecimalFormat)
 
 static AutoPtr<IDouble>  IntNEGATIVE_ZERO_DOUBLE()
 {
-    AutoPtr<CDouble> out;
-    CDouble::NewByFriend(-0.0, (CDouble**)&out);
-    return (IDouble*)out->Probe(EIID_IDouble);
+    AutoPtr<IDouble> out;
+    CDouble::New(-0.0, (IDouble**)&out);
+    return out;
 }
 
 const AutoPtr<IDouble> DecimalFormat::NEGATIVE_ZERO_DOUBLE = IntNEGATIVE_ZERO_DOUBLE();

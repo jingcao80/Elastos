@@ -4188,9 +4188,9 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
                     //if (DEBUG_INPUT_RESIZE) Logger::V(TAG, "Focus " + focus
                     //    + ": focusRect=" + mTempRect.toShortString());
 
-                    IViewGroup* viewGroup = (IViewGroup*)mView->Probe(EIID_IViewGroup);
+                    IViewGroup* viewGroup = IViewGroup::Probe(mView);
                     if (viewGroup) {
-                        viewGroup->OffsetDescendantRectToMyCoords(focus, (IRect*)mTempRect);
+                        viewGroup->OffsetDescendantRectToMyCoords(focus, mTempRect);
                     }
 
                     //if (DEBUG_INPUT_RESIZE) Logger::V(TAG,
@@ -5227,7 +5227,7 @@ ECode ViewRootImpl::FocusSearch(
 
     FAIL_RETURN(CheckThread());
 
-    IViewGroup* viewGroup = (IViewGroup*)mView->Probe(EIID_IViewGroup);
+    IViewGroup* viewGroup = IViewGroup::Probe(mView);
     if (viewGroup == NULL) {
         *result  = NULL;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

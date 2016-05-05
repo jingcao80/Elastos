@@ -28,9 +28,10 @@ ECode CIntentFilterComparison::Equals(
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (IIntentFilterComparison::Probe(obj) != NULL) {
+    IIntentFilterComparison* cmp = IIntentFilterComparison::Probe(obj);
+    if (cmp != NULL) {
         AutoPtr<IIntent> otherIntent;
-        FAIL_RETURN(((IIntentFilterComparison*)obj)->GetIntent((IIntent**)&otherIntent))
+        FAIL_RETURN(cmp->GetIntent((IIntent**)&otherIntent))
         return mIntent->FilterEquals(otherIntent, isEqual);
     }
     *isEqual = FALSE;

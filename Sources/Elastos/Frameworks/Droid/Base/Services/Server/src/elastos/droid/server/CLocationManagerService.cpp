@@ -1118,9 +1118,10 @@ void CLocationManagerService::LoadProvidersLocked()
             R::array::config_locationProviderPackageNames,
             mLocationHandler);
     if (networkProvider != NULL) {
-        mRealProviders->Put(CoreUtils::Convert(ILocationManager::NETWORK_PROVIDER), ILocationProviderInterface::Probe(networkProvider));
-        mProxyProviders->Add(ILocationProviderInterface::Probe(networkProvider));
-        AddProviderLocked((ILocationProviderInterface*)networkProvider);
+        ILocationProviderInterface* lpi = (ILocationProviderInterface*)networkProvider.Get();
+        mRealProviders->Put(CoreUtils::Convert(ILocationManager::NETWORK_PROVIDER), lpi);
+        mProxyProviders->Add(lpi);
+        AddProviderLocked(lpi);
     }
     else {
         Slogger::W(TAG, "no network location provider found");
@@ -1137,12 +1138,13 @@ void CLocationManagerService::LoadProvidersLocked()
                     R::array::config_locationProviderPackageNames,
                     mLocationHandler);
     if (fusedLocationProvider != NULL) {
+        ILocationProviderInterface* lpi = (ILocationProviderInterface*)fusedLocationProvider.Get();
         AddProviderLocked(fusedLocationProvider);
-        mProxyProviders->Add(ILocationProviderInterface::Probe(fusedLocationProvider));
+        mProxyProviders->Add(lpi);
         String providerName;
         fusedLocationProvider->GetName(&providerName);
         mEnabledProviders->Add(CoreUtils::Convert(providerName));
-        mRealProviders->Put(CoreUtils::Convert(ILocationManager::FUSED_PROVIDER), ILocationProviderInterface::Probe(fusedLocationProvider));
+        mRealProviders->Put(CoreUtils::Convert(ILocationManager::FUSED_PROVIDER), lpi);
     }
     else {
         Slogger::E(TAG, "no fused location provider found Location service needs a fused location provider");

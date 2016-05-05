@@ -5,6 +5,7 @@
 #include "elastos/droid/provider/CContactsContractQuickContact.h"
 #include "elastos/droid/widget/Toast.h"
 
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::EIID_IActivity;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IContextWrapper;
@@ -67,11 +68,15 @@ ECode CContactsContractQuickContact::ComposeQuickContactsIntent(
     // When launching from an Activiy, we don't want to start a new task, but otherwise
     // we *must* start a new task.  (Otherwise startActivity() would crash.)
     AutoPtr<IContext> actualContext = context;
-    while ((actualContext->Probe(EIID_IContextWrapper) != NULL)
-            && actualContext->Probe(EIID_IActivity) == NULL ) {
-        ((IContextWrapper*)actualContext->Probe(EIID_IContextWrapper))->GetBaseContext((IContext**)&actualContext);
+    AutoPtr<IContextWrapper> cw = IContextWrapper::Probe(actualContext);
+    AutoPtr<IActivity> act = IActivity::Probe(actualContext);
+    while (cw != NULL && act == NULL) {
+        actualContext = NULL;
+        cw->GetBaseContext((IContext**)&actualContext);
+        cw = IContextWrapper::Probe(actualContext);
+        act = IActivity::Probe(actualContext);
     }
-    const Int32 intentFlags = (actualContext->Probe(EIID_IActivity) != NULL)
+    const Int32 intentFlags = (act != NULL)
             ? IIntent::FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
             : IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_CLEAR_TASK;
 

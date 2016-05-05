@@ -771,7 +771,7 @@ AutoPtr<IContext> ThemeUtils::CreateUiContext(
     String pkgName;
     context->GetPackageName(&pkgName);
     AutoPtr<ThemedUiContext> ctx = new ThemedUiContext(uiContext, pkgName);
-    return (IContext*)ctx->Probe(EIID_IContext);
+    return (IContext*)ctx.Get();
     // } catch (PackageManager.NameNotFoundException e) {
     // }
 }

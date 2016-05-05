@@ -48,13 +48,13 @@ Boolean CLayoutTransition::sInit = CLayoutTransition::InitStatics();
 
 Boolean CLayoutTransition::InitStatics()
 {
-    AutoPtr<CAccelerateDecelerateInterpolator> cdi;
-    CAccelerateDecelerateInterpolator::NewByFriend((CAccelerateDecelerateInterpolator**)&cdi);
-    ACCEL_DECEL_INTERPOLATOR = ITimeInterpolator::Probe((IAccelerateDecelerateInterpolator*)cdi.Get());
+    AutoPtr<ITimeInterpolator> cdi;
+    CAccelerateDecelerateInterpolator::New((ITimeInterpolator**)&cdi);
+    ACCEL_DECEL_INTERPOLATOR = cdi;
 
-    AutoPtr<CDecelerateInterpolator> di;
-    CDecelerateInterpolator::NewByFriend((CDecelerateInterpolator**)&di);
-    DECEL_INTERPOLATOR = ITimeInterpolator::Probe((IDecelerateInterpolator*)di.Get());
+    AutoPtr<ITimeInterpolator> di;
+    CDecelerateInterpolator::New((ITimeInterpolator**)&di);
+    DECEL_INTERPOLATOR = di;
     sAppearingInterpolator = ACCEL_DECEL_INTERPOLATOR;
     sDisappearingInterpolator = ACCEL_DECEL_INTERPOLATOR;
     sChangingAppearingInterpolator = DECEL_INTERPOLATOR;

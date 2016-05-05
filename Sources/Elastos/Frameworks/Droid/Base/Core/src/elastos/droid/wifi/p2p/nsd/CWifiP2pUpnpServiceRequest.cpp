@@ -75,12 +75,7 @@ ECode CWifiP2pUpnpServiceRequest::WriteToParcel(
 ECode CWifiP2pUpnpServiceRequest::NewInstance(
     /* [out] */ IWifiP2pUpnpServiceRequest** instance)
 {
-    VALIDATE_NOT_NULL(instance);
-    AutoPtr<CWifiP2pUpnpServiceRequest> requst;
-    CWifiP2pUpnpServiceRequest::NewByFriend((CWifiP2pUpnpServiceRequest**)&requst);
-    *instance = (IWifiP2pUpnpServiceRequest*)requst.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+    return CWifiP2pUpnpServiceRequest::New(instance);
 }
 
 ECode CWifiP2pUpnpServiceRequest::NewInstance(
@@ -103,11 +98,7 @@ ECode CWifiP2pUpnpServiceRequest::NewInstance(
     FAIL_RETURN(WifiP2pServiceInfo::Bin2HexStr(st.string(), st.GetByteLength(), &temp));
     sb += temp;
 
-    AutoPtr<CWifiP2pUpnpServiceRequest> requst;
-    CWifiP2pUpnpServiceRequest::NewByFriend(sb, (CWifiP2pUpnpServiceRequest**)&requst);
-    *instance = (IWifiP2pUpnpServiceRequest*)requst.Get();
-    REFCOUNT_ADD(*instance);
-    return NOERROR;
+    return CWifiP2pUpnpServiceRequest::New(sb, instance);
 }
 
 } // namespace Nsd

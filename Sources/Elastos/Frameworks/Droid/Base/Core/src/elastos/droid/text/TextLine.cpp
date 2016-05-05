@@ -669,7 +669,7 @@ Int32 TextLine::GetOffsetBeforeAfter(
             for (Int32 j = 0; j < spansLen; j++) {
                 AutoPtr<IMetricAffectingSpan> span = (IMetricAffectingSpan*)((*spans)[j]->Probe(EIID_IMetricAffectingSpan));
                 if (span->Probe(EIID_IReplacementSpan)) {
-                    replacement = (IReplacementSpan*)span->Probe(EIID_IReplacementSpan);
+                    replacement = IReplacementSpan::Probe(span);
                 } else {
                     span->UpdateMeasureState(wp);
                 }

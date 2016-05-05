@@ -487,7 +487,7 @@ void SharedPreferencesImpl::StartLoadFromDisk()
         mLoaded = FALSE;
     }
 
-    AutoPtr<IRunnable> runnable = (IRunnable*)new LoadFromDiskLockedRunnable(this);
+    AutoPtr<IRunnable> runnable = new LoadFromDiskLockedRunnable(this);
     AutoPtr<IThread> thread;
     CThread::New(runnable, String("SharedPreferencesImpl-load"), (IThread**)&thread);
     thread->Start();
@@ -831,7 +831,7 @@ ECode SharedPreferencesImpl::Edit(
         AwaitLoadedLocked();
     }
     AutoPtr<EditorImpl> editorImpl = new EditorImpl(this);
-    *result = (ISharedPreferencesEditor*)editorImpl.Get();
+    *result = editorImpl.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

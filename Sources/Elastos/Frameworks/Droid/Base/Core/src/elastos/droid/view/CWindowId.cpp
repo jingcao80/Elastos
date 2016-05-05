@@ -85,8 +85,9 @@ ECode CWindowId::Equals(
     /* [out] */ Boolean* e)
 {
     VALIDATE_NOT_NULL(e);
-    if (IWindowId::Probe(otherObj)) {
-        AutoPtr<IBinder> binder = IBinder::Probe(((CWindowId*)(IWindowId*)otherObj)->mToken);
+    IWindowId* wid = IWindowId::Probe(otherObj);
+    if (wid) {
+        AutoPtr<IBinder> binder = IBinder::Probe(((CWindowId*)wid)->mToken);
         return IObject::Probe(mToken)->Equals(binder, e);
     }
     *e = FALSE;

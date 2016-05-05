@@ -1033,7 +1033,7 @@ void LockPatternView::AddCellToPattern(
     (*mPatternDrawLookup)[row]->Set(column, b);
     Int32 size = 0;
     mPattern->GetSize(&size);
-    mPattern->Set(size, (IObject*)newCell->Probe(EIID_IObject));
+    mPattern->Set(size, (IObject*)newCell);
     if (!mInStealthMode) {
         StartCellActivatedAnimation(newCell);
     }

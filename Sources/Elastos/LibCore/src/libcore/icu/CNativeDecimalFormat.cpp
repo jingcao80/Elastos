@@ -1244,9 +1244,9 @@ AutoPtr<INumber> CNativeDecimalFormat::Parse(
                 strncmp(data, "Inf", 3) == 0 ||
                 strncmp(data, "-Inf", 4) == 0) {
                 double resultDouble = res.getDouble(status);
-                AutoPtr<IDouble> d;
-                ASSERT_SUCCEEDED(CDouble::New(resultDouble, (IDouble**)&d));
-                return (INumber*)d->Probe(EIID_INumber);
+                AutoPtr<INumber> d;
+                ASSERT_SUCCEEDED(CDouble::New(resultDouble, (INumber**)&d));
+                return d;
             }
             return newBigDecimal(data, len);
         }
@@ -1257,21 +1257,21 @@ AutoPtr<INumber> CNativeDecimalFormat::Parse(
         switch(numType) {
             case U_ICU_NAMESPACE::Formattable::kDouble: {
                 double resultDouble = res.getDouble();
-                AutoPtr<IDouble> d;
-                ASSERT_SUCCEEDED(CDouble::New(resultDouble, (IDouble**)&d));
-                return (INumber*)d->Probe(EIID_INumber);
+                AutoPtr<INumber> d;
+                ASSERT_SUCCEEDED(CDouble::New(resultDouble, (INumber**)&d));
+                return d;
             }
             case U_ICU_NAMESPACE::Formattable::kLong: {
                 long resultLong = res.getLong();
-                AutoPtr<IInteger64> int64;
-                ASSERT_SUCCEEDED(CInteger64::New(resultLong, (IInteger64**)&int64));
-                return (INumber*)int64->Probe(EIID_INumber);
+                AutoPtr<INumber> int64;
+                ASSERT_SUCCEEDED(CInteger64::New(resultLong, (INumber**)&int64));
+                return int64;
             }
             case U_ICU_NAMESPACE::Formattable::kInt64: {
                 int64_t resultInt64 = res.getInt64();
-                AutoPtr<IInteger64> int64;
-                ASSERT_SUCCEEDED(CInteger64::New(resultInt64, (IInteger64**)&int64));
-                return (INumber*)int64->Probe(EIID_INumber);
+                AutoPtr<INumber> int64;
+                ASSERT_SUCCEEDED(CInteger64::New(resultInt64, (INumber**)&int64));
+                return int64;
             }
             default: {
                 return NULL;

@@ -2562,9 +2562,7 @@ PhoneWindow::DialogMenuCallback::DialogMenuCallback(
     /* [in] */ PhoneWindow* host)
     : mFeatureId(featureId)
 {
-    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)host);
-    source->GetWeakReference((IWeakReference**)&mWeakHost);
-    //host->GetWeakReference((IWeakReference**)&mWeakHost);
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 //CAR_INTERFACE_IMPL_2(PhoneWindow::DialogMenuCallback, Object, IMenuBuilderCallback, IMenuPresenterCallback)
@@ -2685,9 +2683,7 @@ ECode PhoneWindow::DialogMenuCallback::OnOpenSubMenu(
 PhoneWindow::DecorRunnable::DecorRunnable(
     /* [in] */ PhoneWindow* host)
 {
-    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)host);
-    source->GetWeakReference((IWeakReference**)&mWeakHost);
-    //host->GetWeakReference((IWeakReference**)&mWeakHost);
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 ECode PhoneWindow::DecorRunnable::Run()
@@ -2720,9 +2716,7 @@ PhoneWindow::DrawableFeatureState::DrawableFeatureState(
 PhoneWindow::InvalidatePanelMenuRunnable::InvalidatePanelMenuRunnable(
     /* [in] */ PhoneWindow* host)
 {
-    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)host);
-    source->GetWeakReference((IWeakReference**)&mWeakHost);
-    //host->GetWeakReference((IWeakReference**)&mWeakHost);
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 ECode PhoneWindow::InvalidatePanelMenuRunnable::Run()
@@ -2758,9 +2752,7 @@ CAR_INTERFACE_IMPL(PhoneWindow::PanelMenuPresenterCallback, Object, IMenuPresent
 PhoneWindow::PanelMenuPresenterCallback::PanelMenuPresenterCallback(
     /* [in] */ PhoneWindow* host)
 {
-    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)host);
-    source->GetWeakReference((IWeakReference**)&mWeakHost);
-    //host->GetWeakReference((IWeakReference**)&mWeakHost);
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 ECode PhoneWindow::PanelMenuPresenterCallback::OnCloseMenu(
@@ -2826,9 +2818,7 @@ CAR_INTERFACE_IMPL(PhoneWindow::ActionMenuPresenterCallback, Object, IMenuPresen
 PhoneWindow::ActionMenuPresenterCallback::ActionMenuPresenterCallback(
     /* [in] */ PhoneWindow* host)
 {
-    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)host);
-    source->GetWeakReference((IWeakReference**)&mWeakHost);
-    //host->GetWeakReference((IWeakReference**)&mWeakHost);
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 ECode PhoneWindow::ActionMenuPresenterCallback::OnOpenSubMenu(
@@ -2948,9 +2938,7 @@ ECode PhoneWindow::InnerSwipeDismissLayoutOnSwipeProgressChangedListener1::OnSwi
 //PhoneWindow::MyMenuBuilderCallback::MyMenuBuilderCallback(
 //    /* [in] */ PhoneWindow* host)
 //{
-//    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)host);
-//    source->GetWeakReference((IWeakReference**)&mWeakHost);
-//    //host->GetWeakReference((IWeakReference**)&mWeakHost);
+//    host->GetWeakReference((IWeakReference**)&mWeakHost);
 //}
 //
 //ECode PhoneWindow::MyMenuBuilderCallback::OnMenuItemSelected(
@@ -5411,7 +5399,7 @@ ECode PhoneWindow::GenerateLayout(
         // Logger::E("PhoneWindow", "Window couldn't find content container view");
         return E_RUNTIME_EXCEPTION;
     }
-    AutoPtr<IViewGroup> contentParent = (IViewGroup*)tmp->Probe(EIID_IViewGroup);
+    AutoPtr<IViewGroup> contentParent = IViewGroup::Probe(tmp);
     if (contentParent == NULL) {
         // Logger::E("PhoneWindow", "Window couldn't find content container view");
         return E_RUNTIME_EXCEPTION;
@@ -6809,7 +6797,7 @@ ECode PhoneWindow::OnMenuItemSelected(
         AutoPtr<IMenuBuilder> rootMenu;
         menu->GetRootMenu((IMenuBuilder**)&rootMenu);
 
-        AutoPtr<PanelFeatureState> panel = FindMenuPanel((IMenu*)rootMenu.Get());
+        AutoPtr<PanelFeatureState> panel = FindMenuPanel(IMenu::Probe(rootMenu));
         if (panel != NULL) {
             return cb->OnMenuItemSelected(panel->mFeatureId, item, state);
         }

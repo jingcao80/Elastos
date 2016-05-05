@@ -294,6 +294,7 @@ ECode MediaRouterRouteInfo::GetIconDrawable(
 ECode MediaRouterRouteInfo::SetTag(
     /* [in] */ IInterface * tag)
 {
+    assert(0 && "TODO");
     // mTag = (Object)(*(IObject::Probe(tag)));
     return RouteUpdated();
 }
@@ -303,6 +304,7 @@ ECode MediaRouterRouteInfo::GetTag(
 {
     VALIDATE_NOT_NULL(result);
     // *result = (IInterface*)mTag;
+    assert(0 && "TODO");
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

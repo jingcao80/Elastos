@@ -612,7 +612,7 @@ void CGpsNetInitiatedHandler::SetNiNotification(
     AutoPtr<IInterface> svTemp;
     AutoPtr<INotificationManager> notificationManager;
     mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&svTemp);
-    notificationManager = (INotificationManager*)svTemp->Probe(EIID_INotificationManager);
+    notificationManager = INotificationManager::Probe(svTemp);
     if (notificationManager == NULL) {
         return;
     }

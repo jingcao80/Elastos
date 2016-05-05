@@ -1518,7 +1518,7 @@ void PopupWindow::RegisterForScrollChanged(
 
     UnregisterForScrollChanged();
 
-    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)anchor->Probe(EIID_IWeakReferenceSource);
+    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(anchor);
     mAnchor = NULL;
     wrs->GetWeakReference((IWeakReference**)&mAnchor);
 

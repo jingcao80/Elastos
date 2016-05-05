@@ -228,7 +228,7 @@ ECode Activity::constructor()
     // assert(0 && "TODO");
     // AutoPtr<IStrictMode> strictMode;
     // CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
-    // strictMode->TrackActivity((IActivity*)this, (IInterface**)&mInstanceTracker);
+    // strictMode->TrackActivity(this, (IInterface**)&mInstanceTracker);
 
     CHandler::New((IHandler**)&mHandler);
 

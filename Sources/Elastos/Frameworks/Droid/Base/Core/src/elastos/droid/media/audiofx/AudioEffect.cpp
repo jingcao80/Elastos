@@ -70,7 +70,7 @@ ECode AudioEffect::NativeEventHandler::HandleMessage(
                 enableStatusChangeListener = mAudioEffect->mEnableStatusChangeListener;
             }
             if (enableStatusChangeListener != NULL) {
-                enableStatusChangeListener->OnEnableStatusChange((IAudioEffect*)mAudioEffect->Probe(EIID_IAudioEffect), (arg1 != 0));
+                enableStatusChangeListener->OnEnableStatusChange((IAudioEffect*)mAudioEffect, (arg1 != 0));
             }
             break;
         case IAudioEffect::NATIVE_EVENT_CONTROL_STATUS:
@@ -79,7 +79,7 @@ ECode AudioEffect::NativeEventHandler::HandleMessage(
                 controlStatusChangeListener = mAudioEffect->mControlChangeStatusListener;
             }
             if (controlStatusChangeListener != NULL) {
-                controlStatusChangeListener->OnControlStatusChange((IAudioEffect*)mAudioEffect->Probe(EIID_IAudioEffect), (arg1 != 0));
+                controlStatusChangeListener->OnControlStatusChange((IAudioEffect*)mAudioEffect, (arg1 != 0));
             }
             break;
         case IAudioEffect::NATIVE_EVENT_PARAMETER_CHANGED:

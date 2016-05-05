@@ -133,8 +133,7 @@ ECode CCalendarContractCalendarEntity::NewEntityIterator(
     AutoPtr<EntityIteratorImpl> impl = new EntityIteratorImpl();
     impl->constructor(cursor);
 
-    AutoPtr<ICursorEntityIterator> obj = (ICursorEntityIterator*)impl;
-    *iter = IEntityIterator::Probe(obj);
+    *iter = (IEntityIterator*)impl.Get();
     REFCOUNT_ADD(*iter);
     return NOERROR;
 }

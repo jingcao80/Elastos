@@ -671,44 +671,6 @@ GlobalActions::SilentModeTriStateAction::SilentModeTriStateAction(
     (*ITEM_IDS)[2] = R::id::option3;
 }
 
-//UInt32 GlobalActions::SilentModeTriStateAction::AddRef()
-//{
-//    return ElRefBase::AddRef();
-//}
-//
-//UInt32 GlobalActions::SilentModeTriStateAction::Release()
-//{
-//    return ElRefBase::Release();
-//}
-//
-//ECode GlobalActions::SilentModeTriStateAction::GetInterfaceID(
-//    /* [in] */ IInterface *pObject,
-//    /* [out] */ InterfaceID *pIID)
-//{
-//    VALIDATE_NOT_NULL(pIID);
-//    if (pObject == (IInterface*)(IViewOnClickListener *)this) {
-//        *pIID = EIID_IViewOnClickListener;
-//        return NOERROR;
-//    } else {
-//        return Action::GetInterfaceID(pObject, pIID);
-//    }
-//}
-//
-//PInterface GlobalActions::SilentModeTriStateAction::Probe(
-//    /* [in]  */ REIID riid)
-//{
-//    if (riid == EIID_IInterface) {
-//        return (PInterface)(IViewOnClickListener*)this;
-//    }
-//    if (riid == EIID_IViewOnClickListener) {
-//        return (IViewOnClickListener*)this;
-//    }
-//    if (riid == EIID_SilentModeTriStateAction) {
-//        return reinterpret_cast<PInterface>(this);
-//    }
-//    return Action::Probe(riid);
-//}
-
 AutoPtr<IView> GlobalActions::SilentModeTriStateAction::Create(
     /* [in] */ IContext* context,
     /* [in] */ IView* convertView,

@@ -156,10 +156,9 @@ AutoPtr<IUUID> CUUID::MakeUuid(
     lsb &= ~(0x3LL << 62);
     lsb |= 2LL << 62;
 
-    AutoPtr<CUUID> uuid;
-    CUUID::NewByFriend(msb, lsb, (CUUID**)&uuid);
-    AutoPtr<IUUID> id = (IUUID*)uuid.Get();
-    return id;
+    AutoPtr<IUUID> uuid;
+    CUUID::New(msb, lsb, (IUUID**)&uuid);
+    return uuid;
 }
 
 ECode CUUID::FromString(
@@ -190,11 +189,7 @@ ECode CUUID::FromString(
 
     Int64 msb = (m1 << 32) | (m2 << 16) | m3;
     Int64 lsb = (lsb1 << 48) | lsb2;
-    AutoPtr<CUUID> outuid;
-    FAIL_RETURN(CUUID::NewByFriend(msb, lsb, (CUUID**)&outuid));
-    *uuid = (IUUID*)outuid->Probe(EIID_IUUID);
-    REFCOUNT_ADD(*uuid)
-    return NOERROR;
+    return CUUID::New(msb, lsb, uuid);
 }
 
 ECode CUUID::GetLeastSignificantBits(

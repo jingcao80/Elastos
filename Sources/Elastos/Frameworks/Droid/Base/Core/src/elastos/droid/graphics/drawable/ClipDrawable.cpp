@@ -38,8 +38,7 @@ ClipDrawable::ClipState::ClipState(
         else {
             state->NewDrawable((IDrawable**)&mDrawable);
         }
-        mDrawable->SetCallback(
-                (IDrawableCallback*)owner->Probe(EIID_IDrawableCallback));
+        mDrawable->SetCallback(IDrawableCallback::Probe(owner));
 
         Int32 value = 0;
         orig->mDrawable->GetLayoutDirection(&value);

@@ -216,7 +216,7 @@ namespace Widget {
 UpdateTextServicesLocaleRunnable::UpdateTextServicesLocaleRunnable(
     /* [in] */ TextView* textView)
 {
-    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)textView->Probe(EIID_IWeakReferenceSource);
+    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)textView;
     wrs->GetWeakReference((IWeakReference**)&mTextView);
 }
 
@@ -245,7 +245,7 @@ ECode UpdateTextServicesLocaleRunnable::Run()
 CompressTextRunnable::CompressTextRunnable(
     /* [in] */ TextView* textView)
 {
-    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)textView->Probe(EIID_IWeakReferenceSource);
+    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)textView;
     wrs->GetWeakReference((IWeakReference**)&mTextView);
 }
 
@@ -1090,9 +1090,9 @@ static AutoPtr<ArrayOf<Int32> > InitMULTILINE_STATE_SET()
 
 static AutoPtr<IBoringLayoutMetrics> InitUNKNOWN_BORING()
 {
-    AutoPtr<CBoringLayoutMetrics> metrics;
-    CBoringLayoutMetrics::NewByFriend((CBoringLayoutMetrics**)&metrics);
-    return (IBoringLayoutMetrics*)metrics.Get();
+    AutoPtr<IBoringLayoutMetrics> metrics;
+    CBoringLayoutMetrics::New((IBoringLayoutMetrics**)&metrics);
+    return metrics;
 }
 
 const char* TextView::TEXT_VIEW_TAG = "TextView";
@@ -4468,7 +4468,7 @@ AutoPtr<IParcelable> TextView::OnSaveInstanceState()
 
         GetError((ICharSequence**)&(ss->mError));
 
-        return (IParcelable*)ss->Probe(EIID_IParcelable);
+        return IParcelable::Probe(ss);
     }
 
     return superState;
@@ -5504,7 +5504,7 @@ ECode TextView::SetFilters(
             }
 
             if (keyFilter) {
-                newFilters->Set(filters->GetLength() + num, (IInputFilter*)IInputFilter::Probe(editor->mKeyListener));
+                newFilters->Set(filters->GetLength() + num, IInputFilter::Probe(editor->mKeyListener));
             }
 
             e->SetFilters(newFilters);
@@ -9454,7 +9454,7 @@ ECode TextView::OnGenericMotionEvent(
 {
     VALIDATE_NOT_NULL(res)
     if (mMovement != NULL && ISpannable::Probe(mText) && mLayout != NULL) {
-        AutoPtr<ISpannable> spannable = (ISpannable*)ISpannable::Probe(mText);
+        AutoPtr<ISpannable> spannable = ISpannable::Probe(mText);
 //        try {
         Boolean result;
         ECode ec = mMovement->OnGenericMotionEvent(this, spannable, event, &result);

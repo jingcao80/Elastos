@@ -411,7 +411,7 @@ AutoPtr<SpellCheckerService::SentenceLevelAdapter::SentenceTextInfoParams> Spell
             AutoPtr<ITextInfo> ti;
             CTextInfo::New(query, 0, queryLength, cookie, queryHashcode, (ITextInfo**)&ti);
             AutoPtr<SentenceWordItem> swi = new SentenceWordItem(ti, wordStart, wordEnd);
-            AutoPtr<IInterface> _swi = IInterface::Probe((IObject*)swi);
+            AutoPtr<IInterface> _swi = (IObject*)swi;
             wordItems->Add(_swi);
             if (SpellCheckerService::DBG) {
                 Int32 size;

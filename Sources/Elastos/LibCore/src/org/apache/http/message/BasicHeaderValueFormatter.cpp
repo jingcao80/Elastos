@@ -14,9 +14,9 @@ namespace Message {
 
 static AutoPtr<IBasicHeaderValueFormatter> InitDefault()
 {
-    AutoPtr<CBasicHeaderValueFormatter> formatter;
-    CBasicHeaderValueFormatter::NewByFriend((CBasicHeaderValueFormatter**)&formatter);
-    return (IBasicHeaderValueFormatter*)formatter.Get();
+    AutoPtr<IBasicHeaderValueFormatter> formatter;
+    CBasicHeaderValueFormatter::New((IBasicHeaderValueFormatter**)&formatter);
+    return formatter;
 }
 const AutoPtr<IBasicHeaderValueFormatter> BasicHeaderValueFormatter::DEFAULT = InitDefault();
 

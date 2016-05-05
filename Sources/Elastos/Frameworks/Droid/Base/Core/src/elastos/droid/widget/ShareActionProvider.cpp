@@ -47,7 +47,7 @@ ECode ShareActionProvider::ShareActivityChooserModelPolicy::OnChooseActivity(
     VALIDATE_NOT_NULL(res)
     if (mHost->mOnShareTargetSelectedListener != NULL) {
         return mHost->mOnShareTargetSelectedListener->OnShareTargetSelected(
-                (IShareActionProvider*)mHost->Probe(EIID_IShareActionProvider), intent, res);
+            (IShareActionProvider*)mHost, intent, res);
     }
     *res = FALSE;
     return NOERROR;

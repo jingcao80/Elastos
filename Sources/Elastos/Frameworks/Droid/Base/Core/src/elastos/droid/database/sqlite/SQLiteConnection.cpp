@@ -1993,7 +1993,7 @@ ECode SQLiteConnection::ExecuteForCursorWindow(
     //try {
     Int64 _result;
     ec = NativeExecuteForCursorWindow(mConnectionPtr, statement->mStatementPtr,
-            ((CCursorWindow*)(ICursorWindow*)window)->mWindowPtr, startPos, requiredPos, countAllRows, &_result);
+            ((CCursorWindow*)window)->mWindowPtr, startPos, requiredPos, countAllRows, &_result);
     if (FAILED(ec)) {
         DetachCancellationSignal(cancellationSignal);
         goto fail;

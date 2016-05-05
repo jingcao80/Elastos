@@ -150,7 +150,7 @@ ECode AnimatedVectorDrawable::GetConstantState(
 {
     VALIDATE_NOT_NULL(state);
     GetChangingConfigurations(&mAnimatedVectorState->mChangingConfigurations);
-    *state = (IDrawableConstantState*)mAnimatedVectorState->Probe(EIID_IDrawableConstantState);
+    *state = IDrawableConstantState::Probe(mAnimatedVectorState);
     REFCOUNT_ADD(*state);
     return NOERROR;
 }

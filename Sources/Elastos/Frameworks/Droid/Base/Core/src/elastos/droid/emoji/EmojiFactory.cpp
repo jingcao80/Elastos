@@ -144,9 +144,8 @@ ECode EmojiFactory::GetBitmapFromAndroidPua(
 
     if (bm == NULL) {
         AutoPtr<IBitmap> ret;
-
         ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
-        mCache->Put(I32, (IInterface*)ret);
+        mCache->Put(I32, ret.Get());
     }
 
     *retBitmap = bm;

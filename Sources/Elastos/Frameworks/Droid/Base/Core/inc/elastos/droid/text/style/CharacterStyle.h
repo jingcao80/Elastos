@@ -58,7 +58,7 @@ public:
  */
 //static
 class CharacterStylePassthrough
-    : CharacterStyle
+    : public CharacterStyle
 {
 public:
     /**

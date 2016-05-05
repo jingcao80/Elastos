@@ -30,7 +30,7 @@ ECode PermissionInfo::constructor(
     /* [in] */ IPermissionInfo* orig)
 {
     VALIDATE_NOT_NULL(orig)
-    PackageItemInfo::constructor((IPackageItemInfo*)orig);
+    PackageItemInfo::constructor(IPackageItemInfo::Probe(orig));
     orig->GetProtectionLevel(&mProtectionLevel);
     orig->GetGroup(&mGroup);
     orig->GetFlags(&mFlags);

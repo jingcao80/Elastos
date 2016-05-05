@@ -175,7 +175,7 @@ AutoPtr<IDisplayManagerGlobal> DisplayManagerGlobal::GetInstance()
             AutoPtr<IInterface> service = ServiceManager::GetService(IContext::DISPLAY_SERVICE);
             if (service != NULL) {
                 AutoPtr<IIDisplayManager> idm = IIDisplayManager::Probe(service);
-                sInstance = (IDisplayManagerGlobal*)new DisplayManagerGlobal(idm);
+                sInstance = new DisplayManagerGlobal(idm);
             }
             else {
                 Logger::E(TAG, "GetInstance() failed to get service %s", IContext::DISPLAY_SERVICE.string());

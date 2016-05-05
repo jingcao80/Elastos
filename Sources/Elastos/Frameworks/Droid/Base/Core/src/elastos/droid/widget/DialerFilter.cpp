@@ -81,7 +81,7 @@ ECode DialerFilter::OnFinishInflate()
     AutoPtr<ITextKeyListener> textKeyListener;
     textKeyListenerHelper->GetInstance((ITextKeyListener**)&textKeyListener);
     AutoPtr<IKeyListener> keyListener;
-    keyListener = (IKeyListener*)textKeyListener->Probe(EIID_IKeyListener);
+    keyListener = IKeyListener::Probe(textKeyListener);
     if(keyListener == NULL){
         // assert(0 && "keyListener is not null");
         return E_ILLEGAL_STATE_EXCEPTION;
@@ -104,7 +104,7 @@ ECode DialerFilter::OnFinishInflate()
     AutoPtr<IDialerKeyListener> dialerKeyListener;
     dialerKeyListenerHelper->GetInstance((IDialerKeyListener**)&dialerKeyListener);
     AutoPtr<IKeyListener> keyListener1;
-    keyListener1 = (IKeyListener*)dialerKeyListener->Probe(EIID_IKeyListener);
+    keyListener1 = IKeyListener::Probe(dialerKeyListener);
     if(keyListener1 == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -157,8 +157,8 @@ ECode DialerFilter::OnKeyDown(
     Boolean keyEventResult = FALSE;
     AutoPtr<IKeyEventHelper> keyEventHelper;
 
-    IKeyEventCallback* mLettersCallback = (IKeyEventCallback*)mLetters->Probe(EIID_IKeyEventCallback);
-    IKeyEventCallback* mDigitsCallback = (IKeyEventCallback*)mDigits->Probe(EIID_IKeyEventCallback);
+    IKeyEventCallback* mLettersCallback = IKeyEventCallback::Probe(mLetters);
+    IKeyEventCallback* mDigitsCallback = IKeyEventCallback::Probe(mDigits);
     if (mLettersCallback == NULL || mDigitsCallback == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -279,8 +279,8 @@ ECode DialerFilter::OnKeyUp(
 {
     VALIDATE_NOT_NULL(result)
 
-    IKeyEventCallback* mLettersCallback = (IKeyEventCallback*)mLetters->Probe(EIID_IKeyEventCallback);
-    IKeyEventCallback* mDigitsCallback = (IKeyEventCallback*)mDigits->Probe(EIID_IKeyEventCallback);
+    IKeyEventCallback* mLettersCallback = IKeyEventCallback::Probe(mLetters);
+    IKeyEventCallback* mDigitsCallback = IKeyEventCallback::Probe(mDigits);
     if (mLettersCallback == NULL || mDigitsCallback == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -466,16 +466,16 @@ ECode DialerFilter::Append(
 
     switch (mMode) {
         case DIGITS_AND_LETTERS:
-            ITextView::Probe(mDigits)->Append((ICharSequence*)csq);
-            ITextView::Probe(mLetters)->Append((ICharSequence*)csq);
+            ITextView::Probe(mDigits)->Append(csq);
+            ITextView::Probe(mLetters)->Append(csq);
             break;
         case DIGITS_AND_LETTERS_NO_LETTERS:
         case DIGITS_ONLY:
-            ITextView::Probe(mDigits)->Append((ICharSequence*)csq);
+            ITextView::Probe(mDigits)->Append(csq);
             break;
         case DIGITS_AND_LETTERS_NO_DIGITS:
         case LETTERS_ONLY:
-            ITextView::Probe(mLetters)->Append((ICharSequence*)csq);
+            ITextView::Probe(mLetters)->Append(csq);
             break;
     }
     return NOERROR;

@@ -311,7 +311,7 @@ ECode Gesture::ToBitmap(
     ToPath((IPath**)&path);
     AutoPtr<IRectF> bounds;
     CRectF::New((IRectF**)&bounds);
-    path->ComputeBounds((IRectF*)bounds, TRUE);
+    path->ComputeBounds(bounds, TRUE);
 
     Float w, h;
     bounds->GetWidth(&w);
@@ -367,9 +367,8 @@ ECode Gesture::WriteToParcel(
     AutoPtr<IByteArrayOutputStream> byteStream;
     CByteArrayOutputStream::New(GestureConstants::IO_BUFFER_SIZE, (IByteArrayOutputStream**)&byteStream);
     AutoPtr<IDataOutputStream> outStream;
-    AutoPtr<IOutputStream> os;
-    os = IOutputStream::Probe(byteStream);
-    CDataOutputStream::New((IOutputStream *)os, (IDataOutputStream**)&outStream);
+    AutoPtr<IOutputStream> os = IOutputStream::Probe(byteStream);
+    CDataOutputStream::New(os, (IDataOutputStream**)&outStream);
 
     ECode ec = Serialize(outStream);
     if (FAILED(ec))

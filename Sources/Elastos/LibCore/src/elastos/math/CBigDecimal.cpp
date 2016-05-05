@@ -547,10 +547,10 @@ ECode CBigDecimal::AddAndMult10(
     else {
         AutoPtr<IBigInteger> iabi = augend->GetUnscaledValue();
         AutoPtr<IBigInteger> itbi = thisValue->GetUnscaledValue();
-        CBigInteger* tbi = (CBigInteger*)(IBigInteger*)itbi;
+        CBigInteger* tbi = (CBigInteger*)itbi.Get();
         AutoPtr<IBigInteger> mbi;
         FAIL_RETURN(Multiplication::MultiplyByTenPow(iabi, diffScale, (IBigInteger**)&mbi));
-        AutoPtr<BigInt> bi = ((CBigInteger*)(IBigInteger*)mbi)->GetBigInt();
+        AutoPtr<BigInt> bi = ((CBigInteger*)mbi.Get())->GetBigInt();
         bi->Add(*tbi->GetBigInt());
 
         AutoPtr<IBigInteger> rbi;
@@ -899,8 +899,8 @@ ECode CBigDecimal::Divide(
     }
 
     return DivideBigIntegers(
-            (CBigInteger*)(IBigInteger*)scaledDividend,
-            (CBigInteger*)(IBigInteger*)scaledDivisor,
+            (CBigInteger*)scaledDividend.Get(),
+            (CBigInteger*)scaledDivisor.Get(),
             scale, roundingMode, result);
 }
 
@@ -962,7 +962,7 @@ ECode CBigDecimal::DivideBigIntegers(
 
         // To check if the discarded fraction >= 0.5
         IComparable* comp = (IComparable*)shiftBI->Probe(EIID_IComparable);
-        comp->CompareTo((IBigInteger*)divisorAbsBI, &compRem);
+        comp->CompareTo(divisorAbsBI.Get(), &compRem);
 
         Boolean testBit;
         quotient->TestBit(0, &testBit);
@@ -1415,7 +1415,7 @@ ECode CBigDecimal::DivideToIntegralValue(
 
             // Log10(r) + ((s2 - s1) - exp) > mc->GetPrecision ?
             Int32 tempPre = 0;
-            ((CBigDecimal*)(IBigDecimal*)tempBD)->GetPrecision(&tempPre);
+            ((CBigDecimal*)tempBD.Get())->GetPrecision(&tempPre);
             compRemDiv = tempPre + exp - divPre;
             if (compRemDiv == 0) {
                 pBI = mBI = NULL;
@@ -1484,7 +1484,7 @@ ECode CBigDecimal::DivideToIntegralValue(
     Int32 iScale = 0;
     FAIL_RETURN(SafeLongToInt(newScale, &iScale));
 
-    CBigDecimal* bd = (CBigDecimal*)(IBigDecimal*)integralValue;
+    CBigDecimal* bd = (CBigDecimal*)integralValue.Get();
     bd->mScale = iScale;
     bd->SetUnscaledValue(strippedBI);
     *result = integralValue;
@@ -1673,8 +1673,8 @@ ECode CBigDecimal::Pow(
     }
 
     // The final value is rounded to the destination precision
-    FAIL_RETURN(((CBigDecimal*)(IBigDecimal*)accum)->InplaceRound(mc));
-    *result = (IBigDecimal*)accum;
+    FAIL_RETURN(((CBigDecimal*)accum.Get())->InplaceRound(mc));
+    *result = accum;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -1878,8 +1878,8 @@ ECode CBigDecimal::SetScale(
     AutoPtr<IBigInteger> mbi;
     FAIL_RETURN(Multiplication::PowerOf10(-diffScale, (IBigInteger**)&mbi));
     return DivideBigIntegers(
-            (CBigInteger*)(IBigInteger*)tubi,
-            (CBigInteger*)(IBigInteger*)mbi,
+            (CBigInteger*)tubi.Get(),
+            (CBigInteger*)mbi.Get(),
             newScale, roundingMode, result);
 }
 
@@ -2465,7 +2465,7 @@ ECode CBigDecimal::Int64Value(
     else {
         AutoPtr<IBigInteger> bi;
         ToBigInteger((IBigInteger**)&bi);
-        INumber* number = (INumber*)bi->Probe(EIID_INumber);
+        INumber* number = INumber::Probe(bi);
         return number->Int64Value(result);
     }
 }
@@ -2513,7 +2513,7 @@ ECode CBigDecimal::Int32Value(
     else {
         AutoPtr<IBigInteger> bi;
         ToBigInteger((IBigInteger**)&bi);
-        INumber* number = (INumber*)bi->Probe(EIID_INumber);
+        INumber* number = INumber::Probe(bi);
         return number->Int32Value(result);
     }
 }
@@ -2543,7 +2543,7 @@ ECode CBigDecimal::Int16Value(
     else {
         AutoPtr<IBigInteger> bi;
         ToBigInteger((IBigInteger**)&bi);
-        INumber* number = (INumber*)bi->Probe(EIID_INumber);
+        INumber* number = INumber::Probe(bi);
         return number->Int16Value(result);
     }
 }
@@ -2572,7 +2572,7 @@ ECode CBigDecimal::ByteValue(
     else {
         AutoPtr<IBigInteger> bi;
         ToBigInteger((IBigInteger**)&bi);
-        INumber* number = (INumber*)bi->Probe(EIID_INumber);
+        INumber* number = INumber::Probe(bi);
         return number->ByteValue(result);
     }
 

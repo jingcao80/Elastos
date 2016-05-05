@@ -46,8 +46,7 @@ AnimatedRotateDrawable::AnimatedRotateState::AnimatedRotateState(
         else {
             state->NewDrawable((IDrawable**)&mDrawable);
         }
-        mDrawable->SetCallback(
-            owner != NULL ? (IDrawableCallback*)owner->Probe(EIID_IDrawableCallback) : NULL);
+        mDrawable->SetCallback(IDrawableCallback::Probe(owner));
 
         Int32 value = 0;
         orig->mDrawable->GetLayoutDirection(&value);

@@ -40,7 +40,7 @@ ECode BluetoothHeadset::ServiceConnection::OnServiceConnected(
     mHost->mService = IIBluetoothHeadset::Probe(service);
 
     if (mHost->mServiceListener != NULL) {
-        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::HEADSET, (IBluetoothProfile*)mHost);
+        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::HEADSET, mHost);
     }
     return NOERROR;
 }

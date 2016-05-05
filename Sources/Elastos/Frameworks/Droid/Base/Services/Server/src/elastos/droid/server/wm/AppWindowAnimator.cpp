@@ -62,7 +62,7 @@ AppWindowAnimator::AppWindowAnimator(
     , mThumbnailForceAboveLayer(0)
     , mDeferThumbnailDestruction(FALSE)
 {
-    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)atoken->Probe(EIID_IWeakReferenceSource);
+    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)atoken;
     assert(wrs != NULL);
     wrs->GetWeakReference((IWeakReference**)&mWeakAppToken);
 

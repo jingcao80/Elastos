@@ -34,11 +34,9 @@ static AutoPtr<ITimeZone> CreateSimpleTimeZone(
     /* [in] */ Int32 offset,
     /* [in] */ const char* name)
 {
-    AutoPtr<CSimpleTimeZone> ctz;
-    CSimpleTimeZone::NewByFriend(offset, String(name), (CSimpleTimeZone**)&ctz);
-    assert(ctz != NULL && " Failed to CreateSimpleTimeZone");
-    AutoPtr<ITimeZone> tz = (ITimeZone*)ctz;
-    return tz;
+    AutoPtr<ITimeZone> ctz;
+    CSimpleTimeZone::New(offset, String(name), (ITimeZone**)&ctz);
+    return ctz;
 }
 
 static AutoPtr<IPattern> CreatePattern(

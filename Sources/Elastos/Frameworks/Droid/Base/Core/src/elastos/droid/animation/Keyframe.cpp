@@ -170,6 +170,7 @@ ECode ObjectKeyframe::SetValue(
 ECode ObjectKeyframe::Clone(
     /* [out] */ IInterface** object)
 {
+    VALIDATE_NOT_NULL(object)
     Boolean has = FALSE;
     AutoPtr<ObjectKeyframe> kfClone = new ObjectKeyframe(mFraction, (HasValue(&has), has) ? mValue : NULL);
     kfClone->mValueWasSetOnStart = mValueWasSetOnStart;
@@ -177,7 +178,7 @@ ECode ObjectKeyframe::Clone(
     GetInterpolator((ITimeInterpolator**)&ti);
     kfClone->SetInterpolator(ti);
 
-    *object = (IKeyframe*)kfClone->Probe(EIID_IKeyframe);
+    *object = (IKeyframe*)kfClone.Get();
     REFCOUNT_ADD(*object);
     return NOERROR;
 }

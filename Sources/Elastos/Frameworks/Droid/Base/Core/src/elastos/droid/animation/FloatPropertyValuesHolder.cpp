@@ -90,7 +90,7 @@ ECode FloatPropertyValuesHolder::Clone(
     v->mJniSetter = mJniSetter;
     v->mFloatKeyframes = mFloatKeyframes;
     v->mFloatAnimatedValue = mFloatAnimatedValue;
-    *holder = (IFloatPropertyValuesHolder*)v->Probe(EIID_IFloatPropertyValuesHolder);
+    *holder = (IFloatPropertyValuesHolder*)v.Get();
     REFCOUNT_ADD(*holder);
 
     return NOERROR;

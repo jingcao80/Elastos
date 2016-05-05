@@ -289,37 +289,37 @@ Boolean CTimedText::ParseParcel(
             case KEY_STRUCT_STYLE_LIST:
             {
                 ReadStyle(parcel);
-                object = (IInterface*)mStyleList.Get();
+                object = mStyleList.Get();
                 break;
             }
             case KEY_STRUCT_FONT_LIST:
             {
                 ReadFont(parcel);
-                object = (IInterface*)mFontList.Get();
+                object = mFontList.Get();
                 break;
             }
             case KEY_STRUCT_HIGHLIGHT_LIST:
             {
                 ReadHighlight(parcel);
-                object = (IInterface*)mHighlightPosList.Get();
+                object = mHighlightPosList.Get();
                 break;
             }
             case KEY_STRUCT_KARAOKE_LIST:
             {
                 ReadKaraoke(parcel);
-                object = (IInterface*)mKaraokeList.Get();
+                object = mKaraokeList.Get();
                 break;
             }
             case KEY_STRUCT_HYPER_TEXT_LIST:
             {
                 ReadHyperText(parcel);
-                object = (IInterface*)mHyperTextList.Get();
+                object = mHyperTextList.Get();
                 break;
             }
             case KEY_STRUCT_BLINKING_TEXT_LIST:
             {
                 ReadBlinkingText(parcel);
-                object = (IInterface*)mBlinkingPosList.Get();
+                object = mBlinkingPosList.Get();
                 break;
             }
             case KEY_WRAP_TEXT:

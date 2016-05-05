@@ -31,9 +31,9 @@ static const String TAG("NumberFormat");
 
 static AutoPtr<INumberFormatField> InitField(const String& name)
 {
-     AutoPtr<CNumberFormatField> field;
-     CNumberFormatField::NewByFriend(name, (CNumberFormatField**)&field);
-     return (INumberFormatField*)field.Get();
+     AutoPtr<INumberFormatField> field;
+     CNumberFormatField::New(name, (INumberFormatField**)&field);
+     return field;
 }
 
 const AutoPtr<INumberFormatField> NumberFormat::Field::SIGN = InitField(String("sign"));
@@ -480,16 +480,16 @@ ECode NumberFormat::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (IDateFormat::Probe(object) == this->Probe(EIID_IDateFormat)) {
+    AutoPtr<INumberFormat> obj = INumberFormat::Probe(object);
+    if (obj == (INumberFormat*)this) {
         *result = TRUE;
         return NOERROR;
     }
-    if (object->Probe(EIID_INumberFormat) == NULL) {
+    if (obj == NULL) {
         *result = FALSE;
         return NOERROR;
     }
 
-    AutoPtr<INumberFormat> obj = (INumberFormat*)object;
     Boolean gu, pio;
     obj->IsGroupingUsed(&gu);
     obj->IsParseIntegerOnly(&pio);

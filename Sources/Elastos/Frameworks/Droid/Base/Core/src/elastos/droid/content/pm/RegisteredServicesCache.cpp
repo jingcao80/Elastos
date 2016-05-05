@@ -256,8 +256,8 @@ ECode RegisteredServicesCache::constructor(
     mAttributesName = attributeName;
     mSerializerAndParser = serializerAndParser;
 
-    mPackageReceiver = (IBroadcastReceiver*)new RegisteredServicesCache::PackageReceiver(this);
-    mPackageReceiver = (IBroadcastReceiver*)new RegisteredServicesCache::ExternalReceiver(this);
+    mPackageReceiver = new RegisteredServicesCache::PackageReceiver(this);
+    mPackageReceiver = new RegisteredServicesCache::ExternalReceiver(this);
 
     AutoPtr<IEnvironment> env;
     CEnvironment::AcquireSingleton((IEnvironment**)&env);

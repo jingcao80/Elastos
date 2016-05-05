@@ -125,7 +125,7 @@ ECode LocationManager::ListenerTransport::OnProviderEnabled(
     msg->SetWhat(TYPE_PROVIDER_ENABLED);
     AutoPtr<IString> istr;
     CString::New(provider, (IString**)&istr);
-    msg->SetObj((IInterface*)istr);
+    msg->SetObj(istr.Get());
     Boolean result = FALSE;
     mListenerHandler->SendMessage(msg, &result);
     return NOERROR;
@@ -138,7 +138,7 @@ LocationManager::ListenerTransport::OnProviderDisabled(
     msg->SetWhat(TYPE_PROVIDER_DISABLED);
     AutoPtr<IString> istr;
     CString::New(provider, (IString**)&istr);
-    msg->SetObj((IInterface*)istr);
+    msg->SetObj(istr.Get());
     Boolean result = FALSE;
     mListenerHandler->SendMessage(msg, &result);
     return NOERROR;

@@ -96,7 +96,7 @@ ECode CThemeChangeListener::constructor(
 ECode CThemeChangeListener::OnProgress(
     /* [in] */ Int32 progress)
 {
-    AutoPtr<IRunnable> runnable = (IRunnable*)new OnProgressRunnable(progress, mHost);
+    AutoPtr<IRunnable> runnable = new OnProgressRunnable(progress, mHost);
     Boolean result;
     return mHost->mHandler->Post(runnable, &result);
 }
@@ -104,7 +104,7 @@ ECode CThemeChangeListener::OnProgress(
 ECode CThemeChangeListener::OnFinish(
     /* [in] */ Boolean isSuccess)
 {
-    AutoPtr<IRunnable> runnable = (IRunnable*)new OnFinishRunnable(isSuccess, mHost);
+    AutoPtr<IRunnable> runnable = new OnFinishRunnable(isSuccess, mHost);
     Boolean result;
     return mHost->mHandler->Post(runnable, &result);
 }

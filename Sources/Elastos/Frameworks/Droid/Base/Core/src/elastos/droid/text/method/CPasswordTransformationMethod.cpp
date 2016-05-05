@@ -268,10 +268,10 @@ ECode CPasswordTransformationMethod::GetInstance(
 {
     VALIDATE_NOT_NULL(ret);
     if (sInstance == NULL) {
-        CPasswordTransformationMethod::NewByFriend((CPasswordTransformationMethod**)&sInstance);
+        CPasswordTransformationMethod::New((IPasswordTransformationMethod**)&sInstance);
     }
 
-    *ret = (IPasswordTransformationMethod*)sInstance.Get();
+    *ret = sInstance;
     REFCOUNT_ADD(*ret);
     return NOERROR;
 }

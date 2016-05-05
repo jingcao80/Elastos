@@ -41,7 +41,7 @@ ScaleDrawable::ScaleState::ScaleState(
         else {
             state->NewDrawable((IDrawable**)&mDrawable);
         }
-        mDrawable->SetCallback((IDrawableCallback*)owner->Probe(EIID_IDrawableCallback));
+        mDrawable->SetCallback((IDrawableCallback*)owner);
         mScaleWidth = orig->mScaleWidth;
         mScaleHeight = orig->mScaleHeight;
         mGravity = orig->mGravity;

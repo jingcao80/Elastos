@@ -51,8 +51,8 @@ ECode CInputBindResult::ReadFromParcel(
 ECode CInputBindResult::WriteToParcel(
     /* [in] */ IParcel *dest)
 {
-    dest->WriteInterfacePtr((IInterface*)mMethod.Get());
-    dest->WriteInterfacePtr((IInterface*)mChannel.Get());
+    dest->WriteInterfacePtr(mMethod.Get());
+    dest->WriteInterfacePtr(mChannel.Get());
     dest->WriteString(mId);
     dest->WriteInt32(mSequence);
     dest->WriteInt32(mUserActionNotificationSequenceNumber);

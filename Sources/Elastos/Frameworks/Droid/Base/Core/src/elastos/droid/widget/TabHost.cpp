@@ -391,7 +391,7 @@ ECode TabHost::IntentContentStrategy::GetContentView(
     if (mLaunchedView != NULL) {
         mLaunchedView->SetVisibility(IView::VISIBLE);
         mLaunchedView->SetFocusableInTouchMode(TRUE);
-        IViewGroup* vg = (IViewGroup*)mLaunchedView->Probe(EIID_IViewGroup);
+        IViewGroup* vg = IViewGroup::Probe(mLaunchedView);
         if (vg) {
             vg->SetDescendantFocusability(IViewGroup::FOCUS_AFTER_DESCENDANTS);
         }

@@ -80,7 +80,7 @@ ECode HdmiControlManager::GetClient(
             if (mHasTvDevice) {
                 AutoPtr<HdmiClient> obj = new HdmiTvClient();
                 obj->constructor(mService);
-                *client = (IHdmiClient*)obj.Get();
+                *client = obj.Get();
                 REFCOUNT_ADD(*client);
                 return NOERROR;
             }
@@ -94,7 +94,7 @@ ECode HdmiControlManager::GetClient(
             if (mHasPlaybackDevice) {
                 AutoPtr<HdmiClient> obj = new HdmiPlaybackClient();
                 obj->constructor(mService);
-                *client = (IHdmiClient*)obj.Get();
+                *client = obj.Get();
                 REFCOUNT_ADD(*client);
                 return NOERROR;
             }

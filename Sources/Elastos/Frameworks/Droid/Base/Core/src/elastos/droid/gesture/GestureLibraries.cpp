@@ -19,7 +19,7 @@ AutoPtr<IGestureLibrary> GestureLibraries::FromFile(
 {
     AutoPtr<IFile> file;
     CFile::New(path, (IFile**)&file);
-    return FromFile((IFile*)file);
+    return FromFile(file);
 }
 
 AutoPtr<IGestureLibrary> GestureLibraries::FromFile(

@@ -1873,10 +1873,9 @@ ECode LockPatternUtils::GetPowerButtonInstantlyLocks(
 Boolean LockPatternUtils::IsSafeModeEnabled()
 {
     AutoPtr<IInterface> window = ServiceManager::GetService(String("window"));
-    AutoPtr<IIWindowManager> manager = (IIWindowManager*)window->Probe(EIID_IIWindowManager);
+    AutoPtr<IIWindowManager> manager = IIWindowManager::Probe(window);
     Boolean result = FALSE;
-    if(manager)
-    {
+    if(manager) {
         manager->IsSafeModeEnabled(&result);
     }
     return result;

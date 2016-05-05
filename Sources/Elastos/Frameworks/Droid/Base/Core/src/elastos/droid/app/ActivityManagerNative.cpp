@@ -19,8 +19,8 @@ Boolean ActivityManagerNative::sSystemReady = FALSE;
 
 AutoPtr<IIActivityManager> ActivityManagerNative::GetDefault()
 {
-    AutoPtr<IIActivityManager> service =
-            (IIActivityManager*)ServiceManager::GetService(IContext::ACTIVITY_SERVICE).Get();
+    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::ACTIVITY_SERVICE);
+    AutoPtr<IIActivityManager> service = IIActivityManager::Probe(obj);
     if (service == NULL) {
         Logger::W("ActivityManagerNative", "GetDefault(): %s service not ready yet.", IContext::ACTIVITY_SERVICE.string());
     }

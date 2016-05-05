@@ -370,8 +370,7 @@ ECode CCalendarContractEventsEntity::NewEntityIterator(
 
     AutoPtr<EntityIteratorImpl> impl = new EntityIteratorImpl();
     impl->constructor(cursor, resolver);
-    AutoPtr<ICursorEntityIterator> obj = (ICursorEntityIterator*)impl;
-    *iterator = IEntityIterator::Probe(impl);
+    *iterator = (IEntityIterator*)impl.Get();
     REFCOUNT_ADD(*iterator);
     return NOERROR;
 }
@@ -385,9 +384,7 @@ ECode CCalendarContractEventsEntity::NewEntityIterator(
 
     AutoPtr<EntityIteratorImpl> impl = new EntityIteratorImpl();
     impl->constructor(cursor, provider);
-
-    AutoPtr<ICursorEntityIterator> obj = (ICursorEntityIterator*)impl;
-    *iterator = IEntityIterator::Probe(impl);
+    *iterator = (IEntityIterator*)impl.Get();
     REFCOUNT_ADD(*iterator);
     return NOERROR;
 }

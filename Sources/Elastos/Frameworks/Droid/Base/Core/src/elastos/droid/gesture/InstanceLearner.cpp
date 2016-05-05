@@ -112,7 +112,7 @@ AutoPtr<IArrayList> InstanceLearner::Classify(
         AutoPtr<IPrediction> prediction;
         CPrediction::New(name, score, (IPrediction**)&prediction);
         Boolean result;
-        predictions->Add((IPrediction*)prediction, &result);
+        predictions->Add(prediction, &result);
     }
 
     AutoPtr<ICollections> collections;

@@ -1254,7 +1254,7 @@ ECode CMediaRouter::SelectRouteInt(
 ECode CMediaRouter::AddUserRoute(
     /* [in] */ IMediaRouterUserRouteInfo* info)
 {
-    return AddRouteStatic((IMediaRouterRouteInfo*)info);
+    return AddRouteStatic(IMediaRouterRouteInfo::Probe(info));
 }
 
 ECode CMediaRouter::AddRouteInt(

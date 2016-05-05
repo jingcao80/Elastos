@@ -17,6 +17,7 @@ namespace Animation {
 //                  AnimatorSet::DependencyListener
 //==============================================================================
 CAR_INTERFACE_IMPL_2(AnimatorSet::DependencyListener, Object, IDependencyListener, IAnimatorListener);
+
 AnimatorSet::DependencyListener::DependencyListener(
     /* [in] */ AnimatorSet* animatorset,
     /* [in] */ Node* node,
@@ -88,10 +89,12 @@ void AnimatorSet::DependencyListener::StartIfReady(
 //                  AnimatorSet::AnimatorSetListener
 //==============================================================================
 CAR_INTERFACE_IMPL_2(AnimatorSet::AnimatorSetListener, Object, IAnimatorSetListener, IAnimatorListener);
+
 AnimatorSet::AnimatorSetListener::AnimatorSetListener(
     /* [in] */ AnimatorSet* animatorSet)
     : mAnimatorSet(animatorSet)
-{}
+{
+}
 
 ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
@@ -115,7 +118,7 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     // mAnimatorSet's reference may be released to 0 when (*itListeners)->OnAnimationEnd()
-    mAnimatorSet->Probe(EIID_IAnimatorSet)->AddRef();
+    mAnimatorSet->AddRef();
     animation->RemoveListener(this);
     mAnimatorSet->mPlayingSet.Remove(animation);
     AutoPtr<IAnimator> key = animation;
@@ -139,14 +142,14 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
             if (mAnimatorSet->mListeners.IsEmpty() == FALSE) {
                 List<AutoPtr<IAnimatorListener> >::Iterator itListeners = mAnimatorSet->mListeners.Begin();
                 for (; itListeners != mAnimatorSet->mListeners.End(); ++itListeners) {
-                    (*itListeners)->OnAnimationEnd((IAnimator*)(mAnimatorSet->Probe(EIID_IAnimator)));
+                    (*itListeners)->OnAnimationEnd(IAnimator::Probe(mAnimatorSet));
                 }
             }
             mAnimatorSet->mStarted = FALSE;
             mAnimatorSet->mPaused = FALSE;
         }
     }
-    mAnimatorSet->Probe(EIID_IAnimatorSet)->Release();
+    mAnimatorSet->Release();
     return NOERROR;
 }
 
@@ -217,7 +220,7 @@ ECode AnimatorSet::Node::Clone(
     newObject->mNodeDependencies.Assign(mNodeDependencies.Begin(), mNodeDependencies.End());
     newObject->mNodeDependents.Assign(mNodeDependents.Begin(), mNodeDependents.End());
     newObject->mDone = mDone;
-    *obj = (ICloneable*)newObject->Probe(EIID_ICloneable);
+    *obj = ICloneable::Probe(newObject);
     REFCOUNT_ADD(*obj);
     return NOERROR;
 }
@@ -272,6 +275,7 @@ ECode AnimatorSet::AnimatorListenerAdapterIMPL::OnAnimationRepeat(
 //                  AnimatorSet
 //==============================================================================
 CAR_INTERFACE_IMPL(AnimatorSet, Animator, IAnimatorSet);
+
 AnimatorSet::AnimatorSet()
     : mTerminated(FALSE)
     , mNeedsSort(TRUE)

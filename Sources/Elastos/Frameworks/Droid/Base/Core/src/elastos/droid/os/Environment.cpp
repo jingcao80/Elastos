@@ -111,9 +111,9 @@ String GetCanonicalPathOrNull(
 static AutoPtr<IUserEnvironment> InitCurrentUser()
 {
     Int32 userId = UserHandle::GetMyUserId();
-    AutoPtr<CUserEnvironment> ue;
-    CUserEnvironment::NewByFriend(userId, (CUserEnvironment**)&ue);
-    return (IUserEnvironment*)ue.Get();
+    AutoPtr<IUserEnvironment> ue;
+    CUserEnvironment::New(userId, (IUserEnvironment**)&ue);
+    return ue;
 }
 
 const AutoPtr<IFile> Environment::DIR_ANDROID_ROOT = GetDirectoryImpl(String("ANDROID_ROOT")/*ENV_ANDROID_ROOT*/, String("/system"));

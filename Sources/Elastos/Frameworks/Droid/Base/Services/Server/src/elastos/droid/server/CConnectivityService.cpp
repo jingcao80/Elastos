@@ -1339,8 +1339,7 @@ ECode CConnectivityService::constructor(
 
 Int32 CConnectivityService::NextNetworkRequestId()
 {
-    ISynchronize* syncObj = (ISynchronize*)Probe(EIID_ISynchronize);
-    AutoLock lock(syncObj);
+    AutoLock lock(this);
     return mNextNetworkRequestId++;
 }
 

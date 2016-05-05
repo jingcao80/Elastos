@@ -632,12 +632,12 @@ ECode URI::Create(
     VALIDATE_NOT_NULL(obj);
 
 //    try {
-    AutoPtr<CURI> outuri;
-    ECode ec = CURI::NewByFriend(uri, (CURI**)&outuri);
+    AutoPtr<IURI> outuri;
+    ECode ec = CURI::New(uri, (IURI**)&outuri);
     if (ec == (ECode)E_URI_SYNTAX_EXCEPTION) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    *obj = (IURI*)outuri.Get();
+    *obj = outuri;
     REFCOUNT_ADD(*obj)
     return ec;
 //    } catch (URISyntaxException e) {

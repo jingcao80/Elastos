@@ -26,7 +26,7 @@ ECode CRoundRectShape::Clone(
     AutoPtr<IRoundRectShape> s;
     CRoundRectShape::New(NULL, NULL, NULL, (IRoundRectShape**)&s);
     RoundRectShape::CloneImpl(s);
-    *shape = (IShape*)s.Get();
+    *shape = IShape::Probe(s);
     REFCOUNT_ADD(*shape);
     return NOERROR;
 }

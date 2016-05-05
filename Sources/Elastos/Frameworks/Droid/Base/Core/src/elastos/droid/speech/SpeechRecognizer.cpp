@@ -100,7 +100,7 @@ ECode SpeechRecognizer::SpeechRecognizerConnection::OnServiceConnected(
     /* [in] */ IBinder* service)
 {
     // always done on the application main thread, so no need to send message to mHandler
-    mHost->mService = (IIRecognitionService*)service;
+    mHost->mService = (IIRecognitionService*)service->Probe(EIID_IIRecognitionService);
     if (mHost->DBG) {
         Logger::D(TAG, String("onServiceConnected - Success\n"));
     }

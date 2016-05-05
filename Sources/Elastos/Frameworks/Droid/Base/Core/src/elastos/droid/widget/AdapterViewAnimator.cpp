@@ -928,13 +928,13 @@ void AdapterViewAnimator::ShowOnly(
                     viewGroupTmp->AddView(newView);
                 }
 
-                AutoPtr<ViewAndMetaData> source = new ViewAndMetaData((IView*)IView::Probe(fl), newRelativeIndex, adapterPosition, itemId);
+                AutoPtr<ViewAndMetaData> source = new ViewAndMetaData(IView::Probe(fl), newRelativeIndex, adapterPosition, itemId);
                 mViewsMap.Insert(HashMap<Int32, AutoPtr<ViewAndMetaData> >::ValueType(index, source));
 
                 IView* viewTmp = IView::Probe(fl);
                 AddChild(viewTmp);
                 ApplyTransformForChildAtIndex(viewTmp, newRelativeIndex);
-                TransformViewForTransition(-1, newRelativeIndex, (IView*)IView::Probe(fl), animate);
+                TransformViewForTransition(-1, newRelativeIndex, IView::Probe(fl), animate);
             }
 
             mViewsMap.Find(index)->mSecond->mView->BringToFront();

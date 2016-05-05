@@ -92,7 +92,7 @@ ECode MediaRouteActionProvider::constructor(
     mRouter = IMediaRouter::Probe(obj);
     AutoPtr<MediaRouterCallback> cb = new MediaRouterCallback();
     cb->constructor(this);
-    mCallback = (IMediaRouterCallback*)cb.Get();
+    mCallback = cb.Get();
 
     // Start with live audio by default.
     // TODO Update this when new route types are added; segment by API level

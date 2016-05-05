@@ -136,9 +136,9 @@ const Int32 AbsListView::PositionScroller::MOVE_OFFSET = 5;
 
 static AutoPtr<IInterpolator> InitInterpolator()
 {
-    AutoPtr<CLinearInterpolator> ator;
-    CLinearInterpolator::NewByFriend((CLinearInterpolator**)&ator);
-    return (IInterpolator*)ator.Get();
+    AutoPtr<IInterpolator> ator;
+    CLinearInterpolator::New((IInterpolator**)&ator);
+    return ator;
 }
 
 AutoPtr<IInterpolator> AbsListView::sLinearInterpolator = InitInterpolator();
@@ -3806,7 +3806,7 @@ AutoPtr<IParcelable> AbsListView::OnSaveInstanceState()
         ss->mCheckedItemCount = mPendingSync->mCheckedItemCount;
         ss->mCheckState = mPendingSync->mCheckState;
         ss->mCheckIdState = mPendingSync->mCheckIdState;
-        return (IParcelable*)ss->Probe(EIID_IParcelable);
+        return IParcelable::Probe(ss);
     }
 
     Int32 count;
@@ -3890,7 +3890,7 @@ AutoPtr<IParcelable> AbsListView::OnSaveInstanceState()
         mRemoteAdapter->SaveRemoteViewsCache();
     }
 
-    return (IParcelable*)ss->Probe(EIID_IParcelable);
+    return IParcelable::Probe(ss);
 }
 
 void AbsListView::OnRestoreInstanceState(

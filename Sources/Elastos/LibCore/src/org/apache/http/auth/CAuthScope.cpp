@@ -19,10 +19,10 @@ namespace Auth {
 
 static AutoPtr<IAuthScope> InitANY()
 {
-    AutoPtr<CAuthScope> scope;
-    CAuthScope::NewByFriend(String(NULL)/*IAuthScope::ANY_HOST*/, IAuthScope::ANY_PORT,
-            String(NULL)/*IAuthScope::ANY_REALM*/, String(NULL)/*IAuthScope::*/, (CAuthScope**)&scope);
-    return (IAuthScope*)scope.Get();
+    AutoPtr<IAuthScope> scope;
+    CAuthScope::New(String(NULL)/*IAuthScope::ANY_HOST*/, IAuthScope::ANY_PORT,
+            String(NULL)/*IAuthScope::ANY_REALM*/, String(NULL)/*IAuthScope::*/, (IAuthScope**)&scope);
+    return scope;
 }
 const AutoPtr<IAuthScope> CAuthScope::ANY = InitANY();
 

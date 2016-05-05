@@ -159,9 +159,9 @@ ECode CScheduledThreadPoolExecutor::ScheduledFutureTask::Run()
 //==========================================================
 static AutoPtr<IAtomicInteger64> InitmSequencer()
 {
-    AutoPtr<CAtomicInteger64> ai;
-    CAtomicInteger64::NewByFriend(1, (CAtomicInteger64**)&ai);
-    return (IAtomicInteger64*)ai.Get();
+    AutoPtr<IAtomicInteger64> ai;
+    CAtomicInteger64::New(1, (IAtomicInteger64**)&ai);
+    return ai;
 }
 
 const AutoPtr<IAtomicInteger64> CScheduledThreadPoolExecutor::mSequencer = InitmSequencer();

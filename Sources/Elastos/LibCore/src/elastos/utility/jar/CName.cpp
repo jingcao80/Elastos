@@ -8,9 +8,9 @@ namespace Jar {
 
 static AutoPtr<IName> CreateName(const String& str)
 {
-    AutoPtr<CName> name;
-    ASSERT_SUCCEEDED(CName::NewByFriend(str, (CName**)&name));
-    return (IName*)name.Get();
+    AutoPtr<IName> name;
+    ASSERT_SUCCEEDED(CName::New(str, (IName**)&name));
+    return name;
 }
 
 const AutoPtr<IName> CName::MANIFEST_VERSION = CreateName(String("Manifest-Version"));

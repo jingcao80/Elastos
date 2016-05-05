@@ -321,7 +321,7 @@ ECode Gallery::constructor(
 
     AutoPtr<DetectorOnGestureListener> listener = new DetectorOnGestureListener(this);
     FAIL_RETURN(CGestureDetector::New(context,
-        (IGestureDetectorOnGestureListener*)listener->Probe(EIID_IGestureDetectorOnGestureListener),
+        (IGestureDetectorOnGestureListener*)listener,
         (IGestureDetector**)&mGestureDetector));
     mGestureDetector->SetIsLongpressEnabled(TRUE);
 

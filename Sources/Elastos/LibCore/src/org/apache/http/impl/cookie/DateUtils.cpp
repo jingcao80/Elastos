@@ -47,9 +47,7 @@ AutoPtr<ISimpleDateFormat> DateUtils::DateFormatHolder::FormatFor(
     formats->Get(cs->Probe(EIID_IInterface), (IInterface**)&value);
     AutoPtr<ISimpleDateFormat> format = ISimpleDateFormat::Probe(value);
     if (format == NULL) {
-        AutoPtr<CSimpleDateFormat> sdf;
-        CSimpleDateFormat::NewByFriend(pattern, CLocale::US, (CSimpleDateFormat**)&sdf);
-        format = (ISimpleDateFormat*)sdf.Get();
+        CSimpleDateFormat::New(pattern, CLocale::US, (ISimpleDateFormat**)&format);
         AutoPtr<CTimeZoneHelper> helper;
         CTimeZoneHelper::AcquireSingletonByFriend((CTimeZoneHelper**)&helper);
         AutoPtr<ITimeZone> timeZone;

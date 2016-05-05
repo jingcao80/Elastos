@@ -615,6 +615,7 @@ module
                     [in] ArrayOf<String>* queryList);
 
                 interface IWifiP2pDnsSdServiceInfo;
+                interface IWifiP2pServiceInfo;
                 interface IParcelable;
             }
 
@@ -634,6 +635,7 @@ module
                     [in] Int32 versionNumber);
 
                 interface IWifiP2pDnsSdServiceRequest;
+                interface IWifiP2pServiceRequest;
                 interface IParcelable;
             }
 
@@ -652,6 +654,7 @@ module
                     [in] ArrayOf<Byte>* data);
 
                 interface IWifiP2pDnsSdServiceResponse;
+                interface IWifiP2pServiceResponse;
                 interface IParcelable;
             }
 
@@ -663,6 +666,7 @@ module
                     [in] ArrayOf<String>* queryList);
 
                 interface IWifiP2pUpnpServiceInfo;
+                interface IWifiP2pServiceInfo;
                 interface IParcelable;
             }
 
@@ -677,6 +681,7 @@ module
                 constructor();
 
                 interface IWifiP2pUpnpServiceRequest;
+                interface IWifiP2pServiceRequest;
                 interface IParcelable;
             }
 
@@ -695,6 +700,7 @@ module
                     [in] ArrayOf<Byte>* data);
 
                 interface IWifiP2pUpnpServiceResponse;
+                interface IWifiP2pServiceResponse;
                 interface IParcelable;
             }
         }

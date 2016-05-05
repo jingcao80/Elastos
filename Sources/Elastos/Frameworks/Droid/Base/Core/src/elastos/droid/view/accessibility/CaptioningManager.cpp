@@ -219,12 +219,12 @@ ECode CaptioningManager::CaptionStyle::ApplyStyle(
     if (!str.IsNull()) {
         newRawTypeface = str;
     }
-    AutoPtr<CCaptioningManagerCaptionStyle> styleObj;
-    CCaptioningManagerCaptionStyle::NewByFriend(newForegroundColor, newBackgroundColor,
-            newEdgeType, newEdgeColor, newWindowColor, newRawTypeface,
-            (CCaptioningManagerCaptionStyle**)&styleObj);
+    AutoPtr<ICaptioningManagerCaptionStyle> styleObj;
+    CCaptioningManagerCaptionStyle::New(newForegroundColor, newBackgroundColor,
+        newEdgeType, newEdgeColor, newWindowColor, newRawTypeface,
+        (ICaptioningManagerCaptionStyle**)&styleObj);
 
-    *style = (ICaptioningManagerCaptionStyle*)styleObj.Get();
+    *style = styleObj;
     REFCOUNT_ADD(*style);
     return NOERROR;
 }
@@ -315,12 +315,12 @@ ECode CaptioningManager::CaptionStyle::GetCustomStyle(
         defStyle->GetRawTypeface(&rawTypeface);
     }
 
-    AutoPtr<CCaptioningManagerCaptionStyle> styleObj;
-    CCaptioningManagerCaptionStyle::NewByFriend(foregroundColor, backgroundColor,
-            edgeType, edgeColor, windowColor, rawTypeface,
-            (CCaptioningManagerCaptionStyle**)&styleObj);
+    AutoPtr<ICaptioningManagerCaptionStyle> styleObj;
+    CCaptioningManagerCaptionStyle::New(foregroundColor, backgroundColor,
+        edgeType, edgeColor, windowColor, rawTypeface,
+        (ICaptioningManagerCaptionStyle**)&styleObj);
 
-    *style = (ICaptioningManagerCaptionStyle*)styleObj.Get();
+    *style = styleObj;
     REFCOUNT_ADD(*style);
     return NOERROR;
 }

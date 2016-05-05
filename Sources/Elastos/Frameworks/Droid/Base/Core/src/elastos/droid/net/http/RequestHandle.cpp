@@ -119,7 +119,7 @@ ECode RequestHandle::constructor(
 
     mRequestQueue = requestQueue;
     mRequest = (Request*)request;
-    AutoPtr<IHttpsConnection> httpsConn = (IHttpsConnection*)conn->Probe(EIID_IHttpsConnection);
+    AutoPtr<IHttpsConnection> httpsConn = IHttpsConnection::Probe(conn);
     if (httpsConn != NULL) {
          mConnection = (Connection*)(HttpsConnection*)conn;
     } else {

@@ -299,11 +299,7 @@ ECode PlainSocketImpl::GetInputStream(
 
     FAIL_RETURN(CheckNotClosed());
 
-    AutoPtr<CPlainSocketInputStream> inS;
-    FAIL_RETURN(CPlainSocketInputStream::NewByFriend(this, (CPlainSocketInputStream**)&inS));
-    *in = (IInputStream *)inS->Probe(EIID_IInputStream);
-    REFCOUNT_ADD(*in)
-    return NOERROR;
+    return CPlainSocketInputStream::New(this, (IInputStream**)&in);
 }
 
 ECode PlainSocketImpl::GetOption(
@@ -325,11 +321,7 @@ ECode PlainSocketImpl::GetOutputStream(
     VALIDATE_NOT_NULL(out)
 
     FAIL_RETURN(CheckNotClosed());
-    AutoPtr<CPlainSocketOutputStream> res;
-    CPlainSocketOutputStream::NewByFriend(this, (CPlainSocketOutputStream**)&res);
-    *out = (IOutputStream*) res->Probe(EIID_IOutputStream);
-    REFCOUNT_ADD(*out)
-    return NOERROR;
+    return CPlainSocketOutputStream::New(this, (IOutputStream**)&out);
 }
 
 ECode PlainSocketImpl::Listen(

@@ -448,9 +448,9 @@ private:
     /*const*/ AutoPtr<LinearLayout> mActivityChooserContent;
     /*const*/ AutoPtr<IDrawable> mActivityChooserContentBackground;
     /*const*/ AutoPtr<FrameLayout> mExpandActivityOverflowButton;
-    /*const*/ AutoPtr<ImageView> mExpandActivityOverflowButtonImage;
+    /*const*/ AutoPtr<IImageView> mExpandActivityOverflowButtonImage;
     /*const*/ AutoPtr<FrameLayout> mDefaultActivityButton;
-    /*const*/ AutoPtr<ImageView> mDefaultActivityButtonImage;
+    /*const*/ AutoPtr<IImageView> mDefaultActivityButtonImage;
     /*const*/ Int32 mListPopupMaxWidth;
     /*const*/ AutoPtr<IDataSetObserver> mModelDataSetOberver;
     /*const*/ AutoPtr<IOnGlobalLayoutListener> mOnGlobalLayoutListener;

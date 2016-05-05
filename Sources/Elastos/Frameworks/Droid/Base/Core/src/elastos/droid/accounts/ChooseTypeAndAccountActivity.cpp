@@ -416,9 +416,8 @@ void ChooseTypeAndAccountActivity::RunAddAccountForAuthenticator(
             (ArrayOf<String>**)&requiredFeatures);
     String authTokenType;
     intent->GetStringExtra(EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING, &authTokenType);
-    AutoPtr<IContext> ctx = (IContext*)Probe(Elastos::Droid::Content::EIID_IContext);
     AutoPtr<IAccountManager> accountManager;
-    ASSERT_SUCCEEDED(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
+    ASSERT_SUCCEEDED(CAccountManager::Get(this, (IAccountManager**)&accountManager));
     AutoPtr<IAccountManagerFuture> future;
     accountManager->AddAccount(type, authTokenType, requiredFeatures,
             options, NULL /* activity */, this /* callback */,
@@ -433,12 +432,11 @@ ECode ChooseTypeAndAccountActivity::Run(
     IBundle* accountManagerResult = IBundle::Probe(obj);
     AutoPtr<IParcelable> parcel;
     accountManagerResult->GetParcelable(IAccountManager::KEY_INTENT, (IParcelable**)&parcel);
-    AutoPtr<IIntent> intent = (IIntent*)parcel->Probe(Elastos::Droid::Content::EIID_IIntent);
+    AutoPtr<IIntent> intent = IIntent::Probe(parcel);
     if (intent != NULL) {
         mPendingRequest = REQUEST_ADD_ACCOUNT;
-        AutoPtr<IContext> ctx = (IContext*)Probe(Elastos::Droid::Content::EIID_IContext);
         AutoPtr<IAccountManager> accountManager;
-        ASSERT_SUCCEEDED(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
+        ASSERT_SUCCEEDED(CAccountManager::Get(this, (IAccountManager**)&accountManager));
         mExistingAccounts = NULL;
         AutoPtr<ArrayOf<IAccount*> > array;
         accountManager->GetAccountsForPackage(mCallingPackage,
@@ -701,8 +699,8 @@ void ChooseTypeAndAccountActivity::PopulateUIAccountList(
     IAdapterView::Probe(list)->SetAdapter(IAdapter::Probe(adapter));
     IAbsListView::Probe(list)->SetChoiceMode(IAbsListView::CHOICE_MODE_SINGLE);
     list->SetItemsCanFocus(FALSE);
-    IAdapterView::Probe(list)->SetOnItemClickListener(
-            (IAdapterViewOnItemClickListener*)new AdapterViewOnItemClickListener(this));
+    AutoPtr<AdapterViewOnItemClickListener> listener = new AdapterViewOnItemClickListener(this);
+    IAdapterView::Probe(list)->SetOnItemClickListener(listener);
     if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
         IAbsListView::Probe(list)->SetItemChecked(mSelectedItemIndex, TRUE);
         if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {

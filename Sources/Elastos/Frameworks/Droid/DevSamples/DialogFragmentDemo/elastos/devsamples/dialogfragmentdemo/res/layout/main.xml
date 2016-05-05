@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button android:id="@+id/ConfimDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="ConfimDialog" />
+
+    <Button android:id="@+id/EditDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="EditDialog" />
+
+    <Button android:id="@+id/LoginDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="LoginDialog" />
+
+    <Button android:id="@+id/DialogInDifferentScreen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="DialogInDifferentScreen" />
+
+    <Button android:id="@+id/LoginDialogWithoutFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="100dp"
+        android:text="LoginDialogWithoutFragment" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/id_ly">
+    </FrameLayout>
+</LinearLayout>

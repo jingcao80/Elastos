@@ -26,7 +26,7 @@ ECode CArcShape::Clone(
     AutoPtr<IArcShape> s;
     CArcShape::New(0, 0, (IArcShape**)&s);
     ArcShape::CloneImpl(s);
-    *shape = (IShape*)s.Get();
+    *shape = IShape::Probe(s);
     REFCOUNT_ADD(*shape);
     return NOERROR;
 }

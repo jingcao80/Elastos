@@ -125,12 +125,12 @@ ECode CSimpleTimeZone::Clone(
 {
     VALIDATE_NOT_NULL(newObj);
 
-    AutoPtr<CSimpleTimeZone> st;
-    FAIL_RETURN(CSimpleTimeZone::NewByFriend(mRawOffset, mID, (CSimpleTimeZone**)&st));
+    AutoPtr<ISimpleTimeZone> st;
+    FAIL_RETURN(CSimpleTimeZone::New(mRawOffset, mID, (ISimpleTimeZone**)&st));
 
-    CloneImpl((ISimpleTimeZone*)st.Get());
+    CloneImpl(st);
 
-    *newObj = (ITimeZone*) st->Probe(EIID_ITimeZone);
+    *newObj = ITimeZone::Probe(st);
     REFCOUNT_ADD(*newObj);
     return NOERROR;
 }
@@ -140,10 +140,10 @@ ECode CSimpleTimeZone::Clone(
 {
     VALIDATE_NOT_NULL(newObj);
 
-    AutoPtr<CSimpleTimeZone> st;
-    FAIL_RETURN(CSimpleTimeZone::NewByFriend(mRawOffset, mID, (CSimpleTimeZone**)&st));
+    AutoPtr<ISimpleTimeZone> st;
+    FAIL_RETURN(CSimpleTimeZone::New(mRawOffset, mID, (ISimpleTimeZone**)&st));
 
-    CloneImpl((ISimpleTimeZone*)st.Get());
+    CloneImpl(st);
 
     *newObj = TO_IINTERFACE(st);
     REFCOUNT_ADD(*newObj);
@@ -155,7 +155,7 @@ ECode CSimpleTimeZone::CloneImpl(
 {
     CSimpleTimeZone* st = (CSimpleTimeZone*)newObj;
 
-    TimeZone::CloneImpl((ITimeZone*) st->Probe(EIID_ITimeZone));
+    TimeZone::CloneImpl((ITimeZone*)st);
 
     st->mRawOffset = mRawOffset;
     st->mStartYear = mStartYear;

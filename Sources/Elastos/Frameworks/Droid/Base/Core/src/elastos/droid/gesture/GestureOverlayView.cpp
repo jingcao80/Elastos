@@ -694,7 +694,7 @@ ECode GestureOverlayView::CancelGesture()
     List<IOnGestureListener *>::Iterator iter = listeners->Begin();
     while (iter != listeners->End()) {
         IOnGestureListener *listener = *iter;
-        listener->OnGestureCancelled((IGestureOverlayView *)this);
+        listener->OnGestureCancelled(this);
         iter++;
     }
 
@@ -709,7 +709,7 @@ ECode GestureOverlayView::CancelGesture()
     List<IOnGesturingListener *>::Iterator it = otherListeners->Begin();
     while (it != otherListeners->End()) {
         IOnGesturingListener *otherListener = *it;
-        otherListener->onGesturingEnded((IGestureOverlayView *)this);
+        otherListener->onGesturingEnded(this);
         it++;
     }
 */

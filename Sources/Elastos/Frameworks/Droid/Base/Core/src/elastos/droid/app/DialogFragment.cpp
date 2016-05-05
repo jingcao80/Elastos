@@ -1,9 +1,12 @@
 
-#include <Elastos.CoreLibrary.IO.h>
-#include "Elastos.Droid.Os.h"
 #include "elastos/droid/app/DialogFragment.h"
 #include "elastos/droid/app/CDialog.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.Os.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::R;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
@@ -12,10 +15,13 @@ using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace App {
+
+static const String TAG("DialogFragment");
 
 const String DialogFragment::SAVED_DIALOG_STATE_TAG("android:savedDialogState");
 const String DialogFragment::SAVED_STYLE("android:style");
@@ -53,7 +59,7 @@ ECode DialogFragment::SetStyle(
 {
     mStyle = style;
     if (mStyle == IDialogFragment::STYLE_NO_FRAME || mStyle == IDialogFragment::STYLE_NO_INPUT) {
-        mTheme = 0/*com.android.internal.R.style.Theme_DeviceDefault_Dialog_NoFrame*/;
+        mTheme = R::style::Theme_DeviceDefault_Dialog_NoFrame;
     }
     if (theme != 0) {
         mTheme = theme;
@@ -80,6 +86,7 @@ ECode DialogFragment::Show(
     /* [in] */ const String& tag,
     /* [out] */ Int32* id)
 {
+    VALIDATE_NOT_NULL(id)
     mDismissed = FALSE;
     mShownByMe = TRUE;
     transaction->Add(this, tag);
@@ -148,6 +155,7 @@ ECode DialogFragment::GetDialog(
 ECode DialogFragment::GetTheme(
     /* [out] */ Int32* theme)
 {
+    VALIDATE_NOT_NULL(theme)
     *theme = mTheme;
     return NOERROR;
 }
@@ -280,7 +288,7 @@ ECode DialogFragment::OnCreateDialog(
     GetActivity((IActivity**)&activity);
     Int32 theme;
     GetTheme(&theme);
-    CDialog::New((IContext*)activity.Get(), theme, dialog);
+    CDialog::New(IContext::Probe(activity), theme, dialog);
     return NOERROR;
 }
 
@@ -318,7 +326,7 @@ ECode DialogFragment::OnActivityCreated(
         AutoPtr<IViewParent> parent;
         view->GetParent((IViewParent**)&parent);
         if (parent != NULL) {
-//             throw new IllegalStateException("DialogFragment can not be attached to a container view");
+            Logger::E(TAG, "DialogFragment can not be attached to a container view");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         mDialog->SetContentView(view);
@@ -331,8 +339,7 @@ ECode DialogFragment::OnActivityCreated(
     mDialog->TakeCancelAndDismissListeners(String("DialogFragment"),
         this, this, &result);
     if (!result) {
-//         throw new IllegalStateException(
-//                 "You can not set Dialog's OnCancelListener or OnDismissListener");
+        Logger::E(TAG, "You can not set Dialog's OnCancelListener or OnDismissListener");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (savedInstanceState != NULL) {

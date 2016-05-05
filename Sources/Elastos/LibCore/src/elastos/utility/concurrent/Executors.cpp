@@ -46,9 +46,9 @@ ECode Executors::RunnableAdapter::Call(
 //===============================================
 static AutoPtr<IAtomicInteger32> InitsPoolNumber()
 {
-    AutoPtr<CAtomicInteger32> ai;
-    CAtomicInteger32::NewByFriend(1, (CAtomicInteger32**)&ai);
-    return (IAtomicInteger32*)ai.Get();
+    AutoPtr<IAtomicInteger32> ai;
+    CAtomicInteger32::New(1, (IAtomicInteger32**)&ai);
+    return ai;
 }
 
 const AutoPtr<IAtomicInteger32> Executors::DefaultThreadFactory::sPoolNumber = InitsPoolNumber();

@@ -129,9 +129,9 @@ ECode CSizeF::ParseSizeF(
     FAIL_RETURN(StringUtils::Parse(string.Substring(0, sep_ix), &w))
     FAIL_RETURN(StringUtils::Parse(string.Substring(sep_ix + 1), &h))
 
-    AutoPtr<CSizeF> s;
-    CSizeF::NewByFriend(w, h, (CSizeF**)&s);
-    *size = (ISizeF*)s.Get();
+    AutoPtr<ISizeF> s;
+    CSizeF::New(w, h, (ISizeF**)&s);
+    *size = s;
     REFCOUNT_ADD(*size)
     // } catch (NumberFormatException e) {
     //     throw invalidSize(string);

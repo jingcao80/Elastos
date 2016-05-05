@@ -241,9 +241,9 @@ AutoPtr<IList> Arrays::CreateArrayList(
     /* [in] */ Int32 length)
 {
     // return new ArrayList<T>(array);
-    AutoPtr<CArrayList> al;
-    CArrayList::NewByFriend(length, (CArrayList**)&al);
-    return (IList*)al->Probe(EIID_IList);
+    AutoPtr<IList> al;
+    CArrayList::New(length, (IList**)&al);
+    return al;
 }
 
 ECode Arrays::AsList(

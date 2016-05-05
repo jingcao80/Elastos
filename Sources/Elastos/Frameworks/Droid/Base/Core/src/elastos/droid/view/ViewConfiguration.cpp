@@ -219,9 +219,7 @@ AutoPtr<IViewConfiguration> ViewConfiguration::Get(
     sConfigurations->Get(density, (IInterface**)&obj);
     AutoPtr<IViewConfiguration> configuration = IViewConfiguration::Probe(obj);
     if (configuration == NULL) {
-        AutoPtr<CViewConfiguration> config;
-        CViewConfiguration::NewByFriend(context, (CViewConfiguration**)&config);
-        configuration = (IViewConfiguration*)config.Get();
+        CViewConfiguration::New(context, (IViewConfiguration**)&configuration);
         sConfigurations->Put(density, configuration);
     }
     return configuration;

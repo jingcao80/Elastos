@@ -1681,7 +1681,7 @@ ECode CActivityThread::InstallSystemApplicationInfo(
 
         // The code package for "android" in the system server needs
         // to be the system context's package.
-        AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)cctx->mPackageInfo->Probe(EIID_IWeakReferenceSource);
+        AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)(cctx->mPackageInfo.Get());
         AutoPtr<IWeakReference> wr;
         wrs->GetWeakReference((IWeakReference**)&wr);
         mPackages[String("android")] = wr;
@@ -2893,7 +2893,7 @@ ECode CActivityThread::HandleCreateBackupAgent(
             Slogger::E(TAG, "CreateBackupAgent: Create BackupAgent object failed.");
             return E_RUNTIME_EXCEPTION;
         }
-        agent = (IBackupAgent*)object->Probe(EIID_IBackupAgent);
+        agent = IBackupAgent::Probe(object);
         if (agent == NULL) {
             Slogger::E(TAG, "CreateBackupAgent: Probe error.");
             return E_RUNTIME_EXCEPTION;

@@ -273,7 +273,7 @@ Boolean ArrowKeyMovementMethod::LeftWord(
     AutoPtr<IWordIterator> wordIterator;
     widget->GetWordIterator((IWordIterator**)&wordIterator);
     wordIterator->SetCharSequence(ICharSequence::Probe(buffer), selectionEnd, selectionEnd);
-    return Selection::MoveToPreceding(buffer, (ISelectionPositionIterator*)wordIterator->Probe(EIID_ISelectionPositionIterator), IsSelecting(buffer));
+    return Selection::MoveToPreceding(buffer, ISelectionPositionIterator::Probe(wordIterator), IsSelecting(buffer));
 }
 
 Boolean ArrowKeyMovementMethod::RightWord(
@@ -285,7 +285,7 @@ Boolean ArrowKeyMovementMethod::RightWord(
     /*const*/ AutoPtr<IWordIterator> wordIterator;
     widget->GetWordIterator((IWordIterator**)&wordIterator);
     wordIterator->SetCharSequence(ICharSequence::Probe(buffer), selectionEnd, selectionEnd);
-    return Selection::MoveToFollowing(buffer, (ISelectionPositionIterator*)wordIterator->Probe(EIID_ISelectionPositionIterator), IsSelecting(buffer));
+    return Selection::MoveToFollowing(buffer, ISelectionPositionIterator::Probe(wordIterator), IsSelecting(buffer));
 }
 
 Boolean ArrowKeyMovementMethod::Home(

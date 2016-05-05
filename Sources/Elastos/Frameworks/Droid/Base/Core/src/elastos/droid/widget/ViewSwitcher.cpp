@@ -97,17 +97,13 @@ ECode ViewSwitcher::ObtainView(
 {
     AutoPtr<IView> child;
     mFactory->MakeView((IView**)&child);
-    AutoPtr<IFrameLayoutLayoutParams> lp;
-    AutoPtr<IViewGroupLayoutParams> temp;
-    child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
-    if (temp) {
-        lp = (IFrameLayoutLayoutParams*)temp->Probe(EIID_IFrameLayoutLayoutParams);
-    }
+    AutoPtr<IViewGroupLayoutParams> lp;
+    child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
     if (lp == NULL) {
         CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
-                IViewGroupLayoutParams::WRAP_CONTENT, (IFrameLayoutLayoutParams**)&lp);
+                IViewGroupLayoutParams::WRAP_CONTENT, (IViewGroupLayoutParams**)&lp);
     }
-    AddView(child, IViewGroupLayoutParams::Probe(lp));
+    AddView(child, lp);
     *v = child;
     REFCOUNT_ADD(*v);
     return NOERROR;

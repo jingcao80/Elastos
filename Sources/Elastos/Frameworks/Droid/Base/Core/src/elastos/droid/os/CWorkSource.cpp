@@ -14,9 +14,9 @@ namespace Os {
 
 static AutoPtr<IWorkSource> InitsTmpWorkSource()
 {
-    AutoPtr<CWorkSource> ws;
-    CWorkSource::NewByFriend(0, (CWorkSource**)&ws);
-    return (IWorkSource*)ws.Get();
+    AutoPtr<IWorkSource> ws;
+    CWorkSource::New(0, (IWorkSource**)&ws);
+    return ws;
 }
 
 const AutoPtr<IWorkSource> CWorkSource::sTmpWorkSource = InitsTmpWorkSource();

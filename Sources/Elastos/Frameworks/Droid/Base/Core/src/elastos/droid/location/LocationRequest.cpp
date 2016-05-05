@@ -54,9 +54,9 @@ ECode LocationRequest::constructor(
 
 AutoPtr<ILocationRequest> LocationRequest::Create()
 {
-    AutoPtr<CLocationRequest> request;
-    CLocationRequest::NewByFriend((CLocationRequest**)&request);
-    return (ILocationRequest*)request.Get();
+    AutoPtr<ILocationRequest> request;
+    CLocationRequest::New((ILocationRequest**)&request);
+    return request;
 }
 
 AutoPtr<ILocationRequest> LocationRequest::CreateFromDeprecatedProvider(

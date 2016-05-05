@@ -45,7 +45,7 @@ RotateDrawable::RotateState::RotateState(
             source->mDrawable->GetConstantState((IDrawableConstantState**)&state);
             state->NewDrawable((IDrawable**)&mDrawable);
         }
-        mDrawable->SetCallback((IDrawableCallback*)owner->Probe(EIID_IDrawableCallback));
+        mDrawable->SetCallback((IDrawableCallback*)owner);
         Int32 value = 0;
         source->mDrawable->GetLayoutDirection(&value);
         mDrawable->SetLayoutDirection(value);

@@ -1,0 +1,94 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IFragment;
+    using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DialogFragmentDemo {
+
+    interface ILoginInputListener {
+        OnLoginInputComplete(
+            [in] String username,
+            [in] String password);
+    }
+
+    interface ILoginInputListenerHolder {
+        GetLoginInputListener(
+            [out] ILoginInputListener** listener);
+    }
+
+    class CActivityOne {
+        constructor();
+
+        interface ILoginInputListenerHolder;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CEditNameDialogFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CFireMissilesDialogFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CLoginDialogFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    } // namespace DialogFragmentDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}

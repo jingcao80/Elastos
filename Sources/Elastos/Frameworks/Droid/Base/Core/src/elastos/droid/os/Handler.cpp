@@ -184,7 +184,7 @@ ECode Handler::constructor(
             mCallback = callback;
         }
         else {
-            AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)callback->Probe(EIID_IWeakReferenceSource);
+            AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(callback);
             if (wrs) {
                 wrs->GetWeakReference((IWeakReference**)&mWeakCallback);
             }
@@ -217,7 +217,7 @@ ECode Handler::constructor(
             mCallback = callback;
         }
         else {
-            AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)callback->Probe(EIID_IWeakReferenceSource);
+            AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(callback);
             if (wrs) {
                 wrs->GetWeakReference((IWeakReference**)&mWeakCallback);
             }

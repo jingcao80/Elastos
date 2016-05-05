@@ -652,14 +652,14 @@ Spinner::SpinnerForwardingListener::SpinnerForwardingListener(
     : mData(popup)
     , mHost(host)
 {
-    ForwardingListener::constructor((IView*)host->Probe(EIID_IView));
+    ForwardingListener::constructor((IView*)host);
 }
 
 ECode Spinner::SpinnerForwardingListener::GetPopup(
     /* [out] */ IListPopupWindow** window)
 {
     VALIDATE_NOT_NULL(window);
-    *window = (IListPopupWindow*)mData->Probe(EIID_IListPopupWindow);
+    *window = (IListPopupWindow*)mData;
     REFCOUNT_ADD(*window);
     return NOERROR;
 }

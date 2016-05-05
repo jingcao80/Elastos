@@ -30,7 +30,7 @@ ECode CBluetoothClass::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IBluetoothClass> bc = (IBluetoothClass*)o->Probe(EIID_IBluetoothClass);
+    AutoPtr<IBluetoothClass> bc = IBluetoothClass::Probe(o);
     if (bc != NULL) {
         Int32 value;
         bc->GetClass(&value);

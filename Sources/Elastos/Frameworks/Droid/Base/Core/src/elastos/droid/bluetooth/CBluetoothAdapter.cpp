@@ -145,7 +145,7 @@ AutoPtr<IBluetoothAdapter> CBluetoothAdapter::GetDefaultAdapter()
 
         AutoPtr<IInterface> b = ServiceManager::GetService(BLUETOOTH_MANAGER_SERVICE);
         if (b != NULL) {
-            AutoPtr<IIBluetoothManager> managerService = (IIBluetoothManager*)IIBluetoothManager::Probe(b);
+            AutoPtr<IIBluetoothManager> managerService = IIBluetoothManager::Probe(b);
             CBluetoothAdapter::New(managerService, (IBluetoothAdapter**)&sAdapter);
         }
         else {

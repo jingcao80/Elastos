@@ -106,11 +106,10 @@ AutoPtr<IBundle> CBundle::ForPair(
     /* [in] */ const String& key,
     /* [in] */ const String& value)
 {
-    AutoPtr<CBundle> b;
-    CBundle::NewByFriend(1, (CBundle**)&b);
-    AutoPtr<IBundle> ib = (IBundle*)b.Get();
-    ib->PutString(key, value);
-    return ib;
+    AutoPtr<IBundle> b;
+    CBundle::New(1, (IBundle**)&b);
+    b->PutString(key, value);
+    return b;
 }
 
 ECode CBundle::SetAllowFds(

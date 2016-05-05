@@ -67,7 +67,7 @@ BluetoothSap::BluetoothSap(
 {
     mContext = context;
     mServiceListener = l;
-    CBluetoothSapStateChangeCallback::New((IBluetoothSap*)this, (IIBluetoothStateChangeCallback**)&mStateChangeCallback);
+    CBluetoothSapStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mStateChangeCallback);
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
     // try {
         CBluetoothAdapter* adapterImpl = (CBluetoothAdapter*)mAdapter.Get();

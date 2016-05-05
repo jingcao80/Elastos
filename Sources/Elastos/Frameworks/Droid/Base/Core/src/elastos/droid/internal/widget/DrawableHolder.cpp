@@ -23,9 +23,9 @@ namespace Widget {
 
 static AutoPtr<IDecelerateInterpolator> CreateInterpolator()
 {
-    AutoPtr<CDecelerateInterpolator> ipt;
-    CDecelerateInterpolator::NewByFriend((CDecelerateInterpolator**)&ipt);
-    return (IDecelerateInterpolator*)ipt.Get();
+    AutoPtr<IDecelerateInterpolator> ipt;
+    CDecelerateInterpolator::New((IDecelerateInterpolator**)&ipt);
+    return ipt;
 }
 
 const String DrawableHolder::TAG("DrawableHolder");

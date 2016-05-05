@@ -11,37 +11,37 @@ namespace XPath {
 
 static AutoPtr<IQName> initNUMBER()
 {
-    AutoPtr<CQName> cq;
-    CQName::NewByFriend(String("http://www.w3.org/1999/XSL/Transform"), String("NUMBER"), (CQName**)&cq);
-    return (IQName*)cq.Get();
+    AutoPtr<IQName> cq;
+    CQName::New(String("http://www.w3.org/1999/XSL/Transform"), String("NUMBER"), (IQName**)&cq);
+    return cq;
 }
 
 static AutoPtr<IQName> initSTRING()
 {
-    AutoPtr<CQName> cq;
-    CQName::NewByFriend(String("http://www.w3.org/1999/XSL/Transform"), String("STRING"), (CQName**)&cq);
-    return (IQName*)cq.Get();
+    AutoPtr<IQName> cq;
+    CQName::New(String("http://www.w3.org/1999/XSL/Transform"), String("STRING"), (IQName**)&cq);
+    return cq;
 }
 
 static AutoPtr<IQName> initBOOLEAN()
 {
-    AutoPtr<CQName> cq;
-    CQName::NewByFriend(String("http://www.w3.org/1999/XSL/Transform"), String("BOOLEAN"), (CQName**)&cq);
-    return (IQName*)cq.Get();
+    AutoPtr<IQName> cq;
+    CQName::New(String("http://www.w3.org/1999/XSL/Transform"), String("BOOLEAN"), (IQName**)&cq);
+    return cq;
 }
 
 static AutoPtr<IQName> initNODESET()
 {
-    AutoPtr<CQName> cq;
-    CQName::NewByFriend(String("http://www.w3.org/1999/XSL/Transform"), String("NODESET"), (CQName**)&cq);
-    return (IQName*)cq.Get();
+    AutoPtr<IQName> cq;
+    CQName::New(String("http://www.w3.org/1999/XSL/Transform"), String("NODESET"), (IQName**)&cq);
+    return cq;
 }
 
 static AutoPtr<IQName> initNODE()
 {
-    AutoPtr<CQName> cq;
-    CQName::NewByFriend(String("http://www.w3.org/1999/XSL/Transform"), String("NODE"), (CQName**)&cq);
-    return (IQName*)cq.Get();
+    AutoPtr<IQName> cq;
+    CQName::New(String("http://www.w3.org/1999/XSL/Transform"), String("NODE"), (IQName**)&cq);
+    return cq;
 }
 
 const AutoPtr<IQName> CXPathConstants::NUMBER = initNUMBER();

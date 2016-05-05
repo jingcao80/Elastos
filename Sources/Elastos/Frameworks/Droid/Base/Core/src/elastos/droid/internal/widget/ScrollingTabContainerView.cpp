@@ -551,7 +551,7 @@ void ScrollingTabContainerView::PerformCollapse()
     IAdapterView::Probe(mTabSpinner)->GetAdapter((IAdapter**)&apt);
     if (apt == NULL) {
         AutoPtr<TabAdapter> adapter = new TabAdapter(this);
-        IAdapterView::Probe(mTabSpinner)->SetAdapter((IAdapter*)adapter->Probe(EIID_IAdapter));
+        IAdapterView::Probe(mTabSpinner)->SetAdapter((IAdapter*)adapter.Get());
     }
     if (mTabSelector != NULL) {
         Boolean result = FALSE;
@@ -787,10 +787,10 @@ ECode ScrollingTabContainerView::AddTab(
     /* [in] */ Boolean setSelected)
 {
     AutoPtr<ITabView> tabView = CreateTabView(tab, FALSE);
-    AutoPtr<ILinearLayoutLayoutParams> lp;
+    AutoPtr<IViewGroupLayoutParams> lp;
     CLinearLayoutLayoutParams::New(0,
-        IViewGroupLayoutParams::MATCH_PARENT, 1, (ILinearLayoutLayoutParams**)&lp);
-    IViewGroup::Probe(mTabLayout)->AddView((IView*)tabView->Probe(EIID_IView), position, IViewGroupLayoutParams::Probe(lp));
+        IViewGroupLayoutParams::MATCH_PARENT, 1, (IViewGroupLayoutParams**)&lp);
+    IViewGroup::Probe(mTabLayout)->AddView(IView::Probe(tabView), position, lp);
 
     if (mTabSpinner != NULL) {
         AutoPtr<IAdapter> tabAdapter;

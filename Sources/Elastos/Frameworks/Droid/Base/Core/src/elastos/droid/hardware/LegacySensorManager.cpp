@@ -276,7 +276,7 @@ LegacySensorManager::LegacySensorManager(
     //synchronized(SensorManager::mLock) {
         assert(mSensorManager != NULL);
         if (!sInitialized) {
-            sWindowManager = (IIWindowManager*)ServiceManager::GetService(String("window")).Get();
+            sWindowManager = IIWindowManager::Probe(ServiceManager::GetService(String("window")));
             // sWindowManager = IWindowManager.Stub.asInterface(
             //         ServiceManager.getService("window"));
             if (sWindowManager != NULL) {

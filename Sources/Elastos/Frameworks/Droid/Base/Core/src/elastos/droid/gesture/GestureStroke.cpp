@@ -237,7 +237,7 @@ ECode GestureStroke::Deserialize(
     AutoPtr<IArrayList> points;
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IGesturePoint> point = CGesturePoint::Deserialize(in);
-        points->Add((IGesturePoint*)point);
+        points->Add(point);
     }
     CGestureStroke::New(points, stroke);
     return NOERROR;

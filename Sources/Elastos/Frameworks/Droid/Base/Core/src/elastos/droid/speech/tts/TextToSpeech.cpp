@@ -942,7 +942,7 @@ ECode TextToSpeech::GetFeatures(
 #if 0
     AutoPtr<TextToSpeechActionR> ttsActionR = new TextToSpeechActionRGetFeatures(this, locale);
     AutoPtr<IObjectContainer> oc;
-    oc = (IObjectContainer*)RunAction(ttsActionR.Get(), (Handle32)NULL, String("getFeatures") );
+    oc = RunAction(ttsActionR.Get(), (Handle32)NULL, String("getFeatures") );
 
     AutoPtr<Set<String> > sRet = new Set<String>();
     if(oc != NULL) {
@@ -1071,7 +1071,7 @@ ECode TextToSpeech::GetLanguage(
     /* [out] */ ILocale** language)
 {
     AutoPtr<TextToSpeechActionR> ttsActionR = new TextToSpeechActionRGetLanguage(this);
-    AutoPtr<ILocale> lRet = (ILocale*)RunAction(ttsActionR.Get(), (Handle32)NULL, String("getLanguage") );
+    AutoPtr<ILocale> lRet = (ILocale*)RunAction(ttsActionR.Get(), (Handle32)0, String("getLanguage") );
     assert(0 && "TODO");
     *language = lRet;
     REFCOUNT_ADD(*language)

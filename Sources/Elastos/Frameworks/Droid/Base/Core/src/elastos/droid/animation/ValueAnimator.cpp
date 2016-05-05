@@ -126,8 +126,7 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
     mTmpAnimations.Clear();
 
     if (mEndingAnims.IsEmpty() == FALSE) {
-        it = mEndingAnims.Begin();
-        for (; it != mEndingAnims.End(); ++it) {
+        for (it = mEndingAnims.Begin(); it != mEndingAnims.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
             va->EndAnimation(this);

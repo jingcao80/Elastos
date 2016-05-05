@@ -265,7 +265,7 @@ CAccountManager::Future2Task::CallbackRunnable::CallbackRunnable(
 
 ECode CAccountManager::Future2Task::CallbackRunnable::Run()
 {
-    return mCallback->Run((IAccountManagerFuture*)mHost);
+    return mCallback->Run(mHost);
 }
 
 //===============================================================
@@ -284,7 +284,7 @@ CAccountManager::Future2Task::Future2Task(
 void CAccountManager::Future2Task::Done()
 {
     if (mCallback != NULL) {
-        AutoPtr<IRunnable> action = (IRunnable*)new CallbackRunnable(mCallback, this);
+        AutoPtr<IRunnable> action = new CallbackRunnable(mCallback, this);
         PostRunnableToHandler(action);
     }
 }
@@ -635,7 +635,7 @@ ECode CAccountManager::Future2Task_GetAuthTokenLabel::BundleToResult(
     bundle->GetString(IAccountManager::KEY_AUTH_TOKEN_LABEL, &s);
     AutoPtr<ICharSequence> cs;
     CString::New(s, (ICharSequence**)&cs);
-    *result = (IInterface*)cs;
+    *result = cs.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -679,7 +679,7 @@ ECode CAccountManager::Future2Task_HasFeatures::BundleToResult(
     bundle->GetBoolean(IAccountManager::KEY_BOOLEAN_RESULT, &res);
     AutoPtr<IBoolean> b;
     CBoolean::New(res, (IBoolean**)&b);
-    *result = (IInterface*)b;
+    *result = b.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -802,7 +802,7 @@ ECode CAccountManager::Future2Task_RemoveAccount::BundleToResult(
     bundle->GetBoolean(IAccountManager::KEY_BOOLEAN_RESULT, &res);
     AutoPtr<IBoolean> b;
     CBoolean::New(res, (IBoolean**)&b);
-    *result = (IInterface*)b;
+    *result = b.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -1872,7 +1872,7 @@ ECode CAccountManager::GetAuthTokenByFeatures(
             activity, addAccountOptions, getAuthTokenOptions, cb, handler, this);
     AutoPtr<IAccountManagerFuture> future;
     task->Start((IAccountManagerFuture**)&future);
-    *accountManagerFuture = (IAccountManagerFuture*)task;
+    *accountManagerFuture = task.Get();
     REFCOUNT_ADD(*accountManagerFuture);
     return NOERROR;
 }
@@ -1967,8 +1967,8 @@ ECode CAccountManager::AddOnAccountsUpdatedListener(
             intentFilter->AddAction(IIntent::ACTION_DEVICE_STORAGE_OK);
             AutoPtr<IIntent> intent;
             FAIL_RETURN(mContext->RegisterReceiver(
-                    (IBroadcastReceiver*)mAccountsChangedBroadcastReceiver,
-                    intentFilter, (IIntent**)&intent));
+                mAccountsChangedBroadcastReceiver.Get(),
+                intentFilter, (IIntent**)&intent));
         }
     }
 

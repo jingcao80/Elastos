@@ -268,7 +268,7 @@ ECode CompoundButton::SetButtonDrawable(
 ECode CompoundButton::SetButtonDrawable(
     /* [in] */ IDrawable* d)
 {
-    if ((IDrawable*)mButtonDrawable.Get() != d) {
+    if (mButtonDrawable.Get() != d) {
         if (mButtonDrawable != NULL) {
             mButtonDrawable->SetCallback(NULL);
             UnscheduleDrawable(mButtonDrawable);

@@ -525,13 +525,12 @@ AutoPtr<ICharSequence> DateFormat::Format(
     }
 
     if (ISpanned::Probe(inFormat) != NULL) {
-        AutoPtr<ICharSequence> cseq;
-        cseq = (ICharSequence*)ICharSequence::Probe(s);
-        AutoPtr<ISpannedString> spannedStr;
-        CSpannedString::New(cseq, (ISpannedString**)&spannedStr);
-        return (ICharSequence*)ICharSequence::Probe(spannedStr);
+        AutoPtr<ICharSequence> cseq = ICharSequence::Probe(s);
+        AutoPtr<ICharSequence> spannedStr;
+        CSpannedString::New(cseq, (ICharSequence**)&spannedStr);
+        return spannedStr;
     } else {
-        return (ICharSequence*)ICharSequence::Probe(s);
+        return ICharSequence::Probe(s);
     }
 }
 

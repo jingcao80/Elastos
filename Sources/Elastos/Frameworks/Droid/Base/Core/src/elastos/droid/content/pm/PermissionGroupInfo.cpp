@@ -27,7 +27,7 @@ ECode PermissionGroupInfo::constructor(
     /* [in] */ IPermissionGroupInfo* orig)
 {
     assert(orig != NULL);
-    PackageItemInfo::constructor((IPackageItemInfo*)orig);
+    PackageItemInfo::constructor(IPackageItemInfo::Probe(orig));
     orig->GetDescriptionRes(&mDescriptionRes);
     orig->GetNonLocalizedDescription((ICharSequence**)&mNonLocalizedDescription);
     orig->GetFlags(&mFlags);

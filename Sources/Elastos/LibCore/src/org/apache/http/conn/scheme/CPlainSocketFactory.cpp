@@ -21,9 +21,9 @@ namespace Scheme {
 
 static AutoPtr<IPlainSocketFactory> InitDefaultFactory()
 {
-    AutoPtr<CPlainSocketFactory> factory;
-    CPlainSocketFactory::NewByFriend((CPlainSocketFactory**)&factory);
-    return (IPlainSocketFactory*)factory.Get();
+    AutoPtr<IPlainSocketFactory> factory;
+    CPlainSocketFactory::New((IPlainSocketFactory**)&factory);
+    return factory;
 }
 const AutoPtr<IPlainSocketFactory> CPlainSocketFactory::DEFAULT_FACTORY = InitDefaultFactory();
 

@@ -497,7 +497,7 @@ ECode SQLiteDatabase::DeleteDatabase(
         String name;
         file->GetName(&name);
         String prefix = name + String("-mj");
-        AutoPtr<IFileFilter> filter = (IFileFilter*)new MyFileFilter(prefix);
+        AutoPtr<IFileFilter> filter = new MyFileFilter(prefix);
         AutoPtr< ArrayOf<IFile*> > fileList;
         dir->ListFiles((ArrayOf<IFile*>**)&fileList);
         if (fileList != NULL) {

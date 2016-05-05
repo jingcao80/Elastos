@@ -105,7 +105,8 @@ ECode BatteryStats::HistoryTag::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if ((IObject*)this == o) {
+    IObject* obj = IObject::Probe(o);
+    if ((IObject*)this == obj) {
         *result = TRUE;
         return NOERROR;
     }
@@ -114,7 +115,7 @@ ECode BatteryStats::HistoryTag::Equals(
         return NOERROR;
     }
 
-    AutoPtr<HistoryTag> that = (HistoryTag*)(IObject*)o;
+    AutoPtr<HistoryTag> that = (HistoryTag*)obj;
 
     if (mUid != that->mUid) {
         *result = FALSE;

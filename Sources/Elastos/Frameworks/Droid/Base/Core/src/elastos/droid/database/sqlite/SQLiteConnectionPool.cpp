@@ -1064,7 +1064,7 @@ void SQLiteConnectionPool::Dump(
                 sb += ": waited for ";
                 sb += ((now - waiter->mStartTime) * 0.001f);
                 sb += " ms - thread=";
-                sb += (IInterface*)waiter->mThread;
+                sb += Object::ToString(waiter->mThread);
                 sb += ", priority=";
                 sb += waiter->mPriority;
                 sb += ", sql='";

@@ -52,7 +52,7 @@ CAR_OBJECT_IMPL(CGlobalsWallpaperManagerCallback)
 ECode CGlobalsWallpaperManagerCallback::constructor(
     /* [in] */ ILooper* looper)
 {
-    mService = (IIWallpaperManager*)ServiceManager::GetService(IContext::WALLPAPER_SERVICE).Get();
+    mService = IIWallpaperManager::Probe(ServiceManager::GetService(IContext::WALLPAPER_SERVICE));
     return NOERROR;
 }
 

@@ -26,9 +26,9 @@ namespace Message {
 
 static AutoPtr<IBasicHeaderValueParser> InitDefault()
 {
-    AutoPtr<CBasicHeaderValueParser> parser;
-    CBasicHeaderValueParser::NewByFriend((CBasicHeaderValueParser**)&parser);
-    return (IBasicHeaderValueParser*)parser.Get();
+    AutoPtr<IBasicHeaderValueParser> parser;
+    CBasicHeaderValueParser::New((IBasicHeaderValueParser**)&parser);
+    return parser;
 }
 const AutoPtr<IBasicHeaderValueParser> BasicHeaderValueParser::DEFAULT = InitDefault();
 const Char32 BasicHeaderValueParser::PARAM_DELIMITER;

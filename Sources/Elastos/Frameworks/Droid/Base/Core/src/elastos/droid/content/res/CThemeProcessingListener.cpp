@@ -64,7 +64,7 @@ ECode CThemeProcessingListener::constructor(
 ECode CThemeProcessingListener::OnFinishedProcessing(
     /* [in] */ const String& pkgName)
 {
-    AutoPtr<IRunnable> runnable = (IRunnable*)new OnFinishedProcessingRunnable(pkgName, mHost);
+    AutoPtr<IRunnable> runnable = new OnFinishedProcessingRunnable(pkgName, mHost);
     Boolean result;
     return mHost->mHandler->Post(runnable, &result);
 }

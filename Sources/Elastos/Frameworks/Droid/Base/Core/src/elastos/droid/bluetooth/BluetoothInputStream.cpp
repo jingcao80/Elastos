@@ -24,7 +24,7 @@ ECode BluetoothInputStream::Available(
 
 ECode BluetoothInputStream::Close()
 {
-    return ((ICloseable*)mSocket->Probe(EIID_ICloseable))->Close();
+    return ICloseable::Probe(mSocket)->Close();
 }
 
 ECode BluetoothInputStream::Read(

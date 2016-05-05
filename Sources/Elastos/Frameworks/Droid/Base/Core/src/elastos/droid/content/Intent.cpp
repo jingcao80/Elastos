@@ -219,9 +219,9 @@ AutoPtr<IIntent> Intent::CreateChooser(
     /* [in] */ IIntent* target,
     /* [in] */ ICharSequence* title)
 {
-    AutoPtr<CIntent> intent;
-    ASSERT_SUCCEEDED(CIntent::NewByFriend(IIntent::ACTION_CHOOSER, (CIntent**)&intent));
-    AutoPtr<IParcelable> parcelable = (IParcelable*)target->Probe(EIID_IParcelable);
+    AutoPtr<IIntent> intent;
+    ASSERT_SUCCEEDED(CIntent::New(IIntent::ACTION_CHOOSER, (IIntent**)&intent));
+    AutoPtr<IParcelable> parcelable = IParcelable::Probe(target);
     intent->PutExtra(IIntent::EXTRA_INTENT, parcelable);
     if (title != NULL) {
         intent->PutExtra(IIntent::EXTRA_TITLE, title);
@@ -241,8 +241,8 @@ AutoPtr<IIntent> Intent::CreateChooser(
         AutoPtr<IUri> data;
         target->GetData((IUri**)&data);
         if (targetClipData == NULL && data != NULL) {
-            // AutoPtr<CClipDataItem> item;
-            // CClipDataItem::NewByFriend(data, (CClipDataItem**)&item);
+            // AutoPtr<IClipDataItem> item;
+            // CClipDataItem::New(data, (IClipDataItem**)&item);
             assert(0);
             AutoPtr< ArrayOf<String> > mimeTypes;
             String type;
@@ -254,7 +254,7 @@ AutoPtr<IIntent> Intent::CreateChooser(
             else {
                 mimeTypes = ArrayOf<String>::Alloc(0);
             }
-            // CClipData::NewByFriend(NULL, mimeTypes, (IClipDataItem*)item,
+            // CClipData::NewByFriend(NULL, mimeTypes, item,
             //         (CClipData**)(IClipData**)&targetClipData);
             assert(0);
         }
@@ -309,22 +309,22 @@ ECode Intent::CloneFilter(
 AutoPtr<IIntent> Intent::MakeMainActivity(
     /* [in] */ IComponentName* mainActivity)
 {
-    AutoPtr<CIntent> intent;
-    ASSERT_SUCCEEDED(CIntent::NewByFriend(IIntent::ACTION_MAIN, (CIntent**)&intent));
+    AutoPtr<IIntent> intent;
+    ASSERT_SUCCEEDED(CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent));
     intent->SetComponent(mainActivity);
     intent->AddCategory(IIntent::CATEGORY_LAUNCHER);
-    return (IIntent*)intent.Get();
+    return intent;
 }
 
 AutoPtr<IIntent> Intent::MakeMainSelectorActivity(
     /* [in] */ const String& selectorAction,
     /* [in] */ const String& selectorCategory)
 {
-    AutoPtr<CIntent> intent;
-    ASSERT_SUCCEEDED(CIntent::NewByFriend(IIntent::ACTION_MAIN, (CIntent**)&intent));
+    AutoPtr<IIntent> intent;
+    ASSERT_SUCCEEDED(CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent));
     intent->AddCategory(IIntent::CATEGORY_LAUNCHER);
-    AutoPtr<CIntent> selector;
-    ASSERT_SUCCEEDED(CIntent::NewByFriend((CIntent**)&selector));
+    AutoPtr<IIntent> selector;
+    ASSERT_SUCCEEDED(CIntent::New((IIntent**)&selector));
     selector->SetAction(selectorAction);
     selector->AddCategory(selectorCategory);
     intent->SetSelector(selector);
@@ -2588,41 +2588,41 @@ void Intent::ToUriInner(
                 uri.AppendChar('=');
                 String tmp;
                 if (entryType == 'S') {
-                    ((ICharSequence*)value.Get())->ToString(&tmp);
+                    ICharSequence::Probe(value)->ToString(&tmp);
                 }
                 else if (entryType == 'B') {
                     Boolean val;
-                    ((IBoolean*)value.Get())->GetValue(&val);
+                    IBoolean::Probe(value)->GetValue(&val);
                     tmp = StringUtils::BooleanToString(val);
                 }
                 else if (entryType == 'b') {
                     Byte val;
-                    ((IByte*)value.Get())->GetValue(&val);
+                    IByte::Probe(value)->GetValue(&val);
                     tmp = StringUtils::ToString((Int32)val);
                 }
                 else if (entryType == 'd') {
                     Double val;
-                    ((IDouble*)value.Get())->GetValue(&val);
+                    IDouble::Probe(value)->GetValue(&val);
                     tmp = StringUtils::ToString(val);
                 }
                 else if (entryType == 'f') {
                     Float val;
-                    ((IFloat*)value.Get())->GetValue(&val);
+                    IFloat::Probe(value)->GetValue(&val);
                     tmp = StringUtils::ToString((Double)val);
                 }
                 else if (entryType == 'i') {
                     Int32 val;
-                    ((IInteger32*)value.Get())->GetValue(&val);
+                    IInteger32::Probe(value)->GetValue(&val);
                     tmp = StringUtils::ToString(val);
                 }
                 else if (entryType == 'l') {
                     Int64 val;
-                    ((IInteger64*)value.Get())->GetValue(&val);
+                    IInteger64::Probe(value)->GetValue(&val);
                     tmp = StringUtils::ToString(val);
                 }
                 else if (entryType == 's') {
                     Int16 val;
-                    ((IInteger16*)value.Get())->GetValue(&val);
+                    IInteger16::Probe(value)->GetValue(&val);
                     tmp = StringUtils::ToString((Int32)val);
                 }
                 Uri::Encode(tmp, &s);
@@ -3101,7 +3101,7 @@ ECode Intent::MigrateExtraStreamToClipData(
         }
         AutoPtr<IUri> stream;
         if (parcelable != NULL) {
-            stream = (IUri*)parcelable->Probe(Elastos::Droid::Net::EIID_IUri);
+            stream = IUri::Probe(parcelable);
         }
 
         AutoPtr<ICharSequence> text;

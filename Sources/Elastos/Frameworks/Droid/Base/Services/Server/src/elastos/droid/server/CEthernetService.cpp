@@ -551,8 +551,8 @@ ECode CEthernetService::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    mNMService = (IINetworkManagementService*)ServiceManager::GetService(
-        IContext::NETWORKMANAGEMENT_SERVICE).Get();
+    mNMService = IINetworkManagementService::Probe(
+        ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
     mTracker = EthernetDataTracker::GetInstance();
     mEthStateReceiver = new EthReceiver(this);
     CIntentFilter::New((IIntentFilter**)&mFilter);

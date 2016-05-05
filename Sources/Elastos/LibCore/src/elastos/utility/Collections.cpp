@@ -2122,7 +2122,7 @@ AutoPtr<IInterface> Collections::_SynchronizedList::ReadResolve()
         AutoPtr<SynchronizedRandomAccessList> p = new SynchronizedRandomAccessList(mList, mLock);
         return (IInterface*)p->Probe(EIID_IInterface);
     }
-    return (IInterface*)TO_IINTERFACE(this);
+    return TO_IINTERFACE(this);
 }
 
 //====================================================================

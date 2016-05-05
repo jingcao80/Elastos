@@ -232,7 +232,7 @@ ECode CApplicationThread::ScheduleReceiver(
 {
     UpdateProcessState(processState, FALSE);
     AutoPtr<CActivityThread::ReceiverData> r = new CActivityThread::ReceiverData(intent, resultCode, data, extras,
-        sync, FALSE, IBinder::Probe((IApplicationThread*)mAThread->mAppThread.Get()), sendingUser);
+        sync, FALSE, IBinder::Probe(mAThread->mAppThread), sendingUser);
     r->mInfo = info;
     r->mCompatInfo = (CCompatibilityInfo*)compatInfo;
 

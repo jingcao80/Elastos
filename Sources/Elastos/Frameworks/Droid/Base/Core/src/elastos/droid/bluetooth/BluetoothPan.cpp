@@ -38,7 +38,7 @@ ECode BluetoothPan::ServiceConnection::OnServiceConnected(
     mHost->mPanService = IIBluetoothPan::Probe(service);
 
     if (mHost->mServiceListener != NULL) {
-        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::PAN, (IBluetoothProfile*)mHost);
+        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::PAN, mHost);
     }
     return NOERROR;
 }

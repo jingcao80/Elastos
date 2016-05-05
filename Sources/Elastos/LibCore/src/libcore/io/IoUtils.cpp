@@ -300,9 +300,9 @@ ECode IoUtils::CreateTemporaryDirectory(
     *file = NULL;
 
     if (TEMPORARY_DIRECTORY_PRNG == NULL) {
-        AutoPtr<CRandom> r;
-        CRandom::NewByFriend((CRandom**)&r);
-        TEMPORARY_DIRECTORY_PRNG = (IRandom*)r->Probe(EIID_IRandom);
+        AutoPtr<IRandom> r;
+        CRandom::New((IRandom**)&r);
+        TEMPORARY_DIRECTORY_PRNG = r;
     }
 
     String prop;

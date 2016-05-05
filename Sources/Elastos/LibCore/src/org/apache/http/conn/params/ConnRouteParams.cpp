@@ -16,17 +16,17 @@ namespace Params {
 
 static AutoPtr<IHttpHost> InitHttpHost()
 {
-    AutoPtr<CHttpHost> host;
-    CHttpHost::NewByFriend(String("127.0.0.255"), 0, String("no-host"), (CHttpHost**)&host);
-    return (IHttpHost*)host.Get();
+    AutoPtr<IHttpHost> host;
+    CHttpHost::New(String("127.0.0.255"), 0, String("no-host"), (IHttpHost**)&host);
+    return host;
 }
 const AutoPtr<IHttpHost> ConnRouteParams::NO_HOST = InitHttpHost();
 
 static AutoPtr<IHttpRoute> InitHttpRoute()
 {
-    AutoPtr<CHttpRoute> route;
-    CHttpRoute::NewByFriend(ConnRouteParams::NO_HOST, (CHttpRoute**)&route);
-    return (IHttpRoute*)route.Get();
+    AutoPtr<IHttpRoute> route;
+    CHttpRoute::New(ConnRouteParams::NO_HOST, (IHttpRoute**)&route);
+    return route;
 }
 const AutoPtr<IHttpRoute> ConnRouteParams::NO_ROUTE = InitHttpRoute();
 

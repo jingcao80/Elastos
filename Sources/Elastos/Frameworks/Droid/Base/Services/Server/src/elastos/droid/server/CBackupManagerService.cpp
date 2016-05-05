@@ -5229,10 +5229,10 @@ ECode CBackupManagerService::SetBackupPassword(
     // try {
     // pwf = new FileOutputStream(mPasswordHashFile);
     FAIL_GOTO((ec = CFileOutputStream::New(mPasswordHashFile,(IFileOutputStream**)&tempout)), _Exit_);
-    pwf = (IOutputStream*)tempout.Get();
+    pwf = IOutputStream::Probe(tempout);
     // buffer = new BufferedOutputStream(pwf);
     FAIL_GOTO((ec = CBufferedOutputStream::New(pwf, (IBufferedOutputStream**)&bufStream)), _Exit_);
-    buffer = (IOutputStream*)bufStream.Get();
+    buffer = IOutputStream::Probe(bufStream);
     // out = new DataOutputStream(buffer);
     FAIL_GOTO((ec =CDataOutputStream::New(buffer,(IDataOutputStream**)&out)), _Exit_);
 

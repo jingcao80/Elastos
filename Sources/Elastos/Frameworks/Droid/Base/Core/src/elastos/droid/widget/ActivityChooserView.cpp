@@ -1048,7 +1048,7 @@ ECode ActivityChooserView::constructor(
     // mListPopupMaxWidth = Math.max(resources.getDisplayMetrics().widthPixels / 2,
     //       resources.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
 
-
+    assert(0 && "TODO");
     ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
     AutoPtr< ArrayOf<Int32> > resAttrs = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::ActivityChooserView),
         ArraySize(R::styleable::ActivityChooserView));
@@ -1083,7 +1083,7 @@ ECode ActivityChooserView::constructor(
 
     AutoPtr<IView> viewTmp3;
     mDefaultActivityButton->FindViewById(R::id::image, (IView**)&viewTmp3);
-    mDefaultActivityButtonImage = (ImageView*)viewTmp3.Get();
+    mDefaultActivityButtonImage = IImageView::Probe(viewTmp3);
 
     AutoPtr<IView> viewTmp4;
     FindViewById(R::id::expand_activities_button, (IView**)&viewTmp4);
@@ -1099,7 +1099,7 @@ ECode ActivityChooserView::constructor(
 
     AutoPtr<IView> viewTmp5;
     expandButton->FindViewById(R::id::image, (IView**)&viewTmp5);
-    mExpandActivityOverflowButtonImage = (ImageView*)viewTmp5.Get();
+    mExpandActivityOverflowButtonImage = IImageView::Probe(viewTmp5);
     mExpandActivityOverflowButtonImage->SetImageDrawable(expandActivityOverflowButtonDrawable);
 
     mAdapter = new ActivityChooserViewAdapter(this);
@@ -1164,7 +1164,8 @@ ECode ActivityChooserView::SetExpandActivityOverflowButtonContentDescription(
     mContext->GetString(resourceId, &str);
     AutoPtr<ICharSequence> contentDescription;
     CString::New(str, (ICharSequence**)&contentDescription);
-    mExpandActivityOverflowButtonImage->SetContentDescription(contentDescription);
+    assert(0 && "TODO");
+    // mExpandActivityOverflowButtonImage->SetContentDescription(contentDescription);
     return NOERROR;
 }
 

@@ -36,36 +36,36 @@ namespace SSL {
 
 static AutoPtr<IX509HostnameVerifier> InitAllowAllHostnameVerifier()
 {
-    AutoPtr<CAllowAllHostnameVerifier> verifier;
-    CAllowAllHostnameVerifier::NewByFriend((CAllowAllHostnameVerifier**)&verifier);
-    return (IX509HostnameVerifier*)verifier.Get();
+    AutoPtr<IX509HostnameVerifier> verifier;
+    CAllowAllHostnameVerifier::New((IX509HostnameVerifier**)&verifier);
+    return verifier;
 }
 const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::ALLOW_ALL_HOSTNAME_VERIFIER
         = InitAllowAllHostnameVerifier();
 
 static AutoPtr<IX509HostnameVerifier> InitBrowserCompatHostnameVerifier()
 {
-    AutoPtr<CBrowserCompatHostnameVerifier> verifier;
-    CBrowserCompatHostnameVerifier::NewByFriend((CBrowserCompatHostnameVerifier**)&verifier);
-    return (IX509HostnameVerifier*)verifier.Get();
+    AutoPtr<IX509HostnameVerifier> verifier;
+    CBrowserCompatHostnameVerifier::NewByFriend((IX509HostnameVerifier**)&verifier);
+    return verifier;
 }
 const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::BROWSER_COMPATIBLE_HOSTNAME_VERIFIER
         = InitBrowserCompatHostnameVerifier();
 
 static AutoPtr<IX509HostnameVerifier> InitStrictHostnameVerifier()
 {
-    AutoPtr<CStrictHostnameVerifier> verifier;
-    CStrictHostnameVerifier::NewByFriend((CStrictHostnameVerifier**)&verifier);
-    return (IX509HostnameVerifier*)verifier.Get();
+    AutoPtr<IX509HostnameVerifier> verifier;
+    CStrictHostnameVerifier::NewByFriend((IX509HostnameVerifier**)&verifier);
+    return verifier;
 }
 const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::STRICT_HOSTNAME_VERIFIER
         = InitStrictHostnameVerifier();
 
 static AutoPtr<ISSLSocketFactory> InitSSLSocketFactory()
 {
-    AutoPtr<CSSLSocketFactory> factory;
-    CSSLSocketFactory::NewByFriend((CSSLSocketFactory**)&factory);
-    return (ISSLSocketFactory*)factory.Get();
+    AutoPtr<ISSLSocketFactory> factory;
+    CSSLSocketFactory::NewByFriend((ISSLSocketFactory**)&factory);
+    return factory;
 }
 const AutoPtr<ISSLSocketFactory> CSSLSocketFactory::DEFAULT_FACTORY
         = InitSSLSocketFactory();

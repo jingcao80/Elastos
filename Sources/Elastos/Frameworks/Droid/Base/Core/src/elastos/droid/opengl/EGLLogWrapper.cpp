@@ -25,7 +25,7 @@ EGLLogWrapper::EGLLogWrapper(
     /* [in] */ Int32 configFlags,
     /* [in] */ IWriter* log)
 {
-    mEgl10 = (IEGL10*)egl;
+    mEgl10 = IEGL10::Probe(egl);
     mLog = log;
     mLogArgumentNames = (IGLDebugHelper::_CONFIG_LOG_ARGUMENT_NAMES & configFlags) != 0;
     mCheckError = (IGLDebugHelper::_CONFIG_CHECK_GL_ERROR & configFlags) != 0;
@@ -617,7 +617,7 @@ ECode EGLLogWrapper::End()
 
 ECode EGLLogWrapper::Flush()
 {
-    IFlushable* flush = (IFlushable*)mLog.Get();
+    IFlushable* flush = IFlushable::Probe(mLog);
     ECode ec = flush->Flush();
     if (FAILED(ec)) {
         mLog = NULL;

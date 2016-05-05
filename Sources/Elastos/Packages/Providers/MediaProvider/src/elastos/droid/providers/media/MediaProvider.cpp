@@ -2811,6 +2811,7 @@ Boolean MediaProvider::QueryThumbnail(
             AutoPtr<IInterface> obj;
             AutoPtr<IMediaThumbRequest> mtq;
             for (Int32 i = 0; i < length; ++i) {
+                assert(0 && "TODO");
                 obj = NULL;
                 mtq = NULL;
                 mtq = IMediaThumbRequest::Probe(obj);
@@ -2821,6 +2822,7 @@ Boolean MediaProvider::QueryThumbnail(
                         assert(0 && "TODO");
                         // mtq->NotifyAll();
                     }
+
                    Boolean flag = FALSE;
                    mMediaThumbQueue->Remove(mtq.Get(), &flag);
                 }

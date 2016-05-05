@@ -40,7 +40,7 @@ ECode BluetoothHealth::ServiceConnection::OnServiceConnected(
     mHost->mService = IIBluetoothHealth::Probe(service);
 
     if (mHost->mServiceListener != NULL) {
-        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::HEALTH, (IBluetoothProfile*)mHost);
+        mHost->mServiceListener->OnServiceConnected(IBluetoothProfile::HEALTH, mHost);
     }
     return NOERROR;
 }

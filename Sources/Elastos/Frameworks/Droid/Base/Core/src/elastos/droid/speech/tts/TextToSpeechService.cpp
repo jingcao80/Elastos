@@ -681,7 +681,7 @@ TextToSpeechService::SynthesisSpeechItemV1::SynthesisSpeechItemV1(
     mText = str;
     CSynthesisRequest::New(mText, mParams, (ISynthesisRequest**)&mSynthesisRequest);
     mDefaultLocale = mTtss->GetSettingsLocale();
-    SetRequestParams((ISynthesisRequest *)mSynthesisRequest);
+    SetRequestParams(mSynthesisRequest);
     mEventLogger = new EventLoggerV1();
     mEventLogger->constructor(mSynthesisRequest, callerUid, callerPid, mTtss->mPackageName);
 }
@@ -879,11 +879,11 @@ ECode TextToSpeechService::TextToSpeechServiceStub::Speak(
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(3);
-    (*aryInterface)[0] = (IInterface*)caller;
+    aryInterface->Set(0, caller);
     AutoPtr<ICharSequence> cs;
     CString::New(text, (ICharSequence**)&cs);
-    (*aryInterface)[1] = (IInterface*)(cs.Get());
-    (*aryInterface)[2] = (IInterface*)params;
+    aryInterface->Set(1, cs);
+    aryInterface->Set(2, params);
 
     if (!CheckNonNull( aryInterface.Get() )) {
         *result = ITextToSpeech::TTS_ERROR;
@@ -904,14 +904,14 @@ ECode TextToSpeechService::TextToSpeechServiceStub::SynthesizeToFile(
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(4);
-    (*aryInterface)[0] = (IInterface*)caller;
+    aryInterface->Set(0, caller);
     AutoPtr<ICharSequence> cs;
     CString::New(text, (ICharSequence**)&cs);
-    (*aryInterface)[1] = (IInterface*)(cs.Get());
+    aryInterface->Set(1, cs);
     AutoPtr<ICharSequence> cs2;
     CString::New(filename, (ICharSequence**)&cs2);
-    (*aryInterface)[2] = (IInterface*)(cs2.Get());
-    (*aryInterface)[3] = (IInterface*)params;
+    aryInterface->Set(2, cs2);
+    aryInterface->Set(3, params);
     if (!CheckNonNull( aryInterface.Get() )) {
         *result = ITextToSpeech::TTS_ERROR;
         return NOERROR;
@@ -932,9 +932,9 @@ ECode TextToSpeechService::TextToSpeechServiceStub::PlayAudio(
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(3);
-    (*aryInterface)[0] = (IInterface*)caller;
-    (*aryInterface)[1] = (IInterface*)audioUri;
-    (*aryInterface)[2] = (IInterface*)params;
+    aryInterface->Set(0, caller);
+    aryInterface->Set(1, audioUri);
+    aryInterface->Set(2, params);
     if (!CheckNonNull(aryInterface.Get())) {
         *result = ITextToSpeech::TTS_ERROR;
         return NOERROR;
@@ -956,8 +956,8 @@ ECode TextToSpeechService::TextToSpeechServiceStub::PlaySilence(
     /* [out] */ Int32* result)
 {
     AutoPtr<ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(2);
-    (*aryInterface)[0] = (IInterface*)caller;
-    (*aryInterface)[1] = (IInterface*)params;
+    aryInterface->Set(0, caller);
+    aryInterface->Set(1, params);
     if (!CheckNonNull(aryInterface.Get())) {
         *result = ITextToSpeech::TTS_ERROR;
         return NOERROR;
@@ -982,7 +982,7 @@ ECode TextToSpeechService::TextToSpeechServiceStub::Stop(
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(1);
-    (*aryInterface)[0] = (IInterface*)caller;
+    aryInterface->Set(0, caller);
     if (!CheckNonNull(aryInterface.Get())) {
         *result = ITextToSpeech::TTS_ERROR;
         return NOERROR;
@@ -1007,7 +1007,7 @@ ECode TextToSpeechService::TextToSpeechServiceStub::IsLanguageAvailable(
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(1);
     AutoPtr<ICharSequence> cs;
     CString::New(lang, (ICharSequence**)&cs);
-    (*aryInterface)[0] = (IInterface*)(cs.Get());
+    aryInterface->Set(0, cs);
 
     if (!CheckNonNull(aryInterface.Get())) {
         *result = ITextToSpeech::TTS_ERROR;
@@ -1052,7 +1052,7 @@ ECode TextToSpeechService::TextToSpeechServiceStub::LoadLanguage(
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(1);
     AutoPtr<ICharSequence> cs;
     CString::New(lang, (ICharSequence**)&cs);
-    (*aryInterface)[0] = (IInterface*)(cs.Get());
+    aryInterface->Set(0, cs);
 
     if (!CheckNonNull(aryInterface.Get())) {
         *result = ITextToSpeech::TTS_ERROR;
@@ -1068,7 +1068,7 @@ ECode TextToSpeechService::TextToSpeechServiceStub::SetCallback(
     /* [in] */ IITextToSpeechCallback* cb)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(1);
-    (*aryInterface)[0] = (IInterface*)caller;
+    aryInterface->Set(0, caller);
     // Note that passing in a null callback is a valid use case.
     if (!CheckNonNull(aryInterface.Get())) {
         return NOERROR;

@@ -522,9 +522,8 @@ AutoPtr<IDrawable> ProgressBar::TileifyIndeterminate(
     /* [in] */ IDrawable* inDrawable)
 {
     AutoPtr<IDrawable> drawable = inDrawable;
-    if (drawable->Probe(EIID_IAnimationDrawable)) {
-        AutoPtr<IAnimationDrawable> background =
-                (IAnimationDrawable*)drawable->Probe(EIID_IAnimationDrawable);
+    AutoPtr<IAnimationDrawable> background = IAnimationDrawable::Probe(drawable);
+    if (background) {
         Int32 N = 0;
         background->GetNumberOfFrames(&N);
         AutoPtr<IAnimationDrawable> newBg;
@@ -1654,7 +1653,7 @@ AutoPtr<IParcelable> ProgressBar::OnSaveInstanceState()
     ss->mProgress = mProgress;
     ss->mSecondaryProgress = mSecondaryProgress;
 
-    return (IParcelable*)ss->Probe(EIID_IParcelable);
+    return IParcelable::Probe(ss);
 }
 
 void ProgressBar::OnRestoreInstanceState(

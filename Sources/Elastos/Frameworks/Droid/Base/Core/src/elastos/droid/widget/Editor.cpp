@@ -306,15 +306,16 @@ ECode PinnedPopupWindow::Init()
     InitContentView();
 
     assert(mContentView != NULL);
+    IView* cv = IView::Probe(mContentView);
 
     AutoPtr<IViewGroupLayoutParams> wrapContent;
     CViewGroupLayoutParams::New(
             IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT,
             (IViewGroupLayoutParams**)&wrapContent);
-    IView::Probe(mContentView)->SetLayoutParams(wrapContent);
+    cv->SetLayoutParams(wrapContent);
 
-    mPopupWindow->SetContentView((IView*)mContentView->Probe(EIID_IView));
+    mPopupWindow->SetContentView(cv);
     return NOERROR;
 }
 
@@ -1913,9 +1914,9 @@ ECode HandleView::UpdatePosition(
                 mContainer->Update(positionX, positionY, -1, -1);
             } else {
                 mContainer->ShowAtLocation(
-                        (IView*)mEditor->mTextView->Probe(EIID_IView),
-                        IGravity::NO_GRAVITY,
-                        positionX, positionY);
+                    IView::Probe(mEditor->mTextView),
+                    IGravity::NO_GRAVITY,
+                    positionX, positionY);
             }
         } else {
             if (IsShowing()) {

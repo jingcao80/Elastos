@@ -266,8 +266,13 @@ ECode CWallpaperInfo::WriteToParcel(
     dest->WriteInt32(mThumbnailResource);
     dest->WriteInt32(mAuthorResource);
     dest->WriteInt32(mDescriptionResource);
-    if (mService != NULL && mService->Probe(EIID_IParcelable) != NULL) {
-        ((IParcelable*)mService->Probe(EIID_IParcelable))->WriteToParcel(dest);
+    IParcelable* p = IParcelable::Probe(mService);
+    if (p != NULL) {
+        dest->WriteInt32(1);
+        p->WriteToParcel(dest);
+    }
+    else {
+        dest->WriteInt32(0);
     }
     return NOERROR;
 }
@@ -279,8 +284,12 @@ ECode CWallpaperInfo::ReadFromParcel(
     source->ReadInt32(&mThumbnailResource);
     source->ReadInt32(&mAuthorResource);
     source->ReadInt32(&mDescriptionResource);
-    if (mService != NULL && mService->Probe(EIID_IParcelable) != NULL) {
-        ((IParcelable*)mService->Probe(EIID_IParcelable))->ReadFromParcel(source);
+    Int32 ival;
+    source->ReadInt32(&ival);
+    if (ival == 1) {
+        assert(mService == NULL);
+        CResolveInfo::New((IResolveInfo**)&mService);
+        IParcelable::Probe(mService)->ReadFromParcel(source);
     }
     return NOERROR;
 }

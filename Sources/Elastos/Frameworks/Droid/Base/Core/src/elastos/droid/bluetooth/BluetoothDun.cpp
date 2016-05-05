@@ -67,7 +67,7 @@ BluetoothDun::BluetoothDun(
 {
     mContext = context;
     mServiceListener = l;
-    CBluetoothDunStateChangeCallback::New((IBluetoothDun*)this, (IIBluetoothStateChangeCallback**)&mStateChangeCallback);
+    CBluetoothDunStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mStateChangeCallback);
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
     // try {
         CBluetoothAdapter* adapterImpl = (CBluetoothAdapter*)mAdapter.Get();

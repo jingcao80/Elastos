@@ -17,9 +17,9 @@ namespace Protocol {
 
 static AutoPtr<IHttpDateGenerator> InitDateGenerator()
 {
-    AutoPtr<CHttpDateGenerator> generator;
-    CHttpDateGenerator::NewByFriend((CHttpDateGenerator**)&generator);
-    return (IHttpDateGenerator*)generator.Get();
+    AutoPtr<IHttpDateGenerator> generator;
+    CHttpDateGenerator::New((IHttpDateGenerator**)&generator);
+    return generator;
 }
 //TODO:
 const AutoPtr<IHttpDateGenerator> RequestDate::DATE_GENERATOR;// = InitDateGenerator();

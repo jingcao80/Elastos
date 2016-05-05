@@ -24,9 +24,9 @@ namespace Message {
 
 static AutoPtr<IBasicLineParser> InitDefault()
 {
-    AutoPtr<CBasicLineParser> parser;
-    CBasicLineParser::NewByFriend((CBasicLineParser**)&parser);
-    return (IBasicLineParser*)parser.Get();
+    AutoPtr<IBasicLineParser> parser;
+    CBasicLineParser::New((IBasicLineParser**)&parser);
+    return parser;
 }
 const AutoPtr<IBasicLineParser> BasicLineParser::DEFAULT = InitDefault();
 

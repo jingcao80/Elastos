@@ -27,6 +27,8 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
+        TO_STRING_IMPL("ValueAnimator::AnimationHandler")
+
         AnimationHandler();
 
         ~AnimationHandler();

@@ -598,7 +598,7 @@ ECode ShapeDrawable::GetConstantState(
 {
     VALIDATE_NOT_NULL(state);
     Drawable::GetChangingConfigurations(&mShapeState->mChangingConfigurations);
-    *state = (IDrawableConstantState*)mShapeState->Probe(EIID_IDrawableConstantState);
+    *state = (IDrawableConstantState*)mShapeState.Get();
     REFCOUNT_ADD(*state);
     return NOERROR;
 }

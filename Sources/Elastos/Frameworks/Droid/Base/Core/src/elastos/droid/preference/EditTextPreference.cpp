@@ -108,7 +108,7 @@ ECode EditTextPreference::OnBindDialogView(
 
     AutoPtr<IViewParent> oldParent;
     IView::Probe(editText)->GetParent((IViewParent**)&oldParent);
-    if ((IView*)oldParent.Get() != view) {
+    if (IView::Probe(oldParent) != view) {
         if (oldParent != NULL) {
             AutoPtr<IViewGroup> vGroup = IViewGroup::Probe(oldParent);
             vGroup->RemoveViewInLayout(IView::Probe(editText));

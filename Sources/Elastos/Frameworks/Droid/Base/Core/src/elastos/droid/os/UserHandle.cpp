@@ -86,7 +86,7 @@ ECode UserHandle::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     if (h != NULL) {
-        IParcelable* parcelable = (IParcelable*)h->Probe(EIID_IParcelable);
+        IParcelable* parcelable = IParcelable::Probe(h);
         if (parcelable) {
             return parcelable->WriteToParcel(out);
         }

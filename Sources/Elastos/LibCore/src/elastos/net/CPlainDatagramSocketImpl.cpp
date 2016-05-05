@@ -137,7 +137,7 @@ ECode CPlainDatagramSocketImpl::GetTimeToLive(
     VALIDATE_NOT_NULL(timeToLive);
     AutoPtr<IInterface> result;
     FAIL_RETURN(GetOption(IIoBridge::ELASTOS_IP_MULTICAST_TTL, (IInterface**)&result));
-    AutoPtr<IInteger32> i32Obj = (IInteger32*)IInteger32::Probe(result);
+    AutoPtr<IInteger32> i32Obj = IInteger32::Probe(result);
     return i32Obj->GetValue(timeToLive);
 }
 

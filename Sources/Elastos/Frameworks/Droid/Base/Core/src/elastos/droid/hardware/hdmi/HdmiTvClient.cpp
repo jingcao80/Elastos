@@ -172,7 +172,7 @@ ECode HdmiTvClient::Create(
 
     AutoPtr<HdmiTvClient> tmp = new HdmiTvClient();
     tmp->constructor(service);
-    *client = (IHdmiTvClient*)tmp.Get();
+    *client = tmp.Get();
     REFCOUNT_ADD(*client);
     return NOERROR;
 }
