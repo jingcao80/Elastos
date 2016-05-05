@@ -8186,7 +8186,7 @@ void BatteryStatsImpl::SetOnBatteryLocked(
                 AutoPtr<IBackgroundThreadHelper> helper;
                 CBackgroundThreadHelper::AcquireSingleton((IBackgroundThreadHelper**)&helper);
                 AutoPtr<IHandler> h;
-                helper->GetHandle((IHandler**)&h);
+                helper->GetHandler((IHandler**)&h);
                 AutoPtr<IRunnable> runnable = new SetOnBatteryRunnable(parcel, this);
 
                 Boolean result;
