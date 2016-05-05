@@ -2,6 +2,9 @@
 module
 {
     interface Elastos.Utility.ILocale;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
 
     namespace Elastos {
     namespace Droid {
@@ -89,6 +92,69 @@ module
     }
 
     /**
+     * A delegate interface that defined the public API of the TimePicker. Allows different
+     * TimePicker implementations. This would need to be implemented by the TimePicker delegates
+     * for the real behavior.
+     */
+    interface ITimePickerDelegate {
+        SetCurrentHour(
+            [in] Int32 currentHour);
+
+        GetCurrentHour(
+            [out] Int32* result);
+
+        SetCurrentMinute(
+            [in] Int32 currentMinute);
+
+        GetCurrentMinute(
+            [out] Int32* result);
+
+        SetIs24HourView(
+            [in] Boolean is24HourView);
+
+        Is24HourView(
+            [out] Boolean* result);
+
+        SetOnTimeChangedListener(
+            [in] ITimePickerOnTimeChangedListener* onTimeChangedListener);
+
+        SetValidationCallback(
+            [in] ITimePickerValidationCallback* valCallback);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        IsEnabled(
+            [out] Boolean* result);
+
+        GetBaseline(
+            [out] Int32* result);
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        OnSaveInstanceState(
+            [in] IParcelable* superState,
+            [out] IParcelable** result);
+
+        OnRestoreInstanceState(
+            [in] IParcelable* state);
+
+        DispatchPopulateAccessibilityEvent(
+            [in] IAccessibilityEvent* event,
+            [out] Boolean* result);
+
+        OnPopulateAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        OnInitializeAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        OnInitializeAccessibilityNodeInfo(
+            [in] IAccessibilityNodeInfo* info);
+    }
+
+    /**
      * A callback interface for updating input validity when the TimePicker
      * when included into a Dialog.
      *
@@ -101,6 +167,10 @@ module
 
     /**
      * An abstract class which can be used as a start for TimePicker implementations
+     */
+    /**
+     * @Involve
+     * interface ITimePickerDelegate
      */
     interface ITimePickerAbstractTimePickerDelegate {
         SetCurrentLocale(

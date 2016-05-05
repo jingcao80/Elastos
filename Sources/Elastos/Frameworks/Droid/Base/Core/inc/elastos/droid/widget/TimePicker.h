@@ -11,7 +11,6 @@ using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
 using Elastos::Droid::Widget::FrameLayout;
-using Elastos::Droid::Widget::ITimePickerAbstractTimePickerDelegate;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::ILocale;
 
@@ -25,72 +24,12 @@ class TimePicker
     , public ITimePicker
 {
 public:
-    class TimePickerDelegate
-        : public Object
-    {
-    public:
-        virtual CARAPI SetCurrentHour(
-            /* [in] */ Int32 currentHour) = 0;
-
-        virtual CARAPI GetCurrentHour(
-            /* [out] */ Int32* result) = 0;
-
-        virtual CARAPI SetCurrentMinute(
-            /* [in] */ Int32 currentMinute) = 0;
-
-        virtual CARAPI GetCurrentMinute(
-            /* [out] */ Int32* result) = 0;
-
-        virtual CARAPI SetIs24HourView(
-            /* [in] */ Boolean is24HourView) = 0;
-
-        virtual CARAPI Is24HourView(
-            /* [out] */ Boolean* result) = 0;
-
-        virtual CARAPI SetOnTimeChangedListener(
-            /* [in] */ ITimePickerOnTimeChangedListener* onTimeChangedListener) = 0;
-
-        virtual CARAPI SetValidationCallback(
-            /* [in] */ ITimePickerValidationCallback* callback) = 0;
-
-        virtual CARAPI SetEnabled(
-            /* [in] */ Boolean enabled) = 0;
-
-        virtual CARAPI IsEnabled(
-            /* [out] */ Boolean* result) = 0;
-
-        virtual CARAPI GetBaseline(
-            /* [out] */ Int32* result) = 0;
-
-        virtual CARAPI OnConfigurationChanged(
-            /* [in] */ IConfiguration* newConfig) = 0;
-
-        virtual CARAPI OnSaveInstanceState(
-            /* [in] */ IParcelable* superState,
-            /* [out] */ IParcelable** result) = 0;
-
-        virtual CARAPI OnRestoreInstanceState(
-            /* [in] */ IParcelable* state) = 0;
-
-        virtual CARAPI DispatchPopulateAccessibilityEvent(
-            /* [in] */ IAccessibilityEvent* event,
-            /* [out] */ Boolean* result) = 0;
-
-        virtual CARAPI OnPopulateAccessibilityEvent(
-            /* [in] */ IAccessibilityEvent* event) = 0;
-
-        virtual CARAPI OnInitializeAccessibilityEvent(
-            /* [in] */ IAccessibilityEvent* event) = 0;
-
-        virtual CARAPI OnInitializeAccessibilityNodeInfo(
-            /* [in] */ IAccessibilityNodeInfo* info) = 0;
-    };
-
     /**
       * An abstract class which can be used as a start for TimePicker implementations
       */
     class AbstractTimePickerDelegate
-        : public TimePickerDelegate
+        : public Object
+        , public ITimePickerDelegate
         , public ITimePickerAbstractTimePickerDelegate
     {
     public:
@@ -247,7 +186,7 @@ protected:
 private:
     static const Int32 MODE_SPINNER = 1;
     static const Int32 MODE_CLOCK = 2;
-    /*const*/ AutoPtr<TimePickerDelegate> mDelegate;
+    /*const*/ AutoPtr<ITimePickerDelegate> mDelegate;
 };
 
 } // namespace Widget

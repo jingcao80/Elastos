@@ -402,7 +402,7 @@ const Int32 TimePickerSpinnerDelegate::HOURS_IN_HALF_DAY;
 CAR_INTERFACE_IMPL_2(TimePickerSpinnerDelegate, TimePicker::AbstractTimePickerDelegate, ITimePickerSpinnerDelegate, IOnValueSelectedListener)
 
 TimePickerSpinnerDelegate::TimePickerSpinnerDelegate()
-    : mIsEnabled(FALSE)
+    : mIsEnabled(DEFAULT_ENABLED_STATE)
     , mAllowAutoAdvance(FALSE)
     , mInitialHourOfDay(0)
     , mInitialMinute(0)

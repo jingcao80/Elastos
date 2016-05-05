@@ -30,7 +30,7 @@ ECode CActivityOne::OnCreate(
     mTimePicker = ITimePicker::Probe(view);
 
     // mTimePicker->SetIs24HourView(TRUE);
-    mTimePicker->SetCurrentHour(9);
+    mTimePicker->SetCurrentHour(19);
     mTimePicker->SetCurrentMinute(50);
 
     return NOERROR;

@@ -3019,7 +3019,16 @@ module
 
     [local]
     class CTimePickerClockDelegate {
+        constructor(
+            [in] ITimePicker* delegator,
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
         interface ITimePickerClockDelegate;
+        interface ITimePickerAbstractTimePickerDelegate;
+        interface ITimePickerDelegate;
     }
 
     [local]
@@ -3052,7 +3061,8 @@ module
 
         interface ITimePickerSpinnerDelegate;
         interface ITimePickerAbstractTimePickerDelegate;
-        //interface IOnValueSelectedListener;
+        interface ITimePickerDelegate;
+        interface IOnValueSelectedListener;
     }
 
     class CTimePickerSpinnerDelegateSavedState {

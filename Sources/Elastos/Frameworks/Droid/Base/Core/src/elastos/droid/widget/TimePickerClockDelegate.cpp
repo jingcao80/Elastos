@@ -257,7 +257,7 @@ CAR_INTERFACE_IMPL(TimePickerClockDelegate, TimePicker::AbstractTimePickerDelega
 TimePickerClockDelegate::TimePickerClockDelegate()
     : mIs24HourView(FALSE)
     , mIsAm(FALSE)
-    , mIsEnabled(FALSE)
+    , mIsEnabled(DEFAULT_ENABLED_STATE)
     , mHourWithTwoDigit(FALSE)
     , mHourFormat(0)
 {

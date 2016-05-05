@@ -1,13 +1,12 @@
 
 #include "elastos/droid/R.h"
 #include "elastos/droid/widget/TimePicker.h"
-#include "elastos/droid/widget/TimePickerClockDelegate.h"
-#include "elastos/droid/widget/TimePickerSpinnerDelegate.h"
+#include "elastos/droid/widget/CTimePickerClockDelegate.h"
+#include "elastos/droid/widget/CTimePickerSpinnerDelegate.h"
 
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Widget::EIID_ITimePickerDelegate;
 using Elastos::Droid::Widget::EIID_ITimePickerAbstractTimePickerDelegate;
-using Elastos::Droid::Widget::TimePickerClockDelegate;
-using Elastos::Droid::Widget::TimePickerSpinnerDelegate;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
@@ -19,7 +18,7 @@ namespace Widget {
 //=====================================================================
 //                TimePicker::AbstractTimePickerDelegate
 //=====================================================================
-CAR_INTERFACE_IMPL(TimePicker::AbstractTimePickerDelegate, TimePickerDelegate, ITimePickerAbstractTimePickerDelegate)
+CAR_INTERFACE_IMPL_2(TimePicker::AbstractTimePickerDelegate, Object, ITimePickerDelegate, ITimePickerAbstractTimePickerDelegate)
 
 TimePicker::AbstractTimePickerDelegate::AbstractTimePickerDelegate()
 {
@@ -121,18 +120,14 @@ ECode TimePicker::constructor(
     a->Recycle();
 
     switch (mode) {
-        case MODE_CLOCK: {
-                mDelegate = new TimePickerSpinnerDelegate();
-                ((TimePickerSpinnerDelegate*)mDelegate.Get())->constructor(this,
-                        context, attrs, defStyleAttr, defStyleRes);
-            }
+        case MODE_CLOCK:
+                CTimePickerSpinnerDelegate::New(this, context, attrs,
+                        defStyleAttr, defStyleRes, (ITimePickerDelegate**)&mDelegate);
             break;
         case MODE_SPINNER:
-        default: {
-                mDelegate = new TimePickerClockDelegate();
-                ((TimePickerClockDelegate*)mDelegate.Get())->constructor(this,
-                        context, attrs, defStyleAttr, defStyleRes);
-            }
+        default:
+                CTimePickerClockDelegate::New(this, context, attrs,
+                        defStyleAttr, defStyleRes, (ITimePickerDelegate**)&mDelegate);
             break;
     }
     return NOERROR;
