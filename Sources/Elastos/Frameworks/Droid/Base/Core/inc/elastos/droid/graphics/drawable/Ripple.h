@@ -6,6 +6,7 @@
 #include "elastos/droid/graphics/CanvasProperty.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/core/Object.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IObjectAnimator;
@@ -24,6 +25,7 @@ namespace Drawable {
  */
 class Ripple
     : public Object
+    , public IRipple
 {
 private:
     /**
@@ -34,7 +36,9 @@ private:
         , public ITimeInterpolator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("Ripple::LogInterpolator");
 
         // @Override
         CARAPI GetInterpolation(
@@ -50,6 +54,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("Ripple::RippleAnimatorListenerAdapter");
+
         RippleAnimatorListenerAdapter(
             /* [in] */ Ripple* host);
 
@@ -61,92 +67,102 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    Ripple();
+
     /**
      * Creates a new ripple.
      */
-    Ripple(
+    CARAPI constructor(
         /* [in] */ IRippleDrawable* owner,
         /* [in] */ IRect* bounds,
         /* [in] */ Float startingX,
         /* [in] */ Float startingY);
 
-    CARAPI_(void) Setup(
+    CARAPI Setup(
         /* [in] */ Int32 maxRadius,
         /* [in] */ Int32 color,
         /* [in] */ Float density);
 
-    CARAPI_(Boolean) IsHardwareAnimating();
+    CARAPI IsHardwareAnimating(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) OnHotspotBoundsChanged();
+    CARAPI OnHotspotBoundsChanged();
 
-    CARAPI_(void) SetOpacity(
+    CARAPI SetOpacity(
         /* [in] */ Float a);
 
-    CARAPI_(Float) GetOpacity();
+    CARAPI GetOpacity(
+        /* [out] */ Float* result);
 
     // @SuppressWarnings("unused")
-    CARAPI_(void) SetRadiusGravity(
+    CARAPI SetRadiusGravity(
         /* [in] */ Float r);
 
     // @SuppressWarnings("unused")
-    CARAPI_(Float) GetRadiusGravity();
+    CARAPI GetRadiusGravity(
+        /* [out] */ Float* result);
 
     // @SuppressWarnings("unused")
-    CARAPI_(void) SetXGravity(
+    CARAPI SetXGravity(
         /* [in] */ Float x);
 
     // @SuppressWarnings("unused")
-    CARAPI_(Float) GetXGravity();
+    CARAPI GetXGravity(
+        /* [out] */ Float* result);
 
     // @SuppressWarnings("unused")
-    CARAPI_(void) SetYGravity(
+    CARAPI SetYGravity(
         /* [in] */ Float y);
 
     // @SuppressWarnings("unused")
-    CARAPI_(Float) GetYGravity();
+    CARAPI GetYGravity(
+        /* [out] */ Float* result);
 
     /**
      * Draws the ripple centered at (0,0) using the specified paint.
      */
-    CARAPI_(Boolean) Draw(
+    CARAPI Draw(
         /* [in] */ ICanvas* c,
-        /* [in] */ IPaint* p);
+        /* [in] */ IPaint* p,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns the maximum bounds of the ripple relative to the ripple center.
      */
-    CARAPI_(void) GetBounds(
+    CARAPI GetBounds(
         /* [in] */ IRect* bounds);
 
     /**
      * Specifies the starting position relative to the drawable bounds. No-op if
      * the ripple has already entered.
      */
-    CARAPI_(void) Move(
+    CARAPI Move(
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     /**
      * Starts the enter animation.
      */
-    CARAPI_(void) Enter();
+    CARAPI Enter();
 
     /**
      * Starts the exit animation.
      */
-    CARAPI_(void) Exit();
+    CARAPI Exit();
 
     /**
      * Jump all animations to their end state. The caller is responsible for
      * removing the ripple from the list of animating ripples.
      */
-    CARAPI_(void) Jump();
+    CARAPI Jump();
 
     /**
      * Cancels all animations. The caller is responsible for removing
      * the ripple from the list of animating ripples.
      */
-    CARAPI_(void) Cancel();
+    CARAPI Cancel();
 
 private:
     CARAPI_(void) ClampStartingPosition();
@@ -182,8 +198,6 @@ private:
 
     CARAPI_(void) InvalidateSelf();
 
-    static CARAPI_(AutoPtr<ITimeInterpolator>) Init_LINEAR_INTERPOLATOR();
-
 private:
     static AutoPtr<ITimeInterpolator> LINEAR_INTERPOLATOR;
     static AutoPtr<ITimeInterpolator> DECEL_INTERPOLATOR;
@@ -199,7 +213,7 @@ private:
     AutoPtr<IArrayList> mRunningAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
     AutoPtr<IArrayList> mPendingAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
 
-    AutoPtr<IRippleDrawable> mOwner;
+    AutoPtr<IWeakReference> mWeakHost;//IRippleDrawable
 
     /** Bounds used for computing max radius. */
     AutoPtr<IRect> mBounds;

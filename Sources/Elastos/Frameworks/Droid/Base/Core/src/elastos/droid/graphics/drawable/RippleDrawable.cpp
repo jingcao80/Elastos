@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/drawable/RippleDrawable.h"
 #include "elastos/droid/graphics/drawable/CRippleDrawable.h"
+#include "elastos/droid/graphics/drawable/CRipple.h"
 #include "elastos/droid/graphics/CPorterDuffXfermode.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CPaint.h"
@@ -192,7 +193,9 @@ ECode RippleDrawable::JumpToCurrentState()
     Boolean needsDraw = FALSE;
 
     if (mRipple != NULL) {
-        needsDraw |= mRipple->IsHardwareAnimating();
+        Boolean bval;
+        mRipple->IsHardwareAnimating(&bval);
+        needsDraw |= bval;
         mRipple->Jump();
     }
 
@@ -212,14 +215,16 @@ Boolean RippleDrawable::CancelExitingRipples()
     Boolean needsDraw = FALSE;
 
     Int32 count = mExitingRipplesCount;
-    AutoPtr<ArrayOf<Ripple*> > ripples = mExitingRipples;
+    AutoPtr<ArrayOf<IRipple*> > ripples = mExitingRipples;
     for (Int32 i = 0; i < count; i++) {
-        needsDraw |= (*ripples)[i]->IsHardwareAnimating();
+        Boolean bval;
+        (*ripples)[i]->IsHardwareAnimating(&bval);
+        needsDraw |= bval;
         (*ripples)[i]->Cancel();
     }
 
     if (ripples != NULL) {
-        Arrays::Fill(ripples, 0, count, (Ripple*)NULL);
+        Arrays::Fill(ripples, 0, count, (IRipple*)NULL);
     }
     mExitingRipplesCount = 0;
 
@@ -568,7 +573,7 @@ void RippleDrawable::TryRippleEnter()
             mHotspotBounds->GetExactCenterX(&x);
             mHotspotBounds->GetExactCenterY(&y);
         }
-        mRipple = new Ripple(this, mHotspotBounds, x, y);
+        CRipple::New(this, mHotspotBounds, x, y, (IRipple**)&mRipple);
     }
 
     Int32 color = 0;
@@ -583,7 +588,7 @@ void RippleDrawable::TryRippleExit()
 {
     if (mRipple != NULL) {
         if (mExitingRipples == NULL) {
-            mExitingRipples = ArrayOf<Ripple*>::Alloc(MAX_RIPPLES);
+            mExitingRipples = ArrayOf<IRipple*>::Alloc(MAX_RIPPLES);
         }
         mExitingRipples->Set(mExitingRipplesCount++, mRipple);
         mRipple->Exit();
@@ -596,7 +601,9 @@ void RippleDrawable::ClearHotspots()
     Boolean needsDraw = FALSE;
 
     if (mRipple != NULL) {
-        needsDraw |= mRipple->IsHardwareAnimating();
+        Boolean bval;
+        mRipple->IsHardwareAnimating(&bval);
+        needsDraw |= bval;
         mRipple->Cancel();
         mRipple = NULL;
     }
@@ -635,7 +642,7 @@ ECode RippleDrawable::GetHotspotBounds(
 void RippleDrawable::OnHotspotBoundsChanged()
 {
     Int32 count = mExitingRipplesCount;
-    AutoPtr<ArrayOf<Ripple*> > ripples = mExitingRipples;
+    AutoPtr<ArrayOf<IRipple*> > ripples = mExitingRipples;
     for (Int32 i = 0; i < count; i++) {
         (*ripples)[i]->OnHotspotBoundsChanged();
     }
@@ -726,10 +733,10 @@ ECode RippleDrawable::Draw(
 }
 
 void RippleDrawable::RemoveRipple(
-    /* [in] */ Ripple* ripple)
+    /* [in] */ IRipple* ripple)
 {
     // Ripple ripple ripple ripple. Ripple ripple.
-    AutoPtr<ArrayOf<Ripple*> > ripples = mExitingRipples;
+    AutoPtr<ArrayOf<IRipple*> > ripples = mExitingRipples;
     Int32 count = mExitingRipplesCount;
     Int32 index = GetRippleIndex(ripple);
     if (index >= 0) {
@@ -743,9 +750,9 @@ void RippleDrawable::RemoveRipple(
 }
 
 Int32 RippleDrawable::GetRippleIndex(
-    /* [in] */ Ripple* ripple)
+    /* [in] */ IRipple* ripple)
 {
-    AutoPtr<ArrayOf<Ripple*> > ripples = mExitingRipples;
+    AutoPtr<ArrayOf<IRipple*> > ripples = mExitingRipples;
     const Int32 count = mExitingRipplesCount;
     for (Int32 i = 0; i < count; i++) {
         if ((*ripples)[i] == ripple) {
@@ -835,14 +842,17 @@ Int32 RippleDrawable::DrawRippleLayer(
 
     // Draw ripples and update the animating ripples array.
     const Int32 count = mExitingRipplesCount;
-    AutoPtr<ArrayOf<Ripple*> > ripples = mExitingRipples;
+    Boolean bval;
+    AutoPtr<ArrayOf<IRipple*> > ripples = mExitingRipples;
     for (Int32 i = 0; i <= count; i++) {
-        AutoPtr<Ripple> ripple;
+        AutoPtr<IRipple> ripple;
         if (i < count) {
             ripple = (*ripples)[i];
-        } else if (mRipple != NULL) {
+        }
+        else if (mRipple != NULL) {
             ripple = mRipple;
-        } else {
+        }
+        else {
             continue;
         }
 
@@ -870,7 +880,8 @@ Int32 RippleDrawable::DrawRippleLayer(
             canvas->Translate(x, y);
         }
 
-        drewRipples |= ripple->Draw(canvas, GetRipplePaint());
+        ripple->Draw(canvas, GetRipplePaint(), &bval);
+        drewRipples |= bval;
     }
 
     // Always restore the translation.
@@ -943,7 +954,7 @@ ECode RippleDrawable::GetDirtyBounds(
         Int32 cY = (Int32) fv;
         AutoPtr<IRect> rippleBounds = mTempRect;
 
-        AutoPtr<ArrayOf<Ripple*> > activeRipples = mExitingRipples;
+        AutoPtr<ArrayOf<IRipple*> > activeRipples = mExitingRipples;
         const Int32 N = mExitingRipplesCount;
         for (Int32 i = 0; i < N; i++) {
             (*activeRipples)[i]->GetBounds(rippleBounds);

@@ -85,6 +85,7 @@ module
     merge("graphics/drawable/PictureDrawable.car");
     merge("graphics/drawable/AnimatedStateListDrawable.car");
     merge("graphics/drawable/AnimatedVectorDrawable.car");
+    merge("graphics/drawable/Ripple.car");
     merge("graphics/drawable/RippleDrawable.car");
     merge("graphics/drawable/VectorDrawable.car");
     merge("graphics/drawable/shapes/Shape.car");
@@ -1596,6 +1597,16 @@ module
 
         interface IVectorDrawable;
         interface IDrawable;
+    }
+
+    class CRipple {
+        constructor(
+            [in] IRippleDrawable* weakOwner,
+            [in] IRect* bounds,
+            [in] Float startingX,
+            [in] Float startingY);
+
+        interface IRipple;
     }
 
     class CRippleDrawable {

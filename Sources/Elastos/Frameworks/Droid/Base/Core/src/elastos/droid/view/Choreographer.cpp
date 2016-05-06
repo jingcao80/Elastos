@@ -313,8 +313,7 @@ Choreographer::Choreographer(
     mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper, this) : NULL;
     mLastFrameTimeNanos = Elastos::Core::Math::INT64_MIN_VALUE;
 
-    Logger::I(TAG, "TODO GetRefreshRate() %.2f", GetRefreshRate());
-    mFrameIntervalNanos = (Int64)(1000000000 / 60.0f/*GetRefreshRate()*/);
+    mFrameIntervalNanos = (Int64)(1000000000 / GetRefreshRate());
 
     mCallbackQueues = ArrayOf<CallbackQueue*>::Alloc(CALLBACK_LAST + 1);
     for (Int32 i = 0; i <= CALLBACK_LAST; i++) {
