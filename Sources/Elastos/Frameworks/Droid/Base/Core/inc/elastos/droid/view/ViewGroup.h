@@ -85,6 +85,19 @@ public:
         virtual CARAPI ResolveLayoutDirection(
             /* [in] */ Int32 layoutDirection);
 
+        /**
+         * Returns a String representation of this set of layout parameters.
+         *
+         * @param output the String to prepend to the internal representation
+         * @return a String with the following format: output +
+         *         "ViewGroup.LayoutParams={ width=WIDTH, height=HEIGHT }"
+         *
+         * @hide
+         */
+        virtual CARAPI Debug(
+            /* [in] */ const String& output,
+            /* [out] */ String* result);
+
         virtual CARAPI OnDebugDraw(
             /* [in] */ IView* view,
             /* [in] */ ICanvas* canvas,
@@ -1740,7 +1753,8 @@ protected:
     virtual CARAPI GenerateDefaultLayoutParams(
         /* [out] */ IViewGroupLayoutParams** params);
 
-    //virtual CARAPI_(void) debug(Int32 depth)
+    virtual CARAPI_(void) Debug(
+        /* [in] */ Int32 depth);
 
     /**
      * Ask all of the children of this view to measure themselves, taking into

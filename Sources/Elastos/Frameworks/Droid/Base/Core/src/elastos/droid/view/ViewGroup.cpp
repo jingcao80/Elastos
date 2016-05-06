@@ -257,6 +257,19 @@ ECode ViewGroup::LayoutParams::ResolveLayoutDirection(
     return NOERROR;
 }
 
+ECode ViewGroup::LayoutParams::Debug(
+    /* [in] */ const String& output,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    String widthStr, heightStr;
+    SizeToString(mWidth, &widthStr);
+    SizeToString(mHeight, &heightStr);
+    *result = output + "ViewGroup.LayoutParams={ width=" + widthStr + ", height=" +
+            heightStr + " }";
+    return NOERROR;
+}
+
 ECode ViewGroup::LayoutParams::OnDebugDraw(
     /* [in] */ IView* view,
     /* [in] */ ICanvas* canvas,
@@ -6413,6 +6426,38 @@ ECode ViewGroup::GenerateDefaultLayoutParams(
     *params = temp;
     REFCOUNT_ADD(*params);
     return NOERROR;
+}
+
+/**
+ * {@inheritDoc}
+ */
+void ViewGroup::Debug(
+    /* [in] */ Int32 depth)
+{
+    View::Debug(depth);
+    String output;
+
+    if (mFocused != NULL) {
+        output = DebugIndent(depth);
+        output += "mFocused";
+        Logger::D(TAG, "%s", output.string());
+    }
+    if (mChildrenCount != 0) {
+        output = DebugIndent(depth);
+        output += "{";
+        Logger::D(TAG, "%s", output.string());
+    }
+    Int32 count = mChildrenCount;
+    for (Int32 i = 0; i < count; i++) {
+        View* child = (View*)(*mChildren)[i];
+        child->Debug(depth + 1);
+    }
+
+    if (mChildrenCount != 0) {
+        output = DebugIndent(depth);
+        output += "}";
+        Logger::D(TAG, "%s", output.string());
+    }
 }
 
 /**

@@ -2479,7 +2479,7 @@ public:
 
     virtual CARAPI ComputeScroll();
 
-    virtual CARAPI Debug(
+    virtual CARAPI_(void) Debug(
         /* [in] */ Int32 depth);
 
     /**

@@ -13388,12 +13388,9 @@ ECode View::GetSolidColor(
  * @param flags the view flags to convert to a string
  * @return a String representing the supplied flags
  */
-ECode View::PrintFlags(
-    /* [in] */ Int32 flags,
-    /* [out] */ String* output)
+String View::PrintFlags(
+    /* [in] */ Int32 flags)
 {
-    VALIDATE_NOT_NULL(output);
-
     StringBuilder sb("");
     Int32 numFlags = 0;
     if ((flags & FOCUSABLE_MASK) == FOCUSABLE) {
@@ -13419,8 +13416,7 @@ ECode View::PrintFlags(
         default:
             break;
         }
-    *output = sb.ToString();
-    return NOERROR;
+    return sb.ToString();
 }
 
 /**
@@ -13430,12 +13426,9 @@ ECode View::PrintFlags(
  * @param privateFlags the private view flags to convert to a string
  * @return a String representing the supplied flags
  */
-ECode View::PrintPrivateFlags(
-    /* [in] */ Int32 privateFlags,
-    /* [out] */ String* output)
+String View::PrintPrivateFlags(
+    /* [in] */ Int32 privateFlags)
 {
-    VALIDATE_NOT_NULL(output);
-
     StringBuilder sb("");
     Int32 numFlags = 0;
 
@@ -13483,8 +13476,7 @@ ECode View::PrintPrivateFlags(
         sb += "DRAWN";
         // USELESS HERE numFlags++;
     }
-    *output = sb.ToString();
-    return NOERROR;
+    return sb.ToString();
 }
 
 /**
@@ -15603,10 +15595,9 @@ ECode View::GetTransitionName(
  *
  * @hide
  */
-ECode View::Debug()
+void View::Debug()
 {
-    //Debug(0);
-    return NOERROR;
+    Debug(0);
 }
 
 /**
@@ -15618,67 +15609,109 @@ ECode View::Debug()
  *
  * @hide
  */
-//void View::Debug(
-//    /* [in] */ int32 depth)
-//{
-//    String output = debugIndent(depth - 1);
-//
-//    output += "+ " + this;
-//    int id = getId();
-//    if (id != -1) {
-//        output += " (id=" + id + ")";
-//    }
-//    Object tag = getTag();
-//    if (tag != NULL) {
-//        output += " (tag=" + tag + ")";
-//    }
-//    Log.d(TAG, output);
-//
-//    if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
-//        output = debugIndent(depth) + " PFLAG_FOCUSED";
-//        Log.d(TAG, output);
-//    }
-//
-//    output = debugIndent(depth);
-//    output += "frame={" + mLeft + ", " + mTop + ", " + mRight
-//            + ", " + mBottom + "} scroll={" + mScrollX + ", " + mScrollY
-//            + "} ";
-//    Log.d(TAG, output);
-//
-//    if (mPaddingLeft != 0 || mPaddingTop != 0 || mPaddingRight != 0
-//            || mPaddingBottom != 0) {
-//        output = debugIndent(depth);
-//        output += "padding={" + mPaddingLeft + ", " + mPaddingTop
-//                + ", " + mPaddingRight + ", " + mPaddingBottom + "}";
-//        Log.d(TAG, output);
-//    }
-//
-//    output = debugIndent(depth);
-//    output += "mMeasureWidth=" + mMeasuredWidth +
-//            " mMeasureHeight=" + mMeasuredHeight;
-//    Log.d(TAG, output);
-//
-//    output = debugIndent(depth);
-//    if (mLayoutParams == NULL) {
-//        output += "BAD! no layout params";
-//    }
-//    else {
-//        output = mLayoutParams.debug(output);
-//    }
-//    Log.d(TAG, output);
-//
-//    output = debugIndent(depth);
-//    output += "flags={";
-//    output += View.printFlags(mViewFlags);
-//    output += "}";
-//    Log.d(TAG, output);
-//
-//    output = debugIndent(depth);
-//    output += "privateFlags={";
-//    output += View.printPrivateFlags(mPrivateFlags);
-//    output += "}";
-//    Log.d(TAG, output);
-//}
+void View::Debug(
+    /* [in] */ Int32 depth)
+{
+    StringBuilder output;
+
+    output.Append(DebugIndent(depth - 1));
+
+    output.Append("+ ");
+    String str;
+    Object::ToString(&str);
+    output.Append(str);
+    Int32 id;
+    GetId(&id);
+    if (id != -1) {
+        output.Append(" (id=");
+        output.Append(id);
+        output.Append(")");
+    }
+    AutoPtr<IInterface> tag;
+    GetTag((IInterface**)&tag);
+    if (tag != NULL) {
+        output.Append(" (tag=");
+        output.Append(TO_CSTR(tag));
+        output.Append(")");
+    }
+    Logger::D(TAG, "%s", output.ToString().string());
+
+    if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
+        output.Reset();
+        output.Append(DebugIndent(depth));
+        output.Append(" PFLAG_FOCUSED");
+        Logger::D(TAG, "%s", output.ToString().string());
+    }
+
+    output.Reset();
+    output.Append(DebugIndent(depth));
+    output.Append("frame={");
+    output.Append(mLeft);
+    output.Append(", ");
+    output.Append(mTop);
+    output.Append(", ");
+    output.Append(mRight);
+    output.Append(", ");
+    output.Append(mBottom);
+    output.Append("} scroll={");
+    output.Append(mScrollX);
+    output.Append(", ");
+    output.Append(mScrollY);
+    output.Append("} ");
+    Logger::D(TAG, "%s", output.ToString().string());
+
+
+    if (mPaddingLeft != 0 || mPaddingTop != 0 || mPaddingRight != 0
+            || mPaddingBottom != 0) {
+        output.Reset();
+        output.Append(DebugIndent(depth));
+        output.Append("padding={");
+        output.Append(mPaddingLeft);
+        output.Append(", ");
+        output.Append(mPaddingTop);
+        output.Append(", ");
+        output.Append(mPaddingRight);
+        output.Append(", ");
+        output.Append(mPaddingBottom);
+        output.Append("}");
+        Logger::D(TAG, "%s", output.ToString().string());
+    }
+
+    output.Reset();
+    output.Append(DebugIndent(depth));
+    output.Append("mMeasureWidth=");
+    output.Append(mMeasuredWidth);
+    output.Append(" mMeasureHeight=");
+    output.Append(mMeasuredHeight);
+    Logger::D(TAG, "%s", output.ToString().string());
+
+    output.Reset();
+    output.Append(DebugIndent(depth));
+    if (mLayoutParams == NULL) {
+        output.Append("BAD! no layout params");
+    }
+    else {
+        output.Reset();
+        String str;
+        mLayoutParams->Debug(output.ToString(), &str);
+        output.Append(str);
+    }
+    Logger::D(TAG, "%s", output.ToString().string());
+
+    output.Reset();
+    output.Append(DebugIndent(depth));
+    output.Append("flags={");
+    output.Append(View::PrintFlags(mViewFlags));
+    output.Append("}");
+    Logger::D(TAG, "%s", output.ToString().string());
+
+    output.Reset();
+    output.Append(DebugIndent(depth));
+    output.Append("privateFlags={");
+    output.Append(View::PrintPrivateFlags(mPrivateFlags));
+    output.Append("}");
+    Logger::D(TAG, "%s", output.ToString().string());
+}
 
 /**
  * Creates an string of whitespaces used for indentation.
@@ -15688,15 +15721,16 @@ ECode View::Debug()
  *
  * @hide
  */
-//static String debugIndent(
-//    /* [in] */ Int32 depth)
-//{
-//    StringBuilder spaces = new StringBuilder((depth * 2 + 3) * 2);
-//    for (int i = 0; i < (depth * 2) + 3; i++) {
-//        spaces.append(' ').append(' ');
-//    }
-//    return spaces.toString();
-//}
+String View::DebugIndent(
+    /* [in] */ Int32 depth)
+{
+    StringBuilder spaces((depth * 2 + 3) * 2);
+    for (Int32 i = 0; i < (depth * 2) + 3; i++) {
+        spaces.Append(' ');
+        spaces.Append(' ');
+    }
+    return spaces.ToString();
+}
 
 /**
  * <p>Return the offset of the widget's text baseline from the widget's top

@@ -4311,7 +4311,13 @@ public:
     virtual CARAPI Animate(
         /* [out] */ IViewPropertyAnimator** res);
 
-    virtual CARAPI Debug();
+    /**
+     * Prints information about this view in the log output, with the tag
+     * {@link #VIEW_LOG_TAG}.
+     *
+     * @hide
+     */
+    virtual CARAPI_(void) Debug();
 
     virtual CARAPI GetBaseline(
         /* [out] */ Int32* baseline);
@@ -5058,10 +5064,10 @@ protected:
     virtual CARAPI_(AutoPtr<IView>) FindViewWithTagTraversal(
         /* [in] */ IInterface* tag);
 
-    //virtual CARAPI_(void) Debug(
-    //    /* [in] */ Int32 depth);
+    virtual CARAPI_(void) Debug(
+       /* [in] */ Int32 depth);
 
-    static String DebugIndent(
+    static CARAPI_(String) DebugIndent(
         /* [in] */ Int32 depth);
 
     virtual CARAPI_(void) OnMeasure(
@@ -5556,13 +5562,11 @@ private:
 
     CARAPI_(Boolean) InitialAwakenScrollBars();
 
-    static CARAPI PrintFlags(
-        /* [in] */ Int32 flags,
-        /* [out] */ String* output);
+    static CARAPI_(String) PrintFlags(
+        /* [in] */ Int32 flags);
 
-    CARAPI PrintPrivateFlags(
-        /* [in] */ Int32 privateFlags,
-        /* [out] */ String* output);
+    static CARAPI_(String) PrintPrivateFlags(
+        /* [in] */ Int32 privateFlags);
 
     static CARAPI_(void) SetTagInternal(
         /* [in] */ IView* view,

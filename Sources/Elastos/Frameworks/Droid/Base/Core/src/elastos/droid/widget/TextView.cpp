@@ -63,6 +63,7 @@
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/view/textservice/CSpellCheckerSubtype.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -192,6 +193,7 @@ using Elastos::Droid::View::InputMethod::CInputMethodManager;
 using Elastos::Droid::View::TextService::ISpellCheckerSubtype;
 using Elastos::Droid::View::TextService::CSpellCheckerSubtype;
 using Elastos::Core::EIID_ICharSequence;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
@@ -8649,31 +8651,45 @@ Int32 TextView::ViewportToContentVerticalOffset()
     return offset;
 }
 
-ECode TextView::Debug(
+void TextView::Debug(
     /* [in] */ Int32 depth)
 {
-    // TODO:
-    /*View::debug(depth);
+    View::Debug(depth);
 
-    String output = debugIndent(depth);
-    output += "frame={" + mLeft + ", " + mTop + ", " + mRight
-            + ", " + mBottom + "} scroll={" + mScrollX + ", " + mScrollY
-            + "} ";
+    StringBuilder output;
+    output.Append(DebugIndent(depth));
+    output.Append("frame={");
+    output.Append(mLeft);
+    output.Append(", ");
+    output.Append(mTop);
+    output.Append(", ");
+    output.Append(mRight);
+    output.Append(", ");
+    output.Append(mBottom);
+    output.Append("} scroll={");
+    output.Append(mScrollX);
+    output.Append(", ");
+    output.Append(mScrollY);
+    output.Append("} ");
 
     if (mText != NULL) {
-
-        output += "mText=\"" + mText + "\" ";
+        output.Append("mText=\"");
+        output.Append(CoreUtils::Unbox(mText));
+        output.Append("\" ");
         if (mLayout != NULL) {
-            output += "mLayout width=" + mLayout->GetWidth()
-                    + " height=" + mLayout->getHeight();
+            Int32 w, h;
+            mLayout->GetWidth(&w);
+            mLayout->GetHeight(&h);
+            output.Append("mLayout width=");
+            output.Append(w);
+            output.Append(" height=");
+            output.Append(h);
         }
     }
     else {
-        output += "mText=NULL";
+        output.Append("mText=NULL");
     }
-    Log::d("TextView", output);
-    return NOERROR;*/
-    return NOERROR;
+    Logger::D("TextView", "%s", output.ToString().string());
 }
 
 ECode TextView::GetSelectionStart(
