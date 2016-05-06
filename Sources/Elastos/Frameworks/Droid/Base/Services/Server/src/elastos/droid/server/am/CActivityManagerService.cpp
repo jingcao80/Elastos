@@ -2884,15 +2884,13 @@ ECode CActivityManagerService::constructor(
 
     CBatteryStatsService::NewByFriend(systemDir, mHandler, (CBatteryStatsService**)&mBatteryStatsService);
     AutoPtr<IBatteryStatsImpl> bstats = mBatteryStatsService->GetActiveStatistics();
-    if (bstats != NULL) {
-        bstats->ReadLocked();
-        bstats->WriteAsyncLocked();
-        if (DEBUG_POWER)
-            mOnBattery = TRUE;
-        else
-            bstats->IsOnBattery(&mOnBattery);
-        bstats->SetCallback(this);
-    }
+    bstats->ReadLocked();
+    bstats->WriteAsyncLocked();
+    if (DEBUG_POWER)
+        mOnBattery = TRUE;
+    else
+        bstats->IsOnBattery(&mOnBattery);
+    bstats->SetCallback(this);
 
     AutoPtr<IFile> file;
     ec = CFile::New(systemDir, String("procstats"), (IFile**)&file);
@@ -3227,8 +3225,6 @@ ECode CActivityManagerService::UpdateCpuStatsNow()
     AutoPtr<ArrayOf<Int64> > cpuSpeedTimes;
     mProcessCpuTracker->GetLastCpuSpeedTimes((ArrayOf<Int64>**)&cpuSpeedTimes);
     AutoPtr<IBatteryStatsImpl> bstats = mBatteryStatsService->GetActiveStatistics();
-    // TODO: should remove
-    if (bstats == NULL) return NOERROR;
 
     synchronized(bstats) {
         {
@@ -4352,24 +4348,22 @@ ECode CActivityManagerService::UpdateUsageStats(
     if (DEBUG_SWITCH)
         Slogger::D(TAG, "updateUsageStats: comp=%s res=%d", TO_CSTR(component), resumed);
     AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-    if (stats != NULL) {
-        if (resumed) {
-            if (mUsageStatsService != NULL) {
-                mUsageStatsService->ReportEvent(component->mRealActivity, component->mUserId,
-                        IUsageEvent::MOVE_TO_FOREGROUND);
-            }
-            synchronized(stats) {
-                stats->NoteActivityResumedLocked(component->mApp->mUid);
-            }
+    if (resumed) {
+        if (mUsageStatsService != NULL) {
+            mUsageStatsService->ReportEvent(component->mRealActivity, component->mUserId,
+                    IUsageEvent::MOVE_TO_FOREGROUND);
         }
-        else {
-            if (mUsageStatsService != NULL) {
-                mUsageStatsService->ReportEvent(component->mRealActivity, component->mUserId,
-                        IUsageEvent::MOVE_TO_BACKGROUND);
-            }
-            synchronized(stats) {
-                stats->NoteActivityPausedLocked(component->mApp->mUid);
-            }
+        synchronized(stats) {
+            stats->NoteActivityResumedLocked(component->mApp->mUid);
+        }
+    }
+    else {
+        if (mUsageStatsService != NULL) {
+            mUsageStatsService->ReportEvent(component->mRealActivity, component->mUserId,
+                    IUsageEvent::MOVE_TO_BACKGROUND);
+        }
+        synchronized(stats) {
+            stats->NoteActivityPausedLocked(component->mApp->mUid);
         }
     }
 
@@ -6439,10 +6433,8 @@ ECode CActivityManagerService::AppDiedLocked(
     Int32 uid;
     app->mInfo->GetUid(&uid);
     AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-    if (stats) {
-        synchronized(stats) {
-            stats->NoteProcessDiedLocked(uid, pid);
-        }
+    synchronized(stats) {
+        stats->NoteProcessDiedLocked(uid, pid);
     }
 
     Process::KillProcessQuiet(pid);
@@ -14022,7 +14014,6 @@ ECode CActivityManagerService::NoteWakeupAlarm(
     }
 
     AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-    if (stats == NULL) return NOERROR;
 
     synchronized(stats) {
         if (mBatteryStatsService->IsOnBattery()) {
@@ -19250,16 +19241,14 @@ ECode CActivityManagerService::BindBackupAgent(
         IPackageItemInfo::Probe(app)->GetPackageName(&pkgName);
         IPackageItemInfo::Probe(app)->GetName(&name);
         AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-        if (stats != NULL) {
-            synchronized(stats) {
-                stats->GetServiceStatsLocked(uid, pkgName, name,
-                    (IBatteryStatsImplUidPkgServ**)&ss);
-            }
+        synchronized(stats) {
+            stats->GetServiceStatsLocked(uid, pkgName, name,
+                (IBatteryStatsImplUidPkgServ**)&ss);
         }
 
         // Backup agent is now in use, its package can't be stopped.
         // try {
-            AppGlobals::GetPackageManager()->SetPackageStoppedState(
+        AppGlobals::GetPackageManager()->SetPackageStoppedState(
                 pkgName, FALSE, UserHandle::GetUserId(uid));
         // } catch (RemoteException e) {
         // } catch (IllegalArgumentException e) {
@@ -20041,9 +20030,9 @@ ECode CActivityManagerService::BroadcastIntentLocked(
                 }
                 if (uid >= 0) {
                     AutoPtr<IBatteryStatsImpl> bs = mBatteryStatsService->GetActiveStatistics();
-                    if (bs != NULL) {
-                       AutoLock lock(bs);
-                       bs->RemoveUidStatsLocked(uid);
+                    {
+                        AutoLock lock(bs);
+                        bs->RemoveUidStatsLocked(uid);
                     }
 
                     mAppOpsService->UidRemoved(uid);
@@ -20148,10 +20137,8 @@ ECode CActivityManagerService::BroadcastIntentLocked(
         mHandler->ObtainMessage(UPDATE_TIME, is24Hour, 0, (IMessage**)&msg);
         mHandler->SendMessage(msg, &bval);
         AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-        if (stats != NULL) {
-            synchronized(stats) {
-                stats->NoteCurrentTimeChangedLocked();
-            }
+        synchronized(stats) {
+            stats->NoteCurrentTimeChangedLocked();
         }
     }
 
@@ -22235,9 +22222,6 @@ ECode CActivityManagerService::CheckExcessivePowerUsageLocked(
     UpdateCpuStatsNow();
 
     AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-    if (stats == NULL) {
-        return NOERROR;
-    }
 
     Boolean doWakeKills = doKills;
     Boolean doCpuKills = doKills;
@@ -22453,11 +22437,9 @@ Boolean CActivityManagerService::ApplyOomAdjLocked(
             // its current wake lock time to later know to kill it if
             // it is not behaving well.
             AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
-            if (stats) {
-                synchronized(stats) {
-                    stats->GetProcessWakeTime(uid,
-                        app->mPid, SystemClock::GetElapsedRealtime(), &app->mLastWakeTime);
-                }
+            synchronized(stats) {
+                stats->GetProcessWakeTime(uid,
+                    app->mPid, SystemClock::GetElapsedRealtime(), &app->mLastWakeTime);
             }
 
             app->mLastCpuTime = app->mCurCpuTime;

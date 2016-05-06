@@ -2,6 +2,7 @@
 #include "elastos/droid/server/CConnectivityService.h"
 #include "elastos/droid/server/CNetworkPolicyListener.h"
 #include "elastos/droid/server/CDataActivityObserver.h"
+#include "elastos/droid/server/am/BatteryStatsService.h"
 #include "elastos/droid/server/connectivity/CNat464Xlat.h"
 #include "elastos/droid/server/connectivity/NetworkAgentInfo.h"
 #include "elastos/droid/server/connectivity/NetworkMonitor.h"
@@ -125,6 +126,7 @@ using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Server::Am::BatteryStatsService;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CSparseArray;
@@ -5337,9 +5339,7 @@ void CConnectivityService::RematchNetworkAndRequests(
 
         AutoPtr<INetworkStatsFactoryHelper> nsfHelper;
         CNetworkStatsFactoryHelper::AcquireSingleton((INetworkStatsFactoryHelper**)&nsfHelper);
-        AutoPtr<IIBatteryStats> bs;
-        assert(0 && "TODO");
-        //bs = CBatteryStatsService::GetService();
+        AutoPtr<IIBatteryStats> bs = BatteryStatsService::GetService();
         bs->NoteNetworkInterfaceType(baseIface, type);
         AutoPtr<IList> links;
         newNetwork->mLinkProperties->GetStackedLinks((IList**)&links);

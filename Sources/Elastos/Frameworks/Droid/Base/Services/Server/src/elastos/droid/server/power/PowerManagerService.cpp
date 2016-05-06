@@ -4,6 +4,7 @@
 #include "elastos/droid/server/power/PowerManagerService.h"
 #include "elastos/droid/server/power/CPowerManagerServiceBinderService.h"
 #include "elastos/droid/server/power/ShutdownThread.h"
+#include "elastos/droid/server/am/BatteryStatsService.h"
 #include "elastos/droid/server/Watchdog.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Binder.h"
@@ -61,6 +62,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Server::Am::BatteryStatsService;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -1762,8 +1764,7 @@ ECode PowerManagerService::SystemReady(
 
         // The notifier runs on the system server's main looper so as not to interfere
         // with the animations and other critical functions of the power manager.
-        assert(0 && "TODO");
-        // mBatteryStats = CBatteryStatsService::GetService();
+        mBatteryStats = BatteryStatsService::GetService();
         AutoPtr<ILooperHelper> helper;
         CLooperHelper::AcquireSingleton((ILooperHelper**)&helper);
         AutoPtr<ILooper> lop;

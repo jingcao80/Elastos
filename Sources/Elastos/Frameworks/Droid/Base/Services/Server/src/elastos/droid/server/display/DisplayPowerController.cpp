@@ -3,6 +3,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Internal.h>
 #include "elastos/droid/server/display/DisplayPowerController.h"
+#include "elastos/droid/server/am/BatteryStatsService.h"
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/utility/MathUtils.h>
@@ -12,7 +13,7 @@
 #include <elastos/core/StringUtils.h>
 
 // using Elastos::Droid::Server::LocalServices;
-// using Elastos::Droid::Server::Am::BatteryStatsService;
+using Elastos::Droid::Server::Am::BatteryStatsService;
 
 using Elastos::Droid::R;
 using Elastos::Droid::Content::Res::IResources;
@@ -319,7 +320,7 @@ DisplayPowerController::DisplayPowerController(
     mHandler = new DisplayControllerHandler(looper, this);
     mCallbacks = callbacks;
 
-    // mBatteryStats = CBatteryStatsService::GetService();
+    mBatteryStats = BatteryStatsService::GetService();
     // mLights = LocalServices::GetService(LightsManager.class);
     mSensorManager = sensorManager;
     // mWindowManagerPolicy = LocalServices::GetService(WindowManagerPolicy.class);
@@ -846,7 +847,7 @@ Boolean DisplayPowerController::SetScreenState(
 
         // Tell battery stats about the transition.
         // try {
-            mBatteryStats->NoteScreenState(state);
+        mBatteryStats->NoteScreenState(state);
         // } catch (RemoteException ex) {
         //     // same process
         // }
@@ -889,7 +890,7 @@ void DisplayPowerController::AnimateScreenBrightness(
     }
     if (mScreenBrightnessRampAnimator->AnimateTo(target, rate)) {
         // try {
-            mBatteryStats->NoteScreenBrightness(target);
+        mBatteryStats->NoteScreenBrightness(target);
         // } catch (RemoteException ex) {
         //     // same process
         // }

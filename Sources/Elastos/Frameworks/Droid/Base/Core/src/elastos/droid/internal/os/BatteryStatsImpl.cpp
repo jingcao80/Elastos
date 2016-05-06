@@ -8531,7 +8531,7 @@ void BatteryStatsImpl::UpdateKernelWakelocksLocked()
         AutoPtr<IInterface> value;
         mKernelWakelockStats->Get(cs, (IInterface**)&value);
         AutoPtr<SamplingTimer> kwlt;
-        if (value = NULL) {
+        if (value == NULL) {
             kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase,
                     TRUE /* track reported val */);
             mKernelWakelockStats->Put(cs, (IObject*)kwlt);

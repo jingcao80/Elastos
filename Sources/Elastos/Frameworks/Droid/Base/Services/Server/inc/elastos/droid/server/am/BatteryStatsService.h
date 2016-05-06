@@ -410,7 +410,6 @@ public:
     static AutoPtr<IIBatteryStats> sService;
 
     AutoPtr<IBatteryStatsImpl> mStats;
-    Object mStatsLock;
     AutoPtr<IContext> mContext;
     AutoPtr<IPowerManagerInternal> mPowerManagerInternal;
 

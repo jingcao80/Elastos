@@ -30,6 +30,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Server::Am::BatteryStatsService;
 // using Elastos::Droid::Telephony::CSignalStrength;
 // using Elastos::Droid::Telephony::CServiceState;
 // using Elastos::Droid::Telephony::CVoLteServiceState;
@@ -39,7 +40,7 @@ using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Telephony::ICellLocationHelper;
 // using Elastos::Droid::Telephony::CCellLocationHelper;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
-// using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 // using Elastos::Droid::Telephony::CSubscriptionManagerHelper;
 using Elastos::Droid::Internal::Telephony::EIID_IITelephonyRegistry;
@@ -164,8 +165,7 @@ ECode CTelephonyRegistry::MyHandler::HandleMessage(
             if (CTelephonyRegistry::VDBG)
                 Slogger::D("CTelephonyRegistry", "MSG_USER_SWITCHED userId=%d", arg1);
             AutoPtr<ITelephonyManagerHelper> helper;
-            assert(0 && "TODO");
-            // CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+            CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
             AutoPtr<ITelephonyManager> tm;
             helper->GetDefault((ITelephonyManager**)&tm);
             Int32 numPhones;
@@ -257,11 +257,10 @@ ECode CTelephonyRegistry::constructor(
     mLogSSC = ArrayOf<LogSSC*>::Alloc(10);
 
     mContext = context;
-    assert(0 && "TODO");
-    // mBatteryStats = BatteryStatsService::GetService();
+    mBatteryStats = BatteryStatsService::GetService();
 
     AutoPtr<ITelephonyManagerHelper> tmHelper;
-    // CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmHelper);
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmHelper);
     AutoPtr<ITelephonyManager> tm;
     tmHelper->GetDefault((ITelephonyManager**)&tm);
     Int32 numPhones;
