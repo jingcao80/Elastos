@@ -21,6 +21,7 @@
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::CContextImpl;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IThemeUtils;
@@ -48,8 +49,6 @@ using Elastos::Utility::IArrayList;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::Logging::Logger;
-
-using Elastos::Droid::App::CContextImpl;
 
 
 namespace Elastos {
@@ -269,7 +268,7 @@ ECode CResourcesManager::GetTopLevelResources(
             }
         }
         else {
-            Logger::W(TAG, "getTopLevelResources: %s / %f", resDir.string(), scale);
+            Logger::W(TAG, "GetTopLevelResources: %s, scale: %.2f", resDir.string(), scale);
         }
     }
 
@@ -376,15 +375,17 @@ ECode CResourcesManager::GetTopLevelResources(
     CResources::New(assets, dm, config, compatInfo, token, (IResources**)&r);
     if (iconsAttached) SetActivityIcons(r);
 
-    if (FALSE) {
+    if (TRUE) {
         AutoPtr<IConfiguration> c;
         r->GetConfiguration((IConfiguration**)&c);
         AutoPtr<ICompatibilityInfo> ci;
         r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
         Float applicationScale;
         ci->GetApplicationScale(&applicationScale);
+        Logger::I(TAG, "=======================================================");
         Logger::I(TAG, "Created app resources: dir:%s resource:%s, config:%s, appScale=%f",
             resDir.string(), TO_CSTR(r), TO_CSTR(c), applicationScale);
+        Logger::I(TAG, "=======================================================");
     }
 
     synchronized(this) {

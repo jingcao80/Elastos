@@ -191,7 +191,7 @@ public:
      * @param ripple the ripple to remove
      */
     CARAPI_(void) RemoveRipple(
-        /* [in] */ Ripple* ripple);
+        /* [in] */ IRipple* ripple);
 
     // @Override
     CARAPI GetDirtyBounds(
@@ -299,7 +299,7 @@ private:
     CARAPI_(void) OnHotspotBoundsChanged();
 
     CARAPI_(Int32) GetRippleIndex(
-        /* [in] */ Ripple* ripple);
+        /* [in] */ IRipple* ripple);
 
     CARAPI_(Int32) DrawContentLayer(
         /* [in] */ ICanvas* canvas,
@@ -370,7 +370,7 @@ private:
     Boolean mBackgroundActive;
 
     /** The current ripple. May be actively animating or pending entry. */
-    AutoPtr<Ripple> mRipple;
+    AutoPtr<IRipple> mRipple;
 
     /** Whether we expect to draw a ripple when visible. */
     Boolean mRippleActive;
@@ -384,7 +384,7 @@ private:
      * Lazily-created array of actively animating ripples. Inactive ripples are
      * pruned during draw(). The locations of these will not change.
      */
-    AutoPtr<ArrayOf<Ripple*> > mExitingRipples;
+    AutoPtr<ArrayOf<IRipple*> > mExitingRipples;
     Int32 mExitingRipplesCount;
 
     /** Paint used to control appearance of ripples. */

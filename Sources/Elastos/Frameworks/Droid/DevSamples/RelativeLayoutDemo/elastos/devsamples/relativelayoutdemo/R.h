@@ -33,8 +33,7 @@ class ECO_PUBLIC R {
         public: static const int layout = 0x7f050000;
     };
     public: class layout {
-        public: static const int m = 0x7f030000;
-        public: static const int main = 0x7f030001;
+        public: static const int main = 0x7f030000;
     };
     public: class string {
         public: static const int app_name = 0x7f040000;

@@ -421,7 +421,6 @@ ECode CAppOpsService::Publish(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    Slogger::W(TAG, " >> TODO Publish ReadPolicy()");
     ReadPolicy();
     return ServiceManager::AddService(IContext::APP_OPS_SERVICE, (IBinder*)this);
 }

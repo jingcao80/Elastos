@@ -59,6 +59,13 @@ ECode Ripple::RippleAnimatorListenerAdapter::OnAnimationEnd(
 
 
 ///////////////////  Ripple  ///////////////////////
+AutoPtr<ITimeInterpolator> Init_LINEAR_INTERPOLATOR()
+{
+    AutoPtr<ITimeInterpolator> li;
+    CLinearInterpolator::New((ITimeInterpolator**)&li);
+    return li;
+}
+
 AutoPtr<ITimeInterpolator> Ripple::LINEAR_INTERPOLATOR = Init_LINEAR_INTERPOLATOR();
 AutoPtr<ITimeInterpolator> Ripple::DECEL_INTERPOLATOR = new Ripple::LogInterpolator();
 const Float Ripple::GLOBAL_SPEED = 1.0f;
@@ -67,18 +74,10 @@ const Float Ripple::WAVE_TOUCH_UP_ACCELERATION = 3400.0f * GLOBAL_SPEED;
 const Float Ripple::WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
 const Int64 Ripple::RIPPLE_ENTER_DELAY = 80;
 
-AutoPtr<ITimeInterpolator> Ripple::Init_LINEAR_INTERPOLATOR()
-{
-    AutoPtr<ITimeInterpolator> li;
-    CLinearInterpolator::New((ITimeInterpolator**)&li);
-    return li;
-}
 
-Ripple::Ripple(
-    /* [in] */ IRippleDrawable* owner,
-    /* [in] */ IRect* bounds,
-    /* [in] */ Float startingX,
-    /* [in] */ Float startingY)
+CAR_INTERFACE_IMPL(Ripple, Object, IRipple)
+
+Ripple::Ripple()
     : mColorOpaque(0)
     , mOuterRadius(0)
     , mDensity(0)
@@ -96,8 +95,16 @@ Ripple::Ripple(
     , mCanUseHardware(FALSE)
     , mHasMaxRadius(FALSE)
     , mCanceled(FALSE)
+{}
+
+ECode Ripple::constructor(
+    /* [in] */ IRippleDrawable* owner,
+    /* [in] */ IRect* bounds,
+    /* [in] */ Float startingX,
+    /* [in] */ Float startingY)
 {
-    mOwner = owner;
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(owner);
+    wrs->GetWeakReference((IWeakReference**)&mWeakHost);
     mBounds = bounds;
 
     mStartingX = startingX;
@@ -106,9 +113,10 @@ Ripple::Ripple(
     CArrayList::New((IArrayList**)&mRunningAnimations);
     CArrayList::New((IArrayList**)&mPendingAnimations);
     mAnimationListener = new RippleAnimatorListenerAdapter(this);
+    return NOERROR;
 }
 
-void Ripple::Setup(
+ECode Ripple::Setup(
     /* [in] */ Int32 maxRadius,
     /* [in] */ Int32 color,
     /* [in] */ Float density)
@@ -132,11 +140,15 @@ void Ripple::Setup(
     mDensity = density;
 
     ClampStartingPosition();
+    return NOERROR;
 }
 
-Boolean Ripple::IsHardwareAnimating()
+ECode Ripple::IsHardwareAnimating(
+    /* [out] */ Boolean* result)
 {
-    return mHardwareAnimating;
+    VALIDATE_NOT_NULL(result)
+    *result = mHardwareAnimating;
+    return NOERROR;
 }
 
 void Ripple::ClampStartingPosition()
@@ -159,7 +171,7 @@ void Ripple::ClampStartingPosition()
     }
 }
 
-void Ripple::OnHotspotBoundsChanged()
+ECode Ripple::OnHotspotBoundsChanged()
 {
     if (!mHasMaxRadius) {
         Int32 width = 0, height = 0;
@@ -171,60 +183,81 @@ void Ripple::OnHotspotBoundsChanged()
 
         ClampStartingPosition();
     }
+    return NOERROR;
 }
 
-void Ripple::SetOpacity(
+ECode Ripple::SetOpacity(
     /* [in] */ Float a)
 {
     mOpacity = a;
     InvalidateSelf();
+    return NOERROR;
 }
 
-Float Ripple::GetOpacity()
+ECode Ripple::GetOpacity(
+    /* [out] */ Float* result)
 {
-    return mOpacity;
+    VALIDATE_NOT_NULL(result)
+    *result = mOpacity;
+    return NOERROR;
 }
 
-void Ripple::SetRadiusGravity(
+ECode Ripple::SetRadiusGravity(
     /* [in] */ Float r)
 {
     mTweenRadius = r;
     InvalidateSelf();
+    return NOERROR;
 }
 
-Float Ripple::GetRadiusGravity()
+ECode Ripple::GetRadiusGravity(
+    /* [out] */ Float* result)
 {
-    return mTweenRadius;
+    VALIDATE_NOT_NULL(result)
+    *result = mTweenRadius;
+    return NOERROR;
 }
 
-void Ripple::SetXGravity(
+ECode Ripple::SetXGravity(
     /* [in] */ Float x)
 {
     mTweenX = x;
     InvalidateSelf();
+    return NOERROR;
 }
 
-Float Ripple::GetXGravity()
+ECode Ripple::GetXGravity(
+    /* [out] */ Float* result)
 {
-    return mTweenX;
+    VALIDATE_NOT_NULL(result)
+    *result = mTweenX;
+    return NOERROR;
 }
 
-void Ripple::SetYGravity(
+ECode Ripple::SetYGravity(
     /* [in] */ Float y)
 {
     mTweenY = y;
     InvalidateSelf();
+    return NOERROR;
 }
 
-Float Ripple::GetYGravity()
+ECode Ripple::GetYGravity(
+    /* [out] */ Float* result)
 {
-    return mTweenY;
+    VALIDATE_NOT_NULL(result)
+    *result = mTweenY;
+    return NOERROR;
 }
 
-Boolean Ripple::Draw(
+ECode Ripple::Draw(
     /* [in] */ ICanvas* c,
-    /* [in] */ IPaint* p)
+    /* [in] */ IPaint* p,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     Boolean canUseHardware = FALSE;
     c->IsHardwareAccelerated(&canUseHardware);
     if (mCanUseHardware != canUseHardware && mCanUseHardware) {
@@ -240,7 +273,8 @@ Boolean Ripple::Draw(
         hasContent = DrawSoftware(c, p);
     }
 
-    return hasContent;
+    *result = hasContent;
+    return NOERROR;
 }
 
 Boolean Ripple::DrawHardware(
@@ -298,16 +332,17 @@ Boolean Ripple::DrawSoftware(
     return hasContent;
 }
 
-void Ripple::GetBounds(
+ECode Ripple::GetBounds(
     /* [in] */ IRect* bounds)
 {
     Int32 outerX = (Int32) mOuterX;
     Int32 outerY = (Int32) mOuterY;
     Int32 r = (Int32) mOuterRadius + 1;
     bounds->Set(outerX - r, outerY - r, outerX + r, outerY + r);
+    return NOERROR;
 }
 
-void Ripple::Move(
+ECode Ripple::Move(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
@@ -315,9 +350,10 @@ void Ripple::Move(
     mStartingY = y;
 
     ClampStartingPosition();
+    return NOERROR;
 }
 
-void Ripple::Enter()
+ECode Ripple::Enter()
 {
     Cancel();
 
@@ -354,9 +390,10 @@ void Ripple::Enter()
     IAnimator::Probe(radius)->Start();
     IAnimator::Probe(cX)->Start();
     IAnimator::Probe(cY)->Start();
+    return NOERROR;
 }
 
-void Ripple::Exit()
+ECode Ripple::Exit()
 {
     Cancel();
 
@@ -378,6 +415,7 @@ void Ripple::Exit()
     } else {
         ExitSoftware(radiusDuration, opacityDuration);
     }
+    return NOERROR;
 }
 
 void Ripple::ExitHardware(
@@ -437,12 +475,13 @@ void Ripple::ExitHardware(
     InvalidateSelf();
 }
 
-void Ripple::Jump()
+ECode Ripple::Jump()
 {
     mCanceled = TRUE;
     EndSoftwareAnimations();
     CancelHardwareAnimations(TRUE);
     mCanceled = FALSE;
+    return NOERROR;
 }
 
 void Ripple::EndSoftwareAnimations()
@@ -515,12 +554,13 @@ void Ripple::ExitSoftware(
     IAnimator::Probe(yAnim)->Start();
 }
 
-void Ripple::Cancel()
+ECode Ripple::Cancel()
 {
     mCanceled = TRUE;
     CancelSoftwareAnimations();
     CancelHardwareAnimations(TRUE);
     mCanceled = FALSE;
+    return NOERROR;
 }
 
 void Ripple::CancelSoftwareAnimations()
@@ -572,13 +612,23 @@ void Ripple::RemoveSelf()
 {
     // The owner will invalidate itself.
     if (!mCanceled) {
-        ((RippleDrawable*)mOwner.Get())->RemoveRipple(this);
+        AutoPtr<IRippleDrawable> rd;
+        mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&rd);
+        if (rd) {
+            RippleDrawable* owner = (RippleDrawable*)rd.Get();
+            owner->RemoveRipple(this);
+        }
     }
 }
 
 void Ripple::InvalidateSelf()
 {
-    IDrawable::Probe(mOwner)->InvalidateSelf();
+    AutoPtr<IRippleDrawable> rd;
+    mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&rd);
+    if (rd) {
+        RippleDrawable* owner = (RippleDrawable*)rd.Get();
+        owner->InvalidateSelf();
+    }
 }
 
 } // namespace Drawable

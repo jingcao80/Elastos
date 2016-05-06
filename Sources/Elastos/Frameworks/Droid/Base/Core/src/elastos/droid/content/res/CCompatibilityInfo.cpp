@@ -9,6 +9,8 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CRegion.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Pm::CApplicationInfo;
 using Elastos::Droid::View::IDisplay;
@@ -18,12 +20,15 @@ using Elastos::Droid::Graphics::CPointF;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CRegion;
 using Elastos::Droid::Utility::CDisplayMetrics;
+using Elastos::Utility::Logging::Logger;
 
 
 namespace Elastos {
 namespace Droid {
 namespace Content {
 namespace Res {
+
+static const String TAG("CCompatibilityInfo");
 
 //===============================================================
 // CCompatibilityInfo::Translator
@@ -270,15 +275,13 @@ ECode CCompatibilityInfo::GetTranslator(
     /* [out] */ ICompatibilityInfoTranslator** translator)
 {
     VALIDATE_NOT_NULL(translator);
+    *translator = NULL;
 
     Boolean isRequire;
     IsScalingRequired(&isRequire);
     if (isRequire) {
         *translator = (ICompatibilityInfoTranslator*)new Translator();
         REFCOUNT_ADD(*translator);
-    }
-    else {
-        *translator = NULL;
     }
     return NOERROR;
 }
@@ -352,7 +355,7 @@ ECode CCompatibilityInfo::ApplyToConfiguration(
         Int32 screenLayout;
         inoutConfig->GetScreenLayout(&screenLayout);
         inoutConfig->SetScreenLayout(
-                (screenLayout & ~IConfiguration::SCREENLAYOUT_SIZE_MASK)
+            (screenLayout & ~IConfiguration::SCREENLAYOUT_SIZE_MASK)
                 | IConfiguration::SCREENLAYOUT_SIZE_NORMAL);
 
         Int32 compatScreenWidthDp;
@@ -438,37 +441,31 @@ ECode CCompatibilityInfo::Equals(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    if (TO_IINTERFACE(this) == obj) {
+    ICompatibilityInfo* info = ICompatibilityInfo::Probe(obj);
+    if (info == NULL){
+        return NOERROR;
+    }
+
+    if (info == (ICompatibilityInfo*)this) {
         *result = TRUE;
         return NOERROR;
     }
 
-    AutoPtr<ICompatibilityInfo> info = ICompatibilityInfo::Probe(obj);
-
-    if (info == NULL){
-        *result = FALSE;
-        return NOERROR;
-    }
-
-    AutoPtr<CCompatibilityInfo> oc = (CCompatibilityInfo*)info.Get();
+    using Elastos::Core::Math;
+    CCompatibilityInfo* oc = (CCompatibilityInfo*)info;
     if (mCompatibilityFlags != oc->mCompatibilityFlags) {
-        *result = FALSE;
         return NOERROR;
     }
     if (mApplicationDensity != oc->mApplicationDensity) {
-        *result = FALSE;
         return NOERROR;
     }
-    if (mApplicationScale != oc->mApplicationScale) {
-        *result = FALSE;
+    if (!Math::Equals(mApplicationScale, oc->mApplicationScale)) {
         return NOERROR;
     }
-    if (mApplicationInvertedScale != oc->mApplicationInvertedScale) {
-        *result = FALSE;
+    if (!Math::Equals(mApplicationInvertedScale, oc->mApplicationInvertedScale)) {
         return NOERROR;
     }
     if (mIsThemeable != oc->mIsThemeable) {
-        *result = FALSE;
         return NOERROR;
     }
 
@@ -716,6 +713,19 @@ ECode CCompatibilityInfo::constructor(
                     / (Float) IDisplayMetrics::DENSITY_DEFAULT;
             mApplicationInvertedScale = 1.0f / mApplicationScale;
             compatFlags |= SCALING_REQUIRED;
+
+            Logger::I(TAG, " >>>> TODO constructor mApplicationScale: %.2f, mApplicationInvertedScale: %.2f",
+                mApplicationScale, mApplicationInvertedScale);
+
+            if (mApplicationScale == 3.0f) {
+                Logger::I(TAG, "========================= TODO delete this =========================");
+
+                compatFlags = NEVER_NEEDS_COMPAT;
+                mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
+                mApplicationScale = 1.0f;
+                mApplicationInvertedScale = 1.0f;
+                mIsThemeable = TRUE;
+            }
         }
     }
 

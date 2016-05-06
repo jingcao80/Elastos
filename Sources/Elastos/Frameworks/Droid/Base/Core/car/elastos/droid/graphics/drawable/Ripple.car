@@ -1,0 +1,77 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+    /**
+     * Draws a Material ripple.
+     */
+    interface IRipple {
+        Setup(
+            [in] Int32 maxRadius,
+            [in] Int32 color,
+            [in] Float density);
+
+        IsHardwareAnimating(
+            [out] Boolean* result);
+
+        OnHotspotBoundsChanged();
+
+        SetOpacity(
+            [in] Float a);
+
+        GetOpacity(
+            [out] Float* result);
+
+        SetRadiusGravity(
+            [in] Float r);
+
+        GetRadiusGravity(
+            [out] Float* result);
+
+        SetXGravity(
+            [in] Float x);
+
+        GetXGravity(
+            [out] Float* result);
+
+        SetYGravity(
+            [in] Float y);
+
+        GetYGravity(
+            [out] Float* result);
+
+        Draw(
+            [in] ICanvas* c,
+            [in] IPaint* p,
+            [out] Boolean* result);
+
+        GetBounds(
+            [in] IRect* bounds);
+
+        Move(
+            [in] Float x,
+            [in] Float y);
+
+        Enter();
+
+        Exit();
+
+        Jump();
+
+        Cancel();
+    }
+
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}
