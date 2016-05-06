@@ -315,107 +315,107 @@ module
 //            [in] Int64 uptime,
 //            [in] Int64 realtime);
 //
-//        AddIsolatedUidLocked(
-//            [in] Int32 isolatedUid,
-//            [in] Int32 appUid);
-//
-//        RemoveIsolatedUidLocked(
-//            [in] Int32 isolatedUid,
-//            [in] Int32 appUid);
-//
+        AddIsolatedUidLocked(
+            [in] Int32 isolatedUid,
+            [in] Int32 appUid);
+
+        RemoveIsolatedUidLocked(
+            [in] Int32 isolatedUid,
+            [in] Int32 appUid);
+
         MapUid(
             [in] Int32 uid,
             [out] Int32* result);
-//
-//        NoteEventLocked(
-//            [in] Int32 code,
-//            [in] String name,
-//            [in] Int32 uid);
+
+        NoteEventLocked(
+            [in] Int32 code,
+            [in] String name,
+            [in] Int32 uid);
 
         NoteCurrentTimeChangedLocked();
-//
-//        NoteProcessStartLocked(
-//            [in] String name,
-//            [in] Int32 uid);
-//
-//        NoteProcessStateLocked(
-//            [in] String name,
-//            [in] Int32 uid,
-//            [in] Int32 state);
-//
-//        NoteProcessFinishLocked(
-//            [in] String name,
-//            [in] Int32 uid);
-//
-//        NoteSyncStartLocked(
-//            [in] String name,
-//            [in] Int32 uid);
-//
-//        NoteSyncFinishLocked(
-//            [in] String name,
-//            [in] Int32 uid);
-//
-//        NoteJobStartLocked(
-//            [in] String name,
-//            [in] Int32 uid);
-//
-//        NoteJobFinishLocked(
-//            [in] String name,
-//            [in] Int32 uid);
-//
-//        SetRecordAllHistoryLocked(
-//            [in] Boolean enabled);
-//
-//        SetNoAutoReset(
-//            [in] Boolean enabled);
-//
-//        NoteStartWakeLocked(
-//            [in] Int32 uid,
-//            [in] Int32 pid,
-//            [in] String name,
-//            [in] String historyName,
-//            [in] Int32 type,
-//            [in] Boolean unimportantForLogging,
-//            [in] Int64 elapsedRealtime,
-//            [in] Int64 uptime);
-//
-//        NoteStopWakeLocked(
-//            [in] Int32 uid,
-//            [in] Int32 pid,
-//            [in] String name,
-//            [in] String historyName,
-//            [in] Int32 type,
-//            [in] Int64 elapsedRealtime,
-//            [in] Int64 uptime);
-//
-//        NoteStartWakeFromSourceLocked(
-//            [in] IWorkSource* ws,
-//            [in] Int32 pid,
-//            [in] String name,
-//            [in] String historyName,
-//            [in] Int32 type,
-//            [in] Boolean unimportantForLogging);
-//
-//        NoteChangeWakelockFromSourceLocked(
-//            [in] IWorkSource* ws,
-//            [in] Int32 pid,
-//            [in] String name,
-//            [in] String historyName,
-//            [in] Int32 type,
-//            [in] IWorkSource* newWs,
-//            [in] Int32 newPid,
-//            [in] String newName,
-//            [in] String newHistoryName,
-//            [in] Int32 newType,
-//            [in] Boolean newUnimportantForLogging);
-//
-//        NoteStopWakeFromSourceLocked(
-//            [in] IWorkSource* ws,
-//            [in] Int32 pid,
-//            [in] String name,
-//            [in] String historyName,
-//            [in] Int32 type);
-//
+
+        NoteProcessStartLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteProcessStateLocked(
+            [in] String name,
+            [in] Int32 uid,
+            [in] Int32 state);
+
+        NoteProcessFinishLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteSyncStartLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteSyncFinishLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteJobStartLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteJobFinishLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        SetRecordAllHistoryLocked(
+            [in] Boolean enabled);
+
+        SetNoAutoReset(
+            [in] Boolean enabled);
+
+        NoteStartWakeLocked(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Boolean unimportantForLogging,
+            [in] Int64 elapsedRealtime,
+            [in] Int64 uptime);
+
+        NoteStopWakeLocked(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Int64 elapsedRealtime,
+            [in] Int64 uptime);
+
+        NoteStartWakeFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Boolean unimportantForLogging);
+
+        NoteChangeWakelockFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] IWorkSource* newWs,
+            [in] Int32 newPid,
+            [in] String newName,
+            [in] String newHistoryName,
+            [in] Int32 newType,
+            [in] Boolean newUnimportantForLogging);
+
+        NoteStopWakeFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type);
+
         NoteWakeupReasonLocked(
             [in] String reason);
 
@@ -449,137 +449,137 @@ module
             [in] String proc,
             [in] Int64 overTime,
             [in] Int64 usedTime);
-//
-//        NoteStartSensorLocked(
-//            [in] Int32 uid,
-//            [in] Int32 sensor);
-//
-//        NoteStopSensorLocked(
-//            [in] Int32 uid,
-//            [in] Int32 sensor);
-//
-//        NoteStartGpsLocked(
-//            [in] Int32 uid);
-//
-//        NoteStopGpsLocked(
-//            [in] Int32 uid);
-//
-//        NoteScreenStateLocked(
-//            [in] Int32 state);
-//
-//        NoteScreenBrightnessLocked(
-//            [in] Int32 brightness);
-//
-//        NoteUserActivityLocked(
-//            [in] Int32 uid,
-//            [in] Int32 event);
-//
-//        NoteInteractiveLocked(
-//            [in] Boolean interactive);
-//
-//        NoteMobileRadioPowerState(
-//            [in] Int32 powerState,
-//            [in] Int64 timestampNs);
-//
-//        NoteLowPowerMode(
-//            [in] Boolean enabled);
-//
-//        NotePhoneOnLocked();
-//
-//        NotePhoneOffLocked();
-//
-//        /**
-//         * Telephony stack updates the phone state.
-//         * @param state phone state from ServiceState.getState()
-//         */
-//        NotePhoneStateLocked(
-//            [in] Int32 state,
-//            [in] Int32 simState);
-//
-//        NotePhoneSignalStrengthLocked(
-//            [in] ISignalStrength* signalStrength);
-//
-//        NotePhoneDataConnectionStateLocked(
-//            [in] Int32 dataType,
-//            [in] Boolean hasData);
-//
-//        NoteWifiOnLocked();
-//
-//        NoteWifiOffLocked();
-//
-//        NoteAudioOnLocked(
-//            [in] Int32 uid);
-//
-//        NoteAudioOffLocked(
-//            [in] Int32 uid);
-//
-//        NoteVideoOnLocked(
-//            [in] Int32 uid);
-//
-//        NoteVideoOffLocked(
-//            [in] Int32 uid);
-//
-//        NoteResetAudioLocked();
-//
-//        NoteResetVideoLocked();
-//
+
+        NoteStartSensorLocked(
+            [in] Int32 uid,
+            [in] Int32 sensor);
+
+        NoteStopSensorLocked(
+            [in] Int32 uid,
+            [in] Int32 sensor);
+
+        NoteStartGpsLocked(
+            [in] Int32 uid);
+
+        NoteStopGpsLocked(
+            [in] Int32 uid);
+
+        NoteScreenStateLocked(
+            [in] Int32 state);
+
+        NoteScreenBrightnessLocked(
+            [in] Int32 brightness);
+
+        NoteUserActivityLocked(
+            [in] Int32 uid,
+            [in] Int32 event);
+
+        NoteInteractiveLocked(
+            [in] Boolean interactive);
+
+        NoteMobileRadioPowerState(
+            [in] Int32 powerState,
+            [in] Int64 timestampNs);
+
+        NoteLowPowerMode(
+            [in] Boolean enabled);
+
+        NotePhoneOnLocked();
+
+        NotePhoneOffLocked();
+
+        /**
+         * Telephony stack updates the phone state.
+         * @param state phone state from ServiceState.getState()
+         */
+        NotePhoneStateLocked(
+            [in] Int32 state,
+            [in] Int32 simState);
+
+        NotePhoneSignalStrengthLocked(
+            [in] ISignalStrength* signalStrength);
+
+        NotePhoneDataConnectionStateLocked(
+            [in] Int32 dataType,
+            [in] Boolean hasData);
+
+        NoteWifiOnLocked();
+
+        NoteWifiOffLocked();
+
+        NoteAudioOnLocked(
+            [in] Int32 uid);
+
+        NoteAudioOffLocked(
+            [in] Int32 uid);
+
+        NoteVideoOnLocked(
+            [in] Int32 uid);
+
+        NoteVideoOffLocked(
+            [in] Int32 uid);
+
+        NoteResetAudioLocked();
+
+        NoteResetVideoLocked();
+
         NoteActivityResumedLocked(
             [in] Int32 uid);
 
         NoteActivityPausedLocked(
             [in] Int32 uid);
-//
-//        NoteVibratorOnLocked(
-//            [in] Int32 uid,
-//            [in] Int64 durationMillis);
-//
-//        NoteVibratorOffLocked(
-//            [in] Int32 uid);
-//
-//        NoteFlashlightOnLocked();
-//
-//        NoteFlashlightOffLocked();
-//
-//        NoteWifiRunningLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiRunningChangedLocked(
-//            [in] IWorkSource* oldWs,
-//            [in] IWorkSource* newWs);
-//
-//        NoteWifiStoppedLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiStateLocked(
-//            [in] Int32 wifiState,
-//            [in] String accessPoint);
-//
-//        NoteWifiSupplicantStateChangedLocked(
-//            [in] Int32 supplState,
-//            [in] Boolean failedAuth);
-//
-//        NoteWifiRssiChangedLocked(
-//            [in] Int32 newRssi);
+
+        NoteVibratorOnLocked(
+            [in] Int32 uid,
+            [in] Int64 durationMillis);
+
+        NoteVibratorOffLocked(
+            [in] Int32 uid);
+
+        NoteFlashlightOnLocked();
+
+        NoteFlashlightOffLocked();
+
+        NoteWifiRunningLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiRunningChangedLocked(
+            [in] IWorkSource* oldWs,
+            [in] IWorkSource* newWs);
+
+        NoteWifiStoppedLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiStateLocked(
+            [in] Int32 wifiState,
+            [in] String accessPoint);
+
+        NoteWifiSupplicantStateChangedLocked(
+            [in] Int32 supplState,
+            [in] Boolean failedAuth);
+
+        NoteWifiRssiChangedLocked(
+            [in] Int32 newRssi);
 
         NoteBluetoothOnLocked();
 
-//        NoteBluetoothOffLocked();
-//
-//        NoteBluetoothStateLocked(
-//            [in] Int32 bluetoothState);
-//
-//        NoteFullWifiLockAcquiredLocked(
-//            [in] Int32 uid);
-//
-//        NoteFullWifiLockReleasedLocked(
-//            [in] Int32 uid);
-//
-//        NoteWifiScanStartedLocked(
-//            [in] Int32 uid);
-//
-//        NoteWifiScanStoppedLocked(
-//            [in] Int32 uid);
-//
+        NoteBluetoothOffLocked();
+
+        NoteBluetoothStateLocked(
+            [in] Int32 bluetoothState);
+
+        NoteFullWifiLockAcquiredLocked(
+            [in] Int32 uid);
+
+        NoteFullWifiLockReleasedLocked(
+            [in] Int32 uid);
+
+        NoteWifiScanStartedLocked(
+            [in] Int32 uid);
+
+        NoteWifiScanStoppedLocked(
+            [in] Int32 uid);
+
 //        NoteWifiBatchedScanStartedLocked(
 //            [in] Int32 uid,
 //            [in] Int32 csph);
@@ -587,78 +587,78 @@ module
 //        NoteWifiBatchedScanStoppedLocked(
 //            [in] Int32 uid);
 //
-//        NoteWifiMulticastEnabledLocked(
-//            [in] Int32 uid);
-//
-//        NoteWifiMulticastDisabledLocked(
-//            [in] Int32 uid);
-//
-//        NoteFullWifiLockAcquiredFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteFullWifiLockReleasedFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiScanStartedFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiScanStoppedFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiBatchedScanStartedFromSourceLocked(
-//            [in] IWorkSource* ws,
-//            [in] Int32 csph);
-//
-//        NoteWifiBatchedScanStoppedFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiMulticastEnabledFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteWifiMulticastDisabledFromSourceLocked(
-//            [in] IWorkSource* ws);
-//
-//        NoteNetworkInterfaceTypeLocked(
-//            [in] String iface,
-//            [in] Int32 networkType);
-//
-//        NoteNetworkStatsEnabledLocked();
-//
+        NoteWifiMulticastEnabledLocked(
+            [in] Int32 uid);
+
+        NoteWifiMulticastDisabledLocked(
+            [in] Int32 uid);
+
+        NoteFullWifiLockAcquiredFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteFullWifiLockReleasedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiScanStartedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiScanStoppedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiBatchedScanStartedFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 csph);
+
+        NoteWifiBatchedScanStoppedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiMulticastEnabledFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiMulticastDisabledFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteNetworkInterfaceTypeLocked(
+            [in] String iface,
+            [in] Int32 networkType);
+
+        NoteNetworkStatsEnabledLocked();
+
         SetCallback(
             [in] IBatteryCallback* cb);
-//
-//        SetNumSpeedSteps(
-//            [in] Int32 steps);
-//
-//        SetRadioScanningTimeout(
-//            [in] Int64 timeout);
-//
+
+        SetNumSpeedSteps(
+            [in] Int32 steps);
+
+        SetRadioScanningTimeout(
+            [in] Int64 timeout);
+
         IsOnBattery(
             [out] Boolean* result);
 
         IsScreenOn(
             [out] Boolean* result);
-//
-//        ResetAllStatsCmdLocked();
-//
+
+        ResetAllStatsCmdLocked();
+
 //        PullPendingStateUpdatesLocked();
 //
-//        SetBatteryState(
-//            [in] Int32 status,
-//            [in] Int32 health,
-//            [in] Int32 plugType,
-//            [in] Int32 level,
-//            [in] Int32 temp,
-//            [in] Int32 volt);
+        SetBatteryState(
+            [in] Int32 status,
+            [in] Int32 health,
+            [in] Int32 plugType,
+            [in] Int32 level,
+            [in] Int32 temp,
+            [in] Int32 volt);
 //
 //        UpdateKernelWakelocksLocked();
 //
-//        GetAwakeTimeBattery(
-//            [out] Int64* result);
-//
-//        GetAwakeTimePlugged(
-//            [out] Int64* result);
-//
+        GetAwakeTimeBattery(
+            [out] Int64* result);
+
+        GetAwakeTimePlugged(
+            [out] Int64* result);
+
 //        GetDischargeStartLevelLocked(
 //            [out] Int32* result);
 //
@@ -714,12 +714,12 @@ module
 //        DistributeWorkLocked(
 //            [in] Int32 which);
 //
-//
-//        ShutdownLocked();
-//
+
+        ShutdownLocked();
+
         WriteAsyncLocked();
-//
-//        WriteSyncLocked();
+
+        WriteSyncLocked();
 //
 //        CommitPendingDataToDisk();
 //
