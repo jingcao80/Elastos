@@ -38,7 +38,7 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-const String AnimatorInflater::TAG = String("AnimatorInflater");
+const String AnimatorInflater::TAG("AnimatorInflater");
 const Int32 AnimatorInflater::TOGETHER = 0;
 const Int32 AnimatorInflater::SEQUENTIALLY = 1;
 const Int32 AnimatorInflater::VALUE_TYPE_FLOAT       = 0;
@@ -598,7 +598,6 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
 {
     VALIDATE_NOT_NULL(animator);
     *animator = NULL;
-    Slogger::I(TAG, " >>> CreateAnimatorFromXml: parent: %s", TO_CSTR(parent));
 
     List<AutoPtr<IAnimator> > childAnims;
 

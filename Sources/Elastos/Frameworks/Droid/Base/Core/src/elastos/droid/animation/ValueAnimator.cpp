@@ -48,6 +48,23 @@ ValueAnimator::AnimationHandler::AnimationHandler()
 
 ValueAnimator::AnimationHandler::~AnimationHandler()
 {
+    // clear refcount of AnimationSet
+    //
+    List<AutoPtr<IValueAnimator> >::Iterator it;
+    for (it = mAnimations.Begin(); it != mAnimations.End(); ++it) {
+        ValueAnimator* anim = (ValueAnimator*)(*it).Get();
+        anim->mParent = NULL;
+    }
+
+    for (it = mPendingAnimations.Begin(); it != mPendingAnimations.End(); ++it) {
+        ValueAnimator* anim = (ValueAnimator*)(*it).Get();
+        anim->mParent = NULL;
+    }
+
+    for (it = mDelayedAnims.Begin(); it != mDelayedAnims.End(); ++it) {
+        ValueAnimator* anim = (ValueAnimator*)(*it).Get();
+        anim->mParent = NULL;
+    }
 }
 
 void ValueAnimator::AnimationHandler::Start()
@@ -274,7 +291,8 @@ ECode ValueAnimator::SetFloatValues(
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         a->Set(0, pvh);
         SetValues(a);
-    } else {
+    }
+    else {
         AutoPtr<IPropertyValuesHolder> valuesHolder = (*mValues)[0];
         valuesHolder->SetFloatValues(values);
     }
@@ -588,6 +606,9 @@ void ValueAnimator::Start(
     mPaused = FALSE;
     UpdateScaledDuration(); // in case the scale factor has changed since creation time
     AutoPtr<AnimationHandler> animationHandler = GetOrCreateAnimationHandler();
+
+    // TODO animation change refcount
+    //
     AutoPtr<IValueAnimator> anim = this;
     animationHandler->mPendingAnimations.PushBack(anim);
     if (mStartDelay == 0) {
@@ -731,7 +752,7 @@ void ValueAnimator::EndAnimation(
     /* [in] */ AnimationHandler* handler)
 {
     assert(handler != NULL);
-    AutoPtr<IValueAnimator> anim = this;
+    AutoPtr<IValueAnimator> anim = this; // holder ref here
     handler->mAnimations.Remove(anim);
     handler->mPendingAnimations.Remove(anim);
     handler->mDelayedAnims.Remove(anim);
@@ -754,6 +775,12 @@ void ValueAnimator::EndAnimation(
     mStarted = FALSE;
     mStartListenersCalled = FALSE;
     mPlayingBackwards = FALSE;
+
+    // clear refcount of AnimationSet
+    //
+    if (mParent != NULL) {
+        mParent = NULL;
+    }
     // if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
     //     Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
     //             System.identityHashCode(this));
@@ -796,7 +823,8 @@ Boolean ValueAnimator::DelayedAnimationFrame(
             mPauseTime = currentTime;
         }
         return FALSE;
-    } else if (mResumed) {
+    }
+    else if (mResumed) {
         mResumed = FALSE;
         if (mPauseTime > 0) {
             // Offset by the duration that the animation was paused

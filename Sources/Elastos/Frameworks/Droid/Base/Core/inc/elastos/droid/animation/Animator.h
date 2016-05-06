@@ -277,9 +277,12 @@ public:
     virtual CARAPI SetAllowRunningAsynchronously(
         /* [in] */ Boolean mayRunAsync);
 
+public:
+    AutoPtr<IAnimatorSet> mParent;
+
 protected:
     //@Override
-    CARAPI CloneSuperData(
+    virtual CARAPI CloneSuperData(
         /* [in] */ Animator* anim);
 
     /**

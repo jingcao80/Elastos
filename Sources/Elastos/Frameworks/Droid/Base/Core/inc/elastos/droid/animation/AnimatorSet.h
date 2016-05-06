@@ -111,7 +111,7 @@ private:
         CARAPI OnAnimationStart(
             /* [in] */ IAnimator* animation);
     private:
-        AnimatorSet* mAnimatorSet;
+        AutoPtr<IWeakReference> mWeakAnimatorSet;
     };
 
     /**

@@ -84,7 +84,10 @@ void AnimatorSet::DependencyListener::StartIfReady(
     mNode->mTmpDependencies.Remove(dependencyToRemove);
     if (mNode->mTmpDependencies.IsEmpty()) {
         // all dependencies satisfied: start the animation
-        mNode->mAnimation->Start();
+        Animator* anim = (Animator*)(mNode->mAnimation.Get());
+        // hold refcount of AnimationSet
+        anim->mParent = mAnimatorSet;
+        anim->Start();
         mAnimatorSet->mPlayingSet.PushBack(mNode->mAnimation);
     }
 }
@@ -96,23 +99,32 @@ CAR_INTERFACE_IMPL_2(AnimatorSet::AnimatorSetListener, Object, IAnimatorSetListe
 
 AnimatorSet::AnimatorSetListener::AnimatorSetListener(
     /* [in] */ AnimatorSet* animatorSet)
-    : mAnimatorSet(animatorSet)
 {
-    Logger::I(TAG, " >>> create AnimatorSetListener with animatorset:%s", TO_CSTR(animatorSet));
+    animatorSet->GetWeakReference((IWeakReference**)&mWeakAnimatorSet);
 }
 
 ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
-    if (!mAnimatorSet->mTerminated) {
+    AutoPtr<IAnimatorSet> obj;
+    mWeakAnimatorSet->Resolve(EIID_IAnimatorSet, (IInterface**)&obj);
+    if (obj == NULL) {
+        Logger::E(TAG, "Error: AnimatorSet has been released!");
+        assert(0 && "Error: AnimatorSet has been released!");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    AnimatorSet* animatorSet = (AnimatorSet*)obj.Get();
+
+    if (!animatorSet->mTerminated) {
         // Listeners are already notified of the AnimatorSet canceling in cancel().
         // The logic below only kicks in when animations end normally
-        if (mAnimatorSet->mPlayingSet.IsEmpty()) {
-            if (mAnimatorSet->mListeners.IsEmpty() == FALSE) {
-                List<AutoPtr<IAnimatorListener> > tmpListeners(mAnimatorSet->mListeners);
-                List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
-                for (; it != tmpListeners.Begin(); ++it) {
-                    (*it)->OnAnimationCancel((IAnimator*)(mAnimatorSet->Probe(EIID_IAnimator)));
+        if (animatorSet->mPlayingSet.IsEmpty()) {
+            if (!animatorSet->mListeners.IsEmpty()) {
+                List<AutoPtr<IAnimatorListener> > tmpListeners(animatorSet->mListeners);
+                List<AutoPtr<IAnimatorListener> >::Iterator it;
+                for (it = tmpListeners.Begin(); it != tmpListeners.Begin(); ++it) {
+                    (*it)->OnAnimationCancel((IAnimator*)animatorSet);
                 }
             }
         }
@@ -123,20 +135,25 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
 ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    Logger::I(TAG, " >>> AnimatorSetListener::OnAnimationEnd:%p", mAnimatorSet);
-    Logger::I(TAG, " >>> AnimatorSetListener::OnAnimationEnd:%s", TO_CSTR(mAnimatorSet));
+    AutoPtr<IAnimatorSet> obj;
+    mWeakAnimatorSet->Resolve(EIID_IAnimatorSet, (IInterface**)&obj);
+    if (obj == NULL) {
+        Logger::E(TAG, "Error: AnimatorSet has been released!");
+        assert(0 && "Error: AnimatorSet has been released!");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // mAnimatorSet's reference may be released to 0 when (*itListeners)->OnAnimationEnd()
-    mAnimatorSet->AddRef();
+    AnimatorSet* animatorSet = (AnimatorSet*)obj.Get();
+
     animation->RemoveListener(this);
-    mAnimatorSet->mPlayingSet.Remove(animation);
+    animatorSet->mPlayingSet.Remove(animation);
     AutoPtr<IAnimator> key = animation;
-    AutoPtr<Node> animNode = (mAnimatorSet->mNodeMap)[key];
+    AutoPtr<Node> animNode = (animatorSet->mNodeMap)[key];
     animNode->mDone = TRUE;
-    if (!(mAnimatorSet->mTerminated)) {
+    if (!(animatorSet->mTerminated)) {
         // Listeners are already notified of the AnimatorSet ending in cancel() or
         // end(); the logic below only kicks in when animations end normally
-        List<AutoPtr<Node> > sortedNodes(mAnimatorSet->mSortedNodes);
+        List<AutoPtr<Node> > sortedNodes(animatorSet->mSortedNodes);
         Boolean allDone = TRUE;
         List<AutoPtr<Node> >::Iterator sortedIt = sortedNodes.Begin();
         for (; sortedIt != sortedNodes.End(); ++sortedIt) {
@@ -148,18 +165,18 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
         if (allDone) {
             // If this was the last child animation to end, then notify listeners that this
             // AnimatorSet has ended
-            if (mAnimatorSet->mListeners.IsEmpty() == FALSE) {
-                List<AutoPtr<IAnimatorListener> > tmpListeners(mAnimatorSet->mListeners);
+            if (animatorSet->mListeners.IsEmpty() == FALSE) {
+                List<AutoPtr<IAnimatorListener> > tmpListeners(animatorSet->mListeners);
                 List<AutoPtr<IAnimatorListener> >::Iterator itListeners = tmpListeners.Begin();
                 for (; itListeners != tmpListeners.End(); ++itListeners) {
-                    (*itListeners)->OnAnimationEnd(IAnimator::Probe(mAnimatorSet));
+                    (*itListeners)->OnAnimationEnd((IAnimator*)animatorSet);
                 }
             }
-            mAnimatorSet->mStarted = FALSE;
-            mAnimatorSet->mPaused = FALSE;
+            animatorSet->mStarted = FALSE;
+            animatorSet->mPaused = FALSE;
         }
     }
-    mAnimatorSet->Release();
+
     return NOERROR;
 }
 
@@ -261,11 +278,13 @@ ECode AnimatorSet::AnimatorListenerAdapterIMPL::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (!mCanceled) {
-        List<AutoPtr<Node> >::Iterator it = mNodes->Begin();
-        for (; it != mNodes->End(); ++it) {
-            AutoPtr<Node> node = *it;
-            node->mAnimation->Start();
-            mHost->mPlayingSet.PushBack(node->mAnimation);
+        List<AutoPtr<Node> >::Iterator it;
+        for (it = mNodes->Begin(); it != mNodes->End(); ++it) {
+            Animator* anim = (Animator*)((*it)->mAnimation.Get());
+            // hold refcount of AnimationSet
+            anim->mParent = mHost;
+            anim->Start();
+            mHost->mPlayingSet.PushBack((*it)->mAnimation);
         }
     }
     mHost->mDelayAnim = NULL;
@@ -298,10 +317,12 @@ AnimatorSet::AnimatorSet()
     , mDuration(-1)
     , mReversible(TRUE)
 {
+    // Logger::I(TAG, " >>>> Create AnimatorSet : 0x%0x =====================", this);
 }
 
 AnimatorSet::~AnimatorSet()
 {
+    // Logger::I(TAG, " >>>> Destory AnimatorSet: 0x%0x =====================", this);
 }
 
 ECode AnimatorSet::PlayTogether(
@@ -516,13 +537,14 @@ ECode AnimatorSet::End()
     Boolean started = FALSE;
     if (IsStarted(&started), started) {
         if (mSortedNodes.GetSize() != mNodes.GetSize()) {
+            if (mSetListener == NULL) {
+                mSetListener = new AnimatorSetListener(this);
+            }
+
             // hasn't been started yet - sort the nodes now, then end them
             SortNodes();
             List<AutoPtr<Node> >::Iterator it = mSortedNodes.Begin();
             for (; it != mSortedNodes.End(); it++) {
-                if (mSetListener == NULL) {
-                    mSetListener = new AnimatorSetListener(this);
-                }
                 (*it)->mAnimation->AddListener(mSetListener);
             }
         }
@@ -716,33 +738,40 @@ ECode AnimatorSet::Start()
     // dependencies on all of the nodes. For example, we don't want to start an animation
     // when some other animation also wants to start when the first animation begins.
     AutoPtr< List<AutoPtr<Node> > > nodesToStart = new List<AutoPtr<Node> >;
-    for (it = mSortedNodes.Begin(); it != mSortedNodes.End(); ++it) {
-        AutoPtr<Node> node = *it;
+    if (!mSortedNodes.IsEmpty()) {
         if (mSetListener == NULL) {
             mSetListener = new AnimatorSetListener(this);
         }
-        if (node->mDependencies.IsEmpty()) {
-            nodesToStart->PushBack(node);
-        }
-        else {
-            List<AutoPtr<Dependency> >::Iterator dependencyIt= node->mDependencies.Begin();
-            for (; dependencyIt != node->mDependencies.End(); ++dependencyIt) {
-                AutoPtr<Dependency> dependency = *dependencyIt;
-                AutoPtr<DependencyListener> lTemp = new DependencyListener(this, node, dependency->mRule);
-                dependency->mNode->mAnimation->AddListener(lTemp);
+
+        for (it = mSortedNodes.Begin(); it != mSortedNodes.End(); ++it) {
+            AutoPtr<Node> node = *it;
+            if (node->mDependencies.IsEmpty()) {
+                nodesToStart->PushBack(node);
             }
-            node->mTmpDependencies.Clear();
-            node->mTmpDependencies.Assign(node->mDependencies.Begin(), node->mDependencies.End());
+            else {
+                List<AutoPtr<Dependency> >::Iterator dependencyIt= node->mDependencies.Begin();
+                for (; dependencyIt != node->mDependencies.End(); ++dependencyIt) {
+                    AutoPtr<Dependency> dependency = *dependencyIt;
+                    AutoPtr<DependencyListener> lTemp = new DependencyListener(this, node, dependency->mRule);
+                    dependency->mNode->mAnimation->AddListener(lTemp);
+                }
+                node->mTmpDependencies.Clear();
+                node->mTmpDependencies.Assign(node->mDependencies.Begin(), node->mDependencies.End());
+            }
+
+
+            node->mAnimation->AddListener(mSetListener);
         }
-        node->mAnimation->AddListener(mSetListener);
     }
 
     // Now that all dependencies are set up, start the animations that should be started.
     if (mStartDelay <= 0) {
-        List<AutoPtr<Node> >::Iterator nodeIt = nodesToStart->Begin();
-        for (; nodeIt != nodesToStart->End(); nodeIt++) {
-            (*nodeIt)->mAnimation->Start();
-            mPlayingSet.PushBack((*nodeIt)->mAnimation);
+        for (it = nodesToStart->Begin(); it != nodesToStart->End(); it++) {
+            Animator* anim = (Animator*)((*it)->mAnimation.Get());
+            // hold refcount of AnimationSet
+            anim->mParent = this;
+            anim->Start();
+            mPlayingSet.PushBack((*it)->mAnimation);
         }
     }
     else {
