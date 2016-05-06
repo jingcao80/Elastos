@@ -4,14 +4,18 @@
 #include "elastos/droid/animation/ValueAnimator.h"
 #include "elastos/droid/animation/CAnimatorSet.h"
 #include "elastos/droid/animation/CAnimatorSetBuilder.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::ICloneable;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
-using Elastos::Core::ICloneable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Animation {
+
+static const String TAG("AnimatorSet");
 
 //==============================================================================
 //                  AnimatorSet::DependencyListener
@@ -94,6 +98,7 @@ AnimatorSet::AnimatorSetListener::AnimatorSetListener(
     /* [in] */ AnimatorSet* animatorSet)
     : mAnimatorSet(animatorSet)
 {
+    Logger::I(TAG, " >>> create AnimatorSetListener with animatorset:%s", TO_CSTR(animatorSet));
 }
 
 ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
@@ -117,6 +122,9 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
 ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
+    Logger::I(TAG, " >>> AnimatorSetListener::OnAnimationEnd:%p", mAnimatorSet);
+    Logger::I(TAG, " >>> AnimatorSetListener::OnAnimationEnd:%s", TO_CSTR(mAnimatorSet));
+
     // mAnimatorSet's reference may be released to 0 when (*itListeners)->OnAnimationEnd()
     mAnimatorSet->AddRef();
     animation->RemoveListener(this);

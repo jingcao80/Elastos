@@ -1467,14 +1467,14 @@ void CNetworkPolicyManagerService::UpdateNetworkRulesLocked()
     }
 
     // Apply policies against all connected interfaces found above
-    mNetworkRules.Clear();
+    mNetworkRules->Clear();
     AutoPtr<IArrayList> ifaceList;
     CArrayList::New((IArrayList**)&ifaceList);
     for (Int32 i = Ptr(mNetworkPolicy)->Func(mNetworkPolicy->GetSize) - 1; i >= 0; --i) {
         AutoPtr<IInterface> obj;
         mNetworkPolicy->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<INetworkPolicy> policy = INetworkPolicy::Probe(obj);
-        ifaceList.Clear();
+        ifaceList->Clear();
         for (Int32 j = Ptr(connIdents)->Func(connIdents->GetSize) - 1; j >= 0; j--) {
             AutoPtr<IInterface> obj;
             connIdents->Get(j, (IInterface**)&obj);
@@ -1715,7 +1715,7 @@ ECode CNetworkPolicyManagerService::ReadPolicyLocked()
     if (LOGV) Slogger::V(TAG, "readPolicyLocked()");
 
     // clear any existing policy and read from disk
-    mNetworkPolicy.Clear();
+    mNetworkPolicy->Clear();
     mUidPolicy.Clear();
 
     AutoPtr<IFileInputStream> fis;
@@ -2215,7 +2215,7 @@ ECode CNetworkPolicyManagerService::SetNetworkPolicies(
 
     MaybeRefreshTrustedTime();
     synchronized(mRulesLock) {
-        mNetworkPolicy.Clear();
+        mNetworkPolicy->Clear();
         for (Int32 i = 0; i <  policies->GetLength(); i++) {
             AutoPtr<INetworkPolicy> policy = (*policies)[i];
             AutoPtr<INetworkTemplate> nwkTemplate;

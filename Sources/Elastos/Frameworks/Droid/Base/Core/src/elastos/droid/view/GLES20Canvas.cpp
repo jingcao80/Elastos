@@ -1192,7 +1192,7 @@ ECode GLES20Canvas::DrawTextRun(
     /* [in] */ Boolean isRtl,
     /* [in] */ IPaint* paint)
 {
-    if ((index | count | text->GetLength() - index - count) < 0) {
+    if ((index | count | (text->GetLength() - index - count)) < 0) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
@@ -1215,7 +1215,7 @@ ECode GLES20Canvas::DrawTextRun(
 {
     Int32 textLen;
     text->GetLength(&textLen);
-    if ((start | end | end - start | textLen - end) < 0) {
+    if ((start | end | (end - start) | (textLen - end)) < 0) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 

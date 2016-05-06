@@ -489,8 +489,8 @@ Int32 UrlQuerySanitizer::DecodeHexDigit(
 
 ECode UrlQuerySanitizer::Clear()
 {
-    mEntries.Clear();
-    mEntriesList.Clear();
+    mEntries->Clear();
+    mEntriesList->Clear();
     return NOERROR;
 }
 
