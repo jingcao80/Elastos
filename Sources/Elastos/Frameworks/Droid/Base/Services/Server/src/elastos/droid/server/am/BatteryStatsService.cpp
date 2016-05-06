@@ -30,6 +30,7 @@ using Elastos::Droid::Internal::Os::CBatteryStatsHelperHelper;
 using Elastos::Droid::Internal::Os::CPowerProfile;
 using Elastos::Droid::Internal::Os::IBatteryStatsHelperHelper;
 using Elastos::Droid::Internal::Os::IPowerProfile;
+using Elastos::Droid::Internal::Os::CBatteryStatsImpl;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CParcelFileDescriptorHelper;
@@ -47,7 +48,7 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Server::LocalServices;
 // using Elastos::Droid::Telephony::CTelephonyManager;
-// using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Core::AutoLock;
@@ -225,7 +226,7 @@ ECode BatteryStatsService::BluetoothProfileServiceListener::OnServiceConnected(
     /* [in] */ IBluetoothProfile* proxy)
 {
     mHost->mBluetoothHeadset = IBluetoothHeadset::Probe(proxy);
-    AutoLock lock(mHost->mStatsLock);
+    AutoLock lock(mHost->mStats);
     if (mHost->mBluetoothPendingStats && mHost->mStats) {
         mHost->mStats->NoteBluetoothOnLocked();
         mHost->mStats->SetBtHeadset(mHost->mBluetoothHeadset);
@@ -259,12 +260,13 @@ ECode BatteryStatsService::WakeupReasonThread::Run()
         Int32 num;
         while ((num = BatteryStatsService::NativeWaitWakeup(mIrqs, mReasons)) >= 0) {
             {
-                AutoLock lock(mHost->mStatsLock);
+                AutoLock lock(mHost->mStats);
                 if (num > 0) {
                     for (Int32 i=0; i<num; i++) {
                         mHost->mStats->NoteWakeupReasonLocked((*mReasons)[i]);
                     }
-                } else {
+                }
+                else {
                     mHost->mStats->NoteWakeupReasonLocked(String("unknown"));
                 }
             }
@@ -291,8 +293,8 @@ ECode BatteryStatsService::constructor(
     /* [in] */ IHandler* handler)
 {
     mBluetoothProfileServiceListener = new BluetoothProfileServiceListener(this);
-    Slogger::W(TAG, " === TODO constructor: BatteryStatsImpl not implemented.");
-    //mStats = new BatteryStatsImpl(systemDir, handler);
+    CBatteryStatsImpl::New(systemDir, handler, (IBatteryStatsImpl**)&mStats);
+    Slogger::W(TAG, " === TODO constructor: BatteryStatsImpl %p.", mStats.Get());
     return NOERROR;
 }
 
@@ -307,13 +309,13 @@ ECode BatteryStatsService::Publish(
     AutoPtr<IPowerProfile> pp;
     CPowerProfile::New(mContext, (IPowerProfile**)&pp);
     pp->GetNumSpeedSteps(&steps);
-    //mStats->SetNumSpeedSteps(steps);
+    mStats->SetNumSpeedSteps(steps);
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
     Int32 value;
     resources->GetInteger(
             R::integer::config_radioScanningTimeout, &value);
-    //mStats->SetRadioScanningTimeout(value * 1000L);
+    mStats->SetRadioScanningTimeout(value * 1000L);
     return NOERROR;
 }
 
@@ -324,7 +326,7 @@ void BatteryStatsService::InitPowerManagement()
     mPowerManagerInternal->RegisterLowPowerModeObserver(this);
     Boolean enabled = FALSE;
     mPowerManagerInternal->GetLowPowerModeEnabled(&enabled);
-    //mStats->NoteLowPowerMode(enabled);
+    mStats->NoteLowPowerMode(enabled);
     AutoPtr<WakeupReasonThread> wrt = new WakeupReasonThread(this);
     wrt->Start();
 }
@@ -332,8 +334,8 @@ void BatteryStatsService::InitPowerManagement()
 void BatteryStatsService::Shutdown()
 {
     Slogger::W("BatteryStats", "Writing battery stats before shutdown...");
-    AutoLock lock(mStatsLock);
-    //mStats->ShutdownLocked();
+    AutoLock lock(mStats);
+    mStats->ShutdownLocked();
 }
 
 AutoPtr<IIBatteryStats> BatteryStatsService::GetService()
@@ -352,10 +354,8 @@ AutoPtr<IIBatteryStats> BatteryStatsService::GetService()
 ECode BatteryStatsService::OnLowPowerModeChanged(
     /* [in] */ Boolean enabled)
 {
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteLowPowerMode(enabled);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteLowPowerMode(enabled);
     return NOERROR;
 }
 
@@ -368,30 +368,24 @@ void BatteryStatsService::AddIsolatedUid(
     /* [in] */ Int32 isolatedUid,
     /* [in] */ Int32 appUid)
 {
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->AddIsolatedUidLocked(isolatedUid, appUid);
-    }
+    AutoLock lock(mStats);
+    mStats->AddIsolatedUidLocked(isolatedUid, appUid);
 }
 
 void BatteryStatsService::RemoveIsolatedUid(
     /* [in] */ Int32 isolatedUid,
     /* [in] */ Int32 appUid)
 {
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->RemoveIsolatedUidLocked(isolatedUid, appUid);
-    }
+    AutoLock lock(mStats);
+    mStats->RemoveIsolatedUidLocked(isolatedUid, appUid);
 }
 
 void BatteryStatsService::NoteProcessStart(
     /* [in] */ const String& name,
     /* [in] */ Int32 uid)
 {
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteProcessStartLocked(name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteProcessStartLocked(name, uid);
 }
 
 void BatteryStatsService::NoteProcessState(
@@ -399,20 +393,16 @@ void BatteryStatsService::NoteProcessState(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 state)
 {
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteProcessStateLocked(name, uid, state);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteProcessStateLocked(name, uid, state);
 }
 
 void BatteryStatsService::NoteProcessFinish(
     /* [in] */ const String& name,
     /* [in] */ Int32 uid)
 {
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteProcessFinishLocked(name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteProcessFinishLocked(name, uid);
 }
 
 ECode BatteryStatsService::GetStatistics(
@@ -461,12 +451,11 @@ ECode BatteryStatsService::ComputeBatteryTimeRemaining(
 {
     VALIDATE_NOT_NULL(timeRemaining);
     {
-        AutoLock lock(mStatsLock);
+        AutoLock lock(mStats);
         Int64 time = 0;
         Int64 realTime = SystemClock::GetElapsedRealtime();
-        assert(realTime);//TODO remove
-        //TODO time = mStats->ComputeBatteryTimeRemaining(realTime);//the method not defined in BatteryStatsImpl.h
-        *timeRemaining = time >= 0 ? (time/1000) : time;
+        IBatteryStats::Probe(mStats)->ComputeBatteryTimeRemaining(realTime, &time);
+        *timeRemaining = time >= 0 ? (time / 1000) : time;
     }
     return NOERROR;
 }
@@ -476,12 +465,11 @@ ECode BatteryStatsService::ComputeChargeTimeRemaining(
 {
     VALIDATE_NOT_NULL(timeRemaining);
     {
-        AutoLock lock(mStatsLock);
+        AutoLock lock(mStats);
         Int64 time = 0;
         Int64 realTime = SystemClock::GetElapsedRealtime();
-        assert(realTime);//TODO remove
-        //TODO time = mStats->ComputeChargeTimeRemaining(realTime);
-        *timeRemaining = time >= 0 ? (time/1000) : time;
+        IBatteryStats::Probe(mStats)->ComputeChargeTimeRemaining(realTime, &time);
+        *timeRemaining = time >= 0 ? (time / 1000) : time;
     }
     return NOERROR;
 }
@@ -492,10 +480,8 @@ ECode BatteryStatsService::NoteEvent(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteEventLocked(code, name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteEventLocked(code, name, uid);
     return NOERROR;
 }
 
@@ -504,10 +490,8 @@ ECode BatteryStatsService::NoteSyncStart(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteSyncStartLocked(name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteSyncStartLocked(name, uid);
     return NOERROR;
 }
 
@@ -516,10 +500,8 @@ ECode BatteryStatsService::NoteSyncFinish(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteSyncFinishLocked(name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteSyncFinishLocked(name, uid);
     return NOERROR;
 }
 
@@ -528,10 +510,8 @@ ECode BatteryStatsService::NoteJobStart(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteJobStartLocked(name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteJobStartLocked(name, uid);
     return NOERROR;
 }
 
@@ -540,10 +520,8 @@ ECode BatteryStatsService::NoteJobFinish(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteJobFinishLocked(name, uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteJobFinishLocked(name, uid);
     return NOERROR;
 }
 
@@ -556,12 +534,10 @@ ECode BatteryStatsService::NoteStartWakelock(
     /* [in] */ Boolean unimportantForLogging)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
+    AutoLock lock(mStats);
     Int64 realTime = SystemClock::GetElapsedRealtime();
     Int64 upTime = SystemClock::GetUptimeMillis();
-    assert(realTime);//TODO remove
-    assert(upTime);//TODO remove
-    //TODO mStats->NoteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging, realTime, upTime);
+    mStats->NoteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging, realTime, upTime);
     return NOERROR;
 }
 
@@ -573,12 +549,10 @@ ECode BatteryStatsService::NoteStopWakelock(
     /* [in] */ Int32 type)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
+    AutoLock lock(mStats);
     Int64 realTime = SystemClock::GetElapsedRealtime();
     Int64 upTime = SystemClock::GetUptimeMillis();
-    assert(realTime);//TODO remove
-    assert(upTime);//TODO remove
-    //TODO mStats->NoteStopWakeLocked(uid, pid, name, historyName, type, realTime, upTime);
+    mStats->NoteStopWakeLocked(uid, pid, name, historyName, type, realTime, upTime);
     return NOERROR;
 }
 
@@ -591,8 +565,8 @@ ECode BatteryStatsService::NoteStartWakelockFromSource(
     /* [in] */ Boolean unimportantForLogging)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //TODO mStats->NoteStartWakeFromSourceLocked(ws, pid, name, historyName, type, unimportantForLogging);
+    AutoLock lock(mStats);
+    mStats->NoteStartWakeFromSourceLocked(ws, pid, name, historyName, type, unimportantForLogging);
     return NOERROR;
 }
 
@@ -610,11 +584,9 @@ ECode BatteryStatsService::NoteChangeWakelockFromSource(
     /* [in] */ Boolean newUnimportantForLogging)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //TODO mStats->NoteChangeWakelockFromSourceLocked(ws, pid, name, historyName, type,
-        //        newWs, newPid, newName, newHistoryName, newType, newUnimportantForLogging);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteChangeWakelockFromSourceLocked(ws, pid, name, historyName, type,
+            newWs, newPid, newName, newHistoryName, newType, newUnimportantForLogging);
     return NOERROR;
 }
 
@@ -623,12 +595,12 @@ ECode BatteryStatsService::NoteStopWakelockFromSource(
     /* [in] */ IWorkSource* ws,
     /* [in] */ Int32 pid,
     /* [in] */ const String& name,
-    /* [in] */ const String& newHistoryName,
+    /* [in] */ const String& historyName,
     /* [in] */ Int32 type)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //TODO mStats->NoteStopWakeFromSourceLocked(ws, pid, name, historyName, type);
+    AutoLock lock(mStats);
+    mStats->NoteStopWakeFromSourceLocked(ws, pid, name, historyName, type);
     return NOERROR;
 }
 
@@ -637,8 +609,8 @@ ECode BatteryStatsService::NoteStartSensor(
     /* [in] */ Int32 sensor)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteStartSensorLocked(uid, sensor);
+    AutoLock lock(mStats);
+    mStats->NoteStartSensorLocked(uid, sensor);
     return NOERROR;
 }
 
@@ -647,8 +619,8 @@ ECode BatteryStatsService::NoteStopSensor(
     /* [in] */ Int32 sensor)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteStopSensorLocked(uid, sensor);
+    AutoLock lock(mStats);
+    mStats->NoteStopSensorLocked(uid, sensor);
     return NOERROR;
 }
 
@@ -657,10 +629,8 @@ ECode BatteryStatsService::NoteVibratorOn(
     /* [in] */ Int64 durationMillis)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteVibratorOnLocked(uid, durationMillis);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteVibratorOnLocked(uid, durationMillis);
     return NOERROR;
 }
 
@@ -668,10 +638,8 @@ ECode BatteryStatsService::NoteVibratorOff(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteVibratorOffLocked(uid);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteVibratorOffLocked(uid);
     return NOERROR;
 }
 
@@ -679,8 +647,8 @@ ECode BatteryStatsService::NoteStartGps(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteStartGpsLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteStartGpsLocked(uid);
     return NOERROR;
 }
 
@@ -688,8 +656,8 @@ ECode BatteryStatsService::NoteStopGps(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteStopGpsLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteStopGpsLocked(uid);
     return NOERROR;
 }
 
@@ -697,8 +665,8 @@ ECode BatteryStatsService::NoteScreenState(
     /* [in] */ Int32 state)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //TODO mStats->NoteScreenStateLocked(state);
+    AutoLock lock(mStats);
+    mStats->NoteScreenStateLocked(state);
     return NOERROR;
 }
 
@@ -706,8 +674,8 @@ ECode BatteryStatsService::NoteScreenBrightness(
     /* [in] */ Int32 brightness)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteScreenBrightnessLocked(brightness);
+    AutoLock lock(mStats);
+    mStats->NoteScreenBrightnessLocked(brightness);
     return NOERROR;
 }
 
@@ -716,8 +684,8 @@ ECode BatteryStatsService::NoteUserActivity(
     /* [in] */ Int32 event)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteUserActivityLocked(uid, event);
+    AutoLock lock(mStats);
+    mStats->NoteUserActivityLocked(uid, event);
     return NOERROR;
 }
 
@@ -725,10 +693,8 @@ ECode BatteryStatsService::NoteInteractive(
     /* [in] */ Boolean interactive)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteInteractiveLocked(interactive);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteInteractiveLocked(interactive);
     return NOERROR;
 }
 
@@ -737,26 +703,24 @@ ECode BatteryStatsService::NoteMobileRadioPowerState(
     /* [in] */ Int64 timestampNs)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteMobileRadioPowerState(powerState, timestampNs);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteMobileRadioPowerState(powerState, timestampNs);
     return NOERROR;
 }
 
 ECode BatteryStatsService::NotePhoneOn()
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NotePhoneOnLocked();
+    AutoLock lock(mStats);
+    mStats->NotePhoneOnLocked();
     return NOERROR;
 }
 
 ECode BatteryStatsService::NotePhoneOff()
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NotePhoneOffLocked();
+    AutoLock lock(mStats);
+    mStats->NotePhoneOffLocked();
     return NOERROR;
 }
 
@@ -764,8 +728,8 @@ ECode BatteryStatsService::NotePhoneSignalStrength(
    /* [in] */ ISignalStrength* signalStrength)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NotePhoneSignalStrengthLocked(signalStrength);
+    AutoLock lock(mStats);
+    mStats->NotePhoneSignalStrengthLocked(signalStrength);
     return NOERROR;
 }
 
@@ -774,8 +738,8 @@ ECode BatteryStatsService::NotePhoneDataConnectionState(
     /* [in] */ Boolean hasData)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NotePhoneDataConnectionStateLocked(dataType, hasData);
+    AutoLock lock(mStats);
+    mStats->NotePhoneDataConnectionStateLocked(dataType, hasData);
     return NOERROR;
 }
 
@@ -784,29 +748,29 @@ ECode BatteryStatsService::NotePhoneState(
 {
     EnforceCallingPermission();
     AutoPtr<ITelephonyManagerHelper> helper;
-    //TODO CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
     AutoPtr<ITelephonyManager> tm;
     helper->GetDefault((ITelephonyManager**)&tm);
     Int32 simState;
     tm->GetSimState(&simState);
-    AutoLock lock(mStatsLock);
-    //mStats->NotePhoneStateLocked(state, simState);
+    AutoLock lock(mStats);
+    mStats->NotePhoneStateLocked(state, simState);
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteWifiOn()
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiOnLocked();
+    AutoLock lock(mStats);
+    mStats->NoteWifiOnLocked();
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteWifiOff()
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiOffLocked();
+    AutoLock lock(mStats);
+    mStats->NoteWifiOffLocked();
     return NOERROR;
 }
 
@@ -814,8 +778,8 @@ ECode BatteryStatsService::NoteStartAudio(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteAudioOnLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteAudioOnLocked(uid);
     return NOERROR;
 }
 
@@ -823,8 +787,8 @@ ECode BatteryStatsService::NoteStopAudio(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteAudioOffLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteAudioOffLocked(uid);
     return NOERROR;
 }
 
@@ -832,8 +796,8 @@ ECode BatteryStatsService::NoteStartVideo(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteVideoOnLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteVideoOnLocked(uid);
     return NOERROR;
 }
 
@@ -841,48 +805,40 @@ ECode BatteryStatsService::NoteStopVideo(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteVideoOffLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteVideoOffLocked(uid);
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteResetAudio()
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteResetAudioLocked();
-    }
+    AutoLock lock(mStats);
+    mStats->NoteResetAudioLocked();
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteResetVideo()
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteResetVideoLocked();
-    }
+    AutoLock lock(mStats);
+    mStats->NoteResetVideoLocked();
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteFlashlightOn()
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteFlashlightOnLocked();
-    }
+    AutoLock lock(mStats);
+    mStats->NoteFlashlightOnLocked();
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteFlashlightOff()
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteFlashlightOffLocked();
-    }
+    AutoLock lock(mStats);
+    mStats->NoteFlashlightOffLocked();
     return NOERROR;
 }
 
@@ -890,8 +846,8 @@ ECode BatteryStatsService::NoteWifiRunning(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiRunningLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteWifiRunningLocked(ws);
     return NOERROR;
 }
 
@@ -900,8 +856,8 @@ ECode BatteryStatsService::NoteWifiRunningChanged(
     /* [in] */ IWorkSource* newWs)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiRunningChangedLocked(oldWs, newWs);
+    AutoLock lock(mStats);
+    mStats->NoteWifiRunningChangedLocked(oldWs, newWs);
     return NOERROR;
 }
 
@@ -909,8 +865,8 @@ ECode BatteryStatsService::NoteWifiStopped(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiStoppedLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteWifiStoppedLocked(ws);
     return NOERROR;
 }
 
@@ -919,10 +875,8 @@ ECode BatteryStatsService::NoteWifiState(
     /* [in] */ const String& accessPoint)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteWifiStateLocked(wifiState, accessPoint);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteWifiStateLocked(wifiState, accessPoint);
     return NOERROR;
 }
 
@@ -931,10 +885,8 @@ ECode BatteryStatsService::NoteWifiSupplicantStateChanged(
     /* [in] */ Boolean failedAuth)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteWifiSupplicantStateChangedLocked(supplState, failedAuth);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteWifiSupplicantStateChangedLocked(supplState, failedAuth);
     return NOERROR;
 }
 
@@ -942,10 +894,8 @@ ECode BatteryStatsService::NoteWifiRssiChanged(
     /* [in] */ Int32 newRssi)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteWifiRssiChangedLocked(newRssi);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteWifiRssiChangedLocked(newRssi);
     return NOERROR;
 }
 
@@ -961,10 +911,10 @@ ECode BatteryStatsService::NoteBluetoothOn()
         adapter->GetProfileProxy(mContext, mBluetoothProfileServiceListener, IBluetoothProfile::HEADSET, &result);
     }
 
-    AutoLock lock(mStatsLock);
+    AutoLock lock(mStats);
     if (mBluetoothHeadset != NULL) {
-        //mStats->NoteBluetoothOnLocked();
-        //mStats->SetBtHeadset(mBluetoothHeadset);
+        mStats->NoteBluetoothOnLocked();
+        mStats->SetBtHeadset(mBluetoothHeadset);
     }
     else {
         mBluetoothPendingStats = TRUE;
@@ -975,9 +925,9 @@ ECode BatteryStatsService::NoteBluetoothOn()
 ECode BatteryStatsService::NoteBluetoothOff()
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
+    AutoLock lock(mStats);
     mBluetoothPendingStats = FALSE;
-    //mStats->NoteBluetoothOffLocked();
+    mStats->NoteBluetoothOffLocked();
     return NOERROR;
 }
 
@@ -985,10 +935,8 @@ ECode BatteryStatsService::NoteBluetoothState(
     /* [in] */ Int32 bluetoothState)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteBluetoothStateLocked(bluetoothState);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteBluetoothStateLocked(bluetoothState);
     return NOERROR;
 }
 
@@ -996,8 +944,8 @@ ECode BatteryStatsService::NoteFullWifiLockAcquired(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteFullWifiLockAcquiredLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteFullWifiLockAcquiredLocked(uid);
     return NOERROR;
 }
 
@@ -1005,8 +953,8 @@ ECode BatteryStatsService::NoteFullWifiLockReleased(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteFullWifiLockReleasedLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteFullWifiLockReleasedLocked(uid);
     return NOERROR;
 }
 
@@ -1014,8 +962,8 @@ ECode BatteryStatsService::NoteWifiScanStarted(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiScanStartedLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteWifiScanStartedLocked(uid);
     return NOERROR;
 }
 
@@ -1023,8 +971,8 @@ ECode BatteryStatsService::NoteWifiScanStopped(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiScanStoppedLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteWifiScanStoppedLocked(uid);
     return NOERROR;
 }
 
@@ -1032,8 +980,8 @@ ECode BatteryStatsService::NoteWifiMulticastEnabled(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiMulticastEnabledLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteWifiMulticastEnabledLocked(uid);
     return NOERROR;
 }
 
@@ -1041,8 +989,8 @@ ECode BatteryStatsService::NoteWifiMulticastDisabled(
     /* [in] */ Int32 uid)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiMulticastDisabledLocked(uid);
+    AutoLock lock(mStats);
+    mStats->NoteWifiMulticastDisabledLocked(uid);
     return NOERROR;
 }
 
@@ -1050,8 +998,8 @@ ECode BatteryStatsService::NoteFullWifiLockAcquiredFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteFullWifiLockAcquiredFromSourceLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteFullWifiLockAcquiredFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1059,8 +1007,8 @@ ECode BatteryStatsService::NoteFullWifiLockReleasedFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteFullWifiLockReleasedFromSourceLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteFullWifiLockReleasedFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1068,8 +1016,8 @@ ECode BatteryStatsService::NoteWifiScanStartedFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiScanStartedFromSourceLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteWifiScanStartedFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1077,8 +1025,8 @@ ECode BatteryStatsService::NoteWifiScanStoppedFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiScanStoppedFromSourceLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteWifiScanStoppedFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1087,10 +1035,8 @@ ECode BatteryStatsService::NoteWifiBatchedScanStartedFromSource(
     /* [in] */ Int32 csph)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteWifiBatchedScanStartedFromSourceLocked(ws, csph);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteWifiBatchedScanStartedFromSourceLocked(ws, csph);
     return NOERROR;
 }
 
@@ -1098,10 +1044,8 @@ ECode BatteryStatsService::NoteWifiBatchedScanStoppedFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteWifiBatchedScanStoppedFromSourceLocked(ws);
-    }
+    AutoLock lock(mStats);
+    mStats->NoteWifiBatchedScanStoppedFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1109,8 +1053,8 @@ ECode BatteryStatsService::NoteWifiMulticastEnabledFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiMulticastEnabledFromSourceLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteWifiMulticastEnabledFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1118,8 +1062,8 @@ ECode BatteryStatsService::NoteWifiMulticastDisabledFromSource(
     /* [in] */ IWorkSource* ws)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteWifiMulticastDisabledFromSourceLocked(ws);
+    AutoLock lock(mStats);
+    mStats->NoteWifiMulticastDisabledFromSourceLocked(ws);
     return NOERROR;
 }
 
@@ -1128,25 +1072,23 @@ ECode BatteryStatsService::NoteNetworkInterfaceType(
     /* [in] */ Int32 type)
 {
     EnforceCallingPermission();
-    AutoLock lock(mStatsLock);
-    //mStats->NoteNetworkInterfaceTypeLocked(iface, type);
+    AutoLock lock(mStats);
+    mStats->NoteNetworkInterfaceTypeLocked(iface, type);
     return NOERROR;
 }
 
 ECode BatteryStatsService::NoteNetworkStatsEnabled()
 {
     EnforceCallingPermission();
-    {
-        AutoLock lock(mStatsLock);
-        //mStats->NoteNetworkStatsEnabledLocked();
-    }
+    AutoLock lock(mStats);
+    mStats->NoteNetworkStatsEnabledLocked();
     return NOERROR;
 }
 
 Boolean BatteryStatsService::IsOnBattery()
 {
     Boolean result = FALSE;
-    //mStats->IsOnBattery(&result);
+    mStats->IsOnBattery(&result);
     return result;
 }
 
@@ -1159,8 +1101,7 @@ ECode BatteryStatsService::SetBatteryState(
     /* [in] */ Int32 volt)
 {
     EnforceCallingPermission();
-    //mStats->SetBatteryState(status, health, plugType, level, temp, volt);
-    return NOERROR;
+    return mStats->SetBatteryState(status, health, plugType, level, temp, volt);
 }
 
 ECode BatteryStatsService::GetAwakeTimeBattery(
@@ -1170,8 +1111,7 @@ ECode BatteryStatsService::GetAwakeTimeBattery(
     *time = 0;
     FAIL_RETURN( mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::BATTERY_STATS, String(NULL)) );
-    //mStats->GetAwakeTimeBattery(time);
-    return NOERROR;
+    return mStats->GetAwakeTimeBattery(time);
 }
 
 ECode BatteryStatsService::GetAwakeTimePlugged(
@@ -1181,8 +1121,7 @@ ECode BatteryStatsService::GetAwakeTimePlugged(
     *time = 0;
     FAIL_RETURN( mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::BATTERY_STATS, String(NULL)) );
-    //mStats->GetAwakeTimePlugged(time);
-    return NOERROR;
+    return mStats->GetAwakeTimePlugged(time);
 }
 
 void BatteryStatsService::EnforceCallingPermission()
@@ -1237,16 +1176,14 @@ Int32 BatteryStatsService::DoEnableOrDisable(
         return -1;
     }
     if (String("full-wake-history").Equals((*args)[i]) || String("full-history").Equals((*args)[i])) {
-        {
-            AutoLock lock(mStatsLock);
-            //mStats->SetRecordAllHistoryLocked(enable);
-        }
-    } else if (String("no-auto-reset").Equals((*args)[i])) {
-        {
-            AutoLock lock(mStatsLock);
-            //mStats->SetNoAutoReset(enable);
-        }
-    } else {
+        AutoLock lock(mStats);
+        mStats->SetRecordAllHistoryLocked(enable);
+    }
+    else if (String("no-auto-reset").Equals((*args)[i])) {
+        AutoLock lock(mStats);
+        mStats->SetNoAutoReset(enable);
+    }
+    else {
         pw->Println(String("Unknown enable/disable option: ") + (*args)[i]);
         DumpHelp(pw);
         return -1;
@@ -1285,9 +1222,11 @@ ECode BatteryStatsService::Dump(
             if (arg.Equals("--checkin")) {
                 useCheckinFormat = TRUE;
                 isRealCheckin = TRUE;
-            } else if (String("--history").Equals(arg)) {
+            }
+            else if (String("--history").Equals(arg)) {
                 flags |= IBatteryStats::DUMP_HISTORY_ONLY;
-            } else if (String("--history-start").Equals(arg)) {
+            }
+            else if (String("--history-start").Equals(arg)) {
                 flags |= IBatteryStats::DUMP_HISTORY_ONLY;
                 i++;
                 if (i >= args->GetLength()) {
@@ -1297,47 +1236,58 @@ ECode BatteryStatsService::Dump(
                 }
                 historyStart = StringUtils::ParseInt64((*args)[i]);
                 writeData = TRUE;
-            } else if (String("-c").Equals(arg)) {
+            }
+            else if (String("-c").Equals(arg)) {
                 useCheckinFormat = TRUE;
                 flags |= IBatteryStats::DUMP_INCLUDE_HISTORY;
-            } else if (String("--unplugged").Equals(arg)) {
+            }
+            else if (String("--unplugged").Equals(arg)) {
                 flags |= IBatteryStats::DUMP_UNPLUGGED_ONLY;
-            } else if (String("--charged").Equals(arg)) {
+            }
+            else if (String("--charged").Equals(arg)) {
                 flags |= IBatteryStats::DUMP_CHARGED_ONLY;
-            } else if (arg.Equals(String("--reset"))) {
-                AutoLock lock(mStatsLock);
-                //TODO mStats->ResetAllStatsCmdLocked();
+            }
+            else if (arg.Equals(String("--reset"))) {
+                AutoLock lock(mStats);
+                mStats->ResetAllStatsCmdLocked();
                 pw->Print(String("Battery stats reset."));
                 noOutput = TRUE;
-            } else if (arg.Equals("--write")) {
-                AutoLock lock(mStatsLock);
-                //mStats->WriteSyncLocked();
+            }
+            else if (arg.Equals("--write")) {
+                AutoLock lock(mStats);
+                mStats->WriteSyncLocked();
                 pw->Print(String("Battery stats written."));
                 noOutput = TRUE;
-            } else if (String("--enable").Equals(arg) || String("enable").Equals(arg)) {
+            }
+            else if (String("--enable").Equals(arg) || String("enable").Equals(arg)) {
                 i = DoEnableOrDisable(pw, i, args, TRUE);
                 if (i < 0) {
                     return NOERROR;
                 }
                 pw->Println(String("Enabled: ") + (*args)[i]);
                 return NOERROR;
-            } else if (String("--disable").Equals(arg) || String("disable").Equals(arg)) {
+            }
+            else if (String("--disable").Equals(arg) || String("disable").Equals(arg)) {
                 i = DoEnableOrDisable(pw, i, args, FALSE);
                 if (i < 0) {
                     return NOERROR;
                 }
                 pw->Println(String("Disabled: ") + (*args)[i]);
                 return NOERROR;
-            } else if (arg.Equals("-h")) {
+            }
+            else if (arg.Equals("-h")) {
                 DumpHelp(pw);
                 return NOERROR;
-            } else if (arg.Equals("-a")) {
+            }
+            else if (arg.Equals("-a")) {
                 flags |= IBatteryStats::DUMP_VERBOSE;
-            } else if (arg.GetLength() > 0 && arg.GetChar(0) == '-'){
+            }
+            else if (arg.GetLength() > 0 && arg.GetChar(0) == '-'){
                 pw->Println(String("Unknown option: ") + arg);
                 DumpHelp(pw);
                 return NOERROR;
-            } else {
+            }
+            else {
                 // Not an option, last argument must be a package name.
                 //try {
                 AutoPtr<IPackageManager> pm;
@@ -1388,43 +1338,40 @@ ECode BatteryStatsService::Dump(
         if (isRealCheckin) {
             // For a real checkin, first we want to prefer to use the last complete checkin
             // file if there is one.
-            {
-                //TODO AutoLock lock(mStats->mCheckinFile);
-                AutoPtr<IAtomicFile> checkinFile;//TODO = mStats->mCheckinFile;
-                Boolean exists = FALSE;
-                if (checkinFile->Exists(&exists), exists) {
-                    //try {
-                        AutoPtr<ArrayOf<Byte> > raw;
-                        checkinFile->ReadFully((ArrayOf<Byte>**)&raw);
-                        if (raw != NULL) {
-                            AutoPtr<IParcel> in;
-                            CParcel::New((IParcel**)&in);
-                            in->Unmarshall(raw, 0, raw->GetLength());
-                            in->SetDataPosition(0);
-                            AutoPtr<IBatteryStatsImpl> checkinStats;
-                            //TODO = new BatteryStatsImpl( null, mStats.mHandler);
-                            checkinStats->ReadSummaryFromParcel(in);
-                            //in->Recycle();
-                            //TODO checkinStats->DumpCheckinLocked(mContext, pw, apps, flags, historyStart);
-                            checkinFile->Delete();
-                            return NOERROR;
-                        }
-                    //} catch (IOException e) {
-                    //    Slog.w(TAG, "Failure reading checkin file "
-                    //            + mStats.mCheckinFile.getBaseFile(), e);
-                    //}
-                }
-            }
+            // synchronized (mStats.mCheckinFile) {
+            //     if (mStats.mCheckinFile.exists()) {
+            //         try {
+            //             byte[] raw = mStats.mCheckinFile.readFully();
+            //             if (raw != null) {
+            //                 Parcel in = Parcel.obtain();
+            //                 in.unmarshall(raw, 0, raw.length);
+            //                 in.setDataPosition(0);
+            //                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
+            //                         null, mStats.mHandler);
+            //                 checkinStats.readSummaryFromParcel(in);
+            //                 in.recycle();
+            //                 checkinStats.dumpCheckinLocked(mContext, pw, apps, flags,
+            //                         historyStart);
+            //                 mStats.mCheckinFile.delete();
+            //                 return;
+            //             }
+            //         } catch (IOException e) {
+            //             Slog.w(TAG, "Failure reading checkin file "
+            //                     + mStats.mCheckinFile.getBaseFile(), e);
+            //         }
+            //     }
+            // }
         }
         {
-            AutoLock lock(mStatsLock);
+            AutoLock lock(mStats);
             //TODO mStats->DumpCheckinLocked(mContext, pw, apps, flags, historyStart);
             if (writeData) {
                 //mStats->WriteAsyncLocked();
             }
         }
-    } else {
-        AutoLock lock(mStatsLock);
+    }
+    else {
+        AutoLock lock(mStats);
         //mStats->DumpLocked(mContext, pw, flags, reqUid, historyStart);
         if (writeData) {
             //mStats->WriteAsyncLocked();

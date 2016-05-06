@@ -423,10 +423,8 @@ AutoPtr<IComponentName> ActiveServices::StartServiceInnerLocked(
     if (r->mStats != NULL) {
         AutoPtr<IBatteryStatsImpl> stats;
         r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-        if (stats) {
-            synchronized (stats) {
-                r->mStats->StartRunningLocked();
-            }
+        synchronized (stats) {
+            r->mStats->StartRunningLocked();
         }
     }
 
@@ -478,10 +476,8 @@ ECode ActiveServices::StopServiceLocked(
     if (service->mStats != NULL) {
         AutoPtr<IBatteryStatsImpl> stats;
         service->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-        if (stats) {
-            synchronized (stats) {
-                service->mStats->StopRunningLocked();
-            }
+        synchronized (stats) {
+            service->mStats->StopRunningLocked();
         }
     }
 
@@ -614,10 +610,8 @@ ECode ActiveServices::StopServiceTokenLocked(
         if (r->mStats != NULL) {
             AutoPtr<IBatteryStatsImpl> stats;
             r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-            if (stats) {
-                synchronized(stats) {
-                    r->mStats->StopRunningLocked();
-                }
+            synchronized(stats) {
+                r->mStats->StopRunningLocked();
             }
         }
 
@@ -1222,18 +1216,16 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
             AutoPtr<ServiceRestarter> res = new ServiceRestarter(this);
             AutoPtr<IBatteryStatsImplUidPkgServ> ss;
             AutoPtr<IBatteryStatsImpl> stats = mAm->mBatteryStatsService->GetActiveStatistics();
-            if (stats) {
-                synchronized(stats) {
-                    AutoPtr<IApplicationInfo> appInfo;
-                    comInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
-                    Int32 sInfoUid;
-                    appInfo->GetUid(&sInfoUid);
-                    String sInfoPkgName, sInfoName;
-                    pkgInfo->GetPackageName(&sInfoPkgName);
-                    pkgInfo->GetName(&sInfoName);
-                    stats->GetServiceStatsLocked(sInfoUid, sInfoPkgName, sInfoName,
-                        (IBatteryStatsImplUidPkgServ**)&ss);
-                }
+            synchronized(stats) {
+                AutoPtr<IApplicationInfo> appInfo;
+                comInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                Int32 sInfoUid;
+                appInfo->GetUid(&sInfoUid);
+                String sInfoPkgName, sInfoName;
+                pkgInfo->GetPackageName(&sInfoPkgName);
+                pkgInfo->GetName(&sInfoName);
+                stats->GetServiceStatsLocked(sInfoUid, sInfoPkgName, sInfoName,
+                    (IBatteryStatsImplUidPkgServ**)&ss);
             }
             CServiceRecord::NewByFriend((CServiceRecord**)&r);
             r->constructor(mAm, ss, name, filter, sInfo, callingFromFg, res);
@@ -1755,10 +1747,8 @@ ECode ActiveServices::RealStartServiceLocked(
     if (r->mStats != NULL) {
         AutoPtr<IBatteryStatsImpl> stats;
         r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-        if (stats) {
-            synchronized(stats) {
-                r->mStats->StartLaunchedLocked();
-            }
+        synchronized(stats) {
+            r->mStats->StartLaunchedLocked();
         }
     }
 
@@ -2003,10 +1993,8 @@ ECode ActiveServices::BringDownServiceLocked(
         if (r->mStats != NULL) {
             AutoPtr<IBatteryStatsImpl> stats;
             r->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-            if (stats) {
-                synchronized (stats) {
-                    r->mStats->StopLaunchedLocked();
-                }
+            synchronized (stats) {
+                r->mStats->StopLaunchedLocked();
             }
         }
 
@@ -2540,14 +2528,10 @@ ECode ActiveServices::KillServicesLocked(
     for (it = app->mServices.Begin(); it != app->mServices.End(); ++it) {
         AutoPtr<CServiceRecord> sr = *it;
         AutoPtr<IBatteryStatsImpl> stats;
-        if (sr->mStats != NULL) {
-            sr->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
-            if (stats) {
-                {
-                    AutoLock lock(stats);
-                    sr->mStats->StopLaunchedLocked();
-                }
-            }
+        sr->mStats->GetBatteryStats((IBatteryStatsImpl**)&stats);
+        {
+            AutoLock lock(stats);
+            sr->mStats->StopLaunchedLocked();
         }
 
         if (sr->mApp.Get() != app && sr->mApp != NULL && !sr->mApp->mPersistent) {

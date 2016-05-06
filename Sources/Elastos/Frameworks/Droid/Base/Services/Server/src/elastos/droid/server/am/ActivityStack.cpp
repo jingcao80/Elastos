@@ -4628,14 +4628,14 @@ void ActivityStack::CompletePauseLocked(
         prev->ResumeKeyDispatchingLocked();
 
         if (prev->mApp != NULL && prev->mCpuTimeAtResume > 0
-                && FALSE/*TODO mService->mBatteryStatsService->IsOnBattery()*/) {
+                && mService->mBatteryStatsService->IsOnBattery()) {
             Int64 diff;
             mService->mProcessCpuTracker->GetCpuTimeForPid(prev->mApp->mPid, &diff);
             diff -= prev->mCpuTimeAtResume;
             if (diff > 0) {
-                //TODO AutoPtr<BatteryStatsImpl> bsi = mService->mBatteryStatsService->GetActiveStatistics();
+                AutoPtr<IBatteryStatsImpl> bsi = mService->mBatteryStatsService->GetActiveStatistics();
                 {
-                    //TODO AutoLock lock(bsi);
+                    AutoLock lock(bsi);
                     AutoPtr<IBatteryStatsImplUidProc> ps;
                     AutoPtr<IUserHandleHelper> helper;
                     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -4647,7 +4647,7 @@ void ActivityStack::CompletePauseLocked(
                     helper->GetUserId(uid, &userId);
                     String packageName;
                     IPackageItemInfo::Probe(prev->mInfo)->GetPackageName(&packageName);
-                    //TODO bsi->GetProcessStatsLocked(userId, packageName, (IBatteryStatsImplUidProc**)&ps);
+                    bsi->GetProcessStatsLocked(userId, packageName, (IBatteryStatsImplUidProc**)&ps);
                     if (ps != NULL) {
                         ps->AddForegroundTimeLocked(diff);
                     }

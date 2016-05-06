@@ -457,7 +457,7 @@ void SupplicantStateTracker::SendSupplicantStateChangedBroadcast(
               break;
     }
     //try {
-        mBatteryStats->NoteWifiSupplicantStateChanged(supplState, failedAuth);
+    mBatteryStats->NoteWifiSupplicantStateChanged(supplState, failedAuth);
     //} catch (RemoteException e) {
         // Won't happen.
     //}

@@ -782,7 +782,8 @@ ECode CNetworkManagementService::NotifyInterfaceClassActivity(
                 // power state to just be whatever the radio last reported.
                 powerState = mLastPowerStateFromRadio;
             }
-        } else {
+        }
+        else {
             mMobileActivityFromRadio = true;
         }
         if (mLastPowerStateFromRadio != powerState) {
@@ -790,15 +791,13 @@ ECode CNetworkManagementService::NotifyInterfaceClassActivity(
             // try {
             AutoPtr<IIBatteryStats> bstats;
             GetBatteryStats((IIBatteryStats**)&bstats);
-            if (bstats != NULL) {
-                ECode ec = bstats->NoteMobileRadioPowerState(powerState, tsNanos);
-                // } catch (RemoteException e) {
-                if (FAILED(ec)) {
-                    if ((ECode)E_REMOTE_EXCEPTION != ec)
-                        return ec;
-                }
-                // }
+            ECode ec = bstats->NoteMobileRadioPowerState(powerState, tsNanos);
+            // } catch (RemoteException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_REMOTE_EXCEPTION != ec)
+                    return ec;
             }
+            // }
         }
     }
 

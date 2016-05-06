@@ -878,9 +878,7 @@ void CBatteryService::ProcessValuesLocked(
     // TODO:
     // Let the battery stats keep track of the current level.
     // try {
-
-    // mBatteryStats->SetBatteryState(status, health,
-    //         mPlugType, level, temperature, voltage);
+    mBatteryStats->SetBatteryState(status, health, mPlugType, level, temperature, voltage);
     // } catch (RemoteException e) {
     //     Should never happen.
     // }
