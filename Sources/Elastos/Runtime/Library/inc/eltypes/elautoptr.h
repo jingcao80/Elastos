@@ -64,9 +64,6 @@ public:
     template<typename U> AutoPtr& operator = (const AutoPtr<U>& other);
     template<typename U> AutoPtr& operator = (U* other);
 
-    // Reset
-    void Clear();
-
     // Accessors
 
     inline  T& operator* () const  { return *mPtr; }
@@ -156,15 +153,6 @@ AutoPtr<T>& AutoPtr<T>::operator = (U* other)
     if (mPtr) mPtr->Release();
     mPtr = other;
     return *this;
-}
-
-template<typename T>
-void AutoPtr<T>::Clear()
-{
-    if (mPtr) {
-        mPtr->Release();
-        mPtr = 0;
-    }
 }
 
 _ELASTOS_NAMESPACE_END

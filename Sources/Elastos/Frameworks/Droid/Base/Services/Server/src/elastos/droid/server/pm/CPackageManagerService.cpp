@@ -847,7 +847,7 @@ void CPackageManagerService::PackageHandler::DoHandleMessage(
                     }
                 }
                 size = i;
-                mHost->mPendingBroadcasts.Clear();
+                mHost->mPendingBroadcasts->Clear();
             }
             // Send broadcasts
             for (Int32 i = 0; i < size; i++) {

@@ -3587,7 +3587,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
 {
     Int32 numWakelocks;
     in->ReadInt32(&numWakelocks);
-    mWakelockStats.Clear();
+    mWakelockStats->Clear();
     for (Int32 j = 0; j < numWakelocks; j++) {
         String wakelockName;
         in->ReadString(&wakelockName);
@@ -3650,7 +3650,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
 
     Int32 numPkgs;
     in->ReadInt32(&numPkgs);
-    mPackageStats.Clear();
+    mPackageStats->Clear();
     for (Int32 l = 0; l < numPkgs; l++) {
         String packageName;
         in->ReadString(&packageName);
@@ -7693,7 +7693,7 @@ ECode BatteryStatsImpl::StartIteratingOldHistoryLocked(
         return NOERROR;
     }
     mHistoryBuffer->SetDataPosition(0);
-    mHistoryReadTmp.Clear();
+    mHistoryReadTmp->Clear();
     mReadOverflow = FALSE;
     mIteratingHistory = TRUE;
     *result = TRUE;
@@ -10376,7 +10376,7 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
 
     Int32 numUids;
     in->ReadInt32(&numUids);
-    mUidStats.Clear();
+    mUidStats->Clear();
     for (Int32 i = 0; i < numUids; i++) {
         Int32 uid;
         in->ReadInt32(&uid);

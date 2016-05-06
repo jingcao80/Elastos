@@ -10047,7 +10047,7 @@ ECode CWindowManagerService::HandleWaitingForDrawnTimeout()
     AutoPtr<IRunnable> callback;
     synchronized(mWindowMapLock) {
         // Slogger::W(TAG, "Timeout waiting for drawn: undrawn=" + mWaitingForDrawn);
-        mWaitingForDrawn.Clear();
+        mWaitingForDrawn->Clear();
         callback = mWaitingForDrawnCallback;
         mWaitingForDrawnCallback = NULL;
     }

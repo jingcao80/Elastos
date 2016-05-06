@@ -986,7 +986,7 @@ ECode ViewGroup::ChildListForAccessibility::Sort(
 
 void ViewGroup::ChildListForAccessibility::Clear()
 {
-    mChildren.Clear();
+    mChildren->Clear();
 }
 
 ViewGroup::ViewLocationHolder::ViewLocationHolder()
@@ -3736,7 +3736,7 @@ void ViewGroup::OnInitializeAccessibilityNodeInfoInternal(
 {
     View::OnInitializeAccessibilityNodeInfoInternal(info);
     if (mAttachInfo != NULL) {
-        mAttachInfo->mTempArrayList.Clear();
+        mAttachInfo->mTempArrayList->Clear();
 
         AutoPtr<IArrayList> childrenForAccessibility = mAttachInfo->mTempArrayList;
         childrenForAccessibility->Clear();

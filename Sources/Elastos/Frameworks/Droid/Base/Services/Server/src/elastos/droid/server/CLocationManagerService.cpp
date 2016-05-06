@@ -840,7 +840,7 @@ ECode CLocationManagerService::constructor(
 
 CLocationManagerService::~CLocationManagerService()
 {
-    mRecordsByProvider.Clear();
+    mRecordsByProvider->Clear();
 }
 
 ECode CLocationManagerService::SystemRunning()
@@ -1287,8 +1287,8 @@ void CLocationManagerService::SwitchUser(
     mBlacklist->SwitchUser(userId);
     mLocationHandler->RemoveMessages(MSG_LOCATION_CHANGED);
     AutoLock lock(mLock);
-    mLastLocation.Clear();
-    mLastLocationCoarseInterval.Clear();
+    mLastLocation->Clear();
+    mLastLocationCoarseInterval->Clear();
     AutoPtr<IIterator> it;
     mProviders->GetIterator((IIterator**)&it);
     Boolean bHasNxt = FALSE;

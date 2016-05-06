@@ -388,7 +388,7 @@ Done: ;
             }
             // Clear the callback reference in the response structure promptly because we
             // will not clear the response vector itself until the next poll.
-            response.mRequest.mCallback.Clear();
+            response.mRequest.mCallback = NULL;
             result = LOOPER_POLL_CALLBACK;
         }
     }

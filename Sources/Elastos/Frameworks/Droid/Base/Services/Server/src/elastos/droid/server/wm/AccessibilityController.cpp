@@ -440,7 +440,7 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::RecomputeBoun
     nonMagnifiedBounds->Set(0, 0, 0, 0, &result);
 
     AutoPtr<ISparseArray> visibleWindows = mTempWindowStates;
-    visibleWindows.Clear();
+    visibleWindows->Clear();
     PopulateWindowsOnScreenLocked(visibleWindows);
 
     Int32 visibleWindowCount;
