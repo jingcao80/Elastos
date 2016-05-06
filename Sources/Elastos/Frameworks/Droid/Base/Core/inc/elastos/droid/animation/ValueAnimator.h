@@ -802,7 +802,6 @@ private:
      */
     List<AutoPtr<IAnimatorUpdateListener> > mUpdateListeners;
 
-    typedef List<AutoPtr<IValueAnimator> >::Iterator VAIterator;
     typedef List<AutoPtr<IAnimatorUpdateListener> >::Iterator AULIterator;
     typedef HashMap<String, AutoPtr<IPropertyValuesHolder> >::Iterator StrMapIterator;
 };

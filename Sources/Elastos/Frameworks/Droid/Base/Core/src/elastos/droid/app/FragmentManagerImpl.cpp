@@ -558,17 +558,17 @@ ECode FragmentManagerImpl::LoadAnimator(
     Int32 fanim;
     fragment->GetNextAnim(&fanim);
     AutoPtr<IAnimator> animObj;
-    fragment->OnCreateAnimator(transit, enter,
-            fanim, (IAnimator**)&animObj);
+    fragment->OnCreateAnimator(transit, enter, fanim, (IAnimator**)&animObj);
     if (animObj != NULL) {
         *animator = animObj;
         REFCOUNT_ADD(*animator);
         return NOERROR;
     }
 
+    IContext* activityCtx = IContext::Probe(mActivity);
     if (fanim != 0) {
         AutoPtr<IAnimator> anim;
-        AnimatorInflater::LoadAnimator(IContext::Probe(mActivity), fanim, (IAnimator**)&anim);
+        AnimatorInflater::LoadAnimator(activityCtx, fanim, (IAnimator**)&anim);
         if (anim != NULL) {
             *animator = anim;
             REFCOUNT_ADD(*animator);
@@ -602,7 +602,7 @@ ECode FragmentManagerImpl::LoadAnimator(
             const_cast<Int32 *>(R::styleable::FragmentAnimation),
             ArraySize(R::styleable::FragmentAnimation));
     AutoPtr<ITypedArray> attrs;
-    IContext::Probe(mActivity)->ObtainStyledAttributes(transitionStyle, attrIds, (ITypedArray**)&attrs);
+    activityCtx->ObtainStyledAttributes(transitionStyle, attrIds, (ITypedArray**)&attrs);
     Int32 anim;
     attrs->GetResourceId(styleIndex, 0, &anim);
     attrs->Recycle();
@@ -611,7 +611,7 @@ ECode FragmentManagerImpl::LoadAnimator(
         return NOERROR;
     }
     AutoPtr<IAnimator> a;
-    AnimatorInflater::LoadAnimator(IContext::Probe(mActivity), anim, (IAnimator**)&a);
+    AnimatorInflater::LoadAnimator(activityCtx, anim, (IAnimator**)&a);
     *animator = a;
     REFCOUNT_ADD(*animator)
     return NOERROR;
@@ -880,8 +880,7 @@ ECode FragmentManagerImpl::MoveToState(
                     if (view != NULL && container != NULL) {
                         AutoPtr<IAnimator> anim;
                         if (mCurState > IFragment::INITIALIZING && !mDestroyed) {
-                            LoadAnimator(f, transit, FALSE,
-                                    transitionStyle, (IAnimator**)&anim);
+                            LoadAnimator(f, transit, FALSE, transitionStyle, (IAnimator**)&anim);
                         }
                         if (anim != NULL) {
                             AutoPtr<IView> view;
@@ -894,7 +893,6 @@ ECode FragmentManagerImpl::MoveToState(
                             anim->AddListener(l);
                             anim->SetTarget(view);
                             anim->Start();
-
                         }
                         IViewManager::Probe(container)->RemoveView(view);
                     }
@@ -1169,8 +1167,7 @@ ECode FragmentManagerImpl::HideFragment(
         fragment->GetView((IView**)&view);
         if (view != NULL) {
             AutoPtr<IAnimator> anim;
-            LoadAnimator(fragment, transition, FALSE,
-                    transitionStyle, (IAnimator**)&anim);
+            LoadAnimator(fragment, transition, FALSE, transitionStyle, (IAnimator**)&anim);
             if (anim != NULL) {
                 anim->SetTarget(view);
                 // Delay the actual hide operation until the animation finishes, otherwise
@@ -1183,11 +1180,9 @@ ECode FragmentManagerImpl::HideFragment(
                 view->SetVisibility(IView::GONE);
             }
         }
-        Boolean added;
+        Boolean added, hasMenu, menuVisible;
         fragment->GetAdded(&added);
-        Boolean hasMenu;
         fragment->GetHasMenu(&hasMenu);
-        Boolean menuVisible;
         fragment->GetMenuVisible(&menuVisible);
         if (added && hasMenu && menuVisible) {
             mNeedMenuInvalidate = TRUE;
@@ -1218,11 +1213,9 @@ ECode FragmentManagerImpl::ShowFragment(
             }
             view->SetVisibility(IView::VISIBLE);
         }
-        Boolean added;
+        Boolean added, hasMenu, menuVisible;
         fragment->GetAdded(&added);
-        Boolean hasMenu;
         fragment->GetHasMenu(&hasMenu);
-        Boolean menuVisible;
         fragment->GetMenuVisible(&menuVisible);
         if (added && hasMenu && menuVisible) {
             mNeedMenuInvalidate = TRUE;

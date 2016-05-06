@@ -272,7 +272,7 @@ ECode ObjectAnimator::SetTarget(
 {
     AutoPtr<IInterface> oldTarget;
     GetTarget((IInterface**)&oldTarget);
-    if (IInterface::Probe(oldTarget) != IInterface::Probe(target)) {
+    if (oldTarget != IInterface::Probe(target)) {
         mTarget = NULL;
         if (target != NULL) {
             IWeakReferenceSource::Probe(target)->GetWeakReference((IWeakReference**)&mTarget);

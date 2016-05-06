@@ -464,8 +464,8 @@ ECode CChangeText::CreateAnimator(
             if (outAnim != NULL && inAnim != NULL) {
                 CAnimatorSet::New((IAnimator**)&anim);
                 AutoPtr<ArrayOf<IAnimator*> > arr = ArrayOf<IAnimator*>::Alloc(2);
-                (*arr)[0] = IAnimator::Probe(outAnim);
-                (*arr)[1] = IAnimator::Probe(inAnim);
+                arr->Set(0, IAnimator::Probe(outAnim));
+                arr->Set(1, IAnimator::Probe(inAnim));
                 IAnimatorSet::Probe(anim)->PlaySequentially(arr);
             }
             else if (outAnim != NULL) {

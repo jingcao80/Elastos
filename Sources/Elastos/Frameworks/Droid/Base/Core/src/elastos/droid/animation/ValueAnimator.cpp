@@ -10,6 +10,7 @@
 #include "elastos/droid/view/CChoreographerHelper.h"
 #include "elastos/droid/view/animation/CLinearInterpolator.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/etl/Algorithm.h>
 #include <unistd.h>
 
@@ -24,15 +25,19 @@ using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::Animation::ILinearInterpolator;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Animation {
 
+static const String TAG("ValueAnimator");
+
 //==============================================================================
 //              ValueAnimator::AnimationHandler
 //==============================================================================
 CAR_INTERFACE_IMPL(ValueAnimator::AnimationHandler, Object, IRunnable);
+
 ValueAnimator::AnimationHandler::AnimationHandler()
     : mAnimationScheduled(FALSE)
 {
@@ -58,19 +63,19 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
     // cause more to be added to the pending list (for example, if one animation
     // starting triggers another starting). So we loop until mPendingAnimations
     // is empty.
-    VAIterator it;
-    while (mPendingAnimations.IsEmpty() == FALSE) {
+    List<AutoPtr<IValueAnimator> >::Iterator it;
+    while (!mPendingAnimations.IsEmpty()) {
         List<AutoPtr<IValueAnimator> > pendingCopy(mPendingAnimations);
         mPendingAnimations.Clear();
-        it = pendingCopy.Begin();
-        for (; it != pendingCopy.End(); ++it) {
+        for (it = pendingCopy.Begin(); it != pendingCopy.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
             assert(va != NULL);
             // If the animation has a startDelay, place it on the delayed list
             if (va->mStartDelay == 0) {
                 va->StartAnimation(this);
-            } else {
+            }
+            else {
                 mDelayedAnims.PushBack(anim);
             }
         }
@@ -78,8 +83,7 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
 
     // Next, process animations currently sitting on the delayed queue, adding
     // them to the active animations if they are ready
-    it = mDelayedAnims.Begin();
-    for (; it != mDelayedAnims.End(); ++it) {
+    for (it = mDelayedAnims.Begin(); it != mDelayedAnims.End(); ++it) {
         AutoPtr<IValueAnimator> anim = *it;
         ValueAnimator* va = (ValueAnimator*)anim.Get();
         if (va->DelayedAnimationFrame(frameTime)) {
@@ -87,45 +91,44 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
         }
     }
 
-    it = mReadyAnims.Begin();
-
-    if(it != mReadyAnims.End()) {
-        for (; it != mReadyAnims.End(); ) {
-            VAIterator itTemp = it++;
-            AutoPtr<IValueAnimator> anim = *itTemp;
+    if (!mReadyAnims.IsEmpty()) {
+        for (it = mReadyAnims.Begin(); it != mReadyAnims.End(); ++it) {
+            AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
             va->StartAnimation(this);
             va->mRunning = TRUE;
 
-            mDelayedAnims.Erase(itTemp);
+            mDelayedAnims.Remove(anim);
         }
         mReadyAnims.Clear();
     }
 
     // Now process all active animations. The return value from animationFrame()
     // tells the handler whether it should now be ended
-    it = mAnimations.Begin();
+
     Int32 numAnims = mAnimations.GetSize();
-    for (; it != mAnimations.End(); it++) {
-        AutoPtr<IValueAnimator> aTemp = *it;
-        mTmpAnimations.PushBack(aTemp);
+    for (it = mAnimations.Begin(); it != mAnimations.End(); it++) {
+        mTmpAnimations.PushBack(*it);
     }
-    it = mTmpAnimations.Begin();
-    for (Int32 i = 0; i < numAnims && it != mTmpAnimations.End(); ++i, ++it) {
-        AutoPtr<IValueAnimator> anim = *it;
-        ValueAnimator* va = (ValueAnimator*)anim.Get();
 
-        VAIterator findResult = Find(mAnimations.Begin(), mAnimations.End(), anim);
+    if (!mTmpAnimations.IsEmpty()) {
+        List<AutoPtr<IValueAnimator> >::Iterator findResult;
+        it = mTmpAnimations.Begin();
+        for (Int32 i = 0; i < numAnims && it != mTmpAnimations.End(); ++i, ++it) {
+            AutoPtr<IValueAnimator> anim = *it;
+            ValueAnimator* va = (ValueAnimator*)anim.Get();
 
-        if (findResult != mAnimations.End()) {
-            if(va->DoAnimationFrame(frameTime)) {
-                mEndingAnims.PushBack(anim);
+            findResult = Find(mAnimations.Begin(), mAnimations.End(), anim);
+            if (findResult != mAnimations.End()) {
+                if (va->DoAnimationFrame(frameTime)) {
+                    mEndingAnims.PushBack(anim);
+                }
             }
         }
+        mTmpAnimations.Clear();
     }
-    mTmpAnimations.Clear();
 
-    if (mEndingAnims.IsEmpty() == FALSE) {
+    if (!mEndingAnims.IsEmpty()) {
         for (it = mEndingAnims.Begin(); it != mEndingAnims.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
@@ -195,6 +198,7 @@ Boolean ValueAnimator::sHaveKey = InitTLS();
 const AutoPtr<ITimeInterpolator> ValueAnimator::sDefaultInterpolator = CreateInterPolator();
 
 CAR_INTERFACE_IMPL(ValueAnimator, Animator, IValueAnimator);
+
 ValueAnimator::ValueAnimator()
     : mStartTime(0)
     , mSeekTime(-1)
@@ -572,8 +576,8 @@ void ValueAnimator::Start(
     AutoPtr<ILooper> looper = Looper::GetMyLooper();
 
     if (looper == NULL) {
+        Logger::E(TAG, "Animators may only be run on Looper threads");
         return;
-//    throw new AndroidRuntimeException("Animators may only be run on Looper threads");
     }
 
     mPlayingBackwards = playBackwards;
@@ -734,16 +738,16 @@ void ValueAnimator::EndAnimation(
 
     mPlayingState = STOPPED;
     mPaused = FALSE;
-    if ((mStarted || mRunning) && mListeners.IsEmpty() == FALSE) {
+    if ((mStarted || mRunning) && !mListeners.IsEmpty()) {
         if (!mRunning) {
             // If it's not yet running, then start listeners weren't called. Call them now.
             NotifyStartListeners();
         }
 
         List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-        Int32 numListeners = tmpListeners.GetSize();
-        for (Int32 i = 0; i < numListeners; i++) {
-            tmpListeners[i]->OnAnimationEnd(this);
+        List<AutoPtr<IAnimatorListener> >::Iterator it;
+        for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
+            (*it)->OnAnimationEnd(this);
         }
     }
     mRunning = FALSE;

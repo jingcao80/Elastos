@@ -109,8 +109,9 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
         // The logic below only kicks in when animations end normally
         if (mAnimatorSet->mPlayingSet.IsEmpty()) {
             if (mAnimatorSet->mListeners.IsEmpty() == FALSE) {
-                List<AutoPtr<IAnimatorListener> >::Iterator it = mAnimatorSet->mListeners.Begin();
-                for (; it != mAnimatorSet->mListeners.Begin(); ++it) {
+                List<AutoPtr<IAnimatorListener> > tmpListeners(mAnimatorSet->mListeners);
+                List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
+                for (; it != tmpListeners.Begin(); ++it) {
                     (*it)->OnAnimationCancel((IAnimator*)(mAnimatorSet->Probe(EIID_IAnimator)));
                 }
             }
@@ -148,8 +149,9 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
             // If this was the last child animation to end, then notify listeners that this
             // AnimatorSet has ended
             if (mAnimatorSet->mListeners.IsEmpty() == FALSE) {
-                List<AutoPtr<IAnimatorListener> >::Iterator itListeners = mAnimatorSet->mListeners.Begin();
-                for (; itListeners != mAnimatorSet->mListeners.End(); ++itListeners) {
+                List<AutoPtr<IAnimatorListener> > tmpListeners(mAnimatorSet->mListeners);
+                List<AutoPtr<IAnimatorListener> >::Iterator itListeners = tmpListeners.Begin();
+                for (; itListeners != tmpListeners.End(); ++itListeners) {
                     (*itListeners)->OnAnimationEnd(IAnimator::Probe(mAnimatorSet));
                 }
             }
@@ -188,6 +190,7 @@ AnimatorSet::Dependency::Dependency(
 //                  AnimatorSet::Node
 //==============================================================================
 CAR_INTERFACE_IMPL(AnimatorSet::Node, Object, ICloneable);
+
 AnimatorSet::Node::Node(
     /* [in] */ IAnimator* animation)
     : mAnimation(animation)
@@ -233,6 +236,9 @@ ECode AnimatorSet::Node::Clone(
     return NOERROR;
 }
 
+//==============================================================================
+//                  AnimatorSet::AnimatorListenerAdapterIMPL
+//==============================================================================
 AnimatorSet::AnimatorListenerAdapterIMPL::AnimatorListenerAdapterIMPL(
     /* [in] */ AnimatorSet* host,
     /* [in] */ List<AutoPtr<Node> >* nodes)
@@ -432,7 +438,7 @@ ECode AnimatorSet::SetTarget(
     List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
     for (; it != mNodes.End(); ++it) {
         AutoPtr<IAnimator> animation = (*it)->mAnimation;
-        if (animation->Probe(EIID_IAnimatorSet) || animation->Probe(EIID_IObjectAnimator)) {
+        if (IAnimatorSet::Probe(animation) || IObjectAnimator::Probe(animation)) {
             animation->SetTarget(target);
         }
     }
@@ -486,7 +492,8 @@ ECode AnimatorSet::Cancel()
             // If we're currently in the startDelay period, just cancel that animator and
             // send out the end event to all listeners
             IAnimator::Probe(mDelayAnim)->Cancel();
-        } else  if (mSortedNodes.IsEmpty() == FALSE) {
+        }
+        else  if (mSortedNodes.IsEmpty() == FALSE) {
             List<AutoPtr<Node> >::Iterator it = mSortedNodes.Begin();
             for (; it != mSortedNodes.End(); it++) {
                 (*it)->mAnimation->Cancel();
@@ -544,8 +551,8 @@ ECode AnimatorSet::IsRunning(
     /* [out] */ Boolean* _running)
 {
     VALIDATE_NOT_NULL(_running);
-    List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-    for (; it != mNodes.End(); it++) {
+    List<AutoPtr<Node> >::Iterator it;
+    for (it = mNodes.Begin(); it != mNodes.End(); it++) {
         Boolean running;
         (*it)->mAnimation->IsRunning(&running);
         if (running) {
@@ -709,15 +716,15 @@ ECode AnimatorSet::Start()
     // dependencies on all of the nodes. For example, we don't want to start an animation
     // when some other animation also wants to start when the first animation begins.
     AutoPtr< List<AutoPtr<Node> > > nodesToStart = new List<AutoPtr<Node> >;
-    it = mSortedNodes.Begin();
-    for (; it!= mSortedNodes.End(); ++it) {
+    for (it = mSortedNodes.Begin(); it != mSortedNodes.End(); ++it) {
         AutoPtr<Node> node = *it;
         if (mSetListener == NULL) {
             mSetListener = new AnimatorSetListener(this);
         }
         if (node->mDependencies.IsEmpty()) {
             nodesToStart->PushBack(node);
-        } else {
+        }
+        else {
             List<AutoPtr<Dependency> >::Iterator dependencyIt= node->mDependencies.Begin();
             for (; dependencyIt != node->mDependencies.End(); ++dependencyIt) {
                 AutoPtr<Dependency> dependency = *dependencyIt;
@@ -742,10 +749,11 @@ ECode AnimatorSet::Start()
         AutoPtr<ArrayOf<Float> > fArray = ArrayOf<Float>::Alloc(2);
         (*fArray)[0] = 0.0f; (*fArray)[1] = 1.0f;
         mDelayAnim = ValueAnimator::OfFloat(fArray);
-        IAnimator::Probe(mDelayAnim)->SetDuration(mStartDelay);
+        IAnimator* da = IAnimator::Probe(mDelayAnim);
+        da->SetDuration(mStartDelay);
         AutoPtr<IAnimatorListener> aladapter = new AnimatorListenerAdapterIMPL(this, nodesToStart);
-        IAnimator::Probe(mDelayAnim)->AddListener(aladapter);
-        IAnimator::Probe(mDelayAnim)->Start();
+        da->AddListener(aladapter);
+        da->Start();
     }
 
     if (!mListeners.IsEmpty()) {

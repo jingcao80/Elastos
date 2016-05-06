@@ -57,32 +57,36 @@ AnimatorInflater::PathDataEvaluator::PathDataEvaluator(
 
 ECode AnimatorInflater::PathDataEvaluator::Evaluate(
     /* [in] */ Float fraction,
-    /* [in] */ IInterface* startPathData /*array*/,
-    /* [in] */ IInterface* endPathData /*array*/,
+    /* [in] */ IInterface* startPathDataObj /*array*/,
+    /* [in] */ IInterface* endPathDataObj /*array*/,
     /* [out] */ IInterface** result)
 {
-    assert(IArrayList::Probe(startPathData) && IArrayList::Probe(endPathData));
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    IArrayList* startPathData = IArrayList::Probe(startPathDataObj);
+    IArrayList* endPathData = IArrayList::Probe(endPathDataObj);
+    assert(startPathData && endPathData);
+
     Int32 count = 0;
-    IArrayList::Probe(startPathData)->GetSize(&count);
+    startPathData->GetSize(&count);
     AutoPtr<ArrayOf<PathDataNode*> > sa = ArrayOf<PathDataNode*>::Alloc(count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
-        IArrayList::Probe(startPathData)->Get(i, (IInterface**)&obj);
+        startPathData->Get(i, (IInterface**)&obj);
         sa->Set(i, (PathDataNode*)(IObject*)obj.Get());
     }
 
-    IArrayList::Probe(endPathData)->GetSize(&count);
+    endPathData->GetSize(&count);
     AutoPtr<ArrayOf<PathDataNode*> > ea = ArrayOf<PathDataNode*>::Alloc(count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
-        IArrayList::Probe(endPathData)->Get(i, (IInterface**)&obj);
+        endPathData->Get(i, (IInterface**)&obj);
         ea->Set(i, (PathDataNode*)(IObject*)obj.Get());
     }
 
     if (!PathParser::CanMorph(sa, ea)) {
         // throw new IllegalArgumentException("Can't interpolate between"
         //         + " two incompatible pathData");
-        *result = NULL;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -90,11 +94,11 @@ ECode AnimatorInflater::PathDataEvaluator::Evaluate(
         mNodeArray = PathParser::DeepCopyNodes(sa);
     }
 
-    IArrayList::Probe(startPathData)->GetSize(&count);
+    startPathData->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> objs, obje;
-        IArrayList::Probe(startPathData)->Get(i, (IInterface**)&objs);
-        IArrayList::Probe(endPathData)->Get(i, (IInterface**)&obje);
+        startPathData->Get(i, (IInterface**)&objs);
+        endPathData->Get(i, (IInterface**)&obje);
         (*mNodeArray)[i]->InterpolatePathDataNode((PathDataNode*)(IObject*)objs.Get(),
                 (PathDataNode*)(IObject*)obje.Get(), fraction);
     }
@@ -128,7 +132,6 @@ ECode AnimatorInflater::LoadAnimator(
     /* [in] */ Int32 id,
     /* [out] */ IAnimator** animator) /*throws NotFoundException*/
 {
-    VALIDATE_NOT_NULL(animator);
     return LoadAnimator(resources, theme, id, 1, animator);
 }
 
@@ -140,35 +143,21 @@ ECode AnimatorInflater::LoadAnimator(
     /* [out] */ IAnimator** animator) /*throws NotFoundException*/
 {
     VALIDATE_NOT_NULL(animator);
+    *animator = NULL;
+
     AutoPtr<IXmlResourceParser> parser;
-    ECode ec = NOERROR;
     // try {
-    ec = resources->GetAnimation(id, (IXmlResourceParser**)&parser);
+    ECode ec = resources->GetAnimation(id, (IXmlResourceParser**)&parser);
     FAIL_GOTO(ec, error);
     ec = CreateAnimatorFromXml(resources, theme, IXmlPullParser::Probe(parser), pathErrorScale, animator);
-    // } catch (XmlPullParserException ex) {
-    //     Resources.NotFoundException rnf =
-    //             new Resources.NotFoundException("Can't load animation resource ID #0x" +
-    //                     Integer.toHexString(id));
-    //     rnf.initCause(ex);
-    //     throw rnf;
-    // } catch (IOException ex) {
-    //     Resources.NotFoundException rnf =
-    //             new Resources.NotFoundException("Can't load animation resource ID #0x" +
-    //                     Integer.toHexString(id));
-    //     rnf.initCause(ex);
-    //     throw rnf;
-    // } finally {
-    //     if (parser != null) parser.close();
-    // }
 
 error:
     if (parser != NULL) {
         parser->Close();
     }
 
-    if (ec != NOERROR) {
-        *animator = NULL;
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "Can't load animation resource ID #0x%08x", id);
         return E_RESOURCES_NOT_FOUND_EXCEPTION;
     }
 
@@ -257,9 +246,8 @@ ECode AnimatorInflater::CreateStateListAnimatorFromXml(
                     }
 
                     if (animator == NULL) {
+                        Slogger::E(TAG, "animation state item must have a valid animation");
                         return E_RESOURCES_NOT_FOUND_EXCEPTION;
-                        // throw new Resources.NotFoundException(
-                        //         "animation state item must have a valid animation");
                     }
                     stateListAnimator->AddState(StateSet::TrimStateSet(states, stateIndex), animator);
                 }
@@ -610,7 +598,8 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
 {
     VALIDATE_NOT_NULL(animator);
     *animator = NULL;
-    // ArrayList<Animator> childAnims = null;
+    Slogger::I(TAG, " >>> CreateAnimatorFromXml: parent: %s", TO_CSTR(parent));
+
     List<AutoPtr<IAnimator> > childAnims;
 
     // Make sure we are on a start tag.
@@ -630,27 +619,27 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
         String name;
         parser->GetName(&name);
 
-        if (name.Equals(String("objectAnimator"))) {
+        if (name.Equals("objectAnimator")) {
             AutoPtr<IObjectAnimator> oa;
             FAIL_RETURN(LoadObjectAnimator(res, theme, attrs, pixelSize, (IObjectAnimator**)&oa));
             anim = IAnimator::Probe(oa);
         }
-        else if (name.Equals(String("animator"))) {
+        else if (name.Equals("animator")) {
             AutoPtr<IValueAnimator> va;
             FAIL_RETURN(LoadAnimator(res, theme, attrs, NULL, pixelSize, (IValueAnimator**)&va));
             anim = IAnimator::Probe(va);
         }
-        else if (name.Equals(String("set"))) {
+        else if (name.Equals("set")) {
             anim = NULL;
             CAnimatorSet::New((IAnimator**)&anim);
             AutoPtr<ITypedArray> a;
-
             AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
                     const_cast<Int32 *>(R::styleable::AnimatorSet),
                     ArraySize(R::styleable::AnimatorSet));
             if (theme != NULL) {
                 theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
-            } else {
+            }
+            else {
                 res->ObtainAttributes(attrs, attrIds, (ITypedArray**)&a);
             }
             Int32 ordering = 0;
@@ -662,8 +651,9 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
             if (FAILED(ec)) {
                 return ec;
             }
-        } else {
-            // throw new RuntimeException("Unknown animator name: " + parser.getName());
+        }
+        else {
+            Slogger::E(TAG, "Unknown animator name: %s", name.string());
             return E_RUNTIME_EXCEPTION;
         }
 
@@ -671,7 +661,8 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
             childAnims.PushBack(anim);
         }
     }
-    if (parent != NULL && childAnims.GetSize() > 0) {
+
+    if (parent != NULL && !childAnims.IsEmpty()) {
         AutoPtr<ArrayOf<IAnimator*> > animsArray = ArrayOf<IAnimator*>::Alloc(childAnims.GetSize());
         Int32 index = 0;
         List<AutoPtr<IAnimator> >::Iterator ator = childAnims.Begin();
@@ -680,7 +671,8 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
         }
         if (sequenceOrdering == TOGETHER) {
             parent->PlayTogether(animsArray);
-        } else {
+        }
+        else {
             parent->PlaySequentially(animsArray);
         }
     }

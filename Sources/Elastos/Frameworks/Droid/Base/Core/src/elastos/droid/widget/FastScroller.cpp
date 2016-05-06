@@ -1211,7 +1211,7 @@ void FastScroller::TransitionToHidden()
     params2->Set(1, IView::Probe(mTrackImage));
     AutoPtr<IAnimator> slideOut = GroupAnimatorOfFloat(
             Elastos::Droid::View::View::TRANSLATION_X, offset, params2);
-
+    mDecorAnimation = NULL;
     CAnimatorSet::New((IAnimatorSet**)&mDecorAnimation);
     AutoPtr<ArrayOf<IAnimator*> > params3 = ArrayOf<IAnimator*>::Alloc(2);
     params3->Set(0, fadeOut);
@@ -1249,6 +1249,7 @@ void FastScroller::TransitionToVisible()
             Elastos::Droid::View::View::TRANSLATION_X, 0.f, params1);
     slideIn->SetDuration(DURATION_FADE_IN);
 
+    mDecorAnimation = NULL;
     CAnimatorSet::New((IAnimatorSet**)&mDecorAnimation);
     AutoPtr<ArrayOf<IAnimator*> > params3 = ArrayOf<IAnimator*>::Alloc(3);
     params3->Set(0, fadeIn);
@@ -1284,6 +1285,7 @@ void FastScroller::TransitionToDragging()
             Elastos::Droid::View::View::TRANSLATION_X, 0.f, params2);
     slideIn->SetDuration(DURATION_FADE_IN);
 
+    mDecorAnimation = NULL;
     CAnimatorSet::New((IAnimatorSet**)&mDecorAnimation);
     AutoPtr<ArrayOf<IAnimator*> > params3 = ArrayOf<IAnimator*>::Alloc(2);
     params3->Set(0, fadeIn);
@@ -1513,26 +1515,16 @@ Boolean FastScroller::TransitionPreviewLayout(
     // Apply preview image padding and animate bounds, if necessary.
 
     Int32 pLeft, pTop, pRight, pBottom;
-    preview->GetPaddingLeft(&pLeft);
-    preview->GetPaddingTop(&pTop);
-    preview->GetPaddingRight(&pRight);
-    preview->GetPaddingBottom(&pBottom);
+    preview->GetPadding(&pLeft, &pTop, &pRight, &pBottom);
 
     Int32 left, top, right, bottom;
-    bounds->GetLeft(&left);
-    bounds->GetRight(&right);
-    bounds->GetTop(&top);
-    bounds->GetBottom(&bottom);
-
-
-    bounds->SetLeft(left - pLeft);
-    bounds->SetRight(right + pRight);
-    bounds->SetTop(top - pTop);
-    bounds->SetBottom(bottom + pBottom);
+    bounds->Get(&left, &top, &right, &bottom);
+    bounds->Set(left - pLeft, top - pTop, right + pRight, bottom + pBottom);
 
     AutoPtr<IAnimator> resizePreview = AnimateBounds(preview, bounds);
     resizePreview->SetDuration(DURATION_RESIZE);
 
+    mPreviewAnimation = NULL;
     CAnimatorSet::New((IAnimatorSet**)&mPreviewAnimation);
     AutoPtr<IAnimatorSetBuilder> builder;
     mPreviewAnimation->Play(hideShowing, (IAnimatorSetBuilder**)&builder);
