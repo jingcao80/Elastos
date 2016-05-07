@@ -15726,8 +15726,8 @@ String View::DebugIndent(
 {
     StringBuilder spaces((depth * 2 + 3) * 2);
     for (Int32 i = 0; i < (depth * 2) + 3; i++) {
-        spaces.Append(' ');
-        spaces.Append(' ');
+        spaces.AppendChar(' ');
+        spaces.AppendChar(' ');
     }
     return spaces.ToString();
 }
