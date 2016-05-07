@@ -3976,10 +3976,12 @@ void WifiConfigStore::ReadAutoJoinConfig()
         CFileReader::New(autoJoinConfigFile, (IFileReader**)&fr);
         if (fr == NULL) {
             Logger::D(TAG, "open %s failed", autoJoinConfigFile.string());
+            return;
         }
         CBufferedReader::New(IReader::Probe(fr), (IBufferedReader**)&reader);
         if (reader == NULL) {
-                Logger::D(TAG, "open %s failed", autoJoinConfigFile.string());
+            Logger::D(TAG, "open %s failed", autoJoinConfigFile.string());
+            return;
         }
 
         String key;
