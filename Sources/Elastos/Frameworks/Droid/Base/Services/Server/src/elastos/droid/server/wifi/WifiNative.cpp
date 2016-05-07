@@ -153,6 +153,7 @@ WifiNative::MonitorThread::MonitorThread(
     /* [in] */ WifiNative* owner)
     :mOwner(owner)
 {
+    Thread::constructor();
 }
 
 ECode WifiNative::MonitorThread::Run()

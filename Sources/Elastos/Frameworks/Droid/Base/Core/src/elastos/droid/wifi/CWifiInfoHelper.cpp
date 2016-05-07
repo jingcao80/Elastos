@@ -15,10 +15,10 @@ ECode CWifiInfoHelper::GetDetailedStateOf(
     /* [out] */ NetworkInfoDetailedState* detailedState)
 {
     VALIDATE_NOT_NULL(detailedState);
-    assert(0);
-    // TODO
-    // *detailedState = CWifiInfo::GetDetailedStateOf(suppState);
-    return E_NOT_IMPLEMENTED;
+    SupplicantState ss;
+    suppState->Get(&ss);
+    *detailedState = CWifiInfo::GetDetailedStateOf(ss);
+    return NOERROR;
 }
 
 ECode CWifiInfoHelper::RemoveDoubleQuotes(

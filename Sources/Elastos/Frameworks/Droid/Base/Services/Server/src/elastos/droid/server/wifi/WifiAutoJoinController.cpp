@@ -225,8 +225,7 @@ ECode WifiAutoJoinController::AddToScanCache(
             result->SetUntrusted(TRUE);
             mWifiConfigStore->AssociateWithConfiguration(result, (IWifiConfiguration**)&associatedConfig);
             String configSID;
-            associatedConfig->GetSSID(&configSID);
-            if (associatedConfig != NULL && !configSID.IsNull()) {
+            if (associatedConfig != NULL && !(associatedConfig->GetSSID(&configSID), configSID.IsNull())) {
                 if (VDBG) {
                     String str("addToScanCache save associated config ");
                     str += configSID;

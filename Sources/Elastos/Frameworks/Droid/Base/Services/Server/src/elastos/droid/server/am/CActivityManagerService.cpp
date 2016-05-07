@@ -14375,7 +14375,13 @@ AutoPtr<IList> CActivityManagerService::ReadLastDonePreBootReceivers()
     AutoPtr<IDataInput> dis;
     CDataInputStream::New(bufferStream, (IDataInput**)&dis);
     Int32 fvers;
-    dis->ReadInt32(&fvers);
+    ECode ec = dis->ReadInt32(&fvers);
+    if (FAILED(ec)) {
+        if (fis != NULL) {
+            fis->Close();
+        }
+        return lastDoneReceivers;
+    }
     if (fvers == LAST_PREBOOT_DELIVERED_FILE_VERSION) {
         String vers;
         dis->ReadUTF(&vers);

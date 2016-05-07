@@ -280,7 +280,7 @@ private:
 public:
     RttService();
 
-    ECode constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // @Override

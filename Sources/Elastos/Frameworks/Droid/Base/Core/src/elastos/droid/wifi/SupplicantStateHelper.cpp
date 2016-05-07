@@ -1,5 +1,8 @@
 
 #include "elastos/droid/wifi/SupplicantStateHelper.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -33,6 +36,7 @@ Boolean SupplicantStateHelper::IsHandshakeState(
             return FALSE;
         default:
             // throw new IllegalArgumentException("Unknown supplicant state");
+            Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
             assert(0);
             return FALSE;
     }
@@ -59,6 +63,7 @@ Boolean SupplicantStateHelper::IsConnecting(
             return FALSE;
         default:
             // throw new IllegalArgumentException("Unknown supplicant state");
+            Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
             assert(0);
             return FALSE;
     }
@@ -85,6 +90,7 @@ Boolean SupplicantStateHelper::IsDriverActive(
             return FALSE;
         default:
             // throw new IllegalArgumentException("Unknown supplicant state");
+            Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
             assert(0);
             return FALSE;
     }

@@ -37,11 +37,13 @@ namespace Wifi {
 //=====================================================================
 //                     WifiController::DefaultState
 //=====================================================================
-Boolean WifiController::DefaultState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::DefaultState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::DefaultState", "what: %d", what);
     switch (what) {
         case CMD_SCREEN_ON:
             mOwner->mAlarmManager->Cancel(mOwner->mIdleIntent);
@@ -120,7 +122,8 @@ Boolean WifiController::DefaultState::ProcessMessage(
             //throw new RuntimeException("WifiController.handleMessage " + msg.what);
             Logger::E("WifiController::DefaultState", "ProcessMessage: %d", what);
     }
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -128,6 +131,7 @@ Boolean WifiController::DefaultState::ProcessMessage(
 //=====================================================================
 ECode WifiController::ApStaDisabledState::Enter()
 {
+    Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
     mOwner->mWifiStateMachine->SetSupplicantRunning(FALSE);
     // Supplicant can't restart right away, so not the time we switched off
     mDisabledTimestamp = SystemClock::GetElapsedRealtime();
@@ -136,25 +140,30 @@ ECode WifiController::ApStaDisabledState::Enter()
     return NOERROR;
 }
 
-Boolean WifiController::ApStaDisabledState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::ApStaDisabledState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::ApStaDisabledState", "what: %d", what);
     switch (what) {
         case CMD_WIFI_TOGGLED:
         case CMD_AIRPLANE_TOGGLED: {
             Boolean isWifiToggleEnabled;
             Boolean isScanAlwaysAvailable;
+            Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
             if (mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled) {
                 if (DoDeferEnable(msg)) {
                     if (mHaveDeferredEnable) {
+            Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
                         //  have 2 toggles now, inc serial number an ignore both
                         mDeferredEnableSerialNumber++;
                     }
                     mHaveDeferredEnable = !mHaveDeferredEnable;
                     break;
                 }
+                Logger::E("leliang", "file:%s. line:%d, func:%s, mDeviceIdle:%d\n", __FILE__, __LINE__, __func__, mOwner->mDeviceIdle);
                 if (mOwner->mDeviceIdle == FALSE) {
                     mOwner->CheckLocksAndTransitionWhenDeviceActive();
                 } else {
@@ -198,10 +207,13 @@ Boolean WifiController::ApStaDisabledState::ProcessMessage(
             mOwner->SendMessage(message);
             break;
         }
-        default:
-            return FALSE;//NOT_HANDLED;
+        default: {
+            *result = FALSE;//NOT_HANDLED;
+            return NOERROR;
+        }
     }
-    return TRUE;//HANDLED;
+    *result = TRUE;//HANDLED;
+    return NOERROR;
 }
 
 Boolean WifiController::ApStaDisabledState::DoDeferEnable(
@@ -238,11 +250,13 @@ ECode WifiController::StaEnabledState::Enter()
     return NOERROR;
 }
 
-Boolean WifiController::StaEnabledState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::StaEnabledState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::StaEnabledState", "what: %d", what);
     switch (what) {
         case CMD_WIFI_TOGGLED: {
             Int32 mWifiState;
@@ -284,10 +298,12 @@ Boolean WifiController::StaEnabledState::ProcessMessage(
             }
         }
         default:
-            return FALSE;//NOT_HANDLED;
+            *result = FALSE;//NOT_HANDLED;
+            return NOERROR;
 
     }
-    return TRUE;//HANDLED;
+    *result = TRUE;//HANDLED;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -305,11 +321,13 @@ ECode WifiController::StaDisabledWithScanState::Enter()
     return NOERROR;
 }
 
-Boolean WifiController::StaDisabledWithScanState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::StaDisabledWithScanState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::StaDisabledWithScanState", "what: %d", what);
     switch (what) {
         case CMD_WIFI_TOGGLED: {
             Boolean isWifiToggleEnabled;
@@ -370,9 +388,11 @@ Boolean WifiController::StaDisabledWithScanState::ProcessMessage(
             break;
         }
         default:
-            return FALSE;//NOT_HANDLED;
+            *result = FALSE;//NOT_HANDLED;
+            return NOERROR;
     }
-    return TRUE;//HANDLED;
+    *result = TRUE;//HANDLED;
+    return NOERROR;
 }
 
 Boolean WifiController::StaDisabledWithScanState::DoDeferEnable(
@@ -404,11 +424,13 @@ Boolean WifiController::StaDisabledWithScanState::DoDeferEnable(
 //=====================================================================
 //                    WifiController::ApEnabledState
 //=====================================================================
-Boolean WifiController::ApEnabledState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::ApEnabledState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::ApEnabledState", "what: %d", what);
     switch (what) {
         case CMD_AIRPLANE_TOGGLED: {
             Boolean isAirplaneModeOn;
@@ -428,9 +450,11 @@ Boolean WifiController::ApEnabledState::ProcessMessage(
             break;
         }
         default:
-            return FALSE;//NOT_HANDLED;
+            *result = FALSE;//NOT_HANDLED;
+            return NOERROR;
     }
-    return TRUE;//HANDLED;
+    *result = TRUE;//HANDLED;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -442,11 +466,13 @@ ECode WifiController::EcmState::Enter()
     return NOERROR;
 }
 
-Boolean WifiController::EcmState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::EcmState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::EcmState", "what: %d", what);
     Int32 arg1;
     msg->GetArg1(&arg1);
     if (what == CMD_EMERGENCY_MODE_CHANGED && arg1 == 0) {
@@ -463,11 +489,11 @@ Boolean WifiController::EcmState::ProcessMessage(
         } else {
             mOwner->TransitionTo(mOwner->mApStaDisabledState);
         }
-        return TRUE;//HANDLED;
+        *result = TRUE;//HANDLED;
     } else {
-        return FALSE;//NOT_HANDLED;
+        *result = FALSE;//NOT_HANDLED;
     }
-    return FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -481,17 +507,20 @@ ECode WifiController::DeviceActiveState::Enter()
     return NOERROR;
 }
 
-Boolean WifiController::DeviceActiveState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::DeviceActiveState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::DeviceActiveState", "what: %d", what);
     if (what == CMD_DEVICE_IDLE) {
         mOwner->CheckLocksAndTransitionWhenDeviceIdle();
         // We let default state handle the rest of work
     } else if (what == CMD_LOCKS_CHANGED) {
         mOwner->CheckLocksAndTransitionWhenDeviceActive();
-        return HANDLED;
+        *result = TRUE;//HANDLED;
+        return NOERROR;
     } else if (what == CMD_USER_PRESENT) {
         // TLS networks can't connect until user unlocks keystore. KeyStore
         // unlocks when the user punches PIN after the reboot. So use this
@@ -500,9 +529,11 @@ Boolean WifiController::DeviceActiveState::ProcessMessage(
             mOwner->mWifiStateMachine->ReloadTlsNetworksAndReconnect();
         }
         mOwner->mFirstUserSignOnSeen = TRUE;
-        return TRUE;//HANDLED;
+        *result = TRUE;//HANDLED;
+        return NOERROR;
     }
-    return FALSE;//NOT_HANDLED;
+    *result = FALSE;//NOT_HANDLED;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -519,24 +550,26 @@ ECode WifiController::DeviceActiveHighPerfState::Enter()
 //=====================================================================
 //                 WifiController::DeviceInactiveState
 //=====================================================================
-Boolean WifiController::DeviceInactiveState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiController::DeviceInactiveState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::D("WifiController::DeviceInactiveState", "what: %d", what);
     switch (what) {
         case CMD_LOCKS_CHANGED:
             mOwner->CheckLocksAndTransitionWhenDeviceIdle();
             mOwner->UpdateBatteryWorkSource();
-            return TRUE;//HANDLED;
+            *result = TRUE;//HANDLED;
         case CMD_SCREEN_ON:
             mOwner->CheckLocksAndTransitionWhenDeviceActive();
             // More work in default state
-            return FALSE;//NOT_HANDLED;
+            *result = FALSE;//NOT_HANDLED;
         default:
-            return FALSE;//NOT_HANDLED;
+            *result = FALSE;//NOT_HANDLED;
     }
-    return FALSE;
+    return NOERROR;
 }
 
 //=====================================================================

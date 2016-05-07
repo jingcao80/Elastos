@@ -32,9 +32,7 @@ ECode CScanResult::constructor(
 {
     mWifiSsid = wifiSsid;
     if (wifiSsid != NULL) {
-        assert(0);
-        // TODO
-        // wifiSsid->ToString(&mSSID);
+        IObject::Probe(wifiSsid)->ToString(&mSSID);
     }
     else {
         mSSID = IWifiSsid::NONE;
@@ -62,9 +60,7 @@ ECode CScanResult::constructor(
 {
     mWifiSsid = wifiSsid;
     if (wifiSsid != NULL) {
-        assert(0);
-        // TODO
-        // wifiSsid->ToString(&mSSID);
+        IObject::Probe(wifiSsid)->ToString(&mSSID);
     }
     else {
         mSSID = IWifiSsid::NONE;
@@ -438,9 +434,7 @@ ECode CScanResult::ToString(
     }
     else {
         String temp;
-        assert(0);
-        // TODO
-        // mWifiSsid->ToString(&temp);
+        IObject::Probe(mWifiSsid)->ToString(&temp);
         sb.Append(temp);
     }
 
@@ -486,9 +480,7 @@ ECode CScanResult::ReadFromParcel(
     source->ReadInterfacePtr((Handle32*)&obj);
     mWifiSsid = IWifiSsid::Probe(obj);
     if (mWifiSsid != NULL) {
-        assert(0);
-        // TODO
-        // mWifiSsid->ToString(&mSSID);
+        IObject::Probe(mWifiSsid)->ToString(&mSSID);
     }
     else mSSID = IWifiSsid::NONE;
     source->ReadString(&mBSSID);
@@ -528,9 +520,7 @@ ECode CScanResult::WriteToParcel(
             Int32 len = bytes->GetLength();
             dest->WriteInt32(id);
             dest->WriteInt32(len);
-            assert(0);
-            // TODO
-            // dest->WriteByteArray(bytes);
+            dest->WriteArrayOf((Handle32)bytes.Get());
         }
     }
     else {

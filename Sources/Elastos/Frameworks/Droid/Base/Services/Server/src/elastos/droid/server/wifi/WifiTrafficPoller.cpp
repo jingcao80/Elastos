@@ -17,6 +17,7 @@ using Elastos::Droid::Net::ITrafficStats;
 using Elastos::Droid::Net::CTrafficStats;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
@@ -139,6 +140,7 @@ WifiTrafficPoller::WifiTrafficPoller(
     /* [in] */ const String& iface)
 {
     CArrayList::New((IList**)&mClients);
+    CAtomicBoolean::New(TRUE, (IAtomicBoolean**)&mScreenOn);
     mInterface = iface;
     mTrafficHandler = new TrafficHandler(this);
 

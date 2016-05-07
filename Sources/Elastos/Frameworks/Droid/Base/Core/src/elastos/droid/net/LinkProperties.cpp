@@ -65,7 +65,8 @@ ECode LinkProperties::constructor(
 {
     if (source != NULL) {
         source->GetInterfaceName(&mIfaceName);
-        AutoPtr<IArrayList> linkAddresses = IArrayList::Probe(RETN_OUT_VAL(source, GetLinkAddresses));
+        AutoPtr<IList> linkAddresses;
+        source->GetLinkAddresses((IList**)&linkAddresses);
         AutoPtr<IIterator> iter;
         linkAddresses->GetIterator((IIterator**)&iter);
         AutoPtr<IInterface> l;
@@ -74,7 +75,7 @@ ECode LinkProperties::constructor(
             mLinkAddresses->Add(l);
             l = NULL;
         }
-        AutoPtr<IArrayList> dnses = IArrayList::Probe(RETN_OUT_VAL(source, GetDnsServers));
+        AutoPtr<IList> dnses = RETN_OUT_VAL(source, GetDnsServers);
         iter = NULL;
         dnses->GetIterator((IIterator**)&iter);
         AutoPtr<IInterface> i;
@@ -84,7 +85,7 @@ ECode LinkProperties::constructor(
             i = NULL;
         }
         source->GetDomains(&mDomains);
-        AutoPtr<IArrayList> routes = IArrayList::Probe(RETN_OUT_VAL(source, GetRoutes));
+        AutoPtr<IList> routes = (RETN_OUT_VAL(source, GetRoutes));
         iter = NULL;
         routes->GetIterator((IIterator**)&iter);
         AutoPtr<IInterface> r;
@@ -412,9 +413,9 @@ ECode LinkProperties::AddRoute(
                 , routeIface.string(), mIfaceName.string());
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        route = RouteWithInterface(route);
-        if (!RETN_OUT_VAL(mRoutes, Contains, IInterface::Probe(route))) {
-            mRoutes->Add(route);
+        AutoPtr<IRouteInfo> route2 = RouteWithInterface(route);
+        if (!RETN_OUT_VAL(mRoutes, Contains, IInterface::Probe(route2))) {
+            mRoutes->Add(route2);
             *result = TRUE;
             return NOERROR;
         }

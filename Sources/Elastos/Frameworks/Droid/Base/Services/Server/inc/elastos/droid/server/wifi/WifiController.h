@@ -49,8 +49,9 @@ public:
         }
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -78,8 +79,9 @@ public:
         CARAPI Enter();
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -111,8 +113,9 @@ public:
         CARAPI Enter();
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -140,8 +143,9 @@ public:
         CARAPI Enter();
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -170,8 +174,9 @@ public:
         }
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -196,8 +201,9 @@ public:
         CARAPI Enter();
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -223,8 +229,9 @@ public:
         CARAPI Enter();
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -270,8 +277,9 @@ public:
         }
 
         // @Override
-        CARAPI_(Boolean) ProcessMessage(
-            /* [in] */ IMessage* msg);
+        CARAPI ProcessMessage(
+            /* [in] */ IMessage* msg,
+            /* [out] */ Boolean* result);
 
         CARAPI_(String) GetName()
         {
@@ -526,7 +534,7 @@ public:
     //real type is WifiServiceImpl::LockList
     //use type Object here, avoid the cross-reference
     AutoPtr<Object> mLocks;
-    static const Int32 BASE = IProtocol::BASE_WIFI_CONTROLLER;
+    static const Int32 BASE = IProtocol::BASE_WIFI_CONTROLLER;//0x00026000 = 155648
     static const Int32 CMD_EMERGENCY_MODE_CHANGED = BASE + 1;
     static const Int32 CMD_SCREEN_ON = BASE + 2;
     static const Int32 CMD_SCREEN_OFF = BASE + 3;

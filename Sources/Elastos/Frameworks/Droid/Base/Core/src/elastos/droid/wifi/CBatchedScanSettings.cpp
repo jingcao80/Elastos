@@ -2,9 +2,11 @@
 #include "elastos/droid/wifi/CBatchedScanSettings.h"
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuffer;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
@@ -259,14 +261,12 @@ ECode CBatchedScanSettings::GetHashCode(
     VALIDATE_NOT_NULL(code);
 
     Int32 _code;
-    assert(0);
-    // TODO
-    // mChannelSet->GetHashCode(&_code);
-    // *code = mMaxScansPerBatch +
-    //             (mMaxApPerScan * 3) +
-    //             (mScanIntervalSec * 5) +
-    //             (mMaxApForDistance * 7) +
-    //             (_code * 11);
+    mChannelSet->GetHashCode(&_code);
+    *code = mMaxScansPerBatch +
+                 (mMaxApPerScan * 3) +
+                 (mScanIntervalSec * 5) +
+                 (mMaxApForDistance * 7) +
+                 (_code * 11);
 
     return NOERROR;
 }
@@ -374,17 +374,51 @@ ECode CBatchedScanSettings::WriteToParcel(
 ECode CBatchedScanSettings::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    source->ReadInt32(&mMaxScansPerBatch);
+    source->ReadInt32(&mMaxApPerScan);
+    source->ReadInt32(&mScanIntervalSec);
+    source->ReadInt32(&mMaxApForDistance);
+    Int32 channelCount;
+    source->ReadInt32(&channelCount);
+    if (channelCount > 0) {
+        //settings.channelSet = new ArrayList(channelCount);
+        CArrayList::New(channelCount, (ICollection**)&mChannelSet);
+        while (channelCount-- > 0) {
+            String tmp;
+            source->ReadString(&tmp);
+            mChannelSet->Add(CoreUtils::Convert(tmp));
+        }
+    }
+    return NOERROR;
 }
 
 ECode CBatchedScanSettings::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    dest->WriteInt32(mMaxScansPerBatch);
+    dest->WriteInt32(mMaxApPerScan);
+    dest->WriteInt32(mScanIntervalSec);
+    dest->WriteInt32(mMaxApForDistance);
+    Int32 size = 0;
+    if (mChannelSet != NULL)
+        mChannelSet->GetSize(&size);
+
+    dest->WriteInt32(size);
+    if (mChannelSet != NULL) {
+            //for (String channel : channelSet) dest.writeString(channel);
+        AutoPtr<IIterator> iterator;
+        mChannelSet->GetIterator((IIterator**)&iterator);
+        Boolean has = FALSE;
+        while (iterator->HasNext(&has), has) {
+            AutoPtr<IInterface> obj;
+            iterator->GetNext((IInterface**)&obj);
+            String temp;
+            ICharSequence::Probe(obj)->ToString(&temp);
+            dest->WriteString(temp);
+        }
+    }
+
+    return NOERROR;
 }
 
 Boolean CBatchedScanSettings::ChannelSetIsValid()

@@ -3579,7 +3579,17 @@ void WifiConfigStore::ReadNetworkHistory()
         IDataInput* di = IDataInput::Probe(in);
         //Int32 id = -1;
         String key;
-        di->ReadUTF(&key);
+        ECode ec = di->ReadUTF(&key);
+        if (FAILED(ec)) {
+            if(in!=NULL) {
+                ICloseable::Probe(in)->Close();
+            }
+            if ((unsigned)ec == E_EOF_EXCEPTION)
+                Loge(String("ReadNetworkHistory, read to end"));
+            else
+                Loge(String("readNetworkHistory: No config file, revert to default"));
+            return;
+        }
         String bssid;
         String ssid;
 
@@ -3964,7 +3974,14 @@ void WifiConfigStore::ReadAutoJoinConfig()
 
         AutoPtr<IFileReader> fr;
         CFileReader::New(autoJoinConfigFile, (IFileReader**)&fr);
+        if (fr == NULL) {
+            Logger::D(TAG, "open %s failed", autoJoinConfigFile.string());
+        }
         CBufferedReader::New(IReader::Probe(fr), (IBufferedReader**)&reader);
+        if (reader == NULL) {
+                Logger::D(TAG, "open %s failed", autoJoinConfigFile.string());
+        }
+
         String key;
         for (reader->ReadLine(&key); !(key.IsNull()); reader->ReadLine(&key)) {
             if (!(key.IsNull())) {
@@ -4472,6 +4489,11 @@ void WifiConfigStore::ReadIpAndProxyConfigurations()
 {
     AutoPtr<ISparseArray> networks;
     IpConfigStore::ReadIpAndProxyConfigurations(ipConfigFile, (ISparseArray**)&networks);
+
+    if (networks == NULL) {
+        // IpConfigStore.readIpAndProxyConfigurations has already logged an error.
+        return;
+    }
 
     Int32 size = 0;
     networks->GetSize(&size);

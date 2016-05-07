@@ -37,9 +37,9 @@ ECode CWifiP2pInfo::SetGroupFormed(
 ECode CWifiP2pInfo::GetIsGroupOwner(
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = mIsGroupOwner;
+    return NOERROR;
 }
 
 ECode CWifiP2pInfo::IsGroupOwner(
@@ -92,9 +92,7 @@ ECode CWifiP2pInfo::ToString(
     sb += " groupOwnerAddress: ";
     if (mGroupOwnerAddress) {
         String temp;
-        assert(0);
-        // TODO
-        // mGroupOwnerAddress->ToString(&temp);
+        IObject::Probe(mGroupOwnerAddress)->ToString(&temp);
         sb += temp;
     }
     else {
@@ -152,6 +150,8 @@ ECode CWifiP2pInfo::WriteToParcel(
 
 ECode CWifiP2pInfo::constructor()
 {
+    mGroupFormed = FALSE;
+    mIsGroupOwner = FALSE;
     return NOERROR;
 }
 
@@ -160,9 +160,7 @@ ECode CWifiP2pInfo::constructor(
 {
     if (source != NULL) {
         FAIL_RETURN(source->GetGroupFormed(&mGroupFormed));
-        assert(0);
-        // TODO
-        // FAIL_RETURN(source->IsGroupOwner(&mIsGroupOwner));
+        FAIL_RETURN(source->GetIsGroupOwner(&mIsGroupOwner));
         FAIL_RETURN(source->GetGroupOwnerAddress(
             (IInetAddress**)&mGroupOwnerAddress));
     }

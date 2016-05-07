@@ -6,6 +6,8 @@
 
 using Elastos::Core::Character;
 using Elastos::Core::StringUtils;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::ICharBuffer;
 using Elastos::IO::ICharBufferHelper;
@@ -19,7 +21,8 @@ using Elastos::IO::Charset::ICharsetHelper;
 using Elastos::IO::Charset::CCharsetHelper;
 using Elastos::IO::Charset::ICharsetDecoder;
 using Elastos::IO::Charset::ICodingErrorAction;
-using Elastos::IO::Charset::CCodingErrorAction;
+using Elastos::IO::Charset::ICodingErrorActionHelper;
+using Elastos::IO::Charset::CCodingErrorActionHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -77,9 +80,7 @@ ECode CWifiSsid::CreateFromHex(
         // } catch(NumberFormatException e) {
         //     val = 0;
         // }
-        assert(0);
-        // TODO
-        // a->mOctets->Write(val);
+        IOutputStream::Probe(a->mOctets)->Write(val);
     }
     *wifiSsid = (IWifiSsid*)a.Get();
     REFCOUNT_ADD(*wifiSsid)
@@ -101,39 +102,27 @@ void CWifiSsid::ConvertToBytes(
                 i++;
                 switch ((*charArray)[i]) {
                     case '\\':
-                        assert(0);
-                        // TODO
-                        // mOctets->Write('\\');
+                        IOutputStream::Probe(mOctets)->Write('\\');
                         i++;
                         break;
                     case '"':
-                        assert(0);
-                        // TODO
-                        // mOctets->Write('"');
+                        IOutputStream::Probe(mOctets)->Write('"');
                         i++;
                         break;
                     case 'n':
-                        assert(0);
-                        // TODO
-                        // mOctets->Write('\n');
+                        IOutputStream::Probe(mOctets)->Write('\n');
                         i++;
                         break;
                     case 'r':
-                        assert(0);
-                        // TODO
-                        // mOctets->Write('\r');
+                        IOutputStream::Probe(mOctets)->Write('\r');
                         i++;
                         break;
                     case 't':
-                        assert(0);
-                        // TODO
-                        // mOctets->Write('\t');
+                        IOutputStream::Probe(mOctets)->Write('\t');
                         i++;
                         break;
                     case 'e':
-                        assert(0);
-                        // TODO
-                        // mOctets->Write(27); //escape char
+                        IOutputStream::Probe(mOctets)->Write(27); //escape char
                         i++;
                         break;
                     case 'x':
@@ -146,15 +135,11 @@ void CWifiSsid::ConvertToBytes(
                         if (val < 0) {
                             val = Character::ToDigit((*charArray)[i], HEX_RADIX);
                             if (val < 0) break;
-                            assert(0);
-                            // TODO
-                            // mOctets->Write(val);
+                            IOutputStream::Probe(mOctets)->Write(val);
                             i++;
                         }
                         else {
-                            assert(0);
-                            // TODO
-                            // mOctets->Write(val);
+                            IOutputStream::Probe(mOctets)->Write(val);
                             i += 2;
                         }
                         break;
@@ -176,18 +161,14 @@ void CWifiSsid::ConvertToBytes(
                             val = val * 8 + (*charArray)[i] - '0';
                             i++;
                         }
-                        assert(0);
-                        // TODO
-                        // mOctets->Write(val);
+                        IOutputStream::Probe(mOctets)->Write(val);
                         break;
                     default:
                         break;
                 }
                 break;
             default:
-                assert(0);
-                // TODO
-                // mOctets->Write(c);
+                IOutputStream::Probe(mOctets)->Write(c);
                 i++;
                 break;
         }
@@ -218,21 +199,13 @@ ECode CWifiSsid::ToString(
     AutoPtr<ICharsetDecoder> decoder;
     charset->NewDecoder((ICharsetDecoder**)&decoder);
 
-    AutoPtr<ICodingErrorAction> ceAction;
-    CCodingErrorAction::New((ICodingErrorAction**)&ceAction);
+    AutoPtr<ICodingErrorActionHelper> ceActionHelper;
+    CCodingErrorActionHelper::AcquireSingleton((ICodingErrorActionHelper**)&ceActionHelper);
     AutoPtr<ICodingErrorAction> replace;
-    assert(0);
-    // TODO
-    // ceAction->GetREPLACE((ICodingErrorAction**)&replace);
+    ceActionHelper->GetREPLACE((ICodingErrorAction**)&replace);
 
-    AutoPtr<ICharsetDecoder> temp;
-    assert(0);
-    // TODO
-    // decoder->OnMalformedInput(replace, (ICharsetDecoder**)&temp);
-    temp = NULL;
-    assert(0);
-    // TODO
-    // decoder->OnUnmappableCharacter(replace, (ICharsetDecoder**)&temp);
+    decoder->OnMalformedInput(replace);//, (ICharsetDecoder**)&temp);
+    decoder->OnUnmappableCharacter(replace);//, (ICharsetDecoder**)&temp);
     AutoPtr<ICharBufferHelper> bufferHelper;
     CCharBufferHelper::AcquireSingleton((ICharBufferHelper**)&bufferHelper);
     AutoPtr<ICharBuffer> out;
@@ -241,22 +214,16 @@ ECode CWifiSsid::ToString(
     AutoPtr<IByteBufferHelper> byteHelper;
     CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&byteHelper);
     AutoPtr<IByteBuffer> buffer;
-    assert(0);
-    // TODO
-    // byteHelper->WrapArray(ssidBytes, (IByteBuffer**)&buffer);
+    byteHelper->Wrap(ssidBytes, (IByteBuffer**)&buffer);
     AutoPtr<ICoderResult> result;
     decoder->Decode(buffer, out, TRUE, (ICoderResult**)&result);
-    assert(0);
-    // TODO
-    // out->Flip();
+    IBuffer::Probe(out)->Flip();
     Boolean error;
     if (result->IsError(&error), error) {
         *value = NONE;
         return NOERROR;
     }
-    assert(0);
-    // TODO
-    // out->ToString(value);
+    IObject::Probe(out)->ToString(value);
     return NOERROR;
 }
 
@@ -272,9 +239,10 @@ Boolean CWifiSsid::IsArrayAllZeroes(
 ECode CWifiSsid::GetOctets(
     /* [out] */ IByteArrayOutputStream** result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = mOctets;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CWifiSsid::IsHidden(
@@ -303,9 +271,7 @@ ECode CWifiSsid::GetHexString(
     AutoPtr<ArrayOf<Byte> > ssidbytes;
     FAIL_RETURN(GetOctets((ArrayOf<Byte>**)&ssidbytes));
     for (Int32 i = 0; i < ssidbytes->GetLength(); i++) {
-        assert(0);
-        // TODO
-        // out.AppendFormat(Locale.US, "%02x", (*ssidbytes)[i]);
+        out.AppendFormat(/*Locale.US, */"%02x", (*ssidbytes)[i]);
     }
     *hexString = out;
     return NOERROR;
@@ -314,17 +280,20 @@ ECode CWifiSsid::GetHexString(
 ECode CWifiSsid::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    Int32 length;
+    source->ReadInt32(&length);
     AutoPtr< ArrayOf<Byte> > b;
     source->ReadArrayOf((Handle32*)&b);
-    assert(0);
-    // TODO
-    // mOctets->WriteBytes(*b);
+    IOutputStream::Probe(mOctets)->Write(b, 0, length);
     return NOERROR;
 }
 
 ECode CWifiSsid::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
+    Int32 size;
+    mOctets->GetSize(&size);
+    dest->WriteInt32(size);
     AutoPtr<ArrayOf<Byte> > array;
     mOctets->ToByteArray((ArrayOf<Byte>**)&array);
     dest->WriteArrayOf((Handle32)array.Get());

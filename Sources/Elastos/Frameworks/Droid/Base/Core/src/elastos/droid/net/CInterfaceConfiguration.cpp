@@ -9,6 +9,7 @@ using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::CHashSet;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -24,11 +25,12 @@ const String CInterfaceConfiguration::FLAG_DOWN("down");
 
 CInterfaceConfiguration::CInterfaceConfiguration()
 {
-    AutoPtr<ISets> tmp;
+    //AutoPtr<ISets> tmp;
     // TODO: Waiting for Sets
-    assert(0);
+    //assert(0);
     // CSets::AcquireSingleton((ISets**)&tmp);
     // tmp->NewHashSet((IHashSet**)&mFlags);
+    CHashSet::New((IHashSet**)&mFlags);
 }
 
 ECode CInterfaceConfiguration::constructor()

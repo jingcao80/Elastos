@@ -1,6 +1,7 @@
 
 #include "elastos/droid/wifi/CWifiInfo.h"
 #include "elastos/droid/wifi/CScanResultHelper.h"
+#include "elastos/droid/wifi/CSupplicantState.h"
 #include "elastos/droid/wifi/CWifiSsidHelper.h"
 #include "elastos/droid/wifi/CWifiSsid.h"
 #include "elastos/droid/net/CNetworkUtils.h"
@@ -104,9 +105,10 @@ ECode CWifiInfo::constructor(
     /* [in] */ IWifiInfo* source)
 {
     if (source != NULL) {
-        assert(0);
-        // TODO
-        // source->GetSupplicantState(&mSupplicantState);
+        AutoPtr<ISupplicantState> supplicantState;
+        source->GetSupplicantState((ISupplicantState**)&supplicantState);
+        supplicantState->Get(&mSupplicantState);
+
         source->GetBSSID(&mBSSID);
         source->GetWifiSsid((IWifiSsid**)&mWifiSsid);
         source->GetNetworkId(&mNetworkId);
@@ -116,9 +118,7 @@ ECode CWifiInfo::constructor(
         Int32 ipAddres;
         source->GetIpAddress(&ipAddres);
         if (ipAddres != 0) {
-            assert(0);
-            // TODO
-            // NetworkUtils::Int32ToInetAddress(ipAddres, (IInetAddress**)&mIpAddress);
+            NetworkUtils::IntToInetAddress(ipAddres, (IInetAddress**)&mIpAddress);
         }
         source->GetMacAddress(&mMacAddress);
         source->GetMeteredHint(&mMeteredHint);
@@ -470,9 +470,7 @@ ECode CWifiInfo::GetSSID(
 
     if (mWifiSsid != NULL) {
         String unicode;
-        assert(0);
-        // TODO
-        // mWifiSsid->ToString(&unicode);
+        IObject::Probe(mWifiSsid)->ToString(&unicode);
 
         AutoPtr<ICharSequence> tmp;
         CString::New(unicode, (ICharSequence**)&tmp);
@@ -595,18 +593,19 @@ ECode CWifiInfo::GetSupplicantState(
     /* [out] */ ISupplicantState** state)
 {
     VALIDATE_NOT_NULL(state);
-    assert(0);
-    // TODO
-    // *state = mSupplicantState;
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<ISupplicantState> iSs;
+    CSupplicantState::New(mSupplicantState, (ISupplicantState**)&iSs);
+    *state = iSs;
+    REFCOUNT_ADD(*state);
+    return NOERROR;
 }
 
 ECode CWifiInfo::SetSupplicantState(
-    /* [in] */ ISupplicantState* state)
+    /* [in] */ ISupplicantState* _state)
 {
-    assert(0);
-    // TODO
-    // mSupplicantState = state;
+    SupplicantState state;
+    _state->Get(&state);
+    mSupplicantState = state;
     return E_NOT_IMPLEMENTED;
 }
 
@@ -699,9 +698,7 @@ ECode CWifiInfo::ToString(
 
     sb.Append("SSID: ");
     String sidStr;
-    assert(0);
-    // TODO
-    // mWifiSsid->ToString(&sidStr);
+    IObject::Probe(mWifiSsid)->ToString(&sidStr);
     sb.Append(mWifiSsid == NULL ? IWifiSsid::NONE : sidStr);
     sb.Append(", BSSID: ");
     sb.Append(mBSSID.IsNull() ? none : mBSSID);
@@ -764,9 +761,10 @@ ECode CWifiInfo::WriteToParcel(
     dest->WriteDouble(mRxSuccessRate);
     dest->WriteInt32(mBadRssiCount);
     dest->WriteInt32(mLowRssiCount);
-    assert(0);
-    // TODO
     // mSupplicantState->WriteToParcel(dest, flags);
+    AutoPtr<ISupplicantState> iSs;
+    CSupplicantState::New(mSupplicantState, (ISupplicantState**)&iSs);
+    IParcelable::Probe(iSs)->WriteToParcel(dest);
 
     return NOERROR;
 }

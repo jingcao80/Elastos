@@ -5066,7 +5066,7 @@ WifiStateMachine::WifiStateMachine(
     CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&filter);
     mContext->RegisterReceiver(bcbr, filter, (IIntent**)&tmpIntent);
 
-    mScanResultCache = new LruCache<String, IScanResult*>(SCAN_RESULT_CACHE_SIZE);
+    mScanResultCache = new LruCache<String, AutoPtr<IScanResult> >(SCAN_RESULT_CACHE_SIZE);
 
     service = NULL;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
@@ -8949,6 +8949,9 @@ void WifiStateMachine::SetScanResults()
                         scanResult->SetSeen(currentTimeMillis);
                     }
                     else {
+                        Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
+                        Logger::E("leliang", "wifiSsid:%s, bssid:%s, flags:%d, lelvel:%d, freq:%d, tsf: %ld",
+                                ssid.string(), bssid.string(), flags.string(), level, freq, tsf);
                         CScanResult::New(wifiSsid, bssid, flags, level, freq, tsf, (IScanResult**)&scanResult);
                         Int64 currentTimeMillis;
                         system->GetCurrentTimeMillis(&currentTimeMillis);

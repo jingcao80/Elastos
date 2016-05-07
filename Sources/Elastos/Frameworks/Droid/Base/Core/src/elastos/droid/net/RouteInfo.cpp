@@ -72,13 +72,11 @@ ECode RouteInfo::constructor(
             if (IInet4Address::Probe(gateway) != NULL) {
                  CIpPrefix::New(net4any, 0, &destination);
             } else {
-                // TODO: Waiting for Inet6Address
-                assert(0);
-                // AutoPtr<IInet6AddressHelper> inet6Helper;
-                // CInet6AddressHelper::AcquireSingleton((IInet6AddressHelper**)&inet6Helper)
-                // AutoPtr<IInet6Address> net6any;
-                // inet6Helper->GetANY((IInet6Address**)&net6any);
-                // CIpPrefix::New(net6any, 0, &destination);
+                AutoPtr<IInet6AddressHelper> inet6Helper;
+                CInet6AddressHelper::AcquireSingleton((IInet6AddressHelper**)&inet6Helper);
+                AutoPtr<IInetAddress> net6any;
+                inet6Helper->GetANY((IInetAddress**)&net6any);
+                CIpPrefix::New(net6any, 0, &destination);
             }
         } else {
             // no destination, no gateway. invalid.
@@ -95,13 +93,11 @@ ECode RouteInfo::constructor(
         if (IInet4Address::Probe(destAddress) != NULL) {
             gateway = net4any;
         } else {
-            // TODO: Waiting for Inet6Address
-            assert(0);
-            // AutoPtr<IInet6AddressHelper> inet6Helper;
-            // CInet6AddressHelper::AcquireSingleton((IInet6AddressHelper**)&inet6Helper)
-            // AutoPtr<IInet6Address> net6any;
-            // inet6Helper->GetANY((IInet6Address**)&net6any);
-            // gateway = net6any;
+            AutoPtr<IInet6AddressHelper> inet6Helper;
+            CInet6AddressHelper::AcquireSingleton((IInet6AddressHelper**)&inet6Helper);
+            AutoPtr<IInetAddress> net6any;
+            inet6Helper->GetANY((IInetAddress**)&net6any);
+            gateway = net6any;
         }
     }
     mHasGateway = (!Ptr(gateway)->Func(gateway->IsAnyLocalAddress));

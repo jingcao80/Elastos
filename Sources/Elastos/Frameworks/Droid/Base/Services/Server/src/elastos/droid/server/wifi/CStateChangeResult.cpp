@@ -1,8 +1,11 @@
 #include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/server/wifi/CStateChangeResult.h"
 #include "elastos/core/StringBuffer.h"
+#include <elastos/utility/logging/Logger.h>
+
 
 using Elastos::Core::StringBuffer;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,6 +23,7 @@ CStateChangeResult::CStateChangeResult(
     /* [in] */ const String& BSSID,
     /* [in] */ SupplicantState state)
 {
+    Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
     mNetworkId = networkId;
     mWifiSsid = wifiSsid;
     mBSSID = BSSID;

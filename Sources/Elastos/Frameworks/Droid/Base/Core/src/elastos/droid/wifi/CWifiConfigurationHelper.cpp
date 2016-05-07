@@ -1,6 +1,7 @@
 
 #include "elastos/droid/wifi/CWifiConfigurationHelper.h"
 #include "elastos/droid/wifi/CWifiConfiguration.h"
+#include "elastos/droid/wifi/CWifiConfigurationKeyMgmt.h"
 
 namespace Elastos {
 namespace Droid {
@@ -20,9 +21,9 @@ ECode CWifiConfigurationHelper::GetWepKeyVarName(
 ECode CWifiConfigurationHelper::GetINVALID_RSSI(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -127;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetINVALID_RSSI(
@@ -36,9 +37,9 @@ ECode CWifiConfigurationHelper::SetINVALID_RSSI(
 ECode CWifiConfigurationHelper::GetUNWANTED_BLACKLIST_SOFT_RSSI_24(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -80;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_SOFT_RSSI_24(
@@ -52,9 +53,9 @@ ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_SOFT_RSSI_24(
 ECode CWifiConfigurationHelper::GetUNWANTED_BLACKLIST_SOFT_RSSI_5(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -70;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_SOFT_RSSI_5(
@@ -68,9 +69,9 @@ ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_SOFT_RSSI_5(
 ECode CWifiConfigurationHelper::GetGOOD_RSSI_24(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -65;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetGOOD_RSSI_24(
@@ -84,9 +85,9 @@ ECode CWifiConfigurationHelper::SetGOOD_RSSI_24(
 ECode CWifiConfigurationHelper::GetLOW_RSSI_24(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -77;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetLOW_RSSI_24(
@@ -100,9 +101,9 @@ ECode CWifiConfigurationHelper::SetLOW_RSSI_24(
 ECode CWifiConfigurationHelper::GetBAD_RSSI_24(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -87;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetBAD_RSSI_24(
@@ -116,9 +117,9 @@ ECode CWifiConfigurationHelper::SetBAD_RSSI_24(
 ECode CWifiConfigurationHelper::GetGOOD_RSSI_5(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -60;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetGOOD_RSSI_5(
@@ -132,9 +133,9 @@ ECode CWifiConfigurationHelper::SetGOOD_RSSI_5(
 ECode CWifiConfigurationHelper::GetLOW_RSSI_5(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -72;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetLOW_RSSI_5(
@@ -148,9 +149,9 @@ ECode CWifiConfigurationHelper::SetLOW_RSSI_5(
 ECode CWifiConfigurationHelper::GetBAD_RSSI_5(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -82;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetBAD_RSSI_5(
@@ -164,9 +165,9 @@ ECode CWifiConfigurationHelper::SetBAD_RSSI_5(
 ECode CWifiConfigurationHelper::GetUNWANTED_BLACKLIST_SOFT_BUMP(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = 4;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_SOFT_BUMP(
@@ -180,9 +181,9 @@ ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_SOFT_BUMP(
 ECode CWifiConfigurationHelper::GetUNWANTED_BLACKLIST_HARD_BUMP(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = 8;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_HARD_BUMP(
@@ -196,9 +197,9 @@ ECode CWifiConfigurationHelper::SetUNWANTED_BLACKLIST_HARD_BUMP(
 ECode CWifiConfigurationHelper::GetUNBLACKLIST_THRESHOLD_24_SOFT(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -77;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_24_SOFT(
@@ -212,9 +213,9 @@ ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_24_SOFT(
 ECode CWifiConfigurationHelper::GetUNBLACKLIST_THRESHOLD_24_HARD(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -68;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_24_HARD(
@@ -228,9 +229,9 @@ ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_24_HARD(
 ECode CWifiConfigurationHelper::GetUNBLACKLIST_THRESHOLD_5_SOFT(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -63;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_5_SOFT(
@@ -244,9 +245,9 @@ ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_5_SOFT(
 ECode CWifiConfigurationHelper::GetUNBLACKLIST_THRESHOLD_5_HARD(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -56;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_5_HARD(
@@ -260,9 +261,9 @@ ECode CWifiConfigurationHelper::SetUNBLACKLIST_THRESHOLD_5_HARD(
 ECode CWifiConfigurationHelper::GetINITIAL_AUTO_JOIN_ATTEMPT_MIN_24(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -80;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetINITIAL_AUTO_JOIN_ATTEMPT_MIN_24(
@@ -276,9 +277,9 @@ ECode CWifiConfigurationHelper::SetINITIAL_AUTO_JOIN_ATTEMPT_MIN_24(
 ECode CWifiConfigurationHelper::GetINITIAL_AUTO_JOIN_ATTEMPT_MIN_5(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -70;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetINITIAL_AUTO_JOIN_ATTEMPT_MIN_5(
@@ -292,9 +293,9 @@ ECode CWifiConfigurationHelper::SetINITIAL_AUTO_JOIN_ATTEMPT_MIN_5(
 ECode CWifiConfigurationHelper::GetA_BAND_PREFERENCE_RSSI_THRESHOLD(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -65;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetA_BAND_PREFERENCE_RSSI_THRESHOLD(
@@ -308,9 +309,9 @@ ECode CWifiConfigurationHelper::SetA_BAND_PREFERENCE_RSSI_THRESHOLD(
 ECode CWifiConfigurationHelper::GetG_BAND_PREFERENCE_RSSI_THRESHOLD(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = -75;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetG_BAND_PREFERENCE_RSSI_THRESHOLD(
@@ -324,9 +325,9 @@ ECode CWifiConfigurationHelper::SetG_BAND_PREFERENCE_RSSI_THRESHOLD(
 ECode CWifiConfigurationHelper::GetHOME_NETWORK_RSSI_BOOST(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = 5;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetHOME_NETWORK_RSSI_BOOST(
@@ -340,9 +341,9 @@ ECode CWifiConfigurationHelper::SetHOME_NETWORK_RSSI_BOOST(
 ECode CWifiConfigurationHelper::GetMAX_INITIAL_AUTO_JOIN_RSSI_BOOST(
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = 8;
+    return NOERROR;
 }
 
 ECode CWifiConfigurationHelper::SetMAX_INITIAL_AUTO_JOIN_RSSI_BOOST(
@@ -357,9 +358,31 @@ ECode CWifiConfigurationHelper::ConfigKey(
     /* [in] */ IScanResult* scanResult,
     /* [out] */ String* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    String ssid;
+    scanResult->GetSSID(&ssid);
+    String key = String("\"") + ssid + "\"";
+
+    String capabilities;
+    scanResult->GetCapabilities(&capabilities);
+    if (capabilities.Contains("WEP")) {
+            key = key + "-WEP";
+    }
+
+    AutoPtr<IWifiConfigurationKeyMgmt> keyMgmt;
+    CWifiConfigurationKeyMgmt::AcquireSingleton((IWifiConfigurationKeyMgmt**)&keyMgmt);
+    AutoPtr<ArrayOf<String> > strings;
+    keyMgmt->GetStrings((ArrayOf<String>**)&strings);
+    if (capabilities.Contains("PSK")) {
+            key = key + "-" + (*strings)[IWifiConfigurationKeyMgmt::WPA_PSK];
+    }
+
+    if (capabilities.Contains("EAP")) {
+            key = key + "-" + (*strings)[IWifiConfigurationKeyMgmt::WPA_EAP];
+    }
+
+    *result = key;
+    return NOERROR;
 }
 
 } // namespace Wifi

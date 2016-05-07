@@ -5,12 +5,14 @@
 #include "elastos/droid/server/wifi/WifiSettingsStore.h"
 #include "elastos/core/StringUtils.h"
 #include "elastos/core/AutoLock.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -27,6 +29,9 @@ const Int32 WifiSettingsStore::WIFI_DISABLED_AIRPLANE_ON;
 
 WifiSettingsStore::WifiSettingsStore(
     /* [in] */ IContext* context)
+    : mAirplaneModeOn(FALSE)
+    , mScanAlwaysAvailable(FALSE)
+    , mCheckSavedStateAtBoot(FALSE)
 {
     mContext = context;
     mAirplaneModeOn = GetPersistedAirplaneModeOn();
@@ -90,6 +95,7 @@ ECode WifiSettingsStore::HandleWifiToggled(
         *result = FALSE;
         return NOERROR;
     }
+    Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
 
     if (wifiEnabled) {
         if (mAirplaneModeOn) {
@@ -177,6 +183,7 @@ Boolean WifiSettingsStore::IsAirplaneSensitive()
 
 Boolean WifiSettingsStore::IsAirplaneToggleable()
 {
+    Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     String toggleableRadios;
@@ -209,6 +216,7 @@ Int32 WifiSettingsStore::GetPersistedWifiState()
     //try {
     Int32 r;
     ECode ec = Settings::Global::GetInt32(cr, ISettingsGlobal::WIFI_ON, &r);
+    Logger::E("leliang", "WifiSettingsStore::GetPersistedWifiState, r=%d", r);
     //} catch (Settings.SettingNotFoundException e) {
     if (FAILED(ec)) {
         Boolean b;
@@ -216,7 +224,7 @@ Int32 WifiSettingsStore::GetPersistedWifiState()
         return WIFI_DISABLED;
     }
     //}
-    return 0;
+    return r;
 }
 
 Boolean WifiSettingsStore::GetPersistedAirplaneModeOn()

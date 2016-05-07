@@ -1201,6 +1201,7 @@ void WifiMonitor::HandleRequests(
 void WifiMonitor::HandleSupplicantStateChange(
     /* [in] */ const String& dataString)
 {
+    Logger::E("leliang", "file:%s. line:%d, func:%s, dataString:%s\n", __FILE__, __LINE__, __func__, dataString.string());
     AutoPtr<IWifiSsid> wifiSsid;
 
     Int32 index = dataString.LastIndexOf("SSID=");
@@ -1228,6 +1229,7 @@ void WifiMonitor::HandleSupplicantStateChange(
             if (nameValue == NULL || nameValue->GetLength() != 2) {
                 continue;
             }
+            Logger::E("leliang", "file:%s. line:%d, func:%s, name:%s, value:%s\n", __FILE__, __LINE__, __func__, (*nameValue)[0].string(), (*nameValue)[1].string());
 
             if ((*nameValue)[0].Equals("BSSID")) {
                 BSSID = (*nameValue)[1];
@@ -1393,8 +1395,10 @@ void WifiMonitor::NotifySupplicantStateChange(
     /* [in] */ const String& BSSID,
     /* [in] */ SupplicantState newState)
 {
+    Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, newState);
     if (DBG) {
-        Logger::W("MonitorThread", "NotifySupplicantStateChange BSSID %s, wifiSsid: %p", BSSID.string(), wifiSsid);
+        Logger::W("MonitorThread", "NotifySupplicantStateChange BSSID %s, wifiSsid: %p, state:%d",
+                BSSID.string(), wifiSsid, newState);
     }
 
     AutoPtr<CStateChangeResult> result = new CStateChangeResult(networkId, wifiSsid, BSSID, newState);

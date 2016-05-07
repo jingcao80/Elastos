@@ -777,6 +777,7 @@ CAR_INTERFACE_IMPL_2(WifiServiceImpl, Object, IIWifiManager, IBinder);
 WifiServiceImpl::WifiServiceImpl()
 {
     CArrayList::New((IList**)&mBatchedScanners);
+    mLocks = new LockList(this);
 }
 
 ECode WifiServiceImpl::constructor(
@@ -1047,6 +1048,7 @@ ECode WifiServiceImpl::SetWifiEnabled(
     Int64 ident;
     binderHelper->ClearCallingIdentity(&ident);
     //try {
+    Slogger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
     Boolean bTemp;
     if (!(mSettingsStore->HandleWifiToggled(enable, &bTemp), bTemp)) {
         // Nothing to do if wifi cannot be toggled
@@ -1063,6 +1065,7 @@ ECode WifiServiceImpl::SetWifiEnabled(
         return NOERROR;
     }
 
+    Slogger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
     mWifiController->SendMessage(WifiController::CMD_WIFI_TOGGLED);
     *result = TRUE;
     return NOERROR;

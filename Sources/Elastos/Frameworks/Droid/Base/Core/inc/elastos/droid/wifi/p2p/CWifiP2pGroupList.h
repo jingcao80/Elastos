@@ -3,10 +3,12 @@
 #define __ELASTOS_DROID_NET_WIFI_P2P_CWIFIP2PGROUPLIST_H__
 
 #include "_Elastos_Droid_Wifi_P2p_CWifiP2pGroupList.h"
-// TODO #include "elastos/droid/utility/LruCache.h"
+#include "elastos/droid/utility/LruCache.h"
 #include <elastos/core/Object.h>
 
-// TODO using Elastos::Droid::Utility::LruCache;
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Core::IInteger32)
+
+using Elastos::Droid::Utility::LruCache;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::ICollection;
 
@@ -21,7 +23,7 @@ CarClass(CWifiP2pGroupList)
 {
 private:
     class GroupLruCache
-        // TODO: public LruCache< AutoPtr<IInteger32>, AutoPtr<IWifiP2pGroup> >
+        : public LruCache< AutoPtr<IInteger32>, AutoPtr<IWifiP2pGroup> >
     {
     public:
         GroupLruCache(

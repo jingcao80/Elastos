@@ -1,6 +1,7 @@
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.App.h"
+#include <Elastos.Droid.Provider.h>
 #include "elastos/droid/net/NetworkScorerAppManager.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/content/CIntent.h"
@@ -11,7 +12,7 @@
 #include "elastos/droid/net/NetworkScorerAppManager.h"
 #include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/UserHandle.h"
-// #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -23,7 +24,8 @@ using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::UserHandle;
-// using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Text::TextUtils;
 
 using Elastos::Core::ICharSequence;
@@ -121,10 +123,8 @@ ECode NetworkScorerAppManager::GetActiveScorer(
     VALIDATE_NOT_NULL(result)
 
     String scorerPackage;
-    // TODO: Waiting for Settings
-    assert(0);
-    // Settings::Global::GetString(Ptr(context)->Func(context->GetContentResolver),
-            // Settings::Global::NETWORK_SCORER_APP, &scorerPackage);
+    Settings::Global::GetString(Ptr(context)->Func(context->GetContentResolver),
+            ISettingsGlobal::NETWORK_SCORER_APP, &scorerPackage);
     return GetScorer(context, scorerPackage, result);
 }
 
@@ -136,10 +136,9 @@ ECode NetworkScorerAppManager::SetActiveScorer(
     VALIDATE_NOT_NULL(result)
 
     String oldPackageName;
-    // TODO: Waiting for Settings
-    assert(0);
-    // Settings::Global::GetString(Ptr(context)->Func(context->GetContentResolver),
-    //         Settings::Global::NETWORK_SCORER_APP, &oldPackageName);
+    Boolean bTemp;
+    Settings::Global::GetString(Ptr(context)->Func(context->GetContentResolver),
+             ISettingsGlobal::NETWORK_SCORER_APP, &oldPackageName);
     if (TextUtils::Equals(oldPackageName, packageName)) {
         // No change.
         *result = TRUE;
@@ -147,10 +146,8 @@ ECode NetworkScorerAppManager::SetActiveScorer(
     }
     Logger::I(TAG, "Changing network scorer from %s to %s", oldPackageName.string(), packageName.string());
     if (packageName.IsNull()) {
-        // TODO: Waiting for Settings
-        assert(0);
-        // Settings::Global::PutString(Ptr(context)->Func(context->GetContentResolver),
-        //         Settings::Global::NETWORK_SCORER_APP, String(NULL));
+        Settings::Global::PutString(Ptr(context)->Func(context->GetContentResolver),
+                 ISettingsGlobal::NETWORK_SCORER_APP, String(NULL), &bTemp);
         *result = TRUE;
         return NOERROR;
     } else {
@@ -158,10 +155,8 @@ ECode NetworkScorerAppManager::SetActiveScorer(
         AutoPtr<INetworkScorerAppData> networkScorerAppData;
         GetScorer(context, packageName, (INetworkScorerAppData**)&networkScorerAppData);
         if (networkScorerAppData != NULL) {
-            // TODO: Waiting for Settings
-            assert(0);
-            // Settings::Global::PutString(context)->Func(context->GetContentResolver),
-            //         Settings::Global::NETWORK_SCORER_APP, packageName);
+            Settings::Global::PutString(Ptr(context)->Func(context->GetContentResolver),
+                     ISettingsGlobal::NETWORK_SCORER_APP, packageName, &bTemp);
             *result = TRUE;
             return NOERROR;
         } else {

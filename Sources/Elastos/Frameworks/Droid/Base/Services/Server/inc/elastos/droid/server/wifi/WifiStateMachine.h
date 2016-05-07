@@ -1908,7 +1908,7 @@ private:
     AutoPtr<IArrayList> mScanResults; //= new ArrayList<ScanResult>();
     static AutoPtr<IPattern> scanResultPattern; //= Pattern.compile("\t+");
     static const Int32 SCAN_RESULT_CACHE_SIZE; //= 160;
-    AutoPtr<LruCache<String, IScanResult*> > mScanResultCache;
+    AutoPtr<LruCache<String, AutoPtr<IScanResult> > > mScanResultCache;
     // For debug, number of known scan results that were found as part of last scan result event,
     // as well the number of scans results returned by the supplicant with that message
     Int32 mNumScanResultsKnown;

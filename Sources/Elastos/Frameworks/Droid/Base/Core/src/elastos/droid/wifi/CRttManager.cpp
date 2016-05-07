@@ -16,6 +16,7 @@ using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::AutoLock;
 using Elastos::Core::IThread;
+using Elastos::Utility::Concurrent::CCountDownLatch;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -168,10 +169,7 @@ ECode CRttManager::GetCapabilities(
     /* [out] */ IRttManagerCapabilities** result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // return CRttManagerCapabilities::New(result);
-    return E_NOT_IMPLEMENTED;
+    return CRttManagerCapabilities::New(result);
 }
 
 ECode CRttManager::StartRanging(
@@ -214,17 +212,12 @@ void CRttManager::Init()
 
         CHandlerThread::New(String("WifiScanner"), (IHandlerThread**)&sHandlerThread);
         CAsyncChannel::New((IAsyncChannel**)&sAsyncChannel);
-        assert(0);
-        // TODO
-        // CCountDownLatch::New(1, (ICountDownLatch**)&sConnected);
+        CCountDownLatch::New(1, (ICountDownLatch**)&sConnected);
 
         IThread::Probe(sHandlerThread)->Start();
-        AutoPtr<IHandler> handler;
         AutoPtr<ILooper> looper;
         sHandlerThread->GetLooper((ILooper**)&looper);
-        assert(0);
-        // TODO
-        // CServiceHandler::New(looper, (IHandler**)&handler);
+        AutoPtr<IHandler> handler = new ServiceHandler(looper);
         sAsyncChannel->Connect(mContext, handler, messenger);
         // try {
             sConnected->Await();
