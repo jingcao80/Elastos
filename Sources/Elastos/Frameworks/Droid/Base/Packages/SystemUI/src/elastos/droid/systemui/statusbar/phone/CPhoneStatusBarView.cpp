@@ -1,11 +1,14 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBarView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include "Elastos.Droid.View.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
 using Elastos::Droid::View::Accessibility::IAccessibilityEventHelper;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -172,7 +175,11 @@ ECode CPhoneStatusBarView::OnTouchEvent(
     if (DEBUG_GESTURES) {
         Int32 masked = 0;
         if ((event->GetActionMasked(&masked), masked) != IMotionEvent::ACTION_MOVE) {
-            assert(0 && "TODO");
+            Float x = 0, y = 0;
+            event->GetX(&x);
+            event->GetY(&y);
+            Logger::D("CPhoneStatusBarView", "OnTouchEvent masked=[%d], x=[%d], y=[%d], barConsumedEvent=[%d]"
+                    , masked, (Int32)x, (Int32)y, (barConsumedEvent ? 1 : 0));
             // EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
             //         event.getActionMasked(), (Int32) event.getX(), (Int32) event.getY(),
             //         barConsumedEvent ? 1 : 0);
@@ -226,8 +233,7 @@ ECode CPhoneStatusBarView::PanelExpansionChanged(
 {
     PanelBar::PanelExpansionChanged(panel, frac, expanded);
     mScrimController->SetPanelExpansion(frac);
-    assert(0 && "TODO");
-    // mBar->UpdateCarrierLabelVisibility(FALSE);
+    ((CPhoneStatusBar*)mBar.Get())->UpdateCarrierLabelVisibility(FALSE);
     return NOERROR;
 }
 

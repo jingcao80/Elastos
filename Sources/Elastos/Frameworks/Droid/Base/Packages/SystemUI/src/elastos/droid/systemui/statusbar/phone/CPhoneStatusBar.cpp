@@ -1708,25 +1708,25 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     IView::Probe(mStatusBarWindow)->FindViewById(R::id::quick_settings_panel, (IView**)&view);
     mQSPanel = IQSPanel::Probe(view);
     if (mQSPanel != NULL) {
-         Logger::D(TAG, "TODO :the codes will make an error-commented.");
-//         AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
-//                 mBluetoothController, mLocationController, mRotationLockController,
-//                 mNetworkController, mZenModeController, mHotspotController,
-//                 mCastController, mFlashlightController,
-//                 mUserSwitcherController, mKeyguardMonitor,
-//                 mSecurityController);
-//         mQSPanel->SetHost((IPhoneQSTileHost*)qsh->Probe(EIID_IPhoneQSTileHost));
+        Logger::D(TAG, "TODO :the codes will make an error-commented.");
+        AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
+                mBluetoothController, mLocationController, mRotationLockController,
+                mNetworkController, mZenModeController, mHotspotController,
+                mCastController, mFlashlightController,
+                mUserSwitcherController, mKeyguardMonitor,
+                mSecurityController);
+        mQSPanel->SetHost((IPhoneQSTileHost*)qsh->Probe(EIID_IPhoneQSTileHost));
 
-//         AutoPtr<ICollection> c;
-//         qsh->GetTiles((ICollection**)&c);
-//         mQSPanel->SetTiles(c);
+        AutoPtr<ICollection> c;
+        qsh->GetTiles((ICollection**)&c);
+        mQSPanel->SetTiles(c);
 
-//         mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
-//         mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
-//         mHeader->SetQSPanel(mQSPanel);
+        mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
+        mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
+        mHeader->SetQSPanel(mQSPanel);
 
-//         AutoPtr<HostCallback> hc = new HostCallback(this, qsh);
-//         qsh->SetCallback(hc);
+        AutoPtr<HostCallback> hc = new HostCallback(this, qsh);
+        qsh->SetCallback(hc);
     }
 
     // User info. Trigger first load.
@@ -3659,8 +3659,11 @@ ECode CPhoneStatusBar::GetGestureRecorder(
     /* [out] */ IGestureRecorder** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = (IGestureRecorder*)mGestureRec->Probe(EIID_IGestureRecorder);
-    REFCOUNT_ADD(*result);
+    *result = NULL;
+    if (mGestureRec != NULL) {
+        *result = (IGestureRecorder*)mGestureRec->Probe(EIID_IGestureRecorder);
+        REFCOUNT_ADD(*result);
+    }
     return NOERROR;
 }
 

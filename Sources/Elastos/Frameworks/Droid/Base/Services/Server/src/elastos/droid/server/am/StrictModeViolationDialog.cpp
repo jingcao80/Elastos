@@ -19,7 +19,9 @@ namespace Am {
 StrictModeViolationDialog::MyHandler::MyHandler(
     /* [in] */ StrictModeViolationDialog* owner)
     : mOwner(owner)
-{}
+{
+    Handler::constructor();
+}
 
 StrictModeViolationDialog::MyHandler::~MyHandler()
 {}

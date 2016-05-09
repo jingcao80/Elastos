@@ -1,5 +1,6 @@
 #include "elastos/droid/systemui/recent/CRecents.h"
 #include "elastos/droid/systemui/recent/RecentsActivity.h"
+#include "elastos/droid/systemui/recents/AlternateRecentsComponent.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/systemui/recent/RecentTasksLoader.h"
@@ -30,6 +31,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::SystemUI::EIID_IRecentsComponent;
 using Elastos::Droid::SystemUI::Recent::RecentsActivity;
 using Elastos::Droid::SystemUI::Recent::RecentTasksLoader;
+using Elastos::Droid::SystemUI::Recents::AlternateRecentsComponent;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Utility::Logging::Logger;
@@ -72,12 +74,11 @@ CRecents::CRecents()
 
 ECode CRecents::Start()
 {
-    Logger::D(TAG, "TODO: Not Implement == [AlternateRecentsComponent].");
     if (mUseAlternateRecents) {
         if (mAlternateRecents == NULL) {
-            // mAlternateRecents = new AlternateRecentsComponent(mContext);
+            mAlternateRecents = new AlternateRecentsComponent(mContext);
         }
-        // mAlternateRecents->OnStart();
+        mAlternateRecents->OnStart();
     }
 
     PutComponent(String("EIID_IRecentsComponent"), (IRecentsComponent*)this);

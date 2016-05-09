@@ -23,8 +23,8 @@ module
         /**
          * Special package name for theming the navbar separate from the rest of SystemUI
          */
-        const String SYSTEMUI_NAVBAR_PKG = "com.android.systemui.navbar";
-        const String SYSTEMUI_STATUS_BAR_PKG = "com.android.systemui";
+        const String SYSTEMUI_NAVBAR_PKG = "Elastos.Droid.SystemUI.Navbar";
+        const String SYSTEMUI_STATUS_BAR_PKG = "Elastos.Droid.SystemUI";
 
         GetOverlayPkgName(
             [out] String* str);

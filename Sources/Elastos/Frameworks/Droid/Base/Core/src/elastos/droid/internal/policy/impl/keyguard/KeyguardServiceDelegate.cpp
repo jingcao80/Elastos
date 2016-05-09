@@ -149,7 +149,7 @@ CAR_INTERFACE_IMPL(KeyguardServiceDelegate, Object, IKeyguardServiceDelegate)
 
 // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
 const String KeyguardServiceDelegate::KEYGUARD_PACKAGE("Elastos.Droid.SystemUI");
-const String KeyguardServiceDelegate::KEYGUARD_CLASS("Elastos.Droid.SystemUI.Keyguard.KeyguardService");
+const String KeyguardServiceDelegate::KEYGUARD_CLASS("Elastos.Droid.SystemUI.Keyguard.CKeyguardService");
 
 const String KeyguardServiceDelegate::TAG("KeyguardServiceDelegate");
 const Boolean KeyguardServiceDelegate::DEBUG = TRUE;
@@ -171,19 +171,8 @@ ECode KeyguardServiceDelegate::constructor(
 ECode KeyguardServiceDelegate::BindService(
     /* [in] */ IContext* context)
 {
-    /*
-    Intent intent = new Intent();
-    intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
-    if (!context.bindServiceAsUser(intent, mKeyguardConnection,
-            Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
-        if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
-        mKeyguardState.showing = false;
-        mKeyguardState.showingAndNotOccluded = false;
-        mKeyguardState.secure = false;
-    } else {
-        if (DEBUG) Log.v(TAG, "*** Keyguard started");
-    }
-    */
+
+    if (DEBUG) Logger::I(TAG, "BindService: %s, %s", KEYGUARD_PACKAGE.string(), KEYGUARD_CLASS.string());
     AutoPtr<IIntent> intent;
     FAIL_RETURN(CIntent::New((IIntent**)&intent));
     intent->SetClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
@@ -192,10 +181,11 @@ ECode KeyguardServiceDelegate::BindService(
     AutoPtr<IUserHandle> userHandle;
     userHandleHelper->GetOWNER((IUserHandle**)&userHandle);
     Boolean result = FALSE;
-    ((Context*)context)->BindServiceAsUser(
+    ECode ec = context->BindServiceAsUser(
         intent, mKeyguardConnection, IContext::BIND_AUTO_CREATE, userHandle, &result);
-    if (!result) {
-        if (DEBUG) Logger::V(TAG, "*** Keyguard: can't bind to %s", KEYGUARD_CLASS.string());
+    if (FAILED(ec) || !result) {
+        if (DEBUG) Logger::V(TAG, "*** Keyguard: can't bind to %s, ec=%08x",
+            KEYGUARD_CLASS.string(), ec);
         mKeyguardState->showing = FALSE;
         mKeyguardState->showingAndNotOccluded = FALSE;
         mKeyguardState->secure = FALSE;

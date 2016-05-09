@@ -2792,7 +2792,6 @@ void CNotificationStackScrollLayout::ApplyCurrentState()
 {
     mCurrentStackScrollState->Apply();
     if (mListener != NULL) {
-        assert(0 && "TODO: recycle ref?");
         mListener->OnChildLocationsChanged(this);
     }
 }

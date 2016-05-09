@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/CExpandHelper.h"
+#include "elastos/droid/systemui/CViewScaler.h"
 #include "Elastos.Droid.Media.h"
 #include "R.h"
 #include "elastos/core/AutoLock.h"
@@ -107,31 +108,34 @@ ECode CExpandHelper::AnimatorListener::OnAnimationEnd(
 }
 
 //============================================================================
-//              CExpandHelper::ViewScaler
+//              CViewScaler
 //============================================================================
-CAR_INTERFACE_IMPL(CExpandHelper::ViewScaler, Object, IViewScaler);
-CExpandHelper::ViewScaler::ViewScaler(
-    /* [in] */ CExpandHelper* host)
-    : mHost(host)
-{}
+CAR_OBJECT_IMPL(CViewScaler);
+CAR_INTERFACE_IMPL(CViewScaler, Object, IViewScaler);
+ECode CViewScaler::constructor(
+    /* [in] */ IExpandHelper* host)
+{
+    mHost = (CExpandHelper*)host;
+    return NOERROR;
+}
 
-ECode CExpandHelper::ViewScaler::SetView(
+ECode CViewScaler::SetView(
     /* [in] */ IExpandableView* v)
 {
     mView = v;
     return NOERROR;
 }
 
-ECode CExpandHelper::ViewScaler::SetHeight(
+ECode CViewScaler::SetHeight(
     /* [in] */ Float h)
 {
-    if (DEBUG_SCALE) Logger::V(TAG, "SetHeight: setting to %f", h);
+    if (CExpandHelper::DEBUG_SCALE) Logger::V(CExpandHelper::TAG, "SetHeight: setting to %f", h);
     mView->SetActualHeight((Int32) h);
     mHost->mCurrentHeight = h;
     return NOERROR;
 }
 
-ECode CExpandHelper::ViewScaler::GetHeight(
+ECode CViewScaler::GetHeight(
     /* [out] */ Float* height)
 {
     VALIDATE_NOT_NULL(height);
@@ -141,7 +145,7 @@ ECode CExpandHelper::ViewScaler::GetHeight(
     return NOERROR;
 }
 
-ECode CExpandHelper::ViewScaler::GetNaturalHeight(
+ECode CViewScaler::GetNaturalHeight(
     /* [in] */ Int32 maximum,
     /* [out] */ Int32* naturalHeight)
 {
@@ -197,14 +201,13 @@ ECode CExpandHelper::constructor(
     mLargeSize = large;
     mContext = context;
     mCallback = callback;
-    mScaler = new ViewScaler(this);
+    CViewScaler::New(this, (IViewScaler**)&mScaler);
     mGravity = IGravity::TOP;
     AutoPtr<ArrayOf<Float> > param = ArrayOf<Float>::Alloc(1);
     (*param)[0] = 0.0f;
     AutoPtr<IObjectAnimatorHelper> aHelper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&aHelper);
-    aHelper->OfFloat(mScaler->Probe(EIID_IInterface), String("height"), param,
-            (IObjectAnimator**)&mScaleAnimation);
+    aHelper->OfFloat(mScaler, String("height"), param, (IObjectAnimator**)&mScaleAnimation);
 
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);

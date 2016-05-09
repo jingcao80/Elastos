@@ -62,7 +62,7 @@ namespace Am {
 const String ActivityRecord::TAG("ActivityManager");
 const String ActivityRecord::TAG_TIMELINE("Timeline");
 const Boolean ActivityRecord::DEBUG_SAVED_STATE = FALSE;// ActivityStackSupervisor::DEBUG_SAVED_STATE;
-const String ActivityRecord::RECENTS_PACKAGE_NAME("com.android.systemui.recent");
+const String ActivityRecord::RECENTS_PACKAGE_NAME("Elastos.Droid.SystemUI.Recent");
 const String ActivityRecord::ACTIVITY_ICON_SUFFIX("_activity_icon_");
 const Int32 ActivityRecord::APPLICATION_ACTIVITY_TYPE;
 const Int32 ActivityRecord::HOME_ACTIVITY_TYPE;

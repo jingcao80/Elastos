@@ -980,7 +980,6 @@ ECode Drawable::DrawableFromBitmap(
     /* [out] */ IDrawable** drawable)
 {
     assert(drawable != NULL);
-    ECode ec = NOERROR;
     AutoPtr<IDrawable> dr;
     if (np != NULL) {
         return CNinePatchDrawable::New(

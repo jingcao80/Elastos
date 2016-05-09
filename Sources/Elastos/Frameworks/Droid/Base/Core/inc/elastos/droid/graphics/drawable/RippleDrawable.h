@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEDRAWABLE_H__
 
 #include "elastos/droid/graphics/drawable/LayerDrawable.h"
-#include "elastos/droid/graphics/drawable/RippleBackground.h"
+#include "elastos/droid/graphics/drawable/CRippleBackground.h"
 
 namespace Elastos {
 namespace Droid {
@@ -364,7 +364,7 @@ private:
     AutoPtr<IDrawable> mMask;
 
     /** The current background. May be actively animating or pending entry. */
-    AutoPtr<RippleBackground> mBackground;
+    AutoPtr<CRippleBackground> mBackground;
 
     /** Whether we expect to draw a background when visible. */
     Boolean mBackgroundActive;

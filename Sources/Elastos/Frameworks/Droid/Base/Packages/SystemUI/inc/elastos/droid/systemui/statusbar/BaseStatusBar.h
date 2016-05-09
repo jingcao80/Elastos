@@ -60,6 +60,8 @@ namespace StatusBar {
 
 class CSettingsObserver;
 class CLockscreenSettingsObserver;
+class CBaseBroadcastReceiver;
+class DelegateViewHelper;
 
 class BaseStatusBar
     : public SystemUI
@@ -178,28 +180,6 @@ private:
         BaseStatusBar* mHost;
     };
 
-    class BaseBroadcastReceiver: public BroadcastReceiver
-    {
-    public:
-        BaseBroadcastReceiver(
-            /* [in] */ BaseStatusBar* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("BaseStatusBar.BaseBroadcastReceiver");
-            return NOERROR;
-        }
-
-    private:
-        BaseStatusBar* mHost;
-    };
-
     class _NotificationListenerService: public NotificationListenerService
     {
     private:
@@ -270,6 +250,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("BaseStatusBar::_NotificationListenerService")
+
         _NotificationListenerService(
             /* [in] */ BaseStatusBar* host);
 
@@ -889,6 +871,8 @@ private:
 
     friend class CSettingsObserver;
     friend class CLockscreenSettingsObserver;
+    friend class CBaseBroadcastReceiver;
+    friend class DelegateViewHelper;
 };
 
 } // namespace StatusBar

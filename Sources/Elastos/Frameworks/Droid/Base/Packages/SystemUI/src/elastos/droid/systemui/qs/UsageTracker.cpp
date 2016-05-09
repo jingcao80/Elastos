@@ -49,7 +49,7 @@ UsageTracker::UsageTracker(
     Int32 v = 0;
     res->GetInteger(R::integer::days_to_show_timeout_tiles, &v);
     mTimeToShowTile = MILLIS_PER_DAY * v;
-    mResetAction = String("com.android.systemui.qs.") + tile->GetSimpleName() + String(".usage_reset");
+    mResetAction = String("Elastos.Droid.SystemUI.Qs.") + tile->GetSimpleName() + String(".usage_reset");
 }
 
 ECode UsageTracker::SetListening(

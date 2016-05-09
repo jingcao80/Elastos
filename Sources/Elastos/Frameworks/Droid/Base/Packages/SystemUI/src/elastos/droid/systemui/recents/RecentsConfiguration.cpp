@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/recents/Constants.h"
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Utility.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/R.h>
@@ -295,11 +296,10 @@ void RecentsConfiguration::UpdateOnReinitialize(
     /* [in] */ SystemServicesProxy* ssp)
 {
     // Check if the developer options are enabled
-    assert(0);
-    // mDeveloperOptionsEnabled = ssp->GetGlobalSetting(context,
-    //         ISettingsGlobal::DEVELOPMENT_SETTINGS_ENABLED) != 0;
-    // mLockToAppEnabled = ssp->GetSystemSetting(context,
-    //         ISettingsSystem::LOCK_TO_APP_ENABLED) != 0;
+    mDeveloperOptionsEnabled = ssp->GetGlobalSetting(context,
+            ISettingsGlobal::DEVELOPMENT_SETTINGS_ENABLED) != 0;
+    mLockToAppEnabled = ssp->GetSystemSetting(context,
+            ISettingsSystem::LOCK_TO_APP_ENABLED) != 0;
 }
 
 /** Called when the configuration has changed, and we want to reset any configuration specific

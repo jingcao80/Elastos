@@ -448,8 +448,8 @@ ECode ValueAnimator::GetAnimatedValue(
     AutoPtr<IInterface> obj;
     if (mValues != NULL && mValues->GetLength() > 0) {
         AutoPtr<IPropertyValuesHolder> holder = (*mValues)[0];
-       PropertyValuesHolder* pvh = (PropertyValuesHolder*)holder.Get();
-       return pvh->GetAnimatedValue(value);
+        PropertyValuesHolder* pvh = (PropertyValuesHolder*)holder.Get();
+        return pvh->GetAnimatedValue(value);
     }
 
     // Shouldn't get here; should always have values unless ValueAnimator was set up wrong

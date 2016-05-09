@@ -71,13 +71,7 @@ private:
             /* [in] */ Int32 oldLeft,
             /* [in] */ Int32 oldTop,
             /* [in] */ Int32 oldRight,
-            /* [in] */ Int32 oldBottom)
-        {
-            if ((oldRight - oldLeft) != (right - left)) {
-                mHost->RescheduleUpdateText();
-            }
-            return NOERROR;
-        }
+            /* [in] */ Int32 oldBottom);
 
     private:
         QSDualTileLabel* mHost;

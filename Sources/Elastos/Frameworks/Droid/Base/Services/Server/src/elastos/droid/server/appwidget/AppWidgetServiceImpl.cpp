@@ -7529,8 +7529,8 @@ Int32 AppWidgetServiceImpl::GetUidForPackage(
     //}
 
     AutoPtr<IApplicationInfo> applicationInfo;
-    pkgInfo->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
-    if (pkgInfo == NULL || applicationInfo == NULL) {
+    if (pkgInfo == NULL
+        || (pkgInfo->GetApplicationInfo((IApplicationInfo**)&applicationInfo), applicationInfo == NULL)) {
         return -1;
     }
 

@@ -90,7 +90,7 @@ ECode CSearchPanelView::Runnable4::Run()
 }
 
 const String CSearchPanelView::TAG("SearchPanelView");
-const String CSearchPanelView::ASSIST_ICON_METADATA_NAME("com.android.systemui.action_assist_icon");
+const String CSearchPanelView::ASSIST_ICON_METADATA_NAME("Elastos.Droid.SystemUI.action_assist_icon");
 Boolean CSearchPanelView::sInit = InitStatic();
 AutoPtr<IAudioAttributes> CSearchPanelView::VIBRATION_ATTRIBUTES;
 CAR_OBJECT_IMPL(CSearchPanelView);
@@ -145,10 +145,13 @@ void CSearchPanelView::StartAssistActivity()
     ICommandQueueCallbacks::Probe(mBar)->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_SEARCH_PANEL);
 
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO [StartAssistActivity]: Not implement SEARCH_SERVICE.");
+    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<ISearchManager> sm = ISearchManager::Probe(obj);
     AutoPtr<IIntent> intent;
-    sm->GetAssistIntent(mContext, TRUE, IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    if (sm != NULL) {
+        sm->GetAssistIntent(mContext, TRUE, IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    }
     if (intent == NULL) return;
 
     AutoPtr<IActivityOptionsHelper> helper;
@@ -185,10 +188,14 @@ ECode CSearchPanelView::OnFinishInflate()
 void CSearchPanelView::MaybeSwapSearchIcon()
 {
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO [MaybeSwapSearchIcon]: Not implement SEARCH_SERVICE.");
+    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<IIntent> intent;
-    ISearchManager::Probe(obj)->GetAssistIntent(mContext, FALSE,
-            IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    if (ISearchManager::Probe(obj) != NULL) {
+        ISearchManager::Probe(obj)->GetAssistIntent(mContext, FALSE,
+                IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    }
+
     if (intent != NULL) {
         AutoPtr<IComponentName> component;
         intent->GetComponent((IComponentName**)&component);
@@ -402,11 +409,15 @@ ECode CSearchPanelView::IsAssistantAvailable(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO [IsAssistantAvailable]: Not implement SEARCH_SERVICE.");
+    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<IIntent> intent;
-    ISearchManager::Probe(obj)->GetAssistIntent(mContext, FALSE,
-        IUserHandle::USER_CURRENT, (IIntent**)&intent);
-    *result = intent.Get() != NULL;
+    if (ISearchManager::Probe(obj) != NULL) {
+        ISearchManager::Probe(obj)->GetAssistIntent(mContext, FALSE,
+            IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    }
+
+    *result = intent != NULL;
     return NOERROR;
 }
 

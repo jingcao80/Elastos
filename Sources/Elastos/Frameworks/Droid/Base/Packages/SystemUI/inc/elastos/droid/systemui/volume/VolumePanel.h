@@ -656,7 +656,7 @@ protected:
     AutoPtr<IVibrator> mVibrator;
 
     static AutoPtr<IAlertDialog> sSafetyWarning;
-    static AutoPtr<IInterface> sSafetyWarningLock;
+    static Object sSafetyWarningLock;
 
 private:
     const static String TAG;

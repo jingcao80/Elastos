@@ -660,7 +660,7 @@ const Int32 VolumePanel::IC_AUDIO_VOL;
 const Int32 VolumePanel::IC_AUDIO_VOL_MUTE;
 const AutoPtr<ArrayOf<VolumePanel::StreamResources*> > VolumePanel::STREAMS = initSTREAMS();
 AutoPtr<IAlertDialog> VolumePanel::sSafetyWarning;
-AutoPtr<IInterface> VolumePanel::sSafetyWarningLock;
+Object VolumePanel::sSafetyWarningLock;
 
 CAR_INTERFACE_IMPL(VolumePanel, Handler, IVolumePanel)
 VolumePanel::VolumePanel()

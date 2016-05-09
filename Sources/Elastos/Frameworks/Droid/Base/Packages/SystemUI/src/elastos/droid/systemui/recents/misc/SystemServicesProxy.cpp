@@ -9,6 +9,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
+#include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -118,7 +119,8 @@ SystemServicesProxy::SystemServicesProxy(
     context->GetPackageManager((IPackageManager**)&mPm);
     mIpm = AppGlobals::GetPackageManager();
     obj = NULL;
-    context->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO [SystemServicesProxy]: Not implement [SEARCH_SERVICE].");
+    // context->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     mSm = ISearchManager::Probe(obj);
     obj = NULL;
     context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
@@ -129,10 +131,8 @@ SystemServicesProxy::SystemServicesProxy(
     // Get the dummy thumbnail width/heights
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
-    assert(0);
-    //TODO
-    Int32 wId = 0;//R::dimen::thumbnail_width;
-    Int32 hId = 0;//R::dimen::thumbnail_height;
+    Int32 wId = Elastos::Droid::R::dimen::thumbnail_width;
+    Int32 hId = Elastos::Droid::R::dimen::thumbnail_height;
     res->GetDimensionPixelSize(wId, &mDummyThumbnailWidth);
     res->GetDimensionPixelSize(hId, &mDummyThumbnailHeight);
 
@@ -145,10 +145,12 @@ SystemServicesProxy::SystemServicesProxy(
     CCanvas::New((ICanvas**)&mBgProtectionCanvas);
 
     // Resolve the assist intent
-    AutoPtr<IIntent> assist;
-    mSm->GetAssistIntent(context, FALSE, (IIntent**)&assist);
-    if (assist != NULL) {
-        assist->GetComponent((IComponentName**)&mAssistComponent);
+    if (mSm != NULL) {
+        AutoPtr<IIntent> assist;
+        mSm->GetAssistIntent(context, FALSE, (IIntent**)&assist);
+        if (assist != NULL) {
+            assist->GetComponent((IComponentName**)&mAssistComponent);
+        }
     }
 
     if (Constants::DebugFlags::App::EnableSystemServicesProxy) {
@@ -663,11 +665,7 @@ AutoPtr<IRect> SystemServicesProxy::GetWindowRect()
 void SystemServicesProxy::LockCurrentTask()
 {
     if (mIam == NULL) return;
-    ECode ec = mIam->StartLockTaskModeOnCurrent();
-    if (FAILED(ec)) {
-        assert(0);
-        // return E_REMOTE_EXCEPTION;
-    }
+    mIam->StartLockTaskModeOnCurrent();
 }
 
 AutoPtr<IBitmap> SystemServicesProxy::TakeScreenshot()

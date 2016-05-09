@@ -10,9 +10,11 @@
 #include "elastos/droid/systemui/recents/views/TaskStackViewTouchHandler.h"
 #include "elastos/droid/systemui/recents/views/TaskView.h"
 #include "elastos/droid/systemui/recents/views/ViewPool.h"
+#include "elastos/droid/systemui/recents/misc/DozeTrigger.h"
 
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Utility::IHashSet;
+using Elastos::Droid::SystemUI::Recents::Misc::DozeTrigger;
 using Elastos::Droid::SystemUI::Recents::Model::IPackageCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::ITaskStack;
 using Elastos::Droid::SystemUI::Recents::Model::ITaskStackCallbacks;
@@ -490,7 +492,7 @@ public:
     AutoPtr<ITaskStackViewCallbacks> mCb;
     AutoPtr<ViewPool> mViewPool;
     AutoPtr<IArrayList> mCurrentTaskTransforms;// item is TaskViewTransform;
-    // AutoPtr<DozeTrigger> mUIDozeTrigger;
+    AutoPtr<DozeTrigger> mUIDozeTrigger;
     AutoPtr<DebugOverlayView> mDebugOverlay;
     AutoPtr<IRect> mTaskStackBounds;
     Int32 mFocusedTaskIndex;

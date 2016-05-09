@@ -12,6 +12,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+class CNotificationPanelView;
+
 CarClass(CPhoneStatusBarView)
     , public PanelBar
     , public IPhoneStatusBarView
@@ -119,6 +121,7 @@ private:
     AutoPtr<IPanelView> mNotificationPanel;
     AutoPtr<PhoneStatusBarTransitions> mBarTransitions;
     AutoPtr<IScrimController> mScrimController;
+    friend class CNotificationPanelView;
 };
 
 }// namespace Phone

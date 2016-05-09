@@ -27,6 +27,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+class CNotificationPanelView;
+
 class PanelView
     : public FrameLayout
     , public IPanelView
@@ -508,6 +510,7 @@ private:
 
     AutoPtr<IRunnable> mFlingCollapseRunnable;
     AutoPtr<IRunnable> mPostCollapseRunnable;
+    friend class CNotificationPanelView;
 };
 
 }// namespace Phone

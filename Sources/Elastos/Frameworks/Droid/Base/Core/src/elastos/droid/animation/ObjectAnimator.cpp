@@ -660,11 +660,13 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     /* [in] */ ArrayOf<Float>* values)
 {
 #if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (target != NULL) {
+        ClassID objId;
+        ECode ec = IObject::Probe(target)->GetClassID(&objId);
+        if (FAILED(ec)) {
+            Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
+            assert(0 && "Target object is not a CAR object!");
+        }
     }
 #endif
     AutoPtr<CObjectAnimator> anim;
@@ -805,11 +807,13 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfPropertyValuesHolder(
     /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
 {
 #if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (target != NULL) {
+        ClassID objId;
+        ECode ec = IObject::Probe(target)->GetClassID(&objId);
+        if (FAILED(ec)) {
+            Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
+            assert(0 && "Target object is not a CAR object!");
+        }
     }
 #endif
     AutoPtr<IObjectAnimator> anim;

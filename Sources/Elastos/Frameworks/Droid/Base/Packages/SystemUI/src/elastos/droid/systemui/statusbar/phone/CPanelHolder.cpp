@@ -1,6 +1,8 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CPanelHolder.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -87,7 +89,11 @@ ECode CPanelHolder::OnTouchEvent(
         Int32 masked = 0;
         event->GetActionMasked(&masked);
         if (masked != IMotionEvent::ACTION_MOVE) {
-            assert(0 && "TODO");
+            Float x = 0, y = 0;
+            event->GetX(&x);
+            event->GetY(&y);
+            Logger::D("CPanelHolder", "OnTouchEvent masked=[%d], x=[%d], y=[%d]"
+                    , masked, (Int32)x, (Int32)y);
             // EventLog.writeEvent(EventLogTags.SYSUI_PANELHOLDER_TOUCH,
             //         masked, (Int32) event.getX(), (Int32) event.getY());
         }
