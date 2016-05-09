@@ -28,26 +28,8 @@ class ECO_PUBLIC R {
         public: static const int test9 = 0x7f02000a;
     };
     public: class id {
-        public: static const int DatePicker = 0x7f050000;
-        public: static const int ImageSwitcher = 0x7f05000a;
-        public: static const int NumberPicker = 0x7f050003;
-        public: static const int ProgressBar = 0x7f050001;
-        public: static const int ScrollView = 0x7f05000f;
-        public: static const int SeekBar = 0x7f050002;
-        public: static const int TextView_One = 0x7f050006;
-        public: static const int TimePicker = 0x7f050004;
-        public: static const int ViewSwitcher = 0x7f050005;
-        public: static const int calendarView = 0x7f05000e;
-        public: static const int demo_switch = 0x7f05000c;
-        public: static const int last = 0x7f05000b;
-        public: static const int myTextView_Two = 0x7f050007;
-        public: static const int next = 0x7f050009;
-        public: static const int prev = 0x7f050008;
-        public: static const int tabhost = 0x7f050010;
-        public: static const int textView = 0x7f05000d;
-        public: static const int view1 = 0x7f050011;
-        public: static const int view2 = 0x7f050012;
-        public: static const int view3 = 0x7f050013;
+        public: static const int dateEt = 0x7f050001;
+        public: static const int datePicker = 0x7f050000;
     };
     public: class layout {
         public: static const int main = 0x7f030000;

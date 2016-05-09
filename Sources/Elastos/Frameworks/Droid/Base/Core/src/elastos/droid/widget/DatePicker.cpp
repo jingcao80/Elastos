@@ -255,7 +255,8 @@ const Boolean DatePicker::DatePickerSpinnerDelegate::DEFAULT_SPINNERS_SHOWN = TR
 const Boolean DatePicker::DatePickerSpinnerDelegate::DEFAULT_ENABLED_STATE = TRUE;
 
 DatePicker::DatePickerSpinnerDelegate::DatePickerSpinnerDelegate()
-    : mIsEnabled(DEFAULT_ENABLED_STATE)
+    : mNumberOfMonths(0)
+    , mIsEnabled(DEFAULT_ENABLED_STATE)
 {
     CSimpleDateFormat::New(DATE_FORMAT, (IDateFormat**)&mDateFormat);
 }
@@ -522,12 +523,12 @@ ECode DatePicker::DatePickerSpinnerDelegate::GetMinDate(
     /* [out] */ ICalendar** calendar)
 {
     VALIDATE_NOT_NULL(calendar)
-    Int64 mD = 0;
-    mCalendarView->GetMinDate(&mD);
     AutoPtr<ICalendarHelper> helper;
     CCalendarHelper::AcquireSingleton((ICalendarHelper**)&helper);
     AutoPtr<ICalendar> minDate;
     helper->GetInstance((ICalendar**)&minDate);
+    Int64 mD = 0;
+    mCalendarView->GetMinDate(&mD);
     minDate->SetTimeInMillis(mD);
     *calendar = minDate;
     REFCOUNT_ADD(*calendar)

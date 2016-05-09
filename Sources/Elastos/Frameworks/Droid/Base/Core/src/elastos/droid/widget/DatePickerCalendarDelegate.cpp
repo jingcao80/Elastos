@@ -9,6 +9,8 @@
 #include "elastos/droid/text/format/CDateFormat.h"
 #include "elastos/droid/text/format/CDateUtils.h"
 #include "elastos/droid/view/animation/CAlphaAnimation.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::Res::CColorStateList;
 using Elastos::Droid::Content::Res::CConfiguration;
@@ -23,11 +25,8 @@ using Elastos::Droid::View::Animation::CAlphaAnimation;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Widget::CDayPickerView;
 using Elastos::Droid::Widget::YearPickerView;
-
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Core::IInteger64;
-using Elastos::Core::CInteger64;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
 using Elastos::Text::CSimpleDateFormat;
 using Elastos::Text::IFormat;
 using Elastos::Utility::ICalendarHelper;
@@ -65,6 +64,11 @@ DatePickerCalendarDelegate::SavedState::SavedState(
     , mListPositionOffset(listPositionOffset)
 {
     Elastos::Droid::View::View::BaseSavedState::constructor(superState);
+}
+
+DatePickerCalendarDelegate::SavedState::SavedState()
+{
+    Elastos::Droid::View::View::BaseSavedState::constructor();
 }
 
 ECode DatePickerCalendarDelegate::SavedState::ReadFromParcel(
@@ -157,6 +161,24 @@ const Int32 DatePickerCalendarDelegate::YEAR_INDEX = 2;
 
 CAR_INTERFACE_IMPL_2(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate, IViewOnClickListener, IDatePickerController)
 
+DatePickerCalendarDelegate::DatePickerCalendarDelegate()
+    : mIsEnabled(TRUE)
+    , mCurrentView(UNINITIALIZED)
+    , mFirstDayOfWeek(USE_LOCALE)
+{
+    AutoPtr<ILocaleHelper> hlp;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&hlp);
+    AutoPtr<ILocale> locale;
+    hlp->GetDefault((ILocale**)&locale);
+    CSimpleDateFormat::New(String("y"), locale, (ISimpleDateFormat**)&mYearFormat);
+    CSimpleDateFormat::New(String("d"), locale, (ISimpleDateFormat**)&mDayFormat);
+
+    CHashSet::New((IHashSet**)&mListeners);
+}
+
+DatePickerCalendarDelegate::~DatePickerCalendarDelegate()
+{}
+
 ECode DatePickerCalendarDelegate::constructor(
     /* [in] */ IDatePicker* delegator,
     /* [in] */ IContext* context,
@@ -170,24 +192,14 @@ ECode DatePickerCalendarDelegate::constructor(
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&hlp);
     AutoPtr<ILocale> locale;
     hlp->GetDefault((ILocale**)&locale);
-    CSimpleDateFormat::New(String("y"), locale, (ISimpleDateFormat**)&mYearFormat);
-    CSimpleDateFormat::New(String("d"), locale, (ISimpleDateFormat**)&mDayFormat);
-
-    mIsEnabled = TRUE;
-
-    mCurrentView = UNINITIALIZED;
-
-    mFirstDayOfWeek = USE_LOCALE;
-
-    CHashSet::New((IHashSet**)&mListeners);
 
     mMinDate = GetCalendarForLocale(mMinDate, locale);
     mMaxDate = GetCalendarForLocale(mMaxDate, locale);
     mTempDate = GetCalendarForLocale(mMaxDate, locale);
     mCurrentDate = GetCalendarForLocale(mCurrentDate, locale);
 
-    mMinDate->Set(DEFAULT_START_YEAR, ICalendar::JANUARY, 1);
-    mMaxDate->Set(DEFAULT_END_YEAR, ICalendar::DECEMBER, 31);
+    mMinDate->Set(DEFAULT_START_YEAR, 1, 1);
+    mMaxDate->Set(DEFAULT_END_YEAR, 12, 31);
 
     AutoPtr<IResources> res;
     IView::Probe(mDelegator)->GetResources((IResources**)&res);
@@ -269,8 +281,7 @@ ECode DatePickerCalendarDelegate::constructor(
     AutoPtr<IColorStateList> cl;
     mHeaderMonthTextView->GetTextColors((IColorStateList**)&cl);
     mHeaderMonthTextView->SetTextColor(CColorStateList::AddFirstIfMissing(
-            cl, R::attr::state_selected,
-            headerSelectedTextColor));
+            cl, R::attr::state_selected, headerSelectedTextColor));
 
     Int32 dayOfMonthTextAppearanceResId = 0;
     a->GetResourceId(
@@ -368,7 +379,8 @@ AutoPtr<ArrayOf<Int32> > DatePickerCalendarDelegate::GetMonthDayYearIndexes(
 {
     AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(3);
 
-    String filteredPattern;// = pattern.ReplaceAll("'.*?'", "");
+    String filteredPattern;
+    StringUtils::ReplaceAll(pattern, "'.*?'", "", &filteredPattern);
 
     Int32 dayIndex = filteredPattern.IndexOf('d');
     Int32 monthMIndex = filteredPattern.IndexOf("M");
@@ -413,57 +425,52 @@ void DatePickerCalendarDelegate::UpdateDisplay(
         String str;
         mCurrentDate->GetDisplayName(ICalendar::DAY_OF_WEEK, ICalendar::LONG,
                 locale, &str);
-        AutoPtr<ICharSequence> cs;
-        CString::New(str, (ICharSequence**)&cs);
-        mDayOfWeekView->SetText(cs);
+        mDayOfWeekView->SetText(CoreUtils::Convert(str));
     }
 
     // Compute indices of Month, Day and Year views
-    AutoPtr<Elastos::Droid::Text::Format::IDateFormat> df;
-    CDateFormat::AcquireSingleton((Elastos::Droid::Text::Format::IDateFormat**)&df);
+    using Elastos::Droid::Text::Format::IDateFormat;
+    AutoPtr<IDateFormat> df;
+    CDateFormat::AcquireSingleton((IDateFormat**)&df);
     String bestDateTimePattern;
     df->GetBestDateTimePattern(mCurrentLocale, String("yMMMd"), &bestDateTimePattern);
     AutoPtr<ArrayOf<Int32> > viewIndices = GetMonthDayYearIndexes(bestDateTimePattern);
 
     // Position the Year and MonthAndDay views within the header.
-    IViewGroup::Probe(mMonthDayYearLayout)->RemoveAllViews();
+    IViewGroup* mdyl = IViewGroup::Probe(mMonthDayYearLayout);
+    mdyl->RemoveAllViews();
     if ((*viewIndices)[YEAR_INDEX] == 0) {
-        IViewGroup::Probe(mMonthDayYearLayout)->AddView(IView::Probe(mHeaderYearTextView));
-        IViewGroup::Probe(mMonthDayYearLayout)->AddView(IView::Probe(mMonthAndDayLayout));
+        mdyl->AddView(IView::Probe(mHeaderYearTextView));
+        mdyl->AddView(IView::Probe(mMonthAndDayLayout));
     }
     else {
-        IViewGroup::Probe(mMonthDayYearLayout)->AddView(IView::Probe(mMonthAndDayLayout));
-        IViewGroup::Probe(mMonthDayYearLayout)->AddView(IView::Probe(mHeaderYearTextView));
+        mdyl->AddView(IView::Probe(mMonthAndDayLayout));
+        mdyl->AddView(IView::Probe(mHeaderYearTextView));
     }
 
     // Position Day and Month views within the MonthAndDay view.
-    IViewGroup::Probe(mMonthAndDayLayout)->RemoveAllViews();
+    IViewGroup* madl = IViewGroup::Probe(mMonthAndDayLayout);
+    madl->RemoveAllViews();
     if ((*viewIndices)[MONTH_INDEX] > (*viewIndices)[DAY_INDEX]) {
-        IViewGroup::Probe(mMonthAndDayLayout)->AddView(IView::Probe(mHeaderDayOfMonthTextView));
-        IViewGroup::Probe(mMonthAndDayLayout)->AddView(IView::Probe(mHeaderMonthTextView));
+        madl->AddView(IView::Probe(mHeaderDayOfMonthTextView));
+        madl->AddView(IView::Probe(mHeaderMonthTextView));
     }
     else {
-        IViewGroup::Probe(mMonthAndDayLayout)->AddView(IView::Probe(mHeaderMonthTextView));
-        IViewGroup::Probe(mMonthAndDayLayout)->AddView(IView::Probe(mHeaderDayOfMonthTextView));
+        madl->AddView(IView::Probe(mHeaderMonthTextView));
+        madl->AddView(IView::Probe(mHeaderDayOfMonthTextView));
     }
 
     String dn;
-    mCurrentDate->GetDisplayName(ICalendar::MONTH, ICalendar::SHORT,
-            locale, &dn);
-    String dnup = dn.ToUpperCase();
-    AutoPtr<ICharSequence> pDN;
-    CString::New(dnup, (ICharSequence**)&pDN);
-    mHeaderMonthTextView->SetText(pDN);
+    mCurrentDate->GetDisplayName(ICalendar::MONTH, ICalendar::SHORT, locale, &dn);
+    String dnup = dn.ToUpperCase(/*locale*/);
+    mHeaderMonthTextView->SetText(CoreUtils::Convert(dnup));
     AutoPtr<IDate> dt;
     mCurrentDate->GetTime((IDate**)&dt);
     String dayF, yearF;
-    IDateFormat::Probe(mDayFormat)->Format(dt, &dayF);
-    IDateFormat::Probe(mYearFormat)->Format(dt, &yearF);
-    AutoPtr<ICharSequence> pD, pY;
-    CString::New(dayF, (ICharSequence**)&pD);
-    CString::New(yearF, (ICharSequence**)&pY);
-    mHeaderDayOfMonthTextView->SetText(pD);
-    mHeaderYearTextView->SetText(pY);
+    Elastos::Text::IDateFormat::Probe(mDayFormat)->Format(dt, &dayF);
+    Elastos::Text::IDateFormat::Probe(mYearFormat)->Format(dt, &yearF);
+    mHeaderDayOfMonthTextView->SetText(CoreUtils::Convert(dayF));
+    mHeaderYearTextView->SetText(CoreUtils::Convert(yearF));
 
     // Accessibility.
     Int64 millis = 0;
@@ -474,17 +481,13 @@ void DatePickerCalendarDelegate::UpdateDisplay(
     CDateUtils::AcquireSingleton((IDateUtils**)&du);
     String monthAndDayText;
     du->FormatDateTime(mContext, millis, flags, &monthAndDayText);
-    AutoPtr<ICharSequence> cs;
-    CString::New(monthAndDayText, (ICharSequence**)&cs);
-    IView::Probe(mMonthAndDayLayout)->SetContentDescription(cs);
+    IView::Probe(mMonthAndDayLayout)->SetContentDescription(CoreUtils::Convert(monthAndDayText));
 
     if (announce) {
         flags = IDateUtils::FORMAT_SHOW_DATE | IDateUtils::FORMAT_SHOW_YEAR;
         String fullDateText;
         du->FormatDateTime(mContext, millis, flags, &fullDateText);
-        AutoPtr<ICharSequence> dt;
-        CString::New(fullDateText, (ICharSequence**)&dt);
-        IView::Probe(mAnimator)->AnnounceForAccessibility(dt);
+        IView::Probe(mAnimator)->AnnounceForAccessibility(CoreUtils::Convert(fullDateText));
     }
     UpdatePickers();
 }
@@ -511,12 +514,9 @@ void DatePickerCalendarDelegate::SetCurrentView(
             String dayString;
             du->FormatDateTime(mContext, millis, flags, &dayString);
             String dsp = mDayPickerDescription + ": " + dayString;
-            AutoPtr<ICharSequence> cDSP;
-            CString::New(dsp, (ICharSequence**)&cDSP);
-            IView::Probe(mAnimator)->SetContentDescription(cDSP);
-            AutoPtr<ICharSequence> cSD;
-            CString::New(mSelectDay, (ICharSequence**)&cSD);
-            IView::Probe(mAnimator)->AnnounceForAccessibility(cSD);
+            IView* animator = IView::Probe(mAnimator);
+            animator->SetContentDescription(CoreUtils::Convert(dsp));
+            animator->AnnounceForAccessibility(CoreUtils::Convert(mSelectDay));
             break;
         }
         case YEAR_VIEW: {
@@ -528,17 +528,12 @@ void DatePickerCalendarDelegate::SetCurrentView(
                 mCurrentView = viewIndex;
             }
 
-            AutoPtr<IInteger64> pM;
-            CInteger64::New(millis, (IInteger64**)&pM);
             String yearString;
-            IFormat::Probe(mYearFormat)->Format(pM, &yearString);
+            IFormat::Probe(mYearFormat)->Format(CoreUtils::Convert(millis), &yearString);
             String yDSP = mYearPickerDescription + ": " + yearString;
-            AutoPtr<ICharSequence> pDSP;
-            CString::New(yDSP, (ICharSequence**)&pDSP);
-            IView::Probe(mAnimator)->SetContentDescription(pDSP);
-            AutoPtr<ICharSequence> pSD;
-            CString::New(mSelectYear, (ICharSequence**)&pSD);
-            IView::Probe(mAnimator)->AnnounceForAccessibility(pSD);
+            IView* animator = IView::Probe(mAnimator);
+            animator->SetContentDescription(CoreUtils::Convert(yDSP));
+            animator->AnnounceForAccessibility(CoreUtils::Convert(mSelectYear));
             break;
         }
     }
@@ -817,7 +812,7 @@ ECode DatePickerCalendarDelegate::OnSaveInstanceState(
     mMinDate->GetTimeInMillis(&minMils);
     mMaxDate->GetTimeInMillis(&maxMils);
     AutoPtr<SavedState> res = new SavedState(superState, year, month, day, minMils,
-                                    maxMils, mCurrentView, listPosition, listPositionOffset);
+            maxMils, mCurrentView, listPosition, listPositionOffset);
     AutoPtr<IViewBaseSavedState> pRes = (IViewBaseSavedState*)res.Get();
     *result = IParcelable::Probe(pRes);
     REFCOUNT_ADD(*result)
@@ -869,27 +864,21 @@ ECode DatePickerCalendarDelegate::OnPopulateAccessibilityEvent(
 
     AutoPtr<IList> l;
     IAccessibilityRecord::Probe(event)->GetText((IList**)&l);
-    AutoPtr<ICharSequence> cs;
-    CString::New(str, (ICharSequence**)&cs);
-    l->Add(cs);
+    l->Add(CoreUtils::Convert(str));
     return NOERROR;
 }
 
 ECode DatePickerCalendarDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    AutoPtr<ICharSequence> cs;
-    CString::New(String("DatePickerCalendarDelegate"), (ICharSequence**)&cs);
-    IAccessibilityRecord::Probe(event)->SetClassName(cs);
+    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("DatePickerCalendarDelegate"));
     return NOERROR;
 }
 
 ECode DatePickerCalendarDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    AutoPtr<ICharSequence> cs;
-    CString::New(String("DatePickerCalendarDelegate"), (ICharSequence**)&cs);
-    info->SetClassName(cs);
+    info->SetClassName(CoreUtils::Convert("DatePickerCalendarDelegate"));
     return NOERROR;
 }
 

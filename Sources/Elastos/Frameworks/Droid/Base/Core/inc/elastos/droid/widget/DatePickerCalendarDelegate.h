@@ -5,10 +5,9 @@
 #include "elastos/droid/widget/DatePicker.h"
 #include "elastos/droid/view/View.h"
 
+using Elastos::Droid::Internal::Widget::IAccessibleDateAnimator;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::Internal::Widget::IAccessibleDateAnimator;
-
 using Elastos::Text::ISimpleDateFormat;
 using Elastos::Utility::IHashSet;
 
@@ -45,6 +44,8 @@ private:
             /* [in] */ Int32 currentView,
             /* [in] */ Int32 listPosition,
             /* [in] */ Int32 listPositionOffset);
+
+        SavedState();
 
         CARAPI WriteToParcel(
             /* [in] */ IParcel* dest);
@@ -84,6 +85,10 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    DatePickerCalendarDelegate();
+
+    ~DatePickerCalendarDelegate();
 
     CARAPI constructor(
         /* [in] */ IDatePicker* delegator,

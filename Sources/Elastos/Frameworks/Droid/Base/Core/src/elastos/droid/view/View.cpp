@@ -9624,8 +9624,7 @@ ECode View::PostDelayed(
 {
     VALIDATE_NOT_NULL(res)
     if (mAttachInfo != NULL) {
-        mAttachInfo->mHandler->PostDelayed(action, delayMillis, res);
-        return NOERROR;
+        return mAttachInfo->mHandler->PostDelayed(action, delayMillis, res);
     }
     // Assume that post will succeed later
     ViewRootImpl::GetRunQueue()->PostDelayed(action, delayMillis);
@@ -9637,9 +9636,9 @@ ECode View::PostOnAnimation(
     /* [in] */ IRunnable* action)
 {
     if (mAttachInfo != NULL) {
-        ViewRootImpl* impl = (ViewRootImpl*)IViewRootImpl::Probe(mAttachInfo->mViewRootImpl);
+        ViewRootImpl* impl = (ViewRootImpl*) mAttachInfo->mViewRootImpl;
         impl->mChoreographer->PostCallback(
-            IChoreographer::CALLBACK_ANIMATION, action, NULL);
+                IChoreographer::CALLBACK_ANIMATION, action, NULL);
     }
     else {
         // Assume that post will succeed later
@@ -9665,9 +9664,9 @@ ECode View::PostOnAnimationDelayed(
     /* [in] */ Int64 delayMillis)
 {
     if (mAttachInfo != NULL) {
-        ViewRootImpl* impl = (ViewRootImpl*)IViewRootImpl::Probe(mAttachInfo->mViewRootImpl);
+        ViewRootImpl* impl = (ViewRootImpl*) mAttachInfo->mViewRootImpl;
         impl->mChoreographer->PostCallbackDelayed(
-            IChoreographer::CALLBACK_ANIMATION, action, NULL, delayMillis);
+                IChoreographer::CALLBACK_ANIMATION, action, NULL, delayMillis);
     }
     else {
         // Assume that post will succeed later
@@ -9685,11 +9684,11 @@ ECode View::RemoveCallbacks(
         if (mAttachInfo != NULL) {
             Logger::I(TAG, " >> View::RemoveCallbacks from mAttachInfo->mHandler: %s", TO_CSTR(action));
             mAttachInfo->mHandler->RemoveCallbacks(action);
-            ViewRootImpl* impl = (ViewRootImpl*)IViewRootImpl::Probe(mAttachInfo->mViewRootImpl);
+            ViewRootImpl* impl = (ViewRootImpl*) mAttachInfo->mViewRootImpl;
             impl->mChoreographer->RemoveCallbacks(
                     IChoreographer::CALLBACK_ANIMATION, action, NULL);
         }
-            Logger::I(TAG, " >> View::RemoveCallbacks from ViewRootImpl::GetRunQueue(): %s", TO_CSTR(action));
+        Logger::I(TAG, " >> View::RemoveCallbacks from ViewRootImpl::GetRunQueue(): %s", TO_CSTR(action));
         // Assume that post will succeed later
         ViewRootImpl::GetRunQueue()->RemoveCallbacks(action);
     }

@@ -3759,7 +3759,7 @@ void ViewRootImpl::PerformDraw()
 void ViewRootImpl::Draw(
     /* [in] */ Boolean fullRedrawNeeded)
 {
-    LocalTrace(mView, "::ENTER << ViewRootImpl::Draw()");
+    LocalTrace(mView, "::ENTER >> ViewRootImpl::Draw()");
     ISurface* surface = mSurface;
     Boolean surfaceValid = FALSE;
     if (surface == NULL || !(surface->IsValid(&surfaceValid), surfaceValid)) {
@@ -3948,7 +3948,7 @@ Boolean ViewRootImpl::DrawSoftware(
     /* [in] */ Boolean scalingRequired,
     /* [in] */ IRect* dirty)
 {
-    LocalTrace(mView, "::ENTER << ViewRootImpl::DrawSoftware()");
+    LocalTrace(mView, "::ENTER >> ViewRootImpl::DrawSoftware()");
     AutoPtr<ICanvas> canvas;
 
     Int32 left, top, right, bottom, l, t, r, b;
@@ -4042,7 +4042,7 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->SetScreenDensity(scalingRequired ? mNoncompatDensity : 0);
     mAttachInfo->mIgnoreDirtyState = FALSE;
 
-    Logger::I(TAG, " ViewRootImpl::DrawSoftware xoff:%d, yoff:%d", xoff, yoff);
+    Logger::I(TAG, " ViewRootImpl::DrawSoftware %s xoff:%d, yoff:%d", TO_CSTR(mView), xoff, yoff);
     mView->Draw(canvas);
 
     if (!attachInfo->mSetIgnoreDirtyState) {

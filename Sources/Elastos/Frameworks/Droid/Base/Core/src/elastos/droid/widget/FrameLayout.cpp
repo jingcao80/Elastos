@@ -164,8 +164,7 @@ ECode FrameLayout::constructor(
             mForegroundGravity, &mForegroundGravity);
 
     AutoPtr<IDrawable> d;
-    a->GetDrawable(R::styleable::FrameLayout_foreground,
-            (IDrawable**)&d);
+    a->GetDrawable(R::styleable::FrameLayout_foreground, (IDrawable**)&d);
     if (d != NULL) {
         SetForeground(d);
     }
@@ -187,7 +186,8 @@ ECode FrameLayout::constructor(
 
     a->HasValue(R::styleable::FrameLayout_foregroundTint, &value);
     if (value) {
-        a->GetColorStateList(R::styleable::FrameLayout_foregroundTint, (IColorStateList**)&mForegroundTintList);
+        a->GetColorStateList(R::styleable::FrameLayout_foregroundTint,
+                (IColorStateList**)&mForegroundTintList);
         mHasForegroundTint = TRUE;
     }
 
@@ -264,8 +264,7 @@ Boolean FrameLayout::VerifyDrawable(
 ECode FrameLayout::JumpDrawablesToCurrentState()
 {
     FAIL_RETURN(ViewGroup::JumpDrawablesToCurrentState());
-    if (mForeground != NULL)
-        return mForeground->JumpToCurrentState();
+    if (mForeground != NULL) return mForeground->JumpToCurrentState();
     return NOERROR;
 }
 
@@ -454,14 +453,16 @@ void FrameLayout::OnMeasure(
     GetChildCount(&count);
 
     Boolean measureMatchParentChildren =
-        MeasureSpec::GetMode(widthMeasureSpec) != MeasureSpec::EXACTLY ||
-        MeasureSpec::GetMode(heightMeasureSpec) != MeasureSpec::EXACTLY;
+            MeasureSpec::GetMode(widthMeasureSpec) != MeasureSpec::EXACTLY ||
+            MeasureSpec::GetMode(heightMeasureSpec) != MeasureSpec::EXACTLY;
     mMatchParentChildren.Clear();
 
     Int32 maxHeight = 0;
     Int32 maxWidth = 0;
     Int32 childState = 0;
     Int32 visibility;
+
+   using Elastos::Core::Math;
 
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
@@ -485,8 +486,8 @@ void FrameLayout::OnMeasure(
             child->GetMeasuredHeight(&childHeight);
             child->GetMeasuredState(&state);
 
-            maxWidth = Elastos::Core::Math::Max(maxWidth, childWidth + ml + mr);
-            maxHeight = Elastos::Core::Math::Max(maxHeight, childHeight + mt + mb);
+            maxWidth = Math::Max(maxWidth, childWidth + ml + mr);
+            maxHeight = Math::Max(maxHeight, childHeight + mt + mb);
             childState = CombineMeasuredStates(childState, state);
             if (measureMatchParentChildren) {
                 Int32 width, height;
@@ -505,8 +506,8 @@ void FrameLayout::OnMeasure(
     maxHeight += GetPaddingTopWithForeground() + GetPaddingBottomWithForeground();
 
     // Check against our minimum height and width
-    maxHeight = Elastos::Core::Math::Max(maxHeight, GetSuggestedMinimumHeight());
-    maxWidth = Elastos::Core::Math::Max(maxWidth, GetSuggestedMinimumWidth());
+    maxHeight = Math::Max(maxHeight, GetSuggestedMinimumHeight());
+    maxWidth = Math::Max(maxWidth, GetSuggestedMinimumWidth());
 
     // Check against our foreground's minimum height and width
     AutoPtr<IDrawable> drawable;
@@ -516,13 +517,13 @@ void FrameLayout::OnMeasure(
         drawable->GetMinimumHeight(&drawMinHeight);
         drawable->GetMinimumWidth(&drawMinWidth);
 
-        maxHeight = Elastos::Core::Math::Max(maxHeight, drawMinHeight);
-        maxWidth = Elastos::Core::Math::Max(maxWidth, drawMinWidth);
+        maxHeight = Math::Max(maxHeight, drawMinHeight);
+        maxWidth = Math::Max(maxWidth, drawMinWidth);
     }
 
     SetMeasuredDimension(ResolveSizeAndState(maxWidth, widthMeasureSpec, childState),
-        ResolveSizeAndState(maxHeight, heightMeasureSpec,
-        childState << IView::MEASURED_HEIGHT_STATE_SHIFT));
+            ResolveSizeAndState(maxHeight, heightMeasureSpec,
+            childState << IView::MEASURED_HEIGHT_STATE_SHIFT));
 
     count = mMatchParentChildren.GetSize();
     if (count > 1) {
@@ -547,7 +548,8 @@ void FrameLayout::OnMeasure(
                 childWidthMeasureSpec = MeasureSpec::MakeMeasureSpec(
                         w - GetPaddingLeftWithForeground()
                         - GetPaddingRightWithForeground() - ml - mr, MeasureSpec::EXACTLY);
-            } else {
+            }
+            else {
                 childWidthMeasureSpec = GetChildMeasureSpec(widthMeasureSpec,
                     GetPaddingLeftWithForeground() + GetPaddingRightWithForeground()
                     + ml + mr, width);
@@ -559,7 +561,8 @@ void FrameLayout::OnMeasure(
                 childHeightMeasureSpec = MeasureSpec::MakeMeasureSpec(
                         h - GetPaddingTopWithForeground()
                         - GetPaddingBottomWithForeground() - mt - mb, MeasureSpec::EXACTLY);
-            } else {
+            }
+            else {
                 childHeightMeasureSpec = GetChildMeasureSpec(heightMeasureSpec,
                     GetPaddingTopWithForeground() + GetPaddingBottomWithForeground()
                     + mt + mb,  height);
@@ -613,8 +616,12 @@ void FrameLayout::LayoutChildren(
             child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
             IFrameLayoutLayoutParams* lp = IFrameLayoutLayoutParams::Probe(vglp);
             IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(vglp);
-            Int32 ml, mt, mr, mb;
-            vgmlp->GetMargins(&ml, &mt, &mr, &mb);
+
+            Int32 width, height;
+            child->GetMeasuredWidth(&width);
+            child->GetMeasuredHeight(&height);
+
+            Int32 childLeft, childTop;
 
             Int32 gravity;
             lp->GetGravity(&gravity);
@@ -622,20 +629,18 @@ void FrameLayout::LayoutChildren(
                 gravity = DEFAULT_CHILD_GRAVITY;
             }
 
-            Int32 width, height;
-            child->GetMeasuredWidth(&width);
-            child->GetMeasuredHeight(&height);
-            Int32 childLeft, childTop;
-
             Int32 layoutDirection = 0;
             GetLayoutDirection(&layoutDirection);
             Int32 absoluteGravity = Gravity::GetAbsoluteGravity(gravity, layoutDirection);
             Int32 verticalGravity = gravity & IGravity::VERTICAL_GRAVITY_MASK;
 
+            Int32 ml, mt, mr, mb;
+            vgmlp->GetMargins(&ml, &mt, &mr, &mb);
+
             switch (absoluteGravity & IGravity::HORIZONTAL_GRAVITY_MASK) {
                 case IGravity::CENTER_HORIZONTAL:
                     childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
-                        ml - mr;
+                            ml - mr;
                     break;
                 case IGravity::RIGHT:
                     if (!forceLeftGravity) {
@@ -706,7 +711,7 @@ ECode FrameLayout::Draw(
             foreground->GetIntrinsicWidth(&iWidth);
             foreground->GetIntrinsicHeight(&iHeight);
             Gravity::Apply(mForegroundGravity, iWidth, iHeight,
-                selfBounds, overlayBounds, layoutDirection);
+                    selfBounds, overlayBounds, layoutDirection);
             foreground->SetBounds(overlayBounds);
         }
 
