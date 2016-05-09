@@ -151,7 +151,7 @@ ECode RippleDrawable::constructor(
 
     AutoPtr<RippleState> ns;
     Boolean can = FALSE;
-    if (theme != NULL && state != NULL && ((RippleState*)state->CanApplyTheme(&can), can)) {
+    if (theme != NULL && state != NULL && (((RippleState*)state)->CanApplyTheme(&can), can)) {
         ns = new RippleState((RippleState*)state, this, res);
         needsTheme = TRUE;
     }
@@ -535,7 +535,7 @@ ECode RippleDrawable::SetHotspot(
 void RippleDrawable::TryBackgroundEnter()
 {
     if (mBackground == NULL) {
-        mBackground = new RippleBackground(this, mHotspotBounds);
+        CRippleBackground::NewByFriend(this, mHotspotBounds, (CRippleBackground**)&mBackground);
     }
 
     AutoPtr<ArrayOf<Int32> > states;
@@ -962,7 +962,7 @@ ECode RippleDrawable::GetDirtyBounds(
             drawingBounds->Union(rippleBounds);
         }
 
-        AutoPtr<RippleBackground> background = mBackground;
+        AutoPtr<CRippleBackground> background = mBackground;
         if (background != NULL) {
             background->GetBounds(rippleBounds);
             rippleBounds->Offset(cX, cY);

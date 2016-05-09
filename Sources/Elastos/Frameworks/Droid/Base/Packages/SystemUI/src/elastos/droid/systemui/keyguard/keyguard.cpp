@@ -1,13 +1,12 @@
+
 #include "elastos/droid/systemui/keyguard/CKeyguardService.h"
-#include "elastos/droid/systemui/keyguard/CKeyguardServiceBinder.h"
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_OBJECT_IMPL(CKeyguardService)
-CAR_OBJECT_IMPL(CKeyguardServiceBinder)
+CAR_OBJECT_IMPL(CKeyguardService);
 
 } // namespace Keyguard
 } // namespace SystemUI

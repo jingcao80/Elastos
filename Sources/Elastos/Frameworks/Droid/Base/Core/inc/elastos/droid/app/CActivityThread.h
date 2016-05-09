@@ -426,7 +426,19 @@ public:
         : public Object
     {
     public:
-        TO_STRING_IMPL("CActivityThread::CreateServiceData")
+        // TO_STRING_IMPL("CActivityThread::CreateServiceData")
+        CARAPI ToString(
+            /* [out] */ String* result)
+        {
+            String s = String("CActivityThread::CreateServiceData");
+            if (mInfo != NULL) {
+                String x;
+                IObject::Probe(mInfo)->ToString(&x);
+                s += x;
+            }
+            *result = s;
+            return NOERROR;
+        }
 
         AutoPtr<IBinder> mToken;
         AutoPtr<IServiceInfo> mInfo;

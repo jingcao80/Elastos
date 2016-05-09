@@ -10,15 +10,15 @@
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
+using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskStackCallbacks;
+using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
-using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
-using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskStackCallbacks;
-using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
 
 namespace Elastos {
 namespace Droid {
@@ -300,8 +300,7 @@ ECode TaskStackView::constructor(
     mStackScroller->SetCallbacks(mWrapper);
     mTouchHandler = new TaskStackViewTouchHandler(context, this, mConfig, mStackScroller);
     AutoPtr<Runnable> runnable = new SleepRunnable(this);
-    assert(0);
-    // mUIDozeTrigger = new DozeTrigger(mConfig->mTaskBarDismissDozeDelaySeconds, runnable);
+    mUIDozeTrigger = new DozeTrigger(mConfig->mTaskBarDismissDozeDelaySeconds, runnable);
     return NOERROR;
 }
 
@@ -1100,8 +1099,7 @@ Boolean TaskStackView::IsTransformedTouchPointInView(
 void TaskStackView::OnUserInteraction()
 {
     // Poke the doze trigger if it is dozing
-    assert(0);
-    // mUIDozeTrigger->Poke();
+    mUIDozeTrigger->Poke();
 }
 
 /**** TaskStackCallbacks Implementation ****/
@@ -1393,8 +1391,7 @@ ECode TaskStackView::OnTaskViewClicked(
     /* [in] */ Boolean lockToTask)
 {
     // Cancel any doze triggers
-    assert(0);
-    // mUIDozeTrigger->StopDozing();
+    mUIDozeTrigger->StopDozing();
 
     if (mCb != NULL) {
         mCb->OnTaskViewClicked(this, tv, mStack, task, lockToTask);
@@ -1466,8 +1463,7 @@ ECode TaskStackView::OnTaskViewFocusChanged(
 ECode TaskStackView::OnScrollChanged(
     /* [in] */ Float p)
 {
-    assert(0);
-    // mUIDozeTrigger->Poke();
+    mUIDozeTrigger->Poke();
     RequestSynchronizeStackViewsWithModel();
     PostInvalidateOnAnimation();
     return NOERROR;

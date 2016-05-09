@@ -87,6 +87,7 @@ module
     merge("graphics/drawable/AnimatedVectorDrawable.car");
     merge("graphics/drawable/Ripple.car");
     merge("graphics/drawable/RippleDrawable.car");
+    merge("graphics/drawable/RippleBackground.car");
     merge("graphics/drawable/VectorDrawable.car");
     merge("graphics/drawable/shapes/Shape.car");
     merge("graphics/drawable/shapes/RectShape.car");
@@ -101,6 +102,7 @@ module
     interface Elastos.Droid.Content.Res.IResources;
     interface Elastos.Droid.Content.Res.IResourcesTheme;
     interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Graphics.Drawable.IRipple;
     interface Elastos.Droid.Graphics.Drawable.Shapes.IShape;
     using interface Elastos.Core.ICloneable;
     using interface Elastos.IO.IInputStream;
@@ -1626,6 +1628,14 @@ module
         interface ILayerDrawable;
         interface IDrawableCallback;
         interface IDrawable;
+    }
+
+    class CRippleBackground {
+        constructor(
+            [in] IRippleDrawable* owner,
+            [in] IRect* bounds);
+
+        interface IRippleBackground;
     }
 
     namespace Shapes {

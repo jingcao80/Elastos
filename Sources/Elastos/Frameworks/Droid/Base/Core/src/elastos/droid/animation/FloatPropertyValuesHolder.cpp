@@ -76,7 +76,7 @@ ECode FloatPropertyValuesHolder::GetAnimatedValue(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IFloat> rst;
-    return CFloat::New(mFloatAnimatedValue, (IFloat**)&rst);
+    CFloat::New(mFloatAnimatedValue, (IFloat**)&rst);
     *value = rst;
     REFCOUNT_ADD(*value);
     return NOERROR;

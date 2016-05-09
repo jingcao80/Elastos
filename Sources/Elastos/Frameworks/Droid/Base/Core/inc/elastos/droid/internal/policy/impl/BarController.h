@@ -135,7 +135,7 @@ private:
     /*const*/ Int32 mStatusBarManagerId;
     /*const*/ Int32 mTranslucentWmFlag;
     /*const*/ AutoPtr<IHandler> mHandler;
-    /*const*/ AutoPtr<Object> mServiceAquireLock;
+    /*const*/ Object mServiceAquireLock;
     AutoPtr<IIStatusBarService> mStatusBarService;
     AutoPtr<IWindowState> mWin;
     Int32 mState;

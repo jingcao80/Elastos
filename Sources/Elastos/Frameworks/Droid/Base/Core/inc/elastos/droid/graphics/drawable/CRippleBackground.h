@@ -1,9 +1,10 @@
 
-#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
-#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
+#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_CRIPPLEBACKGROUND_H__
+#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_CRIPPLEBACKGROUND_H__
 
+#include "_Elastos_Droid_Graphics_Drawable_CRippleBackground.h"
 #include "elastos/droid/graphics/CanvasProperty.h"
-#include "elastos/droid/graphics/drawable/Ripple.h"
+#include "elastos/droid/graphics/drawable/CRipple.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
@@ -20,11 +21,13 @@ namespace Graphics {
 namespace Drawable {
 
 class RippleDrawable;
+
 /**
  * Draws a Material ripple.
  */
-class RippleBackground
-    : public Object
+CarClass(CRippleBackground)
+    , public Object
+    , public IRippleBackground
 {
 private:
     class RBAnimatorListenerAdapter
@@ -32,14 +35,14 @@ private:
     {
     public:
         RBAnimatorListenerAdapter(
-            /* [in] */ RippleBackground* host);
+            /* [in] */ CRippleBackground* host);
 
         // @Override
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
-        RippleBackground* mHost;
+        CRippleBackground* mHost;
     };
 
     class OuterOpacityAnimatorListenerAdapter
@@ -47,7 +50,7 @@ private:
     {
     public:
         OuterOpacityAnimatorListenerAdapter(
-            /* [in] */ RippleBackground* host,
+            /* [in] */ CRippleBackground* host,
             /* [in] */ Int32 duration);
 
         // @Override
@@ -59,16 +62,22 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        RippleBackground* mHost;
+        CRippleBackground* mHost;
         Int32 mDuration;
     };
 
 public:
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
+
+    CRippleBackground();
+
     /**
      * Creates a new ripple.
      */
-    RippleBackground(
-        /* [in] */ RippleDrawable* owner,
+    CARAPI constructor(
+        /* [in] */ IRippleDrawable* owner,
         /* [in] */ IRect* bounds);
 
     CARAPI_(void) Setup(
@@ -173,7 +182,7 @@ private:
     AutoPtr<IArrayList> mRunningAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
     AutoPtr<IArrayList> mPendingAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
 
-    AutoPtr<RippleDrawable> mOwner;
+    RippleDrawable* mOwner;
 
     /** Bounds used for computing max radius. */
     AutoPtr<IRect> mBounds;
@@ -225,4 +234,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif  // __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
+#endif  // __ELASTOS_DROID_GRAPHICS_DRAWABLE_CRIPPLEBACKGROUND_H__

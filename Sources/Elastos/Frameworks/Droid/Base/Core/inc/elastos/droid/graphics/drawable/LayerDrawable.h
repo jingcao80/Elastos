@@ -385,7 +385,7 @@ public:
         /* [in] */ IRect* outRect);
 
 protected:
-    CARAPI_(AutoPtr<LayerState>) CreateConstantState(
+    virtual CARAPI_(AutoPtr<LayerState>) CreateConstantState(
         /* [in] */ LayerState* state,
         /* [in] */ IResources* res);
 

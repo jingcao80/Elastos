@@ -136,7 +136,9 @@ ECode AppNotRespondingDialog::OnStop()
 AppNotRespondingDialog::MyHandler::MyHandler(
     /* [in] */ AppNotRespondingDialog* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 AppNotRespondingDialog::MyHandler::~MyHandler()
 {}

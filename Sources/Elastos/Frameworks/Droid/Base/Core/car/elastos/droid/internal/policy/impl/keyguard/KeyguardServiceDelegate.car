@@ -27,8 +27,8 @@ module
      */
     [local]
     interface IKeyguardServiceDelegate {
-        const String KEYGUARD_PACKAGE = "com.android.systemui";
-        const String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
+        const String KEYGUARD_PACKAGE = "Elastos.Droid.SystemUI";
+        const String KEYGUARD_CLASS = "Elastos.Droid.SystemUI.Keyguard.CKeyguardService";
 
         BindService(
             [in] IContext* context);

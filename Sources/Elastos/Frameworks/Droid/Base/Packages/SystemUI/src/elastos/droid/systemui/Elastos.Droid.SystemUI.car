@@ -524,6 +524,14 @@ module
         interface IViewOnClickListener;
     }
 
+    [local]
+    class CViewScaler {
+        constructor(
+            [in] IExpandHelper* helper);
+
+        interface IViewScaler;
+    }
+
     class CGuestResumeSessionReceiver {
         interface IGuestResumeSessionReceiver;
         interface IBroadcastReceiver;
@@ -693,14 +701,6 @@ module
             interface IComponentCallbacks2;
         }
 
-        class CKeyguardServiceBinder {
-            constructor(
-                [in] Handle32 host);
-
-            interface IIKeyguardService;
-            interface IBinder;
-        }
-
         class CKeyguardViewMediator {
             interface IKeyguardViewMediator;
             interface ISystemUI;
@@ -748,6 +748,14 @@ module
             interface IDrawableCallback;
             interface IKeyEventCallback;
             interface IAccessibilityEventSource;
+        }
+
+        class CIKeyguardService {
+            constructor(
+                [in] IKeyguardService* host);
+
+            interface IIKeyguardService;
+            interface IBinder;
         }
 
     } // namespace Keyguard
@@ -1826,6 +1834,13 @@ module
                 [in] IBaseStatusBar* host);
 
             interface IContentObserver;
+        }
+
+        class CBaseBroadcastReceiver {
+            constructor(
+                [in] IBaseStatusBar* policy);
+
+            interface IBroadcastReceiver;
         }
 
         //===========================================================================

@@ -98,6 +98,7 @@ namespace Phone {
 class CPhoneStatusBarReceiver;
 class CPhoneStatusBarHeadsUpObserver;
 class CPhoneStatusBarUserSetupObserver;
+class CPhoneStatusBarView;
 
 CarClass(CPhoneStatusBar)
     , public BaseStatusBar
@@ -107,23 +108,6 @@ CarClass(CPhoneStatusBar)
     , public IActivityStarter
 {
 private:
-    class HeadsUpObserver: public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CPhoneStatusBar::HeadsUpObserver")
-
-        HeadsUpObserver(
-            /* [in] */ CPhoneStatusBar* host,
-            /* [in] */ IHandler* handler);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        CPhoneStatusBar* mHost;
-    };
-
     class Autohide: public Runnable
     {
     public:
@@ -1896,6 +1880,7 @@ private:
     friend class CPhoneStatusBarReceiver;
     friend class CPhoneStatusBarHeadsUpObserver;
     friend class CPhoneStatusBarUserSetupObserver;
+    friend class CPhoneStatusBarView;
 };
 
 }// namespace Phone

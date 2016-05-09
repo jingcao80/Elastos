@@ -4,6 +4,7 @@
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
 #include "elastos/droid/systemui/statusbar/CSettingsObserver.h"
 #include "elastos/droid/systemui/statusbar/CLockscreenSettingsObserver.h"
+#include "elastos/droid/systemui/statusbar/CBaseBroadcastReceiver.h"
 #include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
@@ -141,8 +142,8 @@ const String BaseStatusBar::SYSTEM_DIALOG_REASON_RECENT_APPS("recentapps");
 const Int32 BaseStatusBar::EXPANDED_LEAVE_ALONE = -10000;
 const Int32 BaseStatusBar::EXPANDED_FULL_OPEN = -10001;
 const Int32 BaseStatusBar::HIDDEN_NOTIFICATION_ID = 10000;
-const String BaseStatusBar::BANNER_ACTION_CANCEL("com.android.systemui.statusbar.banner_action_cancel");
-const String BaseStatusBar::BANNER_ACTION_SETUP("com.android.systemui.statusbar.banner_action_setup");
+const String BaseStatusBar::BANNER_ACTION_CANCEL("Elastos.Droid.SystemUI.StatusBar.banner_action_cancel");
+const String BaseStatusBar::BANNER_ACTION_SETUP("Elastos.Droid.SystemUI.StatusBar.banner_action_setup");
 
 //==============================================================================
 //                  CSettingsObserver
@@ -274,14 +275,17 @@ Boolean BaseStatusBar::_RemoteViewsOnClickHandler::SuperOnClickHandler(
 }
 
 //==============================================================================
-//                  BaseStatusBar::BaseBroadcastReceiver
+//                  CBaseBroadcastReceiver
 //==============================================================================
-BaseStatusBar::BaseBroadcastReceiver::BaseBroadcastReceiver(
-    /* [in] */ BaseStatusBar* host)
-    : mHost(host)
-{}
+CAR_OBJECT_IMPL(CBaseBroadcastReceiver);
+ECode CBaseBroadcastReceiver::constructor(
+    /* [in] */ IBaseStatusBar* host)
+{
+    mHost = (BaseStatusBar*)host;
+    return NOERROR;
+}
 
-ECode BaseStatusBar::BaseBroadcastReceiver::OnReceive(
+ECode CBaseBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -290,7 +294,7 @@ ECode BaseStatusBar::BaseBroadcastReceiver::OnReceive(
     if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, -1, &mHost->mCurrentUserId);
         mHost->UpdateCurrentProfilesCache();
-        if (TRUE) Logger::V(TAG, "userId %d is in the house", mHost->mCurrentUserId);
+        if (TRUE) Logger::V(BaseStatusBar::TAG, "userId %d is in the house", mHost->mCurrentUserId);
 
         mHost->UpdateLockscreenNotificationSetting();
 
@@ -305,19 +309,20 @@ ECode BaseStatusBar::BaseBroadcastReceiver::OnReceive(
         mHost->UpdateLockscreenNotificationSetting();
         mHost->UpdateNotifications();
     }
-    else if (BANNER_ACTION_CANCEL.Equals(action) || BANNER_ACTION_SETUP.Equals(action)) {
+    else if (BaseStatusBar::BANNER_ACTION_CANCEL.Equals(action)
+        || BaseStatusBar::BANNER_ACTION_SETUP.Equals(action)) {
         AutoPtr<IInterface> obj;
         mHost->mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
         AutoPtr<INotificationManager> noMan = INotificationManager::Probe(obj);
 
-        noMan->Cancel(HIDDEN_NOTIFICATION_ID);
+        noMan->Cancel(BaseStatusBar::HIDDEN_NOTIFICATION_ID);
 
         AutoPtr<IContentResolver> cr;
         mHost->mContext->GetContentResolver((IContentResolver**)&cr);
         Boolean tmp = FALSE;
         Elastos::Droid::Provider::Settings::Secure::PutInt32(cr,
             ISettingsSecure::SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0, &tmp);
-        if (BANNER_ACTION_SETUP.Equals(action)) {
+        if (BaseStatusBar::BANNER_ACTION_SETUP.Equals(action)) {
             mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE, TRUE /* force */);
             AutoPtr<IIntent> i;
             CIntent::New(ISettings::ACTION_APP_NOTIFICATION_REDACTION, (IIntent**)&i);
@@ -910,7 +915,7 @@ BaseStatusBar::BaseStatusBar()
     , mDeviceProvisioned(FALSE)
 {
     mOnClickHandler = new _RemoteViewsOnClickHandler(this);
-    mBroadcastReceiver = new BaseBroadcastReceiver(this);
+    CBaseBroadcastReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
     mNotificationListener = new _NotificationListenerService(this);
     mRecentsPreloadOnTouchListener = new RecentsPreloadOnTouchListener(this);
     mHandler = CreateHandler();
@@ -1102,9 +1107,10 @@ ECode BaseStatusBar::Start()
     String name;
     name = GetClass()/*.getCanonicalName()*/;
     CComponentName::New(pn, name, (IComponentName**)&cn);
-    if (FAILED(mNotificationListener->RegisterAsSystemService(mContext, cn, IUserHandle::USER_ALL))) {
-        Logger::E(TAG, "Unable to register notification listener");
-    }
+    Logger::D(TAG, "TODO : Has problem about NotificationListenerService.");
+    // if (FAILED(mNotificationListener->RegisterAsSystemService(mContext, cn, IUserHandle::USER_ALL))) {
+    //     Logger::E(TAG, "Unable to register notification listener");
+    // }
 
     if (DEBUG) {
         Logger::D(TAG,

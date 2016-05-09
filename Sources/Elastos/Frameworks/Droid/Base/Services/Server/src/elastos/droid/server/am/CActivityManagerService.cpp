@@ -6882,6 +6882,7 @@ ECode CActivityManagerService::AppNotResponding(
         Process::SendSignal(app->mPid, IProcess::SIGNAL_QUIT);
     }
 
+    assert(0 && "[wanli] TOOD : Find the anr");
     AddErrorToDropBox(String("anr"), app, app->mProcessName, activity, parent, annotation, cpuInfo, tracesFile, NULL);
 
     if (mController != NULL) {

@@ -6939,8 +6939,7 @@ ECode PhoneWindowManager::SystemReady()
 
 ECode PhoneWindowManager::SystemBooted()
 {
-    if (mKeyguardDelegate != NULL)
-    {
+    if (mKeyguardDelegate != NULL) {
         mKeyguardDelegate->BindService(mContext);
         mKeyguardDelegate->OnBootCompleted();
     }

@@ -32,6 +32,8 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
+class CViewScaler;
+
 CarClass(CExpandHelper)
     , public Object
     , public IExpandHelper
@@ -72,34 +74,6 @@ private:
             /* [in ]*/ IScaleGestureDetector* detector);
     private:
         CExpandHelper* mHost;
-    };
-
-    class ViewScaler
-        : public Object
-        , public IViewScaler
-    {
-    public:
-        ViewScaler(
-            /* [in] */ CExpandHelper* host);
-
-        CAR_INTERFACE_DECL();
-
-        CARAPI SetView(
-            /* [in] */ IExpandableView* v);
-
-        CARAPI SetHeight(
-            /* [in] */ Float h);
-
-        CARAPI GetHeight(
-            /* [out] */ Float* rst);
-
-        CARAPI GetNaturalHeight(
-            /* [in] */ Int32 maximum,
-            /* [out] */ Int32* naturalHeight);
-    private:
-        CExpandHelper* mHost;
-        AutoPtr<IExpandableView> mView;
-        friend class CExpandHelper;
     };
 
 public:
@@ -278,6 +252,7 @@ private:
     IScrollAdapter* mScrollAdapter;
     AutoPtr<FlingAnimationUtils> mFlingAnimationUtils;
     AutoPtr<IVelocityTracker> mVelocityTracker;
+    friend class CViewScaler;
 };
 
 } // namespace SystemUI

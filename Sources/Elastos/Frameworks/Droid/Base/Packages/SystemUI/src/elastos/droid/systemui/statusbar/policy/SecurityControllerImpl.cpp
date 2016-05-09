@@ -132,8 +132,10 @@ ECode SecurityControllerImpl::HasDeviceOwner(
 {
     VALIDATE_NOT_NULL(result);
     String value;
-    assert(0 && "TODO");
-    // mDevicePolicyManager->GetDeviceOwner(&value);
+    if (mDevicePolicyManager != NULL) {
+        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
+        // mDevicePolicyManager->GetDeviceOwner(&value);
+    }
     *result = !TextUtils::IsEmpty(value);
     return NOERROR;
 }
@@ -143,8 +145,10 @@ ECode SecurityControllerImpl::HasProfileOwner(
 {
     VALIDATE_NOT_NULL(result);
     String value;
-    assert(0 && "TODO");
-    // mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, &value);
+    if (mDevicePolicyManager != NULL) {
+        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
+        // mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, &value);
+    }
     *result = !TextUtils::IsEmpty(value);
     return NOERROR;
 }
@@ -153,8 +157,12 @@ ECode SecurityControllerImpl::GetDeviceOwnerName(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // return mDevicePolicyManager->GetDeviceOwnerName(result);
+    if (mDevicePolicyManager != NULL) {
+        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
+        // return mDevicePolicyManager->GetDeviceOwnerName(result);
+    }
+
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -162,8 +170,12 @@ ECode SecurityControllerImpl::GetProfileOwnerName(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // return mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, result);
+    if (mDevicePolicyManager != NULL) {
+        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
+        // return mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, result);
+    }
+
+    *result = String(NULL);
     return NOERROR;
 }
 

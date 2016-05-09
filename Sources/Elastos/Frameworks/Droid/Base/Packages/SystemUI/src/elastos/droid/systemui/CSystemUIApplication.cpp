@@ -21,7 +21,7 @@ namespace Droid {
 namespace SystemUI {
 
 const String CSystemUIApplication::TAG("SystemUIService");
-const Boolean CSystemUIApplication::DEBUG = FALSE;
+const Boolean CSystemUIApplication::DEBUG = TRUE;
 
 CAR_OBJECT_IMPL(CSystemUIApplication);
 CAR_INTERFACE_IMPL(CSystemUIApplication, Application, ISystemUIApplication);
@@ -96,7 +96,7 @@ ECode CSystemUIApplication::StartServicesIfNeeded()
     Int32 N = SERVICES->GetLength();
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IClassInfo> cl = (*SERVICES)[i];
-        if (DEBUG) Logger::D(TAG, String("loading: %p"), cl.Get());
+        if (DEBUG) Logger::D(TAG, String("loading: %s"), TO_CSTR(cl));
 
         AutoPtr<IInterface> object;
         if (FAILED(cl->CreateObject((IInterface**)&object))) {

@@ -1,4 +1,5 @@
 #include "elastos/droid/systemui/statusbar/DelegateViewHelper.h"
+#include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>
@@ -43,12 +44,10 @@ void DelegateViewHelper::SetBar(
 Boolean DelegateViewHelper::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* event)
 {
-    Boolean disable = FALSE;
-    assert(0 && "TODO");
-    // if (mSourceView == NULL || mDelegateView == NULL
-    //     || (mBar->ShouldDisableNavbarGestures(&disable), disable)) {
-    //     return FALSE;
-    // }
+    if (mSourceView == NULL || mDelegateView == NULL
+        || ((BaseStatusBar*)mBar.Get())->ShouldDisableNavbarGestures()) {
+        return FALSE;
+    }
 
     mSourceView->GetLocationOnScreen(mTempPoint);
     Float sourceX = (*mTempPoint)[0];
@@ -88,21 +87,19 @@ Boolean DelegateViewHelper::OnInterceptTouchEvent(
 
             Float distance = mSwapXY ? (mDownPoint[0] - x) : (mDownPoint[1] - y);
             if (distance > mTriggerThreshhold) {
-                assert(0 && "TODO");
-                // mBar->ShowSearchPanel();
+                ICommandQueueCallbacks::Probe(mBar)->ShowSearchPanel();
                 mPanelShowing = TRUE;
                 break;
             }
         }
     }
 
-    assert(0 && "TODO");
-    // if (action == IMotionEvent::ACTION_DOWN) {
-    //     mBar->SetInteracting(IStatusBarManager::WINDOW_NAVIGATION_BAR, TRUE);
-    // }
-    // else if (action == IMotionEvent::ACTION_UP || action == IMotionEvent::ACTION_CANCEL) {
-    //     mBar->SetInteracting(IStatusBarManager::WINDOW_NAVIGATION_BAR, FALSE);
-    // }
+    if (action == IMotionEvent::ACTION_DOWN) {
+        mBar->SetInteracting(IStatusBarManager::WINDOW_NAVIGATION_BAR, TRUE);
+    }
+    else if (action == IMotionEvent::ACTION_UP || action == IMotionEvent::ACTION_CANCEL) {
+        mBar->SetInteracting(IStatusBarManager::WINDOW_NAVIGATION_BAR, FALSE);
+    }
 
     mDelegateView->GetLocationOnScreen(mTempPoint);
     Float delegateX = (*mTempPoint)[0];

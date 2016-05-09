@@ -1,4 +1,5 @@
 #include "elastos/droid/systemui/keyguard/KeyguardService.h"
+#include "elastos/droid/systemui/keyguard/CIKeyguardService.h"
 #include "elastos/droid/content/ContextWrapper.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/core/AutoLock.h>
@@ -26,53 +27,46 @@ namespace SystemUI {
 namespace Keyguard {
 
 //--------------------------------------------------------------------------------------
-// KeyguardService::KeyguardServiceBinder
+// CIKeyguardService
 //--------------------------------------------------------------------------------------
-
-CAR_INTERFACE_IMPL_2(KeyguardService::KeyguardServiceBinder, Object, IIKeyguardService, IBinder)
-
-KeyguardService::KeyguardServiceBinder::KeyguardServiceBinder()
-{}
-
-KeyguardService::KeyguardServiceBinder::KeyguardServiceBinder(
-    /* [in] */ KeyguardService* host)
+CAR_OBJECT_IMPL(CIKeyguardService);
+CAR_INTERFACE_IMPL_2(CIKeyguardService, Object, IIKeyguardService, IBinder);
+CIKeyguardService::CIKeyguardService()
     : mIsOccluded(FALSE)
-    , mHost(host)
 {}
 
-ECode KeyguardService::KeyguardServiceBinder::constructor(
-    /* [in] */ Handle32 host)
+ECode CIKeyguardService::constructor(
+    /* [in] */ IKeyguardService* host)
 {
-    mIsOccluded = FALSE;
     mHost = (KeyguardService*)host;
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::IsShowing(
+ECode CIKeyguardService::IsShowing(
     /* [out] */ Boolean* result)
 {
     return mHost->mKeyguardViewMediator->IsShowing(result);
 }
 
-ECode KeyguardService::KeyguardServiceBinder::IsSecure(
+ECode CIKeyguardService::IsSecure(
     /* [out] */ Boolean* result)
 {
     return mHost->mKeyguardViewMediator->IsSecure(result);
 }
 
-ECode KeyguardService::KeyguardServiceBinder::IsShowingAndNotOccluded(
+ECode CIKeyguardService::IsShowingAndNotOccluded(
     /* [out] */ Boolean* result)
 {
     return mHost->mKeyguardViewMediator->IsShowingAndNotOccluded(result);
 }
 
-ECode KeyguardService::KeyguardServiceBinder::IsInputRestricted(
+ECode CIKeyguardService::IsInputRestricted(
     /* [out] */ Boolean* result)
 {
     return mHost->mKeyguardViewMediator->IsInputRestricted(result);
 }
 
-ECode KeyguardService::KeyguardServiceBinder::VerifyUnlock(
+ECode CIKeyguardService::VerifyUnlock(
     /* [in] */ IIKeyguardExitCallback* callback)
 {
     mHost->CheckPermission();
@@ -80,7 +74,7 @@ ECode KeyguardService::KeyguardServiceBinder::VerifyUnlock(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::KeyguardDone(
+ECode CIKeyguardService::KeyguardDone(
     /* [in] */ Boolean authenticated,
     /* [in] */ Boolean wakeup)
 {
@@ -89,7 +83,7 @@ ECode KeyguardService::KeyguardServiceBinder::KeyguardDone(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::SetOccluded(
+ECode CIKeyguardService::SetOccluded(
     /* [in] */ Boolean isOccluded,
     /* [out] */ Int32* result)
 {
@@ -118,26 +112,26 @@ ECode KeyguardService::KeyguardServiceBinder::SetOccluded(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::Dismiss()
+ECode CIKeyguardService::Dismiss()
 {
     mHost->CheckPermission();
     mHost->mKeyguardViewMediator->Dismiss();
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnDreamingStarted() {
+ECode CIKeyguardService::OnDreamingStarted() {
     mHost->CheckPermission();
     mHost->mKeyguardViewMediator->OnDreamingStarted();
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnDreamingStopped() {
+ECode CIKeyguardService::OnDreamingStopped() {
     mHost->CheckPermission();
     mHost->mKeyguardViewMediator->OnDreamingStopped();
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnScreenTurnedOff(
+ECode CIKeyguardService::OnScreenTurnedOff(
     /* [in] */ Int32 reason)
 {
     mHost->CheckPermission();
@@ -145,7 +139,7 @@ ECode KeyguardService::KeyguardServiceBinder::OnScreenTurnedOff(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnScreenTurnedOn(
+ECode CIKeyguardService::OnScreenTurnedOn(
     /* [in] */ IIKeyguardShowCallback* callback)
 {
     mHost->CheckPermission();
@@ -153,7 +147,7 @@ ECode KeyguardService::KeyguardServiceBinder::OnScreenTurnedOn(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::SetKeyguardEnabled(
+ECode CIKeyguardService::SetKeyguardEnabled(
     /* [in] */ Boolean enabled)
 {
     mHost->CheckPermission();
@@ -161,20 +155,20 @@ ECode KeyguardService::KeyguardServiceBinder::SetKeyguardEnabled(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::IsDismissable(
+ECode CIKeyguardService::IsDismissable(
     /* [out] */ Boolean* result)
 {
     return mHost->mKeyguardViewMediator->IsDismissable(result);
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnSystemReady()
+ECode CIKeyguardService::OnSystemReady()
 {
     mHost->CheckPermission();
     mHost->mKeyguardViewMediator->OnSystemReady();
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::DoKeyguardTimeout(
+ECode CIKeyguardService::DoKeyguardTimeout(
     /* [in] */ IBundle* options)
 {
     mHost->CheckPermission();
@@ -182,7 +176,7 @@ ECode KeyguardService::KeyguardServiceBinder::DoKeyguardTimeout(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::SetCurrentUser(
+ECode CIKeyguardService::SetCurrentUser(
     /* [in] */ Int32 userId)
 {
     mHost->CheckPermission();
@@ -190,30 +184,30 @@ ECode KeyguardService::KeyguardServiceBinder::SetCurrentUser(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::ShowAssistant()
+ECode CIKeyguardService::ShowAssistant()
 {
     return mHost->CheckPermission();
 }
 
-ECode KeyguardService::KeyguardServiceBinder::Dispatch(
+ECode CIKeyguardService::Dispatch(
     /* [in] */ IMotionEvent* event)
 {
     return mHost->CheckPermission();
 }
 
-ECode KeyguardService::KeyguardServiceBinder::LaunchCamera()
+ECode CIKeyguardService::LaunchCamera()
 {
     return mHost->CheckPermission();
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnBootCompleted()
+ECode CIKeyguardService::OnBootCompleted()
 {
     mHost->CheckPermission();
     mHost->mKeyguardViewMediator->OnBootCompleted();
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::StartKeyguardExitAnimation(
+ECode CIKeyguardService::StartKeyguardExitAnimation(
     /* [in] */ Int64 startTime,
     /* [in] */ Int64 fadeoutDuration)
 {
@@ -222,17 +216,17 @@ ECode KeyguardService::KeyguardServiceBinder::StartKeyguardExitAnimation(
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::OnActivityDrawn()
+ECode CIKeyguardService::OnActivityDrawn()
 {
     mHost->CheckPermission();
     mHost->mKeyguardViewMediator->OnActivityDrawn();
     return NOERROR;
 }
 
-ECode KeyguardService::KeyguardServiceBinder::ToString(
+ECode CIKeyguardService::ToString(
     /* [out] */ String* str)
 {
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //--------------------------------------------------------------------------------------
@@ -246,12 +240,12 @@ CAR_INTERFACE_IMPL(KeyguardService, Elastos::Droid::App::Service, IKeyguardServi
 
 KeyguardService::KeyguardService()
 {
-    mBinder = new KeyguardServiceBinder(this);
+    CIKeyguardService::New(this, (IBinder**)&mBinder);
 }
 
 ECode KeyguardService::constructor()
 {
-    return NOERROR;
+    return Service::constructor();
 }
 
 ECode KeyguardService::OnCreate()

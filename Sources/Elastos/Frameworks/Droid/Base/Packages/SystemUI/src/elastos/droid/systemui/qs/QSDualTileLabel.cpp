@@ -10,12 +10,12 @@ using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Text::ITextPaint;
 using Elastos::Droid::Text::TextUtilsTruncateAt_END;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::EIID_IViewOnLayoutChangeListener;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Droid::Widget::CImageView;
 using Elastos::Droid::Widget::CLinearLayout;
+using Elastos::Droid::Widget::CLinearLayoutLayoutParams;
 using Elastos::Droid::Widget::CTextView;
 using Elastos::Droid::Widget::ILinearLayoutLayoutParams;
 using Elastos::Droid::Widget::ImageViewScaleType_MATRIX;
@@ -35,6 +35,29 @@ QSDualTileLabel::UpdateTextRunnable::UpdateTextRunnable(
 ECode QSDualTileLabel::UpdateTextRunnable::Run()
 {
     mHost->UpdateText();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(QSDualTileLabel::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener);
+QSDualTileLabel::OnLayoutChangeListener::OnLayoutChangeListener(
+    /* [in] */ QSDualTileLabel* host)
+    : mHost(host)
+{}
+
+ECode QSDualTileLabel::OnLayoutChangeListener::OnLayoutChange(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom,
+    /* [in] */ Int32 oldLeft,
+    /* [in] */ Int32 oldTop,
+    /* [in] */ Int32 oldRight,
+    /* [in] */ Int32 oldBottom)
+{
+    if ((oldRight - oldLeft) != (right - left)) {
+        mHost->RescheduleUpdateText();
+    }
     return NOERROR;
 }
 
@@ -79,11 +102,11 @@ QSDualTileLabel::QSDualTileLabel(
 
 AutoPtr<IViewGroupLayoutParams> QSDualTileLabel::NewLinearLayoutParams()
 {
-    AutoPtr<IViewGroupLayoutParams> lp;
-    CViewGroupLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT,
-        (IViewGroupLayoutParams**)&lp);
-    ILinearLayoutLayoutParams::Probe(lp)->SetGravity(IGravity::CENTER_HORIZONTAL);
-    return lp;
+    AutoPtr<ILinearLayoutLayoutParams> lp;
+    CLinearLayoutLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT,
+        (ILinearLayoutLayoutParams**)&lp);
+    lp->SetGravity(IGravity::CENTER_HORIZONTAL);
+    return IViewGroupLayoutParams::Probe(lp);
 }
 
 ECode QSDualTileLabel::SetFirstLineCaret(

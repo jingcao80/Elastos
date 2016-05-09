@@ -33,8 +33,8 @@ namespace Phone {
 
 const Boolean SecureCameraLaunchManager::DEBUG = FALSE;
 const String SecureCameraLaunchManager::TAG("SecureCameraLaunchManager");
-const String SecureCameraLaunchManager::CLOSE_CAMERA_ACTION_NAME("com.android.systemui.statusbar.phone.CLOSE_CAMERA");
-const String SecureCameraLaunchManager::META_DATA_WILL_WAIT_FOR_CAMERA_AVAILABLE("com.android.systemui.statusbar.phone.will_wait_for_camera_available");
+const String SecureCameraLaunchManager::CLOSE_CAMERA_ACTION_NAME("Elastos.Droid.SystemUI.StatusBar.Phone.CLOSE_CAMERA");
+const String SecureCameraLaunchManager::META_DATA_WILL_WAIT_FOR_CAMERA_AVAILABLE("Elastos.Droid.SystemUI.StatusBar.Phone.will_wait_for_camera_available");
 const Int32 SecureCameraLaunchManager::CAMERA_AVAILABILITY_TIMEOUT_MS = 1000;
 
 SecureCameraLaunchManager::CameraAvailabilityCallback::CameraAvailabilityCallback(

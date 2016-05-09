@@ -112,13 +112,13 @@ ECode AlternateRecentsComponent::BR::OnReceive(
 // AlternateRecentsComponent
 //-----------------------------------------------------------------------------------
 
-const String AlternateRecentsComponent::EXTRA_FROM_HOME("recents.triggeredOverHome");
-const String AlternateRecentsComponent::EXTRA_FROM_SEARCH_HOME("recents.triggeredOverSearchHome");
-const String AlternateRecentsComponent::EXTRA_FROM_APP_THUMBNAIL("recents.animatingWithThumbnail");
-const String AlternateRecentsComponent::EXTRA_FROM_APP_FULL_SCREENSHOT("recents.thumbnail");
-const String AlternateRecentsComponent::EXTRA_FROM_TASK_ID("recents.activeTaskId");
-const String AlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB("recents.triggeredFromAltTab");
-const String AlternateRecentsComponent::EXTRA_TRIGGERED_FROM_HOME_KEY("recents.triggeredFromHomeKey");
+const String AlternateRecentsComponent::EXTRA_FROM_HOME("Recents.TriggeredOverHome");
+const String AlternateRecentsComponent::EXTRA_FROM_SEARCH_HOME("Recents.TriggeredOverSearchHome");
+const String AlternateRecentsComponent::EXTRA_FROM_APP_THUMBNAIL("Recents.AnimatingWithThumbnail");
+const String AlternateRecentsComponent::EXTRA_FROM_APP_FULL_SCREENSHOT("Recents.Thumbnail");
+const String AlternateRecentsComponent::EXTRA_FROM_TASK_ID("Recents.ActiveTaskId");
+const String AlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB("Recents.TriggeredFromAltTab");
+const String AlternateRecentsComponent::EXTRA_TRIGGERED_FROM_HOME_KEY("Recents.TriggeredFromHomeKey");
 
 const String AlternateRecentsComponent::ACTION_START_ENTER_ANIMATION("action_start_enter_animation");
 const String AlternateRecentsComponent::ACTION_TOGGLE_RECENTS_ACTIVITY("action_toggle_recents_activity");
@@ -126,10 +126,10 @@ const String AlternateRecentsComponent::ACTION_HIDE_RECENTS_ACTIVITY("action_hid
 
 const Int32 AlternateRecentsComponent::sMinToggleDelay;
 
-const String AlternateRecentsComponent::sToggleRecentsAction("com.android.systemui.recents.SHOW_RECENTS");
-const String AlternateRecentsComponent::sRecentsPackage("com.android.systemui");
-const String AlternateRecentsComponent::sRecentsActivity("com.android.systemui.recents.RecentsActivity");
-
+const String AlternateRecentsComponent::sToggleRecentsAction("Elastos.Droid.SystemUI.Recents.SHOW_RECENTS");
+const String AlternateRecentsComponent::sRecentsPackage("Elastos.Droid.SystemUI");
+const String AlternateRecentsComponent::sRecentsActivity("Elastos.Droid.SystemUI.Recents.CRecentsActivity");
+AutoPtr<IBitmap> AlternateRecentsComponent::sLastScreenshot;
 AutoPtr<IRecentsComponentCallbacks> AlternateRecentsComponent::sRecentsComponentCallbacks;
 
 CAR_INTERFACE_IMPL_2(AlternateRecentsComponent, Object, IActivityOptionsOnAnimationStartedListener, IAlternateRecentsComponent)

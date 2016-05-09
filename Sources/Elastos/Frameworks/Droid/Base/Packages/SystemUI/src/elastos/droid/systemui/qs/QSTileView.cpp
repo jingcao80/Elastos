@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/qs/QSTileView.h"
+#include "elastos/droid/systemui/qs/QSDualTileLabel.h"
 #include "elastos/droid/systemui/qs/QSTile.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
 #include "../R.h"
@@ -166,8 +167,7 @@ void QSTileView::RecreateLabel()
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     if (mDual) {
-        assert(0 && "TODO");
-        // mDualLabel = new QSDualTileLabel(mContext);
+        mDualLabel = new QSDualTileLabel(mContext);
         IView::Probe(mDualLabel)->SetId(Elastos::Droid::R::id::title);
         IView::Probe(mDualLabel)->SetBackgroundResource(R::drawable::btn_borderless_rect);
 

@@ -38,7 +38,7 @@ SOURCES += AnimatedVectorDrawable.cpp
 SOURCES += VectorDrawable.cpp
 SOURCES += Ripple.cpp
 SOURCES += RippleDrawable.cpp
-SOURCES += RippleBackground.cpp
+SOURCES += CRippleBackground.cpp
 SOURCES += drawable.cpp
 
 ELASTOS_LIBS += shapes/shapes.lib

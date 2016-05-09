@@ -88,7 +88,7 @@ ECode CBatteryMeterView::Runnable_1::Run()
 // CBatteryMeterView::
 //===============================================================
 String CBatteryMeterView::TAG("BatteryMeterView");// = BatteryMeterView.class.getSimpleName();
-String CBatteryMeterView::ACTION_LEVEL_TEST = String("com.android.systemui.BATTERY_LEVEL_TEST");
+String CBatteryMeterView::ACTION_LEVEL_TEST = String("Elastos.Droid.SystemUI.BATTERY_LEVEL_TEST");
 Boolean CBatteryMeterView::ENABLE_PERCENT = TRUE;
 Boolean CBatteryMeterView::SINGLE_DIGIT_PERCENT = FALSE;
 Boolean CBatteryMeterView::SHOW_100_PERCENT = FALSE;

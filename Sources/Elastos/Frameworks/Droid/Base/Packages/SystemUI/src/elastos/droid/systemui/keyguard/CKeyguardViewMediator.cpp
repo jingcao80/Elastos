@@ -689,7 +689,8 @@ ECode CKeyguardViewMediator::Start()
 ECode CKeyguardViewMediator::OnSystemReady()
 {
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    Logger::D(TAG, "TODO [OnSystemReady]: Not implement SEARCH_SERVICE.");
+    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     mSearchManager = ISearchManager::Probe(obj);
     synchronized(this) {
         if (DEBUG) Logger::D(TAG, "onSystemReady");
@@ -1577,10 +1578,14 @@ ECode CKeyguardViewMediator::IsDismissable(
 
 Boolean CKeyguardViewMediator::IsAssistantAvailable()
 {
+    if (mSearchManager == NULL) {
+        return FALSE;
+    }
+
     AutoPtr<IIntent> intent;
     mSearchManager->GetAssistIntent(mContext, FALSE, IUserHandle::USER_CURRENT,
         (IIntent**)&intent);
-    return mSearchManager != NULL && intent != NULL;
+    return intent != NULL;
 }
 
 ECode CKeyguardViewMediator::OnBootCompleted()
