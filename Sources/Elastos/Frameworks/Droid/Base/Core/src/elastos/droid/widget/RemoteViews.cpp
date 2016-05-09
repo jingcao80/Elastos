@@ -8,6 +8,7 @@
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/animation/PropertyValuesHolder.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/pm/CApplicationInfo.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/os/Build.h"
@@ -39,6 +40,7 @@ using Elastos::Droid::AppWidget::IAppWidgetHostView;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentSender;
 using Elastos::Droid::Content::IContextWrapper;
+using Elastos::Droid::Content::Pm::CApplicationInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Res::IResources;
@@ -2514,7 +2516,9 @@ ECode RemoteViews::constructor(
     }
 
     if (mode == MODE_NORMAL) {
-        parcel->ReadInterfacePtr((Handle32*)&mApplication);
+        AutoPtr<IInterface> obj;
+        parcel->ReadInterfacePtr((Handle32*)&obj);
+        mApplication = IApplicationInfo::Probe(obj);
         parcel->ReadInt32(&mLayoutId);
         Int32 tmp;
         parcel->ReadInt32(&tmp);
@@ -2802,6 +2806,8 @@ ECode RemoteViews::MergeRemoteViews(
 ECode RemoteViews::Clone(
     /* [out] */ IRemoteViews** remoteViews)
 {
+    VALIDATE_NOT_NULL(remoteViews)
+
     AutoPtr<IParcel> source;
     CParcel::New((IParcel**)&source);
     WriteToParcel(source);

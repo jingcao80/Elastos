@@ -102,7 +102,7 @@ RankingHelper::RankingHelper(
         AutoPtr<INotificationSignalExtractor> extractor = INotificationSignalExtractor::Probe(obj);
         extractor->Initialize(mContext);
         extractor->SetConfig(this);
-        (*mSignalExtractors)[i] = extractor;
+        mSignalExtractors->Set(i, extractor);
         // } catch (ClassNotFoundException e) {
         //     Slog.w(TAG, "Couldn't find extractor " + extractorNames[i] + ".", e);
         // } catch (InstantiationException e) {
@@ -696,32 +696,12 @@ void RankingHelper::Dump(
 String RankingHelper::GetElastosClassName(
     /* [in] */ const String& className)
 {
-    // String className(androidClassName);
-    // if (className.IndexOf("$") >= 0) {
-    //     // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
-    //     // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
-    //     className = Replace(className, "\\$", "");
-    // }
-
-    HashMap<String, String> classNameMap;
-    classNameMap[String("android.opengl.")]                     = String("Elastos.Droid.Opengl.C");
-    classNameMap[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
-    classNameMap[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
-    classNameMap[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");
-    classNameMap[String("com.android.server.notification.")]    = String("Elastos.Droid.Server.Notification.C");
-
-    Int32 lastIndex = className.LastIndexOf(".");
-    if (lastIndex != -1) {
-        String ns = className.Substring(0, lastIndex + 1);
-        HashMap<String, String>::Iterator it = classNameMap.Find(ns);
-        if (it != classNameMap.End()) {
-            StringBuilder sb(it->mSecond);
-            sb += className.Substring(lastIndex + 1);
-            return sb.ToString();
-        }
+    static const String sAndroidPrefix("com.android.server.notification.");
+    static const String sElastosPrefix("Elastos.Droid.Server.Notification.C");
+    if (!className.StartWith(sAndroidPrefix)) {
+        return className;
     }
-
-    return className;
+    return sElastosPrefix + className.Substring(sAndroidPrefix.GetLength());
 }
 
 } // Notification

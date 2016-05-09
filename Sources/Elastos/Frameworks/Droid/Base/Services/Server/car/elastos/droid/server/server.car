@@ -1991,6 +1991,13 @@ module
         interface IManagedServices;
     }
 
+    class CNotificationIntrusivenessExtractor {
+        constructor();
+
+        interface INotificationIntrusivenessExtractor;
+        interface INotificationSignalExtractor;
+    }
+
     [local]
     class CNotificationManagerService {
         constructor(
@@ -2015,12 +2022,33 @@ module
         interface IBinder;
     }
 
+    class CPackagePriorityExtractor {
+        constructor();
+
+        interface IPackagePriorityExtractor;
+        interface INotificationSignalExtractor;
+    }
+
+    class CPackageVisibilityExtractor {
+        constructor();
+
+        interface IPackageVisibilityExtractor;
+        interface INotificationSignalExtractor;
+    }
+
     class CStatusBarNotificationHolder {
         constructor(
             [in] IStatusBarNotification* value);
 
         interface IIStatusBarNotificationHolder;
         interface IBinder;
+    }
+
+    class CValidateNotificationPeople {
+        constructor();
+
+        interface IValidateNotificationPeople;
+        interface INotificationSignalExtractor;
     }
 
     } // namespace Notification

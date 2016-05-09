@@ -1,56 +1,57 @@
 
-#include <Elastos.CoreLibrary.Utility.h>
-#include <Elastos.CoreLibrary.Text.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/app/CNotificationBuilder.h"
+#include "elastos/droid/R.h"
 #include "elastos/droid/app/CNotification.h"
 #include "elastos/droid/app/CNotificationAction.h"
+#include "elastos/droid/app/CNotificationBuilder.h"
+#include "elastos/droid/app/CNotificationBuilderRemoteViews.h"
 #include "elastos/droid/app/NotificationStyle.h"
-#include "elastos/droid/R.h"
+#include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/graphics/CCanvas.h"
+#include "elastos/droid/internal/utility/NotificationColorUtil.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/graphics/CBitmap.h"
-#include "elastos/droid/graphics/CCanvas.h"
-#include "elastos/droid/widget/CRemoteViews.h"
 #include "elastos/droid/utility/MathUtils.h"
-#include "elastos/droid/internal/utility/NotificationColorUtil.h"
+#include "elastos/droid/widget/CRemoteViews.h"
+#include <Elastos.CoreLibrary.Text.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/core/ClassLoader.h>
 
-using Elastos::Droid::R;
-using Elastos::Droid::Os::Build;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::CUserHandle;
-using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Graphics::CBitmap;
-using Elastos::Droid::Graphics::ICanvas;
-using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::PorterDuffMode_MULTIPLY;
 using Elastos::Droid::Graphics::PorterDuffMode_SRC_ATOP;
-using Elastos::Droid::Widget::CRemoteViews;
+using Elastos::Droid::Internal::Utility::NotificationColorUtil;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::R;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::MathUtils;
-using Elastos::Droid::Internal::Utility::NotificationColorUtil;
-using Elastos::Core::CoreUtils;
+using Elastos::Droid::Widget::CRemoteViews;
 using Elastos::Core::ClassLoader;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Text::INumberFormatHelper;
 using Elastos::Text::CNumberFormatHelper;
+using Elastos::Text::INumberFormatHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -112,6 +113,7 @@ ECode CNotificationBuilder::constructor(
      */
     mContext = context;
 
+    // Set defaults to match the defaults of a Notification
     AutoPtr<ISystem> system;
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
     system->GetCurrentTimeMillis(&mWhen);
@@ -773,7 +775,9 @@ AutoPtr<IRemoteViews> CNotificationBuilder::ApplyStandardTemplate(
     AutoPtr<IRemoteViews> contentView;
     AutoPtr<IApplicationInfo> ai;
     mContext->GetApplicationInfo((IApplicationInfo**)&ai);
-    CRemoteViews::New(ai, resId, (IRemoteViews**)&contentView);
+    CNotificationBuilderRemoteViews::New(ai, resId, (IRemoteViews**)&contentView);
+
+    ResetStandardTemplate(contentView);
 
     Boolean showLine3 = FALSE;
     Boolean showLine2 = FALSE;

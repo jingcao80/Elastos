@@ -1777,6 +1777,7 @@ ECode BaseBundle::ReadFromParcelInner(
     source->GetDataPosition(&offset);
     source->SetDataPosition(offset + length);
 
+    mParcelledData = NULL;
     CParcel::New((IParcel**)&mParcelledData);
     mParcelledData->SetDataPosition(0);
     mParcelledData->AppendFrom(source, offset, length);
