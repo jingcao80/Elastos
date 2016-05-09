@@ -25,16 +25,10 @@ module
 
         OnHotspotBoundsChanged();
 
-        SetOpacity(
+        SetOuterOpacity(
             [in] Float a);
 
-        GetOpacity(
-            [out] Float* result);
-
-        SetRadiusGravity(
-            [in] Float r);
-
-        GetRadiusGravity(
+        GetOuterOpacity(
             [out] Float* result);
 
         Draw(
