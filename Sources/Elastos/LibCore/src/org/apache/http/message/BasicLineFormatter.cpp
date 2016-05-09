@@ -18,7 +18,7 @@ namespace Message {
 static AutoPtr<IBasicLineFormatter> InitDefault()
 {
     AutoPtr<IBasicLineFormatter> formatter;
-    CBasicLineFormatter::NewByFriend((IBasicLineFormatter**)&formatter);
+    CBasicLineFormatter::New((IBasicLineFormatter**)&formatter);
     return formatter;
 }
 const AutoPtr<IBasicLineFormatter> BasicLineFormatter::DEFAULT = InitDefault();

@@ -92,7 +92,7 @@ AutoPtr<ITimeZone> TimeZone::GetDefault()
         if (!zoneName.IsNull()) {
             zoneName = zoneName.Trim();
         }
-        if (zoneName.IsNull() || zoneName.IsEmpty()) {
+        if (zoneName.IsNullOrEmpty()) {
             // try {
                 // On the host, we can find the configured timezone here.
             ECode ec = IoUtils::ReadFileAsString(String("/etc/timezone"), &zoneName);

@@ -46,7 +46,7 @@ const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::ALLOW_ALL_HOSTNAME_VERIF
 static AutoPtr<IX509HostnameVerifier> InitBrowserCompatHostnameVerifier()
 {
     AutoPtr<IX509HostnameVerifier> verifier;
-    CBrowserCompatHostnameVerifier::NewByFriend((IX509HostnameVerifier**)&verifier);
+    CBrowserCompatHostnameVerifier::New((IX509HostnameVerifier**)&verifier);
     return verifier;
 }
 const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::BROWSER_COMPATIBLE_HOSTNAME_VERIFIER
@@ -55,7 +55,7 @@ const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::BROWSER_COMPATIBLE_HOSTN
 static AutoPtr<IX509HostnameVerifier> InitStrictHostnameVerifier()
 {
     AutoPtr<IX509HostnameVerifier> verifier;
-    CStrictHostnameVerifier::NewByFriend((IX509HostnameVerifier**)&verifier);
+    CStrictHostnameVerifier::New((IX509HostnameVerifier**)&verifier);
     return verifier;
 }
 const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::STRICT_HOSTNAME_VERIFIER
@@ -64,7 +64,7 @@ const AutoPtr<IX509HostnameVerifier> CSSLSocketFactory::STRICT_HOSTNAME_VERIFIER
 static AutoPtr<ISSLSocketFactory> InitSSLSocketFactory()
 {
     AutoPtr<ISSLSocketFactory> factory;
-    CSSLSocketFactory::NewByFriend((ISSLSocketFactory**)&factory);
+    CSSLSocketFactory::New((ISSLSocketFactory**)&factory);
     return factory;
 }
 const AutoPtr<ISSLSocketFactory> CSSLSocketFactory::DEFAULT_FACTORY
