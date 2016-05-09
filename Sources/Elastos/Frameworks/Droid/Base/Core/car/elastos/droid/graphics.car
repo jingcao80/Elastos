@@ -88,7 +88,6 @@ module
     merge("graphics/drawable/Ripple.car");
     merge("graphics/drawable/RippleBackground.car");
     merge("graphics/drawable/RippleDrawable.car");
-    merge("graphics/drawable/RippleBackground.car");
     merge("graphics/drawable/VectorDrawable.car");
     merge("graphics/drawable/shapes/Shape.car");
     merge("graphics/drawable/shapes/RectShape.car");
@@ -1637,14 +1636,6 @@ module
         interface ILayerDrawable;
         interface IDrawableCallback;
         interface IDrawable;
-    }
-
-    class CRippleBackground {
-        constructor(
-            [in] IRippleDrawable* owner,
-            [in] IRect* bounds);
-
-        interface IRippleBackground;
     }
 
     namespace Shapes {
