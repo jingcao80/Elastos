@@ -5,7 +5,7 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/animation/ObjectAnimator.h"
 #include "elastos/droid/graphics/drawable/RippleDrawable.h"
-#include "elastos/droid/graphics/drawable/RippleBackground.h"
+#include "elastos/droid/graphics/drawable/CRippleBackground.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/utility/MathUtils.h"
@@ -26,11 +26,11 @@ namespace Drawable {
 
 
 //===============================================================================
-// RippleBackground::RBAnimatorListenerAdapter
+// CRippleBackground::RBAnimatorListenerAdapter
 //===============================================================================
 
-RippleBackground::RBAnimatorListenerAdapter::RBAnimatorListenerAdapter(
-    /* [in] */ RippleBackground* host)
+CRippleBackground::RBAnimatorListenerAdapter::RBAnimatorListenerAdapter(
+    /* [in] */ CRippleBackground* host)
     : mHost(host)
 {}
 
@@ -42,10 +42,10 @@ ECode CRippleBackground::RBAnimatorListenerAdapter::OnAnimationEnd(
 }
 
 //===============================================================================
-// RippleBackground::OuterOpacityAnimatorListenerAdapter
+// CRippleBackground::OuterOpacityAnimatorListenerAdapter
 //===============================================================================
-RippleBackground::OuterOpacityAnimatorListenerAdapter::OuterOpacityAnimatorListenerAdapter(
-    /* [in] */ RippleBackground* host,
+CRippleBackground::OuterOpacityAnimatorListenerAdapter::OuterOpacityAnimatorListenerAdapter(
+    /* [in] */ CRippleBackground* host,
     /* [in] */ Int32 duration)
     : mHost(host)
     , mDuration(duration)
@@ -73,8 +73,6 @@ ECode CRippleBackground::OuterOpacityAnimatorListenerAdapter::OnAnimationCancel(
     return animation->RemoveListener(this);
 }
 
-
-
 //===============================================================================
 // RippleBackground
 //===============================================================================
@@ -85,16 +83,20 @@ static AutoPtr<ITimeInterpolator> Init_LINEAR_INTERPOLATOR()
     return li;
 }
 
-AutoPtr<ITimeInterpolator> RippleBackground::LINEAR_INTERPOLATOR = Init_LINEAR_INTERPOLATOR();
-const Float RippleBackground::GLOBAL_SPEED = 1.0f;
-const Float RippleBackground::WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
-const Float RippleBackground::WAVE_OUTER_OPACITY_EXIT_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
-const Float RippleBackground::WAVE_OUTER_OPACITY_EXIT_VELOCITY_MIN = 1.5f * GLOBAL_SPEED;
-const Float RippleBackground::WAVE_OUTER_OPACITY_ENTER_VELOCITY = 10.0f * GLOBAL_SPEED;
-const Float RippleBackground::WAVE_OUTER_SIZE_INFLUENCE_MAX = 200.f;
-const Float RippleBackground::WAVE_OUTER_SIZE_INFLUENCE_MIN = 40.f;
+AutoPtr<ITimeInterpolator> CRippleBackground::LINEAR_INTERPOLATOR = Init_LINEAR_INTERPOLATOR();
+const Float CRippleBackground::GLOBAL_SPEED = 1.0f;
+const Float CRippleBackground::WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
+const Float CRippleBackground::WAVE_OUTER_OPACITY_EXIT_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
+const Float CRippleBackground::WAVE_OUTER_OPACITY_EXIT_VELOCITY_MIN = 1.5f * GLOBAL_SPEED;
+const Float CRippleBackground::WAVE_OUTER_OPACITY_ENTER_VELOCITY = 10.0f * GLOBAL_SPEED;
+const Float CRippleBackground::WAVE_OUTER_SIZE_INFLUENCE_MAX = 200.f;
+const Float CRippleBackground::WAVE_OUTER_SIZE_INFLUENCE_MIN = 40.f;
 
-RippleBackground::RippleBackground()
+CAR_INTERFACE_IMPL(CRippleBackground, Object, IRippleBackground)
+
+CAR_OBJECT_IMPL(CRippleBackground)
+
+CRippleBackground::CRippleBackground()
     : mColorOpaque(0)
     , mColorAlpha(0)
     , mOuterRadius(0)
@@ -107,19 +109,13 @@ RippleBackground::RippleBackground()
     , mHasMaxRadius(FALSE)
 {}
 
-
-ECode RippleBackground::constructor(
+ECode CRippleBackground::constructor(
     /* [in] */ IRippleDrawable* owner,
     /* [in] */ IRect* bounds)
 {
     CArrayList::New((IArrayList**)&mRunningAnimations);
     CArrayList::New((IArrayList**)&mPendingAnimations);
-}
 
-ECode CRippleBackground::constructor(
-    /* [in] */ IRippleDrawable* owner,
-    /* [in] */ IRect* bounds)
-{
     mAnimationListener = new RBAnimatorListenerAdapter(this);
     mBounds = bounds;
     IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(owner);
@@ -127,7 +123,7 @@ ECode CRippleBackground::constructor(
     return NOERROR;
 }
 
-ECode RippleBackground::Setup(
+ECode CRippleBackground::Setup(
     /* [in] */ Int32 maxRadius,
     /* [in] */ Int32 color,
     /* [in] */ Float density)
@@ -155,7 +151,7 @@ ECode RippleBackground::Setup(
     return NOERROR;
 }
 
-ECode RippleBackground::IsHardwareAnimating(
+ECode CRippleBackground::IsHardwareAnimating(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -163,7 +159,7 @@ ECode RippleBackground::IsHardwareAnimating(
     return NOERROR;
 }
 
-ECode RippleBackground::OnHotspotBoundsChanged()
+ECode CRippleBackground::OnHotspotBoundsChanged()
 {
     if (!mHasMaxRadius) {
         Int32 width = 0, height = 0;
@@ -176,14 +172,14 @@ ECode RippleBackground::OnHotspotBoundsChanged()
     return NOERROR;
 }
 
-ECode RippleBackground::SetOuterOpacity(
+ECode CRippleBackground::SetOuterOpacity(
     /* [in] */ Float a)
 {
     mOuterOpacity = a;
     InvalidateSelf();
     return NOERROR;
 }
-ECode RippleBackground::GetOuterOpacity(
+ECode CRippleBackground::GetOuterOpacity(
     /* [out] */ Float* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -191,7 +187,7 @@ ECode RippleBackground::GetOuterOpacity(
     return NOERROR;
 }
 
-ECode RippleBackground::Draw(
+ECode CRippleBackground::Draw(
     /* [in] */ ICanvas* c,
     /* [in] */ IPaint* p,
     /* [out] */ Boolean* result)
@@ -216,7 +212,7 @@ ECode RippleBackground::Draw(
     return NOERROR;
 }
 
-ECode RippleBackground::ShouldDraw(
+ECode CRippleBackground::ShouldDraw(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -274,7 +270,7 @@ Boolean CRippleBackground::DrawSoftware(
     return hasContent;
 }
 
-ECode RippleBackground::GetBounds(
+ECode CRippleBackground::GetBounds(
     /* [in] */ IRect* bounds)
 {
     Int32 outerX = (Int32) mOuterX;
@@ -284,7 +280,7 @@ ECode RippleBackground::GetBounds(
     return NOERROR;
 }
 
-ECode RippleBackground::Enter()
+ECode CRippleBackground::Enter()
 {
     Cancel();
 
@@ -306,7 +302,7 @@ ECode RippleBackground::Enter()
     return NOERROR;
 }
 
-ECode RippleBackground::Exit()
+ECode CRippleBackground::Exit()
 {
     Cancel();
 
@@ -396,7 +392,7 @@ void CRippleBackground::ExitHardware(
     InvalidateSelf();
 }
 
-ECode RippleBackground::Jump()
+ECode CRippleBackground::Jump()
 {
     EndSoftwareAnimations();
     CancelHardwareAnimations(TRUE);
@@ -456,7 +452,7 @@ void CRippleBackground::ExitSoftware(
     IAnimator::Probe(outerOpacityAnim)->Start();
 }
 
-ECode RippleBackground::Cancel()
+ECode CRippleBackground::Cancel()
 {
     CancelSoftwareAnimations();
     CancelHardwareAnimations(TRUE);
