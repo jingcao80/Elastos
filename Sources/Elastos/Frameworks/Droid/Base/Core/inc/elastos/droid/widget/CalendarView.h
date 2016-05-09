@@ -894,6 +894,10 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    CalendarView();
+
+    ~CalendarView();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

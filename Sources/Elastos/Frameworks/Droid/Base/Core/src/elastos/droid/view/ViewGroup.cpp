@@ -611,7 +611,7 @@ ECode ViewGroup::MarginLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    LayoutParams::constructor(c, attrs);
+    LayoutParams::constructor();
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
         const_cast<Int32 *>(R::styleable::ViewGroup_MarginLayout),
         ArraySize(R::styleable::ViewGroup_MarginLayout));
@@ -619,8 +619,8 @@ ECode ViewGroup::MarginLayoutParams::constructor(
     ASSERT_SUCCEEDED(c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a));
 
     ECode ec = SetBaseAttributes(a,
-                R::styleable::ViewGroup_MarginLayout_layout_width,
-                R::styleable::ViewGroup_MarginLayout_layout_height);
+            R::styleable::ViewGroup_MarginLayout_layout_width,
+            R::styleable::ViewGroup_MarginLayout_layout_height);
 
     if (FAILED(ec)) {
         a->Recycle();
@@ -629,8 +629,7 @@ ECode ViewGroup::MarginLayoutParams::constructor(
 
     Int32 margin;
     a->GetDimensionPixelSize(
-            R::styleable::ViewGroup_MarginLayout_layout_margin,
-            -1, &margin);
+            R::styleable::ViewGroup_MarginLayout_layout_margin, -1, &margin);
     if (margin >= 0) {
         mLeftMargin = margin;
         mTopMargin = margin;
@@ -646,15 +645,15 @@ ECode ViewGroup::MarginLayoutParams::constructor(
             mLeftMargin = DEFAULT_MARGIN_RESOLVED;
         }
         a->GetDimensionPixelSize(
-                R::styleable::ViewGroup_MarginLayout_layout_marginTop,
-                DEFAULT_MARGIN_RESOLVED, &mTopMargin);
-        a->GetDimensionPixelSize(
                 R::styleable::ViewGroup_MarginLayout_layout_marginRight,
                 UNDEFINED_MARGIN, &mRightMargin);
         if (mRightMargin == UNDEFINED_MARGIN) {
             mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
             mRightMargin = DEFAULT_MARGIN_RESOLVED;
         }
+        a->GetDimensionPixelSize(
+                R::styleable::ViewGroup_MarginLayout_layout_marginTop,
+                DEFAULT_MARGIN_RESOLVED, &mTopMargin);
         a->GetDimensionPixelSize(
                 R::styleable::ViewGroup_MarginLayout_layout_marginBottom,
                 DEFAULT_MARGIN_RESOLVED, &mBottomMargin);
@@ -4240,7 +4239,7 @@ ECode ViewGroup::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Boolean usingRenderNodeProperties;
-    canvas->IsRecordingFor(TO_IINTERFACE(mRenderNode), &usingRenderNodeProperties);
+    canvas->IsRecordingFor(mRenderNode, &usingRenderNodeProperties);
     Int32 childrenCount = mChildrenCount;
     AutoPtr<ArrayOf<IView*> > children = mChildren;
     Int32 flags = mGroupFlags;

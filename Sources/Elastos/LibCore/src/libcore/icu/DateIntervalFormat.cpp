@@ -52,12 +52,13 @@ String DateIntervalFormat::FormatDateRange(
 {
     String id = olsonId;
     if ((flags & IDateIntervalFormat::FORMAT_UTC) != 0) {
-        id = String("UTC");
+        id = "UTC";
     }
     AutoPtr<ITimeZone> tz;
-    if (!olsonId.IsNull()) {
-        Elastos::Utility::TimeZone::GetTimeZone(olsonId, (ITimeZone**)&tz);
-    } else {
+    if (!id.IsNull()) {
+        Elastos::Utility::TimeZone::GetTimeZone(id, (ITimeZone**)&tz);
+    }
+    else {
         tz = Elastos::Utility::TimeZone::GetDefault();
     }
     return FormatDateRange(CLocale::GetDefault(), tz, startMs, endMs, flags);
@@ -70,16 +71,17 @@ String DateIntervalFormat::FormatDateRange(
     /* [in] */ Int64 endMs,
     /* [in] */ Int32 flags)
 {
-    AutoPtr<CCalendarHelper> calendarHelper = NULL;
-    CCalendarHelper::AcquireSingletonByFriend((CCalendarHelper**)&calendarHelper);
-    AutoPtr<ICalendar> startCallendar = NULL;
+    AutoPtr<ICalendarHelper> calendarHelper;
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&calendarHelper);
+    AutoPtr<ICalendar> startCallendar;
     calendarHelper->GetInstance(tz, (ICalendar**)&startCallendar);
     startCallendar->SetTimeInMillis(startMs);
 
-    AutoPtr<ICalendar> endCallendar = NULL;
+    AutoPtr<ICalendar> endCallendar;
     if (startMs == endMs) {
         endCallendar = startCallendar;
-    } else {
+    }
+    else {
         calendarHelper->GetInstance(tz, (ICalendar**)&endCallendar);
         endCallendar->SetTimeInMillis(endMs);
     }
@@ -91,7 +93,7 @@ String DateIntervalFormat::FormatDateRange(
     // This is not the behavior of icu4c's DateIntervalFormat, but it's the historical behavior
     // of Android's DateUtils.formatDateRange.
     if (startMs != endMs && endsAtMidnight &&
-        (((flags & IDateIntervalFormat::FORMAT_SHOW_TIME) == 0) || (DayDistance(startCallendar, endCallendar) <= 1))) {
+            (((flags & IDateIntervalFormat::FORMAT_SHOW_TIME) == 0) || (DayDistance(startCallendar, endCallendar) <= 1))) {
         endCallendar->Roll(ICalendar::DAY_OF_MONTH, FALSE);
         endMs -= DAY_IN_MS;
     }
@@ -271,8 +273,8 @@ Boolean DateIntervalFormat::IsThisYear(
     AutoPtr<ITimeZone> timeZone;
     c->GetTimeZone((ITimeZone**)&timeZone);
     AutoPtr<ICalendar> now;
-    AutoPtr<CCalendarHelper> calendarHelper;
-    CCalendarHelper::AcquireSingletonByFriend((CCalendarHelper**)&calendarHelper);
+    AutoPtr<ICalendarHelper> calendarHelper;
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&calendarHelper);
     calendarHelper->GetInstance(timeZone, (ICalendar**)&now);
     return GetField(c, ICalendar::YEAR) == GetField(now, ICalendar::YEAR);
 }

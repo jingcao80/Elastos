@@ -5,6 +5,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/view/Gravity.h"
 #include "elastos/droid/widget/ActionMenuPresenter.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include "elastos/droid/R.h"
 
@@ -12,7 +13,8 @@ using Elastos::Droid::View::Gravity;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::View::View;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -146,6 +148,7 @@ LinearLayout::LinearLayout()
     , mUseLargestChild(FALSE)
     , mDividerWidth(0)
     , mDividerHeight(0)
+    , mShowDividers(0)
     , mDividerPadding(0)
 {
 }
@@ -177,8 +180,8 @@ ECode LinearLayout::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    ASSERT_SUCCEEDED(ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes));
-    ASSERT_SUCCEEDED(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
+    FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes));
+    FAIL_RETURN(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
     return NOERROR;
 }
 
@@ -277,7 +280,8 @@ ECode LinearLayout::SetDividerDrawable(
     if (divider != NULL) {
         divider->GetIntrinsicWidth(&mDividerWidth);
         divider->GetIntrinsicHeight(&mDividerHeight);
-    } else {
+    }
+    else {
         mDividerWidth = 0;
         mDividerHeight = 0;
     }
@@ -337,11 +341,10 @@ void LinearLayout::DrawDividersVertical(
             child->GetVisibility(&visibility);
             if (visibility != IView::GONE) {
                 if (HasDividerBeforeChildAt(i)) {
-                    AutoPtr<IViewGroupLayoutParams> vglp;
-                    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
-                    ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(vglp);
-                    Int32 ml, mt, mr, mb;
-                    IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
+                    AutoPtr<IViewGroupLayoutParams> lp;
+                    child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+                    Int32 mt;
+                    IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&mt);
                     Int32 top;
                     child->GetTop(&top);
                     top = top - mt - mDividerHeight;
@@ -396,7 +399,8 @@ void LinearLayout::DrawDividersHorizontal(
                         Int32 right;
                         child->GetRight(&right);
                         position = right + mr;
-                    } else {
+                    }
+                    else {
                         Int32 left;
                         child->GetLeft(&left);
                         position = left - ml - mDividerWidth;
@@ -430,7 +434,8 @@ void LinearLayout::DrawDividersHorizontal(
                 Int32 left;
                 child->GetLeft(&left);
                 position = left - ml - mDividerWidth;
-            } else {
+            }
+            else {
                 Int32 right;
                 child->GetRight(&right);
                 position = right + mr;
@@ -636,12 +641,14 @@ Boolean LinearLayout::HasDividerBeforeChildAt(
 {
     if (childIndex == 0) {
         return (mShowDividers & ILinearLayout::SHOW_DIVIDER_BEGINNING) != 0;
-    } else if (childIndex == GetChildCount()) {
+    }
+    else if (childIndex == GetChildCount()) {
         return (mShowDividers & ILinearLayout::SHOW_DIVIDER_END) != 0;
-    } else if ((mShowDividers & ILinearLayout::SHOW_DIVIDER_MIDDLE) != 0) {
+    }
+    else if ((mShowDividers & ILinearLayout::SHOW_DIVIDER_MIDDLE) != 0) {
         Boolean hasVisibleViewBefore = FALSE;
         Int32 visibility;
-        for (int i = childIndex - 1; i >= 0; i--) {
+        for (Int32 i = childIndex - 1; i >= 0; i--) {
             AutoPtr<IView> child;
             GetChildAt(i, (IView**)&child);
             if (child != NULL) {
@@ -683,6 +690,8 @@ ECode LinearLayout::MeasureVertical(
 
     Int32 largestChildHeight = Elastos::Core::Math::INT32_MIN_VALUE;
 
+    using Elastos::Core::Math;
+
     // See how tall everyone is. Also remember max width.
     for (Int32 i = 0; i < count; ++i) {
         AutoPtr<IView> child = GetVirtualChildAt(i);
@@ -713,8 +722,8 @@ ECode LinearLayout::MeasureVertical(
         lp->GetWeight(&weight);
 
         Int32 width, height;
-        IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-        IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+        lv->GetWidth(&width);
+        lv->GetHeight(&height);
 
         Int32 top, left, right, bottom;
         IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
@@ -726,7 +735,7 @@ ECode LinearLayout::MeasureVertical(
             // leftover space. These views will get measured again down below if
             // there is any leftover space.
             Int32 totalLength = mTotalLength;
-            mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + top + bottom);
+            mTotalLength = Math::Max(totalLength, totalLength + top + bottom);
             skippedMeasure = TRUE;
         }
         else {
@@ -738,7 +747,7 @@ ECode LinearLayout::MeasureVertical(
                 // Translate that to WRAP_CONTENT so that it does not end up
                 // with a height of 0
                 oldHeight = 0;
-                IViewGroupLayoutParams::Probe(lp)->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
+                lv->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
             }
 
             // Determine how big this child would like to be. If this or
@@ -750,18 +759,18 @@ ECode LinearLayout::MeasureVertical(
                     totalWeight == 0 ? mTotalLength : 0);
 
             if (oldHeight != Elastos::Core::Math::INT32_MIN_VALUE) {
-                IViewGroupLayoutParams::Probe(lp)->SetHeight(oldHeight);
+                lv->SetHeight(oldHeight);
             }
 
             Int32 childHeight;
             child->GetMeasuredHeight(&childHeight);
 
             Int32 totalLength = mTotalLength;
-            mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + childHeight + top +
+            mTotalLength = Math::Max(totalLength, totalLength + childHeight + top +
                     bottom + GetNextLocationOffset(child));
 
             if (useLargestChild) {
-                largestChildHeight = Elastos::Core::Math::Max(childHeight, largestChildHeight);
+                largestChildHeight = Math::Max(childHeight, largestChildHeight);
             }
         }
 
@@ -799,7 +808,7 @@ ECode LinearLayout::MeasureVertical(
         child->GetMeasuredWidth(&measuredWidth);
         measuredWidth += margin;
 
-        maxWidth = Elastos::Core::Math::Max(maxWidth, measuredWidth);
+        maxWidth = Math::Max(maxWidth, measuredWidth);
         Int32 state;
         child->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
@@ -810,11 +819,11 @@ ECode LinearLayout::MeasureVertical(
              * Widths of weighted Views are bogus if we end up
              * remeasuring, so keep them separate.
              */
-            weightedMaxWidth = Elastos::Core::Math::Max(weightedMaxWidth,
+            weightedMaxWidth = Math::Max(weightedMaxWidth,
                     matchWidthLocally ? margin : measuredWidth);
         }
         else {
-            alternativeMaxWidth = Elastos::Core::Math::Max(alternativeMaxWidth,
+            alternativeMaxWidth = Math::Max(alternativeMaxWidth,
                     matchWidthLocally ? margin : measuredWidth);
         }
 
@@ -846,13 +855,12 @@ ECode LinearLayout::MeasureVertical(
 
             AutoPtr<IViewGroupLayoutParams> lv;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
             Int32 top, left, right, bottom;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
+            IViewGroupMarginLayoutParams::Probe(lv)->GetMargins(&left, &top, &right, &bottom);
 
             // Account for negative margins
             Int32 totalLength = mTotalLength;
-            mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + largestChildHeight +
+            mTotalLength = Math::Max(totalLength, totalLength + largestChildHeight +
                     top + bottom + GetNextLocationOffset(child));
         }
     }
@@ -863,7 +871,7 @@ ECode LinearLayout::MeasureVertical(
     Int32 heightSize = mTotalLength;
 
     // Check against our minimum height
-    heightSize = Elastos::Core::Math::Max(heightSize, GetSuggestedMinimumHeight());
+    heightSize = Math::Max(heightSize, GetSuggestedMinimumHeight());
 
     // Reconcile our calculated size with the heightMeasureSpec
     Int32 heightSizeAndState = ResolveSizeAndState(heightSize, heightMeasureSpec, 0);
@@ -894,8 +902,8 @@ ECode LinearLayout::MeasureVertical(
             Float weight;
             lp->GetWeight(&weight);
             Int32 width, height;
-            IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-            IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+            lv->GetWidth(&width);
+            lv->GetHeight(&height);
             Int32 left, top, right, bottom;
             IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
 
@@ -943,12 +951,12 @@ ECode LinearLayout::MeasureVertical(
             Int32 measuredWidth;
             child->GetMeasuredWidth(&measuredWidth);
             measuredWidth += margin;
-            maxWidth = Elastos::Core::Math::Max(maxWidth, measuredWidth);
+            maxWidth = Math::Max(maxWidth, measuredWidth);
 
             Boolean matchWidthLocally = widthMode != MeasureSpec::EXACTLY &&
                     width == IViewGroupLayoutParams::MATCH_PARENT;
 
-            alternativeMaxWidth = Elastos::Core::Math::Max(alternativeMaxWidth,
+            alternativeMaxWidth = Math::Max(alternativeMaxWidth,
                     matchWidthLocally ? margin : measuredWidth);
 
             allFillParent = allFillParent && width == IViewGroupLayoutParams::MATCH_PARENT;
@@ -957,7 +965,7 @@ ECode LinearLayout::MeasureVertical(
 
             Int32 h;
             child->GetMeasuredHeight(&h);
-            mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + h +
+            mTotalLength = Math::Max(totalLength, totalLength + h +
                     top + bottom + GetNextLocationOffset(child));
         }
 
@@ -966,7 +974,7 @@ ECode LinearLayout::MeasureVertical(
         // TODO: Should we recompute the heightSpec based on the new total length?
     }
     else {
-        alternativeMaxWidth = Elastos::Core::Math::Max(alternativeMaxWidth,
+        alternativeMaxWidth = Math::Max(alternativeMaxWidth,
                 weightedMaxWidth);
         // We have no limit, so make all weighted views as tall as the largest child.
         // Children will have already been measured once.
@@ -1008,7 +1016,7 @@ ECode LinearLayout::MeasureVertical(
     maxWidth += mPaddingLeft + mPaddingRight;
 
     // Check against our minimum width
-    maxWidth = Elastos::Core::Math::Max(maxWidth, GetSuggestedMinimumWidth());
+    maxWidth = Math::Max(maxWidth, GetSuggestedMinimumWidth());
 
     SetMeasuredDimension(ResolveSizeAndState(maxWidth, widthMeasureSpec, childState),
         heightSizeAndState);
@@ -1033,25 +1041,24 @@ void LinearLayout::ForceUniformWidth(
         Int32 v;
         child->GetVisibility(&v);
         if (v != IView::GONE) {
-            AutoPtr<IViewGroupLayoutParams> lv;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
+            AutoPtr<IViewGroupLayoutParams> lp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
             Int32 width;
-            IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
+            lp->GetWidth(&width);
 
             if (width == IViewGroupLayoutParams::MATCH_PARENT) {
                 // Temporarily force children to reuse their old measured height
                 // FIXME: this may not be right for something like wrapping text?
                 Int32 oldHeight;
-                IViewGroupLayoutParams::Probe(lp)->GetHeight(&oldHeight);
+                lp->GetHeight(&oldHeight);
                 Int32 height;
                 child->GetMeasuredHeight(&height);
-                IViewGroupLayoutParams::Probe(lp)->SetHeight(height);
+                lp->SetHeight(height);
 
                 // Remeasue with new dimensions
                 MeasureChildWithMargins(child, uniformMeasureSpec, 0, heightMeasureSpec, 0);
-                IViewGroupLayoutParams::Probe(lp)->SetHeight(oldHeight);
+                lp->SetHeight(oldHeight);
             }
         }
     }
@@ -1096,6 +1103,8 @@ ECode LinearLayout::MeasureHorizontal(
 
     Int32 largestChildWidth = Elastos::Core::Math::INT32_MIN_VALUE;
 
+    using Elastos::Core::Math;
+
     // See how wide everyone is. Also remember max height.
     for (Int32 i = 0; i < count; ++i) {
         AutoPtr<IView> child = GetVirtualChildAt(i);
@@ -1121,8 +1130,8 @@ ECode LinearLayout::MeasureHorizontal(
         ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
         Int32 width, height;
-        IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-        IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+        lv->GetWidth(&width);
+        lv->GetHeight(&height);
 
         Float weight;
         lp->GetWeight(&weight);
@@ -1140,9 +1149,10 @@ ECode LinearLayout::MeasureHorizontal(
             // there is any leftover space.
             if (isExactly) {
                 mTotalLength += left + right;
-            } else {
+            }
+            else {
                 Int32 totalLength = mTotalLength;
-                mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength +
+                mTotalLength = Math::Max(totalLength, totalLength +
                         left + right);
             }
 
@@ -1160,7 +1170,7 @@ ECode LinearLayout::MeasureHorizontal(
             }
         }
         else {
-            Int32 oldWidth = Elastos::Core::Math::INT32_MIN_VALUE;
+            Int32 oldWidth = Math::INT32_MIN_VALUE;
 
             if (width == 0 && weight > 0) {
                 // widthMode is either UNSPECIFIED or AT_MOST, and this
@@ -1168,7 +1178,7 @@ ECode LinearLayout::MeasureHorizontal(
                 // wanted to stretch to fill available space. Translate that to
                 // WRAP_CONTENT so that it does not end up with a width of 0
                 oldWidth = 0;
-                IViewGroupLayoutParams::Probe(lp)->SetWidth(IViewGroupLayoutParams::WRAP_CONTENT);
+                lv->SetWidth(IViewGroupLayoutParams::WRAP_CONTENT);
             }
 
             // Determine how big this child would like to be. If this or
@@ -1180,7 +1190,7 @@ ECode LinearLayout::MeasureHorizontal(
                     heightMeasureSpec, 0);
 
             if (oldWidth != Elastos::Core::Math::INT32_MIN_VALUE) {
-                IViewGroupLayoutParams::Probe(lp)->SetWidth(oldWidth);
+                lv->SetWidth(oldWidth);
             }
 
             Int32 childWidth;
@@ -1188,14 +1198,15 @@ ECode LinearLayout::MeasureHorizontal(
             if (isExactly) {
                 mTotalLength += childWidth + left + right +
                         GetNextLocationOffset(child);
-            } else {
+            }
+            else {
                 Int32 totalLength = mTotalLength;
-                mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + childWidth + left +
+                mTotalLength = Math::Max(totalLength, totalLength + childWidth + left +
                         right + GetNextLocationOffset(child));
             }
 
             if (useLargestChild) {
-                largestChildWidth = Elastos::Core::Math::Max(childWidth, largestChildWidth);
+                largestChildWidth = Math::Max(childWidth, largestChildWidth);
             }
         }
 
@@ -1226,12 +1237,12 @@ ECode LinearLayout::MeasureHorizontal(
                 Int32 index = ((gvt >> IGravity::AXIS_Y_SHIFT)
                         & ~IGravity::AXIS_SPECIFIED) >> 1;
 
-                (*maxAscent)[index] = Elastos::Core::Math::Max((*maxAscent)[index], childBaseline);
-                (*maxDescent)[index] = Elastos::Core::Math::Max((*maxDescent)[index], childHeight - childBaseline);
+                (*maxAscent)[index] = Math::Max((*maxAscent)[index], childBaseline);
+                (*maxDescent)[index] = Math::Max((*maxDescent)[index], childHeight - childBaseline);
             }
         }
 
-        maxHeight = Elastos::Core::Math::Max(maxHeight, childHeight);
+        maxHeight = Math::Max(maxHeight, childHeight);
 
         allFillParent = allFillParent && height == IViewGroupLayoutParams::MATCH_PARENT;
         if (weight > 0) {
@@ -1239,10 +1250,11 @@ ECode LinearLayout::MeasureHorizontal(
                 * Heights of weighted Views are bogus if we end up
                 * remeasuring, so keep them separate.
                 */
-            weightedMaxHeight = Elastos::Core::Math::Max(weightedMaxHeight,
+            weightedMaxHeight = Math::Max(weightedMaxHeight,
                     matchHeightLocally ? margin : childHeight);
-        } else {
-            alternativeMaxHeight = Elastos::Core::Math::Max(alternativeMaxHeight,
+        }
+        else {
+            alternativeMaxHeight = Math::Max(alternativeMaxHeight,
                     matchHeightLocally ? margin : childHeight);
         }
 
@@ -1259,13 +1271,13 @@ ECode LinearLayout::MeasureHorizontal(
             (*maxAscent)[INDEX_CENTER_VERTICAL] != -1 ||
             (*maxAscent)[INDEX_BOTTOM] != -1 ||
             (*maxAscent)[INDEX_FILL] != -1) {
-        Int32 ascent = Elastos::Core::Math::Max((*maxAscent)[INDEX_FILL],
-                Elastos::Core::Math::Max((*maxAscent)[INDEX_CENTER_VERTICAL],
-                Elastos::Core::Math::Max((*maxAscent)[INDEX_TOP], (*maxAscent)[INDEX_BOTTOM])));
-        Int32 descent = Elastos::Core::Math::Max((*maxDescent)[INDEX_FILL],
-                Elastos::Core::Math::Max((*maxDescent)[INDEX_CENTER_VERTICAL],
-                Elastos::Core::Math::Max((*maxDescent)[INDEX_TOP], (*maxDescent)[INDEX_BOTTOM])));
-        maxHeight = Elastos::Core::Math::Max(maxHeight, ascent + descent);
+        Int32 ascent = Math::Max((*maxAscent)[INDEX_FILL],
+                Math::Max((*maxAscent)[INDEX_CENTER_VERTICAL],
+                Math::Max((*maxAscent)[INDEX_TOP], (*maxAscent)[INDEX_BOTTOM])));
+        Int32 descent = Math::Max((*maxDescent)[INDEX_FILL],
+                Math::Max((*maxDescent)[INDEX_CENTER_VERTICAL],
+                Math::Max((*maxDescent)[INDEX_TOP], (*maxDescent)[INDEX_BOTTOM])));
+        maxHeight = Math::Max(maxHeight, ascent + descent);
     }
 
     if (useLargestChild &&
@@ -1286,9 +1298,8 @@ ECode LinearLayout::MeasureHorizontal(
                 continue;
             }
 
-            AutoPtr<IViewGroupLayoutParams> lv;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
+            AutoPtr<IViewGroupLayoutParams> lp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
             Int32 left, top, right, bottom;
             IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
@@ -1296,9 +1307,10 @@ ECode LinearLayout::MeasureHorizontal(
             if (isExactly) {
                 mTotalLength += largestChildWidth + left + right +
                     GetNextLocationOffset(child);
-            } else {
+            }
+            else {
                 Int32 totalLength = mTotalLength;
-                mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + largestChildWidth +
+                mTotalLength = Math::Max(totalLength, totalLength + largestChildWidth +
                         left + right + GetNextLocationOffset(child));
             }
         }
@@ -1310,7 +1322,7 @@ ECode LinearLayout::MeasureHorizontal(
     Int32 widthSize = mTotalLength;
 
     // Check against our minimum width
-    widthSize = Elastos::Core::Math::Max(widthSize, GetSuggestedMinimumWidth());
+    widthSize = Math::Max(widthSize, GetSuggestedMinimumWidth());
 
     // Reconcile our calculated size with the widthMeasureSpec
     Int32 widthSizeAndState = ResolveSizeAndState(widthSize, widthMeasureSpec, 0);
@@ -1350,8 +1362,8 @@ ECode LinearLayout::MeasureHorizontal(
             totalWeight += weight;
 
             Int32 width, height, lpGravity;
-            IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-            IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+            lv->GetWidth(&width);
+            lv->GetHeight(&height);
             lp->GetGravity(&lpGravity);
 
             Int32 left, top, right, bottom;
@@ -1384,7 +1396,8 @@ ECode LinearLayout::MeasureHorizontal(
                     child->Measure(
                         MeasureSpec::MakeMeasureSpec(childWidth, MeasureSpec::EXACTLY),
                         childHeightMeasureSpec);
-                } else {
+                }
+                else {
                     // child was skipped in the loop above. Measure for this first time here
                     child->Measure(MeasureSpec::MakeMeasureSpec(
                             share > 0 ? share : 0, MeasureSpec::EXACTLY),
@@ -1403,9 +1416,10 @@ ECode LinearLayout::MeasureHorizontal(
             if (isExactly) {
                 mTotalLength += result + left + right +
                         GetNextLocationOffset(child);
-            } else {
+            }
+            else {
                 Int32 totalLength = mTotalLength;
-                mTotalLength = Elastos::Core::Math::Max(totalLength, totalLength + result +
+                mTotalLength = Math::Max(totalLength, totalLength + result +
                         left + right + GetNextLocationOffset(child));
             }
 
@@ -1415,8 +1429,8 @@ ECode LinearLayout::MeasureHorizontal(
             Int32 margin = top + bottom;
             child->GetMeasuredHeight(&result);
             Int32 childHeight = result + margin;
-            maxHeight = Elastos::Core::Math::Max(maxHeight, childHeight);
-            alternativeMaxHeight = Elastos::Core::Math::Max(alternativeMaxHeight,
+            maxHeight = Math::Max(maxHeight, childHeight);
+            alternativeMaxHeight = Math::Max(alternativeMaxHeight,
                     matchHeightLocally ? margin : childHeight);
 
             allFillParent = allFillParent && height == IViewGroupLayoutParams::MATCH_PARENT;
@@ -1431,8 +1445,8 @@ ECode LinearLayout::MeasureHorizontal(
                     Int32 index = ((gravity >> IGravity::AXIS_Y_SHIFT)
                             & ~IGravity::AXIS_SPECIFIED) >> 1;
 
-                    (*maxAscent)[index] = Elastos::Core::Math::Max((*maxAscent)[index], childBaseline);
-                    (*maxDescent)[index] = Elastos::Core::Math::Max((*maxDescent)[index],
+                    (*maxAscent)[index] = Math::Max((*maxAscent)[index], childBaseline);
+                    (*maxDescent)[index] = Math::Max((*maxDescent)[index],
                             childHeight - childBaseline);
                 }
             }
@@ -1448,16 +1462,17 @@ ECode LinearLayout::MeasureHorizontal(
                 (*maxAscent)[INDEX_CENTER_VERTICAL] != -1 ||
                 (*maxAscent)[INDEX_BOTTOM] != -1 ||
                 (*maxAscent)[INDEX_FILL] != -1) {
-            Int32 ascent = Elastos::Core::Math::Max((*maxAscent)[INDEX_FILL],
-                    Elastos::Core::Math::Max((*maxAscent)[INDEX_CENTER_VERTICAL],
-                    Elastos::Core::Math::Max((*maxAscent)[INDEX_TOP], (*maxAscent)[INDEX_BOTTOM])));
-            Int32 descent = Elastos::Core::Math::Max((*maxDescent)[INDEX_FILL],
-                    Elastos::Core::Math::Max((*maxDescent)[INDEX_CENTER_VERTICAL],
-                    Elastos::Core::Math::Max((*maxDescent)[INDEX_TOP], (*maxDescent)[INDEX_BOTTOM])));
-            maxHeight = Elastos::Core::Math::Max(maxHeight, ascent + descent);
+            Int32 ascent = Math::Max((*maxAscent)[INDEX_FILL],
+                    Math::Max((*maxAscent)[INDEX_CENTER_VERTICAL],
+                    Math::Max((*maxAscent)[INDEX_TOP], (*maxAscent)[INDEX_BOTTOM])));
+            Int32 descent = Math::Max((*maxDescent)[INDEX_FILL],
+                    Math::Max((*maxDescent)[INDEX_CENTER_VERTICAL],
+                    Math::Max((*maxDescent)[INDEX_TOP], (*maxDescent)[INDEX_BOTTOM])));
+            maxHeight = Math::Max(maxHeight, ascent + descent);
         }
-    } else {
-        alternativeMaxHeight = Elastos::Core::Math::Max(alternativeMaxHeight, weightedMaxHeight);
+    }
+    else {
+        alternativeMaxHeight = Math::Max(alternativeMaxHeight, weightedMaxHeight);
         // We have no limit, so make all weighted views as wide as the largest child.
         // Children will have already been measured once.
         if (useLargestChild && widthMode != MeasureSpec::EXACTLY) {
@@ -1499,7 +1514,7 @@ ECode LinearLayout::MeasureHorizontal(
     maxHeight += mPaddingTop + mPaddingBottom;
 
     // Check against our minimum height
-    maxHeight = Elastos::Core::Math::Max(maxHeight, GetSuggestedMinimumHeight());
+    maxHeight = Math::Max(maxHeight, GetSuggestedMinimumHeight());
 
     SetMeasuredDimension(widthSizeAndState | (childState & IView::MEASURED_STATE_MASK),
         ResolveSizeAndState(maxHeight, heightMeasureSpec,
@@ -1530,25 +1545,24 @@ void LinearLayout::ForceUniformHeight(
         Int32 visibility;
         child->GetVisibility(&visibility);
         if (visibility != IView::GONE) {
-            AutoPtr<IViewGroupLayoutParams> lv;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
+            AutoPtr<IViewGroupLayoutParams> lp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
             Int32 height;
-            IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+            lp->GetHeight(&height);
 
             if (height == IViewGroupLayoutParams::MATCH_PARENT) {
                 // Temporarily force children to reuse their old measured width
                 // FIXME: this may not be right for something like wrapping text?
                 Int32 oldWidth;
-                IViewGroupLayoutParams::Probe(lp)->GetWidth(&oldWidth);
+                lp->GetWidth(&oldWidth);
                 Int32 width;
                 child->GetMeasuredWidth(&width);
-                IViewGroupLayoutParams::Probe(lp)->SetWidth(width);
+                lp->SetWidth(width);
 
                 // Remeasure with new dimensions
                 MeasureChildWithMargins(child, widthMeasureSpec, 0, uniformMeasureSpec, 0);
-                IViewGroupLayoutParams::Probe(lp)->SetWidth(oldWidth);
+                lp->SetWidth(oldWidth);
             }
         }
     }
@@ -1600,7 +1614,8 @@ ECode LinearLayout::OnLayout(
 {
     if (mOrientation == ILinearLayout::VERTICAL) {
         LayoutVertical(l, t, r, b);
-    } else {
+    }
+    else {
         LayoutHorizontal(l, t, r, b);
     }
     return NOERROR;
@@ -1624,7 +1639,8 @@ void LinearLayout::LayoutVertical(
     // Space available for child
     Int32 childSpace = width - paddingLeft - mPaddingRight;
 
-    Int32 count = 0;GetVirtualChildCount(&count);
+    Int32 count = 0;
+    GetVirtualChildCount(&count);
 
     Int32 majorGravity = mGravity & IGravity::VERTICAL_GRAVITY_MASK;
     Int32 minorGravity = mGravity & IGravity::RELATIVE_HORIZONTAL_GRAVITY_MASK;
@@ -1665,8 +1681,8 @@ void LinearLayout::LayoutVertical(
                 ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
                 Int32 width, height, gravity;
-                IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-                IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+                lv->GetWidth(&width);
+                lv->GetHeight(&height);
                 lp->GetGravity(&gravity);
 
                 Int32 left, top, right, bottom;
@@ -1697,7 +1713,6 @@ void LinearLayout::LayoutVertical(
                 if (HasDividerBeforeChildAt(i)) {
                     childTop += mDividerHeight;
                 }
-
 
                 childTop += top;
                 SetChildFrame(child, childLeft, childTop + GetLocationOffset(child),
@@ -1772,87 +1787,83 @@ void LinearLayout::LayoutHorizontal(
         Int32 childIndex = start + dir * i;
         AutoPtr<IView> child = GetVirtualChildAt(childIndex);
 
+        Int32 visibility;
         if (child == NULL) {
             childLeft += MeasureNullChild(childIndex);
-        } else {
-            Int32 visibility;
-            child->GetVisibility(&visibility);
-            if (visibility != IView::GONE) {
-                Int32 childWidth, childHeight;
-                child->GetMeasuredWidth(&childWidth);
-                child->GetMeasuredHeight(&childHeight);
-                Int32 childBaseline = -1;
+        }
+        else if ((child->GetVisibility(&visibility), visibility) != IView::GONE) {
+            Int32 childWidth, childHeight;
+            child->GetMeasuredWidth(&childWidth);
+            child->GetMeasuredHeight(&childHeight);
+            Int32 childBaseline = -1;
 
-                AutoPtr<IViewGroupLayoutParams> lv;
-                child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
-                ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
+            AutoPtr<IViewGroupLayoutParams> lv;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&lv);
+            ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(lv);
 
-                Int32 width, height,  gravity;
-                IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-                IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
-                lp->GetGravity(&gravity);
-
-                Int32 left, top, right, bottom;
-                IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
-
-                if (baselineAligned && height != IViewGroupLayoutParams::MATCH_PARENT) {
-                    child->GetBaseline(&childBaseline);
-                }
-
-                if (gravity < 0) {
-                    gravity = minorGravity;
-                }
-
-                switch (gravity & IGravity::VERTICAL_GRAVITY_MASK) {
-                    case IGravity::TOP:
-                        childTop = paddingTop + top;
-                        if (childBaseline != -1) {
-                            childTop += (*maxAscent)[INDEX_TOP] - childBaseline;
-                        }
-                        break;
-
-                    case IGravity::CENTER_VERTICAL:
-                        // Removed support for baseline alignment when layout_gravity or
-                        // gravity == center_vertical. See bug #1038483.
-                        // Keep the code around if we need to re-enable this feature
-                        // if (childBaseline != -1) {
-                        //     // Align baselines vertically only if the child is smaller than us
-                        //     if (childSpace - childHeight > 0) {
-                        //         childTop = paddingTop + (childSpace / 2) - childBaseline;
-                        //     } else {
-                        //         childTop = paddingTop + (childSpace - childHeight) / 2;
-                        //     }
-                        // } else {
-                        childTop = paddingTop + ((childSpace - childHeight) / 2)
-                                + top - bottom;
-                        break;
-
-                    case IGravity::BOTTOM:
-                        childTop = childBottom - childHeight - bottom;
-                        if (childBaseline != -1) {
-                            Int32 descent;
-                            child->GetMeasuredHeight(&descent);
-                            descent -= childBaseline;
-                            childTop -= ((*maxDescent)[INDEX_BOTTOM] - descent);
-                        }
-                        break;
-                    default:
-                        childTop = paddingTop;
-                        break;
-                }
-
-                if (HasDividerBeforeChildAt(childIndex)) {
-                    childLeft += mDividerWidth;
-                }
-
-                childLeft += left;
-                SetChildFrame(child, childLeft + GetLocationOffset(child), childTop,
-                        childWidth, childHeight);
-                childLeft += childWidth + right +
-                        GetNextLocationOffset(child);
-
-                i += GetChildrenSkipCount(child, childIndex);
+            Int32 height;
+            lv->GetHeight(&height);
+            if (baselineAligned && height != IViewGroupLayoutParams::MATCH_PARENT) {
+                child->GetBaseline(&childBaseline);
             }
+
+            Int32 gravity;
+            lp->GetGravity(&gravity);
+            if (gravity < 0) {
+                gravity = minorGravity;
+            }
+            Int32 left, top, right, bottom;
+            IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&left, &top, &right, &bottom);
+
+            switch (gravity & IGravity::VERTICAL_GRAVITY_MASK) {
+                case IGravity::TOP:
+                    childTop = paddingTop + top;
+                    if (childBaseline != -1) {
+                        childTop += (*maxAscent)[INDEX_TOP] - childBaseline;
+                    }
+                    break;
+
+                case IGravity::CENTER_VERTICAL:
+                    // Removed support for baseline alignment when layout_gravity or
+                    // gravity == center_vertical. See bug #1038483.
+                    // Keep the code around if we need to re-enable this feature
+                    // if (childBaseline != -1) {
+                    //     // Align baselines vertically only if the child is smaller than us
+                    //     if (childSpace - childHeight > 0) {
+                    //         childTop = paddingTop + (childSpace / 2) - childBaseline;
+                    //     } else {
+                    //         childTop = paddingTop + (childSpace - childHeight) / 2;
+                    //     }
+                    // } else {
+                    childTop = paddingTop + ((childSpace - childHeight) / 2)
+                            + top - bottom;
+                    break;
+
+                case IGravity::BOTTOM:
+                    childTop = childBottom - childHeight - bottom;
+                    if (childBaseline != -1) {
+                        Int32 descent;
+                        child->GetMeasuredHeight(&descent);
+                        descent -= childBaseline;
+                        childTop -= ((*maxDescent)[INDEX_BOTTOM] - descent);
+                    }
+                    break;
+                default:
+                    childTop = paddingTop;
+                    break;
+            }
+
+            if (HasDividerBeforeChildAt(childIndex)) {
+                childLeft += mDividerWidth;
+            }
+
+            childLeft += left;
+            SetChildFrame(child, childLeft + GetLocationOffset(child), childTop,
+                    childWidth, childHeight);
+            childLeft += childWidth + right +
+                    GetNextLocationOffset(child);
+
+            i += GetChildrenSkipCount(child, childIndex);
         }
     }
 }
@@ -1936,11 +1947,7 @@ ECode LinearLayout::GenerateLayoutParams(
     VALIDATE_NOT_NULL(params);
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
-    AutoPtr<ILinearLayoutLayoutParams> lp;
-    FAIL_RETURN(CLinearLayoutLayoutParams::New(ctx, attrs, (ILinearLayoutLayoutParams**)&lp));
-    *params = IViewGroupLayoutParams::Probe(lp);
-    REFCOUNT_ADD(*params);
-    return NOERROR;
+    return CLinearLayoutLayoutParams::New(ctx, attrs, params);
 }
 
 ECode LinearLayout::GenerateDefaultLayoutParams(
@@ -1950,18 +1957,14 @@ ECode LinearLayout::GenerateDefaultLayoutParams(
     *lp = NULL;
 
     if (mOrientation == ILinearLayout::HORIZONTAL) {
-        CLinearLayoutLayoutParams::New(
-            IViewGroupLayoutParams::WRAP_CONTENT,
-            IViewGroupLayoutParams::WRAP_CONTENT,
-            lp);
-        return NOERROR;
+        return CLinearLayoutLayoutParams::New(
+                IViewGroupLayoutParams::WRAP_CONTENT,
+                IViewGroupLayoutParams::WRAP_CONTENT, lp);
     }
     else if (mOrientation == ILinearLayout::VERTICAL) {
-        CLinearLayoutLayoutParams::New(
-            IViewGroupLayoutParams::MATCH_PARENT,
-            IViewGroupLayoutParams::WRAP_CONTENT,
-            lp);
-        return NOERROR;
+        return CLinearLayoutLayoutParams::New(
+                IViewGroupLayoutParams::MATCH_PARENT,
+                IViewGroupLayoutParams::WRAP_CONTENT, lp);
     }
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
@@ -1972,7 +1975,7 @@ AutoPtr<IViewGroupLayoutParams> LinearLayout::GenerateLayoutParams(
     assert(p);
     AutoPtr<IViewGroupLayoutParams> params;
     ASSERT_SUCCEEDED(CLinearLayoutLayoutParams::New(p,
-        (IViewGroupLayoutParams**)&params));
+            (IViewGroupLayoutParams**)&params));
     return params;
 }
 
@@ -1980,7 +1983,7 @@ AutoPtr<IViewGroupLayoutParams> LinearLayout::GenerateLayoutParams(
 Boolean LinearLayout::CheckLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    return (p && p->Probe(EIID_ILinearLayoutLayoutParams) != NULL);
+    return (p && ILinearLayoutLayoutParams::Probe(p) != NULL);
 }
 
 //@Override
@@ -1988,8 +1991,8 @@ ECode LinearLayout::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     ViewGroup::OnInitializeAccessibilityEvent(event);
-    //event.setClassName(LinearLayout.class.getName());
-    return NOERROR;
+    return IAccessibilityRecord::Probe(event)->SetClassName(
+            CoreUtils::Convert("CLinearLayout"));
 }
 
 //@Override
@@ -1997,8 +2000,7 @@ ECode LinearLayout::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     ViewGroup::OnInitializeAccessibilityNodeInfo(info);
-    //info.setClassName(LinearLayout.class.getName());
-    return NOERROR;
+    return info->SetClassName(CoreUtils::Convert("CLinearLayout"));
 }
 
 Int32 LinearLayout::GetChildCount()

@@ -2,7 +2,7 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <Elastos.CoreLibrary.Text.h>
 #include "elastos/droid/widget/CalendarView.h"
-#include "elastos/droid/widget/AbsListView.h"
+#include "elastos/droid/widget/CAbsListViewLayoutParams.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CRect.h"
@@ -31,10 +31,12 @@ using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::Widget::CAbsListViewLayoutParams;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Core::ICloneable;
+using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
@@ -92,9 +94,8 @@ CAR_INTERFACE_IMPL(CalendarView::LegacyCalendarViewDelegate::OnScrollListener, O
 
 CalendarView::LegacyCalendarViewDelegate::OnScrollListener::OnScrollListener(
     /* [in] */ LegacyCalendarViewDelegate* owner)
-{
-    mOwner = owner;
-}
+    : mOwner(owner)
+{}
 
 ECode CalendarView::LegacyCalendarViewDelegate::OnScrollListener::OnScrollStateChanged(
     /* [in] */ IAbsListView* view,
@@ -110,8 +111,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::OnScrollListener::OnScroll(
     /* [in] */ Int32 visibleItemCount,
     /* [in] */ Int32 totalItemCount)
 {
-    mOwner->OnScroll(view, firstVisibleItem,
-            visibleItemCount, totalItemCount);
+    mOwner->OnScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
     return NOERROR;
 }
 
@@ -301,7 +301,7 @@ CalendarView::LegacyCalendarViewDelegate::LegacyCalendarViewDelegate(
 
     // go to today or whichever is close to today min or max date
     AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    CSystem::AcquireSingleton((ISystem**)&system);
     Int64 nowTime = 0;
     system->GetCurrentTimeMillis(&nowTime);
     mTempDate->SetTimeInMillis(nowTime);
@@ -705,15 +705,13 @@ ECode CalendarView::LegacyCalendarViewDelegate::OnConfigurationChanged(
 ECode CalendarView::LegacyCalendarViewDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CCalendarView"));
-    return NOERROR;
+    return IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CCalendarView"));
 }
 
 ECode CalendarView::LegacyCalendarViewDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-   info->SetClassName(CoreUtils::Convert("CCalendarView"));
-    return NOERROR;
+   return info->SetClassName(CoreUtils::Convert("CCalendarView"));
 }
 
 ECode CalendarView::LegacyCalendarViewDelegate::SetCurrentLocale(
@@ -733,8 +731,8 @@ void CalendarView::LegacyCalendarViewDelegate::UpdateDateTextSize()
     AutoPtr<IContext> cxt;
     IView::Probe(mDelegator)->GetContext((IContext**)&cxt);
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::TextAppearance),
-        ArraySize(R::styleable::TextAppearance));
+            const_cast<Int32*>(R::styleable::TextAppearance),
+            ArraySize(R::styleable::TextAppearance));
     AutoPtr<ITypedArray> dateTextAppearance;
     cxt->ObtainStyledAttributes(
             mDateTextAppearanceResId, attrIds, (ITypedArray**)&dateTextAppearance);
@@ -748,9 +746,8 @@ void CalendarView::LegacyCalendarViewDelegate::InvalidateAllWeekViews()
     Int32 childCount = 0;
     IViewGroup::Probe(mListView)->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
-        AutoPtr<IView> child;
-        IViewGroup::Probe(mListView)->GetChildAt(i, (IView**)&child);
-        AutoPtr<IView> view = IView::Probe(child);
+        AutoPtr<IView> view;
+        IViewGroup::Probe(mListView)->GetChildAt(i, (IView**)&view);
         view->Invalidate();
     }
 }
@@ -795,7 +792,7 @@ void CalendarView::LegacyCalendarViewDelegate::SetUpAdapter()
     if (mAdapter == NULL) {
         mAdapter = new WeeksAdapter(mContext, this);
         AutoPtr<_DataSetObserver> p = new _DataSetObserver(this);
-        mAdapter->RegisterDataSetObserver(IDataSetObserver::Probe(p));
+        mAdapter->RegisterDataSetObserver(p);
         IAdapterView::Probe(mListView)->SetAdapter(mAdapter);
     }
 
@@ -827,17 +824,17 @@ void CalendarView::LegacyCalendarViewDelegate::SetUpHeader()
     mDayNamesHeader->GetChildCount(&count);
     for (Int32 i = 1; i < count; i++) {
         AutoPtr<IView> child;
-        mDayNamesHeader->GetChildAt(0, (IView**)&child);
+        mDayNamesHeader->GetChildAt(i, (IView**)&child);
         label = ITextView::Probe(child);
         if (mWeekDayTextAppearanceResId > -1) {
             label->SetTextAppearance(mContext, mWeekDayTextAppearanceResId);
         }
         if (i < mDaysPerWeek + 1) {
             label->SetText(CoreUtils::Convert((*mDayLabels)[i - 1]));
-            IView::Probe(label)->SetVisibility(IView::VISIBLE);
+            child->SetVisibility(IView::VISIBLE);
         }
         else {
-            IView::Probe(label)->SetVisibility(IView::GONE);
+            child->SetVisibility(IView::GONE);
         }
     }
     IView::Probe(mDayNamesHeader)->Invalidate();
@@ -850,10 +847,11 @@ void CalendarView::LegacyCalendarViewDelegate::SetUpListView()
     mListView->SetItemsCanFocus(TRUE);
     IView::Probe(mListView)->SetVerticalScrollBarEnabled(FALSE);
     AutoPtr<OnScrollListener> p = new OnScrollListener(this);
-    IAbsListView::Probe(mListView)->SetOnScrollListener(p);
+    IAbsListView* listview = IAbsListView::Probe(mListView);
+    listview->SetOnScrollListener(p);
     // Make the scrolling behavior nicer
-    IAbsListView::Probe(mListView)->SetFriction(mFriction);
-    IAbsListView::Probe(mListView)->SetVelocityScale(mVelocityScale);
+    listview->SetFriction(mFriction);
+    listview->SetVelocityScale(mVelocityScale);
 }
 
 void CalendarView::LegacyCalendarViewDelegate::GoTo(
@@ -899,7 +897,6 @@ void CalendarView::LegacyCalendarViewDelegate::GoTo(
         SetMonthDisplayed(mFirstDayOfMonth);
 
         // the earliest time we can scroll to is the min date
-        Boolean bIsBf = FALSE;
         if ((mFirstDayOfMonth->IsBefore(mMinDate, &bIsBf), bIsBf)) {
             position = 0;
         }
@@ -908,14 +905,15 @@ void CalendarView::LegacyCalendarViewDelegate::GoTo(
         }
 
         mPreviousScrollState = IAbsListViewOnScrollListener::SCROLL_STATE_FLING;
+        IAbsListView* listview = IAbsListView::Probe(mListView);
         if (animate) {
-            IAbsListView::Probe(mListView)->SmoothScrollToPositionFromTop(position, mListScrollTopOffset,
+            listview->SmoothScrollToPositionFromTop(position, mListScrollTopOffset,
                     GOTO_SCROLL_DURATION);
         }
         else {
-            IAbsListView::Probe(mListView)->SetSelectionFromTop(position, mListScrollTopOffset);
+            listview->SetSelectionFromTop(position, mListScrollTopOffset);
             // Perform any after scroll operations that are needed
-            OnScrollStateChanged(IAbsListView::Probe(mListView), IAbsListViewOnScrollListener::SCROLL_STATE_IDLE);
+            OnScrollStateChanged(listview, IAbsListViewOnScrollListener::SCROLL_STATE_IDLE);
         }
     }
     else if (setSelected) {
@@ -929,9 +927,15 @@ Boolean CalendarView::LegacyCalendarViewDelegate::ParseDate(
     /* [in] */ ICalendar* outDate)
 {
     AutoPtr<IDate> d;
-    mDateFormat->Parse(date, (IDate**)&d);
-    outDate->SetTime(d);
-    return TRUE;
+    ECode ec = mDateFormat->Parse(date, (IDate**)&d);
+    if (SUCCEEDED(ec)) {
+        outDate->SetTime(d);
+        return TRUE;
+    }
+    else {
+        // Log.w(LOG_TAG, "Date: " + date + " not in format: " + DATE_FORMAT);
+        return FALSE;
+    }
 }
 
 void CalendarView::LegacyCalendarViewDelegate::OnScrollStateChanged(
@@ -976,6 +980,7 @@ void CalendarView::LegacyCalendarViewDelegate::OnScroll(
     // causes the month to transition when two full weeks of a month are
     // visible when scrolling up, and when the first day in a month reaches
     // the top of the screen when scrolling down.
+    child->GetBottom(&b);
     Int32 offset = b < mWeekMinVisibleHeight ? 1 : 0;
     if (mIsScrollingUp) {
         AutoPtr<IView> c;
@@ -1112,8 +1117,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::ScrollStateRunnable::Run()
             if (mHost->mIsScrollingUp) {
                 Int32 h = 0;
                 child->GetHeight(&h);
-                mView->SmoothScrollBy(dist - h,
-                        ADJUSTMENT_SCROLL_DURATION);
+                mView->SmoothScrollBy(dist - h, ADJUSTMENT_SCROLL_DURATION);
             }
             else {
                 mView->SmoothScrollBy(dist, ADJUSTMENT_SCROLL_DURATION);
@@ -1223,9 +1227,9 @@ ECode CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::GetView(
     }
     else {
         weekView = new WeekView(mHost->mContext, mHost);
-        AutoPtr<AbsListView::LayoutParams> params = new AbsListView::LayoutParams();
-        params->constructor(IViewGroupLayoutParams::WRAP_CONTENT,
-                IViewGroupLayoutParams::WRAP_CONTENT);
+        AutoPtr<IViewGroupLayoutParams> params;
+        CAbsListViewLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
+                IViewGroupLayoutParams::WRAP_CONTENT, (IViewGroupLayoutParams**)&params);
         weekView->SetLayoutParams(params);
         weekView->SetClickable(TRUE);
         weekView->SetOnTouchListener(this);
@@ -1259,7 +1263,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::OnTouch(
     VALIDATE_NOT_NULL(result)
     Boolean bEnbl = FALSE, bTouch = FALSE;
     if ((IView::Probe(mHost->mListView)->IsEnabled(&bEnbl), bEnbl) &&
-         (mGestureDetector->OnTouchEvent(event, &bTouch), bTouch)) {
+            (mGestureDetector->OnTouchEvent(event, &bTouch), bTouch)) {
         AutoPtr<WeekView> weekView = (WeekView*)v;
         // if we cannot find a day for the given location we are done
         Float x = 0.f;
@@ -1666,10 +1670,11 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+    IView* view = IView::Probe(mHost->mListView);
     Int32 h = 0, t = 0, b = 0;
-    IView::Probe(mHost->mListView)->GetHeight(&h);
-    IView::Probe(mHost->mListView)->GetPaddingTop(&t);
-    IView::Probe(mHost->mListView)->GetPaddingBottom(&b);
+    view->GetHeight(&h);
+    view->GetPaddingTop(&t);
+    view->GetPaddingBottom(&b);
     mHeight = (h - t - b) / mHost->mShownWeekCount;
     SetMeasuredDimension(MeasureSpec::GetSize(widthMeasureSpec), mHeight);
 }
@@ -1707,6 +1712,12 @@ ECode CalendarView::LegacyCalendarViewDelegate::_DataSetObserver::OnInvalidated(
 const String CalendarView::TAG("CalendarView");
 
 CAR_INTERFACE_IMPL(CalendarView, FrameLayout, ICalendarView)
+
+CalendarView::CalendarView()
+{}
+
+CalendarView::~CalendarView()
+{}
 
 ECode CalendarView::constructor(
     /* [in] */ IContext* context)

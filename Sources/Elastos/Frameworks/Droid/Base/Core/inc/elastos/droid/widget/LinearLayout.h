@@ -510,9 +510,9 @@ private:
 
     CARAPI InitFromAttributes(
         /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyleAttr = 0,
-        /* [in] */ Int32 defStyleRes = 0);
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr,
+        /* [in] */ Int32 defStyleRes);
 
     CARAPI_(AutoPtr<IView>) GetVirtualChildAt(
         /* [in] */ Int32 index);
