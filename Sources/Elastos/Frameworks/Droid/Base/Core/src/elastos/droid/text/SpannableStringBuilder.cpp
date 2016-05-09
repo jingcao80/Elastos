@@ -9,6 +9,7 @@
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/Character.h>
+#include <elastos/utility/logging/Logger.h>
 #include <libcore/utility/EmptyArray.h>
 
 using Elastos::Droid::Internal::Utility::ArrayUtils;
@@ -19,6 +20,7 @@ using Elastos::Core::CString;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::EIID_ICharSequence;
 using Elastos::Core::EIID_IAppendable;
+using Elastos::Utility::Logging::Logger;
 using Libcore::Utility::EmptyArray;
 
 namespace Elastos {
@@ -639,6 +641,9 @@ ECode SpannableStringBuilder::NextSpanTransition(
     //    kind = Object.class;
     //}
 
+    Logger::I(TAG, " >> NextSpanTransition: start:%d, limit:%d, mSpanCount:%d, gap range[%d, %d]",
+        start, limit, mSpanCount, mGapStart, mGapLength);
+
     for (Int32 i = 0; i < count; i++) {
         Int32 st = (*mSpanStarts)[i];
         Int32 en = (*mSpanEnds)[i];
@@ -650,13 +655,15 @@ ECode SpannableStringBuilder::NextSpanTransition(
         if (en > gapstart) {
             en -= gaplen;
         }
+        Logger::I(TAG, " >> span %d : [%s]", i, TO_CSTR((*mSpans)[i]));
+        if ((*mSpans)[i] != NULL) {
+            if (st > start && st < limit && (*mSpans)[i]->Probe(kind) != NULL) {
+                limit = st;
+            }
 
-        if (st > start && st < limit && (*mSpans)[i]->Probe(kind) != NULL) {
-            limit = st;
-        }
-
-        if (en > start && en < limit && (*mSpans)[i]->Probe(kind) != NULL) {
-            limit = en;
+            if (en > start && en < limit && (*mSpans)[i]->Probe(kind) != NULL) {
+                limit = en;
+            }
         }
     }
 

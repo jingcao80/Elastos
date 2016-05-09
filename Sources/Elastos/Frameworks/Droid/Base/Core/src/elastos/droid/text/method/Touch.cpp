@@ -16,13 +16,15 @@ namespace Elastos {
 namespace Droid {
 namespace Text {
 namespace Method {
+
 /*****************************Touch::DragState*****************************/
+
+CAR_INTERFACE_IMPL_2(Touch::DragState, Object, ITouchDragState, INoCopySpan)
+
 Touch::DragState::DragState()
     : mFarEnough(FALSE)
     , mUsed(FALSE)
 {}
-
-CAR_INTERFACE_IMPL_2(Touch::DragState, Object, ITouchDragState, INoCopySpan)
 
 ECode Touch::DragState::constructor(
     /* [in] */ Float x,

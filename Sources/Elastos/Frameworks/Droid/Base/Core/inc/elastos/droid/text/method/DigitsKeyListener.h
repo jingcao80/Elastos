@@ -20,14 +20,15 @@ class DigitsKeyListener
     , public IDigitsKeyListener
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Allocates a DigitsKeyListener that accepts the digits 0 through 9.
      */
     DigitsKeyListener();
 
     virtual ~DigitsKeyListener();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 

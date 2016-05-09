@@ -1,4 +1,5 @@
 #include "elastos/droid/text/method/DateTimeKeyListener.h"
+#include "elastos/droid/text/method/CDateTimeKeyListener.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {
@@ -18,7 +19,7 @@ static AutoPtr<ArrayOf<Char32> > InitCHARACTERS()
 
 const AutoPtr<ArrayOf<Char32> > DateTimeKeyListener::CHARACTERS = InitCHARACTERS();
 
-CAR_INTERFACE_IMPL_6(DateTimeKeyListener, Object, IDateTimeKeyListener, INumberKeyListener, IBaseKeyListener, IMetaKeyKeyListener, IKeyListener, IInputFilter)
+CAR_INTERFACE_IMPL(DateTimeKeyListener, NumberKeyListener, IDateTimeKeyListener)
 
 ECode DateTimeKeyListener::constructor()
 {
@@ -28,6 +29,7 @@ ECode DateTimeKeyListener::constructor()
 ECode DateTimeKeyListener::GetInputType(
     /* [out] */ Int32* ret)
 {
+    VALIDATE_NOT_NULL(ret)
     *ret = IInputType::TYPE_CLASS_DATETIME | IInputType::TYPE_DATETIME_VARIATION_NORMAL;
     return NOERROR;
 }
@@ -51,7 +53,7 @@ ECode DateTimeKeyListener::GetInstance(
 {
     VALIDATE_NOT_NULL(ret)
     if (sInstance == NULL) {
-        sInstance = new DateTimeKeyListener();
+        CDateTimeKeyListener::New((IDateTimeKeyListener**)&sInstance);
     }
 
     *ret = sInstance;

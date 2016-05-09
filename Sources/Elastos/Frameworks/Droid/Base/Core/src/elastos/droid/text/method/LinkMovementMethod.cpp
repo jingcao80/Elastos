@@ -3,11 +3,13 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/text/method/LinkMovementMethod.h"
 #include "elastos/droid/text/method/CLinkMovementMethod.h"
+#include "elastos/droid/text/CNoCopySpanConcrete.h"
 #include "elastos/droid/text/Selection.h"
 #include "elastos/droid/view/KeyEvent.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Text::Selection;
+using Elastos::Droid::Text::CNoCopySpanConcrete;
 using Elastos::Droid::Text::Style::EIID_IClickableSpan;
 using Elastos::Droid::Text::Style::IClickableSpan;
 using Elastos::Droid::View::KeyEvent;
@@ -18,7 +20,14 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
-AutoPtr<IInterface> LinkMovementMethod::FROM_BELOW /*= (IInterface*)(new Object())*/;//new ElObject();;// = new NoCopySpan.Concrete();
+static AutoPtr<IInterface> InitFROM_BELOW()
+{
+    AutoPtr<INoCopySpan> ncs;
+    CNoCopySpanConcrete::New((INoCopySpan**)&ncs);
+    return ncs.Get();
+}
+
+AutoPtr<IInterface> LinkMovementMethod::FROM_BELOW = InitFROM_BELOW();
 
 AutoPtr<ILinkMovementMethod> LinkMovementMethod::sInstance;
 
@@ -28,13 +37,13 @@ const Int32 LinkMovementMethod::UP = 2;
 
 const Int32 LinkMovementMethod::DOWN = 3;
 
+CAR_INTERFACE_IMPL(LinkMovementMethod, ScrollingMovementMethod, ILinkMovementMethod)
+
 LinkMovementMethod::LinkMovementMethod()
 {}
 
 LinkMovementMethod::~LinkMovementMethod()
 {}
-
-CAR_INTERFACE_IMPL_3(LinkMovementMethod, Object, ILinkMovementMethod, IMovementMethod, IBaseMovementMethod)
 
 ECode LinkMovementMethod::constructor()
 {
@@ -142,7 +151,7 @@ Boolean LinkMovementMethod::Action(
     Int32 last;
     layout->GetLineEnd(linebot, &last);
 
-    AutoPtr< ArrayOf< IClickableSpan* > > candidates;
+    AutoPtr< ArrayOf< IInterface* > > candidates; //IClickableSpan
     ISpanned::Probe(buffer)->GetSpans(first, last, EIID_IClickableSpan, (ArrayOf< IInterface* >**)&candidates);
 
     Int32 a = Selection::GetSelectionStart(ICharSequence::Probe(buffer));
@@ -171,13 +180,14 @@ Boolean LinkMovementMethod::Action(
                 return FALSE;
             }
 
-            AutoPtr< ArrayOf< IClickableSpan* > > link;
+            AutoPtr< ArrayOf< IInterface* > > link;
             ISpanned::Probe(buffer)->GetSpans(selStart, selEnd, EIID_IClickableSpan, (ArrayOf< IInterface* >**)&link);
 
             if (link->GetLength() != 1)
                 return FALSE;
 
-            (*link)[0]->OnClick(IView::Probe(widget));
+            IClickableSpan* cs = IClickableSpan::Probe((*link)[0]);
+            cs->OnClick(IView::Probe(widget));
             break;
         }
 
@@ -269,16 +279,18 @@ ECode LinkMovementMethod::OnTouchEvent(
         Int32 off;
         layout->GetOffsetForHorizontal(line, x, &off);
 
-        AutoPtr< ArrayOf< IClickableSpan* > > link;
+        AutoPtr< ArrayOf< IInterface* > > link;
         ISpanned::Probe(buffer)->GetSpans(off, off,  EIID_IClickableSpan, (ArrayOf< IInterface* >**)&link);
 
         if (link->GetLength() != 0) {
+            IClickableSpan* cs = IClickableSpan::Probe((*link)[0]);
             if (action == IMotionEvent::ACTION_UP) {
-                (*link)[0]->OnClick((IView*)widget);
-            } else if (action == IMotionEvent::ACTION_DOWN) {
+                cs->OnClick((IView*)widget);
+            }
+            else if (action == IMotionEvent::ACTION_DOWN) {
                 Int32 spanStart, spanEnd;
-                ISpanned::Probe(buffer)->GetSpanStart((IInterface*)((*link)[0]), &spanStart);
-                ISpanned::Probe(buffer)->GetSpanEnd((IInterface*)((*link)[0]), &spanEnd);
+                ISpanned::Probe(buffer)->GetSpanStart((*link)[0], &spanStart);
+                ISpanned::Probe(buffer)->GetSpanEnd((*link)[0], &spanEnd);
                 Selection::SetSelection(buffer, spanStart, spanEnd);
             }
 

@@ -15,8 +15,9 @@ namespace Method {
 
 const String AllCapsTransformationMethod::TAG("AllCapsTransformationMethod");
 
-CAR_INTERFACE_IMPL_3(AllCapsTransformationMethod, Object, IAllCapsTransformationMethod \
-        , ITransformationMethod2, ITransformationMethod);
+CAR_INTERFACE_IMPL_3(AllCapsTransformationMethod, Object, IAllCapsTransformationMethod, \
+    ITransformationMethod2, ITransformationMethod)
+
 AllCapsTransformationMethod::AllCapsTransformationMethod()
     : mEnabled(FALSE)
 {}

@@ -25,15 +25,14 @@ namespace Method {
 
 const Int32 WordIterator::WINDOW_WIDTH = 50;
 
+CAR_INTERFACE_IMPL_2(WordIterator, Object, IWordIterator, ISelectionPositionIterator)
+
 WordIterator::WordIterator()
-    : mString("")
-    , mOffsetShift(0)
+    : mOffsetShift(0)
 {}
 
 WordIterator::~WordIterator()
 {}
-
-CAR_INTERFACE_IMPL_2(WordIterator, Object, IWordIterator, ISelectionPositionIterator)
 
 ECode WordIterator::constructor()
 {

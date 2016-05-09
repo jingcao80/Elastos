@@ -30,12 +30,14 @@ ECode CMessageQueue::DebugMessage(
     if (DBG) {
         Int32 what;
         msg->GetWhat(&what);
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
         AutoPtr<IRunnable> r;
         msg->GetCallback((IRunnable**)&r);
         AutoPtr<IHandler> t;
         msg->GetTarget((IHandler**)&t);
-        Slogger::D(TAG, " >>>> Queue: %p, %s message: target: %p, what: %d, callback: %p",
-            this, info, t.Get(), what, r.Get());
+        Slogger::D(TAG, " >>>> Queue: %p, %s message: target: %s, what: %d, obj: %s, callback: %s",
+            this, info, TO_CSTR(t), what, TO_CSTR(obj), TO_CSTR(r));
     }
     return NOERROR;
 }

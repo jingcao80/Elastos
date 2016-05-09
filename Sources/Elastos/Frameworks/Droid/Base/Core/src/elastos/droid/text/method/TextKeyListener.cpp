@@ -4,8 +4,10 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/text/method/TextKeyListener.h"
 #include "elastos/droid/text/method/CTextKeyListener.h"
+#include "elastos/droid/text/method/CNullKeyListener.h"
 #include "elastos/droid/text/method/CQwertyKeyListener.h"
 #include "elastos/droid/text/method/CMultiTapKeyListener.h"
+#include "elastos/droid/text/CNoCopySpanConcrete.h"
 #include "elastos/droid/text/SpannableStringInternal.h"
 #include "elastos/droid/text/Selection.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -19,7 +21,7 @@ using Elastos::Droid::Database::EIID_IContentObserver;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsSystem;
-using Elastos::Droid::Text::Method::CQwertyKeyListener;
+using Elastos::Droid::Text::CNoCopySpanConcrete;
 using Elastos::Droid::View::IKeyCharacterMap;
 
 
@@ -28,9 +30,17 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
-AutoPtr<TextKeyListener::NullKeyListener> TextKeyListener::NullKeyListener::sInstance;
+//==========================================================================
+// TextKeyListener::NullKeyListener
+//==========================================================================
+AutoPtr<IKeyListener> TextKeyListener::NullKeyListener::sInstance;
 
 CAR_INTERFACE_IMPL(TextKeyListener::NullKeyListener, Object, IKeyListener)
+
+ECode TextKeyListener::NullKeyListener::constructor()
+{
+    return NOERROR;
+}
 
 ECode TextKeyListener::NullKeyListener::GetInputType(
     /* [out] */ Int32* inputType)
@@ -83,22 +93,28 @@ ECode TextKeyListener::NullKeyListener::ClearMetaKeyState(
     return NOERROR;
 }
 
-AutoPtr<TextKeyListener::NullKeyListener> TextKeyListener::NullKeyListener::GetInstance()
+AutoPtr<IKeyListener> TextKeyListener::NullKeyListener::GetInstance()
 {
-    if (sInstance != NULL)
-        return sInstance;
+    if (sInstance == NULL) {
+        CNullKeyListener::New((IKeyListener**)&sInstance);
+    }
 
-    sInstance = new NullKeyListener();
     return sInstance;
 }
 
+//==========================================================================
+// TextKeyListener::SettingsObserver
+//==========================================================================
 TextKeyListener::SettingsObserver::SettingsObserver(
     /* [in] */ TextKeyListener* host)
     : mHost(host)
 {
 }
 
-CAR_INTERFACE_IMPL(TextKeyListener::SettingsObserver, Object, IContentObserver)
+ECode TextKeyListener::SettingsObserver::constructor()
+{
+    return ContentObserver::constructor();
+}
 
 //@Override
 ECode TextKeyListener::SettingsObserver::OnChange(
@@ -121,66 +137,21 @@ ECode TextKeyListener::SettingsObserver::OnChange(
     return NOERROR;
 }
 
-//override
-using Elastos::Droid::Database::IIContentObserver;
-ECode TextKeyListener::SettingsObserver::GetContentObserver(
-    /* [out] */ IIContentObserver** observer)
+//==========================================================================
+// TextKeyListener
+//==========================================================================
+
+static AutoPtr<IInterface> InitNoCopySpan()
 {
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<INoCopySpan> ncs;
+    CNoCopySpanConcrete::New((INoCopySpan**)&ncs);
+    return ncs.Get();
 }
 
-ECode TextKeyListener::SettingsObserver::ReleaseContentObserver(
-    /* [out] */ IIContentObserver** observer)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode TextKeyListener::SettingsObserver::DeliverSelfNotifications(
-    /* [out] */ Boolean* result)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode TextKeyListener::SettingsObserver::OnChange(
-    /* [in] */ Boolean selfChange,
-    /* [in] */ IUri* uri)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode TextKeyListener::SettingsObserver::OnChange(
-    /* [in] */ Boolean selfChange,
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 userId)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode TextKeyListener::SettingsObserver::DispatchChange(
-    /* [in] */ Boolean selfChange)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode TextKeyListener::SettingsObserver::DispatchChange(
-    /* [in] */ Boolean selfChange,
-    /* [in] */ IUri* uri)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode TextKeyListener::SettingsObserver::DispatchChange(
-    /* [in] */ Boolean selfChange,
-    /* [in] */ IUri* uri,
-    /* [in] */ Int32 userId)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-const AutoPtr<IInterface> TextKeyListener::ACTIVE /*= MetaKeyKeyListener::NewNoCopySpan()*/;
-const AutoPtr<IInterface> TextKeyListener::CAPPED /*= MetaKeyKeyListener::NewNoCopySpan()*/;
-const AutoPtr<IInterface> TextKeyListener::INHIBIT_REPLACEMENT/* = MetaKeyKeyListener::NewNoCopySpan()*/;
-const AutoPtr<IInterface> TextKeyListener::LAST_TYPED/* = MetaKeyKeyListener::NewNoCopySpan()*/;
+const AutoPtr<IInterface> TextKeyListener::ACTIVE = InitNoCopySpan();
+const AutoPtr<IInterface> TextKeyListener::CAPPED = InitNoCopySpan();
+const AutoPtr<IInterface> TextKeyListener::INHIBIT_REPLACEMENT = InitNoCopySpan();
+const AutoPtr<IInterface> TextKeyListener::LAST_TYPED = InitNoCopySpan();
 
 const Int32 TextKeyListener::AUTO_CAP = 1;
 const Int32 TextKeyListener::AUTO_TEXT = 2;
@@ -190,7 +161,7 @@ const Int32 TextKeyListener::SHOW_PASSWORD = 8;
 const Int32 TextKeyListener::CAPITALIZELENGTH = 4;
 AutoPtr<ArrayOf<ITextKeyListener*> > TextKeyListener::sInstance = ArrayOf<ITextKeyListener*>::Alloc(CAPITALIZELENGTH * 2);
 
-CAR_INTERFACE_IMPL_6(TextKeyListener, Object, ITextKeyListener, IBaseKeyListener, IMetaKeyKeyListener, IKeyListener, ISpanWatcher, INoCopySpan)
+CAR_INTERFACE_IMPL_3(TextKeyListener, BaseKeyListener, ITextKeyListener, ISpanWatcher, INoCopySpan)
 
 TextKeyListener::TextKeyListener()
 {}
@@ -212,7 +183,7 @@ ECode TextKeyListener::constructor(
  * or correction.
  */
 ECode TextKeyListener::GetInstance(
-        /* [out] */ ITextKeyListener** ret)
+    /* [out] */ ITextKeyListener** ret)
 {
     VALIDATE_NOT_NULL(ret);
     return GetInstance(FALSE, Capitalize_NONE, ret);
@@ -226,9 +197,9 @@ ECode TextKeyListener::GetInstance(
  * @param autotext whether to automatically do spelling corrections.
  */
 ECode TextKeyListener::GetInstance(
-        /* [in] */ Boolean autotext,
-        /* [in] */ Capitalize cap,
-        /* [out] */ ITextKeyListener** ret)
+    /* [in] */ Boolean autotext,
+    /* [in] */ Capitalize cap,
+    /* [out] */ ITextKeyListener** ret)
 {
     VALIDATE_NOT_NULL(ret)
     Int32 off = cap * 2 + (autotext ? 1 : 0);
@@ -243,8 +214,6 @@ ECode TextKeyListener::GetInstance(
     REFCOUNT_ADD(*ret)
     return NOERROR;
 }
-
-
 
 /**
  * Returns whether it makes sense to automatically capitalize at the
@@ -337,18 +306,21 @@ ECode TextKeyListener::Clear(
     /* [in] */ IEditable* e)
 {
     e->Clear();
-    ISpannable::Probe(e)->RemoveSpan(ACTIVE);
-    ISpannable::Probe(e)->RemoveSpan(CAPPED);
-    ISpannable::Probe(e)->RemoveSpan(INHIBIT_REPLACEMENT);
-    ISpannable::Probe(e)->RemoveSpan(LAST_TYPED);
+    ISpannable* sp = ISpannable::Probe(e);
+    sp->RemoveSpan(ACTIVE);
+    sp->RemoveSpan(CAPPED);
+    sp->RemoveSpan(INHIBIT_REPLACEMENT);
+    sp->RemoveSpan(LAST_TYPED);
 
     Int32 len;
     ICharSequence::Probe(e)->GetLength(&len);
-    AutoPtr< ArrayOf<IInterface*> > repl = NULL;
-    ISpanned::Probe(e)->GetSpans(0, len, /*EIID_Replaced*/EIID_INoCopySpan, (ArrayOf<IInterface*>**)&repl);
-    Int32 count = repl->GetLength();
-    for (Int32 i = 0; i < count; i++) {
-        ISpannable::Probe(e)->RemoveSpan((*repl)[i]);
+    AutoPtr< ArrayOf<IInterface*> > repl;
+    ISpanned::Probe(e)->GetSpans(0, len, EIID_IReplacedSpan, (ArrayOf<IInterface*>**)&repl);
+    if (repl != NULL) {
+        Int32 count = repl->GetLength();
+        for (Int32 i = 0; i < count; i++) {
+            sp->RemoveSpan((*repl)[i]);
+        }
     }
     return NOERROR;
 }
@@ -416,8 +388,7 @@ AutoPtr<IKeyListener> TextKeyListener::GetKeyListener(
         return IKeyListener::Probe(listener);
     }
 
-    AutoPtr<NullKeyListener> nkl = NullKeyListener::GetInstance();
-    return IKeyListener::Probe(nkl);
+    return NullKeyListener::GetInstance();
 }
 
 ECode TextKeyListener::ReleaseListener()
@@ -427,7 +398,7 @@ ECode TextKeyListener::ReleaseListener()
         mResolver->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj != NULL) {
             AutoPtr<IContentResolver> resolver = IContentResolver::Probe(obj);
-            resolver->UnregisterContentObserver((IContentObserver*)mObserver);
+            resolver->UnregisterContentObserver(mObserver.Get());
         }
 
         mObserver = NULL;
@@ -452,7 +423,8 @@ void TextKeyListener::InitPrefs(
 
     if (mObserver == NULL) {
         mObserver = new SettingsObserver(this);
-        contentResolver->RegisterContentObserver(Settings::System::CONTENT_URI.Get(), TRUE, (IContentObserver*)mObserver);
+        mObserver->constructor();
+        contentResolver->RegisterContentObserver(Settings::System::CONTENT_URI.Get(), TRUE, mObserver.Get());
     }
 
     UpdatePrefs(contentResolver);
@@ -486,6 +458,7 @@ ECode TextKeyListener::GetPrefs(
     /* [in] */ IContext* context,
     /* [out] */ Int32* ret)
 {
+    VALIDATE_NOT_NULL(ret)
     synchronized(mLock) {
         if (!mPrefsInited || mResolver == NULL) {
             InitPrefs(context);

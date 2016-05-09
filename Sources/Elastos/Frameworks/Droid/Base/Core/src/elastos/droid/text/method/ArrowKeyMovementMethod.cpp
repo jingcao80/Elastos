@@ -27,7 +27,7 @@ const AutoPtr<IInterface> ArrowKeyMovementMethod::LAST_TAP_DOWN = (IObject*)new 
 
 AutoPtr<IArrowKeyMovementMethod> ArrowKeyMovementMethod::sInstance;
 
-CAR_INTERFACE_IMPL_3(ArrowKeyMovementMethod, Object, IArrowKeyMovementMethod, IBaseMovementMethod, IMovementMethod)
+CAR_INTERFACE_IMPL(ArrowKeyMovementMethod, BaseMovementMethod, IArrowKeyMovementMethod)
 
 ArrowKeyMovementMethod::~ArrowKeyMovementMethod()
 {}

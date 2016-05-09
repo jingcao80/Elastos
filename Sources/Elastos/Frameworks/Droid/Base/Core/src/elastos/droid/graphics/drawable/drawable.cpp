@@ -14,6 +14,7 @@
 #include "elastos/droid/graphics/drawable/CPaintDrawable.h"
 #include "elastos/droid/graphics/drawable/CPictureDrawable.h"
 #include "elastos/droid/graphics/drawable/CRipple.h"
+#include "elastos/droid/graphics/drawable/CRippleBackground.h"
 #include "elastos/droid/graphics/drawable/CRippleDrawable.h"
 #include "elastos/droid/graphics/drawable/CRotateDrawable.h"
 #include "elastos/droid/graphics/drawable/CScaleDrawable.h"
@@ -27,28 +28,29 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-CAR_OBJECT_IMPL(CAnimatedRotateDrawable);
-CAR_OBJECT_IMPL(CAnimatedStateListDrawable);
-CAR_OBJECT_IMPL(CAnimatedVectorDrawable);
-CAR_OBJECT_IMPL(CAnimationDrawable);
-CAR_OBJECT_IMPL(CBitmapDrawable);
-CAR_OBJECT_IMPL(CClipDrawable);
-CAR_OBJECT_IMPL(CColorDrawable);
-CAR_OBJECT_IMPL(CGradientDrawable);
-CAR_OBJECT_IMPL(CInsetDrawable);
+CAR_OBJECT_IMPL(CAnimatedRotateDrawable)
+CAR_OBJECT_IMPL(CAnimatedStateListDrawable)
+CAR_OBJECT_IMPL(CAnimatedVectorDrawable)
+CAR_OBJECT_IMPL(CAnimationDrawable)
+CAR_OBJECT_IMPL(CBitmapDrawable)
+CAR_OBJECT_IMPL(CClipDrawable)
+CAR_OBJECT_IMPL(CColorDrawable)
+CAR_OBJECT_IMPL(CGradientDrawable)
+CAR_OBJECT_IMPL(CInsetDrawable)
 CAR_OBJECT_IMPL(CLayerDrawable)
-CAR_OBJECT_IMPL(CLevelListDrawable);
-CAR_OBJECT_IMPL(CNinePatchDrawable);
-CAR_OBJECT_IMPL(CPaintDrawable);
-CAR_OBJECT_IMPL(CPictureDrawable);
-CAR_OBJECT_IMPL(CRipple);
-CAR_OBJECT_IMPL(CRippleDrawable);
-CAR_OBJECT_IMPL(CRotateDrawable);
-CAR_OBJECT_IMPL(CScaleDrawable);
-CAR_OBJECT_IMPL(CShapeDrawable);
-CAR_OBJECT_IMPL(CStateListDrawable);
-CAR_OBJECT_IMPL(CTransitionDrawable);
-CAR_OBJECT_IMPL(CVectorDrawable);
+CAR_OBJECT_IMPL(CLevelListDrawable)
+CAR_OBJECT_IMPL(CNinePatchDrawable)
+CAR_OBJECT_IMPL(CPaintDrawable)
+CAR_OBJECT_IMPL(CPictureDrawable)
+CAR_OBJECT_IMPL(CRipple)
+CAR_OBJECT_IMPL(CRippleDrawable)
+CAR_OBJECT_IMPL(CRippleBackground)
+CAR_OBJECT_IMPL(CRotateDrawable)
+CAR_OBJECT_IMPL(CScaleDrawable)
+CAR_OBJECT_IMPL(CShapeDrawable)
+CAR_OBJECT_IMPL(CStateListDrawable)
+CAR_OBJECT_IMPL(CTransitionDrawable)
+CAR_OBJECT_IMPL(CVectorDrawable)
 
 } // namespace Drawable
 } // namespace Graphics

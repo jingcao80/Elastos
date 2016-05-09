@@ -20,13 +20,13 @@ class DialerKeyListener
     , public IDialerKeyListener
 {
 public:
+    CAR_INTERFACE_DECL()
+
     DialerKeyListener();
 
     virtual ~DialerKeyListener();
 
     CARAPI constructor();
-
-    CAR_INTERFACE_DECL()
 
     static CARAPI GetInstance(
         /* [out] */ IDialerKeyListener** ret);

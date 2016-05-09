@@ -459,10 +459,10 @@ ECode CCompatibilityInfo::Equals(
     if (mApplicationDensity != oc->mApplicationDensity) {
         return NOERROR;
     }
-    if (!Math::Equals(mApplicationScale, oc->mApplicationScale)) {
+    if (mApplicationScale != oc->mApplicationScale) {
         return NOERROR;
     }
-    if (!Math::Equals(mApplicationInvertedScale, oc->mApplicationInvertedScale)) {
+    if (mApplicationInvertedScale != oc->mApplicationInvertedScale) {
         return NOERROR;
     }
     if (mIsThemeable != oc->mIsThemeable) {
@@ -558,15 +558,19 @@ ECode CCompatibilityInfo::SetApplicationInvertedScale(
 ECode CCompatibilityInfo::constructor(
     /* [in] */ IApplicationInfo* appInfo,
     /* [in] */ Int32 screenLayout,
-    /* [in] */ Int32 sw,
+    /* [in] */ Int32 scaleWidth,
     /* [in] */ Boolean forceCompat)
 {
+    Logger::I(TAG, " >>> CCompatibilityInfo::constructor: %s, screenLayout:%d, scaleWidth:%d, forceCompat:%d",
+        TO_CSTR(appInfo), screenLayout, scaleWidth, forceCompat);
+
     Int32 compatFlags = 0;
 
     AutoPtr<CApplicationInfo> appInfoCls = (CApplicationInfo*)appInfo;
 
-    if (appInfoCls->mRequiresSmallestWidthDp != 0 || appInfoCls->mCompatibleWidthLimitDp != 0
-            || appInfoCls->mLargestWidthLimitDp != 0) {
+    if (appInfoCls->mRequiresSmallestWidthDp != 0
+        || appInfoCls->mCompatibleWidthLimitDp != 0
+        || appInfoCls->mLargestWidthLimitDp != 0) {
         // New style screen requirements spec.
         Int32 required = appInfoCls->mRequiresSmallestWidthDp != 0
                 ? appInfoCls->mRequiresSmallestWidthDp
@@ -590,13 +594,13 @@ ECode CCompatibilityInfo::constructor(
             // thinks it can handle.
             compatFlags |= NEVER_NEEDS_COMPAT;
         }
-        else if (largest != 0 && sw > largest) {
+        else if (largest != 0 && scaleWidth > largest) {
             // If the screen size is larger than the largest size the
             // app thinks it can work with, then always force it in to
             // compatibility mode.
             compatFlags |= NEEDS_SCREEN_COMPAT | ALWAYS_NEEDS_COMPAT;
         }
-        else if (compat >= sw) {
+        else if (compat >= scaleWidth) {
             // The screen size is something the app says it was designed
             // for, so never do compatibility mode.
             compatFlags |= NEVER_NEEDS_COMPAT;
@@ -611,7 +615,6 @@ ECode CCompatibilityInfo::constructor(
         mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
         mApplicationScale = 1.0f;
         mApplicationInvertedScale = 1.0f;
-
     }
     else {
         /**
@@ -717,7 +720,7 @@ ECode CCompatibilityInfo::constructor(
             Logger::I(TAG, " >>>> TODO constructor mApplicationScale: %.2f, mApplicationInvertedScale: %.2f",
                 mApplicationScale, mApplicationInvertedScale);
 
-            if (mApplicationScale == 3.0f) {
+            if (mApplicationScale > 1.0f) {
                 Logger::I(TAG, "========================= TODO delete this =========================");
 
                 compatFlags = NEVER_NEEDS_COMPAT;

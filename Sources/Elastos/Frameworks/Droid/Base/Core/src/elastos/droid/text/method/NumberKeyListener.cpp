@@ -15,13 +15,13 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
+CAR_INTERFACE_IMPL_2(NumberKeyListener, BaseKeyListener, INumberKeyListener, IInputFilter)
+
 NumberKeyListener::NumberKeyListener()
 {}
 
 NumberKeyListener::~NumberKeyListener()
 {}
-
-CAR_INTERFACE_IMPL_5(NumberKeyListener, Object, INumberKeyListener, IInputFilter, IKeyListener, IMetaKeyKeyListener, IBaseKeyListener)
 
 Int32 NumberKeyListener::Lookup(
     /* [in] */ IKeyEvent* event,
@@ -46,7 +46,7 @@ ECode NumberKeyListener::Filter(
     /* [out] */ ICharSequence** ret)
 {
     VALIDATE_NOT_NULL(ret)
-    PRINT_ENTER_LEAVE("NumberKeyListener::Filter jiazhenjiang");
+
     AutoPtr< ArrayOf<Char32> > accept = GetAcceptedChars();
 
     Int32 i;

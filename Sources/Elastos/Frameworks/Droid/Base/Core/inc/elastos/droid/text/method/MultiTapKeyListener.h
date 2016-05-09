@@ -25,6 +25,8 @@ namespace Method {
 class MultiTapKeyListener
     : public BaseKeyListener
     , public IMultiTapKeyListener
+    , public ISpanWatcher
+    , public INoCopySpan
 {
     friend class TextKeyListener;
 
@@ -32,13 +34,10 @@ private:
     class Timeout
         : public HandlerRunnable
     {
-
     friend class MultiTapKeyListener;
 
     public:
         TO_STRING_IMPL("MultiTapKeyListener::Timeout")
-
-        CAR_INTERFACE_DECL()
 
         Timeout(
             /* [in] */ IEditable* buffer);

@@ -15,7 +15,8 @@ namespace Droid {
 namespace Text {
 namespace Method {
 /*****************************ReplacementTransformationMethod::ReplacementCharSequence*****************************/
-CAR_INTERFACE_IMPL_2(ReplacementTransformationMethod::ReplacementCharSequence, Object, IGetChars, ICharSequence)
+CAR_INTERFACE_IMPL_2(ReplacementTransformationMethod::ReplacementCharSequence, Object, \
+    IGetChars, ICharSequence)
 
 ReplacementTransformationMethod::ReplacementCharSequence::ReplacementCharSequence()
 {}
@@ -114,13 +115,14 @@ ECode ReplacementTransformationMethod::ReplacementCharSequence::GetChars(
 }
 
 /*****************************ReplacementTransformationMethod::SpannedReplacementCharSequence*****************************/
+CAR_INTERFACE_IMPL(ReplacementTransformationMethod::SpannedReplacementCharSequence, \
+    ReplacementCharSequence, ISpanned)
+
 ReplacementTransformationMethod::SpannedReplacementCharSequence::SpannedReplacementCharSequence()
 {}
 
 ReplacementTransformationMethod::SpannedReplacementCharSequence::~SpannedReplacementCharSequence()
 {}
-
-CAR_INTERFACE_IMPL_3(ReplacementTransformationMethod::SpannedReplacementCharSequence, Object, ICharSequence, IGetChars, ISpanned)
 
 ECode ReplacementTransformationMethod::SpannedReplacementCharSequence::GetLength(
     /* [out] */ Int32* number)
@@ -204,13 +206,14 @@ ECode ReplacementTransformationMethod::SpannedReplacementCharSequence::construct
 }
 
 /*****************************ReplacementTransformationMethod*****************************/
+CAR_INTERFACE_IMPL_2(ReplacementTransformationMethod, Object, \
+    IReplacementTransformationMethod, ITransformationMethod)
+
 ReplacementTransformationMethod::ReplacementTransformationMethod()
 {}
 
 ReplacementTransformationMethod::~ReplacementTransformationMethod()
 {}
-
-CAR_INTERFACE_IMPL_2(ReplacementTransformationMethod, Object, IReplacementTransformationMethod, ITransformationMethod)
 
 ECode ReplacementTransformationMethod::GetTransformation(
     /* [in] */ ICharSequence* source,

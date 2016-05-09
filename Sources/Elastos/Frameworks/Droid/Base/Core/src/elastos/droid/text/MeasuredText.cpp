@@ -115,16 +115,16 @@ void MeasuredText::SetPara(
 
     if (ISpanned::Probe(text)) {
         ISpanned* spanned = ISpanned::Probe(text);
-        AutoPtr< ArrayOf<IReplacementSpan*> > spans;
+        AutoPtr< ArrayOf<IInterface*> > spans; //IReplacementSpan
 
-        spanned->GetSpans(start, end,
-                EIID_IReplacementSpan, (ArrayOf<IInterface*> **)&spans);
+        spanned->GetSpans(start, end, EIID_IReplacementSpan, (ArrayOf<IInterface*> **)&spans);
         if (spans != NULL) {
             for (Int32 i = 0; i < spans->GetLength(); i++) {
+                IReplacementSpan* rs = IReplacementSpan::Probe((*spans)[i]);
                 Int32 startInPara, endInPara;
-                spanned->GetSpanStart((*spans)[i], &startInPara);
+                spanned->GetSpanStart(rs, &startInPara);
                 startInPara -= start;
-                spanned->GetSpanEnd((*spans)[i], &endInPara);
+                spanned->GetSpanEnd(rs, &endInPara);
                 endInPara -= start;
 
                 // The span interval may be larger and must be restricted to [start, end[

@@ -1087,7 +1087,9 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
 {
     // TODO: faster implementation...
     AutoPtr<IMethodInfo> returnVal;
+    String signature;
     String methodName = GetMethodName(prefix, mPropertyName);
+
     // Class args[] = null;
     if (valueType == NULL) {
         // try {
@@ -1096,21 +1098,25 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
         // } catch (NoSuchMethodException e) {
         //     // Swallow the error, log it later
         // }
-    } else {
+    }
+    else {
         // args = new Class[1];
         Int32* typeVariants = NULL;
         Int32 length = 1;
-        String signature;
+
         if (*valueType == EIID_IFloat) {
             typeVariants = FLOAT_VARIANTS;
             length = sizeof(FLOAT_VARIANTS)/sizeof(FLOAT_VARIANTS[0]);
-        } else if (*valueType == EIID_IInteger32) {
+        }
+        else if (*valueType == EIID_IInteger32) {
             typeVariants = INTEGER_VARIANTS;
             length = sizeof(INTEGER_VARIANTS)/sizeof(INTEGER_VARIANTS[0]);
-        } else if (*valueType == EIID_IDouble) {
+        }
+        else if (*valueType == EIID_IDouble) {
             typeVariants = DOUBLE_VARIANTS;
             length = sizeof(DOUBLE_VARIANTS)/sizeof(DOUBLE_VARIANTS[0]);
-        } else {
+        }
+        else {
             // typeVariants = new Class[1];
             if (*valueType == EIID_IPointF) {
                 length = 1;
@@ -1140,8 +1146,10 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
     }
 
     if (returnVal == NULL) {
-        Slogger::W("PropertyValuesHolder", "Method %s() with type not found on target class %p",
-            methodName.string(), targetClass);
+        String className;
+        targetClass->GetName(&className);
+        Slogger::E("PropertyValuesHolder", "Error: Method [%s] with [%s] not found on target class %s",
+            methodName.string(), signature.string(), className.string());
     }
 
     return returnVal;

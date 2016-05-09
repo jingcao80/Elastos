@@ -25,6 +25,9 @@ static AutoPtr< ArrayOf< IDigitsKeyListener* > > InitStatic() {
 
 AutoPtr< ArrayOf<IDigitsKeyListener*> > DigitsKeyListener::sInstance = InitStatic();
 
+
+CAR_INTERFACE_IMPL(DigitsKeyListener, NumberKeyListener, IDigitsKeyListener)
+
 AutoPtr< ArrayOf<Char32> > DigitsKeyListener::GetAcceptedChars()
 {
     return mAccepted;
@@ -37,8 +40,6 @@ DigitsKeyListener::DigitsKeyListener()
 
 DigitsKeyListener::~DigitsKeyListener()
 {}
-
-CAR_INTERFACE_IMPL_6(DigitsKeyListener, Object, IDigitsKeyListener, INumberKeyListener, IBaseKeyListener, IInputFilter, IMetaKeyKeyListener, IKeyListener)
 
 ECode DigitsKeyListener::constructor()
 {

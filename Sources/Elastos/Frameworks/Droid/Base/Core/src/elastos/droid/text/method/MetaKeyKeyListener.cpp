@@ -114,6 +114,7 @@ ECode MetaKeyKeyListener::IsMetaTracker(
     /* [in] */ IInterface* what,
     /* [out] */ Boolean* ret)
 {
+    VALIDATE_NOT_NULL(ret)
     *ret = what == CAP || what == ALT || what == SYM ||
            what == SELECTING;
     return NOERROR;
@@ -124,6 +125,7 @@ ECode MetaKeyKeyListener::IsSelectingMetaTracker(
     /* [in] */ IInterface* what,
     /* [out] */ Boolean* ret)
 {
+    VALIDATE_NOT_NULL(ret)
     *ret = what == SELECTING;
     return NOERROR;
 }
@@ -428,6 +430,7 @@ ECode MetaKeyKeyListener::GetMetaState(
     /* [out] */ Int32* ret)
 {
     VALIDATE_NOT_NULL(ret)
+    *ret = 0;
     VALIDATE_NOT_NULL(event)
     Int32 metaState;
     event->GetMetaState(&metaState);

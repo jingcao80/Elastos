@@ -3172,7 +3172,7 @@ void ViewRootImpl::PerformTraversals()
         if (DBG) {
             Logger::D(TAG, "======================================");
             Logger::D(TAG, "performTraversals -- after setFrame");
-            host->Debug();
+            // host->Debug();
         }
     }
     if (triggerGlobalLayoutListener) {
@@ -5618,6 +5618,7 @@ ECode ViewRootImpl::EnqueueInputEvent(
     /* [in] */ Boolean processImmediately)
 {
     AutoPtr<QueuedInputEvent> q = ObtainQueuedInputEvent(event, receiver, flags);
+    assert(q != NULL);
 
     // Always enqueue the input event in order, regardless of its time stamp.
     // We do this because the application or the IME may inject key events
@@ -7107,7 +7108,8 @@ Int32 ViewRootImpl::ViewPostImeInputStage::OnProcess(
 {
     if (IKeyEvent::Probe(q->mEvent)) {
         return ProcessKeyEvent(q);
-    } else {
+    }
+    else {
         // If delivering a new non-key event, make sure the window is
         // now allowed to start updating.
         mHost->HandleDispatchDoneAnimating();
@@ -7115,9 +7117,11 @@ Int32 ViewRootImpl::ViewPostImeInputStage::OnProcess(
         q->mEvent->GetSource(&source);
         if ((source & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
             return ProcessPointerEvent(q);
-        } else if ((source & IInputDevice::SOURCE_CLASS_TRACKBALL) != 0) {
+        }
+        else if ((source & IInputDevice::SOURCE_CLASS_TRACKBALL) != 0) {
             return ProcessTrackballEvent(q);
-        } else {
+        }
+        else {
             return ProcessGenericMotionEvent(q);
         }
     }
@@ -7126,11 +7130,12 @@ Int32 ViewRootImpl::ViewPostImeInputStage::OnProcess(
 ECode ViewRootImpl::ViewPostImeInputStage::OnDeliverToNext(
     /* [in] */ QueuedInputEvent* q)
 {
-    Boolean isTouchEvent;
-    IMotionEvent::Probe(q->mEvent)->IsTouchEvent(&isTouchEvent);
+    IMotionEvent* me = IMotionEvent::Probe(q->mEvent);
+    Boolean isTouchEvent = FALSE;
+    if (me) me->IsTouchEvent(&isTouchEvent);
+
     if (mHost->mUnbufferedInputDispatch
-            && IKeyEvent::Probe(q->mEvent)
-            && isTouchEvent
+            && me && isTouchEvent
             && mHost->IsTerminalInputEvent(q->mEvent)) {
         mHost->mUnbufferedInputDispatch = FALSE;
         mHost->ScheduleConsumeBatchedInput();
@@ -7165,9 +7170,8 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
     // If the Control modifier is held, try to interpret the key as a shortcut.
     Boolean isCtrlPressed;
     event->IsCtrlPressed(&isCtrlPressed);
-    Int32 repeatCount;
+    Int32 repeatCount, keyCode;
     event->GetRepeatCount(&repeatCount);
-    Int32 keyCode;
     event->GetKeyCode(&keyCode);
     Boolean isModifierKey = CKeyEvent::IsModifierKey(keyCode);
     if (action == IKeyEvent::ACTION_DOWN

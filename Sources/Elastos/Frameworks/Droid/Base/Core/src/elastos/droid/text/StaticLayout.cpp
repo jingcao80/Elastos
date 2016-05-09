@@ -310,7 +310,7 @@ ECode StaticLayout::Generate(
                     EIID_ILeadingMarginSpan);
             Int32 tempWidth;
             for (Int32 i = 0; i < sp->GetLength(); i++) {
-                AutoPtr<ILeadingMarginSpan> lms = (ILeadingMarginSpan*)((*sp)[i]->Probe(EIID_ILeadingMarginSpan));
+                AutoPtr<ILeadingMarginSpan> lms = ILeadingMarginSpan::Probe((*sp)[i]);
                 lms->GetLeadingMargin(TRUE, &tempWidth);
                 firstWidth -= tempWidth;
                 lms->GetLeadingMargin(FALSE, &tempWidth);
@@ -318,8 +318,8 @@ ECode StaticLayout::Generate(
 
                 // LeadingMarginSpan2 is odd.  The count affects all
                 // leading margin spans, not just this particular one
-                if (lms->Probe(EIID_ILeadingMarginSpan2)) {
-                    AutoPtr<ILeadingMarginSpan2> lms2 = (ILeadingMarginSpan2*)(lms->Probe(EIID_ILeadingMarginSpan2));
+                ILeadingMarginSpan2* lms2 = ILeadingMarginSpan2::Probe(lms2);
+                if (lms2) {
                     Int32 temp = 0;
                     spanned->GetSpanStart(lms2, &temp);
                     Int32 lmsFirstLine;
@@ -401,8 +401,7 @@ ECode StaticLayout::Generate(
                 measured->AddStyleRun(paint, spanLen, fm);
             }
             else {
-                spanned->NextSpanTransition(spanStart, paraEnd,
-                        EIID_IMetricAffectingSpan, &spanEnd);
+                spanned->NextSpanTransition(spanStart, paraEnd, EIID_IMetricAffectingSpan, &spanEnd);
                 Int32 spanLen = spanEnd - spanStart;
                 AutoPtr< ArrayOf<IInterface*> > spans; //IMetricAffectingSpan
                 spanned->GetSpans(spanStart, spanEnd, EIID_IMetricAffectingSpan,

@@ -33,6 +33,13 @@ module
 
     /**
      * @Involve
+     * interface INoCopySpan
+     */
+    interface IReplacedSpan {
+    }
+
+    /**
+     * @Involve
      * interface IMetaKeyKeyListenerHelper
      * interface IBaseKeyListenerHelper
      */

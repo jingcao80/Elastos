@@ -4,10 +4,12 @@
 #include <elastos/core/Math.h>
 #include "elastos/droid/view/KeyEvent.h"
 #include "elastos/droid/text/method/BaseKeyListener.h"
+#include "elastos/droid/text/CNoCopySpanConcrete.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/CSelection.h"
 
 using Elastos::Droid::Text::CSelection;
+using Elastos::Droid::Text::CNoCopySpanConcrete;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListener;
 using Elastos::Droid::View::IKeyEventHelper;
 using Elastos::Droid::View::KeyEvent;
@@ -18,16 +20,22 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
-CAR_INTERFACE_IMPL_3(BaseKeyListener, Object, IBaseKeyListener, IMetaKeyKeyListener, IKeyListener)
+static AutoPtr<IInterface> InitNoCopySpanConcrete()
+{
+    AutoPtr<INoCopySpan> ncs;
+    CNoCopySpanConcrete::New((INoCopySpan**)&ncs);
+    return (IInterface*)ncs.Get();
+}
+
+const AutoPtr<IInterface> BaseKeyListener::OLD_SEL_START = InitNoCopySpanConcrete();
+
+CAR_INTERFACE_IMPL(BaseKeyListener, MetaKeyKeyListener, IKeyListener)
 
 BaseKeyListener::BaseKeyListener()
 {}
 
 BaseKeyListener::~BaseKeyListener()
 {}
-
-//assert(0 && "TODO");
-const AutoPtr<IInterface> BaseKeyListener::OLD_SEL_START/* = MetaKeyKeyListener::NewNoCopySpan()*/;
 
 ECode BaseKeyListener::Backspace(
     /* [in] */ IView* view,

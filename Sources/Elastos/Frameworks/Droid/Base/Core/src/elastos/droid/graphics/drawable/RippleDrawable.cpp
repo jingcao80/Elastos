@@ -3,6 +3,7 @@
 #include "elastos/droid/graphics/drawable/RippleDrawable.h"
 #include "elastos/droid/graphics/drawable/CRippleDrawable.h"
 #include "elastos/droid/graphics/drawable/CRipple.h"
+#include "elastos/droid/graphics/drawable/CRippleBackground.h"
 #include "elastos/droid/graphics/CPorterDuffXfermode.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CPaint.h"
@@ -24,7 +25,11 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
+//===============================================================================
+// RippleDrawable::RippleState
+//===============================================================================
 CAR_INTERFACE_IMPL(RippleDrawable::RippleState, LayerState, IRippleState);
+
 RippleDrawable::RippleState::RippleState(
     /* [in] */ LayerState* orig,
     /* [in] */ IRippleDrawable* owner,
@@ -72,7 +77,10 @@ ECode RippleDrawable::RippleState::NewDrawable(
     return CRippleDrawable::New(this, res, theme, drawable);
 }
 
-/////////////////////// RippleDrawable //////////////
+
+//===============================================================================
+// RippleDrawable
+//===============================================================================
 static AutoPtr<IPorterDuffXfermode> InitPorterDuffXfermode(
     /* [in] */ PorterDuffMode mode)
 {
@@ -200,7 +208,9 @@ ECode RippleDrawable::JumpToCurrentState()
     }
 
     if (mBackground != NULL) {
-        needsDraw |= mBackground->IsHardwareAnimating();
+        Boolean bval;
+        mBackground->IsHardwareAnimating(&bval);
+        needsDraw |= bval;
         mBackground->Jump();
     }
 
@@ -535,7 +545,8 @@ ECode RippleDrawable::SetHotspot(
 void RippleDrawable::TryBackgroundEnter()
 {
     if (mBackground == NULL) {
-        CRippleBackground::NewByFriend(this, mHotspotBounds, (CRippleBackground**)&mBackground);
+        CRippleBackground::New(this, mHotspotBounds, (IRippleBackground**)&mBackground);
+        assert(mBackground != NULL);
     }
 
     AutoPtr<ArrayOf<Int32> > states;
@@ -609,7 +620,9 @@ void RippleDrawable::ClearHotspots()
     }
 
     if (mBackground != NULL) {
-        needsDraw |= mBackground->IsHardwareAnimating();
+        Boolean bval;
+        mBackground->IsHardwareAnimating(&bval);
+        needsDraw |= bval;
         mBackground->Cancel();
         mBackground = NULL;
     }
@@ -810,7 +823,11 @@ Int32 RippleDrawable::DrawBackgroundLayer(
 {
     Int32 saveCount = -1;
 
-    if (mBackground != NULL && mBackground->ShouldDraw()) {
+    Boolean shouldDraw = FALSE;
+    if (mBackground != NULL) {
+        mBackground->ShouldDraw(&shouldDraw);
+    }
+    if (shouldDraw) {
         // TODO: We can avoid saveLayer here if we push the xfermode into
         // the background's render thread animator at exit() time.
         if (drawMask || mode != SRC_OVER) {
@@ -819,12 +836,12 @@ Int32 RippleDrawable::DrawBackgroundLayer(
             canvas->SaveLayer(left, top, right, bottom, GetMaskingPaint(mode), &saveCount);
         }
 
-        Float x = 0;
+        Float x = 0, y = 0;
+        Boolean bval;
         mHotspotBounds->GetExactCenterX(&x);
-        Float y = 0;
         mHotspotBounds->GetExactCenterY(&y);
         canvas->Translate(x, y);
-        mBackground->Draw(canvas, GetRipplePaint());
+        mBackground->Draw(canvas, GetRipplePaint(), &bval);
         canvas->Translate(-x, -y);
     }
 
@@ -962,7 +979,7 @@ ECode RippleDrawable::GetDirtyBounds(
             drawingBounds->Union(rippleBounds);
         }
 
-        AutoPtr<CRippleBackground> background = mBackground;
+        AutoPtr<IRippleBackground> background = mBackground;
         if (background != NULL) {
             background->GetBounds(rippleBounds);
             rippleBounds->Offset(cX, cY);
