@@ -14,7 +14,6 @@
 #include "elastos/droid/graphics/drawable/CPaintDrawable.h"
 #include "elastos/droid/graphics/drawable/CPictureDrawable.h"
 #include "elastos/droid/graphics/drawable/CRipple.h"
-#include "elastos/droid/graphics/drawable/CRippleBackground.h"
 #include "elastos/droid/graphics/drawable/CRippleDrawable.h"
 #include "elastos/droid/graphics/drawable/CRotateDrawable.h"
 #include "elastos/droid/graphics/drawable/CScaleDrawable.h"
@@ -44,7 +43,6 @@ CAR_OBJECT_IMPL(CPaintDrawable)
 CAR_OBJECT_IMPL(CPictureDrawable)
 CAR_OBJECT_IMPL(CRipple)
 CAR_OBJECT_IMPL(CRippleDrawable)
-CAR_OBJECT_IMPL(CRippleBackground)
 CAR_OBJECT_IMPL(CRotateDrawable)
 CAR_OBJECT_IMPL(CScaleDrawable)
 CAR_OBJECT_IMPL(CShapeDrawable)

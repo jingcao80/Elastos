@@ -69,7 +69,11 @@ private:
     };
 
 public:
-    RippleBackground();
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CRippleBackground();
 
     /**
      * Creates a new ripple.
