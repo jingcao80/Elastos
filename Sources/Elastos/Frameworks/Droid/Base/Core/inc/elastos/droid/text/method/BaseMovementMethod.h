@@ -104,7 +104,7 @@ protected:
      * @param event The key event.
      * @return The keyboard meta states used for movement.
      */
-    CARAPI_(Int32) GetMovementMetaState(
+    virtual CARAPI_(Int32) GetMovementMetaState(
         /* [in] */ ISpannable* buffer,
         /* [in] */ IKeyEvent* event);
 
@@ -125,7 +125,7 @@ protected:
      * @param event The key event.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) HandleMovementKey(
+    virtual CARAPI_(Boolean) HandleMovementKey(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer,
         /* [in] */ Int32 keyCode,
@@ -140,7 +140,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Left(
+    virtual CARAPI_(Boolean) Left(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -152,7 +152,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Right(
+    virtual CARAPI_(Boolean) Right(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -164,7 +164,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Up(
+    virtual CARAPI_(Boolean) Up(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -176,7 +176,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Down(
+    virtual CARAPI_(Boolean) Down(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -188,7 +188,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) PageUp(
+    virtual CARAPI_(Boolean) PageUp(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -200,7 +200,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) PageDown(
+    virtual CARAPI_(Boolean) PageDown(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -212,7 +212,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Top(
+    virtual CARAPI_(Boolean) Top(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -224,7 +224,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Bottom(
+    virtual CARAPI_(Boolean) Bottom(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -236,7 +236,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) LineStart(
+    virtual CARAPI_(Boolean) LineStart(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -248,17 +248,17 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) LineEnd(
+    virtual CARAPI_(Boolean) LineEnd(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
     /** {@hide} */
-    CARAPI_(Boolean) LeftWord(
+    virtual CARAPI_(Boolean) LeftWord(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
     /** {@hide} */
-    CARAPI_(Boolean) RightWord(
+    virtual CARAPI_(Boolean) RightWord(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -272,7 +272,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) Home(
+    virtual CARAPI_(Boolean) Home(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -286,7 +286,7 @@ protected:
      * @param buffer The text buffer.
      * @return True if the event was handled.
      */
-    CARAPI_(Boolean) End(
+    virtual CARAPI_(Boolean) End(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -300,7 +300,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollLeft(
+    virtual CARAPI_(Boolean) ScrollLeft(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer,
         /* [in] */ Int32 amount);
@@ -315,7 +315,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollRight(
+    virtual CARAPI_(Boolean) ScrollRight(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer,
         /* [in] */ Int32 amount);
@@ -330,7 +330,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollUp(
+    virtual CARAPI_(Boolean) ScrollUp(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer,
         /* [in] */ Int32 amount);
@@ -345,7 +345,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollDown(
+    virtual CARAPI_(Boolean) ScrollDown(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer,
         /* [in] */ Int32 amount);
@@ -359,7 +359,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollPageUp(
+    virtual CARAPI_(Boolean) ScrollPageUp(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -372,7 +372,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollPageDown(
+    virtual CARAPI_(Boolean) ScrollPageDown(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -385,7 +385,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollTop(
+    virtual CARAPI_(Boolean) ScrollTop(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -398,7 +398,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollBottom(
+    virtual CARAPI_(Boolean) ScrollBottom(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -411,7 +411,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollLineStart(
+    virtual CARAPI_(Boolean) ScrollLineStart(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 
@@ -424,7 +424,7 @@ protected:
      * @return True if the event was handled.
      * @hide
      */
-    CARAPI_(Boolean) ScrollLineEnd(
+    virtual CARAPI_(Boolean) ScrollLineEnd(
         /* [in] */ ITextView* widget,
         /* [in] */ ISpannable* buffer);
 

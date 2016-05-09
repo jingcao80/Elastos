@@ -43,7 +43,7 @@ ApplicationInfo::constructor(
     info->GetComponentName((IComponentName**)&mComponentName);
     mContainer = ItemInfo::NO_ID;
     SetActivity(mComponentName,
-            IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
     AutoPtr<Elastos::Droid::Content::Pm::IApplicationInfo> ainpo;
     info->GetApplicationInfo((Elastos::Droid::Content::Pm::IApplicationInfo**)&ainpo);
@@ -125,13 +125,8 @@ void ApplicationInfo::DumpApplicationInfoList(
         AutoPtr<IInterface> obj;
         list->Get(i, (IInterface**)&obj);
         AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IObject::Probe(obj);
-
-        String tmp;
-        info->mTitle->ToString(&tmp);
-        String tmp2;
-        IObject::Probe(info->mIconBitmap)->ToString(&tmp2);
         Slogger::D(tag, "   title=\"%s\" iconBitmap=%s firstInstallTime=%d",
-                tmp.string(), tmp2.string(), info->mFirstInstallTime);
+            TO_CSTR(info->mTitle), TO_CSTR(info->mIconBitmap), info->mFirstInstallTime);
     }
     return;
 }
@@ -141,9 +136,9 @@ ECode ApplicationInfo::MakeShortcut(
 {
     VALIDATE_NOT_NULL(info);
 
-    AutoPtr<ShortcutInfo> _info = new ShortcutInfo();
-    _info->constructor(this);
-    *info = IShortcutInfo::Probe(_info);
+    AutoPtr<ShortcutInfo> obj = new ShortcutInfo();
+    obj->constructor(this);
+    *info = (IShortcutInfo*)obj.Get();
     REFCOUNT_ADD(*info);
     return NOERROR;
 }

@@ -318,6 +318,7 @@ module
         interface IMultiTapKeyListener;
         interface IKeyListener;
         interface ISpanWatcher;
+        interface INoCopySpan;
     }
 
     singleton class CMultiTapKeyListenerHelper {
@@ -392,6 +393,12 @@ module
         interface ISingleLineTransformationMethodHelper;
     }
 
+    class CNullKeyListener {
+        constructor();
+
+        interface IKeyListener;
+    }
+
     class CTextKeyListener {
         /**
          * Creates a new TextKeyListener with the specified capitalization
@@ -407,6 +414,7 @@ module
         interface ITextKeyListener;
         interface IKeyListener;
         interface ISpanWatcher;
+        interface INoCopySpan;
     }
 
     singleton class CTextKeyListenerHelper {

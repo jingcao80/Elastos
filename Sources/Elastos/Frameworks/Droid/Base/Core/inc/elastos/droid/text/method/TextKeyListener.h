@@ -20,14 +20,17 @@ class TextKeyListener
     : public BaseKeyListener
     , public ITextKeyListener
     , public ISpanWatcher
+    , public INoCopySpan
 {
-private:
+public:
     class NullKeyListener
         : public Object
         , public IKeyListener
     {
     public:
         CAR_INTERFACE_DECL()
+
+        CARAPI constructor();
 
         CARAPI GetInputType(
             /* [out] */ Int32* inputType);
@@ -57,57 +60,25 @@ private:
             /* [in] */ IEditable* content,
             /* [in] */ Int32 states);
 
-        static AutoPtr<NullKeyListener> GetInstance();
+        static AutoPtr<IKeyListener> GetInstance();
 
     private:
-        static AutoPtr<NullKeyListener> sInstance;
+        static AutoPtr<IKeyListener> sInstance;
     };
 
     class SettingsObserver
-        : public IContentObserver
-        , public Object
+        : public ContentObserver
     {
     public:
-        CAR_INTERFACE_DECL()
-
         TO_STRING_IMPL("TextKeyListener::SettingsObserver")
 
         SettingsObserver(
             /* [in] */ TextKeyListener* host);
 
+        CARAPI constructor();
+
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);
-
-        //override IContentObserver
-        CARAPI GetContentObserver(
-            /* [out] */ IIContentObserver** observer);
-
-        CARAPI ReleaseContentObserver(
-            /* [out] */ IIContentObserver** oldObserver);
-
-        CARAPI DeliverSelfNotifications(
-            /* [out] */ Boolean* result);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri,
-            /* [in] */ Int32 userId);
-
-        CARAPI DispatchChange(
-            /* [in] */ Boolean selfChange);
-
-        CARAPI DispatchChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri);
-
-        CARAPI DispatchChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri,
-            /* [in] */ Int32 userId);
 
     private:
         TextKeyListener* mHost;
@@ -116,11 +87,11 @@ private:
 public:
     friend class SettingsObserver;
 
+    CAR_INTERFACE_DECL()
+
     TextKeyListener();
 
     virtual ~TextKeyListener();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ Capitalize cap,

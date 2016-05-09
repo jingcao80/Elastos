@@ -38,9 +38,9 @@ private:
         : public BaseAdapter
     {
     public:
-        OptionsAdapter();
+        TO_STRING_IMPL("CharacterPickerDialog::OptionsAdapter")
 
-        CAR_INTERFACE_DECL()
+        OptionsAdapter();
 
         CARAPI constructor(
             /* [in] */ IContext* context,
@@ -68,11 +68,11 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     CharacterPickerDialog();
 
     virtual ~CharacterPickerDialog();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context,

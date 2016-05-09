@@ -155,7 +155,7 @@ Boolean Linkify::AddLinks(
     ISpanned* spanned = ISpanned::Probe(text);
     Int32 textLen;
     csq->GetLength(&textLen);
-    AutoPtr< ArrayOf<IURLSpan*> > old;
+    AutoPtr< ArrayOf<IInterface*> > old;
     spanned->GetSpans(0, textLen, EIID_IURLSpan, (ArrayOf<IInterface*>**)&old);
 
     if (old != NULL) {

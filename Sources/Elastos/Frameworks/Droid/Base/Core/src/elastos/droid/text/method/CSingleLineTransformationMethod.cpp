@@ -29,7 +29,8 @@ AutoPtr<ArrayOf<Char32> > CSingleLineTransformationMethod::REPLACEMENT = InitRep
 
 AutoPtr<ISingleLineTransformationMethod> CSingleLineTransformationMethod::sInstance;
 
-CAR_INTERFACE_IMPL_3(CSingleLineTransformationMethod, Object, ISingleLineTransformationMethod, IReplacementTransformationMethod, ITransformationMethod)
+CAR_INTERFACE_IMPL(CSingleLineTransformationMethod, ReplacementTransformationMethod, \
+    ISingleLineTransformationMethod)
 
 CAR_OBJECT_IMPL(CSingleLineTransformationMethod)
 
@@ -43,9 +44,7 @@ ECode CSingleLineTransformationMethod::GetInstance(
 {
     VALIDATE_NOT_NULL(ret)
     if (sInstance == NULL) {
-        AutoPtr<CSingleLineTransformationMethod> stm;
-        CSingleLineTransformationMethod::NewByFriend((CSingleLineTransformationMethod**)&stm);
-        sInstance = (ISingleLineTransformationMethod*)(stm.Get());
+        CSingleLineTransformationMethod::New((ISingleLineTransformationMethod**)&sInstance);
     }
 
     *ret = sInstance;

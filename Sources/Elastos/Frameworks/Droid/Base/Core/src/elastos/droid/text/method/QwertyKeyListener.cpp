@@ -28,15 +28,14 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
-const InterfaceID EIID_Replaced =
-    {0xa40b81a, 0x803b, 0x4e5f, {0xb6, 0xde, 0x49, 0x87, 0x24, 0x49, 0xab, 0x50}};
-
 const Int32 QwertyKeyListener::CAPITALIZELENGTH = 4;
 
 AutoPtr<ArrayOf<IQwertyKeyListener*> > QwertyKeyListener::sInstance =
     ArrayOf<IQwertyKeyListener*>::Alloc(QwertyKeyListener::CAPITALIZELENGTH * 2);
 
 AutoPtr<IQwertyKeyListener> QwertyKeyListener::sFullKeyboardInstance;
+
+CAR_INTERFACE_IMPL_2(QwertyKeyListener::Replaced, Object, IReplacedSpan, INoCopySpan)
 
 QwertyKeyListener::Replaced::Replaced()
 {
@@ -53,7 +52,6 @@ ECode QwertyKeyListener::Replaced::constructor(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(QwertyKeyListener::Replaced, Object, INoCopySpan)
 
 static Boolean InitStaticPICKER_SETS()
 {
@@ -128,7 +126,7 @@ QwertyKeyListener::QwertyKeyListener()
 QwertyKeyListener::~QwertyKeyListener()
 {}
 
-CAR_INTERFACE_IMPL_4(QwertyKeyListener, Object, IQwertyKeyListener, IBaseKeyListener, IMetaKeyKeyListener, IKeyListener)
+CAR_INTERFACE_IMPL(QwertyKeyListener, BaseKeyListener, IQwertyKeyListener)
 
 ECode QwertyKeyListener::constructor(
     /* [in] */ Capitalize cap,
@@ -398,7 +396,7 @@ ECode QwertyKeyListener::OnKeyDown(
                 AutoPtr<ArrayOf<IInterface*> > repl;
                 Int32 len;
                 ICharSequence::Probe(content)->GetLength(&len);
-                ISpanned::Probe(content)->GetSpans(0, len, EIID_Replaced, (ArrayOf<IInterface*>**)&repl);
+                ISpanned::Probe(content)->GetSpans(0, len, EIID_IReplacedSpan, (ArrayOf<IInterface*>**)&repl);
                 for (Int32 a = 0; a < repl->GetLength(); a++)
                     ISpannable::Probe(content)->RemoveSpan((*repl)[a]);
 
@@ -470,7 +468,7 @@ ECode QwertyKeyListener::OnKeyDown(
 
         AutoPtr<ArrayOf<IInterface*> > repl = NULL;
         ISpanned::Probe(content)->GetSpans(
-            selStart - consider, selStart, EIID_Replaced, (ArrayOf<IInterface*>**)&repl);
+            selStart - consider, selStart, EIID_IReplacedSpan, (ArrayOf<IInterface*>**)&repl);
 
         if (repl->GetLength() > 0) {
             Int32 st;
@@ -593,7 +591,7 @@ ECode QwertyKeyListener::MarkAsReplaced(
     AutoPtr<ArrayOf<IInterface*> > repl;
     Int32 len;
     ICharSequence::Probe(content)->GetLength(&len);
-    ISpanned::Probe(content)->GetSpans(0, len, EIID_Replaced, (ArrayOf<IInterface*>**)&repl);
+    ISpanned::Probe(content)->GetSpans(0, len, EIID_IReplacedSpan, (ArrayOf<IInterface*>**)&repl);
     for (Int32 a = 0; a < repl->GetLength(); a++) {
         content->RemoveSpan((*repl)[a]);
     }

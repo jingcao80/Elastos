@@ -382,12 +382,12 @@ ECode CGeckoInputConnection::SetComposingText(
                 continue;
 
             // Get and iterate through list of span objects within range
-            AutoPtr<ArrayOf<ICharacterStyle*> > styles;
+            AutoPtr<ArrayOf<IInterface*> > styles;
             ec  = span->GetSpans(
                 spanStart, spanEnd, id, (ArrayOf<IInterface*>**)&styles);
 
             for (Int32 i = 0; i < styles->GetLength(); i++) {
-                 ICharacterStyle* style = (*styles)[i];
+                 ICharacterStyle* style = ICharacterStyle::Probe((*styles)[i]);
 
                 if (IUnderlineSpan::Probe(style)) {
                     // Text should be underlined

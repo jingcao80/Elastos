@@ -45,8 +45,6 @@ CharacterPickerDialog::OptionsAdapter::OptionsAdapter()
 {
 }
 
-CAR_INTERFACE_IMPL_4(CharacterPickerDialog::OptionsAdapter, Object, IBaseAdapter, IListAdapter, ISpinnerAdapter, IAdapter)
-
 ECode CharacterPickerDialog::OptionsAdapter::constructor(
     /* [in] */ IContext* context,
     /* [in] */ CharacterPickerDialog* host)
@@ -115,8 +113,8 @@ CharacterPickerDialog::CharacterPickerDialog()
 CharacterPickerDialog::~CharacterPickerDialog()
 {}
 
-CAR_INTERFACE_IMPL_9(CharacterPickerDialog, Object, IAdapterViewOnItemClickListener, IViewOnClickListener, ICharacterPickerDialog,
-     IDialog, IDialogInterface, IWindowCallback, IKeyEventCallback, IViewOnCreateContextMenuListener, IOnWindowDismissedCallback)
+CAR_INTERFACE_IMPL_3(CharacterPickerDialog, Dialog, IAdapterViewOnItemClickListener, \
+    IViewOnClickListener, ICharacterPickerDialog)
 
 ECode CharacterPickerDialog::constructor(
     /* [in] */ IContext* context,

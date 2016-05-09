@@ -18,13 +18,13 @@ AutoPtr<ITimeKeyListener> TimeKeyListener::sInstance;
 
 const AutoPtr<ArrayOf<Char32> > TimeKeyListener::CHARACTERS = InitCHARACTERS();
 
+CAR_INTERFACE_IMPL(TimeKeyListener, NumberKeyListener, ITimeKeyListener);
+
 TimeKeyListener::TimeKeyListener()
 {}
 
 TimeKeyListener::~TimeKeyListener()
 {}
-
-CAR_INTERFACE_IMPL(TimeKeyListener, Object, ITimeKeyListener);
 
 ECode TimeKeyListener::constructor()
 {

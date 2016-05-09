@@ -18,6 +18,8 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
+CAR_INTERFACE_IMPL_2(BaseMovementMethod, Object, IBaseMovementMethod, IMovementMethod)
+
 BaseMovementMethod::BaseMovementMethod()
 {}
 
@@ -28,8 +30,6 @@ ECode BaseMovementMethod::constructor()
 {
     return NOERROR;
 }
-
-CAR_INTERFACE_IMPL_2(BaseMovementMethod, Object, IBaseMovementMethod, IMovementMethod)
 
 ECode BaseMovementMethod::CanSelectArbitrarily(
     /* [out] */ Boolean* ret)

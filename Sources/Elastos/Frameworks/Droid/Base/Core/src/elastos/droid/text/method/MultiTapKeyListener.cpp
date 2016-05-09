@@ -35,35 +35,33 @@ ECode MultiTapKeyListener::Timeout::constructor()
 
     Int32 bufLen;
     ICharSequence::Probe(mBuffer)->GetLength(&bufLen);
-    ISpannable::Probe(mBuffer)->SetSpan(TO_IINTERFACE(this), 0, bufLen, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
+    ISpannable::Probe(mBuffer)->SetSpan((IRunnable*)this, 0, bufLen, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
     Boolean result;
-    PostAtTime(this, SystemClock::GetUptimeMillis() + 2000, &result);
+    return PostAtTime(this, SystemClock::GetUptimeMillis() + 2000, &result);
 }
-
-CAR_INTERFACE_IMPL_2(MultiTapKeyListener::Timeout, Object, IRunnable, IHandler)
 
 ECode MultiTapKeyListener::Timeout::Run()
 {
     AutoPtr<ISpannable> buf = ISpannable::Probe(mBuffer);
 
     if (buf != NULL) {
+        ICharSequence* csq = ICharSequence::Probe(buf);
 
-        Int32 st;
-        st = Selection::GetSelectionStart(ICharSequence::Probe(buf));
-        Int32 en;
-        en = Selection::GetSelectionEnd(ICharSequence::Probe(buf));
+        Int32 st, en;
+        st = Selection::GetSelectionStart(csq);
+        en = Selection::GetSelectionEnd(csq);
 
-        Int32 start;
-        ISpanned::Probe(buf)->GetSpanStart((CTextKeyListener::ACTIVE).Get(), &start);
-        Int32 end;
-        ISpanned::Probe(buf)->GetSpanEnd((CTextKeyListener::ACTIVE).Get(), &end);
+        ISpanned* sp = ISpanned::Probe(buf);
+        Int32 start, end;
+        sp->GetSpanStart((CTextKeyListener::ACTIVE).Get(), &start);
+        sp->GetSpanEnd((CTextKeyListener::ACTIVE).Get(), &end);
 
         if (st == start && en == end) {
-            en = Selection::GetSelectionEnd(ICharSequence::Probe(buf));
-            Selection::SetSelection(ISpannable::Probe(buf), en);
+            en = Selection::GetSelectionEnd(csq);
+            Selection::SetSelection(buf, en);
         }
 
-        ISpannable::Probe(buf)->RemoveSpan(TO_IINTERFACE(this));
+        buf->RemoveSpan(TO_IINTERFACE(this));
     }
     return NOERROR;
 }
@@ -92,13 +90,14 @@ const Int32 MultiTapKeyListener::CAPITALIZELENGTH = 4;
 
 AutoPtr<ArrayOf<IMultiTapKeyListener*> > MultiTapKeyListener::sInstance = ArrayOf<IMultiTapKeyListener*>::Alloc(MultiTapKeyListener::CAPITALIZELENGTH * 2);
 
+CAR_INTERFACE_IMPL_3(MultiTapKeyListener, BaseKeyListener, IMultiTapKeyListener, ISpanWatcher, INoCopySpan)
+
 MultiTapKeyListener::MultiTapKeyListener()
+    : mAutoText(FALSE)
 {}
 
 MultiTapKeyListener::~MultiTapKeyListener()
 {}
-
-CAR_INTERFACE_IMPL(MultiTapKeyListener, Object, IMultiTapKeyListener)
 
 ECode MultiTapKeyListener::constructor(
     /* [in] */ Capitalize cap,
@@ -146,6 +145,10 @@ ECode MultiTapKeyListener::OnKeyDown(
     Int32 selStart, selEnd;
     Int32 pref = 0;
 
+    ISpanned* spanned = ISpanned::Probe(content);
+    ISpannable* spannable = ISpannable::Probe(content);
+    ICharSequence* csq = ICharSequence::Probe(content);
+
     if (view != NULL) {
         AutoPtr<IContext> contextT;
         view->GetContext((IContext**)&contextT);
@@ -155,19 +158,17 @@ ECode MultiTapKeyListener::OnKeyDown(
     }
 
     {
-        Int32 a;
-        a = Selection::GetSelectionStart(ICharSequence::Probe(content));
-        Int32 b;
-        b = Selection::GetSelectionEnd(ICharSequence::Probe(content));
+        Int32 a, b;
+        a = Selection::GetSelectionStart(csq);
+        b = Selection::GetSelectionEnd(csq);
 
         selStart = Elastos::Core::Math::Min(a, b);
         selEnd = Elastos::Core::Math::Max(a, b);
     }
 
-    Int32 activeStart;
-    ISpanned::Probe(content)->GetSpanStart(CTextKeyListener::ACTIVE, &activeStart);
-    Int32 activeEnd;
-    ISpanned::Probe(content)->GetSpanEnd(CTextKeyListener::ACTIVE, &activeEnd);
+    Int32 activeStart, activeEnd;
+    spanned->GetSpanStart(CTextKeyListener::ACTIVE, &activeStart);
+    spanned->GetSpanEnd(CTextKeyListener::ACTIVE, &activeEnd);
 
     // now for the multitap cases...
 
@@ -175,7 +176,7 @@ ECode MultiTapKeyListener::OnKeyDown(
     // if we have one and it's still the same key.
 
     Int32 flagsT;
-    ISpanned::Probe(content)->GetSpanFlags(CTextKeyListener::ACTIVE, &flagsT);
+    spanned->GetSpanFlags(CTextKeyListener::ACTIVE, &flagsT);
 
     //Java:    int rec = (content.getSpanFlags(TextKeyListener.ACTIVE) & Spannable.SPAN_USER) >>> Spannable.SPAN_USER_SHIFT;
     Int32 rec = (flagsT & ISpanned::SPAN_USER)/ ((Int32)(Elastos::Core::Math::Pow(2, ISpanned::SPAN_USER_SHIFT)));
@@ -185,24 +186,26 @@ ECode MultiTapKeyListener::OnKeyDown(
             rec >= 0 && rec < sRecs->GetSize()) {
         if (keyCode == IKeyEvent::KEYCODE_STAR) {
             Char32 current;
-            ICharSequence::Probe(content)->GetCharAt(selStart, &current);
+            csq->GetCharAt(selStart, &current);
 
             if (Character::IsLowerCase(current)) {
-                String strT = String((char*)&current,1);
+                String strT;
+                strT.Append(current);
                 AutoPtr<ICharSequence> cs;
                 CString::New(strT.ToUpperCase(), (ICharSequence**)&cs);
                 content->Replace(selStart, selEnd , cs.Get());
-                RemoveTimeouts(ISpannable::Probe(content));
+                RemoveTimeouts(spannable);
                 AutoPtr<Timeout> t = new Timeout(content); // for its side effects
                 *ret = TRUE;
                 return NOERROR;
             }
             if (Character::IsUpperCase(current)) {
-                String strT = String((char*)&current,1);
+                String strT;
+                strT.Append(current);
                 AutoPtr<ICharSequence> cs;
                 CString::New(strT.ToLowerCase(), (ICharSequence**)&cs);
                 content->Replace(selStart, selEnd, cs.Get());
-                RemoveTimeouts(ISpannable::Probe(content));
+                RemoveTimeouts(spannable);
                 AutoPtr<Timeout> t = new Timeout(content); // for its side effects
                 *ret = TRUE;
                 return NOERROR;
@@ -215,7 +218,7 @@ ECode MultiTapKeyListener::OnKeyDown(
             HashMap<Int32, String>::Iterator iterRecs = sRecs->Find(keyCode);
             String val = iterRecs->mSecond;
             Char32 ch;
-            ICharSequence::Probe(content)->GetCharAt(selStart, &ch);
+            csq->GetCharAt(selStart, &ch);
             Int32 ix = val.IndexOf(ch);
 
             if (ix >= 0) {
@@ -223,7 +226,7 @@ ECode MultiTapKeyListener::OnKeyDown(
                 AutoPtr<ICharSequence> cs;
                 CString::New(val, (ICharSequence**)&cs);
                 content->Replace(selStart, selEnd, cs, ix, ix + 1);
-                RemoveTimeouts(ISpannable::Probe(content));
+                RemoveTimeouts(spannable);
                 AutoPtr<Timeout> t = new Timeout(content); // for its side effects
                 *ret = TRUE;
                 return NOERROR;
@@ -239,7 +242,7 @@ ECode MultiTapKeyListener::OnKeyDown(
         rec = ((keyCode < 8 ? keyCode + 10 : keyCode) - 8);
 
         if (rec >= 0) {
-            Selection::SetSelection(ISpannable::Probe(content), selEnd, selEnd);
+            Selection::SetSelection(spannable, selEnd, selEnd);
             selStart = selEnd;
         }
     }
@@ -259,7 +262,7 @@ ECode MultiTapKeyListener::OnKeyDown(
         Int32 off = 0;
         Boolean flag = FALSE;
         if ((pref & CTextKeyListener::AUTO_CAP) != 0 &&
-                (TextKeyListener::ShouldCap(mCapitalize, ICharSequence::Probe(content), selStart, &flag), flag)) {
+                (TextKeyListener::ShouldCap(mCapitalize, csq, selStart, &flag), flag)) {
             AutoPtr<ArrayOf<Char32> > chars = val.GetChars();
             for (Int32 i = 0; i < chars->GetLength(); i++) {
                 if (Character::IsUpperCase((*chars)[i])) {
@@ -270,34 +273,34 @@ ECode MultiTapKeyListener::OnKeyDown(
         }
 
         if (selStart != selEnd) {
-            Selection::SetSelection(ISpannable::Probe(content), selEnd);
+            Selection::SetSelection(spannable, selEnd);
         }
 
-        ISpannable::Probe(content)->SetSpan(OLD_SEL_START, selStart, selStart, ISpanned::SPAN_MARK_MARK);
+        spannable->SetSpan(OLD_SEL_START, selStart, selStart, ISpanned::SPAN_MARK_MARK);
 
         AutoPtr<ICharSequence> cs;
         CString::New(val, (ICharSequence**)&cs);
         content->Replace(selStart, selEnd, cs.Get(), off, off + 1);
 
         Int32 oldStart;
-        ISpanned::Probe(content)->GetSpanStart(OLD_SEL_START, &oldStart);
-        selEnd = Selection::GetSelectionEnd(ICharSequence::Probe(content));
+        spanned->GetSpanStart(OLD_SEL_START, &oldStart);
+        selEnd = Selection::GetSelectionEnd(csq);
 
         if (selEnd != oldStart) {
-            Selection::SetSelection(ISpannable::Probe(content), oldStart, selEnd);
+            Selection::SetSelection(spannable, oldStart, selEnd);
 
-            ISpannable::Probe(content)->SetSpan(CTextKeyListener::LAST_TYPED,
-                                oldStart, selEnd,
-                                ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable->SetSpan(CTextKeyListener::LAST_TYPED,
+                oldStart, selEnd,
+                ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            ISpannable::Probe(content)->SetSpan(CTextKeyListener::ACTIVE,
-                            oldStart, selEnd,
-                            ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE |
-                            (rec << ISpanned::SPAN_USER_SHIFT));
+            spannable->SetSpan(CTextKeyListener::ACTIVE,
+                oldStart, selEnd,
+                ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE |
+                (rec << ISpanned::SPAN_USER_SHIFT));
 
         }
 
-        RemoveTimeouts(ISpannable::Probe(content));
+        RemoveTimeouts(spannable);
         AutoPtr<Timeout> t = new Timeout(content); // for its side effects
         *ret = TRUE;
         return NOERROR;
@@ -306,17 +309,18 @@ ECode MultiTapKeyListener::OnKeyDown(
         // cursor moves.
 
         Int32 spanStart;
-        if ((ISpanned::Probe(content)->GetSpanStart(TO_IINTERFACE(this), &spanStart), spanStart) < 0) {
-            AutoPtr< ArrayOf<IKeyListener*> > methods;
+        if ((spanned->GetSpanStart(TO_IINTERFACE(this), &spanStart), spanStart) < 0) {
+            AutoPtr< ArrayOf<IInterface*> > methods;
             Int32 contentLen;
-            ISpanned::Probe(content)->GetSpans(0, (ICharSequence::Probe(content)->GetLength(&contentLen), contentLen), EIID_IKeyListener, (ArrayOf<IInterface*>**)&methods );
+            csq->GetLength(&contentLen);
+            spanned->GetSpans(0, contentLen, EIID_IKeyListener, (ArrayOf<IInterface*>**)&methods );
 
             Int32 aryLen = methods->GetLength();
             for(Int32 i =0; i < aryLen; i++) {
-                AutoPtr<IKeyListener> method = (*methods)[i];
-                ISpannable::Probe(content)->RemoveSpan((IInterface*)(method.Get()));
+                spannable->RemoveSpan((*methods)[i]);
             }
-            ISpannable::Probe(content)->SetSpan(TO_IINTERFACE(this), 0, (ICharSequence::Probe(content)->GetLength(&contentLen), contentLen), ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
+            csq->GetLength(&contentLen);
+            spannable->SetSpan(TO_IINTERFACE(this), 0, contentLen, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
         }
 
         *ret = TRUE;
@@ -349,15 +353,15 @@ void MultiTapKeyListener::RemoveTimeouts(
 {
     Int32 bufLen;
     ICharSequence::Probe(buf)->GetLength(&bufLen);
-    AutoPtr< ArrayOf<IRunnable*> > timeout;
+    AutoPtr< ArrayOf<IInterface*> > timeout;
     ISpanned::Probe(buf)->GetSpans(0, bufLen, EIID_IRunnable, (ArrayOf<IInterface*>**)&timeout);
 
     for (Int32 i = 0; i < timeout->GetLength(); i++) {
-        AutoPtr<Timeout> t = (Timeout*)((*timeout)[i]);
+        Timeout* t = (Timeout*)IRunnable::Probe((*timeout)[i]);
         t->RemoveCallbacks(t);
 
         t->mBuffer = NULL;
-        ISpannable::Probe(buf)->RemoveSpan((IInterface*)(IRunnable*)(t.Get()));
+        ISpannable::Probe(buf)->RemoveSpan((*timeout)[i]);
     }
 }
 

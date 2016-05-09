@@ -544,7 +544,7 @@ void TextLine::UpdateMetrics(
 Float TextLine::Ascent(
     /* [in] */ Int32 pos)
 {
-    PFL_EX("TODO")
+    assert(0 && "TODO");
 /*
     if (mSpanned == NULL) {
         Float temp;
@@ -553,9 +553,9 @@ Float TextLine::Ascent(
     }
 
     pos += mStart;
-    AutoPtr< ArrayOf<IMetricAffectingSpan> > spans;
+    AutoPtr< ArrayOf<IInterface> > spans;//IMetricAffectingSpan
     mSpanned->GetSpans(pos, pos + 1, ERIID_IMetricAffectingSpan,
-             (ArrayOf<IMetricAffectingSpan>**)&spans);
+             (ArrayOf<IInterface>**)&spans);
     if (spans->GetLength() == 0) {
         Float temp;
         mPaint->Ascent(&temp);
@@ -567,7 +567,7 @@ Float TextLine::Ascent(
     //for (MetricAffectingSpan span : spans) {
     Int32 length = spans->GetLength();
     for (Int32 i = 0; i < length; i++) {
-        (*spans)[i]->UpdateMeasureState(wp);
+        IMetricAffectingSpan::Probe((*spans)[i])->UpdateMeasureState(wp);
     }
 
     Float temp;

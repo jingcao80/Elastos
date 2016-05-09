@@ -135,9 +135,9 @@ void SpellParser::Parse()
         return;
     }
 
-    AutoPtr< ArrayOf<ISpellCheckSpan*> > spellCheckSpans;
+    AutoPtr< ArrayOf<IInterface*> > spellCheckSpans;
     ISpanned::Probe(editable)->GetSpans(start - 1, end + 1, EIID_ISpellCheckSpan, (ArrayOf<IInterface*>**)&spellCheckSpans);
-    AutoPtr< ArrayOf<ISuggestionSpan*> > suggestionSpans;
+    AutoPtr< ArrayOf<IInterface*> > suggestionSpans;
     ISpanned::Probe(editable)->GetSpans(start - 1, end + 1, EIID_ISuggestionSpan, (ArrayOf<IInterface*>**)&suggestionSpans);
 
     Int32 wordCount = 0;
@@ -208,13 +208,13 @@ void SpellParser::Parse()
                     break;
                 }
                 if (wordStart < start && wordEnd > start) {
-                    RemoveSpansAt(editable, start, (ArrayOf<IInterface*>*)spellCheckSpans.Get());
-                    RemoveSpansAt(editable, start, (ArrayOf<IInterface*>*)suggestionSpans.Get());
+                    RemoveSpansAt(editable, start, spellCheckSpans.Get());
+                    RemoveSpansAt(editable, start, suggestionSpans.Get());
                 }
 
                 if (wordStart < end && wordEnd > end) {
-                    RemoveSpansAt(editable, end, (ArrayOf<IInterface*>*)spellCheckSpans.Get());
-                    RemoveSpansAt(editable, end, (ArrayOf<IInterface*>*)suggestionSpans.Get());
+                    RemoveSpansAt(editable, end, spellCheckSpans.Get());
+                    RemoveSpansAt(editable, end, suggestionSpans.Get());
                 }
 
                 Boolean createSpellCheckSpan = TRUE;

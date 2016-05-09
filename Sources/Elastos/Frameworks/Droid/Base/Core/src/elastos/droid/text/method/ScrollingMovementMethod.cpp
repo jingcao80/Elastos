@@ -14,13 +14,13 @@ namespace Method {
 
 AutoPtr<IScrollingMovementMethod> ScrollingMovementMethod::sInstance;
 
+CAR_INTERFACE_IMPL(ScrollingMovementMethod, BaseMovementMethod, IScrollingMovementMethod)
+
 ScrollingMovementMethod::ScrollingMovementMethod()
 {}
 
 ScrollingMovementMethod::~ScrollingMovementMethod()
 {}
-
-CAR_INTERFACE_IMPL_3(ScrollingMovementMethod, Object, IScrollingMovementMethod, IMovementMethod, IBaseMovementMethod)
 
 ECode ScrollingMovementMethod::constructor()
 {

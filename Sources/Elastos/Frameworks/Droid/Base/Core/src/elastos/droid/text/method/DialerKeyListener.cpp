@@ -26,6 +26,9 @@ static AutoPtr<ArrayOf<Char32> > InitCHARACTERS()
 
 const AutoPtr<ArrayOf<Char32> > DialerKeyListener::CHARACTERS = InitCHARACTERS();
 
+
+CAR_INTERFACE_IMPL(DialerKeyListener, NumberKeyListener, IDialerKeyListener)
+
 DialerKeyListener::DialerKeyListener()
 {}
 
@@ -36,8 +39,6 @@ ECode DialerKeyListener::constructor()
 {
     return NOERROR;
 }
-
-CAR_INTERFACE_IMPL(DialerKeyListener, Object, IDialerKeyListener)
 
 AutoPtr< ArrayOf<Char32> > DialerKeyListener::GetAcceptedChars()
 {
@@ -74,6 +75,7 @@ ECode DialerKeyListener::ClearMetaKeyState(
 ECode DialerKeyListener::GetInputType(
     /* [out] */ Int32* ret)
 {
+    VALIDATE_NOT_NULL(ret)
     *ret = IInputType::TYPE_CLASS_PHONE;
     return NOERROR;
 }

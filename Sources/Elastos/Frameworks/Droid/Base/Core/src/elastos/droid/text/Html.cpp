@@ -138,7 +138,7 @@ void Html::WithinHtml(
     Int32 next;
     for (Int32 i = 0; i < len; i = next) {
         text->NextSpanTransition(i, len, EIID_IParagraphStyle, &next);
-        AutoPtr< ArrayOf<IParagraphStyle*> > style;
+        AutoPtr< ArrayOf<IInterface*> > style;
         text->GetSpans(i, next, EIID_IParagraphStyle, (ArrayOf<IInterface*>**)&style);
         StringBuilder elements(" ");
         Boolean needDiv = FALSE;
@@ -147,15 +147,15 @@ void Html::WithinHtml(
             AutoPtr<IAlignmentSpan> alignmentSpan = IAlignmentSpan::Probe((*style)[j]);
             if (alignmentSpan != NULL) {
                 LayoutAlignment align;
-                ((IAlignmentSpan*) (*style)[j])->GetAlignment(&align);
+                alignmentSpan->GetAlignment(&align);
                 needDiv = TRUE;
                 String prev = elements.ToString();
                 elements.Reset();
-                if (align == /*Layout.Alignment.ALIGN_CENTER*/ALIGN_CENTER) {
+                if (align == ALIGN_CENTER) {
                     elements += "align=\"center\" ";
 
                 }
-                else if (align == /*Layout.Alignment.ALIGN_OPPOSITE*/ALIGN_OPPOSITE) {
+                else if (align == ALIGN_OPPOSITE) {
                     elements += "align=\"right\" ";
                 }
                 else {
@@ -266,7 +266,7 @@ void Html::WithinParagraph(
     Int32 next;
     for (Int32 i = start; i < end; i = next) {
         text->NextSpanTransition(i, end, EIID_ICharacterStyle, &next);
-        AutoPtr< ArrayOf<ICharacterStyle*> > style;
+        AutoPtr< ArrayOf<IInterface*> > style;
         text->GetSpans(i, next, EIID_ICharacterStyle, (ArrayOf<IInterface*>**)&style);
 
         for (Int32 j = 0; j < style->GetLength(); j++) {

@@ -20,8 +20,6 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-class RippleDrawable;
-
 /**
  * Draws a Material ripple.
  */
@@ -34,6 +32,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("RippleBackground::RBAnimatorListenerAdapter")
+
         RBAnimatorListenerAdapter(
             /* [in] */ CRippleBackground* host);
 
@@ -49,6 +49,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("RippleBackground::OuterOpacityAnimatorListenerAdapter")
+
         OuterOpacityAnimatorListenerAdapter(
             /* [in] */ CRippleBackground* host,
             /* [in] */ Int32 duration);
@@ -67,11 +69,7 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
-
-    CAR_INTERFACE_DECL();
-
-    CRippleBackground();
+    RippleBackground();
 
     /**
      * Creates a new ripple.
@@ -80,58 +78,62 @@ public:
         /* [in] */ IRippleDrawable* owner,
         /* [in] */ IRect* bounds);
 
-    CARAPI_(void) Setup(
+    CARAPI Setup(
         /* [in] */ Int32 maxRadius,
         /* [in] */ Int32 color,
         /* [in] */ Float density);
 
-    CARAPI_(Boolean) IsHardwareAnimating();
+    CARAPI IsHardwareAnimating(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) OnHotspotBoundsChanged();
+    CARAPI OnHotspotBoundsChanged();
 
     // @SuppressWarnings("unused")
-    CARAPI_(void) SetOuterOpacity(
+    CARAPI SetOuterOpacity(
         /* [in] */ Float a);
 
     // @SuppressWarnings("unused")
-    CARAPI_(Float) GetOuterOpacity();
+    CARAPI GetOuterOpacity(
+        /* [out] */ Float* result);
 
     /**
      * Draws the ripple centered at (0,0) using the specified paint.
      */
-    CARAPI_(Boolean) Draw(
+    CARAPI Draw(
         /* [in] */ ICanvas* c,
-        /* [in] */ IPaint* p);
+        /* [in] */ IPaint* p,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) ShouldDraw();
+    CARAPI ShouldDraw(
+        /* [out] */ Boolean* result);
 
     /**
      * Returns the maximum bounds of the ripple relative to the ripple center.
      */
-    CARAPI_(void) GetBounds(
+    CARAPI GetBounds(
         /* [in] */ IRect* bounds);
 
     /**
      * Starts the enter animation.
      */
-    CARAPI_(void) Enter();
+    CARAPI Enter();
 
     /**
      * Starts the exit animation.
      */
-    CARAPI_(void) Exit();
+    CARAPI Exit();
 
     /**
      * Jump all animations to their end state. The caller is responsible for
      * removing the ripple from the list of animating ripples.
      */
-    CARAPI_(void) Jump();
+    CARAPI Jump();
 
     /**
      * Cancel all animations. The caller is responsible for removing
      * the ripple from the list of animating ripples.
      */
-    CARAPI_(void) Cancel();
+    CARAPI Cancel();
 
 private:
     CARAPI_(Boolean) DrawHardware(
@@ -165,7 +167,6 @@ private:
 
     CARAPI_(void) InvalidateSelf();
 
-    static CARAPI_(AutoPtr<ITimeInterpolator>) Init_LINEAR_INTERPOLATOR();
 
 private:
     static AutoPtr<ITimeInterpolator> LINEAR_INTERPOLATOR;
@@ -182,7 +183,7 @@ private:
     AutoPtr<IArrayList> mRunningAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
     AutoPtr<IArrayList> mPendingAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
 
-    RippleDrawable* mOwner;
+    AutoPtr<IWeakReference> mWeakHost; //IRippleDrawable
 
     /** Bounds used for computing max radius. */
     AutoPtr<IRect> mBounds;

@@ -17,7 +17,7 @@ static AutoPtr<ArrayOf<Char32> > InitCHARACTERS()
 
 const AutoPtr<ArrayOf<Char32> > DateKeyListener::CHARACTERS = InitCHARACTERS();
 
-CAR_INTERFACE_IMPL_6(DateKeyListener, Object, IDateKeyListener, INumberKeyListener, IBaseKeyListener, IMetaKeyKeyListener, IKeyListener, IInputFilter)
+CAR_INTERFACE_IMPL(DateKeyListener, NumberKeyListener, IDateKeyListener)
 
 DateKeyListener::DateKeyListener()
 {}

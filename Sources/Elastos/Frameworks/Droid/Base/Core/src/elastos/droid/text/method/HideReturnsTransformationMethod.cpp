@@ -24,13 +24,14 @@ static AutoPtr<ArrayOf<Char32> > HInitReplacement()
     return ch;
 }
 
+CAR_INTERFACE_IMPL(HideReturnsTransformationMethod, ReplacementTransformationMethod, \
+    IHideReturnsTransformationMethod)
+
 HideReturnsTransformationMethod::HideReturnsTransformationMethod()
 {}
 
 HideReturnsTransformationMethod::~HideReturnsTransformationMethod()
 {}
-
-CAR_INTERFACE_IMPL_3(HideReturnsTransformationMethod, Object, IHideReturnsTransformationMethod, IReplacementTransformationMethod, ITransformationMethod)
 
 ECode HideReturnsTransformationMethod::constructor()
 {

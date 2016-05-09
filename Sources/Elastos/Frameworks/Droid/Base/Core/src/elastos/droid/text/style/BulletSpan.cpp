@@ -121,7 +121,7 @@ ECode BulletSpan::DrawLeadingMargin(
         if ((c->IsHardwareAccelerated(&bIsHardwareAccelerated), bIsHardwareAccelerated))
         {
             if (sBulletPath == NULL) {
-                CPath::New( (IPath**)&sBulletPath );    //Java:    sBulletPath = new Path();
+                CPath::New( (IPath**)&sBulletPath );
 
                 // Bullet is slightly better to avoid aliasing artifacts on mdpi devices.
                 sBulletPath->AddCircle(0.0f, 0.0f, 1.2f * BULLET_RADIUS, PathDirection_CW);

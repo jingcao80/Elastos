@@ -23,7 +23,7 @@ ECode CDateKeyListenerHelper::GetInstance(
     /* [out] */ IDateKeyListener** ret)
 {
     if (sInstance == NULL) {
-        sInstance = new DateKeyListener();
+        CDateKeyListener::New((IDateKeyListener**)&sInstance);
     }
 
     *ret = sInstance;

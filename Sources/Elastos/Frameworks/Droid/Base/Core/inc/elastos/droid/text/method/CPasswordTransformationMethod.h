@@ -76,11 +76,12 @@ private:
         friend class PasswordCharSequence;
 
     public:
+
+        CAR_INTERFACE_DECL()
+
         TO_STRING_IMPL("CPasswordTransformationMethod::Visible")
 
         Visible();
-
-        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ ISpannable* sp,
@@ -107,9 +108,11 @@ private:
         , public INoCopySpan
     {
     public:
-        ViewReference();
-
         CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CPasswordTransformationMethod::ViewReference")
+
+        ViewReference();
 
         CARAPI constructor(
             /* [in] */ IView* v);

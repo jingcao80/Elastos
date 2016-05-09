@@ -59,7 +59,7 @@ ECode Ripple::RippleAnimatorListenerAdapter::OnAnimationEnd(
 
 
 ///////////////////  Ripple  ///////////////////////
-AutoPtr<ITimeInterpolator> Init_LINEAR_INTERPOLATOR()
+static AutoPtr<ITimeInterpolator> Init_LINEAR_INTERPOLATOR()
 {
     AutoPtr<ITimeInterpolator> li;
     CLinearInterpolator::New((ITimeInterpolator**)&li);

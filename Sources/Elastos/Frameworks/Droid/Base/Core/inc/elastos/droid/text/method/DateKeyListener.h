@@ -49,7 +49,7 @@ public:
 
 protected:
     //@Override
-    CARAPI_(AutoPtr< ArrayOf<Char32> >) GetAcceptedChars();
+    virtual CARAPI_(AutoPtr< ArrayOf<Char32> >) GetAcceptedChars();
 
 public:
     /**

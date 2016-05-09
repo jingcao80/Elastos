@@ -78,11 +78,11 @@ private:
         , public ISpanned
     {
     public:
+        CAR_INTERFACE_DECL()
+
         SpannedReplacementCharSequence();
 
         ~SpannedReplacementCharSequence();
-
-        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ ISpanned* source,
@@ -133,11 +133,12 @@ private:
     };
 
 public:
+
+    CAR_INTERFACE_DECL()
+
     ReplacementTransformationMethod();
 
     virtual ~ReplacementTransformationMethod();
-
-    CAR_INTERFACE_DECL()
 
     /**
      * Returns a CharSequence that will mirror the contents of the

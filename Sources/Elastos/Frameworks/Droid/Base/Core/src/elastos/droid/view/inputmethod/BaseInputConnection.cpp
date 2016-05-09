@@ -900,10 +900,10 @@ void BaseInputConnection::ReplaceText(
         SetComposingSpans(sp);
     }
 
-    assert(0 && "TODO");
-    // if (DEBUG) Logger::V(TAG, "Replacing from %d to %d with \"%s\", composing=%d, type=%s",
-    //                             a, b, text, composing
-    //                             text.getClass().getCanonicalName());
+    if (DEBUG) {
+        Logger::V(TAG, "Replacing from %d to %d with \"%s\", composing=%d",
+            a, b, TO_CSTR(text), composing);
+    }
 
     // if (DEBUG) {
     //     LogPrinter lp = new LogPrinter(Log.VERBOSE, TAG);

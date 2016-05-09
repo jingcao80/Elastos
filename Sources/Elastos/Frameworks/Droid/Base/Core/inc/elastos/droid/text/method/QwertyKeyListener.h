@@ -19,14 +19,17 @@ class QwertyKeyListener
 protected:
     class Replaced
         : public Object
+        , public IReplacedSpan
         , public INoCopySpan
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("QwertyKeyListener::Replaced")
+
         Replaced();
 
         ~Replaced();
-
-        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ ArrayOf<Char32>* text);

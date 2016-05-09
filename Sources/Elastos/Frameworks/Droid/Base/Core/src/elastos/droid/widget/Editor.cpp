@@ -1671,10 +1671,11 @@ ECode HandleView::constructor(
     /* [in] */ IDrawable* drawableRtl,
     /* [in] */ Editor* editor)
 {
+    mEditor = editor;
     AutoPtr<IContext> ctx;
     mEditor->mTextView->GetContext((IContext**)&ctx);
     View::constructor(ctx);
-    mEditor = editor;
+
     CPopupWindow::New(ctx, NULL, R::attr::textSelectHandleWindowStyle, (IPopupWindow**)&mContainer);
     mContainer->SetSplitTouchEnabled(TRUE);
     mContainer->SetClippingEnabled(FALSE);
@@ -1688,8 +1689,8 @@ ECode HandleView::constructor(
     ctx->GetResources((IResources**)&res);
     res->GetDimensionPixelSize(R::dimen::text_handle_min_size, &mMinSize);
     UpdateDrawable();
-    assert(0);
-    Int32 handleHeight;// = GetPreferredHeight();
+
+    Int32 handleHeight = GetPreferredHeight();
     mTouchOffsetY = -0.3f * handleHeight;
     mIdealVerticalOffset = 0.7f * handleHeight;
     return NOERROR;
@@ -2054,8 +2055,7 @@ ECode InsertionHandleView::constructor(
     /* [in] */ IDrawable* drawable,
     /* [in] */ Editor* editor)
 {
-    HandleView::constructor(drawable, drawable, editor);
-    return NOERROR;
+    return HandleView::constructor(drawable, drawable, editor);
 }
 
 void InsertionHandleView::Show()
@@ -2455,8 +2455,8 @@ AutoPtr<InsertionHandleView> InsertionPointCursorController::GetHandle()
         AutoPtr<IContext> ctx;
         mEditor->mTextView->GetContext((IContext**)&ctx);
         ctx->GetDrawable(
-                mEditor->mTextView->mTextSelectHandleRes,
-                (IDrawable**)&mEditor->mSelectHandleCenter);
+            mEditor->mTextView->mTextSelectHandleRes,
+            (IDrawable**)&mEditor->mSelectHandleCenter);
     }
     if (mHandle == NULL) {
         mHandle = new InsertionHandleView();
@@ -4100,20 +4100,17 @@ void Editor::DowngradeEasyCorrectionSpans()
     if (spannable) {
         Int32 length;
         ICharSequence::Probe(spannable)->GetLength(&length);
-        AutoPtr<ArrayOf<ISuggestionSpan*> > temp;
-        ISpanned::Probe(spannable)->GetSpans(0, length, EIID_ISuggestionSpan, (ArrayOf<IInterface*>**)&temp);
-        AutoPtr<ArrayOf<ISuggestionSpan*> > suggestionSpans = ArrayOf<ISuggestionSpan*>::Alloc(temp->GetLength());
-        for(Int32 i = 0; i < temp->GetLength(); i++) {
-            suggestionSpans->Set(i, ISuggestionSpan::Probe((*temp)[i]));
-        }
+        AutoPtr<ArrayOf<IInterface*> > suggestionSpans;
+        ISpanned::Probe(spannable)->GetSpans(0, length, EIID_ISuggestionSpan, (ArrayOf<IInterface*>**)&suggestionSpans);
         if (suggestionSpans != NULL) {
             Int32 flags;
             for (Int32 i = 0; i < suggestionSpans->GetLength(); i++) {
-                (*suggestionSpans)[i]->GetFlags(&flags);
+                ISuggestionSpan* ss = ISuggestionSpan::Probe((*suggestionSpans)[i]);
+                ss->GetFlags(&flags);
                 if ((flags & ISuggestionSpan::FLAG_EASY_CORRECT) != 0
                         && (flags & ISuggestionSpan::FLAG_MISSPELLED) == 0) {
                     flags &= ~ISuggestionSpan::FLAG_EASY_CORRECT;
-                    (*suggestionSpans)[i]->SetFlags(flags);
+                    ss->SetFlags(flags);
                 }
             }
         }
