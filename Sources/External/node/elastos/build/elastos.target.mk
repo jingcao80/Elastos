@@ -8,7 +8,10 @@ DEFS_Debug := \
 	'-D_FILE_OFFSET_BITS=64' \
 	'-DBUILDING_NODE_EXTENSION' \
 	'-DDEBUG' \
-	'-D_DEBUG'
+	'-D_DEBUG' \
+	'-D_IOVEC' \
+	'-DANDROID' \
+	'-DHAVE_SYS_UIO_H'
 
 # Flags passed to all source files.
 CFLAGS_Debug := \
@@ -29,9 +32,11 @@ CFLAGS_CC_Debug := \
 	-fno-exceptions
 
 INCS_Debug := \
-	-I/home/whm/.node-gyp/0.12.7/src \
-	-I/home/whm/.node-gyp/0.12.7/deps/uv/include \
-	-I/home/whm/.node-gyp/0.12.7/deps/v8/include \
+    -I $(XDK_SOURCE_PATH)/External/node/deps/uv/include \
+    -I $(XDK_SOURCE_PATH)/External/node/src \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport \
+    -I $(XDK_SOURCE_PATH)/External/node/deps/v8/include \
 	-I$(srcdir)/JavaScriptCore \
 	-I$(srcdir)/JavaScriptCore/icu \
 	-I$(srcdir)/JavaScriptCore/wtf \
@@ -67,7 +72,10 @@ DEFS_Release := \
 	'-DNODE_GYP_MODULE_NAME=elastos' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
-	'-DBUILDING_NODE_EXTENSION'
+	'-DBUILDING_NODE_EXTENSION' \
+	'-D_IOVEC' \
+	'-DANDROID' \
+	'-DHAVE_SYS_UIO_H'
 
 # Flags passed to all source files.
 CFLAGS_Release := \
@@ -91,9 +99,12 @@ CFLAGS_CC_Release := \
 	-fno-exceptions
 
 INCS_Release := \
-	-I/home/whm/.node-gyp/0.12.7/src \
-	-I/home/whm/.node-gyp/0.12.7/deps/uv/include \
-	-I/home/whm/.node-gyp/0.12.7/deps/v8/include \
+    -I $(XDK_SOURCE_PATH)/External/node/deps/uv/include \
+    -I $(XDK_SOURCE_PATH)/External/node/src \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/bionic \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport \
+    -I $(XDK_SOURCE_PATH)/External/node/deps/v8/include \
 	-I$(srcdir)/JavaScriptCore \
 	-I$(srcdir)/JavaScriptCore/icu \
 	-I$(srcdir)/JavaScriptCore/wtf \
@@ -193,18 +204,20 @@ $(obj).$(TOOLSET)/$(TARGET)/%.o: $(obj)/%.cpp FORCE_DO_CMD
 LDFLAGS_Debug := \
 	-pthread \
 	-rdynamic \
-	-L/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Build/Prebuilt/Linux/usr/lib
+	--sysroot=$(XDK_BUILD_PATH)/Prebuilt/Linux \
+	-L$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib
 
 LDFLAGS_Release := \
 	-pthread \
 	-rdynamic \
-	-L/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Build/Prebuilt/Linux/usr/lib
+	--sysroot=$(XDK_BUILD_PATH)/Prebuilt/Linux \
+	-L$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib
 
 LIBS := \
-	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/obj/rdk/arm.gnu.android.dbg/lib/Elastos.Runtime.lib \
-	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/rdk/arm.gnu.android.dbg/bin/Elastos.Runtime.eco \
-	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/rdk/arm.gnu.android.dbg/bin/Elastos.CoreLibrary.eco \
-	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/obj/rdk/arm.gnu.android.dbg/lib/crt0.lib \
+	$(XDK_USER_LIB)/Elastos.Runtime.lib \
+	$(XDK_TARGETS)/Elastos.Runtime.eco \
+	$(XDK_TARGETS)/Elastos.CoreLibrary.eco \
+	$(XDK_USER_LIB)/crt0.lib \
 	-licuuc \
 	-licui18n \
 	-llog \
