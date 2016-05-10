@@ -1,5 +1,6 @@
 
 #include "elastos/droid/widget/TableRow.h"
+#include "elastos/droid/widget/CTableRowLayoutParams.h"
 #include "elastos/droid/view/CGravity.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
@@ -28,7 +29,9 @@ CAR_INTERFACE_IMPL(TableRow::LayoutParams, LinearLayout::LayoutParams, ITableRow
 TableRow::LayoutParams::LayoutParams()
     : mColumn(0)
     , mSpan(0)
-{}
+{
+    mOffset = ArrayOf<Int32>::Alloc(2);
+}
 
 ECode TableRow::LayoutParams::constructor(
     /* [in] */ IContext* c,
@@ -356,7 +359,8 @@ ECode TableRow::GetVirtualChildCount(
     if (mColumnToChildIndex == NULL) {
         MapIndexAndColumns();
     }
-    return mNumColumns;
+    *count = mNumColumns;
+    return NOERROR;
 }
 
 void TableRow::MapIndexAndColumns()
@@ -624,8 +628,7 @@ ECode TableRow::GenerateLayoutParams(
     AutoPtr<ITableRowLayoutParams> lp;
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
-    assert(0);
-    //FAIL_RETURN(CTableRowLayoutParams::New(ctx, attrs, (ITableRowLayoutParams**)&lp));
+    CTableRowLayoutParams::New(ctx, attrs, (ITableRowLayoutParams**)&lp);
     *params = IViewGroupLayoutParams::Probe(lp);
     REFCOUNT_ADD(*params);
     return NOERROR;
@@ -640,10 +643,9 @@ ECode TableRow::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params)
-    AutoPtr<IViewGroupLayoutParams> lp;
-    assert(0);
-    //CTableRowLayoutParams::New((IViewGroupLayoutParams**)&lp);
-    *params = lp;
+    AutoPtr<ITableRowLayoutParams> lp;
+    CTableRowLayoutParams::New((ITableRowLayoutParams**)&lp);
+    *params = IViewGroupLayoutParams::Probe(lp);
     REFCOUNT_ADD(*params);
     return NOERROR;
 }
@@ -663,10 +665,9 @@ Boolean TableRow::CheckLayoutParams(
 AutoPtr<IViewGroupLayoutParams> TableRow::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    AutoPtr<IViewGroupLayoutParams> lp;
-    assert(0);
-    //CTableRowLayoutParams::New((ITableRowLayoutParams**)&lp);
-    return lp;
+    AutoPtr<ITableRowLayoutParams> lp;
+    CTableRowLayoutParams::New((ITableRowLayoutParams**)&lp);
+    return IViewGroupLayoutParams::Probe(lp);
 }
 
 ECode TableRow::OnInitializeAccessibilityEvent(

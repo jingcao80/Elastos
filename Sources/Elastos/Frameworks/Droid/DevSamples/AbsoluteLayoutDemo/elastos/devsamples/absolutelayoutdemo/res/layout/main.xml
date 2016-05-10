@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout android:id="@+id/layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <Button android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="按钮1"
+        android:layout_x="0px"
+        android:layout_y="0px" />
+    <Button android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="按钮2"
+        android:layout_x="50px"
+        android:layout_y="50px" />
+    <Button android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="按钮3"
+        android:layout_x="100px"
+        android:layout_y="100px" />
+</AbsoluteLayout>
