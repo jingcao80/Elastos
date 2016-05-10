@@ -758,9 +758,8 @@ ECode CMessageQueue::RemoveSyncBarrier(
         AutoPtr<IMessage> p = mMessages;
         AutoPtr<IHandler> target;
         while (p != NULL
-            && (p->GetTarget((IHandler**)&target), target != NULL)
-            && (p->GetArg1(&arg1), arg1 != token)
-        ) {
+            && ((p->GetTarget((IHandler**)&target), target != NULL)
+            || (p->GetArg1(&arg1), arg1 != token))) {
             target = NULL;
             prev = p;
             prev->GetNext((IMessage**)&p);
