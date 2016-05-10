@@ -130,9 +130,9 @@ ECode RouteInfo::constructor(
     /* [in] */ const String& iface)
 {
     AutoPtr<IIpPrefix> ipPrefix;
-    if (destination == NULL) {
-    AutoPtr<IInetAddress> destAddress;
-    destination->GetAddress((IInetAddress**)&destAddress);
+    if (destination != NULL) {
+        AutoPtr<IInetAddress> destAddress;
+        destination->GetAddress((IInetAddress**)&destAddress);
         CIpPrefix::New(destAddress, Ptr(destination)->Func(destination->GetPrefixLength), (IIpPrefix**)&ipPrefix);
     }
     return constructor(ipPrefix, gateway, iface);

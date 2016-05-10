@@ -2,7 +2,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/server/wifi/WifiApConfigStore.h"
-//TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 #ifdef DROID_CORE
@@ -376,7 +376,7 @@ void WifiApConfigStore::SetDefaultApConfiguration()
         config->SetPreSharedKey(psk);
     }
 
-    //TODO SendMessage(WifiStateMachine::CMD_SET_AP_CONFIG, config.Get());
+    SendMessage(WifiStateMachine::CMD_SET_AP_CONFIG, config.Get());
 }
 
 

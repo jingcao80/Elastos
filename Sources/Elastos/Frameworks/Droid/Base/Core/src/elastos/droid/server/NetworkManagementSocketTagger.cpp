@@ -118,7 +118,8 @@ ECode NetworkManagementSocketTagger::SetThreadSocketStatsTag(
     AutoPtr<IInterface> obj;
     sThreadSocketTags->Get((IInterface**)&obj);
     AutoPtr<ISocketTags> st = ISocketTags::Probe(obj);
-    st->SetStatsTag(tag);
+    if (st != NULL)
+        st->SetStatsTag(tag);
     return NOERROR;
 }
 
@@ -129,7 +130,8 @@ ECode NetworkManagementSocketTagger::GetThreadSocketStatsTag(
     AutoPtr<IInterface> obj;
     sThreadSocketTags->Get((IInterface**)&obj);
     AutoPtr<ISocketTags> st = ISocketTags::Probe(obj);
-    st->GetStatsTag(tag);
+    if (st != NULL)
+        st->GetStatsTag(tag);
     return NOERROR;
 }
 
@@ -139,7 +141,8 @@ ECode NetworkManagementSocketTagger::SetThreadSocketStatsUid(
     AutoPtr<IInterface> obj;
     sThreadSocketTags->Get((IInterface**)&obj);
     AutoPtr<ISocketTags> st = ISocketTags::Probe(obj);
-    st->SetStatsUid(uid);
+    if (st != NULL)
+        st->SetStatsUid(uid);
     return NOERROR;
 }
 
@@ -149,6 +152,10 @@ ECode NetworkManagementSocketTagger::Tag(
     AutoPtr<IInterface> obj;
     sThreadSocketTags->Get((IInterface**)&obj);
     const AutoPtr<ISocketTags> options = ISocketTags::Probe(obj);
+    if (options == NULL) {
+        assert(0&& "should not be null");
+        return NOERROR;
+    }
     Int32 statsTag, statsUid;
     options->GetStatsTag(&statsTag);
     options->GetStatsUid(&statsUid);
@@ -201,6 +208,10 @@ ECode NetworkManagementSocketTagger::UnTagSocketFd(
     AutoPtr<IInterface> obj;
     sThreadSocketTags->Get((IInterface**)&obj);
     const AutoPtr<ISocketTags> options = ISocketTags::Probe(obj);
+    if (options == NULL) {
+        assert(0&& "should not be null");
+        return NOERROR;
+    }
     Int32 statsTag, statsUid;
     options->GetStatsTag(&statsTag);
     options->GetStatsUid(&statsUid);
@@ -273,6 +284,7 @@ Int32 NetworkManagementSocketTagger::native_tagSocketFd(
     /* [in] */ Int32 tag,
     /* [in] */ Int32 uid)
 {
+    assert(0);
     // int userFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     // if (env->ExceptionOccurred() != NULL) {
@@ -292,6 +304,7 @@ Int32 NetworkManagementSocketTagger::native_tagSocketFd(
 Int32 NetworkManagementSocketTagger::native_untagSocketFd(
     /* [in] */ IFileDescriptor* fd)
 {
+    assert(0);
     // int userFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     // if (env->ExceptionOccurred() != NULL) {
@@ -312,6 +325,7 @@ Int32 NetworkManagementSocketTagger::native_setCounterSet(
     /* [in] */ Int32 tag,
     /* [in] */ Int32 uid)
 {
+    assert(0);
     // int res = qtaguid_setCounterSet(setNum, uid);
     // if (res < 0) {
     //     return (jint)-errno;
@@ -325,6 +339,7 @@ Int32 NetworkManagementSocketTagger::native_deleteTagData(
     /* [in] */ Int32 tag,
     /* [in] */ Int32 uid)
 {
+    assert(0);
     // int res = qtaguid_deleteTagData(tagNum, uid);
     // if (res < 0) {
     //     return (jint)-errno;

@@ -967,7 +967,9 @@ ECode LinkProperties::CompareAllInterfaceNames(
      */
     CLinkPropertiesCompareResult::New(result);
     (*result)->SetRemoved(RETN_OUT_VAL(this, GetAllInterfaceNames));
-    RETN_OUT_VAL((*result), GetAdded)->Clear();
+    AutoPtr<IList> list;
+    (*result)->GetAdded((IList**)&list);
+    list->Clear();
     if (target != NULL) {
         FOR_EACH(iter, RETN_OUT_VAL(target, GetAllInterfaceNames)) {
             AutoPtr<ICharSequence> r = ICharSequence::Probe(RETN_OUT_VAL(iter, GetNext));
@@ -1121,6 +1123,12 @@ ECode LinkPropertiesCompareResult::SetAdded(
 
     mAdded = added;
     return NOERROR;
+}
+
+LinkPropertiesCompareResult::LinkPropertiesCompareResult()
+{
+    CArrayList::New((IList**)&mRemoved);
+    CArrayList::New((IList**)&mAdded);
 }
 
 ECode LinkPropertiesCompareResult::constructor()

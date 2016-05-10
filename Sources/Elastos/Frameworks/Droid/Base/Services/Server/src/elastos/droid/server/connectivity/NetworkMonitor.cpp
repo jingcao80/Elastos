@@ -797,7 +797,7 @@ NetworkMonitor::NetworkMonitor(
     sysProp->GetInt32(REEVALUATE_DELAY_PROPERTY, DEFAULT_REEVALUATE_DELAY_MS, &mReevaluateDelayMs);
 
     Int32 ival;
-    sg->GetInt32(resolver, ISettingsGlobal::CAPTIVE_PORTAL_DETECTION_ENABLED, 1, &ival);
+    sg->GetInt32(resolver, ISettingsGlobal::CAPTIVE_PORTAL_DETECTION_ENABLED, 0/*change from 1 leliang TODO*/, &ival);
     mIsCaptivePortalCheckEnabled = ival == 1;
 
     Start();

@@ -173,9 +173,7 @@ ECode CWifiConnectionStatistics::IncrementOrAddUntrusted(
     }
 
     if (stats != NULL) {
-        assert(0);
-        // TODO
-        // mUntrustedNetworkHistory->Out(iSSID, stats);
+        mUntrustedNetworkHistory->Put(iSSID, stats);
     }
 
     return NOERROR;
@@ -201,6 +199,7 @@ ECode CWifiConnectionStatistics::ToString(
     sbuf.Append("\n");
 
     AutoPtr<ISet> keySet;
+    mUntrustedNetworkHistory->GetKeySet((ISet**)&keySet);
     AutoPtr<IIterator> iter;
     keySet->GetIterator((IIterator**)&iter);
     Boolean bNext;
@@ -220,9 +219,7 @@ ECode CWifiConnectionStatistics::ToString(
             sbuf.Append(key);
             sbuf.Append(" ");
             String statsStr;
-            assert(0);
-            // TODO
-            // stats->ToString(&statsStr);
+            IObject::Probe(stats)->ToString(&statsStr);
             sbuf.Append(statsStr);
             sbuf.Append("\n");
         }
@@ -287,17 +284,67 @@ ECode CWifiConnectionStatistics::WriteToParcel(
 ECode CWifiConnectionStatistics::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    source->ReadInt32(&mNum24GhzConnected);
+    source->ReadInt32(&mNum5GhzConnected);
+    source->ReadInt32(&mNumAutoRoamAttempt);
+    source->ReadInt32(&mNumAutoRoamAttempt);
+    source->ReadInt32(&mNumWifiManagerJoinAttempt);
+    Int32 n;
+    source->ReadInt32(&n);
+    while (n-- > 0) {
+        String key;
+        source->ReadString(&key);
+        Int32 numConnection;
+        source->ReadInt32(&numConnection);
+        Int32 numUsage;
+        source->ReadInt32(&numUsage);
+        AutoPtr<IWifiNetworkConnectionStatistics> st;
+        CWifiNetworkConnectionStatistics::New(numConnection, numUsage, (IWifiNetworkConnectionStatistics**)&st);
+        AutoPtr<IString> iSSID;
+        CString::New(key, (IString**)&iSSID);
+        mUntrustedNetworkHistory->Put(iSSID, st);
+    }
+    return NOERROR;
 }
 
 ECode CWifiConnectionStatistics::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    dest->WriteInt32(mNum24GhzConnected);
+    dest->WriteInt32(mNum5GhzConnected);
+    dest->WriteInt32(mNumAutoJoinAttempt);
+    dest->WriteInt32(mNumAutoRoamAttempt);
+    dest->WriteInt32(mNumWifiManagerJoinAttempt);
+
+    Int32 size;
+    mUntrustedNetworkHistory->GetSize(&size);
+    dest->WriteInt32(size);
+
+    AutoPtr<ISet> keySet;
+    mUntrustedNetworkHistory->GetKeySet((ISet**)&keySet);
+    AutoPtr<IIterator> iter;
+    keySet->GetIterator((IIterator**)&iter);
+    Boolean bNext;
+    iter->HasNext(&bNext);
+    for (; bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> iKey;
+        iter->GetNext((IInterface**)&iKey);
+        String key;
+        ICharSequence::Probe(iKey)->ToString(&key);
+        AutoPtr<IWifiNetworkConnectionStatistics> stats;
+        AutoPtr<IString> iK;
+        CString::New(key, (IString**)&iK);
+        AutoPtr<IInterface> obj;
+        mUntrustedNetworkHistory->Get(iK, (IInterface**)&obj);
+        stats = IWifiNetworkConnectionStatistics::Probe(obj);
+        Int32 numConnection, numUsage;
+        stats->GetNumConnection(&numConnection);
+        stats->GetNumUsage(&numUsage);
+        dest->WriteString(key);
+        dest->WriteInt32(numConnection);
+        dest->WriteInt32(numUsage);
+    }
+    return NOERROR;
 }
 
 } // namespace Wifi

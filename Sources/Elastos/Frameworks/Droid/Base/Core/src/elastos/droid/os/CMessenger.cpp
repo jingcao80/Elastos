@@ -38,7 +38,10 @@ ECode CMessenger::Send(
 ECode CMessenger::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    return source->ReadInterfacePtr((Handle32*)&mTarget);
+    AutoPtr<IInterface> obj;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mTarget = IIMessenger::Probe(obj);
+    return NOERROR;
 }
 
 ECode CMessenger::WriteToParcel(

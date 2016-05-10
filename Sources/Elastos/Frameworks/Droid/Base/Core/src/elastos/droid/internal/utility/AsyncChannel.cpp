@@ -452,10 +452,14 @@ ECode AsyncChannel::Disconnect()
         AutoPtr<IBinder> binder;
         mDstMessenger->GetBinder((IBinder**)&binder);
         AutoPtr<IProxy> proxy = (IProxy*)binder->Probe(EIID_IProxy);
-        assert(proxy != NULL);
-        Boolean res;
-        proxy->UnlinkToDeath(mDeathMonitor, 0, &res);
-        mDeathMonitor = NULL;
+        if (proxy != NULL) {
+            Boolean res;
+            proxy->UnlinkToDeath(mDeathMonitor, 0, &res);
+            mDeathMonitor = NULL;
+        }
+        else {
+            if (DBG) Slogger::D(TAG, " AsyncChannel::Disconnect(), happen in server side");
+        }
     }
     return NOERROR;
 }

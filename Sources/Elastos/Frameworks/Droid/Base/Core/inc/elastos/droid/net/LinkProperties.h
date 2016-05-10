@@ -626,6 +626,8 @@ class LinkPropertiesCompareResult
 public:
     CAR_INTERFACE_DECL()
 
+    LinkPropertiesCompareResult();
+
     CARAPI constructor();
 
     // @Override
