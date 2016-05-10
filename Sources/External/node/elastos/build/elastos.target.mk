@@ -20,7 +20,8 @@ CFLAGS_Debug := \
 	-Wextra \
 	-Wno-unused-parameter \
 	-g \
-	-O0
+	-O0 \
+	-Wno-unused-local-typedefs
 
 # Flags passed to only C files.
 CFLAGS_C_Debug :=
@@ -28,7 +29,9 @@ CFLAGS_C_Debug :=
 # Flags passed to only C++ files.
 CFLAGS_CC_Debug := \
 	-fno-rtti \
-	-fno-exceptions
+	-fno-exceptions \
+	-std=c++98 \
+	-Wno-c++0x-compat
 
 INCS_Debug := \
     -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
