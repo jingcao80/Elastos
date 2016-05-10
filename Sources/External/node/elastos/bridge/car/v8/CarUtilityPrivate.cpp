@@ -69,9 +69,6 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
     CarDataType carDataType = result->mType;
     NPVariantType type = value.type;
 
-    const char* tmpType = ClassNameFromCarDataType((CarDataType)(result->mType));
-    const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(result->mElementType));
-
     switch (carDataType) {
         case CarDataType_Int16:
             if (type == NPVariantType_Int32) {
@@ -92,7 +89,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             // }
             // break;
 
-            Int32 _value;
+            Int32 _value = 0;
             if (type == NPVariantType_Int32) {
                 _value = (Elastos::Int32)(NPVARIANT_TO_INT32(value));
             }
@@ -101,8 +98,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             }
 
             if (result->mTagSetLocalPtr) {
-                CarValue* aCarValue = new CarValue();
-                CarQuintet* carArray;
+                CarQuintet* carArray = NULL;
 
                 NPObject* object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(value) : 0;
                 NPVariant npvLength;
@@ -794,9 +790,6 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
 
 void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 {
-    const char* tmpType = ClassNameFromCarDataType((CarDataType)(value.mType));
-    const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(value.mElementType));
-
     VOID_TO_NPVARIANT(*result);
 
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
@@ -1167,8 +1160,6 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         }
         case CarDataType_LocalPtr:  //deprecated
         {
-            ArrayOf<Int32>* tempArray2 = reinterpret_cast< ArrayOf<Int32>* >(value.mCarQuintet);
-
             NPObject tempNPObject;
             //TODO:convert ArrayOf into NPObject
             result->type = NPVariantType_Object;

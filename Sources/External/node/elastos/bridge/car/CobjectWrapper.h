@@ -73,7 +73,7 @@ public:
     CobjectWrapper(IInterface*, IDataTypeInfo*);
 
 protected:
-    ~CobjectWrapper();
+    virtual ~CobjectWrapper();
 
     AutoPtr<IInterface> mInstance;
     AutoPtr<IDataTypeInfo> mDataTypeInfo;

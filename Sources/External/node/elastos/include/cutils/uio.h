@@ -30,13 +30,13 @@ extern "C" {
 
 #include <stddef.h>
 
-//#ifndef _IOVEC
-//#define _IOVEC
-//struct iovec {
-//    const void*  iov_base;
-//    size_t       iov_len;
-//};
-//#endif
+#ifndef _IOVEC
+#define _IOVEC
+struct iovec {
+   const void*  iov_base;
+   size_t       iov_len;
+};
+#endif
 
 extern int  readv( int  fd, struct iovec*  vecs, int  count );
 extern int  writev( int  fd, const struct iovec*  vecs, int  count );

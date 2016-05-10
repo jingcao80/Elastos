@@ -43,10 +43,9 @@ NodeBridgeVT nodeBridgeVT = {
 
 NodeMessageQueue* _NodeBridge_GetThreadMessageQueue(NodeBridge* _this)
 {
-    NodeMessageQueue* mq;
+    NodeMessageQueue* mq = NULL;
 
     pthread_t tid = pthread_self();
-    int idx = 0;
 
     int i = 0, im = _this->mTop;
     for (; i < im; i++) {
@@ -54,7 +53,6 @@ NodeMessageQueue* _NodeBridge_GetThreadMessageQueue(NodeBridge* _this)
         if (mq->mTid == tid) break;
     }
 
-    idx = i;
     if (i == im) {
         mq = (NodeMessageQueue*)_this->mQueues[i];
         mq->mTid = tid;
@@ -379,15 +377,12 @@ TestCallbackBuf::~TestCallbackBuf()
 void Receive_(int input,Local<Function> callback);
 
 void Observe_bak(uv_work_t* r) {
-    async_req* req = reinterpret_cast<async_req*>(r->data);
     NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
     while ( mq->mTop < 2 || mq->mMessages[1]->mStatus > NodeMessage_Status_Ready ) {
         sleep(1);
     }
 }
 void Observe(uv_work_t* r) {
-    async_req* req = reinterpret_cast<async_req*>(r->data);
-
     NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
     NodeMessageQueue* mq_epk = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mEPK];
 

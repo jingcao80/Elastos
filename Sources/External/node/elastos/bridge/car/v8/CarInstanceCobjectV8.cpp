@@ -102,8 +102,6 @@ void CarInstanceCobject::invokeMethod(const CarMethod* method, CarValue* args, b
         aMethod->GetAllParamInfos(paramInfos);
 
         for (Int32 i = 0; i < numParams; ++i) {
-            const char* tmpType = ClassNameFromCarDataType((CarDataType)(args[i].mType));
-
             AutoPtr<IParamInfo> aParameter = (*paramInfos)[i];
             switch (args[i].mIOAttribute) {
                 case ParamIOAttribute_In:

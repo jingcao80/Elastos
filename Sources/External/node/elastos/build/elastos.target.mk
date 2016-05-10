@@ -9,7 +9,6 @@ DEFS_Debug := \
 	'-DBUILDING_NODE_EXTENSION' \
 	'-DDEBUG' \
 	'-D_DEBUG' \
-	'-D_IOVEC' \
 	'-DANDROID' \
 	'-DHAVE_SYS_UIO_H'
 
@@ -32,11 +31,11 @@ CFLAGS_CC_Debug := \
 	-fno-exceptions
 
 INCS_Debug := \
-    -I $(XDK_SOURCE_PATH)/External/node/deps/uv/include \
-    -I $(XDK_SOURCE_PATH)/External/node/src \
     -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
     -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport \
-    -I $(XDK_SOURCE_PATH)/External/node/deps/v8/include \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/ \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/uv/ \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/v8/ \
 	-I$(srcdir)/JavaScriptCore \
 	-I$(srcdir)/JavaScriptCore/icu \
 	-I$(srcdir)/JavaScriptCore/wtf \
@@ -73,7 +72,6 @@ DEFS_Release := \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
 	'-DBUILDING_NODE_EXTENSION' \
-	'-D_IOVEC' \
 	'-DANDROID' \
 	'-DHAVE_SYS_UIO_H'
 
@@ -88,7 +86,8 @@ CFLAGS_Release := \
 	-ffunction-sections \
 	-fdata-sections \
 	-fno-tree-vrp \
-	-fno-omit-frame-pointer
+	-fno-omit-frame-pointer \
+	-Wno-unused-local-typedefs
 
 # Flags passed to only C files.
 CFLAGS_C_Release :=
@@ -96,15 +95,17 @@ CFLAGS_C_Release :=
 # Flags passed to only C++ files.
 CFLAGS_CC_Release := \
 	-fno-rtti \
-	-fno-exceptions
+	-fno-exceptions \
+	-std=c++98 \
+	-Wno-c++0x-compat
 
 INCS_Release := \
-    -I $(XDK_SOURCE_PATH)/External/node/deps/uv/include \
-    -I $(XDK_SOURCE_PATH)/External/node/src \
     -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
     -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/bionic \
     -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport \
-    -I $(XDK_SOURCE_PATH)/External/node/deps/v8/include \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/ \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/uv/ \
+    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/v8/ \
 	-I$(srcdir)/JavaScriptCore \
 	-I$(srcdir)/JavaScriptCore/icu \
 	-I$(srcdir)/JavaScriptCore/wtf \
@@ -155,27 +156,7 @@ OBJS := \
 	$(obj).target/$(TARGET)/bridge/car/v8/CarInstanceCobjectV8.o \
 	$(obj).target/$(TARGET)/bridge/car/v8/CarMethodCobject.o \
 	$(obj).target/$(TARGET)/bridge/car/v8/CarNPObjectV8.o \
-	$(obj).target/$(TARGET)/bridge/car/v8/CarUtilityPrivate.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/Assertions.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/CurrentTime.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/dtoa.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/DecimalNumber.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/FastMalloc.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/HashTable.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/StackBounds.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/TCSystemAlloc.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/Threading.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/ThreadingNone.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/WTFThreadData.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/AtomicString.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/CString.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/StringBuilder.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/StringImpl.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/StringStatics.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/WTFString.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/unicode/icu/CollatorICU.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/unicode/CollatorDefault.o \
-	$(obj).target/$(TARGET)/JavaScriptCore/wtf/unicode/UTF8.o
+	$(obj).target/$(TARGET)/bridge/car/v8/CarUtilityPrivate.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)

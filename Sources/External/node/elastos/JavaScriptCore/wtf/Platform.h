@@ -809,18 +809,18 @@
 
 #define NDEBUG
 
-#define u_foldCase u_foldCase_48
-#define u_memcasecmp u_memcasecmp_48
-#define u_charDirection u_charDirection_48
-#define u_strFoldCase u_strFoldCase_48
-#define u_strToUpper u_strToUpper_48
-#define u_strToLower u_strToLower_48
-#define ucol_getLocaleByType ucol_getLocaleByType_48
-#define ucol_getAttribute ucol_getAttribute_48
-#define ucol_setAttribute ucol_setAttribute_48
-#define ucol_open ucol_open_48
-#define ucol_close ucol_close_48
-#define ucol_strcoll ucol_strcoll_48
+// #define u_foldCase u_foldCase_48
+// #define u_memcasecmp u_memcasecmp_48
+// #define u_charDirection u_charDirection_48
+// #define u_strFoldCase u_strFoldCase_48
+// #define u_strToUpper u_strToUpper_48
+// #define u_strToLower u_strToLower_48
+// #define ucol_getLocaleByType ucol_getLocaleByType_48
+// #define ucol_getAttribute ucol_getAttribute_48
+// #define ucol_setAttribute ucol_setAttribute_48
+// #define ucol_open ucol_open_48
+// #define ucol_close ucol_close_48
+// #define ucol_strcoll ucol_strcoll_48
 
 #endif /* PLATFORM(ELASTOS) */
 

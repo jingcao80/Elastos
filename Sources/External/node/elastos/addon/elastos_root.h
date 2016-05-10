@@ -132,7 +132,6 @@ public:
 
     //Run in elastos ui thread
     static void EnqueueFunctionPtr(void (*proc)(void*), void* payload) {
-        pthread_t mThread = pthread_self();
         elCallbackQuene.cbFunction = proc;
         elCallbackQuene.cbParameters = payload;
         TestCallbackBuf* callback = new TestCallbackBuf(
