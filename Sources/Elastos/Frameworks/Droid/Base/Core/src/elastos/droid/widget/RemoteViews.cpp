@@ -2645,7 +2645,7 @@ ECode RemoteViews::WriteToParcel(
         if (mIsRoot) {
             mBitmapCache->WriteBitmapsToParcel(dest);
         }
-        IParcelable::Probe(mApplication)->WriteToParcel(dest);
+        dest->WriteInterfacePtr(mApplication);
         dest->WriteInt32(mLayoutId);
         dest->WriteInt32(mIsWidgetCollectionChild ? 1 : 0);
         Int32 count = mActions.GetSize();

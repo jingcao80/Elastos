@@ -55,6 +55,9 @@ using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageInfo;
 // using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Droid::Internal::Utility::Cm::CSpamFilter;
+using Elastos::Droid::Internal::Utility::Cm::ISpamFilter;
+using Elastos::Droid::Internal::Utility::Cm::ISpamFilterSpamContractNotificationTable;
 using Elastos::Droid::Media::CAudioSystem;
 using Elastos::Droid::Media::IAudioSystem;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
@@ -228,7 +231,7 @@ static AutoPtr<IUri> InitFilterUri()
     AutoPtr<IUriBuilder> ub;
     CUriBuilder::New((IUriBuilder**)&ub);
     ub->Scheme(IContentResolver::SCHEME_CONTENT);
-    // ub->Authority(ISpamFilter::AUTHORITY);
+    ub->Authority(ISpamFilter::AUTHORITY);
     ub->AppendPath(String("message"));
     AutoPtr<IUri> res;
     ub->Build((IUri**)&res);
@@ -3635,11 +3638,12 @@ ECode NotificationManagerService::BuzzBeepBlinkLocked(
 
     String pakName;
     mContext->GetPackageName(&pakName);
-    AutoPtr<IProfileGroup> group;
-    profileManager->GetActiveProfileGroup(pakName, (IProfileGroup**)&group);
-    if (group != NULL) {
-        group->ApplyOverridesToNotification(notification);
-    }
+    Slogger::I(TAG, "TODO: Profile Service");
+    // AutoPtr<IProfileGroup> group;
+    // profileManager->GetActiveProfileGroup(pakName, (IProfileGroup**)&group);
+    // if (group != NULL) {
+    //     group->ApplyOverridesToNotification(notification);
+    // }
 
     // If we're not supposed to beep, vibrate, etc. then don't.
     String disableEffects = DisableNotificationEffects(record);
@@ -4188,12 +4192,13 @@ Int32 NotificationManagerService::GetNotificationHash(
     /* [in] */ INotification* notification,
     /* [in] */ const String& packageName)
 {
-    AutoPtr<ICharSequence> message;// = SpamFilter::GetNotificationContent(notification);
-    String str;
-    message->ToString(&str);
-    str += ":";
-    str += packageName;
-    Int32 hc = str.GetHashCode();
+    AutoPtr<ISpamFilter> helper;
+    CSpamFilter::AcquireSingleton((ISpamFilter**)&helper);
+    String message;
+    helper->GetNotificationContent(notification, &message);
+    message += ":";
+    message += packageName;
+    Int32 hc = message.GetHashCode();
     return hc;
 }
 
@@ -4209,15 +4214,22 @@ Boolean NotificationManagerService::IsNotificationSpam(
         isSpam = TRUE;
     }
     else {
-        String msg;// = SpamFilter::GetNotificationContent(notification);
+        AutoPtr<ISpamFilter> helper;
+        CSpamFilter::AcquireSingleton((ISpamFilter**)&helper);
+        String msg;
+        helper->GetNotificationContent(notification, &msg);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         AutoPtr<IContentResolver> resolver;
         context->GetContentResolver((IContentResolver**)&resolver);
+        String content;
+        helper->GetNormalizedContent(msg, &content);
+        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
+        (*array)[0] = content;
+        (*array)[1] = basePkg;
         AutoPtr<ICursor> c;
-        assert(0 && "TODO");
-        // resolver->Query(FILTER_MSG_URI, NULL, IS_FILTERED_QUERY,
-        //         new String[]{SpamFilter::GetNormalizedContent(msg), basePkg}, NULL, (ICursor**)&c);
+        resolver->Query(FILTER_MSG_URI, NULL, IS_FILTERED_QUERY,
+                 array, String(NULL), (ICursor**)&c);
         if (c != NULL) {
             Boolean bMF = FALSE;
             c->MoveToFirst(&bMF);
@@ -4225,8 +4237,7 @@ Boolean NotificationManagerService::IsNotificationSpam(
                 AutoPtr<FilterCacheInfo> info = new FilterCacheInfo();
                 info->mPackageName = basePkg;
                 Int32 ci = 0;
-                assert(0 && "TODO");
-                // c->GetColumnIndex(INotificationTable::ID, &ci);
+                c->GetColumnIndex(ISpamFilterSpamContractNotificationTable::ID, &ci);
                 Int32 notifId = 0;
                 c->GetInt32(ci, &notifId);
                 info->mNotificationId = notifId;

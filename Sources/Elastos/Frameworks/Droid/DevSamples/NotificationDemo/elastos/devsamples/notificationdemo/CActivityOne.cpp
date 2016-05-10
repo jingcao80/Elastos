@@ -202,7 +202,7 @@ ECode CActivityOne::NotifyNotification(
     builder->SetNumber(++mNumMessages);
 
     /* Creates an explicit intent for an Activity in your app */
-    String packageName("NotificationDemo");
+    String packageName("Elastos.DevSamples.NotificationDemo");
     String actionName("android.intent.action.NOTIFICATION");
     String className("CNotificationActivity");
     String parentClassName("CActivityOne");
