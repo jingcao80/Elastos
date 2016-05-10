@@ -299,7 +299,7 @@ ECode PlainSocketImpl::GetInputStream(
 
     FAIL_RETURN(CheckNotClosed());
 
-    return CPlainSocketInputStream::New(this, (IInputStream**)&in);
+    return CPlainSocketInputStream::New(this, in);
 }
 
 ECode PlainSocketImpl::GetOption(
@@ -321,7 +321,7 @@ ECode PlainSocketImpl::GetOutputStream(
     VALIDATE_NOT_NULL(out)
 
     FAIL_RETURN(CheckNotClosed());
-    return CPlainSocketOutputStream::New(this, (IOutputStream**)&out);
+    return CPlainSocketOutputStream::New(this, out);
 }
 
 ECode PlainSocketImpl::Listen(
