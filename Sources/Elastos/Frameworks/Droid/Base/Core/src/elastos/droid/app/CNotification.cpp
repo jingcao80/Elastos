@@ -49,7 +49,7 @@ namespace App {
 //==========================================================================
 // CNotification::BuilderRemoteViews
 //==========================================================================
-CAR_INTERFACE_IMPL(CNotification::BuilderRemoteViews, Object, INotificationBuilderRemoteViews)
+CAR_INTERFACE_IMPL(CNotification::BuilderRemoteViews, RemoteViews, INotificationBuilderRemoteViews)
 
 CNotification::BuilderRemoteViews::BuilderRemoteViews()
 {}
