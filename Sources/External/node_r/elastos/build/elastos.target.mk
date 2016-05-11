@@ -141,7 +141,9 @@ INCS_Release := \
 	-I$(srcdir)/include
 
 OBJS := \
-	$(obj).target/$(TARGET)/addon/elastos_root.o \
+	$(obj).target/$(TARGET)/addon/main.o \
+	$(obj).target/$(TARGET)/bridge/CarValueV8.o \
+	$(obj).target/$(TARGET)/bridge/V8CarObject.o \
 #	$(obj).target/$(TARGET)/bindings_node/v8/V8Utilities.o \
 #	$(obj).target/$(TARGET)/bindings_node/v8/NPV8Object.o \
 #	$(obj).target/$(TARGET)/bindings_node/v8/V8NPObject.o \
