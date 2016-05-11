@@ -2,7 +2,6 @@
 #ifndef __ELASTOS_DROID_APP_CNOTIFICATION_H__
 #define __ELASTOS_DROID_APP_CNOTIFICATION_H__
 
-#include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/widget/RemoteViews.h"
 #include "_Elastos_Droid_App_CNotification.h"
@@ -63,10 +62,11 @@ public:
 
         // @Override
         CARAPI Clone(
-            /* [out] */ IInterface** obj);
-
-        CARAPI Clone(
             /* [out] */ IRemoteViews** obj);
+
+    protected:
+        CARAPI CloneImpl(
+            /* [in] */ INotificationBuilderRemoteViews* views);
     };
 
 public:

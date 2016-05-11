@@ -772,9 +772,9 @@ AutoPtr<IRemoteViews> CNotificationBuilder::ApplyStandardTemplate(
     /* [in] */ Int32 resId,
     /* [in] */ Boolean hasProgress)
 {
-    AutoPtr<IRemoteViews> contentView;
     AutoPtr<IApplicationInfo> ai;
     mContext->GetApplicationInfo((IApplicationInfo**)&ai);
+    AutoPtr<IRemoteViews> contentView;
     CNotificationBuilderRemoteViews::New(ai, resId, (IRemoteViews**)&contentView);
 
     ResetStandardTemplate(contentView);
@@ -782,9 +782,6 @@ AutoPtr<IRemoteViews> CNotificationBuilder::ApplyStandardTemplate(
     Boolean showLine3 = FALSE;
     Boolean showLine2 = FALSE;
     Boolean contentTextInLine2 = FALSE;
-
-    String name;
-    mContext->GetPackageName(&name);
 
     if (mLargeIcon != NULL) {
         contentView->SetImageViewBitmap(R::id::icon, mLargeIcon);
