@@ -740,7 +740,7 @@ const Boolean CWindowManagerService::DEBUG_WINDOW_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_TOKEN_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_ORIENTATION = FALSE;
 const Boolean CWindowManagerService::DEBUG_APP_ORIENTATION = FALSE;
-const Boolean CWindowManagerService::DEBUG_CONFIGURATION = FALSE;
+const Boolean CWindowManagerService::DEBUG_CONFIGURATION = TRUE;
 const Boolean CWindowManagerService::DEBUG_APP_TRANSITIONS = FALSE;
 const Boolean CWindowManagerService::DEBUG_STARTING_WINDOW = FALSE;
 const Boolean CWindowManagerService::DEBUG_REORDER = FALSE;
@@ -8652,6 +8652,7 @@ void CWindowManagerService::AdjustDisplaySizeRanges(
     if (height > largeAppH) {
         displayInfo->SetLargestNominalAppHeight(height);
     }
+    Slogger::I(TAG, " >> ReduceConfigLayout: displayInfo:%s", TO_CSTR(displayInfo));
 }
 
 Int32 CWindowManagerService::ReduceConfigLayout(
@@ -8663,9 +8664,8 @@ Int32 CWindowManagerService::ReduceConfigLayout(
 {
     // TODO: Multidisplay: for now only use with default display.
     // Get the app screen size at this rotation.
-    Int32 w;
+    Int32 w, h;
     mPolicy->GetNonDecorDisplayWidth(dw, dh, rotation, &w);
-    Int32 h;
     mPolicy->GetNonDecorDisplayHeight(dw, dh, rotation, &h);
 
     // Compute the screen layout size class for this rotation.
@@ -8682,6 +8682,8 @@ Int32 CWindowManagerService::ReduceConfigLayout(
     CConfigurationHelper::AcquireSingleton((IConfigurationHelper**)&helper);
     Int32 result;
     helper->ReduceScreenLayout(curLayout, longSize, shortSize, &result);
+    Slogger::I(TAG, " >> ReduceConfigLayout curLayout:%d, rotation:%d, density:%.2f, dw-dh:(%d, %d), w-h:(%d, %d), result:%d",
+        curLayout, rotation, density, dw, dh, w, h, result);
     return result;
 }
 
@@ -8694,6 +8696,9 @@ void CWindowManagerService::ComputeSizeRangesAndScreenLayout(
     /* [in] */ IConfiguration* outConfig)
 {
     // TODO: Multidisplay: for now only use with default display.
+
+    AutoPtr<IConfigurationHelper> helper;
+    CConfigurationHelper::AcquireSingleton((IConfigurationHelper**)&helper);
 
     // We need to determine the smallest width that will occur under normal
     // operation.  To this, start with the base screen size and compute the
@@ -8716,11 +8721,9 @@ void CWindowManagerService::ComputeSizeRangesAndScreenLayout(
     AdjustDisplaySizeRanges(displayInfo, ISurface::ROTATION_90, unrotDh, unrotDw);
     AdjustDisplaySizeRanges(displayInfo, ISurface::ROTATION_180, unrotDw, unrotDh);
     AdjustDisplaySizeRanges(displayInfo, ISurface::ROTATION_270, unrotDh, unrotDw);
-    AutoPtr<IConfigurationHelper> helper;
-    CConfigurationHelper::AcquireSingleton((IConfigurationHelper**)&helper);
-    Int32 layout;
+
+    Int32 layout, sl;
     outConfig->GetScreenLayout(&layout);
-    Int32 sl;
     helper->ResetScreenLayout(layout, &sl);
     sl = ReduceConfigLayout(sl, ISurface::ROTATION_0, density, unrotDw, unrotDh);
     sl = ReduceConfigLayout(sl, ISurface::ROTATION_90, density, unrotDh, unrotDw);
@@ -8730,6 +8733,9 @@ void CWindowManagerService::ComputeSizeRangesAndScreenLayout(
     displayInfo->GetSmallestNominalAppWidth(&w);
     outConfig->SetSmallestScreenWidthDp((Int32)(w / density));
     outConfig->SetScreenLayout(sl);
+
+    Slogger::I(TAG, " >> ComputeSizeRangesAndScreenLayout: rotated:%d, dw-dh:(%d, %d), density:%.2f,\ndisplayInfo:%s, config:%s",
+        rotated, dw, dh, density, TO_CSTR(displayInfo), TO_CSTR(outConfig));
 }
 
 Int32 CWindowManagerService::ReduceCompatConfigWidthSize(
@@ -8741,17 +8747,15 @@ Int32 CWindowManagerService::ReduceCompatConfigWidthSize(
 {
     // TODO: Multidisplay: for now only use with default display.
     assert(dm != NULL);
-    Int32 width;
+    Int32 width, height;
     mPolicy->GetNonDecorDisplayWidth(dw, dh, rotation, &width);
-    dm->SetNoncompatWidthPixels(width);
-    Int32 height;
     mPolicy->GetNonDecorDisplayHeight(dw, dh, rotation, &height);
+    dm->SetNoncompatWidthPixels(width);
     dm->SetNoncompatHeightPixels(height);
     AutoPtr<ICompatibilityInfoHelper> helper;
     CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
-    Float scale;
+    Float scale, density;
     helper->ComputeCompatibleScaling(dm, NULL, &scale);
-    Float density;
     dm->GetDensity(&density);
     Int32 size = (Int32)(((width / scale) / density) + 0.5);
     if (curSize == 0 || size < curSize) {
@@ -8766,6 +8770,7 @@ Int32 CWindowManagerService::ComputeCompatSmallestWidth(
     /* [in] */ Int32 dw,
     /* [in] */ Int32 dh)
 {
+
     // TODO: Multidisplay: for now only use with default display.
     mTmpDisplayMetrics->SetTo(dm);
     AutoPtr<IDisplayMetrics> tmpDm = mTmpDisplayMetrics;
@@ -8778,17 +8783,25 @@ Int32 CWindowManagerService::ComputeCompatSmallestWidth(
         unrotDw = dw;
         unrotDh = dh;
     }
+
+    Slogger::I(TAG, " ======== ComputeCompatSmallestWidth: rotated:%d, w-h:(%d, %d), dm:%s", rotated, unrotDw, unrotDh, TO_CSTR(dm));
     Int32 sw = ReduceCompatConfigWidthSize(0, ISurface::ROTATION_0, tmpDm, unrotDw, unrotDh);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_90, tmpDm, unrotDh, unrotDw);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_180, tmpDm, unrotDw, unrotDh);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_270, tmpDm, unrotDh, unrotDw);
+    Slogger::I(TAG, " ======== ComputeCompatSmallestWidth: sw:%d", sw);
+    if (sw == 318) {
+        assert(0 && "TODO");
+    }
     return sw;
 }
 
 Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
     /* [in] */ IConfiguration* config)
 {
+    Slogger::I(TAG, " >>>>> ComputeScreenConfigurationLocked: config:%s", TO_CSTR(config));
     if (!mDisplayReady) {
+        Slogger::I(TAG, " <<<<< ComputeScreenConfigurationLocked: mDisplayReady not ready.");
         return FALSE;
     }
 
@@ -8804,7 +8817,8 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
             displayContent->mBaseDisplayWidth : displayContent->mBaseDisplayHeight;
     Int32 dw = realdw;
     Int32 dh = realdh;
-
+    Slogger::I(TAG, "  = displayContent->mBaseDisplayDensity:%d, realdw-realdh: (%d, %d)",
+        displayContent->mBaseDisplayDensity, dw, dh);
     if (mAltOrientation) {
         if (realdw > realdh) {
             // Turn landscape into portrait.
@@ -8826,12 +8840,16 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         config->SetOrientation((dw <= dh) ? IConfiguration::ORIENTATION_PORTRAIT :
                 IConfiguration::ORIENTATION_LANDSCAPE);
     }
-
+    Slogger::I(TAG, "  = mRotation:%d, dw-dh: (%d, %d)", mRotation, dw, dh);
     // Update application display metrics.
-    Int32 appWidth;
+    Int32 appWidth, appHeight;
     mPolicy->GetNonDecorDisplayWidth(dw, dh, mRotation, &appWidth);
-    Int32 appHeight;
     mPolicy->GetNonDecorDisplayHeight(dw, dh, mRotation, &appHeight);
+    Slogger::I(TAG, "  = appWidth-appHeight: (%d, %d)", appWidth, appHeight);
+
+    AutoPtr<ICompatibilityInfoHelper> helper;
+    CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
+
     AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
     {
         AutoLock lock(displayContent->mDisplaySizeLock);
@@ -8842,25 +8860,24 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         displayInfo->SetLogicalDensityDpi(displayContent->mBaseDisplayDensity);
         displayInfo->SetAppWidth(appWidth);
         displayInfo->SetAppHeight(appHeight);
-        AutoPtr<ICompatibilityInfoHelper> helper;
-        CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
+
         AutoPtr<ICompatibilityInfo> defaultCompatibilityInfo;
         helper->GetDefault((ICompatibilityInfo**)&defaultCompatibilityInfo);
         displayInfo->GetLogicalMetrics(mRealDisplayMetrics, defaultCompatibilityInfo, NULL);
         displayInfo->GetAppMetrics(mDisplayMetrics);
+        Slogger::I(TAG, "  == displayInfo: %s", TO_CSTR(displayInfo));
         mDisplayManagerInternal->SetDisplayInfoOverrideFromWindowManager(
                 displayContent->GetDisplayId(), displayInfo);
         displayContent->mBaseDisplayRect->Set(0, 0, dw, dh);
     }
-    // if (false) {
-    //     Slogger::I(TAG, "Set app display size: " + appWidth + " x " + appHeight);
-    // }
 
     AutoPtr<IDisplayMetrics> dm = mDisplayMetrics;
-    AutoPtr<ICompatibilityInfoHelper> helper;
-    CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
-    helper->ComputeCompatibleScaling(dm,
-            mCompatDisplayMetrics, &mCompatibleScreenScale);
+    helper->ComputeCompatibleScaling(dm, mCompatDisplayMetrics, &mCompatibleScreenScale);
+
+    if (DEBUG_CONFIGURATION) {
+        Slogger::I(TAG, "Set app display size: %d X %d, rotated:%d, mCompatibleScreenScale:%.2f",
+            appWidth, appHeight, rotated, mCompatibleScreenScale);
+    }
 
     if (config != NULL) {
         Int32 disW, disH;
@@ -8872,11 +8889,13 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         config->SetScreenHeightDp((Int32)(disH / density));
         ComputeSizeRangesAndScreenLayout(displayInfo, rotated, dw, dh, density, config);
 
+        Int32 smallestWidth = ComputeCompatSmallestWidth(rotated, dm, dw, dh);
         config->SetCompatScreenWidthDp((Int32)((disW / density) / mCompatibleScreenScale));
         config->SetCompatScreenHeightDp((Int32)((disH / density) / mCompatibleScreenScale));
-        config->SetCompatSmallestScreenWidthDp(
-                ComputeCompatSmallestWidth(rotated, dm, dw, dh));
+        config->SetCompatSmallestScreenWidthDp(smallestWidth);
         config->SetDensityDpi(displayContent->mBaseDisplayDensity);
+
+        Slogger::I(TAG, "  == config: %s", TO_CSTR(config));
 
         // Update the configuration based on available input devices, lid switch,
         // and platform configuration.
@@ -8964,6 +8983,7 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         mPolicy->AdjustConfigurationLw(config, keyboardPresence, navigationPresence);
     }
 
+    Slogger::I(TAG, " <<<<< ComputeScreenConfigurationLocked: config:%s", TO_CSTR(config));
     return TRUE;
 }
 
@@ -13479,10 +13499,7 @@ AutoPtr<DisplayContent> CWindowManagerService::NewDisplayContentLocked(
     mDisplaySettings->GetOverscanLocked(name, rect);
     AutoLock lock(displayContent->mDisplaySizeLock);
     Int32 left, top, right, bottom;
-    rect->GetLeft(&left);
-    rect->GetTop(&top);
-    rect->GetRight(&right);
-    rect->GetBottom(&bottom);
+    rect->Get(&left, &top, &right, &bottom);
     displayInfo->SetOverscanLeft(left);
     displayInfo->SetOverscanTop(top);
     displayInfo->SetOverscanRight(right);

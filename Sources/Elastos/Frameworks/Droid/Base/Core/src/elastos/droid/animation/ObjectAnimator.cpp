@@ -147,12 +147,14 @@ ECode ObjectAnimator::SetFloatValues(
             AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfFloat(mProperty, values);
             params->Set(0, holder);
             SetValues(params);
-        } else {
+        }
+        else {
             AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfFloat(mPropertyName, values);
             params->Set(0, holder);
             SetValues(params);
         }
-    } else {
+    }
+    else {
         ValueAnimator::SetFloatValues(values);
     }
 

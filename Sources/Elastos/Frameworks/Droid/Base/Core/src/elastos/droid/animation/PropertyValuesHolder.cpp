@@ -43,7 +43,10 @@ namespace Animation {
 
 using Elastos::Core::Math;
 
+static const String TAG("PropertyValuesHolder");
+
 CAR_INTERFACE_IMPL(PropertyValuesHolder::PointFToFloatArray, TypeConverter, IPropertyValuesHolder);
+
 PropertyValuesHolder::PointFToFloatArray::PointFToFloatArray()
 {
     TypeConverter::constructor(EIID_IPointF, EIID_IArrayOf /*float[].class*/);
@@ -56,8 +59,6 @@ ECode PropertyValuesHolder::PointFToFloatArray::Convert(
 {
     VALIDATE_NOT_NULL(values);
     IPointF::Probe(value)->Get(&(*mCoordinates)[0], &(*mCoordinates)[1]);
-    // (*mCoordinates)[0] = value.x;
-    // mCoordinates[1] = value.y;
     AutoPtr<IFloat> x, y;
     CFloat::New((*mCoordinates)[0], (IFloat**)&x);
     CFloat::New((*mCoordinates)[1], (IFloat**)&y);
@@ -72,6 +73,7 @@ ECode PropertyValuesHolder::PointFToFloatArray::Convert(
 }
 
 CAR_INTERFACE_IMPL(PropertyValuesHolder::PointFToInt32Array, TypeConverter, IPropertyValuesHolder);
+
 PropertyValuesHolder::PointFToInt32Array::PointFToInt32Array()
 {
     TypeConverter::constructor(EIID_IPointF, EIID_IArrayOf /*int[].class*/);
@@ -115,30 +117,30 @@ AutoPtr<ITypeEvaluator> PropertyValuesHolder::InitFloatEvaluator()
 }
 
 enum ClassType {
-    intclass = 0,
-    floatclass = 1,
-    doubleclass = 2,
-    Integerclass = 3,
-    Floatclass = 4,
-    Doubleclass = 5
+    CLASS_INT = 0,
+    CLASS_FLOAT = 1,
+    CLASS_DOUBLE = 2,
+    CLASS_IINTEGER32 = 3,
+    CLASS_IFLOAT = 4,
+    CLASS_IDOUBLE = 5
 };
 
 AutoPtr<ITypeEvaluator> PropertyValuesHolder::sInt32Evaluator = InitInt32Evaluator();
 AutoPtr<ITypeEvaluator> PropertyValuesHolder::sFloatEvaluator = InitFloatEvaluator();
 Int32 PropertyValuesHolder::FLOAT_VARIANTS[6] = {
-    floatclass/*float.class*/, Floatclass/*Float.class*/,
-    doubleclass/*double.class*/, intclass/*int.class*/,
-    Doubleclass/*Double.class*/, Integerclass/*Integer.class*/};
+    CLASS_FLOAT/*float.class*/, CLASS_IFLOAT/*Float.class*/,
+    CLASS_DOUBLE/*double.class*/, CLASS_INT/*int.class*/,
+    CLASS_IDOUBLE/*Double.class*/, CLASS_IINTEGER32/*Integer.class*/};
 
 Int32 PropertyValuesHolder::INTEGER_VARIANTS[6] = {
-    intclass/*int.class*/, Integerclass/*Integer.class*/,
-    floatclass/*float.class*/, doubleclass/*double.class*/,
-    Floatclass/*Float.class*/, Doubleclass/*Double.class*/};
+    CLASS_INT/*int.class*/, CLASS_IINTEGER32/*Integer.class*/,
+    CLASS_FLOAT/*float.class*/, CLASS_DOUBLE/*double.class*/,
+    CLASS_IFLOAT/*Float.class*/, CLASS_IDOUBLE/*Double.class*/};
 
 Int32 PropertyValuesHolder::DOUBLE_VARIANTS[6] = {
-    doubleclass/*double.class*/, Doubleclass/*Double.class*/,
-    floatclass/*float.class*/, intclass/*int.class*/,
-    Floatclass/*Float.class*/, Integerclass/*Integer.class*/};
+    CLASS_DOUBLE/*double.class*/, CLASS_IDOUBLE/*Double.class*/,
+    CLASS_FLOAT/*float.class*/, CLASS_INT/*int.class*/,
+    CLASS_IFLOAT/*Float.class*/, CLASS_IINTEGER32/*Integer.class*/};
 
 AutoPtr< PropertyValuesHolder::ClassMethodMap > PropertyValuesHolder::sSetterPropertyMap = new ClassMethodMap();
 AutoPtr< PropertyValuesHolder::ClassMethodMap > PropertyValuesHolder::sGetterPropertyMap = new ClassMethodMap();
@@ -147,31 +149,32 @@ String GetSignature(
     /* [in] */ Int32 type)
 {
     switch(type) {
-        case intclass: {
+        case CLASS_INT: {
             return String("(I32)E");
         }
-        case floatclass: {
+        case CLASS_FLOAT: {
             return String("(F)E");
         }
-        case doubleclass: {
+        case CLASS_DOUBLE: {
             return String("(D)E");
         }
-        case Integerclass: {
+        case CLASS_IINTEGER32: {
             return String("(LElastos/Core/IInteger32;)E");
         }
-        case Floatclass: {
+        case CLASS_IFLOAT: {
             return String("(LElastos/Core/IFloat;)E");
         }
-        case Doubleclass: {
+        case CLASS_IDOUBLE: {
             return String("(LElastos/Core/IDouble;)E");
         }
     }
 
-    assert(0 && "TODO");
+    assert(0 && "Invalid class type.");
     return String(NULL);
 }
 
 CAR_INTERFACE_IMPL_2(PropertyValuesHolder, Object, IPropertyValuesHolder, ICloneable);
+
 PropertyValuesHolder::PropertyValuesHolder(
     /* [in] */ const String& propertyName)
     : mPropertyName(propertyName)
@@ -193,32 +196,32 @@ AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfInt32(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<Int32>* values)
 {
-    AutoPtr<IInt32PropertyValuesHolder> holder = new Int32PropertyValuesHolder(propertyName, values);
-    return IPropertyValuesHolder::Probe(holder);
+    AutoPtr<IPropertyValuesHolder> holder = new Int32PropertyValuesHolder(propertyName, values);
+    return holder;
 }
 
 AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfInt32(
     /* [in] */ IProperty* property,
     /* [in] */ ArrayOf<Int32>* values)
 {
-    AutoPtr<IInt32PropertyValuesHolder> holder = new Int32PropertyValuesHolder(property, values);
-    return IPropertyValuesHolder::Probe(holder);
+    AutoPtr<IPropertyValuesHolder> holder = new Int32PropertyValuesHolder(property, values);
+    return holder;
 }
 
 AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfFloat(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<Float>* values)
 {
-    AutoPtr<IFloatPropertyValuesHolder> holder = new FloatPropertyValuesHolder(propertyName, values);
-    return IPropertyValuesHolder::Probe(holder);
+    AutoPtr<IPropertyValuesHolder> holder = new FloatPropertyValuesHolder(propertyName, values);
+    return holder;
 }
 
 AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfFloat(
     /* [in] */ IProperty* property,
     /* [in] */ ArrayOf<Float>* values)
 {
-    AutoPtr<IFloatPropertyValuesHolder> holder = new FloatPropertyValuesHolder(property, values);
-    return IPropertyValuesHolder::Probe(holder);
+    AutoPtr<IPropertyValuesHolder> holder = new FloatPropertyValuesHolder(property, values);
+    return holder;
 }
 
 AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfObject(
@@ -266,21 +269,22 @@ ECode PropertyValuesHolder::OfMultiInt32(
 {
     VALIDATE_NOT_NULL(holder);
     if (values->GetLength() < 2) {
-        // throw new IllegalArgumentException("At least 2 values must be supplied");
+        Slogger::E(TAG, "At least 2 values must be supplied.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 numParameters = 0;
     AutoPtr<ArrayOf<IInterface*> > arrays = ArrayOf<IInterface*>::Alloc(values->GetLength());
     for (Int32 i = 0; i < values->GetLength(); i++) {
         if ((*values)[i] == NULL) {
-            // throw new IllegalArgumentException("values must not be null");
+            Slogger::E(TAG, "values must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         Int32 length = (*values)[i]->GetLength();
         if (i == 0) {
             numParameters = length;
-        } else if (length != numParameters) {
-            // throw new IllegalArgumentException("Values must all have the same length");
+        }
+        else if (length != numParameters) {
+            Slogger::E(TAG, "Values must all have the same length");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -336,22 +340,24 @@ ECode PropertyValuesHolder::OfMultiFloat(
     /* [out] */ IPropertyValuesHolder** holder)
 {
     VALIDATE_NOT_NULL(holder);
+    *holder = NULL;
     if (values->GetLength() < 2) {
-        // throw new IllegalArgumentException("At least 2 values must be supplied");
+        Slogger::E(TAG, "At least 2 values must be supplied");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 numParameters = 0;
     AutoPtr<ArrayOf<IInterface*> > arrays = ArrayOf<IInterface*>::Alloc(values->GetLength());
     for (Int32 i = 0; i < values->GetLength(); i++) {
         if ((*values)[i] == NULL) {
-            // throw new IllegalArgumentException("values must not be null");
+            Slogger::E(TAG, "values must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         Int32 length = (*values)[i]->GetLength();
         if (i == 0) {
             numParameters = length;
-        } else if (length != numParameters) {
-            // throw new IllegalArgumentException("Values must all have the same length");
+        }
+        else if (length != numParameters) {
+            Slogger::E(TAG, "Values must all have the same length");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -442,11 +448,15 @@ AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfKeyframes(
     /* [in] */ const String& propertyName,
     /* [in] */ IKeyframes* keyframes)
 {
-    if (IInt32Keyframes::Probe(keyframes)) {
-        return new Int32PropertyValuesHolder(propertyName, IInt32Keyframes::Probe(keyframes));
-    } else if (IFloatKeyframes::Probe(keyframes)) {
-        return new FloatPropertyValuesHolder(propertyName, IFloatKeyframes::Probe(keyframes));
-    } else {
+    IInt32Keyframes* intkf = IInt32Keyframes::Probe(keyframes);
+    IFloatKeyframes* floatkf;
+    if (intkf) {
+        return new Int32PropertyValuesHolder(propertyName, intkf);
+    }
+    else if (floatkf = IFloatKeyframes::Probe(keyframes), floatkf != NULL) {
+        return new FloatPropertyValuesHolder(propertyName, floatkf);
+    }
+    else {
         AutoPtr<PropertyValuesHolder> pvh = new PropertyValuesHolder(propertyName);
         pvh->mKeyframes = keyframes;
         keyframes->GetType(&pvh->mValueType);
@@ -458,11 +468,15 @@ AutoPtr<IPropertyValuesHolder> PropertyValuesHolder::OfKeyframes(
     /* [in] */ IProperty* property,
     /* [in] */ IKeyframes* keyframes)
 {
-    if (IInt32Keyframes::Probe(keyframes)) {
-        return new Int32PropertyValuesHolder(property, IInt32Keyframes::Probe(keyframes));
-    } else if (IFloatKeyframes::Probe(keyframes)) {
-        return new FloatPropertyValuesHolder(property, IFloatKeyframes::Probe(keyframes));
-    } else {
+    IInt32Keyframes* intkf = IInt32Keyframes::Probe(keyframes);
+    IFloatKeyframes* floatkf;
+    if (intkf) {
+        return new Int32PropertyValuesHolder(property, intkf);
+    }
+    else if (floatkf = IFloatKeyframes::Probe(keyframes), floatkf != NULL) {
+        return new FloatPropertyValuesHolder(property, floatkf);
+    }
+    else {
         AutoPtr<IPropertyValuesHolder> pvh = new PropertyValuesHolder(property);
         ((PropertyValuesHolder*)pvh.Get())->mKeyframes = keyframes;
         keyframes->GetType(&(((PropertyValuesHolder*)pvh.Get())->mValueType));
@@ -505,8 +519,9 @@ ECode PropertyValuesHolder::SetKeyframes(
 ECode PropertyValuesHolder::SetObjectValues(
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-    if (IObject::Probe((*values)[0])) {
-        IObject::Probe((*values)[0])->GetInterfaceID((*values)[0], &mValueType);
+    IObject* obj = IObject::Probe((*values)[0]);
+    if (obj) {
+        obj->GetInterfaceID((*values)[0], &mValueType);
     }
     else {
         assert(0 && "TODO");
@@ -714,13 +729,12 @@ ECode PropertyValuesHolder::ConvertBack(
     VALIDATE_NOT_NULL(outValue);
     *outValue = NULL;
     if (mConverter != NULL) {
-        if (IBidirectionalTypeConverter::Probe(mConverter) == NULL) {
-            // throw new IllegalArgumentException("Converter "
-            //         + mConverter.getClass().getName()
-            //         + " must be a BidirectionalTypeConverter");
+        IBidirectionalTypeConverter* btc = IBidirectionalTypeConverter::Probe(mConverter);
+        if (btc == NULL) {
+            Slogger::E(TAG, "Converter %s must be a BidirectionalTypeConverter", TO_CSTR(mConverter));
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        IBidirectionalTypeConverter::Probe(mConverter)->ConvertBack(value, outValue);
+        btc->ConvertBack(value, outValue);
     }
 
     return NOERROR;
@@ -740,8 +754,7 @@ ECode PropertyValuesHolder::SetupValue(
     }
     if (mGetter == NULL) {
         SetupGetter(target);
-        if (mGetter == NULL)
-        {
+        if (mGetter == NULL) {
             // Already logged the error - just return to avoid NPE
             return NOERROR;
         }
@@ -886,14 +899,12 @@ ECode PropertyValuesHolder::SetAnimatedValue(
 {
     AutoPtr<IInterface> animatedValue;
     GetAnimatedValue((IInterface**)&animatedValue);
-    if(mProperty)
-    {
+    if (mProperty) {
         if(animatedValue)
             mProperty->Set(target, animatedValue);
     }
 
-    if(mSetter)
-    {
+    if (mSetter) {
         AutoPtr<IArgumentList> args;
         mSetter->CreateArgumentList((IArgumentList**)&args);
         AutoPtr<IFunctionInfo> funcInfo;
@@ -905,8 +916,7 @@ ECode PropertyValuesHolder::SetAnimatedValue(
         CarDataType carType;
         dataTypeInfo->GetDataType(&carType);
 
-        if (mValueType == ECLSID_CInteger32)
-        {
+        if (mValueType == ECLSID_CInteger32) {
             if(carType == CarDataType_Int32) {
                 Int32 setRst;
                 AutoPtr<IInteger32> valTemp = IInteger32::Probe(animatedValue);
@@ -927,8 +937,7 @@ ECode PropertyValuesHolder::SetAnimatedValue(
             }
         }
         else if(mValueType == ECLSID_CFloat) {
-            if (carType == CarDataType_Float)
-            {
+            if (carType == CarDataType_Float) {
                 Float setRst;
                 AutoPtr<IFloat> valTemp = IFloat::Probe(animatedValue);
                 if (!valTemp)
@@ -983,8 +992,7 @@ ECode PropertyValuesHolder::Init()
         // We already handle int and float automatically, but not their Object
         // equivalents
         mEvaluator = (mValueType == ECLSID_CInteger32) ? sInt32Evaluator :
-                (mValueType == ECLSID_CFloat) ? sFloatEvaluator :
-                NULL;
+            (mValueType == ECLSID_CFloat) ? sFloatEvaluator : NULL;
     }
     if (mEvaluator != NULL) {
         // KeyframeSet knows how to evaluate the common types - only give it a custom
@@ -1009,7 +1017,8 @@ ECode PropertyValuesHolder::CalculateValue(
     mKeyframes->GetValue(fraction, (IInterface**)&value);
     if (mConverter == NULL) {
         mAnimatedValue = value;
-    } else {
+    }
+    else {
         mAnimatedValue = NULL;
         mConverter->Convert(value, (IInterface**)&mAnimatedValue);
     }
@@ -1148,8 +1157,9 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
     if (returnVal == NULL) {
         String className;
         targetClass->GetName(&className);
-        Slogger::E("PropertyValuesHolder", "Error: Method [%s] with [%s] not found on target class %s",
+        Slogger::E(TAG, "Error: Method [%s] with [%s] not found on target class %s",
             methodName.string(), signature.string(), className.string());
+        assert(0 && "TODO");
     }
 
     return returnVal;

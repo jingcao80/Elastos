@@ -9,8 +9,10 @@
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/content/CContextWrapper.h"
 #include "elastos/droid/content/pm/CActivityInfo.h"
 #include "elastos/droid/content/res/CConfiguration.h"
+#include "elastos/droid/hardware/input/CInputManager.h"
 #include "elastos/droid/internal/policy/impl/PhoneWindowManager.h"
 #include "elastos/droid/internal/policy/impl/CBarController.h"
 #include "elastos/droid/internal/policy/impl/CImmersiveModeConfirmation.h"
@@ -21,6 +23,8 @@
 #include "elastos/droid/internal/policy/impl/SystemGesturesPointerEventListener.h"
 #include "elastos/droid/internal/policy/impl/keyguard/CKeyguardServiceDelegate.h"
 #include "elastos/droid/internal/widget/CPointerLocationView.h"
+#include "elastos/droid/internal/utility/cm/ActionUtils.h"
+#include "elastos/droid/internal/utility/gesture/CEdgeGesturePosition.h"
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CHandler.h"
@@ -57,7 +61,8 @@
 #include "elastos/droid/widget/CToastHelper.h"
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringUtils.h>
-#include "elastos/core/Math.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <sys/reboot.h>
@@ -78,6 +83,8 @@ using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::IContextWrapper;
+using Elastos::Droid::Content::CContextWrapper;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
@@ -86,11 +93,15 @@ using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Hardware::Input::IIInputManager;
+using Elastos::Droid::Hardware::Input::CInputManager;
 using Elastos::Droid::Internal::Policy::CPolicyManager;
 using Elastos::Droid::Internal::Policy::IIKeyguardServiceConstants;
 using Elastos::Droid::Internal::Policy::Impl::Keyguard::CKeyguardServiceDelegate;
 using Elastos::Droid::Internal::Policy::Impl::Keyguard::EIID_IKeyguardServiceDelegateShowListener;
 using Elastos::Droid::Internal::Widget::CPointerLocationView;
+using Elastos::Droid::Internal::Utility::Cm::ActionUtils;
+using Elastos::Droid::Internal::Utility::Gesture::CEdgeGesturePosition;
+using Elastos::Droid::Internal::Utility::Gesture::IEdgeServiceConstants;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CRingtoneManagerHelper;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
@@ -168,6 +179,8 @@ using Elastos::Droid::View::IWindowManagerGlobal;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
 
+using Elastos::Core::ClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Core::CString;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::StringUtils;
@@ -254,8 +267,10 @@ String PhoneWindowManager::SYSTEM_DIALOG_REASON_HOME_KEY("homekey");
 String PhoneWindowManager::SYSTEM_DIALOG_REASON_ASSIST("assist");
 
 const Int32 PhoneWindowManager::SYSTEM_UI_CHANGING_LAYOUT =
-        IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION | IView::SYSTEM_UI_FLAG_FULLSCREEN
-        | IView::STATUS_BAR_TRANSLUCENT | IView::NAVIGATION_BAR_TRANSLUCENT
+        IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        | IView::SYSTEM_UI_FLAG_FULLSCREEN
+        | IView::STATUS_BAR_TRANSLUCENT
+        | IView::NAVIGATION_BAR_TRANSLUCENT
         | IView::SYSTEM_UI_TRANSPARENT;
 
 AutoPtr<HashMap<Int32, AutoPtr<IInterface> > > PhoneWindowManager::sApplicationLaunchKeyCategories =
@@ -282,16 +297,34 @@ const Int32 PhoneWindowManager::LONG_PRESS_POWER_NOTHING = 0;
 const Int32 PhoneWindowManager::LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
 const Int32 PhoneWindowManager::LONG_PRESS_POWER_SHUT_OFF = 2;
 const Int32 PhoneWindowManager::LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
-const Int32 PhoneWindowManager::LONG_PRESS_HOME_NOTHING = 0;
-const Int32 PhoneWindowManager::LONG_PRESS_HOME_RECENT_SYSTEM_UI = 1;
-const Int32 PhoneWindowManager::LONG_PRESS_HOME_ASSIST = 2;
-const Int32 PhoneWindowManager::DOUBLE_TAP_HOME_NOTHING = 0;
-const Int32 PhoneWindowManager::DOUBLE_TAP_HOME_RECENT_SYSTEM_UI = 1;
 
 const Int32 PhoneWindowManager::APPLICATION_MEDIA_SUBLAYER = -2;
 const Int32 PhoneWindowManager::APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
 const Int32 PhoneWindowManager::APPLICATION_PANEL_SUBLAYER = 1;
 const Int32 PhoneWindowManager::APPLICATION_SUB_PANEL_SUBLAYER = 2;
+
+const Int32 PhoneWindowManager::DEFAULT_LONG_PRESS_POWERON_TIME = 500;
+const Int32 PhoneWindowManager::QUICKBOOT_LAUNCH_TIMEOUT = 2000;
+
+const Int32 PhoneWindowManager::KEY_ACTION_NOTHING = 0;
+const Int32 PhoneWindowManager::KEY_ACTION_MENU = 1;
+const Int32 PhoneWindowManager::KEY_ACTION_APP_SWITCH = 2;
+const Int32 PhoneWindowManager::KEY_ACTION_SEARCH = 3;
+const Int32 PhoneWindowManager::KEY_ACTION_VOICE_SEARCH = 4;
+const Int32 PhoneWindowManager::KEY_ACTION_IN_APP_SEARCH = 5;
+const Int32 PhoneWindowManager::KEY_ACTION_LAUNCH_CAMERA = 6;
+const Int32 PhoneWindowManager::KEY_ACTION_SLEEP = 7;
+const Int32 PhoneWindowManager::KEY_ACTION_LAST_APP = 8;
+
+// Masks for checking presence of hardware keys.
+// Must match values in core/res/res/values/config.xml
+const Int32 PhoneWindowManager::KEY_MASK_HOME = 0x01;
+const Int32 PhoneWindowManager::KEY_MASK_BACK = 0x02;
+const Int32 PhoneWindowManager::KEY_MASK_MENU = 0x04;
+const Int32 PhoneWindowManager::KEY_MASK_ASSIST = 0x08;
+const Int32 PhoneWindowManager::KEY_MASK_APP_SWITCH = 0x10;
+const Int32 PhoneWindowManager::KEY_MASK_CAMERA = 0x20;
+const Int32 PhoneWindowManager::KEY_MASK_VOLUME = 0x40;
 
 AutoPtr<CRect> PhoneWindowManager::mTmpParentFrame = InitCRect();
 AutoPtr<CRect> PhoneWindowManager::mTmpDisplayFrame = InitCRect();
@@ -319,6 +352,7 @@ const Int32 PhoneWindowManager::MSG_DISPATCH_SHOW_RECENTS = 9;
 const Int32 PhoneWindowManager::MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
 const Int32 PhoneWindowManager::MSG_HIDE_BOOT_MESSAGE = 11;
 const Int32 PhoneWindowManager::MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
+const Int32 PhoneWindowManager::MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 13;
 
 const Boolean PhoneWindowManager::PRINT_ANIM = FALSE;
 AutoPtr<ArrayOf<Int32> > PhoneWindowManager::WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = InitWINDOW_TYPES_WHERE_HOME_DOESNT_WORK();
@@ -343,8 +377,8 @@ ECode PhoneWindowManager::MyWakeGestureListener::OnWakeUp()
     {
         AutoLock lock(mHost->mLock);
         if (mHost->ShouldEnableWakeGestureLp()) {
-            Boolean bTemp;
-            mHost->PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::VIRTUAL_KEY, FALSE, &bTemp);
+            Boolean bval;
+            mHost->PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::VIRTUAL_KEY, FALSE, &bval);
             mHost->mPowerManager->WakeUp(SystemClock::GetUptimeMillis());
         }
     }
@@ -613,6 +647,10 @@ ECode PhoneWindowManager::SettingsObserver::Observe()
     resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
 
     uri = NULL;
+    Settings::Secure::GetUriFor(ISettingsSecure::RING_HOME_BUTTON_BEHAVIOR, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
     Settings::Secure::GetUriFor(ISettingsSecure::WAKE_GESTURE_ENABLED, (IUri**)&uri);
     resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
 
@@ -633,6 +671,38 @@ ECode PhoneWindowManager::SettingsObserver::Observe()
     resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
 
     uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_HOME_LONG_PRESS_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_HOME_DOUBLE_TAP_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_MENU_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_MENU_LONG_PRESS_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_ASSIST_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_ASSIST_LONG_PRESS_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_APP_SWITCH_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::KEY_APP_SWITCH_LONG_PRESS_ACTION, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
     Settings::Secure::GetUriFor(ISettingsSecure::DEFAULT_INPUT_METHOD, (IUri**)&uri);
     resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
 
@@ -641,7 +711,51 @@ ECode PhoneWindowManager::SettingsObserver::Observe()
     resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
 
     uri = NULL;
-    Settings::Global::GetUriFor(ISettingsGlobal::POLICY_CONTROL, (IUri**)&uri);
+    Settings::Secure::GetUriFor(ISettingsGlobal::POLICY_CONTROL, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::USE_EDGE_SERVICE_FOR_GESTURES, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::DEV_FORCE_SHOW_NAVBAR, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::HOME_WAKE_SCREEN, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::BACK_WAKE_SCREEN, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::MENU_WAKE_SCREEN, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::ASSIST_WAKE_SCREEN, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::APP_SWITCH_WAKE_SCREEN, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::VOLUME_WAKE_SCREEN, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::VOLBTN_MUSIC_CONTROLS, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::ACCELEROMETER_ROTATION_ANGLES, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
+
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::NAVBAR_LEFT_IN_LANDSCAPE, (IUri**)&uri);
     resolver->RegisterContentObserver(uri, FALSE, this, IUserHandle::USER_ALL);
 
     mHost->UpdateSettings();
@@ -696,9 +810,10 @@ ECode PhoneWindowManager::HideNavInputEventReceiver::OnInputEvent(
     Boolean handled = FALSE;
     //try {
     Int32 source = 0;
-    if (IMotionEvent::Probe(event)
-            && ((event->GetSource(&source), source) & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
-        const AutoPtr<IMotionEvent> motionEvent = IMotionEvent::Probe(event);
+    AutoPtr<IMotionEvent> motionEvent = IMotionEvent::Probe(event);
+    if (motionEvent != NULL
+        && ((event->GetSource(&source), source) & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
+
         Int32 action = 0;
         if ((motionEvent->GetAction(&action), action) == IMotionEvent::ACTION_DOWN) {
             // When the user taps down, we re-show the nav bar.
@@ -838,10 +953,6 @@ ECode PhoneWindowManager::DockBroadReceiver::OnReceive(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::DockBroadReceiver --
-//==============================================================================
-
-//==============================================================================
 //          ++ PhoneWindowManager::DreamBroadReceiver ++
 //==============================================================================
 
@@ -867,10 +978,6 @@ ECode PhoneWindowManager::DreamBroadReceiver::OnReceive(
     }
     return NOERROR;
 }
-
-//==============================================================================
-//          -- PhoneWindowManager::DreamBroadReceiver --
-//==============================================================================
 
 //==============================================================================
 //          ++ PhoneWindowManager::MultiuserBroadReceiver ++
@@ -909,8 +1016,36 @@ ECode PhoneWindowManager::MultiuserBroadReceiver::OnReceive(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::MultiuserBroadReceiver --
+//          ++ PhoneWindowManager::MultiuserBroadReceiver ++
 //==============================================================================
+
+PhoneWindowManager::WifiDisplayReceiver::WifiDisplayReceiver(
+    /*in*/ PhoneWindowManager* host)
+    : mHost(host)
+{
+}
+
+ECode PhoneWindowManager::WifiDisplayReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals(IIntent::ACTION_WIFI_DISPLAY_VIDEO)) {
+        Int32 state;
+        intent->GetInt32Extra(String("state"), 0, &state);
+        if (state == 1) {
+            mHost->mWifiDisplayConnected = TRUE;
+        }
+        else {
+            mHost->mWifiDisplayConnected = FALSE;
+        }
+
+        intent->GetInt32Extra(String("wfd_UIBC_rot"), -1, &mHost->mWifiDisplayCustomRotation);
+        mHost->UpdateRotation(true);
+    }
+    return NOERROR;
+}
 
 //==============================================================================
 //          ++ PhoneWindowManager::ScreenLockTimeoutRunnable ++
@@ -925,7 +1060,7 @@ PhoneWindowManager::ScreenLockTimeoutRunnable::ScreenLockTimeoutRunnable(
 ECode PhoneWindowManager::ScreenLockTimeoutRunnable::Run()
 {
     AutoLock lock(this);
-    // if (localLOGV) Log.v(TAG, "mScreenLockTimeout activating keyguard");
+    // if (localLOGV) Logger::V(TAG, "mScreenLockTimeout activating keyguard");
     if (mHost->mKeyguardDelegate != NULL) {
         mHost->mKeyguardDelegate->DoKeyguardTimeout(mOptions);
     }
@@ -941,8 +1076,53 @@ void PhoneWindowManager::ScreenLockTimeoutRunnable::SetLockOptions(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::ScreenLockTimeoutRunnable --
+//          ++ PhoneWindowManager::QuickBootPowerLongPressRunnable ++
 //==============================================================================
+
+PhoneWindowManager::QuickBootPowerLongPressRunnable::QuickBootPowerLongPressRunnable(
+    /* [in] */ PhoneWindowManager* host)
+    : mHost(host)
+{
+}
+
+ECode PhoneWindowManager::QuickBootPowerLongPressRunnable::Run()
+{
+    assert(0 && "TODO");
+    // Intent intent = new Intent("org.codeaurora.action.QUICKBOOT");
+    // intent.putExtra("mode", 1);
+    // try {
+    //     mContext.startActivityAsUser(intent,UserHandle.CURRENT);
+    // } catch (ActivityNotFoundException e) {
+    //     e.printStackTrace();
+    //     releaseQuickBootWakeLock();
+    //     return;
+    // }
+
+    // BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
+    //     public void onReceive(Context context, Intent intent) {
+
+    //         synchronized (mQuickBootLock) {
+    //             mQuickBootLock.notifyAll();
+    //         }
+    //     }
+    // };
+
+    // IntentFilter filter = new IntentFilter("org.codeaurora.quickboot.poweron_start");
+    // mContext.registerReceiver(broadcastReceiver,filter,
+    //         "android.permission.DEVICE_POWER",null);
+
+    // synchronized (mQuickBootLock) {
+    //     try {
+    //         mQuickBootLock.wait(QUICKBOOT_LAUNCH_TIMEOUT);
+    //     } catch (InterruptedException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
+
+    // releaseQuickBootWakeLock();
+    return NOERROR;
+}
 
 //==============================================================================
 //          ++ PhoneWindowManager::PolicyHandler ++
@@ -966,16 +1146,14 @@ ECode PhoneWindowManager::PolicyHandler::HandleMessage(
         case PhoneWindowManager::MSG_DISABLE_POINTER_LOCATION:
             mHost->DisablePointerLocation();
             break;
-        case PhoneWindowManager::MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK:
-            {
+        case PhoneWindowManager::MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK: {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
                 AutoPtr<IKeyEvent> keyEvent = IKeyEvent::Probe(obj);
                 mHost->DispatchMediaKeyWithWakeLock(keyEvent);
             }
             break;
-        case PhoneWindowManager::MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK:
-            {
+        case PhoneWindowManager::MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK: {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
                 AutoPtr<IKeyEvent> keyEvent = IKeyEvent::Probe(obj);
@@ -1003,13 +1181,24 @@ ECode PhoneWindowManager::PolicyHandler::HandleMessage(
         case MSG_HIDE_BOOT_MESSAGE:
             mHost->HandleHideBootMessage();
             break;
-        case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
-            {
-                Int32 arg1;
-                msg->GetArg1(&arg1);
-                mHost->LaunchVoiceAssistWithWakeLock(arg1 != 0);
-                break;
-            }
+        case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:{
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            mHost->LaunchVoiceAssistWithWakeLock(arg1 != 0);
+            break;
+        }
+
+        case MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<IKeyEvent> event = IKeyEvent::Probe(obj);
+            AutoPtr<IKeyEvent> newEvent;
+            CKeyEvent::ChangeAction(event, IKeyEvent::ACTION_UP, (IKeyEvent**)&newEvent);
+            mHost->mIsLongPress = TRUE;
+            mHost->DispatchMediaKeyWithWakeLockToAudioService(event);
+            mHost->DispatchMediaKeyWithWakeLockToAudioService(newEvent);
+            break;
+        }
     }
     return NOERROR;
 }
@@ -1112,8 +1301,60 @@ ECode PhoneWindowManager::ScreenshotRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::ScreenshotRunnable --
+//          ++ PhoneWindowManager::ScreenshotForLogRunnable ++
 //==============================================================================
+
+PhoneWindowManager::ScreenshotForLogRunnable::ScreenshotForLogRunnable(
+    /* [in] */ PhoneWindowManager* host)
+    : mHost(host)
+{
+}
+
+ECode PhoneWindowManager::ScreenshotForLogRunnable::Run()
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("android.system.agent"), (IIntent**)&intent);
+    AutoPtr<IComponentName> cn;
+    CComponentName::New(
+        String("com.qualcomm.agent"),
+        String("com.qualcomm.agent.SystemAgent"), (IComponentName**)&cn);
+    intent->SetComponent(cn);
+    intent->PutExtra(String("para"), String("takeLogs"));
+
+    AutoPtr<IComponentName> ret;
+    ECode ec = mHost->mContext->StartService(intent, (IComponentName**)&ret);
+    if (FAILED(ec)) {
+        Slogger::E("PhoneWindowManager::ScreenshotForLogRunnable",
+            "Exception when start SystemAgent service ec=%08x", ec);
+    }
+    return NOERROR;
+}
+
+//==============================================================================
+//          ++ PhoneWindowManager::BackLongPressRunnable ++
+//==============================================================================
+
+PhoneWindowManager::BackLongPressRunnable::BackLongPressRunnable(
+    /* [in] */ PhoneWindowManager* host)
+    : mHost(host)
+{
+}
+
+ECode PhoneWindowManager::BackLongPressRunnable::Run()
+{
+    Boolean bval;
+    ActionUtils::KillForegroundApp(mHost->mContext, mHost->mCurrentUserId, &bval);
+    if (bval) {
+        mHost->PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
+
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        AutoPtr<IToast> toast;
+        helper->MakeText(mHost->mContext, R::string::app_killed_message, IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
+    }
+    return NOERROR;
+}
 
 //==============================================================================
 //          ++ PhoneWindowManager::HomeDoubleTapTimeoutRunnable++
@@ -1133,10 +1374,6 @@ ECode PhoneWindowManager::HomeDoubleTapTimeoutRunnable::Run()
     }
     return NOERROR;
 }
-
-//==============================================================================
-//          -- PhoneWindowManager::HomeDoubleTapTimeoutRunnable--
-//==============================================================================
 
 //==============================================================================
 //          ++ PhoneWindowManager::CollapsePanelsRunnable ++
@@ -1166,10 +1403,6 @@ ECode PhoneWindowManager::CollapsePanelsRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::CollapsePanelsRunnable --
-//==============================================================================
-
-//==============================================================================
 //          ++ PhoneWindowManager::ScreenshotHandler ++
 //==============================================================================
 
@@ -1192,10 +1425,6 @@ ECode PhoneWindowManager::ScreenshotHandler::HandleMessage(
     }
     return NOERROR;
 }
-
-//==============================================================================
-//          -- PhoneWindowManager::ScreenshotHandler --
-//==============================================================================
 
 //==============================================================================
 //          ++ PhoneWindowManager::ScreenshotServiceConnection ++
@@ -1254,10 +1483,6 @@ ECode PhoneWindowManager::ScreenshotServiceConnection::OnServiceDisconnected(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::ScreenshotServiceConnection --
-//==============================================================================
-
-//==============================================================================
 //          ++ PhoneWindowManager::UpdateSettingRunnable ++
 //==============================================================================
 
@@ -1274,14 +1499,10 @@ ECode PhoneWindowManager::UpdateSettingRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::UpdateSettingRunnable --
-//==============================================================================
-
-//==============================================================================
 //          ++ PhoneWindowManager::BootMsgDialog ++
 //==============================================================================
 
-ECode PhoneWindowManager::BootMsgDialog::Init(
+ECode PhoneWindowManager::BootMsgDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 theme)
 {
@@ -1292,6 +1513,7 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchKeyEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean *result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -1300,6 +1522,7 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchKeyShortcutEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean *result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -1308,6 +1531,7 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean *result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -1316,6 +1540,7 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchTrackballEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean *result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -1324,6 +1549,7 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchGenericMotionEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean *result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -1332,10 +1558,10 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event,
     /* [out] */ Boolean *result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
-
 
 //==============================================================================
 //          ++ PhoneWindowManager::BootMsgRunnable ++
@@ -1343,38 +1569,39 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchPopulateAccessibilityEvent(
 
 PhoneWindowManager::BootMsgRunnable::BootMsgRunnable(
     /* [in] */ PhoneWindowManager* host,
-    /* [in] */ ICharSequence* msg)
+    /* [in] */ ICharSequence* msg,
+    /* [in] */ Int32 titleRes)
     : mHost(host)
     , mMsg(msg)
+    , mTitleRes(titleRes)
 {
 }
 
 ECode PhoneWindowManager::BootMsgRunnable::Run()
 {
     if (mHost->mBootMsgDialog == NULL) {
-        int theme;
         AutoPtr<IPackageManager> pm;
         mHost->mContext->GetPackageManager((IPackageManager**)&pm);
-        Boolean bTemp;
-        if (pm->HasSystemFeature(IPackageManager::FEATURE_WATCH, &bTemp), bTemp) {
+        Int32 theme = 0;
+        Boolean bval;
+        pm->HasSystemFeature(IPackageManager::FEATURE_WATCH, &bval);
+        if (pm->HasSystemFeature(IPackageManager::FEATURE_WATCH, &bval), bval) {
             theme = R::style::Theme_Micro_Dialog_Alert;
-        } else if (pm->HasSystemFeature(IPackageManager::FEATURE_TELEVISION, &bTemp), bTemp) {
-            theme = R::style::Theme_Leanback_Dialog_Alert;
-        } else {
-            theme = 0;
         }
+        else if (pm->HasSystemFeature(IPackageManager::FEATURE_TELEVISION, &bval), bval) {
+            theme = R::style::Theme_Leanback_Dialog_Alert;
+        }
+
         mHost->mBootMsgDialog = new BootMsgDialog();
-        mHost->mBootMsgDialog->Init(mHost->mContext, theme);
-        mHost->mBootMsgDialog->SetTitle(R::string::android_upgrading_title);
+        mHost->mBootMsgDialog->constructor(mHost->mContext, theme);
+        mHost->mBootMsgDialog->SetTitle(mTitleRes);
         mHost->mBootMsgDialog->SetProgressStyle(IProgressDialog::STYLE_SPINNER);
         mHost->mBootMsgDialog->SetIndeterminate(TRUE);
         AutoPtr<IWindow> window;
         mHost->mBootMsgDialog->GetWindow((IWindow**)&window);
-        window->SetType(
-                IWindowManagerLayoutParams::TYPE_BOOT_PROGRESS);
-        window->AddFlags(
-                IWindowManagerLayoutParams::FLAG_DIM_BEHIND
-                | IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN);
+        window->SetType(IWindowManagerLayoutParams::TYPE_BOOT_PROGRESS);
+        window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND
+            | IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN);
         window->SetDimAmount(1);
         AutoPtr<IWindowManagerLayoutParams> lp;
         window->GetAttributes((IWindowManagerLayoutParams**)&lp);
@@ -1386,10 +1613,6 @@ ECode PhoneWindowManager::BootMsgRunnable::Run()
     mHost->mBootMsgDialog->SetMessage(mMsg);
     return NOERROR;
 }
-
-//==============================================================================
-//          -- PhoneWindowManager::BootMsgRunnable --
-//==============================================================================
 
 //==============================================================================
 //          ++ PhoneWindowManager::UpdateSystemUiVisibilityRunnable ++
@@ -1436,6 +1659,7 @@ PhoneWindowManager::PhoneWindowManager()
     , mCanHideNavigationBar(FALSE)
     , mNavigationBarCanMove(FALSE)
     , mNavigationBarOnBottom(FALSE)
+    , mNavigationBarLeftInLandscape(FALSE)
     , mBootMessageNeedsHiding(FALSE)
     , mPowerKeyHandled(FALSE)
     , mPendingPowerKeyUpCanceled(FALSE)
@@ -1451,6 +1675,7 @@ PhoneWindowManager::PhoneWindowManager()
     , mUiMode(0)
     , mDockMode(IIntent::EXTRA_DOCK_STATE_UNDOCKED)
     , mLidOpenRotation(0)
+    , mHasRemovableLid(FALSE)
     , mCarDockRotation(0)
     , mDeskDockRotation(0)
     , mUndockedHdmiRotation(0)
@@ -1459,6 +1684,7 @@ PhoneWindowManager::PhoneWindowManager()
     , mWakeGestureEnabledSetting(FALSE)
     , mUserRotationMode(IWindowManagerPolicy::USER_ROTATION_FREE)
     , mUserRotation(ISurface::ROTATION_0)
+    , mUserRotationAngles(-1)
     , mAccelerometerDefault(FALSE)
     , mSupportAutoRotation(FALSE)
     , mAllowAllRotations(-1)
@@ -1478,7 +1704,19 @@ PhoneWindowManager::PhoneWindowManager()
     , mCurrentAppOrientation(IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED)
     , mHasSoftInput(FALSE)
     , mTranslucentDecorEnabled(TRUE)
+    , mBackKillTimeout(0)
+    , mDeviceHardwareKeys(0)
+    , mHomeWakeScreen(FALSE)
+    , mBackWakeScreen(FALSE)
+    , mMenuWakeScreen(FALSE)
+    , mAssistWakeScreen(FALSE)
+    , mAppSwitchWakeScreen(FALSE)
+    , mVolumeWakeScreen(FALSE)
+    , mVolumeWakeTriggered(FALSE)
     , mPointerLocationMode(0)
+    , mLongPressPoweronTime(DEFAULT_LONG_PRESS_POWERON_TIME)
+    , mVolBtnMusicControls(FALSE)
+    , mIsLongPress(FALSE)
     , mOverscanScreenLeft(0)
     , mOverscanScreenTop(0)
     , mOverscanScreenWidth(0)
@@ -1507,6 +1745,10 @@ PhoneWindowManager::PhoneWindowManager()
     , mStableFullscreenTop(0)
     , mStableFullscreenRight(0)
     , mStableFullscreenBottom(0)
+    , mForceImmersiveLeft(0)
+    , mForceImmersiveTop(0)
+    , mForceImmersiveRight(0)
+    , mForceImmersiveBottom(0)
     , mCurLeft(0)
     , mCurTop(0)
     , mCurRight(0)
@@ -1535,6 +1777,7 @@ PhoneWindowManager::PhoneWindowManager()
     , mHideLockScreen(FALSE)
     , mForcingShowNavBar(FALSE)
     , mForcingShowNavBarLayer(-1)
+    , mDevForceNavbar(FALSE)
     , mDismissKeyguard(DISMISS_KEYGUARD_NONE)
     , mShowingLockscreen(FALSE)
     , mShowingDream(FALSE)
@@ -1542,15 +1785,25 @@ PhoneWindowManager::PhoneWindowManager()
     , mHomePressed(FALSE)
     , mHomeConsumed(FALSE)
     , mHomeDoubleTapPending(FALSE)
+    , mMenuPressed(FALSE)
+    , mAppSwitchLongPressed(FALSE)
     , mSearchKeyShortcutPending(FALSE)
     , mConsumeSearchKeyUp(FALSE)
     , mAssistKeyLongPressed(FALSE)
     , mPendingMetaAction(FALSE)
+    , mLongPressOnHomeBehavior(-1)
+    , mPressOnMenuBehavior(-1)
+    , mLongPressOnMenuBehavior(-1)
+    , mPressOnAssistBehavior(-1)
+    , mLongPressOnAssistBehavior(-1)
+    , mPressOnAppSwitchBehavior(-1)
+    , mLongPressOnAppSwitchBehavior(-1)
     , mAllowLockscreenWhenOn(FALSE)
     , mLockScreenTimeout(0)
     , mLockScreenTimerActive(FALSE)
     , mEndcallBehavior(0)
     , mIncallPowerBehavior(0)
+    , mRingHomeBehavior(0)
     , mLandscapeRotation(0)
     , mSeascapeRotation(0)
     , mPortraitRotation(0)
@@ -1559,20 +1812,29 @@ PhoneWindowManager::PhoneWindowManager()
     , mOverscanTop(0)
     , mOverscanRight(0)
     , mOverscanBottom(0)
+    , mDoubleTapOnHomeBehavior(0)
     , mHavePendingMediaKeyRepeatWithWakeLock(FALSE)
     , mKeyguardHidden(FALSE)
     , mKeyguardDrawnOnce(FALSE)
-    , mLongPressOnHomeBehavior(0)
-    , mDoubleTapOnHomeBehavior(0)
     , mScreenshotChordEnabled(FALSE)
     , mVolumeDownKeyTriggered(FALSE)
     , mVolumeDownKeyTime(0)
     , mVolumeDownKeyConsumedByScreenshotChord(FALSE)
     , mVolumeUpKeyTriggered(FALSE)
     , mPowerKeyTriggered(FALSE)
+    , mVolumeUpKeyTime(0)
+    , mVolumeUpKeyConsumedByScreenshotChord(FALSE)
     , mPowerKeyTime(0)
     , mCurrentUserId(0)
+    , mWifiDisplayConnected(FALSE)
+    , mWifiDisplayCustomRotation(-1)
+    , mHasPermanentMenuKey(FALSE)
+    , mClearedBecauseOfForceShow(FALSE)
+    , mTopWindowIsKeyguard(FALSE)
     , mForceDefaultOrientation(FALSE)
+    , mLastEdgePositions(0)
+    , mEdgeListenerActivated(FALSE)
+    , mUsingEdgeGestureServiceForGestures(FALSE)
 {
 }
 
@@ -1589,32 +1851,75 @@ ECode PhoneWindowManager::constructor()
     mHDMIObserver = new HDMIUEventObserver(this);
     mPowerLongPress = new PowerLongPressRunnable(this);
     mScreenshotRunnable = new ScreenshotRunnable(this);
+    mScreenshotForLog = new ScreenshotForLogRunnable(this);
     mHideNavInputEventReceiverFactory = new HideNavInputEventReceiverFactory(this);
     mScreenshotTimeout = new ScreenshotTimeoutRunnable(this);
+    mBackLongPress = new BackLongPressRunnable(this);
     mDockReceiver = new DockBroadReceiver(this);
     mDreamReceiver = new DreamBroadReceiver(this);
     mMultiuserReceiver = new MultiuserBroadReceiver(this);
+    mWifiDisplayReceiver = new WifiDisplayReceiver(this);
     mScreenLockTimeout = new ScreenLockTimeoutRunnable(this);
+    mQuickBootPowerLongPress = new QuickBootPowerLongPressRunnable(this);
 
     mFallbackActions = new HashMap<Int32, AutoPtr<IInterface> >();
     CLogDecelerateInterpolator::New(100, 0, (ILogDecelerateInterpolator**)&mLogDecelerateInterpolator);
     CBarController::New(String("StatusBar"),
-            IView::STATUS_BAR_TRANSIENT,
-            IView::STATUS_BAR_UNHIDE,
-            IView::STATUS_BAR_TRANSLUCENT,
-            IStatusBarManager::WINDOW_STATUS_BAR,
-            IWindowManagerLayoutParams::FLAG_TRANSLUCENT_STATUS,
-            (IBarController**)&mStatusBarController);
+        IView::STATUS_BAR_TRANSIENT,
+        IView::STATUS_BAR_UNHIDE,
+        IView::STATUS_BAR_TRANSLUCENT,
+        IStatusBarManager::WINDOW_STATUS_BAR,
+        IWindowManagerLayoutParams::FLAG_TRANSLUCENT_STATUS,
+        (IBarController**)&mStatusBarController);
     CBarController::New(String("NavigationBar"),
-                        IView::NAVIGATION_BAR_TRANSIENT,
-                        IView::NAVIGATION_BAR_UNHIDE,
-                        IView::NAVIGATION_BAR_TRANSLUCENT,
-                        IStatusBarManager::WINDOW_NAVIGATION_BAR,
-                        IWindowManagerLayoutParams::FLAG_TRANSLUCENT_NAVIGATION,
-                        (IBarController**)&mNavigationBarController);
+        IView::NAVIGATION_BAR_TRANSIENT,
+        IView::NAVIGATION_BAR_UNHIDE,
+        IView::NAVIGATION_BAR_TRANSLUCENT,
+        IStatusBarManager::WINDOW_NAVIGATION_BAR,
+        IWindowManagerLayoutParams::FLAG_TRANSLUCENT_NAVIGATION,
+        (IBarController**)&mNavigationBarController);
     mHomeDoubleTapTimeoutRunnable = new HomeDoubleTapTimeoutRunnable(this);
     mClearHideNavigationFlag = new ClearHideNavigationFlagRunnable(this);
     mRequestTransientNav = new RequestTransientBarsRunnable(this);
+    return NOERROR;
+}
+
+ECode PhoneWindowManager::UpdateEdgeGestureListenerState()
+{
+    Int32 flags = 0;
+    if (mUsingEdgeGestureServiceForGestures) {
+        Boolean bval;
+        flags = IEdgeServiceConstants::LONG_LIVING | IEdgeServiceConstants::UNRESTRICTED;
+        if (mStatusBar != NULL && (mStatusBar->IsVisibleLw(&bval), !bval)) {
+            flags |= CEdgeGesturePosition::TOP->FLAG;
+        }
+        if (mNavigationBar != NULL
+            && (mNavigationBar->IsVisibleLw(&bval), !bval)
+            && IsStatusBarKeyguard()) {
+            if (mNavigationBarOnBottom) {
+                flags |= CEdgeGesturePosition::BOTTOM->FLAG;
+            }
+            else if (mNavigationBarLeftInLandscape) {
+                flags |= CEdgeGesturePosition::LEFT->FLAG;
+            }
+            else {
+                flags |= CEdgeGesturePosition::RIGHT->FLAG;
+            }
+        }
+    }
+    if (mEdgeListenerActivated) {
+        Slogger::W(TAG, "TODO needs EdgeGestureManager");
+        assert(0 && "TODO");
+        // mEdgeGestureActivationListener->RestoreListenerState();
+        mEdgeListenerActivated = FALSE;
+    }
+    if (flags != mLastEdgePositions) {
+        Slogger::W(TAG, "TODO needs EdgeGestureManager");
+        assert(0 && "TODO");
+        // mEdgeGestureManager->UpdateEdgeGestureActivationListener(
+        //     mEdgeGestureActivationListener, flags);
+        // mLastEdgePositions = flags;
+    }
     return NOERROR;
 }
 
@@ -1668,8 +1973,8 @@ Boolean PhoneWindowManager::NeedSensorRunningLp()
 
 void PhoneWindowManager::UpdateOrientationListenerLp()
 {
-    Boolean bTemp;
-    if (!(mOrientationListener->CanDetectOrientation(&bTemp), bTemp)) {
+    Boolean bval;
+    if (!(mOrientationListener->CanDetectOrientation(&bval), bval)) {
         // If sensor is turned off or nonexistent for some reason
         return;
     }
@@ -1742,21 +2047,44 @@ void PhoneWindowManager::InterceptScreenshotChord()
             CancelPendingPowerKeyAction();
 
             Boolean isSuccess = FALSE;
-            mHandler->PostDelayed(mScreenshotRunnable, GetScreenshotChordLongPressDelay(), &isSuccess);
+            mHandler->PostDelayed(mScreenshotRunnable,
+                GetScreenshotChordLongPressDelay(), &isSuccess);
         }
     }
 }
 
+void PhoneWindowManager::InterceptScreenshotLog()
+{
+    if (mScreenshotChordEnabled
+            && mVolumeUpKeyTriggered && mPowerKeyTriggered && !mVolumeDownKeyTriggered) {
+        Int64 now = SystemClock::GetUptimeMillis();
+        if (now <= mVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
+               && now <= mPowerKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
+            mVolumeUpKeyConsumedByScreenshotChord = TRUE;
+            CancelPendingScreenshotForLog();
+
+            Boolean isSuccess = FALSE;
+            mHandler->PostDelayed(mScreenshotForLog,
+                GetScreenshotChordLongPressDelay(), &isSuccess);
+        }
+    }
+}
+
+void PhoneWindowManager::CancelPendingScreenshotForLog()
+{
+    mHandler->RemoveCallbacks(mScreenshotForLog);
+}
+
 Int64 PhoneWindowManager::GetScreenshotChordLongPressDelay()
 {
-    //PFL_EX(": PhoneWindowManager::GetScreenshotChordLongPressDelay()")
     Int64 delay;
     AutoPtr<IViewConfiguration> vc = CViewConfiguration::Get(mContext);
     vc->GetDeviceGlobalActionKeyTimeout(&delay);
-    Boolean bTemp;
-    if ((mKeyguardDelegate->IsShowing(&bTemp), bTemp)) {
+    Boolean bval;
+    mKeyguardDelegate->IsShowing(&bval);
+    if (bval) {
          // Double the time it takes to take a screenshot from the keyguard
-         return (Int64) (KEYGUARD_SCREENSHOT_CHORD_DELAY_MULTIPLIER + delay);
+         return (Int64) (KEYGUARD_SCREENSHOT_CHORD_DELAY_MULTIPLIER * delay);
      }
     return delay;
 }
@@ -1774,7 +2102,7 @@ void PhoneWindowManager::PowerShortPress(
         mContext->GetResources((IResources**)&resources);
         resources->GetInteger(R::integer::config_shortPressOnPowerBehavior, &mShortPressOnPowerBehavior);
     }
-
+    assert(0 && "TODO");
     switch (mShortPressOnPowerBehavior) {
         case SHORT_PRESS_POWER_NOTHING:
             break;
@@ -1820,88 +2148,76 @@ Boolean PhoneWindowManager::IsUserSetupComplete()
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
     Int32 value;
     Settings::Secure::GetInt32ForUser(
-            contentResolver, ISettingsSecure::USER_SETUP_COMPLETE, 0, IUserHandle::USER_CURRENT, &value);
+        contentResolver, ISettingsSecure::USER_SETUP_COMPLETE, 0,
+        IUserHandle::USER_CURRENT, &value);
     return value != 0;
 }
 
-void PhoneWindowManager::HandleLongPressOnHome()
+void PhoneWindowManager::TriggerVirtualKeypress(
+    /* [in] */ Int32 keyCode)
 {
-    if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
-        mHomeConsumed = TRUE;
-        Boolean result;
-        PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &result);
+    AutoPtr<IInputManager> im = CInputManager::GetInstance();
+    Int64 now = SystemClock::GetUptimeMillis();
 
-        if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+    AutoPtr<IKeyEvent> downEvent;
+    CKeyEvent::New(now, now, IKeyEvent::ACTION_DOWN,
+        keyCode, 0, 0, IKeyCharacterMap::VIRTUAL_KEYBOARD, 0,
+        IKeyEvent::FLAG_FROM_SYSTEM, IInputDevice::SOURCE_KEYBOARD,
+        (IKeyEvent**)&downEvent);
+    AutoPtr<IKeyEvent> upEvent;
+    CKeyEvent::ChangeAction(downEvent, IKeyEvent::ACTION_UP, (IKeyEvent**)&upEvent);
+
+    Boolean bval;
+    im->InjectInputEvent(IInputEvent::Probe(downEvent),
+        IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, &bval);
+    im->InjectInputEvent(IInputEvent::Probe(upEvent),
+        IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, &bval);
+}
+
+void PhoneWindowManager::LaunchCameraAction()
+{
+    SendCloseSystemWindows();
+    AutoPtr<IIntent> intent;
+    CIntent::New(IIntent::ACTION_CAMERA_BUTTON, NULL, (IIntent**)&intent);
+    String nullStr;
+    mContext->SendOrderedBroadcastAsUser(
+        intent, UserHandle::CURRENT_OR_SELF,
+        nullStr, NULL, NULL, 0, nullStr, NULL);
+}
+
+void PhoneWindowManager::PerformKeyAction(
+    /* [in] */ Int32 behavior)
+{
+    Boolean bval;
+    switch (behavior) {
+        case KEY_ACTION_NOTHING:
+            break;
+        case KEY_ACTION_MENU:
+            TriggerVirtualKeypress(IKeyEvent::KEYCODE_MENU);
+            break;
+        case KEY_ACTION_APP_SWITCH:
             ToggleRecentApps();
-        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_ASSIST) {
+            break;
+        case KEY_ACTION_SEARCH:
             LaunchAssistAction();
-        }
-    }
-}
-
-void PhoneWindowManager::HandleDoubleTapOnHome()
-{
-    if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
-        mHomeConsumed = TRUE;
-        ToggleRecentApps();
-    }
-}
-
-void PhoneWindowManager::ReadConfigurationDependentBehaviors()
-{
-    AutoPtr<IResources> resources;
-    mContext->GetResources((IResources**)&resources);
-    resources->GetInteger(R::integer::config_longPressOnHomeBehavior, &mLongPressOnHomeBehavior);
-    if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
-            mLongPressOnHomeBehavior > LONG_PRESS_HOME_ASSIST) {
-        mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
-    }
-
-    resources->GetInteger(R::integer::config_doubleTapOnHomeBehavior, &mDoubleTapOnHomeBehavior);
-    if (mDoubleTapOnHomeBehavior < DOUBLE_TAP_HOME_NOTHING ||
-            mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
-        mDoubleTapOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
-    }
-}
-
-Boolean PhoneWindowManager::CanHideNavigationBar()
-{
-    Boolean bTemp;
-    return mHasNavigationBar && !(mAccessibilityManager->IsTouchExplorationEnabled(&bTemp), bTemp);
-}
-
-void PhoneWindowManager::UpdateWakeGestureListenerLp()
-{
-    if (ShouldEnableWakeGestureLp()) {
-        mWakeGestureListener->RequestWakeUpTrigger();
-    } else {
-        mWakeGestureListener->CancelWakeUpTrigger();
-    }
-}
-
-Boolean PhoneWindowManager::ShouldEnableWakeGestureLp()
-{
-    Boolean bTemp;
-    mWakeGestureListener->IsSupported(&bTemp);
-    return mWakeGestureEnabledSetting && !mAwake
-        && (!mLidControlsSleep || mLidState != IWindowManagerPolicyWindowManagerFuncs::LID_CLOSED)
-        && bTemp;
-}
-
-void PhoneWindowManager::ReadCameraLensCoverState()
-{
-    mWindowManagerFuncs->GetCameraLensCoverState(&mCameraLensCoverState);
-}
-
-void PhoneWindowManager::AwakenDreams()
-{
-    AutoPtr<IIDreamManager> dreamManager = GetDreamManager();
-    if (dreamManager != NULL) {
-        //try {
-            dreamManager->Awaken();
-        //} catch (RemoteException e) {
-            // fine, stay asleep then
-        //}
+            break;
+        case KEY_ACTION_VOICE_SEARCH:
+            LaunchAssistLongPressAction();
+            break;
+        case KEY_ACTION_IN_APP_SEARCH:
+            TriggerVirtualKeypress(IKeyEvent::KEYCODE_SEARCH);
+            break;
+        case KEY_ACTION_LAUNCH_CAMERA:
+            LaunchCameraAction();
+            break;
+        case KEY_ACTION_SLEEP:
+            mPowerManager->GoToSleep(SystemClock::GetUptimeMillis());
+            break;
+        case KEY_ACTION_LAST_APP:
+            ActionUtils::SwitchToLastApp(mContext, mCurrentUserId, &bval);
+            break;
+        default:
+            break;
     }
 }
 
@@ -1932,6 +2248,9 @@ ECode PhoneWindowManager::Init(
     mHandler = (IHandler*)ph.Get();
     mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler, this);
     mOrientationListener = new MyOrientationListener(mContext, mHandler, this);
+    Int32 rotation;
+    mWindowManager->GetRotation(&rotation);
+    mOrientationListener->SetCurrentRotation(rotation);
     mSettingsObserver = new SettingsObserver(mHandler, this);
     mSettingsObserver->Observe();
     mShortcutManager = new ShortcutManager(context, mHandler);
@@ -1970,10 +2289,15 @@ ECode PhoneWindowManager::Init(
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
     mPowerManager = IPowerManager::Probe(service);
     mPowerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
-            String("PhoneWindowManager.mBroadcastWakeLock"), (IPowerManagerWakeLock**)&mBroadcastWakeLock);
-    String equalsStr2;
-    sp->Get(String("ro.debuggable"), &equalsStr2);
-    mEnableShiftMenuBugReports = String("1").Equals(equalsStr2);
+            String("PhoneWindowManager.mBroadcastWakeLock"),
+            (IPowerManagerWakeLock**)&mBroadcastWakeLock);
+    mPowerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
+            String("PhoneWindowManager.mQuickBootWakeLock"),
+            (IPowerManagerWakeLock**)&mQuickBootWakeLock);
+
+    String str;
+    sp->Get(String("ro.debuggable"), &str);
+    mEnableShiftMenuBugReports = str.Equals("1");
     resources = NULL;
     mContext->GetResources((IResources**)&resources);
     resources->GetBoolean(R::bool_::config_supportAutoRotation, &mSupportAutoRotation);
@@ -1995,8 +2319,17 @@ ECode PhoneWindowManager::Init(
             &mLidNavigationAccessibility);
     resources->GetBoolean(R::bool_::config_lidControlsSleep,
             &mLidControlsSleep);
-    resources->GetBoolean(R::bool_::config_enableTranslucentDecor, &mTranslucentDecorEnabled);
-    ReadConfigurationDependentBehaviors();
+    resources->GetBoolean(R::bool_::config_enableTranslucentDecor,
+            &mTranslucentDecorEnabled);
+
+    resources->GetInteger(R::integer::config_deviceHardwareKeys,
+            &mDeviceHardwareKeys);
+    resources->GetBoolean(R::bool_::config_hasRemovableLid,
+            &mHasRemovableLid);
+    resources->GetInteger(R::integer::config_backKillTimeout,
+            &mBackKillTimeout);
+
+    UpdateKeyAssignments();
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
@@ -2032,8 +2365,9 @@ ECode PhoneWindowManager::Init(
     CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&filter);
     context->RegisterReceiver(mMultiuserReceiver, filter, (IIntent**)&intentTmp);
 
-    CSystemGesturesPointerEventListener::New(context, new SystemGesturesPointerEventListenerCallbacks(this)
-            , (ISystemGesturesPointerEventListener**)&mSystemGestures);
+    CSystemGesturesPointerEventListener::New(context,
+        new SystemGesturesPointerEventListenerCallbacks(this),
+        (ISystemGesturesPointerEventListener**)&mSystemGestures);
     CImmersiveModeConfirmation::New(mContext, (IImmersiveModeConfirmation**)&mImmersiveModeConfirmation);
     mWindowManagerFuncs->RegisterPointerEventListener(IPointerEventListener::Probe(mSystemGestures));
 
@@ -2041,20 +2375,20 @@ ECode PhoneWindowManager::Init(
     context->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&service);
     mVibrator = IVibrator::Probe(service);
 
-    mLongPressVibePattern = GetLongIntArray(resources,
-            R::array::config_longPressVibePattern);
-    mVirtualKeyVibePattern = GetLongIntArray(resources,
-            R::array::config_virtualKeyVibePattern);
-    mKeyboardTapVibePattern = GetLongIntArray(resources,
-             R::array::config_keyboardTapVibePattern);
-    mClockTickVibePattern = GetLongIntArray(resources,
-             R::array::config_clockTickVibePattern);
-    mCalendarDateVibePattern = GetLongIntArray(resources,
-             R::array::config_calendarDateVibePattern);
-    mSafeModeDisabledVibePattern = GetLongIntArray(resources,
-            R::array::config_safeModeDisabledVibePattern);
-    mSafeModeEnabledVibePattern = GetLongIntArray(resources,
-            R::array::config_safeModeEnabledVibePattern);
+    // register for WIFI Display intents
+    intentTmp = NULL;
+    AutoPtr<IIntentFilter> wifiDisplayFilter;
+    CIntentFilter::New(IIntent::ACTION_WIFI_DISPLAY_VIDEO, (IIntentFilter**)&wifiDisplayFilter);
+    AutoPtr<IIntent> wifidisplayIntent;
+    context->RegisterReceiver(mWifiDisplayReceiver, wifiDisplayFilter, (IIntent**)&intentTmp);
+
+    mLongPressVibePattern = GetLongIntArray(resources, R::array::config_longPressVibePattern);
+    mVirtualKeyVibePattern = GetLongIntArray(resources, R::array::config_virtualKeyVibePattern);
+    mKeyboardTapVibePattern = GetLongIntArray(resources, R::array::config_keyboardTapVibePattern);
+    mClockTickVibePattern = GetLongIntArray(resources, R::array::config_clockTickVibePattern);
+    mCalendarDateVibePattern = GetLongIntArray(resources, R::array::config_calendarDateVibePattern);
+    mSafeModeDisabledVibePattern = GetLongIntArray(resources, R::array::config_safeModeDisabledVibePattern);
+    mSafeModeEnabledVibePattern = GetLongIntArray(resources, R::array::config_safeModeEnabledVibePattern);
 
     resources->GetBoolean(R::bool_::config_enableScreenshotChord, &mScreenshotChordEnabled);
 
@@ -2065,10 +2399,164 @@ ECode PhoneWindowManager::Init(
 
     // Match current screen state.
     Boolean isInteractive;
-    if (!(mPowerManager->IsInteractive(&isInteractive), isInteractive)) {
+    mPowerManager->IsInteractive(&isInteractive);
+    if (!isInteractive) {
         GoingToSleep(IWindowManagerPolicy::OFF_BECAUSE_OF_USER);
     }
+
+    String deviceKeyHandlerLib, deviceKeyHandlerClass;
+    resources->GetString(R::string::config_deviceKeyHandlerLib, &deviceKeyHandlerLib);
+    resources->GetString(R::string::config_deviceKeyHandlerClass, &deviceKeyHandlerClass);
+    if (!deviceKeyHandlerLib.IsNullOrEmpty() && !deviceKeyHandlerClass.IsNullOrEmpty()) {
+
+        AutoPtr<IContext> contextWrapper;
+        CContextWrapper::New(mContext, (IContext**)&contextWrapper);
+        AutoPtr<IFile> cacheDir;
+        contextWrapper->GetCacheDir((IFile**)&cacheDir);
+        String path;
+        cacheDir->GetAbsolutePath(&path);
+        AutoPtr<IClassLoader> cl, sysClsLoader;
+        sysClsLoader = ClassLoader::GetSystemClassLoader();
+        CPathClassLoader::New(path, sysClsLoader, (IClassLoader**)&cl);
+        // DexClassLoader loader =  new DexClassLoader(deviceKeyHandlerLib,
+        //         path,
+        //         null,
+        //         ClassLoader.getSystemClassLoader());
+        Logger::I(TAG, "deviceKeyHandlerLib:%s, deviceKeyHandlerClass:%s, cacheDir:%s",
+            deviceKeyHandlerLib.string(), deviceKeyHandlerClass.string(), path.string());
+        assert(0 && "TODO");
+        const String constructorSignature("ctx");
+        AutoPtr<IClassInfo> klass;
+        AutoPtr<IConstructorInfo> constructor;
+        AutoPtr<IArgumentList> args;
+        AutoPtr<IInterface> object;
+
+        ECode ec = cl->LoadClass(deviceKeyHandlerClass, (IClassInfo**)&klass);
+        FAIL_GOTO(ec, _ERROR_)
+
+        ec = klass->GetConstructorInfoByParamNames(
+            constructorSignature, (IConstructorInfo**)&constructor);
+        FAIL_GOTO(ec, _ERROR_)
+        ec = constructor->CreateArgumentList((IArgumentList**)&args);
+        FAIL_GOTO(ec, _ERROR_)
+        ec = args->SetInputArgumentOfObjectPtr(0, mContext);
+        FAIL_GOTO(ec, _ERROR_)
+        ec = constructor->CreateObject(args, (IInterface**)&object);
+        FAIL_GOTO(ec, _ERROR_)
+
+        mDeviceKeyHandler = IDeviceKeyHandler::Probe(object);
+        if (DEBUG) Slogger::D(TAG, "Device key handler loaded");
+_ERROR_:
+        Slogger::W(TAG, "Could not instantiate device key handler %s from class %s. ec=%08x",
+            deviceKeyHandlerClass.string(), deviceKeyHandlerLib.string(), ec);
+    }
     return NOERROR;
+}
+
+void PhoneWindowManager::UpdateKeyAssignments()
+{
+    Int32 activeHardwareKeys = mDeviceHardwareKeys;
+
+    if (mDevForceNavbar) {
+        activeHardwareKeys = 0;
+    }
+    Boolean hasMenu = (activeHardwareKeys & KEY_MASK_MENU) != 0;
+    Boolean hasHome = (activeHardwareKeys & KEY_MASK_HOME) != 0;
+    Boolean hasAssist = (activeHardwareKeys & KEY_MASK_ASSIST) != 0;
+    Boolean hasAppSwitch = (activeHardwareKeys & KEY_MASK_APP_SWITCH) != 0;
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+
+    // Initialize all assignments to sane defaults.
+    mPressOnMenuBehavior = KEY_ACTION_MENU;
+
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+
+    mLongPressOnMenuBehavior =
+    res->GetInteger(R::integer::config_longPressOnMenuBehavior, &mLongPressOnMenuBehavior);
+
+    if (mLongPressOnMenuBehavior == KEY_ACTION_NOTHING &&
+            (hasMenu && !hasAssist)) {
+        mLongPressOnMenuBehavior = KEY_ACTION_SEARCH;
+    }
+    mPressOnAssistBehavior = KEY_ACTION_SEARCH;
+    mLongPressOnAssistBehavior = KEY_ACTION_VOICE_SEARCH;
+    mPressOnAppSwitchBehavior = KEY_ACTION_APP_SWITCH;
+    mLongPressOnAppSwitchBehavior = KEY_ACTION_NOTHING;
+
+    res->GetInteger(R::integer::config_longPressOnHomeBehavior, &mLongPressOnHomeBehavior);
+    if (mLongPressOnHomeBehavior < KEY_ACTION_NOTHING ||
+            mLongPressOnHomeBehavior > KEY_ACTION_SLEEP) {
+        mLongPressOnHomeBehavior = KEY_ACTION_NOTHING;
+    }
+
+    res->GetInteger(R::integer::config_doubleTapOnHomeBehavior, &mDoubleTapOnHomeBehavior);
+    if (mDoubleTapOnHomeBehavior < KEY_ACTION_NOTHING ||
+            mDoubleTapOnHomeBehavior > KEY_ACTION_SLEEP) {
+        mDoubleTapOnHomeBehavior = KEY_ACTION_NOTHING;
+    }
+
+    Boolean hasPermanentMenu = FALSE;
+
+    // Check for custom assignments and whether KEY_ACTION_MENU is assigned.
+    if (hasHome) {
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_HOME_LONG_PRESS_ACTION,
+            mLongPressOnHomeBehavior,
+            IUserHandle::USER_CURRENT, &mLongPressOnHomeBehavior);
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_HOME_DOUBLE_TAP_ACTION,
+            mDoubleTapOnHomeBehavior,
+            IUserHandle::USER_CURRENT, &mDoubleTapOnHomeBehavior);
+
+        hasPermanentMenu = mLongPressOnHomeBehavior == KEY_ACTION_MENU
+                || mDoubleTapOnHomeBehavior == KEY_ACTION_MENU;
+    }
+
+    if (hasMenu) {
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_MENU_ACTION,
+            mPressOnMenuBehavior,
+            IUserHandle::USER_CURRENT, &mPressOnMenuBehavior);
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_MENU_LONG_PRESS_ACTION,
+            mLongPressOnMenuBehavior,
+            IUserHandle::USER_CURRENT, &mLongPressOnMenuBehavior);
+
+        hasPermanentMenu |= mPressOnMenuBehavior == KEY_ACTION_MENU
+                || mLongPressOnMenuBehavior == KEY_ACTION_MENU;
+    }
+
+    if (hasAssist) {
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_ASSIST_ACTION,
+            mPressOnAssistBehavior,
+            IUserHandle::USER_CURRENT, &mPressOnAssistBehavior);
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_ASSIST_LONG_PRESS_ACTION,
+            mLongPressOnAssistBehavior,
+            IUserHandle::USER_CURRENT, &mLongPressOnAssistBehavior);
+
+        hasPermanentMenu |= mPressOnAssistBehavior == KEY_ACTION_MENU
+                || mLongPressOnAssistBehavior == KEY_ACTION_MENU;
+    }
+
+    if (hasAppSwitch) {
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_APP_SWITCH_ACTION,
+            mPressOnAppSwitchBehavior,
+            IUserHandle::USER_CURRENT, &mPressOnAppSwitchBehavior);
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::KEY_APP_SWITCH_LONG_PRESS_ACTION,
+            mLongPressOnAppSwitchBehavior,
+            IUserHandle::USER_CURRENT, &mLongPressOnAppSwitchBehavior);
+
+        hasPermanentMenu |= mPressOnAppSwitchBehavior == KEY_ACTION_MENU
+                || mLongPressOnAppSwitchBehavior == KEY_ACTION_MENU;
+    }
+
+    mHasPermanentMenuKey = hasPermanentMenu;
 }
 
 ECode PhoneWindowManager::SetInitialDisplaySize(
@@ -2120,25 +2608,28 @@ ECode PhoneWindowManager::SetInitialDisplaySize(
     res->GetDimensionPixelSize(R::dimen::status_bar_height, &mStatusBarHeight);
 
     // Height of the navigation bar when presented horizontally at bottom
-    Int32 dim = 0;
-    res->GetDimensionPixelSize(R::dimen::navigation_bar_height, &dim);
+    Int32 i1, i2, i3;
+    res->GetDimensionPixelSize(R::dimen::navigation_bar_height, &i1);
     mNavigationBarHeightForRotation[mPortraitRotation] =
-    mNavigationBarHeightForRotation[mUpsideDownRotation] = dim;
+    mNavigationBarHeightForRotation[mUpsideDownRotation] = i1;
 
-    res->GetDimensionPixelSize(R::dimen::navigation_bar_height_landscape, &dim);
+    res->GetDimensionPixelSize(R::dimen::navigation_bar_height_landscape, &i2);
     mNavigationBarHeightForRotation[mLandscapeRotation] =
-    mNavigationBarHeightForRotation[mSeascapeRotation] = dim;
+    mNavigationBarHeightForRotation[mSeascapeRotation] = i2;
 
     // Width of the navigation bar when presented vertically along one side
-    res->GetDimensionPixelSize(R::dimen::navigation_bar_width, &dim);
+    res->GetDimensionPixelSize(R::dimen::navigation_bar_width, &i3);
     mNavigationBarWidthForRotation[mPortraitRotation] =
     mNavigationBarWidthForRotation[mUpsideDownRotation] =
     mNavigationBarWidthForRotation[mLandscapeRotation] =
-    mNavigationBarWidthForRotation[mSeascapeRotation] = dim;
+    mNavigationBarWidthForRotation[mSeascapeRotation] = i3;
 
     // SystemUI (status bar) layout policy
     Int32 shortSizeDp = shortSize * IDisplayMetrics::DENSITY_DEFAULT / density;
     Int32 longSizeDp = longSize * IDisplayMetrics::DENSITY_DEFAULT / density;
+
+    Slogger::I(TAG, "density:%d, size of navigation bar: (%d, %d, w:%d), sizedp:(%d, %d)",
+        density, i1, i2, i3, shortSizeDp, longSizeDp);
 
     // Allow the navigation bar to move on small devices (phones).
     mNavigationBarCanMove = shortSizeDp < 600;
@@ -2146,11 +2637,12 @@ ECode PhoneWindowManager::SetInitialDisplaySize(
     res->GetBoolean(R::bool_::config_showNavigationBar, &mHasNavigationBar);
     // Allow a system property to override this. Used by the emulator.
     // See also hasNavigationBar().
-    String navBarOverride;
-    SystemProperties::Get(String("qemu.hw.mainkeys"), &navBarOverride);
-    if (String("1").Equals(navBarOverride)) {
+    String str;
+    SystemProperties::Get(String("qemu.hw.mainkeys"), &str);
+    if (str.Equals("1")) {
         mHasNavigationBar = FALSE;
-    } else if (String("0").Equals(navBarOverride)) {
+    }
+    else if (str.Equals("0")) {
         mHasNavigationBar = TRUE;
     }
 
@@ -2158,11 +2650,11 @@ ECode PhoneWindowManager::SetInitialDisplaySize(
     // By default, HDMI locks rotation to landscape.
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
-    String equalsStr;
-    sp->Get(String("persist.demo.hdmirotation"), &equalsStr);
-    if (String("portrait").Equals(equalsStr) == 0) {
+    sp->Get(String("persist.demo.hdmirotation"), &str);
+    if (str.Equals("portrait")) {
         mDemoHdmiRotation = mPortraitRotation;
-    } else {
+    }
+    else {
         mDemoHdmiRotation = mLandscapeRotation;
     }
 
@@ -2171,17 +2663,22 @@ ECode PhoneWindowManager::SetInitialDisplaySize(
     // Only force the default orientation if the screen is xlarge, at least 960dp x 720dp, per
     // http://developer.android.com/guide/practices/screens_support.html#range
     Boolean forceDefaultOrientation;
-    String forced_orient;
     res->GetBoolean(R::bool_::config_forceDefaultOrientation, &forceDefaultOrientation);
-    SystemProperties::Get(String("config.override_forced_orient"), &forced_orient);
+    SystemProperties::Get(String("config.override_forced_orient"), &str);
     mForceDefaultOrientation = longSizeDp >= 960 && shortSizeDp >= 720 &&
-    forceDefaultOrientation &&
-    // For debug purposes the next line turns this feature off with:
-    // $ adb shell setprop config.override_forced_orient true
-    // $ adb shell wm size reset
-    !String("true").Equals(forced_orient);
+        forceDefaultOrientation &&
+        // For debug purposes the next line turns this feature off with:
+        // $ adb shell setprop config.override_forced_orient true
+        // $ adb shell wm size reset
+        !str.Equals("true");
 
     return NOERROR;
+}
+
+Boolean PhoneWindowManager::CanHideNavigationBar()
+{
+    Boolean bval;
+    return mHasNavigationBar && !(mAccessibilityManager->IsTouchExplorationEnabled(&bval), bval);
 }
 
 ECode PhoneWindowManager::IsDefaultOrientationForced(
@@ -2215,21 +2712,70 @@ ECode PhoneWindowManager::UpdateSettings()
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
     Boolean updateRotation = FALSE;
+
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Int32 mDeviceHardwareWakeKeys;
+    res->GetInteger(R::integer::config_deviceHardwareWakeKeys, &mDeviceHardwareWakeKeys);
+
     {
+        Int32 ival;
         AutoLock lock(mLock);
         Settings::System::GetInt32ForUser(resolver,
-                ISettingsSystem::END_BUTTON_BEHAVIOR,
-                ISettingsSystem::END_BUTTON_BEHAVIOR_DEFAULT,
-                IUserHandle::USER_CURRENT, &mEndcallBehavior);
+            ISettingsSystem::END_BUTTON_BEHAVIOR,
+            ISettingsSystem::END_BUTTON_BEHAVIOR_DEFAULT,
+            IUserHandle::USER_CURRENT, &mEndcallBehavior);
+
         Settings::Secure::GetInt32ForUser(resolver,
-                ISettingsSecure::INCALL_POWER_BUTTON_BEHAVIOR,
-                ISettingsSecure::INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
-                IUserHandle::USER_CURRENT, &mIncallPowerBehavior);
+            ISettingsSecure::INCALL_POWER_BUTTON_BEHAVIOR,
+            ISettingsSecure::INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
+            IUserHandle::USER_CURRENT, &mIncallPowerBehavior);
+
+        Settings::Secure::GetInt32ForUser(resolver,
+            ISettingsSecure::RING_HOME_BUTTON_BEHAVIOR,
+            ISettingsSecure::RING_HOME_BUTTON_BEHAVIOR_DEFAULT,
+            IUserHandle::USER_CURRENT, &mRingHomeBehavior);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::HOME_WAKE_SCREEN, 1,
+            IUserHandle::USER_CURRENT, &ival);
+        mHomeWakeScreen = (ival == 1) && ((mDeviceHardwareWakeKeys & KEY_MASK_HOME) != 0);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::BACK_WAKE_SCREEN, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        mBackWakeScreen = (ival == 1) && ((mDeviceHardwareWakeKeys & KEY_MASK_BACK) != 0);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::MENU_WAKE_SCREEN, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        mMenuWakeScreen = (ival == 1) && ((mDeviceHardwareWakeKeys & KEY_MASK_MENU) != 0);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::ASSIST_WAKE_SCREEN, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        mAssistWakeScreen = (ival == 1) && ((mDeviceHardwareWakeKeys & KEY_MASK_ASSIST) != 0);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::APP_SWITCH_WAKE_SCREEN, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        mAppSwitchWakeScreen = (ival == 1) && ((mDeviceHardwareWakeKeys & KEY_MASK_APP_SWITCH) != 0);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::VOLUME_WAKE_SCREEN, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        mVolumeWakeScreen = (ival == 1) && ((mDeviceHardwareWakeKeys & KEY_MASK_VOLUME) != 0);
+
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::VOLBTN_MUSIC_CONTROLS, 1,
+            IUserHandle::USER_CURRENT, &ival);
+        mVolBtnMusicControls = ival == 1;
 
         // Configure wake gesture.
-        Int32 iTemp;
-        Boolean wakeGestureEnabledSetting =
-            (Settings::Secure::GetInt32ForUser(resolver, ISettingsSecure::WAKE_GESTURE_ENABLED, 0, IUserHandle::USER_CURRENT, &iTemp), iTemp) != 0;
+        Settings::Secure::GetInt32ForUser(resolver,
+            ISettingsSecure::WAKE_GESTURE_ENABLED, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        Boolean wakeGestureEnabledSetting = ival != 0;
         if (mWakeGestureEnabledSetting != wakeGestureEnabledSetting) {
             mWakeGestureEnabledSetting = wakeGestureEnabledSetting;
             UpdateWakeGestureListenerLp();
@@ -2238,33 +2784,42 @@ ECode PhoneWindowManager::UpdateSettings()
         // Configure rotation lock.
         Int32 userRotation;
         Settings::System::GetInt32ForUser(resolver,
-                ISettingsSystem::USER_ROTATION, ISurface::ROTATION_0,
-                IUserHandle::USER_CURRENT, &userRotation);
+            ISettingsSystem::USER_ROTATION, ISurface::ROTATION_0,
+            IUserHandle::USER_CURRENT, &userRotation);
         if (mUserRotation != userRotation) {
             mUserRotation = userRotation;
             updateRotation = TRUE;
         }
-        Int32 userRotationMode, value;
+
+        Int32 userRotationMode;
         Settings::System::GetInt32ForUser(resolver,
-                ISettingsSystem::ACCELEROMETER_ROTATION, 0, IUserHandle::USER_CURRENT, &value);
-        userRotationMode = value != 0 ? IWindowManagerPolicy::USER_ROTATION_FREE
-                : IWindowManagerPolicy::USER_ROTATION_LOCKED;
+            ISettingsSystem::ACCELEROMETER_ROTATION, 0,
+            IUserHandle::USER_CURRENT, &ival);
+        userRotationMode = (ival != 0)
+            ? IWindowManagerPolicy::USER_ROTATION_FREE
+            : IWindowManagerPolicy::USER_ROTATION_LOCKED;
         if (mUserRotationMode != userRotationMode) {
             mUserRotationMode = userRotationMode;
             updateRotation = TRUE;
             UpdateOrientationListenerLp();
         }
 
+        Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::ACCELEROMETER_ROTATION_ANGLES, -1,
+            IUserHandle::USER_CURRENT, &mUserRotationAngles);
+
         if (mSystemReady) {
             Int32 pointerLocation;
             Settings::System::GetInt32ForUser(resolver,
-                    ISettingsSystem::POINTER_LOCATION, 0, IUserHandle::USER_CURRENT, &pointerLocation);
+                ISettingsSystem::POINTER_LOCATION, 0,
+                IUserHandle::USER_CURRENT, &pointerLocation);
             if (mPointerLocationMode != pointerLocation) {
                 mPointerLocationMode = pointerLocation;
 
                 AutoPtr<IMessage> message;
-                Int32 what = pointerLocation != 0 ?
-                        MSG_ENABLE_POINTER_LOCATION : MSG_DISABLE_POINTER_LOCATION;
+                Int32 what = pointerLocation != 0
+                    ? MSG_ENABLE_POINTER_LOCATION
+                    : MSG_DISABLE_POINTER_LOCATION;
                 mHandler->ObtainMessage(what, (IMessage**)&message);
                 Boolean isSuccess = FALSE;
                 mHandler->SendMessage(message, &isSuccess);
@@ -2272,11 +2827,13 @@ ECode PhoneWindowManager::UpdateSettings()
         }
         // use screen off timeout setting as the timeout for the lockscreen
         Settings::System::GetInt32ForUser(resolver,
-                ISettingsSystem::SCREEN_OFF_TIMEOUT, 0, IUserHandle::USER_CURRENT, &mLockScreenTimeout);
+            ISettingsSystem::SCREEN_OFF_TIMEOUT, 0,
+            IUserHandle::USER_CURRENT, &mLockScreenTimeout);
         String imId;
-        Settings::Secure::GetStringForUser(resolver, ISettingsSecure::DEFAULT_INPUT_METHOD,
-                IUserHandle::USER_CURRENT, &imId);
-        Boolean hasSoftInput = imId != NULL && imId.GetLength() > 0;
+        Settings::Secure::GetStringForUser(resolver,
+            ISettingsSecure::DEFAULT_INPUT_METHOD,
+            IUserHandle::USER_CURRENT, &imId);
+        Boolean hasSoftInput = !imId.IsNullOrEmpty();
         if (mHasSoftInput != hasSoftInput) {
             mHasSoftInput = hasSoftInput;
             updateRotation = TRUE;
@@ -2292,6 +2849,25 @@ ECode PhoneWindowManager::UpdateSettings()
     return NOERROR;
 }
 
+void PhoneWindowManager::UpdateWakeGestureListenerLp()
+{
+    if (ShouldEnableWakeGestureLp()) {
+        mWakeGestureListener->RequestWakeUpTrigger();
+    }
+    else {
+        mWakeGestureListener->CancelWakeUpTrigger();
+    }
+}
+
+Boolean PhoneWindowManager::ShouldEnableWakeGestureLp()
+{
+    Boolean bval;
+    mWakeGestureListener->IsSupported(&bval);
+    return mWakeGestureEnabledSetting && !mAwake
+        && (!mLidControlsSleep || mLidState != IWindowManagerPolicyWindowManagerFuncs::LID_CLOSED)
+        && bval;
+}
+
 void PhoneWindowManager::EnablePointerLocation()
 {
     if (mPointerLocationView == NULL) {
@@ -2300,9 +2876,9 @@ void PhoneWindowManager::EnablePointerLocation()
 
         AutoPtr<IWindowManagerLayoutParams> lp;
         CWindowManagerLayoutParams::New(
-                IViewGroupLayoutParams::MATCH_PARENT,
-                IViewGroupLayoutParams::MATCH_PARENT,
-                (IWindowManagerLayoutParams**)&lp);
+            IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::MATCH_PARENT,
+            (IWindowManagerLayoutParams**)&lp);
         lp->SetType(IWindowManagerLayoutParams::TYPE_SECURE_SYSTEM_OVERLAY);
         lp->SetFlags(IWindowManagerLayoutParams::FLAG_FULLSCREEN
                 | IWindowManagerLayoutParams::FLAG_NOT_TOUCHABLE
@@ -2524,10 +3100,10 @@ ECode PhoneWindowManager::AdjustWindowParamsLw(
                 attrs->GetFlags(&flags);
                 flags &= ~IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER;
                 attrs->SetFlags(flags);
-                Int32 privateFlags;
-                attrs->GetPrivateFlags(&privateFlags);
-                privateFlags &= ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD;
-                attrs->SetPrivateFlags(privateFlags);
+
+                attrs->GetPrivateFlags(&flags);
+                flags &= ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD;
+                attrs->SetPrivateFlags(flags);
             }
             break;
         }
@@ -2535,20 +3111,19 @@ ECode PhoneWindowManager::AdjustWindowParamsLw(
 
     if (type != IWindowManagerLayoutParams::TYPE_STATUS_BAR) {
         // The status bar is the only window allowed to exhibit keyguard behavior.
-        Int32 privateFlags;
-        attrs->GetPrivateFlags(&privateFlags);
-        privateFlags &= ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD;
-        attrs->SetPrivateFlags(privateFlags);
+        Int32 flags;
+        attrs->GetPrivateFlags(&flags);
+        flags &= ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD;
+        attrs->SetPrivateFlags(flags);
     }
 
     Int32 flags = 0;
     attrs->GetFlags(&flags);
-    Boolean bTemp;
+    Boolean bval;
     AutoPtr<IActivityManagerHelper> amHelper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
-    amHelper->IsHighEndGfx(&bTemp);
-    if (bTemp && (flags & IWindowManagerLayoutParams::FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0)
-    {
+    amHelper->IsHighEndGfx(&bval);
+    if (bval && (flags & IWindowManagerLayoutParams::FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
         Int32 subtreeSystemUiVisibility;
         attrs->GetSubtreeSystemUiVisibility(&subtreeSystemUiVisibility);
         subtreeSystemUiVisibility |= IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -2561,6 +3136,11 @@ ECode PhoneWindowManager::AdjustWindowParamsLw(
 void PhoneWindowManager::ReadLidState()
 {
     mWindowManagerFuncs->GetLidState(&mLidState);
+}
+
+void PhoneWindowManager::ReadCameraLensCoverState()
+{
+    mWindowManagerFuncs->GetCameraLensCoverState(&mCameraLensCoverState);
 }
 
 Boolean PhoneWindowManager::IsHidden(
@@ -2586,7 +3166,6 @@ ECode PhoneWindowManager::AdjustConfigurationLw(
 
     mHaveBuiltInKeyboard = (keyboardPresence & PRESENCE_INTERNAL) != 0;
 
-    ReadConfigurationDependentBehaviors();
     ReadLidState();
     ApplyLidSwitchState();
 
@@ -2615,8 +3194,8 @@ ECode PhoneWindowManager::WindowTypeToLayerLw(
     VALIDATE_NOT_NULL(layer)
 
     *layer = 2;
-    if (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW && type <=
-        IWindowManagerLayoutParams::LAST_APPLICATION_WINDOW) {
+    if (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
+        && type <= IWindowManagerLayoutParams::LAST_APPLICATION_WINDOW) {
         return NOERROR;
     }
 
@@ -2732,8 +3311,10 @@ ECode PhoneWindowManager::WindowTypeToLayerLw(
     case IWindowManagerLayoutParams::TYPE_HIDDEN_NAV_CONSUMER:
         *layer = 29;
         break;
+    default:
+        Slogger::E(TAG, "Unknown window type: %d", type);
+        break;
     }
-    // Log.e(TAG, "Unknown window type: " + type);
 
     return NOERROR;
 }
@@ -2785,10 +3366,12 @@ ECode PhoneWindowManager::GetNonDecorDisplayWidth(
     /* [out] */ Int32* width)
 {
     VALIDATE_NOT_NULL(width);
-    if (mHasNavigationBar) {
+    Boolean bval;
+    HasNavigationBar(&bval);
+    if (bval) {
         // For a basic navigation bar, when we are in portrait mode we place
         // the navigation bar to the bottom.
-        if (!mNavigationBarCanMove || fullWidth < fullHeight) {
+        if (mNavigationBarCanMove && fullWidth > fullHeight) {
             *width = fullWidth - mNavigationBarWidthForRotation[rotation];
             return NOERROR;
         }
@@ -2804,7 +3387,9 @@ ECode PhoneWindowManager::GetNonDecorDisplayHeight(
     /* [out] */ Int32* height)
 {
     VALIDATE_NOT_NULL(height)
-    if (mHasNavigationBar) {
+    Boolean bval;
+    HasNavigationBar(&bval);
+    if (bval) {
         // For a basic navigation bar, when we are in portrait mode we place
         // the navigation bar to the bottom.
         if (!mNavigationBarCanMove || fullWidth < fullHeight) {
@@ -2831,12 +3416,16 @@ ECode PhoneWindowManager::GetConfigDisplayHeight(
     /* [in] */ Int32 rotation,
     /* [out] */ Int32* value)
 {
+    VALIDATE_NOT_NULL(value)
     // If we don't have a system nav bar, then there is a separate status
     // bar at the top of the display.  We don't count that as part of the
     // fixed decor, since it can hide; however, for purposes of configurations,
     // we do want to exclude it since applications can't generally use that part
     // of the screen.
-    return GetNonDecorDisplayHeight(fullWidth, fullHeight, rotation, value);
+    Int32 height;
+    GetNonDecorDisplayHeight(fullWidth, fullHeight, rotation, &height);
+    *value = height - mStatusBarHeight;
+    return NOERROR;
 }
 
 ECode PhoneWindowManager::IsForceHiding(
@@ -2844,15 +3433,14 @@ ECode PhoneWindowManager::IsForceHiding(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    Int32 privateFlags;
+    Int32 privateFlags, type;
     attrs->GetPrivateFlags(&privateFlags);
-    Int32 type;
     attrs->GetType(&type);
     Boolean keyguardHostWindow;
     IsKeyguardHostWindow(attrs, &keyguardHostWindow);
     *result = (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0 ||
-    (keyguardHostWindow && IsKeyguardSecureIncludingHidden()) ||
-    (type == IWindowManagerLayoutParams::TYPE_KEYGUARD_SCRIM);
+        (keyguardHostWindow && IsKeyguardSecureIncludingHidden()) ||
+        (type == IWindowManagerLayoutParams::TYPE_KEYGUARD_SCRIM);
 
     return NOERROR;
 }
@@ -2866,7 +3454,6 @@ ECode PhoneWindowManager::IsKeyguardHostWindow(
     Int32 type = 0;
     attrs->GetType(&type);
     *result = type == IWindowManagerLayoutParams::TYPE_STATUS_BAR;
-
     return NOERROR;
 }
 
@@ -3011,14 +3598,15 @@ ECode PhoneWindowManager::AddStartingWindow(
         Int32 privateFlags = 0;
         lp->GetPrivateFlags(&privateFlags);
         privateFlags |=
-                (IWindowManagerLayoutParams::PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED
-                | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
+            (IWindowManagerLayoutParams::PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED
+            | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
 
         Boolean supportsScreen;
         if (compatInfo != NULL && !(compatInfo->SupportsScreen(&supportsScreen), supportsScreen)) {
             privateFlags |= IWindowManagerLayoutParams::PRIVATE_FLAG_COMPATIBLE_WINDOW;
         }
         lp->SetPrivateFlags(privateFlags);
+
 
         AutoPtr<ICharSequence> tl;
         CString::New(String("Starting ") + packageName, (ICharSequence**)&tl);
@@ -3157,16 +3745,15 @@ ECode PhoneWindowManager::PrepareAddWindowLw(
                     String("PhoneWindowManager")));
             break;
         case IWindowManagerLayoutParams::TYPE_KEYGUARD_SCRIM:
-            if (mKeyguardScrim != NULL)
-            {
+            if (mKeyguardScrim != NULL) {
                 *added = IWindowManagerGlobal::ADD_MULTIPLE_SINGLETON;
                 return NOERROR;
             }
             mKeyguardScrim = win;
             break;
     }
-    *added = IWindowManagerGlobal::ADD_OKAY;
 
+    *added = IWindowManagerGlobal::ADD_OKAY;
     return NOERROR;
 }
 
@@ -3179,10 +3766,10 @@ ECode PhoneWindowManager::RemoveWindowLw(
         mKeyguardDelegate->ShowScrim();
     }
     else if (mKeyguardScrim.Get() == win){
-        //Log.v(TAG, "Removing keyguard scrim");
+        Logger::V(TAG, "Removing keyguard scrim");
         mKeyguardScrim = NULL;
     }
-    if (mNavigationBar.Get() == win) {
+    else if (mNavigationBar.Get() == win) {
         mNavigationBar = NULL;
         mNavigationBarController->SetWindow(NULL);
     }
@@ -3196,25 +3783,22 @@ ECode PhoneWindowManager::SelectAnimationLw(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id);
-    // if (PRINT_ANIM) Log.i(TAG, "selectAnimation in " + win
-    //       + ": transit=" + transit);
+    if (PRINT_ANIM) {
+        Logger::I(TAG, "selectAnimation in %s: transit=%d", TO_CSTR(win), transit);
+    }
+
+    AutoPtr<IWindowManagerLayoutParams> attrs;
+    win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
     if (win == mStatusBar) {
-        AutoPtr<IWindowManagerLayoutParams> attrs;
-        win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
         Int32 privateFlags;
         attrs->GetPrivateFlags(&privateFlags);
         Boolean isKeyguard = (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0;
         if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
-            if (isKeyguard)
-                *id = -1;
-            else
-                *id = R::anim::dock_top_exit;
+            *id = isKeyguard? -1 : R::anim::dock_top_exit;
             return NOERROR;
-        } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
-            if (isKeyguard)
-                *id = -1;
-            else
-                *id = R::anim::dock_top_enter;
+        }
+        else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+            *id = isKeyguard ? -1 : R::anim::dock_top_enter;
             return NOERROR;
         }
     }
@@ -3232,21 +3816,19 @@ ECode PhoneWindowManager::SelectAnimationLw(
         }
         else {
             if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
-                *id = R::anim::dock_right_exit;
+                *id = mNavigationBarLeftInLandscape ? R::anim::dock_left_exit : R::anim::dock_right_exit;
                 return NOERROR;
             }
             else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
-                *id = R::anim::dock_right_enter;
+                *id = mNavigationBarLeftInLandscape ? R::anim::dock_left_enter : R::anim::dock_right_enter;
                 return NOERROR;
             }
         }
     }
 
-    AutoPtr<IWindowManagerLayoutParams> attrs;
-    win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
+
     Int32 type;
     attrs->GetType(&type);
-
     if (transit == TRANSIT_PREVIEW_DONE) {
         Boolean hasAppShownWindows;
         win->HasAppShownWindows(&hasAppShownWindows);
@@ -3274,11 +3856,18 @@ ECode PhoneWindowManager::SelectAnimationLw(
 ECode PhoneWindowManager::SelectRotationAnimationLw(
     /* [in] */ ArrayOf<Int32>* anim)
 {
-    if (PRINT_ANIM)
-        Slogger::I(TAG, "selectRotationAnimation mTopFullscreen=0x%p, rotationAnimation="
-            , mTopFullscreenOpaqueWindowState.Get());//,  " rotationAnimation="
-            //+ (mTopFullscreenOpaqueWindowState == null ?
-            //    "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation));
+    if (PRINT_ANIM) {
+        Int32 r = 0;
+        if (mTopFullscreenOpaqueWindowState != NULL) {
+            AutoPtr<IWindowManagerLayoutParams> attrs;
+            mTopFullscreenOpaqueWindowState->GetAttrs((IWindowManagerLayoutParams**)&attrs);
+            CWindowManagerLayoutParams* wmlParams = (CWindowManagerLayoutParams*)(attrs.Get());
+            r = wmlParams->mRotationAnimation;
+        }
+        Slogger::I(TAG, "selectRotationAnimation mTopFullscreen=%s, rotationAnimation=%d",
+            TO_CSTR(mTopFullscreenOpaqueWindowState), r);
+    }
+
     if (mTopFullscreenOpaqueWindowState != NULL && mTopIsFullscreen) {
         AutoPtr<IWindowManagerLayoutParams> winAttrs;
         mTopFullscreenOpaqueWindowState->GetAttrs((IWindowManagerLayoutParams**)&winAttrs);;
@@ -3305,58 +3894,30 @@ ECode PhoneWindowManager::SelectRotationAnimationLw(
     return NOERROR;
 }
 
-ECode PhoneWindowManager::CreateForceHideWallpaperExitAnimation(
-    /* [in] */ Boolean goingToNotificationShade,
-    /* [in] */ Boolean keyguardShowingMedia,
-    /* [out] */ IAnimation** anim)
-{
-    VALIDATE_NOT_NULL(anim)
-
-    *anim = NULL;
-    AutoPtr<IAnimationUtils> animUtils;
-    CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
-    if (goingToNotificationShade) {
-        return NOERROR;
-    } else if (keyguardShowingMedia) {
-        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_wallpaper_exit_noop, anim);
-    } else {
-        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_fade_in, anim);
-    }
-    return NOERROR;
-}
-
-
-ECode PhoneWindowManager::ShowRecentApps()
-{
-    mHandler->RemoveMessages(MSG_DISPATCH_SHOW_RECENTS);
-    Boolean isSucceed;
-    mHandler->SendEmptyMessage(MSG_DISPATCH_SHOW_RECENTS, &isSucceed);
-    return NOERROR;
-}
-
 ECode PhoneWindowManager::ValidateRotationAnimationLw(
     /* [in] */ Int32 exitAnimId,
     /* [in] */ Int32 enterAnimId,
     /* [in] */ Boolean forceDefault,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     switch (exitAnimId) {
         case R::anim::rotation_animation_xfade_exit:
-        case R::anim::rotation_animation_jump_exit:
-        {
+        case R::anim::rotation_animation_jump_exit: {
             // These are the only cases that matter.
             if (forceDefault) {
                 *result = FALSE;
                 return NOERROR;
             }
-            AutoPtr<ArrayOf<Int32> > anim = ArrayOf<Int32>::Alloc(2);
+
+            AutoPtr< ArrayOf<Int32> > anim = ArrayOf<Int32>::Alloc(2);
             SelectRotationAnimationLw(anim);
             *result = (exitAnimId == (*anim)[0] && enterAnimId == (*anim)[1]);
             return NOERROR;
         }
         default:
             *result = TRUE;
+            return NOERROR;
     }
     return NOERROR;
 }
@@ -3372,38 +3933,90 @@ ECode PhoneWindowManager::CreateForceHideEnterAnimation(
     CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
     if (goingToNotificationShade) {
         return animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_fade_in, anim);
-    } else if (onWallpaper) {
+    }
+    else if (onWallpaper) {
         AutoPtr<IAnimation> a;
         animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_wallpaper, (IAnimation**)&a);
         IAnimationSet* set = IAnimationSet::Probe(a);
 
         // TODO: Use XML interpolators when we have log interpolators available in XML.
+        IInterpolator* ip = IInterpolator::Probe(mLogDecelerateInterpolator);
         AutoPtr<IList> animations;
         set->GetAnimations((IList**)&animations);
         AutoPtr<IInterface> obj;
         animations->Get(0, (IInterface**)&obj);
-        IAnimation::Probe(obj)->SetInterpolator(IInterpolator::Probe(mLogDecelerateInterpolator));
+        IAnimation::Probe(obj)->SetInterpolator(ip);
         obj = NULL;
         animations->Get(1, (IInterface**)&obj);
-        IAnimation::Probe(obj)->SetInterpolator(IInterpolator::Probe(mLogDecelerateInterpolator));
+        IAnimation::Probe(obj)->SetInterpolator(ip);
         *anim = a;
         REFCOUNT_ADD(*anim);
         return NOERROR;
-    } else {
+    }
+    else {
         AutoPtr<IAnimation> a;
         animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter, (IAnimation**)&a);
         IAnimationSet* set = IAnimationSet::Probe(a);
 
         // TODO: Use XML interpolators when we have log interpolators available in XML.
+        IInterpolator* ip = IInterpolator::Probe(mLogDecelerateInterpolator);
         AutoPtr<IList> animations;
         set->GetAnimations((IList**)&animations);
         AutoPtr<IInterface> obj;
         animations->Get(0, (IInterface**)&obj);
-        IAnimation::Probe(obj)->SetInterpolator(IInterpolator::Probe(mLogDecelerateInterpolator));
+        IAnimation::Probe(obj)->SetInterpolator(ip);
         *anim = a;
         REFCOUNT_ADD(*anim);
         return NOERROR;
     }
+}
+
+ECode PhoneWindowManager::CreateForceHideWallpaperExitAnimation(
+    /* [in] */ Boolean goingToNotificationShade,
+    /* [in] */ Boolean keyguardShowingMedia,
+    /* [out] */ IAnimation** anim)
+{
+    VALIDATE_NOT_NULL(anim)
+
+    *anim = NULL;
+    AutoPtr<IAnimationUtils> animUtils;
+    CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
+    if (goingToNotificationShade) {
+        return NOERROR;
+    }
+    else if (keyguardShowingMedia) {
+        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_wallpaper_exit_noop, anim);
+    }
+    else {
+        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_wallpaper_exit, anim);
+    }
+    return NOERROR;
+}
+
+void PhoneWindowManager::AwakenDreams()
+{
+    AutoPtr<IIDreamManager> dreamManager = GetDreamManager();
+    if (dreamManager != NULL) {
+        //try {
+            dreamManager->Awaken();
+        //} catch (RemoteException e) {
+            // fine, stay asleep then
+        //}
+    }
+}
+
+AutoPtr<IIDreamManager> PhoneWindowManager::GetDreamManager()
+{
+    AutoPtr<IInterface> tmpObj = ServiceManager::CheckService(IDreamService::DREAM_SERVICE);
+    AutoPtr<IIDreamManager> dreamManager = IIDreamManager::Probe(tmpObj.Get());
+    return dreamManager;
+}
+
+AutoPtr<ITelecomManager> PhoneWindowManager::GetTelecommService()
+{
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
+   return ITelecomManager::Probe(service);
 }
 
 AutoPtr<IIAudioService> PhoneWindowManager::GetAudioService()
@@ -3434,20 +4047,24 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
 
     Boolean keyguardOn = KeyguardOn();
 
-    Int32 action, keyCode, repeatCount, metaState, flags;
+    Int32 action, keyCode, repeatCount, metaState, flags, deviceId;
     event->GetAction(&action);
     event->GetKeyCode(&keyCode);
     event->GetRepeatCount(&repeatCount);
     event->GetMetaState(&metaState);
     event->GetFlags(&flags);
+    IInputEvent::Probe(event)->GetDeviceId(&deviceId);
     Boolean down = action == IKeyEvent::ACTION_DOWN;
-    Boolean canceled;
+    Boolean canceled, longPress, virtualKey;
     event->IsCanceled(&canceled);
+    longPress = (flags & IKeyEvent::FLAG_LONG_PRESS) != 0;
+    virtualKey = deviceId == IKeyCharacterMap::VIRTUAL_KEYBOARD;
 
-    // if (DEBUG_INPUT) {
-    //     Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
-    //             + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
-    //             + " canceled=" + canceled);}
+    if (DEBUG_INPUT) {
+        Logger::D(TAG, "interceptKeyTi keyCode=%d down=%d repeatCount=%d"
+            " keyguardOn=%d mHomePressed=%d canceled=%d",
+            keyCode, down, repeatCount, keyguardOn, mHomePressed, canceled);
+    }
 
     // If we think we might have a volume down & power key chord on the way
     // but we're not sure, then tell the dispatcher to wait a little while and
@@ -3467,16 +4084,34 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             }
             return -1;
         }
+        if (mVolumeUpKeyTriggered && !mPowerKeyTriggered) {
+            Int64 now = SystemClock::GetUptimeMillis();
+            Int64 timeoutTime = mVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
+            if (now < timeoutTime) {
+                return timeoutTime - now;
+            }
+        }
+        if (keyCode == IKeyEvent::KEYCODE_VOLUME_UP
+                && mVolumeUpKeyConsumedByScreenshotChord) {
+            if (!down) {
+                mVolumeUpKeyConsumedByScreenshotChord = FALSE;
+            }
+            return -1;
+        }
     }
 
     // Cancel any pending meta actions if we see any other keys being pressed between the down
     // of the meta key and its corresponding up.
     AutoPtr<IKeyEventHelper> helper;
     CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
-    Boolean bTemp;
-    helper->IsMetaKey(keyCode, &bTemp);
-    if (mPendingMetaAction && !bTemp) {
+    Boolean bval;
+    helper->IsMetaKey(keyCode, &bval);
+    if (mPendingMetaAction && !bval) {
         mPendingMetaAction = FALSE;
+    }
+
+    if (keyCode == IKeyEvent::KEYCODE_BACK && !down) {
+        mHandler->RemoveCallbacks(mBackLongPress);
     }
 
     // First we always handle the home key here, so applications
@@ -3487,9 +4122,11 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         // If we have released the home key, and didn't do anything else
         // while it was pressed, then it is time to go home!
         if (!down) {
-            CancelPreloadRecentApps();
-            mHomePressed = FALSE;
+            if (mDoubleTapOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
+                CancelPreloadRecentApps();
+            }
 
+            mHomePressed = FALSE;
             if (mHomeConsumed) {
                 mHomeConsumed = FALSE;
                 return -1;
@@ -3503,17 +4140,16 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             // If an incoming call is ringing, HOME is totally disabled.
             // (The user is already on the InCallUI at this point,
             // and his ONLY options are to answer or reject the call.)
-            //TODO
-            //AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
-            //Boolean ringing;
-            //if (telecomManager != NULL && (telecomManager->IsRinging(&ringing), ringing)) {
-            //    Logger::I(TAG, "Ignoring HOME; there's a ringing incoming call.");
-            //    return -1;
-            //}
-            //
+            AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
+            Boolean ringing;
+            if (telecomManager != NULL && (telecomManager->IsRinging(&ringing), ringing)) {
+                Logger::I(TAG, "Ignoring HOME; there's a ringing incoming call.");
+                return -1;
+            }
+
 
             // Delay handling home if a double-tap is possible.
-            if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_NOTHING) {
+            if (mDoubleTapOnHomeBehavior != KEY_ACTION_NOTHING) {
                 mHandler->RemoveCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
                 mHomeDoubleTapPending = TRUE;
                 Boolean isSuccessed;
@@ -3528,7 +4164,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             // If there's a dream running then use home to escape the dream
             // but don't actually go home.
             Boolean isDreaming;
-            if (mDreamManagerInternal != NULL && (mDreamManagerInternal->IsDreaming(&isDreaming), isDreaming)) {
+            if (mDreamManagerInternal != NULL
+                && (mDreamManagerInternal->IsDreaming(&isDreaming), isDreaming)) {
                 mDreamManagerInternal->StopDream(FALSE/*immediate*/);
                 return -1;
             }
@@ -3570,15 +4207,24 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             if (mHomeDoubleTapPending) {
                 mHomeDoubleTapPending = FALSE;
                 mHandler->RemoveCallbacks(mHomeDoubleTapTimeoutRunnable);
-                HandleDoubleTapOnHome();
-            } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI
-                    || mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
+                PerformKeyAction(mDoubleTapOnHomeBehavior);
+                mHomeConsumed = TRUE;
+            }
+            else if (mLongPressOnHomeBehavior == KEY_ACTION_APP_SWITCH
+                || mDoubleTapOnHomeBehavior == KEY_ACTION_APP_SWITCH) {
                 PreloadRecentApps();
             }
         }
-        else if ((flags & IKeyEvent::FLAG_LONG_PRESS) != 0) {
-            if (!keyguardOn) {
-                HandleLongPressOnHome();
+        else if (longPress) {
+            if (!keyguardOn && !mHomeConsumed &&
+                    mLongPressOnHomeBehavior != KEY_ACTION_NOTHING) {
+                if (mLongPressOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
+                    CancelPreloadRecentApps();
+                }
+                mHomePressed = TRUE;
+                PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
+                PerformKeyAction(mLongPressOnHomeBehavior);
+                mHomeConsumed = TRUE;
             }
         }
         return -1;
@@ -3587,42 +4233,65 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         // // Hijack modified menu keys for debugging features
         Int32 chordBug = IKeyEvent::META_SHIFT_ON;
 
-        if (down && repeatCount == 0) {
-            if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                AutoPtr<IIntent> intent;
-                CIntent::New(IIntent::ACTION_BUG_REPORT, (IIntent**)&intent);
+        if (virtualKey || keyguardOn) {
+            // Let the app handle the key
+            return 0;
+        }
 
-                AutoPtr<IUserHandleHelper> helper;
-                CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-                AutoPtr<IUserHandle> current;
-                helper->GetCURRENT((IUserHandle**)&current);
-
-                mContext->SendOrderedBroadcastAsUser(intent, current,
-                        String(NULL), NULL, NULL, 0, String(NULL), NULL);
-                return -1;
+        if (down) {
+            if (mPressOnMenuBehavior == KEY_ACTION_APP_SWITCH
+                || mLongPressOnMenuBehavior == KEY_ACTION_APP_SWITCH) {
+                PreloadRecentApps();
             }
-            else if (SHOW_PROCESSES_ON_ALT_MENU &&
-                    (metaState & IKeyEvent::META_ALT_ON) == IKeyEvent::META_ALT_ON) {
-                AutoPtr<IIntent> service;
-                CIntent::New((IIntent**)&service);
-                service->SetClassName(mContext, String("com.android.server.LoadAverageService"));
-                AutoPtr<IContentResolver> res;
-                mContext->GetContentResolver((IContentResolver**)&res);
-                Boolean shown = Settings::Global::GetInt32(
-                        res, ISettingsGlobal::SHOW_PROCESSES, 0) != 0;
-                if (!shown) {
-                    AutoPtr<IComponentName> component;
-                    mContext->StartService(service, (IComponentName**)&component);
-                } else {
-                    Boolean isSuccess = FALSE;
-                    mContext->StopService(service, &isSuccess);
+            if (repeatCount == 0) {
+                mMenuPressed = TRUE;
+                if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
+                    AutoPtr<IIntent> intent;
+                    CIntent::New(IIntent::ACTION_BUG_REPORT, (IIntent**)&intent);
+
+                    String nullStr;
+                    mContext->SendOrderedBroadcastAsUser(intent, UserHandle::CURRENT,
+                        nullStr, NULL, NULL, 0, nullStr, NULL);
+                    return -1;
                 }
-                Boolean result;
-                Settings::Global::PutInt32(
-                        res, ISettingsGlobal::SHOW_PROCESSES, shown ? 0 : 1, &result);
-                return -1;
+                else if (SHOW_PROCESSES_ON_ALT_MENU
+                    && (metaState & IKeyEvent::META_ALT_ON) == IKeyEvent::META_ALT_ON) {
+                    AutoPtr<IIntent> service;
+                    CIntent::New((IIntent**)&service);
+                    service->SetClassName(mContext, String("com.android.server.LoadAverageService"));
+                    AutoPtr<IContentResolver> res;
+                    mContext->GetContentResolver((IContentResolver**)&res);
+                    Boolean shown = Settings::Global::GetInt32(res, ISettingsGlobal::SHOW_PROCESSES, 0) != 0;
+                    if (!shown) {
+                        AutoPtr<IComponentName> component;
+                        mContext->StartService(service, (IComponentName**)&component);
+                    } else {
+                        Boolean isSuccess = FALSE;
+                        mContext->StopService(service, &isSuccess);
+                    }
+                    Boolean result;
+                    Settings::Global::PutInt32(res, ISettingsGlobal::SHOW_PROCESSES, shown ? 0 : 1, &result);
+                    return -1;
+                }
+            }
+            else if (longPress) {
+                if (UnpinActivity()) {
+                    PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
+                    return -1;
+                }
+                if (!keyguardOn && mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
+                    if (mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
+                        CancelPreloadRecentApps();
+                    }
+                    PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
+                    PerformKeyAction(mLongPressOnMenuBehavior);
+                    mMenuPressed = FALSE;
+                    return -1;
+                }
             }
         }
+
+        return -1;
     }
     else if (keyCode == IKeyEvent::KEYCODE_SEARCH) {
         if (down) {
@@ -3641,23 +4310,58 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
     }
     else if (keyCode == IKeyEvent::KEYCODE_APP_SWITCH) {
         if (!keyguardOn) {
-            if (down && repeatCount == 0) {
-                PreloadRecentApps();
-            } else if (!down) {
-                ToggleRecentApps();
+            if (down) {
+                if (mPressOnAppSwitchBehavior == KEY_ACTION_APP_SWITCH
+                    || mLongPressOnAppSwitchBehavior == KEY_ACTION_APP_SWITCH) {
+                    PreloadRecentApps();
+                }
+                if (repeatCount == 0) {
+                    mAppSwitchLongPressed = FALSE;
+                }
+                else if (longPress) {
+                    if (mLongPressOnAppSwitchBehavior != KEY_ACTION_NOTHING) {
+                        if (mLongPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
+                            CancelPreloadRecentApps();
+                        }
+                        PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
+                        PerformKeyAction(mLongPressOnAppSwitchBehavior);
+                        mAppSwitchLongPressed = TRUE;
+                    }
+                }
+            }
+            else {
+                if (mAppSwitchLongPressed) {
+                    mAppSwitchLongPressed = FALSE;
+                }
+                else {
+                    if (mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH) {
+                        CancelPreloadRecentApps();
+                    }
+                    if (!canceled) {
+                        PerformKeyAction(mPressOnAppSwitchBehavior);
+                    }
+                }
             }
         }
         return -1;
     }
     else if (keyCode == IKeyEvent::KEYCODE_ASSIST) {
         if (down) {
+            if (mPressOnAssistBehavior == KEY_ACTION_APP_SWITCH
+                    || mLongPressOnAssistBehavior == KEY_ACTION_APP_SWITCH) {
+                PreloadRecentApps();
+            }
             if (repeatCount == 0) {
                 mAssistKeyLongPressed = FALSE;
             }
-            else if (repeatCount == 1) {
-                mAssistKeyLongPressed = TRUE;
-                if (!keyguardOn) {
-                    LaunchAssistLongPressAction();
+            else if (longPress) {
+                if (!keyguardOn && mLongPressOnAssistBehavior != KEY_ACTION_NOTHING) {
+                    if (mLongPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
+                        CancelPreloadRecentApps();
+                    }
+                    PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
+                    PerformKeyAction(mLongPressOnAssistBehavior);
+                    mAssistKeyLongPressed = TRUE;
                 }
             }
         }
@@ -3666,8 +4370,11 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 mAssistKeyLongPressed = FALSE;
             }
             else {
-                if (!keyguardOn) {
-                    LaunchAssistAction();
+                if (mPressOnAssistBehavior != KEY_ACTION_APP_SWITCH) {
+                    CancelPreloadRecentApps();
+                }
+                if (!canceled) {
+                    PerformKeyAction(mPressOnAssistBehavior);
                 }
             }
         }
@@ -3684,14 +4391,16 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             }
             mContext->StartActivityAsUser(voiceIntent, UserHandle::CURRENT_OR_SELF);
         }
-    } else if (keyCode == IKeyEvent::KEYCODE_SYSRQ) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_SYSRQ) {
         if (down && repeatCount == 0) {
             Boolean isSuccess = FALSE;
             mHandler->Post(mScreenshotRunnable, &isSuccess);
         }
         return -1;
-    } else if (keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_UP
-            || keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_DOWN) {
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_UP
+        || keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_DOWN) {
         if (down) {
             Int32 direction = keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_UP ? 1 : -1;
 
@@ -3699,56 +4408,53 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             AutoPtr<IContentResolver> resolver;
             mContext->GetContentResolver((IContentResolver**)&resolver);
             Int32 autobrightness;
-            Settings::System::GetInt32ForUser(
-                    resolver,
+            Settings::System::GetInt32ForUser(resolver,
+                ISettingsSystem::SCREEN_BRIGHTNESS_MODE,
+                ISettingsSystem::SCREEN_BRIGHTNESS_MODE_MANUAL,
+                IUserHandle::USER_CURRENT_OR_SELF,
+                &autobrightness);
+            if (autobrightness != 0) {
+                Boolean bval;
+                Settings::System::PutInt32ForUser(resolver,
                     ISettingsSystem::SCREEN_BRIGHTNESS_MODE,
                     ISettingsSystem::SCREEN_BRIGHTNESS_MODE_MANUAL,
                     IUserHandle::USER_CURRENT_OR_SELF,
-                    &autobrightness);
-            if (autobrightness != 0) {
-                Boolean bTemp;
-                Settings::System::PutInt32ForUser(
-                        resolver,
-                        ISettingsSystem::SCREEN_BRIGHTNESS_MODE,
-                        ISettingsSystem::SCREEN_BRIGHTNESS_MODE_MANUAL,
-                        IUserHandle::USER_CURRENT_OR_SELF,
-                        &bTemp);
+                    &bval);
             }
 
-            Int32 min;
+            Int32 min, max;
             mPowerManager->GetMinimumScreenBrightnessSetting(&min);
-            Int32 max;
             mPowerManager->GetMaximumScreenBrightnessSetting(&max);
             Int32 step = (max - min + BRIGHTNESS_STEPS - 1) / BRIGHTNESS_STEPS * direction;
-            Int32 brightness;
-            Int32 screenBrightness;
+            Int32 brightness, screenBrightness;
             mPowerManager->GetDefaultScreenBrightnessSetting(&screenBrightness);
-            Settings::System::GetInt32ForUser(
-                    resolver,
-                    ISettingsSystem::SCREEN_BRIGHTNESS,
-                    screenBrightness,
-                    IUserHandle::USER_CURRENT_OR_SELF,
-                    &brightness);
+            Settings::System::GetInt32ForUser(resolver,
+                ISettingsSystem::SCREEN_BRIGHTNESS,
+                screenBrightness,
+                IUserHandle::USER_CURRENT_OR_SELF,
+                &brightness);
             brightness += step;
             // Make sure we don't go beyond the limits.
             brightness = Elastos::Core::Math::Min(max, brightness);
             brightness = Elastos::Core::Math::Max(min, brightness);
 
-            Boolean bTemp;
+            Boolean bval;
             Settings::System::PutInt32ForUser(resolver,
-                    ISettingsSystem::SCREEN_BRIGHTNESS, brightness,
-                    IUserHandle::USER_CURRENT_OR_SELF,
-                    &bTemp);
+                ISettingsSystem::SCREEN_BRIGHTNESS, brightness,
+                IUserHandle::USER_CURRENT_OR_SELF,
+                &bval);
 
             AutoPtr<IIntent> intent;
             CIntent::New(IIntent::ACTION_SHOW_BRIGHTNESS_DIALOG, (IIntent**)&intent);
             mContext->StartActivityAsUser(intent, UserHandle::CURRENT_OR_SELF);
         }
         return -1;
-    } else if ((helper->IsMetaKey(keyCode, &bTemp), bTemp)) {
+    }
+    else if ((helper->IsMetaKey(keyCode, &bval), bval)) {
         if (down) {
             mPendingMetaAction = TRUE;
-        } else if (mPendingMetaAction) {
+        }
+        else if (mPendingMetaAction) {
             LaunchAssistAction(IIntent::EXTRA_ASSIST_INPUT_HINT_KEYBOARD);
         }
         return -1;
@@ -3771,15 +4477,16 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 if (shortcutIntent != NULL) {
                     shortcutIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
                     // try {
-                    mContext->StartActivityAsUser(shortcutIntent, UserHandle::CURRENT);
-                    // } catch (ActivityNotFoundException ex) {
-                    //     Slog.w(TAG, "Dropping shortcut key combination because "
-                    //             + "the activity to which it is registered was not found: "
-                    //             + "SEARCH+" + IKeyEvent::keyCodeToString(keyCode), ex);
-                    // }
-                    // } else {
-                    // Slogger::I(TAG, "Dropping unregistered shortcut key combination: "
-                    //         + "SEARCH+" + KeyEvent.keyCodeToString(keyCode));
+                    ECode ec = mContext->StartActivityAsUser(shortcutIntent, UserHandle::CURRENT);
+                    if (FAILED(ec)) {
+                        Slogger::W(TAG, "Dropping shortcut key combination because "
+                            "the activity to which it is registered was not found: SEARCH: %s",
+                            CKeyEvent::KeyCodeToString(keyCode).string());
+                    }
+                }
+                else {
+                    Slogger::I(TAG, "Dropping unregistered shortcut key combination: SEARCH: %s",
+                        CKeyEvent::KeyCodeToString(keyCode).string());
                 }
             }
             return -1;
@@ -3799,12 +4506,12 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             if (shortcutIntent != NULL) {
                 shortcutIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
                 // try {
-                mContext->StartActivityAsUser(shortcutIntent, UserHandle::CURRENT);
-                // } catch (ActivityNotFoundException ex) {
-                //     Slog.w(TAG, "Dropping shortcut key combination because "
-                //             + "the activity to which it is registered was not found: "
-                //             + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
-                // }
+                ECode ec = mContext->StartActivityAsUser(shortcutIntent, UserHandle::CURRENT);
+                if (FAILED(ec)) {
+                    Slogger::W(TAG, "Dropping shortcut key combination because "
+                        "the activity to which it is registered was not found: META: %s",
+                        CKeyEvent::KeyCodeToString(keyCode).string());
+                }
                 return -1;
             }
         }
@@ -3825,12 +4532,12 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             AutoPtr<IIntent> intent = CIntent::MakeMainSelectorActivity(IIntent::ACTION_MAIN, category);
             intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
             // try {
-            mContext->StartActivityAsUser(intent, UserHandle::CURRENT);
-            // } catch (ActivityNotFoundException ex) {
-            //     Slog.w(TAG, "Dropping application launch key because "
-            //             + "the activity to which it is registered was not found: "
-            //             + "keyCode=" + keyCode + ", category=" + category, ex);
-            // }
+            ECode ec = mContext->StartActivityAsUser(intent, UserHandle::CURRENT);
+            if (FAILED(ec)) {
+                Slogger::W(TAG, "Dropping application launch key because "
+                    "the activity to which it is registered was not found: keyCode=%s, category=%s",
+                    CKeyEvent::KeyCodeToString(keyCode).string(), category.string());
+            }
             return -1;
         }
     }
@@ -3874,8 +4581,22 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         return -1;
     }
 
-    if (mGlobalKeyManager->HandleGlobalKey(mContext, keyCode, event, &bTemp), bTemp) {
+    if (mGlobalKeyManager->HandleGlobalKey(mContext, keyCode, event, &bval), bval) {
         return -1;
+    }
+
+    // Specific device key handling
+    if (mDeviceKeyHandler != NULL) {
+        // The device only should consume known keys.
+        Boolean bval;
+        ECode ec = mDeviceKeyHandler->HandleKeyEvent(event, &bval);
+        if (FAILED(ec)) {
+            Slogger::W(TAG, "Could not dispatch event to device key handler");
+        }
+
+        if (bval) {
+            return -1;
+        }
     }
 
     // Reserve all the META modifier combos for system behavior
@@ -3887,6 +4608,21 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
     return 0;
 }
 
+Boolean PhoneWindowManager::UnpinActivity()
+{
+    Boolean bval;
+    HasNavigationBar(&bval);
+    if (!bval) {
+        AutoPtr<IIActivityManager>  am = ActivityManagerNative::GetDefault();
+        am->IsInLockTaskMode(&bval);
+        if (bval) {
+            am->StopLockTaskModeOnCurrent();
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 ECode PhoneWindowManager::DispatchUnhandledKey(
     /* [in] */ IWindowState* win,
     /* [in] */ IKeyEvent* event,
@@ -3896,7 +4632,7 @@ ECode PhoneWindowManager::DispatchUnhandledKey(
     VALIDATE_NOT_NULL(keyEvent);
     // Note: This method is only called if the initial down was unhandled.
     // if (DEBUG_INPUT) {
-    //     Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
+    //     Slogger::D(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
     //             + ", flags=" + event.getFlags()
     //             + ", keyCode=" + event.getKeyCode()
     //             + ", scanCode=" + event.getScanCode()
@@ -3937,7 +4673,7 @@ ECode PhoneWindowManager::DispatchUnhandledKey(
 
         if (fallbackAction != NULL) {
             // if (DEBUG_INPUT) {
-            //     Slog.d(TAG, "Fallback: keyCode=" + fallbackAction.keyCode
+            //     Slogger::D(TAG, "Fallback: keyCode=" + fallbackAction.keyCode
             //             + " metaState=" + Integer.toHexString(fallbackAction.metaState));
             // }
             Int32 flagsValue = 0;
@@ -3970,13 +4706,13 @@ ECode PhoneWindowManager::DispatchUnhandledKey(
         }
     }
 
-    // if (DEBUG_INPUT) {
-    //     if (fallbackEvent == null) {
-    //         Slog.d(TAG, "No fallback.");
-    //     } else {
-    //         Slog.d(TAG, "Performing fallback: " + fallbackEvent);
-    //     }
-    // }
+    if (DEBUG_INPUT) {
+        if (fallbackEvent == NULL) {
+            Slogger::D(TAG, "No fallback.");
+        } else {
+            Slogger::D(TAG, "Performing fallback: %s", TO_CSTR(fallbackEvent));
+        }
+    }
     *keyEvent =  fallbackEvent;
     REFCOUNT_ADD(*keyEvent);
 
@@ -3992,8 +4728,7 @@ Boolean PhoneWindowManager::InterceptFallback(
     InterceptKeyBeforeQueueing(fallbackEvent, policyFlags, &actions);
     if ((actions & IWindowManagerPolicy::ACTION_PASS_TO_USER) != 0) {
         Int64 delayMillis = 0;
-        InterceptKeyBeforeDispatching(
-                win, fallbackEvent, policyFlags, &delayMillis);
+        InterceptKeyBeforeDispatching(win, fallbackEvent, policyFlags, &delayMillis);
         if (delayMillis == 0) {
             return TRUE;
         }
@@ -4020,10 +4755,10 @@ void PhoneWindowManager::LaunchAssistLongPressAction()
     }
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(IUserHandle::USER_CURRENT, (IUserHandle**)&userHandle);
-    mContext->StartActivityAsUser(intent, userHandle);
-    // } catch (ActivityNotFoundException e) {
-    //     Slog.w(TAG, "No activity to handle assist long press action.", e);
-    // }
+    ECode ec = mContext->StartActivityAsUser(intent, userHandle);
+    if (FAILED(ec)) {
+        Slogger::W(TAG, "No activity to handle assist long press action. ec=%08x", ec);
+    }
 }
 
 void PhoneWindowManager::LaunchAssistAction()
@@ -4042,18 +4777,17 @@ void PhoneWindowManager::LaunchAssistAction(
     searchManager->GetAssistIntent(mContext, TRUE, IUserHandle::USER_CURRENT, (IIntent**)&intent);
 
     if (intent != NULL) {
-        if (!hint.IsNull())
-        {
+        if (!hint.IsNull()) {
             intent->PutExtra(hint, TRUE);
         }
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
                 | IIntent::FLAG_ACTIVITY_SINGLE_TOP
                 | IIntent::FLAG_ACTIVITY_CLEAR_TOP);
         // try {
-        mContext->StartActivityAsUser(intent, UserHandle::CURRENT);
-        // } catch (ActivityNotFoundException e) {
-        //     Slog.w(TAG, "No activity to handle assist action.", e);
-        // }
+        ECode ec = mContext->StartActivityAsUser(intent, UserHandle::CURRENT);
+        if (FAILED(ec)) {
+            Slogger::W(TAG, "No activity to handle assist action:%s. ec=%08x", hint.string(), ec);
+        }
     }
 }
 
@@ -4075,14 +4809,12 @@ void PhoneWindowManager::PreloadRecentApps()
     ECode ec = NOERROR;
     if (statusbar != NULL) {
         ec = statusbar->PreloadRecentApps();
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Slogger::E(TAG, "RemoteException when preloading recent apps");
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = NULL;
+        }
     }
-    //} catch (RemoteException e) {
-    //    Slog.e(TAG, "RemoteException when preloading recent apps", e);
-    //    // re-acquire status bar service next time it is needed.
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        mStatusBarService = NULL;
-    }
-    //}
 }
 
 void PhoneWindowManager::CancelPreloadRecentApps()
@@ -4094,14 +4826,12 @@ void PhoneWindowManager::CancelPreloadRecentApps()
         ECode ec = NOERROR;
         if (statusbar != NULL) {
             ec = statusbar->CancelPreloadRecentApps();
+            if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                Slogger::E(TAG, "RemoteException when cancelling recent apps preload");
+                // re-acquire status bar service next time it is needed.
+                mStatusBarService = NULL;
+            }
         }
-        //} catch (RemoteException e) {
-        //    Slog.e(TAG, "RemoteException when cancelling recent apps preload", e);
-        // re-acquire status bar service next time it is needed.
-        if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            mStatusBarService = NULL;
-        }
-        //}
     }
 }
 
@@ -4113,14 +4843,20 @@ void PhoneWindowManager::ToggleRecentApps()
     ECode ec = NOERROR;
     if (statusbar != NULL) {
         ec = statusbar->ToggleRecentApps();
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Slogger::E(TAG, "RemoteException when toggling recent apps");
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = NULL;
+        }
     }
-    //} catch (RemoteException e) {
-    //    Slog.e(TAG, "RemoteException when toggling recent apps", e);
-    //    // re-acquire status bar service next time it is needed.
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        mStatusBarService = NULL;
-    }
-    //}
+}
+
+ECode PhoneWindowManager::ShowRecentApps()
+{
+    mHandler->RemoveMessages(MSG_DISPATCH_SHOW_RECENTS);
+    Boolean isSucceed;
+    mHandler->SendEmptyMessage(MSG_DISPATCH_SHOW_RECENTS, &isSucceed);
+    return NOERROR;
 }
 
 void PhoneWindowManager::ShowRecentApps(
@@ -4132,14 +4868,12 @@ void PhoneWindowManager::ShowRecentApps(
     ECode ec = NOERROR;
     if (statusbar != NULL) {
         ec = statusbar->ShowRecentApps(triggeredFromAltTab);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Slogger::E(TAG, "RemoteException when showing recent apps");
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = NULL;
+        }
     }
-    //} catch (RemoteException e) {
-    //    Slog.e(TAG, "RemoteException when showing recent apps", e);
-    //    // re-acquire status bar service next time it is needed.
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        mStatusBarService = NULL;
-    }
-    //}
 }
 
 void PhoneWindowManager::HideRecentApps(
@@ -4152,28 +4886,27 @@ void PhoneWindowManager::HideRecentApps(
     ECode ec = NOERROR;
     if (statusbar != NULL) {
         ec = statusbar->HideRecentApps(triggeredFromAltTab, triggeredFromHome);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Slogger::E(TAG, "RemoteException when closing recent apps");
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = NULL;
+        }
     }
-    //} catch (RemoteException e) {
-    //    Slog.e(TAG, "RemoteException when closing recent apps", e);
-    //    // re-acquire status bar service next time it is needed.
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        mStatusBarService = NULL;
-    }
-    //}
 }
 
 void PhoneWindowManager::LaunchHomeFromHotKey()
 {
-    Boolean bTemp;
-    if (mKeyguardDelegate != NULL && (mKeyguardDelegate->IsShowingAndNotOccluded(&bTemp), bTemp)) {
+    Boolean bval;
+    if (mKeyguardDelegate != NULL && (mKeyguardDelegate->IsShowingAndNotOccluded(&bval), bval)) {
         // don't launch home if keyguard showing
-    } else if (!mHideLockScreen && (mKeyguardDelegate->IsInputRestricted(&bTemp), bTemp)) {
+    }
+    else if (!mHideLockScreen && (mKeyguardDelegate->IsInputRestricted(&bval), bval)) {
         // when in keyguard restricted mode, must first verify unlock
         // before launching home
-        mKeyguardDelegate->VerifyUnlock(new KeyguardDelegateOnKeyguardExitResult(this));
+        AutoPtr<IOnKeyguardExitResult> onExit = new KeyguardDelegateOnKeyguardExitResult(this);
+        mKeyguardDelegate->VerifyUnlock(onExit);
     }
-    else
-    {
+    else {
         // no keyguard stuff to worry about, just launch home!
         // try {
         AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
@@ -4185,7 +4918,8 @@ void PhoneWindowManager::LaunchHomeFromHotKey()
             AwakenDreams();
             SendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             HideRecentApps(FALSE, TRUE);
-        } else {
+        }
+        else {
             // Otherwise, just launch Home
             SendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             StartDockOrHome();
@@ -4202,6 +4936,8 @@ ECode PhoneWindowManager::AdjustSystemUiVisibilityLw(
     mStatusBarController->AdjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
     mNavigationBarController->AdjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
     mRecentsVisible = (visibility & IView::RECENT_APPS_VISIBLE) > 0;
+
+    UpdateEdgeGestureListenerState();
 
     // Reset any bits in mForceClearingStatusBarVisibility that
     // are now clear.
@@ -4247,7 +4983,8 @@ ECode PhoneWindowManager::GetContentInsetHintLw(
                 contentInset->Set(mStableLeft, mStableTop,
                         availRight - mStableRight, availBottom - mStableBottom);
             }
-        } else if ((fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) != 0 || (fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) !=0) {
+        } else if ((fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) != 0
+            || (fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) !=0) {
             contentInset->SetEmpty();
         } else if ((systemUiVisibility & (IView::SYSTEM_UI_FLAG_FULLSCREEN
                     | IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)) == 0) {
@@ -4336,8 +5073,8 @@ ECode PhoneWindowManager::BeginLayoutLw(
     // start with the current dock rect, which will be (0,0,displayWidth,displayHeight)
     AutoPtr<CRect> pf = mTmpParentFrame;
     AutoPtr<CRect> df = mTmpDisplayFrame;
-    AutoPtr<CRect>of = mTmpOverscanFrame;
-    AutoPtr<CRect>vf = mTmpVisibleFrame;
+    AutoPtr<CRect> of = mTmpOverscanFrame;
+    AutoPtr<CRect> vf = mTmpVisibleFrame;
     AutoPtr<CRect>dcf = mTmpDecorFrame;
     pf->mLeft = df->mLeft = of->mLeft = vf->mLeft = mDockLeft;
     pf->mTop = df->mTop = of->mTop = vf->mTop = mDockTop;
@@ -4374,9 +5111,9 @@ ECode PhoneWindowManager::BeginLayoutLw(
             mHandler->GetLooper((ILooper**)&looper);
 
             mWindowManagerFuncs->AddFakeWindow(
-                   looper, mHideNavInputEventReceiverFactory,
-                   String("hidden nav"), IWindowManagerLayoutParams::TYPE_HIDDEN_NAV_CONSUMER, 0,
-                   0, FALSE, FALSE, TRUE, (IFakeWindow**)&mHideNavFakeWindow);
+               looper, mHideNavInputEventReceiverFactory,
+               String("hidden nav"), IWindowManagerLayoutParams::TYPE_HIDDEN_NAV_CONSUMER, 0,
+               0, FALSE, FALSE, TRUE, (IFakeWindow**)&mHideNavFakeWindow);
         }
 
         // For purposes of positioning and showing the nav bar, if we have
@@ -4384,7 +5121,7 @@ ECode PhoneWindowManager::BeginLayoutLw(
         // then take that into account.
         navVisible |= !CanHideNavigationBar();
 
-        Boolean updateSysUiVisibility = false;
+        Boolean updateSysUiVisibility = FALSE;
         if (mNavigationBar != NULL) {
             Boolean transientNavBarShowing;
             mNavigationBarController->IsTransientShowing(&transientNavBarShowing);
@@ -4395,30 +5132,62 @@ ECode PhoneWindowManager::BeginLayoutLw(
             mNavigationBarOnBottom = (!mNavigationBarCanMove || displayWidth < displayHeight);
             if (mNavigationBarOnBottom) {
                 // It's a system nav bar or a portrait screen; nav bar goes on bottom.
-                int top = displayHeight - overscanBottom
-                    - mNavigationBarHeightForRotation[displayRotation];
+                Int32 top = displayHeight - overscanBottom -
+                    mNavigationBarHeightForRotation[displayRotation];
                 mTmpNavigationFrame->Set(0, top, displayWidth, displayHeight - overscanBottom);
                 mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame->mTop;
-                Boolean bTemp = FALSE;
+                Boolean bval = FALSE;
                 if (transientNavBarShowing) {
-                    mNavigationBarController->SetBarShowingLw(TRUE, &bTemp);
+                    mNavigationBarController->SetBarShowingLw(TRUE, &bval);
                 } else if (navVisible) {
-                    mNavigationBarController->SetBarShowingLw(TRUE, &bTemp);
+                    mNavigationBarController->SetBarShowingLw(TRUE, &bval);
                     mDockBottom = mTmpNavigationFrame->mTop;
                     mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
                     mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
                 } else {
                     // We currently want to hide the navigation UI.
-                    mNavigationBarController->SetBarShowingLw(FALSE, &bTemp);
+                    mNavigationBarController->SetBarShowingLw(FALSE, &bval);
                 }
-                bTemp = FALSE;
+                bval = FALSE;
                 if (navVisible && !navTranslucent && !navAllowedHidden
-                        && !(mNavigationBar->IsAnimatingLw(&bTemp), bTemp)
-                        && !(mNavigationBarController->WasRecentlyTranslucent(&bTemp), bTemp)) {
+                        && !(mNavigationBar->IsAnimatingLw(&bval), bval)
+                        && !(mNavigationBarController->WasRecentlyTranslucent(&bval), bval)) {
                     // If the opaque nav bar is currently requested to be visible,
                     // and not in the process of animating on or off, then
                     // we can tell the app that it is covered by it.
                     mSystemBottom = mTmpNavigationFrame->mTop;
+                }
+            }
+            else if (mNavigationBarLeftInLandscape) {
+                // Landscape screen; nav bar goes to the left.
+                Int32 right = overscanLeft + mNavigationBarWidthForRotation[displayRotation];
+                mTmpNavigationFrame->Set(0, 0, right, displayHeight);
+                mStableLeft = mStableFullscreenLeft = mTmpNavigationFrame->mRight;
+                mStableFullscreenLeft = mTmpNavigationFrame->mRight;
+                Boolean bval;
+                if (transientNavBarShowing) {
+                    mNavigationBarController->SetBarShowingLw(TRUE, &bval);
+                }
+                else if (navVisible) {
+                    mNavigationBarController->SetBarShowingLw(TRUE, &bval);
+                    mDockLeft = mTmpNavigationFrame->mRight;
+                    mRestrictedScreenLeft = mDockLeft;
+                    mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
+                    mRestrictedOverscanScreenLeft = mRestrictedScreenLeft;
+                    mRestrictedOverscanScreenWidth = mDockRight
+                            - mRestrictedOverscanScreenLeft;
+                }
+                else {
+                    // We currently want to hide the navigation UI.
+                    mNavigationBarController->SetBarShowingLw(FALSE, &bval);
+                }
+
+                if (navVisible && !navTranslucent && (mNavigationBar->IsAnimatingLw(&bval), !bval)
+                        && (mNavigationBarController->WasRecentlyTranslucent(&bval), !bval)) {
+                    // If the nav bar is currently requested to be visible,
+                    // and not in the process of animating on or off, then
+                    // we can tell the app that it is covered by it.
+                    mSystemLeft = mTmpNavigationFrame->mRight;
                 }
             }
             else {
@@ -4427,27 +5196,28 @@ ECode PhoneWindowManager::BeginLayoutLw(
                     - mNavigationBarWidthForRotation[displayRotation];
                 mTmpNavigationFrame->Set(left, 0, displayWidth - overscanRight, displayHeight);
                 mStableRight = mStableFullscreenRight = mTmpNavigationFrame->mLeft;
-                Boolean bTemp;
+                Boolean bval;
                 if (transientNavBarShowing) {
-                    mNavigationBarController->SetBarShowingLw(TRUE, &bTemp);
+                    mNavigationBarController->SetBarShowingLw(TRUE, &bval);
                 } else if (navVisible) {
-                    mNavigationBarController->SetBarShowingLw(TRUE, &bTemp);
+                    mNavigationBarController->SetBarShowingLw(TRUE, &bval);
                     mDockRight = mTmpNavigationFrame->mLeft;
                     mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
                     mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
                 } else {
                     // We currently want to hide the navigation UI.
-                    mNavigationBarController->SetBarShowingLw(FALSE, &bTemp);
+                    mNavigationBarController->SetBarShowingLw(FALSE, &bval);
                 }
-                bTemp = FALSE;
-                if (navVisible && !navTranslucent && !(mNavigationBar->IsAnimatingLw(&bTemp), bTemp)
-                        && !(mNavigationBarController->WasRecentlyTranslucent(&bTemp), bTemp)) {
+                bval = FALSE;
+                if (navVisible && !navTranslucent && !(mNavigationBar->IsAnimatingLw(&bval), bval)
+                        && !(mNavigationBarController->WasRecentlyTranslucent(&bval), bval)) {
                     // If the nav bar is currently requested to be visible,
                     // and not in the process of animating on or off, then
                     // we can tell the app that it is covered by it.
                     mSystemRight = mTmpNavigationFrame->mLeft;
                 }
             }
+
             // Make sure the content and current rectangles are updated to
             // account for the restrictions from the navigation bar.
             mContentTop = mVoiceContentTop = mCurTop = mDockTop;
@@ -4457,11 +5227,11 @@ ECode PhoneWindowManager::BeginLayoutLw(
             mNavigationBar->GetSurfaceLayer(&mStatusBarLayer);
             // And compute the final frame.
             mNavigationBar->ComputeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                    mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
-                    mTmpNavigationFrame);
-            if (DEBUG_LAYOUT) Slogger::I(TAG, "mNavigationBar frame: xxxxx");// + mTmpNavigationFrame);
-            Boolean bTemp;
-            if (mNavigationBarController->CheckHiddenLw(&bTemp), bTemp) {
+                mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
+                mTmpNavigationFrame);
+            if (DEBUG_LAYOUT) Slogger::I(TAG, "mNavigationBar frame: %s", TO_CSTR(mTmpNavigationFrame));
+            Boolean bval;
+            if (mNavigationBarController->CheckHiddenLw(&bval), bval) {
                 updateSysUiVisibility = TRUE;
             }
         }
@@ -4509,16 +5279,15 @@ ECode PhoneWindowManager::BeginLayoutLw(
                 mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
                 mContentRight = mVoiceContentRight = mCurRight = mDockRight;
 
-                //if (DEBUG_LAYOUT) Slogger::V(TAG, "Status bar: " +
-                //        String.format(
-                //            "dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
-                //            mDockLeft, mDockTop, mDockRight, mDockBottom,
-                //            mContentLeft, mContentTop, mContentRight, mContentBottom,
-                //            mCurLeft, mCurTop, mCurRight, mCurBottom));
+                if (DEBUG_LAYOUT) {
+                    Slogger::V(TAG, "Status bar: dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
+                       mDockLeft, mDockTop, mDockRight, mDockBottom,
+                       mContentLeft, mContentTop, mContentRight, mContentBottom,
+                       mCurLeft, mCurTop, mCurRight, mCurBottom);
+                }
             }
             isVisibleLw = FALSE;
-            Boolean isAnimatingLw;
-            Boolean wasRecentlyTranslucent;
+            Boolean isAnimatingLw, wasRecentlyTranslucent;
             if ((mStatusBar->IsVisibleLw(&isVisibleLw), isVisibleLw)
                     && !(mStatusBar->IsAnimatingLw(&isAnimatingLw), isAnimatingLw)
                     && !statusBarTransient && !statusBarTranslucent
@@ -4544,9 +5313,7 @@ ECode PhoneWindowManager::GetSystemDecorLayerLw(
     /* [out] */ Int32* layer)
 {
     VALIDATE_NOT_NULL(layer);
-    assert(layer != NULL);
     *layer = 0;
-
     if (mStatusBar != NULL) return mStatusBar->GetSurfaceLayer(layer);
     if (mNavigationBar != NULL) return mNavigationBar->GetSurfaceLayer(layer);
     return NOERROR;
@@ -4614,9 +5381,9 @@ void PhoneWindowManager::SetAttachedWindowFrames(
             AutoPtr<IRect> tempRc;
             attached->GetContentFrameLw((IRect**)&tempRc);
             cf->Set(tempRc);
-            Boolean bTemp;
-            attached->IsVoiceInteraction(&bTemp);
-            if (bTemp) {
+            Boolean bval;
+            attached->IsVoiceInteraction(&bval);
+            if (bval) {
                 if (cf->mLeft < mVoiceContentLeft) cf->mLeft = mVoiceContentLeft;
                 if (cf->mTop < mVoiceContentTop) cf->mTop = mVoiceContentTop;
                 if (cf->mRight > mVoiceContentRight) cf->mRight = mVoiceContentRight;
@@ -4648,6 +5415,22 @@ void PhoneWindowManager::SetAttachedWindowFrames(
     AutoPtr<IRect> tempRc;
     attached->GetFrameLw((IRect**)&tempRc);
     pf->Set((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN) == 0 ? tempRc : df);
+}
+
+void PhoneWindowManager::ApplyForceImmersiveMode(
+    /* [in] */ Int32 pfl,
+    /* [in] */ IRect* r)
+{
+    if ((pfl & IWindowManagerLayoutParams::PRIVATE_FLAG_STATUS_HIDE_FORCED) != 0) {
+        r->SetTop(mForceImmersiveTop);
+    }
+    if ((pfl & IWindowManagerLayoutParams::PRIVATE_FLAG_NAV_HIDE_FORCED) != 0) {
+        if (mNavigationBarOnBottom) {
+            r->SetBottom(mForceImmersiveBottom);
+        } else {
+            r->SetRight(mForceImmersiveRight);
+        }
+    }
 }
 
 void PhoneWindowManager::ApplyStableConstraints(
@@ -4694,15 +5477,15 @@ ECode PhoneWindowManager::LayoutWindowLw(
     Boolean needsToOffsetInputMethodTarget = isDefaultDisplay &&
             (win == mLastInputMethodTargetWindow && mLastInputMethodWindow != NULL);
     if (needsToOffsetInputMethodTarget) {
-        // if (DEBUG_LAYOUT) {
-        //     Slogger::I(TAG, "Offset ime target window by the last ime window state");
-        // }
+        if (DEBUG_LAYOUT) {
+            Slogger::I(TAG, "Offset ime target window by the last ime window state");
+        }
         OffsetInputMethodWindowLw(mLastInputMethodWindow);
     }
     Int32 fl = WindowManagerPolicyControl::GetWindowFlags(win, attrs);
+    Int32 pfl = WindowManagerPolicyControl::GetPrivateWindowFlags(win, attrs);
     Int32 sim = 0;
     attrs->GetSoftInputMode(&sim);
-
     Int32 sysUiFl = WindowManagerPolicyControl::GetSystemUiVisibility(win, NULL);
 
     AutoPtr<CRect> pf = mTmpParentFrame;
@@ -4716,7 +5499,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
 
     Boolean visible = FALSE;
     Boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
-            && mNavigationBar != NULL && (mNavigationBar->IsVisibleLw(&visible), visible));
+        && mNavigationBar != NULL && (mNavigationBar->IsVisibleLw(&visible), visible));
 
     const Int32 adjust = sim & IWindowManagerLayoutParams::SOFT_INPUT_MASK_ADJUST;
 
@@ -4777,9 +5560,9 @@ ECode PhoneWindowManager::LayoutWindowLw(
         Boolean isAppWindow =
             type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW &&
             type <= IWindowManagerLayoutParams::LAST_APPLICATION_WINDOW;
-        Boolean bTemp;
+        Boolean bval;
         Boolean topAtRest =
-            win == mTopFullscreenOpaqueWindowState && !(win->IsAnimatingLw(&bTemp), bTemp);
+            win == mTopFullscreenOpaqueWindowState && !(win->IsAnimatingLw(&bval), bval);
         if (isAppWindow && !inheritTranslucentDecor && !topAtRest) {
             if ((sysUiFl & IView::SYSTEM_UI_FLAG_FULLSCREEN) == 0
                     && (fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) == 0
@@ -4797,12 +5580,15 @@ ECode PhoneWindowManager::LayoutWindowLw(
             }
         }
         if ((fl & (IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN |
-                   IWindowManagerLayoutParams::FLAG_LAYOUT_INSET_DECOR))
-                == (IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN | IWindowManagerLayoutParams::FLAG_LAYOUT_INSET_DECOR))
+               IWindowManagerLayoutParams::FLAG_LAYOUT_INSET_DECOR))
+            == (IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN
+                | IWindowManagerLayoutParams::FLAG_LAYOUT_INSET_DECOR))
         {
-            // if (DEBUG_LAYOUT)
-            //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle()
-            //             + "): IN_SCREEN, INSET_DECOR");
+            if (DEBUG_LAYOUT) {
+                AutoPtr<ICharSequence> title;
+                attrs->GetTitle((ICharSequence**)&title);
+                Slogger::V(TAG, "layoutWindowLw(%s): IN_SCREEN, INSET_DECOR", TO_CSTR(title));
+            }
             // This is the case for a normal activity window: we want it
             // to cover all of the screen space, and it can take care of
             // moving its contents to account for screen decorations that
@@ -4811,7 +5597,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
                 // If this window is attached to another, our display
                 // frame is the same as the one we are attached to.
                 SetAttachedWindowFrames(win, fl, adjust, attached, TRUE, pf, df, of, cf, vf);
-            } else {
+            }
+            else {
                 if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL
                         || type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_SUB_PANEL) {
                     // Status bar panels are the only windows who can go on top of
@@ -4830,23 +5617,24 @@ ECode PhoneWindowManager::LayoutWindowLw(
                         ? mRestrictedScreenTop + mRestrictedScreenHeight
                         : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
 
-                    // if (DEBUG_LAYOUT)
-                    //     Slogger::V(TAG, String.format(
-                    //                 "Laying out status bar window: (%d,%d - %d,%d)",
-                    //                 pf.left, pf.top, pf.right, pf.bottom));
-                } else if((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) != 0
-                          && type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
-                          && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
+                    if (DEBUG_LAYOUT)
+                        Slogger::V(TAG, "Laying out status bar window: (%d,%d - %d,%d)",
+                            pf->mLeft, pf->mTop, pf->mRight, pf->mBottom);
+                }
+                else if ((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) != 0
+                      && type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
+                      && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
                     // Asking to layout into the overscan region, so give it that pure
                     // unrestricted area.
                     pf->mLeft = df->mLeft = of->mLeft = mOverscanScreenLeft;
                     pf->mTop = df->mTop = of->mTop = mOverscanScreenTop;
                     pf->mRight = df->mRight = of->mRight = mOverscanScreenLeft + mOverscanScreenWidth;
                     pf->mBottom = df->mBottom = of->mBottom = mOverscanScreenTop + mOverscanScreenHeight;
-                } else if (CanHideNavigationBar()
-                        && (sysUiFl & IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                        && type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
-                        && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
+                }
+                else if (CanHideNavigationBar()
+                    && (sysUiFl & IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                    && type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
+                    && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
                     // Asking for layout as if the nav bar is hidden, lets the
                     // application extend into the unrestricted screen area.  We
                     // only do this for application windows to ensure no window that
@@ -4862,7 +5650,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
                     of->mTop = mUnrestrictedScreenTop;
                     of->mRight = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
                     of->mBottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
-                } else {
+                }
+                else {
                     pf->mLeft = df->mLeft = mRestrictedOverscanScreenLeft;
                     pf->mTop = df->mTop = mRestrictedOverscanScreenTop;
                     pf->mRight = df->mRight = mRestrictedOverscanScreenLeft + mRestrictedOverscanScreenWidth;
@@ -4876,7 +5665,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
                     of->mBottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                 }
 
-                if ((fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) == 0) {
+                if ((fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) == 0
+                    || (pfl & IWindowManagerLayoutParams::PRIVATE_FLAG_WAS_NOT_FULLSCREEN) != 0) {
                     Boolean isVoiceInteraction;
                     if (win->IsVoiceInteraction(&isVoiceInteraction), isVoiceInteraction) {
                         cf->mLeft = mVoiceContentLeft;
@@ -4895,8 +5685,11 @@ ECode PhoneWindowManager::LayoutWindowLw(
                             cf->mRight = mContentRight;
                             cf->mBottom = mContentBottom;
                         }
+
+                        ApplyForceImmersiveMode(pfl, mTmpContentFrame);
                     }
-                } else {
+                }
+                else {
                     // Full screen windows are always given a layout that is as if the
                     // status bar and other transient decors are gone.  This is to avoid
                     // bad states when moving from a window that is not hding the
@@ -4907,186 +5700,214 @@ ECode PhoneWindowManager::LayoutWindowLw(
                     cf->mBottom = mRestrictedScreenTop + mRestrictedScreenHeight;
                 }
 
-                ApplyStableConstraints(sysUiFl, fl, cf);
+                ApplyStableConstraints(sysUiFl, fl, mTmpContentFrame);
                 if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_NOTHING) {
                     vf->mLeft = mCurLeft;
                     vf->mTop = mCurTop;
                     vf->mRight = mCurRight;
                     vf->mBottom = mCurBottom;
                 } else {
-                    vf->Set(cf);
-                }
-                }
-            } else if ((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN) != 0 || (sysUiFl
-                        & (IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) {
-                // if (DEBUG_LAYOUT)
-                //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle() + "): IN_SCREEN");
-                // A window that has requested to fill the entire screen just
-                // gets everything, period.
-                if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL
-                        || type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_SUB_PANEL) {
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = hasNavBar ? mDockLeft : mUnrestrictedScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mUnrestrictedScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = hasNavBar
-                        ? mRestrictedScreenLeft + mRestrictedScreenWidth
-                        : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = hasNavBar
-                        ? mRestrictedScreenTop + mRestrictedScreenHeight
-                        : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
-                    // if (DEBUG_LAYOUT) {
-                    //     Slogger::V(TAG, String.format(
-                    //                 "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
-                    //                 pf.left, pf.top, pf.right, pf.bottom));
-                    // }
-                } else if (type == IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR
-                        || type == IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR_PANEL) {
-                    // The navigation bar has Real Ultimate Power.
-                    pf->mLeft = df->mLeft = of->mLeft = mUnrestrictedScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = mUnrestrictedScreenTop;
-                    pf->mRight = df->mRight = of->mRight = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
-                    // if (DEBUG_LAYOUT) {
-                    //     Slogger::V(TAG, String.format(
-                    //                 "Laying out navigation bar window: (%d,%d - %d,%d)",
-                    //                 pf.left, pf.top, pf.right, pf.bottom));
-                    // }
-                } else if ((type == IWindowManagerLayoutParams::TYPE_SECURE_SYSTEM_OVERLAY
-                            || type == IWindowManagerLayoutParams::TYPE_BOOT_PROGRESS)
-                        && ((fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) != 0)) {
-                    // Fullscreen secure system overlays get what they ask for.
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = mOverscanScreenLeft + mOverscanScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = mOverscanScreenTop + mOverscanScreenHeight;
-                } else if (type == IWindowManagerLayoutParams::TYPE_BOOT_PROGRESS
-                        || type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND) {
-                    // Boot progress screen always covers entire display.
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = mOverscanScreenLeft+mOverscanScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
-                        = mOverscanScreenTop+mOverscanScreenHeight;
-                } else if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
-                    // The wallpaper also has Real Ultimate Power, but we want to tell
-                    // it about the overscan area.
-                    pf->mLeft = df->mLeft = mOverscanScreenLeft;
-                    pf->mTop = df->mTop = mOverscanScreenTop;
-                    pf->mRight = df->mRight = mOverscanScreenLeft + mOverscanScreenWidth;
-                    pf->mBottom = df->mBottom = mOverscanScreenTop + mOverscanScreenHeight;
-                    of->mLeft = cf->mLeft = mUnrestrictedScreenLeft;
-                    of->mTop = cf->mTop = mUnrestrictedScreenTop;
-                    of->mRight = cf->mRight = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
-                    of->mBottom = cf->mBottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
-                } else if ((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) != 0
-                        && type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
-                        && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
-                    // Asking to layout into the overscan region, so give it that pure
-                    // unrestricted area.
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight
-                        = mOverscanScreenLeft + mOverscanScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
-                        = mOverscanScreenTop + mOverscanScreenHeight;
-                } else if (CanHideNavigationBar()
-                        && (sysUiFl & IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                        && (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR
-                        || type == IWindowManagerLayoutParams::TYPE_TOAST
-                        || (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
-                        && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW))) {
-                    // Asking for layout as if the nav bar is hidden, lets the
-                    // application extend into the unrestricted screen area.  We
-                    // only do this for application windows (or toasts) to ensure no window that
-                    // can be above the nav bar can do this.
-                    // XXX This assumes that an app asking for this will also
-                    // ask for layout in only content.  We can't currently figure out
-                    // what the screen would be if only laying out to hide the nav bar.
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mUnrestrictedScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mUnrestrictedScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
-                        = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
-                } else {
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mRestrictedScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mRestrictedScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = mRestrictedScreenLeft
-                        + mRestrictedScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = mRestrictedScreenTop
-                        + mRestrictedScreenHeight;
+                    vf->Set(mTmpContentFrame);
                 }
 
-                ApplyStableConstraints(sysUiFl, fl, cf);
+                ApplyForceImmersiveMode(pfl, mTmpVisibleFrame);
+            }
+        }
+        else if ((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN) != 0
+            || (sysUiFl & (IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) {
+            if (DEBUG_LAYOUT) {
+                AutoPtr<ICharSequence> title;
+                attrs->GetTitle((ICharSequence**)&title);
+                Slogger::V(TAG, "layoutWindowLw(%s): IN_SCREEN, INSET_DECOR", TO_CSTR(title));
+            }
 
-                if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_NOTHING) {
-                    vf->mLeft = mCurLeft;
-                    vf->mTop = mCurTop;
-                    vf->mRight = mCurRight;
-                    vf->mBottom = mCurBottom;
-                } else {
-                    vf->Set(cf);
-                }
-            } else if (attached != NULL) {
-                // if (DEBUG_LAYOUT)
-                //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle() + "): attached to " + attached);
-                // A child window should be placed inside of the same visible
-                // frame that its parent had.
-                SetAttachedWindowFrames(win, fl, adjust, attached, FALSE, pf, df, of, cf, vf);
-            } else {
-                // if (DEBUG_LAYOUT)
-                //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle() + "): normal window");
-                // Otherwise, a normal window must be placed inside the content
-                // of all screen decorations.
-                if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL) {
-                    // Status bar panels are the only windows who can go on top of
-                    // the status bar.  They are protected by the STATUS_BAR_SERVICE
-                    // permission, so they have the same privileges as the status
-                    // bar itself.
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mRestrictedScreenLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mRestrictedScreenTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = mRestrictedScreenLeft + mRestrictedScreenWidth;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
-                        = mRestrictedScreenTop + mRestrictedScreenHeight;
-                } else if (type == IWindowManagerLayoutParams::TYPE_TOAST
-                            || type == IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT
-                            || type == IWindowManagerLayoutParams::TYPE_VOLUME_OVERLAY) {
-                    // These dialogs are stable to interim decor changes.
-                    pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mStableLeft;
-                    pf->mTop = df->mTop = of->mTop = cf->mTop = mStableTop;
-                    pf->mRight = df->mRight = of->mRight = cf->mRight = mStableRight;
-                    pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = mStableBottom;
-                } else {
-                    pf->mLeft = mContentLeft;
-                    pf->mTop = mContentTop;
-                    pf->mRight = mContentRight;
-                    pf->mBottom = mContentBottom;
-                    Boolean isVoiceInteraction;
-                    if (win->IsVoiceInteraction(&isVoiceInteraction), isVoiceInteraction) {
-                        df->mLeft = of->mLeft = cf->mLeft = mVoiceContentLeft;
-                        df->mTop = of->mTop = cf->mTop = mVoiceContentTop;
-                        df->mRight = of->mRight = cf->mRight = mVoiceContentRight;
-                        df->mBottom = of->mBottom = cf->mBottom = mVoiceContentBottom;
-                    } else if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_RESIZE) {
-                        df->mLeft = of->mLeft = cf->mLeft = mDockLeft;
-                        df->mTop = of->mTop = cf->mTop = mDockTop;
-                        df->mRight = of->mRight = cf->mRight = mDockRight;
-                        df->mBottom = of->mBottom = cf->mBottom = mDockBottom;
-                    } else {
-                        df->mLeft = of->mLeft = cf->mLeft = mContentLeft;
-                        df->mTop = of->mTop = cf->mTop = mContentTop;
-                        df->mRight = of->mRight = cf->mRight = mContentRight;
-                        df->mBottom = of->mBottom = cf->mBottom = mContentBottom;
-                    }
-                    if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_NOTHING) {
-                        vf->mLeft = mCurLeft;
-                        vf->mTop = mCurTop;
-                        vf->mRight = mCurRight;
-                        vf->mBottom = mCurBottom;
-                    } else {
-                        vf->Set(cf);
-                    }
+            // A window that has requested to fill the entire screen just
+            // gets everything, period.
+            if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL
+                || type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_SUB_PANEL) {
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = hasNavBar ? mDockLeft : mUnrestrictedScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mUnrestrictedScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = hasNavBar
+                    ? mRestrictedScreenLeft + mRestrictedScreenWidth
+                    : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = hasNavBar
+                    ? mRestrictedScreenTop + mRestrictedScreenHeight
+                    : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                if (DEBUG_LAYOUT) {
+                    Slogger::V(TAG, "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
+                        pf->mLeft, pf->mTop, pf->mRight, pf->mBottom);
                 }
             }
+            else if (type == IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR
+                || type == IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR_PANEL) {
+                // The navigation bar has Real Ultimate Power.
+                pf->mLeft = df->mLeft = of->mLeft = mUnrestrictedScreenLeft;
+                pf->mTop = df->mTop = of->mTop = mUnrestrictedScreenTop;
+                pf->mRight = df->mRight = of->mRight = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
+                if (DEBUG_LAYOUT) {
+                    Slogger::V(TAG, "Laying out navigation bar window: (%d,%d - %d,%d)",
+                        pf->mLeft, pf->mTop, pf->mRight, pf->mBottom);
+                }
+            }
+            else if ((type == IWindowManagerLayoutParams::TYPE_SECURE_SYSTEM_OVERLAY
+                    || type == IWindowManagerLayoutParams::TYPE_BOOT_PROGRESS)
+                && ((fl & IWindowManagerLayoutParams::FLAG_FULLSCREEN) != 0)) {
+                // Fullscreen secure system overlays get what they ask for.
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = mOverscanScreenLeft + mOverscanScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = mOverscanScreenTop + mOverscanScreenHeight;
+            }
+            else if (type == IWindowManagerLayoutParams::TYPE_BOOT_PROGRESS
+                || type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND) {
+                // Boot progress screen always covers entire display.
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = mOverscanScreenLeft+mOverscanScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
+                    = mOverscanScreenTop+mOverscanScreenHeight;
+            }
+            else if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
+                // The wallpaper also has Real Ultimate Power, but we want to tell
+                // it about the overscan area.
+                pf->mLeft = df->mLeft = mOverscanScreenLeft;
+                pf->mTop = df->mTop = mOverscanScreenTop;
+                pf->mRight = df->mRight = mOverscanScreenLeft + mOverscanScreenWidth;
+                pf->mBottom = df->mBottom = mOverscanScreenTop + mOverscanScreenHeight;
+                of->mLeft = cf->mLeft = mUnrestrictedScreenLeft;
+                of->mTop = cf->mTop = mUnrestrictedScreenTop;
+                of->mRight = cf->mRight = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                of->mBottom = cf->mBottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+            }
+            else if ((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) != 0
+                && type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
+                && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
+                // Asking to layout into the overscan region, so give it that pure
+                // unrestricted area.
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight
+                    = mOverscanScreenLeft + mOverscanScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
+                    = mOverscanScreenTop + mOverscanScreenHeight;
+            }
+            else if (CanHideNavigationBar()
+                && (sysUiFl & IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                && (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR
+                || type == IWindowManagerLayoutParams::TYPE_TOAST
+                || (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
+                && type <= IWindowManagerLayoutParams::LAST_SUB_WINDOW))) {
+                // Asking for layout as if the nav bar is hidden, lets the
+                // application extend into the unrestricted screen area.  We
+                // only do this for application windows (or toasts) to ensure no window that
+                // can be above the nav bar can do this.
+                // XXX This assumes that an app asking for this will also
+                // ask for layout in only content.  We can't currently figure out
+                // what the screen would be if only laying out to hide the nav bar.
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mUnrestrictedScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mUnrestrictedScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
+                    = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
+            }
+            else {
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mRestrictedScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mRestrictedScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = mRestrictedScreenLeft
+                    + mRestrictedScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = mRestrictedScreenTop
+                    + mRestrictedScreenHeight;
+            }
+
+            ApplyStableConstraints(sysUiFl, fl, mTmpContentFrame);
+
+            if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_NOTHING) {
+                vf->mLeft = mCurLeft;
+                vf->mTop = mCurTop;
+                vf->mRight = mCurRight;
+                vf->mBottom = mCurBottom;
+            }
+            else {
+                vf->Set(mTmpContentFrame);
+            }
+            ApplyForceImmersiveMode(pfl, mTmpVisibleFrame);
+        }
+        else if (attached != NULL) {
+            if (DEBUG_LAYOUT) {
+                AutoPtr<ICharSequence> title;
+                attrs->GetTitle((ICharSequence**)&title);
+                Slogger::V(TAG, "layoutWindowLw(%s): attached to %s", TO_CSTR(title), TO_CSTR(attached));
+            }
+            // A child window should be placed inside of the same visible
+            // frame that its parent had.
+            SetAttachedWindowFrames(
+                win, fl, adjust, attached, FALSE,
+                mTmpParentFrame, mTmpDisplayFrame, mTmpOverscanFrame, mTmpContentFrame, mTmpVisibleFrame);
+        }
+        else {
+            if (DEBUG_LAYOUT) {
+                AutoPtr<ICharSequence> title;
+                attrs->GetTitle((ICharSequence**)&title);
+                Slogger::V(TAG, "layoutWindowLw(%s): normal window", TO_CSTR(title));
+            }
+            // Otherwise, a normal window must be placed inside the content
+            // of all screen decorations.
+            if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL) {
+                // Status bar panels are the only windows who can go on top of
+                // the status bar.  They are protected by the STATUS_BAR_SERVICE
+                // permission, so they have the same privileges as the status
+                // bar itself.
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mRestrictedScreenLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mRestrictedScreenTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = mRestrictedScreenLeft + mRestrictedScreenWidth;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
+                    = mRestrictedScreenTop + mRestrictedScreenHeight;
+            }
+            else if (type == IWindowManagerLayoutParams::TYPE_TOAST
+                || type == IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT
+                || type == IWindowManagerLayoutParams::TYPE_VOLUME_OVERLAY) {
+                // These dialogs are stable to interim decor changes.
+                pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mStableLeft;
+                pf->mTop = df->mTop = of->mTop = cf->mTop = mStableTop;
+                pf->mRight = df->mRight = of->mRight = cf->mRight = mStableRight;
+                pf->mBottom = df->mBottom = of->mBottom = cf->mBottom = mStableBottom;
+            }
+            else {
+                pf->mLeft = mContentLeft;
+                pf->mTop = mContentTop;
+                pf->mRight = mContentRight;
+                pf->mBottom = mContentBottom;
+                Boolean isVoiceInteraction;
+                if (win->IsVoiceInteraction(&isVoiceInteraction), isVoiceInteraction) {
+                    df->mLeft = of->mLeft = cf->mLeft = mVoiceContentLeft;
+                    df->mTop = of->mTop = cf->mTop = mVoiceContentTop;
+                    df->mRight = of->mRight = cf->mRight = mVoiceContentRight;
+                    df->mBottom = of->mBottom = cf->mBottom = mVoiceContentBottom;
+                } else if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_RESIZE) {
+                    df->mLeft = of->mLeft = cf->mLeft = mDockLeft;
+                    df->mTop = of->mTop = cf->mTop = mDockTop;
+                    df->mRight = of->mRight = cf->mRight = mDockRight;
+                    df->mBottom = of->mBottom = cf->mBottom = mDockBottom;
+                } else {
+                    df->mLeft = of->mLeft = cf->mLeft = mContentLeft;
+                    df->mTop = of->mTop = cf->mTop = mContentTop;
+                    df->mRight = of->mRight = cf->mRight = mContentRight;
+                    df->mBottom = of->mBottom = cf->mBottom = mContentBottom;
+                }
+                if (adjust != IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_NOTHING) {
+                    vf->mLeft = mCurLeft;
+                    vf->mTop = mCurTop;
+                    vf->mRight = mCurRight;
+                    vf->mBottom = mCurBottom;
+                } else {
+                    vf->Set(mTmpContentFrame);
+                }
+
+                ApplyForceImmersiveMode(pfl, mTmpVisibleFrame);
+            }
+        }
     }
 
     // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
@@ -5099,17 +5920,19 @@ ECode PhoneWindowManager::LayoutWindowLw(
         }
     }
 
-    // if (DEBUG_LAYOUT) Slogger::V(TAG, "Compute frame " + attrs.getTitle()
-    //         + ": sim=#" + Integer.toHexString(sim)
-    //         + " attach=" + attached + " type=" + attrs.type
-    //         + String.format(" flags=0x%08x", fl)
-    //         + " pf=" + pf.toShortString() + " df=" + df.toShortString()
-    //         + " of=" + of.toShortString()
-    //         + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
-    //         + " dcf=" + dcf.toShortString()
-    //         + " sf=" + sf.toShortString());
+    if (DEBUG_LAYOUT) {
+        AutoPtr<ICharSequence> title;
+        attrs->GetTitle((ICharSequence**)&title);
+        Int32 type;
+        attrs->GetType(&type);
+        Slogger::V(TAG, "Compute frame %s: sim=#%08x attach=%s type=%d flags=0x%08x"
+            " pf=%s df=%s of=%s cf=%s vf=%s dcf=%s sf=%s",
+            TO_CSTR(title), sim, TO_CSTR(attached), type, fl,
+            TO_CSTR(pf), TO_CSTR(df), TO_CSTR(of), TO_CSTR(cf), TO_CSTR(vf), TO_CSTR(dcf), TO_CSTR(sf));
+    }
 
-    win->ComputeFrameLw(pf, df, of, cf, vf, dcf, sf);
+    win->ComputeFrameLw(mTmpParentFrame, mTmpDisplayFrame, mTmpOverscanFrame, mTmpContentFrame,
+        mTmpVisibleFrame, mTmpDecorFrame, mTmpStableFrame);
 
     // Dock windows carve out the bottom of the screen, so normal windows
     // can't appear underneath them.
@@ -5126,8 +5949,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
     Boolean givenInsetsPendingLw;
     win->IsVisibleOrBehindKeyguardLw(&isVisibleOrBehindKeyguardLw);
     win->GetGivenInsetsPendingLw(&givenInsetsPendingLw);
-    if (type == IWindowManagerLayoutParams::TYPE_VOICE_INTERACTION && isVisibleOrBehindKeyguardLw
-            && !givenInsetsPendingLw) {
+    if (type == IWindowManagerLayoutParams::TYPE_VOICE_INTERACTION
+        && isVisibleOrBehindKeyguardLw && !givenInsetsPendingLw) {
         OffsetVoiceInputWindowLw(win);
     }
 
@@ -5166,9 +5989,10 @@ void PhoneWindowManager::OffsetInputMethodWindowLw(
     if (mCurBottom > top) {
         mCurBottom = top;
     }
-    // if (DEBUG_LAYOUT) Slogger::V(TAG, "Input method: mDockBottom="
-    //         + mDockBottom + " mContentBottom="
-    //         + mContentBottom + " mCurBottom=" + mCurBottom);
+    if (DEBUG_LAYOUT) {
+        Slogger::V(TAG, "Input method: mDockBottom=%d mContentBottom=%d mCurBottom=%d",
+            mDockBottom, mContentBottom, mCurBottom);
+    }
 }
 
 void PhoneWindowManager::OffsetVoiceInputWindowLw(
@@ -5276,8 +6100,7 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
     Boolean isVisibleLw;
     win->IsVisibleLw(&isVisibleLw);
     if (mTopFullscreenOpaqueWindowState == NULL
-            && isVisibleLw && type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD)
-    {
+            && isVisibleLw && type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
         mForcingShowNavBar = TRUE;
         win->GetSurfaceLayer(&mForcingShowNavBarLayer);
     }
@@ -5328,8 +6151,8 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
                 // Remove any previous windows with the same appToken.
                 mAppsToBeHidden->Remove(appToken.Get());
                 mAppsThatDismissKeyguard->Remove(appToken.Get());
-                Boolean bTemp;
-                if ((mAppsToBeHidden->IsEmpty(&bTemp), bTemp) && IsKeyguardSecureIncludingHidden()) {
+                Boolean bval;
+                if ((mAppsToBeHidden->IsEmpty(&bval), bval) && IsKeyguardSecureIncludingHidden()) {
                     mWinShowWhenLocked = win;
                     mHideLockScreen = TRUE;
                     mForceStatusBarFromKeyguard = FALSE;
@@ -5467,15 +6290,15 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
             // and mTopIsFullscreen is that that mTopIsFullscreen is set only if the window
             // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
             // case though.
-            Boolean bTemp;
-            if (mStatusBarController->IsTransientShowing(&bTemp), bTemp) {
-                if (mStatusBarController->SetBarShowingLw(TRUE, &bTemp), bTemp) {
+            Boolean bval;
+            if (mStatusBarController->IsTransientShowing(&bval), bval) {
+                if (mStatusBarController->SetBarShowingLw(TRUE, &bval), bval) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
                 }
             }
             else if (topIsFullscreen) {
                 if (DEBUG_LAYOUT) Slogger::V(TAG, "** HIDING status bar");
-                if (mStatusBarController->SetBarShowingLw(FALSE, &bTemp), bTemp) {
+                if (mStatusBarController->SetBarShowingLw(FALSE, &bval), bval) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
                 }
                 else {
@@ -5484,7 +6307,7 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
             }
             else {
                 if (DEBUG_LAYOUT) Slogger::V(TAG, "** SHOWING status bar: top is not fullscreen");
-                if (mStatusBarController->SetBarShowingLw(TRUE, &bTemp), bTemp) {
+                if (mStatusBarController->SetBarShowingLw(TRUE, &bval), bval) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
                 }
             }
@@ -5502,19 +6325,23 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
     // Hide the key guard if a visible window explicitly specifies that it wants to be
     // displayed when the screen is locked.
     if (mKeyguardDelegate != NULL && mStatusBar != NULL) {
-        // if (localLOGV) Slogger::V(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
-        //         + mHideLockScreen);
-        Boolean bTemp;
-        if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !(IsKeyguardSecure(&bTemp), bTemp)) {
+        if (localLOGV) {
+            Slogger::V(TAG, "finishPostLayoutPolicyLw: mHideKeyguard=%d", mHideLockScreen);
+        }
+        Boolean bval;
+        if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !(IsKeyguardSecure(&bval), bval)) {
             mKeyguardHidden = TRUE;
             Int32 ival;
             mKeyguardDelegate->SetOccluded(TRUE, &ival);
             if (ProcessKeyguardSetHiddenResultLw(ival)) {
-                changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
+                changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT
+                    | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG
+                    | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
             }
-            if (mKeyguardDelegate->IsShowing(&bTemp), bTemp) {
+            if (mKeyguardDelegate->IsShowing(&bval), bval) {
+                AutoPtr<IRunnable> runnable = new KeyguardDelegateKeyguardDone(this);
                 Boolean isSuccess = FALSE;
-                mHandler->Post(new KeyguardDelegateKeyguardDone(this), &isSuccess);
+                mHandler->Post(runnable, &isSuccess);
             }
         }
         else if (mHideLockScreen) {
@@ -5522,7 +6349,9 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
             Int32 ival;
             mKeyguardDelegate->SetOccluded(TRUE, &ival);
             if (ProcessKeyguardSetHiddenResultLw(ival)) {
-                changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
+                changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT
+                    | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG
+                    | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
         else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
@@ -5533,7 +6362,9 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
                 Int32 ival;
                 mKeyguardDelegate->SetOccluded(FALSE, &ival);
                 if (ProcessKeyguardSetHiddenResultLw(ival)) {
-                    changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
+                    changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT
+                        | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG
+                        | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 Boolean isSuccess = FALSE;
                 mHandler->Post(new KeyguardDelegateKeyguardDismiss(this), &isSuccess);
@@ -5545,7 +6376,9 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
             Int32 ival;
             mKeyguardDelegate->SetOccluded(FALSE, &ival);
             if (ProcessKeyguardSetHiddenResultLw(ival)) {
-                changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG | FINISH_LAYOUT_REDO_WALLPAPER;
+                changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT
+                    | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG
+                    | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
     }
@@ -5556,10 +6389,55 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
         changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
     }
 
-    // // update since mAllowLockscreenWhenOn might have changed
+    // update since mAllowLockscreenWhenOn might have changed
     UpdateLockScreenTimeout();
+    UpdateEdgeGestureListenerState();
     *result = changes;
     return NOERROR;
+}
+
+Boolean PhoneWindowManager::ProcessKeyguardSetHiddenResultLw(
+    /* [in] */ Int32 setHiddenResult)
+{
+    if (setHiddenResult
+            == IIKeyguardServiceConstants::KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_SET_FLAGS) {
+        AutoPtr<IWindowManagerLayoutParams> attrs;
+        mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
+        Int32 privateFlags;
+        attrs->GetPrivateFlags(&privateFlags);
+        attrs->SetPrivateFlags(privateFlags|IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD);
+        Int32 flags;
+        attrs->GetFlags(&flags);
+        attrs->SetFlags(flags|IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
+        return TRUE;
+    }
+    else if (setHiddenResult
+            == IIKeyguardServiceConstants::KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_UNSET_FLAGS) {
+        AutoPtr<IWindowManagerLayoutParams> attrs;
+        mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
+        Int32 privateFlags;
+        attrs->GetPrivateFlags(&privateFlags);
+        attrs->SetPrivateFlags(privateFlags & ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD);
+        Int32 flags;
+        attrs->GetFlags(&flags);
+        attrs->SetFlags(flags | ~IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+Boolean PhoneWindowManager::IsStatusBarKeyguard()
+{
+    if (mStatusBar != NULL) {
+        AutoPtr<IWindowManagerLayoutParams> attrs;
+        mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
+        Int32 privateFlags;
+        attrs->GetPrivateFlags(&privateFlags);
+        if (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD)
+            return TRUE;
+    }
+    return FALSE;
 }
 
 ECode PhoneWindowManager::AllowAppAnimationsLw(
@@ -5633,9 +6511,9 @@ ECode PhoneWindowManager::NotifyCameraLensCoverSwitchChanged(
     if (mCameraLensCoverState == IWindowManagerPolicyWindowManagerFuncs::CAMERA_LENS_COVERED &&
             lensCoverState == IWindowManagerPolicyWindowManagerFuncs::CAMERA_LENS_UNCOVERED) {
         AutoPtr<IIntent> intent;
-        Boolean bTemp;
+        Boolean bval;
         Boolean keyguardActive = mKeyguardDelegate == NULL? FALSE:
-                (mKeyguardDelegate->IsShowing(&bTemp), bTemp);
+                (mKeyguardDelegate->IsShowing(&bval), bval);
         if (keyguardActive) {
             CIntent::New(IMediaStore::INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE, (IIntent**)&intent);
         } else {
@@ -5716,6 +6594,20 @@ void PhoneWindowManager::InitializeHdmiState()
     SetHdmiPlugged(!mHdmiPlugged);
 }
 
+Boolean PhoneWindowManager::IsMusicActive()
+{
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+    IAudioManager* am = IAudioManager::Probe(obj);
+    if (am == NULL) {
+        Logger::W(TAG, "isMusicActive: couldn't get AudioManager reference");
+        return FALSE;
+    }
+    Boolean bval;
+    am->IsMusicActive(&bval);
+    return bval;
+}
+
 void PhoneWindowManager::TakeScreenshot()
 {
     AutoLock lock(mScreenshotLock);
@@ -5733,12 +6625,30 @@ void PhoneWindowManager::TakeScreenshot()
     AutoPtr<ScreenshotServiceConnection> conn = new ScreenshotServiceConnection(this);
     Boolean isSuccess = FALSE;
     if (mContext->BindServiceAsUser(
-            intent, conn, IContext::BIND_AUTO_CREATE, UserHandle::CURRENT,
-            &isSuccess), isSuccess)
+        intent, conn, IContext::BIND_AUTO_CREATE, UserHandle::CURRENT,
+        &isSuccess), isSuccess)
     {
         mScreenshotConnection = conn;
         Boolean isSuccess = FALSE;
         mHandler->PostDelayed(mScreenshotTimeout, 10000, &isSuccess);
+    }
+}
+
+void PhoneWindowManager::AcquireQuickBootWakeLock()
+{
+    Boolean bval;
+    mQuickBootWakeLock->IsHeld(&bval);
+    if (!bval)  {
+        mQuickBootWakeLock->AcquireLock();
+    }
+}
+
+void PhoneWindowManager::ReleaseQuickBootWakeLock()
+{
+    Boolean bval;
+    mQuickBootWakeLock->IsHeld(&bval);
+    if (bval) {
+        mQuickBootWakeLock->ReleaseLock();
     }
 }
 
@@ -5756,13 +6666,32 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     }
 
     Boolean interactive = (policyFlags & IWindowManagerPolicy::FLAG_INTERACTIVE) != 0;
-    Int32 action = 0, keyCode = 0, flags = 0;
+    Int32 action = 0, keyCode = 0, scanCode = 0, flags = 0;
     event->GetAction(&action);
     event->GetKeyCode(&keyCode);
+    event->GetScanCode(&scanCode);
     event->GetFlags(&flags);
     Boolean down = action == IKeyEvent::ACTION_DOWN;
     Boolean canceled = FALSE;
     event->IsCanceled(&canceled);
+
+    Boolean bval;
+    Int32 ival;
+    SystemProperties::GetInt32(String("sys.quickboot.enable"), 0, &ival);
+    if (ival == 1) {
+        if (keyCode == IKeyEvent::KEYCODE_POWER && !interactive) {
+            if(down){
+                AcquireQuickBootWakeLock();
+                mHandler->PostDelayed(mQuickBootPowerLongPress.Get(), mLongPressPoweronTime, &bval);
+            }
+            else {
+                ReleaseQuickBootWakeLock();
+                mHandler->RemoveCallbacks(mQuickBootPowerLongPress.Get());
+            }
+        }
+        // ignore this event
+        return NOERROR;
+    }
 
     Boolean isInjected = (policyFlags & IWindowManagerPolicy::FLAG_INJECTED) != 0;
 
@@ -5770,34 +6699,33 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     // the same as if it were open and in front.
     // This will prevent any keys other than the power button from waking the screen
     // when the keyguard is hidden by another activity.
-    Boolean bTemp;
-    Boolean keyguardActive = (mKeyguardDelegate == NULL ? FALSE :
-         (interactive ?
-             (mKeyguardDelegate->IsShowingAndNotOccluded(&bTemp), bTemp) :
-             (mKeyguardDelegate->IsShowing(&bTemp), bTemp)));
+    Boolean keyguardActive = (mKeyguardDelegate == NULL ?
+        FALSE : (interactive
+            ? (mKeyguardDelegate->IsShowingAndNotOccluded(&bval), bval)
+            : (mKeyguardDelegate->IsShowing(&bval), bval)));
 
-    // if (DEBUG_INPUT) {
-    //     Log.d(TAG, "interceptKeyTq keycode=" + keyCode
-    //             + " interactive=" + interactive + " keyguardActive=" + keyguardActive
-    //             + " policyFlags=" + Integer.toHexString(policyFlags));
-    // }
+    if (DEBUG_INPUT) {
+        Logger::D(TAG, "interceptKeyTq keycode=%d interactive=%d keyguardActive=%d policyFlags=%08x",
+            keyCode, interactive, keyguardActive, policyFlags);
+    }
 
     // Basic policy based on screen state and keyguard.
     Int32 result = 0;
     Boolean isWakeKey = (policyFlags & IWindowManagerPolicy::FLAG_WAKE) != 0
-                        || (event->IsWakeKey(&bTemp), bTemp);
-    if (interactive || (isInjected && !isWakeKey))
-    {
+        || (event->IsWakeKey(&bval), bval);
+    if (interactive || (isInjected && !isWakeKey)) {
         // When the screen is on or if the key is injected pass the key to the application.
         result = IWindowManagerPolicy::ACTION_PASS_TO_USER;
         isWakeKey = FALSE;
-    } else if (!interactive && ShouldDispatchInputWhenNonInteractive()) {
+    }
+    else if (!interactive && ShouldDispatchInputWhenNonInteractive()) {
         // If we're currently dozing with the screen on and the keyguard showing, pass the key
         // to the application but preserve its wake key status to make sure we still move
         // from dozing to fully interactive if we would normally go from off to fully
         // interactive.
         result = IWindowManagerPolicy::ACTION_PASS_TO_USER;
-    } else {
+    }
+    else {
         // When the screen is off and the key is not injected, determine whether
         // to wake the device but don't pass the key to the application.
         result = 0;
@@ -5808,8 +6736,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
 
     // If the key would be handled globally, just return the result, don't worry about special
     // key processing.
-    bTemp = FALSE;
-    if (mGlobalKeyManager->ShouldHandleGlobalKey(keyCode, event, &bTemp), bTemp) {
+    if (mGlobalKeyManager->ShouldHandleGlobalKey(keyCode, event, &bval), bval) {
         if (isWakeKey) {
             Int64 eventTime;
             IInputEvent::Probe(event)->GetEventTime(&eventTime);
@@ -5822,201 +6749,274 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     Int32 count;
     event->GetRepeatCount(&count);
     Boolean useHapticFeedback = down
-        && (policyFlags & IWindowManagerPolicy::FLAG_VIRTUAL) != 0
-        && count == 0;
+        && (policyFlags & IWindowManagerPolicy::FLAG_VIRTUAL) != 0 && count == 0;
+
+    // Specific device key handling
+    if (mDeviceKeyHandler != NULL) {
+        // The device only should consume known keys.
+        ECode ec = mDeviceKeyHandler->HandleKeyEvent(event, &bval);
+        if (FAILED(ec)) {
+            Slogger::W(TAG, "Could not dispatch event to device key handler");
+        }
+        if (bval) {
+            return 0;
+        }
+    }
 
     // Handle special keys.
     switch (keyCode) {
     case IKeyEvent::KEYCODE_VOLUME_DOWN:
     case IKeyEvent::KEYCODE_VOLUME_UP:
-    case IKeyEvent::KEYCODE_VOLUME_MUTE:
-        {
-            if (keyCode == IKeyEvent::KEYCODE_VOLUME_DOWN) {
-                if (down) {
-                    if (interactive && !mVolumeDownKeyTriggered
-                            && (flags & IKeyEvent::FLAG_FALLBACK) == 0) {
-                        mVolumeDownKeyTriggered = TRUE;
-                        event->GetDownTime(&mVolumeDownKeyTime);
-                        mVolumeDownKeyConsumedByScreenshotChord = FALSE;
-                        CancelPendingPowerKeyAction();
-                        InterceptScreenshotChord();
-                    }
-                }
-                else {
-                    mVolumeDownKeyTriggered = FALSE;
-                    CancelPendingScreenshotChordAction();
-                }
-            }
-            else if (keyCode == IKeyEvent::KEYCODE_VOLUME_UP) {
-                if (down) {
-                    if (interactive && !mVolumeUpKeyTriggered
-                            && (flags & IKeyEvent::FLAG_FALLBACK) == 0) {
-                        mVolumeUpKeyTriggered = TRUE;
-                        CancelPendingPowerKeyAction();
-                        CancelPendingScreenshotChordAction();
-                    }
-                }
-                else {
-                    mVolumeUpKeyTriggered = FALSE;
-                    CancelPendingScreenshotChordAction();
-                }
-            }
-
-            if (down) {
-                //TODO begin
-                //AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
-                //Boolean bTemp;
-                //if (telecomManager != NULL) {
-                //    if (telecomManager->IsRinging(&bTemp), bTemp) {
-                //        // If an incoming call is ringing, either VOLUME key means
-                //        // "silence ringer".  We handle these keys here, rather than
-                //        // in the InCallScreen, to make sure we'll respond to them
-                //        // even if the InCallScreen hasn't come to the foreground yet.
-                //        // Look for the DOWN event here, to agree with the "fallback"
-                //        // behavior in the InCallScreen.
-                //        Logger::I(TAG, "interceptKeyBeforeQueueing: VOLUME key-down while ringing: Silence ringer!");
-
-                //        // Silence the ringer.  (It's safe to call this
-                //        // even if the ringer has already been silenced.)
-                //        telecomManager->SilenceRinger();
-
-                //        // And *don't* pass this key thru to the current activity
-                //        // (which is probably the InCallScreen.)
-                //        result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
-                //        break;
-                //    }
-                //    if ((telecomManager->IsInCall(&bTemp), bTemp)
-                //            && (result & IWindowManagerPolicy::ACTION_PASS_TO_USER) == 0) {
-                //        // If we are in call but we decided not to pass the key to
-                //        // the application, handle the volume change here.
-                //        AutoPtr<IMediaSessionLegacyHelperHelper> mslHelperHelper;
-                //        CMediaSessionLegacyHelperHelper::AcquireSingleton((IMediaSessionLegacyHelperHelper**)&mslHelperHelper);
-                //        AutoPtr<IMediaSessionLegacyHelper> mslHelper;
-                //        mslHelperHelper->GetHelper(mContext, (IMediaSessionLegacyHelper**)&mslHelper);
-                //        mslHelper->SendVolumeKeyEvent(event, FALSE);
-                //        break;
-                //    }
-                //}
-                //TODO end
-
-                if ((result & IWindowManagerPolicy::ACTION_PASS_TO_USER) == 0) {
-                    // If we aren't passing to the user and no one else
-                    // handled it send it to the session manager to figure
-                    // out.
-                    AutoPtr<IMediaSessionLegacyHelperHelper> mslHelperHelper;
-                    CMediaSessionLegacyHelperHelper::AcquireSingleton((IMediaSessionLegacyHelperHelper**)&mslHelperHelper);
-                    AutoPtr<IMediaSessionLegacyHelper> mslHelper;
-                    mslHelperHelper->GetHelper(mContext, (IMediaSessionLegacyHelper**)&mslHelper);
-                    mslHelper->SendVolumeKeyEvent(event, TRUE);
-                    break;
-                }
-            }
+    case IKeyEvent::KEYCODE_VOLUME_MUTE: {
+        // Eat all down & up keys when using volume wake.
+        // This disables volume control, music control, and "beep" on key up.
+        if (isWakeKey && mVolumeWakeScreen) {
+            mVolumeWakeTriggered = TRUE;
+            break;
         }
-        break;
-
-    case IKeyEvent::KEYCODE_ENDCALL:
-        {
-            result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
-            if (down) {
-                //TODO begin
-                //AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
-                //Boolean hungUp = FALSE;
-                //if (telecomManager != NULL) {
-                //    hungUp = telecomManager->EndCall();
-                //}
-                //InterceptPowerKeyDown(!interactive || hungUp);
-                //TODO end
-            }
-            else {
-                if (InterceptPowerKeyUp(canceled)) {
-                    if ((mEndcallBehavior
-                        & ISettingsSystem::END_BUTTON_BEHAVIOR_HOME/*0x1*/) != 0) {
-                        if (GoHome()) {
-                            break;
-                        }
-                    }
-
-                    if ((mEndcallBehavior
-                        & /*0x2*/ISettingsSystem::END_BUTTON_BEHAVIOR_SLEEP) != 0) {
-                        Int64 eventTime;
-                        IInputEvent::Probe(event)->GetEventTime(&eventTime);
-                        //TODO mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
-                        isWakeKey = FALSE;
-                    }
-                }
-            }
+        else if (mVolumeWakeTriggered && !down) {
+            result &= ~ACTION_PASS_TO_USER;
+            mVolumeWakeTriggered = FALSE;
+            break;
         }
-        break;
-    case IKeyEvent::KEYCODE_POWER:
-        {
-            result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
-            if (down) {
-                Int64 downTime;
-                event->GetDownTime(&downTime);
-                Boolean panic = FALSE;
-                if (panic)
-                {
-                    Boolean isSuccess = FALSE;
-                    mHandler->Post(mRequestTransientNav, &isSuccess);
-                }
 
-                Int32 flags = 0;
-                if (interactive && !mPowerKeyTriggered
-                        && ((event->GetFlags(&flags), flags) & IKeyEvent::FLAG_FALLBACK) == 0) {
-                    mPowerKeyTriggered = TRUE;
-                    event->GetDownTime(&mPowerKeyTime);
+        if (keyCode == IKeyEvent::KEYCODE_VOLUME_DOWN) {
+            if (down) {
+                if (interactive && !mVolumeDownKeyTriggered
+                        && (flags & IKeyEvent::FLAG_FALLBACK) == 0) {
+                    mVolumeDownKeyTriggered = TRUE;
+                    event->GetDownTime(&mVolumeDownKeyTime);
+                    mVolumeDownKeyConsumedByScreenshotChord = FALSE;
+                    CancelPendingPowerKeyAction();
                     InterceptScreenshotChord();
                 }
-
-                //TODO begin no implementation TelecomManager
-                //AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
-                //Boolean hungUp = FALSE;
-                //Boolean bTemp;
-                //if (telecomManager != NULL) {
-                //    if (telecomManager->IsRinging(&bTemp), bTemp) {
-                //        // Pressing Power while there's a ringing incoming
-                //        // call should silence the ringer.
-                //        telecomManager->SilenceRinger();
-                //    } else if ((mIncallPowerBehavior
-                //                & ISettingsSecure::INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
-                //            && (telecomManager->IsInCall(&bTemp), bTemp) && interactive) {
-                //        // Otherwise, if "Power button ends call" is enabled,
-                //        // the Power button will hang up any current active call.
-                //        telecomManager->EndCall(&hungUp);
-                //    }
-                //}
-
-                //InterceptPowerKeyDown(!interactive || hungUp || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered);
-                //TODO end
             }
             else {
-                mPowerKeyTriggered = FALSE;
+                mVolumeDownKeyTriggered = FALSE;
                 CancelPendingScreenshotChordAction();
+            }
+        }
+        else if (keyCode == IKeyEvent::KEYCODE_VOLUME_UP) {
+            if (down) {
+                if (interactive && !mVolumeUpKeyTriggered
+                        && (flags & IKeyEvent::FLAG_FALLBACK) == 0) {
+                    mVolumeUpKeyTriggered = TRUE;
+                    CancelPendingPowerKeyAction();
+                    CancelPendingScreenshotChordAction();
+                }
+            }
+            else {
+                mVolumeUpKeyTriggered = FALSE;
+                CancelPendingScreenshotChordAction();
+            }
+        }
 
-                if (InterceptPowerKeyUp(canceled || mPendingPowerKeyUpCanceled)) {
-                    if (mScreenOnEarly && !mScreenOnFully) {
-                        Slogger::I(TAG, "Suppressed redundant power key press while already in the process of turning the screen on.");
-                    } else {
-                        Int64 eventTime;
-                        IInputEvent::Probe(event)->GetEventTime(&eventTime);
-                        PowerShortPress(eventTime);
+        if (down) {
+
+            AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
+            if (telecomManager != NULL) {
+               if (telecomManager->IsRinging(&bval), bval) {
+                   // If an incoming call is ringing, either VOLUME key means
+                   // "silence ringer".  We handle these keys here, rather than
+                   // in the InCallScreen, to make sure we'll respond to them
+                   // even if the InCallScreen hasn't come to the foreground yet.
+                   // Look for the DOWN event here, to agree with the "fallback"
+                   // behavior in the InCallScreen.
+                   Logger::I(TAG, "interceptKeyBeforeQueueing: VOLUME key-down while ringing: Silence ringer!");
+
+                   // Silence the ringer.  (It's safe to call this
+                   // even if the ringer has already been silenced.)
+                   telecomManager->SilenceRinger();
+
+                   // And *don't* pass this key thru to the current activity
+                   // (which is probably the InCallScreen.)
+                   result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
+                   break;
+               }
+               if ((telecomManager->IsInCall(&bval), bval)
+                       && (result & IWindowManagerPolicy::ACTION_PASS_TO_USER) == 0) {
+                   // If we are in call but we decided not to pass the key to
+                   // the application, handle the volume change here.
+                   AutoPtr<IMediaSessionLegacyHelperHelper> mslHelperHelper;
+                   CMediaSessionLegacyHelperHelper::AcquireSingleton((IMediaSessionLegacyHelperHelper**)&mslHelperHelper);
+                   AutoPtr<IMediaSessionLegacyHelper> mslHelper;
+                   mslHelperHelper->GetHelper(mContext, (IMediaSessionLegacyHelper**)&mslHelper);
+                   mslHelper->SendVolumeKeyEvent(event, FALSE);
+                   break;
+               }
+            }
+        }
+
+        if ((result & IWindowManagerPolicy::ACTION_PASS_TO_USER) == 0) {
+            Boolean mayChangeVolume = FALSE;
+
+            if (IsMusicActive()) {
+                if (mVolBtnMusicControls) {
+                    // Detect long key presses.
+                    if (down) {
+                        mIsLongPress = FALSE;
+                        // Map MUTE key to MEDIA_PLAY_PAUSE
+                        Int32 newKeyCode = IKeyEvent::KEYCODE_MEDIA_PLAY_PAUSE;
+                        switch (keyCode) {
+                            case IKeyEvent::KEYCODE_VOLUME_DOWN:
+                                newKeyCode = IKeyEvent::KEYCODE_MEDIA_PREVIOUS;
+                                break;
+                            case IKeyEvent::KEYCODE_VOLUME_UP:
+                                newKeyCode = IKeyEvent::KEYCODE_MEDIA_NEXT;
+                                break;
+                        }
+                        ScheduleLongPressKeyEvent(event, newKeyCode);
+                        // Consume key down events of all presses.
+                        break;
                     }
+                    else {
+                        mHandler->RemoveMessages(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK);
+                        // Consume key up events of long presses only.
+                        if (mIsLongPress) {
+                            break;
+                        }
+                        // Change volume only on key up events of short presses.
+                        mayChangeVolume = TRUE;
+                    }
+                }
+                else {
+                    // Long key press detection not applicable, change volume only
+                    // on key down events
+                    mayChangeVolume = down;
+                }
+            }
+
+            if (mayChangeVolume) {
+                // If we aren't passing to the user and no one else
+                // handled it send it to the session manager to figure
+                // out.
+
+                // Rewrite the event to use key-down as sendVolumeKeyEvent will
+                // only change the volume on key down.
+                AutoPtr<IKeyEvent> newEvent;
+                CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&newEvent);
+
+                AutoPtr<IMediaSessionLegacyHelperHelper> mslHelperHelper;
+                CMediaSessionLegacyHelperHelper::AcquireSingleton((IMediaSessionLegacyHelperHelper**)&mslHelperHelper);
+                AutoPtr<IMediaSessionLegacyHelper> mslHelper;
+                mslHelperHelper->GetHelper(mContext, (IMediaSessionLegacyHelper**)&mslHelper);
+                mslHelper->SendVolumeKeyEvent(newEvent, TRUE);
+            }
+        }
+
+        break;
+    }
+
+    case IKeyEvent::KEYCODE_HOME:
+        if (down && !interactive && mHomeWakeScreen) {
+            isWakeKey = TRUE;
+        }
+        break;
+
+    case IKeyEvent::KEYCODE_ENDCALL: {
+        result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
+        if (down) {
+            AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
+            Boolean hungUp = FALSE;
+            if (telecomManager != NULL) {
+                telecomManager->EndCall(&hungUp);
+            }
+            InterceptPowerKeyDown(!interactive || hungUp);
+        }
+        else {
+            if (InterceptPowerKeyUp(canceled)) {
+                if ((mEndcallBehavior & ISettingsSystem::END_BUTTON_BEHAVIOR_HOME) != 0) {
+                    if (GoHome()) {
+                        break;
+                    }
+                }
+
+                if ((mEndcallBehavior & ISettingsSystem::END_BUTTON_BEHAVIOR_SLEEP) != 0) {
+                    Int64 eventTime;
+                    IInputEvent::Probe(event)->GetEventTime(&eventTime);
+                    if (mPowerManager) {
+                        mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                    }
+
                     isWakeKey = FALSE;
                 }
-                mPendingPowerKeyUpCanceled = FALSE;
             }
         }
         break;
+    }
+
+    case IKeyEvent::KEYCODE_POWER: {
+        if (mTopFullscreenOpaqueWindowState != NULL) {
+            AutoPtr<IWindowManagerLayoutParams> lp;
+            mTopFullscreenOpaqueWindowState->GetAttrs((IWindowManagerLayoutParams**)&lp);
+            Int32 privateFlags;
+            lp->GetPrivateFlags(&privateFlags);
+            if ((privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_PREVENT_POWER_KEY) != 0
+                && mScreenOnFully) {
+                *bitwise = result;
+                return NOERROR;
+            }
+        }
+
+        result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
+        if (down) {
+            if (interactive && !mPowerKeyTriggered
+                    && (flags & IKeyEvent::FLAG_FALLBACK) == 0) {
+                mPowerKeyTriggered = TRUE;
+                event->GetDownTime(&mPowerKeyTime);
+                InterceptScreenshotChord();
+                InterceptScreenshotLog();
+            }
+
+            AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
+            Boolean hungUp = FALSE;
+            if (telecomManager != NULL) {
+               if (telecomManager->IsRinging(&bval), bval) {
+                   // Pressing Power while there's a ringing incoming
+                   // call should silence the ringer.
+                   telecomManager->SilenceRinger();
+               }
+               else if ((mIncallPowerBehavior & ISettingsSecure::INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
+                    && (telecomManager->IsInCall(&bval), bval) && interactive) {
+                   // Otherwise, if "Power button ends call" is enabled,
+                   // the Power button will hang up any current active call.
+                   telecomManager->EndCall(&hungUp);
+               }
+            }
+
+            InterceptPowerKeyDown(!interactive || hungUp || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered);
+        }
+        else {
+            mPowerKeyTriggered = FALSE;
+            CancelPendingScreenshotChordAction();
+
+            if (InterceptPowerKeyUp(canceled || mPendingPowerKeyUpCanceled)) {
+                if (mScreenOnEarly && !mScreenOnFully) {
+                    Slogger::I(TAG, "Suppressed redundant power key press while already in the process"
+                        " of turning the screen on.");
+                } else {
+                    Int64 eventTime;
+                    IInputEvent::Probe(event)->GetEventTime(&eventTime);
+                    PowerShortPress(eventTime);
+                }
+                isWakeKey = FALSE;
+            }
+            mPendingPowerKeyUpCanceled = FALSE;
+        }
+        break;
+    }
     case IKeyEvent::KEYCODE_SLEEP: {
         result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
-        Boolean bTemp;
-        mPowerManager->IsInteractive(&bTemp);
-        if (!bTemp) {
+        Boolean bval;
+        mPowerManager->IsInteractive(&bval);
+        if (!bval) {
             useHapticFeedback = FALSE; // suppress feedback if already non-interactive
         }
         Int64 eventTime;
         IInputEvent::Probe(event)->GetEventTime(&eventTime);
-        //TODO mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+        if (mPowerManager) {
+            mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+        }
         isWakeKey = FALSE;
         break;
     }
@@ -6035,14 +7035,13 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     case IKeyEvent::KEYCODE_MEDIA_PREVIOUS:
     case IKeyEvent::KEYCODE_MEDIA_REWIND:
     case IKeyEvent::KEYCODE_MEDIA_FAST_FORWARD:
-    case IKeyEvent::KEYCODE_MEDIA_AUDIO_TRACK:
-    {
+    case IKeyEvent::KEYCODE_MEDIA_AUDIO_TRACK: {
         AutoPtr<IMediaSessionLegacyHelperHelper> mslHelperHelper;
         CMediaSessionLegacyHelperHelper::AcquireSingleton((IMediaSessionLegacyHelperHelper**)&mslHelperHelper);
         AutoPtr<IMediaSessionLegacyHelper> mslHelper;
         mslHelperHelper->GetHelper(mContext, (IMediaSessionLegacyHelper**)&mslHelper);
-        Boolean bTemp;
-        if (mslHelper->IsGlobalPriorityActive(&bTemp), bTemp) {
+        Boolean bval;
+        if (mslHelper->IsGlobalPriorityActive(&bval), bval) {
             // If the global session is active pass all media keys to it
             // instead of the active window.
             result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
@@ -6058,31 +7057,30 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
             AutoPtr<IKeyEvent> keyEvent;
             CKeyEvent::New(event, (IKeyEvent**)&keyEvent);
             mHandler->ObtainMessage(MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK,
-            TO_IINTERFACE(keyEvent), (IMessage**)&msg);
+                keyEvent.Get(), (IMessage**)&msg);
             msg->SetAsynchronous(TRUE);
             msg->SendToTarget();
         }
+        break;
     }
-    break;
+
     case IKeyEvent::KEYCODE_CALL: {
         if (down) {
-            ///TODO begin
-            //Boolean bTemp;
-            //AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
-            //if (telecomManager != NULL) {
-            //    if (telecomManager->IsRinging(&bTemp), bTemp) {
-            //        Logger::I(TAG, "interceptKeyBeforeQueueing: CALL key-down while ringing: Answer the call!");
-            //        telecomManager->AcceptRingingCall();
+            AutoPtr<ITelecomManager> telecomManager = GetTelecommService();
+            if (telecomManager != NULL) {
+               if (telecomManager->IsRinging(&bval), bval) {
+                   Logger::I(TAG, "interceptKeyBeforeQueueing: CALL key-down while ringing: Answer the call!");
+                   telecomManager->AcceptRingingCall();
 
-            //        // And *don't* pass this key thru to the current activity
-            //        // (which is presumably the InCallScreen.)
-            //        result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
-            //    }
-            //}
-            //TODO end
+                   // And *don't* pass this key thru to the current activity
+                   // (which is presumably the InCallScreen.)
+                   result &= ~IWindowManagerPolicy::ACTION_PASS_TO_USER;
+               }
+            }
         }
         break;
     }
+
     case IKeyEvent::KEYCODE_VOICE_ASSIST: {
         // Only do this if we would otherwise not pass it to the user. In that case,
         // interceptKeyBeforeDispatching would apply a similar but different policy in
@@ -6092,7 +7090,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
             mBroadcastWakeLock->AcquireLock();
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK,
-            keyguardActive ? 1 : 0, 0, (IMessage**)&msg);
+                keyguardActive ? 1 : 0, 0, (IMessage**)&msg);
             msg->SetAsynchronous(TRUE);
             msg->SendToTarget();
         }
@@ -6102,8 +7100,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     }
 
     if (useHapticFeedback) {
-        Boolean bTemp;
-        PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::VIRTUAL_KEY, FALSE, &bTemp);
+        Boolean bval;
+        PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::VIRTUAL_KEY, FALSE, &bval);
     }
 
     if (isWakeKey) {
@@ -6116,6 +7114,25 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     return NOERROR;
 }
 
+void PhoneWindowManager::ScheduleLongPressKeyEvent(
+    /* [in] */ IKeyEvent* origEvent,
+    /* [in] */ Int32 keyCode)
+{
+    Int64 downTime, eventTime;
+    Int32 action;
+    origEvent->GetDownTime(&downTime);
+    IInputEvent::Probe(origEvent)->GetEventTime(&eventTime);
+    origEvent->GetAction(&action);
+
+    AutoPtr<IKeyEvent> event;
+    CKeyEvent::New(downTime, eventTime, action, keyCode, 0, (IKeyEvent**)&event);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK, event.Get(), (IMessage**)&msg);
+    msg->SetAsynchronous(TRUE);
+    Boolean bval;
+    mHandler->SendMessageDelayed(msg, CViewConfiguration::GetLongPressTimeout(), &bval);
+}
+
 Boolean PhoneWindowManager::IsWakeKeyWhenScreenOff(
     /* [in] */ Int32 keyCode)
 {
@@ -6124,7 +7141,7 @@ Boolean PhoneWindowManager::IsWakeKeyWhenScreenOff(
         case IKeyEvent::KEYCODE_VOLUME_UP:
         case IKeyEvent::KEYCODE_VOLUME_DOWN:
         case IKeyEvent::KEYCODE_VOLUME_MUTE:
-            return mDockMode != IIntent::EXTRA_DOCK_STATE_UNDOCKED;
+            return mVolumeWakeScreen || mDockMode != IIntent::EXTRA_DOCK_STATE_UNDOCKED;
 
         // ignore media and camera keys
         case IKeyEvent::KEYCODE_MUTE:
@@ -6140,9 +7157,39 @@ Boolean PhoneWindowManager::IsWakeKeyWhenScreenOff(
         case IKeyEvent::KEYCODE_MEDIA_FAST_FORWARD:
         case IKeyEvent::KEYCODE_MEDIA_AUDIO_TRACK:
         case IKeyEvent::KEYCODE_CAMERA:
+        case IKeyEvent::KEYCODE_FOCUS:
             return FALSE;
+
+        case IKeyEvent::KEYCODE_BACK:
+            return mBackWakeScreen;
+        case IKeyEvent::KEYCODE_MENU:
+            return mMenuWakeScreen;
+        case IKeyEvent::KEYCODE_ASSIST:
+            return mAssistWakeScreen;
+        case IKeyEvent::KEYCODE_APP_SWITCH:
+            return mAppSwitchWakeScreen;
     }
     return TRUE;
+}
+
+ECode PhoneWindowManager::InterceptMotionBeforeQueueingNonInteractive(
+    /* [in] */ Int64 whenNanos,
+    /* [in] */ Int32 policyFlags,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    if ((policyFlags & IWindowManagerPolicy::FLAG_WAKE) != 0) {
+        mPowerManager->WakeUp(whenNanos / 1000000);
+        *result = 0;
+        return NOERROR;
+    }
+    if (ShouldDispatchInputWhenNonInteractive()) {
+        *result = IWindowManagerPolicy::ACTION_PASS_TO_USER;
+        return NOERROR;
+    }
+    *result = 0;
+    return NOERROR;
 }
 
 Boolean PhoneWindowManager::ShouldDispatchInputWhenNonInteractive()
@@ -6156,6 +7203,42 @@ Boolean PhoneWindowManager::ShouldDispatchInputWhenNonInteractive()
     return FALSE;
 }
 
+void PhoneWindowManager::DispatchMediaKeyWithWakeLock(
+    /* [in] */ IKeyEvent* event)
+{
+    if (DEBUG_INPUT) {
+        Slogger::D(TAG, "dispatchMediaKeyWithWakeLock: %p", event);
+    }
+
+    if (mHavePendingMediaKeyRepeatWithWakeLock) {
+        if (DEBUG_INPUT) {
+            Slogger::D(TAG, "dispatchMediaKeyWithWakeLock: canceled repeat");
+        }
+
+        mHandler->RemoveMessages(MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK);
+        mHavePendingMediaKeyRepeatWithWakeLock = FALSE;
+        mBroadcastWakeLock->ReleaseLock(); // pending repeat was holding onto the wake lock
+    }
+
+    DispatchMediaKeyWithWakeLockToAudioService(event);
+
+    Int32 action, repeatCount;
+    event->GetAction(&action);
+    event->GetRepeatCount(&repeatCount);
+    if (action == IKeyEvent::ACTION_DOWN && repeatCount == 0) {
+        mHavePendingMediaKeyRepeatWithWakeLock = TRUE;
+
+        AutoPtr<IMessage> msg;
+        mHandler->ObtainMessage(MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK, event, (IMessage**)&msg);
+        msg->SetAsynchronous(TRUE);
+        Boolean isSuccess = FALSE;
+        mHandler->SendMessageDelayed(msg, CViewConfiguration::GetKeyRepeatTimeout(), &isSuccess);
+    }
+    else {
+        mBroadcastWakeLock->ReleaseLock();
+    }
+}
+
 void PhoneWindowManager::RequestTransientBars(
     /* [in] */ IWindowState* swipeTarget)
 {
@@ -6166,13 +7249,12 @@ void PhoneWindowManager::RequestTransientBars(
         // Swipe-up for navigation bar is disabled during setup
         return;
     }
-    Boolean sb;
+    Boolean sb, nb;
     mStatusBarController->CheckShowTransientBarLw(&sb);
-    Boolean nb;
     mNavigationBarController->CheckShowTransientBarLw(&nb);
     if (sb || nb) {
         IWindowState* barTarget = sb ? mStatusBar : mNavigationBar;
-        if (sb ^ nb && barTarget != swipeTarget) {
+        if ((sb ^ nb) && barTarget != swipeTarget) {
             if (DEBUG) Slogger::D(TAG, "Not showing transient bar, wrong swipe target");
             return;
         }
@@ -6180,6 +7262,15 @@ void PhoneWindowManager::RequestTransientBars(
         if (nb) mNavigationBarController->ShowTransient();
         mImmersiveModeConfirmation->ConfirmCurrentPrompt();
         UpdateSystemUiVisibilityLw();
+    }
+}
+
+void PhoneWindowManager::DisableQbCharger()
+{
+    Int32 ival;
+    SystemProperties::GetInt32(String("sys.quickboot.enable"), 0, &ival);
+    if (ival == 1) {
+        SystemProperties::Set(String("sys.qbcharger.enable"), String("false"));
     }
 }
 
@@ -6220,7 +7311,7 @@ void PhoneWindowManager::FinishScreenTurningOn()
     Boolean enableScreen;
     {
         AutoLock lock(mLock);
-        //if (DEBUG_WAKEUP) Slog.d(TAG,
+        //if (DEBUG_WAKEUP) Slogger::D(TAG,
         //        "finishScreenTurningOn: mAwake=" + mAwake
         //        + ", mScreenOnEarly=" + mScreenOnEarly
         //        + ", mScreenOnFully=" + mScreenOnFully
@@ -6277,60 +7368,6 @@ void PhoneWindowManager::HandleHideBootMessage()
         if (DEBUG_WAKEUP) Slogger::D(TAG, "handleHideBootMessage: dismissing");
         mBootMsgDialog->Dismiss();
         mBootMsgDialog = NULL;
-    }
-}
-
-ECode PhoneWindowManager::InterceptMotionBeforeQueueingNonInteractive(
-    /* [in] */ Int64 whenNanos,
-    /* [in] */ Int32 policyFlags,
-    /* [out] */ Int32* result)
-{
-    if ((policyFlags & IWindowManagerPolicy::FLAG_WAKE) != 0) {
-        mPowerManager->WakeUp(whenNanos / 1000000);
-        *result = 0;
-        return NOERROR;
-    }
-    if (ShouldDispatchInputWhenNonInteractive()) {
-        *result = IWindowManagerPolicy::ACTION_PASS_TO_USER;
-        return NOERROR;
-    }
-    *result = 0;
-    return NOERROR;
-}
-
-void PhoneWindowManager::DispatchMediaKeyWithWakeLock(
-    /* [in] */ IKeyEvent* event)
-{
-    if (DEBUG_INPUT) {
-        Slogger::D(TAG, "dispatchMediaKeyWithWakeLock: %p", event);
-    }
-
-    if (mHavePendingMediaKeyRepeatWithWakeLock) {
-        if (DEBUG_INPUT) {
-            Slogger::D(TAG, "dispatchMediaKeyWithWakeLock: canceled repeat");
-        }
-
-        mHandler->RemoveMessages(MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK);
-        mHavePendingMediaKeyRepeatWithWakeLock = FALSE;
-        mBroadcastWakeLock->ReleaseLock(); // pending repeat was holding onto the wake lock
-    }
-
-    DispatchMediaKeyWithWakeLockToAudioService(event);
-
-    Int32 action, repeatCount;
-    event->GetAction(&action);
-    event->GetRepeatCount(&repeatCount);
-    if (action == IKeyEvent::ACTION_DOWN && repeatCount == 0) {
-        mHavePendingMediaKeyRepeatWithWakeLock = TRUE;
-
-        AutoPtr<IMessage> msg;
-        mHandler->ObtainMessage(MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK, event, (IMessage**)&msg);
-        msg->SetAsynchronous(TRUE);
-        Boolean isSuccess = FALSE;
-        mHandler->SendMessageDelayed(msg, CViewConfiguration::GetKeyRepeatTimeout(), &isSuccess);
-    }
-    else {
-        mBroadcastWakeLock->ReleaseLock();
     }
 }
 
@@ -6407,6 +7444,9 @@ ECode PhoneWindowManager::WakingUp()
     //TODO EventLog.writeEvent(70000, 1);
     if (DEBUG_WAKEUP) Slogger::I(TAG, "Waking up...");
 
+    // To disable qbcharger process when screen turning on
+    DisableQbCharger();
+
     // Since goToSleep performs these functions synchronously, we must
     // do the same here.  We cannot post this work to a handler because
     // that might cause it to become reordered with respect to what
@@ -6429,7 +7469,8 @@ ECode PhoneWindowManager::WakingUp()
     if (mKeyguardDelegate != NULL) {
         mKeyguardDelegate->OnScreenTurnedOn(mKeyguardDelegateCallback);
         // ... eventually calls finishKeyguardDrawn
-    } else {
+    }
+    else {
         if (DEBUG_WAKEUP) Slogger::D(TAG, "null mKeyguardDelegate: setting mKeyguardDrawComplete.");
         FinishKeyguardDrawn();
     }
@@ -6551,8 +7592,8 @@ ECode PhoneWindowManager::InKeyguardRestrictedKeyInputMode(
 
 ECode PhoneWindowManager::DismissKeyguardLw()
 {
-    Boolean bTemp;
-    if (mKeyguardDelegate != NULL && (mKeyguardDelegate->IsShowing(&bTemp), bTemp)) {
+    Boolean bval;
+    if (mKeyguardDelegate != NULL && (mKeyguardDelegate->IsShowing(&bval), bval)) {
         Boolean isSuccess = FALSE;
         mHandler->Post(new KeyguardDelegateKeyguardDismiss(this), &isSuccess);
     }
@@ -6561,8 +7602,7 @@ ECode PhoneWindowManager::DismissKeyguardLw()
 
 ECode PhoneWindowManager::NotifyActivityDrawnForKeyguardLw()
 {
-    if (mKeyguardDelegate != NULL)
-    {
+    if (mKeyguardDelegate != NULL) {
         Boolean isSuccess = FALSE;
         mHandler->Post(new KeyguardDelegateActivityDrawn(this), &isSuccess);
     }
@@ -6573,7 +7613,8 @@ ECode PhoneWindowManager::IsKeyguardDrawnLw(
     /* [out] */ Boolean* result)
 {
     AutoLock lock(mLock);
-    return mKeyguardDrawnOnce;
+    *result = mKeyguardDrawnOnce;
+    return NOERROR;
 }
 
 ECode PhoneWindowManager::StartKeyguardExitAnimation(
@@ -6636,49 +7677,64 @@ ECode PhoneWindowManager::RotationForOrientationLw(
     }
 
     Int32 preferredRotation;
-    if (mLidState == IWindowManagerPolicyWindowManagerFuncs::LID_OPEN && mLidOpenRotation >= 0) {
-        // Ignore sensor when lid switch is open and rotation is forced.
+    if (mLidState == IWindowManagerPolicyWindowManagerFuncs::LID_OPEN
+        && !(mHasRemovableLid
+            && mDockMode == IIntent::EXTRA_DOCK_STATE_UNDOCKED)) {
+        // Ignore sensor when lid switch is open and rotation is forced
+        // and a removable lid was not undocked.
         preferredRotation = mLidOpenRotation;
-    } else if (mDockMode == IIntent::EXTRA_DOCK_STATE_CAR
-            && (mCarDockEnablesAccelerometer || mCarDockRotation >= 0)) {
+    }
+    else if (mDockMode == IIntent::EXTRA_DOCK_STATE_CAR
+        && (mCarDockEnablesAccelerometer || mCarDockRotation >= 0)) {
         // Ignore sensor when in car dock unless explicitly enabled.
         // This case can override the behavior of NOSENSOR, and can also
         // enable 180 degree rotation while docked.
         preferredRotation = mCarDockEnablesAccelerometer
                 ? sensorRotation : mCarDockRotation;
-    } else if ((mDockMode == IIntent::EXTRA_DOCK_STATE_DESK
+    }
+    else if ((mDockMode == IIntent::EXTRA_DOCK_STATE_DESK
             || mDockMode == IIntent::EXTRA_DOCK_STATE_LE_DESK
             || mDockMode == IIntent::EXTRA_DOCK_STATE_HE_DESK)
-            && (mDeskDockEnablesAccelerometer || mDeskDockRotation >= 0)) {
+        && (mDeskDockEnablesAccelerometer || mDeskDockRotation >= 0)) {
         // Ignore sensor when in desk dock unless explicitly enabled.
         // This case can override the behavior of NOSENSOR, and can also
         // enable 180 degree rotation while docked.
         preferredRotation = mDeskDockEnablesAccelerometer
                 ? sensorRotation : mDeskDockRotation;
-    } else if (mHdmiPlugged && mDemoHdmiRotationLock) {
-        // Ignore sensor when plugged into HDMI.
+    }
+    else if ((mHdmiPlugged || mWifiDisplayConnected) && mDemoHdmiRotationLock) {
+        // Ignore sensor when plugged into HDMI when demo HDMI rotation lock enabled.
         // Note that the dock orientation overrides the HDMI orientation.
         preferredRotation = mDemoHdmiRotation;
-    } else if (mHdmiPlugged && mDockMode == IIntent::EXTRA_DOCK_STATE_UNDOCKED
-                                && mUndockedHdmiRotation >= 0) {
+    }
+    else if ( mWifiDisplayConnected && (mWifiDisplayCustomRotation > -1)) {
+        // Ignore sensor when WFD is active and UIBC rotation is enabled
+        preferredRotation = mWifiDisplayCustomRotation;
+    }
+    else if (mHdmiPlugged && mDockMode == IIntent::EXTRA_DOCK_STATE_UNDOCKED
+            && mUndockedHdmiRotation >= 0) {
         // Ignore sensor when plugged into HDMI and an undocked orientation has
         // been specified in the configuration (only for legacy devices without
         // full multi-display support).
         // Note that the dock orientation overrides the HDMI orientation.
         preferredRotation = mUndockedHdmiRotation;
-    } else if (orientation == IActivityInfo::SCREEN_ORIENTATION_LOCKED) {
+    }
+    else if (orientation == IActivityInfo::SCREEN_ORIENTATION_LOCKED) {
         // Application just wants to remain locked in the last rotation.
         preferredRotation = lastRotation;
-    } else if (!mSupportAutoRotation) {
+    }
+    else if (!mSupportAutoRotation) {
         // If we don't support auto-rotation then bail out here and ignore
         // the sensor and any rotation lock settings.
         preferredRotation = -1;
-    } else if ((mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_FREE
-                    && (orientation == IActivityInfo::SCREEN_ORIENTATION_USER
-                            || orientation == IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
-                            || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_LANDSCAPE
-                            || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_PORTRAIT
-                            || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER))
+    }
+
+    else if ((mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_FREE
+                && (orientation == IActivityInfo::SCREEN_ORIENTATION_USER
+                    || orientation == IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
+                    || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_LANDSCAPE
+                    || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_PORTRAIT
+                    || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER))
             || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR
             || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_SENSOR
             || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -6694,18 +7750,40 @@ ECode PhoneWindowManager::RotationForOrientationLw(
             Boolean isAllowAllRotations = FALSE;
             resources->GetBoolean(R::bool_::config_allowAllRotations, &isAllowAllRotations);
             mAllowAllRotations = isAllowAllRotations? 1 : 0;
-
         }
-        if (sensorRotation != ISurface::ROTATION_180
-                || mAllowAllRotations == 1
-                || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_SENSOR
-                || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER) {
+
+        // Rotation setting bitmask
+        // 1=0 2=90 4=180 8=270
+        Boolean allowed = true;
+        if (mUserRotationAngles < 0) {
+            // Not set by user so use these defaults
+            mUserRotationAngles = mAllowAllRotations == 1 ?
+                    (1 | 2 | 4 | 8) : // All angles
+                        (1 | 2 | 8); // All except 180
+        }
+        switch (sensorRotation) {
+            case ISurface::ROTATION_0:
+                allowed = (mUserRotationAngles & 1) != 0;
+                break;
+            case ISurface::ROTATION_90:
+                allowed = (mUserRotationAngles & 2) != 0;
+                break;
+            case ISurface::ROTATION_180:
+                allowed = (mUserRotationAngles & 4) != 0;
+                break;
+            case ISurface::ROTATION_270:
+                allowed = (mUserRotationAngles & 8) != 0;
+                break;
+        }
+        if (allowed) {
             preferredRotation = sensorRotation;
-        } else {
+        }
+        else {
             preferredRotation = lastRotation;
         }
-    } else if (mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_LOCKED
-            && orientation != IActivityInfo::SCREEN_ORIENTATION_NOSENSOR) {
+    }
+    else if (mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_LOCKED
+        && orientation != IActivityInfo::SCREEN_ORIENTATION_NOSENSOR) {
         // Apply rotation lock.  Does not apply to NOSENSOR.
         // The idea is that the user rotation expresses a weak preference for the direction
         // of gravity and as NOSENSOR is never affected by gravity, then neither should
@@ -6849,8 +7927,11 @@ ECode PhoneWindowManager::GetUserRotationMode(
     AutoPtr<IContentResolver> res;
     mContext->GetContentResolver((IContentResolver**)&res);
     Int32 value;
-    Settings::System::GetInt32ForUser(res, ISettingsSystem::ACCELEROMETER_ROTATION, 0, IUserHandle::USER_CURRENT, &value);
-    *result = value != 0 ?  IWindowManagerPolicy::USER_ROTATION_FREE : IWindowManagerPolicy::USER_ROTATION_LOCKED;
+    Settings::System::GetInt32ForUser(res,
+        ISettingsSystem::ACCELEROMETER_ROTATION, 0,
+        IUserHandle::USER_CURRENT, &value);
+    *result = value != 0
+        ?  IWindowManagerPolicy::USER_ROTATION_FREE : IWindowManagerPolicy::USER_ROTATION_LOCKED;
     return NOERROR;
 }
 
@@ -6909,18 +7990,15 @@ AutoPtr< ArrayOf<Int64> > PhoneWindowManager::GetLongIntArray(
     return out;
 }
 
-AutoPtr<IIDreamManager> PhoneWindowManager::GetDreamManager()
-{
-    AutoPtr<IIDreamManager> dreamManager;
-    AutoPtr<IInterface> tmpObj = ServiceManager::CheckService(IDreamService::DREAM_SERVICE);
-    dreamManager = IIDreamManager::Probe(tmpObj.Get());
-    return dreamManager;
-}
-
 ECode PhoneWindowManager::SystemReady()
 {
     CKeyguardServiceDelegate::New(mContext, NULL, (IKeyguardServiceDelegate**)&mKeyguardDelegate);
     mKeyguardDelegate->OnSystemReady();
+
+    Logger::E(TAG, " =========TODO needs EdgeGestureManager!");
+    // mEdgeGestureManager = EdgeGestureManager.getInstance();
+    // mEdgeGestureManager.setEdgeGestureActivationListener(mEdgeGestureActivationListener);
+
     ReadCameraLensCoverState();
     UpdateUiMode();
 
@@ -6929,12 +8007,7 @@ ECode PhoneWindowManager::SystemReady()
     mSystemReady = TRUE;
     AutoPtr<UpdateSettingRunnable> updateSettingRunnable = new UpdateSettingRunnable(this);
     Boolean isSuccess = FALSE;
-    ECode ec = mHandler->Post(updateSettingRunnable, &isSuccess);
-    if (FAILED(ec)) {
-        Logger::E(TAG, " =========PhoneWindowManager::SystemReady() %08x", ec);
-        assert(0 && "TODO");
-    }
-    return ec;
+    return mHandler->Post(updateSettingRunnable, &isSuccess);
 }
 
 ECode PhoneWindowManager::SystemBooted()
@@ -6956,7 +8029,15 @@ ECode PhoneWindowManager::ShowBootMessage(
     /* [in] */ ICharSequence* msg,
     /* [in] */ Boolean always)
 {
-    AutoPtr<BootMsgRunnable> bootMsgRunnable = new BootMsgRunnable(this, msg);
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    String str;
+    res->GetString(R::string::android_installing_apk, &str);
+    String msgStr = Object::ToString(msg);
+    Int32 titleRes = str.Equals(msgStr) ? R::string::android_installing_title
+        : R::string::android_upgrading_title;
+
+    AutoPtr<BootMsgRunnable> bootMsgRunnable = new BootMsgRunnable(this, msg, titleRes);
     Boolean isSuccess = FALSE;
     return mHandler->Post(bootMsgRunnable, & isSuccess);
 }
@@ -7008,16 +8089,17 @@ ECode PhoneWindowManager::LockNow(
 void PhoneWindowManager::UpdateLockScreenTimeout()
 {
     AutoLock lock(mScreenLockTimeout);
-    Boolean bTemp;
-    Boolean enable = (mAllowLockscreenWhenOn && mAwake &&
-             mKeyguardDelegate != NULL && (mKeyguardDelegate->IsSecure(&bTemp), bTemp));
+    Boolean bval;
+    Boolean enable = (mAllowLockscreenWhenOn && mAwake
+        && mKeyguardDelegate != NULL && (mKeyguardDelegate->IsSecure(&bval), bval));
     if (mLockScreenTimerActive != enable) {
         if (enable) {
-            // if (localLOGV) Log.v(TAG, "setting lockscreen timer");
+            if (localLOGV) Logger::V(TAG, "setting lockscreen timer");
             Boolean isSuccess = FALSE;
             mHandler->PostDelayed(mScreenLockTimeout, mLockScreenTimeout, &isSuccess);
-        } else {
-            // if (localLOGV) Log.v(TAG, "clearing lockscreen timer");
+        }
+        else {
+            if (localLOGV) Logger::V(TAG, "clearing lockscreen timer");
             mHandler->RemoveCallbacks(mScreenLockTimeout);
         }
         mLockScreenTimerActive = enable;
@@ -7036,7 +8118,9 @@ ECode PhoneWindowManager::EnableScreenAfterBoot()
 void PhoneWindowManager::ApplyLidSwitchState()
 {
     if (mLidState == IWindowManagerPolicyWindowManagerFuncs::LID_CLOSED && mLidControlsSleep) {
-        //TODO mPowerManager->GoToSleep(SystemClock::GetUptimeMillis(), IPowerManager::GO_TO_SLEEP_REASON_LID_SWITCH, IPowerManager::GO_TO_SLEEP_FLAG_NO_DOZE);
+        mPowerManager->GoToSleep(SystemClock::GetUptimeMillis(),
+            IPowerManager::GO_TO_SLEEP_REASON_LID_SWITCH,
+            IPowerManager::GO_TO_SLEEP_FLAG_NO_DOZE);
     }
 
     {
@@ -7112,26 +8196,25 @@ AutoPtr<IIntent> PhoneWindowManager::CreateHomeDockIntent()
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IResolveInfo> info;
-    pm->ResolveActivityAsUser(
-            intent,
-            IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA,
-            mCurrentUserId, (IResolveInfo**)&info);
+    pm->ResolveActivityAsUser(intent,
+        IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA,
+        mCurrentUserId, (IResolveInfo**)&info);
     if (info != NULL) {
         info->GetActivityInfo((IActivityInfo**)&ai);
     }
 
     if (ai != NULL) {
+        IPackageItemInfo* pi = IPackageItemInfo::Probe(ai);
         AutoPtr<IBundle> metaData;
-        IPackageItemInfo::Probe(ai)->GetMetaData((IBundle**)&metaData);
+        pi->GetMetaData((IBundle**)&metaData);
         if (metaData != NULL) {
-            Boolean bTemp;
-            if (metaData->GetBoolean(IIntent::METADATA_DOCK_HOME, &bTemp), bTemp) {
-                intent = NULL;
-                CIntent::New((IIntent**)&intent);
-                String packageName;
-                String name;
-                IPackageItemInfo::Probe(ai)->GetPackageName(&packageName);
-                IPackageItemInfo::Probe(ai)->GetName(&name);
+            Boolean bval;
+            if (metaData->GetBoolean(IIntent::METADATA_DOCK_HOME, &bval), bval) {
+                AutoPtr<IIntent> newIntent;
+                CIntent::New(intent, (IIntent**)&newIntent);
+                String packageName, name;
+                pi->GetPackageName(&packageName);
+                pi->GetName(&name);
                 intent->SetClassName(packageName, name);
                 return intent;
             }
@@ -7224,15 +8307,6 @@ Boolean PhoneWindowManager::GoHome()
     return TRUE;
 }
 
-//TODO start TelecomManager is not implemented
-//AutoPtr<ITelecomManager> PhoneWindowManager::GetTelecommService()
-//{
-    // AutoPtr<IInterface> service;
-    // mContext->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
-//    return ITelecomManager::Probe(service);
-//}
-//TODO end
-
 ECode PhoneWindowManager::SetCurrentOrientationLw(
     /* [in] */ Int32 newOrientation)
 {
@@ -7300,7 +8374,7 @@ ECode PhoneWindowManager::PerformHapticFeedbackLw(
     Boolean hapticsDisabled = FALSE;
     Int32 value;
     Settings::System::GetInt32ForUser(contentResolver,
-            ISettingsSystem::HAPTIC_FEEDBACK_ENABLED, 0, IUserHandle::USER_CURRENT, &value);
+        ISettingsSystem::HAPTIC_FEEDBACK_ENABLED, 0, IUserHandle::USER_CURRENT, &value);
     hapticsDisabled = value == 0;
     if (hapticsDisabled && !always) {
          *isSucceed = FALSE;
@@ -7333,6 +8407,7 @@ ECode PhoneWindowManager::PerformHapticFeedbackLw(
             *isSucceed = FALSE;
            return NOERROR;
     }
+
     Int32 owningUid;
     String owningPackage;
     if (win != NULL) {
@@ -7346,7 +8421,8 @@ ECode PhoneWindowManager::PerformHapticFeedbackLw(
     if (pattern->GetLength() == 1) {
         // One-shot vibration
         mVibrator->Vibrate(owningUid, owningPackage, (*pattern)[0], VIBRATION_ATTRIBUTES);
-    } else {
+    }
+    else {
         // Pattern vibration
         mVibrator->Vibrate(owningUid, owningPackage, pattern, -1, VIBRATION_ATTRIBUTES);
     }
@@ -7361,8 +8437,8 @@ ECode PhoneWindowManager::KeepScreenOnStartedLw()
 
 ECode PhoneWindowManager::KeepScreenOnStoppedLw()
 {
-    Boolean bTemp;
-    if (mKeyguardDelegate != NULL && !(mKeyguardDelegate->IsShowingAndNotOccluded(&bTemp), bTemp)) {
+    Boolean bval;
+    if (mKeyguardDelegate != NULL && !(mKeyguardDelegate->IsShowingAndNotOccluded(&bval), bval)) {
         mPowerManager->UserActivity(SystemClock::GetUptimeMillis(), FALSE);
     }
 
@@ -7382,7 +8458,8 @@ Int32 PhoneWindowManager::UpdateSystemUiVisibilityLw()
     win->GetAttrs((IWindowManagerLayoutParams**)&tmp);
     Int32 privateFlags = 0;
     tmp->GetPrivateFlags(&privateFlags);
-    if ((privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0 && mHideLockScreen == TRUE) {
+    if ((privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0
+        && mHideLockScreen == TRUE) {
         // We are updating at a point where the keyguard has gotten
         // focus, but we were last in a state where the top window is
         // hiding it.  This is probably because the keyguard as been
@@ -7392,24 +8469,46 @@ Int32 PhoneWindowManager::UpdateSystemUiVisibilityLw()
         return 0;
     }
 
-    Int32 uiVisiable = WindowManagerPolicyControl::GetSystemUiVisibility(win, NULL);
-    Int32 visibility = uiVisiable & ~mResettingSystemUiFlags;
-    visibility &= ~mForceClearedSystemUiFlags;
+    Int32 tmpVisibility = WindowManagerPolicyControl::GetSystemUiVisibility(win, NULL);
+    tmpVisibility &= ~mResettingSystemUiFlags;
+    tmpVisibility &= ~mForceClearedSystemUiFlags;
 
-    if (mForcingShowNavBar) {
-        Int32 sl;
-        win->GetSurfaceLayer(&sl);
-        if (sl < mForcingShowNavBarLayer) {
-            Int32 fgs = WindowManagerPolicyControl::AdjustClearableFlags(win, IView::SYSTEM_UI_CLEARABLE_FLAGS);
-            visibility &= ~fgs;
-        }
+    Int32 surfaceLayer;
+    win->GetSurfaceLayer(&surfaceLayer);
+    Boolean wasCleared = mClearedBecauseOfForceShow;
+    if (mForcingShowNavBar && surfaceLayer < mForcingShowNavBarLayer) {
+        tmpVisibility &=
+            ~WindowManagerPolicyControl::AdjustClearableFlags(win, IView::SYSTEM_UI_CLEARABLE_FLAGS);
+        mClearedBecauseOfForceShow = TRUE;
+    }
+    else {
+        mClearedBecauseOfForceShow = FALSE;
     }
 
-    visibility = UpdateSystemBarsLw(win, mLastSystemUiFlags, visibility);
+    // The window who requested navbar force showing disappeared and next window wants
+    // to hide navbar. Instead of hiding we will make it transient. SystemUI will take care
+    // about hiding after timeout. This should not happen if next window is keyguard because
+    // transient state have more priority than translucent (why?) and cause bad UX
+    if (wasCleared && !mClearedBecauseOfForceShow
+            && (tmpVisibility & IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0) {
+        mNavigationBarController->ShowTransient();
+        tmpVisibility |= IView::NAVIGATION_BAR_TRANSIENT;
+        mWindowManagerFuncs->AddSystemUIVisibilityFlag(IView::NAVIGATION_BAR_TRANSIENT);
+    }
+
+    Boolean topWindowWasKeyguard = mTopWindowIsKeyguard;
+    mTopWindowIsKeyguard = (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0;
+    if (topWindowWasKeyguard && !mTopWindowIsKeyguard
+            && (tmpVisibility & IView::SYSTEM_UI_FLAG_FULLSCREEN) != 0) {
+        mStatusBarController->ShowTransient();
+        tmpVisibility |= IView::STATUS_BAR_TRANSIENT;
+        mWindowManagerFuncs->AddSystemUIVisibilityFlag(IView::STATUS_BAR_TRANSIENT);
+    }
+
+    Int32 visibility = UpdateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
     Int32 diff = visibility ^ mLastSystemUiFlags;
     Boolean needsMenu = FALSE;
     win->GetNeedsMenuLw(mTopFullscreenOpaqueWindowState, &needsMenu);
-
     AutoPtr<IApplicationToken> appToken;
     win->GetAppToken((IApplicationToken**)&appToken);
     if (diff == 0 && mLastFocusNeedsMenu == needsMenu
@@ -7483,10 +8582,10 @@ Int32 PhoneWindowManager::UpdateSystemBarsLw(
         mNavigationBar != NULL &&
         hideNavBarSysui && immersiveSticky;
 
-    Boolean bTemp;
-    Boolean denyTransientStatus = (mStatusBarController->IsTransientShowRequested(&bTemp), bTemp)
+    Boolean bval;
+    Boolean denyTransientStatus = (mStatusBarController->IsTransientShowRequested(&bval), bval)
         && !transientStatusBarAllowed && hideStatusBarSysui;
-    Boolean denyTransientNav = (mNavigationBarController->IsTransientShowRequested(&bTemp), bTemp)
+    Boolean denyTransientNav = (mNavigationBarController->IsTransientShowRequested(&bval), bval)
         && !transientNavBarAllowed;
     if (denyTransientStatus || denyTransientNav) {
         // clear the clearable flags instead
@@ -7541,60 +8640,16 @@ Boolean PhoneWindowManager::IsImmersiveMode(
  */
 Boolean PhoneWindowManager::AreTranslucentBarsAllowed()
 {
-    Boolean bTemp;
+    Boolean bval;
     return mTranslucentDecorEnabled
-        && !(mAccessibilityManager->IsTouchExplorationEnabled(&bTemp), bTemp);
-}
-
-Boolean PhoneWindowManager::ProcessKeyguardSetHiddenResultLw(
-    /* [in] */ Int32 setHiddenResult)
-{
-    if (setHiddenResult
-            == IIKeyguardServiceConstants::KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_SET_FLAGS) {
-        AutoPtr<IWindowManagerLayoutParams> attrs;
-        mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
-        Int32 privateFlags;
-        attrs->GetPrivateFlags(&privateFlags);
-        attrs->SetPrivateFlags(privateFlags|IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD);
-        Int32 flags;
-        attrs->GetFlags(&flags);
-        attrs->SetFlags(flags|IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
-        return TRUE;
-    } else if (setHiddenResult
-            == IIKeyguardServiceConstants::KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_UNSET_FLAGS) {
-        AutoPtr<IWindowManagerLayoutParams> attrs;
-        mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
-        Int32 privateFlags;
-        attrs->GetPrivateFlags(&privateFlags);
-        attrs->SetPrivateFlags(privateFlags & ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD);
-        Int32 flags;
-        attrs->GetFlags(&flags);
-        attrs->SetFlags(flags | ~IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-Boolean PhoneWindowManager::IsStatusBarKeyguard()
-{
-    if (mStatusBar != NULL)
-    {
-        AutoPtr<IWindowManagerLayoutParams> attrs;
-        mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
-        Int32 privateFlags;
-        attrs->GetPrivateFlags(&privateFlags);
-        if (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD)
-            return TRUE;
-    }
-    return FALSE;
+        && !(mAccessibilityManager->IsTouchExplorationEnabled(&bval), bval);
 }
 
 ECode PhoneWindowManager::HasNavigationBar(
     /* [out] */ Boolean* has)
 {
-    assert(has != NULL);
-    *has = mHasNavigationBar;
+    VALIDATE_NOT_NULL(has)
+    *has = mHasNavigationBar || mDevForceNavbar;
     return NOERROR;
 }
 
@@ -7610,6 +8665,10 @@ ECode PhoneWindowManager::SetLastInputMethodWindowLw(
 ECode PhoneWindowManager::HasPermanentMenuKey(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    Boolean bval;
+    HasNavigationBar(&bval);
+    *result = !bval && mHasPermanentMenuKey;;
     return NOERROR;
 }
 
@@ -7619,6 +8678,8 @@ ECode PhoneWindowManager::HasPermanentMenuKey(
 ECode PhoneWindowManager::NeedsNavigationBar(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = mHasNavigationBar;
     return NOERROR;
 }
 

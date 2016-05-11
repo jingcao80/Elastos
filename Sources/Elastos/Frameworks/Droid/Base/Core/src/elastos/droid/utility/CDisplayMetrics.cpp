@@ -18,10 +18,8 @@ namespace Utility {
 
 static Int32 InitDENSITY_DEVICE()
 {
-    Int32 ro;
-    SystemProperties::GetInt32(String("ro.sf.lcd_density"),
-            IDisplayMetrics::DENSITY_DEFAULT, &ro);
-    Int32 result;
+    Int32 ro, result;
+    SystemProperties::GetInt32(String("ro.sf.lcd_density"), IDisplayMetrics::DENSITY_DEFAULT, &ro);
     SystemProperties::GetInt32(String("qemu.sf.lcd_density"), ro, &result);
     return result;
 }

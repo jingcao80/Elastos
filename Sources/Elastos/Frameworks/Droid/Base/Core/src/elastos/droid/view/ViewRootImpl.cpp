@@ -123,7 +123,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
 #ifndef TRACE_IN_TERMINAL
-#define TRACE_IN_TERMINAL          1
+#define TRACE_IN_TERMINAL          0
 #endif
 
 namespace Elastos {
@@ -4042,7 +4042,7 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->SetScreenDensity(scalingRequired ? mNoncompatDensity : 0);
     mAttachInfo->mIgnoreDirtyState = FALSE;
 
-    Logger::I(TAG, " ViewRootImpl::DrawSoftware %s xoff:%d, yoff:%d", TO_CSTR(mView), xoff, yoff);
+    // Logger::I(TAG, " ViewRootImpl::DrawSoftware %s xoff:%d, yoff:%d", TO_CSTR(mView), xoff, yoff);
     mView->Draw(canvas);
 
     if (!attachInfo->mSetIgnoreDirtyState) {

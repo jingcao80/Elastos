@@ -28,9 +28,6 @@ public:
         /* [in] */ Int32 index,
         /* [in] */ Int32 factor);
 
-private:
-    static CARAPI_(Boolean) InitStatic();
-
 public:
     Int32 INDEX;
     Int32 FLAG;
@@ -44,9 +41,6 @@ public:
     const static AutoPtr<CEdgeGesturePosition> BOTTOM;
     const static AutoPtr<CEdgeGesturePosition> RIGHT;
     const static AutoPtr<CEdgeGesturePosition> TOP;
-
-private:
-    static Boolean sInit;
 };
 
 } // namespace Gesture

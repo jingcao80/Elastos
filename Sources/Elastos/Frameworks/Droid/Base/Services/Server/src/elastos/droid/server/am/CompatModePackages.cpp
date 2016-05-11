@@ -39,6 +39,9 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
+const String CompatModePackages::TAG("CompatModePackages");
+const Boolean CompatModePackages::DEBUG_CONFIGURATION = TRUE;
+
 const Int32 CompatModePackages::COMPAT_FLAG_DONT_ASK;
 const Int32 CompatModePackages::COMPAT_FLAG_ENABLED;
 
@@ -63,30 +66,37 @@ CompatModePackages::CompatModePackages(
     /* [in] */ CActivityManagerService* service,
     /* [in] */ IFile* systemDir,
     /* [in] */ IHandler* handler)
-    : TAG(CActivityManagerService::TAG)
-    , DEBUG_CONFIGURATION(CActivityManagerService::DEBUG_CONFIGURATION)
-    , mService(service)
+    : mService(service)
 {
-    AutoPtr<IFile> file;
-    CFile::New(systemDir, String("packages-compat.xml"), (IFile**)&file);
-    CAtomicFile::New(file, (IAtomicFile**)&mFile);
     AutoPtr<ILooper> looper;
     handler->GetLooper((ILooper**)&looper);
     mHandler = new CompatHandler(looper, this);
 
+    AutoPtr<IFile> file;
+    CFile::New(systemDir, String("packages-compat.xml"), (IFile**)&file);
+    CAtomicFile::New(file, (IAtomicFile**)&mFile);
+
+    if (DEBUG_CONFIGURATION) {
+        Slogger::I(TAG, "reading compat-packages: %s", TO_CSTR(file));
+    }
+
+    Int32 eventType;
+    String nullStr;
     AutoPtr<IFileInputStream> fis;
 //     try {
     AutoPtr<IXmlPullParser> parser;
-    FAIL_GOTO(mFile->OpenRead((IFileInputStream**)&fis), Exit);
+    ECode ec = mFile->OpenRead((IFileInputStream**)&fis);
+    FAIL_GOTO(ec, Exit);
     Xml::NewPullParser((IXmlPullParser**)&parser);
-    FAIL_GOTO(parser->SetInput(IInputStream::Probe(fis), String(NULL)), Exit);
+    ec = parser->SetInput(IInputStream::Probe(fis), nullStr);
+    FAIL_GOTO(ec, Exit);
     {
-
-        Int32 eventType;
-        FAIL_GOTO(parser->GetEventType(&eventType), Exit);
+        ec = parser->GetEventType(&eventType);
+        FAIL_GOTO(ec, Exit);
         while (eventType != IXmlPullParser::START_TAG &&
             eventType != IXmlPullParser::END_DOCUMENT) {
-            FAIL_GOTO(parser->Next(&eventType), Exit);
+            ec = parser->Next(&eventType);
+            FAIL_GOTO(ec, Exit);
         }
         if (eventType == IXmlPullParser::END_DOCUMENT) {
             return;
@@ -104,10 +114,10 @@ CompatModePackages::CompatModePackages(
                     if (depth == 2) {
                         if (tagName.Equals("pkg")) {
                             String pkg;
-                            parser->GetAttributeValue(String(NULL), String("name"), &pkg);
+                            parser->GetAttributeValue(nullStr, String("name"), &pkg);
                             if (!pkg.IsNull()) {
                                 String mode;
-                                parser->GetAttributeValue(String(NULL), String("mode"), &mode);
+                                parser->GetAttributeValue(nullStr, String("mode"), &mode);
                                 Int32 modeInt = 0;
                                 if (!mode.IsNull()) {
     //                                     try {
@@ -121,7 +131,8 @@ CompatModePackages::CompatModePackages(
                     }
                 }
                 parser->Next(&eventType);
-            } while (eventType != IXmlPullParser::END_DOCUMENT);
+            }
+            while (eventType != IXmlPullParser::END_DOCUMENT);
         }
 
     }
@@ -133,6 +144,10 @@ CompatModePackages::CompatModePackages(
     // } finally {
 
 Exit:
+    if (FAILED(ec)) {
+        Slogger::W(TAG, "Error reading compat-packages: %s, ec=%08x", TO_CSTR(file), ec);
+    }
+
     if (fis != NULL) {
             // try {
         ICloseable::Probe(fis)->Close();
@@ -201,7 +216,8 @@ AutoPtr<ICompatibilityInfo> CompatModePackages::CompatibilityInfoForPackageLocke
     AutoPtr<ICompatibilityInfo> ci;
     CCompatibilityInfo::New(ai, layout, widthDp,
         (flags & COMPAT_FLAG_ENABLED) != 0, (ICompatibilityInfo**)&ci);
-    Slogger::I(TAG, "*********** COMPAT FOR PKG  ai.packageName :%s, %s",
+    Slogger::I(TAG, "*********** AMS Configuration :%s", TO_CSTR(mService->mConfiguration));
+    Slogger::I(TAG, "*********** COMPAT FOR PKG ai.packageName :%s, CompatibilityInfo: %s",
         pkgName.string(), TO_CSTR(ci));
     return ci;
 }
@@ -406,10 +422,7 @@ void CompatModePackages::SetPackageScreenCompatModeLocked(
 
             if (app->mThread != NULL) {
                 if (DEBUG_CONFIGURATION) {
-                    String str;
-                    IObject::Probe(ci)->ToString(&str);
-                    Slogger::V(TAG, "Sending to proc %s new compat %s",
-                        app->mProcessName.string(), str.string());
+                    Slogger::V(TAG, "Sending to proc %s new compat %s", app->mProcessName.string(), TO_CSTR(ci));
                 }
                 app->mThread->UpdatePackageCompatibilityInfo(packageName, ci);
             }
@@ -432,6 +445,7 @@ void CompatModePackages::SaveCompatModes()
         pkgs.Insert(mPackages.Begin(), mPackages.End());
     }
 
+    String nullStr;
     AutoPtr<IFileOutputStream> fos;
 
 //     try {
@@ -440,9 +454,9 @@ void CompatModePackages::SaveCompatModes()
     CFastXmlSerializer::New((IFastXmlSerializer**)&serializer);
     AutoPtr<IXmlSerializer> out = IXmlSerializer::Probe(serializer);
     out->SetOutput(IOutputStream::Probe(fos), String("utf-8"));
-    out->StartDocument(String(NULL), TRUE);
+    out->StartDocument(nullStr, TRUE);
     out->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
-    out->WriteStartTag(String(NULL), String("compat-packages"));
+    out->WriteStartTag(nullStr, String("compat-packages"));
 
     AutoPtr<IIPackageManager> pm = AppGlobals::GetPackageManager();
     Int32 screenLayout;
@@ -477,13 +491,13 @@ void CompatModePackages::SaveCompatModes()
         if (neverSupport) {
             continue;
         }
-        out->WriteStartTag(String(NULL), String("pkg"));
-        out->WriteAttribute(String(NULL), String("name"), pkg);
-        out->WriteAttribute(String(NULL), String("mode"), StringUtils::ToString(mode));
-        out->WriteEndTag(String(NULL), String("pkg"));
+        out->WriteStartTag(nullStr, String("pkg"));
+        out->WriteAttribute(nullStr, String("name"), pkg);
+        out->WriteAttribute(nullStr, String("mode"), StringUtils::ToString(mode));
+        out->WriteEndTag(nullStr, String("pkg"));
     }
 
-    out->WriteEndTag(String(NULL), String("compat-packages"));
+    out->WriteEndTag(nullStr, String("compat-packages"));
     out->EndDocument();
 
     mFile->FinishWrite(fos);

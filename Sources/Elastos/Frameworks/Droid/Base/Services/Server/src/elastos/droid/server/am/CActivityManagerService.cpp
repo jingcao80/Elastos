@@ -497,7 +497,7 @@ const Boolean CActivityManagerService::DEBUG_BROADCAST = FALSE;//localLOGV || FA
 const Boolean CActivityManagerService::DEBUG_BROADCAST_LIGHT = FALSE;//DEBUG_BROADCAST || FALSE;
 const Boolean CActivityManagerService::DEBUG_BACKGROUND_BROADCAST = FALSE;//DEBUG_BROADCAST || FALSE;
 const Boolean CActivityManagerService::DEBUG_CLEANUP = localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_CONFIGURATION = localLOGV || FALSE;
+const Boolean CActivityManagerService::DEBUG_CONFIGURATION = localLOGV || TRUE;
 const Boolean CActivityManagerService::DEBUG_FOCUS = FALSE;
 const Boolean CActivityManagerService::DEBUG_IMMERSIVE = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_MU = localLOGV || FALSE;
@@ -14323,7 +14323,7 @@ ECode CActivityManagerService::RetrieveSettings()
         // This happens before any activities are started, so we can
         // change mConfiguration in-place.
         UpdateConfigurationLocked(configuration, NULL, FALSE, TRUE);
-        if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Initial config: %p", mConfiguration.Get());
+        if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Initial config: %s", TO_CSTR(mConfiguration));
     }
     return NOERROR;
 }
@@ -21047,9 +21047,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
         newConfig->UpdateFrom(values, &changes);
         if (changes != 0) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
-                String confDes;
-                values->ToString(&confDes);
-                Slogger::I(TAG, "Updating configuration to: %s", confDes.string());
+                Slogger::I(TAG, "Updating configuration to: %s", TO_CSTR(values));
             }
 
 //            EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
@@ -21070,8 +21068,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
             if (themeConfig != NULL) {
                 AutoPtr<IThemeConfig> otherTC;
                 mConfiguration->GetThemeConfig((IThemeConfig**)&otherTC);
-                Boolean equals;
-                IObject::Probe(themeConfig)->Equals(otherTC, &equals);
+                Boolean equals = Object::Equals(themeConfig, otherTC);
                 SaveThemeResourceLocked(themeConfig, !equals);
             }
 
@@ -21081,7 +21078,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
             }
             newConfig->SetSeq(mConfigurationSeq);
             mConfiguration = newConfig;
-            Slogger::I(TAG, "Config changed:0x%x %s", changes, TO_CSTR(newConfig));
+            Slogger::I(TAG, "Config changed:0x%x %s", changes, TO_CSTR(mConfiguration));
             if (mUsageStatsService != NULL) {
                 mUsageStatsService->ReportConfigurationChange(newConfig, mCurrentUserId);
                 //mUsageStatsService.noteStartConfig(newConfig);
@@ -21094,7 +21091,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
             // showing dialogs?
             mShowDialogs = ShouldShowDialogs(newConfig);
 
-            AttributeCache* ac = AttributeCache::GetInstance();
+            AutoPtr<AttributeCache> ac = AttributeCache::GetInstance();
             if (ac != NULL) {
                 ac->UpdateConfiguration(configCopy);
             }
@@ -21110,6 +21107,10 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
 
             Boolean hasChanges = Settings::System::HasInterestingConfigurationChanges(changes);
             if (persistent && hasChanges) {
+                if (DEBUG_CONFIGURATION) {
+                    Slogger::V(TAG, "Sending UPDATE_CONFIGURATION_MSG with new config %s", TO_CSTR(configCopy));
+                }
+
                 AutoPtr<IConfiguration> config;
                 CConfiguration::New(configCopy, (IConfiguration**)&config);
 
@@ -21125,11 +21126,16 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
                 if (app->mThread != NULL) {
                     if (DEBUG_CONFIGURATION) {
                         Slogger::V(TAG, "Sending to proc %s new config %s",
-                            app->mProcessName.string(), TO_CSTR(mConfiguration));
+                            app->mProcessName.string(), TO_CSTR(configCopy));
                     }
                     app->mThread->ScheduleConfigurationChanged(configCopy);
                 }
             }
+
+            if (DEBUG_CONFIGURATION) {
+                Slogger::V(TAG, "Sending Broadcast with ACTION_CONFIGURATION_CHANGED config %s", TO_CSTR(configCopy));
+            }
+
             AutoPtr<IIntent> intent;
             CIntent::New((IIntent::ACTION_CONFIGURATION_CHANGED), (IIntent**)&intent);
             intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY
@@ -21138,8 +21144,8 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
             Int32 result;
             String nullStr;
             BroadcastIntentLocked(NULL, nullStr, intent, nullStr, NULL, 0,
-                    nullStr, NULL, nullStr, IAppOpsManager::OP_NONE, FALSE, FALSE, MY_PID,
-                    IProcess::SYSTEM_UID, IUserHandle::USER_ALL, &result);
+                nullStr, NULL, nullStr, IAppOpsManager::OP_NONE, FALSE, FALSE, MY_PID,
+                IProcess::SYSTEM_UID, IUserHandle::USER_ALL, &result);
             if ((changes & IActivityInfo::CONFIG_LOCALE) != 0) {
                 AutoPtr<IIntent> newIntent;
                 CIntent::New((IIntent::ACTION_LOCALE_CHANGED), (IIntent**)&newIntent);

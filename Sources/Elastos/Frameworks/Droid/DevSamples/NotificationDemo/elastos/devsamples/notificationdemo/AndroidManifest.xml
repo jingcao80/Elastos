@@ -28,8 +28,4 @@
         </activity>
 
     </application>
-
-  <!-- "android:name" need a classname that extends Instrumentation
-    <instrumentation android:targetPackage="NotificationDemo" android:name="elastos.droid.devsamples.notificationdemo.ins" />
-  -->
 </manifest>

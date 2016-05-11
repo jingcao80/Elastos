@@ -7,6 +7,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::Build;
@@ -18,6 +19,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::ICloneable;
 using Elastos::Core::EIID_IComparable;
 using Elastos::Utility::CLocale;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {
@@ -27,12 +29,14 @@ namespace Res {
 
 static AutoPtr<IConfiguration> InitEmpty()
 {
-    AutoPtr<CConfiguration> config;
-    ASSERT_SUCCEEDED(CConfiguration::NewByFriend((CConfiguration**)&config));
-    return (IConfiguration*)config.Get();
+    AutoPtr<IConfiguration> config;
+    ASSERT_SUCCEEDED(CConfiguration::New((IConfiguration**)&config));
+    return config;
 }
 
 const AutoPtr<IConfiguration> CConfiguration::EMPTY = InitEmpty();
+
+static const String TAG("CConfiguration");
 
 // /** @hide Native-specific bit mask for MCC config; DO NOT USE UNLESS YOU ARE SURE. */
 // const Int32 CConfiguration::NATIVE_CONFIG_MCC = 0x0001;
@@ -122,10 +126,11 @@ Int32 CConfiguration::ResetScreenLayout(
 }
 
 Int32 CConfiguration::ReduceScreenLayout(
-    /* [in] */ Int32 curLayout,
+    /* [in] */ Int32 inCurLayout,
     /* [in] */ Int32 longSizeDp,
     /* [in] */ Int32 shortSizeDp)
 {
+    Int32 curLayout = inCurLayout;
     Int32 screenLayoutSize;
     Boolean screenLayoutLong;
     Boolean screenLayoutCompatNeeded;
@@ -189,6 +194,9 @@ Int32 CConfiguration::ReduceScreenLayout(
     if (screenLayoutSize < curSize) {
         curLayout = (curLayout & ~SCREENLAYOUT_SIZE_MASK) | screenLayoutSize;
     }
+
+    Logger::I(TAG, " > ReduceScreenLayout: curLayout:%d, longSizeDp:%d, shortSizeDp:%d, result:%d",
+        inCurLayout, longSizeDp, shortSizeDp, curLayout);
     return curLayout;
 }
 
@@ -255,16 +263,6 @@ ECode CConfiguration::SetTo(
 ECode CConfiguration::SetToDefaults()
 {
     mFontScale = 1.0f;
-    // mFontScale = StringUtils::ParseFloat(SystemProperties.get("ro.fontScale","1"));
-    // TODO
-    // String scale = Build::DEFAULT_FONTSCALE;
-    // if (scale.EqualsIgnoreCase(Build::UNKNOWN) == FALSE ){
-    //     mFontScale = StringUtils::ParseFloat(scale);
-    // }
-    // else {
-    //     mFontScale = 1.0f;
-    // }
-
     mMcc = mMnc = 0;
     mLocale = NULL;
     mUserSetLocale = FALSE;
@@ -445,8 +443,7 @@ ECode CConfiguration::UpdateFrom(
 
     Boolean equals;
     if (config->mThemeConfig != NULL
-            && (mThemeConfig == NULL ||
-                    (IObject::Probe(mThemeConfig)->Equals(config->mThemeConfig, &equals), !equals))) {
+            && (mThemeConfig == NULL || !Object::Equals(mThemeConfig, config->mThemeConfig))) {
         *changes |= IActivityInfo::CONFIG_THEME_RESOURCE;
         String fontPkgName;
         config->mThemeConfig->GetFontPkgName(&fontPkgName);
@@ -740,6 +737,10 @@ ECode CConfiguration::CompareTo(
         return NOERROR;
     }
 
+    if (iconfig == (IConfiguration*)this) {
+        return 0;
+    }
+
     AutoPtr<CConfiguration> config = (CConfiguration*)iconfig.Get();
     Float a = mFontScale;
     Float b = config->mFontScale;
@@ -880,7 +881,6 @@ ECode CConfiguration::Equals(
     /* [in] */ IInterface* that,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return Equals(IConfiguration::Probe(that), result);
 }
 
@@ -912,7 +912,7 @@ ECode CConfiguration::ToString(
     VALIDATE_NOT_NULL(str);
 
     StringBuilder sb(128);
-    sb += "{";
+    sb += "CConfiguration{";
     sb += mFontScale;
     sb += " ";
     if (mMcc != 0) {
@@ -1054,10 +1054,7 @@ ECode CConfiguration::ToString(
         sb += mSeq;
     }
     sb += " themeResource=";
-    String configStr;
-    if (mThemeConfig != NULL) {
-        IObject::Probe(mThemeConfig)->ToString(&configStr);
-    }
+    String configStr = Object::ToString(mThemeConfig);
     sb += configStr;
     sb += '}';
     *str = sb.ToString();

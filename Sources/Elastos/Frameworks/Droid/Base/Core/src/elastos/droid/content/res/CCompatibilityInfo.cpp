@@ -558,15 +558,20 @@ ECode CCompatibilityInfo::SetApplicationInvertedScale(
 ECode CCompatibilityInfo::constructor(
     /* [in] */ IApplicationInfo* appInfo,
     /* [in] */ Int32 screenLayout,
-    /* [in] */ Int32 scaleWidth,
+    /* [in] */ Int32 screenWidthDp,
     /* [in] */ Boolean forceCompat)
 {
-    Logger::I(TAG, " >>> CCompatibilityInfo::constructor: %s, screenLayout:%d, scaleWidth:%d, forceCompat:%d",
-        TO_CSTR(appInfo), screenLayout, scaleWidth, forceCompat);
-
-    Int32 compatFlags = 0;
+    Logger::I(TAG, " >>> CCompatibilityInfo::constructor: %s, screenLayout:%08x, screenWidthDp:%d, forceCompat:%d",
+        TO_CSTR(appInfo), screenLayout, screenWidthDp, forceCompat);
 
     AutoPtr<CApplicationInfo> appInfoCls = (CApplicationInfo*)appInfo;
+    Int32 compatFlags = 0;
+    mIsThemeable = appInfoCls->mIsThemeable;
+
+    Logger::I(TAG, "    == mRequiresSmallestWidthDp: %d", appInfoCls->mRequiresSmallestWidthDp);
+    Logger::I(TAG, "    == mCompatibleWidthLimitDp: %d", appInfoCls->mCompatibleWidthLimitDp);
+    Logger::I(TAG, "    == mLargestWidthLimitDp: %d", appInfoCls->mLargestWidthLimitDp);
+    Logger::I(TAG, "    == mFlags: %08x", appInfoCls->mFlags);
 
     if (appInfoCls->mRequiresSmallestWidthDp != 0
         || appInfoCls->mCompatibleWidthLimitDp != 0
@@ -594,13 +599,13 @@ ECode CCompatibilityInfo::constructor(
             // thinks it can handle.
             compatFlags |= NEVER_NEEDS_COMPAT;
         }
-        else if (largest != 0 && scaleWidth > largest) {
+        else if (largest != 0 && screenWidthDp > largest) {
             // If the screen size is larger than the largest size the
             // app thinks it can work with, then always force it in to
             // compatibility mode.
             compatFlags |= NEEDS_SCREEN_COMPAT | ALWAYS_NEEDS_COMPAT;
         }
-        else if (compat >= scaleWidth) {
+        else if (compat >= screenWidthDp) {
             // The screen size is something the app says it was designed
             // for, so never do compatibility mode.
             compatFlags |= NEVER_NEEDS_COMPAT;
@@ -642,6 +647,7 @@ ECode CCompatibilityInfo::constructor(
         Boolean anyResizeable = FALSE;
 
         if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+            Logger::I(TAG, "    == LARGE_SCREENS");
             sizeInfo |= LARGE_SCREENS;
             anyResizeable = TRUE;
             if (!forceCompat) {
@@ -653,6 +659,7 @@ ECode CCompatibilityInfo::constructor(
         }
 
         if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+            Logger::I(TAG, "    == XLARGE_SCREENS");
             anyResizeable = TRUE;
             if (!forceCompat) {
                 sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
@@ -660,6 +667,7 @@ ECode CCompatibilityInfo::constructor(
         }
 
         if ((appInfoCls->mFlags & IApplicationInfo::FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+            Logger::I(TAG, "    == FOR_SCREENS");
             anyResizeable = TRUE;
             sizeInfo |= EXPANDABLE;
         }
@@ -674,26 +682,29 @@ ECode CCompatibilityInfo::constructor(
 
         compatFlags |= NEEDS_SCREEN_COMPAT;
         switch (screenLayout & IConfiguration::SCREENLAYOUT_SIZE_MASK) {
-            case IConfiguration::SCREENLAYOUT_SIZE_XLARGE:
-                if ((sizeInfo & XLARGE_SCREENS) != 0) {
-                    compatFlags &= ~NEEDS_SCREEN_COMPAT;
-                }
-                if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-                    compatFlags |= NEVER_NEEDS_COMPAT;
-                }
-                break;
-            case IConfiguration::SCREENLAYOUT_SIZE_LARGE:
-                if ((sizeInfo & LARGE_SCREENS) != 0) {
-                    compatFlags &= ~NEEDS_SCREEN_COMPAT;
-                }
-                if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                    compatFlags |= NEVER_NEEDS_COMPAT;
-                }
-                break;
+        case IConfiguration::SCREENLAYOUT_SIZE_XLARGE:
+            Logger::I(TAG, "    == SCREENLAYOUT_SIZE_XLARGE");
+            if ((sizeInfo & XLARGE_SCREENS) != 0) {
+                compatFlags &= ~NEEDS_SCREEN_COMPAT;
+            }
+            if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+                compatFlags |= NEVER_NEEDS_COMPAT;
+            }
+            break;
+        case IConfiguration::SCREENLAYOUT_SIZE_LARGE:
+            Logger::I(TAG, "    == SCREENLAYOUT_SIZE_LARGE");
+            if ((sizeInfo & LARGE_SCREENS) != 0) {
+                compatFlags &= ~NEEDS_SCREEN_COMPAT;
+            }
+            if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                compatFlags |= NEVER_NEEDS_COMPAT;
+            }
+            break;
         }
 
         if ((screenLayout & IConfiguration::SCREENLAYOUT_COMPAT_NEEDED) != 0) {
-            if ((sizeInfo&EXPANDABLE) != 0) {
+            Logger::I(TAG, "    == SCREENLAYOUT_COMPAT_NEEDED");
+            if ((sizeInfo & EXPANDABLE) != 0) {
                 compatFlags &= ~NEEDS_SCREEN_COMPAT;
             }
             else if (!anyResizeable) {
@@ -711,6 +722,8 @@ ECode CCompatibilityInfo::constructor(
             mApplicationInvertedScale = 1.0f;
         }
         else {
+            Logger::I(TAG, " CDisplayMetrics::DENSITY_DEVICE: %d, DENSITY_DEFAULT: %d",
+                CDisplayMetrics::DENSITY_DEVICE, IDisplayMetrics::DENSITY_DEFAULT);
             mApplicationDensity = IDisplayMetrics::DENSITY_DEFAULT;
             mApplicationScale = CDisplayMetrics::DENSITY_DEVICE
                     / (Float) IDisplayMetrics::DENSITY_DEFAULT;

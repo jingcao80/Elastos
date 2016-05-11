@@ -194,6 +194,8 @@ void CResourcesManager::ApplyNonDefaultDisplayMetricsToConfigurationLocked(
     config->mCompatScreenWidthDp = config->mScreenWidthDp;
     config->mCompatScreenHeightDp = config->mScreenHeightDp;
     config->mCompatSmallestScreenWidthDp = config->mSmallestScreenWidthDp;
+    Logger::I(TAG, " >> ApplyNonDefaultDisplayMetricsToConfigurationLocked: dmObj:%s, config:%s",
+        TO_CSTR(dmObj), TO_CSTR(configObj));
 }
 
 ECode CResourcesManager::ApplyCompatConfiguration(
@@ -588,6 +590,10 @@ ECode CResourcesManager::ApplyConfigurationToResourcesLocked(
         return NOERROR;
     }
 
+    if (CActivityThread::DEBUG_CONFIGURATION) {
+        Logger::V(TAG, "ApplyConfigurationToResourcesLocked new config: %s", TO_CSTR(config));
+    }
+
     Int32 changes;
     mResConfiguration->UpdateFrom(config, &changes);
     FlushDisplayMetricsLocked();
@@ -614,7 +620,6 @@ ECode CResourcesManager::ApplyConfigurationToResourcesLocked(
     CResources::UpdateSystemConfiguration(config, defaultDisplayMetrics, compat);
 
     ApplicationPackageManager::ConfigurationChanged();
-    //Logger::I(TAG, "Configuration changed in " + currentPackageName());
 
     AutoPtr<IConfiguration> tmpConfig;
 

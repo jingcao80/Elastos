@@ -6,15 +6,21 @@ namespace Internal {
 namespace Utility {
 namespace Gesture {
 
+static AutoPtr<CEdgeGesturePosition> Init(Int32 index, Int32 factor)
+{
+    AutoPtr<CEdgeGesturePosition> obj;
+    CEdgeGesturePosition::NewByFriend(index, factor, (CEdgeGesturePosition**)&obj);
+    return obj;
+}
+
+const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::LEFT = Init(0, 0);
+const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::BOTTOM = Init(1, 1);
+const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::RIGHT = Init(2, 2);
+const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::TOP = Init(3, 3);
+
 CAR_INTERFACE_IMPL(CEdgeGesturePosition, Object, IEdgeGesturePosition)
 
 CAR_OBJECT_IMPL(CEdgeGesturePosition)
-
-const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::LEFT;
-const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::BOTTOM;
-const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::RIGHT;
-const AutoPtr<CEdgeGesturePosition> CEdgeGesturePosition::TOP;
-Boolean CEdgeGesturePosition::sInit = InitStatic();
 
 CEdgeGesturePosition::CEdgeGesturePosition()
     : INDEX(0)
@@ -36,15 +42,6 @@ ECode CEdgeGesturePosition::constructor(
     FLAG = (0x01 << index);
     FACTOR = factor;
     return NOERROR;
-}
-
-Boolean CEdgeGesturePosition::InitStatic()
-{
-    CEdgeGesturePosition::NewByFriend(0, 0, (CEdgeGesturePosition**)&LEFT);
-    CEdgeGesturePosition::NewByFriend(1, 1, (CEdgeGesturePosition**)&BOTTOM);
-    CEdgeGesturePosition::NewByFriend(2, 1, (CEdgeGesturePosition**)&RIGHT);
-    CEdgeGesturePosition::NewByFriend(3, 0, (CEdgeGesturePosition**)&TOP);
-    return TRUE;
 }
 
 } // namespace Gesture

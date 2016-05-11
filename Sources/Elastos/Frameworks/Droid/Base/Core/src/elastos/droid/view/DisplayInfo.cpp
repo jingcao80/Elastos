@@ -4,15 +4,20 @@
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/view/Display.h"
 #include "elastos/droid/view/DisplayInfo.h"
 #include "elastos/droid/content/res/CCompatibilityInfoHelper.h"
-#include "elastos/droid/view/Display.h"
+#include <elastos/core/StringBuilder.h>;
 
+using Elastos::Droid::View::Display;
+using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::Content::Res::ICompatibilityInfoHelper;
 using Elastos::Droid::Content::Res::CCompatibilityInfoHelper;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -483,6 +488,7 @@ ECode DisplayInfo::SetPhysicalYDpi(
 ECode DisplayInfo::GetAppVsyncOffsetNanos(
     /* [out] */ Int64* nanos)
 {
+    VALIDATE_NOT_NULL(nanos)
     *nanos = mAppVsyncOffsetNanos;
     return NOERROR;
 }
@@ -497,6 +503,7 @@ ECode DisplayInfo::SetAppVsyncOffsetNanos(
 ECode DisplayInfo::GetPresentationDeadlineNanos(
     /* [out] */ Int64* nanos)
 {
+    VALIDATE_NOT_NULL(nanos)
     *nanos = mPresentationDeadlineNanos;
     return NOERROR;
 }
@@ -511,6 +518,7 @@ ECode DisplayInfo::SetPresentationDeadlineNanos(
 ECode DisplayInfo::GetState(
     /* [out] */ Int32* state)
 {
+    VALIDATE_NOT_NULL(state)
     *state = mState;
     return NOERROR;
 }
@@ -525,6 +533,7 @@ ECode DisplayInfo::SetState(
 ECode DisplayInfo::GetOwnerUid(
     /* [out] */ Int32* uid)
 {
+    VALIDATE_NOT_NULL(uid)
     *uid = mOwnerUid;
     return NOERROR;
 }
@@ -539,6 +548,7 @@ ECode DisplayInfo::SetOwnerUid(
 ECode DisplayInfo::GetOwnerPackageName(
     /* [out] */ String* name)
 {
+     VALIDATE_NOT_NULL(name)
     *name = mOwnerPackageName;
     return NOERROR;
 }
@@ -751,14 +761,12 @@ ECode DisplayInfo::GetMetricsWithSize(
     outMetrics->SetYdpi(mPhysicalXDpi);
     outMetrics->SetNoncompatYdpi(mPhysicalXDpi);
 
-    if (IObject::Probe(compatInfo) != NULL) {
+    if (compatInfo != NULL) {
         AutoPtr<ICompatibilityInfoHelper> helper;
         CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
         AutoPtr<ICompatibilityInfo> info;
         helper->GetDefault((ICompatibilityInfo**)&info);
-        Boolean eql;
-        IObject::Probe(compatInfo)->Equals(info, &eql);
-        if (!eql) {
+        if (!Object::Equals(compatInfo, info)) {
             FAIL_RETURN(compatInfo->ApplyToDisplayMetrics(outMetrics));
         }
     }
@@ -766,33 +774,65 @@ ECode DisplayInfo::GetMetricsWithSize(
     return NOERROR;
 }
 
-// // For debugging purposes
-// @Override
-// public String toString() {
-//     return "DisplayInfo{\"" + name + "\", app " + appWidth + " x " + appHeight
-//             + ", real " + logicalWidth + " x " + logicalHeight
-//             + ", largest app " + largestNominalAppWidth + " x " + largestNominalAppHeight
-//             + ", smallest app " + smallestNominalAppWidth + " x " + smallestNominalAppHeight
-//             + ", " + refreshRate + " fps"
-//             + ", rotation " + rotation
-//             + ", density " + logicalDensityDpi
-//             + ", " + physicalXDpi + " x " + physicalYDpi + " dpi"
-//             + ", layerStack " + layerStack
-//             + ", type " + Display.typeToString(type)
-//             + ", address " + address
-//             + flagsToString(flags) + "}";
-// }
+ECode DisplayInfo::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("DisplayInfo");
+    sb += "\"";
+    sb += mName;
+    sb += "\", app ";
+    sb += mAppWidth;
+    sb += " x ";
+    sb += mAppHeight;
+    sb += ", real ";
+    sb += mLogicalWidth;
+    sb += " x ";
+    sb += mLogicalHeight;
+    sb += ", largest app ";
+    sb += mLargestNominalAppWidth;
+    sb += " x ";
+    sb += mLargestNominalAppHeight;
+    sb += ", smallest app ";
+    sb += mSmallestNominalAppWidth;
+    sb += " x ";
+    sb += mSmallestNominalAppHeight;
+    sb += ", ";
+    sb += mRefreshRate;
+    sb += " fps";
+    sb += ", rotation ";
+    sb += mRotation;
+    sb += ", density ";
+    sb += mLogicalDensityDpi;
+    sb += ", ";
+    sb += mPhysicalXDpi;
+    sb += " x ";
+    sb += mPhysicalYDpi;
+    sb += " dpi";
+    sb += ", layerStack ";
+    sb += mLayerStack;
+    sb += ", type ";
+    sb += Display::TypeToString(mType);
+    sb += ", address ";
+    sb += mAddress;
+    sb += FlagsToString(mFlags);
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
+}
 
-// private static String flagsToString(int flags) {
-//     StringBuilder result = new StringBuilder();
-//     if ((flags & Display.FLAG_SECURE) != 0) {
-//         result.append(", FLAG_SECURE");
-//     }
-//     if ((flags & Display.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
-//         result.append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
-//     }
-//     return result.toString();
-// }
+String DisplayInfo::FlagsToString(
+    /* [in] */ Int32 flags)
+{
+    StringBuilder result;
+    if ((flags & IDisplay::FLAG_SECURE) != 0) {
+        result.Append(", FLAG_SECURE");
+    }
+    if ((flags & IDisplay::FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
+        result.Append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
+    }
+    return result.ToString();
+}
 
 } // namespace View
 } // namespace Droid

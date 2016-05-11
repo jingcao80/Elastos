@@ -724,7 +724,7 @@ ECode CActivityOne::OnTestPowerManager()
     ECode ec = wifi->AddNetwork(wifiConfig, &netId);
     Logger::D("CActivityOne", "AddNetwork %s, netId: %d", SUCCEEDED(ec) ? "succeeded!" : "failed!", netId);
 
-    wifi->EnableNetwork(netId, TRUE, &result);
+    wifi->EnableNetwork(netId, FALSE, &result);
     Logger::D("CActivityOne", "EnableNetwork %s", result ? "succeeded!" : "failed!");
 
     return NOERROR;

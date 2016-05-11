@@ -96,8 +96,8 @@ private:
         /* [in] */ Int32 mode);
 
 private:
-    const String TAG;
-    const Boolean DEBUG_CONFIGURATION;
+    static const String TAG;
+    static const Boolean DEBUG_CONFIGURATION;
 
     CActivityManagerService* mService;
     AutoPtr<IAtomicFile> mFile;

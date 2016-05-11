@@ -248,6 +248,9 @@ public:
         /* [in] */ Int32 uid,
         /* [out] */ Boolean* result);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CARAPI GetMetricsWithSize(
         /* [in] */ IDisplayMetrics* outMetricsObj,
@@ -255,6 +258,9 @@ private:
         /* [in] */ IBinder* token,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
+
+    static String FlagsToString(
+        /* [in] */ Int32 flags);
 
 public:
     /**

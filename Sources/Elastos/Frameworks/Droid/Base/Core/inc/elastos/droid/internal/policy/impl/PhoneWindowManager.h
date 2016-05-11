@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_POLICY_IMPL_PHONEWINDOWMANAGER_H__
 
 #include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.Telecomm.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/app/ProgressDialog.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -39,6 +40,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Internal::Os::IDeviceKeyHandler;
 using Elastos::Droid::Internal::Policy::Impl::GlobalActions;
 using Elastos::Droid::Internal::Policy::Impl::IRecentApplicationsDialog;
 using Elastos::Droid::Internal::Policy::Impl::Keyguard::IKeyguardServiceDelegate;
@@ -85,6 +87,7 @@ using Elastos::Droid::View::IWindowManagerPolicyWindowManagerFuncs;
 using Elastos::Droid::View::IWindowState;
 using Elastos::Droid::View::IWindowCallback;
 using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;
@@ -419,6 +422,23 @@ protected:
         PhoneWindowManager* mHost;
     };
 
+    class WifiDisplayReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        WifiDisplayReceiver(
+            /*in*/ PhoneWindowManager* host);
+
+        // @Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        TO_STRING_IMPL("PhoneWindowManager::WifiDisplayReceiver: ")
+    private:
+        PhoneWindowManager* mHost;
+    };
+
     class ScreenLockTimeoutRunnable
         : public Runnable
     {
@@ -434,6 +454,19 @@ protected:
 
     protected:
         AutoPtr<IBundle> mOptions;
+        PhoneWindowManager* mHost;
+    };
+
+    class QuickBootPowerLongPressRunnable
+        : public Runnable{
+    public:
+        QuickBootPowerLongPressRunnable(
+            /* [in] */ PhoneWindowManager* host);
+
+        // @Override
+        CARAPI Run();
+
+    protected:
         PhoneWindowManager* mHost;
     };
 
@@ -489,6 +522,32 @@ private:
     {
     public:
         ScreenshotRunnable(
+            /* [in] */ PhoneWindowManager* host);
+
+        CARAPI Run();
+
+    private:
+        PhoneWindowManager* mHost;
+    };
+
+    class ScreenshotForLogRunnable
+        : public Runnable
+    {
+    public:
+        ScreenshotForLogRunnable(
+            /* [in] */ PhoneWindowManager* host);
+
+        CARAPI Run();
+
+    private:
+        PhoneWindowManager* mHost;
+    };
+
+    class BackLongPressRunnable
+        : public Runnable
+    {
+    public:
+        BackLongPressRunnable(
             /* [in] */ PhoneWindowManager* host);
 
         CARAPI Run();
@@ -588,7 +647,7 @@ private:
     class BootMsgDialog : public ProgressDialog
     {
     public:
-        CARAPI Init(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Int32 theme);
 
@@ -630,7 +689,8 @@ private:
     public:
         BootMsgRunnable(
             /* [in] */ PhoneWindowManager* host,
-            /* [in] */ ICharSequence* msg);
+            /* [in] */ ICharSequence* msg,
+            /* [in] */ Int32 titleRes);
 
         // @Override
         CARAPI Run();
@@ -638,6 +698,7 @@ private:
     private:
         PhoneWindowManager* mHost;
         AutoPtr<ICharSequence> mMsg;
+        Int32 mTitleRes;
     };
 
     class UpdateSystemUiVisibilityRunnable
@@ -797,18 +858,18 @@ public:
     CARAPI SelectRotationAnimationLw(
         /* [in] */ ArrayOf<Int32>* anim);
 
+    CARAPI ValidateRotationAnimationLw(
+        /* [in] */ Int32 exitAnimId,
+        /* [in] */ Int32 enterAnimId,
+        /* [in] */ Boolean forceDefault,
+        /* [out] */ Boolean* result);
+
     CARAPI CreateForceHideWallpaperExitAnimation(
         /* [in] */ Boolean goingToNotificationShade,
         /* [in] */ Boolean keyguardShowingMedia,
         /* [out] */ IAnimation** anim);
 
     CARAPI ShowRecentApps();
-
-    CARAPI ValidateRotationAnimationLw(
-        /* [in] */ Int32 exitAnimId,
-        /* [in] */ Int32 enterAnimId,
-        /* [in] */ Boolean forceDefault,
-        /* [out] */ Boolean* result);
 
     CARAPI CreateForceHideEnterAnimation(
         /* [in] */ Boolean onWallpaper,
@@ -1031,6 +1092,8 @@ protected:
     static CARAPI_(AutoPtr<IIDreamManager>) GetDreamManager();
 
 protected:
+    CARAPI UpdateEdgeGestureListenerState();
+
     AutoPtr<IIStatusBarService> GetStatusBarService();
 
     /*
@@ -1058,6 +1121,14 @@ protected:
 
     CARAPI_(Boolean) IsUserSetupComplete();
 
+    CARAPI_(void) TriggerVirtualKeypress(
+        /* [in] */ Int32 keyCode);
+
+    CARAPI_(void) LaunchCameraAction();
+
+    CARAPI_(void) PerformKeyAction(
+        /* [in] */ Int32 behavior);
+
     CARAPI_(void) ReadLidState();
 
     CARAPI_(Boolean) KeyguardOn();
@@ -1084,6 +1155,8 @@ protected:
         /* [in] */ Boolean plugged);
 
     CARAPI_(void) InitializeHdmiState();
+
+    CARAPI_(Boolean) IsMusicActive();
 
     CARAPI_(void) DispatchMediaKeyWithWakeLock(
         /* [in] */ IKeyEvent* event);
@@ -1134,7 +1207,7 @@ protected:
     */
     CARAPI_(Boolean) GoHome();
 
-    //TODO CARAPI_(AutoPtr<ITelecomManager> GetTelecommService();
+    CARAPI_(AutoPtr<ITelecomManager>) GetTelecommService();
 
 private:
     CARAPI_(void) InterceptPowerKeyDown(
@@ -1147,6 +1220,10 @@ private:
 
     CARAPI_(void) InterceptScreenshotChord();
 
+    CARAPI_(void) InterceptScreenshotLog();
+
+    CARAPI_(void) CancelPendingScreenshotForLog();
+
     CARAPI_(Int64) GetScreenshotChordLongPressDelay();
 
     CARAPI_(void) CancelPendingScreenshotChordAction();
@@ -1154,16 +1231,7 @@ private:
     CARAPI_(void) PowerShortPress(
         /* [in] */ Int64 eventTime);
 
-    CARAPI_(void) HandleLongPressOnHome();
-
-    CARAPI_(void) HandleDoubleTapOnHome();
-
-    /**
-     * Read values from config.xml that may be overridden depending on
-     * the configuration of the device.
-     * eg. Disable long press on home goes to recents on sw600dp.
-     */
-    CARAPI_(void) ReadConfigurationDependentBehaviors();
+    CARAPI_(void) UpdateKeyAssignments();
 
     /**
      * @return whether the navigation bar can be hidden, e.g. the device has a
@@ -1188,6 +1256,8 @@ private:
 
     CARAPI_(Boolean) IsHidden(
         /* [in] */ Int32 accessibilityMode);
+
+    CARAPI_(Boolean) UnpinActivity();
 
     CARAPI_(Boolean) InterceptFallback(
         /* [in] */ IWindowState* win,
@@ -1216,6 +1286,10 @@ private:
         /* [in] */ Boolean triggeredFromAltTab,
         /* [in] */ Boolean triggeredFromHome);
 
+    CARAPI_(void) ApplyForceImmersiveMode(
+        /* [in] */ Int32 pfl,
+        /* [in] */ IRect* r);
+
     CARAPI_(void) ApplyStableConstraints(
         /* [in] */ Int32 sysui,
         /* [in] */ Int32 fl,
@@ -1230,6 +1304,14 @@ private:
     // Assume this is called from the Handler thread.
     CARAPI_(void) TakeScreenshot();
 
+    CARAPI_(void) AcquireQuickBootWakeLock();
+
+    CARAPI_(void) ReleaseQuickBootWakeLock();
+
+    CARAPI_(void) ScheduleLongPressKeyEvent(
+        /* [in] */ IKeyEvent* origEvent,
+        /* [in] */ Int32 keyCode);
+
     /** When the screen is off we ignore some keys that might otherwise typically
      * be considered wake keys.  We filter them out here.
      *
@@ -1243,6 +1325,8 @@ private:
 
     CARAPI_(void) RequestTransientBars(
         /* [in] */ IWindowState* swipeTarget);
+
+    CARAPI_(void) DisableQbCharger();
 
     CARAPI_(void) FinishKeyguardDrawn();
 
@@ -1326,15 +1410,19 @@ protected:
     static const Boolean SHOW_STARTING_ANIMATIONS;
     static const Boolean SHOW_PROCESSES_ON_ALT_MENU;
 
-    //static const Int32 WINDOW_TYPE_TEST_MODE; //new Window type for AllWinner SDK
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // No longer recommended for desk docks; still useful in car docks.
     static const Boolean ENABLE_CAR_DOCK_HOME_CAPTURE;// = true;
     static const Boolean ENABLE_DESK_DOCK_HOME_CAPTURE;// = false;
-    static const Int32 SHORT_PRESS_POWER_NOTHING;// = 0;
-    static const Int32 SHORT_PRESS_POWER_GO_TO_SLEEP;// = 1;
-    static const Int32 SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP;// = 2;
-    static const Int32 SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME;// = 3;
+
+    // QuickBoot time settings
+    static const Int32 DEFAULT_LONG_PRESS_POWERON_TIME; // = 500;
+    static const Int32 QUICKBOOT_LAUNCH_TIMEOUT; // = 2000;
+
+    static const Int32 SHORT_PRESS_POWER_NOTHING; // = 0;
+    static const Int32 SHORT_PRESS_POWER_GO_TO_SLEEP; // = 1;
+    static const Int32 SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP; // = 2;
+    static const Int32 SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME; // = 3;
 
     static const Int32 LONG_PRESS_POWER_NOTHING;
     static const Int32 LONG_PRESS_POWER_GLOBAL_ACTIONS;
@@ -1343,13 +1431,6 @@ protected:
 
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
-    static const Int32 LONG_PRESS_HOME_NOTHING;
-    static const Int32 LONG_PRESS_HOME_RECENT_SYSTEM_UI;
-    static const Int32 LONG_PRESS_HOME_ASSIST;
-
-    static const Int32 DOUBLE_TAP_HOME_NOTHING;// = 0;
-    static const Int32 DOUBLE_TAP_HOME_RECENT_SYSTEM_UI;// = 1;
-
     static const Int32 APPLICATION_MEDIA_SUBLAYER;
     static const Int32 APPLICATION_MEDIA_OVERLAY_SUBLAYER;
     static const Int32 APPLICATION_PANEL_SUBLAYER;
@@ -1384,8 +1465,6 @@ protected:
     //static Boolean mVolumeMute;
     //static Int32 mPreVolume;
 
-// Need to instantiate in the Constructor.
-protected:
     AutoPtr<IRunnable> mWindowManagerDrawCallback;
     AutoPtr<IKeyguardServiceDelegateShowListener> mKeyguardDelegateCallback;
     AutoPtr<HideNavInputEventReceiverFactory> mHideNavInputEventReceiverFactory;
@@ -1393,9 +1472,10 @@ protected:
     AutoPtr<DockBroadReceiver> mDockReceiver;
     AutoPtr<DreamBroadReceiver> mDreamReceiver;
     AutoPtr<MultiuserBroadReceiver> mMultiuserReceiver;
+    AutoPtr<WifiDisplayReceiver> mWifiDisplayReceiver;
     AutoPtr<ScreenLockTimeoutRunnable> mScreenLockTimeout;
+    AutoPtr<QuickBootPowerLongPressRunnable> mQuickBootPowerLongPress;
 
-protected:
     AutoPtr<IContext> mContext;
     AutoPtr<IIWindowManager> mWindowManager;
     AutoPtr<IWindowManagerPolicyWindowManagerFuncs> mWindowManagerFuncs;
@@ -1441,6 +1521,7 @@ protected:
     Boolean mCanHideNavigationBar;
     Boolean mNavigationBarCanMove; // can the navigation bar ever move to the side?
     Boolean mNavigationBarOnBottom; // is the navigation bar on the bottom *right now*?
+    Boolean mNavigationBarLeftInLandscape; // Navigation bar left handed?
     Int32 mNavigationBarHeightForRotation[4];
     Int32 mNavigationBarWidthForRotation[4];
 
@@ -1468,6 +1549,7 @@ protected:
     Int32 mUiMode;
     Int32 mDockMode;
     Int32 mLidOpenRotation;
+    Boolean mHasRemovableLid;
     Int32 mCarDockRotation;
     Int32 mDeskDockRotation;
     Int32 mUndockedHdmiRotation;
@@ -1477,12 +1559,12 @@ protected:
     Boolean mWakeGestureEnabledSetting;
     AutoPtr<MyWakeGestureListener> mWakeGestureListener;
 
-
     Int32 mUserRotationMode;
     Int32 mUserRotation;
+    Int32 mUserRotationAngles;
     Boolean mAccelerometerDefault;
-    Boolean mSupportAutoRotation;
 
+    Boolean mSupportAutoRotation;
     Int32 mAllowAllRotations;
     Boolean mCarDockEnablesAccelerometer;
     Boolean mDeskDockEnablesAccelerometer;
@@ -1501,12 +1583,33 @@ protected:
     Int32 mCurrentAppOrientation;
     Boolean mHasSoftInput;
     Boolean mTranslucentDecorEnabled;// = true;
+    Int32 mBackKillTimeout;
+
+    Int32 mDeviceHardwareKeys;
+
+    // Button wake control flags
+    Boolean mHomeWakeScreen;
+    Boolean mBackWakeScreen;
+    Boolean mMenuWakeScreen;
+    Boolean mAssistWakeScreen;
+    Boolean mAppSwitchWakeScreen;
+    Boolean mVolumeWakeScreen;
+
+    // During wakeup by volume keys, we still need to capture subsequent events
+    // until the key is released. This is required since the beep sound is produced
+    // post keypressed.
+    Boolean mVolumeWakeTriggered;
 
     Int32 mPointerLocationMode; // guarded by mLock
 
+    Int32 mLongPressPoweronTime; //DEFAULT_LONG_PRESS_POWERON_TIME;
     // The last window we were told about in focusChanged.
     AutoPtr<IWindowState> mFocusedWindow;
     AutoPtr<IApplicationToken> mFocusedApp;
+
+    // Behavior of volbtn music controls
+    Boolean mVolBtnMusicControls;
+    Boolean mIsLongPress;
 
     // Pointer location view state, only modified on the mHandler Looper.
     AutoPtr<IPointerLocationView> mPointerLocationView;
@@ -1515,8 +1618,8 @@ protected:
     Int32 mOverscanScreenLeft, mOverscanScreenTop;
     Int32 mOverscanScreenWidth, mOverscanScreenHeight;
 
-    // The current size of the screen; really; (ir)regardless of whether the status
-    // bar can be hidden or not
+    // The current visible size of the screen; really; (ir)regardless of whether the status
+    // bar can be hidden but not extending into the overscan area.
     Int32 mUnrestrictedScreenLeft, mUnrestrictedScreenTop;
     Int32 mUnrestrictedScreenWidth, mUnrestrictedScreenHeight;
     // Like mOverscanScreen*, but allowed to move into the overscan region where appropriate.
@@ -1536,6 +1639,9 @@ protected:
     // fullscreen window flag, these are the stable dimensions without the status bar.
     Int32 mStableFullscreenLeft, mStableFullscreenTop;
     Int32 mStableFullscreenRight, mStableFullscreenBottom;
+    // For force immersive mode
+    Int32 mForceImmersiveLeft, mForceImmersiveTop;
+    Int32 mForceImmersiveRight, mForceImmersiveBottom;
     // During layout, the current screen borders with all outer decoration
     // (status bar, input method dock) accounted for.
     Int32 mCurLeft, mCurTop, mCurRight, mCurBottom;
@@ -1579,6 +1685,8 @@ protected:
     Boolean mForcingShowNavBar;
     Int32 mForcingShowNavBarLayer;
 
+    Boolean mDevForceNavbar;
+
     Int32 mDismissKeyguard;
 
     Boolean mShowingLockscreen;
@@ -1587,6 +1695,8 @@ protected:
     Boolean mHomePressed;
     Boolean mHomeConsumed;
     Boolean mHomeDoubleTapPending;
+    Boolean mMenuPressed;
+    Boolean mAppSwitchLongPressed;
     AutoPtr<IIntent> mHomeIntent;
     AutoPtr<IIntent> mCarDockIntent;
     AutoPtr<IIntent> mDeskDockIntent;
@@ -1594,6 +1704,15 @@ protected:
     Boolean mConsumeSearchKeyUp;
     Boolean mAssistKeyLongPressed;
     Boolean mPendingMetaAction;
+
+    // Tracks user-customisable behavior for certain key events
+    Int32 mLongPressOnHomeBehavior;// = -1;
+    Int32 mPressOnMenuBehavior;// = -1;
+    Int32 mLongPressOnMenuBehavior;// = -1;
+    Int32 mPressOnAssistBehavior;// = -1;
+    Int32 mLongPressOnAssistBehavior;// = -1;
+    Int32 mPressOnAppSwitchBehavior;// = -1;
+    Int32 mLongPressOnAppSwitchBehavior;// = -1;
 
     // support for activating the lock screen while the screen is on
     Boolean mAllowLockscreenWhenOn;
@@ -1607,6 +1726,10 @@ protected:
     // (See Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR.)
     Int32 mIncallPowerBehavior;
 
+    // Behavior of HOME button during incomming call ring.
+    // (See Settings.Secure.RING_HOME_BUTTON_BEHAVIOR.)
+    Int32 mRingHomeBehavior;
+
     AutoPtr<IDisplay> mDisplay;
 
     Int32 mLandscapeRotation;  // default landscape rotation
@@ -1619,9 +1742,13 @@ protected:
     Int32 mOverscanRight;// = 0;
     Int32 mOverscanBottom;// = 0;
 
+    // What we do when the user double-taps on home
+    Int32 mDoubleTapOnHomeBehavior;
+
     AutoPtr<SettingsObserver> mSettingsObserver;
     AutoPtr<ShortcutManager> mShortcutManager;
     AutoPtr<IPowerManagerWakeLock> mBroadcastWakeLock;
+    AutoPtr<IPowerManagerWakeLock> mQuickBootWakeLock;
     Boolean mHavePendingMediaKeyRepeatWithWakeLock;
 
     AutoPtr<MyOrientationListener> mOrientationListener;
@@ -1634,6 +1761,7 @@ protected:
 private:
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
     static const Int32 WAITING_FOR_DRAWN_TIMEOUT;// = 1000;
+
     // States of keyguard dismiss.
     static const Int32 DISMISS_KEYGUARD_NONE; // Keyguard not being dismissed.
     static const Int32 DISMISS_KEYGUARD_START; // Keyguard needs to be dismissed.
@@ -1655,6 +1783,30 @@ private:
     static const Int32 MSG_DISPATCH_SHOW_GLOBAL_ACTIONS;// = 10;
     static const Int32 MSG_HIDE_BOOT_MESSAGE;// = 11;
     static const Int32 MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK;// = 12;
+    static const Int32 MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK;// = 13;
+
+    // Available custom actions to perform on a key press.
+    // Must match values for KEY_HOME_LONG_PRESS_ACTION in:
+    // core/java/android/provider/Settings.java
+    static const Int32 KEY_ACTION_NOTHING; // = 0;
+    static const Int32 KEY_ACTION_MENU; // = 1;
+    static const Int32 KEY_ACTION_APP_SWITCH; // = 2;
+    static const Int32 KEY_ACTION_SEARCH; // = 3;
+    static const Int32 KEY_ACTION_VOICE_SEARCH; // = 4;
+    static const Int32 KEY_ACTION_IN_APP_SEARCH; // = 5;
+    static const Int32 KEY_ACTION_LAUNCH_CAMERA; // = 6;
+    static const Int32 KEY_ACTION_SLEEP; // = 7;
+    static const Int32 KEY_ACTION_LAST_APP; // = 8;
+
+    // Masks for checking presence of hardware keys.
+    // Must match values in core/res/res/values/config.xml
+    static const Int32 KEY_MASK_HOME; // = 0x01;
+    static const Int32 KEY_MASK_BACK; // = 0x02;
+    static const Int32 KEY_MASK_MENU; // = 0x04;
+    static const Int32 KEY_MASK_ASSIST; // = 0x08;
+    static const Int32 KEY_MASK_APP_SWITCH; // = 0x10;
+    static const Int32 KEY_MASK_CAMERA; // = 0x20;
+    static const Int32 KEY_MASK_VOLUME; // = 0x40;
 
     /* The number of steps between min and max brightness */
     static const Int32 BRIGHTNESS_STEPS;// = 10;
@@ -1667,14 +1819,21 @@ private:
     AutoPtr<HDMIUEventObserver> mHDMIObserver;
     AutoPtr<PowerLongPressRunnable> mPowerLongPress;
     AutoPtr<ScreenshotRunnable> mScreenshotRunnable;
+    AutoPtr<ScreenshotForLogRunnable> mScreenshotForLog;
+
+    AutoPtr<BackLongPressRunnable> mBackLongPress;
+
 
 private:
+    AutoPtr<IDeviceKeyHandler> mDeviceKeyHandler;
+
     /**
      * Lock protecting Internal state.  Must not call out Into window
      * manager with lock held.  (This lock will be acquired in places
      * where the window manager is calling in with its own lock held.)
      */
     Object mLock;
+    Object mQuickBootLock;
 
     /**
      * Keyguard stuff
@@ -1692,12 +1851,6 @@ private:
      * the wallpaper. */
     AutoPtr<IWindowState> mWinShowWhenLocked;
 
-    // What we do when the user long presses on home
-    Int32 mLongPressOnHomeBehavior;
-
-    // What we do when the user double-taps on home
-    Int32 mDoubleTapOnHomeBehavior;
-
     // Screenshot trigger states
     Boolean mScreenshotChordEnabled;
     Boolean mVolumeDownKeyTriggered;
@@ -1705,12 +1858,20 @@ private:
     Boolean mVolumeDownKeyConsumedByScreenshotChord;
     Boolean mVolumeUpKeyTriggered;
     Boolean mPowerKeyTriggered;
+    Int64 mVolumeUpKeyTime;
+    Boolean mVolumeUpKeyConsumedByScreenshotChord;
     Int64 mPowerKeyTime;
 
     Int32 mCurrentUserId;
 
     // Maps global key codes to the components that will handle them.
     AutoPtr<GlobalKeyManager> mGlobalKeyManager;
+
+    Boolean mWifiDisplayConnected;// = false;
+    Int32     mWifiDisplayCustomRotation;// = -1;
+    Boolean mHasPermanentMenuKey;
+    Boolean mClearedBecauseOfForceShow;
+    Boolean mTopWindowIsKeyguard;
 
     // Fallback actions by key code.
     AutoPtr<HashMap<Int32, AutoPtr<IInterface> > > mFallbackActions;//TODO update to SparseArray
@@ -1726,6 +1887,41 @@ private:
     AutoPtr<IRunnable> mHomeDoubleTapTimeoutRunnable;
     AutoPtr<IRunnable> mClearHideNavigationFlag;
     AutoPtr<IRunnable> mRequestTransientNav;
+
+    //TODO needs EdgeGestureManager
+    //
+    // private EdgeGestureManager.EdgeGestureActivationListener mEdgeGestureActivationListener
+    //         = new EdgeGestureManager.EdgeGestureActivationListener() {
+
+    //     @Override
+    //     public void onEdgeGestureActivation(int touchX, int touchY,
+    //             EdgeGesturePosition position, int flags) {
+    //         WindowState target = null;
+
+    //         if (position == EdgeGesturePosition.TOP) {
+    //             target = mStatusBar;
+    //         } else if (position == EdgeGesturePosition.BOTTOM  && mNavigationBarOnBottom) {
+    //             target = mNavigationBar;
+    //         } else if (position == EdgeGesturePosition.LEFT
+    //                 && !mNavigationBarOnBottom && mNavigationBarLeftInLandscape) {
+    //             target = mNavigationBar;
+    //         } else if (position == EdgeGesturePosition.RIGHT && !mNavigationBarOnBottom) {
+    //             target = mNavigationBar;
+    //         }
+
+    //         if (target != null) {
+    //             requestTransientBars(target);
+    //             dropEventsUntilLift();
+    //             mEdgeListenerActivated = true;
+    //         } else {
+    //             restoreListenerState();
+    //         }
+    //     }
+    // };
+    // private EdgeGestureManager mEdgeGestureManager = null;
+    Int32 mLastEdgePositions;// = 0;
+    Boolean mEdgeListenerActivated;// = false;
+    Boolean mUsingEdgeGestureServiceForGestures;// = false;
 };
 
 } // namespace Impl

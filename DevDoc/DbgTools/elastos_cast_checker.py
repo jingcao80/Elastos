@@ -136,10 +136,13 @@ def process_file(path, logFile):
                     pattern = re.compile(r'(\()('+primitive+')(\s*\*\s*\)\s*&\s*)([a-zA-Z]\w*)(\s*\))')
                     match = pattern.search(eachLine)
                     if (match):
-                        firstLog = log_fine_info(logFile, firstLog, path)
-                        logInfo = "   = warning: cast primitive type ({0}*)& at line {1:d}!\n".format(primitive, lineNum + 1)
-                        logFile.write(logInfo)
-                        print logInfo
+                        if isIgnored(path, primitive, match.group(4)) == True:
+                            pass
+                        else:
+                            firstLog = log_fine_info(logFile, firstLog, path)
+                            logInfo = "   = warning: cast primitive type ({0}*)&{1} at line {2:d}!\n".format(primitive, match.group(4), lineNum + 1)
+                            logFile.write(logInfo)
+                            print logInfo
 
         lineNum = lineNum +1
 
@@ -228,6 +231,8 @@ def isIgnored(path, usedType, param):
 
 ############################################################################################################
 ignored_list = [
+    '/core/RealToString.cpp#Int32#ee',
+    '/core/IntegralToString.cpp#Int32#qq',
     '/userfunc/userfunc.cpp#IInterface#pClassObject',
     '/launcher2/Launcher.cpp#IAppWidgetProviderInfo#appWidgetInfo',
     '/launcher2/Launcher.cpp#IBundle#appSearchData',
@@ -243,6 +248,7 @@ ignored_list = [
     '/app/ProcessStats.cpp#IArrayMap#mProcesses',
     '/animation/Keyframe.cpp#IInteger32#mValue',
     '/animation/Keyframe.cpp#IFloat#mValue',
+    '/method/TextKeyListener.cpp#IKeyListener#sInstance',
     '/view/InputEventReceiver.cpp#IMessageQueue#mMessageQueue',
     '/view/View.cpp#IInterpolator#mScrollBarInterpolator',
     '/view/InputDevice.cpp#IArrayList#mMotionRanges',
@@ -250,6 +256,7 @@ ignored_list = [
     '/media/TtmlRenderer.cpp#IXmlPullParser#mParser',
     '/widget/TabHost.cpp#IView#mTabContent',
     '/widget/Spinner.cpp#IAlertDialog#mPopup',
+    '/appwidget/AppWidgetServiceImpl.cpp#IList#mWidgets',
     '/res/CResources.cpp#IFormatter#f',
     '/accessibility/AccessibilityInjector.cpp#ITextToSpeech#mTextToSpeech',
     '/pm/PackageParser.cpp#IPermissionInfo#mInfo',

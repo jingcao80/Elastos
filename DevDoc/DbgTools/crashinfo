@@ -1,26 +1,26 @@
-I/DEBUG   (  272):     #00 pc 011f4fac  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #01 pc 01250a7c  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #02 pc 0124dd60  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #03 pc 0124de90  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #04 pc 0249c5d8  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #05 pc 0249e3bc  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #06 pc 0249e258  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #07 pc 0249c500  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #08 pc 02041708  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Handler::DispatchMessage(Elastos::Droid::Os::IMessage*)+152)
-I/DEBUG   (  272):     #09 pc 02043e68  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Looper::Loop()+572)
-I/DEBUG   (  272):     #10 pc 012fdffc  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #11 pc 013290bc  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  272):     #12 pc 0003d920  /system/lib/Elastos.Runtime.eco
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/animation/AnimatorSet.cpp:120
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/animation/ValueAnimator.cpp:747 (discriminator 2)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/animation/ValueAnimator.cpp:133 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/animation/ValueAnimator.cpp:151
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:214
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:684
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:648
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:203
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:683
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Looper.cpp:140
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThread.cpp:6297
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThreadHelper.cpp:79
+I/DEBUG   (  272):     #07 pc 01bde920  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #08 pc 01bf2d64  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  272):     #09 pc 00afaae4  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #10 pc 00af56fc  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #11 pc 00af53d0  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #12 pc 00ada810  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #13 pc 005d0418  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #14 pc 005cf754  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #15 pc 00aee230  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #16 pc 0024b1a0  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #17 pc 00248bc4  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #18 pc 002486f4  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  272):     #19 pc 0003d920  /system/lib/Elastos.Runtime.eco
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/internal/policy/impl/PhoneWindowManager.cpp:1886
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/internal/policy/impl/PhoneWindowManager.cpp:6383
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/wm/CWindowManagerService.cpp:11968
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/wm/CWindowManagerService.cpp:10891
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/wm/CWindowManagerService.cpp:10827
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/wm/CWindowManagerService.cpp:4806
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/am/CActivityManagerService.cpp:21181
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/am/CActivityManagerService.cpp:21030
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/wm/CWindowManagerService.cpp:9260
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/CSystemServer.cpp:647
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/CSystemServer.cpp:277
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/CSystemServer.cpp:158 (discriminator 3)
 /home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/reflection/invoke_gnuc.S:38

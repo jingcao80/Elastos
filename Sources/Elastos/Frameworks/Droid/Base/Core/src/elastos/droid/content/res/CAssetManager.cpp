@@ -1334,19 +1334,28 @@ String CAssetManager::GetResourceName(
     if (name.package != NULL) {
         str16.setTo(name.package, name.packageLen);
     }
-    if (name.type != NULL) {
+
+    if (name.type8 != NULL || name.type != NULL) {
         if (str16.size() > 0) {
             char16_t div = ':';
             str16.append(&div, 1);
         }
-        str16.append(name.type, name.typeLen);
+        if (name.type8 != NULL) {
+            str16.append(android::String16(name.type8, name.typeLen));
+        } else {
+            str16.append(name.type, name.typeLen);
+        }
     }
-    if (name.name != NULL) {
+    if (name.name8 != NULL || name.name != NULL) {
         if (str16.size() > 0) {
             char16_t div = '/';
             str16.append(&div, 1);
         }
-        str16.append(name.name, name.nameLen);
+        if (name.name8 != NULL) {
+            str16.append(android::String16(name.name8, name.nameLen));
+        } else {
+            str16.append(name.name, name.nameLen);
+        }
     }
 
     android::String8 str8(str16);
@@ -1387,6 +1396,10 @@ String CAssetManager::GetResourceTypeName(
         return String(NULL);
     }
 
+    if (name.type8 != NULL) {
+        return String(name.type8);
+    }
+
     if (name.type != NULL) {
         android::String8 str8(name.type);
         return String(str8.string());
@@ -1406,6 +1419,10 @@ String CAssetManager::GetResourceEntryName(
     android::ResTable::resource_name name;
     if (!am->getResources().getResourceName(resid, true, &name)) {
         return String(NULL);
+    }
+
+    if (name.name8 != NULL) {
+        return String(name.type8);
     }
 
     if (name.name != NULL) {

@@ -7,8 +7,7 @@
     <TextView
         android:id="@+id/DisplayTime"
         android:layout_width="match_parent"
-        android:layout_height="50px"
-        android:layout_weight="1"
+        android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
         android:gravity="center_vertical"
         android:textColor="#ff00ff00"
@@ -16,14 +15,14 @@
         android:background="#FFFFFF"/>
 
     <Button android:id="@+id/Bind"
-        android:layout_width="150px"
-        android:layout_height="50px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Bind Service">
     </Button>
 
     <Button android:id="@+id/Unbind"
-        android:layout_width="150px"
-        android:layout_height="50px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Unbind Service">
     </Button>
 
