@@ -6034,7 +6034,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
         if (provider == NULL) {
             String sourceDir;
             ai->GetSourceDir(&sourceDir);
-            Slogger::E(TAG, "Failed to instantiate class %s from sourceDir ",
+            Slogger::E(TAG, "Failed to instantiate class %s from sourceDir %s",
                 name.string(), sourceDir.string());
             return NULL;
         }

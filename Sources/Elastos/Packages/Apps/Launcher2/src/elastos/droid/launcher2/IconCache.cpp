@@ -39,6 +39,8 @@ IconCache::CacheKey::CacheKey(
     : mComponentName(componentName)
     , mUser(user)
 {
+Slogger::E("IconCache", "============================CacheKey::CacheKey() mComponentName=%p",mComponentName.Get());
+Slogger::E("IconCache", "============================CacheKey::CacheKey() mUser=%p",mUser.Get());
 }
 
 ECode IconCache::CacheKey::GetHashCode(
@@ -47,6 +49,8 @@ ECode IconCache::CacheKey::GetHashCode(
     VALIDATE_NOT_NULL(hashCode);
 
     Int32 code;
+Slogger::E("IconCache", "=============CacheKey::GetHashCode mComponentName=%p",mComponentName.Get());
+Slogger::E("IconCache", "=============CacheKey::GetHashCode IObject::Probe(mComponentName)=%p",IObject::Probe(mComponentName));
     IObject::Probe(mComponentName)->GetHashCode(&code);
     Int32 code2;
     IObject::Probe(mUser)->GetHashCode(&code2);
@@ -243,6 +247,7 @@ void IconCache::GetTitleAndIcon(
         ApplicationInfo* _info = (ApplicationInfo*)application;
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
+Slogger::E("IconCache", "============================GetTitleAndIcon _info->mComponentName=%p",(_info->mComponentName).Get());
         AutoPtr<CacheEntry> entry = CacheLocked(_info->mComponentName, info, labelCache,
                 handle);
 
@@ -269,6 +274,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
         if (launcherActInfo == NULL || component == NULL) {
             return mDefaultIcon;
         }
+Slogger::E("IconCache", "============================GetTitleAndIconcomponent=%p",component.Get());
 
         AutoPtr<CacheEntry> entry = CacheLocked(component, launcherActInfo, NULL, user);
         return entry->mIcon;
@@ -288,6 +294,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
 
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
+Slogger::E("IconCache", "============================GetIcon component=%p",component);
         AutoPtr<CacheEntry> entry = CacheLocked(component, info, labelCache, handle);
         return entry->mIcon;
     }
@@ -306,6 +313,7 @@ AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
     /* [in] */ IHashMap* labelCache,
     /* [in] */ IUserHandle* user)
 {
+Slogger::E("IconCache", "============================IconCache::CacheLocked componentName=%p",componentName);
     AutoPtr<CacheKey> cacheKey = new CacheKey(componentName, user);
     AutoPtr<IInterface> obj;
     mCache->Get(TO_IINTERFACE(cacheKey), (IInterface**)&obj);

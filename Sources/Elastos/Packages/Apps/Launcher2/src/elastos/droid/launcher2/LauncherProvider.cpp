@@ -85,22 +85,26 @@ const String LauncherProvider::DatabaseHelper::TAG_EXTRA("extra");
 LauncherProvider::DatabaseHelper::DatabaseHelper()
     : mMaxId(-1)
 {
+    Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::DatabaseHelper()");
 }
 
 ECode LauncherProvider::DatabaseHelper::constructor(
     /* [in] */ IContext* context)
 {
+Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::constructor 1");
     SQLiteOpenHelper::constructor(context, DATABASE_NAME, NULL, DATABASE_VERSION);
     mContext = context;
     CAppWidgetHost::New(context, ILauncher::APPWIDGET_HOST_ID, (IAppWidgetHost**)&mAppWidgetHost);
-
+Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::constructor 2");
     // In the case where neither onCreate nor onUpgrade gets called, we read the maxId from
     // the DB here
     if (mMaxId == -1) {
+Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::constructor 3");
         AutoPtr<ISQLiteDatabase> db;
         GetWritableDatabase((ISQLiteDatabase**)&db);
         InitializeMaxId(db, &mMaxId);
     }
+Slogger::E("LauncherProvider::DatabaseHelper", "=================DatabaseHelper::constructor return");
     return NOERROR;
 }
 
@@ -1786,6 +1790,13 @@ LauncherProvider::LauncherProvider()
     Slogger::E("LauncherProvider", "============================LauncherProvider::LauncherProvider()");
 }
 
+ECode LauncherProvider::constructor()
+{
+Slogger::E("LauncherProvider", "============================LauncherProvider::constructor");
+    return ContentProvider::constructor();
+Slogger::E("LauncherProvider", "============================LauncherProvider::constructor return");
+}
+
 ECode LauncherProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
@@ -1795,11 +1806,12 @@ Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 1")
     GetContext((IContext**)&context);
 Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 2");
     mOpenHelper = new DatabaseHelper();
-    mOpenHelper->constructor(context);
 Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 3");
+    mOpenHelper->constructor(context);
+Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 4");
     ILauncherApplication::Probe(context)->SetLauncherProvider(this);
     *result = TRUE;
-Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 4");
+Slogger::E("LauncherProvider", "==================LauncherProvider::OnCreate 5");
     return NOERROR;
 }
 

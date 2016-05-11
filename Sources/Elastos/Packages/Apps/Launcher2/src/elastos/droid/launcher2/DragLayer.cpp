@@ -5,6 +5,7 @@
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Animation::CValueAnimator;
@@ -22,6 +23,7 @@ using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::IFloat;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -1176,6 +1178,7 @@ ECode DragLayer::AnimateView(
     mDropAnim->AddUpdateListener(updateCb);
     AutoPtr<IAnimatorListener> lisener = new MyAnimatorListenerAdapter(
             onCompleteRunnable, animationEndStyle, this);
+Slogger::D("DragLayer", "=======DragLayer::AnimateView lisener=%p",lisener.Get());
     IAnimator::Probe(mDropAnim)->AddListener(lisener);
     return IAnimator::Probe(mDropAnim)->Start();
 }
@@ -1214,6 +1217,7 @@ void DragLayer::FadeOutDragView()
     AutoPtr<IAnimatorUpdateListener> lisener = new MyAnimatorUpdateListener2(this);
     mFadeOutAnim->AddUpdateListener(lisener);
     AutoPtr<IAnimatorListener> adapter = new MyAnimatorListenerAdapter2(this);
+Slogger::D("DragLayer", "=======DragLayer::FadeOutDragView adapter=%p",adapter.Get());
     IAnimator::Probe(mFadeOutAnim)->AddListener(adapter);
     IAnimator::Probe(mFadeOutAnim)->Start();
 }

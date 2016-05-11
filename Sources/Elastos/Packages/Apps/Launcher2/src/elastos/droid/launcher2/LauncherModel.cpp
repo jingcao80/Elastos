@@ -1070,7 +1070,7 @@ ECode LauncherModel::LoaderTask::IsLoadingWorkspace(
 void LauncherModel::LoaderTask::LoadAndBindWorkspace()
 {
     mIsLoadingAndBindingWorkspace = TRUE;
-
+Slogger::E("LauncherModel", "==================LoaderTask::LoadAndBindWorkspace() 1");
     // Load the workspace
     if (DEBUG_LOADERS) {
         StringBuilder sb;
@@ -1080,7 +1080,9 @@ void LauncherModel::LoaderTask::LoadAndBindWorkspace()
     }
 
     if (!mHost->mWorkspaceLoaded) {
+Slogger::E("LauncherModel", "==================LoaderTask::LoadAndBindWorkspace() 2");
         LoadWorkspace();
+Slogger::E("LauncherModel", "==================LoaderTask::LoadAndBindWorkspace() 3");
         synchronized(this) {
             if (mStopped) {
                 return;
@@ -1088,9 +1090,10 @@ void LauncherModel::LoaderTask::LoadAndBindWorkspace()
             mHost->mWorkspaceLoaded = TRUE;
         }
     }
-
+Slogger::E("LauncherModel", "==================LoaderTask::LoadAndBindWorkspace() 4");
     // Bind the workspace
     BindWorkspace(-1);
+Slogger::E("LauncherModel", "==================LoaderTask::LoadAndBindWorkspace() 5");
 }
 
 void LauncherModel::LoaderTask::WaitForIdle()
@@ -1171,6 +1174,7 @@ ECode LauncherModel::LoaderTask::RunBindSynchronousPage(
 
 ECode LauncherModel::LoaderTask::Run()
 {
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 1");
     synchronized(mHost->mLock) {
         mHost->mIsLoaderTaskRunning = TRUE;
     }
@@ -1185,6 +1189,7 @@ ECode LauncherModel::LoaderTask::Run()
                 sb += mIsLaunching ? "DEFAULT" : "BACKGROUND";
                 Slogger::D(TAG, sb.ToString());
             }
+
             Process::SetThreadPriority(mIsLaunching
                     ? IProcess::THREAD_PRIORITY_DEFAULT
                     : IProcess::THREAD_PRIORITY_BACKGROUND);
@@ -1195,14 +1200,16 @@ ECode LauncherModel::LoaderTask::Run()
         if (DEBUG_LOADERS) {
             Slogger::D(TAG, "step 1: loading workspace");
         }
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 2");
         LoadAndBindWorkspace();
-
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 3 mStopped=%d",mStopped);
         if (mStopped) {
             goto keep_running;
         }
 
         // Whew! Hard work done.  Slow us down, and wait until the UI thread has
         // settled down.
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 4");
         synchronized(mHost->mLock) {
             if (mIsLaunching) {
                 if (DEBUG_LOADERS) {
@@ -1211,21 +1218,22 @@ ECode LauncherModel::LoaderTask::Run()
                 Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
             }
         }
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 5");
         WaitForIdle();
-
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 7");
         // Second step. Load all apps.
         if (DEBUG_LOADERS) {
             Slogger::D(TAG, "step 2: loading all apps");
         }
 Slogger::D("LauncherModel::LoaderTask::Run", "================  before call LoadAndBindAllApps");
         LoadAndBindAllApps();
-
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 8");
         // Restore the default thread priority after we are done loading items
         synchronized(mHost->mLock) {
             Process::SetThreadPriority(IProcess::THREAD_PRIORITY_DEFAULT);
         }
     }
-
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 9");
 
     // Update the saved icons if necessary
     if (DEBUG_LOADERS) {
@@ -1260,11 +1268,11 @@ Slogger::D("LauncherModel::LoaderTask::Run", "================  before call Load
         }
         sBgDbIconCache->Clear();
     }
-
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 10");
     // Clear out this reference, otherwise we end up holding it until all of the
     // callback runnables are done.
     mContext = NULL;
-
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 11");
     synchronized(mHost->mLock) {
         // If we are still the last one to be scheduled, remove ourselves.
         if (TO_IINTERFACE(mHost->mLoaderTask) == TO_IINTERFACE(this)) {
@@ -1272,6 +1280,7 @@ Slogger::D("LauncherModel::LoaderTask::Run", "================  before call Load
         }
         mHost->mIsLoaderTaskRunning = FALSE;
     }
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run 12");
     return NOERROR;
 }
 
@@ -1409,7 +1418,7 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
 void LauncherModel::LoaderTask::LoadWorkspace()
 {
     Int64 t = DEBUG_LOADERS ? SystemClock::GetUptimeMillis() : 0;
-
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 1");
     AutoPtr<IContext> context = mContext;
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
@@ -1443,28 +1452,26 @@ void LauncherModel::LoaderTask::LoadWorkspace()
         contentResolver->Query(
                 LauncherSettings::Favorites::CONTENT_URI, NULL,
                 String(NULL), NULL, String(NULL), (ICursor**)&c);
-
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 2 c = %p", c.Get());
         // +1 for the hotseat (it can be larger than the workspace)
         // Load workspace in reverse order to ensure that latest items are loaded first (and
         // before any earlier duplicates)
         AutoPtr<ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* > > occupied =
                 ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* >::Alloc(
                 ILauncher::SCREEN_COUNT + 1);
-
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 3");
         for (Int32 i = 0; i < ILauncher::SCREEN_COUNT + 1; i++) {
             AutoPtr<ArrayOf<ArrayOf<ItemInfo*>* > > array2 =
                 ArrayOf<ArrayOf<ItemInfo*>* >::Alloc(mCellCountX + 1);
-            //(*occupied)[i] = array2;
             occupied->Set(i, array2);
 
             for (Int32 j = 0; i < mCellCountX + 1; i++) {
                 AutoPtr<ArrayOf<ItemInfo*> > array3 =
                         ArrayOf<ItemInfo*>::Alloc(mCellCountY + 1);
-                //(*array2)[j] = array3;
                 array2->Set(j, array3);
             }
         }
-
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 4");
         //try
         {
             Int32 idIndex;
@@ -1502,7 +1509,7 @@ void LauncherModel::LoaderTask::LoadWorkspace()
             //final int uriIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.URI);
             //final int displayModeIndex = c.getColumnIndexOrThrow(
             //        LauncherSettings.Favorites.DISPLAY_MODE);
-
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 5");
             AutoPtr<IShortcutInfo> info;
             String intentDescription;
             AutoPtr<LauncherAppWidgetInfo> appWidgetInfo;
@@ -1516,11 +1523,12 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                 //try {
                 Int32 itemType;
                 FAIL_GOTO(c->GetInt32(itemTypeIndex, &itemType), FAILED)
-
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 7");
                 switch (itemType) {
                 case LauncherSettings::Favorites::ITEM_TYPE_APPLICATION:
                 case LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT:
                 {
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 8");
                     FAIL_GOTO(c->GetString(intentIndex, &intentDescription), FAILED)
                     Int32 serialNumber;
                     FAIL_GOTO(c->GetInt32(profileIdIndex, &serialNumber), FAILED)
@@ -1635,6 +1643,7 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                 }
                 case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
                 {
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 9");
                     FAIL_GOTO(c->GetInt64(idIndex, &id), FAILED)
                     AutoPtr<FolderInfo> folderInfo = FindOrMakeFolder(sBgFolders, id);
 
@@ -1669,6 +1678,7 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                 }
                 case LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET:
                 {
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 10");
                     // Read all Launcher-specific widget details
                     Int32 appWidgetId;
                     FAIL_GOTO(c->GetInt32(appWidgetIdIndex, &appWidgetId), FAILED)
@@ -1843,8 +1853,10 @@ void LauncherModel::LoaderTask::FilterCurrentWorkspaceItems(
     // Purge any null ItemInfos
     AutoPtr<IIterator> iter;
     allWorkspaceItems->GetIterator((IIterator**)&iter);
+Slogger::E("LauncherModel::LoaderTask", "========FilterCurrentWorkspaceItems iter=%p",iter.Get());
     Boolean res;
-    while (iter->HasNext(&res), &res) {
+    while ((iter->HasNext(&res), res)) {
+Slogger::E("LauncherModel::LoaderTask", "========FilterCurrentWorkspaceItems 1");
         AutoPtr<IInterface> obj;
         iter->GetNext((IInterface**)&obj);
         AutoPtr<IItemInfo> i = IItemInfo::Probe(obj);
@@ -1852,13 +1864,13 @@ void LauncherModel::LoaderTask::FilterCurrentWorkspaceItems(
             iter->Remove();
         }
     }
-
+Slogger::E("LauncherModel::LoaderTask", "========FilterCurrentWorkspaceItems 2");
     // If we aren't filtering on a screen, then the set of items to load is the full set of
     // items given.
     if (currentScreen < 0) {
         currentScreenItems->AddAll(ICollection::Probe(allWorkspaceItems));
     }
-
+Slogger::E("LauncherModel::LoaderTask", "========FilterCurrentWorkspaceItems 3");
     // Order the set of items by their containers first, this allows use to walk through the
     // list sequentially, build up a list of containers that are in the specified screen,
     // as well as all items in those containers.
@@ -1868,9 +1880,10 @@ void LauncherModel::LoaderTask::FilterCurrentWorkspaceItems(
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
     collections->Sort(IList::Probe(allWorkspaceItems), c);
-
+Slogger::E("LauncherModel::LoaderTask", "========FilterCurrentWorkspaceItems 4");
     Int32 size;
     allWorkspaceItems->GetSize(&size);
+Slogger::E("LauncherModel::LoaderTask", "========FilterCurrentWorkspaceItems size=%d",size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         allWorkspaceItems->Get(i, (IInterface**)&obj);
@@ -2098,21 +2111,25 @@ void LauncherModel::LoaderTask::BindWorkspace(
     CHashMap::New((IHashMap**)&currentFolders);
     AutoPtr<IHashMap> otherFolders;
     CHashMap::New((IHashMap**)&otherFolders);
-
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 1 currentScreen=%d",currentScreen);
     // Separate the items that are on the current screen, and all the other remaining items
     FilterCurrentWorkspaceItems(currentScreen, workspaceItems, currentWorkspaceItems,
             otherWorkspaceItems);
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 2");
     FilterCurrentAppWidgets(currentScreen, appWidgets, currentAppWidgets,
             otherAppWidgets);
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 3");
     FilterCurrentFolders(currentScreen, itemsIdMap, folders, currentFolders,
             otherFolders);
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 4");
     SortWorkspaceItemsSpatially(currentWorkspaceItems);
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 5");
     SortWorkspaceItemsSpatially(otherWorkspaceItems);
-
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 6");
     // Tell the workspace that we're about to start binding items
     r = new MyRunnable12(this, oldCallbacks);
     mHost->RunOnMainThread(r, MAIN_THREAD_BINDING_RUNNABLE);
-
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 7");
     // Load items on the current page
     BindWorkspaceItems(oldCallbacks, currentWorkspaceItems, currentAppWidgets,
             currentFolders, NULL);
@@ -2120,13 +2137,13 @@ void LauncherModel::LoaderTask::BindWorkspace(
         r = new MyRunnable13(this, oldCallbacks, currentScreen);
         mHost->RunOnMainThread(r, MAIN_THREAD_BINDING_RUNNABLE);
     }
-
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 8");
     // Load all the remaining pages (if we are loading synchronously, we want to defer this
     // work until after the first render)
     mDeferredBindRunnables->Clear();
     BindWorkspaceItems(oldCallbacks, otherWorkspaceItems, otherAppWidgets, otherFolders,
             (isLoadingSynchronously ? mDeferredBindRunnables : NULL));
-
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 9");
     // Tell the workspace that we're done binding items
     r = new MyRunnable14(this, oldCallbacks, t);
     if (isLoadingSynchronously) {
@@ -2135,6 +2152,7 @@ void LauncherModel::LoaderTask::BindWorkspace(
     else {
         mHost->RunOnMainThread(r, MAIN_THREAD_BINDING_RUNNABLE);
     }
+Slogger::E("LauncherModel::LoaderTask", "=================LoaderTask::BindWorkspace 10");
 }
 
 void LauncherModel::LoaderTask::LoadAndBindAllApps()
@@ -2239,6 +2257,7 @@ Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====creat IIntent:
                     return;
                 }
                 apps->GetSize(&N);
+Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "============N=%d",N);
                 if (DEBUG_LOADERS) {
                     StringBuilder sb;
                     sb += "queryIntentActivities got ";
@@ -2279,6 +2298,7 @@ Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====creat IIntent:
                 AutoPtr<IInterface> obj;
                 apps->Get(i, (IInterface**)&obj);
                 AutoPtr<ILauncherActivityInfo> _info = ILauncherActivityInfo::Probe(obj);
+Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====new ApplicationInfo");
                 AutoPtr<ApplicationInfo> info = new ApplicationInfo();
                 info->constructor(_info, user, mHost->mIconCache, mLabelCache);
                 mHost->mBgAllAppsList->Add(info);
@@ -2641,13 +2661,12 @@ AutoPtr<IHashMap> LauncherModel::sBgDbIconCache;
 
 Boolean LauncherModel::InitStaticBlock()
 {
-    AutoPtr<IHandlerThread> sWorkerThread;
     CHandlerThread::New(String("launcher-loader"), (IHandlerThread**)&sWorkerThread);
     IThread::Probe(sWorkerThread)->Start();
+Slogger::E("LauncherModel", "============================InitStaticBlock::IThread::Probe(sWorkerThread)->Start()");
 
     AutoPtr<ILooper> looper;
     sWorkerThread->GetLooper((ILooper**)&looper);
-    AutoPtr<IHandler> sWorker;
     CHandler::New(looper, (IHandler**)&sWorker);
 
     CArrayList::New((IArrayList**)&mDeferredBindRunnables);
@@ -3379,7 +3398,9 @@ ECode LauncherModel::Initialize(
     /* [in] */ ILauncherModelCallbacks* _callbacks)
 {
     synchronized(mLock) {
-        mCallbacks = IWeakReference::Probe(_callbacks);
+        AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(_callbacks);
+        wrs->GetWeakReference((IWeakReference**)&mCallbacks);
+Slogger::E("LauncherModel", "============================Initialize mCallbacks=%p", mCallbacks.Get());
     }
     return NOERROR;
 }
@@ -3517,24 +3538,27 @@ ECode LauncherModel::StartLoader(
         if (DEBUG_LOADERS) {
             Slogger::D(TAG, "startLoader isLaunching=" + isLaunching);
         }
-
+Slogger::I("LauncherModel", "===================StartLoader 1");
         // Clear any deferred bind-runnables from the synchronized load process
         // We must do this before any loading/binding is scheduled below.
         mDeferredBindRunnables->Clear();
-
+Slogger::I("LauncherModel", "===================StartLoader 2 mCallbacks=%p", mCallbacks.Get());
         // Don't bother to start the thread if we know it's not going to do anything
         AutoPtr<IInterface> obj;
         mCallbacks->Resolve(EIID_ILauncherModelCallbacks, (IInterface**)&obj);
         AutoPtr<ILauncherModelCallbacks> _callbacks = ILauncherModelCallbacks::Probe(obj);
+Slogger::I("LauncherModel", "===================StartLoader 3 _callbacks=%p", _callbacks.Get());
         if (mCallbacks != NULL && _callbacks != NULL) {
             // If there is already one running, tell it to stop.
             // also, don't downgrade isLaunching if we're already running
             isLaunching = isLaunching || StopLoaderLocked();
             mLoaderTask = new LoaderTask(this, IContext::Probe(mApp), isLaunching);
+Slogger::I("LauncherModel", "===================StartLoader 4");
             if (synchronousBindPage > -1 && mAllAppsLoaded && mWorkspaceLoaded) {
                 mLoaderTask->RunBindSynchronousPage(synchronousBindPage);
             }
             else {
+Slogger::I("LauncherModel", "===================StartLoader 5 sWorkerThread=%p", sWorkerThread.Get());
                 IThread::Probe(sWorkerThread)->SetPriority(IThread::NORM_PRIORITY);
                 Boolean res;
 Slogger::I("LauncherModel::StartLoader", "===================before call sWorker->Post");

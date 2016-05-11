@@ -60,6 +60,7 @@ ECode CHotseat::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     if (mLauncher != NULL) {
+Slogger::D("CHotseat", "========================MyOnClickListener::OnClick OnClickAllAppsButton");
         return mLauncher->OnClickAllAppsButton(v);
     }
     return NOERROR;

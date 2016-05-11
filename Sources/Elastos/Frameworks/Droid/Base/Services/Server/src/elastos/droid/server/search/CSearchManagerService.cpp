@@ -32,14 +32,12 @@ namespace Search {
 
 const String CSearchManagerService::TAG("SearchManagerService");
 
+CAR_INTERFACE_IMPL(CSearchManagerService, Object, IISearchManager, IBinder);
+
+CAR_OBJECT_IMPL(CSearchManagerService);
+
 CSearchManagerService::CSearchManagerService()
 {}
-
-CSearchManagerService::CSearchManagerService(
-    /* [in] */ IContext* ctx)
-{
-    ASSERT_SUCCEEDED(Init(ctx));
-}
 
 ECode CSearchManagerService::constructor(
         /* [in] */ IContext* context)
@@ -211,6 +209,7 @@ ECode CSearchManagerService::GetSearchables(
     VALIDATE_NOT_NULL(rst);
     *rst = NULL;
 
+    assert(0);
     // long origId = Binder.clearCallingIdentity();
     // try {
     //     boolean userExists = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
@@ -219,19 +218,20 @@ ECode CSearchManagerService::GetSearchables(
     // } finally {
     //     Binder.restoreCallingIdentity(origId);
     // }
-    Iterator it = mSearchables.Find(userId);
-    if ((it != mSearchables.End()) && it->mSecond != NULL) {
-        *rst = it->mSecond;
-        REFCOUNT_ADD(*rst);
+    synchronized(mSearchables) {
+        Iterator it = mSearchables.Find(userId);
+        if ((it != mSearchables.End()) && it->mSecond != NULL) {
+            *rst = it->mSecond;
+            REFCOUNT_ADD(*rst);
+        }
+        else {
+            //Log.i(TAG, "Building list of searchable activities for userId=" + userId);
+            *rst = new Searchables(mContext, userId);
+            REFCOUNT_ADD(*rst);
+            (*rst)->BuildSearchableList();
+            mSearchables[userId] = (*rst);
+        }
     }
-    else {
-        //Log.i(TAG, "Building list of searchable activities for userId=" + userId);
-        *rst = new Searchables(mContext, userId);
-        REFCOUNT_ADD(*rst);
-        (*rst)->BuildSearchableList();
-        mSearchables[userId] = (*rst);
-    }
-
     return NOERROR;
 }
 
@@ -286,7 +286,7 @@ CSearchManagerService::BootCompletedReceiver::MyThread::MyThread(
 
 ECode CSearchManagerService::BootCompletedReceiver::MyThread::Run()
 {
-
+    assert(0);
     // Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
     // mHost->mHost->mContext->UnregisterReceiver(mHost);
     // AutoPtr<ISearchables> searchables;

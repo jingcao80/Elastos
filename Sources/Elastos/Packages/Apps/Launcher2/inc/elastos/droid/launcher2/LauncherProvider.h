@@ -225,6 +225,8 @@ public:
 
     LauncherProvider();
 
+    CARAPI constructor();
+
     static CARAPI GetCONTENT_APPWIDGET_RESET_URI(
         /* [out] */ IUri** uri);
 

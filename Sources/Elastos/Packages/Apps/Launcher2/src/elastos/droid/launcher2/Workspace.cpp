@@ -2799,8 +2799,10 @@ ECode Workspace::GetChangeStateAnimation(
                 IView::Probe(cl)->SetRotationY((*mNewRotationYs)[i]);
             }
             else {
+Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 1 new scaleAnim");
                 AutoPtr<LauncherViewPropertyAnimator> a =
                         new LauncherViewPropertyAnimator(IView::Probe(cl));
+Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 2 new scaleAnim a->mListeners=%p",(a->mListeners).Get());
                 a->TranslationX((*mNewTranslationXs)[i]);
                 a->TranslationY((*mNewTranslationYs)[i]);
                 a->ScaleX((*mNewScaleXs)[i]);
@@ -2813,8 +2815,10 @@ ECode Workspace::GetChangeStateAnimation(
                 if ((*mOldAlphas)[i] != (*mNewAlphas)[i] || currentAlpha != (*mNewAlphas)[i]) {
                     AutoPtr<IShortcutAndWidgetContainer> container;
                     cl->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&container);
+Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 3 new scaleAnim");
                     AutoPtr<LauncherViewPropertyAnimator> alphaAnim
                             = new LauncherViewPropertyAnimator(IView::Probe(container));
+Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 4 new scaleAnim alphaAnim->mListeners=%p",(alphaAnim->mListeners).Get());
                     alphaAnim->Alpha((*mNewAlphas)[i]);
                     alphaAnim->SetDuration(duration);
                     alphaAnim->SetInterpolator(mZoomInInterpolator);

@@ -19,6 +19,7 @@
 #include "elastos/droid/app/CKeyguardManager.h"
 #include "elastos/droid/app/SharedPreferencesImpl.h"
 #include "elastos/droid/app/CStatusBarManager.h"
+#include "elastos/droid/app/CSearchManager.h"
 #include "elastos/droid/app/CResourcesManager.h"
 #include "elastos/droid/app/CAppOpsManager.h"
 #include "elastos/droid/app/CJobSchedulerImpl.h"
@@ -93,6 +94,8 @@ using Elastos::Droid::Accounts::EIID_IIAccountManager;
 using Elastos::Droid::App::CUiModeManager;
 using Elastos::Droid::App::NotificationManager;
 using Elastos::Droid::App::CStatusBarManager;
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Droid::App::CSearchManager;
 using Elastos::Droid::App::CKeyguardManager;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::CAppOpsManager;
@@ -2578,13 +2581,11 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::SEARCH_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
-        // public Object createService(ContextImpl ctx) {
-        //     return new SearchManager(ctx.getOuterContext(),
-        //             ctx.mMainThread.getHandler());
-        // }});
-        return E_NOT_IMPLEMENTED;
+        AutoPtr<ISearchManager> searchManager;
+        CSearchManager::New(GetOuterContext(), mMainThread->GetHandler(), (ISearchManager**)&searchManager);
+        *object = searchManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
     }
     else if (IContext::SENSOR_SERVICE.Equals(name)) {
         AutoPtr<ILooper> looper;

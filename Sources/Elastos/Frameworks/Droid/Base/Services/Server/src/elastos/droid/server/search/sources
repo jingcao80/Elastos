@@ -9,3 +9,4 @@ C_DEFINES += -DDROID_SERVER
 
 SOURCES = Searchables.cpp
 SOURCES += CSearchManagerService.cpp
+SOURCES += search.cpp

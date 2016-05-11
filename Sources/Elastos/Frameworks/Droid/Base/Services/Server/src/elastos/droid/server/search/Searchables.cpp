@@ -1,4 +1,5 @@
-#include "search/Searchables.h"
+#include "elastos/droid/search/Searchables.h"
+#include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/text/TextUtils.h"
 
 using Elastos::Droid::Os::IBundle;
@@ -27,18 +28,16 @@ const String Searchables::TAG("Searchables");
 const String Searchables::MD_LABEL_DEFAULT_SEARCHABLE("android.app.default_searchable");
 const String Searchables::MD_SEARCHABLE_SYSTEM_SEARCH("*");
 
-CAR_INTERFACE_IMPL(Searchables, ISearchables)
+CAR_INTERFACE_IMPL(Searchables, Object, ISearchables)
 
 Searchables::Searchables(
     /* [in] */ IContext* ctx,
     /* [in] */ Int32 userId)
     : mUserId(0)
+    , mContext(ctx)
+    , mUserId(userId)
 {
-    mContext = ctx;
-    mUserId = userId;
-    AutoPtr<IActivityThreadHelper> helper;
-    CActivityThreadHelper::AcquireSingleton((IActivityThreadHelper**)&helper);
-    helper->GetPackageManager((IIPackageManager**)&mPm);
+    mPm = AppGlobals::GetPackageManager();
 }
 
 ECode Searchables::GetSearchableInfo(
@@ -47,13 +46,15 @@ ECode Searchables::GetSearchableInfo(
 {
     VALIDATE_NOT_NULL(info);
     *info = NULL;
+
     // Step 1.  Is the result already hashed?  (case 1)
-    {
-        AutoLock lock(mLock);
-        Iterator it = mSearchablesMap->Find(activity);
-        if(it != mSearchablesMap->End() && it->mSecond != NULL)
-        {
-            *info = it->mSecond;
+    AutoPtr<ISearchableInfo> result;
+    synchronized(this) {
+        AutoPtr<IInterface> obj;
+        mSearchablesMap->Get(TO_IINTERFACE(activity), (IInterface**)&obj);
+        result = ISearchableInfo::Probe(obj);
+        if (result != NULL) {
+            *info = result;
             REFCOUNT_ADD(*info);
             return NOERROR;
         }
@@ -63,16 +64,19 @@ ECode Searchables::GetSearchableInfo(
     // Note:  Conceptually, this could be a while(true) loop, but there's
     // no point in implementing reference chaining here and risking a loop.
     // References must point directly to searchable activities.
+
     AutoPtr<IActivityInfo> ai;
-    // try {
-
-    FAIL_RETURN(mPm->GetActivityInfo(activity, IPackageManager::GET_META_DATA, mUserId, (IActivityInfo**)&ai));
-
-    // } catch (RemoteException re) {
-    //     Log.e(LOG_TAG, "Error getting activity info " + re);
-    //     return null;
-    // }
+    //try {
+    ECode ec = mPm->GetActivityInfo(activity, IPackageManager::GET_META_DATA, mUserId, (IActivityInfo**)&ai);
+    //} catch (RemoteException re) {
+    if (ec == (ECode)RemoteException) {
+        Slogger::E(TAG, "Error getting activity info %x" + ec);
+        *info = NULL;
+        return NOERROR;
+    }
+    //}
     String refActivityName(NULL);
+
     // First look for activity-specific reference
     AutoPtr<IBundle> md;
     ai->GetMetaData((IBundle**)&md);
@@ -91,8 +95,7 @@ ECode Searchables::GetSearchableInfo(
     }
 
     // Irrespective of source, if a reference was found, follow it.
-    if (refActivityName != NULL)
-    {
+    if (refActivityName != NULL) {
         // This value is deprecated, return null
         if (refActivityName.Equals(MD_SEARCHABLE_SYSTEM_SEARCH)) {
             *info = NULL;
@@ -100,30 +103,28 @@ ECode Searchables::GetSearchableInfo(
         }
         String pkg;
         activity->GetPackageName(&pkg);
-        String param(pkg);
-        param += refActivityName;
         AutoPtr<IComponentName> referredActivity;
         if (refActivityName.GetChar(0) == '.') {
+            String param(pkg);
+            param += refActivityName;
             CComponentName::New(pkg, param, (IComponentName**)&referredActivity);
-        } else {
+        }
+        else {
             CComponentName::New(pkg, refActivityName, (IComponentName**)&referredActivity);
         }
 
         // Now try the referred activity, and if found, cache
         // it against the original name so we can skip the check
-        {
-            AutoLock lock(mLock);
-            // TODO: you will can't find item forever
-            //
-            Iterator it = mSearchablesMap->Find(referredActivity);
-            if(it != mSearchablesMap->End() && it->mSecond != NULL)
-            {
-                *info = it->mSecond;
+        synchronized (this) {
+            AutoPtr<IInterface> obj;
+            mSearchablesMap->Get(TO_IINTERFACE(referredActivity), (IInterface**)&obj);
+            result = ISearchableInfo::Probe(obj);
+            if (result != NULL) {
+                mSearchablesMap->Put(TO_IINTERFACE(activity), obj);
+                *info = result;
                 REFCOUNT_ADD(*info);
-                (*mSearchablesMap)[activity] = *info;
                 return NOERROR;
             }
-
         }
     }
 
@@ -135,100 +136,111 @@ ECode Searchables::GetSearchableInfo(
 ECode Searchables::BuildSearchableList()
 {
     // These will become the new values at the end of the method
-    mSearchablesMap = new CSHashMap();
-    mSearchablesList = NULL;
-    CObjectContainer::New((IObjectContainer**)&mSearchablesList);
-    mSearchablesInGlobalSearchList = NULL;
-    CObjectContainer::New((IObjectContainer**)&mSearchablesInGlobalSearchList);
+    AutoPtr<IHashMap> newSearchablesMap;
+    CHashMap::New((IHashMap**)&newSearchablesMap);
+    AutoPtr<IArrayList> newSearchablesList;
+    CArrayList::New((IArrayList**)&newSearchablesList);
+    AutoPtr<IArrayList> newSearchablesInGlobalSearchList;
+    CArrayList::New((IArrayList**)&newSearchablesInGlobalSearchList);
 
     // Use intent resolver to generate list of ACTION_SEARCH & ACTION_WEB_SEARCH receivers.
-    AutoPtr<IObjectContainer> searchList;
+    AutoPtr<IList> searchList;
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_SEARCH, (IIntent**)&intent);
+
     Int64 ident;
     AutoPtr<IBinderHelper> binderHelper;
     CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
     binderHelper->ClearCallingIdentity(&ident);
-    QueryIntentActivities(intent, IPackageManager::GET_META_DATA, (IObjectContainer**)&searchList);
-    AutoPtr<IObjectContainer> webSearchInfoList;
-    AutoPtr<IIntent> webSearchIntent;
-    CIntent::New(IIntent::ACTION_WEB_SEARCH, (IIntent**)&webSearchIntent);
-    QueryIntentActivities(webSearchIntent, IPackageManager::GET_META_DATA, (IObjectContainer**)&webSearchInfoList);
-    // analyze each one, generate a Searchables record, and record
 
-    if (searchList != NULL || webSearchInfoList != NULL) {
-        Int32 search_count = 0;
-        if(searchList)
-            searchList->GetObjectCount(&search_count);
-        Int32 web_search_count = 0;
-        if(webSearchInfoList)
-            webSearchInfoList->GetObjectCount(&web_search_count);
+    //try
+    {
+        assert(0 && "try-finally");
+        QueryIntentActivities(intent, IPackageManager::GET_META_DATA, (IList**)&searchList);
+        AutoPtr<IList> webSearchInfoList;
+        AutoPtr<IIntent> webSearchIntent;
+        CIntent::New(IIntent::ACTION_WEB_SEARCH, (IIntent**)&webSearchIntent);
+        QueryIntentActivities(webSearchIntent, IPackageManager::GET_META_DATA,
+                (IList**)&webSearchInfoList);
 
-        Int32 count = search_count + web_search_count;
-        AutoPtr<IObjectEnumerator> sEm;
-        AutoPtr<IObjectEnumerator> wEm;
-        searchList->GetObjectEnumerator((IObjectEnumerator**)&sEm);
-        webSearchInfoList->GetObjectEnumerator((IObjectEnumerator**)&wEm);
-        for (Int32 ii = 0; ii < count; ii++) {
-            // for each component, try to find metadata
-            AutoPtr<IResolveInfo> rInfo;
-            Boolean next = FALSE;
-            if (ii < search_count)
-            {
-                if (sEm->MoveNext(&next), next)
-                {
-                    AutoPtr<IInterface> temp;
-                    sEm->Current((IInterface**)&temp);
-                    rInfo = IResolveInfo::Probe(temp);
-                }
-            } else {
-                if (wEm->MoveNext(&next), next)
-                {
-                    AutoPtr<IInterface> temp;
-                    wEm->Current((IInterface**)&temp);
-                    rInfo = IResolveInfo::Probe(temp);
-                }
+        // analyze each one, generate a Searchables record, and record
+        if (searchList != NULL || webSearchInfoList != NULL) {
+            Int32 search_count = 0;
+            if (searchList != NULL) {
+                searchList->GetSize(&search_count);
             }
-            AutoPtr<IActivityInfo> ai;
-            rInfo->GetActivityInfo((IActivityInfo**)&ai);
-            // Check first to avoid duplicate entries.
-            String pkgName, name;
-            ai->GetPackageName(&pkgName);
-            ai->GetName(&name);
-            AutoPtr<IComponentName> cName;
-            CComponentName::New(pkgName, name, (IComponentName**)&cName);
-            // TODO: you will can't find item forever
-            //
-            Iterator it = mSearchablesMap->Find(cName);
+            Int32 web_search_count = 0;
+            if (webSearchInfoList != NULL) {
+                webSearchInfoList->GetSize(&web_search_count);
+            }
 
-            if (it != mSearchablesMap->End() && it->mSecond != NULL) {
-                AutoPtr<ISearchableInfo> searchable;// = SearchableInfo.getActivityMetaData(mContext, ai, mUserId);
-                if (searchable != NULL) {
-                    mSearchablesList->Add(searchable);
-                    AutoPtr<IComponentName> key;
-                    searchable->GetSearchActivity((IComponentName**)&key);
-                    (*mSearchablesMap)[key] = searchable;
-                    Boolean should;
-                    if (searchable->ShouldIncludeInGlobalSearch(&should), should) {
-                        mSearchablesInGlobalSearchList->Add(searchable);
+            Int32 count = search_count + web_search_count;
+            for (Int32 ii = 0; ii < count; ii++) {
+                // for each component, try to find metadata
+                AutoPtr<IInterface> obj;
+                if (ii < search_count) {
+                    searchList->Get(ii, (IInterface**)&obj);
+                }
+                else {
+                    webSearchInfoList->Get(ii - search_count, (IInterface**)&obj);
+                }
+                AutoPtr<IResolveInfo> info = IResolveInfo::Probe(obj);
+                AutoPtr<IActivityInfo> ai;
+                info->GetActivityInfo((IActivityInfo**)&ai);
+
+                // Check first to avoid duplicate entries.
+                AutoPtr<IComponentName> name;
+                CComponentName::New(ai.packageName, ai.name); IPackageItemInfo
+                String pkgName, name;
+                IPackageItemInfo::Probe(ai)->GetPackageName(&pkgName);
+                IPackageItemInfo::Probe(ai)->GetName(&name);
+                AutoPtr<IComponentName> cName;
+                CComponentName::New(pkgName, name, (IComponentName**)&cName);
+                AutoPtr<IInterface> value;
+                newSearchablesMap->Get(TO_IINTERFACE(cName), (IInterface**)&value);
+                if (value == NULL) {
+                    AutoPtr<ISearchableInfoHelper> helper;
+                    CSearchableInfoHelper::AcquireSingleton((ISearchableInfoHelper**)&helper);
+                    AutoPtr<ISearchableInfo> searchable;
+                    helper->GetActivityMetaData(mContext, ai, mUserId, (ISearchableInfo**)&searchable);
+                    if (searchable != NULL) {
+                        newSearchablesList->Add(TO_IINTERFACE(searchable));
+                        newSearchablesMap->Put(searchable.getSearchActivity(), TO_IINTERFACE(searchable));
+                        Boolean res;
+                        searchable->ShouldIncludeInGlobalSearch(&res);
+                        if (res) {
+                            newSearchablesInGlobalSearchList->Add(TO_IINTERFACE(searchable));
+                        }
                     }
                 }
             }
         }
+
+        AutoPtr<IList> newGlobalSearchActivities;
+        FindGlobalSearchActivities((IList**)&newGlobalSearchActivities);
+
+        // Find the global search activity
+        AutoPtr<IComponentName> newGlobalSearchActivity;
+        FindGlobalSearchActivity(newGlobalSearchActivities, (IComponentName**)&newGlobalSearchActivity);
+
+        // Find the web search activity
+        AutoPtr<IComponentName> newWebSearchActivity;
+        FindWebSearchActivity(newGlobalSearchActivity, (IComponentName**)&newWebSearchActivity);
+
+        // Store a consistent set of new values
+        synchronized(this) {
+            mSearchablesMap = newSearchablesMap;
+            mSearchablesList = newSearchablesList;
+            mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
+            mGlobalSearchActivities = newGlobalSearchActivities;
+            mCurrentGlobalSearchActivity = newGlobalSearchActivity;
+            mWebSearchActivity = newWebSearchActivity;
+        }
     }
-
-    // Find the global search activity
-    mGlobalSearchActivities = NULL;
-    FindGlobalSearchActivities((IObjectContainer**)&mGlobalSearchActivities);
-    mCurrentGlobalSearchActivity = NULL;
-    FindGlobalSearchActivity(mGlobalSearchActivities, (IComponentName**)&mCurrentGlobalSearchActivity);
-
-    // Find the global search activity
-    mWebSearchActivity = NULL;
-    FindWebSearchActivity(mCurrentGlobalSearchActivity, (IComponentName**)&mWebSearchActivity);
-
-    binderHelper->RestoreCallingIdentity(ident);
-    return NOERROR;
+    //} finally {
+FINALLY:
+    return binderHelper->RestoreCallingIdentity(ident);
+    //}
 }
 
 ECode Searchables::GetSearchablesList(
@@ -287,8 +299,7 @@ ECode Searchables::FindGlobalSearchActivities(
     AutoPtr<IObjectContainer> activities;
     QueryIntentActivities(intent, IPackageManager::MATCH_DEFAULT_ONLY, (IObjectContainer**)&activities);
     Int32 count;
-    if (activities != NULL && (activities->GetObjectCount(&count), count) != 0)
-    {
+    if (activities != NULL && (activities->GetObjectCount(&count), count) != 0) {
         // Step 2: Rank matching activities according to our heuristics.
         AutoPtr< List<AutoPtr<IResolveInfo> > > listTemp = TransfromContainer<IResolveInfo>(activities);
         listTemp->Sort(Searchables::ComparatorResolveInfo);
@@ -339,8 +350,7 @@ ECode Searchables::IsInstalled(
     AutoPtr<IObjectContainer> activities;
     QueryIntentActivities(intent, IPackageManager::MATCH_DEFAULT_ONLY, (IObjectContainer**)&activities);
     Int32 count;
-    if (activities != NULL && (activities->GetObjectCount(&count), count) > 0)
-    {
+    if (activities != NULL && (activities->GetObjectCount(&count), count) > 0) {
         *rst = TRUE;
     }
     return NOERROR;
@@ -350,7 +360,7 @@ Boolean Searchables::ComparatorResolveInfo(
     /* [in] */ IResolveInfo* lhs,
     /* [in] */ IResolveInfo* rhs)
 {
-    if(lhs == rhs)
+    if (lhs == rhs)
         return TRUE;
     Boolean lhsSystem, rhsSystem;
     IsSystemApp(lhs, &lhsSystem);
@@ -405,13 +415,11 @@ ECode Searchables::GetDefaultGlobalSearchProvider(
         providerList->GetObjectEnumerator((IObjectEnumerator**)&em);
         Boolean next;
         em->MoveNext(&next);
-        if(next)
-        {
+        if (next) {
             AutoPtr<IInterface> temp;
             em->Current((IInterface**)&temp);
             AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(temp);
-            if (ri)
-            {
+            if (ri) {
                 AutoPtr<IActivityInfo> ai;
                 ri->GetActivityInfo((IActivityInfo**)&ai);
                 String pkgName, name;
@@ -434,7 +442,7 @@ ECode Searchables::GetGlobalSearchProviderSetting(
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    return  secure->GetString(cr, ISettingsSecure::SEARCH_GLOBAL_SEARCH_ACTIVITY, settings);
+    return secure->GetString(cr, ISettingsSecure::SEARCH_GLOBAL_SEARCH_ACTIVITY, settings);
 }
 
 ECode Searchables::FindWebSearchActivity(
@@ -462,13 +470,11 @@ ECode Searchables::FindWebSearchActivity(
         activities->GetObjectEnumerator((IObjectEnumerator**)&em);
         Boolean next;
         em->MoveNext(&next);
-        if(next)
-        {
+        if (next) {
             AutoPtr<IInterface> temp;
             em->Current((IInterface**)&temp);
             AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(temp);
-            if (ri)
-            {
+            if (ri) {
                 AutoPtr<IActivityInfo> ai;
                 ri->GetActivityInfo((IActivityInfo**)&ai);
                 String pkgName, name;
@@ -486,7 +492,7 @@ ECode Searchables::FindWebSearchActivity(
 ECode Searchables::QueryIntentActivities(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 flags,
-    /* [out] */ IObjectContainer** infos)
+    /* [out] */ List** infos)
 {
     VALIDATE_NOT_NULL(infos);
     *infos = NULL;
@@ -504,8 +510,7 @@ AutoPtr<IObjectContainer> Searchables::TransfromList(
     AutoPtr<IObjectContainer> container;
     CObjectContainer::New((IObjectContainer**)&container);
     typename List<AutoPtr<T> >::Iterator it = list->Begin();
-    for(; it != list->End(); it++)
-    {
+    for(; it != list->End(); it++) {
         container->Add(*it);
     }
     return container;
@@ -519,8 +524,7 @@ AutoPtr< List<AutoPtr<T> > > Searchables::TransfromContainer(
     AutoPtr<IObjectEnumerator> em;
     container->GetObjectEnumerator((IObjectEnumerator**)&em);
     Boolean next = FALSE;
-    while(em->MoveNext(&next), next)
-    {
+    while(em->MoveNext(&next), next) {
         AutoPtr<IInterface> temp;
         em->Current((IInterface**)&temp);
         AutoPtr<T> obj = T::Probe(temp);

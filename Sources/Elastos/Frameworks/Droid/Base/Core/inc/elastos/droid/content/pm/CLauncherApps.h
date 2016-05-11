@@ -292,17 +292,14 @@ private:
 private:
     friend class MyOnAppsChangedListener;
 
-    static const String TAG;// = "LauncherApps";
-    static const Boolean DEBUG;// = false;
+    static const String TAG;
+    static const Boolean DEBUG;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IILauncherApps> mService;
     AutoPtr<IPackageManager> mPm;
 
     AutoPtr<IList> mCallbacks;
-    // private List<CallbackMessageHandler> mCallbacks
-    //         = new ArrayList<CallbackMessageHandler>();
-
     AutoPtr<IOnAppsChangedListener> mAppsChangedListener;
 };
 

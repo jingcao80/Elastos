@@ -3,7 +3,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/content/pm/CLauncherActivityInfo.h"
-//#include "elastos/droid/content/pm/CLauncherApps.h"
+#include "elastos/droid/content/pm/CLauncherAppsHelper.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -49,7 +49,9 @@ ECode CLauncherActivityInfo::constructor(
     context->GetPackageManager((IPackageManager**)&mPm);
     VALIDATE_NOT_NULL(info)
     info->GetActivityInfo((IActivityInfo**)&mActivityInfo);
-    // CLauncherApps::GetComponentName(info, (IComponentName**)&mComponentName);
+    AutoPtr<ILauncherAppsHelper> helper;
+    CLauncherAppsHelper::AcquireSingleton((ILauncherAppsHelper**)&helper);
+    helper->GetComponentName(info, (IComponentName**)&mComponentName);
     mUser = user;
     mFirstInstallTime =firstInstallTime;
 

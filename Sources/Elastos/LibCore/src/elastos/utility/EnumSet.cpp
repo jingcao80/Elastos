@@ -1,4 +1,6 @@
 #include "EnumSet.h"
+#include "CMiniEnumSet.h"
+#include "CHugeEnumSet.h"
 #include "Enum.h"
 
 using Elastos::Core::Enum;
@@ -60,19 +62,26 @@ ECode EnumSet::constructor(
 }
 
 ECode EnumSet::NoneOf(
-    /* [in] */ const InterfaceID& type,
+    /* [in] */ const InterfaceID& elementType,
     /* [out] */ IEnumSet** res)
 {
-    assert(0 && "TODO");
     VALIDATE_NOT_NULL(res);
+    assert(0 && "TODO");
     /*if (!elementType.isEnum()) {
         throw new ClassCastException(elementType.getClass().getName() + " is not an Enum");
     }*/
-    AutoPtr< ArrayOf<IInterface*> > enums = Enum::GetSharedConstants(type);
+    AutoPtr<ArrayOf<IInterface*> > enums = Enum::GetSharedConstants(elementType);
     if (enums->GetLength() <= 64) {
-        //return new MiniEnumSet<E>(elementType, enums);
+        AutoPtr<IMiniEnumSet> mEnumSet;
+        CMiniEnumSet::New(elementType, enums, (IMiniEnumSet**)&mEnumSet);
+        *res = IEnumSet::Probe(mEnumSet);
+        REFCOUNT_ADD(*res);
+        return NOERROR;
     }
-    //return new HugeEnumSet<E>(elementType, enums);
+    AutoPtr<IHugeEnumSet> hEnumSet;
+    CHugeEnumSet::New(elementType, enums, (IHugeEnumSet**)&hEnumSet);
+    *res = IEnumSet::Probe(hEnumSet);
+    REFCOUNT_ADD(*res);
     return NOERROR;
 }
 

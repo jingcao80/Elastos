@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/utility/etl/Set.h>
 
 using Elastos::Droid::Animation::Animator;
 using Elastos::Droid::Animation::IAnimator;
@@ -17,6 +18,7 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IEnumSet;
+using Elastos::Utility::Etl::Set;
 
 namespace Elastos {
 namespace Droid {
@@ -134,7 +136,8 @@ public:
         /* [in] */ Float value);
 
 public:
-    AutoPtr<IEnumSet> mPropertiesToSet;
+    //AutoPtr<IEnumSet> mPropertiesToSet;
+    Set<Int32> mPropertiesToSet;
 
     AutoPtr<IViewPropertyAnimator> mViewPropertyAnimator;
     AutoPtr<IView> mTarget;

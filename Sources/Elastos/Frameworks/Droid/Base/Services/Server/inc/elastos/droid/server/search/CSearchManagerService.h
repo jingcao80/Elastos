@@ -26,13 +26,85 @@ namespace Server {
 namespace Search {
 
 CarClass(CSearchManagerService)
+    , public Object
+    , public IISearchManager;
+    , public IBinder;
 {
 public:
+    class BootCompletedReceiver
+        : public BroadcastReceiver
+    {
+    private:
+        class MyThread : public Thread
+        {
+        public:
+            MyThread(
+                /* [in] */ BootCompletedReceiver* host);
+
+            CARAPI Run();
+
+        private:
+            BootCompletedReceiver* mHost;
+        };
+
+    public:
+        BootCompletedReceiver();
+
+        CARAPI constructor(
+            /* [in] */ IInterface* host);
+
+        virtual CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        TO_STRING_IMPL("CSearchManagerService::BootCompletedReceiver: ")
+    private:
+        CSearchManagerService* mHost;
+    };
+
+    class UserReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        UserReceiver();
+
+        CARAPI constructor(
+            /* [in] */ IInterface* host);
+
+        virtual CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        TO_STRING_IMPL("CSearchManagerService::UserReceiver: ")
+    private:
+        CSearchManagerService* mHost;
+    };
+
+    class GlobalSearchProviderObserver
+        : public ContentObserver
+    {
+    public:
+        TO_STRING_IMPL("CSearchManagerService::GlobalSearchProviderObserver")
+
+        GlobalSearchProviderObserver();
+
+        CARAPI constructor(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ IInterface* host);
+
+        virtual CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+    private:
+        AutoPtr<IContentResolver> mResolver;
+        CSearchManagerService* mHost;
+    };
+
+public:
+    CAR_INTERFACE_DECL();
+
+    CAR_OBJECT_DECL();
 
     CSearchManagerService();
-
-    CSearchManagerService(
-        /* [in] */ IContext* cxt);
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -59,62 +131,18 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
 protected:
     CARAPI Init(
         /* [in] */ IContext* context);
-private:
 
+private:
     CARAPI GetSearchables(
         /* [in] */ Int32 userId,
         /* [out] */ ISearchables** rst);
 
     CARAPI OnUserRemoved(
         /* [in] */ Int32 userId);
-
-    class BootCompletedReceiver
-        : public BroadcastReceiver
-    {
-    private:
-        class MyThread : public Thread
-        {
-        public:
-            MyThread(
-                /* [in] */ BootCompletedReceiver* host);
-
-            CARAPI Run();
-
-        private:
-            BootCompletedReceiver* mHost;
-        };
-
-    public:
-        BootCompletedReceiver(
-            /* [in] */ CSearchManagerService* host);
-
-        virtual CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        TO_STRING_IMPL("CSearchManagerService::BootCompletedReceiver: ")
-    private:
-        CSearchManagerService* mHost;
-    };
-
-    class UserReceiver
-        : public BroadcastReceiver
-    {
-    public:
-        UserReceiver(
-            /* [in] */ CSearchManagerService* host);
-
-        virtual CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        TO_STRING_IMPL("CSearchManagerService::UserReceiver: ")
-    private:
-        CSearchManagerService* mHost;
-    };
 
     class MyPackageMonitor
         : public PackageMonitor
@@ -134,26 +162,10 @@ private:
         CSearchManagerService* mHost;
     };
 
-    class GlobalSearchProviderObserver
-        : public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CSearchManagerService::GlobalSearchProviderObserver")
-
-        GlobalSearchProviderObserver(
-            /* [in] */ IContentResolver* resolver,
-            /* [in] */ CSearchManagerService* host);
-
-        virtual CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-    private:
-        AutoPtr<IContentResolver> mResolver;
-        CSearchManagerService* mHost;
-    };
 private:
 
     // general debugging support
-    static const String TAG;// = "SearchManagerService";
+    static const String TAG;
 
     // Context that the service is running in.
     AutoPtr<IContext> mContext;

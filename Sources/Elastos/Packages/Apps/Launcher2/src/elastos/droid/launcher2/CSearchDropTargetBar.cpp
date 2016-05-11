@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/CSearchDropTargetBar.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
@@ -10,6 +11,7 @@ using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::View::Animation::CAccelerateInterpolator;
 using Elastos::Droid::View::Animation::IAccelerateInterpolator;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -96,6 +98,7 @@ void CSearchDropTargetBar::SetupAnimation(
     IAnimator::Probe(anim)->SetInterpolator(ITimeInterpolator::Probe(sAccelerateInterpolator));
     IAnimator::Probe(anim)->SetDuration(sTransitionInDuration);
     AutoPtr<IAnimatorListener> adapter = new MyAdapter(v);
+Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::SetupAnimation adapter=%p",adapter.Get());
     IAnimator::Probe(anim)->AddListener(adapter);
 }
 

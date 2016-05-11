@@ -195,6 +195,7 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
     AutoPtr<IObjectAnimator> outAnim = LauncherAnimUtils::OfFloat(
             IView::Probe(mHost->mAnimationBuffer), String("alpha"), array);
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(mHost);
+Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::MyRunnable2::Run listener=%p",listener.Get());
     IAnimator::Probe(outAnim)->AddListener(listener);
 
     AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
@@ -202,6 +203,7 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
     AutoPtr<IObjectAnimator> inAnim = LauncherAnimUtils::OfFloat(
             IView::Probe(mHost->mAppsCustomizePane), String("alpha"), array2);
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter2(mHost);
+Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::MyRunnable2::Run listener2=%p",listener2.Get());
     IAnimator::Probe(inAnim)->AddListener(listener2);
 
     AutoPtr<IAnimatorSet> animSet = LauncherAnimUtils::CreateAnimatorSet();

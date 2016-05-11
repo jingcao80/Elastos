@@ -625,7 +625,10 @@ module
     }
 
     class CLauncherProvider {
+        constructor();
+
         interface IComponentCallbacks2;
+        interface IComponentCallbacks;
         interface IContentProvider;
         interface ILauncherProvider;
     }

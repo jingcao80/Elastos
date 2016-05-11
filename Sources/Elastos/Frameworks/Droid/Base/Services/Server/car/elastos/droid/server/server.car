@@ -137,6 +137,7 @@ module
     using interface Elastos.Droid.App.IIAppTask;
     using interface Elastos.Droid.App.IINotificationManager;
     using interface Elastos.Droid.App.IIProfileManager;
+    using interface Elastos.Droid.App.IISearchManager;
     using interface Elastos.Droid.App.IIUiModeManager;
     using interface Elastos.Droid.App.IIUserSwitchObserver;
     using interface Elastos.Droid.App.IIWallpaperManager;
@@ -147,6 +148,7 @@ module
     using interface Elastos.Droid.Bluetooth.IIBluetoothCallback;
     using interface Elastos.Droid.Bluetooth.IIBluetoothManager;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Content.IContentResolver;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IComponentName;
@@ -171,6 +173,7 @@ module
     using interface Elastos.Droid.Content.Pm.IPackageManager;
     using interface Elastos.Droid.Content.Pm.IRegisteredServicesCacheListener;
     using interface Elastos.Droid.Content.Res.IIThemeService;
+    using interface Elastos.Droid.Database.IContentObserver;
     using interface Elastos.Droid.Hardware.Display.IDisplayListener;
     using interface Elastos.Droid.Hardware.Display.IIDisplayManager;
     using interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
@@ -757,17 +760,38 @@ module
 
 //     } // namespace Usb
 
-//     namespace Search {
+//    namespace Search {
+//        [local]
+//        class CSearchManagerService {
+//            constructor(
+//               [in] IContext* ctx);
 
-//         [local]
-//         class CSearchManagerService {
-//             constructor(
-//                 [in] IContext* ctx);
+//            interface IISearchManager;
+//            interface IBinder;
+//        }
 
-//             interface IISearchManager;
-//             interface IBinder;
-//         }
-//     }
+//        class CSearchManagerServiceBootCompletedReceiver {
+//            constructor(
+//                [in] IInterface* host);
+
+//            interface IBroadcastReceiver;
+//        }
+
+//        class CSearchManagerServiceUserReceiver {
+//            constructor(
+//                [in] IInterface* host);
+
+//            interface IBroadcastReceiver;
+//        }
+
+//        class CSearchManagerServiceGlobalSearchProviderObserver {
+//            constructor(
+//                [in] IContentResolver* resolver,
+//                [in] IInterface* host);
+
+//            interface IContentObserver;
+//        }
+//    }
 
     namespace Wm {
 

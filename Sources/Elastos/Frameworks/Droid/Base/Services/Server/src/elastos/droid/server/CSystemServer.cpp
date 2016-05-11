@@ -28,6 +28,7 @@
 #include "elastos/droid/server/pm/CLauncherAppsService.h"
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/twilight/CTwilightService.h"
+//#include "elastos/droid/server/search/CSearchManagerService.h"
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
@@ -857,15 +858,17 @@ ECode SystemServer::StartOtherServices()
     //         }
     //     }
 
-    //     if (!disableNonCoreServices) {
-    //         try {
-    //             Slogger::I(TAG, "Search Service");
-    //             ServiceManager::AddService(IContext::SEARCH_SERVICE,
-    //                     new SearchManagerService(context));
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Search Service", ec);
-    //         }
-    //     }
+        // if (!disableNonCoreServices) {
+        //     // try {
+        //     Slogger::I(TAG, "Search Service");
+        //     AutoPtr<IISearchManager> searchManager;
+        //     ec = CSearchManagerService::New(context, (IISearchManager**)&searchManager);
+        //     if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
+        //     ServiceManager::AddService(IContext::SEARCH_SERVICE, searchManager.Get());
+        //     // } catch (Throwable e) {
+        //     //     ReportWtf("starting Search Service", ec);
+        //     // }
+        // }
 
     //     try {
     //         Slogger::I(TAG, "DropBox Service");

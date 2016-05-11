@@ -773,6 +773,7 @@ ECode Folder::AnimateOpen()
     AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(IView::Probe(this), values);
 
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(this);
+Slogger::D("Folder", "=======Folder::AnimateOpen listener=%p",listener.Get());
     IAnimator::Probe(oa)->AddListener(listener);
     IAnimator::Probe(oa)->SetDuration(mExpandDuration);
     SetLayerType(LAYER_TYPE_HARDWARE, NULL);
@@ -844,6 +845,7 @@ ECode Folder::AnimateClosed()
     AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(this, values);
 
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter2(this);
+Slogger::D("Folder", "=======Folder::AnimateClosed listener=%p",listener.Get());
     IAnimator::Probe(oa)->AddListener(listener);
     IAnimator::Probe(oa)->SetDuration(mExpandDuration);
     SetLayerType(LAYER_TYPE_HARDWARE, NULL);

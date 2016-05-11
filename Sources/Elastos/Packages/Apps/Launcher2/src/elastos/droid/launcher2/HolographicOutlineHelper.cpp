@@ -123,6 +123,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     /* [in] */ Boolean clipAlpha,
     /* [in] */ Int32 thickness)
 {
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 1");
     // We start by removing most of the alpha channel so as to ignore shadows, and
     // other types of partial transparency when defining the shape of the object
     if (clipAlpha) {
@@ -131,9 +132,10 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
         Int32 height;
         srcDst->GetHeight(&height);
         AutoPtr<ArrayOf<Int32> > srcBuffer = ArrayOf<Int32>::Alloc(width * height);
+Slogger::E("HolographicOutlineHelper", "=============width=%d,height=%d, width * height=%d",
+                width, height, width * height);
         srcDst->GetPixels(srcBuffer, 0, width, 0, 0, width, height);
         for (Int32 i = 0; i < srcBuffer->GetLength(); i++) {
-            assert(0 && "java >>> ?= c++ >>");
             const Int32 alpha = (*srcBuffer)[i] >> 24;
             if (alpha < 188) {
                 (*srcBuffer)[i] = 0;
@@ -143,7 +145,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     }
     AutoPtr<IBitmap> glowShape;
     srcDst->ExtractAlpha((IBitmap**)&glowShape);
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 2");
     // calculate the outer blur first
     AutoPtr<IBlurMaskFilter> outerBlurMaskFilter;
     switch (thickness) {
@@ -161,6 +163,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
             Slogger::E("HolographicOutlineHelper", "Invalid blur thickness");
             return E_RUNTIME_EXCEPTION;
     }
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 3");
     mBlurPaint->SetMaskFilter(IMaskFilter::Probe(outerBlurMaskFilter));
     AutoPtr<ArrayOf<Int32> > outerBlurOffset = ArrayOf<Int32>::Alloc(2);
     AutoPtr<IBitmap> thickOuterBlur;
@@ -171,11 +174,11 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     else {
         mBlurPaint->SetMaskFilter(IMaskFilter::Probe(sThinOuterBlurMaskFilter));
     }
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 4");
     AutoPtr<ArrayOf<Int32> > brightOutlineOffset = ArrayOf<Int32>::Alloc(2);
     AutoPtr<IBitmap> brightOutline;
     glowShape->ExtractAlpha(mBlurPaint, brightOutlineOffset, (IBitmap**)&brightOutline);
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 4");
     // calculate the inner blur
     srcDstCanvas->SetBitmap(glowShape);
     srcDstCanvas->DrawColor(0xFF000000, PorterDuffMode_SRC_OUT);
@@ -195,11 +198,12 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
             Slogger::E("HolographicOutlineHelper", "Invalid blur thickness");
             return E_RUNTIME_EXCEPTION;
     }
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 6");
     mBlurPaint->SetMaskFilter(IMaskFilter::Probe(innerBlurMaskFilter));
     AutoPtr<ArrayOf<Int32> > thickInnerBlurOffset = ArrayOf<Int32>::Alloc(2);
     AutoPtr<IBitmap> thickInnerBlur;
     glowShape->ExtractAlpha(mBlurPaint, thickInnerBlurOffset, (IBitmap**)&thickInnerBlur);
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 7");
     // mask out the inner blur
     srcDstCanvas->SetBitmap(thickInnerBlur);
     srcDstCanvas->DrawBitmap(glowShape, -(*thickInnerBlurOffset)[0],
@@ -212,7 +216,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     thickInnerBlur->GetWidth(&width);
     srcDstCanvas->DrawRect(0, 0, width, -(*thickInnerBlurOffset)[1],
             mErasePaint);
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 8");
     // draw the inner and outer blur
     srcDstCanvas->SetBitmap(srcDst);
     srcDstCanvas->DrawColor(0, PorterDuffMode_CLEAR);
@@ -221,12 +225,12 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
             mHolographicPaint);
     srcDstCanvas->DrawBitmap(thickOuterBlur, (*outerBlurOffset)[0], (*outerBlurOffset)[1],
             mHolographicPaint);
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 9");
     // draw the bright outline
     mHolographicPaint->SetColor(outlineColor);
     srcDstCanvas->DrawBitmap(brightOutline, (*brightOutlineOffset)[0], (*brightOutlineOffset)[1],
             mHolographicPaint);
-
+Slogger::E("HolographicOutlineHelper", "=====================ApplyExpensiveOutlineWithBlur 10");
     // cleanup
     srcDstCanvas->SetBitmap(NULL);
     brightOutline->Recycle();
@@ -241,6 +245,7 @@ ECode HolographicOutlineHelper::ApplyExtraThickExpensiveOutlineWithBlur(
     /* [in] */ Int32 color,
     /* [in] */ Int32 outlineColor)
 {
+Slogger::E("HolographicOutlineHelper", "============1============ApplyExtraThickExpensiveOutlineWithBlur");
     return ApplyExpensiveOutlineWithBlur(srcDst, srcDstCanvas, color, outlineColor, EXTRA_THICK);
 }
 
@@ -250,6 +255,7 @@ ECode HolographicOutlineHelper::ApplyThickExpensiveOutlineWithBlur(
     /* [in] */ Int32 color,
     /* [in] */ Int32 outlineColor)
 {
+Slogger::E("HolographicOutlineHelper", "========================ApplyThickExpensiveOutlineWithBlur");
     return ApplyExpensiveOutlineWithBlur(srcDst, srcDstCanvas, color, outlineColor, THICK);
 }
 
@@ -260,6 +266,7 @@ ECode HolographicOutlineHelper::ApplyMediumExpensiveOutlineWithBlur(
     /* [in] */ Int32 outlineColor,
     /* [in] */ Boolean clipAlpha)
 {
+Slogger::E("HolographicOutlineHelper", "========================ApplyMediumExpensiveOutlineWithBlur");
     return ApplyExpensiveOutlineWithBlur(srcDst, srcDstCanvas, color, outlineColor, clipAlpha,
             MEDIUM);
 }
@@ -270,6 +277,7 @@ ECode HolographicOutlineHelper::ApplyMediumExpensiveOutlineWithBlur(
     /* [in] */ Int32 color,
     /* [in] */ Int32 outlineColor)
 {
+Slogger::E("HolographicOutlineHelper", "========================ApplyMediumExpensiveOutlineWithBlur");
     return ApplyExpensiveOutlineWithBlur(srcDst, srcDstCanvas, color, outlineColor, MEDIUM);
 }
 

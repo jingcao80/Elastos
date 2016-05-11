@@ -34,13 +34,14 @@ ECode ApplicationInfo::constructor()
     return NOERROR;
 }
 
-ApplicationInfo::constructor(
+ECode ApplicationInfo::constructor(
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IUserHandle* user,
     /* [in] */ IconCache* iconCache,
     /* [in] */ IHashMap* labelCache)
 {
     info->GetComponentName((IComponentName**)&mComponentName);
+Slogger::E("ApplicationInfo", "===============constructor=======mComponentName=%p",mComponentName.Get());
     mContainer = ItemInfo::NO_ID;
     SetActivity(mComponentName,
         IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
@@ -56,7 +57,9 @@ ApplicationInfo::constructor(
         mFlags |= UPDATED_SYSTEM_APP_FLAG;
     }
     info->GetFirstInstallTime(&mFirstInstallTime);
+Slogger::E("ApplicationInfo", "===============constructor=======1");
     iconCache->GetTitleAndIcon(this, info, labelCache);
+Slogger::E("ApplicationInfo", "===============constructor=======2");
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&mIntent);
     mIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
     AutoPtr<IComponentName> name;
@@ -67,7 +70,7 @@ ApplicationInfo::constructor(
     return NOERROR;
 }
 
-ApplicationInfo::constructor(
+ECode ApplicationInfo::constructor(
     /* [in] */ ApplicationInfo* info)
 {
     ItemInfo::constructor(info);

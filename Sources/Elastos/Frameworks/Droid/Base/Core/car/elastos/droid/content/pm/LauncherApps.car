@@ -217,6 +217,12 @@ module
             [in] ILauncherAppsCallback* cb);
     }
 
+    interface ILauncherAppsHelper {
+        GetComponentName(
+            [in] IResolveInfo* info,
+            [out] IComponentName** name);
+    }
+
     } // namespace Pm
     } // namespace Content
     } // namespace Droid

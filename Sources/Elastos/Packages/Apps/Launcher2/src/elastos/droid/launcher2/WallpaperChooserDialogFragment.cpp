@@ -297,7 +297,7 @@ ECode WallpaperChooserDialogFragment::WallpaperDrawable::SetColorFilter(
 }
 
 const String WallpaperChooserDialogFragment::TAG("Launcher.WallpaperChooserDialogFragment");
-const String WallpaperChooserDialogFragment::EMBEDDED_KEY("com.android.launcher2.WallpaperChooserDialogFragment.EMBEDDED_KEY");
+const String WallpaperChooserDialogFragment::EMBEDDED_KEY("Elastos.Droid.Launcher2.WallpaperChooserDialogFragment.EMBEDDED_KEY");
 
 CAR_INTERFACE_IMPL_2(WallpaperChooserDialogFragment, DialogFragment, IAdapterViewOnItemSelectedListener
         , IAdapterViewOnItemClickListener);

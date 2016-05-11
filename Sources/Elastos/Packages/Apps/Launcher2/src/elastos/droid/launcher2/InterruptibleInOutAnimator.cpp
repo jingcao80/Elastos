@@ -4,9 +4,11 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
- using Elastos::Core::IFloat;
+using Elastos::Core::IFloat;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -50,6 +52,7 @@ InterruptibleInOutAnimator::InterruptibleInOutAnimator(
     mOriginalToValue = toValue;
 
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(this);
+Slogger::D("InterruptibleInOutAnimator", "=======InterruptibleInOutAnimator::InterruptibleInOutAnimator listener=%p",listener.Get());
     IAnimator::Probe(mAnimator)->AddListener(listener);
 }
 

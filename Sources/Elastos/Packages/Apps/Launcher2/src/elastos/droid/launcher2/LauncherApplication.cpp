@@ -57,7 +57,7 @@ const String LauncherApplication::TAG("LauncherApplication");
 Boolean LauncherApplication::sIsScreenLarge = FALSE;
 Float LauncherApplication::sScreenDensity = 0.0f;
 Int32 LauncherApplication::sLongPressTimeout = 300;
-const String LauncherApplication::sSharedPreferencesKey("com.android.launcher2.prefs");
+const String LauncherApplication::sSharedPreferencesKey("Elastos.Droid.Launcher2.prefs");
 
 LauncherApplication::LauncherApplication()
 {
@@ -143,7 +143,7 @@ ECode LauncherApplication::SetLauncher(
     /* [out] */ ILauncherModel** mode)
 {
     VALIDATE_NOT_NULL(mode);
-
+Slogger::E("LauncherApplication", "============================SetLauncher");
     mModel->Initialize(ILauncherModelCallbacks::Probe(launcher));
     *mode = mModel;
     REFCOUNT_ADD(*mode);
@@ -183,17 +183,22 @@ ECode LauncherApplication::GetWidgetPreviewCacheDb(
 ECode LauncherApplication::SetLauncherProvider(
     /* [in] */ ILauncherProvider* provider)
 {
-    return IWeakReferenceSource::Probe(provider)->GetWeakReference((IWeakReference**)&mLauncherProvider);
+Slogger::E("LauncherApplication", "=================SetLauncherProvider provider=%p",provider);
+    /*return*/ IWeakReferenceSource::Probe(provider)->GetWeakReference((IWeakReference**)&mLauncherProvider);
+Slogger::E("LauncherApplication", "=================SetLauncherProvider mLauncherProvider=%p",mLauncherProvider.Get());
+return NOERROR;
 }
 
 ECode LauncherApplication::GetLauncherProvider(
     /* [out] */ ILauncherProvider** provider)
 {
     VALIDATE_NOT_NULL(provider);
-
+Slogger::E("LauncherApplication", "=================GetLauncherProvider mLauncherProvider=%p",mLauncherProvider.Get());
     AutoPtr<IInterface> obj;
     mLauncherProvider->Resolve(EIID_ILauncherProvider, (IInterface**)&obj);
+Slogger::E("LauncherApplication", "=================GetLauncherProvider obj=%p",obj.Get());
     *provider = ILauncherProvider::Probe(obj);
+Slogger::E("LauncherApplication", "=================GetLauncherProvider *provider=%p",*provider);
     REFCOUNT_ADD(*provider);
     return NOERROR;
 }

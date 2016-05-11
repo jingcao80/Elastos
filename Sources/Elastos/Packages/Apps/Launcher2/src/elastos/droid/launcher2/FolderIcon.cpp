@@ -186,6 +186,7 @@ ECode FolderIcon::FolderRingAnimator::AnimateToAcceptState()
     AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener(this, previewSize);
     mAcceptAnimator->AddUpdateListener(listener);
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter(this);
+Slogger::D("FolderIcon", "=======FolderIcon::AnimateToAcceptState listener2=%p",listener2.Get());
     IAnimator::Probe(mAcceptAnimator)->AddListener(listener2);
     return IAnimator::Probe(mAcceptAnimator)->Start();
 }
@@ -205,6 +206,7 @@ ECode FolderIcon::FolderRingAnimator::AnimateToNaturalState()
     AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener2(this, previewSize);
     mNeutralAnimator->AddUpdateListener(listener);
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter2(this);
+Slogger::D("FolderIcon", "=======FolderIcon::AnimateToNaturalState listener2=%p",listener2.Get());
     IAnimator::Probe(mNeutralAnimator)->AddListener(listener2);
     return IAnimator::Probe(mNeutralAnimator)->Start();
 }
@@ -966,6 +968,7 @@ void FolderIcon::AnimateFirstItem(
     va->AddUpdateListener(listener);
 
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, onCompleteRunnable);
+Slogger::D("FolderIcon", "=======FolderIcon::AnimateFirstItem listener2=%p",listener2.Get());
     IAnimator::Probe(va)->AddListener(listener2);
     va->SetDuration(duration);
     IAnimator::Probe(va)->Start();

@@ -1,6 +1,7 @@
 
 #include "BasicLruCache.h"
 #include "CLinkedHashMap.h"
+#include <elastos/core/AutoLock.h>
 
 using Elastos::Utility::CLinkedHashMap;
 using Elastos::Utility::IMapEntry;
@@ -45,28 +46,30 @@ ECode BasicLruCache::Get(
 {
     VALIDATE_NOT_NULL(ouface)
 
-    if (key == NULL) {
-        // throw new NullPointerException("key == null");
-        return E_NULL_POINTER_EXCEPTION;
-    }
+    synchronized(this) {
+        if (key == NULL) {
+            // throw new NullPointerException("key == null");
+            return E_NULL_POINTER_EXCEPTION;
+        }
 
-    AutoPtr<IInterface> result;
-    mMap->Get(key, (IInterface**)&result);
-    if (result != NULL) {
+        AutoPtr<IInterface> result;
+        mMap->Get(key, (IInterface**)&result);
+        if (result != NULL) {
+            *ouface = result;
+            REFCOUNT_ADD(*ouface)
+            return NOERROR;
+        }
+
+        result = Create(key);
+
+        AutoPtr<IInterface> midface;
+        if (result != NULL) {
+            mMap->Put(key, result, (IInterface**)&midface);
+            TrimToSize(mMaxSize);
+        }
         *ouface = result;
         REFCOUNT_ADD(*ouface)
-        return NOERROR;
     }
-
-    result = Create(key);
-
-    AutoPtr<IInterface> midface;
-    if (result != NULL) {
-        mMap->Put(key, result, (IInterface**)&midface);
-        TrimToSize(mMaxSize);
-    }
-    *ouface = result;
-    REFCOUNT_ADD(*ouface)
     return NOERROR;
 }
 
@@ -75,16 +78,20 @@ ECode BasicLruCache::Put(
     /* [in] */ IInterface* value,
     /* [out] */ IInterface** outface)
 {
-    if (key == NULL || value == NULL) {
-        if (outface) {
-            *outface = NULL;
-        }
-        // throw new NullPointerException("key or value is null");
-        return E_NULL_POINTER_EXCEPTION;
-    }
+    VALIDATE_NOT_NULL(outface);
 
-    mMap->Put(key, value, outface);
-    TrimToSize(mMaxSize);
+    synchronized(this) {
+        if (key == NULL || value == NULL) {
+            if (outface) {
+                *outface = NULL;
+            }
+            // throw new NullPointerException("key or value is null");
+            return E_NULL_POINTER_EXCEPTION;
+        }
+
+        mMap->Put(key, value, outface);
+        TrimToSize(mMaxSize);
+    }
     return NOERROR;
 }
 
@@ -93,16 +100,20 @@ ECode BasicLruCache::Snapshot(
 {
     VALIDATE_NOT_NULL(outmap)
 
-    AutoPtr<IMap> res;
-    FAIL_RETURN(CLinkedHashMap::New(mMap, (IMap**)&res));
-    *outmap = res;
-    REFCOUNT_ADD(*outmap)
+    synchronized(this) {
+        AutoPtr<IMap> res;
+        FAIL_RETURN(CLinkedHashMap::New(mMap, (IMap**)&res));
+        *outmap = res;
+        REFCOUNT_ADD(*outmap)
+    }
     return NOERROR;
 }
 
 ECode BasicLruCache::EvictAll()
 {
-    TrimToSize(0);
+    synchronized(this) {
+        TrimToSize(0);
+    }
     return NOERROR;
 }
 

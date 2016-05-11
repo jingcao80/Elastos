@@ -5,6 +5,7 @@
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
 #include "elastos/droid/R.h"
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Graphics::IPaint;
@@ -19,6 +20,7 @@ using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -178,6 +180,7 @@ ECode BubbleTextView::DrawableStateChanged()
                 mPressedOrFocusedBackground = NULL;
             }
             else {
+Slogger::E("BubbleTextView", "=====================DrawableStateChanged 1");
                 mPressedOrFocusedBackground = CreateGlowingOutline(
                         mTempCanvas, mFocusedGlowColor, mFocusedOutlineColor);
             }
@@ -293,6 +296,7 @@ ECode BubbleTextView::OnTouchEvent(
             // we pre-create it on ACTION_DOWN (it takes a small but perceptible amount of time
             // to create it)
             if (mPressedOrFocusedBackground == NULL) {
+Slogger::E("BubbleTextView", "=====================OnTouchEvent ACTION_DOWN 1");
                 mPressedOrFocusedBackground = CreateGlowingOutline(
                         mTempCanvas, mPressedGlowColor, mPressedOutlineColor);
             }

@@ -1140,6 +1140,10 @@ module
         interface ILauncherApps;
     }
 
+    singleton class CLauncherAppsHelper {
+        interface ILauncherAppsHelper;
+    }
+
     class CLauncherAppsOnAppsChangedListener {
         constructor();
 

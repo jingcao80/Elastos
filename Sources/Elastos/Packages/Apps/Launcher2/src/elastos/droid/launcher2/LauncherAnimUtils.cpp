@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
@@ -12,6 +13,7 @@ using Elastos::Droid::View::EIID_IOnDrawListener;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -97,6 +99,7 @@ Boolean LauncherAnimUtils::InitStaticBlock()
 {
     CHashSet::New((IHashSet**)&sAnimators);
     sEndAnimListener = new MyAnimatorListener();
+Slogger::D("LauncherAnimUtils", "=======LauncherAnimUtils::InitStaticBlock sEndAnimListener=%p",sEndAnimListener.Get());
     return TRUE;
 }
 

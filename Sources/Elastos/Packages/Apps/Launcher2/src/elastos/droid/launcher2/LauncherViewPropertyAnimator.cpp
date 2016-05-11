@@ -36,9 +36,7 @@ LauncherViewPropertyAnimator::LauncherViewPropertyAnimator(
     , mDuration(0)
     , mRunning(FALSE)
 {
-    AutoPtr<IEnumSetHelper> helper;
-    CEnumSetHelper::AcquireSingleton((IEnumSetHelper**)&helper);
-    helper->NoneOf(EIID_IInteger32, (IEnumSet**)&mPropertiesToSet);
+    mPropertiesToSet.Clear();
 
     CArrayList::New((IArrayList**)&mListeners);
 }
@@ -46,7 +44,7 @@ LauncherViewPropertyAnimator::LauncherViewPropertyAnimator(
 ECode LauncherViewPropertyAnimator::AddListener(
     /* [in] */ IAnimatorListener* listener)
 {
-    return mListeners->Add(TO_IINTERFACE(listener));
+    return mListeners->Add(listener);
 }
 
 ECode LauncherViewPropertyAnimator::Cancel()
@@ -106,8 +104,7 @@ ECode LauncherViewPropertyAnimator::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     Int32 size;
-    mListeners->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
+    for (Int32 i = 0; i < (mListeners->GetSize(&size), size); i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
         AutoPtr<IAnimatorListener> listener = IAnimatorListener::Probe(obj);
@@ -121,11 +118,13 @@ ECode LauncherViewPropertyAnimator::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     Int32 size;
-    mListeners->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
+    for (Int32 i = 0; i < (mListeners->GetSize(&size), size); i++) {
         AutoPtr<IInterface> obj;
+Slogger::D("LauncherViewPropertyAnimator", "=================OnAnimationEnd mListeners=%p",mListeners.Get());
         mListeners->Get(i, (IInterface**)&obj);
+Slogger::D("LauncherViewPropertyAnimator", "=================OnAnimationEnd obj=%p",obj.Get());
         AutoPtr<IAnimatorListener> listener = IAnimatorListener::Probe(obj);
+Slogger::D("LauncherViewPropertyAnimator", "=================OnAnimationEnd listener=%p",listener.Get());
         listener->OnAnimationEnd(this);
     }
     mRunning = FALSE;
@@ -136,8 +135,7 @@ ECode LauncherViewPropertyAnimator::OnAnimationRepeat(
     /* [in] */ IAnimator* animation)
 {
     Int32 size;
-    mListeners->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
+    for (Int32 i = 0; i < (mListeners->GetSize(&size), size); i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
         AutoPtr<IAnimatorListener> listener = IAnimatorListener::Probe(obj);
@@ -154,8 +152,7 @@ ECode LauncherViewPropertyAnimator::OnAnimationStart(
     mFirstFrameHelper->OnAnimationStart(animation);
 
     Int32 size;
-    mListeners->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
+    for (Int32 i = 0; i < (mListeners->GetSize(&size), size); i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
         AutoPtr<IAnimatorListener> listener = IAnimatorListener::Probe(obj);
@@ -197,9 +194,7 @@ ECode LauncherViewPropertyAnimator::RemoveListener(
 ECode LauncherViewPropertyAnimator::SetDuration(
     /* [in] */ Int64 duration)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_DURATION);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_DURATION);
     mDuration = duration;
     return NOERROR;
 }
@@ -207,9 +202,7 @@ ECode LauncherViewPropertyAnimator::SetDuration(
 ECode LauncherViewPropertyAnimator::SetInterpolator(
     /* [in] */ ITimeInterpolator* value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_INTERPOLATOR);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_INTERPOLATOR);
     mInterpolator = value;
     return NOERROR;
 }
@@ -217,9 +210,7 @@ ECode LauncherViewPropertyAnimator::SetInterpolator(
 ECode LauncherViewPropertyAnimator::SetStartDelay(
     /* [in] */ Int64 startDelay)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_START_DELAY);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_START_DELAY);
     mStartDelay = startDelay;
     return NOERROR;
 }
@@ -250,49 +241,39 @@ ECode LauncherViewPropertyAnimator::Start()
     // and then adjusts the play time to keep the first two frames jank-free
     mFirstFrameHelper = new FirstFrameAnimatorHelper(mViewPropertyAnimator, mTarget);
 
-    Boolean res;
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_TRANSLATION_X);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_TRANSLATION_X) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->TranslationX(mTranslationX);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_TRANSLATION_Y);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_TRANSLATION_Y) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->TranslationY(mTranslationY);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_SCALE_X);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_SCALE_X) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->ScaleX(mScaleX);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_ROTATION_Y);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_ROTATION_Y) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->RotationY(mRotationY);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_SCALE_Y);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_SCALE_Y) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->ScaleY(mScaleY);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_ALPHA);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_ALPHA) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->Alpha(mAlpha);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_START_DELAY);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_START_DELAY) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->SetStartDelay(mStartDelay);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_DURATION);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_DURATION) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->SetDuration(mDuration);
     }
 
-    obj = CoreUtils::Convert(LauncherViewPropertyAnimator_INTERPOLATOR);
-    if (mPropertiesToSet->Contains(TO_IINTERFACE(obj), &res), res) {
+    if (mPropertiesToSet.Find(LauncherViewPropertyAnimator_INTERPOLATOR) != mPropertiesToSet.End()) {
         mViewPropertyAnimator->SetInterpolator(mInterpolator);
     }
 
@@ -305,9 +286,7 @@ ECode LauncherViewPropertyAnimator::Start()
 ECode LauncherViewPropertyAnimator::TranslationX(
     /* [in] */ Float value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_TRANSLATION_X);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_TRANSLATION_X);
     mTranslationX = value;
     return NOERROR;
 }
@@ -315,9 +294,7 @@ ECode LauncherViewPropertyAnimator::TranslationX(
 ECode LauncherViewPropertyAnimator::TranslationY(
     /* [in] */ Float value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_TRANSLATION_Y);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_TRANSLATION_Y);
     mTranslationY = value;
     return NOERROR;
 }
@@ -325,9 +302,7 @@ ECode LauncherViewPropertyAnimator::TranslationY(
 ECode LauncherViewPropertyAnimator::ScaleX(
     /* [in] */ Float value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_SCALE_X);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_SCALE_X);
     mScaleX = value;
     return NOERROR;
 }
@@ -335,9 +310,7 @@ ECode LauncherViewPropertyAnimator::ScaleX(
 ECode LauncherViewPropertyAnimator::ScaleY(
     /* [in] */ Float value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_SCALE_Y);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_SCALE_Y);
     mScaleY = value;
     return NOERROR;
 }
@@ -345,9 +318,7 @@ ECode LauncherViewPropertyAnimator::ScaleY(
 ECode LauncherViewPropertyAnimator::RotationY(
     /* [in] */ Float value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_ROTATION_Y);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_ROTATION_Y);
     mRotationY = value;
     return NOERROR;
 }
@@ -355,9 +326,7 @@ ECode LauncherViewPropertyAnimator::RotationY(
 ECode LauncherViewPropertyAnimator::Alpha(
     /* [in] */ Float value)
 {
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(LauncherViewPropertyAnimator_ALPHA);
-    Boolean res;
-    mPropertiesToSet->Add(TO_IINTERFACE(obj), &res);
+    mPropertiesToSet.Insert(LauncherViewPropertyAnimator_ALPHA);
     mAlpha = value;
     return NOERROR;
 }

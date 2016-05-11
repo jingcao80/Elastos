@@ -23,6 +23,7 @@ SOURCES += CKeySet.cpp
 SOURCES += LabeledIntent.cpp
 SOURCES += CLauncherActivityInfo.cpp
 SOURCES += CLauncherApps.cpp
+SOURCES += CLauncherAppsHelper.cpp
 SOURCES += CLimitedLengthInputStream.cpp
 SOURCES += CMacAuthenticatedInputStream.cpp
 SOURCES += CManifestDigest.cpp
