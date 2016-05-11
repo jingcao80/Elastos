@@ -3,24 +3,25 @@
 #define __LIBCORE_ICU_CNATIVEDECIMALFORMAT_H__
 
 #include "_Libcore_ICU_CNativeDecimalFormat.h"
+#include "Object.h"
 #include "StringBuffer.h"
 #include "elastos/utility/etl/Vector.h"
 
+using Elastos::Core::Object;
+using Elastos::Core::ICloneable;
+using Elastos::Core::INumber;
+using Elastos::Core::StringBuffer;
 using Elastos::Math::IBigDecimal;
 using Elastos::Math::IBigInteger;
 using Elastos::Math::RoundingMode;
-using Elastos::Core::INumber;
-using Elastos::Core::StringBuffer;
 using Elastos::Text::IFieldPosition;
 using Elastos::Text::IParsePosition;
 using Elastos::Text::IDecimalFormatSymbols;
 using Elastos::Text::IAttributedCharacterIterator;
 using Elastos::Text::IAttributedCharacterIteratorAttribute;
-using Elastos::Utility::ICurrency;
-using Elastos::Core::ICloneable;
-using Elastos::Utility::Etl::Vector;
 using Elastos::Text::INumberFormatField;
-
+using Elastos::Utility::ICurrency;
+using Elastos::Utility::Etl::Vector;
 
 namespace Libcore {
 namespace ICU {

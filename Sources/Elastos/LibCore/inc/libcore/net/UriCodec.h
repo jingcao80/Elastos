@@ -4,6 +4,7 @@
 #include "elastos/core/Object.h"
 #include "elastos/core/StringBuilder.h"
 
+using Elastos::Core::Object;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IStringBuilder;
 using Elastos::IO::Charset::ICharset;

@@ -7,6 +7,7 @@
 #include <Mutex.h>
 #include "CInteger32.h"
 
+using Elastos::Core::Object;
 using Elastos::Core::Mutex;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;

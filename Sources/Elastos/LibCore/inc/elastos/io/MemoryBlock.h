@@ -3,6 +3,7 @@
 
 #include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::IO::Channels::FileChannelMapMode;
 
 namespace Elastos {

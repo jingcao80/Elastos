@@ -6,6 +6,7 @@
 #include "Singleton.h"
 #include <pthread.h>
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::IDate;
 using Elastos::Text::IDateFormat;
 

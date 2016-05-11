@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.Libcore.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::Text::ICharacterIterator;
 
 namespace Libcore {

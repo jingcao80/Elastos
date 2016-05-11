@@ -5,6 +5,7 @@
 #include "Singleton.h"
 #include "_Libcore_IO_CIoBridge.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Net::IInetAddress;

@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::ICloseable;
 using Elastos::IO::Channels::Spi::ISelectorProvider;
 using Elastos::Utility::ISet;

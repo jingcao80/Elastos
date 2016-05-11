@@ -5,6 +5,8 @@
 #include "_Elastos_IO_Charset_CCodingErrorAction.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace IO {
 namespace Charset {

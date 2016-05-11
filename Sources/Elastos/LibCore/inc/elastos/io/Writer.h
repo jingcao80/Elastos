@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IAppendable;
 using Elastos::Core::ISynchronize;

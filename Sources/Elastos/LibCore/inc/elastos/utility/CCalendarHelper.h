@@ -5,6 +5,7 @@
 #include "_Elastos_Utility_CCalendarHelper.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::ILocale;
 
 namespace Elastos{

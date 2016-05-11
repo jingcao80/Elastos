@@ -5,6 +5,7 @@
 #include "_Libcore_Net_Url_CUrlUtilsHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 
 namespace Libcore {
 namespace Net {

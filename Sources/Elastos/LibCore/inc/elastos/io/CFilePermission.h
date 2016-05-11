@@ -6,6 +6,7 @@
 #include "_Elastos_IO_CFilePermission.h"
 // #include "Permission.h"
 
+using Elastos::Core::Object;
 using Elastos::Security::IGuard;
 // using Elastos::Security::Permission;
 

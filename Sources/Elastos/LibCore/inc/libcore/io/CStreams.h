@@ -4,6 +4,7 @@
 #include "_Libcore_IO_CStreams.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IReader;

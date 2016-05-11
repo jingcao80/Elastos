@@ -5,6 +5,8 @@
 #include "_Elastos_IO_Charset_CCharsets.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace IO {
 namespace Charset {

@@ -6,6 +6,7 @@
 #include "_Libcore_ICU_CNativeIDNHelper.h"
 
 using Elastos::Core::ICharSequence;
+using Elastos::Core::Singleton;
 
 namespace Libcore {
 namespace ICU {

@@ -5,6 +5,7 @@
 #include <Singleton.h>
 #include "_Libcore_ICU_CNativePluralRulesHelper.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::ILocale;
 
 namespace Libcore {

@@ -5,6 +5,7 @@
 #include "_Libcore_ICU_CNativeCollationHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::ILocale;
 
 namespace Libcore {

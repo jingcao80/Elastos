@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
+using Elastos::Core::Object;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {

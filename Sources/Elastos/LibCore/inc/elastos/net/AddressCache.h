@@ -5,6 +5,7 @@
 #include "_Elastos.CoreLibrary.Net.h"
 #include "elastos/core/Object.h"
 
+using Elastos::Core::Object;
 using Libcore::Utility::IBasicLruCache;
 
 namespace Elastos {

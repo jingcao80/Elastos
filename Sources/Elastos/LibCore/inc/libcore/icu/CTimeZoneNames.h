@@ -6,6 +6,7 @@
 #include "Singleton.h"
 
 using Elastos::Core::IArrayOf;
+using Elastos::Core::Singleton;
 using Elastos::Utility::ILocale;
 
 namespace Libcore {

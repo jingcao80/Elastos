@@ -6,6 +6,8 @@
 #include "BasicLruCache.h"
 #include "_Libcore_Utility_CZoneInfoDB.h"
 
+using Elastos::Core::Object;
+using Elastos::Core::Singleton;
 using Libcore::IO::IMemoryMappedFile;
 using Libcore::IO::IBufferIterator;
 
