@@ -8,11 +8,13 @@
 #include "elastos/droid/app/CNotificationBuilder.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -57,7 +59,7 @@ void NotificationStyle::InternalSetSummaryText(
 ECode NotificationStyle::CheckBuilder()
 {
     if (mBuilder == NULL) {
-        //throw new IllegalArgumentException("Style requires a valid Builder object");
+        Logger::I("NotificationStyle", "Style requires a valid Builder object");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;

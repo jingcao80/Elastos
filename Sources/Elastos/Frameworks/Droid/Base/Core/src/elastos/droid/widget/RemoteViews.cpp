@@ -13,6 +13,7 @@
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Process.h"
@@ -59,6 +60,8 @@ using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CUserHandle;
@@ -3455,9 +3458,13 @@ ECode RemoteViews::SetUri(
     if (value != NULL)
     {
         value->GetCanonicalUri((IUri**)&pValue);
-        // if (StrictMode.vmFileUriExposureEnabled()) {
-        //     value.checkFileUriExposed("RemoteViews.setUri()");
-        // }
+        Boolean isVmFileUriExposureEnabled;
+        AutoPtr<IStrictMode> helper;
+        CStrictMode::AcquireSingleton((IStrictMode**)&helper);
+        helper->VmFileUriExposureEnabled(&isVmFileUriExposureEnabled);
+        if (isVmFileUriExposureEnabled) {
+            value->CheckFileUriExposed(String("RemoteViews.setUri()"));
+        }
     }
     AutoPtr<IRemoteViewsAction> action = new ReflectionAction(viewId, methodName, ReflectionAction::URI, pValue);
     return AddAction(action);

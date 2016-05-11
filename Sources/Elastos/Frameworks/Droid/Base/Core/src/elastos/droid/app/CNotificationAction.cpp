@@ -1,6 +1,6 @@
 #include "elastos/droid/app/CNotificationAction.h"
 #include "elastos/droid/app/CPendingIntent.h"
-// #include "elastos/droid/app/CRemoteInput.h"
+#include "elastos/droid/app/CRemoteInput.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -125,7 +125,7 @@ ECode CNotificationAction::ReadFromParcel(
             in->ReadInt32(&value);
             if (value == 1) {
                 AutoPtr<IRemoteInput> ri;
-                // CRemoteInput::New((IRemoteInput**)&ri);
+                CRemoteInput::New((IRemoteInput**)&ri);
                 IParcelable::Probe(ri)->ReadFromParcel(in);
                 mRemoteInputs->Set(i, ri);
             }

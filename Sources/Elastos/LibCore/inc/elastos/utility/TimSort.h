@@ -553,7 +553,9 @@ Int32 TimSort<T>::CountRunAndMakeAscending(
 
     // Find end of run, and reverse range if descending
     Int32 isflag = 0;
-    if (c->Compare(TO_IINTERFACE((*a)[runHi++]), TO_IINTERFACE((*a)[lo]), &isflag), isflag < 0) { // Descending
+    c->Compare(TO_IINTERFACE((*a)[runHi]), TO_IINTERFACE((*a)[lo]), &isflag);
+    runHi++;
+    if (isflag < 0) { // Descending
         while(runHi < hi && (c->Compare(TO_IINTERFACE((*a)[runHi]), TO_IINTERFACE((*a)[runHi - 1]), &isflag), isflag < 0))
             runHi++;
         ReverseRange(a, lo, runHi);

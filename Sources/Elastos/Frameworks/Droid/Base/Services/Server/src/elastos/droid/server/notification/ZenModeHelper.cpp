@@ -211,14 +211,13 @@ ECode ZenModeHelper::ReadDefaultConfig(
             if (config != NULL) {
                 *_config = config;
                 REFCOUNT_ADD(*_config);
+                utils->CloseQuietly(ICloseable::Probe(parser));
                 return NOERROR;;
             }
         }
     }
     else {
         Slogger::W(TAG, "Error reading default zen mode config from resource");
-        utils->CloseQuietly(ICloseable::Probe(parser));
-
     }
     // } catch (Exception e) {
     //     Slog.w(TAG, "Error reading default zen mode config from resource", e);
@@ -229,6 +228,7 @@ ECode ZenModeHelper::ReadDefaultConfig(
     CZenModeConfig::New((IZenModeConfig**)&fig);
     *_config = fig;
     REFCOUNT_ADD(*_config);
+    utils->CloseQuietly(ICloseable::Probe(parser));
     return NOERROR;
 }
 

@@ -1215,7 +1215,6 @@ ECode CNotificationBuilder::BuildUnstyled(
     AutoPtr<ArrayOf<INotificationAction*> > actions;
     if (mActions.IsEmpty() == FALSE) {
         actions = ArrayOf<INotificationAction*>::Alloc(mActions.GetSize());
-        //mActions.ToArray(n->mActions);
         List<AutoPtr<INotificationAction> >::Iterator it = mActions.Begin();
         for(Int32 i = 0; it != mActions.End(); it++) {
             actions->Set(i++, *it);

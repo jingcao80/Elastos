@@ -54,10 +54,11 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageInfo;
-// using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 using Elastos::Droid::Internal::Utility::Cm::CSpamFilter;
 using Elastos::Droid::Internal::Utility::Cm::ISpamFilter;
 using Elastos::Droid::Internal::Utility::Cm::ISpamFilterSpamContractNotificationTable;
+using Elastos::Droid::Internal::Utility::Cm::ISpamFilterSpamContractPackageTable;
 using Elastos::Droid::Media::CAudioSystem;
 using Elastos::Droid::Media::IAudioSystem;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
@@ -223,8 +224,17 @@ const Int32 NotificationManagerService::REASON_NOMAN_CANCEL_ALL = 9;
 const Int32 NotificationManagerService::REASON_LISTENER_CANCEL = 10;
 const Int32 NotificationManagerService::REASON_LISTENER_CANCEL_ALL = 11;
 const Int32 NotificationManagerService::REASON_GROUP_SUMMARY_CANCELED = 12;
-const String NotificationManagerService::IS_FILTERED_QUERY;// = NotificationTable.NORMALIZED_TEXT + "=? AND " +
-        // PackageTable.PACKAGE_NAME + "=?";
+
+String InitIsFilteredQuery()
+{
+    String rev = ISpamFilterSpamContractNotificationTable::NORMALIZED_TEXT;
+    rev += "=? AND ";
+    rev += ISpamFilterSpamContractPackageTable::PACKAGE_NAME;
+    rev += "=?";
+    return rev;
+}
+
+const String NotificationManagerService::IS_FILTERED_QUERY = InitIsFilteredQuery();
 
 static AutoPtr<IUri> InitFilterUri()
 {
@@ -2937,8 +2947,7 @@ void NotificationManagerService::HandleSavePolicyFile()
 
         // try {
         AutoPtr<IXmlSerializer> out;
-        assert (0 && "TODO");
-        // ec = CFastXmlSerializer::New((IXmlSerializer**)&out);
+        ec = CFastXmlSerializer::New((IXmlSerializer**)&out);
         FAIL_GOTO(ec, _EXIT_)
 
         ec = out->SetOutput(IOutputStream::Probe(stream), String("utf-8"));
@@ -3855,8 +3864,7 @@ AutoPtr<IAudioAttributes> NotificationManagerService::AudioAttributesForNotifica
     AutoPtr<IAudioSystem> audioSystem;
     CAudioSystem::AcquireSingleton((IAudioSystem**)&audioSystem);
     Int32 streamType;
-    assert(0 && "TODO");
-    // audioSystem->GetNumStreamTypes(&streamType);
+    audioSystem->GetNumStreamTypes(&streamType);
 
     AutoPtr<INotificationHelper> helper;
     CNotificationHelper::AcquireSingleton((INotificationHelper**)&helper);

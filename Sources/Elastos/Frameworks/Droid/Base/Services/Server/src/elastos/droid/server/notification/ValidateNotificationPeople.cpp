@@ -545,6 +545,8 @@ ECode ValidateNotificationPeople::ValidatePeople(
     else {
         cloneAffinityOut = ArrayOf<Float>::Alloc(1);
     }
+    *outAffinity = cloneAffinityOut;
+    REFCOUNT_ADD(*outAffinity)
 
     Float affinity = NONE;
     if (extras == NULL) {
@@ -583,9 +585,6 @@ ECode ValidateNotificationPeople::ValidatePeople(
 
     // record the best available data, so far:
     (*cloneAffinityOut)[0] = affinity;
-
-    *outAffinity = cloneAffinityOut;
-    REFCOUNT_ADD(*outAffinity);
 
     Boolean res;
     if (pendingLookups->IsEmpty(&res), res) {

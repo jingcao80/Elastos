@@ -271,18 +271,6 @@ ECode CActivityOne::OnCreate(
 
     AutoPtr<IView> temp;
 
-#if 1 // TODO: temp codes to resolve default theme working incorrectly
-    Boolean isNoTitle;
-    GetWindow()->HasFeature(IWindow::FEATURE_NO_TITLE, &isNoTitle);
-    if (!isNoTitle) {
-        temp = FindViewById(Elastos::Droid::R::id::content);
-        assert(temp != NULL);
-        AutoPtr<IViewGroupLayoutParams> params;
-        IView::Probe(temp)->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        params->SetHeight(IViewGroupLayoutParams::MATCH_PARENT);
-    }
-#endif
-
     temp = FindViewById(R::id::statusBarNotificationButton);
     assert(temp != NULL);
     temp->SetOnClickListener(clickListener);
