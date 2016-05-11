@@ -9,35 +9,35 @@
 #include "elastos/droid/app/CNotificationAction.h"
 #include "elastos/droid/app/CNotificationBuilder.h"
 #include "elastos/droid/app/CNotificationBuilderRemoteViews.h"
+#include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/media/CAudioAttributes.h"
+#include "elastos/droid/media/CAudioAttributesBuilder.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/media/CAudioAttributes.h"
-#include "elastos/droid/media/CAudioAttributesBuilder.h"
-#include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/widget/CRemoteViews.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
-#include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::R;
-using Elastos::Droid::Os::UserHandle;
-using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Os::CParcel;
-using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Media::CAudioAttributes;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
-using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CParcel;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::CRemoteViews;
+using Elastos::Droid::R;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CoreUtils;
-using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Text::INumberFormatHelper;
 using Elastos::Text::CNumberFormatHelper;
 using Elastos::Utility::Logging::Logger;
@@ -71,29 +71,19 @@ ECode CNotification::BuilderRemoteViews::Clone(
     /* [out] */ IRemoteViews** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IInterface> obj;
-    Clone((IInterface**)&obj);
+
+    AutoPtr<INotificationBuilderRemoteViews> obj;
+    CNotificationBuilderRemoteViews::New((INotificationBuilderRemoteViews**)&obj);
+    CloneImpl(obj);
     *result = IRemoteViews::Probe(obj);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
-ECode CNotification::BuilderRemoteViews::Clone(
-    /* [out] */ IInterface** obj)
+ECode CNotification::BuilderRemoteViews::CloneImpl(
+    /* [in] */ INotificationBuilderRemoteViews* views)
 {
-    VALIDATE_NOT_NULL(obj)
-
-    AutoPtr<IParcel> parcel;
-    CParcel::New((IParcel**)&parcel);
-    WriteToParcel(parcel);
-    parcel->SetDataPosition(0);
-
-    AutoPtr<INotificationBuilderRemoteViews> brv;
-    CNotificationBuilderRemoteViews::New((INotificationBuilderRemoteViews**)&brv);
-    IParcelable::Probe(brv)->ReadFromParcel(parcel);
-    *obj = brv.Get();
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
+    return RemoteViews::CloneImpl(IRemoteViews::Probe(views));
 }
 
 //==========================================================================
@@ -102,12 +92,12 @@ ECode CNotification::BuilderRemoteViews::Clone(
 
 static AutoPtr<IAudioAttributes> InitAUDIO_ATTRIBUTES_DEFAULT()
 {
-    AutoPtr<IAudioAttributes> attrs;
     AutoPtr<IAudioAttributesBuilder> builder;
-    CAudioAttributesBuilder::NewByFriend((CAudioAttributesBuilder**)&builder);
+    CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&builder);
 
     builder->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
     builder->SetUsage(IAudioAttributes::USAGE_NOTIFICATION);
+    AutoPtr<IAudioAttributes> attrs;
     builder->Build((IAudioAttributes**)&attrs);
 
     return attrs;
@@ -873,21 +863,24 @@ ECode CNotification::WriteToParcel(
     if (mContentIntent != NULL) {
         parcel->WriteInt32(1);
         parcel->WriteInterfacePtr(mContentIntent);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
     if (mDeleteIntent != NULL) {
         parcel->WriteInt32(1);
         parcel->WriteInterfacePtr(mDeleteIntent);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
     if (mTickerText != NULL) {
         parcel->WriteInt32(1);
         TextUtils::WriteToParcel(mTickerText, parcel);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
@@ -895,21 +888,24 @@ ECode CNotification::WriteToParcel(
         parcel->WriteInt32(1);
         parcelable = IParcelable::Probe(mTickerView);
         parcelable->WriteToParcel(parcel);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
     if (mContentView != NULL) {
         parcel->WriteInt32(1);
         IParcelable::Probe(mContentView)->WriteToParcel(parcel);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
     if (mLargeIcon != NULL) {
         parcel->WriteInt32(1);
         IParcelable::Probe(mLargeIcon)->WriteToParcel(parcel);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
@@ -919,7 +915,8 @@ ECode CNotification::WriteToParcel(
     if (mSound != NULL) {
         parcel->WriteInt32(1);
         parcel->WriteInterfacePtr(mSound);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
@@ -927,7 +924,8 @@ ECode CNotification::WriteToParcel(
     if (mAudioAttributes != NULL) {
         parcel->WriteInt32(1);
         IParcelable::Probe(mAudioAttributes)->WriteToParcel(parcel);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
@@ -940,7 +938,8 @@ ECode CNotification::WriteToParcel(
     if (mFullScreenIntent != NULL) {
         parcel->WriteInt32(1);
         IParcelable::Probe(mFullScreenIntent)->WriteToParcel(parcel);
-    } else {
+    }
+    else {
         parcel->WriteInt32(0);
     }
 
@@ -1014,7 +1013,8 @@ ECode CNotification::ToString(
     sb += ", contentView=";
     if (mContentView != NULL) {
         sb += Object::ToString(mContentView);
-    } else {
+    }
+    else {
         sb += ("NULL");
     }
 
@@ -1034,18 +1034,22 @@ ECode CNotification::ToString(
             sb += (*mVibrate)[i];
         }
         sb += "}";
-    } else if ((mDefaults & DEFAULT_VIBRATE) != 0) {
+    }
+    else if ((mDefaults & DEFAULT_VIBRATE) != 0) {
         sb += "default";
-    } else {
+    }
+    else {
         sb += ("NULL");
     }
 
     sb += ", sound=";
     if (mSound != NULL) {
         sb += Object::ToString(mSound);
-    } else if ((mDefaults & DEFAULT_SOUND) != 0) {
+    }
+    else if ((mDefaults & DEFAULT_SOUND) != 0) {
         sb += "default";
-    } else {
+    }
+    else {
         sb += "NULL";
     }
 

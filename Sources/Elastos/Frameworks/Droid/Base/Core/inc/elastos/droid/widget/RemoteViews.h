@@ -13,25 +13,25 @@
 #include <elastos/droid/content/ContextWrapper.h>
 #include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::IArrayList;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::ContextWrapper;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
-using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Graphics::PorterDuffMode;
 using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflaterFilter;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
-using Elastos::Droid::Graphics::IRect;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -940,10 +940,6 @@ public:
         /* [in] */ IRemoteViews* landscape,
         /* [in] */ IRemoteViews* portrait);
 
-    CARAPI constructor(
-        /* [in] */ IParcel* parcel,
-        /* [in] */ IBitmapCache* bitmapCache);
-
     /**
      * Merges the passed RemoteViews actions with this RemoteViews actions according to
      * action-specific merge rules.
@@ -1626,7 +1622,15 @@ public:
     CARAPI GetSequenceNumber(
         /* [out] */ Int32* seqNumber);
 
+protected:
+    CARAPI CloneImpl(
+        /* [in] */ IRemoteViews* views);
+
 private:
+    CARAPI constructor(
+        /* [in] */ IParcel* parcel,
+        /* [in] */ IBitmapCache* bitmapCache);
+
     CARAPI_(void) ConfigureRemoteViewsAsChild(
         /* [in] */ IRemoteViews* rv);
 
@@ -1669,7 +1673,7 @@ private:
         /* [out] */ IApplicationInfo** info);
 
     ECO_LOCAL static CARAPI_(AutoPtr<IRect>) GetSourceBounds(
-        /* [out] */ IView* v);
+        /* [in] */ IView* v);
 
     ECO_LOCAL static CARAPI_(AutoPtr<IArgumentList>) WrapArg(
         /* [in] */ IMethodInfo* value);

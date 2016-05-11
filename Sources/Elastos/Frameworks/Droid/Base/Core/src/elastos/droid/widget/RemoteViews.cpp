@@ -24,11 +24,11 @@
 
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Animation::PropertyValuesHolder;
 using Elastos::Droid::App::CActivityOptionsHelper;
@@ -188,18 +188,18 @@ ECode RemoteViews::MemoryUsageCounter::AddBitmapMemory(
     BitmapConfig c;
     b->GetConfig(&c);
     // If we don't know, be pessimistic and assume 4
-    int bpp = 4;
+    Int32 bpp = 4;
     switch (c) {
-    case BitmapConfig_ALPHA_8:
-        bpp = 1;
-        break;
-    case BitmapConfig_RGB_565:
-    case BitmapConfig_ARGB_4444:
-        bpp = 2;
-        break;
-    case BitmapConfig_ARGB_8888:
-        bpp = 4;
-        break;
+        case BitmapConfig_ALPHA_8:
+            bpp = 1;
+            break;
+        case BitmapConfig_RGB_565:
+        case BitmapConfig_ARGB_4444:
+            bpp = 2;
+            break;
+        case BitmapConfig_ARGB_8888:
+            bpp = 4;
+            break;
     }
 
     Int32 w, h;
@@ -522,7 +522,7 @@ ECode RemoteViews::_SetPendingIntentTemplate::Apply(
     }
     else {
         SLOGGERE("RemoteViews", String("Cannot setPendingIntentTemplate on a view which is not") +
-                        String("an AdapterView (id: ") + StringUtils::ToString(mViewId) + ")")
+                String("an AdapterView (id: ") + StringUtils::ToString(mViewId) + ")")
     }
     return NOERROR;
 }
@@ -607,14 +607,16 @@ ECode RemoteViews::SetRemoteViewsAdapterList::Apply(
         a->GetViewTypeCount(&typeCount);
         if (IRemoteViewsListAdapter::Probe(a) && mViewTypeCount <= typeCount) {
             IRemoteViewsListAdapter::Probe(a)->SetViewsList(mList);
-        } else {
+        }
+        else {
             AutoPtr<IContext> ctx;
             IView::Probe(v)->GetContext((IContext**)&ctx);
             AutoPtr<IAdapter> apt;
             CRemoteViewsListAdapter::New(ctx, mList, mViewTypeCount, (IAdapter**)&apt);
             IAdapterView::Probe(v)->SetAdapter(apt);
         }
-    } else if (IAdapterViewAnimator::Probe(target) != NULL) {
+    }
+    else if (IAdapterViewAnimator::Probe(target) != NULL) {
         AutoPtr<IAdapterViewAnimator> v = IAdapterViewAnimator::Probe(target);
         AutoPtr<IAdapter> a;
         IAdapterView::Probe(v)->GetAdapter((IAdapter**)&a);
@@ -622,7 +624,8 @@ ECode RemoteViews::SetRemoteViewsAdapterList::Apply(
         a->GetViewTypeCount(&typeCount);
         if (IRemoteViewsListAdapter::Probe(a) && mViewTypeCount <= typeCount) {
             IRemoteViewsListAdapter::Probe(a)->SetViewsList(mList);
-        } else {
+        }
+        else {
             AutoPtr<IContext> ctx;
             IView::Probe(v)->GetContext((IContext**)&ctx);
             AutoPtr<IAdapter> apt;
@@ -651,7 +654,7 @@ ECode RemoteViews::SetRemoteViewsAdapterList::ReadFromParcel(
     source->ReadInt32(&count);
     CArrayList::New((IArrayList**)&mList);
 
-    for (int i = 0; i < count; i++) {
+    for (Int32 i = 0; i < count; i++) {
         AutoPtr<IRemoteViews> rv;
         CRemoteViews::New((IRemoteViews**)&rv);
         IParcelable::Probe(rv)->ReadFromParcel(source);
@@ -670,10 +673,11 @@ ECode RemoteViews::SetRemoteViewsAdapterList::WriteToParcel(
     Int32 size;
     if (mList == NULL || (mList->GetSize(&size), size) == 0) {
         dest->WriteInt32(0);
-    } else {
+    }
+    else {
         mList->GetSize(&size);
         dest->WriteInt32(size);
-        for (int i = 0; i < size; i++) {
+        for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> tmp;
             mList->Get(i, (IInterface**)&tmp);
             AutoPtr<IParcelable> p = IParcelable::Probe(tmp);
@@ -728,7 +732,8 @@ ECode RemoteViews::SetRemoteViewsAdapterIntent::Apply(
     if (absListView) {
         absListView->SetRemoteViewsAdapter(mIntent);
         absListView->SetRemoteViewsOnClickHandler(handler);
-    } else if (viewAnimator) {
+    }
+    else if (viewAnimator) {
         viewAnimator->SetRemoteViewsAdapter(mIntent);
         viewAnimator->SetRemoteViewsOnClickHandler(handler);
     }
@@ -1008,7 +1013,8 @@ ECode RemoteViews::ReflectionActionWithoutParams::Apply(
     ECode ec = mHost->GetMethod(view, mMethodName, String("()E"), (IMethodInfo**)&methodInfo);
     if (!FAILED(ec) && methodInfo != NULL) {
         return methodInfo->Invoke(view, NULL);
-    } else {
+    }
+    else {
         return ec;
     }
 }
@@ -1094,7 +1100,8 @@ ECode RemoteViews::BitmapCache::GetBitmapId(
     if (b == NULL) {
         *id = -1;
         return NOERROR;
-    } else {
+    }
+    else {
         List<AutoPtr<IBitmap> >::Iterator it = mBitmaps.Begin();
         Int32 index = 0;
         for (; it != mBitmaps.End(); it++) {
@@ -1117,9 +1124,12 @@ ECode RemoteViews::BitmapCache::GetBitmapForId(
     /* [in] */ Int32 id,
     /* [out] */ IBitmap** bmp)
 {
+    VALIDATE_NOT_NULL(bmp)
+
     if (id < 0 || id > mBitmaps.GetSize()) {
         *bmp = NULL;
-    } else {
+    }
+    else {
         *bmp = mBitmaps[id];
         REFCOUNT_ADD(*bmp)
     }
@@ -1757,7 +1767,8 @@ ECode RemoteViews::ReflectionAction::WriteToParcel(
             if(mValue) {
                 dest->WriteInt32(1);
                 IParcelable::Probe(mValue)->WriteToParcel(dest);
-            } else {
+            }
+            else {
                 dest->WriteInt32(0);
             }
             break;
@@ -2164,7 +2175,8 @@ ECode RemoteViews::TextViewDrawableColorFilterAction::Apply(
     AutoPtr<ArrayOf<IDrawable*> > drawables;
     if (mIsRelative) {
             target->GetCompoundDrawablesRelative((ArrayOf<IDrawable*>**)&drawables);
-    } else {
+    }
+    else {
             target->GetCompoundDrawables((ArrayOf<IDrawable*>**)&drawables);
     }
     if (mIndex < 0 || mIndex >= 4) {
@@ -2195,7 +2207,7 @@ ECode RemoteViews::TextViewDrawableColorFilterAction::ReadFromParcel(
     source->ReadInt32(&mViewId);
     Int32 isRelative;
     source->ReadInt32(&isRelative);
-    mIsRelative =  isRelative == 1;
+    mIsRelative = isRelative == 1;
     source->ReadInt32(&mIndex);
     source->ReadInt32(&mColor);
     source->ReadInt32(&mMode);
@@ -2358,12 +2370,14 @@ RemoteViews::MyContextWrapper::MyContextWrapper(
 ECode RemoteViews::MyContextWrapper::GetResources(
     /* [out] */ IResources** res)
 {
+    VALIDATE_NOT_NULL(res)
     return mContextForResources->GetResources(res);
 }
 
 RemoteViews::MyContextWrapper::GetTheme(
     /* [out] */ IResourcesTheme** theme)
 {
+    VALIDATE_NOT_NULL(theme)
     return mContextForResources->GetTheme(theme);
 }
 //==============================================================================
@@ -2391,8 +2405,8 @@ static AutoPtr<IRemoteViewsOnClickHandler> InitHandler()
     return temp;
 }
 
-const String RemoteViews::TAG("RemoteViews");
 const String RemoteViews::EXTRA_REMOTEADAPTER_APPWIDGET_ID("remoteAdapterAppWidgetId");
+const String RemoteViews::TAG("RemoteViews");
 const Int32 RemoteViews::MODE_NORMAL;
 const Int32 RemoteViews::MODE_HAS_LANDSCAPE_AND_PORTRAIT;
 Object RemoteViews::sMethodsLock;
@@ -2462,8 +2476,8 @@ ECode RemoteViews::constructor(
      * @param portrait The RemoteViews to inflate in portrait configuration
      */
 ECode RemoteViews::constructor(
-        /* [in] */ IRemoteViews* landscape,
-        /* [in] */ IRemoteViews* portrait)
+    /* [in] */ IRemoteViews* landscape,
+    /* [in] */ IRemoteViews* portrait)
 {
     if (landscape == NULL || portrait == NULL) {
         SLOGGERE("RemoteViews", "Both RemoteViews must be non-null")
@@ -2478,8 +2492,7 @@ ECode RemoteViews::constructor(
     IPackageItemInfo::Probe(landApp)->GetPackageName(&landAppName);
     IPackageItemInfo::Probe(portraitApp)->GetPackageName(&portraitAppName);
 
-    if (landUid != portraitUid|| ! landAppName.Equals(portraitAppName))
-    {
+    if (landUid != portraitUid|| !landAppName.Equals(portraitAppName)) {
         SLOGGERE("RemoteViews", "Both RemoteViews must share the same package and user")
         return E_RUNTIME_EXCEPTION;
     }
@@ -2510,7 +2523,8 @@ ECode RemoteViews::constructor(
     // We only store a bitmap cache in the root of the RemoteViews.
     if (bitmapCache == NULL) {
         mBitmapCache = new BitmapCache(parcel);
-    } else {
+    }
+    else {
         SetBitmapCache(bitmapCache);
         SetNotRoot();
     }
@@ -2527,7 +2541,7 @@ ECode RemoteViews::constructor(
         Int32 count;
         parcel->ReadInt32(&count);
         if (count > 0) {
-            for (int i=0; i<count; i++) {
+            for (Int32 i=0; i<count; i++) {
                 Int32 tag;
                 parcel->ReadInt32(&tag);
                 AutoPtr<IRemoteViewsAction> actionImpl;
@@ -2613,12 +2627,13 @@ ECode RemoteViews::constructor(
                 }
             }
         }
-    } else {
+    }
+    else {
         // MODE_HAS_LANDSCAPE_AND_PORTRAIT
         CRemoteViews::New((IRemoteViews**)&mLandscape);
         CRemoteViews::New((IRemoteViews**)&mPortrait);
         ((RemoteViews*)mLandscape.Get())->constructor(parcel, mBitmapCache);
-        ((RemoteViews*)mLandscape.Get())->constructor(parcel, mBitmapCache);
+        ((RemoteViews*)mPortrait.Get())->constructor(parcel, mBitmapCache);
         mApplication = ((RemoteViews*)mPortrait.Get())->mApplication;
         mPortrait->GetLayoutId(&mLayoutId);
     }
@@ -2650,11 +2665,12 @@ ECode RemoteViews::WriteToParcel(
         dest->WriteInt32(mIsWidgetCollectionChild ? 1 : 0);
         Int32 count = mActions.GetSize();
         dest->WriteInt32(count);
-        for (int i=0; i<count; i++) {
+        for (Int32 i=0; i<count; i++) {
             AutoPtr<IRemoteViewsAction> a = mActions[i];
             IParcelable::Probe(a)->WriteToParcel(dest);
         }
-    } else {
+    }
+    else {
         dest->WriteInt32(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
         // We only write the bitmap cache if we are the root RemoteViews, as this cache
         // is shared by all children.
@@ -2662,7 +2678,7 @@ ECode RemoteViews::WriteToParcel(
             mBitmapCache->WriteBitmapsToParcel(dest);
         }
         IParcelable::Probe(mLandscape)->WriteToParcel(dest);
-        IParcelable::Probe(mLandscape)->WriteToParcel(dest);
+        IParcelable::Probe(mPortrait)->WriteToParcel(dest);
     }
     return NOERROR;
 }
@@ -2699,7 +2715,8 @@ AutoPtr<IRemoteViews> RemoteViews::GetRemoteViewsToApply(
         config->GetOrientation(&orientation);
         if (orientation == IConfiguration::ORIENTATION_LANDSCAPE) {
             return mLandscape;
-        } else {
+        }
+        else {
             return mPortrait;
         }
     }
@@ -2808,12 +2825,26 @@ ECode RemoteViews::Clone(
 {
     VALIDATE_NOT_NULL(remoteViews)
 
+    AutoPtr<IRemoteViews> obj;
+    CRemoteViews::New((IRemoteViews**)&obj);
+    RemoteViews::CloneImpl(obj);
+    *remoteViews = obj;
+    REFCOUNT_ADD(*remoteViews)
+    return NOERROR;
+}
+
+ECode RemoteViews::CloneImpl(
+    /* [in] */ IRemoteViews* remoteViews)
+{
+    VALIDATE_NOT_NULL(remoteViews)
+
     AutoPtr<IParcel> source;
     CParcel::New((IParcel**)&source);
     WriteToParcel(source);
+
     source->SetDataPosition(0);
-    CRemoteViews::New(source, NULL, remoteViews);
-    // source->Recycle();
+    CRemoteViews* crv = (CRemoteViews*)remoteViews;
+    crv->constructor(source, NULL);
     return NOERROR;
 }
 
@@ -2824,7 +2855,8 @@ ECode RemoteViews::GetPackage(
 
     if (mApplication != NULL) {
         return IPackageItemInfo::Probe(mApplication)->GetPackageName(pkg);
-    } else {
+    }
+    else {
         *pkg = String(NULL);
     }
 
@@ -2850,6 +2882,7 @@ ECode RemoteViews::SetIsWidgetCollectionChild(
 ECode RemoteViews::GetSequenceNumber(
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
     *number = mActions.GetSize();
     return NOERROR;
 }
@@ -2892,7 +2925,7 @@ void RemoteViews::SetBitmapCache(
     }
     else {
         RemoteViews* land = (RemoteViews*)mLandscape.Get();
-        RemoteViews* prot = (RemoteViews*)mLandscape.Get();
+        RemoteViews* prot = (RemoteViews*)mPortrait.Get();
         land->SetBitmapCache(bitmapCache);
         prot->SetBitmapCache(bitmapCache);
     }
@@ -2901,6 +2934,7 @@ void RemoteViews::SetBitmapCache(
 ECode RemoteViews::EstimateMemoryUsage(
     /* [out] */ Int32* usage)
 {
+    VALIDATE_NOT_NULL(usage)
     return mMemoryUsageCounter->GetMemoryUsage(usage);
 }
 
@@ -2908,7 +2942,7 @@ ECode RemoteViews::AddAction(
     /* [in] */ IRemoteViewsAction* a)
 {
     if (HasLandscapeAndPortraitLayouts()) {
-       SLOGGERE("RemoteViews", String("RemoteViews specifying separate landscape and portrait") +
+        SLOGGERE("RemoteViews", String("RemoteViews specifying separate landscape and portrait") +
             " layouts cannot be modified. Instead, fully configure the landscape and" +
             " portrait layouts individually before constructing the combined layout.");
         return E_RUNTIME_EXCEPTION;
@@ -2919,7 +2953,7 @@ ECode RemoteViews::AddAction(
 }
 
 AutoPtr<IRect> RemoteViews::GetSourceBounds(
-    /* [out] */ IView* v)
+    /* [in] */ IView* v)
 {
     AutoPtr<IContext> ctx;
     v->GetContext((IContext**)&ctx);
@@ -2950,6 +2984,8 @@ ECode RemoteViews::GetMethod(
     /* [in] */ const String& paramType,
     /* [out] */ IMethodInfo** info)
 {
+    VALIDATE_NOT_NULL(info)
+
     AutoPtr<IMethodInfo> method;
     AutoPtr<IClassInfo> klass = PropertyValuesHolder::TransformClassInfo(view);
     if (klass == NULL) {
@@ -2979,7 +3015,8 @@ ECode RemoteViews::GetMethod(
         klass->GetName(&className);
         if (method == NULL) {
             SLOGGERE("RemoteViews", String("view: ") + className + " doesn't have method: " + methodName + paramType)
-        } else {
+        }
+        else {
             String annotation;
             method->GetAnnotation(&annotation);
             if (!annotation.Equals(String("RemotableViewMethod"))) {
@@ -3014,46 +3051,48 @@ ECode RemoteViews::GetApplicationInfo(
     /* [in] */ Int32 userId,
     /* [out] */ IApplicationInfo** info)
 {
-        if (packageName == NULL) {
-            *info = NULL;
-            return NOERROR;
-        }
+    VALIDATE_NOT_NULL(info)
 
-        // Get the application for the passed in package and user.
-        AutoPtr<IApplication> application = CActivityThread::GetCurrentApplication();
-        if (application == NULL) {
-            SLOGGERE(TAG, "Cannot create remote views out of an aplication.");
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
-
-        AutoPtr<IApplicationInfo> applicationInfo;
-        IContext::Probe(application)->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
-        Int32 uid;
-        applicationInfo->GetUid(&uid);
-        String pkgName;
-        IPackageItemInfo::Probe(applicationInfo)->GetPackageName(&pkgName);
-
-        if (UserHandle::GetUserId(uid) != userId
-                || !pkgName.Equals(packageName)) {
-            // try {
-                AutoPtr<IContext> baseContext;
-                IContextWrapper::Probe(application)->GetBaseContext((IContext**)&baseContext);
-                AutoPtr<IUserHandle> uhandle;
-                CUserHandle::New(userId, (IUserHandle**)&uhandle);
-                AutoPtr<IContext> context;
-                ECode ec = baseContext->CreatePackageContextAsUser(
-                        packageName, 0, uhandle, (IContext**)&context);
-                if (FAILED(ec) || context == NULL) {
-                    // throw new IllegalArgumentException("No such package " + packageName);
-                    SLOGGERE(TAG, String("No such package ") + packageName)
-                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
-                }
-
-                return context->GetApplicationInfo(info);
-            // } catch (NameNotFoundException nnfe) {
-            // }
-        }
+    if (packageName == NULL) {
+        *info = NULL;
         return NOERROR;
+    }
+
+    // Get the application for the passed in package and user.
+    AutoPtr<IApplication> application = CActivityThread::GetCurrentApplication();
+    if (application == NULL) {
+        SLOGGERE(TAG, "Cannot create remote views out of an aplication.");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    AutoPtr<IApplicationInfo> applicationInfo;
+    IContext::Probe(application)->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
+    Int32 uid;
+    applicationInfo->GetUid(&uid);
+    String pkgName;
+    IPackageItemInfo::Probe(applicationInfo)->GetPackageName(&pkgName);
+
+    if (UserHandle::GetUserId(uid) != userId
+            || !pkgName.Equals(packageName)) {
+        // try {
+            AutoPtr<IContext> baseContext;
+            IContextWrapper::Probe(application)->GetBaseContext((IContext**)&baseContext);
+            AutoPtr<IUserHandle> uhandle;
+            CUserHandle::New(userId, (IUserHandle**)&uhandle);
+            AutoPtr<IContext> context;
+            ECode ec = baseContext->CreatePackageContextAsUser(
+                    packageName, 0, uhandle, (IContext**)&context);
+            if (FAILED(ec) || context == NULL) {
+                // throw new IllegalArgumentException("No such package " + packageName);
+                SLOGGERE(TAG, String("No such package ") + packageName)
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+
+            return context->GetApplicationInfo(info);
+        // } catch (NameNotFoundException nnfe) {
+        // }
+    }
+    return NOERROR;
 }
 
 ECode RemoteViews::AddView(
@@ -3470,6 +3509,7 @@ ECode RemoteViews::Apply(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
+    VALIDATE_NOT_NULL(view)
     return Apply(ctx, parent, NULL, view);
 }
 
@@ -3480,6 +3520,7 @@ ECode RemoteViews::Apply(
     /* [in] */ IRemoteViewsOnClickHandler* handler,
     /* [out] */ IView** view)
 {
+    VALIDATE_NOT_NULL(view)
     String str;
     return Apply(ctx, parent, handler, str, view);
 }
@@ -3492,6 +3533,7 @@ ECode RemoteViews::Apply(
     /* [in] */ const String& themePackageName,
     /* [out] */ IView** view)
 {
+    VALIDATE_NOT_NULL(view)
     AutoPtr<IRemoteViews> rvToApply = GetRemoteViewsToApply(ctx);
     // RemoteViews may be built by an application installed in another
     // user. So build a context that loads resources from that user but
