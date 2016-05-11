@@ -366,12 +366,15 @@ void DisplayContent::CheckForDeferredActions()
             List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
             for (; taskRit != tasks.REnd(); ++taskRit) {
                 AutoPtr<Task> task = *taskRit;
-                List<AutoPtr<AppWindowToken> > tokens = task->mAppTokens;
-                List<AutoPtr<AppWindowToken> >::ReverseIterator tokenRit = tokens.RBegin();
-                for (; tokenRit != tokens.REnd(); ++tokenRit) {
-                    AutoPtr<AppWindowToken> wtoken = *tokenRit;
+                AutoPtr<IArrayList> tokens = task->mAppTokens;
+                Int32 size;
+                tokens->GetSize(&size);
+                for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+                    AutoPtr<IInterface> value;
+                    tokens->Get(tokenNdx, (IInterface**)&value);
+                    AutoPtr<AppWindowToken> wtoken = (AppWindowToken*)(IObject*)value.Get();
                     if (wtoken->mDeferRemoval) {
-                        stack->mExitingAppTokens.Remove(wtoken);
+                        stack->mExitingAppTokens->Remove((IObject*)wtoken);
                         wtoken->mDeferRemoval = FALSE;
                         mService->RemoveAppFromTaskLocked(wtoken);
                     }

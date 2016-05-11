@@ -117,8 +117,6 @@ public:
 
     Boolean mLaunchTaskBehind;
     Boolean mEnteringAnimation;
-
-    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
 };
 
 } // Wm

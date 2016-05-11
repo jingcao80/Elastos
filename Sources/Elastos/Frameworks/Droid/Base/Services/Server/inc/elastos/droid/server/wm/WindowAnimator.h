@@ -174,7 +174,6 @@ private:
     Boolean mBlurUiEnabled;
 
     friend class AnimationRunnable;
-    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
 };
 
 } // Wm
