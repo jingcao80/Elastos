@@ -138,6 +138,8 @@ const Int32 WifiTrafficPoller::REMOVE_CLIENT;
 WifiTrafficPoller::WifiTrafficPoller(
     /* [in] */ IContext* context,
     /* [in] */ const String& iface)
+    : DBG(FALSE)
+    , VDBG(FALSE)
 {
     CArrayList::New((IList**)&mClients);
     CAtomicBoolean::New(TRUE, (IAtomicBoolean**)&mScreenOn);
@@ -162,7 +164,7 @@ ECode WifiTrafficPoller::AddClient(
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> newMsg;
-    helper->Obtain(mTrafficHandler, ADD_CLIENT, TO_IINTERFACE(client), (IMessage**)&newMsg);
+    helper->Obtain(mTrafficHandler, ADD_CLIENT, client, (IMessage**)&newMsg);
     newMsg->SendToTarget();
     return NOERROR;
 }
@@ -268,7 +270,8 @@ void WifiTrafficPoller::NotifyOnDataActivity()
                     AutoPtr<IInterface> obj;
                     mClients->Get(i, (IInterface**)&obj);
                     IMessenger* client = IMessenger::Probe(obj);
-                    client->Send(msg);
+                    if (client != NULL)
+                        client->Send(msg);
                 //} catch (RemoteException e) {
                     // Failed to reach, skip
                     // Client removal is handled in WifiService

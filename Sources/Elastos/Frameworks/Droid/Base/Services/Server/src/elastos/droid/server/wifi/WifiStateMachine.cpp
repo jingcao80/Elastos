@@ -6966,7 +6966,7 @@ String WifiStateMachine::GetLogRecString(
     Int32 sendingUid;
     msg->GetSendingUid(&sendingUid);
     if (sendingUid > 0 && sendingUid != IProcess::WIFI_UID) {
-        sb.Append(" uid=" + sendingUid);
+        sb.Append(String(" uid=") + StringUtils::ToString(sendingUid));
     }
 
     AutoPtr<ISystem> system;
@@ -10040,8 +10040,10 @@ void WifiStateMachine::HandleIPv4Success(
     /* [in] */ Int32 reason)
 {
     if (PDBG) {
-        // Loge(("wifistatemachine handleIPv4Success <") + dhcpResults.toString() + ">");
-        // Loge("link address " + dhcpResults.ipAddress);
+        String str;
+        IObject::Probe(dhcpResults)->ToString(&str);
+        Logger::E("wifistatemachine:", " handleIPv4Success <%s>", str.string());
+        //Loge("link address " + dhcpResults.ipAddress);
     }
 
     synchronized (mDhcpResultsLock) {

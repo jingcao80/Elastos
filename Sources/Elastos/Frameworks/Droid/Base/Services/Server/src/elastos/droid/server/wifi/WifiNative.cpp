@@ -463,7 +463,7 @@ Boolean WifiNative::RemoveNetwork(
 void WifiNative::LogDbg(
     /* [in] */ const String& debug)
 {
-    assert(0);
+    Logger::E("WifiNative:", "%s", debug.string());
     //long now = SystemClock.elapsedRealtimeNanos();
     //String ts = String.format("[%,d us] ", now/1000);
     //Log.e("WifiNative: ", ts+debug+ " stack:"

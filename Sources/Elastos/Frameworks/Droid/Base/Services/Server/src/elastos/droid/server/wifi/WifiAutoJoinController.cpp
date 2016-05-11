@@ -1116,45 +1116,42 @@ ECode WifiAutoJoinController::RssiBoostFrom5GHzRssi(
 {
     VALIDATE_NOT_NULL(result);
 
-    assert(0 && "TODO"); // wait WifiConfigStore TODO
-    // if (!mWifiConfigStore->mEnable5GHzPreference) {
-    //     *result = 0;
-    //     return NOERROR;
-    // }
-    // if (rssi
-    //         > mWifiConfigStore->mBandPreferenceBoostThreshold5) {
-    //     // Boost by 2 dB for each point
-    //     //    Start boosting at -65
-    //     //    Boost by 20 if above -55
-    //     //    Boost by 40 if abore -45
-    //     Int32 boost = mWifiConfigStore->mBandPreferenceBoostFactor5
-    //             *(rssi - mWifiConfigStore->mBandPreferenceBoostThreshold5);
-    //     if (boost > 50) {
-    //         // 50 dB boost is set so as to overcome the hysteresis of +20 plus a difference of
-    //         // 25 dB between 2.4 and 5GHz band. This allows jumping from 2.4 to 5GHz
-    //         // consistently
-    //         boost = 50;
-    //     }
-    //     if (VDBG && dbg != NULL) {
-    //         String str("        ");
-    //         str += dbg; str += ":    rssi5 ";
-    //         str += rssi; str += " boost ";
-    //         str += boost;
-    //         LogDbg(str);
-    //     }
-    //     *result = boost;
-    //     return NOERROR;
-    // }
+    if (!mWifiConfigStore->enable5GHzPreference) {
+        *result = 0;
+        return NOERROR;
+    }
+    if (rssi > mWifiConfigStore->bandPreferenceBoostThreshold5) {
+        // Boost by 2 dB for each point
+        //    Start boosting at -65
+        //    Boost by 20 if above -55
+        //    Boost by 40 if abore -45
+        Int32 boost = mWifiConfigStore->bandPreferenceBoostFactor5
+                *(rssi - mWifiConfigStore->bandPreferenceBoostThreshold5);
+        if (boost > 50) {
+            // 50 dB boost is set so as to overcome the hysteresis of +20 plus a difference of
+            // 25 dB between 2.4 and 5GHz band. This allows jumping from 2.4 to 5GHz
+            // consistently
+            boost = 50;
+        }
+        if (VDBG && !dbg.IsNull()) {
+            String str("        ");
+            str += dbg; str += ":    rssi5 ";
+            str += rssi; str += " boost ";
+            str += boost;
+            LogDbg(str);
+        }
+        *result = boost;
+        return NOERROR;
+    }
 
-    // if (rssi
-    //         < mWifiConfigStore->mBandPreferencePenaltyThreshold5) {
-    //     // penalize if < -75
-    //     Int32 boost = mWifiConfigStore->mBandPreferencePenaltyFactor5
-    //             *(rssi - mWifiConfigStore->mBandPreferencePenaltyThreshold5);
-    //     *result = boost;
-    //     return NOERROR;
-    // }
-    // *result = 0;
+    if (rssi < mWifiConfigStore->bandPreferencePenaltyThreshold5) {
+        // penalize if < -75
+        Int32 boost = mWifiConfigStore->bandPreferencePenaltyFactor5
+                *(rssi - mWifiConfigStore->bandPreferencePenaltyThreshold5);
+        *result = boost;
+        return NOERROR;
+    }
+    *result = 0;
     return NOERROR;
 }
 
@@ -1961,8 +1958,8 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
         if (candidate != NULL) {
             AutoPtr<IWifiConfigurationVisibility> vis;
             candidate->GetVisibility((IWifiConfigurationVisibility**)&vis);
-            visibility->GetRssi5(&rssi5);
-            visibility->GetRssi24(&rssi24);
+            vis->GetRssi5(&rssi5);
+            vis->GetRssi24(&rssi24);
         }
 
         // Get current date
@@ -2228,9 +2225,8 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             }
         }*/
         String rbssid;
-        roamCandidate->GetBSSID(&rbssid);
         if (roamCandidate != NULL && currentBSSID != NULL
-                && currentBSSID.Equals(rbssid)) {
+                && (roamCandidate->GetBSSID(&rbssid),currentBSSID.Equals(rbssid))) {
             roamCandidate = NULL;
         }
         b = FALSE;

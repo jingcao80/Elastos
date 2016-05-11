@@ -204,10 +204,9 @@ ECode DhcpResults::SetIpAddress(
     *result = FALSE;
 
     AutoPtr<IInetAddress> addr;
-    AutoPtr<ILinkAddress> ipAddress;
     ECode ec;
     FAIL_GOTO((ec = NetworkUtils::NumericToInetAddress(addrString, (IInetAddress**)&addr)), FAIL_CATCH);
-    FAIL_GOTO((ec = CLinkAddress::New(addr, prefixLength, (ILinkAddress**)&ipAddress)), FAIL_CATCH);
+    FAIL_GOTO((ec = CLinkAddress::New(addr, prefixLength, (ILinkAddress**)&mIpAddress)), FAIL_CATCH);
     return NOERROR;
 FAIL_CATCH:
     if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION || ec == (ECode)E_CLASS_CAST_EXCEPTION) {

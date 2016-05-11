@@ -557,6 +557,7 @@ WifiConfigStore::WifiConfigStore(
     , lastUnwantedNetworkDisconnectTimestamp(0)
     , mLastPriority(-1)
 {
+    IpConfigStore::constructor();
     CHashMap::New((IHashMap**)&mConfiguredNetworks);
     CHashMap::New((IHashMap**)&mNetworkIds);
     AutoPtr<IKeyStoreHelper> keyStoreHelper;
@@ -1631,7 +1632,7 @@ ECode WifiConfigStore::LoadConfiguredNetworks()
                 // to decide whether to restore network configurations
                 // in readNetworkHistory() along with IP and proxy settings
                 config->SetAutoJoinStatus(IWifiConfiguration::AUTO_JOIN_ENABLED);
-                //TODO config->SetDuplicateNetwork(TRUE);
+                config->SetDuplicateNetwork(TRUE);
             }
         } else if (config->IsValid(&isValid), isValid) {
             Int32 networkId;
@@ -3031,10 +3032,10 @@ ECode WifiConfigStore::InstallKeys(
     String userCertName = /*TODO ICredentials::USER_CERTIFICATE*/ String("USRCERT_") + name;
     String caCertName = /*TODO ICredentials::CA_CERTIFICATE*/ String("CACERT_") + name;
 
-    assert(0);//TODO
     AutoPtr<IX509Certificate> clientCert;
     config->GetClientCertificate((IX509Certificate**)&clientCert);
     if (clientCert != NULL) {
+        assert(0);//TODO
         AutoPtr<IPrivateKey> clientPriavateKey;
         config->GetClientPrivateKey((IPrivateKey**)&clientPriavateKey);
         AutoPtr<ArrayOf<Byte> > privKeyData;
@@ -3183,10 +3184,10 @@ ECode WifiConfigStore::MigrateCerts(
     VALIDATE_NOT_NULL(config);
     String client;
     config->GetClientCertificateAlias(&client);
-    assert(0);//TODO
     // a valid client certificate is configured
     if (!TextUtils::IsEmpty(client)) {
         Boolean contains = TRUE;
+        assert(0);//TODO
         //TODO mKeyStore->Contains(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID, &contains);
         if (!contains) {
             //TODO mKeyStore->Duplicate(ICredentials::USER_PRIVATE_KEY + client, -1, ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID);
@@ -3636,7 +3637,7 @@ void WifiConfigStore::ReadNetworkHistory()
             rssi = IWifiConfiguration::INVALID_RSSI;
             caps = String(NULL);
 
-        } else if (config != NULL && (/*TODO config->GetDuplicateNetwork(&duplicateNetwork), */duplicateNetwork) ==  FALSE) {
+        } else if (config != NULL && (config->GetDuplicateNetwork(&duplicateNetwork), duplicateNetwork) ==  FALSE) {
             if (key.StartWith(SSID_KEY)) {
                 String key1;
                 StringUtils::Replace(key, SSID_KEY, String(""), &key1);
@@ -4514,6 +4515,7 @@ void WifiConfigStore::ReadIpAndProxyConfigurations()
         AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(p);
 
         Int32 autoJoinStatus = 0;
+        Boolean duplicateNetwork;
         config->GetAutoJoinStatus(&autoJoinStatus);
         if (config == NULL || autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
             String str("configuration found for missing network, nid=");
@@ -4521,8 +4523,7 @@ void WifiConfigStore::ReadIpAndProxyConfigurations()
             str += size;
             Loge(str);
         }
-        else if (config != NULL && /*TODO config.duplicateNetwork ==*/ TRUE) {
-            assert(0);//TODO
+        else if (config != NULL && (config->GetDuplicateNetwork(&duplicateNetwork), duplicateNetwork) == TRUE) {
             if (VDBG) {
                 Int32 networkId = 0;
                 config->GetNetworkId(&networkId);
@@ -4549,10 +4550,9 @@ String WifiConfigStore::EncodeSSID(
     AutoPtr<ArrayOf<Byte> > bytes = tmp.GetBytes(/*Charset.forName("UTF-8")*/);
     AutoPtr<IBigInteger> bigInteger;
     CBigInteger::New(1, (*bytes), (IBigInteger**)&bigInteger);
-    Int64 value;
-    assert(0);//TODO
-    //TODO bigInteger->Int64Value(&value);
-    return StringUtils::ToHexString(value);
+    String value;
+    bigInteger->ToString(16, &value);
+    return value;
 }
 
 AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
@@ -4661,7 +4661,7 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
         }
 
         Boolean isIBSS = FALSE;
-        //TODO config->GetIsIBSS(&isIBSS);
+        config->GetIsIBSS(&isIBSS);
         if (isIBSS) {
             if(!mWifiNative->SetNetworkVariable(
                     netId,
@@ -4670,13 +4670,15 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                 Loge(String("failed to set adhoc mode"));
                 goto setVariables;
             }
-            // if(!mWifiNative->SetNetworkVariable(
-            //         netId,
-            //         IWifiConfiguration::frequencyVarName,
-            //         Integer.toString(config.frequency))) {
-            //     Loge("failed to set frequency");
-            //     break setVariables;
-            // }
+            Int32 freq;
+            config->GetFrequency(&freq);
+            if(!mWifiNative->SetNetworkVariable(
+                    netId,
+                    IWifiConfiguration::frequencyVarName,
+                    StringUtils::ToString(freq))) {
+                Loge(String("failed to set frequency"));
+                goto setVariables;
+            }
         }
 
         AutoPtr<IWifiConfigurationKeyMgmt> mgmt;
@@ -5279,17 +5281,16 @@ void WifiConfigStore::ReadNetworkVariables(
         config->SetHiddenSSID(StringUtils::ParseInt32(value) != 0);
     }
 
-    assert(0);//TODO
     value = mWifiNative->GetNetworkVariable(netId, String("mode")/*TODO IWifiConfiguration::modeVarName*/);
-    //TODO config->SetIsIBSS(FALSE);
+    config->SetIsIBSS(FALSE);
     if (!TextUtils::IsEmpty(value)) {
-        //TODO config->SetIsIBSS(StringUtils::ParseInt32(value) != 0);
+        config->SetIsIBSS(StringUtils::ParseInt32(value) != 0);
     }
 
     value = mWifiNative->GetNetworkVariable(netId, String("frequency")/*TODO IWifiConfiguration::frequencyVarName*/);
-    //TODO config->SetFrequency(0);
+    config->SetFrequency(0);
     if (!TextUtils::IsEmpty(value)) {
-        //TODO config->SetFrequency(StringUtils::ParseInt32(value));
+        config->SetFrequency(StringUtils::ParseInt32(value));
     }
 
     value = mWifiNative->GetNetworkVariable(netId, IWifiConfiguration::wepTxKeyIdxVarName);
@@ -5466,7 +5467,7 @@ String WifiConfigStore::MakeString(
     /* [in] */ IBitSet* inSet,
     /* [in] */ ArrayOf<String>* strings)
 {
-    AutoPtr<StringBuffer> buf;
+    AutoPtr<StringBuffer> buf = new StringBuffer();
     Int32 nextSetBit = -1;
 
     /* Make sure all set bits are in [0, strings.length) to avoid
@@ -5477,7 +5478,7 @@ String WifiConfigStore::MakeString(
     while ((newSet->NextSetBit(nextSetBit + 1, &nextSetBit), nextSetBit) != -1) {
         String str = (*strings)[nextSetBit].Replace('_', '-');
         buf->Append(str);
-        buf->Append(' ');
+        buf->Append(String(" "));
     }
 
     // remove trailing space

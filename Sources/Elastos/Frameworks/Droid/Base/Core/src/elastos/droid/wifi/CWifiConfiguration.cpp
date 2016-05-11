@@ -1868,8 +1868,16 @@ ECode CWifiConfiguration::SetDuplicateNetwork(
 ECode CWifiConfiguration::GetWepKeyVarNames(
     /* [out, callee] */ ArrayOf<String>** result)
 {
-    assert(0);
-    // TODO
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
+    //"wep_key0", "wep_key1", "wep_key2", "wep_key3"
+    array->Set(0, String("wep_key0"));
+    array->Set(1, String("wep_key1"));
+    array->Set(2, String("wep_key2"));
+    array->Set(3, String("wep_key3"));
+
+    *result = array;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -2106,9 +2114,7 @@ ECode CWifiConfiguration::GetKeyIdForCredentials(
         }
 
         Int32 cardinality;
-        assert(0);
-        // TODO
-        // mAllowedKeyManagement->Getcardinality(&cardinality);
+        mAllowedKeyManagement->Cardinality(&cardinality);
         if (cardinality == 0) {
             current->GetAllowedKeyManagement((IBitSet**)&mAllowedKeyManagement);
         }
@@ -2142,9 +2148,7 @@ ECode CWifiConfiguration::GetKeyIdForCredentials(
             current->GetEnterpriseConfig((IWifiEnterpriseConfig**)&enterpriseConfig);
         }
         String keyId;
-        assert(0);
-        // TODO
-        // mEnterpriseConfig->GetKeyId(enterpriseConfig, &keyId);
+        ((CWifiEnterpriseConfig*)mEnterpriseConfig.Get())->GetKeyId(enterpriseConfig, &keyId);
         *result = TrimStringForKeyId(mSSID);
         *result += "_";
         *result += keyMgmt;
@@ -2250,9 +2254,7 @@ ECode CWifiConfiguration::SetProxy(
     /* [in] */ IpConfigurationProxySettings settings,
     /* [in] */ IProxyInfo* proxy)
 {
-    assert(0);
-    // TODO
-    // mIpConfiguration->SetProxySettings(settings);
+    mIpConfiguration->SetProxySettings(settings);
     mIpConfiguration->SetHttpProxy(proxy);
     return NOERROR;
 }
@@ -2261,42 +2263,30 @@ ECode CWifiConfiguration::GetIpAssignment(
     /* [out] */ IpConfigurationIpAssignment* ipAssignment)
 {
     VALIDATE_NOT_NULL(ipAssignment);
-    assert(0);
-    // TODO
-    // *ipAssignment = mIpAssignment;
-    // return NOERROR;
-    return E_NOT_IMPLEMENTED;
+    *ipAssignment = mIpAssignment;
+    return NOERROR;
 }
 
 ECode CWifiConfiguration::SetIpAssignment(
     /* [in] */ IpConfigurationIpAssignment ipAssignment)
 {
-    assert(0);
-    // TODO
-    // mIpAssignment = ipAssignment;
-    // return NOERROR;
-    return E_NOT_IMPLEMENTED;
+    mIpAssignment = ipAssignment;
+    return NOERROR;
 }
 
 ECode CWifiConfiguration::GetProxySettings(
     /* [out] */ IpConfigurationProxySettings* proxySettings)
 {
     VALIDATE_NOT_NULL(proxySettings);
-    assert(0);
-    // TODO
-    // *proxySettings = mProxySettings;
-    // return NOERROR;
-    return E_NOT_IMPLEMENTED;
+    *proxySettings = mProxySettings;
+    return NOERROR;
 }
 
 ECode CWifiConfiguration::SetProxySettings(
     /* [in] */ IpConfigurationProxySettings proxySettings)
 {
-    assert(0);
-    // TODO
-    // mProxySettings = proxySettings;
-    // return NOERROR;
-    return E_NOT_IMPLEMENTED;
+    mProxySettings = proxySettings;
+    return NOERROR;
 }
 
 ECode CWifiConfiguration::GetLinkProperties(

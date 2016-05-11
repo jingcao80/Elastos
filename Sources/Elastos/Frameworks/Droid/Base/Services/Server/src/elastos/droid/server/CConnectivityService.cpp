@@ -271,6 +271,7 @@ const String CConnectivityService::LegacyTypeTracker::TAG("CConnectivityService:
 
 CConnectivityService::LegacyTypeTracker::LegacyTypeTracker(
     /* [in] */ CConnectivityService* host)
+    : mHost(host)
 {
     mTypeLists = ArrayOf<IArrayList*>::Alloc(IConnectivityManager::MAX_NETWORK_TYPE + 1);
 }
@@ -417,7 +418,7 @@ String CConnectivityService::LegacyTypeTracker::NaiToString(
     }
 
     NetworkAgentInfo* info = (NetworkAgentInfo*)nai;
-    String stateStr("???/???");
+    String stateStr("?\?\?/???");
     if (info->mNetworkInfo != NULL) {
         NetworkInfoState state;
         NetworkInfoDetailedState detailedState;
@@ -735,7 +736,7 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<INetworkInfo> info = INetworkInfo::Probe(obj);
+    AutoPtr<INetworkInfo> info;
     Int32 what, arg1, arg2;
     msg->GetWhat(&what);
     msg->GetArg1(&arg1);
@@ -903,9 +904,7 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
             break;
         }
         case NetworkMonitor::EVENT_NETWORK_TESTED: {
-            AutoPtr<IInterface> naiObj;
-            mHost->mNetworkAgentInfos->Get(replyTo, (IInterface**)&naiObj);
-            NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(naiObj);
+            NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(obj);
             if (mHost->IsLiveNetworkAgent(nai, String("EVENT_NETWORK_VALIDATED"))) {
                 Boolean valid = (arg1 == NetworkMonitor::NETWORK_TEST_RESULT_VALID);
                 if (valid) {
@@ -931,9 +930,7 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
             break;
         }
         case NetworkMonitor::EVENT_NETWORK_LINGER_COMPLETE: {
-            AutoPtr<IInterface> naiObj;
-            mHost->mNetworkAgentInfos->Get(replyTo, (IInterface**)&naiObj);
-            NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(naiObj);
+            NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(obj);
             if (mHost->IsLiveNetworkAgent(nai, String("EVENT_NETWORK_LINGER_COMPLETE"))) {
                 mHost->HandleLingerComplete(nai);
             }
@@ -4845,9 +4842,11 @@ Boolean CConnectivityService::UpdateRoutes(
         }
     }
 
-    Boolean e1, e2;
-    added->IsEmpty(&e1);
-    removed->IsEmpty(&e2);
+    Boolean e1 = FALSE, e2 = FALSE;
+    if (added != NULL)
+        added->IsEmpty(&e1);
+    if (removed != NULL)
+        removed->IsEmpty(&e2);
 
     return !e1 || !e2;
 }
@@ -5109,13 +5108,19 @@ void CConnectivityService::HandleDefaultNetworkSwitch()
         AutoPtr<IInterface> tmp;
         it->GetNext((IInterface**)&tmp);
         NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(tmp);
-        assert(0 && "TODO");
-        // if(mDefaultRequest->mNetworkCapabilities->SatisfiedByNetworkCapabilities(
-        //             nai->mNetworkCapabilities)) {
-        //     if(nai->GetCurrentScore() > networkSwitchTo->GetCurrentScore()) {
-        //         networkSwitchTo = nai;
-        //     }
-        // }
+        AutoPtr<INetworkCapabilities> nwCapabilities;
+        mDefaultRequest->GetNetworkCapabilities((INetworkCapabilities**)&nwCapabilities);
+        Boolean bTemp;
+        if (nwCapabilities->SatisfiedByNetworkCapabilities(nai->mNetworkCapabilities, &bTemp), bTemp) {
+
+            Int32 naiScore;
+            nai->GetCurrentScore(&naiScore);
+            Int32 switchToScore;
+            networkSwitchTo->GetCurrentScore(&switchToScore);
+            if(naiScore > switchToScore) {
+                networkSwitchTo = nai;
+            }
+        }
     }
     Slogger::D(TAG, "network switch to: %p", networkSwitchTo.Get());
     if(networkSwitchTo != currentDefaultNetwork) {

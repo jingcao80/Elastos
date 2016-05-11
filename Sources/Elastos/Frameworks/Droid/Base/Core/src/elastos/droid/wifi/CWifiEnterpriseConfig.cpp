@@ -128,8 +128,11 @@ ECode CWifiEnterpriseConfig::GetEapMethod(
     CString::New(EAP_KEY, (ICharSequence**)&iKey);
     AutoPtr<IInterface> iEapMethod;
     mFields->Get(iKey, (IInterface**)&iEapMethod);
-    String eapMethod;
-    ICharSequence::Probe(iEapMethod)->ToString(&eapMethod);
+    String eapMethod(NULL);
+    ICharSequence* iEapMethodcs = ICharSequence::Probe(iEapMethod);
+    if (iEapMethodcs != NULL) {
+        iEapMethodcs->ToString(&eapMethod);
+    }
     AutoPtr< ArrayOf<String> > strings;
     AutoPtr<IWifiEnterpriseConfigEap> iEap;
     CWifiEnterpriseConfigEap::AcquireSingleton((IWifiEnterpriseConfigEap**)&iEap);

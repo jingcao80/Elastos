@@ -3509,15 +3509,16 @@ ECode NotificationManagerService::EnqueueNotificationInternal(
     /* [in] */ INotification* notification,
     /* [in] */ ArrayOf<Int32>* idIn,
     /* [in] */ Int32 incomingUserId,
-    /* [out] */ ArrayOf<Int32>** idOut)
+    /* [out] */ ArrayOf<Int32>** _idOut)
 {
-    VALIDATE_NOT_NULL(idOut)
+    VALIDATE_NOT_NULL(_idOut)
 
+    AutoPtr<ArrayOf<Int32> > idOut;
     if (NULL == idIn) {
-        *idOut = ArrayOf<Int32>::Alloc(1);
+        idOut = ArrayOf<Int32>::Alloc(1);
     }
     else {
-        *idOut = idIn->Clone();
+        idOut = idIn->Clone();
     }
 
     if (DBG) {
@@ -3602,7 +3603,9 @@ ECode NotificationManagerService::EnqueueNotificationInternal(
             this, pkg, opPkg, callingUid, callingPid, tag, id, notification, user, isSystemNotification);
     mHandler->Post(runnable, &res);
 
-    (**idOut)[0] = id;
+    (*idOut)[0] = id;
+    *_idOut = idOut;
+    REFCOUNT_ADD(*_idOut);
     return NOERROR;
 }
 

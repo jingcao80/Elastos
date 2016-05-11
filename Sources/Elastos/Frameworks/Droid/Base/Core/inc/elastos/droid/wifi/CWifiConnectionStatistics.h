@@ -126,7 +126,7 @@ private:
      *  Key = SSID
      *  Value = num connection
      */
-    AutoPtr<IHashMap> mUntrustedNetworkHistory;
+    AutoPtr<IHashMap> mUntrustedNetworkHistory;// String, WifiNetworkConnectionStatistics>
 
     // Number of time we polled the chip and were on 5GHz
     Int32 mNum5GhzConnected;

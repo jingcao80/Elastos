@@ -11,6 +11,7 @@
 #include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/server/CNetworkManagementSocketTaggerHelper.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
@@ -33,6 +34,7 @@ using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Server::INetworkManagementSocketTagger;
+using Elastos::Droid::Server::CNetworkManagementSocketTaggerHelper;
 
 using Elastos::Core::Thread;
 using Elastos::Net::CSocket;
@@ -191,10 +193,9 @@ AutoPtr<IINetworkStatsService> TrafficStats::GetStatsService()
 ECode TrafficStats::SetThreadStatsTag(
     /* [in] */ Int32 tag)
 {
-    // TODO: Waiting for NetworkManagementSocketTagger
-    assert(0);
-    return NOERROR;
-    // return NetworkManagementSocketTagger::SetThreadSocketStatsTag(tag);
+    AutoPtr<INetworkManagementSocketTagger> nmst;
+    CNetworkManagementSocketTaggerHelper::AcquireSingleton((INetworkManagementSocketTagger**)&nmst);
+    return nmst->SetThreadSocketStatsTag(tag);
 }
 
 ECode TrafficStats::SetThreadStatsTagBackup()
@@ -205,35 +206,31 @@ ECode TrafficStats::SetThreadStatsTagBackup()
 ECode TrafficStats::GetThreadStatsTag(
     /* [out] */ Int32* result)
 {
-    // TODO: Waiting for NetworkManagementSocketTagger
-    assert(0);
-    return NOERROR;
-    // return NetworkManagementSocketTagger::GetThreadSocketStatsTag(result);
+    AutoPtr<INetworkManagementSocketTagger> nmst;
+    CNetworkManagementSocketTaggerHelper::AcquireSingleton((INetworkManagementSocketTagger**)&nmst);
+    return nmst->GetThreadSocketStatsTag(result);
 }
 
 ECode TrafficStats::ClearThreadStatsTag()
 {
-    // TODO: Waiting for NetworkManagementSocketTagger
-    assert(0);
-    return NOERROR;
-    // return NetworkManagementSocketTagger::SetThreadSocketStatsTag(-1);
+    AutoPtr<INetworkManagementSocketTagger> nmst;
+    CNetworkManagementSocketTaggerHelper::AcquireSingleton((INetworkManagementSocketTagger**)&nmst);
+    return nmst->SetThreadSocketStatsTag(-1);
 }
 
 ECode TrafficStats::SetThreadStatsUid(
     /* [in] */ Int32 uid)
 {
-    // TODO: Waiting for NetworkManagementSocketTagger
-    assert(0);
-    return NOERROR;
-    // return NetworkManagementSocketTagger::SetThreadSocketStatsUid(uid);
+    AutoPtr<INetworkManagementSocketTagger> nmst;
+    CNetworkManagementSocketTaggerHelper::AcquireSingleton((INetworkManagementSocketTagger**)&nmst);
+    return nmst->SetThreadSocketStatsUid(uid);
 }
 
 ECode TrafficStats::ClearThreadStatsUid()
 {
-    // TODO: Waiting for NetworkManagementSocketTagger
-    assert(0);
-    return NOERROR;
-    // return NetworkManagementSocketTagger::SetThreadSocketStatsUid(-1);
+    AutoPtr<INetworkManagementSocketTagger> nmst;
+    CNetworkManagementSocketTaggerHelper::AcquireSingleton((INetworkManagementSocketTagger**)&nmst);
+    return nmst->SetThreadSocketStatsUid(-1);
 }
 
 ECode TrafficStats::TagSocket(
