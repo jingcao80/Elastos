@@ -4,6 +4,7 @@
 #include "elastos/core/Singleton.h"
 #include "_Libcore_IO_CSocketTaggerHelper.h"
 
+using Elastos::Core::Singleton;
 
 namespace Libcore {
 namespace IO {

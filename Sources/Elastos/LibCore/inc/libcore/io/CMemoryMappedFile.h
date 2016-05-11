@@ -4,6 +4,7 @@
 #include "_Libcore_IO_CMemoryMappedFile.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::ICloseable;
 
 namespace Libcore {

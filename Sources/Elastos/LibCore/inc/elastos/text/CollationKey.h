@@ -5,6 +5,7 @@
 #include "Object.h"
 
 using Elastos::Core::IComparable;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Text {

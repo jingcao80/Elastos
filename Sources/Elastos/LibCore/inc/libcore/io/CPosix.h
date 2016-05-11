@@ -4,6 +4,7 @@
 #include "Object.h"
 #include "_Libcore_IO_CPosix.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IByteBuffer;
 using Elastos::Net::IInetAddress;

@@ -4,6 +4,7 @@
 #include "_Elastos_IO_CByteBufferHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace IO {

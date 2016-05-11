@@ -5,6 +5,7 @@
 #include "_Elastos_IO_CRandomAccessFile.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::Core::ICloseGuard;
 using Elastos::IO::Channels::IFileChannel;
 

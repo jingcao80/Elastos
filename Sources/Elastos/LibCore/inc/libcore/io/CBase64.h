@@ -5,6 +5,7 @@
 #include "Singleton.h"
 #include "_Libcore_IO_CBase64.h"
 
+using Elastos::Core::Singleton;
 
 namespace Libcore {
 namespace IO {

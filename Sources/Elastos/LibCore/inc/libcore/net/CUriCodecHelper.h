@@ -4,6 +4,7 @@
 #include "_Libcore_Net_CUriCodecHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::Charset::ICharset;
 
 namespace Libcore {

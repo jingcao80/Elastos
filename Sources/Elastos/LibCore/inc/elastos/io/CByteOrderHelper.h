@@ -4,6 +4,7 @@
 #include "_Elastos_IO_CByteOrderHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace IO {

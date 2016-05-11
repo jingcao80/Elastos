@@ -7,6 +7,7 @@
 #include "Singleton.h"
 
 using Elastos::Core::IComparator;
+using Elastos::Core::Singleton;
 using Elastos::Utility::IIterable;
 using Elastos::Utility::IList;
 using Elastos::Utility::IIterator;

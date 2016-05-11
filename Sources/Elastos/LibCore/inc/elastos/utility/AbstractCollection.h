@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterable;
 

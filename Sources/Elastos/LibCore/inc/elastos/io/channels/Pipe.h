@@ -4,6 +4,8 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace IO {
 namespace Channels {

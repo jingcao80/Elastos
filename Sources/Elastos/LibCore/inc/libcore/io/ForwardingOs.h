@@ -6,6 +6,7 @@
 #include "core/Object.h"
 
 using Libcore::IO::IOs;
+using Elastos::Core::Object;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IByteBuffer;
 using Elastos::Net::IInetSocketAddress;

@@ -7,6 +7,7 @@
 #include "StringBuilder.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Core::IAppendable;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ICharSequence;

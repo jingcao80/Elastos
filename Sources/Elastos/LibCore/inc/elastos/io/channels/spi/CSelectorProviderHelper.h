@@ -4,6 +4,8 @@
 #include "_Elastos_IO_Channels_Spi_CSelectorProviderHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace IO {
 namespace Channels {

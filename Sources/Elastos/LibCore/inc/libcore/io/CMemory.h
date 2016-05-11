@@ -4,6 +4,7 @@
 #include "_Libcore_IO_CMemory.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::ByteOrder;
 
 namespace Libcore {

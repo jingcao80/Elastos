@@ -7,6 +7,7 @@
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/etl/Set.h>
 
+using Elastos::Core::Object;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Etl::Set;

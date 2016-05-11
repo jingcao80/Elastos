@@ -4,6 +4,8 @@
 #include "_Elastos_IO_Charset_CModifiedUtf8.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace IO {
 namespace Charset {

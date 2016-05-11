@@ -5,6 +5,8 @@
 #include "_Libcore_Net_Event_CNetworkEventDispatcherHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Elastos::Core::Singleton;
+
 namespace Libcore {
 namespace Net {
 namespace Event {

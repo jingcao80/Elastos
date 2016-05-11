@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Core::IRunnable;
 using Elastos::IO::ICloseable;
 

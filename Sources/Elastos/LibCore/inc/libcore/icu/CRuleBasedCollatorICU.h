@@ -5,9 +5,10 @@
 #include <Object.h>
 #include "_Libcore_ICU_CRuleBasedCollatorICU.h"
 
+using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 using Elastos::Text::ICollationKey;
 using Elastos::Text::ICharacterIterator;
-using Elastos::Core::ICloneable;
 using Elastos::Utility::ILocale;
 
 namespace Libcore {

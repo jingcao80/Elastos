@@ -4,6 +4,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/Math.h>
 
+using Elastos::Core::Object;
 using Elastos::Core::IComparable;
 using Elastos::Core::EIID_IComparable;
 

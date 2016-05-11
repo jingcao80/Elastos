@@ -4,6 +4,7 @@
 #include "_Libcore_IO_CIoUtils.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IFile;

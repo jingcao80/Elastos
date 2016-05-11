@@ -5,6 +5,8 @@
 #include "Elastos.CoreLibrary.Libcore.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Libcore {
 namespace Net {
 namespace Event {
