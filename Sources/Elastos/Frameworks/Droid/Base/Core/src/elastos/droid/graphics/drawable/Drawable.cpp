@@ -136,7 +136,7 @@ ECode Drawable::SetBounds(
     if (oldBoundsObj->mLeft != left || oldBoundsObj->mTop != top ||
             oldBoundsObj->mRight != right || oldBoundsObj->mBottom != bottom) {
         Boolean isEmpty = FALSE;
-        if (!(oldBounds->IsEmpty(&isEmpty), isEmpty)) {
+        if ((oldBounds->IsEmpty(&isEmpty), !isEmpty)) {
             // first invalidate the previous bounds
             InvalidateSelf();
         }

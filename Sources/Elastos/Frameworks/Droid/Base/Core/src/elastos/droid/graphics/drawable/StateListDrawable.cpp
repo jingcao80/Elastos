@@ -57,14 +57,6 @@ ECode StateListDrawable::constructor(
     return NOERROR;
 }
 
-void StateListDrawable::SetConstantState(
-    /* [in] */ StateListState* state)
-{
-    DrawableContainer::SetConstantState(state);
-
-    mStateListState = state;
-}
-
 ECode StateListDrawable::AddState(
     /* [in] */ ArrayOf<Int32>* stateSet,
     /* [in] */ IDrawable* drawable)
@@ -272,6 +264,14 @@ ECode StateListDrawable::SetLayoutDirection(
     return NOERROR;
 }
 
+void StateListDrawable::SetConstantState(
+    /* [in] */ StateListState* state)
+{
+    DrawableContainer::SetConstantState(state);
+
+    mStateListState = state;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -284,7 +284,8 @@ StateListDrawable::StateListState::StateListState(
     if (orig != NULL) {
         mStateSets = NULL;
         Arrays::CopyOf(orig->mStateSets, orig->mStateSets->GetLength(), (ArrayOf< AutoPtr<ArrayOf<Int32> > >**)&mStateSets);
-    } else {
+    }
+    else {
         mStateSets = ArrayOf< AutoPtr<ArrayOf<Int32> > >::Alloc(GetCapacity());
     }
 }
@@ -336,7 +337,7 @@ void StateListDrawable::StateListState::GrowArray(
 {
     DrawableContainerState::GrowArray(oldSize, newSize);
     AutoPtr<ArrayOf< AutoPtr<ArrayOf<Int32> > > > newStateSets
-        = ArrayOf< AutoPtr<ArrayOf<Int32> > >::Alloc(newSize);
+            = ArrayOf< AutoPtr<ArrayOf<Int32> > >::Alloc(newSize);
     for (Int32 i = 0; i < oldSize; i++) {
         newStateSets->Set(i, (*mStateSets)[i]);
     }

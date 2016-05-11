@@ -3086,7 +3086,8 @@ ECode View::ComputeClickPointInScreenForAccessibility(
             return NOERROR;
         }
 
-        outPoint->Set(Elastos::Core::Math::Round((*coordinates)[0]), Elastos::Core::Math::Round((*coordinates)[1]));
+        using Elastos::Core::Math;
+        outPoint->Set(Math::Round((*coordinates)[0]), Math::Round((*coordinates)[1]));
     }
 
     *res = TRUE;
@@ -9448,8 +9449,10 @@ void View::TransformRect(
         boundingRect->GetRight(&r);
         boundingRect->GetTop(&t);
         boundingRect->GetBottom(&b);
-        rect->Set((Int32)Elastos::Core::Math::Floor(l), (Int32)Elastos::Core::Math::Floor(t),
-                (Int32)Elastos::Core::Math::Ceil(r), (Int32)Elastos::Core::Math::Ceil(b));
+
+        using Elastos::Core::Math;
+        rect->Set((Int32)Math::Floor(l), (Int32)Math::Floor(t),
+                (Int32)Math::Ceil(r), (Int32)Math::Ceil(b));
     }
 }
 
@@ -12370,10 +12373,11 @@ ECode View::SetClipBounds(
         else {
             CRect* temp1 = (CRect*)mClipBounds.Get();
             CRect* temp2 = (CRect*)clipBounds;
-            Invalidate(Elastos::Core::Math::Min(temp1->mLeft, temp2->mLeft),
-                    Elastos::Core::Math::Min(temp1->mTop, temp2->mTop),
-                    Elastos::Core::Math::Min(temp1->mRight, temp2->mRight),
-                    Elastos::Core::Math::Min(temp1->mBottom, temp2->mBottom));
+            using Elastos::Core::Math;
+            Invalidate(Math::Min(temp1->mLeft, temp2->mLeft),
+                    Math::Min(temp1->mTop, temp2->mTop),
+                    Math::Min(temp1->mRight, temp2->mRight),
+                    Math::Min(temp1->mBottom, temp2->mBottom));
             mClipBounds->Set(clipBounds);
         }
     }
@@ -13260,7 +13264,7 @@ void View::DrawBackground(
         Boolean isValid;
         if (displayList != NULL && (displayList->IsValid(&isValid), isValid)) {
             SetBackgroundDisplayListProperties(displayList);
-            (IHardwareCanvas::Probe(canvas))->DrawRenderNode(displayList);
+            IHardwareCanvas::Probe(canvas)->DrawRenderNode(displayList);
             return;
         }
     }

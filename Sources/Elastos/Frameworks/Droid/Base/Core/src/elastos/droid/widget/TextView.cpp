@@ -266,6 +266,10 @@ ECode CompressTextRunnable::Run()
 //          Drawables
 //==============================================================================
 
+const Int32 Drawables::DRAWABLE_NONE;
+const Int32 Drawables::DRAWABLE_RIGHT;
+const Int32 Drawables::DRAWABLE_LEFT;
+
 Drawables::Drawables()
     : mIsRtlCompatibilityMode(FALSE)
     , mOverride(FALSE)
@@ -1251,7 +1255,7 @@ void TextView::InitStatic()
 
 void TextView::InitFields()
 {
-    mHighlightColor = 0xCC475925;
+    mHighlightColor = 0x6633B5E5;
     mCursorDrawableRes = 0;
 
     mTextSelectHandleLeftRes = 0;
@@ -1269,7 +1273,12 @@ void TextView::InitFields()
     mShadowDx = 0;
     mShadowDy = 0;
 
+    mShadowColor = 0;
+
     mPreDrawRegistered = FALSE;
+    mPreDrawListenerDetached = FALSE;
+
+    mPreventDefaultMovement = FALSE;
 
     mEllipsize = TextUtilsTruncateAt_NONE;
 
@@ -1319,8 +1328,8 @@ void TextView::InitFields()
     mFilters = NO_FILTERS;
 
     ASSERT_SUCCEEDED(CString::New(String(""), (ICharSequence**)&mText));
-    ASSERT_SUCCEEDED(CSpannableFactory::AcquireSingleton((ISpannableFactory**)&mSpannableFactory));
     ASSERT_SUCCEEDED(CEditableFactory::AcquireSingleton((IEditableFactory**)&mEditableFactory));
+    ASSERT_SUCCEEDED(CSpannableFactory::AcquireSingleton((ISpannableFactory**)&mSpannableFactory));
 }
 
 TextView::TextView()
@@ -4863,9 +4872,9 @@ ECode TextView::SetTextKeepState(
     if (start >= 0 || end >= 0) {
         AutoPtr<ISpannable> span = ISpannable::Probe(mText);
         if (span) {
-            Selection::SetSelection(
-                    span, Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(start, len)),
-                    Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(end, len)));
+            using Elastos::Core::Math;
+            Selection::SetSelection(span, Math::Max(0, Math::Min(start, len)),
+                    Math::Max(0, Math::Min(end, len)));
         }
     }
     return NOERROR;
@@ -5649,7 +5658,8 @@ void TextView::InvalidateCursorPath()
 
             Float thick;
             IPaint::Probe(mTextPaint)->GetStrokeWidth(&thick);
-            thick = Elastos::Core::Math::Ceil(thick);
+            using Elastos::Core::Math;
+            thick = Math::Ceil(thick);
             if (thick < 1.0f) {
                 thick = 1.0f;
             }
@@ -5658,10 +5668,10 @@ void TextView::InvalidateCursorPath()
 
             mHighlightPath->ComputeBounds(TEMP_RECTF, FALSE);
 
-            Invalidate((Int32)Elastos::Core::Math::Floor(horizontalPadding + ((CRectF*)TEMP_RECTF.Get())->mLeft - thick),
-                        (Int32)Elastos::Core::Math::Floor(verticalPadding + ((CRectF*)TEMP_RECTF.Get())->mTop - thick),
-                        (Int32)Elastos::Core::Math::Ceil(horizontalPadding + ((CRectF*)TEMP_RECTF.Get())->mRight + thick),
-                        (Int32)Elastos::Core::Math::Ceil(verticalPadding + ((CRectF*)TEMP_RECTF.Get())->mBottom + thick));
+            Invalidate((Int32)Math::Floor(horizontalPadding + ((CRectF*)TEMP_RECTF.Get())->mLeft - thick),
+                        (Int32)Math::Floor(verticalPadding + ((CRectF*)TEMP_RECTF.Get())->mTop - thick),
+                        (Int32)Math::Ceil(horizontalPadding + ((CRectF*)TEMP_RECTF.Get())->mRight + thick),
+                        (Int32)Math::Ceil(verticalPadding + ((CRectF*)TEMP_RECTF.Get())->mBottom + thick));
         }
         else {
             Int32 l, t, r, b;
@@ -5692,8 +5702,9 @@ void TextView::InvalidateCursor(
     /* [in] */ Int32 c)
 {
     if (a >= 0 || b >= 0 || c >= 0) {
-        Int32 start = Elastos::Core::Math::Min(Elastos::Core::Math::Min(a, b), c);
-        Int32 end = Elastos::Core::Math::Max(Elastos::Core::Math::Max(a, b), c);
+        using Elastos::Core::Math;
+        Int32 start = Math::Min(Math::Min(a, b), c);
+        Int32 end = Math::Max(Math::Max(a, b), c);
         InvalidateRegion(start, end, TRUE /* Also invalidates blinking cursor */);
     }
 }
@@ -5744,8 +5755,9 @@ ECode TextView::InvalidateRegion(
                 (*editor->mCursorDrawable)[i]->GetBounds((IRect**)&bounds);
                 bounds->GetTop(&t);
                 bounds->GetBottom(&b);
-                top = Elastos::Core::Math::Min(top, t);
-                bottom = Elastos::Core::Math::Max(bottom, b);
+                using Elastos::Core::Math;
+                top = Math::Min(top, t);
+                bottom = Math::Max(bottom, b);
             }
         }
 
@@ -7743,13 +7755,14 @@ Int32 TextView::Desired(
             return -1;
     }
 
+    using Elastos::Core::Math;
     for (Int32 i = 0; i < N; i++) {
         Float extent;
         layout->GetLineWidth(i, &extent);
-        max = Elastos::Core::Math::Max(max, extent);
+        max = Math::Max(max, extent);
     }
 
-    return (Int32)Elastos::Core::Math::Ceil(max);
+    return (Int32)Math::Ceil(max);
 }
 
 ECode TextView::SetIncludeFontPadding(
@@ -7795,6 +7808,7 @@ void TextView::OnMeasure(
     Int32 des = -1;
     Boolean fromexisting = FALSE;
 
+    using Elastos::Core::Math;
     if (widthMode == View::MeasureSpec::EXACTLY) {
         // Parent has told us how big to be. So be it.
         width = widthSize;
@@ -7816,7 +7830,7 @@ void TextView::OnMeasure(
 
         if (boring == NULL || boring == UNKNOWN_BORING) {
             if (des < 0) {
-                des = (Int32)Elastos::Core::Math::Ceil(Layout::GetDesiredWidth(mTransformed, mTextPaint));
+                des = (Int32)Math::Ceil(Layout::GetDesiredWidth(mTransformed, mTextPaint));
             }
 
             width = des;
@@ -7827,8 +7841,8 @@ void TextView::OnMeasure(
 
         AutoPtr<Drawables> dr = mDrawables;
         if (dr != NULL) {
-            width = Elastos::Core::Math::Max(width, dr->mDrawableWidthTop);
-            width = Elastos::Core::Math::Max(width, dr->mDrawableWidthBottom);
+            width = Math::Max(width, dr->mDrawableWidthTop);
+            width = Math::Max(width, dr->mDrawableWidthBottom);
         }
 
         if (mHint != NULL) {
@@ -7847,7 +7861,7 @@ void TextView::OnMeasure(
 
             if (hintBoring == NULL || hintBoring == UNKNOWN_BORING) {
                 if (hintDes < 0) {
-                    hintDes = (Int32)Elastos::Core::Math::Ceil(
+                    hintDes = (Int32)Math::Ceil(
                             Layout::GetDesiredWidth(mHint, mTextPaint));
                 }
 
@@ -7869,26 +7883,26 @@ void TextView::OnMeasure(
         if (mMaxWidthMode == EMS) {
             Int32 lineHeight;
             GetLineHeight(&lineHeight);
-            width = Elastos::Core::Math::Min(width, mMaxWidth * lineHeight);
+            width = Math::Min(width, mMaxWidth * lineHeight);
         }
         else {
-            width = Elastos::Core::Math::Min(width, mMaxWidth);
+            width = Math::Min(width, mMaxWidth);
         }
 
         if (mMinWidthMode == EMS) {
             Int32 lineHeight;
             GetLineHeight(&lineHeight);
-            width = Elastos::Core::Math::Max(width, mMinWidth * lineHeight);
+            width = Math::Max(width, mMinWidth * lineHeight);
         }
         else {
-            width = Elastos::Core::Math::Max(width, mMinWidth);
+            width = Math::Max(width, mMinWidth);
         }
 
         // Check against our minimum width
-        width = Elastos::Core::Math::Max(width, GetSuggestedMinimumWidth());
+        width = Math::Max(width, GetSuggestedMinimumWidth());
 
         if (widthMode == View::MeasureSpec::AT_MOST) {
-            width = Elastos::Core::Math::Min(widthSize, width);
+            width = Math::Min(widthSize, width);
         }
     }
     Int32 compoundPaddingLeft, compoundPaddingRight;
@@ -7952,7 +7966,7 @@ void TextView::OnMeasure(
         mDesiredHeightAtMeasure = desired;
 
         if (heightMode == View::MeasureSpec::AT_MOST) {
-            height = Elastos::Core::Math::Min(desired, heightSize);
+            height = Math::Min(desired, heightSize);
         }
     }
 
@@ -7966,7 +7980,7 @@ void TextView::OnMeasure(
         if (mMaxMode == LINES && count > mMaximum) {
             Int32 pos;
             mLayout->GetLineTop(mMaximum, &pos);
-            unpaddedHeight = Elastos::Core::Math::Min(unpaddedHeight, pos);
+            unpaddedHeight = Math::Min(unpaddedHeight, pos);
         }
         /*
          * We didn't let MakeNewLayout() register to bring the cursor into view,
@@ -8008,10 +8022,11 @@ Int32 TextView::GetDesiredHeight(
     pad += compoundPaddingBottom;
     layout->GetLineTop(linecount, &desired);
 
+    using Elastos::Core::Math;
     AutoPtr<Drawables> dr = mDrawables;
     if (dr != NULL) {
-        desired = Elastos::Core::Math::Max(desired, dr->mDrawableHeightLeft);
-        desired = Elastos::Core::Math::Max(desired, dr->mDrawableHeightRight);
+        desired = Math::Max(desired, dr->mDrawableHeightLeft);
+        desired = Math::Max(desired, dr->mDrawableHeightRight);
     }
 
     desired += pad;
@@ -8026,8 +8041,8 @@ Int32 TextView::GetDesiredHeight(
                 layout->GetLineTop(mMaximum, &desired);
 
                 if (dr != NULL) {
-                    desired = Elastos::Core::Math::Max(desired, dr->mDrawableHeightLeft);
-                    desired = Elastos::Core::Math::Max(desired, dr->mDrawableHeightRight);
+                    desired = Math::Max(desired, dr->mDrawableHeightLeft);
+                    desired = Math::Max(desired, dr->mDrawableHeightRight);
                 }
 
                 desired += pad;
@@ -8036,7 +8051,7 @@ Int32 TextView::GetDesiredHeight(
         }
     }
     else {
-        desired = Elastos::Core::Math::Min(desired, mMaximum);
+        desired = Math::Min(desired, mMaximum);
     }
 
     if (mMinMode == LINES) {
@@ -8047,11 +8062,11 @@ Int32 TextView::GetDesiredHeight(
         }
     }
     else {
-        desired = Elastos::Core::Math::Max(desired, mMinimum);
+        desired = Math::Max(desired, mMinimum);
     }
 
     // Check against our minimum height
-    desired = Elastos::Core::Math::Max(desired, GetSuggestedMinimumHeight());
+    desired = Math::Max(desired, GetSuggestedMinimumHeight());
 
     return desired;
 }
@@ -8231,6 +8246,7 @@ Boolean TextView::BringTextIntoView()
             Elastos::Droid::Text::ALIGN_RIGHT : Elastos::Droid::Text::ALIGN_LEFT;
     }
 
+    using Elastos::Core::Math;
     if (a == Elastos::Droid::Text::ALIGN_CENTER) {
         /*
          * Keep centered if possible, or, if it is too wide to fit,
@@ -8240,8 +8256,8 @@ Boolean TextView::BringTextIntoView()
         Float fLeft, fRight;
         layout->GetLineLeft(line, &fLeft);
         layout->GetLineRight(line, &fRight);
-        Int32 left = (Int32)Elastos::Core::Math::Floor(fLeft);
-        Int32 right = (Int32)Elastos::Core::Math::Ceil(fRight);
+        Int32 left = (Int32)Math::Floor(fLeft);
+        Int32 right = (Int32)Math::Ceil(fRight);
 
         if (right - left < hspace) {
             scrollx = (right + left) / 2 - hspace / 2;
@@ -8258,13 +8274,13 @@ Boolean TextView::BringTextIntoView()
     else if (a == Elastos::Droid::Text::ALIGN_RIGHT) {
         Float lr;
         layout->GetLineRight(line, &lr);
-        Int32 right = (Int32) Elastos::Core::Math::Ceil(lr);
+        Int32 right = (Int32) Math::Ceil(lr);
         scrollx = right - hspace;
     }
     else { // a == Layout.Alignment.ALIGN_LEFT (will also be the default)
         Float ll;
         layout->GetLineLeft(line, &ll);
-        scrollx = (Int32) Elastos::Core::Math::Floor(ll);
+        scrollx = (Int32) Math::Floor(ll);
     }
 
     if (ht < vspace) {
@@ -8360,8 +8376,9 @@ CARAPI TextView::BringPointIntoView(
     Float lineLeft, lineRight;
     layout->GetLineLeft(line, &lineLeft);
     layout->GetLineRight(line, &lineRight);
-    Int32 left = (Int32) Elastos::Core::Math::Floor(lineLeft);
-    Int32 right = (Int32) Elastos::Core::Math::Ceil(lineRight);
+    using Elastos::Core::Math;
+    Int32 left = (Int32) Math::Floor(lineLeft);
+    Int32 right = (Int32) Math::Ceil(lineRight);
     Int32 ht, compoundPaddingLeft, compoundPaddingRight, extendedPaddingTop, extendedPaddingBottom;
     layout->GetHeight(&ht);
     GetCompoundPaddingLeft(&compoundPaddingLeft);
@@ -8373,7 +8390,7 @@ CARAPI TextView::BringPointIntoView(
 
     if (!mHorizontallyScrolling && right - left > hspace && right > x) {
         // If cursor has been clamped, make sure we don't scroll.
-        right = Elastos::Core::Math::Max(x, left + hspace);
+        right = Math::Max(x, left + hspace);
     }
 
     Int32 hslack = (bottom - top) / 2;
@@ -9108,6 +9125,7 @@ void TextView::HandleTextChanged(
 {
     AutoPtr<InputMethodState> ims = mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mInputMethodState;
 
+    using Elastos::Core::Math;
     if (ims == NULL || ims->mBatchEditNesting == 0) {
         UpdateAfterEdit();
     }
@@ -9118,8 +9136,8 @@ void TextView::HandleTextChanged(
             ims->mChangedEnd = start + before;
         }
         else {
-            ims->mChangedStart = Elastos::Core::Math::Min(ims->mChangedStart, start);
-            ims->mChangedEnd = Elastos::Core::Math::Max(ims->mChangedEnd, start + before - ims->mChangedDelta);
+            ims->mChangedStart = Math::Min(ims->mChangedStart, start);
+            ims->mChangedEnd = Math::Max(ims->mChangedEnd, start + before - ims->mChangedDelta);
         }
         ims->mChangedDelta += after-before;
     }
@@ -10521,15 +10539,16 @@ ECode TextView::GetOffsetForPosition(
 Float TextView::ConvertToLocalHorizontalCoordinate(
     /* [in] */ Float x)
 {
+    using Elastos::Core::Math;
     Int32 totalPaddingLeft;
     GetTotalPaddingLeft(&totalPaddingLeft);
     x -= totalPaddingLeft;
     // Clamp the position to inside of the view.
-    x = Elastos::Core::Math::Max(0.0f, x);
+    x = Math::Max(0.0f, x);
     Int32 width, scrollx, paddingRight;
     GetWidth(&width);
     GetTotalPaddingRight(&paddingRight);
-    x = Elastos::Core::Math::Min((Float)(width - paddingRight - 1.0), x);
+    x = Math::Min((Float)(width - paddingRight - 1.0), x);
     GetScrollX(&scrollx);
     x += scrollx;
     return x;
@@ -10538,15 +10557,16 @@ Float TextView::ConvertToLocalHorizontalCoordinate(
 Int32 TextView::GetLineAtCoordinate(
     /* [in] */ Float y)
 {
+    using Elastos::Core::Math;
     Int32 totalPaddingTop;
     GetTotalPaddingTop(&totalPaddingTop);
     y -= totalPaddingTop;
     // Clamp the position to inside of the view.
-    y = Elastos::Core::Math::Max(0.0f, y);
+    y = Math::Max(0.0f, y);
     Int32 height, scrolly, totalPaddingBottom;
     GetHeight(&height);
     GetTotalPaddingBottom(&totalPaddingBottom);
-    y = Elastos::Core::Math::Min((Float)(height - totalPaddingBottom - 1.0f), y);
+    y = Math::Min((Float)(height - totalPaddingBottom - 1.0f), y);
     GetScrollY(&scrolly);
     y += scrolly;
     AutoPtr<ILayout> layout;

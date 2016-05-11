@@ -44,7 +44,8 @@ LayerDrawable::ChildDrawable::ChildDrawable(
     orig->mDrawable->GetConstantState((IDrawableConstantState**)&state);
     if (res != NULL) {
         state->NewDrawable(res, (IDrawable**)&mDrawable);
-    } else {
+    }
+    else {
         state->NewDrawable((IDrawable**)&mDrawable);
     }
     mDrawable->SetCallback(owner);
@@ -733,7 +734,8 @@ ECode LayerDrawable::GetPadding(
     VALIDATE_NOT_NULL(isPadding);
     if (mLayerState->mPaddingMode == PADDING_MODE_NEST) {
         ComputeNestedPadding(padding);
-    } else {
+    }
+    else {
         ComputeStackedPadding(padding);
     }
 
@@ -779,10 +781,11 @@ void LayerDrawable::ComputeStackedPadding(
     for (Int32 i = 0; i < N; i++) {
         RefreshChildPadding(i, (*array)[i]);
 
-        padding->mLeft = Elastos::Core::Math::Max(padding->mLeft, (*mPaddingL)[i]);
-        padding->mTop = Elastos::Core::Math::Max(padding->mTop, (*mPaddingT)[i]);
-        padding->mRight = Elastos::Core::Math::Max(padding->mRight, (*mPaddingR)[i]);
-        padding->mBottom = Elastos::Core::Math::Max(padding->mBottom, (*mPaddingB)[i]);
+        using Elastos::Core::Math;
+        padding->mLeft = Math::Max(padding->mLeft, (*mPaddingL)[i]);
+        padding->mTop = Math::Max(padding->mTop, (*mPaddingT)[i]);
+        padding->mRight = Math::Max(padding->mRight, (*mPaddingR)[i]);
+        padding->mBottom = Math::Max(padding->mBottom, (*mPaddingB)[i]);
     }
 }
 
@@ -828,7 +831,8 @@ ECode LayerDrawable::SetHotspotBounds(
 
     if (mHotspotBounds == NULL) {
         CRect::New(left, top, right, bottom, (IRect**)&mHotspotBounds);
-    } else {
+    }
+    else {
         mHotspotBounds->Set(left, top, right, bottom);
     }
     return NOERROR;
@@ -839,7 +843,8 @@ ECode LayerDrawable::GetHotspotBounds(
 {
     if (mHotspotBounds != NULL) {
         outRect->Set(mHotspotBounds);
-    } else {
+    }
+    else {
         Drawable::GetHotspotBounds(outRect);
     }
     return NOERROR;
@@ -1119,10 +1124,10 @@ Boolean LayerDrawable::RefreshChildPadding(
     Boolean res;
     r->mDrawable->GetPadding(rect, &res);
     if (rect->mLeft != (*mPaddingL)[i] || rect->mTop != (*mPaddingT)[i] ||
-        rect->mRight != (*mPaddingT)[i] || rect->mBottom != (*mPaddingB)[i]) {
+            rect->mRight != (*mPaddingT)[i] || rect->mBottom != (*mPaddingB)[i]) {
         (*mPaddingL)[i] = rect->mLeft;
         (*mPaddingT)[i] = rect->mTop;
-        (*mPaddingT)[i] = rect->mRight;
+        (*mPaddingR)[i] = rect->mRight;
         (*mPaddingB)[i] = rect->mBottom;
         return TRUE;
     }
@@ -1173,13 +1178,10 @@ ECode LayerDrawable::Mutate()
 ECode LayerDrawable::SetLayoutDirection(
     /* [in] */ Int32 layoutDirection)
 {
-    Int32 dir = 0;
-    if ((GetLayoutDirection(&dir), dir) != layoutDirection) {
-        AutoPtr< ArrayOf<ChildDrawable*> > array = mLayerState->mChildren;
-        const Int32 N = mLayerState->mNum;
-        for (Int32 i = 0; i < N; i++) {
-            (*array)[i]->mDrawable->SetLayoutDirection(layoutDirection);
-        }
+    AutoPtr< ArrayOf<ChildDrawable*> > array = mLayerState->mChildren;
+    const Int32 N = mLayerState->mNum;
+    for (Int32 i = 0; i < N; i++) {
+        (*array)[i]->mDrawable->SetLayoutDirection(layoutDirection);
     }
     return Drawable::SetLayoutDirection(layoutDirection);
 }

@@ -19,8 +19,9 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-const Boolean DrawableContainer::DEFAULT_DITHER;
+const Boolean DrawableContainer::DEBUG;
 const String DrawableContainer::TAG("DrawableContainer");
+const Boolean DrawableContainer::DEFAULT_DITHER;
 
 CAR_INTERFACE_IMPL_2(DrawableContainer, Drawable, IDrawableContainer, IDrawableCallback)
 DrawableContainer::DrawableContainer()
@@ -100,7 +101,7 @@ ECode DrawableContainer::GetOpticalInsets(
 {
     VALIDATE_NOT_NULL(sets);
     if (mCurrDrawable != NULL) {
-        return ((Drawable*)mCurrDrawable.Get())->GetOpticalInsets(sets);
+        return mCurrDrawable->GetOpticalInsets(sets);
     }
 
     *sets = Insets::NONE;
@@ -689,7 +690,7 @@ ECode DrawableContainer::GetConstantState(
     VALIDATE_NOT_NULL(state);
     if (mDrawableContainerState->CanConstantState()) {
         GetChangingConfigurations(&mDrawableContainerState->mChangingConfigurations);
-        *state = IDrawableConstantState::Probe(mDrawableContainerState);
+        *state = (IDrawableConstantState*)mDrawableContainerState;
         REFCOUNT_ADD(*state);
         return NOERROR;
     }
@@ -975,7 +976,7 @@ ECode DrawableContainer::DrawableContainerState::CanApplyTheme(
             mDrawableFutures->Get(i, (IInterface**)&obj);
             if (obj != NULL) {
                 ConstantStateFuture* future = (ConstantStateFuture*)IObject::Probe(obj);
-                if (future->CanApplyTheme()) {
+                if (future != NULL && future->CanApplyTheme()) {
                     *can = TRUE;
                     return NOERROR;
                 }
@@ -1145,13 +1146,10 @@ Int32 DrawableContainer::DrawableContainerState::GetOpacity()
     mCheckedOpacity = TRUE;
 
     Int32 N = mNumChildren;
-    Int32 op;
+    Int32 op = IPixelFormat::TRANSPARENT;
     if (N > 0) {
-        Int32 opacity;
-        (*mDrawables)[0]->GetOpacity(&opacity);
-        op = opacity;
+        (*mDrawables)[0]->GetOpacity(&op);
     }
-    else op = IPixelFormat::TRANSPARENT;
     for (Int32 i = 1; i < N; i++) {
         Int32 opacity;
         (*mDrawables)[i]->GetOpacity(&opacity);

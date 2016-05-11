@@ -106,7 +106,7 @@ public:
 
     CARAPI SetErrorDrawable(
         /* [in] */ IDrawable* dr,
-        /* [in] */ ITextView*tv);
+        /* [in] */ ITextView* tv);
 
 private:
     CARAPI_(void) UpdateDrawablesLayoutDirection(
@@ -116,6 +116,10 @@ private:
         /* [in] */ Int32 layoutDirection);
 
 public:
+    static const Int32 DRAWABLE_NONE = -1;
+    static const Int32 DRAWABLE_RIGHT = 0;
+    static const Int32 DRAWABLE_LEFT = 1;
+
     AutoPtr<IRect> mCompoundRect;
 
     AutoPtr<IDrawable> mDrawableTop;
@@ -153,10 +157,6 @@ public:
 
     Int32 mDrawablePadding;
     Int32 mDrawableSaved;
-
-    static const Int32 DRAWABLE_NONE = -1;
-    static const Int32 DRAWABLE_RIGHT = 0;
-    static const Int32 DRAWABLE_LEFT = 1;
 };
 
 //==============================================================================
