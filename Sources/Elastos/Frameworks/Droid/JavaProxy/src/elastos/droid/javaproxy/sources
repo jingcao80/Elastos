@@ -87,6 +87,17 @@ SOURCES += CIRingtonePlayer.cpp
 SOURCES += CIAudioRoutesObserver.cpp
 SOURCES += CSpellCheckerSessionListenerNative.cpp
 SOURCES += CTextServicesSessionListenerNative.cpp
+SOURCES += CIGpsMeasurementsListenerNative.cpp
+SOURCES += CIGpsNavigationMessageListenerNative.cpp
+SOURCES += CIVolumeControllerNative.cpp
+SOURCES += CIVoiceInteractionSessionNative.cpp
+SOURCES += CIVoiceInteractorNative.cpp
+SOURCES += CIUiAutomationConnectionNative.cpp
+SOURCES += CIActivityContainerCallbackNative.cpp
+SOURCES += CINotificationListenerNative.cpp
+SOURCES += CIConditionProviderNative.cpp
+SOURCES += CIConditionListenerNative.cpp
+SOURCES += CIParcelFileDescriptorFactoryNative.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
