@@ -150,9 +150,8 @@ public:
     AutoPtr<BlurLayer> mBlurLayer;
     AutoPtr<WindowStateAnimator> mBlurWinAnimator;
 
-    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
     /** Application tokens that are exiting, but still on screen for animations. */
-    AppTokenList mExitingAppTokens;
+    AutoPtr<IArrayList> mExitingAppTokens;
 
     /** Detach this stack from its display when animation completes. */
     Boolean mDeferDetach;

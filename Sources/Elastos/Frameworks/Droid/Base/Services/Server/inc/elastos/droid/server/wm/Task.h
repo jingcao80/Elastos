@@ -34,8 +34,7 @@ public:
 
 public:
     AutoPtr<TaskStack> mStack;
-    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
-    AppTokenList mAppTokens;
+    AutoPtr<IArrayList> mAppTokens;
     Int32 mTaskId;
     Int32 mUserId;
     Boolean mDeferRemoval;

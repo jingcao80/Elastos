@@ -15,6 +15,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -38,6 +39,7 @@ TaskStack::TaskStack(
 {
     CRect::New((IRect**)&mTmpRect);
     CRect::New((IRect**)&mBounds);
+    CArrayList::New((IArrayList**)&mExitingAppTokens);
 }
 
 AutoPtr<DisplayContent> TaskStack::GetDisplayContent()
@@ -59,10 +61,13 @@ void TaskStack::ResizeWindows()
     AutoPtr<WindowList> resizingWindows = mService->mResizingWindows;
     List<AutoPtr<Task> >::ReverseIterator rit = mTasks.RBegin();
     for (; rit != mTasks.REnd(); ++rit) {
-        AppTokenList activities = (*rit)->mAppTokens;
-        AppTokenList::ReverseIterator activityRit = activities.RBegin();
-        for (; activityRit != activities.REnd(); ++activityRit) {
-            AutoPtr<WindowList> windows = (*activityRit)->mAllAppWindows;
+        AutoPtr<IArrayList> activities = (*rit)->mAppTokens;
+        Int32 size;
+        activities->GetSize(&size);
+        for (Int32 activityNdx = size - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> value;
+            activities->Get(activityNdx, (IInterface**)&value);
+            AutoPtr<WindowList> windows = ((AppWindowToken*)(IObject*)value.Get())->mAllAppWindows;
             Int32 N;
             windows->GetSize(&N);
             for (Int32 winNdx = N - 1; winNdx >= 0; --winNdx) {
@@ -126,10 +131,13 @@ Boolean TaskStack::IsAnimating()
 {
     List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
     for (; taskRit != mTasks.REnd(); ++taskRit) {
-        AppTokenList activities = (*taskRit)->mAppTokens;
-        AppTokenList::ReverseIterator activityRit = activities.RBegin();
-        for (; activityRit != activities.REnd(); ++activityRit) {
-            AutoPtr<WindowList> windows = (*activityRit)->mAllAppWindows;
+        AutoPtr<IArrayList> activities = (*taskRit)->mAppTokens;
+        Int32 size;
+        activities->GetSize(&size);
+        for (Int32 activityNdx = size - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> value;
+            activities->Get(activityNdx, (IInterface**)&value);
+            AutoPtr<WindowList> windows = ((AppWindowToken*)(IObject*)value.Get())->mAllAppWindows;
             Int32 N;
             windows->GetSize(&N);
             for (Int32 winNdx = N - 1; winNdx >= 0; --winNdx) {
@@ -231,10 +239,13 @@ void TaskStack::DetachDisplay()
     Boolean doAnotherLayoutPass = FALSE;
     List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
     for (; taskRit != mTasks.REnd(); ++taskRit) {
-        AppTokenList appWindowTokens = (*taskRit)->mAppTokens;
-        AppTokenList::ReverseIterator tokenRit = appWindowTokens.RBegin();
-        for (; tokenRit != appWindowTokens.REnd(); ++tokenRit) {
-            AutoPtr<WindowList> appWindows = (*tokenRit)->mAllAppWindows;
+        AutoPtr<IArrayList> appWindowTokens = (*taskRit)->mAppTokens;
+        Int32 size;
+        appWindowTokens->GetSize(&size);
+        for (Int32 appNdx = size - 1; appNdx >= 0; --appNdx) {
+            AutoPtr<IInterface> value;
+            appWindowTokens->Get(appNdx, (IInterface**)&value);
+            AutoPtr<WindowList> appWindows = ((AppWindowToken*)(IObject*)value.Get())->mAllAppWindows;
             Int32 N;
             appWindows->GetSize(&N);
             for (Int32 winNdx = N -1; winNdx >= 0; --winNdx) {

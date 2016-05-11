@@ -458,8 +458,6 @@ private:
     };
 
 public:
-    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
-
     CWindowManagerService();
 
     CAR_INTERFACE_DECL()

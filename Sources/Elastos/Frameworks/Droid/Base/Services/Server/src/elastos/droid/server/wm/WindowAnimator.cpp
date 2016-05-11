@@ -158,10 +158,13 @@ void WindowAnimator::UpdateAppWindowsLocked(
         List< AutoPtr<Task> >& tasks = stack->GetTasks();
         List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
         for (; taskRit != tasks.REnd(); ++taskRit) {
-            AppTokenList tokens = (*taskRit)->mAppTokens;
-            AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
-            for (; tokenRit != tokens.REnd(); ++tokenRit) {
-                AutoPtr<AppWindowAnimator> appAnimator = (*tokenRit)->mAppAnimator;
+            AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+            Int32 size;
+            tokens->GetSize(&size);
+            for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+                AutoPtr<IInterface> value;
+                tokens->Get(tokenNdx, (IInterface**)&value);
+                AutoPtr<AppWindowAnimator> appAnimator = ((AppWindowToken*)(IObject*)value.Get())->mAppAnimator;
                 Boolean wasAnimating = appAnimator->mAnimation != NULL
                         && appAnimator->mAnimation != AppWindowAnimator::sDummyAnimation;
                 if (appAnimator->StepAnimationLocked(mCurrentTime)) {
@@ -182,10 +185,13 @@ void WindowAnimator::UpdateAppWindowsLocked(
             }
         }
 
-        AppTokenList& exitingAppTokens = stack->mExitingAppTokens;
-        AppTokenList::Iterator tokenIt = exitingAppTokens.Begin();
-        for (; tokenIt != exitingAppTokens.End(); ++tokenIt) {
-            AutoPtr<AppWindowAnimator> appAnimator = (*tokenIt)->mAppAnimator;
+        AutoPtr<IArrayList> exitingAppTokens = stack->mExitingAppTokens;
+        Int32 NEAT;
+        exitingAppTokens->GetSize(&NEAT);
+        for (Int32 i = 0; i < NEAT; i++) {
+            AutoPtr<IInterface> value;
+            exitingAppTokens->Get(i, (IInterface**)&value);
+            AutoPtr<AppWindowAnimator> appAnimator = ((AppWindowToken*)(IObject*)value.Get())->mAppAnimator;
             Boolean wasAnimating = appAnimator->mAnimation != NULL
                     && appAnimator->mAnimation != AppWindowAnimator::sDummyAnimation;
             if (appAnimator->StepAnimationLocked(mCurrentTime)) {
@@ -538,10 +544,13 @@ void WindowAnimator::TestTokenMayBeDrawnLocked(
     List< AutoPtr<Task> >& tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
     List<AutoPtr<Task> >::Iterator it = tasks.Begin();
     for (; it != tasks.End(); ++it) {
-        AppTokenList tokens = (*it)->mAppTokens;
-        AppTokenList::Iterator tokenIt = tokens.Begin();
-        for (; tokenIt != tokens.End(); ++tokenIt) {
-            AutoPtr<AppWindowToken> wtoken = *tokenIt;
+        AutoPtr<IArrayList> tokens = (*it)->mAppTokens;
+        Int32 numTokens;
+        tokens->GetSize(&numTokens);
+        for (Int32 tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+            AutoPtr<IInterface> value;
+            tokens->Get(tokenNdx, (IInterface**)&value);
+            AutoPtr<AppWindowToken> wtoken = (AppWindowToken*)(IObject*)value.Get();
             AutoPtr<AppWindowAnimator> appAnimator = wtoken->mAppAnimator;
             Boolean allDrawn = wtoken->mAllDrawn;
             if (allDrawn != appAnimator->mAllDrawn) {

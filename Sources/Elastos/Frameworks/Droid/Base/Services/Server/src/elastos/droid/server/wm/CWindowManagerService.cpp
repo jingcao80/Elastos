@@ -1270,19 +1270,25 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
     // order of applications.
     AutoPtr<WindowState> pos;
 
-    AppTokenList::ReverseIterator tokenRit;
     List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
     List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
+    Int32 tokenNdx = -1;
     for (; taskRit != tasks.REnd(); ++taskRit) {
-        AppTokenList tokens = (*taskRit)->mAppTokens;
-        for (tokenRit = tokens.RBegin(); tokenRit != tokens.REnd(); ++tokenRit) {
-            AutoPtr<AppWindowToken> t = *tokenRit;
+        AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+        Int32 size;
+        tokens->GetSize(&size);
+        for (tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+            AutoPtr<IInterface> value;
+            tokens->Get(tokenNdx, (IInterface**)&value);
+            AutoPtr<AppWindowToken> t = (AppWindowToken*)(IObject*)value.Get();
             if (t == token) {
-                ++tokenRit;
-                if (tokenRit == tokens.REnd()) {
+                --tokenNdx;
+                if (tokenNdx < 0) {
                     ++taskRit;
                     if (taskRit != tasks.REnd()) {
-                        tokenRit = (*taskRit)->mAppTokens.RBegin();
+                        Int32 s;
+                        (*taskRit)->mAppTokens->GetSize(&s);
+                        tokenNdx = s - 1;
                     }
                 }
                 break;
@@ -1299,8 +1305,7 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
                 pos = To_WindowState(obj);
             }
         }
-
-        if (tokenRit != tokens.REnd()) {
+        if (tokenNdx >= 0) {
             // early exit
             break;
         }
@@ -1341,9 +1346,11 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
     // Continue looking down until we find the first
     // token that has windows on this display.
     for (; taskRit != tasks.REnd(); ++taskRit) {
-        AppTokenList tokens = (*taskRit)->mAppTokens;
-        for ( ; tokenRit != tokens.REnd(); ++tokenRit) {
-            AutoPtr<AppWindowToken> t = *tokenRit;
+        AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+        for ( ; tokenNdx >= 0; --tokenNdx) {
+            AutoPtr<IInterface> value;
+            tokens->Get(tokenNdx, (IInterface**)&value);
+            AutoPtr<AppWindowToken> t = (AppWindowToken*)(IObject*)value.Get();
             tokenWindowList = GetTokenWindowsOnDisplay(t, displayContent);
             Int32 NW;
             tokenWindowList->GetSize(&NW);
@@ -1354,7 +1361,7 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
                 break;
             }
         }
-        if (tokenRit != tokens.REnd()) {
+        if (tokenNdx >= 0) {
             // found
             break;
         }
@@ -4203,7 +4210,7 @@ void CWindowManagerService::ValidateAppTokens(
 
         List<AutoPtr<Task> >::ReverseIterator taskRit = localTasks.RBegin();
         for (; taskRit != localTasks.REnd() && t >= 0; ++taskRit, --t) {
-            AppTokenList localTokens = (*taskRit)->mAppTokens;
+            AutoPtr<IArrayList> localTokens = (*taskRit)->mAppTokens;
 
             obj = NULL;
             tasks->Get(t, (IInterface**)&obj);
@@ -4221,22 +4228,26 @@ void CWindowManagerService::ValidateAppTokens(
                 return;
             }
 
-            AppTokenList::ReverseIterator tokenRit = localTokens.RBegin();
+            Int32 tokenNdx;
+            Int32 size;
+            localTokens->GetSize(&size);
             List<AutoPtr<IApplicationToken> >::ReverseIterator appTokenRit = tokens.RBegin();
-            while (taskRit != localTasks.REnd() && appTokenRit!= tokens.REnd()) {
-                AutoPtr<AppWindowToken> atoken = *tokenRit;
+            for (tokenNdx = size - 1; tokenNdx >= 0 && appTokenRit!= tokens.REnd(); ) {
+                AutoPtr<IInterface> value;
+                localTokens->Get(tokenNdx, (IInterface**)&value);
+                AutoPtr<AppWindowToken> atoken = (AppWindowToken*)(IObject*)value.Get();
                 if (atoken->mRemoved) {
-                    ++tokenRit;
+                    --tokenNdx;
                     continue;
                 }
                 if (IBinder::Probe(*appTokenRit) != atoken->mToken) {
                     break;
                 }
-                ++tokenRit;
+                --tokenNdx;
                 ++appTokenRit;
             }
 
-            if (tokenRit != localTokens.REnd() || appTokenRit != tokens.REnd()) {
+            if (tokenNdx >= 0 || appTokenRit != tokens.REnd()) {
                 break;
             }
         }
@@ -4555,7 +4566,7 @@ ECode CWindowManagerService::SetAppGroupId(
             CreateTask(groupId, oldTask->mStack->mStackId, oldTask->mUserId, atoken, (Task**)&newTask);
         }
         else {
-            newTask->mAppTokens.PushBack(atoken);
+            newTask->mAppTokens->Add((IObject*)atoken);
         }
     }
     return NOERROR;
@@ -4615,10 +4626,14 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
     List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
     List<AutoPtr<Task> >::ReverseIterator rit = tasks.RBegin();
     for (; rit != tasks.REnd(); ++rit) {
-        AppTokenList tokens = (*rit)->mAppTokens;
-        AppTokenList::ReverseIterator firstTokenRit = tokens.RBegin();
-        for (; firstTokenRit != tokens.REnd(); ++firstTokenRit) {
-            AutoPtr<AppWindowToken> atoken = *firstTokenRit;
+        AutoPtr<IArrayList> tokens = (*rit)->mAppTokens;
+        Int32 size;
+        tokens->GetSize(&size);
+        Int32 firstToken = size - 1;
+        for (Int32 tokenNdx = firstToken; tokenNdx >= 0; --tokenNdx) {
+            AutoPtr<IInterface> value;
+            tokens->Get(tokenNdx, (IInterface**)&value);
+            AutoPtr<AppWindowToken> atoken = (AppWindowToken*)(IObject*)value.Get();
 
             if (DEBUG_APP_ORIENTATION) Slogger::V(TAG, "Checking app orientation: %p", atoken.Get());
 
@@ -4630,7 +4645,7 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
                 continue;
             }
 
-            if (firstTokenRit == tokens.RBegin()) {
+            if (tokenNdx == firstToken) {
                 // If we have hit a new Task, and the bottom
                 // of the previous group didn't explicitly say to use
                 // the orientation behind it, and the last app was
@@ -4651,7 +4666,7 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
                 continue;
             }
 
-            if (tokens.Begin() == tokens.End()) {
+            if (tokenNdx == 0) {
                 // Last token in this task.
                 lastOrientation = atoken->mRequestedOrientation;
             }
@@ -5879,7 +5894,7 @@ ECode CWindowManagerService::RemoveAppToken(
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) {
                     Slogger::V(TAG, "removeAppToken make exiting: %s", TO_CSTR(wtoken));
                 }
-                stack->mExitingAppTokens.PushBack(wtoken);
+                stack->mExitingAppTokens->Add((IObject*)wtoken);
                 wtoken->mDeferRemoval = TRUE;
             }
             else {
@@ -5995,10 +6010,14 @@ void CWindowManagerService::DumpAppTokensLocked()
         for (; tasksIt != tasks.End(); ++tasksIt) {
             AutoPtr<Task> task = *tasksIt;
             Slogger::V(TAG, "    Task #%d activities from bottom to top:", task->mTaskId);
-            AppTokenList tokens = task->mAppTokens;
-            AppTokenList::Iterator tokensIt = tokens.Begin();
-            for (; tokensIt != tokens.End(); ++tokensIt) {
-                Slogger::V(TAG, "      activity # : %s"/*, tokenNdx*/, TO_CSTR((*tokensIt)->mToken));
+            AutoPtr<IArrayList> tokens = task->mAppTokens;
+            Int32 numTokens;
+            tokens->GetSize(&numTokens);
+            for (Int32 tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                AutoPtr<IInterface> value;
+                tokens->Get(tokenNdx, (IInterface**)&value);
+                AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
+                Slogger::V(TAG, "      activity #%d: %s", tokenNdx, TO_CSTR(token->mToken));
             }
         }
     }
@@ -6052,10 +6071,13 @@ Int32 CWindowManagerService::FindAppWindowInsertionPointLocked(
         if (!found && task->mTaskId != taskId) {
             continue;
         }
-        AppTokenList tokens = task->mAppTokens;
-        AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
-        for (; tokenRit != tokens.REnd(); ++tokenRit) {
-            AutoPtr<AppWindowToken> wtoken = *tokenRit;
+        AutoPtr<IArrayList> tokens = task->mAppTokens;
+        Int32 size;
+        tokens->GetSize(&size);
+        for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+            AutoPtr<IInterface> value;
+            tokens->Get(tokenNdx, (IInterface**)&value);
+            AutoPtr<AppWindowToken> wtoken = (AppWindowToken*)(IObject*)value.Get();
             if (!found && wtoken.Get() == target) {
                 found = TRUE;
             }
@@ -6174,10 +6196,14 @@ Int32 CWindowManagerService::ReAddAppWindowsLocked(
 void CWindowManagerService::TmpRemoveTaskWindowsLocked(
     /* [in] */ Task* task)
 {
-    AppTokenList tokens = task->mAppTokens;
-    AppTokenList::ReverseIterator rit = tokens.RBegin();
-    for (; rit != tokens.REnd(); ++rit) {
-        TmpRemoveAppWindowsLocked(*rit);
+    AutoPtr<IArrayList> tokens = task->mAppTokens;
+    Int32 size;
+    tokens->GetSize(&size);
+    for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+        AutoPtr<IInterface> value;
+        tokens->Get(tokenNdx, (IInterface**)&value);
+        AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
+        TmpRemoveAppWindowsLocked(token);
     }
 }
 
@@ -6195,14 +6221,20 @@ void CWindowManagerService::MoveStackWindowsLocked(
     // Where to start adding?
     taskIt = tasks.Begin();
     for (; taskIt != tasks.End(); ++taskIt) {
-        AppTokenList tokens = (*taskIt)->mAppTokens;
-        if (tokens.Begin() == tokens.End()) {
+        AutoPtr<IArrayList> tokens = (*taskIt)->mAppTokens;
+        Int32 numTokens;
+        tokens->GetSize(&numTokens);
+        if (numTokens == 0) {
             continue;
         }
-        Int32 pos = FindAppWindowInsertionPointLocked(*(tokens.Begin()));
-        AppTokenList::Iterator tokenIt = tokens.Begin();
-        for (; tokenIt != tokens.End(); ++tokenIt) {
-            AutoPtr<AppWindowToken> wtoken = *tokenIt;
+        AutoPtr<IInterface> value;
+        tokens->Get(0, (IInterface**)&value);
+        AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
+        Int32 pos = FindAppWindowInsertionPointLocked(token);
+        for (Int32 tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+            value = NULL;
+            tokens->Get(tokenNdx, (IInterface**)&value);
+            AutoPtr<AppWindowToken> wtoken = (AppWindowToken*)(IObject*)value.Get();
             if (wtoken != NULL) {
                 Int32 newPos = ReAddAppWindowsLocked(displayContent, pos, wtoken);
                 if (newPos != pos) {
@@ -9985,10 +10017,13 @@ ECode CWindowManagerService::HandleAppFreezeTimeout()
             List< AutoPtr<Task> >& tasks = stack->GetTasks();
             List<AutoPtr<Task> >::ReverseIterator rit = tasks.RBegin();
             for (; rit != tasks.REnd(); ++rit) {
-                AppTokenList tokens = (*rit)->mAppTokens;
-                AppTokenList::ReverseIterator rit = tokens.RBegin();
-                for (; rit != tokens.REnd(); ++rit) {
-                    AutoPtr<AppWindowToken> tok = *rit;
+                AutoPtr<IArrayList> tokens = (*rit)->mAppTokens;
+                Int32 size;
+                tokens->GetSize(&size);
+                for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+                    AutoPtr<IInterface> value;
+                    tokens->Get(tokenNdx, (IInterface**)&value);
+                    AutoPtr<AppWindowToken> tok = (AppWindowToken*)(IObject*)value.Get();
                     if (tok->mAppAnimator->mFreezingScreen) {
                         Slogger::W(TAG, "Force clearing freeze: %p", tok.Get());
                         UnsetAppFreezingScreenLocked(tok, TRUE, TRUE);
@@ -10683,10 +10718,14 @@ void CWindowManagerService::RebuildAppWindowListLocked(
     List< AutoPtr<TaskStack> >& stacks = displayContent->GetStacks();
     List<AutoPtr<TaskStack> >::Iterator stackIt = stacks.Begin();
     for (; stackIt != stacks.End(); ++stackIt) {
-        AppTokenList& exitingAppTokens = (*stackIt)->mExitingAppTokens;
-        AppTokenList::Iterator tokenIt = exitingAppTokens.Begin();
-        for (; tokenIt != exitingAppTokens.End(); ++tokenIt) {
-            i = ReAddAppWindowsLocked(displayContent, i, *tokenIt);
+        AutoPtr<IArrayList> exitingAppTokens = (*stackIt)->mExitingAppTokens;
+        Int32 NT;
+        exitingAppTokens->GetSize(&NT);
+        for (Int32 j = 0; j < NT; j++) {
+            AutoPtr<IInterface> value;
+            exitingAppTokens->Get(j, (IInterface**)&value);
+            AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
+            i = ReAddAppWindowsLocked(displayContent, i, token);
         }
     }
 
@@ -10695,10 +10734,13 @@ void CWindowManagerService::RebuildAppWindowListLocked(
         List< AutoPtr<Task> >& tasks = (*stackIt)->GetTasks();
         List<AutoPtr<Task> >::Iterator taskIt = tasks.Begin();
         for (; taskIt != tasks.End(); ++taskIt) {
-            AppTokenList tokens = (*taskIt)->mAppTokens;
-            AppTokenList::Iterator tokenIt = tokens.Begin();
-            for (; tokenIt != tokens.End(); ++tokenIt) {
-                AutoPtr<AppWindowToken> wtoken = *tokenIt;
+            AutoPtr<IArrayList> tokens = (*taskIt)->mAppTokens;
+            Int32 numTokens;
+            tokens->GetSize(&numTokens);
+            for (Int32 tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
+                AutoPtr<IInterface> value;
+                tokens->Get(tokenNdx, (IInterface**)&value);
+                AutoPtr<AppWindowToken> wtoken = (AppWindowToken*)(IObject*)value.Get();
                 if (wtoken->mDeferRemoval) {
                     continue;
                 }
@@ -11532,10 +11574,13 @@ Int32 CWindowManagerService::HandleAnimatingStoppedAndTransitionLocked()
         List< AutoPtr<Task> >& tasks = (*rit)->GetTasks();
         List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
         for (; taskRit != tasks.REnd(); ++taskRit) {
-            AppTokenList tokens = (*taskRit)->mAppTokens;
-            AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
-            for (; tokenRit != tokens.REnd(); ++tokenRit) {
-                (*tokenRit)->mSendingToBottom = FALSE;
+            AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+            Int32 size;
+            tokens->GetSize(&size);
+            for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+                AutoPtr<IInterface> value;
+                tokens->Get(tokenNdx, (IInterface**)&value);
+                ((AppWindowToken*)(IObject*)value.Get())->mSendingToBottom = FALSE;
             }
         }
     }
@@ -11773,17 +11818,19 @@ void CWindowManagerService::UpdateAllDrawnLocked(
 {
     // See if any windows have been drawn, so they (and others
     // associated with them) can now be shown.
-    // begin from this
     List< AutoPtr<TaskStack> >& stacks = displayContent->GetStacks();
     List<AutoPtr<TaskStack> >::ReverseIterator rit = stacks.RBegin();
     for (; rit != stacks.REnd(); ++rit) {
         List<AutoPtr<Task> >& tasks = (*rit)->GetTasks();
         List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
         for (; taskRit != tasks.REnd(); ++taskRit) {
-            AppTokenList tokens = (*taskRit)->mAppTokens;
-            AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
-            for (; tokenRit != tokens.REnd(); tokenRit++) {
-                AutoPtr<AppWindowToken> wtoken = *tokenRit;
+            AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+            Int32 size;
+            tokens->GetSize(&size);
+            for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+                AutoPtr<IInterface> value;
+                tokens->Get(tokenNdx, (IInterface**)&value);
+                AutoPtr<AppWindowToken> wtoken = (AppWindowToken*)(IObject*)value.Get();
                 if (!wtoken->mAllDrawn) {
                     Int32 numInteresting = wtoken->mNumInterestingWindows;
                     if (numInteresting > 0 && wtoken->mNumDrawnWindows >= numInteresting) {
@@ -11840,10 +11887,13 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
         AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
-        AppTokenList& exitingAppTokens = taskStack->mExitingAppTokens;
-        AppTokenList::ReverseIterator tokenRit = exitingAppTokens.RBegin();
-        for (; tokenRit != exitingAppTokens.REnd(); ++tokenRit) {
-            (*tokenRit)->mHasVisible = FALSE;
+        AutoPtr<IArrayList> exitingAppTokens = taskStack->mExitingAppTokens;
+        Int32 size;
+        exitingAppTokens->GetSize(&size);
+        for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
+            AutoPtr<IInterface> value;
+            exitingAppTokens->Get(tokenNdx, (IInterface**)&value);
+            ((AppWindowToken*)(IObject*)value.Get())->mHasVisible = FALSE;
         }
     }
 
@@ -12322,10 +12372,13 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
         AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
-        AppTokenList& exitingAppTokens = taskStack->mExitingAppTokens;
-        AppTokenList::ReverseIterator appTokenRit = exitingAppTokens.RBegin();
-        while (appTokenRit != exitingAppTokens.REnd()) {
-            AutoPtr<AppWindowToken> token = *appTokenRit;
+        AutoPtr<IArrayList> exitingAppTokens = taskStack->mExitingAppTokens;
+        Int32 size;
+        exitingAppTokens->GetSize(&size);
+        for (i = size - 1; i >= 0; i--) {
+            AutoPtr<IInterface> value;
+            exitingAppTokens->Get(i, (IInterface**)&value);
+            AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
             if (!token->mHasVisible &&
                     (Find(mClosingApps.Begin(), mClosingApps.End(), token) == mClosingApps.End()) &&
                     !token->mDeferRemoval) {
@@ -12337,11 +12390,8 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT)
                     Slogger::V(TAG, "performLayout: App token exiting now removed%p", token.Get());
                 RemoveAppFromTaskLocked(token);
-                appTokenRit = List< AutoPtr<AppWindowToken> >::ReverseIterator(
-                        exitingAppTokens.Erase(--(appTokenRit.GetBase())));
-                continue;
+                exitingAppTokens->Remove(i);
             }
-            ++appTokenRit;
         }
     }
 
@@ -12905,10 +12955,14 @@ AutoPtr<WindowState> CWindowManagerService::FindFocusedWindowLocked(
             List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
             List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
             for (; taskRit != tasks.REnd(); ++taskRit) {
-                AppTokenList tokens = (*taskRit)->mAppTokens;
-                AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
-                for (; tokenRit != tokens.REnd(); ++tokenRit) {
-                    AutoPtr<AppWindowToken> token = *tokenRit;
+                AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+                Int32 size;
+                tokens->GetSize(&size);
+                Int32 tokenNdx = size - 1;
+                for ( ; tokenNdx >= 0; --tokenNdx) {
+                    AutoPtr<IInterface> value;
+                    tokens->Get(tokenNdx, (IInterface**)&value);
+                    AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
                     if (wtoken == token) {
                         break;
                     }
@@ -12919,7 +12973,7 @@ AutoPtr<WindowState> CWindowManagerService::FindFocusedWindowLocked(
                         return NULL;
                     }
                 }
-                if (tokenRit != tokens.REnd()) {
+                if (tokenNdx >= 0) {
                     // Early exit from loop, must have found the matching token.
                     break;
                 }

@@ -7,6 +7,7 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -23,8 +24,9 @@ Task::Task(
     , mUserId(userId)
     , mDeferRemoval(FALSE)
 {
+    CArrayList::New((IArrayList**)&mAppTokens);
     mTaskId = wtoken->mGroupId;
-    mAppTokens.PushBack(wtoken);
+    mAppTokens->Add((IObject*)wtoken);
 }
 
 AutoPtr<DisplayContent> Task::GetDisplayContent()
@@ -36,27 +38,28 @@ void Task::AddAppToken(
     /* [in] */ Int32 addPos,
     /* [in] */ AppWindowToken* wtoken)
 {
-    AppTokenList::Iterator it = mAppTokens.Begin();
-    for (Int32 pos = 0; it != mAppTokens.End() && pos < addPos; ++pos, ++it) {
-        if ((*it)->mRemoved) {
+    Int32 lastPos;
+    mAppTokens->GetSize(&lastPos);
+    for (Int32 pos = 0; pos < lastPos && pos < addPos; ++pos) {
+        AutoPtr<IInterface> value;
+        mAppTokens->Get(pos, (IInterface**)&value);
+        AutoPtr<AppWindowToken> token = (AppWindowToken*)(IObject*)value.Get();
+        if (token->mRemoved) {
             // addPos assumes removed tokens are actually gone.
             ++addPos;
         }
     }
-    mAppTokens.Insert(addPos, wtoken);
+    mAppTokens->Add(addPos, (IObject*)wtoken);
     mDeferRemoval = FALSE;
 }
 
 Boolean Task::RemoveAppToken(
     /* [in] */ AppWindowToken* wtoken)
 {
-    AppTokenList::Iterator it = Find(mAppTokens.Begin(), mAppTokens.End(), AutoPtr<AppWindowToken>(wtoken));
-    Boolean removed = FALSE;
-    if (it != mAppTokens.End()) {
-        mAppTokens.Erase(it);
-        removed = TRUE;
-    }
-    if (mAppTokens.Begin() == mAppTokens.End()) {
+    Boolean removed;
+    mAppTokens->Remove((IObject*)wtoken, &removed);
+    Int32 size;
+    if (mAppTokens->GetSize(&size), size == 0) {
         Slogger::D("WM_TASK_REMOVED", "%d removeAppToken: last token", mTaskId);
         // EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, taskId,
         //         "removeAppToken: last token");
