@@ -5,8 +5,9 @@
 #include "Elastos.CoreLibrary.Net.h"
 #include "Object.h"
 
-using Elastos::Utility::IMap;
+using Elastos::Core::Object;
 using Elastos::Net::ICookieHandler;
+using Elastos::Utility::IMap;
 
 namespace Elastos {
 namespace Net {

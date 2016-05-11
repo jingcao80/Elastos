@@ -5,6 +5,7 @@
 #include "libcore/net/UriCodec.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
 using Libcore::Net::UriCodec;
 
 namespace Elastos {

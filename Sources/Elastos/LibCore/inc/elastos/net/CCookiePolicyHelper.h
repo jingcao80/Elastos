@@ -5,6 +5,8 @@
 #include "_Elastos_Net_CCookiePolicyHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Net {
 

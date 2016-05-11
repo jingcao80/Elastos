@@ -4,6 +4,8 @@
 #include "Elastos.CoreLibrary.Net.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace Net {
 

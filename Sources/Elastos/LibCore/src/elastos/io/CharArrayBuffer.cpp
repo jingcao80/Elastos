@@ -38,7 +38,7 @@ ECode CharArrayBuffer::GetPrimitiveArray(
     /* [out] */ Handle64* arrayHandle)
 {
     VALIDATE_NOT_NULL(arrayHandle)
-    *arrayHandle = NULL;
+    *arrayHandle = 0;
 
     AutoPtr<ArrayOf<Char32> > arrayTmp;
     GetArray((ArrayOf<Char32>**)&arrayTmp);

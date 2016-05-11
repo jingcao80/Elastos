@@ -5,6 +5,7 @@
 #include "Singleton.h"
 #include "NetworkInterface.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::IEnumeration;
 
 namespace Elastos {

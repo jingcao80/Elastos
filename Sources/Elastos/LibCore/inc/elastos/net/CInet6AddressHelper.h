@@ -5,6 +5,8 @@
 #include "elastos/net/InetAddress.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Net {
 

@@ -8,6 +8,7 @@
 #include "core/Singleton.h"
 
 using Elastos::Core::Object;
+using Elastos::Core::Singleton;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 using Elastos::Utility::IMap;

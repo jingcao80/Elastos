@@ -4,6 +4,7 @@
 #include "_Elastos_Net_CProxy.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Net {

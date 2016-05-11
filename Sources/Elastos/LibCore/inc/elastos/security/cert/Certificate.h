@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "core/Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IObjectStreamField;
 using Elastos::IO::ISerializable;

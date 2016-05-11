@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.Net.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::IFile;
 using Elastos::Utility::IList;
 using Elastos::Utility::IEnumeration;

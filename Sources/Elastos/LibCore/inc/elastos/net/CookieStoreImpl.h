@@ -5,10 +5,10 @@
 #include "Elastos.CoreLibrary.Net.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+using Elastos::Net::IURI;
 using Elastos::Utility::IList;
 using Elastos::Utility::IMap;
-
-using Elastos::Net::IURI;
 
 DEFINE_OBJECT_HASH_FUNC_FOR(IURI)
 

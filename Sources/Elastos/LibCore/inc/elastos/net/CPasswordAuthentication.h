@@ -5,6 +5,7 @@
 #include "_Elastos_Net_CPasswordAuthentication.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Net {

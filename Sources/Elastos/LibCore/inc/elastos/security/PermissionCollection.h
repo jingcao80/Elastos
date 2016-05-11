@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::ISerializable;
 using Elastos::Utility::IEnumeration;
 

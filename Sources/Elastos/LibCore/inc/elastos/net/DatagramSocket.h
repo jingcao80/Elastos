@@ -6,13 +6,14 @@
 #include "Elastos.CoreLibrary.Net.h"
 #include "Object.h"
 
-using Elastos::Net::IInetAddress;
-using Elastos::Net::IDatagramSocket;
+using Elastos::Core::Object;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::Channels::IDatagramChannel;
-using Elastos::Net::IInetAddress;
 using Elastos::Net::IDatagramSocket;
+using Elastos::Net::IDatagramSocket;
+using Elastos::Net::IInetAddress;
+using Elastos::Net::IInetAddress;
 
 namespace Elastos {
 namespace Net {

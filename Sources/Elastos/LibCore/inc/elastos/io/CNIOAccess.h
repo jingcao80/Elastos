@@ -4,6 +4,8 @@
 #include "_Elastos_IO_CNIOAccess.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace IO {
 

@@ -3,9 +3,8 @@
 
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/Object.h>
-#include <elastos.h>
-#include <elquintet.h>
 
+using Elastos::Core::Object;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {

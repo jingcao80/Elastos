@@ -5,6 +5,8 @@
 #include "_Elastos_Net_CInet4AddressHelper.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Net {
 

@@ -4,6 +4,8 @@
 #include <_Elastos_Net_CResponseCacheHelper.h>
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Net {
 

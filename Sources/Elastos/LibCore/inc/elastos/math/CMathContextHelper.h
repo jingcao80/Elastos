@@ -4,6 +4,7 @@
 #include "_Elastos_Math_CMathContextHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Math {

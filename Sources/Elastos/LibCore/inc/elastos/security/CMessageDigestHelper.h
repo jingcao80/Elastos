@@ -5,6 +5,8 @@
 #include "_Elastos_Security_CMessageDigestHelper.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Security {
 

@@ -4,6 +4,7 @@
 #include "_Elastos_Math_CBigIntegerHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::IRandom;
 
 namespace Elastos {

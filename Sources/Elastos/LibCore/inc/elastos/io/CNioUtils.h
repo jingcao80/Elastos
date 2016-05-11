@@ -4,6 +4,7 @@
 #include "_Elastos_IO_CNioUtils.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::Channels::IFileChannel;
 
 namespace Elastos {
