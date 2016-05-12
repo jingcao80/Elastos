@@ -3,6 +3,7 @@
 #include <node.h>
 #include "eldef.h"
 #include "V8CarObject.h"
+#include "CarUtility.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -125,8 +126,19 @@ void Require(const FunctionCallbackInfo<Value>& args)
         return;
     }
 
-    // TODO: filling argumentlist
-    assert(0);
+    for (Int32 i = 0; i < paramCount - 1; i++) {
+        ec = CarUtility::FillingV8ObjectToArgumentList(
+                args[2 + i], (*paramInfos)[i], argumentlist);
+        if (FAILED(ec)) {
+            StringBuilder sb("Argument type mismathed! Argument index: ");
+            sb += i;
+            isolate->ThrowException(Exception::TypeError(
+                    v8::String::NewFromUtf8(isolate, sb.ToString().string())));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+
+    }
 
     AutoPtr<IInterface> carObject;
     ec = constructorInfo->CreateObject(argumentlist, (IInterface**)&carObject);

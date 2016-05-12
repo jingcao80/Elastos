@@ -11,6 +11,8 @@ struct CarValue
 {
     CarValue();
 
+    CarValue(const CarValue& value);
+
     ~CarValue();
 
     ParamIOAttribute mIOAttribute;

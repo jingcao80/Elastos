@@ -142,6 +142,8 @@ INCS_Release := \
 
 OBJS := \
 	$(obj).target/$(TARGET)/addon/main.o \
+	$(obj).target/$(TARGET)/bridge/CarCallbackProxy.o \
+	$(obj).target/$(TARGET)/bridge/CarUtility.o \
 	$(obj).target/$(TARGET)/bridge/CarValueV8.o \
 	$(obj).target/$(TARGET)/bridge/V8CarObject.o \
 #	$(obj).target/$(TARGET)/bindings_node/v8/V8Utilities.o \
