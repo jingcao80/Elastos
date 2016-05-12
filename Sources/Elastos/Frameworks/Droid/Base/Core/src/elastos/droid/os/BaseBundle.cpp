@@ -589,6 +589,7 @@ void BaseBundle::TypeWarning(
     sb.Append(", className: ");
     sb.Append(className);
     Logger::W(TAG, sb.ToString());
+    assert(0 && "Please fix error!");
 }
 
 AutoPtr<IInterface> BaseBundle::GetValue(
@@ -620,12 +621,14 @@ ECode BaseBundle::GetBoolean(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IBoolean::Probe(obj) == NULL) {
-        TypeWarning(key, String("Boolean"));
+
+    IBoolean* o = IBoolean::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IBoolean"));
         return NOERROR;
     }
 
-    return IBoolean::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetByte(
@@ -648,12 +651,14 @@ ECode BaseBundle::GetByte(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IByte::Probe(obj) == NULL) {
-        TypeWarning(key, String("Byte"));
+
+    IByte* o = IByte::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IByte"));
         return NOERROR;
     }
 
-    return IByte::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetChar(
@@ -676,12 +681,14 @@ ECode BaseBundle::GetChar(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IChar32::Probe(obj) == NULL) {
-        TypeWarning(key, String("Char32"));
+
+    IChar32* o = IChar32::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IChar32"));
         return NOERROR;
     }
 
-    return IChar32::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetInt16(
@@ -704,12 +711,14 @@ ECode BaseBundle::GetInt16(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IInteger16::Probe(obj) == NULL) {
-        TypeWarning(key, String("Int16"));
+
+    IInteger16* o = IInteger16::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IInteger16"));
         return NOERROR;
     }
 
-    return IInteger16::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetInt32(
@@ -732,12 +741,14 @@ ECode BaseBundle::GetInt32(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IInteger32::Probe(obj) == NULL) {
-        TypeWarning(key, String("Int32"));
+
+    IInteger32* o = IInteger32::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IInteger32"));
         return NOERROR;
     }
 
-    return IInteger32::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetInt64(
@@ -760,12 +771,14 @@ ECode BaseBundle::GetInt64(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IInteger64::Probe(obj) == NULL) {
-        TypeWarning(key, String("Int64"));
+
+    IInteger64* o = IInteger64::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IInteger64"));
         return NOERROR;
     }
 
-    return IInteger64::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetFloat(
@@ -788,12 +801,14 @@ ECode BaseBundle::GetFloat(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IFloat::Probe(obj) == NULL) {
-        TypeWarning(key, String("Float"));
+
+    IFloat* o = IFloat::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IFloat"));
         return NOERROR;
     }
 
-    return IFloat::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetDouble(
@@ -816,12 +831,14 @@ ECode BaseBundle::GetDouble(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (IDouble::Probe(obj) == NULL) {
-        TypeWarning(key, String("Double"));
+
+    IDouble* o = IDouble::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IDouble"));
         return NOERROR;
     }
 
-    return IDouble::Probe(obj)->GetValue(value);
+    return o->GetValue(value);
 }
 
 ECode BaseBundle::GetString(
@@ -836,12 +853,14 @@ ECode BaseBundle::GetString(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (ICharSequence::Probe(obj) == NULL) {
-        TypeWarning(key, String("String"));
+
+    ICharSequence* o = ICharSequence::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("ICharSequence"));
         return NOERROR;
     }
 
-    return ICharSequence::Probe(obj)->ToString(value);
+    return o->ToString(value);
 }
 
 ECode BaseBundle::GetString(
@@ -857,12 +876,14 @@ ECode BaseBundle::GetString(
     if (obj == NULL) {
         return NOERROR;
     }
-    if (ICharSequence::Probe(obj) == NULL) {
-        TypeWarning(key, String("String"));
+
+    ICharSequence* o = ICharSequence::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("ICharSequence"));
         return NOERROR;
     }
 
-    return ICharSequence::Probe(obj)->ToString(value);
+    return o->ToString(value);
 }
 
 ECode BaseBundle::GetCharSequence(
@@ -878,12 +899,13 @@ ECode BaseBundle::GetCharSequence(
         return NOERROR;
     }
 
-    if (ICharSequence::Probe(obj) == NULL) {
+    ICharSequence* o = ICharSequence::Probe(obj);
+    if (o == NULL) {
         TypeWarning(key, String("ICharSequence"));
         return NOERROR;
     }
 
-    *value = ICharSequence::Probe(obj);
+    *value = o;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -903,14 +925,15 @@ ECode BaseBundle::GetCharSequence(
         return NOERROR;
     }
 
-    if (ICharSequence::Probe(obj) == NULL) {
+    ICharSequence* o = ICharSequence::Probe(obj);
+    if (o == NULL) {
         TypeWarning(key, String("ICharSequence"));
         *value = defaultValue;
         REFCOUNT_ADD(*value);
         return NOERROR;
     }
 
-    *value = ICharSequence::Probe(obj);
+    *value = o;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -928,12 +951,13 @@ ECode BaseBundle::GetSerializable(
         return NOERROR;
     }
 
-    if (ISerializable::Probe(obj) == NULL) {
+    ISerializable* o = ISerializable::Probe(obj);
+    if (o == NULL) {
         TypeWarning(key, String("ISerializable"));
         return NOERROR;
     }
 
-    *value = ISerializable::Probe(obj);
+    *value = o;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -951,12 +975,13 @@ ECode BaseBundle::GetIntegerArrayList(
         return NOERROR;
     }
 
-    if (IArrayList::Probe(obj) == NULL) {
-        TypeWarning(key, String("IntegerArrayList"));
+    IArrayList* o = IArrayList::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IArrayList<IInteger32>"));
         return NOERROR;
     }
 
-    *value = IArrayList::Probe(obj);
+    *value = o;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -974,12 +999,13 @@ ECode BaseBundle::GetStringArrayList(
         return NOERROR;
     }
 
-    if (IArrayList::Probe(obj) == NULL) {
-        TypeWarning(key, String("StringArrayList"));
+    IArrayList* o = IArrayList::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IArrayList<ICharSequence>"));
         return NOERROR;
     }
 
-    *value = IArrayList::Probe(obj);
+    *value = o;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -997,12 +1023,13 @@ ECode BaseBundle::GetCharSequenceArrayList(
         return NOERROR;
     }
 
-    if (IArrayList::Probe(obj) == NULL) {
-        TypeWarning(key, String("CharSequenceArrayList"));
+    IArrayList* o = IArrayList::Probe(obj);
+    if (o == NULL) {
+        TypeWarning(key, String("IArrayList<ICharSequence>"));
         return NOERROR;
     }
 
-    *value = IArrayList::Probe(obj);
+    *value = o;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -1039,12 +1066,14 @@ ECode BaseBundle::GetBooleanArray(
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Boolean>::Alloc(length);
+        IBoolean* o;
         for (Int32 i = 0; i < length; ++i) {
             Boolean item = FALSE;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IBoolean::Probe(obj) != NULL) {
-                IBoolean::Probe(obj)->GetValue(&item);
+            o = IBoolean::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1063,18 +1092,20 @@ ECode BaseBundle::GetByteArray(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("ByteArray"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IByte>"));
     AutoPtr<ArrayOf<Byte> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Byte>::Alloc(length);
+        IByte* o;
         for (Int32 i = 0; i < length; ++i) {
             Byte item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IByte::Probe(obj) != NULL) {
-                IByte::Probe(obj)->GetValue(&item);
+            o = IByte::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1093,18 +1124,20 @@ ECode BaseBundle::GetInt16Array(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("Int16Array"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IInteger16>"));
     AutoPtr<ArrayOf<Int16> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Int16>::Alloc(length);
+        IInteger16* o;
         for (Int32 i = 0; i < length; ++i) {
             Int16 item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IInteger16::Probe(obj) != NULL) {
-                IInteger16::Probe(obj)->GetValue(&item);
+            o = IInteger16::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1123,18 +1156,20 @@ ECode BaseBundle::GetCharArray(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("Char32Array"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IChar32>"));
     AutoPtr<ArrayOf<Char32> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Char32>::Alloc(length);
+        IChar32* o;
         for (Int32 i = 0; i < length; ++i) {
             Char32 item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IChar32::Probe(obj) != NULL) {
-                IChar32::Probe(obj)->GetValue(&item);
+            o = IChar32::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1153,18 +1188,20 @@ ECode BaseBundle::GetInt32Array(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("Int32Array"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IInteger32>"));
     AutoPtr<ArrayOf<Int32> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Int32>::Alloc(length);
+        IInteger32* o;
         for (Int32 i = 0; i < length; ++i) {
             Int32 item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IInteger32::Probe(obj) != NULL) {
-                IInteger32::Probe(obj)->GetValue(&item);
+            o = IInteger32::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1183,18 +1220,20 @@ ECode BaseBundle::GetInt64Array(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("Int64Array"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IInteger64>"));
     AutoPtr<ArrayOf<Int64> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Int64>::Alloc(length);
+        IInteger64* o;
         for (Int32 i = 0; i < length; ++i) {
             Int64 item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IInteger64::Probe(obj) != NULL) {
-                IInteger64::Probe(obj)->GetValue(&item);
+            o = IInteger64::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1213,18 +1252,20 @@ ECode BaseBundle::GetFloatArray(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("FloatArray"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IFloat>"));
     AutoPtr<ArrayOf<Float> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Float>::Alloc(length);
+        IFloat* o;
         for (Int32 i = 0; i < length; ++i) {
             Float item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IFloat::Probe(obj) != NULL) {
-                IFloat::Probe(obj)->GetValue(&item);
+            o = IFloat::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1243,18 +1284,20 @@ ECode BaseBundle::GetDoubleArray(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("DoubleArray"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<IDouble>"));
     AutoPtr<ArrayOf<Double> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<Double>::Alloc(length);
+        IDouble* o;
         for (Int32 i = 0; i < length; ++i) {
             Double item = 0;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (IDouble::Probe(obj) != NULL) {
-                IDouble::Probe(obj)->GetValue(&item);
+            o = IDouble::Probe(obj);
+            if (o != NULL) {
+                o->GetValue(&item);
             }
             array->Set(i, item);
         }
@@ -1273,18 +1316,20 @@ ECode BaseBundle::GetStringArray(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("StringArray"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<ICharSequence>"));
     AutoPtr<ArrayOf<String> > array;
     if (arrObj) {
         Int32 length;
         arrObj->GetLength(&length);
         array = ArrayOf<String>::Alloc(length);
+        ICharSequence* csq;
         for (Int32 i = 0; i < length; ++i) {
             String item;
             AutoPtr<IInterface> obj;
             arrObj->Get(i, (IInterface**)&obj);
-            if (ICharSequence::Probe(obj) != NULL) {
-                ICharSequence::Probe(obj)->ToString(&item);
+            csq = ICharSequence::Probe(obj);
+            if (csq != NULL) {
+                csq->ToString(&item);
             }
             array->Set(i, item);
         }
@@ -1303,7 +1348,7 @@ ECode BaseBundle::GetCharSequenceArray(
     *value = NULL;
 
     Unparcel();
-    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("CharSequenceArray"));
+    AutoPtr<IArrayOf> arrObj = GetIArrayOf(key, String("IArrayOf<ICharSequence>"));
     AutoPtr<ArrayOf<ICharSequence*> > array;
     if (arrObj) {
         Int32 length;

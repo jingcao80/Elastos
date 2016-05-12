@@ -1,0 +1,12 @@
+TARGET_NAME= gesture
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE -DMTP_DEVICE -DMTP_HOST
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = EdgeGestureManager.cpp
+SOURCES += CEdgeGestureManager.cpp

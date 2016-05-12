@@ -1,0 +1,35 @@
+module
+{
+    interface Elastos.Droid.Service.Gesture.IIEdgeGestureHostCallback;
+    interface Elastos.Droid.Service.Gesture.IIEdgeGestureActivationListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Gesture {
+
+    /** @hide */
+    interface IIEdgeGestureService {
+
+        /** Register a listener for activation gestures. Initially the listener
+         * is set to listen for no position. Use updateEdgeGestureActivationListener() to
+         * bind the listener to positions.
+         * Use the returned IEdgeGestureHostCallback to manipulate the state after activation.
+         */
+        RegisterEdgeGestureActivationListener(
+            [in] IIEdgeGestureActivationListener* listener,
+            [out] IIEdgeGestureHostCallback** eghcb);
+
+        /** Update the listener to react on gestures in the given positions.
+         */
+        UpdateEdgeGestureActivationListener(
+            [in] IBinder* listener,
+            [in] Int32 positionFlags);
+    }
+
+
+    } // namespace Gesture
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

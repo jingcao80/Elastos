@@ -375,12 +375,17 @@ ECode CBundle::GetSize(
     Unparcel();
 
     AutoPtr<IInterface> o = GetValue(key);
-    if (ISize::Probe(o) == NULL) {
-        TypeWarning(key, String("Size"));
+    if (o == NULL) {
         return NOERROR;
     }
 
-    *value = ISize::Probe(o);
+    ISize* obj = ISize::Probe(o);
+    if (obj == NULL) {
+        TypeWarning(key, String("ISize"));
+        return NOERROR;
+    }
+
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -395,12 +400,17 @@ ECode CBundle::GetSizeF(
     Unparcel();
 
     AutoPtr<IInterface> o = GetValue(key);
-    if (ISizeF::Probe(o) == NULL) {
-        TypeWarning(key, String("SizeF"));
+    if (o == NULL) {
         return NOERROR;
     }
 
-    *value = ISizeF::Probe(o);
+    ISizeF* obj = ISizeF::Probe(o);
+    if (obj == NULL) {
+        TypeWarning(key, String("ISizeF"));
+        return NOERROR;
+    }
+
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -415,12 +425,17 @@ ECode CBundle::GetBundle(
     Unparcel();
 
     AutoPtr<IInterface> o = GetValue(key);
-    if (IBundle::Probe(o) == NULL) {
-        TypeWarning(key, String("Bundle"));
+    if (o == NULL) {
         return NOERROR;
     }
 
-    *value = IBundle::Probe(o);
+    IBundle* obj = IBundle::Probe(o);
+    if (obj == NULL) {
+        TypeWarning(key, String("IBundle"));
+        return NOERROR;
+    }
+
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -435,12 +450,17 @@ ECode CBundle::GetParcelable(
     Unparcel();
 
     AutoPtr<IInterface> o = GetValue(key);
-    if (IParcelable::Probe(o) == NULL) {
-        TypeWarning(key, String("Parcelable"));
+    if (o == NULL) {
         return NOERROR;
     }
 
-    *value = IParcelable::Probe(o);
+    IParcelable* obj = IParcelable::Probe(o);
+    if (obj == NULL) {
+        TypeWarning(key, String("IParcelable"));
+        return NOERROR;
+    }
+
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -460,7 +480,7 @@ ECode CBundle::GetParcelableArray(
 
     IArrayOf* arrayObj = IArrayOf::Probe(o);
     if (arrayObj == NULL) {
-        TypeWarning(key, String("Parcelable[]"));
+        TypeWarning(key, String("IArrayOf<IParcelable>"));
         return NOERROR;
     }
 
@@ -494,12 +514,13 @@ ECode CBundle::GetParcelableArrayList(
         return NOERROR;
     }
 
-    if (IArrayList::Probe(o) == NULL) {
-        TypeWarning(key, String("ArrayList"));
+    IArrayList* obj = IArrayList::Probe(o);
+    if (obj == NULL) {
+        TypeWarning(key, String("IArrayList"));
         return NOERROR;
     }
 
-    *value = IArrayList::Probe(o);
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -517,12 +538,13 @@ ECode CBundle::GetSparseParcelableArray(
         return NOERROR;
     }
 
-    if (ISparseArray::Probe(o) == NULL) {
-        TypeWarning(key, String("SparseArray"));
+    ISparseArray* obj = ISparseArray::Probe(o);
+    if (obj == NULL) {
+        TypeWarning(key, String("ISparseArray"));
         return NOERROR;
     }
 
-    *value = ISparseArray::Probe(o);
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -540,12 +562,13 @@ ECode CBundle::GetBinder(
         return NOERROR;
     }
 
-    if (IBinder::Probe(o) == NULL) {
+    IBinder* obj = IBinder::Probe(o);
+    if (obj == NULL) {
         TypeWarning(key, String("IBinder"));
         return NOERROR;
     }
 
-    *value = IBinder::Probe(o);
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }
@@ -563,12 +586,13 @@ ECode CBundle::GetIBinder(
         return NOERROR;
     }
 
-    if (IBinder::Probe(o) == NULL) {
+    IBinder* obj = IBinder::Probe(o);
+    if (obj == NULL) {
         TypeWarning(key, String("IBinder"));
         return NOERROR;
     }
 
-    *value = IBinder::Probe(o);
+    *value = obj;
     REFCOUNT_ADD(*value);
     return NOERROR;
 }

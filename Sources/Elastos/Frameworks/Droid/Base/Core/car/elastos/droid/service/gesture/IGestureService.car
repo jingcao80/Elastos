@@ -1,0 +1,25 @@
+module
+{
+    using Elastos.Droid.App.IPendingIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Gesture {
+
+    /** @hide */
+    interface IIGestureService {
+
+        SetOnLongPressPendingIntent(
+            [in] IPendingIntent* pendingIntent);
+
+        SetOnDoubleClickPendingIntent(
+            [in] IPendingIntent* pendingIntent);
+    }
+
+
+    } // namespace Gesture
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

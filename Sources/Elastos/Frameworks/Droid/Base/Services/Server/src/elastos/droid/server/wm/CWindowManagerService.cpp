@@ -8822,9 +8822,6 @@ Int32 CWindowManagerService::ComputeCompatSmallestWidth(
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_180, tmpDm, unrotDw, unrotDh);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_270, tmpDm, unrotDh, unrotDw);
     Slogger::I(TAG, " ======== ComputeCompatSmallestWidth: sw:%d", sw);
-    if (sw == 318) {
-        assert(0 && "TODO");
-    }
     return sw;
 }
 

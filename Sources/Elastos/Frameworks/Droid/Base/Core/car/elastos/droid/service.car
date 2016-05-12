@@ -54,6 +54,12 @@ module
     merge("service/wallpaper/WallpaperService.car");
     merge("service/wallpaper/WallpaperSettingsActivity.car");
 
+    //merge("service/Gesture/EdgeGestureManager.car");
+    //merge("service/Gesture/IEdgeGestureActivationListener.car");
+    //merge("service/Gesture/IEdgeGestureHostCallback.car");
+    //merge("service/Gesture/IEdgeGestureService.car");
+    //merge("service/Gesture/IGestureService.car");
+
     interface Elastos.Droid.App.IActivity;
     interface Elastos.Droid.App.IListActivity;
     interface Elastos.Droid.App.INotification;
@@ -511,4 +517,14 @@ module
     } // namespace Service
     } // namepsace Droid
     } // namespace Elastos
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Server {
+    // namespace Gesture {
+
+    // }  // namespace Gesture
+    // }  // namespace Server
+    // }  // namespace Droid
+    // }  // namespace Elastos
 }
