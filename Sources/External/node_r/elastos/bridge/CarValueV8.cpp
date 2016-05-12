@@ -23,6 +23,37 @@ CarValue::CarValue()
     mCLSID.mUunm = mUUnm;
 }
 
+CarValue::CarValue(const CarValue& value)
+{
+    mCLSID.mUunm = mUUnm;
+
+    mIOAttribute = value.mIOAttribute;
+    mType = value.mType;
+    mByteValue = value.mByteValue;
+    mBooleanValue = value.mBooleanValue;
+    mInt16Value = value.mInt16Value;
+    mInt32Value = value.mInt32Value;
+    mInt64Value = value.mInt64Value;
+    mCharValue = value.mCharValue;
+    mFloatValue = value.mFloatValue;
+    mDoubleValue = value.mDoubleValue;
+    mStringValue = value.mStringValue;
+    mECodeValue = value.mECodeValue;
+    mEnumValue = value.mEnumValue;
+    mCarQuintet = value.mCarQuintet;
+    _CarQuintet_AddRef(mCarQuintet);
+    mElementType = value.mElementType;
+    mObjectValue = value.mObjectValue;
+    if (mType == CarDataType_EMuid) {
+        mIID = value.mIID;
+    }
+    else if (mType == CarDataType_EGuid) {
+        mCLSID.mClsid = value.mCLSID.mClsid;
+        strcpy(mCLSID.mUunm, value.mCLSID.mUunm);
+        mCLSID.mCarcode = value.mCLSID.mCarcode;
+    }
+}
+
 CarValue::~CarValue()
 {
     switch (mElementType) {
