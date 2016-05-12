@@ -260,7 +260,6 @@ CarCallbackObject* CarCallbackObject::S_CreateObject(
     CarCallbackObject* cbObject = new CarCallbackObject();
     cbObject->mInterface = itfProxy;
     cbObject->mMainThread = pthread_self();
-    // cbObject->mObject = _NPN_RetainObject(object);
     cbObject->mIsolate = v8::Isolate::GetCurrent();
     cbObject->mV8Object.Reset(cbObject->mIsolate, object);
 
