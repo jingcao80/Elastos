@@ -305,6 +305,10 @@ protected:
 
     CARAPI ComputeTime();
 
+protected:
+    CARAPI CloneImpl(
+        /* [in] */ IGregorianCalendar* object);
+
 private:
     CARAPI_(void) FullFieldsCalc();
 

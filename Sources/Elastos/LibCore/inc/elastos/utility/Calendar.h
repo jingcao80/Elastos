@@ -43,8 +43,8 @@ protected:
 
     static AutoPtr<ILocale> GetDefaultLocale();
 
-    CARAPI Clone(
-        /* [in] */ Calendar* clone);
+    CARAPI CloneImpl(
+        /* [in] */ ICalendar* clone);
 
 public:
 
@@ -520,9 +520,6 @@ public:
         /* [in] */ Int32 style,
         /* [in] */ ILocale* locale,
         /* [out] */ IMap** array);
-
-    virtual Clone(
-        /* [out] */ IInterface** cloned) = 0;
 
     CARAPI_(Int32) GetHashCode();
 

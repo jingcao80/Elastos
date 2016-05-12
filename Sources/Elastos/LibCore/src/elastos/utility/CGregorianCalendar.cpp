@@ -14,20 +14,6 @@ namespace Utility{
 
 const Int64 CGregorianCalendar::sDefaultGregorianCutover = -12219292800000ll;
 
-const Int32 CGregorianCalendar::sDaysInYear[12] =
-    { 0, 31, 59, 90, 120, 151, 181,212, 243, 273, 304, 334 };
-
-const Int32 CGregorianCalendar::sMaximums[17] =
-    { 1, 292278994, 11, 53, 6, 31, 366, 7, 6, 1, 11, 23,
-        59, 59, 999, 14 * 3600 * 1000, 7200000 };
-
-const Int32 CGregorianCalendar::sMinimums[17] =
-    { 0, 1, 0, 1, 0, 1, 1, 1, 1, 0,0, 0, 0, 0, 0, -13 * 3600 * 1000, 0 };
-
-const Int32 CGregorianCalendar::sLeastMaximums[17] =
-    { 1, 292269054, 11, 50, 3, 28, 355, 7, 3, 1, 11, 23,
-        59, 59, 999, 50400000, 1200000 };
-
 static AutoPtr<ArrayOf<Byte> > InitDaysInMonth()
 {
     AutoPtr<ArrayOf<Byte> > daysArray = ArrayOf<Byte>::Alloc(12);
@@ -47,6 +33,20 @@ static AutoPtr<ArrayOf<Byte> > InitDaysInMonth()
 }
 
 AutoPtr<ArrayOf<Byte> > CGregorianCalendar::sDaysInMonth = InitDaysInMonth();
+
+const Int32 CGregorianCalendar::sDaysInYear[12] =
+    { 0, 31, 59, 90, 120, 151, 181,212, 243, 273, 304, 334 };
+
+const Int32 CGregorianCalendar::sMaximums[17] =
+    { 1, 292278994, 11, 53, 6, 31, 366, 7, 6, 1, 11, 23,
+        59, 59, 999, 14 * 3600 * 1000, 7200000 };
+
+const Int32 CGregorianCalendar::sMinimums[17] =
+    { 0, 1, 0, 1, 0, 1, 1, 1, 1, 0,0, 0, 0, 0, 0, -13 * 3600 * 1000, 0 };
+
+const Int32 CGregorianCalendar::sLeastMaximums[17] =
+    { 1, 292269054, 11, 50, 3, 28, 355, 7, 3, 1, 11, 23,
+        59, 59, 999, 50400000, 1200000 };
 
 CAR_INTERFACE_IMPL(CGregorianCalendar, Calendar, IGregorianCalendar)
 
@@ -149,8 +149,6 @@ ECode CGregorianCalendar::constructor(
     /* [in] */ Boolean ignored)
 {
     AutoPtr<ITimeZone> tz = TimeZone::GetDefault();
-    Int32 zonevalue;
-    FAIL_RETURN(tz->GetRawOffset(&zonevalue));
     FAIL_RETURN(Calendar::constructor(tz));
     SetFirstDayOfWeek(SUNDAY);
     return SetMinimalDaysInFirstWeek(1);
@@ -1228,12 +1226,20 @@ Int32 CGregorianCalendar::GetFirstDayOfWeek()
 ECode CGregorianCalendar::Clone(
     /* [out] */ IInterface** cloned)
 {
-    AutoPtr<CGregorianCalendar> temp;
-    CGregorianCalendar::NewByFriend((CGregorianCalendar**)&temp);
-    FAIL_RETURN(Calendar::Clone(temp));
-    *cloned = (IGregorianCalendar*)temp;
+    VALIDATE_NOT_NULL(cloned)
+
+    AutoPtr<IGregorianCalendar> temp;
+    CGregorianCalendar::New((IGregorianCalendar**)&temp);
+    CloneImpl(temp);
+    *cloned = temp;
     REFCOUNT_ADD(*cloned);
     return NOERROR;
+}
+
+ECode CGregorianCalendar::CloneImpl(
+    /* [in] */ IGregorianCalendar* object)
+{
+    return Calendar::CloneImpl(ICalendar::Probe(object));
 }
 
 ECode CGregorianCalendar::ToString(

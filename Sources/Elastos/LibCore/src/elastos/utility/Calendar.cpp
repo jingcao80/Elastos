@@ -384,7 +384,7 @@ ECode Calendar::GetMinimalDaysInFirstWeek(
 }
 
 ECode Calendar::GetTime(
-     /* [out] */ IDate** ppDate)
+    /* [out] */ IDate** ppDate)
 {
     VALIDATE_NOT_NULL(ppDate);
     Int64 tim;
@@ -405,7 +405,7 @@ ECode Calendar::GetTimeInMillis(
 }
 
 ECode Calendar::GetTimeZone(
-     /* [out] */ ITimeZone** ppZone)
+    /* [out] */ ITimeZone** ppZone)
 {
     VALIDATE_NOT_NULL(ppZone);
     *ppZone = mZone;
@@ -427,7 +427,6 @@ ECode Calendar::IsLenient(
     *isLenient = mLenient;
     return NOERROR;
 }
-
 
 ECode Calendar::IsSet(
     /* [in] */ Int32 field,
@@ -543,7 +542,7 @@ ECode Calendar::SetTime(
 {
     VALIDATE_NOT_NULL(date);
 
-    Int64 time(0);
+    Int64 time = 0;
     date->GetTime(&time);
     SetTimeInMillis(time);
     return NOERROR;
@@ -628,6 +627,7 @@ ECode Calendar::GetDisplayNameArray(
     /* [out, callee] */ ArrayOf<String>** array)
 {
     VALIDATE_NOT_NULL(array);
+    *array = NULL;
 
     if (field < 0 || field >= ICalendar::FIELD_COUNT) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -639,29 +639,26 @@ ECode Calendar::GetDisplayNameArray(
     AutoPtr<IDateFormatSymbolsHelper> dfsh;
     FAIL_RETURN(CDateFormatSymbolsHelper::AcquireSingleton((IDateFormatSymbolsHelper**)&dfsh));
     dfsh->GetInstance(locale, (IDateFormatSymbols**)&dfs);
-    AutoPtr< ArrayOf<String> > result;
     switch (field) {
         case ICalendar::AM_PM:
-            dfs->GetAmPmStrings((ArrayOf<String>**)&result);
+            return dfs->GetAmPmStrings(array);
         case ICalendar::DAY_OF_WEEK:
             if (style == ICalendar::LONG) {
-                dfs->GetWeekdays((ArrayOf<String>**)&result);
+                return dfs->GetWeekdays(array);
             }
             else {
-                dfs->GetShortWeekdays((ArrayOf<String>**)&result);
+                return dfs->GetShortWeekdays(array);
             }
         case ICalendar::ERA:
-                dfs->GetEras((ArrayOf<String>**)&result);
+            return dfs->GetEras(array);
         case ICalendar::MONTH:
             if (style == ICalendar::LONG) {
-                dfs->GetMonths((ArrayOf<String>**)&result);
+                return dfs->GetMonths(array);
             }
             else {
-                dfs->GetShortMonths((ArrayOf<String>**)&result);
+                return dfs->GetShortMonths(array);
             }
     }
-    *array = result;
-    REFCOUNT_ADD(*array);
     return NOERROR;
 }
 
@@ -722,17 +719,16 @@ void Calendar::InsertValuesInMap(
     }
     for (Int32 i = 0; i < values.GetLength(); ++i) {
         if (!values[i].IsNullOrEmpty()) {
-            AutoPtr<IInteger32> ii = CoreUtils::Convert(i);
-            AutoPtr<ICharSequence> key = CoreUtils::Convert(values[i]);
-            CInteger32::New(i, (IInteger32**)&ii);
-            array->Put(key.Get(), ii.Get());
+            array->Put(CoreUtils::Convert(values[i]), CoreUtils::Convert(i));
         }
     }
 }
 
-ECode Calendar::Clone(
-    /* [in] */ Calendar* clone)
+ECode Calendar::CloneImpl(
+    /* [in] */ ICalendar* _clone)
 {
+    Calendar* clone = (Calendar*)_clone;
+
     clone->mFields = mFields->Clone();
     clone->mIsSet = mIsSet->Clone();
     AutoPtr<IInterface> cloneZone;

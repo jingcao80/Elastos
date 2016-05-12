@@ -414,7 +414,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::GetUnfocusedMonthDateColor(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = mFocusedMonthDateColor;
+    *result = mUnfocusedMonthDateColor;
     return NOERROR;
 }
 
@@ -960,9 +960,9 @@ void CalendarView::LegacyCalendarViewDelegate::OnScroll(
 
     // Figure out where we are
     Int32 h = 0, b = 0, pos = 0;
+    IAdapterView::Probe(view)->GetFirstVisiblePosition(&pos);
     child->GetHeight(&h);
     child->GetBottom(&b);
-    IAdapterView::Probe(view)->GetFirstVisiblePosition(&pos);
     Int64 currScroll = pos * h - b;
 
     // If we have moved since our last call update the direction
@@ -1082,9 +1082,9 @@ CAR_INTERFACE_IMPL(CalendarView::LegacyCalendarViewDelegate::ScrollStateRunnable
 
 CalendarView::LegacyCalendarViewDelegate::ScrollStateRunnable::ScrollStateRunnable(
     /* [in] */ LegacyCalendarViewDelegate* host)
-{
-    mHost = host;
-}
+    : mNewState(0)
+    , mHost(host)
+{}
 
 void CalendarView::LegacyCalendarViewDelegate::ScrollStateRunnable::DoScrollStateChange(
     /* [in] */ IAbsListView* view,
