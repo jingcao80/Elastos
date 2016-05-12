@@ -1159,7 +1159,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
         targetClass->GetName(&className);
         Slogger::E(TAG, "Error: Method [%s] with [%s] not found on target class %s",
             methodName.string(), signature.string(), className.string());
-        assert(0 && "TODO");
+        // assert(0 && "TODO");
     }
 
     return returnVal;

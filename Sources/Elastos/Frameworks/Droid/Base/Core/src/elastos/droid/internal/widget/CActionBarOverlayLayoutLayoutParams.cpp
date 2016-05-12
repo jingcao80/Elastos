@@ -1,12 +1,12 @@
 
-#include "elastos/droid/internal/widget/CActionBarOverlayLayout.h"
+#include "elastos/droid/internal/widget/CActionBarOverlayLayoutLayoutParams.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Widget {
 
-CAR_OBJECT_IMPL(CActionBarOverlayLayout)
+CAR_OBJECT_IMPL(CActionBarOverlayLayoutLayoutParams)
 
 } // namespace Widget
 } // namespace Internal

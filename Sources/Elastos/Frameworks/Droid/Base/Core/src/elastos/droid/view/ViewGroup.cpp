@@ -4465,13 +4465,14 @@ AutoPtr<IList> ViewGroup::BuildOrderedChildList()
         // insert ahead of any Views with greater Z
         Int32 insertIndex = i;
         while (insertIndex > 0) {
-            Float z;
             AutoPtr<IInterface> temp;
             mPreSortedChildren->Get(insertIndex - 1, (IInterface**)&temp);
+            Float z;
             VIEW_PROBE(temp)->GetZ(&z);
             if (z > currentZ) {
                 insertIndex--;
             }
+            else break;
         }
         mPreSortedChildren->Add(insertIndex, nextChild);
     }

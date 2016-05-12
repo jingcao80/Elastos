@@ -24,6 +24,15 @@ module
 
     /**
      * @Involve
+     *
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
+     */
+    interface IActionBarOverlayLayoutLayoutParams {
+    }
+
+    /**
+     * @Involve
      * extends Elastos.Droid.View.IView
      * extends Elastos.Droid.View.IViewGroup
      *

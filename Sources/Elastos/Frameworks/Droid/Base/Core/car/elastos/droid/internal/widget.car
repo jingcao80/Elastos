@@ -75,6 +75,7 @@ module
     interface Elastos.Droid.View.IViewBaseSavedState;
     interface Elastos.Droid.View.IViewOnTouchListener;
     interface Elastos.Droid.View.IViewGroupLayoutParams;
+    interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
     interface Elastos.Droid.Widget.IAbsListView;
     interface Elastos.Droid.Widget.IFrameLayout;
     interface Elastos.Droid.Widget.ILinearLayout;
@@ -695,6 +696,27 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CActionBarOverlayLayoutLayoutParams {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] IViewGroupLayoutParams* vglp);
+
+        constructor(
+            [in] IViewGroupMarginLayoutParams* vgmlp);
+
+        interface IViewGroupLayoutParams;
+        interface IViewGroupMarginLayoutParams;
+        interface IActionBarOverlayLayoutLayoutParams;
     }
 
     [local, deprecated]

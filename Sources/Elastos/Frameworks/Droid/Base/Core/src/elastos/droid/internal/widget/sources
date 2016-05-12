@@ -37,6 +37,7 @@ SOURCES += ActionBarContextView.cpp
 SOURCES += CActionBarContextView.cpp
 SOURCES += ActionBarOverlayLayout.cpp
 SOURCES += CActionBarOverlayLayout.cpp
+SOURCES += CActionBarOverlayLayoutLayoutParams.cpp
 SOURCES += ActionBarView.cpp
 SOURCES += CActionBarView.cpp
 SOURCES += AutoScrollHelper.cpp
