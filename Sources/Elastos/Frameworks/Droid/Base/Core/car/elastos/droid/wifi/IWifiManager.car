@@ -100,6 +100,9 @@ module
         IsDualBandSupported(
             [out] Boolean* result);
 
+        IsIbssSupported(
+            [out] Boolean* result);
+
         SaveConfiguration(
             [out] Boolean* result);
 

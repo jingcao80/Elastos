@@ -249,7 +249,7 @@ ECode CWifiSsid::IsHidden(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr< ArrayOf<Byte> > array;
+    AutoPtr<ArrayOf<Byte> > array;
     mOctets->ToByteArray((ArrayOf<Byte>**)&array);
     *result = IsArrayAllZeroes(array);
     return NOERROR;

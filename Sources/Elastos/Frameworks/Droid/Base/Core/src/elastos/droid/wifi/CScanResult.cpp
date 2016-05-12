@@ -3,8 +3,10 @@
 #include "elastos/droid/wifi/CScanResult.h"
 #include "elastos/droid/wifi/CScanResultHelper.h"
 #include "elastos/droid/wifi/CWifiSsid.h"
+#include "elastos/droid/wifi/CScanResultInformationElement.h"
 #include <elastos/core/StringBuffer.h>
 
+using Elastos::Droid::Wifi::CScanResultInformationElement;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuffer;
@@ -482,12 +484,45 @@ ECode CScanResult::ReadFromParcel(
     if (mWifiSsid != NULL) {
         IObject::Probe(mWifiSsid)->ToString(&mSSID);
     }
-    else mSSID = IWifiSsid::NONE;
+    else {
+        mSSID = IWifiSsid::NONE;
+    }
     source->ReadString(&mBSSID);
     source->ReadString(&mCapabilities);
     source->ReadInt32(&mLevel);
     source->ReadInt32(&mFrequency);
     source->ReadInt64(&mTimestamp);
+    source->ReadInt32(&mDistanceCm);
+    source->ReadInt32(&mDistanceSdCm);
+
+    source->ReadInt64(&mSeen);
+    source->ReadInt32(&mAutoJoinStatus);
+    Int32 untrusted = 0;
+    source->ReadInt32(&untrusted);
+    mUntrusted = untrusted == 1 ? TRUE : FALSE;
+    source->ReadInt32(&mNumConnection);
+    source->ReadInt32(&mNumUsage);
+    source->ReadInt32(&mNumIpConfigFailures);
+    source->ReadInt32(&mIsAutoJoinCandidate);
+
+    Int32 n = 0;
+    source->ReadInt32(&n);
+    if (n != 0) {
+        mInformationElements = ArrayOf<IScanResultInformationElement*>::Alloc(n);
+        for (Int32 i = 0; i < n; i++) {
+            CScanResultInformationElement::New(&((*mInformationElements)[i]));
+            Int32 id = 0;
+            source->ReadInt32(&id);
+            (*mInformationElements)[i]->SetId(id);
+
+            Int32 len = 0;
+            source->ReadInt32(&len);
+            AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(len);
+            assert(0 && "TODO");
+            // source->ReadByteArray(&bytes);
+            (*mInformationElements)[i]->SetBytes(bytes);
+        }
+    }
     return NOERROR;
 }
 

@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/internal/utility/CAsyncChannel.h"
 #include "elastos/droid/wifi/CWifiManager.h"
@@ -330,23 +331,17 @@ ECode CWifiManager::ServiceHandler::HandleMessage(
                 AutoPtr<IWpsResult> result = IWpsResult::Probe(obj);
                 String pin;
                 result->GetPin(&pin);
-                assert(0);
-                // TODO
-                // IWifiManagerWpsCallback::Probe(listener)->OnStartSuccess(pin);
+                IWifiManagerWpsCallback::Probe(listener)->OnStarted(pin);
 
                 //Listener needs to stay until completion or failure
                 AutoLock lock(sListenerMapLock);
-                assert(0);
-                // TODO
-                // sListenerMap[arg2] = listener;
+                sListenerMap->Put(arg2, listener);
             }
             break;
         }
         case IWifiManager::WPS_COMPLETED:
             if (listener != NULL) {
-                assert(0);
-                // TODO
-                // IWifiManagerWpsCallback::Probe(listener)->OnCompletion();
+                IWifiManagerWpsCallback::Probe(listener)->OnSucceeded();
             }
             break;
         case IWifiManager::WPS_FAILED:
@@ -354,9 +349,7 @@ ECode CWifiManager::ServiceHandler::HandleMessage(
             Int32 arg1;
             message->GetArg1(&arg1);
             if (listener != NULL) {
-                assert(0);
-                // TODO
-                // IWifiManagerWpsCallback::Probe(listener)->OnFailure(arg1);
+                IWifiManagerWpsCallback::Probe(listener)->OnFailed(arg1);
             }
             break;
         }
@@ -476,6 +469,9 @@ ECode CWifiManager::constructor(
     mContext = context;
     mService = service;
     Init();
+    AutoPtr<IInterface> p;
+    context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&p);
+    mAppOps = IAppOpsManager::Probe(p);
     return NOERROR;
 }
 
@@ -734,6 +730,21 @@ ECode CWifiManager::IsDualBandSupported(
     // }
 }
 
+ECode CWifiManager::IsIbssSupported(
+    /* [out] */ Boolean* supported)
+{
+    VALIDATE_NOT_NULL(supported);
+    // try {
+    ECode ec = mService->IsIbssSupported(supported);
+    if (FAILED(ec)) {
+        *supported = FALSE;
+    }
+    return NOERROR;
+    // } catch (RemoteException e) {
+    //     return false;
+    // }
+}
+
 ECode CWifiManager::GetDhcpInfo(
     /* [out] */ IDhcpInfo** info)
 {
@@ -754,6 +765,12 @@ ECode CWifiManager::SetWifiEnabled(
     /* [out] */ Boolean* succeeded)
 {
     VALIDATE_NOT_NULL(succeeded);
+    Int32 result = 0;
+    mAppOps->NoteOp(IAppOpsManager::OP_WIFI_CHANGE, &result);
+    if (result != IAppOpsManager::MODE_ALLOWED) {
+        *succeeded = FALSE;
+        return NOERROR;
+    }
     // try {
     ECode ec = mService->SetWifiEnabled(enabled, succeeded);
     if (FAILED(ec)) {

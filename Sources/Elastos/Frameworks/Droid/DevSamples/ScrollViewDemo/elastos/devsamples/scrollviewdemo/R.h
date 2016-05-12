@@ -5,13 +5,13 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Droid_DevSamples_ScrollViewDemo_R_H__
-#define __Elastos_Droid_DevSamples_ScrollViewDemo_R_H__
+#ifndef __Elastos_DevSamples_ScrollViewDemo_R_H__
+#define __Elastos_DevSamples_ScrollViewDemo_R_H__
+#include <elatypes.h>
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace ScrollViewDemo {
-class R {
+class ECO_PUBLIC R {
     public: class attr {
     };
     public: class drawable {
@@ -29,9 +29,6 @@ class R {
         public: static const int test8 = 0x7f02000b;
         public: static const int test9 = 0x7f02000c;
     };
-    public: class id {
-        public: static const int edit = 0x7f050000;
-    };
     public: class layout {
         public: static const int main = 0x7f030000;
     };
@@ -42,6 +39,5 @@ class R {
 };
 };
 };
-};
 
-#endif // __Elastos_Droid_DevSamples_ScrollViewDemo_R_H__
+#endif // __Elastos_DevSamples_ScrollViewDemo_R_H__

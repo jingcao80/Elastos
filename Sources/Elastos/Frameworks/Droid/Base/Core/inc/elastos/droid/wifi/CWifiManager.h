@@ -8,6 +8,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
+using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Os::IBinder;
@@ -363,6 +364,14 @@ public:
      * @hide
      */
     CARAPI IsDualBandSupported(
+        /* [out] */ Boolean* supported);
+
+    /**
+     * Check if the chipset supports IBSS (Adhoc) mode
+     * @return {@code true} if supported, {@code false} otherwise.
+     * @hide
+     */
+    CARAPI IsIbssSupported(
         /* [out] */ Boolean* supported);
 
     CARAPI GetDhcpInfo(
@@ -749,6 +758,7 @@ private:
     static Object sThreadRefLock;
     static Int32 sThreadRefCount;
     static AutoPtr<IHandlerThread> sHandlerThread;
+    AutoPtr<IAppOpsManager> mAppOps;
 
     /* TODO: deprecate synchronous API and open up the following API */
     static const Int32 BASE;

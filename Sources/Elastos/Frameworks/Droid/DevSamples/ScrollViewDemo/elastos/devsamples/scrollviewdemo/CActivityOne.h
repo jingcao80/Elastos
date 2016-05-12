@@ -1,9 +1,10 @@
 
-#ifndef __CACTIVITYONE_H__
-#define __CACTIVITYONE_H__
+#ifndef __Elastos_DevSamples_ScrollViewDemo_CACTIVITYONE_H__
+#define __Elastos_DevSamples_ScrollViewDemo_CACTIVITYONE_H__
 
+#include <Elastos.Droid.Widget.h>
 #include "elastos/droid/app/Activity.h"
-#include "_CActivityOne.h"
+#include "_Elastos_DevSamples_ScrollViewDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
@@ -12,31 +13,37 @@ using Elastos::Droid::Widget::IScrollView;
 using Elastos::Droid::Widget::IButton;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace ScrollViewDemo {
 
 class CActivityOne;
 
-class MyListener
-        : public IViewOnClickListener
-        , public ElRefBase
+CarClass(CActivityOne)
+    , public Activity
 {
 public:
-    CAR_INTERFACE_DECL()
+    class MyListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    MyListener(
-        /* [in] */ CActivityOne* host);
-    CARAPI OnClick(
-       /* [in] */ IView* v);
+        MyListener(
+            /* [in] */ CActivityOne* host);
 
-private:
-    CActivityOne* mHost;
+        CARAPI OnClick(
+            /* [in] */ IView* v);
 
-};
+    private:
+        CActivityOne* mHost;
+    };
 
-class CActivityOne : public Activity
-{
+public:
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor();
+
 protected:
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
@@ -57,6 +64,7 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
+private:
     AutoPtr<IScrollView> mScroll;
     AutoPtr<IButton> mButton;
 
@@ -65,7 +73,6 @@ private:
 
 } // namespace EditTextDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos
 
-#endif // __CACTIVITYONE_H__
+#endif // __Elastos_DevSamples_ScrollViewDemo_CACTIVITYONE_H__

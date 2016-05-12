@@ -1,54 +1,72 @@
-#include "elastos/droid/ext/frameworkdef.h"
+
 #include "CActivityOne.h"
 #include <stdio.h>
 #include "R.h"
 #include <elastos/utility/logging/Slogger.h>
-using Elastos::Utility::Logging::Slogger;
+
 using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace ScrollViewDemo {
 
-CAR_INTERFACE_IMPL(MyListener, IViewOnClickListener)
+//=======================================================================
+// CActivityOne::MyListener::
+//=======================================================================
+CAR_INTERFACE_IMPL(CActivityOne::MyListener, Object, IViewOnClickListener)
 
-MyListener::MyListener(
+CActivityOne::MyListener::MyListener(
     /* [in] */ CActivityOne* host)
+    : mHost(host)
 {
-    mHost = host;
 }
 
-ECode MyListener::OnClick(
+ECode CActivityOne::MyListener::OnClick(
    /* [in] */ IView* v)
 {
-    Slogger::D("jiazhenjiang", "............................The Button in ScrollView was Clicked");
+    Slogger::D("CActivityOne", "............................The Button in ScrollView was Clicked");
+
     Int32 height = 0;
-    mHost->mScroll->GetHeight(&height);
-Slogger::D("jiazhenjiang", "mScroll height = %d", height);
+    IView::Probe(mHost->mScroll)->GetHeight(&height);
+    Slogger::D("CActivityOne", "mScroll height = %d", height);
+
     Int32 count = 0, len = 0;
-    mHost->mScroll->GetChildCount(&count);
-Slogger::D("jiazhenjiang", "mScroll childlen count = %d", count);
-    for(Int32 i = 0; i < count; ++i) {
+    IViewGroup::Probe(mHost->mScroll)->GetChildCount(&count);
+    Slogger::D("CActivityOne", "mScroll childlen count = %d", count);
+
+    for (Int32 i = 0; i < count; ++i) {
         AutoPtr<IView> v;
-        mHost->mScroll->GetChildAt(i, (IView**)&v);
+        IViewGroup::Probe(mHost->mScroll)->GetChildAt(i, (IView**)&v);
         Int32 childlen = 0;
         v->GetHeight(&childlen);
         len += childlen;
-Slogger::D("jiazhenjiang", "childlen = %d, len = %d", childlen, len);
+        Slogger::D("CActivityOne", "childlen = %d, len = %d", childlen, len);
     }
     mHost->mScroll->Fling(2000);
     return NOERROR;
 }
 
+//=======================================================================
+// CActivityOne::
+//=======================================================================
+CAR_OBJECT_IMPL(CActivityOne)
+
+ECode CActivityOne::constructor()
+{
+    Slogger::D("CActivityOne", "CActivityOnefgfg::constructor");
+    return Activity::constructor();
+}
+
 ECode CActivityOne::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Slogger::D("CActivityOne", "CActivityOne::OnCreate");
     Activity::OnCreate(savedInstanceState);
-    Slogger::D("jiazhenjiang", "CActivityOne::OnCreate");
     SetContentView(R::layout::main);
-    AutoPtr<IView> v = FindViewById(R::id::edit);
-    AutoPtr<IEditText> mEdit = IEditText::Probe(v);
+    // AutoPtr<IView> v = FindViewById(R::id::view3);
+    // AutoPtr<IEditText> mEdit = IEditText::Probe(v);
 
     return NOERROR;
 }
@@ -99,5 +117,4 @@ ECode CActivityOne::OnActivityResult(
 
 } // namespace ScrollViewDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos

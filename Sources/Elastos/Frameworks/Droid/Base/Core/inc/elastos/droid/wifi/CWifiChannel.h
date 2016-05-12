@@ -58,14 +58,10 @@ public:
     /** implement Parcelable interface */
     //@Override
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* out,
-        /* [in] */ Int32 flags);
+        /* [in] */ IParcel* out);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
-
-    CARAPI WriteToParcel(
-        /* [in] */ IParcel* dest);
 
 public:
     /** implement Parcelable interface */

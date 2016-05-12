@@ -326,7 +326,6 @@ private:
     String mBSSID;
     AutoPtr<IWifiSsid> mWifiSsid;
     Int32 mNetworkId;
-    Boolean mHiddenSSID;
     /** Received Signal Strength Indicator */
     Int32 mRssi;
 

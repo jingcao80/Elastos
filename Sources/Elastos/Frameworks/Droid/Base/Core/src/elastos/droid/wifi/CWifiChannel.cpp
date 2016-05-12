@@ -111,24 +111,17 @@ ECode CWifiChannel::DescribeContents(
 /** implement Parcelable interface */
 //@Override
 ECode CWifiChannel::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* out)
 {
     out->WriteInt32(mFreqMHz);
     out->WriteInt32(mChannelNum);
-    return out->WriteInt32(mIsDFS ? 1 : 0);
+    out->WriteInt32(mIsDFS ? 1 : 0);
+    out->WriteInt32(mIbssAllowed ? 1 : 0);
+    return NOERROR;
 }
 
 ECode CWifiChannel::ReadFromParcel(
     /* [in] */ IParcel* source)
-{
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CWifiChannel::WriteToParcel(
-    /* [in] */ IParcel* dest)
 {
     assert(0);
     // TODO

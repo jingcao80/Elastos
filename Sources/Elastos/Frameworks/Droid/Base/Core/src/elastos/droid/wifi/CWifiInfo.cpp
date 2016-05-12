@@ -65,7 +65,6 @@ CAR_OBJECT_IMPL(CWifiInfo)
 
 CWifiInfo::CWifiInfo()
     : mNetworkId(0)
-    , mHiddenSSID(FALSE)
     , mRssi(0)
     , mLinkSpeed(0)
     , mMeteredHint(FALSE)
@@ -79,7 +78,6 @@ ECode CWifiInfo::constructor()
     mSupplicantState = SupplicantState_UNINITIALIZED;
     mRssi = INVALID_RSSI;
     mLinkSpeed = -1;
-    mHiddenSSID = FALSE;
     mFrequency = -1;
     return NOERROR;
 }
@@ -88,7 +86,6 @@ ECode CWifiInfo::constructor(
     /* [in] */ Boolean fake)
 {
     mNetworkId = (-1);
-    mHiddenSSID = (FALSE);
     mRssi = (-9999);
     mLinkSpeed = (-1);
     mMeteredHint = (FALSE);
@@ -458,8 +455,6 @@ ECode CWifiInfo::SetSSID(
     /* [in] */ IWifiSsid* wifiSsid)
 {
     mWifiSsid = wifiSsid;
-    // network is considered not hidden by default
-    mHiddenSSID = FALSE;
     return NOERROR;
 }
 
@@ -622,7 +617,7 @@ ECode CWifiInfo::GetIpAddress(
     VALIDATE_NOT_NULL(address);
 
     *address = 0;
-    if (IInet4Address::Probe(mIpAddress)) {
+    if (IInet4Address::Probe(mIpAddress) != NULL) {
         AutoPtr<INetworkUtils> utils;
         CNetworkUtils::AcquireSingleton((INetworkUtils**)&utils);
         utils->InetAddressToInt(IInet4Address::Probe(mIpAddress), address);
@@ -795,6 +790,13 @@ ECode CWifiInfo::ReadFromParcel(
     source->ReadString(&mBSSID);
     source->ReadString(&mMacAddress);
     source->ReadBoolean(&mMeteredHint);
+    source->ReadInt32(&mScore);
+    source->ReadDouble(&mTxSuccessRate);
+    source->ReadDouble(&mTxRetriesRate);
+    source->ReadDouble(&mTxBadRate);
+    source->ReadDouble(&mRxSuccessRate);
+    source->ReadInt32(&mBadRssiCount);
+    source->ReadInt32(&mLowRssiCount);
     source->ReadInt32(&mSupplicantState);
 
     return NOERROR;
