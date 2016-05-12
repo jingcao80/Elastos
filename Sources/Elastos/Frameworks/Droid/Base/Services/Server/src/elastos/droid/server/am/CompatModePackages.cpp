@@ -216,9 +216,6 @@ AutoPtr<ICompatibilityInfo> CompatModePackages::CompatibilityInfoForPackageLocke
     AutoPtr<ICompatibilityInfo> ci;
     CCompatibilityInfo::New(ai, layout, widthDp,
         (flags & COMPAT_FLAG_ENABLED) != 0, (ICompatibilityInfo**)&ci);
-    Slogger::I(TAG, "*********** AMS Configuration :%s", TO_CSTR(mService->mConfiguration));
-    Slogger::I(TAG, "*********** COMPAT FOR PKG ai.packageName :%s, CompatibilityInfo: %s",
-        pkgName.string(), TO_CSTR(ci));
     return ci;
 }
 

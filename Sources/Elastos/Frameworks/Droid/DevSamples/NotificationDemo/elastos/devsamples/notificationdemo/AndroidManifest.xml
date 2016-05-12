@@ -3,9 +3,11 @@
       package="Elastos.DevSamples.NotificationDemo"
       android:versionCode="1"
       android:versionName="1.0">
+
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="21" />
+
     <application android:icon="@null" android:label="@string/app_name">
 
         <activity android:name="Elastos.DevSamples.NotificationDemo.CActivityOne"

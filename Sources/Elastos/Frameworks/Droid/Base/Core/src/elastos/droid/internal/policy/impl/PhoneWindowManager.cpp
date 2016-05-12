@@ -386,11 +386,52 @@ ECode PhoneWindowManager::MyWakeGestureListener::OnWakeUp()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::MyWakeGestureListener--
+// PhoneWindowManager::MyEdgeGestureActivationListener
 //==============================================================================
 
+PhoneWindowManager::MyEdgeGestureActivationListener::MyEdgeGestureActivationListener(
+    /* [in] */ PhoneWindowManager* host)
+    : mHost(host)
+{
+}
+
+ECode PhoneWindowManager::MyEdgeGestureActivationListener::OnEdgeGestureActivation(
+    /* [in] */ Int32 touchX,
+    /* [in] */ Int32 touchY,
+    /* [in] */ IEdgeGesturePosition* position,
+    /* [in] */ Int32 flags)
+{
+    AutoPtr<IWindowState> target;
+
+    if (position == CEdgeGesturePosition::TOP) {
+        target = mHost->mStatusBar;
+    }
+    else if (position == CEdgeGesturePosition::BOTTOM  && mHost->mNavigationBarOnBottom) {
+        target = mHost->mNavigationBar;
+    }
+    else if (position == CEdgeGesturePosition::LEFT
+            && !mHost->mNavigationBarOnBottom && mHost->mNavigationBarLeftInLandscape) {
+        target = mHost->mNavigationBar;
+    }
+    else if (position == CEdgeGesturePosition::RIGHT && !mHost->mNavigationBarOnBottom) {
+        target = mHost->mNavigationBar;
+    }
+
+    if (target != NULL) {
+        mHost->RequestTransientBars(target);
+        Boolean bval;
+        DropEventsUntilLift(&bval);
+        mHost->mEdgeListenerActivated = TRUE;
+    }
+    else {
+        RestoreListenerState();
+    }
+    return NOERROR;
+}
+
+
 //==============================================================================
-//          ++ PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks++
+// PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks++
 //==============================================================================
 CAR_INTERFACE_IMPL(PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks, Object, ISystemGesturesPointerEventListenerCallbacks);
 
@@ -431,11 +472,7 @@ ECode PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks::OnDebug()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks--
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::WindowManagerDrawCallbackRunnable++
+// PhoneWindowManager::WindowManagerDrawCallbackRunnable++
 //==============================================================================
 
 PhoneWindowManager::WindowManagerDrawCallbackRunnable::WindowManagerDrawCallbackRunnable(
@@ -453,11 +490,7 @@ ECode PhoneWindowManager::WindowManagerDrawCallbackRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::WindowManagerDrawCallbackRunnable--
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::KeyguardDelegateCallbackShowListener++
+// PhoneWindowManager::KeyguardDelegateCallbackShowListener++
 //==============================================================================
 CAR_INTERFACE_IMPL(PhoneWindowManager::KeyguardDelegateCallbackShowListener, Object, IKeyguardServiceDelegateShowListener);
 
@@ -477,11 +510,7 @@ ECode PhoneWindowManager::KeyguardDelegateCallbackShowListener::OnShown(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::KeyguardDelegateCallbackShowListener--
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult++
+// PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult++
 //==============================================================================
 CAR_INTERFACE_IMPL(PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult, Object, IOnKeyguardExitResult);
 
@@ -507,11 +536,7 @@ ECode PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult::OnKeyguardExitRe
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult--
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::ClearHideNavigationFlagRunnable++
+// PhoneWindowManager::ClearHideNavigationFlagRunnable++
 //==============================================================================
 
 PhoneWindowManager::ClearHideNavigationFlagRunnable::ClearHideNavigationFlagRunnable(
@@ -534,10 +559,7 @@ ECode PhoneWindowManager::ClearHideNavigationFlagRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::ClearHideNavigationFlagRunnable--
-//==============================================================================
-//==============================================================================
-//          ++ PhoneWindowManager::RequestTransientBarsRunnable++
+// PhoneWindowManager::RequestTransientBarsRunnable++
 //==============================================================================
 
 PhoneWindowManager::RequestTransientBarsRunnable::RequestTransientBarsRunnable(
@@ -553,10 +575,7 @@ ECode PhoneWindowManager::RequestTransientBarsRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::RequestTransientBarsRunnable--
-//==============================================================================
-//==============================================================================
-//          ++ PhoneWindowManager::KeyguardDelegateKeyguardDone++
+// PhoneWindowManager::KeyguardDelegateKeyguardDone++
 //==============================================================================
 
 PhoneWindowManager::KeyguardDelegateKeyguardDone::KeyguardDelegateKeyguardDone(
@@ -572,10 +591,7 @@ ECode PhoneWindowManager::KeyguardDelegateKeyguardDone::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::KeyguardDelegateKeyguardDone--
-//==============================================================================
-//==============================================================================
-//          ++ PhoneWindowManager::KeyguardDelegateKeyguardDismiss++
+// PhoneWindowManager::KeyguardDelegateKeyguardDismiss++
 //==============================================================================
 
 PhoneWindowManager::KeyguardDelegateKeyguardDismiss::KeyguardDelegateKeyguardDismiss(
@@ -591,10 +607,7 @@ ECode PhoneWindowManager::KeyguardDelegateKeyguardDismiss::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::KeyguardDelegateKeyguardDismiss--
-//==============================================================================
-//==============================================================================
-//          ++ PhoneWindowManager::KeyguardDelegateActivityDrawn++
+// PhoneWindowManager::KeyguardDelegateActivityDrawn++
 //==============================================================================
 
 PhoneWindowManager::KeyguardDelegateActivityDrawn::KeyguardDelegateActivityDrawn(
@@ -610,11 +623,7 @@ ECode PhoneWindowManager::KeyguardDelegateActivityDrawn::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::KeyguardDelegateActivityDrawn--
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::SettingsObserver ++
+// PhoneWindowManager::SettingsObserver
 //==============================================================================
 
 PhoneWindowManager::SettingsObserver::SettingsObserver(
@@ -763,11 +772,7 @@ ECode PhoneWindowManager::SettingsObserver::Observe()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::SettingsObserver --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::MyOrientationListener ++
+// PhoneWindowManager::MyOrientationListener
 //==============================================================================
 
 PhoneWindowManager::MyOrientationListener::MyOrientationListener(
@@ -788,11 +793,7 @@ ECode PhoneWindowManager::MyOrientationListener::OnProposedRotationChanged(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::MyOrientationListener --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::HideNavInputEventReceiver ++
+// PhoneWindowManager::HideNavInputEventReceiver
 //==============================================================================
 
 ECode PhoneWindowManager::HideNavInputEventReceiver::constructor(
@@ -859,12 +860,7 @@ ECode PhoneWindowManager::HideNavInputEventReceiver::OnInputEvent(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::HideNavInputEventReceiver --
-//==============================================================================
-
-
-//==============================================================================
-//          ++ PhoneWindowManager::HideNavInputEventReceiverFactory ++
+// PhoneWindowManager::HideNavInputEventReceiverFactory
 //==============================================================================
 CAR_INTERFACE_IMPL(PhoneWindowManager::HideNavInputEventReceiverFactory, Object, IInputEventReceiverFactory)
 
@@ -888,11 +884,7 @@ ECode PhoneWindowManager::HideNavInputEventReceiverFactory::CreateInputEventRece
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::HideNavInputEventReceiverFactory --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::ScreenshotTimeoutRunnable ++
+// PhoneWindowManager::ScreenshotTimeoutRunnable
 //==============================================================================
 
 PhoneWindowManager::ScreenshotTimeoutRunnable::ScreenshotTimeoutRunnable(
@@ -912,11 +904,7 @@ ECode PhoneWindowManager::ScreenshotTimeoutRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::ScreenshotTimeoutRunnable --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::DockBroadReceiver ++
+// PhoneWindowManager::DockBroadReceiver
 //==============================================================================
 
 PhoneWindowManager::DockBroadReceiver::DockBroadReceiver(
@@ -953,7 +941,7 @@ ECode PhoneWindowManager::DockBroadReceiver::OnReceive(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::DreamBroadReceiver ++
+// PhoneWindowManager::DreamBroadReceiver
 //==============================================================================
 
 PhoneWindowManager::DreamBroadReceiver::DreamBroadReceiver(
@@ -980,7 +968,7 @@ ECode PhoneWindowManager::DreamBroadReceiver::OnReceive(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::MultiuserBroadReceiver ++
+// PhoneWindowManager::MultiuserBroadReceiver
 //==============================================================================
 
 PhoneWindowManager::MultiuserBroadReceiver::MultiuserBroadReceiver(
@@ -1016,7 +1004,7 @@ ECode PhoneWindowManager::MultiuserBroadReceiver::OnReceive(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::MultiuserBroadReceiver ++
+// PhoneWindowManager::MultiuserBroadReceiver
 //==============================================================================
 
 PhoneWindowManager::WifiDisplayReceiver::WifiDisplayReceiver(
@@ -1048,7 +1036,7 @@ ECode PhoneWindowManager::WifiDisplayReceiver::OnReceive(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::ScreenLockTimeoutRunnable ++
+// PhoneWindowManager::ScreenLockTimeoutRunnable
 //==============================================================================
 
 PhoneWindowManager::ScreenLockTimeoutRunnable::ScreenLockTimeoutRunnable(
@@ -1076,7 +1064,7 @@ void PhoneWindowManager::ScreenLockTimeoutRunnable::SetLockOptions(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::QuickBootPowerLongPressRunnable ++
+// PhoneWindowManager::QuickBootPowerLongPressRunnable
 //==============================================================================
 
 PhoneWindowManager::QuickBootPowerLongPressRunnable::QuickBootPowerLongPressRunnable(
@@ -1125,7 +1113,7 @@ ECode PhoneWindowManager::QuickBootPowerLongPressRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::PolicyHandler ++
+// PhoneWindowManager::PolicyHandler
 //==============================================================================
 
 PhoneWindowManager::PolicyHandler::PolicyHandler(
@@ -1204,11 +1192,7 @@ ECode PhoneWindowManager::PolicyHandler::HandleMessage(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::PolicyHandler --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::HDMIUEventObserver ++
+// PhoneWindowManager::HDMIUEventObserver
 //==============================================================================
 
 PhoneWindowManager::HDMIUEventObserver::HDMIUEventObserver(
@@ -1227,11 +1211,7 @@ ECode PhoneWindowManager::HDMIUEventObserver::OnUEvent(
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::HDMIUEventObserver --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::PowerLongPressRunnable ++
+// PhoneWindowManager::PowerLongPressRunnable
 //==============================================================================
 
 PhoneWindowManager::PowerLongPressRunnable::PowerLongPressRunnable(
@@ -1281,11 +1261,7 @@ ECode PhoneWindowManager::PowerLongPressRunnable::Run()
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::PowerLongPressRunnable --
-//==============================================================================
-
-//==============================================================================
-//          ++ PhoneWindowManager::ScreenshotRunnable ++
+// PhoneWindowManager::ScreenshotRunnable
 //==============================================================================
 
 PhoneWindowManager::ScreenshotRunnable::ScreenshotRunnable(
@@ -1301,7 +1277,7 @@ ECode PhoneWindowManager::ScreenshotRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::ScreenshotForLogRunnable ++
+// PhoneWindowManager::ScreenshotForLogRunnable
 //==============================================================================
 
 PhoneWindowManager::ScreenshotForLogRunnable::ScreenshotForLogRunnable(
@@ -1331,7 +1307,7 @@ ECode PhoneWindowManager::ScreenshotForLogRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::BackLongPressRunnable ++
+// PhoneWindowManager::BackLongPressRunnable
 //==============================================================================
 
 PhoneWindowManager::BackLongPressRunnable::BackLongPressRunnable(
@@ -1357,7 +1333,7 @@ ECode PhoneWindowManager::BackLongPressRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::HomeDoubleTapTimeoutRunnable++
+// PhoneWindowManager::HomeDoubleTapTimeoutRunnable++
 //==============================================================================
 
 PhoneWindowManager::HomeDoubleTapTimeoutRunnable::HomeDoubleTapTimeoutRunnable(
@@ -1376,7 +1352,7 @@ ECode PhoneWindowManager::HomeDoubleTapTimeoutRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::CollapsePanelsRunnable ++
+// PhoneWindowManager::CollapsePanelsRunnable
 //==============================================================================
 
 PhoneWindowManager::CollapsePanelsRunnable::CollapsePanelsRunnable(
@@ -1403,7 +1379,7 @@ ECode PhoneWindowManager::CollapsePanelsRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::ScreenshotHandler ++
+// PhoneWindowManager::ScreenshotHandler
 //==============================================================================
 
 PhoneWindowManager::ScreenshotHandler::ScreenshotHandler(
@@ -1427,7 +1403,7 @@ ECode PhoneWindowManager::ScreenshotHandler::HandleMessage(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::ScreenshotServiceConnection ++
+// PhoneWindowManager::ScreenshotServiceConnection
 //==============================================================================
 CAR_INTERFACE_IMPL(PhoneWindowManager::ScreenshotServiceConnection, Object, IServiceConnection)
 
@@ -1483,7 +1459,7 @@ ECode PhoneWindowManager::ScreenshotServiceConnection::OnServiceDisconnected(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::UpdateSettingRunnable ++
+// PhoneWindowManager::UpdateSettingRunnable
 //==============================================================================
 
 PhoneWindowManager::UpdateSettingRunnable::UpdateSettingRunnable(
@@ -1499,7 +1475,7 @@ ECode PhoneWindowManager::UpdateSettingRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::BootMsgDialog ++
+// PhoneWindowManager::BootMsgDialog
 //==============================================================================
 
 ECode PhoneWindowManager::BootMsgDialog::constructor(
@@ -1564,7 +1540,7 @@ ECode PhoneWindowManager::BootMsgDialog::DispatchPopulateAccessibilityEvent(
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::BootMsgRunnable ++
+// PhoneWindowManager::BootMsgRunnable
 //==============================================================================
 
 PhoneWindowManager::BootMsgRunnable::BootMsgRunnable(
@@ -1615,7 +1591,7 @@ ECode PhoneWindowManager::BootMsgRunnable::Run()
 }
 
 //==============================================================================
-//          ++ PhoneWindowManager::UpdateSystemUiVisibilityRunnable ++
+// PhoneWindowManager::UpdateSystemUiVisibilityRunnable
 //==============================================================================
 
 PhoneWindowManager::UpdateSystemUiVisibilityRunnable::UpdateSystemUiVisibilityRunnable(
@@ -1646,7 +1622,7 @@ EXCEPTION:
 }
 
 //==============================================================================
-//          -- PhoneWindowManager::UpdateSystemUiVisibilityRunnable --
+// PhoneWindowManager
 //==============================================================================
 CAR_INTERFACE_IMPL_2(PhoneWindowManager, Object, IWindowManagerPolicy, IPhoneWindowManager)
 
@@ -1881,6 +1857,9 @@ ECode PhoneWindowManager::constructor()
     mHomeDoubleTapTimeoutRunnable = new HomeDoubleTapTimeoutRunnable(this);
     mClearHideNavigationFlag = new ClearHideNavigationFlagRunnable(this);
     mRequestTransientNav = new RequestTransientBarsRunnable(this);
+    AutoPtr<MyEdgeGestureActivationListener> egal = new MyEdgeGestureActivationListener(this);
+    egal->constructor();
+    mEdgeGestureActivationListener = egal.Get();
     return NOERROR;
 }
 
@@ -1891,34 +1870,38 @@ ECode PhoneWindowManager::UpdateEdgeGestureListenerState()
         Boolean bval;
         flags = IEdgeServiceConstants::LONG_LIVING | IEdgeServiceConstants::UNRESTRICTED;
         if (mStatusBar != NULL && (mStatusBar->IsVisibleLw(&bval), !bval)) {
-            flags |= CEdgeGesturePosition::TOP->FLAG;
+            Int32 flag;
+            CEdgeGesturePosition::TOP->GetFlag(&flag);
+            flags |= flag;
         }
         if (mNavigationBar != NULL
             && (mNavigationBar->IsVisibleLw(&bval), !bval)
             && IsStatusBarKeyguard()) {
             if (mNavigationBarOnBottom) {
-                flags |= CEdgeGesturePosition::BOTTOM->FLAG;
+                Int32 flag;
+                CEdgeGesturePosition::BOTTOM->GetFlag(&flag);
+                flags |= flag;
             }
             else if (mNavigationBarLeftInLandscape) {
-                flags |= CEdgeGesturePosition::LEFT->FLAG;
+                Int32 flag;
+                CEdgeGesturePosition::LEFT->GetFlag(&flag);
+                flags |= flag;
             }
             else {
-                flags |= CEdgeGesturePosition::RIGHT->FLAG;
+                Int32 flag;
+                CEdgeGesturePosition::RIGHT->GetFlag(&flag);
+                flags |= flag;
             }
         }
     }
     if (mEdgeListenerActivated) {
-        Slogger::W(TAG, "TODO needs EdgeGestureManager");
-        assert(0 && "TODO");
-        // mEdgeGestureActivationListener->RestoreListenerState();
+        mEdgeGestureActivationListener->RestoreListenerState();
         mEdgeListenerActivated = FALSE;
     }
     if (flags != mLastEdgePositions) {
-        Slogger::W(TAG, "TODO needs EdgeGestureManager");
-        assert(0 && "TODO");
-        // mEdgeGestureManager->UpdateEdgeGestureActivationListener(
-        //     mEdgeGestureActivationListener, flags);
-        // mLastEdgePositions = flags;
+        mEdgeGestureManager->UpdateEdgeGestureActivationListener(
+             mEdgeGestureActivationListener, flags);
+        mLastEdgePositions = flags;
     }
     return NOERROR;
 }
@@ -7995,9 +7978,9 @@ ECode PhoneWindowManager::SystemReady()
     CKeyguardServiceDelegate::New(mContext, NULL, (IKeyguardServiceDelegate**)&mKeyguardDelegate);
     mKeyguardDelegate->OnSystemReady();
 
-    Logger::E(TAG, " =========TODO needs EdgeGestureManager!");
-    // mEdgeGestureManager = EdgeGestureManager.getInstance();
-    // mEdgeGestureManager.setEdgeGestureActivationListener(mEdgeGestureActivationListener);
+    mEdgeGestureManager = EdgeGestureManager::GetInstance();
+    Boolean bval;
+    mEdgeGestureManager->SetEdgeGestureActivationListener(mEdgeGestureActivationListener, &bval);
 
     ReadCameraLensCoverState();
     UpdateUiMode();

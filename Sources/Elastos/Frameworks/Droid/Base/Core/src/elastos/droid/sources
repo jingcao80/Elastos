@@ -51,6 +51,7 @@ ELASTOS_LIBS += server/server.lib
 ELASTOS_LIBS += server/backup/backup.lib
 ELASTOS_LIBS += server/net/net.lib
 ELASTOS_LIBS += service/dreams/dreams.lib
+ELASTOS_LIBS += service/gesture/gesture.lib
 ELASTOS_LIBS += service/fingerprint/fingerprint.lib
 ELASTOS_LIBS += service/persistentdata/persistentdata.lib
 ELASTOS_LIBS += service/restrictions/restrictions.lib

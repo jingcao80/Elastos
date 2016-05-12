@@ -377,7 +377,7 @@ ECode CResourcesManager::GetTopLevelResources(
     CResources::New(assets, dm, config, compatInfo, token, (IResources**)&r);
     if (iconsAttached) SetActivityIcons(r);
 
-    if (TRUE) {
+    if (FALSE) {
         AutoPtr<IConfiguration> c;
         r->GetConfiguration((IConfiguration**)&c);
         AutoPtr<ICompatibilityInfo> ci;

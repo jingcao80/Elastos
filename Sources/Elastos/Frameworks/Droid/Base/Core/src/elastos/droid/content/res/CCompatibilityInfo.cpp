@@ -29,7 +29,7 @@ namespace Content {
 namespace Res {
 
 static const String TAG("CCompatibilityInfo");
-static const Boolean DEBUG = TRUE;
+static const Boolean DEBUG = FALSE;
 
 //===============================================================
 // CCompatibilityInfo::Translator
@@ -715,23 +715,8 @@ ECode CCompatibilityInfo::constructor(
             compatFlags |= SCALING_REQUIRED;
 
             if (DEBUG) {
-                Logger::I(TAG, " >>> CCompatibilityInfo::constructor: %s, screenLayout:%08x, screenWidthDp:%d, forceCompat:%d",
-                    TO_CSTR(appInfo), screenLayout, screenWidthDp, forceCompat);
-                Logger::I(TAG, "     = CDisplayMetrics::DENSITY_DEVICE: %d", CDisplayMetrics::DENSITY_DEVICE);
-                Logger::I(TAG, "     = mRequiresSmallestWidthDp: %d", appInfoCls->mRequiresSmallestWidthDp);
-                Logger::I(TAG, "     = mCompatibleWidthLimitDp: %d", appInfoCls->mCompatibleWidthLimitDp);
-                Logger::I(TAG, "     = mLargestWidthLimitDp: %d", appInfoCls->mLargestWidthLimitDp);
-                Logger::I(TAG, "     = mFlags: %08x", appInfoCls->mFlags);
-                Logger::I(TAG, " <<< CCompatibilityInfo::constructor: mApplicationScale: %.2f, mApplicationInvertedScale: %.2f",
+                Logger::I(TAG, "CCompatibilityInfo::constructor: mApplicationScale: %.2f, mApplicationInvertedScale: %.2f",
                     mApplicationScale, mApplicationInvertedScale);
-            }
-
-            if (mApplicationScale > 1.0) {
-                Logger::I(TAG, " >>> ========= TODO delete this ========= <<<<");
-                mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
-                mApplicationScale = 1.0f;
-                mApplicationInvertedScale = 1.0f;
-                compatFlags &= ~SCALING_REQUIRED;
             }
         }
     }

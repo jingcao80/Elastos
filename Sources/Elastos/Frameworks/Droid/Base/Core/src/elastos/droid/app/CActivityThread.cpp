@@ -2209,6 +2209,7 @@ ECode CActivityThread::PerformLaunchActivity(
     component->GetClassName(&className);
     assert(!packageName.IsNull());
     assert(!className.IsNull());
+    className = LoadedPkg::GetElastosClassName(packageName, className);
 
     // for epk
     LoadedPkg* lp = (LoadedPkg*)r->mPackageInfo.Get();
@@ -2705,7 +2706,7 @@ ECode CActivityThread::HandleReceiver(
     //TODO: com.android.server.BootReceiver is declared in android system manifest xml file.
     // the package declared in the same xml file is "android"
     // so maybe we should change the package name in that xml file
-    String className = LoadedPkg::GetElastosClassName(rawClassName);
+    String className = LoadedPkg::GetElastosClassName(packageName, rawClassName);
     if (rawClassName.Equals("com.android.server.MasterClearReceiver")) {
         String path("/system/lib/Elastos.Droid.Server.eco");
         CPathClassLoader::New(path, NULL, (IClassLoader**)&cl);
@@ -2855,6 +2856,9 @@ ECode CActivityThread::HandleCreateBackupAgent(
             || data->mBackupMode == IApplicationThread::BACKUP_MODE_RESTORE_FULL)) {
         className = "Elastos.Droid.App.Backup.FullBackupAgent";
     }
+    else {
+        className = LoadedPkg::GetElastosClassName(packageName, className);
+    }
 
 //     try {
     AutoPtr<IBinder> binder;
@@ -2973,6 +2977,7 @@ ECode CActivityThread::HandleCreateService(
     IPackageItemInfo* pii = IPackageItemInfo::Probe(data->mInfo);
     pii->GetPackageName(&pkgName);
     pii->GetName(&className);
+    className = LoadedPkg::GetElastosClassName(pkgName, className);
 
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(data->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);

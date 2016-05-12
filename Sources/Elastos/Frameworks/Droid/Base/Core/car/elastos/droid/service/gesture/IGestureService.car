@@ -1,6 +1,6 @@
 module
 {
-    using Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.App.IPendingIntent;
 
     namespace Elastos {
     namespace Droid {

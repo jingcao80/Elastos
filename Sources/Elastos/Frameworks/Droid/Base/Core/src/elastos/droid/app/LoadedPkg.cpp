@@ -769,6 +769,7 @@ String LoadedPkg::GetModulePath(
 // }
 
 String LoadedPkg::GetElastosClassName(
+    /* [in] */ const String& packageName,
     /* [in] */ const String& className)
 {
     // String className(androidClassName);
@@ -778,14 +779,21 @@ String LoadedPkg::GetElastosClassName(
     //     className = Replace(className, "\\$", "");
     // }
 
-    HashMap<String, String> classNameMap;
-    classNameMap[String("android.opengl.")]               = String("Elastos.Droid.Opengl.C");
-    classNameMap[String("android.preference.")]           = String("Elastos.Droid.Preference.C");
-    classNameMap[String("com.android.internal.widget.")]  = String("Elastos.Droid.Internal.Widget.C");
-    classNameMap[String("com.android.server.")]           = String("Elastos.Droid.Server.C");
-
     Int32 lastIndex = className.LastIndexOf(".");
-    if (lastIndex != -1) {
+    if (lastIndex == 0) {
+        StringBuilder sb(packageName);
+        sb += className;
+        return sb.ToString();
+    }
+    else if (lastIndex != -1
+        && (className.StartWith("android.")
+            || className.StartWith("com.android."))) {
+        HashMap<String, String> classNameMap;
+        classNameMap[String("android.opengl.")]               = String("Elastos.Droid.Opengl.C");
+        classNameMap[String("android.preference.")]           = String("Elastos.Droid.Preference.C");
+        classNameMap[String("com.android.internal.widget.")]  = String("Elastos.Droid.Internal.Widget.C");
+        classNameMap[String("com.android.server.")]           = String("Elastos.Droid.Server.C");
+
         String ns = className.Substring(0, lastIndex + 1);
         HashMap<String, String>::Iterator it = classNameMap.Find(ns);
         if (it != classNameMap.End()) {

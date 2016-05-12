@@ -15,6 +15,7 @@
 #include "elastos/droid/internal/policy/impl/ShortcutManager.h"
 #include "elastos/droid/internal/policy/impl/WakeGestureListener.h"
 #include "elastos/droid/internal/policy/impl/WindowOrientationListener.h"
+#include "elastos/droid/service/gesture/EdgeGestureManager.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/os/UEventObserver.h"
@@ -48,6 +49,7 @@ using Elastos::Droid::Internal::Policy::Impl::Keyguard::IKeyguardServiceDelegate
 using Elastos::Droid::Internal::Policy::Impl::ShortcutManager;
 using Elastos::Droid::Internal::StatusBar::IIStatusBarService;
 using Elastos::Droid::Internal::Widget::IPointerLocationView;
+using Elastos::Droid::Internal::Utility::Gesture::IEdgeGesturePosition;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Media::IIAudioService;
 using Elastos::Droid::Os::Handler;
@@ -61,6 +63,9 @@ using Elastos::Droid::Os::UEventObserver;
 using Elastos::Droid::Os::IUEvent;
 using Elastos::Droid::Service::Dreams::IDreamManagerInternal;
 using Elastos::Droid::Service::Dreams::IIDreamManager;
+using Elastos::Droid::Service::Gesture::EdgeGestureManager;
+using Elastos::Droid::Service::Gesture::IEdgeGestureManager;
+using Elastos::Droid::Service::Gesture::IEdgeGestureActivationListener;
 using Elastos::Droid::Utility::SparseArray;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Animation::IAnimation;
@@ -465,6 +470,23 @@ protected:
 
         // @Override
         CARAPI Run();
+
+    protected:
+        PhoneWindowManager* mHost;
+    };
+
+    class MyEdgeGestureActivationListener
+        : public EdgeGestureManager::EdgeGestureActivationListener
+    {
+    public:
+        MyEdgeGestureActivationListener(
+            /* [in] */ PhoneWindowManager* host);
+
+        CARAPI OnEdgeGestureActivation(
+            /* [in] */ Int32 touchX,
+            /* [in] */ Int32 touchY,
+            /* [in] */ IEdgeGesturePosition* position,
+            /* [in] */ Int32 flags);
 
     protected:
         PhoneWindowManager* mHost;
@@ -1888,37 +1910,9 @@ private:
     AutoPtr<IRunnable> mClearHideNavigationFlag;
     AutoPtr<IRunnable> mRequestTransientNav;
 
-    //TODO needs EdgeGestureManager
-    //
-    // private EdgeGestureManager.EdgeGestureActivationListener mEdgeGestureActivationListener
-    //         = new EdgeGestureManager.EdgeGestureActivationListener() {
+    AutoPtr<IEdgeGestureActivationListener> mEdgeGestureActivationListener;
+    AutoPtr<IEdgeGestureManager> mEdgeGestureManager;
 
-    //     @Override
-    //     public void onEdgeGestureActivation(int touchX, int touchY,
-    //             EdgeGesturePosition position, int flags) {
-    //         WindowState target = null;
-
-    //         if (position == EdgeGesturePosition.TOP) {
-    //             target = mStatusBar;
-    //         } else if (position == EdgeGesturePosition.BOTTOM  && mNavigationBarOnBottom) {
-    //             target = mNavigationBar;
-    //         } else if (position == EdgeGesturePosition.LEFT
-    //                 && !mNavigationBarOnBottom && mNavigationBarLeftInLandscape) {
-    //             target = mNavigationBar;
-    //         } else if (position == EdgeGesturePosition.RIGHT && !mNavigationBarOnBottom) {
-    //             target = mNavigationBar;
-    //         }
-
-    //         if (target != null) {
-    //             requestTransientBars(target);
-    //             dropEventsUntilLift();
-    //             mEdgeListenerActivated = true;
-    //         } else {
-    //             restoreListenerState();
-    //         }
-    //     }
-    // };
-    // private EdgeGestureManager mEdgeGestureManager = null;
     Int32 mLastEdgePositions;// = 0;
     Boolean mEdgeListenerActivated;// = false;
     Boolean mUsingEdgeGestureServiceForGestures;// = false;

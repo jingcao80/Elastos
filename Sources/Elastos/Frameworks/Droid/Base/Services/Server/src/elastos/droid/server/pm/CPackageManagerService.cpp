@@ -17683,9 +17683,8 @@ ECode CPackageManagerService::SystemReady()
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
     Int32 value;
-    sGlobal->GetInt32(
-            resolver,
-            ISettingsGlobal::COMPATIBILITY_MODE, 1, &value);
+    sGlobal->GetInt32(resolver,
+        ISettingsGlobal::COMPATIBILITY_MODE, 1, &value);
     Boolean compatibilityModeEnabled = value == 1;
     PackageParser::SetCompatibilityModeEnabled(compatibilityModeEnabled);
     if (DEBUG_SETTINGS) {

@@ -1,14 +1,23 @@
 #include "elastos/droid/content/pm/ApplicationInfo.h"
+#include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::R;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::CResources;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Content {
 namespace Pm {
+
+static const String TAG("ApplicationInfo");
 
 CAR_INTERFACE_IMPL_2(ApplicationInfo, PackageItemInfo, IApplicationInfo, IParcelable)
 
@@ -262,6 +271,7 @@ ECode ApplicationInfo::LoadDescription(
 
 ECode ApplicationInfo::DisableCompatibilityMode()
 {
+    Logger::I(TAG, "==================DisableCompatibilityMode ========");
     mFlags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
             FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
             FLAG_SUPPORTS_SCREEN_DENSITIES | FLAG_SUPPORTS_XLARGE_SCREENS);
@@ -274,12 +284,9 @@ ECode ApplicationInfo::LoadDefaultIcon(
 {
     VALIDATE_NOT_NULL(icon);
 
-    if ((mFlags & FLAG_EXTERNAL_STORAGE) != 0
-            && IsPackageUnavailable(pm)) {
-        // return Resources.getSystem().getDrawable(
-        //         com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon);
-        assert(0);
-        return E_NOT_IMPLEMENTED;
+    if ((mFlags & FLAG_EXTERNAL_STORAGE) != 0 && IsPackageUnavailable(pm)) {
+        AutoPtr<IResources> res = CResources::GetSystem();
+        return res->GetDrawable(R::drawable::sym_app_on_sd_unavailable_icon, icon);
     }
     return pm->GetDefaultActivityIcon(icon);
 }

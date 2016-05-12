@@ -1262,6 +1262,8 @@ private:
         /* [in] */ Int32 flags,
         /* [in] */ PackageUserState* state);
 
+    CARAPI_(Int32) GetSDK_VERSION();
+
 public:
     /**
      * List of new permissions that have been added since 1.0.
@@ -1328,7 +1330,6 @@ private:
     Boolean mOnlyCoreApps;
     AutoPtr<IDisplayMetrics> mMetrics;
 
-    static const Int32 SDK_VERSION;
     static const AutoPtr< ArrayOf<String> > SDK_CODENAMES;
 
     static Int32 sParseError;

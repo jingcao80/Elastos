@@ -257,6 +257,7 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/media
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/wallpaper
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/dreams
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/gesture
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/fingerprint
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/persistentdata
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/restrictions

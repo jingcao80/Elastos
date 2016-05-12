@@ -1,10 +1,27 @@
 #include "elastos/droid/service/gesture/EdgeGestureManager.h"
+#include "elastos/droid/service/gesture/CEdgeGestureManager.h"
+#include "elastos/droid/service/gesture/CEdgeGestureActivationListenerDelegator.h"
+#include "elastos/droid/os/Looper.h"
+#include "elastos/droid/os/CHandler.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/internal/utility/gesture/CEdgeGesturePosition.h"
+#include <elastos/core/Thread.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Internal::Utility::Gesture::CEdgeGesturePosition;
+using Elastos::Core::AutoLock;
+using Elastos::Core::Thread;
+using Elastos::Core::IThread;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Service {
 namespace Gesture {
-
 
 //======================================================================
 // EdgeGestureManager::EdgeGestureActivationListener
@@ -15,17 +32,17 @@ CAR_INTERFACE_IMPL(EdgeGestureManager::EdgeGestureActivationListener, Object, IE
 EdgeGestureManager::EdgeGestureActivationListener::EdgeGestureActivationListener()
 {}
 
-ECode EdgeGestureManager::EdgeGestureActivationListener::constructor();
+ECode EdgeGestureManager::EdgeGestureActivationListener::constructor()
 {
     AutoPtr<ILooper> mainLooper = Looper::GetMainLooper();
     return constructor(mainLooper);
 }
 
 ECode EdgeGestureManager::EdgeGestureActivationListener::constructor(
-    /* [in] */ ILooper* looper);
+    /* [in] */ ILooper* looper)
 {
     CHandler::New(looper, (IHandler**)&mHandler);
-    return CEdgeGestureActivationListenerDelegator::New(this, (IEdgeGestureActivationListener**)&mDelegator);
+    return CEdgeGestureActivationListenerDelegator::New(this, (IIEdgeGestureActivationListener**)&mDelegator);
 }
 
 ECode EdgeGestureManager::EdgeGestureActivationListener::SetHostCallback(
@@ -77,12 +94,48 @@ ECode EdgeGestureManager::EdgeGestureActivationListener::RestoreListenerState()
     return NOERROR;
 }
 
+ECode EdgeGestureManager::EdgeGestureActivationListener::OnEdgeGestureActivationInner(
+    /* [in] */ Int32 touchX,
+    /* [in] */ Int32 touchY,
+    /* [in] */ Int32 positionIndex,
+    /* [in] */ Int32 flags)
+{
+    AutoPtr<IRunnable> runnable = new OnEdgeGestureActivationRunnable(
+        this, touchX, touchY, positionIndex, flags);
+    Boolean bval;
+    return mHandler->Post(runnable, &bval);
+}
+
+//======================================================================
+// EdgeGestureManager::EdgeGestureActivationListener::OnEdgeGestureActivationRunnable
+//======================================================================
+EdgeGestureManager::EdgeGestureActivationListener::OnEdgeGestureActivationRunnable::OnEdgeGestureActivationRunnable(
+    /* [in] */ EdgeGestureManager::EdgeGestureActivationListener* host,
+    /* [in] */ Int32 touchX,
+    /* [in] */ Int32 touchY,
+    /* [in] */ Int32 positionIndex,
+    /* [in] */ Int32 flags)
+    : mHost(host)
+    , mTouchX(touchX)
+    , mTouchY(touchY)
+    , mPositionIndex(positionIndex)
+    , mFlags(flags)
+{}
+
+ECode EdgeGestureManager::EdgeGestureActivationListener::OnEdgeGestureActivationRunnable::Run()
+{
+    AutoPtr<ArrayOf<IEdgeGesturePosition*> > values = CEdgeGesturePosition::Values();
+    return mHost->OnEdgeGestureActivation(mTouchX, mTouchY, (*values)[mPositionIndex], mFlags);
+}
+
 //======================================================================
 // EdgeGestureManager
 //======================================================================
 
 const String EdgeGestureManager::TAG("EdgeGestureManager");
 const Boolean EdgeGestureManager::DEBUG = FALSE;
+AutoPtr<IEdgeGestureManager> EdgeGestureManager::sInstance;
+Object EdgeGestureManager::sLock;
 
 CAR_INTERFACE_IMPL(EdgeGestureManager, Object, IEdgeGestureManager)
 
@@ -95,7 +148,7 @@ ECode EdgeGestureManager::constructor()
 }
 
 ECode EdgeGestureManager::constructor(
-    /* [in] */ IIEdgeGestureService ps)
+    /* [in] */ IIEdgeGestureService* ps)
 {
     mPs = ps;
     return NOERROR;
@@ -103,13 +156,12 @@ ECode EdgeGestureManager::constructor(
 
 AutoPtr<IEdgeGestureManager> EdgeGestureManager::GetInstance()
 {
-    synchronized(sLock) {
-        if (sInstance == NULL) {
-            AutoPtr<IInterface> obj = ServiceManager::GetService(String("edgegestureservice"));
-            IIEdgeGestureService* service = IIEdgeGestureService::Probe(obj);
-            CEdgeGestureManager::New(service, (IEdgeGestureManager**)&sInstance);
-        }
-        return sInstance;
+    AutoLock lock(sLock);
+    if (sInstance == NULL) {
+        AutoPtr<IInterface> obj = ServiceManager::GetService(String("edgegestureservice"));
+        IIEdgeGestureService* service = IIEdgeGestureService::Probe(obj);
+        CEdgeGestureManager::New((IEdgeGestureManager**)&sInstance);
+        ((CEdgeGestureManager*)sInstance.Get())->constructor(service);
     }
     return sInstance;
 }
@@ -130,6 +182,10 @@ ECode EdgeGestureManager::SetEdgeGestureActivationListener(
     *result = FALSE;
     if (DEBUG) {
         Slogger::D(TAG, "Set edge gesture activation listener");
+    }
+
+    if (mPs == NULL) {
+        return NOERROR;
     }
 
     EdgeGestureActivationListener* agal = (EdgeGestureActivationListener*)listener;
@@ -157,12 +213,16 @@ ECode EdgeGestureManager::UpdateEdgeGestureActivationListener(
     if (DEBUG) {
         Slogger::D(TAG, "Update edge gesture activation listener: 0x08x", positions);
     }
+    if (mPs == NULL) {
+        return NOERROR;
+    }
 
     EdgeGestureActivationListener* agal = (EdgeGestureActivationListener*)listener;
     ECode ec = mPs->UpdateEdgeGestureActivationListener(IBinder::Probe(agal->mDelegator), positions);
     if (FAILED(ec)) {
         Slogger::E(TAG, "Failed to update edge gesture activation listener: %08x", ec);
     }
+    return ec;
 }
 
 

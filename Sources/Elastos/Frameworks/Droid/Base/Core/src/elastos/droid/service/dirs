@@ -1,5 +1,6 @@
 DIRS += dreams
 DIRS += fingerprint
+DIRS += gesture
 DIRS += media
 DIRS += persistentdata
 DIRS += restrictions

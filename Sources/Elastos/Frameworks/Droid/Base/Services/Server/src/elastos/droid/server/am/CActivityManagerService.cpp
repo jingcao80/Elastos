@@ -14594,7 +14594,7 @@ ECode CActivityManagerService::SystemReady(
             if (mWaitingUpdate) {
                 return NOERROR;
             }
-            Slogger::I(TAG, " >> TODO SystemReady(): DeliverPreBootCompleted");
+
             AutoPtr<List<AutoPtr<IComponentName> > > doneReceivers = new List<AutoPtr<IComponentName> >();
             AutoPtr<IRunnable> runnable = new OnFinishCallback(this, doneReceivers.Get(), goingCallback);
             mWaitingUpdate = DeliverPreBootCompleted(runnable, doneReceivers, IUserHandle::USER_OWNER);

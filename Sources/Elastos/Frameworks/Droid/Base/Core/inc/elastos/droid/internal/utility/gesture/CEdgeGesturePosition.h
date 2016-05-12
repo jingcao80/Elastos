@@ -28,19 +28,31 @@ public:
         /* [in] */ Int32 index,
         /* [in] */ Int32 factor);
 
+    CARAPI GetIndex(
+        /* [out] */ Int32* index);
+
+    CARAPI GetFlag(
+        /* [out] */ Int32* flag);
+
+    CARAPI GetFactor(
+        /* [out] */ Int32* factor);
+
+    static AutoPtr<ArrayOf<IEdgeGesturePosition*> > Values();
+
 public:
-    Int32 INDEX;
-    Int32 FLAG;
+    const static AutoPtr<IEdgeGesturePosition> LEFT;
+    const static AutoPtr<IEdgeGesturePosition> BOTTOM;
+    const static AutoPtr<IEdgeGesturePosition> RIGHT;
+    const static AutoPtr<IEdgeGesturePosition> TOP;
+
+private:
+    Int32 mIndex;
+    Int32 mFlag;
     /**
      * This is 1 when the position is not at the axis (like {@link EdgeGesturePosition.RIGHT} is
      * at {@code Layout.getWidth()} not at {@code 0}).
      */
-    Int32 FACTOR;
-
-    const static AutoPtr<CEdgeGesturePosition> LEFT;
-    const static AutoPtr<CEdgeGesturePosition> BOTTOM;
-    const static AutoPtr<CEdgeGesturePosition> RIGHT;
-    const static AutoPtr<CEdgeGesturePosition> TOP;
+    Int32 mFactor;
 };
 
 } // namespace Gesture

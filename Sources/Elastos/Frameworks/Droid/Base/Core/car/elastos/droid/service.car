@@ -54,11 +54,11 @@ module
     merge("service/wallpaper/WallpaperService.car");
     merge("service/wallpaper/WallpaperSettingsActivity.car");
 
-    //merge("service/Gesture/EdgeGestureManager.car");
-    //merge("service/Gesture/IEdgeGestureActivationListener.car");
-    //merge("service/Gesture/IEdgeGestureHostCallback.car");
-    //merge("service/Gesture/IEdgeGestureService.car");
-    //merge("service/Gesture/IGestureService.car");
+    merge("service/gesture/EdgeGestureManager.car");
+    merge("service/gesture/IEdgeGestureActivationListener.car");
+    merge("service/gesture/IEdgeGestureHostCallback.car");
+    merge("service/gesture/IEdgeGestureService.car");
+    merge("service/gesture/IGestureService.car");
 
     interface Elastos.Droid.App.IActivity;
     interface Elastos.Droid.App.IListActivity;
@@ -518,13 +518,31 @@ module
     } // namepsace Droid
     } // namespace Elastos
 
-    // namespace Elastos {
-    // namespace Droid {
-    // namespace Server {
-    // namespace Gesture {
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Gesture {
 
-    // }  // namespace Gesture
-    // }  // namespace Server
-    // }  // namespace Droid
-    // }  // namespace Elastos
+    class CEdgeGestureManager {
+        constructor();
+
+        interface IEdgeGestureManager;
+    }
+
+    singleton class CEdgeGestureManagerHelper {
+        interface IEdgeGestureManagerHelper;
+    }
+
+    class CEdgeGestureActivationListenerDelegator {
+        constructor(
+            [in] IEdgeGestureActivationListener* weakHost);
+
+        interface IIEdgeGestureActivationListener;
+        interface IBinder;
+    }
+
+    }  // namespace Gesture
+    }  // namespace Service
+    }  // namespace Droid
+    }  // namespace Elastos
 }

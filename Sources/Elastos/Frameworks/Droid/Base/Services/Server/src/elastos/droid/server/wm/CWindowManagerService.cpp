@@ -740,7 +740,7 @@ const Boolean CWindowManagerService::DEBUG_WINDOW_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_TOKEN_MOVEMENT = FALSE;
 const Boolean CWindowManagerService::DEBUG_ORIENTATION = FALSE;
 const Boolean CWindowManagerService::DEBUG_APP_ORIENTATION = FALSE;
-const Boolean CWindowManagerService::DEBUG_CONFIGURATION = TRUE;
+const Boolean CWindowManagerService::DEBUG_CONFIGURATION = FALSE;
 const Boolean CWindowManagerService::DEBUG_APP_TRANSITIONS = FALSE;
 const Boolean CWindowManagerService::DEBUG_STARTING_WINDOW = FALSE;
 const Boolean CWindowManagerService::DEBUG_REORDER = FALSE;
@@ -8684,7 +8684,6 @@ void CWindowManagerService::AdjustDisplaySizeRanges(
     if (height > largeAppH) {
         displayInfo->SetLargestNominalAppHeight(height);
     }
-    Slogger::I(TAG, " >> ReduceConfigLayout: displayInfo:%s", TO_CSTR(displayInfo));
 }
 
 Int32 CWindowManagerService::ReduceConfigLayout(
@@ -8714,8 +8713,6 @@ Int32 CWindowManagerService::ReduceConfigLayout(
     CConfigurationHelper::AcquireSingleton((IConfigurationHelper**)&helper);
     Int32 result;
     helper->ReduceScreenLayout(curLayout, longSize, shortSize, &result);
-    Slogger::I(TAG, " >> ReduceConfigLayout curLayout:%d, rotation:%d, density:%.2f, dw-dh:(%d, %d), w-h:(%d, %d), result:%d",
-        curLayout, rotation, density, dw, dh, w, h, result);
     return result;
 }
 
@@ -8802,7 +8799,6 @@ Int32 CWindowManagerService::ComputeCompatSmallestWidth(
     /* [in] */ Int32 dw,
     /* [in] */ Int32 dh)
 {
-
     // TODO: Multidisplay: for now only use with default display.
     mTmpDisplayMetrics->SetTo(dm);
     AutoPtr<IDisplayMetrics> tmpDm = mTmpDisplayMetrics;
@@ -8816,21 +8812,17 @@ Int32 CWindowManagerService::ComputeCompatSmallestWidth(
         unrotDh = dh;
     }
 
-    Slogger::I(TAG, " ======== ComputeCompatSmallestWidth: rotated:%d, w-h:(%d, %d), dm:%s", rotated, unrotDw, unrotDh, TO_CSTR(dm));
     Int32 sw = ReduceCompatConfigWidthSize(0, ISurface::ROTATION_0, tmpDm, unrotDw, unrotDh);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_90, tmpDm, unrotDh, unrotDw);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_180, tmpDm, unrotDw, unrotDh);
     sw = ReduceCompatConfigWidthSize(sw, ISurface::ROTATION_270, tmpDm, unrotDh, unrotDw);
-    Slogger::I(TAG, " ======== ComputeCompatSmallestWidth: sw:%d", sw);
     return sw;
 }
 
 Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
     /* [in] */ IConfiguration* config)
 {
-    Slogger::I(TAG, " >>>>> ComputeScreenConfigurationLocked: config:%s", TO_CSTR(config));
     if (!mDisplayReady) {
-        Slogger::I(TAG, " <<<<< ComputeScreenConfigurationLocked: mDisplayReady not ready.");
         return FALSE;
     }
 
@@ -8846,8 +8838,6 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
             displayContent->mBaseDisplayWidth : displayContent->mBaseDisplayHeight;
     Int32 dw = realdw;
     Int32 dh = realdh;
-    Slogger::I(TAG, "  = displayContent->mBaseDisplayDensity:%d, realdw-realdh: (%d, %d)",
-        displayContent->mBaseDisplayDensity, dw, dh);
     if (mAltOrientation) {
         if (realdw > realdh) {
             // Turn landscape into portrait.
@@ -8869,12 +8859,11 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         config->SetOrientation((dw <= dh) ? IConfiguration::ORIENTATION_PORTRAIT :
                 IConfiguration::ORIENTATION_LANDSCAPE);
     }
-    Slogger::I(TAG, "  = mRotation:%d, dw-dh: (%d, %d)", mRotation, dw, dh);
+
     // Update application display metrics.
     Int32 appWidth, appHeight;
     mPolicy->GetNonDecorDisplayWidth(dw, dh, mRotation, &appWidth);
     mPolicy->GetNonDecorDisplayHeight(dw, dh, mRotation, &appHeight);
-    Slogger::I(TAG, "  = appWidth-appHeight: (%d, %d)", appWidth, appHeight);
 
     AutoPtr<ICompatibilityInfoHelper> helper;
     CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
@@ -8923,8 +8912,6 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         config->SetCompatScreenHeightDp((Int32)((disH / density) / mCompatibleScreenScale));
         config->SetCompatSmallestScreenWidthDp(smallestWidth);
         config->SetDensityDpi(displayContent->mBaseDisplayDensity);
-
-        Slogger::I(TAG, "  == config: %s", TO_CSTR(config));
 
         // Update the configuration based on available input devices, lid switch,
         // and platform configuration.
@@ -9011,8 +8998,6 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         config->SetNavigationHidden(IConfiguration::NAVIGATIONHIDDEN_NO);
         mPolicy->AdjustConfigurationLw(config, keyboardPresence, navigationPresence);
     }
-
-    Slogger::I(TAG, " <<<<< ComputeScreenConfigurationLocked: config:%s", TO_CSTR(config));
     return TRUE;
 }
 

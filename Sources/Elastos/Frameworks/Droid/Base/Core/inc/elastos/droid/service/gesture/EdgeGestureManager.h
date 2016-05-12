@@ -3,12 +3,17 @@
 #define __ELASTOS_DROID_SERVICE_GESTURE_EDGE_GESTURE_MANAGER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Service.h"
+#include "elastos/droid/os/Runnable.h"
 
-using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Looper;
-using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Internal::Utility::Gesture::IEdgeGesturePosition;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -32,6 +37,24 @@ public:
         : public Object
         , public IEdgeGestureActivationListener
     {
+    private:
+        class OnEdgeGestureActivationRunnable
+            : public Runnable
+        {
+        public:
+            OnEdgeGestureActivationRunnable(
+                /* [in] */ EdgeGestureActivationListener* host,
+                /* [in] */ Int32 touchX,
+                /* [in] */ Int32 touchY,
+                /* [in] */ Int32 positionIndex,
+                /* [in] */ Int32 flags);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<EdgeGestureActivationListener> mHost;
+            Int32 mTouchX, mTouchY, mPositionIndex, mFlags;
+        };
     public:
         CAR_INTERFACE_DECL()
 
@@ -81,7 +104,14 @@ public:
          */
         CARAPI RestoreListenerState();
 
+        CARAPI OnEdgeGestureActivationInner(
+            /* [in] */ Int32 touchX,
+            /* [in] */ Int32 touchY,
+            /* [in] */ Int32 positionIndex,
+            /* [in] */ Int32 flags);
+
     private:
+        friend class EdgeGestureManager;
         AutoPtr<IHandler> mHandler;
         AutoPtr<IIEdgeGestureHostCallback> mCallback;
         AutoPtr<IIEdgeGestureActivationListener> mDelegator;
@@ -140,7 +170,7 @@ public:
 
 private:
     CARAPI constructor(
-        /* [in] */ IIEdgeGestureService ps);
+        /* [in] */ IIEdgeGestureService* ps);
 
 private:
     static const String TAG;// = "EdgeGestureManager";

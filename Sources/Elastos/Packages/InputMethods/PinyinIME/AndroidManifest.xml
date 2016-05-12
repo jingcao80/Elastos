@@ -9,6 +9,10 @@
         <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY"/>
         <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
+        <uses-sdk
+            android:minSdkVersion="8"
+            android:targetSdkVersion="21" />
+
         <application android:icon="@drawable/app_icon"
           android:label="@string/ime_name">
             <service android:name=".CPinyinDecoderService"

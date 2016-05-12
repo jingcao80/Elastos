@@ -12,7 +12,7 @@ module
     interface IEdgeGestureActivationListener {
         /* package */
         SetHostCallback(
-            [in] IIEdgeGestureHostCallback* hostCallback)
+            [in] IIEdgeGestureHostCallback* hostCallback);
 
         /**
          * Override this to receive activations from the edge gesture service.
@@ -36,7 +36,11 @@ module
          * @see IEdgeGestureHostCallback#gainTouchFocus(IBinder)
          */
         GainTouchFocus(
-            [in] IBinder* applicationWindowToken);
+            [in] IBinder* applicationWindowToken,
+            [out] Boolean* result);
+
+        DropEventsUntilLift(
+            [out] Boolean* result);
 
         /**
          * Turns listening for edge gesture activation gestures on again, after it was disabled during
@@ -79,7 +83,7 @@ module
          */
         SetEdgeGestureActivationListener(
             [in] IEdgeGestureActivationListener* listener,
-            [out] Boolean* result)
+            [out] Boolean* result);
 
         /**
          * Update the listener to react on gestures in the given positions.

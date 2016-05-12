@@ -7,7 +7,14 @@ module
     namespace Gesture {
 
     interface IEdgeGesturePosition {
+        GetIndex(
+            [out] Int32* index);
 
+        GetFlag(
+            [out] Int32* flag);
+
+        GetFactor(
+            [out] Int32* factor);
     }
 
     }//namespace Gesture

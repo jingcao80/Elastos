@@ -8,5 +8,7 @@ include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-SOURCES = EdgeGestureManager.cpp
+SOURCES += EdgeGestureManager.cpp
 SOURCES += CEdgeGestureManager.cpp
+SOURCES += CEdgeGestureManagerHelper.cpp
+SOURCES += CEdgeGestureActivationListenerDelegator.cpp

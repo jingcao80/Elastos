@@ -1,5 +1,6 @@
 module
 {
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Service.Gesture.IIEdgeGestureHostCallback;
     interface Elastos.Droid.Service.Gesture.IIEdgeGestureActivationListener;
 

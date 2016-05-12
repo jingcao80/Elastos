@@ -342,6 +342,7 @@ public:
         /* [in] */ const String& packageName);
 
     static String GetElastosClassName(
+        /* [in] */ const String& packageName,
         /* [in] */ const String& androidClassName);
 
 private:

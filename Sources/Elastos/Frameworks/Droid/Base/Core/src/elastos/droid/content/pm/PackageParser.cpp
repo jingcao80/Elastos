@@ -147,20 +147,20 @@ AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > Init_SPLIT_PERMISSIONS()
 
     AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > perms =
             ArrayOf<PackageParser::SplitPermissionInfo*>::Alloc(3);
-    AutoPtr<PackageParser::SplitPermissionInfo> info1 = new PackageParser::SplitPermissionInfo(String("android.permission.WRITE_EXTERNAL_STORAGE")
-            ,
+    AutoPtr<PackageParser::SplitPermissionInfo> info1 =
+        new PackageParser::SplitPermissionInfo(String("android.permission.WRITE_EXTERNAL_STORAGE"),
             array1,
             Build::VERSION_CODES::CUR_DEVELOPMENT + 1);
     perms->Set(0, info1);
 
-    AutoPtr<PackageParser::SplitPermissionInfo> info2 = new PackageParser::SplitPermissionInfo(String("android.permission.READ_CONTACTS")
-            ,
+    AutoPtr<PackageParser::SplitPermissionInfo> info2 =
+        new PackageParser::SplitPermissionInfo(String("android.permission.READ_CONTACTS"),
             array2,
             Build::VERSION_CODES::JELLY_BEAN);
     perms->Set(1, info2);
 
-    AutoPtr<PackageParser::SplitPermissionInfo> info3 = new PackageParser::SplitPermissionInfo(String("android.permission.WRITE_CONTACTS")
-            ,
+    AutoPtr<PackageParser::SplitPermissionInfo> info3 =
+        new PackageParser::SplitPermissionInfo(String("android.permission.WRITE_CONTACTS"),
             array3,
             Build::VERSION_CODES::JELLY_BEAN);
     perms->Set(2, info3);
@@ -170,7 +170,7 @@ AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > Init_SPLIT_PERMISSIONS()
 const AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > PackageParser::SPLIT_PERMISSIONS =
         Init_SPLIT_PERMISSIONS();
 
-const Int32 PackageParser::SDK_VERSION = Build::VERSION::SDK_INT;
+// const Int32 PackageParser::SDK_VERSION = Build::VERSION::SDK_INT; see GetSDK_VERSION
 const AutoPtr< ArrayOf<String> > PackageParser::SDK_CODENAMES = Build::VERSION::ACTIVE_CODENAMES;
 const Int32 PackageParser::CERTIFICATE_BUFFER_SIZE = 4096;
 Int32 PackageParser::sParseError = IPackageManager::INSTALL_SUCCEEDED;
@@ -192,6 +192,10 @@ const Int32 PackageParser::PARSE_IS_PREBUNDLED_DIR = 1<<10;
 
 const String PackageParser::ANDROID_RESOURCES("http://schemas.android.com/apk/res/android");
 
+Int32 PackageParser::GetSDK_VERSION()
+{
+    return Build::VERSION::SDK_INT;
+}
 
 //=================================================================
 // PackageParser::NewPermissionInfo
@@ -2599,9 +2603,6 @@ ECode PackageParser::ParseBaseApk(
 
     pkgName = (*packageSplit)[0];
     splitName = (*packageSplit)[1];
-
-    Int32 type;
-
     if (!splitName.IsNullOrEmpty()) {
         StringBuilder sb("Expected base APK, but found split ");
         sb += splitName;
@@ -2609,6 +2610,8 @@ ECode PackageParser::ParseBaseApk(
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
         return NOERROR;
     }
+
+    Slogger::I(TAG, "=================ParseBaseApk: %s", pkgName.string());
 
     AutoPtr<PackageParser::Package> pkg = new PackageParser::Package(pkgName);
     AutoPtr<IBundle> metaDataBundle;
@@ -2626,9 +2629,7 @@ ECode PackageParser::ParseBaseApk(
     pkg->mApplicationInfo->SetVersionCode(pkg->mVersionCode);
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifest_versionName, 0, &pkg->mVersionName);
-    // if (pkg->mVersionName != NULL) {
-    //     pkg->mVersionName = pkg->mVersionName.intern();
-    // }
+
     String str;
     sa->GetNonConfigurationString(R::styleable::AndroidManifest_sharedUserId, 0, &str);
     if (!str.IsNullOrEmpty()) {
@@ -2685,6 +2686,7 @@ ECode PackageParser::ParseBaseApk(
     Int32 outerDepth = 0;
     parser->GetDepth(&outerDepth);
     Int32 depth = 0;
+    Int32 type;
     while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
            && (type != IXmlPullParser::END_TAG
            || (parser->GetDepth(&depth), depth) > outerDepth)) {
@@ -2903,7 +2905,7 @@ ECode PackageParser::ParseBaseApk(
         }
 
         else if (tagName.Equals("uses-sdk")) {
-            if (SDK_VERSION > 0) {
+            if (GetSDK_VERSION() > 0) {
                 sa = NULL;
 
                 size = ArraySize(R::styleable::AndroidManifestUsesSdk);
@@ -2918,8 +2920,7 @@ ECode PackageParser::ParseBaseApk(
                 String targetCode;
 
                 AutoPtr<ITypedValue> val;
-                sa->PeekValue(
-                        R::styleable::AndroidManifestUsesSdk_minSdkVersion, (ITypedValue**)&val);
+                sa->PeekValue(R::styleable::AndroidManifestUsesSdk_minSdkVersion, (ITypedValue**)&val);
                 if (val != NULL) {
                     Int32 valType;
                     val->GetType(&valType);
@@ -2939,8 +2940,7 @@ ECode PackageParser::ParseBaseApk(
                 }
 
                 val = NULL;
-                sa->PeekValue(
-                        R::styleable::AndroidManifestUsesSdk_targetSdkVersion, (ITypedValue**)&val);
+                sa->PeekValue(R::styleable::AndroidManifestUsesSdk_targetSdkVersion, (ITypedValue**)&val);
                 if (val != NULL) {
                     Int32 valType;
                     val->GetType(&valType);
@@ -2990,11 +2990,11 @@ ECode PackageParser::ParseBaseApk(
                         return NOERROR;
                     }
                 }
-                else if (minVers > SDK_VERSION) {
+                else if (minVers > GetSDK_VERSION()) {
                     StringBuilder sb("Requires newer sdk version #");
                     sb += minVers;
                     sb += " (current version is #";
-                    sb += SDK_VERSION;
+                    sb += GetSDK_VERSION();
                     sb += ")";
                     (*outError)[0] = sb.ToString();
                     sParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
@@ -3197,14 +3197,14 @@ ECode PackageParser::ParseBaseApk(
         else {
             String des;
             parser->GetPositionDescription(&des);
-            // Logger::W(TAG, StringBuffer("Unknown element under <manifest>: ") + tagName
-            //     + " at " + mArchiveSourcePath + " " + des);
+            Logger::W(TAG, "Unknown element under <manifest>: %s at %s %s",
+                tagName.string(), mArchiveSourcePath.string(), des.string());
             XmlUtils::SkipCurrentTag(parser);
             continue;
         }
     }
 
-    if (!foundApp && pkg->mInstrumentation.Begin() == pkg->mInstrumentation.End()) {
+    if (!foundApp && pkg->mInstrumentation.IsEmpty()) {
         (*outError)[0] = "<manifest> does not contain an <application> or <instrumentation>";
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
     }
@@ -3259,6 +3259,7 @@ ECode PackageParser::ParseBaseApk(
 
     Int32 pkgSdkVersion, pkgFlags;
     pkg->mApplicationInfo->GetTargetSdkVersion(&pkgSdkVersion);
+
     if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
         && pkgSdkVersion >= Build::VERSION_CODES::DONUT)) {
         pkg->mApplicationInfo->GetFlags(&pkgFlags);

@@ -880,18 +880,11 @@ ECode LayoutInflater::CreateViewFromTag(
     *view = NULL;
 
     String name;
-    if (!inName.Compare("view")) {
+    if (inName.Equals("view")) {
         attrs->GetAttributeValue(String(NULL), String("class"), &name);
     }
     else {
         name = inName;
-    }
-
-    name = LoadedPkg::GetElastosClassName(name);
-
-    if (DEBUG) {
-        Slogger::D(TAG, "******** Creating view: %s, mFactory2: %p, mFactory: %p, mPrivateFactory: %p",
-            name.string(),  mFactory2.Get(), mFactory.Get(), mPrivateFactory);
     }
 
     AutoPtr<IContext> viewContext;
@@ -900,6 +893,15 @@ ECode LayoutInflater::CreateViewFromTag(
     }
     else {
         viewContext = mContext;
+    }
+
+    String packageName;
+    viewContext->GetPackageName(&packageName);
+    name = LoadedPkg::GetElastosClassName(packageName, name);
+
+    if (DEBUG) {
+        Slogger::D(TAG, "******** Creating view: %s, mFactory2: %p, mFactory: %p, mPrivateFactory: %p",
+            name.string(),  mFactory2.Get(), mFactory.Get(), mPrivateFactory);
     }
 
     // Apply a theme wrapper, if requested.
