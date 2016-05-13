@@ -204,8 +204,8 @@ ECode CWifiSsid::ToString(
     AutoPtr<ICodingErrorAction> replace;
     ceActionHelper->GetREPLACE((ICodingErrorAction**)&replace);
 
-    decoder->OnMalformedInput(replace);//, (ICharsetDecoder**)&temp);
-    decoder->OnUnmappableCharacter(replace);//, (ICharsetDecoder**)&temp);
+    decoder->OnMalformedInput(replace);
+    decoder->OnUnmappableCharacter(replace);
     AutoPtr<ICharBufferHelper> bufferHelper;
     CCharBufferHelper::AcquireSingleton((ICharBufferHelper**)&bufferHelper);
     AutoPtr<ICharBuffer> out;

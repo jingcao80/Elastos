@@ -36,7 +36,7 @@ Boolean SupplicantStateHelper::IsHandshakeState(
             return FALSE;
         default:
             // throw new IllegalArgumentException("Unknown supplicant state");
-            Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
+            Logger::E("SupplicantStateHelper", "Unknown supplicant state line:%d, state:%d\n", __LINE__, state);
             assert(0);
             return FALSE;
     }
@@ -63,7 +63,7 @@ Boolean SupplicantStateHelper::IsConnecting(
             return FALSE;
         default:
             // throw new IllegalArgumentException("Unknown supplicant state");
-            Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
+            Logger::E("SupplicantStateHelper", "Unknown supplicant line:%d, state state:%d\n", __LINE__, state);
             assert(0);
             return FALSE;
     }
@@ -90,7 +90,7 @@ Boolean SupplicantStateHelper::IsDriverActive(
             return FALSE;
         default:
             // throw new IllegalArgumentException("Unknown supplicant state");
-            Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
+            Logger::E("SupplicantStateHelper", "Unknown supplicant state line %d, state:%d\n", __LINE__, state);
             assert(0);
             return FALSE;
     }

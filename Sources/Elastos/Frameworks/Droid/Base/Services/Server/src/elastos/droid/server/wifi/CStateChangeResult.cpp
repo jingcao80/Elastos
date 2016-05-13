@@ -23,7 +23,6 @@ CStateChangeResult::CStateChangeResult(
     /* [in] */ const String& BSSID,
     /* [in] */ SupplicantState state)
 {
-    Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, state);
     mNetworkId = networkId;
     mWifiSsid = wifiSsid;
     mBSSID = BSSID;

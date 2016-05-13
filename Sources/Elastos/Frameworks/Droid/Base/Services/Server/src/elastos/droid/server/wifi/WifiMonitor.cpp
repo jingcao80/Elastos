@@ -539,7 +539,7 @@ ECode WifiMonitor::MonitorThread::Run()
 void WifiMonitor::LogDbg(
     /* [in] */ const String& debug)
 {
-    Logger::E(TAG, debug/*+ " stack:" + Thread.currentThread().getStackTrace()[2].getMethodName()
+    Logger::D(TAG, debug/*+ " stack:" + Thread.currentThread().getStackTrace()[2].getMethodName()
                        +" - "+ Thread.currentThread().getStackTrace()[3].getMethodName()
                        +" - "+ Thread.currentThread().getStackTrace()[4].getMethodName()
                        +" - "+ Thread.currentThread().getStackTrace()[5].getMethodName()*/);
@@ -555,7 +555,7 @@ Boolean WifiMonitor::DispatchEvent(
         if (!eventStr.IsNull()&& !eventStr.Contains("CTRL-EVENT-BSS-ADDED")) {
             //logDbg("WifiMonitor:" + iface + " cnt=" + Integer.toString(eventLogCounter)
             //+ " dispatchEvent: " + eventStr);
-            Logger::E(TAG, "WifiMonitor:%s, cnt = %d, dispatchEvent: ", iface.string(), eventLogCounter, eventStr.string());
+            Logger::D(TAG, "WifiMonitor:%s, cnt = %d, dispatchEvent: %s", iface.string(), eventLogCounter, eventStr.string());
         }
     }
 
@@ -801,7 +801,7 @@ void WifiMonitor::HandleEvent(
     /* [in] */ const String& remainder)
 {
     if (DBG) {
-        Logger::E(TAG, "handleEvent %d %s", event, remainder.string());
+        Logger::D(TAG, "handleEvent %d %s", event, remainder.string());
     }
     switch (event) {
         case DISCONNECTED:
@@ -822,7 +822,7 @@ void WifiMonitor::HandleEvent(
 
         case UNKNOWN:
             if (DBG) {
-                Logger::E(TAG, "handleEvent unknown: %d, %s", event, remainder.string());
+                Logger::D(TAG, "handleEvent unknown: %d, %s", event, remainder.string());
             }
             break;
         default:
@@ -1201,7 +1201,7 @@ void WifiMonitor::HandleRequests(
 void WifiMonitor::HandleSupplicantStateChange(
     /* [in] */ const String& dataString)
 {
-    Logger::E("leliang", "file:%s. line:%d, func:%s, dataString:%s\n", __FILE__, __LINE__, __func__, dataString.string());
+    if (DBG) Logger::D("WifiMonitor", "HandleSupplicantStateChange String:%s\n", dataString.string());
     AutoPtr<IWifiSsid> wifiSsid;
 
     Int32 index = dataString.LastIndexOf("SSID=");
@@ -1229,7 +1229,9 @@ void WifiMonitor::HandleSupplicantStateChange(
             if (nameValue == NULL || nameValue->GetLength() != 2) {
                 continue;
             }
-            Logger::E("leliang", "file:%s. line:%d, func:%s, name:%s, value:%s\n", __FILE__, __LINE__, __func__, (*nameValue)[0].string(), (*nameValue)[1].string());
+            if (DBG)
+                Logger::D("WifiMonitor", "line:%d, name:%s, value:%s\n",
+                    __LINE__, (*nameValue)[0].string(), (*nameValue)[1].string());
 
             if ((*nameValue)[0].Equals("BSSID")) {
                 BSSID = (*nameValue)[1];
@@ -1384,7 +1386,7 @@ void WifiMonitor::NotifyNetworkStateChange(
         AutoPtr<IMessage> m;
         mStateMachine->ObtainMessage(NETWORK_DISCONNECTION_EVENT,
                 netId, reason, TO_IINTERFACE(cs), (IMessage**)&m);
-        if (DBG) Logger::E(TAG, "WifiMonitor notify network disconnect: %s, reason=%d", BSSID.string(), reason);
+        if (DBG) Logger::D(TAG, "WifiMonitor notify network disconnect: %s, reason=%d", BSSID.string(), reason);
         mStateMachine->SendMessage(m);
     }
 }
@@ -1395,7 +1397,6 @@ void WifiMonitor::NotifySupplicantStateChange(
     /* [in] */ const String& BSSID,
     /* [in] */ SupplicantState newState)
 {
-    Logger::E("leliang", "file:%s. line:%d, func:%s, state:%d\n", __FILE__, __LINE__, __func__, newState);
     if (DBG) {
         Logger::W("MonitorThread", "NotifySupplicantStateChange BSSID %s, wifiSsid: %p, state:%d",
                 BSSID.string(), wifiSsid, newState);

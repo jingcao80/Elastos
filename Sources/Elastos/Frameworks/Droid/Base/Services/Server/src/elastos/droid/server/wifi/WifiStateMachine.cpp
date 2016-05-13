@@ -116,6 +116,7 @@ using Elastos::IO::ICloseable;
 using Elastos::IO::IFileReader;
 using Elastos::IO::IReader;
 using Elastos::Net::IInet4Address;
+using Elastos::Net::IInet6Address;
 using Elastos::Net::IInetAddress;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CLinkedList;
@@ -2717,8 +2718,8 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
                 if (DBG) {
                     mHost->Loge(String("WifiStateMachine CMD_START_SCAN with age=")
                             + StringUtils::ToString(now_ms - mHost->lastFullBandConnectedTimeMilli)
-                            + " interval=" + mHost->fullBandConnectedTimeIntervalMilli
-                            + " maxinterval=" + mHost->maxFullBandConnectedTimeIntervalMilli);
+                            + " interval=" + StringUtils::ToString(mHost->fullBandConnectedTimeIntervalMilli)
+                            + " maxinterval=" + StringUtils::ToString(mHost->maxFullBandConnectedTimeIntervalMilli));
                 }
                 if (mHost->mWifiInfo != NULL) {
                     if (mHost->mWifiConfigStore->enableFullBandScanWhenAssociated &&
@@ -2727,8 +2728,8 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
                         if (DBG) {
                             mHost->Loge(String("WifiStateMachine CMD_START_SCAN try full band scan age=")
                                  + StringUtils::ToString(now_ms - mHost->lastFullBandConnectedTimeMilli)
-                                 + " interval=" + mHost->fullBandConnectedTimeIntervalMilli
-                                 + " maxinterval=" + mHost->maxFullBandConnectedTimeIntervalMilli);
+                                 + " interval=" + StringUtils::ToString(mHost->fullBandConnectedTimeIntervalMilli)
+                                 + " maxinterval=" + StringUtils::ToString(mHost->maxFullBandConnectedTimeIntervalMilli));
                         }
                         tryFullBandScan = TRUE;
                     }
@@ -2793,7 +2794,7 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
 
                             if (DBG) {
                                 mHost->Loge(String("WifiStateMachine CMD_START_SCAN bump interval =")
-                                + mHost->fullBandConnectedTimeIntervalMilli);
+                                + StringUtils::ToString(mHost->fullBandConnectedTimeIntervalMilli));
                             }
                         }
                         mHost->HandleScanRequest(
@@ -2818,7 +2819,7 @@ ECode WifiStateMachine::L2ConnectedState::ProcessMessage(
 
                                 if (DBG) {
                                     mHost->Loge(String("WifiStateMachine CMD_START_SCAN bump interval =")
-                                            + mHost->fullBandConnectedTimeIntervalMilli);
+                                            + StringUtils::ToString(mHost->fullBandConnectedTimeIntervalMilli));
                                 }
                             }
                             mHost->HandleScanRequest(
@@ -4961,7 +4962,6 @@ WifiStateMachine::WifiStateMachine(
 
     temp = NULL;
     temp = ServiceManager::GetService(IContext::WIFI_P2P_SERVICE);
-    //Logger::E("leliang", "tmp: %p, wifip2pServiceImpl:%p", temp.Get(), (WifiP2pServiceImpl*)(IObject*)temp.Get());
     mWifiP2pServiceImpl = (WifiP2pServiceImpl*)(IObject::Probe(temp));
 
     mNetworkInfo->SetIsAvailable(FALSE);
@@ -8949,9 +8949,11 @@ void WifiStateMachine::SetScanResults()
                         scanResult->SetSeen(currentTimeMillis);
                     }
                     else {
-                        Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
-                        Logger::E("leliang", "wifiSsid:%s, bssid:%s, flags:%d, lelvel:%d, freq:%d, tsf: %ld",
-                                ssid.string(), bssid.string(), flags.string(), level, freq, tsf);
+                        if (PDBG) {
+                            Logger::E("WifiStateMachine", "line:%d, func:%s\n", __LINE__, "SetScanResults");
+                            Logger::E("WifiStateMachine", "wifiSsid:%s, bssid:%s, flags:%d, lelvel:%d, freq:%d, tsf: %ld",
+                                    ssid.string(), bssid.string(), flags.string(), level, freq, tsf);
+                        }
                         CScanResult::New(wifiSsid, bssid, flags, level, freq, tsf, (IScanResult**)&scanResult);
                         Int64 currentTimeMillis;
                         system->GetCurrentTimeMillis(&currentTimeMillis);
@@ -9601,8 +9603,12 @@ void WifiStateMachine::UpdateLinkProperties(
 
     if (linkChanged) {
         if (DBG) {
-            // Log(String("Link configuration changed for netId: ") + mLastNetworkId
-            //         + " old: " + mLinkProperties + " new: " + newLp);
+            String strLP;
+            IObject::Probe(mLinkProperties)->ToString(&strLP);
+            String strNewLP;
+            IObject::Probe(newLp)->ToString(&strNewLP);
+            Log(String("Link configuration changed for netId: ") + StringUtils::ToString(mLastNetworkId)
+                     + " old: " + strLP + " new: " + strNewLP);
         }
         mLinkProperties = newLp;
         if (mTcpBufferSizes.IsEmpty() == FALSE) {
@@ -9756,6 +9762,11 @@ String WifiStateMachine::UpdateDefaultRouteMacAddress(
         Boolean b1, b2;
         route->IsDefaultRoute(&b1);
         route->HasGateway(&b2);
+        if (PDBG) {
+            String strR;
+            IObject::Probe(route)->ToString(&strR);
+            Logger::E("WifiStateMachine", "line:%d, func:%s, b1:%d, b2:%d,rou:%s\n", __LINE__, __func__,b1, b2, strR.string());
+        }
         if (b1 && b2) {
             AutoPtr<IInetAddress> gateway;
             route->GetGateway((IInetAddress**)&gateway);
@@ -10043,7 +10054,7 @@ void WifiStateMachine::HandleIPv4Success(
         String str;
         IObject::Probe(dhcpResults)->ToString(&str);
         Logger::E("wifistatemachine:", " handleIPv4Success <%s>", str.string());
-        //Loge("link address " + dhcpResults.ipAddress);
+        //Logger::E("link address " + dhcpResults.ipAddress);
     }
 
     synchronized (mDhcpResultsLock) {
@@ -10055,6 +10066,9 @@ void WifiStateMachine::HandleIPv4Success(
     AutoPtr<IInetAddress> ia;
     la->GetAddress((IInetAddress**)&ia);
     AutoPtr<IInet4Address> addr = IInet4Address::Probe(ia);
+    if (PDBG) {
+        Logger::E("WifiStateMachine", "line:%d, func:%s, addr:%p\n", __LINE__, "HandleIPv4Success", addr.Get());
+    }
     Boolean b;
     if (IsRoaming(&b), b) {
         if (IInet4Address::Probe(addr) != NULL) {

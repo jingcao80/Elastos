@@ -188,7 +188,7 @@ ECode WifiAutoJoinController::AddToScanCache(
                 String str(sid);
                 str += String(" ");
                 str += bsid;
-                str += " rssi="; str += level;
+                str += " rssi="; str += StringUtils::ToString(level);
                 str += " cap "; str += cap;
                 str += " is not scored";
                 LogDbg(str);
@@ -318,11 +318,11 @@ ECode WifiAutoJoinController::NewSupplicantResults(
         String str("newSupplicantResults size=");
         Int32 size = 0;
         mScanResultCache->GetSize(&size);
-        str += size;
+        str += StringUtils::ToString(size);
         str += " known=";
-        str += numScanResultsKnown;
+        str += StringUtils::ToString(numScanResultsKnown);
         str += " ";
-        str += doAutoJoin;
+        str += StringUtils::ToString(doAutoJoin);
         LogDbg(str);
     }
     if (doAutoJoin) {
@@ -1522,7 +1522,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             Int32 size = 0;
             mWifiConfigStore->GetconfiguredNetworkSize(&size);
             String str("attemptAutoJoin nothing known=");
-            str += size;
+            str += StringUtils::ToString(size);
             LogDbg(str);
         }
         return NOERROR;
@@ -1535,7 +1535,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
     if (VDBG) {
         String str("attemptAutoJoin() status=");
         str += val; str += " split=";
-        str += status->GetLength();
+        str += StringUtils::ToString(status->GetLength());
         LogDbg(str);
     }
 
@@ -1605,9 +1605,9 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
         String str("attemptAutoJoin() num recent config ");
         Int32 s = 0;
         list->GetSize(&s);
-        str += s;
+        str += StringUtils::ToString(s);
         str += conf; str += last;
-        str += " ---> suppNetId="; str += supplicantNetId;
+        str += " ---> suppNetId="; str += StringUtils::ToString(supplicantNetId);
         LogDbg(str);
     }
 
@@ -1687,9 +1687,9 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             // Avoid networks disabled because of AUTH failure altogether
             if (DBG) {
                 String str("attemptAutoJoin skip candidate due to auto join status ");
-                str += autoJoinStatus;
+                str += StringUtils::ToString(autoJoinStatus);
                 str += " key "; str += ckt;
-                str += " reason "; str += disableReason;
+                str += " reason "; str += StringUtils::ToString(disableReason);
                 LogDbg(str);
             }
             continue;
@@ -1737,12 +1737,12 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                 < mWifiConfigStore->thresholdUnblacklistThreshold24Soft) {
             if (DBG) {
                 String str("attemptAutoJoin do not unblacklist due to low visibility ");
-                str += autoJoinStatus;
+                str += StringUtils::ToString(autoJoinStatus);
                 str += " key "; str += ckt;
-                str += " rssi=("; str += rssi24;
-                str += ","; str += rssi5;
-                str += ") num=("; str += num24;
-                str += ","; str += num5; str += ")";
+                str += " rssi=("; str += StringUtils::ToString(rssi24);
+                str += ","; str += StringUtils::ToString(rssi5);
+                str += ") num=("; str += StringUtils::ToString(num24);
+                str += ","; str += StringUtils::ToString(num5); str += ")";
                 LogDbg(str);
             }
         }
@@ -1754,11 +1754,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             config->SetAutoJoinStatus(autoJoinStatus - 1);
             if (DBG) {
                 String str("attemptAutoJoin good candidate seen, bumped soft -> status=");
-                str += autoJoinStatus;
+                str += StringUtils::ToString(autoJoinStatus);
                 str += " "; str += ckt; str += " rssi=(";
-                str += rssi24; str += ","; str += rssi5;
-                str += ") num=("; str += num24;
-                str += ","; str += num5; str += ")";
+                str += StringUtils::ToString(rssi24); str += ","; str += StringUtils::ToString(rssi5);
+                str += ") num=("; str += StringUtils::ToString(num24);
+                str += ","; str += StringUtils::ToString(num5); str += ")";
                 LogDbg(str);
             }
         }
@@ -1766,11 +1766,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             config->SetAutoJoinStatus(autoJoinStatus - 3);
             if (DBG) {
                 String str("attemptAutoJoin good candidate seen, bumped hard -> status=");
-                str += autoJoinStatus;
+                str += StringUtils::ToString(autoJoinStatus);
                 str += " "; str += ckt; str += " rssi=(";
-                str += rssi24; str += ","; str += rssi5;
-                str += ") num=("; str += num24;
-                str += ","; str += num5; str += ")";
+                str += StringUtils::ToString(rssi24); str += ","; str += StringUtils::ToString(rssi5);
+                str += ") num=("; str += StringUtils::ToString(num24);
+                str += ","; str += StringUtils::ToString(num5); str += ")";
                 LogDbg(str);
             }
         }
@@ -1780,11 +1780,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             // Network is blacklisted, skip
             if (DBG) {
                 String str("attemptAutoJoin skip blacklisted -> status=");
-                str += autoJoinStatus;
+                str += StringUtils::ToString(autoJoinStatus);
                 str += " "; str += ckt; str += " rssi=(";
-                str += rssi24; str += ","; str += rssi5;
-                str += ") num=("; str += num24;
-                str += ","; str += num5; str += ")";
+                str += StringUtils::ToString(rssi24); str += ","; str += StringUtils::ToString(rssi5);
+                str += ") num=("; str += StringUtils::ToString(num24);
+                str += ","; str += StringUtils::ToString(num5); str += ")";
                 LogDbg(str);
             }
             continue;
@@ -1794,7 +1794,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
         if (networkId == currentNetId) {
             if (DBG) {
                 String str("attemptAutoJoin skip current candidate  ");
-                str += currentNetId;
+                str += StringUtils::ToString(currentNetId);
                 str += " key "; str += ckt;
                 LogDbg(str);
             }
@@ -1819,11 +1819,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             < mWifiConfigStore->thresholdInitialAutoJoinAttemptMin24RSSI) {
             if (DBG) {
                 String str("attemptAutoJoin skip due to low visibility -> status=");
-                str += autoJoinStatus;
+                str += StringUtils::ToString(autoJoinStatus);
                 str += " key "; str += ckt; str += " rssi=";
-                str += rssi24; str += ", "; str += rssi5;
-                str += " num="; str += num24;
-                str += ", "; str += num5;
+                str += StringUtils::ToString(rssi24); str += ", "; str += StringUtils::ToString(rssi5);
+                str += " num="; str += StringUtils::ToString(num24);
+                str += ", "; str += StringUtils::ToString(num5);
                 LogDbg(str);
             }
 
@@ -1874,9 +1874,9 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                 cur += cck;
             }
             String str("attemptAutoJoin trying id=");
-            str += networkId; str += " ";
+            str += StringUtils::ToString(networkId); str += " ";
             str += ckt;
-            str += " status="; str += autoJoinStatus;
+            str += " status="; str += StringUtils::ToString(autoJoinStatus);
             str += cur;
             LogDbg(str);
         }
@@ -1915,7 +1915,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                     str += cck;
                     str += " over "; str += ckt;
                     str += " because it is the last selected -> ";
-                    str += order;
+                    str += StringUtils::ToString(order);
                     LogDbg(str);
                 }
             }
@@ -1931,7 +1931,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                     str += ckt;
                     str += " over "; str += cck;
                     str += " because it is the last selected -> ";
-                    str += order;
+                    str += StringUtils::ToString(order);
                     LogDbg(str);
                 }
             }
@@ -2015,11 +2015,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                             str += ssid;
                             Int32 level = 0;
                             result->GetLevel(&level);
-                            str += " RSSI="; str += level;
+                            str += " RSSI="; str += StringUtils::ToString(level);
                             Int32 frequency = 0;
                             result->GetFrequency(&frequency);
-                            str += " freq="; str += frequency;
-                            str += " score="; str += score;
+                            str += " freq="; str += StringUtils::ToString(frequency);
+                            str += " score="; str += StringUtils::ToString(score);
                             LogDbg(str);
                         }
                     }
@@ -2098,7 +2098,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
         str += (currentConfiguration != NULL
                         && (currentConfiguration->IsLinked(candidate, &b), b));
         str += " : delta=";
-        str += networkDelta;
+        str += StringUtils::ToString(networkDelta);
         str += " "; str += doSwitch;
         LogDbg(str);
     }
@@ -2128,7 +2128,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                 String str("AutoJoin auto connect with netId ");
                 Int32 networkId = 0;
                 candidate->GetNetworkId(&networkId);
-                str += networkId;
+                str += StringUtils::ToString(networkId);
                 str += " to ";
                 str += ck;
                 LogDbg(str);
@@ -2177,8 +2177,8 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                         roamCandidate->GetFrequency(&frequency);
                         String str("AutoJoinController: lock to 5GHz ");
                         str += rbssid;
-                        str += " RSSI="; str += level;
-                        str += " freq="; str += frequency;
+                        str += " RSSI="; str += StringUtils::ToString(level);
+                        str += " freq="; str += StringUtils::ToString(frequency);
                         LogDbg(str);
                     }
                 }
@@ -2236,7 +2236,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             currentConfiguration->GetNetworkId(&networkId);
             if (DBG) {
                 String str("AutoJoin auto roam with netId ");
-                str += networkId;
+                str += StringUtils::ToString(networkId);
                 str += " ";
                 String ck;
                 currentConfiguration->ConfigKey(&ck);
@@ -2245,11 +2245,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                 str += " freq=";
                 Int32 frequency = 0;
                 roamCandidate->GetFrequency(&frequency);
-                str += frequency;
+                str += StringUtils::ToString(frequency);
                 str += " RSSI=";
                 Int32 level = 0;
                 roamCandidate->GetLevel(&level);
-                str += level;
+                str += StringUtils::ToString(level);
                 LogDbg(str);
             }
             networkSwitchType = AUTO_JOIN_ROAMING;
@@ -2263,7 +2263,7 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
     }
     if (VDBG) {
         String str("Done attemptAutoJoin status=");
-        str += networkSwitchType;
+        str += StringUtils::ToString(networkSwitchType);
         LogDbg(str);
     }
     return NOERROR;
@@ -2281,13 +2281,13 @@ void WifiAutoJoinController::AgeScanResultsOut(
     sys->GetCurrentTimeMillis(&milli);
     if (VDBG) {
         String str("ageScanResultsOut delay ");
-        str += delay;
+        str += StringUtils::ToString(delay);
         str += " size ";
         Int32 size = 0;
         mScanResultCache->GetSize(&size);
-        str += size;
+        str += StringUtils::ToString(size);
         str += " now ";
-        str += milli;
+        str += StringUtils::ToString(milli);
         LogDbg(str);
     }
 
@@ -2365,7 +2365,7 @@ Int32 WifiAutoJoinController::CompareNetwork(
             str += ck4;
             str += " over "; str += ck3;
             str += " because it is the last selected -> ";
-            str += order;
+            str += StringUtils::ToString(order);
             LogDbg(str);
         }
     }
@@ -2381,7 +2381,7 @@ Int32 WifiAutoJoinController::CompareNetwork(
             str += ck3; str += " over ";
             str += ck4;
             str += " because it is the last selected -> ";
-            str += order;
+            str += StringUtils::ToString(order);
             LogDbg(str);
         }
     }

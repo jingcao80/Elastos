@@ -39,7 +39,7 @@ ECode WifiService::OnStart()
 ECode WifiService::OnBootPhase(
     /* [in] */ Int32 phase)
 {
-    Logger::I(TAG, "leliang OnBootPhase, phase:%d, %d", phase, ISystemService::PHASE_SYSTEM_SERVICES_READY);
+    //Logger::I(TAG, "OnBootPhase, phase:%d, %d", phase, ISystemService::PHASE_SYSTEM_SERVICES_READY);
     if (phase == ISystemService::PHASE_SYSTEM_SERVICES_READY) {
          mImpl->CheckAndStartWifi();
     }

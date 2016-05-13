@@ -4767,9 +4767,20 @@ Boolean CConnectivityService::UpdateRoutes(
     /* [in] */ ILinkProperties* oldLp,
     /* [in] */ Int32 netId)
 {
+    if (DBG) {
+        String strNewLp, strOldLp;
+        if (newLp)
+            IObject::Probe(newLp)->ToString(&strNewLp);
+        if (oldLp)
+            IObject::Probe(oldLp)->ToString(&strOldLp);
+        Slogger::D(TAG, "old linkProperties %s", strOldLp.string());
+        Slogger::D(TAG, "new linkProperties %s", strNewLp.string());
+    }
     AutoPtr<ILinkPropertiesCompareResult> routeDiff;
-    CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&routeDiff);
 
+    if (oldLp == NULL) {
+        CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&routeDiff);
+    }
     if (oldLp != NULL) {
         oldLp->CompareAllRoutes(newLp, (ILinkPropertiesCompareResult**)&routeDiff);
     }
@@ -4788,6 +4799,8 @@ Boolean CConnectivityService::UpdateRoutes(
     // add routes before removing old in case it helps with continuous connectivity
 
     // do this twice, adding non-nexthop routes first, then routes they are dependent on
+    // first add the route without specific gateway
+    // second add the route with specific gateway
     Int32 i = 0;
     while (i < 2) {
         ++i;
@@ -4801,7 +4814,8 @@ Boolean CConnectivityService::UpdateRoutes(
                 it->GetNext((IInterface**)&obj);
                 route = IRouteInfo::Probe(obj);
                 route->HasGateway(&bval);
-                if (bval) continue;
+                if (i == 1 && bval) continue;
+                if (i == 2 && !bval) continue;
                 if (DBG) Slogger::D(TAG, "Adding Route [%s] to network %d",
                     TO_CSTR(route), netId);
                 ec = mNetd->AddRoute(netId, route);
@@ -4821,7 +4835,6 @@ Boolean CConnectivityService::UpdateRoutes(
             }
         }
     }
-
     it = NULL;
     routeDiff->GetRemoved((IList**)&removed);
     if (removed != NULL) {
@@ -4830,7 +4843,6 @@ Boolean CConnectivityService::UpdateRoutes(
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
             route = IRouteInfo::Probe(obj);
-            route->HasGateway(&bval);
 
             if (DBG) Slogger::D(TAG, "Removing Route [%s] to network %d",
                 TO_CSTR(route), netId);

@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/net/IpPrefix.h"
 #include "elastos/droid/net/NetworkUtils.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -10,6 +11,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Net::CInetAddressHelper;
 using Elastos::Net::IInetAddress;
 using Elastos::Net::IInetAddressHelper;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
 
@@ -72,8 +74,8 @@ ECode IpPrefix::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) != IInterface::Probe(obj)) {
-        *result = FALSE;
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
         return NOERROR;
     }
 
@@ -162,7 +164,7 @@ ECode IpPrefix::ToString(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *result += "/";
-    *result += mPrefixLength;
+    *result += StringUtils::ToString(mPrefixLength);
     return NOERROR;
 }
 
