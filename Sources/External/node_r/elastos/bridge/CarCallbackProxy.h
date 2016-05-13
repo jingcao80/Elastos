@@ -44,9 +44,7 @@ public:
     };
 
 public:
-    CarCallbackInterfaceProxy()
-        : mMethodInfos(NULL)
-    {}
+    CarCallbackInterfaceProxy();
 
     ~CarCallbackInterfaceProxy();
 
