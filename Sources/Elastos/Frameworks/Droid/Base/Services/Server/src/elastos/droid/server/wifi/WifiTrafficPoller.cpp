@@ -112,7 +112,8 @@ ECode WifiTrafficPoller::TrafficHandler::HandleMessage(
             if (mOwner->DBG) {
                 Int32 size;
                 mOwner->mClients->GetSize(&size);
-                Logger::E(mOwner->TAG, "ADD_CLIENT: %d", size);
+                IMessenger* client = IMessenger::Probe(obj);
+                Logger::E(mOwner->TAG, "ADD_CLIENT: %d, IMessenger:%p", size, client);
             }
             break;
         }
@@ -120,6 +121,12 @@ ECode WifiTrafficPoller::TrafficHandler::HandleMessage(
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             mOwner->mClients->Remove(obj);
+            if (mOwner->DBG) {
+                Int32 size;
+                mOwner->mClients->GetSize(&size);
+                IMessenger* client = IMessenger::Probe(obj);
+                Logger::E(mOwner->TAG, "REMOVE_CLIENT: %d, IMessenger:%p", size, client);
+            }
             break;
         }
     }
@@ -270,8 +277,10 @@ void WifiTrafficPoller::NotifyOnDataActivity()
                     AutoPtr<IInterface> obj;
                     mClients->Get(i, (IInterface**)&obj);
                     IMessenger* client = IMessenger::Probe(obj);
-                    if (client != NULL)
+                    if (client != NULL) {
+                        if (DBG) Logger::E("TAG", "line:%d, func:%s, IMessenger:%p\n", __LINE__, __func__, client);
                         client->Send(msg);
+                    }
                 //} catch (RemoteException e) {
                     // Failed to reach, skip
                     // Client removal is handled in WifiService

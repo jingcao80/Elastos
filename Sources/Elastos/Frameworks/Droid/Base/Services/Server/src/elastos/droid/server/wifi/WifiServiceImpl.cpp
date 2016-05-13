@@ -309,11 +309,11 @@ ECode WifiServiceImpl::ClientHandler::HandleMessage(
             Int32 arg1;
             msg->GetArg1(&arg1);
             if (arg1 == IAsyncChannel::STATUS_SUCCESSFUL) {
-                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "New client listening to asynchronous messages");
                 // We track the clients by the Messenger
                 // since it is expected to be always available
                 AutoPtr<IMessenger> replyTo;
                 msg->GetReplyTo((IMessenger**)&replyTo);
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "New client listening to asynchronous messages, IMessenger:%p", replyTo.Get());
                 mOwner->mTrafficPoller->AddClient(replyTo);
             } else {
                 Slogger::E(TAG, "Client connection failure, error=%d", arg1);
@@ -323,13 +323,13 @@ ECode WifiServiceImpl::ClientHandler::HandleMessage(
         case IAsyncChannel::CMD_CHANNEL_DISCONNECTED: {
             Int32 arg1;
             msg->GetArg1(&arg1);
-            if (arg1 == IAsyncChannel::STATUS_SEND_UNSUCCESSFUL) {
-                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Send failed, client connection lost");
-            } else {
-                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Client connection lost with reason: %d", arg1);
-            }
             AutoPtr<IMessenger> replyTo;
             msg->GetReplyTo((IMessenger**)&replyTo);
+            if (arg1 == IAsyncChannel::STATUS_SEND_UNSUCCESSFUL) {
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Send failed, client connection lost, IMessenger:%p", replyTo.Get());
+            } else {
+                if (WifiServiceImpl::DBG) Slogger::D(WifiServiceImpl::TAG, "Client connection lost with reason: %d, IMessenger:%p", arg1, replyTo.Get());
+            }
             mOwner->mTrafficPoller->RemoveClient(replyTo);
             break;
         }

@@ -4778,13 +4778,11 @@ Boolean CConnectivityService::UpdateRoutes(
     }
     AutoPtr<ILinkPropertiesCompareResult> routeDiff;
 
-    if (oldLp == NULL) {
-        CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&routeDiff);
-    }
     if (oldLp != NULL) {
         oldLp->CompareAllRoutes(newLp, (ILinkPropertiesCompareResult**)&routeDiff);
     }
     else if (newLp != NULL) {
+        CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&routeDiff);
         AutoPtr<IList> list;
         newLp->GetAllRoutes((IList**)&list);
         routeDiff->SetAdded(list);
@@ -4799,8 +4797,6 @@ Boolean CConnectivityService::UpdateRoutes(
     // add routes before removing old in case it helps with continuous connectivity
 
     // do this twice, adding non-nexthop routes first, then routes they are dependent on
-    // first add the route without specific gateway
-    // second add the route with specific gateway
     Int32 i = 0;
     while (i < 2) {
         ++i;
@@ -4814,8 +4810,8 @@ Boolean CConnectivityService::UpdateRoutes(
                 it->GetNext((IInterface**)&obj);
                 route = IRouteInfo::Probe(obj);
                 route->HasGateway(&bval);
-                if (i == 1 && bval) continue;
-                if (i == 2 && !bval) continue;
+                if (i == 1 && bval) continue; // first round add the route without specific gateway
+                if (i == 2 && !bval) continue;// second round add the route with specific gateway
                 if (DBG) Slogger::D(TAG, "Adding Route [%s] to network %d",
                     TO_CSTR(route), netId);
                 ec = mNetd->AddRoute(netId, route);

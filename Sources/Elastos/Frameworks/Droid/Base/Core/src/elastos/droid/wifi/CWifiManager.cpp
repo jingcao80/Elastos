@@ -281,7 +281,7 @@ ECode CWifiManager::ServiceHandler::HandleMessage(
                 // This will cause all further async API calls on the WifiManager
                 // to fail and throw an exception
                 if (sAsyncChannel) {
-                    sAsyncChannel->Disconnected();
+                    //sAsyncChannel->Disconnected();
                     sAsyncChannel = NULL;
                 }
             }
@@ -292,11 +292,11 @@ ECode CWifiManager::ServiceHandler::HandleMessage(
             // Ignore
             break;
         case AsyncChannel::CMD_CHANNEL_DISCONNECTED:
-            // Logger::E(TAG, "ServiceHandler HandleMessage CMD_CHANNEL_DISCONNECTED Channel connection lost");
+            //Logger::E(TAG, "ServiceHandler HandleMessage CMD_CHANNEL_DISCONNECTED Channel connection lost");
             // This will cause all further async API calls on the WifiManager
             // to fail and throw an exception
             if (sAsyncChannel) {
-                sAsyncChannel->Disconnected();
+                //sAsyncChannel->Disconnected();
                 sAsyncChannel = NULL;
             }
             mLooper->Quit();
@@ -425,7 +425,7 @@ AutoPtr<IAsyncChannel> CWifiManager::sAsyncChannel;
 AutoPtr<ICountDownLatch> CWifiManager::sConnected;
 
 Object CWifiManager::sThreadRefLock;
-Int32 CWifiManager::sThreadRefCount;
+Int32 CWifiManager::sThreadRefCount = 0;
 AutoPtr<IHandlerThread> CWifiManager::sHandlerThread;
 
 CAR_INTERFACE_IMPL(CWifiManager, Object, IWifiManager)
@@ -435,26 +435,31 @@ CAR_OBJECT_IMPL(CWifiManager)
 CWifiManager::CWifiManager()
     : mActiveLockCount(0)
 {
-    sAsyncChannel = new AsyncChannel();
+    //sAsyncChannel = new AsyncChannel();
     CCountDownLatch::New(1, (ICountDownLatch**)&sConnected);
 }
 
 CWifiManager::~CWifiManager()
 {
-    if (sAsyncChannel) {
-        sAsyncChannel->Disconnected();
-        sAsyncChannel = NULL;
-    }
+    //Logger::E("CWifiManager", "destructor CWifiManager line:%d, func:%s, sAsyncChannel:%p, sThreadRefCount;%d\n",
+    //        __LINE__, __func__, sAsyncChannel.Get(), sThreadRefCount);
 
     //try {
     {
         AutoLock lock(sThreadRefLock);
-        if (--sThreadRefCount == 0 && sHandlerThread != NULL) {
-            AutoPtr<ILooper> l;
-            sHandlerThread->GetLooper((ILooper**)&l);
-            if (l != NULL) {
-                l->Quit();
+        if (--sThreadRefCount == 0) {
+            if (sAsyncChannel) {
+                sAsyncChannel->Disconnect();
+                //sAsyncChannel->Disconnected();
+                //sAsyncChannel = NULL;
             }
+            //if (sHandlerThread != NULL) {
+            //    AutoPtr<ILooper> l;
+            //    sHandlerThread->GetLooper((ILooper**)&l);
+            //    if (l != NULL) {
+            //        l->Quit();
+            //    }
+            //}
         }
     }
     //} finally {
@@ -1023,6 +1028,7 @@ AutoPtr<IInterface> CWifiManager::RemoveListener(
 void CWifiManager::Init()
 {
     AutoLock lock(sThreadRefLock);
+    //Logger::E("CWifiManager", "enter CWifiManager::Init line:%d, func:%s, sThreadRefCount:%d\n", __LINE__, __func__, sThreadRefCount);
     if (++sThreadRefCount == 1) {
         AutoPtr<IMessenger> messenger;
         GetWifiServiceMessenger((IMessenger**)&messenger);
@@ -1039,6 +1045,8 @@ void CWifiManager::Init()
         AutoPtr<ILooper> looper;
         sHandlerThread->GetLooper((ILooper**)&looper);
         AutoPtr<IHandler> handler = new ServiceHandler(looper);
+        //Logger::E("CWifiManager", "before async channel connect line:%d, func:%s, sAsyncChannel:%p, handler:%p\n",
+        //        __LINE__, __func__, sAsyncChannel.Get(), handler.Get());
         sAsyncChannel->Connect(mContext, handler, messenger);
         // try {
             sConnected->Await();
