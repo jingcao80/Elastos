@@ -34,7 +34,9 @@ ECode CDateUtils::FormatDateRange(
     /* [out] */ Elastos::Utility::IFormatter** ret)
 {
     VALIDATE_NOT_NULL(ret);
-    *ret = DateUtils::FormatDateRange(context, formatter, startMillis, endMillis, flags);
+    AutoPtr<Elastos::Utility::IFormatter> f = DateUtils::FormatDateRange(
+            context, formatter, startMillis, endMillis, flags);
+    *ret = f;
     REFCOUNT_ADD(*ret);
     return NOERROR;
 }
@@ -49,7 +51,9 @@ ECode CDateUtils::FormatDateRange(
     /* [out] */ Elastos::Utility::IFormatter** ret)
 {
     VALIDATE_NOT_NULL(ret);
-    *ret = DateUtils::FormatDateRange(context, formatter, startMillis, endMillis, flags, timeZone);
+    AutoPtr<Elastos::Utility::IFormatter> f = DateUtils::FormatDateRange(
+            context, formatter, startMillis, endMillis, flags, timeZone);
+    *ret = f;
     REFCOUNT_ADD(*ret);
     return NOERROR;
 }

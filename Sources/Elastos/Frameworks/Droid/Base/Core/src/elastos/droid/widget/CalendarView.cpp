@@ -7,7 +7,7 @@
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/text/format/CDateUtils.h"
+#include "elastos/droid/text/format/DateUtils.h"
 #include "elastos/droid/utility/CTypedValueHelper.h"
 #include "elastos/droid/view/CGestureDetector.h"
 #include "elastos/droid/R.h"
@@ -22,7 +22,7 @@ using Elastos::Droid::Graphics::PaintStyle_FILL;
 using Elastos::Droid::Graphics::PaintAlign_CENTER;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Format::IDateUtils;
-using Elastos::Droid::Text::Format::CDateUtils;
+using Elastos::Droid::Text::Format::DateUtils;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::ITypedValueHelper;
 using Elastos::Droid::Utility::CTypedValueHelper;
@@ -116,11 +116,11 @@ ECode CalendarView::LegacyCalendarViewDelegate::OnScrollListener::OnScroll(
 }
 
 //========================================================================================
-//              CalendarView::LegacyCalendarViewDelegate::
+//              CalendarView::LegacyCalendarViewDelegate
 //========================================================================================
 const Boolean CalendarView::LegacyCalendarViewDelegate::DEFAULT_SHOW_WEEK_NUMBER = TRUE;
 
-const Int64 CalendarView::LegacyCalendarViewDelegate::MILLIS_IN_DAY = 86400000L;
+const Int64 CalendarView::LegacyCalendarViewDelegate::MILLIS_IN_DAY = 86400000LL;
 
 const Int32 CalendarView::LegacyCalendarViewDelegate::DAYS_PER_WEEK = 7;
 
@@ -805,10 +805,8 @@ void CalendarView::LegacyCalendarViewDelegate::SetUpHeader()
     mDayLabels = ArrayOf<String>::Alloc(mDaysPerWeek);
     for (Int32 i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
         Int32 calendarDay = (i > ICalendar::SATURDAY) ? i - ICalendar::SATURDAY : i;
-        AutoPtr<IDateUtils> du;
-        CDateUtils::AcquireSingleton((IDateUtils**)&du);
-        du->GetDayOfWeekString(calendarDay,
-                IDateUtils::LENGTH_SHORTEST, &((*mDayLabels)[i - mFirstDayOfWeek]));
+        (*mDayLabels)[i - mFirstDayOfWeek] = DateUtils::GetDayOfWeekString(calendarDay,
+                IDateUtils::LENGTH_SHORTEST);
     }
 
     AutoPtr<IView> child;
@@ -953,10 +951,10 @@ void CalendarView::LegacyCalendarViewDelegate::OnScroll(
 {
     AutoPtr<IView> _child;
     IViewGroup::Probe(view)->GetChildAt(0, (IView**)&_child);
-    AutoPtr<WeekView> child = (WeekView*) _child.Get();
-    if (child == NULL) {
+    if (_child == NULL) {
         return;
     }
+    AutoPtr<WeekView> child = (WeekView*)_child.Get();
 
     // Figure out where we are
     Int32 h = 0, b = 0, pos = 0;
@@ -1041,10 +1039,7 @@ void CalendarView::LegacyCalendarViewDelegate::SetMonthDisplayed(
             | IDateUtils::FORMAT_SHOW_YEAR;
     Int64 millis = 0;
     calendar->GetTimeInMillis(&millis);
-    AutoPtr<IDateUtils> du;
-    CDateUtils::AcquireSingleton((IDateUtils**)&du);
-    String newMonthName;
-    du->FormatDateRange(mContext, millis, millis, flags, &newMonthName);
+    String newMonthName = DateUtils::FormatDateRange(mContext, millis, millis, flags);
     mMonthName->SetText(CoreUtils::Convert(newMonthName));
     IView::Probe(mMonthName)->Invalidate();
 }
@@ -1236,8 +1231,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::GetView(
     }
 
     Int32 dfw = 0;
-    mSelectedDate->Get(ICalendar::DAY_OF_WEEK, &dfw);
-    Int32 selectedWeekDay = (mSelectedWeek == position) ? dfw : -1;
+    Int32 selectedWeekDay = (mSelectedWeek == position) ? (mSelectedDate->Get(ICalendar::DAY_OF_WEEK, &dfw), dfw) : -1;
     weekView->Init(position, selectedWeekDay, mFocusedMonth);
 
     *result = weekView;

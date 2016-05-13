@@ -16,31 +16,31 @@ ECode CCalendarHelper::GetAvailableLocales(
 }
 
 ECode CCalendarHelper::GetInstance(
-    /* [out] */ ICalendar ** ppCalenar)
+    /* [out] */ ICalendar** calenar)
 {
-    return Calendar::GetInstance(ppCalenar);
+    return Calendar::GetInstance(calenar);
 }
 
 ECode CCalendarHelper::GetInstance(
-    /* [in] */ ILocale * pLocale,
-    /* [out] */ ICalendar ** ppCalenar)
+    /* [in] */ ILocale* locale,
+    /* [out] */ ICalendar** calenar)
 {
-    return Calendar::GetInstance(pLocale, ppCalenar);
+    return Calendar::GetInstance(locale, calenar);
 }
 
 ECode CCalendarHelper::GetInstance(
-    /* [in] */ ITimeZone * pTimezone,
-    /* [out] */ ICalendar ** ppCalenar)
+    /* [in] */ ITimeZone* timezone,
+    /* [out] */ ICalendar** calenar)
 {
-    return Calendar::GetInstance(pTimezone, ppCalenar);
+    return Calendar::GetInstance(timezone, calenar);
 }
 
 ECode CCalendarHelper::GetInstance(
-    /* [in] */ ITimeZone * pTimezone,
-    /* [in] */ ILocale * pLocale,
-    /* [out] */ ICalendar ** ppCalenar)
+    /* [in] */ ITimeZone* timezone,
+    /* [in] */ ILocale* locale,
+    /* [out] */ ICalendar** calenar)
 {
-    return Calendar::GetInstance(pTimezone, pLocale, ppCalenar);
+    return Calendar::GetInstance(timezone, locale, calenar);
 }
 
 } // Utility
