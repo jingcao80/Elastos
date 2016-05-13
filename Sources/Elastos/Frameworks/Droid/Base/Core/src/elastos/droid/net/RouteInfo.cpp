@@ -379,10 +379,11 @@ ECode RouteInfo::Equals(
     if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
     if (!(IRouteInfo::Probe(obj) != NULL)) FUNC_RETURN(FALSE)
     AutoPtr<IRouteInfo> target = IRouteInfo::Probe(obj);
-    *result = Objects::Equals(mDestination, Ptr(target)->Func(target->GetDestination)) &&
-            Objects::Equals(mGateway, Ptr(target)->Func(target->GetGateway)) &&
-            mInterface.Equals(Ptr(target)->Func(target->GetInterface)) &&
-            mType == Ptr(target)->Func(target->GetType);
+    Boolean b1 = Objects::Equals(mDestination, Ptr(target)->Func(target->GetDestination));
+    Boolean b2 = Objects::Equals(mGateway, Ptr(target)->Func(target->GetGateway));
+    Boolean b3 = mInterface.Equals(Ptr(target)->Func(target->GetInterface));
+    Boolean b4 = mType == Ptr(target)->Func(target->GetType);
+    *result = b1 && b2 && b3 && b4;
     return NOERROR;
 }
 

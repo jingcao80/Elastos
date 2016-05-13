@@ -27,7 +27,8 @@ public:
 
     TO_STRING_IMPL("Elastos::Droid::Os::CMessengerImpl");
 private:
-    IHandler* mOwner;
+    //IHandler* mOwner;
+    AutoPtr<IWeakReference> mOwner;//IHandler
 };
 
 } // namespace Os

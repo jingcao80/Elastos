@@ -95,7 +95,6 @@ ECode WifiSettingsStore::HandleWifiToggled(
         *result = FALSE;
         return NOERROR;
     }
-    Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
 
     if (wifiEnabled) {
         if (mAirplaneModeOn) {
@@ -183,7 +182,6 @@ Boolean WifiSettingsStore::IsAirplaneSensitive()
 
 Boolean WifiSettingsStore::IsAirplaneToggleable()
 {
-    Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     String toggleableRadios;
@@ -216,7 +214,7 @@ Int32 WifiSettingsStore::GetPersistedWifiState()
     //try {
     Int32 r;
     ECode ec = Settings::Global::GetInt32(cr, ISettingsGlobal::WIFI_ON, &r);
-    Logger::E("leliang", "WifiSettingsStore::GetPersistedWifiState, r=%d", r);
+    Logger::D("WifiSettingsStore", "WifiSettingsStore::GetPersistedWifiState, r=%d", r);
     //} catch (Settings.SettingNotFoundException e) {
     if (FAILED(ec)) {
         Boolean b;

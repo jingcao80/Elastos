@@ -65,7 +65,7 @@ ECode NetworkFactory::constructor(
 
 ECode NetworkFactory::Register()
 {
-    if (DBG) Log("Registering NetworkFactory");
+    if (DBG) Logger::E(mLOG_TAG, "Registering NetworkFactory");
     if (mMessenger == NULL) {
         CMessenger::New(this, (IMessenger**)&mMessenger);
         AutoPtr<IConnectivityManager> connectivityManager;
@@ -77,7 +77,7 @@ ECode NetworkFactory::Register()
 
 ECode NetworkFactory::Unregister()
 {
-    if (DBG) Log("Unregistering NetworkFactory");
+    if (DBG) Logger::E(mLOG_TAG, "Unregistering NetworkFactory");
     if (mMessenger != NULL) {
         AutoPtr<IConnectivityManager> connectivityManager;
         CConnectivityManager::From(mContext, (IConnectivityManager**)&connectivityManager);
@@ -99,7 +99,7 @@ ECode NetworkFactory::HandleMessage(
     switch (what) {
         case IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION: {
             if (mAsyncChannel != NULL) {
-                Log("asyncchannel is connected");
+                Logger::E(mLOG_TAG, "asyncchannel is connected");
             }
             else {
                 AutoPtr<IMessenger> replyTo;
@@ -155,7 +155,7 @@ ECode NetworkFactory::HandleAddRequest(
     if (n == NULL) {
         String s;
         IObject::Probe(request)->ToString(&s);
-        if (DBG) Log("got request %s with score %d", s.string(), score);
+        if (DBG) Logger::E(mLOG_TAG, "got request %s with score %d", s.string(), score);
         n = new NetworkRequestInfo(request, score);
         Int32 requestId;
         n->mRequest->GetRequestId(&requestId);
@@ -163,12 +163,12 @@ ECode NetworkFactory::HandleAddRequest(
     } else {
         String s;
         IObject::Probe(request)->ToString(&s);
-        if (VDBG) Log("new score %d for exisiting request ", score, s.string());
+        if (VDBG) Logger::E(mLOG_TAG, "new score %d for exisiting request %s", score, s.string());
         n->mScore = score;
     }
     String s;
     IObject::Probe(mCapabilityFilter)->ToString(&s);
-    if (VDBG) Log("  my score=%d, my filter=", mScore, s.string());
+    if (VDBG) Logger::E(mLOG_TAG, "  my score=%d, my filter= %s", mScore, s.string());
     EvalRequest(n);
     return NOERROR;
 }
@@ -322,10 +322,11 @@ ECode NetworkFactory::SetCapabilityFilter(
 ECode NetworkFactory::Log(
     /* [in] */ const char* fmt, ...)
 {
-    va_list ap;
-    va_start(ap, fmt);
-    Logger::E(mLOG_TAG, fmt, ap);
-    va_end(ap);
+    Logger::E(mLOG_TAG, "NetworkFactory::Log no out put");
+    //va_list ap;
+    //va_start(ap, fmt);
+    //Logger::E(mLOG_TAG, fmt, ap);
+    //va_end(ap);
     return NOERROR;
 }
 

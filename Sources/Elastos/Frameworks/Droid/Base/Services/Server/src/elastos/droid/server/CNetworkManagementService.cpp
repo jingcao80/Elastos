@@ -1399,6 +1399,11 @@ ECode CNetworkManagementService::ModifyRoute(
 
     Int32 type;
     route->GetType(&type);
+    if (DBG) {
+        String ss;
+        IObject::Probe(route)->ToString(&ss);
+        Logger::E("NetworkManagementService", "line:%d, func:%s, type:%d route:%s\n", __LINE__, "ModifyRoute", type, ss.string());
+    }
     switch (type) {
         case IRouteInfo::RTN_UNICAST:
         {
@@ -1876,8 +1881,9 @@ ECode CNetworkManagementService::ModifyNat(
        FAIL_RETURN(interfaceAddresses->GetIterator((IIterator**)&emu));
        Boolean hasNext;
        while (emu->HasNext(&hasNext), hasNext ) {
-           AutoPtr<IInterfaceAddress> ia;
-           emu->GetNext((IInterface**)&ia);
+           AutoPtr<IInterface> obj;
+           emu->GetNext((IInterface**)&obj);
+           AutoPtr<IInterfaceAddress> ia = IInterfaceAddress::Probe(obj);
            AutoPtr<IInetAddress> addrIn;
            AutoPtr<IInetAddress> addrOut;
            Int16 prefixLen;
@@ -2009,8 +2015,6 @@ ECode CNetworkManagementService::StartAccessPoint(
     if (b) {
         WifiFirmwareReload(wlanIface, String("AP"));
     }
-    StringBuffer cmd("softap start ");
-    cmd += wlanIface;
     if (wifiConfig == NULL) {
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
         args->Set(0, CoreUtils::Convert(String("set")));

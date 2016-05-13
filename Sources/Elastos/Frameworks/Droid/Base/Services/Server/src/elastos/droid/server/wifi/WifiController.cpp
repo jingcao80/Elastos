@@ -131,7 +131,7 @@ ECode WifiController::DefaultState::ProcessMessage(
 //=====================================================================
 ECode WifiController::ApStaDisabledState::Enter()
 {
-    Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
+    if (DBG) Logger::D("WifiController", "ApStaDisabledState::Enter\n");
     mOwner->mWifiStateMachine->SetSupplicantRunning(FALSE);
     // Supplicant can't restart right away, so not the time we switched off
     mDisabledTimestamp = SystemClock::GetElapsedRealtime();
@@ -146,24 +146,21 @@ ECode WifiController::ApStaDisabledState::ProcessMessage(
 {
     Int32 what;
     msg->GetWhat(&what);
-    Logger::D("WifiController::ApStaDisabledState", "what: %d", what);
+    Logger::D("WifiController", "ApStaDisabledState what: %d", what);
     switch (what) {
         case CMD_WIFI_TOGGLED:
         case CMD_AIRPLANE_TOGGLED: {
             Boolean isWifiToggleEnabled;
             Boolean isScanAlwaysAvailable;
-            Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
             if (mOwner->mSettingsStore->IsWifiToggleEnabled(&isWifiToggleEnabled), isWifiToggleEnabled) {
                 if (DoDeferEnable(msg)) {
                     if (mHaveDeferredEnable) {
-            Logger::E("leliang", "file:%s. line:%d, func:%s\n", __FILE__, __LINE__, __func__);
                         //  have 2 toggles now, inc serial number an ignore both
                         mDeferredEnableSerialNumber++;
                     }
                     mHaveDeferredEnable = !mHaveDeferredEnable;
                     break;
                 }
-                Logger::E("leliang", "file:%s. line:%d, func:%s, mDeviceIdle:%d\n", __FILE__, __LINE__, __func__, mOwner->mDeviceIdle);
                 if (mOwner->mDeviceIdle == FALSE) {
                     mOwner->CheckLocksAndTransitionWhenDeviceActive();
                 } else {
@@ -197,10 +194,10 @@ ECode WifiController::ApStaDisabledState::ProcessMessage(
             Int32 arg1;
             msg->GetArg1(&arg1);
             if (arg1 != mDeferredEnableSerialNumber) {
-                Logger::D("WifiController::ApStaDisabledState", "DEFERRED_TOGGLE ignored due to serial mismatch");
+                Logger::D("WifiController", "ApStaDisabledState CMD_DEFERRED_TOGGLE ignored due to serial mismatch");
                 break;
             }
-            Logger::D("WifiController::ApStaDisabledState", "DEFERRED_TOGGLE handled");
+            Logger::D("WifiController", "ApStaDisabledState CMD_DEFERRED_TOGGLE handled");
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             IMessage* message = IMessage::Probe(obj);

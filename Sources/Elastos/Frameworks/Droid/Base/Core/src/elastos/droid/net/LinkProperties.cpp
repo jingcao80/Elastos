@@ -587,7 +587,8 @@ ECode LinkProperties::ToString(
     }
     routes += "] ";
     String s;
-    IObject::Probe(mHttpProxy)->ToString(&s);
+    if (mHttpProxy != NULL)
+        IObject::Probe(mHttpProxy)->ToString(&s);
     String proxy = (mHttpProxy == NULL ? String("") : String(" HttpProxy: ") + s + " ");
     String stacked("");
     AutoPtr<ICollection> values;

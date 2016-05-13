@@ -239,12 +239,20 @@ CPendingIntentRecord::CPendingIntentRecord()
 CPendingIntentRecord::~CPendingIntentRecord()
 {
     if (!mCanceled) {
-        AutoPtr<IMessage> msg;
-        mOwner->mHandler->ObtainMessage(
-            CActivityManagerService::FINALIZE_PENDING_INTENT_MSG,
-            TO_IINTERFACE(this), (IMessage**)&msg);
-        Boolean res;
-        mOwner->mHandler->SendMessage(msg, &res);
+        //NOTE:(leliang) in android the code below is called in finalize,
+        // and the task of CompleteFinalize will be handed
+        // in another thread throught the message.
+        // in Elastos, because now in destructor,
+        // CompleteFinalize can not be invoked anymore in another thread.
+        // so just called here
+        //
+        //AutoPtr<IMessage> msg;
+        //mOwner->mHandler->ObtainMessage(
+        //    CActivityManagerService::FINALIZE_PENDING_INTENT_MSG,
+        //    TO_IINTERFACE(this), (IMessage**)&msg);
+        //Boolean res;
+        //mOwner->mHandler->SendMessage(msg, &res);
+        CompleteFinalize();
     }
 }
 

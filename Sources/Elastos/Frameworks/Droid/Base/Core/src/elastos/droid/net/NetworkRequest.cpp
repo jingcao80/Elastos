@@ -61,10 +61,11 @@ ECode NetworkRequest::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = String("NetworkRequest [ id=");
+    String request("NetworkRequest [ id=");
     String s;
     IObject::Probe(mNetworkCapabilities)->ToString(&s);
-    result->AppendFormat("%d, legacyType=%d, %s ]", mRequestId, mLegacyType, s.string());
+    request.AppendFormat(" requestId:%d, legacyType=%d, %s ]", mRequestId, mLegacyType, s.string());
+    *result = request;
     return NOERROR;
 }
 

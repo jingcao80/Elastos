@@ -202,7 +202,9 @@ ECode WifiConfigStore::InnerDelayedDiskWriteWriter::OnWriteCalled(
             continue;
         }
         if (VDBG) {
-            mOwner->Loge(String("writeKnownNetworkHistory write config "));// + config.configKey());
+            String ck;
+            config->ConfigKey(&ck);
+            mOwner->Loge(String("writeKnownNetworkHistory write config ") + ck);
         }
         String configKey;
         config->ConfigKey(&configKey);
@@ -322,8 +324,10 @@ ECode WifiConfigStore::InnerDelayedDiskWriteWriter::OnWriteCalled(
         AutoPtr<IHashMap> linkedConfigurations;
         config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
         if (linkedConfigurations != NULL) {
-            mOwner->Loge(String("writeKnownNetworkHistory write linked "));
-                    //+ config.linkedConfigurations.size());
+            Int32 size;
+            linkedConfigurations->GetSize(&size);
+            mOwner->Loge(String("writeKnownNetworkHistory write linked ")
+                        + StringUtils::ToString(size));
 
             AutoPtr<ISet> keySet;
             connectChoices->GetKeySet((ISet**)&keySet);
@@ -794,10 +798,15 @@ ECode WifiConfigStore::UpdateConfiguration(
             result->AverageRssi(previousRssi, previousSeen,
                     WifiAutoJoinController::mScanResultMaximumAge);
             if (VDBG) {
-                Loge(String("updateConfiguration freq= xxxTODO "));// + result.frequency
-                    //+ " BSSID=" + result.BSSID
-                    //+ " RSSI=" + result.level
-                    //+ " " + config.configKey());
+                Int32 frequency;
+                result->GetFrequency(&frequency);
+                String configkey;
+                config->ConfigKey(&configkey);
+                Loge(String("updateConfiguration freq=") +
+                    StringUtils::ToString(frequency)
+                    + " BSSID=" + bssid
+                    + " RSSI=" + StringUtils::ToString(rssi)
+                    + " " + configkey);
             }
         }
     }
@@ -977,8 +986,10 @@ ECode WifiConfigStore::SaveNetwork(
     // A new network cannot have null SSID
     Int32 networkId;
     String ssid;
+    if (config != NULL)
+        config->GetSSID(&ssid);
     if (config == NULL || ((config->GetNetworkId(&networkId), networkId) == IWifiConfiguration::INVALID_NETWORK_ID &&
-            (config->GetSSID(&ssid), ssid).IsNull())) {
+            ssid.IsNull())) {
         AutoPtr<NetworkUpdateResult> nur = new NetworkUpdateResult(IWifiConfiguration::INVALID_NETWORK_ID);
         *result = nur;
         REFCOUNT_ADD(*result);
@@ -1107,7 +1118,7 @@ ECode WifiConfigStore::SaveWifiConfigBSSID(
     if (!((config->GetAutoJoinBSSID(&autoJoinBSSID), autoJoinBSSID).IsNull())) {
         String configKey;
         config->ConfigKey(&configKey);
-        Loge(String("saveWifiConfigBSSID Setting BSSID for ") + configKey
+        Loge(String("saveWifiConfig BSSID Setting BSSID for ") + configKey
                 + String(" to ") + autoJoinBSSID);
         if (!mWifiNative->SetNetworkVariable(
                 networkId,
@@ -1802,8 +1813,10 @@ ECode WifiConfigStore::WriteKnownNetworkHistory()
         }
     }
     if (VDBG) {
-        Loge(String(" writeKnownNetworkHistory() num networks:"));
-                //mConfiguredNetworks.size() + " needWrite=" + needUpdate);
+        Int32 size;
+        mConfiguredNetworks->GetSize(&size);
+        Loge(String(" writeKnownNetworkHistory() num networks:")
+                + StringUtils::ToString(size) + " needWrite=" + StringUtils::ToString(needUpdate));
     }
     if (needUpdate == FALSE) {
         return NOERROR;
@@ -2406,26 +2419,28 @@ ECode WifiConfigStore::UpdateSavedNetworkHistory(
 
         String configSSID;
         config->GetSSID(&configSSID);
+        String configConfigKey;
+        config->ConfigKey(&configConfigKey);
+        String capabilities;
+        scanResult->GetCapabilities(&capabilities);
         if (configSSID.IsNull() || !configSSID.Equals(SSID)) {
             // SSID mismatch
             if (VVDBG) {
-                Loge(String("updateSavedNetworkHistory(): SSID mismatch "));
-                        //+ config.configKey()
-                        //+ " SSID=" + config.SSID + " " + SSID);
+                Loge(String("updateSavedNetworkHistory(): SSID mismatch ")
+                        + configConfigKey
+                        + " SSID=" + configSSID + " " + SSID);
             }
             continue;
         }
         if (VDBG) {
-            Loge(String("updateSavedNetworkHistory(): try "));
-                    //+ config.configKey()
-                    //+ " SSID=" + config.SSID + " " + scanResult.SSID
-                    //+ " " + scanResult.capabilities
-                    //+ " ajst=" + config.autoJoinStatus);
+            Int32 autoJoinStatus;
+            config->GetAutoJoinStatus(&autoJoinStatus);
+            Loge(String("updateSavedNetworkHistory(): try ")
+                    + configConfigKey
+                    + " SSID=" + configSSID + " " + ssid
+                    + " cap=" + capabilities
+                    + " ajst=" + StringUtils::ToString(autoJoinStatus));
         }
-        String capabilities;
-        scanResult->GetCapabilities(&capabilities);
-        String configConfigKey;
-        config->ConfigKey(&configConfigKey);
         if (capabilities.Contains("WEP")
                 && configConfigKey.Contains("WEP")) {
             found = TRUE;
@@ -2451,8 +2466,8 @@ ECode WifiConfigStore::UpdateSavedNetworkHistory(
             config->GetAutoJoinStatus(&autoJoinStatus);
             if (autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DELETED) {
                 if (VVDBG) {
-                    Loge(String("updateSavedNetworkHistory(): found a deleted, skip it...  "));
-                            //+ configConfigKey);
+                    Loge(String("updateSavedNetworkHistory(): found a deleted, skip it...  configkey")
+                            + configConfigKey);
                 }
                 // The scan result belongs to a deleted config:
                 //   - increment numConfigFound to remember that we found a config
@@ -2502,17 +2517,22 @@ ECode WifiConfigStore::UpdateSavedNetworkHistory(
         }
 
         if (VDBG && found) {
-            //String status("");
-            //if (scanResult.autoJoinStatus > 0) {
-            //    status = " status=" + Integer.toString(scanResult.autoJoinStatus);
-            //}
-            Loge(String("        got known scan result "));
-                    //+ scanResult.BSSID + " key : "
-                    //+ config.configKey() + " num: " +
+            Int32 autoJoinStatus;
+            scanResult->GetAutoJoinStatus(&autoJoinStatus);
+            String status("");
+            if (autoJoinStatus > 0) {
+                status = String(" status=") + StringUtils::ToString(autoJoinStatus);
+            }
+            String bssid;
+            scanResult->GetBSSID(&bssid);
+            Loge(String("        got known scan result ")
+                    + bssid  + " key : "
+                    + configConfigKey
+                    //+ " num: " +
                     //Integer.toString(config.scanResultCache.size())
                     //+ " rssi=" + Integer.toString(scanResult.level)
                     //+ " freq=" + Integer.toString(scanResult.frequency)
-                    //+ status);
+                    + status);
         }
     }
     *result = numConfigFound != 0;
@@ -5066,7 +5086,7 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
 
     if (DBG) {
         String str("will read network variables netId=");
-        str += netId;
+        str += StringUtils::ToString(netId);
         Loge(str);
     }
 
