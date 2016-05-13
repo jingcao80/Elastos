@@ -1,0 +1,23 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace Database {
+
+    interface IContactUpdateUtils {
+        SetSuperPrimary(
+            [in] IContext* context,
+            [in] Int64 dataId);
+    }
+
+    } // Database
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

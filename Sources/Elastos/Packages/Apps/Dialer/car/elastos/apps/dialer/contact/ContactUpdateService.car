@@ -1,0 +1,33 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Contact {
+
+    /**
+      * @Invovle
+      * interface IService
+      * interface IIntentService
+      */
+    interface IContactUpdateService
+    {
+        const String EXTRA_PHONE_NUMBER_DATA_ID = "phone_number_data_id";
+    }
+
+    interface IContactUpdateServiceHelper
+    {
+        /** Creates an intent that sets the selected data item as super primary (default) */
+        CreateSetSuperPrimaryIntent(
+            [in] IContext* context,
+            [in] Int64 dataId,
+            [out] IIntent** intent);
+    }
+
+    } //Contact
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
