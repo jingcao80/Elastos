@@ -5,9 +5,11 @@
 #include "elastos/droid/animation/PathKeyframes.h"
 #include "elastos/droid/animation/CArgbEvaluator.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -282,7 +284,7 @@ ECode ObjectAnimator::SetTarget(
 {
     AutoPtr<IInterface> oldTarget;
     GetTarget((IInterface**)&oldTarget);
-    if (oldTarget != IInterface::Probe(target)) {
+    if (oldTarget.Get() != IInterface::Probe(target)) {
         mTarget = NULL;
         if (target != NULL) {
             IWeakReferenceSource::Probe(target)->GetWeakReference((IWeakReference**)&mTarget);
@@ -372,7 +374,7 @@ static ECode CheckIsCarObject(
     ClassID objId;
     ECode ec = IObject::Probe(target)->GetClassID(&objId);
     if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
+        Logger::E("ObjectAnimator", "Target object [%s] is not a CAR object!", TO_CSTR(target));
         assert(0 && "Target object is not a CAR object!");
     }
     return ec;
@@ -812,7 +814,7 @@ ECode ObjectAnimator::ToString(
             sb += "\n    ";
             sb += v;
         }
-        sb += "\n}"
+        sb += "\n}";
     }
     sb += "}";
     *str = sb.ToString();
