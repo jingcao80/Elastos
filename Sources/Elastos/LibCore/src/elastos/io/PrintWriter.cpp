@@ -343,16 +343,7 @@ ECode PrintWriter::Println(
 ECode PrintWriter::Println(
     /* [in] */ IInterface* obj)
 {
-    String str;
-    IObject* object = IObject::Probe(obj);
-    if (object) {
-        object->ToString(&str);
-    }
-    else {
-        str.AppendFormat("%p", obj);
-    }
-
-    return Println(str);
+    return Println(Object::ToString(obj));
 }
 
 ECode PrintWriter::Println(
