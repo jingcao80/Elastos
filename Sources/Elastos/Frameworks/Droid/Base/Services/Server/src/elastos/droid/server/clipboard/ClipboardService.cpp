@@ -143,13 +143,13 @@ ECode ClipboardService::constructor(
     AutoPtr<IBroadcastReceiver> myBR = (IBroadcastReceiver*)new MyBroadcastReceiver(this);
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(myBR, userFilter, (IIntent**)&intent);
-    AutoPtr<IInterface> bridgeObject;
 
     // try {
     /*
      * load and create the security bridge
      */
-    assert(0 && "TODO");
+    Slogger::E(TAG, "TODO: load and create the security bridge");
+    AutoPtr<IInterface> bridgeObject;
     // bridgeObject = getClass().getClassLoader().loadClass(SECURITY_BRIDGE_NAME).newInstance();
     mSecurityBridge = IClipboardManagerMonitor::Probe(bridgeObject);
 
@@ -213,7 +213,9 @@ ECode ClipboardService::SetPrimaryClip(
         const Int32 userId = UserHandle::GetUserId(callingUid);
         AutoPtr<PerUserClipboard> clipboard = GetClipboard(userId);
         RevokeUris(clipboard);
-        mSecurityBridge->NotifyCopy(Binder::GetCallingUid(), clip);
+        if (mSecurityBridge) {
+            FAIL_RETURN(mSecurityBridge->NotifyCopy(Binder::GetCallingUid(), clip))
+        }
         SetPrimaryClipInternal(clipboard, clip);
         AutoPtr<IList> related;
         GetRelatedProfiles(userId, (IList**)&related);
@@ -345,8 +347,10 @@ ECode ClipboardService::GetPrimaryClip(
         FAIL_RETURN(AddActiveOwnerLocked(Binder::GetCallingUid(), pkg));
         AutoPtr<IClipData> _clip = GetClipboard()->mPrimaryClip;
         if (_clip != NULL) {
-            Boolean flag = FALSE;
-            mSecurityBridge->ApprovePasteRequest(Binder::GetCallingUid(), _clip.Get(), &flag);
+            Boolean flag = TRUE;
+            if (mSecurityBridge) {
+                mSecurityBridge->ApprovePasteRequest(Binder::GetCallingUid(), _clip.Get(), &flag);
+            }
             if (!flag) {
                 _clip = NULL;
             }
@@ -404,11 +408,14 @@ ECode ClipboardService::HasPrimaryClip(
         Boolean hasClip = FALSE;
         AutoPtr<IClipData> cd = GetClipboard()->mPrimaryClip;
         if (cd != NULL) {
-            mSecurityBridge->ApprovePasteRequest(Binder::GetCallingUid(),
-                cd, &hasClip);
+            if (mSecurityBridge) {
+                mSecurityBridge->ApprovePasteRequest(Binder::GetCallingUid(), cd, &hasClip);
+            }
+            else {
+                hasClip = TRUE;
+            }
         }
         *hasPrimaryClip = hasClip;
-
         return NOERROR;
     }
     return NOERROR;

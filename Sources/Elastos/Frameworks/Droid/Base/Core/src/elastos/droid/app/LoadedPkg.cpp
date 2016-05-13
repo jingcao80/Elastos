@@ -789,10 +789,11 @@ String LoadedPkg::GetElastosClassName(
         && (className.StartWith("android.")
             || className.StartWith("com.android."))) {
         HashMap<String, String> classNameMap;
-        classNameMap[String("android.opengl.")]               = String("Elastos.Droid.Opengl.C");
-        classNameMap[String("android.preference.")]           = String("Elastos.Droid.Preference.C");
-        classNameMap[String("com.android.internal.widget.")]  = String("Elastos.Droid.Internal.Widget.C");
-        classNameMap[String("com.android.server.")]           = String("Elastos.Droid.Server.C");
+        classNameMap[String("android.opengl.")]                     = String("Elastos.Droid.Opengl.C");
+        classNameMap[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
+        classNameMap[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
+        classNameMap[String("com.android.internal.view.menu.")]     = String("Elastos.Droid.Internal.View.Menu.C");
+        classNameMap[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");
 
         String ns = className.Substring(0, lastIndex + 1);
         HashMap<String, String>::Iterator it = classNameMap.Find(ns);

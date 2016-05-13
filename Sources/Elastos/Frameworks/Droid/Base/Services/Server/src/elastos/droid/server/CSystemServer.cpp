@@ -697,12 +697,7 @@ ECode SystemServer::StartOtherServices()
         }
 
         if (!disableSystemUI) {
-            Slogger::I(TAG, "Status Bar todo");
-            // ec = CStatusBarManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
-            //     (CStatusBarManagerService**)&statusBar);
-            // if (FAILED(ec)) ReportWtf("starting CStatusBarManagerService", ec);
-            // ServiceManager::AddService(IContext::STATUS_BAR_SERVICE, TO_IINTERFACE(statusBar));
-            Slogger::I(TAG, "Add the service StatusBarManagerService.");
+            Slogger::I(TAG, "Status Bar");
             ec = CStatusBarManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
                 (CStatusBarManagerService**)&statusBar);
             if (FAILED(ec)) Slogger::E(TAG, "failed to start CStatusBarManagerService");
@@ -710,11 +705,11 @@ ECode SystemServer::StartOtherServices()
         }
 
         if (!disableNonCoreServices) {
-            Slogger::I(TAG, "Clipboard Service todo");
-            // AutoPtr<IIClipboard> cb;
-            // ec = CClipboardService::New(context, (IIClipboard**)&cb);
-            // if (FAILED(ec)) ReportWtf("starting Clipboard Service", ec);
-            // ServiceManager::AddService(IContext::CLIPBOARD_SERVICE, cb.Get());
+            Slogger::I(TAG, "Clipboard Service");
+            AutoPtr<IIClipboard> cb;
+            ec = CClipboardService::New(context, (IIClipboard**)&cb);
+            if (FAILED(ec)) ReportWtf("starting Clipboard Service", ec);
+            ServiceManager::AddService(IContext::CLIPBOARD_SERVICE, cb.Get());
         }
 
         if (!disableNetwork) {
