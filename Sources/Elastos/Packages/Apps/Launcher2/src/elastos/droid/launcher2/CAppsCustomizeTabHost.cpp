@@ -461,6 +461,7 @@ ECode CAppsCustomizeTabHost::OnTabChangedEnd(
 ECode CAppsCustomizeTabHost::OnTabChanged(
     /* [in] */ const String& tabId)
 {
+Slogger::E("CAppsCustomizeTabHost", "===================CAppsCustomizeTabHost::OnTabChanged");
     AppsCustomizePagedViewContentType type;
     GetContentTypeForTabTag(tabId, &type);
 

@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/CheckLongPressHelper.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 using Elastos::Droid::View::IViewParent;
 

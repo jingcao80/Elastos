@@ -7,7 +7,6 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Content::IIntentShortcutIconResource;
 using Elastos::Droid::Content::CIntentShortcutIconResource;

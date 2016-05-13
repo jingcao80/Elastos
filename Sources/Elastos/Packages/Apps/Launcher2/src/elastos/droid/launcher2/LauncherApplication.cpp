@@ -61,16 +61,16 @@ const String LauncherApplication::sSharedPreferencesKey("Elastos.Droid.Launcher2
 
 LauncherApplication::LauncherApplication()
 {
-Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication 1");
+Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication enter");
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
     CLauncherApplicationContentObserver::New(handler, this, (IContentObserver**)&mFavoritesObserver);
-Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication 2");
+Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication return");
 }
 
 ECode LauncherApplication::OnCreate()
 {
-Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate 1");
+Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate enter");
     Application::OnCreate();
 
     // set sIsScreenXLarge and sScreenDensity *before* creating icon cache
@@ -116,9 +116,10 @@ Slogger::E("LauncherApplication", "============================LauncherApplicati
     // Register for changes to the favorites
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate return");
-    return resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
+    /*return*/ resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
             mFavoritesObserver);
+Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate return");
+return NOERROR;
 }
 
 ECode LauncherApplication::RecreateWidgetPreviewDb()
@@ -183,22 +184,17 @@ ECode LauncherApplication::GetWidgetPreviewCacheDb(
 ECode LauncherApplication::SetLauncherProvider(
     /* [in] */ ILauncherProvider* provider)
 {
-Slogger::E("LauncherApplication", "=================SetLauncherProvider provider=%p",provider);
-    /*return*/ IWeakReferenceSource::Probe(provider)->GetWeakReference((IWeakReference**)&mLauncherProvider);
-Slogger::E("LauncherApplication", "=================SetLauncherProvider mLauncherProvider=%p",mLauncherProvider.Get());
-return NOERROR;
+    return IWeakReferenceSource::Probe(provider)->GetWeakReference((IWeakReference**)&mLauncherProvider);
 }
 
 ECode LauncherApplication::GetLauncherProvider(
     /* [out] */ ILauncherProvider** provider)
 {
     VALIDATE_NOT_NULL(provider);
-Slogger::E("LauncherApplication", "=================GetLauncherProvider mLauncherProvider=%p",mLauncherProvider.Get());
+
     AutoPtr<IInterface> obj;
     mLauncherProvider->Resolve(EIID_ILauncherProvider, (IInterface**)&obj);
-Slogger::E("LauncherApplication", "=================GetLauncherProvider obj=%p",obj.Get());
     *provider = ILauncherProvider::Probe(obj);
-Slogger::E("LauncherApplication", "=================GetLauncherProvider *provider=%p",*provider);
     REFCOUNT_ADD(*provider);
     return NOERROR;
 }

@@ -1,7 +1,9 @@
 
 #include "elastos/droid/launcher2/CPagedViewWidgetImageView.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -25,6 +27,7 @@ ECode CPagedViewWidgetImageView::constructor(
 
 ECode CPagedViewWidgetImageView::RequestLayout()
 {
+Slogger::E("CPagedViewWidgetImageView", "=============RequestLayout");
     if (mAllowRequestLayout) {
         return ImageView::RequestLayout();
     }

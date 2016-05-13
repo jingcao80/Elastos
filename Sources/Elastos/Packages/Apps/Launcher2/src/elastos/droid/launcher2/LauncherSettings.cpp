@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/StringBuilder.h>
-#include "R.h"
 
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;

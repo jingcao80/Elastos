@@ -761,6 +761,7 @@ Workspace::MyRunnabl9::MyRunnabl9(
 
 ECode Workspace::MyRunnabl9::Run()
 {
+assert(0);
 //     String spKey;
 //     LauncherApplication::GetSharedPreferencesKey(&spKey);
 //     AutoPtr<ISharedPreferences> sp;
@@ -897,7 +898,7 @@ Workspace::Workspace()
     , mCurrentTranslationY(0)
     , mTransitionProgress(0)
 {
-Slogger::E("Workspace", "============================Workspace::Workspace() 1");
+Slogger::E("Workspace", "============================Workspace::Workspace() enter");
     mTargetCell = ArrayOf<Int32>::Alloc(2);
 
     mTempCell = ArrayOf<Int32>::Alloc(2);
@@ -945,7 +946,7 @@ ECode Workspace::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-Slogger::E("Workspace", "============================Workspace::constructor 1");
+Slogger::E("Workspace", "============================Workspace::constructor enter");
     SmoothPagedView::constructor(context, attrs, defStyle);
     mContentIsRefreshable = FALSE;
     mOriginalPageSpacing = mPageSpacing;
@@ -2799,10 +2800,8 @@ ECode Workspace::GetChangeStateAnimation(
                 IView::Probe(cl)->SetRotationY((*mNewRotationYs)[i]);
             }
             else {
-Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 1 new scaleAnim");
                 AutoPtr<LauncherViewPropertyAnimator> a =
                         new LauncherViewPropertyAnimator(IView::Probe(cl));
-Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 2 new scaleAnim a->mListeners=%p",(a->mListeners).Get());
                 a->TranslationX((*mNewTranslationXs)[i]);
                 a->TranslationY((*mNewTranslationYs)[i]);
                 a->ScaleX((*mNewScaleXs)[i]);
@@ -2815,10 +2814,8 @@ Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimat
                 if ((*mOldAlphas)[i] != (*mNewAlphas)[i] || currentAlpha != (*mNewAlphas)[i]) {
                     AutoPtr<IShortcutAndWidgetContainer> container;
                     cl->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&container);
-Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 3 new scaleAnim");
                     AutoPtr<LauncherViewPropertyAnimator> alphaAnim
                             = new LauncherViewPropertyAnimator(IView::Probe(container));
-Slogger::D("Workspace", "========================Workspace::GetChangeStateAnimation 4 new scaleAnim alphaAnim->mListeners=%p",(alphaAnim->mListeners).Get());
                     alphaAnim->Alpha((*mNewAlphas)[i]);
                     alphaAnim->SetDuration(duration);
                     alphaAnim->SetInterpolator(mZoomInInterpolator);
@@ -5824,6 +5821,7 @@ ECode Workspace::SyncPageItems(
     /* [in] */ Int32 page,
     /* [in] */ Boolean immediate)
 {
+Slogger::E("Workspace", "============================SyncPageItems");
     return NOERROR;
 }
 

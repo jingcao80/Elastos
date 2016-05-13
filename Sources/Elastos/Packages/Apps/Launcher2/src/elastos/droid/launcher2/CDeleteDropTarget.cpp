@@ -247,7 +247,7 @@ CDeleteDropTarget::MyTimeInterpolator2::MyTimeInterpolator2(
 {
 }
 
-CARAPI CDeleteDropTarget::MyTimeInterpolator2::GetInterpolation(
+ECode CDeleteDropTarget::MyTimeInterpolator2::GetInterpolation(
     /* [in] */ Float t,
     /* [out] */ Float* result)
 {

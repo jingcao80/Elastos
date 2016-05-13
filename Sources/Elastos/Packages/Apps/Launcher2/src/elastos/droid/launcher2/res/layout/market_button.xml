@@ -16,7 +16,7 @@
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/MarketButton"
-    android:onClick="onClickAppMarketButton"
+    android:onClick="OnClickAppMarketButton"
     android:gravity="center"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"

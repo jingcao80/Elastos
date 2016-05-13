@@ -10,7 +10,6 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Content::IContext;
@@ -39,8 +38,6 @@ IconCache::CacheKey::CacheKey(
     : mComponentName(componentName)
     , mUser(user)
 {
-Slogger::E("IconCache", "============================CacheKey::CacheKey() mComponentName=%p",mComponentName.Get());
-Slogger::E("IconCache", "============================CacheKey::CacheKey() mUser=%p",mUser.Get());
 }
 
 ECode IconCache::CacheKey::GetHashCode(
@@ -49,8 +46,6 @@ ECode IconCache::CacheKey::GetHashCode(
     VALIDATE_NOT_NULL(hashCode);
 
     Int32 code;
-Slogger::E("IconCache", "=============CacheKey::GetHashCode mComponentName=%p",mComponentName.Get());
-Slogger::E("IconCache", "=============CacheKey::GetHashCode IObject::Probe(mComponentName)=%p",IObject::Probe(mComponentName));
     IObject::Probe(mComponentName)->GetHashCode(&code);
     Int32 code2;
     IObject::Probe(mUser)->GetHashCode(&code2);
@@ -198,6 +193,7 @@ AutoPtr<IDrawable> IconCache::GetFullResIcon(
 
 AutoPtr<IBitmap> IconCache::MakeDefaultIcon()
 {
+Slogger::E("IconCache", "============================IconCache::MakeDefaultIcon");
     AutoPtr<IDrawable> d = GetFullResDefaultActivityIcon();
     AutoPtr<IBitmap> b;
     Int32 width;
@@ -247,10 +243,10 @@ void IconCache::GetTitleAndIcon(
         ApplicationInfo* _info = (ApplicationInfo*)application;
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
-Slogger::E("IconCache", "============================GetTitleAndIcon _info->mComponentName=%p",(_info->mComponentName).Get());
+Slogger::E("IconCache", "============================GetTitleAndIcon call CacheLocked");
         AutoPtr<CacheEntry> entry = CacheLocked(_info->mComponentName, info, labelCache,
                 handle);
-
+Slogger::E("IconCache", "============================GetTitleAndIcon return CacheLocked");
         _info->mTitle = CoreUtils::Convert(entry->mTitle);
         _info->mIconBitmap = entry->mIcon;
         _info->mContentDescription = entry->mContentDescription;
@@ -274,7 +270,6 @@ AutoPtr<IBitmap> IconCache::GetIcon(
         if (launcherActInfo == NULL || component == NULL) {
             return mDefaultIcon;
         }
-Slogger::E("IconCache", "============================GetTitleAndIconcomponent=%p",component.Get());
 
         AutoPtr<CacheEntry> entry = CacheLocked(component, launcherActInfo, NULL, user);
         return entry->mIcon;
@@ -294,7 +289,6 @@ AutoPtr<IBitmap> IconCache::GetIcon(
 
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
-Slogger::E("IconCache", "============================GetIcon component=%p",component);
         AutoPtr<CacheEntry> entry = CacheLocked(component, info, labelCache, handle);
         return entry->mIcon;
     }
@@ -313,12 +307,13 @@ AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
     /* [in] */ IHashMap* labelCache,
     /* [in] */ IUserHandle* user)
 {
-Slogger::E("IconCache", "============================IconCache::CacheLocked componentName=%p",componentName);
     AutoPtr<CacheKey> cacheKey = new CacheKey(componentName, user);
     AutoPtr<IInterface> obj;
     mCache->Get(TO_IINTERFACE(cacheKey), (IInterface**)&obj);
     AutoPtr<IconCache::CacheEntry> entry = (IconCache::CacheEntry*)IObject::Probe(obj);
+Slogger::E("IconCache", "============================IconCache::CacheLocked entry=%p",entry.Get());
     if (entry == NULL) {
+Slogger::E("IconCache", "============================IconCache::CacheLocked new IconCache::CacheEntry");
         entry = new IconCache::CacheEntry();
 
         mCache->Put(TO_IINTERFACE(cacheKey), TO_IINTERFACE(entry));
@@ -349,7 +344,7 @@ Slogger::E("IconCache", "============================IconCache::CacheLocked comp
             info->GetComponentName((IComponentName**)&name);
             name->GetShortClassName(&(entry->mTitle));
         }
-        AutoPtr<ICharSequence> label = CoreUtils::Convert(entry->mTitle);;
+        AutoPtr<ICharSequence> label = CoreUtils::Convert(entry->mTitle);
         mPackageManager->GetUserBadgedLabel(label, user, (ICharSequence**)&(entry->mContentDescription));
         AutoPtr<IDrawable> drawable;
         info->GetBadgedIcon(mIconDpi, (IDrawable**)&drawable);

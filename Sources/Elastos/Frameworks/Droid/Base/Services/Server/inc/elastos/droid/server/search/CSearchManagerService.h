@@ -53,11 +53,12 @@ public:
         CARAPI constructor(
             /* [in] */ IInterface* host);
 
-        virtual CARAPI OnReceive(
+        CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
         TO_STRING_IMPL("CSearchManagerService::BootCompletedReceiver: ")
+
     private:
         CSearchManagerService* mHost;
     };
@@ -71,11 +72,12 @@ public:
         CARAPI constructor(
             /* [in] */ IInterface* host);
 
-        virtual CARAPI OnReceive(
+        CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
         TO_STRING_IMPL("CSearchManagerService::UserReceiver: ")
+
     private:
         CSearchManagerService* mHost;
     };
@@ -92,8 +94,9 @@ public:
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IInterface* host);
 
-        virtual CARAPI OnChange(
+        CARAPI OnChange(
             /* [in] */ Boolean selfChange);
+
     private:
         AutoPtr<IContentResolver> mResolver;
         CSearchManagerService* mHost;
@@ -155,6 +158,7 @@ private:
 
         CARAPI OnPackageModified(
             /* [in] */ const String& pkg);
+
     private:
         CARAPI_(void) UpdateSearchables();
 
@@ -163,7 +167,6 @@ private:
     };
 
 private:
-
     // general debugging support
     static const String TAG;
 

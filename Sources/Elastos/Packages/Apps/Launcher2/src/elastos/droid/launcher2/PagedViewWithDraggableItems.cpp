@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/PagedViewWithDraggableItems.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
-#include "R.h"
 
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;

@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/Alarm.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
-#include "R.h"
 
 using Elastos::Droid::Os::CHandler;
 using Elastos::Core::ISystem;

@@ -4,7 +4,6 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::View::EIID_IOnDrawListener;

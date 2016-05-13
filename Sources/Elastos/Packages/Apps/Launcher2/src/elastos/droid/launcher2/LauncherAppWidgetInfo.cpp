@@ -4,7 +4,6 @@
 #include "elastos/droid/launcher2/AppWidgetResizeFrame.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/StringBuilder.h>
-#include "R.h"
 
 using Elastos::Core::StringBuilder;
 

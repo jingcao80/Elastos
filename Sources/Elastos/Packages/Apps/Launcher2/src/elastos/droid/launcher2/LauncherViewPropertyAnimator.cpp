@@ -5,7 +5,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
 using Elastos::Core::IInteger32;

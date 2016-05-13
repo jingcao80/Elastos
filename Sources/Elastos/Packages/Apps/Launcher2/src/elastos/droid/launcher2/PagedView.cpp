@@ -2135,6 +2135,7 @@ ECode PagedView::LoadAssociatedPages(
     /* [in] */ Int32 page,
     /* [in] */ Boolean immediateAndOnly)
 {
+Logger::E("PagedView", "=================== LoadAssociatedPages 1 mContentIsRefreshable=%d",mContentIsRefreshable);
     if (mContentIsRefreshable) {
         Int32 count = GetPageCount();
         if (page < count) {
@@ -2154,18 +2155,23 @@ ECode PagedView::LoadAssociatedPages(
                     mDirtyPageContent->Set(i, CoreUtils::Convert(TRUE));
                 }
             }
+Logger::E("PagedView", "=================== LoadAssociatedPages 2 count=%d",count);
             // Next, load any new pages
             for (Int32 i = 0; i < count; ++i) {
                 if ((i != page) && immediateAndOnly) {
                     continue;
                 }
+Logger::E("PagedView", "=================== LoadAssociatedPages 3");
                 if (lowerPageBound <= i && i <= upperPageBound) {
                     AutoPtr<IInterface> value;
                     mDirtyPageContent->Get(i, (IInterface**)&value);
                     Boolean b;
                     IBoolean::Probe(value)->GetValue(&b);
+Logger::E("PagedView", "=================== LoadAssociatedPages 4 b=%d",b);
                     if (b) {
+Logger::E("PagedView", "=================== call SyncPageItems");
                         SyncPageItems(i, (i == page) && immediateAndOnly);
+Logger::E("PagedView", "=================== return SyncPageItems ");
                         mDirtyPageContent->Set(i, CoreUtils::Convert(FALSE));
                     }
                 }
@@ -2203,6 +2209,7 @@ ECode PagedView::InvalidatePageData(
     /* [in] */ Int32 currentPage,
     /* [in] */ Boolean immediateAndOnly)
 {
+Logger::E("PagedView", "=================== InvalidatePageData currentPage=%d, immediateAndOnly=%d",currentPage, immediateAndOnly);
     if (!mIsDataReady) {
         return NOERROR;
     }
@@ -2213,7 +2220,9 @@ ECode PagedView::InvalidatePageData(
         mNextPage = INVALID_PAGE;
 
         // Update all the pages
+Logger::E("PagedView", "=================== InvalidatePageData call SyncPages");
         SyncPages();
+Logger::E("PagedView", "=================== InvalidatePageData return SyncPages");
 
         // We must force a measure after we've loaded the pages to update the content width and
         // to determine the full scroll width
@@ -2236,9 +2245,12 @@ ECode PagedView::InvalidatePageData(
         }
 
         // Load any pages that are necessary for the current window of views
+Logger::E("PagedView", "=================== InvalidatePageData call LoadAssociatedPages");
         LoadAssociatedPages(mCurrentPage, immediateAndOnly);
+Logger::E("PagedView", "=================== InvalidatePageData return LoadAssociatedPages");
         RequestLayout();
     }
+Logger::E("PagedView", "=================== InvalidatePageData return");
     return NOERROR;
 }
 

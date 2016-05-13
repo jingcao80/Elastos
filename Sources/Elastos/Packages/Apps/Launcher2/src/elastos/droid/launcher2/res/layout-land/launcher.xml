@@ -108,7 +108,7 @@
             android:layout_gravity="top|start"
             android:layout_marginTop="64dp"
             android:clickable="true"
-            android:onClick="onClickVoiceButton"
+            android:onClick="OnClickVoiceButton"
             android:importantForAccessibility="no"
             launcher:sourceViewId="@+id/voice_button" />
 

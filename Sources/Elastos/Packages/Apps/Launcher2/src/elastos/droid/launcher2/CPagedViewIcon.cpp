@@ -5,11 +5,12 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::CFastBitmapDrawable;
 using Elastos::Droid::App::IFastBitmapDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -40,6 +41,7 @@ CPagedViewIcon::CPagedViewIcon()
 
 ECode CPagedViewIcon::constructor()
 {
+Slogger::E("CPagedViewIcon", "===================constructor()");
     return NOERROR;
 }
 
@@ -61,6 +63,7 @@ ECode CPagedViewIcon::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
+Slogger::E("CPagedViewIcon", "===================constructor(context,attrs,defStyle)");
     return TextView::constructor(context, attrs, defStyle);
 }
 
@@ -69,12 +72,15 @@ ECode CPagedViewIcon::ApplyFromApplicationInfo(
     /* [in] */ Boolean scaleUp,
     /* [in] */ IPagedViewIconPressedCallback* cb)
 {
+Slogger::E("CPagedViewIcon", "===================ApplyFromApplicationInfo");
     ApplicationInfo* _info = (ApplicationInfo*)info;
     mIcon = _info->mIconBitmap;
     mPressedCallback = cb;
     AutoPtr<FastBitmapDrawable> drawable = new FastBitmapDrawable();
     drawable->constructor(mIcon);
+Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set icon");
     SetCompoundDrawablesWithIntrinsicBounds(NULL, IDrawable::Probe(drawable), NULL, NULL);
+Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set text");
     SetText(_info->mTitle);
     if (_info->mContentDescription != NULL) {
         SetContentDescription(_info->mContentDescription);

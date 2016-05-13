@@ -5,7 +5,6 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Text::TextUtils;

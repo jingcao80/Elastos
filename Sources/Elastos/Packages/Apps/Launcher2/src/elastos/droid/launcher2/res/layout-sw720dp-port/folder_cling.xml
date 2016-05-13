@@ -40,7 +40,7 @@
                 style="@style/ClingButton"
                 android:id="@+id/cling_dismiss"
                 android:layout_marginTop="15dp"
-                android:onClick="dismissFolderCling" />
+                android:onClick="DismissFolderCling" />
         </LinearLayout>
     </FrameLayout>
 </Elastos.Droid.Launcher2.CCling>

@@ -33,7 +33,7 @@
         android:layout_alignParentTop="true"
         android:layout_toStartOf="@+id/voice_button_container"
         android:paddingStart="8dp"
-        android:onClick="onClickSearchButton"
+        android:onClick="OnClickSearchButton"
         android:focusable="true"
         android:clickable="true"
         android:contentDescription="@string/accessibility_search_button">
@@ -58,7 +58,7 @@
         android:layout_alignParentTop="true"
         android:paddingEnd="8dp"
         android:gravity="end"
-        android:onClick="onClickVoiceButton"
+        android:onClick="OnClickVoiceButton"
         android:focusable="true"
         android:clickable="true"
         android:contentDescription="@string/accessibility_voice_search_button">

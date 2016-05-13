@@ -102,7 +102,7 @@
             android:layout_height="@dimen/qsb_bar_height"
             android:layout_gravity="top|end"
             android:clickable="true"
-            android:onClick="onClickVoiceButton"
+            android:onClick="OnClickVoiceButton"
             android:importantForAccessibility="no"
             launcher:sourceViewId="@+id/voice_button" />
 

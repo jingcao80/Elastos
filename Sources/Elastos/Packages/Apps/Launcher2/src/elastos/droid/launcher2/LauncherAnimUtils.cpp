@@ -3,7 +3,6 @@
 #include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
 using Elastos::Droid::Animation::CAnimatorSet;

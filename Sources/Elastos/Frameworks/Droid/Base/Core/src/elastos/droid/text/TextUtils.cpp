@@ -1,5 +1,6 @@
 
 #include <Elastos.CoreLibrary.Libcore.h>
+#include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/os/SystemProperties.h"
@@ -55,6 +56,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
@@ -1363,84 +1365,92 @@ AutoPtr<ICharSequence> TextUtils::Ellipsize(
         return text;
     }
 
-    assert(0 && "TODO");
-    // // XXX assumes ellipsis string does not require shaping and
-    // // is unaffected by style
-    // Float ellipsiswid;
-    // paint->MeasureText(ellipsis, &ellipsiswid);
-    // avail -= ellipsiswid;
+    // XXX assumes ellipsis string does not require shaping and
+    // is unaffected by style
+    Float ellipsiswid;
+    IPaint::Probe(paint)->MeasureText(ellipsis, &ellipsiswid);
+    avail -= ellipsiswid;
 
-    // Int32 left = 0;
-    // Int32 right = len;
-    // if (avail < 0) {
-    //     // it all goes
-    // } else if (where == TextUtilsTruncateAt_START) {
-    //     right = len - mt->BreakText(len, FALSE, avail);
-    // } else if (where == TextUtilsTruncateAt_END
-    //     || where == TextUtilsTruncateAt_END_SMALL) {
-    //     left = mt->BreakText(len, TRUE, avail);
-    // } else {
-    //     right = len - mt->BreakText(len, FALSE, avail / 2);
-    //     avail -= mt->Measure(right, len);
-    //     left = mt->BreakText(right, TRUE, avail);
-    // }
+    Int32 left = 0;
+    Int32 right = len;
+    if (avail < 0) {
+        // it all goes
+    }
+    else if (where == TextUtilsTruncateAt_START) {
+        right = len - mt->BreakText(len, FALSE, avail);
+    }
+    else if (where == TextUtilsTruncateAt_END
+        || where == TextUtilsTruncateAt_END_SMALL) {
+        left = mt->BreakText(len, TRUE, avail);
+    }
+    else {
+        right = len - mt->BreakText(len, FALSE, avail / 2);
+        avail -= mt->Measure(right, len);
+        left = mt->BreakText(right, TRUE, avail);
+    }
 
-    // if (callback != NULL) {
-    //     callback->Ellipsized(left, right);
-    // }
+    if (callback != NULL) {
+        callback->Ellipsized(left, right);
+    }
 
-    // AutoPtr<ArrayOf<Char32> > buf = mt->mChars;
-    // AutoPtr<ISpanned> sp = ISpanned::Probe(text);
+    AutoPtr<ArrayOf<Char32> > buf = mt->mChars;
+    AutoPtr<ISpanned> sp = ISpanned::Probe(text);
+    Int32 remaining = len - (right - left);
+    if (preserveLength) {
+        if (remaining > 0) { // else eliminate the ellipsis too
+           (*buf)[left++] = ellipsis.GetChar(0);
+        }
+        for (Int32 i = left; i < right; i++) {
+           (*buf)[i] = ZWNBS_CHAR;
+        }
 
-    // Int32 remaining = len - (right - left);
-    // if (preserveLength) {
-    //     if (remaining > 0) { // else eliminate the ellipsis too
-    //        (*buf)[left++] = ellipsis.GetChar(0);
-    //     }
-    //     for (Int32 i = left; i < right; i++) {
-    //        (*buf)[i] = ZWNBS_CHAR;
-    //     }
+        String str(*buf, 0, len);
+        AutoPtr<ICharSequence> s;
+        CString::New(str, (ICharSequence**)&s);
+        if (sp == NULL) {
+            MeasuredText::Recycle(mt);
+            return s;
+        }
 
-    //     StringBuilder sb;
-    //     sb.AppendChars(*buf, 0, len);
-    //     AutoPtr<ICharSequence> s = sb.ToCharSequence();
-    //     if (sp == NULL) {
-    //         MeasuredText::Recycle(mt);
-    //         return s;
-    //     }
+        AutoPtr<ISpannableString> ss;
+        CSpannableString::New(s, (ISpannableString**)&ss);
+        CopySpansFrom(sp, 0, len, EIID_IInterface, ISpannable::Probe(ss), 0);
+        MeasuredText::Recycle(mt);
+        return ICharSequence::Probe(ss);
+    }
 
-    //     AutoPtr<ISpannableString> ss;
-    //     CSpannableString::New(s, (ISpannableString**)&ss);
-    //     CopySpansFrom(sp, 0, len, EIID_IInterface, ss, 0);
-    //     MeasuredText::Recycle(mt);
-    //     return ss;
-    // }
+    if (remaining == 0) {
+        AutoPtr<ICharSequence> seq;
+        CString::New(String(""), (ICharSequence**)&seq);
+        MeasuredText::Recycle(mt);
+        return seq;
+    }
 
-    // if (remaining == 0) {
-    //     AutoPtr<ICharSequence> seq;
-    //     CString::New(String(""), (ICharSequence**)&seq);
-    //     MeasuredText::Recycle(mt);
-    //     return seq;
-    // }
-
-    // if (sp == NULL) {
-    //     Int32 length = remaining + ellipsis.GetByteLength();
-    //     StringBuilder sb(length);
-    //     sb.AppendChars(*buf, 0, left);
-    //     sb.Append(ellipsis);
-    //     sb.AppendChars(*buf, right, len - right);
-    //     MeasuredText::Recycle(mt);
-    //     return sb.ToCharSequence();
-    // }
+    if (sp == NULL) {
+        Int32 length = remaining + ellipsis.GetByteLength();
+        StringBuilder sb(length);
+        String tmp(*buf, 0, left);
+        sb += tmp;
+        sb += ellipsis;
+        String tmp2(*buf, right, len - right);
+        sb += tmp2;
+        String str;
+        sb.ToString(&str);
+        AutoPtr<ICharSequence> seq;
+        CString::New(str, (ICharSequence**)&seq);
+        MeasuredText::Recycle(mt);
+        return seq;
+    }
 
     AutoPtr<ISpannableStringBuilder> ssb;
-    // CSpannableStringBuilder::New((ISpannableStringBuilder**)&ssb);
-    // ssb->Append(text, 0, left);
-    // AutoPtr<ICharSequence> elpSeq;
-    // CString::New(ellipsis, (ICharSequence**)&elpSeq);
-    // ssb->Append(elpSeq);
-    // ssb->Append(text, right, len);
-    // MeasuredText::Recycle(mt);
+    CSpannableStringBuilder::New((ISpannableStringBuilder**)&ssb);
+    ssb->Append(text, 0, left);
+    AutoPtr<ICharSequence> elpSeq;
+    CString::New(ellipsis, (ICharSequence**)&elpSeq);
+    assert(0 && "TODO");
+    //ssb->Append(elpSeq);
+    //ssb->Append(text, right, len);
+    MeasuredText::Recycle(mt);
     return ICharSequence::Probe(ssb);
    //} finally {
       // MeasuredText.recycle(mt);

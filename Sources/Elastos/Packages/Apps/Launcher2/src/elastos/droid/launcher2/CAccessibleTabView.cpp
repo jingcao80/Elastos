@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/CAccessibleTabView.h"
 #include "elastos/droid/launcher2/FocusHelper.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 namespace Elastos {
 namespace Droid {

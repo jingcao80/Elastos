@@ -1,7 +1,6 @@
 
 #include "elastos/droid/launcher2/AllAppsList.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 using Elastos::Droid::Content::Pm::ILauncherApps;
 using Elastos::Utility::CArrayList;

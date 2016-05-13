@@ -4,7 +4,6 @@
 #include "elastos/droid/launcher2/Workspace.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.View.h"
-#include "R.h"
 
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;

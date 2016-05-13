@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/PagedViewGridLayout.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
-#include "R.h"
 
 namespace Elastos {
 namespace Droid {

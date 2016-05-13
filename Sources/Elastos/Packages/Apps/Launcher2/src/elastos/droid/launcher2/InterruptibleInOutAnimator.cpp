@@ -5,7 +5,6 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Core::IFloat;
 using Elastos::Utility::Logging::Slogger;
@@ -20,7 +19,7 @@ InterruptibleInOutAnimator::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter
 {
 }
 
-CARAPI InterruptibleInOutAnimator::MyAnimatorListenerAdapter::OnAnimationEnd(
+ECode InterruptibleInOutAnimator::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->mDirection = STOPPED;

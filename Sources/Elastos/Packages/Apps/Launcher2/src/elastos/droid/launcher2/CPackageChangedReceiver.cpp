@@ -5,7 +5,6 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Utility::Logging::Slogger;

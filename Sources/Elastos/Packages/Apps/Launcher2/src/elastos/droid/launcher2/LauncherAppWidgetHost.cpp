@@ -3,7 +3,6 @@
 #include "elastos/droid/launcher2/LauncherAppWidgetHostView.h"
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 using Elastos::Droid::Launcher2::LauncherAppWidgetHostView;
 

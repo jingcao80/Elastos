@@ -6,7 +6,6 @@
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;

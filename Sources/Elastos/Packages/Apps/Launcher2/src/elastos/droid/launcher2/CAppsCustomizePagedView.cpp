@@ -17,6 +17,7 @@
 #include "elastos/droid/widget/GridLayout.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Build.h"
+#include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
@@ -25,6 +26,7 @@
 #include "R.h"
 
 using Elastos::Droid::Animation::IAnimatorSetBuilder;
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::AppWidget::IAppWidgetHost;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
 using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
@@ -278,6 +280,7 @@ ECode CAppsCustomizePagedView::MyRunnable4::Run()
     dragController->IsDragging(&res);
     if (res) {
         // Dismiss the cling
+Slogger::E("CAppsCustomizePagedView", "===================MyRunnable4 call DismissAllAppsCling");
         mHost->mLauncher->DismissAllAppsCling(NULL);
 
         // Reset the alpha on the dragged icon before we drag
@@ -637,10 +640,14 @@ void CAppsCustomizePagedView::UpdatePageCounts()
 {
     Int32 size;
     mWidgets->GetSize(&size);
+Slogger::E("CAppsCustomizePagedView", "=============UpdatePageCounts mWidgetCountX=%d, mWidgetCountY=%d",mWidgetCountX,mWidgetCountY);
     mNumWidgetPages = (Int32)Elastos::Core::Math::Ceil(size /
             (Float)(mWidgetCountX * mWidgetCountY));
+Slogger::E("CAppsCustomizePagedView", "=============UpdatePageCounts size=%d, mNumWidgetPages=%d",size,mNumWidgetPages);
     mApps->GetSize(&size);
+Slogger::E("CAppsCustomizePagedView", "=============UpdatePageCounts mCellCountX=%d, mCellCountY=%d",mCellCountX,mCellCountY);
     mNumAppsPages = (Int32)Elastos::Core::Math::Ceil((Float)size / (mCellCountX * mCellCountY));
+Slogger::E("CAppsCustomizePagedView", "=============UpdatePageCounts size=%d, mNumAppsPages=%d",size,mNumAppsPages);
     return;
 }
 
@@ -691,7 +698,9 @@ ECode CAppsCustomizePagedView::OnDataReady(
             mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
     mWidgetSpacingLayout->CalculateCellCount(width, height, maxCellCountX, maxCellCountY);
     mWidgetSpacingLayout->GetCellCountX(&mCellCountX);
+Slogger::E("CAppsCustomizePagedView", "=============OnDataReady mCellCountX=%d",mCellCountX);
     mWidgetSpacingLayout->GetCellCountY(&mCellCountY);
+Slogger::E("CAppsCustomizePagedView", "=============OnDataReady mCellCountY=%d",mCellCountY);
     UpdatePageCounts();
 
     // Force a measure to update recalculate the gaps
@@ -713,8 +722,9 @@ ECode CAppsCustomizePagedView::OnDataReady(
     // Restore the page
     Int32 page;
     GetPageForComponent(mSaveInstanceStateItemIndex, &page);
+Slogger::E("CAppsCustomizePagedView", "=================== call InvalidatePageData");
     InvalidatePageData(Elastos::Core::Math::Max(0, page), hostIsTransitioning);
-
+Slogger::E("CAppsCustomizePagedView", "=================== return InvalidatePageData");
     // Show All Apps cling if we are finished transitioning, otherwise, we will try again when
     // the transition completes in AppsCustomizeTabHost (otherwise the wrong offsets will be
     // returned while animating)
@@ -723,6 +733,7 @@ ECode CAppsCustomizePagedView::OnDataReady(
         Boolean res;
         Post(run, &res);
     }
+Slogger::E("CAppsCustomizePagedView", "=================== return OnDataReady");
     return NOERROR;
 }
 
@@ -759,6 +770,7 @@ void CAppsCustomizePagedView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+Slogger::E("CAppsCustomizePagedView", "=================================OnMeasure");
     Int32 width = View::MeasureSpec::GetSize(widthMeasureSpec);
     Int32 height = View::MeasureSpec::GetSize(heightMeasureSpec);
     if (!IsDataReady()) {
@@ -766,9 +778,13 @@ void CAppsCustomizePagedView::OnMeasure(
         mApps->GetSize(&size);
         Boolean tmp;
         mWidgets->IsEmpty(&tmp);
-        if (size > 0 && !tmp) {
+Slogger::E("CAppsCustomizePagedView", "============OnMeasure size=%d,tmp=%d",size,tmp);
+Slogger::E("CAppsCustomizePagedView","==================TO DO /*&& !tmp*/=================???");
+        if (size > 0 /*&& !tmp*/) {
             SetDataIsReady();
+Slogger::E("CAppsCustomizePagedView", "============OnMeasure width=%d,height=%d",width,height);
             SetMeasuredDimension(width, height);
+Slogger::E("CAppsCustomizePagedView", "============ call OnDataReady");
             OnDataReady(width, height);
         }
     }
@@ -783,6 +799,7 @@ ECode CAppsCustomizePagedView::OnPackagesUpdated(
     mWidgets->Clear();
     Int32 size;
     widgetsAndShortcuts->GetSize(&size);
+Slogger::E("CAppsCustomizePagedView", "============OnPackagesUpdated size=%d",size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> o;
         widgetsAndShortcuts->Get(i, (IInterface**)&o);
@@ -849,7 +866,7 @@ ECode CAppsCustomizePagedView::OnPackagesUpdated(
             mWidgets->Add(o);
         }
     }
-
+Slogger::E("CAppsCustomizePagedView", "===========OnPackagesUpdated");
     UpdatePageCountsAndInvalidateData();
     return NOERROR;
 }
@@ -1636,9 +1653,11 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
     IsLayoutRtl(&isRtl);
     Int32 numCells = mCellCountX * mCellCountY;
     Int32 startIndex = page * numCells;
+Slogger::E("CAppsCustomizePagedView", "===================SyncAppsPageItems page=%d, numCells=%d, startIndex=%d",page, numCells,startIndex);
     Int32 size;
     mApps->GetSize(&size);
     Int32 endIndex = Elastos::Core::Math::Min(startIndex + numCells, size);
+Slogger::E("CAppsCustomizePagedView", "===================SyncAppsPageItems endIndex=%d",endIndex);
     AutoPtr<IView> view;
     GetPageAt(page, (IView**)&view);
     AutoPtr<IPagedViewCellLayout> layout = IPagedViewCellLayout::Probe(view);
@@ -1648,6 +1667,7 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
     CArrayList::New((IArrayList**)&items);
     AutoPtr<IArrayList> images;
     CArrayList::New((IArrayList**)&images);
+Slogger::E("CAppsCustomizePagedView", "===================SyncAppsPageItems size=%d",size);
     for (Int32 i = startIndex; i < endIndex; ++i) {
         AutoPtr<IInterface> obj;
         mApps->Get(i, (IInterface**)&obj);
@@ -1657,6 +1677,8 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
                 Elastos::Droid::Launcher2::R::layout::apps_customize_application,
                 IViewGroup::Probe(layout), FALSE, (IView**)&view);
         AutoPtr<IPagedViewIcon> icon = IPagedViewIcon::Probe(view);
+Slogger::E("CAppsCustomizePagedView", "===================SyncAppsPageItems icon=%p",icon.Get());
+Slogger::E("CAppsCustomizePagedView", "===================SyncAppsPageItems call ApplyFromApplicationInfo");
         icon->ApplyFromApplicationInfo(info, TRUE, this);
         IView::Probe(icon)->SetOnClickListener(this);
         IView::Probe(icon)->SetOnLongClickListener(this);
@@ -1673,8 +1695,10 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
                 new PagedViewCellLayout::LayoutParams();
         params->constructor(x, y, 1, 1);
         Boolean tmp;
+Slogger::E("CAppsCustomizePagedView", "=================== call AddViewToCellLayout");
         layout->AddViewToCellLayout(IView::Probe(icon), -1, i,
                 IPagedViewCellLayoutLayoutParams::Probe(params), &tmp);
+Slogger::E("CAppsCustomizePagedView", "=================== return AddViewToCellLayout");
 
         items->Add(info);
         images->Add(((ApplicationInfo*)info.Get())->mIconBitmap);
@@ -2011,7 +2035,7 @@ ECode CAppsCustomizePagedView::SyncPages()
 {
     RemoveAllViews();
     CancelAllTasks();
-
+Slogger::E("CAppsCustomizePagedView", "=================== SyncPages 1 mNumWidgetPages=%d,mNumAppsPages=%d",mNumWidgetPages,mNumAppsPages);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     for (Int32 j = 0; j < mNumWidgetPages; ++j) {
@@ -2028,26 +2052,30 @@ ECode CAppsCustomizePagedView::SyncPages()
     for (Int32 i = 0; i < mNumAppsPages; ++i) {
         AutoPtr<IPagedViewCellLayout> layout = new PagedViewCellLayout();
         ((PagedViewCellLayout*)layout.Get())->constructor(context);
+Slogger::E("CAppsCustomizePagedView", "=================== SetupPage ");
         SetupPage(layout);
+Slogger::E("CAppsCustomizePagedView", "=================== AddView ");
         AddView(IView::Probe(layout));
     }
     return NOERROR;
 }
 
-CARAPI CAppsCustomizePagedView::SyncPageItems(
+ECode CAppsCustomizePagedView::SyncPageItems(
     /* [in] */ Int32 page,
     /* [in] */ Boolean immediate)
 {
     if (page < mNumAppsPages) {
+Slogger::E("CAppsCustomizePagedView", "=================== SyncPageItems 1 page=%d,immediate=%d",page,immediate);
         SyncAppsPageItems(page, immediate);
     }
     else {
+Slogger::E("CAppsCustomizePagedView", "=================== SyncPageItems 2");
         SyncWidgetPageItems(page, immediate);
     }
     return NOERROR;
 }
 
-CARAPI CAppsCustomizePagedView::GetPageAt(
+ECode CAppsCustomizePagedView::GetPageAt(
     /* [in] */ Int32 index,
     /* [out] */ IView** view)
 {
@@ -2058,7 +2086,7 @@ CARAPI CAppsCustomizePagedView::GetPageAt(
     return GetChildAt(_index, view);
 }
 
-CARAPI CAppsCustomizePagedView::ScreenScrolled(
+ECode CAppsCustomizePagedView::ScreenScrolled(
     /* [in] */ Int32 screenCenter)
 {
     Boolean isRtl;
@@ -2273,7 +2301,7 @@ ECode CAppsCustomizePagedView::SetApps(
     mApps = list;
     AutoPtr<IComparator> comparator;
     LauncherModel::GetAppNameComparator((IComparator**)&comparator);
-
+Slogger::E("CAppsCustomizePagedView", "======================SetApps");
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
     helper->Sort(IList::Probe(mApps), comparator);
@@ -2402,9 +2430,12 @@ ECode CAppsCustomizePagedView::Reset()
 AutoPtr<IAppsCustomizeTabHost> CAppsCustomizePagedView::GetTabHost()
 {
     AutoPtr<IView> view;
-    IView::Probe(mLauncher)->FindViewById(
+Logger::E("CAppsCustomizePagedView", "=================== GetTabHost IActivity::Probe(mLauncher) = %p", IActivity::Probe(mLauncher));
+    IActivity::Probe(mLauncher)->FindViewById(
             Elastos::Droid::Launcher2::R::id::apps_customize_pane,
             (IView**)&view);
+Logger::E("CAppsCustomizePagedView", "=================== GetTabHost view = %p", view.Get());
+
     AutoPtr<IAppsCustomizeTabHost> tmp = IAppsCustomizeTabHost::Probe(view);
     return tmp;
 }

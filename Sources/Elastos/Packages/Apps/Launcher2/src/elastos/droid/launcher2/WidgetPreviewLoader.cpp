@@ -1184,7 +1184,7 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
     }
     c->DrawBitmap(tempBitmap, 0.0f, 0.0f, p);
     c->SetBitmap(NULL);
-
+Slogger::E("WidgetPreviewLoader", "==========GenerateShortcutPreview (icon hight&width) mAppIconSize=%",mAppIconSize);
     RenderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
 
     *bitmap = preview;

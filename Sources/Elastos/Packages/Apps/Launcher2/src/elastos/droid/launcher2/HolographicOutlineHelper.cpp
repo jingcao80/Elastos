@@ -4,7 +4,6 @@
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "R.h"
 
 using Elastos::Droid::Graphics::IMaskFilter;
 using Elastos::Droid::Graphics::IXfermode;

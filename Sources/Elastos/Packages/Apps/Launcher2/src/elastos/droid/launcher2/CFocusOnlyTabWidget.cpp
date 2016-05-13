@@ -1,7 +1,6 @@
 
 #include "elastos/droid/launcher2/CFocusOnlyTabWidget.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 namespace Elastos {
 namespace Droid {

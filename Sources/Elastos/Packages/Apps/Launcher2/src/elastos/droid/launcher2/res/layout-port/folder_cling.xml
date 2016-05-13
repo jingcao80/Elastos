@@ -45,5 +45,5 @@
         android:layout_marginBottom="15dp"
         android:layout_marginEnd="10dp"
         android:layout_gravity="bottom|end"
-        android:onClick="dismissFolderCling" />
+        android:onClick="DismissFolderCling" />
 </Elastos.Droid.Launcher2.CCling>

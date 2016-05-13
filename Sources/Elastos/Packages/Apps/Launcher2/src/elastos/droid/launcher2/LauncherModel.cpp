@@ -890,8 +890,12 @@ ECode LauncherModel::LoaderTask::MyRunnable16::Run()
     Int64 t = SystemClock::GetUptimeMillis();
     if (mCallbacks != NULL) {
         if (mFirstProfile) {
+Slogger::E("LauncherModel", "============LoaderTask::MyRunnable16::Run BindAllApplications 1");
             mCallbacks->BindAllApplications(mAdded);
-        } else {
+Slogger::E("LauncherModel", "============LoaderTask::MyRunnable16::Run BindAllApplications 2");
+        }
+        else {
+Slogger::E("LauncherModel", "============LoaderTask::MyRunnable16::Run BindAppsAdded");
             mCallbacks->BindAppsAdded(mAdded);
         }
         if (DEBUG_LOADERS) {
@@ -1245,6 +1249,7 @@ Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::
         AutoPtr<IIterator> fit;
         fkeyset->GetIterator((IIterator**)&fit);
         Boolean hasNext;
+Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::Run UpdateSavedIcon");
         while (fit->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> key;
             fit->GetNext((IInterface**)&key);
@@ -1254,6 +1259,7 @@ Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::
             Int32 length;
             arrayObj->GetLength(&length);
             AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(length);
+Slogger::D("LauncherModel", "==========LauncherModel::LoaderTask::Run UpdateSavedIcon length=%d",length);
             for (Int32 i = 0; i < length; i++) {
                 AutoPtr<IInterface> obj;
                 arrayObj->Get(i, (IInterface**)&obj);
@@ -1262,9 +1268,7 @@ Slogger::D("LauncherModel", "========================LauncherModel::LoaderTask::
                 b->GetValue(&value);
                 (*array)[i] = value;
             }
-
             mHost->UpdateSavedIcon(mContext, IShortcutInfo::Probe(key), array);
-
         }
         sBgDbIconCache->Clear();
     }
@@ -1456,10 +1460,13 @@ Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 2 c = 
         // +1 for the hotseat (it can be larger than the workspace)
         // Load workspace in reverse order to ensure that latest items are loaded first (and
         // before any earlier duplicates)
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() SCREEN_COUNT=%d",ILauncher::SCREEN_COUNT);
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() mCellCountX=%d",mCellCountX);
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() mCellCountY=%d",mCellCountY);
         AutoPtr<ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* > > occupied =
                 ArrayOf<ArrayOf<ArrayOf<ItemInfo*>* >* >::Alloc(
                 ILauncher::SCREEN_COUNT + 1);
-Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 3");
+
         for (Int32 i = 0; i < ILauncher::SCREEN_COUNT + 1; i++) {
             AutoPtr<ArrayOf<ArrayOf<ItemInfo*>* > > array2 =
                 ArrayOf<ArrayOf<ItemInfo*>* >::Alloc(mCellCountX + 1);
@@ -1509,7 +1516,7 @@ Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 4");
             //final int uriIndex = c.getColumnIndexOrThrow(LauncherSettings.Favorites.URI);
             //final int displayModeIndex = c.getColumnIndexOrThrow(
             //        LauncherSettings.Favorites.DISPLAY_MODE);
-Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 5");
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 5 mStopped=%d",mStopped);
             AutoPtr<IShortcutInfo> info;
             String intentDescription;
             AutoPtr<LauncherAppWidgetInfo> appWidgetInfo;
@@ -1520,10 +1527,11 @@ Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 5");
 
             Boolean res;
             while (!mStopped && (c->MoveToNext(&res), res)) {
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 6");
                 //try {
                 Int32 itemType;
                 FAIL_GOTO(c->GetInt32(itemTypeIndex, &itemType), FAILED)
-Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 7");
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 7 itemType=%d",itemType);
                 switch (itemType) {
                 case LauncherSettings::Favorites::ITEM_TYPE_APPLICATION:
                 case LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT:
@@ -1784,6 +1792,7 @@ FINALLY:
         //}
         Int32 size;
         itemsToRemove->GetSize(&size);
+Slogger::E("LauncherModel", "=================LoaderTask::LoadWorkspace() 11 size=%d",size);
         if (size > 0) {
             AutoPtr<IContentProviderClient> client;
             contentResolver->AcquireContentProviderClient(
@@ -2220,7 +2229,6 @@ void LauncherModel::LoaderTask::LoadAllAppsByBatch()
         return;
     }
 
-
 Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====creat IIntent::CATEGORY_LAUNCHER");
     AutoPtr<IIntent> mainIntent;
     CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&mainIntent);
@@ -2232,6 +2240,7 @@ Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====creat IIntent:
     mHost->mBgAllAppsList->Clear();
     Int32 profileCount;
     profiles->GetSize(&profileCount);
+Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "============profileCount=%d",profileCount);
     for (Int32 p = 0; p < profileCount; p++) {
         AutoPtr<IInterface> obj;
         profiles->Get(p, (IInterface**)&obj);
@@ -2299,6 +2308,11 @@ Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "============N=%d",N
                 apps->Get(i, (IInterface**)&obj);
                 AutoPtr<ILauncherActivityInfo> _info = ILauncherActivityInfo::Probe(obj);
 Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====new ApplicationInfo");
+AutoPtr<IComponentName> name;
+_info->GetComponentName((IComponentName**)&name);
+String packageName;
+name->GetPackageName(&packageName);
+Slogger::I("LauncherModel::LoaderTask::LoadAllAppsByBatch", "=====i=%d, packageName=%s",i,packageName.string());
                 AutoPtr<ApplicationInfo> info = new ApplicationInfo();
                 info->constructor(_info, user, mHost->mIconCache, mLabelCache);
                 mHost->mBgAllAppsList->Add(info);
@@ -2544,7 +2558,7 @@ LauncherModel::MyComparator3::MyComparator3(
 {
 }
 
-CARAPI LauncherModel::MyComparator3::Compare(
+ECode LauncherModel::MyComparator3::Compare(
     /* [in] */ IInterface* a,
     /* [in] */ IInterface* b,
     /* [out] */ Int32* outresult)
@@ -2587,7 +2601,7 @@ LauncherModel::MyComparator4::MyComparator4(
 {
 }
 
-CARAPI LauncherModel::MyComparator4::Compare(
+ECode LauncherModel::MyComparator4::Compare(
     /* [in] */ IInterface* a,
     /* [in] */ IInterface* b,
     /* [out] */ Int32* result)
@@ -3654,6 +3668,7 @@ ECode LauncherModel::GetSortedWidgetsAndShortcuts(
     // Add the widgets for the managed profiles next.
     Int32 profileCount;
     profiles->GetSize(&profileCount);
+Slogger::E("LauncherModel", "=================== GetSortedWidgetsAndShortcuts profileCount=%d",profileCount);
     for (Int32 i = 0; i < profileCount; i++) {
         AutoPtr<IInterface> obj;
         profiles->Get(i, (IInterface**)&obj);
@@ -3661,6 +3676,9 @@ ECode LauncherModel::GetSortedWidgetsAndShortcuts(
         // Add the widget providers for the profile.
         AutoPtr<IList> providers;
         widgetManager->GetInstalledProvidersForProfile(profile, (IList**)&providers);
+Int32 size;
+providers->GetSize(&size);
+Slogger::E("Launcher", "==================GetSortedWidgetsAndShortcuts providers size=%d",size);
         widgetsAndShortcuts->AddAll(ICollection::Probe(providers));
     }
 
@@ -3673,6 +3691,10 @@ ECode LauncherModel::GetSortedWidgetsAndShortcuts(
     AutoPtr<IList> activities;
     packageManager->QueryIntentActivities(shortcutsIntent, 0, (IList**)&activities);
     widgetsAndShortcuts->AddAll(ICollection::Probe(activities));
+
+Int32 size;
+activities->GetSize(&size);
+Slogger::E("Launcher", "==================GetSortedWidgetsAndShortcuts activities size=%d",size);
 
     AutoPtr<IComparator> c = new WidgetAndShortcutNameComparator(packageManager);
     AutoPtr<ICollections> collections;

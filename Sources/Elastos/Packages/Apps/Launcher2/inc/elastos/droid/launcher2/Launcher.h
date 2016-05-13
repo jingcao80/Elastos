@@ -71,6 +71,7 @@ using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::IButton;
 using Elastos::Core::Thread;
 using Elastos::Core::Object;
 using Elastos::Core::IComparator;
@@ -1956,6 +1957,8 @@ private:
     AutoPtr<IArrayList> mWidgetsAndShortcuts;
 
     AutoPtr<IRunnable> mBindPackagesUpdatedRunnable;
+
+    AutoPtr<IButton> btnClingDismisView;
 };
 
 } // namespace Launcher2

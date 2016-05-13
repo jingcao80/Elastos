@@ -923,6 +923,7 @@ Launcher::MyRunnable15::MyRunnable15(
 ECode Launcher::MyRunnable15::Run()
 {
     if (mHost->mAppsCustomizeContent != NULL) {
+Slogger::E("Launcher", "====================MyRunnable15::Run() SetApps");
         return mHost->mAppsCustomizeContent->SetApps(mApps);
     }
     return NOERROR;
@@ -1279,11 +1280,20 @@ Slogger::E("Launcher", "============================Launcher call SetupViews");
     mSavedState = savedInstanceState;
     RestoreState(mSavedState);
 
+Slogger::E("Launcher", "============================Launcher add temporary by snow begin");
+    AutoPtr<IView> clingDismisView = FindViewById(R::id::cling_dismiss_button);
+    btnClingDismisView = IButton::Probe(clingDismisView);
+    IView::Probe(btnClingDismisView)->SetOnClickListener(this);
+Slogger::E("Launcher", "============================Launcher add temporary by snow end");
+
     // Update customization drawer _after_ restoring the states
     if (mAppsCustomizeContent != NULL) {
         AutoPtr<IArrayList> list;
         LauncherModel::GetSortedWidgetsAndShortcuts(IContext::Probe(this),
                 (IArrayList**)&list);
+Int32 size;
+list->GetSize(&size);
+Slogger::E("Launcher", "============================Launcher call OnPackagesUpdated size=%d",size);
         mAppsCustomizeContent->OnPackagesUpdated(list);
     }
     // if (PROFILE_STARTUP) {
@@ -1300,9 +1310,8 @@ Slogger::E("Launcher", "============================Launcher call SetupViews");
             // configuration change) while launcher is in the foreground
             Int32 page;
             IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
-Slogger::E("Launcher", "============================Launcher::OnCreate 16");
+Slogger::E("Launcher", "============================Launcher::OnCreate StartLoader page=%d", page);
             mModel->StartLoader(TRUE, page);
-Slogger::E("Launcher", "============================Launcher::OnCreate 17");
         }
     }
 Slogger::E("Launcher", "============================Launcher::OnCreate 18");
@@ -3334,7 +3343,20 @@ Slogger::E("Launcher", "=================OnClick 2");
     if (!res) {
         return NOERROR;
     }
-Slogger::E("Launcher", "=================OnClick 3");
+
+Slogger::E("Launcher", "============================Launcher add temporary by snow begin");
+    Int32 id;
+    v->GetId(&id);
+    switch (id) {
+        case R::id::cling_dismiss_button:
+Slogger::E("Launcher", "=================OnClick calll DismissAllAppsCling");
+            DismissAllAppsCling(v);
+            break;
+        default:
+            break;
+    }
+Slogger::E("Launcher", "============================Launcher add temporary by snow end");
+
     AutoPtr<IInterface> tag;
     v->GetTag((IInterface**)&tag);
     if (IShortcutInfo::Probe(tag) != NULL) {
@@ -5679,6 +5701,7 @@ ECode Launcher::BindSearchablesChanged()
 ECode Launcher::BindAllApplications(
     /* [in] */ IArrayList* apps)
 {
+Slogger::D("Launcher", "===================BindAllApplications 1");
     AutoPtr<IRunnable> setAllAppsRunnable = new MyRunnable15(this, apps);
 
     // Remove the progress bar entirely; we could also make it GONE
@@ -5688,6 +5711,7 @@ ECode Launcher::BindAllApplications(
             Elastos::Droid::Launcher2::R::id::apps_customize_progress_bar,
             (IView**)&progressBar);
     if (progressBar != NULL) {
+Slogger::D("Launcher", "===================BindAllApplications 2");
         AutoPtr<IViewParent> p;
         progressBar->GetParent((IViewParent**)&p);
         IViewGroup::Probe(p)->RemoveView(progressBar);
@@ -5699,6 +5723,7 @@ ECode Launcher::BindAllApplications(
         IView::Probe(mAppsCustomizeTabHost)->Post(setAllAppsRunnable, &res);
     }
     else {
+Slogger::D("Launcher", "===================BindAllApplications 3");
         // If we did not initialize the spinner in onCreate, then we can directly set the
         // list of applications without waiting for any progress bars views to be hidden.
         setAllAppsRunnable->Run();
@@ -6137,6 +6162,7 @@ ECode Launcher::DismissWorkspaceCling(
 ECode Launcher::DismissAllAppsCling(
     /* [in] */ IView* v)
 {
+Slogger::E("Launcher", "===============Launcher::DismissAllAppsCling");
     AutoPtr<IView> view;
     FindViewById(
             Elastos::Droid::Launcher2::R::id::all_apps_cling, (IView**)&view);

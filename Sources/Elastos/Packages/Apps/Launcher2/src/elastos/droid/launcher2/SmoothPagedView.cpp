@@ -3,7 +3,6 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/Math.h>
-#include "R.h"
 
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::View::Animation::COvershootInterpolator;

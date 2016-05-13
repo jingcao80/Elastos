@@ -37,7 +37,7 @@ WallpaperChooserDialogFragment::MyOnClickListener::MyOnClickListener(
 {
 }
 
-CARAPI WallpaperChooserDialogFragment::MyOnClickListener::OnClick(
+ECode WallpaperChooserDialogFragment::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     Int32 position;

@@ -4,7 +4,6 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/StringBuilder.h>
-#include "R.h"
 
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Core::StringBuilder;

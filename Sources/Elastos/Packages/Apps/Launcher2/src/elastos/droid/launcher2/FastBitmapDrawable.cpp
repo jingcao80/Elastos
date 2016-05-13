@@ -1,11 +1,12 @@
 
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -23,6 +24,7 @@ FastBitmapDrawable::FastBitmapDrawable()
 ECode FastBitmapDrawable::constructor(
     /* [in] */ IBitmap* b)
 {
+Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::constructor");
     CPaint::New(IPaint::FILTER_BITMAP_FLAG, (IPaint**)&mPaint);
 
     mAlpha = 255;
@@ -34,6 +36,7 @@ ECode FastBitmapDrawable::constructor(
     else {
         mWidth = mHeight = 0;
     }
+Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::constructor mWidth=%d, mHeight=%d",mWidth,mHeight);
     return NOERROR;
 }
 
@@ -43,6 +46,7 @@ ECode FastBitmapDrawable::Draw(
     AutoPtr<IRect> r;
     GetBounds((IRect**)&r);
     // Draw the bitmap into the bounding rect
+Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::Draw");
     return canvas->DrawBitmap(mBitmap, NULL, r, mPaint);
 }
 

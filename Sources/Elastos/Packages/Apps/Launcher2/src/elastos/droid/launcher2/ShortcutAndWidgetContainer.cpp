@@ -3,7 +3,6 @@
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 using Elastos::Droid::App::CWallpaperManagerHelper;
 using Elastos::Droid::App::IWallpaperManagerHelper;

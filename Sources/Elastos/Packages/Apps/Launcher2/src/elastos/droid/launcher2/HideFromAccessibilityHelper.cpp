@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/HideFromAccessibilityHelper.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/CoreUtils.h>
-#include "R.h"
 
 using Elastos::Droid::Launcher2::ECLSID_CAppsCustomizeTabHost;
 using Elastos::Droid::View::IViewGroup;

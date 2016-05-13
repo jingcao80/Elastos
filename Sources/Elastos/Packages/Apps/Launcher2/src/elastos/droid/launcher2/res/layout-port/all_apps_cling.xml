@@ -40,9 +40,9 @@
     </FrameLayout>
     <Button
         style="@style/ClingButton"
-        android:id="@+id/cling_dismiss"
+        android:id="@+id/cling_dismiss_button"
         android:layout_marginBottom="15dp"
         android:layout_marginEnd="10dp"
         android:layout_gravity="bottom|end"
-        android:onClick="dismissAllAppsCling" />
+        android:onClick="DismissAllAppsCling" />
 </Elastos.Droid.Launcher2.CCling>

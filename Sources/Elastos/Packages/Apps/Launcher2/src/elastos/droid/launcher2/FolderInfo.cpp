@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/FolderInfo.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 using Elastos::Utility::CArrayList;
 

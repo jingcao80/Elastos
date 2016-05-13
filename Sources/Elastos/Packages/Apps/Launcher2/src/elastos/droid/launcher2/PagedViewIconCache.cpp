@@ -2,7 +2,6 @@
 #include "elastos/droid/launcher2/PagedViewIconCache.h"
 #include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "Elastos.Droid.Service.h"
-#include "R.h"
 
 using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IComponentInfo;
