@@ -369,7 +369,7 @@ const AutoPtr<GridLayout::Alignment> GridLayout::FILL = InitFill(); // = FillAli
 const Int32 GridLayout::INFLEXIBLE;
 const Int32 GridLayout::CAN_STRETCH;
 
-CAR_INTERFACE_IMPL(GridLayout, Object, IGridLayout)
+CAR_INTERFACE_IMPL(GridLayout, ViewGroup, IGridLayout)
 
 GridLayout::GridLayout()
     : mOrientation(DEFAULT_ORIENTATION)
