@@ -240,15 +240,16 @@ ECode Calendar::Equals(
 
 ECode Calendar::Get(
     /* [in] */ Int32 field,
-    /* [out] */ Int32* pValue)
+    /* [out] */ Int32* value)
 {
-    VALIDATE_NOT_NULL(pValue);
+    VALIDATE_NOT_NULL(value);
     if (field < 0 || field >= mFields->GetLength()) {
+        *value = 0;
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
     Complete();
-    *pValue = (*mFields)[field];
+    *value = (*mFields)[field];
     return NOERROR;
 }
 

@@ -280,6 +280,7 @@ void CGregorianCalendar::FullFieldsCalc()
 {
     Int32 millis = (Int32) (mTime % 86400000);
     Int64 days = mTime / 86400000;
+
     if (millis < 0) {
         millis += 86400000;
         days--;
@@ -297,12 +298,11 @@ void CGregorianCalendar::FullFieldsCalc()
         days++;
     }
 
-    Int32 dayOfYear = ComputeYearAndDay(days, mTime + (*mFields)[ICalendar::ZONE_OFFSET]);
+    Int32 dayOfYear = ComputeYearAndDay(days, mTime + (*mFields)[ZONE_OFFSET]);
     (*mFields)[DAY_OF_YEAR] = dayOfYear;
-    if ((*mFields)[YEAR] == mChangeYear && mGregorianCutover <= mTime + (*mFields)[ICalendar::ZONE_OFFSET]){
+    if ((*mFields)[YEAR] == mChangeYear && mGregorianCutover <= mTime + (*mFields)[ZONE_OFFSET]){
         dayOfYear += mCurrentYearSkew;
     }
-
     Int32 month = dayOfYear / 32;
     Boolean leapYear = IsLeapYear((*mFields)[YEAR]);
     Int32 date = dayOfYear - DaysInYear(leapYear, month);
@@ -311,18 +311,18 @@ void CGregorianCalendar::FullFieldsCalc()
         month++;
     }
     (*mFields)[DAY_OF_WEEK] = Mod7(days - 3) + 1;
-    Int32 dstOffset(0);
+    Int32 dstOffset;
     if ((*mFields)[YEAR] <= 0) {
         dstOffset = 0;
     }
     else {
         AutoPtr<ITimeZone> tz;
         GetTimeZone((ITimeZone**)&tz);
-        tz->GetOffset(IGregorianCalendar::AD,(*mFields)[YEAR], month, date,
+        tz->GetOffset(IGregorianCalendar::AD, (*mFields)[YEAR], month, date,
                 (*mFields)[DAY_OF_WEEK], millis, &dstOffset);
     }
     if ((*mFields)[YEAR] > 0) {
-        dstOffset -= (*mFields)[ICalendar::ZONE_OFFSET];
+        dstOffset -= (*mFields)[ZONE_OFFSET];
     }
     (*mFields)[DST_OFFSET] = dstOffset;
     if (dstOffset != 0) {
@@ -337,11 +337,11 @@ void CGregorianCalendar::FullFieldsCalc()
             days++;
         }
         if (oldDays != days) {
-            dayOfYear = ComputeYearAndDay(days, mTime - (*mFields)[ICalendar::ZONE_OFFSET]
+            dayOfYear = ComputeYearAndDay(days, mTime - (*mFields)[ZONE_OFFSET]
                     + dstOffset);
             (*mFields)[DAY_OF_YEAR] = dayOfYear;
-            if((*mFields)[YEAR] == mChangeYear
-             && mGregorianCutover <= mTime - (*mFields)[ICalendar::ZONE_OFFSET] + dstOffset){
+            if ((*mFields)[YEAR] == mChangeYear
+                    && mGregorianCutover <= mTime - (*mFields)[ZONE_OFFSET] + dstOffset) {
                 dayOfYear += mCurrentYearSkew;
             }
             month = dayOfYear / 32;
@@ -354,6 +354,7 @@ void CGregorianCalendar::FullFieldsCalc()
             (*mFields)[DAY_OF_WEEK] = Mod7(days - 3) + 1;
         }
     }
+
     (*mFields)[MILLISECOND] = (millis % 1000);
     millis /= 1000;
     (*mFields)[SECOND] = (millis % 60);
@@ -365,20 +366,19 @@ void CGregorianCalendar::FullFieldsCalc()
     (*mFields)[HOUR] = (*mFields)[HOUR_OF_DAY] % 12;
 
     if ((*mFields)[YEAR] <= 0) {
-        (*mFields)[ERA] = IGregorianCalendar::BC;
+        (*mFields)[ERA] = BC;
         (*mFields)[YEAR] = -(*mFields)[YEAR] + 1;
     }
     else {
-        (*mFields)[ERA] = IGregorianCalendar::AD;
+        (*mFields)[ERA] = AD;
     }
     (*mFields)[MONTH] = month;
     (*mFields)[DATE] = date;
     (*mFields)[DAY_OF_WEEK_IN_MONTH] = (date - 1) / 7 + 1;
-    Int32 firstDayOfWeek = GetFirstDayOfWeek();
     (*mFields)[WEEK_OF_MONTH] = (date - 1 + Mod7(days - date - 2
-            - (firstDayOfWeek - 1))) / 7 + 1;
+            - (GetFirstDayOfWeek() - 1))) / 7 + 1;
     Int32 daysFromStart = Mod7(days - 3 - ((*mFields)[DAY_OF_YEAR] - 1)
-            - (firstDayOfWeek - 1));
+            - (GetFirstDayOfWeek() - 1));
     Int32 minimalDaysInFirstWeek;
     GetMinimalDaysInFirstWeek(&minimalDaysInFirstWeek);
     Int32 week = ((*mFields)[DAY_OF_YEAR] - 1 + daysFromStart) / 7
@@ -406,11 +406,10 @@ ECode CGregorianCalendar::ComputeFields()
 
     AutoPtr<IDate> date;
     CDate::New(mTime, (IDate**)&date);
-    Boolean isInDaylightTime(FALSE);
+    Boolean isInDaylightTime = FALSE;
     timeZone->InDaylightTime(date, &isInDaylightTime);
     Int32 savings = 0;
-    timeZone->GetDSTSavings(&savings);
-    Int32 dstOffset =  isInDaylightTime ? savings : 0;
+    Int32 dstOffset =  isInDaylightTime ? (timeZone->GetDSTSavings(&savings), savings) : 0;
     Int32 zoneOffset = 0;
     timeZone->GetRawOffset(&zoneOffset);
 
@@ -432,6 +431,7 @@ ECode CGregorianCalendar::ComputeFields()
     // set by the user and fields set by our internal field calculation.
     (*mFields)[DST_OFFSET] = dstOffset;
     (*mFields)[ZONE_OFFSET] = zoneOffset;
+
     FullFieldsCalc();
 
     for (Int32 i = 0; i < FIELD_COUNT; i++) {
@@ -448,55 +448,55 @@ ECode CGregorianCalendar::ComputeTime()
     if (!isLenient) {
         if ((*mIsSet)[HOUR_OF_DAY]) {
             if ((*mFields)[HOUR_OF_DAY] < 0 || (*mFields)[HOUR_OF_DAY] > 23) {
-                return E_INVALID_ARGUMENT;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
         else if ((*mIsSet)[HOUR] && ((*mFields)[HOUR] < 0 || (*mFields)[HOUR] > 11)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[MINUTE] && ((*mFields)[MINUTE] < 0 || (*mFields)[MINUTE] > 59)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[SECOND] && ((*mFields)[SECOND] < 0 || (*mFields)[SECOND] > 59)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[MILLISECOND]
                 && ((*mFields)[MILLISECOND] < 0 || (*mFields)[MILLISECOND] > 999)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[WEEK_OF_YEAR]
                 && ((*mFields)[WEEK_OF_YEAR] < 1 || (*mFields)[WEEK_OF_YEAR] > 53)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[DAY_OF_WEEK]
                 && ((*mFields)[DAY_OF_WEEK] < 1 || (*mFields)[DAY_OF_WEEK] > 7)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[DAY_OF_WEEK_IN_MONTH]
                 && ((*mFields)[DAY_OF_WEEK_IN_MONTH] < 1 || (*mFields)[DAY_OF_WEEK_IN_MONTH] > 6)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[WEEK_OF_MONTH]
                 && ((*mFields)[WEEK_OF_MONTH] < 1 || (*mFields)[WEEK_OF_MONTH] > 6)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[AM_PM] && (*mFields)[AM_PM] != AM && (*mFields)[AM_PM] != PM) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[HOUR] && ((*mFields)[HOUR] < 0 || (*mFields)[HOUR] > 11)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mIsSet)[YEAR]) {
             if ((*mIsSet)[ERA] && (*mFields)[ERA] == BC
                     && ((*mFields)[YEAR] < 1 || (*mFields)[YEAR] > 292269054)) {
-                return E_INVALID_ARGUMENT;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             else if ((*mFields)[YEAR] < 1 || (*mFields)[YEAR] > 292278994) {
-                return E_INVALID_ARGUMENT;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
         if ((*mIsSet)[MONTH] && ((*mFields)[MONTH] < 0 || (*mFields)[MONTH] > 11)) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
 
@@ -525,7 +525,7 @@ ECode CGregorianCalendar::ComputeTime()
     if ((*mIsSet)[ERA]) {
         // Always test for valid ERA, even if the Calendar is lenient
         if ((*mFields)[ERA] != BC && (*mFields)[ERA] != AD) {
-            return E_INVALID_ARGUMENT;
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if ((*mFields)[ERA] == BC) {
             year = 1 - year;
@@ -576,7 +576,7 @@ ECode CGregorianCalendar::ComputeTime()
             if (!isLenient
                     && ((*mFields)[DATE] < 1 || (*mFields)[DATE] > DaysInMonth(
                             leapYear, month))) {
-                return E_INVALID_ARGUMENT;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             days += (*mFields)[DATE] - 1;
         }
@@ -586,13 +586,11 @@ ECode CGregorianCalendar::ComputeTime()
                 dayOfWeek = (*mFields)[DAY_OF_WEEK] - 1;
             }
             else {
-                dayOfWeek = GetFirstDayOfWeek();
-                dayOfWeek = dayOfWeek - 1;
+                dayOfWeek = GetFirstDayOfWeek() - 1;
             }
             if ((*mIsSet)[WEEK_OF_MONTH]
                     && mLastDateFieldSet != DAY_OF_WEEK_IN_MONTH) {
-                Int32 fdow = GetFirstDayOfWeek();
-                Int32 skew = Mod7(days - 3 - (fdow - 1));
+                Int32 skew = Mod7(days - 3 - (GetFirstDayOfWeek() - 1));
                 days += ((*mFields)[WEEK_OF_MONTH] - 1) * 7
                         + Mod7(skew + dayOfWeek - (days - 3)) - skew;
             }
@@ -609,8 +607,7 @@ ECode CGregorianCalendar::ComputeTime()
                 }
             }
             else if ((*mIsSet)[DAY_OF_WEEK]) {
-                Int32 fdow = GetFirstDayOfWeek();
-                Int32 skew = Mod7(days - 3 - (fdow - 1));
+                Int32 skew = Mod7(days - 3 - (GetFirstDayOfWeek() - 1));
                 days += Mod7(Mod7(skew + dayOfWeek - (days - 3)) - skew);
             }
         }
@@ -628,12 +625,9 @@ ECode CGregorianCalendar::ComputeTime()
                 dayOfWeek = (*mFields)[DAY_OF_WEEK] - 1;
             }
             else {
-                dayOfWeek = GetFirstDayOfWeek();
-                dayOfWeek = dayOfWeek - 1;
+                dayOfWeek = GetFirstDayOfWeek() - 1;
             }
-
-            Int32 fdow = GetFirstDayOfWeek();
-            Int32 skew = Mod7(days - 3 - (fdow - 1));
+            Int32 skew = Mod7(days - 3 - (GetFirstDayOfWeek() - 1));
             days += ((*mFields)[WEEK_OF_YEAR] - 1) * 7
                     + Mod7(skew + dayOfWeek - (days - 3)) - skew;
             Int32 mdifw;
@@ -648,7 +642,7 @@ ECode CGregorianCalendar::ComputeTime()
             if (!isLenient
                     && ((*mFields)[DAY_OF_YEAR] < 1 || (*mFields)[DAY_OF_YEAR] > (365 + (isLeapYear ? 1
                             : 0)))) {
-                return E_INVALID_ARGUMENT;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             days += (*mFields)[DAY_OF_YEAR] - 1;
         }
@@ -658,7 +652,7 @@ ECode CGregorianCalendar::ComputeTime()
     }
     mLastDateFieldSet = 0;
 
-    timeVal += days * 86400000;
+    timeVal += days * 86400000LL;
     // Use local time to compare with the gregorian change
     if (year == mChangeYear
             && timeVal >= mGregorianCutover + JulianError() * 86400000LL) {
@@ -675,7 +669,6 @@ ECode CGregorianCalendar::ComputeTime()
     GetTimeZone((ITimeZone**)&tz);
     Int32 rawOffset;
     tz->GetRawOffset(&rawOffset);
-
     Int64 timeValWithoutDST = timeVal - GetOffset(timeVal) + rawOffset;
     timeVal -= GetOffset(timeValWithoutDST);
     // Need to update wall time in fields, since it was invalid due to DST

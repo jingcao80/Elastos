@@ -719,9 +719,9 @@ AutoPtr<Elastos::Utility::IFormatter> DateUtils::FormatDateRange(
     String range;
     dIntervalFormat->FormatDateRange(startMillis, endMillis, flags, timeZone, &range);
     // try {
-        AutoPtr<IAppendable> appendable;
-        formatter->GetOut((IAppendable**)&appendable);
-        appendable->Append(CoreUtils::Convert(range));
+    AutoPtr<IAppendable> appendable;
+    formatter->GetOut((IAppendable**)&appendable);
+    appendable->Append(CoreUtils::Convert(range));
     // } catch () {
         // throw new AssertionError(impossible);
         // return E_ASSERTION_ERROR;
