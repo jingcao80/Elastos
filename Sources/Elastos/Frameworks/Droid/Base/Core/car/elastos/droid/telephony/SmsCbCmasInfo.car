@@ -1,14 +1,163 @@
 
-module {
+module
+{
 
     namespace Elastos {
     namespace Droid {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface ISmsCbCmasInfo {
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
+
+        // CMAS message class (in GSM/UMTS message identifier or CDMA service category).
+
+        /** Presidential-level alert (Korean Public Alert System Class 0 message). */
+        const Int32 CMAS_CLASS_PRESIDENTIAL_LEVEL_ALERT = 0x00;
+
+        /** Extreme threat to life and property (Korean Public Alert System Class 1 message). */
+        const Int32 CMAS_CLASS_EXTREME_THREAT = 0x01;
+
+        /** Severe threat to life and property (Korean Public Alert System Class 1 message). */
+        const Int32 CMAS_CLASS_SEVERE_THREAT = 0x02;
+
+        /** Child abduction emergency (AMBER Alert). */
+        const Int32 CMAS_CLASS_CHILD_ABDUCTION_EMERGENCY = 0x03;
+
+        /** CMAS test message. */
+        const Int32 CMAS_CLASS_REQUIRED_MONTHLY_TEST = 0x04;
+
+        /** CMAS exercise. */
+        const Int32 CMAS_CLASS_CMAS_EXERCISE = 0x05;
+
+        /** CMAS category for operator defined use. */
+        const Int32 CMAS_CLASS_OPERATOR_DEFINED_USE = 0x06;
+
+        /** CMAS category for warning types that are reserved for future extension. */
+        const Int32 CMAS_CLASS_UNKNOWN = -1;
+
+        // CMAS alert category (in CDMA type 1 elements record).
+
+        /** CMAS alert category: Geophysical including landslide. */
+        const Int32 CMAS_CATEGORY_GEO = 0x00;
+
+        /** CMAS alert category: Meteorological including flood. */
+        const Int32 CMAS_CATEGORY_MET = 0x01;
+
+        /** CMAS alert category: General emergency and public safety. */
+        const Int32 CMAS_CATEGORY_SAFETY = 0x02;
+
+        /** CMAS alert category: Law enforcement, military, homeland/local/private security. */
+        const Int32 CMAS_CATEGORY_SECURITY = 0x03;
+
+        /** CMAS alert category: Rescue and recovery. */
+        const Int32 CMAS_CATEGORY_RESCUE = 0x04;
+
+        /** CMAS alert category: Fire suppression and rescue. */
+        const Int32 CMAS_CATEGORY_FIRE = 0x05;
+
+        /** CMAS alert category: Medical and public health. */
+        const Int32 CMAS_CATEGORY_HEALTH = 0x06;
+
+        /** CMAS alert category: Pollution and other environmental. */
+        const Int32 CMAS_CATEGORY_ENV = 0x07;
+
+        /** CMAS alert category: Public and private transportation. */
+        const Int32 CMAS_CATEGORY_TRANSPORT = 0x08;
+
+        /** CMAS alert category: Utility, telecom, other non-transport infrastructure. */
+        const Int32 CMAS_CATEGORY_INFRA = 0x09;
+
+        /** CMAS alert category: Chem, bio, radiological, nuclear, high explosive threat or attack. */
+        const Int32 CMAS_CATEGORY_CBRNE = 0x0a;
+
+        /** CMAS alert category: Other events. */
+        const Int32 CMAS_CATEGORY_OTHER = 0x0b;
+
+        /**
+         * CMAS alert category is unknown. The category is only available for CDMA broadcasts
+         * containing a type 1 elements record, so GSM and UMTS broadcasts always return unknown.
+         */
+        const Int32 CMAS_CATEGORY_UNKNOWN = -1;
+
+        // CMAS response type (in CDMA type 1 elements record).
+
+        /** CMAS response type: Take shelter in place. */
+        const Int32 CMAS_RESPONSE_TYPE_SHELTER = 0x00;
+
+        /** CMAS response type: Evacuate (Relocate). */
+        const Int32 CMAS_RESPONSE_TYPE_EVACUATE = 0x01;
+
+        /** CMAS response type: Make preparations. */
+        const Int32 CMAS_RESPONSE_TYPE_PREPARE = 0x02;
+
+        /** CMAS response type: Execute a pre-planned activity. */
+        const Int32 CMAS_RESPONSE_TYPE_EXECUTE = 0x03;
+
+        /** CMAS response type: Attend to information sources. */
+        const Int32 CMAS_RESPONSE_TYPE_MONITOR = 0x04;
+
+        /** CMAS response type: Avoid hazard. */
+        const Int32 CMAS_RESPONSE_TYPE_AVOID = 0x05;
+
+        /** CMAS response type: Evaluate the information in this message (not for public warnings). */
+        const Int32 CMAS_RESPONSE_TYPE_ASSESS = 0x06;
+
+        /** CMAS response type: No action recommended. */
+        const Int32 CMAS_RESPONSE_TYPE_NONE = 0x07;
+
+        /**
+         * CMAS response type is unknown. The response type is only available for CDMA broadcasts
+         * containing a type 1 elements record, so GSM and UMTS broadcasts always return unknown.
+         */
+        const Int32 CMAS_RESPONSE_TYPE_UNKNOWN = -1;
+
+        // 4-bit CMAS severity (in GSM/UMTS message identifier or CDMA type 1 elements record).
+
+        /** CMAS severity type: Extraordinary threat to life or property. */
+        const Int32 CMAS_SEVERITY_EXTREME = 0x0;
+
+        /** CMAS severity type: Significant threat to life or property. */
+        const Int32 CMAS_SEVERITY_SEVERE = 0x1;
+
+        /**
+         * CMAS alert severity is unknown. The severity is available for CDMA warning alerts
+         * containing a type 1 elements record and for all GSM and UMTS alerts except for the
+         * Presidential-level alert class (Korean Public Alert System Class 0).
+         */
+        const Int32 CMAS_SEVERITY_UNKNOWN = -1;
+
+        // CMAS urgency (in GSM/UMTS message identifier or CDMA type 1 elements record).
+
+        /** CMAS urgency type: Responsive action should be taken immediately. */
+        const Int32 CMAS_URGENCY_IMMEDIATE = 0x0;
+
+        /** CMAS urgency type: Responsive action should be taken within the next hour. */
+        const Int32 CMAS_URGENCY_EXPECTED = 0x1;
+
+        /**
+         * CMAS alert urgency is unknown. The urgency is available for CDMA warning alerts
+         * containing a type 1 elements record and for all GSM and UMTS alerts except for the
+         * Presidential-level alert class (Korean Public Alert System Class 0).
+         */
+        const Int32 CMAS_URGENCY_UNKNOWN = -1;
+
+        // CMAS certainty (in GSM/UMTS message identifier or CDMA type 1 elements record).
+
+        /** CMAS certainty type: Determined to have occurred or to be ongoing. */
+        const Int32 CMAS_CERTAINTY_OBSERVED = 0x0;
+
+        /** CMAS certainty type: Likely (probability > ~50%). */
+        const Int32 CMAS_CERTAINTY_LIKELY = 0x1;
+
+        /**
+         * CMAS alert certainty is unknown. The certainty is available for CDMA warning alerts
+         * containing a type 1 elements record and for all GSM and UMTS alerts except for the
+         * Presidential-level alert class (Korean Public Alert System Class 0).
+         */
+        const Int32 CMAS_CERTAINTY_UNKNOWN = -1;
 
         GetMessageClass(
             [out] Int32* result);
@@ -27,17 +176,6 @@ module {
 
         GetCertainty(
             [out] Int32* result);
-
-        DescribeContents(
-            [out] Int32* result);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] SmsCbCmasInfo* result);
-
-        NewArray(
-            [in] Int32 size);
-
     }
 
     }//Telephony

@@ -1,6 +1,7 @@
 
 module
 {
+    merge("telephony/CellBroadcastMessage.car");
     merge("telephony/CellIdentityCdma.car");
     merge("telephony/CellIdentityGsm.car");
     merge("telephony/CellIdentityLte.car");
@@ -30,6 +31,12 @@ module
     merge("telephony/SignalStrength.car");
     merge("telephony/SubInfoRecord.car");
     merge("telephony/SubscriptionManager.car");
+    merge("telephony/SmsCbCmasInfo.car");
+    merge("telephony/SmsCbEtwsInfo.car");
+    merge("telephony/SmsCbLocation.car");
+    merge("telephony/SmsCbMessage.car");
+    merge("telephony/SmsManager.car");
+    merge("telephony/SmsMessage.car");
     merge("telephony/TelephonyManager.car");
     merge("telephony/VoLteServiceState.car");
 

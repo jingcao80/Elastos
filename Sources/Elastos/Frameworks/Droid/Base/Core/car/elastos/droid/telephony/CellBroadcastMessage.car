@@ -1,37 +1,35 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Content.IContext;
+    // interface Elastos.Droid.DataBase.ICursor;
+    interface Elastos.Droid.Telephony.ISmsCbCmasInfo;
+    interface Elastos.Droid.Telephony.ISmsCbEtwsInfo;
 
     namespace Elastos {
     namespace Droid {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local]
     interface ICellBroadcastMessage {
+
+        /** Identifier for getExtra() when adding this object to an Intent. */
+        const String SMS_CB_MESSAGE_EXTRA =
+            "com.android.cellbroadcastreceiver.SMS_CB_MESSAGE";
+
         SetSubId(
             [in] Int64 subId);
 
         GetSubId(
             [out] Int64* result);
 
-        DescribeContents(
-            [out] Int32* result);
-
-        WriteToParcel(
-            [in] Parcel out, 
-            [in] Int32 flags);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] CellBroadcastMessage* result);
-
-        NewArray(
-            [in] Int32 size);
-
-        CreateFromCursor(
-            [in] Cursor cursor,
-            [out] CellBroadcastMessage* result);
-
         GetContentValues(
-            [out] ContentValues* result);
+            [out] IContentValues** result);
 
         SetIsRead(
             [in] Boolean isRead);
@@ -55,10 +53,10 @@ module {
             [out] Int32* result);
 
         GetCmasWarningInfo(
-            [out] SmsCbCmasInfo* result);
+            [out] ISmsCbCmasInfo** result);
 
         GetEtwsWarningInfo(
-            [out] SmsCbEtwsInfo* result);
+            [out] ISmsCbEtwsInfo** result);
 
         IsPublicAlertMessage(
             [out] Boolean* result);
@@ -85,13 +83,19 @@ module {
             [out] Boolean* result);
 
         GetDateString(
-            [in] Context context,
+            [in] IContext* context,
             [out] String* result);
 
         GetSpokenDateString(
-            [in] Context context,
+            [in] IContext* context,
             [out] String* result);
+    }
 
+    [local]
+    interface ICellBroadcastMessageHelper {
+        // CreateFromCursor(
+        //     [in] ICursor* cursor,
+        //     [out] ICellBroadcastMessage** result);
     }
 
     }//Telephony

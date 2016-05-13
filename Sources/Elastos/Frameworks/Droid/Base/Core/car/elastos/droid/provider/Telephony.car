@@ -1,68 +1,2662 @@
 
-module {
+module
+{
+    using interface Elastos.Utility.ISet;
+
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Net.IUri;
+    // interface Elastos.Droid.Telephony.ISmsMessage;
 
     namespace Elastos {
     namespace Droid {
     namespace Provider {
 
-    interface ITelephony {
-        interface ITelephonySms {
+    /**
+     * Base columns for tables that contain text-based SMSs.
+     */
+    interface ITelephonyTextBasedSmsColumns {
+
+        /** Message type: all messages. */
+        const Int32 MESSAGE_TYPE_ALL    = 0;
+
+        /** Message type: inbox. */
+        const Int32 MESSAGE_TYPE_INBOX  = 1;
+
+        /** Message type: sent messages. */
+        const Int32 MESSAGE_TYPE_SENT   = 2;
+
+        /** Message type: drafts. */
+        const Int32 MESSAGE_TYPE_DRAFT  = 3;
+
+        /** Message type: outbox. */
+        const Int32 MESSAGE_TYPE_OUTBOX = 4;
+
+        /** Message type: failed outgoing message. */
+        const Int32 MESSAGE_TYPE_FAILED = 5;
+
+        /** Message type: queued to send later. */
+        const Int32 MESSAGE_TYPE_QUEUED = 6;
+
+        /**
+         * The type of message.
+         * <P>Type: INTEGER</P>
+         */
+        const String TYPE = "type";
+
+        /**
+         * The thread ID of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String THREAD_ID = "thread_id";
+
+        /**
+         * The address of the other party.
+         * <P>Type: TEXT</P>
+         */
+        const String ADDRESS = "address";
+
+        /**
+         * The date the message was received.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATE = "date";
+
+        /**
+         * The date the message was sent.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATE_SENT = "date_sent";
+
+        /**
+         * Has the message been read?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String READ = "read";
+
+        /**
+         * Has the message been seen by the user? The "seen" flag determines
+         * whether we need to show a notification.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String SEEN = "seen";
+
+        /**
+         * {@code TP-Status} value for the message, or -1 if no status has been received.
+         * <P>Type: INTEGER</P>
+         */
+        const String STATUS = "status";
+
+        /** TP-Status: no status received. */
+        const Int32 STATUS_NONE = -1;
+        /** TP-Status: complete. */
+        const Int32 STATUS_COMPLETE = 0;
+        /** TP-Status: pending. */
+        const Int32 STATUS_PENDING = 32;
+        /** TP-Status: failed. */
+        const Int32 STATUS_FAILED = 64;
+
+        /**
+         * The subject of the message, if present.
+         * <P>Type: TEXT</P>
+         */
+        const String SUBJECT = "subject";
+
+        /**
+         * The body of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String BODY = "body";
+
+        /**
+         * The ID of the sender of the conversation, if present.
+         * <P>Type: INTEGER (reference to item in {@code content://contacts/people})</P>
+         */
+        const String PERSON = "person";
+
+        /**
+         * The protocol identifier code.
+         * <P>Type: INTEGER</P>
+         */
+        const String PROTOCOL = "protocol";
+
+        /**
+         * Is the {@code TP-Reply-Path} flag set?
+         * <P>Type: BOOLEAN</P>
+         */
+        const String REPLY_PATH_PRESENT = "reply_path_present";
+
+        /**
+         * The service center (SC) through which to send the message, if present.
+         * <P>Type: TEXT</P>
+         */
+        const String SERVICE_CENTER = "service_center";
+
+        /**
+         * Is the message locked?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String LOCKED = "locked";
+
+        /**
+         * The phone id to which the message belongs to
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        const String PHONE_ID = "phone_id";
+
+        /**
+         * The MTU size of the mobile interface to which the APN connected
+         * @hide
+         */
+        const String MTU = "mtu";
+
+        /**
+         * Error code associated with sending or receiving this message
+         * <P>Type: INTEGER</P>
+         */
+        const String ERROR_CODE = "error_code";
+
+        /**
+         * The identity of the sender of a sent message. It is
+         * usually the package name of the app which sends the message.
+         * <p>Type: TEXT</p>
+         */
+        const String CREATOR = "creator";
+
+       /**
+         * The priority of the message.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        const String PRIORITY = "priority";
+    }
+
+    /**
+     * Contains all text-based SMS messages in the SMS app inbox.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     * interface ITextBasedSmsColumns
+     */
+    interface ITelephonySmsInbox {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * Add an SMS to the Draft box.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the pseudo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the Draft box.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @param subId the sub_id which the message belongs to
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [out] IUri** result);
+    }
+
+    /**
+     * Contains all sent text-based SMS messages in the SMS app.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     * interface ITextBasedSmsColumns
+     */
+    interface ITelephonySmsSent {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * Add an SMS to the Draft box.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the pseudo-subject of the message
+         * @param date the timestamp for the message
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the Draft box.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param subId the sub_id which the message belongs to
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [out] IUri** result);
+    }
+
+    /**
+     * Contains all sent text-based SMS messages in the SMS app.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     * interface ITextBasedSmsColumns
+     */
+    interface ITelephonySmsDraft {
+
+       /**
+        * @hide
+        */
+        AddMessage(
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the Draft box.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param subId the sub_id which the message belongs to
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [out] IUri** result);
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+    }
+
+    /**
+     * Contains all pending outgoing text-based SMS messages.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     * interface ITextBasedSmsColumns
+     */
+    interface ITelephonySmsOutbox {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * Add an SMS to the outbox.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the pseudo-subject of the message
+         * @param date the timestamp for the message
+         * @param deliveryReport whether a delivery report was requested for the message
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean deliveryReport,
+            [in] Int64 threadId,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the Out box.
+         *
+         * @param resolver the content resolver to use
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param deliveryReport whether a delivery report was requested for the message
+         * @param subId the sub_id which the message belongs to
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessage(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean deliveryReport,
+            [in] Int64 threadId,
+            [out] IUri** result);
+    }
+
+    /**
+     * Contains all sent text-based SMS messages in the SMS app.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     * interface ITextBasedSmsColumns
+     */
+    interface ITelephonySmsConversations {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * The first 45 characters of the body of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String SNIPPET = "snippet";
+
+        /**
+         * The number of messages in the conversation.
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_COUNT = "msg_count";
+    }
+
+    /**
+     * Contains constants for SMS related Intents that are broadcast.
+     */
+    interface ITelephonySmsIntents {
+
+        /**
+         * Set by BroadcastReceiver to indicate that the message was handled
+         * successfully.
+         */
+        const Int32 RESULT_SMS_HANDLED = 1;
+
+        /**
+         * Set by BroadcastReceiver to indicate a generic error while
+         * processing the message.
+         */
+        const Int32 RESULT_SMS_GENERIC_ERROR = 2;
+
+        /**
+         * Set by BroadcastReceiver to indicate insufficient memory to store
+         * the message.
+         */
+        const Int32 RESULT_SMS_OUT_OF_MEMORY = 3;
+
+        /**
+         * Set by BroadcastReceiver to indicate that the message, while
+         * possibly valid, is of a format or encoding that is not
+         * supported.
+         */
+        const Int32 RESULT_SMS_UNSUPPORTED = 4;
+
+        /**
+         * Set by BroadcastReceiver to indicate a duplicate incoming message.
+         */
+        const Int32 RESULT_SMS_DUPLICATED = 5;
+
+        /**
+         * Used internally: The sender of the SMS was blacklisted
+         * for not being listed in the contact list
+         * @hide
+         */
+        const Int32 RESULT_SMS_BLACKLISTED_UNKNOWN = 6;
+
+        /**
+         * Used internally: The sender of the SMS was blacklisted
+         * for being listed in the blacklist
+         * @hide
+         */
+        const Int32 RESULT_SMS_BLACKLISTED_LIST = 7;
+
+        /**
+         * Used internally: The sender of the SMS was blacklisted
+         * for matching a blacklist regex entry
+         * @hide
+         */
+        const Int32 RESULT_SMS_BLACKLISTED_REGEX = 8;
+
+        /**
+         * Used internally:
+         * Broadcast Action: A new protected text-based SMS message has been received
+         * by the device. This intent will be delivered to all registered
+         * receivers who possess {@link android.Manifest.permission#RECEIVE_PROTECTED_SMS}.
+         * These apps SHOULD NOT write the message or notify the user.
+         * The intent will have the following extra values:
+         * </p>
+         *
+         * <ul>
+         *   <li><em>"pdus"</em> - An Object[] of byte[]s containing the PDUs
+         *   that make up the message.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         * @hide
+         */
+        const String PROTECTED_SMS_RECEIVED_ACTION =
+                "android.provider.Telephony.ACTION_PROTECTED_SMS_RECEIVED";
+
+        /**
+         * Activity action: Ask the user to change the default
+         * SMS application. This will show a dialog that asks the
+         * user whether they want to replace the current default
+         * SMS application with the one specified in
+         * {@link #EXTRA_PACKAGE_NAME}.
+         */
+        const String ACTION_CHANGE_DEFAULT =
+                "android.provider.Telephony.ACTION_CHANGE_DEFAULT";
+
+        /**
+         * The PackageName string passed in as an
+         * extra for {@link #ACTION_CHANGE_DEFAULT}
+         *
+         * @see #ACTION_CHANGE_DEFAULT
+         */
+        const String EXTRA_PACKAGE_NAME = "package";
+
+        /**
+         * Broadcast Action: A new text-based SMS message has been received
+         * by the device. This intent will only be delivered to the default
+         * sms app. That app is responsible for writing the message and notifying
+         * the user. The intent will have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"pdus"</em> - An Object[] of byte[]s containing the PDUs
+         *   that make up the message.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         *
+         * <p class="note"><strong>Note:</strong>
+         * The broadcast receiver that filters for this intent must declare
+         * {@link android.Manifest.permission#BROADCAST_SMS} as a required permission in
+         * the <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+         * &lt;receiver>}</a> tag.
+         */
+        const String SMS_DELIVER_ACTION =
+                "android.provider.Telephony.SMS_DELIVER";
+
+        /**
+         * Broadcast Action: A new text-based SMS message has been received
+         * by the device. This intent will only be delivered to a
+         * carrier app which is responsible for filtering the message.
+         * If the carrier app wants to drop a message, it should set the result
+         * code to {@link android.app.Activity#RESULT_CANCELED}. The carrier app can
+         * also modify the SMS PDU by setting the "pdus" value in result extras.</p>
+         *
+         * The intent will have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"pdus"</em> - An Object[] of byte[]s containing the PDUs
+         *   that make up the message.</li>
+         *   <li><em>"format"</em> - A String describing the format of the PDUs. It can
+         *   be either "3gpp" or "3gpp2".</li>
+         *   <li><em>"destport"</em> - An int describing the destination port of a data
+         *   SMS. It will be -1 for text SMS.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p class="note"><strong>Note:</strong>
+         * The broadcast receiver that filters for this intent must be a carrier privileged app.
+         * It must also declare {@link android.Manifest.permission#BROADCAST_SMS} as a required
+         * permission in the <a href="{@docRoot}guide/topics/manifest/receiver-element.html">
+         * {@code &lt;receiver>}</a> tag.
+         * {@hide}
+         */
+        const String SMS_FILTER_ACTION =
+                "android.provider.Telephony.SMS_FILTER";
+
+        /**
+         * Broadcast Action: A new text-based SMS message has been received
+         * by the device. This intent will be delivered to all registered
+         * receivers as a notification. These apps are not expected to write the
+         * message or notify the user. The intent will have the following extra
+         * values:</p>
+         *
+         * <ul>
+         *   <li><em>"pdus"</em> - An Object[] of byte[]s containing the PDUs
+         *   that make up the message.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         */
+        const String SMS_RECEIVED_ACTION =
+                "android.provider.Telephony.SMS_RECEIVED";
+
+        /**
+         * Broadcast Action: A new data based SMS message has been received
+         * by the device. This intent will be delivered to all registered
+         * receivers as a notification. The intent will have the following extra
+         * values:</p>
+         *
+         * <ul>
+         *   <li><em>"pdus"</em> - An Object[] of byte[]s containing the PDUs
+         *   that make up the message.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         */
+        const String DATA_SMS_RECEIVED_ACTION =
+                "android.intent.action.DATA_SMS_RECEIVED";
+
+        /**
+         * Broadcast Action: A new WAP PUSH message has been received by the
+         * device. This intent will only be delivered to the default
+         * sms app. That app is responsible for writing the message and notifying
+         * the user. The intent will have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"transactionId"</em> - (Integer) The WAP transaction ID</li>
+         *   <li><em>"pduType"</em> - (Integer) The WAP PDU type</li>
+         *   <li><em>"header"</em> - (byte[]) The header of the message</li>
+         *   <li><em>"data"</em> - (byte[]) The data payload of the message</li>
+         *   <li><em>"contentTypeParameters" </em>
+         *   -(HashMap&lt;String,String&gt;) Any parameters associated with the content type
+         *   (decoded from the WSP Content-Type header)</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         *
+         * <p>The contentTypeParameters extra value is map of content parameters keyed by
+         * their names.</p>
+         *
+         * <p>If any unassigned well-known parameters are encountered, the key of the map will
+         * be 'unassigned/0x...', where '...' is the hex value of the unassigned parameter.  If
+         * a parameter has No-Value the value in the map will be null.</p>
+         *
+         * <p class="note"><strong>Note:</strong>
+         * The broadcast receiver that filters for this intent must declare
+         * {@link android.Manifest.permission#BROADCAST_WAP_PUSH} as a required permission in
+         * the <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+         * &lt;receiver>}</a> tag.
+         */
+        const String WAP_PUSH_DELIVER_ACTION =
+                "android.provider.Telephony.WAP_PUSH_DELIVER";
+
+        /**
+         * Broadcast Action: A new WAP PUSH message has been received by the
+         * device. This intent will be delivered to all registered
+         * receivers as a notification. These apps are not expected to write the
+         * message or notify the user. The intent will have the following extra
+         * values:</p>
+         *
+         * <ul>
+         *   <li><em>"transactionId"</em> - (Integer) The WAP transaction ID</li>
+         *   <li><em>"pduType"</em> - (Integer) The WAP PDU type</li>
+         *   <li><em>"header"</em> - (byte[]) The header of the message</li>
+         *   <li><em>"data"</em> - (byte[]) The data payload of the message</li>
+         *   <li><em>"contentTypeParameters"</em>
+         *   - (HashMap&lt;String,String&gt;) Any parameters associated with the content type
+         *   (decoded from the WSP Content-Type header)</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         *
+         * <p>The contentTypeParameters extra value is map of content parameters keyed by
+         * their names.</p>
+         *
+         * <p>If any unassigned well-known parameters are encountered, the key of the map will
+         * be 'unassigned/0x...', where '...' is the hex value of the unassigned parameter.  If
+         * a parameter has No-Value the value in the map will be null.</p>
+         */
+        const String WAP_PUSH_RECEIVED_ACTION =
+                "android.provider.Telephony.WAP_PUSH_RECEIVED";
+
+        /**
+         * Broadcast Action: A new Cell Broadcast message has been received
+         * by the device. The intent will have the following extra
+         * values:</p>
+         *
+         * <ul>
+         *   <li><em>"message"</em> - An SmsCbMessage object containing the broadcast message
+         *   data. This is not an emergency alert, so ETWS and CMAS data will be null.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         */
+        const String SMS_CB_RECEIVED_ACTION =
+                "android.provider.Telephony.SMS_CB_RECEIVED";
+
+        /**
+         * Broadcast Action: A new Emergency Broadcast message has been received
+         * by the device. The intent will have the following extra
+         * values:</p>
+         *
+         * <ul>
+         *   <li><em>"message"</em> - An SmsCbMessage object containing the broadcast message
+         *   data, including ETWS or CMAS warning notification info if present.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         */
+        const String SMS_EMERGENCY_CB_RECEIVED_ACTION =
+                "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+
+        /**
+         * Broadcast Action: A new CDMA SMS has been received containing Service Category
+         * Program Data (updates the list of enabled broadcast channels). The intent will
+         * have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"operations"</em> - An array of CdmaSmsCbProgramData objects containing
+         *   the service category operations (add/delete/clear) to perform.</li>
+         * </ul>
+         *
+         * <p>The extra values can be extracted using
+         * {@link #getMessagesFromIntent(Intent)}.</p>
+         *
+         * <p>If a BroadcastReceiver encounters an error while processing
+         * this intent it should set the result code appropriately.</p>
+         */
+        const String SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION =
+                "android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED";
+
+        /**
+         * Broadcast Action: The SIM storage for SMS messages is full.  If
+         * space is not freed, messages targeted for the SIM (class 2) may
+         * not be saved.
+         */
+        const String SIM_FULL_ACTION =
+                "android.provider.Telephony.SIM_FULL";
+
+        /**
+         * Broadcast Action: An incoming SMS has been rejected by the
+         * telephony framework.  This intent is sent in lieu of any
+         * of the RECEIVED_ACTION intents.  The intent will have the
+         * following extra value:</p>
+         *
+         * <ul>
+         *   <li><em>"result"</em> - An int result code, e.g. {@link #RESULT_SMS_OUT_OF_MEMORY}
+         *   indicating the error returned to the network.</li>
+         * </ul>
+         */
+        const String SMS_REJECTED_ACTION =
+            "android.provider.Telephony.SMS_REJECTED";
+
+        /**
+         * Broadcast Action: A new SMS PDU needs to be sent from
+         * the device. This intent will only be delivered to a
+         * carrier app. That app is responsible for sending the PDU.
+         * The intent will have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"pdu"</em> - (byte[]) The PDU to send.</li>
+         *   <li><em>"smsc"</em> - (byte[]) The service center address (for GSM PDU only).</li>
+         *   <li><em>"format"</em> - (String) The format of the PDU. Either 3gpp or 3gpp2. </li>
+         *   <li><em>"concat.refNumber"</em> - (int) If the SMS is part of a multi-part SMS, the
+         *   ref number used in the SMS header.</li>
+         *   <li><em>"concat.seqNumber"</em> - (int) If the SMS is part of a multi-part SMS, the
+         *   sequence number of this SMS.</li>
+         *   <li><em>"concat.msgCount"</em> - (int) If the SMS is part of a multi-part SMS, the
+         *   total number of SMSes in the multi-part SMS.</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver is trying to send the message,
+         *  it should set the result code to {@link android.app.Activity#RESULT_OK} and set
+         *  the following in the result extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"messageref"</em> - (int) The new message reference number which will be
+         *   later used in the updateSmsSendStatus call.</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver cannot send the message, it should not set the result
+         *  code and the platform will send it via the normal pathway.
+         * </p>
+         *
+         * <p class="note"><strong>Note:</strong>
+         * The broadcast receiver that filters for this intent must be a carrier privileged app.
+         * It must also declare {@link android.Manifest.permission#BROADCAST_SMS} as a required
+         * permission in the <a href="{@docRoot}guide/topics/manifest/receiver-element.html">
+         * {@code &lt;receiver>}</a> tag.
+         * {@hide}
+         */
+        const String SMS_SEND_ACTION =
+            "android.provider.Telephony.SMS_SEND";
+
+        /**
+         * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
+         * {@link #DATA_SMS_RECEIVED_ACTION} intent.
+         *
+         * @param intent the intent to read from
+         * @return an array of SmsMessages for the PDUs
+         */
+        // GetMessagesFromIntent(
+        //     [in] IIntent* intent,
+        //     [out, callee] ArrayOf<ISmsMessage*>* result);
+
+        /**
+         * Read the normalized addresses out of PDUs
+         * @param pdus bytes for PDUs
+         * @param format the format of the message
+         * @return a list of Addresses for the PDUs
+         * @hide
+         */
+        // GetNormalizedAddressesFromPdus(
+        //     [in] byte[][] pdus,
+        //     [in] String format,
+        //     [out] IList** result);
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     * interface ITextBasedSmsColumns
+     */
+    [local, deprecated]
+    interface ITelephonySms {
+
+        /**
+         * Used to determine the currently configured default SMS package.
+         * @param context context of the requesting application
+         * @return package name for the default SMS package or null
+         */
         GetDefaultSmsPackage(
-            [in] Context context,
+            [in] IContext* context,
             [out] String* result);
 
+        /**
+         * Return cursor for table query.
+         * @hide
+         */
+        Query(
+            [in] IContentResolver* cr,
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** result);
+
+        /**
+         * Return cursor for table query.
+         * @hide
+         */
+        Query(
+            [in] IContentResolver* cr,
+            [in] ArrayOf<String>* projection,
+            [in] String where,
+            [in] String orderBy,
+            [out] ICursor** result);
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * Add an SMS to the given URI.
+         *
+         * @param resolver the content resolver to use
+         * @param uri the URI to add the message to
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the pseudo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @param deliveryReport true if a delivery report was requested, false if not
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessageToUri(
+            [in] IContentResolver* resolver,
+            [in] IUri* uri,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [in] Boolean deliveryReport,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the given URI.
+         *
+         * @param resolver the content resolver to use
+         * @param uri the URI to add the message to
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @param deliveryReport true if a delivery report was requested, false if not
+         * @param subId the sub_id which the message belongs to
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessageToUri(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] IUri* uri,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [in] Boolean deliveryReport,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the given URI with the specified thread ID.
+         *
+         * @param resolver the content resolver to use
+         * @param uri the URI to add the message to
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the pseudo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @param deliveryReport true if a delivery report was requested, false if not
+         * @param threadId the thread_id of the message
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessageToUri(
+            [in] IContentResolver* resolver,
+            [in] IUri* uri,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [in] Boolean deliveryReport,
+            [in] Int64 threadId,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the given URI with thread_id specified.
+         *
+         * @param resolver the content resolver to use
+         * @param uri the URI to add the message to
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @param deliveryReport true if a delivery report was requested, false if not
+         * @param threadId the thread_id of the message
+         * @param subId the sub_id which the message belongs to
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessageToUri(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] IUri* uri,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [in] Boolean deliveryReport,
+            [in] Int64 threadId,
+            [out] IUri** result);
+
+        /**
+         * Add an SMS to the given URI with priority specified.
+         *
+         * @param resolver the content resolver to use
+         * @param uri the URI to add the message to
+         * @param address the address of the sender
+         * @param body the body of the message
+         * @param subject the psuedo-subject of the message
+         * @param date the timestamp for the message
+         * @param read true if the message has been read, false if not
+         * @param deliveryReport true if a delivery report was requested, false if not
+         * @param threadId the thread_id of the message
+         * @param subId the sub_id which the message belongs to
+         * @param priority the priority of the message
+         * @return the URI for the new message
+         * @hide
+         */
+        AddMessageToUri(
+            [in] Int64 subId,
+            [in] IContentResolver* resolver,
+            [in] IUri* uri,
+            [in] String address,
+            [in] String body,
+            [in] String subject,
+            [in] Int64 date,
+            [in] Boolean read,
+            [in] Boolean deliveryReport,
+            [in] Int64 threadId,
+            [in] Int32 priority,
+            [out] IUri** result);
+
+        /**
+         * Move a message to the given folder.
+         *
+         * @param context the context to use
+         * @param uri the message to move
+         * @param folder the folder to move to
+         * @return true if the operation succeeded
+         * @hide
+         */
+        MoveMessageToFolder(
+            [in] IContext* context,
+            [in] IUri* uri,
+            [in] Int32 folder,
+            [in] Int32 error,
+            [out] Boolean* result);
+
+        /**
+         * Returns true iff the folder (message type) identifies an
+         * outgoing message.
+         * @hide
+         */
         IsOutgoingFolder(
             [in] Int32 messageType,
             [out] Boolean* result);
+    }
 
-        interface ITelephonySmsInbox {
-        }
+    /**
+     * Base columns for tables that contain MMSs.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyBaseMmsColumns {
 
-        }
+        /** Message box: all messages. */
+        const Int32 MESSAGE_BOX_ALL    = 0;
+        /** Message box: inbox. */
+        const Int32 MESSAGE_BOX_INBOX  = 1;
+        /** Message box: sent messages. */
+        const Int32 MESSAGE_BOX_SENT   = 2;
+        /** Message box: drafts. */
+        const Int32 MESSAGE_BOX_DRAFTS = 3;
+        /** Message box: outbox. */
+        const Int32 MESSAGE_BOX_OUTBOX = 4;
+        /** Message box: failed. */
+        const Int32 MESSAGE_BOX_FAILED = 5;
 
-        interface ITelephonyThreads {
+        /**
+         * The thread ID of the message.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String THREAD_ID = "thread_id";
+
+        /**
+         * The date the message was received.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATE = "date";
+
+        /**
+         * The date the message was sent.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATE_SENT = "date_sent";
+
+        /**
+         * The box which the message belongs to, e.g. {@link #MESSAGE_BOX_INBOX}.
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_BOX = "msg_box";
+
+        /**
+         * Has the message been read?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String READ = "read";
+
+        /**
+         * Has the message been seen by the user? The "seen" flag determines
+         * whether we need to show a new message notification.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String SEEN = "seen";
+
+        /**
+         * Does the message have only a text part (can also have a subject) with
+         * no picture, slideshow, sound, etc. parts?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String TEXT_ONLY = "text_only";
+
+        /**
+         * The {@code Message-ID} of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String MESSAGE_ID = "m_id";
+
+        /**
+         * The subject of the message, if present.
+         * <P>Type: TEXT</P>
+         */
+        const String SUBJECT = "sub";
+
+        /**
+         * The character set of the subject, if present.
+         * <P>Type: INTEGER</P>
+         */
+        const String SUBJECT_CHARSET = "sub_cs";
+
+        /**
+         * The {@code Content-Type} of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String CONTENT_TYPE = "ct_t";
+
+        /**
+         * The {@code Content-Location} of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String CONTENT_LOCATION = "ct_l";
+
+        /**
+         * The expiry time of the message.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String EXPIRY = "exp";
+
+        /**
+         * The class of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String MESSAGE_CLASS = "m_cls";
+
+        /**
+         * The type of the message defined by MMS spec.
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_TYPE = "m_type";
+
+        /**
+         * The version of the specification that this message conforms to.
+         * <P>Type: INTEGER</P>
+         */
+        const String MMS_VERSION = "v";
+
+        /**
+         * The size of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_SIZE = "m_size";
+
+        /**
+         * The priority of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String PRIORITY = "pri";
+
+        /**
+         * The {@code read-report} of the message.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String READ_REPORT = "rr";
+
+        /**
+         * Is read report allowed?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String REPORT_ALLOWED = "rpt_a";
+
+        /**
+         * The {@code response-status} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String RESPONSE_STATUS = "resp_st";
+
+        /**
+         * The {@code status} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String STATUS = "st";
+
+        /**
+         * The {@code transaction-id} of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String TRANSACTION_ID = "tr_id";
+
+        /**
+         * The {@code retrieve-status} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String RETRIEVE_STATUS = "retr_st";
+
+        /**
+         * The {@code retrieve-text} of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String RETRIEVE_TEXT = "retr_txt";
+
+        /**
+         * The character set of the retrieve-text.
+         * <P>Type: INTEGER</P>
+         */
+        const String RETRIEVE_TEXT_CHARSET = "retr_txt_cs";
+
+        /**
+         * The {@code read-status} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String READ_STATUS = "read_status";
+
+        /**
+         * The {@code content-class} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String CONTENT_CLASS = "ct_cls";
+
+        /**
+         * The {@code delivery-report} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String DELIVERY_REPORT = "d_rpt";
+
+        /**
+         * The {@code delivery-time-token} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String DELIVERY_TIME_TOKEN = "d_tm_tok";
+
+        /**
+         * The {@code delivery-time} of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String DELIVERY_TIME = "d_tm";
+
+        /**
+         * The {@code response-text} of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String RESPONSE_TEXT = "resp_txt";
+
+        /**
+         * The {@code sender-visibility} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String SENDER_VISIBILITY = "s_vis";
+
+        /**
+         * The {@code reply-charging} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLY_CHARGING = "r_chg";
+
+        /**
+         * The {@code reply-charging-deadline-token} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLY_CHARGING_DEADLINE_TOKEN = "r_chg_dl_tok";
+
+        /**
+         * The {@code reply-charging-deadline} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLY_CHARGING_DEADLINE = "r_chg_dl";
+
+        /**
+         * The {@code reply-charging-id} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLY_CHARGING_ID = "r_chg_id";
+
+        /**
+         * The {@code reply-charging-size} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLY_CHARGING_SIZE = "r_chg_sz";
+
+        /**
+         * The {@code previously-sent-by} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String PREVIOUSLY_SENT_BY = "p_s_by";
+
+        /**
+         * The {@code previously-sent-date} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String PREVIOUSLY_SENT_DATE = "p_s_d";
+
+        /**
+         * The {@code store} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String STORE = "store";
+
+        /**
+         * The {@code mm-state} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MM_STATE = "mm_st";
+
+        /**
+         * The {@code mm-flags-token} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MM_FLAGS_TOKEN = "mm_flg_tok";
+
+        /**
+         * The {@code mm-flags} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MM_FLAGS = "mm_flg";
+
+        /**
+         * The {@code store-status} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String STORE_STATUS = "store_st";
+
+        /**
+         * The {@code store-status-text} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String STORE_STATUS_TEXT = "store_st_txt";
+
+        /**
+         * The {@code stored} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String STORED = "stored";
+
+        /**
+         * The {@code totals} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String TOTALS = "totals";
+
+        /**
+         * The {@code mbox-totals} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MBOX_TOTALS = "mb_t";
+
+        /**
+         * The {@code mbox-totals-token} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MBOX_TOTALS_TOKEN = "mb_t_tok";
+
+        /**
+         * The {@code quotas} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String QUOTAS = "qt";
+
+        /**
+         * The {@code mbox-quotas} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MBOX_QUOTAS = "mb_qt";
+
+        /**
+         * The {@code mbox-quotas-token} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MBOX_QUOTAS_TOKEN = "mb_qt_tok";
+
+        /**
+         * The {@code message-count} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String MESSAGE_COUNT = "m_cnt";
+
+        /**
+         * The {@code start} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String START = "start";
+
+        /**
+         * The {@code distribution-indicator} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String DISTRIBUTION_INDICATOR = "d_ind";
+
+        /**
+         * The {@code element-descriptor} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String ELEMENT_DESCRIPTOR = "e_des";
+
+        /**
+         * The {@code limit} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String LIMIT = "limit";
+
+        /**
+         * The {@code recommended-retrieval-mode} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String RECOMMENDED_RETRIEVAL_MODE = "r_r_mod";
+
+        /**
+         * The {@code recommended-retrieval-mode-text} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String RECOMMENDED_RETRIEVAL_MODE_TEXT = "r_r_mod_txt";
+
+        /**
+         * The {@code status-text} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String STATUS_TEXT = "st_txt";
+
+        /**
+         * The {@code applic-id} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String APPLIC_ID = "apl_id";
+
+        /**
+         * The {@code reply-applic-id} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLY_APPLIC_ID = "r_apl_id";
+
+        /**
+         * The {@code aux-applic-id} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String AUX_APPLIC_ID = "aux_apl_id";
+
+        /**
+         * The {@code drm-content} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String DRM_CONTENT = "drm_c";
+
+        /**
+         * The {@code adaptation-allowed} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String ADAPTATION_ALLOWED = "adp_a";
+
+        /**
+         * The {@code replace-id} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String REPLACE_ID = "repl_id";
+
+        /**
+         * The {@code cancel-id} of the message.
+         * <P>Type: TEXT</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String CANCEL_ID = "cl_id";
+
+        /**
+         * The {@code cancel-status} of the message.
+         * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported.
+         * @hide
+         */
+        const String CANCEL_STATUS = "cl_st";
+
+        /**
+         * Is the message locked?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String LOCKED = "locked";
+
+        /**
+         * The phone id to which message belongs to
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        const String PHONE_ID = "phone_id";
+
+        /**
+         * The identity of the sender of a sent message. It is
+         * usually the package name of the app which sends the message.
+         * <p>Type: TEXT</p>
+         */
+        const String CREATOR = "creator";
+    }
+
+    /**
+     * Columns for the "canonical_addresses" table used by MMS and SMS.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyCanonicalAddressesColumns {
+        /**
+         * An address used in MMS or SMS.  Email addresses are
+         * converted to lower case and are compared by string
+         * equality.  Other addresses are compared using
+         * PHONE_NUMBERS_EQUAL.
+         * <P>Type: TEXT</P>
+         */
+        const String ADDRESS = "address";
+    }
+
+    /**
+     * Columns for the "threads" table used by MMS and SMS.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyThreadsColumns {
+
+        /**
+         * The date at which the thread was created.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATE = "date";
+
+        /**
+         * A string encoding of the recipient IDs of the recipients of
+         * the message, in numerical order and separated by spaces.
+         * <P>Type: TEXT</P>
+         */
+        const String RECIPIENT_IDS = "recipient_ids";
+
+        /**
+         * The message count of the thread.
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_COUNT = "message_count";
+
+        /**
+         * Indicates whether all messages of the thread have been read.
+         * <P>Type: INTEGER</P>
+         */
+        const String READ = "read";
+
+        /**
+         * The snippet of the latest message in the thread.
+         * <P>Type: TEXT</P>
+         */
+        const String SNIPPET = "snippet";
+
+        /**
+         * The charset of the snippet.
+         * <P>Type: INTEGER</P>
+         */
+        const String SNIPPET_CHARSET = "snippet_cs";
+
+        /**
+         * Type of the thread, either {@link Threads#COMMON_THREAD} or
+         * {@link Threads#BROADCAST_THREAD}.
+         * <P>Type: INTEGER</P>
+         */
+        const String TYPE = "type";
+
+        /**
+         * Indicates whether there is a transmission error in the thread.
+         * <P>Type: INTEGER</P>
+         */
+        const String ERROR = "error";
+
+        /**
+         * Indicates whether this thread contains any attachments.
+         * <P>Type: INTEGER</P>
+         */
+        const String HAS_ATTACHMENT = "has_attachment";
+
+        /**
+         * If the thread is archived
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String ARCHIVED = "archived";
+    }
+
+    /**
+     * Helper functions for the "threads" table used by MMS and SMS.
+     */
+    /**
+     * @Involve
+     * interface IThreadsColumns
+     */
+    [local]
+    interface ITelephonyThreads {
+
+        /** Thread type: common thread. */
+        const Int32 COMMON_THREAD    = 0;
+
+        /** Thread type: broadcast thread. */
+        const Int32 BROADCAST_THREAD = 1;
+
+        /**
+         * This is a single-recipient version of {@code getOrCreateThreadId}.
+         * It's convenient for use with SMS messages.
+         * @param context the context object to use.
+         * @param recipient the recipient to send to.
+         * @hide
+         */
         GetOrCreateThreadId(
-            [in] Context context, 
+            [in] IContext* context,
             [in] String recipient,
             [out] Int64* result);
 
-        }
+        /**
+         * Given the recipients list and subject of an unsaved message,
+         * return its thread ID.  If the message starts a new thread,
+         * allocate a new thread ID.  Otherwise, use the appropriate
+         * existing thread ID.
+         *
+         * <p>Find the thread ID of the same set of recipients (in any order,
+         * without any additions). If one is found, return it. Otherwise,
+         * return a unique thread ID.</p>
+         * @hide
+         */
+        GetOrCreateThreadId(
+            [in] IContext* context,
+            [in] ISet* recipients,
+            [out] Int64* result);
+    }
 
-        interface ITelephonyMms {
+    /**
+     * Contains all MMS messages in the MMS app inbox.
+     */
+    /**
+     * @Involve
+     * interface IBaseMmsColumns
+     */
+    interface ITelephonyMmsInbox {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+    }
+
+    /**
+     * Contains all MMS messages in the MMS app sent folder.
+     */
+    /**
+     * @Involve
+     * interface IBaseMmsColumns
+     */
+    interface ITelephonyMmsSent {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+    }
+
+    /**
+     * Contains all MMS messages in the MMS app drafts folder.
+     */
+    /**
+     * @Involve
+     * interface IBaseMmsColumns
+     */
+    interface ITelephonyMmsDraft {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+    }
+
+    /**
+     * Contains all MMS messages in the MMS app outbox.
+     */
+    /**
+     * @Involve
+     * interface IBaseMmsColumns
+     */
+    interface ITelephonyMmsOutbox {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+    }
+
+    /**
+     * Contains address information for an MMS message.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyMmsAddr {
+
+        /**
+         * The ID of MM which this address entry belongs to.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String MSG_ID = "msg_id";
+
+        /**
+         * The ID of contact entry in Phone Book.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String CONTACT_ID = "contact_id";
+
+        /**
+         * The address text.
+         * <P>Type: TEXT</P>
+         */
+        const String ADDRESS = "address";
+
+        /**
+         * Type of address: must be one of {@code PduHeaders.BCC},
+         * {@code PduHeaders.CC}, {@code PduHeaders.FROM}, {@code PduHeaders.TO}.
+         * <P>Type: INTEGER</P>
+         */
+        const String TYPE = "type";
+
+        /**
+         * Character set of this entry (MMS charset value).
+         * <P>Type: INTEGER</P>
+         */
+        const String CHARSET = "charset";
+    }
+
+    /**
+     * Contains message parts.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyMmsPart {
+
+        /**
+         * The identifier of the message which this part belongs to.
+         * <P>Type: INTEGER</P>
+         */
+        const String MSG_ID = "mid";
+
+        /**
+         * The order of the part.
+         * <P>Type: INTEGER</P>
+         */
+        const String SEQ = "seq";
+
+        /**
+         * The content type of the part.
+         * <P>Type: TEXT</P>
+         */
+        const String CONTENT_TYPE = "ct";
+
+        /**
+         * The name of the part.
+         * <P>Type: TEXT</P>
+         */
+        const String NAME = "name";
+
+        /**
+         * The charset of the part.
+         * <P>Type: TEXT</P>
+         */
+        const String CHARSET = "chset";
+
+        /**
+         * The file name of the part.
+         * <P>Type: TEXT</P>
+         */
+        const String FILENAME = "fn";
+
+        /**
+         * The content disposition of the part.
+         * <P>Type: TEXT</P>
+         */
+        const String CONTENT_DISPOSITION = "cd";
+
+        /**
+         * The content ID of the part.
+         * <P>Type: INTEGER</P>
+         */
+        const String CONTENT_ID = "cid";
+
+        /**
+         * The content location of the part.
+         * <P>Type: INTEGER</P>
+         */
+        const String CONTENT_LOCATION = "cl";
+
+        /**
+         * The start of content-type of the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String CT_START = "ctt_s";
+
+        /**
+         * The type of content-type of the message.
+         * <P>Type: TEXT</P>
+         */
+        const String CT_TYPE = "ctt_t";
+
+        /**
+         * The location (on filesystem) of the binary data of the part.
+         * <P>Type: INTEGER</P>
+         */
+        const String _DATA = "_data";
+
+        /**
+         * The message text.
+         * <P>Type: TEXT</P>
+         */
+        const String TEXT = "text";
+    }
+
+    /**
+     * Message send rate table.
+     */
+    interface ITelephonyMmsRate {
+
+        /**
+         * When a message was successfully sent.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String SENT_TIME = "sent_time";
+    }
+
+    /**
+     * Intents class.
+     */
+    interface ITelephonyMmsIntents {
+
+        /**
+         * Indicates that the contents of specified URIs were changed.
+         * The application which is showing or caching these contents
+         * should be updated.
+         */
+        const String CONTENT_CHANGED_ACTION
+                = "android.intent.action.CONTENT_CHANGED";
+
+        /**
+         * Broadcast Action: A new MMS PDU needs to be sent from
+         * the device. This intent will only be delivered to a
+         * carrier app. That app is responsible for sending the PDU.
+         * The intent will have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>{@link #EXTRA_MMS_CONTENT_URI}</em> - (Uri) The content provider of the
+         *     PDU to send.</li>
+         *   <li><em>{@link #EXTRA_MMS_LOCATION_URL}</em> - (String) The optional url to send
+         *     this MMS PDU. If this is not specified, PDU should be sent to the default MMSC
+         *     url.</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver is trying to send the message,
+         *  it should set the result code to {@link android.app.Activity#RESULT_OK} and set
+         *  the following in the result extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"messageref"</em> - (int) The new message reference number which will be
+         *   later used in the updateMmsSendStatus call.</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver cannot send the message, it should not set the result
+         *  code and the platform will send it via the normal pathway.
+         * </p>
+         *
+         * <p class="note"><strong>Note:</strong>
+         * The broadcast receiver that filters for this intent must be a carrier privileged app.
+         * It must also declare {@link android.Manifest.permission#BROADCAST_WAP_PUSH} as a required
+         * permission in the <a href="{@docRoot}guide/topics/manifest/receiver-element.html">
+         * {@code &lt;receiver>}</a> tag.
+         * {@hide}
+         */
+        const String MMS_SEND_ACTION =
+                "android.provider.Telephony.MMS_SEND";
+
+        /**
+         * Broadcast Action: A new MMS needs to be downloaded.
+         * This intent will only be delivered to a
+         * carrier app. That app is responsible for downloading the message at the URL.
+         * The intent will have the following extra values:</p>
+         *
+         * <ul>
+         *   <li><em>{@link #EXTRA_MMS_CONTENT_URI}</em> - (Uri) The content provider of the
+         *     PDU to be downloaded.</li>
+         *   <li><em>{@link #EXTRA_MMS_LOCATION_URL}</em> - (String) The message URL to be
+         *     downloaded.</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver is trying to download the message,
+         *  it should set the result code to {@link android.app.Activity#RESULT_OK} and set
+         *  the following in the result extra values:</p>
+         *
+         * <ul>
+         *   <li><em>"messageref"</em> - (int) The new message reference number which will be
+         *   later used in the updateMmsDownloadStatus call.</li>
+         * </ul>
+         *
+         * <p>If a BroadcastReceiver cannot download the message, it should not set the result
+         *  code and the platform will download it via the normal pathway.
+         * </p>
+         *
+         * <p class="note"><strong>Note:</strong>
+         * The broadcast receiver that filters for this intent must be a carrier privileged app.
+         * It must also declare {@link android.Manifest.permission#BROADCAST_WAP_PUSH} as a required
+         * permission in the <a href="{@docRoot}guide/topics/manifest/receiver-element.html">
+         * {@code &lt;receiver>}</a> tag.
+         * {@hide}
+         */
+        const String MMS_DOWNLOAD_ACTION =
+                "android.provider.Telephony.MMS_DOWNLOAD";
+
+        /**
+         * An extra field which stores the URI of deleted contents.
+         */
+        const String DELETED_CONTENTS = "deleted_contents";
+
+        /**
+         * The content provider of the PDU to be sent/downloaded passed as an extra for
+         * {@link #MMS_DOWNLOAD_ACTION} and {@link #MMS_SEND_ACTION}.
+         * {@hide}
+         */
+        const String EXTRA_MMS_CONTENT_URI =
+                "android.provider.Telephony.extra.MMS_CONTENT_URI";
+
+        /**
+         * The message URL to be downloaded passed as an extra for {@link #MMS_DOWNLOAD_ACTION}.
+         * It is also the URL to send an MMS to passed as an extra for
+         * {@link #MMS_SEND_ACTION}.
+         * {@hide}
+         */
+        const String EXTRA_MMS_LOCATION_URL =
+                "android.provider.Telephony.extra.MMS_LOCATION_URL";
+    }
+
+    /**
+     * Contains all MMS messages.
+     */
+    /**
+     * @Involve
+     * interface IBaseMmsColumns
+     */
+    [deprecated]
+    interface ITelephonyMms {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * Regex pattern for names and email addresses.
+         * <ul>
+         *     <li><em>mailbox</em> = {@code name-addr}</li>
+         *     <li><em>name-addr</em> = {@code [display-name] angle-addr}</li>
+         *     <li><em>angle-addr</em> = {@code [CFWS] "<" addr-spec ">" [CFWS]}</li>
+         * </ul>
+         * @hide
+         */
+        // const Pattern NAME_ADDR_EMAIL_PATTERN =
+        //        Pattern.compile("\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*");
+
+        /**
+         * Helper method to query this table.
+         * @hide
+         */
+        Query(
+            [in] IContentResolver* cr,
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** result);
+
+        /**
+         * Helper method to query this table.
+         * @hide
+         */
+        Query(
+            [in] IContentResolver* cr,
+            [in] ArrayOf<String>* projection,
+            [in] String where,
+            [in] String orderBy,
+            [out] ICursor** result);
+
+        /**
+         * Helper method to extract email address from address string.
+         * @hide
+         */
         ExtractAddrSpec(
             [in] String address,
             [out] String* result);
 
+        /**
+         * Is the specified address an email address?
+         *
+         * @param address the input address to test
+         * @return true if address is an email address; false otherwise.
+         * @hide
+         */
         IsEmailAddress(
             [in] String address,
             [out] Boolean* result);
 
+        /**
+         * Is the specified number a phone number?
+         *
+         * @param number the input number to test
+         * @return true if number is a phone number; false otherwise.
+         * @hide
+         */
         IsPhoneNumber(
             [in] String number,
             [out] Boolean* result);
-
-        interface ITelephonyMmsInbox {
-        }
-
-        }
-
-        interface ITelephonyMmsSms {
-        interface ITelephonyMmsSmsPendingMessages {
-        }
-
-        }
-
-        interface ITelephonyCarriers {
-        }
-
-        interface ITelephonyCellBroadcasts {
-        }
-
-        interface ITelephonyBlacklist {
-        }
-
     }
 
+    /**
+     * Contains pending messages info.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyMmsSmsPendingMessages {
+
+        /**
+         * The type of transport protocol (MMS or SMS).
+         * <P>Type: INTEGER</P>
+         */
+        const String PROTO_TYPE = "proto_type";
+
+        /**
+         * The ID of the message to be sent or downloaded.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String MSG_ID = "msg_id";
+
+        /**
+         * The type of the message to be sent or downloaded.
+         * This field is only valid for MM. For SM, its value is always set to 0.
+         * <P>Type: INTEGER</P>
+         */
+        const String MSG_TYPE = "msg_type";
+
+        /**
+         * The type of the error code.
+         * <P>Type: INTEGER</P>
+         */
+        const String ERROR_TYPE = "err_type";
+
+        /**
+         * The error code of sending/retrieving process.
+         * <P>Type: INTEGER</P>
+         */
+        const String ERROR_CODE = "err_code";
+
+        /**
+         * How many times we tried to send or download the message.
+         * <P>Type: INTEGER</P>
+         */
+        const String RETRY_INDEX = "retry_index";
+
+        /**
+         * The time to do next retry.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DUE_TIME = "due_time";
+
+        /**
+         * The time we last tried to send or download the message.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String LAST_TRY = "last_try";
+
+        /**
+         * The phone id to which the pending message belongs to
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        const String PHONE_ID = "pending_phone_id";
+    }
+
+    /**
+     * Words table used by provider for full-text searches.
+     * @hide
+     */
+    interface ITelephonyMmsSmsWordsTable {
+
+        /**
+         * Primary key.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String ID = "_id";
+
+        /**
+         * Source row ID.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String SOURCE_ROW_ID = "source_id";
+
+        /**
+         * Table ID (either 1 or 2).
+         * <P>Type: INTEGER</P>
+         */
+        const String TABLE_ID = "table_to_use";
+
+        /**
+         * The words to index.
+         * <P>Type: TEXT</P>
+         */
+        const String INDEXED_TEXT = "index_text";
+    }
+
+    /**
+     * Contains all MMS and SMS messages.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyMmsSms {
+
+        /**
+         * The column that specifies number of messages of type.
+         * @hide
+         */
+        const String TRANSPORT_TYPE_COUNT_COLUMN =
+                "transport_type_count";
+
+        /**
+         * The column to distinguish SMS and MMS messages in query results.
+         */
+        const String TYPE_DISCRIMINATOR_COLUMN =
+                "transport_type";
+
+        // Constants for message protocol types.
+
+        /** SMS protocol type. */
+        const Int32 SMS_PROTO = 0;
+
+        /** MMS protocol type. */
+        const Int32 MMS_PROTO = 1;
+
+        // Constants for error types of pending messages.
+
+        /** Error type: no error. */
+        const Int32 NO_ERROR                      = 0;
+
+        /** Error type: generic transient error. */
+        const Int32 ERR_TYPE_GENERIC              = 1;
+
+        /** Error type: SMS protocol transient error. */
+        const Int32 ERR_TYPE_SMS_PROTO_TRANSIENT  = 2;
+
+        /** Error type: MMS protocol transient error. */
+        const Int32 ERR_TYPE_MMS_PROTO_TRANSIENT  = 3;
+
+        /** Error type: transport failure. */
+        const Int32 ERR_TYPE_TRANSPORT_FAILURE    = 4;
+
+        /** Error type: permanent error (along with all higher error values). */
+        const Int32 ERR_TYPE_GENERIC_PERMANENT    = 10;
+
+        /** Error type: SMS protocol permanent error. */
+        const Int32 ERR_TYPE_SMS_PROTO_PERMANENT  = 11;
+
+        /** Error type: MMS protocol permanent error. */
+        const Int32 ERR_TYPE_MMS_PROTO_PERMANENT  = 12;
+    }
+
+    /**
+     * Carriers class contains information about APNs, including MMSC information.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyCarriers {
+
+        /**
+         * The default sort order for this table.
+         */
+        const String DEFAULT_SORT_ORDER = "name ASC";
+
+        /**
+         * Entry name.
+         * <P>Type: TEXT</P>
+         */
+        const String NAME = "name";
+
+        /**
+         * APN name.
+         * <P>Type: TEXT</P>
+         */
+        const String APN = "apn";
+
+        /**
+         * Proxy address.
+         * <P>Type: TEXT</P>
+         */
+        const String PROXY = "proxy";
+
+        /**
+         * Proxy port.
+         * <P>Type: TEXT</P>
+         */
+        const String PORT = "port";
+
+        /**
+         * MMS proxy address.
+         * <P>Type: TEXT</P>
+         */
+        const String MMSPROXY = "mmsproxy";
+
+        /**
+         * MMS proxy port.
+         * <P>Type: TEXT</P>
+         */
+        const String MMSPORT = "mmsport";
+
+        /**
+         * Server address.
+         * <P>Type: TEXT</P>
+         */
+        const String SERVER = "server";
+
+        /**
+         * APN username.
+         * <P>Type: TEXT</P>
+         */
+        const String USER = "user";
+
+        /**
+         * APN password.
+         * <P>Type: TEXT</P>
+         */
+        const String PASSWORD = "password";
+
+        /**
+         * MMSC URL.
+         * <P>Type: TEXT</P>
+         */
+        const String MMSC = "mmsc";
+
+        /**
+         * Mobile Country Code (MCC).
+         * <P>Type: TEXT</P>
+         */
+        const String MCC = "mcc";
+
+        /**
+         * Mobile Network Code (MNC).
+         * <P>Type: TEXT</P>
+         */
+        const String MNC = "mnc";
+
+        /**
+         * Numeric operator ID (as String). Usually {@code MCC + MNC}.
+         * <P>Type: TEXT</P>
+         */
+        const String NUMERIC = "numeric";
+
+        /**
+         * Authentication type.
+         * <P>Type:  INTEGER</P>
+         */
+        const String AUTH_TYPE = "authtype";
+
+        /**
+         * Comma-delimited list of APN types.
+         * <P>Type: TEXT</P>
+         */
+        const String TYPE = "type";
+
+        /**
+         * The protocol to use to connect to this APN.
+         *
+         * One of the {@code PDP_type} values in TS 27.007 section 10.1.1.
+         * For example: {@code IP}, {@code IPV6}, {@code IPV4V6}, or {@code PPP}.
+         * <P>Type: TEXT</P>
+         */
+        const String PROTOCOL = "protocol";
+
+        /**
+         * The protocol to use to connect to this APN when roaming.
+         * The syntax is the same as protocol.
+         * <P>Type: TEXT</P>
+         */
+        const String ROAMING_PROTOCOL = "roaming_protocol";
+
+        /**
+         * Is this the current APN?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String CURRENT = "current";
+
+        /**
+         * Is this APN enabled?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String CARRIER_ENABLED = "carrier_enabled";
+
+        /**
+         * Radio Access Technology info.
+         * To check what values are allowed, refer to {@link android.telephony.ServiceState}.
+         * This should be spread to other technologies,
+         * but is currently only used for LTE (14) and eHRPD (13).
+         * <P>Type: INTEGER</P>
+         */
+        const String BEARER = "bearer";
+
+        /**
+         * MVNO type:
+         * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
+         * <P>Type: TEXT</P>
+         */
+        const String MVNO_TYPE = "mvno_type";
+
+        /**
+         * MVNO data.
+         * Use the following examples.
+         * <ul>
+         *     <li>SPN: A MOBILE, BEN NL, ...</li>
+         *     <li>IMSI: 302720x94, 2060188, ...</li>
+         *     <li>GID: 4E, 33, ...</li>
+         * </ul>
+         * <P>Type: TEXT</P>
+         */
+        const String MVNO_MATCH_DATA = "mvno_match_data";
+
+        /**
+         * The sub_id to which the APN belongs to
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        const String SUB_ID = "sub_id";
+
+        /**
+         * The profile_id to which the APN saved in modem
+         * <p>Type: INTEGER</p>
+         *@hide
+         */
+        const String PROFILE_ID = "profile_id";
+
+        /**
+         * Is the apn setting to be set in modem
+         * <P>Type: INTEGER (boolean)</P>
+         *@hide
+         */
+        const String MODEM_COGNITIVE = "modem_cognitive";
+
+        /**
+         * The max connections of this apn
+         * <p>Type: INTEGER</p>
+         *@hide
+         */
+        const String MAX_CONNS = "max_conns";
+
+        /**
+         * The wait time for retry of the apn
+         * <p>Type: INTEGER</p>
+         *@hide
+         */
+        const String WAIT_TIME = "wait_time";
+
+        /**
+         * The time to limit max connection for the apn
+         * <p>Type: INTEGER</p>
+         *@hide
+         */
+        const String MAX_CONNS_TIME = "max_conns_time";
+
+        /**
+         * The MTU size of the mobile interface to  which the APN connected
+         * <p>Type: INTEGER </p>
+         * @hide
+         */
+        const String MTU = "mtu";
+    }
+
+    /**
+     * Contains received SMS cell broadcast messages.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyCellBroadcasts {
+
+        /**
+         * Message geographical scope.
+         * <P>Type: INTEGER</P>
+         */
+        const String GEOGRAPHICAL_SCOPE = "geo_scope";
+
+        /**
+         * Message serial number.
+         * <P>Type: INTEGER</P>
+         */
+        const String SERIAL_NUMBER = "serial_number";
+
+        /**
+         * PLMN of broadcast sender. {@code SERIAL_NUMBER + PLMN + LAC + CID} uniquely identifies
+         * a broadcast for duplicate detection purposes.
+         * <P>Type: TEXT</P>
+         */
+        const String PLMN = "plmn";
+
+        /**
+         * Location Area (GSM) or Service Area (UMTS) of broadcast sender. Unused for CDMA.
+         * Only included if Geographical Scope of message is not PLMN wide (01).
+         * <P>Type: INTEGER</P>
+         */
+        const String LAC = "lac";
+
+        /**
+         * Cell ID of message sender (GSM/UMTS). Unused for CDMA. Only included when the
+         * Geographical Scope of message is cell wide (00 or 11).
+         * <P>Type: INTEGER</P>
+         */
+        const String CID = "cid";
+
+        /**
+         * Message code. <em>OBSOLETE: merged into SERIAL_NUMBER.</em>
+         * <P>Type: INTEGER</P>
+         */
+        const String V1_MESSAGE_CODE = "message_code";
+
+        /**
+         * Message identifier. <em>OBSOLETE: renamed to SERVICE_CATEGORY.</em>
+         * <P>Type: INTEGER</P>
+         */
+        const String V1_MESSAGE_IDENTIFIER = "message_id";
+
+        /**
+         * Service category (GSM/UMTS: message identifier; CDMA: service category).
+         * <P>Type: INTEGER</P>
+         */
+        const String SERVICE_CATEGORY = "service_category";
+
+        /**
+         * Message language code.
+         * <P>Type: TEXT</P>
+         */
+        const String LANGUAGE_CODE = "language";
+
+        /**
+         * Message body.
+         * <P>Type: TEXT</P>
+         */
+        const String MESSAGE_BODY = "body";
+
+        /**
+         * Message delivery time.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DELIVERY_TIME = "date";
+
+        /**
+         * Has the message been viewed?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String MESSAGE_READ = "read";
+
+        /**
+         * Message format (3GPP or 3GPP2).
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_FORMAT = "format";
+
+        /**
+         * Message priority (including emergency).
+         * <P>Type: INTEGER</P>
+         */
+        const String MESSAGE_PRIORITY = "priority";
+
+        /**
+         * ETWS warning type (ETWS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String ETWS_WARNING_TYPE = "etws_warning_type";
+
+        /**
+         * CMAS message class (CMAS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String CMAS_MESSAGE_CLASS = "cmas_message_class";
+
+        /**
+         * CMAS category (CMAS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String CMAS_CATEGORY = "cmas_category";
+
+        /**
+         * CMAS response type (CMAS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String CMAS_RESPONSE_TYPE = "cmas_response_type";
+
+        /**
+         * CMAS severity (CMAS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String CMAS_SEVERITY = "cmas_severity";
+
+        /**
+         * CMAS urgency (CMAS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String CMAS_URGENCY = "cmas_urgency";
+
+        /**
+         * CMAS certainty (CMAS alerts only).
+         * <P>Type: INTEGER</P>
+         */
+        const String CMAS_CERTAINTY = "cmas_certainty";
+
+        /** The default sort order for this table. */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+    }
+
+    /**
+     * Contains phone numbers that are blacklisted
+     * for phone and/or message purposes.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface ITelephonyBlacklist {
+
+        /**
+         * Query parameter used to match numbers by regular-expression like
+         * matching. Supported are the '*' and the '.' operators.
+         * <p>
+         * TYPE: boolean
+         */
+        const String REGEX_KEY = "regex";
+
+        /**
+         * The default sort order for this table
+         */
+        const String DEFAULT_SORT_ORDER = "number ASC";
+
+        /**
+         * The phone number as the user entered it.
+         * <P>Type: TEXT</P>
+         */
+        const String NUMBER = "number";
+
+        /**
+         * Whether the number contains a regular expression pattern
+         * <P>Type: BOOLEAN (read only)</P>
+         */
+        const String IS_REGEX = "is_regex";
+
+        /**
+         * Blacklisting mode for phone calls
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String PHONE_MODE = "phone";
+
+        /**
+         * Blacklisting mode for messages
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String MESSAGE_MODE = "message";
+    }
+
+    interface ITelephony {
+    }
 
     } // namespace Provider
     } // namespace Droid

@@ -1,14 +1,34 @@
 
-module {
+module
+{
 
     namespace Elastos {
     namespace Droid {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface ISmsCbEtwsInfo {
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
+
+        /** ETWS warning type for earthquake. */
+        const Int32 ETWS_WARNING_TYPE_EARTHQUAKE = 0x00;
+
+        /** ETWS warning type for tsunami. */
+        const Int32 ETWS_WARNING_TYPE_TSUNAMI = 0x01;
+
+        /** ETWS warning type for earthquake and tsunami. */
+        const Int32 ETWS_WARNING_TYPE_EARTHQUAKE_AND_TSUNAMI = 0x02;
+
+        /** ETWS warning type for test messages. */
+        const Int32 ETWS_WARNING_TYPE_TEST_MESSAGE = 0x03;
+
+        /** ETWS warning type for other emergency types. */
+        const Int32 ETWS_WARNING_TYPE_OTHER_EMERGENCY = 0x04;
+
+        /** Unknown ETWS warning type. */
+        const Int32 ETWS_WARNING_TYPE_UNKNOWN = -1;
 
         GetWarningType(
             [out] Int32* result);
@@ -23,16 +43,6 @@ module {
             [out] Int64* result);
 
         GetPrimaryNotificationSignature();
-
-        DescribeContents(
-            [out] Int32* result);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] SmsCbEtwsInfo* result);
-
-        NewArray(
-            [in] Int32 size);
 
     }
 

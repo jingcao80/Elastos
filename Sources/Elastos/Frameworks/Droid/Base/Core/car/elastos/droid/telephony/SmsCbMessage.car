@@ -1,21 +1,49 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Telephony.ISmsCbLocation;
+    interface Elastos.Droid.Telephony.ISmsCbEtwsInfo;
+    interface Elastos.Droid.Telephony.ISmsCbCmasInfo;
 
     namespace Elastos {
     namespace Droid {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface ISmsCbMessage {
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
 
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] SmsCbMessage* result);
+        /** Cell wide geographical scope with immediate display (GSM/UMTS only). */
+        const Int32 GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE = 0;
 
-        NewArray(
-            [in] Int32 size);
+        /** PLMN wide geographical scope (GSM/UMTS and all CDMA broadcasts). */
+        const Int32 GEOGRAPHICAL_SCOPE_PLMN_WIDE = 1;
+
+        /** Location / service area wide geographical scope (GSM/UMTS only). */
+        const Int32 GEOGRAPHICAL_SCOPE_LA_WIDE = 2;
+
+        /** Cell wide geographical scope (GSM/UMTS only). */
+        const Int32 GEOGRAPHICAL_SCOPE_CELL_WIDE = 3;
+
+        /** GSM or UMTS format cell broadcast. */
+        const Int32 MESSAGE_FORMAT_3GPP = 1;
+
+        /** CDMA format cell broadcast. */
+        const Int32 MESSAGE_FORMAT_3GPP2 = 2;
+
+        /** Normal message priority. */
+        const Int32 MESSAGE_PRIORITY_NORMAL = 0;
+
+        /** Interactive message priority. */
+        const Int32 MESSAGE_PRIORITY_INTERACTIVE = 1;
+
+        /** Urgent message priority. */
+        const Int32 MESSAGE_PRIORITY_URGENT = 2;
+
+        /** Emergency message priority. */
+        const Int32 MESSAGE_PRIORITY_EMERGENCY = 3;
 
         GetGeographicalScope(
             [out] Int32* result);
@@ -24,7 +52,7 @@ module {
             [out] Int32* result);
 
         GetLocation(
-            [out] SmsCbLocation* result);
+            [out] ISmsCbLocation** result);
 
         GetServiceCategory(
             [out] Int32* result);
@@ -42,10 +70,10 @@ module {
             [out] Int32* result);
 
         GetEtwsWarningInfo(
-            [out] SmsCbEtwsInfo* result);
+            [out] ISmsCbEtwsInfo** result);
 
         GetCmasWarningInfo(
-            [out] SmsCbCmasInfo* result);
+            [out] ISmsCbCmasInfo** result);
 
         IsEmergencyMessage(
             [out] Boolean* result);
@@ -55,9 +83,6 @@ module {
 
         IsCmasMessage(
             [out] Boolean* result);
-
-        DescribeContents(
-            [out] Int32* result);
 
     }
 

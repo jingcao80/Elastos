@@ -7,21 +7,11 @@ module {
     namespace Ims {
     namespace Csvt {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface ICallForwardInfoP {
-        DescribeContents(
-            [out] Int32* result);
-
-        WriteToParcel(
-            [in] Parcel out, 
-            [in] Int32 flags);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] CallForwardInfoP* result);
-
-        NewArray(
-            [in] Int32 size);
-
     }
 
     }//Csvt
