@@ -32,6 +32,7 @@ namespace TextViewDemo {
 
 CarClass(CActivityOne)
     , public Activity
+    , public IActivityOne
 {
 public:
     class MyListener
@@ -92,6 +93,8 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     CAR_OBJECT_DECL()
 
     CARAPI constructor();
@@ -100,6 +103,9 @@ public:
         /* [in] */ IContextMenu* menu,
         /* [in] */ IView* v,
         /* [in] */ IContextMenuInfo* menuInfo);
+
+    CARAPI OnClickPopupWindow(
+        /* [in] */ IView* v);
 
 protected:
     CARAPI OnCreate(
@@ -120,8 +126,6 @@ protected:
 
     CARAPI ShowAlert(
         /* [in] */ const String& info);
-
-    CARAPI OnCreatePopupWindow();
 
     CARAPI OnTestPowerManager();
 

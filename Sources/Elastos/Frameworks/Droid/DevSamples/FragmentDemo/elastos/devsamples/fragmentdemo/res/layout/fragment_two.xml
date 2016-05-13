@@ -7,7 +7,6 @@
     <Button android:id="@+id/fragment_two_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Click Two" />
 
 </LinearLayout>

@@ -14,7 +14,8 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-const String ObjectAnimator::LOGTAG = String("ObjectAnimator");
+const String ObjectAnimator::LOGTAG("ObjectAnimator");
+
 CAR_INTERFACE_IMPL(ObjectAnimator, ValueAnimator, IObjectAnimator);
 
 ObjectAnimator::ObjectAnimator()
@@ -75,13 +76,16 @@ ECode ObjectAnimator::GetPropertyName(
     String propertyName;
     if (mPropertyName != NULL) {
         propertyName = mPropertyName;
-    } else if (mProperty != NULL) {
+    }
+    else if (mProperty != NULL) {
         mProperty->GetName(&propertyName);
-    } else if (mValues != NULL && mValues->GetLength() > 0) {
+    }
+    else if (mValues != NULL && mValues->GetLength() > 0) {
         for (Int32 i = 0; i < mValues->GetLength(); ++i) {
             if (i == 0) {
                 propertyName = String("");
-            } else {
+            }
+            else {
                 propertyName += String(",");
             }
 
@@ -94,9 +98,13 @@ ECode ObjectAnimator::GetPropertyName(
     return NOERROR;
 }
 
-String ObjectAnimator::GetNameForTrace() {
+String ObjectAnimator::GetNameForTrace()
+{
     String name;
-    return String("animator:") + (GetPropertyName(&name), name);
+    GetPropertyName(&name);
+    StringBuilder sb("animator:");
+    sb += name;
+    return sb.ToString();
 }
 
 ECode ObjectAnimator::constructor(
@@ -356,19 +364,30 @@ ECode ObjectAnimator::Clone(
     return NOERROR;
 }
 
-AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<Int32>* values)
+static ECode CheckIsCarObject(
+    /* [in] */ IInterface* target)
 {
 #if defined(_DEBUG)
+    assert(target != NULL);
     ClassID objId;
     ECode ec = IObject::Probe(target)->GetClassID(&objId);
     if (FAILED(ec)) {
         Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
         assert(0 && "Target object is not a CAR object!");
     }
+    return ec;
 #endif
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+
     AutoPtr<CObjectAnimator> anim;
     CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
     anim->constructor(target, propertyName);
@@ -381,14 +400,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
     /* [in] */ IProperty* property,
     /* [in] */ ArrayOf<Int32>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<CObjectAnimator> anim;
     CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
     anim->constructor(target, property);
@@ -402,14 +417,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
     /* [in] */ const String& yPropertyName,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = target->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
     AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xPropertyName,
             IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXInt32Keyframes()));
@@ -428,14 +439,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
     /* [in] */ IProperty* yProperty,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
     AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xProperty,
             IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXInt32Keyframes()));
@@ -452,14 +459,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<ArrayOf<Int32>* >* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh;
     PropertyValuesHolder::OfMultiInt32(propertyName, values, (IPropertyValuesHolder**)&pvh);
 
@@ -473,14 +476,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
     /* [in] */ const String& propertyName,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiInt32(propertyName, path);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
     a->Set(0, pvh);
@@ -494,14 +493,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
     /* [in] */ ITypeEvaluator* evaluator,
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiInt32(propertyName, converter,
             evaluator, values);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
@@ -514,14 +509,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfArgb(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<Int32>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IObjectAnimator> animator = OfInt32(target, propertyName, values);
     IValueAnimator::Probe(animator)->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
     return animator;
@@ -532,14 +523,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfArgb(
     /* [in] */ IProperty* property,
     /* [in] */ ArrayOf<Int32>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IObjectAnimator> animator = OfInt32(target, property, values);
     IValueAnimator::Probe(animator)->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
     return animator;
@@ -551,14 +538,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     /* [in] */ const String& yPropertyName,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
     AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xPropertyName,
             IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXFloatKeyframes()));
@@ -576,14 +559,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     /* [in] */ IProperty* yProperty,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
     AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xProperty,
             IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXFloatKeyframes()));
@@ -600,14 +579,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<ArrayOf<Float>*>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh;
     PropertyValuesHolder::OfMultiFloat(propertyName, values, (IPropertyValuesHolder**)&pvh);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
@@ -620,14 +595,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
     /* [in] */ const String& propertyName,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiFloat(propertyName, path);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
     a->Set(0, pvh);
@@ -641,14 +612,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
     /* [in] */ ITypeEvaluator* evaluator,
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiFloat(propertyName, converter,
             evaluator, values);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
@@ -661,16 +628,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<Float>* values)
 {
-#if defined(_DEBUG)
-    if (target != NULL) {
-        ClassID objId;
-        ECode ec = IObject::Probe(target)->GetClassID(&objId);
-        if (FAILED(ec)) {
-            Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-            assert(0 && "Target object is not a CAR object!");
-        }
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<CObjectAnimator> anim;
     CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
     anim->constructor(target, propertyName);
@@ -683,14 +644,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     /* [in] */ IProperty* property,
     /* [in] */ ArrayOf<Float>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<CObjectAnimator> anim;
     CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
     anim->constructor(target, property);
@@ -704,14 +661,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
     /* [in] */ ITypeEvaluator* evaluator,
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<CObjectAnimator> anim;
     CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
     anim->constructor(target, propertyName);
@@ -726,14 +679,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
     /* [in] */ ITypeEvaluator* evaluator,
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<CObjectAnimator> anim;
     CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
     anim->constructor(target, property);
@@ -748,14 +697,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
     /* [in] */ /*@Nullable*/ ITypeConverter* converter,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(propertyName, converter, path);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
     a->Set(0, pvh);
@@ -769,14 +714,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
     /* [in] */ ITypeEvaluator* evaluator,
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(property, converter, evaluator,
             values);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
@@ -790,14 +731,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
     /* [in] */ /*@Nullable*/ ITypeConverter* converter,
     /* [in] */ IPath* path)
 {
-#if defined(_DEBUG)
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(property, converter, path);
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
     a->Set(0, pvh);
@@ -808,16 +745,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfPropertyValuesHolder(
     /* [in] */ IInterface* target,
     /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
 {
-#if defined(_DEBUG)
-    if (target != NULL) {
-        ClassID objId;
-        ECode ec = IObject::Probe(target)->GetClassID(&objId);
-        if (FAILED(ec)) {
-            Logger::E(LOGTAG, "Target object [%s] is not a CAR object!", TO_CSTR(target));
-            assert(0 && "Target object is not a CAR object!");
-        }
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
     }
-#endif
+
     AutoPtr<IObjectAnimator> anim;
     CObjectAnimator::New((IObjectAnimator**)&anim);
     IAnimator::Probe(anim)->SetTarget(target);
@@ -868,16 +799,23 @@ ECode ObjectAnimator::ToString(
     GetHashCode(&hashCode);
     AutoPtr<IInterface> t;
     GetTarget((IInterface**)&t);
-    String returnVal = String("ObjectAnimator@") + StringUtils::ToHexString(hashCode) + String(", target ") +
-        StringUtils::ToHexString((Int32)t.Get());
+
+    StringBuilder sb("ObjectAnimator@");
+    sb += StringUtils::ToHexString(hashCode);
+    sb += ", target:";
+    sb += Object::ToString(t);
+
     if (mValues != NULL) {
+        sb += ", values{";
         for (Int32 i = 0; i < mValues->GetLength(); ++i) {
-            String v;
-            IObject::Probe((*mValues)[i])->ToString(&v);
-            returnVal += String("\n    ") + v;
+            String v = Object::ToString((*mValues)[i]);
+            sb += "\n    ";
+            sb += v;
         }
+        sb += "\n}"
     }
-    *str = returnVal;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

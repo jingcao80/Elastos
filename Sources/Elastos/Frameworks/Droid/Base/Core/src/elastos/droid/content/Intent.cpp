@@ -358,8 +358,8 @@ ECode Intent::ParseUri(
     // Validate intent scheme for if requested.
     if ((flags & IIntent::URI_INTENT_SCHEME) != 0) {
         if (!uri.StartWith("intent:")) {
-            AutoPtr<CIntent> cintent;
-            ASSERT_SUCCEEDED(CIntent::NewByFriend(IIntent::ACTION_VIEW, (CIntent**)&cintent));
+            AutoPtr<IIntent> cintent;
+            ASSERT_SUCCEEDED(CIntent::New(IIntent::ACTION_VIEW, (IIntent**)&cintent));
             *_intent = cintent;
             REFCOUNT_ADD(*_intent);
             // try {
@@ -380,8 +380,8 @@ ECode Intent::ParseUri(
     if (i == -1) {
         AutoPtr<IUri> data;
         FAIL_RETURN(Uri::Parse(uri, (IUri**)&data));
-        AutoPtr<CIntent> cintent;
-        FAIL_RETURN(CIntent::NewByFriend(IIntent::ACTION_VIEW, data, (CIntent**)&cintent));
+        AutoPtr<IIntent> cintent;
+        FAIL_RETURN(CIntent::New(IIntent::ACTION_VIEW, data, (IIntent**)&cintent));
         *_intent = cintent;
         REFCOUNT_ADD(*_intent);
         return NOERROR;
@@ -399,7 +399,7 @@ ECode Intent::ParseUri(
 
     // fetch data part, if present
     String data = i >= 0 ? uri.Substring(0, i) : String(NULL);
-    String scheme(NULL);
+    String scheme;
     i += String("#Intent;").GetLength();
 
     // loop over contents of Intent, all name=value;

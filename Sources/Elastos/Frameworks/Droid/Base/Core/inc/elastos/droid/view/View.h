@@ -2526,6 +2526,25 @@ private:
         Int64 mLastEventTimeMillis;
     };
 
+    class InnerViewOnClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerViewOnClickListener(
+            /* [in] */ IWeakReference* weakHost,
+            /* [in] */ const String& handlerName);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+    private:
+        AutoPtr<IWeakReference> mWeakHost;
+        String mHandlerName;
+        AutoPtr<IMethodInfo> mHandler;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 

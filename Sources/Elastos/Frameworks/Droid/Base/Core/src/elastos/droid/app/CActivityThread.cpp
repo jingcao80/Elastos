@@ -147,7 +147,7 @@ const Boolean CActivityThread::DEBUG_MESSAGES = TRUE;
 const Boolean CActivityThread::DEBUG_BROADCAST = FALSE;
 const Boolean CActivityThread::DEBUG_RESULTS = TRUE;
 const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
-const Boolean CActivityThread::DEBUG_CONFIGURATION = TRUE;
+const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
 const Boolean CActivityThread::DEBUG_SERVICE = TRUE;
 const Boolean CActivityThread::DEBUG_MEMORY_TRIM = TRUE;
 const Boolean CActivityThread::DEBUG_PROVIDER = TRUE;
@@ -5240,17 +5240,13 @@ ECode CActivityThread::HandleBindApplication(
         AutoPtr<IContextImpl> instrContext;
         CContextImpl::CreateAppContext(this, pi, (IContextImpl**)&instrContext);
 
-//        try {
         String className;
         data->mInstrumentationName->GetClassName(&className);
-        Int32 index = className.LastIndexOf('.');
-        if (index < 0) {
-            Slogger::E(TAG, "HandleBindApplication: Cann't Find the Instrumentation %s's path", className.string());
-            return E_RUNTIME_EXCEPTION;
-        }
-        String path = className.Substring(0, index) + ".eco";
+        className = LoadedPkg::GetElastosClassName(ci->mPackageName, className);
+
+//        try {
         AutoPtr<IClassLoader> cl;
-        CPathClassLoader::New(path, NULL/*ClassLoader::GetSystemClassLoader()*/, (IClassLoader**)&cl);
+        IContext::Probe(instrContext)->GetClassLoader((IClassLoader**)&cl);
 
         AutoPtr<IClassInfo> classInfo;
         ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
@@ -6012,25 +6008,26 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
             return NULL;
         }
 
+        String className = LoadedPkg::GetElastosClassName(appPkgName, name);
         AutoPtr<IClassLoader> cl;
         c->GetClassLoader((IClassLoader**)&cl);
         if (cl == NULL) {
             Slogger::E(TAG, "Unable to get class loader in %s for package %s while loading content provider %s",
-                TO_CSTR(c), appPkgName.string(), name.string());
+                TO_CSTR(c), appPkgName.string(), className.string());
             return NULL;
         }
 
         AutoPtr<IClassInfo> classInfo;
-        ECode ec = cl->LoadClass(name, (IClassInfo**)&classInfo);
+        ECode ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: LoadClass %s in %s failed, ec=%08x", name.string(), TO_CSTR(cl), ec);
+            Slogger::E(TAG, "InstallProvider: LoadClass %s in %s failed, ec=%08x", className.string(), TO_CSTR(cl), ec);
             return NULL;
         }
 
         AutoPtr<IInterface> object;
         ec = classInfo->CreateObject((IInterface**)&object);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Create ContentProvider object %s failed, ec=%08x", name.string(), ec);
+            Slogger::E(TAG, "InstallProvider: Create ContentProvider object %s failed, ec=%08x", className.string(), ec);
             return NULL;
         }
 
@@ -6040,7 +6037,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
             String sourceDir;
             ai->GetSourceDir(&sourceDir);
             Slogger::E(TAG, "Failed to instantiate class %s from sourceDir %s",
-                name.string(), sourceDir.string());
+                className.string(), sourceDir.string());
             return NULL;
         }
 

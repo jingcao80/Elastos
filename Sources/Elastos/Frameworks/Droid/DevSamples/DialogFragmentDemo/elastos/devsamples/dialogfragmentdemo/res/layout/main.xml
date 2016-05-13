@@ -7,31 +7,26 @@
     <Button android:id="@+id/ConfimDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="ConfimDialog" />
 
     <Button android:id="@+id/EditDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="EditDialog" />
 
     <Button android:id="@+id/LoginDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="LoginDialog" />
 
     <Button android:id="@+id/DialogInDifferentScreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="DialogInDifferentScreen" />
 
     <Button android:id="@+id/LoginDialogWithoutFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="LoginDialogWithoutFragment" />
 
     <FrameLayout
