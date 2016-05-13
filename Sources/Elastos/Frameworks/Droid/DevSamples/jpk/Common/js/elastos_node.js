@@ -10,7 +10,7 @@ root.Elastos = ( function () {
     var _api = require('./elastos.node');
 
     var _Runtime = require('./elastos_runtime.js')(_api);
-    var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.Core.eco");
+    var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
     var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
 
     var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", "CTestEventListener");
