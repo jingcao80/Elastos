@@ -1,5 +1,6 @@
 
 #include "CarCallbackProxy.h"
+#include "V8Utility.h"
 #include <sys/mman.h>
 #include <utils/Log.h>
 #include <uv.h>
@@ -111,6 +112,9 @@ static int InitCarCallbackProxyEntry()
 //============================================================
 //  CarCallbackInterfaceProxy
 //============================================================
+CarCallbackInterfaceProxy::CarCallbackInterfaceProxy()
+{}
+
 CarCallbackInterfaceProxy::~CarCallbackInterfaceProxy()
 {}
 
@@ -139,6 +143,131 @@ ECode CarCallbackInterfaceProxy::S_GetInterfaceID(
     /* [out] */ InterfaceID *pIID)
 {
     return pThis->mOwner->GetInterfaceID(pObject, pIID);
+}
+
+ECode CarCallbackInterfaceProxy::ReadParam(
+    /* [in] */ IMethodInfo* methodInfo,
+    /* [in] */ UInt32* puArgs,
+    /* [in] */ Int32 paramCount,
+    /* [in] */ v8::Persistent<v8::Value>* v8Args)
+{
+    v8::Isolate* isolate = mOwner->mIsolate;
+
+    AutoPtr< ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(paramCount);
+    methodInfo->GetAllParamInfos(paramInfos);
+
+    for (Int32 i = 0; i < paramCount; i++) {
+        IParamInfo* paramInfo = (*paramInfos)[i];
+        ParamIOAttribute paramIOAttr;
+        paramInfo->GetIOAttribute(&paramIOAttr);
+        AutoPtr<IDataTypeInfo> paramTypeInfo;
+        paramInfo->GetTypeInfo((IDataTypeInfo**)&paramTypeInfo);
+        CarDataType paramDataType;
+        paramTypeInfo->GetDataType(&paramDataType);
+
+        switch (paramIOAttr) {
+            case ParamIOAttribute_In: {
+                switch (paramDataType) {
+                    case CarDataType_Boolean:
+                    {
+                        v8Args[i].Reset(isolate, v8::Boolean::New(isolate, (bool)*puArgs));
+                        puArgs++;
+                        break;
+                    }
+                    case CarDataType_Byte:
+                    case CarDataType_Char32:
+                    case CarDataType_Int16:
+                    case CarDataType_Int32:
+                    case CarDataType_ECode:
+                    case CarDataType_Enum:
+                    {
+                        v8Args[i].Reset(isolate, v8::Number::New(isolate, (double)*puArgs));
+                        puArgs++;
+                        break;
+                    }
+                    case CarDataType_Float:
+                    {
+                        v8Args[i].Reset(isolate, v8::Number::New(isolate, (double)*(Float*)puArgs));
+                        puArgs++;
+                        break;
+                    }
+                    case CarDataType_Int64:
+                    case CarDataType_Double:
+                    {
+                        puArgs = (UInt32*)ROUND8((Int32)puArgs);
+                        v8Args[i].Reset(isolate, v8::Number::New(isolate, (double)*(UInt64*)puArgs));
+                        puArgs += 2;
+                        break;
+                    }
+                    case CarDataType_String:
+                    {
+                        String& str = **(String**)puArgs;
+                        v8Args[i].Reset(isolate, v8::String::NewFromUtf8(isolate, str.string()));
+                        puArgs++;
+                        break;
+                    }
+                    case CarDataType_EMuid:
+                    {
+                        EMuid& iid = *(EMuid*)puArgs;
+
+                        v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                        v8Array->Set(0, v8::Number::New(isolate, iid.mData1));
+                        v8Array->Set(1, v8::Number::New(isolate, iid.mData2));
+                        v8Array->Set(2, v8::Number::New(isolate, iid.mData3));
+                        v8::Local<v8::Array> v8Array1 = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                        for(Int32 j = 0; j < 8; j++) {
+                            v8Array1->Set(j, v8::Number::New(isolate, iid.mData4[j]));
+                        }
+                        v8Array->Set(3, v8Array1);
+
+                        v8Args[i].Reset(isolate, v8Array);
+
+                        puArgs += sizeof(EMuid) / 4;
+                        break;
+                    }
+                    case CarDataType_EGuid:
+                    {
+                        EGuid& cid = *(EGuid*)puArgs;
+                        EMuid& iid = cid.mClsid;
+
+                        v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                        v8Array->Set(0, v8::Number::New(isolate, iid.mData1));
+                        v8Array->Set(1, v8::Number::New(isolate, iid.mData2));
+                        v8Array->Set(2, v8::Number::New(isolate, iid.mData3));
+                        v8::Local<v8::Array> v8Array1 = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                        for(Int32 j = 0; j < 8; j++) {
+                            v8Array1->Set(j, v8::Number::New(isolate, iid.mData4[j]));
+                        }
+                        v8Array->Set(3, v8Array1);
+
+                        v8::Local<v8::Object> v8Object = v8::Local<v8::Object>::New(isolate, v8::Object::New(isolate));
+                        v8Object->Set(v8::String::NewFromUtf8(isolate, "mClsid"), v8Array);
+                        v8Object->Set(v8::String::NewFromUtf8(isolate, "mUunm"), v8::String::NewFromUtf8(isolate, cid.mUunm));
+                        v8Object->Set(v8::String::NewFromUtf8(isolate, "mCarcode"), v8::Number::New(isolate, cid.mCarcode));
+
+                        v8Args[i].Reset(isolate, v8Object);
+
+                        puArgs += sizeof(EGuid) / 4;
+                        break;
+                    }
+                }
+
+                break;
+            }
+            case ParamIOAttribute_CalleeAllocOut: {
+                break;
+            }
+            case ParamIOAttribute_CallerAllocOut: {
+                break;
+            }
+            default: {
+                Logger::E("CarCallbackInterfaceProxy", "ParamIOAttribute of No.%d parameter is wrong!", i);
+                break;
+            }
+        }
+    }
+
+    return NOERROR;
 }
 
 // Callback in the JS thread.
@@ -223,6 +352,47 @@ CarCallbackInterfaceProxy::Callback::~Callback()
 
 void CarCallbackInterfaceProxy::Callback::Call()
 {
+    Int32 paramCount;
+    mMethodInfo->GetParamCount(&paramCount);
+
+    if (paramCount != mParamCount) {
+        Logger::E("CarCallbackInterfaceProxy::Callback", "ParamCount is wrong!");
+        return;
+    }
+
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
+    if (isolate != mIsolate) {
+        Logger::E("CarCallbackInterfaceProxy::Callback", "Isolate is wrong!");
+        return;
+    }
+
+    v8::HandleScope scope(isolate);
+
+    v8::Local<v8::Object> object = v8::Local<v8::Object>::New(isolate, mObject->mV8Object);
+
+    Elastos::String methodName;
+    mMethodInfo->GetName(&methodName);
+    v8::Local<v8::Value> method = V8Utility::GetProperty(object, methodName);
+
+    if (method.IsEmpty() || !method->IsFunction()) {
+        Logger::E("CarCallbackInterfaceProxy::Callback", "Method %s doesn't exist!", methodName.string());
+        return;
+    }
+
+    v8::Local<v8::Function> jsFunction = v8::Local<v8::Function>::Cast(method);
+
+    v8::Local<v8::Value>* argv = NULL;
+    if (mParamCount > 0) {
+        argv = new v8::Local<v8::Value>[mParamCount];
+        for (int i = 0; i < mParamCount; i++) {
+            argv[i] = v8::Local<v8::Value>::New(isolate, mV8Params[i]);
+        }
+    }
+
+    jsFunction->Call(isolate->GetCurrentContext()->Global(), mParamCount, argv);
+
+    if (argv != NULL) delete[] argv;
 }
 
 
