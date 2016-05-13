@@ -32,24 +32,24 @@ module
         const Int32 AXIS_Y_SHIFT = 4;
 
         /** Push object to the top of its container, not changing its size. */
-        const Int32 TOP = 0x0003 << 4;
+        const Int32 TOP = 0x0003 << AXIS_Y_SHIFT;
         /** Push object to the bottom of its container, not changing its size. */
-        const Int32 BOTTOM = 0x0005 << 4;
+        const Int32 BOTTOM = 0x0005 << AXIS_Y_SHIFT;
         /** Push object to the left of its container, not changing its size. */
-        const Int32 LEFT = 0x0003 << 4;
+        const Int32 LEFT = 0x0003 << AXIS_X_SHIFT;
         /** Push object to the right of its container, not changing its size. */
-        const Int32 RIGHT = 0x0005 << 4;
+        const Int32 RIGHT = 0x0005 << AXIS_X_SHIFT;
 
         /** Place object in the vertical center of its container, not changing its
          *  size. */
-        const Int32 CENTER_VERTICAL = 0x0001<<AXIS_Y_SHIFT;
+        const Int32 CENTER_VERTICAL = AXIS_SPECIFIED<<AXIS_Y_SHIFT;
         /** Grow the vertical size of the object if needed so it completely fills
          *  its container. */
         const Int32 FILL_VERTICAL = TOP|BOTTOM;
 
         /** Place object in the horizontal center of its container, not changing its
          *  size. */
-        const Int32 CENTER_HORIZONTAL = 0x0001<<4;
+        const Int32 CENTER_HORIZONTAL = AXIS_SPECIFIED<<AXIS_X_SHIFT;
         /** Grow the horizontal size of the object if needed so it completely fills
          *  its container. */
         const Int32 FILL_HORIZONTAL = LEFT|RIGHT;
@@ -68,7 +68,7 @@ module
 
         /** Flag to clip the edges of the object to its container along the
          *  horizontal axis. */
-        const Int32 CLIP_HORIZONTAL = AXIS_CLIP<<4;
+        const Int32 CLIP_HORIZONTAL = AXIS_CLIP<<AXIS_X_SHIFT;
 
         /** Raw bit controlling whether the layout direction is relative or not (START/END instead of
          * absolute LEFT/RIGHT).
@@ -78,7 +78,7 @@ module
         /**
          * Binary mask to get the absolute horizontal gravity of a gravity.
          */
-        const Int32 HORIZONTAL_GRAVITY_MASK = 0x0007 << 4;
+        const Int32 HORIZONTAL_GRAVITY_MASK = 0x0007 << AXIS_X_SHIFT;
         /**
          * Binary mask to get the vertical gravity of a gravity.
          */
