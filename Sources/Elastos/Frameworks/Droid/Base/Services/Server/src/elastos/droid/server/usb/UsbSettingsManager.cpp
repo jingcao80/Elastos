@@ -1042,7 +1042,7 @@ void UsbSettingsManager::ResolveActivity(
     /* [in] */ IUsbAccessory* accessory)
 {
     // don't show the resolver activity if there are no choices available
-    if (matches->Begin() == matches->End()) {
+    if (matches->IsEmpty()) {
         if (accessory != NULL) {
             String uri;
             accessory->GetUri(&uri);

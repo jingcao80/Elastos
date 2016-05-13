@@ -23,40 +23,58 @@ class ResolverDrawerLayout
     , public IResolverDrawerLayout
 {
 public:
-    class ResolverDrawerLayoutLayoutParams
+    class ResolverDrawerLayoutParams
         : public ViewGroup::MarginLayoutParams
-        , public IResolverDrawerLayoutLayoutParams
+        , public IResolverDrawerLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
 
-        ResolverDrawerLayoutLayoutParams(
+        ResolverDrawerLayoutParams();
+
+        CARAPI constructor(
             /* [in] */ IContext* c,
             /* [in] */ IAttributeSet* attrs);
 
-        ResolverDrawerLayoutLayoutParams(
+        CARAPI constructor(
             /* [in] */ Int32 width,
             /* [in] */ Int32 height);
 
-        ResolverDrawerLayoutLayoutParams(
-            /* [in] */ IResolverDrawerLayoutLayoutParams* source);
+        CARAPI constructor(
+            /* [in] */ IResolverDrawerLayoutParams* source);
 
-        ResolverDrawerLayoutLayoutParams(
+        CARAPI constructor(
             /* [in] */ IViewGroupMarginLayoutParams* source);
 
-        ResolverDrawerLayoutLayoutParams(
+        CARAPI constructor(
             /* [in] */ IViewGroupLayoutParams* source);
+
+        CARAPI SetAlwaysShow(
+            /* [in] */ Boolean alwaysShow);
+
+        CARAPI GetAlwaysShow(
+            /* [out] */ Boolean* alwaysShow);
+
+        CARAPI SetIgnoreOffset(
+            /* [in] */ Boolean ignoreOffset);
+
+        CARAPI GetIgnoreOffset(
+            /* [out] */ Boolean* ignoreOffset);
 
     public:
         Boolean mAlwaysShow;
         Boolean mIgnoreOffset;
     };
 
-    class SavedState
+    class ResolverDrawerLayoutSavedState
         : public BaseSavedState
     {
     public:
-        SavedState(
+        ResolverDrawerLayoutSavedState();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
             /* [in] */ IParcelable* superState);
 
         CARAPI ReadFromParcel(

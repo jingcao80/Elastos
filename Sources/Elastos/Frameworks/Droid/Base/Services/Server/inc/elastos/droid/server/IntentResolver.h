@@ -1049,7 +1049,7 @@ void IntentResolver<F, R>::BuildResolveList(
     }
 
     if (hasNonDefaults) {
-        if (dest->Begin() == dest->End()) {
+        if (dest->IsEmpty()) {
             Slogger::W(TAG, "resolveIntent failed: found match, but none with CATEGORY_DEFAULT");
         }
         else if (dest->GetSize() > 1) {

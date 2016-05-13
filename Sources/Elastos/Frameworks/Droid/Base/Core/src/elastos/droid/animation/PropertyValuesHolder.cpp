@@ -146,26 +146,51 @@ AutoPtr< PropertyValuesHolder::ClassMethodMap > PropertyValuesHolder::sSetterPro
 AutoPtr< PropertyValuesHolder::ClassMethodMap > PropertyValuesHolder::sGetterPropertyMap = new ClassMethodMap();
 
 String GetSignature(
-    /* [in] */ Int32 type)
+    /* [in] */ Int32 type,
+    /* [in] */ const String& prefix)
 {
-    switch(type) {
-        case CLASS_INT: {
-            return String("(I32)E");
+    if (prefix.Equals("Get")) {
+        switch(type) {
+            case CLASS_INT: {
+                return String("(I32*)E");
+            }
+            case CLASS_FLOAT: {
+                return String("(F*)E");
+            }
+            case CLASS_DOUBLE: {
+                return String("(D*)E");
+            }
+            case CLASS_IINTEGER32: {
+                return String("(LElastos/Core/IInteger32;**)E");
+            }
+            case CLASS_IFLOAT: {
+                return String("(LElastos/Core/IFloat;**)E");
+            }
+            case CLASS_IDOUBLE: {
+                return String("(LElastos/Core/IDouble;**)E");
+            }
         }
-        case CLASS_FLOAT: {
-            return String("(F)E");
-        }
-        case CLASS_DOUBLE: {
-            return String("(D)E");
-        }
-        case CLASS_IINTEGER32: {
-            return String("(LElastos/Core/IInteger32;)E");
-        }
-        case CLASS_IFLOAT: {
-            return String("(LElastos/Core/IFloat;)E");
-        }
-        case CLASS_IDOUBLE: {
-            return String("(LElastos/Core/IDouble;)E");
+    }
+    else {
+        switch(type) {
+            case CLASS_INT: {
+                return String("(I32)E");
+            }
+            case CLASS_FLOAT: {
+                return String("(F)E");
+            }
+            case CLASS_DOUBLE: {
+                return String("(D)E");
+            }
+            case CLASS_IINTEGER32: {
+                return String("(LElastos/Core/IInteger32;*)E");
+            }
+            case CLASS_IFLOAT: {
+                return String("(LElastos/Core/IFloat;*)E");
+            }
+            case CLASS_IDOUBLE: {
+                return String("(LElastos/Core/IDouble;*)E");
+            }
         }
     }
 
@@ -559,9 +584,14 @@ ECode PropertyValuesHolder::SetupSetter(
 ECode PropertyValuesHolder::SetupGetter(
      /* [in] */ IInterface* target)
 {
+    InterfaceID propertyType = mValueType;
+    if (mConverter != NULL) {
+        mConverter->GetTargetType(&propertyType);
+    }
+
     AutoPtr<IClassInfo> info = TransformClassInfo(target);
     if (info) {
-        mGetter = SetupSetterOrGetter(info, sGetterPropertyMap.Get(), String("Get"), NULL);
+        mGetter = SetupSetterOrGetter(info, sGetterPropertyMap.Get(), String("Get"), &propertyType);
         return NOERROR;
     }
 
@@ -702,19 +732,47 @@ ECode PropertyValuesHolder::SetupSetterAndGetter(
                     kf->SetValue(value);
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }
-                else{
+                else {
                     assert(0);
                 }
             }
             else {
-                AutoPtr<IInterface> getRst;
-                arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-                FAIL_RETURN(mGetter->Invoke(target, arg));
+                if (carType == CarDataType_Float) {
+                    Float getRst;
+                    arg->SetOutputArgumentOfFloatPtr(0, &getRst);
+                    FAIL_RETURN(mGetter->Invoke(target, arg));
+                    AutoPtr<IFloat> carRst;
+                    CFloat::New(getRst, (IFloat**)&carRst);
 
-                AutoPtr<IInterface> value;
-                FAIL_RETURN(ConvertBack(getRst, (IInterface**)&value));
-                kf->SetValue(value);
-                ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
+                    AutoPtr<IInterface> value;
+                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
+                    kf->SetValue(value);
+                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
+                }
+                else if (carType == CarDataType_Int32) {
+                    Int32 getRst;
+                    arg->SetOutputArgumentOfInt32Ptr(0, &getRst);
+                    FAIL_RETURN(mGetter->Invoke(target, arg));
+                    AutoPtr<IInteger32> carRst;
+                    CInteger32::New(getRst, (IInteger32**)&carRst);
+
+                    AutoPtr<IInterface> value;
+                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
+                    kf->SetValue(value);
+                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
+                }
+                else if(carType == CarDataType_Interface) {
+                    AutoPtr<IInterface> getRst;
+                    arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
+                    FAIL_RETURN(mGetter->Invoke(target, arg));
+                    AutoPtr<IInterface> value;
+                    FAIL_RETURN(ConvertBack(getRst, (IInterface**)&value));
+                    kf->SetValue(value);
+                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
+                }
+                else {
+                    assert(0 && "TODO please add process to carType!");
+                }
             }
         }
     }
@@ -819,7 +877,8 @@ ECode PropertyValuesHolder::SetupValue(
         else{
             assert(0);
         }
-    } else if(mValueType == ECLSID_CDouble) {
+    }
+    else if(mValueType == ECLSID_CDouble) {
         if (carType == CarDataType_Double) {
             Double getRst;
             arg->SetOutputArgumentOfDoublePtr(0, &getRst);
@@ -843,14 +902,44 @@ ECode PropertyValuesHolder::SetupValue(
         else{
             assert(0);
         }
-    } else {
-       AutoPtr<IInterface> getRst;
-       arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-       FAIL_RETURN(mGetter->Invoke(target, arg));
+    }
+    else {
+        if (carType == CarDataType_Float) {
+            Float getRst;
+            arg->SetOutputArgumentOfFloatPtr(0, &getRst);
+            FAIL_RETURN(mGetter->Invoke(target, arg));
+            AutoPtr<IFloat> carRst;
+            CFloat::New(getRst, (IFloat**)&carRst);
 
-        AutoPtr<IInterface> cValue;
-        FAIL_RETURN(ConvertBack(getRst, (IInterface**)&cValue));
-       kf->SetValue(cValue);
+            AutoPtr<IInterface> value;
+            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
+            kf->SetValue(value);
+            ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
+        }
+        else if (carType == CarDataType_Int32) {
+            Int32 getRst;
+            arg->SetOutputArgumentOfInt32Ptr(0, &getRst);
+            FAIL_RETURN(mGetter->Invoke(target, arg));
+            AutoPtr<IInteger32> carRst;
+            CInteger32::New(getRst, (IInteger32**)&carRst);
+
+            AutoPtr<IInterface> value;
+            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
+            kf->SetValue(value);
+            ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
+        }
+        else if (carType == CarDataType_Interface) {
+            AutoPtr<IInterface> getRst;
+            arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
+            FAIL_RETURN(mGetter->Invoke(target, arg));
+
+            AutoPtr<IInterface> cValue;
+            FAIL_RETURN(ConvertBack(getRst, (IInterface**)&cValue));
+            kf->SetValue(cValue);
+        }
+        else {
+            assert(0 && "TODO please add process to carType!");
+        }
     }
     return NOERROR;
 }
@@ -1101,9 +1190,8 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
 
     // Class args[] = null;
     if (valueType == NULL) {
-        // try {
-        // returnVal = targetClass.getMethod(methodName, args);
-        targetClass->GetMethodInfo(methodName, String("()E"), (IMethodInfo**)&returnVal);
+        signature = "()E";
+        targetClass->GetMethodInfo(methodName, signature, (IMethodInfo**)&returnVal);
         // } catch (NoSuchMethodException e) {
         //     // Swallow the error, log it later
         // }
@@ -1130,21 +1218,22 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
             if (*valueType == EIID_IPointF) {
                 length = 1;
                 signature = "(LElastos/Droid/Graphics/IPointF;)E";
-            } else {
+            }
+            else {
                 length = 0;
             }
         }
 
         for (Int32 i = 0; i < length; i++) {
             if (signature.IsNull()) {
-                signature = GetSignature(typeVariants[i]);
+                signature = GetSignature(typeVariants[i], prefix);
             }
 
             if (FAILED(targetClass->GetMethodInfo(methodName, signature, (IMethodInfo**)&returnVal)) || returnVal == NULL) {
                 continue;
             }
 
-            if (mConverter == NULL) {
+            if (mConverter == NULL && prefix.Equals("Set")) {
                 // change the value type to suit
                 mValueType = *valueType;
             }

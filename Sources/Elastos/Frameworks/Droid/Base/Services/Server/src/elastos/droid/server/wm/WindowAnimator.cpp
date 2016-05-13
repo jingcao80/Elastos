@@ -421,7 +421,7 @@ void WindowAnimator::UpdateWindowsLocked(
 
     // If we have windows that are being show due to them no longer
     // being force-hidden, apply the appropriate animation to them.
-    if (unForceHiding.Begin() != unForceHiding.End()) {
+    if (unForceHiding.IsEmpty() == FALSE) {
         Boolean startKeyguardExit = TRUE;
         List<AutoPtr<WindowStateAnimator> >::ReverseIterator animRIt = unForceHiding.RBegin();
         for (; animRIt != unForceHiding.REnd(); ++animRIt) {

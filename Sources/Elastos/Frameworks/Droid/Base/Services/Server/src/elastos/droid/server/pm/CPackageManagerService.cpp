@@ -671,7 +671,7 @@ void CPackageManagerService::PackageHandler::DoHandleMessage(
                 mPendingInstalls.PushBack(params);
                 // Already bound to the service. Just make
                 // sure we trigger off processing the first request.
-                if (mPendingInstalls.Begin() == mPendingInstalls.End()) {
+                if (mPendingInstalls.IsEmpty()) {
                     Boolean result;
                     mHost->mHandler->SendEmptyMessage(MCS_BOUND, &result);
                 }
@@ -3210,7 +3210,7 @@ ECode CPackageManagerService::FileInstallArgs::CleanUpResourcesLI()
 
     CleanUp();
 
-    if (allCodePaths->Begin() != allCodePaths->End()) {
+    if (allCodePaths->IsEmpty() == FALSE) {
         if (mInstructionSets == NULL) {
             Slogger::E(CPackageManagerService::TAG, "instructionSet == null");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -3615,7 +3615,7 @@ ECode CPackageManagerService::AsecInstallArgs::CleanUpResourcesLI(
 {
     CleanUp();
 
-    if (allCodePaths->Begin() != allCodePaths->End()) {
+    if (allCodePaths->IsEmpty() == FALSE) {
         if (mInstructionSets == NULL) {
             Slogger::E(CPackageManagerService::TAG, "instructionSet == null");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -4545,7 +4545,7 @@ ECode CPackageManagerService::constructor(
              * Ensure all external libraries have had dexopt run on them.
              */
             // TODO
-            // if (mSharedLibraries.Begin() != mSharedLibraries.End()) {
+            // if (mSharedLibraries.IsEmpty() == FALSE) {
             //     // NOTE: For now, we're compiling these system "shared libraries"
             //     // (and framework jars) into all available architectures. It's possible
             //     // to compile them only when we come across an app that uses them (there's
@@ -7367,7 +7367,7 @@ AutoPtr<IResolveInfo> CPackageManagerService::FindPersistentPreferredActivityLP(
             ? ppir->QueryIntent(intent, resolvedType,
                     (flags & IPackageManager::MATCH_DEFAULT_ONLY) != 0, userId)
             : NULL;
-    if (pprefs != NULL && pprefs->Begin() != pprefs->End()) {
+    if (pprefs != NULL && pprefs->IsEmpty() == FALSE) {
         List<AutoPtr<PersistentPreferredActivity> >::Iterator pprefIt = pprefs->Begin();
         for (; pprefIt != pprefs->End(); ++pprefIt) {
             AutoPtr<PersistentPreferredActivity> ppa = *pprefIt;
@@ -7474,7 +7474,7 @@ AutoPtr<IResolveInfo> CPackageManagerService::FindPreferredActivity(
                 ? pir->QueryIntent(intent, resolvedType,
                         (flags & IPackageManager::MATCH_DEFAULT_ONLY) != 0, userId)
                 : NULL;
-        if (prefs != NULL && prefs->Begin() != prefs->End()) {
+        if (prefs != NULL && prefs->IsEmpty() == FALSE) {
             Boolean changed = FALSE;
             // try {
             // First figure out how good the original match set is.
@@ -7863,7 +7863,7 @@ AutoPtr<IResolveInfo> CPackageManagerService::CheckTargetCanHandle(
 {
     AutoPtr<List<AutoPtr<IResolveInfo> > > resultTargetUser = mActivities->QueryIntent(intent,
             resolvedType, flags, filter->GetTargetUserId());
-    if (resultTargetUser != NULL && resultTargetUser->Begin() != resultTargetUser->End()) {
+    if (resultTargetUser != NULL && resultTargetUser->IsEmpty() == FALSE) {
         return CreateForwardingResolveInfo(filter, sourceUserId, filter->GetTargetUserId());
     }
     return NULL;
@@ -10431,7 +10431,7 @@ ECode CPackageManagerService::UpdateSharedLibrariesLPw(
                 }
             }
         }
-        if (usesLibraryFiles->Begin() != usesLibraryFiles->End()) {
+        if (usesLibraryFiles->IsEmpty() == FALSE) {
             AutoPtr<ArrayOf<String> > files = ArrayOf<String>::Alloc(usesLibraryFiles->GetSize());
             List<String>::Iterator it = usesLibraryFiles->Begin();
             for (Int32 i = 0; it != usesLibraryFiles->End(); ++it, ++i) {
@@ -12537,7 +12537,7 @@ void CPackageManagerService::UninstallThemeForAllApps(
         if (map != NULL) {
             map->Erase(opkg->mPackageName);
 
-            if (map->Begin() == map->End()) {
+            if (map->IsEmpty()) {
                 mOverlays.Erase(target);
             }
         }
@@ -13391,7 +13391,7 @@ void CPackageManagerService::CleanPackageDataStructuresLILPw(
             }
             if (appOpPerms != NULL) {
                 appOpPerms->Erase(pkg->mPackageName);
-                if (appOpPerms->Begin() == appOpPerms->End()) {
+                if (appOpPerms->IsEmpty()) {
                     mAppOpPermissionPackages.Erase(perm);
                 }
             }
@@ -13916,7 +13916,7 @@ ECode CPackageManagerService::NextPackageToClean(
         if (lastPackage != NULL) {
             pkgs.Remove(lastPackage);
         }
-        if (pkgs.Begin() != pkgs.End()) {
+        if (pkgs.IsEmpty() == FALSE) {
             *nextPackage = *pkgs.Begin();
             REFCOUNT_ADD(*nextPackage)
         }
@@ -15407,7 +15407,7 @@ void CPackageManagerService::UpdateSettingsLI(
     synchronized (mPackagesLock) {
         UpdatePermissionsLPw(newPackage->mPackageName, newPackage,
                 UPDATE_PERMISSIONS_REPLACE_PKG |
-                    (newPackage->mPermissions.Begin() != newPackage->mPermissions.End() ? UPDATE_PERMISSIONS_ALL : 0));
+                    (newPackage->mPermissions.IsEmpty() == FALSE ? UPDATE_PERMISSIONS_ALL : 0));
         // For system-bundled packages, we assume that installing an upgraded version
         // of the package implies that the user actually wants to run that new code,
         // so we enable the package.

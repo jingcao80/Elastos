@@ -3,6 +3,7 @@
 #include "elastos/droid/widget/DayPickerView.h"
 #include "elastos/droid/widget/SimpleMonthAdapter.h"
 #include "elastos/droid/widget/SimpleMonthView.h"
+#include "elastos/droid/widget/CAbsListViewLayoutParams.h"
 #include "elastos/core/Math.h"
 #include "elastos/core/StringBuffer.h"
 #include <elastos/utility/logging/Logger.h>
@@ -212,17 +213,6 @@ ECode DayPickerView::constructor(
 ECode DayPickerView::SetController(
     /* [in] */ IDatePickerController* controller)
 {
-    VALIDATE_NOT_NULL(controller);
-    // ==================before translated======================
-    // if (mController != null) {
-    //     mController.unregisterOnDateChangedListener(this);
-    // }
-    // mController = controller;
-    // mController.registerOnDateChangedListener(this);
-    // setUpAdapter();
-    // setAdapter(mAdapter);
-    // onDateChanged();
-
     if (mController != NULL) {
         mController->UnregisterOnDateChangedListener(this);
     }
@@ -236,15 +226,11 @@ ECode DayPickerView::SetController(
 
 ECode DayPickerView::Init()
 {
-    // ==================before translated======================
-    // setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-    // setDrawSelectorOnTop(false);
-    //
-    // setUpListView();
-
-    AutoPtr<LayoutParams> layoutParams = new LayoutParams();
-    layoutParams->constructor(IListPopupWindow::MATCH_PARENT, IListPopupWindow::MATCH_PARENT);
-    SetLayoutParams(layoutParams);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    CAbsListViewLayoutParams::New(
+        IListPopupWindow::MATCH_PARENT, IListPopupWindow::MATCH_PARENT,
+        (IViewGroupLayoutParams**)&vglp);
+    SetLayoutParams(vglp);
     SetDrawSelectorOnTop(FALSE);
     SetUpListView();
     return NOERROR;
@@ -252,10 +238,6 @@ ECode DayPickerView::Init()
 
 ECode DayPickerView::OnChange()
 {
-    // ==================before translated======================
-    // setUpAdapter();
-    // setAdapter(mAdapter);
-
     SetUpAdapter();
     SetAdapter(IAdapter::Probe(mAdapter));
     return NOERROR;

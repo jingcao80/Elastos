@@ -113,7 +113,7 @@ AutoPtr<MediaSessionRecord> MediaSessionStack::GetDefaultSession(
         return mCachedDefault;
     }
     AutoPtr<List<AutoPtr<MediaSessionRecord> > > records = GetPriorityListLocked(TRUE, 0, userId);
-    if (records->Begin() != records->End()) {
+    if (records->IsEmpty() == FALSE) {
         return *(records->Begin());
     }
     return NULL;
@@ -130,7 +130,7 @@ AutoPtr<MediaSessionRecord> MediaSessionStack::GetDefaultMediaButtonSession(
     }
     AutoPtr<List<AutoPtr<MediaSessionRecord> > > records = GetPriorityListLocked(TRUE,
             IMediaSession::FLAG_HANDLES_MEDIA_BUTTONS, userId);
-    if (records->Begin() != records->End()) {
+    if (records->IsEmpty() == FALSE) {
         mCachedButtonReceiver = *(records->Begin());
     }
     return mCachedButtonReceiver;

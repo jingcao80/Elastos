@@ -1987,8 +1987,6 @@ private:
     Boolean mOverlayHorizontalScrollbar;
     Boolean mOverlayVerticalScrollbar;
 
-    static const Boolean SUPPORTS_ON_ANIMATION;
-
     static const String TAG;
 
     static const String WEB_ARCHIVE_EXTENSION;

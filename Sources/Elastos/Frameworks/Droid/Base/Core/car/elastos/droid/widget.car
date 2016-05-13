@@ -137,6 +137,7 @@ module
     using interface Elastos.Utility.IObservable;
 
     interface Elastos.Droid.App.IITransientNotification;
+    interface Elastos.Droid.App.IActionBarLayoutParams;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
@@ -347,6 +348,54 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+    }
+
+    class CToolbarSavedState {
+        constructor();
+
+        constructor(
+            [in] IParcelable* state);
+
+        interface IToolbarSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    [local]
+    class CToolbarLayoutParams {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 gravity);
+
+        constructor(
+            [in] Int32 gravity);
+
+        constructor(
+            [in] IToolbarLayoutParams* tlp);
+
+        constructor(
+            [in] IActionBarLayoutParams* ablp);
+
+        constructor(
+            [in] IViewGroupMarginLayoutParams* vgmlp);
+
+        constructor(
+            [in] IViewGroupLayoutParams* vglp);
+
+        interface IToolbarLayoutParams;
+        interface IActionBarLayoutParams;
+        interface IViewGroupMarginLayoutParams;
+        interface IViewGroupLayoutParams;
     }
 
     class CScrollBarDrawable {

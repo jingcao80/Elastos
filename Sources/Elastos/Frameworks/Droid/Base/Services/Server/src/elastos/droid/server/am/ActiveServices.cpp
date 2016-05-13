@@ -1044,7 +1044,7 @@ ECode ActiveServices::UnbindServiceLocked(
 
     Int64 origId = Binder::ClearCallingIdentity();
 //     try {
-    while (clist->Begin() != clist->End()) {
+    while (clist->IsEmpty() == FALSE) {
         AutoPtr<ConnectionRecord> r = clist->GetFront();
         RemoveConnectionLocked(r, NULL, NULL);
         if (clist->GetSize() > 0 && clist->GetFront() == r) {
@@ -2497,7 +2497,7 @@ ECode ActiveServices::KillServicesLocked(
     if (FALSE) {
         // XXX we are letting the client link to the service for
         // death notifications.
-        if (app->mServices.Begin() != app->mServices.End()) {
+        if (app->mServices.IsEmpty() == FALSE) {
             HashSet< AutoPtr<CServiceRecord> >::Iterator it;
             for (it = app->mServices.Begin(); it != app->mServices.End(); ++it) {
                 AutoPtr<CServiceRecord> r = *it;
@@ -2656,7 +2656,7 @@ ECode ActiveServices::KillServicesLocked(
             // extreme case of so many attempts to deliver a command
             // that it failed we also will stop it here.
             if (sr->mStartRequested && (sr->mStopIfKilled || canceled)) {
-                if (sr->mPendingStarts.Begin() == sr->mPendingStarts.End()) {
+                if (sr->mPendingStarts.IsEmpty()) {
                     sr->mStartRequested = FALSE;
                     if (sr->mTracker != NULL) {
                         sr->mTracker->SetStarted(FALSE, mAm->mProcessStats->GetMemFactorLocked(),
@@ -2962,7 +2962,7 @@ void ActiveServices::DumpServicesLocked(
             AutoPtr<ServiceMap> smap = GetServiceMap(user);
             Boolean printed = FALSE;
             IComponentNameCServiceRecordHashMap::Iterator it;
-            if (smap->mServicesByName.Begin() != smap->mServicesByName.End()) {
+            if (smap->mServicesByName.IsEmpty() == FALSE) {
                 Int64 nowReal = SystemClock::GetElapsedRealtime();
                 needSep = FALSE;
                 for (it = smap->mServicesByName.Begin(); it != smap->mServicesByName.End(); ++it) {
@@ -3004,7 +3004,7 @@ void ActiveServices::DumpServicesLocked(
                         pw->Print(r->mStartRequested);
                         pw->Print(String(" connections="));
                         pw->Println((Int32)r->mConnections.GetSize());
-                        if (r->mConnections.Begin() != r->mConnections.End()) {
+                        if (r->mConnections.IsEmpty() == FALSE) {
                             pw->Println(String("    Connections:"));
                             HashMap< AutoPtr<IBinder>, AutoPtr<ConnectionRecordList> >::Iterator connIt;
                             for (connIt = r->mConnections.Begin(); connIt != r->mConnections.End(); ++connIt) {
@@ -3108,7 +3108,7 @@ void ActiveServices::DumpServicesLocked(
     //     Slog.w(TAG, "Exception in dumpServicesLocked: " + e);
     // }
 
-    if (mPendingServices.Begin() != mPendingServices.End()) {
+    if (mPendingServices.IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         List< AutoPtr<CServiceRecord> >::Iterator it;
         for (it = mPendingServices.Begin(); it != mPendingServices.End(); ++it) {
@@ -3162,7 +3162,7 @@ void ActiveServices::DumpServicesLocked(
         needSep = TRUE;
     }
 
-    if (mDestroyingServices.Begin() != mDestroyingServices.End()) {
+    if (mDestroyingServices.IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         List< AutoPtr<CServiceRecord> >::Iterator it;
         for (it = mDestroyingServices.Begin(); it != mDestroyingServices.End(); ++it) {
@@ -3313,7 +3313,7 @@ Boolean ActiveServices::DumpService(
         }
     }
 
-    if (services.Begin() == services.End()) {
+    if (services.IsEmpty()) {
         return FALSE;
     }
 

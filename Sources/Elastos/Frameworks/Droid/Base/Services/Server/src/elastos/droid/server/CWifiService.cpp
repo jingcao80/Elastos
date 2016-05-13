@@ -1838,7 +1838,7 @@ ECode CWifiService::InitializeMulticastFiltering()
     {
         AutoLock lock(mMulticastersLock);
         // if anybody had requested filters be off, leave off
-        if (mMulticasters.Begin() != mMulticasters.End()) {
+        if (mMulticasters.IsEmpty() == FALSE) {
             return NOERROR;
         }
         else {
@@ -1910,7 +1910,7 @@ void CWifiService::RemoveMulticasterLocked(
     if (removed != NULL) {
         removed->UnlinkDeathRecipient();
     }
-    if (mMulticasters.Begin() == mMulticasters.End()) {
+    if (mMulticasters.IsEmpty()) {
         mWifiStateMachine->StartFilteringMulticastV4Packets();
     }
 
@@ -1933,7 +1933,7 @@ ECode CWifiService::IsMulticastEnabled(
 
     {
         AutoLock lock(mMulticastersLock);
-        *result =  mMulticasters.Begin() != mMulticasters.End();
+        *result =  mMulticasters.IsEmpty() == FALSE;
     }
     return NOERROR;
 }

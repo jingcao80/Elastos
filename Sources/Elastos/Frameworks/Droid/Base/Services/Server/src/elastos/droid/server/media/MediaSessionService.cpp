@@ -622,7 +622,7 @@ void MediaSessionService::PushSessionsChanged(
 {
     synchronized (mLock) {
         AutoPtr<List<AutoPtr<MediaSessionRecord> > > records = mPriorityStack->GetActiveSessions(userId);
-        if (records->Begin() != records->End()) {
+        if (records->IsEmpty() == FALSE) {
             RememberMediaButtonReceiverLocked((*records->Begin()));
         }
         AutoPtr<IList> tokens;

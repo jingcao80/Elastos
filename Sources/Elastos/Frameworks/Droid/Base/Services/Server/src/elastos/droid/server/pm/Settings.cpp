@@ -438,7 +438,7 @@ void Settings::PruneSharedUsersLPw()
     HashMap<String, AutoPtr<SharedUserSetting> >::Iterator userit = mSharedUsers.Begin();
     for (; userit != mSharedUsers.End(); ++userit) {
         AutoPtr<SharedUserSetting> sus = userit->mSecond;
-        if (sus == NULL || sus->mPackages.Begin() == sus->mPackages.End()) {
+        if (sus == NULL || sus->mPackages.IsEmpty()) {
             removeStage.PushBack(userit->mFirst);
         }
     }
@@ -888,7 +888,7 @@ Int32 Settings::RemovePackageLPw(
         mPackages.Erase(it);
         if (p->mSharedUser != NULL) {
             p->mSharedUser->RemovePackage(p);
-            if (p->mSharedUser->mPackages.Begin() == p->mSharedUser->mPackages.End()) {
+            if (p->mSharedUser->mPackages.IsEmpty()) {
                 mSharedUsers.Erase(p->mSharedUser->mName);
                 RemoveUserIdLPw(p->mSharedUser->mUserId);
                 p->mPkg = NULL;

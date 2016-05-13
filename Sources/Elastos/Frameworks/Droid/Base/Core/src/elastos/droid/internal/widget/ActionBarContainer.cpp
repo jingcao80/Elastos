@@ -128,6 +128,7 @@ ECode ActionBarContainer::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     FAIL_RETURN(FrameLayout::constructor(context, attrs));
+
     AutoPtr<IDrawable> drawable = new ActionBarBackgroundDrawable(this);
     SetBackgroundDrawable(drawable);
 
@@ -240,7 +241,6 @@ ECode ActionBarContainer::SetSplitBackground(
 ECode ActionBarContainer::SetVisibility(
     /* [in] */ Int32 visibility)
 {
-    FAIL_RETURN(FrameLayout::SetVisibility(visibility));
     Boolean isVisible = visibility == IView::VISIBLE;
     Boolean res = FALSE;
     if (mBackground != NULL) {
@@ -257,7 +257,6 @@ ECode ActionBarContainer::SetVisibility(
 
 ECode ActionBarContainer::JumpDrawablesToCurrentState()
 {
-    FAIL_RETURN(FrameLayout::JumpDrawablesToCurrentState());
     if (mBackground != NULL) {
         mBackground->JumpToCurrentState();
     }
@@ -370,8 +369,8 @@ void ActionBarContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    if (mActionBarView == NULL &&
-            View::MeasureSpec::GetMode(heightMeasureSpec) == View::MeasureSpec::AT_MOST && mHeight >= 0) {
+    if (mActionBarView == NULL
+        && View::MeasureSpec::GetMode(heightMeasureSpec) == View::MeasureSpec::AT_MOST && mHeight >= 0) {
         heightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(Elastos::Core::Math::Min(mHeight,
                 View::MeasureSpec::GetSize(heightMeasureSpec)), View::MeasureSpec::AT_MOST);
     }
@@ -494,6 +493,7 @@ Boolean ActionBarContainer::VerifyDrawable(
 ECode ActionBarContainer::DrawableStateChanged()
 {
     FAIL_RETURN(FrameLayout::DrawableStateChanged());
+
     AutoPtr< ArrayOf<Int32> > drawableState;
     GetDrawableState((ArrayOf<Int32>**)&drawableState);
     Boolean res = FALSE;
@@ -512,10 +512,11 @@ ECode ActionBarContainer::DrawableStateChanged()
 Boolean ActionBarContainer::IsCollapsed(
     /* [in] */ IView* view)
 {
-    Int32 visibility = 0, measureHeight = 0;
-    return view == NULL ||
-            (view->GetVisibility(&visibility), visibility == IView::GONE) ||
-            (view->GetMeasuredHeight(&measureHeight), measureHeight == 0);
+    Int32 visibility = 0;
+    Int32 measureHeight = 0;
+    return view == NULL
+        || (view->GetVisibility(&visibility), visibility == IView::GONE)
+        || (view->GetMeasuredHeight(&measureHeight), measureHeight == 0);
 }
 
 Int32 ActionBarContainer::GetMeasuredHeightWithMargins(

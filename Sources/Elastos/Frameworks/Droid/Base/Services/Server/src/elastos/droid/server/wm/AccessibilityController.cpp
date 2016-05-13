@@ -1168,7 +1168,7 @@ void AccessibilityController::WindowsForAccessibilityObserver::ComputeChangedWin
             // Different size means something changed.
             windowsChanged = TRUE;
         }
-        else if ((mOldWindows.Begin() != mOldWindows.End()) || (windows->IsEmpty(&isEmpty), !isEmpty)) {
+        else if ((mOldWindows.IsEmpty() == FALSE) || (windows->IsEmpty(&isEmpty), !isEmpty)) {
             // Since we always traverse windows from high to low layer
             // the old and new windows at the same index should be the
             // same, otherwise something changed.

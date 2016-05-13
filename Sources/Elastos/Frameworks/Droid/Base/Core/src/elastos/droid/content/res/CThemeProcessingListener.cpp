@@ -35,7 +35,7 @@ ECode CThemeProcessingListener::OnFinishedProcessingRunnable::Run()
             //     listenersToRemove.add(listener);
             // }
         }
-        if (listenersToRemove.Begin() != listenersToRemove.End()) {
+        if (listenersToRemove.IsEmpty() == FALSE) {
             List<AutoPtr<IThemeProcessingListener> >::Iterator removeIt = listenersToRemove.Begin();
             for (; removeIt != listenersToRemove.End(); ++removeIt) {
                 mHost->mProcessingListeners.Erase(*removeIt);

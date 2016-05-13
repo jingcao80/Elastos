@@ -1264,6 +1264,8 @@ private:
 
     CARAPI_(Int32) GetSDK_VERSION();
 
+    AutoPtr< ArrayOf<String> > GetSDK_CODENAMES();
+
 public:
     /**
      * List of new permissions that have been added since 1.0.
@@ -1329,8 +1331,6 @@ private:
     AutoPtr< ArrayOf<String> > mSeparateProcesses;
     Boolean mOnlyCoreApps;
     AutoPtr<IDisplayMetrics> mMetrics;
-
-    static const AutoPtr< ArrayOf<String> > SDK_CODENAMES;
 
     static Int32 sParseError;
 

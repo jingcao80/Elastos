@@ -11317,7 +11317,7 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
             }
             if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "New transit: %d", transit);
         }
-        else if ((oldWallpaper != NULL) && mOpeningApps.Begin() != mOpeningApps.End()
+        else if ((oldWallpaper != NULL) && mOpeningApps.IsEmpty() == FALSE
                 && (Find(mOpeningApps.Begin(), mOpeningApps.End(), temp = oldWallpaper->mAppToken) == mOpeningApps.End())) {
             // We are transitioning from an activity with
             // a wallpaper to one without.

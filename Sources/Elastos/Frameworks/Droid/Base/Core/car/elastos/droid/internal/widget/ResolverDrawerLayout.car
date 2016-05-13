@@ -11,19 +11,20 @@ module
      * @Involve
      * extends Elastos.Droid.View.IViewGroupMarginLayoutParams
      */
-    interface IResolverDrawerLayoutLayoutParams {
-//         SetAlwaysShow(
-//             [in] Boolean alwaysShow);
+    interface IResolverDrawerLayoutParams {
+        SetAlwaysShow(
+            [in] Boolean alwaysShow);
 
-//         GetAlwaysShow(
-//             [out] Boolean* alwaysShow);
+        GetAlwaysShow(
+            [out] Boolean* alwaysShow);
 
-//         SetIgnoreOffset(
-//             [in] Boolean ignoreOffset);
+        SetIgnoreOffset(
+            [in] Boolean ignoreOffset);
 
-//         GetIgnoreOffset(
-//             [out] Boolean* ignoreOffset);
+        GetIgnoreOffset(
+            [out] Boolean* ignoreOffset);
     }
+
     /**
      * @Involve
      * extends Elastos.Droid.View.IView

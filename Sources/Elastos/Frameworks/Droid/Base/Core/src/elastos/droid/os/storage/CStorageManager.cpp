@@ -263,7 +263,7 @@ ECode CStorageManager::UnregisterListener(
         }
         ++it;
     }
-    if (mListeners.Begin() == mListeners.End() && mBinderListener != NULL) {
+    if (mListeners.IsEmpty() && mBinderListener != NULL) {
         // try {
         if (FAILED(mMountService->UnregisterListener(mBinderListener))) {
         // } catch (RemoteException rex) {

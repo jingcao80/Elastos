@@ -1063,7 +1063,7 @@ void CursorWindow::RecordClosingOfWindow(
     /* [in] */ Int64 window)
 {
     synchronized(sWindowToPidMapLock) {
-        if (sWindowToPidMap.Begin() == sWindowToPidMap.End()) {
+        if (sWindowToPidMap.IsEmpty()) {
             // this means we are not in the ContentProvider.
             return;
         }
@@ -1079,7 +1079,7 @@ String CursorWindow::PrintStats()
     HashMap<Int32, Int32> pidCounts;
 
     synchronized(sWindowToPidMapLock) {
-        if (sWindowToPidMap.Begin() == sWindowToPidMap.End()) {
+        if (sWindowToPidMap.IsEmpty()) {
             // this means we are not in the ContentProvider.
             return String("");
         }

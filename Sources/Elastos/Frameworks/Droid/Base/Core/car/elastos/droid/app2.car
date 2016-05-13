@@ -1,6 +1,7 @@
 
 module
 {
+    merge("app/ActionBar.car");
     merge("app/ITransientNotification.car");
     merge("app/PendingIntent.car");
 }

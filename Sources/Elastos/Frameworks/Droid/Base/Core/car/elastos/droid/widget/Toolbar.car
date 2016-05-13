@@ -68,8 +68,14 @@ module
         GetExpandedMenuItemId(
             [out] Int32* itemId);
 
+        SetExpandedMenuItemId(
+            [in] Int32 itemId);
+
         IsOverflowOpen(
             [out] Boolean* isOverflowOpen);
+
+        SetOverflowOpen(
+            [in] Boolean isOverflowOpen);
     }
 
 

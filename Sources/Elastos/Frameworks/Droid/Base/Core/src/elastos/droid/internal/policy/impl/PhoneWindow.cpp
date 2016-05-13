@@ -1140,10 +1140,8 @@ ECode PhoneWindow::_DecorView::DispatchApplyWindowInsets(
         insets->ReplaceSystemWindowInsets(left, top, right, bottom, (IWindowInsets**)&newInsets);
         return FrameLayout::DispatchApplyWindowInsets(newInsets, result);
     }
-    else {
-        return FrameLayout::DispatchApplyWindowInsets(insets, result);
-    }
-    return NOERROR;
+
+    return FrameLayout::DispatchApplyWindowInsets(insets, result);
 }
 
 ECode PhoneWindow::_DecorView::OnTouchEvent(

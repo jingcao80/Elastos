@@ -229,7 +229,7 @@ ECode SystemProperties::AddChangeCallback(
     /* [in] */ IRunnable* callback)
 {
     AutoLock lock(sChangeCallbacksLock);
-    if (sChangeCallbacks.Begin() == sChangeCallbacks.End()) {
+    if (sChangeCallbacks.IsEmpty()) {
         NativeAddChangeCallback();
     }
     sChangeCallbacks.PushBack(callback);

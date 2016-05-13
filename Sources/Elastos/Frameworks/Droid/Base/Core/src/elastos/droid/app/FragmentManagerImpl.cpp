@@ -448,7 +448,7 @@ ECode FragmentManagerImpl::Dump(
 
 //TODO:
 //     if (mBackStack != NULL) {
-//         if (mBackStack->Begin() != mBackStack->End()) {
+//         if (mBackStack->IsEmpty() == FALSE) {
 //             writer->Print(prefix);
 //             writer->Println("Back Stack:");
 //             List<IBackStackRecord* >::Iterator it;
@@ -485,7 +485,7 @@ ECode FragmentManagerImpl::Dump(
 //             }
 //         }
 
-//         if (mAvailBackStackIndices != NULL && mAvailBackStackIndices->Begin() != mAvailBackStackIndices->End()) {
+//         if (mAvailBackStackIndices != NULL && mAvailBackStackIndices->IsEmpty() == FALSE) {
 //             writer->Print(prefix);
 //             writer->Print("mAvailBackStackIndices: ");
 // //            writer->Println(Arrays.toString(mAvailBackStackIndices.toArray()));

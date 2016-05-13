@@ -35,7 +35,7 @@ ECode CThemeChangeListener::OnProgressRunnable::Run()
             //     listenersToRemove.add(listener);
             // }
         }
-        if (listenersToRemove.Begin() != listenersToRemove.End()) {
+        if (listenersToRemove.IsEmpty() == FALSE) {
             List<AutoPtr<IThemeChangeListener> >::Iterator removeIt = listenersToRemove.Begin();
             for (; removeIt != listenersToRemove.End(); ++removeIt) {
                 mHost->mChangeListeners.Erase(*removeIt);
@@ -67,7 +67,7 @@ ECode CThemeChangeListener::OnFinishRunnable::Run()
             //     listenersToRemove.add(listener);
             // }
         }
-        if (listenersToRemove.Begin() != listenersToRemove.End()) {
+        if (listenersToRemove.IsEmpty() == FALSE) {
             List<AutoPtr<IThemeChangeListener> >::Iterator removeIt = listenersToRemove.Begin();
             for (; removeIt != listenersToRemove.End(); ++removeIt) {
                 mHost->mChangeListeners.Erase(*removeIt);

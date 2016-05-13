@@ -53,7 +53,7 @@ ECode CThemeManager::AddClient(
             Logger::E(TAG, "Client was already added ");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        if (mChangeListeners.Begin() == mChangeListeners.End()) {
+        if (mChangeListeners.IsEmpty()) {
             // try {
             if (FAILED(mService->RequestThemeChangeUpdates(mThemeChangeListener))) {
                 Logger::W(TAG, "Unable to register listener");
@@ -72,7 +72,7 @@ ECode CThemeManager::RemoveClient(
 {
     synchronized (mChangeListenersLock) {
         mChangeListeners.Erase(listener);
-        if (mChangeListeners.Begin() == mChangeListeners.End()) {
+        if (mChangeListeners.IsEmpty()) {
             // try {
             if (FAILED(mService->RemoveUpdates(mThemeChangeListener))) {
                 Logger::W(TAG, "Unable to remove listener");
@@ -111,7 +111,7 @@ ECode CThemeManager::RegisterProcessingListener(
             Logger::E(TAG, "Listener was already added ");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        if (mProcessingListeners.Begin() == mProcessingListeners.End()) {
+        if (mProcessingListeners.IsEmpty()) {
             // try {
             if (FAILED(mService->RegisterThemeProcessingListener(mThemeProcessingListener))) {
                 Logger::W(TAG, "Unable to register listener");
@@ -130,7 +130,7 @@ ECode CThemeManager::UnregisterProcessingListener(
 {
     synchronized (mProcessingListenersLock) {
         mProcessingListeners.Erase(listener);
-        if (mProcessingListeners.Begin() == mProcessingListeners.End()) {
+        if (mProcessingListeners.IsEmpty()) {
             // try {
             if (FAILED(mService->UnregisterThemeProcessingListener(mThemeProcessingListener))) {
                 Logger::W(TAG, "Unable to remove listener");

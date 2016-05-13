@@ -1100,7 +1100,6 @@ const String AwContents::WEB_ARCHIVE_EXTENSION(".mht");
 const Float AwContents::ZOOM_CONTROLS_EPSILON = 0.007f;
 const AutoPtr<IRect> AwContents::sLocalGlobalVisibleRect = sLocalGlobalVisibleRectCreate();
 const String AwContents::SAVE_RESTORE_STATE_KEY("WEBVIEW_CHROMIUM_STATE");
-const Boolean AwContents::SUPPORTS_ON_ANIMATION = Build::VERSION::SDK_INT >= Build::VERSION_CODES::JELLY_BEAN;
 
 void AwContents::Init(
     /* [in] */ AwBrowserContext* browserContext,
@@ -2939,7 +2938,7 @@ Boolean AwContents::RequestDrawGL(
 void AwContents::PostInvalidateOnAnimation()
 {
     AutoPtr<IView> view = IView::Probe(mContainerView);
-    if (SUPPORTS_ON_ANIMATION) {
+    if (Build::VERSION::SDK_INT >= Build::VERSION_CODES::JELLY_BEAN) {
         view->PostInvalidateOnAnimation();
     }
     else {

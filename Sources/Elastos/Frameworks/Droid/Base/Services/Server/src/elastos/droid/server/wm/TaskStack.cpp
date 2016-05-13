@@ -209,7 +209,7 @@ void TaskStack::RemoveTask(
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(CWindowManagerService::TAG, "removeTask: task=%p", task);
     mTasks.Remove(task);
     if (mDisplayContent != NULL) {
-        if (mTasks.Begin() == mTasks.End()) {
+        if (mTasks.IsEmpty()) {
             mDisplayContent->MoveStack(this, FALSE);
         }
         mDisplayContent->mLayoutNeeded = TRUE;

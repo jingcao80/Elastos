@@ -58,7 +58,7 @@ Boolean PackageVerificationState::SetVerifierResponse(
             }
 
             mSufficientVerifierUids.Erase(it);
-            if (mSufficientVerifierUids.Begin() == mSufficientVerifierUids.End()) {
+            if (mSufficientVerifierUids.IsEmpty()) {
                 mSufficientVerificationComplete = TRUE;
             }
 
@@ -75,7 +75,7 @@ Boolean PackageVerificationState::IsVerificationComplete()
         return FALSE;
     }
 
-    if (mSufficientVerifierUids.Begin() == mSufficientVerifierUids.End()) {
+    if (mSufficientVerifierUids.IsEmpty()) {
         return TRUE;
     }
 

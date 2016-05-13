@@ -9911,7 +9911,7 @@ ECode CActivityManagerService::RemoveUriPermissionIfNeededLocked(
                 Slogger::V(TAG, "Removing %d permission to %s", perm->mTargetUid, TO_CSTR(perm->mUri));
             }
             perms->Erase(perm->mUri);
-            if (perms->Begin() == perms->End()) {
+            if (perms->IsEmpty()) {
                 mGrantedUriPermissions.Erase(perm->mTargetUid);
             }
         }
@@ -14999,7 +14999,7 @@ Boolean CActivityManagerService::HandleAppCrashLocked(
     // from blocking the user to manually clear the list.
     Int32 homeFlags;
     List< AutoPtr<ActivityRecord> > activities = app->mActivities;
-    if (app == mHomeProcess && activities.Begin() != activities.End()
+    if (app == mHomeProcess && activities.IsEmpty() == FALSE
         && ((mHomeProcess->mInfo->GetFlags(&homeFlags), homeFlags & IApplicationInfo::FLAG_SYSTEM) == 0)) {
         List< AutoPtr<ActivityRecord> >::Iterator it;
         for (it = activities.Begin(); it != activities.End(); ++it) {
@@ -16370,7 +16370,7 @@ void CActivityManagerService::DumpProcessesLocked(
         }
     }
 
-    if (mIsolatedProcesses.Begin() != mIsolatedProcesses.End()) {
+    if (mIsolatedProcesses.IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         HashMap<Int32, AutoPtr<ProcessRecord> >::Iterator it;
         Int32 i = 0;
@@ -16395,7 +16395,7 @@ void CActivityManagerService::DumpProcessesLocked(
         }
     }
 
-    if (mLruProcesses.Begin() != mLruProcesses.End()) {
+    if (mLruProcesses.IsEmpty() == FALSE) {
         if (needSep) {
             pw->Println();
         }
@@ -16438,7 +16438,7 @@ void CActivityManagerService::DumpProcessesLocked(
         }
     }
 
-    if (mForegroundProcesses.Begin() != mForegroundProcesses.End()) {
+    if (mForegroundProcesses.IsEmpty() == FALSE) {
         AutoLock lock(mPidsSelfLockedLock);
         Boolean printed = FALSE;
         HashMap<Int32, AutoPtr<ForegroundToken> >::Iterator it;
@@ -16469,7 +16469,7 @@ void CActivityManagerService::DumpProcessesLocked(
         }
     }
 
-    if (mPersistentStartingProcesses.Begin() != mPersistentStartingProcesses.End()) {
+    if (mPersistentStartingProcesses.IsEmpty() == FALSE) {
         if (needSep) pw->Println();
         needSep = TRUE;
         printedAnything = TRUE;
@@ -16478,7 +16478,7 @@ void CActivityManagerService::DumpProcessesLocked(
                 String("Starting Norm"), String("Restarting PERS"), dumpPackage);
     }
 
-    if (mRemovedProcesses.Begin() != mRemovedProcesses.End()) {
+    if (mRemovedProcesses.IsEmpty() == FALSE) {
         if (needSep) pw->Println();
         needSep = TRUE;
         printedAnything = TRUE;
@@ -16499,7 +16499,7 @@ void CActivityManagerService::DumpProcessesLocked(
     needSep = DumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll, dumpPackage);
 
     AutoPtr<HashMap<String, AutoPtr<HashMap<Int32, Int64> > > > tMap = mProcessCrashTimes->GetMap();
-    if (tMap->Begin() != tMap->End()) {
+    if (tMap->IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         Int64 now = SystemClock::GetUptimeMillis();
         HashMap<String, AutoPtr<HashMap<Int32, Int64> > >::Iterator mapIt;
@@ -16534,7 +16534,7 @@ void CActivityManagerService::DumpProcessesLocked(
     }
 
     AutoPtr<HashMap<String, AutoPtr<HashMap<Int32, AutoPtr<BadProcessInfo> > > > > badMap = mBadProcesses->GetMap();
-    if (badMap->Begin() != badMap->End()) {
+    if (badMap->IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         HashMap<String, AutoPtr<HashMap<Int32, AutoPtr<BadProcessInfo> > > >::Iterator badMapIt;
         for (badMapIt = badMap->Begin(); badMapIt != badMap->End(); ++badMapIt) {
@@ -16687,7 +16687,7 @@ void CActivityManagerService::DumpProcessesLocked(
         sb += GetFocusedStack()->mConfigWillChange;
         pw->Println(sb.ToString());
         HashMap<String, Int32>& packages = mCompatModePackages->GetPackages();
-        if (packages.Begin() != packages.End()) {
+        if (packages.IsEmpty() == FALSE) {
             Boolean printed = FALSE;
             HashMap<String, Int32>::Iterator it;
             for (it = packages.Begin(); it != packages.End(); ++it) {
@@ -16862,7 +16862,7 @@ Boolean CActivityManagerService::DumpProcessesToGc(
     /* [in] */ Boolean dumpAll,
     /* [in] */ const String& dumpPackage)
 {
-    if (mProcessesToGc.Begin() != mProcessesToGc.End()) {
+    if (mProcessesToGc.IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         Int64 now = SystemClock::GetUptimeMillis();
         List< AutoPtr<ProcessRecord> >::Iterator it;
@@ -16924,7 +16924,7 @@ Boolean CActivityManagerService::DumpOomLocked(
 {
     Boolean needSep = FALSE;
 
-    if (mLruProcesses.Begin() != mLruProcesses.End()) {
+    if (mLruProcesses.IsEmpty() == FALSE) {
         if (needSep) pw->Println();
         needSep = TRUE;
         pw->Println(String("  OOM levels:"));
@@ -17101,7 +17101,7 @@ void CActivityManagerService::DumpBroadcastsLocked(
 
     pw->Println(String("ACTIVITY MANAGER BROADCAST STATE (dumpsys activity broadcasts)"));
     if (!onlyHistory && dumpAll) {
-        if (mRegisteredReceivers.Begin() != mRegisteredReceivers.End()) {
+        if (mRegisteredReceivers.IsEmpty() == FALSE) {
             Boolean printed = FALSE;
             HashMap<AutoPtr<IBinder>, AutoPtr<ReceiverList> >::Iterator it;
             for (it = mRegisteredReceivers.Begin(); it != mRegisteredReceivers.End(); ++it) {
@@ -17223,7 +17223,7 @@ void CActivityManagerService::DumpProvidersLocked(
     needSep = mProviderMap->DumpProvidersLocked(pw, dumpAll, dumpPackage);
     printedAnything |= needSep;
 
-    if (mLaunchingProviders.Begin() != mLaunchingProviders.End()) {
+    if (mLaunchingProviders.IsEmpty() == FALSE) {
         Boolean printed = FALSE;
         List< AutoPtr<ContentProviderRecord> >::ReverseIterator rit;
         Int32 i=mLaunchingProviders.GetSize()-1;
@@ -17304,7 +17304,7 @@ void CActivityManagerService::DumpPendingIntentsLocked(
 
     pw->Println(String("ACTIVITY MANAGER PENDING INTENTS (dumpsys activity intents)"));
 
-    if (mIntentSenderRecords.Begin() != mIntentSenderRecords.End()) {
+    if (mIntentSenderRecords.IsEmpty() == FALSE) {
         PendingIntentRecordHashMap::Iterator it;
         for (it = mIntentSenderRecords.Begin(); it != mIntentSenderRecords.End(); ++it) {
             AutoPtr<IWeakReference> ref = it->mSecond;
@@ -17569,7 +17569,7 @@ AutoPtr<List<AutoPtr<ProcessRecord> > > CActivityManagerService::CollectProcesse
                     procs->PushBack(proc);
                 }
             }
-            if (procs->Begin() == procs->End()) {
+            if (procs->IsEmpty()) {
                 return NULL;
             }
         }
@@ -22109,8 +22109,7 @@ Boolean CActivityManagerService::CanGcNowLocked()
     Boolean processingBroadcasts = FALSE;
     for (Int32 i = 0; i < mBroadcastQueues->GetLength(); ++i) {
         AutoPtr<BroadcastQueue> q = (*mBroadcastQueues)[i];
-        if (q->mParallelBroadcasts.Begin() != q->mParallelBroadcasts.End() ||
-                q->mOrderedBroadcasts.Begin() != q->mOrderedBroadcasts.End()) {
+        if (q->mParallelBroadcasts.IsEmpty() == FALSE || q->mOrderedBroadcasts.IsEmpty() == FALSE) {
             processingBroadcasts = TRUE;
         }
     }
@@ -22120,11 +22119,11 @@ Boolean CActivityManagerService::CanGcNowLocked()
 
 ECode CActivityManagerService::PerformAppGcsLocked()
 {
-    if (mProcessesToGc.Begin() == mProcessesToGc.End()) {
+    if (mProcessesToGc.IsEmpty()) {
         return NOERROR;
     }
     if (CanGcNowLocked()) {
-        while (mProcessesToGc.Begin() != mProcessesToGc.End()) {
+        while (mProcessesToGc.IsEmpty() == FALSE) {
             List< AutoPtr<ProcessRecord> >::Iterator it = mProcessesToGc.Begin();
             AutoPtr<ProcessRecord> proc = *it;
             mProcessesToGc.Erase(it);

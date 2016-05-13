@@ -1467,7 +1467,7 @@ ECode LoadedPkg::ForgetServiceDispatcher(
         if (sd != NULL) {
             map->Erase(sdit);
             sd->DoForget();
-            if (map->Begin() == map->End()) {
+            if (map->IsEmpty()) {
                 mServices.Erase(it);
                 map = NULL;
             }

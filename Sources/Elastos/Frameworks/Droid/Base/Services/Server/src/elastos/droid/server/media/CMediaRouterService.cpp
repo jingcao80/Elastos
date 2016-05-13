@@ -1584,7 +1584,7 @@ void CMediaRouterService::DisposeUserIfNeededLocked(
     // then leave it alone since we might be connected to a route or want to query
     // the same route information again soon.
     if (userRecord->mUserId != mCurrentUserId
-            && userRecord->mClientRecords.Begin() == userRecord->mClientRecords.End()) {
+            && userRecord->mClientRecords.IsEmpty()) {
         if (DEBUG) {
             Slogger::D(TAG, "%p: Disposed", userRecord);
         }

@@ -4344,7 +4344,7 @@ void CMountService::HandleObbMcsBound(
         }
         mActions.Clear();
     }
-    else if (mActions.Begin() != mActions.End()) {
+    else if (mActions.IsEmpty() == FALSE) {
         AutoPtr<ObbAction> action = *mActions.Begin();
         if (action != NULL) {
             action->Execute(mObbActionHandler);
@@ -4360,7 +4360,7 @@ void CMountService::HandleObbMcsReconnect()
 {
     if (DEBUG_OBB)
         Slogger::I(TAG, "OBB_MCS_RECONNECT");
-    if (mActions.Begin() != mActions.End()) {
+    if (mActions.IsEmpty() == FALSE) {
         if (mBound) {
             DisconnectService();
         }
@@ -4382,10 +4382,10 @@ void CMountService::HandleObbMcsUnbind()
         Slogger::I(TAG, "OBB_MCS_UNBIND");
 
     // Delete pending install
-    if (mActions.Begin() != mActions.End()) {
+    if (mActions.IsEmpty() == FALSE) {
         mActions.Erase(mActions.Begin());
     }
-    if (mActions.Begin() == mActions.End()) {
+    if (mActions.IsEmpty()) {
         if (mBound) {
             DisconnectService();
         }

@@ -118,6 +118,8 @@
 #include "elastos/droid/widget/CToastTransientNotification.h"
 #include "elastos/droid/widget/CToggleButton.h"
 #include "elastos/droid/widget/CToolbar.h"
+#include "elastos/droid/widget/CToolbarSavedState.h"
+#include "elastos/droid/widget/CToolbarLayoutParams.h"
 #include "elastos/droid/widget/CTwoLineListItem.h"
 #include "elastos/droid/widget/CVideoView.h"
 #include "elastos/droid/widget/CViewAnimator.h"
@@ -251,6 +253,8 @@ CAR_OBJECT_IMPL(CToast)
 CAR_OBJECT_IMPL(CToastTransientNotification)
 CAR_OBJECT_IMPL(CToggleButton)
 CAR_OBJECT_IMPL(CToolbar)
+CAR_OBJECT_IMPL(CToolbarSavedState)
+CAR_OBJECT_IMPL(CToolbarLayoutParams)
 CAR_OBJECT_IMPL(CTwoLineListItem)
 CAR_OBJECT_IMPL(CVideoView)
 CAR_OBJECT_IMPL(CViewAnimator)

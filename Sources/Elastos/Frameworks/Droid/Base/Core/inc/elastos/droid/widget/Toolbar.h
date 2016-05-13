@@ -36,14 +36,14 @@ class Toolbar
     , public IToolbar
 {
 public:
-    class LayoutParams
+    class ToolbarLayoutParams
         : public ActionBarLayoutParams
         , public IToolbarLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        ToolbarLayoutParams();
 
         CARAPI constructor(
         /* [in] */ IContext* ctx,
@@ -80,21 +80,17 @@ public:
             /* [out] */ Int32* type);
 
     public:
-        static const Int32 CUSTOM = 0;
-        static const Int32 SYSTEM = 1;
-        static const Int32 EXPANDED = 2;
-
         Int32 mViewType;// = CUSTOM;
     };
 
-    class SavedState
+    class ToolbarSavedState
         : public View::BaseSavedState
         , public IToolbarSavedState
     {
     public:
         CAR_INTERFACE_DECL()
 
-        SavedState();
+        ToolbarSavedState();
 
         CARAPI constructor();
 
@@ -106,6 +102,18 @@ public:
 
         CARAPI ReadFromParcel(
             /* [in] */ IParcel* source);
+
+        CARAPI GetExpandedMenuItemId(
+            /* [out] */ Int32* itemId);
+
+        CARAPI SetExpandedMenuItemId(
+            /* [in] */ Int32 itemId);
+
+        CARAPI IsOverflowOpen(
+            /* [out] */ Boolean* isOverflowOpen);
+
+        CARAPI SetOverflowOpen(
+            /* [in] */ Boolean isOverflowOpen);
 
     public:
         Int32 mExpandedMenuItemId;

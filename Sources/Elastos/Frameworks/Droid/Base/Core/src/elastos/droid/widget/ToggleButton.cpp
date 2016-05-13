@@ -13,6 +13,7 @@ namespace Widget {
 const Int32 ToggleButton::NO_ALPHA = 0xFF;
 
 CAR_INTERFACE_IMPL(ToggleButton, CompoundButton, IToggleButton);
+
 ToggleButton::ToggleButton()
     : mDisabledAlpha(0)
 {}

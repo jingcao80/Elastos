@@ -3,6 +3,8 @@
 #include "elastos/droid/widget/CImageButton.h"
 #include "elastos/droid/widget/CTextView.h"
 #include "elastos/droid/widget/CActionMenuView.h"
+#include "elastos/droid/widget/CToolbarSavedState.h"
+#include "elastos/droid/widget/CToolbarLayoutParams.h"
 #include "elastos/droid/internal/widget/CToolbarWidgetWrapper.h"
 #include "elastos/droid/view/Gravity.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
@@ -22,6 +24,7 @@ using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ICollapsibleActionView;
+using Elastos::Droid::View::IAbsSavedState;
 using Elastos::Droid::Widget::CImageView;
 using Elastos::Droid::Widget::CImageButton;
 using Elastos::Droid::Widget::CTextView;
@@ -36,27 +39,23 @@ namespace Droid {
 namespace Widget {
 
 /////////////////////////////////////////////////////////////
-//              Toolbar::LayoutParams
+//              Toolbar::ToolbarLayoutParams
 /////////////////////////////////////////////////////////////
 
-const Int32 Toolbar::LayoutParams::CUSTOM;
-const Int32 Toolbar::LayoutParams::SYSTEM;
-const Int32 Toolbar::LayoutParams::EXPANDED;
+CAR_INTERFACE_IMPL(Toolbar::ToolbarLayoutParams, ActionBarLayoutParams, IToolbarLayoutParams)
 
-CAR_INTERFACE_IMPL(Toolbar::LayoutParams, ActionBarLayoutParams, IToolbarLayoutParams)
-
-Toolbar::LayoutParams::LayoutParams()
-    : mViewType(CUSTOM)
+Toolbar::ToolbarLayoutParams::ToolbarLayoutParams()
+    : mViewType(IToolbarLayoutParams::CUSTOM)
 {}
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
 /* [in] */ IContext* ctx,
 /* [in] */ IAttributeSet* attrs)
 {
     return ActionBarLayoutParams::constructor(ctx, attrs);
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -65,7 +64,7 @@ ECode Toolbar::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 gravity)
@@ -75,52 +74,51 @@ ECode Toolbar::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ Int32 gravity)
 {
     return constructor(IViewGroupLayoutParams::WRAP_CONTENT,
         IViewGroupLayoutParams::MATCH_PARENT, gravity);
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ IToolbarLayoutParams* source)
 {
     ActionBarLayoutParams::constructor(IActionBarLayoutParams::Probe(source));
-
     source->GetViewType(&mViewType);
     return NOERROR;
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ IActionBarLayoutParams* source)
 {
     return ActionBarLayoutParams::constructor(source);
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
     ActionBarLayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
-    // ActionBar.LayoutParams doesn't have a MarginLayoutParams constructor.
+    // ActionBar.ToolbarLayoutParams doesn't have a MarginLayoutParams constructor.
     // Fake it here and copy over the relevant data.
     CopyMarginsFrom(source);
     return NOERROR;
 }
 
-ECode Toolbar::LayoutParams::constructor(
+ECode Toolbar::ToolbarLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ActionBarLayoutParams::constructor(source);
 }
 
-ECode Toolbar::LayoutParams::SetViewType(
+ECode Toolbar::ToolbarLayoutParams::SetViewType(
     /* [in] */ Int32 type)
 {
     mViewType = type;
     return  NOERROR;
 }
 
-ECode Toolbar::LayoutParams::GetViewType(
+ECode Toolbar::ToolbarLayoutParams::GetViewType(
     /* [out] */ Int32* type)
 {
     VALIDATE_NOT_NULL(type)
@@ -129,28 +127,28 @@ ECode Toolbar::LayoutParams::GetViewType(
 }
 
 /////////////////////////////////////////////////////////////
-//              Toolbar::SavedState
+//              Toolbar::ToolbarSavedState
 /////////////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL(Toolbar::SavedState, View::BaseSavedState, IToolbarSavedState)
+CAR_INTERFACE_IMPL(Toolbar::ToolbarSavedState, View::BaseSavedState, IToolbarSavedState)
 
-Toolbar::SavedState::SavedState()
+Toolbar::ToolbarSavedState::ToolbarSavedState()
     : mExpandedMenuItemId(0)
     , mIsOverflowOpen(FALSE)
 {}
 
-ECode Toolbar::SavedState::constructor()
+ECode Toolbar::ToolbarSavedState::constructor()
 {
     return NOERROR;
 }
 
-ECode Toolbar::SavedState::constructor(
+ECode Toolbar::ToolbarSavedState::constructor(
     /* [in] */ IParcelable* superState)
 {
     return BaseSavedState::constructor(superState);
 }
 
-ECode Toolbar::SavedState::WriteToParcel(
+ECode Toolbar::ToolbarSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     BaseSavedState::WriteToParcel(dest);
@@ -159,7 +157,7 @@ ECode Toolbar::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode Toolbar::SavedState::ReadFromParcel(
+ECode Toolbar::ToolbarSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);
@@ -167,6 +165,36 @@ ECode Toolbar::SavedState::ReadFromParcel(
     Int32 res;
     source->ReadInt32(&res);
     mIsOverflowOpen = res != 0;
+    return NOERROR;
+}
+
+ECode Toolbar::ToolbarSavedState::GetExpandedMenuItemId(
+    /* [out] */ Int32* itemId)
+{
+    VALIDATE_NOT_NULL(itemId)
+    *itemId = mExpandedMenuItemId;
+    return NOERROR;
+}
+
+ECode Toolbar::ToolbarSavedState::SetExpandedMenuItemId(
+    /* [in] */ Int32 itemId)
+{
+    mExpandedMenuItemId = itemId;
+    return NOERROR;
+}
+
+ECode Toolbar::ToolbarSavedState::IsOverflowOpen(
+    /* [out] */ Boolean* isOverflowOpen)
+{
+    VALIDATE_NOT_NULL(isOverflowOpen)
+    *isOverflowOpen = mIsOverflowOpen;
+    return NOERROR;
+}
+
+ECode Toolbar::ToolbarSavedState::SetOverflowOpen(
+    /* [in] */ Boolean isOverflowOpen)
+{
+    mIsOverflowOpen = isOverflowOpen;
     return NOERROR;
 }
 
@@ -305,8 +333,7 @@ ECode Toolbar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
         mHost->GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mHost->mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
-        assert(0);
-        //lp->SetViewType(LayoutParams::EXPANDED);
+        lp->SetViewType(IToolbarLayoutParams::EXPANDED);
         IView::Probe(mHost->mExpandedActionView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
         mHost->AddView(IView::Probe(mHost->mExpandedActionView));
     }
@@ -1157,48 +1184,16 @@ ECode Toolbar::GenerateLayoutParams(
     /* [out] */ IToolbarLayoutParams** layoutParams)
 {
     VALIDATE_NOT_NULL(layoutParams)
-    AutoPtr<LayoutParams> result = new LayoutParams();
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
-    result->constructor(ctx, attrs);
-    *layoutParams = IToolbarLayoutParams::Probe(result);
-    REFCOUNT_ADD(*layoutParams)
-    return NOERROR;
+    return CToolbarLayoutParams::New(ctx, attrs, layoutParams);
 }
 
 ECode Toolbar::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p,
     /* [out] */ IToolbarLayoutParams** layoutParams)
 {
-    VALIDATE_NOT_NULL(layoutParams)
-    if (IToolbarLayoutParams::Probe(p)) {
-            AutoPtr<LayoutParams> result = new LayoutParams();
-            result->constructor(IToolbarLayoutParams::Probe(p));
-            *layoutParams = (IToolbarLayoutParams*)result.Get();
-            REFCOUNT_ADD(*layoutParams)
-            return NOERROR;
-    }
-    else if (IActionBarLayoutParams::Probe(p)) {
-        AutoPtr<LayoutParams> result = new LayoutParams();
-        result->constructor(IActionBarLayoutParams::Probe(p));
-        *layoutParams = (IToolbarLayoutParams*)result.Get();
-        REFCOUNT_ADD(*layoutParams)
-        return NOERROR;
-    }
-    else if (IViewGroupMarginLayoutParams::Probe(p)) {
-        AutoPtr<LayoutParams> result = new LayoutParams();
-        result->constructor(IViewGroupMarginLayoutParams::Probe(p));
-        *layoutParams = (IToolbarLayoutParams*)result.Get();
-        REFCOUNT_ADD(*layoutParams)
-        return NOERROR;
-    }
-    else {
-        AutoPtr<LayoutParams> result = new LayoutParams();
-        result->constructor(p);
-        *layoutParams = (IToolbarLayoutParams*)result.Get();
-        REFCOUNT_ADD(*layoutParams)
-        return NOERROR;
-    }
+    return CToolbarLayoutParams::New(p, layoutParams);
 }
 
 ECode Toolbar::GetWrapper(
@@ -1232,37 +1227,53 @@ ECode Toolbar::SetMenuCallbacks(
 
 AutoPtr<IParcelable> Toolbar::OnSaveInstanceState()
 {
-    assert(0);
-    /*SavedState state = new SavedState(super.onSaveInstanceState());
+    AutoPtr<IParcelable> p = ViewGroup::OnSaveInstanceState();
 
-    if (mExpandedMenuPresenter != null && mExpandedMenuPresenter.mCurrentExpandedItem != null) {
-        state.expandedMenuItemId = mExpandedMenuPresenter.mCurrentExpandedItem.getItemId();
+    AutoPtr<IToolbarSavedState> state;
+    CToolbarSavedState::New(p, (IToolbarSavedState**)&state);
+
+    if (mExpandedMenuPresenter != NULL
+        && mExpandedMenuPresenter->mCurrentExpandedItem != NULL) {
+        Int32 itemId;
+        IMenuItem::Probe(mExpandedMenuPresenter->mCurrentExpandedItem)->GetItemId(&itemId);
+        state->SetExpandedMenuItemId(itemId);
     }
 
-    state.isOverflowOpen = isOverflowMenuShowing();
+    Boolean bval;
+    IsOverflowMenuShowing(&bval);
+    state->SetOverflowOpen(bval);
 
-    return state;*/
-    return NULL;
+    return IParcelable::Probe(state);
 }
 
 void Toolbar::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    assert(0);
-    /*final SavedState ss = (SavedState) state;
-    super.onRestoreInstanceState(ss.getSuperState());
+    AutoPtr<IToolbarSavedState> ss = IToolbarSavedState::Probe(state);
+    AutoPtr<IParcelable> superSS;
+    IAbsSavedState::Probe(ss)->GetSuperState((IParcelable**)&superSS);
+    ViewGroup::OnRestoreInstanceState(superSS);
 
-    final Menu menu = mMenuView != null ? mMenuView.peekMenu() : null;
-    if (ss.expandedMenuItemId != 0 && mExpandedMenuPresenter != null && menu != null) {
-        final MenuItem item = menu.findItem(ss.expandedMenuItemId);
-        if (item != null) {
-            item.expandActionView();
+    AutoPtr<IMenuBuilder> menu;
+    if (mMenuView != NULL) {
+        mMenuView->PeekMenu((IMenuBuilder**)&menu);
+    }
+    Int32 itemId;
+    ss->GetExpandedMenuItemId(&itemId);
+    if (itemId != 0 && mExpandedMenuPresenter != NULL && menu != NULL) {
+        AutoPtr<IMenuItem> item;
+        IMenu::Probe(menu)->FindItem(itemId, (IMenuItem**)&item);
+        if (item != NULL) {
+            Boolean bval;
+            item->ExpandActionView(&bval);
         }
     }
 
-    if (ss.isOverflowOpen) {
-        postShowOverflowMenu();
-    }*/
+    Boolean bval;
+    ss->IsOverflowOpen(&bval);
+    if (bval) {
+        PostShowOverflowMenu();
+    }
 }
 
 ECode Toolbar::OnDetachedFromWindow()
@@ -1295,72 +1306,77 @@ void Toolbar::OnMeasure(
     }
 
     // System views measure first.
-
+    using Elastos::Core::Math;
     Int32 navWidth = 0;
-    if (ShouldLayout(IView::Probe(mNavButtonView))) {
-        MeasureChildConstrained(IView::Probe(mNavButtonView), widthMeasureSpec,
+
+    IView* view = IView::Probe(mNavButtonView);
+    if (ShouldLayout(view)) {
+        MeasureChildConstrained(view, widthMeasureSpec,
             width, heightMeasureSpec, 0, mMaxButtonHeight);
         Int32 measureWidth, measureHeight, state;
-        IView::Probe(mNavButtonView)->GetMeasuredWidth(&measureWidth);
-        navWidth = measureWidth + GetHorizontalMargins(IView::Probe(mNavButtonView));
-        IView::Probe(mNavButtonView)->GetMeasuredHeight(&measureHeight);
-        height = Elastos::Core::Math::Max(height, measureHeight + GetVerticalMargins(IView::Probe(mNavButtonView)));
-        IView::Probe(mNavButtonView)->GetMeasuredState(&state);
+        view->GetMeasuredWidth(&measureWidth);
+        navWidth = measureWidth + GetHorizontalMargins(view);
+        view->GetMeasuredHeight(&measureHeight);
+        height = Math::Max(height, measureHeight + GetVerticalMargins(view));
+        view->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
 
-    if (ShouldLayout(IView::Probe(mCollapseButtonView))) {
-        MeasureChildConstrained(IView::Probe(mCollapseButtonView), widthMeasureSpec, width,
+    view = IView::Probe(mCollapseButtonView);
+    if (ShouldLayout(view)) {
+        MeasureChildConstrained(view, widthMeasureSpec, width,
                 heightMeasureSpec, 0, mMaxButtonHeight);
         Int32 measureWidth, measureHeight, state;
-        IView::Probe(mCollapseButtonView)->GetMeasuredWidth(&measureWidth);
-        navWidth = measureWidth + GetHorizontalMargins(IView::Probe(mCollapseButtonView));
-        IView::Probe(mCollapseButtonView)->GetMeasuredHeight(&measureHeight);
-        height = Elastos::Core::Math::Max(height, measureHeight + GetVerticalMargins(IView::Probe(mCollapseButtonView)));
-        IView::Probe(mCollapseButtonView)->GetMeasuredState(&state);
+        view->GetMeasuredWidth(&measureWidth);
+        navWidth = measureWidth + GetHorizontalMargins(view);
+        view->GetMeasuredHeight(&measureHeight);
+        height = Math::Max(height, measureHeight + GetVerticalMargins(view));
+        view->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
 
     Int32 contentInsetStart;
     GetContentInsetStart(&contentInsetStart);
-    width += Elastos::Core::Math::Max(contentInsetStart, navWidth);
-    (*collapsingMargins)[marginStartIndex] = Elastos::Core::Math::Max(0, contentInsetStart - navWidth);
+    width += Math::Max(contentInsetStart, navWidth);
+    (*collapsingMargins)[marginStartIndex] = Math::Max(0, contentInsetStart - navWidth);
 
     Int32 menuWidth = 0;
-    if (ShouldLayout(IView::Probe(mMenuView))) {
-        MeasureChildConstrained(IView::Probe(mMenuView), widthMeasureSpec, width, heightMeasureSpec, 0,
+    view = IView::Probe(mMenuView);
+    if (ShouldLayout(view)) {
+        MeasureChildConstrained(view, widthMeasureSpec, width, heightMeasureSpec, 0,
                 mMaxButtonHeight);
         Int32 measureWidth, measureHeight, state;
-        IView::Probe(mMenuView)->GetMeasuredWidth(&measureWidth);
-        menuWidth = measureWidth + GetHorizontalMargins(IView::Probe(mMenuView));
-        IView::Probe(mMenuView)->GetMeasuredHeight(&measureHeight);
-        height = Elastos::Core::Math::Max(height, measureHeight + GetVerticalMargins(IView::Probe(mMenuView)));
-        IView::Probe(mMenuView)->GetMeasuredState(&state);
+        view->GetMeasuredWidth(&measureWidth);
+        menuWidth = measureWidth + GetHorizontalMargins(view);
+        view->GetMeasuredHeight(&measureHeight);
+        height = Math::Max(height, measureHeight + GetVerticalMargins(view));
+        view->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
 
     Int32 contentInsetEnd;
     GetContentInsetEnd(&contentInsetEnd);
-    width += Elastos::Core::Math::Max(contentInsetEnd, menuWidth);
-    (*collapsingMargins)[marginEndIndex] = Elastos::Core::Math::Max(0, contentInsetEnd - menuWidth);
+    width += Math::Max(contentInsetEnd, menuWidth);
+    (*collapsingMargins)[marginEndIndex] = Math::Max(0, contentInsetEnd - menuWidth);
 
     if (ShouldLayout(mExpandedActionView)) {
         width += MeasureChildCollapseMargins(mExpandedActionView, widthMeasureSpec, width,
                 heightMeasureSpec, 0, collapsingMargins);
         Int32 measureHeight, state;
         mExpandedActionView->GetMeasuredHeight(&measureHeight);
-        height = Elastos::Core::Math::Max(height, measureHeight + GetVerticalMargins(mExpandedActionView));
+        height = Math::Max(height, measureHeight + GetVerticalMargins(mExpandedActionView));
         mExpandedActionView->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
 
-    if (ShouldLayout(IView::Probe(mLogoView))) {
-        width += MeasureChildCollapseMargins(IView::Probe(mLogoView), widthMeasureSpec, width,
+    view = IView::Probe(mLogoView);
+    if (ShouldLayout(view)) {
+        width += MeasureChildCollapseMargins(view, widthMeasureSpec, width,
                 heightMeasureSpec, 0, collapsingMargins);
         Int32 measureHeight, state;
-        IView::Probe(mLogoView)->GetMeasuredHeight(&measureHeight);
-        height = Elastos::Core::Math::Max(height, measureHeight + GetVerticalMargins(IView::Probe(mLogoView)));
-        IView::Probe(mLogoView)->GetMeasuredState(&state);
+        view->GetMeasuredHeight(&measureHeight);
+        height = Math::Max(height, measureHeight + GetVerticalMargins(view));
+        view->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
 
@@ -1374,9 +1390,8 @@ void Toolbar::OnMeasure(
         child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
         AutoPtr<IToolbarLayoutParams> lp = IToolbarLayoutParams::Probe(temp);
         Int32 viewTpye;
-        assert(0);
-        //lp->GetViewType(&viewTpye);
-        if (viewTpye != LayoutParams::CUSTOM || !ShouldLayout(child)) {
+        lp->GetViewType(&viewTpye);
+        if (viewTpye != IToolbarLayoutParams::CUSTOM || !ShouldLayout(child)) {
             // We already got all system views above. Skip them and GONE views.
             continue;
         }
@@ -1385,7 +1400,7 @@ void Toolbar::OnMeasure(
                 heightMeasureSpec, 0, collapsingMargins);
         Int32 measureHeight, state;
         child->GetMeasuredHeight(&measureHeight);
-        height = Elastos::Core::Math::Max(height, measureHeight + GetVerticalMargins(child));
+        height = Math::Max(height, measureHeight + GetVerticalMargins(child));
         child->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
@@ -1394,30 +1409,33 @@ void Toolbar::OnMeasure(
     Int32 titleHeight = 0;
     Int32 titleVertMargins = mTitleMarginTop + mTitleMarginBottom;
     Int32 titleHorizMargins = mTitleMarginStart + mTitleMarginEnd;
-    if (ShouldLayout(IView::Probe(mTitleTextView))) {
-        titleWidth = MeasureChildCollapseMargins(IView::Probe(mTitleTextView), widthMeasureSpec,
+    view = IView::Probe(mTitleTextView);
+    if (ShouldLayout(view)) {
+        titleWidth = MeasureChildCollapseMargins(view, widthMeasureSpec,
                 width + titleHorizMargins, heightMeasureSpec, titleVertMargins, collapsingMargins);
         Int32 measureWidth, measureHeight, state;
-        IView::Probe(mTitleTextView)->GetMeasuredWidth(&measureWidth);
-        titleWidth = measureWidth + GetHorizontalMargins(IView::Probe(mTitleTextView));
-        IView::Probe(mTitleTextView)->GetMeasuredHeight(&measureHeight);
-        titleHeight = measureHeight + GetVerticalMargins(IView::Probe(mTitleTextView));
-        IView::Probe(mTitleTextView)->GetMeasuredState(&state);
+        view->GetMeasuredWidth(&measureWidth);
+        titleWidth = measureWidth + GetHorizontalMargins(view);
+        view->GetMeasuredHeight(&measureHeight);
+        titleHeight = measureHeight + GetVerticalMargins(view);
+        view->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
-    if (ShouldLayout(IView::Probe(mSubtitleTextView))) {
-        titleWidth = Elastos::Core::Math::Max(titleWidth,
-            MeasureChildCollapseMargins(IView::Probe(mSubtitleTextView), widthMeasureSpec,
+
+    view = IView::Probe(mSubtitleTextView);
+    if (ShouldLayout(view)) {
+        titleWidth = Math::Max(titleWidth,
+            MeasureChildCollapseMargins(view, widthMeasureSpec,
             width + titleHorizMargins, heightMeasureSpec, titleHeight + titleVertMargins, collapsingMargins));
         Int32 measureHeight, state;
-        IView::Probe(mSubtitleTextView)->GetMeasuredHeight(&measureHeight);
-        titleHeight += measureHeight + GetVerticalMargins(IView::Probe(mSubtitleTextView));
-        IView::Probe(mSubtitleTextView)->GetMeasuredState(&state);
+        view->GetMeasuredHeight(&measureHeight);
+        titleHeight += measureHeight + GetVerticalMargins(view);
+        view->GetMeasuredState(&state);
         childState = CombineMeasuredStates(childState, state);
     }
 
     width += titleWidth;
-    height = Elastos::Core::Math::Max(height, titleHeight);
+    height = Math::Max(height, titleHeight);
 
     // Measurement already took padding into account for available space for the children,
     // add it in for the final size.
@@ -1430,10 +1448,10 @@ void Toolbar::OnMeasure(
     height += paddingTop + paddingBottom;
 
     Int32 measuredWidth = ResolveSizeAndState(
-            Elastos::Core::Math::Max(width, GetSuggestedMinimumWidth()),
+            Math::Max(width, GetSuggestedMinimumWidth()),
             widthMeasureSpec, childState & MEASURED_STATE_MASK);
     Int32 measuredHeight = ResolveSizeAndState(
-            Elastos::Core::Math::Max(height, GetSuggestedMinimumHeight()),
+            Math::Max(height, GetSuggestedMinimumHeight()),
             heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT);
 
     SetMeasuredDimension(measuredWidth, ShouldCollapse() ? 0 : measuredHeight);
@@ -1466,66 +1484,62 @@ ECode Toolbar::OnLayout(
     Int32 alignmentHeight;
     GetMinimumHeight(&alignmentHeight);
 
-    if (ShouldLayout(IView::Probe(mNavButtonView))) {
+    IView* view = IView::Probe(mNavButtonView);
+    if (ShouldLayout(view)) {
         if (isRtl) {
-            right = LayoutChildRight(IView::Probe(mNavButtonView), right, collapsingMargins,
-                    alignmentHeight);
+            right = LayoutChildRight(view, right, collapsingMargins, alignmentHeight);
         }
         else {
-            left = LayoutChildLeft(IView::Probe(mNavButtonView), left, collapsingMargins,
-                    alignmentHeight);
+            left = LayoutChildLeft(view, left, collapsingMargins, alignmentHeight);
         }
     }
 
-    if (ShouldLayout(IView::Probe(mCollapseButtonView))) {
+    view = IView::Probe(mCollapseButtonView);
+    if (ShouldLayout(view)) {
         if (isRtl) {
-            right = LayoutChildRight(IView::Probe(mCollapseButtonView), right, collapsingMargins,
-                    alignmentHeight);
+            right = LayoutChildRight(view, right, collapsingMargins, alignmentHeight);
         }
         else {
-            left = LayoutChildLeft(IView::Probe(mCollapseButtonView), left, collapsingMargins,
-                    alignmentHeight);
+            left = LayoutChildLeft(view, left, collapsingMargins, alignmentHeight);
         }
     }
 
-    if (ShouldLayout(IView::Probe(mMenuView))) {
+    view = IView::Probe(mMenuView);
+    if (ShouldLayout(view)) {
         if (isRtl) {
-            left = LayoutChildLeft(IView::Probe(mMenuView), left, collapsingMargins,
-                    alignmentHeight);
+            left = LayoutChildLeft(view, left, collapsingMargins, alignmentHeight);
         }
         else {
-            right = LayoutChildRight(IView::Probe(mMenuView), right, collapsingMargins,
-                    alignmentHeight);
+            right = LayoutChildRight(view, right, collapsingMargins, alignmentHeight);
         }
     }
 
+    using Elastos::Core::Math;
     Int32 insetLeft, insetRight;
     GetContentInsetLeft(&insetLeft);
     GetContentInsetRight(&insetRight);
-    (*collapsingMargins)[0] = Elastos::Core::Math::Max(0, insetLeft - left);
-    (*collapsingMargins)[1] = Elastos::Core::Math::Max(0, insetRight - (width - paddingRight - right));
-    left = Elastos::Core::Math::Max(left, insetLeft);
-    right = Elastos::Core::Math::Min(right, width - paddingRight - insetRight);
+    (*collapsingMargins)[0] = Math::Max(0, insetLeft - left);
+    (*collapsingMargins)[1] = Math::Max(0, insetRight - (width - paddingRight - right));
+    left = Math::Max(left, insetLeft);
+    right = Math::Min(right, width - paddingRight - insetRight);
 
     if (ShouldLayout(mExpandedActionView)) {
         if (isRtl) {
-            right = LayoutChildRight(mExpandedActionView, right, collapsingMargins,
-                    alignmentHeight);
+            right = LayoutChildRight(mExpandedActionView, right, collapsingMargins, alignmentHeight);
         }
         else {
-            left = LayoutChildLeft(mExpandedActionView, left, collapsingMargins,
-                    alignmentHeight);
+            left = LayoutChildLeft(mExpandedActionView, left, collapsingMargins, alignmentHeight);
         }
     }
 
-    if (ShouldLayout(IView::Probe(mLogoView))) {
+    view = IView::Probe(mLogoView);
+    if (ShouldLayout(view)) {
         if (isRtl) {
-            right = LayoutChildRight(IView::Probe(mLogoView), right, collapsingMargins,
+            right = LayoutChildRight(view, right, collapsingMargins,
                     alignmentHeight);
         }
         else {
-            left = LayoutChildLeft(IView::Probe(mLogoView), left, collapsingMargins,
-                    alignmentHeight);
+            left = LayoutChildLeft(view, left, collapsingMargins, alignmentHeight);
         }
     }
 
@@ -1592,7 +1606,7 @@ ECode Toolbar::OnLayout(
                     Int32 spaceBelow = height - paddingBottom - titleHeight -
                             spaceAbove - paddingTop;
                     if (spaceBelow < bottom + mTitleMarginBottom) {
-                        spaceAbove = Elastos::Core::Math::Max(0, spaceAbove -
+                        spaceAbove = Math::Max(0, spaceAbove -
                                 (secondBottom + mTitleMarginBottom - spaceBelow));
                     }
                 }
@@ -1608,97 +1622,101 @@ ECode Toolbar::OnLayout(
         }
         if (isRtl) {
             Int32 rd = (titleHasWidth ? mTitleMarginStart : 0) - (*collapsingMargins)[1];
-            right -= Elastos::Core::Math::Max(0, rd);
-            (*collapsingMargins)[1] = Elastos::Core::Math::Max(0, -rd);
+            right -= Math::Max(0, rd);
+            (*collapsingMargins)[1] = Math::Max(0, -rd);
             Int32 titleRight = right;
             Int32 subtitleRight = right;
 
             if (layoutTitle) {
+                view = IView::Probe(mTitleTextView);
                 AutoPtr<IViewGroupLayoutParams> temp;
-                IView::Probe(mTitleTextView)->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+                view->GetLayoutParams((IViewGroupLayoutParams**)&temp);
                 AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(temp);
                 Int32 width, height;
-                IView::Probe(mTitleTextView)->GetMeasuredWidth(&width);
+                view->GetMeasuredWidth(&width);
                 Int32 titleLeft = titleRight - width;
-                IView::Probe(mTitleTextView)->GetMeasuredHeight(&height);
+                view->GetMeasuredHeight(&height);
                 Int32 titleBottom = titleTop + height;
-                IView::Probe(mTitleTextView)->Layout(titleLeft, titleTop, titleRight, titleBottom);
+                view->Layout(titleLeft, titleTop, titleRight, titleBottom);
                 titleRight = titleLeft - mTitleMarginEnd;
                 Int32 bottom;
                 lp->GetBottomMargin(&bottom);
                 titleTop = titleBottom + bottom;
             }
             if (layoutSubtitle) {
+                view = IView::Probe(mSubtitleTextView);
                 AutoPtr<IViewGroupLayoutParams> temp;
-                IView::Probe(mSubtitleTextView)->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+                view->GetLayoutParams((IViewGroupLayoutParams**)&temp);
                 AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(temp);
                 Int32 top;
                 lp->GetTopMargin(&top);
                 titleTop += top;
                 Int32 width, height;
-                IView::Probe(mSubtitleTextView)->GetMeasuredWidth(&width);
+                view->GetMeasuredWidth(&width);
                 Int32 subtitleLeft = subtitleRight - width;
-                IView::Probe(mSubtitleTextView)->GetMeasuredHeight(&height);
+                view->GetMeasuredHeight(&height);
                 Int32 subtitleBottom = titleTop + height;
-                IView::Probe(mSubtitleTextView)->Layout(subtitleLeft, titleTop, subtitleRight, subtitleBottom);
+                view->Layout(subtitleLeft, titleTop, subtitleRight, subtitleBottom);
                 subtitleRight = subtitleRight - mTitleMarginEnd;
                 Int32 bottom;
                 lp->GetBottomMargin(&bottom);
                 titleTop = subtitleBottom + bottom;
             }
             if (titleHasWidth) {
-                right = Elastos::Core::Math::Min(titleRight, subtitleRight);
+                right = Math::Min(titleRight, subtitleRight);
             }
         }
         else {
             Int32 ld = (titleHasWidth ? mTitleMarginStart : 0) - (*collapsingMargins)[0];
-            left += Elastos::Core::Math::Max(0, ld);
-            (*collapsingMargins)[0] = Elastos::Core::Math::Max(0, -ld);
+            left += Math::Max(0, ld);
+            (*collapsingMargins)[0] = Math::Max(0, -ld);
             Int32 titleLeft = left;
             Int32 subtitleLeft = left;
 
             if (layoutTitle) {
+                view = IView::Probe(mTitleTextView);
                 AutoPtr<IViewGroupLayoutParams> temp;
-                IView::Probe(mTitleTextView)->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+                view->GetLayoutParams((IViewGroupLayoutParams**)&temp);
                 AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(temp);
                 Int32 width, height;
-                IView::Probe(mTitleTextView)->GetMeasuredWidth(&width);
+                view->GetMeasuredWidth(&width);
                 Int32 titleRight = titleLeft + width;
-                IView::Probe(mTitleTextView)->GetMeasuredHeight(&height);
+                view->GetMeasuredHeight(&height);
                 Int32 titleBottom = titleTop + height;
-                IView::Probe(mTitleTextView)->Layout(titleLeft, titleTop, titleRight, titleBottom);
+                view->Layout(titleLeft, titleTop, titleRight, titleBottom);
                 titleLeft = titleRight + mTitleMarginEnd;
                 Int32 bottom;
                 lp->GetBottomMargin(&bottom);
                 titleTop = titleBottom + bottom;
             }
             if (layoutSubtitle) {
+                view = IView::Probe(mSubtitleTextView);
                 AutoPtr<IViewGroupLayoutParams> temp;
-                IView::Probe(mSubtitleTextView)->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+                view->GetLayoutParams((IViewGroupLayoutParams**)&temp);
                 AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(temp);
                 Int32 top, height;
                 lp->GetTopMargin(&top);
                 titleTop += top;
-                IView::Probe(mSubtitleTextView)->GetMeasuredWidth(&top);
+                view->GetMeasuredWidth(&top);
                 Int32 subtitleRight = subtitleLeft + top;
-                IView::Probe(mSubtitleTextView)->GetMeasuredHeight(&height);
+                view->GetMeasuredHeight(&height);
                 Int32 subtitleBottom = titleTop + height;
-                IView::Probe(mSubtitleTextView)->Layout(subtitleLeft, titleTop, subtitleRight, subtitleBottom);
+                view->Layout(subtitleLeft, titleTop, subtitleRight, subtitleBottom);
                 subtitleLeft = subtitleRight + mTitleMarginEnd;
                 Int32 bottom;
                 lp->GetBottomMargin(&bottom);
                 titleTop = subtitleBottom + bottom;
             }
             if (titleHasWidth) {
-                left = Elastos::Core::Math::Max(titleLeft, subtitleLeft);
+                left = Math::Max(titleLeft, subtitleLeft);
             }
         }
     }
 
     // Get all remaining children sorted for layout. This is all prepared
     // such that absolute layout direction can be used below.
-
-    AddCustomViewsWithGravity(IList::Probe(mTempViews), IGravity::LEFT);
+    IList* tempViews = IList::Probe(mTempViews);
+    AddCustomViewsWithGravity(tempViews, IGravity::LEFT);
     Int32 leftViewsCount;
     mTempViews->GetSize(&leftViewsCount);
     AutoPtr<IInterface> obj;
@@ -1708,7 +1726,7 @@ ECode Toolbar::OnLayout(
         left = LayoutChildLeft(IView::Probe(obj), left, collapsingMargins, alignmentHeight);
     }
 
-    AddCustomViewsWithGravity(IList::Probe(mTempViews), IGravity::RIGHT);
+    AddCustomViewsWithGravity(tempViews, IGravity::RIGHT);
     Int32 rightViewsCount;
     mTempViews->GetSize(&rightViewsCount);
     for (Int32 i = 0; i < rightViewsCount; i++) {
@@ -1719,8 +1737,8 @@ ECode Toolbar::OnLayout(
 
     // Centered views try to center with respect to the whole bar, but views pinned
     // to the left or right can push the mass of centered views to one side or the other.
-    AddCustomViewsWithGravity(IList::Probe(mTempViews), IGravity::CENTER_HORIZONTAL);
-    Int32 centerViewsWidth = GetViewListMeasuredWidth(IList::Probe(mTempViews), collapsingMargins);
+    AddCustomViewsWithGravity(tempViews, IGravity::CENTER_HORIZONTAL);
+    Int32 centerViewsWidth = GetViewListMeasuredWidth(tempViews, collapsingMargins);
     Int32 parentCenter = paddingLeft + (width - paddingLeft - paddingRight) / 2;
     Int32 halfCenterViewsWidth = centerViewsWidth / 2;
     Int32 centerLeft = parentCenter - halfCenterViewsWidth;
@@ -1747,12 +1765,8 @@ ECode Toolbar::OnLayout(
 ECode Toolbar::GenerateDefaultLayoutParams(
     /* [out] */ IToolbarLayoutParams** params)
 {
-    VALIDATE_NOT_NULL(params)
-    AutoPtr<LayoutParams> obj = new LayoutParams();
-    obj->constructor(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
-    *params = (IToolbarLayoutParams*)obj.Get();
-    REFCOUNT_ADD(*params)
-    return NOERROR;
+    return CToolbarLayoutParams::New(
+        IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT, params);
 }
 
 Boolean Toolbar::CheckLayoutParams(
@@ -1845,7 +1859,7 @@ ECode Toolbar::EnsureCollapseButtonView()
         GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
-        lp->SetViewType(LayoutParams::EXPANDED);
+        lp->SetViewType(IToolbarLayoutParams::EXPANDED);
         IView::Probe(mCollapseButtonView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
         AutoPtr<IViewOnClickListener> listener = new CollapseOnClickListener(this);
         IView::Probe(mCollapseButtonView)->SetOnClickListener(listener);
@@ -1869,7 +1883,8 @@ ECode Toolbar::AddSystemView(
     else {
         lp = IToolbarLayoutParams::Probe(vlp);
     }
-    lp->SetViewType(LayoutParams::SYSTEM);
+
+    lp->SetViewType(IToolbarLayoutParams::SYSTEM);
     AddView(v, IViewGroupLayoutParams::Probe(lp));
     return NOERROR;
 }
@@ -1890,6 +1905,7 @@ ECode Toolbar::MeasureChildConstrained(
     /* [in] */ Int32 heightUsed,
     /* [in] */ Int32 heightConstraint)
 {
+    using Elastos::Core::Math;
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
     AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(params);
@@ -1910,7 +1926,7 @@ ECode Toolbar::MeasureChildConstrained(
     Int32 childHeightMode = MeasureSpec::GetMode(childHeightSpec);
     if (childHeightMode != MeasureSpec::EXACTLY && heightConstraint >= 0) {
         Int32 size = childHeightMode != MeasureSpec::UNSPECIFIED ?
-               Elastos::Core::Math::Min(MeasureSpec::GetSize(childHeightSpec), heightConstraint) :
+               Math::Min(MeasureSpec::GetSize(childHeightSpec), heightConstraint) :
                 heightConstraint;
         childHeightSpec = MeasureSpec::MakeMeasureSpec(size, MeasureSpec::EXACTLY);
     }
@@ -1933,18 +1949,16 @@ Int32 Toolbar::MeasureChildCollapseMargins(
     Int32 width, height, leftMargin, rightMargin, topMargin, bottomMargin;
     params->GetWidth(&width);
     params->GetHeight(&height);
-    lp->GetLeftMargin(&leftMargin);
-    lp->GetRightMargin(&rightMargin);
-    lp->GetTopMargin(&topMargin);
-    lp->GetBottomMargin(&bottomMargin);
+    lp->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
 
+    using Elastos::Core::Math;
     Int32 leftDiff = leftMargin - (*collapsingMargins)[0];
     Int32 rightDiff = rightMargin - (*collapsingMargins)[1];
-    Int32 left = Elastos::Core::Math::Max(0, leftDiff);
-    Int32 right = Elastos::Core::Math::Max(0, rightDiff);
+    Int32 left = Math::Max(0, leftDiff);
+    Int32 right = Math::Max(0, rightDiff);
     Int32 hMargins = left + right;
-    (*collapsingMargins)[0] = Elastos::Core::Math::Max(0, -leftDiff);
-    (*collapsingMargins)[1] = Elastos::Core::Math::Max(0, -rightDiff);
+    (*collapsingMargins)[0] = Math::Max(0, -leftDiff);
+    (*collapsingMargins)[1] = Math::Max(0, -rightDiff);
 
     Int32 childWidthMeasureSpec = GetChildMeasureSpec(parentWidthMeasureSpec,
             mPaddingLeft + mPaddingRight + hMargins + widthUsed, width);
@@ -1982,6 +1996,7 @@ Int32 Toolbar::GetViewListMeasuredWidth(
     /* [in] */ IList* views,
     /* [in] */ ArrayOf<Int32> * collapsingMargins)
 {
+    using Elastos::Core::Math;
     Int32 collapseLeft = (*collapsingMargins)[0];
     Int32 collapseRight = (*collapsingMargins)[1];
     Int32 width = 0;
@@ -2000,10 +2015,10 @@ Int32 Toolbar::GetViewListMeasuredWidth(
         lp->GetRightMargin(&right);
         Int32 l = left - collapseLeft;
         Int32 r = right - collapseRight;
-        Int32 leftMargin = Elastos::Core::Math::Max(0, l);
-        Int32 rightMargin = Elastos::Core::Math::Max(0, r);
-        collapseLeft = Elastos::Core::Math::Max(0, -l);
-        collapseRight = Elastos::Core::Math::Max(0, -r);
+        Int32 leftMargin = Math::Max(0, l);
+        Int32 rightMargin = Math::Max(0, r);
+        collapseLeft = Math::Max(0, -l);
+        collapseRight = Math::Max(0, -r);
         Int32 width;
         v->GetMeasuredWidth(&width);
         width += leftMargin + width + rightMargin;
@@ -2017,14 +2032,15 @@ Int32 Toolbar::LayoutChildLeft(
     /* [in] */ ArrayOf<Int32> * collapsingMargins,
     /* [in] */ Int32 alignmentHeight)
 {
+    using Elastos::Core::Math;
     AutoPtr<IViewGroupLayoutParams> temp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
     AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(temp);
     Int32 leftMargin, right;
     lp->GetLeftMargin(&leftMargin);
     Int32 l = leftMargin - (*collapsingMargins)[0];
-    left += Elastos::Core::Math::Max(0, l);
-    (*collapsingMargins)[0] = Elastos::Core::Math::Max(0, -l);
+    left += Math::Max(0, l);
+    (*collapsingMargins)[0] = Math::Max(0, -l);
     Int32 top = GetChildTop(child, alignmentHeight);
     Int32 childWidth, height;
     child->GetMeasuredWidth(&childWidth);
@@ -2041,6 +2057,7 @@ Int32 Toolbar::LayoutChildRight(
     /* [in] */ ArrayOf<Int32> * collapsingMargins,
     /* [in] */ Int32 alignmentHeight)
 {
+    using Elastos::Core::Math;
     AutoPtr<IViewGroupLayoutParams> temp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
     AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(temp);
@@ -2048,8 +2065,8 @@ Int32 Toolbar::LayoutChildRight(
     lp->GetRightMargin(&rightMargin);
 
     Int32 r = rightMargin - (*collapsingMargins)[1];
-    right -= Elastos::Core::Math::Max(0, r);
-    (*collapsingMargins)[1] = Elastos::Core::Math::Max(0, -r);
+    right -= Math::Max(0, r);
+    (*collapsingMargins)[1] = Math::Max(0, -r);
     Int32 top = GetChildTop(child, alignmentHeight);
     Int32 childWidth, height;
     child->GetMeasuredWidth(&childWidth);
@@ -2064,6 +2081,7 @@ Int32 Toolbar::GetChildTop(
     /* [in] */ IView* child,
     /* [in] */ Int32 alignmentHeight)
 {
+    using Elastos::Core::Math;
     AutoPtr<IViewGroupLayoutParams> temp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
     AutoPtr<IActionBarLayoutParams> lp = IActionBarLayoutParams::Probe(temp);
@@ -2107,7 +2125,7 @@ Int32 Toolbar::GetChildTop(
                 Int32 spaceBelow = height - paddingBottom - childHeight -
                         spaceAbove - paddingTop;
                 if (spaceBelow < bottom) {
-                    spaceAbove = Elastos::Core::Math::Max(0, spaceAbove - (bottom - spaceBelow));
+                    spaceAbove = Math::Max(0, spaceAbove - (bottom - spaceBelow));
                 }
             }
             return paddingTop + spaceAbove;
@@ -2149,10 +2167,9 @@ void Toolbar::AddCustomViewsWithGravity(
             AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 viewTpye, gravity;
-            assert(0);
-            //IToolbarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
+            IToolbarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
             IActionBarLayoutParams::Probe(lp)->GetGravity(&gravity);
-            if (viewTpye == LayoutParams::CUSTOM && ShouldLayout(child) &&
+            if (viewTpye == IToolbarLayoutParams::CUSTOM && ShouldLayout(child) &&
                     GetChildHorizontalGravity(gravity) == absGrav) {
                 views->Add(child);
             }
@@ -2165,10 +2182,9 @@ void Toolbar::AddCustomViewsWithGravity(
             AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 viewTpye, gravity;
-            assert(0);
-            //IToolbarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
+            IToolbarLayoutParams::Probe(lp)->GetViewType(&viewTpye);
             IActionBarLayoutParams::Probe(lp)->GetGravity(&gravity);
-            if (viewTpye == LayoutParams::CUSTOM && ShouldLayout(child) &&
+            if (viewTpye == IToolbarLayoutParams::CUSTOM && ShouldLayout(child) &&
                     GetChildHorizontalGravity(gravity) == absGrav) {
                 views->Add(child);
             }
@@ -2235,9 +2251,8 @@ Boolean Toolbar::IsCustomView(
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
     Int32 viewTpye;
-    assert(0);
-    //IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
-    return viewTpye == LayoutParams::CUSTOM;
+    IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
+    return viewTpye == IToolbarLayoutParams::CUSTOM;
 }
 
 ECode Toolbar::SetChildVisibilityForExpandedActionView(
@@ -2251,9 +2266,8 @@ ECode Toolbar::SetChildVisibilityForExpandedActionView(
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
         Int32 viewTpye;
-        assert(0);
-        //IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
-        if (viewTpye != LayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
+        IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
+        if (viewTpye != IToolbarLayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
             child->SetVisibility(expand ? IView::GONE : IView::VISIBLE);
         }
     }
@@ -2266,9 +2280,8 @@ ECode Toolbar::UpdateChildVisibilityForExpandedActionView(
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
     Int32 viewTpye;
-    assert(0);
-    //IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
-    if (viewTpye != LayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
+    IToolbarLayoutParams::Probe(params)->GetViewType(&viewTpye);
+    if (viewTpye != IToolbarLayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
         child->SetVisibility(mExpandedActionView != NULL ? IView::GONE : IView::VISIBLE);
     }
     return NOERROR;

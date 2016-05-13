@@ -5910,7 +5910,7 @@ ECode BatteryStatsImpl::StartAddingCpuLocked(
     *result = 0;
     mHandler->RemoveMessages(MSG_UPDATE_WAKELOCKS);
 
-    if (mPartialTimers.Begin() == mPartialTimers.End()) {
+    if (mPartialTimers.IsEmpty()) {
         mLastPartialTimers.Clear();
         mDistributeWakelockCpu = FALSE;
         return NOERROR;

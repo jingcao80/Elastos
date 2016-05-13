@@ -4569,7 +4569,7 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
             callbacks->PushBack(cb);
         }
 
-        if (mActivities.Begin() != mActivities.End()) {
+        if (mActivities.IsEmpty() == FALSE) {
             HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
             for (it = mActivities.Begin(); it != mActivities.End(); ++it) {
                 ActivityClientRecord* ar = it->mSecond;
@@ -4604,7 +4604,7 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
                 }
             }
         }
-        if (mServices.Begin() != mServices.End()) {
+        if (mServices.IsEmpty() == FALSE) {
             HashMap<AutoPtr<IBinder>, AutoPtr<IService> >:: Iterator it;
             for (it = mServices.Begin(); it != mServices.End(); ++it) {
                 AutoPtr<IService> service = it->mSecond;
@@ -4617,7 +4617,7 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
     }
     {
         AutoLock lock(mProviderMapLock);
-        if (mLocalProviders.Begin() != mLocalProviders.End()) {
+        if (mLocalProviders.IsEmpty() == FALSE) {
             HashMap<AutoPtr<IBinder>, AutoPtr<ProviderClientRecord> >::Iterator it;
             for (it = mLocalProviders.Begin(); it != mLocalProviders.End(); ++it) {
                 AutoPtr<ProviderClientRecord> providerClientRecord = it->mSecond;

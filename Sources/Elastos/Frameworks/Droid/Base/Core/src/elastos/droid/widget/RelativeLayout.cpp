@@ -172,7 +172,7 @@ ECode DependencyGraph::GetSortedViews(
             AutoPtr<Node> dependent = it->mFirst;
             HashMap<Int32, Node* >* dependencies = &dependent->mDependencies;
             dependencies->Erase(key);
-            if (dependencies->Begin() == dependencies->End()) {
+            if (dependencies->IsEmpty()) {
                 roots.PushBack(dependent);
             }
         }

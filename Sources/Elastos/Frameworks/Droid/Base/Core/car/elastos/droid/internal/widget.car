@@ -699,27 +699,6 @@ module
     }
 
     [local]
-    class CActionBarOverlayLayoutLayoutParams {
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        constructor(
-            [in] Int32 width,
-            [in] Int32 height);
-
-        constructor(
-            [in] IViewGroupLayoutParams* vglp);
-
-        constructor(
-            [in] IViewGroupMarginLayoutParams* vgmlp);
-
-        interface IViewGroupLayoutParams;
-        interface IViewGroupMarginLayoutParams;
-        interface IActionBarOverlayLayoutLayoutParams;
-    }
-
-    [local, deprecated]
     class CActionBarOverlayLayout {
         constructor(
             [in] IContext* ctx);
@@ -734,6 +713,26 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CActionBarOverlayLayoutLayoutParams {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] IViewGroupLayoutParams* source);
+
+        constructor(
+            [in] IViewGroupMarginLayoutParams* vgmlp);
+
+        interface IViewGroupMarginLayoutParams;
+        interface IViewGroupLayoutParams;
     }
 
     [local]
@@ -939,6 +938,42 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CResolverDrawerLayoutParams {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] IResolverDrawerLayoutParams* rdlp);
+
+        constructor(
+            [in] IViewGroupMarginLayoutParams* vgmlp);
+
+        constructor(
+            [in] IViewGroupLayoutParams* vglp);
+
+        interface IResolverDrawerLayoutParams;
+        interface IViewGroupMarginLayoutParams;
+        interface IViewGroupLayoutParams;
+    }
+
+    [local]
+    class CResolverDrawerLayoutSavedState {
+        constructor();
+
+        constructor(
+            [in] IParcelable* superState);
+
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
     }
 
     } // namespace Widget

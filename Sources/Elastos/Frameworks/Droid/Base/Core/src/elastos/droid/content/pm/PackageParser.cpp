@@ -124,11 +124,13 @@ AutoPtr< ArrayOf<PackageParser::NewPermissionInfo*> > Init_NEW_PERMISSIONS()
 {
     AutoPtr< ArrayOf<PackageParser::NewPermissionInfo*> > perms =
             ArrayOf<PackageParser::NewPermissionInfo*>::Alloc(2);
-    AutoPtr<PackageParser::NewPermissionInfo> writePermission = new PackageParser::NewPermissionInfo(String("android.permission.WRITE_EXTERNAL_STORAGE")
-            , Build::VERSION_CODES::DONUT, 0);
+    AutoPtr<PackageParser::NewPermissionInfo> writePermission =
+        new PackageParser::NewPermissionInfo(String("android.permission.WRITE_EXTERNAL_STORAGE"),
+            Build::VERSION_CODES::DONUT, 0);
     perms->Set(0, writePermission);
-    AutoPtr<PackageParser::NewPermissionInfo> readPermission = new PackageParser::NewPermissionInfo(String("android.permission.READ_PHONE_STATE")
-            , Build::VERSION_CODES::DONUT, 0);
+    AutoPtr<PackageParser::NewPermissionInfo> readPermission =
+        new PackageParser::NewPermissionInfo(String("android.permission.READ_PHONE_STATE"),
+            Build::VERSION_CODES::DONUT, 0);
     perms->Set(1, readPermission);
     return perms;
 }
@@ -170,8 +172,7 @@ AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > Init_SPLIT_PERMISSIONS()
 const AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > PackageParser::SPLIT_PERMISSIONS =
         Init_SPLIT_PERMISSIONS();
 
-// const Int32 PackageParser::SDK_VERSION = Build::VERSION::SDK_INT; see GetSDK_VERSION
-const AutoPtr< ArrayOf<String> > PackageParser::SDK_CODENAMES = Build::VERSION::ACTIVE_CODENAMES;
+
 const Int32 PackageParser::CERTIFICATE_BUFFER_SIZE = 4096;
 Int32 PackageParser::sParseError = IPackageManager::INSTALL_SUCCEEDED;
 Boolean PackageParser::sCompatibilityModeEnabled = TRUE;
@@ -195,6 +196,11 @@ const String PackageParser::ANDROID_RESOURCES("http://schemas.android.com/apk/re
 Int32 PackageParser::GetSDK_VERSION()
 {
     return Build::VERSION::SDK_INT;
+}
+
+AutoPtr< ArrayOf<String> > PackageParser::GetSDK_CODENAMES()
+{
+    return Build::VERSION::ACTIVE_CODENAMES;
 }
 
 //=================================================================
@@ -2961,6 +2967,7 @@ ECode PackageParser::ParseBaseApk(
 
                 sa->Recycle();
 
+                AutoPtr<ArrayOf<String> > SDK_CODENAMES = GetSDK_CODENAMES();
                 if (!minCode.IsNull()) {
                     Boolean allowedCodename = FALSE;
                     for (Int32 i = 0; i < SDK_CODENAMES->GetLength(); ++i) {
@@ -5511,7 +5518,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
     }
 
     if (!setExported) {
-        IComponentInfo::Probe(a->mInfo)->SetExported(a->mIntents.Begin() != a->mIntents.End());
+        IComponentInfo::Probe(a->mInfo)->SetExported(a->mIntents.IsEmpty() == FALSE);
     }
 
     return a;
@@ -6580,7 +6587,7 @@ Boolean PackageParser::CopyNeeded(
         return TRUE;
     }
     if (state->mProtectedComponents != NULL) {
-        Boolean protect = state->mProtectedComponents->Begin() != state->mProtectedComponents->End();
+        Boolean protect = state->mProtectedComponents->IsEmpty() == FALSE;
         Boolean appProtect;
         if (p->mApplicationInfo->GetProtect(&appProtect), appProtect != protect) {
             return TRUE;
@@ -6633,7 +6640,7 @@ ECode PackageParser::UpdateApplicationInfo(
     }
     aiObj->mEnabledSetting = state->mEnabled;
     if (state->mProtectedComponents != NULL) {
-        aiObj->mProtect = state->mProtectedComponents->Begin() != state->mProtectedComponents->End();
+        aiObj->mProtect = state->mProtectedComponents->IsEmpty() == FALSE;
     }
     return NOERROR;
 }

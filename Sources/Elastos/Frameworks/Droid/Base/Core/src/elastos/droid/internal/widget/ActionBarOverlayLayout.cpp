@@ -70,7 +70,8 @@ ECode ActionBarOverlayLayout::LayoutParams::constructor(
 ActionBarOverlayLayout::InnerAnimatorListenerAdapter::InnerAnimatorListenerAdapter(
     /* [in] */ ActionBarOverlayLayout* owner)
     : mOwner(owner)
-{}
+{
+}
 
 ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)

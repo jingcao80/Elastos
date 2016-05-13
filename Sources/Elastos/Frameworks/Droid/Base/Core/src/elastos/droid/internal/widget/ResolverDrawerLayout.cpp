@@ -1,7 +1,9 @@
 
 #include "elastos/droid/internal/widget/ResolverDrawerLayout.h"
+#include "elastos/droid/internal/widget/CResolverDrawerLayoutSavedState.h"
+#include "elastos/droid/internal/widget/CResolverDrawerLayoutParams.h"
 #include "elastos/droid/graphics/CRect.h"
-//#include "elastos/droid/view/CVelocityTrackerHelper.h"
+#include "elastos/droid/view/CVelocityTrackerHelper.h"
 #include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/view/animation/CAnimationUtils.h"
 #include "elastos/droid/widget/COverScroller.h"
@@ -13,11 +15,13 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::R;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IVelocityTrackerHelper;
-//using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::IAbsSavedState;
+using Elastos::Droid::View::IViewBaseSavedState;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Droid::View::EIID_IOnTouchModeChangeListener;
 using Elastos::Droid::View::Animation::IAnimationUtils;
@@ -34,15 +38,21 @@ namespace Internal {
 namespace Widget {
 
 //===============================================================
-// ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::
+// ResolverDrawerLayout::ResolverDrawerLayoutParams::
 //===============================================================
-CAR_INTERFACE_IMPL(ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams, MarginLayoutParams, IResolverDrawerLayoutLayoutParams)
+CAR_INTERFACE_IMPL(ResolverDrawerLayout::ResolverDrawerLayoutParams,
+    MarginLayoutParams, IResolverDrawerLayoutParams)
 
-ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::ResolverDrawerLayoutLayoutParams(
+ResolverDrawerLayout::ResolverDrawerLayoutParams::ResolverDrawerLayoutParams()
+    : mAlwaysShow(FALSE)
+    , mIgnoreOffset(FALSE)
+{}
+
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    LayoutParams::constructor(c, attrs);
+    ViewGroup::MarginLayoutParams::constructor(c, attrs);
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
         const_cast<Int32 *>(R::styleable::ResolverDrawerLayout_LayoutParams),
         ArraySize(R::styleable::ResolverDrawerLayout_LayoutParams));
@@ -56,48 +66,87 @@ ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::ResolverDrawerLayoutLayo
             R::styleable::ResolverDrawerLayout_LayoutParams_layout_ignoreOffset,
             FALSE, &mIgnoreOffset);
     a->Recycle();
+    return NOERROR;
 }
 
-ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::ResolverDrawerLayoutLayoutParams(
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    LayoutParams::constructor(width, height);
+    return ViewGroup::MarginLayoutParams::constructor(width, height);
 }
 
-ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::ResolverDrawerLayoutLayoutParams(
-    /* [in] */ IResolverDrawerLayoutLayoutParams* source)
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::constructor(
+    /* [in] */ IResolverDrawerLayoutParams* source)
 {
-    LayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
-    AutoPtr<ResolverDrawerLayoutLayoutParams> cs = (ResolverDrawerLayoutLayoutParams*)source;
+    ViewGroup::MarginLayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
+    AutoPtr<ResolverDrawerLayoutParams> cs = (ResolverDrawerLayoutParams*)source;
     mAlwaysShow = cs->mAlwaysShow;
     mIgnoreOffset = cs->mIgnoreOffset;
+    return NOERROR;
 }
 
-ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::ResolverDrawerLayoutLayoutParams(
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
-    LayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
+    return ViewGroup::MarginLayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
 }
 
-ResolverDrawerLayout::ResolverDrawerLayoutLayoutParams::ResolverDrawerLayoutLayoutParams(
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
-    LayoutParams::constructor(source);
+    return ViewGroup::MarginLayoutParams::constructor(source);
 }
 
-//===============================================================
-// ResolverDrawerLayout::SavedState::
-//===============================================================
-
-ResolverDrawerLayout::SavedState::SavedState(
-    /* [in] */ IParcelable* superState)
-    : mOpen(FALSE)
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::SetAlwaysShow(
+    /* [in] */ Boolean alwaysShow)
 {
-    BaseSavedState::constructor(superState);
+    mAlwaysShow = alwaysShow;
+    return NOERROR;
 }
 
-ECode ResolverDrawerLayout::SavedState::ReadFromParcel(
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::GetAlwaysShow(
+    /* [out] */ Boolean* alwaysShow)
+{
+    VALIDATE_NOT_NULL(alwaysShow)
+    *alwaysShow = mAlwaysShow;
+    return NOERROR;
+}
+
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::SetIgnoreOffset(
+    /* [in] */ Boolean ignoreOffset)
+{
+    mIgnoreOffset = ignoreOffset;
+    return NOERROR;
+}
+
+ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::GetIgnoreOffset(
+    /* [out] */ Boolean* ignoreOffset)
+{
+    VALIDATE_NOT_NULL(ignoreOffset)
+    *ignoreOffset = mIgnoreOffset;
+    return NOERROR;
+}
+
+//===============================================================
+// ResolverDrawerLayout::ResolverDrawerLayoutSavedState
+//===============================================================
+ResolverDrawerLayout::ResolverDrawerLayoutSavedState::ResolverDrawerLayoutSavedState()
+    : mOpen(FALSE)
+{}
+
+ECode ResolverDrawerLayout::ResolverDrawerLayoutSavedState::constructor()
+{
+    return BaseSavedState::constructor();
+}
+
+ECode ResolverDrawerLayout::ResolverDrawerLayoutSavedState::constructor(
+    /* [in] */ IParcelable* superState)
+{
+    return BaseSavedState::constructor(superState);
+}
+
+ECode ResolverDrawerLayout::ResolverDrawerLayoutSavedState::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     BaseSavedState::ReadFromParcel(in);
@@ -107,7 +156,7 @@ ECode ResolverDrawerLayout::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode ResolverDrawerLayout::SavedState::WriteToParcel(
+ECode ResolverDrawerLayout::ResolverDrawerLayoutSavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     BaseSavedState::WriteToParcel(out);
@@ -207,8 +256,7 @@ ECode ResolverDrawerLayout::constructor(
             R::interpolator::decelerate_quint, (IInterpolator**)&p);
     COverScroller::New(context, p, (IOverScroller**)&mScroller);
     AutoPtr<IVelocityTrackerHelper> hlp;
-    assert(0 && "TODO");
-//     CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&hlp);
+    CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&hlp);
     hlp->Obtain((IVelocityTracker**)&mVelocityTracker);
 
     AutoPtr<IViewConfigurationHelper> chlp;
@@ -510,8 +558,8 @@ Float ResolverDrawerLayout::PerformDrag(
             GetChildAt(i, (IView**)&child);
             AutoPtr<IViewGroupLayoutParams> vlp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&vlp);
-            AutoPtr<ResolverDrawerLayoutLayoutParams> lp =
-                (ResolverDrawerLayoutLayoutParams*)(IResolverDrawerLayoutLayoutParams::Probe(vlp));
+            AutoPtr<ResolverDrawerLayoutParams> lp =
+                (ResolverDrawerLayoutParams*)(IResolverDrawerLayoutParams::Probe(vlp));
             if (!lp->mIgnoreOffset) {
                 child->OffsetTopAndBottom((Int32) dy);
             }
@@ -840,8 +888,8 @@ void ResolverDrawerLayout::OnMeasure(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> vlp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&vlp);
-        AutoPtr<ResolverDrawerLayoutLayoutParams> lp =
-                (ResolverDrawerLayoutLayoutParams*)(IResolverDrawerLayoutLayoutParams::Probe(vlp));
+        AutoPtr<ResolverDrawerLayoutParams> lp =
+                (ResolverDrawerLayoutParams*)(IResolverDrawerLayoutParams::Probe(vlp));
         Int32 vis = 0;
         child->GetVisibility(&vis);
         if (lp->mAlwaysShow && vis != GONE) {
@@ -860,8 +908,8 @@ void ResolverDrawerLayout::OnMeasure(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> vlp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&vlp);
-        AutoPtr<ResolverDrawerLayoutLayoutParams> lp =
-                (ResolverDrawerLayoutLayoutParams*)(IResolverDrawerLayoutLayoutParams::Probe(vlp));
+        AutoPtr<ResolverDrawerLayoutParams> lp =
+                (ResolverDrawerLayoutParams*)(IResolverDrawerLayoutParams::Probe(vlp));
         Int32 vis = 0;
         child->GetVisibility(&vis);
         if (!lp->mAlwaysShow && vis != GONE) {
@@ -913,8 +961,8 @@ ECode ResolverDrawerLayout::OnLayout(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> vlp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&vlp);
-        AutoPtr<ResolverDrawerLayoutLayoutParams> lp =
-                (ResolverDrawerLayoutLayoutParams*)(IResolverDrawerLayoutLayoutParams::Probe(vlp));
+        AutoPtr<ResolverDrawerLayoutParams> lp =
+                (ResolverDrawerLayoutParams*)(IResolverDrawerLayoutParams::Probe(vlp));
 
         Int32 vis = 0;
         child->GetVisibility(&vis);
@@ -951,49 +999,21 @@ ECode ResolverDrawerLayout::GenerateLayoutParams(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IContext> cxt;
     GetContext((IContext**)&cxt);
-    AutoPtr<ResolverDrawerLayoutLayoutParams> p = new ResolverDrawerLayoutLayoutParams(cxt, attrs);
-    *result = IViewGroupLayoutParams::Probe(p);
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CResolverDrawerLayoutParams::New(cxt, attrs, result);
 }
 
 ECode ResolverDrawerLayout::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p,
     /* [out] */ IViewGroupLayoutParams** result)
 {
-    VALIDATE_NOT_NULL(result)
-    if (IResolverDrawerLayoutLayoutParams::Probe(p) != NULL) {
-        AutoPtr<ResolverDrawerLayoutLayoutParams> res =
-            new ResolverDrawerLayoutLayoutParams(
-                IResolverDrawerLayoutLayoutParams::Probe(p));
-        *result = IViewGroupLayoutParams::Probe(res);
-        REFCOUNT_ADD(*result)
-        return NOERROR;
-    }
-    else if (IViewGroupMarginLayoutParams::Probe(p) != NULL) {
-        AutoPtr<ResolverDrawerLayoutLayoutParams> res =
-            new ResolverDrawerLayoutLayoutParams(
-                IViewGroupMarginLayoutParams::Probe(p));
-        *result = IViewGroupLayoutParams::Probe(res);
-        REFCOUNT_ADD(*result)
-        return NOERROR;
-    }
-    AutoPtr<ResolverDrawerLayoutLayoutParams> res =
-        new ResolverDrawerLayoutLayoutParams(p);
-    *result = IViewGroupLayoutParams::Probe(res);
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CResolverDrawerLayoutParams::New(p, result);
 }
 
 ECode ResolverDrawerLayout::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
-    VALIDATE_NOT_NULL(result)
-    AutoPtr<ResolverDrawerLayoutLayoutParams> p =
-        new ResolverDrawerLayoutLayoutParams(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT);
-    *result = IViewGroupLayoutParams::Probe(p);
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CResolverDrawerLayoutParams::New(
+        IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, result);
 }
 
 ECode ResolverDrawerLayout::OnSaveInstanceState(
@@ -1001,8 +1021,9 @@ ECode ResolverDrawerLayout::OnSaveInstanceState(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IParcelable> p = View::OnSaveInstanceState();
-    AutoPtr<SavedState> ss = new SavedState(p);
-    ss->mOpen = mCollapsibleHeight > 0 && mCollapseOffset == 0;
+    AutoPtr<IViewBaseSavedState> ss;
+    CResolverDrawerLayoutSavedState::New(p, (IViewBaseSavedState**)&ss);
+    ((ResolverDrawerLayoutSavedState*)ss.Get())->mOpen = mCollapsibleHeight > 0 && mCollapseOffset == 0;
     *result = IParcelable::Probe(ss);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -1011,7 +1032,7 @@ ECode ResolverDrawerLayout::OnSaveInstanceState(
 void ResolverDrawerLayout::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    AutoPtr<SavedState> ss = (SavedState*)state;
+    ResolverDrawerLayoutSavedState* ss = (ResolverDrawerLayoutSavedState*)state;
     AutoPtr<IParcelable> parcl;
     ss->GetSuperState((IParcelable**)&parcl);
     View::OnRestoreInstanceState(parcl);

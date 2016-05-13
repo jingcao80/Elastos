@@ -1,7 +1,6 @@
 
 module
 {
-    merge("app/ActionBar.car");
     merge("app/Activity.car");
     merge("app/ActivityGroup.car");
     merge("app/ActivityManager.car");

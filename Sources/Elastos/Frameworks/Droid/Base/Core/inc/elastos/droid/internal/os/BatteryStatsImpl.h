@@ -3254,7 +3254,7 @@ template<typename T>
 void BatteryStatsImpl::OverflowArrayMap<T>::Cleanup()
 {
     if (mActiveOverflow != NULL) {
-        if (mActiveOverflow->Begin() == mActiveOverflow->End()) {
+        if (mActiveOverflow->IsEmpty()) {
             mActiveOverflow = NULL;
         }
     }
