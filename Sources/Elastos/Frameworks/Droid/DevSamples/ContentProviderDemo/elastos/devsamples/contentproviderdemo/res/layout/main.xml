@@ -7,25 +7,21 @@
     <Button android:id="@+id/Add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Add" />
 
     <Button android:id="@+id/Query"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Query" />
 
     <Button android:id="@+id/Update"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Update" />
 
     <Button android:id="@+id/Delete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Delete" />
 
 </LinearLayout>

@@ -8,6 +8,7 @@ module
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
@@ -20,9 +21,16 @@ module
     namespace DevSamples {
     namespace TextViewDemo {
 
+    [local]
+    interface IActivityOne {
+        OnClickPopupWindow(
+            [in] IView* v);
+    }
+
     class CActivityOne {
         constructor();
 
+        interface IActivityOne;
         interface IActivity;
         interface IContext;
         interface IContextThemeWrapper;

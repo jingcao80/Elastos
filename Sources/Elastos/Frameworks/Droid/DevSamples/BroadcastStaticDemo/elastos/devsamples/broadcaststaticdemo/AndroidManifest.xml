@@ -9,7 +9,7 @@
         android:targetSdkVersion="21" />
 
     <application android:icon="@null" android:label="@string/app_name">
-        <activity android:name="Elastos.DevSamples.BroadcastStaticDemo.CActivityOne"
+        <activity android:name=".CActivityOne"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="Elastos.DevSamples.BroadcastStaticDemo.CBroadcastReceiverOne">
+        <receiver android:name=".CBroadcastReceiverOne">
             <intent-filter android:priority="100">
                 <action android:name="Elastos.DevSamples.BroadcastDemo.TEST_RECEIVER"/>
                 <category android:name="android.intent.category.DEFAULT" />

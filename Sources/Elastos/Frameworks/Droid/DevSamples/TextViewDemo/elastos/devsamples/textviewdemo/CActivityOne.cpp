@@ -155,7 +155,7 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::PopupWindowButton) {
         Logger::D("CActivityOne", "Show PopupWindow!");
-        mHost->OnCreatePopupWindow();
+        mHost->OnClickPopupWindow(view);
     }
     else if (id == R::id::PowerManagerButton) {
         Logger::D("CActivityOne", "Test PowerManager!");
@@ -278,6 +278,8 @@ ECode CActivityOne::MyListener::OnCheckedChanged(
 // CActivityOne
 //=======================================================================
 
+CAR_INTERFACE_IMPL(CActivityOne, Activity, IActivityOne)
+
 CAR_OBJECT_IMPL(CActivityOne)
 
 ECode CActivityOne::constructor()
@@ -390,9 +392,11 @@ ECode CActivityOne::OnCreate(
     mDialogButton->SetOnClickListener(clickListener);
     mDialogButton->SetOnKeyListener(keyListener);
 
-    mPopupWindowButton = FindViewById(R::id::PopupWindowButton);
-    assert(mPopupWindowButton != NULL);
-    mPopupWindowButton->SetOnClickListener(clickListener);
+    // set onclick handler through layout xml.
+    //
+    // mPopupWindowButton = FindViewById(R::id::PopupWindowButton);
+    // assert(mPopupWindowButton != NULL);
+    // mPopupWindowButton->SetOnClickListener(clickListener);
 
     mPowerManagerButton = FindViewById(R::id::PowerManagerButton);
     assert(mPowerManagerButton != NULL);
@@ -620,9 +624,10 @@ ECode CActivityOne::CreateNavigationBar()
     return NOERROR;
 }
 
-ECode CActivityOne::OnCreatePopupWindow()
+ECode CActivityOne::OnClickPopupWindow(
+    /* [in] */ IView* view)
 {
-    Logger::D("CActivityOne", "CActivityOne::OnCreatePopupWindow()");
+    Logger::D("CActivityOne", "CActivityOne::OnClickPopupWindow()");
     mPopupWindow = NULL;
 
     AutoPtr<IInterface> obj;

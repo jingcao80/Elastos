@@ -7,19 +7,16 @@
     <Button android:id="@+id/RegisterReceiver"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Register" />
 
     <Button android:id="@+id/SendBroadcast"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Send Broadcast" />
 
     <Button android:id="@+id/UnregisterReceiver"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="100dp"
         android:text="Unregister" />
 
 </LinearLayout>

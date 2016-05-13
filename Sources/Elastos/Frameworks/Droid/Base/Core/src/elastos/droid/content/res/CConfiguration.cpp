@@ -195,8 +195,6 @@ Int32 CConfiguration::ReduceScreenLayout(
         curLayout = (curLayout & ~SCREENLAYOUT_SIZE_MASK) | screenLayoutSize;
     }
 
-    Logger::I(TAG, " > ReduceScreenLayout: curLayout:%d, longSizeDp:%d, shortSizeDp:%d, result:%d",
-        inCurLayout, longSizeDp, shortSizeDp, curLayout);
     return curLayout;
 }
 

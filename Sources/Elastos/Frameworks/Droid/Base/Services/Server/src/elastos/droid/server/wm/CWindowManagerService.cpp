@@ -8762,9 +8762,6 @@ void CWindowManagerService::ComputeSizeRangesAndScreenLayout(
     displayInfo->GetSmallestNominalAppWidth(&w);
     outConfig->SetSmallestScreenWidthDp((Int32)(w / density));
     outConfig->SetScreenLayout(sl);
-
-    Slogger::I(TAG, " >> ComputeSizeRangesAndScreenLayout: rotated:%d, dw-dh:(%d, %d), density:%.2f,\ndisplayInfo:%s, config:%s",
-        rotated, dw, dh, density, TO_CSTR(displayInfo), TO_CSTR(outConfig));
 }
 
 Int32 CWindowManagerService::ReduceCompatConfigWidthSize(

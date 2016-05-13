@@ -1122,9 +1122,9 @@ ECode View::MatchLabelForPredicate::Apply(
     return NOERROR;
 }
 
-/////////////////////////////////////////////////////////////////////
+//===================================================================
 //           View::SendViewStateChangedAccessibilityEvent
-/////////////////////////////////////////////////////////////////////
+//===================================================================
 View::SendViewStateChangedAccessibilityEvent::SendViewStateChangedAccessibilityEvent(
     /* [in] */ View* host)
     : Runnable()
@@ -1197,9 +1197,65 @@ ECode View::SendViewStateChangedAccessibilityEvent::RunOrPost(
     return NOERROR;
 }
 
-/////////////////////////////////////////////////////////////////////
+//===================================================================
+//           View::InnerViewOnClickListener
+//===================================================================
+CAR_INTERFACE_IMPL(View::InnerViewOnClickListener, Object, IViewOnClickListener)
+
+View::InnerViewOnClickListener::InnerViewOnClickListener(
+    /* [in] */ IWeakReference* weakHost,
+    /* [in] */ const String& handlerName)
+    : mWeakHost(weakHost)
+    , mHandlerName(handlerName)
+{
+}
+
+ECode View::InnerViewOnClickListener::OnClick(
+    /* [in] */ IView* v)
+{
+    AutoPtr<IView> view;
+    mWeakHost->Resolve(EIID_IView, (IInterface**)&view);
+    if (view == NULL) {
+        return NOERROR;
+    }
+
+    const String signature("(LElastos/Droid/View/IView;*)E");
+
+    AutoPtr<IContext> ctx;
+    view->GetContext((IContext**)&ctx);
+    if (mHandler == NULL) {
+        AutoPtr<IClassInfo> classInfo = GetClassInfo(ctx.Get());
+        if (classInfo == NULL) {
+            Logger::E(TAG, "%s is not a CAR class when trying call OnClick on %s.", TO_CSTR(ctx), TO_CSTR(this));
+            return NOERROR;
+        }
+
+        ECode ec = classInfo->GetMethodInfo(mHandlerName, signature, (IMethodInfo**)&mHandler);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Could not find a method [%s] with [%s] for onClick handler on view %s in %s",
+                mHandlerName.string(), signature.string(), TO_CSTR(this), TO_CSTR(ctx));
+            return E_NO_SUCH_METHOD_EXCEPTION;
+        }
+    }
+
+    if (mHandler != NULL) {
+        AutoPtr<IArgumentList> args;
+        mHandler->CreateArgumentList((IArgumentList**)&args);
+        args->SetInputArgumentOfObjectPtr(0, (IView*)this);
+        ECode ec = mHandler->Invoke(ctx.Get(), args);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Could not execute method [%s] with [%s] for onClick handler on view %s in %s",
+                mHandlerName.string(), signature.string(), TO_CSTR(this), TO_CSTR(ctx));
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+    }
+
+    return NOERROR;
+}
+
+//===================================================================
 //                          View
-/////////////////////////////////////////////////////////////////////
+//===================================================================
 CAR_INTERFACE_IMPL_4(View, Object, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource)
 
 View::View()
@@ -18167,49 +18223,24 @@ ECode View::constructor(
             case R::styleable::View_minHeight:
                 a->GetDimensionPixelSize(attr, 0, &mMinHeight);
                 break;
-            case R::styleable::View_onClick:
-                //assert(0 && "TODO");
-                Logger::E("View","===============================TODO: case R::styleable::View_onClick:");
-//                if (context.isRestricted()) {
-//                    throw new IllegalStateException("The android:onClick attribute cannot "
-//                            + "be used within a restricted context");
-//                }
-//
-//                final String handlerName = a.getString(attr);
-//                if (handlerName != NULL) {
-//                    setOnClickListener(new OnClickListener() {
-//                        private Method mHandler;
-//
-//                        public void onClick(View v) {
-//                            if (mHandler == NULL) {
-//                                try {
-//                                    mHandler = getContext().getClass().getMethod(handlerName,
-//                                            View.class);
-//                                } catch (NoSuchMethodException e) {
-//                                    int id = getId();
-//                                    String idText = id == IView::NO_ID ? "" : " with id '"
-//                                            + getContext().getResources().getResourceEntryName(
-//                                                id) + "'";
-//                                    throw new IllegalStateException("Could not find a method " +
-//                                            handlerName + "(View) in the activity "
-//                                            + getContext().getClass() + " for onClick handler"
-//                                            + " on view " + View.this.getClass() + idText, e);
-//                                }
-//                            }
-//
-//                             try {
-//                                 mHandler.invoke(getContext(), View.this);
-//                             } catch (IllegalAccessException e) {
-//                                 throw new IllegalStateException("Could not execute non "
-//                                         + "public method of the activity", e);
-//                             } catch (InvocationTargetException e) {
-//                                 throw new IllegalStateException("Could not execute "
-//                                         + "method of the activity", e);
-//                             }
-//                         }
-//                     });
-//                }
+            case R::styleable::View_onClick: {
+                Boolean bval;
+                context->IsRestricted(&bval);
+                if (bval) {
+                    Logger::E(TAG, "The android:onClick attribute cannot be used within a restricted context.");
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                }
+
+                String handlerName;
+                a->GetString(attr, &handlerName);
+                if (!handlerName.IsNullOrEmpty()) {
+                    AutoPtr<IWeakReference> wr;
+                    GetWeakReference((IWeakReference**)&wr);
+                    AutoPtr<IViewOnClickListener> listener = new InnerViewOnClickListener(wr, handlerName);
+                    SetOnClickListener(listener);
+                }
                 break;
+            }
             case R::styleable::View_overScrollMode:
                 a->GetInt32(attr, IView::OVER_SCROLL_IF_CONTENT_SCROLLS, &overScrollMode);
                 break;
