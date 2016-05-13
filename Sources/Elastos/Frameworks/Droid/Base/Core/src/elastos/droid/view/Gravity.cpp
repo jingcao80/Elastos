@@ -223,6 +223,7 @@ ECode Gravity::IsVertical(
     /* [in] */ Int32 gravity,
     /* [out] */ Boolean* rst)
 {
+    VALIDATE_NOT_NULL(rst)
     *rst = IsVertical(gravity);
     return NOERROR;
 }
@@ -237,6 +238,7 @@ ECode Gravity::IsHorizontal(
     /* [in] */ Int32 gravity,
     /* [out] */ Boolean* rst)
 {
+    VALIDATE_NOT_NULL(rst)
     *rst = IsHorizontal(gravity);
     return NOERROR;
 }
@@ -246,6 +248,7 @@ ECode Gravity::GetAbsoluteGravity(
     /* [in] */ Int32 layoutDirection,
     /* [out] */ Int32* rst)
 {
+    VALIDATE_NOT_NULL(rst)
     *rst = GetAbsoluteGravity(gravity, layoutDirection);
     return NOERROR;
 }
