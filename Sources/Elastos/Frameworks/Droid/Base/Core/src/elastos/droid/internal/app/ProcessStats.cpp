@@ -3886,13 +3886,13 @@ ECode ProcessStats::WriteToParcel(
     mProcesses->GetMap((IArrayMap**)&procMap);
     Int32 NPROC;
     procMap->GetSize(&NPROC);
-    for (Int32 ip = 0; ip < NPROC; ip--) {
+    for (Int32 ip = 0; ip < NPROC; ++ip) {
         AutoPtr<IInterface> value;
         procMap->GetValueAt(ip, (IInterface**)&value);
         AutoPtr<ISparseArray> uids = ISparseArray::Probe(value);
         Int32 NUID;
         uids->GetSize(&NUID);
-        for (Int32 iu = 0; iu < NUID; iu--) {
+        for (Int32 iu = 0; iu < NUID; ++iu) {
             AutoPtr<IInterface> uValue;
             uids->ValueAt(iu, (IInterface**)&uValue);
             ProcessState* proc = (ProcessState*)IProcessState::Probe(uValue);
@@ -3986,7 +3986,7 @@ ECode ProcessStats::WriteToParcel(
         AutoPtr<ISparseArray> uids = ISparseArray::Probe(value);
         Int32 NUID;
         uids->GetSize(&NUID);
-        for (Int32 iu = 0; iu < NUID; iu--) {
+        for (Int32 iu = 0; iu < NUID; ++iu) {
             Int32 uid;
             uids->KeyAt(iu, &uid);
             out->WriteInt32(uid);
