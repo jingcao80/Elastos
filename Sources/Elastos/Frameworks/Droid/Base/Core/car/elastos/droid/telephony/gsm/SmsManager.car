@@ -1,23 +1,101 @@
 
-module {
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
     namespace Telephony {
     namespace Gsm {
 
+    [deprecated]
     interface ISmsManager {
+
         GetDefault(
-            [out] SmsManager* result);
+            [out] ISmsManager** result);
+
+        SendTextMessage(
+            [in] String destinationAddress,
+            [in] String scAddress,
+            [in] String text,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent);
 
         DivideMessage(
-            [in] String text);
+            [in] String text,
+            [out] IArrayList** result);
+
+        SendMultipartTextMessage(
+            [in] String destinationAddress,
+            [in] String scAddress,
+            [in] IArrayList* parts,
+            [in] IArrayList* sentIntents,
+            [in] IArrayList* deliveryIntents);
+
+        SendDataMessage(
+            [in] String destinationAddress,
+            [in] String scAddress,
+            [in] Int16 destinationPort,
+            [in] ArrayOf<Byte>* data,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent);
+
+        CopyMessageToSim(
+            [in] ArrayOf<Byte>* smsc,
+            [in] ArrayOf<Byte>* pdu,
+            [in] Int32 status,
+            [out] Boolean* result);
 
         DeleteMessageFromSim(
             [in] Int32 messageIndex,
             [out] Boolean* result);
 
-        GetAllMessagesFromSim();
+        UpdateMessageOnSim(
+            [in] Int32 messageIndex,
+            [in] Int32 newStatus,
+            [in] ArrayOf<Byte>* pdu,
+            [out] Boolean* result);
+
+        GetAllMessagesFromSim(
+            [out] IArrayList** result);
+
+        /** Free space (TS 51.011 10.5.3).
+         *  @deprecated Use android.telephony.SmsManager. */
+        const Int32 STATUS_ON_SIM_FREE      = 0;
+
+        /** Received and read (TS 51.011 10.5.3).
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 STATUS_ON_SIM_READ      = 1;
+
+        /** Received and unread (TS 51.011 10.5.3).
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 STATUS_ON_SIM_UNREAD    = 3;
+
+        /** Stored and sent (TS 51.011 10.5.3).
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 STATUS_ON_SIM_SENT      = 5;
+
+        /** Stored and unsent (TS 51.011 10.5.3).
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 STATUS_ON_SIM_UNSENT    = 7;
+
+        /** Generic failure cause
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 RESULT_ERROR_GENERIC_FAILURE    = 1;
+
+        /** Failed because radio was explicitly turned off
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 RESULT_ERROR_RADIO_OFF          = 2;
+
+        /** Failed because no pdu provided
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 RESULT_ERROR_NULL_PDU           = 3;
+
+        /** Failed because service is currently unavailable
+         * @deprecated Use android.telephony.SmsManager. */
+        const Int32 RESULT_ERROR_NO_SERVICE         = 4;
 
     }
 

@@ -45,6 +45,8 @@ module
     merge("telephony/cdma/CdmaSmsCbProgramResults.car");
 
     merge("telephony/gsm/GsmCellLocation.car");
+    merge("telephony/gsm/SmsManager.car");
+    merge("telephony/gsm/SmsMessage.car");
 
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Net.ILinkProperties;
