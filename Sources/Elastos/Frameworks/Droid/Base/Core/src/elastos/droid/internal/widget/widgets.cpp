@@ -37,6 +37,7 @@
 #include "elastos/droid/internal/widget/CToolbarWidgetWrapper.h"
 #include "elastos/droid/internal/widget/CWaveView.h"
 #include "elastos/droid/internal/widget/CWeightedLinearLayout.h"
+#include "elastos/droid/internal/widget/CActionBarViewHomeView.h"
 
 namespace Elastos {
 namespace Droid {
@@ -82,6 +83,7 @@ CAR_OBJECT_IMPL(CTextProgressBar)
 CAR_OBJECT_IMPL(CToolbarWidgetWrapper)
 CAR_OBJECT_IMPL(CWaveView)
 CAR_OBJECT_IMPL(CWeightedLinearLayout)
+CAR_OBJECT_IMPL(CActionBarViewHomeView);
 
 }// namespace Widget
 }// namespace Internal
