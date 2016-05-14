@@ -1,0 +1,7 @@
+module
+{
+    merge("codeaurora/ims/csvt/CallForwardInfoP.car");
+    merge("codeaurora/ims/csvt/ICsvtService.car");
+    merge("codeaurora/ims/csvt/ICsvtServiceListener.car");
+
+}

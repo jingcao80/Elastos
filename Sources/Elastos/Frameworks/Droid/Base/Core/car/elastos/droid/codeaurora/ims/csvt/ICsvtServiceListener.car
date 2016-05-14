@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -12,7 +14,7 @@ module {
      *
      * {@hide}
      */
-    interface IICsvtServiceListener{
+    interface IICsvtServiceListener {
 
         /**
          * Called when phone state changed.

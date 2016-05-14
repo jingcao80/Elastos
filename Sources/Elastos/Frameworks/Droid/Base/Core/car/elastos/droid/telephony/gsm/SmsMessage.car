@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    using interface Elastos.Core.ICharSequence;
 
     namespace Elastos {
     namespace Droid {
@@ -7,96 +9,379 @@ module {
     namespace Gsm {
 
     interface ISubmitPdu {
-        SmsMessage();
+    }
 
+    interface ISmsMessage {
+
+        /** Unknown encoding scheme (see TS 23.038)
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 ENCODING_UNKNOWN = 0;
+
+        /** 7-bit encoding scheme (see TS 23.038)
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 ENCODING_7BIT = 1;
+
+        /** 8-bit encoding scheme (see TS 23.038)
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 ENCODING_8BIT = 2;
+
+        /** 16-bit encoding scheme (see TS 23.038)
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 ENCODING_16BIT = 3;
+
+        /** The maximum number of payload bytes per message
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 MAX_USER_DATA_BYTES = 140;
+
+        /**
+         * The maximum number of payload bytes per message if a user data header
+         * is present.  This assumes the header only contains the
+         * CONCATENATED_8_BIT_REFERENCE element.
+         *
+         * @deprecated Use android.telephony.SmsMessage.
+         * @hide pending API Council approval to extend the public API
+         */
+        const Int32 MAX_USER_DATA_BYTES_WITH_HEADER = 134;
+
+        /** The maximum number of payload septets per message
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 MAX_USER_DATA_SEPTETS = 160;
+
+        /**
+         * The maximum number of payload septets per message if a user data header
+         * is present.  This assumes the header only contains the
+         * CONCATENATED_8_BIT_REFERENCE element.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        const Int32 MAX_USER_DATA_SEPTETS_WITH_HEADER = 153;
+
+        /**
+         * Returns the address of the SMS service center that relayed this message
+         * or null if there is none.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetServiceCenterAddress(
+            [out] String* result);
+
+        /**
+         * Returns the originating address (sender) of this SMS message in String
+         * form or null if unavailable
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetOriginatingAddress(
+            [out] String* result);
+
+        /**
+         * Returns the originating address, or email from address if this message
+         * was from an email gateway. Returns null if originating address
+         * unavailable.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetDisplayOriginatingAddress(
+            [out] String* result);
+
+        /**
+         * Returns the message body as a String, if it exists and is text based.
+         * @return message body is there is one, otherwise null
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetMessageBody(
+            [out] String* result);
+
+        /**
+         * Returns the class of this message.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        // GetMessageClass(
+        //     [out] MessageClass* result);
+
+        /**
+         * Returns the message body, or email message body if this message was from
+         * an email gateway. Returns null if message body unavailable.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetDisplayMessageBody(
+            [out] String* result);
+
+        /**
+         * Unofficial convention of a subject line enclosed in parens empty string
+         * if not present
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetPseudoSubject(
+            [out] String* result);
+
+        /**
+         * Returns the service centre timestamp in currentTimeMillis() format
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetTimestampMillis(
+            [out] Int64* result);
+
+        /**
+         * Returns true if message is an email.
+         *
+         * @return true if this message came through an email gateway and email
+         *         sender / subject / parsed body are available
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsEmail(
+            [out] Boolean* result);
+
+        /**
+         * @return if isEmail() is true, body of the email sent through the gateway.
+         *         null otherwise
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetEmailBody(
+            [out] String* result);
+
+        /**
+         * @return if isEmail() is true, email from address of email sent through
+         *         the gateway. null otherwise
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetEmailFrom(
+            [out] String* result);
+
+        /**
+         * Get protocol identifier.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetProtocolIdentifier(
+            [out] Int32* result);
+
+        /**
+         * See TS 23.040 9.2.3.9 returns true if this is a "replace short message" SMS
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsReplace(
+            [out] Boolean* result);
+
+        /**
+         * Returns true for CPHS MWI toggle message.
+         *
+         * @return true if this is a CPHS MWI toggle message See CPHS 4.2 section B.4.2
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsCphsMwiMessage(
+            [out] Boolean* result);
+
+        /**
+         * returns true if this message is a CPHS voicemail / message waiting
+         * indicator (MWI) clear message
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsMWIClearMessage(
+            [out] Boolean* result);
+
+        /**
+         * returns true if this message is a CPHS voicemail / message waiting
+         * indicator (MWI) set message
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsMWISetMessage(
+            [out] Boolean* result);
+
+        /**
+         * returns true if this message is a "Message Waiting Indication Group:
+         * Discard Message" notification and should not be stored.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsMwiDontStore(
+            [out] Boolean* result);
+
+        /**
+         * returns the user data section minus the user data header if one was present.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetUserData(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Returns the raw PDU for the message.
+         *
+         * @return the raw PDU for the message.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetPdu(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Returns the status of the message on the SIM (read, unread, sent, unsent).
+         *
+         * @return the status of the message on the SIM.  These are:
+         *         SmsManager.STATUS_ON_SIM_FREE
+         *         SmsManager.STATUS_ON_SIM_READ
+         *         SmsManager.STATUS_ON_SIM_UNREAD
+         *         SmsManager.STATUS_ON_SIM_SEND
+         *         SmsManager.STATUS_ON_SIM_UNSENT
+         * @deprecated Use android.telephony.SmsMessage and getStatusOnIcc instead.
+         */
+        GetStatusOnSim(
+            [out] Int32* result);
+
+        /**
+         * Returns the status of the message on the ICC (read, unread, sent, unsent).
+         *
+         * @return the status of the message on the ICC.  These are:
+         *         SmsManager.STATUS_ON_ICC_FREE
+         *         SmsManager.STATUS_ON_ICC_READ
+         *         SmsManager.STATUS_ON_ICC_UNREAD
+         *         SmsManager.STATUS_ON_ICC_SEND
+         *         SmsManager.STATUS_ON_ICC_UNSENT
+         * @deprecated Use android.telephony.SmsMessage.
+         * @hide
+         */
+        GetStatusOnIcc(
+            [out] Int32* result);
+
+        /**
+         * Returns the record index of the message on the SIM (1-based index).
+         * @return the record index of the message on the SIM, or -1 if this
+         *         SmsMessage was not created from a SIM SMS EF record.
+         * @deprecated Use android.telephony.SmsMessage and getIndexOnIcc instead.
+         */
+        GetIndexOnSim(
+            [out] Int32* result);
+
+        /**
+         * Returns the record index of the message on the ICC (1-based index).
+         * @return the record index of the message on the ICC, or -1 if this
+         *         SmsMessage was not created from a ICC SMS EF record.
+         * @deprecated Use android.telephony.SmsMessage.
+         * @hide
+         */
+        GetIndexOnIcc(
+            [out] Int32* result);
+
+        /**
+         * GSM:
+         * For an SMS-STATUS-REPORT message, this returns the status field from
+         * the status report.  This field indicates the status of a previously
+         * submitted SMS, if requested.  See TS 23.040, 9.2.3.15 TP-Status for a
+         * description of values.
+         * CDMA:
+         * For not interfering with status codes from GSM, the value is
+         * shifted to the bits 31-16.
+         * The value is composed of an error class (bits 25-24) and a status code (bits 23-16).
+         * Possible codes are described in C.S0015-B, v2.0, 4.5.21.
+         *
+         * @return 0 indicates the previously sent message was received.
+         *         See TS 23.040, 9.9.2.3.15 and C.S0015-B, v2.0, 4.5.21
+         *         for a description of other possible values.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetStatus(
+            [out] Int32* result);
+
+        /**
+         * Return true iff the message is a SMS-STATUS-REPORT message.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsStatusReportMessage(
+            [out] Boolean* result);
+
+        /**
+         * Returns true iff the <code>TP-Reply-Path</code> bit is set in
+         * this message.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        IsReplyPathPresent(
+            [out] Boolean* result);
+
+    }
+
+    [deprecated]
+    interface ISmsMessageHelper {
+
+        /**
+         * Create an SmsMessage from a raw PDU.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        CreateFromPdu(
+            [in] ArrayOf<Byte>* pdu,
+            [out] ISmsMessage** result);
+
+        /**
+         * Get the TP-Layer-Length for the given SMS-SUBMIT PDU Basically, the
+         * length in bytes (not hex chars) less the SMSC header
+         * @deprecated Use android.telephony.SmsMessage.
+         */
         GetTPLayerLengthForPDU(
             [in] String pdu,
             [out] Int32* result);
 
         CalculateLength(
-            [in] CharSequence messageBody, 
-            [in] Boolean use7bitOnly);
+            [in] ICharSequence* messageBody,
+            [in] Boolean use7bitOnly,
+            [out, callee] ArrayOf<Int32>* result);
 
         CalculateLength(
-            [in] String messageBody, 
-            [in] Boolean use7bitOnly);
+            [in] String messageBody,
+            [in] Boolean use7bitOnly,
+            [out, callee] ArrayOf<Int32>* result);
 
-        GetServiceCenterAddress(
-            [out] String* result);
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @deprecated Use android.telephony.SmsMessage.
+         * @hide
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] ArrayOf<Byte>* header,
+            [out] ISubmitPdu** result);
 
-        GetOriginatingAddress(
-            [out] String* result);
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [out] ISubmitPdu** result);
 
-        GetDisplayOriginatingAddress(
-            [out] String* result);
-
-        GetMessageBody(
-            [out] String* result);
-
-        GetMessageClass(
-            [out] MessageClass* result);
-
-        GetDisplayMessageBody(
-            [out] String* result);
-
-        GetPseudoSubject(
-            [out] String* result);
-
-        GetTimestampMillis(
-            [out] Int64* result);
-
-        IsEmail(
-            [out] Boolean* result);
-
-        GetEmailBody(
-            [out] String* result);
-
-        GetEmailFrom(
-            [out] String* result);
-
-        GetProtocolIdentifier(
-            [out] Int32* result);
-
-        IsReplace(
-            [out] Boolean* result);
-
-        IsCphsMwiMessage(
-            [out] Boolean* result);
-
-        IsMWIClearMessage(
-            [out] Boolean* result);
-
-        IsMWISetMessage(
-            [out] Boolean* result);
-
-        IsMwiDontStore(
-            [out] Boolean* result);
-
-        GetUserData();
-
-        GetPdu();
-
-        GetStatusOnSim(
-            [out] Int32* result);
-
-        GetStatusOnIcc(
-            [out] Int32* result);
-
-        GetIndexOnSim(
-            [out] Int32* result);
-
-        GetIndexOnIcc(
-            [out] Int32* result);
-
-        GetStatus(
-            [out] Int32* result);
-
-        IsStatusReportMessage(
-            [out] Boolean* result);
-
-        IsReplyPathPresent(
-            [out] Boolean* result);
-
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+         *
+         * @param scAddress Service Centre address. null == use default
+         * @param destinationAddress the address of the destination for the message
+         * @param destinationPort the port to deliver the message to at the
+         *        destination
+         * @param data the dat for the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @deprecated Use android.telephony.SmsMessage.
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] Int16 destinationPort,
+            [in] ArrayOf<Byte>* data,
+            [in] Boolean statusReportRequested,
+            [out] ISubmitPdu** result);
     }
 
     } // namespace Gsm

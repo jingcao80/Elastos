@@ -10,6 +10,10 @@ module
     merge("../../../car/elastos/droid/animation.car");
     }
 
+    submodule Elastos.Droid.CodeAurora {
+    merge("../../../car/elastos/droid/codeaurora.car");
+    }
+
     submodule Elastos.Droid.Graphics {
     merge("../../../car/elastos/droid/graphics.car");
     }

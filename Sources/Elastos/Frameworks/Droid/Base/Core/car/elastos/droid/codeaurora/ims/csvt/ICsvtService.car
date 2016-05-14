@@ -1,5 +1,8 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.CodeAurora.Ims.Csvt.IICsvtServiceListener;
 
     namespace Elastos {
     namespace Droid {
@@ -129,8 +132,8 @@ module {
          *        successfully.
          */
         SetCallWaiting(
-            [in] Boolean enable,
-            [in] IMessage* onComplete);
+            [in] Boolean enbl,
+            [in] IMessage* msg);
 
         RegisterListener(
             [in] IICsvtServiceListener* l);
