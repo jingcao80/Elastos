@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CTableRowLayoutParams)
-    , public TableRow::LayoutParams
+    , public TableRow::TableRowLayoutParams
 {
 public:
     CAR_OBJECT_DECL()

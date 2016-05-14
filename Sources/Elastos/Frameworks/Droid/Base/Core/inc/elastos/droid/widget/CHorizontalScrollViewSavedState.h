@@ -10,7 +10,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CHorizontalScrollViewSavedState)
-    , public HorizontalScrollView::SavedState
+    , public HorizontalScrollView::HorizontalScrollViewSavedState
 {
 public:
     CAR_OBJECT_DECL();

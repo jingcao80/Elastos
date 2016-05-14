@@ -19,14 +19,14 @@ class ECO_PUBLIC FrameLayout
     , public IFrameLayout
 {
 public:
-    class LayoutParams
+    class FrameLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public IFrameLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        FrameLayoutLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

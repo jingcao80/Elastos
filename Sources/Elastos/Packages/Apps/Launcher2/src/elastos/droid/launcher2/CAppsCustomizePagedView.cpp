@@ -64,6 +64,8 @@ using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::IGridLayoutSpec;
 using Elastos::Droid::Widget::GridLayout;
+using Elastos::Droid::Widget::IGridLayoutLayoutParams;
+using Elastos::Droid::Widget::CGridLayoutLayoutParams;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
@@ -1927,14 +1929,17 @@ ECode CAppsCustomizePagedView::SyncWidgetPageItems(
         Int32 iy = i / mWidgetCountX;
         AutoPtr<IGridLayoutSpec> specx = GridLayout::GetSpec(iy, GridLayout::START);
         AutoPtr<IGridLayoutSpec> specy = GridLayout::GetSpec(ix, GridLayout::TOP);
-        AutoPtr<GridLayout::LayoutParams> lp = new GridLayout::LayoutParams();
-        lp->constructor(specx, specy);
-        lp->mWidth = cellWidth;
-        lp->mHeight = cellHeight;
-        lp->SetGravity(IGravity::TOP | IGravity::START);
-        if (ix > 0) lp->mLeftMargin = mWidgetWidthGap;
-        if (iy > 0) lp->mTopMargin = mWidgetHeightGap;
-        IViewGroup::Probe(layout)->AddView(IView::Probe(widget), IViewGroupLayoutParams::Probe(lp));
+        AutoPtr<IGridLayoutLayoutParams> layoutParams;
+        CGridLayoutLayoutParams::New(specx, specy, (IGridLayoutLayoutParams**)&layoutParams);
+        IViewGroupLayoutParams* vglp = IViewGroupLayoutParams::Probe(layoutParams);
+        vglp->SetWidth(cellWidth);
+        vglp->SetHeight(cellHeight);
+        layoutParams->SetGravity(IGravity::TOP | IGravity::START);
+
+        IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(layoutParams);
+        if (ix > 0) vgmlp->SetLeftMargin(mWidgetWidthGap);
+        if (iy > 0) vgmlp->SetTopMargin(mWidgetHeightGap);
+        IViewGroup::Probe(layout)->AddView(IView::Probe(widget), vglp);
     }
 
     // wait until a call on onLayout to start loading, because

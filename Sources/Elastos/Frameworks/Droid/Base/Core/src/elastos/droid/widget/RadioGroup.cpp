@@ -18,49 +18,49 @@ namespace Widget {
 //              RadioGroup::CheckedStateTracker
 //==============================================================================
 
-CAR_INTERFACE_IMPL(RadioGroup::LayoutParams, LinearLayout::LayoutParams, IRadioGroupLayoutParams);
+CAR_INTERFACE_IMPL(RadioGroup::RadioGroupLayoutParams, LinearLayout::LinearLayoutLayoutParams, IRadioGroupLayoutParams);
 
-RadioGroup::LayoutParams::LayoutParams()
+RadioGroup::RadioGroupLayoutParams::RadioGroupLayoutParams()
 {}
 
-RadioGroup::LayoutParams::~LayoutParams()
+RadioGroup::RadioGroupLayoutParams::~RadioGroupLayoutParams()
 {}
 
-ECode RadioGroup::LayoutParams::constructor(
+ECode RadioGroup::RadioGroupLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    return LinearLayout::LayoutParams::constructor(c, attrs);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(c, attrs);
 }
 
-ECode RadioGroup::LayoutParams::constructor(
+ECode RadioGroup::RadioGroupLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    return LinearLayout::LayoutParams::constructor(width, height);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(width, height);
 }
 
-ECode RadioGroup::LayoutParams::constructor(
+ECode RadioGroup::RadioGroupLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Float weight)
 {
-    return LinearLayout::LayoutParams::constructor(width, height, weight);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(width, height, weight);
 }
 
-ECode RadioGroup::LayoutParams::constructor(
+ECode RadioGroup::RadioGroupLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    return LinearLayout::LayoutParams::constructor(p);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(p);
 }
 
-ECode RadioGroup::LayoutParams::constructor(
+ECode RadioGroup::RadioGroupLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
-    return LinearLayout::LayoutParams::constructor(source);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(source);
 }
 
-ECode RadioGroup::LayoutParams::SetBaseAttributes(
+ECode RadioGroup::RadioGroupLayoutParams::SetBaseAttributes(
     /* [in] */ ITypedArray* a,
     /* [in] */ Int32 widthAttr,
     /* [in] */ Int32 heightAttr)

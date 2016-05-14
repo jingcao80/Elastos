@@ -21,24 +21,16 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CAR_INTERFACE_IMPL(AbsSpinner::SavedState, BaseSavedState, IAbsSpinnerSavedState);
-AbsSpinner::SavedState::SavedState()
+CAR_INTERFACE_IMPL(AbsSpinner::AbsSpinnerSavedState, BaseSavedState, IAbsSpinnerSavedState);
+AbsSpinner::AbsSpinnerSavedState::AbsSpinnerSavedState()
     : mSelectedId(0)
     , mPosition(0)
 {}
 
-ECode AbsSpinner::SavedState::constructor()
-{
-    return NOERROR;
-}
+AbsSpinner::AbsSpinnerSavedState::~AbsSpinnerSavedState()
+{}
 
-ECode AbsSpinner::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return BaseSavedState::constructor(superState);
-}
-
-ECode AbsSpinner::SavedState::ReadFromParcel(
+ECode AbsSpinner::AbsSpinnerSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);
@@ -47,7 +39,7 @@ ECode AbsSpinner::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode AbsSpinner::SavedState::WriteToParcel(
+ECode AbsSpinner::AbsSpinnerSavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     BaseSavedState::WriteToParcel(out);
@@ -56,7 +48,7 @@ ECode AbsSpinner::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode AbsSpinner::SavedState::ToString(
+ECode AbsSpinner::AbsSpinnerSavedState::ToString(
     /* [out] */ String* str)
 {
     StringBuilder sb("AbsSpinner.SavedState{");
@@ -85,7 +77,7 @@ AbsSpinner::AbsSpinner()
 ECode AbsSpinner::constructor(
     /* [in] */ IContext* context)
 {
-    ASSERT_SUCCEEDED(AdapterView::constructor(context));
+    FAIL_RETURN(AdapterView::constructor(context));
     InitAbsSpinner();
     return NOERROR;
 }

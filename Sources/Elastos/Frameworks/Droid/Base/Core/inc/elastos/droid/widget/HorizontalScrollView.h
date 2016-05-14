@@ -22,16 +22,16 @@ class HorizontalScrollView
     , public IHorizontalScrollView
 {
 public:
-    class SavedState
+    class HorizontalScrollViewSavedState
         : public View::BaseSavedState
+        , public IHorizontalScrollViewSavedState
     {
     public:
-        SavedState();
+        CAR_INTERFACE_DECL()
 
-        CARAPI constructor();
+        HorizontalScrollViewSavedState();
 
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        ~HorizontalScrollViewSavedState();
 
         // @Override
         CARAPI WriteToParcel(
@@ -467,7 +467,7 @@ private:
      * drags/flings if multiple pointers are used.
      */
     Int32 mActivePointerId;
-    AutoPtr<SavedState> mSavedState;
+    AutoPtr<HorizontalScrollViewSavedState> mSavedState;
 };
 
 } // namespace Widget

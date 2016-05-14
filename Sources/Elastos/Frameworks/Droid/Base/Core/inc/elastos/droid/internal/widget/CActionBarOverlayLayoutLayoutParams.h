@@ -10,7 +10,7 @@ namespace Internal {
 namespace Widget {
 
 CarClass(CActionBarOverlayLayoutLayoutParams)
-    , public ActionBarOverlayLayout::LayoutParams
+    , public ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams
 {
 public:
     CAR_OBJECT_DECL()

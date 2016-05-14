@@ -53,23 +53,15 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CAR_INTERFACE_IMPL(ScrollView::SavedState, BaseSavedState, IScrollViewSavedState);
-ScrollView::SavedState::SavedState()
+CAR_INTERFACE_IMPL(ScrollView::ScrollViewSavedState, BaseSavedState, IScrollViewSavedState);
+ScrollView::ScrollViewSavedState::ScrollViewSavedState()
     : mScrollPosition(0)
 {}
 
-ECode ScrollView::SavedState::constructor()
-{
-    return NOERROR;
-}
+ScrollView::ScrollViewSavedState::~ScrollViewSavedState()
+{}
 
-ECode ScrollView::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return BaseSavedState::constructor(superState);
-}
-
-ECode ScrollView::SavedState::WriteToParcel(
+ECode ScrollView::ScrollViewSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     BaseSavedState::WriteToParcel(dest);
@@ -77,7 +69,7 @@ ECode ScrollView::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode ScrollView::SavedState::ReadFromParcel(
+ECode ScrollView::ScrollViewSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);
@@ -85,7 +77,7 @@ ECode ScrollView::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode ScrollView::SavedState::ToString(
+ECode ScrollView::ScrollViewSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
@@ -2153,7 +2145,7 @@ void ScrollView::OnRestoreInstanceState(
         FrameLayout::OnRestoreInstanceState(state);
         return;
     }
-    AutoPtr<SavedState> ss = (SavedState*) state;
+    AutoPtr<ScrollViewSavedState> ss = (ScrollViewSavedState*) state;
     AutoPtr<IParcelable> p;
     ss->GetSuperState((IParcelable**)&p);
     FrameLayout::OnRestoreInstanceState(p);

@@ -27,14 +27,14 @@ class ActionMenuView
     , public IMenuBuilderItemInvoker
 {
 public:
-    class LayoutParams
-        : public LinearLayout::LayoutParams
+    class ActionMenuViewLayoutParams
+        : public LinearLayout::LinearLayoutLayoutParams
         , public IActionMenuViewLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        ActionMenuViewLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

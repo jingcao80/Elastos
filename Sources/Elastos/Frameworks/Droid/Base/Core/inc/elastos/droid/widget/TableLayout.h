@@ -62,12 +62,16 @@ class TableLayout
     , public ITableLayout
 {
 public:
-    class LayoutParams
-        : public LinearLayout::LayoutParams
+    class TableLayoutLayoutParams
+        : public LinearLayout::LinearLayoutLayoutParams
         , public ITableLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
+
+        TableLayoutLayoutParams();
+
+        ~TableLayoutLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

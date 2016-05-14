@@ -28,16 +28,16 @@ const Int32 LinearLayout::INDEX_BOTTOM = 2;
 const Int32 LinearLayout::INDEX_FILL = 3;
 
 //=========================================================================
-// LinearLayout::LayoutParams
+// LinearLayout::LinearLayoutLayoutParams
 //=========================================================================
-CAR_INTERFACE_IMPL(LinearLayout::LayoutParams, MarginLayoutParams, ILinearLayoutLayoutParams);
+CAR_INTERFACE_IMPL(LinearLayout::LinearLayoutLayoutParams, MarginLayoutParams, ILinearLayoutLayoutParams);
 
-LinearLayout::LayoutParams::LayoutParams()
+LinearLayout::LinearLayoutLayoutParams::LinearLayoutLayoutParams()
     : mWeight(0)
     , mGravity(-1)
 {}
 
-ECode LinearLayout::LayoutParams::constructor(
+ECode LinearLayout::LinearLayoutLayoutParams::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -59,7 +59,7 @@ ECode LinearLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::constructor(
+ECode LinearLayout::LinearLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -68,7 +68,7 @@ ECode LinearLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::constructor(
+ECode LinearLayout::LinearLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Float weight)
@@ -78,37 +78,37 @@ ECode LinearLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::constructor(
+ECode LinearLayout::LinearLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     MarginLayoutParams::constructor(source);
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::constructor(
+ECode LinearLayout::LinearLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
     MarginLayoutParams::constructor(source);
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::constructor(
+ECode LinearLayout::LinearLayoutLayoutParams::constructor(
     /* [in] */ ILinearLayoutLayoutParams* source)
 {
     MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(source));
-    mWeight = ((LayoutParams*)source)->mWeight;
-    mGravity = ((LayoutParams*)source)->mGravity;
+    mWeight = ((LinearLayoutLayoutParams*)source)->mWeight;
+    mGravity = ((LinearLayoutLayoutParams*)source)->mGravity;
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::SetWeight(
+ECode LinearLayout::LinearLayoutLayoutParams::SetWeight(
     /* [in] */ Float weight)
 {
     mWeight = weight;
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::GetWeight(
+ECode LinearLayout::LinearLayoutLayoutParams::GetWeight(
     /* [out] */ Float* weight)
 {
     VALIDATE_NOT_NULL(weight);
@@ -116,14 +116,14 @@ ECode LinearLayout::LayoutParams::GetWeight(
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::SetGravity(
+ECode LinearLayout::LinearLayoutLayoutParams::SetGravity(
     /* [in] */ Int32 gravity)
 {
     mGravity = gravity;
     return NOERROR;
 }
 
-ECode LinearLayout::LayoutParams::GetGravity(
+ECode LinearLayout::LinearLayoutLayoutParams::GetGravity(
     /* [out] */ Int32* gravity)
 {
     VALIDATE_NOT_NULL(gravity);

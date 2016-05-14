@@ -42,8 +42,8 @@ public:
      * @attr ref android.R.styleable#TableRow_Cell_layout_column
      * @attr ref android.R.styleable#TableRow_Cell_layout_span
      */
-    class LayoutParams
-        : public LinearLayout::LayoutParams
+    class TableRowLayoutParams
+        : public LinearLayout::LinearLayoutLayoutParams
         , public ITableRowLayoutParams
     {
         friend class TableRow;
@@ -51,7 +51,7 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        TableRowLayoutParams();
 
         /**
          * {@inheritDoc}

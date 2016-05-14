@@ -11,6 +11,7 @@
 #include "elastos/droid/widget/CActivityChooserView.h"
 #include "elastos/droid/widget/CAdapterView.h"
 #include "elastos/droid/widget/CAdapterViewAnimator.h"
+#include "elastos/droid/widget/CAdapterViewAnimatorSavedState.h"
 #include "elastos/droid/widget/CAdapterViewFlipper.h"
 #include "elastos/droid/widget/CAlphabetIndexer.h"
 #include "elastos/droid/widget/CAnalogClock.h"
@@ -28,6 +29,9 @@
 #include "elastos/droid/widget/CCursorAdapterChangeObserver.h"
 #include "elastos/droid/widget/CCursorAdapterDataSetObserver.h"
 #include "elastos/droid/widget/CDatePicker.h"
+#include "elastos/droid/widget/CDatePickerCalendarDelegate.h"
+#include "elastos/droid/widget/CDatePickerCalendarDelegateSavedState.h"
+#include "elastos/droid/widget/CDatePickerSavedState.h"
 #include "elastos/droid/widget/CDateTimeView.h"
 #include "elastos/droid/widget/CDayPickerView.h"
 #include "elastos/droid/widget/CDialerFilter.h"
@@ -146,6 +150,7 @@ CAR_OBJECT_IMPL(CActionMenuViewLayoutParams)
 CAR_OBJECT_IMPL(CActivityChooserView)
 CAR_OBJECT_IMPL(CAdapterView)
 CAR_OBJECT_IMPL(CAdapterViewAnimator)
+CAR_OBJECT_IMPL(CAdapterViewAnimatorSavedState)
 CAR_OBJECT_IMPL(CAdapterViewFlipper)
 CAR_OBJECT_IMPL(CAlphabetIndexer)
 CAR_OBJECT_IMPL(CAnalogClock)
@@ -163,6 +168,9 @@ CAR_OBJECT_IMPL(CCursorFilter)
 CAR_OBJECT_IMPL(CCursorAdapterChangeObserver)
 CAR_OBJECT_IMPL(CCursorAdapterDataSetObserver)
 CAR_OBJECT_IMPL(CDatePicker)
+CAR_OBJECT_IMPL(CDatePickerCalendarDelegate)
+CAR_OBJECT_IMPL(CDatePickerCalendarDelegateSavedState)
+CAR_OBJECT_IMPL(CDatePickerSavedState)
 CAR_OBJECT_IMPL(CDateTimeView)
 CAR_OBJECT_IMPL(CDayPickerView)
 CAR_OBJECT_IMPL(CDialerFilter)

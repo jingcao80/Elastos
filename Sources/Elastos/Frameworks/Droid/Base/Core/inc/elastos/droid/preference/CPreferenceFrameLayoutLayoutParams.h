@@ -10,7 +10,7 @@ namespace Droid {
 namespace Preference {
 
 CarClass(CPreferenceFrameLayoutLayoutParams)
-    , public PreferenceFrameLayout::LayoutParams
+    , public PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams
 {
 public:
     CAR_OBJECT_DECL()

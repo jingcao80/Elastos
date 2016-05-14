@@ -12,7 +12,7 @@ namespace View {
 namespace Menu {
 
 CarClass(CIconMenuViewLayoutParams)
-    , public IconMenuView::LayoutParams
+    , public IconMenuView::IconMenuViewLayoutParams
 {
 public:
     CAR_OBJECT_DECL()

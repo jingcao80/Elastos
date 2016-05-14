@@ -1,7 +1,8 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "elastos/droid/widget/DatePicker.h"
+#include "elastos/droid/widget/CDatePickerSavedState.h"
 #include "elastos/droid/widget/CNumberPickerHelper.h"
-#include "elastos/droid/widget/DatePickerCalendarDelegate.h"
+#include "elastos/droid/widget/CDatePickerCalendarDelegate.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/text/format/DateUtils.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -29,7 +30,6 @@ using Elastos::Droid::View::InputMethod::CInputMethodManager;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Widget::INumberPickerHelper;
 using Elastos::Droid::Widget::CNumberPickerHelper;
-using Elastos::Droid::Widget::DatePickerCalendarDelegate;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -57,140 +57,8 @@ const String DatePicker::TAG("DatePicker");
 const Int32 DatePicker::MODE_SPINNER = 1;
 const Int32 DatePicker::MODE_CALENDAR = 2;
 
-// ==================================================================
-//                DatePicker::DatePickerOnChangeListener
-// ==================================================================
-CAR_INTERFACE_IMPL(DatePicker::DatePickerOnChangeListener, Object, INumberPickerOnValueChangeListener)
-
-DatePicker::DatePickerOnChangeListener::DatePickerOnChangeListener(
-    /* [in] */ DatePickerSpinnerDelegate* host)
-    : mHost(host)
-{
-}
-
-ECode DatePicker::DatePickerOnChangeListener::OnValueChange(
-    /* [in] */ INumberPicker* picker,
-    /* [in] */ Int32 oldVal,
-    /* [in] */ Int32 newVal)
-{
-    mHost->UpdateInputState();
-    Int64 millis = 0;
-    mHost->mCurrentDate->GetTimeInMillis(&millis);
-    mHost->mTempDate->SetTimeInMillis(millis);
-    // take care of wrapping of days and months to update greater fields
-    if (picker == mHost->mDaySpinner) {
-        Int32 maxDayOfMonth = 0;
-        mHost->mTempDate->GetActualMaximum(ICalendar::DAY_OF_MONTH, &maxDayOfMonth);
-        if (oldVal == maxDayOfMonth && newVal == 1) {
-            mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, 1);
-        }
-        else if (oldVal == 1 && newVal == maxDayOfMonth) {
-            mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, -1);
-        }
-        else {
-            mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, newVal - oldVal);
-        }
-    }
-    else if (picker == mHost->mMonthSpinner) {
-        if (oldVal == 11 && newVal == 0) {
-            mHost->mTempDate->Add(ICalendar::MONTH, 1);
-        }
-        else if (oldVal == 0 && newVal == 11) {
-            mHost->mTempDate->Add(ICalendar::MONTH, -1);
-        }
-        else {
-            mHost->mTempDate->Add(ICalendar::MONTH, newVal - oldVal);
-        }
-    }
-    else if (picker == mHost->mYearSpinner) {
-        mHost->mTempDate->Set(ICalendar::YEAR, newVal);
-    }
-    else {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    // now set the date to the adjusted one
-    Int32 year = 0, month = 0, day = 0;
-    mHost->mTempDate->Get(ICalendar::YEAR, &year);
-    mHost->mTempDate->Get(ICalendar::MONTH, &month);
-    mHost->mTempDate->Get(ICalendar::DAY_OF_MONTH, &day);
-    mHost->SetDate(year, month, day);
-    mHost->UpdateSpinners();
-    mHost->UpdateCalendarView();
-    mHost->NotifyDateChanged();
-    return NOERROR;
-}
-
-// ==================================================================
-//                DatePicker::DatePickerOnDateChangeListener
-// ==================================================================
-CAR_INTERFACE_IMPL(DatePicker::DatePickerOnDateChangeListener, Object, IOnDateChangeListener)
-
-DatePicker::DatePickerOnDateChangeListener::DatePickerOnDateChangeListener(
-    /* [in] */ DatePickerSpinnerDelegate* host)
-    : mHost(host)
-{
-}
-
-ECode DatePicker::DatePickerOnDateChangeListener::OnSelectedDayChange(
-    /* [in] */ ICalendarView* view,
-    /* [in] */ Int32 year,
-    /* [in] */ Int32 month,
-    /* [in] */ Int32 dayOfMonth)
-{
-    mHost->SetDate(year, month, dayOfMonth);
-    mHost->UpdateSpinners();
-    mHost->NotifyDateChanged();
-    return NOERROR;
-}
-
-// ==================================================================
-//                DatePicker::DatePickerSavedState
-// ==================================================================
-
-DatePicker::DatePickerSavedState::DatePickerSavedState(
-    /* [in] */ IParcelable* superState,
-    /* [in] */ Int32 year,
-    /* [in] */ Int32 month,
-    /* [in] */ Int32 day)
-{
-    BaseSavedState::constructor(superState);
-    mYear = year;
-    mMonth = month;
-    mDay = day;
-}
-
-ECode DatePicker::DatePickerSavedState::ReadFromParcel(
-    /* [in] */ IParcel* in)
-{
-    in->ReadInt32(&mYear);
-    in->ReadInt32(&mMonth);
-    in->ReadInt32(&mDay);
-    return NOERROR;
-}
-
-ECode DatePicker::DatePickerSavedState::WriteToParcel(
-    /* [in] */ IParcel* dest)
-{
-    BaseSavedState::WriteToParcel(dest);
-    dest->WriteInt32(mYear);
-    dest->WriteInt32(mMonth);
-    dest->WriteInt32(mDay);
-    return NOERROR;
-}
-
-ECode DatePicker::DatePickerSavedState::GetSuperState(
-    /* [out] */ IParcelable** state)
-{
-    VALIDATE_NOT_NULL(state);
-    AutoPtr<IParcelable> parcelable;
-    AbsSavedState::GetSuperState((IParcelable**)&parcelable);
-    *state = parcelable;
-    REFCOUNT_ADD(*state);
-    return NOERROR;
-}
-
 //===============================================================
-// DatePicker::AbstractDatePickerDelegate::
+// DatePicker::AbstractDatePickerDelegate
 //===============================================================
 CAR_INTERFACE_IMPL(DatePicker::AbstractDatePickerDelegate, Object, IDatePickerDelegate)
 
@@ -237,6 +105,60 @@ void DatePicker::AbstractDatePickerDelegate::OnValidationChanged(
         mValidationCallback->OnValidationChanged(valid);
     }
 }
+
+// ==================================================================
+//                DatePicker::DatePickerSavedState
+// ==================================================================
+
+CAR_INTERFACE_IMPL(DatePicker::DatePickerSavedState, View::BaseSavedState, IDatePickerSavedState)
+
+DatePicker::DatePickerSavedState::DatePickerSavedState()
+    : mYear(0)
+    , mMonth(0)
+    , mDay(0)
+{}
+
+DatePicker::DatePickerSavedState::~DatePickerSavedState()
+{}
+
+ECode DatePicker::DatePickerSavedState::constructor()
+{
+    return NOERROR;
+}
+
+ECode DatePicker::DatePickerSavedState::constructor(
+    /* [in] */ IParcelable* superState,
+    /* [in] */ Int32 year,
+    /* [in] */ Int32 month,
+    /* [in] */ Int32 day)
+{
+    BaseSavedState::constructor(superState);
+    mYear = year;
+    mMonth = month;
+    mDay = day;
+
+    return NOERROR;
+}
+
+ECode DatePicker::DatePickerSavedState::ReadFromParcel(
+    /* [in] */ IParcel* in)
+{
+    in->ReadInt32(&mYear);
+    in->ReadInt32(&mMonth);
+    in->ReadInt32(&mDay);
+    return NOERROR;
+}
+
+ECode DatePicker::DatePickerSavedState::WriteToParcel(
+    /* [in] */ IParcel* dest)
+{
+    BaseSavedState::WriteToParcel(dest);
+    dest->WriteInt32(mYear);
+    dest->WriteInt32(mMonth);
+    dest->WriteInt32(mDay);
+    return NOERROR;
+}
+
 
 //===============================================================
 // DatePicker::DatePickerSpinnerDelegate::
@@ -653,16 +575,13 @@ ECode DatePicker::DatePickerSpinnerDelegate::OnSaveInstanceState(
     GetYear(&y);
     GetMonth(&m);
     GetDayOfMonth(&dm);
-    AutoPtr<DatePickerSavedState> ss = new DatePickerSavedState(superState, y, m, dm);
-    *result = IParcelable::Probe(ss);
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CDatePickerSavedState::New(superState, y, m, dm, result);
 }
 
 ECode DatePicker::DatePickerSpinnerDelegate::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    AutoPtr<DatePickerSavedState> ss = (DatePickerSavedState*)IViewBaseSavedState::Probe(state);
+    AutoPtr<CDatePickerSavedState> ss = (CDatePickerSavedState*)IDatePickerSavedState::Probe(state);
     SetDate(ss->mYear, ss->mMonth, ss->mDay);
     UpdateSpinners();
     UpdateCalendarView();
@@ -1036,6 +955,92 @@ ECode DatePicker::DatePickerSpinnerDelegate::UpdateInputState()
     return NOERROR;
 }
 
+// ==================================================================
+//                DatePicker::DatePickerOnChangeListener
+// ==================================================================
+CAR_INTERFACE_IMPL(DatePicker::DatePickerOnChangeListener, Object, INumberPickerOnValueChangeListener)
+
+DatePicker::DatePickerOnChangeListener::DatePickerOnChangeListener(
+    /* [in] */ DatePickerSpinnerDelegate* host)
+    : mHost(host)
+{
+}
+
+ECode DatePicker::DatePickerOnChangeListener::OnValueChange(
+    /* [in] */ INumberPicker* picker,
+    /* [in] */ Int32 oldVal,
+    /* [in] */ Int32 newVal)
+{
+    mHost->UpdateInputState();
+    Int64 millis = 0;
+    mHost->mCurrentDate->GetTimeInMillis(&millis);
+    mHost->mTempDate->SetTimeInMillis(millis);
+    // take care of wrapping of days and months to update greater fields
+    if (picker == mHost->mDaySpinner) {
+        Int32 maxDayOfMonth = 0;
+        mHost->mTempDate->GetActualMaximum(ICalendar::DAY_OF_MONTH, &maxDayOfMonth);
+        if (oldVal == maxDayOfMonth && newVal == 1) {
+            mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, 1);
+        }
+        else if (oldVal == 1 && newVal == maxDayOfMonth) {
+            mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, -1);
+        }
+        else {
+            mHost->mTempDate->Add(ICalendar::DAY_OF_MONTH, newVal - oldVal);
+        }
+    }
+    else if (picker == mHost->mMonthSpinner) {
+        if (oldVal == 11 && newVal == 0) {
+            mHost->mTempDate->Add(ICalendar::MONTH, 1);
+        }
+        else if (oldVal == 0 && newVal == 11) {
+            mHost->mTempDate->Add(ICalendar::MONTH, -1);
+        }
+        else {
+            mHost->mTempDate->Add(ICalendar::MONTH, newVal - oldVal);
+        }
+    }
+    else if (picker == mHost->mYearSpinner) {
+        mHost->mTempDate->Set(ICalendar::YEAR, newVal);
+    }
+    else {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    // now set the date to the adjusted one
+    Int32 year = 0, month = 0, day = 0;
+    mHost->mTempDate->Get(ICalendar::YEAR, &year);
+    mHost->mTempDate->Get(ICalendar::MONTH, &month);
+    mHost->mTempDate->Get(ICalendar::DAY_OF_MONTH, &day);
+    mHost->SetDate(year, month, day);
+    mHost->UpdateSpinners();
+    mHost->UpdateCalendarView();
+    mHost->NotifyDateChanged();
+    return NOERROR;
+}
+
+// ==================================================================
+//                DatePicker::DatePickerOnDateChangeListener
+// ==================================================================
+CAR_INTERFACE_IMPL(DatePicker::DatePickerOnDateChangeListener, Object, IOnDateChangeListener)
+
+DatePicker::DatePickerOnDateChangeListener::DatePickerOnDateChangeListener(
+    /* [in] */ DatePickerSpinnerDelegate* host)
+    : mHost(host)
+{
+}
+
+ECode DatePicker::DatePickerOnDateChangeListener::OnSelectedDayChange(
+    /* [in] */ ICalendarView* view,
+    /* [in] */ Int32 year,
+    /* [in] */ Int32 month,
+    /* [in] */ Int32 dayOfMonth)
+{
+    mHost->SetDate(year, month, dayOfMonth);
+    mHost->UpdateSpinners();
+    mHost->NotifyDateChanged();
+    return NOERROR;
+}
+
 //===============================================================
 // DatePicker::
 //===============================================================
@@ -1119,8 +1124,9 @@ AutoPtr<IDatePickerDelegate> DatePicker::CreateCalendarUIDelegate(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    AutoPtr<DatePickerCalendarDelegate> res = new DatePickerCalendarDelegate();
-    res->constructor(this, context, attrs, defStyleAttr, defStyleRes);
+    AutoPtr<IDatePickerCalendarDelegate> res;
+    CDatePickerCalendarDelegate::New((IDatePicker*)this, context, attrs, defStyleAttr, defStyleRes,
+            (IDatePickerCalendarDelegate**)&res);
     return IDatePickerDelegate::Probe(res);
 }
 

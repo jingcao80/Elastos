@@ -7,6 +7,7 @@
 #include "elastos/droid/view/CViewConfiguration.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/widget/AdapterViewAnimator.h"
+#include "elastos/droid/widget/CAdapterViewAnimatorSavedState.h"
 #include "elastos/droid/widget/CFrameLayout.h"
 #include "elastos/droid/widget/CRemoteViewsAdapter.h"
 #include "elastos/core/IntegralToString.h"
@@ -162,35 +163,48 @@ ECode AdapterViewAnimator::CheckDataRun::Run()
 }
 
 //=====================================================================
-//               AdapterViewAnimator::InternalInsetsInfo
+//               AdapterViewAnimator::AdapterViewAnimatorSavedState
 //=====================================================================
-AdapterViewAnimator::SavedState::SavedState(
-    /* [in] */ IParcelable* superState,
-    /* [in] */ Int32 whichChild)
-    : mWhichChild(whichChild)
-{
-    View::BaseSavedState::constructor(superState);
-}
+CAR_INTERFACE_IMPL(AdapterViewAnimator::AdapterViewAnimatorSavedState, View::BaseSavedState, IAdapterViewAnimatorSavedState)
 
-/**
- * Constructor called from {@link #CREATOR}
- */
-//private SavedState(Parcel in) {
-//    super(in);
-//    this.whichChild = in.readInt();
-//}
+AdapterViewAnimator::AdapterViewAnimatorSavedState::AdapterViewAnimatorSavedState()
+    : mWhichChild(0)
+{}
 
-ECode AdapterViewAnimator::SavedState::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+AdapterViewAnimator::AdapterViewAnimatorSavedState::~AdapterViewAnimatorSavedState()
+{}
+
+ECode AdapterViewAnimator::AdapterViewAnimatorSavedState::constructor()
 {
-    assert(0);
-    //-- base class has corresponding func: ViewBaseSavedState::WriteToParcel(out, flags);
-    out->WriteInt32(this->mWhichChild);
     return NOERROR;
 }
 
-ECode AdapterViewAnimator::SavedState::ToString(
+ECode AdapterViewAnimator::AdapterViewAnimatorSavedState::constructor(
+    /* [in] */ IParcelable* superState,
+    /* [in] */ Int32 whichChild)
+{
+    FAIL_RETURN(View::BaseSavedState::constructor(superState))
+    mWhichChild = whichChild;
+    return NOERROR;
+}
+
+ECode AdapterViewAnimator::AdapterViewAnimatorSavedState::WriteToParcel(
+    /* [in] */ IParcel* out)
+{
+    FAIL_RETURN(View::BaseSavedState::WriteToParcel(out))
+    out->WriteInt32(mWhichChild);
+    return NOERROR;
+}
+
+ECode AdapterViewAnimator::AdapterViewAnimatorSavedState::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    FAIL_RETURN(View::BaseSavedState::ReadFromParcel(source))
+    source->ReadInt32(&mWhichChild);
+    return NOERROR;
+}
+
+ECode AdapterViewAnimator::AdapterViewAnimatorSavedState::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -386,18 +400,25 @@ ECode AdapterViewAnimator::OnSaveInstanceState(
         mRemoteViewsAdapter->SaveRemoteViewsCache();
     }
 
-    assert(0);
-    //*result = new SavedState(superState, mWhichChild);
-    //REFCOUNT_ADD(*result);
+    AutoPtr<IAdapterViewAnimatorSavedState> state;
+    CAdapterViewAnimatorSavedState::New(superState, mWhichChild,
+            (IAdapterViewAnimatorSavedState**)&state);
+    *result = IParcelable::Probe(state);
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 void AdapterViewAnimator::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    SavedState* ss = (SavedState*)state;
-    assert(0);
-    //--: AdapterView::OnRestoreInstanceState(ss->GetSuperState());
+    AutoPtr<CAdapterViewAnimatorSavedState> ss =
+            (CAdapterViewAnimatorSavedState*)IAdapterViewAnimatorSavedState::Probe(state);
+    if (!ss) return;
+
+    AutoPtr<IParcelable> superState;
+    ss->GetSuperState((IParcelable**)&superState);
+
+    AdapterView::OnRestoreInstanceState(superState);
 
     // Here we set mWhichChild in addition to setDisplayedChild
     // We do the former in case mAdapter is null, and hence setDisplayedChild won't

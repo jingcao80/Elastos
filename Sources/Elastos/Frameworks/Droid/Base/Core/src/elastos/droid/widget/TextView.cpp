@@ -1136,29 +1136,18 @@ AutoPtr<IBoringLayoutMetrics> TextView::UNKNOWN_BORING = InitUNKNOWN_BORING();
 
 //==============================================================================
 
-CAR_INTERFACE_IMPL(TextView::SavedState, View::BaseSavedState, ITextViewSavedState)
+CAR_INTERFACE_IMPL(TextView::TextViewSavedState, View::BaseSavedState, ITextViewSavedState)
 
-TextView::SavedState::SavedState()
+TextView::TextViewSavedState::TextViewSavedState()
     : mSelStart(0)
     , mSelEnd(0)
     , mFrozenWithFocus(FALSE)
 {}
 
-TextView::SavedState::~SavedState()
+TextView::TextViewSavedState::~TextViewSavedState()
 {}
 
-ECode TextView::SavedState::constructor()
-{
-    return View::BaseSavedState::constructor();
-}
-
-ECode TextView::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return View::BaseSavedState::constructor(superState);
-}
-
-ECode TextView::SavedState::WriteToParcel(
+ECode TextView::TextViewSavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     FAIL_RETURN(View::BaseSavedState::WriteToParcel(out));
@@ -1179,7 +1168,7 @@ ECode TextView::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode TextView::SavedState::ReadFromParcel(
+ECode TextView::TextViewSavedState::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     FAIL_RETURN(View::BaseSavedState::ReadFromParcel(in));
@@ -1197,7 +1186,7 @@ ECode TextView::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode TextView::SavedState::ToString(
+ECode TextView::TextViewSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)

@@ -43,17 +43,17 @@ ECode IconMenuView::OnClickListener::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(IconMenuView::SavedState, View::BaseSavedState, IIconMenuViewSavedState)
-IconMenuView::SavedState::SavedState()
+CAR_INTERFACE_IMPL(IconMenuView::IconMenuViewSavedState, View::BaseSavedState, IIconMenuViewSavedState)
+IconMenuView::IconMenuViewSavedState::IconMenuViewSavedState()
     : mFocusedPosition(0)
 {}
 
-ECode IconMenuView::SavedState::constructor()
+ECode IconMenuView::IconMenuViewSavedState::constructor()
 {
     return NOERROR;
 }
 
-ECode IconMenuView::SavedState::constructor(
+ECode IconMenuView::IconMenuViewSavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ Int32 focusedPosition)
 {
@@ -62,21 +62,21 @@ ECode IconMenuView::SavedState::constructor(
     return NOERROR;
 }
 
-ECode IconMenuView::SavedState::SetFocusedPosition(
+ECode IconMenuView::IconMenuViewSavedState::SetFocusedPosition(
     /* [in] */ Int32 focusedPosition)
 {
     mFocusedPosition = focusedPosition;
     return NOERROR;
 }
 
-ECode IconMenuView::SavedState::GetFocusedPosition(
+ECode IconMenuView::IconMenuViewSavedState::GetFocusedPosition(
     /* [out] */ Int32* focusedPosition)
 {
     *focusedPosition = mFocusedPosition;
     return NOERROR;
 }
 
-ECode IconMenuView::SavedState::ReadFromParcel(
+ECode IconMenuView::IconMenuViewSavedState::ReadFromParcel(
     /* [in] */ IParcel *source)
 {
     View::BaseSavedState::ReadFromParcel(source);
@@ -84,7 +84,7 @@ ECode IconMenuView::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode IconMenuView::SavedState::WriteToParcel(
+ECode IconMenuView::IconMenuViewSavedState::WriteToParcel(
     /* [in] */ IParcel *dest)
 {
     View::BaseSavedState::WriteToParcel(dest);
@@ -92,9 +92,9 @@ ECode IconMenuView::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(IconMenuView::LayoutParams, MarginLayoutParams, IIconMenuViewLayoutParams)
+CAR_INTERFACE_IMPL(IconMenuView::IconMenuViewLayoutParams, MarginLayoutParams, IIconMenuViewLayoutParams)
 
-IconMenuView::LayoutParams::LayoutParams()
+IconMenuView::IconMenuViewLayoutParams::IconMenuViewLayoutParams()
     : mLeft(0)
     , mTop(0)
     , mRight(0)
@@ -103,98 +103,98 @@ IconMenuView::LayoutParams::LayoutParams()
     , mMaxNumItemsOnRow(0)
 {}
 
-ECode IconMenuView::LayoutParams::constructor(
+ECode IconMenuView::IconMenuViewLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
     return MarginLayoutParams::constructor(c, attrs);
 }
 
-ECode IconMenuView::LayoutParams::constructor(
+ECode IconMenuView::IconMenuViewLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     return MarginLayoutParams::constructor(width, height);
 }
 
-ECode IconMenuView::LayoutParams::SetLeft(
+ECode IconMenuView::IconMenuViewLayoutParams::SetLeft(
     /* [in] */ Int32 left)
 {
     mLeft = left;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::GetLeft(
+ECode IconMenuView::IconMenuViewLayoutParams::GetLeft(
     /* [out] */ Int32* left)
 {
     *left = mLeft;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::SetTop(
+ECode IconMenuView::IconMenuViewLayoutParams::SetTop(
     /* [in] */ Int32 top)
 {
     mTop = top;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::GetTop(
+ECode IconMenuView::IconMenuViewLayoutParams::GetTop(
     /* [out] */ Int32* top)
 {
     *top = mTop;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::SetRight(
+ECode IconMenuView::IconMenuViewLayoutParams::SetRight(
     /* [in] */ Int32 right)
 {
     mRight = right;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::GetRight(
+ECode IconMenuView::IconMenuViewLayoutParams::GetRight(
     /* [out] */ Int32* right)
 {
     *right = mRight;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::SetBottom(
+ECode IconMenuView::IconMenuViewLayoutParams::SetBottom(
     /* [in] */ Int32 bottom)
 {
     mBottom = bottom;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::GetBottom(
+ECode IconMenuView::IconMenuViewLayoutParams::GetBottom(
     /* [out] */ Int32* bottom)
 {
     *bottom = mBottom;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::SetDesiredWidth(
+ECode IconMenuView::IconMenuViewLayoutParams::SetDesiredWidth(
     /* [in] */ Int32 desiredWidth)
 {
     mDesiredWidth = desiredWidth;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::GetDesiredWidth(
+ECode IconMenuView::IconMenuViewLayoutParams::GetDesiredWidth(
     /* [out] */ Int32* desiredWidth)
 {
     *desiredWidth = mDesiredWidth;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::SetMaxNumItemsOnRow(
+ECode IconMenuView::IconMenuViewLayoutParams::SetMaxNumItemsOnRow(
     /* [in] */ Int32 maxNumItemsOnRow)
 {
     mMaxNumItemsOnRow = maxNumItemsOnRow;
     return NOERROR;
 }
 
-ECode IconMenuView::LayoutParams::GetMaxNumItemsOnRow(
+ECode IconMenuView::IconMenuViewLayoutParams::GetMaxNumItemsOnRow(
     /* [out] */ Int32* maxNumItemsOnRow)
 {
     *maxNumItemsOnRow = mMaxNumItemsOnRow;
@@ -204,7 +204,7 @@ ECode IconMenuView::LayoutParams::GetMaxNumItemsOnRow(
 const Int32 IconMenuView::ITEM_CAPTION_CYCLE_DELAY;
 
 CAR_INTERFACE_IMPL_4(IconMenuView, ViewGroup, IIconMenuView,
-    IMenuBuilderItemInvoker, IMenuView, IRunnable)
+        IMenuBuilderItemInvoker, IMenuView, IRunnable)
 
 IconMenuView::IconMenuView()
     : mRowHeight(0)

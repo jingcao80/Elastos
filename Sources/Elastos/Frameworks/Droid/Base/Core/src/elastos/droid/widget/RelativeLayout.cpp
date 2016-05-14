@@ -3,10 +3,10 @@
 #include "elastos/droid/widget/RelativeLayout.h"
 #include "elastos/droid/widget/CRelativeLayoutLayoutParams.h"
 #include "elastos/droid/graphics/CRect.h"
-#include "elastos/droid/R.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/view/Gravity.h"
 #include "elastos/droid/view/ViewGroup.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -255,8 +255,8 @@ List< AutoPtr<Node> >& DependencyGraph::FindRoots(
     return mRoots;
 }
 
-CAR_INTERFACE_IMPL(RelativeLayout::LayoutParams, ViewGroup::MarginLayoutParams, IRelativeLayoutLayoutParams);
-RelativeLayout::LayoutParams::LayoutParams()
+CAR_INTERFACE_IMPL(RelativeLayout::RelativeLayoutLayoutParams, ViewGroup::MarginLayoutParams, IRelativeLayoutLayoutParams);
+RelativeLayout::RelativeLayoutLayoutParams::RelativeLayoutLayoutParams()
     : mLeft(0)
     , mTop(0)
     , mRight(0)
@@ -269,7 +269,7 @@ RelativeLayout::LayoutParams::LayoutParams()
     mInitialRules = ArrayOf<Int32>::Alloc(IRelativeLayout::VERB_COUNT);
 }
 
-ECode RelativeLayout::LayoutParams::constructor(
+ECode RelativeLayout::RelativeLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -278,7 +278,7 @@ ECode RelativeLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::constructor(
+ECode RelativeLayout::RelativeLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -286,26 +286,26 @@ ECode RelativeLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::constructor(
+ECode RelativeLayout::RelativeLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     ASSERT_SUCCEEDED(MarginLayoutParams::constructor(source));
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::constructor(
+ECode RelativeLayout::RelativeLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
     ASSERT_SUCCEEDED(MarginLayoutParams::constructor(source));
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::constructor(
+ECode RelativeLayout::RelativeLayoutLayoutParams::constructor(
     /* [in] */ IRelativeLayoutLayoutParams* _source)
 {
     ASSERT_SUCCEEDED(MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(_source)));
 
-    LayoutParams* source = (LayoutParams*)_source;
+    RelativeLayoutLayoutParams* source = (RelativeLayoutLayoutParams*)_source;
     mIsRtlCompatibilityMode = source->mIsRtlCompatibilityMode;
     mRulesChanged = source->mRulesChanged;
     mAlignWithParent = source->mAlignWithParent;
@@ -315,7 +315,7 @@ ECode RelativeLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::InitFromAttributes(
+ECode RelativeLayout::RelativeLayoutLayoutParams::InitFromAttributes(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -433,7 +433,7 @@ ECode RelativeLayout::LayoutParams::InitFromAttributes(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::AddRule(
+ECode RelativeLayout::RelativeLayoutLayoutParams::AddRule(
     /* [in] */ Int32 verb)
 {
     if (verb < 0 || verb >= mRules->GetLength())
@@ -446,7 +446,7 @@ ECode RelativeLayout::LayoutParams::AddRule(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::AddRule(
+ECode RelativeLayout::RelativeLayoutLayoutParams::AddRule(
     /* [in] */ Int32 verb,
     /* [in] */ Int32 anchor)
 {
@@ -459,7 +459,7 @@ ECode RelativeLayout::LayoutParams::AddRule(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::RemoveRule(
+ECode RelativeLayout::RelativeLayoutLayoutParams::RemoveRule(
     /* [in] */ Int32 verb)
 {
     if (verb < 0 || verb >= mRules->GetLength())
@@ -471,7 +471,7 @@ ECode RelativeLayout::LayoutParams::RemoveRule(
     return NOERROR;
 }
 
-Boolean RelativeLayout::LayoutParams::HasRelativeRules()
+Boolean RelativeLayout::RelativeLayoutLayoutParams::HasRelativeRules()
 {
     return ((*mInitialRules)[IRelativeLayout::START_OF] != 0
             || (*mInitialRules)[IRelativeLayout::END_OF] != 0
@@ -481,7 +481,7 @@ Boolean RelativeLayout::LayoutParams::HasRelativeRules()
             || (*mInitialRules)[IRelativeLayout::ALIGN_PARENT_END] != 0);
 }
 
-void RelativeLayout::LayoutParams::ResolveRules(
+void RelativeLayout::RelativeLayoutLayoutParams::ResolveRules(
     /* [in] */ Int32 layoutDirection)
 {
     Boolean isLayoutRtl = (layoutDirection == IView::LAYOUT_DIRECTION_RTL);
@@ -600,7 +600,7 @@ void RelativeLayout::LayoutParams::ResolveRules(
     mRulesChanged = FALSE;
 }
 
-ECode RelativeLayout::LayoutParams::GetRules(
+ECode RelativeLayout::RelativeLayoutLayoutParams::GetRules(
     /* [in] */ Int32 layoutDirection,
     /* [out, callee] */ ArrayOf<Int32>** rules)
 {
@@ -618,7 +618,7 @@ ECode RelativeLayout::LayoutParams::GetRules(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::GetRules(
+ECode RelativeLayout::RelativeLayoutLayoutParams::GetRules(
     /* [out, callee] */ ArrayOf<Int32>** rules)
 {
     VALIDATE_NOT_NULL(rules);
@@ -627,7 +627,7 @@ ECode RelativeLayout::LayoutParams::GetRules(
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::ResolveLayoutDirection(
+ECode RelativeLayout::RelativeLayoutLayoutParams::ResolveLayoutDirection(
     /* [in] */ Int32 layoutDirection)
 {
     Boolean isLayoutRtl = FALSE;
@@ -641,14 +641,14 @@ ECode RelativeLayout::LayoutParams::ResolveLayoutDirection(
     return MarginLayoutParams::ResolveLayoutDirection(layoutDirection);
 }
 
-ECode RelativeLayout::LayoutParams::SetAlignWithParent(
+ECode RelativeLayout::RelativeLayoutLayoutParams::SetAlignWithParent(
     /* [in] */ Boolean align)
 {
     mAlignWithParent = align;
     return NOERROR;
 }
 
-ECode RelativeLayout::LayoutParams::GetAlignWithParent(
+ECode RelativeLayout::RelativeLayoutLayoutParams::GetAlignWithParent(
     /* [out] */ Boolean* align)
 {
     VALIDATE_NOT_NULL(align);
@@ -698,8 +698,8 @@ RelativeLayout::RelativeLayout()
     , mAllowBrokenMeasureSpecs(FALSE)
     , mMeasureVerticalWithPaddingMargin(FALSE)
 {
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mContentBounds));
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mSelfBounds));
+    CRect::New((IRect**)&mContentBounds);
+    CRect::New((IRect**)&mSelfBounds);
     mGraph = new DependencyGraph();
 }
 
@@ -740,8 +740,8 @@ ECode RelativeLayout::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    ASSERT_SUCCEEDED(ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes));
-    ASSERT_SUCCEEDED(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
+    FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes));
+    FAIL_RETURN(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
     QueryCompatibilityModes(context);
     return NOERROR;
 }
@@ -970,7 +970,7 @@ void RelativeLayout::OnMeasure(
             AutoPtr<ArrayOf<Int32> > rules;
             params->GetRules(layoutDirection, (ArrayOf<Int32>**)&rules);
 
-            LayoutParams* lp = (LayoutParams*)params;
+            RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)params;
             ApplyHorizontalSizeRules(lp, myWidth, rules);
             MeasureChildHorizontal(child, lp, myWidth, myHeight);
             if (PositionChildHorizontal(child, lp, myWidth, isWrapContentWidth)) {
@@ -988,6 +988,8 @@ void RelativeLayout::OnMeasure(
     Int32 targetSdkVersion = 0;
     info->GetTargetSdkVersion(&targetSdkVersion);
 
+    using Elastos::Core::Math;
+
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child = (*views)[i];
         assert(child);
@@ -999,7 +1001,7 @@ void RelativeLayout::OnMeasure(
             child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
             IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
 
-            LayoutParams* lp = (LayoutParams*)params;
+            RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)params;
             assert(lp);
             ApplyVerticalSizeRules(lp, myHeight);
             MeasureChild(child, lp, myWidth, myHeight);
@@ -1010,35 +1012,35 @@ void RelativeLayout::OnMeasure(
             if (isWrapContentWidth) {
                 if ((IsLayoutRtl(&rtl), rtl)) {
                     if (targetSdkVersion < Build::VERSION_CODES::KITKAT) {
-                        width = Elastos::Core::Math::Max(width, myWidth - lp->mLeft);
+                        width = Math::Max(width, myWidth - lp->mLeft);
                     } else {
-                        width = Elastos::Core::Math::Max(width, myWidth - lp->mLeft - lp->mLeftMargin);
+                        width = Math::Max(width, myWidth - lp->mLeft - lp->mLeftMargin);
                     }
                 } else {
                     if (targetSdkVersion < Build::VERSION_CODES::KITKAT) {
-                        width = Elastos::Core::Math::Max(width, lp->mRight);
+                        width = Math::Max(width, lp->mRight);
                     } else {
-                        width = Elastos::Core::Math::Max(width, lp->mRight + lp->mRightMargin);
+                        width = Math::Max(width, lp->mRight + lp->mRightMargin);
                     }
                 }
             }
 
             if (isWrapContentHeight) {
                 if (targetSdkVersion < Build::VERSION_CODES::KITKAT) {
-                    height = Elastos::Core::Math::Max(height, lp->mBottom);
+                    height = Math::Max(height, lp->mBottom);
                 } else {
-                    height = Elastos::Core::Math::Max(height, lp->mBottom + lp->mBottomMargin);
+                    height = Math::Max(height, lp->mBottom + lp->mBottomMargin);
                 }
             }
 
             if (child != ignore || verticalGravity) {
-                left = Elastos::Core::Math::Min(left, lp->mLeft - lp->mLeftMargin);
-                top = Elastos::Core::Math::Min(top, lp->mTop - lp->mTopMargin);
+                left = Math::Min(left, lp->mLeft - lp->mLeftMargin);
+                top = Math::Min(top, lp->mTop - lp->mTopMargin);
             }
 
             if (child != ignore || horizontalGravity) {
-                right = Elastos::Core::Math::Max(right, lp->mRight + lp->mRightMargin);
-                bottom = Elastos::Core::Math::Max(bottom, lp->mBottom + lp->mBottomMargin);
+                right = Math::Max(right, lp->mRight + lp->mRightMargin);
+                bottom = Math::Max(bottom, lp->mBottom + lp->mBottomMargin);
             }
         }
     }
@@ -1053,16 +1055,16 @@ void RelativeLayout::OnMeasure(
                 child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
                 IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
 
-                LayoutParams* lp = (LayoutParams*)params;
+                RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)params;
                 AlignBaseline(child, lp);
                 if (child != ignore || verticalGravity) {
-                    left = Elastos::Core::Math::Min(left, lp->mLeft - lp->mLeftMargin);
-                    top = Elastos::Core::Math::Min(top, lp->mTop - lp->mTopMargin);
+                    left = Math::Min(left, lp->mLeft - lp->mLeftMargin);
+                    top = Math::Min(top, lp->mTop - lp->mTopMargin);
                 }
 
                 if (child != ignore || horizontalGravity) {
-                    right = Elastos::Core::Math::Max(right, lp->mRight + lp->mRightMargin);
-                    bottom = Elastos::Core::Math::Max(bottom, lp->mBottom + lp->mBottomMargin);
+                    right = Math::Max(right, lp->mRight + lp->mRightMargin);
+                    bottom = Math::Max(bottom, lp->mBottom + lp->mBottomMargin);
                 }
             }
         }
@@ -1075,10 +1077,10 @@ void RelativeLayout::OnMeasure(
 
         Int32 lpWidth = 0;
         if (mLayoutParams != NULL && (mLayoutParams->GetWidth(&lpWidth), lpWidth) >= 0) {
-            width = Elastos::Core::Math::Max(width, lpWidth);
+            width = Math::Max(width, lpWidth);
         }
 
-        width = Elastos::Core::Math::Max(width, GetSuggestedMinimumWidth());
+        width = Math::Max(width, GetSuggestedMinimumWidth());
         width = ResolveSize(width, widthMeasureSpec);
 
         if (offsetHorizontalAxis) {
@@ -1092,7 +1094,7 @@ void RelativeLayout::OnMeasure(
                     AutoPtr<IViewGroupLayoutParams> vglp;
                     child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
 
-                    LayoutParams* lp = (LayoutParams*)IRelativeLayoutLayoutParams::Probe(vglp);
+                    RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)IRelativeLayoutLayoutParams::Probe(vglp);
                     AutoPtr<ArrayOf<Int32> > rules;
                     lp->GetRules(layoutDirection, (ArrayOf<Int32>**)&rules);
                     if ((*rules)[IRelativeLayout::CENTER_IN_PARENT] != 0 ||
@@ -1117,10 +1119,10 @@ void RelativeLayout::OnMeasure(
 
         Int32 lpHeight = 0;
         if (mLayoutParams != NULL && (mLayoutParams->GetHeight(&lpHeight), lpHeight) >= 0) {
-            height = Elastos::Core::Math::Max(height, lpHeight);
+            height = Math::Max(height, lpHeight);
         }
 
-        height = Elastos::Core::Math::Max(height, GetSuggestedMinimumHeight());
+        height = Math::Max(height, GetSuggestedMinimumHeight());
         height = ResolveSize(height, heightMeasureSpec);
 
         if (offsetVerticalAxis) {
@@ -1135,7 +1137,7 @@ void RelativeLayout::OnMeasure(
                     child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
                     IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
 
-                    LayoutParams* lp = (LayoutParams*)params;
+                    RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)params;
                     AutoPtr<ArrayOf<Int32> > rules;
                     lp->GetRules(layoutDirection, (ArrayOf<Int32>**)&rules);
                     if ((*rules)[IRelativeLayout::CENTER_IN_PARENT] != 0 ||
@@ -1173,7 +1175,7 @@ void RelativeLayout::OnMeasure(
                     AutoPtr<IViewGroupLayoutParams> vglp;
                     child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
                     IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
-                    LayoutParams* lp = (LayoutParams*)params;
+                    RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)params;
 
                     if (horizontalGravity) {
                         lp->mLeft += horizontalOffset;
@@ -1199,8 +1201,8 @@ void RelativeLayout::OnMeasure(
                 child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
 
                 AutoPtr<IRelativeLayoutLayoutParams> params = IRelativeLayoutLayoutParams::Probe(vglp);
-                ((LayoutParams*)params.Get())->mLeft -= offsetWidth;
-                ((LayoutParams*)params.Get())->mRight -= offsetWidth;
+                ((RelativeLayoutLayoutParams*)params.Get())->mLeft -= offsetWidth;
+                ((RelativeLayoutLayoutParams*)params.Get())->mRight -= offsetWidth;
             }
         }
     }
@@ -1210,7 +1212,7 @@ void RelativeLayout::OnMeasure(
 
 void RelativeLayout::AlignBaseline(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params)
+    /* [in] */ RelativeLayoutLayoutParams* params)
 {
     assert(child != NULL && params != NULL);
 
@@ -1222,7 +1224,7 @@ void RelativeLayout::AlignBaseline(
     Int32 anchorBaseline = GetRelatedViewBaseline(rules, IRelativeLayout::ALIGN_BASELINE);
 
     if (anchorBaseline != -1) {
-        AutoPtr<LayoutParams> anchorParams =
+        AutoPtr<RelativeLayoutLayoutParams> anchorParams =
                 GetRelatedViewParams(rules, IRelativeLayout::ALIGN_BASELINE);
         if (anchorParams != NULL) {
             Int32 offset = anchorParams->mTop + anchorBaseline;
@@ -1244,7 +1246,7 @@ void RelativeLayout::AlignBaseline(
         AutoPtr<IViewGroupLayoutParams> vglp;
         mBaselineView->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
         IRelativeLayoutLayoutParams* layoutParams = IRelativeLayoutLayoutParams::Probe(vglp);
-        LayoutParams* lp = (LayoutParams*)layoutParams;
+        RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)layoutParams;
 
         if (params->mTop < lp->mTop || (params->mTop == lp->mTop && params->mLeft < lp->mLeft)) {
             mBaselineView = child;
@@ -1254,7 +1256,7 @@ void RelativeLayout::AlignBaseline(
 
 void RelativeLayout::MeasureChild(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params,
+    /* [in] */ RelativeLayoutLayoutParams* params,
     /* [in] */ Int32 myWidth,
     /* [in] */ Int32 myHeight)
 {
@@ -1273,7 +1275,7 @@ void RelativeLayout::MeasureChild(
 
 void RelativeLayout::MeasureChildHorizontal(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params,
+    /* [in] */ RelativeLayoutLayoutParams* params,
     /* [in] */ Int32 myWidth,
     /* [in] */ Int32 myHeight)
 {
@@ -1407,7 +1409,7 @@ Int32 RelativeLayout::GetChildMeasureSpec(
 
 Boolean RelativeLayout::PositionChildHorizontal(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params,
+    /* [in] */ RelativeLayoutLayoutParams* params,
     /* [in] */ Int32 myWidth,
     /* [in] */ Boolean wrapContent)
 {
@@ -1461,7 +1463,7 @@ Boolean RelativeLayout::PositionChildHorizontal(
 
 Boolean RelativeLayout::PositionChildVertical(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params,
+    /* [in] */ RelativeLayoutLayoutParams* params,
     /* [in] */ Int32 myHeight,
     /* [in] */ Boolean wrapContent)
 {
@@ -1502,12 +1504,12 @@ Boolean RelativeLayout::PositionChildVertical(
 }
 
 void RelativeLayout::ApplyHorizontalSizeRules(
-    /* [in] */ LayoutParams* childParams,
+    /* [in] */ RelativeLayoutLayoutParams* childParams,
     /* [in] */ Int32 myWidth,
     /* [in] */ ArrayOf<Int32>* rules)
 {
     assert(childParams != NULL);
-    AutoPtr<LayoutParams> anchorParams;
+    AutoPtr<RelativeLayoutLayoutParams> anchorParams;
 
     // VALUE_NOT_SET indicates a "soft requirement" in that direction. For example:
     // left=10, right=VALUE_NOT_SET means the view must start at 10, but can go as far as it
@@ -1569,14 +1571,14 @@ void RelativeLayout::ApplyHorizontalSizeRules(
 }
 
 void RelativeLayout::ApplyVerticalSizeRules(
-    /* [in] */ LayoutParams* childParams,
+    /* [in] */ RelativeLayoutLayoutParams* childParams,
     /* [in] */ Int32 myHeight)
 {
     assert(childParams != NULL);
 
     AutoPtr<ArrayOf<Int32> > rules;
     childParams->GetRules((ArrayOf<Int32>**)&rules);
-    AutoPtr<LayoutParams> anchorParams;
+    AutoPtr<RelativeLayoutLayoutParams> anchorParams;
 
     childParams->mTop = VALUE_NOT_SET;
     childParams->mBottom = VALUE_NOT_SET;
@@ -1676,17 +1678,17 @@ AutoPtr<IView> RelativeLayout::GetRelatedView(
     return v;
 }
 
-AutoPtr<RelativeLayout::LayoutParams> RelativeLayout::GetRelatedViewParams(
+AutoPtr<RelativeLayout::RelativeLayoutLayoutParams> RelativeLayout::GetRelatedViewParams(
     /* [in] */ ArrayOf<Int32>* rules,
     /* [in] */ Int32 relation)
 {
-    AutoPtr<LayoutParams> lp;
+    AutoPtr<RelativeLayoutLayoutParams> lp;
     AutoPtr<IView> v = GetRelatedView(rules, relation);
     if (v != NULL) {
         AutoPtr<IViewGroupLayoutParams> params;
         v->GetLayoutParams((IViewGroupLayoutParams**)&params);
         if (params != NULL && params->Probe(EIID_IRelativeLayoutLayoutParams) != NULL) {
-             lp = (LayoutParams*)IRelativeLayoutLayoutParams::Probe(params);
+             lp = (RelativeLayoutLayoutParams*)IRelativeLayoutLayoutParams::Probe(params);
         }
     }
 
@@ -1710,7 +1712,7 @@ Int32 RelativeLayout::GetRelatedViewBaseline(
 
 void RelativeLayout::CenterHorizontal(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params,
+    /* [in] */ RelativeLayoutLayoutParams* params,
     /* [in] */ Int32 myWidth)
 {
     assert(child != NULL);
@@ -1725,7 +1727,7 @@ void RelativeLayout::CenterHorizontal(
 
 void RelativeLayout::CenterVertical(
     /* [in] */ IView* child,
-    /* [in] */ LayoutParams* params,
+    /* [in] */ RelativeLayoutLayoutParams* params,
     /* [in] */ Int32 myHeight)
 {
     assert(child != NULL);
@@ -1758,7 +1760,7 @@ ECode RelativeLayout::OnLayout(
         if (visibility != IView::GONE) {
             AutoPtr<IViewGroupLayoutParams> vglp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
-            LayoutParams* st = (LayoutParams*)IRelativeLayoutLayoutParams::Probe(vglp);
+            RelativeLayoutLayoutParams* st = (RelativeLayoutLayoutParams*)IRelativeLayoutLayoutParams::Probe(vglp);
             child->Layout(st->mLeft, st->mTop, st->mRight, st->mBottom);
         }
     }
@@ -1854,7 +1856,6 @@ ECode RelativeLayout::OnInitializeAccessibilityNodeInfo(
     CString::New(String("CRelativeLayout"), (ICharSequence**)&seq);
     return info->SetClassName(seq);
 }
-
 
 } // namespace Widget
 } // namespace Droid

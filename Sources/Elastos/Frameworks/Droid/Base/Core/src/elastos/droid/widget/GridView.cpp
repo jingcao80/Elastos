@@ -1115,12 +1115,15 @@ void GridView::OnMeasure(
 
         AutoPtr<IViewGroupLayoutParams> vglp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
-        IAbsListViewLayoutParams* p = IAbsListViewLayoutParams::Probe(vglp);
-        if (p == NULL) {
-            CAbsListViewLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
-                IViewGroupLayoutParams::WRAP_CONTENT, 0, (IViewGroupLayoutParams**)&vglp);
-            child->SetLayoutParams(vglp);
+        IAbsListViewLayoutParams* p;
+        if (vglp != NULL) {
             p = IAbsListViewLayoutParams::Probe(vglp);
+        }
+        else {
+            CAbsListViewLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
+                    IViewGroupLayoutParams::WRAP_CONTENT, 0, (IViewGroupLayoutParams**)&vglp);
+            p = IAbsListViewLayoutParams::Probe(vglp);
+            child->SetLayoutParams(vglp);
         }
 
         CAbsListViewLayoutParams* alvlp = (CAbsListViewLayoutParams*)p;
@@ -1135,7 +1138,7 @@ void GridView::OnMeasure(
 
         child->GetMeasuredHeight(&childHeight);
 
-        if (mRecycler->ShouldRecycleViewType(((CAbsListViewLayoutParams*)p)->mViewType)) {
+        if (mRecycler->ShouldRecycleViewType(alvlp->mViewType)) {
             mRecycler->AddScrapView(child, -1);
         }
     }
@@ -2241,8 +2244,9 @@ ECode GridView::OnInitializeAccessibilityNodeInfoForItem(
 
     AutoPtr<IViewGroupLayoutParams> lp;
     view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-    AbsListView::LayoutParams* temp = (AbsListView::LayoutParams*)IAbsListViewLayoutParams::Probe(lp);
-    Boolean isHeading = lp != NULL && temp->mViewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
+    Int32 viewType;
+    IAbsListViewLayoutParams::Probe(lp)->GetViewType(&viewType);
+    Boolean isHeading = lp != NULL && viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
     Boolean isSelected;
     IsItemChecked(position, &isSelected);
 

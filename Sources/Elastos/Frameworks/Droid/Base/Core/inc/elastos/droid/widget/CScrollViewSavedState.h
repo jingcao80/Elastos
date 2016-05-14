@@ -8,7 +8,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CarClass(CScrollViewSavedState), public ScrollView::SavedState
+CarClass(CScrollViewSavedState)
+    , public ScrollView::ScrollViewSavedState
 {
 public:
     CAR_OBJECT_DECL();

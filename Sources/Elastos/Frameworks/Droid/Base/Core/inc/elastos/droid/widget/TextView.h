@@ -452,21 +452,16 @@ public:
      * User interface state that is stored by TextView for implementing
      * {@link View#onSaveInstanceState}.
      */
-    class SavedState
+    class TextViewSavedState
         : public View::BaseSavedState
         , public ITextViewSavedState
     {
     public:
         CAR_INTERFACE_DECL()
 
-        SavedState();
+        TextViewSavedState();
 
-        ~SavedState();
-
-        CARAPI constructor();
-
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        ~TextViewSavedState();
 
         // @Override
         CARAPI WriteToParcel(

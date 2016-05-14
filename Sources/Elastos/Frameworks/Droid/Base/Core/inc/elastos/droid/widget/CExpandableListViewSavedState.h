@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CExpandableListViewSavedState)
-    , public ExpandableListView::SavedState
+    , public ExpandableListView::ExpandableListViewSavedState
 {
 public:
     CAR_OBJECT_DECL();

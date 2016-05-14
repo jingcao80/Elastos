@@ -12,15 +12,14 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+CAR_INTERFACE_IMPL(AbsoluteLayout::AbsoluteLayoutLayoutParams, ViewGroup::LayoutParams, IAbsoluteLayoutLayoutParams)
 
-CAR_INTERFACE_IMPL(AbsoluteLayout::LayoutParams, ViewGroup::LayoutParams, IAbsoluteLayoutLayoutParams)
-
-AbsoluteLayout::LayoutParams::LayoutParams()
+AbsoluteLayout::AbsoluteLayoutLayoutParams::AbsoluteLayoutLayoutParams()
     : mX(0)
     , mY(0)
 {}
 
-ECode AbsoluteLayout::LayoutParams::constructor(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 x,
@@ -32,7 +31,7 @@ ECode AbsoluteLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode AbsoluteLayout::LayoutParams::constructor(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -40,13 +39,13 @@ ECode AbsoluteLayout::LayoutParams::constructor(
     return InitFromAttributes(c, attrs);
 }
 
-ECode AbsoluteLayout::LayoutParams::constructor(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ViewGroup::LayoutParams::constructor(source);
 }
 
-ECode AbsoluteLayout::LayoutParams::InitFromAttributes(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::InitFromAttributes(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -64,21 +63,21 @@ ECode AbsoluteLayout::LayoutParams::InitFromAttributes(
     return a->Recycle();
 }
 
-ECode AbsoluteLayout::LayoutParams::SetX(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::SetX(
     /* [in] */ Int32 x)
 {
     mX = x;
     return NOERROR;
 }
 
-ECode AbsoluteLayout::LayoutParams::SetY(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::SetY(
     /* [in] */ Int32 y)
 {
     mY = y;
     return NOERROR;
 }
 
-ECode AbsoluteLayout::LayoutParams::GetX(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::GetX(
     /* [out] */ Int32* x)
 {
     VALIDATE_NOT_NULL(x)
@@ -86,7 +85,7 @@ ECode AbsoluteLayout::LayoutParams::GetX(
     return NOERROR;
 }
 
-ECode AbsoluteLayout::LayoutParams::GetY(
+ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::GetY(
     /* [out] */ Int32* y)
 {
     VALIDATE_NOT_NULL(y)

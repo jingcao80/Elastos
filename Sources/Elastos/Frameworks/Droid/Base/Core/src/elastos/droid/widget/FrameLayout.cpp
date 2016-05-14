@@ -24,13 +24,13 @@ namespace Widget {
 
 static const String TAG("FrameLayout");
 
-CAR_INTERFACE_IMPL(FrameLayout::LayoutParams, ViewGroup::MarginLayoutParams, IFrameLayoutLayoutParams)
+CAR_INTERFACE_IMPL(FrameLayout::FrameLayoutLayoutParams, ViewGroup::MarginLayoutParams, IFrameLayoutLayoutParams)
 
-FrameLayout::LayoutParams::LayoutParams()
+FrameLayout::FrameLayoutLayoutParams::FrameLayoutLayoutParams()
     : mGravity(-1)
 {}
 
-ECode FrameLayout::LayoutParams::constructor(
+ECode FrameLayout::FrameLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -47,14 +47,14 @@ ECode FrameLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode FrameLayout::LayoutParams::constructor(
+ECode FrameLayout::FrameLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     return ViewGroup::MarginLayoutParams::constructor(width, height);
 }
 
-ECode FrameLayout::LayoutParams::constructor(
+ECode FrameLayout::FrameLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 gravity)
@@ -64,27 +64,27 @@ ECode FrameLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode FrameLayout::LayoutParams::constructor(
+ECode FrameLayout::FrameLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ViewGroup::MarginLayoutParams::constructor(source);
 }
 
-ECode FrameLayout::LayoutParams::constructor(
+ECode FrameLayout::FrameLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
     return ViewGroup::MarginLayoutParams::constructor(source);
 }
 
-ECode FrameLayout::LayoutParams::constructor(
+ECode FrameLayout::FrameLayoutLayoutParams::constructor(
     /* [in] */ IFrameLayoutLayoutParams* source)
 {
     ViewGroup::MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(source));
-    mGravity = ((LayoutParams*)source)->mGravity;
+    mGravity = ((FrameLayoutLayoutParams*)source)->mGravity;
     return NOERROR;
 }
 
-ECode FrameLayout::LayoutParams::GetGravity(
+ECode FrameLayout::FrameLayoutLayoutParams::GetGravity(
     /* [out] */ Int32* gravity)
 {
     VALIDATE_NOT_NULL(gravity);
@@ -92,7 +92,7 @@ ECode FrameLayout::LayoutParams::GetGravity(
     return NOERROR;
 }
 
-ECode FrameLayout::LayoutParams::SetGravity(
+ECode FrameLayout::FrameLayoutLayoutParams::SetGravity(
     /* [in] */ Int32 gravity)
 {
     mGravity = gravity;

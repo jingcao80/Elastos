@@ -167,23 +167,23 @@ ECode ExpandableListView::ExpandableListContextMenuInfo::GetId(
 }
 
 //==============================================================================
-//          ExpandableListView::SavedState
+//          ExpandableListView::ExpandableListViewSavedState
 //==============================================================================
 
-CAR_INTERFACE_IMPL(ExpandableListView::SavedState, View::BaseSavedState, IExpandableListViewSavedState);
+CAR_INTERFACE_IMPL(ExpandableListView::ExpandableListViewSavedState, View::BaseSavedState, IExpandableListViewSavedState);
 
-ExpandableListView::SavedState::SavedState()
+ExpandableListView::ExpandableListViewSavedState::ExpandableListViewSavedState()
 {}
 
-ExpandableListView::SavedState::~SavedState()
+ExpandableListView::ExpandableListViewSavedState::~ExpandableListViewSavedState()
 {}
 
-ECode ExpandableListView::SavedState::constructor()
+ECode ExpandableListView::ExpandableListViewSavedState::constructor()
 {
     return View::BaseSavedState::constructor();
 }
 
-ECode ExpandableListView::SavedState::constructor(
+ECode ExpandableListView::ExpandableListViewSavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ IArrayList* expandedGroupMetadataList)
 {
@@ -192,7 +192,7 @@ ECode ExpandableListView::SavedState::constructor(
     return NOERROR;
 }
 
-ECode ExpandableListView::SavedState::WriteToParcel(
+ECode ExpandableListView::ExpandableListViewSavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     FAIL_RETURN(View::BaseSavedState::WriteToParcel(out));
@@ -208,7 +208,7 @@ ECode ExpandableListView::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode ExpandableListView::SavedState::ReadFromParcel(
+ECode ExpandableListView::ExpandableListViewSavedState::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     FAIL_RETURN(View::BaseSavedState::ReadFromParcel(in));
@@ -1153,7 +1153,7 @@ void ExpandableListView::OnRestoreInstanceState(
     }
 
     AutoPtr<IExpandableListView> view = IExpandableListView::Probe(state);
-    AutoPtr<SavedState> ss = (SavedState*)view.Get();
+    AutoPtr<ExpandableListViewSavedState> ss = (ExpandableListViewSavedState*)view.Get();
     AutoPtr<IParcelable> p;
     ss->GetSuperState((IParcelable**)&p);
     ListView::OnRestoreInstanceState(p);

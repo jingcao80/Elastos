@@ -170,24 +170,16 @@ ProgressBar::ProgressTintInfo::ProgressTintInfo()
     , mHasSecondaryProgressTintMode(FALSE)
 {}
 
-CAR_INTERFACE_IMPL(ProgressBar::SavedState, BaseSavedState, IProgressBarSavedState);
-ProgressBar::SavedState::SavedState()
+CAR_INTERFACE_IMPL(ProgressBar::ProgressBarSavedState, BaseSavedState, IProgressBarSavedState);
+ProgressBar::ProgressBarSavedState::ProgressBarSavedState()
     : mProgress(0)
     , mSecondaryProgress(0)
 {}
 
-ECode ProgressBar::SavedState::constructor()
-{
-    return NOERROR;
-}
+ProgressBar::ProgressBarSavedState::~ProgressBarSavedState()
+{}
 
-ECode ProgressBar::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return BaseSavedState::constructor(superState);
-}
-
-ECode ProgressBar::SavedState::WriteToParcel(
+ECode ProgressBar::ProgressBarSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     BaseSavedState::WriteToParcel(dest);
@@ -197,7 +189,7 @@ ECode ProgressBar::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode ProgressBar::SavedState::ReadFromParcel(
+ECode ProgressBar::ProgressBarSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);

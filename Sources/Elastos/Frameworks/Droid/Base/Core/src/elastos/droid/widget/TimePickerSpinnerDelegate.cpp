@@ -54,11 +54,11 @@ namespace Widget {
 using Elastos::Droid::Text::Format::IDateFormat;
 
 //=====================================================================
-//                TimePickerSpinnerDelegate::SavedState
+//                TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState
 //=====================================================================
-CAR_INTERFACE_IMPL(TimePickerSpinnerDelegate::SavedState, Elastos::Droid::View::View::BaseSavedState, ITimePickerSpinnerDelegateSavedState)
+CAR_INTERFACE_IMPL(TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState, Elastos::Droid::View::View::BaseSavedState, ITimePickerSpinnerDelegateSavedState)
 
-TimePickerSpinnerDelegate::SavedState::SavedState()
+TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::TimePickerSpinnerDelegateSavedState()
     : mHour(0)
     , mMinute(0)
     , mIs24HourMode(FALSE)
@@ -66,15 +66,15 @@ TimePickerSpinnerDelegate::SavedState::SavedState()
     , mCurrentItemShowing(0)
 {}
 
-TimePickerSpinnerDelegate::SavedState::~SavedState()
+TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::~TimePickerSpinnerDelegateSavedState()
 {}
 
-ECode TimePickerSpinnerDelegate::SavedState::constructor()
+ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::constructor()
 {
     return Elastos::Droid::View::View::BaseSavedState::constructor();
 }
 
-ECode TimePickerSpinnerDelegate::SavedState::constructor(
+ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ Int32 hour,
     /* [in] */ Int32 minute,
@@ -94,37 +94,37 @@ ECode TimePickerSpinnerDelegate::SavedState::constructor(
     return NOERROR;
 }
 
-Int32 TimePickerSpinnerDelegate::SavedState::GetHour()
+Int32 TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::GetHour()
 {
     return mHour;
 }
 
-Int32 TimePickerSpinnerDelegate::SavedState::GetMinute()
+Int32 TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::GetMinute()
 {
     return mMinute;
 }
 
-Boolean TimePickerSpinnerDelegate::SavedState::Is24HourMode()
+Boolean TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::Is24HourMode()
 {
     return mIs24HourMode;
 }
 
-Boolean TimePickerSpinnerDelegate::SavedState::InKbMode()
+Boolean TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::InKbMode()
 {
     return mInKbMode;
 }
 
-AutoPtr<IArrayList> TimePickerSpinnerDelegate::SavedState::GetTypesTimes()
+AutoPtr<IArrayList> TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::GetTypesTimes()
 {
     return mTypedTimes;
 }
 
-Int32 TimePickerSpinnerDelegate::SavedState::GetCurrentItemShowing()
+Int32 TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::GetCurrentItemShowing()
 {
     return mCurrentItemShowing;
 }
 
-ECode TimePickerSpinnerDelegate::SavedState::WriteToParcel(
+ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest);
@@ -139,7 +139,7 @@ ECode TimePickerSpinnerDelegate::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode TimePickerSpinnerDelegate::SavedState::ReadFromParcel(
+ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     VALIDATE_NOT_NULL(source);
@@ -154,7 +154,7 @@ ECode TimePickerSpinnerDelegate::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode TimePickerSpinnerDelegate::SavedState::ToString(
+ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);

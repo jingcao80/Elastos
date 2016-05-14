@@ -4,13 +4,12 @@
 #include "_Elastos_Droid_Widget_CGridLayoutLayoutParams.h"
 #include "elastos/droid/widget/GridLayout.h"
 
-
 namespace Elastos {
 namespace Droid {
 namespace Widget {
 
 CarClass(CGridLayoutLayoutParams)
-    , public GridLayout::LayoutParams
+    , public GridLayout::GridLayoutLayoutParams
 {
 public:
     CAR_OBJECT_DECL()

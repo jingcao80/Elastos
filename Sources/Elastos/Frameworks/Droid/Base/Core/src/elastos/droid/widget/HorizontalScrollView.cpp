@@ -46,24 +46,18 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-HorizontalScrollView::SavedState::SavedState()
+CAR_INTERFACE_IMPL(HorizontalScrollView::HorizontalScrollViewSavedState, View::BaseSavedState, IHorizontalScrollViewSavedState)
+
+HorizontalScrollView::HorizontalScrollViewSavedState::HorizontalScrollViewSavedState()
     : mScrollPosition(0)
     , mIsLayoutRtl(FALSE)
 {
 }
 
-ECode HorizontalScrollView::SavedState::constructor()
-{
-    return NOERROR;
-}
+HorizontalScrollView::HorizontalScrollViewSavedState::~HorizontalScrollViewSavedState()
+{}
 
-ECode HorizontalScrollView::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return View::BaseSavedState::constructor(superState);
-}
-
-ECode HorizontalScrollView::SavedState::WriteToParcel(
+ECode HorizontalScrollView::HorizontalScrollViewSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     BaseSavedState::WriteToParcel(dest);
@@ -72,7 +66,7 @@ ECode HorizontalScrollView::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode HorizontalScrollView::SavedState::ReadFromParcel(
+ECode HorizontalScrollView::HorizontalScrollViewSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);
@@ -88,7 +82,7 @@ ECode HorizontalScrollView::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode HorizontalScrollView::SavedState::ToString(
+ECode HorizontalScrollView::HorizontalScrollViewSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
@@ -377,7 +371,7 @@ void HorizontalScrollView::OnMeasure(
 
             Int32 childHeightMeasureSpec = GetChildMeasureSpec(heightMeasureSpec,
                     mPaddingTop + mPaddingBottom,
-                    ((FrameLayout::LayoutParams*)params)->mHeight);
+                    ((FrameLayout::FrameLayoutLayoutParams*)params)->mHeight);
             width -= mPaddingLeft;
             width -= mPaddingRight;
             Int32 childWidthMeasureSpec =
@@ -1651,7 +1645,7 @@ ECode HorizontalScrollView::OnLayout(
         child->GetMeasuredWidth(&childWidth);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<FrameLayout::LayoutParams> childParams = (FrameLayout::LayoutParams*) IFrameLayoutLayoutParams::Probe(params);
+        AutoPtr<FrameLayout::FrameLayoutLayoutParams> childParams = (FrameLayout::FrameLayoutLayoutParams*) IFrameLayoutLayoutParams::Probe(params);
         childMargins = childParams->mLeftMargin + childParams->mRightMargin;
     }
 
@@ -1893,7 +1887,7 @@ void HorizontalScrollView::OnRestoreInstanceState(
         FrameLayout::OnRestoreInstanceState(state);
         return;
     }
-    AutoPtr<SavedState> ss = (SavedState*) IViewBaseSavedState::Probe(state);
+    AutoPtr<HorizontalScrollViewSavedState> ss = (HorizontalScrollViewSavedState*) IViewBaseSavedState::Probe(state);
     AutoPtr<IParcelable> p;
     ss->GetSuperState((IParcelable**)&p);
     FrameLayout::OnRestoreInstanceState(p);
@@ -1915,7 +1909,7 @@ AutoPtr<IParcelable> HorizontalScrollView::OnSaveInstanceState()
     AutoPtr<IParcelable> superState = FrameLayout::OnSaveInstanceState();
     AutoPtr<IParcelable> _ss;
     CHorizontalScrollViewSavedState::New(superState, (IParcelable**)&_ss);
-    SavedState* ss = (SavedState*)_ss.Get();
+    HorizontalScrollViewSavedState* ss = (HorizontalScrollViewSavedState*)_ss.Get();
     ss->mScrollPosition = mScrollX;
     IsLayoutRtl(&ss->mIsLayoutRtl);
     return ss;

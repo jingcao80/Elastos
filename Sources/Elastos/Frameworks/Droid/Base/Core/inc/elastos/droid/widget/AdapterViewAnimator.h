@@ -59,34 +59,37 @@ public:
         AdapterViewAnimator* mHost;
     };
 
-    class SavedState
+    class AdapterViewAnimatorSavedState
         : public View::BaseSavedState
+        , public IAdapterViewAnimatorSavedState
     {
+        friend class AdapterViewAnimator;
     public:
-        SavedState(
+        CAR_INTERFACE_DECL()
+
+        AdapterViewAnimatorSavedState();
+
+        ~AdapterViewAnimatorSavedState();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
             /* [in] */ IParcelable* superState,
             /* [in] */ Int32 whichChild);
 
         // @Override
         CARAPI WriteToParcel(
-            /* [in] */ IParcel* out,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* out);
+
+        // @Override
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* source);
 
         // @Override
         CARAPI ToString(
             /* [out] */ String* result);
 
-    private:
-        /**
-         * Constructor called from {@link #CREATOR}
-         */
-        /*SavedState(Parcel in) {
-            super(in);
-            this.whichChild = in.readInt();
-        }*/
-
-    public:
-        //public static final Parcelable.Creator<SavedState> CREATOR;
+    protected:
         Int32 mWhichChild;
     };
 

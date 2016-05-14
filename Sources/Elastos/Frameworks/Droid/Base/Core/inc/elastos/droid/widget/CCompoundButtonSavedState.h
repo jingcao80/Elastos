@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CCompoundButtonSavedState)
-    , public CompoundButton::SavedState
+    , public CompoundButton::CompoundButtonSavedState
 {
 public:
     CAR_OBJECT_DECL();

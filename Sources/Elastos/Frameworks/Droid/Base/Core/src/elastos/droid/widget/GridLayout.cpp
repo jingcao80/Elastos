@@ -6,11 +6,11 @@
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/widget/CGridLayoutLayoutParams.h"
 
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::IInsets;
@@ -36,15 +36,15 @@ static AutoPtr<GridLayout::Interval> InitDSpan() {
     return val;
 }
 
-const Int32 GridLayout::LayoutParams::DEFAULT_MARGIN = Elastos::Core::Math::INT32_MIN_VALUE;
-const Int32 GridLayout::LayoutParams::DEFAULT_ROW = Elastos::Core::Math::INT32_MIN_VALUE;
-const Int32 GridLayout::LayoutParams::DEFAULT_COLUMN = Elastos::Core::Math::INT32_MIN_VALUE;
-const AutoPtr<GridLayout::Interval> GridLayout::LayoutParams::DEFAULT_SPAN = InitDSpan();
-const Int32 GridLayout::LayoutParams::DEFAULT_SPAN_SIZE = DEFAULT_SPAN->Size();
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN = Elastos::Core::Math::INT32_MIN_VALUE;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_ROW = Elastos::Core::Math::INT32_MIN_VALUE;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN = Elastos::Core::Math::INT32_MIN_VALUE;
+const AutoPtr<GridLayout::Interval> GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN = InitDSpan();
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE = DEFAULT_SPAN->Size();
 
-CAR_INTERFACE_IMPL(GridLayout::LayoutParams, ViewGroup::MarginLayoutParams, IGridLayoutLayoutParams)
+CAR_INTERFACE_IMPL(GridLayout::GridLayoutLayoutParams, ViewGroup::MarginLayoutParams, IGridLayoutLayoutParams)
 
-void GridLayout::LayoutParams::ReInitSuper(
+void GridLayout::GridLayoutLayoutParams::ReInitSuper(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -66,7 +66,7 @@ void GridLayout::LayoutParams::ReInitSuper(
     //}
 }
 
-void GridLayout::LayoutParams::Init(
+void GridLayout::GridLayoutLayoutParams::Init(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -99,10 +99,10 @@ void GridLayout::LayoutParams::Init(
 }
 
 
-GridLayout::LayoutParams::LayoutParams()
+GridLayout::GridLayoutLayoutParams::GridLayoutLayoutParams()
 {}
 
-ECode GridLayout::LayoutParams::SetGravity(
+ECode GridLayout::GridLayoutLayoutParams::SetGravity(
     /* [in] */ Int32 gravity)
 {
     AutoPtr<GridLayout::Spec> row = (GridLayout::Spec*)mRowSpec.Get();
@@ -112,21 +112,21 @@ ECode GridLayout::LayoutParams::SetGravity(
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::SetRowSpec(
+ECode GridLayout::GridLayoutLayoutParams::SetRowSpec(
     /* [in] */ IGridLayoutSpec* r)
 {
     mRowSpec = r;
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::SetColumnSpec(
+ECode GridLayout::GridLayoutLayoutParams::SetColumnSpec(
     /* [in] */ IGridLayoutSpec* c)
 {
     mColumnSpec = c;
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::GetRowSpec(
+ECode GridLayout::GridLayoutLayoutParams::GetRowSpec(
     /* [out] */ IGridLayoutSpec** r)
 {
     VALIDATE_NOT_NULL(r)
@@ -136,7 +136,7 @@ ECode GridLayout::LayoutParams::GetRowSpec(
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::GetColumnSpec(
+ECode GridLayout::GridLayoutLayoutParams::GetColumnSpec(
     /* [out] */ IGridLayoutSpec** c)
 {
     VALIDATE_NOT_NULL(c)
@@ -146,21 +146,21 @@ ECode GridLayout::LayoutParams::GetColumnSpec(
     return NOERROR;
 }
 
-void GridLayout::LayoutParams::SetRowSpecSpan(
+void GridLayout::GridLayoutLayoutParams::SetRowSpecSpan(
     /* [in] */ GridLayout::Interval* span)
 {
     AutoPtr<GridLayout::Spec> row = (GridLayout::Spec*)mRowSpec.Get();
     mRowSpec = row->CopyWriteSpan(span);
 }
 
-void GridLayout::LayoutParams::SetColumnSpecSpan(
+void GridLayout::GridLayoutLayoutParams::SetColumnSpecSpan(
     /* [in] */ GridLayout::Interval* span)
 {
     AutoPtr<GridLayout::Spec> col = (GridLayout::Spec*)mColumnSpec.Get();
     mColumnSpec = col->CopyWriteSpan(span);
 }
 
-ECode GridLayout::LayoutParams::Equals(
+ECode GridLayout::GridLayoutLayoutParams::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean* result)
 {
@@ -171,7 +171,7 @@ ECode GridLayout::LayoutParams::Equals(
     IGridLayoutLayoutParams * glp = IGridLayoutLayoutParams::Probe(obj);
     if (glp == NULL) return NOERROR;
 
-    LayoutParams* that = (LayoutParams*) glp;
+    GridLayoutLayoutParams* that = (GridLayoutLayoutParams*) glp;
 
     Boolean equals = FALSE;
     IObject::Probe(mColumnSpec)->Equals(that->mColumnSpec, &equals);
@@ -183,7 +183,7 @@ ECode GridLayout::LayoutParams::Equals(
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::GetHashCode(
+ECode GridLayout::GridLayoutLayoutParams::GetHashCode(
     /* [out] */ Int32* hash)
 {
     VALIDATE_NOT_NULL(hash)
@@ -197,7 +197,7 @@ ECode GridLayout::LayoutParams::GetHashCode(
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::SetBaseAttributes(
+ECode GridLayout::GridLayoutLayoutParams::SetBaseAttributes(
     /* [in] */ ITypedArray* attributes,
     /* [in] */ Int32 widthAttr,
     /* [in] */ Int32 heightAttr)
@@ -206,7 +206,7 @@ ECode GridLayout::LayoutParams::SetBaseAttributes(
     return attributes->GetLayoutDimension(heightAttr, DEFAULT_HEIGHT, &mHeight);
 }
 
-ECode GridLayout::LayoutParams::constructor(
+ECode GridLayout::GridLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 left,
@@ -223,12 +223,12 @@ ECode GridLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::constructor()
+ECode GridLayout::GridLayoutLayoutParams::constructor()
 {
     return constructor(GridLayout::Spec::UNDEFINED, GridLayout::Spec::UNDEFINED);
 }
 
-ECode GridLayout::LayoutParams::constructor(
+ECode GridLayout::GridLayoutLayoutParams::constructor(
     /* [in] */ IGridLayoutSpec* rowSpec,
     /* [in] */ IGridLayoutSpec* columnSpec)
 {
@@ -237,29 +237,29 @@ ECode GridLayout::LayoutParams::constructor(
         rowSpec, columnSpec);
 }
 
-ECode GridLayout::LayoutParams::constructor(
+ECode GridLayout::GridLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* params)
 {
     return MarginLayoutParams::constructor(params);
 }
 
-ECode GridLayout::LayoutParams::constructor(
+ECode GridLayout::GridLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* params)
 {
     return MarginLayoutParams::constructor(params);
 }
 
-ECode GridLayout::LayoutParams::constructor(
+ECode GridLayout::GridLayoutLayoutParams::constructor(
     /* [in] */ IGridLayoutLayoutParams* that)
 {
     FAIL_RETURN(MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(that)))
-    AutoPtr<LayoutParams> cgl = (LayoutParams*)that;
+    AutoPtr<GridLayoutLayoutParams> cgl = (GridLayoutLayoutParams*)that;
     mRowSpec = cgl->mRowSpec;
     mColumnSpec = cgl->mColumnSpec;
     return NOERROR;
 }
 
-ECode GridLayout::LayoutParams::constructor(
+ECode GridLayout::GridLayoutLayoutParams::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -1292,7 +1292,8 @@ void GridLayout::ConsistencyCheck()
     if (mLastLayoutParamsHashCode == UNINITIALIZED_HASH) {
         ValidateLayoutParams();
         mLastLayoutParamsHashCode = ComputeLayoutParamsHashCode();
-    } else if (mLastLayoutParamsHashCode != ComputeLayoutParamsHashCode()) {
+    }
+    else if (mLastLayoutParamsHashCode != ComputeLayoutParamsHashCode()) {
         SLOGGERW(TAG, String("The fields of some layout parameters were modified in between layout") +
             " operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
         InvalidateStructure();
@@ -1337,7 +1338,8 @@ void GridLayout::MeasureChildrenWithMargins(
             MeasureChildWithMargins2(c, widthSpec, heightSpec, width, height);
             mHorizontalAxis->RecordOriginalMeasurement(i);
             mVerticalAxis->RecordOriginalMeasurement(i);
-        } else {
+        }
+        else {
             Boolean horizontal = (mOrientation == HORIZONTAL);
             AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
             glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
@@ -1351,7 +1353,8 @@ void GridLayout::MeasureChildrenWithMargins(
                 Int32 viewSize = cellSize - GetTotalMargin(c, horizontal);
                 if (horizontal) {
                     MeasureChildWithMargins2(c, widthSpec, heightSpec, viewSize, height);
-                } else {
+                }
+                else {
                     MeasureChildWithMargins2(c, widthSpec, heightSpec, width, viewSize);
                 }
             }
@@ -1366,7 +1369,8 @@ Int32 GridLayout::GetMeasurement(
     Int32 result = 0;
     if (horizontal) {
         c->GetMeasuredWidth(&result);
-    } else {
+    }
+    else {
         c->GetMeasuredHeight(&result);
     }
     return result;
@@ -2100,7 +2104,8 @@ void GridLayout::Axis::SetCount(
             String wt = String("column") + String("Count must be greater than or equal to the maximum of all grid indices ")
                 + String("(and spans) defined in the LayoutParams of each child");
             mHost->HandleInvalidParams(wt);
-        } else {
+        }
+        else {
             String wt = String("row") + String("Count must be greater than or equal to the maximum of all grid indices ")
                 + String("(and spans) defined in the LayoutParams of each child");
             mHost->HandleInvalidParams(wt);

@@ -14,21 +14,21 @@ namespace Droid {
 namespace Preference {
 
 //====================================================
-// PreferenceFrameLayout::LayoutParams
+// PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams
 //====================================================
 
-CAR_INTERFACE_IMPL(PreferenceFrameLayout::LayoutParams, FrameLayout::LayoutParams, IPreferenceFrameLayoutParams)
+CAR_INTERFACE_IMPL(PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams, FrameLayout::FrameLayoutLayoutParams, IPreferenceFrameLayoutParams)
 
-PreferenceFrameLayout::LayoutParams::LayoutParams()
+PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::PreferenceFrameLayoutLayoutParams()
     : mRemoveBorders(FALSE)
 {
 }
 
-ECode PreferenceFrameLayout::LayoutParams::constructor(
+ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    FAIL_RETURN(FrameLayout::LayoutParams::constructor(c, attrs));
+    FAIL_RETURN(FrameLayout::FrameLayoutLayoutParams::constructor(c, attrs));
     AutoPtr<ITypedArray> a;
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::PreferenceFrameLayout_Layout),
@@ -40,34 +40,34 @@ ECode PreferenceFrameLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode PreferenceFrameLayout::LayoutParams::constructor(
+ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    return FrameLayout::LayoutParams::constructor(width, height);
+    return FrameLayout::FrameLayoutLayoutParams::constructor(width, height);
 }
 
-ECode PreferenceFrameLayout::LayoutParams::GetGravity(
+ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::GetGravity(
     /* [out] */ Int32* gravity)
 {
     VALIDATE_NOT_NULL(gravity)
-    return FrameLayout::LayoutParams::GetGravity(gravity);
+    return FrameLayout::FrameLayoutLayoutParams::GetGravity(gravity);
 }
 
-ECode PreferenceFrameLayout::LayoutParams::SetGravity(
+ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::SetGravity(
     /* [in] */ Int32 gravity)
 {
-    return FrameLayout::LayoutParams::SetGravity(gravity);
+    return FrameLayout::FrameLayoutLayoutParams::SetGravity(gravity);
 }
 
-ECode PreferenceFrameLayout::LayoutParams::SetRemoveBorders(
+ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::SetRemoveBorders(
     /* [in] */ Boolean res)
 {
     mRemoveBorders = res;
     return NOERROR;
 }
 
-ECode PreferenceFrameLayout::LayoutParams::GetRemoveBorders(
+ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::GetRemoveBorders(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
@@ -181,11 +181,11 @@ ECode PreferenceFrameLayout::AddView(
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
 
-    AutoPtr<LayoutParams> layoutParams;
+    AutoPtr<PreferenceFrameLayoutLayoutParams> layoutParams;
     if (IPreferenceFrameLayoutParams::Probe(params) != NULL) {
         AutoPtr<IViewGroupLayoutParams> vglp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
-        layoutParams = (LayoutParams*)(vglp.Get());
+        layoutParams = (PreferenceFrameLayoutLayoutParams*)(vglp.Get());
     }
     else {
         layoutParams = NULL;

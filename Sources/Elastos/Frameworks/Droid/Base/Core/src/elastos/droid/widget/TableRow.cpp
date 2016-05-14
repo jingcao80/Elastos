@@ -17,27 +17,27 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-const Int32 TableRow::LayoutParams::LOCATION;
-const Int32 TableRow::LayoutParams::LOCATION_NEXT;
+const Int32 TableRow::TableRowLayoutParams::LOCATION;
+const Int32 TableRow::TableRowLayoutParams::LOCATION_NEXT;
 
 //==============================================================================
-//              TableRow::LayoutParams
+//              TableRow::TableRowLayoutParams
 //==============================================================================
 
-CAR_INTERFACE_IMPL(TableRow::LayoutParams, LinearLayout::LayoutParams, ITableRowLayoutParams)
+CAR_INTERFACE_IMPL(TableRow::TableRowLayoutParams, LinearLayout::LinearLayoutLayoutParams, ITableRowLayoutParams)
 
-TableRow::LayoutParams::LayoutParams()
+TableRow::TableRowLayoutParams::TableRowLayoutParams()
     : mColumn(0)
     , mSpan(0)
 {
     mOffset = ArrayOf<Int32>::Alloc(2);
 }
 
-ECode TableRow::LayoutParams::constructor(
+ECode TableRow::TableRowLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(c, attrs));
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(c, attrs));
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::TableRow_Cell),
@@ -55,30 +55,30 @@ ECode TableRow::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::constructor(
+ECode TableRow::TableRowLayoutParams::constructor(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(w, h));
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(w, h));
     mColumn = -1;
     mSpan = 1;
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::constructor(
+ECode TableRow::TableRowLayoutParams::constructor(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Float initWeight)
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(w, h, initWeight));
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(w, h, initWeight));
     mColumn = -1;
     mSpan = 1;
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::constructor()
+ECode TableRow::TableRowLayoutParams::constructor()
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(
             IViewGroupLayoutParams::MATCH_PARENT,
             IViewGroupLayoutParams::WRAP_CONTENT));
     mColumn = -1;
@@ -86,10 +86,10 @@ ECode TableRow::LayoutParams::constructor()
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::constructor(
+ECode TableRow::TableRowLayoutParams::constructor(
     /* [in] */ Int32 column)
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(
             IViewGroupLayoutParams::MATCH_PARENT,
             IViewGroupLayoutParams::WRAP_CONTENT));
     mColumn = column;
@@ -97,32 +97,32 @@ ECode TableRow::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::constructor(
+ECode TableRow::TableRowLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(p));
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(p));
     mColumn = -1;
     mSpan = 1;
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::constructor(
+ECode TableRow::TableRowLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
-    FAIL_RETURN(LinearLayout::LayoutParams::constructor(source));
+    FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(source));
     mColumn = -1;
     mSpan = 1;
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::SetColumn(
+ECode TableRow::TableRowLayoutParams::SetColumn(
     /* [in] */ Int32 column)
 {
     mColumn = column;
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::GetColumn(
+ECode TableRow::TableRowLayoutParams::GetColumn(
     /* [out] */ Int32* column)
 {
     VALIDATE_NOT_NULL(column)
@@ -130,14 +130,14 @@ ECode TableRow::LayoutParams::GetColumn(
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::SetSpan(
+ECode TableRow::TableRowLayoutParams::SetSpan(
     /* [in] */ Int32 span)
 {
     mSpan = span;
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::GetSpan(
+ECode TableRow::TableRowLayoutParams::GetSpan(
     /* [out] */ Int32* span)
 {
     VALIDATE_NOT_NULL(span)
@@ -145,7 +145,7 @@ ECode TableRow::LayoutParams::GetSpan(
     return NOERROR;
 }
 
-ECode TableRow::LayoutParams::SetBaseAttributes(
+ECode TableRow::TableRowLayoutParams::SetBaseAttributes(
     /* [in] */ ITypedArray* a,
     /* [in] */ Int32 widthAttr,
     /* [in] */ Int32 heightAttr)
@@ -457,11 +457,11 @@ void TableRow::MeasureChildBeforeLayout(
                 bottomMargin + totalHeight, heightLayout);
 
         child->Measure(childWidthMeasureSpec, childHeightMeasureSpec);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        TableRowLayoutParams* lp = (TableRowLayoutParams*)_lp.Get();
         if (isHorizontalGravity) {
             Int32 childWidth;
             child->GetMeasuredWidth(&childWidth);
-            (*lp->mOffset)[LayoutParams::LOCATION_NEXT] = columnWidth - childWidth;
+            (*lp->mOffset)[TableRowLayoutParams::LOCATION_NEXT] = columnWidth - childWidth;
 
             Int32 layoutDirection;
             GetLayoutDirection(&layoutDirection);
@@ -472,15 +472,15 @@ void TableRow::MeasureChildBeforeLayout(
                     // don't offset on X axis
                     break;
                 case IGravity::RIGHT:
-                    (*lp->mOffset)[LayoutParams::LOCATION] = (*lp->mOffset)[LayoutParams::LOCATION_NEXT];
+                    (*lp->mOffset)[TableRowLayoutParams::LOCATION] = (*lp->mOffset)[TableRowLayoutParams::LOCATION_NEXT];
                     break;
                 case IGravity::CENTER_HORIZONTAL:
-                    (*lp->mOffset)[LayoutParams::LOCATION] = (*lp->mOffset)[LayoutParams::LOCATION_NEXT] / 2;
+                    (*lp->mOffset)[TableRowLayoutParams::LOCATION] = (*lp->mOffset)[TableRowLayoutParams::LOCATION_NEXT] / 2;
                     break;
             }
         }
         else {
-            (*lp->mOffset)[LayoutParams::LOCATION] = (*lp->mOffset)[LayoutParams::LOCATION_NEXT] = 0;
+            (*lp->mOffset)[TableRowLayoutParams::LOCATION] = (*lp->mOffset)[TableRowLayoutParams::LOCATION_NEXT] = 0;
         }
     }
     else {
@@ -514,8 +514,8 @@ Int32 TableRow::GetLocationOffset(
 {
     AutoPtr<IViewGroupLayoutParams> layoutParams;
     child->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-    LayoutParams* lp = (LayoutParams*)ITableRowLayoutParams::Probe(layoutParams);
-    return (*lp->mOffset)[LayoutParams::LOCATION];
+    TableRowLayoutParams* lp = (TableRowLayoutParams*)ITableRowLayoutParams::Probe(layoutParams);
+    return (*lp->mOffset)[TableRowLayoutParams::LOCATION];
 }
 
 /**
@@ -526,8 +526,8 @@ Int32 TableRow::GetNextLocationOffset(
 {
     AutoPtr<IViewGroupLayoutParams> layoutParams;
     child->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-    LayoutParams* lp = (LayoutParams*)ITableRowLayoutParams::Probe(layoutParams);
-    return (*lp->mOffset)[LayoutParams::LOCATION_NEXT];
+    TableRowLayoutParams* lp = (TableRowLayoutParams*)ITableRowLayoutParams::Probe(layoutParams);
+    return (*lp->mOffset)[TableRowLayoutParams::LOCATION_NEXT];
 }
 
 /**
@@ -558,7 +558,7 @@ AutoPtr<ArrayOf<Int32> > TableRow::GetColumnsWidths(
         if (child != NULL && (child->GetVisibility(&visible), visible != IView::GONE)) {
             AutoPtr<IViewGroupLayoutParams> layoutParams;
             child->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-            LayoutParams* lp = (LayoutParams*)ITableRowLayoutParams::Probe(layoutParams);
+            TableRowLayoutParams* lp = (TableRowLayoutParams*)ITableRowLayoutParams::Probe(layoutParams);
 
             if (lp->mSpan == 1) {
                 Int32 spec;

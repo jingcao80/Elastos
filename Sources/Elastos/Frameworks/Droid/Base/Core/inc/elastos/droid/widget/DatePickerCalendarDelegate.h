@@ -20,21 +20,29 @@ namespace Widget {
  */
 class DatePickerCalendarDelegate
     : public DatePicker::AbstractDatePickerDelegate
+    , public IDatePickerCalendarDelegate
     , public IViewOnClickListener
     , public IDatePickerController
 {
-private:
+public:
     /**
      * Class for managing state storing/restoring.
      */
-    class SavedState
+    class DatePickerCalendarDelegateSavedState
         : public Elastos::Droid::View::View::BaseSavedState
+        , public IDatePickerCalendarDelegateSavedState
     {
     public:
+        CAR_INTERFACE_DECL();
+
+        DatePickerCalendarDelegateSavedState();
+
+        ~DatePickerCalendarDelegateSavedState();
+
         /**
          * Constructor called from {@link DatePicker#onSaveInstanceState()}
          */
-        SavedState(
+        CARAPI constructor(
             /* [in] */ IParcelable* superState,
             /* [in] */ Int32 year,
             /* [in] */ Int32 month,
@@ -45,7 +53,7 @@ private:
             /* [in] */ Int32 listPosition,
             /* [in] */ Int32 listPositionOffset);
 
-        SavedState();
+        CARAPI constructor();
 
         CARAPI WriteToParcel(
             /* [in] */ IParcel* dest);

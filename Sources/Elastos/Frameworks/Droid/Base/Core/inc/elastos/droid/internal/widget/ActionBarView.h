@@ -57,25 +57,32 @@ class ActionBarView
     , public IActionBarView
 {
 public:
-    class SavedState
+    class ActionBarViewSavedState
         : public View::BaseSavedState
+        , public IActionBarViewSavedState
     {
     public:
-        SavedState(
-            /* [in] */ IParcelable* superState);
+        CAR_INTERFACE_DECL()
 
-        SavedState(
-            /* [in] */ IParcel* in);
+        ActionBarViewSavedState();
+
+        ~ActionBarViewSavedState();
 
         // @Override
         CARAPI WriteToParcel(
-            /* [in] */ IParcel* out,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* out);
+
+        // @Override
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* source);
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     public:
-        Int32 expandedMenuItemId;
-        Boolean isOverflowOpen;
-        static const AutoPtr<IParcelable> CREATOR;
+        Int32 mExpandedMenuItemId;
+        Boolean mIsOverflowOpen;
     };
 
 private:
@@ -112,35 +119,6 @@ private:
 
     private:
         ActionBarView* mOwner;
-    };
-
-    class InnerParcelableCreator
-        : public Object
-        , public IParcelable
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerParcelableCreator();
-
-        virtual CARAPI CreateFromParcel(
-            /* [in] */ IParcel* in,
-            /* [out] */ SavedState** result);
-
-        virtual CARAPI NewArray(
-            /* [in] */ Int32 size,
-            /* [out] */ ArrayOf<SavedState*>** result);
-
-        // override for compile
-        virtual CARAPI ReadFromParcel(
-            /* [in] */ IParcel* source);
-
-        // override for compile
-        virtual CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest);
-
-    private:
-        SavedState* mOwner;
     };
 
     class HomeView
@@ -641,7 +619,7 @@ private:
 } // namespace Elastos
 
 template <>
-struct Conversion<Elastos::Droid::Internal::Widget::ActionBarView::SavedState*, IInterface*>
+struct Conversion<Elastos::Droid::Internal::Widget::ActionBarView::ActionBarViewSavedState*, IInterface*>
 {
     enum { exists = TRUE, exists2Way = FALSE, sameType = FALSE };
 };

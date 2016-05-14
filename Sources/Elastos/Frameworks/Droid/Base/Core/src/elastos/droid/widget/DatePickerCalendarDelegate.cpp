@@ -2,6 +2,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "elastos/droid/widget/DatePickerCalendarDelegate.h"
+#include "elastos/droid/widget/CDatePickerCalendarDelegateSavedState.h"
 #include "elastos/droid/widget/CDayPickerView.h"
 #include "elastos/droid/widget/YearPickerView.h"
 #include "elastos/droid/content/res/CColorStateList.h"
@@ -41,10 +42,26 @@ namespace Droid {
 namespace Widget {
 
 // ==================================================================
-//                DatePickerCalendarDelegate::SavedState::
+//                DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::
 // ==================================================================
 
-DatePickerCalendarDelegate::SavedState::SavedState(
+CAR_INTERFACE_IMPL(DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState, View::BaseSavedState, IDatePickerCalendarDelegateSavedState)
+
+DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::DatePickerCalendarDelegateSavedState()
+    : mSelectedYear(0)
+    , mSelectedMonth(0)
+    , mSelectedDay(0)
+    , mMinDate(0)
+    , mMaxDate(0)
+    , mCurrentView(0)
+    , mListPosition(0)
+    , mListPositionOffset(0)
+{}
+
+DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::~DatePickerCalendarDelegateSavedState()
+{}
+
+ECode DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ Int32 year,
     /* [in] */ Int32 month,
@@ -54,24 +71,25 @@ DatePickerCalendarDelegate::SavedState::SavedState(
     /* [in] */ Int32 currentView,
     /* [in] */ Int32 listPosition,
     /* [in] */ Int32 listPositionOffset)
-    : mSelectedYear(year)
-    , mSelectedMonth(month)
-    , mSelectedDay(day)
-    , mMinDate(minDate)
-    , mMaxDate(maxDate)
-    , mCurrentView(currentView)
-    , mListPosition(listPosition)
-    , mListPositionOffset(listPositionOffset)
 {
     Elastos::Droid::View::View::BaseSavedState::constructor(superState);
+    mSelectedYear = year;
+    mSelectedMonth = month;
+    mSelectedDay = day;
+    mMinDate = minDate;
+    mMaxDate = maxDate;
+    mCurrentView = currentView;
+    mListPosition = listPosition;
+    mListPositionOffset = listPositionOffset;
+    return NOERROR;
 }
 
-DatePickerCalendarDelegate::SavedState::SavedState()
+ECode DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::constructor()
 {
-    Elastos::Droid::View::View::BaseSavedState::constructor();
+    return Elastos::Droid::View::View::BaseSavedState::constructor();
 }
 
-ECode DatePickerCalendarDelegate::SavedState::ReadFromParcel(
+ECode DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     Elastos::Droid::View::View::BaseSavedState::ReadFromParcel(source);
@@ -86,7 +104,7 @@ ECode DatePickerCalendarDelegate::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode DatePickerCalendarDelegate::SavedState::WriteToParcel(
+ECode DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     Elastos::Droid::View::View::BaseSavedState::WriteToParcel(dest);
@@ -101,42 +119,42 @@ ECode DatePickerCalendarDelegate::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-Int32 DatePickerCalendarDelegate::SavedState::GetSelectedDay()
+Int32 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetSelectedDay()
 {
     return mSelectedDay;
 }
 
-Int32 DatePickerCalendarDelegate::SavedState::GetSelectedMonth()
+Int32 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetSelectedMonth()
 {
     return mSelectedMonth;
 }
 
-Int32 DatePickerCalendarDelegate::SavedState::GetSelectedYear()
+Int32 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetSelectedYear()
 {
     return mSelectedYear;
 }
 
-Int64 DatePickerCalendarDelegate::SavedState::GetMinDate()
+Int64 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetMinDate()
 {
     return mMinDate;
 }
 
-Int64 DatePickerCalendarDelegate::SavedState::GetMaxDate()
+Int64 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetMaxDate()
 {
     return mMaxDate;
 }
 
-Int32 DatePickerCalendarDelegate::SavedState::GetCurrentView()
+Int32 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetCurrentView()
 {
     return mCurrentView;
 }
 
-Int32 DatePickerCalendarDelegate::SavedState::GetListPosition()
+Int32 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetListPosition()
 {
     return mListPosition;
 }
 
-Int32 DatePickerCalendarDelegate::SavedState::GetListPositionOffset()
+Int32 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::GetListPositionOffset()
 {
     return mListPositionOffset;
 }
@@ -159,7 +177,7 @@ const Int32 DatePickerCalendarDelegate::MONTH_INDEX = 0;
 const Int32 DatePickerCalendarDelegate::DAY_INDEX = 1;
 const Int32 DatePickerCalendarDelegate::YEAR_INDEX = 2;
 
-CAR_INTERFACE_IMPL_2(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate, IViewOnClickListener, IDatePickerController)
+CAR_INTERFACE_IMPL_3(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate, IDatePickerCalendarDelegate, IViewOnClickListener, IDatePickerController)
 
 DatePickerCalendarDelegate::DatePickerCalendarDelegate()
     : mIsEnabled(TRUE)
@@ -811,10 +829,11 @@ ECode DatePickerCalendarDelegate::OnSaveInstanceState(
     Int64 minMils = 0, maxMils = 0;
     mMinDate->GetTimeInMillis(&minMils);
     mMaxDate->GetTimeInMillis(&maxMils);
-    AutoPtr<SavedState> res = new SavedState(superState, year, month, day, minMils,
-            maxMils, mCurrentView, listPosition, listPositionOffset);
-    AutoPtr<IViewBaseSavedState> pRes = (IViewBaseSavedState*)res.Get();
-    *result = IParcelable::Probe(pRes);
+    AutoPtr<IDatePickerCalendarDelegateSavedState> res;
+    CDatePickerCalendarDelegateSavedState::New(superState, year, month, day, minMils,
+            maxMils, mCurrentView, listPosition, listPositionOffset,
+            (IDatePickerCalendarDelegateSavedState**)&res);
+    *result = IParcelable::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -822,7 +841,7 @@ ECode DatePickerCalendarDelegate::OnSaveInstanceState(
 ECode DatePickerCalendarDelegate::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    AutoPtr<SavedState> ss = (SavedState*) state;
+    AutoPtr<DatePickerCalendarDelegateSavedState> ss = (DatePickerCalendarDelegateSavedState*) state;
 
     mCurrentDate->Set(ss->GetSelectedYear(), ss->GetSelectedMonth(), ss->GetSelectedDay());
     mCurrentView = ss->GetCurrentView();
@@ -871,14 +890,14 @@ ECode DatePickerCalendarDelegate::OnPopulateAccessibilityEvent(
 ECode DatePickerCalendarDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("DatePickerCalendarDelegate"));
+    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CDatePickerCalendarDelegate"));
     return NOERROR;
 }
 
 ECode DatePickerCalendarDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    info->SetClassName(CoreUtils::Convert("DatePickerCalendarDelegate"));
+    info->SetClassName(CoreUtils::Convert("CDatePickerCalendarDelegate"));
     return NOERROR;
 }
 

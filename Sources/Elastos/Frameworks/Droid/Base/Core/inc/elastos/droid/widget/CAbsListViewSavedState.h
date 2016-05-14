@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CAbsListViewSavedState)
-    , public AbsListView::SavedState
+    , public AbsListView::AbsListViewSavedState
 {
 public:
     CAR_OBJECT_DECL();

@@ -31,19 +31,16 @@ class Spinner
     , public ISpinner
 {
 public:
-    class SavedState
-        : public AbsSpinner::SavedState
+    class SpinnerSavedState
+        : public AbsSpinner::AbsSpinnerSavedState
         , public ISpinnerSavedState
     {
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        SpinnerSavedState();
 
-        CARAPI constructor();
-
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        ~SpinnerSavedState();
 
         // @Override
         CARAPI WriteToParcel(

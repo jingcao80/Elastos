@@ -39,25 +39,25 @@ namespace Droid {
 namespace Widget {
 
 //=====================================================================
-//                 TimePickerClockDelegate::SavedState
+//                 TimePickerClockDelegate::TimePickerClockDelegateSavedState
 //=====================================================================
 
-CAR_INTERFACE_IMPL(TimePickerClockDelegate::SavedState, Elastos::Droid::View::View::BaseSavedState, ITimePickerClockDelegateSavedState)
+CAR_INTERFACE_IMPL(TimePickerClockDelegate::TimePickerClockDelegateSavedState, Elastos::Droid::View::View::BaseSavedState, ITimePickerClockDelegateSavedState)
 
-TimePickerClockDelegate::SavedState::SavedState()
+TimePickerClockDelegate::TimePickerClockDelegateSavedState::TimePickerClockDelegateSavedState()
     : mHour(0)
     , mMinute(0)
 {}
 
-TimePickerClockDelegate::SavedState::~SavedState()
+TimePickerClockDelegate::TimePickerClockDelegateSavedState::~TimePickerClockDelegateSavedState()
 {}
 
-ECode TimePickerClockDelegate::SavedState::constructor()
+ECode TimePickerClockDelegate::TimePickerClockDelegateSavedState::constructor()
 {
     return Elastos::Droid::View::View::BaseSavedState::constructor();
 }
 
-ECode TimePickerClockDelegate::SavedState::constructor(
+ECode TimePickerClockDelegate::TimePickerClockDelegateSavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ Int32 hour,
     /* [in] */ Int32 minute)
@@ -69,17 +69,17 @@ ECode TimePickerClockDelegate::SavedState::constructor(
     return NOERROR;
 }
 
-Int32 TimePickerClockDelegate::SavedState::GetHour()
+Int32 TimePickerClockDelegate::TimePickerClockDelegateSavedState::GetHour()
 {
     return mHour;
 }
 
-Int32 TimePickerClockDelegate::SavedState::GetMinute()
+Int32 TimePickerClockDelegate::TimePickerClockDelegateSavedState::GetMinute()
 {
     return mMinute;
 }
 
-ECode TimePickerClockDelegate::SavedState::WriteToParcel(
+ECode TimePickerClockDelegate::TimePickerClockDelegateSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     FAIL_RETURN(Elastos::Droid::View::View::BaseSavedState::WriteToParcel(dest));
@@ -88,7 +88,7 @@ ECode TimePickerClockDelegate::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode TimePickerClockDelegate::SavedState::ReadFromParcel(
+ECode TimePickerClockDelegate::TimePickerClockDelegateSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     FAIL_RETURN(Elastos::Droid::View::View::BaseSavedState::ReadFromParcel(source));
@@ -97,7 +97,7 @@ ECode TimePickerClockDelegate::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode TimePickerClockDelegate::SavedState::ToString(
+ECode TimePickerClockDelegate::TimePickerClockDelegateSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);

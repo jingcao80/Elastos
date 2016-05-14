@@ -34,22 +34,16 @@ class AbsSpinner
     , public IAbsSpinner
 {
 public:
-    class SavedState
+    class AbsSpinnerSavedState
         : public View::BaseSavedState
         , public IAbsSpinnerSavedState
     {
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        AbsSpinnerSavedState();
 
-        CARAPI constructor();
-
-        /**
-         * Constructor called from {@link AbsSpinner#onSaveInstanceState()}
-         */
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        ~AbsSpinnerSavedState();
 
         CARAPI ReadFromParcel(
             /* [in] */ IParcel* source);

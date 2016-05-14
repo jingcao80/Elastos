@@ -24,6 +24,7 @@ module
     merge("widget/AutoCompleteTextView.car");
     merge("widget/FrameLayout.car");
     merge("widget/DatePicker.car");
+    merge("widget/DatePickerCalendarDelegate.car");
     merge("widget/DigitalClock.car");
     merge("widget/DateTimeView.car");
     merge("widget/RelativeLayout.car");
@@ -1113,6 +1114,56 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+    }
+
+    class CDatePickerSavedState {
+        constructor(
+            [in] IParcelable* superState,
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 day);
+
+        constructor();
+
+        interface IDatePickerSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    [local]
+    class CDatePickerCalendarDelegate {
+        constructor(
+            [in] IDatePicker* delegator,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IDatePickerCalendarDelegate;
+        interface IDatePickerDelegate;
+        interface IViewOnClickListener;
+        interface IDatePickerController;
+    }
+
+    class CDatePickerCalendarDelegateSavedState {
+        constructor(
+            [in] IParcelable* superState,
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int64 minDate,
+            [in] Int64 maxDate,
+            [in] Int32 currentView,
+            [in] Int32 listPosition,
+            [in] Int32 listPositionOffset);
+
+        constructor();
+
+        interface IDatePickerCalendarDelegateSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
     }
 
     [local]
@@ -2485,13 +2536,13 @@ module
         interface IAccessibilityEventSource;
     }
 
-    class CHorizontalScrollViewSavedState
-    {
+    class CHorizontalScrollViewSavedState {
         constructor();
 
         constructor(
             [in] IParcelable* state);
 
+        interface IHorizontalScrollViewSavedState;
         interface IViewBaseSavedState;
         interface IAbsSavedState;
         interface IParcelable;
@@ -2869,6 +2920,19 @@ module
             [in] Int32 defStyleRes);
 
         interface IAdapterViewAnimator;
+    }
+
+    class CAdapterViewAnimatorSavedState {
+        constructor(
+            [in] IParcelable* superState,
+            [in] Int32 whichChild);
+
+        constructor();
+
+        interface IAdapterViewAnimatorSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
     }
 
    //  [local]

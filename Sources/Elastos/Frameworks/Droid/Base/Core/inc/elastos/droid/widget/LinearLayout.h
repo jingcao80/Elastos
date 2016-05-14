@@ -18,14 +18,14 @@ class ECO_PUBLIC LinearLayout
     , public ILinearLayout
 {
 public:
-    class LayoutParams
+    class LinearLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public ILinearLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        LinearLayoutLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

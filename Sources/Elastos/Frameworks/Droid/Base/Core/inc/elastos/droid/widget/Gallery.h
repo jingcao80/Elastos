@@ -51,12 +51,16 @@ public:
      * info.
      *
      */
-    class LayoutParams
+    class GalleryLayoutParams
         : public ViewGroup::LayoutParams
         , public IGalleryLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
+
+        GalleryLayoutParams();
+
+        ~GalleryLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

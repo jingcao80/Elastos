@@ -278,10 +278,10 @@ ECode LockPatternView::CellState::SetLineAnimator(
 }
 
 /////////////////////////////////////////////////////////////
-//                  LockPatternView::SavedState
+//                  LockPatternView::LockPatternViewSavedState
 /////////////////////////////////////////////////////////////
-CAR_INTERFACE_IMPL(LockPatternView::SavedState, View::BaseSavedState, ILockPatternViewSavedState);
-LockPatternView::SavedState::SavedState()
+CAR_INTERFACE_IMPL(LockPatternView::LockPatternViewSavedState, View::BaseSavedState, ILockPatternViewSavedState);
+LockPatternView::LockPatternViewSavedState::LockPatternViewSavedState()
     : mDisplayMode(0)
     , mPatternSize(0)
     , mInputEnabled(FALSE)
@@ -291,12 +291,12 @@ LockPatternView::SavedState::SavedState()
     , mShowErrorPath(FALSE)
 {}
 
-ECode LockPatternView::SavedState::constructor()
+ECode LockPatternView::LockPatternViewSavedState::constructor()
 {
-    return NOERROR;
+    return BaseSavedState::constructor();
 }
 
-ECode LockPatternView::SavedState::constructor(
+ECode LockPatternView::LockPatternViewSavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ const String& serializedPattern,
     /* [in] */ Int32 displayMode,
@@ -319,7 +319,7 @@ ECode LockPatternView::SavedState::constructor(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::GetSerializedPattern(
+ECode LockPatternView::LockPatternViewSavedState::GetSerializedPattern(
     /* [out] */ String* pattern)
 {
     VALIDATE_NOT_NULL(pattern);
@@ -327,7 +327,7 @@ ECode LockPatternView::SavedState::GetSerializedPattern(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::GetDisplayMode(
+ECode LockPatternView::LockPatternViewSavedState::GetDisplayMode(
     /* [out] */ Int32* mode)
 {
     VALIDATE_NOT_NULL(mode);
@@ -335,7 +335,7 @@ ECode LockPatternView::SavedState::GetDisplayMode(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::GetPatternSize(
+ECode LockPatternView::LockPatternViewSavedState::GetPatternSize(
     /* [out] */ Byte* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -343,7 +343,7 @@ ECode LockPatternView::SavedState::GetPatternSize(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::IsInputEnabled(
+ECode LockPatternView::LockPatternViewSavedState::IsInputEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -351,7 +351,7 @@ ECode LockPatternView::SavedState::IsInputEnabled(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::IsInStealthMode(
+ECode LockPatternView::LockPatternViewSavedState::IsInStealthMode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -359,7 +359,7 @@ ECode LockPatternView::SavedState::IsInStealthMode(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::IsTactileFeedbackEnabled(
+ECode LockPatternView::LockPatternViewSavedState::IsTactileFeedbackEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -367,7 +367,7 @@ ECode LockPatternView::SavedState::IsTactileFeedbackEnabled(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::IsVisibleDots(
+ECode LockPatternView::LockPatternViewSavedState::IsVisibleDots(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -375,7 +375,7 @@ ECode LockPatternView::SavedState::IsVisibleDots(
     return NOERROR;
 }
 
-ECode LockPatternView::SavedState::IsShowErrorPath(
+ECode LockPatternView::LockPatternViewSavedState::IsShowErrorPath(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -1559,7 +1559,7 @@ AutoPtr<IParcelable> LockPatternView::OnSaveInstanceState()
 void LockPatternView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    AutoPtr<SavedState> ss = (SavedState*) state;
+    AutoPtr<LockPatternViewSavedState> ss = (LockPatternViewSavedState*) state;
     AutoPtr<IParcelable> value;
     ss->GetSuperState((IParcelable**)&value);
     View::OnRestoreInstanceState(value);

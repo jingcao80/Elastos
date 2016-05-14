@@ -67,6 +67,38 @@ public:
         AutoPtr<IDatePickerValidationCallback> mValidationCallback;
     };
 
+    class DatePickerSavedState
+        : public View::BaseSavedState
+        , public IDatePickerSavedState
+    {
+        friend class DatePicker;
+    public:
+        CAR_INTERFACE_DECL()
+
+        DatePickerSavedState();
+
+        ~DatePickerSavedState();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ IParcelable* superState,
+            /* [in] */ Int32 year,
+            /* [in] */ Int32 month,
+            /* [in] */ Int32 day);
+
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* in);
+
+        CARAPI WriteToParcel(
+            /* [in] */ IParcel* dest);
+
+    private:
+        Int32 mYear;
+        Int32 mMonth;
+        Int32 mDay;
+    };
+
 private:
     /**
      * A delegate implementing the basic DatePicker
@@ -333,31 +365,6 @@ private:
 
     private:
         DatePickerSpinnerDelegate* mHost;
-    };
-
-    class DatePickerSavedState
-        : public View::BaseSavedState
-    {
-    public:
-        DatePickerSavedState(
-            /* [in] */ IParcelable* superState,
-            /* [in] */ Int32 year,
-            /* [in] */ Int32 month,
-            /* [in] */ Int32 day);
-
-        CARAPI ReadFromParcel(
-            /* [in] */ IParcel* in);
-
-        CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest);
-
-        CARAPI GetSuperState(
-            /* [out] */ IParcelable** state);
-
-    public:
-        Int32 mYear;
-        Int32 mMonth;
-        Int32 mDay;
     };
 
 public:

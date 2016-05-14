@@ -162,6 +162,16 @@ module
             [in] Int32 y);
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IHorizontalScrollViewSavedState {
+
+    }
+
     }// namespace Widget
     }// namespace Droid
     }// namespace Elastos

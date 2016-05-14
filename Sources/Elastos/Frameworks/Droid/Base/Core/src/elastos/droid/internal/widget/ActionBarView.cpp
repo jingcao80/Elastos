@@ -1,6 +1,7 @@
 
 #include "elastos/droid/app/CActionBarLayoutParams.h"
 #include "elastos/droid/internal/transition/ActionBarTransition.h"
+#include "elastos/droid/internal/widget/CActionBarViewSavedState.h"
 #include "elastos/droid/internal/widget/ActionBarView.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -12,7 +13,9 @@
 #include "elastos/droid/widget/CLinearLayoutLayoutParams.h"
 #include "elastos/droid/widget/CProgressBar.h"
 #include "elastos/droid/widget/CSpinner.h"
-#include "elastos/core/Math.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::App::CActionBarLayoutParams;
 using Elastos::Droid::App::IActionBarLayoutParams;
@@ -46,6 +49,8 @@ using Elastos::Droid::Widget::CProgressBar;
 using Elastos::Droid::Widget::CSpinner;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::ILinearLayoutLayoutParams;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -53,50 +58,55 @@ namespace Internal {
 namespace Widget {
 
 //=====================================================================
-//                      ActionBarView::SavedState
+//                      ActionBarView::ActionBarViewSavedState
 //=====================================================================
-const AutoPtr<IParcelable> ActionBarView::SavedState::CREATOR = new ActionBarView::InnerParcelableCreator();
 
-ActionBarView::SavedState::SavedState(
-    /* [in] */ IParcelable* superState)
-{
-    // ==================before translated======================
-    // super(superState);
+CAR_INTERFACE_IMPL(ActionBarView::ActionBarViewSavedState, View::BaseSavedState, IActionBarViewSavedState);
 
-    View::BaseSavedState::constructor(superState);
-}
+ActionBarView::ActionBarViewSavedState::ActionBarViewSavedState()
+    : mExpandedMenuItemId(0)
+    , mIsOverflowOpen(FALSE)
+{}
 
-ECode ActionBarView::SavedState::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+ActionBarView::ActionBarViewSavedState::~ActionBarViewSavedState()
+{}
+
+ECode ActionBarView::ActionBarViewSavedState::WriteToParcel(
+    /* [in] */ IParcel* out)
 {
     VALIDATE_NOT_NULL(out);
-    // ==================before translated======================
-    // super.writeToParcel(out, flags);
-    // out.writeInt(expandedMenuItemId);
-    // out.writeInt(isOverflowOpen ? 1 : 0);
 
-    assert(0);
-    //View::BaseSavedState::WriteToParcel(out, flags);
-    out->WriteInt32(expandedMenuItemId);
-    out->WriteInt32(isOverflowOpen ? 1 : 0);
+    FAIL_RETURN(View::BaseSavedState::WriteToParcel(out));
+    out->WriteInt32(mExpandedMenuItemId);
+    out->WriteBoolean(mIsOverflowOpen);
     return NOERROR;
 }
 
-ActionBarView::SavedState::SavedState(
-    /* [in] */ IParcel* in)
+ECode ActionBarView::ActionBarViewSavedState::ReadFromParcel(
+    /* [in] */ IParcel* source)
 {
-    // ==================before translated======================
-    // super(in);
-    // expandedMenuItemId = in.readInt();
-    // isOverflowOpen = in.readInt() != 0;
+    FAIL_RETURN(View::BaseSavedState::ReadFromParcel(source));
+    source->ReadInt32(&mExpandedMenuItemId);
+    source->ReadBoolean(&mIsOverflowOpen);
+    return NOERROR;
+}
 
-    assert(0);
-    //View::BaseSavedState::constructor(superState);
-    in->ReadInt32(&expandedMenuItemId);
-    Int32 intTmp = 0;
-    in->ReadInt32(&intTmp);
-    isOverflowOpen = intTmp != 0;
+ECode ActionBarView::ActionBarViewSavedState::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder buider;
+    buider += "ActionBarView.SavedState{";
+
+    buider += StringUtils::ToHexString((Int32)this);
+    buider += " mExpandedMenuItemId=";
+    buider += mExpandedMenuItemId;
+    buider += " mIsOverflowOpen=";
+    buider += mIsOverflowOpen;
+    buider += "}";
+
+    *str = buider.ToString();
+    return NOERROR;
 }
 
 //=====================================================================
@@ -161,59 +171,6 @@ ECode ActionBarView::InnerOnClickListener1::OnClick(
         Boolean res = FALSE;
         mOwner->mWindowCallback->OnMenuItemSelected(IWindow::FEATURE_OPTIONS_PANEL, IMenuItem::Probe(mOwner->mLogoNavItem), &res);
     }
-    return NOERROR;
-}
-
-//=====================================================================
-//                ActionBarView::InnerParcelableCreator
-//=====================================================================
-CAR_INTERFACE_IMPL(ActionBarView::InnerParcelableCreator, Object, IParcelable)
-
-ActionBarView::InnerParcelableCreator::InnerParcelableCreator()
-{
-}
-
-ECode ActionBarView::InnerParcelableCreator::CreateFromParcel(
-    /* [in] */ IParcel* in,
-    /* [out] */ SavedState** result)
-{
-    VALIDATE_NOT_NULL(in);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new SavedState(in);
-
-    assert(0);
-    *result = new SavedState(in);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-ECode ActionBarView::InnerParcelableCreator::NewArray(
-    /* [in] */ Int32 size,
-    /* [out] */ ArrayOf<SavedState*>** result)
-{
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new SavedState[size];
-
-    *result = ArrayOf<SavedState*>::Alloc(size);
-    for (Int32 idx=0; idx<size; ++idx) {
-        AutoPtr<SavedState> item;// = new SavedState();
-        (*result)->Set(idx, item);
-    }
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-ECode ActionBarView::InnerParcelableCreator::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::InnerParcelableCreator::WriteToParcel(
-    /* [in] */ IParcel* dest)
-{
     return NOERROR;
 }
 
@@ -1213,8 +1170,7 @@ ECode ActionBarView::constructor(
     //     setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     // }
 
-    assert(0);
-    ViewGroup::constructor(context, attrs);
+    AbsActionBarView::constructor(context, attrs);
     SetBackgroundResource(0);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
@@ -2385,12 +2341,8 @@ ECode ActionBarView::GenerateLayoutParams(
     // return new ActionBar.LayoutParams(getContext(), attrs);
 
     AutoPtr<IContext> context;
-    IView::Probe(this)->GetContext((IContext**)&context);
-    AutoPtr<IActionBarLayoutParams> lp;
-    CActionBarLayoutParams::New(context, attrs, (IActionBarLayoutParams**)&lp);
-    *result = IViewGroupLayoutParams::Probe(lp);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    GetContext((IContext**)&context);
+    return CActionBarLayoutParams::New(context, attrs, result);
 }
 
 ECode ActionBarView::GenerateLayoutParams(
@@ -2407,7 +2359,7 @@ ECode ActionBarView::GenerateLayoutParams(
 
     *result = lp;
     if (lp == NULL) {
-        GenerateDefaultLayoutParams(result);
+        return GenerateDefaultLayoutParams(result);
     }
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -2417,28 +2369,18 @@ ECode ActionBarView::OnSaveInstanceState(
     /* [out] */ IParcelable** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Parcelable superState = super.onSaveInstanceState();
-    // SavedState state = new SavedState(superState);
-    //
-    // if (mExpandedMenuPresenter != null && mExpandedMenuPresenter.mCurrentExpandedItem != null) {
-    //     state.expandedMenuItemId = mExpandedMenuPresenter.mCurrentExpandedItem.getItemId();
-    // }
-    //
-    // state.isOverflowOpen = isOverflowMenuShowing();
-    //
-    // return state;
 
-    assert(0);
     AutoPtr<IParcelable> superState = View::OnSaveInstanceState();
-    AutoPtr<SavedState> state = new SavedState(superState);
+    AutoPtr<IActionBarViewSavedState> state;
+    CActionBarViewSavedState::New(superState, (IActionBarViewSavedState**)&state);
+    CActionBarViewSavedState* ss = (CActionBarViewSavedState*)state.Get();
     if (mExpandedMenuPresenter != NULL && mExpandedMenuPresenter->mCurrentExpandedItem != NULL) {
         Int32 itemId = 0;
         IMenuItem::Probe(mExpandedMenuPresenter->mCurrentExpandedItem)->GetItemId(&itemId);
-        state->expandedMenuItemId = itemId;
+        ss->mExpandedMenuItemId = itemId;
     }
-    IAbsActionBarView::Probe(this)->IsOverflowMenuShowing(&state->isOverflowOpen);
-    *result = state;
+    IAbsActionBarView::Probe(this)->IsOverflowMenuShowing(&ss->mIsOverflowOpen);
+    *result = IParcelable::Probe(state);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -2446,37 +2388,24 @@ ECode ActionBarView::OnSaveInstanceState(
 void ActionBarView::OnRestoreInstanceState(
     /* [in] */ IParcelable* p)
 {
-    // ==================before translated======================
-    // SavedState state = (SavedState) p;
-    //
-    // super.onRestoreInstanceState(state.getSuperState());
-    //
-    // if (state.expandedMenuItemId != 0 &&
-    //         mExpandedMenuPresenter != null && mOptionsMenu != null) {
-    //     final MenuItem item = mOptionsMenu.findItem(state.expandedMenuItemId);
-    //     if (item != null) {
-    //         item.expandActionView();
-    //     }
-    // }
-    //
-    // if (state.isOverflowOpen) {
-    //     postShowOverflowMenu();
-    // }
+    AutoPtr<CActionBarViewSavedState> ss =
+            (CActionBarViewSavedState*)IActionBarViewSavedState::Probe(p);
+    if (!ss) return;
 
-    assert(0);
-    SavedState* state = (SavedState*)p;
-    AutoPtr<IParcelable> ss;
-    state->GetSuperState((IParcelable**)&ss);
-    View::OnRestoreInstanceState(ss);
-    if (state->expandedMenuItemId != 0 && mExpandedMenuPresenter != NULL && mOptionsMenu != NULL) {
+    AutoPtr<IParcelable> superState;
+    ss->GetSuperState((IParcelable**)&superState);
+
+    AbsActionBarView::OnRestoreInstanceState(superState);
+
+    if (ss->mExpandedMenuItemId != 0 && mExpandedMenuPresenter != NULL && mOptionsMenu != NULL) {
         AutoPtr<IMenuItem> item;
-        IMenu::Probe(mOptionsMenu)->FindItem(state->expandedMenuItemId, (IMenuItem**)&item);
+        IMenu::Probe(mOptionsMenu)->FindItem(ss->mExpandedMenuItemId, (IMenuItem**)&item);
         if (item != NULL) {
             Boolean resTmp;
             item->ExpandActionView(&resTmp);
         }
     }
-    if (state->isOverflowOpen) {
+    if (ss->mIsOverflowOpen) {
         PostShowOverflowMenu();
     }
 }
@@ -2640,12 +2569,8 @@ ECode ActionBarView::GenerateDefaultLayoutParams(
     // // Used by custom nav views if they don't supply layout params. Everything else
     // // added to an ActionBarView should have them already.
     // return new ActionBar.LayoutParams(DEFAULT_CUSTOM_GRAVITY);
-
-    AutoPtr<IActionBarLayoutParams> ap;
-    CActionBarLayoutParams::New(DEFAULT_CUSTOM_GRAVITY, (IActionBarLayoutParams**)&ap);
-    *result = IViewGroupLayoutParams::Probe(ap);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    VALIDATE_NOT_NULL(result)
+    return CActionBarLayoutParams::New(DEFAULT_CUSTOM_GRAVITY, result);
 }
 
 ECode ActionBarView::OnFinishInflate()

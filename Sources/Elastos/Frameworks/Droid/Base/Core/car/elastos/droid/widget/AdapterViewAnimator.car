@@ -154,6 +154,16 @@ module
             [in] IIntent* intent);
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IAdapterViewAnimatorSavedState {
+
+    }
+
     }// namespace Widget
     }// namespace Droid
     }// namespace Elastos

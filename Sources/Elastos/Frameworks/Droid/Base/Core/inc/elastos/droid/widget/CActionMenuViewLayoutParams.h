@@ -9,7 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CarClass(CActionMenuViewLayoutParams) , public ActionMenuView::LayoutParams
+CarClass(CActionMenuViewLayoutParams)
+    , public ActionMenuView::ActionMenuViewLayoutParams
 {
 public:
     CAR_OBJECT_DECL()

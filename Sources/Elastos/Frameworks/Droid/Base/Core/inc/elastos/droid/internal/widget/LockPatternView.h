@@ -143,14 +143,14 @@ public:
     /**
      * The parecelable for saving and restoring a lock pattern view.
      */
-    class SavedState
+    class LockPatternViewSavedState
         : public View::BaseSavedState
         , public ILockPatternViewSavedState
     {
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        LockPatternViewSavedState();
 
         CARAPI constructor();
 

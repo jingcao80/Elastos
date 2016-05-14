@@ -30,35 +30,35 @@ namespace Internal {
 namespace Widget {
 
 //=====================================================================
-//                 ActionBarOverlayLayout::LayoutParams
+//                 ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams
 //=====================================================================
-CAR_INTERFACE_IMPL(ActionBarOverlayLayout::LayoutParams, ViewGroup::MarginLayoutParams, IActionBarOverlayLayoutLayoutParams)
+CAR_INTERFACE_IMPL(ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams, ViewGroup::MarginLayoutParams, IActionBarOverlayLayoutLayoutParams)
 
-ActionBarOverlayLayout::LayoutParams::LayoutParams()
+ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::ActionBarOverlayLayoutLayoutParams()
 {
 }
 
-ECode ActionBarOverlayLayout::LayoutParams::constructor(
+ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
     return ViewGroup::MarginLayoutParams::constructor(c, attrs);
 }
 
-ECode ActionBarOverlayLayout::LayoutParams::constructor(
+ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     return ViewGroup::MarginLayoutParams::constructor(width, height);
 }
 
-ECode ActionBarOverlayLayout::LayoutParams::constructor(
+ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ViewGroup::MarginLayoutParams::constructor(source);
 }
 
-ECode ActionBarOverlayLayout::LayoutParams::constructor(
+ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
     return ViewGroup::MarginLayoutParams::constructor(source);

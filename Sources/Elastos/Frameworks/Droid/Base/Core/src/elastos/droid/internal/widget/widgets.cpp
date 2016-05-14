@@ -5,6 +5,7 @@
 #include "elastos/droid/internal/widget/CActionBarContextView.h"
 #include "elastos/droid/internal/widget/CActionBarOverlayLayout.h"
 #include "elastos/droid/internal/widget/CActionBarView.h"
+#include "elastos/droid/internal/widget/CActionBarViewSavedState.h"
 #include "elastos/droid/internal/widget/CBackgroundFallback.h"
 #include "elastos/droid/internal/widget/CDialogTitle.h"
 #include "elastos/droid/internal/widget/CDrawableHolder.h"
@@ -49,6 +50,7 @@ CAR_OBJECT_IMPL(CActionBarContainer)
 CAR_OBJECT_IMPL(CActionBarContextView)
 CAR_OBJECT_IMPL(CActionBarOverlayLayout)
 CAR_OBJECT_IMPL(CActionBarView)
+CAR_OBJECT_IMPL(CActionBarViewSavedState)
 CAR_OBJECT_IMPL(CBackgroundFallback)
 CAR_OBJECT_IMPL(CDialogTitle)
 CAR_OBJECT_IMPL(CDrawableHolder)

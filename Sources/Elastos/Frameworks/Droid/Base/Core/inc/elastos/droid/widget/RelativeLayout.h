@@ -10,10 +10,10 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Droid::View::IViewGroupLayoutParams;
-using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Utility::Pools;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IView;
 using Elastos::Core::IComparator;
@@ -25,7 +25,9 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 class Node;
-}}}
+}
+}
+}
 
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Widget::Node);
 DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::Node, IInterface);
@@ -166,14 +168,14 @@ class ECO_PUBLIC RelativeLayout
     , public IRelativeLayout
 {
 public:
-    class LayoutParams
+    class RelativeLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public IRelativeLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        RelativeLayoutLayoutParams();
 
         CARAPI AddRule(
             /* [in] */ Int32 verb);
@@ -362,11 +364,11 @@ private:
 
     CARAPI_(void) AlignBaseline(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params);
+        /* [in] */ RelativeLayoutLayoutParams* params);
 
     /**
      * Measure a child. The child should have left, top, right and bottom information
-     * stored in its LayoutParams. If any of these values is -1 it means that the view
+     * stored in its RelativeLayoutLayoutParams. If any of these values is -1 it means that the view
      * can extend up to the corresponding edge.
      *
      * @param child Child to measure
@@ -376,13 +378,13 @@ private:
      */
     CARAPI_(void) MeasureChild(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params,
+        /* [in] */ RelativeLayoutLayoutParams* params,
         /* [in] */ Int32 myWidth,
         /* [in] */ Int32 myHeight);
 
     CARAPI_(void) MeasureChildHorizontal(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params,
+        /* [in] */ RelativeLayoutLayoutParams* params,
         /* [in] */ Int32 myWidth,
         /* [in] */ Int32 myHeight);
 
@@ -414,30 +416,30 @@ private:
 
     CARAPI_(Boolean) PositionChildHorizontal(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params,
+        /* [in] */ RelativeLayoutLayoutParams* params,
         /* [in] */ Int32 myWidth,
         /* [in] */ Boolean wrapContent);
 
     CARAPI_(Boolean) PositionChildVertical(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params,
+        /* [in] */ RelativeLayoutLayoutParams* params,
         /* [in] */ Int32 myHeight,
         /* [in] */ Boolean wrapContent);
 
     CARAPI_(void) ApplyHorizontalSizeRules(
-        /* [in] */ LayoutParams* childParams,
+        /* [in] */ RelativeLayoutLayoutParams* childParams,
         /* [in] */ Int32 myWidth,
         /* [in] */ ArrayOf<Int32>* rules);
 
     CARAPI_(void) ApplyVerticalSizeRules(
-        /* [in] */ LayoutParams* childParams,
+        /* [in] */ RelativeLayoutLayoutParams* childParams,
         /* [in] */ Int32 myHeight);
 
     CARAPI_(AutoPtr<IView>) GetRelatedView(
         /* [in] */ ArrayOf<Int32>* rules,
         /* [in] */ Int32 relation);
 
-    CARAPI_(AutoPtr<LayoutParams>) GetRelatedViewParams(
+    CARAPI_(AutoPtr<RelativeLayoutLayoutParams>) GetRelatedViewParams(
         /* [in] */ ArrayOf<Int32>* rules,
         /* [in] */ Int32 relation);
 
@@ -447,12 +449,12 @@ private:
 
     static CARAPI_(void) CenterHorizontal(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params,
+        /* [in] */ RelativeLayoutLayoutParams* params,
         /* [in] */ Int32 myWidth);
 
     static CARAPI_(void) CenterVertical(
         /* [in] */ IView* child,
-        /* [in] */ LayoutParams* params,
+        /* [in] */ RelativeLayoutLayoutParams* params,
         /* [in] */ Int32 myHeight);
 
     CARAPI InitFromAttributes(
@@ -465,7 +467,7 @@ private:
         /* [in] */ IContext* context);
 
 private:
-    friend class LayoutParams;
+    friend class RelativeLayoutLayoutParams;
 
     ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > RULES_VERTICAL;
     ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > RULES_HORIZONTAL;

@@ -55,14 +55,14 @@ class ActionBarOverlayLayout
     , public IActionBarOverlayLayout
 {
 public:
-    class LayoutParams
+    class ActionBarOverlayLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public IActionBarOverlayLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        ActionBarOverlayLayoutLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

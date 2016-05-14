@@ -43,7 +43,7 @@ public:
     class Bounds;
 
 public:
-    class LayoutParams
+    class GridLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public IGridLayoutLayoutParams
     {
@@ -69,7 +69,7 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        GridLayoutLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IGridLayoutSpec* rowSpec,

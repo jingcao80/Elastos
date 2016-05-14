@@ -21,19 +21,16 @@ class ECO_PUBLIC ScrollView
     , public IScrollView
 {
 public:
-    class SavedState
+    class ScrollViewSavedState
         : public BaseSavedState
         , public IScrollViewSavedState
     {
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        ScrollViewSavedState();
 
-        CARAPI constructor();
-
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        ~ScrollViewSavedState();
 
         // @Override
         CARAPI WriteToParcel(
@@ -519,7 +516,7 @@ private:
      AutoPtr<IStrictModeSpan> mScrollStrictSpan;
      AutoPtr<IStrictModeSpan> mFlingStrictSpan;
 
-     AutoPtr<SavedState> mSavedState;
+     AutoPtr<ScrollViewSavedState> mSavedState;
 };
 
 } // namespace Widget

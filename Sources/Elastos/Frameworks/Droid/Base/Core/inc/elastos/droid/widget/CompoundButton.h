@@ -33,7 +33,7 @@ class ECO_PUBLIC CompoundButton
     , public ICheckable
 {
 public:
-    class SavedState
+    class CompoundButtonSavedState
         : public View::BaseSavedState
         , public ICompoundButtonSavedState
     {
@@ -41,14 +41,9 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        CompoundButtonSavedState();
 
-        ~SavedState();
-
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
-
-        CARAPI constructor();
+        ~CompoundButtonSavedState();
 
         // @Override
         CARAPI WriteToParcel(

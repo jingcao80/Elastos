@@ -15,16 +15,16 @@ class RadioGroup
     , public IRadioGroup
 {
 public:
-    class LayoutParams
-        : public LinearLayout::LayoutParams
+    class RadioGroupLayoutParams
+        : public LinearLayout::LinearLayoutLayoutParams
         , public IRadioGroupLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        RadioGroupLayoutParams();
 
-        ~LayoutParams();
+        ~RadioGroupLayoutParams();
 
         /**
          * {@inheritDoc}

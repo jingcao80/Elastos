@@ -331,6 +331,17 @@ module
             [out] Int32* firstDayOfWeek);
     }
 
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IDatePickerSavedState {
+
+    }
+
     }// namespace Widget
     }// namespace Droid
     }// namespace Elastos

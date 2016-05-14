@@ -1864,12 +1864,15 @@ void ListView::SetupChild(
 
     AutoPtr<IViewGroupLayoutParams> p;
     child->GetLayoutParams((IViewGroupLayoutParams**)&p);
-    AutoPtr<IAbsListViewLayoutParams> lp = IAbsListViewLayoutParams::Probe(p);
-    AutoPtr<CAbsListViewLayoutParams> cp = (CAbsListViewLayoutParams*)lp.Get();
-    if (p == NULL) {
+    AutoPtr<CAbsListViewLayoutParams> cp;
+    if (p != NULL) {
+        cp = (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(p);
+    }
+    else {
         GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&p);
         cp = (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(p.Get());
     }
+
     IAdapter::Probe(mAdapter)->GetItemViewType(position, &(cp->mViewType));
 
     if ((recycled && !cp->mForceAdd) || (cp->mRecycledHeaderFooter &&

@@ -66,14 +66,14 @@ public:
      * @attr ref android.R.styleable#SizeAdaptiveLayout_Layout_layout_minHeight
      * @attr ref android.R.styleable#SizeAdaptiveLayout_Layout_layout_maxHeight
      */
-    class LayoutParams
+    class SizeAdaptiveLayoutLayoutParams
         : public ViewGroup::LayoutParams
         , public ISizeAdaptiveLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        SizeAdaptiveLayoutLayoutParams();
 
         /**
          * {@inheritDoc}

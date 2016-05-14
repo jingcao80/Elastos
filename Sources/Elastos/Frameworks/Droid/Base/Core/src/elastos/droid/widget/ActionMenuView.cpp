@@ -4,21 +4,19 @@
 #include "elastos/droid/widget/CActionMenuViewLayoutParams.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/internal/view/menu/CMenuBuilder.h"
-
 #include "elastos/droid/R.h"
-
 #include <elastos/core/Math.h>
 
-using Elastos::Droid::R;
-using Elastos::Droid::View::CContextThemeWrapper;
-using Elastos::Droid::View::IGravity;
-using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Internal::View::Menu::CMenuBuilder;
 using Elastos::Droid::Internal::View::Menu::IMenuPresenter;
 using Elastos::Droid::Internal::View::Menu::IActionMenuItemView;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuPresenterCallback;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuView;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilderItemInvoker;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::R;
 
 namespace Elastos {
 namespace Droid {
@@ -43,9 +41,9 @@ String ActionMenuView::TAG("ActionMenuView");
 const Int32 ActionMenuView::MIN_CELL_SIZE = 56; // dips
 const Int32 ActionMenuView::GENERATED_ITEM_PADDING = 4; // dips
 
-CAR_INTERFACE_IMPL(ActionMenuView::LayoutParams, LinearLayout::LayoutParams, IActionMenuViewLayoutParams)
+CAR_INTERFACE_IMPL(ActionMenuView::ActionMenuViewLayoutParams, LinearLayout::LinearLayoutLayoutParams, IActionMenuViewLayoutParams)
 
-ActionMenuView::LayoutParams::LayoutParams()
+ActionMenuView::ActionMenuViewLayoutParams::ActionMenuViewLayoutParams()
     : mIsOverflowButton(0)
     , mCellsUsed(0)
     , mExtraPixels(0)
@@ -54,57 +52,57 @@ ActionMenuView::LayoutParams::LayoutParams()
     , mExpanded(0)
 {}
 
-ECode ActionMenuView::LayoutParams::constructor(
+ECode ActionMenuView::ActionMenuViewLayoutParams::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ IAttributeSet* attrs)
 {
-    LinearLayout::LayoutParams::constructor(ctx, attrs);
+    LinearLayout::LinearLayoutLayoutParams::constructor(ctx, attrs);
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::constructor(
+ECode ActionMenuView::ActionMenuViewLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* other)
 {
-    LinearLayout::LayoutParams::constructor(other);
+    LinearLayout::LinearLayoutLayoutParams::constructor(other);
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::constructor(
+ECode ActionMenuView::ActionMenuViewLayoutParams::constructor(
     /* [in] */ IActionMenuViewLayoutParams* actLp)
 {
     IViewGroupMarginLayoutParams* temp = IViewGroupMarginLayoutParams::Probe(actLp);
-    LinearLayout::LayoutParams::constructor(temp);
+    LinearLayout::LinearLayoutLayoutParams::constructor(temp);
     actLp->GetIsOverflowButton(&mIsOverflowButton);
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::constructor(
+ECode ActionMenuView::ActionMenuViewLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    LinearLayout::LayoutParams::constructor(width, height);
+    LinearLayout::LinearLayoutLayoutParams::constructor(width, height);
     mIsOverflowButton = FALSE;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::constructor(
+ECode ActionMenuView::ActionMenuViewLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Boolean isOverflowButton)
 {
-    LinearLayout::LayoutParams::constructor(width, height);
+    LinearLayout::LinearLayoutLayoutParams::constructor(width, height);
     mIsOverflowButton = isOverflowButton;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::SetIsOverflowButton(
+ECode ActionMenuView::ActionMenuViewLayoutParams::SetIsOverflowButton(
     /* [in] */ Boolean isOverflow)
 {
     mIsOverflowButton = isOverflow;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::GetIsOverflowButton(
+ECode ActionMenuView::ActionMenuViewLayoutParams::GetIsOverflowButton(
     /* [out] */ Boolean* isOverflow)
 {
     VALIDATE_NOT_NULL(isOverflow)
@@ -112,14 +110,14 @@ ECode ActionMenuView::LayoutParams::GetIsOverflowButton(
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::SetCellsUsed(
+ECode ActionMenuView::ActionMenuViewLayoutParams::SetCellsUsed(
     /* [in] */ Int32 cellsUsed)
 {
     mCellsUsed = cellsUsed;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::GetCellsUsed(
+ECode ActionMenuView::ActionMenuViewLayoutParams::GetCellsUsed(
     /* [out] */ Int32* cellsUsed)
 {
     VALIDATE_NOT_NULL(cellsUsed)
@@ -127,14 +125,14 @@ ECode ActionMenuView::LayoutParams::GetCellsUsed(
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::SetExtraPixels(
+ECode ActionMenuView::ActionMenuViewLayoutParams::SetExtraPixels(
     /* [in] */ Int32 extraPixels)
 {
     mExtraPixels = extraPixels;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::GetExtraPixels(
+ECode ActionMenuView::ActionMenuViewLayoutParams::GetExtraPixels(
     /* [out] */ Int32* extraPixels)
 {
     VALIDATE_NOT_NULL(extraPixels)
@@ -142,14 +140,14 @@ ECode ActionMenuView::LayoutParams::GetExtraPixels(
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::SetExpandable(
+ECode ActionMenuView::ActionMenuViewLayoutParams::SetExpandable(
     /* [in] */ Boolean expandable)
 {
     mExpandable = expandable;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::GetExpandable(
+ECode ActionMenuView::ActionMenuViewLayoutParams::GetExpandable(
     /* [out] */ Boolean* expandable)
 {
     VALIDATE_NOT_NULL(expandable)
@@ -157,14 +155,14 @@ ECode ActionMenuView::LayoutParams::GetExpandable(
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::SetPreventEdgeOffset(
+ECode ActionMenuView::ActionMenuViewLayoutParams::SetPreventEdgeOffset(
     /* [in] */ Boolean preventEdgeOffset)
 {
     mPreventEdgeOffset = preventEdgeOffset;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::GetPreventEdgeOffset(
+ECode ActionMenuView::ActionMenuViewLayoutParams::GetPreventEdgeOffset(
     /* [out] */ Boolean* preventEdgeOffset)
 {
     VALIDATE_NOT_NULL(preventEdgeOffset)
@@ -172,14 +170,14 @@ ECode ActionMenuView::LayoutParams::GetPreventEdgeOffset(
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::SetExpanded(
+ECode ActionMenuView::ActionMenuViewLayoutParams::SetExpanded(
     /* [in] */ Boolean expanded)
 {
     mExpanded = expanded;
     return NOERROR;
 }
 
-ECode ActionMenuView::LayoutParams::GetExpanded(
+ECode ActionMenuView::ActionMenuViewLayoutParams::GetExpanded(
     /* [out] */ Boolean* expanded)
 {
     VALIDATE_NOT_NULL(expanded)
@@ -349,7 +347,8 @@ void ActionMenuView::OnMeasure(
     GetChildCount(&childCount);
     if (mFormatItems && childCount> 0) {
         OnMeasureExactFormat(widthMeasureSpec, heightMeasureSpec);
-    } else {
+    }
+    else {
         // Previous measurement at exact format may have set margins - reset them.
         Int32 childCount;
         GetChildCount(&childCount);

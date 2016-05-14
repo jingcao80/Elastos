@@ -9,7 +9,6 @@
 #include "elastos/droid/widget/CScroller.h"
 #include <elastos/core/Math.h>
 
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::SoundEffectConstants;
 using Elastos::Droid::View::IGravity;
@@ -23,30 +22,38 @@ using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::EIID_IGestureDetectorOnGestureListener;
 using Elastos::Droid::Widget::CGalleryLayoutParams;
 using Elastos::Droid::Widget::CScroller;
+using Elastos::Core::EIID_IRunnable;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
 
 //==============================================================================
-//              Gallery::LayoutParams
+//              Gallery::GalleryLayoutParams
 //==============================================================================
-CAR_INTERFACE_IMPL(Gallery::LayoutParams, ViewGroup::LayoutParams, IGalleryLayoutParams);
-ECode Gallery::LayoutParams::constructor(
+CAR_INTERFACE_IMPL(Gallery::GalleryLayoutParams, ViewGroup::LayoutParams, IGalleryLayoutParams);
+
+Gallery::GalleryLayoutParams::GalleryLayoutParams()
+{}
+
+Gallery::GalleryLayoutParams::~GalleryLayoutParams()
+{}
+
+ECode Gallery::GalleryLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
     return ViewGroup::LayoutParams::constructor(c, attrs);
 }
 
-ECode Gallery::LayoutParams::constructor(
+ECode Gallery::GalleryLayoutParams::constructor(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
 {
     return ViewGroup::LayoutParams::constructor(w, h);
 }
 
-ECode Gallery::LayoutParams::constructor(
+ECode Gallery::GalleryLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ViewGroup::LayoutParams::constructor(source);

@@ -1,0 +1,37 @@
+
+module
+{
+    using interface Elastos.Utility.ICalendar;
+    interface Elastos.Droid.Widget.IDatePicker;
+    interface Elastos.Droid.Widget.ICalendarView;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IDatePickerDelegate
+     * interface Elastos.Droid.Widget.IDatePickerController
+     * interface Elastos.Droid.View.IViewOnClickListener
+     */
+    interface IDatePickerCalendarDelegate {
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IDatePickerCalendarDelegateSavedState {
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

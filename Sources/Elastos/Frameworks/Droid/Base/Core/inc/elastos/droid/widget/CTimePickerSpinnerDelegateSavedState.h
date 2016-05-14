@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CTimePickerSpinnerDelegateSavedState)
-    , public TimePickerSpinnerDelegate::SavedState
+    , public TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState
 {
 public:
     CAR_OBJECT_DECL();

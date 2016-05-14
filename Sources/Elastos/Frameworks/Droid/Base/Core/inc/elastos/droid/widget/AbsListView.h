@@ -78,7 +78,7 @@ class ECO_PUBLIC AbsListView
 {
     friend class FastScroller;
 public:
-    class LayoutParams
+    class AbsListViewLayoutParams
         : public ViewGroup::LayoutParams
         , public IAbsListViewLayoutParams
     {
@@ -86,9 +86,9 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        AbsListViewLayoutParams();
 
-        ~LayoutParams();
+        ~AbsListViewLayoutParams();
 
         /**
          * {@inheritDoc}
@@ -186,7 +186,7 @@ public:
         Int64 mItemId;
     };
 
-    class SavedState
+    class AbsListViewSavedState
         : public View::BaseSavedState
         , public IAbsListViewSavedState
     {
@@ -194,9 +194,9 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        AbsListViewSavedState();
 
-        ~SavedState();
+        ~AbsListViewSavedState();
 
         // @Override
         CARAPI WriteToParcel(

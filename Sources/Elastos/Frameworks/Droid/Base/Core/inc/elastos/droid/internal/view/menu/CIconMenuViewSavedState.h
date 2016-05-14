@@ -11,7 +11,7 @@ namespace View {
 namespace Menu {
 
 CarClass(CIconMenuViewSavedState)
-    , public IconMenuView::SavedState
+    , public IconMenuView::IconMenuViewSavedState
 {
 public:
     CAR_OBJECT_DECL()

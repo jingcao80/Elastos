@@ -10,7 +10,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CLinearLayoutLayoutParams)
-    , public LinearLayout::LayoutParams
+    , public LinearLayout::LinearLayoutLayoutParams
 {
 public:
     CAR_OBJECT_DECL();

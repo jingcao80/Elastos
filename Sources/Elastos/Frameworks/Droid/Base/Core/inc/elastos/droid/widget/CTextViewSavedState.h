@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CTextViewSavedState)
-    , public TextView::SavedState
+    , public TextView::TextViewSavedState
 {
 public:
     CAR_OBJECT_DECL()

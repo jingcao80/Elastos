@@ -26,12 +26,12 @@ class IconMenuView
 {
     friend class IconMenuPresenter;
 public:
-    class SavedState
+    class IconMenuViewSavedState
         : public View::BaseSavedState
         , public IIconMenuViewSavedState
     {
     public:
-        SavedState();
+        IconMenuViewSavedState();
 
         CAR_INTERFACE_DECL()
 
@@ -61,12 +61,12 @@ public:
      * Layout parameters specific to IconMenuView (stores the left, top, right, bottom from the
      * measure pass).
      */
-    class LayoutParams
+    class IconMenuViewLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public IIconMenuViewLayoutParams
     {
     public:
-        LayoutParams();
+        IconMenuViewLayoutParams();
 
         CAR_INTERFACE_DECL()
 

@@ -8,7 +8,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CarClass(CAbsSpinnerSavedState) , public AbsSpinner::SavedState
+CarClass(CAbsSpinnerSavedState) , public AbsSpinner::AbsSpinnerSavedState
 {
 public:
     CAR_OBJECT_DECL();

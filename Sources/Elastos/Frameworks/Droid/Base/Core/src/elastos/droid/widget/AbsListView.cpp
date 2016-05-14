@@ -144,12 +144,12 @@ static AutoPtr<IInterpolator> InitInterpolator()
 AutoPtr<IInterpolator> AbsListView::sLinearInterpolator = InitInterpolator();
 
 //==============================================================================
-//          AbsListView::LayoutParams
+//          AbsListView::AbsListViewLayoutParams
 //==============================================================================
 
-CAR_INTERFACE_IMPL(AbsListView::LayoutParams, ViewGroup::LayoutParams, IAbsListViewLayoutParams);
+CAR_INTERFACE_IMPL(AbsListView::AbsListViewLayoutParams, ViewGroup::LayoutParams, IAbsListViewLayoutParams);
 
-AbsListView::LayoutParams::LayoutParams()
+AbsListView::AbsListViewLayoutParams::AbsListViewLayoutParams()
     : mViewType(0)
     , mRecycledHeaderFooter(FALSE)
     , mForceAdd(FALSE)
@@ -157,24 +157,24 @@ AbsListView::LayoutParams::LayoutParams()
     , mItemId(-1)
 {}
 
-AbsListView::LayoutParams::~LayoutParams()
+AbsListView::AbsListViewLayoutParams::~AbsListViewLayoutParams()
 {}
 
-ECode AbsListView::LayoutParams::constructor(
+ECode AbsListView::AbsListViewLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
     return ViewGroup::LayoutParams::constructor(c, attrs);
 }
 
-ECode AbsListView::LayoutParams::constructor(
+ECode AbsListView::AbsListViewLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     return ViewGroup::LayoutParams::constructor(width, height);
 }
 
-ECode AbsListView::LayoutParams::constructor(
+ECode AbsListView::AbsListViewLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 viewType)
@@ -185,48 +185,48 @@ ECode AbsListView::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::constructor(
+ECode AbsListView::AbsListViewLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     return ViewGroup::LayoutParams::constructor(source);
 }
 
-ECode AbsListView::LayoutParams::SetItemId(
+ECode AbsListView::AbsListViewLayoutParams::SetItemId(
     /* [in] */ Int64 itemId)
 {
     mItemId = itemId;
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::SetScrappedFromPosition(
+ECode AbsListView::AbsListViewLayoutParams::SetScrappedFromPosition(
     /* [in] */ Int32 scrappedFromPosition)
 {
     mScrappedFromPosition = scrappedFromPosition;
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::SetForceAdd(
+ECode AbsListView::AbsListViewLayoutParams::SetForceAdd(
     /* [in] */ Boolean force)
 {
     mForceAdd = force;
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::SetRecycledHeaderFooter(
+ECode AbsListView::AbsListViewLayoutParams::SetRecycledHeaderFooter(
     /* [in] */ Boolean footer)
 {
     mRecycledHeaderFooter = footer;
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::SetViewType(
+ECode AbsListView::AbsListViewLayoutParams::SetViewType(
     /* [in] */ Int32 type)
 {
     mViewType = type;
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::GetItemId(
+ECode AbsListView::AbsListViewLayoutParams::GetItemId(
     /* [out] */ Int64* itemId)
 {
     VALIDATE_NOT_NULL(itemId)
@@ -234,7 +234,7 @@ ECode AbsListView::LayoutParams::GetItemId(
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::GetScrappedFromPosition(
+ECode AbsListView::AbsListViewLayoutParams::GetScrappedFromPosition(
     /* [out] */ Int32* scrappedFromPosition)
 {
     VALIDATE_NOT_NULL(scrappedFromPosition)
@@ -242,7 +242,7 @@ ECode AbsListView::LayoutParams::GetScrappedFromPosition(
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::GetForceAdd(
+ECode AbsListView::AbsListViewLayoutParams::GetForceAdd(
     /* [out] */ Boolean* force)
 {
     VALIDATE_NOT_NULL(force)
@@ -250,7 +250,7 @@ ECode AbsListView::LayoutParams::GetForceAdd(
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::GetRecycledHeaderFooter(
+ECode AbsListView::AbsListViewLayoutParams::GetRecycledHeaderFooter(
     /* [out] */ Boolean* footer)
 {
     VALIDATE_NOT_NULL(footer)
@@ -258,7 +258,7 @@ ECode AbsListView::LayoutParams::GetRecycledHeaderFooter(
     return NOERROR;
 }
 
-ECode AbsListView::LayoutParams::GetViewType(
+ECode AbsListView::AbsListViewLayoutParams::GetViewType(
     /* [in] */ Int32* type)
 {
     *type = mViewType;
@@ -266,12 +266,12 @@ ECode AbsListView::LayoutParams::GetViewType(
 }
 
 //==============================================================================
-//          AbsListView::SavedState
+//          AbsListView::AbsListViewSavedState
 //==============================================================================
 
-CAR_INTERFACE_IMPL(AbsListView::SavedState, View::BaseSavedState, IAbsListViewSavedState);
+CAR_INTERFACE_IMPL(AbsListView::AbsListViewSavedState, View::BaseSavedState, IAbsListViewSavedState);
 
-AbsListView::SavedState::SavedState()
+AbsListView::AbsListViewSavedState::AbsListViewSavedState()
     : mSelectedId(-1)
     , mFirstId(-1)
     , mViewTop(0)
@@ -282,13 +282,13 @@ AbsListView::SavedState::SavedState()
 {
 }
 
-AbsListView::SavedState::~SavedState()
+AbsListView::AbsListViewSavedState::~AbsListViewSavedState()
 {
     mCheckState = NULL;
     mCheckIdState = NULL;
 }
 
-ECode AbsListView::SavedState::WriteToParcel(
+ECode AbsListView::AbsListViewSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     FAIL_RETURN(View::BaseSavedState::WriteToParcel(dest));
@@ -331,7 +331,7 @@ ECode AbsListView::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode AbsListView::SavedState::ReadFromParcel(
+ECode AbsListView::AbsListViewSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     FAIL_RETURN(View::BaseSavedState::ReadFromParcel(source));
@@ -376,7 +376,7 @@ ECode AbsListView::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode AbsListView::SavedState::ToString(
+ECode AbsListView::AbsListViewSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);

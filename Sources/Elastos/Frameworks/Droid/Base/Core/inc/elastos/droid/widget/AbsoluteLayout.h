@@ -37,14 +37,14 @@ public:
  * {@link android.R.styleable#AbsoluteLayout_Layout Absolute Layout Attributes}
  * for a list of all child view attributes that this class supports.
  */
-    class LayoutParams
+    class AbsoluteLayoutLayoutParams
         : public ViewGroup::LayoutParams
         , public IAbsoluteLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        AbsoluteLayoutLayoutParams();
 
         /**
          * Creates a new set of layout parameters with the specified width,
@@ -89,7 +89,7 @@ public:
         CARAPI constructor(
             /* [in] */ IViewGroupLayoutParams* source);
 
-        virtual ~LayoutParams() {}
+        virtual ~AbsoluteLayoutLayoutParams() {}
 
         CARAPI SetX(
             /* [in] */ Int32 x);

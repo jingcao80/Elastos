@@ -8,7 +8,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CarClass(CProgressBarSavedState) , public ProgressBar::SavedState
+CarClass(CProgressBarSavedState)
+    , public ProgressBar::ProgressBarSavedState
 {
 public:
     CAR_OBJECT_DECL();

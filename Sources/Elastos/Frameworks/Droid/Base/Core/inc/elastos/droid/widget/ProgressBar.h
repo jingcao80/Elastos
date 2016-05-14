@@ -26,19 +26,16 @@ class ECO_PUBLIC ProgressBar
     , public IProgressBar
 {
 public:
-    class SavedState
+    class ProgressBarSavedState
         : public View::BaseSavedState
         , public IProgressBarSavedState
     {
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        ProgressBarSavedState();
 
-        CARAPI constructor();
-
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        ~ProgressBarSavedState();
 
         CARAPI WriteToParcel(
             /* [in] */ IParcel* dest);

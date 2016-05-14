@@ -9,7 +9,8 @@ namespace Droid {
 namespace Internal {
 namespace Widget {
 
-CarClass(CLockPatternViewSavedState), public LockPatternView::SavedState
+CarClass(CLockPatternViewSavedState)
+    , public LockPatternView::LockPatternViewSavedState
 {
 public:
     CAR_OBJECT_DECL();

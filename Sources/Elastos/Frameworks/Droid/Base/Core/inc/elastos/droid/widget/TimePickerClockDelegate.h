@@ -38,7 +38,7 @@ public:
     /**
       * Used to save / restore state of time picker
       */
-    class SavedState
+    class TimePickerClockDelegateSavedState
         : public Elastos::Droid::View::View::BaseSavedState
         , public ITimePickerClockDelegateSavedState
     {
@@ -46,9 +46,9 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        SavedState();
+        TimePickerClockDelegateSavedState();
 
-        ~SavedState();
+        ~TimePickerClockDelegateSavedState();
 
         CARAPI constructor(
             /* [in] */ IParcelable* superState,
@@ -314,7 +314,7 @@ private:
 } // namespace Elastos
 
 template <>
-struct Conversion<Elastos::Droid::Widget::TimePickerClockDelegate::SavedState*, IInterface*>
+struct Conversion<Elastos::Droid::Widget::TimePickerClockDelegate::TimePickerClockDelegateSavedState*, IInterface*>
 {
     enum { exists = TRUE, exists2Way = FALSE, sameType = FALSE };
 };

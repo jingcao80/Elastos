@@ -9,7 +9,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CRadioGroupLayoutParams)
-    , public RadioGroup::LayoutParams
+    , public RadioGroup::RadioGroupLayoutParams
 {
 public:
     CAR_OBJECT_DECL();

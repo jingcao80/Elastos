@@ -1221,10 +1221,10 @@ ECode CGregorianCalendar::Clone(
 {
     VALIDATE_NOT_NULL(cloned)
 
-    AutoPtr<IGregorianCalendar> temp;
-    CGregorianCalendar::New((IGregorianCalendar**)&temp);
-    CloneImpl(temp);
-    *cloned = temp;
+    AutoPtr<CGregorianCalendar> temp = new CGregorianCalendar();
+    AutoPtr<IGregorianCalendar> calendar = (IGregorianCalendar*)temp.Get();
+    CloneImpl(calendar);
+    *cloned = calendar;
     REFCOUNT_ADD(*cloned);
     return NOERROR;
 }

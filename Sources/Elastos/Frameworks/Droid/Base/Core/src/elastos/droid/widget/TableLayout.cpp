@@ -23,48 +23,54 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CAR_INTERFACE_IMPL(TableLayout::LayoutParams, LinearLayout::LayoutParams, ITableLayoutLayoutParams)
+CAR_INTERFACE_IMPL(TableLayout::TableLayoutLayoutParams, LinearLayout::LinearLayoutLayoutParams, ITableLayoutLayoutParams)
 
-ECode TableLayout::LayoutParams::constructor(
+TableLayout::TableLayoutLayoutParams::TableLayoutLayoutParams()
+{}
+
+TableLayout::TableLayoutLayoutParams::~TableLayoutLayoutParams()
+{}
+
+ECode TableLayout::TableLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    return LinearLayout::LayoutParams::constructor(c, attrs);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(c, attrs);
 }
 
-ECode TableLayout::LayoutParams::constructor(
+ECode TableLayout::TableLayoutLayoutParams::constructor(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
 {
-    return LinearLayout::LayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT, h);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT, h);
 }
 
-ECode TableLayout::LayoutParams::constructor(
+ECode TableLayout::TableLayoutLayoutParams::constructor(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Float initWeight)
 {
-    return LinearLayout::LayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT, h, initWeight);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT, h, initWeight);
 }
 
-ECode TableLayout::LayoutParams::constructor()
+ECode TableLayout::TableLayoutLayoutParams::constructor()
 {
-    return LinearLayout::LayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT, WRAP_CONTENT);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT, WRAP_CONTENT);
 }
 
-ECode TableLayout::LayoutParams::constructor(
+ECode TableLayout::TableLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    return LinearLayout::LayoutParams::constructor(p);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(p);
 }
 
-ECode TableLayout::LayoutParams::constructor(
+ECode TableLayout::TableLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
-    return LinearLayout::LayoutParams::constructor(source);
+    return LinearLayout::LinearLayoutLayoutParams::constructor(source);
 }
 
-ECode TableLayout::LayoutParams::SetBaseAttributes(
+ECode TableLayout::TableLayoutLayoutParams::SetBaseAttributes(
     /* [in] */ ITypedArray* a,
     /* [in] */ Int32 widthAttr,
     /* [in] */ Int32 heightAttr)

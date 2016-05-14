@@ -36,30 +36,19 @@ static AutoPtr<ArrayOf<Int32> > Init_CHECKED_STATE_SET()
 AutoPtr<ArrayOf<Int32> > CompoundButton::CHECKED_STATE_SET = Init_CHECKED_STATE_SET();
 
 //==============================================================================
-//          CompoundButton::SavedState
+//          CompoundButton::CompoundButtonSavedState
 //==============================================================================
 
-CAR_INTERFACE_IMPL(CompoundButton::SavedState, View::BaseSavedState, ICompoundButtonSavedState);
+CAR_INTERFACE_IMPL(CompoundButton::CompoundButtonSavedState, View::BaseSavedState, ICompoundButtonSavedState);
 
-CompoundButton::SavedState::SavedState()
+CompoundButton::CompoundButtonSavedState::CompoundButtonSavedState()
     : mSavedStateChecked(FALSE)
 {}
 
-CompoundButton::SavedState::~SavedState()
+CompoundButton::CompoundButtonSavedState::~CompoundButtonSavedState()
 {}
 
-ECode CompoundButton::SavedState::constructor()
-{
-    return View::BaseSavedState::constructor();
-}
-
-ECode CompoundButton::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return View::BaseSavedState::constructor(superState);
-}
-
-ECode CompoundButton::SavedState::WriteToParcel(
+ECode CompoundButton::CompoundButtonSavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     FAIL_RETURN(View::BaseSavedState::WriteToParcel(out));
@@ -67,7 +56,7 @@ ECode CompoundButton::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode CompoundButton::SavedState::ReadFromParcel(
+ECode CompoundButton::CompoundButtonSavedState::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     FAIL_RETURN(View::BaseSavedState::ReadFromParcel(in));
@@ -75,7 +64,7 @@ ECode CompoundButton::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode CompoundButton::SavedState::ToString(
+ECode CompoundButton::CompoundButtonSavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
@@ -560,13 +549,14 @@ AutoPtr<IParcelable> CompoundButton::OnSaveInstanceState()
 {
     AutoPtr<IParcelable> superState = Button::OnSaveInstanceState();
 
-    AutoPtr<CCompoundButtonSavedState> ss;
-    ASSERT_SUCCEEDED(CCompoundButtonSavedState::NewByFriend(
-            superState, (CCompoundButtonSavedState**)&ss));
+    AutoPtr<ICompoundButtonSavedState> ss;
+    ASSERT_SUCCEEDED(CCompoundButtonSavedState::New(superState, (ICompoundButtonSavedState**)&ss));
 
-    IsChecked(&(ss->mSavedStateChecked));
+    CCompoundButtonSavedState* state = (CCompoundButtonSavedState*)ss.Get();
 
-   return ss;
+    IsChecked(&(state->mSavedStateChecked));
+
+   return IParcelable::Probe(ss);
 }
 
 void CompoundButton::OnRestoreInstanceState(

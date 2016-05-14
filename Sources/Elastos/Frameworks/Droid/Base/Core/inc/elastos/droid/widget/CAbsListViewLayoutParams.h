@@ -10,7 +10,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CAbsListViewLayoutParams)
-    , public AbsListView::LayoutParams
+    , public AbsListView::AbsListViewLayoutParams
 {
 public:
     CAR_OBJECT_DECL();

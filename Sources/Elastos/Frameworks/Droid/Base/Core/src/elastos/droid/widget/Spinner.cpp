@@ -680,36 +680,28 @@ ECode Spinner::SpinnerForwardingListener::OnForwardingStarted(
 }
 
 //==========================================================================
-//                       Spinner::SavedState
+//                       Spinner::SpinnerSavedState
 //==========================================================================
-CAR_INTERFACE_IMPL(Spinner::SavedState, AbsSpinner::SavedState, ISpinnerSavedState);
-Spinner::SavedState::SavedState()
+CAR_INTERFACE_IMPL(Spinner::SpinnerSavedState, AbsSpinner::AbsSpinnerSavedState, ISpinnerSavedState);
+Spinner::SpinnerSavedState::SpinnerSavedState()
     : mShowDropdown(FALSE)
 {}
 
-ECode Spinner::SavedState::constructor()
-{
-    return NOERROR;
-}
+Spinner::SpinnerSavedState::~SpinnerSavedState()
+{}
 
-ECode Spinner::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
-{
-    return AbsSpinner::SavedState::constructor(superState);
-}
-
-ECode Spinner::SavedState::WriteToParcel(
+ECode Spinner::SpinnerSavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
-    AbsSpinner::SavedState::WriteToParcel(out);
+    AbsSpinner::AbsSpinnerSavedState::WriteToParcel(out);
     out->WriteBoolean(mShowDropdown);
     return NOERROR;
 }
 
-ECode Spinner::SavedState::ReadFromParcel(
+ECode Spinner::SpinnerSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    AbsSpinner::SavedState::ReadFromParcel(source);
+    AbsSpinner::AbsSpinnerSavedState::ReadFromParcel(source);
     source->ReadBoolean(&mShowDropdown);
     return NOERROR;
 }
@@ -1160,7 +1152,7 @@ AutoPtr<IParcelable> Spinner::OnSaveInstanceState()
 void Spinner::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    AutoPtr<SavedState> ss = (SavedState*) state;
+    AutoPtr<SpinnerSavedState> ss = (SpinnerSavedState*) state;
 
     AutoPtr<IParcelable> s;
     ss->GetSuperState((IParcelable**)&s);

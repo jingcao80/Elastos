@@ -77,15 +77,15 @@ ECode SizeAdaptiveLayout::BringToFrontOnEnd::OnAnimationStart(
 }
 
 //===================================================================================
-//              SizeAdaptiveLayout::LayoutParams
+//              SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams
 //===================================================================================
-CAR_INTERFACE_IMPL(SizeAdaptiveLayout::LayoutParams, ViewGroup::LayoutParams, ISizeAdaptiveLayoutLayoutParams);
-SizeAdaptiveLayout::LayoutParams::LayoutParams()
+CAR_INTERFACE_IMPL(SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams, ViewGroup::LayoutParams, ISizeAdaptiveLayoutLayoutParams);
+SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::SizeAdaptiveLayoutLayoutParams()
     : mMinHeight(0)
     , mMaxHeight(0)
 {}
 
-ECode SizeAdaptiveLayout::LayoutParams::constructor(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -125,7 +125,7 @@ ECode SizeAdaptiveLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::constructor(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Int32 minHeight,
@@ -137,19 +137,19 @@ ECode SizeAdaptiveLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::constructor(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     return constructor(width, height, UNBOUNDED, UNBOUNDED);
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::constructor()
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::constructor()
 {
     return constructor(MeasureSpec::UNSPECIFIED, MeasureSpec::UNSPECIFIED);
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::constructor(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* p)
 {
     ViewGroup::LayoutParams::constructor(p);
@@ -158,7 +158,7 @@ ECode SizeAdaptiveLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::Debug(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::Debug(
     /* [in] */ const String& output,
     /* [out] */ String* str)
 {
@@ -169,14 +169,14 @@ ECode SizeAdaptiveLayout::LayoutParams::Debug(
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::SetMinHeight(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::SetMinHeight(
     /* [in] */ Int32 mh)
 {
     mMinHeight = mh;
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::GetMinHeight(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::GetMinHeight(
     /* [out] */ Int32* mh)
 {
     VALIDATE_NOT_NULL(mh);
@@ -184,14 +184,14 @@ ECode SizeAdaptiveLayout::LayoutParams::GetMinHeight(
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::SetMaxHeight(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::SetMaxHeight(
     /* [in] */ Int32 mh)
 {
     mMaxHeight = mh;
     return NOERROR;
 }
 
-ECode SizeAdaptiveLayout::LayoutParams::GetMaxHeight(
+ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::GetMaxHeight(
     /* [out] */ Int32* mh)
 {
     VALIDATE_NOT_NULL(mh);

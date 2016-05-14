@@ -10,7 +10,7 @@ namespace Droid {
 namespace Internal {
 namespace Widget {
 
-CarClass(CSizeAdaptiveLayoutLayoutParams), public SizeAdaptiveLayout::LayoutParams
+CarClass(CSizeAdaptiveLayoutLayoutParams), public SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams
 {
 public:
     CAR_OBJECT_DECL();

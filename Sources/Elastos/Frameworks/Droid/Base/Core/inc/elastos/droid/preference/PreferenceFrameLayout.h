@@ -30,14 +30,14 @@ class PreferenceFrameLayout
     , public IPreferenceFrameLayout
 {
 public:
-    class LayoutParams
-        : public FrameLayout::LayoutParams
+    class PreferenceFrameLayoutLayoutParams
+        : public FrameLayout::FrameLayoutLayoutParams
         , public IPreferenceFrameLayoutParams
     {
     public:
         CAR_INTERFACE_DECL()
 
-        LayoutParams();
+        PreferenceFrameLayoutLayoutParams();
 
         CARAPI constructor(
             /* [in] */ IContext* c,

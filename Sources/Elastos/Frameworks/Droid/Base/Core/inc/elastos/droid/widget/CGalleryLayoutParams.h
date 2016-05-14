@@ -9,7 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CarClass(CGalleryLayoutParams), public Gallery::LayoutParams
+CarClass(CGalleryLayoutParams)
+    , public Gallery::GalleryLayoutParams
 {
 public:
     CAR_OBJECT_DECL();

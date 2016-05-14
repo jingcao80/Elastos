@@ -9,7 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CarClass(CRelativeLayoutLayoutParams), public RelativeLayout::LayoutParams
+CarClass(CRelativeLayoutLayoutParams)
+    , public RelativeLayout::RelativeLayoutLayoutParams
 {
 public:
     CAR_OBJECT_DECL();

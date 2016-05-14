@@ -123,16 +123,16 @@ public:
         Int64 mId;
     };
 
-    class SavedState
+    class ExpandableListViewSavedState
         : public View::BaseSavedState
         , public IExpandableListViewSavedState
     {
     public:
         CAR_INTERFACE_DECL();
 
-        SavedState();
+        ExpandableListViewSavedState();
 
-        ~SavedState();
+        ~ExpandableListViewSavedState();
 
         CARAPI constructor();
 
