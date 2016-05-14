@@ -2900,12 +2900,6 @@ protected:
          /* [in] */ Int32 start,
          /* [in] */ Int32 end);
 
-     CARAPI InitFromAttributes(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyleAttr,
-        /* [in] */ Int32 defStyleRes);
-
 private:
     ECO_LOCAL CARAPI_(void) SetTypefaceFromAttrs(
         /* [in] */ const String& familyName,
@@ -3118,8 +3112,6 @@ private:
 
     ECO_LOCAL CARAPI_(void) CreateEditorIfNeeded();
 
-    ECO_LOCAL CARAPI_(void) InitFields();
-
     ECO_LOCAL CARAPI_(Int32) GetBoxHeight(
         /* [in] */ ILayout* l);
 
@@ -3129,12 +3121,12 @@ private:
         /* [in] */ Boolean allowNullLocale);
 
 public:
-    static const char* TEXT_VIEW_TAG;
+    static const String TEXT_VIEW_TAG;
     static const Boolean DEBUG_EXTRACT;
 
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
     // a link is pressed). These highlight-related fields do not go in mEditor.
-    Int32 mHighlightColor;// = 0x6633B5E5;
+    Int32 mHighlightColor;
 
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
@@ -3162,49 +3154,49 @@ private:
 
     // Enum for the "typeface" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
-    ECO_LOCAL static const Int32 SANS = 1;
-    ECO_LOCAL static const Int32 SERIF = 2;
-    ECO_LOCAL static const Int32 MONOSPACE = 3;
+    ECO_LOCAL static const Int32 SANS;
+    ECO_LOCAL static const Int32 SERIF;
+    ECO_LOCAL static const Int32 MONOSPACE;
 
     // Bitfield for the "numeric" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
-    ECO_LOCAL static const Int32 SIGNED = 2;
-    ECO_LOCAL static const Int32 DECIMAL = 4;
+    ECO_LOCAL static const Int32 SIGNED;
+    ECO_LOCAL static const Int32 DECIMAL;
 
     /**
      * Draw marquee text with fading edges as usual
      */
-    ECO_LOCAL static const Int32 MARQUEE_FADE_NORMAL = 0;
+    ECO_LOCAL static const Int32 MARQUEE_FADE_NORMAL;
 
     /**
      * Draw marquee text as ellipsize end while inactive instead of with the fade.
      * (Useful for devices where the fade can be expensive if overdone)
      */
-    ECO_LOCAL static const Int32 MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS = 1;
+    ECO_LOCAL static const Int32 MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
 
     /**
      * Draw marquee text with fading edges because it is currently active/animating.
      */
-    ECO_LOCAL static const Int32 MARQUEE_FADE_SWITCH_SHOW_FADE = 2;
+    ECO_LOCAL static const Int32 MARQUEE_FADE_SWITCH_SHOW_FADE;
 
-    ECO_LOCAL static const Int32 LINES = 1;
-    ECO_LOCAL static const Int32 EMS = 1;
-    ECO_LOCAL static const Int32 PIXELS = 2;
+    ECO_LOCAL static const Int32 LINES;
+    ECO_LOCAL static const Int32 EMS;
+    ECO_LOCAL static const Int32 PIXELS;
 
-    ECO_LOCAL static const AutoPtr<IRectF> TEMP_RECTF;// = new RectF();
+    ECO_LOCAL static const AutoPtr<IRectF> TEMP_RECTF;
     ECO_LOCAL static Object sTempRectLock;
 
     // XXX should be much larger
-    ECO_LOCAL static const Int32 VERY_WIDE = 1024*1024;
-    ECO_LOCAL static const Int32 ANIMATED_SCROLL_GAP = 250;
+    ECO_LOCAL static const Int32 VERY_WIDE;
+    ECO_LOCAL static const Int32 ANIMATED_SCROLL_GAP;
 
-    ECO_LOCAL static AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > NO_FILTERS;// = new InputFilter[0];
-    ECO_LOCAL static AutoPtr<ISpanned> EMPTY_SPANNED;// = new SpannedString("");
+    ECO_LOCAL static AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > NO_FILTERS;
+    ECO_LOCAL static AutoPtr<ISpanned> EMPTY_SPANNED;
 
-    ECO_LOCAL static const Int32 CHANGE_WATCHER_PRIORITY = 100;
+    ECO_LOCAL static const Int32 CHANGE_WATCHER_PRIORITY;
 
     // New state used to change background based on whether this TextView is multiline.
-    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > MULTILINE_STATE_SET;// = { R.attr.state_multiline };
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > MULTILINE_STATE_SET;
 
     // System wide time for last cut or copy action.
     ECO_LOCAL static Int64 LAST_CUT_OR_COPY_TIME;
@@ -3243,16 +3235,16 @@ private:
     AutoPtr<Marquee> mMarquee;
     Boolean mRestartMarquee;
 
-    Int32 mMarqueeRepeatLimit;// = 3
+    Int32 mMarqueeRepeatLimit;
 
-    Int32 mLastLayoutDirection;// = -1;
+    Int32 mLastLayoutDirection;
 
     /**
      * On some devices the fading edges add a performance penalty if used
      * extensively in the same layout. This mode indicates how the marquee
      * is currently being shown, if applicable. (mEllipsize will == MARQUEE)
      */
-    Int32 mMarqueeFadeMode;// = MARQUEE_FADE_NORMAL;
+    Int32 mMarqueeFadeMode;
 
     /**
      * When mMarqueeFadeMode is not MARQUEE_FADE_NORMAL, this stores
@@ -3263,7 +3255,7 @@ private:
     //@ViewDebug.ExportedProperty(category = "text")
     AutoPtr<ICharSequence> mText;
     AutoPtr<ICharSequence> mTransformed;
-    BufferType mBufferType;// = BufferType.NORMAL;
+    BufferType mBufferType;
 
     AutoPtr<ICharSequence> mHint;
     AutoPtr<ILayout> mHintLayout;
@@ -3281,32 +3273,32 @@ private:
     Boolean mUserSetTextScaleX;
     AutoPtr<ILayout> mLayout;
 
-    Int32 mGravity;// = Gravity.TOP | Gravity.START;
+    Int32 mGravity;
     Boolean mHorizontallyScrolling;
 
     Int32 mAutoLinkMask;
-    Boolean mLinksClickable;// = true;
+    Boolean mLinksClickable;
 
-    Float mSpacingMult;// = 1.0f;
-    Float mSpacingAdd;// = 0.0f;
+    Float mSpacingMult;
+    Float mSpacingAdd;
 
-    Int32 mMaximum;// = Integer.MAX_VALUE;
-    Int32 mMaxMode;// = LINES;
-    Int32 mMinimum;// = 0;
-    Int32 mMinMode;// = LINES;
+    Int32 mMaximum;
+    Int32 mMaxMode;
+    Int32 mMinimum;
+    Int32 mMinMode;
 
-    Int32 mOldMaximum;// = mMaximum;
-    Int32 mOldMaxMode;// = mMaxMode;
+    Int32 mOldMaximum;
+    Int32 mOldMaxMode;
 
-    Int32 mMaxWidth;// = Integer.MAX_VALUE;
-    Int32 mMaxWidthMode;// = PIXELS;
-    Int32 mMinWidth;// = 0;
-    Int32 mMinWidthMode;// = PIXELS;
+    Int32 mMaxWidth;
+    Int32 mMaxWidthMode;
+    Int32 mMinWidth;
+    Int32 mMinWidthMode;
 
     Boolean mSingleLine;
-    Int32 mDesiredHeightAtMeasure;// = -1;
-    Boolean mIncludePad;// = true;
-    Int32 mDeferScroll;// = -1;
+    Int32 mDesiredHeightAtMeasure;
+    Boolean mIncludePad;
+    Int32 mDeferScroll;
 
     // tmp primitives, so we don't alloc them on each draw
     AutoPtr<IRect> mTempRect;
@@ -3318,13 +3310,13 @@ private:
 
     AutoPtr<ITextDirectionHeuristic> mTextDir;
 
-    AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > mFilters;// = NO_FILTERS;
+    AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > mFilters;
 
     /* volatile */ AutoPtr<ILocale> mCurrentSpellCheckerLocaleCache;
 
     AutoPtr<IPath> mHighlightPath;
     AutoPtr<IPaint> mHighlightPaint;
-    Boolean mHighlightPathBogus;// = true;
+    Boolean mHighlightPathBogus;
 
     /**
      * EditText specific data, created on demand when one of the Editor fields is used.

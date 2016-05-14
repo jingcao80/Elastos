@@ -24,7 +24,6 @@ CAR_INTERFACE_IMPL(EditText, TextView, IEditText)
 EditText::EditText()
 {}
 
-
 ECode EditText::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,

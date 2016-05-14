@@ -762,8 +762,7 @@ ECode Layout::DrawBackground(
         csq->GetLength(&textLength);
         mLineBackgroundSpans->Init(buffer, 0, textLength);
 
-        Int32 numberOfSpans = mLineBackgroundSpans->mNumberOfSpans;
-        if (numberOfSpans > 0) {
+        if (mLineBackgroundSpans->mNumberOfSpans > 0) {
             Int32 previousLineBottom, previousLineEnd;
             GetLineTop(firstLine, &previousLineBottom);
             GetLineStart(firstLine, &previousLineEnd);
@@ -796,18 +795,14 @@ ECode Layout::DrawBackground(
                     if (start != end || start == 0) {
                         // Equivalent to a getSpans(start, end), but filling the 'spans' local
                         // array instead to reduce memory allocation
-                        Int32 numberOfSpans = mLineBackgroundSpans->mNumberOfSpans;
                         AutoPtr< ArrayOf<Int32> > spanStarts = mLineBackgroundSpans->mSpanStarts;
                         AutoPtr< ArrayOf<Int32> > spanEnds = mLineBackgroundSpans->mSpanEnds;
                         AutoPtr< ArrayOf<ILineBackgroundSpan*> > lbSpans = mLineBackgroundSpans->mSpans;
-                        IInterface* obj;
-                        for (Int32 j = 0; j < numberOfSpans; j++) {
+                        for (Int32 j = 0; j < mLineBackgroundSpans->mNumberOfSpans; j++) {
                             // equal test is valid since both intervals are not empty by
                             // construction
-                            if ((*spanStarts)[j] >= end || (*spanEnds)[j] <= start)
-                                continue;
-                            obj = TO_IINTERFACE((*lbSpans)[i]);
-                            spans = GrowingArrayUtils::Append(spans, spansLength, obj);
+                            if ((*spanStarts)[j] >= end || (*spanEnds)[j] <= start) continue;
+                            spans = GrowingArrayUtils::Append(spans, spansLength, (IInterface*)(*lbSpans)[i]);
                             spansLength++;
                         }
                     }
@@ -815,14 +810,12 @@ ECode Layout::DrawBackground(
 
                 for (Int32 n = 0; n < spansLength; n++) {
                     AutoPtr<ILineBackgroundSpan> lineBackgroundSpan
-                        = ILineBackgroundSpan::Probe((*spans)[n]);
-                    if (lineBackgroundSpan)
-                        lineBackgroundSpan->DrawBackground(canvas, p, 0, width,
+                            = ILineBackgroundSpan::Probe((*spans)[n]);
+                    lineBackgroundSpan->DrawBackground(canvas, p, 0, width,
                             ltop, lbaseline, lbottom, csq, start, end, i);
                 }
             }
         }
-
         mLineBackgroundSpans->Recycle();
     }
 

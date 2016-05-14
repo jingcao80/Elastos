@@ -1056,83 +1056,6 @@ ECode ChangeWatcher::OnSpanRemoved(
     return  mHost->SpanChange(ISpanned::Probe(buf), what, s, -1, e, -1);
 }
 
-//==============================================================================
-//          TextView
-//==============================================================================
-
-CAR_INTERFACE_IMPL_2(TextView, View, ITextView, IOnPreDrawListener)
-
-static AutoPtr<IRectF> InitCRectF()
-{
-    AutoPtr<IRectF> r;
-    CRectF::New((IRectF**)&r);
-    return r;
-}
-
-static AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > InitNO_FILTERS()
-{
-    AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > filters
-        = ArrayOf<Elastos::Droid::Text::IInputFilter*>::Alloc(0);
-    return filters;
-}
-
-static AutoPtr<ISpanned> InitISpanned()
-{
-    AutoPtr<ICharSequence> seq;
-    CString::New(String(""), (ICharSequence**)&seq);
-    static AutoPtr<ISpannedString> str;
-    CSpannedString::New(seq, (ISpannedString**)&str);
-    static AutoPtr<ISpanned> spanned = ISpanned::Probe(str);
-
-    return spanned;
-}
-
-static AutoPtr<ArrayOf<Int32> > InitMULTILINE_STATE_SET()
-{
-    AutoPtr<ArrayOf<Int32> > sets = ArrayOf<Int32>::Alloc(1);
-    (*sets)[0] = R::attr::state_multiline;
-    return sets;
-}
-
-static AutoPtr<IBoringLayoutMetrics> InitUNKNOWN_BORING()
-{
-    AutoPtr<IBoringLayoutMetrics> metrics;
-    CBoringLayoutMetrics::New((IBoringLayoutMetrics**)&metrics);
-    return metrics;
-}
-
-const char* TextView::TEXT_VIEW_TAG = "TextView";
-const Boolean TextView::DEBUG_EXTRACT = FALSE;
-const Int32 TextView::SANS;
-const Int32 TextView::SERIF;
-const Int32 TextView::MONOSPACE;
-const Int32 TextView::SIGNED;
-const Int32 TextView::DECIMAL;
-
-const Int32 TextView::MARQUEE_FADE_NORMAL;
-const Int32 TextView::MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
-const Int32 TextView::MARQUEE_FADE_SWITCH_SHOW_FADE;
-
-const Int32 TextView::LINES;
-const Int32 TextView::EMS;
-const Int32 TextView::PIXELS;
-
-const AutoPtr<IRectF> TextView::TEMP_RECTF = InitCRectF();
-Object TextView::sTempRectLock;
-
-const Int32 TextView::VERY_WIDE;
-const Int32 TextView::ANIMATED_SCROLL_GAP;
-
-AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > TextView::NO_FILTERS = InitNO_FILTERS();
-AutoPtr<ISpanned> TextView::EMPTY_SPANNED = InitISpanned();
-
-const Int32 TextView::CHANGE_WATCHER_PRIORITY;
-
-AutoPtr<ArrayOf<Int32> > TextView::MULTILINE_STATE_SET = InitMULTILINE_STATE_SET();
-
-Int64 TextView::LAST_CUT_OR_COPY_TIME = 0;
-
-AutoPtr<IBoringLayoutMetrics> TextView::UNKNOWN_BORING = InitUNKNOWN_BORING();
 
 //==============================================================================
 
@@ -1226,104 +1149,135 @@ ECode TextView::OnRestoreInstanceStateRunnable::Run()
     return mHost->SetError(mError);
 }
 
+
+//==============================================================================
+//          TextView
 //==============================================================================
 
-/*
- * Kick-start the font cache for the zygote process (to pay the cost of
- * initializing freetype for our default font only once).
- */
-void TextView::InitStatic()
+CAR_INTERFACE_IMPL_2(TextView, View, ITextView, IOnPreDrawListener)
+
+static AutoPtr<IRectF> InitCRectF()
 {
-//static {
-//    Paint p = new Paint();
-//    p.setAntiAlias(true);
-//    // We don't care about the result, just the side-effect of measuring.
-//    p.measureText("H");
-//}
+    AutoPtr<IRectF> r;
+    CRectF::New((IRectF**)&r);
+    return r;
 }
 
-void TextView::InitFields()
+static AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > InitNO_FILTERS()
 {
-    mHighlightColor = 0x6633B5E5;
-    mCursorDrawableRes = 0;
-
-    mTextSelectHandleLeftRes = 0;
-    mTextSelectHandleRightRes = 0;
-    mTextSelectHandleRes = 0;
-    mTextEditSuggestionItemLayout = 0;
-
-    mCurTextColor = 0;
-    mCurHintTextColor = 0;
-    mFreezesText = FALSE;
-    mTemporaryDetach = FALSE;
-    mDispatchTemporaryDetach = FALSE;
-
-    mShadowRadius = 0;
-    mShadowDx = 0;
-    mShadowDy = 0;
-
-    mShadowColor = 0;
-
-    mPreDrawRegistered = FALSE;
-    mPreDrawListenerDetached = FALSE;
-
-    mPreventDefaultMovement = FALSE;
-
-    mEllipsize = TextUtilsTruncateAt_NONE;
-
-    mRestartMarquee = FALSE;
-
-    mMarqueeRepeatLimit = 3;
-
-    mLastLayoutDirection = -1;
-
-    mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
-
-    mBufferType = BufferType_NORMAL;
-    mAllowTransformationLengthChange = FALSE;
-    mUserSetTextScaleX = FALSE;
-
-    mGravity = IGravity::TOP | IGravity::START;
-    mHorizontallyScrolling = FALSE;
-
-    mAutoLinkMask = 0;
-    mLinksClickable = TRUE;
-
-    mSpacingMult = 1.0f;
-    mSpacingAdd = 0.0f;
-
-    mMaximum = Elastos::Core::Math::INT32_MAX_VALUE;
-    mMaxMode = LINES;
-    mMinimum = 0;
-    mMinMode = LINES;
-
-    mOldMaximum = mMaximum;
-    mOldMaxMode = mMaxMode;
-
-    mMaxWidth = Elastos::Core::Math::INT32_MAX_VALUE;
-    mMaxWidthMode = PIXELS;
-    mMinWidth = 0;
-    mMinWidthMode = PIXELS;
-
-    mSingleLine = FALSE;
-    mDesiredHeightAtMeasure = -1;
-    mIncludePad = TRUE;
-    mDeferScroll = -1;
-
-    mLastScroll = 0;
-
-    mHighlightPathBogus = TRUE;
-
-    mFilters = NO_FILTERS;
-
-    ASSERT_SUCCEEDED(CString::New(String(""), (ICharSequence**)&mText));
-    ASSERT_SUCCEEDED(CEditableFactory::AcquireSingleton((IEditableFactory**)&mEditableFactory));
-    ASSERT_SUCCEEDED(CSpannableFactory::AcquireSingleton((ISpannableFactory**)&mSpannableFactory));
+    AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > filters
+        = ArrayOf<Elastos::Droid::Text::IInputFilter*>::Alloc(0);
+    return filters;
 }
+
+static AutoPtr<ISpanned> InitISpanned()
+{
+    AutoPtr<ICharSequence> seq;
+    CString::New(String(""), (ICharSequence**)&seq);
+    AutoPtr<ISpanned> spanned;
+    CSpannedString::New(seq, (ISpanned**)&spanned);
+    return spanned;
+}
+
+static AutoPtr<ArrayOf<Int32> > InitMULTILINE_STATE_SET()
+{
+    AutoPtr<ArrayOf<Int32> > sets = ArrayOf<Int32>::Alloc(1);
+    (*sets)[0] = R::attr::state_multiline;
+    return sets;
+}
+
+static AutoPtr<IBoringLayoutMetrics> InitUNKNOWN_BORING()
+{
+    AutoPtr<IBoringLayoutMetrics> metrics;
+    CBoringLayoutMetrics::New((IBoringLayoutMetrics**)&metrics);
+    return metrics;
+}
+
+const String TextView::TEXT_VIEW_TAG("TextView");
+const Boolean TextView::DEBUG_EXTRACT = FALSE;
+const Int32 TextView::SANS = 1;
+const Int32 TextView::SERIF = 2;
+const Int32 TextView::MONOSPACE = 3;
+const Int32 TextView::SIGNED = 2;
+const Int32 TextView::DECIMAL = 4;
+
+const Int32 TextView::MARQUEE_FADE_NORMAL = 0;
+const Int32 TextView::MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS = 1;
+const Int32 TextView::MARQUEE_FADE_SWITCH_SHOW_FADE = 2;
+
+const Int32 TextView::LINES = 1;
+const Int32 TextView::EMS = LINES;
+const Int32 TextView::PIXELS = 2;
+
+const AutoPtr<IRectF> TextView::TEMP_RECTF = InitCRectF();
+
+const Int32 TextView::VERY_WIDE = 1024*1024;
+const Int32 TextView::ANIMATED_SCROLL_GAP = 250;
+
+AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > TextView::NO_FILTERS = InitNO_FILTERS();
+AutoPtr<ISpanned> TextView::EMPTY_SPANNED = InitISpanned();
+
+const Int32 TextView::CHANGE_WATCHER_PRIORITY = 100;
+
+AutoPtr<ArrayOf<Int32> > TextView::MULTILINE_STATE_SET = InitMULTILINE_STATE_SET();
+
+Int64 TextView::LAST_CUT_OR_COPY_TIME = 0;
+
+AutoPtr<IBoringLayoutMetrics> TextView::UNKNOWN_BORING = InitUNKNOWN_BORING();
 
 TextView::TextView()
+    : mHighlightColor(0x6633B5E5)
+    , mCursorDrawableRes(0)
+    , mTextSelectHandleLeftRes(0)
+    , mTextSelectHandleRightRes(0)
+    , mTextSelectHandleRes(0)
+    , mTextEditSuggestionItemLayout(0)
+    , mCurTextColor(0)
+    , mCurHintTextColor(0)
+    , mFreezesText(FALSE)
+    , mTemporaryDetach(FALSE)
+    , mDispatchTemporaryDetach(FALSE)
+    , mShadowRadius(0)
+    , mShadowDx(0)
+    , mShadowDy(0)
+    , mShadowColor(0)
+    , mPreDrawRegistered(FALSE)
+    , mPreDrawListenerDetached(FALSE)
+    , mPreventDefaultMovement(FALSE)
+    , mEllipsize(TextUtilsTruncateAt_NONE)
+    , mRestartMarquee(FALSE)
+    , mMarqueeRepeatLimit(3)
+    , mLastLayoutDirection(-1)
+    , mMarqueeFadeMode(MARQUEE_FADE_NORMAL)
+    , mBufferType(BufferType_NORMAL)
+    , mAllowTransformationLengthChange(FALSE)
+    , mUserSetTextScaleX(FALSE)
+    , mGravity(IGravity::TOP | IGravity::START)
+    , mHorizontallyScrolling(FALSE)
+    , mAutoLinkMask(0)
+    , mLinksClickable(TRUE)
+    , mSpacingMult(1.0f)
+    , mSpacingAdd(0.0f)
+    , mMaximum(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mMaxMode(LINES)
+    , mMinimum(0)
+    , mMinMode(LINES)
+    , mOldMaximum(mMaximum)
+    , mOldMaxMode(mMaxMode)
+    , mMaxWidth(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mMaxWidthMode(PIXELS)
+    , mMinWidth(0)
+    , mMinWidthMode(PIXELS)
+    , mSingleLine(FALSE)
+    , mDesiredHeightAtMeasure(-1)
+    , mIncludePad(TRUE)
+    , mDeferScroll(-1)
+    , mLastScroll(0)
+    , mFilters(NO_FILTERS)
+    , mHighlightPathBogus(TRUE)
 {
-    InitFields();
+    ASSERT_SUCCEEDED(CEditableFactory::AcquireSingleton((IEditableFactory**)&mEditableFactory));
+    ASSERT_SUCCEEDED(CSpannableFactory::AcquireSingleton((ISpannableFactory**)&mSpannableFactory));
 }
 
 ECode TextView::constructor(
@@ -1356,40 +1310,30 @@ ECode TextView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    ASSERT_SUCCEEDED(View::constructor(context, attrs, defStyleAttr, defStyleRes));
-    ASSERT_SUCCEEDED(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
-    return NOERROR;
-}
+    FAIL_RETURN(View::constructor(context, attrs, defStyleAttr, defStyleRes));
 
-ECode TextView::InitFromAttributes(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyleAttr,
-    /* [in] */ Int32 defStyleRes)
-{
-    VALIDATE_NOT_NULL(context);
+    CString::New(String(""), (ICharSequence**)&mText);
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     AutoPtr<ICompatibilityInfo> compat;
     res->GetCompatibilityInfo((ICompatibilityInfo**)&compat);
-    Float applicationScale;
-    compat->GetApplicationScale(&applicationScale);
 
+    CTextPaint::New(IPaint::ANTI_ALIAS_FLAG, (ITextPaint**)&mTextPaint);
     AutoPtr<IDisplayMetrics> dm;
     res->GetDisplayMetrics((IDisplayMetrics**)&dm);
     Float density;
     dm->GetDensity(&density);
-
-    CTextPaint::New(IPaint::ANTI_ALIAS_FLAG, (ITextPaint**)&mTextPaint);
-
     mTextPaint->SetDensity(density);
+    Float applicationScale;
+    compat->GetApplicationScale(&applicationScale);
     IPaint::Probe(mTextPaint)->SetCompatibilityScaling(applicationScale);
 
-    ASSERT_SUCCEEDED(CPaint::New(IPaint::ANTI_ALIAS_FLAG, (IPaint**)&mHighlightPaint));
+    CPaint::New(IPaint::ANTI_ALIAS_FLAG, (IPaint**)&mHighlightPaint);
     mHighlightPaint->SetCompatibilityScaling(applicationScale);
 
     mMovement = GetDefaultMovementMethod();
+
     mTransformation = NULL;
 
     Int32 textColorHighlight = 0;
@@ -1401,7 +1345,6 @@ ECode TextView::InitFromAttributes(
     Int32 typefaceIndex = -1;
     Int32 styleIndex = -1;
     Boolean allCaps = FALSE;
-
     Int32 shadowcolor = 0;
     Float dx = 0, dy = 0, r = 0;
     Boolean elegant = FALSE;
@@ -1422,7 +1365,6 @@ ECode TextView::InitFromAttributes(
             ArraySize(R::styleable::TextViewAppearance));
     AutoPtr<ITypedArray> a;
     theme->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
-
     AutoPtr<ITypedArray> appearance;
     Int32 ap;
     a->GetResourceId(R::styleable::TextViewAppearance_textAppearance, -1, &ap);
@@ -1528,18 +1470,14 @@ ECode TextView::InitFromAttributes(
     AutoPtr<ICharSequence> text;
     CString::New(String(""), (ICharSequence**)&text);
     AutoPtr<ICharSequence> hint;
-
     Boolean password = FALSE;
     Int32 inputType = IInputType::TYPE_NULL;
 
-    a = NULL;
     attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::TextView),
             ArraySize(R::styleable::TextView));
+    a = NULL;
     theme->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
-
-    //TODO  typedarray should has TextView_minHeight value, but now it has not
-    SetMinHeight(35);
 
     Int32 n;
     a->GetIndexCount(&n);
@@ -1603,7 +1541,7 @@ ECode TextView::InitFromAttributes(
                 break;
 
             case R::styleable::TextView_drawableTop:
-                drawableTop = drawableTop;
+                drawableTop = NULL;
                 a->GetDrawable(attr, (IDrawable**)&drawableTop);
                 break;
 
@@ -1822,8 +1760,7 @@ ECode TextView::InitFromAttributes(
                 break;
 
             case R::styleable::TextView_inputType:
-                a->GetInt32(attr, inputType, &inputType);
-
+                a->GetInt32(attr, IInputType::TYPE_NULL, &inputType);
                 break;
 
             case R::styleable::TextView_imeOptions: {
@@ -1832,7 +1769,8 @@ ECode TextView::InitFromAttributes(
                 editor->CreateInputContentTypeIfNeeded();
                 a->GetInt32(attr,
                         editor->mInputContentType->mImeOptions,
-                        &editor->mInputContentType->mImeOptions);
+                        &ivalue);
+                editor->mInputContentType->mImeOptions = ivalue;
                 break;
             }
 
@@ -1851,7 +1789,8 @@ ECode TextView::InitFromAttributes(
                 editor->CreateInputContentTypeIfNeeded();
                 a->GetInt32(attr,
                         editor->mInputContentType->mImeActionId,
-                        &editor->mInputContentType->mImeActionId);
+                        &ivalue);
+                editor->mInputContentType->mImeActionId = ivalue;
                 break;
             }
 
@@ -1928,6 +1867,7 @@ ECode TextView::InitFromAttributes(
         == (IInputType::TYPE_CLASS_TEXT | IInputType::TYPE_TEXT_VARIATION_WEB_PASSWORD);
     Boolean numberPasswordInputType = variation
         == (IInputType::TYPE_CLASS_NUMBER | IInputType::TYPE_NUMBER_VARIATION_PASSWORD);
+
     Boolean isTextSelectable;
     if (inputMethod != NULL) {
         assert(0 && "TODO");
@@ -1962,7 +1902,11 @@ ECode TextView::InitFromAttributes(
         DigitsKeyListener::GetInstance(dstring, (IDigitsKeyListener**)&listener);
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener = IKeyListener::Probe(listener);
-        editor->mInputType = inputType != IInputType::TYPE_NULL ? inputType : IInputType::TYPE_CLASS_TEXT;
+        // If no input type was specified, we will default to generic
+        // text, since we can't tell the IME about the set of digits
+        // that was selected.
+        editor->mInputType = inputType != IInputType::TYPE_NULL ?
+            inputType : IInputType::TYPE_CLASS_TEXT;
     }
     else if (inputType != IInputType::TYPE_NULL) {
         SetInputType(inputType, TRUE);
@@ -1990,15 +1934,11 @@ ECode TextView::InitFromAttributes(
             inputType |= IInputType::TYPE_NUMBER_FLAG_DECIMAL;
         }
         editor->mInputType = inputType;
-
     }
     else if (autotext || autocap != -1) {
         Elastos::Droid::Text::Method::Capitalize cap;
 
         inputType = IInputType::TYPE_CLASS_TEXT;
-        if (!singleLine) {
-            inputType |= IInputType::TYPE_TEXT_FLAG_MULTI_LINE;
-        }
 
         switch (autocap) {
             case 1:
@@ -2020,9 +1960,9 @@ ECode TextView::InitFromAttributes(
                 cap = Elastos::Droid::Text::Method::Capitalize_NONE;
                 break;
         }
+
         CreateEditorIfNeeded();
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
-        editor->mKeyListener = NULL;
         AutoPtr<ITextKeyListener> listener;
         TextKeyListener::GetInstance(autotext, cap, (ITextKeyListener**)&listener);
         editor->mKeyListener = IKeyListener::Probe(listener);
@@ -2044,7 +1984,6 @@ ECode TextView::InitFromAttributes(
     else if (editable) {
         CreateEditorIfNeeded();
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
-        editor->mKeyListener = NULL;
         AutoPtr<ITextKeyListener> tkl;
         TextKeyListener::GetInstance((ITextKeyListener**)&tkl);
         editor->mKeyListener = IKeyListener::Probe(tkl);
@@ -2069,7 +2008,7 @@ ECode TextView::InitFromAttributes(
     if (mEditor != NULL) {
         TO_EDITOR(mEditor)->AdjustInputType(password, passwordInputType,
                 webPasswordInputType, numberPasswordInputType);
-        }
+    }
 
     if (selectallonfocus) {
         CreateEditorIfNeeded();
@@ -2088,13 +2027,12 @@ ECode TextView::InitFromAttributes(
     // Same as setSingleLine(), but make sure the transformation method and the maximum number
     // of lines of height are unchanged for multi-line TextViews.
     SetInputTypeSingleLine(singleLine);
-
     ApplySingleLine(singleLine, singleLine, singleLine);
 
     AutoPtr<IKeyListener> keyListener;
     GetKeyListener((IKeyListener**)&keyListener);
     if (singleLine && keyListener == NULL && ellipsize < 0) {
-        ellipsize = TextUtilsTruncateAt_END; // END
+        ellipsize = 3; // END
     }
 
     switch (ellipsize) {
@@ -2108,34 +2046,31 @@ ECode TextView::InitFromAttributes(
             SetEllipsize(TextUtilsTruncateAt_END);
             break;
         case 4: {
-                AutoPtr<IViewConfiguration> config = ViewConfiguration::Get(context);
-                Boolean isFadingMarqueeEnabled = FALSE;
-                config->IsFadingMarqueeEnabled(&isFadingMarqueeEnabled);
-                if (isFadingMarqueeEnabled) {
-                    SetHorizontalFadingEdgeEnabled(TRUE);
-                    mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
-                }
-                else {
-                    SetHorizontalFadingEdgeEnabled(FALSE);
-                    mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
-                }
-                SetEllipsize(TextUtilsTruncateAt_MARQUEE);
-
+            AutoPtr<IViewConfiguration> config = ViewConfiguration::Get(context);
+            Boolean isFadingMarqueeEnabled = FALSE;
+            config->IsFadingMarqueeEnabled(&isFadingMarqueeEnabled);
+            if (isFadingMarqueeEnabled) {
+                SetHorizontalFadingEdgeEnabled(TRUE);
+                mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
             }
+            else {
+                SetHorizontalFadingEdgeEnabled(FALSE);
+                mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
+            }
+            SetEllipsize(TextUtilsTruncateAt_MARQUEE);
             break;
+        }
     }
 
     if (textColor == NULL) {
         CColorStateList::ValueOf(0xFF000000, (IColorStateList**)&textColor);
     }
-
     SetTextColor(textColor);
     SetHintTextColor(textColorHint);
     SetLinkTextColor(textColorLink);
     if (textColorHighlight != 0) {
         SetHighlightColor(textColorHighlight);
     }
-
     SetRawTextSize(textSize);
     SetElegantTextHeight(elegant);
     SetLetterSpacing(letterSpacing);
@@ -2178,6 +2113,7 @@ ECode TextView::InitFromAttributes(
     else {
         SetFilters(NO_FILTERS);
     }
+
     SetText(text, bufferType);
     if (hint != NULL) SetHint(hint);
     /*
@@ -2185,9 +2121,9 @@ ECode TextView::InitFromAttributes(
      * However, TextViews that have input or movement methods *are*
      * focusable by default.
      */
-    a = NULL;
     attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::View), ArraySize(R::styleable::View));
+    a = NULL;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 
@@ -5633,7 +5569,7 @@ void TextView::InvalidateCursorPath()
         Int32 verticalPadding = extendedPaddingTop + GetVerticalOffset(TRUE);
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         if (editor->mCursorCount == 0) {
-            AutoLock lock(sTempRectLock);
+            AutoLock lock(TEMP_RECTF);
 
             /*
                 * The reason for this concern about the thickness of the
@@ -6230,7 +6166,6 @@ void TextView::OnDraw(
     Int32 rightOffset = isLayoutRtl ? offset : 0 ;
 
     AutoPtr<Drawables> dr = mDrawables;
-
     if (dr != NULL) {
         /*
          * Compound, not extended, because the icon is not clipped
@@ -6457,7 +6392,7 @@ ECode TextView::GetFocusedRect(
             }
 
             {
-                AutoLock lock(TextView::sTempRectLock);
+                AutoLock lock(TextView::TEMP_RECTF);
                 mHighlightPath->ComputeBounds(TEMP_RECTF, TRUE);
                 rect->SetLeft((Int32)((CRectF*)TEMP_RECTF.Get())->mLeft - 1);
                 rect->SetRight((Int32)((CRectF*)TEMP_RECTF.Get())->mRight + 1);
