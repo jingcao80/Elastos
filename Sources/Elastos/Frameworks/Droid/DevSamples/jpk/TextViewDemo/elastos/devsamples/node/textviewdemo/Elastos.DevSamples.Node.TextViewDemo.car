@@ -3,8 +3,19 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBundle;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IContextMenu;
+    interface Elastos.Droid.View.IContextMenuInfo;
+
     using interface Elastos.Droid.App.IActivity;
-    using interface Elastos.Droid.Content.IContext;
+    //using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
@@ -21,6 +32,92 @@ module
     namespace Node {
     namespace TextViewDemo {
 
+    [deprecated]
+    interface IMessageListener {
+        OnHandleMessage(
+            [in] IContext* context,
+            [in] IMessage* msg);
+    }
+
+    [deprecated]
+    interface IActivityListener {
+        OnCreate(
+            [in] IContext* context,
+            [in] IBundle* savedInstanceState);
+        OnStart(
+            [in] IContext* context);
+        OnResume(
+            [in] IContext* context);
+        OnPause(
+            [in] IContext* context);
+        OnStop(
+            [in] IContext* context);
+        OnDestroy(
+            [in] IContext* context);
+
+        OnBackPressed(
+            [in] IContext* context);
+
+        OnNewIntent(
+            [in] IContext* context,
+            [in] IIntent *intent);
+
+        OnCreateDialog(
+            [in] IContext* context,
+            [in] Int32 id,
+            [out] IInterface** dlg);
+
+        OnActivityResult(
+            [in] IContext* context,
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent *data);
+
+        OnCreateContextMenu(
+            [in] IContext* context,
+            [in] IContextMenu* menu,
+            [in] IView* v,
+            [in] IContextMenuInfo* menuInfo);
+    }
+
+    [deprecated]
+    interface INodeBridgeListener {
+        OnRegistActivity(
+            [in] String packageName,
+            [in] String activityName,
+            [in] IInterface* activityInstance,
+            [in] Int32 activityListener,    //IActivityListener**
+            [in] IHandler* activityHandler,
+            [out] Boolean* result);
+    }
+
+    [deprecated]
+    interface ITestEventListener {
+        OnNodeEvent(
+            [in] Int32 eventId);
+
+        GetEnqueueUIMessagePtr(
+            [out] Int32* outPtr);
+
+        Sleep(
+            [in] Int32 interval);
+
+        Lock();
+
+        Unlock();
+
+        SetActivityListener(
+            [in] Int32 activityListener,    //IActivityListener**
+            [in] IActivityListener* jsActivityListener);
+
+        SetNodeBridgeListener(
+            [in] INodeBridgeListener* nodeBridgeListener);
+
+        SetNodeBridge(
+            [in] Int32 from,
+            [in] Int32 threadIndex);
+    }
+
     class CActivityOne {
         constructor();
 
@@ -35,6 +132,12 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
+    }
+
+    class CTestEventListener {
+        constructor();
+
+        interface ITestEventListener;
     }
 
     } // namespace TextViewDemo
