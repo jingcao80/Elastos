@@ -1256,7 +1256,7 @@ ECode WifiServiceImpl::AddOrUpdateNetwork(
         config->GetSSID(&SSID);
         Int32 networkId;
         config->GetNetworkId(&networkId);
-        Slogger::E("addOrUpdateNetwork", " uid = %d, SSID=%s, nid=%d", uid,SSID.string(), networkId);
+        Slogger::E("WifiServiceImpl", "addOrUpdateNetwork uid = %d, SSID=%s, nid=%d", uid,SSID.string(), networkId);
         if (networkId == IWifiConfiguration::INVALID_NETWORK_ID) {
             config->SetCreatorUid(uid);
         } else {

@@ -215,8 +215,8 @@ ECode IpConfiguration::GetHashCode(
 ECode IpConfiguration::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
-    AutoPtr<IInterface> obj;
     parcel->ReadInt32(&mIpAssignment);
+    AutoPtr<IInterface> obj;
     parcel->ReadInterfacePtr((Handle32*)&obj);
     mStaticIpConfiguration = IStaticIpConfiguration::Probe(obj);
     parcel->ReadInt32(&mProxySettings);

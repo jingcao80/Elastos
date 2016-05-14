@@ -568,10 +568,6 @@ private:
 
     AutoPtr<IWifiConfigurationVisibility> mVisibility;
 
-    IpConfigurationIpAssignment mIpAssignment;
-    IpConfigurationProxySettings mProxySettings;
-    AutoPtr<ILinkProperties> mLinkProperties;
-
     Int32 mAutoJoinStatus;
     Int32 mNumConnectionFailures;
     Int32 mNumIpConfigFailures;

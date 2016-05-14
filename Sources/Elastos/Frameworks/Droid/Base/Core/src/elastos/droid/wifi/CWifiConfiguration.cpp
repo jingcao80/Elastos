@@ -376,7 +376,7 @@ ECode CWifiConfiguration::ToString(
     sbuf.Append(" KeyMgmt:");
     Int32 size;
     mAllowedKeyManagement->GetSize(&size);
-    for (Int32 k = 0; size; k++) {
+    for (Int32 k = 0; k < size; k++) {
         Boolean bFlag;
         mAllowedKeyManagement->Get(k, &bFlag);
         if (bFlag) {
@@ -487,7 +487,9 @@ ECode CWifiConfiguration::ToString(
     }
 
     sbuf.Append("\nEnterprise config:\n");
-    sbuf.Append(mEnterpriseConfig);
+    String enterpriseConfigStr;
+    IObject::Probe(mEnterpriseConfig)->ToString(&enterpriseConfigStr);
+    sbuf.Append(enterpriseConfigStr);
 
     sbuf.Append("IP config:\n");
     String ipConfigurationStr;
@@ -818,6 +820,9 @@ ECode CWifiConfiguration::ReadFromParcel(
     source->ReadInt32(&mDisableReason);
     source->ReadString(&mSSID);
     source->ReadString(&mBSSID);
+    source->ReadString(&mAutoJoinBSSID);
+    source->ReadString(&mFQDN);
+    source->ReadString(&mNaiRealm);
     source->ReadString(&mPreSharedKey);
     for (Int32 i = 0; i < mWepKeys->GetLength(); ++i) {
         String key;
@@ -829,25 +834,49 @@ ECode CWifiConfiguration::ReadFromParcel(
     source->ReadBoolean(&mHiddenSSID);
     source->ReadBoolean(&mIsIBSS);
     source->ReadInt32(&mFrequency);
+    source->ReadBoolean(&mRequirePMF);
+    source->ReadString(&mUpdateIdentifier);
 
-    mAllowedKeyManagement = ReadBitSet(source);
-    mAllowedProtocols = ReadBitSet(source);
-    mAllowedAuthAlgorithms = ReadBitSet(source);
-    mAllowedPairwiseCiphers = ReadBitSet(source);
-    mAllowedGroupCiphers = ReadBitSet(source);
+    //mAllowedKeyManagement = ReadBitSet(source);
+    //mAllowedProtocols = ReadBitSet(source);
+    //mAllowedAuthAlgorithms = ReadBitSet(source);
+    //mAllowedPairwiseCiphers = ReadBitSet(source);
+    //mAllowedGroupCiphers = ReadBitSet(source);
 
-    assert(0);
-    // TODO
-    // for (Int32 i = 0; i < mEnterpriseFields->GetLength(); ++i) {
-    //     String value;
-    //     source->ReadString(&value);
-    //     ((*mEnterpriseFields)[i])->SetValue(value);
-    // }
+    //AutoPtr<IInterface> ecObj;
+    //source->ReadInterfacePtr((Handle32*)&ecObj);
+    //mEnterpriseConfig = IWifiEnterpriseConfig::Probe(ecObj);
+    //AutoPtr<IInterface> icObj;
+    //source->ReadInterfacePtr((Handle32*)&icObj);
+    //mIpConfiguration = IIpConfiguration::Probe(icObj);
 
-    source->ReadInt32(&mIpAssignment);
-    source->ReadInt32(&mProxySettings);
-
-    return source->ReadInterfacePtr((Handle32*)(ILinkProperties**)&mLinkProperties);
+    source->ReadString(&mDhcpServer);
+    source->ReadString(&mDefaultGwMacAddress);
+    source->ReadInt32(&mAutoJoinStatus);
+    source->ReadBoolean(&mSelfAdded);
+    source->ReadBoolean(&mDidSelfAdd);
+    source->ReadBoolean(&mNoInternetAccess);
+    source->ReadInt32(&mCreatorUid);
+    source->ReadInt32(&mLastConnectUid);
+    source->ReadInt32(&mLastUpdateUid);
+    source->ReadInt64(&mBlackListTimestamp);
+    source->ReadInt64(&mLastConnectionFailure);
+    source->ReadInt32(&mNumConnectionFailures);
+    source->ReadInt32(&mNumIpConfigFailures);
+    source->ReadInt32(&mNumAuthFailures);
+    source->ReadInt32(&mNumScorerOverride);
+    source->ReadInt32(&mNumScorerOverrideAndSwitchedNetwork);
+    source->ReadInt32(&mNumAssociation);
+    source->ReadInt32(&mNumUserTriggeredWifiDisableLowRSSI);
+    source->ReadInt32(&mNumUserTriggeredWifiDisableBadRSSI);
+    source->ReadInt32(&mNumUserTriggeredWifiDisableNotHighRSSI);
+    source->ReadInt32(&mNumTicksAtLowRSSI);
+    source->ReadInt32(&mNumTicksAtBadRSSI);
+    source->ReadInt32(&mNumTicksAtNotHighRSSI);
+    source->ReadInt32(&mNumUserTriggeredJoinAttempts);
+    source->ReadInt32(&mAutoJoinUseAggressiveJoinAttemptThreshold);
+    source->ReadBoolean(&mAutoJoinBailedDueToLowRssi);
+    return NOERROR;
 }
 
 ECode CWifiConfiguration::WriteToParcel(
@@ -867,29 +896,27 @@ ECode CWifiConfiguration::WriteToParcel(
     }
     dest->WriteInt32(mWepTxKeyIndex);
     dest->WriteInt32(mPriority);
-    dest->WriteInt32(mHiddenSSID ? 1 : 0);
-    dest->WriteInt32(mIsIBSS ? 1 : 0);
+    dest->WriteBoolean(mHiddenSSID ? 1 : 0);
+    dest->WriteBoolean(mIsIBSS ? 1 : 0);
     dest->WriteInt32(mFrequency);
-    dest->WriteInt32(mRequirePMF ? 1 : 0);
+    dest->WriteBoolean(mRequirePMF ? 1 : 0);
     dest->WriteString(mUpdateIdentifier);
 
-    WriteBitSet(dest, mAllowedKeyManagement);
-    WriteBitSet(dest, mAllowedProtocols);
-    WriteBitSet(dest, mAllowedAuthAlgorithms);
-    WriteBitSet(dest, mAllowedPairwiseCiphers);
-    WriteBitSet(dest, mAllowedGroupCiphers);
+    //WriteBitSet(dest, mAllowedKeyManagement);
+    //WriteBitSet(dest, mAllowedProtocols);
+    //WriteBitSet(dest, mAllowedAuthAlgorithms);
+    //WriteBitSet(dest, mAllowedPairwiseCiphers);
+    //WriteBitSet(dest, mAllowedGroupCiphers);
 
-    assert(0);
-    // TODO
-    // dest->WriteParcelable(enterpriseConfig, flags);
+    //dest->WriteInterfacePtr(mEnterpriseConfig);
+    //dest->WriteInterfacePtr(mIpConfiguration);
 
-    // dest->WriteParcelable(mIpConfiguration, flags);
     dest->WriteString(mDhcpServer);
     dest->WriteString(mDefaultGwMacAddress);
     dest->WriteInt32(mAutoJoinStatus);
-    dest->WriteInt32(mSelfAdded ? 1 : 0);
-    dest->WriteInt32(mDidSelfAdd ? 1 : 0);
-    dest->WriteInt32(mNoInternetAccess ? 1 : 0);
+    dest->WriteBoolean(mSelfAdded ? 1 : 0);
+    dest->WriteBoolean(mDidSelfAdd ? 1 : 0);
+    dest->WriteBoolean(mNoInternetAccess ? 1 : 0);
     dest->WriteInt32(mCreatorUid);
     dest->WriteInt32(mLastConnectUid);
     dest->WriteInt32(mLastUpdateUid);
@@ -909,7 +936,8 @@ ECode CWifiConfiguration::WriteToParcel(
     dest->WriteInt32(mNumTicksAtNotHighRSSI);
     dest->WriteInt32(mNumUserTriggeredJoinAttempts);
     dest->WriteInt32(mAutoJoinUseAggressiveJoinAttemptThreshold);
-    return dest->WriteInt32(mAutoJoinBailedDueToLowRssi ? 1 : 0);
+    dest->WriteBoolean(mAutoJoinBailedDueToLowRssi ? 1 : 0);
+    return NOERROR;
 }
 
 String CWifiConfiguration::ConfigKey(
@@ -2262,47 +2290,25 @@ ECode CWifiConfiguration::SetProxy(
 ECode CWifiConfiguration::GetIpAssignment(
     /* [out] */ IpConfigurationIpAssignment* ipAssignment)
 {
-    VALIDATE_NOT_NULL(ipAssignment);
-    *ipAssignment = mIpAssignment;
-    return NOERROR;
+    return mIpConfiguration->GetIpAssignment(ipAssignment);
 }
 
 ECode CWifiConfiguration::SetIpAssignment(
     /* [in] */ IpConfigurationIpAssignment ipAssignment)
 {
-    mIpAssignment = ipAssignment;
-    return NOERROR;
+    return mIpConfiguration->SetIpAssignment(ipAssignment);
 }
 
 ECode CWifiConfiguration::GetProxySettings(
     /* [out] */ IpConfigurationProxySettings* proxySettings)
 {
-    VALIDATE_NOT_NULL(proxySettings);
-    *proxySettings = mProxySettings;
-    return NOERROR;
+    return mIpConfiguration->GetProxySettings(proxySettings);
 }
 
 ECode CWifiConfiguration::SetProxySettings(
     /* [in] */ IpConfigurationProxySettings proxySettings)
 {
-    mProxySettings = proxySettings;
-    return NOERROR;
-}
-
-ECode CWifiConfiguration::GetLinkProperties(
-    /* [out] */ ILinkProperties** linkProperties)
-{
-    VALIDATE_NOT_NULL(linkProperties);
-    *linkProperties = mLinkProperties;
-    REFCOUNT_ADD(*linkProperties);
-    return NOERROR;
-}
-
-ECode CWifiConfiguration::SetLinkProperties(
-    /* [in] */ ILinkProperties* linkProperties)
-{
-    mLinkProperties = linkProperties;
-    return NOERROR;
+    return mIpConfiguration->SetProxySettings(proxySettings);
 }
 
 } // namespace Wifi

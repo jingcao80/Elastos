@@ -92,7 +92,7 @@ AutoPtr<AsyncChannel::SyncMessenger> AsyncChannel::SyncMessenger::Obtain()
         else {
             AutoPtr<IInterface> item;
             sStack->Pop((IInterface**)&item);
-            sm = (SyncMessenger*)IServiceConnection::Probe(item);
+            sm = (SyncMessenger*)IObject::Probe(item);
         }
     }
     return sm;

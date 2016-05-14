@@ -658,14 +658,9 @@ ECode CWifiManager::GetScanResults(
     VALIDATE_NOT_NULL(results);
     *results = NULL;
 
-    AutoPtr<IList> temp;
     String packageName;
     mContext->GetOpPackageName(&packageName);
-    assert(0);
-    // TODO
-    // FAIL_RETURN(mService->GetScanResults(packageName, (IList**)&temp));
-    *results = temp;
-    REFCOUNT_ADD(*results);
+    FAIL_RETURN(mService->GetScanResults(packageName, results));
     return NOERROR;
     // } catch (RemoteException e) {
     //     return NULL;
@@ -999,9 +994,7 @@ Int32 CWifiManager::PutListener(
         do {
             key = sListenerKey++;
         } while (key == INVALID_KEY);
-        assert(0);
-        // TODO
-        // sListenerMap[key] = listener;
+        sListenerMap->Put(key, listener);
     }
     return key;
 }
@@ -1014,13 +1007,8 @@ AutoPtr<IInterface> CWifiManager::RemoveListener(
         AutoLock lock(sListenerMapLock);
 
         AutoPtr<IInterface> listener;
-        assert(0);
-        // TODO
-        // HashMap<Int32, AutoPtr<IInterface> >::Iterator it = sListenerMap.Find(key);
-        // if (it != sListenerMap.End()) {
-        //     listener = it->mSecond;
-        //     sListenerMap.Erase(it);
-        // }
+        sListenerMap->Get(key, (IInterface**)&listener);
+        sListenerMap->Remove(key);
         return listener;
     }
 }
@@ -1205,9 +1193,7 @@ ECode CWifiManager::CreateWifiLock(
     /* [out] */ IWifiManagerWifiLock** lock)
 {
     VALIDATE_NOT_NULL(lock);
-    assert(0);
-    // TODO
-    // *lock = new WifiLock(lockType, tag, this);
+    *lock = new WifiLock(lockType, tag, this);
     REFCOUNT_ADD(*lock);
     return NOERROR;
 }
@@ -1217,9 +1203,7 @@ ECode CWifiManager::CreateWifiLock(
     /* [out] */ IWifiManagerWifiLock** lock)
 {
     VALIDATE_NOT_NULL(lock);
-    assert(0);
-    // TODO
-    // *lock = new WifiLock(WIFI_MODE_FULL, tag, this);
+    *lock = new WifiLock(WIFI_MODE_FULL, tag, this);
     REFCOUNT_ADD(*lock);
     return NOERROR;
 }
@@ -1229,9 +1213,7 @@ ECode CWifiManager::CreateMulticastLock(
     /* [out] */ IWifiManagerMulticastLock** lock)
 {
     VALIDATE_NOT_NULL(lock);
-    assert(0);
-    // TODO
-    // *lock = new MulticastLock(tag, this);
+    *lock = new MulticastLock(tag, this);
     REFCOUNT_ADD(*lock);
     return NOERROR;
 }

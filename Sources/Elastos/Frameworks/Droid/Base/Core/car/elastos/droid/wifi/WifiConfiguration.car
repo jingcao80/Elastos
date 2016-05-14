@@ -24,7 +24,7 @@ module
      * @Involved
      * interface IParcelable;
      */
-    [deprecated, local]
+    [deprecated, local, parcelable]
     interface IWifiConfiguration {
         /** {@hide} */
         const String ssidVarName = "ssid";
