@@ -854,7 +854,7 @@ protected:
      * last state.
      */
     virtual CARAPI_(Boolean) OnStateChange(
-        /* [in] */ const ArrayOf<Int32>* state);
+        /* [in] */ ArrayOf<Int32>* state);
 
     /** Override this in your subclass to change appearance if you vary based
      *  on level.

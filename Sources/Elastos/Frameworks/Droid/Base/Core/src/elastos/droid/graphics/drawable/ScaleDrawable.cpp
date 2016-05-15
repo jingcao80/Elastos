@@ -324,11 +324,10 @@ ECode ScaleDrawable::IsStateful(
 }
 
 Boolean ScaleDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean changed;
-    mScaleState->mDrawable->SetState(
-            const_cast<ArrayOf<Int32>*>(state), &changed);
+    mScaleState->mDrawable->SetState(state, &changed);
     AutoPtr<IRect> rect;
     GetBounds((IRect**)&rect);
     OnBoundsChange(rect);

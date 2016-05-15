@@ -1005,7 +1005,7 @@ ECode LayerDrawable::IsStateful(
 }
 
 Boolean LayerDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean paddingChanged = FALSE;
     Boolean changed = FALSE;
@@ -1016,7 +1016,7 @@ Boolean LayerDrawable::OnStateChange(
         AutoPtr<ChildDrawable> r = (*array)[i];
         Boolean res = FALSE, res2 = FALSE;
         r->mDrawable->IsStateful(&res);
-        r->mDrawable->SetState(const_cast<ArrayOf<Int32>*>(state), &res2);
+        r->mDrawable->SetState(state, &res2);
         if (res && res2) {
             changed = TRUE;
         }

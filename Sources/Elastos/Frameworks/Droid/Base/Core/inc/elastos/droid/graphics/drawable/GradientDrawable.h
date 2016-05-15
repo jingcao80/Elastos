@@ -376,7 +376,7 @@ protected:
         /* [in] */ Int32 level);
 
     CARAPI_(Boolean) OnStateChange(
-        /* [in] */ const ArrayOf<Int32>* stateSet);
+        /* [in] */ ArrayOf<Int32>* stateSet);
 
 private:
     CARAPI_(Int32) ModulateAlpha(

@@ -30,15 +30,15 @@ ECode CLinearGradient::constructor(
     /* [in] */ Float y0,
     /* [in] */ Float x1,
     /* [in] */ Float y1,
-    /* [in] */ const ArrayOf<Int32>& colors,
+    /* [in] */ const ArrayOf<Int32>* colors,
     /* [in] */ const ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tile)
 {
-    if (colors.GetLength() < 2) {
+    if (colors->GetLength() < 2) {
 //        throw new IllegalArgumentException("needs >= 2 number of colors");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (positions != NULL && colors.GetLength() != positions->GetLength()) {
+    if (positions != NULL && colors->GetLength() != positions->GetLength()) {
 //        throw new IllegalArgumentException("color and position arrays must be of equal length");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -47,7 +47,7 @@ ECode CLinearGradient::constructor(
     mY0 = y0;
     mX1 = x1;
     mY1 = y1;
-    mColors = const_cast<ArrayOf<Int32>*>(&colors);
+    mColors = const_cast<ArrayOf<Int32>*>(colors);
     mPositions = const_cast<ArrayOf<Float>*>(positions);
     mTileMode = tile;
     Init(NativeCreate1(x0, y0, x1, y1, colors, positions, tile));
@@ -80,7 +80,7 @@ Int64 CLinearGradient::NativeCreate1(
     /* [in] */ Float y0,
     /* [in] */ Float x1,
     /* [in] */ Float y1,
-    /* [in] */ const ArrayOf<Int32>& colors,
+    /* [in] */ const ArrayOf<Int32>* colors,
     /* [in] */ const ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tileMode)
 {
@@ -88,7 +88,7 @@ Int64 CLinearGradient::NativeCreate1(
     pts[0].set(x0, y0);
     pts[1].set(x1, y1);
 
-    size_t count = colors.GetLength();
+    size_t count = colors->GetLength();
 
     // AutoJavaFloatArray autoPos(env, posArray, count);
 #ifdef SK_SCALAR_IS_FLOAT
@@ -98,7 +98,7 @@ Int64 CLinearGradient::NativeCreate1(
 #endif
 
     SkShader* shader = SkGradientShader::CreateLinear(pts,
-            reinterpret_cast<const SkColor*>(colors.GetPayload()), pos, count,
+            reinterpret_cast<const SkColor*>(colors->GetPayload()), pos, count,
             static_cast<SkShader::TileMode>(tileMode));
 
     // env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
@@ -137,7 +137,7 @@ ECode CLinearGradient::Copy(
     AutoPtr<IShader> copy;
     switch (mType) {
         case TYPE_COLORS_AND_POSITIONS:
-            CLinearGradient::New(mX0, mY0, mX1, mY1, *mColors->Clone(),
+            CLinearGradient::New(mX0, mY0, mX1, mY1, mColors->Clone(),
                     mPositions != NULL ? mPositions->Clone() : NULL, mTileMode, (IShader**)&copy);
             break;
         case TYPE_COLOR_START_AND_COLOR_END:

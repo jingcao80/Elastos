@@ -151,9 +151,9 @@ ECode InsetDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/
 {
-    Int32 size = ArraySize(R::styleable::InsetDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::InsetDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::InsetDrawable),
+            ArraySize(R::styleable::InsetDrawable));
     AutoPtr<ITypedArray> a;
     ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
     FAIL_GOTO(ec, error);
@@ -465,11 +465,10 @@ ECode InsetDrawable::IsStateful(
 }
 
 Boolean InsetDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean changed;
-    mInsetState->mDrawable->SetState(
-        const_cast<ArrayOf<Int32>*>(state), &changed);
+    mInsetState->mDrawable->SetState(state, &changed);
     AutoPtr<IRect> rect;
     GetBounds((IRect**)&rect);
     OnBoundsChange(rect);

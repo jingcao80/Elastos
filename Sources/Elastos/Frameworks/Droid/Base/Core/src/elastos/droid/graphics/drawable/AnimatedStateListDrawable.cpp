@@ -386,9 +386,9 @@ ECode AnimatedStateListDrawable::IsStateful(
 }
 
 Boolean AnimatedStateListDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
-    Int32 keyframeIndex = mState->IndexOfKeyframe(const_cast<ArrayOf<Int32>*>(stateSet));
+    Int32 keyframeIndex = mState->IndexOfKeyframe(stateSet);
     Int32 value = 0;
     if (keyframeIndex == (GetCurrentIndex(&value), value)) {
         // Propagate state change to current keyframe.
@@ -396,7 +396,7 @@ Boolean AnimatedStateListDrawable::OnStateChange(
         GetCurrent((IDrawable**)&current);
         if (current != NULL) {
             Boolean isStateful = FALSE;
-            current->SetState(const_cast<ArrayOf<Int32>*>(stateSet), &isStateful);
+            current->SetState(stateSet, &isStateful);
             return isStateful;
         }
         return FALSE;

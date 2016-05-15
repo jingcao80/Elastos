@@ -326,7 +326,7 @@ public:
 protected:
     // @Override
     CARAPI_(Boolean) OnStateChange(
-        /* [in] */ const ArrayOf<Int32>* stateSet);
+        /* [in] */ ArrayOf<Int32>* stateSet);
 
     void SetConstantState(
         /* [in] */ /*@NonNull*/ AnimatedStateListState* state);

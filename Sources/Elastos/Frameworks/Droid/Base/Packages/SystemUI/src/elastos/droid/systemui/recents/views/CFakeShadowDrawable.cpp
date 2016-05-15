@@ -287,7 +287,7 @@ void CFakeShadowDrawable::BuildShadowCorners()
     (*positions2)[2] = 1.0f;
     AutoPtr<ILinearGradient> linearGradient;
     CLinearGradient::New(0, -mCornerRadius + mShadowSize, 0, -mCornerRadius - mShadowSize,
-        *colors2, positions2, ShaderTileMode_CLAMP, (ILinearGradient**)&linearGradient);
+        colors2, positions2, ShaderTileMode_CLAMP, (ILinearGradient**)&linearGradient);
     mEdgeShadowPaint->SetShader(IShader::Probe(linearGradient));
 }
 

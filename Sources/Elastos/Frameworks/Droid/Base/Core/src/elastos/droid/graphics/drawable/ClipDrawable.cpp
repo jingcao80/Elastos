@@ -298,10 +298,10 @@ ECode ClipDrawable::IsStateful(
 }
 
 Boolean ClipDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean changed;
-    mClipState->mDrawable->SetState(const_cast<ArrayOf<Int32>*>(state), &changed);
+    mClipState->mDrawable->SetState(state, &changed);
     return changed;
 }
 

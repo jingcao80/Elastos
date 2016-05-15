@@ -353,10 +353,10 @@ Boolean AnimatedRotateDrawable::OnLevelChange(
 }
 
 Boolean AnimatedRotateDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean isStateful = FALSE;
-    mState->mDrawable->SetState(const_cast<ArrayOf<Int32>*>(state), &isStateful);
+    mState->mDrawable->SetState(state, &isStateful);
     return isStateful;
 }
 

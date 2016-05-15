@@ -554,7 +554,7 @@ ECode Drawable::GetTransparentRegion(
 }
 
 Boolean Drawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     return FALSE;
 }

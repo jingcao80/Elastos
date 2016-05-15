@@ -36,7 +36,7 @@ public:
         /* [in] */ Float y0,
         /* [in] */ Float x1,
         /* [in] */ Float y1,
-        /* [in] */ const ArrayOf<Int32>& colors,
+        /* [in] */ const ArrayOf<Int32>* colors,
         /* [in] */ const ArrayOf<Float>* positions,
         /* [in] */ ShaderTileMode tile);
 
@@ -64,7 +64,7 @@ private:
         /* [in] */ Float y0,
         /* [in] */ Float x1,
         /* [in] */ Float y1,
-        /* [in] */ const ArrayOf<Int32>& colors,
+        /* [in] */ const ArrayOf<Int32>* colors,
         /* [in] */ const ArrayOf<Float>* positions,
         /* [in] */ ShaderTileMode tileMode);
 

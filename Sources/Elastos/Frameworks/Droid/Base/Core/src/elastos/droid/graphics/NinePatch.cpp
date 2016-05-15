@@ -268,7 +268,6 @@ Boolean NinePatch::IsNinePatchChunk(
     if (array != NULL) {
         const android::Res_png_9patch* chunk = reinterpret_cast<const android::Res_png_9patch*>(array->GetPayload());
         int8_t wasDeserialized = chunk->wasDeserialized;
-        // env->ReleaseByteArrayElements(chunk, const_cast<jbyte*>(array), JNI_ABORT);
         return (wasDeserialized != -1) ? TRUE : FALSE;
     }
     return FALSE;
@@ -290,12 +289,12 @@ Int64 NinePatch::ValidateNinePatchChunk(
     size_t chunkSize = chunk->GetLength();
     if (chunkSize < (int) (sizeof(android::Res_png_9patch))) {
         // jniThrowRuntimeException(env, "Array too small for chunk.");
-        return /*NULL*/0;
+        return 0;
     }
 
     int8_t* storage = new int8_t[chunkSize];
     // This call copies the content of the jbyteArray
-    // env->GetByteArrayRegion(chunk, 0, chunkSize, reinterpret_cast<jbyte*>(storage));
+    memcpy(storage, chunk->GetPayload(), chunkSize);
 
     // Deserialize in place, return the array we just allocated
     return reinterpret_cast<Int64>(android::Res_png_9patch::deserialize(storage));

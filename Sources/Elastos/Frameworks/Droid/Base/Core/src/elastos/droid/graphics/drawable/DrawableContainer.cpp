@@ -328,16 +328,16 @@ ECode DrawableContainer::GetHotspotBounds(
 }
 
 Boolean DrawableContainer::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     if (mLastDrawable != NULL) {
         Boolean isStateful;
-        mLastDrawable->SetState(const_cast<ArrayOf<Int32>*>(state), &isStateful);
+        mLastDrawable->SetState(state, &isStateful);
         return isStateful;
     }
     if (mCurrDrawable != NULL) {
         Boolean isStateful;
-        mCurrDrawable->SetState(const_cast<ArrayOf<Int32>*>(state), &isStateful);
+        mCurrDrawable->SetState(state, &isStateful);
         return isStateful;
     }
     return FALSE;
@@ -449,7 +449,7 @@ ECode DrawableContainer::UnscheduleDrawable(
 {
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
-    if (who == mCurrDrawable && callback != NULL) {
+    if (who == mCurrDrawable.Get() && callback != NULL) {
         callback->UnscheduleDrawable(this, what);
     }
     return NOERROR;

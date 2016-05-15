@@ -157,7 +157,7 @@ public:
 protected:
     //@Override
     CARAPI_(Boolean) OnStateChange(
-        /* [in] */ const ArrayOf<Int32>* state);
+        /* [in] */ ArrayOf<Int32>* state);
 
     //@Override
     CARAPI_(Boolean) OnLevelChange(

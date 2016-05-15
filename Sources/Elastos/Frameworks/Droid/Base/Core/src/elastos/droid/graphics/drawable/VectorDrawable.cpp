@@ -1289,7 +1289,7 @@ ECode VectorDrawable::IsStateful(
 }
 
 Boolean VectorDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     AutoPtr<VectorDrawableState> state = mVectorState;
     if (state->mTint.Get() != NULL && state->mTintMode != -1) {

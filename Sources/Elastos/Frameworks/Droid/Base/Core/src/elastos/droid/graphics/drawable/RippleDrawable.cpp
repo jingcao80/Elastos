@@ -267,7 +267,7 @@ ECode RippleDrawable::GetOpacity(
 }
 
 Boolean RippleDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     Boolean changed = LayerDrawable::OnStateChange(stateSet);
 
@@ -390,11 +390,10 @@ ECode RippleDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/
 {
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::RippleDrawable),
+            ArraySize(R::styleable::RippleDrawable));
     AutoPtr<ITypedArray> a;
-    Int32 size = ArraySize(R::styleable::RippleDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::RippleDrawable, size);
-
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
     ECode ec = UpdateStateFromTypedArray(a);
     if (FAILED(ec)) {

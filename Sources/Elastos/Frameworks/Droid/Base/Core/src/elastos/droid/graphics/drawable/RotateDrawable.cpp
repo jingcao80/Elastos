@@ -386,10 +386,10 @@ ECode RotateDrawable::IsStateful(
 }
 
 Boolean RotateDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean changed;
-    mState->mDrawable->SetState(const_cast<ArrayOf<Int32>*>(state), &changed);
+    mState->mDrawable->SetState(state, &changed);
     AutoPtr<IRect> rect;
     GetBounds((IRect**)&rect);
     OnBoundsChange(rect);

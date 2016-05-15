@@ -770,7 +770,7 @@ ECode GradientDrawable::SetColor(
 }
 
 Boolean GradientDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     Boolean invalidateSelf = FALSE;
 
@@ -778,7 +778,7 @@ Boolean GradientDrawable::OnStateChange(
     AutoPtr<IColorStateList> stateList = s->mColorStateList;
     if (stateList != NULL) {
         Int32 newColor = 0;
-        stateList->GetColorForState((ArrayOf<Int32>*)stateSet, 0, &newColor);
+        stateList->GetColorForState(stateSet, 0, &newColor);
         Int32 oldColor = 0;
         mFillPaint->GetColor(&oldColor);
         if (oldColor != newColor) {
@@ -792,7 +792,7 @@ Boolean GradientDrawable::OnStateChange(
         AutoPtr<IColorStateList> strokeStateList = s->mStrokeColorStateList;
         if (strokeStateList != NULL) {
             Int32 newStrokeColor = 0;
-            strokeStateList->GetColorForState((ArrayOf<Int32>*)stateSet, 0, &newStrokeColor);
+            strokeStateList->GetColorForState(stateSet, 0, &newStrokeColor);
             Int32 oldStrokeColor = 0;
             strokePaint->GetColor(&oldStrokeColor);
             if (oldStrokeColor != newStrokeColor) {
@@ -973,7 +973,7 @@ Boolean GradientDrawable::EnsureValidRect()
                 }
 
                 AutoPtr<IShader> shader;
-                CLinearGradient::New(x0, y0, x1, y1, *colors,
+                CLinearGradient::New(x0, y0, x1, y1, colors,
                         st->mPositions, ShaderTileMode_CLAMP, (IShader**)&shader);
                 mFillPaint->SetShader(shader);
             }

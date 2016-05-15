@@ -180,10 +180,10 @@ void AnimatedVectorDrawable::OnBoundsChange(
 }
 
 Boolean AnimatedVectorDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean result = FALSE;
-    IDrawable::Probe(mAnimatedVectorState->mVectorDrawable)->SetState(const_cast<ArrayOf<Int32>*>(state), &result);
+    IDrawable::Probe(mAnimatedVectorState->mVectorDrawable)->SetState(state, &result);
     return result;
 }
 

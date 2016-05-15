@@ -400,7 +400,7 @@ void ShapeDrawable::OnBoundsChange(
 }
 
 Boolean ShapeDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>& stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     AutoPtr<ShapeState> state = mShapeState;
     if (state->mTint.Get() != NULL && state->mTintMode != -1) {

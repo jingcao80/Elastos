@@ -80,13 +80,13 @@ ECode StateListDrawable::IsStateful(
 }
 
 Boolean StateListDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     Int32 idx = mStateListState->IndexOfStateSet(stateSet);
     // if (DEBUG) android.util.Log.i(TAG, "onStateChange " + this + " states "
     //             + Arrays.toString(stateSet) + " found " + idx);
     if (idx < 0) {
-        idx = mStateListState->IndexOfStateSet(const_cast<ArrayOf<Int32>*>(StateSet::WILD_CARD.Get()));
+        idx = mStateListState->IndexOfStateSet(StateSet::WILD_CARD.Get());
     }
 
     Boolean res = FALSE;
@@ -295,12 +295,11 @@ StateListDrawable::StateListState::~StateListState()
 }
 
 Int32 StateListDrawable::StateListState::AddStateSet(
-    /* [in] */ const ArrayOf<Int32>* stateSet,
+    /* [in] */ ArrayOf<Int32>* stateSet,
     /* [in] */ IDrawable* drawable)
 {
     Int32 pos = AddChild(drawable);
-    AutoPtr<ArrayOf<Int32> > set = const_cast< ArrayOf<Int32>* >(stateSet);
-    mStateSets->Set(pos, set);
+    mStateSets->Set(pos, stateSet);
     return pos;
 }
 

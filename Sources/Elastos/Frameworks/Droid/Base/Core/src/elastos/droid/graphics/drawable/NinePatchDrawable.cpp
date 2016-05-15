@@ -611,19 +611,15 @@ ECode NinePatchDrawable::Inflate(
 {
     Drawable::Inflate(r, parser, attrs, theme);
 
-    Int32 size = ArraySize(R::styleable::NinePatchDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::NinePatchDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::NinePatchDrawable),
+            ArraySize(R::styleable::NinePatchDrawable));
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
     ECode ec = UpdateStateFromTypedArray(a);
-    if (FAILED(ec)) {
     a->Recycle();
-        return ec;
-    }
-    a->Recycle();
-    return NOERROR;
+    return ec;
 }
 
 ECode NinePatchDrawable::UpdateStateFromTypedArray(
@@ -646,12 +642,12 @@ ECode NinePatchDrawable::UpdateStateFromTypedArray(
     Int32 srcResId = 0;
     a->GetResourceId(R::styleable::NinePatchDrawable_src, 0, &srcResId);
     if (srcResId != 0) {
-        AutoPtr<IBitmapFactoryOptions> options;
-        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options);
-        ((CBitmapFactoryOptions*)options.Get())->mInDither = !state->mDither;
+        AutoPtr<CBitmapFactoryOptions> options;
+        CBitmapFactoryOptions::NewByFriend((CBitmapFactoryOptions**)&options);
+        options->mInDither = !state->mDither;
         AutoPtr<IDisplayMetrics> dm;
         r->GetDisplayMetrics((IDisplayMetrics**)&dm);
-        dm->GetNoncompatDensityDpi(&((CBitmapFactoryOptions*)options.Get())->mInScreenDensity);
+        dm->GetNoncompatDensityDpi(&options->mInScreenDensity);
 
         AutoPtr<IRect> padding;
         CRect::New((IRect**)&padding);
@@ -665,7 +661,7 @@ ECode NinePatchDrawable::UpdateStateFromTypedArray(
         AutoPtr<IInputStream> is;
         r->OpenRawResource(srcResId, value, (IInputStream**)&is);
 
-        BitmapFactory::DecodeResourceStream(r, value, is, padding, options, (IBitmap**)&bitmap);
+        BitmapFactory::DecodeResourceStream(r, value, is, padding, options.Get(), (IBitmap**)&bitmap);
 
         is->Close();
         // } catch (IOException e) {
@@ -685,7 +681,9 @@ ECode NinePatchDrawable::UpdateStateFromTypedArray(
 
         bitmap->GetOpticalInsets(opticalInsets);
 
-        CNinePatch::New(bitmap, chunk, (INinePatch**)&state->mNinePatch);
+        AutoPtr<INinePatch> np;
+        CNinePatch::New(bitmap, chunk, (INinePatch**)&np);
+        state->mNinePatch = np;
         state->mPadding = padding;
         state->mOpticalInsets = Insets::Of(opticalInsets);
     }
@@ -837,7 +835,7 @@ ECode NinePatchDrawable::Mutate()
 }
 
 Boolean NinePatchDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>& stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     AutoPtr<NinePatchState> state = mNinePatchState;
     if (state->mTint != NULL && state->mTintMode != -1) {

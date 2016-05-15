@@ -739,7 +739,7 @@ ECode BitmapDrawable::Mutate()
 }
 
 Boolean BitmapDrawable::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     AutoPtr<BitmapState> state = mBitmapState;
     if (state->mTint != NULL && state->mTintMode != -1) {
