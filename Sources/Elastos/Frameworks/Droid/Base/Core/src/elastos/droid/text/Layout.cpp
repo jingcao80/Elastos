@@ -1499,26 +1499,30 @@ ECode Layout::GetLineForOffset(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = 0;
 
     Int32 high;
     GetLineCount(&high);
     Int32 low = -1, guess;
-    Int32 start;
+
     while (high - low > 1) {
         guess = (high + low) / 2;
 
+        Int32 start;
         GetLineStart(guess, &start);
-        if (start > offset)
+        if (start > offset) {
             high = guess;
-        else
+        }
+        else {
             low = guess;
+        }
     }
 
-    if (low < 0)
-        return NOERROR;
-
-    *result = low;
+    if (low < 0) {
+        *result = 0;
+    }
+    else {
+        *result = low;
+    }
     return NOERROR;
 }
 
@@ -1861,8 +1865,7 @@ ECode Layout::GetCursorPath(
     Float h1 = horiz - 0.5f;
     Boolean bval;
     IsLevelBoundary(point, &bval);
-    GetSecondaryHorizontal(point, clamped, &horiz);
-    Float h2 = bval ? horiz - 0.5f : h1;
+    Float h2 = bval ? (GetSecondaryHorizontal(point, clamped, &horiz), horiz - 0.5f) : h1;
 
     Int32 caps = 0, fn = 0, dist = 0;
     Int32 data1, data2;
@@ -1874,21 +1877,26 @@ ECode Layout::GetCursorPath(
     if (caps != 0 || fn != 0) {
         dist = (bottom - top) >> 2;
 
-        if (fn != 0)
+        if (fn != 0) {
             top += dist;
-        if (caps != 0)
+        }
+        if (caps != 0) {
             bottom -= dist;
+        }
     }
 
-    if (h1 < 0.5f)
+    if (h1 < 0.5f) {
         h1 = 0.5f;
-    if (h2 < 0.5f)
+    }
+    if (h2 < 0.5f) {
         h2 = 0.5f;
+    }
 
     if (Elastos::Core::Math::Compare(h1, h2) == 0) {
         dest->MoveTo(h1, top);
         dest->LineTo(h1, bottom);
-    } else {
+    }
+    else {
         dest->MoveTo(h1, top);
         dest->LineTo(h1, (top + bottom) >> 1);
 
@@ -1901,7 +1909,8 @@ ECode Layout::GetCursorPath(
         dest->LineTo(h2 - dist, bottom + dist);
         dest->LineTo(h2, bottom);
         dest->LineTo(h2 + dist, bottom + dist);
-    } else if (caps == 1) {
+    }
+    else if (caps == 1) {
         dest->MoveTo(h2, bottom);
         dest->LineTo(h2 - dist, bottom + dist);
 
@@ -1917,7 +1926,8 @@ ECode Layout::GetCursorPath(
         dest->LineTo(h1 - dist, top - dist);
         dest->LineTo(h1, top);
         dest->LineTo(h1 + dist, top - dist);
-    } else if (fn == 1) {
+    }
+    else if (fn == 1) {
         dest->MoveTo(h1, top);
         dest->LineTo(h1 - dist, top - dist);
 

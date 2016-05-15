@@ -21,6 +21,18 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
+#define TO_CRECT(obj) \
+    ((CRect*)obj.Get())
+
+#define TO_CBITMAP(obj) \
+    ((CBitmap*)obj.Get())
+
+#define TO_CANVAS(obj) \
+    ((Canvas*)obj)
+
+#define TO_PAINT(obj) \
+    ((Paint*)obj)
+
 extern ECode NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
         const SkPaint* paint, SkRegion** outRegion);
@@ -51,7 +63,7 @@ NinePatch::InsetStruct::InsetStruct(
         mOpticalRect->Scale(decodeScale);
 
         // round inward while scaling outline, as the outline should always be conservative
-        ((CRect*)mOutlineRect.Get())->ScaleRoundIn(decodeScale);
+        TO_CRECT(mOutlineRect)->ScaleRoundIn(decodeScale);
     }
 }
 
@@ -109,7 +121,7 @@ ECode NinePatch::constructor(
 {
     mBitmap = bitmap;
     mSrcName = srcName;
-    mNativeChunk = ValidateNinePatchChunk(((CBitmap*)mBitmap.Get())->mNativeBitmap, chunk);
+    mNativeChunk = ValidateNinePatchChunk(TO_CBITMAP(mBitmap)->mNativeBitmap, chunk);
     return NOERROR;
 }
 
@@ -188,8 +200,8 @@ void NinePatch::DrawSoftware(
     /* [in] */ IRectF* location,
     /* [in] */ IPaint* paint)
 {
-    NativeDraw(((Canvas*)canvas)->GetNativeCanvasWrapper(), location, ((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk,
-            paint != NULL ? ((Paint*)paint)->mNativePaint : 0, ((Canvas*)canvas)->mDensity, ((CBitmap*)mBitmap.Get())->mDensity);
+    NativeDraw(TO_CANVAS(canvas)->GetNativeCanvasWrapper(), location, TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk,
+            paint != NULL ? TO_PAINT(paint)->mNativePaint : 0, TO_CANVAS(canvas)->mDensity, TO_CBITMAP(mBitmap)->mDensity);
 }
 
 void NinePatch::DrawSoftware(
@@ -197,8 +209,8 @@ void NinePatch::DrawSoftware(
     /* [in] */ IRect* location,
     /* [in] */ IPaint* paint)
 {
-    NativeDraw(((Canvas*)canvas)->GetNativeCanvasWrapper(), location, ((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk,
-            paint != NULL ? ((Paint*)paint)->mNativePaint  : 0, ((Canvas*)canvas)->mDensity, ((CBitmap*)mBitmap.Get())->mDensity);
+    NativeDraw(TO_CANVAS(canvas)->GetNativeCanvasWrapper(), location, TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk,
+            paint != NULL ? TO_PAINT(paint)->mNativePaint  : 0, TO_CANVAS(canvas)->mDensity, TO_CBITMAP(mBitmap)->mDensity);
 }
 
 ECode NinePatch::GetDensity(
@@ -234,7 +246,7 @@ ECode NinePatch::GetTransparentRegion(
     /* [out] */ IRegion** region)
 {
     VALIDATE_NOT_NULL(region);
-    Int64 r = NativeGetTransparentRegion(((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk, bounds);
+    Int64 r = NativeGetTransparentRegion(TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk, bounds);
     if (r != 0) {
         return CRegion::New(r, region);
     }

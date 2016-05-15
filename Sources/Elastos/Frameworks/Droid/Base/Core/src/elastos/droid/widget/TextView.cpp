@@ -6079,7 +6079,7 @@ ECode TextView::OnCreateDrawableState(
 
 AutoPtr<IPath> TextView::GetUpdatedHighlightPath()
 {
-    AutoPtr<IPath> highlight = NULL;
+    AutoPtr<IPath> highlight;
     AutoPtr<IPaint> highlightPaint = mHighlightPaint;
 
     Int32 selStart, selEnd;

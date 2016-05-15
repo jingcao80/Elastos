@@ -1143,7 +1143,7 @@ ECode Canvas::DrawPatch(
     /* [in] */ /*@NonNull*/ IRect* dst,
     /* [in] */ /*@Nullable*/ IPaint* paint)
 {
-    assert(patch != NULL && dst != NULL && paint != NULL);
+    assert(patch != NULL && dst != NULL);
     ((NinePatch*)patch)->DrawSoftware(this, dst, paint);
     return NOERROR;
 }
@@ -1153,6 +1153,7 @@ ECode Canvas::DrawPatch(
     /* [in] */ IRectF* dst,
     /* [in] */ IPaint* paint)
 {
+    assert(patch != NULL && dst != NULL);
     ((NinePatch*)patch)->DrawSoftware(this, dst, paint);
     return NOERROR;
 }

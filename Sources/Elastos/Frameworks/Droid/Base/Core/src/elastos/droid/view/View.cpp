@@ -17874,7 +17874,6 @@ ECode View::constructor(
 {
     FAIL_RETURN(constructor(context))
 
-    //printf("View::Init\n");
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::View),
             ArraySize(R::styleable::View));
@@ -17937,12 +17936,10 @@ ECode View::constructor(
     a->GetIndexCount(&N);
     for (Int32 i = 0; i < N; i++) {
         a->GetIndex(i, &attr);
-        //printf("View::Init---Index = %d, attr = %d\n", i, attr);
         switch (attr) {
             case R::styleable::View_background:
                 background = NULL;
                 a->GetDrawable(attr, (IDrawable**)&background);
-                //printf("Drawable = 0x%08x\n", (Int32)background.Get());
                 break;
             case R::styleable::View_padding:
                 a->GetDimensionPixelSize(attr, -1, &padding);

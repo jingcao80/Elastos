@@ -383,21 +383,24 @@ ECode NinePatchDrawable::Draw(
     GetBounds((IRect**)&bounds);
 
     Boolean clearColorFilter = FALSE;
-    AutoPtr<IPaint> paint;
-    GetPaint((IPaint**)&paint);
-    AutoPtr<IColorFilter> cf;
-    paint->GetColorFilter((IColorFilter**)&cf);
-    if (mTintFilter != NULL && cf == NULL) {
-        mPaint->SetColorFilter(IColorFilter::Probe(mTintFilter));
-        clearColorFilter = TRUE;
-    } else {
-        clearColorFilter = FALSE;
+    if (mTintFilter != NULL) {
+        AutoPtr<IPaint> paint;
+        GetPaint((IPaint**)&paint);
+        AutoPtr<IColorFilter> cf;
+        paint->GetColorFilter((IColorFilter**)&cf);
+        if (cf == NULL) {
+            mPaint->SetColorFilter(IColorFilter::Probe(mTintFilter));
+            clearColorFilter = TRUE;
+        }
     }
 
     Boolean needsMirroring = NeedsMirroring();
     if (needsMirroring) {
         // Mirror the 9patch
-        canvas->Translate(((CRect*)bounds.Get())->mRight - ((CRect*)bounds.Get())->mLeft, 0);
+        Int32 right, left;
+        bounds->GetRight(&right);
+        bounds->GetLeft(&left);
+        canvas->Translate(right - left, 0);
         canvas->Scale(-1.0f, 1.0f);
     }
 
@@ -405,7 +408,8 @@ ECode NinePatchDrawable::Draw(
     if (mNinePatchState->mBaseAlpha != 1.0f) {
         mPaint->GetAlpha(&restoreAlpha);
         mPaint->SetAlpha((Int32) (restoreAlpha * mNinePatchState->mBaseAlpha + 0.5f));
-    } else {
+    }
+    else {
         restoreAlpha = -1;
     }
 

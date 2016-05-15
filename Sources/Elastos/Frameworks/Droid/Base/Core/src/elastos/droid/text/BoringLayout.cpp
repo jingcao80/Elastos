@@ -380,8 +380,9 @@ ECode BoringLayout::GetLineTop(
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
-    if (line != 0)
+    if (line != 0) {
         *result = mBottom;
+    }
     return NOERROR;
 }
 

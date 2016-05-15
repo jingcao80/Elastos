@@ -712,7 +712,6 @@ ECode RippleDrawable::Draw(
     // Next, try to draw the ripples (into a layer if necessary). If we need
     // to mask against the underlying content, set the xfermode to SRC_ATOP.
     AutoPtr<IPorterDuffXfermode> xfermode = (hasMask || !drawNonMaskContent) ? SRC_OVER : SRC_ATOP;
-
     // If we have a background and a non-opaque mask, draw the masking layer.
     Int32 backgroundLayer = DrawBackgroundLayer(canvas, bounds, xfermode, drawMask);
     if (backgroundLayer >= 0) {
@@ -798,10 +797,10 @@ Int32 RippleDrawable::DrawContentLayer(
     }
 
     AutoPtr<IPaint> maskingPaint = GetMaskingPaint(mode);
-    Int32 left = 0, top = 0, right = 0, bottom = 0;
-    bounds->Get(&left, &top, &right, &bottom);
     Int32 restoreToCount = -1;
     if (needsLayer) {
+        Int32 left = 0, top = 0, right = 0, bottom = 0;
+        bounds->Get(&left, &top, &right, &bottom);
         canvas->SaveLayer(left, top, right, bottom, maskingPaint, &restoreToCount);
     }
 
@@ -837,10 +836,10 @@ Int32 RippleDrawable::DrawBackgroundLayer(
         }
 
         Float x = 0, y = 0;
-        Boolean bval;
         mHotspotBounds->GetExactCenterX(&x);
         mHotspotBounds->GetExactCenterY(&y);
         canvas->Translate(x, y);
+        Boolean bval;
         mBackground->Draw(canvas, GetRipplePaint(), &bval);
         canvas->Translate(-x, -y);
     }
