@@ -1,5 +1,14 @@
 
-module {
+module
+{
+    // interface Elastos.Droid.Internal.Telephony.PhoneConstants;
+    // interface Elastos.Droid.Internal.Telephony.IUUSInfo;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Telecomm.Telecom.IPhone;
+
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,22 +16,16 @@ module {
     namespace Telephony {
 
     interface ICallManager {
-        GetInstance(
-            [out] CallManager* result);
 
-        IsSamePhone(
-            [in] Phone p1, 
-            [in] Phone p2,
-            [out] Boolean* result);
+        GetAllPhones(
+            [out] IList** result);
 
-        GetAllPhones();
+        // GetState(
+        //     [out] PhoneConstantsState* result);
 
-        GetState(
-            [out] State* result);
-
-        GetState(
-            [in] Int64 subId,
-            [out] State* result);
+        // GetState(
+        //     [in] Int64 subId,
+        //     [out] PhoneConstantsState* result);
 
         GetServiceState(
             [out] Int32* result);
@@ -32,51 +35,156 @@ module {
             [out] Int32* result);
 
         GetPhoneInCall(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetPhoneInCall(
             [in] Int64 subId,
-            [out] Phone* result);
+            [out] IPhone** result);
 
         RegisterPhone(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         UnregisterPhone(
-            [in] Phone phone);
+            [in] IPhone* phone);
 
         GetDefaultPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetFgPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetFgPhone(
             [in] Int64 subId,
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetBgPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetBgPhone(
             [in] Int64 subId,
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetRingingPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetRingingPhone(
             [in] Int64 subId,
-            [out] Phone* result);
+            [out] IPhone** result);
+
+        /**
+         * Answers a ringing or waiting call.
+         *
+         * Active call, if any, go on hold.
+         * If active call can't be held, i.e., a background call of the same channel exists,
+         * the active call will be hang up.
+         *
+         * Answering occurs asynchronously, and final notification occurs via
+         * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+         * java.lang.Object) registerForPreciseCallStateChanged()}.
+         *
+         * @exception CallStateException when call is not ringing or waiting
+         */
+        AcceptCall(
+            [in] ICall* ringingCall);
+
+        /**
+         * Reject (ignore) a ringing call. In GSM, this means UDUB
+         * (User Determined User Busy). Reject occurs asynchronously,
+         * and final notification occurs via
+         * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+         * java.lang.Object) registerForPreciseCallStateChanged()}.
+         *
+         * @exception CallStateException when no call is ringing or waiting
+         */
+        RejectCall(
+            [in] ICall* ringingCall);
+
+        /**
+         * Places active call on hold, and makes held call active.
+         * Switch occurs asynchronously and may fail.
+         *
+         * There are 4 scenarios
+         * 1. only active call but no held call, aka, hold
+         * 2. no active call but only held call, aka, unhold
+         * 3. both active and held calls from same phone, aka, swap
+         * 4. active and held calls from different phones, aka, phone swap
+         *
+         * Final notification occurs via
+         * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+         * java.lang.Object) registerForPreciseCallStateChanged()}.
+         *
+         * @exception CallStateException if active call is ringing, waiting, or
+         * dialing/alerting, or heldCall can't be active.
+         * In these cases, this operation may not be performed.
+         */
+        SwitchHoldingAndActive(
+            [in] ICall* heldCall);
+
+        /**
+         * Hangup foreground call and resume the specific background call
+         *
+         * Note: this is noop if there is no foreground call or the heldCall is null
+         *
+         * @param heldCall to become foreground
+         * @throws CallStateException
+         */
+        HangupForegroundResumeBackground(
+            [in] ICall* heldCall);
 
         CanConference(
-            [in] Call heldCall,
+            [in] ICall* heldCall,
             [out] Boolean* result);
 
         CanConference(
-            [in] Call heldCall, 
+            [in] ICall* heldCall,
             [in] Int64 subId,
             [out] Boolean* result);
+
+        /**
+         * Conferences holding and active. Conference occurs asynchronously
+         * and may fail. Final notification occurs via
+         * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+         * java.lang.Object) registerForPreciseCallStateChanged()}.
+         *
+         * @exception CallStateException if canConference() would return false.
+         * In these cases, this operation may not be performed.
+         */
+        Conference(
+            [in] ICall* heldCall);
+
+        /**
+         * Initiate a new voice connection. This happens asynchronously, so you
+         * cannot assume the audio path is connected (or a call index has been
+         * assigned) until PhoneStateChanged notification has occurred.
+         *
+         * @exception CallStateException if a new outgoing call is not currently
+         * possible because no more call slots exist or a call exists that is
+         * dialing, alerting, ringing, or waiting.  Other errors are
+         * handled asynchronously.
+         */
+        // Dial(
+        //     [in] IPhone* phone,
+        //     [in] String dialString,
+        //     [in] Int32 videoState,
+        //     [out] IConnection** result);
+
+        /**
+         * Initiate a new voice connection. This happens asynchronously, so you
+         * cannot assume the audio path is connected (or a call index has been
+         * assigned) until PhoneStateChanged notification has occurred.
+         *
+         * @exception CallStateException if a new outgoing call is not currently
+         * possible because no more call slots exist or a call exists that is
+         * dialing, alerting, ringing, or waiting.  Other errors are
+         * handled asynchronously.
+         */
+        // Dial(
+        //     [in] IPhone* phone,
+        //     [in] String dialString,
+        //     [in] IUUSInfo* uusInfo,
+        //     [in] Int32 videoState,
+        //     [out] IConnection** result);
 
         ClearDisconnected();
 
@@ -84,19 +192,35 @@ module {
             [in] Int64 subId);
 
         CanTransfer(
-            [in] Call heldCall,
+            [in] ICall* heldCall,
             [out] Boolean* result);
 
         CanTransfer(
-            [in] Call heldCall, 
+            [in] ICall* heldCall,
             [in] Int64 subId,
             [out] Boolean* result);
 
+        /**
+         * Connects the held call and active call
+         * Disconnects the subscriber from both calls
+         *
+         * Explicit Call Transfer occurs asynchronously
+         * and may fail. Final notification occurs via
+         * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+         * java.lang.Object) registerForPreciseCallStateChanged()}.
+         *
+         * @exception CallStateException if canTransfer() would return false.
+         * In these cases, this operation may not be performed.
+         */
+        ExplicitCallTransfer(
+            [in] ICall* heldCall);
+
         GetPendingMmiCodes(
-            [in] Phone phone);
+            [in] IPhone* phone,
+            [out] IList** result);
 
         SendUssdResponse(
-            [in] Phone phone, 
+            [in] IPhone* phone,
             [in] String ussdMessge,
             [out] Boolean* result);
 
@@ -119,204 +243,207 @@ module {
         StopDtmf();
 
         SendBurstDtmf(
-            [in] String dtmfString, 
-            [in] Int32 on, 
-            [in] Int32 off, 
-            [in] Message onComplete,
+            [in] String dtmfString,
+            [in] Int32 on,
+            [in] Int32 off,
+            [in] IMessage* onComplete,
             [out] Boolean* result);
 
         RegisterForDisconnect(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForDisconnect(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForPreciseCallStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForPreciseCallStateChanged(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForUnknownConnection(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForUnknownConnection(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForNewRingingConnection(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForNewRingingConnection(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForIncomingRing(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForIncomingRing(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForRingbackTone(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForRingbackTone(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForOnHoldTone(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForOnHoldTone(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForResendIncallMute(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForResendIncallMute(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForMmiInitiate(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForMmiInitiate(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForMmiComplete(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForMmiComplete(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForEcmTimerReset(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForEcmTimerReset(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForServiceStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForServiceStateChanged(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSuppServiceNotification(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSuppServiceNotification(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSuppServiceFailed(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSuppServiceFailed(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForInCallVoicePrivacyOn(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForInCallVoicePrivacyOn(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForInCallVoicePrivacyOff(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForInCallVoicePrivacyOff(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForCallWaiting(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForCallWaiting(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSignalInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSignalInfo(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForDisplayInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForDisplayInfo(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForCdmaOtaStatusChange(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForCdmaOtaStatusChange(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSubscriptionInfoReady(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSubscriptionInfoReady(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSubscriptionChange(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSubscriptionChange(
-            [in] Handler h);
+            [in] IHandler* h);
 
         SetActiveSubscription(
             [in] Int64 subscription);
 
         RegisterForPostDialCharacter(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForPostDialCharacter(
-            [in] Handler h);
+            [in] IHandler* h);
 
-        GetRingingCalls();
+        GetRingingCalls(
+            [out] IList** result);
 
-        GetForegroundCalls();
+        GetForegroundCalls(
+            [out] IList** result);
 
-        GetBackgroundCalls();
+        GetBackgroundCalls(
+            [out] IList** result);
 
         HasActiveFgCall(
             [out] Boolean* result);
@@ -340,49 +467,53 @@ module {
             [out] Boolean* result);
 
         GetActiveFgCall(
-            [out] Call* result);
+            [out] ICall** result);
 
         GetActiveFgCall(
             [in] Int64 subId,
-            [out] Call* result);
+            [out] ICall** result);
 
         GetFirstActiveBgCall(
-            [out] Call* result);
+            [out] ICall** result);
 
         GetFirstActiveBgCall(
             [in] Int64 subId,
-            [out] Call* result);
+            [out] ICall** result);
 
         GetFirstActiveRingingCall(
-            [out] Call* result);
+            [out] ICall** result);
 
         GetFirstActiveRingingCall(
             [in] Int64 subId,
-            [out] Call* result);
+            [out] ICall** result);
 
-        GetActiveFgCallState(
-            [out] State* result);
+        // GetActiveFgCallState(
+        //     [out] PhoneConstantsState* result);
 
-        GetActiveFgCallState(
-            [in] Int64 subId,
-            [out] State* result);
-
-        GetFgCallConnections();
+        // GetActiveFgCallState(
+        //     [in] Int64 subId,
+        //     [out] PhoneConstantsState* result);
 
         GetFgCallConnections(
-            [in] Int64 subId);
+            [out] IList** result);
 
-        GetBgCallConnections();
+        GetFgCallConnections(
+            [in] Int64 subId,
+            [out] IList** result);
 
         GetBgCallConnections(
-            [in] Int64 subId);
+            [out] IList** result);
 
-        GetFgCallLatestConnection(
-            [out] Connection* result);
-
-        GetFgCallLatestConnection(
+        GetBgCallConnections(
             [in] Int64 subId,
-            [out] Connection* result);
+            [out] IList** result);
+
+        // GetFgCallLatestConnection(
+        //     [out] IConnection** result);
+
+        // GetFgCallLatestConnection(
+        //     [in] Int64 subId,
+        //     [out] IConnection** result);
 
         HasDisconnectedFgCall(
             [out] Boolean* result);
@@ -398,6 +529,16 @@ module {
             [in] Int64 subId,
             [out] Boolean* result);
 
+    }
+
+    interface ICallManagerHelper {
+        GetInstance(
+            [out] ICallManager** result);
+
+        IsSamePhone(
+            [in] IPhone* p1,
+            [in] IPhone* p2,
+            [out] Boolean* result);
     }
 
     }//Telephony
