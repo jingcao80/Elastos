@@ -216,10 +216,10 @@ ECode IpConfiguration::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
     parcel->ReadInt32(&mIpAssignment);
+    parcel->ReadInt32(&mProxySettings);
     AutoPtr<IInterface> obj;
     parcel->ReadInterfacePtr((Handle32*)&obj);
     mStaticIpConfiguration = IStaticIpConfiguration::Probe(obj);
-    parcel->ReadInt32(&mProxySettings);
     obj = NULL;
     parcel->ReadInterfacePtr((Handle32*)&obj);
     mHttpProxy = IProxyInfo::Probe(obj);
@@ -230,8 +230,8 @@ ECode IpConfiguration::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mIpAssignment);
-    dest->WriteInterfacePtr(mStaticIpConfiguration);
     dest->WriteInt32(mProxySettings);
+    dest->WriteInterfacePtr(mStaticIpConfiguration);
     dest->WriteInterfacePtr(mHttpProxy);
     return NOERROR;
 }

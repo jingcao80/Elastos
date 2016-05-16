@@ -590,7 +590,7 @@ void CProcessStatsService::TrimHistoricStatesWriteLocked()
     }
     while (filesArray->GetSize() > MAX_HISTORIC_STATES) {
         String file = filesArray->GetFront();
-        filesArray->PushFront();
+        filesArray->PopFront();
         Slogger::I(TAG, "Pruning old procstats: %s", file.string());
         AutoPtr<IFile> ifile;
         CFile::New(file, (IFile**)&ifile);

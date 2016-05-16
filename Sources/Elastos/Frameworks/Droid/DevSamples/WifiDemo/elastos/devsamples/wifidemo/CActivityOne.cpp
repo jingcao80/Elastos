@@ -188,6 +188,10 @@ ECode CActivityOne::MyListener::OnClick(
         Logger::D("CActivityOne", "Test WifiEnableLog!");
         mHost->OnTestWifiLog(TRUE);
     }
+    else if (id == R::id::WifiClearConfigsButton) {
+        Logger::D("CActivityOne", "Test WifiClearConfigs!");
+        mHost->OnTestClearWifiConfigurations();
+    }
     //else if (id == R::id::btn_close_popup) {
     //    Logger::D("CActivityOne", "Dismiss PopupWindow!");
     //    mHost->mPopupWindow->Dismiss();
@@ -470,6 +474,10 @@ ECode CActivityOne::OnCreate(
     mWifiEnableLogButton = FindViewById(R::id::WifiEnableLogButton);
     assert(mWifiEnableLogButton != NULL);
     mWifiEnableLogButton->SetOnClickListener(clickListener);
+
+    mWifiClearConfigsButton = FindViewById(R::id::WifiClearConfigsButton);
+    assert(mWifiClearConfigsButton != NULL);
+    mWifiClearConfigsButton->SetOnClickListener(clickListener);
     //// Setup CheckBox
     ////
     //temp = FindViewById(R::id::chkAndroid);
@@ -966,6 +974,47 @@ ECode CActivityOne::OnTestWifiLog(
     }
     else {
         mWifiManager->EnableVerboseLogging(0);
+    }
+    return NOERROR;
+}
+
+ECode CActivityOne::OnTestClearWifiConfigurations()
+{
+    Logger::D("CActivityOne", "try to clear the wifi configurations");
+    AutoPtr<IList> configs;
+    mWifiManager->GetConfiguredNetworks((IList**)&configs);
+    if (configs != NULL) {
+        Int32 size;
+        configs->GetSize(&size);
+        Logger::D("CActivityOne", "Get %d WifiConfiguration!", size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            configs->Get(i, (IInterface**)&obj);
+            IWifiConfiguration* wifiConfig = IWifiConfiguration::Probe(obj);
+            if (wifiConfig == NULL) {
+                Logger::D("CActivityOne", "the %dth is not a WifiConfiguration !", i);
+                continue;
+            }
+            else {
+                String strWifiConfig;
+                IObject::Probe(wifiConfig)->ToString(&strWifiConfig);
+                Logger::D("CActivityOne", "the %dth AddNetwork is: \n%s", i, strWifiConfig.string());
+            }
+            Int32 networkId = -1;
+            wifiConfig->GetNetworkId(&networkId);
+            Boolean removed;
+            mWifiManager->RemoveNetwork(networkId, &removed);
+            if (removed) {
+                Logger::D("CActivityOne", "success to RemoveNetwork with networkID:%d", networkId);
+            }
+            else {
+                Logger::D("CActivityOne", "fail to RemoveNetwork with networkID:%d", networkId);
+            }
+        }
+        Logger::D("CActivityOne", "finish clear the wifi configurations");
+    }
+    else {
+        Logger::D("CActivityOne", "ERROR in GetConfiguredNetworks");
     }
     return NOERROR;
 }

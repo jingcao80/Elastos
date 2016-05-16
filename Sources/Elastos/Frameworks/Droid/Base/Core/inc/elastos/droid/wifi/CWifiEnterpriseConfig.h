@@ -350,6 +350,11 @@ private:
         /* [in] */ IParcel* dest,
         /* [in] */ IX509Certificate* cert);
 
+    CARAPI ReadCertificate(
+        /* [in] */ IParcel* in,
+        /* [out] */ IX509Certificate** cert);
+
+
     CARAPI_(String) RemoveDoubleQuotes(
         /* [in] */ const String& string);
 

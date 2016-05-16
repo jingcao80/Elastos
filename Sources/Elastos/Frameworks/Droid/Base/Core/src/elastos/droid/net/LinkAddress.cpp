@@ -226,7 +226,7 @@ ECode LinkAddress::IsGlobalPreferred(
 ECode LinkAddress::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadInterfacePtr((Handle32*)&mAddress);
+    NetworkUtils::UnparcelInetAddress(source, (IInetAddress**)&mAddress);
     source->ReadInt32(&mPrefixLength);
     source->ReadInt32(&mFlags);
     source->ReadInt32(&mScope);
@@ -236,7 +236,7 @@ ECode LinkAddress::ReadFromParcel(
 ECode LinkAddress::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteInterfacePtr(mAddress.Get());
+    NetworkUtils::ParcelInetAddress(dest, mAddress, 0);
     dest->WriteInt32(mPrefixLength);
     dest->WriteInt32(mFlags);
     dest->WriteInt32(mScope);

@@ -3120,13 +3120,13 @@ ECode WifiConfigStore::InstallKeys(
 ECode WifiConfigStore::RemoveKeys(
     /* [in] */ IWifiEnterpriseConfig* config)
 {
-    assert(0);//TODO
     VALIDATE_NOT_NULL(config);
     String client;
     config->GetClientCertificateAlias(&client);
     // a valid client certificate is configured
     if (!TextUtils::IsEmpty(client)) {
         if (DBG) Logger::D(TAG, "removing client private key and user cert");
+        assert(0);
         //TODO mKeyStore->DelKey(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID);
         //TODO mKeyStore->Delete(ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID);
     }
@@ -3136,6 +3136,7 @@ ECode WifiConfigStore::RemoveKeys(
     // a valid ca certificate is configured
     if (!TextUtils::IsEmpty(ca)) {
         if (DBG) Logger::D(TAG, "removing CA cert");
+        assert(0);
         //TODO mKeyStore->Delete(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID);
     }
     return NOERROR;
@@ -3339,15 +3340,17 @@ Boolean WifiConfigStore::RemoveConfigAndSendBroadcastIfNeeded(
     mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
     IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
     if (config != NULL) {
+        String configKey;
+        config->ConfigKey(&configKey);
+        Int32 id;
+        config->GetNetworkId(&id);
         if (VDBG) {
-            Loge(String("removeNetwork "));
-                    //+ Integer.toString(netId) + " key=" +
-                    //config.configKey() + " config.id=" + Integer.toString(config.networkId));
+            Loge(String("removeNetwork ")
+                    + StringUtils::ToString(netId) + " key=" +
+                    configKey + " config.id=" + StringUtils::ToString(id));
         }
 
         // cancel the last user choice
-        String configKey;
-        config->ConfigKey(&configKey);
         if (configKey.Equals(lastSelectedConfiguration)) {
             lastSelectedConfiguration = String(NULL);
         }
@@ -3369,11 +3372,11 @@ Boolean WifiConfigStore::RemoveConfigAndSendBroadcastIfNeeded(
         allowedKeyManagement->Get(IWifiConfigurationKeyMgmt::WPA_PSK, &wpa_psk);
         if (selfAdded || linkedConfigurations != NULL || wpa_psk) {
             remove = FALSE;
-            Loge(String("removeNetwork "));
-                    //+ Integer.toString(netId)
-                    //+ " key=" + config.configKey()
-                    //+ " config.id=" + Integer.toString(config.networkId)
-                    //+ " -> mark as deleted");
+            Loge(String("removeNetwork ")
+                    + StringUtils::ToString(netId)
+                    + " key=" + configKey
+                    + " config.id=" + StringUtils::ToString(id)
+                    + " -> mark as deleted");
         }
 
         if (remove) {
@@ -3404,7 +3407,7 @@ Boolean WifiConfigStore::RemoveConfigAndSendBroadcastIfNeeded(
                     networkId,
                     IWifiConfiguration::pskVarName,
                     String("\"") + DELETED_CONFIG_PSK + String("\""))) {
-                Loge(String("removeNetwork, failed to clear PSK, nid="));// + config.networkId);
+                Loge(String("removeNetwork, failed to clear PSK, nid=") + StringUtils::ToString(networkId));
             }
             // Loose the BSSID
             config->SetBSSID(String(NULL));
@@ -5579,7 +5582,7 @@ void WifiConfigStore::LocalLog(
     }
 
     if (config != NULL) {
-        String str(s);
+        StringBuilder str(s);
         str += " ";
         String ss;
         config->GetPrintableSsid(&ss);
@@ -5593,13 +5596,13 @@ void WifiConfigStore::LocalLog(
         String ck;
         config->ConfigKey(&ck);
         str += ck;
-        mLocalLog->Log(str);
+        mLocalLog->Log(str.ToString());
     }
     else {
-        String str(s);
+        StringBuilder str(s);
         str += " ";
         str += netId;
-        mLocalLog->Log(str);
+        mLocalLog->Log(str.ToString());
     }
 }
 

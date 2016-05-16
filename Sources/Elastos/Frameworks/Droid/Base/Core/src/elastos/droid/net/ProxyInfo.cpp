@@ -352,24 +352,52 @@ ECode ProxyInfo::GetHashCode(
 ECode ProxyInfo::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
-    parcel->ReadString(&mHost);
-    parcel->ReadInt32(&mPort);
+    Byte byte = 0;
+    parcel->ReadByte(&byte);
+    if (byte != 0) {
+        AutoPtr<IInterface> obj;
+        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInt32(&mPort);
+        return NOERROR;
+    }
+    byte = 0;
+    parcel->ReadByte(&byte);
+    if (byte != 0) {
+        parcel->ReadString(&mHost);
+        parcel->ReadInt32(&mPort);
+    }
     parcel->ReadString(&mExclusionList);
     parcel->ReadArrayOfString((ArrayOf<String>**)&mParsedExclusionList);
-    AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mPacFileUrl = IUri::Probe(obj);
     return NOERROR;
 }
 
 ECode ProxyInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteString(mHost);
-    dest->WriteInt32(mPort);
+    Boolean eqEmpty;
+    AutoPtr<IUri> empty;
+    Uri::Uri::GetEMPTY((IUri**)&empty);
+    IObject::Probe(empty)->Equals(mPacFileUrl, &eqEmpty);
+    if (!eqEmpty) {
+        dest->WriteByte((Byte)1);
+        dest->WriteInterfacePtr(mPacFileUrl);
+        dest->WriteInt32(mPort);
+        return NOERROR;
+    }
+    else {
+        dest->WriteByte((Byte)0);
+    }
+
+    if (!mHost.IsNull()) {
+        dest->WriteByte((Byte)1);
+        dest->WriteString(mHost);
+        dest->WriteInt32(mPort);
+    }
+    else {
+        dest->WriteByte((Byte)0);
+    }
     dest->WriteString(mExclusionList);
     dest->WriteArrayOfString(mParsedExclusionList);
-    dest->WriteInterfacePtr(mPacFileUrl);
     return NOERROR;
 }
 
