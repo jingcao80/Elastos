@@ -1,0 +1,14 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+DIRS = inc
+DIRS += reflection
+DIRS += marshal
+DIRS += libusr
+DIRS += carapi
+DIRS += elapi
+DIRS += eladll
+
+PLATFORM_DIRS = marshal elapi
+PLATFORM_LIST = android linux

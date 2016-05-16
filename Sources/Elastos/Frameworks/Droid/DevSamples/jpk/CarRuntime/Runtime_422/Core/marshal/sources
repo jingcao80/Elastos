@@ -1,0 +1,9 @@
+TARGET_NAME = marshalcomm
+TARGET_TYPE = lib
+
+C_DEFINES+=-D_UNDEFDLLEXP
+C_DEFINES+=-DHAVE_PTHREADS
+
+SOURCES = metainfos.cpp
+
+INCLUDES += $(MAKEDIR)/../../Library/inc/elasys

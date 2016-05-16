@@ -1,0 +1,20 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+#SPECIAL_TARGET=copyheader
+
+TARGET_NAME= win32_porting
+TARGET_TYPE= lib
+
+EXPORT_HEADERS += sys/atomics.h
+EXPORT_HEADERS += sys/mman.h
+EXPORT_HEADERS += dlfcn.h
+EXPORT_HEADERS += e_time.h
+
+SOURCES = atomic.c
+SOURCES += dlfcn.c
+SOURCES += mmap.c
+SOURCES += time.c
+
+

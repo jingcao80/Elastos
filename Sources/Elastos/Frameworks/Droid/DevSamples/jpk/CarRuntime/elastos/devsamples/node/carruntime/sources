@@ -1,0 +1,50 @@
+TARGET_NAME= Elastos.DevSamples.Node.CarRuntime
+TARGET_TYPE= eco
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+INCLUDES += $(MAKEDIR)
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/../../../../
+
+SOURCES = Elastos.DevSamples.Node.CarRuntime.car
+SOURCES += CCarRuntime.cpp
+SOURCES += CTestCarDataType.cpp
+SOURCES += CTestProperty.cpp
+SOURCES += CTestDataTypeInfo.cpp
+SOURCES += CTestArgumentList.cpp
+SOURCES += CTestCallbackArgumentList.cpp
+SOURCES += CTestCallbackMethodInfo.cpp
+SOURCES += CTestCarArrayInfo.cpp
+SOURCES += CTestClassInfo.cpp
+SOURCES += CTestConstantInfo.cpp
+SOURCES += CTestConstructorInfo.cpp
+SOURCES += CTestCppVectorInfo.cpp
+SOURCES += CTestDelegateProxy.cpp
+SOURCES += CTestEnumInfo.cpp
+SOURCES += CTestEnumItemInfo.cpp
+SOURCES += CTestFieldInfo.cpp
+SOURCES += CTestInterfaceInfo.cpp
+SOURCES += CTestIntrinsicInfo.cpp
+SOURCES += CTestLocalPtrInfo.cpp
+SOURCES += CTestLocalTypeInfo.cpp
+SOURCES += CTestMethodInfo.cpp
+SOURCES += CTestModuleInfo.cpp
+SOURCES += CTestParamInfo.cpp
+SOURCES += CTestStructInfo.cpp
+SOURCES += CTestTypeAliasInfo.cpp
+SOURCES += CTestVariableOfCarArray.cpp
+SOURCES += CTestVariableOfCppVector.cpp
+SOURCES += CTestVariableOfStruct.cpp
+
+SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils

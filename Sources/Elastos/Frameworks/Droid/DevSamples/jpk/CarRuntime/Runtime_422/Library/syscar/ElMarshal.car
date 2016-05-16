@@ -1,0 +1,30 @@
+
+library
+{
+    enum MarshalType {
+        MarshalType_IPC,
+        MarshalType_RPC,
+    }
+
+    enum UnmarshalFlag {
+        UnmarshalFlag_Noncoexisting     = 0x10,
+        UnmarshalFlag_Coexisting        = 0x20,
+    }
+
+    interface IParcelable {
+        ReadFromParcel(
+            [in] IParcel *source);
+
+        WriteToParcel(
+            [in] IParcel *dest);
+    }
+
+    interface ICustomMarshal {
+        GetClsid(
+                [out] ClassID *clsid);
+
+        CreateObject(
+                [in] ICustomMarshal *originProxy,
+                [out] IInterface **newProxy);
+    }
+}
