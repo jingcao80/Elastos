@@ -110,6 +110,7 @@ SOURCES += TabWidget.cpp
 SOURCES += TextClock.cpp
 SOURCES += TextSwitcher.cpp
 SOURCES += TextView.cpp
+SOURCES += TextViewWithCircularIndicator.cpp
 SOURCES += TimePicker.cpp
 SOURCES += TimePickerClockDelegate.cpp
 SOURCES += CTimePickerClockDelegateHelper.cpp

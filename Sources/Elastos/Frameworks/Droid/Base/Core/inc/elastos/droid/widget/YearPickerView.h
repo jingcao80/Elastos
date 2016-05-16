@@ -3,7 +3,6 @@
 
 #include "elastos/droid/widget/ListView.h"
 #include "elastos/droid/widget/ArrayAdapter.h"
-#include "elastos/droid/R.h"
 
 using Elastos::Droid::Widget::ListView;
 using Elastos::Droid::Widget::ArrayAdapter;
@@ -26,6 +25,7 @@ private:
         YearAdapter();
 
         CARAPI constructor(
+            /* [in] */ YearPickerView* host,
             /* [in] */ IContext* context,
             /* [in] */ Int32 resource);
 
@@ -39,7 +39,28 @@ private:
             /* [in] */ Int32 resId);
 
     private:
+        YearPickerView* mHost;
         Int32 mItemTextAppearanceResId;
+    };
+
+    class YearRunnable
+        : public Runnable
+    {
+    public:
+        YearRunnable(
+            /* [in] */ YearPickerView* host,
+            /* [in] */ Int32 position,
+            /* [in] */ Int32 offset);
+
+        ~YearRunnable();
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        YearPickerView* mHost;
+        Int32 mPosition;
+        Int32 mOffset;
     };
 
 public:
@@ -47,11 +68,25 @@ public:
 
     YearPickerView();
 
+    ~YearPickerView();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
+
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyleAttr = R::attr::listViewStyle,
-        /* [in] */ Int32 defStyleRes = 0);
+        /* [in] */ IAttributeSet* attrs);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr,
+        /* [in] */ Int32 defStyleRes);
 
     CARAPI Init(
         /* [in] */ IDatePickerController* controller);

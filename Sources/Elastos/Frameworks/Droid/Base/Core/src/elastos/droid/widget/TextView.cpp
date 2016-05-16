@@ -2177,9 +2177,6 @@ void TextView::SetTypefaceFromAttrs(
 {
     AutoPtr<ITypeface> tf;
     if (!familyName.IsNull()) {
-//        AutoPtr<ITypefaceHelper> helper;
-//        CTypefaceHelper::AcquireSingleton((ITypefaceHelper**)&helper);
-//        helper->Create(familyName, styleIndex, (ITypeface**)&tf);
         Typeface::Create(familyName, styleIndex, (ITypeface**)&tf);
         if (tf != NULL) {
             SetTypeface(tf);

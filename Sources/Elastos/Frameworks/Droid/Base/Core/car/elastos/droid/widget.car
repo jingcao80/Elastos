@@ -97,6 +97,7 @@ module
     merge("widget/ViewAnimator.car");
     merge("widget/ViewSwitcher.car");
     merge("widget/ImageSwitcher.car");
+    merge("widget/TextViewWithCircularIndicator.car");
     merge("widget/TextSwitcher.car");
     merge("widget/TextClock.car");
     merge("widget/TimePicker.car");
@@ -3124,6 +3125,61 @@ module
             [in] IDatePickerController* attrs);
 
         interface IDayPickerView;
+        interface IListView;
+        interface IAbsListView;
+        interface IAdapterView;
+        interface IViewGroup;
+        interface IView;
+        interface ITextWatcher;
+        interface INoCopySpan;
+        interface IOnGlobalLayoutListener;
+        interface IFilterListener;
+        interface IOnTouchModeChangeListener;
+        interface IRemoteAdapterConnectionCallback;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CYearPickerView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IYearPickerView;
+        interface IListView;
+        interface IAbsListView;
+        interface IAdapterView;
+        interface IViewGroup;
+        interface IView;
+        interface ITextWatcher;
+        interface INoCopySpan;
+        interface IOnGlobalLayoutListener;
+        interface IFilterListener;
+        interface IOnTouchModeChangeListener;
+        interface IRemoteAdapterConnectionCallback;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     [local]
@@ -3208,6 +3264,35 @@ module
         constructor();
 
         interface IParcelable;
+    }
+
+    [local]
+    class CTextViewWithCircularIndicator {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface ITextViewWithCircularIndicator;
+        interface ITextView;
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     } // namespace Widget

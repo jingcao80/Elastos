@@ -113,6 +113,7 @@
 #include "elastos/droid/widget/CTextSwitcher.h"
 #include "elastos/droid/widget/CTextView.h"
 #include "elastos/droid/widget/CTextViewSavedState.h"
+#include "elastos/droid/widget/CTextViewWithCircularIndicator.h"
 #include "elastos/droid/widget/CTimePicker.h"
 #include "elastos/droid/widget/CTimePickerClockDelegate.h"
 #include "elastos/droid/widget/CTimePickerClockDelegateSavedState.h"
@@ -129,6 +130,7 @@
 #include "elastos/droid/widget/CViewAnimator.h"
 #include "elastos/droid/widget/CViewFlipper.h"
 #include "elastos/droid/widget/CViewSwitcher.h"
+#include "elastos/droid/widget/CYearPickerView.h"
 #include "elastos/droid/widget/CZoomButton.h"
 #include "elastos/droid/widget/CZoomButtonsController.h"
 #include "elastos/droid/widget/CZoomControls.h"
@@ -252,6 +254,7 @@ CAR_OBJECT_IMPL(CTextClock)
 CAR_OBJECT_IMPL(CTextSwitcher)
 CAR_OBJECT_IMPL(CTextView)
 CAR_OBJECT_IMPL(CTextViewSavedState)
+CAR_OBJECT_IMPL(CTextViewWithCircularIndicator)
 CAR_OBJECT_IMPL(CTimePicker)
 CAR_OBJECT_IMPL(CTimePickerClockDelegate)
 CAR_OBJECT_IMPL(CTimePickerClockDelegateSavedState)
@@ -268,6 +271,7 @@ CAR_OBJECT_IMPL(CVideoView)
 CAR_OBJECT_IMPL(CViewAnimator)
 CAR_OBJECT_IMPL(CViewFlipper)
 CAR_OBJECT_IMPL(CViewSwitcher)
+CAR_OBJECT_IMPL(CYearPickerView)
 CAR_OBJECT_IMPL(CZoomButton)
 CAR_OBJECT_IMPL(CZoomButtonsController)
 CAR_OBJECT_IMPL(CZoomControls)

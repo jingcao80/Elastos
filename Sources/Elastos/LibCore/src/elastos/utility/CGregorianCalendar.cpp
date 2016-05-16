@@ -1221,8 +1221,7 @@ ECode CGregorianCalendar::Clone(
 {
     VALIDATE_NOT_NULL(cloned)
 
-    AutoPtr<CGregorianCalendar> temp = new CGregorianCalendar();
-    AutoPtr<IGregorianCalendar> calendar = (IGregorianCalendar*)temp.Get();
+    AutoPtr<IGregorianCalendar> calendar = new CGregorianCalendar();
     CloneImpl(calendar);
     *cloned = calendar;
     REFCOUNT_ADD(*cloned);

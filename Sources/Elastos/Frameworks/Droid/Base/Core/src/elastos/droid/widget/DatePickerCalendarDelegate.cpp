@@ -1,15 +1,15 @@
 
-#include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "elastos/droid/widget/DatePickerCalendarDelegate.h"
 #include "elastos/droid/widget/CDatePickerCalendarDelegateSavedState.h"
 #include "elastos/droid/widget/CDayPickerView.h"
-#include "elastos/droid/widget/YearPickerView.h"
+#include "elastos/droid/widget/CYearPickerView.h"
 #include "elastos/droid/content/res/CColorStateList.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/text/format/CDateFormat.h"
 #include "elastos/droid/text/format/CDateUtils.h"
 #include "elastos/droid/view/animation/CAlphaAnimation.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 
@@ -25,7 +25,8 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::Animation::CAlphaAnimation;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Widget::CDayPickerView;
-using Elastos::Droid::Widget::YearPickerView;
+using Elastos::Droid::Widget::CYearPickerView;
+using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Text::CSimpleDateFormat;
@@ -324,8 +325,7 @@ ECode DatePickerCalendarDelegate::constructor(
             cl, R::attr::state_selected, headerSelectedTextColor));
 
     CDayPickerView::New(mContext, this, (IDayPickerView**)&mDayPickerView);
-    mYearPickerView = new YearPickerView();
-    ((YearPickerView*)mYearPickerView.Get())->constructor(mContext);
+    CYearPickerView::New(mContext, (IYearPickerView**)&mYearPickerView);
     mYearPickerView->Init(this);
 
     Int32 yearSelectedCircleColor = 0;
@@ -339,7 +339,7 @@ ECode DatePickerCalendarDelegate::constructor(
     Int32 calendarSelectedTextColor = 0;
     a->GetColor(
             R::styleable::DatePicker_calendarSelectedTextColor, defaultHighlightColor, &calendarSelectedTextColor);
-    ISimpleMonthAdapter::Probe(mDayPickerView)->SetCalendarTextColor(CColorStateList::AddFirstIfMissing(
+    ((CDayPickerView*)mDayPickerView.Get())->SetCalendarTextColor(CColorStateList::AddFirstIfMissing(
             calendarTextColor, R::attr::state_selected, calendarSelectedTextColor));
 
     res->GetString(R::string::day_picker_description, &mDayPickerDescription);

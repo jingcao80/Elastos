@@ -1,9 +1,11 @@
 #include "elastos/droid/widget/YearPickerView.h"
 #include "elastos/droid/widget/CAbsListViewLayoutParams.h"
+#include "elastos/droid/R.h"
 
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Widget::CAbsListViewLayoutParams;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::R;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Utility::ICalendar;
@@ -17,17 +19,17 @@ namespace Widget{
 ///////////////////////////////////////////////////////////////
 
 YearPickerView::YearAdapter::YearAdapter()
-    : ArrayAdapter()
-    , mItemTextAppearanceResId(0)
+    : mItemTextAppearanceResId(0)
 {
 }
 
 ECode YearPickerView::YearAdapter::constructor(
+    /* [in] */ YearPickerView* host,
     /* [in] */ IContext* context,
     /* [in] */ Int32 resource)
 {
-    ArrayAdapter::constructor(context, resource);
-    return NOERROR;
+    mHost = host;
+    return ArrayAdapter::constructor(context, resource);
 }
 
 ECode YearPickerView::YearAdapter::GetView(
@@ -36,17 +38,31 @@ ECode YearPickerView::YearAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    /*TextViewWithCircularIndicator v = (TextViewWithCircularIndicator)
-            super.getView(position, convertView, parent);
-    v.setTextAppearance(getContext(), mItemTextAppearanceResId);
-    v.requestLayout();
-    int year = getItem(position);
-    boolean selected = mController.getSelectedDay().get(Calendar.YEAR) == year;
-    v.setDrawIndicator(selected);
+    VALIDATE_NOT_NULL(view)
+
+    AutoPtr<IView> tmp;
+    ArrayAdapter::GetView(position, convertView, parent, (IView**)&tmp);
+    AutoPtr<ITextViewWithCircularIndicator> v = ITextViewWithCircularIndicator::Probe(tmp);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    ITextView::Probe(v)->SetTextAppearance(context, mItemTextAppearanceResId);
+    tmp->RequestLayout();
+    AutoPtr<IInterface> obj;
+    GetItem(position, (IInterface**)&obj);
+    Int32 year;
+    IInteger32::Probe(obj)->GetValue(&year);
+    AutoPtr<ICalendar> calendar;
+    mHost->mController->GetSelectedDay((ICalendar**)&calendar);
+    Int32 y;
+    calendar->Get(ICalendar::YEAR, &y);
+    Boolean selected = y == year;
+    v->SetDrawIndicator(selected);
     if (selected) {
-        v.setCircleColor(mYearSelectedCircleColor);
+        v->SetCircleColor(mHost->mYearSelectedCircleColor);
     }
-    return v;*/
+
+    *view = tmp;
+    REFCOUNT_ADD(*view);
     return NOERROR;
 }
 
@@ -58,17 +74,62 @@ ECode YearPickerView::YearAdapter::SetItemTextAppearance(
 }
 
 ///////////////////////////////////////////////////////////////
+//              YearPickerView::YearRunnable
+///////////////////////////////////////////////////////////////
+
+YearPickerView::YearRunnable::YearRunnable(
+    /* [in] */ YearPickerView* host,
+    /* [in] */ Int32 position,
+    /* [in] */ Int32 offset)
+    : mHost(host)
+    , mPosition(position)
+    , mOffset(offset)
+{}
+
+YearPickerView::YearRunnable::~YearRunnable()
+{}
+
+ECode YearPickerView::YearRunnable::Run()
+{
+    mHost->SetSelectionFromTop(mPosition, mOffset);
+    mHost->RequestLayout();
+    return NOERROR;
+}
+
+///////////////////////////////////////////////////////////////
 //                  YearPickerView
 ///////////////////////////////////////////////////////////////
 CAR_INTERFACE_IMPL_3(YearPickerView, ListView, IYearPickerView, IAdapterViewOnItemClickListener, IOnDateChangedListener)
 
 YearPickerView::YearPickerView()
-    : ListView()
-    , mViewSize(0)
+    : mViewSize(0)
     , mChildSize(0)
     , mSelectedPosition(-1)
     , mYearSelectedCircleColor(0)
+{}
+
+YearPickerView::~YearPickerView()
+{}
+
+ECode YearPickerView::constructor(
+    /* [in] */ IContext* context)
 {
+    return constructor(context, NULL);
+}
+
+ECode YearPickerView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    return constructor(context, attrs, R::attr::listViewStyle);
+}
+
+ECode YearPickerView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs,
+    /* [in] */ Int32 defStyleAttr)
+{
+    return constructor(context, attrs, defStyleAttr, 0);
 }
 
 ECode YearPickerView::constructor(
@@ -109,7 +170,7 @@ ECode YearPickerView::Init(
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     mAdapter = new YearAdapter();
-    mAdapter->constructor(ctx, R::layout::year_label_text_view);
+    mAdapter->constructor(this, ctx, R::layout::year_label_text_view);
     UpdateAdapterData();
     SetAdapter(mAdapter);
 
@@ -174,8 +235,9 @@ ECode YearPickerView::PostSetSelectionFromTop(
     /* [in] */ Int32 position,
     /* [in] */ Int32 offset)
 {
-
-    return NOERROR;
+    AutoPtr<IRunnable> runnable = new YearRunnable(this, position, offset);
+    Boolean res;
+    return Post(runnable, &res);
 }
 
 ECode YearPickerView::GetFirstPositionOffset(
@@ -211,8 +273,9 @@ ECode YearPickerView::OnInitializeAccessibilityEvent(
     Int32 type;
     event->GetEventType(&type);
     if (type == IAccessibilityEvent::TYPE_VIEW_SCROLLED) {
-        IAccessibilityRecord::Probe(event)->SetFromIndex(0);
-        IAccessibilityRecord::Probe(event)->SetToIndex(0);
+        IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
+        record->SetFromIndex(0);
+        record->SetToIndex(0);
     }
     return NOERROR;
 }

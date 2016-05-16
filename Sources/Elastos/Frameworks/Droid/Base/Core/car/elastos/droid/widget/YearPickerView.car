@@ -52,7 +52,6 @@ module
 
         GetFirstPositionOffset(
             [out] Int32* offset);
-
     }
 
     } // namespace Widget

@@ -37,16 +37,14 @@ class DayPickerView
 {
 protected:
     class ScrollStateRunnable
-        : public Object
-        , public IRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
         ScrollStateRunnable(
             /* [in] */ DayPickerView* owner,
             /* [in] */ IView* view);
 
+        ~ScrollStateRunnable();
         /**
           * Sets up the runnable with a short delay in case the scroll state
           * immediately changes again.
@@ -55,7 +53,7 @@ protected:
           * @param scrollState The new state it changed to
           */
         virtual CARAPI DoScrollStateChange(
-            /* [in] */ AbsListView* view,
+            /* [in] */ IAbsListView* view,
             /* [in] */ Int32 scrollState);
 
         // @Override
@@ -69,15 +67,14 @@ protected:
 
 private:
     class InnerRunnable
-        : public Object
-        , public IRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
         InnerRunnable(
             /* [in] */ DayPickerView* owner,
             /* [in] */ Int32 position);
+
+        ~InnerRunnable();
 
         // @Override
         CARAPI Run();
@@ -172,9 +169,10 @@ public:
       * When scroll forward/backward events are received, announce the newly scrolled-to month.
       */
     // @Override
-    CARAPI_(Boolean) PerformAccessibilityAction(
+    CARAPI PerformAccessibilityAction(
         /* [in] */ Int32 action,
-        /* [in] */ IBundle* arguments);
+        /* [in] */ IBundle* arguments,
+        /* [out] */ Boolean* res);
 
 protected:
     /**

@@ -4,6 +4,7 @@
 #include "elastos/droid/widget/SimpleMonthAdapter.h"
 #include "elastos/droid/widget/SimpleMonthView.h"
 #include "elastos/droid/widget/CAbsListViewLayoutParams.h"
+#include "elastos/droid/widget/CSimpleMonthAdapter.h"
 #include "elastos/core/Math.h"
 #include "elastos/core/StringBuffer.h"
 #include <elastos/utility/logging/Logger.h>
@@ -32,29 +33,25 @@ namespace Widget {
 //=====================================================================
 //                  DayPickerView::ScrollStateRunnable
 //=====================================================================
-CAR_INTERFACE_IMPL(DayPickerView::ScrollStateRunnable, Object, IRunnable)
-
 DayPickerView::ScrollStateRunnable::ScrollStateRunnable(
     /* [in] */ DayPickerView* owner,
     /* [in] */ IView* view)
     : mOwner(owner)
+    , mNewState(0)
     , mParent(view)
 {
-    // ==================before translated======================
-    // mParent = view;
     assert(mOwner);
     assert(mParent);
 }
 
+DayPickerView::ScrollStateRunnable::~ScrollStateRunnable()
+{}
+
 ECode DayPickerView::ScrollStateRunnable::DoScrollStateChange(
-    /* [in] */ AbsListView* view,
+    /* [in] */ IAbsListView* view,
     /* [in] */ Int32 scrollState)
 {
     VALIDATE_NOT_NULL(view);
-    // ==================before translated======================
-    // mParent.removeCallbacks(this);
-    // mNewState = scrollState;
-    // mParent.postDelayed(this, SCROLL_CHANGE_DELAY);
 
     Boolean resTmp;
     mParent->RemoveCallbacks(this, &resTmp);
@@ -65,43 +62,6 @@ ECode DayPickerView::ScrollStateRunnable::DoScrollStateChange(
 
 ECode DayPickerView::ScrollStateRunnable::Run()
 {
-    // ==================before translated======================
-    // mCurrentScrollState = mNewState;
-    // if (Log.isLoggable(TAG, Log.DEBUG)) {
-    //     Log.d(TAG,
-    //             "new scroll state: " + mNewState + " old state: " + mPreviousScrollState);
-    // }
-    // // Fix the position after a scroll or a fling ends
-    // if (mNewState == OnScrollListener.SCROLL_STATE_IDLE
-    //         && mPreviousScrollState != OnScrollListener.SCROLL_STATE_IDLE
-    //         && mPreviousScrollState != OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-    //     mPreviousScrollState = mNewState;
-    //     int i = 0;
-    //     View child = getChildAt(i);
-    //     while (child != null && child.getBottom() <= 0) {
-    //         child = getChildAt(++i);
-    //     }
-    //     if (child == null) {
-    //         // The view is no longer visible, just return
-    //         return;
-    //     }
-    //     int firstPosition = getFirstVisiblePosition();
-    //     int lastPosition = getLastVisiblePosition();
-    //     boolean scroll = firstPosition != 0 && lastPosition != getCount() - 1;
-    //     final int top = child.getTop();
-    //     final int bottom = child.getBottom();
-    //     final int midpoint = getHeight() / 2;
-    //     if (scroll && top < LIST_TOP_OFFSET) {
-    //         if (bottom > midpoint) {
-    //             smoothScrollBy(top, GOTO_SCROLL_DURATION);
-    //         } else {
-    //             smoothScrollBy(bottom, GOTO_SCROLL_DURATION);
-    //         }
-    //     }
-    // } else {
-    //     mPreviousScrollState = mNewState;
-    // }
-
     mOwner->mCurrentScrollState = mNewState;
     if (Logger::IsLoggable(TAG, Logger::___DEBUG)) {
         Logger::D(TAG, "new scroll state: %d old state: %d", mNewState, mOwner->mPreviousScrollState);
@@ -111,12 +71,11 @@ ECode DayPickerView::ScrollStateRunnable::Run()
         && mOwner->mPreviousScrollState != IAbsListViewOnScrollListener::SCROLL_STATE_IDLE
         && mOwner->mPreviousScrollState != IAbsListViewOnScrollListener::SCROLL_STATE_TOUCH_SCROLL) {
         mOwner->mPreviousScrollState = mNewState;
-        int i = 0;
+        Int32 i = 0;
         AutoPtr<IView> child;
         mOwner->GetChildAt(i, (IView**)&child);
         Int32 bottom = 0;
-        child->GetBottom(&bottom);
-        while (child != NULL && bottom <= 0) {
+        while (child != NULL && (child->GetBottom(&bottom), bottom) <= 0) {
             child = NULL;
             mOwner->GetChildAt(++i, (IView**)&child);
         }
@@ -154,24 +113,20 @@ ECode DayPickerView::ScrollStateRunnable::Run()
 //=====================================================================
 //                    DayPickerView::InnerRunnable
 //=====================================================================
-CAR_INTERFACE_IMPL(DayPickerView::InnerRunnable, Object, IRunnable)
-
 DayPickerView::InnerRunnable::InnerRunnable(
     /* [in] */ DayPickerView* owner,
     /* [in] */ Int32 position)
     : mOwner(owner)
     , mPosition(position)
 {
-    // ==================before translated======================
-    // mOwner = owner;
     assert(mOwner);
 }
 
+DayPickerView::InnerRunnable::~InnerRunnable()
+{}
+
 ECode DayPickerView::InnerRunnable::Run()
 {
-    // ==================before translated======================
-    // setSelection(position);
-
     mOwner->SetSelection(mPosition);
     return NOERROR;
 }
@@ -187,23 +142,30 @@ const Int32 DayPickerView::LIST_TOP_OFFSET;
 CAR_INTERFACE_IMPL_3(DayPickerView, ListView, IDayPickerView, IAbsListViewOnScrollListener, IOnDateChangedListener)
 
 DayPickerView::DayPickerView()
-    : mFriction(0.0f)
+    : mFriction(1.0f)
     , mCurrentMonthDisplayed(0)
-    , mPreviousScrollState(0)
-    , mCurrentScrollState(0)
+    , mPreviousScrollState(IAbsListViewOnScrollListener::SCROLL_STATE_IDLE)
+    , mCurrentScrollState(IAbsListViewOnScrollListener::SCROLL_STATE_IDLE)
     , mPerformingScroll(FALSE)
 {
+    AutoPtr<ILocaleHelper> helper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+    AutoPtr<ILocale> locale;
+    helper->GetDefault((ILocale**)&locale);
+    CSimpleDateFormat::New(String("yyyy"), locale, (ISimpleDateFormat**)&mYearFormat);
+
+    AutoPtr<ICalendarHelper> calHelper;
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&calHelper);
+    calHelper->GetInstance((ICalendar**)&mSelectedDay);
+    calHelper->GetInstance((ICalendar**)&mTempDay);
+
+    mScrollStateChangedRunnable = new ScrollStateRunnable(this, (IView*)this);
 }
 
 ECode DayPickerView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDatePickerController* controller)
 {
-    // ==================before translated======================
-    // super(context);
-    // init();
-    // setController(controller);
-
     ListView::constructor(context);
     Init();
     SetController(controller);
@@ -227,11 +189,11 @@ ECode DayPickerView::SetController(
 ECode DayPickerView::Init()
 {
     AutoPtr<IViewGroupLayoutParams> vglp;
-    CAbsListViewLayoutParams::New(
-        IListPopupWindow::MATCH_PARENT, IListPopupWindow::MATCH_PARENT,
-        (IViewGroupLayoutParams**)&vglp);
+    CAbsListViewLayoutParams::New(IListPopupWindow::MATCH_PARENT,
+            IListPopupWindow::MATCH_PARENT, (IViewGroupLayoutParams**)&vglp);
     SetLayoutParams(vglp);
     SetDrawSelectorOnTop(FALSE);
+
     SetUpListView();
     return NOERROR;
 }
@@ -252,56 +214,6 @@ ECode DayPickerView::GoTo(
 {
     VALIDATE_NOT_NULL(day);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //
-    // // Set the selected day
-    // if (setSelected) {
-    //     mSelectedDay.setTimeInMillis(day.getTimeInMillis());
-    // }
-    //
-    // mTempDay.setTimeInMillis(day.getTimeInMillis());
-    // final int position = getPositionFromDay(day);
-    //
-    // View child;
-    // int i = 0;
-    // int top = 0;
-    // // Find a child that's completely in the view
-    // do {
-    //     child = getChildAt(i++);
-    //     if (child == null) {
-    //         break;
-    //     }
-    //     top = child.getTop();
-    // } while (top < 0);
-    //
-    // // Compute the first and last position visible
-    // int selectedPosition;
-    // if (child != null) {
-    //     selectedPosition = getPositionForView(child);
-    // } else {
-    //     selectedPosition = 0;
-    // }
-    //
-    // if (setSelected) {
-    //     mAdapter.setSelectedDay(mSelectedDay);
-    // }
-    //
-    // // Check if the selected day is now outside of our visible range
-    // // and if so scroll to the month that contains it
-    // if (position != selectedPosition || forceScroll) {
-    //     setMonthDisplayed(mTempDay);
-    //     mPreviousScrollState = OnScrollListener.SCROLL_STATE_FLING;
-    //     if (animate) {
-    //         smoothScrollToPositionFromTop(
-    //                 position, LIST_TOP_OFFSET, GOTO_SCROLL_DURATION);
-    //         return true;
-    //     } else {
-    //         postSetSelection(position);
-    //     }
-    // } else if (setSelected) {
-    //     setMonthDisplayed(mSelectedDay);
-    // }
-    // return false;
 
     // Set the selected day
     Int64 timeInMillis = 0;
@@ -318,6 +230,7 @@ ECode DayPickerView::GoTo(
     Int32 top = 0;
     // Find a child that's completely in the view
     do {
+        child = NULL;
         GetChildAt(i++, (IView**)&child);
         if (child == NULL) {
             break;
@@ -362,17 +275,6 @@ ECode DayPickerView::GoTo(
 ECode DayPickerView::PostSetSelection(
     /* [in] */ Int32 position)
 {
-    // ==================before translated======================
-    // clearFocus();
-    // post(new Runnable() {
-    //
-    //     @Override
-    //     public void run() {
-    //         setSelection(position);
-    //     }
-    // });
-    // onScrollStateChanged(this, OnScrollListener.SCROLL_STATE_IDLE);
-
     ClearFocus();
     AutoPtr<IRunnable> runnable = new InnerRunnable(this, position);
     Boolean resTmp;
@@ -388,17 +290,10 @@ ECode DayPickerView::OnScroll(
     /* [in] */ Int32 totalItemCount)
 {
     VALIDATE_NOT_NULL(view);
-    // ==================before translated======================
-    // SimpleMonthView child = (SimpleMonthView) view.getChildAt(0);
-    // if (child == null) {
-    //     return;
-    // }
-    //
-    // mPreviousScrollState = mCurrentScrollState;
 
     AutoPtr<IView> viewTmp;
     (IViewGroup::Probe(view))->GetChildAt(0, (IView**)&viewTmp);
-    SimpleMonthView* child = (SimpleMonthView*)viewTmp.Get();
+    ISimpleMonthView* child = ISimpleMonthView::Probe(viewTmp);
     if (child == NULL) {
         return NOERROR;
     }
@@ -411,12 +306,8 @@ ECode DayPickerView::OnScrollStateChanged(
     /* [in] */ Int32 scrollState)
 {
     VALIDATE_NOT_NULL(view);
-    // ==================before translated======================
-    // // use a post to prevent re-entering onScrollStateChanged before it
-    // // exits
-    // mScrollStateChangedRunnable.doScrollStateChange(view, scrollState);
 
-    mScrollStateChangedRunnable->DoScrollStateChange((AbsListView*)view, scrollState);
+    mScrollStateChangedRunnable->DoScrollStateChange(view, scrollState);
     return NOERROR;
 }
 
@@ -424,8 +315,6 @@ ECode DayPickerView::SetCalendarTextColor(
     /* [in] */ IColorStateList* colors)
 {
     VALIDATE_NOT_NULL(colors);
-    // ==================before translated======================
-    // mAdapter.setCalendarTextColor(colors);
 
     mAdapter->SetCalendarTextColor(colors);
     return NOERROR;
@@ -435,28 +324,6 @@ ECode DayPickerView::GetMostVisiblePosition(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int firstPosition = getFirstVisiblePosition();
-    // final int height = getHeight();
-    //
-    // int maxDisplayedHeight = 0;
-    // int mostVisibleIndex = 0;
-    // int i=0;
-    // int bottom = 0;
-    // while (bottom < height) {
-    //     View child = getChildAt(i);
-    //     if (child == null) {
-    //         break;
-    //     }
-    //     bottom = child.getBottom();
-    //     int displayedHeight = Math.min(bottom, height) - Math.max(0, child.getTop());
-    //     if (displayedHeight > maxDisplayedHeight) {
-    //         mostVisibleIndex = i;
-    //         maxDisplayedHeight = displayedHeight;
-    //     }
-    //     i++;
-    // }
-    // return firstPosition + mostVisibleIndex;
 
     Int32 firstPosition = 0, height = 0;
     GetFirstVisiblePosition(&firstPosition);
@@ -464,10 +331,11 @@ ECode DayPickerView::GetMostVisiblePosition(
 
     Int32 maxDisplayedHeight = 0;
     Int32 mostVisibleIndex = 0;
-    Int32 i=0;
+    Int32 i = 0;
     Int32 top = 0;
     Int32 bottom = 0;
     Int32 displayedHeight = 0;
+    using Elastos::Core::Math;
     while (bottom < height) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
@@ -477,8 +345,7 @@ ECode DayPickerView::GetMostVisiblePosition(
 
         child->GetBottom(&bottom);
         child->GetTop(&top);
-        displayedHeight = Elastos::Core::Math::Min(bottom, height) -
-            Elastos::Core::Math::Max(0, top);
+        displayedHeight = Math::Min(bottom, height) - Math::Max(0, top);
         if (displayedHeight > maxDisplayedHeight) {
             mostVisibleIndex = i;
             maxDisplayedHeight = displayedHeight;
@@ -492,9 +359,6 @@ ECode DayPickerView::GetMostVisiblePosition(
 
 ECode DayPickerView::OnDateChanged()
 {
-    // ==================before translated======================
-    // goTo(mController.getSelectedDay(), false, true, true);
-
     AutoPtr<ICalendar> calendar;
     mController->GetSelectedDay((ICalendar**)&calendar);
     Boolean resTmp;
@@ -506,9 +370,6 @@ ECode DayPickerView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     VALIDATE_NOT_NULL(event);
-    // ==================before translated======================
-    // super.onInitializeAccessibilityEvent(event);
-    // event.setItemCount(-1);
 
     ListView::OnInitializeAccessibilityEvent(event);
     (IAccessibilityRecord::Probe(event))->SetItemCount(-1);
@@ -519,10 +380,6 @@ ECode DayPickerView::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     VALIDATE_NOT_NULL(info);
-    // ==================before translated======================
-    // super.onInitializeAccessibilityNodeInfo(info);
-    // info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-    // info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
 
     ListView::OnInitializeAccessibilityNodeInfo(info);
     info->AddAction(IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD);
@@ -530,56 +387,16 @@ ECode DayPickerView::OnInitializeAccessibilityNodeInfo(
     return NOERROR;
 }
 
-Boolean DayPickerView::PerformAccessibilityAction(
+ECode DayPickerView::PerformAccessibilityAction(
     /* [in] */ Int32 action,
-    /* [in] */ IBundle* arguments)
+    /* [in] */ IBundle* arguments,
+    /* [out] */ Boolean* res)
 {
-    // ==================before translated======================
-    // if (action != AccessibilityNodeInfo.ACTION_SCROLL_FORWARD &&
-    //         action != AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
-    //     return super.performAccessibilityAction(action, arguments);
-    // }
-    //
-    // // Figure out what month is showing.
-    // int firstVisiblePosition = getFirstVisiblePosition();
-    // int month = firstVisiblePosition % 12;
-    // int year = firstVisiblePosition / 12 + mController.getMinYear();
-    // Calendar day = Calendar.getInstance();
-    // day.set(year, month, 1);
-    //
-    // // Scroll either forward or backward one month.
-    // if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) {
-    //     day.add(Calendar.MONTH, 1);
-    //     if (day.get(Calendar.MONTH) == 12) {
-    //         day.set(Calendar.MONTH, 0);
-    //         day.add(Calendar.YEAR, 1);
-    //     }
-    // } else if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
-    //     View firstVisibleView = getChildAt(0);
-    //     // If the view is fully visible, jump one month back. Otherwise, we'll just jump
-    //     // to the first day of first visible month.
-    //     if (firstVisibleView != null && firstVisibleView.getTop() >= -1) {
-    //         // There's an off-by-one somewhere, so the top of the first visible item will
-    //         // actually be -1 when it's at the exact top.
-    //         day.add(Calendar.MONTH, -1);
-    //         if (day.get(Calendar.MONTH) == -1) {
-    //             day.set(Calendar.MONTH, 11);
-    //             day.add(Calendar.YEAR, -1);
-    //         }
-    //     }
-    // }
-    //
-    // // Go to that month.
-    // announceForAccessibility(getMonthAndYearString(day));
-    // goTo(day, true, false, true);
-    // mPerformingScroll = true;
-    // return true;
+    VALIDATE_NOT_NULL(res)
 
     if (action != IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD &&
             action != IAccessibilityNodeInfo::ACTION_SCROLL_BACKWARD) {
-        Boolean resTmp = FALSE;
-        ListView::PerformAccessibilityAction(action, arguments, &resTmp);
-        return resTmp;
+        return ListView::PerformAccessibilityAction(action, arguments, res);
     }
 
     // Figure out what month is showing.
@@ -634,52 +451,27 @@ Boolean DayPickerView::PerformAccessibilityAction(
     Boolean resTmp;
     GoTo(day, TRUE, FALSE, TRUE, &resTmp);
     mPerformingScroll = TRUE;
-    return TRUE;
+    *res = TRUE;
+    return NOERROR;
 }
 
 void DayPickerView::SetUpAdapter()
 {
-    // ==================before translated======================
-    // if (mAdapter == null) {
-    //     mAdapter = new SimpleMonthAdapter(getContext(), mController);
-    // } else {
-    //     mAdapter.setSelectedDay(mSelectedDay);
-    //     mAdapter.notifyDataSetChanged();
-    // }
-    // // refresh the view with the new parameters
-    // mAdapter.notifyDataSetChanged();
-
     if (mAdapter == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        mAdapter = new SimpleMonthAdapter();
-        ((SimpleMonthAdapter*)mAdapter.Get())->constructor(context, mController);
+        CSimpleMonthAdapter::New(context, mController, (ISimpleMonthAdapter**)&mAdapter);
     }
     else {
         mAdapter->SetSelectedDay(mSelectedDay);
-        ((SimpleMonthAdapter*)mAdapter.Get())->NotifyDataSetChanged();
+        IBaseAdapter::Probe(mAdapter)->NotifyDataSetChanged();
     }
     // refresh the view with the new parameters
-    ((SimpleMonthAdapter*)mAdapter.Get())->NotifyDataSetChanged();
+    IBaseAdapter::Probe(mAdapter)->NotifyDataSetChanged();
 }
 
 void DayPickerView::SetUpListView()
 {
-    // ==================before translated======================
-    // // Transparent background on scroll
-    // setCacheColorHint(0);
-    // // No dividers
-    // setDivider(null);
-    // // Items are clickable
-    // setItemsCanFocus(true);
-    // // The thumb gets in the way, so disable it
-    // setFastScrollEnabled(false);
-    // setVerticalScrollBarEnabled(false);
-    // setOnScrollListener(this);
-    // setFadingEdgeLength(0);
-    // // Make the scrolling behavior nicer
-    // setFriction(ViewConfiguration.getScrollFriction() * mFriction);
-
     // Transparent background on scroll
     SetCacheColorHint(0);
     // No dividers
@@ -702,12 +494,6 @@ void DayPickerView::SetUpListView()
 void DayPickerView::SetMonthDisplayed(
     /* [in] */ ICalendar* date)
 {
-    // ==================before translated======================
-    // if (mCurrentMonthDisplayed != date.get(Calendar.MONTH)) {
-    //     mCurrentMonthDisplayed = date.get(Calendar.MONTH);
-    //     invalidateViews();
-    // }
-
     Int32 month = 0;
     date->Get(ICalendar::MONTH, &month);
     if (mCurrentMonthDisplayed != month) {
@@ -718,15 +504,6 @@ void DayPickerView::SetMonthDisplayed(
 
 ECode DayPickerView::LayoutChildren()
 {
-    // ==================before translated======================
-    // final Calendar focusedDay = findAccessibilityFocus();
-    // super.layoutChildren();
-    // if (mPerformingScroll) {
-    //     mPerformingScroll = false;
-    // } else {
-    //     restoreAccessibilityFocus(focusedDay);
-    // }
-
     AutoPtr<ICalendar> focusedDay = FindAccessibilityFocus();
     ListView::LayoutChildren();
     if (mPerformingScroll) {
@@ -741,9 +518,6 @@ ECode DayPickerView::LayoutChildren()
 void DayPickerView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    // ==================before translated======================
-    // mYearFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
-
     AutoPtr<ILocaleHelper> helper;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
     AutoPtr<ILocale> locale;
@@ -755,11 +529,6 @@ Int32 DayPickerView::GetDiffMonths(
     /* [in] */ ICalendar* start,
     /* [in] */ ICalendar* end)
 {
-    // ==================before translated======================
-    // final int diffYears = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
-    // final int diffMonths = end.get(Calendar.MONTH) - start.get(Calendar.MONTH) + 12 * diffYears;
-    // return diffMonths;
-
     Int32 diffYears = 0, diffMonths = 0;
     Int32 tmp1 = 0, tmp2 = 0;
     end->Get(ICalendar::YEAR, &tmp1);
@@ -775,18 +544,6 @@ Int32 DayPickerView::GetDiffMonths(
 Int32 DayPickerView::GetPositionFromDay(
     /* [in] */ ICalendar* day)
 {
-    // ==================before translated======================
-    // final int diffMonthMax = getDiffMonths(mController.getMinDate(), mController.getMaxDate());
-    // int diffMonth = getDiffMonths(mController.getMinDate(), day);
-    //
-    // if (diffMonth < 0 ) {
-    //     diffMonth = 0;
-    // } else if (diffMonth > diffMonthMax) {
-    //     diffMonth = diffMonthMax;
-    // }
-    //
-    // return diffMonth;
-
     AutoPtr<ICalendar> minDate;
     AutoPtr<ICalendar> maxDate;
     mController->GetMinDate((ICalendar**)&minDate);
@@ -805,20 +562,6 @@ Int32 DayPickerView::GetPositionFromDay(
 
 AutoPtr<ICalendar> DayPickerView::FindAccessibilityFocus()
 {
-    // ==================before translated======================
-    // final int childCount = getChildCount();
-    // for (int i = 0; i < childCount; i++) {
-    //     final View child = getChildAt(i);
-    //     if (child instanceof SimpleMonthView) {
-    //         final Calendar focus = ((SimpleMonthView) child).getAccessibilityFocus();
-    //         if (focus != null) {
-    //             return focus;
-    //         }
-    //     }
-    // }
-    //
-    // return null;
-
     Int32 childCount = 0;
     GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; ++i) {
@@ -839,23 +582,6 @@ AutoPtr<ICalendar> DayPickerView::FindAccessibilityFocus()
 Boolean DayPickerView::RestoreAccessibilityFocus(
     /* [in] */ ICalendar* day)
 {
-    // ==================before translated======================
-    // if (day == null) {
-    //     return false;
-    // }
-    //
-    // final int childCount = getChildCount();
-    // for (int i = 0; i < childCount; i++) {
-    //     final View child = getChildAt(i);
-    //     if (child instanceof SimpleMonthView) {
-    //         if (((SimpleMonthView) child).restoreAccessibilityFocus(day)) {
-    //             return true;
-    //         }
-    //     }
-    // }
-    //
-    // return false;
-
     if (day == NULL) {
         return FALSE;
     }
@@ -878,13 +604,6 @@ Boolean DayPickerView::RestoreAccessibilityFocus(
 String DayPickerView::GetMonthAndYearString(
     /* [in] */ ICalendar* day)
 {
-    // ==================before translated======================
-    // StringBuffer sbuf = new StringBuffer();
-    // sbuf.append(day.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()));
-    // sbuf.append(" ");
-    // sbuf.append(mYearFormat.format(day.getTime()));
-
-    assert(0);
     AutoPtr<StringBuffer> sbuf = new StringBuffer();
     AutoPtr<ILocaleHelper> helper;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
@@ -898,8 +617,9 @@ String DayPickerView::GetMonthAndYearString(
 
     AutoPtr<IDate> dateTime;
     day->GetTime((IDate**)&dateTime);
-    AutoPtr<IStringBuffer> yearFormat; // = mYearFormat.format(dateTime);
-    sbuf->Append(yearFormat);
+    String str;
+    Elastos::Text::IDateFormat::Probe(mYearFormat)->Format(dateTime, &str);
+    sbuf->Append(str);
     String result;
     sbuf->ToString(&result);
     return result;
@@ -908,5 +628,3 @@ String DayPickerView::GetMonthAndYearString(
 } // namespace Widget
 } // namespace Droid
 } // namespace Elastos
-
-
