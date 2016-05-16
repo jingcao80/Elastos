@@ -21,6 +21,8 @@ module
      */
     [local]
     interface IActivityGroup {
+        const String PARENT_NON_CONFIG_INSTANCE_KEY = "android:parent_non_config_instance";
+
         GetCurrentActivity(
             [out] IActivity** activity);
 

@@ -43,7 +43,7 @@ namespace App {
  * {@link android.os.Build.VERSION_CODES#DONUT}.
  */
 
-class TabActivity
+class ECO_PUBLIC TabActivity
     : public ActivityGroup
     , public ITabActivity
 {
@@ -53,8 +53,6 @@ public:
     TabActivity();
 
     virtual ~TabActivity();
-
-    CARAPI constructor();
 
     /**
      * Sets the default tab that is the first tab highlighted.

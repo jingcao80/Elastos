@@ -293,7 +293,7 @@ PinnedPopupWindow::~PinnedPopupWindow()
 {
 }
 
-ECode PinnedPopupWindow::Init()
+ECode PinnedPopupWindow::constructor()
 {
     CreatePopupWindow();
 
@@ -5001,7 +5001,7 @@ void Editor::ShowSuggestions()
 {
     if (mSuggestionsPopupWindow == NULL) {
         mSuggestionsPopupWindow = new SuggestionsPopupWindow(this);
-        mSuggestionsPopupWindow->Init();
+        mSuggestionsPopupWindow->constructor();
     }
     HideControllers();
     mSuggestionsPopupWindow->Show();
@@ -5230,6 +5230,7 @@ ECode Editor::SpanController::OnSpanAdded(
     } else if (IEasyEditSpan::Probe(span)) {
         if (mPopupWindow == NULL) {
             mPopupWindow = new EasyEditPopupWindow(mHost);
+            mPopupWindow->constructor();
             mHidePopup = new SpanControllerRunnable(this);
         }
 
