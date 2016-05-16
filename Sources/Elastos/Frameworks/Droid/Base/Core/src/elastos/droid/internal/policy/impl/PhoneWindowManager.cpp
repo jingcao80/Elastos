@@ -2085,18 +2085,23 @@ void PhoneWindowManager::PowerShortPress(
         mContext->GetResources((IResources**)&resources);
         resources->GetInteger(R::integer::config_shortPressOnPowerBehavior, &mShortPressOnPowerBehavior);
     }
-    assert(0 && "TODO");
+
     switch (mShortPressOnPowerBehavior) {
         case SHORT_PRESS_POWER_NOTHING:
             break;
         case SHORT_PRESS_POWER_GO_TO_SLEEP:
-            //TODO mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+            mPowerManager->GoToSleep(eventTime,
+                    IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
             break;
         case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
-            //TODO mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, IPowerManager::GO_TO_SLEEP_FLAG_NO_DOZE);
+            mPowerManager->GoToSleep(eventTime,
+                    IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON,
+                    IPowerManager::GO_TO_SLEEP_FLAG_NO_DOZE);
             break;
         case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
-            //TODO mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, IPowerManager::GO_TO_SLEEP_FLAG_NO_DOZE);
+            mPowerManager->GoToSleep(eventTime,
+                    IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON,
+                    IPowerManager::GO_TO_SLEEP_FLAG_NO_DOZE);
             LaunchHomeFromHotKey();
             break;
     }

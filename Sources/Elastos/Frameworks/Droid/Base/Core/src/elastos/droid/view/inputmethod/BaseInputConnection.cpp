@@ -268,9 +268,11 @@ ECode BaseInputConnection::CommitText(
 {
     VALIDATE_NOT_NULL(result)
 
-    String str;
-    text->ToString(&str);
-    if (DEBUG) Logger::V(TAG, "commitText %s", str.string());
+    if (DEBUG) {
+        String str;
+        text->ToString(&str);
+        Logger::V(TAG, "commitText %s", str.string());
+    }
     ReplaceText(text, newCursorPosition, FALSE);
     mIMM->NotifyUserAction();
     SendCurrentText();

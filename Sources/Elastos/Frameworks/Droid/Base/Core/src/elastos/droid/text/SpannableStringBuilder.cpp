@@ -314,8 +314,8 @@ ECode SpannableStringBuilder::Replace(
 }
 
 ECode SpannableStringBuilder::Replace(
-    /* [in] */ const Int32 start,
-    /* [in] */ const Int32 end,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 end,
     /* [in] */ ICharSequence* _tb,
     /* [in] */ Int32 tbstart,
     /* [in] */ Int32 tbend)
@@ -407,8 +407,9 @@ Boolean SpannableStringBuilder::IsSpanEquals(
     /* [in] */ IInterface* rhs)
 {
     assert(lhs != NULL);
-    if (!rhs)
+    if (!rhs) {
         return FALSE;
+    }
 
     AutoPtr<IComparable> cpr = (IComparable*)(lhs->Probe(Elastos::Core::EIID_IComparable));
     if (cpr) {
@@ -558,9 +559,10 @@ ECode SpannableStringBuilder::GetSpans(
 
         if (count == 0) {
             // Safe conversion thanks to the isInstance test above
-            ret1 = curSpan;
+            ret1 = curSpan->Probe(kind);
             count++;
-        } else {
+        }
+        else {
             if (count == 1) {
                 // Safe conversion, but requires a suppressWarning
                 ret = ArrayOf<IInterface*>::Alloc(spanCount - i + 1);
@@ -586,11 +588,12 @@ ECode SpannableStringBuilder::GetSpans(
                 }
 
                 // Safe conversion thanks to the isInstance test above
-                ret->Set(j, curSpan);
+                ret->Set(j, curSpan->Probe(kind));
                 count++;
-            } else {
+            }
+            else {
                 // Safe conversion thanks to the isInstance test above
-                ret->Set(count++, curSpan);
+                ret->Set(count++, curSpan->Probe(kind));
             }
         }
     }
@@ -601,7 +604,6 @@ ECode SpannableStringBuilder::GetSpans(
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
-
     else if (count == 1) {
         // Safe conversion, but requires a suppressWarning
         ret = ArrayOf<IInterface*>::Alloc(1);
@@ -610,7 +612,6 @@ ECode SpannableStringBuilder::GetSpans(
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
-
     if (count == ret->GetLength()) {
         *result = ret;
         REFCOUNT_ADD(*result)
@@ -641,8 +642,8 @@ ECode SpannableStringBuilder::NextSpanTransition(
     //    kind = Object.class;
     //}
 
-    Logger::I(TAG, " >> NextSpanTransition: start:%d, limit:%d, mSpanCount:%d, gap range[%d, %d]",
-        start, limit, mSpanCount, mGapStart, mGapLength);
+    // Logger::I(TAG, " >> NextSpanTransition: start:%d, limit:%d, mSpanCount:%d, gap range[%d, %d]",
+    //     start, limit, mSpanCount, mGapStart, mGapLength);
 
     for (Int32 i = 0; i < count; i++) {
         Int32 st = (*mSpanStarts)[i];
@@ -655,7 +656,7 @@ ECode SpannableStringBuilder::NextSpanTransition(
         if (en > gapstart) {
             en -= gaplen;
         }
-        Logger::I(TAG, " >> span %d : [%s]", i, TO_CSTR((*mSpans)[i]));
+        // Logger::I(TAG, " >> span %d : [%s]", i, TO_CSTR((*mSpans)[i]));
         if ((*mSpans)[i] != NULL) {
             if (st > start && st < limit && (*mSpans)[i]->Probe(kind) != NULL) {
                 limit = st;

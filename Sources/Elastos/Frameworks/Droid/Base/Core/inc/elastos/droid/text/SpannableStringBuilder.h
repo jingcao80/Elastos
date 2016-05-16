@@ -122,8 +122,8 @@ public:
 
     // Documentation from interface
     CARAPI Replace(
-        /* [in] */ const Int32 start,
-        /* [in] */ const Int32 end,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end,
         /* [in] */ ICharSequence* tb,
         /* [in] */ Int32 tbstart,
         /* [in] */ Int32 tbend);
