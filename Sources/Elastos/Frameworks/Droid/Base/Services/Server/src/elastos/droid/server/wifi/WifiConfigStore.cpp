@@ -4637,7 +4637,7 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
             }
             else {
                 String str("addOrUpdateNetworkNative created netId=");
-                str += netId;
+                str += StringUtils::ToString(netId);
                 Loge(str);
             }
         }
@@ -4645,7 +4645,7 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
 
     Boolean updateFailed = TRUE;
 
-    setVariables: {
+    {
 
         String ssid;
         config->GetSSID(&ssid);
@@ -4983,6 +4983,7 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
         }
         updateFailed = FALSE;
     } // End of setVariables
+    setVariables:
 
     if (updateFailed) {
         if (newNetwork) {
@@ -5040,8 +5041,8 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
             Int32 creatorUid = 0;
             config->GetCreatorUid(&creatorUid);
             String str("created new config netId=");
-            str += netId; str += " uid=";
-            str += creatorUid;
+            str += StringUtils::ToString(netId); str += " uid=";
+            str += StringUtils::ToString(creatorUid);
             Loge(str);
         }
     }

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/myTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:textColor="#ff00ffff"
+        android:textSize="20dp"
+        android:text="Wifi Test!"
+        android:background="#FFFFFF"/>
+    <EditText android:id="@+id/mySSID"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="mmmkkk"/>
+    <EditText android:id="@+id/myPW"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="kortide1230"/>
+<!--
+    <EditText android:id="@+id/myEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="50dp"
+        android:hint="Input text here."/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/chkIos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="iOS系统">
+        </CheckBox>
+
+        <CheckBox
+            android:id="@+id/chkAndroid"
+            android:layout_width="200px"
+            android:layout_height="50px"
+            android:text="Android系统"
+            android:checked="true">
+        </CheckBox>
+    </LinearLayout>
+
+    <RadioGroup
+        android:id="@+id/radioSex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/radioMale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disable Wifi"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radioFemale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Wifi"/>
+    </RadioGroup>
+
+-->
+    <!--
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <ToggleButton
+            android:id="@+id/toggleButton1"
+            android:layout_width="150px"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton"
+            android:layout_gravity="center_horizontal"/>
+
+        <ToggleButton
+            android:id="@+id/toggleButton2"
+            android:layout_width="150px"
+            android:layout_height="wrap_content"
+            android:textOn="Turn On"
+            android:textOff="Turn Off"
+            android:checked="true"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+    -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+    <!--
+        <Button android:id="@+id/AnamtionButton"
+            android:layout_width="110px"
+            android:layout_height="wrap_content"
+            android:text="Animation">
+        </Button>
+        <Button android:id="@+id/DialogButton"
+            android:layout_width="110px"
+            android:layout_height="wrap_content"
+            android:text="Dialog">
+        </Button>
+        <Button android:id="@+id/PopupWindowButton"
+            android:layout_width="160px"
+            android:layout_height="wrap_content"
+            android:text="PopupWindow">
+        </Button>
+        <Button android:id="@+id/PowerManagerButton"
+            android:layout_width="160px"
+            android:layout_height="wrap_content"
+            android:text="PowerManager">
+        </Button>
+        <Button android:id="@+id/ConnectivityManagerButton"
+            android:layout_width="160px"
+            android:layout_height="wrap_content"
+            android:text="ConnectivityManager">
+        </Button>
+    -->
+        <Button android:id="@+id/WifiEnableButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiEnable">
+        </Button>
+        <Button android:id="@+id/WifiDisableButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiDisable">
+        </Button>
+        <Button android:id="@+id/WifiStartScanButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiStartScan">
+        </Button>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <Button android:id="@+id/WifiConnectButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiConnect">
+        </Button>
+        <Button android:id="@+id/WifiDisableLogButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiDisableLog">
+        </Button>
+        <Button android:id="@+id/WifiEnableLogButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiEnableLog">
+        </Button>
+    </LinearLayout>
+    </LinearLayout>
+<!--
+    <ListView
+        android:id="@+id/myListView"
+        android:layout_width="match_parent"
+        android:layout_height="500px">
+    </ListView>
+-->
+</LinearLayout>

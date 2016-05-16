@@ -10275,12 +10275,8 @@ void WifiStateMachine::ReplyToMessage(
     msg->GetReplyTo((IMessenger**)&replyTo);
     if (replyTo == NULL) return;
     AutoPtr<IMessage> dstMsg = ObtainMessageWithArg2(msg);
-    Int32 dstWhat;
-    dstMsg->GetWhat(&dstWhat);
-    dstWhat = what;
-    Int32 dstarg1;
-    dstMsg->GetArg1(&dstarg1);
-    dstarg1 = arg1;
+    dstMsg->SetWhat(what);
+    dstMsg->SetArg1(arg1);
     mReplyChannel->ReplyToMessage(msg, dstMsg);
 }
 

@@ -1703,7 +1703,22 @@ module
          * the radio, but subsequent calls will be ignored.  Only one call to {@link #release}
          * will be required, regardless of the number of times that {@code acquire} is called.
          */
-        Acquire();
+        AcquireLock();
+
+
+        /**
+         * Unlocks the Wi-Fi radio, allowing it to turn off when the device is idle.
+         *
+         * If this WifiLock is reference-counted, each call to {@code release} will decrement the
+         * reference count, and the radio will be unlocked only when the reference count reaches
+         * zero.  If the reference count goes below zero (that is, if {@code release} is called
+         * a greater number of times than {@link #acquire}), an exception is thrown.
+         *
+         * If this WifiLock is not reference-counted, the first call to {@code release} (after
+         * the radio was locked using {@link #acquire}) will unlock the radio, and subsequent
+         * calls will be ignored.
+         */
+        ReleaseLock();
 
         /**
          * Controls whether this is a reference-counted or non-reference-counted WifiLock.
@@ -1765,7 +1780,33 @@ module
          * Also note that applications cannot leave Multicast locked on.
          * When an app exits or crashes, any Multicast locks will be released.
          */
-        Acquire();
+        AcquireLock();
+
+        /**
+         * Unlocks Wifi Multicast, restoring the filter of packets
+         * not addressed specifically to this device and saving power.
+         *
+         * If this MulticastLock is reference-counted, each call to
+         * {@code release} will decrement the reference count, and the
+         * multicast packets will only stop being received when the reference
+         * count reaches zero.  If the reference count goes below zero (that
+         * is, if {@code release} is called a greater number of times than
+         * {@link #acquire}), an exception is thrown.
+         *
+         * If this MulticastLock is not reference-counted, the first call to
+         * {@code release} (after the radio was multicast locked using
+         * {@link #acquire}) will unlock the multicast, and subsequent calls
+         * will be ignored.
+         *
+         * Note that if any other Wifi Multicast Locks are still outstanding
+         * this {@code release} call will not have an immediate effect.  Only
+         * when all applications have released all their Multicast Locks will
+         * the Multicast filter be turned back on.
+         *
+         * Also note that when an app exits or crashes all of its Multicast
+         * Locks will be automatically released.
+         */
+        ReleaseLock();
 
         /**
          * Controls whether this is a reference-counted or non-reference-
