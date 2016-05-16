@@ -545,29 +545,29 @@ module
             [in] Int32 screen);
 
         GetSpanForWidget(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComponentName* component,
             [in] Int32 minWidth,
             [in] Int32 minHeight,
             [out, callee] ArrayOf<Int32>* array);
 
         GetSpanForWidget(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAppWidgetProviderInfo* info,
             [out, callee] ArrayOf<Int32>* array);
 
         GetMinSpanForWidget(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAppWidgetProviderInfo* info,
             [out, callee] ArrayOf<Int32>* array);
 
         GetSpanForWidget(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPendingAddWidgetInfo* info,
             [out, callee] ArrayOf<Int32>* array);
 
         GetMinSpanForWidget(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPendingAddWidgetInfo* info,
             [out, callee] ArrayOf<Int32>* array);
 

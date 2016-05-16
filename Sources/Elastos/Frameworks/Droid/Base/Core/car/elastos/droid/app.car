@@ -1029,7 +1029,7 @@ module
     [local]
     class CProfileManager {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHandler* handler);
 
         interface IProfileManager;

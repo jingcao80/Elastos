@@ -58,7 +58,7 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface IFrameLayout;
@@ -183,7 +183,7 @@ module
     [local]
     class CUserSpinnerAdapter {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IArrayList* users);
 
         interface ISpinnerAdapter;

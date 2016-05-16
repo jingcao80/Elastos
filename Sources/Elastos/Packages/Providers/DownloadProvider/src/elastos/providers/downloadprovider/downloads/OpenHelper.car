@@ -15,7 +15,7 @@ module
          * handling subtleties around installing packages.
          */
         StartViewIntent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int64 id,
             [in] Int32 intentFlags,
             [out] Boolean* result);

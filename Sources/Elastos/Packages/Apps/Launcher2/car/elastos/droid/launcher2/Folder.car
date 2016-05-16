@@ -214,7 +214,7 @@ module
          * @return A new UserFolder.
          */
         FromXml(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IFolder** folder);
     }
 

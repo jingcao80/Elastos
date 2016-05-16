@@ -15,7 +15,7 @@ module
     interface IDownloadReceiver
     {
         OnReceive(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* intent);
     }
 

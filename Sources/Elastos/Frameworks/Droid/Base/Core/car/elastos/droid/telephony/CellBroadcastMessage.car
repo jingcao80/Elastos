@@ -83,11 +83,11 @@ module
             [out] Boolean* result);
 
         GetDateString(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* result);
 
         GetSpokenDateString(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* result);
     }
 

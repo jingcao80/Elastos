@@ -38,7 +38,7 @@ module
     interface IBrightnessSettingsHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IBrightnessSettings** obj);
     }
 

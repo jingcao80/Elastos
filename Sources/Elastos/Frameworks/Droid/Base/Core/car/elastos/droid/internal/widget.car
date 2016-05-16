@@ -357,23 +357,6 @@ module
         interface ISmileysHelper;
     }
 
-   //  [local]
-   //  class CDigitalClock2 {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IDigitalClock;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
     [local]
     class CSlidingTab {
         constructor(
@@ -404,6 +387,7 @@ module
 
         interface IWaveView;
         interface IAnimatorUpdateListener;
+        interface IView;
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
@@ -419,6 +403,9 @@ module
             [in] IAttributeSet* attrs);
 
         interface IFaceUnlockView;
+        interface IRelativeLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -450,6 +437,9 @@ module
             [in] IAttributeSet* attrs);
 
         interface ILinearLayoutWithDefaultTouchRecepient;
+        interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -536,13 +526,15 @@ module
             [in] Int32 defStyleRes);
 
         interface IPasswordEntryKeyboardView;
-//          interface IKeyboardView;
+        interface IKeyboardView;
         interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     [local]
     class CDrawableHolder {
-
         constructor(
             [in] IBitmapDrawable* drawable);
 
@@ -576,6 +568,9 @@ module
             [in] IAttributeSet* attrs);
 
         interface IWeightedLinearLayout;
+        interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -646,12 +641,15 @@ module
             [in] Int32 defStyleRes);
 
         interface IActionBarContextView;
+        interface IAnimatorListener;
+        interface IAbsActionBarView;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-        interface IAnimatorListener;
     }
 
     [local]
@@ -675,12 +673,14 @@ module
             [in] Int32 defStyleRes);
 
         interface ITextProgressBar;
+        interface IRelativeLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-        interface IOnChronometerTickListener;
     }
 
     [local]
@@ -691,8 +691,11 @@ module
 
         interface IActionBarView;
         interface IDecorToolbar;
+        interface IAbsActionBarView;
+        interface IViewGroup;
         interface IViewParent;
         interface IViewManager;
+        interface IView;
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
@@ -739,6 +742,9 @@ module
             [in] IAttributeSet* attrs);
 
         interface IActionBarOverlayLayout;
+        interface IDecorContentParent;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -776,6 +782,9 @@ module
             [in] IAttributeSet* attrs);
 
         interface IActionBarContainer;
+        interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
         interface IViewParent;
         interface IViewManager;
         interface IDrawableCallback;
@@ -933,7 +942,7 @@ module
     [local]
     class CResolverDrawerLayout {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
             [in] IContext* ctx,
@@ -1023,9 +1032,8 @@ module
 
     [local]
     class CGlowPadView {
-
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
             [in] IContext* ctx,
@@ -1033,6 +1041,9 @@ module
 
         interface IGlowPadView;
         interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     } // namespace Multiwaveview

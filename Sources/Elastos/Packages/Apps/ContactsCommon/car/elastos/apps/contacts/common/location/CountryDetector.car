@@ -16,7 +16,7 @@ module
          */
         // @NeededForTesting
         GetInstanceForTest(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ITelephonyManager* telephonyManager,
             [in] ILocationManager* locationManager,
             [in] ILocaleProvider* localeProvider,
@@ -30,7 +30,7 @@ module
 
     interface ICountryDetectorHelper {
         RegisterForLocationUpdates(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ILocationManager* locationManager);
 
          /**
@@ -40,7 +40,7 @@ module
          * @return the initialized country detector.
          */
         GetInstance(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] ICountryDetector** detector);
     }
 

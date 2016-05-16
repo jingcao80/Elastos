@@ -71,7 +71,7 @@ module
     interface IProfileTriggerHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IProfileTrigger** trigger);
     }
 
@@ -211,7 +211,7 @@ module
     interface IProfileHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IProfile** profile);
     }
 

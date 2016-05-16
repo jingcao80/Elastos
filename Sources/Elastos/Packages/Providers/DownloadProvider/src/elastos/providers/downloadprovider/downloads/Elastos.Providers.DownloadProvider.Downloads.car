@@ -67,7 +67,7 @@ module
 
     class CDownloadInfo {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISystemFacade* systemFacade,
             [in] IDownloadNotifier* notifier);
 
@@ -113,7 +113,7 @@ module
 
     class CDownloadThread {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISystemFacade* systemFacade,
             [in] IDownloadNotifier* notifier,
             [in] IDownloadInfo* info);

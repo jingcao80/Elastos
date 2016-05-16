@@ -3186,7 +3186,7 @@ module
     class CTimePickerClockDelegate {
         constructor(
             [in] ITimePicker* delegator,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);

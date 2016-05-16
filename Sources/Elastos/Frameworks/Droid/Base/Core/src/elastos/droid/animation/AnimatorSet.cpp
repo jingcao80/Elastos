@@ -85,8 +85,6 @@ void AnimatorSet::DependencyListener::StartIfReady(
     if (mNode->mTmpDependencies.IsEmpty()) {
         // all dependencies satisfied: start the animation
         Animator* anim = (Animator*)(mNode->mAnimation.Get());
-        // hold refcount of AnimationSet
-        anim->mParent = mAnimatorSet;
         anim->Start();
         mAnimatorSet->mPlayingSet.PushBack(mNode->mAnimation);
     }
@@ -139,6 +137,11 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     mWeakAnimatorSet->Resolve(EIID_IAnimatorSet, (IInterface**)&obj);
     if (obj == NULL) {
         Logger::E(TAG, "Error: AnimatorSet has been released!");
+        IValueAnimator* va = IValueAnimator::Probe(animation);
+        if (va) {
+            ValueAnimator* valAni = (ValueAnimator*)va;
+            assert(valAni->mParent != NULL);
+        }
         assert(0 && "Error: AnimatorSet has been released!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -281,8 +284,6 @@ ECode AnimatorSet::AnimatorListenerAdapterIMPL::OnAnimationEnd(
         List<AutoPtr<Node> >::Iterator it;
         for (it = mNodes->Begin(); it != mNodes->End(); ++it) {
             Animator* anim = (Animator*)((*it)->mAnimation.Get());
-            // hold refcount of AnimationSet
-            anim->mParent = mHost;
             anim->Start();
             mHost->mPlayingSet.PushBack((*it)->mAnimation);
         }
@@ -317,12 +318,12 @@ AnimatorSet::AnimatorSet()
     , mDuration(-1)
     , mReversible(TRUE)
 {
-    // Logger::I(TAG, " >>>> Create AnimatorSet : 0x%0x =====================", this);
+    Logger::I(TAG, " >>>> Create AnimatorSet : 0x%0x =====================", this);
 }
 
 AnimatorSet::~AnimatorSet()
 {
-    // Logger::I(TAG, " >>>> Destory AnimatorSet: 0x%0x =====================", this);
+    Logger::I(TAG, " >>>> Destory AnimatorSet: 0x%0x =====================", this);
 }
 
 ECode AnimatorSet::PlayTogether(
@@ -498,6 +499,8 @@ ECode AnimatorSet::Play(
 
 ECode AnimatorSet::Cancel()
 {
+    AutoPtr<AnimatorSet> holdThis(this); // hold refcount of AnimationSet
+
     mTerminated = TRUE;
     Boolean started = FALSE;
     if (IsStarted(&started), started) {
@@ -533,6 +536,8 @@ ECode AnimatorSet::Cancel()
 
 ECode AnimatorSet::End()
 {
+    AutoPtr<AnimatorSet> holdThis(this); // hold refcount of AnimationSet
+
     mTerminated = TRUE;
     Boolean started = FALSE;
     if (IsStarted(&started), started) {
@@ -759,7 +764,8 @@ ECode AnimatorSet::Start()
                 node->mTmpDependencies.Assign(node->mDependencies.Begin(), node->mDependencies.End());
             }
 
-
+            // hold refcount of AnimationSet
+            ((Animator*)node->mAnimation.Get())->mParent = this;
             node->mAnimation->AddListener(mSetListener);
         }
     }
@@ -768,8 +774,6 @@ ECode AnimatorSet::Start()
     if (mStartDelay <= 0) {
         for (it = nodesToStart->Begin(); it != nodesToStart->End(); it++) {
             Animator* anim = (Animator*)((*it)->mAnimation.Get());
-            // hold refcount of AnimationSet
-            anim->mParent = this;
             anim->Start();
             mPlayingSet.PushBack((*it)->mAnimation);
         }

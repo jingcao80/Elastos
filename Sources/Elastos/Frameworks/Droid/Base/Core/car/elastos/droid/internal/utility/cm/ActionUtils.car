@@ -19,7 +19,7 @@ module
          * @return {@code true} when a user application was found and closed.
          */
         KillForegroundApp(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 userId,
             [out] Boolean* result);
 
@@ -30,7 +30,7 @@ module
          * @return whether an activity was found to switch to
          */
         SwitchToLastApp(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 userId,
             [out] Boolean* result);
     }

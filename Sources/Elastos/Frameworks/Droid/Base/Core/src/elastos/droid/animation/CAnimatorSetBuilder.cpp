@@ -6,8 +6,9 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-CAR_OBJECT_IMPL(CAnimatorSetBuilder);
-CAR_INTERFACE_IMPL(CAnimatorSetBuilder, Object, IAnimatorSetBuilder);
+CAR_OBJECT_IMPL(CAnimatorSetBuilder)
+
+CAR_INTERFACE_IMPL(CAnimatorSetBuilder, Object, IAnimatorSetBuilder)
 
 ECode CAnimatorSetBuilder::constructor(
     /* [in] */ IAnimatorSet* host,
@@ -16,8 +17,7 @@ ECode CAnimatorSetBuilder::constructor(
     mHost = (AnimatorSet*)host;
     AutoPtr<IAnimator> key = anim;
     mCurrentNode = mHost->mNodeMap[key];
-    if(mCurrentNode == NULL)
-    {
+    if (mCurrentNode == NULL) {
         mCurrentNode = new AnimatorSet::Node(anim);
         mHost->mNodeMap[key] = mCurrentNode;
         mHost->mNodes.PushBack(mCurrentNode);

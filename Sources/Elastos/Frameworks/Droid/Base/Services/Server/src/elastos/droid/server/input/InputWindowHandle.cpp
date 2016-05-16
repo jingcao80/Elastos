@@ -58,10 +58,9 @@ void InputWindowHandle::NativeDispose()
     android::AutoMutex _l(gHandleMutex);
 
     if (mPtr) {
-        mPtr = 0;
-
         NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(mPtr);
         handle->decStrong((void*)GetNativeInputWindowHandle);
+        mPtr = 0;
     }
 }
 

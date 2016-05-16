@@ -12,13 +12,13 @@
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/view/ViewRootImpl.h"
 #include "elastos/droid/view/FocusFinder.h"
-#include "elastos/droid/view/CMotionEvent.h"
+#include "elastos/droid/view/MotionEvent.h"
+#include "elastos/droid/view/DragEvent.h"
 #include "elastos/droid/view/CViewGroupOverlay.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/animation/CTransformation.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/view/animation/LayoutAnimationController.h"
-
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/etl/Algorithm.h>
@@ -36,11 +36,6 @@ using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::IDisplayMetrics;
-using Elastos::Droid::View::ViewRootImpl;
-using Elastos::Droid::View::FocusFinder;
-using Elastos::Droid::View::CMotionEvent;
-using Elastos::Droid::View::CViewGroupOverlay;
-using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::Animation::IAnimationParameters;
 using Elastos::Droid::View::Animation::CTransformation;
 using Elastos::Droid::View::Animation::AnimationUtils;
@@ -2206,7 +2201,7 @@ ECode ViewGroup::DispatchDragEvent(
         mCurrentDragView = NULL;
 
         // Set up our tracking of drag-started notifications
-        //mCurrentDrag = CDragEvent::Obtain(event);
+        mCurrentDrag = DragEvent::Obtain(event);
         mDragNotifiedChildren.Clear();
 
         // Now dispatch down to our children, caching the responses
@@ -2765,7 +2760,7 @@ void ViewGroup::ExitHoverTargets()
     if (mHoveredSelf || mFirstHoverTarget != NULL) {
         Int64 now = SystemClock::GetUptimeMillis();
         AutoPtr<IMotionEvent> event;
-        CMotionEvent::Obtain(
+        MotionEvent::Obtain(
             now, now, IMotionEvent::ACTION_HOVER_EXIT,
             0.0f, 0.0f, 0, (IMotionEvent**)&event);
         IInputEvent::Probe(event)->SetSource(IInputDevice::SOURCE_TOUCHSCREEN);
@@ -2793,7 +2788,7 @@ void ViewGroup::CancelHoverTarget(
 
             Int64 now = SystemClock::GetUptimeMillis();
             AutoPtr<IMotionEvent> event;
-            CMotionEvent::Obtain(
+            MotionEvent::Obtain(
                 now, now, IMotionEvent::ACTION_HOVER_EXIT,
                 0.0f, 0.0f, 0, (IMotionEvent**)&event);
             IInputEvent::Probe(event)->SetSource(IInputDevice::SOURCE_TOUCHSCREEN);
@@ -2853,7 +2848,7 @@ AutoPtr<IMotionEvent> ViewGroup::ObtainMotionEventNoHistoryOrSelf(
         return event;
     }
     AutoPtr<IMotionEvent> motionEvent;
-    CMotionEvent::ObtainNoHistory((CMotionEvent*)event, (IMotionEvent**)&motionEvent);
+    MotionEvent::ObtainNoHistory(event, (IMotionEvent**)&motionEvent);
 
     return motionEvent;
 }
@@ -2926,7 +2921,7 @@ Boolean ViewGroup::DispatchTransformedGenericPointerEvent(
     Boolean handled = FALSE;
     if (!child->HasIdentityMatrix()) {
         AutoPtr<IMotionEvent> transformedEvent;
-        CMotionEvent::Obtain(event, (IMotionEvent**)&transformedEvent);
+        MotionEvent::Obtain(event, (IMotionEvent**)&transformedEvent);
         transformedEvent->OffsetLocation(offsetX, offsetY);
 
         AutoPtr<IMatrix> matrix;
@@ -3187,7 +3182,7 @@ void ViewGroup::CancelAndClearTouchTargets(
         AutoPtr<IMotionEvent> temp = event;
         if (temp == NULL) {
             Int64 now = SystemClock::GetUptimeMillis();
-            CMotionEvent::Obtain(
+            MotionEvent::Obtain(
                 now, now, IMotionEvent::ACTION_CANCEL,
                 0.0f, 0.0f, 0, (IMotionEvent**)&temp);
             IInputEvent::Probe(temp)->SetSource(IInputDevice::SOURCE_TOUCHSCREEN);
@@ -3272,7 +3267,7 @@ void ViewGroup::CancelTouchTarget(
 
             Int64 now = SystemClock::GetUptimeMillis();
             AutoPtr<IMotionEvent> event;
-            CMotionEvent::Obtain(
+            MotionEvent::Obtain(
                 now, now, IMotionEvent::ACTION_CANCEL,
                 0.0f, 0.0f, 0, (IMotionEvent**)&event);
             IInputEvent::Probe(event)->SetSource(IInputDevice::SOURCE_TOUCHSCREEN);
@@ -3381,7 +3376,7 @@ Boolean ViewGroup::DispatchTransformedTouchEvent(
             }
             return handled;
         }
-        CMotionEvent::Obtain(event, (IMotionEvent**)&transformedEvent);
+        MotionEvent::Obtain(event, (IMotionEvent**)&transformedEvent);
     }
     else {
         event->Split(newPointerIdBits, (IMotionEvent**)&transformedEvent);

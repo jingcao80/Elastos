@@ -2065,7 +2065,7 @@ module
         [local]
         class CKeyButtonRipple {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IView* targetView);
 
             interface IKeyButtonRipple;
@@ -2452,7 +2452,7 @@ module
         [local]
         class CBarBackgroundDrawable {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] Int32 gradientResourceId);
 
             interface IDrawable;

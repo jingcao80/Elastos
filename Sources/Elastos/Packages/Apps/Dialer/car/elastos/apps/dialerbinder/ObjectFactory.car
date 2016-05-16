@@ -17,7 +17,7 @@ module
          * @return Instance of CallLogAdapter.
          */
         NewCallLogAdapter(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ICallFetcher* callFetcher,
             [in] IContactInfoHelper* contactInfoHelper,
             [in] ICallItemExpandedListener* callItemExpandedListener,

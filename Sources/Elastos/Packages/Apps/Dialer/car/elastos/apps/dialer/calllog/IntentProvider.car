@@ -13,7 +13,7 @@ module
      */
     interface IIntentProvider {
         GetIntent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IIntent* intent);
     }
 

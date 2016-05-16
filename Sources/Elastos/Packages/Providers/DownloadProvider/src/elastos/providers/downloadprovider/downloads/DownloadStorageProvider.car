@@ -74,7 +74,7 @@ module
     interface IDownloadStorageProviderHelper
     {
         OnDownloadProviderDelete(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int64 id);
     }
 

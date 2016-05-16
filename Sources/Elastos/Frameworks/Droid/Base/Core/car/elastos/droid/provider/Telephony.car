@@ -848,7 +848,7 @@ module
          * @return package name for the default SMS package or null
          */
         GetDefaultSmsPackage(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* result);
 
         /**
@@ -1025,7 +1025,7 @@ module
          * @hide
          */
         MoveMessageToFolder(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [in] Int32 folder,
             [in] Int32 error,
@@ -1690,7 +1690,7 @@ module
          * @hide
          */
         GetOrCreateThreadId(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String recipient,
             [out] Int64* result);
 
@@ -1706,7 +1706,7 @@ module
          * @hide
          */
         GetOrCreateThreadId(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISet* recipients,
             [out] Int64* result);
     }

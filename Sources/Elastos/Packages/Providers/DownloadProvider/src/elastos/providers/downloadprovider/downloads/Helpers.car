@@ -20,7 +20,7 @@ module
          * This file will be touched to reserve it.
          */
         GenerateSaveFile(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String url,
             [in] String hint,
             [in] String contentDisposition,
@@ -34,17 +34,17 @@ module
          * prevents us from opening files that aren't actually downloads.
          */
         IsFilenameValid(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IFile* file,
             [out] Boolean* result);
 
         GetRunningDestinationDirectory(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 destination,
             [out] IFile** result);
 
         GetSuccessDestinationDirectory(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 destination,
             [out] IFile** result);
 

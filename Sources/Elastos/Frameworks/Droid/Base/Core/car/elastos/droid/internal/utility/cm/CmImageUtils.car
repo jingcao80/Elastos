@@ -51,7 +51,7 @@ module
          */
         GetCroppedKeyguardStream(
             [in] String pkgName,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IInputStream** result);
 
         /**
@@ -64,7 +64,7 @@ module
          */
         GetCroppedWallpaperStream(
             [in] String pkgName,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IInputStream** result);
     }
 

@@ -375,7 +375,7 @@ module
          * @hide
          */
         GetStaticDefaultRingtoneUri(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IUri** result);
 
         /**
@@ -416,7 +416,7 @@ module
          * @hide
          */
         GetActualRingtoneUriBySubId(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 subId,
             [out] IUri** result);
 
@@ -429,7 +429,7 @@ module
          * @hide
          */
         SetActualRingtoneUriBySubId(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 subId,
             [in] IUri* ringtoneUri);
     }

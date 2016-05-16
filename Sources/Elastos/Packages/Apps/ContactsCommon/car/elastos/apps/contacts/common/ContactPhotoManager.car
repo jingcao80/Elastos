@@ -233,11 +233,11 @@ module
             [out] IContactPhotoManagerDefaultImageRequest** request);
 
         GetInstance(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IContactPhotoManager* instance);
 
         CreateContactPhotoManager(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IContactPhotoManager* instance);
     }
 

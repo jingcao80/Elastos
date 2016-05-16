@@ -40,7 +40,7 @@ module
     interface IRingModeSettingsHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IRingModeSettings** obj);
     }
 

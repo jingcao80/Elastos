@@ -835,7 +835,7 @@ module
         [local]
         class CRestrictionsManager {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IIRestrictionsManager* service);
 
             interface IRestrictionsManager;
@@ -1755,7 +1755,7 @@ module
     [local]
     class CThemeManager {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIThemeService* service);
 
         interface IThemeManager;

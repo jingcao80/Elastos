@@ -872,7 +872,7 @@ module
             [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPackageManager* packageManager,
             [in] IIAccountAuthenticatorCache* authenticatorCache);
 
@@ -2007,7 +2007,7 @@ module
     [local]
     class CConditionProviders {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHandler* handler,
             [in] IInterface* userProfiles,
             [in] IInterface* zenModeHelper);

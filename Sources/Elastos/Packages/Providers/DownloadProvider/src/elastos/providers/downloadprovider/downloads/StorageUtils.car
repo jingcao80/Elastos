@@ -30,7 +30,7 @@ module
          * </ul>
          */
         EnsureAvailableSpace(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IFileDescriptor* fd,
             [in] Int64 bytes);
 

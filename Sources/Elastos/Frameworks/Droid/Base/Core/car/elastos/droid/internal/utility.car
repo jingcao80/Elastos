@@ -78,7 +78,7 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ILockscreenShortcutsHelperOnChangeListener* listener);
 
         interface ILockscreenShortcutsHelper;

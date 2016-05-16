@@ -10,15 +10,15 @@ module
 
     interface IScreenType {
         IsPhone(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         IsHybrid(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         IsTablet(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
     }
 

@@ -120,7 +120,7 @@ module
             [out] IUri* uri);
 
         IsVideoEnabled(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
     }
 

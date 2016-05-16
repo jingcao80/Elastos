@@ -16,11 +16,11 @@ module
          *         is in.
          */
         GetCurrentCountryIso(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* result);
 
         GetGeocodedLocationFor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String phoneNumber,
             [out] String* result);
     }

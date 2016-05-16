@@ -46,7 +46,7 @@ module
             [in] IConfiguration* overrideConfiguration,
             [in] ICompatibilityInfo* compatInfo,
             [in] IBinder* token,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IResources** res);
 
         /**

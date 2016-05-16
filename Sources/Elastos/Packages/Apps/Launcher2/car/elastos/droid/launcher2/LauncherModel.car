@@ -103,7 +103,7 @@ module
          * Find a folder in the db, creating the FolderInfo if necessary, and adding it to folderList.
          */
         GetFolderById(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHashMap* folderList,
             [in] Int64 id,
             [out] IFolderInfo** info);
@@ -153,7 +153,7 @@ module
             [in] IPackageManager* manager,
             [in] IIntent* intent,
             [in] IUserHandle* user,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IShortcutInfo** sinfo);
 
         /**
@@ -165,7 +165,7 @@ module
             [in] IPackageManager* manager,
             [in] IIntent* intent,
             [in] IUserHandle* user,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ICursor* c,
             [in] Int32 iconIndex,
             [in] Int32 titleIndex,
@@ -175,11 +175,11 @@ module
         GetIconFromCursor(
             [in] ICursor* c,
             [in] Int32 iconIndex,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IBitmap** map);
 
         AddShortcut(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* data,
             [in] Int64 container,
             [in] Int32 screen,
@@ -192,7 +192,7 @@ module
          * Attempts to find an AppWidgetProviderInfo that matches the given component.
          */
         FindAppWidgetProviderInfoWithComponent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComponentName* component,
             [out] IAppWidgetProviderInfo** pinfo);
 
@@ -200,12 +200,12 @@ module
          * Returns a list of all the widgets that can handle configuration with a particular mimeType.
          */
         ResolveWidgetsForMimeType(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String mimeType,
             [out] IList** list);
 
         InfoFromShortcutIntent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* data,
             [in] IBitmap* fallbackIcon,
             [out] IShortcutInfo** sinfo);
@@ -218,7 +218,7 @@ module
             [out] Boolean* result);
 
         UpdateSavedIcon(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IShortcutInfo* info,
             [in] ArrayOf<Byte>* data);
 

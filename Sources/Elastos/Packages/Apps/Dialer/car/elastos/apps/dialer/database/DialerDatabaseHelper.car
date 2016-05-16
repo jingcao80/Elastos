@@ -105,7 +105,7 @@ module
          * Access function to get the singleton instance of DialerDatabaseHelper.
          */
         GetInstance(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IDialerDatabaseHelper** helper);
     }
 

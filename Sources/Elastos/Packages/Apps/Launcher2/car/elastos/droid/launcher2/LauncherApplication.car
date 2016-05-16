@@ -53,7 +53,7 @@ module
             [out] Boolean* result);
 
         IsScreenLandscape(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         GetScreenDensity(

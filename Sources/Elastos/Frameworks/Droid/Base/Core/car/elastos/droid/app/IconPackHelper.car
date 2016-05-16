@@ -20,7 +20,7 @@ module
     interface IIconCustomizer {
         GetComposedIconDrawable(
             [in] IDrawable* icon,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComposedIconInfo* iconInfo,
             [out] IDrawable** drawable);
 
@@ -138,7 +138,7 @@ module
     [local]
     interface IIconPackHelperHelper {
         CreateIconResource(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String packageName,
             [out] IResources** iconRes);
 

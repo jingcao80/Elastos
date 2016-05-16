@@ -93,7 +93,7 @@ module
     interface IProfileGroupHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IProfileGroup** group);
     }
 

@@ -33,7 +33,7 @@ module
          *         Can be NULL.
          */
         GetXmlResourcesToIndex(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Boolean enabled,
             [out] IList** list); /* List<SearchIndexableResource> */
 
@@ -46,7 +46,7 @@ module
          * @return a list of {@link SearchIndexableRaw} references. Can be NULL.
          */
         GetRawDataToIndex(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Boolean enabled,
             [out] IList** list); /* List<SearchIndexableRaw>  */
 
@@ -57,7 +57,7 @@ module
          * @return a list of {@link SearchIndexableRaw} references. Can be NULL.
          */
         GetNonIndexableKeys(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IList** list); /* List<String>  */
     }
 

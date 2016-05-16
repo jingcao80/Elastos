@@ -35,14 +35,14 @@ module
     [deprecated]
     interface IMessageListener {
         OnHandleMessage(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IMessage* msg);
     }
 
     [deprecated]
     interface IActivityListener {
         OnCreate(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IBundle* savedInstanceState);
         OnStart(
             [in] IContext* context);
@@ -59,22 +59,22 @@ module
             [in] IContext* context);
 
         OnNewIntent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent *intent);
 
         OnCreateDialog(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 id,
             [out] IInterface** dlg);
 
         OnActivityResult(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 requestCode,
             [in] Int32 resultCode,
             [in] IIntent *data);
 
         OnCreateContextMenu(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IContextMenu* menu,
             [in] IView* v,
             [in] IContextMenuInfo* menuInfo);

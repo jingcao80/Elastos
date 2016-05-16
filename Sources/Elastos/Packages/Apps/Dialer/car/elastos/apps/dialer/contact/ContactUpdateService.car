@@ -21,7 +21,7 @@ module
     {
         /** Creates an intent that sets the selected data item as super primary (default) */
         CreateSetSuperPrimaryIntent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int64 dataId,
             [out] IIntent** intent);
     }

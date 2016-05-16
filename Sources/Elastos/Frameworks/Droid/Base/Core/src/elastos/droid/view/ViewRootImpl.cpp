@@ -123,7 +123,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
 #ifndef TRACE_IN_TERMINAL
-#define TRACE_IN_TERMINAL          1
+#define TRACE_IN_TERMINAL          0
 #endif
 
 namespace Elastos {
@@ -3172,7 +3172,7 @@ void ViewRootImpl::PerformTraversals()
         if (DBG) {
             Logger::D(TAG, "======================================");
             Logger::D(TAG, "performTraversals -- after setFrame");
-            host->Debug();
+            // host->Debug();
         }
     }
     if (triggerGlobalLayoutListener) {

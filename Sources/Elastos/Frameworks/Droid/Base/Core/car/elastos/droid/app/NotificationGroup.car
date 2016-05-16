@@ -46,7 +46,7 @@ module
     interface INotificationGroupHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INotificationGroup** group);
     }
 

@@ -64,7 +64,7 @@ module
     interface IDownloadInfoReader
     {
         NewDownloadInfo(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISystemFacade* systemFacade,
             [in] IDownloadNotifier* notifier,
             [out] IDownloadInfo** Result);

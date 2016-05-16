@@ -724,7 +724,7 @@ module
          * @throws IllegalArgumentException if contentUri is empty
          */
         SendMultimediaMessage(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* contentUri,
             [in] String locationUrl,
             [in] IBundle* configOverrides,
@@ -744,7 +744,7 @@ module
          * @throws IllegalArgumentException if locationUrl or contentUri is empty
          */
         DownloadMultimediaMessage(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String locationUrl,
             [in] IUri* contentUri,
             [in] IBundle* configOverrides,
@@ -782,7 +782,7 @@ module
          * {@hide}
          */
         UpdateMmsSendStatus(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 messageRef,
             [in] ArrayOf<Byte>* pdu,
             [in] Int32 status,
@@ -806,7 +806,7 @@ module
          * {@hide}
          */
         UpdateMmsDownloadStatus(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 messageRef,
             [in] Int32 status,
             [in] IUri* contentUri);

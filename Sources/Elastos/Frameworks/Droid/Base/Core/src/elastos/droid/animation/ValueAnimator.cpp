@@ -808,7 +808,7 @@ void ValueAnimator::StartAnimation(
 
 String ValueAnimator::GetNameForTrace()
 {
-    return String("animator");
+    return String("ValueAnimator");
 }
 
 Boolean ValueAnimator::DelayedAnimationFrame(

@@ -11,15 +11,15 @@ module
 
     interface IQSUtils {
         GetAvailableTiles(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IList** result);
 
         GetDefaultTiles(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IList** result);
 
         GetDefaultTilesAsString(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* result);
 
         DeviceSupportsLte(
@@ -27,7 +27,7 @@ module
             [out] Boolean* result);
 
         DeviceSupportsDdsSupported(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         DeviceSupportsMobileData(
@@ -38,15 +38,15 @@ module
             [out] Boolean* result);
 
         DeviceSupportsNfc(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         DeviceSupportsFlashLight(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         DeviceSupportsCompass(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
     }
 

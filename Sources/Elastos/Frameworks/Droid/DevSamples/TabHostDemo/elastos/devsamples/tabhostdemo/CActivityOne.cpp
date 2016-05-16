@@ -82,7 +82,7 @@ ECode CActivityOne::OnCreate(
 
     AutoPtr<ITabSpec> page3;
     tabHost->NewTabSpec(String("tab3"), (ITabSpec**)&page3);
-    page3->SetIndicator(CoreUtils::Convert("杯子"));
+    page3->SetIndicator(CoreUtils::Convert("碟子"));
     page3->SetContent(R::id::cupple);
     tabHost->AddTab(page3);
 

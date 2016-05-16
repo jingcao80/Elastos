@@ -34,7 +34,7 @@ module
          * if the file is protected content.
          */
         GetOriginalMimeType(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IFile* file,
             [in] String currentMime,
             [out] String* result);
