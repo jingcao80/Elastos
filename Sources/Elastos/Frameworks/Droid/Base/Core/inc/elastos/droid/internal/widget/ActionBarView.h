@@ -85,42 +85,6 @@ public:
         Boolean mIsOverflowOpen;
     };
 
-private:
-    class InnerOnClickListener
-        : public Object
-        , public IViewOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerOnClickListener(
-            /* [in] */ ActionBarView* owner);
-
-        // @Override
-        CARAPI OnClick(
-            /* [in] */ IView* v);
-
-    private:
-        ActionBarView* mOwner;
-    };
-
-    class InnerOnClickListener1
-        : public Object
-        , public IViewOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerOnClickListener1(
-            /* [in] */ ActionBarView* owner);
-
-        virtual CARAPI OnClick(
-            /* [in] */ IView* v);
-
-    private:
-        ActionBarView* mOwner;
-    };
-
     class HomeView
         : public FrameLayout
     {
@@ -134,22 +98,22 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IAttributeSet* attrs);
 
-        virtual CARAPI SetShowUp(
+        CARAPI SetShowUp(
             /* [in] */ Boolean isUp);
 
-        virtual CARAPI SetShowIcon(
+        CARAPI SetShowIcon(
             /* [in] */ Boolean showIcon);
 
-        virtual CARAPI SetIcon(
+        CARAPI SetIcon(
             /* [in] */ IDrawable* icon);
 
-        virtual CARAPI SetUpIndicator(
+        CARAPI SetUpIndicator(
             /* [in] */ IDrawable* d);
 
-        virtual CARAPI SetDefaultUpIndicator(
+        CARAPI SetDefaultUpIndicator(
             /* [in] */ IDrawable* d);
 
-        virtual CARAPI SetUpIndicator(
+        CARAPI SetUpIndicator(
             /* [in] */ Int32 resId);
 
         // @Override
@@ -205,6 +169,42 @@ private:
         AutoPtr<IDrawable> mDefaultUpIndicator;
         AutoPtr<IDrawable> mUpIndicator;
         static const Int64 DEFAULT_TRANSITION_DURATION = 150;
+    };
+
+private:
+    class InnerOnClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerOnClickListener(
+            /* [in] */ ActionBarView* owner);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        ActionBarView* mOwner;
+    };
+
+    class InnerOnClickListener1
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerOnClickListener1(
+            /* [in] */ ActionBarView* owner);
+
+        virtual CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        ActionBarView* mOwner;
     };
 
     class ExpandedActionViewMenuPresenter
@@ -469,39 +469,39 @@ public:
     CARAPI SetDefaultNavigationContentDescription(
         /* [in] */ Int32 defaultNavigationContentDescription);
 
-    virtual CARAPI GetContext(
+    CARAPI GetContext(
         /* [out] */ IContext** result);
 
-    virtual CARAPI SetSplitView(
+    CARAPI SetSplitView(
         /* [in] */ IViewGroup* splitView);
 
-    virtual CARAPI SetSplitWhenNarrow(
+    CARAPI SetSplitWhenNarrow(
         /* [in] */ Boolean splitWhenNarrow);
 
-    virtual CARAPI CanShowOverflowMenu(
+    CARAPI CanShowOverflowMenu(
         /* [out] */ Boolean* result);
 
-    virtual CARAPI IsOverflowMenuShowing(
+    CARAPI IsOverflowMenuShowing(
         /* [out] */ Boolean* result);
 
-    virtual CARAPI IsOverflowMenuShowPending(
+    CARAPI IsOverflowMenuShowPending(
         /* [out] */ Boolean* result);
 
-    virtual CARAPI ShowOverflowMenu(
+    CARAPI ShowOverflowMenu(
         /* [out] */ Boolean* result);
 
-    virtual CARAPI HideOverflowMenu(
+    CARAPI HideOverflowMenu(
         /* [out] */ Boolean* result);
 
-    virtual CARAPI DismissPopupMenus();
+    CARAPI DismissPopupMenus();
 
-    virtual CARAPI AnimateToVisibility(
+    CARAPI AnimateToVisibility(
         /* [in] */ Int32 visibility);
 
-    virtual CARAPI SaveHierarchyState(
+    CARAPI SaveHierarchyState(
         /* [in] */ ISparseArray* toolbarStates);
 
-    virtual CARAPI RestoreHierarchyState(
+    CARAPI RestoreHierarchyState(
         /* [in] */ ISparseArray* toolbarStates);
 
 protected:

@@ -698,6 +698,25 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
+    class CActionBarViewHomeView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
     class CActionBarViewSavedState {
         constructor(
             [in] IParcelable* superState);
@@ -852,23 +871,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
     }
-
-   //  [local]
-   //  class CActionBarViewHomeView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IActionBarViewHomeView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
 
     [local]
     class CLockPatternView {

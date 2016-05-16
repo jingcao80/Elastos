@@ -667,14 +667,17 @@ String LayoutInflater::GetReflectionClassName(
     if (!prefix.IsNull()) {
         sb += prefix;
     }
-    Int32 index = name.LastIndexOf('.');
+    String tmp = name;
+    Int32 index = name.LastIndexOf('$');
+    if (index != -1) {
+        tmp = name.Substring(0, index);
+        tmp += name.Substring(index + 1);
+    }
+    index = tmp.LastIndexOf('.');
     if (index == -1) {
         sb += "C";
-        sb += name;
     }
-    else {
-        sb += name;
-    }
+    sb += tmp;
     return sb.ToString();
 }
 
@@ -982,7 +985,6 @@ ECode LayoutInflater::RInflate(
     Int32 orgDepth, depth;
     Int32 type;
     String name;
-
     FAIL_RETURN(parser->GetDepth(&orgDepth));
     FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
     FAIL_RETURN(parser->GetDepth(&depth));

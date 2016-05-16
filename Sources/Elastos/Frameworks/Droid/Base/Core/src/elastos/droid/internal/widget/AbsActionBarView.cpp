@@ -50,10 +50,7 @@ ECode AbsActionBarView::VisibilityAnimListener::WithFinalVisibility(
     /* [in] */ Int32 visibility,
     /* [out] */ VisibilityAnimListener** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // mFinalVisibility = visibility;
-    // return this;
+    VALIDATE_NOT_NULL(result)
 
     mFinalVisibility = visibility;
     *result = this;
@@ -79,15 +76,7 @@ ECode AbsActionBarView::VisibilityAnimListener::OnAnimationStart(
 ECode AbsActionBarView::VisibilityAnimListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    VALIDATE_NOT_NULL(animation);
-    // ==================before translated======================
-    // if (mCanceled) return;
-    //
-    // mVisibilityAnim = null;
-    // setVisibility(mFinalVisibility);
-    // if (mSplitView != null && mMenuView != null) {
-    //     mMenuView.setVisibility(mFinalVisibility);
-    // }
+    VALIDATE_NOT_NULL(animation)
 
     if (mCanceled)
         return NOERROR;
@@ -103,10 +92,7 @@ ECode AbsActionBarView::VisibilityAnimListener::OnAnimationEnd(
 ECode AbsActionBarView::VisibilityAnimListener::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
-    VALIDATE_NOT_NULL(animation);
-    // ==================before translated======================
-    // mCanceled = true;
-
+    VALIDATE_NOT_NULL(animation)
     mCanceled = TRUE;
     return NOERROR;
 }
@@ -155,9 +141,6 @@ AbsActionBarView::AbsActionBarView()
 ECode AbsActionBarView::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // this(context, null);
-
     return constructor(context, NULL);
 }
 
@@ -165,9 +148,6 @@ ECode AbsActionBarView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    // ==================before translated======================
-    // this(context, attrs, 0);
-
     return constructor(context, attrs, 0);
 }
 
@@ -176,9 +156,6 @@ ECode AbsActionBarView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
 {
-    // ==================before translated======================
-    // this(context, attrs, defStyleAttr, 0);
-
     return constructor(context, attrs, defStyleAttr, 0);
 }
 
@@ -188,17 +165,6 @@ ECode AbsActionBarView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    // ==================before translated======================
-    // super(context, attrs, defStyleAttr, defStyleRes);
-    //
-    // final TypedValue tv = new TypedValue();
-    // if (context.getTheme().resolveAttribute(R.attr.actionBarPopupTheme, tv, true)
-    //         && tv.resourceId != 0) {
-    //     mPopupContext = new ContextThemeWrapper(context, tv.resourceId);
-    // } else {
-    //     mPopupContext = context;
-    // }
-
     ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
     AutoPtr<ITypedValue> tv;
     CTypedValue::New((ITypedValue**)&tv);
@@ -221,9 +187,6 @@ ECode AbsActionBarView::constructor(
 ECode AbsActionBarView::SetSplitToolbar(
     /* [in] */ Boolean split)
 {
-    // ==================before translated======================
-    // mSplitActionBar = split;
-
     mSplitActionBar = split;
     return NOERROR;
 }

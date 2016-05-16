@@ -3,6 +3,7 @@
 #include "elastos/droid/internal/transition/ActionBarTransition.h"
 #include "elastos/droid/internal/widget/CActionBarViewSavedState.h"
 #include "elastos/droid/internal/widget/ActionBarView.h"
+#include "elastos/droid/internal/view/menu/CActionMenuItem.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
@@ -30,6 +31,7 @@ using Elastos::Droid::Internal::View::Menu::EIID_IMenuPresenter;
 using Elastos::Droid::Internal::View::Menu::IBaseMenuPresenter;
 using Elastos::Droid::Internal::Widget::EIID_IActionBarView;
 using Elastos::Droid::Internal::Widget::EIID_IDecorToolbar;
+using Elastos::Droid::Internal::View::Menu::CActionMenuItem;
 using Elastos::Droid::Text::ILayout;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::IDisplayMetrics;
@@ -109,6 +111,7 @@ ECode ActionBarView::ActionBarViewSavedState::ToString(
     return NOERROR;
 }
 
+
 //=====================================================================
 //                 ActionBarView::InnerOnClickListener
 //=====================================================================
@@ -117,23 +120,11 @@ CAR_INTERFACE_IMPL(ActionBarView::InnerOnClickListener, Object, IViewOnClickList
 ActionBarView::InnerOnClickListener::InnerOnClickListener(
     /* [in] */ ActionBarView* owner)
     : mOwner(owner)
-{
-    // ==================before translated======================
-    // mOwner = owner;
-
-    assert(mOwner);
-}
+{}
 
 ECode ActionBarView::InnerOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    VALIDATE_NOT_NULL(v);
-    // ==================before translated======================
-    // final MenuItemImpl item = mExpandedMenuPresenter.mCurrentExpandedItem;
-    // if (item != null) {
-    //     item.collapseActionView();
-    // }
-
     AutoPtr<IMenuItemImpl> item = mOwner->mExpandedMenuPresenter->mCurrentExpandedItem;
     if (item) {
         Boolean res = FALSE;
@@ -150,23 +141,11 @@ CAR_INTERFACE_IMPL(ActionBarView::InnerOnClickListener1, Object, IViewOnClickLis
 ActionBarView::InnerOnClickListener1::InnerOnClickListener1(
     /* [in] */ ActionBarView* owner)
     : mOwner(owner)
-{
-    // ==================before translated======================
-    // mOwner = owner;
-
-    assert(mOwner);
-}
+{}
 
 ECode ActionBarView::InnerOnClickListener1::OnClick(
     /* [in] */ IView* v)
 {
-    VALIDATE_NOT_NULL(v);
-    // ==================before translated======================
-    // if (mMenuPrepared) {
-    //     // Only invoke the window callback if the options menu has been initialized.
-    //     mWindowCallback.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
-    // }
-
     if (mOwner->mWindowCallback) {
         Boolean res = FALSE;
         mOwner->mWindowCallback->OnMenuItemSelected(IWindow::FEATURE_OPTIONS_PANEL, IMenuItem::Probe(mOwner->mLogoNavItem), &res);
@@ -189,9 +168,6 @@ ActionBarView::HomeView::HomeView()
 ECode ActionBarView::HomeView::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // this(context, null);
-
     return constructor(context, NULL);
 }
 
@@ -199,16 +175,6 @@ ECode ActionBarView::HomeView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(attrs);
-    // ==================before translated======================
-    // super(context, attrs);
-    // LayoutTransition t = getLayoutTransition();
-    // if (t != null) {
-    //     // Set a lower duration than the default
-    //     t.setDuration(DEFAULT_TRANSITION_DURATION);
-    // }
-
     FrameLayout::constructor(context, attrs);
     AutoPtr<ILayoutTransition> t;
     GetLayoutTransition((ILayoutTransition**)&t);
@@ -222,9 +188,6 @@ ECode ActionBarView::HomeView::constructor(
 ECode ActionBarView::HomeView::SetShowUp(
     /* [in] */ Boolean isUp)
 {
-    // ==================before translated======================
-    // mUpView.setVisibility(isUp ? VISIBLE : GONE);
-
     IView::Probe(mUpView)->SetVisibility(isUp ? VISIBLE : IView::GONE);
     return NOERROR;
 }
@@ -232,9 +195,6 @@ ECode ActionBarView::HomeView::SetShowUp(
 ECode ActionBarView::HomeView::SetShowIcon(
     /* [in] */ Boolean showIcon)
 {
-    // ==================before translated======================
-    // mIconView.setVisibility(showIcon ? VISIBLE : GONE);
-
     IView::Probe(mIconView)->SetVisibility(showIcon ? VISIBLE : IView::GONE);
     return NOERROR;
 }
@@ -242,10 +202,6 @@ ECode ActionBarView::HomeView::SetShowIcon(
 ECode ActionBarView::HomeView::SetIcon(
     /* [in] */ IDrawable* icon)
 {
-    VALIDATE_NOT_NULL(icon);
-    // ==================before translated======================
-    // mIconView.setImageDrawable(icon);
-
     mIconView->SetImageDrawable(icon);
     return NOERROR;
 }
@@ -253,12 +209,6 @@ ECode ActionBarView::HomeView::SetIcon(
 ECode ActionBarView::HomeView::SetUpIndicator(
     /* [in] */ IDrawable* d)
 {
-    VALIDATE_NOT_NULL(d);
-    // ==================before translated======================
-    // mUpIndicator = d;
-    // mUpIndicatorRes = 0;
-    // updateUpIndicator();
-
     mUpIndicator = d;
     mUpIndicatorRes = 0;
     UpdateUpIndicator();
@@ -268,11 +218,6 @@ ECode ActionBarView::HomeView::SetUpIndicator(
 ECode ActionBarView::HomeView::SetDefaultUpIndicator(
     /* [in] */ IDrawable* d)
 {
-    VALIDATE_NOT_NULL(d);
-    // ==================before translated======================
-    // mDefaultUpIndicator = d;
-    // updateUpIndicator();
-
     mDefaultUpIndicator = d;
     UpdateUpIndicator();
     return NOERROR;
@@ -281,11 +226,6 @@ ECode ActionBarView::HomeView::SetDefaultUpIndicator(
 ECode ActionBarView::HomeView::SetUpIndicator(
     /* [in] */ Int32 resId)
 {
-    // ==================before translated======================
-    // mUpIndicatorRes = resId;
-    // mUpIndicator = null;
-    // updateUpIndicator();
-
     mUpIndicatorRes = resId;
     mUpIndicator = NULL;
     UpdateUpIndicator();
@@ -296,10 +236,7 @@ ECode ActionBarView::HomeView::DispatchPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event,
     /* [out] */ Boolean* result)
 {
-    // ==================before translated======================
-    // onPopulateAccessibilityEvent(event);
-    // return true;
-
+    VALIDATE_NOT_NULL(result)
     OnPopulateAccessibilityEvent(event);
     *result = TRUE;
     return NOERROR;
@@ -308,14 +245,7 @@ ECode ActionBarView::HomeView::DispatchPopulateAccessibilityEvent(
 ECode ActionBarView::HomeView::OnPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    VALIDATE_NOT_NULL(event);
-    // ==================before translated======================
-    // super.onPopulateAccessibilityEvent(event);
-    // final CharSequence cdesc = getContentDescription();
-    // if (!TextUtils.isEmpty(cdesc)) {
-    //     event.getText().add(cdesc);
-    // }
-
+    VALIDATE_NOT_NULL(event)
     FrameLayout::OnPopulateAccessibilityEvent(event);
     AutoPtr<ICharSequence> cdesc;
     GetContentDescription((ICharSequence**)&cdesc);
@@ -331,12 +261,7 @@ ECode ActionBarView::HomeView::DispatchHoverEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(event);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Don't allow children to hover; we want this to be treated as a single component.
-    // return onHoverEvent(event);
-
+    VALIDATE_NOT_NULL(result)
     OnHoverEvent(event, result);
     return NOERROR;
 }
@@ -344,10 +269,7 @@ ECode ActionBarView::HomeView::DispatchHoverEvent(
 ECode ActionBarView::HomeView::GetStartOffset(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUpView.getVisibility() == GONE ? mStartOffset : 0;
-
+    VALIDATE_NOT_NULL(result)
     Int32 visibility = 0;
     IView::Probe(mUpView)->GetVisibility(&visibility);
     *result = visibility == IView::GONE ? mStartOffset : 0;
@@ -357,95 +279,14 @@ ECode ActionBarView::HomeView::GetStartOffset(
 ECode ActionBarView::HomeView::GetUpWidth(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUpWidth;
-
+    VALIDATE_NOT_NULL(result)
     *result = mUpWidth;
-    return NOERROR;
-}
-
-ECode ActionBarView::GetContext(
-    /* [out] */ IContext** result)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::SetSplitView(
-    /* [in] */ IViewGroup* splitView)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::SetSplitWhenNarrow(
-    /* [in] */ Boolean splitWhenNarrow)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::CanShowOverflowMenu(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::IsOverflowMenuShowing(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::IsOverflowMenuShowPending(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::ShowOverflowMenu(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::HideOverflowMenu(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::DismissPopupMenus()
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::AnimateToVisibility(
-    /* [in] */ Int32 visibility)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::SaveHierarchyState(
-    /* [in] */ ISparseArray* toolbarStates)
-{
-    return NOERROR;
-}
-
-ECode ActionBarView::RestoreHierarchyState(
-    /* [in] */ ISparseArray* toolbarStates)
-{
     return NOERROR;
 }
 
 void ActionBarView::HomeView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    // ==================before translated======================
-    // super.onConfigurationChanged(newConfig);
-    // if (mUpIndicatorRes != 0) {
-    //     // Reload for config change
-    //     updateUpIndicator();
-    // }
-
     FrameLayout::OnConfigurationChanged(newConfig);
     if (mUpIndicatorRes != 0) {
         // Reload for config change
@@ -455,11 +296,6 @@ void ActionBarView::HomeView::OnConfigurationChanged(
 
 ECode ActionBarView::HomeView::OnFinishInflate()
 {
-    // ==================before translated======================
-    // mUpView = (ImageView) findViewById(com.android.internal.R.id.up);
-    // mIconView = (ImageView) findViewById(com.android.internal.R.id.home);
-    // mDefaultUpIndicator = mUpView.getDrawable();
-
     AutoPtr<IView> viewTmp;
     FindViewById(R::id::up, (IView**)&viewTmp);
     mUpView = IImageView::Probe(viewTmp);
@@ -475,55 +311,6 @@ void ActionBarView::HomeView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    // ==================before translated======================
-    // measureChildWithMargins(mUpView, widthMeasureSpec, 0, heightMeasureSpec, 0);
-    // final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
-    // final int upMargins = upLp.leftMargin + upLp.rightMargin;
-    // mUpWidth = mUpView.getMeasuredWidth();
-    // mStartOffset = mUpWidth + upMargins;
-    // int width = mUpView.getVisibility() == GONE ? 0 : mStartOffset;
-    // int height = upLp.topMargin + mUpView.getMeasuredHeight() + upLp.bottomMargin;
-    //
-    // if (mIconView.getVisibility() != GONE) {
-    //     measureChildWithMargins(mIconView, widthMeasureSpec, width, heightMeasureSpec, 0);
-    //     final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
-    //     width += iconLp.leftMargin + mIconView.getMeasuredWidth() + iconLp.rightMargin;
-    //     height = Math.max(height,
-    //             iconLp.topMargin + mIconView.getMeasuredHeight() + iconLp.bottomMargin);
-    // } else if (upMargins < 0) {
-    //     // Remove the measurement effects of negative margins used for offsets
-    //     width -= upMargins;
-    // }
-    //
-    // final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-    // final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-    // final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-    // final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-    //
-    // switch (widthMode) {
-    //     case MeasureSpec.AT_MOST:
-    //         width = Math.min(width, widthSize);
-    //         break;
-    //     case MeasureSpec.EXACTLY:
-    //         width = widthSize;
-    //         break;
-    //     case MeasureSpec.UNSPECIFIED:
-    //     default:
-    //         break;
-    // }
-    // switch (heightMode) {
-    //     case MeasureSpec.AT_MOST:
-    //         height = Math.min(height, heightSize);
-    //         break;
-    //     case MeasureSpec.EXACTLY:
-    //         height = heightSize;
-    //         break;
-    //     case MeasureSpec.UNSPECIFIED:
-    //     default:
-    //         break;
-    // }
-    // setMeasuredDimension(width, height);
-
     MeasureChildWithMargins(IView::Probe(mUpView), widthMeasureSpec, 0, heightMeasureSpec, 0);
     AutoPtr<IViewGroupLayoutParams> upLp;
     IView::Probe(mUpView)->GetLayoutParams((IViewGroupLayoutParams**)&upLp);
@@ -609,51 +396,6 @@ ECode ActionBarView::HomeView::OnLayout(
     /* [in] */ Int32 r,
     /* [in] */ Int32 b)
 {
-    // ==================before translated======================
-    // final int vCenter = (b - t) / 2;
-    // final boolean isLayoutRtl = isLayoutRtl();
-    // final int width = getWidth();
-    // int upOffset = 0;
-    // if (mUpView.getVisibility() != GONE) {
-    //     final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
-    //     final int upHeight = mUpView.getMeasuredHeight();
-    //     final int upWidth = mUpView.getMeasuredWidth();
-    //     upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
-    //     final int upTop = vCenter - upHeight / 2;
-    //     final int upBottom = upTop + upHeight;
-    //     final int upRight;
-    //     final int upLeft;
-    //     if (isLayoutRtl) {
-    //         upRight = width;
-    //         upLeft = upRight - upWidth;
-    //         r -= upOffset;
-    //     } else {
-    //         upRight = upWidth;
-    //         upLeft = 0;
-    //         l += upOffset;
-    //     }
-    //     mUpView.layout(upLeft, upTop, upRight, upBottom);
-    // }
-    //
-    // final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
-    // final int iconHeight = mIconView.getMeasuredHeight();
-    // final int iconWidth = mIconView.getMeasuredWidth();
-    // final int hCenter = (r - l) / 2;
-    // final int iconTop = Math.max(iconLp.topMargin, vCenter - iconHeight / 2);
-    // final int iconBottom = iconTop + iconHeight;
-    // final int iconLeft;
-    // final int iconRight;
-    // int marginStart = iconLp.getMarginStart();
-    // final int delta = Math.max(marginStart, hCenter - iconWidth / 2);
-    // if (isLayoutRtl) {
-    //     iconRight = width - upOffset - delta;
-    //     iconLeft = iconRight - iconWidth;
-    // } else {
-    //     iconLeft = upOffset + delta;
-    //     iconRight = iconLeft + iconWidth;
-    // }
-    // mIconView.layout(iconLeft, iconTop, iconRight, iconBottom);
-
     Int32 vCenter = (b - t) / 2;
     Boolean isLayoutRtl = FALSE;
     IsLayoutRtl(&isLayoutRtl);
@@ -725,15 +467,6 @@ ECode ActionBarView::HomeView::OnLayout(
 
 void ActionBarView::HomeView::UpdateUpIndicator()
 {
-    // ==================before translated======================
-    // if (mUpIndicator != null) {
-    //     mUpView.setImageDrawable(mUpIndicator);
-    // } else if (mUpIndicatorRes != 0) {
-    //     mUpView.setImageDrawable(getContext().getDrawable(mUpIndicatorRes));
-    // } else {
-    //     mUpView.setImageDrawable(mDefaultUpIndicator);
-    // }
-
     if (mUpIndicator != NULL) {
         mUpView->SetImageDrawable(mUpIndicator);
     }
@@ -765,15 +498,6 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::InitForMenu(
     /* [in] */ IContext* context,
     /* [in] */ IMenuBuilder* menu)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(menu);
-    // ==================before translated======================
-    // // Clear the expanded action view when menus change.
-    // if (mMenu != null && mCurrentExpandedItem != null) {
-    //     mMenu.collapseItemActionView(mCurrentExpandedItem);
-    // }
-    // mMenu = menu;
-
     if (mMenu && mCurrentExpandedItem) {
         Boolean res = FALSE;
         mMenu->CollapseItemActionView(mCurrentExpandedItem, &res);
@@ -786,11 +510,6 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::GetMenuView(
     /* [in] */ IViewGroup* root,
     /* [out] */ IMenuView** result)
 {
-    VALIDATE_NOT_NULL(root);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-
     *result = NULL;
     return NOERROR;
 }
@@ -798,28 +517,6 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::GetMenuView(
 ECode ActionBarView::ExpandedActionViewMenuPresenter::UpdateMenuView(
     /* [in] */ Boolean cleared)
 {
-    // ==================before translated======================
-    // // Make sure the expanded item we have is still there.
-    // if (mCurrentExpandedItem != null) {
-    //     boolean found = false;
-    //
-    //     if (mMenu != null) {
-    //         final int count = mMenu.size();
-    //         for (int i = 0; i < count; i++) {
-    //             final MenuItem item = mMenu.getItem(i);
-    //             if (item == mCurrentExpandedItem) {
-    //                 found = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //
-    //     if (!found) {
-    //         // The item we had expanded disappeared. Collapse.
-    //         collapseItemActionView(mMenu, mCurrentExpandedItem);
-    //     }
-    // }
-
     if (mCurrentExpandedItem) {
         Boolean found = FALSE;
 
@@ -846,7 +543,6 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::UpdateMenuView(
 ECode ActionBarView::ExpandedActionViewMenuPresenter::SetCallback(
     /* [in] */ IMenuPresenterCallback* cb)
 {
-    VALIDATE_NOT_NULL(cb);
     return NOERROR;
 }
 
@@ -854,11 +550,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::OnSubMenuSelected(
     /* [in] */ ISubMenuBuilder* subMenu,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(subMenu);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
     return NOERROR;
 }
@@ -867,17 +559,13 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::OnCloseMenu(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ Boolean allMenusAreClosing)
 {
-    VALIDATE_NOT_NULL(menu);
     return NOERROR;
 }
 
 ECode ActionBarView::ExpandedActionViewMenuPresenter::FlagActionItems(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
     return NOERROR;
 }
@@ -887,35 +575,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::ExpandItemActionView(
     /* [in] */ IMenuItemImpl* item,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(menu);
-    VALIDATE_NOT_NULL(item);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // ActionBarTransition.beginDelayedTransition(ActionBarView.this);
-    //
-    // mExpandedActionView = item.getActionView();
-    // mExpandedHomeLayout.setIcon(mIcon.getConstantState().newDrawable(getResources()));
-    // mCurrentExpandedItem = item;
-    // if (mExpandedActionView.getParent() != ActionBarView.this) {
-    //     addView(mExpandedActionView);
-    // }
-    // if (mExpandedHomeLayout.getParent() != mUpGoerFive) {
-    //     mUpGoerFive.addView(mExpandedHomeLayout);
-    // }
-    // mHomeLayout.setVisibility(GONE);
-    // if (mTitleLayout != null) mTitleLayout.setVisibility(GONE);
-    // if (mTabScrollView != null) mTabScrollView.setVisibility(GONE);
-    // if (mSpinner != null) mSpinner.setVisibility(GONE);
-    // if (mCustomNavView != null) mCustomNavView.setVisibility(GONE);
-    // setHomeButtonEnabled(false, false);
-    // requestLayout();
-    // item.setActionViewExpanded(true);
-    //
-    // if (mExpandedActionView instanceof CollapsibleActionView) {
-    //     ((CollapsibleActionView) mExpandedActionView).onActionViewExpanded();
-    // }
-    //
-    // return true;
+    VALIDATE_NOT_NULL(result)
 
     IMenuItem::Probe(item)->GetActionView((IView**)&(mOwner->mExpandedActionView));
     AutoPtr<IDrawableConstantState> state;
@@ -962,44 +622,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::CollapseItemActionView(
     /* [in] */ IMenuItemImpl* item,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(menu);
-    VALIDATE_NOT_NULL(item);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // ActionBarTransition.beginDelayedTransition(ActionBarView.this);
-    //
-    // // Do this before detaching the actionview from the hierarchy, in case
-    // // it needs to dismiss the soft keyboard, etc.
-    // if (mExpandedActionView instanceof CollapsibleActionView) {
-    //     ((CollapsibleActionView) mExpandedActionView).onActionViewCollapsed();
-    // }
-    //
-    // removeView(mExpandedActionView);
-    // mUpGoerFive.removeView(mExpandedHomeLayout);
-    // mExpandedActionView = null;
-    // if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) != 0) {
-    //     mHomeLayout.setVisibility(VISIBLE);
-    // }
-    // if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
-    //     if (mTitleLayout == null) {
-    //         initTitle();
-    //     } else {
-    //         mTitleLayout.setVisibility(VISIBLE);
-    //     }
-    // }
-    // if (mTabScrollView != null) mTabScrollView.setVisibility(VISIBLE);
-    // if (mSpinner != null) mSpinner.setVisibility(VISIBLE);
-    // if (mCustomNavView != null) mCustomNavView.setVisibility(VISIBLE);
-    //
-    // mExpandedHomeLayout.setIcon(null);
-    // mCurrentExpandedItem = null;
-    // setHomeButtonEnabled(mWasHomeEnabled); // Set by expandItemActionView above
-    // requestLayout();
-    // item.setActionViewExpanded(false);
-    //
-    // return true;
-
-    assert(0);
+    VALIDATE_NOT_NULL(result)
     ActionBarTransition::BeginDelayedTransition(IViewGroup::Probe(this));
     ICollapsibleActionView* collapsibleActionView = ICollapsibleActionView::Probe(mOwner->mExpandedActionView);
     if (collapsibleActionView) {
@@ -1039,10 +662,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::CollapseItemActionView(
 ECode ActionBarView::ExpandedActionViewMenuPresenter::GetId(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return 0;
-
+    VALIDATE_NOT_NULL(result)
     *result = 0;
     return NOERROR;
 }
@@ -1050,10 +670,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::GetId(
 ECode ActionBarView::ExpandedActionViewMenuPresenter::OnSaveInstanceState(
     /* [out] */ IParcelable** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
     return NOERROR;
 }
@@ -1061,7 +678,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::OnSaveInstanceState(
 ECode ActionBarView::ExpandedActionViewMenuPresenter::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    VALIDATE_NOT_NULL(state);
+    VALIDATE_NOT_NULL(state)
     return NOERROR;
 }
 
@@ -1097,85 +714,14 @@ ECode ActionBarView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    // ==================before translated======================
-    // super(context, attrs);
-    //
-    // // Background is always provided by the container.
-    // setBackgroundResource(0);
-    //
-    // TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar,
-    //         com.android.internal.R.attr.actionBarStyle, 0);
-    //
-    // mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode,
-    //         ActionBar.NAVIGATION_MODE_STANDARD);
-    // mTitle = a.getText(R.styleable.ActionBar_title);
-    // mSubtitle = a.getText(R.styleable.ActionBar_subtitle);
-    // mLogo = a.getDrawable(R.styleable.ActionBar_logo);
-    // mIcon = a.getDrawable(R.styleable.ActionBar_icon);
-    //
-    // final LayoutInflater inflater = LayoutInflater.from(context);
-    //
-    // final int homeResId = a.getResourceId(
-    //         com.android.internal.R.styleable.ActionBar_homeLayout,
-    //         com.android.internal.R.layout.action_bar_home);
-    //
-    // mUpGoerFive = (ViewGroup) inflater.inflate(
-    //         com.android.internal.R.layout.action_bar_up_container, this, false);
-    // mHomeLayout = (HomeView) inflater.inflate(homeResId, mUpGoerFive, false);
-    //
-    // mExpandedHomeLayout = (HomeView) inflater.inflate(homeResId, mUpGoerFive, false);
-    // mExpandedHomeLayout.setShowUp(true);
-    // mExpandedHomeLayout.setOnClickListener(mExpandedActionViewUpListener);
-    // mExpandedHomeLayout.setContentDescription(getResources().getText(
-    //         mDefaultUpDescription));
-    //
-    // // This needs to highlight/be focusable on its own.
-    // // TODO: Clean up the handoff between expanded/normal.
-    // final Drawable upBackground = mUpGoerFive.getBackground();
-    // if (upBackground != null) {
-    //     mExpandedHomeLayout.setBackground(upBackground.getConstantState().newDrawable());
-    // }
-    // mExpandedHomeLayout.setEnabled(true);
-    // mExpandedHomeLayout.setFocusable(true);
-    //
-    // mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
-    // mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
-    // mProgressStyle = a.getResourceId(R.styleable.ActionBar_progressBarStyle, 0);
-    // mIndeterminateProgressStyle = a.getResourceId(
-    //         R.styleable.ActionBar_indeterminateProgressStyle, 0);
-    //
-    // mProgressBarPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_progressBarPadding, 0);
-    // mItemPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_itemPadding, 0);
-    //
-    // setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT));
-    //
-    // final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
-    // if (customNavId != 0) {
-    //     mCustomNavView = (View) inflater.inflate(customNavId, this, false);
-    //     mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
-    //     setDisplayOptions(mDisplayOptions | ActionBar.DISPLAY_SHOW_CUSTOM);
-    // }
-    //
-    // mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
-    //
-    // a.recycle();
-    //
-    // mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
-    //
-    // mUpGoerFive.setOnClickListener(mUpClickListener);
-    // mUpGoerFive.setClickable(true);
-    // mUpGoerFive.setFocusable(true);
-    //
-    // if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-    //     setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    // }
-
     AbsActionBarView::constructor(context, attrs);
+
+    // Background is always provided by the container.
     SetBackgroundResource(0);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ActionBar),
-        ArraySize(R::styleable::ActionBar));
+            const_cast<Int32 *>(R::styleable::ActionBar),
+            ArraySize(R::styleable::ActionBar));
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, R::attr::actionBarStyle, 0, (ITypedArray**)&a);
 
@@ -1183,7 +729,6 @@ ECode ActionBarView::constructor(
     a->GetText(R::styleable::ActionBar_title, (ICharSequence**)&mTitle);
     a->GetText(R::styleable::ActionBar_subtitle, (ICharSequence**)&mSubtitle);
     a->GetDrawable(R::styleable::ActionBar_logo, (IDrawable**)&mLogo);
-    mIcon = NULL;
     a->GetDrawable(R::styleable::ActionBar_icon, (IDrawable**)&mIcon);
 
     AutoPtr<ILayoutInflater> inflater;
@@ -1244,7 +789,7 @@ ECode ActionBarView::constructor(
     a->GetLayoutDimension(R::styleable::ActionBar_height, 0, &mContentHeight);
     a->Recycle();
 
-    //mLogoNavItem = new ActionMenuItem(context, 0, R::id::home, 0, 0, mTitle);
+    CActionMenuItem::New(context, 0, R::id::home, 0, 0, mTitle, (IActionMenuItem**)&mLogoNavItem);
     mHomeLayout->SetOnClickListener(mUpClickListener);
     mHomeLayout->SetClickable(TRUE);
     mHomeLayout->SetFocusable(TRUE);
@@ -1260,23 +805,12 @@ ECode ActionBarView::constructor(
 ECode ActionBarView::SetWindowCallback(
     /* [in] */ IWindowCallback* cb)
 {
-    // ==================before translated======================
-    // mWindowCallback = cb;
-
     mWindowCallback = cb;
     return NOERROR;
 }
 
 ECode ActionBarView::OnDetachedFromWindow()
 {
-    // ==================before translated======================
-    // super.onDetachedFromWindow();
-    // removeCallbacks(mTabSelector);
-    // if (mActionMenuPresenter != null) {
-    //     mActionMenuPresenter.hideOverflowMenu();
-    //     mActionMenuPresenter.hideSubMenus();
-    // }
-
     AbsActionBarView::OnDetachedFromWindow();
     Boolean resTmp;
     RemoveCallbacks(mTabSelector, &resTmp);
@@ -1291,23 +825,13 @@ ECode ActionBarView::OnDetachedFromWindow()
 ECode ActionBarView::ShouldDelayChildPressedState(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
     return NOERROR;
 }
 
 ECode ActionBarView::InitProgress()
 {
-    // ==================before translated======================
-    // mProgressView = new ProgressBar(mContext, null, 0, mProgressStyle);
-    // mProgressView.setId(R.id.progress_horizontal);
-    // mProgressView.setMax(10000);
-    // mProgressView.setVisibility(GONE);
-    // addView(mProgressView);
-
     CProgressBar::New(mContext, NULL, 0, mProgressStyle, (IProgressBar**)&mProgressView);
     IView::Probe(mProgressView)->SetId(R::id::progress_horizontal);
     mProgressView->SetMax(10000);
@@ -1318,13 +842,6 @@ ECode ActionBarView::InitProgress()
 
 ECode ActionBarView::InitIndeterminateProgress()
 {
-    // ==================before translated======================
-    // mIndeterminateProgressView = new ProgressBar(mContext, null, 0,
-    //         mIndeterminateProgressStyle);
-    // mIndeterminateProgressView.setId(R.id.progress_circular);
-    // mIndeterminateProgressView.setVisibility(GONE);
-    // addView(mIndeterminateProgressView);
-
     CProgressBar::New(mContext, NULL, 0, mIndeterminateProgressStyle, (IProgressBar**)&mIndeterminateProgressView);
     IView::Probe(mIndeterminateProgressView)->SetId(R::id::progress_circular);
     IView::Probe(mIndeterminateProgressView)->SetVisibility(IView::GONE);
@@ -1335,47 +852,7 @@ ECode ActionBarView::InitIndeterminateProgress()
 ECode ActionBarView::SetSplitToolbar(
     /* [in] */ Boolean splitActionBar)
 {
-    // ==================before translated======================
-    // if (mSplitActionBar != splitActionBar) {
-    //     if (mMenuView != null) {
-    //         final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
-    //         if (oldParent != null) {
-    //             oldParent.removeView(mMenuView);
-    //         }
-    //         if (splitActionBar) {
-    //             if (mSplitView != null) {
-    //                 mSplitView.addView(mMenuView);
-    //             }
-    //             mMenuView.getLayoutParams().width = LayoutParams.MATCH_PARENT;
-    //         } else {
-    //             addView(mMenuView);
-    //             mMenuView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
-    //         }
-    //         mMenuView.requestLayout();
-    //     }
-    //     if (mSplitView != null) {
-    //         mSplitView.setVisibility(splitActionBar ? VISIBLE : GONE);
-    //     }
-    //
-    //     if (mActionMenuPresenter != null) {
-    //         if (!splitActionBar) {
-    //             mActionMenuPresenter.setExpandedActionViewsExclusive(
-    //                     getResources().getBoolean(
-    //                             com.android.internal.R.bool.action_bar_expanded_action_views_exclusive));
-    //         } else {
-    //             mActionMenuPresenter.setExpandedActionViewsExclusive(false);
-    //             // Allow full screen width in split mode.
-    //             mActionMenuPresenter.setWidthLimit(
-    //                     getContext().getResources().getDisplayMetrics().widthPixels, true);
-    //             // No limit to the item count; use whatever will fit.
-    //             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
-    //         }
-    //     }
-    //     super.setSplitToolbar(splitActionBar);
-    // }
-
-    assert(0);
-    if (mSplitActionBar != splitActionBar) {
+   if (mSplitActionBar != splitActionBar) {
         if (mMenuView != NULL) {
             AutoPtr<IViewParent> viewParent;
             IView::Probe(mMenuView)->GetParent((IViewParent**)&viewParent);
@@ -1433,10 +910,7 @@ ECode ActionBarView::SetSplitToolbar(
 ECode ActionBarView::IsSplit(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSplitActionBar;
-
+    VALIDATE_NOT_NULL(result)
     *result = mSplitActionBar;
     return NOERROR;
 }
@@ -1444,10 +918,7 @@ ECode ActionBarView::IsSplit(
 ECode ActionBarView::CanSplit(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return true;
-
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -1455,10 +926,7 @@ ECode ActionBarView::CanSplit(
 ECode ActionBarView::HasEmbeddedTabs(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIncludeTabs;
-
+    VALIDATE_NOT_NULL(result)
     *result = mIncludeTabs;
     return NOERROR;
 }
@@ -1466,21 +934,6 @@ ECode ActionBarView::HasEmbeddedTabs(
 ECode ActionBarView::SetEmbeddedTabView(
     /* [in] */ IScrollingTabContainerView* tabs)
 {
-    VALIDATE_NOT_NULL(tabs);
-    // ==================before translated======================
-    // if (mTabScrollView != null) {
-    //     removeView(mTabScrollView);
-    // }
-    // mTabScrollView = tabs;
-    // mIncludeTabs = tabs != null;
-    // if (mIncludeTabs && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
-    //     addView(mTabScrollView);
-    //     ViewGroup.LayoutParams lp = mTabScrollView.getLayoutParams();
-    //     lp.width = LayoutParams.WRAP_CONTENT;
-    //     lp.height = LayoutParams.MATCH_PARENT;
-    //     tabs.setAllowCollapse(true);
-    // }
-
     if (mTabScrollView) {
         RemoveView(IView::Probe(mTabScrollView));
     }
@@ -1500,9 +953,6 @@ ECode ActionBarView::SetEmbeddedTabView(
 
 ECode ActionBarView::SetMenuPrepared()
 {
-    // ==================before translated======================
-    // mMenuPrepared = true;
-
     mMenuPrepared = TRUE;
     return NOERROR;
 }
@@ -1511,73 +961,7 @@ ECode ActionBarView::SetMenu(
     /* [in] */ IMenu* menu,
     /* [in] */ IMenuPresenterCallback* cb)
 {
-    VALIDATE_NOT_NULL(menu);
-    VALIDATE_NOT_NULL(cb);
-    // ==================before translated======================
-    // if (menu == mOptionsMenu) return;
-    //
-    // if (mOptionsMenu != null) {
-    //     mOptionsMenu.removeMenuPresenter(mActionMenuPresenter);
-    //     mOptionsMenu.removeMenuPresenter(mExpandedMenuPresenter);
-    // }
-    //
-    // MenuBuilder builder = (MenuBuilder) menu;
-    // mOptionsMenu = builder;
-    // if (mMenuView != null) {
-    //     final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
-    //     if (oldParent != null) {
-    //         oldParent.removeView(mMenuView);
-    //     }
-    // }
-    // if (mActionMenuPresenter == null) {
-    //     mActionMenuPresenter = new ActionMenuPresenter(mContext);
-    //     mActionMenuPresenter.setCallback(cb);
-    //     mActionMenuPresenter.setId(com.android.internal.R.id.action_menu_presenter);
-    //     mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter();
-    // }
-    //
-    // ActionMenuView menuView;
-    // final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
-    //         LayoutParams.MATCH_PARENT);
-    // if (!mSplitActionBar) {
-    //     mActionMenuPresenter.setExpandedActionViewsExclusive(
-    //             getResources().getBoolean(
-    //             com.android.internal.R.bool.action_bar_expanded_action_views_exclusive));
-    //     configPresenters(builder);
-    //     menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-    //     final ViewGroup oldParent = (ViewGroup) menuView.getParent();
-    //     if (oldParent != null && oldParent != this) {
-    //         oldParent.removeView(menuView);
-    //     }
-    //     addView(menuView, layoutParams);
-    // } else {
-    //     mActionMenuPresenter.setExpandedActionViewsExclusive(false);
-    //     // Allow full screen width in split mode.
-    //     mActionMenuPresenter.setWidthLimit(
-    //             getContext().getResources().getDisplayMetrics().widthPixels, true);
-    //     // No limit to the item count; use whatever will fit.
-    //     mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
-    //     // Span the whole width
-    //     layoutParams.width = LayoutParams.MATCH_PARENT;
-    //     layoutParams.height = LayoutParams.WRAP_CONTENT;
-    //     configPresenters(builder);
-    //     menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-    //     if (mSplitView != null) {
-    //         final ViewGroup oldParent = (ViewGroup) menuView.getParent();
-    //         if (oldParent != null && oldParent != mSplitView) {
-    //             oldParent.removeView(menuView);
-    //         }
-    //         menuView.setVisibility(getAnimatedVisibility());
-    //         mSplitView.addView(menuView, layoutParams);
-    //     } else {
-    //         // We'll add this later if we missed it this time.
-    //         menuView.setLayoutParams(layoutParams);
-    //     }
-    // }
-    // mMenuView = menuView;
-
-    assert(0);
-    if (TO_IINTERFACE(menu) == TO_IINTERFACE(mOptionsMenu))
+    if (menu == IMenu::Probe(mOptionsMenu))
         return NOERROR;
 
     if (mOptionsMenu) {
@@ -1672,24 +1056,13 @@ ECode ActionBarView::SetMenu(
 ECode ActionBarView::HasExpandedActionView(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mExpandedMenuPresenter != null &&
-    //         mExpandedMenuPresenter.mCurrentExpandedItem != null;
-
+    VALIDATE_NOT_NULL(result)
     *result = mExpandedMenuPresenter != NULL && mExpandedMenuPresenter->mCurrentExpandedItem != NULL;
     return NOERROR;
 }
 
 ECode ActionBarView::CollapseActionView()
 {
-    // ==================before translated======================
-    // final MenuItemImpl item = mExpandedMenuPresenter == null ? null :
-    //         mExpandedMenuPresenter.mCurrentExpandedItem;
-    // if (item != null) {
-    //     item.collapseActionView();
-    // }
-
     AutoPtr<IMenuItemImpl> item = mExpandedMenuPresenter == NULL ? NULL : mExpandedMenuPresenter->mCurrentExpandedItem;
     if (item) {
         Boolean res = FALSE;
@@ -1701,20 +1074,6 @@ ECode ActionBarView::CollapseActionView()
 ECode ActionBarView::SetCustomView(
     /* [in] */ IView* view)
 {
-    VALIDATE_NOT_NULL(view);
-    // ==================before translated======================
-    // final boolean showCustom = (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0;
-    // if (showCustom) {
-    //     ActionBarTransition.beginDelayedTransition(this);
-    // }
-    // if (mCustomNavView != null && showCustom) {
-    //     removeView(mCustomNavView);
-    // }
-    // mCustomNavView = view;
-    // if (mCustomNavView != null && showCustom) {
-    //     addView(mCustomNavView);
-    // }
-
     Boolean showCustom = (mDisplayOptions & IActionBar::DISPLAY_SHOW_CUSTOM) != 0;
     if (showCustom) {
         ActionBarTransition::BeginDelayedTransition(this);
@@ -1732,10 +1091,7 @@ ECode ActionBarView::SetCustomView(
 ECode ActionBarView::GetTitle(
     /* [out] */ ICharSequence** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mTitle;
-
+    VALIDATE_NOT_NULL(result)
     *result = mTitle;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1744,11 +1100,6 @@ ECode ActionBarView::GetTitle(
 ECode ActionBarView::SetTitle(
     /* [in] */ ICharSequence* title)
 {
-    VALIDATE_NOT_NULL(title);
-    // ==================before translated======================
-    // mUserTitle = true;
-    // setTitleImpl(title);
-
     mUserTitle = TRUE;
     SetTitleImpl(title);
     return NOERROR;
@@ -1757,12 +1108,6 @@ ECode ActionBarView::SetTitle(
 ECode ActionBarView::SetWindowTitle(
     /* [in] */ ICharSequence* title)
 {
-    VALIDATE_NOT_NULL(title);
-    // ==================before translated======================
-    // if (!mUserTitle) {
-    //     setTitleImpl(title);
-    // }
-
     if (!mUserTitle) {
         SetTitleImpl(title);
     }
@@ -1772,10 +1117,7 @@ ECode ActionBarView::SetWindowTitle(
 ECode ActionBarView::GetSubtitle(
     /* [out] */ ICharSequence** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSubtitle;
-
+    VALIDATE_NOT_NULL(result)
     *result = mSubtitle;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1784,20 +1126,6 @@ ECode ActionBarView::GetSubtitle(
 ECode ActionBarView::SetSubtitle(
     /* [in] */ ICharSequence* subtitle)
 {
-    VALIDATE_NOT_NULL(subtitle);
-    // ==================before translated======================
-    // ActionBarTransition.beginDelayedTransition(this);
-    // mSubtitle = subtitle;
-    // if (mSubtitleView != null) {
-    //     mSubtitleView.setText(subtitle);
-    //     mSubtitleView.setVisibility(subtitle != null ? VISIBLE : GONE);
-    //     final boolean visible = mExpandedActionView == null &&
-    //             (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0 &&
-    //             (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
-    //     mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
-    // }
-    // updateHomeAccessibility(mUpGoerFive.isEnabled());
-
     ActionBarTransition::BeginDelayedTransition(this);
     mSubtitle = subtitle;
     if (mSubtitleView != NULL) {
@@ -1816,9 +1144,6 @@ ECode ActionBarView::SetSubtitle(
 ECode ActionBarView::SetHomeButtonEnabled(
     /* [in] */ Boolean enable)
 {
-    // ==================before translated======================
-    // setHomeButtonEnabled(enable, true);
-
     SetHomeButtonEnabled(enable, TRUE);
     return NOERROR;
 }
@@ -1826,75 +1151,6 @@ ECode ActionBarView::SetHomeButtonEnabled(
 ECode ActionBarView::SetDisplayOptions(
     /* [in] */ Int32 options)
 {
-    // ==================before translated======================
-    // final int flagsChanged = mDisplayOptions == -1 ? -1 : options ^ mDisplayOptions;
-    // mDisplayOptions = options;
-    //
-    // if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
-    //     ActionBarTransition.beginDelayedTransition(this);
-    //
-    //     if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-    //         final boolean setUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
-    //         mHomeLayout.setShowUp(setUp);
-    //
-    //         // Showing home as up implicitly enables interaction with it.
-    //         // In honeycomb it was always enabled, so make this transition
-    //         // a bit easier for developers in the common case.
-    //         // (It would be silly to show it as up without responding to it.)
-    //         if (setUp) {
-    //             setHomeButtonEnabled(true);
-    //         }
-    //     }
-    //
-    //     if ((flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
-    //         final boolean logoVis = mLogo != null && (options & ActionBar.DISPLAY_USE_LOGO) != 0;
-    //         mHomeLayout.setIcon(logoVis ? mLogo : mIcon);
-    //     }
-    //
-    //     if ((flagsChanged & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
-    //         if ((options & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
-    //             initTitle();
-    //         } else {
-    //             mUpGoerFive.removeView(mTitleLayout);
-    //         }
-    //     }
-    //
-    //     final boolean showHome = (options & ActionBar.DISPLAY_SHOW_HOME) != 0;
-    //     final boolean homeAsUp = (mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0;
-    //     final boolean titleUp = !showHome && homeAsUp;
-    //     mHomeLayout.setShowIcon(showHome);
-    //
-    //     final int homeVis = (showHome || titleUp) && mExpandedActionView == null ?
-    //             VISIBLE : GONE;
-    //     mHomeLayout.setVisibility(homeVis);
-    //
-    //     if ((flagsChanged & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
-    //         if ((options & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
-    //             addView(mCustomNavView);
-    //         } else {
-    //             removeView(mCustomNavView);
-    //         }
-    //     }
-    //
-    //     if (mTitleLayout != null &&
-    //             (flagsChanged & ActionBar.DISPLAY_TITLE_MULTIPLE_LINES) != 0) {
-    //         if ((options & ActionBar.DISPLAY_TITLE_MULTIPLE_LINES) != 0) {
-    //             mTitleView.setSingleLine(false);
-    //             mTitleView.setMaxLines(2);
-    //         } else {
-    //             mTitleView.setMaxLines(1);
-    //             mTitleView.setSingleLine(true);
-    //         }
-    //     }
-    //
-    //     requestLayout();
-    // } else {
-    //     invalidate();
-    // }
-    //
-    // // Make sure the home button has an accurate content description for accessibility.
-    // updateHomeAccessibility(mUpGoerFive.isEnabled());
-
     Int32 flagsChanged = mDisplayOptions == -1 ? -1 : options ^ mDisplayOptions;
     mDisplayOptions = options;
 
@@ -1968,17 +1224,6 @@ ECode ActionBarView::SetDisplayOptions(
 ECode ActionBarView::SetIcon(
     /* [in] */ IDrawable* icon)
 {
-    VALIDATE_NOT_NULL(icon);
-    // ==================before translated======================
-    // mIcon = icon;
-    // if (icon != null &&
-    //         ((mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) == 0 || mLogo == null)) {
-    //     mHomeLayout.setIcon(icon);
-    // }
-    // if (mExpandedActionView != null) {
-    //     mExpandedHomeLayout.setIcon(mIcon.getConstantState().newDrawable(getResources()));
-    // }
-
     mIcon = icon;
     if (icon && ((mDisplayOptions & IActionBar::DISPLAY_USE_LOGO) == 0 || mLogo == NULL)) {
         mHomeLayout->SetIcon(icon);
@@ -1999,9 +1244,6 @@ ECode ActionBarView::SetIcon(
 ECode ActionBarView::SetIcon(
     /* [in] */ Int32 resId)
 {
-    // ==================before translated======================
-    // setIcon(resId != 0 ? mContext.getDrawable(resId) : null);
-
     AutoPtr<IDrawable> drawable;
     mContext->GetDrawable(resId, (IDrawable**)&drawable);
     SetIcon(resId != 0 ? drawable : NULL);
@@ -2011,10 +1253,7 @@ ECode ActionBarView::SetIcon(
 ECode ActionBarView::HasIcon(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIcon != null;
-
+    VALIDATE_NOT_NULL(result)
     *result = mIcon != NULL;
     return NOERROR;
 }
@@ -2022,13 +1261,6 @@ ECode ActionBarView::HasIcon(
 ECode ActionBarView::SetLogo(
     /* [in] */ IDrawable* logo)
 {
-    VALIDATE_NOT_NULL(logo);
-    // ==================before translated======================
-    // mLogo = logo;
-    // if (logo != null && (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0) {
-    //     mHomeLayout.setIcon(logo);
-    // }
-
     mLogo = logo;
     if (logo && (mDisplayOptions & IActionBar::DISPLAY_USE_LOGO) != 0) {
         mHomeLayout->SetIcon(logo);
@@ -2039,9 +1271,6 @@ ECode ActionBarView::SetLogo(
 ECode ActionBarView::SetLogo(
     /* [in] */ Int32 resId)
 {
-    // ==================before translated======================
-    // setLogo(resId != 0 ? mContext.getDrawable(resId) : null);
-
     AutoPtr<IDrawable> drawable;
     mContext->GetDrawable(resId, (IDrawable**)&drawable);
     SetLogo(resId != 0 ? drawable : NULL);
@@ -2051,10 +1280,7 @@ ECode ActionBarView::SetLogo(
 ECode ActionBarView::HasLogo(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mLogo != null;
-
+    VALIDATE_NOT_NULL(result)
     *result = mLogo != NULL;
     return NOERROR;
 }
@@ -2062,51 +1288,6 @@ ECode ActionBarView::HasLogo(
 ECode ActionBarView::SetNavigationMode(
     /* [in] */ Int32 mode)
 {
-    // ==================before translated======================
-    // final int oldMode = mNavigationMode;
-    // if (mode != oldMode) {
-    //     ActionBarTransition.beginDelayedTransition(this);
-    //     switch (oldMode) {
-    //     case ActionBar.NAVIGATION_MODE_LIST:
-    //         if (mListNavLayout != null) {
-    //             removeView(mListNavLayout);
-    //         }
-    //         break;
-    //     case ActionBar.NAVIGATION_MODE_TABS:
-    //         if (mTabScrollView != null && mIncludeTabs) {
-    //             removeView(mTabScrollView);
-    //         }
-    //     }
-    //
-    //     switch (mode) {
-    //     case ActionBar.NAVIGATION_MODE_LIST:
-    //         if (mSpinner == null) {
-    //             mSpinner = new Spinner(mContext, null,
-    //                     com.android.internal.R.attr.actionDropDownStyle);
-    //             mSpinner.setId(com.android.internal.R.id.action_bar_spinner);
-    //             mListNavLayout = new LinearLayout(mContext, null,
-    //                     com.android.internal.R.attr.actionBarTabBarStyle);
-    //             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-    //                     LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-    //             params.gravity = Gravity.CENTER;
-    //             mListNavLayout.addView(mSpinner, params);
-    //         }
-    //         if (mSpinner.getAdapter() != mSpinnerAdapter) {
-    //             mSpinner.setAdapter(mSpinnerAdapter);
-    //         }
-    //         mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
-    //         addView(mListNavLayout);
-    //         break;
-    //     case ActionBar.NAVIGATION_MODE_TABS:
-    //         if (mTabScrollView != null && mIncludeTabs) {
-    //             addView(mTabScrollView);
-    //         }
-    //         break;
-    //     }
-    //     mNavigationMode = mode;
-    //     requestLayout();
-    // }
-
     Int32 oldMode = mNavigationMode;
     if (mode != oldMode) {
         ActionBarTransition::BeginDelayedTransition(this);
@@ -2165,16 +1346,6 @@ ECode ActionBarView::SetDropdownParams(
     /* [in] */ ISpinnerAdapter* adapter,
     /* [in] */ IAdapterViewOnItemSelectedListener* l)
 {
-    VALIDATE_NOT_NULL(adapter);
-    VALIDATE_NOT_NULL(l);
-    // ==================before translated======================
-    // mSpinnerAdapter = adapter;
-    // mNavItemSelectedListener = l;
-    // if (mSpinner != null) {
-    //     mSpinner.setAdapter(adapter);
-    //     mSpinner.setOnItemSelectedListener(l);
-    // }
-
     mSpinnerAdapter = adapter;
     mNavItemSelectedListener = l;
     if (mSpinner != NULL) {
@@ -2187,10 +1358,7 @@ ECode ActionBarView::SetDropdownParams(
 ECode ActionBarView::GetDropdownItemCount(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSpinnerAdapter != null ? mSpinnerAdapter.getCount() : 0;
-
+    VALIDATE_NOT_NULL(result)
     Int32 count = 0;
     IAdapterView::Probe(mSpinnerAdapter)->GetCount(&count);
     *result = mSpinnerAdapter != NULL ? count : 0;
@@ -2200,9 +1368,6 @@ ECode ActionBarView::GetDropdownItemCount(
 ECode ActionBarView::SetDropdownSelectedPosition(
     /* [in] */ Int32 position)
 {
-    // ==================before translated======================
-    // mSpinner.setSelection(position);
-
     IAdapterView::Probe(mSpinner)->SetSelection(position);
     return NOERROR;
 }
@@ -2210,10 +1375,7 @@ ECode ActionBarView::SetDropdownSelectedPosition(
 ECode ActionBarView::GetDropdownSelectedPosition(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSpinner.getSelectedItemPosition();
-
+    VALIDATE_NOT_NULL(result)
     IAdapterView::Probe(mSpinner)->GetSelectedItemPosition(result);
     return NOERROR;
 }
@@ -2221,10 +1383,7 @@ ECode ActionBarView::GetDropdownSelectedPosition(
 ECode ActionBarView::GetCustomView(
     /* [out] */ IView** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCustomNavView;
-
+    VALIDATE_NOT_NULL(result)
     *result = mCustomNavView;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -2233,10 +1392,7 @@ ECode ActionBarView::GetCustomView(
 ECode ActionBarView::GetNavigationMode(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mNavigationMode;
-
+    VALIDATE_NOT_NULL(result)
     *result = mNavigationMode;
     return NOERROR;
 }
@@ -2244,10 +1400,7 @@ ECode ActionBarView::GetNavigationMode(
 ECode ActionBarView::GetDisplayOptions(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mDisplayOptions;
-
+    VALIDATE_NOT_NULL(result)
     *result = mDisplayOptions;
     return NOERROR;
 }
@@ -2255,10 +1408,7 @@ ECode ActionBarView::GetDisplayOptions(
 ECode ActionBarView::GetViewGroup(
     /* [out] */ IViewGroup** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return this;
-
+    VALIDATE_NOT_NULL(result)
     *result = IViewGroup::Probe(this);
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -2268,9 +1418,6 @@ ECode ActionBarView::SetContextView(
     /* [in] */ IActionBarContextView* view)
 {
     VALIDATE_NOT_NULL(view);
-    // ==================before translated======================
-    // mContextView = view;
-
     mContextView = view;
     return NOERROR;
 }
@@ -2278,9 +1425,6 @@ ECode ActionBarView::SetContextView(
 ECode ActionBarView::SetCollapsible(
     /* [in] */ Boolean collapsible)
 {
-    // ==================before translated======================
-    // mIsCollapsible = collapsible;
-
     mIsCollapsible = collapsible;
     return NOERROR;
 }
@@ -2288,25 +1432,7 @@ ECode ActionBarView::SetCollapsible(
 ECode ActionBarView::IsTitleTruncated(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mTitleView == null) {
-    //     return false;
-    // }
-    //
-    // final Layout titleLayout = mTitleView.getLayout();
-    // if (titleLayout == null) {
-    //     return false;
-    // }
-    //
-    // final int lineCount = titleLayout.getLineCount();
-    // for (int i = 0; i < lineCount; i++) {
-    //     if (titleLayout.getEllipsisCount(i) > 0) {
-    //         return true;
-    //     }
-    // }
-    // return false;
-
+    VALIDATE_NOT_NULL(result)
     if (!mTitleView) {
         *result = FALSE;
         return NOERROR;
@@ -2335,11 +1461,7 @@ ECode ActionBarView::GenerateLayoutParams(
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IViewGroupLayoutParams** result)
 {
-    VALIDATE_NOT_NULL(attrs);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new ActionBar.LayoutParams(getContext(), attrs);
-
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     return CActionBarLayoutParams::New(context, attrs, result);
@@ -2349,14 +1471,7 @@ ECode ActionBarView::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* lp,
     /* [out] */ IViewGroupLayoutParams** result)
 {
-    VALIDATE_NOT_NULL(lp);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (lp == null) {
-    //     lp = generateDefaultLayoutParams();
-    // }
-    // return lp;
-
+    VALIDATE_NOT_NULL(result)
     *result = lp;
     if (lp == NULL) {
         return GenerateDefaultLayoutParams(result);
@@ -2368,8 +1483,7 @@ ECode ActionBarView::GenerateLayoutParams(
 ECode ActionBarView::OnSaveInstanceState(
     /* [out] */ IParcelable** result)
 {
-    VALIDATE_NOT_NULL(result);
-
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IParcelable> superState = View::OnSaveInstanceState();
     AutoPtr<IActionBarViewSavedState> state;
     CActionBarViewSavedState::New(superState, (IActionBarViewSavedState**)&state);
@@ -2413,10 +1527,7 @@ void ActionBarView::OnRestoreInstanceState(
 ECode ActionBarView::SetNavigationIcon(
     /* [in] */ IDrawable* indicator)
 {
-    VALIDATE_NOT_NULL(indicator);
-    // ==================before translated======================
-    // mHomeLayout.setUpIndicator(indicator);
-
+    VALIDATE_NOT_NULL(indicator)
     mHomeLayout->SetUpIndicator(indicator);
     return NOERROR;
 }
@@ -2424,10 +1535,6 @@ ECode ActionBarView::SetNavigationIcon(
 ECode ActionBarView::SetDefaultNavigationIcon(
     /* [in] */ IDrawable* icon)
 {
-    VALIDATE_NOT_NULL(icon);
-    // ==================before translated======================
-    // mHomeLayout.setDefaultUpIndicator(icon);
-
     mHomeLayout->SetDefaultUpIndicator(icon);
     return NOERROR;
 }
@@ -2435,9 +1542,6 @@ ECode ActionBarView::SetDefaultNavigationIcon(
 ECode ActionBarView::SetNavigationIcon(
     /* [in] */ Int32 resId)
 {
-    // ==================before translated======================
-    // mHomeLayout.setUpIndicator(resId);
-
     mHomeLayout->SetUpIndicator(resId);
     return NOERROR;
 }
@@ -2445,11 +1549,6 @@ ECode ActionBarView::SetNavigationIcon(
 ECode ActionBarView::SetNavigationContentDescription(
     /* [in] */ ICharSequence* description)
 {
-    VALIDATE_NOT_NULL(description);
-    // ==================before translated======================
-    // mHomeDescription = description;
-    // updateHomeAccessibility(mUpGoerFive.isEnabled());
-
     mHomeDescription = description;
     Boolean isEnabled = FALSE;
     IView::Probe(mUpGoerFive)->IsEnabled(&isEnabled);
@@ -2460,11 +1559,6 @@ ECode ActionBarView::SetNavigationContentDescription(
 ECode ActionBarView::SetNavigationContentDescription(
     /* [in] */ Int32 resId)
 {
-    // ==================before translated======================
-    // mHomeDescriptionRes = resId;
-    // mHomeDescription = resId != 0 ? getResources().getText(resId) : null;
-    // updateHomeAccessibility(mUpGoerFive.isEnabled());
-
     mHomeDescriptionRes = resId;
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
@@ -2482,13 +1576,6 @@ ECode ActionBarView::SetNavigationContentDescription(
 ECode ActionBarView::SetDefaultNavigationContentDescription(
     /* [in] */ Int32 defaultNavigationContentDescription)
 {
-    // ==================before translated======================
-    // if (mDefaultUpDescription == defaultNavigationContentDescription) {
-    //     return;
-    // }
-    // mDefaultUpDescription = defaultNavigationContentDescription;
-    // updateHomeAccessibility(mUpGoerFive.isEnabled());
-
     if (mDefaultUpDescription == defaultNavigationContentDescription) {
         return NOERROR;
     }
@@ -2502,33 +1589,6 @@ ECode ActionBarView::SetDefaultNavigationContentDescription(
 void ActionBarView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    // ==================before translated======================
-    // super.onConfigurationChanged(newConfig);
-    //
-    // mTitleView = null;
-    // mSubtitleView = null;
-    // if (mTitleLayout != null && mTitleLayout.getParent() == mUpGoerFive) {
-    //     mUpGoerFive.removeView(mTitleLayout);
-    // }
-    // mTitleLayout = null;
-    // if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
-    //     initTitle();
-    // }
-    //
-    // if (mHomeDescriptionRes != 0) {
-    //     setNavigationContentDescription(mHomeDescriptionRes);
-    // }
-    //
-    // if (mTabScrollView != null && mIncludeTabs) {
-    //     ViewGroup.LayoutParams lp = mTabScrollView.getLayoutParams();
-    //     if (lp != null) {
-    //         lp.width = LayoutParams.WRAP_CONTENT;
-    //         lp.height = LayoutParams.MATCH_PARENT;
-    //     }
-    //     mTabScrollView.setAllowCollapse(true);
-    // }
-
-    assert(0);
     AbsActionBarView::OnConfigurationChanged(newConfig);
     mTitleView = NULL;
     mSubtitleView = NULL;
@@ -2565,32 +1625,12 @@ void ActionBarView::OnConfigurationChanged(
 ECode ActionBarView::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
-    // ==================before translated======================
-    // // Used by custom nav views if they don't supply layout params. Everything else
-    // // added to an ActionBarView should have them already.
-    // return new ActionBar.LayoutParams(DEFAULT_CUSTOM_GRAVITY);
     VALIDATE_NOT_NULL(result)
     return CActionBarLayoutParams::New(DEFAULT_CUSTOM_GRAVITY, result);
 }
 
 ECode ActionBarView::OnFinishInflate()
 {
-    // ==================before translated======================
-    // super.onFinishInflate();
-    //
-    // mUpGoerFive.addView(mHomeLayout, 0);
-    // addView(mUpGoerFive);
-    //
-    // if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
-    //     final ViewParent parent = mCustomNavView.getParent();
-    //     if (parent != this) {
-    //         if (parent instanceof ViewGroup) {
-    //             ((ViewGroup) parent).removeView(mCustomNavView);
-    //         }
-    //         addView(mCustomNavView);
-    //     }
-    // }
-
     AbsActionBarView::OnFinishInflate();
     mUpGoerFive->AddView(IView::Probe(mHomeLayout), 0);
     AddView(IView::Probe(mUpGoerFive));
@@ -2614,225 +1654,6 @@ void ActionBarView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    // ==================before translated======================
-    // final int childCount = getChildCount();
-    // if (mIsCollapsible) {
-    //     int visibleChildren = 0;
-    //     for (int i = 0; i < childCount; i++) {
-    //         final View child = getChildAt(i);
-    //         if (child.getVisibility() != GONE &&
-    //                 !(child == mMenuView && mMenuView.getChildCount() == 0) &&
-    //                 child != mUpGoerFive) {
-    //             visibleChildren++;
-    //         }
-    //     }
-    //
-    //     final int upChildCount = mUpGoerFive.getChildCount();
-    //     for (int i = 0; i < upChildCount; i++) {
-    //         final View child = mUpGoerFive.getChildAt(i);
-    //         if (child.getVisibility() != GONE) {
-    //             visibleChildren++;
-    //         }
-    //     }
-    //
-    //     if (visibleChildren == 0) {
-    //         // No size for an empty action bar when collapsable.
-    //         setMeasuredDimension(0, 0);
-    //         return;
-    //     }
-    // }
-    //
-    // int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-    // if (widthMode != MeasureSpec.EXACTLY) {
-    //     throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
-    //             "with android:layout_width=\"match_parent\" (or fill_parent)");
-    // }
-    //
-    // int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-    // if (heightMode != MeasureSpec.AT_MOST) {
-    //     throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
-    //             "with android:layout_height=\"wrap_content\"");
-    // }
-    //
-    // int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
-    //
-    // int maxHeight = mContentHeight >= 0 ?
-    //         mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
-    //
-    // final int verticalPadding = getPaddingTop() + getPaddingBottom();
-    // final int paddingLeft = getPaddingLeft();
-    // final int paddingRight = getPaddingRight();
-    // final int height = maxHeight - verticalPadding;
-    // final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
-    // final int exactHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-    //
-    // int availableWidth = contentWidth - paddingLeft - paddingRight;
-    // int leftOfCenter = availableWidth / 2;
-    // int rightOfCenter = leftOfCenter;
-    //
-    // final boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
-    //         (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
-    //
-    // HomeView homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
-    //
-    // final ViewGroup.LayoutParams homeLp = homeLayout.getLayoutParams();
-    // int homeWidthSpec;
-    // if (homeLp.width < 0) {
-    //     homeWidthSpec = MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST);
-    // } else {
-    //     homeWidthSpec = MeasureSpec.makeMeasureSpec(homeLp.width, MeasureSpec.EXACTLY);
-    // }
-    //
-    // /*
-    //  * This is a little weird.
-    //  * We're only measuring the *home* affordance within the Up container here
-    //  * on purpose, because we want to give the available space to all other views before
-    //  * the title text. We'll remeasure the whole up container again later.
-    //  * We need to measure this container so we know the right offset for the up affordance
-    //  * no matter what.
-    //  */
-    // homeLayout.measure(homeWidthSpec, exactHeightSpec);
-    //
-    // int homeWidth = 0;
-    // if ((homeLayout.getVisibility() != GONE && homeLayout.getParent() == mUpGoerFive)
-    //         || showTitle) {
-    //     homeWidth = homeLayout.getMeasuredWidth();
-    //     final int homeOffsetWidth = homeWidth + homeLayout.getStartOffset();
-    //     availableWidth = Math.max(0, availableWidth - homeOffsetWidth);
-    //     leftOfCenter = Math.max(0, availableWidth - homeOffsetWidth);
-    // }
-    //
-    // if (mMenuView != null && mMenuView.getParent() == this) {
-    //     availableWidth = measureChildView(mMenuView, availableWidth, exactHeightSpec, 0);
-    //     rightOfCenter = Math.max(0, rightOfCenter - mMenuView.getMeasuredWidth());
-    // }
-    //
-    // if (mIndeterminateProgressView != null &&
-    //         mIndeterminateProgressView.getVisibility() != GONE) {
-    //     availableWidth = measureChildView(mIndeterminateProgressView, availableWidth,
-    //             childSpecHeight, 0);
-    //     rightOfCenter = Math.max(0,
-    //             rightOfCenter - mIndeterminateProgressView.getMeasuredWidth());
-    // }
-    //
-    // if (mExpandedActionView == null) {
-    //     switch (mNavigationMode) {
-    //         case ActionBar.NAVIGATION_MODE_LIST:
-    //             if (mListNavLayout != null) {
-    //                 final int itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
-    //                 availableWidth = Math.max(0, availableWidth - itemPaddingSize);
-    //                 leftOfCenter = Math.max(0, leftOfCenter - itemPaddingSize);
-    //                 mListNavLayout.measure(
-    //                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-    //                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-    //                 final int listNavWidth = mListNavLayout.getMeasuredWidth();
-    //                 availableWidth = Math.max(0, availableWidth - listNavWidth);
-    //                 leftOfCenter = Math.max(0, leftOfCenter - listNavWidth);
-    //             }
-    //             break;
-    //         case ActionBar.NAVIGATION_MODE_TABS:
-    //             if (mTabScrollView != null) {
-    //                 final int itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
-    //                 availableWidth = Math.max(0, availableWidth - itemPaddingSize);
-    //                 leftOfCenter = Math.max(0, leftOfCenter - itemPaddingSize);
-    //                 mTabScrollView.measure(
-    //                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-    //                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-    //                 final int tabWidth = mTabScrollView.getMeasuredWidth();
-    //                 availableWidth = Math.max(0, availableWidth - tabWidth);
-    //                 leftOfCenter = Math.max(0, leftOfCenter - tabWidth);
-    //             }
-    //             break;
-    //     }
-    // }
-    //
-    // View customView = null;
-    // if (mExpandedActionView != null) {
-    //     customView = mExpandedActionView;
-    // } else if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 &&
-    //         mCustomNavView != null) {
-    //     customView = mCustomNavView;
-    // }
-    //
-    // if (customView != null) {
-    //     final ViewGroup.LayoutParams lp = generateLayoutParams(customView.getLayoutParams());
-    //     final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
-    //             (ActionBar.LayoutParams) lp : null;
-    //
-    //     int horizontalMargin = 0;
-    //     int verticalMargin = 0;
-    //     if (ablp != null) {
-    //         horizontalMargin = ablp.leftMargin + ablp.rightMargin;
-    //         verticalMargin = ablp.topMargin + ablp.bottomMargin;
-    //     }
-    //
-    //     // If the action bar is wrapping to its content height, don't allow a custom
-    //     // view to MATCH_PARENT.
-    //     int customNavHeightMode;
-    //     if (mContentHeight <= 0) {
-    //         customNavHeightMode = MeasureSpec.AT_MOST;
-    //     } else {
-    //         customNavHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
-    //                 MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
-    //     }
-    //     final int customNavHeight = Math.max(0,
-    //             (lp.height >= 0 ? Math.min(lp.height, height) : height) - verticalMargin);
-    //
-    //     final int customNavWidthMode = lp.width != LayoutParams.WRAP_CONTENT ?
-    //             MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
-    //     int customNavWidth = Math.max(0,
-    //             (lp.width >= 0 ? Math.min(lp.width, availableWidth) : availableWidth)
-    //             - horizontalMargin);
-    //     final int hgrav = (ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY) &
-    //             Gravity.HORIZONTAL_GRAVITY_MASK;
-    //
-    //     // Centering a custom view is treated specially; we try to center within the whole
-    //     // action bar rather than in the available space.
-    //     if (hgrav == Gravity.CENTER_HORIZONTAL && lp.width == LayoutParams.MATCH_PARENT) {
-    //         customNavWidth = Math.min(leftOfCenter, rightOfCenter) * 2;
-    //     }
-    //
-    //     customView.measure(
-    //             MeasureSpec.makeMeasureSpec(customNavWidth, customNavWidthMode),
-    //             MeasureSpec.makeMeasureSpec(customNavHeight, customNavHeightMode));
-    //     availableWidth -= horizontalMargin + customView.getMeasuredWidth();
-    // }
-    //
-    // /*
-    //  * Measure the whole up container now, allowing for the full home+title sections.
-    //  * (This will re-measure the home view.)
-    //  */
-    // availableWidth = measureChildView(mUpGoerFive, availableWidth + homeWidth,
-    //         MeasureSpec.makeMeasureSpec(mContentHeight, MeasureSpec.EXACTLY), 0);
-    // if (mTitleLayout != null) {
-    //     leftOfCenter = Math.max(0, leftOfCenter - mTitleLayout.getMeasuredWidth());
-    // }
-    //
-    // if (mContentHeight <= 0) {
-    //     int measuredHeight = 0;
-    //     for (int i = 0; i < childCount; i++) {
-    //         View v = getChildAt(i);
-    //         int paddedViewHeight = v.getMeasuredHeight() + verticalPadding;
-    //         if (paddedViewHeight > measuredHeight) {
-    //             measuredHeight = paddedViewHeight;
-    //         }
-    //     }
-    //     setMeasuredDimension(contentWidth, measuredHeight);
-    // } else {
-    //     setMeasuredDimension(contentWidth, maxHeight);
-    // }
-    //
-    // if (mContextView != null) {
-    //     mContextView.setContentHeight(getMeasuredHeight());
-    // }
-    //
-    // if (mProgressView != null && mProgressView.getVisibility() != GONE) {
-    //     mProgressView.measure(MeasureSpec.makeMeasureSpec(
-    //             contentWidth - mProgressBarPadding * 2, MeasureSpec.EXACTLY),
-    //             MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.AT_MOST));
-    // }
-
-    assert(0);
     Int32 childCount = 0;
     GetChildCount(&childCount);
     if (mIsCollapsible) {
@@ -2904,10 +1725,10 @@ void ActionBarView::OnMeasure(
     IView::Probe(mTitleLayout)->GetVisibility(&visibility);
     Boolean showTitle = mTitleLayout != NULL && visibility != IView::GONE && (mDisplayOptions & IActionBar::DISPLAY_SHOW_TITLE) != 0;
 
-    AutoPtr<IActionBarViewHomeView> homeLayout = mExpandedActionView != NULL ? IActionBarViewHomeView::Probe(mExpandedHomeLayout) : IActionBarViewHomeView::Probe(mHomeLayout);
+    AutoPtr<HomeView> homeLayout = mExpandedActionView != NULL ? mExpandedHomeLayout : mHomeLayout;
 
     AutoPtr<IViewGroupLayoutParams> homeLp;
-    IView::Probe(homeLayout)->GetLayoutParams((IViewGroupLayoutParams**)&homeLp);
+    homeLayout->GetLayoutParams((IViewGroupLayoutParams**)&homeLp);
     Int32 homeWidthSpec = 0;
     Int32 homeLpWidth = 0;
     homeLp->GetWidth(&homeLpWidth);
@@ -2918,14 +1739,14 @@ void ActionBarView::OnMeasure(
         homeWidthSpec = View::MeasureSpec::MakeMeasureSpec(homeLpWidth, View::MeasureSpec::EXACTLY);
     }
 
-    IView::Probe(homeLayout)->Measure(homeWidthSpec, exactHeightSpec);
+    homeLayout->Measure(homeWidthSpec, exactHeightSpec);
     Int32 homeWidth = 0;
     Int32 homeVisibility = 0;
-    IView::Probe(homeLayout)->GetVisibility(&homeVisibility);
+    homeLayout->GetVisibility(&homeVisibility);
     AutoPtr<IViewParent> viewParent;
-    IView::Probe(homeLayout)->GetParent((IViewParent**)&viewParent);
+    homeLayout->GetParent((IViewParent**)&viewParent);
     if ((homeVisibility != IView::GONE && TO_IINTERFACE(viewParent) == TO_IINTERFACE(mUpGoerFive)) || showTitle) {
-        IView::Probe(homeLayout)->GetMeasuredWidth(&homeWidth);
+        homeLayout->GetMeasuredWidth(&homeWidth);
         Int32 homeof = 0;
         homeLayout->GetStartOffset(&homeof);
         Int32 homeOffsetWidth = homeWidth + homeof;
@@ -2933,18 +1754,20 @@ void ActionBarView::OnMeasure(
         leftOfCenter = Elastos::Core::Math::Max(0, availableWidth - homeOffsetWidth);
     }
 
-    AutoPtr<IViewParent> mp;
-    IView::Probe(mMenuView)->GetParent((IViewParent**)&mp);
-    if (mMenuView && TO_IINTERFACE(mp) == TO_IINTERFACE(this)) {
-        availableWidth = MeasureChildView(IView::Probe(mMenuView), availableWidth, exactHeightSpec, 0);
-        Int32 menuw = 0;
-        IView::Probe(mMenuView)->GetMeasuredWidth(&menuw);
-        rightOfCenter = Elastos::Core::Math::Max(0, rightOfCenter - menuw);
+    if (mMenuView) {
+        AutoPtr<IViewParent> mp;
+        IView::Probe(mMenuView)->GetParent((IViewParent**)&mp);
+        if (mp.Get() == IViewParent::Probe(this)) {
+            availableWidth = MeasureChildView(IView::Probe(mMenuView), availableWidth, exactHeightSpec, 0);
+            Int32 menuw = 0;
+            IView::Probe(mMenuView)->GetMeasuredWidth(&menuw);
+            rightOfCenter = Elastos::Core::Math::Max(0, rightOfCenter - menuw);
+        }
     }
 
     Int32 iv = 0;
-    IView::Probe(mIndeterminateProgressView)->GetVisibility(&iv);
-    if (mIndeterminateProgressView && iv != IView::GONE) {
+    if (mIndeterminateProgressView &&
+            (IView::Probe(mIndeterminateProgressView)->GetVisibility(&iv), iv != IView::GONE)) {
         availableWidth = MeasureChildView(IView::Probe(mIndeterminateProgressView), availableWidth, childSpecHeight, 0);
         Int32 ipw = 0;
         IView::Probe(mIndeterminateProgressView)->GetMeasuredWidth(&ipw);
@@ -3076,12 +1899,12 @@ void ActionBarView::OnMeasure(
     }
 
     Int32 pv = 0;
-    IView::Probe(mProgressView)->GetVisibility(&pv);
-    if (mProgressView && pv != IView::GONE) {
+    if (mProgressView && (IView::Probe(mProgressView)->GetVisibility(&pv), pv != IView::GONE)) {
         Int32 measureHeight = 0;
         GetMeasuredHeight(&measureHeight);
-        IView::Probe(mProgressView)->Measure(View::MeasureSpec::MakeMeasureSpec(contentWidth - mProgressBarPadding * 2, View::MeasureSpec::EXACTLY),
-            View::MeasureSpec::MakeMeasureSpec(measureHeight, View::MeasureSpec::AT_MOST));
+        IView::Probe(mProgressView)->Measure(View::MeasureSpec::MakeMeasureSpec(
+                contentWidth - mProgressBarPadding * 2, View::MeasureSpec::EXACTLY),
+                View::MeasureSpec::MakeMeasureSpec(measureHeight, View::MeasureSpec::AT_MOST));
     }
 }
 
@@ -3092,170 +1915,6 @@ ECode ActionBarView::OnLayout(
     /* [in] */ Int32 r,
     /* [in] */ Int32 b)
 {
-    // ==================before translated======================
-    // final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
-    //
-    // if (contentHeight <= 0) {
-    //     // Nothing to do if we can't see anything.
-    //     return;
-    // }
-    //
-    // final boolean isLayoutRtl = isLayoutRtl();
-    // final int direction = isLayoutRtl ? 1 : -1;
-    // int menuStart = isLayoutRtl ? getPaddingLeft() : r - l - getPaddingRight();
-    // // In LTR mode, we start from left padding and go to the right; in RTL mode, we start
-    // // from the padding right and go to the left (in reverse way)
-    // int x = isLayoutRtl ? r - l - getPaddingRight() : getPaddingLeft();
-    // final int y = getPaddingTop();
-    //
-    // HomeView homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
-    // final boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
-    //         (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
-    // int startOffset = 0;
-    // if (homeLayout.getParent() == mUpGoerFive) {
-    //     if (homeLayout.getVisibility() != GONE) {
-    //         startOffset = homeLayout.getStartOffset();
-    //     } else if (showTitle) {
-    //         startOffset = homeLayout.getUpWidth();
-    //     }
-    // }
-    //
-    // // Position the up container based on where the edge of the home layout should go.
-    // x += positionChild(mUpGoerFive,
-    //         next(x, startOffset, isLayoutRtl), y, contentHeight, isLayoutRtl);
-    // x = next(x, startOffset, isLayoutRtl);
-    //
-    // if (mExpandedActionView == null) {
-    //     switch (mNavigationMode) {
-    //         case ActionBar.NAVIGATION_MODE_STANDARD:
-    //             break;
-    //         case ActionBar.NAVIGATION_MODE_LIST:
-    //             if (mListNavLayout != null) {
-    //                 if (showTitle) {
-    //                     x = next(x, mItemPadding, isLayoutRtl);
-    //                 }
-    //                 x += positionChild(mListNavLayout, x, y, contentHeight, isLayoutRtl);
-    //                 x = next(x, mItemPadding, isLayoutRtl);
-    //             }
-    //             break;
-    //         case ActionBar.NAVIGATION_MODE_TABS:
-    //             if (mTabScrollView != null) {
-    //                 if (showTitle) x = next(x, mItemPadding, isLayoutRtl);
-    //                 x += positionChild(mTabScrollView, x, y, contentHeight, isLayoutRtl);
-    //                 x = next(x, mItemPadding, isLayoutRtl);
-    //             }
-    //             break;
-    //     }
-    // }
-    //
-    // if (mMenuView != null && mMenuView.getParent() == this) {
-    //     positionChild(mMenuView, menuStart, y, contentHeight, !isLayoutRtl);
-    //     menuStart += direction * mMenuView.getMeasuredWidth();
-    // }
-    //
-    // if (mIndeterminateProgressView != null &&
-    //         mIndeterminateProgressView.getVisibility() != GONE) {
-    //     positionChild(mIndeterminateProgressView, menuStart, y, contentHeight, !isLayoutRtl);
-    //     menuStart += direction * mIndeterminateProgressView.getMeasuredWidth();
-    // }
-    //
-    // View customView = null;
-    // if (mExpandedActionView != null) {
-    //     customView = mExpandedActionView;
-    // } else if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 &&
-    //         mCustomNavView != null) {
-    //     customView = mCustomNavView;
-    // }
-    // if (customView != null) {
-    //     final int layoutDirection = getLayoutDirection();
-    //     ViewGroup.LayoutParams lp = customView.getLayoutParams();
-    //     final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
-    //             (ActionBar.LayoutParams) lp : null;
-    //     final int gravity = ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY;
-    //     final int navWidth = customView.getMeasuredWidth();
-    //
-    //     int topMargin = 0;
-    //     int bottomMargin = 0;
-    //     if (ablp != null) {
-    //         x = next(x, ablp.getMarginStart(), isLayoutRtl);
-    //         menuStart += direction * ablp.getMarginEnd();
-    //         topMargin = ablp.topMargin;
-    //         bottomMargin = ablp.bottomMargin;
-    //     }
-    //
-    //     int hgravity = gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
-    //     // See if we actually have room to truly center; if not push against left or right.
-    //     if (hgravity == Gravity.CENTER_HORIZONTAL) {
-    //         final int centeredLeft = ((mRight - mLeft) - navWidth) / 2;
-    //         if (isLayoutRtl) {
-    //             final int centeredStart = centeredLeft + navWidth;
-    //             final int centeredEnd = centeredLeft;
-    //             if (centeredStart > x) {
-    //                 hgravity = Gravity.RIGHT;
-    //             } else if (centeredEnd < menuStart) {
-    //                 hgravity = Gravity.LEFT;
-    //             }
-    //         } else {
-    //             final int centeredStart = centeredLeft;
-    //             final int centeredEnd = centeredLeft + navWidth;
-    //             if (centeredStart < x) {
-    //                 hgravity = Gravity.LEFT;
-    //             } else if (centeredEnd > menuStart) {
-    //                 hgravity = Gravity.RIGHT;
-    //             }
-    //         }
-    //     } else if (gravity == Gravity.NO_GRAVITY) {
-    //         hgravity = Gravity.START;
-    //     }
-    //
-    //     int xpos = 0;
-    //     switch (Gravity.getAbsoluteGravity(hgravity, layoutDirection)) {
-    //         case Gravity.CENTER_HORIZONTAL:
-    //             xpos = ((mRight - mLeft) - navWidth) / 2;
-    //             break;
-    //         case Gravity.LEFT:
-    //             xpos = isLayoutRtl ? menuStart : x;
-    //             break;
-    //         case Gravity.RIGHT:
-    //             xpos = isLayoutRtl ? x - navWidth : menuStart - navWidth;
-    //             break;
-    //     }
-    //
-    //     int vgravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
-    //
-    //     if (gravity == Gravity.NO_GRAVITY) {
-    //         vgravity = Gravity.CENTER_VERTICAL;
-    //     }
-    //
-    //     int ypos = 0;
-    //     switch (vgravity) {
-    //         case Gravity.CENTER_VERTICAL:
-    //             final int paddedTop = getPaddingTop();
-    //             final int paddedBottom = mBottom - mTop - getPaddingBottom();
-    //             ypos = ((paddedBottom - paddedTop) - customView.getMeasuredHeight()) / 2;
-    //             break;
-    //         case Gravity.TOP:
-    //             ypos = getPaddingTop() + topMargin;
-    //             break;
-    //         case Gravity.BOTTOM:
-    //             ypos = getHeight() - getPaddingBottom() - customView.getMeasuredHeight()
-    //                     - bottomMargin;
-    //             break;
-    //     }
-    //     final int customWidth = customView.getMeasuredWidth();
-    //     customView.layout(xpos, ypos, xpos + customWidth,
-    //             ypos + customView.getMeasuredHeight());
-    //     x = next(x, customWidth, isLayoutRtl);
-    // }
-    //
-    // if (mProgressView != null) {
-    //     mProgressView.bringToFront();
-    //     final int halfProgressHeight = mProgressView.getMeasuredHeight() / 2;
-    //     mProgressView.layout(mProgressBarPadding, -halfProgressHeight,
-    //             mProgressBarPadding + mProgressView.getMeasuredWidth(), halfProgressHeight);
-    // }
-
-    assert(0);
     Int32 paddingTop, paddingBottom;
     GetPaddingTop(&paddingTop);
     GetPaddingBottom(&paddingBottom);
@@ -3277,7 +1936,7 @@ ECode ActionBarView::OnLayout(
     Int32 x = isLayoutRtl ? r - l - paddingRight : paddingLeft;
     Int32 y = paddingTop;
 
-    AutoPtr<HomeView> homeLayout = mExpandedActionView ? (HomeView*)mExpandedHomeLayout : (HomeView*)mHomeLayout;
+    AutoPtr<HomeView> homeLayout = mExpandedActionView ? mExpandedHomeLayout : mHomeLayout;
     Int32 titleVisibility = 0;
     IView::Probe(mTitleLayout)->GetVisibility(&titleVisibility);
     Boolean showTitle = mTitleLayout != NULL && titleVisibility != IView::GONE &&
@@ -3334,8 +1993,8 @@ ECode ActionBarView::OnLayout(
     }
 
     Int32 visibility = 0;
-    IView::Probe(mIndeterminateProgressView)->GetVisibility(&visibility);
-    if (mIndeterminateProgressView && visibility != IView::GONE) {
+    if (mIndeterminateProgressView &&
+            (IView::Probe(mIndeterminateProgressView)->GetVisibility(&visibility), visibility != IView::GONE)) {
         PositionChild(IView::Probe(mIndeterminateProgressView), menuStart, y, contentHeight, !isLayoutRtl);
         Int32 w = 0;
         IView::Probe(mIndeterminateProgressView)->GetMeasuredWidth(&w);
@@ -3471,18 +2130,6 @@ ECode ActionBarView::OnLayout(
 void ActionBarView::ConfigPresenters(
     /* [in] */ IMenuBuilder* builder)
 {
-    // ==================before translated======================
-    // if (builder != null) {
-    //     builder.addMenuPresenter(mActionMenuPresenter, mPopupContext);
-    //     builder.addMenuPresenter(mExpandedMenuPresenter, mPopupContext);
-    // } else {
-    //     mActionMenuPresenter.initForMenu(mPopupContext, null);
-    //     mExpandedMenuPresenter.initForMenu(mPopupContext, null);
-    //     mActionMenuPresenter.updateMenuView(true);
-    //     mExpandedMenuPresenter.updateMenuView(true);
-    // }
-
-    assert(0);
     if (builder) {
         builder->AddMenuPresenter(IMenuPresenter::Probe(mActionMenuPresenter), mPopupContext);
         builder->AddMenuPresenter(IMenuPresenter::Probe(mExpandedMenuPresenter), mPopupContext);
@@ -3498,22 +2145,6 @@ void ActionBarView::ConfigPresenters(
 void ActionBarView::SetTitleImpl(
     /* [in] */ ICharSequence* title)
 {
-    // ==================before translated======================
-    // ActionBarTransition.beginDelayedTransition(this);
-    // mTitle = title;
-    // if (mTitleView != null) {
-    //     mTitleView.setText(title);
-    //     final boolean visible = mExpandedActionView == null &&
-    //             (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0 &&
-    //             (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
-    //     mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
-    // }
-    // if (mLogoNavItem != null) {
-    //     mLogoNavItem.setTitle(title);
-    // }
-    // updateHomeAccessibility(mUpGoerFive.isEnabled());
-
-    assert(0);
     ActionBarTransition::BeginDelayedTransition(this);
     mTitle = title;
     if (mTitleView) {
@@ -3534,24 +2165,6 @@ void ActionBarView::SetHomeButtonEnabled(
     /* [in] */ Boolean enable,
     /* [in] */ Boolean recordState)
 {
-    // ==================before translated======================
-    // if (recordState) {
-    //     mWasHomeEnabled = enable;
-    // }
-    //
-    // if (mExpandedActionView != null) {
-    //     // There's an action view currently showing and we want to keep the state
-    //     // configured for the action view at the moment. If we needed to record the
-    //     // new state for later we will have done so above.
-    //     return;
-    // }
-    //
-    // mUpGoerFive.setEnabled(enable);
-    // mUpGoerFive.setFocusable(enable);
-    // // Make sure the home button has an accurate content description for accessibility.
-    // updateHomeAccessibility(enable);
-
-    assert(0);
     if (recordState) {
         mWasHomeEnabled = enable;
     }
@@ -3568,15 +2181,6 @@ void ActionBarView::SetHomeButtonEnabled(
 void ActionBarView::UpdateHomeAccessibility(
     /* [in] */ Boolean homeEnabled)
 {
-    // ==================before translated======================
-    // if (!homeEnabled) {
-    //     mUpGoerFive.setContentDescription(null);
-    //     mUpGoerFive.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-    // } else {
-    //     mUpGoerFive.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-    //     mUpGoerFive.setContentDescription(buildHomeContentDescription());
-    // }
-
     if (!homeEnabled) {
         IView::Probe(mUpGoerFive)->SetContentDescription(NULL);
         IView::Probe(mUpGoerFive)->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -3589,34 +2193,6 @@ void ActionBarView::UpdateHomeAccessibility(
 
 AutoPtr<ICharSequence> ActionBarView::BuildHomeContentDescription()
 {
-    // ==================before translated======================
-    // final CharSequence homeDesc;
-    // if (mHomeDescription != null) {
-    //     homeDesc = mHomeDescription;
-    // } else {
-    //     if ((mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-    //         homeDesc = mContext.getResources().getText(mDefaultUpDescription);
-    //     } else {
-    //         homeDesc = mContext.getResources().getText(R.string.action_bar_home_description);
-    //     }
-    // }
-    //
-    // final CharSequence title = getTitle();
-    // final CharSequence subtitle = getSubtitle();
-    // if (!TextUtils.isEmpty(title)) {
-    //     final String result;
-    //     if (!TextUtils.isEmpty(subtitle)) {
-    //         result = getResources().getString(
-    //                 R.string.action_bar_home_subtitle_description_format,
-    //                 title, subtitle, homeDesc);
-    //     } else {
-    //         result = getResources().getString(R.string.action_bar_home_description_format,
-    //                 title, homeDesc);
-    //     }
-    //     return result;
-    // }
-    // return homeDesc;
-
     AutoPtr<ICharSequence> homeDesc;
     if (mHomeDescription != NULL) {
         homeDesc = mHomeDescription;
@@ -3663,41 +2239,6 @@ AutoPtr<ICharSequence> ActionBarView::BuildHomeContentDescription()
 
 void ActionBarView::InitTitle()
 {
-    // ==================before translated======================
-    // if (mTitleLayout == null) {
-    //     LayoutInflater inflater = LayoutInflater.from(getContext());
-    //     mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item,
-    //             this, false);
-    //     mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
-    //     mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
-    //
-    //     if (mTitleStyleRes != 0) {
-    //         mTitleView.setTextAppearance(mContext, mTitleStyleRes);
-    //     }
-    //     if (mTitle != null) {
-    //         mTitleView.setText(mTitle);
-    //     }
-    //
-    //     if (mSubtitleStyleRes != 0) {
-    //         mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
-    //     }
-    //     if (mSubtitle != null) {
-    //         mSubtitleView.setText(mSubtitle);
-    //         mSubtitleView.setVisibility(VISIBLE);
-    //     }
-    // }
-    //
-    // ActionBarTransition.beginDelayedTransition(this);
-    // mUpGoerFive.addView(mTitleLayout);
-    // if (mExpandedActionView != null ||
-    //         (TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle))) {
-    //     // Don't show while in expanded mode or with empty text
-    //     mTitleLayout.setVisibility(GONE);
-    // } else {
-    //     mTitleLayout.setVisibility(VISIBLE);
-    // }
-
-    assert(0);
     if (!mTitleLayout) {
         AutoPtr<IContext> context;
         IView::Probe(this)->GetContext((IContext**)&context);
@@ -3738,6 +2279,77 @@ void ActionBarView::InitTitle()
     else {
         IView::Probe(mTitleLayout)->SetVisibility(VISIBLE);
     }
+}
+
+ECode ActionBarView::GetContext(
+    /* [out] */ IContext** result)
+{
+    return AbsActionBarView::GetContext(result);
+}
+
+ECode ActionBarView::SetSplitView(
+    /* [in] */ IViewGroup* splitView)
+{
+    return AbsActionBarView::SetSplitView(splitView);
+}
+
+ECode ActionBarView::SetSplitWhenNarrow(
+    /* [in] */ Boolean splitWhenNarrow)
+{
+    return AbsActionBarView::SetSplitWhenNarrow(splitWhenNarrow);
+}
+
+ECode ActionBarView::CanShowOverflowMenu(
+    /* [out] */ Boolean* result)
+{
+    return AbsActionBarView::CanShowOverflowMenu(result);
+}
+
+ECode ActionBarView::IsOverflowMenuShowing(
+    /* [out] */ Boolean* result)
+{
+    return AbsActionBarView::IsOverflowMenuShowing(result);
+}
+
+ECode ActionBarView::IsOverflowMenuShowPending(
+    /* [out] */ Boolean* result)
+{
+    return AbsActionBarView::IsOverflowMenuShowPending(result);
+}
+
+ECode ActionBarView::ShowOverflowMenu(
+    /* [out] */ Boolean* result)
+{
+    return AbsActionBarView::ShowOverflowMenu(result);
+}
+
+ECode ActionBarView::HideOverflowMenu(
+    /* [out] */ Boolean* result)
+{
+    return AbsActionBarView::HideOverflowMenu(result);
+}
+
+ECode ActionBarView::DismissPopupMenus()
+{
+    return AbsActionBarView::DismissPopupMenus();
+}
+
+ECode ActionBarView::AnimateToVisibility(
+    /* [in] */ Int32 visibility)
+{
+    return AbsActionBarView::AnimateToVisibility(visibility);
+}
+
+ECode ActionBarView::SaveHierarchyState(
+    /* [in] */ ISparseArray* toolbarStates)
+{
+    return AbsActionBarView::SaveHierarchyState(toolbarStates);
+}
+
+ECode ActionBarView::RestoreHierarchyState(
+    /* [in] */ ISparseArray* toolbarStates)
+{
+    return AbsActionBarView::RestoreHierarchyState(toolbarStates);
 }
 
 } // namespace Widget
