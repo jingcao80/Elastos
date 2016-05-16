@@ -17,11 +17,6 @@ TabActivity::TabActivity()
 TabActivity::~TabActivity()
 {}
 
-ECode TabActivity::constructor()
-{
-    return ActivityGroup::constructor();
-}
-
 ECode TabActivity::SetDefaultTab(
     /* [in] */ const String& tag)
 {

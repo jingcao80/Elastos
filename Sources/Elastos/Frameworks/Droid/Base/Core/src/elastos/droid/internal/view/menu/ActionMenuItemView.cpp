@@ -93,7 +93,7 @@ Boolean ActionMenuItemView::ActionMenuItemForwardingListener::OnForwardingStoppe
 String ActionMenuItemView::TAG("ActionMenuItemView");
 const Int32 ActionMenuItemView::MAX_ICON_SIZE = 32; // dp
 
-CAR_INTERFACE_IMPL_5(ActionMenuItemView, TextView, IActionMenuChildView, IMenuItemView,
+CAR_INTERFACE_IMPL_5(ActionMenuItemView, TextView, IActionMenuItemView, IMenuItemView,
     IViewOnClickListener, IViewOnLongClickListener, IActionMenuChildView)
 
 ActionMenuItemView::ActionMenuItemView()

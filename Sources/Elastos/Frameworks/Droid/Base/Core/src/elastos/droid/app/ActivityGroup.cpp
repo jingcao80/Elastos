@@ -25,7 +25,7 @@ ECode ActivityGroup::constructor()
 ECode ActivityGroup::constructor(
     /* [in] */ Boolean singleActivityMode)
 {
-    CLocalActivityManager::New(IActivity::Probe(this),
+    CLocalActivityManager::New((IActivity*)this,
         singleActivityMode, (ILocalActivityManager**)&mLocalActivityManager);
     return NOERROR;
 }

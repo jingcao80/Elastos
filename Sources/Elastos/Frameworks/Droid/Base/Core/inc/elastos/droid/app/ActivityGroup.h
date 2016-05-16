@@ -15,7 +15,7 @@ namespace App {
  * instead; these are also
  * available On older platforms through the Android compatibility package.
  */
-class ActivityGroup
+class ECO_PUBLIC ActivityGroup
     : public Activity
     , public IActivityGroup
 {
