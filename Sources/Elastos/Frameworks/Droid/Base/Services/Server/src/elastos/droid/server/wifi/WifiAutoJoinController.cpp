@@ -747,7 +747,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
         astatus->GetRssi24(&arssi24);
         bstatus->GetRssi5(&brssi5);
         bstatus->GetRssi24(&brssi24);
-        String str("    compareWifiConfigurationsRSSI: ");
+        StringBuilder str("    compareWifiConfigurationsRSSI: ");
         str += aCK;
         str += " ";
         str += arssi24;
@@ -763,7 +763,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
         str += brssi5;
         str += " boost=";
         str += bRssiBoost;
-        LogDbg(str);
+        LogDbg(str.ToString());
     }
 
     GetScoreFromVisibility(astatus, aRssiBoost, aCK, &scoreA);
@@ -800,7 +800,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
         astatus->GetNum24(&anum24);
         bstatus->GetNum5(&bnum5);
         bstatus->GetNum24(&bnum24);
-        String str("    compareWifiConfigurationsRSSI ");
+        StringBuilder str("    compareWifiConfigurationsRSSI ");
         str += aCK;
         str += " rssi=("; str += arssi24;
         str += ","; str += arssi5;
@@ -816,7 +816,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
         str += bnum5; str += ")";
         str += " scoreb="; str += scoreB;
         str += " -> "; str += order;
-        LogDbg(str);
+        LogDbg(str.ToString());
     }
 
     *result = order;
@@ -890,7 +890,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsWithScorer(
         avisibility->GetNum24(&anum24);
         bvisibility->GetNum5(&bnum5);
         bvisibility->GetNum24(&bnum24);
-        String str("    compareWifiConfigurationsWithScorer ");
+        StringBuilder str("    compareWifiConfigurationsWithScorer ");
         str += aConKey;
         str += " rssi=("; str += arssi24;
         str += ","; str += arssi5;
@@ -904,7 +904,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsWithScorer(
         str += ","; str += bnum5; str += ")";
         str += " sc="; str += scoreB;
         str += " -> "; str += scoreB - scoreA;
-        LogDbg(str);
+        LogDbg(str.ToString());
     }
 
     // If scoreA > scoreB, the comparison is descending hence the return value is negative

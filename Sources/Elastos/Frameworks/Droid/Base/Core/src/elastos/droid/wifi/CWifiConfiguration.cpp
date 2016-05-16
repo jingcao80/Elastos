@@ -837,18 +837,18 @@ ECode CWifiConfiguration::ReadFromParcel(
     source->ReadBoolean(&mRequirePMF);
     source->ReadString(&mUpdateIdentifier);
 
-    //mAllowedKeyManagement = ReadBitSet(source);
-    //mAllowedProtocols = ReadBitSet(source);
-    //mAllowedAuthAlgorithms = ReadBitSet(source);
-    //mAllowedPairwiseCiphers = ReadBitSet(source);
-    //mAllowedGroupCiphers = ReadBitSet(source);
+    mAllowedKeyManagement = ReadBitSet(source);
+    mAllowedProtocols = ReadBitSet(source);
+    mAllowedAuthAlgorithms = ReadBitSet(source);
+    mAllowedPairwiseCiphers = ReadBitSet(source);
+    mAllowedGroupCiphers = ReadBitSet(source);
 
-    //AutoPtr<IInterface> ecObj;
-    //source->ReadInterfacePtr((Handle32*)&ecObj);
-    //mEnterpriseConfig = IWifiEnterpriseConfig::Probe(ecObj);
-    //AutoPtr<IInterface> icObj;
-    //source->ReadInterfacePtr((Handle32*)&icObj);
-    //mIpConfiguration = IIpConfiguration::Probe(icObj);
+    AutoPtr<IInterface> ecObj;
+    source->ReadInterfacePtr((Handle32*)&ecObj);
+    mEnterpriseConfig = IWifiEnterpriseConfig::Probe(ecObj);
+    AutoPtr<IInterface> icObj;
+    source->ReadInterfacePtr((Handle32*)&icObj);
+    mIpConfiguration = IIpConfiguration::Probe(icObj);
 
     source->ReadString(&mDhcpServer);
     source->ReadString(&mDefaultGwMacAddress);
@@ -902,14 +902,14 @@ ECode CWifiConfiguration::WriteToParcel(
     dest->WriteBoolean(mRequirePMF ? 1 : 0);
     dest->WriteString(mUpdateIdentifier);
 
-    //WriteBitSet(dest, mAllowedKeyManagement);
-    //WriteBitSet(dest, mAllowedProtocols);
-    //WriteBitSet(dest, mAllowedAuthAlgorithms);
-    //WriteBitSet(dest, mAllowedPairwiseCiphers);
-    //WriteBitSet(dest, mAllowedGroupCiphers);
+    WriteBitSet(dest, mAllowedKeyManagement);
+    WriteBitSet(dest, mAllowedProtocols);
+    WriteBitSet(dest, mAllowedAuthAlgorithms);
+    WriteBitSet(dest, mAllowedPairwiseCiphers);
+    WriteBitSet(dest, mAllowedGroupCiphers);
 
-    //dest->WriteInterfacePtr(mEnterpriseConfig);
-    //dest->WriteInterfacePtr(mIpConfiguration);
+    dest->WriteInterfacePtr(mEnterpriseConfig);
+    dest->WriteInterfacePtr(mIpConfiguration);
 
     dest->WriteString(mDhcpServer);
     dest->WriteString(mDefaultGwMacAddress);

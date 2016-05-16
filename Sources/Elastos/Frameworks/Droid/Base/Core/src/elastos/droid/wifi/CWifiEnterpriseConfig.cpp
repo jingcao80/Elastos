@@ -1,8 +1,10 @@
-
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Security.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/wifi/CWifiEnterpriseConfig.h"
 #include "elastos/droid/wifi/CWifiEnterpriseConfigEap.h"
 #include "elastos/droid/wifi/CWifiEnterpriseConfigPhase2.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuffer.h>
 
 using Elastos::Droid::Text::TextUtils;
@@ -10,7 +12,20 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuffer;
+using Elastos::Core::CoreUtils;
 using Elastos::Security::IKey;
+using Elastos::Security::IKeyFactoryHelper;
+using Elastos::Security::IKeyFactory;
+using Elastos::Security::Cert::ICertificateFactoryHelper;
+using Elastos::Security::Cert::ICertificateFactory;
+using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
+using Elastos::Security::Spec::IKeySpec;
+//TODO using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
+//TODO using Elastos::Security::Cert::CCertificateFactoryHelper
+using Elastos::IO::IInputStream;
+using Elastos::IO::IByteArrayInputStream;
+using Elastos::IO::CByteArrayInputStream;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::IMap;
 using Elastos::Utility::IIterator;
@@ -813,20 +828,89 @@ Int32 CWifiEnterpriseConfig::GetStringIndex(
     return defaultIndex;
 }
 
+ECode CWifiEnterpriseConfig::ReadCertificate(
+    /* [in] */ IParcel* in,
+    /* [out] */ IX509Certificate** x509cert)
+{
+    VALIDATE_NOT_NULL(x509cert);
+    AutoPtr<IX509Certificate> cert;
+    Int32 len;
+    in->ReadInt32(&len);
+    if (len > 0) {
+        //try {
+            AutoPtr<ArrayOf<Byte> > bytes;// = ArrayOf<Byte>::Alloc(len);
+            in->ReadArrayOf((Handle32*)&bytes);
+            AutoPtr<ICertificateFactoryHelper> cfHelper;
+            //TODO CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfHelper);
+            AutoPtr<ICertificateFactory> cFactory;
+            cfHelper->GetInstance(String("X.509"), (ICertificateFactory**)&cFactory);
+            AutoPtr<ICertificate> c;
+            AutoPtr<IByteArrayInputStream> bais;
+            CByteArrayInputStream::New(bytes, (IByteArrayInputStream**)&bais);
+            cFactory->GenerateCertificate(IInputStream::Probe(bais), (ICertificate**)&c);
+
+            cert = IX509Certificate::Probe(c);
+        //} catch (CertificateException e) {
+        //    cert = null;
+        //}
+    }
+
+    *x509cert = cert;
+    REFCOUNT_ADD(*x509cert);
+    return NOERROR;
+}
+
 ECode CWifiEnterpriseConfig::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    //WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+    Int32 count = 0;
+    source->ReadInt32(&count);
+    for (Int32 i = 0; i < count; ++i) {
+        String key;
+        source->ReadString(&key);
+        String value;
+        source->ReadString(&value);
+        mFields->Put(CoreUtils::Convert(key), CoreUtils::Convert(value));
+    }
+
+    ReadCertificate(source, (IX509Certificate**)&mCaCert);
+
+    AutoPtr<IPrivateKey> userKey;
+    Int32 len;
+    source->ReadInt32(&len);
+    if (len > 0) {
+        //try {
+            //byte[] bytes = new byte[len];
+        AutoPtr<ArrayOf<Byte> > bytes;
+        source->ReadArrayOf((Handle32*)&bytes);
+        String algorithm;
+        source->ReadString(&algorithm);
+
+        assert(0);
+        AutoPtr<IKeyFactoryHelper> kfHelper;
+        //TODO CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&cfHelper);
+        AutoPtr<IKeyFactory> keyFactory;
+        kfHelper->GetInstance(algorithm, (IKeyFactory**)&keyFactory);
+        AutoPtr<IPKCS8EncodedKeySpec> keySpec;
+        //TODO CPKCS8EncodedKeySpec::New(bytes, (IPKCS8EncodedKeySpec**)&keySpec);
+        keyFactory->GeneratePrivate(IKeySpec::Probe(keySpec), (IPrivateKey**)&userKey);
+        //} catch (NoSuchAlgorithmException e) {
+        //    userKey = null;
+        //} catch (InvalidKeySpecException e) {
+        //    userKey = null;
+        //}
+    }
+
+    mClientPrivateKey = userKey;
+    ReadCertificate(source, (IX509Certificate**)&mClientCertificate);
+    return NOERROR;
 }
 
 ECode CWifiEnterpriseConfig::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    return WriteToParcel(dest, 0);
 }
 
 } // namespace Wifi

@@ -140,6 +140,8 @@ protected:
     CARAPI OnTestWifiLog(
         /* [in] */ Boolean enable);
 
+    CARAPI OnTestClearWifiConfigurations();
+
     CARAPI OnTestPing(
         /* [in] */ const String& targetUrl);
 
@@ -178,6 +180,7 @@ private:
     AutoPtr<IView> mWifiConnectButton;
     AutoPtr<IView> mWifiDisableLogButton;
     AutoPtr<IView> mWifiEnableLogButton;
+    AutoPtr<IView> mWifiClearConfigsButton;
     AutoPtr<IEditText> mSSIDEditText;
     AutoPtr<IEditText> mPWEditText;
     AutoPtr<IView> mContent;

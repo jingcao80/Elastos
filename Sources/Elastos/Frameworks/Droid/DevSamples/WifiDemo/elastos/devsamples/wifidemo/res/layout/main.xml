@@ -18,12 +18,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="10dp"
-        android:text="mmmkkk"/>
+        android:text="elastos-os"/>
     <EditText android:id="@+id/myPW"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="10dp"
-        android:text="kortide1230"/>
+        android:text="elastosos"/>
 <!--
     <EditText android:id="@+id/myEditText"
         android:layout_width="match_parent"
@@ -144,6 +144,11 @@
             android:layout_width="450px"
             android:layout_height="wrap_content"
             android:text="WifiStartScan">
+        </Button>
+        <Button android:id="@+id/WifiClearConfigsButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="WifiClearConfig">
         </Button>
     </LinearLayout>
     <LinearLayout

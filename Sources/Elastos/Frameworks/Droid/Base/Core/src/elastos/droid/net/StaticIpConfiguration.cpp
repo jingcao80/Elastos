@@ -5,6 +5,7 @@
 #include "elastos/droid/net/IpConfiguration.h"
 #include "elastos/droid/net/LinkProperties.h"
 #include "elastos/droid/net/ReturnOutValue.h"
+#include "elastos/droid/net/NetworkUtils.h"
 #include <elastos/core/StringBuffer.h>
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/etl/List.h>
@@ -173,13 +174,14 @@ ECode StaticIpConfiguration::ReadFromParcel(
     AutoPtr<IInterface> obj;
     parcel->ReadInterfacePtr((Handle32*)&obj);
     mIpAddress = ILinkAddress::Probe(obj);
-    obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mGateway = IInetAddress::Probe(obj);
-    obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mDnsServers = IArrayList::Probe(obj);
-    parcel->ReadString(&mDomains);
+    NetworkUtils::UnparcelInetAddress(parcel, (IInetAddress**)&mGateway);
+    Int32 size;
+    parcel->ReadInt32(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInetAddress> iAddress;
+        NetworkUtils::UnparcelInetAddress(parcel, (IInetAddress**)&iAddress);
+        mDnsServers->Add(iAddress);
+    }
     return NOERROR;
 }
 
@@ -187,9 +189,16 @@ ECode StaticIpConfiguration::WriteToParcel(
         /* [in] */ IParcel* dest)
 {
     dest->WriteInterfacePtr(mIpAddress.Get());
-    dest->WriteInterfacePtr(mGateway.Get());
-    dest->WriteInterfacePtr(mDnsServers.Get());
-    dest->WriteString(mDomains);
+    NetworkUtils::ParcelInetAddress(dest, mGateway, 0);
+    Int32 size = 0;
+    mDnsServers->GetSize(&size);
+    dest->WriteInt32(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mDnsServers->Get(i, (IInterface**)&obj);
+        IInetAddress* dnsServer = IInetAddress::Probe(obj);
+        NetworkUtils::ParcelInetAddress(dest, dnsServer, 0);
+    }
     return NOERROR;
 }
 
