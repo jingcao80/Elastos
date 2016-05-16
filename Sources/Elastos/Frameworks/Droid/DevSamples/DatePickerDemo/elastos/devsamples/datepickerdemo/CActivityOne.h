@@ -8,9 +8,7 @@
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::IDatePicker;
-using Elastos::Droid::Widget::IDatePickerOnDateChangedListener;
 
 namespace Elastos {
 namespace DevSamples {
@@ -19,28 +17,6 @@ namespace DatePickerDemo {
 CarClass(CActivityOne)
     , public Activity
 {
-public:
-    class DatePickerOnDateChangedListener
-        : public Object
-        , public IDatePickerOnDateChangedListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        DatePickerOnDateChangedListener(
-            /* [in] */ CActivityOne* host);
-
-        ~DatePickerOnDateChangedListener();
-
-        CARAPI OnDateChanged(
-            /* [in] */ IDatePicker* view,
-            /* [in] */ Int32 year,
-            /* [in] */ Int32 monthOfYear,
-            /* [in] */ Int32 dayOfMonth);
-    private:
-        CActivityOne* mHost;
-    };
-
 public:
     CAR_OBJECT_DECL()
 
@@ -62,7 +38,6 @@ protected:
 
 private:
     AutoPtr<IDatePicker> mDatePicker;
-    AutoPtr<IEditText> mEditText;
 };
 
 } // namespace DatePickerDemo

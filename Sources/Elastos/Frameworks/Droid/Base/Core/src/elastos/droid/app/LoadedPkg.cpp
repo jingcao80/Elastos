@@ -791,6 +791,7 @@ String LoadedPkg::GetElastosClassName(
         HashMap<String, String> classNameMap;
         classNameMap[String("android.opengl.")]                     = String("Elastos.Droid.Opengl.C");
         classNameMap[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
+        classNameMap[String("android.widget.")]                     = String("Elastos.Droid.Widget.C");
         classNameMap[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
         classNameMap[String("com.android.internal.view.menu.")]     = String("Elastos.Droid.Internal.View.Menu.C");
         classNameMap[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");

@@ -552,8 +552,8 @@ ECode LayoutInflater::Inflate(
 
     AutoLock lock(mConstructorArgsLock);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
-    AutoPtr<IContext> lastContext = (IContext*)((*mConstructorArgs)[0]);
-    mConstructorArgs->Set(0, (IInterface*)mContext);
+    AutoPtr<IContext> lastContext = IContext::Probe((*mConstructorArgs)[0]);
+    mConstructorArgs->Set(0, mContext);
     AutoPtr<IView> result = root != NULL? IView::Probe(root) : NULL;
 
 //    try {

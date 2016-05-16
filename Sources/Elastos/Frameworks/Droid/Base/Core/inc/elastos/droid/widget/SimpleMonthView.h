@@ -55,7 +55,8 @@ private:
     {
     public:
         MonthViewTouchHelper(
-            /* [in] */ SimpleMonthView* owner);
+            /* [in] */ SimpleMonthView* owner,
+            /* [in] */ IView* host);
 
         virtual CARAPI SetFocusedVirtualView(
             /* [in] */ Int32 virtualViewId);
@@ -282,66 +283,92 @@ private:
 
 private:
     static const String TAG;
-    static const Int32 DEFAULT_HEIGHT = 32;
-    static const Int32 MIN_HEIGHT = 10;
-    static const Int32 DEFAULT_SELECTED_DAY = -1;
-    static const Int32 DEFAULT_WEEK_START = ICalendar::SUNDAY;
-    static const Int32 DEFAULT_NUM_DAYS = 7;
-    static const Int32 DEFAULT_NUM_ROWS = 6;
-    static const Int32 MAX_NUM_ROWS = 6;
-    static const Int32 SELECTED_CIRCLE_ALPHA = 60;
-    static const Int32 DAY_SEPARATOR_WIDTH = 1;
+    static const Int32 DEFAULT_HEIGHT;
+    static const Int32 MIN_HEIGHT;
+    static const Int32 DEFAULT_SELECTED_DAY;
+    static const Int32 DEFAULT_WEEK_START;
+    static const Int32 DEFAULT_NUM_DAYS;
+    static const Int32 DEFAULT_NUM_ROWS;
+    static const Int32 MAX_NUM_ROWS;
+    static const Int32 SELECTED_CIRCLE_ALPHA;
+    static const Int32 DAY_SEPARATOR_WIDTH;
+
     /*const*/ Int32 mMiniDayNumberTextSize;
     /*const*/ Int32 mMonthLabelTextSize;
     /*const*/ Int32 mMonthDayLabelTextSize;
     /*const*/ Int32 mMonthHeaderSize;
     /*const*/ Int32 mDaySelectedCircleSize;
+
     // used for scaling to the device density
     static Float mScale;
+
     /** Single-letter (when available) formatter for the day of week label. */
     AutoPtr<ISimpleDateFormat> mDayFormatter;
+
     // affects the padding on the sides of this view
     Int32 mPadding;
+
     String mDayOfWeekTypeface;
     String mMonthTitleTypeface;
+
     AutoPtr<IPaint> mDayNumberPaint;
     AutoPtr<IPaint> mDayNumberDisabledPaint;
     AutoPtr<IPaint> mDayNumberSelectedPaint;
+
     AutoPtr<IPaint> mMonthTitlePaint;
     AutoPtr<IPaint> mMonthDayLabelPaint;
+
     /*const*/ AutoPtr<IFormatter> mFormatter;
     /*const*/ AutoPtr<StringBuilder> mStringBuilder;
+
     Int32 mMonth;
     Int32 mYear;
+
     // Quick reference to the width of this view, matches parent
     Int32 mWidth;
+
     // The height this view should draw at in pixels, set by height param
     Int32 mRowHeight;
+
     // If this view contains the today
     Boolean mHasToday;
+
     // Which day is selected [0-6] or -1 if no day is selected
     Int32 mSelectedDay;
+
     // Which day is today [0-6] or -1 if no day is today
     Int32 mToday;
+
     // Which day of the week to start on [0-6]
     Int32 mWeekStart;
+
     // How many days to display
     Int32 mNumDays;
+
     // The number of days + a spot for week number if it is displayed
     Int32 mNumCells;
+
     Int32 mDayOfWeekStart;
+
     // First enabled day
     Int32 mEnabledDayStart;
+
     // Last enabled day
     Int32 mEnabledDayEnd;
+
     /*const*/ AutoPtr<ICalendar> mCalendar;
     /*const*/ AutoPtr<ICalendar> mDayLabelCalendar;
+
     /*const*/ AutoPtr<MonthViewTouchHelper> mTouchHelper;
+
     Int32 mNumRows;
+
     // Optional listener for handling day click actions
     AutoPtr<IOnDayClickListener> mOnDayClickListener;
+
     // Whether to prevent setting the accessibility delegate
     Boolean mLockAccessibilityDelegate;
+
     Int32 mNormalTextColor;
     Int32 mDisabledTextColor;
     Int32 mSelectedDayColor;

@@ -9,10 +9,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"/>
 
-    <EditText android:id="@+id/dateEt"
+<!--     <EditText android:id="@+id/dateEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:cursorVisible="false"
-        android:editable="false"/>
+        android:editable="false"/> -->
 
 </LinearLayout>

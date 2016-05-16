@@ -2,12 +2,11 @@
 #ifndef __ELASTOS_DROID_WIDGET_INTERNAL_EXPLOREBYTOUCHHELPER_H__
 #define __ELASTOS_DROID_WIDGET_INTERNAL_EXPLOREBYTOUCHHELPER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "_Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "_Elastos.Droid.Internal.h"
 #include "elastos/droid/view/accessibility/AccessibilityNodeProvider.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/view/View.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
@@ -19,7 +18,6 @@ using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::IAccessibilityDelegate;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
-using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -43,8 +41,7 @@ namespace Widget {
  * </pre>
  */
 class ExploreByTouchHelper
-    : public Object
-    , public IAccessibilityDelegate
+    : public Elastos::Droid::View::View::AccessibilityDelegate
     , public IExploreByTouchHelper
 {
 private:
@@ -488,6 +485,7 @@ private:
 
 private:
     /** Default class name used for virtual views. */
+    static const Int32 INVALID_ID;
     static const String DEFAULT_CLASS_NAME;
     static const String TAG;
 

@@ -1,9 +1,10 @@
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/internal/widget/ExploreByTouchHelper.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/view/accessibility/CAccessibilityEvent.h"
 #include "elastos/droid/view/accessibility/CAccessibilityNodeInfo.h"
-#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Graphics::CRect;
@@ -47,10 +48,11 @@ ECode ExploreByTouchHelper::ExploreByTouchNodeProvider::PerformAction(
     return NOERROR;
 }
 
-
+const Int32 ExploreByTouchHelper::INVALID_ID = Elastos::Core::Math::INT32_MIN_VALUE;
 const String ExploreByTouchHelper::DEFAULT_CLASS_NAME("CView"); // = View.class.getName();
 const String ExploreByTouchHelper::TAG("ExploreByTouchHelper");
-CAR_INTERFACE_IMPL_2(ExploreByTouchHelper, Object, IAccessibilityDelegate, IExploreByTouchHelper);
+
+CAR_INTERFACE_IMPL(ExploreByTouchHelper, Elastos::Droid::View::View::AccessibilityDelegate, IExploreByTouchHelper);
 ExploreByTouchHelper::ExploreByTouchHelper()
     : mFocusedVirtualViewId(INVALID_ID)
     , mHoveredVirtualViewId(INVALID_ID)
@@ -85,7 +87,7 @@ ECode ExploreByTouchHelper::GetAccessibilityNodeProvider(
     if (mNodeProvider == NULL) {
         mNodeProvider = new ExploreByTouchNodeProvider(this);
     }
-    *provider = mNodeProvider;
+    *provider = (IAccessibilityNodeProvider*)mNodeProvider.Get();
     REFCOUNT_ADD(*provider);
     return NOERROR;
 }
@@ -96,6 +98,7 @@ ECode ExploreByTouchHelper::DispatchHoverEvent(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
+
     Boolean enabled1 = FALSE, enabled2 = FALSE;
     mManager->IsEnabled(&enabled1);
     if (!enabled1 || (mManager->IsTouchExplorationEnabled(&enabled2), !enabled2)) {

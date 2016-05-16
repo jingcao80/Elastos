@@ -28,7 +28,6 @@ class ECO_PUBLIC R {
         public: static const int test9 = 0x7f02000a;
     };
     public: class id {
-        public: static const int dateEt = 0x7f050001;
         public: static const int datePicker = 0x7f050000;
     };
     public: class layout {
