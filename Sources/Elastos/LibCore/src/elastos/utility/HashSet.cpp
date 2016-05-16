@@ -41,6 +41,9 @@ ECode HashSet::constructor(
     /* [in] */ ICollection* collection)
 {
     Int32 clolen = 0;
+    if (collection == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     collection->GetSize(&clolen);
     AutoPtr<IMap> map;
     FAIL_RETURN(CHashMap::New(clolen < 6 ? 11 : clolen * 2, (IMap**)&map));

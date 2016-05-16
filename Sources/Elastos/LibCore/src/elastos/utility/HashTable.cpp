@@ -897,6 +897,7 @@ Int32 HashTable::CapacityForInitSize(
 ECode HashTable::Clone(
     /* [out] */ IInterface** object)
 {
+    assert(0);
     /*synchronized(this);
 
     AutoPtr<CHashTable> result;
