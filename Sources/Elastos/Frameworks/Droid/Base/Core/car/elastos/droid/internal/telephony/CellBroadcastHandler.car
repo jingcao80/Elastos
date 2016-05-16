@@ -1,13 +1,24 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    // interface Elastos.Droid.Internal.Telephony.IPhoneBase;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IWakeLockStateMachine
+     */
     interface ICellBroadcastHandler {
-        CellBroadcastHandler MakeCellBroadcastHandler(Context context, PhoneBase phone);
+
+        // MakeCellBroadcastHandler(
+        //     [in] IContext* context,
+        //     [in] IPhoneBase* phone,
+        //     [out] ICellBroadcastHandler** result);
 
     }
 

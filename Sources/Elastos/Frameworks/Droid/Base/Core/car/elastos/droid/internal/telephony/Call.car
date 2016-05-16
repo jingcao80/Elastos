@@ -1,42 +1,102 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Telecomm.Telecom.IPhone;
+    // interface Elastos.Droid.Internal.Telephony.IConnection;
+    interface Elastos.Droid.Os.IBundle;
+
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    enum ICallState {
+
+        ICallState_IDLE,
+        ICallState_ACTIVE,
+        ICallState_HOLDING,
+        ICallState_DIALING,
+        ICallState_ALERTING,
+        ICallState_INCOMING,
+        ICallState_WAITING,
+        ICallState_DISCONNECTED,
+        ICallState_DISCONNECTING
+
+        // public boolean isAlive() {
+        //    return !(this == IDLE || this == DISCONNECTED || this == DISCONNECTING);
+        // }
+
+        // public boolean isRinging() {
+        //     return this == INCOMING || this == WAITING;
+        // }
+
+        // public boolean isDialing() {
+        //     return this == DIALING || this == ALERTING;
+        // }
+    }
+
     interface ICall {
-        IsAlive(
+
+        GetConnections(
+            [out] IList** result);
+
+        GetPhone(
+            [out] IPhone** result);
+
+        IsMultiparty(
             [out] Boolean* result);
 
-        IsRinging(
-            [out] Boolean* result);
+        Hangup();
 
-        IsDialing(
-            [out] Boolean* result);
-
-        HasConnection(
-            [in] Connection c,
-            [out] Boolean* result);
+        // HasConnection(
+        //     [in] IConnection* c,
+        //     [out] Boolean* result);
 
         HasConnections(
             [out] Boolean* result);
 
         GetState(
-            [out] State* result);
+            [out] ICallState* result);
 
         GetExtras(
-            [out] Bundle* result);
+            [out] IBundle** result);
 
         IsIdle(
             [out] Boolean* result);
+
+        /**
+         * Returns the Connection associated with this Call that was created
+         * first, or null if there are no Connections in this Call
+         */
+        // GetEarliestConnection(
+        //     [out] IConnection** result);
+
+        GetEarliestCreateTime(
+            [out] Int64* result);
+
+        GetEarliestConnectTime(
+            [out] Int64* result);
+
+        IsDialingOrAlerting(
+            [out] Boolean* result);
+
+        IsRinging(
+            [out] Boolean* result);
+
+        /**
+         * Returns the Connection associated with this Call that was created
+         * last, or null if there are no Connections in this Call
+         */
+        // GetLatestConnection(
+        //     [out] IConnection** result);
 
         IsGeneric(
             [out] Boolean* result);
 
         SetGeneric(
-            [in] Boolean generic);
+            [in] Boolean gene);
 
         HangupIfAlive();
 

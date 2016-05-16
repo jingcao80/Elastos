@@ -7,6 +7,19 @@ module {
     namespace Telephony {
 
     interface IATResponseParser {
+
+        NextBoolean(
+            [out] Boolean* result);
+
+        /** positive int only */
+        NextInt32(
+            [out] Int32* result);
+
+        NextString(
+            [out] String* result);
+
+        HasMore(
+            [out] Boolean* result);
     }
 
     }//Telephony

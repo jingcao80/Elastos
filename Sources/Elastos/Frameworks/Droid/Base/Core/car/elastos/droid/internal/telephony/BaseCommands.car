@@ -1,507 +1,92 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    // interface Elastos.Droid.Internal.Telephony.DataConnection.IDataProfile;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface ICommandsInterface
+     */
+    [deprecated]
     interface IBaseCommands {
-        GetRadioState(
-            [out] RadioState* result);
-
-        RegisterForRadioStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForRadioStateChanged(
-            [in] Handler h);
 
         RegisterForImsNetworkStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForImsNetworkStateChanged(
-            [in] Handler h);
-
-        RegisterForOn(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForOn(
-            [in] Handler h);
-
-        RegisterForAvailable(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForAvailable(
-            [in] Handler h);
-
-        RegisterForNotAvailable(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForNotAvailable(
-            [in] Handler h);
-
-        RegisterForOffOrNotAvailable(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForOffOrNotAvailable(
-            [in] Handler h);
-
-        RegisterForCallStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCallStateChanged(
-            [in] Handler h);
-
-        RegisterForVoiceNetworkStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForVoiceNetworkStateChanged(
-            [in] Handler h);
-
-        RegisterForDataNetworkStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForDataNetworkStateChanged(
-            [in] Handler h);
-
-        RegisterForVoiceRadioTechChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForVoiceRadioTechChanged(
-            [in] Handler h);
-
-        RegisterForIccStatusChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForIccStatusChanged(
-            [in] Handler h);
-
-        SetOnNewGsmSms(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnNewGsmSms(
-            [in] Handler h);
-
-        SetOnNewCdmaSms(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnNewCdmaSms(
-            [in] Handler h);
-
-        SetOnNewGsmBroadcastSms(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnNewGsmBroadcastSms(
-            [in] Handler h);
-
-        SetOnSmsOnSim(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnSmsOnSim(
-            [in] Handler h);
-
-        SetOnSmsStatus(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnSmsStatus(
-            [in] Handler h);
-
-        SetOnSignalStrengthUpdate(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnSignalStrengthUpdate(
-            [in] Handler h);
-
-        SetOnNITZTime(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnNITZTime(
-            [in] Handler h);
-
-        SetOnUSSD(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnUSSD(
-            [in] Handler h);
-
-        SetOnSuppServiceNotification(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnSuppServiceNotification(
-            [in] Handler h);
-
-        SetOnCatSessionEnd(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCatSessionEnd(
-            [in] Handler h);
-
-        SetOnCatProactiveCmd(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCatProactiveCmd(
-            [in] Handler h);
-
-        SetOnCatEvent(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCatEvent(
-            [in] Handler h);
-
-        SetOnCatCallSetUp(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCatCallSetUp(
-            [in] Handler h);
-
-        SetOnCatSendSmsResult(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCatSendSmsResult(
-            [in] Handler h);
-
-        SetOnIccSmsFull(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnIccSmsFull(
-            [in] Handler h);
-
-        RegisterForIccRefresh(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        SetOnIccRefresh(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        SetEmergencyCallbackMode(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForIccRefresh(
-            [in] Handler h);
-
-        UnsetOnIccRefresh(
-            [in] Handler h);
-
-        SetOnCallRing(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCallRing(
-            [in] Handler h);
-
-        SetOnSs(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnSs(
-            [in] Handler h);
-
-        SetOnCatCcAlphaNotify(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnCatCcAlphaNotify(
-            [in] Handler h);
-
-        RegisterForInCallVoicePrivacyOn(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForInCallVoicePrivacyOn(
-            [in] Handler h);
-
-        RegisterForInCallVoicePrivacyOff(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForInCallVoicePrivacyOff(
-            [in] Handler h);
-
-        SetOnRestrictedStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnRestrictedStateChanged(
-            [in] Handler h);
-
-        RegisterForDisplayInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForDisplayInfo(
-            [in] Handler h);
-
-        RegisterForCallWaitingInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCallWaitingInfo(
-            [in] Handler h);
-
-        RegisterForSignalInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        SetOnUnsolOemHookRaw(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnSetOnUnsolOemHookRaw(
-            [in] Handler h);
-
-        UnregisterForSignalInfo(
-            [in] Handler h);
-
-        RegisterForCdmaOtaProvision(
-            [in] Handler h,Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCdmaOtaProvision(
-            [in] Handler h);
-
-        RegisterForNumberInfo(
-            [in] Handler h,Int32 what, 
-            [in] Object obj);
-
-        UnregisterForNumberInfo(
-            [in] Handler h);
-
-        RegisterForRedirectedNumberInfo(
-            [in] Handler h,Int32 what, 
-            [in] Object obj);
-
-        UnregisterForRedirectedNumberInfo(
-            [in] Handler h);
-
-        RegisterForLineControlInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForLineControlInfo(
-            [in] Handler h);
-
-        RegisterFoT53ClirlInfo(
-            [in] Handler h,Int32 what, 
-            [in] Object obj);
-
-        UnregisterForT53ClirInfo(
-            [in] Handler h);
-
-        RegisterForT53AudioControlInfo(
-            [in] Handler h,Int32 what, 
-            [in] Object obj);
-
-        UnregisterForT53AudioControlInfo(
-            [in] Handler h);
-
-        RegisterForRingbackTone(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForRingbackTone(
-            [in] Handler h);
-
-        RegisterForResendIncallMute(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForResendIncallMute(
-            [in] Handler h);
-
-        RegisterForCdmaSubscriptionChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCdmaSubscriptionChanged(
-            [in] Handler h);
-
-        RegisterForCdmaPrlChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCdmaPrlChanged(
-            [in] Handler h);
-
-        RegisterForExitEmergencyCallbackMode(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForExitEmergencyCallbackMode(
-            [in] Handler h);
-
-        RegisterForHardwareConfigChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForHardwareConfigChanged(
-            [in] Handler h);
-
-        RegisterForRilConnected(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForRilConnected(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSubscriptionStatusChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSubscriptionStatusChanged(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForWwanIwlanCoexistence(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForWwanIwlanCoexistence(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForSimRefreshEvent(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForSimRefreshEvent(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForModemCapEvent(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForModemCapEvent(
-            [in] Handler h);
-
-        GetDataCallProfile(
-            [in] Int32 appType, 
-            [in] Message result);
+            [in] IHandler* h);
 
         SendSMSExpectMore(
-            [in] String smscPDU, 
-            [in] String pdu, 
-            [in] Message result);
+            [in] String smscPDU,
+            [in] String pdu,
+            [in] IMessage* result);
 
         GetModemCapability(
-            [in] Message response);
+            [in] IMessage* response);
 
         UpdateStackBinding(
-            [in] Int32 stackId, 
-            [in] Int32 enable, 
-            [in] Message response);
+            [in] Int32 stackId,
+            [in] Int32 enbl,
+            [in] IMessage* response);
 
-        GetLteOnCdmaMode(
-            [out] Int32* result);
+        SetUiccSubscription(
+            [in] Int32 slotId,
+            [in] Int32 appIndex,
+            [in] Int32 subId,
+            [in] Int32 subStatus,
+            [in] IMessage* response);
 
-        RegisterForCellInfoList(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCellInfoList(
-            [in] Handler h);
-
-        RegisterForSrvccStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForSrvccStateChanged(
-            [in] Handler h);
-
-        TestingEmergencyCall();
+        // SetDataProfile(
+        //     [in] ArrayOf<IDataProfile*>* dps,
+        //     [in] IMessage* result);
 
         SetDataAllowed(
-            [in] Boolean allowed, 
-            [in] Message response);
+            [in] Boolean allowed,
+            [in] IMessage* response);
 
-        RequestShutdown(
-            [in] Message result);
-
-        IccOpenLogicalChannel(
-            [in] String AID, 
-            [in] Message response);
-
-        GetLteOnGsmMode(
-            [out] Int32* result);
-
+        SetLocalCallHold(
+            [in] Int32 lchStatus);
     }
 
     }//Telephony

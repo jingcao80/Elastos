@@ -6,9 +6,13 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IRuntimeException
+     */
     interface ICommandException {
-        GetCommandError(
-            [out] Error* result);
+        // GetCommandError(
+        //     [out] IError* result);
 
     }
 

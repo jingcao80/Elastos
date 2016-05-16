@@ -6,6 +6,10 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IException
+     */
     interface ICallStateException {
     }
 

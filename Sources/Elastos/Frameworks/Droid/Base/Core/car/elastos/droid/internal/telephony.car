@@ -1,5 +1,16 @@
 module
 {
+    merge("telephony/ATParseEx.car");
+    merge("telephony/ATResponseParser.car");
+    merge("telephony/BaseCommands.car");
+    merge("telephony/Call.car");
+    merge("telephony/CallForwardInfo.car");
+    merge("telephony/CallManager.car");
+    merge("telephony/CallStateException.car");
+    merge("telephony/CallTracker.car");
+    merge("telephony/CellBroadcastHandler.car");
+    merge("telephony/CommandException.car");
+    merge("telephony/CommandsInterface.car");
     merge("telephony/CallInfo.car");
     merge("telephony/CallerInfo.car");
     merge("telephony/CallerInfoAsyncQuery.car");

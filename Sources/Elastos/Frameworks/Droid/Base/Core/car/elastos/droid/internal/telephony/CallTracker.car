@@ -1,12 +1,25 @@
 
-module {
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
+    [deprecated]
     interface ICallTracker {
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
     }
 
     }//Telephony
