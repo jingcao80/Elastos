@@ -1,0 +1,16 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= elasys
+TARGET_TYPE= lib
+
+C_DEFINES= -D_UNDEFDLLEXP
+
+INCLUDES+= ../syscar;
+
+SOURCES = sysiids.cpp
+SOURCES += kclsinfo.cpp
+SOURCES += relocate.cpp
+SOURCES += elaatomics.cpp
+

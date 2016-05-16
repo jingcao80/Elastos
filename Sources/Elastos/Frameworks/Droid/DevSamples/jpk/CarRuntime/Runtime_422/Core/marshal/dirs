@@ -1,0 +1,11 @@
+
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+DIRS += android_linux
+DIRS += linux_rpc
+else
+ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+DIRS += others_rpc
+else
+DIRS += others
+endif
+endif

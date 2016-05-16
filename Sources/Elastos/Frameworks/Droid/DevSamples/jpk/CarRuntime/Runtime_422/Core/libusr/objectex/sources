@@ -1,0 +1,15 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= objectex
+TARGET_TYPE= lib
+
+C_DEFINES= -D_UNDEFDLLEXP
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES = ../../../Library/syscar;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = AObjectEx.cpp
+

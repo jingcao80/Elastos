@@ -1,0 +1,9 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= elstring
+TARGET_TYPE= lib
+
+SOURCES = elsharedbuf.cpp
+SOURCES += elstring.cpp

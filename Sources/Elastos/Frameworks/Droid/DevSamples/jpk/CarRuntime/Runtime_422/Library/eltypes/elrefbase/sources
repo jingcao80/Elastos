@@ -1,0 +1,8 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= elrefbase
+TARGET_TYPE= lib
+
+SOURCES = elrefbase.cpp

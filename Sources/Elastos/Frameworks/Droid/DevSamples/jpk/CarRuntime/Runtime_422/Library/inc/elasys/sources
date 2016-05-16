@@ -1,0 +1,22 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+EXPORT_HEADERS = elans.h
+EXPORT_HEADERS += elatypes.h
+EXPORT_HEADERS += elaatomics.h
+EXPORT_HEADERS += elaerror.h
+EXPORT_HEADERS += fserror.h
+EXPORT_HEADERS += eladef.h
+EXPORT_HEADERS += clsinfo.h
+EXPORT_HEADERS += queue.h
+EXPORT_HEADERS += hook.h
+EXPORT_HEADERS += debugdef.h
+EXPORT_HEADERS += asm.h
+
+ifneq "$(XDK_COMPILER)" "gnu"
+    ifeq "$(XDK_TARGET_CPU)" "arm"
+        EXPORT_HEADERS += kxarm.h
+    endif
+endif
+

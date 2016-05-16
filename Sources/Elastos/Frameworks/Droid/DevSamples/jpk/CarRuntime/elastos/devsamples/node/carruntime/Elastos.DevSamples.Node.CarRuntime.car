@@ -1,0 +1,1862 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    interface IModuleInfo;
+    interface IClassInfo;
+    interface IConstantInfo;
+    interface ITypeAliasInfo;
+    interface IEnumItemInfo;
+    interface IFieldInfo;
+    interface IFunctionInfo;
+    interface IMethodInfo;
+    interface IParamInfo;
+    interface IArgumentList;
+    interface IConstructorInfo;
+    interface ICallbackMethodInfo;
+    interface IDelegateProxy;
+    interface ICallbackInvocation;
+    interface ICallbackArgumentList;
+
+    interface IVariable;
+    interface IVariableOfCarArray;
+    interface IVariableOfStruct;
+    interface ICarArraySetter;
+    interface ICarArrayGetter;
+    interface IStructSetter;
+    interface IStructGetter;
+    interface ICppVectorSetter;
+    interface ICppVectorGetter;
+
+    interface IDataTypeInfo;
+    interface IInterfaceInfo;
+    interface IStructInfo;
+    interface IEnumInfo;
+
+    interface ICarArrayInfo;
+    interface ICppVectorInfo;
+    interface ILocalPtrInfo;
+
+    //typedef [dummytype] PVoid PCarQuintet;
+    //typedef [dummytype] PVoid PRegime;
+    //typedef PVoid LocalPtr;
+
+    typedef Int32* PCarQuintet;
+    typedef IRegime* PRegime;
+
+    interface ITestCarDataType;
+    interface IMethodTest;
+    interface IProperty;
+
+    //interface ITestModuleInfo;
+    //interface ITestClassInfo;
+    //interface ITestMethodInfo;
+    //interface ITestParamInfo;
+    //interface ITestTypeAliasInfo;
+    //interface ITestArgumentList;
+
+    interface ITestDataTypeInfo;
+    interface ITestLocalPtrInfo;
+    interface ITestEnumInfo;
+    interface ITestEnumItemInfo;
+    interface ITestCarArrayInfo;
+    interface ITestCppVectorInfo;
+    interface ITestStructInfo;
+    interface ITestFieldInfo;
+    interface ITestInterfaceInfo;
+    interface ITestFunctionInfo;
+    interface ITestMethodInfo;
+    interface ITestParamInfo;
+    interface ITestTypeAliasInfo;
+    interface ITestArgumentList;
+    interface ITestVariable;
+    interface ITestVariableOfCarArray;
+    interface ITestVariableOfStruct;
+    interface ITestVariableOfCppVector;  //whm add
+    interface ITestCarArraySetter;
+    interface ITestCarArrayGetter;
+    interface ITestStructSetter;
+    interface ITestStructGetter;
+    interface ITestCppVectorSetter;
+    interface ITestCppVectorGetter;
+    interface ITestModuleInfo;
+    interface ITestConstantInfo;
+    interface ITestClassInfo;
+    interface ITestConstructorInfo;
+    interface ITestCallbackMethodInfo;
+    interface ITestDelegateProxy;
+    interface ITestCallbackInvocation;
+    interface ITestCallbackArgumentList;
+
+    interface IIntrinsicInfo;  //whm add
+    interface ILocalTypeInfo;  //whm add
+
+    interface ITestIntrinsicInfo;  //whm add
+    interface ITestLocalTypeInfo;  //whm add
+
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace Node {
+    namespace CarRuntime {
+
+    //-------------------------user interface---------------------
+
+    [deprecated]
+    interface ITestEventListener {
+        OnEvent1(
+            [in] Int32 eventId);
+        OnEvent2(
+            [in] String eventStr);
+    }
+
+    [deprecated]
+    interface ICarRuntime {
+        Test_Require(
+            [in] String moduleName,
+            [in] String className,
+            [out] IInterface** outObject);
+
+        Test_Require_ModuleInfo(
+            [in] String moduleName,
+            [out] IInterface** outObject);
+
+        Test_Require_ClassInfo(
+            [in] String moduleName,
+            [in] String className,
+            [out] IInterface** outObject);
+
+        Test_Require_Activity(
+            [in] String activityId,
+            [out] IInterface** outObject);
+
+        Test_AddEventListener(
+            [in] ITestEventListener* listener);
+    }
+
+    //[local,deprecated]
+    [deprecated]
+    interface ITestCarDataType {
+        Test_NULL();
+
+        Test_Int16(
+            [in] Int16 inValue,
+            [out] Int16* outValue);
+        Test_Int16_Ref(
+            [in] Int16* inValue,    //deprecated
+            [out] Int16* outValue);
+
+        Test_Int32(
+            [in] Int32 inValue,
+            [out] Int32* outValue);
+        Test_Int32_Ref(
+            [in] Int32* inValue,    //deprecated
+            [out] Int32* outValue);
+
+        Test_Int64(
+            [in] Int64 inValue,
+            [out] Int64* outValue);
+        Test_Int64_Ref(
+            [in] Int64* inValue,    //deprecated
+            [out] Int64* outValue);
+
+        Test_Byte(
+            [in] Byte inValue,
+            [out] Byte* outValue);
+        Test_Byte_Ref(
+            [in] Byte* inValue,    //deprecated
+            [out] Byte* outValue);
+
+        Test_Float(
+            [in] Float inValue,
+            [out] Float* outValue);
+        Test_Float_Ref(
+            [in] Float* inValue,    //deprecated
+            [out] Float* outValue);
+
+        Test_Double(
+            [in] Double inValue,
+            [out] Double* outValue);
+        Test_Double_Ref(
+            [in] Double* inValue,    //deprecated
+            [out] Double* outValue);
+
+        Test_Char16(
+            [in] Char16 inValue,
+            [out] Char16* outValue);
+        Test_Char16_Ref(
+            [in] Char16* inValue,    //deprecated
+            [out] Char16* outValue);
+
+        Test_String(
+            [in] String inStr,
+            [out] String* outStr);
+        Test_String_Ref(
+            [in] String* inStr,    //deprecated
+            [out] String* outStr);
+
+        Test_Boolean(
+            [in] Boolean inValue,
+            [out] Boolean* outValue);
+        Test_Boolean_Ref(
+            [in] Boolean* inValue,    //deprecated
+            [out] Boolean* outValue);
+
+        Test_EMuid(
+            [in] EMuid inId,
+            [out] EMuid* outId);
+        Test_EMuid_Ref(
+            [in] EMuid* inId,    //deprecated
+            [out] EMuid* outId);
+
+        Test_EGuid(
+            [in] EGuid inId,
+            [out] EGuid* outId);
+        Test_EGuid_Ref(
+            [in] EGuid* inId,    //deprecated
+            [out] EGuid* outId);
+
+        Test_ECode(
+            [in] ECode inValue,
+            [out] ECode* outValue);
+        Test_ECode_Ref(
+            [in] ECode* inValue,    //deprecated
+            [out] ECode* outValue);
+
+        //Test_LocalPtr (can only be used in local interface)
+        //Test_LocalPtr(
+        //  [in] LocalPtr inValue,
+        //  [out] LocalPtr* outValue);
+
+        //LocalType
+
+        //Enum
+        Test_Enum(
+            [in] enum CarDataType inValue,
+            [out] enum CarDataType* outValue);
+        Test_Enum_Ref(
+            [in] enum CarDataType* inValue,    //deprecated
+            [out] enum CarDataType* outValue);
+
+        //ArrayOf
+        Test_ArrayOf_Int16(
+            [in] ArrayOf<Int16> inArrayOf,
+            [out, callee] ArrayOf<Int16>* outArrayOf);
+        Test_ArrayOf_Ref(
+            [in] ArrayOf<Int16>* inArrayOf,    //deprecated
+            [out, callee] ArrayOf<Int16>* outArrayOf);
+
+        Test_ArrayOf_Int32(
+            [in] ArrayOf<Int32> inArrayOf,
+            [out, callee] ArrayOf<Int32>* outArrayOf);
+        Test_ArrayOf_Int64(
+            [in] ArrayOf<Int64> inArrayOf,
+            [out, callee] ArrayOf<Int64>* outArrayOf);
+        Test_ArrayOf_Byte(
+            [in] ArrayOf<Byte> inArrayOf,
+            [out, callee] ArrayOf<Byte>* outArrayOf);
+        Test_ArrayOf_Float(
+            [in] ArrayOf<Float> inArrayOf,
+            [out, callee] ArrayOf<Float>* outArrayOf);
+        Test_ArrayOf_Double(
+            [in] ArrayOf<Double> inArrayOf,
+            [out, callee] ArrayOf<Double>* outArrayOf);
+        Test_ArrayOf_Char16(
+            [in] ArrayOf<Char16> inArrayOf,
+            [out, callee] ArrayOf<Char16>* outArrayOf);
+        Test_ArrayOf_String(
+            [in] ArrayOf<String> inArrayOf,
+            [out, callee] ArrayOf<String>* outArrayOf);
+        Test_ArrayOf_Boolean(
+            [in] ArrayOf<Boolean> inArrayOf,
+            [out, callee] ArrayOf<Boolean>* outArrayOf);
+        Test_ArrayOf_EMuid(
+            [in] ArrayOf<EMuid> inArrayOf,
+            [out, callee] ArrayOf<EMuid>* outArrayOf);
+        Test_ArrayOf_EGuid(
+            [in] ArrayOf<EGuid> inArrayOf,
+            [out, callee] ArrayOf<EGuid>* outArrayOf);
+        Test_ArrayOf_ECode(
+            [in] ArrayOf<ECode> inArrayOf,
+            [out, callee] ArrayOf<ECode>* outArrayOf);
+
+        //Test_ArrayOf_LocalPtr(...)
+        //Test_ArrayOf_LocalType(...)
+
+        Test_ArrayOf_Enum(
+            [in] ArrayOf<enum CarDataType> inArrayOf,
+            [out, callee] ArrayOf<enum CarDataType>* outArrayOf);
+
+        //CARQuintet type cann't be nested(system notification bug:CARQuintet->CARQuient)
+        //Test_ArrayOf_StringBuf(...)
+        //Test_ArrayOf_ArrayOf(...)
+        //Test_ArrayOf_CppVector(...)
+
+        Test_ArrayOf_IInterface(
+            [in] ArrayOf<IInterface*> inArrayOf,
+            [out, callee] ArrayOf<IInterface*>* outArrayOf);
+
+        //CppVector
+            //ICppVectorInfo/ICppVectorSetter/ICppVectorGetter
+
+        //Struct
+            //IStructInfo/IStructSetter/IStructGetter
+
+        Test_Interface(
+            [in] IInterface* inObject,
+            [out] IInterface** outObject);
+        Test_Interface_Ref(
+            [in] IInterface** inObject,         //deprecated
+            [out] IInterface** outObject);
+    }
+
+    [deprecated]
+    interface IMethodTest {
+        TestMethod_00();
+    }
+
+    struct StructProperty {
+        IStructInfo* desc;
+    }
+
+    [deprecated]
+    interface IProperty {
+
+        const Int32 CONSTANT_TEST_01 = 0x0001;
+        const String CONSTANT_TEST_02 = "CONSTANT_TEST_02_TEXT";
+
+        GetProperty(
+            [out] IInterface** property);
+        SetProperty(
+            [in] IInterface* property);
+        TestMethod_00();
+    }
+
+
+    struct StructTestProperty {
+        IStructInfo* desc;
+
+        Int16 mInt16Value;
+        Int32 mInt32Value;
+        Int64 mInt64Value;
+    }
+
+    //-------------------------new reflection interface---------------------
+
+    [deprecated]
+    interface ITestDataTypeInfo {
+        GetName(
+            [out] String* name);
+
+        GetSize(
+            [out] MemorySize* size);
+
+        GetDataType(
+            [out] CarDataType* dataType);
+    }
+
+    [deprecated]
+    interface ITestLocalPtrInfo extends ITestDataTypeInfo {
+        GetTargetTypeInfo(
+            [out] ITestDataTypeInfo** dateTypeInfo);
+
+        GetPtrLevel(
+            [out] Int32* level);
+    }
+
+    [deprecated]
+    interface ITestEnumInfo extends ITestDataTypeInfo {
+        GetNamespace(
+            [out] String* ns);
+
+        GetModuleInfo(
+            [out] ITestModuleInfo** moduleInfo);
+
+        GetItemCount(
+            [out] Int32* count);
+
+        GetAllItemInfos(
+            [out, callee] ArrayOf<ITestEnumItemInfo*>* itemInfos);
+
+        GetItemInfo(
+            [in] String name,
+            [out] ITestEnumItemInfo** enumItemInfo);
+    }
+
+    [deprecated]
+    interface ITestEnumItemInfo {
+        GetName(
+            [out] String* name);
+
+        GetEnumInfo(
+            [out] ITestEnumInfo** enumInfo);
+
+        GetValue(
+            [out] Int32* value);
+    }
+
+    [deprecated]
+    interface ITestCarArrayInfo extends ITestDataTypeInfo {
+        GetElementTypeInfo(
+            [out] ITestDataTypeInfo** elementTypeInfo);
+
+        CreateVariable(
+            [in] Int32 capacity,
+            [out] ITestVariableOfCarArray** variableBox);
+
+        CreateVariableBox(
+            [in] PCarQuintet variableDescriptor,
+            [out] ITestVariableOfCarArray** variableBox);
+    }
+
+    [deprecated]
+    interface ITestCppVectorInfo extends ITestDataTypeInfo {
+        GetElementTypeInfo(
+            [out] ITestDataTypeInfo** elementTypeInfo);
+
+        GetLength(
+            [out] Int32* length);
+    }
+
+    [deprecated]
+    interface ITestStructInfo extends ITestDataTypeInfo {
+        GetModuleInfo(
+            [out] ITestModuleInfo** moduleInfo);
+
+        GetFieldCount(
+            [out] Int32* count);
+
+        GetAllFieldInfos(
+            [out, callee] ArrayOf<ITestFieldInfo*>* fieldInfos);
+
+        GetFieldInfo(
+            [in] String name,
+            [out] ITestFieldInfo** fieldInfo);
+
+        CreateVariable(
+            [out] ITestVariableOfStruct** variableBox);
+
+        CreateVariableBox(
+            //[in] PVoid variableDescriptor,
+            //[in] Int32* variableDescriptor,
+            [in] PCarQuintet variableDescriptor,
+            [out] ITestVariableOfStruct** variableBox);
+    }
+
+    [deprecated]
+    interface ITestFieldInfo {
+        GetName(
+            [out] String* name);
+
+        GetTypeInfo(
+            [out] ITestDataTypeInfo** typeInfo);
+    }
+
+    [deprecated]
+    interface ITestInterfaceInfo extends ITestDataTypeInfo {
+        GetNamespace(
+            [out] String* ns);
+
+        GetId(
+            [out] InterfaceID* iid);
+
+        GetModuleInfo(
+            [out] ITestModuleInfo** moduleInfo);
+
+        IsLocal(
+            [out] Boolean* isLocal);
+
+        HasBase(
+            [out] Boolean* hasBase);
+
+        GetBaseInfo(
+            [out] IInterfaceInfo** baseInfo);
+
+        GetMethodCount(
+            [out] Int32* count);
+
+        GetAllMethodInfos(
+            [out, callee] ArrayOf<ITestMethodInfo*>* methodInfos);
+
+        GetMethodInfo(
+            [in] String name,
+            [in] String signature,
+            [out] ITestMethodInfo** methodInfo);
+    }
+
+    [deprecated]
+    interface ITestFunctionInfo {
+        GetName(
+            [out] String* name);
+
+        GetParamCount(
+            [out] Int32* count);
+
+        GetAllParamInfos(
+            [out, callee] ArrayOf<ITestParamInfo*>* paramInfos);
+
+        GetParamInfoByIndex(
+            [in] Int32 index,
+            [out] ITestParamInfo** paramInfo);
+
+        GetParamInfoByName(
+            [in] String name,
+            [out] ITestParamInfo** paramInfo);
+    }
+
+    [deprecated]
+    interface ITestMethodInfo extends ITestFunctionInfo {
+        GetAnnotation(
+            [out] String* annotation);
+
+        CreateArgumentList(
+            [out] ITestArgumentList** argumentList);
+
+        Invoke(
+            [in] PInterface target,
+            [in] ITestArgumentList* argumentList);
+    }
+
+    [deprecated]
+    interface ITestParamInfo {
+        GetMethodInfo(
+            [out] ITestMethodInfo** methodInfo);
+
+        GetName(
+            [out] String* name);
+
+        GetIndex(
+            [out] Int32* index);
+
+        GetIOAttribute(
+            [out] ParamIOAttribute* ioAttrib);
+
+        IsReturnValue(
+            [out] Boolean* returnValue);
+
+        GetTypeInfo(
+            [out] ITestDataTypeInfo** typeInfo);
+
+        GetAdvisedCapacity(
+            [out] Int32* advisedCapacity);
+
+        IsUsingTypeAlias(
+            [out] Boolean* usingTypeAlias);
+
+        GetUsedTypeAliasInfo(
+            [out] ITestTypeAliasInfo** usedTypeAliasInfo);
+    }
+
+    [deprecated]
+    interface ITestTypeAliasInfo {
+        GetName(
+            [out] String* name);
+
+        GetTypeInfo(
+            [out] ITestDataTypeInfo** typeInfo);
+
+        GetModuleInfo(
+            [out] ITestModuleInfo** moduleInfo);
+
+        IsDummy(
+            [out] Boolean* isDummy);
+
+        GetPtrLevel(
+            [out] Int32* level);
+    }
+
+    //[local, deprecated]
+    [deprecated]
+    interface ITestArgumentList {
+        GetFunctionInfo(
+            [out] ITestFunctionInfo** functionInfo);
+
+        SetInputArgumentOfInt16(
+            [in] Int32 index,
+            [in] Int16 value);
+
+        SetInputArgumentOfInt32(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        SetInputArgumentOfInt64(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        SetInputArgumentOfByte(
+            [in] Int32 index,
+            [in] Byte value);
+
+        SetInputArgumentOfFloat(
+            [in] Int32 index,
+            [in] Float value);
+
+        SetInputArgumentOfDouble(
+            [in] Int32 index,
+            [in] Double value);
+
+        SetInputArgumentOfChar(
+            [in] Int32 index,
+            [in] Char32 value);
+
+        SetInputArgumentOfString(
+            [in] Int32 index,
+            [in] String value);
+
+        SetInputArgumentOfBoolean(
+            [in] Int32 index,
+            [in] Boolean value);
+
+        SetInputArgumentOfEMuid(
+            [in] Int32 index,
+            [in] EMuid* value);
+
+        SetInputArgumentOfEGuid(
+            [in] Int32 index,
+            [in] EGuid* value);
+
+        SetInputArgumentOfECode(
+            [in] Int32 index,
+            [in] ECode value);
+
+        SetInputArgumentOfLocalPtr(
+            [in] Int32* localPtrType,
+            [in] Int32 index,
+            //[in] LocalPtr value);
+            //[in] Int32* value);
+            [in] Int32 value);
+
+        SetInputArgumentOfLocalType(
+            [in] Int32 index,
+            //[in] PVoid value);
+            [in] Int32* value);
+
+        SetInputArgumentOfEnum(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        SetInputArgumentOfCarArray(
+            [in] Int32 index,
+            [in] PCarQuintet value);
+
+        SetInputArgumentOfStructPtr(
+            [in] Int32 index,
+            //[in] PVoid value);
+            [in] Int32* value);
+
+        SetInputArgumentOfObjectPtr(
+            [in] Int32 index,
+            [in] PInterface value);
+
+        SetOutputArgumentOfInt16Ptr(
+            [in] Int32 index,
+            [out] Int16* value);
+
+        SetOutputArgumentOfInt32Ptr(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        SetOutputArgumentOfInt64Ptr(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        SetOutputArgumentOfBytePtr(
+            [in] Int32 index,
+            [out] Byte* value);
+
+        SetOutputArgumentOfFloatPtr(
+            [in] Int32 index,
+            [out] Float* value);
+
+        SetOutputArgumentOfDoublePtr(
+            [in] Int32 index,
+            [out] Double* value);
+
+        SetOutputArgumentOfCharPtr(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        SetOutputArgumentOfStringPtr(
+            [in] Int32 index,
+            [out] String* value);
+
+        SetOutputArgumentOfBooleanPtr(
+            [in] Int32 index,
+            [out] Boolean* value);
+
+        SetOutputArgumentOfEMuidPtr(
+            [in] Int32 index,
+            [out] EMuid* value);
+
+        SetOutputArgumentOfEGuidPtr(
+            [in] Int32 index,
+            [out] EGuid* value);
+
+        SetOutputArgumentOfECodePtr(
+            [in] Int32 index,
+            [out] ECode* value);
+
+        SetOutputArgumentOfLocalPtrPtr(     //??
+            [in] Int32 index,
+            //[out] LocalPtr* value);
+            [out] Int32* value);
+
+        SetOutputArgumentOfLocalTypePtr(    //??
+            [in] Int32 index,
+            //[out] PVoid value);
+            [out] Int32* value);
+
+        SetOutputArgumentOfEnumPtr(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        // Caller allocated
+        SetOutputArgumentOfCarArrayPtr(     //??
+            [in] Int32 index,
+            //[out] PCarQuintet value);
+            [out] Int32* value);
+
+        // Callee allocated
+        SetOutputArgumentOfCarArrayPtrPtr(  //??
+            [in] Int32 index,
+            //[out] PCarQuintet* value);
+            [out] Int32* value);
+
+        // Caller allocated
+        SetOutputArgumentOfStructPtr(       //??
+            [in] Int32 index,
+            //[out] PVoid value);
+            [out] Int32* value);
+
+        // Callee allocated
+        SetOutputArgumentOfStructPtrPtr(    //??
+            [in] Int32 index,
+            //[out] PVoid* value);
+            [out] Int32* value);
+
+        SetOutputArgumentOfObjectPtrPtr(
+            [in] Int32 index,
+            [out] PInterface* value);
+
+        GetInternalObject(
+            [out] PInterface* object);
+    }
+
+    [deprecated]
+    interface ITestVariable {
+        GetTypeInfo(
+            [out] ITestDataTypeInfo** typeInfo);
+
+        GetPayload(
+            //[out] PVoid* payload);
+            [out] Int32* payload);
+
+        Rebox(
+            //[in] PVoid localVariablePtr); //??
+            [in] Int32* localVariablePtr);
+    }
+
+    [deprecated]
+    interface ITestVariableOfCarArray extends ITestVariable {
+        GetSetter(
+            [out] ITestCarArraySetter** setter);
+
+        GetGetter(
+            [out] ITestCarArrayGetter** getter);
+    }
+
+    [deprecated]
+    interface ITestVariableOfStruct extends ITestVariable {
+        GetSetter(
+            [out] ITestStructSetter** setter);
+
+        GetGetter(
+            [out] ITestStructGetter** getter);
+    }
+
+    [deprecated]
+    interface ITestVariableOfCppVector extends ITestVariable {
+        GetSetter(
+            [out] ITestCppVectorSetter** setter);
+
+        GetGetter(
+            [out] ITestCppVectorGetter** getter);
+    }
+
+    [deprecated]
+    interface ITestCarArraySetter {
+        SetUsed(
+            [in] Int32 used);
+
+        SetInt16Element(
+            [in] Int32 index,
+            [in] Int16 value);
+
+        SetInt32Element(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        SetInt64Element(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        SetByteElement(
+            [in] Int32 index,
+            [in] Byte value);
+
+        SetFloatElement(
+            [in] Int32 index,
+            [in] Float value);
+
+        SetDoubleElement(
+            [in] Int32 index,
+            [in] Double value);
+
+        SetEnumElement(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        SetCharElement(
+            [in] Int32 index,
+            [in] Char32 value);
+
+        SetStringElement(
+            [in] Int32 index,
+            [in] String value);
+
+        SetBooleanElement(
+            [in] Int32 index,
+            [in] Boolean value);
+
+        SetEMuidElement(
+            [in] Int32 index,
+            [in] EMuid* value);
+
+        SetEGuidElement(
+            [in] Int32 index,
+            [in] EGuid* value);
+
+        SetECodeElement(
+            [in] Int32 index,
+            [in] ECode value);
+
+        SetLocalTypeElement(
+            [in] Int32 index,
+            //[in] PVoid value);
+            [in] Int32* value);
+
+        SetObjectPtrElement(
+            [in] Int32 index,
+            [in] PInterface value);
+
+        GetStructElementSetter(
+            [in] Int32 index,
+            [out] ITestStructSetter** setter);
+    }
+
+    [deprecated]
+    interface ITestCarArrayGetter {
+        GetCapacity(
+            [out] Int32* capacity);
+
+        GetUsed(
+            [out] Int32* used);
+
+        GetInt16Element(
+            [in] Int32 index,
+            [out] Int16* value);
+
+        GetInt32Element(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        GetInt64Element(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        GetByteElement(
+            [in] Int32 index,
+            [out] Byte* value);
+
+        GetFloatElement(
+            [in] Int32 index,
+            [out] Float* value);
+
+        GetDoubleElement(
+            [in] Int32 index,
+            [out] Double* value);
+
+        GetEnumElement(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        GetCharElement(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        GetStringElement(
+            [in] Int32 index,
+            [out] String* value);
+
+        GetBooleanElement(
+            [in] Int32 index,
+            [out] Boolean* value);
+
+        GetEMuidElement(
+            [in] Int32 index,
+            [out] EMuid* value);
+
+        GetEGuidElement(
+            [in] Int32 index,
+            [out] EGuid* value);
+
+        GetECodeElement(
+            [in] Int32 index,
+            [out] ECode* value);
+
+        GetLocalTypeElement(
+            [in] Int32 index,
+            //[out] PVoid value);
+            [out] Int32* value);
+
+        GetObjectPtrElement(
+            [in] Int32 index,
+            [out] PInterface* value);
+
+        GetStructElementGetter(
+            [in] Int32 index,
+            [out] ITestStructGetter** getter);
+    }
+
+    [deprecated]
+    interface ITestStructSetter {
+        ZeroAllFields();
+
+        SetInt16Field(
+            [in] String name,
+            [in] Int16 value);
+
+        SetInt32Field(
+            [in] String name,
+            [in] Int32 value);
+
+        SetInt64Field(
+            [in] String name,
+            [in] Int64 value);
+
+        SetByteField(
+            [in] String name,
+            [in] Byte value);
+
+        SetFloatField(
+            [in] String name,
+            [in] Float value);
+
+        SetDoubleField(
+            [in] String name,
+            [in] Double value);
+
+        SetCharField(
+            [in] String name,
+            [in] Char32 value);
+
+        SetBooleanField(
+            [in] String name,
+            [in] Boolean value);
+
+        SetEMuidField(
+            [in] String name,
+            [in] EMuid* value);
+
+        SetEGuidField(
+            [in] String name,
+            [in] EGuid* value);
+
+        SetECodeField(
+            [in] String name,
+            [in] ECode value);
+
+        SetLocalPtrField(
+            [in] String name,
+            //[in] LocalPtr value);
+            [in] Int32* value);
+
+        SetLocalTypeField(
+            [in] String name,
+            //[in] PVoid value);
+            [in] Int32* value);
+
+        SetEnumField(
+            [in] String name,
+            [in] Int32 value);
+
+        GetStructFieldSetter(
+            [in] String name,
+            [out] ITestStructSetter** setter);
+
+        GetCppVectorFieldSetter(
+            [in] String name,
+            [out] ITestCppVectorSetter** setter);
+    }
+
+    [deprecated]
+    interface ITestStructGetter {
+        GetInt16Field(
+            [in] String name,
+            [out] Int16* value);
+
+        GetInt32Field(
+            [in] String name,
+            [out] Int32* value);
+
+        GetInt64Field(
+            [in] String name,
+            [out] Int64* value);
+
+        GetByteField(
+            [in] String name,
+            [out] Byte* value);
+
+        GetFloatField(
+            [in] String name,
+            [out] Float* value);
+
+        GetDoubleField(
+            [in] String name,
+            [out] Double* value);
+
+        GetCharField(
+            [in] String name,
+            [out] Char32* value);
+
+        GetBooleanField(
+            [in] String name,
+            [out] Boolean* value);
+
+        GetEMuidField(
+            [in] String name,
+            [out] EMuid* value);
+
+        GetEGuidField(
+            [in] String name,
+            [out] EGuid* value);
+
+        GetECodeField(
+            [in] String name,
+            [out] ECode* value);
+
+        GetLocalPtrField(
+            [in] String name,
+            //[out] LocalPtr* value);
+            [out] Int32* value);
+
+        GetLocalTypeField(
+            [in] String name,
+            //[out] PVoid value);
+            [out] Int32* value);
+
+        GetEnumField(
+            [in] String name,
+            [out] Int32* value);
+
+        GetStructFieldGetter(
+            [in] String name,
+            [out] ITestStructGetter** getter);
+
+        GetCppVectorFieldGetter(
+            [in] String name,
+            [out] ITestCppVectorGetter** getter);
+    }
+
+    [deprecated]
+    interface ITestCppVectorSetter {
+        ZeroAllElements();
+
+        SetAllElements(
+            //[in] PVoid value,
+            [in] Int32* value,
+            [in] MemorySize size);
+
+        SetInt16Element(
+            [in] Int32 index,
+            [in] Int16 value);
+
+        SetInt32Element(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        SetInt64Element(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        SetByteElement(
+            [in] Int32 index,
+            [in] Byte value);
+
+        SetFloatElement(
+            [in] Int32 index,
+            [in] Float value);
+
+        SetDoubleElement(
+            [in] Int32 index,
+            [in] Double value);
+
+        SetCharElement(
+            [in] Int32 index,
+            [in] Char32 value);
+
+        SetBooleanElement(
+            [in] Int32 index,
+            [in] Boolean value);
+
+        SetEMuidElement(
+            [in] Int32 index,
+            [in] EMuid* value);
+
+        SetEGuidElement(
+            [in] Int32 index,
+            [in] EGuid* value);
+
+        SetECodeElement(
+            [in] Int32 index,
+            [in] ECode value);
+
+        SetLocalPtrElement(
+            [in] Int32 index,
+            //[in] LocalPtr value);
+            [in] Int32* value);
+
+        SetLocalTypeElement(
+            [in] Int32 index,
+            //[in] PVoid value);
+            [in] Int32* value);
+
+        SetEnumElement(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        GetStructElementSetter(
+            [in] Int32 index,
+            [out] ITestStructSetter** setter);
+
+        GetCppVectorElementSetter(
+            [in] Int32 index,
+            [out] ITestCppVectorSetter** setter);
+    }
+
+    [deprecated]
+    interface ITestCppVectorGetter {
+        GetLength(
+            [out] Int32* length);
+
+        GetRank(
+            [out] Int32* rank);
+
+        GetInt16Element(
+            [in] Int32 index,
+            [out] Int16* value);
+
+        GetInt32Element(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        GetInt64Element(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        GetByteElement(
+            [in] Int32 index,
+            [out] Byte* value);
+
+        GetFloatElement(
+            [in] Int32 index,
+            [out] Float* value);
+
+        GetDoubleElement(
+            [in] Int32 index,
+            [out] Double* value);
+
+        GetCharElement(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        GetBooleanElement(
+            [in] Int32 index,
+            [out] Boolean* value);
+
+        GetEMuidElement(
+            [in] Int32 index,
+            [out] EMuid* value);
+
+        GetEGuidElement(
+            [in] Int32 index,
+            [out] EGuid* value);
+
+        GetECodeElement(
+            [in] Int32 index,
+            [out] ECode* value);
+
+        GetLocalPtrElement(
+            [in] Int32 index,
+            //[out] LocalPtr* value);
+            [out] Int32* value);
+
+        GetLocalTypeElement(
+            [in] Int32 index,
+            //[out] PVoid value);
+            [out] Int32* value);
+
+        GetEnumElement(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        GetStructElementGetter(
+            [in] Int32 index,
+            [out] ITestStructGetter** getter);
+
+        GetCppVectorElementGetter(
+            [in] Int32 index,
+            [out] ITestCppVectorGetter** getter);
+    }
+
+    [deprecated]
+    interface ITestModuleInfo {
+        GetPath(
+            [out] String* path);
+
+        GetVersion(
+            [out] Int32* major,
+            [out] Int32* minor,
+            [out] Int32* build,
+            [out] Int32* revision);
+
+        GetClassCount(
+            [out] Int32* count);
+
+        GetAllClassInfos(
+            [out, callee] ArrayOf<ITestClassInfo*>* classInfos);
+
+        GetClassInfo(
+            [in] String fullName,
+            [out] ITestClassInfo** classInfo);
+
+        GetInterfaceCount(
+            [out] Int32* count);
+
+        GetAllInterfaceInfos(
+            [out, callee] ArrayOf<ITestInterfaceInfo*>* interfaceInfos);
+
+        GetInterfaceInfo(
+            [in] String fullName,
+            [out] ITestInterfaceInfo** interfaceInfo);
+
+        GetStructCount(
+            [out] Int32* count);
+
+        GetAllStructInfos(
+            [out, callee] ArrayOf<ITestStructInfo*>* structInfos);
+
+        GetStructInfo(
+            [in] String name,
+            [out] ITestStructInfo** structInfo);
+
+        GetEnumCount(
+            [out] Int32* count);
+
+        GetAllEnumInfos(
+            [out, callee] ArrayOf<ITestEnumInfo*>* enumInfos);
+
+        GetEnumInfo(
+            [in] String fullName,
+            [out] ITestEnumInfo** enumInfo);
+
+        GetTypeAliasCount(
+            [out] Int32* count);
+
+        GetAllTypeAliasInfos(
+            [out, callee] ArrayOf<ITestTypeAliasInfo*>* typeAliasInfos);
+
+        GetTypeAliasInfo(
+            [in] String name,
+            [out] ITestTypeAliasInfo** typeAliasInfo);
+
+        GetConstantCount(
+            [out] Int32* count);
+
+        GetAllConstantInfos(
+            [out, callee] ArrayOf<ITestConstantInfo*>* constantInfos);
+
+        GetConstantInfo(
+            [in] String name,
+            [out] ITestConstantInfo** constantInfo);
+
+        GetImportModuleInfoCount(
+            [out] Int32* count);
+
+        GetAllImportModuleInfos(
+            [out, callee] ArrayOf<ITestModuleInfo*>* moduleInfos);
+    }
+
+    [deprecated]
+    interface ITestConstantInfo {
+        GetName(
+            [out] String* name);
+
+        GetValue(
+            [out] Int32* value);
+
+        GetModuleInfo(
+            [out] ITestModuleInfo** moduleInfo);
+    }
+
+    [deprecated]
+    interface ITestClassInfo {
+        GetName(
+            [out] String* name);
+
+        GetNamespace(
+            [out] String* ns);
+
+        GetId(
+            [out] ClassID* clsid);
+
+        GetModuleInfo(
+            [out] ITestModuleInfo** moduleInfo);
+
+        IsSingleton(
+            [out] Boolean* isSingleton);
+
+        GetThreadingModel(
+            [out] ThreadingModel* threadingModel);
+
+        IsPrivate(
+            [out] Boolean* isPrivate);
+
+        IsReturnValue(
+            [out] Boolean* returnValue);
+
+        IsBaseClass(
+            [out] Boolean* isBaseClass);
+
+        HasBaseClass(
+            [out] Boolean* hasBaseClass);
+
+        GetBaseClassInfo(
+            [out] ITestClassInfo** baseClassInfo);
+
+        IsGeneric(
+            [out] Boolean* isGeneric);
+
+        HasGeneric(
+            [out] Boolean* hasGeneric);
+
+        GetGenericInfo(
+            [out] ITestClassInfo** genericInfo);
+
+        IsRegime(
+            [out] Boolean* isRegime);
+
+        GetAspectCount(
+            [out] Int32* count);
+
+        GetAllAspectInfos(
+            [out, callee] ArrayOf<ITestClassInfo*>* aspectInfos);
+
+        GetAspectInfo(
+            [in] String name,
+            [out] ITestClassInfo** aspectInfo);
+
+        IsAspect(
+            [out] Boolean* isAspect);
+
+        GetAggregateeCount(
+            [out] Int32* count);
+
+        GetAllAggregateeInfos(
+            [out, callee] ArrayOf<ITestClassInfo*>* aggregateeInfos);
+
+        GetAggregateeInfo(
+            [in] String name,
+            [out] ITestClassInfo** aggregateeInfo);
+
+        GetConstructorCount(
+            [out] Int32* count);
+
+        GetAllConstructorInfos(
+            [out, callee] ArrayOf<ITestConstructorInfo*>* constructorInfos);
+
+        GetConstructorInfoByParamNames(
+            [in] String name,
+            [out] ITestConstructorInfo** constructorInfo);
+
+        GetConstructorInfoByParamCount(
+            [in] Int32 count,
+            [out] ITestConstructorInfo** constructorInfo);
+
+        GetInterfaceCount(
+            [out] Int32* count);
+
+        GetAllInterfaceInfos(
+            [out, callee] ArrayOf<ITestInterfaceInfo*>* interfaceInfos);
+
+        GetInterfaceInfo(
+            [in] String fullName,
+            [out] ITestInterfaceInfo** interfaceInfo);
+
+        GetCallbackInterfaceCount(
+            [out] Int32* count);
+
+        GetAllCallbackInterfaceInfos(
+            [out, callee] ArrayOf<ITestInterfaceInfo*>* callbackInterfaceInfos);
+
+        GetCallbackInterfaceInfo(
+            [in] String name,
+            [out] ITestInterfaceInfo** callbackInterfaceInfo);
+
+        GetMethodCount(
+            [out] Int32* count);
+
+        GetAllMethodInfos(
+            [out, callee] ArrayOf<ITestMethodInfo*>* methodInfos);
+
+        GetMethodInfo(
+            [in] String name,
+            [in] String signature,
+            [out] ITestMethodInfo** methodInfo);
+
+        GetCallbackMethodCount(
+            [out] Int32* count);
+
+        GetAllCallbackMethodInfos(
+            [out, callee] ArrayOf<ITestCallbackMethodInfo*>* callbackMethodInfos);
+
+        GetCallbackMethodInfo(
+            [in] String name,
+            [out] ITestCallbackMethodInfo** callbackMethodInfo);
+
+        RemoveAllCallbackHandlers(
+            [in] PInterface server);
+
+        CreateObject(
+            [out] PInterface* object);
+
+        CreateObjectInRegime(
+            [in] PRegime rgm,
+            [out] PInterface* object);
+    }
+
+    [deprecated]
+    interface ITestConstructorInfo extends ITestFunctionInfo {
+        GetAnnotation(
+            [out] String* annotation);
+
+        CreateArgumentList(
+            [out] ITestArgumentList** argumentList);
+
+        CreateObject(
+            [in] ITestArgumentList* argumentList,
+            [out] PInterface* object);
+
+        CreateObjectInRegime(
+            [in] PRegime rgm,
+            [in] ITestArgumentList* argumentList,
+            [out] PInterface* object);
+
+        GetClassInfo(
+            [out] ITestClassInfo** classInfo);
+    }
+
+    [deprecated]
+    interface ITestCallbackMethodInfo extends ITestFunctionInfo {
+        AddCallback(
+            [in] PInterface server,
+            [in] EventHandler handler);
+
+        RemoveCallback(
+            [in] PInterface server,
+            [in] EventHandler handler);
+
+        CreateDelegateProxy(
+            //[in] PVoid targetObject,
+            [in] Int32* targetObject,
+            //[in] PVoid targetMethod,
+            [in] Int32* targetMethod,
+            [in] ITestCallbackInvocation* callbackInvocation,
+            [out] ITestDelegateProxy** delegateProxy);
+    }
+
+    [deprecated]
+    interface ITestDelegateProxy {
+        GetCallbackMethodInfo(
+            [out] ITestCallbackMethodInfo** callbackMethodInfo);
+
+        GetTargetObject(
+            //[out] PVoid* targetObject);
+            [out] Int32* targetObject);
+
+        GetTargetMethod(
+            //[out] PVoid* targetMethod);
+            [out] Int32* targetMethod);
+
+        GetCallbackInvocation(
+            [out] ITestCallbackInvocation** callbackInvocation);
+
+        GetDelegate(
+            [out] EventHandler* handler);
+    }
+
+    [deprecated]
+    interface ITestCallbackInvocation {
+        Invoke(
+            //[in] PVoid targetObject,
+            [in] Int32* targetObject,
+            //[in] PVoid targetMethod,
+            [in] Int32* targetMethod,
+            [in] ICallbackArgumentList* callbackArgumentList);
+    }
+
+    [deprecated]
+    interface ITestCallbackArgumentList {
+        GetCallbackMethodInfo(
+            [out] ITestCallbackMethodInfo** callbackMethodInfo);
+
+        GetServerPtrArgument(
+            [out] PInterface* server);
+
+        GetInt16Argument(
+            [in] Int32 index,
+            [out] Int16* value);
+
+        GetInt32Argument(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        GetInt64Argument(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        GetByteArgument(
+            [in] Int32 index,
+            [out] Byte* value);
+
+        GetFloatArgument(
+            [in] Int32 index,
+            [out] Float* value);
+
+        GetDoubleArgument(
+            [in] Int32 index,
+            [out] Double* value);
+
+        GetCharArgument(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        GetStringArgument(
+            [in] Int32 index,
+            [out] String* value);
+
+        GetBooleanArgument(
+            [in] Int32 index,
+            [out] Boolean* value);
+
+        GetEMuidArgument(
+            [in] Int32 index,
+            //[out] EMuid** value);
+            [out] Int32* value);
+
+        GetEGuidArgument(
+            [in] Int32 index,
+            //[out] EGuid** value);
+            [out] Int32* value);
+
+        GetECodeArgument(
+            [in] Int32 index,
+            [out] ECode* value);
+
+        // Need it?
+        GetLocalPtrArgument(
+            [in] Int32 index,
+            //[out] LocalPtr* value);
+            [out] Int32* value);
+
+        GetEnumArgument(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        GetCarArrayArgument(
+            [in] Int32 index,
+            //[out] PCarQuintet* value);
+            [out] Int32* value);
+
+        GetStructPtrArgument(
+            [in] Int32 index,
+            //[out] PVoid* value);
+            [out] Int32* value);
+
+        GetObjectPtrArgument(
+            [in] Int32 index,
+            [out] PInterface* value);
+    }
+
+    //add by whm
+    //[deprecated]
+    interface IIntrinsicInfo extends ITestDataTypeInfo {
+        DoNothing();
+    }
+    //typedef ITestDataTypeInfo IIntrinsicInfo;
+
+    //add by whm
+    [deprecated]
+    interface ILocalTypeInfo extends ITestDataTypeInfo {
+        DoNothing();
+    }
+    //typedef ITestDataTypeInfo ILocalTypeInfo;
+
+    //add by whm
+    [deprecated]
+    interface ITestIntrinsicInfo extends ITestDataTypeInfo {
+        DoNothing();
+    }
+    //typedef IIntrinsicInfo ITestIntrinsicInfo;
+
+    //add by whm
+    [deprecated]
+    interface ITestLocalTypeInfo extends ITestDataTypeInfo {
+        DoNothing();
+    }
+    //typedef ILocalTypeInfo ITestLocalTypeInfo;
+
+//-------------------------user class---------------------
+
+    class CCarRuntime {
+        interface ICarRuntime;
+    }
+
+    class CTestCarDataType {
+        interface ITestCarDataType;
+    }
+
+    class CTestProperty {
+        constructor();
+
+        constructor(
+            [in] IInterface* property);
+
+        interface IProperty;
+        interface IMethodTest;
+    }
+
+//-------------------------reflection class---------------------
+
+    class CTestDataTypeInfo {
+        constructor();
+        constructor(
+            [in] IDataTypeInfo* dataTypeInfo);
+
+        interface ITestDataTypeInfo;
+    }
+
+    class CTestArgumentList {
+        constructor();
+        constructor(
+            [in] IArgumentList* argumentList);
+
+        interface ITestArgumentList;
+    }
+
+    class CTestCallbackArgumentList {
+        constructor();
+        constructor(
+            [in] ICallbackArgumentList* callbackArgumentList);
+
+        interface ITestCallbackArgumentList;
+    }
+
+    class CTestCallbackMethodInfo {
+        constructor();
+        constructor(
+            [in] ICallbackMethodInfo* callbackMethodInfo);
+
+        interface ITestCallbackMethodInfo;
+    }
+
+    class CTestCarArrayInfo {
+        constructor();
+        constructor(
+            [in] ICarArrayInfo* carArrayInfo);
+
+        interface ITestCarArrayInfo;
+    }
+
+    class CTestClassInfo {
+        constructor();
+        constructor(
+            [in] IClassInfo* classInfo);
+
+        interface ITestClassInfo;
+    }
+
+    class CTestConstantInfo {
+        constructor();
+        constructor(
+            [in] IConstantInfo* constantInfo);
+
+        interface ITestConstantInfo;
+    }
+
+    class CTestConstructorInfo {
+        constructor();
+        constructor(
+            [in] IConstructorInfo* constructorInfo);
+
+        interface ITestConstructorInfo;
+    }
+
+    class CTestCppVectorInfo {
+        constructor();
+        constructor(
+            [in] ICppVectorInfo* cppVectorInfo);
+
+        interface ITestCppVectorInfo;
+    }
+
+    class CTestDelegateProxy {
+        constructor();
+        constructor(
+            [in] IDelegateProxy* delegateProxy);
+
+        interface ITestDelegateProxy;
+    }
+
+    class CTestEnumInfo {
+        constructor();
+        constructor(
+            [in] IEnumInfo* enumInfo);
+
+        interface ITestEnumInfo;
+    }
+
+    class CTestEnumItemInfo {
+        constructor();
+        constructor(
+            [in] IEnumItemInfo* enumItemInfo);
+
+        interface ITestEnumItemInfo;
+    }
+
+    class CTestFieldInfo {
+        constructor();
+        constructor(
+            [in] IFieldInfo* fieldInfo);
+
+        interface ITestFieldInfo;
+    }
+
+    class CTestInterfaceInfo {
+        constructor();
+        constructor(
+            [in] IInterfaceInfo* interfaceInfo);
+
+        interface ITestInterfaceInfo;
+    }
+
+    class CTestIntrinsicInfo {
+        constructor();
+        constructor(
+            [in] IIntrinsicInfo* intrinsicInfo);
+
+        interface ITestIntrinsicInfo;
+    }
+
+    class CTestLocalPtrInfo {
+        constructor();
+        constructor(
+            [in] ILocalPtrInfo* localPtrInfo);
+
+        interface ITestLocalPtrInfo;
+    }
+
+    class CTestLocalTypeInfo {
+        constructor();
+        constructor(
+            [in] ILocalTypeInfo* localTypeInfo);
+
+        interface ITestLocalTypeInfo;
+    }
+
+    class CTestMethodInfo {
+        constructor();
+        constructor(
+            [in] IMethodInfo* methodInfo);
+
+        interface ITestMethodInfo;
+    }
+
+    class CTestModuleInfo {
+        constructor();
+        constructor(
+            [in] IModuleInfo* moduleInfo);
+
+        interface ITestModuleInfo;
+    }
+
+    class CTestParamInfo {
+        constructor();
+        constructor(
+            [in] IParamInfo* paramInfo);
+
+        interface ITestParamInfo;
+    }
+
+    class CTestStructInfo {
+        constructor();
+        constructor(
+            [in] IStructInfo* structInfo);
+
+        interface ITestStructInfo;
+    }
+
+    class CTestTypeAliasInfo {
+        constructor();
+        constructor(
+            [in] ITypeAliasInfo* typeAliasInfo);
+
+        interface ITestTypeAliasInfo;
+    }
+
+    class CTestVariableOfCarArray {
+        constructor();
+        constructor(
+            [in] IVariableOfCarArray* variableOfCarArray);
+
+        interface ITestVariableOfCarArray;
+        interface ITestCarArraySetter;
+        interface ITestCarArrayGetter;
+    }
+
+    class CTestVariableOfCppVector {
+        constructor();
+        constructor(
+            [in] ICppVectorSetter* cppVectorSetter);
+
+        interface ITestVariableOfCppVector;
+        interface ITestCppVectorSetter;
+        interface ITestCppVectorGetter;
+    }
+
+    class CTestVariableOfStruct {
+        constructor();
+        constructor(
+            [in] IVariableOfStruct* variableOfStruct);
+
+        interface ITestVariableOfStruct;
+        interface ITestCarArraySetter;
+        interface ITestCarArrayGetter;
+    }
+
+    } // namespace JSCarRuntime
+    } // namespace Droid
+    } // namespace Node
+    } // namespace Elastos
+
+}
