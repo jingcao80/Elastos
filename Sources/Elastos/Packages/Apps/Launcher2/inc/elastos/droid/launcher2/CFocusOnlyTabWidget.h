@@ -26,20 +26,6 @@ public:
 
     CAR_OBJECT_DECL();
 
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IContext* context);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyle);
-
     CARAPI GetSelectedTab(
         /* [out] */ IView** tab);
 

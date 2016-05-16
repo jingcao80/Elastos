@@ -108,13 +108,13 @@ ECode FocusHelper::MyComparator::Compare(
 
     AutoPtr<IViewGroupLayoutParams> lhsParams;
     lhsView->GetLayoutParams((IViewGroupLayoutParams**)&lhsParams);
-    AutoPtr<CellLayout::LayoutParams> llp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(lhsParams);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> llp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(lhsParams);
 
     AutoPtr<IViewGroupLayoutParams> rhsParams;
     rhsView->GetLayoutParams((IViewGroupLayoutParams**)&rhsParams);
-    AutoPtr<CellLayout::LayoutParams> rlp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(rhsParams);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> rlp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(rhsParams);
 
     Int32 lvIndex = (llp->mCellY * mCellCountX) + llp->mCellX;
     Int32 rvIndex = (rlp->mCellY * mCellCountX) + rlp->mCellX;
@@ -936,8 +936,8 @@ AutoPtr<IView> FocusHelper::GetClosestIconOnLine(
     AutoPtr<IArrayList> views = GetCellLayoutChildrenSortedSpatially(layout, parent);
     AutoPtr<IViewGroupLayoutParams> params;
     v->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<CellLayout::LayoutParams> lp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(params);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
     Int32 cellCountY;
     layout->GetCountY(&cellCountY);
     Int32 row = lp->mCellY;
@@ -956,8 +956,8 @@ AutoPtr<IView> FocusHelper::GetClosestIconOnLine(
             AutoPtr<IView> newV = IView::Probe(obj);
             AutoPtr<IViewGroupLayoutParams> _params;
             newV->GetLayoutParams((IViewGroupLayoutParams**)&_params);
-            AutoPtr<CellLayout::LayoutParams> tmpLp =
-                    (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(_params);
+            AutoPtr<CellLayout::CellLayoutLayoutParams> tmpLp =
+                    (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(_params);
             Boolean satisfiesRow = (lineDelta < 0) ? (tmpLp->mCellY < row) : (tmpLp->mCellY > row);
             if (satisfiesRow && (IBubbleTextView::Probe(newV) != NULL
                         || IFolderIcon::Probe(newV) != NULL)) {

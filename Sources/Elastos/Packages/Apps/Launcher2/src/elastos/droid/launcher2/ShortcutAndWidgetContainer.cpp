@@ -69,8 +69,8 @@ ECode ShortcutAndWidgetContainer::GetChildAt(
         ViewGroup::GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<CellLayout::LayoutParams> lp =
-                (CellLayout::LayoutParams*)IObject::Probe(params);
+        AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+                (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
 
         if ((lp->mCellX <= x) && (x < lp->mCellX + lp->mCellHSpan) &&
                 (lp->mCellY <= y) && (y < lp->mCellY + lp->mCellVSpan)) {
@@ -100,8 +100,8 @@ ECode ShortcutAndWidgetContainer::DispatchDraw(
             ViewGroup::GetChildAt(i, (IView**)&child);
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            AutoPtr<CellLayout::LayoutParams> lp =
-                    (CellLayout::LayoutParams*)IObject::Probe(params);
+            AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+                    (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
             canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
         }
     }
@@ -127,7 +127,7 @@ void ShortcutAndWidgetContainer::OnMeasure(
 ECode ShortcutAndWidgetContainer::SetupLp(
     /* [in] */ ICellLayoutLayoutParams* lp)
 {
-    ((CellLayout::LayoutParams*)lp)->Setup(mCellWidth, mCellHeight,
+    ((CellLayout::CellLayoutLayoutParams*)lp)->Setup(mCellWidth, mCellHeight,
             mWidthGap, mHeightGap, InvertLayoutHorizontally(),
             mCountX);
     return NOERROR;
@@ -147,8 +147,8 @@ ECode ShortcutAndWidgetContainer::MeasureChild(
     const Int32 cellHeight = mCellHeight;
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<CellLayout::LayoutParams> lp =
-            (CellLayout::LayoutParams*)IObject::Probe(params);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+            (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
     lp->Setup(cellWidth, cellHeight, mWidthGap, mHeightGap,
             InvertLayoutHorizontally(), mCountX);
     Int32 childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(
@@ -193,8 +193,8 @@ ECode ShortcutAndWidgetContainer::OnLayout(
         if (visibility != GONE) {
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            AutoPtr<CellLayout::LayoutParams> lp =
-                    (CellLayout::LayoutParams*)IObject::Probe(params);
+            AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+                    (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
             Int32 childLeft = lp->mX;
             Int32 childTop = lp->mY;
             child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);

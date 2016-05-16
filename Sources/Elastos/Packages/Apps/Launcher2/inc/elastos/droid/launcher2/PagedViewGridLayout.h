@@ -30,17 +30,19 @@ class PagedViewGridLayout
     , public IPage
 {
 public:
-    class LayoutParams
+    class PagedViewGridLayoutLayoutParams
         : public FrameLayout::LayoutParams
     {
     public:
-        LayoutParams(
+        PagedViewGridLayoutLayoutParams(
             /* [in] */ Int32 width,
             /* [in] */ Int32 height);
     };
 
 public:
     CAR_INTERFACE_DECL();
+
+    TO_STRING_IMPL("PagedViewGridLayout")
 
     PagedViewGridLayout(
         /* [in] */ IContext* context,

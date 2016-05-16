@@ -141,7 +141,7 @@ const Int32 PagedView::sScrollIndicatorFadeOutDuration;
 const Int32 PagedView::sScrollIndicatorFlashDuration;
 
 const String PagedView::TAG("PagedView");
-const Boolean PagedView::DEBUG;
+const Boolean PagedView::DEBUG = TRUE;
 const Int32 PagedView::MIN_LENGTH_FOR_FLING;
 const Float PagedView::OVERSCROLL_ACCELERATE_FACTOR;
 const Float PagedView::OVERSCROLL_DAMP_FACTOR;
@@ -214,14 +214,14 @@ PagedView::PagedView()
 ECode PagedView::constructor(
     /* [in] */ IContext* context)
 {
-    return ViewGroup::constructor(context, NULL);
+    return constructor(context, NULL);
 }
 
 ECode PagedView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return ViewGroup::constructor(context, attrs, 0);
+    return constructor(context, attrs, 0);
 }
 
 ECode PagedView::constructor(
@@ -446,9 +446,8 @@ ECode PagedView::SetCurrentPage(
         return NOERROR;
     }
 
-
-    mCurrentPage = Elastos::Core::Math::Max(0,
-        Elastos::Core::Math::Min(currentPage, GetPageCount() - 1));
+    using Elastos::Core::Math;
+    mCurrentPage = Math::Max(0, Math::Min(currentPage, GetPageCount() - 1));
     UpdateCurrentPageScroll();
     UpdateScrollingIndicator();
     NotifyPageSwitchListener();
@@ -638,11 +637,12 @@ void PagedView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+Logger::E("PagedView", "===================PagedView::OnMeasure 1");
     if (!mIsDataReady) {
         ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
         return;
     }
-
+Logger::E("PagedView", "===================PagedView::OnMeasure 1");
     Int32 widthMode = MeasureSpec::GetMode(widthMeasureSpec);
     Int32 widthSize = MeasureSpec::GetSize(widthMeasureSpec);
     Int32 heightMode = MeasureSpec::GetMode(heightMeasureSpec);
@@ -712,7 +712,7 @@ void PagedView::OnMeasure(
         child->GetMeasuredWidth(&mw);
         child->GetMeasuredHeight(&mh);
         maxChildHeight = Elastos::Core::Math::Max(maxChildHeight, mh);
-        if (DEBUG) Logger::D(TAG, "\tmeasure-child%d: %d, %d", i, mw, mh);
+        if (DEBUG) Logger::D(TAG, "\tmeasure-child %d [%s]: %d, %d", i, TO_CSTR(child), mw, mh);
     }
 
     if (heightMode == MeasureSpec::AT_MOST) {
@@ -835,10 +835,11 @@ ECode PagedView::OnLayout(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
+Logger::E("PagedView", "===================PagedView::OnLayout 1");
     if (!mIsDataReady) {
         return NOERROR;
     }
-
+Logger::E("PagedView", "===================PagedView::OnLayout 2");
     if (DEBUG) Logger::D(TAG, "PagedView::onLayout()");
     Int32 pTop;
     Int32 pBottom;
@@ -868,7 +869,7 @@ ECode PagedView::OnLayout(
                 childTop += ((measuredHeight - verticalPadding) - childHeight) / 2;
             }
 
-            if (DEBUG) Logger::D(TAG, "\tlayout-child%d: %d, %d", i, childLeft, childTop);
+            if (DEBUG) Logger::D(TAG, "\tlayout-child %d [%s]: %d, %d", i, TO_CSTR(child), childLeft, childTop);
             Int32 measuredWidth;
             child->GetMeasuredWidth(&measuredWidth);
             child->Layout(childLeft, childTop, childLeft + measuredWidth,
@@ -1065,6 +1066,7 @@ Boolean PagedView::ShouldDrawChild(
 ECode PagedView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
+Logger::E("PagedView", "========================PagedView::DispatchDraw ");
     Int32 measuredWidth;
     GetMeasuredWidth(&measuredWidth);
     Int32 halfScreenSize = measuredWidth / 2;
@@ -1105,8 +1107,10 @@ ECode PagedView::DispatchDraw(
 
             for (Int32 i = GetPageCount() - 1; i >= 0; i--) {
                 AutoPtr<IView> v = GetPageAt(i);
+Logger::E("PagedView", "========================PagedView::DispatchDraw ShouldDrawChild View: %s", TO_CSTR(v));
                 if (mForceDrawAllChildrenNextFrame ||
                     (leftScreen <= i && i <= rightScreen && ShouldDrawChild(v))) {
+Logger::E("PagedView", "========================PagedView::DispatchDraw to View: %s", TO_CSTR(v));
                     DrawChild(canvas, v, drawingTime);
                 }
             }

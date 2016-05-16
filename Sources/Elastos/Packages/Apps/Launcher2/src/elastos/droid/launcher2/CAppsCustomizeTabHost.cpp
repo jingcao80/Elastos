@@ -230,10 +230,13 @@ CAppsCustomizeTabHost::CAppsCustomizeTabHost()
     , mTransitioningToWorkspace(FALSE)
     , mResetAfterTransition(FALSE)
 {
+Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::CAppsCustomizeTabHost()");
 }
 
 ECode CAppsCustomizeTabHost::constructor()
 {
+Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::constructor()");
+
     return NOERROR;
 }
 
@@ -241,9 +244,12 @@ ECode CAppsCustomizeTabHost::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::constructor(context, attrs) 1");
     TabHost::constructor(context, attrs);
     LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
     mRelayoutAndMakeVisible = new MyRunnable(this);
+Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::constructor(context, attrs) 2");
+
     return NOERROR;
 }
 
@@ -271,6 +277,7 @@ ECode CAppsCustomizeTabHost::SelectWidgetsTab()
 
 ECode CAppsCustomizeTabHost::OnFinishInflate()
 {
+Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::OnFinishInflate 1");
     // Setup the tab host
     Setup();
 

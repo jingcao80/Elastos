@@ -39,34 +39,6 @@ CPagedViewIcon::CPagedViewIcon()
 {
 }
 
-ECode CPagedViewIcon::constructor()
-{
-Slogger::E("CPagedViewIcon", "===================constructor()");
-    return NOERROR;
-}
-
-ECode CPagedViewIcon::constructor(
-    /* [in] */ IContext* context)
-{
-    return constructor(context, NULL);
-}
-
-ECode CPagedViewIcon::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return constructor(context, attrs, 0);
-}
-
-ECode CPagedViewIcon::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle)
-{
-Slogger::E("CPagedViewIcon", "===================constructor(context,attrs,defStyle)");
-    return TextView::constructor(context, attrs, defStyle);
-}
-
 ECode CPagedViewIcon::ApplyFromApplicationInfo(
     /* [in] */ IApplicationInfo* info,
     /* [in] */ Boolean scaleUp,
@@ -78,9 +50,9 @@ Slogger::E("CPagedViewIcon", "===================ApplyFromApplicationInfo");
     mPressedCallback = cb;
     AutoPtr<FastBitmapDrawable> drawable = new FastBitmapDrawable();
     drawable->constructor(mIcon);
-Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set icon");
+Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set icon: %s", TO_CSTR(mIcon));
     SetCompoundDrawablesWithIntrinsicBounds(NULL, IDrawable::Probe(drawable), NULL, NULL);
-Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set text");
+Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set text: %s", TO_CSTR(_info->mTitle));
     SetText(_info->mTitle);
     if (_info->mContentDescription != NULL) {
         SetContentDescription(_info->mContentDescription);

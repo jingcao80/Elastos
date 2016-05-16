@@ -578,7 +578,7 @@ ECode FolderIcon::OnDragEnter(
     AutoPtr<IViewGroupLayoutParams> params;
     GetLayoutParams((IViewGroupLayoutParams**)&params);
 
-    AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp = (CellLayout::CellLayoutLayoutParams*)
             ICellLayoutLayoutParams::Probe(params);
 
     AutoPtr<IViewParent> parent1;

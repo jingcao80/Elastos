@@ -22,6 +22,8 @@ class HandleView
     : public ImageView
 {
 public:
+    TO_STRING_IMPL("HandleView")
+
     HandleView();
 
     virtual ~HandleView() {}

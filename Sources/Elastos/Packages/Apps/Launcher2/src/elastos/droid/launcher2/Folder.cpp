@@ -946,7 +946,7 @@ ECode Folder::CreateAndAddShortcut(
         }
     }
 
-    AutoPtr<CellLayout::LayoutParams> lp = new CellLayout::LayoutParams();
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp = new CellLayout::CellLayoutLayoutParams();
     lp->constructor(_item->mCellX, _item->mCellY, _item->mSpanX, _item->mSpanY);
     Boolean insert = FALSE;
     AutoPtr<IViewOnKeyListener> lis = new FolderKeyEventListener();
@@ -1438,11 +1438,10 @@ void Folder::SetupContentForNumItems(
     AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(res);
 
     if (lp == NULL) {
-        AutoPtr<DragLayer::LayoutParams> _lp = new DragLayer::LayoutParams();
-        _lp->constructor(0, 0);
-        _lp->mCustomPosition = TRUE;
-        lp = IDragLayerLayoutParams::Probe(_lp);
-        SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        AutoPtr<DragLayer::DragLayerLayoutParams> lp = new DragLayer::DragLayerLayoutParams();
+        lp->constructor(0, 0);
+        lp->mCustomPosition = TRUE;
+        SetLayoutParams((IViewGroupLayoutParams*)lp.Get());
     }
     CenterAboutIcon();
 }
@@ -1498,8 +1497,8 @@ void Folder::ArrangeChildren(
         mContent->GetVacantCell(vacant, 1, 1, &tmp);
         AutoPtr<IViewGroupLayoutParams> res;
         v->GetLayoutParams((IViewGroupLayoutParams**)&res);
-        CellLayout::LayoutParams* lp =
-                (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(res);
+        CellLayout::CellLayoutLayoutParams* lp =
+                (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(res);
         lp->mCellX = (*vacant)[0];
         lp->mCellY = (*vacant)[1];
         AutoPtr<IInterface> obj2;
@@ -1633,7 +1632,7 @@ ECode Folder::OnDrop(
 
         AutoPtr<IViewGroupLayoutParams> res;
         mCurrentDragView->GetLayoutParams((IViewGroupLayoutParams**)&res);
-        CellLayout::LayoutParams* lp = (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(res);
+        CellLayout::CellLayoutLayoutParams* lp = (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(res);
         lp->mCellX = (*mEmptyCell)[0];
         si->mCellX = (*mEmptyCell)[0];
         lp->mCellY = (*mEmptyCell)[1];

@@ -27,6 +27,8 @@ class PagedViewCellLayoutChildren
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("PagedViewCellLayoutChildren")
+
     PagedViewCellLayoutChildren(
         /* [in] */ IContext* context);
 

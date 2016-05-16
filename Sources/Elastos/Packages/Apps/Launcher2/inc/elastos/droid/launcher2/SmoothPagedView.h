@@ -53,6 +53,8 @@ public:
     };
 
 public:
+    TO_STRING_IMPL("SmoothPagedView")
+
     SmoothPagedView();
 
     /**

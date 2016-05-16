@@ -269,7 +269,7 @@ Slogger::E("CHotseat", "============================CHotseat::ResetLayout ITextV
     GetCellXFromOrder(mAllAppsButtonRank, &x);
     Int32 y;
     GetCellYFromOrder(mAllAppsButtonRank, &y);
-    AutoPtr<CellLayout::LayoutParams> lp = new CellLayout::LayoutParams();
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp = new CellLayout::CellLayoutLayoutParams();
     lp->constructor(x,y,1,1);
     lp->mCanReorder = FALSE;
     Boolean tmp;

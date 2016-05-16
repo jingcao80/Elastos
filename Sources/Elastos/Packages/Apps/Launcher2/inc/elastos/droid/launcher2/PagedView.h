@@ -695,7 +695,7 @@ protected:
 
 private:
     static const String TAG;
-    static const Boolean DEBUG = FALSE;
+    static const Boolean DEBUG;
 
     // the min drag distance for a fling to register, to prevent random page shifts
     static const Int32 MIN_LENGTH_FOR_FLING = 25;

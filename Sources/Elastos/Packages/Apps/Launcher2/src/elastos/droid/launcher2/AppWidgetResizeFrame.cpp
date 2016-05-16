@@ -304,8 +304,8 @@ ECode AppWidgetResizeFrame::VisualizeResizeForDelta(
     AutoPtr<IViewGroupLayoutParams> res;
     GetLayoutParams((IViewGroupLayoutParams**)&res);
 
-    AutoPtr<DragLayer::LayoutParams> lp =
-            (DragLayer::LayoutParams*)IDragLayerLayoutParams::Probe(res);
+    AutoPtr<DragLayer::DragLayerLayoutParams> lp =
+            (DragLayer::DragLayerLayoutParams*)IDragLayerLayoutParams::Probe(res);
 
     if (mLeftBorderActive) {
         lp->SetX(mBaselineX + mDeltaX);
@@ -368,8 +368,8 @@ ECode AppWidgetResizeFrame::ResizeWidgetIfNeeded(
 
     AutoPtr<IViewGroupLayoutParams> res;
     IView::Probe(mWidgetView)->GetLayoutParams((IViewGroupLayoutParams**)&res);
-    AutoPtr<CellLayout::LayoutParams> _lp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(res);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> _lp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(res);
 
     Int32 spanX = _lp->mCellHSpan;
     Int32 spanY = _lp->mCellVSpan;

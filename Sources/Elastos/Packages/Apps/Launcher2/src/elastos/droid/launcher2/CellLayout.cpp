@@ -224,9 +224,9 @@ Int64 CellLayout::CellLayoutAnimationController::GetDelayForView(
     return (Int32) (Elastos::Core::Math::Random() * 150);
 }
 
-CAR_INTERFACE_IMPL(CellLayout::LayoutParams, MarginLayoutParams, ICellLayoutLayoutParams)
+CAR_INTERFACE_IMPL(CellLayout::CellLayoutLayoutParams, MarginLayoutParams, ICellLayoutLayoutParams)
 
-CellLayout::LayoutParams::LayoutParams()
+CellLayout::CellLayoutLayoutParams::CellLayoutLayoutParams()
     : mCellX(0)
     , mCellY(0)
     , mTmpCellX(0)
@@ -241,7 +241,7 @@ CellLayout::LayoutParams::LayoutParams()
     , mDropped(FALSE)
 {}
 
-ECode CellLayout::LayoutParams::constructor(
+ECode CellLayout::CellLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -251,7 +251,7 @@ ECode CellLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode CellLayout::LayoutParams::constructor(
+ECode CellLayout::CellLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     MarginLayoutParams::constructor(source);
@@ -260,8 +260,8 @@ ECode CellLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode CellLayout::LayoutParams::constructor(
-    /* [in] */ LayoutParams* source)
+ECode CellLayout::CellLayoutLayoutParams::constructor(
+    /* [in] */ CellLayoutLayoutParams* source)
 {
     MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(source));
     mCellX = source->mCellX;
@@ -271,7 +271,7 @@ ECode CellLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-ECode CellLayout::LayoutParams::constructor(
+ECode CellLayout::CellLayoutLayoutParams::constructor(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 cellHSpan,
@@ -285,7 +285,7 @@ ECode CellLayout::LayoutParams::constructor(
     return NOERROR;
 }
 
-void CellLayout::LayoutParams::Setup(
+void CellLayout::CellLayoutLayoutParams::Setup(
     /* [in] */ Int32 cellWidth,
     /* [in] */ Int32 cellHeight,
     /* [in] */ Int32 widthGap,
@@ -312,32 +312,32 @@ void CellLayout::LayoutParams::Setup(
     }
 }
 
-ECode CellLayout::LayoutParams::ToString(
+ECode CellLayout::CellLayoutLayoutParams::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    str->AppendFormat("(%d, %d)", mCellX, mCellY);
+    str->AppendFormat("CellLayoutLayoutParams(%d, %d)", mCellX, mCellY);
     return NOERROR;
 }
 
-void CellLayout::LayoutParams::SetX(
+void CellLayout::CellLayoutLayoutParams::SetX(
     /* [in] */ Int32 x)
 {
     mX = x;
 }
 
-Int32 CellLayout::LayoutParams::GetX()
+Int32 CellLayout::CellLayoutLayoutParams::GetX()
 {
     return mX;
 }
 
-void CellLayout::LayoutParams::SetY(
+void CellLayout::CellLayoutLayoutParams::SetY(
     /* [in] */ Int32 y)
 {
     mY = y;
 }
 
-Int32 CellLayout::LayoutParams::GetY()
+Int32 CellLayout::CellLayoutLayoutParams::GetY()
 {
     return mY;
 }
@@ -422,7 +422,7 @@ ECode CellLayout::MyAnimatorListenerAdapter2::OnAnimationEnd(
 CAR_INTERFACE_IMPL(CellLayout::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
 
 CellLayout::AnimatorUpdateListener2::AnimatorUpdateListener2(
-    /* [in] */ LayoutParams* lp,
+    /* [in] */ CellLayoutLayoutParams* lp,
     /* [in] */ Int32 oldX,
     /* [in] */ Int32 oldY,
     /* [in] */ Int32 newX,
@@ -451,7 +451,7 @@ ECode CellLayout::AnimatorUpdateListener2::OnAnimationUpdate(
 
 CellLayout::MyAnimatorListenerAdapter3::MyAnimatorListenerAdapter3(
     /* [in] */ CellLayout* host,
-    /* [in] */ LayoutParams* lp,
+    /* [in] */ CellLayoutLayoutParams* lp,
     /* [in] */ IView* child)
     : mHost(host)
     , mLp(lp)
@@ -1544,7 +1544,7 @@ ECode CellLayout::AddViewToCellLayout(
 {
     VALIDATE_NOT_NULL(result);
 
-    LayoutParams* lp = (LayoutParams*)params;
+    CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)params;
 
     // Hotseat icons - remove text
     if (IBubbleTextView::Probe(child)) {
@@ -1695,7 +1695,7 @@ ECode CellLayout::SetTagToCellInfoForPoint(
         IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
 
         Int32 v;
         child->GetVisibility(&v);
@@ -2234,7 +2234,7 @@ ECode CellLayout::AnimateChildToPosition(
     if (index != -1) {
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         AutoPtr<IInterface> tag;
         child->GetTag((IInterface**)&tag);
         ItemInfo* info = (ItemInfo*)IObject::Probe(tag);
@@ -2835,7 +2835,7 @@ Boolean CellLayout::PushViewsToTempLocation(
                 if (cluster->IsViewTouchingEdge(v, whichEdge)) {
                     AutoPtr<IViewGroupLayoutParams> _lp;
                     v->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-                    LayoutParams* lp = (LayoutParams*)_lp.Get();
+                    CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
                     if (!lp->mCanReorder) {
                         // The push solution includes the all apps button, this is not viable.
                         fail = TRUE;
@@ -3128,7 +3128,7 @@ Boolean CellLayout::RearrangementExists(
         CellAndSpan* c = (CellAndSpan*)IObject::Probe(value);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         r1->Set(c->mX, c->mY, c->mX + c->mSpanX, c->mY + c->mSpanY);
         Boolean res;
         rHelper->Intersects(r0, r1, &res);
@@ -3257,7 +3257,7 @@ void CellLayout::CopyCurrentStateToSolution(
         IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         AutoPtr<CellAndSpan> c;
         if (temp) {
             c = new CellAndSpan(lp->mTmpCellX, lp->mTmpCellY, lp->mCellHSpan, lp->mCellVSpan);
@@ -3287,7 +3287,7 @@ void CellLayout::CopySolutionToTempState(
         if (child.Get() == dragView) continue;
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         AutoPtr<IInterface> value;
         solution->mMap->Get(child, (IInterface**)&value);
         CellAndSpan* c = (CellAndSpan*)IObject::Probe(value);
@@ -3354,7 +3354,7 @@ void CellLayout::BeginOrAdjustHintAnimations(
         CellAndSpan* c = (CellAndSpan*)IObject::Probe(value);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         if (c != NULL) {
             AutoPtr<ReorderHintAnimation> rha = new ReorderHintAnimation(child, lp->mCellX, lp->mCellY,
                     c->mX, c->mY, c->mSpanX, c->mSpanY, this);
@@ -3389,7 +3389,7 @@ void CellLayout::CommitTempPlacement()
         IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         AutoPtr<IInterface> tag;
         child->GetTag((IInterface**)&tag);
         ItemInfo* info = (ItemInfo*)IObject::Probe(tag);
@@ -3421,7 +3421,7 @@ ECode CellLayout::SetUseTempCoords(
         IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         lp->mUseTmpCoords = useTempCoords;
     }
     return NOERROR;
@@ -3546,7 +3546,7 @@ void CellLayout::GetViewsIntersectingRegion(
         if (child.Get() == dragView) continue;
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         r1->Set(lp->mCellX, lp->mCellY, lp->mCellX + lp->mCellHSpan, lp->mCellY + lp->mCellVSpan);
         Boolean res;
         rHelper->Intersects(r0, r1, &res);
@@ -3592,7 +3592,7 @@ ECode CellLayout::RevertTempState()
         IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         if (lp->mTmpCellX != lp->mCellX || lp->mTmpCellY != lp->mCellY) {
             lp->mTmpCellX = lp->mCellX;
             lp->mTmpCellY = lp->mCellY;
@@ -3973,7 +3973,7 @@ ECode CellLayout::OnDropChild(
     if (child != NULL) {
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        LayoutParams* lp = (LayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
         lp->mDropped = TRUE;
         child->RequestLayout();
     }
@@ -4191,7 +4191,7 @@ ECode CellLayout::MarkCellsAsOccupiedForView(
     }
     AutoPtr<IViewGroupLayoutParams> _lp;
     view->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-    LayoutParams* lp = (LayoutParams*)_lp.Get();
+    CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
     MarkCellsForView(lp->mCellX, lp->mCellY, lp->mCellHSpan, lp->mCellVSpan, occupied, TRUE);
     return NOERROR;
 }
@@ -4213,7 +4213,7 @@ ECode CellLayout::MarkCellsAsUnoccupiedForView(
     }
     AutoPtr<IViewGroupLayoutParams> _lp;
     view->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-    LayoutParams* lp = (LayoutParams*)_lp.Get();
+    CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
     MarkCellsForView(lp->mCellX, lp->mCellY, lp->mCellHSpan, lp->mCellVSpan, occupied, FALSE);
     return NOERROR;
 }
@@ -4283,7 +4283,7 @@ ECode CellLayout::GenerateLayoutParams(
     VALIDATE_NOT_NULL(lp);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<LayoutParams> p = new LayoutParams();
+    AutoPtr<CellLayoutLayoutParams> p = new CellLayoutLayoutParams();
     p->constructor(context, attrs);
     *lp = IViewGroupLayoutParams::Probe(p);
     REFCOUNT_ADD(*lp);
@@ -4299,7 +4299,7 @@ Boolean CellLayout::CheckLayoutParams(
 AutoPtr<IViewGroupLayoutParams> CellLayout::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    AutoPtr<LayoutParams> _p = new LayoutParams();
+    AutoPtr<CellLayoutLayoutParams> _p = new CellLayoutLayoutParams();
     _p->constructor(p);
     return IViewGroupLayoutParams::Probe(_p);
 }

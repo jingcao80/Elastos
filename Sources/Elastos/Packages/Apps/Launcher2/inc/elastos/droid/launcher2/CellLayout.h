@@ -149,12 +149,12 @@ public:
             /* [in] */ IView* view);
     };
 
-    class LayoutParams
+    class CellLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public ICellLayoutLayoutParams
     {
     public:
-        LayoutParams();
+        CellLayoutLayoutParams();
 
         CAR_INTERFACE_DECL()
 
@@ -166,7 +166,7 @@ public:
             /* [in] */ IViewGroupLayoutParams* source);
 
         CARAPI constructor(
-            /* [in] */ LayoutParams* source);
+            /* [in] */ CellLayoutLayoutParams* source);
 
         CARAPI constructor(
             /* [in] */ Int32 cellX,
@@ -331,7 +331,7 @@ private:
     {
     public:
         AnimatorUpdateListener2(
-            /* [in] */ LayoutParams* lp,
+            /* [in] */ CellLayoutLayoutParams* lp,
             /* [in] */ Int32 oldX,
             /* [in] */ Int32 oldY,
             /* [in] */ Int32 newX,
@@ -345,7 +345,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<LayoutParams> mLp;
+        AutoPtr<CellLayoutLayoutParams> mLp;
         Int32 mOldX;
         Int32 mOldY;
         Int32 mNewX;
@@ -359,7 +359,7 @@ private:
     public:
         MyAnimatorListenerAdapter3(
             /* [in] */ CellLayout* mHost,
-            /* [in] */ LayoutParams* lp,
+            /* [in] */ CellLayoutLayoutParams* lp,
             /* [in] */ IView* child);
 
         // @Override
@@ -368,7 +368,7 @@ private:
 
     private:
         CellLayout* mHost;
-        AutoPtr<LayoutParams> mLp;
+        AutoPtr<CellLayoutLayoutParams> mLp;
         AutoPtr<IView> mChild;
         Boolean mCancelled;
     };

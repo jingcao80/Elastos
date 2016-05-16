@@ -7,7 +7,7 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-PagedViewGridLayout::LayoutParams::LayoutParams(
+PagedViewGridLayout::PagedViewGridLayoutLayoutParams::PagedViewGridLayoutLayoutParams(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {

@@ -15,7 +15,7 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-const String PagedViewCellLayoutChildren::TAG("PagedViewCellLayout");
+const String PagedViewCellLayoutChildren::TAG("PagedViewCellLayoutChildren");
 
 CAR_INTERFACE_IMPL(PagedViewCellLayoutChildren, ViewGroup, IPagedViewCellLayoutChildren);
 
@@ -82,6 +82,7 @@ void PagedViewCellLayoutChildren::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+    Slogger::I(TAG, " >>>> OnMeasure %s:", TO_CSTR(this));
     Int32 widthSpecMode = View::MeasureSpec::GetMode(widthMeasureSpec);
     Int32 widthSpecSize = View::MeasureSpec::GetSize(widthMeasureSpec);
 
@@ -96,16 +97,16 @@ void PagedViewCellLayoutChildren::OnMeasure(
 
     Int32 count;
     GetChildCount(&count);
+    Slogger::I(TAG, " >>>> OnMeasure== %s: count=%d", TO_CSTR(this), count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-            (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
-        Int32 left;
+        AutoPtr<PagedViewCellLayout::PagedViewCellLayoutLayoutParams> lp =
+            (PagedViewCellLayout::PagedViewCellLayoutLayoutParams*)IObject::Probe(params);
+        Int32 left, top;
         GetPaddingLeft(&left);
-        Int32 top;
         GetPaddingTop(&top);
         lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
                 left, top);
@@ -114,10 +115,12 @@ void PagedViewCellLayoutChildren::OnMeasure(
                 View::MeasureSpec::EXACTLY);
         Int32 childheightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mHeight,
                 View::MeasureSpec::EXACTLY);
+        Slogger::I(TAG, "     Measure %s", TO_CSTR(child));
         child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
 
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
+    Slogger::I(TAG, " <<<< OnMeasure: %d, %d", widthSpecSize, heightSpecSize);
 }
 
 ECode PagedViewCellLayoutChildren::OnLayout(
@@ -127,6 +130,7 @@ ECode PagedViewCellLayoutChildren::OnLayout(
     /* [in] */ Int32 r,
     /* [in] */ Int32 b)
 {
+    Slogger::I(TAG, " >>>>>  OnLayout %s", TO_CSTR(this));
     Int32 count;
     GetChildCount(&count);
 
@@ -143,8 +147,8 @@ ECode PagedViewCellLayoutChildren::OnLayout(
             if (visibility != GONE) {
                 AutoPtr<IViewGroupLayoutParams> params;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-                AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-                        (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+                AutoPtr<PagedViewCellLayout::PagedViewCellLayoutLayoutParams> lp =
+                        (PagedViewCellLayout::PagedViewCellLayoutLayoutParams*)IObject::Probe(params);
                 minRowX = Elastos::Core::Math::Min(minRowX, lp->mX);
                 maxRowX = Elastos::Core::Math::Max(maxRowX, lp->mX + lp->mWidth);
             }
@@ -163,14 +167,16 @@ ECode PagedViewCellLayoutChildren::OnLayout(
         if (visibility != GONE) {
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-                    (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+            AutoPtr<PagedViewCellLayout::PagedViewCellLayoutLayoutParams> lp =
+                    (PagedViewCellLayout::PagedViewCellLayoutLayoutParams*)IObject::Probe(params);
 
             Int32 childLeft = offsetX + lp->mX;
             Int32 childTop = lp->mY;
+            Slogger::I(TAG, "     OnLayout %s", TO_CSTR(child));
             child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
         }
     }
+    Slogger::I(TAG, " <<<< OnLayout: %d, %d, %d, %d", l, t, r, b);
     return NOERROR;
 }
 

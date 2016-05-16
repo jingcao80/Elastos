@@ -11,27 +11,6 @@ CAR_INTERFACE_IMPL(CAccessibleTabView, TextView, IAccessibleTabView);
 
 CAR_OBJECT_IMPL(CAccessibleTabView);
 
-ECode CAccessibleTabView::constructor(
-    /* [in] */ IContext* context)
-{
-    return TextView::constructor(context);
-}
-
-ECode CAccessibleTabView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return TextView::constructor(context, attrs);
-}
-
-ECode CAccessibleTabView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle)
-{
-    return TextView::constructor(context, attrs, defStyle);
-}
-
 ECode CAccessibleTabView::OnKeyDown(
     /* [in] */ Int32 keyCode,
     /* [in] */ IKeyEvent* event,

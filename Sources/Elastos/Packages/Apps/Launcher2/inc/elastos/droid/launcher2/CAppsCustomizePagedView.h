@@ -263,8 +263,6 @@ public:
 
     CAppsCustomizePagedView();
 
-    CARAPI constructor();
-
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);

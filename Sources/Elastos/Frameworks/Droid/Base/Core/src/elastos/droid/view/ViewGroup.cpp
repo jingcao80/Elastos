@@ -4238,6 +4238,7 @@ void ViewGroup::OnDebugDraw(
 ECode ViewGroup::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(TAG, " >>>>> == %s DispatchDraw ==", TO_CSTR(this));
     Boolean usingRenderNodeProperties;
     canvas->IsRecordingFor(mRenderNode, &usingRenderNodeProperties);
     Int32 childrenCount = mChildrenCount;
@@ -4337,6 +4338,7 @@ ECode ViewGroup::DispatchDraw(
             AutoPtr<IInterface> temp;
             mDisappearingChildren->Get(i, (IInterface**)&temp);
             AutoPtr<IView> child = IView::Probe(temp);
+            Logger::I(TAG, "  DispatchDraw child: %s", TO_CSTR(child));
             more |= DrawChild(canvas, child, drawingTime);
         }
     }
@@ -4363,6 +4365,7 @@ ECode ViewGroup::DispatchDraw(
     }
     if ((flags & FLAG_ANIMATION_DONE) == 0 &&
         (flags & FLAG_NOTIFY_ANIMATION_LISTENER) == 0 && isDone && !more) {
+        Logger::I(TAG, "  DispatchDraw drawChild() after the animation is over: %s", TO_CSTR(this));
         // We want to erase the drawing cache and notify the listener after the
         // next frame is drawn because one extra invalidate() is caused by
         // drawChild() after the animation is over
@@ -4371,6 +4374,7 @@ ECode ViewGroup::DispatchDraw(
         Post(end, &bval);
     }
 
+    Logger::I(TAG, " <<<<< == %s DispatchDraw ==", TO_CSTR(this));
     return NOERROR;
 }
 

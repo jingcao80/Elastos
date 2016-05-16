@@ -30,6 +30,8 @@ class LauncherAppWidgetHostView
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("LauncherAppWidgetHostView")
+
     LauncherAppWidgetHostView();
 
     CARAPI constructor(

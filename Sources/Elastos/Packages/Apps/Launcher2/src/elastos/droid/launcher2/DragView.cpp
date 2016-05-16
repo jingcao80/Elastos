@@ -392,7 +392,7 @@ ECode DragView::Show(
     IViewGroup::Probe(mDragLayer)->AddView(this);
 
     // Start the pick-up animation
-    AutoPtr<DragLayer::LayoutParams> lp = new DragLayer::LayoutParams();
+    AutoPtr<DragLayer::DragLayerLayoutParams> lp = new DragLayer::DragLayerLayoutParams();
     lp->constructor(0, 0);
     mBitmap->GetWidth(&(lp->mWidth));
     mBitmap->GetHeight(&(lp->mHeight));

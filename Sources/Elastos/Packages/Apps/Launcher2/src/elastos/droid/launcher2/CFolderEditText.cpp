@@ -8,32 +8,6 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(CFolderEditText, EditText, IFolderEditText);
 
-ECode CFolderEditText::constructor()
-{
-    return NOERROR;
-}
-
-ECode CFolderEditText::constructor(
-    /* [in] */ IContext* context)
-{
-    return EditText::constructor(context);
-}
-
-ECode CFolderEditText::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return EditText::constructor(context, attrs);
-}
-
-ECode CFolderEditText::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle)
-{
-    return EditText::constructor(context, attrs, defStyle);
-}
-
 ECode CFolderEditText::SetFolder(
     /* [in] */ IFolder* folder)
 {

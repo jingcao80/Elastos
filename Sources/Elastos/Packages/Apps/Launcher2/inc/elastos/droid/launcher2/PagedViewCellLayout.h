@@ -30,14 +30,14 @@ class PagedViewCellLayout
     , public IPage
 {
 public:
-    class LayoutParams
+    class PagedViewCellLayoutLayoutParams
         : public ViewGroup::MarginLayoutParams
         , public IPagedViewCellLayoutLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        PagedViewCellLayoutLayoutParams();
 
         CARAPI constructor();
 
@@ -49,7 +49,7 @@ public:
             /* [in] */ IViewGroupLayoutParams* source);
 
         CARAPI constructor(
-            /* [in] */ LayoutParams* source);
+            /* [in] */ PagedViewCellLayoutLayoutParams* source);
 
         CARAPI constructor(
             /* [in] */ Int32 cellX,
@@ -118,6 +118,8 @@ public:
 
 public:
     CAR_INTERFACE_DECL();
+
+    TO_STRING_IMPL("PagedViewCellLayout")
 
     PagedViewCellLayout();
 

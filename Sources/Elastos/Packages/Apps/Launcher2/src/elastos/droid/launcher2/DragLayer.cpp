@@ -29,31 +29,31 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL(DragLayer::LayoutParams, FrameLayout::LayoutParams,
+CAR_INTERFACE_IMPL(DragLayer::DragLayerLayoutParams, FrameLayout::LayoutParams,
         IDragLayerLayoutParams);
 
-DragLayer::LayoutParams::LayoutParams()
+DragLayer::DragLayerLayoutParams::DragLayerLayoutParams()
     : mX(0)
     , mY(0)
     , mCustomPosition(FALSE)
 {
 }
 
-ECode DragLayer::LayoutParams::constructor(
+ECode DragLayer::DragLayerLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
     return FrameLayout::LayoutParams::constructor(width, height);
 }
 
-ECode DragLayer::LayoutParams::SetWidth(
+ECode DragLayer::DragLayerLayoutParams::SetWidth(
     /* [in] */ Int32 width)
 {
     mWidth = width;
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::GetWidth(
+ECode DragLayer::DragLayerLayoutParams::GetWidth(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
@@ -62,14 +62,14 @@ ECode DragLayer::LayoutParams::GetWidth(
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::SetHeight(
+ECode DragLayer::DragLayerLayoutParams::SetHeight(
     /* [in] */ Int32 height)
 {
     mHeight = height;
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::GetHeight(
+ECode DragLayer::DragLayerLayoutParams::GetHeight(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
@@ -78,14 +78,14 @@ ECode DragLayer::LayoutParams::GetHeight(
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::SetX(
+ECode DragLayer::DragLayerLayoutParams::SetX(
     /* [in] */ Int32 x)
 {
     mX = x;
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::GetX(
+ECode DragLayer::DragLayerLayoutParams::GetX(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
@@ -94,14 +94,14 @@ ECode DragLayer::LayoutParams::GetX(
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::SetY(
+ECode DragLayer::DragLayerLayoutParams::SetY(
     /* [in] */ Int32 y)
 {
     mY = y;
     return NOERROR;
 }
 
-ECode DragLayer::LayoutParams::GetY(
+ECode DragLayer::DragLayerLayoutParams::GetY(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
@@ -836,7 +836,7 @@ ECode DragLayer::OnLayout(
         AutoPtr<IFrameLayoutLayoutParams> flp = IFrameLayoutLayoutParams::Probe(param);
         if (IDragLayerLayoutParams::Probe(flp) != NULL) {
             AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(flp);
-            AutoPtr<DragLayer::LayoutParams> _lp = (DragLayer::LayoutParams*)lp.Get();
+            AutoPtr<DragLayerLayoutParams> _lp = (DragLayerLayoutParams*)lp.Get();
             if (_lp->mCustomPosition) {
                 Int32 width;
                 lp->GetWidth(&width);
@@ -897,7 +897,7 @@ ECode DragLayer::AddResizeFrame(
     AutoPtr<AppWidgetResizeFrame> resizeFrame = new AppWidgetResizeFrame();
     resizeFrame->constructor(context, widget, cellLayout, this);
 
-    AutoPtr<LayoutParams> lp = new LayoutParams();
+    AutoPtr<DragLayerLayoutParams> lp = new DragLayerLayoutParams();
     lp->constructor(-1, -1);
     lp->mCustomPosition = TRUE;
 
@@ -959,8 +959,8 @@ ECode DragLayer::AnimateViewIntoPosition(
 
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<CellLayout::LayoutParams> lp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(params);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
     parentChildren->MeasureChild(child);
 
     AutoPtr<IRect> r;

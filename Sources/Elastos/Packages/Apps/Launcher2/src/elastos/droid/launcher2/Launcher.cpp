@@ -863,13 +863,13 @@ ECode Launcher::MyComparator::Compare(
 
     AutoPtr<IViewGroupLayoutParams> aParams;
     IView::Probe(a)->GetLayoutParams((IViewGroupLayoutParams**)&aParams);
-    AutoPtr<CellLayout::LayoutParams> alp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(aParams);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> alp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(aParams);
 
     AutoPtr<IViewGroupLayoutParams> bParams;
     IView::Probe(b)->GetLayoutParams((IViewGroupLayoutParams**)&bParams);
-    AutoPtr<CellLayout::LayoutParams> blp =
-            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(bParams);
+    AutoPtr<CellLayout::CellLayoutLayoutParams> blp =
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(bParams);
 
     Int32 cellCountX;
     LauncherModel::GetCellCountX(&cellCountX);
@@ -3831,14 +3831,14 @@ void Launcher::CopyFolderIconToImage(
         CCanvas::New(mFolderIconBitmap, (ICanvas**)&mFolderIconCanvas);
     }
 
-    AutoPtr<DragLayer::LayoutParams> lp;
+    AutoPtr<DragLayer::DragLayerLayoutParams> lp;
     AutoPtr<IViewGroupLayoutParams> para;
     IView::Probe(mFolderIconImageView)->GetLayoutParams((IViewGroupLayoutParams**)&para);
     if (IDragLayerLayoutParams::Probe(para) != NULL) {
-        lp = (DragLayer::LayoutParams*)IDragLayerLayoutParams::Probe(para);
+        lp = (DragLayer::DragLayerLayoutParams*)IDragLayerLayoutParams::Probe(para);
     }
     else {
-        lp = new DragLayer::LayoutParams();
+        lp = new DragLayer::DragLayerLayoutParams();
         lp->constructor(width, height);
     }
 
@@ -3918,7 +3918,7 @@ void Launcher::GrowAndFadeOutFolderIcon(
 
         AutoPtr<IViewGroupLayoutParams> params;
         IView::Probe(fi)->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        CellLayout::LayoutParams* lp = (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(params);
+        CellLayout::CellLayoutLayoutParams* lp = (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
         cl->SetFolderLeaveBehindCell(lp->mCellX, lp->mCellY);
     }
 

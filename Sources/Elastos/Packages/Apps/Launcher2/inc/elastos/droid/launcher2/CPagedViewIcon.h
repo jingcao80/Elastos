@@ -46,20 +46,6 @@ public:
 
     CPagedViewIcon();
 
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IContext* context);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyle);
-
     CARAPI ApplyFromApplicationInfo(
         /* [in] */ IApplicationInfo* info,
         /* [in] */ Boolean scaleUp,

@@ -26,26 +26,6 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(CInfoDropTarget, ButtonDropTarget, IInfoDropTarget);
 
-ECode CInfoDropTarget::constructor()
-{
-    return NOERROR;
-}
-
-ECode CInfoDropTarget::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return constructor(context, attrs, 0);
-}
-
-ECode CInfoDropTarget::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle)
-{
-    return ButtonDropTarget::constructor(context, attrs, defStyle);
-}
-
 ECode CInfoDropTarget::OnFinishInflate()
 {
     ButtonDropTarget::OnFinishInflate();

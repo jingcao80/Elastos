@@ -30,7 +30,7 @@ LauncherApplication::MyContentObserver::MyContentObserver()
 
 LauncherApplication::MyContentObserver::constructor()
 {
-    return NOERROR;//ContentObserver::constructor();
+    return ContentObserver::constructor();
 }
 
 LauncherApplication::MyContentObserver::constructor(

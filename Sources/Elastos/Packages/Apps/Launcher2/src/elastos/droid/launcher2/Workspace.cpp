@@ -1396,13 +1396,13 @@ ECode Workspace::AddInScreen(
 
     AutoPtr<IViewGroupLayoutParams> genericLp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&genericLp);
-    AutoPtr<CellLayout::LayoutParams> lp;
+    AutoPtr<CellLayout::CellLayoutLayoutParams> lp;
     if (genericLp == NULL || ICellLayoutLayoutParams::Probe(genericLp) == NULL) {
-        lp = new CellLayout::LayoutParams();
+        lp = new CellLayout::CellLayoutLayoutParams();
         lp->constructor(x, y, spanX, spanY);
     }
     else {
-        lp = (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(genericLp);
+        lp = (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(genericLp);
         lp->mCellX = x;
         lp->mCellY = y;
         lp->mCellHSpan = spanX;
@@ -3396,7 +3396,7 @@ ECode Workspace::WillCreateUserFolder(
         AutoPtr<IViewGroupLayoutParams> _params;
         dropOverView->GetLayoutParams((IViewGroupLayoutParams**)&_params);
         AutoPtr<ICellLayoutLayoutParams> params = ICellLayoutLayoutParams::Probe(_params);
-        AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Probe(params);
+        AutoPtr<CellLayout::CellLayoutLayoutParams> lp = (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
         if (lp->mUseTmpCoords && (lp->mTmpCellX != lp->mCellX || lp->mTmpCellY != lp->mTmpCellY)) {
             *result = FALSE;
             return NOERROR;
@@ -3445,7 +3445,7 @@ ECode Workspace::WillAddToExistingUserFolder(
         AutoPtr<IViewGroupLayoutParams> _params;
         dropOverView->GetLayoutParams((IViewGroupLayoutParams**)&_params);
         AutoPtr<ICellLayoutLayoutParams> params = ICellLayoutLayoutParams::Probe(_params);
-        AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Probe(params);
+        AutoPtr<CellLayout::CellLayoutLayoutParams> lp = (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
         if (lp->mUseTmpCoords && (lp->mTmpCellX != lp->mCellX || lp->mTmpCellY != lp->mTmpCellY)) {
             *result = FALSE;
             return NOERROR;
@@ -3736,8 +3736,8 @@ ECode Workspace::OnDrop(
                 // update the item's position after drop
                 AutoPtr<IViewGroupLayoutParams> _params;
                 cell->GetLayoutParams((IViewGroupLayoutParams**)&_params);
-                AutoPtr<CellLayout::LayoutParams> lp =
-                        (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(_params);
+                AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+                        (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(_params);
                 lp->mCellX = lp->mTmpCellX = (*mTargetCell)[0];
                 lp->mCellY = lp->mTmpCellY = (*mTargetCell)[1];
                 lp->mCellHSpan = item->mSpanX;
@@ -3775,8 +3775,8 @@ ECode Workspace::OnDrop(
                 // If we can't find a drop location, we return the item to its original position
                 AutoPtr<IViewGroupLayoutParams> _params;
                 cell->GetLayoutParams((IViewGroupLayoutParams**)&_params);
-                AutoPtr<CellLayout::LayoutParams> lp =
-                        (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(_params);
+                AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+                        (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(_params);
                 (*mTargetCell)[0] = lp->mCellX;
                 (*mTargetCell)[1] = lp->mCellY;
                 AutoPtr<IViewParent> parent;
@@ -4840,8 +4840,8 @@ ECode Workspace::OnDropExternal(
         cellLayout->OnDropChild(view);
         AutoPtr<IViewGroupLayoutParams> _params;
         view->GetLayoutParams((IViewGroupLayoutParams**)&_params);
-        AutoPtr<CellLayout::LayoutParams> lp =
-                (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(_params);
+        AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
+                (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(_params);
         AutoPtr<IShortcutAndWidgetContainer> sw;
         cellLayout->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&sw);
         sw->MeasureChild(view);

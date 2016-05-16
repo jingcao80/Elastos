@@ -50,14 +50,14 @@ class DragLayer
     , public IViewGroupOnHierarchyChangeListener
 {
 public:
-    class LayoutParams
+    class DragLayerLayoutParams
         : public FrameLayout::LayoutParams
         , public IDragLayerLayoutParams
     {
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams();
+        DragLayerLayoutParams();
 
         /**
          * {@inheritDoc}

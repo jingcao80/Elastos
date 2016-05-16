@@ -10,32 +10,6 @@ CAR_INTERFACE_IMPL(CFocusOnlyTabWidget, TabWidget, IFocusOnlyTabWidget);
 
 CAR_OBJECT_IMPL(CFocusOnlyTabWidget);
 
-ECode CFocusOnlyTabWidget::constructor()
-{
-    return NOERROR;
-}
-
-ECode CFocusOnlyTabWidget::constructor(
-    /* [in] */ IContext* context)
-{
-    return TabWidget::constructor(context);
-}
-
-ECode CFocusOnlyTabWidget::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return TabWidget::constructor(context, attrs);
-}
-
-ECode CFocusOnlyTabWidget::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle)
-{
-    return TabWidget::constructor(context, attrs, defStyle);
-}
-
 ECode CFocusOnlyTabWidget::GetSelectedTab(
     /* [out] */ IView** tab)
 {

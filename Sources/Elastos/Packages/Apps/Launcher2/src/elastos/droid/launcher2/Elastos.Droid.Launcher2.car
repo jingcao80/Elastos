@@ -138,8 +138,6 @@ module
 
     [local]
     class CAppsCustomizeTabHost {
-        constructor();
-
         constructor(
             [in] IContext* ctx,
             [in] IAttributeSet* attrs);
@@ -160,7 +158,6 @@ module
 
     [local]
     class CAppsCustomizePagedView {
-        constructor();
 
         constructor(
             [in] IContext* ctx,
@@ -210,8 +207,6 @@ module
 
     [local]
     class CCellLayout {
-        constructor();
-
         constructor(
             [in] IContext* ctx);
 
@@ -265,8 +260,6 @@ module
 
     [local]
     class CDragLayer {
-        constructor();
-
         constructor(
             [in] IContext* ctx,
             [in] IAttributeSet* attrs);
@@ -309,8 +302,6 @@ module
 
     [local]
     class CDeleteDropTarget {
-        constructor();
-
         constructor(
             [in] IContext* ctx,
             [in] IAttributeSet* attrs);
@@ -334,8 +325,6 @@ module
 
     [local]
     class CFolder {
-        constructor();
-
         /**
          * Used to inflate the Workspace from XML.
          *
@@ -370,8 +359,6 @@ module
 
     [local]
     class CFolderEditText {
-        constructor();
-
         constructor(
             [in] IContext* ctx);
 
@@ -396,8 +383,6 @@ module
 
     [local]
     class CFolderIcon {
-        constructor();
-
         constructor(
             [in] IContext* ctx,
             [in] IAttributeSet* attrs);
@@ -422,8 +407,6 @@ module
 
     [local]
     class CFocusOnlyTabWidget {
-        constructor();
-
         constructor(
             [in] IContext* ctx);
 
@@ -451,7 +434,6 @@ module
 
     [local]
     class CHolographicImageView {
-        constructor();
 
         constructor(
             [in] IContext* ctx);
@@ -475,7 +457,6 @@ module
 
     [local]
     class CHolographicLinearLayout {
-        constructor();
 
         constructor(
             [in] IContext* ctx);
@@ -502,7 +483,6 @@ module
 
     [local]
     class CHotseat {
-        constructor();
 
         constructor(
             [in] IContext* ctx);
@@ -529,7 +509,6 @@ module
 
     [local]
     class CInfoDropTarget {
-        constructor();
 
         constructor(
             [in] IContext* ctx,
@@ -719,8 +698,6 @@ module
 
     [local]
     class CPagedViewIcon {
-        constructor();
-
         constructor(
             [in] IContext* ctx);
 
@@ -734,6 +711,7 @@ module
             [in] Int32 defStyle);
 
         interface IView;
+        interface ITextView;
         interface IOnPreDrawListener;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
@@ -800,8 +778,6 @@ module
 
     [local]
     class CWorkspace {
-        constructor();
-
         constructor(
             [in] IContext* ctx,
             [in] IAttributeSet* attrs);

@@ -54,6 +54,7 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnKeyListener;
 using Elastos::Droid::View::Animation::CAccelerateInterpolator;
@@ -256,7 +257,7 @@ ECode CAppsCustomizePagedView::MyRunnable3::Run()
 
     // We want the first widget layout to be the correct size. This will be important
     // for width size reporting to the AppWidgetManager.
-    AutoPtr<DragLayer::LayoutParams> lp = new DragLayer::LayoutParams();
+    AutoPtr<DragLayer::DragLayerLayoutParams> lp = new DragLayer::DragLayerLayoutParams();
     lp->constructor((*unScaledSize)[0], (*unScaledSize)[1]);
     lp->SetX(0);
     lp->SetY(0);
@@ -465,11 +466,6 @@ Slogger::E("CAppsCustomizePagedView", "====TODO===========CAppsCustomizePagedVie
     // CRectCache::New((IRectCache**)&mCachedAppWidgetPreviewSrcRect);
     // CRectCache::New((IRectCache**)&mCachedAppWidgetPreviewDestRect);
     // CPaintCache::New((IPaintCache**)&mCachedAppWidgetPreviewPaint);
-}
-
-ECode CAppsCustomizePagedView::constructor()
-{
-    return NOERROR;
 }
 
 ECode CAppsCustomizePagedView::constructor(
@@ -772,7 +768,7 @@ void CAppsCustomizePagedView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-Slogger::E("CAppsCustomizePagedView", "=================================OnMeasure");
+Slogger::E("CAppsCustomizePagedView", "=============CAppsCustomizePagedView::OnMeasure");
     Int32 width = View::MeasureSpec::GetSize(widthMeasureSpec);
     Int32 height = View::MeasureSpec::GetSize(heightMeasureSpec);
     if (!IsDataReady()) {
@@ -780,13 +776,13 @@ Slogger::E("CAppsCustomizePagedView", "=================================OnMeasur
         mApps->GetSize(&size);
         Boolean tmp;
         mWidgets->IsEmpty(&tmp);
-Slogger::E("CAppsCustomizePagedView", "============OnMeasure size=%d,tmp=%d",size,tmp);
+Slogger::E("CAppsCustomizePagedView", "============CAppsCustomizePagedViewOnMeasure size=%d,tmp=%d",size,tmp);
 Slogger::E("CAppsCustomizePagedView","==================TO DO /*&& !tmp*/=================???");
         if (size > 0 /*&& !tmp*/) {
             SetDataIsReady();
-Slogger::E("CAppsCustomizePagedView", "============OnMeasure width=%d,height=%d",width,height);
+Slogger::E("CAppsCustomizePagedView", "============CAppsCustomizePagedViewOnMeasure width=%d,height=%d",width,height);
             SetMeasuredDimension(width, height);
-Slogger::E("CAppsCustomizePagedView", "============ call OnDataReady");
+Slogger::E("CAppsCustomizePagedView", "============CAppsCustomizePagedView call OnDataReady");
             OnDataReady(width, height);
         }
     }
@@ -1693,8 +1689,8 @@ Slogger::E("CAppsCustomizePagedView", "===================SyncAppsPageItems call
         if (isRtl) {
             x = mCellCountX - x - 1;
         }
-        AutoPtr<PagedViewCellLayout::LayoutParams> params =
-                new PagedViewCellLayout::LayoutParams();
+        AutoPtr<PagedViewCellLayout::PagedViewCellLayoutLayoutParams> params =
+                new PagedViewCellLayout::PagedViewCellLayoutLayoutParams();
         params->constructor(x, y, 1, 1);
         Boolean tmp;
 Slogger::E("CAppsCustomizePagedView", "=================== call AddViewToCellLayout");
@@ -2047,10 +2043,11 @@ Slogger::E("CAppsCustomizePagedView", "=================== SyncPages 1 mNumWidge
         AutoPtr<PagedViewGridLayout> layout = new PagedViewGridLayout(
                 context, mWidgetCountX, mWidgetCountY);
         SetupPage(layout);
-        AutoPtr<PagedView::LayoutParams> params = new
-                PagedView::LayoutParams();
-        params->constructor(ViewGroup::LayoutParams::MATCH_PARENT,
-                ViewGroup::LayoutParams::MATCH_PARENT);
+        AutoPtr<IViewGroupLayoutParams> params;
+        CViewGroupLayoutParams::New(
+            IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::MATCH_PARENT,
+            (IViewGroupLayoutParams**)&params);
         AddView(layout, params);
     }
 

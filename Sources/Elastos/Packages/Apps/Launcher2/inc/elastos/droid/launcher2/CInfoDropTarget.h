@@ -25,17 +25,6 @@ CarClass(CInfoDropTarget)
 public:
     CAR_INTERFACE_DECL();
 
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyle);
-
     //@Override
     CARAPI AcceptDrop(
         /* [in] */ IDropTargetDragObject* d,
