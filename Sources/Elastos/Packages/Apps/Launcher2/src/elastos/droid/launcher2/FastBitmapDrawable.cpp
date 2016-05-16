@@ -19,14 +19,12 @@ FastBitmapDrawable::FastBitmapDrawable()
     , mWidth(0)
     , mHeight(0)
 {
+    CPaint::New(IPaint::FILTER_BITMAP_FLAG, (IPaint**)&mPaint);
 }
 
 ECode FastBitmapDrawable::constructor(
     /* [in] */ IBitmap* b)
 {
-Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::constructor");
-    CPaint::New(IPaint::FILTER_BITMAP_FLAG, (IPaint**)&mPaint);
-
     mAlpha = 255;
     mBitmap = b;
     if (b != NULL) {
@@ -36,7 +34,6 @@ Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::constru
     else {
         mWidth = mHeight = 0;
     }
-Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::constructor mWidth=%d, mHeight=%d",mWidth,mHeight);
     return NOERROR;
 }
 
@@ -46,7 +43,6 @@ ECode FastBitmapDrawable::Draw(
     AutoPtr<IRect> r;
     GetBounds((IRect**)&r);
     // Draw the bitmap into the bounding rect
-Slogger::E("FastBitmapDrawable", "===================FastBitmapDrawable::Draw");
     return canvas->DrawBitmap(mBitmap, NULL, r, mPaint);
 }
 
@@ -60,7 +56,6 @@ ECode FastBitmapDrawable::GetOpacity(
     /* [out] */ Int32* opacity)
 {
     VALIDATE_NOT_NULL(opacity);
-
     *opacity = IPixelFormat::TRANSLUCENT;
     return NOERROR;
 }
@@ -82,7 +77,6 @@ ECode FastBitmapDrawable::GetAlpha(
     /* [out] */ Int32* alpha)
 {
     VALIDATE_NOT_NULL(alpha);
-
     *alpha = mAlpha;
     return NOERROR;
 }
@@ -91,7 +85,6 @@ ECode FastBitmapDrawable::GetIntrinsicWidth(
     /* [out] */ Int32* width)
 {
     VALIDATE_NOT_NULL(width);
-
     *width = mWidth;
     return NOERROR;
 }
@@ -100,7 +93,6 @@ ECode FastBitmapDrawable::GetIntrinsicHeight(
     /* [out] */ Int32* height)
 {
     VALIDATE_NOT_NULL(height);
-
     *height = mHeight;
     return NOERROR;
 }
@@ -109,7 +101,6 @@ ECode FastBitmapDrawable::GetMinimumWidth(
     /* [out] */ Int32* width)
 {
     VALIDATE_NOT_NULL(width);
-
     *width = mWidth;
     return NOERROR;
 }
@@ -118,7 +109,6 @@ ECode FastBitmapDrawable::GetMinimumHeight(
     /* [out] */ Int32* height)
 {
     VALIDATE_NOT_NULL(height);
-
     *height = mHeight;
     return NOERROR;
 }
@@ -141,7 +131,6 @@ ECode FastBitmapDrawable::GetBitmap(
     /* [out] */ IBitmap** map)
 {
     VALIDATE_NOT_NULL(map);
-
     *map = mBitmap;
     REFCOUNT_ADD(*map);
     return NOERROR;

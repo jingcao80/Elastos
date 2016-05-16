@@ -55,17 +55,7 @@ ECode ApplicationInfo::constructor(
         mFlags |= UPDATED_SYSTEM_APP_FLAG;
     }
     info->GetFirstInstallTime(&mFirstInstallTime);
-Slogger::E("ApplicationInfo", "===============ApplicationInfo::constructor======call GetTitleAndIcon");
     iconCache->GetTitleAndIcon(this, info, labelCache);
-
-String title2;
-mTitle->ToString(&title2);
-Slogger::E("ApplicationInfo", "===============ApplicationInfo::constructor======title2=%s",title2.string());
-Slogger::E("ApplicationInfo", "===============ApplicationInfo::constructor======mIconBitmap=%p",mIconBitmap.Get());
-String description2;
-mContentDescription->ToString(&description2);
-Slogger::E("ApplicationInfo", "===============ApplicationInfo::constructor======description2=%s",description2.string());
-Slogger::E("ApplicationInfo", "===============ApplicationInfo::constructor======return GetTitleAndIcon");
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&mIntent);
     mIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
     AutoPtr<IComponentName> name;

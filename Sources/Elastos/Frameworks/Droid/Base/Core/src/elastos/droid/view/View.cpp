@@ -15916,7 +15916,6 @@ ECode View::Measure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Logger::I(TAG, " >>>> Measure %s", TO_CSTR(this));
     Boolean optical = IsLayoutModeOptical(TO_IINTERFACE(this));
     if (optical != IsLayoutModeOptical(mParent)) {
         AutoPtr<IInsets> insets;
@@ -15930,13 +15929,11 @@ ECode View::Measure(
 
     // Suppress sign extension for the low bytes
     Int64 key = ((Int64) widthMeasureSpec << 32) | ((Int64) heightMeasureSpec & 0xffffffffL);
-    Logger::I(TAG, " <<<< Measure %s %d, key:%08x, %d", TO_CSTR(this), __LINE__, key, key);
+
     if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
             widthMeasureSpec != mOldWidthMeasureSpec ||
             heightMeasureSpec != mOldHeightMeasureSpec) {
 
-        Logger::I(TAG, " <<<< Measure %s %d, sIgnoreMeasureCache:%d, size:%d",
-            TO_CSTR(this), __LINE__, sIgnoreMeasureCache, mMeasureCache.GetSize());
         // first clears the measured dimension flag
         mPrivateFlags &= ~PFLAG_MEASURED_DIMENSION_SET;
         Boolean resolveRtlPropertiesIfNeeded;
@@ -15944,12 +15941,10 @@ ECode View::Measure(
 
         HashMap<Int64, Int64>::Iterator it = mMeasureCache.Find(key);
         if (it == mMeasureCache.End() || sIgnoreMeasureCache) {
-            Logger::I(TAG, " <<<< Measure %s %d", TO_CSTR(this), __LINE__);
             OnMeasure(widthMeasureSpec, heightMeasureSpec);
             mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
         }
         else {
-            Logger::I(TAG, " <<<< Measure %s %d", TO_CSTR(this), __LINE__);
             Int64 value = it->mSecond;
             // Casting a long to int drops the high 32 bits, no mask needed
             SetMeasuredDimensionRaw((Int32) (value >> 32), (Int32) value);
@@ -15974,7 +15969,6 @@ ECode View::Measure(
     Int64 valueHeight = ((Int64)mMeasuredWidth) << 32 | ((Int64)mMeasuredHeight & 0xffffffffL);
     mMeasureCache.Insert(HashMap<Int64, Int64>::ValueType(key, valueHeight)); // suppress sign extension
 
-    Logger::I(TAG, " <<<< Measure %s", TO_CSTR(this));
     return NOERROR;
 }
 

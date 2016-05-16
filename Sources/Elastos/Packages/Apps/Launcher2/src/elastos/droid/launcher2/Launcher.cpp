@@ -923,7 +923,6 @@ Launcher::MyRunnable15::MyRunnable15(
 ECode Launcher::MyRunnable15::Run()
 {
     if (mHost->mAppsCustomizeContent != NULL) {
-Slogger::E("Launcher", "====================MyRunnable15::Run() SetApps");
         return mHost->mAppsCustomizeContent->SetApps(mApps);
     }
     return NOERROR;
@@ -5701,7 +5700,6 @@ ECode Launcher::BindSearchablesChanged()
 ECode Launcher::BindAllApplications(
     /* [in] */ IArrayList* apps)
 {
-Slogger::D("Launcher", "===================BindAllApplications 1");
     AutoPtr<IRunnable> setAllAppsRunnable = new MyRunnable15(this, apps);
 
     // Remove the progress bar entirely; we could also make it GONE
@@ -5711,7 +5709,6 @@ Slogger::D("Launcher", "===================BindAllApplications 1");
             Elastos::Droid::Launcher2::R::id::apps_customize_progress_bar,
             (IView**)&progressBar);
     if (progressBar != NULL) {
-Slogger::D("Launcher", "===================BindAllApplications 2");
         AutoPtr<IViewParent> p;
         progressBar->GetParent((IViewParent**)&p);
         IViewGroup::Probe(p)->RemoveView(progressBar);
@@ -5723,7 +5720,6 @@ Slogger::D("Launcher", "===================BindAllApplications 2");
         IView::Probe(mAppsCustomizeTabHost)->Post(setAllAppsRunnable, &res);
     }
     else {
-Slogger::D("Launcher", "===================BindAllApplications 3");
         // If we did not initialize the spinner in onCreate, then we can directly set the
         // list of applications without waiting for any progress bars views to be hidden.
         setAllAppsRunnable->Run();

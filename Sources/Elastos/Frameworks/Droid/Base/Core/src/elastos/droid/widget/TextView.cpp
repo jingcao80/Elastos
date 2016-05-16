@@ -7710,7 +7710,6 @@ void TextView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Logger::I(TEXT_VIEW_TAG, " >>> OnMeasure:%s", TO_CSTR(this));
     Int32 widthMode = View::MeasureSpec::GetMode(widthMeasureSpec);
     Int32 heightMode = View::MeasureSpec::GetMode(heightMeasureSpec);
     Int32 widthSize = View::MeasureSpec::GetSize(widthMeasureSpec);
@@ -7762,7 +7761,7 @@ void TextView::OnMeasure(
             width = Math::Max(width, dr->mDrawableWidthTop);
             width = Math::Max(width, dr->mDrawableWidthBottom);
         }
-        Logger::I(TEXT_VIEW_TAG, "     OnMeasure %d:%s: %d, %d", __LINE__, TO_CSTR(this), width, height);
+
         if (mHint != NULL) {
             Int32 hintDes = -1;
             Int32 hintWidth;
@@ -7823,7 +7822,6 @@ void TextView::OnMeasure(
             width = Math::Min(widthSize, width);
         }
     }
-    Logger::I(TEXT_VIEW_TAG, "     OnMeasure %d:%s: %d, %d", __LINE__, TO_CSTR(this), width, height);
     Int32 compoundPaddingLeft, compoundPaddingRight;
     GetCompoundPaddingLeft(&compoundPaddingLeft);
     GetCompoundPaddingRight(&compoundPaddingRight);
@@ -7836,7 +7834,6 @@ void TextView::OnMeasure(
         mHintLayout->GetWidth(&hintWidth);
     }
     if (mLayout == NULL) {
-        Logger::I(TEXT_VIEW_TAG, "     OnMeasure %d:%s: %d, %d", __LINE__, TO_CSTR(this), width, height);
         Int32 compoundPaddingLeft, compoundPaddingRight;
         GetCompoundPaddingLeft(&compoundPaddingLeft);
         GetCompoundPaddingRight(&compoundPaddingRight);
@@ -7844,7 +7841,6 @@ void TextView::OnMeasure(
             width - compoundPaddingLeft - compoundPaddingRight, FALSE);
     }
     else {
-        Logger::I(TEXT_VIEW_TAG, "     OnMeasure %d:%s: %d, %d", __LINE__, TO_CSTR(this), width, height);
         Int32 layoutWidth, layoutEllipsizedWidth;
         mLayout->GetWidth(&layoutWidth);
         mLayout->GetEllipsizedWidth(&layoutEllipsizedWidth);
@@ -7875,7 +7871,6 @@ void TextView::OnMeasure(
             // Nothing has changed
         }
     }
-    Logger::I(TEXT_VIEW_TAG, "     OnMeasure %d:%s: %d, %d", __LINE__, TO_CSTR(this), width, height);
     if (heightMode == View::MeasureSpec::EXACTLY) {
         // Parent has told us how big to be. So be it.
         height = heightSize;
@@ -7891,7 +7886,7 @@ void TextView::OnMeasure(
             height = Math::Min(desired, heightSize);
         }
     }
-    Logger::I(TEXT_VIEW_TAG, "     OnMeasure %d:%s: %d, %d", __LINE__, TO_CSTR(this), width, height);
+
     if (mAttachInfo != NULL) {
         Int32 count;
         mLayout->GetLineCount(&count);
@@ -7919,7 +7914,6 @@ void TextView::OnMeasure(
         }
     }
     SetMeasuredDimension(width, height);
-    Logger::I(TEXT_VIEW_TAG, " <<< OnMeasure:%s: %d, %d", TO_CSTR(this), width, height);
 }
 
 Int32 TextView::GetDesiredHeight()

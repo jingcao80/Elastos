@@ -36,23 +36,19 @@ CAR_OBJECT_IMPL(CPagedViewIcon);
 
 CPagedViewIcon::CPagedViewIcon()
     : mLockDrawableState(FALSE)
-{
-}
+{}
 
 ECode CPagedViewIcon::ApplyFromApplicationInfo(
     /* [in] */ IApplicationInfo* info,
     /* [in] */ Boolean scaleUp,
     /* [in] */ IPagedViewIconPressedCallback* cb)
 {
-Slogger::E("CPagedViewIcon", "===================ApplyFromApplicationInfo");
     ApplicationInfo* _info = (ApplicationInfo*)info;
     mIcon = _info->mIconBitmap;
     mPressedCallback = cb;
     AutoPtr<FastBitmapDrawable> drawable = new FastBitmapDrawable();
     drawable->constructor(mIcon);
-Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set icon: %s", TO_CSTR(mIcon));
-    SetCompoundDrawablesWithIntrinsicBounds(NULL, IDrawable::Probe(drawable), NULL, NULL);
-Slogger::E("CPagedViewIcon", "==========ApplyFromApplicationInfo set text: %s", TO_CSTR(_info->mTitle));
+    SetCompoundDrawablesWithIntrinsicBounds(NULL, drawable.Get(), NULL, NULL);
     SetText(_info->mTitle);
     if (_info->mContentDescription != NULL) {
         SetContentDescription(_info->mContentDescription);
@@ -76,7 +72,7 @@ ECode CPagedViewIcon::ResetDrawableState()
 
 ECode CPagedViewIcon::DrawableStateChanged()
 {
-    TextView::DrawableStateChanged();
+    FAIL_RETURN(TextView::DrawableStateChanged());
 
     // We keep in the pressed state until resetDrawableState() is called to reset the press
     // feedback
