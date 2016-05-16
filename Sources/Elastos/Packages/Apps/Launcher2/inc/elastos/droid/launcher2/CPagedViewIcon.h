@@ -59,7 +59,6 @@ protected:
     CARAPI DrawableStateChanged();
 
 private:
-    //@SuppressWarnings("unused")
     static const String TAG;
     static const Float PRESS_ALPHA;
 

@@ -77,25 +77,21 @@ CAR_INTERFACE_IMPL(IconCache, Object, IIconCache);
 IconCache::IconCache()
     : mIconDpi(0)
 {
-Slogger::E("IconCache", "============================IconCache::IconCache()");
+    CHashMap::New(INITIAL_ICON_CACHE_CAPACITY, (IHashMap**)&mCache);
 }
 
 ECode IconCache::constructor(
     /* [in] */ ILauncherApplication* context)
 {
-Slogger::E("IconCache", "============================IconCache::constructor 1");
-    CHashMap::New(INITIAL_ICON_CACHE_CAPACITY, (IHashMap**)&mCache);
-
     AutoPtr<IInterface> obj;
     IContext::Probe(context)->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IActivityManager> activityManager = IActivityManager::Probe(obj);
-Slogger::E("IconCache", "============================IconCache::constructor 2");
+
     mContext = context;
     IContext::Probe(context)->GetPackageManager((IPackageManager**)&mPackageManager);
     activityManager->GetLauncherLargeIconDensity(&mIconDpi);
     // need to set mIconDpi before getting default icon
     mDefaultIcon = MakeDefaultIcon();
-Slogger::E("IconCache", "============================IconCache::constructor return");
     return NOERROR;
 }
 
@@ -220,7 +216,7 @@ Slogger::E("IconCache", "============================IconCache::MakeDefaultIcon"
 void IconCache::Remove(
     /* [in] */ IComponentName* componentName)
 {
-    synchronized(mCacheLock) {
+    synchronized(mCache) {
         mCache->Remove(TO_IINTERFACE(componentName));
     }
     return;
@@ -228,7 +224,7 @@ void IconCache::Remove(
 
 void IconCache::Flush()
 {
-    synchronized(mCacheLock) {
+    synchronized(mCache) {
         mCache->Clear();
     }
     return;
@@ -239,14 +235,13 @@ void IconCache::GetTitleAndIcon(
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IHashMap* labelCache)
 {
-    synchronized(mCacheLock) {
+    synchronized(mCache) {
         ApplicationInfo* _info = (ApplicationInfo*)application;
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
-Slogger::E("IconCache", "============================GetTitleAndIcon call CacheLocked");
         AutoPtr<CacheEntry> entry = CacheLocked(_info->mComponentName, info, labelCache,
                 handle);
-Slogger::E("IconCache", "============================GetTitleAndIcon return CacheLocked");
+
         _info->mTitle = CoreUtils::Convert(entry->mTitle);
         _info->mIconBitmap = entry->mIcon;
         _info->mContentDescription = entry->mContentDescription;
@@ -258,7 +253,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
     /* [in] */ IIntent* intent,
     /* [in] */ IUserHandle* user)
 {
-    synchronized(mCacheLock) {
+    synchronized(mCache) {
         AutoPtr<IInterface> obj;
         IContext::Probe(mContext)->GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
         AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
@@ -282,7 +277,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IHashMap* labelCache)
 {
-    synchronized(mCacheLock) {
+    synchronized(mCache) {
         if (info == NULL || component == NULL) {
             return NULL;
         }
@@ -309,14 +304,12 @@ AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
 {
     AutoPtr<CacheKey> cacheKey = new CacheKey(componentName, user);
     AutoPtr<IInterface> obj;
-    mCache->Get(TO_IINTERFACE(cacheKey), (IInterface**)&obj);
+    mCache->Get((IObject*)cacheKey, (IInterface**)&obj);
     AutoPtr<IconCache::CacheEntry> entry = (IconCache::CacheEntry*)IObject::Probe(obj);
-Slogger::E("IconCache", "============================IconCache::CacheLocked entry=%p",entry.Get());
     if (entry == NULL) {
-Slogger::E("IconCache", "============================IconCache::CacheLocked new IconCache::CacheEntry");
         entry = new IconCache::CacheEntry();
 
-        mCache->Put(TO_IINTERFACE(cacheKey), TO_IINTERFACE(entry));
+        mCache->Put((IObject*)cacheKey, (IObject*)entry);
 
         AutoPtr<IComponentName> key;
         info->GetComponentName((IComponentName**)&key);

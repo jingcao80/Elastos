@@ -146,7 +146,6 @@ private:
     AutoPtr<ILauncherApplication> mContext;
     AutoPtr<IPackageManager> mPackageManager;
     AutoPtr<IHashMap> mCache;
-    Object mCacheLock;
     Int32 mIconDpi;
 };
 

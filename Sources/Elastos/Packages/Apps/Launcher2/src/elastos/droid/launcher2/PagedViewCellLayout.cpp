@@ -193,7 +193,6 @@ ECode PagedViewCellLayout::constructor(
     // setup default cell parameters
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
-    mOriginalCellWidth = mCellWidth =
     resources->GetDimensionPixelSize(
             Elastos::Droid::Launcher2::R::dimen::apps_customize_cell_width,
             &mCellWidth);
@@ -362,7 +361,6 @@ void PagedViewCellLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Slogger::I(TAG, " >>> OnMeasure %s:", TO_CSTR(this));
     Int32 widthSpecMode = View::MeasureSpec::GetMode(widthMeasureSpec);
     Int32 widthSpecSize = View::MeasureSpec::GetSize(widthMeasureSpec);
 
@@ -372,8 +370,9 @@ void PagedViewCellLayout::OnMeasure(
     if (widthSpecMode == View::MeasureSpec::UNSPECIFIED ||
             heightSpecMode == View::MeasureSpec::UNSPECIFIED) {
         //throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
-        Slogger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
         //return E_RUNTIME_EXCEPTION;
+        Slogger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
+        return;
     }
 
     Int32 numWidthGaps = mCellCountX - 1;
@@ -440,13 +439,10 @@ void PagedViewCellLayout::OnMeasure(
         Int32 childheightMeasureSpec =
                 View::MeasureSpec::MakeMeasureSpec(newHeight - top -
                 bottom, View::MeasureSpec::EXACTLY);
-
-        Slogger::I(TAG, "     Measure child %s:", TO_CSTR(child));
         child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
 
     SetMeasuredDimension(newWidth, newHeight);
-    Slogger::I(TAG, " <<< OnMeasure: %d, %d", newWidth, newWidth);
 }
 
 ECode PagedViewCellLayout::GetContentWidth(
@@ -508,7 +504,6 @@ ECode PagedViewCellLayout::OnLayout(
         GetPadding(&left, &top, &right, &bottom);
         child->Layout(left, top, r - l - right, b - t - bottom);
     }
-    Slogger::I(TAG, " >> OnLayout: %d, %d, %d, %d", l, t, r, b);
     return NOERROR;
 }
 

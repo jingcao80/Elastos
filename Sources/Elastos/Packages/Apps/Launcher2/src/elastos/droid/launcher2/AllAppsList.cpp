@@ -29,8 +29,8 @@ ECode AllAppsList::Add(
     if (FindActivity(mData, info->mComponentName, info->mUser)) {
         return NOERROR;
     }
-    mData->Add(TO_IINTERFACE(info));
-    return mAdded->Add(TO_IINTERFACE(info));
+    mData->Add((IApplicationInfo*)info);
+    return mAdded->Add((IApplicationInfo*)info);
 }
 
 ECode AllAppsList::Clear()
@@ -59,7 +59,7 @@ ECode AllAppsList::Get(
 
     AutoPtr<IInterface> obj;
     mData->Get(index, (IInterface**)&obj);
-    *info = (ApplicationInfo*)IObject::Probe(obj);
+    *info = (ApplicationInfo*)IApplicationInfo::Probe(obj);
     REFCOUNT_ADD(*info);
     return NOERROR;
 }
@@ -98,7 +98,7 @@ ECode AllAppsList::RemovePackage(
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         data->Get(i, (IInterface**)&obj);
-        AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IObject::Probe(obj);
+        AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IApplicationInfo::Probe(obj);
 
         AutoPtr<IComponentName> component;
         info->mIntent->GetComponent((IComponentName**)&component);
@@ -140,7 +140,7 @@ ECode AllAppsList::UpdatePackage(
         for (Int32 i = _size - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
             mData->Get(i, (IInterface**)&obj);
-            AutoPtr<ApplicationInfo> applicationInfo = (ApplicationInfo*)IObject::Probe(obj);
+            AutoPtr<ApplicationInfo> applicationInfo = (ApplicationInfo*)IApplicationInfo::Probe(obj);
             AutoPtr<IComponentName> component;
             applicationInfo->mIntent->GetComponent((IComponentName**)&component);
 
@@ -197,7 +197,7 @@ ECode AllAppsList::UpdatePackage(
         for (Int32 i = size - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
             mData->Get(i, (IInterface**)&obj);
-            AutoPtr<ApplicationInfo> applicationInfo = (ApplicationInfo*)IObject::Probe(obj);
+            AutoPtr<ApplicationInfo> applicationInfo = (ApplicationInfo*)IApplicationInfo::Probe(obj);
             AutoPtr<IComponentName> component;
             applicationInfo->mIntent->GetComponent((IComponentName**)&component);
 
@@ -256,7 +256,7 @@ Boolean AllAppsList::FindActivity(
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         apps->Get(i, (IInterface**)&obj);
-        AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IObject::Probe(obj);
+        AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IApplicationInfo::Probe(obj);
 
         Boolean res;
         info->mUser->Equals(user, &res);
@@ -281,7 +281,7 @@ AutoPtr<ApplicationInfo> AllAppsList::FindApplicationInfoLocked(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mData->Get(i, (IInterface**)&obj);
-        AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IObject::Probe(obj);
+        AutoPtr<ApplicationInfo> info = (ApplicationInfo*)IApplicationInfo::Probe(obj);
 
         AutoPtr<IComponentName> component;
         info->mIntent->GetComponent((IComponentName**)&component);
