@@ -290,9 +290,6 @@ private:
         /* [in] */ IView* view,
         /* [in] */ IAttributeSet* attrs);
 
-    static CARAPI_(String) ConvertViewName(
-        /* [in] */ const String& name);
-
     static CARAPI_(String) GetReflectionClassName(
         /* [in] */ const String& prefix,
         /* [in] */ const String& name);

@@ -839,39 +839,6 @@ ECode LayoutInflater::OnCreateView(
     return OnCreateView(name, attrs, view);
 }
 
-// static String Replace(const String& name, const char* regix, const char* replacement)
-// {
-//     String result;
-//     StringUtils::ReplaceAll(name, String(regix), String(replacement), &result);
-//     return result;
-// }
-
-String LayoutInflater::ConvertViewName(
-    /* [in] */ const String& nameIn)
-{
-    String name(nameIn.string());
-    //TODO delete
-    // if (name.IndexOf("$") >= 0) {
-    //     // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
-    //     // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
-    //     name = Replace(name, "\\$", "");
-    // }
-
-    // if (name.StartWith("com.android.internal.widget.")) {
-    //     return Replace(name, "com.android.internal.widget.",
-    //         "Elastos.Droid.Internal.Widget.C");
-    // }
-    // else if (name.StartWith("android.preference.")) {
-    //     return Replace(name, "android.preference.",
-    //         "Elastos.Droid.Preference.C");
-    // }
-    // else if (name.StartWith("android.opengl.")) {
-    //     return Replace(name, "android.opengl.",
-    //         "Elastos.Droid.Opengl.C");
-    // }
-    return name;
-}
-
 ECode LayoutInflater::CreateViewFromTag(
     /* [in] */ IView* parent,
     /* [in] */ const String& inName,
