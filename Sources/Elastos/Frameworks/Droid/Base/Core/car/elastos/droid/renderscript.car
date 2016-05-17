@@ -1,0 +1,5 @@
+
+module
+{
+    merge("renderscript/Allocation.car");
+}
