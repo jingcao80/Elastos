@@ -1391,7 +1391,7 @@ ECode CAppOpsService::StartOperation(
             // req = AskOperationLocked(code, uid, packageName, switchOp);
         }
     }
-    Int32 result;// = req.get();
+    Int32 result = 0;// = req.get();
     BroadcastOpIfNeeded(code);
     *mode = result;
     return NOERROR;
@@ -1560,6 +1560,7 @@ AutoPtr<CAppOpsService::Ops> CAppOpsService::GetOpsRawLocked(
             if (pkgUid != uid) {
                 // Oops!  The package name is not valid for the uid they are calling
                 // under.  Abort.
+                Binder::RestoreCallingIdentity(ident);
                 Slogger::W(TAG, "Bad call: specified package %s under uid %d but it is really %d",
                     packageName.string(), uid, pkgUid);
                 return NULL;

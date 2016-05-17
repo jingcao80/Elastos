@@ -370,12 +370,14 @@ static ECode CheckIsCarObject(
     /* [in] */ IInterface* target)
 {
 #if defined(_DEBUG)
-    assert(target != NULL);
-    ClassID objId;
-    ECode ec = IObject::Probe(target)->GetClassID(&objId);
-    if (FAILED(ec)) {
-        Logger::E("ObjectAnimator", "Target object [%s] is not a CAR object!", TO_CSTR(target));
-        assert(0 && "Target object is not a CAR object!");
+    ECode ec = NOERROR;
+    if (target != NULL) {
+        ClassID objId;
+        ec = IObject::Probe(target)->GetClassID(&objId);
+        if (FAILED(ec)) {
+            Logger::E("ObjectAnimator", "Target object [%s] is not a CAR object!", TO_CSTR(target));
+            assert(0 && "Target object is not a CAR object!");
+        }
     }
     return ec;
 #endif

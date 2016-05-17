@@ -23,6 +23,7 @@ using Elastos::Droid::SystemUI::StatusBar::Stack::IOnOverscrollTopChangedListene
 using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLayoutChangeListener;
+using Elastos::Droid::Widget::IGridLayout;
 using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
@@ -867,7 +868,7 @@ private:
     AutoPtr<IKeyguardStatusBarView> mKeyguardStatusBar;
     AutoPtr<IView> mQsContainer;
     AutoPtr<IQSPanel> mQsPanel;
-    // AutoPtr<IKeyguardStatusView> mKeyguardStatusView;
+    AutoPtr<IGridLayout> mKeyguardStatusView;
     AutoPtr<IObservableScrollView> mScrollView;
     AutoPtr<ITextView> mClockView;
     AutoPtr<IView> mReserveNotificationSpace;

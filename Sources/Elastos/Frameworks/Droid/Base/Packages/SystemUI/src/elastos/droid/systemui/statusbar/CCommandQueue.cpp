@@ -56,7 +56,6 @@ ECode CCommandQueue::constructor(
     mCallbacks = callbacks;
     mList = list;
     mHandler = new MyHandler(this);
-    ((MyHandler*)mHandler.Get())->constructor();
     return NOERROR;
 }
 
@@ -309,11 +308,8 @@ ECode CCommandQueue::ToString(
 CCommandQueue::MyHandler::MyHandler(
     /* [in] */ CCommandQueue* host)
     : mHost(host)
-{}
-
-CCommandQueue::MyHandler::constructor()
 {
-    return Handler::constructor((IHandlerCallback*)NULL, FALSE);
+    Handler::constructor();
 }
 
 ECode CCommandQueue::MyHandler::HandleMessage(

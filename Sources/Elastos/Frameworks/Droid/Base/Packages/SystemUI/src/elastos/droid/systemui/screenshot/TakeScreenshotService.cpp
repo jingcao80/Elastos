@@ -32,7 +32,6 @@ ECode TakeScreenshotService::MyRunnable::Run()
 //---------------------------------------------------------
 // TakeScreenshotService::MyHandler
 //---------------------------------------------------------
-
 TakeScreenshotService::MyHandler::MyHandler(
     /* [in] */ TakeScreenshotService* host)
     : mHost(host)
@@ -65,15 +64,13 @@ ECode TakeScreenshotService::MyHandler::HandleMessage(
 //---------------------------------------------------------
 // TakeScreenshotService
 //---------------------------------------------------------
-
 const String TakeScreenshotService::TAG("TakeScreenshotService");
 AutoPtr<GlobalScreenshot> TakeScreenshotService::mScreenshot;
-
 CARAPI TakeScreenshotService::constructor()
 {
     AutoPtr<MyHandler> h = new MyHandler(this);
     mHandler = h;
-    return NOERROR;
+    return Service::constructor();
 }
 
 ECode TakeScreenshotService::OnBind(

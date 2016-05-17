@@ -631,7 +631,7 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
 {
     Boolean shown = FALSE;
     IsShown(&shown);
-    Logger::D(TAG, "TODO: need the app Keyguard.");
+    Logger::D(TAG, "TODO [UpdateLockIcon] : need the app Keyguard.");
     Boolean visible = shown/* && KeyguardUpdateMonitor.getInstance(mContext).isScreenOn()*/;
     if (visible) {
         ((CTrustDrawable*)mTrustDrawable.Get())->Start();

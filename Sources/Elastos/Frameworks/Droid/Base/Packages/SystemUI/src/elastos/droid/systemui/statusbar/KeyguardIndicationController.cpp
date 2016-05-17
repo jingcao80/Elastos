@@ -78,7 +78,7 @@ KeyguardIndicationController::KeyguardIndicationController(
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(IBatteryStats::SERVICE_NAME);
     mBatteryInfo = IIBatteryStats::Probe(obj);
-    Logger::D("KeyguardIndicationController", "TODO: need the app Keyguard.");
+    Logger::D("KeyguardIndicationController", "TODO [KeyguardIndicationController] : need the app Keyguard.");
     // KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);

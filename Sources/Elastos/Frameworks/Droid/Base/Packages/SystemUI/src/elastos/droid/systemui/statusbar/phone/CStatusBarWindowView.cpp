@@ -82,7 +82,7 @@ ECode CStatusBarWindowView::FitSystemWindows(
     return NOERROR;
 }
 
-ECode CStatusBarWindowView::OnAttachedToWindow ()
+ECode CStatusBarWindowView::OnAttachedToWindow()
 {
     FrameLayout::OnAttachedToWindow();
 

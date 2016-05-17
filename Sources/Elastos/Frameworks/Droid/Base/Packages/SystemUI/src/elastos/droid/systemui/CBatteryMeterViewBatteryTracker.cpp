@@ -3,11 +3,13 @@
 #include "elastos/droid/systemui/CBatteryMeterView.h"
 #include "R.h"
 #include "Elastos.Droid.Os.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::IInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -25,6 +27,8 @@ CBatteryMeterViewBatteryTracker::CBatteryMeterViewBatteryTracker()
     , mTemperature(0)
     , mTestmode(FALSE)
 {
+    mLevel = 50;
+    Logger::D("CBatteryMeterViewBatteryTracker", "TODO: Set mLevel = 50.");
 }
 
 ECode CBatteryMeterViewBatteryTracker::constructor(

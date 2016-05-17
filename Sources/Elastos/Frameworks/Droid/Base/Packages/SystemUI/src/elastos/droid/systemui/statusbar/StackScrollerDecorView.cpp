@@ -1,7 +1,9 @@
 
 #include "elastos/droid/systemui/statusbar/StackScrollerDecorView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 
 using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::SystemUI::StatusBar::Phone::CPhoneStatusBar;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::View::IViewPropertyAnimator;
 
@@ -99,13 +101,12 @@ void StackScrollerDecorView::AnimateText(
         // Animate text
         Float endValue = nowVisible ? 1.0f : 0.0f;
         AutoPtr<IInterpolator> interpolator;
-        assert(0 && "TODO");
-        // if (nowVisible) {
-        //     interpolator = CPhoneStatusBar::ALPHA_IN;
-        // }
-        // else {
-        //     interpolator = CPhoneStatusBar::ALPHA_OUT;
-        // }
+        if (nowVisible) {
+            interpolator = CPhoneStatusBar::ALPHA_IN;
+        }
+        else {
+            interpolator = CPhoneStatusBar::ALPHA_OUT;
+        }
         mAnimating = TRUE;
         AutoPtr<IViewPropertyAnimator> anim;
         mContent->Animate((IViewPropertyAnimator**)&anim);

@@ -9,6 +9,7 @@
 #include "elastos/droid/systemui/statusbar/phone/CStatusBarWindowView.h"
 #include "elastos/droid/systemui/statusbar/phone/QSTileHost.h"
 #include "elastos/droid/systemui/statusbar/policy/AccessibilityController.h"
+#include "elastos/droid/systemui/statusbar/policy/KeyguardUserSwitcher.h"
 #include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
 #include "elastos/droid/systemui/statusbar/stack/StackScrollState.h"
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
@@ -68,6 +69,7 @@ using Elastos::Droid::SystemUI::StatusBar::Policy::AccessibilityController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IBatteryStateChangeCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IKeyButtonView;
 using Elastos::Droid::SystemUI::StatusBar::Policy::INetworkControllerImplSignalCluster;
+using Elastos::Droid::SystemUI::StatusBar::Policy::KeyguardUserSwitcher;
 using Elastos::Droid::SystemUI::StatusBar::Policy::PreviewInflater;
 using Elastos::Droid::SystemUI::StatusBar::Stack::EIID_IOnChildLocationsChangedListener;
 using Elastos::Droid::SystemUI::StatusBar::Stack::StackScrollState;
@@ -118,12 +120,12 @@ namespace Phone {
 
 const String CPhoneStatusBar::TAG("CPhoneStatusBar");
 const Boolean CPhoneStatusBar::DEBUG = BaseStatusBar::DEBUG;
-const Boolean CPhoneStatusBar::SPEW = FALSE;
+const Boolean CPhoneStatusBar::SPEW = TRUE;
 const Boolean CPhoneStatusBar::DUMPTRUCK = TRUE; // extra dumpsys info
 const Boolean CPhoneStatusBar::DEBUG_GESTURES = FALSE;
 const Boolean CPhoneStatusBar::DEBUG_MEDIA = FALSE;
 const Boolean CPhoneStatusBar::DEBUG_MEDIA_FAKE_ARTWORK = FALSE;
-const Boolean CPhoneStatusBar::DEBUG_WINDOW_STATE = FALSE;
+const Boolean CPhoneStatusBar::DEBUG_WINDOW_STATE = TRUE;
 const Boolean CPhoneStatusBar::CHATTY = DEBUG;
 const String CPhoneStatusBar::ACTION_STATUSBAR_START("com.android.internal.policy.statusbar.START");
 const Boolean CPhoneStatusBar::SHOW_LOCKSCREEN_MEDIA_ARTWORK = TRUE;
@@ -1666,7 +1668,11 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     IView::Probe(mStatusBarWindow)->FindViewById(R::id::carrier_label, (IView**)&view);
     mCarrierLabel = ITextView::Probe(view);
     mShowCarrierInPanel = (mCarrierLabel != NULL);
-    if (DEBUG) Logger::V(TAG, "carrierlabel=%s show=%d", TO_CSTR(mCarrierLabel), mShowCarrierInPanel);
+    if (DEBUG) {
+        AutoPtr<ICharSequence> t;
+        mCarrierLabel->GetText((ICharSequence**)&t);
+        Logger::V(TAG, "carrierlabel=%s show=%d", TO_CSTR(t), mShowCarrierInPanel);
+    }
     if (mShowCarrierInPanel) {
         IView::Probe(mCarrierLabel)->SetVisibility(mCarrierLabelVisible ? IView::VISIBLE : IView::INVISIBLE);
 
@@ -1699,16 +1705,14 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
 
     view = NULL;
     IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_user_switcher, (IView**)&view);
-    Logger::D(TAG, "TODO : ============== mKeyguardUserSwitcher.");
-    // mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext, IViewStub::Probe(view),
-    //         mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
+    mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext, IViewStub::Probe(view),
+            mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
 
     // Set up the quick settings tile panel
     view = NULL;
     IView::Probe(mStatusBarWindow)->FindViewById(R::id::quick_settings_panel, (IView**)&view);
     mQSPanel = IQSPanel::Probe(view);
     if (mQSPanel != NULL) {
-        Logger::D(TAG, "TODO :the codes will make an error-commented.");
         AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
                 mBluetoothController, mLocationController, mRotationLockController,
                 mNetworkController, mZenModeController, mHotspotController,
@@ -3605,11 +3609,14 @@ ECode CPhoneStatusBar::InterceptTouchEvent(
         Int32 masked = 0;
         event->GetActionMasked(&masked);
         if (masked != IMotionEvent::ACTION_MOVE) {
-            assert(0 && "TODO");
+            Float x = 0, y = 0;
+            event->GetX(&x);
+            event->GetY(&y);
+            Logger::D("CPhoneStatusBar", "InterceptTouchEvent masked=[%d], x=[%d], y=[%d], mDisabled=[%d]"
+                    , masked, (Int32)x, (Int32)y, mDisabled);
             // EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
             //         event.getActionMasked(), (Int32) event.getX(), (Int32) event.getY(), mDisabled);
         }
-
     }
 
     if (SPEW) {
@@ -3629,7 +3636,7 @@ ECode CPhoneStatusBar::InterceptTouchEvent(
             Float x = 0, y = 0;
             event->GetRawX(&x);
             event->GetRawY(&y);
-            Logger::D(TAG, "panel: %s at (%f, %f) mDisabled=0x%08x",
+            Logger::D(TAG, "panel: %s at (%f, %f) mDisabled=%d",
                         str.string(), x, y, mDisabled);
         }
     }
@@ -4499,7 +4506,11 @@ void CPhoneStatusBar::SetHeadsUpVisibility(
 {
     if (!ENABLE_HEADS_UP) return;
     if (DEBUG) Logger::V(TAG, "%s heads up window", (vis ? "showing" : "hiding"));
-    assert(0 && "TODO");
+
+    String key;
+    mHeadsUpNotificationView->GetKey(&key);
+    Logger::D("CPhoneStatusBar", "SetHeadsUpVisibility key=[%s], vis=[%d]"
+            , key.string(), (vis ? 1 : 0));
     // EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_STATUS,
     //         vis ? mHeadsUpNotificationView.getKey() : "",
     //         vis ? 1 : 0);
