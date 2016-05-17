@@ -113,6 +113,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("Launcher::MyBroadcastReceiver")
+
         MyBroadcastReceiver();
 
         CARAPI constructor();
@@ -136,6 +138,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("Launcher::CloseSystemDialogsIntentReceiver")
+
         CloseSystemDialogsIntentReceiver();
 
         CARAPI constructor();
@@ -159,6 +163,8 @@ public:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("Launcher::AppWidgetResetObserver")
+
         AppWidgetResetObserver();
 
         CARAPI constructor();
@@ -179,6 +185,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable")
+
         MyRunnable(
             /* [in] */ Launcher* host);
 
@@ -192,6 +200,8 @@ private:
         : public AsyncTask
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAsyncTask")
+
         MyAsyncTask(
             /* [in] */ Launcher* host);
 
@@ -225,6 +235,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("Launcher::MyThread")
+
         MyThread(
             /* [in] */ Launcher* host,
             /* [in] */ const String& name,
@@ -241,6 +253,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable2")
+
         MyRunnable2(
             /* [in] */ Launcher* host,
             /* [in] */ Int32 appWidgetId,
@@ -260,6 +274,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable3")
+
         MyRunnable3(
             /* [in] */ Launcher* host,
             /* [in] */ Int32 resultCode);
@@ -275,6 +291,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("Launcher::MyThread2")
+
         MyThread2(
             /* [in] */ Launcher* host,
             /* [in] */ const String& name,
@@ -296,6 +314,8 @@ private:
             : public Runnable
         {
         public:
+            TO_STRING_IMPL("Launcher::MyRunnable4")
+
             MyRunnable4(
                 /* [in] */ Launcher* host,
                 /* [in] */ IOnDrawListener* listener);
@@ -308,6 +328,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("Launcher::MyOnDrawListener")
+
         CAR_INTERFACE_DECL();
 
         MyOnDrawListener(
@@ -328,6 +350,8 @@ private:
             : public Runnable
         {
         public:
+            TO_STRING_IMPL("Launcher::MyRunnable5")
+
             MyRunnable5(
                 /* [in] */ IView* v);
 
@@ -338,6 +362,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("Launcher::MyHandler")
+
         MyHandler(
             /* [in] */ Launcher* host);
 
@@ -352,6 +378,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable6")
+
         MyRunnable6(
             /* [in] */ Launcher* host,
             /* [in] */ Boolean alreadyOnHome);
@@ -367,6 +395,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorListenerAdapter")
+
         MyAnimatorListenerAdapter(
             /* [in] */ Launcher* host,
             /* [in] */ ICellLayout* cl,
@@ -386,6 +416,8 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorUpdateListener")
+
         CAR_INTERFACE_DECL();
 
         MyAnimatorUpdateListener(
@@ -406,6 +438,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorListenerAdapter2")
+
         MyAnimatorListenerAdapter2(
             /* [in] */ Launcher* host,
             /* [in] */ IView* fromView,
@@ -435,6 +469,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable7")
+
         MyRunnable7(
             /* [in] */ Launcher* host,
             /* [in] */ IAnimatorSet* stateAnimation,
@@ -459,6 +495,8 @@ private:
         , public IOnGlobalLayoutListener
     {
     public:
+        TO_STRING_IMPL("Launcher::MyOnGlobalLayoutListener")
+
         CAR_INTERFACE_DECL();
 
         MyOnGlobalLayoutListener(
@@ -477,6 +515,8 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorUpdateListener2")
+
         CAR_INTERFACE_DECL();
 
         MyAnimatorUpdateListener2(
@@ -497,6 +537,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorListenerAdapter3")
+
         MyAnimatorListenerAdapter3(
             /* [in] */ Launcher* host,
             /* [in] */ IView* fromView,
@@ -519,6 +561,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable8")
+
         MyRunnable8(
             /* [in] */ Launcher* host);
 
@@ -532,6 +576,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable9")
+
         MyRunnable9(
             /* [in] */ Launcher* host,
             /* [in] */ Boolean successfulDrop,
@@ -549,6 +595,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable10")
+
         MyRunnable10(
             /* [in] */ Launcher* host,
             /* [in] */ IArrayList* shortcuts,
@@ -568,6 +616,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable11")
+
         MyRunnable11(
             /* [in] */ Launcher* host,
             /* [in] */ IHashMap* folders);
@@ -583,6 +633,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable12")
+
         MyRunnable12(
             /* [in] */ Launcher* host,
             /* [in] */ ILauncherAppWidgetInfo* item);
@@ -598,6 +650,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable13")
+
         MyRunnable13(
             /* [in] */ Launcher* host);
 
@@ -611,6 +665,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable14")
+
         MyRunnable14(
             /* [in] */ Launcher* host);
 
@@ -625,6 +681,8 @@ private:
         , public IComparator
     {
     public:
+        TO_STRING_IMPL("Launcher::MyComparator")
+
         CAR_INTERFACE_DECL();
 
         CARAPI Compare(
@@ -637,6 +695,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorListenerAdapter4")
+
         MyAnimatorListenerAdapter4(
             /* [in] */ Launcher* host);
 
@@ -651,6 +711,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("Launcher::MyThread3")
+
         MyThread3(
             /* [in] */ Launcher* host,
             /* [in] */ const String& name);
@@ -665,6 +727,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable15")
+
         MyRunnable15(
             /* [in] */ Launcher* host,
             /* [in] */ IArrayList* apps);
@@ -680,6 +744,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable16")
+
         MyRunnable16(
             /* [in] */ Launcher* host,
             /* [in] */ IArrayList* apps);
@@ -695,6 +761,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable17")
+
         MyRunnable17(
             /* [in] */ Launcher* host,
             /* [in] */ IArrayList* apps);
@@ -710,6 +778,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable18")
+
         MyRunnable18(
             /* [in] */ Launcher* host,
             /* [in] */ IArrayList* packageNames,
@@ -731,6 +801,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable19")
+
         MyRunnable19(
             /* [in] */ Launcher* host);
 
@@ -744,6 +816,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable20")
+
         MyRunnable20(
             /* [in] */ Launcher* host);
 
@@ -757,6 +831,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable21")
+
         MyRunnable21(
             /* [in] */ Launcher* host,
             /* [in] */ ICling* cling);
@@ -772,6 +848,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("Launcher::MyThread4")
+
         MyThread4(
             /* [in] */ Launcher* host,
             /* [in] */ const String& name,
@@ -788,6 +866,8 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("Launcher::MyAnimatorListenerAdapter5")
+
         MyAnimatorListenerAdapter5(
             /* [in] */ Launcher* host,
             /* [in] */ ICling* cling,
@@ -806,6 +886,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("Launcher::MyRunnable22")
+
         MyRunnable22(
             /* [in] */ IViewGroup* parent,
             /* [in] */ IView* cling);

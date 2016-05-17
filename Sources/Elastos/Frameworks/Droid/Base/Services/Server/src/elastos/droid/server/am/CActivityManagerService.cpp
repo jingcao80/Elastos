@@ -24956,6 +24956,7 @@ void CActivityManagerService::HandleReportMemUsageMsg(
 void CActivityManagerService::HandleCollectPssBgMsg()
 {
     //assert(0 && "TODO");
+    Slogger::E(TAG, "TODO: need CDebug.");
     return;
 
     Int64 start = SystemClock::GetUptimeMillis();

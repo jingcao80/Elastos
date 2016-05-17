@@ -1040,6 +1040,7 @@ Launcher::MyAnimatorListenerAdapter5::MyAnimatorListenerAdapter5(
 ECode Launcher::MyAnimatorListenerAdapter5::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
+    Slogger::I("MyAnimatorListenerAdapter5", " >>> OnAnimationEnd");
     IView::Probe(mCling)->SetVisibility(IView::GONE);
     mCling->Cleanup();
     // We should update the shared preferences on a background thread
@@ -1239,13 +1240,13 @@ ECode Launcher::OnCreate(
     app->SetLauncher(this, (ILauncherModel**)&mModel);
     app->GetIconCache((IIconCache**)&mIconCache);
     mDragController = new DragController();
-    ((DragController*)mDragController.Get())->constructor(ILauncher::Probe(this));
+    ((DragController*)mDragController.Get())->constructor((ILauncher*)this);
     GetLayoutInflater((ILayoutInflater**)&mInflater);
 
     AutoPtr<IAppWidgetManagerHelper> helper;
     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
     helper->GetInstance((IContext*)this, (IAppWidgetManager**)&mAppWidgetManager);
-    mAppWidgetHost = new LauncherAppWidgetHost(ILauncher::Probe(this), APPWIDGET_HOST_ID);
+    mAppWidgetHost = new LauncherAppWidgetHost((ILauncher*)this, APPWIDGET_HOST_ID);
     IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
 
     // If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,
@@ -2029,10 +2030,18 @@ void Launcher::SetupViews()
     mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view);
     view = NULL;
     IView::Probe(mAppsCustomizeTabHost)->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,
+<<<<<<< HEAD
             (IView**)&view);
     mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view);
     mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
 
+=======
+            (IView**)&view6);
+    mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view6);
+Slogger::E("Launcher", "============================Launcher::SetupViews mAppsCustomizeContent=%p",mAppsCustomizeContent.Get());
+    mAppsCustomizeContent->Setup((ILauncher*)this, dragController);
+Slogger::E("Launcher", "============================Launcher::SetupViews 13");
+>>>>>>> update launcher2.
     // Setup the drag controller (drop targets have to be added in reverse order in priority)
     dragController->SetDragScoller(IDragScroller::Probe(mWorkspace));
     dragController->SetScrollView(IView::Probe(mDragLayer));
@@ -3151,7 +3160,7 @@ ECode Launcher::AddFolder(
 
     // Create the view
     AutoPtr<IFolderIcon> newFolder;
-    FolderIcon::FromXml(Elastos::Droid::Launcher2::R::layout::folder_icon, ILauncher::Probe(this),
+    FolderIcon::FromXml(Elastos::Droid::Launcher2::R::layout::folder_icon, (ILauncher*)this,
             IViewGroup::Probe(layout), IFolderInfo::Probe(folderInfo), mIconCache,
             (IFolderIcon**)&newFolder);
     Boolean res;
@@ -5443,7 +5452,7 @@ ECode Launcher::BindAppWidget(
             appWidgetInfo, (IAppWidgetHostView**)&(_item->mHostView));
 
     IView::Probe(_item->mHostView)->SetTag(TO_IINTERFACE(item));
-    item->OnBindAppWidget(ILauncher::Probe(this));
+    item->OnBindAppWidget((ILauncher*)this);
 
     workspace->AddInScreen(IView::Probe(_item->mHostView), _item->mContainer, _item->mScreen, _item->mCellX,
             _item->mCellY, _item->mSpanX, _item->mSpanY, FALSE);
@@ -5840,14 +5849,14 @@ Boolean Launcher::IsClingsEnabled()
     AutoPtr<IActivityManagerHelper> helper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
     helper->IsRunningInTestHarness(&res);
-    if(res) {
+    if (res) {
         return FALSE;
     }
 
     // Restricted secondary users (child mode) will potentially have very few apps
     // seeded when they start up for the first time. Clings won't work well with that
     Boolean supportsLimitedUsers =
-            Build::VERSION::SDK_INT >= Build::VERSION_CODES::JELLY_BEAN_MR2;
+        Build::VERSION::SDK_INT >= Build::VERSION_CODES::JELLY_BEAN_MR2;
 
     AutoPtr<IAccountManagerHelper> helper2;
     CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper2);
@@ -5890,14 +5899,14 @@ AutoPtr<ICling> Launcher::InitCling(
     FindViewById(clingId, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     if (cling != NULL) {
-        cling->CCling_Init(ILauncher::Probe(this), positionData);
-        IView::Probe(cling)->SetVisibility(IView::VISIBLE);
-        IView::Probe(cling)->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
+        cling->CCling_Init((ILauncher*)this, positionData);
+        view->SetVisibility(IView::VISIBLE);
+        view->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
         if (animate) {
-            IView::Probe(cling)->BuildLayer();
-            IView::Probe(cling)->SetAlpha(0.0f);
+            view->BuildLayer();
+            view->SetAlpha(0.0f);
             AutoPtr<IViewPropertyAnimator> res;
-            IView::Probe(cling)->Animate((IViewPropertyAnimator**)&res);
+            view->Animate((IViewPropertyAnimator**)&res);
             res->Alpha(1.0f);
             AutoPtr<ITimeInterpolator> interpolator;
             CAccelerateInterpolator::New((ITimeInterpolator**)&interpolator);
@@ -5907,12 +5916,12 @@ AutoPtr<ICling> Launcher::InitCling(
             res->Start();
         }
         else {
-            IView::Probe(cling)->SetAlpha(1.0f);
+            view->SetAlpha(1.0f);
         }
-        IView::Probe(cling)->SetFocusableInTouchMode(TRUE);
+        view->SetFocusableInTouchMode(TRUE);
         AutoPtr<IRunnable> r = new MyRunnable21(this, cling);
         Boolean res;
-        IView::Probe(cling)->Post(r, &res);
+        view->Post(r, &res);
         mHideFromAccessibilityHelper->SetImportantForAccessibilityToNo(
                 IView::Probe(mDragLayer), clingId == Elastos::Droid::Launcher2::R::id::all_apps_cling);
     }
@@ -5926,16 +5935,24 @@ void Launcher::DismissCling(
 {
     // To catch cases where siblings of top-level views are made invisible, just check whether
     // the cling is directly set to GONE before dismissing it.
+    IView* view = IView::Probe(cling);
     Int32 visibility;
-    IView::Probe(cling)->GetVisibility(&visibility);
-    if (cling != NULL && visibility != IView::GONE) {
+    if (view != NULL && (view->GetVisibility(&visibility), visibility != IView::GONE)) {
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
         (*array)[0] = 0.0f;
-        AutoPtr<IObjectAnimator> anim = LauncherAnimUtils::OfFloat(IView::Probe(cling), String("alpha"), array);
-        IAnimator::Probe(anim)->SetDuration(duration);
+        AutoPtr<IObjectAnimator> anim = LauncherAnimUtils::OfFloat(view, String("alpha"), array);
+        IAnimator* a = IAnimator::Probe(anim);
+        a->SetDuration(duration);
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter5(this, cling, flag);
+<<<<<<< HEAD
         IAnimator::Probe(anim)->AddListener(listener);
         IAnimator::Probe(anim)->Start();
+=======
+        Slogger::D("Launcher", "=======Launcher::DismissCling animation:%s, listener=%s",
+            TO_CSTR(anim), TO_CSTR(listener));
+        a->AddListener(listener);
+        a->Start();
+>>>>>>> update launcher2.
         mHideFromAccessibilityHelper->RestoreImportantForAccessibility(IView::Probe(mDragLayer));
     }
 }
@@ -5959,14 +5976,12 @@ void Launcher::RemoveCling(
 Boolean Launcher::SkipCustomClingIfNoAccounts()
 {
     AutoPtr<IView> view;
-    FindViewById(
-            Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&view);
+    FindViewById(Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     String identifier;
     cling->GetDrawIdentifier(&identifier);
-    Boolean customCling = identifier.Equals(String("workspace_custom"));
+    Boolean customCling = identifier.Equals("workspace_custom");
     if (customCling) {
-
         AutoPtr<IAccountManagerHelper> helper;
         CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper);
         AutoPtr<IAccountManager> am;
@@ -5992,13 +6007,11 @@ ECode Launcher::ShowFirstRunWorkspaceCling()
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         Boolean res3;
-        resources->GetBoolean(
-                Elastos::Droid::Launcher2::R::bool_::config_useCustomClings, &res3);
+        resources->GetBoolean(Elastos::Droid::Launcher2::R::bool_::config_useCustomClings, &res3);
         if (id != 0 && res3) {
             // Use a custom cling
             AutoPtr<IView> cling;
-            FindViewById(
-                    Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&cling);
+            FindViewById(Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&cling);
             AutoPtr<IViewParent> p;
             cling->GetParent((IViewParent**)&p);
             AutoPtr<IViewGroup> clingParent = IViewGroup::Probe(p);
@@ -6010,11 +6023,9 @@ ECode Launcher::ShowFirstRunWorkspaceCling()
                     Elastos::Droid::Launcher2::R::layout::custom_workspace_cling,
                     clingParent, FALSE, (IView**)&customCling);
             clingParent->AddView(customCling, clingIndex);
-            customCling->SetId(
-                    Elastos::Droid::Launcher2::R::id::workspace_cling);
+            customCling->SetId(Elastos::Droid::Launcher2::R::id::workspace_cling);
         }
-        InitCling(
-                Elastos::Droid::Launcher2::R::id::workspace_cling, NULL, FALSE, 0);
+        InitCling(Elastos::Droid::Launcher2::R::id::workspace_cling, NULL, FALSE, 0);
     }
     else {
         RemoveCling(Elastos::Droid::Launcher2::R::id::workspace_cling);
@@ -6029,8 +6040,7 @@ ECode Launcher::ShowFirstRunAllAppsCling(
     Boolean res;
     mSharedPrefs->GetBoolean(ICling::ALLAPPS_CLING_DISMISSED_KEY, FALSE, &res);
     if (IsClingsEnabled() && !res) {
-        InitCling(
-                Elastos::Droid::Launcher2::R::id::all_apps_cling, position, TRUE, 0);
+        InitCling(Elastos::Droid::Launcher2::R::id::all_apps_cling, position, TRUE, 0);
     }
     else {
         RemoveCling(Elastos::Droid::Launcher2::R::id::all_apps_cling);
@@ -6047,8 +6057,7 @@ ECode Launcher::ShowFirstRunFoldersCling(
     Boolean res;
     mSharedPrefs->GetBoolean(ICling::FOLDER_CLING_DISMISSED_KEY, FALSE, &res);
     if (IsClingsEnabled() && !res) {
-        AutoPtr<ICling> c = InitCling(
-                Elastos::Droid::Launcher2::R::id::folder_cling, NULL, TRUE, 0);
+        AutoPtr<ICling> c = InitCling(Elastos::Droid::Launcher2::R::id::folder_cling, NULL, TRUE, 0);
         *cling = c;
         REFCOUNT_ADD(*cling);
         return NOERROR;
@@ -6084,8 +6093,7 @@ ECode Launcher::DismissWorkspaceCling(
     /* [in] */ IView* v)
 {
     AutoPtr<IView> view;
-    FindViewById(
-            Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&view);
+    FindViewById(Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     DismissCling(cling, ICling::WORKSPACE_CLING_DISMISSED_KEY, DISMISS_CLING_DURATION);
     return NOERROR;
@@ -6095,8 +6103,7 @@ ECode Launcher::DismissAllAppsCling(
     /* [in] */ IView* v)
 {
     AutoPtr<IView> view;
-    FindViewById(
-            Elastos::Droid::Launcher2::R::id::all_apps_cling, (IView**)&view);
+    FindViewById(Elastos::Droid::Launcher2::R::id::all_apps_cling, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     DismissCling(cling, ICling::ALLAPPS_CLING_DISMISSED_KEY, DISMISS_CLING_DURATION);
     return NOERROR;
@@ -6106,8 +6113,7 @@ ECode Launcher::DismissFolderCling(
     /* [in] */ IView* v)
 {
     AutoPtr<IView> view;
-    FindViewById(
-            Elastos::Droid::Launcher2::R::id::folder_cling, (IView**)&view);
+    FindViewById(Elastos::Droid::Launcher2::R::id::folder_cling, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     DismissCling(cling, ICling::FOLDER_CLING_DISMISSED_KEY, DISMISS_CLING_DURATION);
     return NOERROR;

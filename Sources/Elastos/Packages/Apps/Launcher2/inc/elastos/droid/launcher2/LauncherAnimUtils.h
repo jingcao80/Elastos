@@ -34,6 +34,8 @@ private:
         , public IAnimatorListener
     {
     public:
+        TO_STRING_IMPL("LauncherAnimUtils::MyAnimatorListener")
+
         CAR_INTERFACE_DECL();
 
         CARAPI OnAnimationStart(
@@ -54,6 +56,8 @@ private:
         , public IOnDrawListener
     {
     public:
+        TO_STRING_IMPL("LauncherAnimUtils::MyOnDrawListener")
+
         CAR_INTERFACE_DECL();
 
         MyOnDrawListener(
@@ -72,6 +76,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("LauncherAnimUtils::MyRunnable")
+
         MyRunnable(
             /* [in] */ IView* view,
             /* [in] */ IOnDrawListener* listener);
