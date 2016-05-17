@@ -2,19 +2,16 @@
 #ifndef __ELASTOS_DROID_INTERNAL_WIDGET_PASSWORDENTRYKEYBOARDHELPER_H__
 #define __ELASTOS_DROID_INTERNAL_WIDGET_PASSWORDENTRYKEYBOARDHELPER_H__
 
-#define LAYOUTS_LENGTH 5
-
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/widget/CPasswordEntryKeyboard.h"
-
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::InputMethodService::IKeyboardView;
-//using Elastos::Droid::InputMethod::Keyboard::IKeyboardActionListener;
+using Elastos::Droid::InputMethodService::IOnKeyboardActionListener;
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::Object;
@@ -27,7 +24,7 @@ namespace Widget {
 class PasswordEntryKeyboardHelper
     : public Object
     , public IPasswordEntryKeyboardHelper
-//    , public IKeyboardActionListener
+    , public IOnKeyboardActionListener
 {
 public:
     CAR_INTERFACE_DECL()

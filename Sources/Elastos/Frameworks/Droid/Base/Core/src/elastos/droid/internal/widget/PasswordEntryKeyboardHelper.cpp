@@ -24,7 +24,6 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IHapticFeedbackConstants;
 using Elastos::Droid::InputMethodService::IKeyboard;
 using Elastos::Droid::InputMethodService::EIID_IKeyboard;
-using Elastos::Droid::InputMethodService::IOnKeyboardActionListener;
 using Elastos::Droid::InputMethodService::EIID_IOnKeyboardActionListener;
 
 namespace Elastos {
@@ -44,8 +43,7 @@ const Int32 PasswordEntryKeyboardHelper::QWERTY_SHIFTED = 2;
 const Int32 PasswordEntryKeyboardHelper::SYMBOLS = 3;
 const Int32 PasswordEntryKeyboardHelper::SYMBOLS_SHIFTED = 4;
 
-//CAR_INTERFACE_IMPL_2(PasswordEntryKeyboardHelper, Object, IPasswordEntryKeyboardHelper, IKeyboardActionListener)
-CAR_INTERFACE_IMPL(PasswordEntryKeyboardHelper, Object, IPasswordEntryKeyboardHelper)
+CAR_INTERFACE_IMPL_2(PasswordEntryKeyboardHelper, Object, IPasswordEntryKeyboardHelper, IOnKeyboardActionListener)
 
 PasswordEntryKeyboardHelper::PasswordEntryKeyboardHelper()
     : mKeyboardMode(KEYBOARD_MODE_ALPHA)
@@ -53,7 +51,7 @@ PasswordEntryKeyboardHelper::PasswordEntryKeyboardHelper()
     , mEnableHaptics(FALSE)
     , mUsingScreenWidth(FALSE)
 {
-    mLayouts = ArrayOf<Int32>::Alloc(LAYOUTS_LENGTH);
+    mLayouts = ArrayOf<Int32>::Alloc(5);
     (*mLayouts)[0] = R::xml::password_kbd_numeric;
     (*mLayouts)[1] = R::xml::password_kbd_qwerty;
     (*mLayouts)[2] = R::xml::password_kbd_qwerty_shifted;

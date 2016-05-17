@@ -6,8 +6,6 @@ module
     merge("inputmethodservice/InputMethodService.car");
     merge("inputmethodservice/SoftInputWindow.car");
     merge("inputmethodservice/ExtractEditLayout.car");
-    merge("inputmethodservice/Keyboard.car");
-    merge("inputmethodservice/KeyboardView.car");
 
     //For SoftKeyboard.
     merge("inputmethodservice/SoftKeyboard.car");

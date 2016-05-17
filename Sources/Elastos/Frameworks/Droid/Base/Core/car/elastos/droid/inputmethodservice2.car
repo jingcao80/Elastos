@@ -1,0 +1,5 @@
+module
+{
+    merge("inputmethodservice/Keyboard.car");
+    merge("inputmethodservice/KeyboardView.car");
+}

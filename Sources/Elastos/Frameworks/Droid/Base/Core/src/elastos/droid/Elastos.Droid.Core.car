@@ -100,6 +100,10 @@ module
     merge("../../../car/elastos/droid/media.car");
     }
 
+    submodule Elastos.Droid.InputMethodService {
+    merge("../../../car/elastos/droid/inputmethodservice2.car");
+    }
+
     submodule Elastos.Droid.Widget {
     merge("../../../car/elastos/droid/widget.car");
     }
