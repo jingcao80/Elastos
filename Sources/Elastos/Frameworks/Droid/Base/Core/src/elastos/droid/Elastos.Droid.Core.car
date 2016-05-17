@@ -217,5 +217,9 @@ module
     merge("../../../car/elastos/droid/service.car");
     }
 
+    //submodule Elastos.Droid.RenderScript {
+    //merge("../../../car/elastos/droid/renderscript.car");
+    //}
+
     //merge("../../../car/elastos/droid/swextend.car");
 }
