@@ -64,7 +64,7 @@ ECode CActivityOne::OnCreate(
 
     AutoPtr<IView> view = FindViewById(R::id::ImageView);
     IImageView* imageView = IImageView::Probe(view);
-    imageView->SetImageResource(R::drawable::transformer);
+    imageView->SetImageResource(R::drawable::cupple);
     imageView->SetScaleType(Elastos::Droid::Widget::ImageViewScaleType_FIT_CENTER);
 
     AutoPtr<MyListener> l = new MyListener(this);

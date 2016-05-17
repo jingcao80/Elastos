@@ -5,24 +5,20 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_DevSamples_ImageViewDemo_R_H__
-#define __Elastos_DevSamples_ImageViewDemo_R_H__
+#ifndef __Elastos_DevSamples_MenuDemo_R_H__
+#define __Elastos_DevSamples_MenuDemo_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace DevSamples {
-namespace ImageViewDemo {
+namespace MenuDemo {
 class ECO_PUBLIC R {
     public: class attr {
     };
     public: class drawable {
-        public: static const int colorleaf = 0x7f020000;
-        public: static const int cupple = 0x7f020001;
-        public: static const int earth = 0x7f020002;
-        public: static const int icon = 0x7f020003;
-        public: static const int leaf = 0x7f020004;
+        public: static const int icon = 0x7f020000;
     };
     public: class id {
-        public: static const int ImageView = 0x7f050000;
+        public: static const int tv = 0x7f050000;
     };
     public: class layout {
         public: static const int main = 0x7f030000;
@@ -35,4 +31,4 @@ class ECO_PUBLIC R {
 };
 };
 
-#endif // __Elastos_DevSamples_ImageViewDemo_R_H__
+#endif // __Elastos_DevSamples_MenuDemo_R_H__
