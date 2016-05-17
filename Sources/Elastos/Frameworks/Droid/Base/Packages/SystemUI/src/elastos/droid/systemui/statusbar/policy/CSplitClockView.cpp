@@ -60,6 +60,7 @@ ECode CSplitClockView::OnFinishInflate()
     FindViewById(R::id::time_view, (IView**)&view);
     mTimeView = ITextClock::Probe(view);
 
+    view = NULL;
     FindViewById(R::id::am_pm_view, (IView**)&view);
     mAmPmView = ITextClock::Probe(view);
     return NOERROR;
@@ -140,7 +141,6 @@ Int32 CSplitClockView::GetAmPmPartEndIndex(
             continue;
         }
         if (i == length - 1) {
-
             // First character was not AM/PM and not whitespace, so it's not ending with AM/PM.
             return -1;
         } else {

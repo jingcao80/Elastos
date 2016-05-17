@@ -28,7 +28,7 @@ ECode CPhoneStatusBarView::Runnable1::Run()
 }
 
 const String CPhoneStatusBarView::TAG("PhoneStatusBarView");
-const Boolean CPhoneStatusBarView::DEBUG = FALSE;/* PhoneStatusBar::DEBUG; // TODO*/
+const Boolean CPhoneStatusBarView::DEBUG = CPhoneStatusBar::DEBUG;
 const Boolean CPhoneStatusBarView::DEBUG_GESTURES = TRUE;
 CAR_OBJECT_IMPL(CPhoneStatusBarView);
 CAR_INTERFACE_IMPL(CPhoneStatusBarView, PanelBar, IPhoneStatusBarView);

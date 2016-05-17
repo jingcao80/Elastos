@@ -1202,7 +1202,6 @@ ECode RecentsPanelView::HandleOnClick(
             //     Logger::E(TAG, "Error launching activity %s", TO_CSTR(intent));
             //     return E_ACTIVITY_NOT_FOUND_EXCEPTION;
             // }
-
         }
     }
     if (usingDrawingCache) {

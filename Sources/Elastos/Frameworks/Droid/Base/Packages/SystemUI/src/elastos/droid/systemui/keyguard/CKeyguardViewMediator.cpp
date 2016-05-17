@@ -324,7 +324,7 @@ ECode CKeyguardViewMediator::MyViewMediatorCallback::KeyguardGone()
 {
     //TODO
     // return mHost->mKeyguardDisplayManager->Hide();
-    assert(0);
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -864,6 +864,7 @@ ECode CKeyguardViewMediator::OnScreenTurnedOn(
         }
     }
 
+    Logger::D(TAG, "TODO [OnScreenTurnedOn] : Not implement the app Keyguard");
     //TODO
     // AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
     // CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
@@ -1112,6 +1113,7 @@ void CKeyguardViewMediator::DoKeyguardLocked(
         return;
     }
 
+    Logger::D(TAG, "TODO: Need the app Keyguard.");
     // if the setup wizard hasn't run yet, don't show
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);

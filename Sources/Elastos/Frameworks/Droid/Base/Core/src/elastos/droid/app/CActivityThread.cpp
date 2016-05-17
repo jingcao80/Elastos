@@ -730,7 +730,6 @@ CActivityThread::H::H(
     /* [in] */ CActivityThread* host)
     : mHost(host)
 {
-    Handler::constructor(FALSE);
 }
 
 String CActivityThread::H::CodeToString(

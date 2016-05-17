@@ -286,7 +286,7 @@ void CKeyButtonRipple::EnterSoftware()
 
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-    AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
+    AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(2);
     (*fa)[0] = 0.f;
     (*fa)[1] = GLOW_MAX_SCALE_FACTOR;
 

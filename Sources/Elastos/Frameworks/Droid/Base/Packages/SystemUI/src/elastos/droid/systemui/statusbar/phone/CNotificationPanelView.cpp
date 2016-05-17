@@ -5,6 +5,7 @@
 #include "elastos/droid/systemui/statusbar/phone/ScrimController.h"
 #include "elastos/droid/systemui/statusbar/phone/SecureCameraLaunchManager.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardStatusView.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "../../R.h"
 #include "Elastos.Droid.Graphics.h"
@@ -23,6 +24,7 @@ using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Graphics::CColor;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Drawable::IColorDrawable;
+using Elastos::Droid::SystemUI::Keyguard::CKeyguardStatusView;
 using Elastos::Droid::SystemUI::StatusBar::BaseStatusBar;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IScrollAdapter;
 using Elastos::Droid::SystemUI::StatusBar::Stack::EIID_IOnOverscrollTopChangedListener;
@@ -58,8 +60,7 @@ CNotificationPanelView::Runnable1::Runnable1(
 ECode CNotificationPanelView::Runnable1::Run()
 {
     mHost->mKeyguardStatusViewAnimating = FALSE;
-    Logger::D("CNotificationPanelView", "TODO [Runnable1::Run] : need Keyguard app.");
-    // mHost->mKeyguardStatusView->SetVisibility(IView::GONE);
+    IView::Probe(mHost->mKeyguardStatusView)->SetVisibility(IView::GONE);
     return NOERROR;
 }
 
@@ -341,9 +342,8 @@ ECode CNotificationPanelView::OnPreDrawListener2::OnPreDraw(
 
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-    Logger::D("CNotificationPanelView", "TODO [OnPreDrawListener2::OnPreDraw] : need Keyguard app.");
-    // helper->OfFloat(mHost->mKeyguardStatusView, View::Y, fvs
-    //         , (IObjectAnimator**)&mHost->mClockAnimator);
+    helper->OfFloat(mHost->mKeyguardStatusView, View::Y, fvs
+            , (IObjectAnimator**)&mHost->mClockAnimator);
     IAnimator::Probe(mHost->mClockAnimator)->SetInterpolator(ITimeInterpolator::Probe(mHost->mFastOutSlowInInterpolator));
     IAnimator::Probe(mHost->mClockAnimator)->SetDuration(IStackStateAnimator::ANIMATION_DURATION_STANDARD);
     AutoPtr<AnimatorListenerAdapter2> listener = new AnimatorListenerAdapter2(mHost);
@@ -572,8 +572,7 @@ ECode CNotificationPanelView::OnFinishInflate()
 
     view = NULL;
     FindViewById(R::id::keyguard_status_view, (IView**)&view);
-    Logger::D("CNotificationPanelView", "TODO [OnFinishInflate 1] : need Keyguard app.");
-    // mKeyguardStatusView = IKeyguardStatusView::Probe(view);
+    mKeyguardStatusView = IGridLayout::Probe(view);
     FindViewById(R::id::quick_settings_container, (IView**)&mQsContainer);
 
     view = NULL;
@@ -581,9 +580,8 @@ ECode CNotificationPanelView::OnFinishInflate()
     mQsPanel = IQSPanel::Probe(view);
 
     view = NULL;
-    Logger::D("CNotificationPanelView", "TODO [OnFinishInflate 2] : need Keyguard app.");
     FindViewById(R::id::clock_view, (IView**)&view);
-    // mClockView = ITextView::Probe(view);
+    mClockView = ITextView::Probe(view);
 
     view = NULL;
     FindViewById(R::id::scroll_view, (IView**)&view);
@@ -699,11 +697,10 @@ ECode CNotificationPanelView::OnLayout(
     // Update Clock Pivot
     Int32 w = 0;
     GetWidth(&w);
-    Logger::D("CNotificationPanelView", "TODO [OnLayout] : need Keyguard app.");
-    // mKeyguardStatusView->SetPivotX(w / 2);
-    // Float size = 0;
-    // mClockView->GetTextSize(&size);
-    // mKeyguardStatusView->SetPivotY((FONT_HEIGHT - CAP_HEIGHT) / 2048.f * size);
+    IView::Probe(mKeyguardStatusView)->SetPivotX(w / 2);
+    Float size = 0;
+    mClockView->GetTextSize(&size);
+    IView::Probe(mKeyguardStatusView)->SetPivotY((FONT_HEIGHT - CAP_HEIGHT) / 2048.f * size);
 
     // Calculate quick setting heights.
     Int32 h = 0, h2 = 0;
@@ -757,8 +754,7 @@ void CNotificationPanelView::PositionClockAndNotifications()
         Int32 value = 0, h = 0, h2 = 0;
         mNotificationStackScroller->GetNotGoneChildCount(&value);
         GetHeight(&h);
-        Logger::D("CNotificationPanelView", "TODO [PositionClockAndNotifications 1]: need Keyguard app.");
-        // mKeyguardStatusView->GetHeight(&h2);
+        IView::Probe(mKeyguardStatusView)->GetHeight(&h2);
         Float fv = 0;
         mClockPositionAlgorithm->Setup(
                 ((BaseStatusBar*)IBaseStatusBar::Probe(mStatusBar))->GetMaxKeyguardNotifications(),
@@ -773,8 +769,7 @@ void CNotificationPanelView::PositionClockAndNotifications()
             StartClockAnimation(mClockPositionResult->mClockY);
         }
         else {
-            Logger::D("CNotificationPanelView", "TODO [PositionClockAndNotifications 2]: need Keyguard app.");
-            // mKeyguardStatusView->SetY(mClockPositionResult.clockY);
+            IView::Probe(mKeyguardStatusView)->SetY(mClockPositionResult->mClockY);
         }
         UpdateClock(mClockPositionResult->mClockAlpha, mClockPositionResult->mClockScale);
         stackScrollerPadding = mClockPositionResult->mStackScrollerPadding;
@@ -801,12 +796,11 @@ void CNotificationPanelView::UpdateClock(
     /* [in] */ Float alpha,
     /* [in] */ Float scale)
 {
-    Logger::D("CNotificationPanelView", "TODO [UpdateClock] : need Keyguard app.");
-    // if (!mKeyguardStatusViewAnimating) {
-    //     mKeyguardStatusView->SetAlpha(alpha);
-    // }
-    // mKeyguardStatusView->SetScaleX(scale);
-    // mKeyguardStatusView->SetScaleY(scale);
+    if (!mKeyguardStatusViewAnimating) {
+        IView::Probe(mKeyguardStatusView)->SetAlpha(alpha);
+    }
+    IView::Probe(mKeyguardStatusView)->SetScaleX(scale);
+    IView::Probe(mKeyguardStatusView)->SetScaleY(scale);
 }
 
 ECode CNotificationPanelView::AnimateToFullShade(
@@ -1270,8 +1264,8 @@ void CNotificationPanelView::OnQsTouch(
 
 Int32 CNotificationPanelView::GetFalsingThreshold()
 {
-    assert(0 && "TODO");
-    Float factor = 0;/*mStatusBar->IsScreenOnComingFromTouch() ? 1.5f : 1.0f;*/
+    Boolean tmp = FALSE;
+    Float factor = (mStatusBar->IsScreenOnComingFromTouch(&tmp), tmp) ? 1.5f : 1.0f;
     return (Int32) (mQsFalsingThreshold * factor);
 }
 
@@ -1447,66 +1441,63 @@ void CNotificationPanelView::SetKeyguardStatusViewVisibility(
     /* [in] */ Boolean keyguardFadingAway,
     /* [in] */ Boolean goingToFullShade)
 {
-    Logger::D("CNotificationPanelView", "TODO [SetKeyguardStatusViewVisibility] : need Keyguard app.");
-    // AutoPtr<IViewPropertyAnimator> vpa;
-    // if ((!keyguardFadingAway && mStatusBarState == IStatusBarState::KEYGUARD
-    //         && statusBarState != IStatusBarState::KEYGUARD) || goingToFullShade) {
-    //     IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //     vpa->Cancel();
-    //     mKeyguardStatusViewAnimating = TRUE;
+    AutoPtr<IViewPropertyAnimator> vpa;
+    if ((!keyguardFadingAway && mStatusBarState == IStatusBarState::KEYGUARD
+            && statusBarState != IStatusBarState::KEYGUARD) || goingToFullShade) {
+        IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
+        mKeyguardStatusViewAnimating = TRUE;
 
-    //     vpa = NULL;
-    //     IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //     vpa->Alpha(0.f);
-    //     vpa->SetStartDelay(0);
-    //     vpa->SetDuration(160);
-    //     assert(0 && "TODO");
-    //     // vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
-    //     vpa->WithEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
-    //     if (keyguardFadingAway) {
-    //         vpa = NULL;
-    //         IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //         Int64 t = 0;
-    //         vpa->SetStartDelay((mStatusBar->GetKeyguardFadingAwayDelay(&t), t))
-    //         vpa->SetDuration((mStatusBar->GetKeyguardFadingAwayDuration(&t), t) / 2)
-    //         vpa->Start();
-    //     }
-    // }
-    // else if (mStatusBarState == IStatusBarState::SHADE_LOCKED
-    //         && statusBarState == IStatusBarState::KEYGUARD) {
-    //     vpa = NULL;
-    //     IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //     vpa->Cancel();
-    //     IView::Probe(mKeyguardStatusView)->SetVisibility(IView::VISIBLE);
-    //     mKeyguardStatusViewAnimating = TRUE;
-    //     IView::Probe(mKeyguardStatusView)->SetAlpha(0.f);
+        vpa = NULL;
+        IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Alpha(0.f);
+        vpa->SetStartDelay(0);
+        vpa->SetDuration(160);
+        vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
+        vpa->WithEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
+        if (keyguardFadingAway) {
+            vpa = NULL;
+            IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+            Int64 t = 0;
+            vpa->SetStartDelay((mStatusBar->GetKeyguardFadingAwayDelay(&t), t));
+            vpa->SetDuration((mStatusBar->GetKeyguardFadingAwayDuration(&t), t) / 2);
+            vpa->Start();
+        }
+    }
+    else if (mStatusBarState == IStatusBarState::SHADE_LOCKED
+            && statusBarState == IStatusBarState::KEYGUARD) {
+        vpa = NULL;
+        IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
+        IView::Probe(mKeyguardStatusView)->SetVisibility(IView::VISIBLE);
+        mKeyguardStatusViewAnimating = TRUE;
+        IView::Probe(mKeyguardStatusView)->SetAlpha(0.f);
 
-    //     vpa = NULL;
-    //     IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //     vpa->Alpha(1.f);
-    //     vpa->SetStartDelay(0);
-    //     vpa->SetDuration(320);
+        vpa = NULL;
+        IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Alpha(1.f);
+        vpa->SetStartDelay(0);
+        vpa->SetDuration(320);
 
-    //     assert(0 && "TODO");
-    //     // vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
-    //     vpa->WithEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
-    // }
-    // else if (statusBarState == IStatusBarState::KEYGUARD) {
-    //     vpa = NULL;
-    //     IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //     vpa->Cancel();
-    //     mKeyguardStatusViewAnimating = FALSE;
-    //     IView::Probe(mKeyguardStatusView)->SetVisibility(IView::VISIBLE);
-    //     IView::Probe(mKeyguardStatusView)->SetAlpha(1.f);
-    // }
-    // else {
-    //     vpa = NULL;
-    //     IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
-    //     vpa->Cancel();
-    //     mKeyguardStatusViewAnimating = FALSE;
-    //     IView::Probe(mKeyguardStatusView)->SetVisibility(IView::GONE);
-    //     IView::Probe(mKeyguardStatusView)->SetAlpha(1.f);
-    // }
+        vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
+        vpa->WithEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
+    }
+    else if (statusBarState == IStatusBarState::KEYGUARD) {
+        vpa = NULL;
+        IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
+        mKeyguardStatusViewAnimating = FALSE;
+        IView::Probe(mKeyguardStatusView)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mKeyguardStatusView)->SetAlpha(1.f);
+    }
+    else {
+        vpa = NULL;
+        IView::Probe(mKeyguardStatusView)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
+        mKeyguardStatusViewAnimating = FALSE;
+        IView::Probe(mKeyguardStatusView)->SetVisibility(IView::GONE);
+        IView::Probe(mKeyguardStatusView)->SetAlpha(1.f);
+    }
 }
 
 void CNotificationPanelView::UpdateQsState()
@@ -2591,8 +2582,7 @@ ECode CNotificationPanelView::SetKeyguardUserSwitcher(
 
 ECode CNotificationPanelView::OnScreenTurnedOn()
 {
-    Logger::D("CNotificationPanelView", "TODO [OnScreenTurnedOn] : need Keyguard app.");
-    // mKeyguardStatusView->RefreshTime();
+    ((CKeyguardStatusView*)mKeyguardStatusView.Get())->RefreshTime();
     return NOERROR;
 }
 

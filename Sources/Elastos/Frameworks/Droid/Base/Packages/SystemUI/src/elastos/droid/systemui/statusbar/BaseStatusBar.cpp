@@ -1107,10 +1107,9 @@ ECode BaseStatusBar::Start()
     String name;
     name = GetClass()/*.getCanonicalName()*/;
     CComponentName::New(pn, name, (IComponentName**)&cn);
-    Logger::D(TAG, "TODO : Has problem about NotificationListenerService.");
-    // if (FAILED(mNotificationListener->RegisterAsSystemService(mContext, cn, IUserHandle::USER_ALL))) {
-    //     Logger::E(TAG, "Unable to register notification listener");
-    // }
+    if (FAILED(mNotificationListener->RegisterAsSystemService(mContext, cn, IUserHandle::USER_ALL))) {
+        Logger::E(TAG, "Unable to register notification listener");
+    }
 
     if (DEBUG) {
         Logger::D(TAG,

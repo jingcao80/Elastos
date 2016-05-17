@@ -39,7 +39,8 @@ ECode SignalClusterView::TmpCallback::OnStateChanged()
 
 const String SignalClusterView::TAG("SignalClusterView");
 Boolean SignalClusterView::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-CAR_INTERFACE_IMPL_3(SignalClusterView, LinearLayout, ISignalClusterView, INetworkControllerImplSignalCluster, ISecurityControllerCallback);
+CAR_INTERFACE_IMPL_3(SignalClusterView, LinearLayout, ISignalClusterView \
+        , INetworkControllerImplSignalCluster, ISecurityControllerCallback);
 SignalClusterView::SignalClusterView()
     : mVpnVisible(FALSE)
     , mWifiVisible(FALSE)
@@ -294,7 +295,8 @@ void SignalClusterView::Apply()
         CString::New(mMobileTypeDescription + " " + mMobileDescription, (ICharSequence**)&des);
         IView::Probe(mMobileGroup)->SetContentDescription(des);
         IView::Probe(mMobileGroup)->SetVisibility(IView::VISIBLE);
-    } else {
+    } 
+    else {
         IView::Probe(mMobileGroup)->SetVisibility(IView::GONE);
     }
 

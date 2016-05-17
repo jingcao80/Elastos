@@ -449,7 +449,7 @@ void StatusBarKeyguardViewManager::UpdateStates()
         mScrimController->SetBouncerShowing(bouncerShowing);
     }
 
-    assert(0 && "TODO: Need the app Keyguard.");
+    Slogger::D(TAG, "TODO [UpdateStates] : Need the app Keyguard.");
     // KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
     // if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
     //     updateMonitor->SendKeyguardVisibilityChanged(showing && !occluded);

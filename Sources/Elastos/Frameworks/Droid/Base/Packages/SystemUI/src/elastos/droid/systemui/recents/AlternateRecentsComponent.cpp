@@ -64,6 +64,8 @@ using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 
+typedef Elastos::Droid::View::View::MeasureSpec MeasureSpec;
+
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
@@ -406,10 +408,9 @@ ECode AlternateRecentsComponent::ReloadHeaderBarLayout()
     mHeaderBar = ITaskViewHeader::Probe(view);
     Int32 w;
     taskViewSize->GetWidth(&w);
-    //TODO
-    // IView::Probe(mHeaderBar)->Measure(
-    //         View::MeasureSpec::MakeMeasureSpec(w, View::MeasureSpec::EXACTLY),
-    //         View::MeasureSpec::MakeMeasureSpec(taskBarHeight, View::MeasureSpec::EXACTLY));
+    IView::Probe(mHeaderBar)->Measure(
+            MeasureSpec::MakeMeasureSpec(w, MeasureSpec::EXACTLY),
+            MeasureSpec::MakeMeasureSpec(taskBarHeight, MeasureSpec::EXACTLY));
     IView::Probe(mHeaderBar)->Layout(0, 0, w, taskBarHeight);
     return NOERROR;
 }

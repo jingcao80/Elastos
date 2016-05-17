@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CClock.h"
+#include "elastos/droid/systemui/statusbar/policy/CClockIntentReceiver.h"
 #include "../../R.h"
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "Elastos.Droid.Content.h"
@@ -47,17 +48,21 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CClock::IntentReceiver::IntentReceiver(
-    /* [in] */ CClock* host)
-    : mHost(host)
-{}
+CAR_OBJECT_IMPL(CClockIntentReceiver);
+ECode CClockIntentReceiver::constructor(
+    /* [in] */ IClock* host)
+{
+    mHost = (CClock*)host;
+    return NOERROR;
+}
 
-ECode CClock::IntentReceiver::OnReceive(
+ECode CClockIntentReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
     String action;
     intent->GetAction(&action);
+    assert(0 && "TODO : not excute????");
     if (action.Equals(IIntent::ACTION_TIMEZONE_CHANGED)) {
         String tz;
         intent->GetStringExtra(String("time-zone"), &tz);
@@ -101,7 +106,7 @@ CClock::CClock()
     , mAmPmStyle(0)
     , mDemoMode(FALSE)
 {
-    mIntentReceiver = new IntentReceiver(this);
+    CClockIntentReceiver::New(this, (IBroadcastReceiver**)&mIntentReceiver);
 }
 
 ECode CClock::constructor(

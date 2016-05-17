@@ -148,7 +148,7 @@ Float Utilities::MapCoordInSelfToDescendent(
     Float scale = 1.0f;
     Int32 count;
     ancestorChain->GetSize(&count);
-    assert(0);//TODO
+    assert(0 && "TODO");
     //tmpInverseMatrix->Set(Matrix::IDENTITY_MATRIX);
     for (Int32 i = count - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
@@ -254,7 +254,7 @@ void Utilities::SetShadowProperty(
     /* [in] */ const String& value)
 {
     // sPropertyMethod.invoke(null, property, value);
-    //TODO
+    assert(0 && "TODO");
 }
 
 Boolean Utilities::IsDocument(

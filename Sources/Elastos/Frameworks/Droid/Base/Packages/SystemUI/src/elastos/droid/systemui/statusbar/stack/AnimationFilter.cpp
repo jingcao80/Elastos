@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/stack/AnimationFilter.h"
+#include "elastos/droid/systemui/statusbar/stack/CNotificationStackScrollLayout.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
 namespace Elastos {
@@ -92,17 +93,16 @@ ECode AnimationFilter::ApplyCombination(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         events->Get(i, (IInterface**)&obj);
+        CNotificationStackScrollLayout::AnimationEvent* item =
+                (CNotificationStackScrollLayout::AnimationEvent*)IObject::Probe(obj);
+        CombineFilter((AnimationFilter*)item->mFilter.Get());
 
-        assert(0 && "TODO");
-        AutoPtr<IInterface> filter/* = events.get(i).filter*/;
-        CombineFilter((AnimationFilter*)IAnimationFilter::Probe(filter));
-
-        assert(0 && "TODO");
-        // if (events.get(i).animationType ==
-        //         NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_GO_TO_FULL_SHADE) {
-        //     mHasGoToFullShadeEvent = TRUE;
-        // }
+        if (item->mAnimationType ==
+                CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_GO_TO_FULL_SHADE) {
+            mHasGoToFullShadeEvent = TRUE;
+        }
     }
+
     return NOERROR;
 }
 

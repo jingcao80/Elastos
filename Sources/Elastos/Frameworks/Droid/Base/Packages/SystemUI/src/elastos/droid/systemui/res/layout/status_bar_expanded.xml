@@ -35,10 +35,10 @@
         android:layout_gravity="bottom"
         />
 
-<!--    <include
+    <include
         layout="@layout/keyguard_status_view"
         android:layout_height="wrap_content"
-        android:visibility="gone" /> -->
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/emergency_calls_only"

@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/KeyguardBouncer.h"
 #include "../../R.h"
 #include <elastos/droid/view/LayoutInflater.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::SystemUI::Keyguard::IKeyguardViewMediator;
 using Elastos::Droid::View::CChoreographerHelper;
@@ -10,6 +11,7 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -201,20 +203,20 @@ Boolean KeyguardBouncer::OnBackPressed()
 
 Boolean KeyguardBouncer::NeedsFullscreenBouncer()
 {
-    assert(0 && "TODO: need the app Keyguard.");
+    Logger::D("KeyguardBouncer", "TODO [NeedsFullscreenBouncer] : need the app Keyguard.");
     // if (mKeyguardView != NULL) {
     //     SecurityMode mode = mKeyguardView.getSecurityMode();
     //     return mode == SecurityMode.SimPin
     //             || mode == SecurityMode.SimPuk;
     // }
-    return FALSE;
+    return TRUE;
 }
 
 Boolean KeyguardBouncer::IsSecure()
 {
-    assert(0 && "TODO: need the app Keyguard.");
+    Logger::D("KeyguardBouncer", "TODO [IsSecure] : need the app Keyguard.");
     // return mKeyguardView == NULL || mKeyguardView.getSecurityMode() != SecurityMode.None;
-    return FALSE;
+    return TRUE;
 }
 
 Boolean KeyguardBouncer::OnMenuPressed()

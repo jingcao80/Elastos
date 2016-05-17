@@ -631,7 +631,10 @@ void StackStateAnimator::StartHeightAnimation(
     AutoPtr<IInteger32> _previousEndValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_END_HEIGHT));
     Int32 newEndValue = viewState->mHeight;
     Int32 previousStartValue = 0, previousEndValue = 0;
-    _previousStartValue->GetValue(&previousStartValue);
+
+    if (_previousStartValue != NULL) {
+        _previousStartValue->GetValue(&previousStartValue);
+    }
     if (_previousEndValue != NULL
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {
         return;
@@ -714,7 +717,10 @@ void StackStateAnimator::StartInsetAnimation(
     AutoPtr<IInteger32> _previousStartValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_START_TOP_INSET));
     AutoPtr<IInteger32> _previousEndValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_END_TOP_INSET));
     Int32 previousStartValue = 0, previousEndValue = 0;
-    _previousStartValue->GetValue(&previousStartValue);
+
+    if (_previousStartValue != NULL) {
+        _previousStartValue->GetValue(&previousStartValue);
+    }
 
     Int32 newEndValue = viewState->mClipTopAmount;
     if (_previousEndValue != NULL
@@ -801,7 +807,10 @@ void StackStateAnimator::StartAlphaAnimation(
     AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_ALPHA));
     AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_ALPHA));
     Float previousStartValue = 0, previousEndValue = 0;
-    _previousStartValue->GetValue(&previousStartValue);
+
+    if (_previousStartValue != NULL) {
+        _previousStartValue->GetValue(&previousStartValue);
+    }
     const Float newEndValue = viewState->mAlpha;
     if (_previousEndValue != NULL
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {
@@ -892,7 +901,10 @@ void StackStateAnimator::StartZTranslationAnimation(
     AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_TRANSLATION_Z));
     AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_TRANSLATION_Z));
     Float previousStartValue = 0, previousEndValue = 0;
-    _previousStartValue->GetValue(&previousStartValue);
+
+    if (_previousStartValue != NULL) {
+        _previousStartValue->GetValue(&previousStartValue);
+    }
     Float newEndValue = viewState->mZTranslation;
     if (_previousEndValue != NULL
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {
@@ -976,7 +988,9 @@ void StackStateAnimator::StartYTranslationAnimation(
     AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_TRANSLATION_Y));
     AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_TRANSLATION_Y));
     Float previousStartValue = 0, previousEndValue = 0;
-    _previousStartValue->GetValue(&previousStartValue);
+    if (_previousStartValue != NULL) {
+        _previousStartValue->GetValue(&previousStartValue);
+    }
     Float newEndValue = viewState->mYTranslation;
     if (_previousEndValue != NULL
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {
@@ -1059,7 +1073,10 @@ void StackStateAnimator::StartScaleAnimation(
     AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_SCALE));
     AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_SCALE));
     Float previousStartValue = 0, previousEndValue = 0;
-    _previousStartValue->GetValue(&previousStartValue);
+
+    if (_previousStartValue != NULL) {
+        _previousStartValue->GetValue(&previousStartValue);
+    }
     Float newEndValue = viewState->mScale;
     if (_previousEndValue != NULL
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {

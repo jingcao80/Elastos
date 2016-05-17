@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/stack/StackScrollAlgorithm.h"
+#include "elastos/droid/systemui/statusbar/stack/StackStateAnimator.h"
 #include "elastos/droid/systemui/statusbar/stack/PiecewiseLinearIndentationFunctor.h"
 #include "../../R.h"
 #include "Elastos.Droid.Content.h"
@@ -867,8 +868,7 @@ void StackScrollAlgorithm::UpdateFirstChildHeightWhileExpanding(
         if (mExpandedOnStart) {
             // We are collapsing the shade, so the first child can get as most as high as the
             // current height or the end value of the animation.
-            assert(0 && "TODO");
-            // mFirstChildMaxHeight = StackStateAnimator::GetFinalActualHeight(mFirstChildWhileExpanding);
+            mFirstChildMaxHeight = StackStateAnimator::GetFinalActualHeight(mFirstChildWhileExpanding);
         }
         else {
             UpdateFirstChildMaxSizeToMaxHeight();

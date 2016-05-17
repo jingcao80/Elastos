@@ -167,10 +167,7 @@ ECode CKeyguardAffordanceView::AnimatorUpdateListener2::OnAnimationUpdate(
 {
     AutoPtr<IInterface> obj;
     animation->GetAnimatedValue((IInterface**)&obj);
-    Logger::D("CKeyguardAffordanceView::AnimatorUpdateListener2", "TODO: NULL?????");
-    if (IFloat::Probe(obj) != NULL) {
-        IFloat::Probe(obj)->GetValue(&mHost->mImageScale);
-    }
+    IFloat::Probe(obj)->GetValue(&mHost->mImageScale);
     mHost->Invalidate();
     return NOERROR;
 }

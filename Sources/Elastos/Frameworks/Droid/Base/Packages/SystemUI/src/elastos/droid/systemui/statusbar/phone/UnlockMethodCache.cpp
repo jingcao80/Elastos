@@ -59,14 +59,14 @@ void UnlockMethodCache::UpdateMethodSecure(
     Boolean secure = FALSE;
     mLockPatternUtils->IsSecure(&secure);
     Boolean hasTrust = TRUE;
-    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
+    Logger::D("UnlockMethodCache", "TODO [UpdateMethodSecure 1] : Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor->GetUserHasTrust(user, &hasTrust);
     Boolean methodInsecure = !secure || hasTrust;
     Boolean trustManaged = TRUE;
-    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
+    Logger::D("UnlockMethodCache", "TODO [UpdateMethodSecure 2] : Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor->GetUserTrustIsManaged(user, &trustManaged);
     Boolean running = FALSE;
-    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
+    Logger::D("UnlockMethodCache", "TODO [UpdateMethodSecure 3] : Not implement the app Keyguard.");
     // mKeyguardUpdateMonitor->IsFaceUnlockRunning(user, &running);
     Boolean faceUnlockRunning = running && trustManaged;
     Boolean changed = methodInsecure != mMethodInsecure || trustManaged != mTrustManaged

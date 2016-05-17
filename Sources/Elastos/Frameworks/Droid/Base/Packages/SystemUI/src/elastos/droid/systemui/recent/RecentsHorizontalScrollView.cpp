@@ -2,11 +2,13 @@
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
 #include "../R.h"
+#include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::SystemUI::CSwipeHelper;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::FloatMath;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
 using Elastos::Droid::View::EIID_IView;
@@ -162,6 +164,7 @@ RecentsHorizontalScrollView::RecentsHorizontalScrollView(
     , mCallback(NULL)
     , mNumItemsInOneScreenful(0)
 {
+    assert(0 && "TODO");
     //TODO
     // HorizontalScrollView::constructor(ctx, attrs, 0);
 
@@ -610,7 +613,7 @@ ECode RecentsHorizontalScrollView::SetAdapter(
     child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     Int32 width;
     child->GetMeasuredWidth(&width);
-    mNumItemsInOneScreenful = (Int32)Elastos::Core::Math::Ceil(widthPixels / (Float)width); //TODO: FloatMath
+    mNumItemsInOneScreenful = (Int32)FloatMath::Ceil(widthPixels / (Float)width);
     AddToRecycledViews(child);
 
     for (Int32 i = 0; i < mNumItemsInOneScreenful - 1; i++) {

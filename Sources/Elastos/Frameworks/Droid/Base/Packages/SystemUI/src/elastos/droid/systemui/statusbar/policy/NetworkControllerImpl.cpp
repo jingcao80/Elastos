@@ -300,6 +300,8 @@ NetworkControllerImpl::NetworkControllerImpl(
     , mDemoQSDataTypeIconId(0)
     , mDemoMobileLevel(0)
 {
+    mHasMobileDataFeature = TRUE;
+    Logger::D(TAG, "TODO : Set mHasMobileDataFeature = TRUE to show the signal image.");
     CArrayList::New((IArrayList**)&mCombinedLabelViews);
     CArrayList::New((IArrayList**)&mMobileLabelViews);
     CArrayList::New((IArrayList**)&mWifiLabelViews);
@@ -1243,7 +1245,7 @@ void NetworkControllerImpl::UpdateConnectivity(
         Logger::D(TAG, "updateConnectivity: intent=%p", intent);
     }
 
-    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
+    Logger::D(TAG, "TODO [UpdateConnectivity] : CONNECTIVITY_SERVICE.");
     // AutoPtr<IInterface> obj;
     // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
     // AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(obj);
@@ -1282,11 +1284,11 @@ void NetworkControllerImpl::UpdateConnectivity(
     // }
 
     // // We want to update all the icons, all at once, for any condition change
-    // UpdateDataNetType();
-    // UpdateWimaxIcons();
-    // UpdateDataIcon();
-    // UpdateTelephonySignalStrength();
-    // UpdateWifiIcons();
+    UpdateDataNetType();
+    UpdateWimaxIcons();
+    UpdateDataIcon();
+    UpdateTelephonySignalStrength();
+    UpdateWifiIcons();
 }
 
 

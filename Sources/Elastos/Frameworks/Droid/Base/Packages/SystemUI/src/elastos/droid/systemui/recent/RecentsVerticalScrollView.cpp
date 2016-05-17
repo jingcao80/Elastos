@@ -2,11 +2,13 @@
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
 #include "../R.h"
+#include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::SystemUI::CSwipeHelper;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::FloatMath;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
@@ -655,7 +657,7 @@ ECode RecentsVerticalScrollView::SetAdapter(
     child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     Int32 height;
     child->GetMeasuredHeight(&height);
-    mNumItemsInOneScreenful =(Int32)Elastos::Core::Math::Ceil(heightPixels / (Float)height); //TODO: FloatMath
+    mNumItemsInOneScreenful =(Int32)FloatMath::Ceil(heightPixels / (Float)height);
     AddToRecycledViews(child);
 
     for (Int32 i = 0; i < mNumItemsInOneScreenful - 1; i++) {

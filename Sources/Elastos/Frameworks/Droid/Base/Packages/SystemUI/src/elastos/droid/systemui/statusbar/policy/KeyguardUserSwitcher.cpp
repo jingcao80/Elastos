@@ -251,7 +251,8 @@ void KeyguardUserSwitcher::StartAppearAnimation()
     }
     mUserSwitcher->SetClipChildren(FALSE);
     mUserSwitcher->SetClipToPadding(FALSE);
-    Logger::D("KeyguardUserSwitcher", "TODO: Need keyguard");
+    Logger::D("KeyguardUserSwitcher", "TODO [StartAppearAnimation] : Need keyguard");
+    assert(0 && "TODO");
     // mAppearAnimationUtils->StartAppearAnimation(objects, new Runnable() {
     //     // @Override
     //     ECode KeyguardUserSwitcher::Run()

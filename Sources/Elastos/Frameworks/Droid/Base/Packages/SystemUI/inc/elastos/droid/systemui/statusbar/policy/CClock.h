@@ -22,6 +22,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
+class CClockIntentReceiver;
+
 /**
  * Digital clock for the status bar.
  */
@@ -30,29 +32,6 @@ CarClass(CClock)
     , public IClock
     , public IDemoMode
 {
-private:
-    class IntentReceiver: public BroadcastReceiver
-    {
-    public:
-        IntentReceiver(
-            /* [in] */ CClock* host);
-
-        // @Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CClock.IntentReceiver");
-            return NOERROR;
-        }
-
-    private:
-        CClock* mHost;
-    };
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -102,6 +81,7 @@ private:
 
     Boolean mDemoMode;
     AutoPtr<BroadcastReceiver> mIntentReceiver;
+    friend class CClockIntentReceiver;
 };
 
 }// namespace Policy
