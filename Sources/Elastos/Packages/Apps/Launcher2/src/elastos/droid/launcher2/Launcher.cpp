@@ -1257,7 +1257,7 @@ Slogger::E("Launcher", "============================Launcher call LauncherApplic
 
     AutoPtr<IAppWidgetManagerHelper> helper;
     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
-    helper->GetInstance(IContext::Probe(this), (IAppWidgetManager**)&mAppWidgetManager);
+    helper->GetInstance((IContext*)this, (IAppWidgetManager**)&mAppWidgetManager);
     mAppWidgetHost = new LauncherAppWidgetHost(ILauncher::Probe(this), APPWIDGET_HOST_ID);
 Slogger::E("Launcher", "============================Launcher call mAppWidgetHost->StartListening");
     IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
@@ -1290,7 +1290,7 @@ Slogger::E("Launcher", "============================Launcher add temporary by sn
     // Update customization drawer _after_ restoring the states
     if (mAppsCustomizeContent != NULL) {
         AutoPtr<IArrayList> list;
-        LauncherModel::GetSortedWidgetsAndShortcuts(IContext::Probe(this),
+        LauncherModel::GetSortedWidgetsAndShortcuts((IContext*)this,
                 (IArrayList**)&list);
 Int32 size;
 list->GetSize(&size);
@@ -1676,7 +1676,7 @@ void Launcher::CompleteTwoStageWidgetDrop(
     if (resultCode == RESULT_OK) {
         animationType = IWorkspace::COMPLETE_TWO_STAGE_WIDGET_DROP_ANIMATION;
         AutoPtr<IAppWidgetHostView> layout;
-        IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(IContext::Probe(this), appWidgetId,
+        IAppWidgetHost::Probe(mAppWidgetHost)->CreateView((IContext*)this, appWidgetId,
                 mPendingAddWidgetInfo, (IAppWidgetHostView**)&layout);
         boundWidget = layout;
         onCompleteRunnable = new MyRunnable2(this, appWidgetId, layout, resultCode);
@@ -1906,28 +1906,36 @@ void Launcher::ClearTypedText()
     helper->SetSelection(ISpannable::Probe(mDefaultKeySsb), 0);
 }
 
-State Launcher::IntToState(
+LauncherState Launcher::OrdinalToState(
     /* [in] */ Int32 stateOrdinal)
 {
-    State state;
     switch(stateOrdinal){
         case 0:
-            state = Launcher_NONE;
-            break;
+            return Launcher_NONE;
         case 1:
-            state = Launcher_WORKSPACE;
-            break;
+            return Launcher_WORKSPACE;
         case 2:
-            state = Launcher_APPS_CUSTOMIZE;
-            break;
+            return Launcher_APPS_CUSTOMIZE;
         case 3:
-            state = Launcher_APPS_CUSTOMIZE_SPRING_LOADED;
-            break;
-        default:
-            state = Launcher_WORKSPACE;
-            break;
+            return Launcher_APPS_CUSTOMIZE_SPRING_LOADED;
     }
-    return state;
+    return Launcher_WORKSPACE;
+}
+
+Int32 Launcher::OrdinalOfState(
+        /* [in] */ LauncherState state)
+{
+    switch(state){
+        case Launcher_NONE:
+            return 0;
+        case Launcher_WORKSPACE:
+            return 1;
+        case Launcher_APPS_CUSTOMIZE:
+            return 2;
+        case Launcher_APPS_CUSTOMIZE_SPRING_LOADED:
+            return 3;
+    }
+    return 1;
 }
 
 void Launcher::RestoreState(
@@ -1938,8 +1946,8 @@ void Launcher::RestoreState(
     }
 
     Int32 s;
-    savedState->GetInt32(RUNTIME_STATE, 1/*State.WORKSPACE.ordinal()*/, &s);
-    LauncherState state = IntToState(s);
+    savedState->GetInt32(RUNTIME_STATE, OrdinalOfState(Launcher_WORKSPACE), &s);
+    LauncherState state = OrdinalToState(s);
     if (state == Launcher_APPS_CUSTOMIZE) {
         mOnResumeState = Launcher_APPS_CUSTOMIZE;
     }
@@ -2216,7 +2224,7 @@ void Launcher::CompleteAddShortcut(
         return;
     }
 
-    LauncherModel::AddItemToDatabase(IContext::Probe(this), (ItemInfo*)IItemInfo::Probe(info),
+    LauncherModel::AddItemToDatabase((IContext*)this, (ItemInfo*)IItemInfo::Probe(info),
             container, screen, (*cellXY)[0], (*cellXY)[1], FALSE);
 
     if (!mRestoring) {
@@ -2240,15 +2248,9 @@ ECode Launcher::GetSpanForWidget(
             component, NULL);
     // We want to account for the extra amount of padding that we are adding to the widget
     // to ensure that it gets the full amount of space that it has requested
-    Int32 left;
-    padding->GetLeft(&left);
-    Int32 right;
-    padding->GetRight(&right);
+    Int32 left, top, right, bottom;
+    padding->Get(&left, &top, &right, &bottom);
     Int32 requiredWidth = minWidth + left + right;
-    Int32 top;
-    padding->GetTop(&top);
-    Int32 bottom;
-    padding->GetBottom(&bottom);
     Int32 requiredHeight = minHeight + top + bottom;
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
@@ -2264,9 +2266,8 @@ ECode Launcher::GetSpanForWidget(
 
     AutoPtr<IComponentName> name;
     info->GetProvider((IComponentName**)&name);
-    Int32 width;
+    Int32 width, height;
     info->GetMinWidth(&width);
-    Int32 height;
     info->GetMinHeight(&height);
     return GetSpanForWidget(context, name, width, height, array);
 }
@@ -2280,9 +2281,8 @@ ECode Launcher::GetMinSpanForWidget(
 
     AutoPtr<IComponentName> name;
     info->GetProvider((IComponentName**)&name);
-    Int32 width;
+    Int32 width, height;
     info->GetMinResizeWidth(&width);
-    Int32 height;
     info->GetMinResizeHeight(&height);
     return GetSpanForWidget(context, name, width, height, array);
 }
@@ -2295,9 +2295,8 @@ ECode Launcher::GetSpanForWidget(
     VALIDATE_NOT_NULL(array);
 
     PendingAddWidgetInfo* _info = (PendingAddWidgetInfo*)info;
-    Int32 width;
+    Int32 width, height;
     _info->mInfo->GetMinWidth(&width);
-    Int32 height;
     _info->mInfo->GetMinHeight(&height);
     return GetSpanForWidget(context, _info->mComponentName, width, height, array);
 }
@@ -2355,8 +2354,8 @@ void Launcher::CompleteAddAppWidget(
         // when dragging and dropping, just find the closest free spot
         AutoPtr<ArrayOf<Int32> > result;
         layout->FindNearestVacantArea(
-                (*touchXY)[0], (*touchXY)[1], (*minSpanXY)[0], (*minSpanXY)[1], (*spanXY)[0],
-                (*spanXY)[1], cellXY, finalSpan, (ArrayOf<Int32>**)&result);
+            (*touchXY)[0], (*touchXY)[1], (*minSpanXY)[0], (*minSpanXY)[1], (*spanXY)[0],
+            (*spanXY)[1], cellXY, finalSpan, (ArrayOf<Int32>**)&result);
         (*spanXY)[0] = (*finalSpan)[0];
         (*spanXY)[1] = (*finalSpan)[1];
         foundCellSpan = (result != NULL);
@@ -2395,8 +2394,8 @@ void Launcher::CompleteAddAppWidget(
     if (!mRestoring) {
         if (hostView == NULL) {
             // Perform actual inflation because we're live
-            IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(IContext::Probe(this),
-                    appWidgetId, appWidgetInfo, (IAppWidgetHostView**)&(launcherInfo->mHostView));
+            IAppWidgetHost::Probe(mAppWidgetHost)->CreateView((IContext*)this,
+                appWidgetId, appWidgetInfo, (IAppWidgetHostView**)&(launcherInfo->mHostView));
             launcherInfo->mHostView->SetAppWidget(appWidgetId, appWidgetInfo);
         }
         else {
@@ -2575,7 +2574,7 @@ ECode Launcher::ShowOutOfSpaceMessage(
     CToastHelper::AcquireSingleton((IToastHelper**)&helper);
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     AutoPtr<IToast> toast;
-    helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+    helper->MakeText((IContext*)this, cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
 
     return toast->Show();
 }
@@ -2684,10 +2683,8 @@ ECode Launcher::OnSaveInstanceState(
     outState->PutInt32(RUNTIME_STATE_CURRENT_SCREEN, page);
     Activity::OnSaveInstanceState(outState);
 
-    //Int32 ordinal;
-    assert(0); //ordinal ?= mState
-    //mState->Ordinal(&ordinal);
-    outState->PutInt32(RUNTIME_STATE, mState/*ordinal*/);
+    Int32 ordinal = OrdinalOfState(mState);
+    outState->PutInt32(RUNTIME_STATE, ordinal);
     // We close any open folder since it will not be re-opened, and we need to make sure
     // this state is reflected.
     CloseFolder();
@@ -3510,7 +3507,7 @@ ECode Launcher::StartApplicationDetailsActivity(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3521,7 +3518,7 @@ ECode Launcher::StartApplicationDetailsActivity(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
             Elastos::Droid::Launcher2::R::string::activity_not_found,
             IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3542,7 +3539,7 @@ ECode Launcher::StartApplicationUninstallActivity(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
                 Elastos::Droid::Launcher2::R::string::uninstall_system_app_text,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         return toast->Show();
@@ -3648,7 +3645,7 @@ ERROR:
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3685,7 +3682,7 @@ ECode Launcher::StartActivitySafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
             Elastos::Droid::Launcher2::R::string::activity_not_found,
             IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3713,7 +3710,7 @@ ECode Launcher::StartAppWidgetConfigureActivitySafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         return toast->Show();
@@ -3732,7 +3729,7 @@ ECode Launcher::StartActivityForResultSafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3742,7 +3739,7 @@ ECode Launcher::StartActivityForResultSafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText(IContext::Probe(this),
+        helper->MakeText((IContext*)this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -4486,7 +4483,7 @@ Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelpe
 }
 
 void Launcher::HideAppsCustomizeHelper(
-    /* [in] */ State toState,
+    /* [in] */ LauncherState toState,
     /* [in] */ Boolean animated,
     /* [in] */ Boolean springLoaded,
     /* [in] */ IRunnable* onCompleteRunnable)
@@ -5919,7 +5916,7 @@ Boolean Launcher::IsClingsEnabled()
     AutoPtr<IAccountManagerHelper> helper2;
     CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper2);
     AutoPtr<IAccountManager> accountManager;
-    helper2->Get(IContext::Probe(this), (IAccountManager**)&accountManager);
+    helper2->Get((IContext*)this, (IAccountManager**)&accountManager);
     AutoPtr<ArrayOf<IAccount*> > accounts;
     accountManager->GetAccounts((ArrayOf<IAccount*>**)&accounts);
     if (supportsLimitedUsers && accounts->GetLength() == 0) {
@@ -6038,7 +6035,7 @@ Boolean Launcher::SkipCustomClingIfNoAccounts()
         AutoPtr<IAccountManagerHelper> helper;
         CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper);
         AutoPtr<IAccountManager> am;
-        helper->Get(IContext::Probe(this), (IAccountManager**)&am);
+        helper->Get((IContext*)this, (IAccountManager**)&am);
         AutoPtr<ArrayOf<IAccount*> > accounts;
         am->GetAccountsByType(String("com.google"), (ArrayOf<IAccount*>**)&accounts);
         return accounts->GetLength() == 0;

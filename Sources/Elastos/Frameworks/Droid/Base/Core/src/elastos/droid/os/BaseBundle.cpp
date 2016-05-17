@@ -6,6 +6,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/utility/CArrayMap.h"
+#include "elastos/droid/utility/CSparseArray.h"
 
 #include <binder/Parcel.h>
 
@@ -24,6 +25,8 @@ using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IMapEntry;
 using Elastos::Droid::Utility::CArrayMap;
+using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::ISparseArray;
 
 namespace Elastos {
 namespace Droid {
@@ -1385,9 +1388,11 @@ ECode BaseBundle::WriteValue(
         dest->WriteInt32(v);
         return NOERROR;
     }
-    // else if (v instanceof Map) {
-    //     writeInt(VAL_MAP);
-    //     writeMap((Map) v);
+    // else if (IMap::Probe(obj) != NULL) {
+    //     // writeInt(VAL_MAP);
+    //     // writeMap((Map) v);
+    //     Logger::I(TAG, " ======================= BaseBundle::WriteValue IMap! ============");
+    //     return NOERROR;
     // }
     else if (IBundle::Probe(obj) != NULL) {
         // // Must be before Parcelable
@@ -1464,10 +1469,28 @@ ECode BaseBundle::WriteValue(
     //     writeInt(VAL_LIST);
     //     writeList((List) v);
     // }
-    // else if (v instanceof SparseArray) {
-    //     writeInt(VAL_SPARSEARRAY);
-    //     writeSparseArray((SparseArray) v);
-    // }
+    else if (ISparseArray::Probe(obj) != NULL) {
+        dest->WriteInt32(VAL_SPARSEARRAY);
+        // WriteSparseArray((SparseArray) v);
+        // if (val == NULL) {
+        //     dest->WriteInt32(-1);
+        //     return NOERROR;
+        // }
+        AutoPtr<ISparseArray> o = ISparseArray::Probe(obj);
+        Int32 N = 0;
+        o->GetSize(&N);
+        dest->WriteInt32(N);
+        Int32 i = 0, k = 0;
+        while (i < N) {
+            o->KeyAt(i, &k);
+            dest->WriteInt32(k);
+            AutoPtr<IInterface> v;
+            o->ValueAt(i, (IInterface**)&v);
+            WriteValue(dest, v);
+            i++;
+        }
+        return NOERROR;
+    }
     // else if (v instanceof boolean[]) {
     //     writeInt(VAL_BOOLEANARRAY);
     //     writeBooleanArray((boolean[]) v);
@@ -1519,7 +1542,7 @@ ECode BaseBundle::WriteValue(
     //     writeSerializable((Serializable) v);
     // }
     else {
-        Logger::D(TAG, "Unable to marshal value %d", obj);
+        Logger::D(TAG, "Unable to marshal value %p, obj=[%s]", obj, TO_CSTR(obj));
 
         assert(0);
         return E_RUNTIME_EXCEPTION;
@@ -1647,8 +1670,27 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
         }
         return array;
     }
-    // case VAL_SPARSEARRAY:
-    //     return readSparseArray(loader);
+    case VAL_SPARSEARRAY: {
+        Int32 N = 0;
+        source->ReadInt32(&N);
+        if (N < 0) {
+            return NULL;
+        }
+
+        AutoPtr<ISparseArray> sa;
+        CSparseArray::New(N, (ISparseArray**)&sa);
+
+        while (N > 0) {
+            Int32 key = 0;
+            source->ReadInt32(&key);
+            AutoPtr<IInterface> value = ReadValue(source);
+            //Log.i(TAG, "Unmarshalling key=" + key + " value=" + value);
+            sa->Append(key, value);
+            N--;
+        }
+
+        return sa;
+    }
     // case VAL_SPARSEBOOLEANARRAY:
     //     return readSparseBooleanArray();
     case VAL_BUNDLE:{
@@ -1854,4 +1896,3 @@ ECode BaseBundle::GetJavaData(
 } // namespace Os
 } // namespace Droid
 } // namespace Elastos
-

@@ -1490,8 +1490,11 @@ private:
      * Given the integer (ordinal) value of a State enum instance, convert it to a variable of type
      * State
      */
-    static CARAPI_(State) IntToState(
+    static CARAPI_(LauncherState) OrdinalToState(
         /* [in] */ Int32 stateOrdinal);
+
+    static CARAPI_(Int32) OrdinalOfState(
+        /* [in] */ LauncherState state);
 
     /**
      * Restores the previous state, if it exists.
@@ -1654,7 +1657,7 @@ private:
      * @param animated If true, the transition will be animated.
      */
     CARAPI_(void) HideAppsCustomizeHelper(
-        /* [in] */ State toState,
+        /* [in] */ LauncherState toState,
         /* [in] */ Boolean animated,
         /* [in] */ Boolean springLoaded,
         /* [in] */ IRunnable* onCompleteRunnable);
@@ -1868,7 +1871,7 @@ private:
     // We set the state in both onCreate and then onNewIntent in some cases, which causes both
     // scroll issues (because the workspace may not have been measured yet) and extra work.
     // Instead, just save the state that we need to restore Launcher to, and commit it in onResume.
-    State mOnResumeState;
+    LauncherState mOnResumeState;
 
     AutoPtr<ISpannableStringBuilder> mDefaultKeySsb;
 

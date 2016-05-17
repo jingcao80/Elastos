@@ -610,7 +610,7 @@ ECode CActivityThread::ResultData::ToString(
 ECode CActivityThread::StopInfo::Run()
 {
     // Tell activity manager we have been stopped.
-    if (DEBUG_MEMORY_TRIM) Slogger::V(TAG, "Reporting activity stopped: %p", mActivity.Get());
+    if (DEBUG_MEMORY_TRIM) Slogger::V(TAG, "Reporting activity stopped: %s", TO_CSTR(mActivity));
     return ActivityManagerNative::GetDefault()->ActivityStopped(
         mActivity->mToken, mState, mPersistentState, mDescription);
 }
@@ -2051,14 +2051,14 @@ ECode CActivityThread::StartActivityNow(
             compname->ToShortString(&name);
         } else {
             StringBuilder sb("(Intent ");
-            sb += (IInterface*)intent;
+            sb += TO_STR(intent);
             sb += ").getComponent() returned NULL";
             name = sb.ToString();
         }
         String action;
         intent->GetAction(&action);
-        Slogger::V(TAG, "Performing launch: action=%s, comp=%s, token=%p",
-                action.string(), name.string(), token);
+        Slogger::V(TAG, "Performing launch: action=%s, comp=%s, token=%s",
+            action.string(), name.string(), TO_CSTR(token));
     }
     return PerformLaunchActivity(r, NULL, activity);
 }
@@ -2090,8 +2090,8 @@ ECode CActivityThread::SendActivityResult(
     VALIDATE_NOT_NULL(data);
 
     if (DEBUG_RESULTS) {
-        Slogger::V(TAG, "sendActivityResult: id=%s req=%d res=%d data=%p",
-                id.string(), requestCode, resultCode, data);
+        Slogger::V(TAG, "sendActivityResult: id=%s req=%d res=%d data=%s",
+            id.string(), requestCode, resultCode, TO_CSTR(data));
     }
     AutoPtr<IArrayList> list;
     CArrayList::New((IArrayList**)&list);
@@ -2136,8 +2136,8 @@ ECode CActivityThread::SendMessage(
     AutoLock lock(this);
 
     if (DEBUG_MESSAGES) {
-        Slogger::V(TAG, "SendMessage %d %s: arg1=%d, arg2=%d, obj=%p",
-            what, H::CodeToString(what).string(), arg1, arg2, obj);
+        Slogger::V(TAG, "SendMessage %d %s: arg1=%d, arg2=%d, obj=%s",
+            what, H::CodeToString(what).string(), arg1, arg2, TO_CSTR(obj));
     }
 
     AutoPtr<IMessage> msg;
@@ -2752,8 +2752,8 @@ ECode CActivityThread::HandleReceiver(
         packageInfo->GetPackageName(&pkg);
         component->ToShortString(&comp);
         packageInfo->GetAppDir(&dir);
-        Slogger::V(TAG, "Performing receive of %p: app=%p, appName=%s, pkg=%s, comp=%s, dir=%s",
-            data->mIntent.Get(), app.Get(), appName.string(), pkg.string(),
+        Slogger::V(TAG, "Performing receive of %s: app=%p, appName=%s, pkg=%s, comp=%s, dir=%s",
+            TO_CSTR(data->mIntent), app.Get(), appName.string(), pkg.string(),
             comp.string(), dir.string());
     }
 
@@ -3049,7 +3049,7 @@ ECode CActivityThread::HandleBindService(
         s = it->mSecond;
     }
     if (DEBUG_SERVICE) {
-        Slogger::V(TAG, "handleBindService s=%p rebind%d", s.Get(),  data->mRebind);
+        Slogger::V(TAG, "handleBindService s=%s rebind%d", TO_CSTR(s),  data->mRebind);
     }
     if (s != NULL) {
 //        try {
@@ -3725,7 +3725,7 @@ ECode CActivityThread::PerformStopActivityInner(
     /* [in] */ Boolean keepShown,
     /* [in] */ Boolean saveState)
 {
-    if (localLOGV) Slogger::V(TAG, "Performing stop of %p", r);
+    if (localLOGV) Slogger::V(TAG, "Performing stop of %s", TO_CSTR(r));
 
     if (r != NULL) {
         if (!keepShown && r->mStopped) {
@@ -3851,7 +3851,7 @@ ECode CActivityThread::HandleStopActivity(
     PerformStopActivityInner(r, info, show, TRUE);
 
     if (localLOGV) Slogger::V(
-            TAG, "Finishing stop of %s: show=%d win=%p", TO_CSTR(r), show, r->mWindow.Get());
+            TAG, "Finishing stop of %s: show=%d win=%s", TO_CSTR(r), show, TO_CSTR(r->mWindow));
 
     UpdateVisibility(r, show);
 
@@ -3892,7 +3892,7 @@ ECode CActivityThread::HandleWindowVisibility(
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
 
     if (r == NULL) {
-        Slogger::W(TAG, "handleWindowVisibility: no activity for token %p", token);
+        Slogger::W(TAG, "handleWindowVisibility: no activity for token %s", TO_CSTR(token));
         return NOERROR;
     }
     if (!show && !r->mStopped) {
@@ -3919,7 +3919,7 @@ ECode CActivityThread::HandleSleeping(
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
 
     if (r == NULL) {
-        Slogger::W(TAG, "handleSleeping: no activity for token %p", token);
+        Slogger::W(TAG, "handleSleeping: no activity for token %s", TO_CSTR(token));
         return NOERROR;
     }
 
@@ -4060,7 +4060,7 @@ ECode CActivityThread::HandleSendResult(
 {
     assert(res != NULL);
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(res->mToken);
-    if (DEBUG_RESULTS) Slogger::V(TAG, "Handling send result to %p", r.Get());
+    if (DEBUG_RESULTS) Slogger::V(TAG, "Handling send result to %s", TO_CSTR(r));
     if (r != NULL) {
         Activity*  activity = (Activity*)r->mActivity.Get();
 
@@ -4747,7 +4747,7 @@ ECode CActivityThread::HandleConfigurationChanged(
             return NOERROR;
         }
 
-        if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Handle configuration changed: %p", config.Get());
+        if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Handle configuration changed: %s", TO_CSTR(config));
 
         Boolean bval;
         mResourcesManager->ApplyConfigurationToResourcesLocked(config, compat, &bval);
@@ -5834,7 +5834,7 @@ ECode CActivityThread::HandleUnstableProviderDiedLocked(
         String name;
         IPackageItemInfo::Probe(pInfo)->GetName(&name);
         if (DEBUG_PROVIDER) {
-            Slogger::V(TAG, "Cleaning up dead provider %p %s", provider, name.string());
+            Slogger::V(TAG, "Cleaning up dead provider %s %s", TO_CSTR(provider), name.string());
         }
         mProviderRefCountMap.Erase(it);
         if (prc->mClient != NULL && prc->mClient->mNames != NULL) {
@@ -6066,7 +6066,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
         AutoLock lock(mProviderMapLock);
 
         if (DEBUG_PROVIDER) {
-            Slogger::V(TAG, "Checking to add %p / %s", provider.Get(), name.string());
+            Slogger::V(TAG, "Checking to add %s / %s", TO_CSTR(provider), name.string());
         }
         AutoPtr<IBinder> jBinder = IBinder::Probe(provider);
         if (localProvider != NULL) {
@@ -6312,7 +6312,7 @@ AutoPtr<CActivityThread::ActivityClientRecord> CActivityThread::GetActivityClien
         return it->mSecond;
     }
 
-    Slogger::W(TAG, " >>> Failed to GetActivityClientRecord %p", token);
+    Slogger::W(TAG, " >>> Failed to GetActivityClientRecord %s", TO_CSTR(token));
     return NULL;
 }
 
