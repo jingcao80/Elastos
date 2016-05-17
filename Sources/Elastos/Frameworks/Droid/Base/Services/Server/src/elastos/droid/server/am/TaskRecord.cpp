@@ -276,9 +276,10 @@ void TaskRecord::SetIntent(
 }
 
 void TaskRecord::SetIntent(
-    /* [in] */ IIntent* intent,
+    /* [in] */ IIntent* _intent,
     /* [in] */ IActivityInfo* info)
 {
+    AutoPtr<IIntent> intent = _intent;
     if (mIntent == NULL) {
         Int32 flags;
         info->GetFlags(&flags);
