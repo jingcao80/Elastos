@@ -448,6 +448,9 @@ ECode HashMap::PutAll(
     /* [in] */ IMap* map)
 {
     Int32 sizelen = 0;
+    if (map == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     map->GetSize(&sizelen);
     EnsureCapacity(sizelen);
     return AbstractMap::PutAll(map);
