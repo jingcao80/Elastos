@@ -10,7 +10,7 @@ VPATH = $(MAKEDIR)/src/elastos/devsamples/node/imageviewdemo
 
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/inc
-INCLUDES += $(MAKEDIR)/inc/node
+INCLUDES += $(MAKEDIR)/../Common/inc
 INCLUDES += $(MAKEDIR)/inc/elastos/devsamples/node/imageviewdemo
 
 SOURCES = Elastos.DevSamples.Node.ImageViewDemo.car

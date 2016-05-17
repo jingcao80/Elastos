@@ -6,7 +6,7 @@ LUBE_FLAGS += -n -u
 
 include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
-INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/../../../../../Common/inc
 INCLUDES += $(MAKEDIR)/../../../../
 
 SOURCES = Elastos.DevSamples.Node.TextViewDemo.car
