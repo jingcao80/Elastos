@@ -199,8 +199,13 @@ ECode ItemInfo::ToString(
 
     sb += " dropPos=";
     sb += "(";
-    for (Int32 i = 0; i < mDropPos->GetLength(); i++) {
-        sb += (*mDropPos)[i];
+    if (mDropPos == NULL) {
+        sb += "NULL";
+    }
+    else {
+        for (Int32 i = 0; i < mDropPos->GetLength(); i++) {
+            sb += (*mDropPos)[i];
+        }
     }
     sb += ")";
 

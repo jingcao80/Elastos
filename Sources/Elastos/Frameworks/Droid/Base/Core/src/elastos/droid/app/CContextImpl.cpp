@@ -1362,7 +1362,6 @@ ECode CContextImpl::StartActivityAsUser(
     intent->ResolveTypeIfNeeded(resolver, &type);
     Int32 id, result;
     user->GetIdentifier(&id);
-     AutoPtr<IActivity> actvity;
     ActivityManagerNative::GetDefault()->StartActivityAsUser(
         appThread, packageName, intent, type,
         NULL, String(NULL), 0, IIntent::FLAG_ACTIVITY_NEW_TASK, NULL, options,

@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Core.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/app/AppGlobals.h"
 //TODO #include "elastos/droid/internal/os/BatteryStatsImpl.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -55,11 +56,12 @@ using Elastos::Droid::Os::ITrace;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::View::IDisplay;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Server::Am::IActivityRecord;
 using Elastos::Droid::Server::Watchdog;
 using Elastos::Droid::Server::Wm::AppTransition;
 using Elastos::Droid::Server::Wm::TaskGroup;
-using Elastos::Droid::View::IDisplay;
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::CSystem;
@@ -393,22 +395,17 @@ AutoPtr<ActivityRecord> ActivityStack::IsInStackLocked(
     if (r != NULL) {
         AutoPtr<TaskRecord> task = r->mTask;
         if (task != NULL) {
-            Boolean taskHistoryContainsTask;
-            mTaskHistory->Contains(TO_IINTERFACE(task), &taskHistoryContainsTask);
-            Boolean activitiesContainsTask = FALSE;
-            AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-            List<AutoPtr<ActivityRecord> >::Iterator iterator = activities->Begin();
-            while(iterator != activities->End()) {
-                if ((*iterator).Get() == r.Get()) {
-                    activitiesContainsTask = TRUE;
-                    break;
+            List<AutoPtr<ActivityRecord> >::Iterator it = Find(
+                    task->mActivities->Begin(), task->mActivities->End(), r);
+            if (it != task->mActivities->End()) {
+                Boolean taskHistoryContainsTask;
+                mTaskHistory->Contains(TO_IINTERFACE(task), &taskHistoryContainsTask);
+                if (taskHistoryContainsTask) {
+                    if (task->mStack != this) {
+                        Slogger::W(TAG, "Illegal state! task does not point to stack it is in.");
+                    }
+                    return r;
                 }
-            }
-
-            if (activitiesContainsTask && taskHistoryContainsTask) {
-                if (task->mStack != this)
-                    Slogger::W(TAG, "Illegal state! task does not point to stack it is in.");
-                return r;
             }
         }
     }
@@ -1811,10 +1808,10 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
                     Slogger::V(TAG, "Delivering results to %s : result size:%d", TO_CSTR(next), N);
                 }
                 AutoPtr<IList> list;
-                CArrayList::New((IList**)&list);
-                for (UInt32 i = 0; i < a->GetSize(); ++i) {
-                    AutoPtr<ActivityResult> ar = (*a)[i];
-                    list->Add(TO_IINTERFACE(ar));
+                CParcelableList::New((IList**)&list);
+                List< AutoPtr<ActivityResult> >::Iterator it;
+                for (it = a->Begin(); it != a->End(); ++it) {
+                    list->Add((*it)->mResultInfo);
                 }
                 ec = next->mApp->mThread->ScheduleSendResult(nextAppToken, list);
                 FAIL_GOTO(ec, _ERROR_)
@@ -1823,10 +1820,10 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
 
         if (next->mNewIntents != NULL) {
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
-            for (UInt32 i = 0; i < next->mNewIntents->GetSize(); ++i) {
-                AutoPtr<IIntent> intent = (*(next->mNewIntents))[i];
-                list->Add(TO_IINTERFACE(intent));
+            CParcelableList::New((IList**)&list);
+            List< AutoPtr<IIntent> >::Iterator it;
+            for (it = next->mNewIntents->Begin(); it != next->mNewIntents->End(); ++it) {
+                list->Add(*it);
             }
             ec = next->mApp->mThread->ScheduleNewIntent(list, nextAppToken);
             FAIL_GOTO(ec, _ERROR_)
@@ -2456,10 +2453,10 @@ void ActivityStack::SendActivityResultLocked(
         //try {
             //ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
             AutoPtr<IArrayList> list;
-            CArrayList::New((IArrayList**)&list);
+            CParcelableList::New((IArrayList**)&list);
             AutoPtr<IResultInfo> resultInfo;
             CResultInfo::New(resultWho, requestCode, resultCode, data, (IResultInfo**)&resultInfo);
-            list->Add(TO_IINTERFACE(resultInfo));
+            list->Add(resultInfo);
             r->mApp->mThread->ScheduleSendResult(IBinder::Probe(r->mAppToken), IList::Probe(list));
             return;
         //} catch (Exception e) {
@@ -5144,21 +5141,19 @@ Boolean ActivityStack::RelaunchActivityLocked(
 
     AutoPtr<IList> iResults, iNewIntents;
     if (results) {
-        CArrayList::New((IList**)&iResults);
+        CParcelableList::New((IList**)&iResults);
         List< AutoPtr<ActivityResult> >::Iterator it = results->Begin();
         while (it != results->End()) {
-            AutoPtr<ActivityResult> ar = *it;
-            iResults->Add(TO_IINTERFACE(ar));
+            iResults->Add((*it)->mResultInfo);
             ++it;
         }
     }
 
     if (newIntents) {
-        CArrayList::New((IList**)&iNewIntents);
+        CParcelableList::New((IList**)&iNewIntents);
         List< AutoPtr<IIntent> >::Iterator it = newIntents->Begin();
         while (it != newIntents->End()) {
-            AutoPtr<IIntent> intent = *it;
-            iNewIntents->Add(TO_IINTERFACE(intent));
+            iNewIntents->Add(*it);
             ++it;
         }
     }
