@@ -2030,18 +2030,10 @@ void Launcher::SetupViews()
     mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view);
     view = NULL;
     IView::Probe(mAppsCustomizeTabHost)->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,
-<<<<<<< HEAD
             (IView**)&view);
     mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view);
     mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
 
-=======
-            (IView**)&view6);
-    mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view6);
-Slogger::E("Launcher", "============================Launcher::SetupViews mAppsCustomizeContent=%p",mAppsCustomizeContent.Get());
-    mAppsCustomizeContent->Setup((ILauncher*)this, dragController);
-Slogger::E("Launcher", "============================Launcher::SetupViews 13");
->>>>>>> update launcher2.
     // Setup the drag controller (drop targets have to be added in reverse order in priority)
     dragController->SetDragScoller(IDragScroller::Probe(mWorkspace));
     dragController->SetScrollView(IView::Probe(mDragLayer));
