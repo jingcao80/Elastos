@@ -252,7 +252,7 @@ ECode CActivityThread::Idler::QueueIdle(
         AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
         AutoPtr<ActivityClientRecord> prev;
         do {
-            Boolean finished = FALSE;
+            Boolean finished = TRUE;
             if (a->mActivity != NULL)
                 a->mActivity->IsFinishing(&finished);
 
@@ -260,7 +260,7 @@ ECode CActivityThread::Idler::QueueIdle(
                 Slogger::V(TAG, "Reporting idle of %s finished=", TO_CSTR(a), finished);
             }
 
-            if (finished) {
+            if (!finished) {
                 am->ActivityIdle(a->mToken, a->mCreatedConfig, stopProfiling);
                 a->mCreatedConfig = NULL;
             }

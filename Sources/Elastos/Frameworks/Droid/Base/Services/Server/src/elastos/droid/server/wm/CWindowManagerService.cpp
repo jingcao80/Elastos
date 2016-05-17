@@ -691,16 +691,19 @@ ECode CWindowManagerService::LocalService::WaitForAllWindowsDrawn(
     // synchronized(mHost->mWindowMapLock) {
     //     mHost->mWaitingForDrawnCallback = callback;
     //     AutoPtr<WindowList> windows = mHost->GetDefaultWindowListLocked();
-    //     WindowList::ReverseIterator rit = windows->RBegin();
-    //     for (; rit != windows->REnd(); ++rit) {
-    //         AutoPtr<WindowState> win = *rit;
+    //     Int32 size;
+    //     windows->GetSize(&size);
+    //     for (Int32 winNdx = size - 1; winNdx >= 0; --winNdx) {
+    //         AutoPtr<IInterface> obj;
+    //         windows->Get(winNdx, (IInterface**)&obj);
+    //         WindowState* win = To_WindowState(obj);
     //         Boolean isVisible, isHiding;
     //         if ((win->IsVisibleLw(&isVisible), isVisible)
     //                 && (win->mAppToken != NULL || (mHost->mPolicy->IsForceHiding(win->mAttrs, &isHiding), isHiding))) {
     //             win->mWinAnimator->mDrawState = WindowStateAnimator::DRAW_PENDING;
     //             // Force add to mResizingWindows.
     //             win->mLastContentInsets->Set(-1, -1, -1, -1);
-    //             mHost->mWaitingForDrawn.PushBack(win);
+    //             mHost->mWaitingForDrawn->Add(obj);
     //         }
     //     }
     //     mHost->RequestTraversalLocked();

@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include "elastos/core/Thread.h"
+#include <binder/Binder.h>
 
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Bluetooth::IBluetoothProfile;
@@ -40,6 +41,24 @@ class BatteryStatsService
     , public IBinder
 {
 private:
+    class NativeBatteryStatsService : public android::BBinder
+    {
+    public:
+        NativeBatteryStatsService(
+            /* [in] */ BatteryStatsService* host)
+            : mHost(host)
+        {}
+
+        android::status_t onTransact(
+            /* [in] */ uint32_t code,
+            /* [in] */ const android::Parcel& data,
+            /* [in] */ android::Parcel* reply,
+            /* [in] */ uint32_t flags = 0);
+
+    private:
+        BatteryStatsService* mHost;
+    };
+
     class BluetoothProfileServiceListener
         : public Object
         , public IBluetoothProfileServiceListener
@@ -417,6 +436,8 @@ private:
     Boolean mBluetoothPendingStats;
     AutoPtr<IBluetoothHeadset> mBluetoothHeadset;
     AutoPtr<IBluetoothProfileServiceListener> mBluetoothProfileServiceListener;
+
+    android::sp<NativeBatteryStatsService> mNative;
 };
 
 } // namespace Am

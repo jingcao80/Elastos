@@ -16,6 +16,8 @@
 #include "elastos/core/StringBuilder.h"
 #include "elastos/core/StringUtils.h"
 #include <elastos/utility/logging/Slogger.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
 
 using Elastos::Droid::Bluetooth::EIID_IBluetoothProfileServiceListener;
 using Elastos::Droid::Bluetooth::IBluetoothProfile;
@@ -219,6 +221,89 @@ static Int32 nativeWaitWakeup(
 
 //====================================================================================
 
+enum {
+    NOTE_START_SENSOR_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION,
+    NOTE_STOP_SENSOR_TRANSACTION,
+    NOTE_START_VIDEO_TRANSACTION,
+    NOTE_STOP_VIDEO_TRANSACTION,
+    NOTE_START_AUDIO_TRANSACTION,
+    NOTE_STOP_AUDIO_TRANSACTION,
+    NOTE_RESET_VIDEO_TRANSACTION,
+    NOTE_RESET_AUDIO_TRANSACTION,
+};
+
+android::status_t BatteryStatsService::NativeBatteryStatsService::onTransact(
+    /* [in] */ uint32_t code,
+    /* [in] */ const android::Parcel& data,
+    /* [in] */ android::Parcel* reply,
+    /* [in] */ uint32_t flags)
+{
+    android::String16 interfaceName("com.android.internal.app.IBatteryStats");
+    switch(code) {
+        case NOTE_START_SENSOR_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 uid = data.readInt32();
+            Int32 sensor = data.readInt32();
+            mHost->NoteStartSensor(uid, sensor);
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_STOP_SENSOR_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 uid = data.readInt32();
+            Int32 sensor = data.readInt32();
+            mHost->NoteStopSensor(uid, sensor);
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_START_VIDEO_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 uid = data.readInt32();
+            mHost->NoteStartVideo(uid);
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_STOP_VIDEO_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 uid = data.readInt32();
+            mHost->NoteStopVideo(uid);
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_START_AUDIO_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 uid = data.readInt32();
+            mHost->NoteStartAudio(uid);
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_STOP_AUDIO_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 uid = data.readInt32();
+            mHost->NoteStopAudio(uid);
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_RESET_VIDEO_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            mHost->NoteResetVideo();
+            reply->writeNoException();
+        }
+        break;
+        case NOTE_RESET_AUDIO_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            mHost->NoteResetAudio();
+            reply->writeNoException();
+        }
+        break;
+        default:
+            return BBinder::onTransact(code, data, reply, flags);
+    }
+    return android::NO_ERROR;
+}
+
+//====================================================================================
+
 CAR_INTERFACE_IMPL(BatteryStatsService::BluetoothProfileServiceListener, Object, IBluetoothProfileServiceListener)
 
 ECode BatteryStatsService::BluetoothProfileServiceListener::OnServiceConnected(
@@ -316,6 +401,17 @@ ECode BatteryStatsService::Publish(
     resources->GetInteger(
             R::integer::config_radioScanningTimeout, &value);
     mStats->SetRadioScanningTimeout(value * 1000L);
+
+    if (mNative == NULL) {
+        mNative = new NativeBatteryStatsService(this);
+        android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+        int res = sm->addService(android::String16("batterystats"), mNative);
+        if (res != 0) {
+            Slogger::E(TAG, "add service batterystats failed");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+
     return NOERROR;
 }
 
