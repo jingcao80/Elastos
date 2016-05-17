@@ -390,7 +390,7 @@ ECode CellLayout::AnimatorUpdateListener::OnAnimationUpdate(
                 mThisIndex, TO_CSTR(val), isStopped);
         }
         // Try to prevent it from continuing to run
-        IAnimation::Probe(animation)->Cancel();
+        IAnimator::Probe(animation)->Cancel();
     }
     else {
         AutoPtr<IInterface> val;
@@ -2494,8 +2494,7 @@ void CellLayout::RecycleTempRects(
     /* [in] */ IStack* used)
 {
     Boolean isEmpty;
-    used->IsEmpty(&isEmpty);
-    while (!isEmpty) {
+    while (used->IsEmpty(&isEmpty), !isEmpty) {
         AutoPtr<IInterface> item;
         used->Pop((IInterface**)&item);
         mTempRectStack->Push(item);

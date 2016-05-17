@@ -76,32 +76,32 @@ public:
 
 
 protected:
-    CARAPI_(Boolean) BeginDragging(
+    virtual CARAPI_(Boolean) BeginDragging(
         /* [in] */ IView* v);
 
-    CARAPI_(void) CancelDragging();
+    virtual CARAPI_(void) CancelDragging();
 
     /*
      * Determines if we should change the touch state to start scrolling after the
      * user moves their touch point too far.
      */
-    CARAPI DetermineScrollingStart(
+    virtual CARAPI DetermineScrollingStart(
         /* [in] */ IMotionEvent* ev);
 
     /*
      * Determines if we should change the touch state to start dragging after the
      * user moves their touch point far enough.
      */
-    CARAPI_(void) DetermineDraggingStart(
+    virtual CARAPI_(void) DetermineDraggingStart(
         /* [in] */ IMotionEvent* ev);
 
     //@Override
     CARAPI OnDetachedFromWindow();
 
     /** Show the scrolling indicators when we move the page */
-    CARAPI OnPageBeginMoving();
+    virtual CARAPI OnPageBeginMoving();
 
-    CARAPI OnPageEndMoving();
+    virtual CARAPI OnPageEndMoving();
 
 private:
     CARAPI_(void) HandleTouchEvent(

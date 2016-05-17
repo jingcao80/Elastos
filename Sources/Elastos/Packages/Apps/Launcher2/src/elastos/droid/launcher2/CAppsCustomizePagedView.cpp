@@ -976,17 +976,17 @@ ECode CAppsCustomizePagedView::OnKey(
     return NOERROR;
 }
 
-ECode CAppsCustomizePagedView::DetermineDraggingStart(
+void CAppsCustomizePagedView::DetermineDraggingStart(
     /* [in] */ IMotionEvent* ev)
 {
     // Disable dragging by pulling an app down for now.
-    return NOERROR;
 }
 
 void CAppsCustomizePagedView::BeginDraggingApplication(
     /* [in] */ IView* v)
 {
     AutoPtr<IWorkspace> workspace;
+    mLauncher->GetWorkspace((IWorkspace**)&workspace);
     workspace->OnDragStartedWithItem(v);
     workspace->BeginDragShared(v, this);
 }
@@ -1147,7 +1147,6 @@ ECode CAppsCustomizePagedView::CleanUpShortPress(
 Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         /* [in] */ IView* v)
 {
-    Slogger::I(TAG, " >> BeginDraggingWidget");
     mDraggingWidget = TRUE;
     // Get the widget preview as the drag representation
     AutoPtr<IView> view;
@@ -1298,15 +1297,11 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
     return TRUE;
 }
 
-ECode CAppsCustomizePagedView::BeginDragging(
-    /* [in] */ IView* v,
-    /* [out] */ Boolean* result)
+Boolean CAppsCustomizePagedView::BeginDragging(
+    /* [in] */ IView* v)
 {
-    VALIDATE_NOT_NULL(result);
-
     if (!PagedViewWithDraggableItems::BeginDragging(v)) {
-        *result = FALSE;
-        return NOERROR;
+        return FALSE;
     }
 
     if (IPagedViewIcon::Probe(v) != NULL) {
@@ -1314,8 +1309,7 @@ ECode CAppsCustomizePagedView::BeginDragging(
     }
     else if (IPagedViewWidget::Probe(v) != NULL) {
         if (!BeginDraggingWidget(v)) {
-            *result = FALSE;
-            return NOERROR;
+            return FALSE;
         }
     }
 
@@ -1325,8 +1319,7 @@ ECode CAppsCustomizePagedView::BeginDragging(
     Boolean res;
     PostDelayed(run, 150, &res);
 
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 void CAppsCustomizePagedView::EndDragging(

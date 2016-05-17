@@ -79,7 +79,7 @@ private:
         CARAPI Vibrate(
             /* [in] */ Int32 uid,
             /* [in] */ const String& opPkg,
-            /* [in] */ const ArrayOf<Int64>& pattern,
+            /* [in] */ ArrayOf<Int64>* pattern,
             /* [in] */ Int32 repeat,
             /* [in] */ IAudioAttributes* attributes);
 

@@ -4775,8 +4775,9 @@ ECode Workspace::OnDropExternal(
             {
                 if (info->mContainer == NO_ID && IApplicationInfo::Probe(info) != NULL) {
                     // Came from all apps -- make a copy
-                    info = new ShortcutInfo();
-                    info->constructor((ApplicationInfo*)IApplicationInfo::Probe(info));
+                    AutoPtr<ShortcutInfo> stInfo = new ShortcutInfo();
+                    stInfo->constructor((ApplicationInfo*)IApplicationInfo::Probe(info));
+                    info = stInfo;
                 }
                 mLauncher->CreateShortcut(
                         Elastos::Droid::Launcher2::R::layout::application,

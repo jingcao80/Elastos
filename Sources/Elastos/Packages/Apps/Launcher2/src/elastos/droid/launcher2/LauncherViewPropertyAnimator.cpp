@@ -119,11 +119,8 @@ ECode LauncherViewPropertyAnimator::OnAnimationEnd(
     Int32 size;
     for (Int32 i = 0; i < (mListeners->GetSize(&size), size); i++) {
         AutoPtr<IInterface> obj;
-Slogger::D("LauncherViewPropertyAnimator", "=================OnAnimationEnd mListeners=%p",mListeners.Get());
         mListeners->Get(i, (IInterface**)&obj);
-Slogger::D("LauncherViewPropertyAnimator", "=================OnAnimationEnd obj=%p",obj.Get());
         AutoPtr<IAnimatorListener> listener = IAnimatorListener::Probe(obj);
-Slogger::D("LauncherViewPropertyAnimator", "=================OnAnimationEnd listener=%p",listener.Get());
         listener->OnAnimationEnd(this);
     }
     mRunning = FALSE;

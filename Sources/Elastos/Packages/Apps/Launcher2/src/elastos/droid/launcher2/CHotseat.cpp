@@ -236,7 +236,7 @@ ECode CHotseat::ResetLayout()
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
 
     AutoPtr<IView> view;
-    ECode ec = inflater->Inflate(R::layout::application, IViewGroup::Probe(mContent), FALSE, (IView**)&view);
+    inflater->Inflate(R::layout::application, IViewGroup::Probe(mContent), FALSE, (IView**)&view);
     AutoPtr<IBubbleTextView> allAppsButton = IBubbleTextView::Probe(view);
     AutoPtr<IResources> r;
     context->GetResources((IResources**)&r);

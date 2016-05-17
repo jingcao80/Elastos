@@ -51,7 +51,7 @@ class DragLayer
 {
 public:
     class DragLayerLayoutParams
-        : public FrameLayout::LayoutParams
+        : public FrameLayout::FrameLayoutLayoutParams
         , public IDragLayerLayoutParams
     {
     public:

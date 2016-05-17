@@ -49,8 +49,7 @@ public:
      *
      * @return True if the hardware has a vibrator, else false.
      */
-    CARAPI HasVibrator(
-        /* [out] */ Boolean* result);
+    using IVibrator::HasVibrator;
 
     /**
      * Vibrate constantly for the specified period of time.
@@ -75,7 +74,7 @@ public:
      */
     CARAPI Vibrate(
         /* [in] */ Int64 milliseconds,
-        /* [in] */ IAudioAttributes* aa);
+        /* [in] */ IAudioAttributes* attributes);
 
     /**
      * Vibrate with a given pattern.
@@ -135,31 +134,21 @@ public:
      * Like {@link #vibrate(long, AudioAttributes)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    CARAPI Vibrate(
-        /* [in] */ Int32 uid,
-        /* [in] */ const String& opPkg,
-        /* [in] */ Int64 milliseconds,
-        /* [in] */ IAudioAttributes* attributes);
+    using IVibrator::Vibrate;
 
     /**
      * @hide
      * Like {@link #vibrate(long[], int, AudioAttributes)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    CARAPI Vibrate(
-        /* [in] */ Int32 uid,
-        /* [in] */ const String& opPkg,
-        /* [in] */ ArrayOf<Int64>* pattern,
-        /* [in] */ Int32 repeat,
-        /* [in] */ IAudioAttributes* attributes);
+    using IVibrator::Vibrate;
 
     /**
      * Turn the vibrator off.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#VIBRATE}.
      */
-    CARAPI Cancel();
-
+    using IVibrator::Cancel;
 
 protected:
     String mPackageName;

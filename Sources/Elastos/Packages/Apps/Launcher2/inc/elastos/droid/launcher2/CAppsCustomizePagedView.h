@@ -431,13 +431,12 @@ protected:
      * PagedViewWithDraggableItems implementation
      */
     //@Override
-    CARAPI DetermineDraggingStart(
+    CARAPI_(void) DetermineDraggingStart(
         /* [in] */ IMotionEvent* ev);
 
     //@Override
-    CARAPI BeginDragging(
-        /* [in] */ IView* v,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) BeginDragging(
+        /* [in] */ IView* v);
 
     //@Override
     CARAPI OnDetachedFromWindow();

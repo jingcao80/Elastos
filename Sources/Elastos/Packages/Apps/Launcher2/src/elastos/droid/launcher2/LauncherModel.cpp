@@ -1533,8 +1533,8 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                     //try {
                     AutoPtr<IIntentHelper> helper;
                     CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-                    if ((ECode)E_URI_SYNTAX_EXCEPTION == helper->ParseUri(intentDescription,
-                            0, (IIntent**)&intent)) {
+                    ECode ec = helper->ParseUri(intentDescription, 0, (IIntent**)&intent);
+                    if (FAILED(ec)) {
                         continue;
                     }
                     //} catch (URISyntaxException e) {

@@ -29,7 +29,7 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL(DragLayer::DragLayerLayoutParams, FrameLayout::LayoutParams,
+CAR_INTERFACE_IMPL(DragLayer::DragLayerLayoutParams, FrameLayout::FrameLayoutLayoutParams,
         IDragLayerLayoutParams);
 
 DragLayer::DragLayerLayoutParams::DragLayerLayoutParams()
@@ -195,9 +195,8 @@ ECode DragLayer::MyAnimatorUpdateListener::OnAnimationUpdate(
     Int32 sx;
     IView::Probe(mHost->mDropView)->GetScrollX(&sx);
     Int32 sx2;
-    mHost->mAnchorView->GetScrollX(&sx2);
     Int32 xPos = x - sx + (mHost->mAnchorView != NULL
-            ? (mHost->mAnchorViewInitialScrollX - sx2) : 0);
+            ? (mHost->mAnchorViewInitialScrollX - (mHost->mAnchorView->GetScrollX(&sx2), sx2)) : 0);
     Int32 sy;
     IView::Probe(mHost->mDropView)->GetScrollY(&sy);
     Int32 yPos = y - sy;
@@ -1178,7 +1177,6 @@ ECode DragLayer::AnimateView(
     mDropAnim->AddUpdateListener(updateCb);
     AutoPtr<IAnimatorListener> lisener = new MyAnimatorListenerAdapter(
             onCompleteRunnable, animationEndStyle, this);
-Slogger::D("DragLayer", "=======DragLayer::AnimateView lisener=%p",lisener.Get());
     IAnimator::Probe(mDropAnim)->AddListener(lisener);
     return IAnimator::Probe(mDropAnim)->Start();
 }

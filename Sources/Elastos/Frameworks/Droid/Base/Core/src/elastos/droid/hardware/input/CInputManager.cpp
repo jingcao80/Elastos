@@ -100,15 +100,15 @@ ECode CInputManager::InputDeviceVibrator::Vibrate(
 ECode CInputManager::InputDeviceVibrator::Vibrate(
     /* [in] */ Int32 uid,
     /* [in] */ const String& opPkg,
-    /* [in] */ const ArrayOf<Int64>& pattern,
+    /* [in] */ ArrayOf<Int64>* pattern,
     /* [in] */ Int32 repeat,
     /* [in] */ IAudioAttributes* attributes)
 {
-    if (repeat >= pattern.GetLength()) {
+    if (repeat >= pattern->GetLength()) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    if (FAILED(mOwner->mIm->Vibrate(mDeviceId, pattern, repeat, mToken))) {
+    if (FAILED(mOwner->mIm->Vibrate(mDeviceId, *pattern, repeat, mToken))) {
         Logger::W(TAG, "Failed to vibrate.");
         return E_RUNTIME_EXCEPTION;
     }
