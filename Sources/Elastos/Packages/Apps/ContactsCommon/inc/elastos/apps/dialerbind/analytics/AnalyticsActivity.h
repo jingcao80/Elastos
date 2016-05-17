@@ -1,6 +1,6 @@
 
-#ifndef __ELASTOS_APPS_DIALERBINDER_ANALYTICSACTIVITY_H__
-#define __ELASTOS_APPS_DIALERBINDER_ANALYTICSACTIVITY_H__
+#ifndef __ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSACTIVITY_H__
+#define __ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSACTIVITY_H__
 
 #include <Activity.h>
 
@@ -8,7 +8,8 @@ using Elastos::Droid::App::Activity;
 
 namespace Elastos{
 namespace Apps{
-namespace DialerBinder {
+namespace DailerBind {
+namespace Analytics {
 
 class ECO_PUBLIC AnalyticsActivity
     : public Activity
@@ -30,8 +31,9 @@ public:
 
 };
 
-} // DialerBinder
+} // Analytics
+} // DailerBind
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALERBINDER_ANALYTICSACTIVITY_H__
+#endif //__ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSACTIVITY_H__

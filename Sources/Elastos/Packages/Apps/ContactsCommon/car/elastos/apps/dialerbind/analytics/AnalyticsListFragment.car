@@ -3,7 +3,8 @@ module
 
     namespace Elastos{
     namespace Apps {
-    namespace DailerBinder {
+    namespace DailerBind {
+    namespace Analytics {
 
     /**
      * @Involve
@@ -12,7 +13,8 @@ module
     interface IAnalyticsListFragment {
     }
 
-    } // DailerBinder
+    } // Analytics
+    } // DailerBind
     } // Apps
     } // Elastos
 

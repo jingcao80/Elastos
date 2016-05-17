@@ -11,8 +11,7 @@ module
       * @Invovle
       * interface ISQLiteOpenHelper
       */
-    interface IDialerDatabaseHelper
-    {
+    interface IDialerDatabaseHelper {
         /**
          * SmartDial DB version ranges:
          * <pre>
@@ -92,15 +91,13 @@ module
     {
     }
 
-    interface IDialerDatabaseHelperDeleteContactQuery
-    {
+    interface IDialerDatabaseHelperDeleteContactQuery {
         /** Selects only rows that have been deleted after a certain time stamp.*/
         const String SELECT_UPDATED_CLAUSE = /*ContactsContract.DeletedContacts.CONTACT_DELETED_TIMESTAMP*/
                  "contact_deleted_timestamp" + " > ?";
     }
 
-    interface IDialerDatabaseHelperHelper
-    {
+    interface IDialerDatabaseHelperHelper {
         /**
          * Access function to get the singleton instance of DialerDatabaseHelper.
          */

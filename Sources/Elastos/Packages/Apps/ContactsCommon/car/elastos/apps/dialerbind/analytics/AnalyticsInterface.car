@@ -4,7 +4,8 @@ module
 
     namespace Elastos{
     namespace Apps {
-    namespace DailerBinder {
+    namespace DailerBind {
+    namespace Analytics {
 
     interface IAnalyticsInterface {
         SendHitEvent(
@@ -15,7 +16,8 @@ module
         SendScreenView();
     }
 
-    } // DailerBinder
+    } // Analytics
+    } // DailerBind
     } // Apps
     } // Elastos
 

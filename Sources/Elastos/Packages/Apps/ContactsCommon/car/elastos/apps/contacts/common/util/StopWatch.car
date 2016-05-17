@@ -1,0 +1,46 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace Util {
+
+    interface IStopWatch {
+        /**
+         * Record a lap.
+         */
+        Lap(
+            [in] String lapLabel);
+
+        /**
+         * Stop it and log the result, if the total time >= {@code timeThresholdToLog}.
+         */
+        StopAndLog(
+            [in] String TAG,
+            [in] Int32 timeThresholdToLog);
+    }
+
+    interface IStopWatchHelper {
+        /**
+         * Create a new instance and start it.
+         */
+        Start(
+            [in] String label,
+            [out] IStopWatch* result);
+
+        /**
+         * Return a dummy instance that does no operations.
+         */
+        GetNullStopWatch(
+            [out] IStopWatch* result);
+    }
+
+    } // Util
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

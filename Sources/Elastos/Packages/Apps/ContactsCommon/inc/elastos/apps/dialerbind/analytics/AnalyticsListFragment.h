@@ -1,9 +1,10 @@
-#ifndef __ELASTOS_APPS_DIALERBINDER_ANALYTICSLISTFRAGMENT_H__
-#define __ELASTOS_APPS_DIALERBINDER_ANALYTICSLISTFRAGMENT_H__
+#ifndef __ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
+#define __ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
 
 namespace Elastos{
 namespace Apps{
-namespace DialerBinder {
+namespace DailerBind {
+namespace Analytics {
 
 class ECO_PUBLIC AnalyticsListFragment
     /* : public ListFragment*/
@@ -26,8 +27,9 @@ public:
 
 };
 
-} // DialerBinder
+} // Analytics
+} // DailerBind
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALERBINDER_ANALYTICSLISTFRAGMENT_H__
+#endif //__ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
