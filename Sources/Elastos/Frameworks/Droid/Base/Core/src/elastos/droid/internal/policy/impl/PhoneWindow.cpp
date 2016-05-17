@@ -4314,8 +4314,7 @@ ECode PhoneWindow::PerformPanelIdentifierAction(
     IMenu::Probe(st->mMenu)->PerformIdentifierAction(id, flags, succeeded);
 
     // Only close down the menu if we don't have an action bar keeping it open.
-    if (mDecorContentParent == NULL)
-    {
+    if (mDecorContentParent == NULL) {
         ClosePanel(st, TRUE);
     }
 
@@ -6445,6 +6444,7 @@ ECode PhoneWindow::PreparePanel(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* prepared)
 {
+    Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
     VALIDATE_NOT_NULL(prepared)
     *prepared = FALSE;
     VALIDATE_NOT_NULL(st)
@@ -6459,7 +6459,7 @@ ECode PhoneWindow::PreparePanel(
         *prepared = TRUE;
         return NOERROR;
     }
-
+    Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
     if ((mPreparedPanel != NULL) && (mPreparedPanel.Get() != st)) {
         // Another Panel is prepared and possibly open, so close it
         ClosePanel(mPreparedPanel, FALSE);
@@ -6467,39 +6467,45 @@ ECode PhoneWindow::PreparePanel(
 
     AutoPtr<IWindowCallback> cb;
     GetCallback((IWindowCallback**)&cb);
-
+    Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
     if (cb != NULL) {
         AutoPtr<IView> view;
         cb->OnCreatePanelView(st->mFeatureId, (IView**)&view);
         st->mCreatedPanelView = view;
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
     }
 
     Boolean isActionBarMenu = st->mFeatureId == FEATURE_OPTIONS_PANEL || st->mFeatureId == FEATURE_ACTION_BAR;
-    if (isActionBarMenu && mDecorContentParent != NULL)
-    {
+    if (isActionBarMenu && mDecorContentParent != NULL) {
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
         // Enforce ordering guarantees around events so that the action bar never
         // dispatches menu-related events before the panel is prepared.
         mDecorContentParent->SetMenuPrepared();
     }
 
     if (st->mCreatedPanelView == NULL) {
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
         // Init the panel state's menu--return false if init failed
         if (st->mMenu == NULL || st->mRefreshMenuContent) {
+            Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
             if (st->mMenu == NULL) {
+                Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
                 if (!InitializePanelMenu(st) || (st->mMenu == NULL)) {
+                    Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
                     *prepared = FALSE;
                     return NOERROR;
                 }
             }
-
+            Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
             if (isActionBarMenu && mDecorContentParent != NULL) {
+                Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
                 if (mActionMenuPresenterCallback == NULL) {
                     mActionMenuPresenterCallback = new ActionMenuPresenterCallback(this);
                 }
-
+                Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
                 mDecorContentParent->SetMenu(IMenu::Probe(st->mMenu), mActionMenuPresenterCallback);
             }
-
+            Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
             // Call callback, and return if it doesn't want to display menu.
 
             // Creating the panel menu will involve a lot of manipulation;
@@ -6507,6 +6513,7 @@ ECode PhoneWindow::PreparePanel(
             st->mMenu->StopDispatchingItemsChanged();
             Boolean result = FALSE;
             if ((cb == NULL) || !(cb->OnCreatePanelMenu(st->mFeatureId, IMenu::Probe(st->mMenu), &result), result)) {
+                Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
                 // Ditch the menu created above
                 st->SetMenu(NULL);
 
@@ -6514,14 +6521,14 @@ ECode PhoneWindow::PreparePanel(
                     // Don't show it in the action bar either
                     mDecorContentParent->SetMenu(NULL, mActionMenuPresenterCallback);
                 }
-
+                Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
                 *prepared = FALSE;
                 return NOERROR;
             }
-
+            Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
             st->mRefreshMenuContent = FALSE;
         }
-
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
         // Callback and return if the callback does not want to show the menu
 
         // Preparing the panel menu can involve a lot of manipulation;
@@ -6534,7 +6541,7 @@ ECode PhoneWindow::PreparePanel(
             st->mMenu->RestoreActionViewStates(st->mFrozenActionViewState);
             st->mFrozenActionViewState = NULL;
         }
-
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
         Boolean tmp = FALSE;
         if (!(cb->OnPreparePanel(st->mFeatureId, st->mCreatedPanelView, IMenu::Probe(st->mMenu), &tmp), tmp)) {
             if (isActionBarMenu && mDecorContentParent != NULL) {
@@ -6544,11 +6551,11 @@ ECode PhoneWindow::PreparePanel(
             }
 
             st->mMenu->StartDispatchingItemsChanged();
-
+            Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
             *prepared = FALSE;
             return NOERROR;
         }
-
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
         // Set the proper keymap
         Int32 devId = 0;
         AutoPtr<IKeyCharacterMapHelper> kcHelper;
@@ -6561,6 +6568,7 @@ ECode PhoneWindow::PreparePanel(
         st->mQwertyMode = (kmap->GetKeyboardType(&boardType), boardType) != IKeyCharacterMap::NUMERIC;
         IMenu::Probe(st->mMenu)->SetQwertyMode(st->mQwertyMode);
         st->mMenu->StartDispatchingItemsChanged();
+        Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
     }
 
     // Set other state
@@ -6568,7 +6576,7 @@ ECode PhoneWindow::PreparePanel(
     st->mIsHandled = FALSE;
     mPreparedPanel = st;
     *prepared = TRUE;
-
+    Slogger::I(TAG, " >>> PreparePanel %d", __LINE__);
     return NOERROR;
 }
 

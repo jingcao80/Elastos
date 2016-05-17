@@ -1147,6 +1147,7 @@ ECode CAppsCustomizePagedView::CleanUpShortPress(
 Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         /* [in] */ IView* v)
 {
+    Slogger::I(TAG, " >> BeginDraggingWidget");
     mDraggingWidget = TRUE;
     // Get the widget preview as the drag representation
     AutoPtr<IView> view;

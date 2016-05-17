@@ -213,6 +213,7 @@ ECode DragController::StartDrag(
     /* [in] */ IRect* dragRegion,
     /* [in] */ Float initialDragViewScale)
 {
+    Slogger::I(TAG, " >> StartDrag: (%d, %d)", dragLayerX, dragLayerY);
     // if (PROFILE_DRAWING_DURING_DRAG) {
     //     Debug::StartMethodTracing(String("Launcher"));
     // }

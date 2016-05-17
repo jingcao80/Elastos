@@ -3114,6 +3114,7 @@ AutoPtr<IBitmap> Workspace::CreateDragOutline(
 ECode Workspace::StartDrag(
     /* [in] */ ICellLayoutCellInfo* cellInfo)
 {
+    Slogger::I(TAG, " >> StartDrag %s", TO_CSTR(cellInfo));
     AutoPtr<IView> child = ((CellLayout::CellInfo*)cellInfo)->mCell;
 
     // Make sure the drag was started by a long press as opposed to a long click.
@@ -3148,6 +3149,7 @@ ECode Workspace::BeginDragShared(
     /* [in] */ IView* child,
     /* [in] */ IDragSource* source)
 {
+    Slogger::I(TAG, " >> BeginDragShared");
     AutoPtr<IResources> r;
     GetResources((IResources**)&r);
 
@@ -3214,6 +3216,7 @@ ECode Workspace::BeginDragShared(
         icon->ClearPressedOrFocusedBackground();
     }
 
+    Slogger::I(TAG, " >> StartDrag");
     AutoPtr<IInterface> tag;
     child->GetTag((IInterface**)&tag);
     mDragController->StartDrag(b, dragLayerX, dragLayerY, source, tag,

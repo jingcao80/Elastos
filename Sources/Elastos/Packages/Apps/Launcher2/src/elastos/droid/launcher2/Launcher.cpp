@@ -4035,6 +4035,7 @@ ECode Launcher::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
+    Slogger::I(TAG, " >> OnLongClick");
     VALIDATE_NOT_NULL(result);
 
     Boolean res;
@@ -4079,6 +4080,7 @@ ECode Launcher::OnLongClick(
     Boolean allowLongPress = tmp1 || tmp2;
     if (allowLongPress && (mDragController->IsDragging(&res), !res)) {
         if (itemUnderLongClick == NULL) {
+            Slogger::I(TAG, " >> StartWallpaper");
             // User long pressed on empty space
             Boolean res;
             IView::Probe(mWorkspace)->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
@@ -4086,6 +4088,7 @@ ECode Launcher::OnLongClick(
             StartWallpaper();
         }
         else {
+            Slogger::I(TAG, " >> StartDrag: longClickCellInfo %s", TO_CSTR(longClickCellInfo));
             if (IFolder::Probe(itemUnderLongClick) == NULL) {
                 // User long pressed on an item
                 mWorkspace->StartDrag(longClickCellInfo);
@@ -5944,15 +5947,10 @@ void Launcher::DismissCling(
         IAnimator* a = IAnimator::Probe(anim);
         a->SetDuration(duration);
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter5(this, cling, flag);
-<<<<<<< HEAD
-        IAnimator::Probe(anim)->AddListener(listener);
-        IAnimator::Probe(anim)->Start();
-=======
         Slogger::D("Launcher", "=======Launcher::DismissCling animation:%s, listener=%s",
             TO_CSTR(anim), TO_CSTR(listener));
         a->AddListener(listener);
         a->Start();
->>>>>>> update launcher2.
         mHideFromAccessibilityHelper->RestoreImportantForAccessibility(IView::Probe(mDragLayer));
     }
 }
@@ -6081,7 +6079,7 @@ ECode Launcher::IsFolderClingVisible(
     AutoPtr<ICling> cling = ICling::Probe(view);
     if (cling != NULL) {
         Int32 visibility;
-        IView::Probe(cling)->GetVisibility(&visibility);
+        view->GetVisibility(&visibility);
         *result = visibility == IView::VISIBLE;
         return NOERROR;
     }
@@ -6121,8 +6119,8 @@ ECode Launcher::DismissFolderCling(
 
 ECode Launcher::DumpState()
 {
-    Slogger::D(TAG, String("BEGIN launcher2 dump state for launcher ") + TO_STR(this));
-    Slogger::D(TAG, String("mSavedState=") + TO_STR(mSavedState));
+    Slogger::D(TAG, "BEGIN launcher2 dump state for launcher %s", TO_CSTR(this));
+    Slogger::D(TAG, "mSavedState=%s", TO_CSTR(mSavedState));
     StringBuilder sb, sb1, sb2, sb3;
     sb += "mWorkspaceLoading=";
     sb += mWorkspaceLoading;
@@ -6133,7 +6131,7 @@ ECode Launcher::DumpState()
     sb2 += "mWaitingForResult=";
     sb2 += mWaitingForResult;
     Slogger::D(TAG, sb2.ToString());
-    Slogger::D(TAG, String("mSavedInstanceState=") + TO_STR(mSavedInstanceState));
+    Slogger::D(TAG, "mSavedInstanceState=%s", TO_CSTR(mSavedInstanceState));
     Int32 size;
     sFolders->GetSize(&size);
     sb3 += "sFolders.size=";
