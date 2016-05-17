@@ -195,7 +195,6 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
     AutoPtr<IObjectAnimator> outAnim = LauncherAnimUtils::OfFloat(
             IView::Probe(mHost->mAnimationBuffer), String("alpha"), array);
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(mHost);
-Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::MyRunnable2::Run listener=%p",listener.Get());
     IAnimator::Probe(outAnim)->AddListener(listener);
 
     AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
@@ -203,7 +202,6 @@ Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::MyRunnable2::
     AutoPtr<IObjectAnimator> inAnim = LauncherAnimUtils::OfFloat(
             IView::Probe(mHost->mAppsCustomizePane), String("alpha"), array2);
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter2(mHost);
-Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::MyRunnable2::Run listener2=%p",listener2.Get());
     IAnimator::Probe(inAnim)->AddListener(listener2);
 
     AutoPtr<IAnimatorSet> animSet = LauncherAnimUtils::CreateAnimatorSet();
@@ -229,14 +227,10 @@ CAppsCustomizeTabHost::CAppsCustomizeTabHost()
     : mInTransition(FALSE)
     , mTransitioningToWorkspace(FALSE)
     , mResetAfterTransition(FALSE)
-{
-Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::CAppsCustomizeTabHost()");
-}
+{}
 
 ECode CAppsCustomizeTabHost::constructor()
 {
-Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::constructor()");
-
     return NOERROR;
 }
 
@@ -244,12 +238,9 @@ ECode CAppsCustomizeTabHost::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::constructor(context, attrs) 1");
     TabHost::constructor(context, attrs);
     LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
     mRelayoutAndMakeVisible = new MyRunnable(this);
-Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::constructor(context, attrs) 2");
-
     return NOERROR;
 }
 
@@ -277,7 +268,6 @@ ECode CAppsCustomizeTabHost::SelectWidgetsTab()
 
 ECode CAppsCustomizeTabHost::OnFinishInflate()
 {
-Slogger::E("CAppsCustomizeTabHost", "====================CAppsCustomizeTabHost::OnFinishInflate 1");
     // Setup the tab host
     Setup();
 
@@ -468,7 +458,6 @@ ECode CAppsCustomizeTabHost::OnTabChangedEnd(
 ECode CAppsCustomizeTabHost::OnTabChanged(
     /* [in] */ const String& tabId)
 {
-Slogger::E("CAppsCustomizeTabHost", "===================CAppsCustomizeTabHost::OnTabChanged");
     AppsCustomizePagedViewContentType type;
     GetContentTypeForTabTag(tabId, &type);
 

@@ -178,7 +178,6 @@ public:
         /* [in] */ const String& packageName,
         /* [in] */ const String& className);
 
-
 private:
     String mPackage;
     String mClass;

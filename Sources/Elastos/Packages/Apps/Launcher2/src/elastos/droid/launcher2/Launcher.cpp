@@ -191,10 +191,9 @@ ECode Launcher::MyAsyncTask::DoInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-Logger::E("Launcher::MyAsyncTask", "============================MyAsyncTask::DoInBackground 1");
     AutoPtr<LocaleConfiguration> localeConfiguration = new LocaleConfiguration();
     mHost->ReadConfiguration(mHost, localeConfiguration);
-    *result = TO_IINTERFACE(localeConfiguration);
+    *result = (IObject*)localeConfiguration;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -202,7 +201,6 @@ Logger::E("Launcher::MyAsyncTask", "============================MyAsyncTask::DoI
 ECode Launcher::MyAsyncTask::OnPostExecute(
     /* [in] */ IInterface* result)
 {
-Logger::E("Launcher::MyAsyncTask", "============================MyAsyncTask::OnPostExecute");
     mHost->sLocaleConfiguration = (LocaleConfiguration*)IObject::Probe(result);
     mHost->CheckForLocaleChange();  // recursive, but now with a locale configuration
     return NOERROR;
@@ -528,16 +526,11 @@ ECode Launcher::MyAnimatorUpdateListener::OnAnimationUpdate(
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IInterface> value;
-Slogger::D("Launcher::MyAnimatorUpdateListener", "======OnAnimationUpdate animation=%p",animation);
     animation->GetAnimatedValue((IInterface**)&value);
-Slogger::D("Launcher::MyAnimatorUpdateListener", "======OnAnimationUpdate value=%p",value.Get());
-    AutoPtr<IFloat> obj = IFloat::Probe(value);
     Float t;
-Slogger::D("Launcher::MyAnimatorUpdateListener", "======OnAnimationUpdate obj=%p",obj.Get());
-    obj->GetValue(&t);
+    IFloat::Probe(value)->GetValue(&t);
     mHost->DispatchOnLauncherTransitionStep(IView::Probe(mFromView), t);
     mHost->DispatchOnLauncherTransitionStep(IView::Probe(mToView), t);
-Slogger::D("Launcher::MyAnimatorUpdateListener", "======OnAnimationUpdate return");
     return NOERROR;
 }
 
@@ -1178,7 +1171,6 @@ Launcher::Launcher()
     , mRestoreScreenOrientationDelay(500)
     , mNewShortcutAnimatePage(-1)
 {
-Slogger::E("Launcher", "============================Launcher::Launcher() 1");
     Activity::constructor();
 
     CLauncherCloseSystemDialogsIntentReceiver::New(this, (IBroadcastReceiver**)&mCloseSystemDialogsReceiver);
@@ -1208,13 +1200,11 @@ Slogger::E("Launcher", "============================Launcher::Launcher() 1");
     mHandler = new MyHandler(this);
 
     mBindPackagesUpdatedRunnable = new MyRunnable19(this);
-Slogger::E("Launcher", "============================Launcher::Launcher() return");
 }
 
 ECode Launcher::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-Slogger::E("Launcher", "============================Launcher::OnCreate 1");
     if (DEBUG_STRICT_MODE) {
         AutoPtr<IStrictModeThreadPolicyBuilder> builder;
         CStrictModeThreadPolicyBuilder::New((IStrictModeThreadPolicyBuilder**)&builder);
@@ -1246,21 +1236,18 @@ Slogger::E("Launcher", "============================Launcher::OnCreate 1");
     String spKey;
     LauncherApplication::GetSharedPreferencesKey(&spKey);
     GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&mSharedPrefs);
-Slogger::E("Launcher", "============================Launcher call LauncherApplication::SetLauncher");
     app->SetLauncher(this, (ILauncherModel**)&mModel);
     app->GetIconCache((IIconCache**)&mIconCache);
-
     mDragController = new DragController();
     ((DragController*)mDragController.Get())->constructor(ILauncher::Probe(this));
-
     GetLayoutInflater((ILayoutInflater**)&mInflater);
 
     AutoPtr<IAppWidgetManagerHelper> helper;
     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
     helper->GetInstance((IContext*)this, (IAppWidgetManager**)&mAppWidgetManager);
     mAppWidgetHost = new LauncherAppWidgetHost(ILauncher::Probe(this), APPWIDGET_HOST_ID);
-Slogger::E("Launcher", "============================Launcher call mAppWidgetHost->StartListening");
     IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
+
     // If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,
     // this also ensures that any synchronous binding below doesn't re-trigger another
     // LauncherModel load.
@@ -1270,31 +1257,28 @@ Slogger::E("Launcher", "============================Launcher call mAppWidgetHost
     //     android.os.Debug.startMethodTracing(
     //             Environment.getExternalStorageDirectory() + "/launcher");
     // }
-Slogger::E("Launcher", "============================Launcher call CheckForLocaleChange");
+
     CheckForLocaleChange();
     SetContentView(R::layout::launcher);
-Slogger::E("Launcher", "============================Launcher call SetupViews");
     SetupViews();
     ShowFirstRunWorkspaceCling();
+
     RegisterContentObservers();
+
     LockAllApps();
+
     mSavedState = savedInstanceState;
     RestoreState(mSavedState);
 
-Slogger::E("Launcher", "============================Launcher add temporary by snow begin");
     AutoPtr<IView> clingDismisView = FindViewById(R::id::cling_dismiss_button);
     btnClingDismisView = IButton::Probe(clingDismisView);
     IView::Probe(btnClingDismisView)->SetOnClickListener(this);
-Slogger::E("Launcher", "============================Launcher add temporary by snow end");
 
     // Update customization drawer _after_ restoring the states
     if (mAppsCustomizeContent != NULL) {
         AutoPtr<IArrayList> list;
         LauncherModel::GetSortedWidgetsAndShortcuts((IContext*)this,
                 (IArrayList**)&list);
-Int32 size;
-list->GetSize(&size);
-Slogger::E("Launcher", "============================Launcher call OnPackagesUpdated size=%d",size);
         mAppsCustomizeContent->OnPackagesUpdated(list);
     }
     // if (PROFILE_STARTUP) {
@@ -1311,11 +1295,10 @@ Slogger::E("Launcher", "============================Launcher call OnPackagesUpda
             // configuration change) while launcher is in the foreground
             Int32 page;
             IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
-Slogger::E("Launcher", "============================Launcher::OnCreate StartLoader page=%d", page);
             mModel->StartLoader(TRUE, page);
         }
     }
-Slogger::E("Launcher", "============================Launcher::OnCreate 18");
+
     Boolean res;
     mModel->IsAllAppsLoaded(&res);
     if (!res) {
@@ -1327,21 +1310,20 @@ Slogger::E("Launcher", "============================Launcher::OnCreate 18");
                 Elastos::Droid::Launcher2::R::layout::apps_customize_progressbar,
                 appsCustomizeContentParent, (IView**)&tmp);
     }
-Slogger::E("Launcher", "============================Launcher::OnCreate 19");
+
     // For handling default keys
     CSpannableStringBuilder::New((ISpannableStringBuilder**)&mDefaultKeySsb);
     AutoPtr<ISelection> helper2;
     CSelection::AcquireSingleton((ISelection**)&helper2);
     helper2->SetSelection(ISpannable::Probe(mDefaultKeySsb), 0);
-Slogger::E("Launcher", "============================Launcher::OnCreate 20");
+
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter);
     AutoPtr<IIntent> tmp;
-Slogger::E("Launcher", "============================Launcher::OnCreate 21");
     RegisterReceiver(mCloseSystemDialogsReceiver, filter, (IIntent**)&tmp);
-Slogger::E("Launcher", "============================Launcher::OnCreate 22");
+
     UpdateGlobalIcons();
-Slogger::E("Launcher", "============================Launcher::OnCreate return");
+
     // On large interfaces, we want the screen to auto-rotate based on the current orientation
     return UnlockScreenOrientation(TRUE);
 }
@@ -1355,7 +1337,6 @@ ECode Launcher::OnUserLeaveHint()
 
 void Launcher::UpdateGlobalIcons()
 {
-Slogger::E("Launcher", "=================UpdateGlobalIcons 1");
     Boolean searchVisible = FALSE;
     Boolean voiceVisible = FALSE;
     // If we have a saved version of these external icons, we load them up immediately
@@ -1366,26 +1347,20 @@ Slogger::E("Launcher", "=================UpdateGlobalIcons 1");
         searchVisible = UpdateGlobalSearchIcon();
         voiceVisible = UpdateVoiceSearchIcon(searchVisible);
     }
-Slogger::E("Launcher", "=================UpdateGlobalIcons 2");
     if ((*sGlobalSearchIcon)[coi] != NULL) {
         UpdateGlobalSearchIcon((*sGlobalSearchIcon)[coi]);
         searchVisible = TRUE;
     }
-Slogger::E("Launcher", "=================UpdateGlobalIcons 3");
     if ((*sVoiceSearchIcon)[coi] != NULL) {
         UpdateVoiceSearchIcon((*sVoiceSearchIcon)[coi]);
         voiceVisible = TRUE;
     }
-Slogger::E("Launcher", "=================UpdateGlobalIcons 4");
     if ((*sAppMarketIcon)[coi] != NULL) {
         UpdateAppMarketIcon((*sAppMarketIcon)[coi]);
     }
-Slogger::E("Launcher", "=================UpdateGlobalIcons 5");
     if (mSearchDropTargetBar != NULL) {
         mSearchDropTargetBar->OnSearchPackagesChanged(searchVisible, voiceVisible);
     }
-Slogger::E("Launcher", "=================UpdateGlobalIcons 6");
-    return;
 }
 
 void Launcher::CheckForLocaleChange()
@@ -1407,18 +1382,18 @@ void Launcher::CheckForLocaleChange()
     configuration->GetLocale((ILocale**)&_locale);
     String locale;
     _locale->ToString(&locale);
-Logger::E("Launcher", "===========Launcher::CheckForLocaleChange previousLocale=%s, locale=%s", previousLocale.string(), locale.string());
+
     Int32 previousMcc = sLocaleConfiguration->mMcc;
     Int32 mcc;
     configuration->GetMcc(&mcc);
-Logger::E("Launcher", "===========Launcher::CheckForLocaleChange previousMcc=%d, mcc=%d", previousMcc, mcc);
+
     Int32 previousMnc = sLocaleConfiguration->mMnc;
     Int32 mnc;
     configuration->GetMnc(&mnc);
-Logger::E("Launcher", "===========Launcher::CheckForLocaleChange previousMnc=%d, mnc=%d", previousMnc, mnc);
+
     Boolean localeChanged = !locale.Equals(previousLocale) || mcc != previousMcc
             || mnc != previousMnc;
-Logger::E("Launcher", "===========Launcher::CheckForLocaleChange localeChanged=%d", localeChanged);
+
     if (localeChanged) {
         sLocaleConfiguration->mLocale = locale;
         sLocaleConfiguration->mMcc = mcc;
@@ -2012,76 +1987,60 @@ void Launcher::RestoreState(
 void Launcher::SetupViews()
 {
     AutoPtr<IDragController> dragController = mDragController;
-Slogger::E("Launcher", "============================Launcher::SetupViews 1");
+
     mLauncherView = FindViewById(R::id::launcher);
-Slogger::E("Launcher", "============================Launcher::SetupViews 2 mLauncherView=%p",mLauncherView.Get());
     AutoPtr<IView> view = FindViewById(R::id::drag_layer);
-Slogger::E("Launcher", "============================Launcher::SetupViews 2 view=%p",view.Get());
     mDragLayer = IDragLayer::Probe(view);
-Slogger::E("Launcher", "============================Launcher::SetupViews 2 mDragLayer=%p",mDragLayer.Get());
-    AutoPtr<IView> view2;
-Slogger::E("Launcher", "============================Launcher::SetupViews 2 IView::Probe(mDragLayer)=%p",IView::Probe(mDragLayer));
-    IView::Probe(mDragLayer)->FindViewById(R::id::workspace, (IView**)&view2);
-Slogger::E("Launcher", "============================Launcher::SetupViews 3 view2=%p",view2.Get());
-    mWorkspace = IWorkspace::Probe(view2);
-Slogger::E("Launcher", "============================Launcher::SetupViews 4 mWorkspace=%p", mWorkspace.Get());
+    view = NULL;
+    IView::Probe(mDragLayer)->FindViewById(R::id::workspace, (IView**)&view);
+    mWorkspace = IWorkspace::Probe(view);
     mQsbDivider = FindViewById(R::id::qsb_divider);
-Slogger::E("Launcher", "============================Launcher::SetupViews 4 mQsbDivider=%p=========================", mQsbDivider.Get());
     mDockDivider = FindViewById(R::id::dock_divider);
-Slogger::E("Launcher", "============================Launcher::SetupViews 4 mDockDivider=%p", mDockDivider.Get());
+
     mLauncherView->SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     resources->GetDrawable(Elastos::Droid::Launcher2::R::drawable::workspace_bg,
             (IDrawable**)&mWorkspaceBackgroundDrawable);
-Slogger::E("Launcher", "============================Launcher Setup the draglayer");
+
     // Setup the drag layer
     mDragLayer->Setup(this, dragController);
-Slogger::E("Launcher", "============================Launcher Setup the hotseat");
+
     // Setup the hotseat
-    AutoPtr<IView> view3 = FindViewById(Elastos::Droid::Launcher2::R::id::hotseat);
-    mHotseat = IHotseat::Probe(view3);
+    view = FindViewById(Elastos::Droid::Launcher2::R::id::hotseat);
+    mHotseat = IHotseat::Probe(view);
     if (mHotseat != NULL) {
         mHotseat->Setup(this);
     }
-Slogger::E("Launcher", "============================Launcher SetupViews SetHapticFeedbackEnabled=false");
+
     // Setup the workspace
     IView::Probe(mWorkspace)->SetHapticFeedbackEnabled(FALSE);
-Slogger::E("Launcher", "============================Launcher::SetupViews OnLongClickListener");
     IView::Probe(mWorkspace)->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));
-Slogger::E("Launcher", "============================Launcher::SetupViews 9");
     mWorkspace->Setup(dragController);
-Slogger::E("Launcher", "============================Launcher::SetupViews 10");
     dragController->AddDragListener(IDragControllerDragListener::Probe(mWorkspace));
-Slogger::E("Launcher", "============================Launcher::SetupViews 11");
+
     // Get the search/delete bar
-    AutoPtr<IView> view4;
-Slogger::E("Launcher", "============================Launcher::SetupViews 12");
-    IView::Probe(mDragLayer)->FindViewById(Elastos::Droid::Launcher2::R::id::qsb_bar, (IView**)&view4);
-    mSearchDropTargetBar = ISearchDropTargetBar::Probe(view4);
-Slogger::E("Launcher", "============================Launcher::SetupViews mSearchDropTargetBar=%p",mSearchDropTargetBar.Get());
+    view = NULL;
+    IView::Probe(mDragLayer)->FindViewById(Elastos::Droid::Launcher2::R::id::qsb_bar, (IView**)&view);
+    mSearchDropTargetBar = ISearchDropTargetBar::Probe(view);
+
     // Setup AppsCustomize
-    AutoPtr<IView> view5 = FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane);
-Slogger::E("Launcher", "============================Launcher::SetupViews view5=%p",view5.Get());
-    mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view5);
-Slogger::E("Launcher", "============================Launcher::SetupViews mAppsCustomizeTabHost=%p",mAppsCustomizeTabHost.Get());
-    AutoPtr<IView> view6;
+    view = FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane);
+    mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view);
+    view = NULL;
     IView::Probe(mAppsCustomizeTabHost)->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,
-            (IView**)&view6);
-    mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view6);
-Slogger::E("Launcher", "============================Launcher::SetupViews mAppsCustomizeContent=%p",mAppsCustomizeContent.Get());
+            (IView**)&view);
+    mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view);
     mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
-Slogger::E("Launcher", "============================Launcher::SetupViews 13");
+
     // Setup the drag controller (drop targets have to be added in reverse order in priority)
     dragController->SetDragScoller(IDragScroller::Probe(mWorkspace));
     dragController->SetScrollView(IView::Probe(mDragLayer));
     dragController->SetMoveTarget(IView::Probe(mWorkspace));
     dragController->AddDropTarget(IDropTarget::Probe(mWorkspace));
-Slogger::E("Launcher", "============================Launcher::SetupViews 14");
     if (mSearchDropTargetBar != NULL) {
         mSearchDropTargetBar->Setup(this, dragController);
     }
-Slogger::E("Launcher", "============================Launcher::SetupViews 15");
 }
 
 ECode Launcher::CreateShortcut(
@@ -3327,7 +3286,6 @@ void Launcher::OnAppWidgetReset()
 ECode Launcher::OnClick(
     /* [in] */ IView* v)
 {
-Slogger::E("Launcher", "=================OnClick 1");
     // Make sure that rogue clicks don't get through while allapps is launching, or after the
     // view has detached (it's possible for this to happen if the view is removed mid touch).
     AutoPtr<IBinder> token;
@@ -3335,30 +3293,26 @@ Slogger::E("Launcher", "=================OnClick 1");
     if (token == NULL) {
         return NOERROR;
     }
-Slogger::E("Launcher", "=================OnClick 2");
+
     Boolean res;
     mWorkspace->IsFinishedSwitchingState(&res);
     if (!res) {
         return NOERROR;
     }
 
-Slogger::E("Launcher", "============================Launcher add temporary by snow begin");
     Int32 id;
     v->GetId(&id);
     switch (id) {
         case R::id::cling_dismiss_button:
-Slogger::E("Launcher", "=================OnClick calll DismissAllAppsCling");
             DismissAllAppsCling(v);
             break;
         default:
             break;
     }
-Slogger::E("Launcher", "============================Launcher add temporary by snow end");
 
     AutoPtr<IInterface> tag;
     v->GetTag((IInterface**)&tag);
     if (IShortcutInfo::Probe(tag) != NULL) {
-Slogger::E("Launcher", "=================OnClick 4");
         // Open shortcut
         ShortcutInfo* info = (ShortcutInfo*)IShortcutInfo::Probe(tag);
         AutoPtr<IIntent> intent = info->mIntent;
@@ -3382,14 +3336,12 @@ Slogger::E("Launcher", "=================OnClick 4");
         }
     }
     else if (IFolderInfo::Probe(tag) != NULL) {
-Slogger::E("Launcher", "=================OnClick 5");
         if (IFolderIcon::Probe(v) != NULL) {
             AutoPtr<IFolderIcon> fi = IFolderIcon::Probe(v);
             HandleFolderClick(fi);
         }
     }
     else if (TO_IINTERFACE(v) == TO_IINTERFACE(mAllAppsButton)) {
-Slogger::E("Launcher", "=================OnClick 6");
         Boolean res;
         IsAllAppsVisible(&res);
         if (res) {
@@ -3467,7 +3419,6 @@ ERROR:
 ECode Launcher::OnClickAllAppsButton(
     /* [in] */ IView* v)
 {
-Slogger::E("Launcher", "=================OnClickAllAppsButton======ShowAllApps");
     return ShowAllApps(TRUE);
 }
 
@@ -3982,7 +3933,6 @@ void Launcher::ShrinkAndFadeInFolderIcon(
             Elastos::Droid::Launcher2::R::integer::config_folderAnimDuration, &tmp);
     IAnimator::Probe(oa)->SetDuration(tmp);
     AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this, cl, fi);
-Slogger::D("Launcher", "=======Launcher::ShrinkAndFadeInFolderIcon lis=%p",lis.Get());
     IAnimator::Probe(oa)->AddListener(lis);
     IAnimator::Probe(oa)->Start();
 }
@@ -4076,7 +4026,6 @@ ECode Launcher::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
-Slogger::D("Launcher", "=====================================OnLongClick");
     VALIDATE_NOT_NULL(result);
 
     Boolean res;
@@ -4122,11 +4071,9 @@ Slogger::D("Launcher", "=====================================OnLongClick");
     if (allowLongPress && (mDragController->IsDragging(&res), !res)) {
         if (itemUnderLongClick == NULL) {
             // User long pressed on empty space
-Slogger::D("Launcher", "=============OnLongClick: User long pressed on empty space ");
             Boolean res;
             IView::Probe(mWorkspace)->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
                     IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING, &res);
-Slogger::D("Launcher", "=============OnLongClick: StartWallpaper ");
             StartWallpaper();
         }
         else {
@@ -4335,7 +4282,6 @@ void Launcher::ShowAppsCustomizeHelper(
     /* [in] */ Boolean animated,
     /* [in] */ Boolean springLoaded)
 {
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 1");
     if (mStateAnimation != NULL) {
         IAnimator::Probe(mStateAnimation)->SetDuration(0);
         IAnimator::Probe(mStateAnimation)->Cancel();
@@ -4358,45 +4304,44 @@ Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelpe
             &tmp);
     Float scale = (Float)tmp;
     AutoPtr<IView> fromView = IView::Probe(mWorkspace);
-    AutoPtr<IAppsCustomizeTabHost> toView = mAppsCustomizeTabHost;
+    AutoPtr<IView> toView = IView::Probe(mAppsCustomizeTabHost);
     Int32 startDelay;
     res->GetInteger(
             Elastos::Droid::Launcher2::R::integer::config_workspaceAppsCustomizeAnimationStagger,
             &startDelay);
 
-    SetPivotsForZoom(IView::Probe(toView), scale);
+    SetPivotsForZoom(toView, scale);
 
     // Shrink workspaces away if going to AppsCustomize from workspace
     AutoPtr<IAnimator> workspaceAnim;
     mWorkspace->GetChangeStateAnimation(State_SMALL, animated, (IAnimator**)&workspaceAnim);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 2 animated=%d",animated);
+
     if (animated) {
-        IView::Probe(toView)->SetScaleX(scale);
-        IView::Probe(toView)->SetScaleY(scale);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 3 new scaleAnim");
+        toView->SetScaleX(scale);
+        toView->SetScaleY(scale);
         AutoPtr<LauncherViewPropertyAnimator> scaleAnim =
-                new LauncherViewPropertyAnimator(IView::Probe(toView));
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 4 scaleAnim->mListeners=%p",(scaleAnim->mListeners).Get());
+                new LauncherViewPropertyAnimator(toView);
         scaleAnim->ScaleX(1.0f);
         scaleAnim->ScaleY(1.0f);
         scaleAnim->SetDuration(duration);
         AutoPtr<ITimeInterpolator> polator = new Workspace::ZoomOutInterpolator();
         scaleAnim->SetInterpolator(polator);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 5");
-        IView::Probe(toView)->SetVisibility(IView::VISIBLE);
-        IView::Probe(toView)->SetAlpha(0.0f);
+
+        toView->SetVisibility(IView::VISIBLE);
+        toView->SetAlpha(0.0f);
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
         (*array)[0] = 0.0f;
         (*array)[1] = 1.0f;
-        AutoPtr<IObjectAnimator> alphaAnim = LauncherAnimUtils::OfFloat(IView::Probe(toView),
+        AutoPtr<IObjectAnimator> alphaAnim = LauncherAnimUtils::OfFloat(toView,
                 String("alpha"), array);
         IAnimator::Probe(alphaAnim)->SetDuration(fadeDuration);
         AutoPtr<ITimeInterpolator> value;
         CDecelerateInterpolator::New(1.5f, (ITimeInterpolator**)&value);
         IAnimator::Probe(alphaAnim)->SetInterpolator(value);
-        AutoPtr<IAnimatorUpdateListener> lis = new MyAnimatorUpdateListener(this, fromView, toView);
+        AutoPtr<IAnimatorUpdateListener> lis = new MyAnimatorUpdateListener(
+                this, fromView, IAppsCustomizeTabHost::Probe(toView));
         IValueAnimator::Probe(alphaAnim)->AddUpdateListener(lis);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 6");
+
         // toView should appear right at the end of the workspace shrink
         // animation
         mStateAnimation = LauncherAnimUtils::CreateAnimatorSet();
@@ -4406,22 +4351,21 @@ Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelpe
         AutoPtr<IAnimatorSetBuilder> builder2;
         mStateAnimation->Play(IAnimator::Probe(alphaAnim), (IAnimatorSetBuilder**)&builder2);
         builder2->After(startDelay);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 7");
+
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter2(this,
-                fromView, toView, animated, springLoaded);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper listener=%p",listener.Get());
+                fromView, IAppsCustomizeTabHost::Probe(toView), animated, springLoaded);
         IAnimator::Probe(mStateAnimation)->AddListener(listener);
 
         if (workspaceAnim != NULL) {
             AutoPtr<IAnimatorSetBuilder> builder;
             mStateAnimation->Play(IAnimator::Probe(workspaceAnim), (IAnimatorSetBuilder**)&builder);
         }
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 8");
+
         Boolean delayAnim = FALSE;
 
-        DispatchOnLauncherTransitionPrepare(IView::Probe(fromView), animated, FALSE);
-        DispatchOnLauncherTransitionPrepare(IView::Probe(toView), animated, FALSE);
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 9");
+        DispatchOnLauncherTransitionPrepare(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(toView, animated, FALSE);
+
         // If any of the objects being animated haven't been measured/laid out
         // yet, delay the animation until we get a layout pass
         AutoPtr<ILauncherTransitionable> transitionable = ILauncherTransitionable::Probe(toView);
@@ -4432,33 +4376,32 @@ Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelpe
         Int32 width2;
         IView::Probe(mWorkspace)->GetMeasuredWidth(&width2);
         Int32 width3;
-        IView::Probe(toView)->GetMeasuredWidth(&width3);
+        toView->GetMeasuredWidth(&width3);
         if ((width1 == 0) || (width2 == 0) || (width3 == 0)) {
             delayAnim = TRUE;
         }
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 10");
+
         AutoPtr<IAnimatorSet> stateAnimation = mStateAnimation;
         AutoPtr<IRunnable> startAnimRunnable = new MyRunnable7(this, stateAnimation,
-                fromView, toView, animated, scale);
+                fromView, IAppsCustomizeTabHost::Probe(toView), animated, scale);
         if (delayAnim) {
             AutoPtr<IViewTreeObserver> observer;
-            IView::Probe(toView)->GetViewTreeObserver((IViewTreeObserver**)&observer);
+            toView->GetViewTreeObserver((IViewTreeObserver**)&observer);
             AutoPtr<IOnGlobalLayoutListener> listener2 = new MyOnGlobalLayoutListener(startAnimRunnable,
-                    toView);
+                    IAppsCustomizeTabHost::Probe(toView));
             observer->AddOnGlobalLayoutListener(listener2);
         }
         else {
             startAnimRunnable->Run();
         }
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 11");
     }
     else {
-        IView::Probe(toView)->SetTranslationX(0.0f);
-        IView::Probe(toView)->SetTranslationY(0.0f);
-        IView::Probe(toView)->SetScaleX(1.0f);
-        IView::Probe(toView)->SetScaleY(1.0f);
-        IView::Probe(toView)->SetVisibility(IView::VISIBLE);
-        IView::Probe(toView)->BringToFront();
+        toView->SetTranslationX(0.0f);
+        toView->SetTranslationY(0.0f);
+        toView->SetScaleX(1.0f);
+        toView->SetScaleY(1.0f);
+        toView->SetVisibility(IView::VISIBLE);
+        toView->BringToFront();
 
         Boolean res;
         if (!springLoaded && (LauncherApplication::IsScreenLarge(&res), !res)) {
@@ -4471,15 +4414,14 @@ Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelpe
                 mSearchDropTargetBar->HideSearchBar(FALSE);
             }
         }
-        DispatchOnLauncherTransitionPrepare(IView::Probe(fromView), animated, FALSE);
-        DispatchOnLauncherTransitionStart(IView::Probe(fromView), animated, FALSE);
-        DispatchOnLauncherTransitionEnd(IView::Probe(fromView), animated, FALSE);
-        DispatchOnLauncherTransitionPrepare(IView::Probe(toView), animated, FALSE);
-        DispatchOnLauncherTransitionStart(IView::Probe(toView), animated, FALSE);
-        DispatchOnLauncherTransitionEnd(IView::Probe(toView), animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionStart(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionEnd(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(toView, animated, FALSE);
+        DispatchOnLauncherTransitionStart(toView, animated, FALSE);
+        DispatchOnLauncherTransitionEnd(toView, animated, FALSE);
         UpdateWallpaperVisibility(FALSE);
     }
-Slogger::D("Launcher", "========================Launcher::ShowAppsCustomizeHelper 12 return");
 }
 
 void Launcher::HideAppsCustomizeHelper(
@@ -4488,7 +4430,6 @@ void Launcher::HideAppsCustomizeHelper(
     /* [in] */ Boolean springLoaded,
     /* [in] */ IRunnable* onCompleteRunnable)
 {
-Slogger::D("Launcher", "========================Launcher::HideAppsCustomizeHelper 1");
     if (mStateAnimation != NULL) {
         IAnimator::Probe(mStateAnimation)->SetDuration(0);
         IAnimator::Probe(mStateAnimation)->Cancel();
@@ -4559,7 +4500,6 @@ Slogger::D("Launcher", "========================Launcher::HideAppsCustomizeHelpe
 
         AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, fromView,
                 toView, animated, onCompleteRunnable);
-Slogger::D("Launcher", "=======Launcher::HideAppsCustomizeHelper listener2=%p",listener2.Get());
         IAnimator::Probe(mStateAnimation)->AddListener(listener2);
 
         AutoPtr<ArrayOf<IAnimator*> > array2 = ArrayOf<IAnimator*>::Alloc(2);
@@ -4584,7 +4524,6 @@ Slogger::D("Launcher", "=======Launcher::HideAppsCustomizeHelper listener2=%p",l
         DispatchOnLauncherTransitionEnd(toView, animated, TRUE);
         IPagedView::Probe(mWorkspace)->HideScrollingIndicator(FALSE);
     }
-Slogger::D("Launcher", "========================Launcher::HideAppsCustomizeHelper return");
 }
 
 ECode Launcher::OnTrimMemory(
@@ -4665,28 +4604,25 @@ ECode Launcher::ShowWorkspace(
 ECode Launcher::ShowAllApps(
     /* [in] */ Boolean animated)
 {
-Slogger::D("Launcher", "========================Launcher::ShowAllApps 1");
     if (mState != Launcher_WORKSPACE) return NOERROR;
 
     ShowAppsCustomizeHelper(animated, FALSE);
-Slogger::D("Launcher", "========================Launcher::ShowAllApps 2");
     Boolean res;
     IView::Probe(mAppsCustomizeTabHost)->RequestFocus(&res);
-Slogger::D("Launcher", "========================Launcher::ShowAllApps 3");
+
     // Change the state *after* we've called all the transition code
     mState = Launcher_APPS_CUSTOMIZE;
-Slogger::D("Launcher", "========================Launcher::ShowAllApps 4");
+
     // Pause the auto-advance of widgets until we are out of AllApps
     mUserPresent = FALSE;
     UpdateRunning();
     CloseFolder();
-Slogger::D("Launcher", "========================Launcher::ShowAllApps 5");
+
     // Send an accessibility event to announce the context change
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
     AutoPtr<IView> v;
     window->GetDecorView((IView**)&v);
-Slogger::D("Launcher", "========================Launcher::ShowAllApps 6");
     return v->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
 }
 
@@ -4876,6 +4812,7 @@ AutoPtr<IDrawable> Launcher::GetExternalPackageToolbarIcon(
     /* [in] */ IComponentName* activityName,
     /* [in] */ const String& resourceName)
 {
+Slogger::E("Launcher", "[snow]=================TODO=========GetExternalPackageToolbarIcon ");
 //     //try {
 //     ECode ec;
 //     AutoPtr<IPackageManager> packageManager;
@@ -5678,7 +5615,6 @@ void Launcher::RunNewAppsAnimation(
         }
         anim->PlayTogether(bounceAnims);
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter4(this);
-Slogger::D("Launcher", "=======Launcher::RunNewAppsAnimation listener=%p",listener.Get());
         IAnimator::Probe(anim)->AddListener(listener);
         IAnimator::Probe(anim)->Start();
     }
@@ -5998,7 +5934,6 @@ void Launcher::DismissCling(
         AutoPtr<IObjectAnimator> anim = LauncherAnimUtils::OfFloat(IView::Probe(cling), String("alpha"), array);
         IAnimator::Probe(anim)->SetDuration(duration);
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter5(this, cling, flag);
-Slogger::D("Launcher", "=======Launcher::DismissCling listener=%p",listener.Get());
         IAnimator::Probe(anim)->AddListener(listener);
         IAnimator::Probe(anim)->Start();
         mHideFromAccessibilityHelper->RestoreImportantForAccessibility(IView::Probe(mDragLayer));
@@ -6045,7 +5980,6 @@ Boolean Launcher::SkipCustomClingIfNoAccounts()
 
 ECode Launcher::ShowFirstRunWorkspaceCling()
 {
-Slogger::E("Launcher", "============================Launcher::ShowFirstRunWorkspaceCling 1");
     // Enable the clings only if they have not been dismissed before
     Boolean res;
     mSharedPrefs->GetBoolean(ICling::WORKSPACE_CLING_DISMISSED_KEY, FALSE, &res);
@@ -6085,7 +6019,6 @@ Slogger::E("Launcher", "============================Launcher::ShowFirstRunWorksp
     else {
         RemoveCling(Elastos::Droid::Launcher2::R::id::workspace_cling);
     }
-Slogger::E("Launcher", "============================Launcher::ShowFirstRunWorkspaceCling return");
     return NOERROR;
 }
 
@@ -6161,7 +6094,6 @@ ECode Launcher::DismissWorkspaceCling(
 ECode Launcher::DismissAllAppsCling(
     /* [in] */ IView* v)
 {
-Slogger::E("Launcher", "===============Launcher::DismissAllAppsCling");
     AutoPtr<IView> view;
     FindViewById(
             Elastos::Droid::Launcher2::R::id::all_apps_cling, (IView**)&view);

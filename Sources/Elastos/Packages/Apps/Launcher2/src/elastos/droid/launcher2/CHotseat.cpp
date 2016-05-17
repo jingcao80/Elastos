@@ -60,7 +60,6 @@ ECode CHotseat::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     if (mLauncher != NULL) {
-Slogger::D("CHotseat", "========================MyOnClickListener::OnClick OnClickAllAppsButton");
         return mLauncher->OnClickAllAppsButton(v);
     }
     return NOERROR;
@@ -102,8 +101,8 @@ ECode CHotseat::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    FrameLayout::constructor(context, attrs, defStyle);
-Slogger::E("CHotseat", "============================CHotseat::constructor()");
+    FAIL_RETURN(FrameLayout::constructor(context, attrs, defStyle));
+
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Hotseat),
             ArraySize(Elastos::Droid::Launcher2::R::styleable::Hotseat));
@@ -127,7 +126,6 @@ Slogger::E("CHotseat", "============================CHotseat::constructor()");
     Int32 orientation;
     config->GetOrientation(&orientation);
     mIsLandscape = orientation == IConfiguration::ORIENTATION_LANDSCAPE;
-Slogger::E("CHotseat", "============================CHotseat::constructor return");
     return NOERROR;
 }
 
@@ -223,7 +221,7 @@ ECode CHotseat::OnFinishInflate()
     mContent = ICellLayout::Probe(view);
     mContent->SetGridSize(mCellCountX, mCellCountY);
     mContent->SetIsHotseat(TRUE);
-Slogger::E("CHotseat", "============================CHotseat::OnFinishInflate()");
+
     return ResetLayout();
 }
 
@@ -239,18 +237,12 @@ ECode CHotseat::ResetLayout()
 
     AutoPtr<IView> view;
     ECode ec = inflater->Inflate(R::layout::application, IViewGroup::Probe(mContent), FALSE, (IView**)&view);
-Slogger::E("CHotseat", "============================CHotseat::ResetLayout ec=%x",ec);
-Slogger::E("CHotseat", "============================CHotseat::ResetLayout view=%p",view.Get());
     AutoPtr<IBubbleTextView> allAppsButton = IBubbleTextView::Probe(view);
-
     AutoPtr<IResources> r;
     context->GetResources((IResources**)&r);
     AutoPtr<IDrawable> drawable;
-Slogger::E("CHotseat", "============================CHotseat::ResetLayout allAppsButton=%p",allAppsButton.Get());
     r->GetDrawable(R::drawable::all_apps_button_icon, (IDrawable**)&drawable);
-Slogger::E("CHotseat", "============================CHotseat::ResetLayout drawable=%p",drawable.Get());
     ITextView::Probe(allAppsButton)->SetCompoundDrawablesWithIntrinsicBounds(NULL, drawable, NULL, NULL);
-Slogger::E("CHotseat", "============================CHotseat::ResetLayout ITextView::Probe(allAppsButton)=%p",ITextView::Probe(allAppsButton));
     String lable;
     context->GetString(Elastos::Droid::Launcher2::R::
             string::all_apps_button_label, &lable);
@@ -273,10 +265,9 @@ Slogger::E("CHotseat", "============================CHotseat::ResetLayout ITextV
     lp->constructor(x,y,1,1);
     lp->mCanReorder = FALSE;
     Boolean tmp;
-    /*return*/ mContent->AddViewToCellLayout(IView::Probe(allAppsButton), -1, 0,
+    mContent->AddViewToCellLayout(IView::Probe(allAppsButton), -1, 0,
             ICellLayoutLayoutParams::Probe(lp), TRUE, &tmp);
-Slogger::E("CHotseat", "============================CHotseat::ResetLayout return");
-return NOERROR;
+    return NOERROR;
 }
 
 } // namespace Launcher2

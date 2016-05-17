@@ -315,7 +315,7 @@ AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
         info->GetComponentName((IComponentName**)&key);
         if (labelCache != NULL) {
             Boolean res;
-            labelCache->ContainsKey(TO_IINTERFACE(key), &res);
+            labelCache->ContainsKey(key, &res);
             if (res) {
                 AutoPtr<IInterface> obj;
                 labelCache->Get(TO_IINTERFACE(key), (IInterface**)&obj);
@@ -329,10 +329,10 @@ AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
             lable->ToString(&(entry->mTitle));
             if (labelCache != NULL) {
                 AutoPtr<ICharSequence> cchar = CoreUtils::Convert(entry->mTitle);
-                labelCache->Put(TO_IINTERFACE(key), TO_IINTERFACE(cchar));
+                labelCache->Put((IObject*)cacheKey, cchar);
             }
         }
-        if (entry->mTitle == NULL) {
+        if (entry->mTitle.IsNull()) {
             AutoPtr<IComponentName> name;
             info->GetComponentName((IComponentName**)&name);
             name->GetShortClassName(&(entry->mTitle));

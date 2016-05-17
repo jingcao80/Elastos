@@ -51,7 +51,6 @@ InterruptibleInOutAnimator::InterruptibleInOutAnimator(
     mOriginalToValue = toValue;
 
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(this);
-Slogger::D("InterruptibleInOutAnimator", "=======InterruptibleInOutAnimator::InterruptibleInOutAnimator listener=%p",listener.Get());
     IAnimator::Probe(mAnimator)->AddListener(listener);
 }
 

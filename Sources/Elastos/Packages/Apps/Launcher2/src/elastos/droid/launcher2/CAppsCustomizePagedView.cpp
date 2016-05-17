@@ -283,7 +283,6 @@ ECode CAppsCustomizePagedView::MyRunnable4::Run()
     dragController->IsDragging(&res);
     if (res) {
         // Dismiss the cling
-Slogger::E("CAppsCustomizePagedView", "===================MyRunnable4 call DismissAllAppsCling");
         mHost->mLauncher->DismissAllAppsCling(NULL);
 
         // Reset the alpha on the dragged icon before we drag
@@ -784,7 +783,6 @@ ECode CAppsCustomizePagedView::OnPackagesUpdated(
     mWidgets->Clear();
     Int32 size;
     widgetsAndShortcuts->GetSize(&size);
-Slogger::E("CAppsCustomizePagedView", "============OnPackagesUpdated size=%d",size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> o;
         widgetsAndShortcuts->Get(i, (IInterface**)&o);
@@ -851,7 +849,6 @@ Slogger::E("CAppsCustomizePagedView", "============OnPackagesUpdated size=%d",si
             mWidgets->Add(o);
         }
     }
-Slogger::E("CAppsCustomizePagedView", "===========OnPackagesUpdated");
     UpdatePageCountsAndInvalidateData();
     return NOERROR;
 }
@@ -2016,7 +2013,7 @@ ECode CAppsCustomizePagedView::SyncPages()
 {
     RemoveAllViews();
     CancelAllTasks();
-Slogger::E("CAppsCustomizePagedView", "=================== SyncPages 1 mNumWidgetPages=%d,mNumAppsPages=%d",mNumWidgetPages,mNumAppsPages);
+
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     for (Int32 j = 0; j < mNumWidgetPages; ++j) {
@@ -2034,9 +2031,7 @@ Slogger::E("CAppsCustomizePagedView", "=================== SyncPages 1 mNumWidge
     for (Int32 i = 0; i < mNumAppsPages; ++i) {
         AutoPtr<IPagedViewCellLayout> layout = new PagedViewCellLayout();
         ((PagedViewCellLayout*)layout.Get())->constructor(context);
-Slogger::E("CAppsCustomizePagedView", "=================== SetupPage ");
         SetupPage(layout);
-Slogger::E("CAppsCustomizePagedView", "=================== AddView ");
         AddView(IView::Probe(layout));
     }
     return NOERROR;
@@ -2047,11 +2042,9 @@ ECode CAppsCustomizePagedView::SyncPageItems(
     /* [in] */ Boolean immediate)
 {
     if (page < mNumAppsPages) {
-Slogger::E("CAppsCustomizePagedView", "=================== SyncPageItems 1 page=%d,immediate=%d",page,immediate);
         SyncAppsPageItems(page, immediate);
     }
     else {
-Slogger::E("CAppsCustomizePagedView", "=================== SyncPageItems 2");
         SyncWidgetPageItems(page, immediate);
     }
     return NOERROR;
@@ -2411,12 +2404,9 @@ ECode CAppsCustomizePagedView::Reset()
 AutoPtr<IAppsCustomizeTabHost> CAppsCustomizePagedView::GetTabHost()
 {
     AutoPtr<IView> view;
-Logger::E("CAppsCustomizePagedView", "=================== GetTabHost IActivity::Probe(mLauncher) = %p", IActivity::Probe(mLauncher));
     IActivity::Probe(mLauncher)->FindViewById(
             Elastos::Droid::Launcher2::R::id::apps_customize_pane,
             (IView**)&view);
-Logger::E("CAppsCustomizePagedView", "=================== GetTabHost view = %p", view.Get());
-
     AutoPtr<IAppsCustomizeTabHost> tmp = IAppsCustomizeTabHost::Probe(view);
     return tmp;
 }

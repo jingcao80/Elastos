@@ -503,12 +503,9 @@ ECode PagedView::SetOnLongClickListener(
 {
     mLongClickListener = l;
     Int32 count = GetPageCount();
-Logger::E("PagedView", "============================PagedView::SetOnLongClickListener count=%d", count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> view = GetPageAt(i);
-Logger::E("PagedView", "============================PagedView::SetOnLongClickListener view=%p",view.Get());
         view->SetOnLongClickListener(l);
-Logger::E("PagedView", "============================PagedView::SetOnLongClickListener return");
     }
     return NOERROR;
 }
@@ -637,12 +634,11 @@ void PagedView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-Logger::E("PagedView", "===================PagedView::OnMeasure 1");
     if (!mIsDataReady) {
         ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
         return;
     }
-Logger::E("PagedView", "===================PagedView::OnMeasure 1");
+
     Int32 widthMode = MeasureSpec::GetMode(widthMeasureSpec);
     Int32 widthSize = MeasureSpec::GetSize(widthMeasureSpec);
     Int32 heightMode = MeasureSpec::GetMode(heightMeasureSpec);
@@ -835,11 +831,10 @@ ECode PagedView::OnLayout(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-Logger::E("PagedView", "===================PagedView::OnLayout 1");
     if (!mIsDataReady) {
         return NOERROR;
     }
-Logger::E("PagedView", "===================PagedView::OnLayout 2");
+
     if (DEBUG) Logger::D(TAG, "PagedView::onLayout()");
     Int32 pTop;
     Int32 pBottom;
@@ -1066,7 +1061,6 @@ Boolean PagedView::ShouldDrawChild(
 ECode PagedView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
-Logger::E("PagedView", "========================PagedView::DispatchDraw ");
     Int32 measuredWidth;
     GetMeasuredWidth(&measuredWidth);
     Int32 halfScreenSize = measuredWidth / 2;
@@ -1107,10 +1101,8 @@ Logger::E("PagedView", "========================PagedView::DispatchDraw ");
 
             for (Int32 i = GetPageCount() - 1; i >= 0; i--) {
                 AutoPtr<IView> v = GetPageAt(i);
-Logger::E("PagedView", "========================PagedView::DispatchDraw ShouldDrawChild View: %s", TO_CSTR(v));
                 if (mForceDrawAllChildrenNextFrame ||
                     (leftScreen <= i && i <= rightScreen && ShouldDrawChild(v))) {
-Logger::E("PagedView", "========================PagedView::DispatchDraw to View: %s", TO_CSTR(v));
                     DrawChild(canvas, v, drawingTime);
                 }
             }
@@ -2139,7 +2131,6 @@ ECode PagedView::LoadAssociatedPages(
     /* [in] */ Int32 page,
     /* [in] */ Boolean immediateAndOnly)
 {
-Logger::E("PagedView", "=================== LoadAssociatedPages 1 mContentIsRefreshable=%d",mContentIsRefreshable);
     if (mContentIsRefreshable) {
         Int32 count = GetPageCount();
         if (page < count) {
@@ -2159,23 +2150,18 @@ Logger::E("PagedView", "=================== LoadAssociatedPages 1 mContentIsRefr
                     mDirtyPageContent->Set(i, CoreUtils::Convert(TRUE));
                 }
             }
-Logger::E("PagedView", "=================== LoadAssociatedPages 2 count=%d",count);
             // Next, load any new pages
             for (Int32 i = 0; i < count; ++i) {
                 if ((i != page) && immediateAndOnly) {
                     continue;
                 }
-Logger::E("PagedView", "=================== LoadAssociatedPages 3");
                 if (lowerPageBound <= i && i <= upperPageBound) {
                     AutoPtr<IInterface> value;
                     mDirtyPageContent->Get(i, (IInterface**)&value);
                     Boolean b;
                     IBoolean::Probe(value)->GetValue(&b);
-Logger::E("PagedView", "=================== LoadAssociatedPages 4 b=%d",b);
                     if (b) {
-Logger::E("PagedView", "=================== call SyncPageItems");
                         SyncPageItems(i, (i == page) && immediateAndOnly);
-Logger::E("PagedView", "=================== return SyncPageItems ");
                         mDirtyPageContent->Set(i, CoreUtils::Convert(FALSE));
                     }
                 }
@@ -2213,7 +2199,6 @@ ECode PagedView::InvalidatePageData(
     /* [in] */ Int32 currentPage,
     /* [in] */ Boolean immediateAndOnly)
 {
-Logger::E("PagedView", "=================== InvalidatePageData currentPage=%d, immediateAndOnly=%d",currentPage, immediateAndOnly);
     if (!mIsDataReady) {
         return NOERROR;
     }
@@ -2224,9 +2209,7 @@ Logger::E("PagedView", "=================== InvalidatePageData currentPage=%d, i
         mNextPage = INVALID_PAGE;
 
         // Update all the pages
-Logger::E("PagedView", "=================== InvalidatePageData call SyncPages");
         SyncPages();
-Logger::E("PagedView", "=================== InvalidatePageData return SyncPages");
 
         // We must force a measure after we've loaded the pages to update the content width and
         // to determine the full scroll width
@@ -2249,12 +2232,9 @@ Logger::E("PagedView", "=================== InvalidatePageData return SyncPages"
         }
 
         // Load any pages that are necessary for the current window of views
-Logger::E("PagedView", "=================== InvalidatePageData call LoadAssociatedPages");
         LoadAssociatedPages(mCurrentPage, immediateAndOnly);
-Logger::E("PagedView", "=================== InvalidatePageData return LoadAssociatedPages");
         RequestLayout();
     }
-Logger::E("PagedView", "=================== InvalidatePageData return");
     return NOERROR;
 }
 

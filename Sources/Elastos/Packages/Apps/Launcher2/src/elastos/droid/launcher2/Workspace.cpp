@@ -898,7 +898,6 @@ Workspace::Workspace()
     , mCurrentTranslationY(0)
     , mTransitionProgress(0)
 {
-Slogger::E("Workspace", "============================Workspace::Workspace() enter");
     mTargetCell = ArrayOf<Int32>::Alloc(2);
 
     mTempCell = ArrayOf<Int32>::Alloc(2);
@@ -926,7 +925,6 @@ Slogger::E("Workspace", "============================Workspace::Workspace() ente
     mBindPages = new MyRunnable(this);
 
     mZoomInInterpolator = new ZoomInInterpolator();
-Slogger::E("Workspace", "============================Workspace::Workspace() return");
 }
 
 ECode Workspace::constructor()
@@ -946,7 +944,6 @@ ECode Workspace::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-Slogger::E("Workspace", "============================Workspace::constructor enter");
     SmoothPagedView::constructor(context, attrs, defStyle);
     mContentIsRefreshable = FALSE;
     mOriginalPageSpacing = mPageSpacing;
@@ -1061,7 +1058,6 @@ Slogger::E("Workspace", "============================Workspace::constructor ente
     if (accessibility == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
         SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
-Slogger::E("Workspace", "============================Workspace::constructor return");
     return NOERROR;
 }
 
@@ -1228,9 +1224,7 @@ ECode Workspace::OnChildViewAdded(
     AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
     array->Set(0, TO_IINTERFACE(CoreUtils::Convert(count)));
     String str;
-Slogger::E("Workspace", "============================Workspace::OnChildViewAdded 1 context=%p", context.Get());
     context->GetString(R::string::workspace_description_format, array, &str);
-Slogger::E("Workspace", "============================Workspace::OnChildViewAdded 1 str=%s",str.string());
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     return IView::Probe(cl)->SetContentDescription(cchar);
 }
@@ -5821,7 +5815,6 @@ ECode Workspace::SyncPageItems(
     /* [in] */ Int32 page,
     /* [in] */ Boolean immediate)
 {
-Slogger::E("Workspace", "============================SyncPageItems");
     return NOERROR;
 }
 
