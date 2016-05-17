@@ -281,9 +281,7 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
 }
 
 InstallShortcutReceiver::InstallShortcutReceiver()
-{
-    Slogger::E("InstallShortcutReceiver", "==============InstallShortcutReceiver::InstallShortcutReceiver()");
-}
+{}
 
 ECode InstallShortcutReceiver::constructor()
 {

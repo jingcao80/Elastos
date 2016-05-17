@@ -313,15 +313,12 @@ AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
 
         AutoPtr<IComponentName> key;
         info->GetComponentName((IComponentName**)&key);
-        if (labelCache != NULL) {
-            Boolean res;
-            labelCache->ContainsKey(key, &res);
-            if (res) {
-                AutoPtr<IInterface> obj;
-                labelCache->Get(TO_IINTERFACE(key), (IInterface**)&obj);
-                AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
-                cchar->ToString(&(entry->mTitle));
-            }
+        Boolean res;
+        if (labelCache != NULL && (labelCache->ContainsKey(key, &res), res)) {
+            AutoPtr<IInterface> obj;
+            labelCache->Get(TO_IINTERFACE(key), (IInterface**)&obj);
+            AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
+            cchar->ToString(&(entry->mTitle));
         }
         else {
             AutoPtr<ICharSequence> lable;
