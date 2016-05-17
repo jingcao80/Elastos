@@ -261,7 +261,7 @@ ECode CLauncherAppsImpl::PackageCallbackList::OnCallbackDied(
 //==============================================================================
 
 const Boolean CLauncherAppsImpl::DEBUG;
-const String CLauncherAppsImpl::TAG("LauncherAppsService");
+const String CLauncherAppsImpl::TAG("CLauncherAppsImpl");
 
 CLauncherAppsImpl::CLauncherAppsImpl()
 {
@@ -561,6 +561,7 @@ ECode CLauncherAppsImpl::StartActivityAsUser(
         Binder::RestoreCallingIdentity(ident);
         return ec;
     }
+
     Boolean exported;
     if (IComponentInfo::Probe(info)->GetExported(&exported), !exported) {
         Logger::E(TAG, "Cannot launch non-exported components %p", component);
@@ -577,33 +578,37 @@ ECode CLauncherAppsImpl::StartActivityAsUser(
         Binder::RestoreCallingIdentity(ident);
         return ec;
     }
+
     AutoPtr<IIterator> it;
     apps->GetIterator((IIterator**)&it);
     Boolean hasNext;
+    String aiPkgName, aiClsName, className;
+    component->GetClassName(&className);
+
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
         AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(value);
         AutoPtr<IActivityInfo> activityInfo;
         ri->GetActivityInfo((IActivityInfo**)&activityInfo);
-        String aiPkgName, pkgName;
-        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&pkgName);
-        component->GetPackageName(&pkgName);
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&aiPkgName);
         if (aiPkgName.Equals(pkgName)) {
-            String aiName, className;
-            IPackageItemInfo::Probe(activityInfo)->GetName(&aiName);
-            component->GetClassName(&className);
-            if (aiName.Equals(className)) {
+            IPackageItemInfo::Probe(activityInfo)->GetName(&aiClsName);
+            if (aiClsName.Equals(className)) {
                 // Found an activity with category launcher that matches
                 // this component so ok to launch.
                 launchIntent->SetComponent(component);
                 ec = mContext->StartActivityAsUser(launchIntent, opts, user);
                 Binder::RestoreCallingIdentity(ident);
+                if (FAILED(ec)) {
+                    Logger::E(TAG, "Failed to launch activity [%s], ec=%08x.", TO_CSTR(component), ec);
+                }
                 return ec;
             }
         }
     }
-    Logger::E(TAG, "Attempt to launch activity without  category Intent.CATEGORY_LAUNCHER %p", component);
+
+    Logger::E(TAG, "Attempt to launch activity [%s] without category Intent.CATEGORY_LAUNCHER", TO_CSTR(component));
     Binder::RestoreCallingIdentity(ident);
     return E_SECURITY_EXCEPTION;
     // } finally {

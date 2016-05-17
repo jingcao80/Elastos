@@ -3,7 +3,7 @@
       package="Launcher"
       android:versionCode="1"
       android:versionName="1.0">
-    <application android:icon="@null" android:label="Launcher">
+    <application android:icon="@drawable/icon" android:label="Launcher">
         <activity android:name="CApp"
                   android:label="Launcher"
                   android:theme="@android:style/Theme.NoTitleBar">

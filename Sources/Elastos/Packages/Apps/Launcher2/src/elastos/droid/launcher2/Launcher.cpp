@@ -38,6 +38,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
@@ -138,6 +139,7 @@ using Elastos::Core::Character;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
 using Elastos::IO::IInputStream;
@@ -1346,7 +1348,7 @@ Slogger::E("Launcher", "============================Launcher::OnCreate return");
 
 ECode Launcher::OnUserLeaveHint()
 {
-    Launcher::OnUserLeaveHint();
+    Activity::OnUserLeaveHint();
     sPausedFromUserAction = TRUE;
     return NOERROR;
 }
@@ -3673,16 +3675,19 @@ ECode Launcher::StartActivitySafely(
     /* [in] */ IInterface* tag,
     /* [out] */ Boolean* result)
 {
+    Slogger::I(TAG, " >> StartActivitySafely %s, intent:%s, tag:%s",
+        TO_CSTR(v), TO_CSTR(intent), TO_CSTR(tag));
     VALIDATE_NOT_NULL(result);
 
     Boolean success = FALSE;
-    if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION == StartActivity(v, intent, tag, &success)) {
+    ECode ec = StartActivity(v, intent, tag, &success);
+    if (FAILED(ec) || !success ) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
         helper->MakeText(IContext::Probe(this),
-                Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
+            Elastos::Droid::Launcher2::R::string::activity_not_found,
+            IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
 
         StringBuilder sb;
@@ -3690,7 +3695,8 @@ ECode Launcher::StartActivitySafely(
         sb += TO_STR(tag);
         sb +=" intent=";
         sb += TO_STR(intent);
-        sb += E_ACTIVITY_NOT_FOUND_EXCEPTION;
+        sb += "ec=";
+        sb += StringUtils::ToHexString(ec);
         Slogger::E(TAG, sb.ToString());
     }
 

@@ -679,8 +679,8 @@ ECode PackageParser::Activity::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    StringBuilder sb("Activity{");
-    sb += (Int32)this;
+    StringBuilder sb("PackageParser::Activity{");
+    sb += StringUtils::ToHexString((Int32)this);
     sb += " ";
     AppendComponentShortName(&sb);
     sb += "}";

@@ -7,7 +7,7 @@
       <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="17" />
-    <application android:icon="@null" android:label="@string/app_name">
+    <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name="CActivityOne"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.Light">

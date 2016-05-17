@@ -11,7 +11,7 @@
     <permission android:protectionLevel="normal"
         android:name="kesalin.permission.BROADCAST_PERMISSION" />
 
-    <application android:icon="@null" android:label="@string/app_name">
+    <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".CActivityOne"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.NoTitleBar">

@@ -886,6 +886,7 @@ void CAppsCustomizePagedView::UpdatePageCountsAndInvalidateData()
 ECode CAppsCustomizePagedView::OnClick(
     /* [in] */ IView* v)
 {
+    Slogger::E("CAppsCustomizePagedView", " >> OnClick %s", TO_CSTR(v));
     // When we have exited all apps or are in transition, disregard clicks
     Boolean res;
     mLauncher->IsAllAppsVisible(&res);
@@ -912,8 +913,7 @@ ECode CAppsCustomizePagedView::OnClick(
         // when Launcher resumes and we are still in AllApps.
         mLauncher->UpdateWallpaperVisibility(TRUE);
         Boolean tmp;
-        mLauncher->StartActivitySafely(IView::Probe(v), appInfo->mIntent,
-            TO_IINTERFACE(appInfo), &tmp);
+        mLauncher->StartActivitySafely(v, appInfo->mIntent, obj, &tmp);
 
     }
     else if (IPagedViewWidget::Probe(v) != NULL) {
