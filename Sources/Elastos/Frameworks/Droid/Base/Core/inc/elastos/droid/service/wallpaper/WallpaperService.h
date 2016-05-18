@@ -158,8 +158,8 @@ public:
         {
             friend class IWallpaperEngineWrapper;
         public:
-            MWindow(
-                /* [in] */ Engine* host);
+            CARAPI constructor(
+                /* [in] */ IWallpaperServiceEngine* host);
 
             // @Override
             CARAPI Resized(
@@ -522,9 +522,6 @@ public:
         CAR_INTERFACE_DECL()
 
         IWallpaperEngineWrapper();
-
-        IWallpaperEngineWrapper(
-            /* [in] */ WallpaperService* host);
 
         CARAPI constructor(
             /* [in] */ IWallpaperService* context,

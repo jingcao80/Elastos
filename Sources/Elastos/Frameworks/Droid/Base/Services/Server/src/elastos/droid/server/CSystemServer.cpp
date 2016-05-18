@@ -875,10 +875,9 @@ ECode SystemServer::StartOtherServices()
 
         if (!disableNonCoreServices
             && (res->GetBoolean(R::bool_::config_enableWallpaperService, &bval), bval)) {
-            Slogger::I(TAG, "Wallpaper Service todo");
-            // ec = CWallpaperManagerService::NewByFriend(context, (CWallpaperManagerService**)&wallpaper);
-            // if (FAILED(ec)) ReportWtf("starting Wallpaper Service", ec);
-            // ServiceManager::AddService(IContext::WALLPAPER_SERVICE, TO_IINTERFACE(wallpaper));
+            ec = CWallpaperManagerService::NewByFriend(context, (CWallpaperManagerService**)&wallpaper);
+            if (FAILED(ec)) ReportWtf("starting Wallpaper Service", ec);
+            ServiceManager::AddService(IContext::WALLPAPER_SERVICE, TO_IINTERFACE(wallpaper));
         }
 
         if (!disableMedia &&

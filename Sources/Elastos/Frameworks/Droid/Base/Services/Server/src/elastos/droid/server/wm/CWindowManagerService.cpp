@@ -7120,10 +7120,9 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
     // If we are turning on the screen after the boot is completed
     // normally, don't do so until we have the application and
     // wallpaper.
-    Slogger::W(TAG, "TODO: we only have a home app now");
-    // if (mSystemBooted && ((!haveApp && !haveKeyguard) || (wallpaperEnabled && !haveWallpaper))) {
-    //     return TRUE;
-    // }
+    if (mSystemBooted && ((!haveApp && !haveKeyguard) || (wallpaperEnabled && !haveWallpaper))) {
+        return TRUE;
+    }
 
     return FALSE;
 }

@@ -3,11 +3,13 @@
 #include "elastos/droid/internal/os/CHandlerCaller.h"
 #include "elastos/droid/service/wallpaper/WallpaperService.h"
 #include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/service/wallpaper/CIWallpaperEngineWrapper.h"
 #include "elastos/droid/service/wallpaper/CIWallpaperServiceWrapper.h"
+#include "elastos/droid/service/wallpaper/CWallpaperServiceEngineWindow.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/view/CInputChannel.h"
 #include "elastos/droid/view/CMotionEventHelper.h"
@@ -22,6 +24,7 @@ using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Internal::Os::CHandlerCaller;
 using Elastos::Droid::Internal::Os::EIID_IHandlerCallerCallback;
 using Elastos::Droid::Os::Build;
@@ -56,6 +59,7 @@ using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::R;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -190,10 +194,11 @@ ECode WallpaperService::Engine::WallpaperInputEventReceiver::OnInputEvent(
 //WallpaperService::Engine::MWindow
 //===============================
 
-WallpaperService::Engine::MWindow::MWindow(
-    /* [in] */ Engine* host)
-    : mHost(host)
+ECode WallpaperService::Engine::MWindow::constructor(
+    /* [in] */ IWallpaperServiceEngine* host)
 {
+    mHost = (Engine*)host;
+    return NOERROR;
 }
 
 ECode WallpaperService::Engine::MWindow::Resized(
@@ -364,8 +369,11 @@ WallpaperService::Engine::Engine(
     AutoPtr<MSurfaceHolder> msh = new MSurfaceHolder(this);
     mSurfaceHolder = (BaseSurfaceHolder*)(msh.Get());
 
-    AutoPtr<MWindow> mw = new MWindow(this);
+    AutoPtr<IBaseIWindow> mw;
+    CWallpaperServiceEngineWindow::New(this, (IBaseIWindow**)&mw);
     mWindow = (BaseIWindow*)(mw.Get());
+
+    CConfiguration::New((IConfiguration**)&mConfiguration);
 }
 
 ECode WallpaperService::Engine::constructor()
@@ -700,14 +708,35 @@ ECode WallpaperService::Engine::UpdateSurface(
         } else {
             _mLayout->mSurfaceInsets->Set(0, 0, 0, 0);
         }
-        Int32 _relayoutResult;
+
+        AutoPtr<IRect> winFrame, overscanInsets, contentInsets, visibleInsets, stableInsets;
+        AutoPtr<IConfiguration> configuration;
+        AutoPtr<ISurface> surface;
+
+        Int32 relayoutResult;
         mSession->Relayout((IIWindow*)mWindow, mWindow->mSeq, mLayout.Get(), mWidth, mHeight,
             IView::VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets, mVisibleInsets,
-            mStableInsets, mConfiguration, mSurfaceHolder->mSurface, (IRect**)&mWinFrame,
-            (IRect**)&mOverscanInsets, (IRect**)&mContentInsets, (IRect**)&mVisibleInsets,
-            (IRect**)&mStableInsets,(IConfiguration**)&mConfiguration,
-            &_relayoutResult, (ISurface**)(&(mSurfaceHolder->mSurface)));
-        const Int32 relayoutResult = _relayoutResult;
+            mStableInsets, mConfiguration, mSurfaceHolder->mSurface, (IRect**)&winFrame,
+            (IRect**)&overscanInsets, (IRect**)&contentInsets, (IRect**)&visibleInsets,
+            (IRect**)&stableInsets,(IConfiguration**)&configuration,
+            &relayoutResult, (ISurface**)&surface);
+
+        if (mWinFrame != NULL && winFrame != NULL)
+            mWinFrame->Set(winFrame);
+        if (mOverscanInsets != NULL && overscanInsets != NULL)
+            mOverscanInsets->Set(overscanInsets);
+        if (mContentInsets != NULL && contentInsets != NULL)
+            mContentInsets->Set(contentInsets);
+        if (mVisibleInsets != NULL && visibleInsets != NULL)
+            mVisibleInsets->Set(visibleInsets);
+        if (mStableInsets != NULL && stableInsets != NULL)
+            mStableInsets->Set(stableInsets);
+        if (mConfiguration != NULL && configuration != NULL)
+            mConfiguration->SetTo(configuration);
+
+        if (mSurfaceHolder->mSurface != NULL && surface != NULL) {
+            mSurfaceHolder->mSurface->TransferFrom(surface);
+        }
 
         if (WallpaperService::DEBUG) {
             String str1, str2;
@@ -1225,17 +1254,11 @@ ECode WallpaperService::Engine::Detach() {
 CAR_INTERFACE_IMPL_4(WallpaperService::IWallpaperEngineWrapper, Object, IIWallpaperEngine, IHandlerCallerCallback, IBinder, IIWallpaperEngineWrapper)
 
 WallpaperService::IWallpaperEngineWrapper::IWallpaperEngineWrapper()
-{
-}
-
-WallpaperService::IWallpaperEngineWrapper::IWallpaperEngineWrapper(
-    /* [in] */ WallpaperService* host)
     : mWindowType(0)
     , mIsPreview(FALSE)
     , mShownReported(FALSE)
     , mReqWidth(0)
     , mReqHeight(0)
-    , mHost(host)
 {
     CRect::New((IRect**)&mDisplayPadding);
 }
@@ -1250,6 +1273,7 @@ ECode WallpaperService::IWallpaperEngineWrapper::constructor(
     /* [in] */ Int32 reqHeight,
     /* [in] */ IRect* padding)
 {
+    mHost = (WallpaperService*)context;
     AutoPtr<ILooper> looper;
     IContext::Probe(context)->GetMainLooper((ILooper**)&looper);
     CHandlerCaller::New(IContext::Probe(context), looper.Get(), this, TRUE, TRUE, (IHandlerCaller**)&mCaller);
@@ -1506,6 +1530,7 @@ CAR_INTERFACE_IMPL(WallpaperService, Service, IWallpaperService)
 
 WallpaperService::WallpaperService()
 {
+    CArrayList::New((IArrayList**)&mActiveEngines);
 }
 
 ECode WallpaperService::constructor()

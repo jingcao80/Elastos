@@ -204,10 +204,6 @@ public:
 
         WallpaperConnection();
 
-        WallpaperConnection(
-            /*  [in] */ WallpaperManagerService* host);
-
-    public:
         CARAPI constructor(
             /* [in] */ IWallpaperInfo* info,
             /* [in] */ IWallpaperData* wallpaper);

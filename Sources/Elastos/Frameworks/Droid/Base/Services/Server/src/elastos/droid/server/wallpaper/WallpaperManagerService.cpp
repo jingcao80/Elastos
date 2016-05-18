@@ -5,13 +5,11 @@
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/SELinux.h"
+#include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/utility/Xml.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
-// #include "elstos/droid/os/FileUtils.h"
-// #include "elstos/droid/os/SELinux.h"
-// #include "elstos/droid/utility/Xml.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/R.h"
 #include "elastos/utility/logging/Slogger.h"
@@ -22,7 +20,6 @@
 
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::AppGlobals;
-// using Elastos::Droid::App::Backup::CBackupManager;
 using Elastos::Droid::App::CContextImpl;
 using Elastos::Droid::App::CPendingIntent;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -31,6 +28,7 @@ using Elastos::Droid::App::CWallpaperManager;
 using Elastos::Droid::App::EIID_IIWallpaperManager;
 using Elastos::Droid::App::EIID_IIUserSwitchObserver;
 using Elastos::Droid::App::IPendingIntentHelper;
+// using Elastos::Droid::App::Backup::CBackupManager;
 using Elastos::Droid::App::Backup::IBackupManager;
 using Elastos::Droid::App::Backup::IWallpaperBackupHelper;
 using Elastos::Droid::Content::CComponentName;
@@ -66,7 +64,6 @@ using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::EIID_IBinder;
-// using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::IBinderHelper;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::IFileObserver;
@@ -77,6 +74,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::FileUtils;
+using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SELinux;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Server::Wallpaper::CWallpaperConnection;
@@ -151,16 +149,15 @@ ECode WallpaperManagerService::WallpaperObserver::OnEvent(
         IObject::Probe(mWallpaperFile)->Equals(IInterface::Probe(changedFile), &isEquals);
         if (isEquals) {
             // changing the wallpaper means we'll need to back up the new one
-            AutoPtr<IBinderHelper> bh;
-            CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
-            Int64 origId;
-            bh->ClearCallingIdentity(&origId);
-            #if 0 //waiting CBackupManager attend compile
-            AutoPtr<IBackupManager> bm;
-            CBackupManager::New(mHost->mContext, (IBackupManager**)&bm);
-            bm->DataChanged();
-            #endif
-            bh->RestoreCallingIdentity(origId);
+            Slogger::E(TAG, "TODO: CBackupManager is not compiled!");
+            // AutoPtr<IBinderHelper> bh;
+            // CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
+            // Int64 origId;
+            // bh->ClearCallingIdentity(&origId);
+            // AutoPtr<IBackupManager> bm;
+            // CBackupManager::New(mHost->mContext, (IBackupManager**)&bm);
+            // bm->DataChanged();
+            // bh->RestoreCallingIdentity(origId);
 
             mHost->NotifyCallbacksLocked(mWallpaper.Get());
             const Boolean written = (event == IFileObserver::CLOSE_WRITE || event == IFileObserver::MOVED_TO);
@@ -241,14 +238,8 @@ WallpaperManagerService::KeyguardWallpaperData::KeyguardWallpaperData(
 CAR_INTERFACE_IMPL_4(WallpaperManagerService::WallpaperConnection, Object, IWallpaperConnection, IIWallpaperConnection, IBinder, IServiceConnection)
 
 WallpaperManagerService::WallpaperConnection::WallpaperConnection()
-{
-}
-
-WallpaperManagerService::WallpaperConnection::WallpaperConnection(
-    /*  [in] */ WallpaperManagerService* host)
     : mDimensionsChanged(FALSE)
     , mPaddingChanged(FALSE)
-    , mHost(host)
 {
     CBinder::New((IBinder**)&mToken);
 }
@@ -300,16 +291,15 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceDisconnected(
                 // This race is overcome by the general rule that we only reset the
                 // wallpaper if its service was shut down twice
                 // during {@link #MIN_WALLPAPER_CRASH_TIME} millis.
-                #if 0 // TODO need CSystemClockHelper
                 if (_mWallpaper->mLastDiedTime != 0
                         && _mWallpaper->mLastDiedTime + WallpaperManagerService::MIN_WALLPAPER_CRASH_TIME
                             > SystemClock::GetUptimeMillis()) {
                     Slogger::W(WallpaperManagerService::TAG, "Reverting to built-in wallpaper!");
                     mHost->ClearWallpaperLocked(TRUE, _mWallpaper->mUserId, NULL);
-                } else {
+                }
+                else {
                     _mWallpaper->mLastDiedTime = SystemClock::GetUptimeMillis();
                 }
-                #endif
             }
         }
     }
@@ -672,8 +662,11 @@ ECode WallpaperManagerService::constructor(
     mContext = context;
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
-    String str;
-    res->GetString(R::string::image_wallpaper_component, &str);
+    String str("Elastos.Droid.SystemUI/Elastos.Droid.SystemUI.CImageWallpaper");
+    // TODO: should modify resources
+    // image_wallpaper_component is "com.android.systemui/com.android.systemui.ImageWallpaper"
+    //
+    // res->GetString(R::string::image_wallpaper_component, &str);
     AutoPtr<IComponentNameHelper> cnh;
     CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&cnh);
     cnh->UnflattenFromString(str, (IComponentName**)&mImageWallpaper);
@@ -1593,9 +1586,9 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
     }
 
     // try {
-        #if 0 //TODO CWallpaperManager
         if (componentName == NULL) {
-            componentName = CWallpaperManager::GetDefaultWallpaperComponent(mContext);
+            Slogger::E(TAG, "TODO: need CWallpaperManagerHelper::GetDefaultWallpaperComponent");
+            // componentName = CWallpaperManager::GetDefaultWallpaperComponent(mContext);
             if (componentName == NULL) {
                 // Fall back to static image wallpaper
                 componentName = mImageWallpaper.Get();
@@ -1604,7 +1597,7 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
                 if (DEBUG) Slogger::V(TAG, "Using image wallpaper");
             }
         }
-        #endif
+
         Int32 serviceUserId = wallpaper->mUserId;
         AutoPtr<IServiceInfo> si;
         mIPackageManager->GetServiceInfo(componentName,
@@ -1706,8 +1699,9 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
             IObject::Probe(componentName)->ToString(&str);
             Slogger::V(TAG, "Binding to:%s", str.string());
         }
-        AutoPtr<IServiceConnection> newConn;
-        CWallpaperConnection::New(wi, wallpaper, (IServiceConnection**)&newConn);
+        AutoPtr<CWallpaperConnection> newConn;
+        CWallpaperConnection::NewByFriend(wi, wallpaper, (CWallpaperConnection**)&newConn);
+        newConn->mHost = this;
         intent->SetComponent(componentName);
         intent->PutExtra(IIntent::EXTRA_CLIENT_LABEL, R::string::wallpaper_binding_label);
 
@@ -1730,10 +1724,9 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
         AutoPtr<IParcelable> parcelable = IParcelable::Probe(pendingIntent);
         intent->PutExtra(IIntent::EXTRA_CLIENT_INTENT, parcelable.Get());
 
-        //TODO
-        // AutoPtr<CContextImpl> impl = CContextImpl::GetImpl(mContext);
         Boolean isBindServiceAsUser = FALSE;
-        // impl->BindServiceAsUser(intent.Get(), newConn.Get(), IContext::BIND_AUTO_CREATE | IContext::BIND_SHOWING_UI, userhandle, &isBindServiceAsUser);
+        mContext->BindServiceAsUser(intent.Get(), newConn.Get(), IContext::BIND_AUTO_CREATE | IContext::BIND_SHOWING_UI,
+            userhandle, &isBindServiceAsUser);
 
         if (!isBindServiceAsUser) {
             String cnstr;
@@ -1751,8 +1744,8 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
             DetachWallpaperLocked((IWallpaperData*)mLastWallpaper);
         }
         wallpaper->mWallpaperComponent = componentName;
-        wallpaper->mConnection = (WallpaperConnection*)newConn.Get();
-        AutoPtr<WallpaperConnection> _newConn = (WallpaperConnection*)newConn.Get();
+        wallpaper->mConnection = newConn;
+        AutoPtr<WallpaperConnection> _newConn = newConn;
         _newConn->mReply = reply;
 
         if (wallpaper->mUserId == mCurrentUserId) {
@@ -2093,88 +2086,92 @@ ECode WallpaperManagerService::LoadSettingsLocked(
         wallpaper = new WallpaperData(userId, this);
         mWallpaperMap->Put(userId, IInterface::Probe((IWallpaperData*)wallpaper));
     }
+
     Boolean success = FALSE;
-    // try {
-    CFileInputStream::New(file, (IFileInputStream**)&stream);
-    AutoPtr<IXmlPullParser> parser;
-#if 0 // TODO need CXmlHelper
-    ECode ec = Xml::NewPullParser((IXmlPullParser**)&parser);
-
-    if (FAILED(ec)) {
-        String ecstr;
-        IObject::Probe(file)->ToString(&ecstr);
-        Slogger::W(TAG, "failed parsing %s %d", ecstr.string(), ec);
-        return E_XML_PULL_PARSER_EXCEPTION;
-    }
-
-    parser->SetInput(IInputStream::Probe(stream), String(NULL));
-
-    Int32 type;
+    ECode ec = NOERROR;
     do {
-        parser->Next(&type);
-        if (type == IXmlPullParser::START_TAG) {
-            String tag;
-            parser->GetName(&tag);
-            if (String("wp").Equals(tag)) {
-                String attriValue1;
-                parser->GetAttributeValue(String(NULL), String("width"), &attriValue1);
-                wallpaper->mWidth = StringUtils::ParseInt32(attriValue1);
-                String attriValue2;
-                parser->GetAttributeValue(String(NULL), String("height"), &attriValue2);
-                wallpaper->mHeight = StringUtils::ParseInt32(attriValue2);
+        ec = CFileInputStream::New(file, (IFileInputStream**)&stream);
+        if (FAILED(ec))
+            break;
 
-                wallpaper->mPadding->SetLeft(GetAttributeInt32(parser, String("paddingLeft"), 0));
-                wallpaper->mPadding->SetTop(GetAttributeInt32(parser, String("paddingTop"), 0));
-                wallpaper->mPadding->SetRight(GetAttributeInt32(parser, String("paddingRight"), 0));
-                wallpaper->mPadding->SetBottom(GetAttributeInt32(parser, String("paddingBottom"), 0));
+        AutoPtr<IXmlPullParser> parser;
+        ec = Xml::NewPullParser((IXmlPullParser**)&parser);
+        if (FAILED(ec))
+            break;
 
-                parser->GetAttributeValue(String(NULL), String("name"), &(wallpaper->mName));
+        if (FAILED(ec)) {
+            String ecstr;
+            IObject::Probe(file)->ToString(&ecstr);
+            Slogger::W(TAG, "failed parsing %s %d", ecstr.string(), ec);
+            return E_XML_PULL_PARSER_EXCEPTION;
+        }
 
-                String comp;
-                parser->GetAttributeValue(String(NULL), String("component"), &comp);
+        ec = parser->SetInput(IInputStream::Probe(stream), String(NULL));
+        if (FAILED(ec))
+            break;
 
-                AutoPtr<IComponentName> cn;
-                CComponentName::UnflattenFromString(comp, (IComponentName**)&cn);
+        Int32 type;
+        do {
+            ec = parser->Next(&type);
+            if (type == IXmlPullParser::START_TAG) {
+                String tag;
+                ec = parser->GetName(&tag);
+                if (String("wp").Equals(tag)) {
+                    String attriValue1;
+                    ec = parser->GetAttributeValue(String(NULL), String("width"), &attriValue1);
+                    wallpaper->mWidth = StringUtils::ParseInt32(attriValue1);
+                    String attriValue2;
+                    ec = parser->GetAttributeValue(String(NULL), String("height"), &attriValue2);
+                    wallpaper->mHeight = StringUtils::ParseInt32(attriValue2);
 
-                wallpaper->mNextWallpaperComponent = !(comp.IsNull()) ? cn : NULL;
+                    wallpaper->mPadding->SetLeft(GetAttributeInt32(parser, String("paddingLeft"), 0));
+                    wallpaper->mPadding->SetTop(GetAttributeInt32(parser, String("paddingTop"), 0));
+                    wallpaper->mPadding->SetRight(GetAttributeInt32(parser, String("paddingRight"), 0));
+                    wallpaper->mPadding->SetBottom(GetAttributeInt32(parser, String("paddingBottom"), 0));
 
-                String packageName;
-                wallpaper->mNextWallpaperComponent->GetPackageName(&packageName);
-                if (wallpaper->mNextWallpaperComponent == NULL || String("android").Equals(packageName)) {
-                    wallpaper->mNextWallpaperComponent = mImageWallpaper;
-                }
+                    ec = parser->GetAttributeValue(String(NULL), String("name"), &(wallpaper->mName));
 
-                if (DEBUG) {
-                    Slogger::V(TAG, "mWidth:%d", wallpaper->mWidth);
-                    Slogger::V(TAG, "mHeight:%d", wallpaper->mHeight);
-                    Slogger::V(TAG, "mName:%s", (wallpaper->mName).string());
-                    String nwc;
-                    IObject::Probe(wallpaper->mNextWallpaperComponent)->ToString(&nwc);
-                    Slogger::V(TAG, "mNextWallpaperComponent:%s", nwc.string());
+                    String comp;
+                    ec = parser->GetAttributeValue(String(NULL), String("component"), &comp);
+
+                    AutoPtr<IComponentNameHelper> cnHelper;
+                    CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&cnHelper);
+                    AutoPtr<IComponentName> cn;
+                    cnHelper->UnflattenFromString(comp, (IComponentName**)&cn);
+
+                    wallpaper->mNextWallpaperComponent = !(comp.IsNull()) ? cn : NULL;
+
+                    String packageName;
+                    if (wallpaper->mNextWallpaperComponent != NULL)
+                        wallpaper->mNextWallpaperComponent->GetPackageName(&packageName);
+
+                    if (packageName.Equals("android")) {
+                        Slogger::D("xihaoc", "packageName is android");
+                        wallpaper->mNextWallpaperComponent = mImageWallpaper;
+                    }
+
+                    if (DEBUG) {
+                        Slogger::V(TAG, "mWidth:%d", wallpaper->mWidth);
+                        Slogger::V(TAG, "mHeight:%d", wallpaper->mHeight);
+                        Slogger::V(TAG, "mName:%s", (wallpaper->mName).string());
+                        String nwc;
+                        IObject::Probe(wallpaper->mNextWallpaperComponent)->ToString(&nwc);
+                        Slogger::V(TAG, "mNextWallpaperComponent:%s", nwc.string());
+                    }
                 }
             }
-        }
-    } while (type != IXmlPullParser::END_DOCUMENT);
-    success = TRUE;
-    // } catch (FileNotFoundException e) {
-    //     Slog.w(TAG, "no current wallpaper -- first boot?");
-    // } catch (NullPointerException e) {
-    //     Slog.w(TAG, "failed parsing " + file + " " + e);
-    // } catch (NumberFormatException e) {
-    //     Slog.w(TAG, "failed parsing " + file + " " + e);
-    // } catch (XmlPullParserException e) {
-    //     Slog.w(TAG, "failed parsing " + file + " " + e);
-    // } catch (IOException e) {
-    //     Slog.w(TAG, "failed parsing " + file + " " + e);
-    // } catch (IndexOutOfBoundsException e) {
-    //     Slog.w(TAG, "failed parsing " + file + " " + e);
-    // }
+        } while (type != IXmlPullParser::END_DOCUMENT);
+    } while (0);
+
+    if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
+        Slogger::W(TAG, "no current wallpaper -- first boot?");
+    }
+    else if (FAILED(ec)) {
+        Slogger::W(TAG, "failed parsing %s, ec = 0x%08x ", TO_CSTR(file), ec);
+    }
 
     if (stream != NULL) {
-        ECode ec = ICloseable::Probe(stream)->Close();
-        if (FAILED(ec)) {
-            return E_IO_EXCEPTION;
-        }
+        ICloseable::Probe(stream)->Close();
     }
 
     if (!success) {
@@ -2192,7 +2189,7 @@ ECode WallpaperManagerService::LoadSettingsLocked(
     if (wallpaper->mHeight < baseSize) {
         wallpaper->mHeight = baseSize;
     }
-#endif
+
     return NOERROR;
 }
 
