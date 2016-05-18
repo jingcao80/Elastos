@@ -4,6 +4,8 @@
 
 #include <elastos/droid/ext/frameworkext.h>
 
+using Elastos::Core::IClassLoader;
+
 _ETL_NAMESPACE_BEGIN
 template<> struct Hash<Elastos::InterfaceID>
 {
@@ -19,15 +21,11 @@ class Utils
 {
 public:
     static AutoPtr<IClassInfo> GetClassInfo(
-        /* [in] */ const String& className,
-        /* [in] */ Int32 flag = 0);
-
-public:
-    static const Int32 ELASTOS_DROID_CORE_ECO_FALG;
+        /* [in] */ const String& className);
 
 private:
     static const String sModulePath;
-    static AutoPtr<IModuleInfo> sModuleInfo;
+    static AutoPtr<IClassLoader> sClassLoader;
 };
 
 } // namespace SystemUI

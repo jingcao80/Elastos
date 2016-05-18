@@ -252,14 +252,14 @@ private:
 public:
     CKeyguardViewMediator();
 
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
     CARAPI UserActivity();
 
-private:
-    CARAPI_(void) Setup();
-
-public:
     // @Override
     CARAPI Start();
 
@@ -388,6 +388,8 @@ public:
         /* [out] */ IViewMediatorCallback** cb);
 
 private:
+    CARAPI_(void) Setup();
+
     CARAPI_(void) DoKeyguardLaterLocked();
 
     CARAPI_(void) CancelDoKeyguardLaterLocked();

@@ -703,6 +703,8 @@ module
         }
 
         class CKeyguardViewMediator {
+            constructor();
+
             interface IKeyguardViewMediator;
             interface ISystemUI;
         }

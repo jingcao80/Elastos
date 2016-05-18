@@ -1,7 +1,9 @@
 
 #include "elastos/droid/systemui/Utils.h"
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/core/ClassLoader.h>
 
+using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -9,31 +11,20 @@ namespace Droid {
 namespace SystemUI {
 
 static const String TAG("Elastos.Droid.SystemUI.Utils");
-
 const String Utils::sModulePath("Elastos.Droid.SystemUI.eco");
-const Int32 Utils::ELASTOS_DROID_CORE_ECO_FALG = 1;
-AutoPtr<IModuleInfo> Utils::sModuleInfo;
+
+AutoPtr<IClassLoader> Utils::sClassLoader;
+
 AutoPtr<IClassInfo> Utils::GetClassInfo(
-    /* [in] */ const String& className,
-    /* [in] */ Int32 flag)
+    /* [in] */ const String& className)
 {
-    if (flag == ELASTOS_DROID_CORE_ECO_FALG) {
-        AutoPtr<IModuleInfo> m;
-        ASSERT_SUCCEEDED(CReflector::AcquireModuleInfo(String("Elastos.Droid.Core.eco"), (IModuleInfo**)&m));
-        AutoPtr<IClassInfo> classInfo;
-        m->GetClassInfo(className, (IClassInfo**)&classInfo);
-        assert(classInfo != NULL);
-        return classInfo;
+    if (sClassLoader == NULL) {
+        ASSERT_SUCCEEDED(CPathClassLoader::New(sModulePath, NULL, (IClassLoader**)&sClassLoader))
+        assert(sClassLoader != NULL);
     }
 
-    if (sModuleInfo == NULL) {
-        ASSERT_SUCCEEDED(CReflector::AcquireModuleInfo(sModulePath, (IModuleInfo**)&sModuleInfo));
-        assert(sModuleInfo != NULL);
-    }
-
-    Logger::D(TAG, "the class className is [%s]", className.string());
     AutoPtr<IClassInfo> classInfo;
-    sModuleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+    sClassLoader->LoadClass(className, (IClassInfo**)&classInfo);
     assert(classInfo != NULL);
     return classInfo;
 }

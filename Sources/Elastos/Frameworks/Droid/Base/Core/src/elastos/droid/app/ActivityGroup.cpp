@@ -25,12 +25,11 @@ ECode ActivityGroup::constructor()
 ECode ActivityGroup::constructor(
     /* [in] */ Boolean singleActivityMode)
 {
-    CLocalActivityManager::New((IActivity*)this,
+    return CLocalActivityManager::New((IActivity*)this,
         singleActivityMode, (ILocalActivityManager**)&mLocalActivityManager);
-    return NOERROR;
 }
 
-ECode ActivityGroup:: OnCreate(
+ECode ActivityGroup::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     FAIL_RETURN(Activity::OnCreate(savedInstanceState))

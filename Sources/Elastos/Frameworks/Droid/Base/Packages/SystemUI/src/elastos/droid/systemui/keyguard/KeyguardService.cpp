@@ -69,25 +69,23 @@ ECode CIKeyguardService::IsInputRestricted(
 ECode CIKeyguardService::VerifyUnlock(
     /* [in] */ IIKeyguardExitCallback* callback)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->VerifyUnlock(callback);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->VerifyUnlock(callback);
 }
 
 ECode CIKeyguardService::KeyguardDone(
     /* [in] */ Boolean authenticated,
     /* [in] */ Boolean wakeup)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->KeyguardDone(authenticated, wakeup);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->KeyguardDone(authenticated, wakeup);
 }
 
 ECode CIKeyguardService::SetOccluded(
     /* [in] */ Boolean isOccluded,
     /* [out] */ Int32* result)
 {
-    mHost->CheckPermission();
+    FAIL_RETURN(mHost->CheckPermission())
     synchronized(this) {
         Boolean b;
         mHost->mKeyguardViewMediator->IsShowing(&b);
@@ -114,45 +112,41 @@ ECode CIKeyguardService::SetOccluded(
 
 ECode CIKeyguardService::Dismiss()
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->Dismiss();
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->Dismiss();
 }
 
-ECode CIKeyguardService::OnDreamingStarted() {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnDreamingStarted();
-    return NOERROR;
+ECode CIKeyguardService::OnDreamingStarted()
+{
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnDreamingStarted();
 }
 
-ECode CIKeyguardService::OnDreamingStopped() {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnDreamingStopped();
-    return NOERROR;
+ECode CIKeyguardService::OnDreamingStopped()
+{
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnDreamingStopped();
 }
 
 ECode CIKeyguardService::OnScreenTurnedOff(
     /* [in] */ Int32 reason)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnScreenTurnedOff(reason);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnScreenTurnedOff(reason);
 }
 
 ECode CIKeyguardService::OnScreenTurnedOn(
     /* [in] */ IIKeyguardShowCallback* callback)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnScreenTurnedOn(callback);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnScreenTurnedOn(callback);
 }
 
 ECode CIKeyguardService::SetKeyguardEnabled(
     /* [in] */ Boolean enabled)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->SetKeyguardEnabled(enabled);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->SetKeyguardEnabled(enabled);
 }
 
 ECode CIKeyguardService::IsDismissable(
@@ -163,25 +157,22 @@ ECode CIKeyguardService::IsDismissable(
 
 ECode CIKeyguardService::OnSystemReady()
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnSystemReady();
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnSystemReady();
 }
 
 ECode CIKeyguardService::DoKeyguardTimeout(
     /* [in] */ IBundle* options)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->DoKeyguardTimeout(options);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->DoKeyguardTimeout(options);
 }
 
 ECode CIKeyguardService::SetCurrentUser(
     /* [in] */ Int32 userId)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->SetCurrentUser(userId);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->SetCurrentUser(userId);
 }
 
 ECode CIKeyguardService::ShowAssistant()
@@ -202,25 +193,22 @@ ECode CIKeyguardService::LaunchCamera()
 
 ECode CIKeyguardService::OnBootCompleted()
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnBootCompleted();
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnBootCompleted();
 }
 
 ECode CIKeyguardService::StartKeyguardExitAnimation(
     /* [in] */ Int64 startTime,
     /* [in] */ Int64 fadeoutDuration)
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->StartKeyguardExitAnimation(startTime, fadeoutDuration);
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->StartKeyguardExitAnimation(startTime, fadeoutDuration);
 }
 
 ECode CIKeyguardService::OnActivityDrawn()
 {
-    mHost->CheckPermission();
-    mHost->mKeyguardViewMediator->OnActivityDrawn();
-    return NOERROR;
+    FAIL_RETURN(mHost->CheckPermission())
+    return mHost->mKeyguardViewMediator->OnActivityDrawn();
 }
 
 ECode CIKeyguardService::ToString(
@@ -240,11 +228,11 @@ CAR_INTERFACE_IMPL(KeyguardService, Elastos::Droid::App::Service, IKeyguardServi
 
 KeyguardService::KeyguardService()
 {
-    CIKeyguardService::New(this, (IBinder**)&mBinder);
 }
 
 ECode KeyguardService::constructor()
 {
+    CIKeyguardService::New(this, (IBinder**)&mBinder);
     return Service::constructor();
 }
 

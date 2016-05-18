@@ -15899,11 +15899,10 @@ ECode CActivityManagerService::GetRunningAppProcesses(
                         ProcessRecord* pr = (ProcessRecord*)IProcessRecord::Probe(app->mAdjSource);
                         currApp->SetImportanceReasonPid(pr->mPid);
                         Int32 imp = 0;
-                        assert(0);
-                        // AutoPtr<IActivityManagerRunningAppProcessInfoHelper> amrapHelper;
-                        // CActivityManagerRunningAppProcessInfoHelper::AcquireSingleton((
-                        //     IActivityManagerRunningAppProcessInfo**)&amrapHelper);
-                        // amrapHelper->ProcStateToImportance(app->mAdjSourceProcState, &imp);
+                        AutoPtr<IActivityManagerRunningAppProcessInfoHelper> amrapHelper;
+                        CActivityManagerRunningAppProcessInfoHelper::AcquireSingleton(
+                            (IActivityManagerRunningAppProcessInfoHelper**)&amrapHelper);
+                        amrapHelper->ProcStateToImportance(app->mAdjSourceProcState, &imp);
                         currApp->SetImportanceReasonImportance(imp);
                     }
                     else if (IActivityRecord::Probe(app->mAdjSource) != NULL) {

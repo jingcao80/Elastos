@@ -324,7 +324,7 @@ ECode CKeyguardViewMediator::MyViewMediatorCallback::KeyguardGone()
 {
     //TODO
     // return mHost->mKeyguardDisplayManager->Hide();
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -504,6 +504,8 @@ ECode CKeyguardViewMediator::MyRunnable::Run()
 
 CAR_INTERFACE_IMPL(CKeyguardViewMediator, SystemUI, IKeyguardViewMediator)
 
+CAR_OBJECT_IMPL(CKeyguardViewMediator)
+
 const Int32 CKeyguardViewMediator::KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT;
 const Boolean CKeyguardViewMediator::DEBUG = FALSE;
 const Boolean CKeyguardViewMediator::DBG_WAKE = FALSE;
@@ -528,9 +530,7 @@ const Int32 CKeyguardViewMediator::START_KEYGUARD_EXIT_ANIM;
 const Int32 CKeyguardViewMediator::ON_ACTIVITY_DRAWN;
 
 const Int32 CKeyguardViewMediator::AWAKE_INTERVAL_DEFAULT_MS;
-
 const Int32 CKeyguardViewMediator::KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
-
 const Int32 CKeyguardViewMediator::KEYGUARD_DONE_DRAWING_TIMEOUT_MS;
 
 const String CKeyguardViewMediator::KEYGUARD_ANALYTICS_SETTING("keyguard_analytics");
@@ -540,7 +540,7 @@ static AutoPtr<IIntent> InitUPI()
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_USER_PRESENT, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING
-                    | IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        | IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     return intent;
 }
 
@@ -553,7 +553,7 @@ CKeyguardViewMediator::CKeyguardViewMediator()
     , mBootCompleted(FALSE)
     , mBootSendUserPresent(FALSE)
     , mSuppressNextLockSound(TRUE)
-    , mExternallyEnabled(TRUE)
+    , mExternallyEnabled(FALSE) // TRUE // TODO restore. zhaohui
     , mNeedToReshowWhenReenabled(FALSE)
     , mShowing(FALSE)
     , mOccluded(FALSE)
@@ -570,11 +570,17 @@ CKeyguardViewMediator::CKeyguardViewMediator()
     , mLockSoundStreamId(0)
     , mLockSoundVolume(0.0f)
 {
+    Slogger::E(TAG, "TODO restore mExternallyEnabled to TRUE when keyguard ready.");
+}
+
+ECode CKeyguardViewMediator::constructor()
+{
     mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
     mViewMediatorCallback = new MyViewMediatorCallback(this);
     mBroadcastReceiver = new MyBroadcastReceiver(this);
     mHandler = new MyHandler(this);
     mKeyguardGoingAwayRunnable = new MyRunnable(this);
+    return NOERROR;
 }
 
 ECode CKeyguardViewMediator::UserActivity()
@@ -641,12 +647,12 @@ void CKeyguardViewMediator::Setup()
 
     mPM->IsScreenOn(&mScreenOn);
 
+    // TODO
     // CSoundPool::New(1, IAudioManager::STREAM_SYSTEM, 0, (ISoundPool**)&mLockSounds);
-    AutoPtr<ISettingsGlobal> sg;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
-    String soundPath;
-    sg->GetString(cr, ISettingsGlobal::LOCK_SOUND, &soundPath);
-    Logger::W(TAG, "TODO: Need debug SoundPool.");
+    // AutoPtr<ISettingsGlobal> sg;
+    // CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    // String soundPath;
+    // sg->GetString(cr, ISettingsGlobal::LOCK_SOUND, &soundPath);
     // if (!soundPath.IsNull()) {
     //     mLockSounds->Load(soundPath, 1, &mLockSoundId);
     // }
@@ -664,9 +670,9 @@ void CKeyguardViewMediator::Setup()
     // if (!soundPath.IsNull()) {
     //     mLockSounds->Load(soundPath, 1, &mTrustedSoundId);
     // }
-    if (soundPath.IsNull() || mTrustedSoundId == 0) {
-        Logger::W(TAG, "failed to load trusted sound from %s", soundPath.string());
-    }
+    // if (soundPath.IsNull() || mTrustedSoundId == 0) {
+    //     Logger::W(TAG, "failed to load trusted sound from %s", soundPath.string());
+    // }
 
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
@@ -977,8 +983,7 @@ ECode CKeyguardViewMediator::VerifyUnlock(
     /* [in] */ IIKeyguardExitCallback* callback)
 {
     synchronized(this) {
-        if (DEBUG) Logger::D(TAG, "verifyUnlock");
-        Boolean isDeviceProvisioned = FALSE;
+        Boolean isDeviceProvisioned = TRUE;
         // mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
         if (!isDeviceProvisioned) {
             // don't allow this api when the device isn't provisioned
@@ -993,7 +998,7 @@ ECode CKeyguardViewMediator::VerifyUnlock(
             // this only applies when the user has externally disabled the
             // keyguard.  this is unexpected and means the user is not
             // using the api properly.
-            Logger::W(TAG, "verifyUnlock called when not externally disabled");
+            if (DEBUG) Logger::W(TAG, "verifyUnlock called when not externally disabled");
             ECode ec = callback->OnKeyguardExitResult(FALSE);
             if (FAILED(ec)) {
                 Slogger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
@@ -1001,6 +1006,10 @@ ECode CKeyguardViewMediator::VerifyUnlock(
             }
         }
         else if (mExitSecureCallback != NULL) {
+            if (DEBUG) {
+                Logger::D(TAG, "VerifyUnlock already in progress with someone else. %s",
+                    TO_CSTR(mExitSecureCallback));
+            }
             // already in progress with someone else
             ECode ec = callback->OnKeyguardExitResult(FALSE);
             if (FAILED(ec)) {
@@ -1080,7 +1089,7 @@ ECode CKeyguardViewMediator::IsInputRestricted(
     /* [out] */ Boolean* isInputRestricted)
 {
     VALIDATE_NOT_NULL(isInputRestricted)
-    Boolean isDeviceProvisioned = FALSE;
+    Boolean isDeviceProvisioned = TRUE;
     // mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
     *isInputRestricted = mShowing || mNeedToReshowWhenReenabled || !isDeviceProvisioned;
     return NOERROR;

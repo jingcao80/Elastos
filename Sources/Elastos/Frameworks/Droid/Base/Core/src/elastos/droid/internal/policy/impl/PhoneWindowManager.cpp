@@ -523,6 +523,7 @@ PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult::KeyguardDelegateOnKeyg
 ECode PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult::OnKeyguardExitResult(
     /* [in] */ Boolean success)
 {
+    Slogger::I(TAG, " >> OnKeyguardExitResult: %d", success);
     if (success) {
         //try {
         AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
@@ -4934,21 +4935,17 @@ void PhoneWindowManager::HideRecentApps(
 
 void PhoneWindowManager::LaunchHomeFromHotKey()
 {
-    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 1");
     Boolean bval;
     if (mKeyguardDelegate != NULL && (mKeyguardDelegate->IsShowingAndNotOccluded(&bval), bval)) {
         // don't launch home if keyguard showing
-    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 2");
     }
     else if (!mHideLockScreen && (mKeyguardDelegate->IsInputRestricted(&bval), bval)) {
-    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 3");
         // when in keyguard restricted mode, must first verify unlock
         // before launching home
         AutoPtr<IOnKeyguardExitResult> onExit = new KeyguardDelegateOnKeyguardExitResult(this);
         mKeyguardDelegate->VerifyUnlock(onExit);
     }
     else {
-    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 4");
         // no keyguard stuff to worry about, just launch home!
         // try {
         AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
@@ -4956,14 +4953,12 @@ void PhoneWindowManager::LaunchHomeFromHotKey()
         // } catch (RemoteException e) {
         // }
         if (mRecentsVisible) {
-    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 5");
             // Hide Recents and notify it to launch Home
             AwakenDreams();
             SendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             HideRecentApps(FALSE, TRUE);
         }
         else {
-    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 6");
             // Otherwise, just launch Home
             SendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             StartDockOrHome();
@@ -8275,6 +8270,7 @@ void PhoneWindowManager::StartDockOrHome()
     AwakenDreams();
 
     AutoPtr<IIntent> dock = CreateHomeDockIntent();
+    Slogger::I(TAG, "StartDockOrHome: %s", TO_CSTR(dock));
     if (dock != NULL) {
         //try {
         mContext->StartActivityAsUser(dock, UserHandle::CURRENT);

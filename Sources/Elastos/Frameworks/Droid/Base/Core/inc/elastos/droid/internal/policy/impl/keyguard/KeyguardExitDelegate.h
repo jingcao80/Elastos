@@ -20,8 +20,8 @@ namespace Keyguard {
 
 class KeyguardExitDelegate
     : public Object
-    , public IBinder
     , public IIKeyguardExitCallback
+    , public IBinder
 {
 public:
     CAR_INTERFACE_DECL()

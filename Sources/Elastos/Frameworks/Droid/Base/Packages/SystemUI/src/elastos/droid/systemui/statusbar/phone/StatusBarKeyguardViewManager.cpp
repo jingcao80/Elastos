@@ -248,6 +248,7 @@ void StatusBarKeyguardViewManager::CallbackAfterDraw(
 
 ECode StatusBarKeyguardViewManager::VerifyUnlock()
 {
+    Slogger::I(TAG, " >> VerifyUnlock");
     Dismiss();
     return NOERROR;
 }

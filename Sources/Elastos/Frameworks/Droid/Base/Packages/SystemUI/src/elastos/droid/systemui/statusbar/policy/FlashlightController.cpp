@@ -7,6 +7,7 @@
 #include <elastos/droid/hardware/camera2/CameraCharacteristics.h>
 #include <elastos/droid/hardware/camera2/CaptureRequest.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::CSurfaceTexture;
@@ -32,6 +33,8 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IThread;
 using Elastos::Core::IInteger32;
+using Elastos::Core::ClassLoader;
+using Elastos::Core::IClassLoader;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IList;
@@ -310,12 +313,14 @@ ECode FlashlightController::GetSmallestSize(
     outcc->Get(CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP, (IInterface**)&values);
 
     assert(IStreamConfigurationMap::Probe(values));
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+    AutoPtr<IClassInfo> classInfo;
+    FAIL_RETURN(cl->LoadClass(String("Elastos.Droid.Graphics.CSurfaceTexture"), (IClassInfo**)&classInfo))
+
     AutoPtr<ArrayOf<ISize*> > outputSizes;
-    AutoPtr<IClassInfo> cs = Utils::GetClassInfo(String("Elastos.Droid.Graphics.CSurfaceTexture"), Utils::ELASTOS_DROID_CORE_ECO_FALG);
-    FAIL_RETURN(IStreamConfigurationMap::Probe(values)->GetOutputSizes(cs, (ArrayOf<ISize*>**)&outputSizes));
+    FAIL_RETURN(IStreamConfigurationMap::Probe(values)->GetOutputSizes(classInfo, (ArrayOf<ISize*>**)&outputSizes))
     if (outputSizes == NULL || outputSizes->GetLength() == 0) {
-        // throw new IllegalStateException(
-        //         "Camera " + cameraId + "doesn't support any outputSize.");
+        Logger::E(TAG, "Camera %s doesn't support any outputSize.", cameraId.string());
         *result = NULL;
         return E_ILLEGAL_STATE_EXCEPTION;
     }
