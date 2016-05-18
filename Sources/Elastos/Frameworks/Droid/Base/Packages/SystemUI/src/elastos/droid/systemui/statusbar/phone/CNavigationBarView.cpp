@@ -278,8 +278,6 @@ ECode CNavigationBarView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, "=====================================================================");
-    Logger::I(TAG, " >>> Enter OnTouchEvent");
     VALIDATE_NOT_NULL(result);
     InitDownStates(event);
     Boolean tmp = FALSE;
@@ -299,7 +297,6 @@ ECode CNavigationBarView::OnTouchEvent(
             return NOERROR;
         }
     }
-    Logger::I(TAG, " >>> Leave OnTouchEvent");
     return LinearLayout::OnTouchEvent(event, result);
 }
 
@@ -317,8 +314,6 @@ ECode CNavigationBarView::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, "=====================================================================");
-    Logger::I(TAG, " >>> Enter OnInterceptTouchEvent");
     VALIDATE_NOT_NULL(result);
     InitDownStates(event);
     Boolean intercept = FALSE;
@@ -337,7 +332,6 @@ ECode CNavigationBarView::OnInterceptTouchEvent(
         IInputEvent::Probe(cancelEvent)->Recycle();
     }
     *result = intercept;
-    Logger::I(TAG, " <<< Leave OnInterceptTouchEvent: %d", intercept);
     return NOERROR;
 }
 

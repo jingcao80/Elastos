@@ -68,7 +68,7 @@ ECode CKeyButtonView::CheckLongPressRunnable::Run()
 //                  CKeyButtonView
 //==============================================================================
 const String CKeyButtonView::TAG("CKeyButtonView");
-const Boolean CKeyButtonView::DEBUG = TRUE;
+const Boolean CKeyButtonView::DEBUG = FALSE;
 const Float CKeyButtonView::DEFAULT_QUIESCENT_ALPHA = 1.f;
 
 CAR_INTERFACE_IMPL(CKeyButtonView, ImageView, IKeyButtonView)
@@ -235,6 +235,7 @@ ECode CKeyButtonView::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
+    if (DEBUG) Logger::D("CKeyButtonView", " >>>> OnTouchEvent: %s", TO_CSTR(ev));
     Int32 action;
     ev->GetAction(&action);
     Int32 x, y;
@@ -319,7 +320,9 @@ ECode CKeyButtonView::OnTouchEvent(
         }
     }
 
-    return TRUE;
+    if (DEBUG) Logger::D("CKeyButtonView", " <<<< OnTouchEvent: %s", TO_CSTR(ev));
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode CKeyButtonView::PlaySoundEffect(

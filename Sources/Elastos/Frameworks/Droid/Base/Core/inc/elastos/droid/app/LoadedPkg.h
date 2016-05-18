@@ -428,6 +428,8 @@ private:
     Object mServicesLock;
 
     Int32 mClientCount;
+
+    static const AutoPtr<HashMap<String, String> > sA2EClassnameMap;
 };
 
 } // namespace App

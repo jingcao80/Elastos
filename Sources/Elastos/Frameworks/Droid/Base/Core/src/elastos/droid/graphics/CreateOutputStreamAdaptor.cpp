@@ -139,6 +139,28 @@ SkStream* CreateInputStreamAdaptor(
     return new InputStreamAdaptor(stream, storage);
 }
 
+static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
+    SkASSERT(stream != NULL);
+    size_t bufferSize = 4096;
+    size_t streamLen = 0;
+    size_t len;
+    char* data = (char*)sk_malloc_throw(bufferSize);
+
+    while ((len = stream->read(data + streamLen,
+                               bufferSize - streamLen)) != 0) {
+        streamLen += len;
+        if (streamLen == bufferSize) {
+            bufferSize *= 2;
+            data = (char*)sk_realloc_throw(data, bufferSize);
+        }
+    }
+    data = (char*)sk_realloc_throw(data, streamLen);
+
+    SkMemoryStream* streamMem = new SkMemoryStream();
+    streamMem->setMemoryOwned(data, streamLen);
+    return streamMem;
+}
+
 SkStreamRewindable* CopyJavaInputStream(
     /* [in] */ IInputStream* stream,
     /* [in] */ ArrayOf<Byte>* storage)
@@ -147,9 +169,7 @@ SkStreamRewindable* CopyJavaInputStream(
     if (NULL == adaptor.get()) {
         return NULL;
     }
-    assert(0 && "TODO: need jni codes.");
-    // return adaptor_to_mem_stream(adaptor.get());
-    return NULL;
+    return adaptor_to_mem_stream(adaptor.get());
 }
 
 class SkOutputStream : public SkWStream
@@ -161,7 +181,12 @@ public:
         : mOutputStream(stream)
         , mByteArray(storage)
         , mCapacity(storage->GetLength())
+        , mBytesWritten(0)
     {}
+
+    virtual size_t bytesWritten() const {
+        return mBytesWritten;
+    }
 
     virtual bool write(
         /* [in] */ const void* buffer,
@@ -185,6 +210,7 @@ public:
 
             buffer = (void*)((char*)buffer + requested);
             size -= requested;
+            mBytesWritten += requested;
         }
         return true;
     }
@@ -199,15 +225,14 @@ private:
     AutoPtr<IOutputStream> mOutputStream;  // the caller owns this object
     AutoPtr< ArrayOf<Byte> > mByteArray;     // the caller owns this object
     Int32 mCapacity;
+    size_t mBytesWritten;
 };
 
 SkWStream* CreateOutputStreamAdaptor(
     /* [in] */ IOutputStream* stream,
     /* [in] */ ArrayOf<Byte>* storage)
 {
-    assert(0 && "TODO: need jni codes.");
-    // return new SkOutputStream(stream, storage);
-    return NULL;
+    return new SkOutputStream(stream, storage);
 }
 
 } // namespace Graphics

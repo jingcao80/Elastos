@@ -2040,9 +2040,6 @@ void CPhoneStatusBar::PrepareNavigationBarView()
     mNavigationBarView->GetBackButton((IView**)&view);
     view->SetLongClickable(TRUE);
     view->SetOnLongClickListener(mLongPressBackRecentsListener);
-    Logger::I(TAG, "=========================================================");
-    Logger::I(TAG, "BackButton:%s SetOnLongClickListener:%s", TO_CSTR(view), TO_CSTR(mLongPressBackRecentsListener));
-    Logger::I(TAG, "=========================================================");
 
     view = NULL;
     mNavigationBarView->GetHomeButton((IView**)&view);
@@ -5515,6 +5512,8 @@ void CPhoneStatusBar::HandleLongPressBackRecents(
         }
         Boolean tmp = FALSE;
         Int32 id = 0;
+        v->GetId(&id);
+        Logger::I(TAG, " activityManager:%s", TO_CSTR(activityManager));
         ec = activityManager->IsInLockTaskMode(&tmp);
         if (FAILED(ec)) {
             break;
@@ -5532,7 +5531,7 @@ void CPhoneStatusBar::HandleLongPressBackRecents(
                     break;
                 }
             }
-            else if ((v->GetId(&id), id) == R::id::back) {
+            else if (id == R::id::back) {
                 AutoPtr<IView> view;
                 mNavigationBarView->GetRecentsButton((IView**)&view);
                 view->IsPressed(&tmp);
@@ -5546,7 +5545,7 @@ void CPhoneStatusBar::HandleLongPressBackRecents(
         }
         else {
             // If this is back still need to handle sending the Int64-press event.
-            if ((v->GetId(&id), id) == R::id::back) {
+            if (id == R::id::back) {
                 sendBackLongPress = TRUE;
             }
             else if (isAccessiblityEnabled && (activityManager->IsInLockTaskMode(&tmp), tmp)) {

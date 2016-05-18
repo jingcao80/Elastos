@@ -3,6 +3,7 @@
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "../../R.h"
 #include "Elastos.Droid.Media.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IStatusBarManager;
 using Elastos::Droid::Graphics::CPaint;
@@ -22,6 +23,7 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewRootImpl;
 using Elastos::Droid::View::IWindowManagerGlobal;
 using Elastos::Droid::View::IWindowManagerGlobalHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -138,6 +140,7 @@ ECode CStatusBarWindowView::DispatchKeyEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> DispatchKeyEvent: %s", TO_CSTR(event));
     VALIDATE_NOT_NULL(result);
     Int32 action = 0, code = 0;
     event->GetAction(&action);
@@ -180,13 +183,16 @@ ECode CStatusBarWindowView::DispatchKeyEvent(
         *result = TRUE;
         return NOERROR;
     }
-    return FrameLayout::DispatchKeyEvent(event, result);
+    ECode ec = FrameLayout::DispatchKeyEvent(event, result);
+    Logger::I(TAG, " <<< DispatchKeyEvent: %s", TO_CSTR(event));
+    return ec;
 }
 
 ECode CStatusBarWindowView::DispatchTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> DispatchTouchEvent: %s", TO_CSTR(ev));
     VALIDATE_NOT_NULL(result);
     Int32 v = 0;
     if (mBrightnessMirror != NULL && (mBrightnessMirror->GetVisibility(&v), v) == IView::VISIBLE) {
@@ -199,13 +205,16 @@ ECode CStatusBarWindowView::DispatchTouchEvent(
             return NOERROR;
         }
     }
-    return FrameLayout::DispatchTouchEvent(ev, result);
+    ECode ec = FrameLayout::DispatchTouchEvent(ev, result);
+    Logger::I(TAG, " <<< DispatchTouchEvent: %s", TO_CSTR(ev));
+    return ec;
 }
 
 ECode CStatusBarWindowView::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> OnInterceptTouchEvent: %s", TO_CSTR(ev));
     VALIDATE_NOT_NULL(result);
     Boolean intercept = FALSE;
     Boolean tmp = FALSE;
@@ -236,6 +245,7 @@ ECode CStatusBarWindowView::OnInterceptTouchEvent(
         IInputEvent::Probe(cancellation)->Recycle();
     }
     *result = intercept;
+    Logger::I(TAG, " <<< OnInterceptTouchEvent: %s", TO_CSTR(ev));
     return NOERROR;
 }
 
@@ -243,6 +253,7 @@ ECode CStatusBarWindowView::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> OnTouchEvent: %s", TO_CSTR(ev));
     VALIDATE_NOT_NULL(result);
     Boolean handled = FALSE, tmp = FALSE;
     Int32 v = 0;
@@ -258,6 +269,7 @@ ECode CStatusBarWindowView::OnTouchEvent(
         IBaseStatusBar::Probe(mService)->SetInteracting(IStatusBarManager::WINDOW_STATUS_BAR, FALSE);
     }
     *result = handled;
+    Logger::I(TAG, " <<< OnTouchEvent: %s", TO_CSTR(ev));
     return NOERROR;
 }
 
