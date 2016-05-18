@@ -11674,8 +11674,9 @@ ECode CActivityManagerService::StopLockTaskModeOnCurrent()
 ECode CActivityManagerService::IsInLockTaskMode(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     synchronized(this) {
-        return mStackSupervisor->IsInLockTaskMode();
+        *result = mStackSupervisor->IsInLockTaskMode();
     }
     return NOERROR;
 }

@@ -4032,6 +4032,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = 0;
 
     Boolean keyguardOn = KeyguardOn();
 
@@ -4062,7 +4063,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             Int64 now = SystemClock::GetUptimeMillis();
             Int64 timeoutTime = mVolumeDownKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
             if (now < timeoutTime) {
-                return timeoutTime - now;
+                *result = timeoutTime - now;
+                return NOERROR;
             }
         }
         if (keyCode == IKeyEvent::KEYCODE_VOLUME_DOWN
@@ -4070,13 +4072,15 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             if (!down) {
                 mVolumeDownKeyConsumedByScreenshotChord = FALSE;
             }
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
         if (mVolumeUpKeyTriggered && !mPowerKeyTriggered) {
             Int64 now = SystemClock::GetUptimeMillis();
             Int64 timeoutTime = mVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
             if (now < timeoutTime) {
-                return timeoutTime - now;
+                *result = timeoutTime - now;
+                return NOERROR;
             }
         }
         if (keyCode == IKeyEvent::KEYCODE_VOLUME_UP
@@ -4084,7 +4088,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             if (!down) {
                 mVolumeUpKeyConsumedByScreenshotChord = FALSE;
             }
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
     }
 
@@ -4113,12 +4118,14 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             mHomePressed = FALSE;
             if (mHomeConsumed) {
                 mHomeConsumed = FALSE;
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
 
             if (canceled) {
                 Logger::I(TAG, "Ignoring HOME; event canceled.");
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
 
             // If an incoming call is ringing, HOME is totally disabled.
@@ -4128,9 +4135,9 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             Boolean ringing;
             if (telecomManager != NULL && (telecomManager->IsRinging(&ringing), ringing)) {
                 Logger::I(TAG, "Ignoring HOME; there's a ringing incoming call.");
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
-
 
             // Delay handling home if a double-tap is possible.
             if (mDoubleTapOnHomeBehavior != KEY_ACTION_NOTHING) {
@@ -4142,7 +4149,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 Int32 doubleTapTimeout;
                 vcHelper->GetDoubleTapTimeout(&doubleTapTimeout);
                 mHandler->PostDelayed(mHomeDoubleTapTimeoutRunnable, doubleTapTimeout, &isSuccessed);
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
 
             // If there's a dream running then use home to escape the dream
@@ -4151,12 +4159,14 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             if (mDreamManagerInternal != NULL
                 && (mDreamManagerInternal->IsDreaming(&isDreaming), isDreaming)) {
                 mDreamManagerInternal->StopDream(FALSE/*immediate*/);
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
 
             // Go home!
             LaunchHomeFromHotKey();
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
 
         // If a system window has focus, then it doesn't make sense
@@ -4174,7 +4184,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                     || type == IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG
                     || (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
                 // the "app" is keyguard, so give it the key
-                return 0;
+                *result = 0;
+                return NOERROR;
             }
             Int32 typeCount = WINDOW_TYPES_WHERE_HOME_DOESNT_WORK->GetLength();
             for (Int32 i = 0; i < typeCount; i++) {
@@ -4205,13 +4216,16 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 if (mLongPressOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
                     CancelPreloadRecentApps();
                 }
+
                 mHomePressed = TRUE;
                 PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
                 PerformKeyAction(mLongPressOnHomeBehavior);
                 mHomeConsumed = TRUE;
             }
         }
-        return -1;
+
+        *result = -1;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_MENU) {
         // // Hijack modified menu keys for debugging features
@@ -4219,7 +4233,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
 
         if (virtualKey || keyguardOn) {
             // Let the app handle the key
-            return 0;
+            *result = 0;
+            return NOERROR;
         }
 
         if (down) {
@@ -4236,7 +4251,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                     String nullStr;
                     mContext->SendOrderedBroadcastAsUser(intent, UserHandle::CURRENT,
                         nullStr, NULL, NULL, 0, nullStr, NULL);
-                    return -1;
+                    *result = -1;
+                    return NOERROR;
                 }
                 else if (SHOW_PROCESSES_ON_ALT_MENU
                     && (metaState & IKeyEvent::META_ALT_ON) == IKeyEvent::META_ALT_ON) {
@@ -4253,15 +4269,17 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                         Boolean isSuccess = FALSE;
                         mContext->StopService(service, &isSuccess);
                     }
-                    Boolean result;
-                    Settings::Global::PutInt32(res, ISettingsGlobal::SHOW_PROCESSES, shown ? 0 : 1, &result);
-                    return -1;
+                    Boolean bval;
+                    Settings::Global::PutInt32(res, ISettingsGlobal::SHOW_PROCESSES, shown ? 0 : 1, &bval);
+                    *result = -1;
+                    return NOERROR;
                 }
             }
             else if (longPress) {
                 if (UnpinActivity()) {
                     PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
-                    return -1;
+                    *result = -1;
+                    return NOERROR;
                 }
                 if (!keyguardOn && mLongPressOnMenuBehavior != KEY_ACTION_NOTHING) {
                     if (mLongPressOnMenuBehavior != KEY_ACTION_APP_SWITCH) {
@@ -4270,12 +4288,14 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                     PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::LONG_PRESS, FALSE, &bval);
                     PerformKeyAction(mLongPressOnMenuBehavior);
                     mMenuPressed = FALSE;
-                    return -1;
+                    *result = -1;
+                    return NOERROR;
                 }
             }
         }
 
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_SEARCH) {
         if (down) {
@@ -4287,10 +4307,12 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             mSearchKeyShortcutPending = FALSE;
             if (mConsumeSearchKeyUp) {
                 mConsumeSearchKeyUp = FALSE;
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
         }
-        return 0;
+        *result = 0;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_APP_SWITCH) {
         if (!keyguardOn) {
@@ -4327,7 +4349,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 }
             }
         }
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_ASSIST) {
         if (down) {
@@ -4362,7 +4385,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 }
             }
         }
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_VOICE_ASSIST) {
         if (!down) {
@@ -4381,7 +4405,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             Boolean isSuccess = FALSE;
             mHandler->Post(mScreenshotRunnable, &isSuccess);
         }
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_UP
         || keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_DOWN) {
@@ -4432,7 +4457,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             CIntent::New(IIntent::ACTION_SHOW_BRIGHTNESS_DIALOG, (IIntent**)&intent);
             mContext->StartActivityAsUser(intent, UserHandle::CURRENT_OR_SELF);
         }
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     else if ((helper->IsMetaKey(keyCode, &bval), bval)) {
         if (down) {
@@ -4441,7 +4467,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         else if (mPendingMetaAction) {
             LaunchAssistAction(IIntent::EXTRA_ASSIST_INPUT_HINT_KEYBOARD);
         }
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     else if (keyCode == IKeyEvent::KEYCODE_BACK) {
         if (!down) {
@@ -4490,7 +4517,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                         CKeyEvent::KeyCodeToString(keyCode).string());
                 }
             }
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
     }
 
@@ -4513,7 +4541,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                         "the activity to which it is registered was not found: META: %s",
                         CKeyEvent::KeyCodeToString(keyCode).string());
                 }
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
         }
     }
@@ -4539,7 +4568,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                     "the activity to which it is registered was not found: keyCode=%s, category=%s",
                     CKeyEvent::KeyCodeToString(keyCode).string(), category.string());
             }
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
     }
 
@@ -4555,7 +4585,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             if ((helper->MetaStateHasModifiers(shiftlessModifiers, IKeyEvent::META_ALT_ON, &bval1), bval1)) {
                 mRecentAppsHeldModifiers = shiftlessModifiers;
                 ShowRecentApps(TRUE);
-                return -1;
+                *result = -1;
+                return NOERROR;
             }
         }
     }
@@ -4573,17 +4604,20 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         Int32 direction = (metaState & IKeyEvent::META_SHIFT_MASK) != 0 ? -1 : 1;
         Int32 deviceId = 0;
         mWindowManagerFuncs->SwitchKeyboardLayout((IInputEvent::Probe(event)->GetDeviceId(&deviceId), deviceId), direction);
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
     if (mLanguageSwitchKeyPressed && !down
             && (keyCode == IKeyEvent::KEYCODE_LANGUAGE_SWITCH
                     || keyCode == IKeyEvent::KEYCODE_SPACE)) {
         mLanguageSwitchKeyPressed = FALSE;
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
 
     if (mGlobalKeyManager->HandleGlobalKey(mContext, keyCode, event, &bval), bval) {
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
 
     // Specific device key handling
@@ -4596,17 +4630,20 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         }
 
         if (bval) {
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
     }
 
     // Reserve all the META modifier combos for system behavior
     if ((metaState & IKeyEvent::META_META_ON) != 0) {
-        return -1;
+        *result = -1;
+        return NOERROR;
     }
 
     // Let the application handle the key.
-    return 0;
+    *result = 0;
+    return NOERROR;
 }
 
 Boolean PhoneWindowManager::UnpinActivity()
@@ -4897,17 +4934,21 @@ void PhoneWindowManager::HideRecentApps(
 
 void PhoneWindowManager::LaunchHomeFromHotKey()
 {
+    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 1");
     Boolean bval;
     if (mKeyguardDelegate != NULL && (mKeyguardDelegate->IsShowingAndNotOccluded(&bval), bval)) {
         // don't launch home if keyguard showing
+    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 2");
     }
     else if (!mHideLockScreen && (mKeyguardDelegate->IsInputRestricted(&bval), bval)) {
+    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 3");
         // when in keyguard restricted mode, must first verify unlock
         // before launching home
         AutoPtr<IOnKeyguardExitResult> onExit = new KeyguardDelegateOnKeyguardExitResult(this);
         mKeyguardDelegate->VerifyUnlock(onExit);
     }
     else {
+    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 4");
         // no keyguard stuff to worry about, just launch home!
         // try {
         AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
@@ -4915,12 +4956,14 @@ void PhoneWindowManager::LaunchHomeFromHotKey()
         // } catch (RemoteException e) {
         // }
         if (mRecentsVisible) {
+    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 5");
             // Hide Recents and notify it to launch Home
             AwakenDreams();
             SendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             HideRecentApps(FALSE, TRUE);
         }
         else {
+    Slogger::I(TAG, " >> LaunchHomeFromHotKey. 6");
             // Otherwise, just launch Home
             SendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             StartDockOrHome();
@@ -6760,7 +6803,8 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
             Slogger::W(TAG, "Could not dispatch event to device key handler");
         }
         if (bval) {
-            return 0;
+            *bitwise = 0;
+            return NOERROR;
         }
     }
 

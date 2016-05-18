@@ -55,6 +55,20 @@ namespace App {
 
 const String LoadedPkg::TAG("LoadedPkg");
 
+AutoPtr<HashMap<String, String> > InitA2EClassnameMap()
+{
+    AutoPtr<HashMap<String, String> > classnameMap = new HashMap<String, String> ();
+    (*classnameMap)[String("android.app.")]                        = String("Elastos.Droid.App.C");
+    (*classnameMap)[String("android.opengl.")]                     = String("Elastos.Droid.Opengl.C");
+    (*classnameMap)[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
+    (*classnameMap)[String("android.webkit.")]                     = String("Elastos.Droid.Webkit.C");
+    (*classnameMap)[String("android.widget.")]                     = String("Elastos.Droid.Widget.C");
+    (*classnameMap)[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
+    (*classnameMap)[String("com.android.internal.view.menu.")]     = String("Elastos.Droid.Internal.View.Menu.C");
+    (*classnameMap)[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");
+    return classnameMap;
+}
+const AutoPtr<HashMap<String, String> > LoadedPkg::sA2EClassnameMap = InitA2EClassnameMap();
 
 //==============================================================================
 // LoadedPkg::ReceiverDispatcher::Args
@@ -787,20 +801,10 @@ String LoadedPkg::GetElastosClassName(
     }
     else if (className.StartWith("android.")
         || className.StartWith("com.android.")) {
-        HashMap<String, String> classNameMap;
-        classNameMap[String("android.app.")]                        = String("Elastos.Droid.App.C");
-        classNameMap[String("android.opengl.")]                     = String("Elastos.Droid.Opengl.C");
-        classNameMap[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
-        classNameMap[String("android.webkit.")]                     = String("Elastos.Droid.Webkit.C");
-        classNameMap[String("android.widget.")]                     = String("Elastos.Droid.Widget.C");
-        classNameMap[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
-        classNameMap[String("com.android.internal.view.menu.")]     = String("Elastos.Droid.Internal.View.Menu.C");
-        classNameMap[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");
-
         Int32 lastIndex = className.LastIndexOf(".");
         String ns = className.Substring(0, lastIndex + 1);
-        HashMap<String, String>::Iterator it = classNameMap.Find(ns);
-        if (it != classNameMap.End()) {
+        HashMap<String, String>::Iterator it = sA2EClassnameMap->Find(ns);
+        if (it != sA2EClassnameMap->End()) {
             StringBuilder sb(it->mSecond);
             sb += className.Substring(lastIndex + 1);
             return sb.ToString();

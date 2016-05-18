@@ -1327,6 +1327,7 @@ ECode Activity::OnKeyDown(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> %s OnKeyDown: %s", TO_CSTR(event));
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
@@ -1444,6 +1445,7 @@ ECode Activity::OnKeyUp(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> %s OnKeyUp: %s", TO_CSTR(event));
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
