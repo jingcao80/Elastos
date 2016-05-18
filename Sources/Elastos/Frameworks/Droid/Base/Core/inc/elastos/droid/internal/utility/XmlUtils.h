@@ -41,6 +41,10 @@ public:
         /* [in] */ Int32 defaultValue);
 
     static CARAPI_(Boolean) ConvertValueToBoolean(
+        /* [in] */ const String& value,
+        /* [in] */ Boolean defaultValue);
+
+    static CARAPI_(Boolean) ConvertValueToBoolean(
         /* [in] */ ICharSequence* value,
         /* [in] */ Boolean defaultValue);
 

@@ -5416,10 +5416,9 @@ ECode Workspace::GetParentCellLayoutForView(
     GetWorkspaceAndHotseatCellLayouts((IArrayList**)&layouts);
     Int32 size;
     layouts->GetSize(&size);
-    for (Int32 i = 0; i > size; i++) {
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         layouts->Get(i, (IInterface**)&obj);
-
         AutoPtr<ICellLayout> layout = ICellLayout::Probe(obj);
         AutoPtr<IShortcutAndWidgetContainer> container;
         layout->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&container);

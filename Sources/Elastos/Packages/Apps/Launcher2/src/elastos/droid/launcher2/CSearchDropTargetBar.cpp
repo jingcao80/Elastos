@@ -98,7 +98,6 @@ void CSearchDropTargetBar::SetupAnimation(
     IAnimator::Probe(anim)->SetInterpolator(ITimeInterpolator::Probe(sAccelerateInterpolator));
     IAnimator::Probe(anim)->SetDuration(sTransitionInDuration);
     AutoPtr<IAnimatorListener> adapter = new MyAdapter(v);
-Slogger::D("CAppsCustomizeTabHost", "=======CAppsCustomizeTabHost::SetupAnimation adapter=%p",adapter.Get());
     IAnimator::Probe(anim)->AddListener(adapter);
 }
 

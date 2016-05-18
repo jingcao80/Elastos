@@ -232,7 +232,6 @@ ECode DragController::StartDrag(
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
         AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
-
         listener->OnDragStart(source, dragInfo, dragAction);
     }
 

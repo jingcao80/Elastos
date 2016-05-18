@@ -4080,7 +4080,6 @@ ECode Launcher::OnLongClick(
             StartWallpaper();
         }
         else {
-            Slogger::I(TAG, " >> StartDrag: longClickCellInfo %s", TO_CSTR(longClickCellInfo));
             if (IFolder::Probe(itemUnderLongClick) == NULL) {
                 // User long pressed on an item
                 mWorkspace->StartDrag(longClickCellInfo);

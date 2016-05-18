@@ -113,20 +113,29 @@ Int32 XmlUtils::ConvertValueToList(
 }
 
 Boolean XmlUtils::ConvertValueToBoolean(
-    /* [in] */ ICharSequence* value,
+    /* [in] */ const String& value,
     /* [in] */ Boolean defaultValue)
 {
     Boolean result = FALSE;
 
-    if (NULL == value) return defaultValue;
+    if (value.IsNull()) return defaultValue;
 
-    String str;
-    value->ToString(&str);
-    if (str.Equals("1") ||  str.Equals("true") ||  str.Equals("TRUE")) {
+    if (value.Equals("1") ||  value.Equals("true") ||  value.Equals("TRUE")) {
         result = TRUE;
     }
 
     return result;
+}
+
+Boolean XmlUtils::ConvertValueToBoolean(
+    /* [in] */ ICharSequence* value,
+    /* [in] */ Boolean defaultValue)
+{
+    if (NULL == value) return defaultValue;
+
+    String str;
+    value->ToString(&str);
+    return ConvertValueToBoolean(str, defaultValue);
 }
 
 Int32 XmlUtils::ConvertValueToInt32(
@@ -1308,7 +1317,7 @@ ECode XmlUtils::ReadThisPrimitiveValueXml(
         String value;
         FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("value"), &value))
         AutoPtr<IBoolean> bv;
-        CBoolean::New(value.EqualsIgnoreCase("true"), (IBoolean**)&bv);
+        CBoolean::New(ConvertValueToBoolean(value, FALSE), (IBoolean**)&bv);
         res = bv;
     }
     *ret = res;

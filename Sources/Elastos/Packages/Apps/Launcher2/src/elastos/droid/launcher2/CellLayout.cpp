@@ -224,7 +224,7 @@ Int64 CellLayout::CellLayoutAnimationController::GetDelayForView(
     return (Int32) (Elastos::Core::Math::Random() * 150);
 }
 
-CAR_INTERFACE_IMPL(CellLayout::CellLayoutLayoutParams, MarginLayoutParams, ICellLayoutLayoutParams)
+CAR_INTERFACE_IMPL(CellLayout::CellLayoutLayoutParams, ViewGroup::MarginLayoutParams, ICellLayoutLayoutParams)
 
 CellLayout::CellLayoutLayoutParams::CellLayoutLayoutParams()
     : mCellX(0)
@@ -1685,7 +1685,7 @@ ECode CellLayout::SetTagToCellInfoForPoint(
     GetScrollX(&x);
     x += touchX;
     GetScrollY(&y);
-    x += touchY;
+    y += touchY;
     Int32 count;
     mShortcutsAndWidgets->GetChildCount(&count);
 
@@ -1695,12 +1695,12 @@ ECode CellLayout::SetTagToCellInfoForPoint(
         IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
-        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
+        CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(_lp);
 
         Int32 v;
         child->GetVisibility(&v);
         AutoPtr<IAnimation> anim;
-        if ((v == VISIBLE || (child->GetAnimation((IAnimation**)&anim), anim) != NULL) &&
+        if ((v == VISIBLE || (child->GetAnimation((IAnimation**)&anim), anim != NULL)) &&
                     lp->mIsLockedToGrid) {
             child->GetHitRect(frame);
 

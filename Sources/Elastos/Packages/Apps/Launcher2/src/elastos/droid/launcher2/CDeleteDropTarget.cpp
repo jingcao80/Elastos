@@ -140,7 +140,7 @@ CDeleteDropTarget::MyRunnable::MyRunnable(
 
 ECode CDeleteDropTarget::MyRunnable::Run()
 {
-    IButtonDropTarget::Probe(mHost->mSearchDropTargetBar)->OnDragEnd();
+    IDragControllerDragListener::Probe(mHost->mSearchDropTargetBar)->OnDragEnd();
     mHost->mLauncher->ExitSpringLoadedDragMode();
     mHost->CompleteDrop(mD);
     return NOERROR;
