@@ -1,5 +1,9 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContentValues;
+
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,11 +11,40 @@ module {
     namespace Telephony {
 
     interface IIccPhoneBookInterfaceManagerProxy {
+
+        SetmIccPhoneBookInterfaceManager(
+            [in] IIccPhoneBookInterfaceManager* iccPhoneBookInterfaceManager);
+
+        UpdateAdnRecordsInEfBySearch (
+            [in] Int32 efid,
+            [in] String oldTag,
+            [in] String oldPhoneNumber,
+            [in] String newTag,
+            [in] String newPhoneNumber,
+            [in] String pin2,
+            [out] Boolean* result);
+
+        UpdateAdnRecordsWithContentValuesInEfBySearch(
+            [in] Int32 efid,
+            [in] IContentValues* values,
+            [in] String pin2,
+            [out] Boolean* result);
+
+        UpdateAdnRecordsInEfByIndex(
+            [in] Int32 efid,
+            [in] String newTag,
+            [in] String newPhoneNumber,
+            [in] Int32 index,
+            [in] String pin2,
+            [out] Boolean* result);
+
         GetAdnRecordsSize(
-            [in] Int32 efid);
+            [in] Int32 efid,
+            [out, callee] ArrayOf<Int32>* result);
 
         GetAdnRecordsInEf(
-            [in] Int32 efid);
+            [in] Int32 efid,
+            [out] IList** result);
 
         GetAdnCount(
             [out] Int32* result);

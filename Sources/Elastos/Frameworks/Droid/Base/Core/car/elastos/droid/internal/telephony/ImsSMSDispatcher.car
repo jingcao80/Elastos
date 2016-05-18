@@ -6,24 +6,15 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface ISMSDispatcher
+     */
     interface IImsSMSDispatcher {
         Dispose();
 
-        HandleMessage(
-            [in] Message msg);
-
-
-        SendRetrySms(
-            [in] SmsTracker tracker);
-
-        IsIms(
-            [out] Boolean* result);
-
-        GetImsSmsFormat(
-            [out] String* result);
-
         EnableSendSmsOverIms(
-            [in] Boolean enable);
+            [in] Boolean enbl);
 
         IsImsSmsEnabled(
             [out] Boolean* result);

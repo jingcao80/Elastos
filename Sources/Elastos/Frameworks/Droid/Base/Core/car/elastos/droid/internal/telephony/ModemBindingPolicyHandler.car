@@ -1,20 +1,39 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface IModemBindingPolicyHandler {
-        GetInstance(
-            [out] ModemBindingPolicyHandler* result);
-
-        HandleMessage(
-            [in] Message msg);
 
         UpdatePrefNwTypeIfRequired();
 
+        SetPreferredNetworkType(
+            [in] Int32 networkType,
+            [in] Int32 phoneId,
+            [in] IMessage* response);
+
+    }
+
+    interface IModemBindingPolicyHandlerHelper {
+        //***** Class Methods
+        // Make(
+        //     [in] IContext* context,
+        //     [in] IUiccController* uiccMgr,
+        //     [in] ArrayOf<ICommandsInterface*>* ci,
+        //     [out] IModemBindingPolicyHandler** result);
+
+        GetInstance(
+            [out] IModemBindingPolicyHandler** result);
     }
 
     }//Telephony

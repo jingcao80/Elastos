@@ -6,20 +6,21 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IContentProvider
+     */
     interface IIccProvider {
-        OnCreate(
-            [out] Boolean* result);
 
-        GetType(
-            [in] Uri url,
-            [out] String* result);
-
-        Insert(
-            [in] Uri url, 
-            [in] ContentValues initialValues,
-            [out] Uri* result);
-
-
+        const String STR_TAG = "tag";
+        const String STR_NUMBER = "number";
+        const String STR_EMAILS = "emails";
+        const String STR_ANRS = "anrs";
+        const String STR_NEW_TAG = "newTag";
+        const String STR_NEW_NUMBER = "newNumber";
+        const String STR_NEW_EMAILS = "newEmails";
+        const String STR_NEW_ANRS = "newAnrs";
+        const String STR_PIN2 = "pin2";
     }
 
     }//Telephony

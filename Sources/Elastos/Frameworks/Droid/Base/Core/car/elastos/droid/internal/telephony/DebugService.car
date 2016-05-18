@@ -7,12 +7,6 @@ module {
     namespace Telephony {
 
     interface IDebugService {
-
-
-
-
-
-
     }
 
     }//Telephony

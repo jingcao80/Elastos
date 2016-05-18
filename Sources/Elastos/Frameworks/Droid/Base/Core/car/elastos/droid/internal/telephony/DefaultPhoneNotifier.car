@@ -1,65 +1,110 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Telecomm.Telecom.IPhone;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    interface IDataStateChangedCallback {
+        OnDataStateChanged(
+            [in] Int64 subId,
+            [in] String state,
+            [in] String reason,
+            [in] String apnName,
+            [in] String apnType,
+            [in] Boolean unavailable);
+    }
+
+    /**
+     * @Involve
+     * interface IPhoneNotifier
+     */
     interface IDefaultPhoneNotifier {
-        NotifyPhoneState(
-            [in] Phone sender);
 
-        NotifyServiceState(
-            [in] Phone sender);
-
-        NotifySignalStrength(
-            [in] Phone sender);
-
-        NotifyMessageWaitingChanged(
-            [in] Phone sender);
-
-        NotifyCallForwardingChanged(
-            [in] Phone sender);
-
-        NotifyDataActivity(
-            [in] Phone sender);
-
-        NotifyDataConnectionFailed(
-            [in] Phone sender, 
-            [in] String reason, 
-            [in] String apnType);
-
-        NotifyCellLocation(
-            [in] Phone sender);
-
-
+        NotifyPreciseCallState(
+            [in] IPhone* sender);
 
         NotifyDisconnectCause(
-            [in] Int32 cause, 
+            [in] Int32 cause,
             [in] Int32 preciseCause);
 
+        NotifyPreciseDataConnectionFailed(
+            [in] IPhone* sender,
+            [in] String reason,
+            [in] String apnType,
+            [in] String apn,
+            [in] String failCause);
 
-        NotifyVoLteServiceStateChanged(
-            [in] Phone sender, 
-            [in] VoLteServiceState lteState);
+    }
 
-        ConvertCallState(
-            [in] Int32 state,
-            [out] State* result);
+    [local, deprecated]
+    interface IDefaultPhoneNotifierHelper {
+        /**
+         * Convert the {@link PhoneConstants.State} enum into the TelephonyManager.CALL_STATE_*
+         * constants for the public API.
+         */
+        // ConvertCallState(
+        //     [in] IPhoneConstantsState* state,
+        //     [out] Int32* result);
 
-        ConvertDataState(
-            [in] Int32 state,
-            [out] DataState* result);
+        /**
+         * Convert the TelephonyManager.CALL_STATE_* constants into the
+         * {@link PhoneConstants.State} enum for the public API.
+         */
+        // ConvertCallState(
+        //     [in] Int32 state,
+        //     [out] IPhoneConstantsState** result);
 
-        ConvertDataActivityState(
-            [in] Int32 state,
-            [out] DataActivityState* result);
+        /**
+         * Convert the {@link PhoneConstants.DataState} enum into the TelephonyManager.DATA_* constants
+         * for the public API.
+         */
+        // ConvertDataState(
+        //     [in] IPhoneConstantsDataState* state,
+        //     [out] Int32* result);
 
+        /**
+         * Convert the TelephonyManager.DATA_* constants into {@link PhoneConstants.DataState} enum
+         * for the public API.
+         */
+        // ConvertDataState(
+        //     [in] Int32 state,
+        //     [out] IPhoneConstantsDataState** result);
+
+        /**
+         * Convert the {@link Phone.DataActivityState} enum into the TelephonyManager.DATA_* constants
+         * for the public API.
+         */
+        // ConvertDataActivityState(
+        //     [in] IPhoneDataActivityState* state,
+        //     [out] Int32* result);
+
+        /**
+         * Convert the TelephonyManager.DATA_* constants into the {@link Phone.DataActivityState} enum
+         * for the public API.
+         */
+        // ConvertDataActivityState(
+        //     [in] Int32 state,
+        //     [out] IPhoneDataActivityState** result);
+
+        /**
+         * Convert the {@link State} enum into the PreciseCallState.PRECISE_CALL_STATE_* constants
+         * for the public API.
+         */
+        ConvertPreciseCallState(
+            [in] ICallState* state,
+            [out] Int32* result);
+
+        /**
+         * Convert the Call.State.* constants into the {@link State} enum
+         * for the public API.
+         */
         ConvertPreciseCallState(
             [in] Int32 state,
-            [out] State* result);
-
+            [out] ICallState** result);
     }
 
     }//Telephony

@@ -1,68 +1,37 @@
 
-module {
+module
+{
+    // interface Elastos.Droid.Internal.Telephony.IPhoneBase;
+    // interface Elastos.Droid.Internal.Telephony.ISmsMessageBase;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IStateMachine
+     */
     interface IInboundSmsHandler {
+
+        /** New SMS received as an AsyncResult. */
+        const Int32 EVENT_NEW_SMS = 1;
+
+        /** New SMS received as an AsyncResult. */
+        const Int32 EVENT_INJECT_SMS = 8;
+
         Dispose();
 
-        UpdatePhoneObject(
-            [in] PhoneBase phone);
+        // UpdatePhoneObject(
+        //     [in] IPhoneBase* phone);
 
-        GetPhone(
-            [out] PhoneBase* result);
+        // GetPhone(
+        //     [out] IPhoneBase** result);
 
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        Enter();
-
-        Exit();
-
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        Enter();
-
-        Exit();
-
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        HandleNewSms(
-            [in] AsyncResult ar);
-
-        HandleInjectSms(
-            [in] AsyncResult ar);
-
-        DispatchMessage(
-            [in] SmsMessageBase smsb,
-            [out] Int32* result);
-
-        ProcessMessagePart(
-            [in] InboundSmsTracker tracker,
-            [out] Boolean* result);
-
-        SetAndDirectIntent(
-            [in] Intent intent, 
-            [in] Int32 destPort);
-
-        IsCurrentFormat3gpp2(
-            [out] Boolean* result);
+        // DispatchMessage(
+        //     [in] ISmsMessageBase* smsb,
+        //     [out] Int32* result);
 
     }
 

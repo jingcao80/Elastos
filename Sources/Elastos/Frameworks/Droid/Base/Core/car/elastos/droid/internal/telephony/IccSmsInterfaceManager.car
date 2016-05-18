@@ -1,23 +1,342 @@
 
-module {
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Net.IUri;
+
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    [deprecated]
     interface IIccSmsInterfaceManager {
-        HandleMessage(
-            [in] Message msg);
+        /**
+         * Update the specified message on the Icc.
+         *
+         * @param index record index of message to update
+         * @param status new message status (STATUS_ON_ICC_READ,
+         *                  STATUS_ON_ICC_UNREAD, STATUS_ON_ICC_SENT,
+         *                  STATUS_ON_ICC_UNSENT, STATUS_ON_ICC_FREE)
+         * @param pdu the raw PDU to store
+         * @return success or not
+         *
+         */
+        UpdateMessageOnIccEf(
+            [in] String callingPackage,
+            [in] Int32 index,
+            [in] Int32 status,
+            [in] ArrayOf<Byte>* pdu,
+            [out] Boolean* result);
 
+        /**
+         * Copy a raw SMS PDU to the Icc.
+         *
+         * @param pdu the raw PDU to store
+         * @param status message status (STATUS_ON_ICC_READ, STATUS_ON_ICC_UNREAD,
+         *               STATUS_ON_ICC_SENT, STATUS_ON_ICC_UNSENT)
+         * @return success or not
+         *
+         */
+        CopyMessageToIccEf(
+            [in] String callingPackage,
+            [in] Int32 status,
+            [in] ArrayOf<Byte>* pdu,
+            [in] ArrayOf<Byte>* smsc,
+            [out] Boolean* result);
 
+        SynthesizeMessages(
+            [in] String originatingAddress,
+            [in] String scAddress,
+            [in] IList* messages,
+            [in] Int64 timestampMillis);
+
+        /**
+         * Retrieves all messages currently stored on Icc.
+         *
+         * @return list of SmsRawData of all sms on Icc
+         */
+        GetAllMessagesFromIccEf(
+            [in] String callingPackage,
+            [out] IList** result);
+
+        /**
+         * Send a data based SMS to a specific application port.
+         *
+         * @param destAddr the address to send the message to
+         * @param scAddr is the service center address or null to use
+         *  the current default SMSC
+         * @param destPort the port to deliver the message to
+         * @param data the body of the message to send
+         * @param sentIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully sent, or failed.
+         *  The result code will be <code>Activity.RESULT_OK<code> for success,
+         *  or one of these errors:<br>
+         *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+         *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+         *  <code>RESULT_ERROR_NULL_PDU</code><br>
+         *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+         *  the extra "errorCode" containing a radio technology specific value,
+         *  generally only useful for troubleshooting.<br>
+         *  The per-application based SMS control checks sentIntent. If sentIntent
+         *  is NULL the caller will be checked against all unknown applications,
+         *  which cause smaller number of SMS to be sent in checking period.
+         * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is delivered to the recipient.  The
+         *  raw pdu of the status report is in the extended data ("pdu").
+         */
+        SendData(
+            [in] String callingPackage,
+            [in] String destAddr,
+            [in] String scAddr,
+            [in] Int32 destPort,
+            [in] ArrayOf<Byte>* data,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent);
+
+        /**
+         * Send a data based SMS to a specific application port.
+         *
+         * @param destAddr the address to send the message to
+         * @param scAddr is the service center address or null to use
+         *  the current default SMSC
+         * @param destPort the port to deliver the message to
+         * @param origPort the originator port set by sender
+         * @param data the body of the message to send
+         * @param sentIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully sent, or failed.
+         *  The result code will be <code>Activity.RESULT_OK<code> for success,
+         *  or one of these errors:<br>
+         *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+         *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+         *  <code>RESULT_ERROR_NULL_PDU</code><br>
+         *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+         *  the extra "errorCode" containing a radio technology specific value,
+         *  generally only useful for troubleshooting.<br>
+         *  The per-application based SMS control checks sentIntent. If sentIntent
+         *  is NULL the caller will be checked against all unknown applications,
+         *  which cause smaller number of SMS to be sent in checking period.
+         * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is delivered to the recipient.  The
+         *  raw pdu of the status report is in the extended data ("pdu").
+         */
+        SendDataWithOrigPort(
+            [in] String callingPackage,
+            [in] String destAddr,
+            [in] String scAddr,
+            [in] Int32 destPort,
+            [in] Int32 origPort,
+            [in] ArrayOf<Byte>* data,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent);
+
+        /**
+         * Send a text based SMS.
+         *
+         * @param destAddr the address to send the message to
+         * @param scAddr is the service center address or null to use
+         *  the current default SMSC
+         * @param text the body of the message to send
+         * @param sentIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully sent, or failed.
+         *  The result code will be <code>Activity.RESULT_OK<code> for success,
+         *  or one of these errors:<br>
+         *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+         *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+         *  <code>RESULT_ERROR_NULL_PDU</code><br>
+         *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+         *  the extra "errorCode" containing a radio technology specific value,
+         *  generally only useful for troubleshooting.<br>
+         *  The per-application based SMS control checks sentIntent. If sentIntent
+         *  is NULL the caller will be checked against all unknown applications,
+         *  which cause smaller number of SMS to be sent in checking period.
+         * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is delivered to the recipient.  The
+         *  raw pdu of the status report is in the extended data ("pdu").
+         */
+        SendText(
+            [in] String callingPackage,
+            [in] String destAddr,
+            [in] String scAddr,
+            [in] String text,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent);
+
+        /**
+         * Send a text based SMS with Messaging Options.
+         *
+         * @param destAddr the address to send the message to
+         * @param scAddr is the service center address or null to use
+         *  the current default SMSC
+         * @param text the body of the message to send
+         * @param sentIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully sent, or failed.
+         *  The result code will be <code>Activity.RESULT_OK<code> for success,
+         *  or one of these errors:<br>
+         *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+         *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+         *  <code>RESULT_ERROR_NULL_PDU</code><br>
+         *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+         *  the extra "errorCode" containing a radio technology specific value,
+         *  generally only useful for troubleshooting.<br>
+         *  The per-application based SMS control checks sentIntent. If sentIntent
+         *  is NULL the caller will be checked against all unknown applications,
+         *  which cause smaller number of SMS to be sent in checking period.
+         * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is delivered to the recipient.  The
+         *  raw pdu of the status report is in the extended data ("pdu").
+         * @param priority Priority level of the message
+         *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
+         *  ---------------------------------
+         *  PRIORITY      | Level of Priority
+         *  ---------------------------------
+         *      '00'      |     Normal
+         *      '01'      |     Interactive
+         *      '10'      |     Urgent
+         *      '11'      |     Emergency
+         *  ----------------------------------
+         *  Any Other values included Negative considered as Invalid Priority Indicator of the message.
+         * @param isExpectMore is a boolean to indicate the sending message is multi segmented or not.
+         * @param validityPeriod Validity Period of the message in mins.
+         *  Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
+         *  Validity Period(Minimum) -> 5 mins
+         *  Validity Period(Maximum) -> 635040 mins(i.e.63 weeks).
+         *  Any Other values included Negative considered as Invalid Validity Period of the message.
+         */
+        SendTextWithOptions(
+            [in] String callingPackage,
+            [in] String destAddr,
+            [in] String scAddr,
+            [in] String text,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent,
+            [in] Int32 priority,
+            [in] Boolean isExpectMore,
+            [in] Int32 validityPeriod);
+
+        /**
+         * Inject an SMS PDU into the android application framework.
+         *
+         * @param pdu is the byte array of pdu to be injected into android application framework
+         * @param format is the format of SMS pdu (3gpp or 3gpp2)
+         * @param receivedIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully received by the
+         *  android application framework. This intent is broadcasted at
+         *  the same time an SMS received from radio is acknowledged back.
+         */
+        InjectSmsPdu(
+            [in] ArrayOf<Byte>* pdu,
+            [in] String format,
+            [in] IPendingIntent* receivedIntent);
+
+        /**
+         * Update the status of a pending (send-by-IP) SMS message and resend by PSTN if necessary.
+         * This outbound message was handled by the carrier app. If the carrier app fails to send
+         * this message, it would be resent by PSTN.
+         *
+         * @param messageRef the reference number of the SMS message.
+         * @param success True if and only if the message was sent successfully. If its value is
+         *  false, this message should be resent via PSTN.
+         * {@hide}
+         */
+        UpdateSmsSendStatus(
+            [in] Int32 messageRef,
+            [in] Boolean success);
+
+        /**
+         * Send a multi-part text based SMS.
+         *
+         * @param destAddr the address to send the message to
+         * @param scAddr is the service center address or null to use
+         *   the current default SMSC
+         * @param parts an <code>ArrayList</code> of strings that, in order,
+         *   comprise the original message
+         * @param sentIntents if not null, an <code>ArrayList</code> of
+         *   <code>PendingIntent</code>s (one for each message part) that is
+         *   broadcast when the corresponding message part has been sent.
+         *   The result code will be <code>Activity.RESULT_OK<code> for success,
+         *   or one of these errors:
+         *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
+         *   <code>RESULT_ERROR_RADIO_OFF</code>
+         *   <code>RESULT_ERROR_NULL_PDU</code>.
+         *  The per-application based SMS control checks sentIntent. If sentIntent
+         *  is NULL the caller will be checked against all unknown applications,
+         *  which cause smaller number of SMS to be sent in checking period.
+         * @param deliveryIntents if not null, an <code>ArrayList</code> of
+         *   <code>PendingIntent</code>s (one for each message part) that is
+         *   broadcast when the corresponding message part has been delivered
+         *   to the recipient.  The raw pdu of the status report is in the
+         *   extended data ("pdu").
+         */
+        SendMultipartText(
+            [in] String callingPackage,
+            [in] String destAddr,
+            [in] String scAddr,
+            [in] IList* parts,
+            [in] IList* sentIntents,
+            [in] IList* deliveryIntents);
+
+        /**
+         * Send a multi-part text based SMS with Messaging Options.
+         *
+         * @param destAddr the address to send the message to
+         * @param scAddr is the service center address or null to use
+         *   the current default SMSC
+         * @param parts an <code>ArrayList</code> of strings that, in order,
+         *   comprise the original message
+         * @param sentIntents if not null, an <code>ArrayList</code> of
+         *   <code>PendingIntent</code>s (one for each message part) that is
+         *   broadcast when the corresponding message part has been sent.
+         *   The result code will be <code>Activity.RESULT_OK<code> for success,
+         *   or one of these errors:
+         *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
+         *   <code>RESULT_ERROR_RADIO_OFF</code>
+         *   <code>RESULT_ERROR_NULL_PDU</code>.
+         *  The per-application based SMS control checks sentIntent. If sentIntent
+         *  is NULL the caller will be checked against all unknown applications,
+         *  which cause smaller number of SMS to be sent in checking period.
+         * @param deliveryIntents if not null, an <code>ArrayList</code> of
+         *   <code>PendingIntent</code>s (one for each message part) that is
+         *   broadcast when the corresponding message part has been delivered
+         *   to the recipient.  The raw pdu of the status report is in the
+         *   extended data ("pdu").
+         * @param priority Priority level of the message
+         *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
+         *  ---------------------------------
+         *  PRIORITY      | Level of Priority
+         *  ---------------------------------
+         *      '00'      |     Normal
+         *      '01'      |     Interactive
+         *      '10'      |     Urgent
+         *      '11'      |     Emergency
+         *  ----------------------------------
+         *  Any Other values included Negative considered as Invalid Priority Indicator of the message.
+         * @param isExpectMore is a boolean to indicate the sending message is multi segmented or not.
+         * @param validityPeriod Validity Period of the message in mins.
+         *  Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
+         *  Validity Period(Minimum) -> 5 mins
+         *  Validity Period(Maximum) -> 635040 mins(i.e.63 weeks).
+         *  Any Other values included Negative considered as Invalid Validity Period of the message.
+         */
+        SendMultipartTextWithOptions(
+            [in] String callingPackage,
+            [in] String destAddr,
+            [in] String scAddr,
+            [in] IList* parts,
+            [in] IList* sentIntents,
+            [in] IList* deliveryIntents,
+            [in] Int32 priority,
+            [in] Boolean isExpectMore,
+            [in] Int32 validityPeriod);
 
         GetPremiumSmsPermission(
             [in] String packageName,
             [out] Int32* result);
 
         SetPremiumSmsPermission(
-            [in] String packageName, 
+            [in] String packageName,
             [in] Int32 permission);
 
         EnableCellBroadcast(
@@ -29,36 +348,61 @@ module {
             [out] Boolean* result);
 
         EnableCellBroadcastRange(
-            [in] Int32 startMessageId, 
+            [in] Int32 startMessageId,
             [in] Int32 endMessageId,
             [out] Boolean* result);
 
         DisableCellBroadcastRange(
-            [in] Int32 startMessageId, 
+            [in] Int32 startMessageId,
             [in] Int32 endMessageId,
             [out] Boolean* result);
 
         EnableGsmBroadcastRange(
-            [in] Int32 startMessageId, 
+            [in] Int32 startMessageId,
             [in] Int32 endMessageId,
             [out] Boolean* result);
 
         DisableGsmBroadcastRange(
-            [in] Int32 startMessageId, 
+            [in] Int32 startMessageId,
             [in] Int32 endMessageId,
             [out] Boolean* result);
 
         EnableCdmaBroadcastRange(
-            [in] Int32 startMessageId, 
+            [in] Int32 startMessageId,
             [in] Int32 endMessageId,
             [out] Boolean* result);
 
         DisableCdmaBroadcastRange(
-            [in] Int32 startMessageId, 
+            [in] Int32 startMessageId,
             [in] Int32 endMessageId,
             [out] Boolean* result);
 
+        IsImsSmsSupported(
+            [out] Boolean* result);
 
+        GetImsSmsFormat(
+            [out] String* result);
+
+        SendStoredText(
+            [in] String callingPkg,
+            [in] IUri* messageUri,
+            [in] String scAddress,
+            [in] IPendingIntent* sentIntent,
+            [in] IPendingIntent* deliveryIntent);
+
+        SendStoredMultipartText(
+            [in] String callingPkg,
+            [in] IUri* messageUri,
+            [in] String scAddress,
+            [in] IList* sentIntents,
+            [in] IList* deliveryIntents);
+
+        GetSmsCapacityOnIcc(
+            [out] Int32* result);
+
+        IsShortSMSCode(
+            [in] String destAddr,
+            [out] Boolean* result);
     }
 
     }//Telephony

@@ -6,7 +6,26 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    enum IDriverCallState {
+        DriverCallState_ACTIVE,
+        DriverCallState_HOLDING,
+        DriverCallState_DIALING,    // MO call only
+        DriverCallState_ALERTING,   // MO call only
+        DriverCallState_INCOMING,   // MT call only
+        DriverCallState_WAITING     // MT call only
+                                    // If you add a state, make sure to look for the switch()
+                                    // statements that use this enum
+    }
+
     interface IDriverCall {
+
+        StateFromCLCC(
+            [in] Int32 state,
+            [out] IDriverCallState* result);
+
+        PresentationFromCLIP(
+            [in] Int32 cli,
+            [out] Int32* result);
     }
 
     }//Telephony

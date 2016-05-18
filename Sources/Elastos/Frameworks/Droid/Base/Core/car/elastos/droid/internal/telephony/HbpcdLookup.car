@@ -6,24 +6,95 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IHbpcdLookupMccIdd {
+
+        const String DEFAULT_SORT_ORDER = "MCC ASC";
+
+        const String MCC = "MCC";
+        const String IDD = "IDD";
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IHbpcdLookupMccLookup {
+
+        const String DEFAULT_SORT_ORDER = "MCC ASC";
+
+        const String MCC = "MCC";
+        const String COUNTRY_CODE = "Country_Code";
+        const String COUNTRY_NAME = "Country_Name";
+        const String NDD = "NDD";
+        const String NANPS = "NANPS";
+        const String GMT_OFFSET_LOW = "GMT_Offset_Low";
+        const String GMT_OFFSET_HIGH = "GMT_Offset_High";
+        const String GMT_DST_LOW = "GMT_DST_Low";
+        const String GMT_DST_HIGH = "GMT_DST_High";
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IHbpcdLookupMccSidConflicts {
+
+        const String DEFAULT_SORT_ORDER = "MCC ASC";
+
+        const String MCC = "MCC";
+        const String SID_CONFLICT = "SID_Conflict";
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IHbpcdLookupMccSidRange {
+        const String DEFAULT_SORT_ORDER = "MCC ASC";
+
+        const String MCC = "MCC";
+        const String RANGE_LOW = "SID_Range_Low";
+        const String RANGE_HIGH = "SID_Range_High";
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IHbpcdLookupArbitraryMccSidMatch {
+        const String DEFAULT_SORT_ORDER = "MCC ASC";
+
+        const String MCC = "MCC";
+        const String SID = "SID";
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IHbpcdLookupNanpAreaCode {
+        const String DEFAULT_SORT_ORDER = "Area_Code ASC";
+
+        const String AREA_CODE = "Area_Code";
+    }
+
     interface IHbpcdLookup {
-        interface IHbpcdLookupMccIdd {
-        }
+        const String AUTHORITY = "hbpcd_lookup";
 
-        interface IHbpcdLookupMccLookup {
-        }
+        const String PATH_MCC_IDD = "idd";
+        const String PATH_MCC_LOOKUP_TABLE = "lookup";
+        const String PATH_MCC_SID_CONFLICT = "conflict";
+        const String PATH_MCC_SID_RANGE = "range";
+        const String PATH_NANP_AREA_CODE = "nanp";
+        const String PATH_ARBITRARY_MCC_SID_MATCH = "arbitrary";
+        const String PATH_USERADD_COUNTRY = "useradd";
 
-        interface IHbpcdLookupMccSidConflicts {
-        }
-
-        interface IHbpcdLookupMccSidRange {
-        }
-
-        interface IHbpcdLookupArbitraryMccSidMatch {
-        }
-
-        interface IHbpcdLookupNanpAreaCode {
-        }
+        const String ID = "_id";
+        const Int32 IDINDEX = 0;
 
     }
 

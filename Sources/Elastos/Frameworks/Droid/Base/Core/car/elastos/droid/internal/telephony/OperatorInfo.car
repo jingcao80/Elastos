@@ -6,20 +6,33 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    enum IOperatorInfoState {
+        OperatorInfoState_UNKNOWN,
+        OperatorInfoState_AVAILABLE,
+        OperatorInfoState_CURRENT,
+        OperatorInfoState_FORBIDDEN
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface IOperatorInfo {
-        DescribeContents(
-            [out] Int32* result);
 
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
+        GetOperatorAlphaLong(
+            [out] String* result);
 
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] OperatorInfo* result);
+        GetOperatorAlphaShort(
+            [out] String* result);
 
-        NewArray(
-            [in] Int32 size);
+        GetOperatorNumeric(
+            [out] String* result);
+
+        GetState(
+            [out] IOperatorInfoState* result);
+
+        GetRadioTech(
+            [out] String* result);
 
     }
 

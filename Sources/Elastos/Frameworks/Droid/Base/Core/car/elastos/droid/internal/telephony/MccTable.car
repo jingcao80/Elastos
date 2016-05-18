@@ -1,5 +1,9 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    using interface Elastos.Utility.ILocale;
 
     namespace Elastos {
     namespace Droid {
@@ -11,12 +15,67 @@ module {
             [in] Int32 mcc,
             [out] String* result);
 
+        /**
+         * Given a GSM Mobile Country Code, returns
+         * an ISO two-character country code if available.
+         * Returns "" if unavailable.
+         */
+        CountryCodeForMcc(
+            [in] Int32 mcc,
+            [out] String* result);
+
         DefaultLanguageForMcc(
             [in] Int32 mcc,
             [out] String* result);
 
+        /**
+         * Given a GSM Mobile Country Code, returns
+         * the smallest number of digits that M if available.
+         * Returns 2 if unavailable.
+         */
+        SmallestDigitsMccForMnc(
+            [in] Int32 mcc,
+            [out] Int32* result);
 
+        /**
+         * Updates MCC and MNC device configuration information for application retrieving
+         * correct version of resources.  If MCC is 0, MCC and MNC will be ignored (not set).
+         * @param context Context to act on.
+         * @param mccmnc truncated imsi with just the MCC and MNC - MNC assumed to be from 4th to end
+         * @param fromServiceState true if coming from the radio service state, false if from SIM
+         */
+        UpdateMccMncConfiguration(
+            [in] IContext* context,
+            [in] String mccmnc,
+            [in] Boolean fromServiceState);
 
+        /**
+         * Return Locale for the language and country or null if no good match.
+         *
+         * @param context Context to act on.
+         * @param language Two character language code desired
+         * @param country Two character country code desired
+         *
+         * @return Locale or null if no appropriate value
+         */
+        GetLocaleForLanguageCountry(
+            [in] IContext* context,
+            [in] String language,
+            [in] String country,
+            [out] ILocale** result);
+
+        /**
+         * Utility code to set the system locale if it's not set already
+         * @param context Context to act on.
+         * @param language Two character language code desired
+         * @param country Two character country code desired
+         *
+         *  {@hide}
+         */
+        SetSystemLocale(
+            [in] IContext* context,
+            [in] String language,
+            [in] String country);
     }
 
     }//Telephony

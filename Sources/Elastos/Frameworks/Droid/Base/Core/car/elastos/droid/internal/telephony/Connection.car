@@ -1,14 +1,80 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Telecomm.Telecom.IConnectionVideoProvider;
+    // interface Elastos.Droid.Internal.Telephony.IUUSInfo;
+
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
-    interface IConnection {
+    interface IConnectionPostDialListener {
+
+        OnPostDialWait();
+    }
+
+    enum IConnectionPostDialState {
+        PostDialState_NOT_STARTED,    /* The post dial string playback hasn't
+                                        been started, or this call is not yet
+                                        connected, or this is an incoming call */
+        PostDialState_STARTED,        /* The post dial string playback has begun */
+        PostDialState_WAIT,           /* The post dial string playback is waiting for a
+                                        call to proceedAfterWaitChar() */
+        PostDialState_WILD,           /* The post dial string playback is waiting for a
+                                        call to proceedAfterWildChar() */
+        PostDialState_COMPLETE,       /* The post dial string playback is complete */
+        PostDialState_CANCELLED,       /* The post dial string playback was cancelled
+                                        with cancelPostDial() */
+        PostDialState_PAUSE           /* The post dial string playback is pausing for a
+                                        call to processNextPostDialChar*/
+    }
+
+    /**
+     * Listener interface for events related to the connection which should be reported to the
+     * {@link android.telecom.Connection}.
+     */
+    interface IConnectionListener {
+
+        OnVideoStateChanged(
+            [in] Int32 videoState);
+
         OnLocalVideoCapabilityChanged(
             [in] Boolean capable);
+
+        OnRemoteVideoCapabilityChanged(
+            [in] Boolean capable);
+
+        OnVideoProviderChanged(
+            [in] IConnectionVideoProvider* videoProvider);
+
+        OnAudioQualityChanged(
+            [in] Int32 audioQuality);
+
+        OnCallSubstateChanged(
+            [in] Int32 callSubstate);
+
+        OnConferenceParticipantsChanged(
+            [in] IList* participants);
+    }
+
+    interface IConnection {
+
+        const Int32 AUDIO_QUALITY_STANDARD = 1;
+        const Int32 AUDIO_QUALITY_HIGH_DEFINITION = 2;
+
+        /**
+         * Gets address (e.g. phone number) associated with connection.
+         * TODO: distinguish reasons for unavailability
+         *
+         * @return address or null if unavailable
+         */
+        GetAddress(
+            [out] String* result);
 
         GetCnapName(
             [out] String* result);
@@ -19,6 +85,12 @@ module {
         GetCnapNamePresentation(
             [out] Int32* result);
 
+        /**
+         * @return Call that owns this Connection, or null if none
+         */
+        GetCall(
+            [out] ICall** result);
+
         GetCreateTime(
             [out] Int64* result);
 
@@ -28,46 +100,153 @@ module {
         GetConnectTimeReal(
             [out] Int64* result);
 
+        /**
+         * Disconnect time in currentTimeMillis() format.
+         * The time when this Connection makes a transition into ENDED or FAIL.
+         * Returns 0 before then.
+         */
+        GetDisconnectTime(
+            [out] Int64* result);
+
         GetDurationMillis(
             [out] Int64* result);
 
         GetHoldingStartTime(
             [out] Int64* result);
 
+        /**
+         * If this connection is HOLDING, return the number of milliseconds
+         * that it has been on hold for (approximately).
+         * If this connection is in any other state, return 0.
+         */
+        GetHoldDurationMillis(
+            [out] Int64* result);
+
+        /**
+         * Returns call disconnect cause. Values are defined in
+         * {@link android.telephony.DisconnectCause}. If the call is not yet
+         * disconnected, NOT_DISCONNECTED is returned.
+         */
+        GetDisconnectCause(
+            [out] Int32* result);
+
         IsIncoming(
             [out] Boolean* result);
 
         GetState(
-            [out] State* result);
+            [out] ICallState* result);
 
         GetStateBeforeHandover(
-            [out] State* result);
+            [out] ICallState* result);
 
         GetExtras(
-            [out] Bundle* result);
+            [out] IBundle** result);
+
+        /**
+         * isAlive()
+         *
+         * @return true if the connection isn't disconnected
+         * (could be active, holding, ringing, dialing, etc)
+         */
+        IsAlive(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if Connection is connected and is INCOMING or WAITING
+         */
+        IsRinging(
+            [out] Boolean* result);
 
         GetUserData(
-            [out] Object* result);
+            [out] IInterface** result);
 
         SetUserData(
-            [in] Object userdata);
+            [in] IInterface* userdata);
+
+        /**
+         * Hangup individual Connection
+         */
+        Hangup();
+
+        /**
+         * Separate this call from its owner Call and assigns it to a new Call
+         * (eg if it is currently part of a Conference call
+         * TODO: Throw exception? Does GSM require error display on failure here?
+         */
+        Separate();
 
         ClearUserData();
 
         AddPostDialListener(
-            [in] PostDialListener listener);
+            [in] IConnectionPostDialListener* listener);
+
+        GetPostDialState(
+            [out] IConnectionPostDialState* result);
+
+        /**
+         * Returns the portion of the post dial string that has not
+         * yet been dialed, or "" if none
+         */
+        GetRemainingPostDialString(
+            [out] String* result);
+
+        /**
+         * See Phone.setOnPostDialWaitCharacter()
+         */
+        ProceedAfterWaitChar();
+
+        /**
+         * See Phone.setOnPostDialWildCharacter()
+         */
+        ProceedAfterWildChar(
+            [in] String str);
+
+        /**
+         * Cancel any post
+         */
+        CancelPostDial();
+
+        /**
+         * Returns the caller id presentation type for incoming and waiting calls
+         * @return one of PRESENTATION_*
+         */
+        GetNumberPresentation(
+            [out] Int32* result);
+
+        /**
+         * Returns the User to User Signaling (UUS) information associated with
+         * incoming and waiting calls
+         * @return UUSInfo containing the UUS userdata.
+         */
+        // GetUUSInfo(
+        //     [out] IUUSInfo** result);
+
+        /**
+         * Returns the CallFail reason provided by the RIL with the result of
+         * RIL_REQUEST_LAST_CALL_FAIL_CAUSE
+         */
+        GetPreciseDisconnectCause(
+            [out] Int32* result);
 
         GetOrigConnection(
-            [out] Connection* result);
+            [out] IConnection** result);
+
+        /**
+         * Returns whether the original ImsPhoneConnection was a member
+         * of a conference call
+         * @return valid only when getOrigConnection() is not null
+         */
+        IsMultiparty(
+            [out] Boolean* result);
 
         MigrateFrom(
-            [in] Connection c);
+            [in] IConnection* c);
 
         AddListener(
-            [in] Listener listener);
+            [in] IConnectionListener* listener);
 
         RemoveListener(
-            [in] Listener listener);
+            [in] IConnectionListener* listener);
 
         GetVideoState(
             [out] Int32* result);
@@ -79,7 +258,7 @@ module {
             [out] Boolean* result);
 
         GetVideoProvider(
-            [out] VideoProvider* result);
+            [out] IConnectionVideoProvider** result);
 
         GetAudioQuality(
             [out] Int32* result);
@@ -102,11 +281,27 @@ module {
         SetCallSubstate(
             [in] Int32 callSubstate);
 
+        /**
+         * Sets the {@link android.telecom.Connection.VideoProvider} for the connection.
+         *
+         * @param videoProvider The video call provider.
+         */
+        SetVideoProvider(
+            [in] IConnectionVideoProvider* videoProvider);
+
         SetConverted(
             [in] String oriNumber);
 
+        /**
+         * Notifies listeners of a change to conference participant(s).
+         *
+         * @param conferenceParticipants The participant(s).
+         */
+        UpdateConferenceParticipants(
+            [in] IList* conferenceParticipants);
+
         OnDisconnectConferenceParticipant(
-            [in] Uri endpoint);
+            [in] IUri* endpoint);
 
     }
 

@@ -7,47 +7,6 @@ module {
     namespace Telephony {
 
     interface IInboundSmsTracker {
-        GetContentValues(
-            [out] ContentValues* result);
-
-        GetRealDestPort(
-            [in] Int32 destPort,
-            [out] Int32* result);
-
-        GetPdu();
-
-        GetTimestamp(
-            [out] Int64* result);
-
-        GetDestPort(
-            [out] Int32* result);
-
-        Is3gpp2(
-            [out] Boolean* result);
-
-        GetFormat(
-            [out] String* result);
-
-        GetIndexOffset(
-            [out] Int32* result);
-
-        GetAddress(
-            [out] String* result);
-
-        GetReferenceNumber(
-            [out] Int32* result);
-
-        GetSequenceNumber(
-            [out] Int32* result);
-
-        GetMessageCount(
-            [out] Int32* result);
-
-        GetDeleteWhere(
-            [out] String* result);
-
-        GetDeleteWhereArgs();
-
     }
 
     }//Telephony

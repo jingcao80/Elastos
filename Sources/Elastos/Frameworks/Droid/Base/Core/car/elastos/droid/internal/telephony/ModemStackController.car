@@ -1,27 +1,32 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
-    interface IModemStackController {
-        interface IModemStackControllerModemCapabilityInfo {
-        }
+    interface IModemStackControllerModemCapabilityInfo {
+        GetSupportedRatBitMask(
+            [out] Int32* result);
 
         GetStackId(
             [out] Int32* result);
 
-        OnReceive(
-            [in] Context context, 
-            [in] Intent intent);
+        GetMaxDataCap(
+            [out] Int32* result);
+    }
 
-        GetInstance(
-            [out] ModemStackController* result);
-
-        HandleMessage(
-            [in] Message msg);
+    /**
+     * @Involve
+     * interface IHandler
+     */
+    [deprecated]
+    interface IModemStackController {
 
         IsStackReady(
             [out] Boolean* result);
@@ -36,25 +41,42 @@ module {
         GetPrimarySub(
             [out] Int32* result);
 
-        GetModemRatCapsForPhoneId(
-            [in] Int32 phoneId,
-            [out] ModemCapabilityInfo* result);
+        // GetModemRatCapsForPhoneId(
+        //     [in] Int32 phoneId,
+        //     [out] IModemCapabilityInfo** result);
+
+        UpdateStackBinding(
+            [in] ArrayOf<Int32>* prefStackIds,
+            [in] Boolean isBootUp,
+            [in] IMessage* msg,
+            [out] Int32* result);
 
         RegisterForStackReady(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         RegisterForModemRatCapsAvailable(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         RegisterForModemDataCapsUpdate(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
+    }
+
+    interface IModemStackControllerHelper {
+        // Make(
+        //     [in] IContext* context,
+        //     [in] IUiccController* uiccMgr,
+        //     [in] ArrayOf<ICommandsInterface*>* ci,
+        //     [out] IModemStackController** result);
+
+        GetInstance(
+            [out] IModemStackController** result);
     }
 
     }//Telephony

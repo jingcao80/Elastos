@@ -1,0 +1,69 @@
+
+module
+{
+    interface Elastos.Droid.Internal.Telephony.IPhone;
+
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * {@hide}
+     */
+    enum IMmiCodeState {
+        IMmiCodeState_PENDING,
+        IMmiCodeState_CANCELLED,
+        IMmiCodeState_COMPLETE,
+        IMmiCodeState_FAILED
+    }
+
+    interface IMmiCode
+    {
+        /**
+         * @return Current state of MmiCode request
+         */
+        GetState(
+            [out] IMmiCodeState* result);
+
+        /**
+         * @return Localized message for UI display, valid only in COMPLETE
+         * or FAILED states. null otherwise
+         */
+
+        GetMessage(
+            [out] ICharSequence** result);
+
+        /**
+         * @return Phone associated with the MMI/USSD message
+         */
+        GetPhone(
+            [out] IPhone** result);
+
+        /**
+         * Cancels pending MMI request.
+         * State becomes CANCELLED unless already COMPLETE or FAILED
+         */
+        Cancel();
+
+        /**
+         * @return true if the network response is a REQUEST for more user input.
+         */
+        IsUssdRequest(
+            [out] Boolean* result);
+
+        /**
+         * @return true if an outstanding request can be canceled.
+         */
+        IsCancelable(
+            [out] Boolean* result);
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}
