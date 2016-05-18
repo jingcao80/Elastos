@@ -1896,8 +1896,9 @@ ECode CAccountManagerService::ValidateAccountsInternal(
         service->GetType((IInterface**)&obj);
         knownAuth->Add(obj);
     }
+    {
+        AutoLock lock(accounts->mCacheLock);
 
-    synchronized(accounts->mCacheLock) {
         AutoPtr<ISQLiteDatabase> db;
         FAIL_RETURN(accounts->mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db))
         Boolean accountDeleted = FALSE;

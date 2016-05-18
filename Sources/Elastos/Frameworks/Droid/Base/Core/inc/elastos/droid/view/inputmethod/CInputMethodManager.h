@@ -6,6 +6,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"
 #include "_Elastos_Droid_View_InputMethod_CInputMethodManager.h"
+#include "elastos/droid/view/InputEventSender.h"
 #include "elastos/droid/view/inputmethod/CControlledInputConnectionWrapper.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
@@ -76,8 +77,7 @@ private:
     };
 
     class ImeInputEventSender
-        : public Object
-//        : public InputEventSender
+        : public InputEventSender
     {
     public:
         ImeInputEventSender(

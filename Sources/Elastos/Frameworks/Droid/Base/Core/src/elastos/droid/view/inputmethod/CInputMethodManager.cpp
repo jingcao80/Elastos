@@ -445,13 +445,11 @@ void CInputMethodManager::SetInputChannelLocked(
     if (mCurChannel.Get() != channel) {
         if (mCurSender != NULL) {
             FlushPendingEventsLocked();
-            assert(0 && "TODO");
-//            mCurSender->Dispose();
+            mCurSender->Dispose();
             mCurSender = NULL;
         }
         if (mCurChannel != NULL) {
-            assert(0 && "TODO");
-//            mCurChannel->Dispose();
+           mCurChannel->Dispose();
         }
         mCurChannel = channel;
     }
