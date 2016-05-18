@@ -222,17 +222,13 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/textservice
  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/accessibility
  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/animation
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/menu
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/impl
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/animation
-#  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/bluetooth
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/preference
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/location
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/speech/srec
   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/speech/tts
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/speech
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/internal
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/gesture
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/emoji
@@ -250,7 +246,6 @@
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telephony/gsm
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telephony
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/ims
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/statusbar
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/server
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/server/backup
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/server/net
@@ -266,13 +261,6 @@
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/voice
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service/notification
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/service
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui/statusbar/policy
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui/statusbar/phone
-#- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui/statusbar/tablet
-#> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui/statusbar
-#> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui/recent
-#> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui/media
-#> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/systemui
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/appwidget
 #- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/wifidisplay
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/opengl/gles
@@ -394,25 +382,11 @@
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider Elastos.Droid.SettingsProvider.car
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
 
-#  Elastos/Frameworks/Droid/DevSamples/SoftKeyboard
-#- Elastos/Frameworks/Droid/DevSamples/PinyinIME/share
-#> Elastos/Frameworks/Droid/DevSamples/PinyinIME
-## - Elastos/Frameworks/Droid/DevSamples/Snowfox/AudioTrack
-## > Elastos/Frameworks/Droid/DevSamples/Snowfox
-#- Elastos/Frameworks/Droid/DevSamples/MusicPlayer MusicPlayer.car
-#- Elastos/Frameworks/Droid/DevSamples/MusicPlayer Elastos.Droid.Core.eco
-#> Elastos/Frameworks/Droid/DevSamples/MusicPlayer
-#- Elastos/Frameworks/Droid/DevSamples/Gallery Elastos.Droid.Core.eco
-#- Elastos/Frameworks/Droid/DevSamples/Gallery Gallery.car
-#- Elastos/Frameworks/Droid/DevSamples/Gallery/src/data Elastos.Droid.Core.eco
-#  Elastos/Frameworks/Droid/DevSamples/Gallery/src/data
-#- Elastos/Frameworks/Droid/DevSamples/Gallery/src/ui Elastos.Droid.Core.eco
-#  Elastos/Frameworks/Droid/DevSamples/Gallery/src/ui
-#- Elastos/Frameworks/Droid/DevSamples/Gallery/src/util Elastos.Droid.Core.eco
-#  Elastos/Frameworks/Droid/DevSamples/Gallery/src/util
-#> Elastos/Frameworks/Droid/DevSamples/Gallery
-#  Elastos/Frameworks/Droid/DevSamples/AccountsAndSyncSettings
-#> Elastos/Frameworks/Droid/DevSamples
+# ==== build DevSamples ====
+ Elastos/Frameworks/Droid/DevSamples/ImageDemo/elastos/devsamples/imagedemo Elastos.DevSamples.ImageDemo.car
+> Elastos/Frameworks/Droid/DevSamples/ImageDemo/elastos/devsamples/imagedemo
+ Elastos/Frameworks/Droid/DevSamples/TabHostDemo/elastos/devsamples/tabhostdemo Elastos.DevSamples.TabHostDemo.car
+> Elastos/Frameworks/Droid/DevSamples/TabHostDemo/elastos/devsamples/tabhostdemo
 
 # ==== build Commands ====
 #> Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Core.eco
