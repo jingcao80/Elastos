@@ -2484,8 +2484,7 @@ void Workspace::UpdateChildrenLayersEnabled(
             for (Int32 i = 0; i < count; i++) {
                 AutoPtr<IView> view;
                 GetChildAt(i, (IView**)&view);
-                AutoPtr<ICellLayout> cl = ICellLayout::Probe(view);
-                cl->DisableHardwareLayers();
+                ICellLayout::Probe(view)->DisableHardwareLayers();
             }
         }
     }

@@ -144,7 +144,7 @@ ECode LauncherApplication::SetLauncher(
     /* [out] */ ILauncherModel** mode)
 {
     VALIDATE_NOT_NULL(mode);
-Slogger::E("LauncherApplication", "============================SetLauncher");
+
     mModel->Initialize(ILauncherModelCallbacks::Probe(launcher));
     *mode = mModel;
     REFCOUNT_ADD(*mode);

@@ -80,7 +80,8 @@ ECode CSearchDropTargetBar::Setup(
     dragController->AddDropTarget(IDropTarget::Probe(mDeleteDropTarget));
     dragController->SetFlingToDeleteDropTarget(IDropTarget::Probe(mDeleteDropTarget));
     mInfoDropTarget->SetLauncher(launcher);
-    return mDeleteDropTarget->SetLauncher(launcher);
+    mDeleteDropTarget->SetLauncher(launcher);
+    return NOERROR;
 }
 
 void CSearchDropTargetBar::PrepareStartAnimation(

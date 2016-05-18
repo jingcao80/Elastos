@@ -1423,9 +1423,10 @@ void LauncherModel::LoaderTask::LoadWorkspace()
     manager->IsSafeMode(&isSafeMode);
 
     // Make sure the default workspace is loaded, if needed
-    AutoPtr<ILauncherProvider> provider;
-    mHost->mApp->GetLauncherProvider((ILauncherProvider**)&provider);
-    provider->LoadDefaultFavoritesIfNecessary(0, FALSE);
+    // TODO:
+    // AutoPtr<ILauncherProvider> provider;
+    // mHost->mApp->GetLauncherProvider((ILauncherProvider**)&provider);
+    // provider->LoadDefaultFavoritesIfNecessary(0, FALSE);
 
     synchronized(sBgLock) {
         sBgWorkspaceItems->Clear();
