@@ -13,6 +13,10 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
+const Int32 TransitionDrawable::TRANSITION_STARTING;
+const Int32 TransitionDrawable::TRANSITION_RUNNING;
+const Int32 TransitionDrawable::TRANSITION_NONE;
+
 TransitionDrawable::TransitionState::TransitionState(
     /* [in] */ TransitionState* orig,
     /* [in] */ TransitionDrawable* owner,
@@ -23,6 +27,7 @@ TransitionDrawable::TransitionState::TransitionState(
 ECode TransitionDrawable::TransitionState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
+    VALIDATE_NOT_NULL(drawable)
     return CTransitionDrawable::New(this, NULL, NULL, drawable);
 }
 
@@ -30,6 +35,7 @@ ECode TransitionDrawable::TransitionState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
+    VALIDATE_NOT_NULL(drawable)
     return CTransitionDrawable::New(this, res, NULL, drawable);
 }
 
@@ -38,6 +44,7 @@ ECode TransitionDrawable::TransitionState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
+    VALIDATE_NOT_NULL(drawable)
     return CTransitionDrawable::New(this, res, theme, drawable);
 }
 
@@ -49,9 +56,6 @@ ECode TransitionDrawable::TransitionState::GetChangingConfigurations(
     return NOERROR;
 }
 
-const Int32 TransitionDrawable::TRANSITION_STARTING;
-const Int32 TransitionDrawable::TRANSITION_RUNNING;
-const Int32 TransitionDrawable::TRANSITION_NONE;
 CAR_INTERFACE_IMPL(TransitionDrawable, LayerDrawable, ITransitionDrawable);
 
 TransitionDrawable::TransitionDrawable()

@@ -125,16 +125,6 @@ public:
         /* [out] */ Boolean* enabled);
 
 private:
-    TransitionDrawable(
-        /* [in] */ TransitionState* state,
-        /* [in] */ IResources* res,
-        /* [in] */ IResourcesTheme* theme);
-
-    TransitionDrawable(
-        /* [in] */ TransitionState* state,
-        /* [in] */ ArrayOf<IDrawable*>* layers);
-
-private:
     /**
      * A transition is about to start.
      */

@@ -38,6 +38,13 @@
             android:text="Android系统"
             android:checked="true">
         </CheckBox>
+
+        <CheckBox
+            android:id="@+id/chkUbuntu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ubuntu系统">
+        </CheckBox>
     </LinearLayout>
 
     <RadioGroup
@@ -62,14 +69,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="horizontal" >
 
         <ToggleButton
             android:id="@+id/toggleButton1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ToggleButton"
-            android:layout_gravity="center_horizontal"/>
+            android:text="ToggleButton"/>
 
         <ToggleButton
             android:id="@+id/toggleButton2"
@@ -77,8 +83,7 @@
             android:layout_height="wrap_content"
             android:textOn="Turn On"
             android:textOff="Turn Off"
-            android:checked="true"
-            android:layout_gravity="center_horizontal"/>
+            android:checked="true"/>
     </LinearLayout>
 
     <LinearLayout

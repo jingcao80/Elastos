@@ -506,12 +506,6 @@ const AutoPtr<ArrayOf<Int32Array> > View::InitViewStateSets()
     for (Int32 i = 0; i < stateSets->GetLength(); i++) {
         Int32 numBits = bitCount(i);
 
-        Int32 tmp = i;
-        while (tmp != 0) {
-            tmp &=(tmp - 1);
-            numBits ++;
-        }
-
         AutoPtr<ArrayOf<Int32> > temp = ArrayOf<Int32>::Alloc(numBits);
         Int32 pos = 0;
         for (Int32 j = 0; j < orderedIds->GetLength(); j += 2) {
@@ -1920,7 +1914,8 @@ ECode View::PerformClick(
         PlaySoundEffect(SoundEffectConstants::CLICK);
         li->mOnClickListener->OnClick(this);
         result = TRUE;
-    } else {
+    }
+    else {
         result = FALSE;
     }
 
@@ -2015,9 +2010,7 @@ ECode View::ShowContextMenu(
     VALIDATE_NOT_NULL(res)
     AutoPtr<IViewParent> parent;
     GetParent((IViewParent**)&parent);
-    parent->ShowContextMenuForChild(this, res);
-
-    return NOERROR;
+    return parent->ShowContextMenuForChild(this, res);
 }
 
 ECode View::ShowContextMenu(
@@ -2027,8 +2020,7 @@ ECode View::ShowContextMenu(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
-    ShowContextMenu(res);
-    return NOERROR;
+    return ShowContextMenu(res);
 }
 
 ECode View::StartActionMode(
@@ -2042,8 +2034,7 @@ ECode View::StartActionMode(
         *mode = NULL;
         return NOERROR;
     }
-    parent->StartActionModeForChild(this, callback, mode);
-    return NOERROR;
+    return parent->StartActionModeForChild(this, callback, mode);
 }
 
 /***
@@ -2118,8 +2109,9 @@ ECode View::HandleFocusGainInternal(
 
         AutoPtr<IView> oldFocus;
         if (mAttachInfo) {
-            GetRootView((IView**)&oldFocus);
-            oldFocus->FindFocus((IView**)&oldFocus);
+            AutoPtr<IView> tmp;
+            GetRootView((IView**)&tmp);
+            tmp->FindFocus((IView**)&oldFocus);
         }
 
         if (mParent != NULL) {
@@ -2151,7 +2143,8 @@ ECode View::GetHotspotBounds(
     GetBackground((IDrawable**)&background);
     if (background) {
         background->GetHotspotBounds(outRect);
-    } else {
+    }
+    else {
         GetBoundsOnScreen(outRect);
     }
     return NOERROR;
@@ -2433,7 +2426,7 @@ void View::OnFocusChanged(
     }
     else {
         NotifyViewAccessibilityStateChangedIfNeeded(
-                    IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
+                IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
@@ -2493,10 +2486,11 @@ ECode View::AnnounceForAccessibility(
             CAccessibilityEvent::Obtain(IAccessibilityEvent::TYPE_ANNOUNCEMENT,
                 (IAccessibilityEvent**)&event);
             OnInitializeAccessibilityEvent(event);
+            IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
             AutoPtr<IList> container;
-            (IAccessibilityRecord::Probe(event))->GetText((IList**)&container);
+            record->GetText((IList**)&container);
             container->Add(text);
-            (IAccessibilityRecord::Probe(event))->SetContentDescription(NULL);
+            record->SetContentDescription(NULL);
             Boolean result;
             mParent->RequestSendAccessibilityEvent(this, event, &result);
         }
@@ -2620,10 +2614,11 @@ ECode View::OnInitializeAccessibilityEvent(
 void View::OnInitializeAccessibilityEventInternal(
     /* [in] */ IAccessibilityEvent* event)
 {
-    (IAccessibilityRecord::Probe(event))->SetSource(this);
+    IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
+    record->SetSource(this);
     AutoPtr<ICharSequence> seq;
     CString::New(String("View"), (ICharSequence**)&seq);
-    (IAccessibilityRecord::Probe(event))->SetClassName(seq);
+    record->SetClassName(seq);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String pkgName;
@@ -2633,8 +2628,8 @@ void View::OnInitializeAccessibilityEventInternal(
     event->SetPackageName(seq);
     Boolean isEnabled;
     IsEnabled(&isEnabled);
-    (IAccessibilityRecord::Probe(event))->SetEnabled(isEnabled);
-    (IAccessibilityRecord::Probe(event))->SetContentDescription(mContentDescription);
+    record->SetEnabled(isEnabled);
+    record->SetContentDescription(mContentDescription);
 
     Int32 type;
     switch (event->GetEventType(&type), type) {
@@ -2643,7 +2638,8 @@ void View::OnInitializeAccessibilityEventInternal(
             AutoPtr<IArrayList> focusablesTempList;
             if (mAttachInfo) {
                 focusablesTempList = mAttachInfo->mTempArrayList;
-            } else {
+            }
+            else {
                 CArrayList::New((IArrayList**)&focusablesTempList);
             }
             AutoPtr<IView> rootView;
@@ -2651,10 +2647,10 @@ void View::OnInitializeAccessibilityEventInternal(
             rootView->AddFocusables(focusablesTempList, IView::FOCUS_FORWARD, IView::FOCUSABLES_ALL);
             Int32 focusablesTempListSize;
             focusablesTempList->GetSize(&focusablesTempListSize);
-            (IAccessibilityRecord::Probe(event))->SetItemCount(focusablesTempListSize);
+            record->SetItemCount(focusablesTempListSize);
             Int32 index;
             focusablesTempList->IndexOf(TO_IINTERFACE(this), &index);
-            (IAccessibilityRecord::Probe(event))->SetCurrentItemIndex(index);
+            record->SetCurrentItemIndex(index);
 
             if (mAttachInfo) {
                 focusablesTempList->Clear();
@@ -2672,9 +2668,9 @@ void View::OnInitializeAccessibilityEventInternal(
                     Int32 start, end;
                     GetAccessibilitySelectionStart(&start);
                     GetAccessibilitySelectionEnd(&end);
-                    (IAccessibilityRecord::Probe(event))->SetFromIndex(start);
-                    (IAccessibilityRecord::Probe(event))->SetToIndex(end);
-                    (IAccessibilityRecord::Probe(event))->SetItemCount(len);
+                    record->SetFromIndex(start);
+                    record->SetToIndex(end);
+                    record->SetItemCount(len);
                 }
             }
         } break;
@@ -2688,7 +2684,8 @@ ECode View::CreateAccessibilityNodeInfo(
     if (mAccessibilityDelegate) {
         mAccessibilityDelegate->CreateAccessibilityNodeInfo(this, res);
         return NOERROR;
-    } else {
+    }
+    else {
         CreateAccessibilityNodeInfoInternal(res);
         return NOERROR;
     }
@@ -5246,7 +5243,8 @@ ECode View::SetImportantForAccessibility(
                 & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK;
         if (!maySkipNotify || oldIncludeForAccessibility != res) {
             NotifySubtreeAccessibilityStateChangedIfNeeded();
-        } else {
+        }
+        else {
             NotifyViewAccessibilityStateChangedIfNeeded(
                     IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
         }
@@ -5549,9 +5547,9 @@ Boolean View::PerformAccessibilityActionInternal(
                 arguments->GetInt32(
                         IAccessibilityNodeInfo::ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT, &granularity);
                 Boolean extendSelection;
-                (IBaseBundle::Probe(arguments))->GetBoolean(
+                IBaseBundle::Probe(arguments)->GetBoolean(
                         IAccessibilityNodeInfo::ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN, &extendSelection);
-                return TraverseAtGranularity(granularity, FALSE, extendSelection);
+                return TraverseAtGranularity(granularity, TRUE, extendSelection);
             }
         } break;
         case IAccessibilityNodeInfo::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY: {
@@ -5560,7 +5558,7 @@ Boolean View::PerformAccessibilityActionInternal(
                 arguments->GetInt32(
                         IAccessibilityNodeInfo::ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT, &granularity);
                 Boolean extendSelection;
-                (IBaseBundle::Probe(arguments))->GetBoolean(
+                IBaseBundle::Probe(arguments)->GetBoolean(
                         IAccessibilityNodeInfo::ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN, &extendSelection);
                 return TraverseAtGranularity(granularity, FALSE, extendSelection);
             }
@@ -5572,10 +5570,10 @@ Boolean View::PerformAccessibilityActionInternal(
                 return FALSE;
             }
             Int32 start = -1, end= -1;
-            if (arguments) {
-                (IBaseBundle::Probe(arguments))->GetInt32(
+            if (arguments != NULL) {
+                IBaseBundle::Probe(arguments)->GetInt32(
                         IAccessibilityNodeInfo::ACTION_ARGUMENT_SELECTION_START_INT, -1, &start);
-                (IBaseBundle::Probe(arguments))->GetInt32(
+                IBaseBundle::Probe(arguments)->GetInt32(
                         IAccessibilityNodeInfo::ACTION_ARGUMENT_SELECTION_END_INT, -1, &end);
             }
             // Only cursor position can be specified (selection length == 0)
@@ -5616,12 +5614,15 @@ Boolean View::TraverseAtGranularity(
         if (forward) {
             current = 0;
         }
-        text->GetLength(&current);
+        else {
+            text->GetLength(&current);
+        }
     }
     AutoPtr< ArrayOf<Int32> > range;
     if (forward) {
         iterator->Following(current, (ArrayOf<Int32>**)&range);
-    } else {
+    }
+    else {
         iterator->Preceding(current, (ArrayOf<Int32>**)&range);
     }
     if (!range) {
@@ -5638,7 +5639,8 @@ Boolean View::TraverseAtGranularity(
             selectionStart = forward ? segmentStart : segmentEnd;
         }
         selectionEnd = forward ? segmentEnd : segmentStart;
-    } else {
+    }
+    else {
         selectionStart = selectionEnd = forward ? segmentEnd : segmentStart;
     }
     SetAccessibilitySelection(selectionStart, selectionEnd);
@@ -5700,7 +5702,8 @@ ECode View::SetAccessibilitySelection(
     csq->GetLength(&len);
     if (start >= 0 && start == end && end <= len) {
         mAccessibilityCursorPosition = start;
-    } else {
+    }
+    else {
         mAccessibilityCursorPosition = IView::ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
     }
     SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_TEXT_SELECTION_CHANGED);
@@ -5719,12 +5722,13 @@ void View::SendViewTextTraversedAtGranularityEvent(
 
     AutoPtr<IAccessibilityEvent> event;
     CAccessibilityEvent::Obtain(
-        IAccessibilityEvent::TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY,
-        (IAccessibilityEvent**)&event);
+            IAccessibilityEvent::TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY,
+            (IAccessibilityEvent**)&event);
     OnInitializeAccessibilityEvent(event);
     OnPopulateAccessibilityEvent(event);
-    (IAccessibilityRecord::Probe(event))->SetFromIndex(fromIndex);
-    (IAccessibilityRecord::Probe(event))->SetToIndex(toIndex);
+    IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
+    record->SetFromIndex(fromIndex);
+    record->SetToIndex(toIndex);
     event->SetAction(action);
     event->SetMovementGranularity(granularity);
     Boolean result;
@@ -5826,12 +5830,12 @@ Boolean View::HasAncestorThatBlocksDescendantFocus()
         Boolean res;
         vgAncestor->ShouldBlockFocusForTouchscreen(&res);
         if (focusability == IViewGroup::FOCUS_BLOCK_DESCENDANTS
-            || (!focusableInTouchMode && res)) {
+                || (!focusableInTouchMode && res)) {
             return TRUE;
         }
         else {
             ancestor = NULL;
-            (IView::Probe(vgAncestor))->GetParent((IViewParent**)&ancestor);
+            IView::Probe(vgAncestor)->GetParent((IViewParent**)&ancestor);
         }
     }
     return FALSE;
@@ -6102,7 +6106,7 @@ ECode View::DispatchGenericMotionEvent(
     }
 
     Int32 source = 0;
-    (IInputEvent::Probe(event))->GetSource(&source);
+    IInputEvent::Probe(event)->GetSource(&source);
     if ((source & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
         Int32 action = 0;
         event->GetAction(&action);
@@ -9419,7 +9423,9 @@ AutoPtr<IView> View::GetProjectionReceiver()
         if (v->IsProjectionReceiver()) {
             return v;
         }
-        p->GetParent((IViewParent**)&p);
+        AutoPtr<IViewParent> tmp;
+        p->GetParent((IViewParent**)&tmp);
+        p = tmp;
     }
 
     return NULL;
@@ -9484,8 +9490,9 @@ ECode View::DamageInParent()
     if (p != NULL && ai != NULL) {
         AutoPtr<IRect> r = ai->mTmpInvalRect;
         r->Set(0, 0, mRight - mLeft, mBottom - mTop);
-        if (IViewGroup::Probe(mParent)) {
-            (IViewGroup::Probe(mParent))->DamageChild(this, r);
+        IViewGroup* vg = IViewGroup::Probe(mParent);
+        if (vg != NULL) {
+            vg->DamageChild(this, r);
         }
         else {
             mParent->InvalidateChild(this, r);
@@ -10489,7 +10496,7 @@ void View::OnDrawScrollBars(
                 cache->mState = ScrollabilityCache::OFF;
             }
             else {
-                (IDrawable::Probe(cache->mScrollBar))->SetAlpha(Elastos::Core::Math::Round((*values)[0]));
+                IDrawable::Probe(cache->mScrollBar)->SetAlpha(Elastos::Core::Math::Round((*values)[0]));
             }
 
             // This will make the scroll bars inval themselves after
@@ -10500,7 +10507,7 @@ void View::OnDrawScrollBars(
         else {
             // We're just on -- but we may have been fading before so
             // reset alpha
-            (IDrawable::Probe(cache->mScrollBar))->SetAlpha(255);
+            IDrawable::Probe(cache->mScrollBar)->SetAlpha(255);
         }
 
         Int32 viewFlags = mViewFlags;
@@ -11758,7 +11765,7 @@ ECode View::UpdateDisplayListIfDirty()
 
         AutoPtr<IHardwareCanvas> canvas;
         renderNode->Start(width, height, (IHardwareCanvas**)&canvas);
-        (ICanvas::Probe(canvas))->SetHighContrastText(mAttachInfo->mHighContrastText);
+        ICanvas::Probe(canvas)->SetHighContrastText(mAttachInfo->mHighContrastText);
 
         //try {
         AutoPtr<IHardwareLayer> layer = GetHardwareLayer();
@@ -11766,39 +11773,45 @@ ECode View::UpdateDisplayListIfDirty()
         layer->IsValid(&layerIsValid);
         if (layer != NULL && layerIsValid) {
             canvas->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
-        } else if (layerType == IView::LAYER_TYPE_SOFTWARE) {
+        }
+        else if (layerType == IView::LAYER_TYPE_SOFTWARE) {
             BuildDrawingCache(TRUE);
             AutoPtr<IBitmap> cache;
             GetDrawingCache(TRUE, (IBitmap**)&cache);
             if (cache != NULL) {
-                (ICanvas::Probe(canvas))->DrawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
+                ICanvas::Probe(canvas)->DrawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
             }
-        } else {
+        }
+        else {
             ComputeScroll();
 
-            (ICanvas::Probe(canvas))->Translate(-mScrollX, -mScrollY);
+            ICanvas* _canvas = ICanvas::Probe(canvas);
+
+            _canvas->Translate(-mScrollX, -mScrollY);
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-                DispatchDraw(ICanvas::Probe(canvas));
+                DispatchDraw(_canvas);
                 Boolean isEmpty;
                 if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
                     AutoPtr<IViewGroup> group;
                     mOverlay->GetOverlayView((IViewGroup**)&group);
-                    (IView::Probe(group))->Draw(ICanvas::Probe(canvas));
+                    IView::Probe(group)->Draw(_canvas);
                 }
-            } else {
-                Draw(ICanvas::Probe(canvas));
             }
-            DrawAccessibilityFocus(ICanvas::Probe(canvas));
+            else {
+                Draw(_canvas);
+            }
+            DrawAccessibilityFocus(_canvas);
         }
         //} finally {
         renderNode->End(canvas);
         SetDisplayListProperties(renderNode);
         //}
-    } else {
+    }
+    else {
         mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
         mPrivateFlags &= ~PFLAG_DIRTY_MASK;
     }
@@ -12149,7 +12162,7 @@ ECode View::BuildDrawingCache(
             if (mOverlay != NULL && (mOverlay->IsEmpty(&mOverlayIsEmpty), !mOverlayIsEmpty)) {
                 AutoPtr<IViewGroup> group;
                 mOverlay->GetOverlayView((IViewGroup**)&group);
-                (IView::Probe(group))->Draw(canvas);
+                IView::Probe(group)->Draw(canvas);
             }
         }
         else {
@@ -12971,7 +12984,7 @@ Boolean View::Draw(
             else {
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
                 Int32 res;
-                (IHardwareCanvas::Probe(canvas))->DrawRenderNode(renderNode, NULL, flags, &res);
+                IHardwareCanvas::Probe(canvas)->DrawRenderNode(renderNode, NULL, flags, &res);
             }
         }
     }
@@ -13990,15 +14003,11 @@ Boolean View::VerifyDrawable(
 ECode View::DrawableStateChanged()
 {
     AutoPtr<IDrawable> d = mBackground;
-    if (d != NULL) {
-        Boolean stateful;
-        d->IsStateful(&stateful);
-
-        if (stateful) {
-            AutoPtr<ArrayOf<Int32> > drawableState;
-            GetDrawableState((ArrayOf<Int32>**)&drawableState);
-            d->SetState(drawableState, &stateful);
-        }
+    Boolean stateful;
+    if (d != NULL && (d->IsStateful(&stateful), stateful)) {
+        AutoPtr<ArrayOf<Int32> > drawableState;
+        GetDrawableState((ArrayOf<Int32>**)&drawableState);
+        d->SetState(drawableState, &stateful);
     }
 
     if (mStateListAnimator != NULL) {
@@ -14141,6 +14150,12 @@ ECode View::OnCreateDrawableState(
 //                + " wf=" + hasWindowFocus
 //                + ": " + Arrays.toString(drawableState));
 //    }
+
+    if (extraSpace == 0) {
+        *_drawableState = drawableState;
+        REFCOUNT_ADD(*_drawableState);
+        return NOERROR;
+    }
 
     AutoPtr<ArrayOf<Int32> > fullState;
     if (drawableState != NULL) {
@@ -15393,16 +15408,16 @@ ECode View::FindViewByPredicateInsideOut(
         }
 
         AutoPtr<IViewParent> parent;
-        startView->GetParent((IViewParent**)&parent);
-        IView* vp = IView::Probe(parent);
-        if (vp == NULL) {
+        start->GetParent((IViewParent**)&parent);
+        if (parent == NULL || IView::Probe(parent) == NULL) {
             *res = NULL;
             return NOERROR;
         }
 
         childToSkip = start;
-        start = vp;
+        start = IView::Probe(parent);
     }
+    return NOERROR;
 }
 
 /**
@@ -18554,12 +18569,14 @@ Boolean View::InLiveRegion()
 
     AutoPtr<IViewParent> parent;
     GetParent((IViewParent**)&parent);
-    while (IView::Probe(parent)) {
-        (IView::Probe(parent))->GetAccessibilityLiveRegion(&region);
+    while (IView::Probe(parent) != NULL) {
+        IView::Probe(parent)->GetAccessibilityLiveRegion(&region);
         if (region != IView::ACCESSIBILITY_LIVE_REGION_NONE) {
             return TRUE;
         }
-        (IView::Probe(parent))->GetParent((IViewParent**)&parent);
+        AutoPtr<IViewParent> tmp;
+        parent->GetParent((IViewParent**)&tmp);
+        parent = tmp;
     }
 
     return FALSE;
@@ -18583,7 +18600,7 @@ ECode View::AlpahFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetAlpha(value);
+    IView::Probe(obj)->SetAlpha(value);
     return NOERROR;
 }
 
@@ -18593,7 +18610,7 @@ ECode View::AlpahFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float alpha;
-    (IView::Probe(obj))->GetAlpha(&alpha);
+    IView::Probe(obj)->GetAlpha(&alpha);
     AutoPtr<IFloat> temp;
     CFloat::New(alpha, (IFloat**)&temp);
     *rst = temp;
@@ -18613,7 +18630,7 @@ ECode View::TranslationXFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetTranslationX(value);
+    IView::Probe(obj)->SetTranslationX(value);
     return NOERROR;
 }
 
@@ -18623,7 +18640,7 @@ ECode View::TranslationXFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float translationX;
-    (IView::Probe(obj))->GetTranslationX(&translationX);
+    IView::Probe(obj)->GetTranslationX(&translationX);
     AutoPtr<IFloat> temp;
     CFloat::New(translationX, (IFloat**)&temp);
     *rst = temp;
@@ -18643,7 +18660,7 @@ ECode View::TranslationYFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetTranslationY(value);
+    IView::Probe(obj)->SetTranslationY(value);
     return NOERROR;
 }
 
@@ -18653,7 +18670,7 @@ ECode View::TranslationYFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float translationY;
-    (IView::Probe(obj))->GetTranslationY(&translationY);
+    IView::Probe(obj)->GetTranslationY(&translationY);
     AutoPtr<IFloat> temp;
     CFloat::New(translationY, (IFloat**)&temp);
     *rst = temp;
@@ -18673,7 +18690,7 @@ ECode View::TranslationZFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetTranslationZ(value);
+    IView::Probe(obj)->SetTranslationZ(value);
     return NOERROR;
 }
 
@@ -18683,7 +18700,7 @@ ECode View::TranslationZFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float translationZ;
-    (IView::Probe(obj))->GetTranslationZ(&translationZ);
+    IView::Probe(obj)->GetTranslationZ(&translationZ);
     AutoPtr<IFloat> temp;
     CFloat::New(translationZ, (IFloat**)&temp);
     *rst = temp;
@@ -18703,7 +18720,7 @@ ECode View::XFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetX(value);
+    IView::Probe(obj)->SetX(value);
     return NOERROR;
 }
 
@@ -18713,7 +18730,7 @@ ECode View::XFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float x;
-    (IView::Probe(obj))->GetX(&x);
+    IView::Probe(obj)->GetX(&x);
     AutoPtr<IFloat> temp;
     CFloat::New(x, (IFloat**)&temp);
     *rst = temp;
@@ -18733,7 +18750,7 @@ ECode View::YFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetY(value);
+    IView::Probe(obj)->SetY(value);
     return NOERROR;
 }
 
@@ -18743,7 +18760,7 @@ ECode View::YFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float y;
-    (IView::Probe(obj))->GetY(&y);
+    IView::Probe(obj)->GetY(&y);
     AutoPtr<IFloat> temp;
     CFloat::New(y, (IFloat**)&temp);
     *rst = temp;
@@ -18763,7 +18780,7 @@ ECode View::ZFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetZ(value);
+    IView::Probe(obj)->SetZ(value);
     return NOERROR;
 }
 
@@ -18773,7 +18790,7 @@ ECode View::ZFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float z;
-    (IView::Probe(obj))->GetZ(&z);
+    IView::Probe(obj)->GetZ(&z);
     AutoPtr<IFloat> temp;
     CFloat::New(z, (IFloat**)&temp);
     *rst = temp;
@@ -18793,7 +18810,7 @@ ECode View::RotationFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetRotation(value);
+    IView::Probe(obj)->SetRotation(value);
     return NOERROR;
 }
 
@@ -18803,7 +18820,7 @@ ECode View::RotationFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float rotation;
-    (IView::Probe(obj))->GetRotation(&rotation);
+    IView::Probe(obj)->GetRotation(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
     *rst = temp;
@@ -18823,7 +18840,7 @@ ECode View::RotationXFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetRotationX(value);
+    IView::Probe(obj)->SetRotationX(value);
     return NOERROR;
 }
 
@@ -18833,7 +18850,7 @@ ECode View::RotationXFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float rotation;
-    (IView::Probe(obj))->GetRotationX(&rotation);
+    IView::Probe(obj)->GetRotationX(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
     *rst = temp;
@@ -18853,7 +18870,7 @@ ECode View::RotationYFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetRotationY(value);
+    IView::Probe(obj)->SetRotationY(value);
     return NOERROR;
 }
 
@@ -18863,7 +18880,7 @@ ECode View::RotationYFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float rotation;
-    (IView::Probe(obj))->GetRotationY(&rotation);
+    IView::Probe(obj)->GetRotationY(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
     *rst = temp;
@@ -18883,7 +18900,7 @@ ECode View::ScaleXFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetScaleX(value);
+    IView::Probe(obj)->SetScaleX(value);
     return NOERROR;
 }
 
@@ -18893,7 +18910,7 @@ ECode View::ScaleXFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float rotation;
-    (IView::Probe(obj))->GetScaleX(&rotation);
+    IView::Probe(obj)->GetScaleX(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
     *rst = temp;
@@ -18913,7 +18930,7 @@ ECode View::ScaleYFloatProperty::SetValue(
     /* [in] */ IInterface* obj,
     /* [in] */ Float value)
 {
-    (IView::Probe(obj))->SetScaleY(value);
+    IView::Probe(obj)->SetScaleY(value);
     return NOERROR;
 }
 
@@ -18923,7 +18940,7 @@ ECode View::ScaleYFloatProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
     Float rotation;
-    (IView::Probe(obj))->GetScaleY(&rotation);
+    IView::Probe(obj)->GetScaleY(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
     *rst = temp;

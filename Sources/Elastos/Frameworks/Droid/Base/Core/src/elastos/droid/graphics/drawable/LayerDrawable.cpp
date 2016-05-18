@@ -22,9 +22,9 @@ namespace Graphics {
 namespace Drawable {
 
 //=====================================================================
-// LayerDrawable::ChildDrawable
+// ChildDrawable
 //=====================================================================
-LayerDrawable::ChildDrawable::ChildDrawable()
+ChildDrawable::ChildDrawable()
     : mInsetL(0)
     , mInsetT(0)
     , mInsetR(0)
@@ -32,7 +32,7 @@ LayerDrawable::ChildDrawable::ChildDrawable()
     , mId(IView::NO_ID)
 {}
 
-LayerDrawable::ChildDrawable::ChildDrawable(
+ChildDrawable::ChildDrawable(
     /* [in] */ ChildDrawable* orig,
     /* [in] */ LayerDrawable* owner,
     /* [in] */ IResources* res)
@@ -551,7 +551,7 @@ void LayerDrawable::AddLayer(
     st->InvalidateCache();
 }
 
-AutoPtr<LayerDrawable::ChildDrawable> LayerDrawable::AddLayer(
+AutoPtr<ChildDrawable> LayerDrawable::AddLayer(
     /* [in] */ IDrawable* layer,
     /* [in] */ ArrayOf<Int32>* themeAttrs,
     /* [in] */ Int32 id,

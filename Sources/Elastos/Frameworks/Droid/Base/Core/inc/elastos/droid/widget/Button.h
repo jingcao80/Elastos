@@ -3,9 +3,6 @@
 #define __ELASTOS_DROID_WIDGET_BUTTON_H__
 
 #include "elastos/droid/widget/TextView.h"
-#include "elastos/droid/R.h"
-
-using Elastos::Droid::R;
 
 namespace Elastos {
 namespace Droid {
@@ -21,10 +18,22 @@ public:
     Button();
 
     CARAPI constructor(
+        /* [in] */ IContext* context);
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyleAttr = R::attr::buttonStyle,
-        /* [in] */ Int32 defStyleRes = 0);
+        /* [in] */ IAttributeSet* attrs);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr,
+        /* [in] */ Int32 defStyleRes);
 
     //@Override
     virtual CARAPI OnInitializeAccessibilityEvent(

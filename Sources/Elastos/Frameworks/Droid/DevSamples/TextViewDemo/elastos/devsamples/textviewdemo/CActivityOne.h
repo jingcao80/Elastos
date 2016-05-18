@@ -24,7 +24,9 @@ using Elastos::Droid::Widget::ICheckBox;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IRadioButton;
 using Elastos::Droid::Widget::IRadioGroup;
+using Elastos::Droid::Widget::IToggleButton;
 
 namespace Elastos {
 namespace DevSamples {
@@ -167,10 +169,18 @@ private:
 
     AutoPtr<ICheckBox> mAndroidCheckBox;
     AutoPtr<ICheckBox> mIosCheckBox;
+    AutoPtr<ICheckBox> mUbuntuCheckBox;
 
     AutoPtr<IEditText> mEditText;
     AutoPtr<ITextView> mTextView;
     AutoPtr<IListView> mListView;
+
+    AutoPtr<IRadioGroup> mRadioGroup;
+    AutoPtr<IRadioButton> mRadioButtonMale;
+    AutoPtr<IRadioButton> mRadioButtonFemale;
+
+    AutoPtr<IToggleButton> mToggleButton1;
+    AutoPtr<IToggleButton> mToggleButton2;
 };
 
 } // namespace TextViewDemo

@@ -9,31 +9,45 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
+class LayerDrawable;
+
+class ChildDrawable : public Object
+{
+public:
+    ChildDrawable();
+
+    ChildDrawable(
+        /* [in] */ ChildDrawable* orig,
+        /* [in] */ LayerDrawable* owner,
+        /* [in] */ IResources* res);
+
+    AutoPtr<IDrawable> mDrawable;
+    AutoPtr<ArrayOf<Int32> > mThemeAttrs;
+    Int32 mInsetL;
+    Int32 mInsetT;
+    Int32 mInsetR;
+    Int32 mInsetB;
+    Int32 mId;
+};
+
+} // namespace Drawable
+} // namespace Graphics
+} // namespace Droid
+} // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Graphics::Drawable::ChildDrawable, IInterface);
+
+namespace Elastos {
+namespace Droid {
+namespace Graphics {
+namespace Drawable {
+
 class LayerDrawable
     : public Drawable
     , public ILayerDrawable
     , public IDrawableCallback
 {
 public:
-    class ChildDrawable : public Object
-    {
-    public:
-        ChildDrawable();
-
-        ChildDrawable(
-            /* [in] */ ChildDrawable* orig,
-            /* [in] */ LayerDrawable* owner,
-            /* [in] */ IResources* res);
-
-        AutoPtr<IDrawable> mDrawable;
-        AutoPtr<ArrayOf<Int32> > mThemeAttrs;
-        Int32 mInsetL;
-        Int32 mInsetT;
-        Int32 mInsetR;
-        Int32 mInsetB;
-        Int32 mId;
-    };
-
     class LayerState
         : public Drawable::ConstantState
     {
@@ -483,7 +497,5 @@ private:
 } // namespace Graphics
 } // namespace Droid
 } // namespace Elastos
-
-DEFINE_CONVERSION_FOR(Elastos::Droid::Graphics::Drawable::LayerDrawable::ChildDrawable, IInterface)
 
 #endif // __ELASTOS_DROID_GRAPHICS_DRAWABLE_LAYERDRAWABLE_H__

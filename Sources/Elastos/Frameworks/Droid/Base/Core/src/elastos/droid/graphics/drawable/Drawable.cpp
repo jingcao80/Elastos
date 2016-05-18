@@ -32,15 +32,17 @@
 #include "elastos/droid/utility/StateSet.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include "elastos/droid/utility/Xml.h"
+#include <elastos/utility/Arrays.h>
 #include "elastos/droid/R.h"
 #include "elastos/utility/logging/Logger.h"
 
-using Elastos::Droid::Graphics::PorterDuffMode_NONE;
 using Elastos::Droid::Content::Res::CColorStateList;
+using Elastos::Droid::Graphics::PorterDuffMode_NONE;
 using Elastos::Droid::Utility::StateSet;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::R;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -394,30 +396,14 @@ ECode Drawable::SetState(
     /* [in] */ ArrayOf<Int32>* stateSet,
     /* [out] */ Boolean* isStateful)
 {
-    VALIDATE_NOT_NULL(isStateful);
-    Boolean isEqual = TRUE;
+    VALIDATE_NOT_NULL(isStateful)
 
-    if (mStateSet.Get() == stateSet) {
-        isEqual = TRUE;
-    }
-    else if (mStateSet == NULL || stateSet == NULL
-            || mStateSet->GetLength() != stateSet->GetLength()) {
-        isEqual = FALSE;
-    }
-    else {
-        Int32 len = mStateSet->GetLength();
-        for (Int32 i = 0; i < len; i++) {
-            if ((*mStateSet)[i] != (*stateSet)[i]) {
-                isEqual = FALSE;
-            }
-        }
-    }
-
-    if (!isEqual) {
+    if (!Arrays::Equals(mStateSet.Get(), stateSet)) {
         mStateSet = stateSet;
         *isStateful = OnStateChange(stateSet);
         return NOERROR;
     }
+
     *isStateful = FALSE;
     return NOERROR;
 }
@@ -808,11 +794,11 @@ ECode Drawable::CreateFromXmlInner(
     if (name.Equals("selector")) {
         FAIL_RETURN(CStateListDrawable::New(drawable));
     }
-    else if (name.Equals("level-list")) {
-        FAIL_RETURN(CLevelListDrawable::New(drawable));
-    }
     else if (name.Equals("animated-selector")) {
         FAIL_RETURN(CAnimatedStateListDrawable::New(drawable));
+    }
+    else if (name.Equals("level-list")) {
+        FAIL_RETURN(CLevelListDrawable::New(drawable));
     }
     else if (name.Equals("layer-list")) {
         FAIL_RETURN(CLayerDrawable::New(drawable));
@@ -945,7 +931,8 @@ ECode Drawable::Inflate(
     if (theme != NULL) {
         FAIL_RETURN(theme->ObtainStyledAttributes(
             attrs, attrIds, 0, 0, (ITypedArray**)&a));
-    } else {
+    }
+    else {
         FAIL_RETURN(r->ObtainAttributes(attrs, attrIds, (ITypedArray**)&a));
     }
 
@@ -980,7 +967,6 @@ ECode Drawable::DrawableFromBitmap(
     /* [out] */ IDrawable** drawable)
 {
     assert(drawable != NULL);
-    AutoPtr<IDrawable> dr;
     if (np != NULL) {
         return CNinePatchDrawable::New(
             res, bm, np, pad, layoutBounds, srcName, drawable);
@@ -1008,8 +994,8 @@ AutoPtr<IPorterDuffColorFilter> Drawable::UpdateTintFilter(
         return filter;
     }
 
-    ((CPorterDuffColorFilter*)tintFilter)->SetColor(color);
-    ((CPorterDuffColorFilter*)tintFilter)->SetMode(tintMode);
+    tintFilter->SetColor(color);
+    tintFilter->SetMode(tintMode);
     return tintFilter;
 }
 

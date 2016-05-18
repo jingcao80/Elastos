@@ -205,12 +205,12 @@ RadioGroup::constructor(
             const_cast<Int32 *>(R::styleable::RadioGroup),
             ArraySize(R::styleable::RadioGroup));
     AutoPtr<ITypedArray> attributes;
-    context->ObtainStyledAttributes(
-            attrs, attrIds, R::attr::radioButtonStyle, 0, (ITypedArray**)&attributes);
+    context->ObtainStyledAttributes(attrs, attrIds,
+            R::attr::radioButtonStyle, 0, (ITypedArray**)&attributes);
 
     Int32 value;
-    attributes->GetResourceId(
-        R::styleable::RadioGroup_checkedButton, IView::NO_ID, &value);
+    attributes->GetResourceId(R::styleable::RadioGroup_checkedButton,
+            IView::NO_ID, &value);
     if (value != IView::NO_ID) {
         mCheckedId = value;
     }
@@ -270,7 +270,7 @@ ECode RadioGroup::AddView(
             }
             mProtectFromCheckedChange = FALSE;
             Int32 id;
-            IView::Probe(child)->GetId(&id);
+            child->GetId(&id);
             SetCheckedId(id);
         }
     }
@@ -314,7 +314,7 @@ void RadioGroup::SetCheckedStateForView(
 {
     AutoPtr<IView> checkedView;
     FindViewById(viewId, (IView**)&checkedView);
-    if (IRadioButton::Probe(checkedView) && ICheckable::Probe(checkedView)) {
+    if (checkedView != NULL && IRadioButton::Probe(checkedView)) {
         ICheckable::Probe(checkedView)->SetChecked(checked);
     }
 }
@@ -347,11 +347,7 @@ ECode RadioGroup::GenerateLayoutParams(
     VALIDATE_NOT_NULL(params);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IRadioGroupLayoutParams> lp;
-    FAIL_RETURN(CRadioGroupLayoutParams::New(context, attrs, (IRadioGroupLayoutParams**)&lp));
-    *params = IViewGroupLayoutParams::Probe(lp);
-    REFCOUNT_ADD(*params);
-    return NOERROR;
+    return CRadioGroupLayoutParams::New(context, attrs, params);
 }
 
 Boolean RadioGroup::CheckLayoutParams(
@@ -363,6 +359,8 @@ Boolean RadioGroup::CheckLayoutParams(
 ECode RadioGroup::GenerateDefaultLayoutParams(
     /* [out] */ ILinearLayoutLayoutParams** params)
 {
+    VALIDATE_NOT_NULL(*params)
+
     AutoPtr<IRadioGroupLayoutParams> p;
     CRadioGroupLayoutParams::New(
             IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT,
@@ -377,16 +375,14 @@ ECode RadioGroup::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     LinearLayout::OnInitializeAccessibilityEvent(event);
-    IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CRadioGroup"));
-    return NOERROR;
+    return IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CRadioGroup"));
 }
 
 ECode RadioGroup::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     LinearLayout::OnInitializeAccessibilityNodeInfo(info);
-    info->SetClassName(CoreUtils::Convert("CRadioGroup"));
-    return NOERROR;
+    return info->SetClassName(CoreUtils::Convert("CRadioGroup"));
 }
 
 } // namespace Widget

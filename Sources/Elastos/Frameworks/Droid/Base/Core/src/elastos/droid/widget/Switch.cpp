@@ -1,4 +1,5 @@
 
+#include "elastos/droid/widget/Switch.h"
 #include "elastos/droid/animation/ObjectAnimator.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/Typeface.h"
@@ -11,9 +12,9 @@
 #include "elastos/droid/utility/MathUtils.h"
 #include "elastos/droid/view/CViewConfiguration.h"
 #include "elastos/droid/view/CMotionEvent.h"
-#include "elastos/droid/widget/Switch.h"
 #include "elastos/droid/content/res/CTypedArray.h"
 #include "elastos/droid/content/res/CAssetManager.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 
@@ -46,6 +47,7 @@ using Elastos::Droid::View::CMotionEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Content::Res::CTypedArray;
 using Elastos::Droid::Content::Res::CAssetManager;
+using Elastos::Droid::R;
 using Elastos::Core::IFloat;
 using Elastos::Core::CFloat;
 using Elastos::Core::CString;
@@ -100,10 +102,30 @@ Switch::Switch()
     , mSwitchTop(0)
     , mSwitchRight(0)
     , mSwitchBottom(0)
-
 {
     mVelocityTracker = VelocityTracker::Obtain();
     CRect::New((IRect**)&mTempRect);
+}
+
+ECode Switch::constructor(
+    /* [in] */ IContext* context)
+{
+    return constructor(context, NULL);
+}
+
+ECode Switch::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    return constructor(context, attrs, R::attr::switchStyle);
+}
+
+ECode Switch::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs,
+    /* [in] */ Int32 defStyleAttr)
+{
+    return constructor(context, attrs, defStyleAttr, 0);
 }
 
 ECode Switch::constructor(

@@ -30,7 +30,7 @@ public:
             /* [in] */ IDrawable* drawable);
 
         CARAPI_(Int32) IndexOfStateSet(
-            /* [in] */ const ArrayOf<Int32>* stateSet);
+            /* [in] */ ArrayOf<Int32>* stateSet);
 
         //@Override
         CARAPI NewDrawable(

@@ -86,7 +86,7 @@ Boolean StateListDrawable::OnStateChange(
     // if (DEBUG) android.util.Log.i(TAG, "onStateChange " + this + " states "
     //             + Arrays.toString(stateSet) + " found " + idx);
     if (idx < 0) {
-        idx = mStateListState->IndexOfStateSet(StateSet::WILD_CARD.Get());
+        idx = mStateListState->IndexOfStateSet(StateSet::WILD_CARD);
     }
 
     Boolean res = FALSE;
@@ -231,7 +231,7 @@ ECode StateListDrawable::GetStateDrawableIndex(
     /* [out] */ Int32* index)
 {
     VALIDATE_NOT_NULL(index);
-    *index = mStateListState->IndexOfStateSet((ArrayOf<Int32>*)&stateSet);
+    *index = mStateListState->IndexOfStateSet(stateSet);
     return NOERROR;
 }
 
@@ -304,7 +304,7 @@ Int32 StateListDrawable::StateListState::AddStateSet(
 }
 
 Int32 StateListDrawable::StateListState::IndexOfStateSet(
-    /* [in] */ const ArrayOf<Int32>* stateSet)
+    /* [in] */ ArrayOf<Int32>* stateSet)
 {
     Int32 N = GetChildCount();
     for (Int32 i = 0; i < N; i++) {

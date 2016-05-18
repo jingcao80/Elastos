@@ -39,8 +39,8 @@ CAR_INTERFACE_IMPL(CServiceManager, Object, IServiceManager)
 
 CAR_SINGLETON_IMPL(CServiceManager)
 
-CServiceManager::CServiceManager() :
-    mServiceCache(11)
+CServiceManager::CServiceManager()
+    : mServiceCache(11)
 {}
 
 CServiceManager::~CServiceManager()

@@ -280,7 +280,8 @@ void BitmapDrawable::ComputeBitmapSize()
     if (bitmap != NULL) {
         bitmap->GetScaledWidth(mTargetDensity, &mBitmapWidth);
         bitmap->GetScaledHeight(mTargetDensity, &mBitmapHeight);
-    } else {
+    }
+    else {
         mBitmapWidth = mBitmapHeight = -1;
     }
 }
@@ -519,35 +520,38 @@ ECode BitmapDrawable::Draw(
         ShaderTileMode tmy = state->mTileModeY;
         if (tmx == -1 && tmy == -1) {
             paint->SetShader(NULL);
-        } else {
+        }
+        else {
             AutoPtr<IShader> s;
             CBitmapShader::New(bitmap,
                     tmx == -1 ? ShaderTileMode_CLAMP : tmx,
                     tmy == -1 ? ShaderTileMode_CLAMP : tmy, (IShader**)&s);
-            state->mPaint->SetShader(s);
+            paint->SetShader(s);
         }
 
         state->mRebuildShader = FALSE;
     }
 
     Int32 restoreAlpha = 0;
-    if (state->mBaseAlpha != 1.0) {
+    if (state->mBaseAlpha != 1.0f) {
         AutoPtr<IPaint> p;
         GetPaint((IPaint**)&p);
         p->GetAlpha(&restoreAlpha);
-        Int32 newAlpha = (Int32) (restoreAlpha * state->mBaseAlpha + 0.5);
+        Int32 newAlpha = (Int32) (restoreAlpha * state->mBaseAlpha + 0.5f);
         p->SetAlpha(newAlpha);
         Logger::I("BitmapDrawable", "mBaseAlpha:%d, alpha:%d", state->mBaseAlpha, newAlpha);
-    } else {
+    }
+    else {
         restoreAlpha = -1;
     }
 
     Boolean clearColorFilter = FALSE;
     AutoPtr<IColorFilter> cf;
-    if (mTintFilter != NULL && (paint->GetColorFilter((IColorFilter**)&cf), cf.Get()) == NULL) {
+    if (mTintFilter != NULL && (paint->GetColorFilter((IColorFilter**)&cf), cf) == NULL) {
         paint->SetColorFilter(IColorFilter::Probe(mTintFilter));
         clearColorFilter = TRUE;
-    } else {
+    }
+    else {
         clearColorFilter = FALSE;
     }
 
@@ -564,7 +568,7 @@ ECode BitmapDrawable::Draw(
             mDstRect->GetLeft(&left);
             mDstRect->GetRight(&right);
             canvas->Translate(right - left, 0);
-            canvas->Scale(-1.0, 1.0);
+            canvas->Scale(-1.0f, 1.0f);
         }
 
         canvas->DrawBitmap(bitmap, NULL, mDstRect, paint);
@@ -572,7 +576,8 @@ ECode BitmapDrawable::Draw(
         if (needMirroring) {
             canvas->Restore();
         }
-    } else {
+    }
+    else {
         if (needMirroring) {
             // Mirror the bitmap
             Int32 left = 0, right = 0;
@@ -581,7 +586,8 @@ ECode BitmapDrawable::Draw(
             UpdateMirrorMatrix(right - left);
             shader->SetLocalMatrix(mMirrorMatrix);
             paint->SetShader(shader);
-        } else {
+        }
+        else {
             if (mMirrorMatrix != NULL) {
                 mMirrorMatrix = NULL;
                 shader->SetLocalMatrix(CMatrix::IDENTITY_MATRIX);
@@ -623,7 +629,8 @@ void BitmapDrawable::UpdateDstRectAndInsetsIfDirty()
             Int32 right = bd->mRight - dr->mRight;
             Int32 bottom = bd->mBottom - dr->mBottom;
             mOpticalInsets = Insets::Of(left, top, right, bottom);
-        } else {
+        }
+        else {
             CopyBounds(mDstRect);
             mOpticalInsets = Insets::NONE;
         }
@@ -765,9 +772,9 @@ ECode BitmapDrawable::Inflate(
 {
     FAIL_RETURN(Drawable::Inflate(r, parser, attrs, theme));
 
-    Int32 size = ArraySize(R::styleable::BitmapDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::BitmapDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::BitmapDrawable),
+            ArraySize(R::styleable::BitmapDrawable));
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));

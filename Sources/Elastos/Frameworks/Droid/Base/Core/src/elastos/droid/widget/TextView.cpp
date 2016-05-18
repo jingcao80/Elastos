@@ -9333,20 +9333,23 @@ ECode TextView::OnTouchEvent(
         *res = superResult;
         return NOERROR;
     }
+
     Boolean isFocused;
     Boolean touchIsFinished = (action == IMotionEvent::ACTION_UP) &&
             (mEditor == NULL || !TO_EDITOR(mEditor)->mIgnoreActionUpEvent) &&
-        (IsFocused(&isFocused), isFocused);
+            (IsFocused(&isFocused), isFocused);
+
     Boolean isEnabled, onCheckIsTextEditor;
      if ((mMovement != NULL || (OnCheckIsTextEditor(&onCheckIsTextEditor), onCheckIsTextEditor))
-        && (IsEnabled(&isEnabled), isEnabled)
-        && ISpannable::Probe(mText) && mLayout != NULL) {
+            && (IsEnabled(&isEnabled), isEnabled)
+            && ISpannable::Probe(mText) != NULL && mLayout != NULL) {
         AutoPtr<ISpannable> spannable = ISpannable::Probe(mText);
         Boolean handled = FALSE;
 
         if (mMovement != NULL) {
             Boolean result;
-            handled |= mMovement->OnTouchEvent(this, spannable, event, &result);
+            mMovement->OnTouchEvent(this, spannable, event, &result);
+            handled |= result;
         }
 
         Boolean textIsSelectable;
@@ -9355,10 +9358,10 @@ ECode TextView::OnTouchEvent(
             // The LinkMovementMethod which should handle taps on links has not been installed
             // on non editable text that support text selection.
             // We reproduce its behavior here to open links for these.
-            AutoPtr<ArrayOf<IInterface*> > links;
             Int32 selectionStart, selectionEnd;
             GetSelectionStart(&selectionStart);
             GetSelectionEnd(&selectionEnd);
+            AutoPtr<ArrayOf<IInterface*> > links;
             ISpanned::Probe(spannable)->GetSpans(selectionStart,
                     selectionEnd, EIID_IClickableSpan, (ArrayOf<IInterface*>**)&links);
 
@@ -9380,7 +9383,7 @@ ECode TextView::OnTouchEvent(
                 if (result) {
                     imm->ShowSoftInput(this, 0, &result);
                 }
-                handled |= result; ;
+                handled |= result;
             }
 
             // The above condition ensures that the mEditor is not NULL

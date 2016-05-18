@@ -6,6 +6,7 @@
 #include "elastos/droid/widget/CompoundButton.h"
 #include "elastos/droid/widget/CCompoundButtonSavedState.h"
 #include "elastos/droid/graphics/drawable/Drawable.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -16,6 +17,7 @@ using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::IGravity;
+using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -128,7 +130,7 @@ ECode CompoundButton::constructor(
             const_cast<Int32 *>(R::styleable::CompoundButton),
             ArraySize(R::styleable::CompoundButton));
     AutoPtr<ITypedArray> a;
-    ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
+    FAIL_RETURN(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 
     AutoPtr<IDrawable> d;
@@ -344,17 +346,18 @@ ECode CompoundButton::OnInitializeAccessibilityEvent(
 {
     Button::OnInitializeAccessibilityEvent(event);
 
-    return IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("CompoundButton"));
+    IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
+    record->SetClassName(CoreUtils::Convert("CCompoundButton"));
+    return record->SetChecked(mChecked);
 }
 
 ECode CompoundButton::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     FAIL_RETURN(Button::OnInitializeAccessibilityNodeInfo(info));
-    FAIL_RETURN(info->SetClassName(CoreUtils::Convert("CompoundButton")));
+    FAIL_RETURN(info->SetClassName(CoreUtils::Convert("CCompoundButton")));
     info->SetCheckable(TRUE);
-    info->SetChecked(mChecked);
-    return NOERROR;
+    return info->SetChecked(mChecked);
 }
 
 ECode CompoundButton::GetCompoundPaddingLeft(
@@ -371,7 +374,6 @@ ECode CompoundButton::GetCompoundPaddingLeft(
         if (buttonDrawable != NULL) {
             Int32 w;
             buttonDrawable->GetIntrinsicWidth(&w);
-
             padding += w;
         }
     }
@@ -391,7 +393,6 @@ ECode CompoundButton::GetCompoundPaddingRight(
     if (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) {
         AutoPtr<IDrawable> buttonDrawable = mButtonDrawable;
         if (buttonDrawable != NULL) {
-
             Int32 w;
             buttonDrawable->GetIntrinsicWidth(&w);
             padding += w;
@@ -409,10 +410,7 @@ ECode CompoundButton::GetHorizontalOffsetForDrawables(
 
     AutoPtr<IDrawable> buttonDrawable = mButtonDrawable;
     if(buttonDrawable != NULL) {
-        Int32 width;
-        buttonDrawable->GetIntrinsicWidth(&width);
-        *offset = width;
-        return NOERROR;
+        return buttonDrawable->GetIntrinsicWidth(offset);
     }
     else {
         return NOERROR;
@@ -507,8 +505,8 @@ ECode CompoundButton::DrawableStateChanged()
         AutoPtr<ArrayOf<Int32> > myDrawableState;
         GetDrawableState((ArrayOf<Int32>**)&myDrawableState);
 
-        Boolean state;
         // Set the state of the Drawable
+        Boolean state;
         mButtonDrawable->SetState(myDrawableState, &state);
 
         Invalidate();

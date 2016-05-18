@@ -35,7 +35,6 @@ public:
         /* [in] */ Int32 defStyleAttr,
         /* [in] */ Int32 defStyleRes);
 
-
     CARAPI OnInitializeAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
 
@@ -46,4 +45,4 @@ public:
 }// namespace Widget
 }// namespace Droid
 }// namespace Elastos
-#endif //__CHECKBOXBUTTON_H__
+#endif //__ELASTOS_DROID_WIDGET_CHECKBOX_H__

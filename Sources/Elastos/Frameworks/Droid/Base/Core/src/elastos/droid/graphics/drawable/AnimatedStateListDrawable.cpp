@@ -14,9 +14,9 @@
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
-using Elastos::Droid::R;
 using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Droid::Utility::StateSet;
+using Elastos::Droid::R;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -38,8 +38,9 @@ AnimatedStateListDrawable::AnimationDrawableTransition::AnimationDrawableTransit
     (*array)[1] = toFrame;
     AutoPtr<IObjectAnimator> anim = ObjectAnimator::OfInt32(ad, String("currentIndex"), array);
     anim->SetAutoCancel(TRUE);
-    IAnimator::Probe(anim)->SetDuration(interp->GetTotalDuration());
-    IAnimator::Probe(anim)->SetInterpolator(interp);
+    IAnimator* animator = IAnimator::Probe(anim);
+    animator->SetDuration(interp->GetTotalDuration());
+    animator->SetInterpolator(interp);
 
     mAnim = anim;
 }
@@ -82,7 +83,8 @@ void AnimatedStateListDrawable::AnimatedVectorDrawableTransition::Start()
 {
     if (mReversed) {
         Reverse();
-    } else {
+    }
+    else {
         IAnimatable::Probe(mAvd)->Start();
     }
 }
@@ -91,7 +93,8 @@ void AnimatedStateListDrawable::AnimatedVectorDrawableTransition::Reverse()
 {
     if (CanReverse()) {
         mAvd->Reverse();
-    } else {
+    }
+    else {
         Logger::W(LOGTAG, String("Reverse() is called on a drawable can't reverse"));
     }
 }
@@ -136,7 +139,7 @@ Int32 AnimatedStateListDrawable::AnimatedStateListState::AddTransition(
 
     if (reversible) {
         Int64 keyToFrom = GenerateTransitionKey(toId, fromId);
-        mTransitions[keyToFrom] = pos | (1L << REVERSE_SHIFT);
+        mTransitions[keyToFrom] = pos | (1LL << REVERSE_SHIFT);
     }
 
     return AddChild(anim);
@@ -260,6 +263,8 @@ ECode AnimatedStateListDrawable::FrameInterpolator::GetInterpolation(
     /* [in] */ Float input,
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     Int32 elapsed = (Int32) (input * mTotalDuration + 0.5f);
     Int32 N = mFrames;
     AutoPtr<ArrayOf<Int32> > frameTimes = mFrameTimes;
@@ -276,7 +281,8 @@ ECode AnimatedStateListDrawable::FrameInterpolator::GetInterpolation(
     Float frameElapsed;
     if (i < N) {
         frameElapsed = remaining / (Float) mTotalDuration;
-    } else {
+    }
+    else {
         frameElapsed = 0;
     }
 
@@ -286,7 +292,7 @@ ECode AnimatedStateListDrawable::FrameInterpolator::GetInterpolation(
 ECode AnimatedStateListDrawable::FrameInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    VALIDATE_NOT_NULL(res);
+    VALIDATE_NOT_NULL(res)
     *res = FALSE;
     return NOERROR;
 }
@@ -425,7 +431,8 @@ Boolean AnimatedStateListDrawable::SelectTransition(
         if (toIndex == mTransitionToIndex) {
             // Already animating to that keyframe.
             return TRUE;
-        } else if (toIndex == mTransitionFromIndex && currentTransition->CanReverse()) {
+        }
+        else if (toIndex == mTransitionFromIndex && currentTransition->CanReverse()) {
             // Reverse the current animation.
             currentTransition->Reverse();
             mTransitionToIndex = mTransitionFromIndex;
@@ -438,7 +445,8 @@ Boolean AnimatedStateListDrawable::SelectTransition(
 
         // Changing animation, end the current animation.
         currentTransition->Stop();
-    } else {
+    }
+    else {
         GetCurrentIndex(&fromIndex);
     }
 
@@ -471,12 +479,15 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     if (IAnimationDrawable::Probe(d)) {
         Boolean reversed = state->IsTransitionReversed(fromId, toId);
         transition = new AnimationDrawableTransition(IAnimationDrawable::Probe(d), reversed);
-    } else if (IAnimatedVectorDrawable::Probe(d)) {
+    }
+    else if (IAnimatedVectorDrawable::Probe(d)) {
         Boolean reversed = state->IsTransitionReversed(fromId, toId);
         transition = new AnimatedVectorDrawableTransition(IAnimatedVectorDrawable::Probe(d), reversed);
-    } else if (IAnimatable::Probe(d)) {
+    }
+    else if (IAnimatable::Probe(d)) {
         transition = new AnimatableTransition(IAnimatable::Probe(d));
-    } else {
+    }
+    else {
         // We don't know how to animate this transition.
         return FALSE;
     }
@@ -511,11 +522,11 @@ ECode AnimatedStateListDrawable::Inflate(
     /* [in] */ /*@NonNull*/ IAttributeSet* attrs,
     /* [in] */ /*@Nullable*/ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/
 {
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::AnimatedStateListDrawable),
+            ArraySize(R::styleable::AnimatedStateListDrawable));
     AutoPtr<ITypedArray> a;
-    Int32 size = ArraySize(R::styleable::AnimatedStateListDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AnimatedStateListDrawable, size);
-    FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
+    FAIL_RETURN(ObtainAttributes(r, theme, attrs, attrIds, (ITypedArray**)&a));
 
     StateListDrawable::InflateWithAttributes(r, parser, a, R::styleable::AnimatedStateListDrawable_visible);
 
@@ -560,7 +571,8 @@ ECode AnimatedStateListDrawable::Inflate(
         if (name.Equals(ELEMENT_ITEM)) {
             Int32 value = 0;
             FAIL_RETURN(ParseItem(r, parser, attrs, theme, &value));
-        } else if (name.Equals(ELEMENT_TRANSITION)) {
+        }
+        else if (name.Equals(ELEMENT_TRANSITION)) {
             Int32 value = 0;
             FAIL_RETURN(ParseTransition(r, parser, attrs, theme, &value));
         }
@@ -611,7 +623,8 @@ ECode AnimatedStateListDrawable::ParseTransition(
     AutoPtr<IDrawable> dr;
     if (drawableRes != 0) {
         r->GetDrawable(drawableRes, theme, (IDrawable**)&dr);
-    } else {
+    }
+    else {
         Int32 type = 0;
         while ((parser->Next(&type), type) == IXmlPullParser::TEXT) {
         }
@@ -667,7 +680,8 @@ ECode AnimatedStateListDrawable::ParseItem(
     AutoPtr<IDrawable> dr;
     if (drawableRes != 0) {
         r->GetDrawable(drawableRes, theme, (IDrawable**)&dr);
-    } else {
+    }
+    else {
         Int32 type = 0;
         while ((parser->Next(&type), type) == IXmlPullParser::TEXT) {
         }

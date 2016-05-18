@@ -1,7 +1,6 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/drawable/DrawableContainer.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/Insets.h"
@@ -77,10 +76,12 @@ ECode DrawableContainer::GetPadding(
         Int32 left = 0, top = 0, bottom = 0, right = 0;
         r->Get(&left, &top, &right, &bottom);
         result = (left | top | bottom | right) != 0;
-    } else {
+    }
+    else {
         if (mCurrDrawable != NULL) {
             mCurrDrawable->GetPadding(padding, &result);
-        } else {
+        }
+        else {
             Drawable::GetPadding(padding, &result);
         }
     }

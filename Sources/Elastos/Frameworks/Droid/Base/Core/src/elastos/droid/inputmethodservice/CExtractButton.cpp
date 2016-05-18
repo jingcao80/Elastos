@@ -1,5 +1,8 @@
 
 #include "elastos/droid/inputmethodservice/CExtractButton.h"
+#include "elastos/droid/R.h"
+
+using Elastos::Droid::R;
 
 namespace Elastos {
 namespace Droid {

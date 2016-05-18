@@ -1,9 +1,11 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/widget/ToggleButton.h"
+#include "elastos/droid/R.h"
 
 using Elastos::Droid::Graphics::Drawable::ILayerDrawable;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::R;
 using Elastos::Core::CString;
 
 namespace Elastos {
