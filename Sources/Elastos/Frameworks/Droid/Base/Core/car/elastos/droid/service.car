@@ -88,6 +88,7 @@ module
     interface Elastos.Droid.View.ILayoutInflaterFactory;
     interface Elastos.Droid.View.ILayoutInflaterFactory2;
     interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.View.IIWindow;
     interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
     interface Elastos.Droid.Internal.App.IIVoiceInteractionManagerService;
     interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
@@ -95,6 +96,7 @@ module
     interface Elastos.Droid.Internal.TextService.IISpellCheckerService;
     interface Elastos.Droid.Internal.TextService.IISpellCheckerSession;
     interface Elastos.Droid.Internal.TextService.IISpellCheckerSessionListener;
+    interface Elastos.Droid.Internal.View.IBaseIWindow;
     using interface Elastos.Utility.ILocale;
     using interface Elastos.Core.ICloneable;
 
@@ -228,10 +230,14 @@ module
             interface IWallpaperSettingsActivity;
         }
 
-        class CWallpaperServiceEngine {
-            constructor();
+        [local]
+        class CWallpaperServiceEngineWindow {
+            constructor(
+                [in] IWallpaperServiceEngine* host);
 
-            interface IWallpaperServiceEngine;
+            interface IBaseIWindow;
+            interface IIWindow;
+            interface IBinder;
         }
 
         [local]
