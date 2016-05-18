@@ -50,7 +50,7 @@ private:
         , public IMediaPlayerOnVideoSizeChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVOnVideoSizeChangedListener(
             /* [in] */ VideoView* host);
@@ -69,7 +69,7 @@ private:
       , public IMediaPlayerOnPreparedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVOnPreparedListener(
             /* [in] */ VideoView* host);
@@ -86,7 +86,7 @@ private:
         , public IMediaPlayerOnCompletionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVOnCompletionListener(
             /* [in] */ VideoView* host);
@@ -103,7 +103,7 @@ private:
         , public IMediaPlayerOnErrorListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVOnErrorListener(
             /* [in] */ VideoView* host);
@@ -123,7 +123,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVDialogOnClickListener(
             /* [in] */ VideoView* host);
@@ -141,7 +141,7 @@ private:
         , public IMediaPlayerOnBufferingUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVOnBufferingUpdateListener(
             /* [in] */ VideoView* host);
@@ -159,7 +159,7 @@ private:
         , public ISurfaceHolderCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VVSurfaceHodlerCallback(
             /* [in] */ VideoView* host);
@@ -185,7 +185,7 @@ private:
         , public IMediaPlayerOnInfoListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InfoListener(
             /* [in] */ VideoView* host);
@@ -205,7 +205,7 @@ private:
         , public ISubtitleTrackRenderingWidgetOnChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ChangedListener(
             /* [in] */ VideoView* host);
@@ -219,7 +219,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     VideoView();
 

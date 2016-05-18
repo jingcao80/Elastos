@@ -26,7 +26,7 @@ public:
         , public IScrollViewSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ScrollViewSavedState();
 
@@ -48,7 +48,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScrollView();
 

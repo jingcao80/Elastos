@@ -34,7 +34,7 @@ public:
         , public ICaptioningManagerCaptionStyle
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CaptionStyle();
 
@@ -208,7 +208,7 @@ public:
         , public ICaptioningManagerCaptioningChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Called when the captioning enabled state changes.
@@ -282,7 +282,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CaptioningManager();
 

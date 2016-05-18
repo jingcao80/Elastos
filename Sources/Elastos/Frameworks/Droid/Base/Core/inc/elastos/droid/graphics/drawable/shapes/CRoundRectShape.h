@@ -14,7 +14,7 @@ namespace Shapes {
 CarClass(CRoundRectShape), public RoundRectShape
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /**
      * RoundRectShape constructor.

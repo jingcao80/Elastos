@@ -61,7 +61,7 @@ private:
         , public INumberPickerFormatter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         NumberFormatter(
             /* [in] */ const String& format);
@@ -76,7 +76,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MultiFieldTimePickerDialog(
         /* [in] */ IContext* context,

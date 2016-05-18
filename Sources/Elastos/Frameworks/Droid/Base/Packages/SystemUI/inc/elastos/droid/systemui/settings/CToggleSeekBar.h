@@ -20,7 +20,7 @@ namespace Settings {
 CarClass(CToggleSeekBar), public SeekBar
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context);

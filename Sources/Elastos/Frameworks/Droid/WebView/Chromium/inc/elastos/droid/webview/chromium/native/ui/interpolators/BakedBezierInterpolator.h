@@ -32,7 +32,7 @@ class BakedBezierInterpolator
     , public IInterpolator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     // @Override
     CARAPI_(Float) GetInterpolation(

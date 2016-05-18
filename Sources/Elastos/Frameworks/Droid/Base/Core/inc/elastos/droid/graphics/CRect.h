@@ -45,9 +45,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Create a new empty Rect. All coordinates are initialized to 0.

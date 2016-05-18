@@ -33,7 +33,7 @@ namespace StatusBar {
 const String StatusBarIconView::TAG("StatusBarIconView");
 const Boolean StatusBarIconView::DBG = FALSE;
 
-CAR_INTERFACE_IMPL(StatusBarIconView, AnimatedImageView, IStatusBarIconView);
+CAR_INTERFACE_IMPL(StatusBarIconView, AnimatedImageView, IStatusBarIconView)
 StatusBarIconView::StatusBarIconView()
     : mNumberX(0)
     , mNumberY(0)

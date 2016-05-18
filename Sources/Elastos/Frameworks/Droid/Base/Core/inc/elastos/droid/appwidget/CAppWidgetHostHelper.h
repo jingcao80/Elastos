@@ -17,7 +17,7 @@ CarClass(CAppWidgetHostHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     /**
      * Remove all records about all hosts for your package.
      * <ul>

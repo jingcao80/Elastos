@@ -90,7 +90,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyClickListener(
             /* [in] */ ZoomButtonsController* host,
@@ -117,7 +117,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Constructor for the {@link ZoomButtonsController}.

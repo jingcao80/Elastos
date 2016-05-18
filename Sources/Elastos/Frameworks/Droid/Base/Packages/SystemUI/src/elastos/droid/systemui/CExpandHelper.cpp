@@ -110,8 +110,8 @@ ECode CExpandHelper::AnimatorListener::OnAnimationEnd(
 //============================================================================
 //              CViewScaler
 //============================================================================
-CAR_OBJECT_IMPL(CViewScaler);
-CAR_INTERFACE_IMPL(CViewScaler, Object, IViewScaler);
+CAR_OBJECT_IMPL(CViewScaler)
+CAR_INTERFACE_IMPL(CViewScaler, Object, IViewScaler)
 ECode CViewScaler::constructor(
     /* [in] */ IExpandHelper* host)
 {
@@ -159,7 +159,7 @@ ECode CViewScaler::GetNaturalHeight(
 //============================================================================
 //              CExpandHelper
 //============================================================================
-CAR_OBJECT_IMPL(CExpandHelper);
+CAR_OBJECT_IMPL(CExpandHelper)
 CAR_INTERFACE_IMPL_2(CExpandHelper, Object, IExpandHelper, IGefingerpoken);
 CExpandHelper::CExpandHelper()
     : mExpanding(FALSE)

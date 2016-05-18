@@ -14,7 +14,7 @@ class ContextThemeWrapperInLayoutInflater
     , public IContextThemeWrapperInLayoutInflater
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI ToString(
         /* [out] */ String* str);

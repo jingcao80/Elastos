@@ -20,7 +20,7 @@ class BidirectionalTypeConverter
     , public IBidirectionalTypeConverter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BidirectionalTypeConverter();
 

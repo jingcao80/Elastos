@@ -18,7 +18,7 @@ CarClass(CAppWidgetManagerHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Get the AppWidgetManager instance to use for the supplied {@link android.content.Context

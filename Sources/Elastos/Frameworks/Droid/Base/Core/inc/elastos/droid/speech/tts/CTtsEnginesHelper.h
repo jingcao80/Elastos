@@ -19,7 +19,7 @@ CarClass(CTtsEnginesHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * This method tries its best to return a valid {@link Locale} object from the TTS-specific

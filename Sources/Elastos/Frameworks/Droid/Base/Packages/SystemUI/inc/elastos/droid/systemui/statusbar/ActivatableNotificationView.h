@@ -77,7 +77,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener(
             /* [in] */ ActivatableNotificationView* host);
@@ -117,7 +117,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ActivatableNotificationView();
 

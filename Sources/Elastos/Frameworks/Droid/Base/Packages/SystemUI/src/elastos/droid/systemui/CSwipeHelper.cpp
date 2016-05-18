@@ -103,7 +103,7 @@ ECode CSwipeHelper::AnimatorListenerAdapter2::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CSwipeHelper::AnimatorUpdateListenerOne, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CSwipeHelper::AnimatorUpdateListenerOne, Object, IAnimatorUpdateListener)
 CSwipeHelper::AnimatorUpdateListenerOne::AnimatorUpdateListenerOne(
     /* [in] */ CSwipeHelper* host,
     /* [in] */ IView* animView,
@@ -142,7 +142,7 @@ const Boolean CSwipeHelper::DISMISS_IF_SWIPED_FAR_ENOUGH = TRUE;
 AutoPtr<ILinearInterpolator> CSwipeHelper::sLinearInterpolator = InitLinearInterpolator();
 const Int32 CSwipeHelper::SNAP_ANIM_LEN = 150;//SLOW_ANIMATIONS ? 1000 : 150; // ms
 
-CAR_OBJECT_IMPL(CSwipeHelper);
+CAR_OBJECT_IMPL(CSwipeHelper)
 CAR_INTERFACE_IMPL_2(CSwipeHelper, Object, ISwipeHelper, IGefingerpoken);
 CSwipeHelper::CSwipeHelper()
     : SWIPE_ESCAPE_VELOCITY(100.f)

@@ -13,7 +13,7 @@ class RadioButton
     , public IRadioButton
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RadioButton();
 

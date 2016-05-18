@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(SystemUIDialog, AlertDialog, ISystemUIDialog);
+CAR_INTERFACE_IMPL(SystemUIDialog, AlertDialog, ISystemUIDialog)
 ECode SystemUIDialog::constructor(
     /* [in] */ IContext* context)
 {

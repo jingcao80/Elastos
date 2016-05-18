@@ -17,7 +17,7 @@ class BatteryController;
 CarClass(CBatteryControllerBroadcastReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IBatteryController* controller);

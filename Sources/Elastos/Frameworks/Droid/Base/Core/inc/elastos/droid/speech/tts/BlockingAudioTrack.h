@@ -29,7 +29,7 @@ class BlockingAudioTrack
     , public IBlockingAudioTrack
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BlockingAudioTrack();
 

@@ -12,7 +12,7 @@ namespace Phone {
 
 AutoPtr<Pools::SynchronizedPool<IVelocityTrackerInterface> > PlatformVelocityTracker::sPool
     = new Pools::SynchronizedPool<IVelocityTrackerInterface>(2);
-CAR_INTERFACE_IMPL(PlatformVelocityTracker, Object, IVelocityTrackerInterface);
+CAR_INTERFACE_IMPL(PlatformVelocityTracker, Object, IVelocityTrackerInterface)
 AutoPtr<PlatformVelocityTracker> PlatformVelocityTracker::Obtain()
 {
     AutoPtr<PlatformVelocityTracker> tracker = (PlatformVelocityTracker*)sPool->AcquireItem().Get();

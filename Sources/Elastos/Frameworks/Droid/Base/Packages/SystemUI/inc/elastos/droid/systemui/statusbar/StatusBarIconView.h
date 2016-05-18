@@ -18,7 +18,7 @@ class StatusBarIconView
     , public IStatusBarIconView
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     StatusBarIconView();
 

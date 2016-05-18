@@ -19,7 +19,7 @@ CarClass(CRecognizerHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetConfigDir(
         /* [in] */ ILocale* locale,

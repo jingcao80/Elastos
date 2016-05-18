@@ -191,7 +191,7 @@ public:
         , public IActivityClientRecord
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ActivityClientRecord();
 

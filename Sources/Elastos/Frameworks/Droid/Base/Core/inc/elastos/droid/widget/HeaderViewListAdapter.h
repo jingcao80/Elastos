@@ -23,7 +23,7 @@ class HeaderViewListAdapter
     , public IFilterable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     HeaderViewListAdapter();
 

@@ -78,7 +78,7 @@ public:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Receiver(
             /* [in] */ IICountryListener* listener,
@@ -100,7 +100,7 @@ public:
         , public ICountryListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LocationBasedDetectorListener(
             /* [in] */ CCountryDetectorService* host);

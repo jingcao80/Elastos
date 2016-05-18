@@ -56,7 +56,7 @@ public:
         MyListener(
             /* [in] */ CBrowserActivity* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -84,7 +84,7 @@ public:
         MyViewBinder(
             /* [in] */ CBrowserActivity* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI SetViewValue(
             /* [in] */ IView* view,

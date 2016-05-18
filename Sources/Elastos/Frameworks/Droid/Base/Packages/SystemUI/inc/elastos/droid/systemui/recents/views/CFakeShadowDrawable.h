@@ -33,7 +33,7 @@ namespace Views {
 CarClass(CFakeShadowDrawable), public Drawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CFakeShadowDrawable();
 

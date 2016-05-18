@@ -29,7 +29,7 @@ namespace Browser {
 class SmartClipProvider
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     /**
       * Initiate extraction of text, HTML, and other information for clipping puposes (smart clip)
       * from the rectangle area defined by starting positions (x and y), and width and height.

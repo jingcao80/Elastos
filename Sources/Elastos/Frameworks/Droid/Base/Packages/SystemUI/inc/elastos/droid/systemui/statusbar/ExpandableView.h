@@ -21,7 +21,7 @@ class ExpandableView
     , public IExpandableView
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ExpandableView();
 

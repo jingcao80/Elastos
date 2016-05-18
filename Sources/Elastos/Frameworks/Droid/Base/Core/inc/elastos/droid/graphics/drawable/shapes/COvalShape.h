@@ -14,7 +14,7 @@ namespace Shapes {
 CarClass(COvalShape), public OvalShape
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor();
 

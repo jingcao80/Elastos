@@ -24,7 +24,7 @@ class DrawFilter
     , public IDrawFilter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~DrawFilter();
 

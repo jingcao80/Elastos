@@ -40,7 +40,7 @@ private:
         , public IUserInfoControllerOnUserInfoChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnUserInfoChangedListener(
             /* [in] */ CKeyguardStatusBarView* host);
@@ -73,7 +73,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnPreDrawListener(
             /* [in] */ CKeyguardStatusBarView* host,
@@ -91,9 +91,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CKeyguardStatusBarView();
 

@@ -14,9 +14,9 @@ CarClass(CPaintFontMetrics)
     , public IPaintFontMetrics
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI GetTop(
         /* [out] */ Float* top);

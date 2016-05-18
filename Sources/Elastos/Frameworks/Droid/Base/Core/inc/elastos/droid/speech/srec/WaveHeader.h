@@ -34,7 +34,7 @@ class WaveHeader
     , public IWaveHeader
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WaveHeader();
 

@@ -46,7 +46,7 @@ private:
         , public IIConditionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ConditionListener(
             /* [in] */ ZenModeControllerImpl* host);
@@ -146,7 +146,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ZenModeControllerImpl(
         /* [in] */ IContext* context,

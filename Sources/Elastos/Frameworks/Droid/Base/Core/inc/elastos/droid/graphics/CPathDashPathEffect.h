@@ -13,9 +13,9 @@ CarClass(CPathDashPathEffect)
     , public IPathDashPathEffect
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
     * Dash the drawn path by stamping it with the specified shape. This only

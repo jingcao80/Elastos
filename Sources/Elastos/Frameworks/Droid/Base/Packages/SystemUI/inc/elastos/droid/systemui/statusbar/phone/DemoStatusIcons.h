@@ -22,7 +22,7 @@ class DemoStatusIcons
     , public IDemoMode
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     DemoStatusIcons(
         /* [in] */ ILinearLayout* statusIcons,

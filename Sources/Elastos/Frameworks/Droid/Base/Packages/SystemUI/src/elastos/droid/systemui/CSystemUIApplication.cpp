@@ -23,8 +23,10 @@ namespace SystemUI {
 const String CSystemUIApplication::TAG("SystemUIService");
 const Boolean CSystemUIApplication::DEBUG = TRUE;
 
-CAR_OBJECT_IMPL(CSystemUIApplication);
-CAR_INTERFACE_IMPL(CSystemUIApplication, Application, ISystemUIApplication);
+CAR_OBJECT_IMPL(CSystemUIApplication)
+
+CAR_INTERFACE_IMPL(CSystemUIApplication, Application, ISystemUIApplication)
+
 CSystemUIApplication::CSystemUIApplication()
     : mServicesStarted(FALSE)
     , mBootCompleted(FALSE)

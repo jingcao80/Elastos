@@ -11,7 +11,7 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_INTERFACE_IMPL(ExpandableView, FrameLayout, IExpandableView);
+CAR_INTERFACE_IMPL(ExpandableView, FrameLayout, IExpandableView)
 ExpandableView::ExpandableView()
     : mActualHeight(0)
     , mClipTopAmount(0)

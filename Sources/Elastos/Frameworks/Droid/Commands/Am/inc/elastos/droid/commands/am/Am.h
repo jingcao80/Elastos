@@ -41,7 +41,7 @@ class Am : public BaseCommand
 {
 private:
     class System
-    { 
+    {
     public:
         static AutoPtr<IPrintStream> Out;
         static AutoPtr<IPrintStream> Err;
@@ -60,7 +60,7 @@ public:
                 /* [in] */ MyActivityController* host,
                 /* [in] */ IReader* converter);
 
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             CARAPI Run();
 
@@ -74,7 +74,7 @@ public:
 
         virtual ~MyActivityController() = 0;
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ IIActivityManager* am,
@@ -166,7 +166,7 @@ public:
 
         virtual ~IntentReceiver() = 0;
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI PerformReceive(
             /* [in] */ IIntent* intent,
@@ -192,7 +192,7 @@ public:
 
         virtual ~InstrumentationWatcher() = 0;
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI InstrumentationStatus(
             /* [in] */ IComponentName* name,
@@ -228,7 +228,7 @@ public:
         Comparator(
             /* [in] */ IArrayMap* am);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI Compare(

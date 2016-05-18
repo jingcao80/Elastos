@@ -13,7 +13,7 @@ class RatingBar
     , public IRatingBar
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RatingBar();
 

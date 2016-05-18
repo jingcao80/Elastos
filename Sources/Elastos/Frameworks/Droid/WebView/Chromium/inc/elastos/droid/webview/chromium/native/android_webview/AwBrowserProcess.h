@@ -29,7 +29,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         InnerRunnable(
             /* [in] */ IContext* context);
 

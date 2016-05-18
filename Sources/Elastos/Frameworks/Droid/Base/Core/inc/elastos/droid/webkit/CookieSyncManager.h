@@ -53,7 +53,7 @@ class CookieSyncManager
 {
     friend class CCookieSyncManagerHelper;
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 

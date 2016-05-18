@@ -44,7 +44,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MountShutdownObserver();
 
@@ -76,7 +76,7 @@ private:
         , public IDialogInterfaceOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CloseDialogReceiver(
             /* [in] */IContext* context);
@@ -112,7 +112,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DialogInterfaceOnClickListener(
             /* [in] */ IContext* context,

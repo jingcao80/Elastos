@@ -12,8 +12,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CObservableScrollView);
-CAR_INTERFACE_IMPL(CObservableScrollView, ScrollView, IObservableScrollView);
+CAR_OBJECT_IMPL(CObservableScrollView)
+CAR_INTERFACE_IMPL(CObservableScrollView, ScrollView, IObservableScrollView)
 CObservableScrollView::CObservableScrollView()
     : mLastOverscrollAmount(0)
     , mTouchEnabled(TRUE)

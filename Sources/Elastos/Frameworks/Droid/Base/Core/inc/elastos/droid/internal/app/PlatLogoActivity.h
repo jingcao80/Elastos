@@ -100,7 +100,7 @@ private:
             /* [in] */ StickView* stick,
             /* [in] */ IDrawable* platlogo);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);

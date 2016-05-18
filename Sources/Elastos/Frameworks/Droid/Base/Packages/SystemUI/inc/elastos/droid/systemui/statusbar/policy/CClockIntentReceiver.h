@@ -17,7 +17,7 @@ class CClock;
 CarClass(CClockIntentReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IClock* controller);

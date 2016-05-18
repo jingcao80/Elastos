@@ -123,7 +123,7 @@ private:
         , public IPredicate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AddNodeInfosForViewId(
             /* [in] */ AccessibilityInteractionController* host);
@@ -148,7 +148,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AccessibilityInteractionController();
 

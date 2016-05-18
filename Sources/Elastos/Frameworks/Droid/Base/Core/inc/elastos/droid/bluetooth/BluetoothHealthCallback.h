@@ -20,7 +20,7 @@ class BluetoothHealthCallback
     , public IBluetoothHealthCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothHealthCallback();
 

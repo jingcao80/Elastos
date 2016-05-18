@@ -13,7 +13,7 @@ CarClass(CGalleryLayoutParams)
     , public Gallery::GalleryLayoutParams
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Widget

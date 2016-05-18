@@ -13,7 +13,7 @@ namespace Shapes {
 CarClass(CRectShape), public RectShape
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor();
 

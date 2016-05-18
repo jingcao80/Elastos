@@ -14,7 +14,7 @@ namespace Drawable {
 CarClass(CShapeDrawable), public ShapeDrawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Drawable

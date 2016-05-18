@@ -13,7 +13,7 @@ CarClass(CAbsListViewLayoutParams)
     , public AbsListView::AbsListViewLayoutParams
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

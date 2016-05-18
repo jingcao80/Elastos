@@ -56,7 +56,7 @@ public:
         , public IGalleryLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         GalleryLayoutParams();
 
@@ -148,7 +148,7 @@ private:
         , public IGestureDetectorOnGestureListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DetectorOnGestureListener(
             /* [in] */ Gallery* host);
@@ -186,7 +186,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Gallery();
 

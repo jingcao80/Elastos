@@ -56,7 +56,7 @@ private:
         , public IQSPanelRecord
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Record();
 
@@ -70,7 +70,7 @@ private:
         , public IQSPanelTileRecord
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TileRecord();
 
@@ -117,7 +117,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DetailDoneButtonOnClickListener(
             /* [in] */ CQSPanel* host);
@@ -135,7 +135,7 @@ private:
         , public IQSTileCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         QSTileCallback(
             /* [in] */ CQSPanel* host,
@@ -171,7 +171,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnClickListener1(
             /* [in] */ TileRecord* r);
@@ -189,7 +189,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnClickListener2(
             /* [in] */ TileRecord* r);
@@ -207,7 +207,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnClickListener3(
             /* [in] */ CQSPanel* host,
@@ -223,9 +223,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CQSPanel();
 

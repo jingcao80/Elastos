@@ -12,7 +12,7 @@ namespace StatusBar {
 namespace Phone {
 
 const String PanelBar::TAG("PanelBar");
-CAR_INTERFACE_IMPL(PanelBar, FrameLayout, IPanelBar);
+CAR_INTERFACE_IMPL(PanelBar, FrameLayout, IPanelBar)
 PanelBar::PanelBar()
     : mPanelExpandedFractionSum(0)
     , mState(IPanelBar::STATE_CLOSED)

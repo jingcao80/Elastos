@@ -31,7 +31,7 @@ public:
         , public IComparable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LocaleInfo(
             /* [in] */ const String& label,

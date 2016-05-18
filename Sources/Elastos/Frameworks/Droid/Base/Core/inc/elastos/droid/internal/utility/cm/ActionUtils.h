@@ -64,6 +64,7 @@ private:
     const static Boolean DEBUG;
     const static String TAG;
     const static String SYSTEMUI_PACKAGE;
+    const static String DEFAULT_HOME_PACKAGE;
 };
 
 } // namespace Cm

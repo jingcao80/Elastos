@@ -29,8 +29,8 @@ namespace SystemUI {
 const String CGuestResumeSessionReceiver::TAG("GuestResumeSessionReceiver");
 const String CGuestResumeSessionReceiver::SETTING_GUEST_HAS_LOGGED_IN("systemui.guest_has_logged_in");
 
-CAR_OBJECT_IMPL(CGuestResumeSessionReceiver);
-CAR_INTERFACE_IMPL(CGuestResumeSessionReceiver, BroadcastReceiver, IGuestResumeSessionReceiver);
+CAR_OBJECT_IMPL(CGuestResumeSessionReceiver)
+CAR_INTERFACE_IMPL(CGuestResumeSessionReceiver, BroadcastReceiver, IGuestResumeSessionReceiver)
 ECode CGuestResumeSessionReceiver::Register(
     /* [in] */ IContext* context)
 {

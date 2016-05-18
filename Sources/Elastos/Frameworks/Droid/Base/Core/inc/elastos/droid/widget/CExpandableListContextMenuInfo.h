@@ -12,7 +12,7 @@ CarClass(CExpandableListContextMenuInfo)
     , public ExpandableListView::ExpandableListContextMenuInfo
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Widget

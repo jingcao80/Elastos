@@ -12,7 +12,7 @@ CarClass(CAdapterViewAnimatorSavedState)
     , public AdapterViewAnimator::AdapterViewAnimatorSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

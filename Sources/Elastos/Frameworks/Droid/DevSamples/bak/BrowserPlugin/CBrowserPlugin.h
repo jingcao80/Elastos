@@ -17,7 +17,7 @@ namespace BrowserPlugin {
 CarClass(CBrowserPlugin), public Elastos::Droid::App::Service
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     ECode OnBind(IIntent* intent, IBinder** binder);
 private:
 };

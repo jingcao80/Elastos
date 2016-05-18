@@ -24,7 +24,7 @@ public:
         , public IDispatcherState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DispatcherState();
 
@@ -411,7 +411,7 @@ private:
         /* [out] */ Int32* ret);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyEvent();
 

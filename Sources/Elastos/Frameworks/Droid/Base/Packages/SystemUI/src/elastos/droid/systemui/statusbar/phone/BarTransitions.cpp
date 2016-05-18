@@ -32,7 +32,7 @@ const Boolean BarTransitions::DEBUG = FALSE;
 const Boolean BarTransitions::DEBUG_COLORS = FALSE;
 const Boolean BarTransitions::HIGH_END = InitStatic();
 
-CAR_INTERFACE_IMPL(BarTransitions, Object, IBarTransitions);
+CAR_INTERFACE_IMPL(BarTransitions, Object, IBarTransitions)
 BarTransitions::BarTransitions(
     /* [in] */ IView* view,
     /* [in] */ Int32 gradientResourceId)

@@ -20,9 +20,9 @@ CarClass(CInt32Evaluator)
     , public ITypeEvaluator
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * This function returns the result of linearly interpolating the start and end values, with

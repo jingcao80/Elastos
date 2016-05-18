@@ -2943,6 +2943,7 @@ ECode ViewGroup::DispatchTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* res)
 {
+    // Logger::I(TAG, " >>>>>>>>>>>>>>>>>>> Enter DispatchTouchEvent %s", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     if (mInputEventConsistencyVerifier != NULL) {
         mInputEventConsistencyVerifier->OnTouchEvent(ev, 1);
@@ -3139,6 +3140,7 @@ ECode ViewGroup::DispatchTouchEvent(
         mInputEventConsistencyVerifier->OnUnhandledEvent(IInputEvent::Probe(ev), 1);
     }
     *res = handled;
+    // Logger::I(TAG, " <<<<<<<<<<<<<<<<<<<< Leave DispatchTouchEvent %s, handled:%d", TO_CSTR(this), handled);
     return NOERROR;
 }
 
@@ -3338,6 +3340,7 @@ Boolean ViewGroup::DispatchTransformedTouchEvent(
             View::DispatchTouchEvent(event, &handled);
         }
         else {
+            Logger::I(TAG, " >> DispatchTouchEvent to child canel :%s", TO_CSTR(_child));
             _child->DispatchTouchEvent(event, &handled);
         }
         event->SetAction(oldAction);
@@ -3395,7 +3398,7 @@ Boolean ViewGroup::DispatchTransformedTouchEvent(
             _child->GetInverseMatrix((IMatrix**)&temp);
             transformedEvent->Transform(temp);
         }
-
+        Logger::I(TAG, " >> DispatchTouchEvent to child:%s", TO_CSTR(_child));
         _child->DispatchTouchEvent(transformedEvent, &handled);
     }
 

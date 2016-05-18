@@ -13,7 +13,7 @@ class TimeAnimator
     , public ITimeAnimator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TimeAnimator();
 

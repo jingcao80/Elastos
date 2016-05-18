@@ -39,7 +39,7 @@ public:
     {
         friend class CompoundButton;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CompoundButtonSavedState();
 
@@ -62,7 +62,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CompoundButton();
 

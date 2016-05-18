@@ -22,7 +22,7 @@ class ArcShape
     , public IArcShape
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * ArcShape constructor.

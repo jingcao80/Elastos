@@ -25,7 +25,7 @@ public:
         , public IGridLayoutAnimationParameters
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         GridLayoutAnimationParameters();
 
@@ -81,7 +81,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     GridLayoutAnimationController();
 

@@ -26,7 +26,7 @@ class ECO_PUBLIC Animator
     , public IAnimator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Animator();
 

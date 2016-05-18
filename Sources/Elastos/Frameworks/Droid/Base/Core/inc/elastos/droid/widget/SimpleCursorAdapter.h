@@ -37,7 +37,7 @@ class SimpleCursorAdapter
     , public ISimpleCursorAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SimpleCursorAdapter();
 

@@ -40,7 +40,7 @@ public:
                 : mHost(host)
             {}
 
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             CARAPI OnClick(
                 /* [in] */ IView* v);
@@ -58,7 +58,7 @@ public:
                 : mHost(host)
             {}
 
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             CARAPI OnClick(
                 /* [in] */ IDialogInterface* dialog,
@@ -78,7 +78,7 @@ public:
                 : mHost(host)
             {}
 
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             CARAPI OnKey(
                 /* [in] */ IView* v,

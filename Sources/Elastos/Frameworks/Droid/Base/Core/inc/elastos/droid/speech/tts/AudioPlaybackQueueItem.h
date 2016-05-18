@@ -25,7 +25,7 @@ private:
 //        , public IMediaPlayerOnErrorListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MediaPlayerOnErrorListener();
 
@@ -54,7 +54,7 @@ private:
 //        , public IMediaPlayerOnCompletionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MediaPlayerOnCompletionListener();
 
@@ -77,7 +77,7 @@ private:
     friend class MediaPlayerOnCompletionListener;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AudioPlaybackQueueItem();
 

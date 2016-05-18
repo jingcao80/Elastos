@@ -92,7 +92,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListenerOne(
             /* [in] */ CSwipeHelper* host,
@@ -109,9 +109,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CSwipeHelper();
 

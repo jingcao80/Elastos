@@ -173,7 +173,7 @@ private:
         , public IMenuPresenterCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ActionMenuPresenterCallback(
             /* [in] */ PhoneWindow* owner);
@@ -880,7 +880,7 @@ private:
 //        MyMenuBuilderCallback(
 //            /* [in] */ PhoneWindow* host);
 //
-//        CAR_INTERFACE_DECL();
+//        CAR_INTERFACE_DECL()
 //
 //        CARAPI OnMenuItemSelected(
 //            /* [in] */ IMenuBuilder* menu,
@@ -895,7 +895,7 @@ private:
 //    };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PhoneWindow();
 

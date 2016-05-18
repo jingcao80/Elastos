@@ -12,7 +12,7 @@ namespace Graphics {
 CarClass(CPaint), public Paint
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Graphics

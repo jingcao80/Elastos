@@ -12,7 +12,7 @@ CarClass(CRemoteDisplayInfo)
     , public RemoteDisplayState::RemoteDisplayInfo
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Elastos

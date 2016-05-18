@@ -39,7 +39,7 @@ class AppWidgetProvider
     , public IAppWidgetProvider
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TO_STRING_IMPL("AppWidgetProvider")
 

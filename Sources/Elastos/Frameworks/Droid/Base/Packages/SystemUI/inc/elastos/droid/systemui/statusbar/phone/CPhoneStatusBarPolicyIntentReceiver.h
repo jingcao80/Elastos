@@ -18,7 +18,7 @@ class PhoneStatusBarPolicy;
 CarClass(CPhoneStatusBarPolicyIntentReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IInterface* controller);

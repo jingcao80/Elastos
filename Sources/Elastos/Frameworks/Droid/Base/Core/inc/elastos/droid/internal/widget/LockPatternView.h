@@ -36,7 +36,7 @@ public:
         , public ILockPatternViewCell
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Cell();
 
@@ -84,7 +84,7 @@ public:
         , public ILockPatternViewCellState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CellState();
 
@@ -148,7 +148,7 @@ public:
         , public ILockPatternViewSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LockPatternViewSavedState();
 
@@ -224,7 +224,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener(
             /* [in] */ LockPatternView* host,
@@ -267,7 +267,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener2(
             /* [in] */ LockPatternView* host,
@@ -298,7 +298,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     LockPatternView();
 

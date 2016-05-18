@@ -30,7 +30,7 @@ class UsageTracker
     , public IListenable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     UsageTracker(
         /* [in] */ IContext* context,

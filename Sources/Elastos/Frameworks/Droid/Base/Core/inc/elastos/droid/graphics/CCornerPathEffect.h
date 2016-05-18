@@ -14,9 +14,9 @@ CarClass(CCornerPathEffect)
     , public ICornerPathEffect
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Transforms geometries that are drawn (either STROKE or FILL styles) by

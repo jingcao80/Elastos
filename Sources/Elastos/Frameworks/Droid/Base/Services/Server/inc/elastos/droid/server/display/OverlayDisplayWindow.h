@@ -49,7 +49,7 @@ private:
         , public IDisplayListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyDisplayListener(
             /* [in] */ OverlayDisplayWindow* owner);
@@ -75,7 +75,7 @@ private:
         , public ISurfaceTextureListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MySurfaceTextureListener(
             /* [in] */ OverlayDisplayWindow* owner);
@@ -110,7 +110,7 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyViewOnTouchListener(
             /* [in] */ OverlayDisplayWindow* owner);

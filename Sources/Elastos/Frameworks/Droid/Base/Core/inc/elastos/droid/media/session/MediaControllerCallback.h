@@ -24,7 +24,7 @@ class ECO_PUBLIC MediaControllerCallback
     , public IMediaControllerCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MediaControllerCallback();
 

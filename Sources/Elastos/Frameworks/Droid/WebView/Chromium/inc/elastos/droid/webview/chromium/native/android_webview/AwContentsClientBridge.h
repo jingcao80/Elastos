@@ -54,7 +54,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             ProceedRunnable(
                 /* [in] */ ClientCertificateRequestCallback* owner,
                 /* [in] */ IPrivateKey* privateKey,
@@ -73,7 +73,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             IgnoreRunnable(
                 /* [in] */ ClientCertificateRequestCallback* owner);
 
@@ -88,7 +88,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             CancelRunnable(
                 /* [in] */ ClientCertificateRequestCallback* owner);
 
@@ -143,7 +143,7 @@ private:
         , public IValueCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
     private:
         class InnerRunnable
@@ -151,7 +151,7 @@ private:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerRunnable(
                 /* [in] */ InnerValueCallback* owner,
                 /* [in] */ IInterface* value,

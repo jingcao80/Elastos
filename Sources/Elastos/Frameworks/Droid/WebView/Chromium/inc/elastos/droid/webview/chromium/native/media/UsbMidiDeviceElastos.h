@@ -53,7 +53,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         InnerRunnable(
             /* [in] */ UsbMidiDeviceElastos* owner,
             /* [in] */ Int32 endpointNumber,

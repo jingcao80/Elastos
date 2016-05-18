@@ -326,7 +326,7 @@ public:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CallbackRecord(
             /* [in] */ CDisplayManagerService* owner,

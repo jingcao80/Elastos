@@ -20,7 +20,7 @@ class ECO_PUBLIC AbstractInputMethodImpl
     , public IInputMethod
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbstractInputMethodImpl(
         /* [in] */ AbstractInputMethodService* host);

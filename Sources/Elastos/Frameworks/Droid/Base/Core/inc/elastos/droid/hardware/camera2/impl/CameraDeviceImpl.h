@@ -39,7 +39,7 @@ public:
         , public ICameraDeviceImplCaptureCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * This method is called when the camera device has started capturing
@@ -118,7 +118,7 @@ public:
         , public ICameraDeviceImplStateCallbackKK
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * The method called when a camera device has no outputs configured.
@@ -156,7 +156,7 @@ public:
         , public ICameraDeviceImplCaptureCallbackHolder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CaptureCallbackHolder();
 
@@ -198,7 +198,7 @@ public:
         , public ICameraDeviceImplFrameNumberTracker
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FrameNumberTracker();
 
@@ -269,7 +269,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CameraDeviceCallbacks();
 
@@ -560,7 +560,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CameraDeviceImpl();
 

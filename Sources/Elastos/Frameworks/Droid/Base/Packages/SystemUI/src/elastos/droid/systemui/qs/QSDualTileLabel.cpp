@@ -38,7 +38,7 @@ ECode QSDualTileLabel::UpdateTextRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(QSDualTileLabel::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener);
+CAR_INTERFACE_IMPL(QSDualTileLabel::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
 QSDualTileLabel::OnLayoutChangeListener::OnLayoutChangeListener(
     /* [in] */ QSDualTileLabel* host)
     : mHost(host)
@@ -61,7 +61,7 @@ ECode QSDualTileLabel::OnLayoutChangeListener::OnLayoutChange(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(QSDualTileLabel, LinearLayout, IQSDualTileLabel);
+CAR_INTERFACE_IMPL(QSDualTileLabel, LinearLayout, IQSDualTileLabel)
 QSDualTileLabel::QSDualTileLabel(
     /* [in] */ IContext* context)
     : mHorizontalPaddingPx(0)

@@ -44,7 +44,7 @@ private:
         , public IXmlSerializerAndParser
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI WriteAsXml(
             /* [in] */ IInterface* item,

@@ -46,7 +46,7 @@ Boolean MobileDataController::sInit = InitStatic();
 AutoPtr<IStringBuilder> MobileDataController::PERIOD_BUILDER;
 AutoPtr<IFormatter> MobileDataController::PERIOD_FORMATTER;
 
-CAR_INTERFACE_IMPL(MobileDataController, Object, IMobileDataController);
+CAR_INTERFACE_IMPL(MobileDataController, Object, IMobileDataController)
 MobileDataController::MobileDataController(
     /* [in] */ IContext* context)
 {

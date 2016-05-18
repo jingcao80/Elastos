@@ -25,7 +25,7 @@ class ECO_PUBLIC InputEventReceiver
     , public IInputEventReceiver
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     InputEventReceiver();
 

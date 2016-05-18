@@ -24,7 +24,7 @@ protected:
         , public IInterpolator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         static CARAPI_(Float) ViscousFluid(
             /* [in] */ Float x);
@@ -42,7 +42,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Scroller();
 

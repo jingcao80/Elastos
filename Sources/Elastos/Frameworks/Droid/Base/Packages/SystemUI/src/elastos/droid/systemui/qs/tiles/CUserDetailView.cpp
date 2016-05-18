@@ -15,7 +15,7 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_INTERFACE_IMPL(CUserDetailView::Adapter, BaseUserAdapter, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CUserDetailView::Adapter, BaseUserAdapter, IViewOnClickListener)
 CUserDetailView::Adapter::Adapter(
     /* [in] */ IContext* context,
     /* [in] */ IUserSwitcherController* controller)
@@ -67,8 +67,8 @@ ECode CUserDetailView::Adapter::OnClick(
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CUserDetailView);
-CAR_INTERFACE_IMPL(CUserDetailView, PseudoGridView, IUserDetailView);
+CAR_OBJECT_IMPL(CUserDetailView)
+CAR_INTERFACE_IMPL(CUserDetailView, PseudoGridView, IUserDetailView)
 ECode CUserDetailView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

@@ -132,7 +132,7 @@ private:
         , public IOnGlobalLayoutListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnGlobalLayoutListener(
             /* [in] */ PanelView* host);
@@ -212,7 +212,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener(
             /* [in] */ PanelView* host);
@@ -226,7 +226,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PanelView();
 

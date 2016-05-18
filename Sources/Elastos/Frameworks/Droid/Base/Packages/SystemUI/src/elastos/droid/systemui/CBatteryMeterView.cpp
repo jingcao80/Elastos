@@ -95,7 +95,7 @@ Boolean CBatteryMeterView::SHOW_100_PERCENT = FALSE;
 Int32 CBatteryMeterView::FULL = 96;
 Float CBatteryMeterView::BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
-CAR_OBJECT_IMPL(CBatteryMeterView);
+CAR_OBJECT_IMPL(CBatteryMeterView)
 CAR_INTERFACE_IMPL_3(CBatteryMeterView, View, IBatteryMeterView, IDemoMode, IBatteryStateChangeCallback);
 CBatteryMeterView::CBatteryMeterView()
     : mShowPercent(TRUE)

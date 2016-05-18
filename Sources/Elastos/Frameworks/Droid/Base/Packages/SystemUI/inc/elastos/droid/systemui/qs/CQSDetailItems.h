@@ -36,7 +36,7 @@ public:
         , public IQSDetailItemsItem
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Item();
 
@@ -73,7 +73,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnClickListener1(
             /* [in] */ CQSDetailItems* host,
@@ -93,7 +93,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnClickListener2(
             /* [in] */ CQSDetailItems* host,
@@ -109,9 +109,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CQSDetailItems();
 

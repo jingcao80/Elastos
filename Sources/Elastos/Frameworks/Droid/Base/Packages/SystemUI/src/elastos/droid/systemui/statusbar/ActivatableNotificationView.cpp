@@ -88,7 +88,7 @@ ECode ActivatableNotificationView::AnimatorListenerAdapter2::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(ActivatableNotificationView::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(ActivatableNotificationView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 ActivatableNotificationView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ ActivatableNotificationView* host)
     : mHost(host)
@@ -154,7 +154,7 @@ AutoPtr<IInterpolator> ActivatableNotificationView::ACTIVATE_INVERSE_INTERPOLATO
 AutoPtr<IInterpolator> ActivatableNotificationView::ACTIVATE_INVERSE_ALPHA_INTERPOLATOR;
 Boolean ActivatableNotificationView::sInit = InitStatic();
 
-CAR_INTERFACE_IMPL(ActivatableNotificationView, ExpandableOutlineView, IActivatableNotificationView);
+CAR_INTERFACE_IMPL(ActivatableNotificationView, ExpandableOutlineView, IActivatableNotificationView)
 ActivatableNotificationView::ActivatableNotificationView()
     : mTintedRippleColor(0)
     , mLowPriorityRippleColor(0)

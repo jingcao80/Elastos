@@ -14,7 +14,7 @@ CarClass(CInputFilterHost)
     , public CInputManagerService::InputFilterHost
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Input

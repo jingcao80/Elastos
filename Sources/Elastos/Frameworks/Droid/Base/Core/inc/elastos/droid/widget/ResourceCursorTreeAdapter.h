@@ -19,7 +19,7 @@ class ResourceCursorTreeAdapter
     , public IResourceCursorTreeAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ResourceCursorTreeAdapter();
 

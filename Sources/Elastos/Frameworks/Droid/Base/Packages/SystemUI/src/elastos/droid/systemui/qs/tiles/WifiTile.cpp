@@ -183,7 +183,7 @@ void WifiTile::WifiDetailAdapter::UpdateItems()
     mItems->SetItems(items);
 }
 
-CAR_INTERFACE_IMPL(WifiTile::Callback, Object, INetworkSignalChangedCallback);
+CAR_INTERFACE_IMPL(WifiTile::Callback, Object, INetworkSignalChangedCallback)
 WifiTile::Callback::Callback(
     /* [in] */ WifiTile* host)
     : mHost(host)

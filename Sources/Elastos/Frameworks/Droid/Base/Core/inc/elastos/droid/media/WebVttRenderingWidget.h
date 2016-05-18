@@ -41,7 +41,7 @@ private:
 
         ~RegionLayout();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI SetCaptionStyle(
             /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
@@ -84,7 +84,7 @@ private:
 
         ~CueLayout();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI SetCaptionStyle(
             /* [in] */ ICaptioningManagerCaptionStyle* style,
@@ -132,7 +132,7 @@ private:
 
         ~SpanLayout();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Update();
 

@@ -48,7 +48,7 @@ class NetworkChangeNotifierAutoDetect
     , public ApplicationStatus::ApplicationStateListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /** Queries the ConnectivityManager for information about the current connection. */
     class ConnectivityManagerDelegate

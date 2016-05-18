@@ -64,7 +64,7 @@ ECode SecurityControllerImpl::NetworkCallback::OnLost(
 }
 
 AutoPtr<INetworkRequest> SecurityControllerImpl::REQUEST = InitStatic();
-CAR_INTERFACE_IMPL(SecurityControllerImpl, Object, ISecurityController);
+CAR_INTERFACE_IMPL(SecurityControllerImpl, Object, ISecurityController)
 SecurityControllerImpl::SecurityControllerImpl(
     /* [in] */ IContext* context)
     : mCurrentVpnNetworkId(NO_NETWORK)

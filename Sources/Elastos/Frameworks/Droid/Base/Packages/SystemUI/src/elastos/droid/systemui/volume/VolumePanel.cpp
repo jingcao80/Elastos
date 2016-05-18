@@ -188,7 +188,7 @@ CAR_INTERFACE_IMPL(VolumePanel::StreamControl, Object, IVolumePanelStreamControl
 //------------------------------------------------------------------------------------
 // CVolumePanelBroadcastReceiver2
 //------------------------------------------------------------------------------------
-CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver2);
+CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver2)
 ECode CVolumePanelBroadcastReceiver2::constructor(
     /* [in] */ ISystemUIDialog* host)
 {
@@ -522,7 +522,7 @@ ECode VolumePanel::ZMPCallback::OnExpanded(
 //------------------------------------------------------------------------------------
 // CVolumePanelBroadcastReceiver1
 //------------------------------------------------------------------------------------
-CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver1);
+CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver1)
 ECode CVolumePanelBroadcastReceiver1::constructor(
     /* [in] */ IVolumePanel* host)
 {

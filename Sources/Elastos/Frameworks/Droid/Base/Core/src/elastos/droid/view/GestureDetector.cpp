@@ -10,12 +10,16 @@
 #include "elastos/droid/view/VelocityTracker.h"
 #include "elastos/droid/view/MotionEvent.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::ILooper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
+
+static const String TAG("GestureDetector");
 
 Int32 GestureDetector::LONGPRESS_TIMEOUT =  ViewConfiguration::GetLongPressTimeout();
 Int32 GestureDetector::TAP_TIMEOUT = ViewConfiguration::GetTapTimeout();
@@ -131,6 +135,7 @@ ECode GestureDetector::GestureHandler::HandleMessage(
 
     switch (what) {
         case GestureDetector::SHOW_PRESS:
+            Logger::I(TAG, "%s: OnShowPress", TO_CSTR(mHost->mListener));
             mHost->mListener->OnShowPress(
                 mHost->mCurrentDownEvent);
             break;
@@ -295,6 +300,7 @@ ECode GestureDetector::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> Enter OnTouchEvent:%s", TO_CSTR(ev));
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
@@ -435,7 +441,7 @@ ECode GestureDetector::OnTouchEvent(
             }
 
             mHandler->SendEmptyMessageAtTime(SHOW_PRESS, dt + TAP_TIMEOUT, &result);
-
+            Logger::I(TAG, "%s: OnDown", TO_CSTR(mListener));
             mListener->OnDown(ev, &result);
             handled |= result;
             break;
@@ -457,6 +463,7 @@ ECode GestureDetector::OnTouchEvent(
                 const Int32 deltaY = (Int32) (focusY - mDownFocusY);
                 Int32 distance = (deltaX * deltaX) + (deltaY * deltaY);
                 if (distance > mTouchSlopSquare) {
+                    Logger::I(TAG, "%s: OnScroll", TO_CSTR(mListener));
                     mListener->OnScroll(mCurrentDownEvent, ev, scrollX, scrollY, &handled);
                     mLastFocusX = focusX;
                     mLastFocusY = focusY;
@@ -470,6 +477,7 @@ ECode GestureDetector::OnTouchEvent(
                 }
             }
             else if ((Elastos::Core::Math::Abs(scrollX) >= 1) || (Elastos::Core::Math::Abs(scrollY) >= 1)) {
+                Logger::I(TAG, "%s: OnScroll 2", TO_CSTR(mListener));
                 mListener->OnScroll(mCurrentDownEvent, ev, scrollX, scrollY, &handled);
                 mLastFocusX = focusX;
                 mLastFocusY = focusY;
@@ -478,6 +486,7 @@ ECode GestureDetector::OnTouchEvent(
         }
 
         case IMotionEvent::ACTION_UP: {
+            Logger::I(TAG, " >>> ACTION_UP %d", __LINE__);
             mStillDown = FALSE;
             AutoPtr<IMotionEvent> currentUpEvent;
             MotionEvent::Obtain(ev, (IMotionEvent**)&currentUpEvent);
@@ -485,34 +494,40 @@ ECode GestureDetector::OnTouchEvent(
                 // Finally, give the up event of the double-tap
                 Boolean dtap = FALSE;
                 handled |= (mDoubleTapListener->OnDoubleTapEvent(ev, &dtap), dtap);
+                Logger::I(TAG, " >>> ACTION_UP %d", __LINE__);
             }
             else if (mInLongPress) {
                 mHandler->RemoveMessages(TAP);
                 mInLongPress = FALSE;
+                Logger::I(TAG, " >>> ACTION_UP %d", __LINE__);
             }
             else if (mAlwaysInTapRegion) {
+                Logger::I(TAG, "%s: OnSingleTapUp", TO_CSTR(mListener));
                 mListener->OnSingleTapUp(ev, &handled);
                 if (mDeferConfirmSingleTap && mDoubleTapListener != NULL) {
                     Boolean tmp = FALSE;
                     mDoubleTapListener->OnSingleTapConfirmed(ev, &tmp);
                 }
+                Logger::I(TAG, " >>> ACTION_UP %d", __LINE__);
             }
             else {
+                Logger::I(TAG, " >>> ACTION_UP %d", __LINE__);
                 // A fling must travel the minimum tap distance
                 AutoPtr<IVelocityTracker> velocityTracker = mVelocityTracker;
                 Int32 pointerId = 0;
                 ev->GetPointerId(0, &pointerId);
                 velocityTracker->ComputeCurrentVelocity(1000, mMaximumFlingVelocity);
-                Float velocityY;
-                velocityTracker->GetYVelocity(pointerId, &velocityY);
-                Float velocityX;
+                Float velocityY, velocityX;
                 velocityTracker->GetXVelocity(pointerId, &velocityX);
-
+                velocityTracker->GetYVelocity(pointerId, &velocityY);
+                Logger::I(TAG, " >>> ACTION_UP (%.2f, %.2f), min:(%.2f, %.2f)", velocityX, velocityY, mMinimumFlingVelocity);
                 if ((Elastos::Core::Math::Abs(velocityY) > mMinimumFlingVelocity)
                         || (Elastos::Core::Math::Abs(velocityX) > mMinimumFlingVelocity)){
+                    Logger::I(TAG, "%s: OnFling", TO_CSTR(mListener));
                     mListener->OnFling(mCurrentDownEvent, ev, velocityX, velocityY, &handled);
                 }
             }
+
             if (mPreviousUpEvent != NULL) {
                 IInputEvent::Probe(mPreviousUpEvent)->Recycle();
             }
@@ -542,6 +557,7 @@ ECode GestureDetector::OnTouchEvent(
     }
 
     *result =  handled;
+    Logger::I(TAG, " >>> Leave OnTouchEvent:%s, handled:%d", TO_CSTR(ev), handled);
     return NOERROR;
 }
 
@@ -606,6 +622,7 @@ void GestureDetector::DispatchLongPress()
     mHandler->RemoveMessages(TAP);
     mDeferConfirmSingleTap = FALSE;
     mInLongPress = TRUE;
+    Logger::I(TAG, "%s: OnLongPress", TO_CSTR(mListener));
     mListener->OnLongPress(mCurrentDownEvent);
 }
 

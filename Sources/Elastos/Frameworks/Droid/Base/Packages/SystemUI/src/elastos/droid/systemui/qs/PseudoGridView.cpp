@@ -95,7 +95,7 @@ void PseudoGridView::ViewGroupAdapterBridge::ReleaseAdapter()
     }
 }
 
-CAR_INTERFACE_IMPL(PseudoGridView, ViewGroup, IPseudoGridView);
+CAR_INTERFACE_IMPL(PseudoGridView, ViewGroup, IPseudoGridView)
 PseudoGridView::PseudoGridView()
     : mNumColumns(3)
     , mVerticalSpacing(0)

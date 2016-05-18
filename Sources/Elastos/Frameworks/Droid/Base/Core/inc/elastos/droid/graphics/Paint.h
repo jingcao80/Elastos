@@ -18,7 +18,7 @@ class Paint
     , public IPaint
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Paint();
 

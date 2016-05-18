@@ -7,7 +7,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CIconMerger);
+CAR_OBJECT_IMPL(CIconMerger)
 
 } // namespace Phone
 } // namespace StatusBar

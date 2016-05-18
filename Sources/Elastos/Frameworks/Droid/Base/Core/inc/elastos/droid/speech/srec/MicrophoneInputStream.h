@@ -22,7 +22,7 @@ class MicrophoneInputStream
     , public IMicrophoneInputStream
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MicrophoneInputStream();
 

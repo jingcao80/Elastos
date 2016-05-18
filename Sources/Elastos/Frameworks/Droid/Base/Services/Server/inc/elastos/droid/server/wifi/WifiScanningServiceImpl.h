@@ -135,7 +135,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WifiScanningStateMachine(
             /* [in] */ WifiScanningServiceImpl* owner,
@@ -393,7 +393,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WifiChangeStateMachine(
             /* [in] */ WifiScanningServiceImpl* owner,
@@ -542,7 +542,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WifiScanningServiceImpl();
 

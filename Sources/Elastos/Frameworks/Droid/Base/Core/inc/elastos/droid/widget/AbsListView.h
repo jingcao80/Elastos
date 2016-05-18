@@ -84,7 +84,7 @@ public:
     {
         friend class AbsListView;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AbsListViewLayoutParams();
 
@@ -192,7 +192,7 @@ public:
     {
         friend class AbsListView;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AbsListViewSavedState();
 
@@ -274,7 +274,7 @@ protected:
         , public IMultiChoiceModeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MultiChoiceModeWrapper(
             /* [in] */ AbsListView* host);
@@ -512,7 +512,7 @@ protected:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PositionScroller(
             /* [in] */ AbsListView* host);
@@ -725,7 +725,7 @@ private:
         , public IInputConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InputConnectionWrapper(
             /* [in] */ AbsListView* host,
@@ -931,7 +931,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbsListView();
 

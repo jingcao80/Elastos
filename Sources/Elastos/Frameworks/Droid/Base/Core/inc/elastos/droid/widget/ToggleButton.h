@@ -17,7 +17,7 @@ class ToggleButton
     , public IToggleButton
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ToggleButton();
 

@@ -78,7 +78,7 @@ public:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TouchOutsideListener(
             /* [in] */ Int32 msg,
@@ -102,7 +102,7 @@ protected:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RecentsPreloadOnTouchListener(
             /* [in] */ BaseStatusBar* host);
@@ -137,7 +137,7 @@ protected:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         NotificationClicker(
             /* [in] */ IPendingIntent* intent,
@@ -281,7 +281,7 @@ private:
         , public IRecentsComponentCallbacks
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RecentsComponentCallbacks(
             /* [in] */ BaseStatusBar* host);
@@ -298,7 +298,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ViewOnClickListener1(
             /* [in] */ BaseStatusBar* host,
@@ -323,7 +323,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ViewOnClickListener2(
             /* [in] */ BaseStatusBar* host,
@@ -344,7 +344,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ViewOnClickListener3(
             /* [in] */ BaseStatusBar* host,
@@ -367,7 +367,7 @@ private:
         , public ISwipeHelperLongPressListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         BaseLongPressListener(
             /* [in] */ BaseStatusBar* host);
@@ -398,7 +398,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BaseStatusBar();
 

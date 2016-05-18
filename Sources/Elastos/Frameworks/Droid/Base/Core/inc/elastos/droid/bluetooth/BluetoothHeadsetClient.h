@@ -39,7 +39,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         BluetoothStateChangeCallbackStub();
 
@@ -66,7 +66,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerServiceConnection(
             /* [in] */ BluetoothHeadsetClient* owner);
@@ -85,7 +85,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothHeadsetClient();
 

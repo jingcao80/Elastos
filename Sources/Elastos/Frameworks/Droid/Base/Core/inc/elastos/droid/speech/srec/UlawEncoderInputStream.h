@@ -26,7 +26,7 @@ class UlawEncoderInputStream
     , public IUlawEncoderInputStream
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Create an InputStream which takes 16 bit pcm data and produces ulaw data.

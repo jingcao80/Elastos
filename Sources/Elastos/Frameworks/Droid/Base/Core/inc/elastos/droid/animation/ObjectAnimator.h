@@ -17,7 +17,7 @@ class ObjectAnimator
     , public IObjectAnimator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ObjectAnimator();
 

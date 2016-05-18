@@ -10,7 +10,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(KeyguardMonitor, Object, IKeyguardMonitor);
+CAR_INTERFACE_IMPL(KeyguardMonitor, Object, IKeyguardMonitor)
 KeyguardMonitor::KeyguardMonitor()
     : mShowing(FALSE)
     , mSecure(FALSE)

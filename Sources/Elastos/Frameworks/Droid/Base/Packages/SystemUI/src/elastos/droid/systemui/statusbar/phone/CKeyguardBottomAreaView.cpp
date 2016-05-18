@@ -152,7 +152,7 @@ ECode CKeyguardBottomAreaView::DevicePolicyReceiver::OnReceive(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::UnlockMethodChangedListener, Object, IOnUnlockMethodChangedListener);
+CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::UnlockMethodChangedListener, Object, IOnUnlockMethodChangedListener)
 CKeyguardBottomAreaView::UnlockMethodChangedListener::UnlockMethodChangedListener(
     /* [in] */ CKeyguardBottomAreaView* host)
     : mHost(host)
@@ -164,7 +164,7 @@ ECode CKeyguardBottomAreaView::UnlockMethodChangedListener::OnMethodSecureChange
     return mHost->OnMethodSecureChanged(methodSecure);
 }
 
-CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::OnClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::OnClickListener, Object, IViewOnClickListener)
 CKeyguardBottomAreaView::OnClickListener::OnClickListener(
     /* [in] */ CKeyguardBottomAreaView* host)
     : mHost(host)
@@ -176,7 +176,7 @@ ECode CKeyguardBottomAreaView::OnClickListener::OnClick(
     return mHost->OnClick(v);
 }
 
-CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::OnLongClickListener, Object, IViewOnLongClickListener);
+CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::OnLongClickListener, Object, IViewOnLongClickListener)
 CKeyguardBottomAreaView::OnLongClickListener::OnLongClickListener(
     /* [in] */ CKeyguardBottomAreaView* host)
     : mHost(host)
@@ -221,7 +221,7 @@ AutoPtr<IIntent> CKeyguardBottomAreaView::INSECURE_CAMERA_INTENT = InitIntent(
 AutoPtr<IIntent> CKeyguardBottomAreaView::PHONE_INTENT = InitIntent(
     IIntent::ACTION_DIAL, -1);
 
-CAR_OBJECT_IMPL(CKeyguardBottomAreaView);
+CAR_OBJECT_IMPL(CKeyguardBottomAreaView)
 CAR_INTERFACE_IMPL_5(CKeyguardBottomAreaView, FrameLayout, IKeyguardBottomAreaView, IViewOnClickListener \
         , IOnUnlockMethodChangedListener, IAccessibilityStateChangedCallback, IViewOnLongClickListener);
 CKeyguardBottomAreaView::CKeyguardBottomAreaView()

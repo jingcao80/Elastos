@@ -34,7 +34,7 @@ class SimpleExpandableListAdapter
     , public ISimpleExpandableListAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SimpleExpandableListAdapter();
 

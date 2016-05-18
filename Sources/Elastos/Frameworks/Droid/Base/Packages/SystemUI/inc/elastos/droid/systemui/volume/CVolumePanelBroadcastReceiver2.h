@@ -14,7 +14,7 @@ namespace Volume{
 CarClass(CVolumePanelBroadcastReceiver2), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ ISystemUIDialog* dlg);

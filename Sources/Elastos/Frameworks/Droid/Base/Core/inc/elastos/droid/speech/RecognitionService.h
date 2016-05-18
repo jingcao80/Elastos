@@ -37,7 +37,7 @@ public:
     {
         friend class RecognitionService;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RecognitionServiceCallback();
 
@@ -156,7 +156,7 @@ public:
 //        , public IHandler
     {
     public:
-//        CAR_INTERFACE_DECL();
+//        CAR_INTERFACE_DECL()
 
         RecognitionServiceHandler();
 
@@ -181,7 +181,7 @@ private:
         , public IIRecognitionService
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RecognitionServiceBinder();
 

@@ -14,7 +14,7 @@ CarClass(CPrediction)
     , public Prediction
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CPrediction();
 

@@ -12,7 +12,7 @@ namespace Webkit {
 CarClass(CJsResult), public JsResult
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Webkit

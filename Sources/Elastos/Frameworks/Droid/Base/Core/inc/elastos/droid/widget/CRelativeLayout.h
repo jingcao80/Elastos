@@ -13,7 +13,7 @@ CarClass(CRelativeLayout)
     , public RelativeLayout
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Widget

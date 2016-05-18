@@ -171,7 +171,7 @@ public:
         , public IVoiceInteractorConfirmationRequest
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Confirms an operation with the user via the trusted system
@@ -212,7 +212,7 @@ public:
         , public IVoiceInteractorCompleteVoiceRequest
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Reports that the current interaction was successfully completed with voice, so the
@@ -249,7 +249,7 @@ public:
         , public IVoiceInteractorAbortVoiceRequest
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Reports that the current interaction can not be complete with voice, so the
@@ -289,7 +289,7 @@ public:
         , public IVoiceInteractorCommandRequest
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Execute a command using the trusted system VoiceInteractionService.

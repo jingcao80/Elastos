@@ -129,7 +129,7 @@ ECode PanelView::AnimatorListenerAdapter2::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(PanelView::OnGlobalLayoutListener, Object, IOnGlobalLayoutListener);
+CAR_INTERFACE_IMPL(PanelView::OnGlobalLayoutListener, Object, IOnGlobalLayoutListener)
 PanelView::OnGlobalLayoutListener::OnGlobalLayoutListener(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -228,7 +228,7 @@ ECode PanelView::AnimatorListenerAdapter4::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(PanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(PanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 PanelView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -248,7 +248,7 @@ ECode PanelView::AnimatorUpdateListener::OnAnimationUpdate(
 
 const Boolean PanelView::DEBUG = IPanelBar::DEBUG;
 const String PanelView::TAG("PanelView.class.getSimpleName()");
-CAR_INTERFACE_IMPL(PanelView, FrameLayout, IPanelView);
+CAR_INTERFACE_IMPL(PanelView, FrameLayout, IPanelView)
 void PanelView::OnExpandingFinished()
 {
     mClosing = FALSE;

@@ -7,7 +7,8 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
-CAR_INTERFACE_IMPL(SystemUI, Object, ISystemUI);
+CAR_INTERFACE_IMPL(SystemUI, Object, ISystemUI)
+
 SystemUI::SystemUI()
 {}
 

@@ -93,7 +93,7 @@ public:
         , public IValueCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerValueCallback(
             /* [in] */ AwWebContentsDelegateAdapter* owner,

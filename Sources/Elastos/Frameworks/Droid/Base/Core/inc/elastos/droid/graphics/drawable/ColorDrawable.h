@@ -53,7 +53,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a new black ColorDrawable.

@@ -83,7 +83,7 @@ private:
 public:
     NetInitiatedActivity();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

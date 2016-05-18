@@ -14,7 +14,7 @@ namespace Webkit {
 CarClass(CDateSorter), public DateSorter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Webkit

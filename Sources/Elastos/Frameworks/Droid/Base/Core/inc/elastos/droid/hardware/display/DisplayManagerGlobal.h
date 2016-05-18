@@ -85,7 +85,7 @@ private:
         , public IIVirtualDisplayCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VirtualDisplayCallback(
             /* [in] */ IVirtualDisplayCallback* callback,
@@ -111,7 +111,7 @@ private:
     ~DisplayManagerGlobal();
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Gets an instance of the display manager global singleton.

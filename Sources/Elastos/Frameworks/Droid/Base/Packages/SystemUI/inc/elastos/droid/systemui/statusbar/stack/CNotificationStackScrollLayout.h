@@ -114,7 +114,7 @@ private:
         , public IOnPreDrawListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ChildrenUpdater(
             /* [in] */ CNotificationStackScrollLayout* host);
@@ -154,7 +154,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CNotificationStackScrollLayout();
 

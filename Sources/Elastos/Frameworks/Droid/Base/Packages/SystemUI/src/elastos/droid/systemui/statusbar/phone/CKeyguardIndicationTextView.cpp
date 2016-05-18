@@ -10,8 +10,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CKeyguardIndicationTextView);
-CAR_INTERFACE_IMPL(CKeyguardIndicationTextView, TextView, IKeyguardIndicationTextView);
+CAR_OBJECT_IMPL(CKeyguardIndicationTextView)
+CAR_INTERFACE_IMPL(CKeyguardIndicationTextView, TextView, IKeyguardIndicationTextView)
 ECode CKeyguardIndicationTextView::constructor(
     /* [in] */ IContext* context)
 {

@@ -67,7 +67,7 @@ ECode CTrustDrawable::StateUpdateAnimatorListener::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CTrustDrawable::AlphaUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CTrustDrawable::AlphaUpdateListener, Object, IAnimatorUpdateListener)
 CTrustDrawable::AlphaUpdateListener::AlphaUpdateListener(
     /* [in] */ CTrustDrawable* host)
     : mHost(host)
@@ -83,7 +83,7 @@ ECode CTrustDrawable::AlphaUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CTrustDrawable::RadiusUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CTrustDrawable::RadiusUpdateListener, Object, IAnimatorUpdateListener)
 CTrustDrawable::RadiusUpdateListener::RadiusUpdateListener(
     /* [in] */ CTrustDrawable* host)
     : mHost(host)
@@ -99,7 +99,7 @@ ECode CTrustDrawable::RadiusUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CTrustDrawable);
+CAR_OBJECT_IMPL(CTrustDrawable)
 CTrustDrawable::CTrustDrawable()
     : mAlpha(0)
     , mAnimating(FALSE)

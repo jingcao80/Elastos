@@ -12,7 +12,7 @@ CarClass(CDatePickerCalendarDelegate)
     , public DatePickerCalendarDelegate
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

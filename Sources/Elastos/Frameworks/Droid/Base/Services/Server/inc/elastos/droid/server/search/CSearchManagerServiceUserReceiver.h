@@ -15,7 +15,7 @@ CarClass(CSearchManagerServiceUserReceiver)
     , public CSearchManagerService::UserReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Elastos

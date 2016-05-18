@@ -47,7 +47,7 @@ public:
         /* [out] */ Boolean *ret);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SenderPackageFilter(
         /* in */ const String& packageName);

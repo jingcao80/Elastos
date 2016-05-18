@@ -11,7 +11,7 @@ namespace Widget {
 CarClass(CSimpleAdapter), public SimpleAdapter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Widget

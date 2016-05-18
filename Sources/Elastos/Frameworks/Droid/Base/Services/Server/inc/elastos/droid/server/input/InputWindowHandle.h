@@ -26,7 +26,7 @@ class InputWindowHandle
     , public IInputWindowHandle
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     InputWindowHandle(
         /* [in] */ InputApplicationHandle* inputApplicationHandle,

@@ -19,7 +19,7 @@ CarClass(CAm)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Command-line entry point.

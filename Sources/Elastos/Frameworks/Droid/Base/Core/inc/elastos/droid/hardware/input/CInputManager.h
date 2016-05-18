@@ -61,7 +61,7 @@ private:
         : public Vibrator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InputDeviceVibrator(
             /* [in] */ Int32 deviceId,
@@ -102,7 +102,7 @@ public:
     static AutoPtr<IInputManager> GetInstance();
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
 

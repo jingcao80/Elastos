@@ -42,7 +42,7 @@ private:
         , public IKeyframes
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         virtual ~SimpleKeyframes() = 0;
 
@@ -67,7 +67,7 @@ private:
         , public IInt32Keyframes
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         virtual ~Int32KeyframesBase() = 0;
 
@@ -86,7 +86,7 @@ private:
         , public IFloatKeyframes
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         virtual ~FloatKeyframesBase() = 0;
 
@@ -137,7 +137,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PathKeyframes(
         /* [in] */ IPath* path);

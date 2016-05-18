@@ -17,7 +17,7 @@ class BluetoothGattCallback
     , public IBluetoothGattCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothGattCallback();
 

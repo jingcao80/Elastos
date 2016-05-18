@@ -25,7 +25,7 @@ public:
         , public IAnimationParameters
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimationParameters();
 
@@ -60,7 +60,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     LayoutAnimationController();
 

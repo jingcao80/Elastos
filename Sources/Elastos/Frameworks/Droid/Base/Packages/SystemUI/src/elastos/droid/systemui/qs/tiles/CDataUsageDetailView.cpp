@@ -19,8 +19,8 @@ namespace Tiles {
 const Double CDataUsageDetailView::KB = 1024;
 const Double CDataUsageDetailView::MB = 1024 * KB;
 const Double CDataUsageDetailView::GB = 1024 * MB;
-CAR_OBJECT_IMPL(CDataUsageDetailView);
-CAR_INTERFACE_IMPL(CDataUsageDetailView, LinearLayout, IDataUsageDetailView);
+CAR_OBJECT_IMPL(CDataUsageDetailView)
+CAR_INTERFACE_IMPL(CDataUsageDetailView, LinearLayout, IDataUsageDetailView)
 CDataUsageDetailView::CDataUsageDetailView()
 {
     CDecimalFormat::New(String("#.##"), (IDecimalFormat**)&FORMAT);

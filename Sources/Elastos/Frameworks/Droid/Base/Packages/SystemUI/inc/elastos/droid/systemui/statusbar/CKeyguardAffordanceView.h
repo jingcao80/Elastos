@@ -153,7 +153,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener(
             /* [in] */ CKeyguardAffordanceView* host);
@@ -171,7 +171,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener2(
             /* [in] */ CKeyguardAffordanceView* host);
@@ -189,7 +189,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener3(
             /* [in] */ CKeyguardAffordanceView* host,
@@ -209,7 +209,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener4(
             /* [in] */ CKeyguardAffordanceView* host);
@@ -223,9 +223,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CKeyguardAffordanceView();
 

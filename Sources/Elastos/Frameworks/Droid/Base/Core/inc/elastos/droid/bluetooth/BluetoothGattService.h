@@ -24,7 +24,7 @@ class BluetoothGattService
     , public IBluetoothGattService
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothGattService();
 

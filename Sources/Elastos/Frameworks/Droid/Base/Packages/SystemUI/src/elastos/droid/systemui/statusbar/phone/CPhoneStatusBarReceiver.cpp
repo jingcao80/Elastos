@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CPhoneStatusBarReceiver);
+CAR_OBJECT_IMPL(CPhoneStatusBarReceiver)
 ECode CPhoneStatusBarReceiver::constructor(
     /* [in] */ IPhoneStatusBar* controller)
 {

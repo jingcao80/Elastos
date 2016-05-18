@@ -31,7 +31,7 @@ class ECO_PUBLIC BaseAdapter
     , public IAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI HasStableIds(
         /* [out] */ Boolean* has);

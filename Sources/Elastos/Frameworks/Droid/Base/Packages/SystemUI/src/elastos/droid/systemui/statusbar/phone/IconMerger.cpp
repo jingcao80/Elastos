@@ -23,7 +23,7 @@ ECode IconMerger::IconRunnable::Run()
 
 const String IconMerger::TAG("IconMerger");
 const Boolean IconMerger::DEBUG = FALSE;
-CAR_INTERFACE_IMPL(IconMerger, LinearLayout, IIconMerger);
+CAR_INTERFACE_IMPL(IconMerger, LinearLayout, IIconMerger)
 IconMerger::IconMerger()
     : mIconSize(0)
 {}

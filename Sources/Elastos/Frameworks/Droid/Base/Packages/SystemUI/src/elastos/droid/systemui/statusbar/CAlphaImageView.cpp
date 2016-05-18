@@ -6,8 +6,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CAlphaImageView);
-CAR_INTERFACE_IMPL(CAlphaImageView, ImageView, IAlphaImageView);
+CAR_OBJECT_IMPL(CAlphaImageView)
+CAR_INTERFACE_IMPL(CAlphaImageView, ImageView, IAlphaImageView)
 ECode CAlphaImageView::constructor(
     /* [in] */ IContext* context)
 {

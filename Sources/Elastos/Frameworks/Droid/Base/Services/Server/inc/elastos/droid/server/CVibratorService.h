@@ -81,7 +81,7 @@ public:
             /* [in] */ const String& opPkg,
             /* [in] */ CVibratorService* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI ProxyDied();
 

@@ -12,7 +12,7 @@ CarClass(CBootReceiver)
     , public BootReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Server

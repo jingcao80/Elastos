@@ -12,7 +12,7 @@ class ECO_PUBLIC SeekBar
     , public ISeekBar
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SeekBar();
 

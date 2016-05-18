@@ -18,7 +18,7 @@ class AnimatedImageView
     , public IAnimatedImageView
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AnimatedImageView();
 

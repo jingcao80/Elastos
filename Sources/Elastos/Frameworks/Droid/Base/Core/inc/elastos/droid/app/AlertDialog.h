@@ -20,7 +20,7 @@ class ECO_PUBLIC AlertDialog
     , public IAlertDialog
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AlertDialog();
 

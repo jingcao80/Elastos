@@ -48,7 +48,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CClockIntentReceiver);
+CAR_OBJECT_IMPL(CClockIntentReceiver)
+
 ECode CClockIntentReceiver::constructor(
     /* [in] */ IClock* host)
 {
@@ -100,7 +101,11 @@ ECode CClockIntentReceiver::OnReceive(
 const Int32 CClock::AM_PM_STYLE_NORMAL  = 0;
 const Int32 CClock::AM_PM_STYLE_SMALL   = 1;
 const Int32 CClock::AM_PM_STYLE_GONE    = 2;
+
 CAR_INTERFACE_IMPL_2(CClock, TextView, IClock, IDemoMode);
+
+CAR_OBJECT_IMPL(CClock)
+
 CClock::CClock()
     : mAttached(FALSE)
     , mAmPmStyle(0)

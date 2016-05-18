@@ -49,7 +49,7 @@ class AutofillPopup
     , public IAdapterViewOnItemClickListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     /**
       * An interface to handle the touch interaction with an AutofillPopup object.
       */

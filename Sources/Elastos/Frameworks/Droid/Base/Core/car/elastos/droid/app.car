@@ -868,6 +868,10 @@ module
         interface IParcelable;
     }
 
+    singleton class CActivityManagerRunningAppProcessInfoHelper {
+        interface IActivityManagerRunningAppProcessInfoHelper;
+    }
+
     class CActivityManagerRunningServiceInfo {
         constructor();
 

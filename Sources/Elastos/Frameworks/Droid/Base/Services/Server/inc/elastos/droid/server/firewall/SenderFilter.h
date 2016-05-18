@@ -37,7 +37,7 @@ public:
         , public IFilter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Matches(
@@ -56,7 +56,7 @@ public:
         , public IFilter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Matches(
@@ -75,7 +75,7 @@ public:
         , public IFilter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Matches(
@@ -94,7 +94,7 @@ public:
         , public IFilter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Matches(
@@ -109,7 +109,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     //@Override
     CARAPI Matches(

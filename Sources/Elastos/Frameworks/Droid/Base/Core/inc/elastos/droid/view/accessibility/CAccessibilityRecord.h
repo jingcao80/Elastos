@@ -14,7 +14,7 @@ CarClass(CAccessibilityRecord)
     , public AccessibilityRecord
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Accessibility

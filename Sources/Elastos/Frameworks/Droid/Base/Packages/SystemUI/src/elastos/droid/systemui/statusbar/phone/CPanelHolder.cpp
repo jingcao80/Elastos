@@ -12,8 +12,8 @@ namespace Phone {
 
 const Boolean CPanelHolder::DEBUG_GESTURES = TRUE;
 
-CAR_OBJECT_IMPL(CPanelHolder);
-CAR_INTERFACE_IMPL(CPanelHolder, FrameLayout, IPanelHolder);
+CAR_OBJECT_IMPL(CPanelHolder)
+CAR_INTERFACE_IMPL(CPanelHolder, FrameLayout, IPanelHolder)
 CPanelHolder::CPanelHolder()
     : mSelectedPanelIndex(-1)
 {}

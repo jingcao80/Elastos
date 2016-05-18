@@ -30,7 +30,7 @@ public:
     static CARAPI_(AutoPtr<IWebViewDatabase>) GetInstance(
         /* [in] */ IContext* context);
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Gets whether there are any saved username/password pairs for web forms.

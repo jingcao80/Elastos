@@ -13,7 +13,7 @@ namespace Animation {
 CarClass(CTranslateAnimation), public TranslateAnimation
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace Animation

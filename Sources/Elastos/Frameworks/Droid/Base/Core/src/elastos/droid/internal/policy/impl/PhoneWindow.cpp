@@ -434,6 +434,7 @@ ECode PhoneWindow::_DecorView::StylusGestureFilter::OnFling(
     /* [in] */ Float velocityY,
     /* [out] */ Boolean* res)
 {
+    Slogger::I(TAG, " >>> OnFling");
     VALIDATE_NOT_NULL(res)
     *res = FALSE;
 

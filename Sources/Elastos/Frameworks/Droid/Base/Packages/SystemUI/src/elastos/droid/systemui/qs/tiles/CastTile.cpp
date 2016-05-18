@@ -44,7 +44,7 @@ ECode CastTile::Callback::OnKeyguardChanged()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CastTile::CastDetailAdapter::MyListener, Object, IViewOnAttachStateChangeListener);
+CAR_INTERFACE_IMPL(CastTile::CastDetailAdapter::MyListener, Object, IViewOnAttachStateChangeListener)
 CastTile::CastDetailAdapter::MyListener::MyListener(
     /* [in] */ CastDetailAdapter* host)
     : mAdapter(host)

@@ -148,7 +148,7 @@ const String BaseStatusBar::BANNER_ACTION_SETUP("Elastos.Droid.SystemUI.StatusBa
 //==============================================================================
 //                  CSettingsObserver
 //==============================================================================
-CAR_OBJECT_IMPL(CSettingsObserver);
+CAR_OBJECT_IMPL(CSettingsObserver)
 ECode CSettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ IBaseStatusBar* host)
@@ -183,7 +183,7 @@ ECode CSettingsObserver::OnChange(
 //==============================================================================
 //                  CLockscreenSettingsObserver
 //==============================================================================
-CAR_OBJECT_IMPL(CLockscreenSettingsObserver);
+CAR_OBJECT_IMPL(CLockscreenSettingsObserver)
 ECode CLockscreenSettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ IBaseStatusBar* host)
@@ -277,7 +277,7 @@ Boolean BaseStatusBar::_RemoteViewsOnClickHandler::SuperOnClickHandler(
 //==============================================================================
 //                  CBaseBroadcastReceiver
 //==============================================================================
-CAR_OBJECT_IMPL(CBaseBroadcastReceiver);
+CAR_OBJECT_IMPL(CBaseBroadcastReceiver)
 ECode CBaseBroadcastReceiver::constructor(
     /* [in] */ IBaseStatusBar* host)
 {
@@ -498,7 +498,7 @@ ECode BaseStatusBar::_NotificationListenerService::OnNotificationRankingUpdate(
 //==============================================================================
 //                  BaseStatusBar::RecentsPreloadOnTouchListener
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::RecentsPreloadOnTouchListener, Object, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::RecentsPreloadOnTouchListener, Object, IViewOnTouchListener)
 BaseStatusBar::RecentsPreloadOnTouchListener::RecentsPreloadOnTouchListener(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -589,7 +589,7 @@ ECode BaseStatusBar::H::HandleMessage(
 //==============================================================================
 //                  BaseStatusBar::TouchOutsideListener
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::TouchOutsideListener, Object, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::TouchOutsideListener, Object, IViewOnTouchListener)
 BaseStatusBar::TouchOutsideListener::TouchOutsideListener(
     /* [in] */ Int32 msg,
     /* [in] */ IStatusBarPanel* panel,
@@ -626,7 +626,7 @@ ECode BaseStatusBar::TouchOutsideListener::OnTouch(
 //==============================================================================
 //                  BaseStatusBar::NotificationClicker
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::NotificationClicker, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::NotificationClicker, Object, IViewOnClickListener)
 BaseStatusBar::NotificationClicker::NotificationClicker(
     /* [in] */ IPendingIntent* intent,
     /* [in] */ const String& notificationKey,
@@ -707,7 +707,7 @@ ECode BaseStatusBar::NotificationClicker::OnClick(
 //==============================================================================
 //                  BaseStatusBar::RecentsComponentCallbacks
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::RecentsComponentCallbacks, Object, IRecentsComponentCallbacks);
+CAR_INTERFACE_IMPL(BaseStatusBar::RecentsComponentCallbacks, Object, IRecentsComponentCallbacks)
 BaseStatusBar::RecentsComponentCallbacks::RecentsComponentCallbacks(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -722,7 +722,7 @@ ECode BaseStatusBar::RecentsComponentCallbacks::OnVisibilityChanged(
 //==============================================================================
 //                  BaseStatusBar::ViewOnClickListener1
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener1, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener1, Object, IViewOnClickListener)
 BaseStatusBar::ViewOnClickListener1::ViewOnClickListener1(
     /* [in] */ BaseStatusBar* host,
     /* [in] */ const String& pkg,
@@ -756,7 +756,7 @@ ECode BaseStatusBar::ViewOnClickListener1::OnClick(
 //==============================================================================
 //                  BaseStatusBar::ViewOnClickListener2
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener2, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener2, Object, IViewOnClickListener)
 BaseStatusBar::ViewOnClickListener2::ViewOnClickListener2(
     /* [in] */ BaseStatusBar* host,
     /* [in] */ const String& pkg,
@@ -776,7 +776,7 @@ ECode BaseStatusBar::ViewOnClickListener2::OnClick(
 //==============================================================================
 //                  BaseStatusBar::ViewOnClickListener3
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener3, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener3, Object, IViewOnClickListener)
 BaseStatusBar::ViewOnClickListener3::ViewOnClickListener3(
     /* [in] */ BaseStatusBar* host,
     /* [in] */ IIntent* appSettingsLaunchIntent,
@@ -802,7 +802,7 @@ ECode BaseStatusBar::ViewOnClickListener3::OnClick(
 //==============================================================================
 //                  BaseStatusBar::BaseLongPressListener
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::BaseLongPressListener, Object, ISwipeHelperLongPressListener);
+CAR_INTERFACE_IMPL(BaseStatusBar::BaseLongPressListener, Object, ISwipeHelperLongPressListener)
 BaseStatusBar::BaseLongPressListener::BaseLongPressListener(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -1802,6 +1802,7 @@ void BaseStatusBar::CancelPreloadingRecents()
 
 void BaseStatusBar::ShowRecentsNextAffiliatedTask()
 {
+    Logger::I(TAG, " >>> ShowRecentsNextAffiliatedTask:%s", TO_CSTR(mRecents));
     if (mRecents != NULL) {
         mRecents->ShowNextAffiliatedTask();
     }
@@ -1809,6 +1810,7 @@ void BaseStatusBar::ShowRecentsNextAffiliatedTask()
 
 void BaseStatusBar::ShowRecentsPreviousAffiliatedTask()
 {
+    Logger::I(TAG, " >>> ShowRecentsPreviousAffiliatedTask:%s", TO_CSTR(mRecents));
     if (mRecents != NULL) {
         mRecents->ShowPrevAffiliatedTask();
     }

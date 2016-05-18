@@ -91,7 +91,7 @@ private:
         , public IQSPanelCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         QsPanelCallback(
             /* [in] */ CStatusBarHeaderView* host);
@@ -176,7 +176,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ClickListener(
             /* [in] */ CStatusBarHeaderView* host,
@@ -211,7 +211,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ClickListener2(
             /* [in] */ CStatusBarHeaderView* host);
@@ -229,7 +229,7 @@ private:
         , public IViewOnLayoutChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnLayoutChangeListener(
             /* [in] */ CStatusBarHeaderView* host);
@@ -270,7 +270,7 @@ private:
         , public IUserInfoControllerOnUserInfoChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnUserInfoChangedListener(
             /* [in] */ CStatusBarHeaderView* host);
@@ -285,9 +285,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CStatusBarHeaderView();
 

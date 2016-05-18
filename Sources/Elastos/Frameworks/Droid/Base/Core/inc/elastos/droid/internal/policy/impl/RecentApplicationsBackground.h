@@ -24,7 +24,7 @@ class RecentApplicationsBackground
     , public IRecentApplicationsBackground
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RecentApplicationsBackground();
 

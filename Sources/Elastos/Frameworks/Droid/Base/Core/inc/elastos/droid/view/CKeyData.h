@@ -13,7 +13,7 @@ CarClass(CKeyData)
     , public KeyCharacterMap::KeyData
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace View

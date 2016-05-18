@@ -36,7 +36,7 @@ private:
         , public ITransitionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         NavTransitionListener(
             /* [in] */ CNavigationBarView* host);
@@ -84,7 +84,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ImeSwitcherClickListener(
             /* [in] */ CNavigationBarView* host);
@@ -98,9 +98,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CNavigationBarView();
 

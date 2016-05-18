@@ -9,7 +9,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Stack {
 
-CAR_INTERFACE_IMPL(AnimationFilter, Object, IAnimationFilter);
+CAR_INTERFACE_IMPL(AnimationFilter, Object, IAnimationFilter)
 AnimationFilter::AnimationFilter()
     : mAnimateAlpha(FALSE)
     , mAnimateY(FALSE)

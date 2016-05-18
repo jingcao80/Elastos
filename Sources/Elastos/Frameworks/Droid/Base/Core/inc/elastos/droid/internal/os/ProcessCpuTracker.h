@@ -29,7 +29,7 @@ public:
             /* [in] */ Int32 parentPid,
             /* [in] */ Boolean includeThreads);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI GetPid(
             /* [out] */ Int32* pid);

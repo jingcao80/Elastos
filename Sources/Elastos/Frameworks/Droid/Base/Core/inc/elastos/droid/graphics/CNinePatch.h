@@ -29,7 +29,7 @@ namespace Graphics {
 CarClass(CNinePatch), public NinePatch
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IBitmap* bitmap,

@@ -23,7 +23,7 @@ class ZoomControls
     , public IZoomControls
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ZoomControls();
 

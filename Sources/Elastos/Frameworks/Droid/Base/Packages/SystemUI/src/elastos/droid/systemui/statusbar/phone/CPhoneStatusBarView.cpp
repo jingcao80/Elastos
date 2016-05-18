@@ -30,8 +30,11 @@ ECode CPhoneStatusBarView::Runnable1::Run()
 const String CPhoneStatusBarView::TAG("PhoneStatusBarView");
 const Boolean CPhoneStatusBarView::DEBUG = CPhoneStatusBar::DEBUG;
 const Boolean CPhoneStatusBarView::DEBUG_GESTURES = TRUE;
-CAR_OBJECT_IMPL(CPhoneStatusBarView);
-CAR_INTERFACE_IMPL(CPhoneStatusBarView, PanelBar, IPhoneStatusBarView);
+
+CAR_OBJECT_IMPL(CPhoneStatusBarView)
+
+CAR_INTERFACE_IMPL(CPhoneStatusBarView, PanelBar, IPhoneStatusBarView)
+
 ECode CPhoneStatusBarView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

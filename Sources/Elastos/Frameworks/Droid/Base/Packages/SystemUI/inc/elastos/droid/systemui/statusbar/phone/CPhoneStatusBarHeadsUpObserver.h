@@ -18,7 +18,7 @@ class CPhoneStatusBar;
 CarClass(CPhoneStatusBarHeadsUpObserver), public ContentObserver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IPhoneStatusBar* host,

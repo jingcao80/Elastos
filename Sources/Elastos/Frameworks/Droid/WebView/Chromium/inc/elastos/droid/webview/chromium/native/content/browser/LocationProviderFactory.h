@@ -82,7 +82,7 @@ private:
         LocationProviderImpl(
             /* [in] */ IContext* context);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
           * Start listening for location updates.

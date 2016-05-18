@@ -21,7 +21,7 @@ class RectEvaluator
     , public ITypeEvaluator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Construct a RectEvaluator that returns a new Rect on every evaluate call.

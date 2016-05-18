@@ -42,7 +42,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RotationLockControllerImpl(
         /* [in] */ IContext* context);

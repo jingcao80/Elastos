@@ -25,7 +25,7 @@ class KeyguardPreviewContainer
     , public IKeyguardPreviewContainer
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyguardPreviewContainer(
         /* [in] */ IContext* context,

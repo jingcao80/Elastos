@@ -13,7 +13,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CHotspotControllerReceiver);
+CAR_OBJECT_IMPL(CHotspotControllerReceiver)
 ECode CHotspotControllerReceiver::constructor(
     /* [in] */ IHotspotController* controller)
 {

@@ -21,7 +21,7 @@ namespace Policy {
 
 const String BatteryController::TAG("BatteryController");
 const Boolean BatteryController::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-CAR_INTERFACE_IMPL(BatteryController, Object, IBatteryController);
+CAR_INTERFACE_IMPL(BatteryController, Object, IBatteryController)
 BatteryController::BatteryController(
     /* [in] */ IContext* context)
 {

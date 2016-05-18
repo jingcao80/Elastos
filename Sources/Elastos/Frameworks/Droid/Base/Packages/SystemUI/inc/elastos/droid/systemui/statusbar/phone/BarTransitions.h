@@ -32,7 +32,7 @@ class BarTransitions
     , public IBarTransitions
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BarTransitions(
         /* [in] */ IView* view,

@@ -31,7 +31,7 @@ class SelectionHandleController
     : public CursorController
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SelectionHandleController(
         /* [in] */ IView* parent,

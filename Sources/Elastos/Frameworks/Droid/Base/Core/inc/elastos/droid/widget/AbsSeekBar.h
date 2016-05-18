@@ -18,7 +18,7 @@ class ECO_PUBLIC AbsSeekBar
     , public IAbsSeekBar
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbsSeekBar();
 

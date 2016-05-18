@@ -12,7 +12,7 @@ CarClass(CSpinnerSavedState)
     , public Spinner::SpinnerSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

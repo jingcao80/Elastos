@@ -264,7 +264,7 @@ private:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             CallbackRunnable(
                 /* [in] */ IAccountManagerCallback* cb,
@@ -461,7 +461,7 @@ private:
             , public IAccountManagerCallback
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             GetAccountsCallback(
                 /* [in] */ GetAuthTokenByTypeAndFeaturesTask* host);
@@ -527,7 +527,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CallbackAction(
             /* [in] */ IAccountManagerCallback* accountManagerCb,
@@ -545,7 +545,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AccountUpdateAction(
             /* [in] */ IOnAccountsUpdateListener* listener,

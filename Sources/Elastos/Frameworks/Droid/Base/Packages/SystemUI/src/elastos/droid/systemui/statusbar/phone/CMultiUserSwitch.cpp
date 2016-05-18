@@ -28,7 +28,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(CMultiUserSwitch::ViewOnClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CMultiUserSwitch::ViewOnClickListener, Object, IViewOnClickListener)
 CMultiUserSwitch::ViewOnClickListener::ViewOnClickListener(
     /* [in] */ CMultiUserSwitch* host)
     : mHost(host)
@@ -40,7 +40,7 @@ ECode CMultiUserSwitch::ViewOnClickListener::OnClick(
     return mHost->OnClick(v);
 }
 
-CAR_OBJECT_IMPL(CMultiUserSwitch);
+CAR_OBJECT_IMPL(CMultiUserSwitch)
 CAR_INTERFACE_IMPL_2(CMultiUserSwitch, FrameLayout, IMultiUserSwitch, IViewOnClickListener);
 CMultiUserSwitch::CMultiUserSwitch()
     : mKeyguardMode(FALSE)

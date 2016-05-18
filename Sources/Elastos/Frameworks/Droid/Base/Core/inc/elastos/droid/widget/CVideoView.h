@@ -11,7 +11,7 @@ namespace Widget {
 CarClass(CVideoView), public VideoView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Widget

@@ -12,7 +12,7 @@ CarClass(CAbsListViewSavedState)
     , public AbsListView::AbsListViewSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

@@ -7,8 +7,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CNotificationGuts);
-CAR_INTERFACE_IMPL(CNotificationGuts, FrameLayout, INotificationGuts);
+CAR_OBJECT_IMPL(CNotificationGuts)
+CAR_INTERFACE_IMPL(CNotificationGuts, FrameLayout, INotificationGuts)
 CNotificationGuts::CNotificationGuts()
     : mClipTopAmount(0)
     , mActualHeight(0)

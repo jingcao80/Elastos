@@ -14,7 +14,7 @@ namespace Views {
 CarClass(CFixedSizeImageView)
     , public FixedSizeImageView
 {
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Views

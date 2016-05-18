@@ -111,6 +111,8 @@ private:
     class Autohide: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Autohide")
+
         Autohide(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -124,6 +126,8 @@ private:
     class MediaListener: public MediaControllerCallback
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::MediaListener")
+
         MediaListener(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -144,7 +148,9 @@ private:
         , public IOnChildLocationsChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::OnChildLocationsChangedListener")
+
+        CAR_INTERFACE_DECL()
 
         OnChildLocationsChangedListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -162,7 +168,9 @@ private:
         , public IOnChildLocationsChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::NotificationLocationsChangedListener")
+
+        CAR_INTERFACE_DECL()
 
         NotificationLocationsChangedListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -178,6 +186,8 @@ private:
     class VisibilityReporter: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::VisibilityReporter")
+
         VisibilityReporter(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -195,7 +205,9 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::OverflowClickListener")
+
+        CAR_INTERFACE_DECL()
 
         OverflowClickListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -213,7 +225,9 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::RecentsClickListener")
+
+        CAR_INTERFACE_DECL()
 
         RecentsClickListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -230,7 +244,9 @@ private:
         , public IViewOnLongClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::LongPressBackRecentsListener")
+
+        CAR_INTERFACE_DECL()
 
         LongPressBackRecentsListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -247,6 +263,8 @@ private:
     class ShowSearchPanelRunnable: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::ShowSearchPanelRunnable")
+
         ShowSearchPanelRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -261,7 +279,9 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::HomeActionListener")
+
+        CAR_INTERFACE_DECL()
 
         HomeActionListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -278,6 +298,8 @@ private:
     class HideBackdropFront: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::HideBackdropFront")
+
         HideBackdropFront(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -309,7 +331,9 @@ private:
         , public IViewOnFocusChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::FocusChangeListener")
+
+        CAR_INTERFACE_DECL()
 
         CARAPI OnFocusChange(
             /* [in] */ IView* v,
@@ -319,6 +343,8 @@ private:
     class AnimateCollapsePanelsRunnable: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::AnimateCollapsePanelsRunnable")
+
         AnimateCollapsePanelsRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -332,6 +358,8 @@ private:
     class CheckBarModesRunnable: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::CheckBarModesRunnable")
+
         CheckBarModesRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -345,6 +373,8 @@ private:
     class MyTicker: public Ticker
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::MyTicker")
+
         MyTicker(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IContext* context,
@@ -367,7 +397,9 @@ private:
         , public IAnimationAnimationListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::TickingDoneListener")
+
+        CAR_INTERFACE_DECL()
 
         TickingDoneListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -388,6 +420,8 @@ private:
     class StartTracing: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::StartTracing")
+
         StartTracing(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -400,6 +434,8 @@ private:
     class StopTracing: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::StopTracing")
+
         StopTracing(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -412,6 +448,8 @@ private:
     class ShadeUpdates: public Object
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::ShadeUpdates")
+
         ShadeUpdates(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -447,7 +485,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DozeServiceHost(
             /* [in] */ CPhoneStatusBar* host);
@@ -515,7 +553,9 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::OnTouchListener1")
+
+        CAR_INTERFACE_DECL()
 
         OnTouchListener1(
             /* [in] */ CPhoneStatusBar* host);
@@ -534,7 +574,9 @@ private:
         , public IOnVerticalChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::VerticalChangedListener")
+
+        CAR_INTERFACE_DECL()
 
         VerticalChangedListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -552,7 +594,9 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::OnTouchListener2")
+
+        CAR_INTERFACE_DECL()
 
         OnTouchListener2(
             /* [in] */ CPhoneStatusBar* host);
@@ -571,7 +615,9 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::OnClickListener1")
+
+        CAR_INTERFACE_DECL()
 
         OnClickListener1(
             /* [in] */ CPhoneStatusBar* host);
@@ -589,7 +635,9 @@ private:
         , public IBatteryStateChangeCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::BatteryStateChangeCallback")
+
+        CAR_INTERFACE_DECL()
 
         BatteryStateChangeCallback(
             /* [in] */ CPhoneStatusBar* host);
@@ -612,7 +660,9 @@ private:
         , public IQSTileHostCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::HostCallback")
+
+        CAR_INTERFACE_DECL()
 
         HostCallback(
             /* [in] */ CPhoneStatusBar* host,
@@ -629,6 +679,8 @@ private:
     class Runnable1: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable1")
+
         Runnable1(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -642,6 +694,8 @@ private:
     class Runnable2: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable2")
+
         Runnable2(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -655,6 +709,8 @@ private:
     class Runnable3: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable3")
+
         Runnable3(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -670,7 +726,9 @@ private:
         , public IOnPreDrawListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CPhoneStatusBar::OnPreDrawListener")
+
+        CAR_INTERFACE_DECL()
 
         OnPreDrawListener(
             /* [in] */ CPhoneStatusBar* host);
@@ -686,6 +744,8 @@ private:
     class Runnable4: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable4")
+
         Runnable4(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -699,6 +759,8 @@ private:
     class AnimatorListenerAdapter1: public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter1")
+
         AnimatorListenerAdapter1(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -713,6 +775,8 @@ private:
     class AnimatorListenerAdapter2: public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter2")
+
         AnimatorListenerAdapter2(
             /* [in] */ IView* view);
 
@@ -727,6 +791,8 @@ private:
     class Runnable5: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable5")
+
         Runnable5(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -740,6 +806,8 @@ private:
     class Runnable6: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable6")
+
         Runnable6(
             /* [in] */ IView* view);
 
@@ -753,6 +821,8 @@ private:
     class AnimatorListenerAdapter3: public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter3")
+
         AnimatorListenerAdapter3(
             /* [in] */ IView* view,
             /* [in] */ IViewPropertyAnimator* a,
@@ -771,6 +841,8 @@ private:
     class AnimatorListenerAdapter4: public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter4")
+
         AnimatorListenerAdapter4(
             /* [in] */ IView* view,
             /* [in] */ Int32 vis);
@@ -787,6 +859,8 @@ private:
     class Runnable7: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable7")
+
         Runnable7(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -800,6 +874,8 @@ private:
     class Runnable8: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable8")
+
         Runnable8(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -813,6 +889,8 @@ private:
     class Runnable9: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable9")
+
         Runnable9(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IIntent* intent);
@@ -828,6 +906,8 @@ private:
     class Runnable10: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable10")
+
         Runnable10(
             /* [in] */ CPhoneStatusBar* host);
 
@@ -841,6 +921,8 @@ private:
     class Runnable11: public Runnable
     {
     public:
+        TO_STRING_IMPL("CPhoneStatusBar::Runnable11")
+
         Runnable11(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IRunnable* beforeFading);
@@ -854,9 +936,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CPhoneStatusBar();
 

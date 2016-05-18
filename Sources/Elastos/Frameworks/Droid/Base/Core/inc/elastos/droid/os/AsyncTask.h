@@ -214,7 +214,7 @@ private:
     public:
         MyThreadFactory();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI NewThread(
             /* [in] */ IRunnable* r,
@@ -248,7 +248,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SerialExecutor();
 
@@ -276,7 +276,7 @@ private:
 
         ~WorkerRunnable();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Call(
             /* [out] */ IInterface** result);

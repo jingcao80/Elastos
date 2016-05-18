@@ -34,7 +34,7 @@ public:
         , public IOnPreDrawListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerViewTreeObserverOnPreDrawListener(
             /* [in] */ ViewPositionObserver* owner);

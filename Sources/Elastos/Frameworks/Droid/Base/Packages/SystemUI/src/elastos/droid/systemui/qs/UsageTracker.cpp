@@ -15,7 +15,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-CAR_OBJECT_IMPL(CUsageTrackerReceiver);
+CAR_OBJECT_IMPL(CUsageTrackerReceiver)
 ECode CUsageTrackerReceiver::constructor(
     /* [in] */ IListenable* host)
 {
@@ -36,7 +36,7 @@ ECode CUsageTrackerReceiver::OnReceive(
 }
 
 const Int64 UsageTracker::MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
-CAR_INTERFACE_IMPL(UsageTracker, Object, IListenable);
+CAR_INTERFACE_IMPL(UsageTracker, Object, IListenable)
 UsageTracker::UsageTracker(
     /* [in] */ IContext* context,
     /* [in] */ QSTile/*Class<?>*/* tile)

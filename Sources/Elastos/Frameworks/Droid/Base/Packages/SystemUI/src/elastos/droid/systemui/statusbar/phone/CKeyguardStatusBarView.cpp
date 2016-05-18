@@ -32,7 +32,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(CKeyguardStatusBarView::OnUserInfoChangedListener, Object, IUserInfoControllerOnUserInfoChangedListener);
+CAR_INTERFACE_IMPL(CKeyguardStatusBarView::OnUserInfoChangedListener, Object, IUserInfoControllerOnUserInfoChangedListener)
 CKeyguardStatusBarView::OnUserInfoChangedListener::OnUserInfoChangedListener(
     /* [in] */ CKeyguardStatusBarView* host)
     : mHost(host)
@@ -60,7 +60,7 @@ ECode CKeyguardStatusBarView::OnPreDrawListener::Runnable1::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardStatusBarView::OnPreDrawListener, Object, IOnPreDrawListener);
+CAR_INTERFACE_IMPL(CKeyguardStatusBarView::OnPreDrawListener, Object, IOnPreDrawListener)
 CKeyguardStatusBarView::OnPreDrawListener::OnPreDrawListener(
     /* [in] */ CKeyguardStatusBarView* host,
     /* [in] */ Boolean userSwitcherVisible,
@@ -118,7 +118,7 @@ ECode CKeyguardStatusBarView::OnPreDrawListener::OnPreDraw(
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CKeyguardStatusBarView);
+CAR_OBJECT_IMPL(CKeyguardStatusBarView)
 CAR_INTERFACE_IMPL_2(CKeyguardStatusBarView, RelativeLayout, IKeyguardStatusBarView, IBatteryStateChangeCallback);
 CKeyguardStatusBarView::CKeyguardStatusBarView()
     : mBatteryCharging(FALSE)

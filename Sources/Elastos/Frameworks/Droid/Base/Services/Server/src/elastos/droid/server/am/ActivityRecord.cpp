@@ -1552,7 +1552,7 @@ String ActivityRecord::ToString()
     }
     StringBuilder sb(128);
     sb += "ActivityRecord{0X";
-    sb += StringUtils::ToString((Int32)this, 16);
+    sb += StringUtils::ToHexString((Int32)this);
     sb += " u";
     sb += mUserId;
     sb += ' ';

@@ -13,7 +13,7 @@ class PrivacySettingsStub
     , public IInterface
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI_(Boolean) IsStub();
 

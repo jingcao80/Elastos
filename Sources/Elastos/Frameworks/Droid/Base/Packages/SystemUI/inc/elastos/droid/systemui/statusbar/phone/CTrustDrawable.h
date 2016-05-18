@@ -56,7 +56,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AlphaUpdateListener(
             /* [in] */ CTrustDrawable* host);
@@ -74,7 +74,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RadiusUpdateListener(
             /* [in] */ CTrustDrawable* host);
@@ -88,7 +88,7 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CTrustDrawable();
 

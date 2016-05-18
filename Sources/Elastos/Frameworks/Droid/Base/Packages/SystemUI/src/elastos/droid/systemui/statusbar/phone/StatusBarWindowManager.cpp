@@ -40,7 +40,7 @@ Boolean StatusBarWindowManager::State::IsKeyguardShowingAndNotOccluded()
     return mKeyguardShowing && !mKeyguardOccluded;
 }
 
-CAR_INTERFACE_IMPL(StatusBarWindowManager, Object, IStatusBarWindowManager);
+CAR_INTERFACE_IMPL(StatusBarWindowManager, Object, IStatusBarWindowManager)
 StatusBarWindowManager::StatusBarWindowManager(
     /* [in] */ IContext* context)
     : mBarHeight(0)

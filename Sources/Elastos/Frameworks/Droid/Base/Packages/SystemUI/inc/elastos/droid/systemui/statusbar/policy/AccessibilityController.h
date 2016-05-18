@@ -28,7 +28,7 @@ class AccessibilityController
     , public IAccessibilityManagerTouchExplorationStateChangeListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AccessibilityController(
         /* [in] */ IContext* context);

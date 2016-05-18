@@ -102,7 +102,7 @@ private:
         , public IMediaScannerClient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyMediaScannerClient(
             /* [in] */ CMediaScanner* owner);
@@ -242,9 +242,9 @@ public:
 
     ~CMediaScanner();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* c);

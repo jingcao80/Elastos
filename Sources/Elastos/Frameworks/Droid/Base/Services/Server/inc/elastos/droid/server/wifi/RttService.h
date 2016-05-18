@@ -211,7 +211,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RttServiceImpl();
 
@@ -264,7 +264,7 @@ private:
         , public IWifiNativeRttEventHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerWifiNativeRttEventHandler(
             /* [in] */ RttServiceImpl* owner);

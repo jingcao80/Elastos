@@ -32,7 +32,7 @@ public:
         /* [in] */ Path* path,
         /* [in] */ Int64 version);
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI_(AutoPtr<Path>) GetPath();
 

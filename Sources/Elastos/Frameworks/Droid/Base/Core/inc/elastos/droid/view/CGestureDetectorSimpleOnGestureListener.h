@@ -14,7 +14,7 @@ CarClass(CGestureDetectorSimpleOnGestureListener)
     , public GestureDetector::SimpleOnGestureListener
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace View

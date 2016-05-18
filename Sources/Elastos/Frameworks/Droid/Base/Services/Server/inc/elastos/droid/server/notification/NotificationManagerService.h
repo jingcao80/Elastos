@@ -107,7 +107,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         BinderService();
 
@@ -484,7 +484,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         StatusBarNotificationHolder();
 
@@ -560,7 +560,7 @@ private:
         , public IIterator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         IteratorInner(
             /* [in] */ IIterator* iter,
@@ -674,7 +674,7 @@ private:
         , public INotificationDelegate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyNotificationDelegate(
             /* [in] */ NotificationManagerService* host);
@@ -790,7 +790,7 @@ private:
         , public INotificationManagerInternal
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyNotificationManagerInternal(
             /* [in] */ NotificationManagerService* host);

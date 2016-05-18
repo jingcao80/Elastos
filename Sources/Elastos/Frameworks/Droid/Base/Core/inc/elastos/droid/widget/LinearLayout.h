@@ -23,7 +23,7 @@ public:
         , public ILinearLayoutLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LinearLayoutLayoutParams();
 
@@ -80,7 +80,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     LinearLayout();
 

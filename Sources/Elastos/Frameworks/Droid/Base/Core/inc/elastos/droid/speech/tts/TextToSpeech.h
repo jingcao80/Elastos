@@ -62,7 +62,7 @@ public:
         , public ITextToSpeechEngineInfo
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TextToSpeechEngineInfo();
 
@@ -302,7 +302,7 @@ private:
             , public IITextToSpeechCallback
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             TextToSpeechConnectionCallback();
 
@@ -335,7 +335,7 @@ private:
 
         };
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TextToSpeechConnection();
 
@@ -392,7 +392,7 @@ private:
     friend class TextToSpeechConnection;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TextToSpeech();
 

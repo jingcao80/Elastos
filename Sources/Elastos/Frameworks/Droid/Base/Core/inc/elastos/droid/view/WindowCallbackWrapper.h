@@ -27,7 +27,7 @@ class WindowCallbackWrapper
 public:
     WindowCallbackWrapper();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IWindowCallback* wrapped);

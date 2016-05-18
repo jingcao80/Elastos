@@ -21,7 +21,7 @@ class ECO_PUBLIC ViewOutlineProvider
     , public IViewOutlineProvider
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Called to get the provider to populate the Outline.

@@ -10,7 +10,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CFastColorDrawable);
+CAR_OBJECT_IMPL(CFastColorDrawable)
 CFastColorDrawable::CFastColorDrawable()
     : mColor(0)
 {}

@@ -41,7 +41,7 @@ public:
         , public IViewGroupLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Used internally by MarginLayoutParams.
@@ -383,7 +383,7 @@ private:
         , public ITransitionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LayoutTransitionListener(
             /* [in] */ ViewGroup* host);

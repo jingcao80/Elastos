@@ -20,7 +20,7 @@ class RectShape
     , public IRectShape
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * RectShape constructor.

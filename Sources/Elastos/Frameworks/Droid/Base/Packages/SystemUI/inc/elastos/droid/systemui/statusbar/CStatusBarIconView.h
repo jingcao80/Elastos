@@ -13,7 +13,7 @@ namespace StatusBar {
 CarClass(CStatusBarIconView), public StatusBarIconView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace StatusBar

@@ -24,7 +24,7 @@ class ECO_PUBLIC CookieManager
     , public ICloneable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Gets the singleton CookieManager instance. If this method is used

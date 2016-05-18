@@ -95,7 +95,7 @@ ECode WifiAccessPointController::Receiver::OnReceive(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(WifiAccessPointController::WifiComparator, Object, IComparator);
+CAR_INTERFACE_IMPL(WifiAccessPointController::WifiComparator, Object, IComparator)
 ECode WifiAccessPointController::WifiComparator::Compare(
     /* [in] */ IInterface* lhs,
     /* [in] */ IInterface* rhs,
@@ -116,7 +116,7 @@ Int32 WifiAccessPointController::WifiComparator::Score(
     return level + (isConnected ? 10 : 0);
 }
 
-CAR_INTERFACE_IMPL(WifiAccessPointController::Listener, Object, IWifiManagerActionListener);
+CAR_INTERFACE_IMPL(WifiAccessPointController::Listener, Object, IWifiManagerActionListener)
 ECode WifiAccessPointController::Listener::OnSuccess()
 {
     if (DEBUG) Logger::D(TAG, "connect success");
@@ -131,7 +131,7 @@ ECode WifiAccessPointController::Listener::OnFailure(
 }
 
 
-CAR_INTERFACE_IMPL(WifiAccessPointController, Object, IWifiAccessPointController);
+CAR_INTERFACE_IMPL(WifiAccessPointController, Object, IWifiAccessPointController)
 WifiAccessPointController::WifiAccessPointController(
     /* [in] */ IContext* context)
     : mScanning(FALSE)

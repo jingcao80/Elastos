@@ -12,7 +12,7 @@ CarClass(CScaleGestureDetectorSimpleOnScaleGestureListener)
     , public ScaleGestureDetector::SimpleOnScaleGestureListener
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace View

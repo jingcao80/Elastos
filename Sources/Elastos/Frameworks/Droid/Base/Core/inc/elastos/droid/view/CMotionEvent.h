@@ -13,7 +13,7 @@ CarClass(CMotionEvent)
     , public MotionEvent
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace View

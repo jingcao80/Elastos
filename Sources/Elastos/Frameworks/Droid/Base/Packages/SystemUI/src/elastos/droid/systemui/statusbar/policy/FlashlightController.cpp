@@ -172,7 +172,7 @@ void FlashlightController::AvailabilityCallback::SetCameraAvailable(
     }
 }
 
-CAR_INTERFACE_IMPL(FlashlightController, Object, IFlashlightController);
+CAR_INTERFACE_IMPL(FlashlightController, Object, IFlashlightController)
 FlashlightController::FlashlightController(
     /* [in] */ IContext* mContext)
 {

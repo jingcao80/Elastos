@@ -117,7 +117,7 @@ private:
         PositiveButtonClickListener(
             /* [in] */ ContentVideoView* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
@@ -128,7 +128,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     //@CalledByNative
     virtual CARAPI_(void) OnMediaPlayerError(

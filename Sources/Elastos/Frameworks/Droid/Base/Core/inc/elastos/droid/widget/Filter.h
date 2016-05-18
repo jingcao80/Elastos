@@ -26,7 +26,7 @@ protected:
         , public IFilterResults
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FilterResults();
 
@@ -124,7 +124,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Filter();
 

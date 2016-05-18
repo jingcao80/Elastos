@@ -32,7 +32,7 @@ class WebViewFragment
     , public IWebViewFragment
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WebViewFragment();
 

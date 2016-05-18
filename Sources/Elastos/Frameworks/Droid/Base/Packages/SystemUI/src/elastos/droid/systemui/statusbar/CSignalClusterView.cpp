@@ -6,7 +6,7 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CSignalClusterView);
+CAR_OBJECT_IMPL(CSignalClusterView)
 
 } // namespace StatusBar
 } // namespace SystemUI

@@ -12,7 +12,7 @@ CarClass(CAccessibilityInteractionController)
     , public AccessibilityInteractionController
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // View

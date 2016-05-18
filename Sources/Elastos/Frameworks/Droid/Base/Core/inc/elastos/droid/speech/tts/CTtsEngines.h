@@ -15,7 +15,7 @@ CarClass(CTtsEngines)
     , public TtsEngines
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Tts

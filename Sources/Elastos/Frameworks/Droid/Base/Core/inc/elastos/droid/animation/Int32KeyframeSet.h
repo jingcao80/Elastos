@@ -24,7 +24,7 @@ class Int32KeyframeSet
     , public IInt32Keyframes
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Int32KeyframeSet(
         /* [in] */ ArrayOf<IInt32Keyframe*>* keyframes);

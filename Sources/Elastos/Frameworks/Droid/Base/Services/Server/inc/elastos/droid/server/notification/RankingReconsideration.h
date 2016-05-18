@@ -21,7 +21,7 @@ class RankingReconsideration
     , public IRankingReconsideration
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RankingReconsideration(
         /* [in] */ const String& key);

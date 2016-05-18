@@ -43,7 +43,7 @@ private:
         InnerWebChromeClient(
             /* [in] */ CActivityOne* owner);
 
-        //CAR_INTERFACE_DECL();
+        //CAR_INTERFACE_DECL()
 
         CARAPI OnProgressChanged(
             /* [in] */ IWebView* view,
@@ -174,7 +174,7 @@ private:
         InnerWebViewClient(
             /* [in] */ CActivityOne* owner);
 
-        //CAR_INTERFACE_DECL();
+        //CAR_INTERFACE_DECL()
 
         CARAPI ShouldOverrideUrlLoading(
             /* [in] */ IWebView* view,
@@ -263,7 +263,7 @@ private:
         Btn1OnClickListener(
             /* [in] */ CActivityOne* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -280,7 +280,7 @@ private:
         Btn2OnClickListener(
             /* [in] */ CActivityOne* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -297,7 +297,7 @@ private:
         Btn3OnClickListener(
             /* [in] */ CActivityOne* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -314,7 +314,7 @@ private:
         InnerDownloadListener(
             /* [in] */ CActivityOne* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnDownloadStart(
             /* [in] */ const String& url,

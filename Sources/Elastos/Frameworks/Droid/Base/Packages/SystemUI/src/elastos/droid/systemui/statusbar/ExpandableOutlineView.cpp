@@ -32,7 +32,7 @@ ECode ExpandableOutlineView::ExpandableViewOutlineProvider::GetOutline(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(ExpandableOutlineView, ExpandableView, IExpandableOutlineView);
+CAR_INTERFACE_IMPL(ExpandableOutlineView, ExpandableView, IExpandableOutlineView)
 ExpandableOutlineView::ExpandableOutlineView()
     : mCustomOutline(FALSE)
 {

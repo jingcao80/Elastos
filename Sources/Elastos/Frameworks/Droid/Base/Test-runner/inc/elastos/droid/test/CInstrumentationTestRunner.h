@@ -172,7 +172,7 @@ private:
         , public IPredicate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Apply(
             /* [in] */ IInterface* t,

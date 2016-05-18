@@ -24,7 +24,7 @@ public:
         , public IYesNoPreferenceSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor();
 

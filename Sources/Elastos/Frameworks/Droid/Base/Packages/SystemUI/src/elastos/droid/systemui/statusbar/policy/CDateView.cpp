@@ -48,7 +48,7 @@ ECode CDateView::DateViewBroadcastReceiver::OnReceive(
 }
 
 const String CDateView::TAG("DateView");
-CAR_INTERFACE_IMPL(CDateView, TextView, IDateView);
+CAR_INTERFACE_IMPL(CDateView, TextView, IDateView)
 CDateView::CDateView()
 {
     mIntentReceiver = new DateViewBroadcastReceiver(this);

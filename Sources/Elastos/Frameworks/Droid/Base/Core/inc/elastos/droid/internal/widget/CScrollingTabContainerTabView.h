@@ -13,7 +13,7 @@ namespace Widget {
 CarClass(CScrollingTabContainerTabView), public ScrollingTabContainerView::TabView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

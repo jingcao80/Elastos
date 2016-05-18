@@ -25,7 +25,7 @@ class PathEffect
     friend class Paint;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~PathEffect();
 

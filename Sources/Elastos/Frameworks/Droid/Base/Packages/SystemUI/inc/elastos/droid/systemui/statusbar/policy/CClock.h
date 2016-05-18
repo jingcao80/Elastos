@@ -33,7 +33,9 @@ CarClass(CClock)
     , public IDemoMode
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CClock();
 
@@ -80,7 +82,7 @@ private:
     Int32 mAmPmStyle;
 
     Boolean mDemoMode;
-    AutoPtr<BroadcastReceiver> mIntentReceiver;
+    AutoPtr<IBroadcastReceiver> mIntentReceiver;
     friend class CClockIntentReceiver;
 };
 

@@ -345,8 +345,8 @@ ECode CSearchPanelCircleView::MyAnimatorListenerAdapter5::OnAnimationEnd(
 //========================================================
 // CSearchPanelCircleView
 //========================================================
-CAR_OBJECT_IMPL(CSearchPanelCircleView);
-CAR_INTERFACE_IMPL(CSearchPanelCircleView, FrameLayout, ISearchPanelCircleView);
+CAR_OBJECT_IMPL(CSearchPanelCircleView)
+CAR_INTERFACE_IMPL(CSearchPanelCircleView, FrameLayout, ISearchPanelCircleView)
 CSearchPanelCircleView::CSearchPanelCircleView()
     : mClipToOutline(FALSE)
     , mAnimatingOut(FALSE)

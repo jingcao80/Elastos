@@ -56,7 +56,7 @@ private:
         , public ISecurityControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ QSFooter* host);
@@ -92,7 +92,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         QSFooterClickListener(
             /* [in] */ QSFooter* host);
@@ -106,7 +106,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     QSFooter(
         /* [in] */ IQSPanel* qsPanel,

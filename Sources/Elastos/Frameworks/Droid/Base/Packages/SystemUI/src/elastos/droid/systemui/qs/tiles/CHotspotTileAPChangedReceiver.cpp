@@ -8,7 +8,7 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_OBJECT_IMPL(CHotspotTileAPChangedReceiver);
+CAR_OBJECT_IMPL(CHotspotTileAPChangedReceiver)
 ECode CHotspotTileAPChangedReceiver::constructor(
     /* [in] */ IQSTile* host)
 {

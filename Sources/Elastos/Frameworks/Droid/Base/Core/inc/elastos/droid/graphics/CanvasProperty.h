@@ -31,7 +31,7 @@ class ECO_PUBLIC CanvasProperty/*<T>*/
     , public ICanvasProperty
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static AutoPtr<CanvasProperty> CreateFloat(
         /* [in] */ Float initialValue);

@@ -29,7 +29,7 @@ public:
         , public IRequestHolderBuilder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Builder();
 

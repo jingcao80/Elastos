@@ -35,7 +35,7 @@ class SelectPopupAdapter
     : public ArrayAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a new SelectPopupItem adapter for the select popup alert dialog list.

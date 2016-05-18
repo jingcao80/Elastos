@@ -23,9 +23,9 @@ CarClass(CBounceInterpolator)
     , public ITimeInterpolator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CBounceInterpolator();
 

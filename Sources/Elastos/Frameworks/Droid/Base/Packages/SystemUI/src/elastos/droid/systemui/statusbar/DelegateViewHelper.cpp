@@ -3,17 +3,21 @@
 #include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IStatusBarManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::SystemUI::R;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
+
+static const String TAG("DelegateViewHelper");
 
 DelegateViewHelper::DelegateViewHelper(
     /* [in] */ IView* sourceView)

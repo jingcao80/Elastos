@@ -17,7 +17,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CProfileReceiverBroadcastReceiver);
+CAR_OBJECT_IMPL(CProfileReceiverBroadcastReceiver)
 ECode CProfileReceiverBroadcastReceiver::constructor(
     /* [in] */ IUserInfoController* controller)
 {

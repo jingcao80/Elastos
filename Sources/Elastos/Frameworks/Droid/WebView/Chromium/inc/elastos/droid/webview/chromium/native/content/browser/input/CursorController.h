@@ -27,7 +27,7 @@ class CursorController
     , public IOnTouchModeChangeListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Hide the cursor controller from screen.

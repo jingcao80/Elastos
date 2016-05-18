@@ -19,7 +19,7 @@ class AccessPoint
     , public INetworkControllerAccessPoint
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AccessPoint();
 
@@ -67,7 +67,7 @@ class DataUsageInfo
     , public INetworkControllerDataUsageInfo
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     DataUsageInfo();
 

@@ -29,7 +29,7 @@ private:
         , public IUtteranceProgressListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         UtteranceProgressListenerStand();
 
@@ -84,7 +84,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     UtteranceProgressListener();
 

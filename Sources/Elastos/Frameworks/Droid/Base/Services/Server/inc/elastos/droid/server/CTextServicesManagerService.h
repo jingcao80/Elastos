@@ -57,7 +57,7 @@ private:
         , public IIUserSwitchObserver
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CTSMSUserSwitchObserver(
             /* [in] */ CTextServicesManagerService* owner);
@@ -98,7 +98,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InternalServiceConnection(
             /* [in] */ const String& id,

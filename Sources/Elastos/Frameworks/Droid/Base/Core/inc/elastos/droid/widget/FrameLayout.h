@@ -24,7 +24,7 @@ public:
         , public IFrameLayoutLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FrameLayoutLayoutParams();
 
@@ -93,7 +93,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FrameLayout();
 

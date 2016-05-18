@@ -44,7 +44,7 @@ protected:
         , public IMenuBuilderCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ExtractActionMode(
             /* [in] */ IActionModeCallback* cb,
@@ -125,7 +125,7 @@ protected:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _OnClickListener(
             /* [in] */ CExtractEditLayout* host);
@@ -138,9 +138,9 @@ protected:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* ctx);

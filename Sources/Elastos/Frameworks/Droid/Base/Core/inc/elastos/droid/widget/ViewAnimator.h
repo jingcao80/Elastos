@@ -30,7 +30,7 @@ class ECO_PUBLIC ViewAnimator
     , public IViewAnimator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ViewAnimator();
 

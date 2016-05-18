@@ -10,7 +10,7 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_INTERFACE_IMPL(HotspotTile::Callback, Object, IHotspotControllerCallback);
+CAR_INTERFACE_IMPL(HotspotTile::Callback, Object, IHotspotControllerCallback)
 HotspotTile::Callback::Callback(
     /* [in] */ HotspotTile* host)
     : mHost(host)

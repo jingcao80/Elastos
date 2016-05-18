@@ -28,7 +28,7 @@ class AbstractSynthesisCallback
     , public SynthesisCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbstractSynthesisCallback();
 

@@ -56,7 +56,7 @@ public:
         , public IUserSwitcherControllerBaseUserAdapter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI GetCount(
@@ -101,7 +101,7 @@ public:
         , public IUserSwitcherControllerUserRecord
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         UserRecord(
             /* [in] */ IUserInfo* info,
@@ -134,7 +134,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ExitGuestDialog(
             /* [in] */ IContext* context,
@@ -156,7 +156,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AddUserDialog(
             /* [in] */ IContext* context,
@@ -213,7 +213,7 @@ private:
         , public IQSTileDetailAdapter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         UserDetailAdapter(
             /* [in] */ UserSwitcherController* host);
@@ -251,7 +251,7 @@ private:
         , public IKeyguardMonitorCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyguardMonitorCallback(
             /* [in] */ UserSwitcherController* host);
@@ -287,7 +287,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     UserSwitcherController(
         /* [in] */ IContext* context,

@@ -14,7 +14,7 @@ class AlphaAnimation
     , public IAlphaAnimation
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AlphaAnimation();
 

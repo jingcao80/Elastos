@@ -50,7 +50,11 @@ Boolean CNavigationBarView::SLIPPERY_WHEN_DISABLED = TRUE;
 const Boolean CNavigationBarView::WORKAROUND_INVALID_LAYOUT = TRUE;
 const Int32 CNavigationBarView::MSG_CHECK_INVALID_LAYOUT = 8686;
 
-CAR_INTERFACE_IMPL(CNavigationBarView::NavTransitionListener, Object, ITransitionListener);
+//==========================================================================
+// CNavigationBarView::NavTransitionListener
+//==========================================================================
+CAR_INTERFACE_IMPL(CNavigationBarView::NavTransitionListener, Object, ITransitionListener)
+
 CNavigationBarView::NavTransitionListener::NavTransitionListener(
     /* [in] */ CNavigationBarView* host)
     : mHost(host)
@@ -127,6 +131,9 @@ ECode CNavigationBarView::NavTransitionListener::OnBackAltCleared()
     return NOERROR;
 }
 
+//==========================================================================
+// CNavigationBarView::H
+//==========================================================================
 CNavigationBarView::H::H(
     /* [in] */ CNavigationBarView* host)
     : mHost(host)
@@ -166,7 +173,11 @@ ECode CNavigationBarView::H::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNavigationBarView::ImeSwitcherClickListener, Object, IViewOnClickListener);
+//==========================================================================
+// CNavigationBarView::ImeSwitcherClickListener
+//==========================================================================
+CAR_INTERFACE_IMPL(CNavigationBarView::ImeSwitcherClickListener, Object, IViewOnClickListener)
+
 CNavigationBarView::ImeSwitcherClickListener::ImeSwitcherClickListener(
     /* [in] */ CNavigationBarView* host)
     : mHost(host)
@@ -181,9 +192,13 @@ ECode CNavigationBarView::ImeSwitcherClickListener::OnClick(
     return NOERROR;
 }
 
+//==========================================================================
+// CNavigationBarView
+//==========================================================================
+CAR_OBJECT_IMPL(CNavigationBarView)
 
-CAR_OBJECT_IMPL(CNavigationBarView);
-CAR_INTERFACE_IMPL(CNavigationBarView, LinearLayout, INavigationBarView);
+CAR_INTERFACE_IMPL(CNavigationBarView, LinearLayout, INavigationBarView)
+
 CNavigationBarView::CNavigationBarView()
     : mBarSize(0)
     , mVertical(FALSE)
@@ -194,10 +209,6 @@ CNavigationBarView::CNavigationBarView()
     , mIsLayoutRtl(FALSE)
     , mDelegateIntercepted(FALSE)
 {
-    mHandler = new H(this);
-    mRotatedViews = ArrayOf<IView*>::Alloc(4);
-    mTransitionListener = new NavTransitionListener(this);
-    mImeSwitcherClickListener = new ImeSwitcherClickListener(this);
 }
 
 ECode CNavigationBarView::constructor(
@@ -205,6 +216,11 @@ ECode CNavigationBarView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     LinearLayout::constructor(context, attrs);
+
+    mHandler = new H(this);
+    mRotatedViews = ArrayOf<IView*>::Alloc(4);
+    mTransitionListener = new NavTransitionListener(this);
+    mImeSwitcherClickListener = new ImeSwitcherClickListener(this);
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
@@ -262,6 +278,8 @@ ECode CNavigationBarView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, "=====================================================================");
+    Logger::I(TAG, " >>> Enter OnTouchEvent");
     VALIDATE_NOT_NULL(result);
     InitDownStates(event);
     Boolean tmp = FALSE;
@@ -281,6 +299,7 @@ ECode CNavigationBarView::OnTouchEvent(
             return NOERROR;
         }
     }
+    Logger::I(TAG, " >>> Leave OnTouchEvent");
     return LinearLayout::OnTouchEvent(event, result);
 }
 
@@ -298,6 +317,8 @@ ECode CNavigationBarView::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, "=====================================================================");
+    Logger::I(TAG, " >>> Enter OnInterceptTouchEvent");
     VALIDATE_NOT_NULL(result);
     InitDownStates(event);
     Boolean intercept = FALSE;
@@ -316,6 +337,7 @@ ECode CNavigationBarView::OnInterceptTouchEvent(
         IInputEvent::Probe(cancelEvent)->Recycle();
     }
     *result = intercept;
+    Logger::I(TAG, " <<< Leave OnInterceptTouchEvent: %d", intercept);
     return NOERROR;
 }
 

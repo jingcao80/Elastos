@@ -331,7 +331,7 @@ private:
             /* [in] */ ResolverActivity* host,
             /* [in] */ ResolveListAdapter* adapter);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnLongClick(
             /* [in] */ IView* v,

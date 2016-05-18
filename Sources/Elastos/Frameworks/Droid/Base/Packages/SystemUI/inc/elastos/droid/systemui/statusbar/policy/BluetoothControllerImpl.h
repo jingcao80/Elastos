@@ -71,7 +71,7 @@ private:
         , public IBluetoothProfileServiceListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ServiceListener(
             /* [in] */ IBluetoothDevice* device,
@@ -94,7 +94,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothControllerImpl(
         /* [in] */ IContext* context);

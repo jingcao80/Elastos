@@ -65,7 +65,7 @@ ECode CRecents::MyOnAnimationStartedListener::OnAnimationStarted()
 
 const String CRecents::TAG("CRecents");
 const Boolean CRecents::DEBUG = TRUE;
-CAR_OBJECT_IMPL(CRecents);
+CAR_OBJECT_IMPL(CRecents)
 CAR_INTERFACE_IMPL(CRecents, SystemUI, IRecentsComponent)
 CRecents::CRecents()
     : mUseAlternateRecents(TRUE)

@@ -68,7 +68,7 @@ private:
         , public IMediaDrmOnEventListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         MediaDrmListener(
             /* [in] */ MediaDrmBridge* owner);
 
@@ -120,7 +120,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         ResumePendingOperationsRunnable(
             /* [in] */ MediaDrmBridge* owner);
 
@@ -135,7 +135,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         OnSessionCreatedRunnable(
             /* [in] */ MediaDrmBridge* owner,
             /* [in] */ Int32 sessionId,
@@ -154,7 +154,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         OnSessionMessageRunnable(
             /* [in] */ MediaDrmBridge* owner,
             /* [in] */ Int32 sessionId,
@@ -173,7 +173,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         OnSessionReadyRunnable(
             /* [in] */ MediaDrmBridge* owner,
             /* [in] */ Int32 sessionId);
@@ -190,7 +190,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         OnSessionClosedRunnable(
             /* [in] */ MediaDrmBridge* owner,
             /* [in] */ Int32 sessionId);
@@ -207,7 +207,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnSessionErrorRunnable(
             /* [in] */ MediaDrmBridge* owner,

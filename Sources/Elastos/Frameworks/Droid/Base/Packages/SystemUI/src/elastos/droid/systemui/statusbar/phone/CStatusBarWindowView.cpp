@@ -31,8 +31,8 @@ namespace Phone {
 
 const String CStatusBarWindowView::TAG("StatusBarWindowView");
 const Boolean CStatusBarWindowView::DEBUG = BaseStatusBar::DEBUG;
-CAR_OBJECT_IMPL(CStatusBarWindowView);
-CAR_INTERFACE_IMPL(CStatusBarWindowView, FrameLayout, IStatusBarWindowView);
+CAR_OBJECT_IMPL(CStatusBarWindowView)
+CAR_INTERFACE_IMPL(CStatusBarWindowView, FrameLayout, IStatusBarWindowView)
 ECode CStatusBarWindowView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

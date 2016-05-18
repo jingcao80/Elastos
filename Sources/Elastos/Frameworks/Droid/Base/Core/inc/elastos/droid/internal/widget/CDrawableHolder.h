@@ -13,7 +13,7 @@ CarClass(CDrawableHolder)
     , public DrawableHolder
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

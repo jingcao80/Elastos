@@ -37,7 +37,7 @@ class BluetoothManager
     , public IBluetoothManager
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothManager();
 

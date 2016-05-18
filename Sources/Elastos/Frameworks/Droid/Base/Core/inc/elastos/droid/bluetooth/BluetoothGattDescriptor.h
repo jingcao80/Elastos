@@ -24,7 +24,7 @@ class BluetoothGattDescriptor
     , public IBluetoothGattDescriptor
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothGattDescriptor();
 

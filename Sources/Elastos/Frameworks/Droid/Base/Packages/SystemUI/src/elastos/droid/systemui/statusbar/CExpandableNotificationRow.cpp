@@ -17,7 +17,7 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_INTERFACE_IMPL(CExpandableNotificationRow::InflateListener, Object, IViewStubOnInflateListener);
+CAR_INTERFACE_IMPL(CExpandableNotificationRow::InflateListener, Object, IViewStubOnInflateListener)
 CExpandableNotificationRow::InflateListener::InflateListener(
     /* [in] */ CExpandableNotificationRow* host)
     : mHost(host)
@@ -47,8 +47,8 @@ ECode CExpandableNotificationRow::Runnable1::Run()
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CExpandableNotificationRow);
-CAR_INTERFACE_IMPL(CExpandableNotificationRow, ActivatableNotificationView, IExpandableNotificationRow);
+CAR_OBJECT_IMPL(CExpandableNotificationRow)
+CAR_INTERFACE_IMPL(CExpandableNotificationRow, ActivatableNotificationView, IExpandableNotificationRow)
 CExpandableNotificationRow::CExpandableNotificationRow()
     : mRowMinHeight(0)
     , mRowMaxHeight(0)

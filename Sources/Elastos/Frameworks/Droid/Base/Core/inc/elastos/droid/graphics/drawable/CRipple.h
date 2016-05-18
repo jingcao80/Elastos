@@ -13,7 +13,7 @@ namespace Drawable {
 CarClass(CRipple), public Ripple
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Drawable

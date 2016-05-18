@@ -30,7 +30,7 @@ class NextAlarmController
     , public INextAlarmController
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     NextAlarmController(
         /* [in] */ IContext* context);

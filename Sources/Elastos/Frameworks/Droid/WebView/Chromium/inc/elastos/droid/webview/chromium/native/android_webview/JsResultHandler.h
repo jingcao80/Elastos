@@ -29,7 +29,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         ConfirmRunnable(
             /* [in] */ JsResultHandler* owner,
             /* [in] */ const String& promptResult);
@@ -46,7 +46,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         CancelRunnable(
             /* [in] */ JsResultHandler* owner);
 
@@ -57,7 +57,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JsResultHandler(
         /* [in] */ AwContentsClientBridge* bridge,

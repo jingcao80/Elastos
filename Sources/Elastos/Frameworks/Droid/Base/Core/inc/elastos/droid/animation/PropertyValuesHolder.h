@@ -33,7 +33,7 @@ private:
         : public TypeConverter/*<PointF, float[]>*/
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PointFToFloatArray();
 
@@ -53,7 +53,7 @@ private:
         : public TypeConverter/*<PointF, int[]>*/
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PointFToInt32Array();
 
@@ -70,7 +70,7 @@ public:
     typedef HashMap< String, AutoPtr<IMethodInfo> > MethodMap;
     typedef HashMap< AutoPtr<IClassInfo>, AutoPtr<PropertyValuesHolder::MethodMap > > ClassMethodMap;
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Constructs and returns a PropertyValuesHolder with a given property name and

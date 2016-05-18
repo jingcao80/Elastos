@@ -108,7 +108,7 @@ private:
         , public IIdleHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SynthThread();
 
@@ -140,7 +140,7 @@ private:
         : public Object
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SpeechItem();
 
@@ -556,7 +556,7 @@ private:
         , public IITextToSpeechService
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TextToSpeechServiceStub();
 
@@ -728,7 +728,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TextToSpeechService();
 

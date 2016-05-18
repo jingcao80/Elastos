@@ -13,7 +13,7 @@ CarClass(CAppWidgetManager)
     , public AppWidgetManager
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace AppWidget

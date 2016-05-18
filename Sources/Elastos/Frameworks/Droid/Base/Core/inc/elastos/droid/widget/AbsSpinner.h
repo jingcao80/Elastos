@@ -39,7 +39,7 @@ public:
         , public IAbsSpinnerSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AbsSpinnerSavedState();
 
@@ -82,7 +82,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbsSpinner();
 

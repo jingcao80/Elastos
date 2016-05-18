@@ -71,7 +71,7 @@ public:
         , public ISizeAdaptiveLayoutLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SizeAdaptiveLayoutLayoutParams();
 
@@ -149,7 +149,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SizeAdaptiveLayout();
 

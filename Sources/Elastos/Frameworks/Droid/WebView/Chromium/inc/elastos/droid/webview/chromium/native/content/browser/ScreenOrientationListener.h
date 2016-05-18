@@ -146,7 +146,7 @@ private:
         ScreenOrientationDisplayListener(
           /* [in] */ ScreenOrientationListener* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // ScreenOrientationListenerBackend implementation:
         // @Override

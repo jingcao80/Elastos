@@ -55,7 +55,7 @@ public:
         , public IDataSetObserver
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DataSetObserver();
 
@@ -71,7 +71,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CursorAdapter();
 

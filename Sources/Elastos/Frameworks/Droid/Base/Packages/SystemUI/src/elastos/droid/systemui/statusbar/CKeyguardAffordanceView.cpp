@@ -139,7 +139,7 @@ ECode CKeyguardAffordanceView::AnimatorListenerAdapter3::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 CKeyguardAffordanceView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ CKeyguardAffordanceView* host)
     : mHost(host)
@@ -156,7 +156,7 @@ ECode CKeyguardAffordanceView::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
 CKeyguardAffordanceView::AnimatorUpdateListener2::AnimatorUpdateListener2(
     /* [in] */ CKeyguardAffordanceView* host)
     : mHost(host)
@@ -172,7 +172,7 @@ ECode CKeyguardAffordanceView::AnimatorUpdateListener2::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener3, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener3, Object, IAnimatorUpdateListener)
 CKeyguardAffordanceView::AnimatorUpdateListener3::AnimatorUpdateListener3(
     /* [in] */ CKeyguardAffordanceView* host,
     /* [in] */ IDrawable* background)
@@ -195,7 +195,7 @@ ECode CKeyguardAffordanceView::AnimatorUpdateListener3::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener4, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CKeyguardAffordanceView::AnimatorUpdateListener4, Object, IAnimatorUpdateListener)
 CKeyguardAffordanceView::AnimatorUpdateListener4::AnimatorUpdateListener4(
     /* [in] */ CKeyguardAffordanceView* host)
     : mHost(host)
@@ -217,8 +217,8 @@ const Int64 CKeyguardAffordanceView::CIRCLE_APPEAR_DURATION = 80;
 const Int64 CKeyguardAffordanceView::CIRCLE_DISAPPEAR_MAX_DURATION = 200;
 const Int64 CKeyguardAffordanceView::NORMAL_ANIMATION_DURATION = 200;
 
-CAR_OBJECT_IMPL(CKeyguardAffordanceView);
-CAR_INTERFACE_IMPL(CKeyguardAffordanceView, ImageView, IKeyguardAffordanceView);
+CAR_OBJECT_IMPL(CKeyguardAffordanceView)
+CAR_INTERFACE_IMPL(CKeyguardAffordanceView, ImageView, IKeyguardAffordanceView)
 CKeyguardAffordanceView::CKeyguardAffordanceView()
     : mMinBackgroundRadius(0)
     , mInverseColor(0)

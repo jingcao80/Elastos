@@ -57,8 +57,7 @@ ECode UpdateCountryService::OnHandleIntent(
         AutoPtr<IPreferenceManagerHelper> helper;
         CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
         AutoPtr<ISharedPreferences> prefs;
-        helper->GetDefaultSharedPreferences(
-                context, (ISharedPreferences**)&sharedPreferences);
+        helper->GetDefaultSharedPreferences(context, (ISharedPreferences**)&prefs);
 
         AutoPtr<IEditor> editor;
         prefs->Edit((IEditor**)&editor);

@@ -235,7 +235,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         //@Override
         CARAPI Run();
 
@@ -454,7 +454,7 @@ public:
         , public IComponentCallbacks2
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         AwComponentCallbacks(
             /* [in] */ AwContents* owner);
 
@@ -479,7 +479,7 @@ public:
         , public IViewOnLayoutChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         AwLayoutChangeListener(
             /* [in] */ AwContents* owner);
 
@@ -509,7 +509,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerRunnable(
                 /* [in] */ AwGeolocationCallback* owner,
                 /* [in] */ const String& origin,
@@ -665,7 +665,7 @@ public:
         , public ICallable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         InnerCallable(
             /* [in] */ AwContents* owner);
 
@@ -686,7 +686,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerRunnable(
                 /* [in] */ InnerValueCallback* owner,
                 /* [in] */ ArrayOf<String>* value);
@@ -757,7 +757,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         SaveWebArchiveInternalRunnable(
             /* [in] */ AwContents* owner,
             /* [in] */ IValueCallback* callback);
@@ -794,7 +794,7 @@ public:
     static const String SAVE_RESTORE_STATE_KEY;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @param browserContext the browsing context to associate this view contents with.

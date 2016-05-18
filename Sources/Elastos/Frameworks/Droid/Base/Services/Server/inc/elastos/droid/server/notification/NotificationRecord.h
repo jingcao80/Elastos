@@ -41,7 +41,7 @@ class NotificationRecord
     friend class PackageVisibilityExtractor;
     friend class ZenModeHelper;
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     // @VisibleForTesting
     NotificationRecord(

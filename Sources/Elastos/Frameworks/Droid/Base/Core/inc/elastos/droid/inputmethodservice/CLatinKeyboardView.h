@@ -13,7 +13,7 @@ namespace InputMethodService {
 CarClass(CLatinKeyboardView), public KeyboardView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* ctx,

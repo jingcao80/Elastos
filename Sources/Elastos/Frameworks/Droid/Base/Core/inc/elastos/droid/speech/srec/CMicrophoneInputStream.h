@@ -13,7 +13,7 @@ CarClass(CMicrophoneInputStream)
     , public MicrophoneInputStream
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Srec

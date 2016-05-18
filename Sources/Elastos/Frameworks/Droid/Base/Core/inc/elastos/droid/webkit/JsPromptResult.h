@@ -20,7 +20,7 @@ class JsPromptResult
     , public IJsPromptResult
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JsPromptResult();
 

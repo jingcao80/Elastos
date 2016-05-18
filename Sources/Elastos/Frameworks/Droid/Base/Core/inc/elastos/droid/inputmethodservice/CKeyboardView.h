@@ -25,7 +25,7 @@ namespace InputMethodService {
 CarClass(CKeyboardView), public KeyboardView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace InputMethodService

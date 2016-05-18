@@ -20,7 +20,7 @@ class PhoneStatusBarTransitions
     , public IPhoneStatusBarTransitions
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PhoneStatusBarTransitions(
         /* [in] */ IPhoneStatusBarView* view);

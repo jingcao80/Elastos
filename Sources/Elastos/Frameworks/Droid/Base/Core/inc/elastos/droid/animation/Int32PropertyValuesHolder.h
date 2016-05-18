@@ -16,7 +16,7 @@ class Int32PropertyValuesHolder
     , public IInt32PropertyValuesHolder
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Int32PropertyValuesHolder(
         /* [in] */ const String& propertyName,

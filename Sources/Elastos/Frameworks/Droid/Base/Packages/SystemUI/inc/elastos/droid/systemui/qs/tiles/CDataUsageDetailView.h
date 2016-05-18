@@ -24,9 +24,9 @@ CarClass(CDataUsageDetailView)
     , public IDataUsageDetailView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CDataUsageDetailView();
 

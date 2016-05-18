@@ -131,7 +131,7 @@ ECode CStatusBarHeaderView::Runnable3::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::ClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::ClickListener, Object, IViewOnClickListener)
 CStatusBarHeaderView::ClickListener::ClickListener(
     /* [in] */ CStatusBarHeaderView* host,
     /* [in] */ IQSTileDetailAdapter* detail)
@@ -165,7 +165,7 @@ ECode CStatusBarHeaderView::Runnable4::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::QsPanelCallback, Object, IQSPanelCallback);
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::QsPanelCallback, Object, IQSPanelCallback)
 CStatusBarHeaderView::QsPanelCallback::QsPanelCallback(
     /* [in] */ CStatusBarHeaderView* host)
     : mScanState(FALSE)
@@ -278,7 +278,7 @@ void CStatusBarHeaderView::QsPanelCallback::Transition(
     vpa->Start();
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::ClickListener2, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::ClickListener2, Object, IViewOnClickListener)
 CStatusBarHeaderView::ClickListener2::ClickListener2(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
@@ -290,7 +290,7 @@ ECode CStatusBarHeaderView::ClickListener2::OnClick(
     return mHost->OnClick(v);
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener);
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
 CStatusBarHeaderView::OnLayoutChangeListener::OnLayoutChangeListener(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
@@ -334,7 +334,7 @@ ECode CStatusBarHeaderView::OutlineProvider::GetOutline(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnUserInfoChangedListener, Object, IUserInfoControllerOnUserInfoChangedListener);
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnUserInfoChangedListener, Object, IUserInfoControllerOnUserInfoChangedListener)
 CStatusBarHeaderView::OnUserInfoChangedListener::OnUserInfoChangedListener(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
@@ -348,7 +348,7 @@ ECode CStatusBarHeaderView::OnUserInfoChangedListener::OnUserInfoChanged(
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CStatusBarHeaderView);
+CAR_OBJECT_IMPL(CStatusBarHeaderView)
 CAR_INTERFACE_IMPL_4(CStatusBarHeaderView, RelativeLayout, IStatusBarHeaderView, IViewOnClickListener \
         , IBatteryStateChangeCallback, INextAlarmChangeCallback);
 CStatusBarHeaderView::CStatusBarHeaderView()

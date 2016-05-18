@@ -25,7 +25,7 @@ class KeyframeSet
     , public ICloneable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyframeSet();
 

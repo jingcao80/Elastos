@@ -18,7 +18,7 @@ CarClass(CTypefaceHelper)
     , public ITypefaceHelper
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_SINGLETON_DECL();
 

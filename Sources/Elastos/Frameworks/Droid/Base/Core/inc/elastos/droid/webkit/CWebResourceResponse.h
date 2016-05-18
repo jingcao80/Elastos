@@ -21,7 +21,7 @@ struct ElaWebResourceResponseCallback
 CarClass(CWebResourceResponse), public WebResourceResponse
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Webkit

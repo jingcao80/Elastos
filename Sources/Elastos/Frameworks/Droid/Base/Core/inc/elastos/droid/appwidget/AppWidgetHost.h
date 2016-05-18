@@ -40,7 +40,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callbacks();
 
@@ -88,7 +88,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AppWidgetHost();
 

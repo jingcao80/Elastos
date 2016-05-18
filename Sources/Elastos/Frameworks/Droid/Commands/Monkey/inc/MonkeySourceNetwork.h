@@ -66,7 +66,7 @@ protected:
 private:
     class FlipCommand : public ElRefBase, public IMonkeyCommand{
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -78,7 +78,7 @@ private:
 
     class TouchCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -88,7 +88,7 @@ private:
 
     class TrackballCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -98,7 +98,7 @@ private:
 
     class KeyCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -108,7 +108,7 @@ private:
 
     class SleepCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -118,7 +118,7 @@ private:
 
     class TypeCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -128,7 +128,7 @@ private:
 
     class WakeCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -138,7 +138,7 @@ private:
 
     class TapCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -151,7 +151,7 @@ private:
      */
     class PressCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -180,7 +180,7 @@ private:
      */
     class DeferReturnCommand : public ElRefBase, public IMonkeyCommand {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -190,7 +190,7 @@ private:
 
     class CommandQueueImpl : public ElRefBase, public ICommandQueue {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CommandQueueImpl();
 

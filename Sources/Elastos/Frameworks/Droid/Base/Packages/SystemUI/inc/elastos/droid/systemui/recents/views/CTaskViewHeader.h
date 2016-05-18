@@ -14,7 +14,7 @@ namespace Views {
 CarClass(CTaskViewHeader)
     , public TaskViewHeader
 {
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Views

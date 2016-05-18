@@ -29,7 +29,7 @@ namespace Policy {
 const String HotspotControllerImpl::TAG("HotspotController");
 const Boolean HotspotControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
 
-CAR_INTERFACE_IMPL(HotspotControllerImpl, Object, IHotspotController);
+CAR_INTERFACE_IMPL(HotspotControllerImpl, Object, IHotspotController)
 HotspotControllerImpl::HotspotControllerImpl(
     /* [in] */ IContext* context)
 {

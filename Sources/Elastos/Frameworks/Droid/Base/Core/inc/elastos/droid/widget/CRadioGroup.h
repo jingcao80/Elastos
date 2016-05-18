@@ -12,7 +12,7 @@ CarClass(CRadioGroup)
     , public RadioGroup
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

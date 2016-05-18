@@ -45,7 +45,7 @@ private:
         , public ISecurityControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TmpCallback(
             /* [in] */ SignalClusterView* host);
@@ -57,7 +57,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SignalClusterView();
 

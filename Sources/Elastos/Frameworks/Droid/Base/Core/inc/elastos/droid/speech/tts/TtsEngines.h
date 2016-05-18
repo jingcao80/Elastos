@@ -42,7 +42,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         EngineInfoComparator();
 
@@ -77,7 +77,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TtsEngines();
 

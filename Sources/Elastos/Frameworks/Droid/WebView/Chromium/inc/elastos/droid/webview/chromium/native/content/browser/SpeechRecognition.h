@@ -50,7 +50,7 @@ public:
         Listener(
             /* [in] */ SpeechRecognition* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnBeginningOfSpeech();

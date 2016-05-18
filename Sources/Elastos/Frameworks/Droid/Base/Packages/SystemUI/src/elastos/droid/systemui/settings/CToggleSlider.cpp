@@ -91,7 +91,7 @@ ECode CToggleSlider::MySeekListener::OnStopTrackingTouch(
 //==================================
 //   CToggleSlider
 //==================================
-CAR_OBJECT_IMPL(CToggleSlider);
+CAR_OBJECT_IMPL(CToggleSlider)
 CAR_INTERFACE_IMPL(CToggleSlider, RelativeLayout, IToggleSlider)
 CToggleSlider::CToggleSlider()
 {

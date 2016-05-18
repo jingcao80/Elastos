@@ -36,7 +36,7 @@ class MobileDataController
     , public IMobileDataController
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MobileDataController(
         /* [in] */ IContext* context);

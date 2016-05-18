@@ -12,7 +12,7 @@ CarClass(CEmojiFactory)
     , public EmojiFactory
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CEmojiFactory();
 

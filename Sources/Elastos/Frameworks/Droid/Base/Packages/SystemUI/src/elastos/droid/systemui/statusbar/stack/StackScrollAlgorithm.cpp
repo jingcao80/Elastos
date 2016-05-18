@@ -33,7 +33,7 @@ StackScrollAlgorithm::StackScrollAlgorithmState::StackScrollAlgorithmState()
     CArrayList::New((IArrayList**)&mVisibleChildren);
 }
 
-CAR_INTERFACE_IMPL(StackScrollAlgorithm::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener);
+CAR_INTERFACE_IMPL(StackScrollAlgorithm::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
 StackScrollAlgorithm::OnLayoutChangeListener::OnLayoutChangeListener(
     /* [in] */ StackScrollAlgorithm* host)
     : mHost(host)
@@ -78,7 +78,7 @@ const String StackScrollAlgorithm::TAG("StackScrollAlgorithm");
 const Int32 StackScrollAlgorithm::MAX_ITEMS_IN_BOTTOM_STACK = 3;
 const Int32 StackScrollAlgorithm::MAX_ITEMS_IN_TOP_STACK = 3;
 const Float StackScrollAlgorithm::DIMMED_SCALE = 0.95f;
-CAR_INTERFACE_IMPL(StackScrollAlgorithm, Object, IStackScrollAlgorithm);
+CAR_INTERFACE_IMPL(StackScrollAlgorithm, Object, IStackScrollAlgorithm)
 StackScrollAlgorithm::StackScrollAlgorithm(
     /* [in] */ IContext* context)
     : mPaddingBetweenElements(0)

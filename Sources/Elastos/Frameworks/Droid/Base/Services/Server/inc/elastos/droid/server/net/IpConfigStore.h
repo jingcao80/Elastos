@@ -27,7 +27,7 @@ private:
         , public IDelayedDiskWriteWriter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerSub_Writer(
             /* [in] */ IpConfigStore* host,

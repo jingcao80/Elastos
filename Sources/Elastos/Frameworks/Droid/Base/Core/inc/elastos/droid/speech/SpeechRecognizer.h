@@ -68,7 +68,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SpeechRecognizerConnection();
 
@@ -126,7 +126,7 @@ private:
         friend class SpeechRecognizer;
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SpeechRecognizerInternalListener();
 
@@ -199,7 +199,7 @@ private:
     friend class SpeechRecognizerInternalListener;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SpeechRecognizer();
 

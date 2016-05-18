@@ -33,7 +33,7 @@ void ColorInversionTile::ColorSettings::HandleValueChanged(
     }
 }
 
-CAR_INTERFACE_IMPL(ColorInversionTile, QSTile, IColorInversionTile);
+CAR_INTERFACE_IMPL(ColorInversionTile, QSTile, IColorInversionTile)
 ColorInversionTile::ColorInversionTile(
     /* [in] */ IQSTileHost* host)
     : mListening(FALSE)

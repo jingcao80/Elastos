@@ -23,7 +23,7 @@ class AnimationFilter
     , public IAnimationFilter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AnimationFilter();
 

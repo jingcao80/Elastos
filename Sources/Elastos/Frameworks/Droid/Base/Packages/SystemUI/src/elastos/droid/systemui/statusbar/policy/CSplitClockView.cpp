@@ -40,7 +40,7 @@ ECode CSplitClockView::IntentReceiver::OnReceive(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CSplitClockView, LinearLayout, ISplitClockView);
+CAR_INTERFACE_IMPL(CSplitClockView, LinearLayout, ISplitClockView)
 CSplitClockView::CSplitClockView()
 {
     mIntentReceiver = new IntentReceiver(this);

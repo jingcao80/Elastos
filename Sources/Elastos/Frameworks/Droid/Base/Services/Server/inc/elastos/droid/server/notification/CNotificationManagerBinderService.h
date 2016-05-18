@@ -14,7 +14,7 @@ CarClass(CNotificationManagerBinderService)
     , public NotificationManagerService::BinderService
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Notification

@@ -46,7 +46,7 @@ private:
             /* [in] */ Boolean isHigh,
             /* [in] */ const String& imageUrl);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 

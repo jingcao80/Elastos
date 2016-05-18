@@ -20,7 +20,7 @@ class JsResult
     , public IJsResult
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JsResult();
 

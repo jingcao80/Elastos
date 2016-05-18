@@ -12,7 +12,7 @@ namespace AppWidget {
 CarClass(CAppWidgetHostView), public AppWidgetHostView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace AppWidget

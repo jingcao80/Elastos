@@ -13,7 +13,7 @@ CarClass(CMonotoneCubicSpline)
     , public MonotoneCubicSpline
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Utility

@@ -14,7 +14,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Settings {
 
-CAR_OBJECT_IMPL(CBrightnessDialog);
+CAR_OBJECT_IMPL(CBrightnessDialog)
 ECode CBrightnessDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {

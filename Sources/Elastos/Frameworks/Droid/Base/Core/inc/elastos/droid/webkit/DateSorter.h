@@ -26,7 +26,7 @@ class DateSorter
     , public IDateSorter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @param context Application context

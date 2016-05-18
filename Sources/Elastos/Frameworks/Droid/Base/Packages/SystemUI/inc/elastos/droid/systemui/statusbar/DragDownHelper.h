@@ -54,7 +54,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener(
             /* [in] */ DragDownHelper* host);
@@ -68,7 +68,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     DragDownHelper(
         /* [in] */ IContext* context,

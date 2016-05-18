@@ -51,7 +51,7 @@ private:
 public:
     StandaloneActionMode();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context,

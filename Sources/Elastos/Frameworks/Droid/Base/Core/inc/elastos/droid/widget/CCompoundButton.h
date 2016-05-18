@@ -12,7 +12,7 @@ CarClass(CCompoundButton)
     , public CompoundButton
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

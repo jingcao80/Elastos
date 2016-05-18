@@ -38,7 +38,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyguardConnection(
             /* [in] */ KeyguardTouchDelegate* host);
@@ -57,7 +57,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI_(AutoPtr<KeyguardTouchDelegate>) GetInstance(
         /* [in] */ IContext* context);

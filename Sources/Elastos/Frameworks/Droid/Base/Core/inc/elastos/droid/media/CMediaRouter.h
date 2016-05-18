@@ -65,7 +65,7 @@ public:
           , public IIAudioRoutesObserver
       {
       public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyAudioRoutesObserver(
           /* [in] */ Static* owner);
@@ -100,7 +100,7 @@ public:
           , public IIMediaRouterClient
       {
       public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyStaticClient(
             /* [in] */ Static* owner);
@@ -112,7 +112,7 @@ public:
       };
 
   public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ~Static();
 

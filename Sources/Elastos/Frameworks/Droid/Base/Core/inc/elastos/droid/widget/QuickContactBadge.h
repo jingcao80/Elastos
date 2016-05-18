@@ -42,7 +42,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         QuickContactBadgeClickListener(
             /* [in] */ QuickContactBadge* host);
@@ -55,7 +55,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     constructor(
         /* [in] */ IContext* context);

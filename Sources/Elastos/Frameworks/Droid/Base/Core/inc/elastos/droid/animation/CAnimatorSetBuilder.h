@@ -68,9 +68,9 @@ CarClass(CAnimatorSetBuilder)
     , public IAnimatorSetBuilder
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * package-private constructor. Builders are only constructed by AnimatorSet, when the

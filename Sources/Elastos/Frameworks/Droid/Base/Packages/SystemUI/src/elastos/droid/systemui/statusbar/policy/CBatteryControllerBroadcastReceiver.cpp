@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CBatteryControllerBroadcastReceiver);
+CAR_OBJECT_IMPL(CBatteryControllerBroadcastReceiver)
 ECode CBatteryControllerBroadcastReceiver::constructor(
     /* [in] */ IBatteryController* controller)
 {

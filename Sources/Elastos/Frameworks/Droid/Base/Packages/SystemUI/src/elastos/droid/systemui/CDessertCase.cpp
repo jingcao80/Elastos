@@ -17,8 +17,8 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
-CAR_OBJECT_IMPL(CDessertCase);
-CAR_INTERFACE_IMPL(CDessertCase, Activity, IDessertCase);
+CAR_OBJECT_IMPL(CDessertCase)
+CAR_INTERFACE_IMPL(CDessertCase, Activity, IDessertCase)
 ECode CDessertCase::OnStart()
 {
     Activity::OnStart();

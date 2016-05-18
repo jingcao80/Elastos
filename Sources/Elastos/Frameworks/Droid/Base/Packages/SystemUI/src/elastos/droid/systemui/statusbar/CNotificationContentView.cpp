@@ -50,8 +50,8 @@ AutoPtr<IPaint> CNotificationContentView::INVERT_PAINT = CreateInvertPaint();
 AutoPtr<IColorFilter> CNotificationContentView::NO_COLOR_FILTER;
 Boolean CNotificationContentView::sInit = InitStatic();
 
-CAR_OBJECT_IMPL(CNotificationContentView);
-CAR_INTERFACE_IMPL(CNotificationContentView, FrameLayout, INotificationContentView);
+CAR_OBJECT_IMPL(CNotificationContentView)
+CAR_INTERFACE_IMPL(CNotificationContentView, FrameLayout, INotificationContentView)
 CNotificationContentView::CNotificationContentView()
     : mSmallHeight(0)
     , mClipTopAmount(0)

@@ -116,7 +116,7 @@ private:
     FocusFinder();
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Find the next view to take focus in root's descendants, starting from the view

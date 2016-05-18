@@ -31,7 +31,7 @@ private:
         , public ILayoutInflaterFilter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnLoadClass(
             /* [in] */ IClassInfo* clazz,
@@ -44,7 +44,7 @@ private:
         , public IParcelable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ParcelableSparseArray();
 
@@ -58,7 +58,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AppWidgetHostView();
 

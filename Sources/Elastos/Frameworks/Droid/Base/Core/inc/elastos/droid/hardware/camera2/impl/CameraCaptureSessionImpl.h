@@ -33,7 +33,7 @@ private:
         , public ITaskDrainerDrainListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SequenceDrainListener(
             /* [in] */ CameraCaptureSessionImpl* host);
@@ -50,7 +50,7 @@ private:
         , public ITaskDrainerDrainListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AbortDrainListener(
             /* [in] */ CameraCaptureSessionImpl* host);
@@ -67,7 +67,7 @@ private:
         , public ITaskDrainerDrainListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         IdleDrainListener(
             /* [in] */ CameraCaptureSessionImpl* host);
@@ -84,7 +84,7 @@ private:
         , public ITaskDrainerDrainListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         UnconfigureDrainListener(
             /* [in] */ CameraCaptureSessionImpl* host);
@@ -163,7 +163,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CameraCaptureSessionImpl();
 

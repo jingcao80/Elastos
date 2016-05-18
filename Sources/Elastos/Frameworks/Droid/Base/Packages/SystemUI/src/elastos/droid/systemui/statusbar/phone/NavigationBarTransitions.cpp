@@ -19,7 +19,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(NavigationBarTransitions::LightsOutListener, Object, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(NavigationBarTransitions::LightsOutListener, Object, IViewOnTouchListener)
 NavigationBarTransitions::LightsOutListener::LightsOutListener(
     /* [in] */ NavigationBarTransitions* host)
     : mHost(host)

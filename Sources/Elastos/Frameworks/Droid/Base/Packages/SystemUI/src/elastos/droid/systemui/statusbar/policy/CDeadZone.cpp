@@ -43,7 +43,7 @@ ECode CDeadZone::DebugFlashRunnable::Run()
 }
 
 const Boolean CDeadZone::CHATTY = TRUE;
-CAR_INTERFACE_IMPL(CDeadZone, View, IDeadZone);
+CAR_INTERFACE_IMPL(CDeadZone, View, IDeadZone)
 CDeadZone::CDeadZone()
     : mShouldFlash(FALSE)
     , mFlashFrac(0.0f)

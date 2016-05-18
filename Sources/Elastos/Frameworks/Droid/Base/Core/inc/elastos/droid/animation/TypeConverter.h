@@ -23,7 +23,7 @@ class TypeConverter/*<T, V>*/
     , public ITypeConverter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TypeConverter();
 

@@ -37,7 +37,7 @@ private:
         , public IKeyguardMonitorCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ CastTile* host);
@@ -63,7 +63,7 @@ private:
             , public IViewOnAttachStateChangeListener
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             MyListener(
                 /* [in] */ CastDetailAdapter* host);
@@ -79,7 +79,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CastDetailAdapter(
             /* [in] */ CastTile* host);

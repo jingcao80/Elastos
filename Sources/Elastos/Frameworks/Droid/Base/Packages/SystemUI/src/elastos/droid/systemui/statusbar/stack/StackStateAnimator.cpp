@@ -43,7 +43,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Stack {
 
-CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener1, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener1, Object, IAnimatorUpdateListener)
 StackStateAnimator::AnimatorUpdateListener1::AnimatorUpdateListener1(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -74,7 +74,7 @@ ECode StackStateAnimator::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener2, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
 StackStateAnimator::AnimatorUpdateListener2::AnimatorUpdateListener2(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -240,7 +240,7 @@ ECode StackStateAnimator::Runnable1::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener3, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener3, Object, IAnimatorUpdateListener)
 StackStateAnimator::AnimatorUpdateListener3::AnimatorUpdateListener3(
     /* [in] */ StackStateAnimator* host,
     /* [in] */ Boolean onTop,
@@ -309,7 +309,7 @@ const Int32 StackStateAnimator::TAG_START_SCALE = R::id::scale_animator_start_va
 const Int32 StackStateAnimator::TAG_START_ALPHA = R::id::alpha_animator_start_value_tag;
 const Int32 StackStateAnimator::TAG_START_HEIGHT = R::id::height_animator_start_value_tag;
 const Int32 StackStateAnimator::TAG_START_TOP_INSET = R::id::top_inset_animator_start_value_tag;
-CAR_INTERFACE_IMPL(StackStateAnimator, Object, IStackStateAnimator);
+CAR_INTERFACE_IMPL(StackStateAnimator, Object, IStackStateAnimator)
 StackStateAnimator::StackStateAnimator(
     /* [in] */ INotificationStackScrollLayout* hostLayout)
     : mGoToFullShadeAppearingTranslation(0)

@@ -19,7 +19,7 @@ CarClass(CBitmapRegionDecoderHelper)
     , public IBitmapRegionDecoderHelper
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_SINGLETON_DECL();
 

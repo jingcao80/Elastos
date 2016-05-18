@@ -94,7 +94,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         EditorImpl(
             /* [in] */ SharedPreferencesImpl* host);
@@ -178,7 +178,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SharedPreferencesImpl();
 

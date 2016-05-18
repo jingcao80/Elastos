@@ -32,7 +32,7 @@ class HotspotControllerImpl
     , public IHotspotController
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     HotspotControllerImpl(
         /* [in] */ IContext* context);

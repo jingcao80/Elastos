@@ -37,7 +37,7 @@ private:
         , public IDisplayListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PresentationDisplayListener(
             /* [in] */ Presentation* host)

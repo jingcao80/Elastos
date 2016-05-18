@@ -24,7 +24,7 @@ class EditableInputConnection
     , public IEditableInputConnection
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     EditableInputConnection();
 

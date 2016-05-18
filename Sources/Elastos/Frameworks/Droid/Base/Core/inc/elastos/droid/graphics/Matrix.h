@@ -26,7 +26,7 @@ class Matrix
     , public IMatrix
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~Matrix();
 

@@ -17,8 +17,8 @@ const String CSystemBars::TAG("SystemBars");
 const Boolean CSystemBars::DEBUG = FALSE;
 const Int32 CSystemBars::WAIT_FOR_BARS_TO_DIE = 500;
 
-CAR_OBJECT_IMPL(CSystemBars);
-CAR_INTERFACE_IMPL(CSystemBars, SystemUI, IServiceMonitorCallbacks);
+CAR_OBJECT_IMPL(CSystemBars)
+CAR_INTERFACE_IMPL(CSystemBars, SystemUI, IServiceMonitorCallbacks)
 ECode CSystemBars::Start()
 {
     if (DEBUG) Logger::D(TAG, "start");

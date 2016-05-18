@@ -171,7 +171,7 @@ private:
         , public IAnimationAnimationListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimationDoneListener(
             /* [in] */ SlidingTab* host);
@@ -194,7 +194,7 @@ private:
         , public IAnimationAnimationListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         StartAnimationListener(
             /* [in] */ SlidingTab* host,
@@ -221,7 +221,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SlidingTab();
 

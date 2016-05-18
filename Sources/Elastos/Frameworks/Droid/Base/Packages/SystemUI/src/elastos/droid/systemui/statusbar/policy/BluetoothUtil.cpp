@@ -15,7 +15,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile1, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile1, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile1::Profile1(
     /* [in] */ IBluetoothA2dp* a2dp)
     : mA2dp(a2dp)
@@ -37,7 +37,7 @@ ECode BluetoothUtil::Profile1::Disconnect(
     return mA2dp->Disconnect(device, result);
 }
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile2, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile2, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile2::Profile2(
     /* [in] */ IBluetoothHeadset* headset)
     : mHeadset(headset)
@@ -59,7 +59,7 @@ ECode BluetoothUtil::Profile2::Disconnect(
     return mHeadset->Disconnect(device, result);
 }
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile3, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile3, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile3::Profile3(
     /* [in] */ IBluetoothA2dpSink* sink)
     : mSink(sink)
@@ -81,7 +81,7 @@ ECode BluetoothUtil::Profile3::Disconnect(
     return mSink->Disconnect(device, result);
 }
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile4, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile4, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile4::Profile4(
     /* [in] */ IBluetoothHeadsetClient* client)
     : mClient(client)
@@ -103,7 +103,7 @@ ECode BluetoothUtil::Profile4::Disconnect(
     return mClient->Disconnect(device, result);
 }
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile5, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile5, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile5::Profile5(
     /* [in] */ IBluetoothInputDevice* input)
     : mInput(input)
@@ -125,7 +125,7 @@ ECode BluetoothUtil::Profile5::Disconnect(
     return mInput->Disconnect(device, result);
 }
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile6, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile6, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile6::Profile6(
     /* [in] */ IBluetoothMap* map)
     : mMap(map)
@@ -147,7 +147,7 @@ ECode BluetoothUtil::Profile6::Disconnect(
     return mMap->Disconnect(device, result);
 }
 
-CAR_INTERFACE_IMPL(BluetoothUtil::Profile7, Object, IBluetoothUtilProfile);
+CAR_INTERFACE_IMPL(BluetoothUtil::Profile7, Object, IBluetoothUtilProfile)
 BluetoothUtil::Profile7::Profile7(
     /* [in] */ IBluetoothPan* pan)
     : mPan(pan)

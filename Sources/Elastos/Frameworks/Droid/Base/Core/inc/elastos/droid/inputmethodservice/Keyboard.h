@@ -68,7 +68,7 @@ public:
         , public IKeyboardRow
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Row(
             /* [in] */ Keyboard* parent);
@@ -161,7 +161,7 @@ public:
         , public IKeyboardKey
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /** Create an empty key with no attributes. */
         Key(
@@ -373,7 +373,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a keyboard from the given xml key layout file.

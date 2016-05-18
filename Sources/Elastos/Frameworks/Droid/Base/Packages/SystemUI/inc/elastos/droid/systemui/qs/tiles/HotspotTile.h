@@ -23,7 +23,7 @@ private:
         , public IHotspotControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ HotspotTile* host);

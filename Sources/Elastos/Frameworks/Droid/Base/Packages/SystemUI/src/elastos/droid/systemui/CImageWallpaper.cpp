@@ -32,8 +32,8 @@ const String CImageWallpaper::PROPERTY_KERNEL_QEMU("ro.kernel.qemu");
 const Boolean CImageWallpaper::FIXED_SIZED_SURFACE = TRUE;
 const Boolean CImageWallpaper::USE_OPENGL = TRUE;
 
-CAR_OBJECT_IMPL(CImageWallpaper);
-CAR_INTERFACE_IMPL(CImageWallpaper, WallpaperService, IImageWallpaper);
+CAR_OBJECT_IMPL(CImageWallpaper)
+CAR_INTERFACE_IMPL(CImageWallpaper, WallpaperService, IImageWallpaper)
 CImageWallpaper::CImageWallpaper()
     : mIsHwAccelerated(FALSE)
 {

@@ -6,8 +6,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CBackDropView);
-CAR_INTERFACE_IMPL(CBackDropView, FrameLayout, IBackDropView);
+CAR_OBJECT_IMPL(CBackDropView)
+CAR_INTERFACE_IMPL(CBackDropView, FrameLayout, IBackDropView)
 ECode CBackDropView::constructor(
     /* [in] */ IContext* context)
 {

@@ -14,7 +14,7 @@ namespace Shapes {
 CarClass(CPathShape), public PathShape
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /**
      * PathShape constructor.

@@ -76,7 +76,7 @@ public:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ManagedServiceInfo(
             /* [in] */ ManagedServices* host,
@@ -183,7 +183,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyServiceConnection(
             /* [in] */ ManagedServices* host,

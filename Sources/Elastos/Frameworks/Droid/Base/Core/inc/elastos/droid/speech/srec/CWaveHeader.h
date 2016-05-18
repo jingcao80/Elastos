@@ -13,7 +13,7 @@ CarClass(CWaveHeader)
     , public WaveHeader
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Srec

@@ -14,7 +14,7 @@ namespace Shapes {
 CarClass(CArcShape), public ArcShape
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /**
      * ArcShape constructor.

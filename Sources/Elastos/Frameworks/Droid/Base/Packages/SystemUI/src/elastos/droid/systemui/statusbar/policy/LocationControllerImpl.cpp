@@ -43,7 +43,7 @@ const String LocationControllerImpl::LOCATION_STATUS_ICON_PLACEHOLDER("location"
 const Int32 LocationControllerImpl::LOCATION_STATUS_ICON_ID = R::drawable::stat_sys_location;
 AutoPtr<ArrayOf<Int32> > LocationControllerImpl::mHighPowerRequestAppOpArray = InitStatic();
 
-CAR_INTERFACE_IMPL(LocationControllerImpl, Object, ILocationController);
+CAR_INTERFACE_IMPL(LocationControllerImpl, Object, ILocationController)
 LocationControllerImpl::LocationControllerImpl()
     : mAreActiveLocationRequests(FALSE)
 {

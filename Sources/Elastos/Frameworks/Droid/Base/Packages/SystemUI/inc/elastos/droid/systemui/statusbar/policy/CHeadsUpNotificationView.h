@@ -44,7 +44,7 @@ private:
         , public IGefingerpoken
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         EdgeSwipeHelper(
             /* [in] */ Float touchSlop,
@@ -79,9 +79,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CHeadsUpNotificationView();
 

@@ -27,7 +27,7 @@ class Xfermode
     friend class Paint;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~Xfermode();
 

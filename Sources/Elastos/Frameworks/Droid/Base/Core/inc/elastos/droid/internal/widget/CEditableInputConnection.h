@@ -13,7 +13,7 @@ CarClass(CEditableInputConnection)
     , public EditableInputConnection
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

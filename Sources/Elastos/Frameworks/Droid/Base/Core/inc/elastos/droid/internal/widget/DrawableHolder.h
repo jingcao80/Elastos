@@ -32,7 +32,7 @@ class DrawableHolder
     , public IAnimatorListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     DrawableHolder();
 

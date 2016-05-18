@@ -15,9 +15,9 @@ CarClass(CBitmapFactoryOptions)
     , public IBitmapFactoryOptions
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /**
      * Create a default Options object, which if left unchanged will give

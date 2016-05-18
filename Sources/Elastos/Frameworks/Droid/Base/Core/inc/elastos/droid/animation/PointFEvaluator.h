@@ -21,7 +21,7 @@ class PointFEvaluator
     , public ITypeEvaluator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Construct a PointFEvaluator that returns a new PointF on every evaluate call.

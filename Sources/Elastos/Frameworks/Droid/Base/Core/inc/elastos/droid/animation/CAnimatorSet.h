@@ -14,7 +14,7 @@ namespace Animation {
 CarClass(CAnimatorSet) , public AnimatorSet
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace Animation

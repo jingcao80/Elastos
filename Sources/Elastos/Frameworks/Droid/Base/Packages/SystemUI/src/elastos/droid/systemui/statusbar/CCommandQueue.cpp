@@ -47,7 +47,7 @@ const Int32 CCommandQueue::MSG_NOTIFICATION_LIGHT_OFF     = 16 << MSG_SHIFT;
 const Int32 CCommandQueue::MSG_NOTIFICATION_LIGHT_PULSE   = 17 << MSG_SHIFT;
 const String CCommandQueue::SHOW_IME_SWITCHER_KEY("showImeSwitcherKey");
 
-CAR_OBJECT_IMPL(CCommandQueue);
+CAR_OBJECT_IMPL(CCommandQueue)
 CAR_INTERFACE_IMPL_3(CCommandQueue, Object, ICommandQueue, IIStatusBar, IBinder);
 ECode CCommandQueue::constructor(
     /* [in] */ ICommandQueueCallbacks* callbacks,

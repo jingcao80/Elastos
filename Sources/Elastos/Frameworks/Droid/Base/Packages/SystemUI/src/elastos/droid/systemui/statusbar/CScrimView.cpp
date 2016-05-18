@@ -17,7 +17,7 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_INTERFACE_IMPL(CScrimView::AlphaUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CScrimView::AlphaUpdateListener, Object, IAnimatorUpdateListener)
 CScrimView::AlphaUpdateListener::AlphaUpdateListener(
     /* [in] */ CScrimView* host)
     : mHost(host)
@@ -45,8 +45,8 @@ ECode CScrimView::ClearAnimatorListener::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CScrimView);
-CAR_INTERFACE_IMPL(CScrimView, View, IScrimView);
+CAR_OBJECT_IMPL(CScrimView)
+CAR_INTERFACE_IMPL(CScrimView, View, IScrimView)
 CScrimView::CScrimView()
     : mScrimColor(0)
     , mIsEmpty(TRUE)

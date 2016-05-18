@@ -11,7 +11,7 @@ namespace Widget {
 CarClass(CArrayAdapter) , public ArrayAdapter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 }// namespace Widget
 }// namespace Droid

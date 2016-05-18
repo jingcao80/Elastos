@@ -19,7 +19,7 @@ class KeyguardPreviewContainer;
 CarClass(CBlackBarDrawable), public Drawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IKeyguardPreviewContainer* host);

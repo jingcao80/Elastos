@@ -107,7 +107,7 @@ ECode ScrimController::PulseOutFinished::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(ScrimController::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(ScrimController::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 ScrimController::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ IScrimView* scrim)
     : mScrim(scrim)

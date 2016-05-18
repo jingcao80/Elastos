@@ -54,7 +54,7 @@ private:
         , public IIdleHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerIdleHandler(
             /* [in] */ ContentApplication* owner);

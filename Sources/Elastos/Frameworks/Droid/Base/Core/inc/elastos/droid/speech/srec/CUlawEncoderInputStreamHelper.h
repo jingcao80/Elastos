@@ -17,7 +17,7 @@ CarClass(CUlawEncoderInputStreamHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Encode(
         /* [in] */ ArrayOf<Byte>* pcmBuf,

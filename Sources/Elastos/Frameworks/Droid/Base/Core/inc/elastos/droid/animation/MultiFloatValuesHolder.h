@@ -13,7 +13,7 @@ class MultiFloatValuesHolder
     , public IMultiFloatValuesHolder
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MultiFloatValuesHolder(
         /* [in] */ const String& propertyName,

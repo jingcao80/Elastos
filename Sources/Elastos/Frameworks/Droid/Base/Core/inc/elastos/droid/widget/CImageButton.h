@@ -12,7 +12,7 @@ namespace Widget {
 CarClass(CImageButton), public Elastos::Droid::Widget::ImageButton
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Droid {
 namespace SettingsProvider {
 
-CAR_OBJECT_IMPL(CSettingsBackupAgent);
+CAR_OBJECT_IMPL(CSettingsBackupAgent)
 
 } // namespace SettingsProvider
 } // namespace Droid

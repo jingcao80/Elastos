@@ -19,7 +19,7 @@ class CastDevice
     , public ICastControllerCastDevice
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CastDevice();
 

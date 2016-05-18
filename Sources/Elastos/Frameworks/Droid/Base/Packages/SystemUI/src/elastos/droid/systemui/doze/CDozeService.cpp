@@ -79,7 +79,7 @@ ECode CDozeService::DozeBroadcastReceiver::OnReceive(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CDozeService::DozeHostCallback, Object, IDozeHostCallback);
+CAR_INTERFACE_IMPL(CDozeService::DozeHostCallback, Object, IDozeHostCallback)
 CDozeService::DozeHostCallback::DozeHostCallback(
     /* [in] */ CDozeService* host)
     : mHost(host)
@@ -121,7 +121,7 @@ ECode CDozeService::DozeHostCallback::OnPowerSaveChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CDozeService::TriggerSensor, Object, ITriggerEventListener);
+CAR_INTERFACE_IMPL(CDozeService::TriggerSensor, Object, ITriggerEventListener)
 CDozeService::TriggerSensor::TriggerSensor(
     /* [in] */ Int32 type,
     /* [in] */ Boolean configured,
@@ -323,7 +323,7 @@ ECode CDozeService::ProximityCheck::OnAccuracyChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CDozeService::ProximityCheckImpl::PulseCallback, Object, IDozeHostPulseCallback);
+CAR_INTERFACE_IMPL(CDozeService::ProximityCheckImpl::PulseCallback, Object, IDozeHostPulseCallback)
 CDozeService::ProximityCheckImpl::PulseCallback::PulseCallback(
     /* [in] */ ProximityCheckImpl* host)
     : mHost(host)
@@ -390,8 +390,8 @@ ECode CDozeService::DSRunnable::Run()
 }
 
 
-CAR_OBJECT_IMPL(CDozeService);
-CAR_INTERFACE_IMPL(CDozeService, DreamService, IDozeService);
+CAR_OBJECT_IMPL(CDozeService)
+CAR_INTERFACE_IMPL(CDozeService, DreamService, IDozeService)
 CDozeService::CDozeService()
     : mDreaming(FALSE)
     , mPulsing(FALSE)

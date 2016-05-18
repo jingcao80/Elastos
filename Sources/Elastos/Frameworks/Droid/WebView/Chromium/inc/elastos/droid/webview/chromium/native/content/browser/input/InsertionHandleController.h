@@ -50,7 +50,7 @@ public:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PastePopupMenu(
             /* [in] */ InsertionHandleController* owner);
@@ -88,7 +88,7 @@ public:
         /* [in] */ IView* parent,
         /* [in] */ PositionObserver* positionObserver);
 
-    //CAR_INTERFACE_DECL();
+    //CAR_INTERFACE_DECL()
 
     /** Allows the handle to be shown automatically when cursor position changes */
     CARAPI_(void) AllowAutomaticShowing();

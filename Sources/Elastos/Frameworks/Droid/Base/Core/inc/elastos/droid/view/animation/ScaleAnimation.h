@@ -18,7 +18,7 @@ class ScaleAnimation
     , public IScaleAnimation
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScaleAnimation();
 

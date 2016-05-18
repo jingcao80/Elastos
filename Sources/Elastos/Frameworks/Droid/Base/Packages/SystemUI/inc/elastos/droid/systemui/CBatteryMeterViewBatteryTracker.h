@@ -15,7 +15,7 @@ class CBatteryMeterView;
 CarClass(CBatteryMeterViewBatteryTracker), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CBatteryMeterViewBatteryTracker();
 

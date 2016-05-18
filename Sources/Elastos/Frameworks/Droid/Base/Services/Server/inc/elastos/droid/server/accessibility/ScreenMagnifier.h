@@ -47,7 +47,7 @@ public:
         , public IMagnificationController
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MagnificationController();
 
@@ -131,7 +131,7 @@ private:
         , public IScaleGestureDetectorOnScaleGestureListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MagnifiedContentInteractonStateHandler(
             /* [in] */ IContext* context,
@@ -325,7 +325,7 @@ private:
         , public ITypeEvaluator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MagnificationSpecTypeEvaluator();
 
@@ -443,7 +443,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScreenMagnifier(
         /* [in] */ IContext* context,

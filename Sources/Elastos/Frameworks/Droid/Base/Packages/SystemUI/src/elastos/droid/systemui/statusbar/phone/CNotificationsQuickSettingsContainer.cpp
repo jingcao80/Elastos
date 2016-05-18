@@ -10,7 +10,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CNotificationsQuickSettingsContainer);
+CAR_OBJECT_IMPL(CNotificationsQuickSettingsContainer)
 CAR_INTERFACE_IMPL_2(CNotificationsQuickSettingsContainer, FrameLayout, INotificationsQuickSettingsContainer \
     , IViewStubOnInflateListener);
 CNotificationsQuickSettingsContainer::CNotificationsQuickSettingsContainer()

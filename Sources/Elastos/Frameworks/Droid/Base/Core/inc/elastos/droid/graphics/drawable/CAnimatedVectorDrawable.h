@@ -13,7 +13,7 @@ namespace Drawable {
 CarClass(CAnimatedVectorDrawable), public AnimatedVectorDrawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Drawable

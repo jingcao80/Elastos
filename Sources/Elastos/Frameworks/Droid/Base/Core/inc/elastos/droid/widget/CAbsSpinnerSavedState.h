@@ -11,7 +11,7 @@ namespace Widget {
 CarClass(CAbsSpinnerSavedState) , public AbsSpinner::AbsSpinnerSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

@@ -47,7 +47,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerRunnable(
                 /* [in] */ CookieCallback* owner,
                 /* [in] */ IInterface* t);

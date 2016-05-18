@@ -10,7 +10,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Stack {
 
-CAR_INTERFACE_IMPL(AmbientState, Object, IAmbientState);
+CAR_INTERFACE_IMPL(AmbientState, Object, IAmbientState)
 AmbientState::AmbientState()
     : mScrollY(0)
     , mDimmed(FALSE)

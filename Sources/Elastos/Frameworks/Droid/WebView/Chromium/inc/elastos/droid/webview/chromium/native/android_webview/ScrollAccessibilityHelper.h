@@ -33,7 +33,7 @@ public:
         , public IHandlerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         static const Int32 MSG_VIEW_SCROLLED = 1;
 
         HandlerCallback(

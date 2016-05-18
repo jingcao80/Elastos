@@ -22,7 +22,7 @@ protected:
         , public IRippleState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RippleState(
             /* [in] */ LayerState* orig,
@@ -55,7 +55,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RippleDrawable();
 

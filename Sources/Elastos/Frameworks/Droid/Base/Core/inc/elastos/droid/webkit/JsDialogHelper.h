@@ -35,7 +35,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CancelListener(
             /* [in] */ JsDialogHelper* owner);
@@ -56,7 +56,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PositiveListener(
             /* [in] */ JsDialogHelper* owner,
@@ -72,7 +72,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IJsPromptResult* result,

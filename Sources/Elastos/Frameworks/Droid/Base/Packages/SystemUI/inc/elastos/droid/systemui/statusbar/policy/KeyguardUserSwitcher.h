@@ -41,7 +41,7 @@ public:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Adapter(
             /* [in] */ IContext* context,
@@ -106,7 +106,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyguardUserSwitcher(
         /* [in] */ IContext* context,

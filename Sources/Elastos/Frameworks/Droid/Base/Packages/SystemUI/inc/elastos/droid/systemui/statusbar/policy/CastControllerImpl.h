@@ -81,7 +81,7 @@ private:
         , public IMediaProjectionManagerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MediaProjectionManagerCallback(
             /* [in] */ CastControllerImpl* host);
@@ -99,7 +99,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CastControllerImpl(
         /* [in] */ IContext* context);

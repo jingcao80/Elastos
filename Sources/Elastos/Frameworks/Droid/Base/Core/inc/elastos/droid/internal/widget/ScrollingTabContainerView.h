@@ -50,7 +50,7 @@ public:
         , public IViewOnLongClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ IContext* context,
@@ -141,7 +141,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TabClickListener(
             /* [in] */ ScrollingTabContainerView* host);
@@ -158,7 +158,7 @@ protected:
         , public IAnimatorListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VisibilityAnimListener(
             /* [in] */ ScrollingTabContainerView* host);
@@ -185,7 +185,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScrollingTabContainerView();
 

@@ -47,7 +47,7 @@ public:
         , public IDrawableConstantState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         virtual ~ConstantState()
         {}
@@ -101,7 +101,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Drawable();
 

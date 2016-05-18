@@ -39,7 +39,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InvalidateUpdateListener(
             /* [in] */ RadialTimePickerView* host);
@@ -72,7 +72,7 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RadialTimePickerViewOnTouchListener(
             /* [in] */ RadialTimePickerView* host);
@@ -87,7 +87,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RadialTimePickerView();
 

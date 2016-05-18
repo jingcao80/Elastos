@@ -108,7 +108,7 @@ ECode KeyguardAffordanceHelper::AnimatorListenerAdapter2::OnAnimationStart(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyguardAffordanceHelper::AnimatorUpdateListener1, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(KeyguardAffordanceHelper::AnimatorUpdateListener1, Object, IAnimatorUpdateListener)
 KeyguardAffordanceHelper::AnimatorUpdateListener1::AnimatorUpdateListener1(
     /* [in] */ KeyguardAffordanceHelper* host,
     /* [in] */ IKeyguardAffordanceView* targetView,
@@ -132,7 +132,7 @@ ECode KeyguardAffordanceHelper::AnimatorUpdateListener1::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyguardAffordanceHelper::AnimatorUpdateListener2, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(KeyguardAffordanceHelper::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
 KeyguardAffordanceHelper::AnimatorUpdateListener2::AnimatorUpdateListener2(
     /* [in] */ KeyguardAffordanceHelper* host)
     : mHost(host)

@@ -66,7 +66,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     /**
      * Creates an instance of a ContentView.
      * @param context The Context the view is running in, through which it can

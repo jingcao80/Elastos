@@ -41,7 +41,7 @@ private:
         , public IAccessibilityNodeProvider
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerAccessibilityNodeProvider(
             /* [in] */ JellyBeanBrowserAccessibilityManager* owner);

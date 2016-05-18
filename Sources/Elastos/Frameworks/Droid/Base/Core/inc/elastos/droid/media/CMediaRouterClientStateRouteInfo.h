@@ -12,7 +12,7 @@ CarClass(CMediaRouterClientStateRouteInfo)
     , public MediaRouterClientState::RouteInfo
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Elastos

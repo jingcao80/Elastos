@@ -6,8 +6,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CDismissViewImageButton);
-CAR_INTERFACE_IMPL(CDismissViewImageButton, ImageButton, IDismissViewImageButton);
+CAR_OBJECT_IMPL(CDismissViewImageButton)
+CAR_INTERFACE_IMPL(CDismissViewImageButton, ImageButton, IDismissViewImageButton)
 ECode CDismissViewImageButton::constructor(
     /* [in] */ IContext* context)
 {

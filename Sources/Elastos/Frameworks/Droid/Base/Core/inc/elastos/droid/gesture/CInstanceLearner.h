@@ -12,7 +12,7 @@ CarClass(CInstanceLearner)
     , public InstanceLearner
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CInstanceLearner();
 

@@ -15,7 +15,7 @@ class ECO_PUBLIC MediaRouterSimpleCallback
     , public IMediaRouterSimpleCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MediaRouterSimpleCallback();
 

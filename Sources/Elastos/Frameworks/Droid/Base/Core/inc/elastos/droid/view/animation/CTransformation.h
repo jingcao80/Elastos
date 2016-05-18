@@ -21,9 +21,9 @@ CarClass(CTransformation)
     , public ITransformation
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CTransformation();
 

@@ -12,7 +12,7 @@ namespace Widget {
 CarClass(CLockPatternViewCell), public LockPatternView::Cell
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

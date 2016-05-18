@@ -108,7 +108,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     //@Override
     CARAPI OnCreate();

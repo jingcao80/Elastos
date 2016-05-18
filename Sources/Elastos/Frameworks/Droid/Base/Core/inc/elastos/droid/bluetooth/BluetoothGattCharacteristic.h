@@ -27,7 +27,7 @@ class BluetoothGattCharacteristic
     , public IBluetoothGattCharacteristic
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothGattCharacteristic();
 

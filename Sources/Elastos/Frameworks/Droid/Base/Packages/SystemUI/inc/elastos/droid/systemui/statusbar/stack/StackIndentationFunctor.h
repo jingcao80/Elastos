@@ -22,7 +22,7 @@ class StackIndentationFunctor
     , public IStackIndentationFunctor
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @param maxItemsInStack The maximum number of items which should be visible at the same time,

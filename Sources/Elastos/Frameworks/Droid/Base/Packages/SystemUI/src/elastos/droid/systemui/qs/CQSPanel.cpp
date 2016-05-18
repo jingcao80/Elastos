@@ -51,11 +51,11 @@ ECode CQSPanel::H::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSPanel::Record, Object, IQSPanelRecord);
+CAR_INTERFACE_IMPL(CQSPanel::Record, Object, IQSPanelRecord)
 CQSPanel::Record::Record()
 {}
 
-CAR_INTERFACE_IMPL(CQSPanel::TileRecord, Object, IQSPanelTileRecord);
+CAR_INTERFACE_IMPL(CQSPanel::TileRecord, Object, IQSPanelTileRecord)
 CQSPanel::TileRecord::TileRecord()
     : mRow(0)
     , mCol(0)
@@ -96,7 +96,7 @@ ECode CQSPanel::HideGridContentWhenDone::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSPanel::DetailDoneButtonOnClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CQSPanel::DetailDoneButtonOnClickListener, Object, IViewOnClickListener)
 CQSPanel::DetailDoneButtonOnClickListener::DetailDoneButtonOnClickListener(
     /* [in] */ CQSPanel* host)
     : mHost(host)
@@ -109,7 +109,7 @@ ECode CQSPanel::DetailDoneButtonOnClickListener::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSPanel::QSTileCallback, Object, IQSTileCallback);
+CAR_INTERFACE_IMPL(CQSPanel::QSTileCallback, Object, IQSTileCallback)
 CQSPanel::QSTileCallback::QSTileCallback(
     /* [in] */ CQSPanel* host,
     /* [in] */ TileRecord* r)
@@ -166,7 +166,7 @@ ECode CQSPanel::QSTileCallback::OnAnnouncementRequested(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSPanel::OnClickListener1, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CQSPanel::OnClickListener1, Object, IViewOnClickListener)
 CQSPanel::OnClickListener1::OnClickListener1(
     /* [in] */ TileRecord* r)
     : mR(r)
@@ -179,7 +179,7 @@ ECode CQSPanel::OnClickListener1::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSPanel::OnClickListener2, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CQSPanel::OnClickListener2, Object, IViewOnClickListener)
 CQSPanel::OnClickListener2::OnClickListener2(
     /* [in] */ TileRecord* r)
     : mR(r)
@@ -192,7 +192,7 @@ ECode CQSPanel::OnClickListener2::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSPanel::OnClickListener3, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CQSPanel::OnClickListener3, Object, IViewOnClickListener)
 CQSPanel::OnClickListener3::OnClickListener3(
     /* [in] */ CQSPanel* host,
     /* [in] */ IIntent* settingsIntent)
@@ -208,8 +208,8 @@ ECode CQSPanel::OnClickListener3::OnClick(
 }
 
 const Float CQSPanel::TILE_ASPECT = 1.2f;
-CAR_OBJECT_IMPL(CQSPanel);
-CAR_INTERFACE_IMPL(CQSPanel, ViewGroup, IQSPanel);
+CAR_OBJECT_IMPL(CQSPanel)
+CAR_INTERFACE_IMPL(CQSPanel, ViewGroup, IQSPanel)
 CQSPanel::CQSPanel()
     : mColumns(0)
     , mCellWidth(0)

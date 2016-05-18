@@ -32,7 +32,7 @@ public:
         /* [in] */ Int32 state);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Internal method to create a display.

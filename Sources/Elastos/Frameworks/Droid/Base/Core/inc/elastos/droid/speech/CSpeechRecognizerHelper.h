@@ -21,7 +21,7 @@ CarClass(CSpeechRecognizerHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI IsRecognitionAvailable(
         /* [in] */ IContext * pContext,

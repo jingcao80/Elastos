@@ -30,7 +30,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ServiceConnection(
             /* [in] */ BluetoothPbap* host);
@@ -47,7 +47,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothPbap();
 

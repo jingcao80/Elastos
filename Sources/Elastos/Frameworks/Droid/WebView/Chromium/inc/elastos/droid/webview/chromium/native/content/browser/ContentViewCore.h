@@ -176,7 +176,7 @@ public:
     class InternalAccessDelegate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * @see View#drawChild(Canvas, View, long)
@@ -291,7 +291,7 @@ private:
         , public ViewElastosDelegate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerViewAndroidDelegate(
             /* [in] */ ContentViewCore* owner);
@@ -456,7 +456,7 @@ private:
         InnerOnVisibilityChangedListener(
             /* [in] */ ContentViewCore* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI OnPopupZoomerShown(
@@ -521,7 +521,7 @@ private:
             /* [in] */ IView* parent,
             /* [in] */ PositionObserver* positionObserver);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI_(void) SelectBetweenCoordinates(
@@ -548,7 +548,7 @@ private:
             /* [in] */ IView* parent,
             /* [in] */ PositionObserver* positionObserver);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI_(void) SetCursorPosition(
@@ -640,7 +640,7 @@ private:
         InnerContentObserver(
             /* [in] */ ContentViewCore* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnChange(
             /* [in] */ Boolean selfChange,

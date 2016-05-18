@@ -96,7 +96,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InputFilterHost();
 
@@ -128,7 +128,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ChainedInputFilterHost();
 
@@ -208,7 +208,7 @@ private:
             /* [in] */ IInputDevicesChangedListener* listener,
             /* [in] */ CInputManagerService* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI ProxyDied();
@@ -227,7 +227,7 @@ private:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VibratorToken(
             /* [in] */ Int32 deviceId,
@@ -254,7 +254,7 @@ private:
         , public IInputManagerInternal
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LocalService(
             /* [in] */ CInputManagerService* host);
@@ -359,7 +359,7 @@ private:
         , public IKeyboardLayoutVisitor
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyboardLayoutVisitorInUpdateKeyboardLayouts(
             /* [in] */ IHashSet* availableKeyboardLayouts);
@@ -381,7 +381,7 @@ private:
         , public IKeyboardLayoutVisitor
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyboardLayoutVisitorInGetKeyboardLayouts(
             /* [in] */ IArrayList* list);
@@ -403,7 +403,7 @@ private:
         , public IKeyboardLayoutVisitor
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyboardLayoutVisitorInGetKeyboardLayout(
             /* [in] */ ArrayOf<IKeyboardLayout*>* layouts);
@@ -425,7 +425,7 @@ private:
         , public IKeyboardLayoutVisitor
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyboardLayoutVisitorInGetKeyboardLayoutOverlay(
             /* [in] */ ArrayOf<String>* layoutOverlays);
@@ -511,7 +511,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
 

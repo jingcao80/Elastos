@@ -22,7 +22,7 @@ public:
         , public IPointerCoords
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PointerCoords();
 
@@ -312,7 +312,7 @@ public:
         , public IPointerProperties
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PointerProperties();
 
@@ -690,7 +690,7 @@ private:
         /* [in] */ Float high);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MotionEvent();
 

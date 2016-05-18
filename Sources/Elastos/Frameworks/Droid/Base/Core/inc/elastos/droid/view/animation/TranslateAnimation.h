@@ -20,7 +20,7 @@ class TranslateAnimation
     , public ITranslateAnimation
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     TranslateAnimation();
 

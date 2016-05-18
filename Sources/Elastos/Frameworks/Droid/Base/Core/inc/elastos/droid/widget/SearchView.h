@@ -93,7 +93,7 @@ private:
         SearchViewClickListener(
             /* [in] */ SearchView* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -110,7 +110,7 @@ private:
         SearchViewKeyListener(
             /* [in] */ SearchView* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnKey(
             /* [in] */ IView* v,
@@ -130,7 +130,7 @@ private:
         SearchViewEditorActionListener(
             /* [in] */ SearchView* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnEditorAction(
             /* [in] */ ITextView* v,
@@ -170,7 +170,7 @@ private:
         SearchViewItemSelectedListener(
             /* [in] */ SearchView* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnItemSelected(
             /* [in] */ IAdapterView* parent,
@@ -193,7 +193,7 @@ private:
         SearchViewTextWatcher(
             /* [in] */ SearchView* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI BeforeTextChanged(
             /* [in] */ ICharSequence* s,
@@ -240,7 +240,7 @@ private:
         SearchViewLayoutChangeListener(
             /* [in] */ SearchView* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnLayoutChange(
             /* [in] */ IView* v,
@@ -263,7 +263,7 @@ public:
         , public ISearchViewSearchAutoComplete
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _SearchAutoComplete();
 
@@ -322,7 +322,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SearchView();
 

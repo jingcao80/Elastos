@@ -16,7 +16,7 @@ class ColorFilter
     friend class Paint;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~ColorFilter();
 

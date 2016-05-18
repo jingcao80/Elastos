@@ -51,7 +51,7 @@ private:
         , public IOnComputeInternalInsetsListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _OnComputeInternalInsetsListener(
             /* [in] */ InputMethodService* host);
@@ -70,7 +70,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _OnClickListener(
             /* [in] */ InputMethodService* host);
@@ -296,7 +296,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     InputMethodService();
 

@@ -23,7 +23,7 @@ class Int32ArrayEvaluator
     , public ITypeEvaluator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Create an IntArrayEvaluator that does not reuse the animated value. Care must be taken

@@ -40,7 +40,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         UIRunnable(
             /* [in] */ DefaultVideoPosterRequestHandler* owner,
             /* [in] */ IPipedOutputStream* outputStream,
@@ -59,7 +59,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         AsyncTaskRunnable(
             /* [in] */ DefaultVideoPosterRequestHandler* owner,
             /* [in] */ IBitmap* defaultVideoPoster,

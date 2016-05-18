@@ -45,7 +45,7 @@ public:
         /* [out] */ Boolean *ret);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PortFilter(
         /* [in] */ Int32 lowerBound,

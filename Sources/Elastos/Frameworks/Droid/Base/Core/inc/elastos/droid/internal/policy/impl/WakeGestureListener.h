@@ -35,7 +35,7 @@ private:
         , public ITriggerEventListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerTriggerEventListener(
             /* [in] */ WakeGestureListener* owner);
@@ -66,7 +66,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WakeGestureListener();
 

@@ -999,7 +999,7 @@ private:
             : mHost(host)
         {}
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,

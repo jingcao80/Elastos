@@ -49,7 +49,7 @@ class ExternalVideoSurfaceContainer
     , public ISurfaceHolderCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 private:
     // Because WebView does hole-punching by itself, instead, the hole-punching logic
     // in SurfaceView can clear out some web elements like media control or subtitle.

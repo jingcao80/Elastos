@@ -12,7 +12,7 @@ CarClass(CSettingsBackupAgent)
     , public SettingsBackupAgent
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace SettingsProvider

@@ -24,7 +24,7 @@ class ECO_PUBLIC AbstractInputMethodService
     , public IKeyEventCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbstractInputMethodService();
 

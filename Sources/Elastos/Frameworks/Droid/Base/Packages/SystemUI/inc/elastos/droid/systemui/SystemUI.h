@@ -24,7 +24,7 @@ class SystemUI
     , public ISystemUI
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SystemUI();
 

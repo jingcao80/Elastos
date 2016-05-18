@@ -35,6 +35,7 @@ namespace Cm {
 const Boolean ActionUtils::DEBUG = FALSE;
 const String ActionUtils::TAG("ActionUtils"); // = ActionUtils.class.getSimpleName();
 const String ActionUtils::SYSTEMUI_PACKAGE("Elastos.Droid.SystemUI");
+const String ActionUtils::DEFAULT_HOME_PACKAGE("Elastos.Droid.Launcher2");
 
 ECode ActionUtils::KillForegroundApp(
     /* [in] */ IContext* context,
@@ -68,23 +69,23 @@ Boolean ActionUtils::KillForegroundAppInternal(
     /* [in] */ IContext* context,
     /* [in] */ Int32 userId)
 {
+    Logger::I(TAG, "### KillForegroundAppInternal");
     // try {
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
-    String defaultHomePackage("com.android.launcher");
     intent->AddCategory(IIntent::CATEGORY_HOME);
     AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IResolveInfo> res;
     pm->ResolveActivity(intent, 0, (IResolveInfo**)&res);
-
+    String homePackage = DEFAULT_HOME_PACKAGE;
     AutoPtr<IActivityInfo> ai;
     res->GetActivityInfo((IActivityInfo**)&ai);
     if (ai != NULL) {
         String pkgName;
         IPackageItemInfo::Probe(ai)->GetPackageName(&pkgName);
         if (!pkgName.Equals("android")) {
-            defaultHomePackage = pkgName;
+            homePackage = pkgName;
         }
     }
 
@@ -113,8 +114,7 @@ Boolean ActionUtils::KillForegroundAppInternal(
                 if (pkgList->GetLength() > 0) {
                     for (Int32 i = 0; i < pkgList->GetLength(); i++) {
                         String pkg = (*pkgList)[i];
-                        if (!pkg.Equals("Elastos.Droid.SystemUI")
-                                && !pkg.Equals(defaultHomePackage)) {
+                        if (!pkg.Equals(SYSTEMUI_PACKAGE) && !pkg.Equals(homePackage)) {
                             am->ForceStopPackage(pkg, IUserHandle::USER_CURRENT);
                             return TRUE;
                         }

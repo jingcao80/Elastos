@@ -8,7 +8,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CUserInfoControllerReceiver);
+CAR_OBJECT_IMPL(CUserInfoControllerReceiver)
 ECode CUserInfoControllerReceiver::constructor(
     /* [in] */ IUserInfoController* controller)
 {

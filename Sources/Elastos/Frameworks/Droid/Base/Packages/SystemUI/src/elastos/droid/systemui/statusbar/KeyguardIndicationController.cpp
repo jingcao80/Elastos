@@ -66,7 +66,7 @@ ECode KeyguardIndicationController::ControllerHandler::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyguardIndicationController, Object, IKeyguardIndicationController);
+CAR_INTERFACE_IMPL(KeyguardIndicationController, Object, IKeyguardIndicationController)
 KeyguardIndicationController::KeyguardIndicationController(
     /* [in] */ IContext* context,
     /* [in] */ IKeyguardIndicationTextView* textView)

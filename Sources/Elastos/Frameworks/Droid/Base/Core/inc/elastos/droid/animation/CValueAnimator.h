@@ -12,7 +12,7 @@ namespace Animation {
 CarClass(CValueAnimator) , public ValueAnimator
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /**
      * Constructs and returns a ValueAnimator that animates between Int32 values. A single

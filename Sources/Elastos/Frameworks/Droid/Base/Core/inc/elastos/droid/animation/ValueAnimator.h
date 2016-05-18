@@ -25,7 +25,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TO_STRING_IMPL("ValueAnimator::AnimationHandler")
 
@@ -72,7 +72,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a new ValueAnimator object. This default constructor is primarily for

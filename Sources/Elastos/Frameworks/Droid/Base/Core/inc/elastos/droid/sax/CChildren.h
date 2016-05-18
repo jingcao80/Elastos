@@ -40,7 +40,7 @@ public:
 
 public:
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CChildren();
     virtual ~CChildren();

@@ -275,7 +275,7 @@ static AutoPtr<IUri> init()
 
 const AutoPtr<IUri> CVolumeUI::SETTING_URI = init();
 const Int32 CVolumeUI::DEFAULT;
-CAR_OBJECT_IMPL(CVolumeUI);
+CAR_OBJECT_IMPL(CVolumeUI)
 CVolumeUI::CVolumeUI()
     : mDismissDelay(0)
 {

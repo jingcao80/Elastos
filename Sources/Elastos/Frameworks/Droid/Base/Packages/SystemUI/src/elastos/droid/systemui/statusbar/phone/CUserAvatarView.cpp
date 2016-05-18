@@ -16,8 +16,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CUserAvatarView);
-CAR_INTERFACE_IMPL(CUserAvatarView, View, IUserAvatarView);
+CAR_OBJECT_IMPL(CUserAvatarView)
+CAR_INTERFACE_IMPL(CUserAvatarView, View, IUserAvatarView)
 CUserAvatarView::CUserAvatarView()
     : mActiveFrameColor(0)
     , mFrameColor(0)

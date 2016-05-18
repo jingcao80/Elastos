@@ -12,7 +12,7 @@ namespace Widget {
 CarClass(CSimpleMonthAdapter), public SimpleMonthAdapter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Widget

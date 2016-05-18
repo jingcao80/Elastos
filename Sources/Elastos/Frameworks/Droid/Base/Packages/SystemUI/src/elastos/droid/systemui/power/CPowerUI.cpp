@@ -178,8 +178,8 @@ ECode CPowerUI::MyObs::OnChange(
 
 const String CPowerUI::TAG("CPowerUI");
 const Boolean CPowerUI::DEBUG = Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
-CAR_OBJECT_IMPL(CPowerUI);
-CAR_INTERFACE_IMPL(CPowerUI, SystemUI, IPowerUI);
+CAR_OBJECT_IMPL(CPowerUI)
+CAR_INTERFACE_IMPL(CPowerUI, SystemUI, IPowerUI)
 CPowerUI::CPowerUI()
     : mBatteryLevel(100)
     , mBatteryStatus(IBatteryManager::BATTERY_STATUS_UNKNOWN)

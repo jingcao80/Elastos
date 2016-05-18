@@ -20,7 +20,7 @@ public:
         , public IRadioGroupLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RadioGroupLayoutParams();
 
@@ -84,7 +84,7 @@ private:
         , public ICompoundButtonOnCheckedChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CheckedStateTracker(
             /* [in] */ RadioGroup* host);
@@ -108,7 +108,7 @@ private:
     {
         friend class RadioGroup;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PassThroughHierarchyChangeListener(
             /* [in] */ RadioGroup* host);
@@ -133,7 +133,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RadioGroup();
 

@@ -46,7 +46,7 @@ public:
         , public IAdapterViewOnItemClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyOnItemClickListener(
             /* [in] */ ListFragment* host)

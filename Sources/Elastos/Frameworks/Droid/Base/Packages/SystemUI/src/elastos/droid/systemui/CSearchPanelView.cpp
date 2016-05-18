@@ -93,7 +93,7 @@ const String CSearchPanelView::TAG("SearchPanelView");
 const String CSearchPanelView::ASSIST_ICON_METADATA_NAME("Elastos.Droid.SystemUI.action_assist_icon");
 Boolean CSearchPanelView::sInit = InitStatic();
 AutoPtr<IAudioAttributes> CSearchPanelView::VIBRATION_ATTRIBUTES;
-CAR_OBJECT_IMPL(CSearchPanelView);
+CAR_OBJECT_IMPL(CSearchPanelView)
 CAR_INTERFACE_IMPL_2(CSearchPanelView, FrameLayout, ISearchPanelView, IStatusBarPanel);
 CSearchPanelView::CSearchPanelView()
     : mThreshold(0)

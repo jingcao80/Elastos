@@ -34,7 +34,7 @@ private:
         , public ITimeInterpolator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InterpolatorInterpolator(
             /* [in] */ IInterpolator* interpolator1,
@@ -64,7 +64,7 @@ private:
         , public ITimeInterpolator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VelocityInterpolator(
             /* [in] */ Float durationSeconds,

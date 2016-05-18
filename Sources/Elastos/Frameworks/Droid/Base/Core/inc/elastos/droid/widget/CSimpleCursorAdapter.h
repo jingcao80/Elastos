@@ -12,7 +12,7 @@ namespace Widget {
 CarClass(CSimpleCursorAdapter), public SimpleCursorAdapter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Elastos

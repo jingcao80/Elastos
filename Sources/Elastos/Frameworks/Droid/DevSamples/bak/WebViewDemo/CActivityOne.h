@@ -38,7 +38,7 @@ public:
             : mOwner(owner)
         {}
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -56,7 +56,7 @@ public:
             : mOwner(owner)
         {}
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
@@ -76,7 +76,7 @@ public:
             : mOwner(owner)
         {}
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnKey(
             /* [in] */ IView * v,

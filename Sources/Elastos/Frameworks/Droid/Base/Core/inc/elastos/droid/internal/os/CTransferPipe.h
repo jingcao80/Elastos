@@ -41,7 +41,7 @@ public:
 public:
     CTransferPipe();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
 

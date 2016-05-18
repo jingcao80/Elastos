@@ -25,9 +25,9 @@ CarClass(CDecelerateInterpolator)
     , public IInterpolator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CDecelerateInterpolator();
 

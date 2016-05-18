@@ -35,7 +35,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     // don't allow clients to call this directly
     CARAPI constructor(

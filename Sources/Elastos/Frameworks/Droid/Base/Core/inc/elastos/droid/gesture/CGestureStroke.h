@@ -18,7 +18,7 @@ CarClass(CGestureStroke)
     , public GestureStroke
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CGestureStroke();
 

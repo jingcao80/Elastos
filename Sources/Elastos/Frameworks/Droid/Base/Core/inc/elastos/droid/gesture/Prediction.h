@@ -16,7 +16,7 @@ class Prediction
     , public IPrediction
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Prediction();
 

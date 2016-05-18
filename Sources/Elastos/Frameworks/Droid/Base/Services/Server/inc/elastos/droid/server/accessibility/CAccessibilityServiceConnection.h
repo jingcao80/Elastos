@@ -22,7 +22,7 @@ CarClass(CAccessibilityServiceConnection)
     , public AccessibilityManagerService::Service
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Accessibility

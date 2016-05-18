@@ -23,7 +23,7 @@ class BatteryController
     , public IBatteryController
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BatteryController(
         /* [in] */ IContext* context);

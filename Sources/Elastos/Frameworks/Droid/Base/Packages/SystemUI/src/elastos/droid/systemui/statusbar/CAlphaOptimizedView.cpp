@@ -6,8 +6,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CAlphaOptimizedView);
-CAR_INTERFACE_IMPL(CAlphaOptimizedView, View, IAlphaOptimizedView);
+CAR_OBJECT_IMPL(CAlphaOptimizedView)
+CAR_INTERFACE_IMPL(CAlphaOptimizedView, View, IAlphaOptimizedView)
 ECode CAlphaOptimizedView::constructor(
     /* [in] */ IContext* context)
 {

@@ -18,9 +18,9 @@ CarClass(CAvoidXfermode)
     , public IAvoidXfermode
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /** This xfermode draws, or doesn't draw, based on the destination's
      * distance from an op-color.

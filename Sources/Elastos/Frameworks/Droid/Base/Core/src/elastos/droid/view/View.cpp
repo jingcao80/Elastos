@@ -704,6 +704,7 @@ ECode View::MeasureSpec::GetDescription(
 
 ECode View::CheckForLongPress::Run()
 {
+    Logger::I(TAG, "%s >>> CheckForLongPress", TO_CSTR(mView));
     Boolean isPressed;
     mView->IsPressed(&isPressed);
     if (isPressed && (mView->mParent != NULL)
@@ -818,6 +819,7 @@ ECode View::AccessibilityDelegate::CreateAccessibilityNodeInfo(
 
 ECode View::CheckForTap::Run()
 {
+    Logger::I(TAG, "%s CheckForTap", TO_CSTR(mView));
     mView->mPrivateFlags &= ~PFLAG_PREPRESSED;
     mView->SetPressed(TRUE, mX, mY);
     mView->CheckForLongClick(CViewConfiguration::GetTapTimeout());
@@ -1910,6 +1912,7 @@ ECode View::SetOnCreateContextMenuListener(
 ECode View::PerformClick(
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, "%s PerformClick", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     Boolean result;
     AutoPtr<ListenerInfo> li = mListenerInfo;
@@ -1929,6 +1932,7 @@ ECode View::PerformClick(
 ECode View::CallOnClick(
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, "%s CallOnClick", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     AutoPtr<ListenerInfo> li = mListenerInfo;
     if (li != NULL && li->mOnClickListener != NULL) {
@@ -1949,6 +1953,7 @@ ECode View::CallOnClick(
 ECode View::PerformLongClick(
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, "%s PerformLongClick", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_LONG_CLICKED);
 
@@ -6562,6 +6567,7 @@ ECode View::OnKeyDown(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, "%s OnKeyDown", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     Boolean keyDown, result = FALSE;
     AutoPtr<IKeyEventHelper> helper;
@@ -6956,6 +6962,7 @@ ECode View::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, "%s OnTouchEvent", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     Float x, y;
     event->GetX(&x);
@@ -7062,6 +7069,7 @@ ECode View::OnTouchEvent(
                     // For views inside a scrolling container, delay the pressed feedback for
                     // a short period in case this is a scroll.
                     if (isInScrollingContainer) {
+                        Logger::I(TAG, "%s OnTouchEvent CheckForTap", TO_CSTR(this));
                         mPrivateFlags |= PFLAG_PREPRESSED;
                         if (mPendingCheckForTap == NULL) {
                             mPendingCheckForTap = new CheckForTap(this);
@@ -7072,6 +7080,7 @@ ECode View::OnTouchEvent(
                         PostDelayed(mPendingCheckForTap, CViewConfiguration::GetTapTimeout(), &isPost);
                     }
                     else {
+                        Logger::I(TAG, "%s OnTouchEvent CheckForLongClick", TO_CSTR(this));
                         // Not inside a scrolling container, so show the feedback right away
                         SetPressed(TRUE, x, y);
                         CheckForLongClick(0);
@@ -9741,13 +9750,11 @@ ECode View::RemoveCallbacks(
     VALIDATE_NOT_NULL(res)
     if (action != NULL) {
         if (mAttachInfo != NULL) {
-            Logger::I(TAG, " >> View::RemoveCallbacks from mAttachInfo->mHandler: %s", TO_CSTR(action));
             mAttachInfo->mHandler->RemoveCallbacks(action);
             ViewRootImpl* impl = (ViewRootImpl*) mAttachInfo->mViewRootImpl;
             impl->mChoreographer->RemoveCallbacks(
                     IChoreographer::CALLBACK_ANIMATION, action, NULL);
         }
-        Logger::I(TAG, " >> View::RemoveCallbacks from ViewRootImpl::GetRunQueue(): %s", TO_CSTR(action));
         // Assume that post will succeed later
         ViewRootImpl::GetRunQueue()->RemoveCallbacks(action);
     }
@@ -16782,6 +16789,8 @@ ECode View::ApplyDrawableToTransparentRegion(
 void View::CheckForLongClick(
     /* [in] */ Int32 delayOffset)
 {
+    Logger::I(TAG, " >> CheckForLongClick delayOffset:%d", delayOffset);
+
     if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
         mHasPerformedLongPress = FALSE;
 

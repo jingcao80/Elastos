@@ -53,7 +53,7 @@ public:
     friend class CRemoteControlClient;
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // only use RemoteControlClient.editMetadata() to get a MetadataEditor instance
         MetadataEditor(
@@ -186,9 +186,9 @@ public:
 
     virtual ~CRemoteControlClient();
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Class constructor.

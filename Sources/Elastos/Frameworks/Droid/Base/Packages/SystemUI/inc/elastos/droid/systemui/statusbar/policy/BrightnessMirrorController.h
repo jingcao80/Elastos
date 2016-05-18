@@ -43,7 +43,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BrightnessMirrorController(
         /* [in] */ IStatusBarWindowView* statusBarWindow);

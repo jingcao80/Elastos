@@ -27,7 +27,7 @@ class BounceInterpolator
     , public ITimeInterpolator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     // @Override
     CARAPI GetInterpolation(

@@ -27,7 +27,7 @@ class PlatformVelocityTracker
     , public IVelocityTrackerInterface
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI_(AutoPtr<PlatformVelocityTracker>) Obtain();
 

@@ -16,7 +16,7 @@ CarClass(CAlphaOptimizedLinearLayout)
     , public LinearLayout
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context);

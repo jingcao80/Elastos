@@ -26,8 +26,12 @@ CarClass(CKeyButtonView)
     , public IKeyButtonView
 {
 private:
-    class CheckLongPressRunnable : public Runnable {
+    class CheckLongPressRunnable
+        : public Runnable
+    {
     public:
+        TO_STRING_IMPL("CKeyButtonView::CheckLongPressRunnable")
+
         CheckLongPressRunnable(
             /* [in] */ CKeyButtonView* host);
 
@@ -38,7 +42,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CKeyButtonView();
 

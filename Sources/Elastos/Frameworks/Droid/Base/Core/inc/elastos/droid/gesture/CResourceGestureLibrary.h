@@ -11,7 +11,7 @@ CarClass(CResourceGestureLibrary)
     , public GestureLibraries::ResourceGestureLibrary
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CResourceGestureLibrary();
     virtual ~CResourceGestureLibrary();

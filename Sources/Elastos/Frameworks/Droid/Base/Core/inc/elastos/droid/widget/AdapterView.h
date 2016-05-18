@@ -31,7 +31,7 @@ public:
         , public IAdapterContextMenuInfo
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AdapterContextMenuInfo(
             /* [in] */ IView* targetView,

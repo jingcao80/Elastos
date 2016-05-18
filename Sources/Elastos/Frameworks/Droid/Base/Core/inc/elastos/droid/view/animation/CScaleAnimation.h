@@ -13,7 +13,7 @@ namespace Animation {
 CarClass(CScaleAnimation), public ScaleAnimation
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace Animation

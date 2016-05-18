@@ -13,7 +13,7 @@ CarClass(CLockPatternViewSavedState)
     , public LockPatternView::LockPatternViewSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

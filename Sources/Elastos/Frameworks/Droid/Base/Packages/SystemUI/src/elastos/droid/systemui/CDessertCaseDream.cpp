@@ -9,8 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
-CAR_OBJECT_IMPL(CDessertCaseDream);
-CAR_INTERFACE_IMPL(CDessertCaseDream, DreamService, IDessertCaseDream);
+CAR_OBJECT_IMPL(CDessertCaseDream)
+CAR_INTERFACE_IMPL(CDessertCaseDream, DreamService, IDessertCaseDream)
 ECode CDessertCaseDream::OnAttachedToWindow()
 {
     DreamService::OnAttachedToWindow();

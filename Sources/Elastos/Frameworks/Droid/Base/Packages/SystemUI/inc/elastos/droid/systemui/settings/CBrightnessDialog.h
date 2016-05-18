@@ -22,7 +22,7 @@ namespace Settings {
 CarClass(CBrightnessDialog), public Activity
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     // @Override
     CARAPI OnCreate(

@@ -23,7 +23,7 @@ class MimeTypeMap
 {
     friend class CMimeTypeMapHelper;
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Return true if the given MIME type has an entry in the map.

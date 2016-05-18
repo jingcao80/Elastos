@@ -20,7 +20,7 @@ class PathShape
     , public IPathShape
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * PathShape constructor.

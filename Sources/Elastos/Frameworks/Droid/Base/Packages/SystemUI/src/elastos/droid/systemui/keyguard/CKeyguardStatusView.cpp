@@ -73,7 +73,7 @@ void CKeyguardStatusView::Patterns::Update(
 
 const Boolean CKeyguardStatusView::DEBUG = /*KeyguardConstants.DEBUG*/TRUE;
 const String CKeyguardStatusView::TAG("KeyguardStatusView");
-CAR_OBJECT_IMPL(CKeyguardStatusView);
+CAR_OBJECT_IMPL(CKeyguardStatusView)
 ECode CKeyguardStatusView::constructor(
     /* [in] */ IContext* context)
 {

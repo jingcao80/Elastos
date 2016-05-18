@@ -44,7 +44,7 @@ public:
         , public IActionModeCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnCreateActionMode(
             /* [in] */ IActionMode* mode,
@@ -72,7 +72,7 @@ public:
     FindActionModeCallback(
         /* [in] */ IContext* context);
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI_(void) Finish();
 

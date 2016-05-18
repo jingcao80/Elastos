@@ -25,7 +25,7 @@ class Element
     , public IElement
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Element();
 

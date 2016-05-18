@@ -28,7 +28,7 @@ ECode StackScrollerDecorView::ViewRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(StackScrollerDecorView, ExpandableView, IStackScrollerDecorView);
+CAR_INTERFACE_IMPL(StackScrollerDecorView, ExpandableView, IStackScrollerDecorView)
 StackScrollerDecorView::StackScrollerDecorView()
     : mIsVisible(FALSE)
     , mAnimating(FALSE)

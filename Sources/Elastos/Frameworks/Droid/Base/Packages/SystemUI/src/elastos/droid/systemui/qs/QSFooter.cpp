@@ -37,7 +37,7 @@ ECode QSFooter::UpdateDisplayState::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(QSFooter::Callback, Object, ISecurityControllerCallback);
+CAR_INTERFACE_IMPL(QSFooter::Callback, Object, ISecurityControllerCallback)
 QSFooter::Callback::Callback(
     /* [in] */ QSFooter* host)
     : mHost(host)
@@ -91,7 +91,7 @@ ECode QSFooter::H::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(QSFooter::QSFooterClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(QSFooter::QSFooterClickListener, Object, IViewOnClickListener)
 QSFooter::QSFooterClickListener::QSFooterClickListener(
     /* [in] */ QSFooter* host)
     : mHost(host)

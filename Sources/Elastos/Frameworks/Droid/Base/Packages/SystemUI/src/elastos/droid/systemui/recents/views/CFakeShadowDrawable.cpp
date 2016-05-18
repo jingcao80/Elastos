@@ -27,7 +27,7 @@ namespace Views {
 const Double CFakeShadowDrawable::COS_45 = Elastos::Core::Math::Cos(Elastos::Core::Math::ToRadians(45));
 const Float CFakeShadowDrawable::SHADOW_MULTIPLIER;
 
-CAR_OBJECT_IMPL(CFakeShadowDrawable);
+CAR_OBJECT_IMPL(CFakeShadowDrawable)
 CFakeShadowDrawable::CFakeShadowDrawable()
     : mInsetShadow(.0)
     , mCornerRadius(.0)

@@ -26,7 +26,7 @@ class ScanRecord
     , public IScanRecord
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScanRecord();
 

@@ -115,7 +115,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener1(
             /* [in] */ KeyguardAffordanceHelper* host,
@@ -137,7 +137,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener2(
             /* [in] */ KeyguardAffordanceHelper* host);

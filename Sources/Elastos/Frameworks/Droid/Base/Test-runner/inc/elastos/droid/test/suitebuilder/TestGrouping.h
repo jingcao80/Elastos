@@ -32,7 +32,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Compare(
             /* [in] */ IInterface* lhs,
@@ -49,7 +49,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Compare(
             /* [in] */ IInterface* lhs,
@@ -62,7 +62,7 @@ private:
         , public IPredicate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Apply(
             /* [in] */ IInterface* t,
@@ -78,7 +78,7 @@ private:
         , public IPredicate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Apply(
             /* [in] */ IInterface* t,

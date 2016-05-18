@@ -44,7 +44,7 @@ public:
 
         Builder();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
           * Add a service UUID to advertise data.
@@ -119,7 +119,7 @@ public:
 public:
     AdvertiseData();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
       * Returns a list of service UUIDs within the advertisement that are used to identify the

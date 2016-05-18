@@ -13,7 +13,7 @@ class MultiInt32ValuesHolder
     , public IMultiInt32ValuesHolder
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     MultiInt32ValuesHolder(
         /* [in] */ const String& propertyName,

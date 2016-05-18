@@ -33,7 +33,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile1(
             /* [in] */ IBluetoothA2dp* a2dp);
@@ -55,7 +55,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile2(
             /* [in] */ IBluetoothHeadset* headset);
@@ -77,7 +77,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile3(
             /* [in] */ IBluetoothA2dpSink* sink);
@@ -99,7 +99,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile4(
             /* [in] */ IBluetoothHeadsetClient* client);
@@ -121,7 +121,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile5(
             /* [in] */ IBluetoothInputDevice* input);
@@ -143,7 +143,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile6(
             /* [in] */ IBluetoothMap* map);
@@ -165,7 +165,7 @@ private:
         , public IBluetoothUtilProfile
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Profile7(
             /* [in] */ IBluetoothPan* pan);

@@ -48,7 +48,7 @@ public:
         /* [out] */ Boolean *ret);
 
 private:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CategoryFilter(
         /* in */ const String& categoryName);

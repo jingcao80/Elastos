@@ -71,7 +71,7 @@ public:
         , public IExpandableListContextMenuInfo
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ExpandableListContextMenuInfo();
 
@@ -128,7 +128,7 @@ public:
         , public IExpandableListViewSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ExpandableListViewSavedState();
 
@@ -153,7 +153,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ExpandableListView();
 

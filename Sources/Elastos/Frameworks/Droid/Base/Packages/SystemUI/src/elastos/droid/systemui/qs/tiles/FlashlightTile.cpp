@@ -29,7 +29,7 @@ ECode FlashlightTile::RecentlyOnTimeout::Run()
 }
 
 const Int64 FlashlightTile::RECENTLY_ON_DURATION_MILLIS = 500;
-CAR_INTERFACE_IMPL(FlashlightTile, QSTile, IFlashlightListener);
+CAR_INTERFACE_IMPL(FlashlightTile, QSTile, IFlashlightListener)
 FlashlightTile::FlashlightTile(
     /* [in] */ IQSTileHost* host)
 {

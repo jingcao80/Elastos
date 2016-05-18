@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(KeyguardPreviewContainer, FrameLayout, IKeyguardPreviewContainer);
+CAR_INTERFACE_IMPL(KeyguardPreviewContainer, FrameLayout, IKeyguardPreviewContainer)
 KeyguardPreviewContainer::KeyguardPreviewContainer(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

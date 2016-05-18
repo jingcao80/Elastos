@@ -11,7 +11,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-CAR_OBJECT_IMPL(CRecentsPreloadReceiver);
+CAR_OBJECT_IMPL(CRecentsPreloadReceiver)
 ECode CRecentsPreloadReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)

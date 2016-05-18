@@ -157,7 +157,7 @@ ECode UserInfoController::UserInfoTask::OnPostExecute(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(UserInfoController, Object, IUserInfoController);
+CAR_INTERFACE_IMPL(UserInfoController, Object, IUserInfoController)
 UserInfoController::UserInfoController(
     /* [in] */ IContext* context)
     : mUseDefaultAvatar(FALSE)

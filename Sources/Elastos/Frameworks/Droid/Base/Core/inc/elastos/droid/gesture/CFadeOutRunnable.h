@@ -15,7 +15,7 @@ CarClass(CFadeOutRunnable)
     , public GestureOverlayView::FadeOutRunnable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CFadeOutRunnable();
 

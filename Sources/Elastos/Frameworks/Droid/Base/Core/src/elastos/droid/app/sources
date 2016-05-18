@@ -23,6 +23,7 @@ SOURCES += CActivityManagerMemoryInfo.cpp
 SOURCES += CActivityManagerProcessErrorStateInfo.cpp
 SOURCES += CActivityManagerRecentTaskInfo.cpp
 SOURCES += CActivityManagerRunningAppProcessInfo.cpp
+SOURCES += CActivityManagerRunningAppProcessInfoHelper.cpp
 SOURCES += CActivityManagerRunningServiceInfo.cpp
 SOURCES += CActivityManagerRunningTaskInfo.cpp
 SOURCES += CActivityManagerTaskDescription.cpp

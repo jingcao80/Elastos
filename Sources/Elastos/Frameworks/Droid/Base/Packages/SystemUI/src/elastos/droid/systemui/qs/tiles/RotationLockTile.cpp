@@ -12,7 +12,7 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_INTERFACE_IMPL(RotationLockTile::Callback, Object, IRotationLockControllerCallback);
+CAR_INTERFACE_IMPL(RotationLockTile::Callback, Object, IRotationLockControllerCallback)
 RotationLockTile::Callback::Callback(
     /* [in] */ RotationLockTile* host)
     : mHost(host)

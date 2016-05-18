@@ -74,7 +74,7 @@ public:
             , public IPdfDocumentPageInfoBuilder
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             /**
              * Creates a new builder with the mandatory page info attributes.
@@ -111,7 +111,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Gets the page width in PostScript points (1/72th of an inch).
@@ -173,7 +173,7 @@ public:
         , public IPdfDocumentPage
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Gets the {@link Canvas} of the page.
@@ -256,9 +256,9 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /**
      * Creates a new instance.

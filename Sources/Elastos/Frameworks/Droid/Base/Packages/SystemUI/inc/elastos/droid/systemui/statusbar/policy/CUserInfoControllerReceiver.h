@@ -17,7 +17,7 @@ class UserInfoController;
 CarClass(CUserInfoControllerReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IUserInfoController* controller);

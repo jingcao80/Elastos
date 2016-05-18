@@ -25,7 +25,7 @@ private:
         , public IKeyguardMonitorCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ LocationTile* host);

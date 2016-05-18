@@ -26,7 +26,7 @@ ECode SignalClusterView::ChangedRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(SignalClusterView::TmpCallback, Object, ISecurityControllerCallback);
+CAR_INTERFACE_IMPL(SignalClusterView::TmpCallback, Object, ISecurityControllerCallback)
 SignalClusterView::TmpCallback::TmpCallback(
     /* [in] */ SignalClusterView* host)
     : mHost(host)
@@ -295,7 +295,7 @@ void SignalClusterView::Apply()
         CString::New(mMobileTypeDescription + " " + mMobileDescription, (ICharSequence**)&des);
         IView::Probe(mMobileGroup)->SetContentDescription(des);
         IView::Probe(mMobileGroup)->SetVisibility(IView::VISIBLE);
-    } 
+    }
     else {
         IView::Probe(mMobileGroup)->SetVisibility(IView::GONE);
     }

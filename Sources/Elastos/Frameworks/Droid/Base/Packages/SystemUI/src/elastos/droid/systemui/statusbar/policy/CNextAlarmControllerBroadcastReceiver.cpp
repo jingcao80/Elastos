@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CNextAlarmControllerBroadcastReceiver);
+CAR_OBJECT_IMPL(CNextAlarmControllerBroadcastReceiver)
 ECode CNextAlarmControllerBroadcastReceiver::constructor(
     /* [in] */ INextAlarmController* controller)
 {

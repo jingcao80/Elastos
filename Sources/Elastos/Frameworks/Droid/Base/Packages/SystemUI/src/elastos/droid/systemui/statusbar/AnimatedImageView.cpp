@@ -8,7 +8,7 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_INTERFACE_IMPL(AnimatedImageView, ImageView, IAnimatedImageView);
+CAR_INTERFACE_IMPL(AnimatedImageView, ImageView, IAnimatedImageView)
 AnimatedImageView::AnimatedImageView()
     : mAttached(FALSE)
 {}

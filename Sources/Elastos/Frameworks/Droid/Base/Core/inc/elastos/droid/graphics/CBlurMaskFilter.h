@@ -20,9 +20,9 @@ CarClass(CBlurMaskFilter)
     , public IBlurMaskFilter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Create a blur maskfilter.

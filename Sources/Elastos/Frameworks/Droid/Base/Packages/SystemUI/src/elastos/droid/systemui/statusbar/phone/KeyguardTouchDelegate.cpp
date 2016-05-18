@@ -25,7 +25,7 @@ const String KeyguardTouchDelegate::KEYGUARD_CLASS("Elastos.Droid.SystemUI.Keygu
 AutoPtr<KeyguardTouchDelegate> KeyguardTouchDelegate::sInstance;
 AutoPtr<IList> KeyguardTouchDelegate::sConnectionListeners = InitList();
 
-CAR_INTERFACE_IMPL(KeyguardTouchDelegate::KeyguardConnection, Object, IServiceConnection);
+CAR_INTERFACE_IMPL(KeyguardTouchDelegate::KeyguardConnection, Object, IServiceConnection)
 KeyguardTouchDelegate::KeyguardConnection::KeyguardConnection(
     /* [in] */ KeyguardTouchDelegate* host)
     : mHost(host)
@@ -67,7 +67,7 @@ ECode KeyguardTouchDelegate::KeyguardConnection::OnServiceDisconnected(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyguardTouchDelegate, Object, IKeyguardTouchDelegate);
+CAR_INTERFACE_IMPL(KeyguardTouchDelegate, Object, IKeyguardTouchDelegate)
 KeyguardTouchDelegate::KeyguardTouchDelegate(
     /* [in] */ IContext* context)
 {

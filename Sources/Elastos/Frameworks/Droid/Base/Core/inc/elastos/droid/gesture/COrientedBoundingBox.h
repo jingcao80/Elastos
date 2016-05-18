@@ -12,7 +12,7 @@ CarClass(COrientedBoundingBox)
     , public OrientedBoundingBox
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     COrientedBoundingBox();
 

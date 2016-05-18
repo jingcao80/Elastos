@@ -22,7 +22,7 @@ CarClass(CRecognizerIntent)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the broadcast intent to fire with

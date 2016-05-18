@@ -46,7 +46,7 @@ public:
     public:
         InnerRunnable();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Run();
     };

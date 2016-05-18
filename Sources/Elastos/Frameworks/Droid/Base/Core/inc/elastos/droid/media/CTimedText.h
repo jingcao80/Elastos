@@ -335,9 +335,9 @@ public:
 
     virtual ~CTimedText();
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IParcel* parcel);

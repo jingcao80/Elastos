@@ -51,7 +51,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OkDialogInterfaceOnClickListener(
             /* [in] */ SelectPopupDialog* owner,
@@ -71,7 +71,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CancelDialogInterfaceOnClickListener(
             /* [in] */ SelectPopupDialog* owner);
@@ -89,7 +89,7 @@ private:
         , public IAdapterViewOnItemClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerAdapterViewOnItemClickListener(
             /* [in] */ SelectPopupDialog* owner,
@@ -111,7 +111,7 @@ private:
         , public IDialogInterfaceOnCancelListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerDialogInterfaceOnCancelListener(
             /* [in] */ SelectPopupDialog* owner);

@@ -6,7 +6,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_OBJECT_IMPL(CAlphaOptimizedLinearLayout);
+CAR_OBJECT_IMPL(CAlphaOptimizedLinearLayout)
 ECode CAlphaOptimizedLinearLayout::constructor(
     /* [in] */ IContext* context)
 {

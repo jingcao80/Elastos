@@ -58,7 +58,7 @@ public:
 
         ~CustomEditText();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ IContext* context,
@@ -284,7 +284,7 @@ private:
     public:
         TwoDigitFormatter();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Format(
             /* [in] */ Int32 value,
@@ -315,7 +315,7 @@ private:
         NumberPickerOnClickListener(
             /* [in] */ NumberPicker* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -331,7 +331,7 @@ private:
         NumberPickerOnLongCliskListener(
             /* [in] */ NumberPicker* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnLongClick(
             /* [in] */ IView* v,
@@ -348,7 +348,7 @@ private:
         NumberPickerOnFocusChangeListener(
             /* [in] */ NumberPicker* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnFocusChange(
             /* [in] */ IView* v,
@@ -358,7 +358,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     NumberPicker();
 

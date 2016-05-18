@@ -169,7 +169,7 @@ private:
         , public ILocationListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         EmptyLocationListener();
 
@@ -193,7 +193,7 @@ private:
         , public ILocationListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyLocationListener(
             /* [in] */ TwilightService* owner);

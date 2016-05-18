@@ -27,7 +27,7 @@ class Window
     friend class CWindowManagerGlobal;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Window();
 

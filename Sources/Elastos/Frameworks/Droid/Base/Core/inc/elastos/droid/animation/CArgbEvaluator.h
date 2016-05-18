@@ -20,9 +20,9 @@ CarClass(CArgbEvaluator)
     , public ITypeEvaluator
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns an instance of <code>ArgbEvaluator</code> that may be used in

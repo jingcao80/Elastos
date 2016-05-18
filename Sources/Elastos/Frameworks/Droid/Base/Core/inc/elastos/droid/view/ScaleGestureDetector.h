@@ -38,7 +38,7 @@ public:
         , public IScaleGestureDetectorOnScaleGestureListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SimpleOnScaleGestureListener();
 
@@ -77,7 +77,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScaleGestureDetector();
 

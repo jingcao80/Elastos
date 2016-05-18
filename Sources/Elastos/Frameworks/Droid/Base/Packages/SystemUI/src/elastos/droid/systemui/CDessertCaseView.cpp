@@ -85,7 +85,7 @@ Float CDessertCaseView::PROB_2X = 0.33f;
 Float CDessertCaseView::PROB_3X = 0.1f;
 Float CDessertCaseView::PROB_4X = 0.01f;
 
-CAR_OBJECT_IMPL(CDessertCaseView);
+CAR_OBJECT_IMPL(CDessertCaseView)
 CAR_INTERFACE_IMPL(CDessertCaseView, FrameLayout, IDessertCaseView)
 CDessertCaseView::CDessertCaseView()
 {

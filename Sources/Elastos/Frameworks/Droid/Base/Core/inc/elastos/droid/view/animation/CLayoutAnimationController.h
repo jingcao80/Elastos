@@ -14,7 +14,7 @@ CarClass(CLayoutAnimationController)
     , public LayoutAnimationController
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace Animation

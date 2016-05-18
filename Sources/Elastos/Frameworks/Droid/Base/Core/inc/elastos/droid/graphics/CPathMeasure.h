@@ -15,9 +15,9 @@ CarClass(CPathMeasure)
     , public IPathMeasure
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     ~CPathMeasure();
 

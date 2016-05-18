@@ -23,7 +23,7 @@ class ScrollBarDrawable
     , public IScrollBarDrawable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ScrollBarDrawable();
 

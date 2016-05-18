@@ -13,7 +13,7 @@ CarClass(CViewGroupMarginLayoutParams)
     , public ViewGroup::MarginLayoutParams
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace View

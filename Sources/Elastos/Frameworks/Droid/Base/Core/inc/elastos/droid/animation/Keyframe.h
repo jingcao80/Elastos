@@ -44,7 +44,7 @@ class Keyframe
     , public ICloneable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Keyframe();
 
@@ -350,7 +350,7 @@ class FloatKeyframe
     , public IFloatKeyframe
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FloatKeyframe(
             /* [in] */ Float fraction);

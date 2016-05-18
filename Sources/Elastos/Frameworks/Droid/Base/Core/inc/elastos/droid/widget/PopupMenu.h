@@ -38,7 +38,7 @@ private:
             : mHost(host)
         {}
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnMenuItemSelected(
             /* [in] */ IMenuBuilder* menu,
@@ -86,7 +86,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PopupMenu();
 

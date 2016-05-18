@@ -207,7 +207,7 @@ private:
         , public IVGroup
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VGroup(
             /* [in] */ VGroup* copy,
@@ -318,7 +318,7 @@ private:
         , public IVPath
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VPath();
 
@@ -359,7 +359,7 @@ private:
         , public IVClipPath
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VClipPath();
 
@@ -387,7 +387,7 @@ private:
         , public IVFullPath
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VFullPath();
 
@@ -498,7 +498,7 @@ private:
 
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     VectorDrawable();
 

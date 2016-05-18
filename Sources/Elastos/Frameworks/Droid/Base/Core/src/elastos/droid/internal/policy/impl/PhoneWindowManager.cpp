@@ -4098,10 +4098,6 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
         mPendingMetaAction = FALSE;
     }
 
-    if (keyCode == IKeyEvent::KEYCODE_BACK && !down) {
-        mHandler->RemoveCallbacks(mBackLongPress);
-    }
-
     // First we always handle the home key here, so applications
     // can never break it, although if keyguard is on, we do let
     // it handle it, because that gives us the correct 5 second
@@ -4446,6 +4442,23 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
             LaunchAssistAction(IIntent::EXTRA_ASSIST_INPUT_HINT_KEYBOARD);
         }
         return -1;
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_BACK) {
+        if (!down) {
+            mHandler->RemoveCallbacks(mBackLongPress);
+        }
+
+        AutoPtr<IContentResolver> resolver;
+        mContext->GetContentResolver((IContentResolver**)&resolver);
+        Int32 ival;
+        Settings::Secure::GetInt32(resolver,
+            ISettingsSecure::KILL_APP_LONGPRESS_BACK, 0, &ival);
+        if (ival == 1) {
+            if (down && repeatCount == 0) {
+                Boolean bval;
+                mHandler->PostDelayed(mBackLongPress, mBackKillTimeout, &bval);
+            }
+        }
     }
 
     // Shortcuts are invoked through Search+key, so intercept those here

@@ -252,7 +252,7 @@ private:
 public:
     CKeyguardViewMediator();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI UserActivity();
 

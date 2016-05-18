@@ -13,8 +13,8 @@ namespace SystemUI {
 const Int32 CResetSessionDialog::BUTTON_WIPE = IDialogInterface::BUTTON_NEGATIVE;
 const Int32 CResetSessionDialog::BUTTON_DONTWIPE = IDialogInterface::BUTTON_POSITIVE;
 
-CAR_OBJECT_IMPL(CResetSessionDialog);
-CAR_INTERFACE_IMPL(CResetSessionDialog, SystemUIDialog, IDialogInterfaceOnClickListener);
+CAR_OBJECT_IMPL(CResetSessionDialog)
+CAR_INTERFACE_IMPL(CResetSessionDialog, SystemUIDialog, IDialogInterfaceOnClickListener)
 CResetSessionDialog::CResetSessionDialog()
     : mUserId(0)
 {}

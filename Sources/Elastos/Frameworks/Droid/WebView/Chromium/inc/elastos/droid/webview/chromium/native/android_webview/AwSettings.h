@@ -38,7 +38,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         SetInitialPageScaleRunnable(
             /* [in] */ AwSettings* owner);
 
@@ -53,7 +53,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         SetSaveFormDataRunnable(
             /* [in] */ AwSettings* owner);
 
@@ -68,7 +68,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         SetUserAgentStringRunnable(
             /* [in] */ AwSettings* owner);
 
@@ -83,7 +83,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         SetLoadWithOverviewModeRunnable(
             /* [in] */ AwSettings* owner);
 
@@ -98,7 +98,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         OnGestureZoomSupportChangedRunnable(
             /* [in] */ AwSettings* owner,
             /* [in] */ Boolean supportsDoubleTapZoom,
@@ -117,7 +117,7 @@ public:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         SetVideoOverlayForEmbeddedVideoEnabledRunnable(
             /* [in] */ AwSettings* owner);
 
@@ -182,7 +182,7 @@ public:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerRunnable(
                 /* [in] */ EventHandler* owner);
 

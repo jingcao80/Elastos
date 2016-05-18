@@ -207,7 +207,7 @@ private:
         , public IGlobalActionsSinglePressAction
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SinglePressAction(
             /* [in] */ GlobalActions* owner,
@@ -256,7 +256,7 @@ private:
         , public IGlobalActionsLongPressAction
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PowerAction(
             /* [in] */ GlobalActions* owner);
@@ -384,7 +384,7 @@ private:
     {
     public:
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SilentModeTriStateAction(
             /* [in] */ IContext* context,
@@ -648,7 +648,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DialogOnClickListener(
             /* [in] */ GlobalActions* host);
@@ -721,7 +721,7 @@ private:
         MyAdapterViewOnItemLongClickListener(
             /* [in] */ GlobalActions* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnItemLongClick(
@@ -757,7 +757,7 @@ private:
 
 public:
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @param context everything needs a context :(

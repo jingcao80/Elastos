@@ -26,7 +26,7 @@ public:
 
         ~DataTokenizer();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ ITokenizer* host);
@@ -57,7 +57,7 @@ public:
 
         ~TagTokenizer();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ ITokenizer* host);
@@ -82,7 +82,7 @@ public:
 
     virtual ~Tokenizer();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ ITokenizerOnTokenListener* listener);

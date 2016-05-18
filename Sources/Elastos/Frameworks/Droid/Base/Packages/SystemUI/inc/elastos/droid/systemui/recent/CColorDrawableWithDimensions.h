@@ -16,7 +16,7 @@ CarClass(CColorDrawableWithDimensions)
     , public ColorDrawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CColorDrawableWithDimensions();
 

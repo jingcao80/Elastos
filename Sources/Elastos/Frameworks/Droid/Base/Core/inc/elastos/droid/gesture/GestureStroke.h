@@ -28,7 +28,7 @@ class GestureStroke
     , public IGestureStroke
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     GestureStroke();
 

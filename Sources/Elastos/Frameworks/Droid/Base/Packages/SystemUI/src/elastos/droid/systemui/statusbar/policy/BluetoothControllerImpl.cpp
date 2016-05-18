@@ -90,7 +90,7 @@ BluetoothControllerImpl::DeviceInfo::DeviceInfo()
     , mBonded(FALSE)
 {}
 
-CAR_INTERFACE_IMPL(BluetoothControllerImpl::ServiceListener, Object, IBluetoothProfileServiceListener);
+CAR_INTERFACE_IMPL(BluetoothControllerImpl::ServiceListener, Object, IBluetoothProfileServiceListener)
 BluetoothControllerImpl::ServiceListener::ServiceListener(
     /* [in] */ IBluetoothDevice* device,
     /* [in] */ const String& action,
@@ -132,7 +132,7 @@ ECode BluetoothControllerImpl::ServiceListener::OnServiceDisconnected(
 
 const String BluetoothControllerImpl::TAG("BluetoothController");
 const Boolean BluetoothControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-CAR_INTERFACE_IMPL(BluetoothControllerImpl, Object, IBluetoothController);
+CAR_INTERFACE_IMPL(BluetoothControllerImpl, Object, IBluetoothController)
 BluetoothControllerImpl::BluetoothControllerImpl(
     /* [in] */ IContext* context)
     : mEnabled(FALSE)

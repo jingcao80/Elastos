@@ -14,7 +14,7 @@ namespace Views {
 CarClass(CTaskStackView)
     , public TaskStackView
 {
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Views

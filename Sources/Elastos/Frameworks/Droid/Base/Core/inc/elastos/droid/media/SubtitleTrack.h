@@ -95,7 +95,7 @@ public:
 
         virtual ~CueList();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ SubtitleTrack* host);

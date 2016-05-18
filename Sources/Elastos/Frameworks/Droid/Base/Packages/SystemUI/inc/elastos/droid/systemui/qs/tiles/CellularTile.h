@@ -47,7 +47,7 @@ private:
         , public INetworkSignalChangedCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         NetworkSignalChangedCallback(
             /* [in] */ CellularTile* host);
@@ -94,7 +94,7 @@ private:
         , public IQSTileDetailAdapter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CellularDetailAdapter(
             /* [in] */ CellularTile* host);

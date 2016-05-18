@@ -63,7 +63,7 @@ private:
             : public Handler
         {
         public:
-            //CAR_INTERFACE_DECL();
+            //CAR_INTERFACE_DECL()
             InnerHandler(
                 /* [in] */ ILooper* looper);
 

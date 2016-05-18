@@ -36,7 +36,7 @@ namespace Policy {
 const String ZenModeControllerImpl::TAG("ZenModeController");
 const Boolean ZenModeControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
 
-CAR_INTERFACE_IMPL(ZenModeControllerImpl::ConditionListener, Object, IIConditionListener);
+CAR_INTERFACE_IMPL(ZenModeControllerImpl::ConditionListener, Object, IIConditionListener)
 ZenModeControllerImpl::ConditionListener::ConditionListener(
     /* [in] */ ZenModeControllerImpl* host)
     : mHost(host)
@@ -184,7 +184,7 @@ void ZenModeControllerImpl::ConfigSetting::HandleValueChanged(
 }
 
 
-CAR_INTERFACE_IMPL(ZenModeControllerImpl, Object, IZenModeController);
+CAR_INTERFACE_IMPL(ZenModeControllerImpl, Object, IZenModeController)
 ZenModeControllerImpl::ZenModeControllerImpl(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler)

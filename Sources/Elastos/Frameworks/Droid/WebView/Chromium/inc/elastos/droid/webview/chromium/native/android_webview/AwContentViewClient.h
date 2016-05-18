@@ -38,7 +38,7 @@ public:
             , public IWebChromeClientCustomViewCallback
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerWebChromeClientCustomViewCallback(
                 /* [in] */ AwContentVideoViewClient* owner);
 
@@ -53,7 +53,7 @@ public:
             , public IViewOnAttachStateChangeListener
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
             InnerViewOnAttachStateChangeListener(
                 /* [in] */ AwContentVideoViewClient* owner,
                 /* [in] */ IFrameLayout* viewGroup);

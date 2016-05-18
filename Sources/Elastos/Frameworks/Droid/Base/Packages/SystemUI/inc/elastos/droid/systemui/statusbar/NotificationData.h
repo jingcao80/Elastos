@@ -39,7 +39,7 @@ public:
         , public INotificationDataEntry
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Entry();
 
@@ -149,7 +149,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Comparator(
             /* [in] */ NotificationData* host);
@@ -167,7 +167,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     NotificationData(
         /* [in] */ INotificationEnvironment* environment);

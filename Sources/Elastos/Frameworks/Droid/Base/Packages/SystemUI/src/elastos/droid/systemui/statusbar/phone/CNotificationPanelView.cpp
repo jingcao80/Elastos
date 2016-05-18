@@ -89,7 +89,7 @@ ECode CNotificationPanelView::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
 CNotificationPanelView::OnLayoutChangeListener::OnLayoutChangeListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -126,7 +126,7 @@ ECode CNotificationPanelView::OnLayoutChangeListener::OnLayoutChange(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::OnPreDrawListener, Object, IOnPreDrawListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::OnPreDrawListener, Object, IOnPreDrawListener)
 CNotificationPanelView::OnPreDrawListener::OnPreDrawListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -213,7 +213,7 @@ ECode CNotificationPanelView::Runnable5::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::ViewOnClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::ViewOnClickListener, Object, IViewOnClickListener)
 CNotificationPanelView::ViewOnClickListener::ViewOnClickListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -225,7 +225,7 @@ ECode CNotificationPanelView::ViewOnClickListener::OnClick(
     return mHost->OnClick(v);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::Listener, Object, IListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::Listener, Object, IListener)
 CNotificationPanelView::Listener::Listener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -244,7 +244,7 @@ ECode CNotificationPanelView::Listener::OnOverscrolled(
     return mHost->OnOverscrolled(lastX, lastY, amount);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::HeightChangedListener, Object, IExpandableViewOnHeightChangedListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::HeightChangedListener, Object, IExpandableViewOnHeightChangedListener)
 CNotificationPanelView::HeightChangedListener::HeightChangedListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -262,7 +262,7 @@ ECode CNotificationPanelView::HeightChangedListener::OnReset(
     return mHost->OnReset(view);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::TopChangedListener, Object, IOnOverscrollTopChangedListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::TopChangedListener, Object, IOnOverscrollTopChangedListener)
 CNotificationPanelView::TopChangedListener::TopChangedListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -282,7 +282,7 @@ ECode CNotificationPanelView::TopChangedListener::FlingTopOverscroll(
     return mHost->FlingTopOverscroll(velocity, open);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener2, Object, IViewOnLayoutChangeListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener2, Object, IViewOnLayoutChangeListener)
 CNotificationPanelView::OnLayoutChangeListener2::OnLayoutChangeListener2(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -320,7 +320,7 @@ ECode CNotificationPanelView::OnPreDrawListener2::AnimatorListenerAdapter2::OnAn
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::OnPreDrawListener2, Object, IOnPreDrawListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::OnPreDrawListener2, Object, IOnPreDrawListener)
 CNotificationPanelView::OnPreDrawListener2::OnPreDrawListener2(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -365,7 +365,7 @@ ECode CNotificationPanelView::Runnable6::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 CNotificationPanelView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -428,7 +428,7 @@ ECode CNotificationPanelView::Runnable8::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
 CNotificationPanelView::AnimatorUpdateListener2::AnimatorUpdateListener2(
     /* [in] */ IView* target,
     /* [in] */ Int32 r,
@@ -476,7 +476,7 @@ const Float CNotificationPanelView::LOCK_ICON_ACTIVE_SCALE = 1.2f;
 const Int32 CNotificationPanelView::DOZE_BACKGROUND_COLOR = 0xff000000;
 const Int32 CNotificationPanelView::TAG_KEY_ANIM = R::id::scrim;
 const Int64 CNotificationPanelView::DOZE_BACKGROUND_ANIM_DURATION = ScrimController::ANIMATION_DURATION;
-CAR_OBJECT_IMPL(CNotificationPanelView);
+CAR_OBJECT_IMPL(CNotificationPanelView)
 CAR_INTERFACE_IMPL_6(CNotificationPanelView, PanelView, INotificationPanelView, IExpandableViewOnHeightChangedListener \
     , IListener, IViewOnClickListener, IOnOverscrollTopChangedListener, IKeyguardAffordanceHelperCallback);
 CNotificationPanelView::CNotificationPanelView()

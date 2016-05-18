@@ -33,7 +33,7 @@ public:
         , public IDatePickerCalendarDelegateSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DatePickerCalendarDelegateSavedState();
 

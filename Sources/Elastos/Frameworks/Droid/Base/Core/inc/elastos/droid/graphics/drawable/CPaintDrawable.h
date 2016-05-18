@@ -13,7 +13,7 @@ namespace Drawable {
 CarClass(CPaintDrawable), public PaintDrawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Drawable

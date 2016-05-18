@@ -56,7 +56,7 @@ private:
         , public IViewOnLayoutChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnLayoutChangeListener(
             /* [in] */ QSDualTileLabel* host);
@@ -78,7 +78,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     QSDualTileLabel(
         /* [in] */ IContext* context);

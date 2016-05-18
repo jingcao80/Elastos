@@ -70,7 +70,7 @@ private:
         PopupWindowScrollChangedListener(
             /* [in] */ PopupWindow* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnScrollChanged();
 
@@ -79,7 +79,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PopupWindow();
 

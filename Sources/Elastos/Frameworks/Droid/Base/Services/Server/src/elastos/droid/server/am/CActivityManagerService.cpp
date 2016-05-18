@@ -98,6 +98,8 @@ using Elastos::Droid::App::CActivityManagerMemoryInfo;
 using Elastos::Droid::App::CActivityManagerProcessErrorStateInfo;
 using Elastos::Droid::App::CActivityManagerRecentTaskInfo;
 using Elastos::Droid::App::CActivityManagerRunningAppProcessInfo;
+using Elastos::Droid::App::IActivityManagerRunningAppProcessInfoHelper;
+using Elastos::Droid::App::CActivityManagerRunningAppProcessInfoHelper;
 using Elastos::Droid::App::CActivityManagerTaskDescription;
 using Elastos::Droid::App::CApplicationErrorReport;
 using Elastos::Droid::App::CApplicationErrorReportHelper;
@@ -15805,19 +15807,18 @@ Int32 CActivityManagerService::ProcStateToImportance(
     /* [in] */ Int32 memAdj,
     /* [in] */ IActivityManagerRunningAppProcessInfo* currApp)
 {
-    Int32 imp = 0;
-    assert(0);
-    // AutoPtr<IActivityManagerRunningAppProcessInfoHelper> amrapHelper;
-    // CActivityManagerRunningAppProcessInfoHelper::AcquireSingleton((
-    //     IActivityManagerRunningAppProcessInfo**)&amrapHelper);
-    // amrapHelper->ProcStateToImportance(procState, &imp);
-    if (imp == IActivityManagerRunningAppProcessInfo::IMPORTANCE_BACKGROUND) {
+    AutoPtr<IActivityManagerRunningAppProcessInfoHelper> amrapHelper;
+    CActivityManagerRunningAppProcessInfoHelper::AcquireSingleton(
+        (IActivityManagerRunningAppProcessInfoHelper**)&amrapHelper);
+    Int32 ival = 0;
+    amrapHelper->ProcStateToImportance(procState, &ival);
+    if (ival == IActivityManagerRunningAppProcessInfo::IMPORTANCE_BACKGROUND) {
         currApp->SetLru(memAdj);
     }
     else {
         currApp->SetLru(0);
     }
-    return imp;
+    return ival;
 }
 
 ECode CActivityManagerService::FillInProcMemInfo(

@@ -236,7 +236,7 @@ protected:
         , public ITimeInterpolator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FrameInterpolator(
             /* [in] */ IAnimationDrawable* d,
@@ -264,7 +264,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AnimatedStateListDrawable();
 

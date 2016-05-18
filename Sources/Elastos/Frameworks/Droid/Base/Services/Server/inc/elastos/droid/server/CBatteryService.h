@@ -268,7 +268,7 @@ private:
         , public IBatteryManagerInternal
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LocalService(
             /* [in] */ CBatteryService* host);

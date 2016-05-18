@@ -14,8 +14,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CSpeedBumpView);
-CAR_INTERFACE_IMPL(CSpeedBumpView, ExpandableView, ISpeedBumpView);
+CAR_OBJECT_IMPL(CSpeedBumpView)
+CAR_INTERFACE_IMPL(CSpeedBumpView, ExpandableView, ISpeedBumpView)
 CSpeedBumpView::CSpeedBumpView()
     : mSpeedBumpHeight(0)
     , mIsVisible(FALSE)

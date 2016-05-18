@@ -12,7 +12,7 @@ CarClass(CRadioGroupLayoutParams)
     , public RadioGroup::RadioGroupLayoutParams
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

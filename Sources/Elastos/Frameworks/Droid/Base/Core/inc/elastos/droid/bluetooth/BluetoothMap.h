@@ -34,7 +34,7 @@ public:
         , public IBinder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         BluetoothStateChangeCallbackStub();
 
@@ -60,7 +60,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerServiceConnection(
             /* [in] */ BluetoothMap* owner);
@@ -77,7 +77,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothMap();
 

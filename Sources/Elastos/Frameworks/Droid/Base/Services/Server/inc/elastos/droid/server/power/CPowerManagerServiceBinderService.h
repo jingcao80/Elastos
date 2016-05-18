@@ -14,7 +14,7 @@ CarClass(CPowerManagerServiceBinderService)
     , public PowerManagerService::BinderService
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Power

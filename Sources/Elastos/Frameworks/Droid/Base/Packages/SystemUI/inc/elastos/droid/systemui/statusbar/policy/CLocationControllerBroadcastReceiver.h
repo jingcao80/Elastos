@@ -17,7 +17,7 @@ class LocationControllerImpl;
 CarClass(CLocationControllerBroadcastReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ ILocationController* controller);

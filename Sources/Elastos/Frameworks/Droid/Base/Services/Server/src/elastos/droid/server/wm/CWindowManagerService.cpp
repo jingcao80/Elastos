@@ -4933,6 +4933,7 @@ ECode CWindowManagerService::SetFocusedApp(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean moveFocusNow)
 {
+    Slogger::I(TAG, " >>> SetFocusedApp");
     if (!CheckCallingPermission(
             Manifest::permission::MANAGE_APP_TOKENS,
             String("SetFocusedApp()"))) {
@@ -4982,7 +4983,7 @@ ECode CWindowManagerService::SetFocusedApp(
             Binder::RestoreCallingIdentity(origId);
         }
     }
-
+    Slogger::I(TAG, " <<< SetFocusedApp");
     return NOERROR;
 }
 

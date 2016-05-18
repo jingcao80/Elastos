@@ -36,7 +36,7 @@ public:
         , public ISpinnerSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SpinnerSavedState();
 
@@ -61,7 +61,7 @@ private:
         , public ISpinnerAdapter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DropDownAdapter(
             /* [in] */ ISpinnerAdapter* adapter);
@@ -126,7 +126,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DialogPopup(
             /* [in] */ Spinner* host);
@@ -184,7 +184,7 @@ private:
         , public IAdapterViewOnItemClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ItemClickListener(
             /* [in] */ Spinner* spinnerHost,
@@ -206,7 +206,7 @@ private:
         , public IOnGlobalLayoutListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         GlobalLayoutListener(
             /* [in] */ Spinner* spinnerHost,
@@ -224,7 +224,7 @@ private:
         , public IOnGlobalLayoutListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         GlobalLayoutListener2(
             /* [in] */ Spinner* host);
@@ -240,7 +240,7 @@ private:
         , public IPopupWindowOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DismissListener(
             /* [in] */ Spinner* spinnerHost,
@@ -259,7 +259,7 @@ private:
         , public ISpinnerPopup
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DropdownPopup(
             /* [in] */ IContext* context,
@@ -336,7 +336,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Spinner();
 

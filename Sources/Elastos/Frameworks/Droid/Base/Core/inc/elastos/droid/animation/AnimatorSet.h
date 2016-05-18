@@ -92,7 +92,7 @@ private:
         , public IAnimatorSetListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TO_STRING_IMPL("AnimatorSet::AnimatorSetListener")
 
@@ -148,7 +148,7 @@ public:
         , public ICloneable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Node(
             /* [in] */ IAnimator* animation);
@@ -243,7 +243,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Sets up this AnimatorSet to play all of the supplied animations at the same time.

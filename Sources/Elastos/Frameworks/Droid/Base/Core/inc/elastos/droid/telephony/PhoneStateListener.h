@@ -29,7 +29,7 @@ public:
         : public Object
         , public IIPhoneStateListener
     {
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PhoneStateListenerCallback(
             /* [in] */ PhoneStateListener* host);

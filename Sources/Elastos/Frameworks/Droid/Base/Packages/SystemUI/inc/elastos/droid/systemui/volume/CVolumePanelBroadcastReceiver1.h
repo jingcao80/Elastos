@@ -16,7 +16,7 @@ class VolumePanel;
 CarClass(CVolumePanelBroadcastReceiver1), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IVolumePanel* panel);

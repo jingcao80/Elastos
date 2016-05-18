@@ -31,7 +31,7 @@ public:
         , public IProgressBarSavedState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ProgressBarSavedState();
 
@@ -132,7 +132,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ProgressBar();
 

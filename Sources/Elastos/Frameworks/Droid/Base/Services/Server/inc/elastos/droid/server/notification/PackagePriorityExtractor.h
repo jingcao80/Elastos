@@ -19,7 +19,7 @@ class PackagePriorityExtractor
     , public INotificationSignalExtractor
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PackagePriorityExtractor();
 

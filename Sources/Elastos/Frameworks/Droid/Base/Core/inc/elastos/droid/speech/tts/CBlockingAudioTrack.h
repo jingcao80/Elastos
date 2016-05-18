@@ -14,7 +14,7 @@ CarClass(CBlockingAudioTrack)
     , public BlockingAudioTrack
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Tts

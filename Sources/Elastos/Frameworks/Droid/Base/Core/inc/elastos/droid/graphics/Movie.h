@@ -18,7 +18,7 @@ class Movie
     , public IMovie
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Movie(
         /* [in] */ Int64 nativeMovie);

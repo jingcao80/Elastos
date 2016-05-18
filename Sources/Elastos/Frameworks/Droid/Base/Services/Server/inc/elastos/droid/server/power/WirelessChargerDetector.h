@@ -77,7 +77,7 @@ private:
         MySensorEventListener(
             /* [in] */ WirelessChargerDetector* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnSensorChanged(

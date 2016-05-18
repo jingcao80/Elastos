@@ -20,7 +20,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Compare(
             /* [in] */ IInterface* object1,
@@ -29,7 +29,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     InstanceLearner();
 

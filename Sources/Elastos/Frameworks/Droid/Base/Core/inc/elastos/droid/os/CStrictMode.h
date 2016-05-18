@@ -60,7 +60,7 @@ public:
         , public IStrictModeThreadPolicy
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI ToString(
             /* [out] */ String* str);
@@ -87,7 +87,7 @@ public:
         , public IStrictModeVmPolicy
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         VmPolicy(
             /* [in] */ Int32 mask,
@@ -163,7 +163,7 @@ private:
         , public IBlockGuardPolicy
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AndroidBlockGuardPolicy(
             /* [in] */ Int32 policyMask);
@@ -256,7 +256,7 @@ private:
     public:
         CARAPI Finish();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
     };
 
     // Dummy throwable, for now, since we don't know when or where the

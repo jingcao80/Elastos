@@ -37,7 +37,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ColorInversionTile(
         /* [in] */ IQSTileHost* host);

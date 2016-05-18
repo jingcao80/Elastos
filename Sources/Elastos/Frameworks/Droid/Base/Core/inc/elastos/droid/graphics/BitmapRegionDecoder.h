@@ -20,7 +20,7 @@ class BitmapRegionDecoder
     friend class GraphicsNative;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ~BitmapRegionDecoder();
 

@@ -20,7 +20,7 @@ CarClass(CAppWidgetHostViewHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     /**
      * As of ICE_CREAM_SANDWICH we are automatically adding padding to widgets targeting
      * ICE_CREAM_SANDWICH and higher. The new widget design guidelines strongly recommend

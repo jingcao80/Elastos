@@ -38,7 +38,7 @@ class ECO_PUBLIC GeolocationPermissions
     , public IGeolocationPermissions
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 

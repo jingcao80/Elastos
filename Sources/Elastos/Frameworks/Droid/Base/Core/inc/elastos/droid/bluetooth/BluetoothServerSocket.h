@@ -20,7 +20,7 @@ class BluetoothServerSocket
     , public ICloseable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothServerSocket();
 

@@ -27,7 +27,7 @@ class AwPicture
     , public IPicture
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 private:
     // There is no explicit destroy method on Picture base-class, so cleanup is always
     // handled via the CleanupReference.
@@ -36,7 +36,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         //@Override
         CARAPI Run();
 

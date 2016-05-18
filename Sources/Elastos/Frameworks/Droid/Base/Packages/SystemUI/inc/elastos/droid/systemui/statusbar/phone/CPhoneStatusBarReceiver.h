@@ -18,7 +18,7 @@ class CPhoneStatusBar;
 CarClass(CPhoneStatusBarReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ IPhoneStatusBar* controller);

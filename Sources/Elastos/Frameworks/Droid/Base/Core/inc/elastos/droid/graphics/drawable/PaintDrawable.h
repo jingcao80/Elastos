@@ -18,7 +18,7 @@ class PaintDrawable
     , public IPaintDrawable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PaintDrawable();
 

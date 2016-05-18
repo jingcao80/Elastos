@@ -30,7 +30,7 @@ private:
         , public IAdapterViewOnItemClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AdapterViewOnItemClickListener(
             /* [in] */ ChooseTypeAndAccountActivity* host);

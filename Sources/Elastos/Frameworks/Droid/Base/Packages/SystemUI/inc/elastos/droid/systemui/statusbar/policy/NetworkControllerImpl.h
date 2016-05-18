@@ -108,7 +108,7 @@ private:
         , public IMobileDataControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MobileDataControllerCallback(
             /* [in] */ NetworkControllerImpl* host);
@@ -140,7 +140,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Construct this controller object and register for updates.

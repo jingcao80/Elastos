@@ -12,7 +12,7 @@ CarClass(CFileGestureLibrary)
     , public GestureLibraries::FileGestureLibrary
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CFileGestureLibrary();
 

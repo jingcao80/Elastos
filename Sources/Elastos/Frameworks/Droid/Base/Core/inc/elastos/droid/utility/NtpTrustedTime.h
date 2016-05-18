@@ -29,7 +29,7 @@ private:
         /* [in] */ Int64 timeout);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI GetInstance(
         /* [in] */ IContext* context,

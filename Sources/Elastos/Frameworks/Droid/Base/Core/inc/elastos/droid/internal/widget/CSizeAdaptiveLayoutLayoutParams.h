@@ -13,7 +13,7 @@ namespace Widget {
 CarClass(CSizeAdaptiveLayoutLayoutParams), public SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

@@ -28,7 +28,7 @@ public:
         , public ICallbackProxiesDeviceStateCallbackProxy
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor();
 
@@ -77,7 +77,7 @@ public:
         , public ICallbackProxiesDeviceCaptureCallbackProxy
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor();
 
@@ -135,7 +135,7 @@ public:
         , public ICallbackProxiesSessionStateCallbackProxy
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor();
 
@@ -167,7 +167,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
 private:
     CallbackProxies(

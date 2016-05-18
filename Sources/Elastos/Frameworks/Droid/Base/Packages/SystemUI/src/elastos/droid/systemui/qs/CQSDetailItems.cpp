@@ -22,7 +22,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-CAR_INTERFACE_IMPL(CQSDetailItems::Item, Object, IQSDetailItemsItem);
+CAR_INTERFACE_IMPL(CQSDetailItems::Item, Object, IQSDetailItemsItem)
 CQSDetailItems::Item::Item()
     : mIcon(0)
     , mCanDisconnect(FALSE)
@@ -61,7 +61,7 @@ ECode CQSDetailItems::H::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSDetailItems::OnClickListener1, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CQSDetailItems::OnClickListener1, Object, IViewOnClickListener)
 CQSDetailItems::OnClickListener1::OnClickListener1(
     /* [in] */ CQSDetailItems* host,
     /* [in] */ IQSDetailItemsItem* item)
@@ -78,7 +78,7 @@ ECode CQSDetailItems::OnClickListener1::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CQSDetailItems::OnClickListener2, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CQSDetailItems::OnClickListener2, Object, IViewOnClickListener)
 CQSDetailItems::OnClickListener2::OnClickListener2(
     /* [in] */ CQSDetailItems* host,
     /* [in] */ IQSDetailItemsItem* item)
@@ -98,8 +98,8 @@ ECode CQSDetailItems::OnClickListener2::OnClick(
 
 const String CQSDetailItems::TAG("QSDetailItems");
 const Boolean CQSDetailItems::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-CAR_OBJECT_IMPL(CQSDetailItems);
-CAR_INTERFACE_IMPL(CQSDetailItems, FrameLayout, IQSDetailItems);
+CAR_OBJECT_IMPL(CQSDetailItems)
+CAR_INTERFACE_IMPL(CQSDetailItems, FrameLayout, IQSDetailItems)
 CQSDetailItems::CQSDetailItems()
     : mItemsVisible(TRUE)
 {

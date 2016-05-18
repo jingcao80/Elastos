@@ -19,7 +19,7 @@ class ECO_PUBLIC ViewSwitcher
     , public IViewSwitcher
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a new empty ViewSwitcher.

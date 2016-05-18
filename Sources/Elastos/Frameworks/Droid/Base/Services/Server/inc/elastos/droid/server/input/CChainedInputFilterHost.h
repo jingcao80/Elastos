@@ -14,7 +14,7 @@ CarClass(CChainedInputFilterHost)
     , public CInputManagerService::ChainedInputFilterHost
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Input

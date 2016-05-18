@@ -23,7 +23,7 @@ class FloatArrayEvaluator
     , public ITypeEvaluator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Create a FloatArrayEvaluator that does not reuse the animated value. Care must be taken

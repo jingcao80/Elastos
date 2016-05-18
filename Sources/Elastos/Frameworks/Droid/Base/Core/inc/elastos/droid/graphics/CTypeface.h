@@ -20,7 +20,7 @@ namespace Graphics {
 CarClass(CTypeface), public Typeface
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Graphics

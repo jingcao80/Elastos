@@ -151,7 +151,10 @@ const Int32 CPhoneStatusBar::VISIBLE_LOCATIONS = StackScrollState::ViewState::LO
             | StackScrollState::ViewState::LOCATION_MAIN_AREA
             | StackScrollState::ViewState::LOCATION_BOTTOM_STACK_PEEKING;
 
-CAR_OBJECT_IMPL(CPhoneStatusBarUserSetupObserver);
+//=================================================================================
+// CPhoneStatusBarUserSetupObserver
+//=================================================================================
+CAR_OBJECT_IMPL(CPhoneStatusBarUserSetupObserver)
 ECode CPhoneStatusBarUserSetupObserver::constructor(
     /* [in] */ IPhoneStatusBar* host,
     /* [in] */ IHandler* handler)
@@ -185,7 +188,10 @@ ECode CPhoneStatusBarUserSetupObserver::OnChange(
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CPhoneStatusBarHeadsUpObserver);
+//=================================================================================
+// CPhoneStatusBarHeadsUpObserver
+//=================================================================================
+CAR_OBJECT_IMPL(CPhoneStatusBarHeadsUpObserver)
 ECode CPhoneStatusBarHeadsUpObserver::constructor(
     /* [in] */ IPhoneStatusBar* host,
     /* [in] */ IHandler* handler)
@@ -225,6 +231,9 @@ ECode CPhoneStatusBarHeadsUpObserver::OnChange(
     return NOERROR;
 }
 
+//=================================================================================
+// CPhoneStatusBar::Autohide
+//=================================================================================
 CPhoneStatusBar::Autohide::Autohide(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -239,6 +248,9 @@ ECode CPhoneStatusBar::Autohide::Run()
     return NOERROR;
 }
 
+//=================================================================================
+// CPhoneStatusBar::MediaListener
+//=================================================================================
 CPhoneStatusBar::MediaListener::MediaListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -262,7 +274,10 @@ ECode CPhoneStatusBar::MediaListener::OnMetadataChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnChildLocationsChangedListener, Object, IOnChildLocationsChangedListener);
+//=================================================================================
+// CPhoneStatusBar::OnChildLocationsChangedListener
+//=================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::OnChildLocationsChangedListener, Object, IOnChildLocationsChangedListener)
 CPhoneStatusBar::OnChildLocationsChangedListener::OnChildLocationsChangedListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -275,7 +290,10 @@ ECode CPhoneStatusBar::OnChildLocationsChangedListener::OnChildLocationsChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::NotificationLocationsChangedListener, Object, IOnChildLocationsChangedListener);
+//=================================================================================
+// CPhoneStatusBar::NotificationLocationsChangedListener
+//=================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::NotificationLocationsChangedListener, Object, IOnChildLocationsChangedListener)
 CPhoneStatusBar::NotificationLocationsChangedListener::NotificationLocationsChangedListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -299,6 +317,9 @@ ECode CPhoneStatusBar::NotificationLocationsChangedListener::OnChildLocationsCha
     return NOERROR;
 }
 
+//=================================================================================
+// CPhoneStatusBar::VisibilityReporter
+//=================================================================================
 CPhoneStatusBar::VisibilityReporter::VisibilityReporter(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -363,7 +384,10 @@ ECode CPhoneStatusBar::VisibilityReporter::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OverflowClickListener, Object, IViewOnClickListener);
+//=================================================================================
+// CPhoneStatusBar::OverflowClickListener
+//=================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::OverflowClickListener, Object, IViewOnClickListener)
 CPhoneStatusBar::OverflowClickListener::OverflowClickListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -376,7 +400,10 @@ ECode CPhoneStatusBar::OverflowClickListener::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::RecentsClickListener, Object, IViewOnClickListener);
+//=================================================================================
+// CPhoneStatusBar::RecentsClickListener
+//=================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::RecentsClickListener, Object, IViewOnClickListener)
 CPhoneStatusBar::RecentsClickListener::RecentsClickListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -385,12 +412,17 @@ CPhoneStatusBar::RecentsClickListener::RecentsClickListener(
 ECode CPhoneStatusBar::RecentsClickListener::OnClick(
     /* [in] */ IView* v)
 {
+    Logger::I(TAG, " >> RecentsClickListener::OnLongClick: %s", TO_CSTR(v));
     mHost->AwakenDreams();
     mHost->ToggleRecentApps();
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::LongPressBackRecentsListener, Object, IViewOnLongClickListener);
+//=================================================================================
+// CPhoneStatusBar::LongPressBackRecentsListener
+//=================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::LongPressBackRecentsListener, Object, IViewOnLongClickListener)
+
 CPhoneStatusBar::LongPressBackRecentsListener::LongPressBackRecentsListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -400,12 +432,16 @@ ECode CPhoneStatusBar::LongPressBackRecentsListener::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >> LongPressBackRecentsListener::OnLongClick: %s", TO_CSTR(v));
     VALIDATE_NOT_NULL(result);
     mHost->HandleLongPressBackRecents(v);
     *result = TRUE;
     return NOERROR;
 }
 
+//=================================================================================
+// CPhoneStatusBar::ShowSearchPanelRunnable
+//=================================================================================
 CPhoneStatusBar::ShowSearchPanelRunnable::ShowSearchPanelRunnable(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -418,7 +454,10 @@ ECode CPhoneStatusBar::ShowSearchPanelRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::HomeActionListener, Object, IViewOnTouchListener);
+//=================================================================================
+// CPhoneStatusBar::HomeActionListener
+//=================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::HomeActionListener, Object, IViewOnTouchListener)
 CPhoneStatusBar::HomeActionListener::HomeActionListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -451,6 +490,9 @@ ECode CPhoneStatusBar::HomeActionListener::OnTouch(
     return NOERROR;
 }
 
+//=================================================================================
+// CPhoneStatusBar::HideBackdropFront
+//=================================================================================
 CPhoneStatusBar::HideBackdropFront::HideBackdropFront(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -469,6 +511,9 @@ ECode CPhoneStatusBar::HideBackdropFront::Run()
     return NOERROR;
 }
 
+//=================================================================================
+// CPhoneStatusBar::H
+//=================================================================================
 CPhoneStatusBar::H::H(
     /* [in] */ CPhoneStatusBar* host)
     : BaseStatusBar::H(host)
@@ -510,7 +555,7 @@ ECode CPhoneStatusBar::H::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::FocusChangeListener, Object, IViewOnFocusChangeListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::FocusChangeListener, Object, IViewOnFocusChangeListener)
 ECode CPhoneStatusBar::FocusChangeListener::OnFocusChange(
     /* [in] */ IView* v,
     /* [in] */ Boolean hasFocus)
@@ -593,7 +638,7 @@ ECode CPhoneStatusBar::MyTicker::TickerHalting()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::TickingDoneListener, Object, IAnimationAnimationListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::TickingDoneListener, Object, IAnimationAnimationListener)
 CPhoneStatusBar::TickingDoneListener::TickingDoneListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -736,7 +781,7 @@ ECode CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::HandleMessage(
 
 
 const Int64 CPhoneStatusBar::DozeServiceHost::PROCESSING_TIME = 500;
-CAR_INTERFACE_IMPL(CPhoneStatusBar::DozeServiceHost, Object, IDozeHost);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::DozeServiceHost, Object, IDozeHost)
 CPhoneStatusBar::DozeServiceHost::DozeServiceHost(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -887,7 +932,7 @@ void CPhoneStatusBar::DozeServiceHost::HandleStopDozing()
     }
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnTouchListener1, Object, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::OnTouchListener1, Object, IViewOnTouchListener)
 CPhoneStatusBar::OnTouchListener1::OnTouchListener1(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -908,7 +953,7 @@ ECode CPhoneStatusBar::OnTouchListener1::OnTouch(
     return IView::Probe(mHost->mStatusBarWindow)->OnTouchEvent(event, result);
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::VerticalChangedListener, Object, IOnVerticalChangedListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::VerticalChangedListener, Object, IOnVerticalChangedListener)
 CPhoneStatusBar::VerticalChangedListener::VerticalChangedListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -924,7 +969,7 @@ ECode CPhoneStatusBar::VerticalChangedListener::OnVerticalChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnTouchListener2, Object, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::OnTouchListener2, Object, IViewOnTouchListener)
 CPhoneStatusBar::OnTouchListener2::OnTouchListener2(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -941,7 +986,7 @@ ECode CPhoneStatusBar::OnTouchListener2::OnTouch(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnClickListener1, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::OnClickListener1, Object, IViewOnClickListener)
 CPhoneStatusBar::OnClickListener1::OnClickListener1(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -954,7 +999,7 @@ ECode CPhoneStatusBar::OnClickListener1::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::BatteryStateChangeCallback, Object, IBatteryStateChangeCallback);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::BatteryStateChangeCallback, Object, IBatteryStateChangeCallback)
 CPhoneStatusBar::BatteryStateChangeCallback::BatteryStateChangeCallback(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -980,7 +1025,7 @@ ECode CPhoneStatusBar::BatteryStateChangeCallback::OnBatteryLevelChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::HostCallback, Object, IQSTileHostCallback);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::HostCallback, Object, IQSTileHostCallback)
 CPhoneStatusBar::HostCallback::HostCallback(
     /* [in] */ CPhoneStatusBar* host,
     /* [in] */ IQSTileHost* qsh)
@@ -1032,7 +1077,7 @@ ECode CPhoneStatusBar::Runnable3::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnPreDrawListener, Object, IOnPreDrawListener);
+CAR_INTERFACE_IMPL(CPhoneStatusBar::OnPreDrawListener, Object, IOnPreDrawListener)
 CPhoneStatusBar::OnPreDrawListener::OnPreDrawListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -1243,7 +1288,7 @@ ECode CPhoneStatusBar::Runnable11::Run()
     return NOERROR;
 }
 
-CAR_OBJECT_IMPL(CPhoneStatusBar);
+CAR_OBJECT_IMPL(CPhoneStatusBar)
 CAR_INTERFACE_IMPL_4(CPhoneStatusBar, BaseStatusBar, IPhoneStatusBar, IDemoMode, IDragDownCallback, IActivityStarter);
 CPhoneStatusBar::CPhoneStatusBar()
     : mNaturalBarHeight(-1)
@@ -1995,6 +2040,9 @@ void CPhoneStatusBar::PrepareNavigationBarView()
     mNavigationBarView->GetBackButton((IView**)&view);
     view->SetLongClickable(TRUE);
     view->SetOnLongClickListener(mLongPressBackRecentsListener);
+    Logger::I(TAG, "=========================================================");
+    Logger::I(TAG, "BackButton:%s SetOnLongClickListener:%s", TO_CSTR(view), TO_CSTR(mLongPressBackRecentsListener));
+    Logger::I(TAG, "=========================================================");
 
     view = NULL;
     mNavigationBarView->GetHomeButton((IView**)&view);
@@ -5442,17 +5490,17 @@ ECode CPhoneStatusBar::OnScreenTurnedOn()
 }
 
 /**
- * This handles Int64-press of both back and recents.  They are
- * handled together to capture them both being Int64-pressed
+ * This handles long-press of both back and recents.  They are
+ * handled together to capture them both being long-pressed
  * at the same time to exit screen pinning (lock task).
  *
- * When accessibility mode is on, only a Int64-press from recents
+ * When accessibility mode is on, only a long-press from recents
  * is required to exit.
  *
- * In all other circumstances we try to pass through Int64-press events
+ * In all other circumstances we try to pass through long-press events
  * for Back, so that apps can still use it.  Which can be from two things.
  * 1) Not currently in screen pinning (lock task).
- * 2) Back is Int64-pressed without recents.
+ * 2) Back is long-pressed without recents.
  */
 void CPhoneStatusBar::HandleLongPressBackRecents(
     /* [in] */ IView* v)
@@ -5462,7 +5510,9 @@ void CPhoneStatusBar::HandleLongPressBackRecents(
         Boolean sendBackLongPress = FALSE;
         AutoPtr<IIActivityManager> activityManager = ActivityManagerNative::GetDefault();
         Boolean isAccessiblityEnabled = FALSE;
-        mAccessibilityManager->IsEnabled(&isAccessiblityEnabled);
+        if (mAccessibilityManager) {
+            mAccessibilityManager->IsEnabled(&isAccessiblityEnabled);
+        }
         Boolean tmp = FALSE;
         Int32 id = 0;
         ec = activityManager->IsInLockTaskMode(&tmp);

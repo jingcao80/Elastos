@@ -83,7 +83,7 @@ public:
         , public ISensorEventListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SensorEventListenerImpl(
             /* [in] */ WindowOrientationListener* owner);
@@ -313,7 +313,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     /**
       * Creates a new WindowOrientationListener.
       *

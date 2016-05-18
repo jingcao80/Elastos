@@ -46,7 +46,7 @@ class StringFilter
     , public IFilter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     StringFilter(
         /* [in] */ ValueProvider* valueProvider);

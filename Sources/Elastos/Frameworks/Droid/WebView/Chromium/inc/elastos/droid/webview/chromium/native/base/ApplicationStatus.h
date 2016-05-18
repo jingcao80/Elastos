@@ -114,7 +114,7 @@ private:
     public:
         InnerActivityLifecycleCallbacks();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnActivityCreated(
             /* [in] */ IActivity* activity,

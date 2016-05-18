@@ -34,7 +34,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         GetAllowedRunnable(
             /* [in] */ AwGeolocationPermissions* owner,
             /* [in] */ IValueCallback* callback,
@@ -53,7 +53,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         GetOriginsRunnable(
             /* [in] */ AwGeolocationPermissions* owner,
             /* [in] */ IValueCallback* callback);

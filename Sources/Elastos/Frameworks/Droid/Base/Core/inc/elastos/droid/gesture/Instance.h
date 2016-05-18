@@ -20,7 +20,7 @@ class Instance
     , public IInstance
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Instance();
 

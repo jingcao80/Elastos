@@ -40,7 +40,7 @@ private:
         , public ICastControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CastCallback(
             /* [in] */ PhoneStatusBarPolicy* host);

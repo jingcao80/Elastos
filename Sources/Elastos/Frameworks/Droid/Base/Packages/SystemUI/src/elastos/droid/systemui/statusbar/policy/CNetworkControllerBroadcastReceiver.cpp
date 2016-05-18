@@ -13,7 +13,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CNetworkControllerBroadcastReceiver);
+CAR_OBJECT_IMPL(CNetworkControllerBroadcastReceiver)
 ECode CNetworkControllerBroadcastReceiver::constructor(
     /* [in] */ INetworkControllerImpl* controller)
 {

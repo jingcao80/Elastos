@@ -87,7 +87,7 @@ private:
         , public IViewOnLayoutChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnLayoutChangeListener(
             /* [in] */ CNotificationPanelView* host);
@@ -113,7 +113,7 @@ private:
         , public IViewOnLayoutChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnLayoutChangeListener2(
             /* [in] */ CNotificationPanelView* host);
@@ -139,7 +139,7 @@ private:
         , public IOnPreDrawListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnPreDrawListener(
             /* [in] */ CNotificationPanelView* host);
@@ -196,7 +196,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ViewOnClickListener(
             /* [in] */ CNotificationPanelView* host);
@@ -213,7 +213,7 @@ private:
         , public IListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Listener(
             /* [in] */ CNotificationPanelView* host);
@@ -234,7 +234,7 @@ private:
         , public IExpandableViewOnHeightChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         HeightChangedListener(
             /* [in] */ CNotificationPanelView* host);
@@ -254,7 +254,7 @@ private:
         , public IOnOverscrollTopChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TopChangedListener(
             /* [in] */ CNotificationPanelView* host);
@@ -291,7 +291,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnPreDrawListener2(
             /* [in] */ CNotificationPanelView* host);
@@ -322,7 +322,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener(
             /* [in] */ CNotificationPanelView* host);
@@ -384,7 +384,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener2(
             /* [in] */ IView* target,
@@ -419,9 +419,9 @@ private:
 
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CNotificationPanelView();
 

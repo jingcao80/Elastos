@@ -7,8 +7,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CTickerView);
-CAR_INTERFACE_IMPL(CTickerView, TextSwitcher, ITickerView);
+CAR_OBJECT_IMPL(CTickerView)
+CAR_INTERFACE_IMPL(CTickerView, TextSwitcher, ITickerView)
 ECode CTickerView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

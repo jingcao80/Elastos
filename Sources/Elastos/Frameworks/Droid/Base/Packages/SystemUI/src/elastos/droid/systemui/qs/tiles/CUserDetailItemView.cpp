@@ -20,8 +20,8 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_OBJECT_IMPL(CUserDetailItemView);
-CAR_INTERFACE_IMPL(CUserDetailItemView, LinearLayout, IUserDetailItemView);
+CAR_OBJECT_IMPL(CUserDetailItemView)
+CAR_INTERFACE_IMPL(CUserDetailItemView, LinearLayout, IUserDetailItemView)
 ECode CUserDetailItemView::constructor(
     /* [in] */ IContext* context)
 {

@@ -28,7 +28,7 @@ public:
         , public INinePatchInsetStruct
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
         InsetStruct(
@@ -64,7 +64,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~NinePatch();
 

@@ -16,7 +16,7 @@ CarClass(CInstanceHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI CreateInstance(
         /* [in] */ Int32 sequenceType,

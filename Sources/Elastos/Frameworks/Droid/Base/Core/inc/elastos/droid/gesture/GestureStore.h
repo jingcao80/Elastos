@@ -27,7 +27,7 @@ class GestureStore
     , public IGestureStore
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     GestureStore();
 

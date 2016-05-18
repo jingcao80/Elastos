@@ -2020,6 +2020,12 @@ module
             [in] Int32 processState);
     }
 
+    interface IActivityManagerRunningAppProcessInfoHelper {
+        ProcStateToImportance(
+            [in] Int32 procState,
+            [out] Int32* result);
+    }
+
     } // namespace App
     } // namespace Droid
     } // namespace Elastos

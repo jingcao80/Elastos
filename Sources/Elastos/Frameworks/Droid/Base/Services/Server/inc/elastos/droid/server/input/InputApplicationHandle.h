@@ -14,7 +14,7 @@ class InputApplicationHandle
     , public IInputApplicationHandle
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     InputApplicationHandle(
         /* [in] */ IObject* appWindowToken);

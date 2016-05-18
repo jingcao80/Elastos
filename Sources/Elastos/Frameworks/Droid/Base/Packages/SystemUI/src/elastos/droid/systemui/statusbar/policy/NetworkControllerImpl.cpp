@@ -194,7 +194,7 @@ ECode NetworkControllerImpl::WifiHandler::HandleMessage(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(NetworkControllerImpl::MobileDataControllerCallback, Object, IMobileDataControllerCallback);
+CAR_INTERFACE_IMPL(NetworkControllerImpl::MobileDataControllerCallback, Object, IMobileDataControllerCallback)
 NetworkControllerImpl::MobileDataControllerCallback::MobileDataControllerCallback(
     /* [in] */ NetworkControllerImpl* host)
     : mHost(host)

@@ -20,7 +20,7 @@ class ZenModeControllerCallback
     , public IZenModeControllerCallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI OnZenChanged(
         /* [in] */ Int32 zen);

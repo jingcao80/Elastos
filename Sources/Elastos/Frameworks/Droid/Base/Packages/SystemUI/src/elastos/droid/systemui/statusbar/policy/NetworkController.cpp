@@ -7,7 +7,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(AccessPoint, Object, INetworkControllerAccessPoint);
+CAR_INTERFACE_IMPL(AccessPoint, Object, INetworkControllerAccessPoint)
 AccessPoint::AccessPoint()
     : mNetworkId(0)
     , mIconId(0)
@@ -90,7 +90,7 @@ ECode AccessPoint::GetLevel(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(DataUsageInfo, Object, INetworkControllerDataUsageInfo);
+CAR_INTERFACE_IMPL(DataUsageInfo, Object, INetworkControllerDataUsageInfo)
 DataUsageInfo::DataUsageInfo()
     : mLimitLevel(0)
     , mWarningLevel(0)

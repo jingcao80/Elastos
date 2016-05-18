@@ -15,7 +15,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(NextAlarmController, Object, INextAlarmController);
+CAR_INTERFACE_IMPL(NextAlarmController, Object, INextAlarmController)
 NextAlarmController::NextAlarmController(
     /* [in] */ IContext* context)
 {

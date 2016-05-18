@@ -38,7 +38,7 @@ public:
         , public IPrinter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Println(
@@ -82,7 +82,7 @@ private:
     public:
         IdleTracingLooperMonitor();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI QueueIdle(

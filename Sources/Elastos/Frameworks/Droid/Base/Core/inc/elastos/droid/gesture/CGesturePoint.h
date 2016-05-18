@@ -12,7 +12,7 @@ CarClass(CGesturePoint)
     , public GesturePoint
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CGesturePoint();
 

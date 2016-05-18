@@ -12,7 +12,7 @@ CarClass(CListView)
     , public ListView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

@@ -20,7 +20,7 @@ namespace Media{
 //-------------------------------------------
 //    CMyRingtonePlayer
 //-------------------------------------------
-CAR_OBJECT_IMPL(CMyRingtonePlayer);
+CAR_OBJECT_IMPL(CMyRingtonePlayer)
 CAR_INTERFACE_IMPL_2(CMyRingtonePlayer, Object, IIRingtonePlayer, IBinder);
 ECode CMyRingtonePlayer::constructor(
     /* [in] */ ISystemUI* host)

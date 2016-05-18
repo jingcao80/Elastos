@@ -19,7 +19,7 @@ class CursorFilter
     , public ICursorFilter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ ICursorFilterClient* client);

@@ -312,8 +312,8 @@ void CLoadAverageService::LoadView::UpdateDisplay()
 }
 
 
-CAR_OBJECT_IMPL(CLoadAverageService);
-CAR_INTERFACE_IMPL(CLoadAverageService, Service, ILoadAverageService);
+CAR_OBJECT_IMPL(CLoadAverageService)
+CAR_INTERFACE_IMPL(CLoadAverageService, Service, ILoadAverageService)
 ECode CLoadAverageService::OnCreate()
 {
     Service::OnCreate();

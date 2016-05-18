@@ -235,7 +235,7 @@ private:
         /* [in] */ ILooper* looper);
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @return The refresh rate as the nanoseconds between frames

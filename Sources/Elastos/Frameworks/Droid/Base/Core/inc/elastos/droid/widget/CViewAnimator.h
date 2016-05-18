@@ -11,7 +11,7 @@ namespace Widget {
 CarClass(CViewAnimator) , public ViewAnimator
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

@@ -20,7 +20,7 @@ CarClass(CGestureUtils)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CGestureUtils();
 

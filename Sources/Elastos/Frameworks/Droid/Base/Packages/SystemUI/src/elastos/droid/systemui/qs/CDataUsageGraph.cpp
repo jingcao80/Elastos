@@ -12,8 +12,8 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-CAR_OBJECT_IMPL(CDataUsageGraph);
-CAR_INTERFACE_IMPL(CDataUsageGraph, View, IDataUsageGraph);
+CAR_OBJECT_IMPL(CDataUsageGraph)
+CAR_INTERFACE_IMPL(CDataUsageGraph, View, IDataUsageGraph)
 CDataUsageGraph::CDataUsageGraph()
     : mTrackColor(0)
     , mUsageColor(0)

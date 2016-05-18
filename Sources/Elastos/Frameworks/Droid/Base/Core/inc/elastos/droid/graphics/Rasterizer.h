@@ -20,7 +20,7 @@ class Rasterizer
     friend class Paint;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ~Rasterizer();
 

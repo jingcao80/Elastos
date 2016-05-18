@@ -66,7 +66,7 @@ public:
         , public IOnKeyboardActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _OnKeyboardActionListener(
             /* [in] */ KeyboardView* host);
@@ -176,7 +176,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyboardView();
 

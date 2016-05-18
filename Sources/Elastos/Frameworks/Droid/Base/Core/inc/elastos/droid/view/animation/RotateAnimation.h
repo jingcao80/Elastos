@@ -14,7 +14,7 @@ class RotateAnimation
     , public IRotateAnimation
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RotateAnimation();
 

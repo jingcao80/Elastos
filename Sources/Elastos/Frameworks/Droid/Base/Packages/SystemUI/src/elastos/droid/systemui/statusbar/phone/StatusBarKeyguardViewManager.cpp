@@ -119,7 +119,7 @@ ECode StatusBarKeyguardViewManager::Runnable7::Run()
 }
 
 
-CAR_INTERFACE_IMPL(StatusBarKeyguardViewManager, Object, IStatusBarKeyguardViewManager);
+CAR_INTERFACE_IMPL(StatusBarKeyguardViewManager, Object, IStatusBarKeyguardViewManager)
 StatusBarKeyguardViewManager::StatusBarKeyguardViewManager(
     /* [in] */ IContext* context,
     /* [in] */ IViewMediatorCallback* callback,

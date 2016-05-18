@@ -12,7 +12,7 @@ CarClass(CTimePickerClockDelegateSavedState)
     , public TimePickerClockDelegate::TimePickerClockDelegateSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

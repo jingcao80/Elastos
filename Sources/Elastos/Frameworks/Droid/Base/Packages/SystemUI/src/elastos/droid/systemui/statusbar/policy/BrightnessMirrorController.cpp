@@ -28,7 +28,7 @@ ECode BrightnessMirrorController::Runnable1::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(BrightnessMirrorController, Object, IBrightnessMirrorController);
+CAR_INTERFACE_IMPL(BrightnessMirrorController, Object, IBrightnessMirrorController)
 BrightnessMirrorController::BrightnessMirrorController(
     /* [in] */ IStatusBarWindowView* statusBarWindow)
     : TRANSITION_DURATION_OUT(150)

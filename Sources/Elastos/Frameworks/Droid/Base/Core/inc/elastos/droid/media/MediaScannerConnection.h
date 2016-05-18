@@ -16,7 +16,7 @@ public:
         , public IIMediaScannerListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyMediaScannerListener(
             /* [in] */ IWeakReference* host);

@@ -62,7 +62,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI Compare(
@@ -80,7 +80,7 @@ private:
         , public IWifiManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnSuccess();
@@ -91,7 +91,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WifiAccessPointController(
         /* [in] */ IContext* context);

@@ -31,7 +31,7 @@ public:
         , public IKeyguardManagerKeyguardLock
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyguardLock();
 

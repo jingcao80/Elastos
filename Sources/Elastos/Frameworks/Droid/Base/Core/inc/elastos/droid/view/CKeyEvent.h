@@ -14,7 +14,7 @@ CarClass(CKeyEvent)
     , public KeyEvent
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace View

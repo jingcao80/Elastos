@@ -18,7 +18,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CBarBackgroundDrawable);
+CAR_OBJECT_IMPL(CBarBackgroundDrawable)
 CBarBackgroundDrawable::CBarBackgroundDrawable()
     : mOpaque(0)
     , mSemiTransparent(0)

@@ -307,7 +307,7 @@ ECode CNotificationStackScrollLayout::Runnable2::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationStackScrollLayout::ChildrenUpdater, Object, IOnPreDrawListener);
+CAR_INTERFACE_IMPL(CNotificationStackScrollLayout::ChildrenUpdater, Object, IOnPreDrawListener)
 CNotificationStackScrollLayout::ChildrenUpdater::ChildrenUpdater(
     /* [in] */ CNotificationStackScrollLayout* host)
     : mHost(host)

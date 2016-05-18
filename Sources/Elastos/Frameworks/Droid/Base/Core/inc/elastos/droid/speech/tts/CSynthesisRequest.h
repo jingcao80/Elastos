@@ -16,7 +16,7 @@ CarClass(CSynthesisRequest)
     , public SynthesisRequest
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Tts

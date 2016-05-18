@@ -21,9 +21,9 @@ CarClass(CKeyguardIndicationTextView)
     , public IKeyguardIndicationTextView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context);

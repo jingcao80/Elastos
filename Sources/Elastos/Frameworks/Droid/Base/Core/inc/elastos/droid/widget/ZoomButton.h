@@ -43,7 +43,7 @@ private:
         , public IViewOnLongClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LongClickListener(
             /* [in] */ ZoomButton* host);
@@ -57,7 +57,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ZoomButton();
 

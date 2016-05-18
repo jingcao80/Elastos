@@ -20,7 +20,7 @@ class NotificationComparator
     , public IComparator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     NotificationComparator();
 

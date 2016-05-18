@@ -33,7 +33,7 @@ private:
         , public ICompoundButtonOnCheckedChangeListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyCheckListener(
             /* [in] */ CToggleSlider* host);
@@ -72,9 +72,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CToggleSlider();
 

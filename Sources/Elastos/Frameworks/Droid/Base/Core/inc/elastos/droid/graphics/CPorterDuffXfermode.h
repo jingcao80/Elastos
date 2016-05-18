@@ -14,9 +14,9 @@ CarClass(CPorterDuffXfermode)
     , public IPorterDuffXfermode
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Create an xfermode that uses the specified porter-duff mode.

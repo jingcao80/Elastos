@@ -21,7 +21,7 @@ class BluetoothActivityEnergyInfo
     , public IParcelable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothActivityEnergyInfo();
 

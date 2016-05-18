@@ -12,7 +12,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-CAR_INTERFACE_IMPL(SecureSetting, ContentObserver, IListenable);
+CAR_INTERFACE_IMPL(SecureSetting, ContentObserver, IListenable)
 SecureSetting::SecureSetting(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,

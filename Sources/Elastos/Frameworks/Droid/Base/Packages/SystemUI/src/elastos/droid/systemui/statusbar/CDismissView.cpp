@@ -7,8 +7,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CDismissView);
-CAR_INTERFACE_IMPL(CDismissView, StackScrollerDecorView, IDismissView);
+CAR_OBJECT_IMPL(CDismissView)
+CAR_INTERFACE_IMPL(CDismissView, StackScrollerDecorView, IDismissView)
 ECode CDismissView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

@@ -18,7 +18,7 @@ class WindowManagerImpl
     , public IViewManager
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WindowManagerImpl(
         /* [in] */ IDisplay* display);

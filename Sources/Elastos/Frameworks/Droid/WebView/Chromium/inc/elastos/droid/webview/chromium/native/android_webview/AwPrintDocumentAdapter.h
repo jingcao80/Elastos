@@ -37,7 +37,7 @@ public:
         , public IValueCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         InnerValueCallback(
             /* [in] */ AwPrintDocumentAdapter* owner,
             /* [in] */ /*TODO IWriteResultCallback*/IInterface* callback);

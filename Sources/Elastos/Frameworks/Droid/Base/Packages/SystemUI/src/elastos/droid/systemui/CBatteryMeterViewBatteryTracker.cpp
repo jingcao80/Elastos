@@ -16,7 +16,7 @@ namespace Droid {
 namespace SystemUI {
 
 Int32 CBatteryMeterViewBatteryTracker::UNKNOWN_LEVEL = -1;
-CAR_OBJECT_IMPL(CBatteryMeterViewBatteryTracker);
+CAR_OBJECT_IMPL(CBatteryMeterViewBatteryTracker)
 CBatteryMeterViewBatteryTracker::CBatteryMeterViewBatteryTracker()
     : mLevel(UNKNOWN_LEVEL)
     , mPlugType(0)

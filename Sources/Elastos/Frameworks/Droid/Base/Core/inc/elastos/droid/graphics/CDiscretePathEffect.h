@@ -14,9 +14,9 @@ CarClass(CDiscretePathEffect)
     , public IDiscretePathEffect
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Chop the path into lines of segmentLength, randomly deviating from the

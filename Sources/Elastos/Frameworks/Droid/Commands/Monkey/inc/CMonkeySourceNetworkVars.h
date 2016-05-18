@@ -36,7 +36,7 @@ public:
     class ListVarCommand : public ElRefBase, public IMonkeyCommand
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         // listvar
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -50,7 +50,7 @@ public:
      class GetVarCommand : public ElRefBase, public IMonkeyCommand
      {
      public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         // getvar varname
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,

@@ -90,7 +90,7 @@ public:
         , public IPdfRendererPage //implements AutoCloseable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ~Page();
 
@@ -196,9 +196,9 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     /** @hide */
     // @IntDef({

@@ -24,7 +24,7 @@ class ECO_PUBLIC HttpAuthHandler
     , public IHttpAuthHandler
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @hide Only for use by WebViewProvider implementations.

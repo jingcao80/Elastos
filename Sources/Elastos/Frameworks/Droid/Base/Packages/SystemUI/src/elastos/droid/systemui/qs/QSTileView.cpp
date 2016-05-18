@@ -53,7 +53,7 @@ ECode QSTileView::H::HandleMessage(
 }
 
 AutoPtr<ITypeface> QSTileView::CONDENSED = InitStatic();
-CAR_INTERFACE_IMPL(QSTileView, ViewGroup, IQSTileView);
+CAR_INTERFACE_IMPL(QSTileView, ViewGroup, IQSTileView)
 QSTileView::QSTileView()
     : mIconSizePx(0)
     , mTileSpacingPx(0)

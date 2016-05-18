@@ -39,7 +39,7 @@ class SparseInt32Array
     , public ICloneable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SparseInt32Array();
 

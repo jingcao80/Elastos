@@ -73,7 +73,7 @@ private:
 public:
     ChildProcessService();
 
-    //CAR_INTERFACE_DECL();
+    //CAR_INTERFACE_DECL()
 
     /* package */
     static AutoPtr<IContext> GetContext();

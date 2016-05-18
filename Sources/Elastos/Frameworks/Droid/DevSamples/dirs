@@ -1,0 +1,3 @@
+
+DIRS += ImageDemp/elastos/devsamples/imagedemo
+DIRS += TabHostDemp/elastos/devsamples/tabhostdemo

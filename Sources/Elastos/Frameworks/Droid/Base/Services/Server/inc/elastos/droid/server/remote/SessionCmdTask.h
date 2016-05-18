@@ -43,7 +43,7 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ const String& clientCmd);
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * call() implements Callable<> and

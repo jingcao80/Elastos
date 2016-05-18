@@ -26,7 +26,7 @@ class KeyguardService
     , public IKeyguardService
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyguardService();
 

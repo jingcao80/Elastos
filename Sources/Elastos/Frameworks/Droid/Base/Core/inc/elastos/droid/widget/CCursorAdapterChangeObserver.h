@@ -13,7 +13,7 @@ CarClass(CCursorAdapterChangeObserver)
     , public CursorAdapter::ChangeObserver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

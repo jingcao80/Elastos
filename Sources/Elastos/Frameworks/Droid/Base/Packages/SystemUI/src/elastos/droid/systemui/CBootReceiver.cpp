@@ -27,15 +27,17 @@ ECode CBootReceiver::OnReceive(
     context->GetContentResolver((IContentResolver**)&res);
 
     Int32 value = 0;
-    ECode ec = Elastos::Droid::Provider::Settings::Global::GetInt32(res, ISettingsGlobal::SHOW_PROCESSES, 0, &value);
+    ECode ec = Elastos::Droid::Provider::Settings::Global::GetInt32(
+        res, ISettingsGlobal::SHOW_PROCESSES, 0, &value);
     if (FAILED(ec)) {
         Logger::E(TAG, "Can't start load average service");
     }
 
     if (value != 0) {
         AutoPtr<IIntent> loadavg;
-        CIntent::New(context, ECLSID_CLoadAverageService/*com.android.systemui.LoadAverageService.class*/
-                        , (IIntent**)&loadavg);
+        CIntent::New(context,
+            ECLSID_CLoadAverageService/*com.android.systemui.LoadAverageService.class*/,
+            (IIntent**)&loadavg);
 
         AutoPtr<IComponentName> name;
         if (FAILED(context->StartService(loadavg, (IComponentName**)&name))) {

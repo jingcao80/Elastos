@@ -147,7 +147,7 @@ private:
         , public IOnUnlockMethodChangedListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         UnlockMethodChangedListener(
             /* [in] */ CKeyguardBottomAreaView* host);
@@ -164,7 +164,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnClickListener(
             /* [in] */ CKeyguardBottomAreaView* host);
@@ -181,7 +181,7 @@ private:
         , public IViewOnLongClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnLongClickListener(
             /* [in] */ CKeyguardBottomAreaView* host);
@@ -208,9 +208,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CKeyguardBottomAreaView();
 

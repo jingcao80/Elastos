@@ -362,7 +362,7 @@ INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::System::sNameValue
 static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
 {
     AutoPtr<IHashSet> hs;
-    CHashSet::New(45, (IHashSet**)&hs);
+    CHashSet::New(44, (IHashSet**)&hs);
 
     hs->Add(CoreUtils::Convert(ISettingsSecure::ANDROID_ID));
     hs->Add(CoreUtils::Convert(ISettingsSecure::HTTP_PROXY));
@@ -405,10 +405,12 @@ static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
     hs->Add(CoreUtils::Convert(ISettingsSecure::QS_TILES));
     hs->Add(CoreUtils::Convert(ISettingsSecure::QS_USE_MAIN_TILES));
     hs->Add(CoreUtils::Convert(ISettingsSecure::QS_SHOW_BRIGHTNESS_SLIDER));
-    // TODO:
-    // for (Int32 i = 0; i < Settings::Secure::NAVIGATION_RING_TARGETS->GetLength(); i++) {
-    //     hs->Add(CoreUtils::Convert((*Settings::Secure::NAVIGATION_RING_TARGETS)[i]));
-    // }
+
+    /* Settings::Secure::NAVIGATION_RING_TARGETS */
+    hs->Add(CoreUtils::Convert("navigation_ring_targets_0"));
+    hs->Add(CoreUtils::Convert("navigation_ring_targets_1"));
+    hs->Add(CoreUtils::Convert("navigation_ring_targets_2"));
+
     hs->Add(CoreUtils::Convert(ISettingsSecure::DEV_FORCE_SHOW_NAVBAR));
     hs->Add(CoreUtils::Convert(ISettingsSecure::KEYBOARD_BRIGHTNESS));
     hs->Add(CoreUtils::Convert(ISettingsSecure::BUTTON_BRIGHTNESS));
@@ -1538,6 +1540,8 @@ ECode Settings::Secure::GetInt32ForUser(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = def;
+
     if (ISettingsSecure::LOCATION_MODE.Equals(name)) {
         // HACK ALERT: temporary hack to work around b/10491283.
         // TODO: once b/10491283 fixed, remove this hack
@@ -1547,7 +1551,7 @@ ECode Settings::Secure::GetInt32ForUser(
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
     Int32 _value;
-    if (v.IsNull()) {
+    if (v.IsNullOrEmpty()) {
         _value = def;
         return NOERROR;
     } else {
@@ -2102,6 +2106,8 @@ ECode Settings::Global::GetStringForUser(
     /* [out] */ String* value)
 {
     VALIDATE_NOT_NULL(value);
+    *value = String(NULL);
+
     Boolean flag = FALSE;
     MOVED_TO_SECURE->Contains(CoreUtils::Convert(name).Get(), &flag);
     if (flag) {

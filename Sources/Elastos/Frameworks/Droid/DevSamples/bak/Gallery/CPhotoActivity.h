@@ -52,7 +52,7 @@ private:
         MyListener(
             /* [in] */ CPhotoActivity* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -81,7 +81,7 @@ private:
         , public IDialogInterfaceOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DialogListener(
             /* [in] */ CPhotoActivity* host);

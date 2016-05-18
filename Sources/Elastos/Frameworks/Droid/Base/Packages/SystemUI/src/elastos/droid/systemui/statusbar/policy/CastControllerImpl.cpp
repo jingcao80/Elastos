@@ -92,7 +92,7 @@ ECode CastControllerImpl::MediaCallback::OnRouteUnselected(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CastControllerImpl::MediaProjectionManagerCallback, Object, IMediaProjectionManagerCallback);
+CAR_INTERFACE_IMPL(CastControllerImpl::MediaProjectionManagerCallback, Object, IMediaProjectionManagerCallback)
 CastControllerImpl::MediaProjectionManagerCallback::MediaProjectionManagerCallback(
     /* [in] */ CastControllerImpl* host)
     : mHost(host)
@@ -112,7 +112,7 @@ ECode CastControllerImpl::MediaProjectionManagerCallback::OnStop(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CastControllerImpl, Object, ICastController);
+CAR_INTERFACE_IMPL(CastControllerImpl, Object, ICastController)
 CastControllerImpl::CastControllerImpl(
     /* [in] */ IContext* context)
     : mDiscovering(FALSE)

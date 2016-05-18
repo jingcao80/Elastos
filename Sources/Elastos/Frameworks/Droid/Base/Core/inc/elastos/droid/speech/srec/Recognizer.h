@@ -102,7 +102,7 @@ public:
     public:
         friend class Recognizer;
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RecognizerGrammar();
 
@@ -176,7 +176,7 @@ public:
     friend class RecognizerGrammar;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Recognizer();
 

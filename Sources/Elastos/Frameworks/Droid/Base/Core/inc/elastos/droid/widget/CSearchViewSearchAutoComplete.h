@@ -11,7 +11,7 @@ namespace Widget {
 CarClass(CSearchViewSearchAutoComplete), public SearchView::_SearchAutoComplete
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

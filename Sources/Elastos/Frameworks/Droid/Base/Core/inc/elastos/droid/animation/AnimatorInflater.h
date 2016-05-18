@@ -33,7 +33,7 @@ private:
         , public ITypeEvaluator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Create a PathDataEvaluator that reuses <code>nodeArray</code> for every evaluate() call.

@@ -9,7 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
-CAR_OBJECT_IMPL(CSystemUIBroadcastReceiver);
+CAR_OBJECT_IMPL(CSystemUIBroadcastReceiver)
+
 ECode CSystemUIBroadcastReceiver::constructor(
     /* [in] */ ISystemUIApplication* host)
 {

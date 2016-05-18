@@ -36,7 +36,7 @@ private:
             /* [in] */ const Handle64 nativeThread,
             /* [in] */ const Handle64 nativeEvent);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Run();

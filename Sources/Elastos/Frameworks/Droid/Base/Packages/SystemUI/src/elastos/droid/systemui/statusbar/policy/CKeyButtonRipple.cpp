@@ -30,7 +30,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(CKeyButtonRipple::LogInterpolator, Object, IInterpolator);
+CAR_INTERFACE_IMPL(CKeyButtonRipple::LogInterpolator, Object, IInterpolator)
 ECode CKeyButtonRipple::LogInterpolator::GetInterpolation(
     /* [in] */ Float input,
     /* [out] */ Float* result)
@@ -62,8 +62,8 @@ const Float CKeyButtonRipple::GLOW_MAX_ALPHA = 0.2f;
 const Int32 CKeyButtonRipple::ANIMATION_DURATION_SCALE = 350;
 const Int32 CKeyButtonRipple::ANIMATION_DURATION_FADE = 450;
 
-CAR_OBJECT_IMPL(CKeyButtonRipple);
-CAR_INTERFACE_IMPL(CKeyButtonRipple, Drawable, IKeyButtonRipple);
+CAR_OBJECT_IMPL(CKeyButtonRipple)
+CAR_INTERFACE_IMPL(CKeyButtonRipple, Drawable, IKeyButtonRipple)
 CKeyButtonRipple::CKeyButtonRipple()
     : mGlowAlpha(0.f)
     , mGlowScale(1.f)

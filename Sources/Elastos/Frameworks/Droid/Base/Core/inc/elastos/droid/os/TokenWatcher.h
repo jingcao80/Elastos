@@ -48,7 +48,7 @@ private:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Death(
             /* [in] */ IBinder* token,

@@ -22,7 +22,7 @@ CarClass(CSomnambulator)
     , public Activity
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor();
 

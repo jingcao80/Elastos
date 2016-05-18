@@ -25,7 +25,7 @@ class BaseNetworkStateTracker
     // TODO: migrate to make NetworkStateTracker abstract class
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI constructor(
         /* [in] */ Int32 networkType);

@@ -14,7 +14,7 @@ CarClass(CDispatcherState)
     , public KeyEvent::DispatcherState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }   //namespace View

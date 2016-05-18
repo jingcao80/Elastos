@@ -13,7 +13,7 @@ CarClass(CAppWidgetHostCallbacks)
     , public AppWidgetHost::Callbacks
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace AppWidget

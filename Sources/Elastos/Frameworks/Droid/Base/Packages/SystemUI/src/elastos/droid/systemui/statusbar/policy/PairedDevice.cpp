@@ -7,7 +7,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(PairedDevice, Object, IBluetoothControllerPairedDevice);
+CAR_INTERFACE_IMPL(PairedDevice, Object, IBluetoothControllerPairedDevice)
 PairedDevice::PairedDevice()
     : mState(STATE_DISCONNECTED)
 {}

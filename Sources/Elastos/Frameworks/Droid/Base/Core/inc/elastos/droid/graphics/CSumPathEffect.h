@@ -14,9 +14,9 @@ CarClass(CSumPathEffect)
     , public ISumPathEffect
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Construct a PathEffect whose effect is to apply two effects, in sequence.

@@ -46,7 +46,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener1(
             /* [in] */ IExpandableView* child);
@@ -78,7 +78,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener2(
             /* [in] */ IExpandableView* child);
@@ -227,7 +227,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AnimatorUpdateListener3(
             /* [in] */ StackStateAnimator* host,
@@ -261,7 +261,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     StackStateAnimator(
         /* [in] */ INotificationStackScrollLayout* hostLayout);

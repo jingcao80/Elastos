@@ -12,7 +12,7 @@ CarClass(CMasterClearReceiver)
     , public MasterClearReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Server

@@ -12,7 +12,7 @@ CarClass(CGestureStore)
     , public GestureStore
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CGestureStore();
 

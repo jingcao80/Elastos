@@ -45,7 +45,7 @@ public:
         , public IFixedViewInfo
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FixedViewInfo();
 
@@ -121,7 +121,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ListView();
 

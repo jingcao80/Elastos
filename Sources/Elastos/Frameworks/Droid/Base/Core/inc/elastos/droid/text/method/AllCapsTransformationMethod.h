@@ -28,7 +28,7 @@ class AllCapsTransformationMethod
     , public ITransformationMethod
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AllCapsTransformationMethod();
 

@@ -19,7 +19,7 @@ CarClass(CTvContractProgramsGenres)
     , public ITvContractProgramsGenres
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_SINGLETON_DECL()
 

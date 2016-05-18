@@ -117,13 +117,14 @@ class PhoneWindowManager
     : public Object
     , public IWindowManagerPolicy
     , public IPhoneWindowManager
-
 {
 protected:
     class MyWakeGestureListener
         : public WakeGestureListener
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::MyWakeGestureListener")
+
         MyWakeGestureListener(
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
@@ -140,8 +141,9 @@ protected:
         , public ISystemGesturesPointerEventListenerCallbacks
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks")
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SystemGesturesPointerEventListenerCallbacks(
             /* [in] */ PhoneWindowManager* host);
@@ -162,6 +164,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::WindowManagerDrawCallbackRunnable")
+
         WindowManagerDrawCallbackRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -176,17 +180,18 @@ protected:
         , public IKeyguardServiceDelegateShowListener
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::KeyguardDelegateCallbackShowListener")
+
         KeyguardDelegateCallbackShowListener(
             /* [in] */ PhoneWindowManager* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnShown(
             /* [in] */ IBinder* windowToken);
 
     private:
         PhoneWindowManager* mHost;
-
     };
 
     class KeyguardDelegateOnKeyguardExitResult
@@ -194,23 +199,26 @@ protected:
         , public IOnKeyguardExitResult
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::KeyguardDelegateOnKeyguardExitResult")
+
         KeyguardDelegateOnKeyguardExitResult(
             /* [in] */ PhoneWindowManager* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnKeyguardExitResult(
             /* [in] */ Boolean success);
 
     private:
         PhoneWindowManager* mHost;
-
     };
 
     class ClearHideNavigationFlagRunnable
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ClearHideNavigationFlagRunnable")
+
         ClearHideNavigationFlagRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -224,6 +232,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::RequestTransientBarsRunnable")
+
         RequestTransientBarsRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -237,6 +247,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::KeyguardDelegateKeyguardDone")
+
         KeyguardDelegateKeyguardDone(
             /* [in] */ PhoneWindowManager* host);
 
@@ -250,6 +262,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::KeyguardDelegateKeyguardDismiss")
+
         KeyguardDelegateKeyguardDismiss(
             /* [in] */ PhoneWindowManager* host);
 
@@ -263,6 +277,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::KeyguardDelegateActivityDrawn")
+
         KeyguardDelegateActivityDrawn(
             /* [in] */ PhoneWindowManager* host);
 
@@ -296,6 +312,8 @@ protected:
          : public WindowOrientationListener
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::MyOrientationListener")
+
         MyOrientationListener(
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
@@ -328,6 +346,8 @@ protected:
         : public InputEventReceiver
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::HideNavInputEventReceiver")
+
         CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
@@ -346,11 +366,12 @@ protected:
         , public IInputEventReceiverFactory
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::HideNavInputEventReceiverFactory")
 
         HideNavInputEventReceiverFactory(
             /* [in] */ PhoneWindowManager* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI CreateInputEventReceiver(
@@ -366,6 +387,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ScreenshotTimeoutRunnable")
+
         ScreenshotTimeoutRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -448,6 +471,8 @@ protected:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ScreenLockTimeoutRunnable")
+
         ScreenLockTimeoutRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -463,8 +488,11 @@ protected:
     };
 
     class QuickBootPowerLongPressRunnable
-        : public Runnable{
+        : public Runnable
+    {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::QuickBootPowerLongPressRunnable")
+
         QuickBootPowerLongPressRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -479,6 +507,8 @@ protected:
         : public EdgeGestureManager::EdgeGestureActivationListener
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::MyEdgeGestureActivationListener")
+
         MyEdgeGestureActivationListener(
             /* [in] */ PhoneWindowManager* host);
 
@@ -514,6 +544,8 @@ private:
         : public UEventObserver
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::HDMIUEventObserver")
+
         HDMIUEventObserver(
             /* [in] */ PhoneWindowManager* host);
 
@@ -529,6 +561,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::PowerLongPressRunnable")
+
         PowerLongPressRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -543,6 +577,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ScreenshotRunnable")
+
         ScreenshotRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -556,6 +592,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ScreenshotForLogRunnable")
+
         ScreenshotForLogRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -569,6 +607,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::BackLongPressRunnable")
+
         BackLongPressRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -585,6 +625,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::HomeDoubleTapTimeoutRunnable")
+
         HomeDoubleTapTimeoutRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -599,6 +641,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::CollapsePanelsRunnable")
+
         CollapsePanelsRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -632,10 +676,12 @@ private:
         , public IServiceConnection
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::ScreenshotServiceConnection")
+
         ScreenshotServiceConnection(
             /* [in] */ PhoneWindowManager* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnServiceConnected(
@@ -654,6 +700,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::UpdateSettingRunnable")
+
         UpdateSettingRunnable(
             /* [in] */ PhoneWindowManager* host);
 
@@ -669,6 +717,8 @@ private:
     class BootMsgDialog : public ProgressDialog
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::BootMsgDialog")
+
         CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Int32 theme);
@@ -702,13 +752,14 @@ private:
         CARAPI DispatchPopulateAccessibilityEvent(
             /* [in] */ IAccessibilityEvent* event,
             /* [out] */ Boolean *result);
-
     };
 
     class BootMsgRunnable
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::BootMsgRunnable")
+
         BootMsgRunnable(
             /* [in] */ PhoneWindowManager* host,
             /* [in] */ ICharSequence* msg,
@@ -727,6 +778,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PhoneWindowManager::UpdateSystemUiVisibilityRunnable")
+
         UpdateSystemUiVisibilityRunnable(
             /* [in] */ Int32 visibility,
             /* [in] */ Boolean needsMenu,

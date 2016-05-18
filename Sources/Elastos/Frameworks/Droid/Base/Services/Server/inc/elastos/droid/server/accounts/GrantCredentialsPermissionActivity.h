@@ -38,7 +38,7 @@ private:
             , public IRunnable
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             OnCreateAccountManagerCallbackRunnable(
                 /* [in] */ ICharSequence* authTokenLabel,
@@ -52,7 +52,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnCreateAccountManagerCallback(
             /* [in] */ ITextView* textView,

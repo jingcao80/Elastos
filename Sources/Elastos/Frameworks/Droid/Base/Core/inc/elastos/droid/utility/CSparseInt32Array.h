@@ -13,7 +13,7 @@ CarClass(CSparseInt32Array)
     , public SparseInt32Array
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Utility

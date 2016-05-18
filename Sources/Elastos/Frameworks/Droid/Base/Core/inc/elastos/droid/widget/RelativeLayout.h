@@ -173,7 +173,7 @@ public:
         , public IRelativeLayoutLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RelativeLayoutLayoutParams();
 
@@ -270,7 +270,7 @@ public:
 
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RelativeLayout();
 

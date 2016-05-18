@@ -15,7 +15,7 @@ class FloatPropertyValuesHolder
     , public IFloatPropertyValuesHolder
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FloatPropertyValuesHolder(
         /* [in] */ const String& propertyName,

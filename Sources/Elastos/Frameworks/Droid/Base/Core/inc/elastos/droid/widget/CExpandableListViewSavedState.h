@@ -12,7 +12,7 @@ CarClass(CExpandableListViewSavedState)
     , public ExpandableListView::ExpandableListViewSavedState
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Elastos

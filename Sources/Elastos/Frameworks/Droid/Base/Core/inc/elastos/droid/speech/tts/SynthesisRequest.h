@@ -38,7 +38,7 @@ class SynthesisRequest
     , public ISynthesisRequest
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SynthesisRequest();
 

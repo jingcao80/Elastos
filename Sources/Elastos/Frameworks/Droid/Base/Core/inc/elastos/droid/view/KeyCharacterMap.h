@@ -32,7 +32,7 @@ public:
         , public IFallbackAction
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor();
 
@@ -80,7 +80,7 @@ public:
         , public IKeyData
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyData();
 
@@ -131,7 +131,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     KeyCharacterMap();
 

@@ -50,7 +50,7 @@ ECode CKeyButtonView::CheckLongPressRunnable::Run()
 {
     Boolean tmp = FALSE;
     if (mHost->IsPressed(&tmp), tmp) {
-        // Logger.d("CKeyButtonView", "longpressed: " + this);
+        if (DEBUG) Logger::D(TAG, " CheckLongPressRunnable longpressed %s", TO_CSTR(mHost));
         if (mHost->IsLongClickable(&tmp), tmp) {
             // Just an old-fashioned ImageView
             mHost->PerformLongClick(&tmp);
@@ -67,10 +67,12 @@ ECode CKeyButtonView::CheckLongPressRunnable::Run()
 //==============================================================================
 //                  CKeyButtonView
 //==============================================================================
-const String CKeyButtonView::TAG("StatusBar.KeyButtonView");
-const Boolean CKeyButtonView::DEBUG = FALSE;
+const String CKeyButtonView::TAG("CKeyButtonView");
+const Boolean CKeyButtonView::DEBUG = TRUE;
 const Float CKeyButtonView::DEFAULT_QUIESCENT_ALPHA = 1.f;
-CAR_INTERFACE_IMPL(CKeyButtonView, ImageView, IKeyButtonView);
+
+CAR_INTERFACE_IMPL(CKeyButtonView, ImageView, IKeyButtonView)
+
 CKeyButtonView::CKeyButtonView()
     : mDownTime(0)
     , mCode(0)
@@ -79,8 +81,6 @@ CKeyButtonView::CKeyButtonView()
     , mQuiescentAlpha(DEFAULT_QUIESCENT_ALPHA)
     , mSupportsLongpress(TRUE)
 {
-    CObjectAnimator::New((IAnimator**)&mAnimateToQuiescent);
-    mCheckLongPress = new CheckLongPressRunnable(this);
 }
 
 ECode CKeyButtonView::constructor(
@@ -96,6 +96,9 @@ ECode CKeyButtonView::constructor(
     /* [in] */ Int32 defStyle)
 {
     ASSERT_SUCCEEDED(ImageView::constructor(context, attrs));
+
+    CObjectAnimator::New((IAnimator**)&mAnimateToQuiescent);
+    mCheckLongPress = new CheckLongPressRunnable(this);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::KeyButtonView),
@@ -239,7 +242,7 @@ ECode CKeyButtonView::OnTouchEvent(
     Boolean tmp = FALSE;
     switch (action) {
         case IMotionEvent::ACTION_DOWN: {
-            //Logger.d("CKeyButtonView", "press");
+            if (DEBUG) Logger::D("CKeyButtonView", " ACTION_DOWN, mSupportsLongpress: %d", mSupportsLongpress);
             mDownTime = SystemClock::GetUptimeMillis();
             SetPressed(TRUE);
             if (mCode != 0) {
@@ -255,10 +258,12 @@ ECode CKeyButtonView::OnTouchEvent(
                 CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
                 Int32 timeout;
                 helper->GetLongPressTimeout(&timeout);
+                if (DEBUG) Logger::D("CKeyButtonView", "Post mCheckLongPress Delayed %d", timeout);
                 PostDelayed(mCheckLongPress, timeout, &tmp);
             }
-        }
             break;
+        }
+
         case IMotionEvent::ACTION_MOVE: {
             ev->GetX(&fx);
             ev->GetY(&fy);
@@ -271,18 +276,22 @@ ECode CKeyButtonView::OnTouchEvent(
                     && x < w + mTouchSlop
                     && y >= -mTouchSlop
                     && y < h + mTouchSlop);
-        }
             break;
-        case IMotionEvent::ACTION_CANCEL:
+        }
+
+        case IMotionEvent::ACTION_CANCEL: {
             SetPressed(FALSE);
             if (mCode != 0) {
                 SendEvent(IKeyEvent::ACTION_UP, IKeyEvent::FLAG_CANCELED);
             }
             if (mSupportsLongpress) {
+                if (DEBUG) Logger::D("CKeyButtonView", "Remove mCheckLongPress");
                 RemoveCallbacks(mCheckLongPress, &tmp);
             }
             break;
-        case IMotionEvent::ACTION_UP:
+        }
+
+        case IMotionEvent::ACTION_UP: {
             Boolean doIt = FALSE;
             IsPressed(&doIt);
             SetPressed(FALSE);
@@ -303,9 +312,11 @@ ECode CKeyButtonView::OnTouchEvent(
                 }
             }
             if (mSupportsLongpress) {
+                if (DEBUG) Logger::D("CKeyButtonView", "Remove mCheckLongPress");
                 RemoveCallbacks(mCheckLongPress, &tmp);
             }
             break;
+        }
     }
 
     return TRUE;
@@ -336,19 +347,20 @@ void CKeyButtonView::SendEvent(
     /* [in] */ Int64 when)
 {
     Int32 repeatCount = (flags & IKeyEvent::FLAG_LONG_PRESS) != 0 ? 1 : 0;
-    AutoPtr<IKeyEvent> ev;
+    AutoPtr<IInputEvent> ev;
     CKeyEvent::New(mDownTime, when, action, mCode, repeatCount,
-            0, IKeyCharacterMap::VIRTUAL_KEYBOARD, 0,
-            flags | IKeyEvent::FLAG_FROM_SYSTEM | IKeyEvent::FLAG_VIRTUAL_HARD_KEY,
-            IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&ev);
+        0, IKeyCharacterMap::VIRTUAL_KEYBOARD, 0,
+        flags | IKeyEvent::FLAG_FROM_SYSTEM | IKeyEvent::FLAG_VIRTUAL_HARD_KEY,
+        IInputDevice::SOURCE_KEYBOARD, (IInputEvent**)&ev);
 
     AutoPtr<IInputManagerHelper> helper;
     CInputManagerHelper::AcquireSingleton((IInputManagerHelper**)&helper);
     AutoPtr<IInputManager> inputManager;
     helper->GetInstance((IInputManager**)&inputManager);
     Boolean result;
-    inputManager->InjectInputEvent(
-            IInputEvent::Probe(ev), IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, &result);
+    inputManager->InjectInputEvent(ev, IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, &result);
+
+    if (DEBUG) Logger::D(TAG, " SendEvent %s", TO_CSTR(ev));
 }
 
 }// namespace Policy

@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CBlackBarDrawable);
+CAR_OBJECT_IMPL(CBlackBarDrawable)
 ECode CBlackBarDrawable::constructor(
     /* [in] */ IKeyguardPreviewContainer* host)
 {

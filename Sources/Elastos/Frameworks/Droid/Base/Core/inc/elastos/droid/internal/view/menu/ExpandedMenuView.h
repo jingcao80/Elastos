@@ -52,7 +52,7 @@ private:
 public:
     ExpandedMenuView();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Instantiates the ExpandedMenuView that is linked with the provided MenuBuilder.

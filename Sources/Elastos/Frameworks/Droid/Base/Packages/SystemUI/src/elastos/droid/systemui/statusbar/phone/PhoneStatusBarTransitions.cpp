@@ -17,7 +17,7 @@ namespace Phone {
 const Float PhoneStatusBarTransitions::ICON_ALPHA_WHEN_NOT_OPAQUE = 1;
 const Float PhoneStatusBarTransitions::ICON_ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK = 0.5f;
 const Float PhoneStatusBarTransitions::ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK = 0;
-CAR_INTERFACE_IMPL(PhoneStatusBarTransitions, BarTransitions, IPhoneStatusBarTransitions);
+CAR_INTERFACE_IMPL(PhoneStatusBarTransitions, BarTransitions, IPhoneStatusBarTransitions)
 PhoneStatusBarTransitions::PhoneStatusBarTransitions(
     /* [in] */ IPhoneStatusBarView* view)
     : BarTransitions(IView::Probe(view), R::drawable::status_background)

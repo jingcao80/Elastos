@@ -6,7 +6,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_OBJECT_IMPL(CKeyguardService);
+CAR_OBJECT_IMPL(CKeyguardService)
 
 } // namespace Keyguard
 } // namespace SystemUI

@@ -20,7 +20,7 @@ class FilterList
     , public IFilter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     // throws IOException, XmlPullParserException
     CARAPI_(FilterList*) ReadFromXml(

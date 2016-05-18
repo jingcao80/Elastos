@@ -12,7 +12,7 @@ CarClass(CRadioButton)
     , public RadioButton
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

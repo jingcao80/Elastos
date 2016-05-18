@@ -85,7 +85,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ButtonViewOnClickListener(
             /* [in] */ IWeakReference* host);

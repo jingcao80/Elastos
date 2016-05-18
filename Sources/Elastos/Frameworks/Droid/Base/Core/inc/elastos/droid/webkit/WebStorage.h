@@ -45,7 +45,7 @@ public:
     {
         friend class WebStorageClassic;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Gets the string representation of this origin.
@@ -105,7 +105,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * This class should not be instantiated directly, applications must only use

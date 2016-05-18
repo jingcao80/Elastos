@@ -13,7 +13,7 @@ class SilencePlaybackQueueItem
     : public PlaybackQueueItem
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     SilencePlaybackQueueItem();
 

@@ -12,7 +12,7 @@ namespace Animation {
 CarClass(CTimeAnimator) , public TimeAnimator
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Animation

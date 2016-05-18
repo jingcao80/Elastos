@@ -30,7 +30,7 @@ class AppWidgetManager
     , public IAppWidgetManager
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AppWidgetManager();
 

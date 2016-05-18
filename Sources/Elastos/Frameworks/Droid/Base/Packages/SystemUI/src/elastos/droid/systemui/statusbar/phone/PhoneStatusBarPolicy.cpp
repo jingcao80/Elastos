@@ -43,7 +43,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_OBJECT_IMPL(CPhoneStatusBarPolicyIntentReceiver);
+CAR_OBJECT_IMPL(CPhoneStatusBarPolicyIntentReceiver)
 ECode CPhoneStatusBarPolicyIntentReceiver::constructor(
     /* [in] */ IInterface* host)
 {
@@ -82,7 +82,7 @@ ECode CPhoneStatusBarPolicyIntentReceiver::OnReceive(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(PhoneStatusBarPolicy::CastCallback, Object, ICastControllerCallback);
+CAR_INTERFACE_IMPL(PhoneStatusBarPolicy::CastCallback, Object, ICastControllerCallback)
 PhoneStatusBarPolicy::CastCallback::CastCallback(
     /* [in] */ PhoneStatusBarPolicy* host)
     : mHost(host)

@@ -12,7 +12,7 @@ namespace Webkit {
 CarClass(CGeolocationPermissions), public GeolocationPermissions
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Webkit

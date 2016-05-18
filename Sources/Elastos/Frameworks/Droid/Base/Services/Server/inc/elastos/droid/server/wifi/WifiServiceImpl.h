@@ -93,7 +93,7 @@ public:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DeathRecipient(
             /* [in] */ WifiServiceImpl* owner,
@@ -318,7 +318,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     WifiServiceImpl();
 

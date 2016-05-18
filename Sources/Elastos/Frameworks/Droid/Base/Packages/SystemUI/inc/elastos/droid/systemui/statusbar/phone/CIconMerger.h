@@ -13,7 +13,7 @@ namespace Phone {
 CarClass(CIconMerger), public IconMerger
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Phone

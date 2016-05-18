@@ -22,7 +22,7 @@ private:
         , public IRotationLockControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ RotationLockTile* host);

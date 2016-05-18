@@ -14,9 +14,9 @@ CarClass(CComposeShader)
     , public IComposeShader
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CComposeShader();
 

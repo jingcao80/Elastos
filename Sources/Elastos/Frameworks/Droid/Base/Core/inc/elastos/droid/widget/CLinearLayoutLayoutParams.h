@@ -13,7 +13,7 @@ CarClass(CLinearLayoutLayoutParams)
     , public LinearLayout::LinearLayoutLayoutParams
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

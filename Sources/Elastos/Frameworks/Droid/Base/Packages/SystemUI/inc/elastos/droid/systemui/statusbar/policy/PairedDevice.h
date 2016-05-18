@@ -19,7 +19,7 @@ class PairedDevice
     , public IBluetoothControllerPairedDevice
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PairedDevice();
 

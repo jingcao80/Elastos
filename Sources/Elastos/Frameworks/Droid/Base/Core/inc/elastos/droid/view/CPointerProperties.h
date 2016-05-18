@@ -13,7 +13,7 @@ CarClass(CPointerProperties)
     , public MotionEvent::PointerProperties
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }

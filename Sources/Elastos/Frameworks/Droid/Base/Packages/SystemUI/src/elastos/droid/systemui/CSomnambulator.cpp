@@ -16,7 +16,7 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 
-CAR_OBJECT_IMPL(CSomnambulator);
+CAR_OBJECT_IMPL(CSomnambulator)
 ECode CSomnambulator::constructor()
 {
     return NOERROR;

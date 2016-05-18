@@ -20,8 +20,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CNotificationOverflowIconsView);
-CAR_INTERFACE_IMPL(CNotificationOverflowIconsView, IconMerger, INotificationOverflowIconsView);
+CAR_OBJECT_IMPL(CNotificationOverflowIconsView)
+CAR_INTERFACE_IMPL(CNotificationOverflowIconsView, IconMerger, INotificationOverflowIconsView)
 CNotificationOverflowIconsView::CNotificationOverflowIconsView()
     : mTintColor(0)
     , mIconSize(0)

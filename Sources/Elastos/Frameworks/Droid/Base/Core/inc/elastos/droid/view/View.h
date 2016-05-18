@@ -2083,7 +2083,7 @@ public:
         , public IAccessibilityDelegate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Sends an accessibility event of the given type. If accessibility is not
@@ -2437,7 +2437,7 @@ private:
         , public IPredicate
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _Predicate(
             /* [in] */ Int32 id);
@@ -2477,7 +2477,7 @@ private:
     public:
         MatchIdPredicate();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Apply(
@@ -2495,7 +2495,7 @@ private:
     public:
         MatchLabelForPredicate();
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         //@Override
         CARAPI Apply(
@@ -2546,7 +2546,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     View();
 

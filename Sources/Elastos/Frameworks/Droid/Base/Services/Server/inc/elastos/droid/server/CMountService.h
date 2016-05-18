@@ -382,7 +382,7 @@ private:
             /* [in] */ IIMountServiceListener* listener,
             /* [in] */ CMountService* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI ProxyDied();
 

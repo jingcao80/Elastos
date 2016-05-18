@@ -63,7 +63,7 @@ private:
         , public IDozeHostCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DozeHostCallback(
             /* [in] */ CDozeService* host);
@@ -91,7 +91,7 @@ private:
         , public ITriggerEventListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TriggerSensor(
             /* [in] */ Int32 type,
@@ -133,7 +133,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ProximityCheck(
             /* [in] */ CDozeService* host);
@@ -182,7 +182,7 @@ private:
             , public IDozeHostPulseCallback
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             PulseCallback(
                 /* [in] */ ProximityCheckImpl* host);
@@ -224,9 +224,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CDozeService();
 

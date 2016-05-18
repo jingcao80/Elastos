@@ -18,7 +18,7 @@ namespace Recent {
 CarClass(CRecentsPreloadReceiver), public BroadcastReceiver
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     // @Override
     CARAPI OnReceive(

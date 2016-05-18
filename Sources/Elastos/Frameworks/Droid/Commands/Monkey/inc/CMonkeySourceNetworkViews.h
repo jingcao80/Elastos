@@ -50,7 +50,7 @@ public:
      class ListViewsCommand : public ElRefBase, public IListViewsCommand {
         public:
             //listviews
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -68,7 +68,7 @@ public:
         //queryview [id type] [id(s)] [command]
         //queryview viewid button1 gettext
         //queryview accessibilityids 12 5 getparent
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -83,7 +83,7 @@ public:
      {
         // getrootview
      public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,
@@ -101,7 +101,7 @@ public:
         // getviewswithtext [text]
         // getviewswithtext "some text here"
      public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI TranslateCommand(
             /* [in] */ ArrayOf<String> *command,

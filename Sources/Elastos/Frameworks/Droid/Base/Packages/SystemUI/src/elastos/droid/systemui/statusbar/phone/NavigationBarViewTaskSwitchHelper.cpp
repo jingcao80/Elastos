@@ -3,12 +3,14 @@
 #include "../../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +18,11 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(NavigationBarViewTaskSwitchHelper, GestureDetector::SimpleOnGestureListener, INavigationBarViewTaskSwitchHelper);
+static const String TAG("NavigationBarViewTaskSwitchHelper");
+
+CAR_INTERFACE_IMPL(NavigationBarViewTaskSwitchHelper, \
+    GestureDetector::SimpleOnGestureListener, INavigationBarViewTaskSwitchHelper)
+
 NavigationBarViewTaskSwitchHelper::NavigationBarViewTaskSwitchHelper(
     /* [in] */ IContext* context)
     : mIsVertical(FALSE)
@@ -58,6 +64,7 @@ ECode NavigationBarViewTaskSwitchHelper::OnInterceptTouchEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+
     // If we move more than a fixed amount, then start capturing for the
     // task switcher detector
     Boolean tmp = FALSE;
@@ -110,6 +117,7 @@ ECode NavigationBarViewTaskSwitchHelper::OnFling(
     /* [in] */ Float velocityY,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> Enter OnFling");
     VALIDATE_NOT_NULL(result);
     Float absVelX = Elastos::Core::Math::Abs(velocityX);
     Float absVelY = Elastos::Core::Math::Abs(velocityY);
@@ -125,12 +133,15 @@ ECode NavigationBarViewTaskSwitchHelper::OnFling(
             showNext = mIsVertical ? (velocityY < 0) : (velocityX > 0);
         }
         if (showNext) {
+            Logger::I(TAG, "  ShowNextAffiliatedTask");
             mBar->ShowNextAffiliatedTask();
         }
         else {
+            Logger::I(TAG, "  ShowPreviousAffiliatedTask");
             mBar->ShowPreviousAffiliatedTask();
         }
     }
+    Logger::I(TAG, " >>> Leave OnFling");
     *result = TRUE;
     return NOERROR;
 }

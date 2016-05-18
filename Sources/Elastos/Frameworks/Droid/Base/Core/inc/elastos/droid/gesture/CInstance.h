@@ -12,7 +12,7 @@ CarClass(CInstance)
     , public Instance
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CInstance();
 

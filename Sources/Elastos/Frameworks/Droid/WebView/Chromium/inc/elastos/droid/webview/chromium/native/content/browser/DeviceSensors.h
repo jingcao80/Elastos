@@ -100,7 +100,7 @@ private:
         InnerCallable(
             /* [in] */ DeviceSensors* owner);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Call(
             /* [out] */ IInterface** result);
@@ -110,7 +110,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Start listening for sensor events. If this object is already listening

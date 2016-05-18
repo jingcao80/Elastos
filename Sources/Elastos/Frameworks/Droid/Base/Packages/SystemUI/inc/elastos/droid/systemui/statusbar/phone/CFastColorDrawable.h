@@ -18,7 +18,7 @@ namespace Phone {
 CarClass(CFastColorDrawable), public Drawable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CFastColorDrawable();
 

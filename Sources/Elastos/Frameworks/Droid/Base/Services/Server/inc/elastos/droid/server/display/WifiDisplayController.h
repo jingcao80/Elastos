@@ -94,7 +94,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WFDInfoActionListener(
             /* [in] */ WifiDisplayController* host);
@@ -113,7 +113,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WFDInfoActionListener2(
             /* [in] */ WifiDisplayController* host);
@@ -132,7 +132,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DiscoverPeersActionListener(
             /* [in] */ WifiDisplayController* host);
@@ -151,7 +151,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         StopPeerDiscoveryActionListener(
             /* [in] */ WifiDisplayController* host);
@@ -170,7 +170,7 @@ private:
         , public IWifiP2pManagerPeerListListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         RequestPeersPeerListListener(
             /* [in] */ WifiDisplayController* host);
@@ -187,7 +187,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyActionListenerEx2(
             /* [in] */ WifiDisplayController* host,
@@ -213,7 +213,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ConnectDeviceActionListener(
             /* [in] */ WifiDisplayController* host,
@@ -234,7 +234,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DisconnectingDeviceActionListener(
             /* [in] */ WifiDisplayController* host,
@@ -258,7 +258,7 @@ private:
         , public IWifiP2pManagerActionListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CancelingDeviceActionListener(
             /* [in] */ WifiDisplayController* host,
@@ -282,7 +282,7 @@ private:
         , public IRemoteDisplayListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyRemoteDisplayListener(
             /* [in] */ WifiDisplayController* host,
@@ -310,7 +310,7 @@ private:
         , public IWifiP2pManagerGroupInfoListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ConnectionChangedGroupInfoListener(
             /* [in] */ WifiDisplayController* host);

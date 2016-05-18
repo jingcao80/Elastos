@@ -9,8 +9,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-CAR_OBJECT_IMPL(CEmptyShadeView);
-CAR_INTERFACE_IMPL(CEmptyShadeView, StackScrollerDecorView, IEmptyShadeView);
+CAR_OBJECT_IMPL(CEmptyShadeView)
+CAR_INTERFACE_IMPL(CEmptyShadeView, StackScrollerDecorView, IEmptyShadeView)
 ECode CEmptyShadeView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

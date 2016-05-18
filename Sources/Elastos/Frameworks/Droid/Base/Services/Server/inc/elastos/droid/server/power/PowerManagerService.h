@@ -121,7 +121,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         BinderService();
 
@@ -499,7 +499,7 @@ private:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WakeLock(
             /* [in] */ IBinder* lock,
@@ -566,7 +566,7 @@ private:
         , public ISuspendBlocker
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SuspendBlockerImpl(
             /* [in] */ const String& name);
@@ -595,7 +595,7 @@ private:
         , public IPowerManagerInternal
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LocalService(
             /* [in] */ PowerManagerService* host);
@@ -653,7 +653,7 @@ private:
         , public IDisplayPowerCallbacks
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyDisplayPowerCallbacks(
             /* [in] */ PowerManagerService* host);
@@ -719,7 +719,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PowerManagerService();
 

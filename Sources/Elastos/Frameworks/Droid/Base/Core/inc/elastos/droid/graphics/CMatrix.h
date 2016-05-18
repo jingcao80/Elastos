@@ -180,7 +180,7 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
 public:
     static AutoPtr<IMatrix> IDENTITY_MATRIX;

@@ -19,7 +19,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-CAR_INTERFACE_IMPL(QSTile::State, Object, IQSTileState);
+CAR_INTERFACE_IMPL(QSTile::State, Object, IQSTileState)
 QSTile::State::State()
     : mVisible(FALSE)
     , mIconId(0)

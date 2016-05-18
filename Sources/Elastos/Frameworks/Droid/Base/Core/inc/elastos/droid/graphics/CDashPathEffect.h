@@ -14,9 +14,9 @@ CarClass(CDashPathEffect)
     , public IDashPathEffect
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * The intervals array must contain an even number of entries (>=2), with

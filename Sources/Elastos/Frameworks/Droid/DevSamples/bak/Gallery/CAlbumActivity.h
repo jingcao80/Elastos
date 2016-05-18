@@ -64,7 +64,7 @@ private:
         MyListener(
             /* [in] */ CAlbumActivity* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);
@@ -98,7 +98,7 @@ private:
         MyViewBinder(
             /* [in] */ CAlbumActivity* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI SetViewValue(
             /* [in] */ IView* view,
@@ -118,7 +118,7 @@ private:
         LoadImageInfoRunnable(
             /* [in] */ IWeakReference* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 

@@ -36,7 +36,7 @@ CellularTile::CallbackInfo::CallbackInfo()
     , mIsDataTypeIconWide(FALSE)
 {}
 
-CAR_INTERFACE_IMPL(CellularTile::NetworkSignalChangedCallback, Object, INetworkSignalChangedCallback);
+CAR_INTERFACE_IMPL(CellularTile::NetworkSignalChangedCallback, Object, INetworkSignalChangedCallback)
 CellularTile::NetworkSignalChangedCallback::NetworkSignalChangedCallback(
     /* [in] */ CellularTile* host)
     : mHost(host)
@@ -103,7 +103,7 @@ ECode CellularTile::NetworkSignalChangedCallback::OnMobileDataEnabled(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CellularTile::CellularDetailAdapter, Object, IQSTileDetailAdapter);
+CAR_INTERFACE_IMPL(CellularTile::CellularDetailAdapter, Object, IQSTileDetailAdapter)
 CellularTile::CellularDetailAdapter::CellularDetailAdapter(
     /* [in] */ CellularTile* host)
     : mHost(host)

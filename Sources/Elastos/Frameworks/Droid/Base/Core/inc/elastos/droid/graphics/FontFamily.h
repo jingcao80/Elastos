@@ -22,7 +22,7 @@ class FontFamily
     , public IFontFamily
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FontFamily();
 

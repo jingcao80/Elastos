@@ -148,7 +148,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AutoScrollHelper();
 
@@ -548,7 +548,7 @@ class AbsListViewAutoScroller
     , public IAbsListViewAutoScroller
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbsListViewAutoScroller();
 

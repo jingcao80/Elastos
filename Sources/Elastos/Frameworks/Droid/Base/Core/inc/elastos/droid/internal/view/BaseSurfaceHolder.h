@@ -27,7 +27,7 @@ class ECO_PUBLIC BaseSurfaceHolder
 public:
     BaseSurfaceHolder();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI OnUpdateSurface() = 0;
 

@@ -26,7 +26,7 @@ PreviewInflater::WidgetInfo::WidgetInfo()
 
 const String PreviewInflater::TAG("PreviewInflater");
 const String PreviewInflater::META_DATA_KEYGUARD_LAYOUT("com.android.keyguard.layout");
-CAR_INTERFACE_IMPL(PreviewInflater, Object, IPreviewInflater);
+CAR_INTERFACE_IMPL(PreviewInflater, Object, IPreviewInflater)
 PreviewInflater::PreviewInflater(
     /* [in] */ IContext* context,
     /* [in] */ ILockPatternUtils* lockPatternUtils)

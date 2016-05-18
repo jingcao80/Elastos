@@ -33,7 +33,7 @@ namespace StatusBar {
 //=============================================================================
 //              Entry
 //=============================================================================
-CAR_INTERFACE_IMPL(NotificationData::Entry, Object, INotificationDataEntry);
+CAR_INTERFACE_IMPL(NotificationData::Entry, Object, INotificationDataEntry)
 NotificationData::Entry::Entry()
     : mAutoRedacted(FALSE)
     , mLegacy(FALSE)
@@ -262,7 +262,7 @@ ECode NotificationData::Entry::GetTargetSdk(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(NotificationData::Comparator, Object, IComparator);
+CAR_INTERFACE_IMPL(NotificationData::Comparator, Object, IComparator)
 NotificationData::Comparator::Comparator(
     /* [in] */ NotificationData* host)
     : mHost(host)
@@ -343,7 +343,7 @@ ECode NotificationData::Comparator::Compare(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(NotificationData, Object, INotificationData);
+CAR_INTERFACE_IMPL(NotificationData, Object, INotificationData)
 NotificationData::NotificationData(
     /* [in] */ INotificationEnvironment* environment)
 {

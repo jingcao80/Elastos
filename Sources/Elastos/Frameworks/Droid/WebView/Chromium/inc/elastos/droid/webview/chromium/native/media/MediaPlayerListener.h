@@ -45,7 +45,7 @@ class MediaPlayerListener
     , public IAudioManagerOnAudioFocusChangeListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
     //@Override
     CARAPI OnError(
         /* [in] */ IMediaPlayer* mp,

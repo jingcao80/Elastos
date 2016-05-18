@@ -11,7 +11,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_OBJECT_IMPL(CLocationControllerBroadcastReceiver);
+CAR_OBJECT_IMPL(CLocationControllerBroadcastReceiver)
 ECode CLocationControllerBroadcastReceiver::constructor(
     /* [in] */ ILocationController* controller)
 {

@@ -136,7 +136,7 @@ public:
         friend class EventDispatchHandler;
         friend class InvocationHandler;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Service();
 
@@ -426,7 +426,7 @@ public:
         , public IWindowsForAccessibilityCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WindowsForAccessibilityCallback(
             /* [in] */ AccessibilityManagerService* host);
@@ -669,7 +669,7 @@ private:
     {
         friend class Service;
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AccessibilityConnectionWrapper(
             /* [in] */ Int32 windowId,
@@ -847,7 +847,7 @@ private:
         , public IProxyDeathRecipient
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         UserStateDeathRecipient(
             /* [in] */ UserState* host);
@@ -968,7 +968,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnDialogOKListener(
             /* [in] */ UserState* state,
@@ -993,7 +993,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         OnDialogCancelListener();
 
@@ -1005,7 +1005,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AccessibilityManagerService();
 

@@ -29,7 +29,7 @@ private:
         , public IViewStubOnInflateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InflateListener(
             /* [in] */ CExpandableNotificationRow* host);
@@ -57,9 +57,9 @@ private:
     };
 
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CExpandableNotificationRow();
 

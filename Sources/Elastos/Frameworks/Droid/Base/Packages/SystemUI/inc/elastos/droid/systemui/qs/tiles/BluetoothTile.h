@@ -28,7 +28,7 @@ private:
         , public IBluetoothControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ BluetoothTile* host);
@@ -51,7 +51,7 @@ private:
         , public IQSDetailItemsCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         BluetoothDetailAdapter(
             /* [in] */ BluetoothTile* host);

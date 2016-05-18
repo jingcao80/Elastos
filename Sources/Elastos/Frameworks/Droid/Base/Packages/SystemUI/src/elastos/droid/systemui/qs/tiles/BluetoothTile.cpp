@@ -26,7 +26,7 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_INTERFACE_IMPL(BluetoothTile::Callback, Object, IBluetoothControllerCallback);
+CAR_INTERFACE_IMPL(BluetoothTile::Callback, Object, IBluetoothControllerCallback)
 BluetoothTile::Callback::Callback(
     /* [in] */ BluetoothTile* host)
     : mHost(host)

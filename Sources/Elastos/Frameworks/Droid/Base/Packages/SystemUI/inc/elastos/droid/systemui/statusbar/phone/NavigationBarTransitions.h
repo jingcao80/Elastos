@@ -27,7 +27,7 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         LightsOutListener(
             /* [in] */ NavigationBarTransitions* host);

@@ -14,7 +14,7 @@ class Insets
     , public IInsets
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Return an Insets instance with the appropriate values.

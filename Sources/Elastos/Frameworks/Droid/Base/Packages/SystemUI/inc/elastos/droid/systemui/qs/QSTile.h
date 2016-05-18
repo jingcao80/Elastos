@@ -41,7 +41,7 @@ public:
         , public IQSTileState
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         State();
 
@@ -140,7 +140,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     QSTile();
 

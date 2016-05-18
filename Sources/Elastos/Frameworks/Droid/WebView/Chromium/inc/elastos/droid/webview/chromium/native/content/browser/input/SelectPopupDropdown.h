@@ -68,7 +68,7 @@ private:
         , public IAdapterViewOnItemClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerAdapterViewOnItemClickListener(
             /* [in] */ SelectPopupDropdown* owner);
@@ -88,7 +88,7 @@ private:
         , public IPopupWindowOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerPopupWindowOnDismissListener(
             /* [in] */ SelectPopupDropdown* owner);

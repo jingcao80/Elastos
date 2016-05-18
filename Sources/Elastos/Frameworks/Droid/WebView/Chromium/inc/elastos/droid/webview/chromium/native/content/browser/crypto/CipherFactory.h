@@ -87,7 +87,7 @@ private:
         , public ICallable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerCallable(
             /* [in] */ CipherFactory* owner);

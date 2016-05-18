@@ -195,7 +195,7 @@ private:
     public:
         TO_STRING_IMPL("IntentFirewall::FirewallHandler")
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FirewallHandler(
             /* [in] */ ILooper* looper);

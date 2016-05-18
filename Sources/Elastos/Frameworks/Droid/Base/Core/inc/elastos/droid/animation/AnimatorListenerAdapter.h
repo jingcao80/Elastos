@@ -15,7 +15,7 @@ class ECO_PUBLIC AnimatorListenerAdapter
     , public IAnimatorPauseListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AnimatorListenerAdapter();
 

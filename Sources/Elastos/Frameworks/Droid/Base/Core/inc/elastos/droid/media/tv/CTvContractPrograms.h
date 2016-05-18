@@ -18,7 +18,7 @@ CarClass(CTvContractPrograms)
     , public ITvContractPrograms
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_SINGLETON_DECL()
 

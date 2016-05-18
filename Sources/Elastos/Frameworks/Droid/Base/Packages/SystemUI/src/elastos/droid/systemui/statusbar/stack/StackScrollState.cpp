@@ -41,7 +41,7 @@ StackScrollState::ViewState::ViewState()
 {}
 
 const String StackScrollState::CHILD_NOT_FOUND_TAG("StackScrollStateNoSuchChild");
-CAR_INTERFACE_IMPL(StackScrollState, Object, IStackScrollState);
+CAR_INTERFACE_IMPL(StackScrollState, Object, IStackScrollState)
 StackScrollState::StackScrollState(
     /* [in] */ IViewGroup* hostView)
     : mClearAllTopPadding(0)

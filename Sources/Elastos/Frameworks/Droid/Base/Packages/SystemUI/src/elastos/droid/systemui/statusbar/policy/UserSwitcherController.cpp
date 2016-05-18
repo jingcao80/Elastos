@@ -57,7 +57,7 @@ const String UserSwitcherController::TAG("UserSwitcherController");
 const Boolean UserSwitcherController::DEBUG = FALSE;
 const String UserSwitcherController::SIMPLE_USER_SWITCHER_GLOBAL_SETTING("lockscreenSimpleUserSwitcher");
 
-CAR_INTERFACE_IMPL(UserSwitcherController::BaseUserAdapter, BaseAdapter, IUserSwitcherControllerBaseUserAdapter);
+CAR_INTERFACE_IMPL(UserSwitcherController::BaseUserAdapter, BaseAdapter, IUserSwitcherControllerBaseUserAdapter)
 UserSwitcherController::BaseUserAdapter::BaseUserAdapter(
     /* [in] */ UserSwitcherController* controller)
 {
@@ -182,7 +182,7 @@ ECode UserSwitcherController::BaseUserAdapter::GetDrawable(
             /* light= */ TRUE, drawable);
 }
 
-CAR_INTERFACE_IMPL(UserSwitcherController::UserRecord, Object, IUserSwitcherControllerUserRecord);
+CAR_INTERFACE_IMPL(UserSwitcherController::UserRecord, Object, IUserSwitcherControllerUserRecord)
 UserSwitcherController::UserRecord::UserRecord(
     /* [in] */ IUserInfo* info,
     /* [in] */ IBitmap* picture,
@@ -239,7 +239,7 @@ ECode UserSwitcherController::UserRecord::ToString(
     return sb.ToString(str);
 }
 
-CAR_INTERFACE_IMPL(UserSwitcherController::ExitGuestDialog, SystemUIDialog, IDialogInterfaceOnClickListener);
+CAR_INTERFACE_IMPL(UserSwitcherController::ExitGuestDialog, SystemUIDialog, IDialogInterfaceOnClickListener)
 UserSwitcherController::ExitGuestDialog::ExitGuestDialog(
     /* [in] */ IContext* context,
     /* [in] */ Int32 guestId,
@@ -282,7 +282,7 @@ ECode UserSwitcherController::ExitGuestDialog::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(UserSwitcherController::AddUserDialog, SystemUIDialog, IDialogInterfaceOnClickListener);
+CAR_INTERFACE_IMPL(UserSwitcherController::AddUserDialog, SystemUIDialog, IDialogInterfaceOnClickListener)
 UserSwitcherController::AddUserDialog::AddUserDialog(
     /* [in] */ IContext* context,
     /* [in] */ UserSwitcherController* host)
@@ -429,7 +429,7 @@ ECode UserSwitcherController::SettingsObserver::OnChange(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(UserSwitcherController::UserDetailAdapter, Object, IQSTileDetailAdapter);
+CAR_INTERFACE_IMPL(UserSwitcherController::UserDetailAdapter, Object, IQSTileDetailAdapter)
 UserSwitcherController::UserDetailAdapter::UserDetailAdapter(
     /* [in] */ UserSwitcherController* host)
     : mHost(host)
@@ -489,7 +489,7 @@ ECode UserSwitcherController::UserDetailAdapter::SetToggleState(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(UserSwitcherController::KeyguardMonitorCallback, Object, IKeyguardMonitorCallback);
+CAR_INTERFACE_IMPL(UserSwitcherController::KeyguardMonitorCallback, Object, IKeyguardMonitorCallback)
 UserSwitcherController::KeyguardMonitorCallback::KeyguardMonitorCallback(
     /* [in] */ UserSwitcherController* host)
     : mHost(host)
@@ -629,7 +629,7 @@ ECode UserSwitcherController::UserAsyncTask::OnPostExecute(
 }
 
 
-CAR_INTERFACE_IMPL(UserSwitcherController, Object, IUserSwitcherController);
+CAR_INTERFACE_IMPL(UserSwitcherController, Object, IUserSwitcherController)
 UserSwitcherController::UserSwitcherController(
     /* [in] */ IContext* context,
     /* [in] */ IKeyguardMonitor* keyguardMonitor)

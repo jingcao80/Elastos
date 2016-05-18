@@ -35,7 +35,7 @@ const Boolean CHeadsUpNotificationView::SPEW = DEBUG;
 AutoPtr<IViewOutlineProvider> CHeadsUpNotificationView::CONTENT_HOLDER_OUTLINE_PROVIDER = new _ViewOutlineProvider();
 
 const Boolean CHeadsUpNotificationView::EdgeSwipeHelper::DEBUG_EDGE_SWIPE = FALSE;
-CAR_INTERFACE_IMPL(CHeadsUpNotificationView::EdgeSwipeHelper, Object, IGefingerpoken);
+CAR_INTERFACE_IMPL(CHeadsUpNotificationView::EdgeSwipeHelper, Object, IGefingerpoken)
 CHeadsUpNotificationView::EdgeSwipeHelper::EdgeSwipeHelper(
     /* [in] */ Float touchSlop,
     /* [in] */ CHeadsUpNotificationView* host)
@@ -125,7 +125,7 @@ ECode CHeadsUpNotificationView::_ViewOutlineProvider::GetOutline(
 }
 
 
-CAR_OBJECT_IMPL(CHeadsUpNotificationView);
+CAR_OBJECT_IMPL(CHeadsUpNotificationView)
 CAR_INTERFACE_IMPL_4(CHeadsUpNotificationView, FrameLayout, IHeadsUpNotificationView, ISwipeHelperCallback, \
         IExpandHelperCallback, IOnComputeInternalInsetsListener);
 CHeadsUpNotificationView::CHeadsUpNotificationView()

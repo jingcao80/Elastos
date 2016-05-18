@@ -51,7 +51,7 @@ private:
         , public IDowntimeConditionProviderCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DowntimeCallback(
             /* [in] */ ConditionProviders* host);

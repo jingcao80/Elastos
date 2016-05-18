@@ -25,7 +25,7 @@ public:
         MyListener(
             /* [in] */ CAboutActivity* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IView* v);

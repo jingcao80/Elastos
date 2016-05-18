@@ -85,7 +85,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         TO_STRING_IMPL("Toast::TN::TransientNotification")
 
@@ -160,7 +160,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Toast();
 

@@ -65,7 +65,7 @@ private:
         , public IAdapterViewOnItemClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerAdapterViewOnItemClickListener(
             /* [in] */ InputDialogContainer* owner,
@@ -97,7 +97,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerDialogInterfaceOnClickListener(
             /* [in] */ InputDialogContainer* owner);
@@ -115,7 +115,7 @@ private:
         , public IDialogInterfaceOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         InnerDialogInterfaceOnDismissListener(
             /* [in] */ InputDialogContainer* owner);
@@ -132,7 +132,7 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SetButtonDialogInterfaceOnClickListener(
             /* [in] */ InputDialogContainer* owner);
@@ -150,7 +150,7 @@ private:
         , public IDialogInterfaceOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SetOnDismissListenerDialogInterfaceOnDismissListener(
             /* [in] */ InputDialogContainer* owner);
@@ -167,7 +167,7 @@ private:
         , public IDatePickerDialogOnDateSetListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DateListener(
             /* [in] */ InputDialogContainer* owner,

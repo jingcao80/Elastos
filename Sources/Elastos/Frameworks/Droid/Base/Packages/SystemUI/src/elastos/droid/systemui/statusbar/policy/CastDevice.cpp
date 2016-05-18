@@ -7,7 +7,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(CastDevice, Object, ICastControllerCastDevice);
+CAR_INTERFACE_IMPL(CastDevice, Object, ICastControllerCastDevice)
 CastDevice::CastDevice()
     : mState(STATE_DISCONNECTED)
 {}

@@ -40,7 +40,7 @@ ECode DragDownHelper::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(DragDownHelper::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(DragDownHelper::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 DragDownHelper::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ DragDownHelper* host)
     : mHost(host)

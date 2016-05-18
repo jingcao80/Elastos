@@ -27,7 +27,7 @@ class RankingHelper
     , public IRankingConfig
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     RankingHelper(
         /* [in] */ IContext* context,

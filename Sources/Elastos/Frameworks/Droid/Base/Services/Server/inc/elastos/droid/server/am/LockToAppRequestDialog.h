@@ -29,7 +29,7 @@ class LockToAppRequestDialog
     , public IDialogInterfaceOnClickListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     LockToAppRequestDialog(
         /* [in] */ IContext* context,

@@ -20,7 +20,9 @@ class NavigationBarViewTaskSwitchHelper
     , public INavigationBarViewTaskSwitchHelper
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("NavigationBarViewTaskSwitchHelper")
 
     NavigationBarViewTaskSwitchHelper(
         /* [in] */ IContext* context);

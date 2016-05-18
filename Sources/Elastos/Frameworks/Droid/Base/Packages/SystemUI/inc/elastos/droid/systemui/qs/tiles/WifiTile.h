@@ -49,7 +49,7 @@ private:
         , public IQSDetailItemsCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         WifiDetailAdapter(
             /* [in] */ WifiTile* host);
@@ -105,7 +105,7 @@ private:
         , public INetworkSignalChangedCallback
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ WifiTile* host);

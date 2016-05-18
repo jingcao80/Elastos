@@ -23,7 +23,7 @@ class ECO_PUBLIC AbstractInputMethodSessionImpl
     , public IAbstractInputMethodSessionImpl
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AbstractInputMethodSessionImpl(
         /* [in] */ AbstractInputMethodService* host);

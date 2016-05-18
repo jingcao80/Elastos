@@ -19,7 +19,7 @@ class PanelBar
     , public IPanelBar
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PanelBar();
 

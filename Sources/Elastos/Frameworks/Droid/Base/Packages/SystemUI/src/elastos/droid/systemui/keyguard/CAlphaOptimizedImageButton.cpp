@@ -6,7 +6,7 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_OBJECT_IMPL(CAlphaOptimizedImageButton);
+CAR_OBJECT_IMPL(CAlphaOptimizedImageButton)
 ECode CAlphaOptimizedImageButton::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)

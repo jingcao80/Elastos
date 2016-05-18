@@ -29,7 +29,7 @@ public:
         , public IAdvertiseSettingsBuilder
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Builder();
 
@@ -90,7 +90,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     AdvertiseSettings();
 

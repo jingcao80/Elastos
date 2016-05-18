@@ -28,7 +28,7 @@ class ECO_PUBLIC ImageView
     , public IImageView
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ImageView();
 

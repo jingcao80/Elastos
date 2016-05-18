@@ -12,7 +12,7 @@ namespace Widget {
 CarClass(CLockPatternUtils), public LockPatternUtils
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 }// namespace Widget

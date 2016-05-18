@@ -14,7 +14,7 @@ CarClass(CAccessibilityManagerService)
     , public AccessibilityManagerService
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // Accessibility

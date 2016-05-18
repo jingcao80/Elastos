@@ -7,7 +7,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Stack {
 
-CAR_INTERFACE_IMPL(StackIndentationFunctor, Object, IStackIndentationFunctor);
+CAR_INTERFACE_IMPL(StackIndentationFunctor, Object, IStackIndentationFunctor)
 StackIndentationFunctor::StackIndentationFunctor(
     /* [in] */ Int32 maxItemsInStack,
     /* [in] */ Int32 peekSize,
