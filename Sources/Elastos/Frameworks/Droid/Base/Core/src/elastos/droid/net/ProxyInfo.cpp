@@ -78,6 +78,11 @@ ECode ProxyInfo::BuildPacProxy(
     return CProxyInfo::New(pacUri, result);
 }
 
+ECode ProxyInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode ProxyInfo::constructor(
     /* [in] */ const String& host,
     /* [in] */ Int32 port,
@@ -179,6 +184,13 @@ ECode ProxyInfo::GetPacFileUrl(
     FUNC_RETURN(mPacFileUrl)
 }
 
+ECode ProxyInfo::SetPacFileUrl(
+    /* [in] */ IUri* pacUri)
+{
+    mPacFileUrl = pacUri;
+    return NOERROR;
+}
+
 ECode ProxyInfo::GetHost(
     /* [out] */ String* result)
 {
@@ -199,6 +211,13 @@ ECode ProxyInfo::GetExclusionList(
     /* [out, callee] */ ArrayOf<String>** result)
 {
     FUNC_RETURN(mParsedExclusionList)
+}
+
+ECode ProxyInfo::SetExclusionList(
+        /* [in] */ ArrayOf<String>* exclusionList)
+{
+    mParsedExclusionList = exclusionList;
+    return NOERROR;
 }
 
 ECode ProxyInfo::GetExclusionListAsString(

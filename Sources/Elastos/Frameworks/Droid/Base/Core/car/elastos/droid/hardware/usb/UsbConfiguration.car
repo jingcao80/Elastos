@@ -22,6 +22,7 @@ module
      * @Involve
      * interface IParcelable;
      */
+    [deprecated]
     interface IUsbConfiguration {
 
         /**
@@ -83,6 +84,9 @@ module
         GetInterface(
             [in] Int32 index,
             [out] IUsbInterface** outui);
+
+        SetInterfaces(
+            [in] ArrayOf<IParcelable*>* interfaces);
 
         // @Override
         ToString(

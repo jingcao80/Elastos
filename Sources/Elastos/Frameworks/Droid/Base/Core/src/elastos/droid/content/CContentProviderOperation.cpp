@@ -259,8 +259,7 @@ AutoPtr<IContentProviderOperationBuilder> CContentProviderOperation::NewInsert(
     /* [in] */ IUri* uri)
 {
     AutoPtr<CContentProviderOperationBuilder> builder;
-    CContentProviderOperationBuilder::NewByFriend((CContentProviderOperationBuilder**)&builder);
-    builder->constructor(IContentProviderOperation::TYPE_INSERT, uri);
+    CContentProviderOperationBuilder::NewByFriend(IContentProviderOperation::TYPE_INSERT, uri, (CContentProviderOperationBuilder**)&builder);
     return (IContentProviderOperationBuilder*)builder.Get();
 }
 
@@ -268,8 +267,7 @@ AutoPtr<IContentProviderOperationBuilder> CContentProviderOperation::NewUpdate(
     /* [in] */ IUri* uri)
 {
     AutoPtr<CContentProviderOperationBuilder> builder;
-    CContentProviderOperationBuilder::NewByFriend((CContentProviderOperationBuilder**)&builder);
-    builder->constructor(IContentProviderOperation::TYPE_UPDATE, uri);
+    CContentProviderOperationBuilder::NewByFriend(IContentProviderOperation::TYPE_UPDATE, uri, (CContentProviderOperationBuilder**)&builder);
     return (IContentProviderOperationBuilder*)builder.Get();
 }
 
@@ -277,8 +275,7 @@ AutoPtr<IContentProviderOperationBuilder> CContentProviderOperation::NewDelete(
     /* [in] */ IUri* uri)
 {
     AutoPtr<CContentProviderOperationBuilder> builder;
-    CContentProviderOperationBuilder::NewByFriend((CContentProviderOperationBuilder**)&builder);
-    builder->constructor(IContentProviderOperation::TYPE_DELETE, uri);
+    CContentProviderOperationBuilder::NewByFriend(IContentProviderOperation::TYPE_DELETE, uri, (CContentProviderOperationBuilder**)&builder);
     return (IContentProviderOperationBuilder*)builder.Get();
 }
 
@@ -286,8 +283,7 @@ AutoPtr<IContentProviderOperationBuilder> CContentProviderOperation::NewAssertQu
     /* [in] */ IUri* uri)
 {
     AutoPtr<CContentProviderOperationBuilder> builder;
-    CContentProviderOperationBuilder::NewByFriend((CContentProviderOperationBuilder**)&builder);
-    builder->constructor(IContentProviderOperation::TYPE_ASSERT, uri);
+    CContentProviderOperationBuilder::NewByFriend(IContentProviderOperation::TYPE_ASSERT, uri, (CContentProviderOperationBuilder**)&builder);
     return (IContentProviderOperationBuilder*)builder.Get();
 }
 

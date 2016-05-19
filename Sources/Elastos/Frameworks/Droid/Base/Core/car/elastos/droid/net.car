@@ -724,6 +724,8 @@ module
     }
 
     class CProxyInfo {
+        constructor();
+
         constructor(
             [in] String host,
             [in] Int32 port,

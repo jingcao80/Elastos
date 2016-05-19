@@ -644,6 +644,51 @@ ECode CPackageInfo::SetThemeInfo(
     return NOERROR;
 }
 
+ECode CPackageInfo::GetCoreApp(
+    /* [out] */ Boolean* coreApp)
+{
+    VALIDATE_NOT_NULL(coreApp)
+    *coreApp = mCoreApp;
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetCoreApp(
+    /* [in] */ Boolean coreApp)
+{
+    mCoreApp = coreApp;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetRequiredForAllUsers(
+    /* [out] */ Boolean* requiredForAllUsers)
+{
+    VALIDATE_NOT_NULL(requiredForAllUsers)
+    *requiredForAllUsers = mRequiredForAllUsers;
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetRequiredForAllUsers(
+    /* [in] */ Boolean requiredForAllUsers)
+{
+    mRequiredForAllUsers = requiredForAllUsers;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetOverlayTarget(
+    /* [out] */ String* overlayTarget)
+{
+    VALIDATE_NOT_NULL(overlayTarget)
+    *overlayTarget = mOverlayTarget;
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetOverlayTarget(
+    /* [in] */ const String& overlayTarget)
+{
+    mOverlayTarget = overlayTarget;
+    return NOERROR;
+}
+
 } // namespace Pm
 } // namespace Content
 } // namespace Droid

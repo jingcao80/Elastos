@@ -1236,6 +1236,12 @@ module
 
         SetBlurMaskAlphaThreshold(
             [in] Float blurMaskAlphaThreshold);
+
+        GetRotationAnimation(
+            [out] Int32* rotationAnimation);
+
+        SetRotationAnimation(
+            [in] Int32 rotationAnimation);
     }
 
     interface IWindowManagerLayoutParamsHelper {

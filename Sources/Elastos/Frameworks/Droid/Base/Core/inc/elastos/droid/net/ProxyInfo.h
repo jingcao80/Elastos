@@ -64,6 +64,8 @@ public:
         /* [in] */ IUri* pacUri,
         /* [out] */ IProxyInfo** result);
 
+    CARAPI constructor();
+
     /**
      * Create a ProxyProperties that points at a HTTP Proxy.
      * @hide
@@ -114,6 +116,9 @@ public:
     CARAPI GetPacFileUrl(
         /* [out] */ IUri** result);
 
+    CARAPI SetPacFileUrl(
+        /* [in] */ IUri* pacUri);
+
     /**
      * When configured to use a Direct Proxy this returns the host
      * of the proxy.
@@ -134,6 +139,9 @@ public:
      */
     CARAPI GetExclusionList(
         /* [out, callee] */ ArrayOf<String>** result);
+
+    CARAPI SetExclusionList(
+        /* [in] */ ArrayOf<String>* exclusionList);
 
     /**
      * comma separated

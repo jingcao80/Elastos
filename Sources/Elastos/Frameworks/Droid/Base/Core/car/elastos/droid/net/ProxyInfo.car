@@ -23,6 +23,7 @@ module
      * @Involved
      * interface IParcelable;
      */
+    [deprecated]
     interface IProxyInfo {
         /**
          *@hide
@@ -53,6 +54,12 @@ module
             [out] IUri** result);
 
         /**
+         * @hide
+         */
+        SetPacFileUrl(
+            [in] IUri* pacUri);
+
+        /**
          * When configured to use a Direct Proxy this returns the host
          * of the proxy.
          */
@@ -72,6 +79,12 @@ module
          */
         GetExclusionList(
             [out, callee] ArrayOf<String>* result);
+
+        /**
+         * @hide
+         */
+        SetExclusionList(
+            [in] ArrayOf<String>* exclusionList);
 
         /**
          * comma separated

@@ -29,6 +29,7 @@ module
      * @Involve
      * interface IParcelable;
      */
+    [deprecated]
     interface IUsbDevice {
         /**
          * Returns the name of the device.
@@ -108,6 +109,9 @@ module
         GetInterface(
             [in] Int32 index,
             [out] IUsbInterface** usbInterface);
+
+        SetConfigurations(
+            [in] ArrayOf<IParcelable*>* configuration);
 
         GetHashCode(
             [out] Int32* value);

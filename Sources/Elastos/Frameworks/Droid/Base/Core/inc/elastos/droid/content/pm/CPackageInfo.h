@@ -263,6 +263,24 @@ public:
     CARAPI SetThemeInfo(
         /* [in] */ IThemeInfo* themeInfo);
 
+    CARAPI GetCoreApp(
+        /* [out] */ Boolean* coreApp);
+
+    CARAPI SetCoreApp(
+        /* [in] */ Boolean coreApp);
+
+    CARAPI GetRequiredForAllUsers(
+        /* [out] */ Boolean* requiredForAllUsers);
+
+    CARAPI SetRequiredForAllUsers(
+        /* [in] */ Boolean requiredForAllUsers);
+
+    CARAPI GetOverlayTarget(
+        /* [out] */ String* overlayTarget);
+
+    CARAPI SetOverlayTarget(
+        /* [in] */ const String& overlayTarget);
+
 public:
     /**
      * The name of this package.  From the &lt;manifest&gt; tag's "name"

@@ -927,6 +927,8 @@ module
             [in] ICharSequence* msg,
             [in] Boolean always);
 
+        KeyguardWaitingForActivityDrawn();
+
         ShouldUpRecreateTask(
             [in] IBinder* token,
             [in] String destAffinity,

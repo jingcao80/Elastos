@@ -223,6 +223,12 @@ public:
     CARAPI SetBlurMaskAlphaThreshold(
     /* [in] */ Float blurMaskAlphaThreshold);
 
+    CARAPI GetRotationAnimation(
+        /* [out] */ Int32* rotationAnimation);
+
+    CARAPI SetRotationAnimation(
+        /* [in] */ Int32 rotationAnimation);
+
     CARAPI ReadFromParcel(
         /* [in] */ IParcel *source);
 

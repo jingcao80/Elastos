@@ -31,7 +31,9 @@ module
     using interface Elastos.Droid.Content.IISyncStatusObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver;
+    using interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver2;
     using interface Elastos.Droid.Content.Pm.IIPackageInstallObserver;
+    using interface Elastos.Droid.Content.Pm.IIPackageInstallObserver2;
     using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageStatsObserver;
     using interface Elastos.Droid.Database.ICursor;
@@ -43,6 +45,7 @@ module
     using interface Elastos.Droid.Internal.App.IIVoiceInteractor;
     using interface Elastos.Droid.Internal.Location.IILocationProvider;
     using interface Elastos.Droid.Internal.Os.IIParcelFileDescriptorFactory;
+    using interface Elastos.Droid.Internal.TextService.IISpellCheckerSessionListener;
     using interface Elastos.Droid.Internal.TextService.IITextServicesSessionListener;
     using interface Elastos.Droid.Internal.View.IInputMethodClient;
     using interface Elastos.Droid.Internal.View.IIInputContext;
@@ -83,8 +86,8 @@ module
     using interface Elastos.Droid.View.IInputMethodCallback;
     using interface Elastos.Droid.View.IOnKeyguardExitResult;
     using interface Elastos.Droid.View.IRotationWatcher;
+    using interface Elastos.Droid.View.IIWindowSessionCallback;
     using interface Elastos.Droid.View.InputMethod.IInputMethodSession;
-    using interface Elastos.Droid.View.TextService.ISpellCheckerSessionListener;
     using interface Elastos.IO.ISerializable;
 
     namespace Elastos {
@@ -368,6 +371,15 @@ module
         interface IBinder;
     }
 
+    class CPackageInstallObserver2Native {
+        constructor(
+           [in] Handle64 jVM,
+           [in] Handle64 jInstance);
+
+        interface IIPackageInstallObserver2;
+        interface IBinder;
+    }
+
     class CMediaContainerServiceNative {
         constructor(
            [in] Handle64 jVM,
@@ -410,6 +422,15 @@ module
             [in] Handle64 jInstance);
 
         interface IIPackageDeleteObserver;
+        interface IBinder;
+    }
+
+    class CIPackageDeleteObserver2Native {
+        constructor(
+            [in] Handle64 jVM,
+            [in] Handle64 jInstance);
+
+        interface IIPackageDeleteObserver2;
         interface IBinder;
     }
 
@@ -725,7 +746,7 @@ module
             [in] Handle64 jVM,
             [in] Handle64 jInstance);
 
-        interface ISpellCheckerSessionListener;
+        interface IISpellCheckerSessionListener;
         interface IBinder;
     }
 
@@ -861,6 +882,15 @@ module
             [in] Handle64 jInstance);
 
         interface IIParcelFileDescriptorFactory;
+        interface IBinder;
+    }
+
+    class CIWindowSessionCallbackNative {
+        constructor(
+            [in] Handle64 jVM,
+            [in] Handle64 jInstance);
+
+        interface IIWindowSessionCallback;
         interface IBinder;
     }
 

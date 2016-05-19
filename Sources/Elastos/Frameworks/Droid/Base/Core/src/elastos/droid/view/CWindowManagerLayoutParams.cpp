@@ -734,6 +734,21 @@ ECode CWindowManagerLayoutParams::SetBlurMaskAlphaThreshold(
     return NOERROR;
 }
 
+ECode CWindowManagerLayoutParams::GetRotationAnimation(
+    /* [out] */ Int32* rotationAnimation)
+{
+    VALIDATE_NOT_NULL(rotationAnimation);
+    *rotationAnimation = mRotationAnimation;
+    return NOERROR;
+}
+
+ECode CWindowManagerLayoutParams::SetRotationAnimation(
+    /* [in] */ Int32 rotationAnimation)
+{
+    mRotationAnimation = rotationAnimation;
+    return NOERROR;
+}
+
 ECode CWindowManagerLayoutParams::ReadFromParcel(
     /* [in] */ IParcel *source)
 {

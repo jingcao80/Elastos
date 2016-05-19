@@ -290,6 +290,42 @@ module
          */
         SetThemeInfo(
             [in] IThemeInfo* themeInfo);
+
+        /**
+         * {@hide}
+         */
+        GetCoreApp(
+            [out] Boolean* coreApp);
+
+        /**
+         * {@hide}
+         */
+        SetCoreApp(
+            [in] Boolean coreApp);
+
+        /**
+         * {@hide}
+         */
+        GetRequiredForAllUsers(
+            [out] Boolean* requiredForAllUsers);
+
+        /**
+         * {@hide}
+         */
+        SetRequiredForAllUsers(
+            [in] Boolean requiredForAllUsers);
+
+        /**
+         * {@hide}
+         */
+        GetOverlayTarget(
+            [out] String* overlayTarget);
+
+        /**
+         * {@hide}
+         */
+        SetOverlayTarget(
+            [in] String overlayTarget);
     }
 
     } // namespace Pm

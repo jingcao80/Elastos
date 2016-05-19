@@ -119,6 +119,9 @@ module
 
         /* Deny USB debugging from the attached host */
         DenyUsbDebugging();
+
+        /* Clear public keys installed for secure USB debugging */
+        ClearUsbDebuggingKeys();
     }
 
     } // namespace Usb

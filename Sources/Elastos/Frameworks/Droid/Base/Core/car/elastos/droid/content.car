@@ -485,6 +485,10 @@ module
         }
 
         class CContentProviderOperationBuilder {
+            constructor(
+                [in] Int32 type,
+                [in] IUri* uri);
+
             interface IContentProviderOperationBuilder;
         }
 
