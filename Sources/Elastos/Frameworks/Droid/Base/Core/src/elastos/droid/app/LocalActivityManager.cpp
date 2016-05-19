@@ -55,8 +55,6 @@ ECode LocalActivityManager::LocalActivityRecord::ToString(
 // LocalActivityManager
 //==========================================================
 
-CAR_INTERFACE_IMPL(LocalActivityManager, Object, ILocalActivityManager)
-
 const Int32 LocalActivityManager::RESTORED = 0;      // State restored, but no StartActivity().
 const Int32 LocalActivityManager::INITIALIZING = 1;  // Ready to launch (after StartActivity()).
 const Int32 LocalActivityManager::CREATED = 2;       // Created, not started or resumed.
@@ -66,6 +64,8 @@ const Int32 LocalActivityManager::DESTROYED = 5;     // No longer with us.
 
 const String LocalActivityManager::TAG("LocalActivityManager");
 const Boolean LocalActivityManager::localLOGV = FALSE;
+
+CAR_INTERFACE_IMPL(LocalActivityManager, Object, ILocalActivityManager)
 
 LocalActivityManager::LocalActivityManager()
     : mSingleMode(FALSE)
@@ -82,6 +82,9 @@ ECode LocalActivityManager::constructor(
 {
     mActivityThread = CActivityThread::GetCurrentActivityThread();
     mSingleMode = singleMode;
+
+    CHashMap::New((IMap**)&mActivities);
+    CArrayList::New((IArrayList**)&mActivityArray);
 
     IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(parent);
     wrs->GetWeakReference((IWeakReference**)&mWeakParent);

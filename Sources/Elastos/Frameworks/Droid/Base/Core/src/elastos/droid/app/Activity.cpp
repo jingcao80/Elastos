@@ -4048,6 +4048,7 @@ ECode Activity::Attach(
 #if _DEBUG
     if (!mIsConstructed) {
         Slogger::E(TAG, "Error: Activity::constructor() is not called by sub classes %s!", TO_CSTR(this));
+        assert(0 && "Error: Activity::constructor() is not called by sub classes");
     }
 #endif
 
