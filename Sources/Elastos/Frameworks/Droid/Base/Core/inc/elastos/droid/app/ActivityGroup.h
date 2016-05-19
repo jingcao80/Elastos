@@ -75,15 +75,15 @@ protected:
     //@Override
     CARAPI OnDestroy();
 
-public:
-    static const String PARENT_NON_CONFIG_INSTANCE_KEY;// = "android:parent_non_config_instance";
+    AutoPtr<ILocalActivityManager> GetLocalActivityManager();
 
-protected:
+private:
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
     AutoPtr<ILocalActivityManager> mLocalActivityManager;
+    Boolean mSingleActivityMode;
 
 private:
     static const String STATES_KEY;// = "android:states";

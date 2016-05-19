@@ -135,10 +135,10 @@ private:
         AutoPtr<IViewOnLayoutChangeListener> mListener;
     };
 
-    class _AnimatorListenerAdapterEx2 : public AnimatorListenerAdapter
+    class AppearingAnimatorListener : public AnimatorListenerAdapter
     {
     public:
-        _AnimatorListenerAdapterEx2(
+        AppearingAnimatorListener(
             /* [in] */ CLayoutTransition* host,
             /* [in] */ IView* child,
             /* [in] */ IViewGroup* parent);

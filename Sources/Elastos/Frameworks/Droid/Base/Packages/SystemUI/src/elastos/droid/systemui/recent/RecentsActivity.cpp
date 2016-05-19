@@ -109,7 +109,7 @@ RecentsActivity::RecentsActivity()
 
 ECode RecentsActivity::constructor()
 {
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode RecentsActivity::OnPause()
@@ -118,8 +118,7 @@ ECode RecentsActivity::OnPause()
         R::anim::recents_return_to_launcher_enter,
         R::anim::recents_return_to_launcher_exit);
     mForeground = FALSE;
-    Activity::OnPause();
-    return NOERROR;
+    return Activity::OnPause();
 }
 
 ECode RecentsActivity::OnStop()
@@ -128,8 +127,7 @@ ECode RecentsActivity::OnStop()
     if (mRecentsPanel != NULL) {
         mRecentsPanel->OnUiHidden();
     }
-    Activity::OnStop();
-    return NOERROR;
+    return Activity::OnStop();
 }
 
 void RecentsActivity::UpdateWallpaperVisibility(
@@ -182,8 +180,7 @@ ECode RecentsActivity::OnStart()
         mRecentsPanel->RefreshRecentTasksList();
         mRecentsPanel->RefreshViews();
     }
-    Activity::OnStart();
-    return NOERROR;
+    return Activity::OnStart();
 }
 
 ECode RecentsActivity::OnResume()
@@ -282,8 +279,7 @@ ECode RecentsActivity::OnCreate(
     mIntentFilter->AddAction(WINDOW_ANIMATION_START_INTENT);
     AutoPtr<IIntent> intent;
     RegisterReceiver(mIntentReceiver, mIntentFilter, (IIntent**)&intent);
-    Activity::OnCreate(savedInstanceState);
-    return NOERROR;
+    return Activity::OnCreate(savedInstanceState);
 }
 
 ECode RecentsActivity::OnSaveInstanceState(
@@ -300,8 +296,7 @@ ECode RecentsActivity::OnDestroy()
     AutoPtr<RecentTasksLoader> recentTasksLoader = RecentTasksLoader::GetInstance(this);
     recentTasksLoader->SetRecentsPanel(NULL, mRecentsPanel);
     UnregisterReceiver(mIntentReceiver);
-    Activity::OnDestroy();
-    return NOERROR;
+    return Activity::OnDestroy();
 }
 
 ECode RecentsActivity::OnNewIntent(

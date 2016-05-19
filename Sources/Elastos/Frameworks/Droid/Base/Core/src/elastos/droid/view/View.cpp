@@ -813,7 +813,6 @@ ECode View::AccessibilityDelegate::CreateAccessibilityNodeInfo(
 
 ECode View::CheckForTap::Run()
 {
-    Logger::I(TAG, "%s CheckForTap", TO_CSTR(mView));
     mView->mPrivateFlags &= ~PFLAG_PREPRESSED;
     mView->SetPressed(TRUE, mX, mY);
     mView->CheckForLongClick(CViewConfiguration::GetTapTimeout());
@@ -1906,7 +1905,6 @@ ECode View::SetOnCreateContextMenuListener(
 ECode View::PerformClick(
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, "%s PerformClick", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     Boolean result;
     AutoPtr<ListenerInfo> li = mListenerInfo;
@@ -1927,7 +1925,6 @@ ECode View::PerformClick(
 ECode View::CallOnClick(
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, "%s CallOnClick", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     AutoPtr<ListenerInfo> li = mListenerInfo;
     if (li != NULL && li->mOnClickListener != NULL) {
@@ -1948,7 +1945,6 @@ ECode View::CallOnClick(
 ECode View::PerformLongClick(
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, "%s PerformLongClick", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_LONG_CLICKED);
 
@@ -6966,7 +6962,6 @@ ECode View::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, "%s OnTouchEvent", TO_CSTR(this));
     VALIDATE_NOT_NULL(res)
     Float x, y;
     event->GetX(&x);

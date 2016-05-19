@@ -904,6 +904,8 @@ public:
 
     Launcher();
 
+    CARAPI constructor();
+
     CARAPI GetDragLayer(
         /* [out] */ IDragLayer** layer);
 

@@ -371,6 +371,14 @@ SettingsActivity::SettingsActivity()
     (*SETTINGS_FOR_RESTRICTED)[23] = R::id::nfc_payment_settings;
     (*SETTINGS_FOR_RESTRICTED)[24] = R::id::home_settings;
     (*SETTINGS_FOR_RESTRICTED)[25] = R::id::dashboard;
+}
+
+SettingsActivity::~SettingsActivity()
+{}
+
+ECode SettingsActivity::constructor()
+{
+    Activity::constructor();
 
     mBatteryInfoReceiver = new BatteryInfoReceiver(this);
 
@@ -379,10 +387,8 @@ SettingsActivity::SettingsActivity()
     CArrayList::New((IArrayList**)&mCategories);
 
     mHandler = new BuildCategoriesHandler(this);
+    return NOERROR;
 }
-
-SettingsActivity::~SettingsActivity()
-{}
 
 ECode SettingsActivity::GetSwitchBar(
     /* [out] */ SwitchBar** switchBar)

@@ -256,7 +256,9 @@ ECode CLinkedBlockingQueue::Offer(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
     if (e == NULL) return E_NULL_POINTER_EXCEPTION;
+
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
     Int32 c = -1;
@@ -289,7 +291,9 @@ ECode CLinkedBlockingQueue::Offer(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
     if (e == NULL) return E_NULL_POINTER_EXCEPTION;
+
     Int32 c = -1;
     if (mCount->Get(&c), c == mCapacity) {
         *result = FALSE;
@@ -318,6 +322,7 @@ ECode CLinkedBlockingQueue::Offer(
 ECode CLinkedBlockingQueue::Take(
     /* [out] */ IInterface** e)
 {
+    VALIDATE_NOT_NULL(e)
     AutoPtr<IInterface> x;
     Int32 c = -1;
     {

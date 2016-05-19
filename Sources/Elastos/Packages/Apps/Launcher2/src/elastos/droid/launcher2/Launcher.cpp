@@ -1172,6 +1172,10 @@ Launcher::Launcher()
     , mRestoreScreenOrientationDelay(500)
     , mNewShortcutAnimatePage(-1)
 {
+}
+
+ECode Launcher::constructor()
+{
     Activity::constructor();
 
     CLauncherCloseSystemDialogsIntentReceiver::New(this, (IBroadcastReceiver**)&mCloseSystemDialogsReceiver);
@@ -1183,24 +1187,19 @@ Launcher::Launcher()
     mTmpAddItemCellCoordinates = ArrayOf<Int32>::Alloc(2);
 
     CArrayList::New((IArrayList**)&mOnResumeCallbacks);
-
     CHashMap::New((IHashMap**)&mWidgetsToAdvance);
-
     CArrayList::New((IArrayList**)&mSynchronouslyBoundPages);
-
     CArrayList::New((IArrayList**)&mNewShortcutAnimateViews);
-
     CRect::New((IRect**)&mRectForFolderAnimation);
 
     mHideFromAccessibilityHelper = new HideFromAccessibilityHelper();
-
     AutoPtr<IRunnable> mBuildLayersRunnable = new MyRunnable(this);
 
     CLauncherBroadcastReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
 
     mHandler = new MyHandler(this);
-
     mBindPackagesUpdatedRunnable = new MyRunnable19(this);
+    return NOERROR;
 }
 
 ECode Launcher::OnCreate(

@@ -29,11 +29,6 @@ ExpandableListActivity::ExpandableListActivity()
 ExpandableListActivity::~ExpandableListActivity()
 {}
 
-ECode ExpandableListActivity::constructor()
-{
-    return Activity::constructor();
-}
-
 ECode ExpandableListActivity::OnCreateContextMenu(
     /* [in] */ IContextMenu* menu,
     /* [in] */ IView* v,

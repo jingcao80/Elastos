@@ -459,15 +459,13 @@ ECode CNavigationBarView::SetNavigationIconHints(
     // Update menu button in case the IME state has changed.
     SetMenuVisibility(mShowMenu, TRUE);
 
-    SetDisabledFlags(mDisabledFlags, TRUE);
-    return NOERROR;
+    return SetDisabledFlags(mDisabledFlags, TRUE);
 }
 
 ECode CNavigationBarView::SetDisabledFlags(
     /* [in] */ Int32 disabledFlags)
 {
-    SetDisabledFlags(disabledFlags, FALSE);
-    return NOERROR;
+    return SetDisabledFlags(disabledFlags, FALSE);
 }
 
 ECode CNavigationBarView::SetDisabledFlags(

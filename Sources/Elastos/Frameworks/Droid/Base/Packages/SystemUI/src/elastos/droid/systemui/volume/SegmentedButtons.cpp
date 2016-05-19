@@ -154,7 +154,7 @@ ECode SegmentedButtons::AddButton(
 
     AutoPtr<IInteger32> i;
     CInteger32::New(labelResId, (IInteger32**)&i);
-    IView::Probe(b)->SetTag(LABEL_RES_KEY, i);
+    IView::Probe(b)->SetTag(R::id::label/*LABEL_RES_KEY*/, i);
 
     AutoPtr<ICharSequence> cs;
     CString::New(StringUtils::ToString(labelResId), (ICharSequence**)&cs);
@@ -186,7 +186,7 @@ ECode SegmentedButtons::UpdateLocale()
         GetChildAt(i, (IView**)&c);
         const AutoPtr<IButton> b = IButton::Probe(c);
         AutoPtr<IInterface> tag;
-        IView::Probe(b)->GetTag(LABEL_RES_KEY, (IInterface**)&tag);
+        IView::Probe(b)->GetTag(R::id::label/*LABEL_RES_KEY*/, (IInterface**)&tag);
         AutoPtr<IInteger32> i32 = IInteger32::Probe(tag);
         Int32 value;
         i32->GetValue(&value);

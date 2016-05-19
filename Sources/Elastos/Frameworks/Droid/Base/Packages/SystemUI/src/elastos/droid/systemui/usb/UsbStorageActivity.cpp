@@ -242,7 +242,7 @@ UsbStorageActivity::UsbStorageActivity()
 
 ECode UsbStorageActivity::constructor()
 {
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode UsbStorageActivity::OnCreate(

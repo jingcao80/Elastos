@@ -233,6 +233,10 @@ RecentsActivity::RecentsActivity()
     : mVisible(FALSE)
     , mLastTabKeyEventTime(0L)
 {
+}
+
+ECode RecentsActivity::constructor()
+{
     AutoPtr<BR1> br1 = new BR1(this);
     mServiceBroadcastReceiver = (BroadcastReceiver*)br1.Get();
 
@@ -241,11 +245,7 @@ RecentsActivity::RecentsActivity()
 
     AutoPtr<MR> mr = new MR(this);
     mDebugTrigger = new DebugTrigger((IRunnable*)mr);
-}
-
-ECode RecentsActivity::constructor()
-{
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode RecentsActivity::UpdateRecentsTasks(

@@ -27,7 +27,7 @@ SyncActivityTooManyDeletes::~SyncActivityTooManyDeletes()
 
 ECode SyncActivityTooManyDeletes::constructor()
 {
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode SyncActivityTooManyDeletes::OnCreate(

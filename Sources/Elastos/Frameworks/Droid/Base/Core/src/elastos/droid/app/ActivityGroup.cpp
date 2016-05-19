@@ -6,12 +6,12 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-const String ActivityGroup::PARENT_NON_CONFIG_INSTANCE_KEY("android:parent_non_config_instance");
 const String ActivityGroup::STATES_KEY("android:states");
 
 CAR_INTERFACE_IMPL(ActivityGroup, Activity, IActivityGroup)
 
 ActivityGroup::ActivityGroup()
+    : mSingleActivityMode(TRUE)
 {}
 
 ActivityGroup::~ActivityGroup()
@@ -25,8 +25,8 @@ ECode ActivityGroup::constructor()
 ECode ActivityGroup::constructor(
     /* [in] */ Boolean singleActivityMode)
 {
-    return CLocalActivityManager::New((IActivity*)this,
-        singleActivityMode, (ILocalActivityManager**)&mLocalActivityManager);
+    mSingleActivityMode = singleActivityMode;
+    return Activity::constructor();
 }
 
 ECode ActivityGroup::OnCreate(
@@ -36,21 +36,22 @@ ECode ActivityGroup::OnCreate(
     AutoPtr<IBundle> states;
     if (savedInstanceState != NULL)
         savedInstanceState->GetBundle(STATES_KEY, (IBundle**)&states);
-    return mLocalActivityManager->DispatchCreate(states);
+    return GetLocalActivityManager()->DispatchCreate(states);
 }
 
 ECode ActivityGroup:: OnResume()
 {
     FAIL_RETURN(Activity::OnResume())
-    return mLocalActivityManager->DispatchResume();
+    return GetLocalActivityManager()->DispatchResume();
 }
 
 ECode ActivityGroup:: OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     FAIL_RETURN(Activity::OnSaveInstanceState(outState))
+    assert(GetLocalActivityManager() != NULL);
     AutoPtr<IBundle> state;
-    mLocalActivityManager->SaveInstanceState((IBundle**)&state);
+    GetLocalActivityManager()->SaveInstanceState((IBundle**)&state);
     if (state != NULL) {
         outState->PutBundle(STATES_KEY, state);
     }
@@ -62,13 +63,13 @@ ECode ActivityGroup:: OnPause()
     FAIL_RETURN(Activity::OnPause())
     Boolean finish;
     IsFinishing(&finish);
-    return mLocalActivityManager->DispatchPause(finish);
+    return GetLocalActivityManager()->DispatchPause(finish);
 }
 
 ECode ActivityGroup:: OnStop()
 {
     FAIL_RETURN(Activity::OnStop())
-    return mLocalActivityManager->DispatchStop();
+    return GetLocalActivityManager()->DispatchStop();
 }
 
 ECode ActivityGroup:: OnDestroy()
@@ -76,26 +77,36 @@ ECode ActivityGroup:: OnDestroy()
     FAIL_RETURN(Activity::OnDestroy())
     Boolean bval;
     IsFinishing(&bval);
-    return mLocalActivityManager->DispatchDestroy(bval);
+    return GetLocalActivityManager()->DispatchDestroy(bval);
 }
 
 ECode ActivityGroup::OnRetainNonConfigurationChildInstances(
     /* [out] */ IHashMap** map)
 {
-    return mLocalActivityManager->DispatchRetainNonConfigurationInstance(map);
+    return GetLocalActivityManager()->DispatchRetainNonConfigurationInstance(map);
 }
 
 ECode ActivityGroup::GetCurrentActivity(
     /* [out] */ IActivity** activity)
 {
-    return mLocalActivityManager->GetCurrentActivity(activity);
+    return GetLocalActivityManager()->GetCurrentActivity(activity);
+}
+
+AutoPtr<ILocalActivityManager> ActivityGroup::GetLocalActivityManager()
+{
+    if (mLocalActivityManager == NULL) {
+        CLocalActivityManager::New((IActivity*)this, mSingleActivityMode,
+            (ILocalActivityManager**)&mLocalActivityManager);
+    }
+    return mLocalActivityManager;
 }
 
 ECode ActivityGroup::GetLocalActivityManager(
     /* [out] */ ILocalActivityManager** mgr)
 {
     VALIDATE_NOT_NULL(mgr)
-    *mgr = mLocalActivityManager;
+    AutoPtr<ILocalActivityManager> tmp = GetLocalActivityManager();
+    *mgr = tmp;
     REFCOUNT_ADD(*mgr)
     return NOERROR;
 }
@@ -108,7 +119,7 @@ ECode ActivityGroup::DispatchActivityResult(
 {
     if (who != NULL) {
         AutoPtr<IActivity> act;
-        mLocalActivityManager->GetActivity(who, (IActivity**)&act);
+        GetLocalActivityManager()->GetActivity(who, (IActivity**)&act);
         /*
         if (false) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode

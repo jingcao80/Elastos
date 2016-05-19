@@ -355,6 +355,8 @@ module
     namespace SystemUI {
 
     class CImageWallpaper {
+        constructor();
+
         interface IImageWallpaper;
         interface IWallpaperService;
         interface IService;
@@ -365,6 +367,8 @@ module
     }
 
     class CLoadAverageService {
+        constructor();
+
         interface ILoadAverageService;
         interface IService;
         interface IContext;
@@ -374,6 +378,8 @@ module
     }
 
     class CSomnambulator {
+        constructor();
+
         interface IActivity;
         interface IContext;
         interface IContextWrapper;
@@ -389,6 +395,8 @@ module
     }
 
     class CSystemUIService {
+        constructor();
+
         interface ISystemUIService;
         interface IService;
         interface IContext;
@@ -439,10 +447,14 @@ module
     }
 
     class CBootReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
     }
 
     class CDessertCase {
+        constructor();
+
         interface IDessertCase;
         interface IActivity;
         interface IContext;
@@ -458,6 +470,8 @@ module
     }
 
     class CDessertCaseDream {
+        constructor();
+
         interface IDessertCaseDream;
         interface IDreamService;
         interface IService;
@@ -534,6 +548,8 @@ module
     }
 
     class CGuestResumeSessionReceiver {
+        constructor();
+
         interface IGuestResumeSessionReceiver;
         interface IBroadcastReceiver;
     }
@@ -792,7 +808,8 @@ module
     //===========================================================================
     namespace Usb {
 
-        class CStorageNotification {
+        class CStorageNotification
+        {
             constructor();
 
             interface IStorageNotification;
@@ -985,6 +1002,8 @@ module
         }
 
         class CVolumeUI {
+            constructor();
+
             interface ISystemUI;
         }
 
@@ -1038,6 +1057,8 @@ module
         }
 
         class CRingtonePlayer {
+            constructor();
+
             interface ISystemUI;
         }
 
@@ -1073,6 +1094,8 @@ module
     //===========================================================================
     namespace Power {
         class CPowerUI {
+            constructor();
+
             interface IPowerUI;
             interface ISystemUI;
         }
@@ -1083,6 +1106,8 @@ module
     //===========================================================================
     namespace Recent {
         class CRecents {
+            constructor();
+
             interface IRecentsComponent;
             interface ISystemUI;
         }
@@ -1106,6 +1131,8 @@ module
         }
 
         class CRecentsPreloadReceiver {
+            constructor();
+
             interface IBroadcastReceiver;
         }
 
@@ -1407,6 +1434,8 @@ module
     //===========================================================================
     namespace StatusBar {
         class CSystemBars {
+            constructor();
+
             interface ISystemUI;
             interface IServiceMonitorCallbacks;
         }
@@ -2444,6 +2473,8 @@ module
         }
 
         class CPhoneStatusBar {
+            constructor();
+
             interface IPhoneStatusBar;
             interface IDemoMode;
             interface IDragDownCallback;
@@ -2659,6 +2690,8 @@ module
 
     namespace Settings {
         class CBrightnessDialog {
+            constructor();
+
             interface IActivity;
             interface IContext;
             interface IContextThemeWrapper;

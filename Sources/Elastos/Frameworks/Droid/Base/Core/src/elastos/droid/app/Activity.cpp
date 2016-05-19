@@ -209,6 +209,9 @@ Activity::Activity()
     , mTitleColor(0)
     , mTitleReady(FALSE)
     , mDefaultKeyMode(IActivity::DEFAULT_KEYS_DISABLE)
+#if defined(_DEBUG)
+    , mIsConstructed(FALSE)
+#endif
 {
 }
 
@@ -238,6 +241,9 @@ ECode Activity::constructor()
     mEnterTransitionListener = SharedElementCallback::NULL_CALLBACK;
     mExitTransitionListener = SharedElementCallback::NULL_CALLBACK;
 
+#if defined(_DEBUG)
+     mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -4039,6 +4045,12 @@ ECode Activity::Attach(
     /* [in] */ IConfiguration* config,
     /* [in] */ IIVoiceInteractor* voiceInteractor)
 {
+#if _DEBUG
+    if (!mIsConstructed) {
+        Slogger::E(TAG, "Error: Activity::constructor() is not called by sub classes %s!", TO_CSTR(this));
+    }
+#endif
+
     FAIL_RETURN(AttachBaseContext(context));
     FAIL_RETURN(mFragments->AttachActivity(this, mContainer, NULL));
     AutoPtr<IPolicyManager> pm;

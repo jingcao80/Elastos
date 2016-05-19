@@ -310,7 +310,7 @@ private:
     /** Thread our activities are running in. */
     AutoPtr<IActivityThread> mActivityThread;
     /** The containing activity that owns the activities we create. */
-    AutoPtr<IActivity> mParent;
+    AutoPtr<IWeakReference> mWeakParent; // IActivity
 
     /** The activity that is currently resumed. */
     AutoPtr<ILocalActivityRecord> mResumed;

@@ -17,11 +17,12 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/ServiceManager.h"
-// #include "elastos/droid/view/CKeyEvent.h"
-// #include "elastos/droid/view/CKeyEventHelper.h"
-// #include "elastos/droid/view/CViewConfigurationHelper.h"
-// #include "elastos/droid/view/CKeyCharacterMapHelper.h"
-
+#include "elastos/droid/os/PerformanceCollector.h"
+#include "elastos/droid/view/CKeyEvent.h"
+#include "elastos/droid/view/CKeyEventHelper.h"
+#include "elastos/droid/view/CViewConfigurationHelper.h"
+#include "elastos/droid/view/CKeyCharacterMapHelper.h"
+#include <Elastos.Droid.Telephony.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
@@ -47,21 +48,22 @@ using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::PerformanceCollector;
 using Elastos::Droid::Os::EIID_IIdleHandler;
 using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Privacy::IPrivacySettings;
-// using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::View::IInputEvent;
-// using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::IKeyEventHelper;
-// using Elastos::Droid::View::CKeyEventHelper;
+using Elastos::Droid::View::CKeyEventHelper;
 using Elastos::Droid::View::IKeyCharacterMap;
 using Elastos::Droid::View::IKeyCharacterMapHelper;
-// using Elastos::Droid::View::CKeyCharacterMapHelper;
+using Elastos::Droid::View::CKeyCharacterMapHelper;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IViewConfigurationHelper;
-// using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
 
 using Elastos::Core::CString;
 using Elastos::Core::StringBuilder;
@@ -228,7 +230,8 @@ ECode Instrumentation::MenuRunnable::Run()
     AutoPtr<IWindow> win;
     mActivity->GetWindow((IWindow**)&win);
 
-    return win->PerformPanelIdentifierAction(IWindow::FEATURE_OPTIONS_PANEL, mIdentifier, mFlags, &mReturnValue);
+    return win->PerformPanelIdentifierAction(IWindow::FEATURE_OPTIONS_PANEL,
+        mIdentifier, mFlags, &mReturnValue);
 }
 
 //====================================================
@@ -250,7 +253,8 @@ ECode Instrumentation::ContextMenuRunnable::Run()
     AutoPtr<IWindow> win;
     mActivity->GetWindow((IWindow**)&win);
 
-    return win->PerformPanelIdentifierAction(IWindow::FEATURE_OPTIONS_PANEL, mIdentifier, mFlags, &mReturnValue);
+    return win->PerformPanelIdentifierAction(IWindow::FEATURE_OPTIONS_PANEL,
+        mIdentifier, mFlags, &mReturnValue);
 }
 
 //====================================================
@@ -272,7 +276,7 @@ Instrumentation::BlockPhoneCallRunnable::Run()
     String packageName;
     mContext->GetPackageName(&packageName);
     extras->PutString(String("packageName"), packageName);
-    // extras->PutInt32(String("phoneState"), ITelephonyManager::CALL_STATE_IDLE);
+    extras->PutInt32(String("phoneState"), ITelephonyManager::CALL_STATE_IDLE);
     privacy->PutExtras(extras);
     mContext->SendBroadcast(privacy);
     Slogger::I("PrivacyContext", "sent privacy intent");
@@ -312,11 +316,7 @@ ECode Instrumentation::Start()
         return E_RUNTIME_EXCEPTION;
     }
     StringBuilder sb("Instr: ");
-    AutoPtr<IClassInfo> clsInfo;
-    _CObject_ReflectClassInfo(Probe(EIID_IObject), (IClassInfo**)&clsInfo);
-    String name;
-    clsInfo->GetName(&name);
-    sb += name;
+    sb += Object::GetClassName(Probe(EIID_IObject));
     mRunner = new InstrumentationThread(sb.ToString(), this);
     mRunner->Start();
     return NOERROR;
@@ -383,30 +383,30 @@ ECode Instrumentation::Finish(
 
 ECode Instrumentation::SetAutomaticPerformanceSnapshots()
 {
+    assert(0 && "TODO");
     mAutomaticPerformanceSnapshots = TRUE;
-//    mPerformanceCollector = new PerformanceCollector();
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    // mPerformanceCollector = new PerformanceCollector();
+    return NOERROR;
 }
 
 ECode Instrumentation::StartPerformanceSnapshot()
 {
+    assert(0 && "TODO");
     Boolean isProfiling;
     if (IsProfiling(&isProfiling), !isProfiling) {
-        assert(0);
-        // mPerformanceCollector->BeginSnapshot(null);
+        // mPerformanceCollector->BeginSnapshot(NULL);
     }
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode Instrumentation::EndPerformanceSnapshot()
 {
+    assert(0 && "TODO");
     Boolean isProfiling;
     if (IsProfiling(&isProfiling), !isProfiling) {
-        assert(0);
-        // mPerfMetrics = mPerformanceCollector.endSnapshot();
+        // mPerfMetrics = mPerformanceCollector->EndSnapshot();
     }
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode Instrumentation::OnDestroy()
@@ -612,7 +612,7 @@ ECode Instrumentation::AddMonitor(
     VALIDATE_NOT_NULL(monitor)
     AutoPtr<IInstrumentationActivityMonitor> am;
     CInstrumentationActivityMonitor::New(filter, result, block,
-            (IInstrumentationActivityMonitor**)&am);
+        (IInstrumentationActivityMonitor**)&am);
     AddMonitor(am);
     *monitor = am;
     REFCOUNT_ADD(*monitor)
@@ -628,7 +628,7 @@ ECode Instrumentation::AddMonitor(
     VALIDATE_NOT_NULL(monitor)
     AutoPtr<IInstrumentationActivityMonitor> am;
     CInstrumentationActivityMonitor::New(cls, result, block,
-            (IInstrumentationActivityMonitor**)&am);
+        (IInstrumentationActivityMonitor**)&am);
     AddMonitor(am);
     *monitor = am;
     REFCOUNT_ADD(*monitor)
@@ -724,14 +724,14 @@ ECode Instrumentation::InvokeContextMenuAction(
     //   long press to set metadata for its selected child
 
     AutoPtr<IKeyEvent> downEvent;
-    // CKeyEvent::New(IKeyEvent::ACTION_DOWN, IKeyEvent::KEYCODE_DPAD_CENTER, (IKeyEvent**)&downEvent);
+    CKeyEvent::New(IKeyEvent::ACTION_DOWN, IKeyEvent::KEYCODE_DPAD_CENTER, (IKeyEvent**)&downEvent);
     SendKeySync(downEvent);
 
     // Need to wait for long press
     WaitForIdleSync();
     // try {
     AutoPtr<IViewConfigurationHelper> helper;
-    // CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     Int32 timeout;
     helper->GetLongPressTimeout(&timeout);
     ECode ec = Thread::Sleep(timeout);
@@ -746,7 +746,7 @@ ECode Instrumentation::InvokeContextMenuAction(
     // }
 
     AutoPtr<IKeyEvent> upEvent;
-    // CKeyEvent::New(IKeyEvent::ACTION_UP, IKeyEvent::KEYCODE_DPAD_CENTER, (IKeyEvent**)&upEvent);
+    CKeyEvent::New(IKeyEvent::ACTION_UP, IKeyEvent::KEYCODE_DPAD_CENTER, (IKeyEvent**)&upEvent);
     SendKeySync(upEvent);
 
     // Wait for context menu to appear
@@ -766,7 +766,7 @@ ECode Instrumentation::SendStringSync(
     }
 
     AutoPtr<IKeyCharacterMapHelper> helper;
-    // CKeyCharacterMapHelper::AcquireSingleton((IKeyCharacterMapHelper**)&helper);
+    CKeyCharacterMapHelper::AcquireSingleton((IKeyCharacterMapHelper**)&helper);
     AutoPtr<IKeyCharacterMap> keyCharacterMap;
     helper->Load(IKeyCharacterMap::VIRTUAL_KEYBOARD, (IKeyCharacterMap**)&keyCharacterMap);
 
@@ -782,7 +782,7 @@ ECode Instrumentation::SendStringSync(
             // possible for an event to become stale before it is injected if it
             // takes too long to inject the preceding ones.
             AutoPtr<IKeyEventHelper> helper;
-            // CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
+            CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
             AutoPtr<IKeyEvent> keyEvent;
             helper->ChangeTimeRepeat((*events)[i], SystemClock::GetUptimeMillis(), 0, (IKeyEvent**)&keyEvent);
             SendKeySync(keyEvent);
@@ -821,9 +821,9 @@ ECode Instrumentation::SendKeySync(
     }
 
     AutoPtr<IInputEvent> newEvent;
-    // CKeyEvent::New(downTime, eventTime, action, code, repeatCount, metaState,
-    //         deviceId, scancode, flags | IKeyEvent::FLAG_FROM_SYSTEM, source,
-    //         (IInputEvent**)&newEvent);
+    CKeyEvent::New(downTime, eventTime, action, code, repeatCount, metaState,
+        deviceId, scancode, flags | IKeyEvent::FLAG_FROM_SYSTEM, source,
+        (IInputEvent**)&newEvent);
     Boolean result;
     AutoPtr<IInputManagerHelper> helper;
     CInputManagerHelper::AcquireSingleton((IInputManagerHelper**)&helper);
@@ -837,11 +837,11 @@ ECode Instrumentation::SendKeyDownUpSync(
     /* [in] */ Int32 key)
 {
     AutoPtr<IKeyEvent> downEvent;
-    // CKeyEvent::New(IKeyEvent::ACTION_DOWN, key, (IKeyEvent**)&downEvent);
+    CKeyEvent::New(IKeyEvent::ACTION_DOWN, key, (IKeyEvent**)&downEvent);
     FAIL_RETURN(SendKeySync(downEvent))
 
     AutoPtr<IKeyEvent> upEvent;
-    // CKeyEvent::New(IKeyEvent::ACTION_UP, key, (IKeyEvent**)&upEvent);
+    CKeyEvent::New(IKeyEvent::ACTION_UP, key, (IKeyEvent**)&upEvent);
     return SendKeySync(upEvent);
 }
 
@@ -849,11 +849,11 @@ ECode Instrumentation::SendCharacterSync(
     /* [in] */ Int32 keyCode)
 {
     AutoPtr<IKeyEvent> downEvent;
-    // CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&downEvent);
+    CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&downEvent);
     FAIL_RETURN(SendKeySync(downEvent))
 
     AutoPtr<IKeyEvent> upEvent;
-    // CKeyEvent::New(IKeyEvent::ACTION_UP, keyCode, (IKeyEvent**)&upEvent);
+    CKeyEvent::New(IKeyEvent::ACTION_UP, keyCode, (IKeyEvent**)&upEvent);
     return SendKeySync(upEvent);
 }
 

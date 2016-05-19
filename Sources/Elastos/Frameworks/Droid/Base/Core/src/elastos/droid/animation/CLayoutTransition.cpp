@@ -143,7 +143,7 @@ ECode CLayoutTransition::_AnimatorListenerAdapterEx::OnAnimationEnd(
     return NOERROR;
 }
 
-CLayoutTransition::_AnimatorListenerAdapterEx2::_AnimatorListenerAdapterEx2(
+CLayoutTransition::AppearingAnimatorListener::AppearingAnimatorListener(
     /* [in] */ CLayoutTransition* host,
     /* [in] */ IView* child,
     /* [in] */ IViewGroup* parent)
@@ -153,7 +153,7 @@ CLayoutTransition::_AnimatorListenerAdapterEx2::_AnimatorListenerAdapterEx2(
     , mParent(parent)
 {}
 
-ECode CLayoutTransition::_AnimatorListenerAdapterEx2::OnAnimationEnd(
+ECode CLayoutTransition::AppearingAnimatorListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->mCurrentAppearingAnimations.Erase(mChild);
@@ -1151,12 +1151,10 @@ void CLayoutTransition::RunAppearingTransition(
         anim->SetInterpolator(mAppearingInterpolator);
     }
     if (IObjectAnimator::Probe(anim) != NULL) {
-        AutoPtr<IObjectAnimator> temp = (IObjectAnimator*)(anim->Probe(EIID_IObjectAnimator));
-        IValueAnimator::Probe(temp)->SetCurrentPlayTime(0);
+        IValueAnimator::Probe(anim)->SetCurrentPlayTime(0);
     }
 
-    AutoPtr<IAnimatorListener> adapter =
-            new _AnimatorListenerAdapterEx2(this, child, parent);
+    AutoPtr<IAnimatorListener> adapter = new AppearingAnimatorListener(this, child, parent);
     anim->AddListener(adapter);
     mCurrentAppearingAnimations[child] = anim;
     anim->Start();

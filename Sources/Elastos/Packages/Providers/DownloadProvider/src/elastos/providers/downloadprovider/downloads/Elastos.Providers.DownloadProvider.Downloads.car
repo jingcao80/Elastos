@@ -131,6 +131,8 @@ module
     }
 
     class CSizeLimitActivity {
+        constructor();
+
         interface IActivity;
         // interface ILayoutInflaterFactory;
         // interface ILayoutInflaterFactory2;

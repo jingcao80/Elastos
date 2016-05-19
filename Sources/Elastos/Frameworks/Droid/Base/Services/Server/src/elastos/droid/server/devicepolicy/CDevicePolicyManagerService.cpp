@@ -944,8 +944,9 @@ ECode CDevicePolicyManagerService::ActiveAdmin::GetAllTrustAgentFeatures(
     AutoPtr<IHashMap> result;
     CHashMap::New((IHashMap**)&result);
     Int32 parserDepthNow;
-    while (parser->Next(&typeDAM), parser->GetDepth(&parserDepthNow),
-            typeDAM != IXmlPullParser::END_DOCUMENT && (typeDAM != IXmlPullParser::END_TAG || parserDepthNow > outerDepthDAM)) {
+    while ((parser->Next(&typeDAM), parser->GetDepth(&parserDepthNow),
+            typeDAM != IXmlPullParser::END_DOCUMENT)
+        && (typeDAM != IXmlPullParser::END_TAG || parserDepthNow > outerDepthDAM)) {
         if (typeDAM == IXmlPullParser::END_TAG || typeDAM == IXmlPullParser::TEXT) {
             continue;
         }
@@ -1467,7 +1468,8 @@ const Int64 CDevicePolicyManagerService::MS_PER_DAY = 86400 * 1000;
 
 const Int64 CDevicePolicyManagerService::EXPIRATION_GRACE_PERIOD_MS = 5 * MS_PER_DAY; // 5 days, in ms
 
-const String CDevicePolicyManagerService::ACTION_EXPIRED_PASSWORD_NOTIFICATION("com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION");
+const String CDevicePolicyManagerService::ACTION_EXPIRED_PASSWORD_NOTIFICATION(
+    "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION");
 
 const Int32 CDevicePolicyManagerService::MONITORING_CERT_NOTIFICATION_ID = R::string::ssl_ca_cert_warning;
 
@@ -1476,11 +1478,15 @@ const Boolean CDevicePolicyManagerService::DBG = FALSE;
 const String CDevicePolicyManagerService::ATTR_PERMISSION_PROVIDER("permission-provider");
 const String CDevicePolicyManagerService::ATTR_SETUP_COMPLETE("setup-complete");
 
-const AutoPtr<ISet> CDevicePolicyManagerService::DEVICE_OWNER_USER_RESTRICTIONS = InitDEVICE_OWNER_USER_RESTRICTIONS();
+const AutoPtr<ISet> CDevicePolicyManagerService::DEVICE_OWNER_USER_RESTRICTIONS
+    = InitDEVICE_OWNER_USER_RESTRICTIONS();
 
-const AutoPtr<ISet> CDevicePolicyManagerService::SECURE_SETTINGS_WHITELIST = InitSECURE_SETTINGS_WHITELIST();
-const AutoPtr<ISet> CDevicePolicyManagerService::SECURE_SETTINGS_DEVICEOWNER_WHITELIST = InitSECURE_SETTINGS_DEVICEOWNER_WHITELIST();
-const AutoPtr<ISet> CDevicePolicyManagerService::GLOBAL_SETTINGS_WHITELIST = InitGLOBAL_SETTINGS_WHITELIST();
+const AutoPtr<ISet> CDevicePolicyManagerService::SECURE_SETTINGS_WHITELIST
+    = InitSECURE_SETTINGS_WHITELIST();
+const AutoPtr<ISet> CDevicePolicyManagerService::SECURE_SETTINGS_DEVICEOWNER_WHITELIST
+    = InitSECURE_SETTINGS_DEVICEOWNER_WHITELIST();
+const AutoPtr<ISet> CDevicePolicyManagerService::GLOBAL_SETTINGS_WHITELIST
+    = InitGLOBAL_SETTINGS_WHITELIST();
 
 const String CDevicePolicyManagerService::SYSTEM_PROP_DISABLE_CAMERA("sys.secpolicy.camera.disabled");
 
@@ -1510,7 +1516,8 @@ ECode CDevicePolicyManagerService::constructor(
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
     AutoPtr<IPowerManager> powerMgr = IPowerManager::Probe(service);
-    powerMgr->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, String("DPM"), (IPowerManagerWakeLock**)&mWakeLock);
+    powerMgr->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
+        String("DPM"), (IPowerManagerWakeLock**)&mWakeLock);
 
     mLocalService = new LocalService(this);
     if (!mHasFeature) {
@@ -1527,7 +1534,8 @@ ECode CDevicePolicyManagerService::constructor(
     filter->SetPriority(IIntentFilter::SYSTEM_HIGH_PRIORITY);
 
     AutoPtr<IIntent> bootCompletedIntent;
-    context->RegisterReceiverAsUser(mReceiver, UserHandle::ALL, filter, String(NULL), mHandler, (IIntent**)&bootCompletedIntent);
+    context->RegisterReceiverAsUser(mReceiver,
+        UserHandle::ALL, filter, String(NULL), mHandler, (IIntent**)&bootCompletedIntent);
 
     filter = NULL;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -1538,7 +1546,8 @@ ECode CDevicePolicyManagerService::constructor(
     filter->AddDataScheme(String("package"));
 
     AutoPtr<IIntent> pkgChangedIntent;
-    context->RegisterReceiverAsUser(mReceiver, UserHandle::ALL, filter, String(NULL), mHandler, (IIntent**)&pkgChangedIntent);
+    context->RegisterReceiverAsUser(mReceiver,
+        UserHandle::ALL, filter, String(NULL), mHandler, (IIntent**)&pkgChangedIntent);
 
     LocalServices::AddService(EIID_IDevicePolicyManagerInternal, TO_IINTERFACE(mLocalService));
     return NOERROR;
@@ -1565,7 +1574,8 @@ ECode CDevicePolicyManagerService::SetPasswordQuality(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
         if (ap->mPasswordQuality != quality) {
             ap->mPasswordQuality = quality;
             SaveSettingsLocked(userHandle);
@@ -1648,7 +1658,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumLength(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
 
         if (ap->mMinimumPasswordLength != length) {
             ap->mMinimumPasswordLength = length;
@@ -1731,7 +1742,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumUpperCase(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
 
         if (ap->mMinimumPasswordUpperCase != length) {
             ap->mMinimumPasswordUpperCase = length;
@@ -1812,7 +1824,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumLowerCase(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
 
         if (ap->mMinimumPasswordLowerCase != length) {
             ap->mMinimumPasswordLowerCase = length;
@@ -1896,7 +1909,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumLetters(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
 
         if (ap->mMinimumPasswordLetters != length) {
             ap->mMinimumPasswordLetters = length;
@@ -1979,7 +1993,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumNumeric(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
         if (ap->mMinimumPasswordNumeric != length) {
             ap->mMinimumPasswordNumeric = length;
             SaveSettingsLocked(userHandle);
@@ -2061,7 +2076,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumSymbols(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
         if (ap->mMinimumPasswordSymbols != length) {
             ap->mMinimumPasswordSymbols = length;
             SaveSettingsLocked(userHandle);
@@ -2143,7 +2159,8 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumNonLetter(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
         if (ap->mMinimumPasswordNonLetter != length) {
             ap->mMinimumPasswordNonLetter = length;
             SaveSettingsLocked(userHandle);
@@ -2225,7 +2242,8 @@ ECode CDevicePolicyManagerService::SetPasswordHistoryLength(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
 
         if (ap->mPasswordHistoryLength != length) {
             ap->mPasswordHistoryLength = length;
@@ -2311,7 +2329,8 @@ ECode CDevicePolicyManagerService::SetPasswordExpirationTimeout(
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_EXPIRE_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_EXPIRE_PASSWORD, (ActiveAdmin**)&ap))
 
         AutoPtr<ISystem> system;
         Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
@@ -2535,7 +2554,8 @@ ECode CDevicePolicyManagerService::IsActivePasswordSufficient(
         // This API can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(NULL, IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(NULL,
+            IDeviceAdminInfo::USES_POLICY_LIMIT_PASSWORD, (ActiveAdmin**)&ap))
 
         Int32 quality;
         FAIL_RETURN(GetPasswordQuality(NULL, userHandle, &quality))
@@ -2895,7 +2915,8 @@ ECode CDevicePolicyManagerService::SetMaximumTimeToLock(
         }
 
         AutoPtr<ActiveAdmin> ap;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_FORCE_LOCK, (ActiveAdmin**)&ap))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(who,
+            IDeviceAdminInfo::USES_POLICY_FORCE_LOCK, (ActiveAdmin**)&ap))
 
         if (ap->mMaximumTimeToUnlock != timeMs) {
             ap->mMaximumTimeToUnlock = timeMs;
@@ -2974,7 +2995,8 @@ ECode CDevicePolicyManagerService::LockNow()
         // This API can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
         AutoPtr<ActiveAdmin> admin;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(NULL, IDeviceAdminInfo::USES_POLICY_FORCE_LOCK, (ActiveAdmin**)&admin))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(NULL,
+            IDeviceAdminInfo::USES_POLICY_FORCE_LOCK, (ActiveAdmin**)&admin))
         LockNowUnchecked();
     }
     return NOERROR;
@@ -2993,7 +3015,8 @@ ECode CDevicePolicyManagerService::WipeData(
         // This API can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
         AutoPtr<ActiveAdmin> admin;
-        FAIL_RETURN(GetActiveAdminForCallerLocked(NULL, IDeviceAdminInfo::USES_POLICY_WIPE_DATA, (ActiveAdmin**)&admin))
+        FAIL_RETURN(GetActiveAdminForCallerLocked(NULL,
+            IDeviceAdminInfo::USES_POLICY_WIPE_DATA, (ActiveAdmin**)&admin))
 
         String source;
         if (admin != NULL && admin->mInfo != NULL) {
@@ -7072,7 +7095,8 @@ ECode CDevicePolicyManagerService::SetPermittedInputMethods(
                 enabledPackages->Add(StringUtils::ParseCharSequence(packageName));
             }
             Boolean bCheckPackagesInPermittedListOrSystem;
-            CheckPackagesInPermittedListOrSystem(enabledPackages, packageList, &bCheckPackagesInPermittedListOrSystem);
+            CheckPackagesInPermittedListOrSystem(enabledPackages,
+                packageList, &bCheckPackagesInPermittedListOrSystem);
             if (!bCheckPackagesInPermittedListOrSystem) {
                 Slogger::E(LOG__TAG, "Cannot set permitted input methods, "
                         "because it contains already enabled input method.");
@@ -8240,14 +8264,16 @@ ECode CDevicePolicyManagerService::SetSecureSetting(
         IsDeviceOwner(packageName, &isDeviceOwner);
         if (isDeviceOwner) {
             Boolean isContains;
-            ICollection::Probe(SECURE_SETTINGS_DEVICEOWNER_WHITELIST)->Contains(StringUtils::ParseCharSequence(setting), &isContains);
+            ICollection::Probe(SECURE_SETTINGS_DEVICEOWNER_WHITELIST)->Contains(
+                StringUtils::ParseCharSequence(setting), &isContains);
             if (!isContains) {
                 Logger::E(LOG__TAG, "Permission denial: Device owners cannot update %s", setting.string());
                 return E_SECURITY_EXCEPTION;
             }
         } else {
             Boolean isContains;
-            ICollection::Probe(SECURE_SETTINGS_WHITELIST)->Contains(StringUtils::ParseCharSequence(setting), &isContains);
+            ICollection::Probe(SECURE_SETTINGS_WHITELIST)->Contains(
+                StringUtils::ParseCharSequence(setting), &isContains);
             if (!isContains) {
                 Logger::E(LOG__TAG, "Permission denial: Profile owners cannot update %s", setting.string());
                 return E_SECURITY_EXCEPTION;
@@ -8278,7 +8304,8 @@ ECode CDevicePolicyManagerService::SetMasterVolumeMuted(
         }
         AutoPtr<ActiveAdmin> objNoUse;
         GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
-        AutoPtr<IIAudioService> iAudioService = IIAudioService::Probe(ServiceManager::GetService(IContext::AUDIO_SERVICE));
+        AutoPtr<IIAudioService> iAudioService =
+            IIAudioService::Probe(ServiceManager::GetService(IContext::AUDIO_SERVICE));
         // try{
         ECode ec;
         do {

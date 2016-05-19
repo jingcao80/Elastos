@@ -97,6 +97,15 @@ def process_file(path, logFile):
         if isCodeLine(line):
             pattern = re.compile(r'(for\s*\()(.*;.*)')
             match = pattern.search(line)
+            if match == None:
+                pattern = re.compile(r'( while\s*\()(.*\)\s*{)')
+                match = pattern.search(line)
+            if match == None:
+                pattern = re.compile(r' do\s*{')
+                match = pattern.search(line)
+            if match == None:
+                pattern = re.compile(r' switch\s*\(.*\)')
+                match = pattern.search(line)
             if match:
                 forRange = find_for_range(lines, lineNum)
                 start = forRange[0]

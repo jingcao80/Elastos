@@ -28,11 +28,6 @@ AliasActivity::AliasActivity()
 AliasActivity::~AliasActivity()
 {}
 
-ECode AliasActivity::constructor()
-{
-    return Activity::constructor();
-}
-
 ECode AliasActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {

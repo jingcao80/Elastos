@@ -314,6 +314,7 @@ ECode KeyframeSet::GetValue(
 ECode KeyframeSet::Clone(
     /* [out] */ IInterface** object)
 {
+    VALIDATE_NOT_NULL(object)
     Int32 numKeyframes = mKeyframes->GetLength();
     AutoPtr<ArrayOf<IKeyframe*> > newKeyframes = ArrayOf<IKeyframe*>::Alloc(numKeyframes);
     for (Int32 i = 0; i < numKeyframes; ++i) {

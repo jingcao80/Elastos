@@ -96,6 +96,8 @@ module
 //    }
 
     class CRingtonePickerActivity {
+        constructor();
+
         interface IAlertActivity;
         interface IActivity;
         interface IContext;

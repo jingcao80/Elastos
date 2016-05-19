@@ -34,8 +34,6 @@ public:
 
     virtual ~AliasActivity();
 
-    CARAPI constructor();
-
     //@Override
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

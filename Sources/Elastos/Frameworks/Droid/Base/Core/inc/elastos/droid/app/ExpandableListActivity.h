@@ -159,8 +159,6 @@ public:
 
     virtual ~ExpandableListActivity();
 
-    CARAPI constructor();
-
     /**
      * Override this to populate the context menu when an item is Int64 pressed. menuInfo
      * will contain an {@link android.Widget::IExpandableListView.ExpandableListContextMenuInfo}

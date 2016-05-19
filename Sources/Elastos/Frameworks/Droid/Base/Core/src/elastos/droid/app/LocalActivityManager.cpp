@@ -12,8 +12,8 @@ using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Utility::CArrayMap;
-using Elastos::Utility::CArrayList;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ISet;
@@ -81,8 +81,10 @@ ECode LocalActivityManager::constructor(
     /* [in] */ Boolean singleMode)
 {
     mActivityThread = CActivityThread::GetCurrentActivityThread();
-    mParent = parent;
     mSingleMode = singleMode;
+
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(parent);
+    wrs->GetWeakReference((IWeakReference**)&mWeakParent);
     return NOERROR;
 }
 
@@ -90,6 +92,12 @@ ECode LocalActivityManager::MoveToState(
     /* [in] */ ILocalActivityRecord* record,
     /* [in] */ Int32 desiredState)
 {
+    AutoPtr<IActivity> parent;
+    mWeakParent->Resolve(EIID_IActivity, (IInterface**)&parent);
+    if (parent == NULL) {
+        return NOERROR;
+    }
+
     LocalActivityRecord* r = (LocalActivityRecord*)record;
     if (r->mCurState == RESTORED || r->mCurState == DESTROYED) {
         // StartActivity() has not yet been called, so nothing to do.
@@ -99,7 +107,7 @@ ECode LocalActivityManager::MoveToState(
     if (r->mCurState == INITIALIZING) {
         // Get the lastNonConfigurationInstance for the activity
         AutoPtr<IHashMap> lastNonConfigurationInstances;
-        mParent->GetLastNonConfigurationChildInstances((IHashMap**)&lastNonConfigurationInstances);
+        parent->GetLastNonConfigurationChildInstances((IHashMap**)&lastNonConfigurationInstances);
         AutoPtr<IInterface> instanceObj;
         if (lastNonConfigurationInstances != NULL) {
             AutoPtr<ICharSequence> seq = CoreUtils::Convert(r->mId);
@@ -119,7 +127,7 @@ ECode LocalActivityManager::MoveToState(
             mActivityThread->ResolveActivityInfo(r->mIntent, (IActivityInfo**)&r->mActivityInfo);
         }
         mActivityThread->StartActivityNow(
-            mParent, r->mId, r->mIntent, r->mActivityInfo, r, r->mInstanceState, instance,
+            parent, r->mId, r->mIntent, r->mActivityInfo, r, r->mInstanceState, instance,
             (IActivity**)&r->mActivity);
         if (r->mActivity == NULL) {
             return NOERROR;

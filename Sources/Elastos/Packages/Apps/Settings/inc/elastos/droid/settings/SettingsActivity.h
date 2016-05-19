@@ -155,6 +155,8 @@ public:
 
     ~SettingsActivity();
 
+    CARAPI constructor();
+
    CARAPI GetSwitchBar(
        /* [out] */ SwitchBar** switchBar);
 

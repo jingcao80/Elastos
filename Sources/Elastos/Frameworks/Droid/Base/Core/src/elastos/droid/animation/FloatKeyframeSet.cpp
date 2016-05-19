@@ -12,6 +12,7 @@ namespace Droid {
 namespace Animation {
 
 CAR_INTERFACE_IMPL_2(FloatKeyframeSet, KeyframeSet, IFloatKeyframeSet, IFloatKeyframes)
+
 FloatKeyframeSet::FloatKeyframeSet(
     /* [in] */ ArrayOf<IFloatKeyframe*>* keyframes)
     : mFirstValue(0.0f)
@@ -31,6 +32,7 @@ ECode FloatKeyframeSet::GetValue(
     /* [in] */ Float fraction,
     /* [out] */ IInterface** value)
 {
+    VALIDATE_NOT_NULL(value)
     Float v;
     GetFloatValue(fraction, &v);
     AutoPtr<IFloat> rst;
@@ -43,6 +45,7 @@ ECode FloatKeyframeSet::GetValue(
 ECode FloatKeyframeSet::Clone(
     /* [out] */ IInterface** obj)
 {
+    VALIDATE_NOT_NULL(obj)
     Int32 numKeyframes = mKeyframes->GetLength();
     AutoPtr<ArrayOf<IFloatKeyframe*> > newKeyframes = ArrayOf<IFloatKeyframe*>::Alloc(numKeyframes);
     for (Int32 i = 0; i < numKeyframes; ++i) {
@@ -66,6 +69,7 @@ ECode FloatKeyframeSet::GetFloatValue(
     /* [in] */ Float frc,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
     Float fraction = frc;
     if (mNumKeyframes == 2) {
         if (mFirstTime) {
@@ -99,13 +103,10 @@ ECode FloatKeyframeSet::GetFloatValue(
     if (fraction <= 0.0f) {
         AutoPtr<IFloatKeyframe> prevKeyframe = IFloatKeyframe::Probe((*mKeyframes)[0]);
         AutoPtr<IFloatKeyframe> nextKeyframe = IFloatKeyframe::Probe((*mKeyframes)[1]);
-        Float prevValue;
+        Float prevValue, nextValue, prevFraction, nextFraction;
         prevKeyframe->GetFloatValue(&prevValue);
-        Float nextValue;
         nextKeyframe->GetFloatValue(&nextValue);
-        Float prevFraction;
         IKeyframe::Probe(prevKeyframe)->GetFraction(&prevFraction);
-        Float nextFraction;
         IKeyframe::Probe(nextKeyframe)->GetFraction(&nextFraction);
         AutoPtr<ITimeInterpolator> interpolator;
         IKeyframe::Probe(nextKeyframe)->GetInterpolator((ITimeInterpolator**)&interpolator);
@@ -115,7 +116,8 @@ ECode FloatKeyframeSet::GetFloatValue(
 
         Float intervalFraction = (fraction - prevFraction) / (nextFraction - prevFraction);
         if (mEvaluator == NULL) {
-            return (prevValue + intervalFraction * (nextValue - prevValue));
+            *value = (prevValue + intervalFraction * (nextValue - prevValue));
+            return NOERROR;
         }
 
         AutoPtr<IFloat> pValue, nValue;
@@ -128,19 +130,13 @@ ECode FloatKeyframeSet::GetFloatValue(
         return NOERROR;
     }
     else if (fraction >= 1.0f) {
-        AutoPtr<IFloatKeyframe> prevKeyframe =
-                (IFloatKeyframe*)((*mKeyframes)[mNumKeyframes - 2]->Probe(EIID_IFloatKeyframe));
+        AutoPtr<IFloatKeyframe> prevKeyframe = IFloatKeyframe::Probe((*mKeyframes)[mNumKeyframes - 2]);
+        AutoPtr<IFloatKeyframe> nextKeyframe = IFloatKeyframe::Probe((*mKeyframes)[mNumKeyframes - 1]);
 
-        AutoPtr<IFloatKeyframe> nextKeyframe =
-                (IFloatKeyframe*)((*mKeyframes)[mNumKeyframes - 1]->Probe(EIID_IFloatKeyframe));
-
-        Float prevValue;
+        Float prevValue, nextValue, prevFraction, nextFraction;
         prevKeyframe->GetFloatValue(&prevValue);
-        Float nextValue;
         nextKeyframe->GetFloatValue(&nextValue);
-        Float prevFraction;
         IKeyframe::Probe(prevKeyframe)->GetFraction(&prevFraction);
-        Float nextFraction;
         IKeyframe::Probe(nextKeyframe)->GetFraction(&nextFraction);
         AutoPtr<ITimeInterpolator> interpolator;
         IKeyframe::Probe(nextKeyframe)->GetInterpolator((ITimeInterpolator**)&interpolator);
@@ -164,9 +160,9 @@ ECode FloatKeyframeSet::GetFloatValue(
         return NOERROR;
     }
 
-    AutoPtr<IFloatKeyframe> prevKeyframe = (IFloatKeyframe*)((*mKeyframes)[0]->Probe(EIID_IFloatKeyframe));
+    AutoPtr<IFloatKeyframe> prevKeyframe = IFloatKeyframe::Probe((*mKeyframes)[0]);
     for (Int32 i = 1; i < mNumKeyframes; ++i) {
-        AutoPtr<IFloatKeyframe> nextKeyframe = (IFloatKeyframe*)((*mKeyframes)[i]->Probe(EIID_IFloatKeyframe));
+        AutoPtr<IFloatKeyframe> nextKeyframe = IFloatKeyframe::Probe((*mKeyframes)[1]);
         Float nFraction;
         IKeyframe::Probe(nextKeyframe)->GetFraction(&nFraction);
         if (fraction < nFraction) {
@@ -187,6 +183,7 @@ ECode FloatKeyframeSet::GetFloatValue(
 
             if (mEvaluator == NULL) {
                 *value = prevValue + intervalFraction * (nextValue - prevValue);
+                return NOERROR;
             }
 
             AutoPtr<IFloat> pValue, nValue;
@@ -204,7 +201,7 @@ ECode FloatKeyframeSet::GetFloatValue(
 
     // shouldn't get here
     AutoPtr<IFloatKeyframe> frame =
-            (IFloatKeyframe*)((*mKeyframes)[mNumKeyframes - 1]->Probe(EIID_IFloatKeyframe));
+            IFloatKeyframe::Probe((*mKeyframes)[mNumKeyframes - 1]);
     AutoPtr<IInterface> obj;
     IKeyframe::Probe(frame)->GetValue((IInterface**)&obj);
     assert(obj != NULL);

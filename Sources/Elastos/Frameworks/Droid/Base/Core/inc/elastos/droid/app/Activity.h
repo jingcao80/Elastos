@@ -3817,6 +3817,10 @@ private:
     AutoPtr<IThread> mUiThread;
 
     Object mManagedCursorsLock;
+
+#if defined(_DEBUG)
+     Boolean mIsConstructed;
+#endif
 };
 
 } // namespace App

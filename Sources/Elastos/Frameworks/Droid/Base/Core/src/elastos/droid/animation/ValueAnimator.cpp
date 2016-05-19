@@ -357,8 +357,8 @@ ECode ValueAnimator::InitAnimation()
         Int32 numValues = mValues->GetLength();
         for (Int32 i = 0; i < numValues; ++i) {
             AutoPtr<IPropertyValuesHolder> pvh = (*mValues)[i];
-           PropertyValuesHolder* holder = (PropertyValuesHolder*)pvh.Get();
-           holder->Init();
+            PropertyValuesHolder* holder = (PropertyValuesHolder*)pvh.Get();
+            holder->Init();
         }
 
         mInitialized = TRUE;
@@ -370,10 +370,8 @@ ECode ValueAnimator::SetDuration(
     /* [in] */ Int64 duration)
 {
     if (duration < 0) {
-        PRINT_FILE_LINE_EX("IllegalArgumentException: Animators cannot have negative duration: %d", duration);
+        Logger::E(TAG, "IllegalArgumentException: Animators cannot have negative duration: %d", duration);
         return NOERROR;
-        // throw new IllegalArgumentException("Animators cannot have negative duration: " +
-        //         duration);
     }
 
     mUnscaledDuration = duration;

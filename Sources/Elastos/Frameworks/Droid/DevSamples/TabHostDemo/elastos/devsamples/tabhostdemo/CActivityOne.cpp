@@ -55,14 +55,14 @@ CAR_OBJECT_IMPL(CActivityOne)
 ECode CActivityOne::constructor()
 {
     Logger::I(TAG, " >> constructor()");
-    return Activity::constructor();
+    return TabActivity::constructor();
 }
 
 ECode CActivityOne::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Logger::I(TAG, " >> OnCreate()");
-    Activity::OnCreate(savedInstanceState);
+    TabActivity::OnCreate(savedInstanceState);
     SetContentView(R::layout::tabhost);
 
     AutoPtr<ITabHost> tabHost;
@@ -94,31 +94,31 @@ ECode CActivityOne::OnCreate(
 ECode CActivityOne::OnStart()
 {
     Logger::I(TAG, " >> OnStart()");
-    return Activity::OnStart();
+    return TabActivity::OnStart();
 }
 
 ECode CActivityOne::OnResume()
 {
     Logger::I(TAG, " >> OnResume()");
-    return Activity::OnResume();
+    return TabActivity::OnResume();
 }
 
 ECode CActivityOne::OnPause()
 {
     Logger::I(TAG, " >> OnPause()");
-    return Activity::OnPause();
+    return TabActivity::OnPause();
 }
 
 ECode CActivityOne::OnStop()
 {
     Logger::I(TAG, " >> OnStop()");
-    return Activity::OnStop();
+    return TabActivity::OnStop();
 }
 
 ECode CActivityOne::OnDestroy()
 {
     Logger::I(TAG, " >> OnDestroy()");
-    return Activity::OnDestroy();
+    return TabActivity::OnDestroy();
 }
 
 ECode CActivityOne::OnActivityResult(
@@ -127,7 +127,7 @@ ECode CActivityOne::OnActivityResult(
     /* [in] */ IIntent *data)
 {
     Logger::I(TAG, " >> OnActivityResult()");
-    return Activity::OnActivityResult(requestCode, resultCode, data);
+    return TabActivity::OnActivityResult(requestCode, resultCode, data);
 }
 
 } // namespace TabHostDemo

@@ -108,6 +108,9 @@ RecentTasksLoader::TaskLoaderAsyncTask::TaskLoaderAsyncTask(
 ECode RecentTasksLoader::TaskLoaderAsyncTask::OnProgressUpdate(
     /* [in] */ ArrayOf<IInterface*>* values)
 {
+    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " >> OnProgressUpdate:%p, size:%d",
+        values, values ? values->GetLength() : 0);
+
     if (!IsCancelled()) {
         AutoPtr<IArrayList> newTasks = IArrayList::Probe((*values)[0]);
         // do a callback to RecentsPanelView to let it know we have more values
@@ -131,6 +134,9 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
+    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " >> DoInBackground:%p, size:%d",
+        params, params ? params->GetLength() : 0);
+
     VALIDATE_NOT_NULL(result)
     // We load in two stages: first, we update progress with just the first screenful
     // of items. Then, we update with the rest of the items
@@ -287,6 +293,8 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
 ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::OnProgressUpdate(
     /* [in] */ ArrayOf<IInterface*>* values)
 {
+    Logger::I("RecentTasksLoader::ThumbnailLoaderAsyncTask", " >> OnProgressUpdate:%p, size:%d",
+        values, values ? values->GetLength() : 0);
     if (!IsCancelled()) {
         AutoPtr<ITaskDescription> td = ITaskDescription::Probe((*values)[0]);
         Boolean isNull;
@@ -309,6 +317,9 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
+    Logger::I("RecentTasksLoader::ThumbnailLoaderAsyncTask", " >> DoInBackground:%p, size:%d",
+        params, params ? params->GetLength() : 0);
+
     VALIDATE_NOT_NULL(result)
     Int32 origPri;
     Process::GetThreadPriority(Process::MyTid(), &origPri);

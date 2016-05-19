@@ -543,6 +543,8 @@ module
     }
 
     class CLauncher {
+        constructor();
+
         interface IContext;
         interface IContextWrapper;
         interface IContextThemeWrapper;
