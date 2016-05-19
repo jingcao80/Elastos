@@ -7068,7 +7068,6 @@ ECode View::OnTouchEvent(
                     // For views inside a scrolling container, delay the pressed feedback for
                     // a short period in case this is a scroll.
                     if (isInScrollingContainer) {
-                        Logger::I(TAG, "%s OnTouchEvent CheckForTap", TO_CSTR(this));
                         mPrivateFlags |= PFLAG_PREPRESSED;
                         if (mPendingCheckForTap == NULL) {
                             mPendingCheckForTap = new CheckForTap(this);
@@ -7079,7 +7078,6 @@ ECode View::OnTouchEvent(
                         PostDelayed(mPendingCheckForTap, CViewConfiguration::GetTapTimeout(), &isPost);
                     }
                     else {
-                        Logger::I(TAG, "%s OnTouchEvent CheckForLongClick", TO_CSTR(this));
                         // Not inside a scrolling container, so show the feedback right away
                         SetPressed(TRUE, x, y);
                         CheckForLongClick(0);
@@ -16799,8 +16797,6 @@ ECode View::ApplyDrawableToTransparentRegion(
 void View::CheckForLongClick(
     /* [in] */ Int32 delayOffset)
 {
-    Logger::I(TAG, " >> CheckForLongClick delayOffset:%d", delayOffset);
-
     if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
         mHasPerformedLongPress = FALSE;
 

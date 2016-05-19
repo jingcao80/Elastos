@@ -717,6 +717,7 @@ ECode CActivityOne::OnClickPopupWindow(
 
 ECode CActivityOne::OnTestPowerManager()
 {
+    return NOERROR;
     // AutoPtr<IInterface> obj;
     // GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     // AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
@@ -790,6 +791,7 @@ ECode CActivityOne::OnTestPowerManager()
 
 ECode CActivityOne::OnTestConnectivityManager()
 {
+    return NOERROR;
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IConnectivityManager> conn = IConnectivityManager::Probe(obj);

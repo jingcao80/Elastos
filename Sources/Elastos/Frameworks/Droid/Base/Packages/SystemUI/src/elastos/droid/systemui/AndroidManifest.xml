@@ -105,7 +105,7 @@
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
         android:icon="@drawable/icon"
-        android:process="elastos.droid.systemui"
+        android:process="Elastos.Droid.SystemUI"
         android:supportsRtl="true"
         android:theme="@style/systemui_theme">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().

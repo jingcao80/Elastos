@@ -412,9 +412,9 @@ CPhoneStatusBar::RecentsClickListener::RecentsClickListener(
 ECode CPhoneStatusBar::RecentsClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    Logger::I(TAG, " >> RecentsClickListener::OnLongClick: %s", TO_CSTR(v));
-    mHost->AwakenDreams();
-    mHost->ToggleRecentApps();
+    Logger::I(TAG, " >> TODO RecentsClickListener::OnLongClick: %s", TO_CSTR(v));
+    // mHost->AwakenDreams();
+    // mHost->ToggleRecentApps();
     return NOERROR;
 }
 
