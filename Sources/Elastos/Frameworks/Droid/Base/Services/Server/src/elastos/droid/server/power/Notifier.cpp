@@ -1,26 +1,25 @@
 
 #include <Elastos.Droid.Media.h>
 #include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.App.h>
 #include "elastos/droid/server/power/Notifier.h"
 #include "elastos/droid/server/LocalServices.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-// #include "elastos/droid/app/AppOpsManager.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/SystemClock.h"
-// #include "elastos/droid/os/BatteryStats.h"
 #include "elastos/droid/provider/Settings.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
-// using Elastos::Droid::App::AppOpsManager;
+using Elastos::Droid::App::IAppOpsManagerHelper;
+using Elastos::Droid::App::CAppOpsManagerHelper;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::EIID_IActivityManagerInternal;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Hardware::Input::EIID_IInputManagerInternal;
 using Elastos::Droid::Media::IRingtone;
-// using Elastos::Droid::Media::CRingtoneManager;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::Uri;
@@ -30,7 +29,7 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::SystemClock;
-// using Elastos::Droid::Os::BatteryStats;
+using Elastos::Droid::Os::IBatteryStats;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Utility::Logging::Slogger;
@@ -227,8 +226,9 @@ void Notifier::OnWakeLockAcquired(
                 historyTag, monitorType, unimportantForLogging);
         // XXX need to deal with disabled operations.
         AutoPtr<IBinder> binder;
-        assert(0 && "TODO");
-        // AppOpsManager::GetToken(mAppOps, (IBinder**)&binder);
+        AutoPtr<IAppOpsManagerHelper> aomHelper;
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aomHelper);
+        aomHelper->GetToken(mAppOps, (IBinder**)&binder);
         Int32 result;
         mAppOps->StartOperation(binder, IAppOpsManager::OP_WAKE_LOCK,
                 ownerUid, packageName, &result);
@@ -300,8 +300,10 @@ void Notifier::OnWakeLockReleased(
     else {
         mBatteryStats->NoteStopWakelock(ownerUid, ownerPid, tag, historyTag, monitorType);
         AutoPtr<IBinder> binder;
-        assert(0 && "TODO");
-        // AppOpsManager::GetToken(mAppOps, (IBinder**)&binder);
+        AutoPtr<IAppOpsManagerHelper> aomHelper;
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aomHelper);
+        aomHelper->GetToken(mAppOps, (IBinder**)&binder);
+        aomHelper->GetToken(mAppOps, (IBinder**)&binder);
         mAppOps->FinishOperation(binder,
                 IAppOpsManager::OP_WAKE_LOCK, ownerUid, packageName);
     }
@@ -313,15 +315,13 @@ void Notifier::OnWakeLockReleased(
 Int32 Notifier::GetBatteryStatsWakeLockMonitorType(
     /* [in] */ Int32 flags)
 {
-    assert(0 && "TODO");
     switch (flags & IPowerManager::WAKE_LOCK_LEVEL_MASK) {
-        // case IPowerManager::PARTIAL_WAKE_LOCK:
-        // case IPowerManager::PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-        //     return BatteryStats::WAKE_TYPE_PARTIAL;
-        // default:
-        //     return BatteryStats::WAKE_TYPE_FULL;
+        case IPowerManager::PARTIAL_WAKE_LOCK:
+        case IPowerManager::PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+            return IBatteryStats::WAKE_TYPE_PARTIAL;
+        default:
+            return IBatteryStats::WAKE_TYPE_FULL;
     }
-    return 0;
 }
 
 void Notifier::OnInteractiveStateChangeStarted(

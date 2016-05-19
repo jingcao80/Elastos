@@ -1,0 +1,24 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Display {
+
+    /**
+     * <p>
+     * Animates a screen transition from on to off or off to on by applying
+     * some GL transformations to a screenshot.
+     * </p><p>
+     * This component must only be created or accessed by the {@link Looper} thread
+     * that belongs to the {@link DisplayPowerController}.
+     * </p>
+     */
+    interface IColorFade {
+    }
+
+    } // namespace Display
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

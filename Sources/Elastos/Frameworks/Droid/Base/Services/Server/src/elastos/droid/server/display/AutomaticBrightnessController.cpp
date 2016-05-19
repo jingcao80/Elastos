@@ -4,6 +4,7 @@
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.Droid.Text.h>
 #include "elastos/droid/server/display/AutomaticBrightnessController.h"
+#include "elastos/droid/server/LocalServices.h"
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/utility/MathUtils.h>
 #include <elastos/droid/utility/TimeUtils.h>
@@ -23,6 +24,7 @@ using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::Hardware::EIID_ISensorEventListener;
 using Elastos::Droid::Server::Twilight::EIID_ITwilightListener;
+using Elastos::Droid::Server::Twilight::EIID_ITwilightManager;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Arrays;
@@ -369,8 +371,7 @@ AutomaticBrightnessController::AutomaticBrightnessController(
     mContext = ctx;
 
     mCallbacks = callbacks;
-    assert(0 && "TODO");
-    // mTwilight = LocalServices::GetService(TwilightManager.class);
+    mTwilight = ITwilightManager::Probe(LocalServices::GetService(EIID_ITwilightManager));
     mSensorManager = sensorManager;
     mScreenAutoBrightnessSpline = autoBrightnessSpline;
     mScreenBrightnessRangeMinimum = brightnessMin;
@@ -397,8 +398,7 @@ AutomaticBrightnessController::AutomaticBrightnessController(
     }
 
     if (USE_TWILIGHT_ADJUSTMENT) {
-        assert(0 && "TODO");
-        // mTwilight->RegisterListener(mTwilightListener.Get(), mHandler);
+        mTwilight->RegisterListener(mTwilightListener.Get(), mHandler);
     }
 }
 

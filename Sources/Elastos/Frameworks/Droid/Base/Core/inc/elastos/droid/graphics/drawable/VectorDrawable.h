@@ -2,6 +2,8 @@
 #ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_VECTORDRAWABLE_H__
 #define __ELASTOS_DROID_GRAPHICS_DRAWABLE_VECTORDRAWABLE_H__
 
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/graphics/drawable/Drawable.h"
 #include "elastos/droid/utility/PathParser.h"
 
@@ -18,7 +20,7 @@ class VectorDrawable
     : public Drawable
     , public IVectorDrawable
 {
-private:
+public:
     class VPathRenderer;
 
 protected:
@@ -103,7 +105,7 @@ protected:
         friend class VectorDrawable;
     };
 
-private:
+public:
     class VGroup;
     class VPath;
     class VPathRenderer
@@ -138,6 +140,8 @@ private:
             /* [in] */ Int32 w,
             /* [in] */ Int32 h,
             /* [in] */ IColorFilter* filter);
+
+        TO_STRING_IMPL("VectorDrawable::VPathRenderer");
 
     private:
         CARAPI_(Boolean) RecursiveCanApplyTheme(
@@ -209,11 +213,17 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        VGroup(
-            /* [in] */ VGroup* copy,
+        //VGroup();
+
+        //VGroup(
+        //    /* [in] */ VGroup* copy,
+        //    /* [in] */ IArrayMap/*<String, Object>*/* targetsMap);
+
+        CARAPI constructor(
+            /* [in] */ IVGroup* copy,
             /* [in] */ IArrayMap/*<String, Object>*/* targetsMap);
 
-        VGroup();
+        CARAPI constructor();
 
         CARAPI_(String) GetGroupName();
 
@@ -234,50 +244,52 @@ private:
         CARAPI_(Float) GetRotation();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetRotation(
+        CARAPI SetRotation(
             /* [in] */ Float rotation);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetPivotX();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetPivotX(
+        CARAPI SetPivotX(
             /* [in] */ Float pivotX);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetPivotY();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetPivotY(
+        CARAPI SetPivotY(
             /* [in] */ Float pivotY);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetScaleX();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetScaleX(
+        CARAPI SetScaleX(
             /* [in] */ Float scaleX);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetScaleY();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetScaleY(
+        CARAPI SetScaleY(
             /* [in] */ Float scaleY);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetTranslateX();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetTranslateX(
+        CARAPI SetTranslateX(
             /* [in] */ Float translateX);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetTranslateY();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetTranslateY(
+        CARAPI SetTranslateY(
             /* [in] */ Float translateY);
+
+        TO_STRING_IMPL("VectorDrawable::VGroup");
 
     private:
         CARAPI_(void) UpdateStateFromTypedArray(
@@ -325,6 +337,9 @@ private:
         VPath(
             /* [in] */ VPath* copy);
 
+        CARAPI constructor(
+            /* [in] */ VPath* copy);
+
         virtual CARAPI_(void) ToPath(
             /* [in] */ IPath* path);
 
@@ -361,10 +376,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        VClipPath();
+        CARAPI constructor();
 
-        VClipPath(
-            /* [in] */ VClipPath* copy);
+        CARAPI constructor(
+            /* [in] */ IVClipPath* copy);
 
         CARAPI_(void) Inflate(
             /* [in] */ IResources* r,
@@ -373,6 +388,8 @@ private:
 
         // @Override
         CARAPI_(Boolean) IsClipPath();
+
+        TO_STRING_IMPL("VectorDrawable::VClipPath");
 
     private:
         CARAPI_(void) UpdateStateFromTypedArray(
@@ -389,10 +406,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        VFullPath();
+        CARAPI constructor();
 
-        VFullPath(
-            /* [in] */ VFullPath* copy);
+        CARAPI constructor(
+            /* [in] */ IVFullPath* copy);
 
         // @Override
         CARAPI_(Boolean) CanApplyTheme();
@@ -411,57 +428,59 @@ private:
         CARAPI_(Int32) GetStrokeColor();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetStrokeColor(
+        CARAPI SetStrokeColor(
             /* [in] */ Int32 strokeColor);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetStrokeWidth();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetStrokeWidth(
+        CARAPI SetStrokeWidth(
             /* [in] */ Float strokeWidth);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetStrokeAlpha();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetStrokeAlpha(
+        CARAPI SetStrokeAlpha(
             /* [in] */ Float strokeAlpha);
 
         // @SuppressWarnings("unused")
         CARAPI_(Int32) GetFillColor();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetFillColor(
+        CARAPI SetFillColor(
             /* [in] */ Int32 fillColor);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetFillAlpha();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetFillAlpha(
+        CARAPI SetFillAlpha(
             /* [in] */ Float fillAlpha);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetTrimPathStart();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetTrimPathStart(
+        CARAPI SetTrimPathStart(
             /* [in] */ Float trimPathStart);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetTrimPathEnd();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetTrimPathEnd(
+        CARAPI SetTrimPathEnd(
             /* [in] */ Float trimPathEnd);
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetTrimPathOffset();
 
         // @SuppressWarnings("unused")
-        CARAPI_(void) SetTrimPathOffset(
+        CARAPI SetTrimPathOffset(
             /* [in] */ Float trimPathOffset);
+
+        TO_STRING_IMPL("VectorDrawable::VFullPath");
 
     private:
         CARAPI_(PaintCap) GetStrokeLineCap(

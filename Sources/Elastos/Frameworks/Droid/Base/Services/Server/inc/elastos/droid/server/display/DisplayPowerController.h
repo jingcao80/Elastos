@@ -5,12 +5,13 @@
 #include <Elastos.Droid.Animation.h>
 #include <Elastos.Droid.View.h>
 #include "elastos/droid/server/display/DisplayPowerState.h"
+#include "elastos/droid/server/display/CDisplayPowerState.h"
 #include "elastos/droid/server/display/AutomaticBrightnessController.h"
 #include "elastos/droid/server/display/RampAnimator.h"
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/os/Runnable.h>
 
-// using Elastos::Droid::Server::Lights::ILightsManager;
+using Elastos::Droid::Server::Lights::ILightsManager;
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IAnimatorListener;
@@ -377,7 +378,7 @@ private:
     AutoPtr<IIBatteryStats> mBatteryStats;
 
     // The lights service.
-    // AutoPtr<ILightsManager> mLights;
+    AutoPtr<ILightsManager> mLights;
 
     // The sensor manager.
     AutoPtr<ISensorManager> mSensorManager;

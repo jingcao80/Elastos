@@ -665,10 +665,12 @@ ECode SystemSensorManager::UnregisterListenerImpl(
     /* [in] */ ISensor* sensor)
 {
     // Trigger Sensors should use the cancelTriggerSensor call.
-    Int32 mode;
-    FAIL_RETURN(sensor->GetReportingMode(&mode))
-    if (sensor != NULL && mode == ISensor::REPORTING_MODE_ONE_SHOT) {
-        return NOERROR;
+    if (sensor != NULL) {
+        Int32 mode;
+        FAIL_RETURN(sensor->GetReportingMode(&mode))
+        if (mode == ISensor::REPORTING_MODE_ONE_SHOT) {
+            return NOERROR;
+        }
     }
 
     synchronized(mSensorListenersLock) {

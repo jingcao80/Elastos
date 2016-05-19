@@ -2,9 +2,11 @@
 #define __ELASTOS_DROID_SERVER_POWER_DISPLAYPOWERSTATE_H__
 
 #include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/server/display/ColorFade.h"
-// #include "elastos/droid/server/LightsService.h"
+#include "elastos/droid/server/lights/Light.h"
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/utility/Int32Property.h>
 #include <elastos/droid/utility/FloatProperty.h>
@@ -12,6 +14,8 @@
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Server::Lights::Light;
+using Elastos::Droid::Server::Lights::ILight;
 using Elastos::Droid::View::IChoreographer;
 using Elastos::Droid::Utility::FloatProperty;
 using Elastos::Droid::Utility::Int32Property;
@@ -46,6 +50,7 @@ namespace Display {
  */
 class DisplayPowerState
     : public Object
+    , public IDisplayPowerState
 {
 public:
     class DisplayPowerStateFloatProperty
@@ -163,10 +168,14 @@ private:
     };
 
 public:
-    DisplayPowerState(
+    CAR_INTERFACE_DECL();
+
+    DisplayPowerState();
+
+    CARAPI constructor(
         /* [in] */ IDisplayBlanker* blanker,
-        ///* [in] */ LightsService::Light* backlight,
-        /* [in] */ ColorFade* electronBeam);
+        /* [in] */ ILight* backlight,
+        /* [in] */ IColorFade* electronBeam);
 
     /**
      * Gets the desired screen state.
@@ -266,7 +275,7 @@ private:
     AutoPtr<IHandler> mHandler;
     AutoPtr<IChoreographer> mChoreographer;
     AutoPtr<IDisplayBlanker> mBlanker;
-    // AutoPtr<LightsService::Light> mBacklight;
+    AutoPtr<Light> mBacklight;
     AutoPtr<ColorFade> mColorFade;
     AutoPtr<PhotonicModulator> mPhotonicModulator;
 

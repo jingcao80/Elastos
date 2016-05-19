@@ -1128,8 +1128,10 @@ ECode SystemServer::StartOtherServices()
     res->UpdateConfiguration(config, metrics);
 
     // try {
-    //     // TODO: use boot phase
-    //     mPowerManagerService.systemReady(mActivityManagerService.getAppOpsService());
+    // TODO: use boot phase
+    Slogger::I(TAG, "Power Manager Service ready...");
+    ec = mPowerManagerService->SystemReady(mActivityManagerService->GetAppOpsService());
+    if (FAILED(ec)) ReportWtf("making Power Manager Service ready", ec);
     // } catch (Throwable e) {
     //     ReportWtf("making Power Manager Service ready", ec);
     // }

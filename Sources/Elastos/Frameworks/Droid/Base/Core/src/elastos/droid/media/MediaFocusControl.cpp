@@ -687,30 +687,32 @@ Int32 MediaFocusControl::RequestAudioFocus(
         //     return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         // }
 
-        Boolean b1, b2;
+        Boolean b1 = TRUE, b2 = FALSE;
         mFocusStack->IsEmpty(&b1);
-        AutoPtr<IInterface> obj;
-        mFocusStack->Peek((IInterface**)&obj);
-        AutoPtr<IFocusRequester> exFocusOwner = IFocusRequester::Probe(obj);
-        exFocusOwner->HasSameClient(clientId, &b2);
-        if (!b1 && b2) {
-            // if focus is already owned by this client and the reason for acquiring the focus
-            // hasn't changed, don't do anything
-            Int32 val;
-            exFocusOwner->GetGainRequest(&val);
-            if (val == focusChangeHint) {
-                // unlink death handler so it can be gc'ed.
-                // linkToDeath() creates a JNI global reference preventing collection.
-                Boolean b;
-                proxy->UnlinkToDeath(afdh, 0, &b);
-                return IAudioManager::AUDIOFOCUS_REQUEST_GRANTED;
+        if (!b1) {
+            AutoPtr<IInterface> obj;
+            mFocusStack->Peek((IInterface**)&obj);
+            AutoPtr<IFocusRequester> exFocusOwner = IFocusRequester::Probe(obj);
+            exFocusOwner->HasSameClient(clientId, &b2);
+            if (b2) {
+                // if focus is already owned by this client and the reason for acquiring the focus
+                // hasn't changed, don't do anything
+                Int32 val;
+                exFocusOwner->GetGainRequest(&val);
+                if (val == focusChangeHint) {
+                    // unlink death handler so it can be gc'ed.
+                    // linkToDeath() creates a JNI global reference preventing collection.
+                    Boolean b;
+                    proxy->UnlinkToDeath(afdh, 0, &b);
+                    return IAudioManager::AUDIOFOCUS_REQUEST_GRANTED;
+                }
+                // the reason for the audio focus request has changed: remove the current top of
+                // stack and respond as if we had a new focus owner
+                obj = NULL;
+                mFocusStack->Pop((IInterface**)&obj);
+                AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
+                fr->ReleaseResources();
             }
-            // the reason for the audio focus request has changed: remove the current top of
-            // stack and respond as if we had a new focus owner
-            obj = NULL;
-            mFocusStack->Pop((IInterface**)&obj);
-            AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
-            fr->ReleaseResources();
         }
 
         // focus requester might already be somewhere below in the stack, remove it
@@ -1419,12 +1421,13 @@ void MediaFocusControl::RemoveFocusStackEntry(
     /* [in] */ const String& clientToRemove,
     /* [in] */ Boolean signal)
 {
-    Boolean b1, b2;
+    Boolean b1 = TRUE, b2 = FALSE;
     mFocusStack->IsEmpty(&b1);
-    AutoPtr<IInterface> obj;
-    mFocusStack->Peek((IInterface**)&obj);
-    IFocusRequester::Probe(obj)->HasSameClient(clientToRemove, &b2);
-
+    if (!b1) {
+        AutoPtr<IInterface> obj;
+        mFocusStack->Peek((IInterface**)&obj);
+        IFocusRequester::Probe(obj)->HasSameClient(clientToRemove, &b2);
+    }
     // is the current top of the focus stack abandoning focus? (because of request, not death)
     if (!b1 && b2)
     {
@@ -1461,14 +1464,16 @@ void MediaFocusControl::RemoveFocusStackEntry(
 void MediaFocusControl::RemoveFocusStackEntryForClient(
     /* [in] */ IBinder* cb)
 {
-    // is the owner of the audio focus part of the client to remove?
-    AutoPtr<IInterface> obj;
-    mFocusStack->Peek((IInterface**)&obj);
-    AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
-
-    Boolean b1, b2;
+    Boolean b1 = TRUE, b2 = FALSE;
     mFocusStack->IsEmpty(&b1);
-    fr->HasSameBinder(cb, &b2);
+    if (!b1) {
+        // is the owner of the audio focus part of the client to remove?
+        AutoPtr<IInterface> obj;
+        mFocusStack->Peek((IInterface**)&obj);
+        AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
+        fr->HasSameBinder(cb, &b2);
+    }
+
     Boolean isTopOfStackForClientToRemove = !b1 && b2;
     // (using an iterator on the stack so we can safely remove an entry after having
     //  evaluated it, traversal order doesn't matter here)
@@ -1499,16 +1504,18 @@ Boolean MediaFocusControl::CanReassignAudioFocus(
     // client will first check if any voice calls are in CALL_INACTIVE/CALL_HOLD state
     Boolean b1, b2;
     mFocusStack->IsEmpty(&b1);
-    AutoPtr<IInterface> obj;
-    mFocusStack->Peek((IInterface**)&obj);
-    AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
-    fr->HasSameClient(IN_VOICE_COMM_FOCUS_ID, &b2);
-    if (!b1 && b2) {
-        if (clientId.Contains(CLIENT_ID_QCHAT)) {
-            return TRUE;
-        }
-        else {
-            return FALSE;
+    if (!b1) {
+        AutoPtr<IInterface> obj;
+        mFocusStack->Peek((IInterface**)&obj);
+        AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
+        fr->HasSameClient(IN_VOICE_COMM_FOCUS_ID, &b2);
+        if (b2) {
+            if (clientId.Contains(CLIENT_ID_QCHAT)) {
+                return TRUE;
+            }
+            else {
+                return FALSE;
+            }
         }
     }
     return TRUE;
@@ -1971,13 +1978,15 @@ void MediaFocusControl::RemoveMediaButtonReceiver_syncPrs(
 Boolean MediaFocusControl::IsCurrentRcController(
     /* [in] */ IPendingIntent* pi)
 {
-    Boolean b1 = FALSE;
-    mPRStack->IsEmpty(&b1);
-    AutoPtr<IInterface> obj;
-    mPRStack->Peek((IInterface**)&obj);
-    AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
+    Boolean b1 = TRUE;
     Boolean b2 = FALSE;
-    prse->HasMatchingMediaButtonIntent(pi, &b2);
+    mPRStack->IsEmpty(&b1);
+    if (!b1) {
+        AutoPtr<IInterface> obj;
+        mPRStack->Peek((IInterface**)&obj);
+        AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
+        prse->HasMatchingMediaButtonIntent(pi, &b2);
+    }
     if (!b1 && b2) {
         return TRUE;
     }

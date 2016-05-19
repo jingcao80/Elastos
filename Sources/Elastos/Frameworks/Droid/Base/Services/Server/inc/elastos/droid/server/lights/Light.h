@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_SERVER_LIGHTS_LIGHTS_H__
 #define __ELASTOS_DROID_SERVER_LIGHTS_LIGHTS_H__
 
+#include "_Elastos.Droid.Server.h"
 #include <elastos/core/Object.h>
 
 namespace Elastos {
@@ -11,8 +12,11 @@ namespace Lights {
 
 class Light
     : public Object
+    , public ILight
 {
 public:
+    CAR_INTERFACE_DECL();
+
     virtual ~Light();
 
     virtual CARAPI_(void) SetBrightness(

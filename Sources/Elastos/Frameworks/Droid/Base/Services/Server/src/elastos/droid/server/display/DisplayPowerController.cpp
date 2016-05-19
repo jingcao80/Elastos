@@ -4,6 +4,9 @@
 #include <Elastos.Droid.Internal.h>
 #include "elastos/droid/server/display/DisplayPowerController.h"
 #include "elastos/droid/server/am/BatteryStatsService.h"
+#include "elastos/droid/server/LocalServices.h"
+#include "elastos/droid/server/lights/Light.h"
+#include "elastos/droid/server/lights/LightsManager.h"
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/utility/MathUtils.h>
@@ -12,8 +15,11 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 
-// using Elastos::Droid::Server::LocalServices;
+using Elastos::Droid::Server::Lights::Light;
+using Elastos::Droid::Server::Lights::LightsManager;
+using Elastos::Droid::Server::LocalServices;
 using Elastos::Droid::Server::Am::BatteryStatsService;
+using Elastos::Droid::Server::Lights::EIID_ILightsManager;
 
 using Elastos::Droid::R;
 using Elastos::Droid::Content::Res::IResources;
@@ -23,6 +29,7 @@ using Elastos::Droid::Animation::EIID_IAnimatorListener;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::View::EIID_IScreenOnListener;
+using Elastos::Droid::View::EIID_IWindowManagerPolicy;
 
 using Elastos::Droid::Hardware::EIID_ISensorEventListener;
 using Elastos::Droid::Hardware::Display::CDisplayPowerRequest;
@@ -89,6 +96,7 @@ ECode DisplayPowerController::DisplayControllerHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case DisplayPowerController::MSG_UPDATE_POWER_STATE:
+            //leliang the screen lock event
             mHost->UpdatePowerState();
             break;
 
@@ -315,15 +323,16 @@ DisplayPowerController::DisplayPowerController(
     , mAppliedDimming(FALSE)
     , mAppliedLowPower(FALSE)
 {
+    mAnimatorListener = new AnimatorListener(this);
     AutoPtr<ILooper> looper;
     handler->GetLooper((ILooper**)&looper);
     mHandler = new DisplayControllerHandler(looper, this);
     mCallbacks = callbacks;
 
     mBatteryStats = BatteryStatsService::GetService();
-    // mLights = LocalServices::GetService(LightsManager.class);
+    mLights = ILightsManager::Probe(LocalServices::GetService(EIID_ILightsManager));
     mSensorManager = sensorManager;
-    // mWindowManagerPolicy = LocalServices::GetService(WindowManagerPolicy.class);
+    mWindowManagerPolicy = IWindowManagerPolicy::Probe(LocalServices::GetService(EIID_IWindowManagerPolicy));
     mBlanker = blanker;
     mContext = context;
 
@@ -519,12 +528,12 @@ void DisplayPowerController::Initialize()
 {
     // Initialize the power state object for the default display.
     // In the future, we might manage multiple displays independently.
-    // AutoPtr<ILight> light;
-    // mLights->GetLight(LightsManager::LIGHT_ID_BACKLIGHT, &light);
+    AutoPtr<Light> light = ((LightsManager*)mLights.Get())->GetLight(LightsManager::LIGHT_ID_BACKLIGHT);
     AutoPtr<ColorFade> colorFade = new ColorFade(IDisplay::DEFAULT_DISPLAY);
-    assert(0 && "TODO");
-    mPowerState = new DisplayPowerState(mBlanker, /*light,*/ colorFade);
-    IInterface* stateObj = TO_IINTERFACE(mPowerState);
+    AutoPtr<IDisplayPowerState> dps;
+    CDisplayPowerState::New(mBlanker, light, colorFade, (IDisplayPowerState**)&dps);
+    mPowerState = (DisplayPowerState*)dps.Get();
+
     IProperty* property = IProperty::Probe(DisplayPowerState::COLOR_FADE_LEVEL);
 
     AutoPtr<IObjectAnimatorHelper> helper;
@@ -533,21 +542,21 @@ void DisplayPowerController::Initialize()
     AutoPtr<ArrayOf<Float> > params = ArrayOf<Float>::Alloc(2);
     params->Set(0, 0.0f);
     params->Set(1, 1.0f);
-    helper->OfFloat(stateObj, property, params, (IObjectAnimator**)&mColorFadeOnAnimator);
+    helper->OfFloat(dps, property, params, (IObjectAnimator**)&mColorFadeOnAnimator);
     IAnimator* on = IAnimator::Probe(mColorFadeOnAnimator);
     on->SetDuration(COLOR_FADE_ON_ANIMATION_DURATION_MILLIS);
     on->AddListener(mAnimatorListener);
 
     params->Set(0, 1.0f);
     params->Set(1, 0.0f);
-    helper->OfFloat(stateObj, property, params, (IObjectAnimator**)&mColorFadeOffAnimator);
+    helper->OfFloat(dps, property, params, (IObjectAnimator**)&mColorFadeOffAnimator);
 
     IAnimator* off = IAnimator::Probe(mColorFadeOffAnimator);
     off->SetDuration(COLOR_FADE_OFF_ANIMATION_DURATION_MILLIS);
     off->AddListener(mAnimatorListener);
 
     mScreenBrightnessRampAnimator = new RampAnimator(
-        stateObj, DisplayPowerState::SCREEN_BRIGHTNESS);
+        dps, DisplayPowerState::SCREEN_BRIGHTNESS);
     mScreenBrightnessRampAnimator->SetListener(mRampAnimatorListener);
 
     // Initialize screen state for battery stats.
@@ -671,16 +680,20 @@ void DisplayPowerController::UpdatePowerState()
     // Use zero brightness when screen is off.
     if (state == IDisplay::STATE_OFF) {
         brightness = IPowerManager::BRIGHTNESS_OFF;
-        // mLights->GetLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(brightness);
-        // mLights->GetLight(LightsManager.LIGHT_ID_KEYBOARD).setBrightness(brightness);
+        AutoPtr<Light> lightButton = ((LightsManager*)mLights.Get())->GetLight(LightsManager::LIGHT_ID_BUTTONS);
+        lightButton->SetBrightness(brightness);
+        AutoPtr<Light> lightKeyboard = ((LightsManager*)mLights.Get())->GetLight(LightsManager::LIGHT_ID_KEYBOARD);
+        lightKeyboard->SetBrightness(brightness);
     }
 
     // Use default brightness when dozing unless overridden.
     if (brightness < 0 && (state == IDisplay::STATE_DOZE
             || state == IDisplay::STATE_DOZE_SUSPEND)) {
         brightness = mScreenBrightnessDozeConfig;
-        // mLights.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(PowerManager.BRIGHTNESS_OFF);
-        // mLights.getLight(LightsManager.LIGHT_ID_KEYBOARD).setBrightness(PowerManager.BRIGHTNESS_OFF);
+        AutoPtr<Light> lightButton = ((LightsManager*)mLights.Get())->GetLight(LightsManager::LIGHT_ID_BUTTONS);
+        lightButton->SetBrightness(IPowerManager::BRIGHTNESS_OFF);
+        AutoPtr<Light> lightKeyboard = ((LightsManager*)mLights.Get())->GetLight(LightsManager::LIGHT_ID_KEYBOARD);
+        lightKeyboard->SetBrightness(IPowerManager::BRIGHTNESS_OFF);
     }
 
     // Configure auto-brightness.

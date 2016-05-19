@@ -192,7 +192,9 @@ ECode CServiceManager::CheckService(
     /* [in] */ const String& name,
     /* [out] */ IInterface** service)
 {
-    assert(0);
+    //TODO
+    //assert(0);
+    Slogger::E("CServiceManager", "line:%d, name:%s, not implemented\n", __LINE__, name.string());
     return NOERROR;
 }
 

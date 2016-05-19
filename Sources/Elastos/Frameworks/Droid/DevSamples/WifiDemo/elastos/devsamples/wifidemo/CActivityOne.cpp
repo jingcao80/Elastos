@@ -192,6 +192,10 @@ ECode CActivityOne::MyListener::OnClick(
         Logger::D("CActivityOne", "Test WifiClearConfigs!");
         mHost->OnTestClearWifiConfigurations();
     }
+    else if (id == R::id::RebootButton) {
+        Logger::D("CActivityOne", "Test Reboot!");
+        mHost->OnTestReboot(String("Reboot"));
+    }
     //else if (id == R::id::btn_close_popup) {
     //    Logger::D("CActivityOne", "Dismiss PopupWindow!");
     //    mHost->mPopupWindow->Dismiss();
@@ -478,6 +482,11 @@ ECode CActivityOne::OnCreate(
     mWifiClearConfigsButton = FindViewById(R::id::WifiClearConfigsButton);
     assert(mWifiClearConfigsButton != NULL);
     mWifiClearConfigsButton->SetOnClickListener(clickListener);
+
+    mRebootButton = FindViewById(R::id::RebootButton);
+    assert(mRebootButton != NULL);
+    mRebootButton->SetOnClickListener(clickListener);
+
     //// Setup CheckBox
     ////
     //temp = FindViewById(R::id::chkAndroid);
@@ -1030,6 +1039,23 @@ ECode CActivityOne::OnTestPing(
 
     ShowAlert(String("try to ping ") + url);
 
+    return NOERROR;
+}
+
+ECode CActivityOne::OnTestReboot(
+    /* [in] */ const String& info)
+{
+    AutoPtr<IInterface> obj;
+    GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(obj);
+
+    if (powerManager == NULL) {
+        Logger::D("CActivityOne", "OnTestReboot get power manager failed!");
+        return NOERROR;
+    }
+    powerManager->Reboot(String(NULL));
+    //Will not return if the reboot is successful.
+    Logger::D("CActivityOne", "OnTestReboot Reboot return!");
     return NOERROR;
 }
 

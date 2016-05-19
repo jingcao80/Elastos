@@ -181,6 +181,10 @@ ECode LiveDisplayController::LiveDisplayHandler::HandleMessage(
     switch (what) {
         case MSG_UPDATE_LIVE_DISPLAY:
             AutoPtr<ITwilightState> twilight;
+            if (mHost->mTwilightManager == NULL) {
+                Slogger::E(TAG, "TODO mTwilightManager is NULL");
+                return NOERROR;
+            }
             mHost->mTwilightManager->GetCurrentState((ITwilightState**)&twilight);
 
             mHost->UpdateColorTemperature(twilight);
@@ -459,7 +463,12 @@ LiveDisplayController::LiveDisplayController(
     mCmHardwareManager = ICmHardwareManager::Probe(service);
 
     mTwilightManager = ITwilightManager::Probe(LocalServices::GetService(EIID_ITwilightManager));
-    mTwilightManager->RegisterListener(mTwilightListener, mHandler);
+    if (mTwilightManager == NULL) {
+        Slogger::E(TAG, "TODO can not get Twilight service, maybe result from location service not ready");
+    }
+    else {
+        mTwilightManager->RegisterListener(mTwilightListener, mHandler);
+    }
 
     Boolean sunlightEnhancementSupported;
     mCmHardwareManager->IsSupported(ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT, &sunlightEnhancementSupported);

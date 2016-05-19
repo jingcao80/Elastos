@@ -200,8 +200,7 @@ void DisplayPowerState::PhotonicModulator::SetBrightness(
     /* [in] */ Int32 backlight)
 {
     //Trace.traceBegin(Trace.TRACE_TAG_POWER, "setBrightness(" + backlight + ")");
-    assert(0 && "TODO");
-    // mBacklight->SetBrightness(backlight);
+    mHost->mBacklight->SetBrightness(backlight);
 }
 
 //=====================================================================
@@ -267,26 +266,32 @@ static AutoPtr<IInt32Property> InitInt32Property(
     return ip;
 }
 
+CAR_INTERFACE_IMPL(DisplayPowerState, Object, IDisplayPowerState);
 Boolean DisplayPowerState::DEBUG = FALSE;
 AutoPtr<IFloatProperty> DisplayPowerState::COLOR_FADE_LEVEL = InitFloatProperty(fName);
 AutoPtr<IInt32Property> DisplayPowerState::SCREEN_BRIGHTNESS = InitInt32Property(iName);
 
-DisplayPowerState::DisplayPowerState(
-    /* [in] */ IDisplayBlanker* blanker,
-    ///* [in] */ LightsService::Light* backlight,
-    /* [in] */ ColorFade* colorFade)
-    : mBlanker(blanker)
-    //, mBacklight(backlight)
-    , mColorFade(colorFade)
-    , mScreenState(IDisplay::STATE_ON)
-    , mScreenBrightness(IPowerManager::BRIGHTNESS_ON)
-    , mScreenReady(FALSE)
-    , mScreenUpdatePending(FALSE)
-    , mColorFadePrepared(FALSE)
-    , mColorFadeLevel(1.0f)
-    , mColorFadeReady(TRUE)
-    , mColorFadeDrawPending(FALSE)
+DisplayPowerState::DisplayPowerState()
 {
+}
+
+ECode DisplayPowerState::constructor(
+    /* [in] */ IDisplayBlanker* blanker,
+    /* [in] */ ILight* backlight,
+    /* [in] */ IColorFade* colorFade)
+{
+    mBlanker = blanker;
+    mBacklight = (Light*)backlight;
+    mColorFade = (ColorFade*)colorFade;
+    mScreenState = IDisplay::STATE_ON;
+    mScreenBrightness = IPowerManager::BRIGHTNESS_ON;
+    mScreenReady = FALSE;
+    mScreenUpdatePending = FALSE;
+    mColorFadePrepared = FALSE;
+    mColorFadeLevel = 1.0f;
+    mColorFadeReady = TRUE;
+    mColorFadeDrawPending = FALSE;
+
     mScreenUpdateRunnable = (IRunnable*)new ScreenUpdateRunnable(this);
     mColorFadeDrawRunnable = (IRunnable*)new ColorFadeDrawRunnable(this);
 
@@ -305,6 +310,7 @@ DisplayPowerState::DisplayPowerState(
     // will reset the brightness to a new level immediately before the changes
     // actually have a chance to be applied.
     ScheduleScreenUpdate();
+    return NOERROR;
 }
 
 void DisplayPowerState::SetScreenState(

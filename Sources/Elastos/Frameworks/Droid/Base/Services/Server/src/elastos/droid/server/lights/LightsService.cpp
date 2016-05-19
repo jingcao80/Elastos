@@ -145,7 +145,6 @@ void LightImpl::SetLightLocked(
         mMode = mode;
         mOnMS = onMS;
         mOffMS = offMS;
-        assert(0 && "TODO");
         //Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", " + color + ")");
         // try {
         mHost->SetLight_native(mId, color, mode, onMS, offMS, brightnessMode);
