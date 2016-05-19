@@ -178,6 +178,7 @@ private:
     AutoPtr<IRadioGroup> mRadioGroup;
     AutoPtr<IRadioButton> mRadioButtonMale;
     AutoPtr<IRadioButton> mRadioButtonFemale;
+    AutoPtr<IRadioButton> mRadioButtonSecret;
 
     AutoPtr<IToggleButton> mToggleButton1;
     AutoPtr<IToggleButton> mToggleButton2;

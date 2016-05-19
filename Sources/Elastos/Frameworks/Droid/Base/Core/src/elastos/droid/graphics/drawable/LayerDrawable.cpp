@@ -1156,7 +1156,7 @@ Boolean LayerDrawable::RefreshChildPadding(
     Boolean res;
     r->mDrawable->GetPadding(rect, &res);
     if (rect->mLeft != (*mPaddingL)[i] || rect->mTop != (*mPaddingT)[i] ||
-            rect->mRight != (*mPaddingT)[i] || rect->mBottom != (*mPaddingB)[i]) {
+            rect->mRight != (*mPaddingR)[i] || rect->mBottom != (*mPaddingB)[i]) {
         (*mPaddingL)[i] = rect->mLeft;
         (*mPaddingT)[i] = rect->mTop;
         (*mPaddingR)[i] = rect->mRight;

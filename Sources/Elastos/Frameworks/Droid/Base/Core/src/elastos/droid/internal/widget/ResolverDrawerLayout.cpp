@@ -689,7 +689,9 @@ Boolean ResolverDrawerLayout::IsDescendantClipped(
         child->GetParent((IViewParent**)&p);
         while (p != this) {
             v = IView::Probe(p);
-            v->GetParent((IViewParent**)&p);
+            AutoPtr<IViewParent> tmp;
+            v->GetParent((IViewParent**)&tmp);
+            p = tmp;
         }
         directChild = v;
     }

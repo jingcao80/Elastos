@@ -24,6 +24,8 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
+static const String LOGTAG("AnimatedStateListDrawable");
+
 AnimatedStateListDrawable::AnimationDrawableTransition::AnimationDrawableTransition(
     /* [in] */ IAnimationDrawable* ad,
     /* [in] */ Boolean reversed)
@@ -394,9 +396,16 @@ ECode AnimatedStateListDrawable::IsStateful(
 Boolean AnimatedStateListDrawable::OnStateChange(
     /* [in] */ ArrayOf<Int32>* stateSet)
 {
+    Logger::I(LOGTAG, "==================== OnStateChange ==================");
+    for (Int32 i = 0; i < stateSet->GetLength(); i++) {
+        Logger::I(LOGTAG, " > stateSet %d: %d", i, (*stateSet)[i]);
+    }
+
     Int32 keyframeIndex = mState->IndexOfKeyframe(stateSet);
     Int32 value = 0;
-    if (keyframeIndex == (GetCurrentIndex(&value), value)) {
+    GetCurrentIndex(&value);
+    Logger::I(LOGTAG, " keyframeIndex:%d, value:%d", keyframeIndex, value);
+    if (keyframeIndex == value) {
         // Propagate state change to current keyframe.
         AutoPtr<IDrawable> current;
         GetCurrent((IDrawable**)&current);
@@ -429,6 +438,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     AutoPtr<Transition> currentTransition = mTransition;
     if (currentTransition != NULL) {
         if (toIndex == mTransitionToIndex) {
+            Logger::I(LOGTAG, " SelectTransition: %d", __LINE__);
             // Already animating to that keyframe.
             return TRUE;
         }
@@ -437,6 +447,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
             currentTransition->Reverse();
             mTransitionToIndex = mTransitionFromIndex;
             mTransitionFromIndex = toIndex;
+            Logger::I(LOGTAG, " SelectTransition: %d", __LINE__);
             return TRUE;
         }
 
@@ -449,7 +460,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     else {
         GetCurrentIndex(&fromIndex);
     }
-
+    Logger::I(LOGTAG, " fromIndex:%d, toIndex:%d", fromIndex, toIndex);
     // Reset state.
     mTransition = NULL;
     mTransitionFromIndex = -1;
@@ -497,6 +508,8 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     mTransition = transition;
     mTransitionFromIndex = fromIndex;
     mTransitionToIndex = toIndex;
+
+    Logger::I(LOGTAG, " SelectTransition: %d", __LINE__);
     return TRUE;
 }
 

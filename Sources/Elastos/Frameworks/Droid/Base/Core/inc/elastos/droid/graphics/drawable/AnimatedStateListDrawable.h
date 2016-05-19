@@ -51,8 +51,6 @@ private:
         : public Object
     {
     public:
-        virtual CARAPI_(AutoPtr<Transition>) Clone() = 0;
-
         virtual CARAPI_(void) Start() = 0;
 
         virtual CARAPI_(void) Stop() = 0;
@@ -79,13 +77,6 @@ private:
         }
 
         // @Override
-        CARAPI_(AutoPtr<Transition>) Clone()
-        {
-            AutoPtr<Transition> obj = new AnimatableTransition(mA);
-            return obj;
-        }
-
-        // @Override
         CARAPI_(void) Start()
         {
             mA->Start();
@@ -108,13 +99,6 @@ private:
         AnimationDrawableTransition(
             /* [in] */ IAnimationDrawable* ad,
             /* [in] */ Boolean reversed);
-
-        // @Override
-        CARAPI_(AutoPtr<Transition>) Clone()
-        {
-            AutoPtr<Transition> obj = new AnimationDrawableTransition(mAnim);
-            return obj;
-        }
 
         // @Override
         CARAPI_(Boolean) CanReverse();
@@ -145,13 +129,6 @@ private:
         AnimatedVectorDrawableTransition(
             /* [in] */ IAnimatedVectorDrawable* avd,
             /* [in] */ Boolean reversed);
-
-        // @Override
-        CARAPI_(AutoPtr<Transition>) Clone()
-        {
-            AutoPtr<Transition> obj = new AnimatedVectorDrawableTransition(mAvd, mReversed);
-            return obj;
-        }
 
         // @Override
         CARAPI_(Boolean) CanReverse();
