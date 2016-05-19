@@ -3,7 +3,7 @@
 
 namespace Elastos{
 namespace Apps{
-namespace DialerBinder {
+namespace DialerBind {
 
 CAR_INTERFACE_IMPL(CDatabaseHelperManager, Singleton, IDatabaseHelperManager)
 
@@ -26,6 +26,6 @@ AutoPtr<IDialerDatabaseHelper> CDatabaseHelperManager::GetDatabaseHelper(
     return DialerDatabaseHelper::GetInstance(context);
 }
 
-} // DialerBinder
+} // DialerBind
 } // Apps
 } // Elastos

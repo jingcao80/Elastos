@@ -8,7 +8,7 @@ namespace Dialpad {
 
 CAR_INTERFACE_IMPL(CDialpadFragmentErrorDialogFragmentHelper, Singleton, IDialpadFragmentErrorDialogFragmentHelper)
 
-CAR_SINGLETON_DECL(CDialpadFragmentErrorDialogFragmentHelper)
+CAR_SINGLETON_IMPL(CDialpadFragmentErrorDialogFragmentHelper)
 
 ECode CDialpadFragmentErrorDialogFragmentHelper::NewInstance(
     /* [in] */ Int32 messageResId,

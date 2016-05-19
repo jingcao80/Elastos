@@ -3,7 +3,7 @@
 
 namespace Elastos{
 namespace Apps{
-namespace DialerBinder {
+namespace DialerBind {
 
 CAR_INTERFACE_IMPL(CObjectFactory, Singleton, IObjectFactory)
 
@@ -79,7 +79,7 @@ AutoPtr<IDialogFragment> CObjectFactory::GetReportDialogFragment(
     return NULL;
 }
 
-} // DialerBinder
+} // DialerBind
 } // Apps
 } // Elastos
 

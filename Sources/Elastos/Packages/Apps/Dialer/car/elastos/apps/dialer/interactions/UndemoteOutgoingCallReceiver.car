@@ -1,0 +1,21 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Interactions {
+
+    /**
+     * @Involve
+     * interface IBroadcastReceiver
+     */
+    interface IUndemoteOutgoingCallReceiver {
+    }
+
+    } //Interactions
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

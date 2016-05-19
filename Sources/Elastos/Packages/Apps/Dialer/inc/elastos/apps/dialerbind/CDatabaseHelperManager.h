@@ -1,13 +1,13 @@
 
-#ifndef __ELASTOS_APPS_DIALERBINDER_CDATABASEHELPERMANAGER_H__
-#define __ELASTOS_APPS_DIALERBINDER_CDATABASEHELPERMANAGER_H__
+#ifndef __ELASTOS_APPS_DIALERBIND_CDATABASEHELPERMANAGER_H__
+#define __ELASTOS_APPS_DIALERBIND_CDATABASEHELPERMANAGER_H__
 
-#include "_Elastos_Apps_Dialer_CDatabaseHelperManager.h"
+#include "_Elastos_Apps_DialerBind_CDatabaseHelperManager.h"
 #include <elastos/core/Singleton.h>
 
 namespace Elastos{
 namespace Apps{
-namespace DialerBinder {
+namespace DialerBind {
 
 CarClass(CDatabaseHelperManager)
     , public singleton
@@ -27,8 +27,8 @@ public:
 
 };
 
-} // DialerBinder
+} // DialerBind
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALERBINDER_CDATABASEHELPERMANAGER_H__
+#endif //__ELASTOS_APPS_DIALERBIND_CDATABASEHELPERMANAGER_H__

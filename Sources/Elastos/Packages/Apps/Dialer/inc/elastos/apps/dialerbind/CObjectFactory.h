@@ -1,14 +1,14 @@
-#ifndef __ELASTOS_APPS_DIALERBINDER_COBJECTFACTORY_H__
-#define __ELASTOS_APPS_DIALERBINDER_COBJECTFACTORY_H__
+#ifndef __ELASTOS_APPS_DIALERBIND_COBJECTFACTORY_H__
+#define __ELASTOS_APPS_DIALERBIND_COBJECTFACTORY_H__
 
-#include "_Elastos_Apps_Dialer_CObjectFactory.h"
+#include "_Elastos_Apps_DialerBind_CObjectFactory.h"
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
 
 namespace Elastos{
 namespace Apps{
-namespace DialerBinder {
+namespace DialerBind {
 
 CarClass(CObjectFactory)
     , public singleton
@@ -57,8 +57,8 @@ public:
         /* [in] */ const String& name);
 };
 
-} // DialerBinder
+} // DialerBind
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALERBINDER_COBJECTFACTORY_H__
+#endif //__ELASTOS_APPS_DIALERBIND_COBJECTFACTORY_H__

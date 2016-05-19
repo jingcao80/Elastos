@@ -1,0 +1,28 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Dialpad {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.ILoader
+     * interface Elastos.Droid.Content.IAsyncTaskLoader
+     */
+    interface ISmartDialCursorLoader {
+        /**
+         * Configures the query string to be used to find SmartDial matches.
+         * @param query The query string user typed.
+         */
+        ConfigureQuery(
+            [in] String query);
+    }
+
+    } //Dialpad
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

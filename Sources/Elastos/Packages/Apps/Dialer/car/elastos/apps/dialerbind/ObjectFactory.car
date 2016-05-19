@@ -2,7 +2,7 @@ module
 {
     namespace Elastos{
     namespace Apps {
-    namespace DailerBinder {
+    namespace DailerBind {
 
     interface IObjectFactory {
         NewCachedNumberLookupService(
@@ -30,7 +30,7 @@ module
             [out] IDialogFragment** fragment);
     }
 
-    } // DailerBinder
+    } // DailerBind
     } // Apps
     } // Elastos
 }

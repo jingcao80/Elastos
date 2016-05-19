@@ -2,7 +2,7 @@ module
 {
     namespace Elastos{
     namespace Apps {
-    namespace DailerBinder {
+    namespace DailerBind {
 
     interface IDatabaseHelperManager {
         GetDatabaseHelper(
@@ -10,7 +10,7 @@ module
             [out] IDialerDatabaseHelper** helper);
     }
 
-    } //DailerBinder
+    } //DailerBind
     } //Apps
     } //Elastos
 }

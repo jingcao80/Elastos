@@ -1,0 +1,90 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Interactions {
+
+    interface IPhoneDisambiguationDialogFragment{
+    }
+
+    interface IPhoneDisambiguationDialogFragmentHelper{
+        Show(
+            [in] IFragmentManager* fragmentManager,
+            [in] IArrayList* phoneList,
+            [in] Int32 interactionType,
+            [in] String callOrigin);
+    }
+
+    interface IPhoneNumberInteraction {
+        /**
+         * Start call action using given contact Uri. If there are multiple candidates for the phone
+         * call, dialog is automatically shown and the user is asked to choose one.
+         *
+         * @param activity that is calling this interaction. This must be of type
+         * {@link TransactionSafeActivity} because we need to check on the activity state after the
+         * phone numbers have been queried for.
+         * @param uri contact Uri (built from {@link Contacts#CONTENT_URI}) or data Uri
+         * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
+         * data Uri won't.
+         */
+        StartInteractionForPhoneCall(
+            [in] ITransactionSafeActivity* activity,
+            [in] IUri* uri);
+
+        /**
+         * Start call action using given contact Uri. If there are multiple candidates for the phone
+         * call, dialog is automatically shown and the user is asked to choose one.
+         *
+         * @param activity that is calling this interaction. This must be of type
+         * {@link TransactionSafeActivity} because we need to check on the activity state after the
+         * phone numbers have been queried for.
+         * @param uri contact Uri (built from {@link Contacts#CONTENT_URI}) or data Uri
+         * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
+         * data Uri won't.
+         * @param useDefault Whether or not to use the primary(default) phone number. If true, the
+         * primary phone number will always be used by default if one is available. If false, a
+         * disambiguation dialog will be shown regardless of whether or not a primary phone number
+         * is available.
+         */
+        StartInteractionForPhoneCall(
+            [in] ITransactionSafeActivity* activity,
+            [in] IUri* uri,
+            [in] Boolean useDefault);
+
+        /**
+         * @param activity that is calling this interaction. This must be of type
+         * {@link TransactionSafeActivity} because we need to check on the activity state after the
+         * phone numbers have been queried for.
+         * @param callOrigin If non null, {@link PhoneConstants#EXTRA_CALL_ORIGIN} will be
+         * appended to the Intent initiating phone call. See comments in Phone package (PhoneApp)
+         * for more detail.
+         */
+        StartInteractionForPhoneCall(
+            [in] ITransactionSafeActivity* activity,
+            [in] IUri* uri,
+            [in] String callOrigin);
+
+        /**
+         * Start text messaging (a.k.a SMS) action using given contact Uri. If there are multiple
+         * candidates for the phone call, dialog is automatically shown and the user is asked to choose
+         * one.
+         *
+         * @param activity that is calling this interaction. This must be of type
+         * {@link TransactionSafeActivity} because we need to check on the activity state after the
+         * phone numbers have been queried for.
+         * @param uri contact Uri (built from {@link Contacts#CONTENT_URI}) or data Uri
+         * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
+         * data Uri won't.
+         */
+        StartInteractionForTextMessage(
+            [in] ITransactionSafeActivity* activity,
+            [in] IUri* uri);
+    }
+
+    } //Interactions
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

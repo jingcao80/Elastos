@@ -361,6 +361,10 @@ const String DialpadFragment::EXTRA_SEND_EMPTY_FLASH("com.android.phone.extra.SE
 
 const String DialpadFragment::PREF_DIGITS_FILLED_BY_INTENT("pref_digits_filled_by_intent");
 
+CAR_INTERFACE_IMPL_8(DialpadFragment, AnalyticsFragment, IDialpadFragment, IViewOnClickListener,
+        IViewOnLongClickListener, IViewOnKeyListener, IAdapterViewOnItemClickListener, ITextWatcher,
+        IPopupMenuOnMenuItemClickListener, IDialpadKeyButtonOnPressedListener)
+
 DialpadFragment::DialpadFragment()
     : mStartedFromNewIntent(FALSE)
     , mFirstLaunch(FALSE)

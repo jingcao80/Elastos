@@ -1,0 +1,21 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Dialpad {
+
+    /**
+     * @Involve
+     * interface ISmartDialMap
+     */
+    interface ILatinSmartDialMap {
+    }
+
+    } //Dialpad
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
