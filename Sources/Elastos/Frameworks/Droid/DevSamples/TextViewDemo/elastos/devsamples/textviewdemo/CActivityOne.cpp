@@ -206,6 +206,9 @@ ECode CActivityOne::MyListener::OnClick(
     else if (id == R::id::radioFemale) {
         Logger::D("CActivityOne", "Click Women RadioButton");
     }
+    else if (id == R::id::radioSecret) {
+        Logger::D("CActivityOne", "Click Secret RadioButton");
+    }
     else if (id == R::id::toggleButton1) {
         Logger::D("CActivityOne", "Click toggleButton1 ToggleButton");
     }
@@ -447,6 +450,10 @@ ECode CActivityOne::OnCreate(
     temp = FindViewById(R::id::radioFemale);
     mRadioButtonFemale = IRadioButton::Probe(temp);
     IView::Probe(mRadioButtonFemale)->SetOnClickListener(clickListener);
+
+    temp = FindViewById(R::id::radioSecret);
+    mRadioButtonSecret = IRadioButton::Probe(temp);
+    IView::Probe(mRadioButtonSecret)->SetOnClickListener(clickListener);
 
     // temp = FindViewById(R::id::radioSex);
     // mRadioGroup = IRadioGroup::Probe(temp);
