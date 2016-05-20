@@ -2,6 +2,10 @@
 module
 {
 
+    using interface Elastos.IO.IFile;
+
+    interface Elastos.Droid.Content.IContext;
+
     namespace Elastos {
     namespace Droid {
     namespace Renderscript {
@@ -10,6 +14,16 @@ module
         RenderScriptContextType_NORMAL,
         RenderScriptContextType_DEBUG,
         RenderScriptContextType_PROFILE,
+    }
+
+    /**
+     * RenderScript worker thread priority enumeration.  The default value is
+     * NORMAL.  Applications wishing to do background processing should set
+     * their priority to LOW to avoid starving forground processes.
+     */
+    enum RenderScriptPriority {
+        RenderScriptPriority_LOW = 15, // (Process.THREAD_PRIORITY_BACKGROUND + (5 * Process.THREAD_PRIORITY_LESS_FAVORABLE)),
+        RenderScriptPriority_NORMAL = -4, // (Process.THREAD_PRIORITY_DISPLAY);
     }
 
     /**
@@ -44,6 +58,44 @@ module
         */
         const Int32 CREATE_FLAG_LOW_POWER = 0x0004;
 
+        /**
+         * Change the priority of the worker threads for this context.
+         *
+         * @param p New priority to be set.
+         */
+        SetPriority(
+            [in] RenderScriptPriority p);
+
+        /**
+         * Gets the application context associated with the RenderScript context.
+         *
+         * @return The application context.
+         */
+        GetApplicationContext(
+            [out] IContext** ctx);
+
+        /**
+         * Print the currently available debugging information about the state of
+         * the RS context to the log.
+         *
+         */
+        ContextDump();
+
+        /**
+         * Wait for any pending asynchronous opeations (such as copies to a RS
+         * allocation or RS script executions) to complete.
+         *
+         */
+        Finish();
+
+        /**
+         * Destroys this RenderScript context.  Once this function is called,
+         * using this context or any objects belonging to this context is
+         * illegal.
+         *
+         */
+        Destroy();
+
     }
 
     interface IRenderScriptHelper {
@@ -64,7 +116,68 @@ module
          * @hide
          * @param cacheDir A directory the current process can write to
          */
-        public static void setupDiskCache(File cacheDir)
+        SetupDiskCache(
+            [in] IFile* cacheDir);
+
+        /**
+         * @hide
+         */
+        Create(
+            [in] IContext* ctx,
+            [in] Int32 sdkVersion,
+            [out] IRenderScript** rs);
+
+        /**
+         * Create a RenderScript context.
+         *
+         * @hide
+         * @param ctx The context.
+         * @return RenderScript
+         */
+        Create(
+            [in] IContext* ctx,
+            [in] Int32 sdkVersion,
+            [in] RenderScriptContextType ct,
+            [in] Int32 flags,
+            [out] IRenderScript** rs);
+
+        /**
+         * Create a RenderScript context.
+         *
+         * @param ctx The context.
+         * @return RenderScript
+         */
+        Create(
+            [in] IContext* ctx,
+            [out] IRenderScript** rs);
+
+        /**
+         * Create a RenderScript context.
+         *
+         *
+         * @param ctx The context.
+         * @param ct The type of context to be created.
+         * @return RenderScript
+         */
+        Create(
+            [in] IContext* ctx,
+            [in] RenderScriptContextType ct,
+            [out] IRenderScript** rs);
+
+         /**
+         * Create a RenderScript context.
+         *
+         *
+         * @param ctx The context.
+         * @param ct The type of context to be created.
+         * @param flags The OR of the CREATE_FLAG_* options desired
+         * @return RenderScript
+         */
+        Create(
+            [in] IContext* ctx,
+            [in] RenderScriptContextType ct,
+            [in] Int32 flags,
+            [out] IRenderScript** rs);
 
     }
 

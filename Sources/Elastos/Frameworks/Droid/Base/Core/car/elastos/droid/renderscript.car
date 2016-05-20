@@ -2,4 +2,6 @@
 module
 {
     merge("renderscript/Allocation.car");
+    merge("renderscript/RenderScript.car");
+    merge("renderscript/BaseObj.car");
 }

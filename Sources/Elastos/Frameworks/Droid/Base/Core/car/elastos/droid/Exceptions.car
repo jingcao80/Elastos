@@ -146,4 +146,11 @@ module
     //==========================================================================
     // Elastos Droid preference exception codes (Family: 0x7A - EA)
     const E_ABSTRACT_METHOD_ERROR = 0x7A010000;
+
+    //==========================================================================
+    // Elastos Droid renderscript exception codes (Family: 0x7B)
+    const E_RS_ILLEGAL_ARGUMENT_EXCEPTION = 0x7B010000;
+    const E_RS_INVALID_STATE_EXCEPTION    = 0x7B020000;
+    const E_RS_RUNTIME_EXCEPTION          = 0x7B030000;
+    const E_RS_DRIVER_EXCEPTION           = 0x7B040000;
 }
