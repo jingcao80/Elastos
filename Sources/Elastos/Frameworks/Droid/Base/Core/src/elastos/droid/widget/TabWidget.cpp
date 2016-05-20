@@ -371,12 +371,14 @@ ECode TabWidget::IsStripEnabled(
 ECode TabWidget::ChildDrawableStateChanged(
     /* [in] */ IView* child)
 {
-    Int32 count;
-    AutoPtr<IView> v;
-    if (mSelectedTab != -1 && (GetTabCount(&count), count) > 0
-        && child == (GetChildTabViewAt(mSelectedTab, (IView**)&v),  v)) {
-        // To make sure that the bottom strip is redrawn
-        Invalidate();
+    if (mSelectedTab != -1) {
+        Int32 count;
+        AutoPtr<IView> v;
+        if ((GetTabCount(&count), count) > 0
+                && child == (GetChildTabViewAt(mSelectedTab, (IView**)&v),  v)) {
+            // To make sure that the bottom strip is redrawn
+            Invalidate();
+        }
     }
     return LinearLayout::ChildDrawableStateChanged(child);
 }

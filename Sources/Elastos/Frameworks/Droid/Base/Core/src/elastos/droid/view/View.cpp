@@ -13397,12 +13397,9 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     //}
 
     // Set up drawable properties that are view-independent.
-    CRect* boundsObj = (CRect*)bounds.Get();
-    Boolean res;
-    renderNode->SetLeftTopRightBottom(boundsObj->mLeft, boundsObj->mTop,
-            boundsObj->mRight, boundsObj->mBottom, &res);
     Boolean isProjected;
     drawable->IsProjected(&isProjected);
+    Boolean res;
     renderNode->SetProjectBackwards(isProjected, &res);
     renderNode->SetProjectionReceiver(TRUE, &res);
     renderNode->SetClipToBounds(FALSE, &res);

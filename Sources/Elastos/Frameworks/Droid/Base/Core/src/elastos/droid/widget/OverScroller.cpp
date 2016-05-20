@@ -797,8 +797,8 @@ void SplineOverScroller::OnEdgeReached()
 
     if (distance > mOver) {
         // Default deceleration is not sufficient to slow us down before boundary
-         mDeceleration = - sign * velocitySquared / (2.0f * mOver);
-         distance = mOver;
+        mDeceleration = - sign * velocitySquared / (2.0f * mOver);
+        distance = mOver;
     }
 
     mOver = (Int32) distance;

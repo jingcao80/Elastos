@@ -166,12 +166,12 @@ ECode ViewConfiguration::constructor(
             default:
             case HAS_PERMANENT_MENU_KEY_AUTODETECT: {
                 AutoPtr<IIWindowManager> wm = CWindowManagerGlobal::GetWindowManagerService();
-                Boolean hasNavigationBar;
-                if (FAILED(wm->HasNavigationBar(&hasNavigationBar))) {
+                Boolean hasPermanentMenuKey;
+                if (FAILED(wm->HasPermanentMenuKey(&hasPermanentMenuKey))) {
                     sHasPermanentMenuKey = FALSE;
                 }
                 else {
-                    sHasPermanentMenuKey = !hasNavigationBar;
+                    sHasPermanentMenuKey = hasPermanentMenuKey;
                     sHasPermanentMenuKeySet = TRUE;
                 }
             }

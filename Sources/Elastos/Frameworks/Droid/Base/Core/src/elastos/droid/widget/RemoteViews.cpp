@@ -3528,8 +3528,7 @@ ECode RemoteViews::Apply(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
-    String str;
-    return Apply(ctx, parent, handler, str, view);
+    return Apply(ctx, parent, handler, String(NULL), view);
 }
 
 /** @hide */

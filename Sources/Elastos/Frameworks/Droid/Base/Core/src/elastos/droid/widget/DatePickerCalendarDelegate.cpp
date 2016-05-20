@@ -217,8 +217,8 @@ ECode DatePickerCalendarDelegate::constructor(
     mTempDate = GetCalendarForLocale(mMaxDate, locale);
     mCurrentDate = GetCalendarForLocale(mCurrentDate, locale);
 
-    mMinDate->Set(DEFAULT_START_YEAR, 1, 1);
-    mMaxDate->Set(DEFAULT_END_YEAR, 12, 31);
+    mMinDate->Set(DEFAULT_START_YEAR, ICalendar::JANUARY, 1);
+    mMaxDate->Set(DEFAULT_END_YEAR, ICalendar::DECEMBER, 31);
 
     AutoPtr<IResources> res;
     IView::Probe(mDelegator)->GetResources((IResources**)&res);
