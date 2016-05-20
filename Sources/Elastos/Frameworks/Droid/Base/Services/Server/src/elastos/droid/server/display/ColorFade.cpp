@@ -24,7 +24,9 @@ using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayManagerInternal;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayTransactionListener;
 using Elastos::Droid::Opengl::IEGL14;
+using Elastos::Droid::Opengl::CEGL14;
 using Elastos::Droid::Opengl::IGLES20;
+using Elastos::Droid::Opengl::CGLES20;
 using Elastos::Droid::Opengl::IGLES11Ext;
 using Elastos::Droid::Utility::FloatMath;
 using Elastos::Droid::View::IDisplayInfo;
@@ -132,6 +134,8 @@ const String ColorFade::TAG("ColorFade");
 const Boolean ColorFade::DEBUG = FALSE;
 const Int32 ColorFade::COLOR_FADE_LAYER = 0x40000001;
 const Int32 ColorFade::DEJANK_FRAMES = 3;
+
+CAR_INTERFACE_IMPL(ColorFade, Object, IColorFade);
 
 ColorFade::ColorFade(
     /* [in] */ Int32 displayId)
@@ -262,7 +266,7 @@ Int32 ColorFade::LoadShader(
     ReadFile(context, resourceId, &source);
 
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     Int32 shader;
     gles20->GlCreateShader(type, &shader);
 
@@ -289,7 +293,7 @@ Boolean ColorFade::InitGLShaders(
     /* [in] */ IContext* context)
 {
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     Int32 vshader = LoadShader(context, R::raw::color_fade_vert,
             IGLES20::_GL_VERTEX_SHADER);
     Int32 fshader = LoadShader(context, R::raw::color_fade_frag,
@@ -328,7 +332,7 @@ Boolean ColorFade::InitGLShaders(
 void ColorFade::DestroyGLShaders()
 {
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     gles20->GlDeleteProgram(mProgram);
     CheckGlErrors(String("glDeleteProgram"));
 }
@@ -339,7 +343,7 @@ Boolean ColorFade::InitGLBuffers()
     SetQuad(mVertexBuffer, 0, 0, mDisplayWidth, mDisplayHeight);
 
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
 
     // Setup GL Textures
     gles20->GlBindTexture(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, (*mTexNames)[0]);
@@ -378,7 +382,7 @@ Boolean ColorFade::InitGLBuffers()
 void ColorFade::DestroyGLBuffers()
 {
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     gles20->GlDeleteBuffers(2, mGLBuffers, 0);
     CheckGlErrors(String("glDeleteBuffers"));
 }
@@ -422,7 +426,7 @@ void ColorFade::Dismiss()
         DestroySurface();
 
         AutoPtr<IGLES20> gles20;
-        // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+        CGLES20::AcquireSingleton((IGLES20**)&gles20);
         gles20->GlFlush();
         mPrepared = FALSE;
     }
@@ -448,7 +452,7 @@ Boolean ColorFade::Draw(
     }
     // try {
         AutoPtr<IGLES20> gles20;
-        // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+        CGLES20::AcquireSingleton((IGLES20**)&gles20);
         // Clear frame to solid black.
         gles20->GlClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         gles20->GlClear(IGLES20::_GL_COLOR_BUFFER_BIT);
@@ -467,7 +471,7 @@ Boolean ColorFade::Draw(
         }
 
         AutoPtr<IEGL14> egl14;
-        // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+        CEGL14::AcquireSingleton((IEGL14**)&egl14);
         Boolean bval;
         egl14->EglSwapBuffers(mEglDisplay, mEglSurface, &bval);
     // } finally {
@@ -488,7 +492,7 @@ void ColorFade::DrawFaded(
     }
 
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
 
     // Use shaders
     gles20->GlUseProgram(mProgram);
@@ -554,7 +558,7 @@ Boolean ColorFade::CaptureScreenshotTextureAndSetViewport()
     }
     // try {
         AutoPtr<IGLES20> gles20;
-        // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+        CGLES20::AcquireSingleton((IGLES20**)&gles20);
         if (!mTexNamesGenerated) {
             gles20->GlGenTextures(1, mTexNames, 0);
             if (CheckGlErrors(String("glGenTextures"))) {
@@ -607,7 +611,7 @@ void ColorFade::DestroyScreenshotTexture()
     if (mTexNamesGenerated) {
         mTexNamesGenerated = FALSE;
         AutoPtr<IGLES20> gles20;
-        // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+        CGLES20::AcquireSingleton((IGLES20**)&gles20);
         gles20->GlDeleteTextures(1, mTexNames, 0);
         CheckGlErrors(String("glDeleteTextures"));
     }
@@ -616,12 +620,12 @@ void ColorFade::DestroyScreenshotTexture()
 Boolean ColorFade::CreateEglContext()
 {
     AutoPtr<IEGL14> egl14;
-    // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
     Boolean bval;
 
     if (mEglDisplay == NULL) {
         egl14->EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEglDisplay);
-        if (mEglDisplay == NULL /* CEGL14::EGL_NO_DISPLAY */) {
+        if (mEglDisplay == NULL/*CEGL14::EGL_NO_DISPLAY*/ ) {
             LogEglError(String("eglGetDisplay"));
             return FALSE;
         }
@@ -729,7 +733,7 @@ Boolean ColorFade::CreateEglSurface()
 
         // turn our SurfaceControl into a Surface
         AutoPtr<IEGL14> egl14;
-        // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+        CEGL14::AcquireSingleton((IEGL14**)&egl14);
         egl14->EglCreateWindowSurface(mEglDisplay, mEglConfig, mSurface,
             eglSurfaceAttribList, 0, (IEGLSurface**)&mEglSurface);
         if (mEglSurface == NULL) {
@@ -744,7 +748,7 @@ void ColorFade::DestroyEglSurface()
 {
     if (mEglSurface != NULL) {
         AutoPtr<IEGL14> egl14;
-        // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+        CEGL14::AcquireSingleton((IEGL14**)&egl14);
         Boolean bval;
         egl14->EglDestroySurface(mEglDisplay, mEglSurface, &bval);
         if (!bval) {
@@ -801,7 +805,7 @@ Boolean ColorFade::AttachEglContext()
         return FALSE;
     }
     AutoPtr<IEGL14> egl14;
-    // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
     Boolean bval;
     egl14->EglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext, &bval);
     if (!bval) {
@@ -816,7 +820,7 @@ void ColorFade::DetachEglContext()
     if (mEglDisplay != NULL) {
         Boolean bval;
         AutoPtr<IEGL14> egl14;
-        // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+        CEGL14::AcquireSingleton((IEGL14**)&egl14);
         egl14->EglMakeCurrent(mEglDisplay,
             NULL/*CEGL14::EGL_NO_SURFACE*/,
             NULL/*CEGL14::EGL_NO_SURFACE*/,
@@ -846,7 +850,7 @@ void ColorFade::LogEglError(
     /* [in] */ const String& func)
 {
     AutoPtr<IEGL14> egl14;
-    // CEGL14::AcquireSingleton((IEGL14**)&egl14);
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
     Int32 error;
     egl14->EglGetError(&error);
     Slogger::E(TAG, "%s failed: error %d", func.string(), error);
@@ -864,7 +868,7 @@ Boolean ColorFade::CheckGlErrors(
 {
     Boolean hadError = FALSE;
     AutoPtr<IGLES20> gles20;
-    // CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
 
     Int32 error;
     gles20->GlGetError(&error);

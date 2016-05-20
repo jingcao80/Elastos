@@ -35,8 +35,10 @@ module
 
     merge("display/AutomaticBrightnessController.car");
     merge("display/WifiDisplayController.car");
+    merge("display/ColorFade.car");
     merge("display/DisplayAdapter.car");
     merge("display/DisplayBlanker.car");
+    merge("display/DisplayPowerState.car");
     merge("display/OverlayDisplayWindow.car");
     merge("display/RampAnimator.car");
 
@@ -61,6 +63,7 @@ module
     merge("input/InputWindowHandle.car");
 
     merge("lights/LightsManager.car");
+    merge("lights/Light.car");
 
     merge("location/LocationProviderInterface.car");
     merge("location/FlpHardwareProvider.car");
@@ -113,9 +116,13 @@ module
     // merge("DeviceStorageMonitorService.car");
     // merge("search/Searchables.car");
 
+    interface Elastos.Droid.Server.Display.IColorFade;
+    interface Elastos.Droid.Server.Display.IDisplayBlanker;
+    interface Elastos.Droid.Server.Display.IDisplayPowerState;
     interface Elastos.Droid.Server.ISystemService;
     interface Elastos.Droid.Server.IWatchdogMonitor;
     interface Elastos.Droid.Server.Location.IFlpHardwareProvider;
+    interface Elastos.Droid.Server.Lights.ILight;
     interface Elastos.Droid.Server.Wallpaper.IWallpaperConnection;
     interface Elastos.Droid.Server.Wallpaper.IWallpaperData;
     interface Elastos.Droid.Server.Wallpaper.IWallpaperManagerService;
@@ -1544,7 +1551,6 @@ module
     } // namepsace Droid
     } // namespace Elastos
 
-
     namespace Elastos {
     namespace Droid {
     namespace Server {
@@ -1591,6 +1597,15 @@ module
 
         interface IIMediaProjectionCallback;
         interface IBinder;
+    }
+
+    class CDisplayPowerState {
+        constructor(
+            [in] IDisplayBlanker* blanker,
+            [in] ILight* backlight,
+            [in] IColorFade* electronBeam);
+
+        interface IDisplayPowerState;
     }
 
     } // namespace Display

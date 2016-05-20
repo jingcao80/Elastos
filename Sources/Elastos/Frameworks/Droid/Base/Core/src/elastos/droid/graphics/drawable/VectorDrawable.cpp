@@ -9,6 +9,9 @@
 #include "elastos/droid/graphics/CPath.h"
 #include "elastos/droid/graphics/CPathMeasure.h"
 #include "elastos/droid/graphics/Color.h"
+#include "elastos/droid/graphics/drawable/CVGroup.h"
+#include "elastos/droid/graphics/drawable/CVFullPath.h"
+#include "elastos/droid/graphics/drawable/CVClipPath.h"
 #include "elastos/droid/content/res/CTypedArray.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/utility/CArrayMap.h"
@@ -247,7 +250,9 @@ VectorDrawable::VPathRenderer::VPathRenderer()
 {
     CMatrix::New((IMatrix**)&mFinalPathMatrix);
     CArrayMap::New((IArrayMap**)&mVGTargetsMap);
-    mRootGroup = new VGroup();
+    AutoPtr<IVGroup> ivgroup;
+    CVGroup::New((IVGroup**)&ivgroup);
+    mRootGroup = (VGroup*)ivgroup.Get();
     CPath::New((IPath**)&mPath);
     CPath::New((IPath**)&mRenderPath);
 }
@@ -286,7 +291,9 @@ VectorDrawable::VPathRenderer::VPathRenderer(
     CMatrix::New((IMatrix**)&mFinalPathMatrix);
     CArrayMap::New((IArrayMap**)&mVGTargetsMap);
 
-    mRootGroup = new VGroup(copy->mRootGroup, mVGTargetsMap);
+    AutoPtr<IVGroup> ivgroup;
+    CVGroup::New(copy->mRootGroup, mVGTargetsMap, (IVGroup**)&ivgroup);
+    mRootGroup = (VGroup*)ivgroup.Get();
     CPath::New(copy->mPath, (IPath**)&mPath);
     CPath::New(copy->mRenderPath, (IPath**)&mRenderPath);
     mBaseWidth = copy->mBaseWidth;
@@ -509,13 +516,14 @@ void VectorDrawable::VPathRenderer::DrawPath(
 
 //////////////////////////////////// VGroup ////////////////////////////
 CAR_INTERFACE_IMPL(VectorDrawable::VGroup, Object, IVGroup);
-VectorDrawable::VGroup::VGroup(
-    /* [in] */ VGroup* copy,
+ECode VectorDrawable::VGroup::constructor(
+    /* [in] */ IVGroup* _copy,
     /* [in] */ IArrayMap/*<String, Object>*/* targetsMap)
 {
     CMatrix::New((IMatrix**)&mStackedMatrix);
     CArrayList::New((IArrayList**)&mChildren);
     CMatrix::New((IMatrix**)&mLocalMatrix);
+    VGroup* copy = (VGroup*)_copy;
 
     mRotate = copy->mRotate;
     mPivotX = copy->mPivotX;
@@ -543,14 +551,21 @@ VectorDrawable::VGroup::VGroup(
         children->Get(i, (IInterface**)&copyChild);
         if (IVGroup::Probe(copyChild)) {
             AutoPtr<VGroup> copyGroup = (VGroup*)IVGroup::Probe(copyChild);
-            AutoPtr<VGroup> vg = new VGroup(copyGroup, targetsMap);
-            mChildren->Add((IVGroup*)vg);
+            AutoPtr<IVGroup> ivgroup;
+            CVGroup::New(copyGroup, targetsMap, (IVGroup**)&ivgroup);
+            //AutoPtr<VGroup> vg = (VGroup*)ivgroup.Get();
+            //mChildren->Add((IVGroup*)vg);
+            mChildren->Add(ivgroup);
         } else {
             AutoPtr<VPath> newPath;
             if (IVFullPath::Probe(copyChild)) {
-                newPath = new VFullPath((VFullPath*) IVFullPath::Probe(copyChild));
+                AutoPtr<IVFullPath> ivfp;
+                CVFullPath::New(IVFullPath::Probe(copyChild), (IVFullPath**)&ivfp);
+                newPath = (VFullPath*)ivfp.Get();
             } else if (IVClipPath::Probe(copyChild)) {
-                newPath = new VClipPath((VClipPath*) IVClipPath::Probe(copyChild));
+                AutoPtr<IVClipPath> ivcp;
+                CVClipPath::New(IVClipPath::Probe(copyChild), (IVClipPath**)&ivcp);
+                newPath = (VClipPath*)ivcp.Get();
             } else {
                 // throw new IllegalStateException("Unknown object in the tree!");
                 // return E_ILLEGAL_STATE_EXCEPTION;
@@ -564,21 +579,23 @@ VectorDrawable::VGroup::VGroup(
             }
         }
     }
+    return NOERROR;
 }
 
-VectorDrawable::VGroup::VGroup()
-    : mRotate(0)
-    , mPivotX(0)
-    , mPivotY(0)
-    , mScaleX(1)
-    , mScaleY(1)
-    , mTranslateX(0)
-    , mTranslateY(0)
-    , mChangingConfigurations(0)
+ECode VectorDrawable::VGroup::constructor()
 {
+    mRotate = 0;
+    mPivotX = 0;
+    mPivotY = 0;
+    mScaleX = 1;
+    mScaleY = 1;
+    mTranslateX = 0;
+    mTranslateY = 0;
+    mChangingConfigurations = 0;
     CMatrix::New((IMatrix**)&mStackedMatrix);
     CArrayList::New((IArrayList**)&mChildren);
     CMatrix::New((IMatrix**)&mLocalMatrix);
+    return NOERROR;
 }
 
 String VectorDrawable::VGroup::GetGroupName()
@@ -671,13 +688,14 @@ Float VectorDrawable::VGroup::GetRotation()
     return mRotate;
 }
 
-void VectorDrawable::VGroup::SetRotation(
+ECode VectorDrawable::VGroup::SetRotation(
     /* [in] */ Float rotation)
 {
     if (rotation != mRotate) {
         mRotate = rotation;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 Float VectorDrawable::VGroup::GetPivotX()
@@ -685,13 +703,14 @@ Float VectorDrawable::VGroup::GetPivotX()
     return mPivotX;
 }
 
-void VectorDrawable::VGroup::SetPivotX(
+ECode VectorDrawable::VGroup::SetPivotX(
     /* [in] */ Float pivotX)
 {
     if (pivotX != mPivotX) {
         mPivotX = pivotX;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 Float VectorDrawable::VGroup::GetPivotY()
@@ -699,13 +718,14 @@ Float VectorDrawable::VGroup::GetPivotY()
     return mPivotY;
 }
 
-void VectorDrawable::VGroup::SetPivotY(
+ECode VectorDrawable::VGroup::SetPivotY(
     /* [in] */ Float pivotY)
 {
     if (pivotY != mPivotY) {
         mPivotY = pivotY;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 Float VectorDrawable::VGroup::GetScaleX()
@@ -713,13 +733,14 @@ Float VectorDrawable::VGroup::GetScaleX()
     return mScaleX;
 }
 
-void VectorDrawable::VGroup::SetScaleX(
+ECode VectorDrawable::VGroup::SetScaleX(
     /* [in] */ Float scaleX)
 {
     if (scaleX != mScaleX) {
         mScaleX = scaleX;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 Float VectorDrawable::VGroup::GetScaleY()
@@ -727,13 +748,14 @@ Float VectorDrawable::VGroup::GetScaleY()
     return mScaleY;
 }
 
-void VectorDrawable::VGroup::SetScaleY(
+ECode VectorDrawable::VGroup::SetScaleY(
     /* [in] */ Float scaleY)
 {
     if (scaleY != mScaleY) {
         mScaleY = scaleY;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 Float VectorDrawable::VGroup::GetTranslateX()
@@ -741,13 +763,14 @@ Float VectorDrawable::VGroup::GetTranslateX()
     return mTranslateX;
 }
 
-void VectorDrawable::VGroup::SetTranslateX(
+ECode VectorDrawable::VGroup::SetTranslateX(
     /* [in] */ Float translateX)
 {
     if (translateX != mTranslateX) {
         mTranslateX = translateX;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 Float VectorDrawable::VGroup::GetTranslateY()
@@ -755,13 +778,14 @@ Float VectorDrawable::VGroup::GetTranslateY()
     return mTranslateY;
 }
 
-void VectorDrawable::VGroup::SetTranslateY(
+ECode VectorDrawable::VGroup::SetTranslateY(
     /* [in] */ Float translateY)
 {
     if (translateY != mTranslateY) {
         mTranslateY = translateY;
         UpdateLocalMatrix();
     }
+    return NOERROR;
 }
 
 ////////////////////////////// VPath /////////////////////
@@ -774,11 +798,18 @@ VectorDrawable::VPath::VPath()
 
 VectorDrawable::VPath::VPath(
     /* [in] */ VPath* copy)
-    : mChangingConfigurations(0)
 {
+    constructor(copy);
+}
+
+ECode VectorDrawable::VPath::constructor(
+    /* [in] */ VPath* copy)
+{
+    mChangingConfigurations = 0;
     mPathName = copy->mPathName;
     mChangingConfigurations = copy->mChangingConfigurations;
     mNodes = PathParser::DeepCopyNodes(copy->mNodes);
+    return NOERROR;
 }
 
 void VectorDrawable::VPath::ToPath(
@@ -828,15 +859,17 @@ void VectorDrawable::VPath::SetPathData(
 
 ///////////////////////////// VClipPath /////////////////////
 CAR_INTERFACE_IMPL(VectorDrawable::VClipPath, VPath, IVClipPath);
-VectorDrawable::VClipPath::VClipPath()
+ECode VectorDrawable::VClipPath::constructor()
 {
     // Empty constructor.
+    return NOERROR;
 }
 
-VectorDrawable::VClipPath::VClipPath(
-    /* [in] */ VClipPath* copy)
-    : VPath(copy)
+ECode VectorDrawable::VClipPath::constructor(
+    /* [in] */ IVClipPath* copy)
 {
+    VPath::constructor((VClipPath*)copy);
+    return NOERROR;
 }
 
 void VectorDrawable::VClipPath::Inflate(
@@ -881,27 +914,28 @@ Boolean VectorDrawable::VClipPath::IsClipPath()
 
 ///////////////////////////// VFullPath /////////////////
 CAR_INTERFACE_IMPL(VectorDrawable::VFullPath, VPath, IVFullPath);
-VectorDrawable::VFullPath::VFullPath()
-    : mStrokeColor(IColor::TRANSPARENT)
-    , mStrokeWidth(0)
-    , mFillColor(IColor::TRANSPARENT)
-    , mStrokeAlpha(1.0f)
-    , mFillRule(0)
-    , mFillAlpha(1.0f)
-    , mTrimPathStart(0)
-    , mTrimPathEnd(1)
-    , mTrimPathOffset(0)
-    , mStrokeLineCap(PaintCap_BUTT)
-    , mStrokeLineJoin(PaintJoin_MITER)
-    , mStrokeMiterlimit(4)
+ECode VectorDrawable::VFullPath::constructor()
 {
-    // Empty constructor.
+    mStrokeColor = IColor::TRANSPARENT;
+    mStrokeWidth = 0;
+    mFillColor = IColor::TRANSPARENT;
+    mStrokeAlpha = 1.0f;
+    mFillRule = 0;
+    mFillAlpha = 1.0f;
+    mTrimPathStart = 0;
+    mTrimPathEnd = 1;
+    mTrimPathOffset = 0;
+    mStrokeLineCap = PaintCap_BUTT;
+    mStrokeLineJoin = PaintJoin_MITER;
+    mStrokeMiterlimit = 4;
+    return NOERROR;
 }
 
-VectorDrawable::VFullPath::VFullPath(
-    /* [in] */ VFullPath* copy)
-    : VPath(copy)
+ECode VectorDrawable::VFullPath::constructor(
+    /* [in] */ IVFullPath* _copy)
 {
+    VFullPath* copy = (VFullPath*)_copy;
+    VPath::constructor(copy);
     mThemeAttrs = copy->mThemeAttrs;
 
     mStrokeColor = copy->mStrokeColor;
@@ -917,6 +951,7 @@ VectorDrawable::VFullPath::VFullPath(
     mStrokeLineCap = copy->mStrokeLineCap;
     mStrokeLineJoin = copy->mStrokeLineJoin;
     mStrokeMiterlimit = copy->mStrokeMiterlimit;
+    return NOERROR;
 }
 
 PaintCap VectorDrawable::VFullPath::GetStrokeLineCap(
@@ -1031,10 +1066,11 @@ Int32 VectorDrawable::VFullPath::GetStrokeColor()
     return mStrokeColor;
 }
 
-void VectorDrawable::VFullPath::SetStrokeColor(
+ECode VectorDrawable::VFullPath::SetStrokeColor(
     /* [in] */ Int32 strokeColor)
 {
     mStrokeColor = strokeColor;
+    return NOERROR;
 }
 
 Float VectorDrawable::VFullPath::GetStrokeWidth()
@@ -1042,10 +1078,11 @@ Float VectorDrawable::VFullPath::GetStrokeWidth()
     return mStrokeWidth;
 }
 
-void VectorDrawable::VFullPath::SetStrokeWidth(
+ECode VectorDrawable::VFullPath::SetStrokeWidth(
     /* [in] */ Float strokeWidth)
 {
     mStrokeWidth = strokeWidth;
+    return NOERROR;
 }
 
 Float VectorDrawable::VFullPath::GetStrokeAlpha()
@@ -1053,10 +1090,11 @@ Float VectorDrawable::VFullPath::GetStrokeAlpha()
     return mStrokeAlpha;
 }
 
-void VectorDrawable::VFullPath::SetStrokeAlpha(
+ECode VectorDrawable::VFullPath::SetStrokeAlpha(
     /* [in] */ Float strokeAlpha)
 {
     mStrokeAlpha = strokeAlpha;
+    return NOERROR;
 }
 
 Int32 VectorDrawable::VFullPath::GetFillColor()
@@ -1064,10 +1102,11 @@ Int32 VectorDrawable::VFullPath::GetFillColor()
     return mFillColor;
 }
 
-void VectorDrawable::VFullPath::SetFillColor(
+ECode VectorDrawable::VFullPath::SetFillColor(
     /* [in] */ Int32 fillColor)
 {
     mFillColor = fillColor;
+    return NOERROR;
 }
 
 Float VectorDrawable::VFullPath::GetFillAlpha()
@@ -1075,10 +1114,11 @@ Float VectorDrawable::VFullPath::GetFillAlpha()
     return mFillAlpha;
 }
 
-void VectorDrawable::VFullPath::SetFillAlpha(
+ECode VectorDrawable::VFullPath::SetFillAlpha(
     /* [in] */ Float fillAlpha)
 {
     mFillAlpha = fillAlpha;
+    return NOERROR;
 }
 
 Float VectorDrawable::VFullPath::GetTrimPathStart()
@@ -1086,10 +1126,11 @@ Float VectorDrawable::VFullPath::GetTrimPathStart()
     return mTrimPathStart;
 }
 
-void VectorDrawable::VFullPath::SetTrimPathStart(
+ECode VectorDrawable::VFullPath::SetTrimPathStart(
     /* [in] */ Float trimPathStart)
 {
     mTrimPathStart = trimPathStart;
+    return NOERROR;
 }
 
 Float VectorDrawable::VFullPath::GetTrimPathEnd()
@@ -1097,10 +1138,11 @@ Float VectorDrawable::VFullPath::GetTrimPathEnd()
     return mTrimPathEnd;
 }
 
-void VectorDrawable::VFullPath::SetTrimPathEnd(
+ECode VectorDrawable::VFullPath::SetTrimPathEnd(
     /* [in] */ Float trimPathEnd)
 {
     mTrimPathEnd = trimPathEnd;
+    return NOERROR;
 }
 
 Float VectorDrawable::VFullPath::GetTrimPathOffset()
@@ -1108,10 +1150,11 @@ Float VectorDrawable::VFullPath::GetTrimPathOffset()
     return mTrimPathOffset;
 }
 
-void VectorDrawable::VFullPath::SetTrimPathOffset(
+ECode VectorDrawable::VFullPath::SetTrimPathOffset(
     /* [in] */ Float trimPathOffset)
 {
     mTrimPathOffset = trimPathOffset;
+    return NOERROR;
 }
 
 ////////////////////////////////// VectorDrawable ///////////////
@@ -1556,7 +1599,9 @@ ECode VectorDrawable::InflateInternal(
             AutoPtr<VGroup> currentGroup = (VGroup*)IVGroup::Probe(currentGroupObj);
 
             if (SHAPE_PATH.Equals(tagName)) {
-                AutoPtr<VFullPath> path = new VFullPath();
+                AutoPtr<IVFullPath> ivfp;
+                CVFullPath::New((IVFullPath**)&ivfp);
+                AutoPtr<VFullPath> path = (VFullPath*)ivfp.Get();
                 path->Inflate(res, attrs, theme);
                 currentGroup->mChildren->Add((IVFullPath*)path);
                 if (path->GetPathName() != NULL) {
@@ -1567,7 +1612,9 @@ ECode VectorDrawable::InflateInternal(
                 noPathTag = FALSE;
                 state->mChangingConfigurations |= path->mChangingConfigurations;
             } else if (SHAPE_CLIP_PATH.Equals(tagName)) {
-                AutoPtr<VClipPath> path = new VClipPath();
+                AutoPtr<IVClipPath> ivcp;
+                CVClipPath::New((IVClipPath**)&ivcp);
+                AutoPtr<VClipPath> path = (VClipPath*)ivcp.Get();
                 path->Inflate(res, attrs, theme);
                 currentGroup->mChildren->Add((IVClipPath*)path);
                 if (path->GetPathName() != NULL) {
@@ -1577,7 +1624,9 @@ ECode VectorDrawable::InflateInternal(
                 }
                 state->mChangingConfigurations |= path->mChangingConfigurations;
             } else if (SHAPE_GROUP.Equals(tagName)) {
-                AutoPtr<VGroup> newChildGroup = new VGroup();
+                AutoPtr<IVGroup> ivgroup;
+                CVGroup::New((IVGroup**)&ivgroup);
+                AutoPtr<VGroup> newChildGroup = (VGroup*)ivgroup.Get();
                 newChildGroup->Inflate(res, attrs, theme);
                 currentGroup->mChildren->Add((IVGroup*)newChildGroup);
                 groupStack->Push((IVGroup*)newChildGroup);

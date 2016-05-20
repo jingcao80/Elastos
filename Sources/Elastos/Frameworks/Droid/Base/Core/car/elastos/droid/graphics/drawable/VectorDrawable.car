@@ -162,15 +162,113 @@ module
             [out] IVectorDrawable** drawable);
     }
 
-    interface IVGroup {}
+    interface IVGroup {
 
-    interface IVPath {}
+        GetRotation(
+            [out] Float* rotation);
+
+        SetRotation(
+            [in] Float rotation);
+
+        GetPivotX(
+            [out] Float* pivotx);
+
+        SetPivotX(
+            [in] Float pivotx);
+
+        GetPivotY(
+            [out] Float* pivoty);
+
+        SetPivotY(
+            [in] Float pivoty);
+
+        GetScaleX(
+            [out] Float* scalex);
+
+        SetScaleX(
+            [in] Float scalex);
+
+        GetScaleY(
+            [out] Float* scaley);
+
+        SetScaleY(
+            [in] Float scaley);
+
+        GetTranslateX(
+            [out] Float* translatex);
+
+        SetTranslateX(
+            [in] Float translatex);
+
+        GetTranslateY(
+            [out] Float* translatey);
+
+        SetTranslateY(
+            [in] Float translatey);
+    }
+
+    interface IVPath {
+        //GetPathData(
+        //    [out] ArrayOf<IInterface*>** pathData);
+
+        //SetPathData(
+        //    [in] ArrayOf<IInterface*>* pathData);
+    }
 
     /**
     * @Involve
     * interface IVPath
     */
-    interface IVFullPath {}
+    interface IVFullPath {
+
+        GetStrokeColor(
+            [out] Int32* strokeColor);
+
+        SetStrokeColor(
+            [in] Int32 strokeColor);
+
+        GetStrokeWidth(
+            [out] Float* strokeWidth);
+
+        SetStrokeWidth(
+            [in] Float strokeWidth);
+
+        GetStrokeAlpha(
+             [out] Float* strokeAlpha);
+
+        SetStrokeAlpha(
+            [in] Float strokeAlpha);
+
+        GetFillColor(
+            [out] Int32* fillColor);
+
+        SetFillColor(
+            [in] Int32 fillColor);
+
+        GetFillAlpha(
+            [out] Float* fillAlpha);
+
+        SetFillAlpha(
+            [in] Float fillAlpha);
+
+        GetTrimPathStart(
+            [out] Float* trimPathStart);
+
+        SetTrimPathStart(
+            [in] Float trimPathStart);
+
+        GetTrimPathEnd(
+            [out] Float* trimPathEnd);
+
+        SetTrimPathEnd(
+            [in] Float trimPathEnd);
+
+        GetTrimPathOffset(
+            [out] Float* trimPathOffset);
+
+        SetTrimPathOffset(
+            [in] Float trimPathOffset);
+    }
 
     /**
     * @Involve

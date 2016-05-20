@@ -380,6 +380,7 @@ void AnimatedVectorDrawable::SetupAnimatorsForTarget(
     /* [in] */ IAnimator* animator)
 {
     AutoPtr<IInterface> target = ((VectorDrawable*)mAnimatedVectorState->mVectorDrawable.Get())->GetTargetByName(name);
+    //leliang the target must be CAR class
     animator->SetTarget(target);
     if (mAnimatedVectorState->mAnimators == NULL) {
         CArrayList::New((IArrayList**)&mAnimatedVectorState->mAnimators);

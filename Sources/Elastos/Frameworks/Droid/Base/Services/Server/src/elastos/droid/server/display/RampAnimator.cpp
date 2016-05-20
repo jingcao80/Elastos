@@ -87,6 +87,7 @@ RampAnimator::RampAnimator(
     , mLastFrameTimeNanos(0)
     , mFirstTime(TRUE)
 {
+    mAnimationCallback = new MyRunnable(this);
     mObject = object;
     mProperty = property;
     AutoPtr<IChoreographerHelper> helper;

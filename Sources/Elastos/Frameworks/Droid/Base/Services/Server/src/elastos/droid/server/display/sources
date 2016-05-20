@@ -11,6 +11,7 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 SOURCES = display.cpp
 SOURCES += AutomaticBrightnessController.cpp
 SOURCES += CDisplayManagerService.cpp
+SOURCES += CDisplayPowerState.cpp
 SOURCES += ColorFade.cpp
 SOURCES += DisplayAdapter.cpp
 SOURCES += DisplayDevice.cpp

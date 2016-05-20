@@ -3,6 +3,7 @@
 #include <Elastos.Droid.Nfc.h>
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Widget.h>
+#include <Elastos.Droid.Bluetooth.h>
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/power/CMountShutdownObserver.h"
 #include "elastos/droid/server/power/PowerManagerService.h"
@@ -19,8 +20,8 @@ using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::IProgressDialog;
 using Elastos::Droid::App::CProgressDialog;
-// using Elastos::Droid::Bluetooth::IIBluetoothManager;
-// using Elastos::Droid::Bluetooth::IBluetoothAdapter;
+using Elastos::Droid::Bluetooth::IIBluetoothManager;
+using Elastos::Droid::Bluetooth::IBluetoothAdapter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::CIntent;
@@ -189,7 +190,7 @@ ECode ShutdownThread::DialogInterfaceOnClickListener::OnClick(
     /* [in] */ Int32 which)
 {
     if (mAdvancedReboot) {
-        Boolean softReboot = FALSE;
+        //Boolean softReboot = FALSE;
         AutoPtr<IListView> reasonsList;
         IAlertDialog::Probe(dialog)->GetListView((IListView**)&reasonsList);
         Int32 selected;
@@ -248,9 +249,9 @@ ShutdownThread::ShutdownRadiosThread::ShutdownRadiosThread(
 
 ECode ShutdownThread::ShutdownRadiosThread::Run()
 {
-    Boolean nfcOff;
-    Boolean bluetoothOff;
-    Boolean radioOff;
+    Boolean nfcOff = TRUE;
+    Boolean bluetoothOff = TRUE;
+    Boolean radioOff = TRUE;
 
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
@@ -262,18 +263,17 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     serviceManager->CheckService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<IITelephony> phone = IITelephony::Probe(obj);
 
-    // TODO
-    // obj = NULL;
-    // serviceManager->CheckService(IBluetoothAdapter::BLUETOOTH_MANAGER_SERVICE, (IInterface**)&obj);
-    // AutoPtr<IIBluetoothManager> bluetooth = IIBluetoothManager::Probe(obj);
+    obj = NULL;
+    serviceManager->CheckService(IBluetoothAdapter::BLUETOOTH_MANAGER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IIBluetoothManager> bluetooth = IIBluetoothManager::Probe(obj);
 
     Boolean res;
+    ECode ec;
 
     // try {
-    nfcOff = TRUE;
     if (nfc != NULL) {
         Int32 state;
-        ECode ec = nfc->GetState(&state);
+        ec = nfc->GetState(&state);
         if (FAILED(ec)) {
             Logger::E(TAG, "RemoteException during NFC shutdown");
             nfcOff = TRUE;
@@ -289,39 +289,43 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
 
     Boolean isEnabled;
     // // try {
-    // ec = bluetooth->IsEnabled(&isEnabled);
-    // if (FAILED(ec)) {
-    //     Logger::E(TAG, "RemoteException during bluetooth shutdown");
-    //     bluetoothOff = TRUE;
-    // }
-    // else {
-    //     bluetoothOff = bluetooth == NULL || !isEnabled;
-    //     if (!bluetoothOff) {
-    //         Logger::W(TAG, "Disabling Bluetooth...");
-    //         if (FAILED(bluetooth->Disable(FALSE, &res))) {
-    //             Logger::E(TAG, "RemoteException during bluetooth shutdown");
-    //             bluetoothOff = TRUE;
-    //         }  // disable but don't persist new state
-    //     }
-    // }
+    if (bluetooth != NULL) {
+        ec = bluetooth->IsEnabled(&isEnabled);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "RemoteException during bluetooth shutdown");
+            bluetoothOff = TRUE;
+        }
+        else {
+            bluetoothOff = !isEnabled;
+            if (!bluetoothOff) {
+                Logger::W(TAG, "Disabling Bluetooth...");
+                if (FAILED(bluetooth->Disable(FALSE, &res))) {
+                    Logger::E(TAG, "RemoteException during bluetooth shutdown");
+                    bluetoothOff = TRUE;
+                }  // disable but don't persist new state
+            }
+        }
+    }
     // // } catch (RemoteException ex) {
     // //     Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
     // //     bluetoothOff = true;
     // // }
 
     // try {
-    ECode ec = phone->NeedMobileRadioShutdown(&isEnabled);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "RemoteException during radio shutdown");
-        radioOff = TRUE;
-    }
-    else {
-        radioOff = phone == NULL || !isEnabled;
-        if (!radioOff) {
-            Logger::W(TAG, "Turning off cellular radios...");
-            if (FAILED(phone->ShutdownMobileRadios())) {
-                Logger::E(TAG, "RemoteException during radio shutdown");
-                radioOff = TRUE;
+    if (phone != NULL) {
+        ECode ec = phone->NeedMobileRadioShutdown(&isEnabled);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "RemoteException during radio shutdown");
+            radioOff = TRUE;
+        }
+        else {
+            radioOff = !isEnabled;
+            if (!radioOff) {
+                Logger::W(TAG, "Turning off cellular radios...");
+                if (FAILED(phone->ShutdownMobileRadios())) {
+                    Logger::E(TAG, "RemoteException during radio shutdown");
+                    radioOff = TRUE;
+                }
             }
         }
     }
@@ -537,7 +541,7 @@ void ShutdownThread::ShutdownInner(
         resourceId = Elastos::Droid::R::string::reboot_confirm;
     }
 
-    Logger::D(TAG, "Notifying thread to start shutdown longPressBehavior=%d", longPressBehavior);
+    Logger::D(TAG, "Notifying thread to start shutdown longPressBehavior=%d, confirm:%d", longPressBehavior, confirm);
 
     if (confirm) {
         AutoPtr<CloseDialogReceiver> closer = new CloseDialogReceiver(context);
@@ -836,7 +840,6 @@ ECode ShutdownThread::Run()
 
     obj = NULL;
     serviceManager->GetService(String("package"), (IInterface**)&obj);
-    assert(0 && "TODO");
     AutoPtr<CPackageManagerService> pm = (CPackageManagerService*)IIPackageManager::Probe(obj);
     if (pm != NULL) {
         pm->Shutdown();

@@ -170,6 +170,11 @@
             android:layout_height="wrap_content"
             android:text="WifiEnableLog">
         </Button>
+        <Button android:id="@+id/RebootButton"
+            android:layout_width="450px"
+            android:layout_height="wrap_content"
+            android:text="Reboot">
+        </Button>
     </LinearLayout>
     </LinearLayout>
 <!--

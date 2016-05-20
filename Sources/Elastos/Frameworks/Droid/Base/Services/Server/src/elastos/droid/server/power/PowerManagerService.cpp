@@ -40,7 +40,7 @@ using Elastos::Droid::Hardware::Display::CDisplayPowerRequest;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayPowerCallbacks;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayManagerInternal;
 using Elastos::Droid::Hardware::ISystemSensorManager;
-// using Elastos::Droid::Hardware::CSystemSensorManager;
+using Elastos::Droid::Hardware::CSystemSensorManager;
 using Elastos::Droid::Internal::Os::CBackgroundThreadHelper;
 using Elastos::Droid::Internal::Os::IBackgroundThreadHelper;
 using Elastos::Droid::Os::Binder;
@@ -80,6 +80,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
+using Elastos::Core::Thread;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Logging::Slogger;
@@ -617,12 +618,15 @@ void PowerManagerService::BinderService::RunWithProximityCheck(
         return;
     }
 
+    Boolean hasIncomingCall = FALSE;
     AutoPtr<IInterface> service;
     mHost->mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&service);
     AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(service);
-    Int32 callState;
-    tm->GetCallState(&callState);
-    Boolean hasIncomingCall = callState == ITelephonyManager::CALL_STATE_RINGING;
+    if (tm != NULL) {
+        Int32 callState;
+        tm->GetCallState(&callState);
+        hasIncomingCall = callState == ITelephonyManager::CALL_STATE_RINGING;
+    }
 
     if (mHost->mProximityWakeSupported && mHost->mProximityWakeEnabled && mHost->mProximitySensor != NULL
             && !hasIncomingCall) {
@@ -1758,8 +1762,7 @@ ECode PowerManagerService::SystemReady(
         AutoPtr<ILooper> looper;
         mHandler->GetLooper((ILooper**)&looper);
         AutoPtr<ISystemSensorManager> systemSensorManager;
-        assert(0 && "TODO");
-        // CSystemSensorManager::New(mContext, looper, (ISystemSensorManager**)&systemSensorManager);
+        CSystemSensorManager::New(mContext, looper, (ISystemSensorManager**)&systemSensorManager);
         AutoPtr<ISensorManager> sensorManager = ISensorManager::Probe(systemSensorManager);
 
         // The notifier runs on the system server's main looper so as not to interfere
@@ -2502,7 +2505,7 @@ Boolean PowerManagerService::UserActivityNoUpdateLocked(
     /* [in] */ Int32 uid)
 {
     if (DEBUG_SPEW) {
-        Slogger::D(TAG, "userActivityNoUpdateLocked: eventTime=%lld, event=%d, flags=0x%08x, uid=%d",
+        Slogger::D(TAG, "enter userActivityNoUpdateLocked: eventTime=%lld, event=%d, flags=0x%08x, uid=%d",
                 eventTime, event, flags, uid);
     }
 
@@ -2542,6 +2545,10 @@ Boolean PowerManagerService::UserActivityNoUpdateLocked(
         }
     }
 
+    if (DEBUG_SPEW) {
+        Slogger::D(TAG, "exit userActivityNoUpdateLocked: mLastUserActivityTime=%lld",
+                mLastUserActivityTime);
+    }
     // } finally {
     // Trace.traceEnd(Trace.TRACE_TAG_POWER);
     // }
@@ -2797,10 +2804,10 @@ void PowerManagerService::UpdatePowerStateLocked()
         return;
     }
 
-    assert(0 && "TODO");
-    // if (!Thread.holdsLock(mLock)) {
-    //     Slog.wtf(TAG, "Power manager lock was not held when calling updatePowerStateLocked");
-    // }
+    if (TRUE/*TODO !Thread::HoldsLock(&mLock)*/) {
+        //Slog.wtf(TAG, "Power manager lock was not held when calling updatePowerStateLocked");
+        Slogger::E(TAG, "Power manager lock was not held when calling updatePowerStateLocked");
+    }
 
     // Trace.traceBegin(Trace.TRACE_TAG_POWER, "updatePowerState");
     // try {
@@ -2853,10 +2860,14 @@ void PowerManagerService::UpdateIsPoweredLocked(
         Boolean wasPowered = mIsPowered;
         Int32 oldPlugType = mPlugType;
         Boolean oldLevelLow = mBatteryLevelLow;
-        mBatteryManagerInternal->IsPowered(IBatteryManager::BATTERY_PLUGGED_ANY, &mIsPowered);
-        mBatteryManagerInternal->GetPlugType(&mPlugType);
-        mBatteryManagerInternal->GetBatteryLevel(&mBatteryLevel);
-        mBatteryManagerInternal->GetBatteryLevelLow(&mBatteryLevelLow);
+        if (mBatteryManagerInternal) {
+            mBatteryManagerInternal->IsPowered(IBatteryManager::BATTERY_PLUGGED_ANY, &mIsPowered);
+            mBatteryManagerInternal->GetPlugType(&mPlugType);
+            mBatteryManagerInternal->GetBatteryLevel(&mBatteryLevel);
+            mBatteryManagerInternal->GetBatteryLevelLow(&mBatteryLevelLow);
+        } else {
+            Slogger::E(TAG, "UpdateIsPoweredLocked, mBatteryManagerInternal is %p", mBatteryManagerInternal.Get());
+        }
 
         if (DEBUG_SPEW) {
             Slogger::D(TAG, "updateIsPoweredLocked: wasPowered=%d, mIsPowered=%d, oldPlugType=%d, mBatteryLevel=%d",
@@ -2950,7 +2961,12 @@ void PowerManagerService::UpdateStayOnLocked(
         Boolean wasStayOn = mStayOn;
         if (mStayOnWhilePluggedInSetting != 0
                 && !IsMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
-            mBatteryManagerInternal->IsPowered(mStayOnWhilePluggedInSetting, &mStayOn);
+            if (mBatteryManagerInternal) {
+                mBatteryManagerInternal->IsPowered(mStayOnWhilePluggedInSetting, &mStayOn);
+            }
+            else {
+                Slogger::E(TAG, "UpdateStayOnLocked, mBatteryManagerInternal is %p", mBatteryManagerInternal.Get());
+            }
         }
         else {
             mStayOn = FALSE;
@@ -3047,6 +3063,10 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
             if (mWakefulness == WAKEFULNESS_AWAKE && mLastUserActivityTime >= mLastWakeTime) {
                 nextTimeout = mLastUserActivityTime
                         + screenOffTimeout - screenDimDuration;
+                if (DEBUG) {
+                    Slogger::E(TAG, "line:%d, func:%s, mLastUserActivityTime:%lld, screenOffTimeout:%d, screenDimDuration:%d,nextTimeout:%lld\n"
+                        ,__LINE__, __func__, mLastUserActivityTime, screenOffTimeout, screenDimDuration, nextTimeout);
+                }
                 if (now < nextTimeout) {
                     Int32 buttonBrightness, keyboardBrightness;
                     if (mButtonBrightnessOverrideFromWindowManager >= 0) {
@@ -3098,6 +3118,10 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
                     }
                 }
             }
+            if (DEBUG) {
+                Slogger::E(TAG, "line:%d, func:%s, mUserActivitySummary:%d, sleepTimeout:%d\n",
+                    __LINE__, __func__, mUserActivitySummary, sleepTimeout);
+            }
             if (mUserActivitySummary == 0) {
                 if (sleepTimeout >= 0) {
                     const Int64 anyUserActivity = Elastos::Core::Math::Max(mLastUserActivityTime,
@@ -3127,8 +3151,8 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
         }
 
         if (DEBUG_SPEW) {
-            Slogger::D(TAG, "updateUserActivitySummaryLocked: mWakefulness=%s, mUserActivitySummary=0x%08x, nextTimeout=%s",
-                    WakefulnessToString(mWakefulness).string(), mUserActivitySummary,
+            Slogger::D(TAG, "updateUserActivitySummaryLocked: mWakefulness=%s, mUserActivitySummary=0x%08x, now:%lld, nextTimeout=%s",
+                    WakefulnessToString(mWakefulness).string(), mUserActivitySummary, now,
                     TimeUtils::FormatUptime(nextTimeout).string());
         }
     }
@@ -3676,7 +3700,7 @@ ECode PowerManagerService::ShutdownOrRebootInternal(
     /* [in] */ Boolean wait)
 {
     if (mHandler == NULL || !mSystemReady) {
-        Slogger::E(TAG, "Too early to call shutdown() or reboot()");
+        Slogger::E(TAG, "Too early to call shutdown() or reboot(), mHandler:%p, mSystemReady:%d", mHandler.Get(), mSystemReady);
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Too early to call shutdown() or reboot()");
     }

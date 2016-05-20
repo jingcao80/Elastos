@@ -104,6 +104,7 @@ module
     interface Elastos.Droid.Content.Res.IColorStateList;
     interface Elastos.Droid.Graphics.Drawable.IRipple;
     interface Elastos.Droid.Graphics.Drawable.Shapes.IShape;
+    interface Elastos.Droid.Utility.IArrayMap;
     using interface Elastos.Core.ICloneable;
     using interface Elastos.IO.IInputStream;
 
@@ -1599,6 +1600,34 @@ module
 
         interface IVectorDrawable;
         interface IDrawable;
+    }
+
+    class CVGroup {
+        constructor();
+
+        constructor(
+            [in] IVGroup* copy,
+            [in] IArrayMap* targetsMap);
+
+        interface IVGroup;
+    }
+
+    class CVFullPath {
+        constructor();
+
+        constructor(
+            [in] IVFullPath* copy);
+
+        interface IVFullPath;
+    }
+
+    class CVClipPath {
+        constructor();
+
+        constructor(
+            [in] IVClipPath* copy);
+
+        interface IVClipPath;
     }
 
     class CRipple {

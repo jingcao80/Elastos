@@ -145,6 +145,9 @@ protected:
     CARAPI OnTestPing(
         /* [in] */ const String& targetUrl);
 
+    CARAPI OnTestReboot(
+        /* [in] */ const String& info);
+
 private:
     CARAPI OnActivityResult(
         /* [in] */ Int32 requestCode,
@@ -181,6 +184,7 @@ private:
     AutoPtr<IView> mWifiDisableLogButton;
     AutoPtr<IView> mWifiEnableLogButton;
     AutoPtr<IView> mWifiClearConfigsButton;
+    AutoPtr<IView> mRebootButton;
     AutoPtr<IEditText> mSSIDEditText;
     AutoPtr<IEditText> mPWEditText;
     AutoPtr<IView> mContent;

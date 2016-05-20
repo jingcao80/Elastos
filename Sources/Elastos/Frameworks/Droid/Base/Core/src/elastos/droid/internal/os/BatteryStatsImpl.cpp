@@ -1275,7 +1275,8 @@ BatteryStatsImpl::StopwatchTimer::StopwatchTimer(
     , mAcquireTime(0)
     , mTimeout(0)
     , mInList(FALSE)
-{}
+{
+}
 
 void BatteryStatsImpl::StopwatchTimer::SetTimeout(
     /* [in] */ Int64 timeout)
@@ -1583,12 +1584,13 @@ ECode BatteryStatsImpl::Uid::Wakelock::GetWakeTime(
     VALIDATE_NOT_NULL(timer)
     *timer = NULL;
     switch (type) {
-        case WAKE_TYPE_FULL: *timer = mTimerFull;
-        case WAKE_TYPE_PARTIAL: *timer = mTimerPartial;
-        case WAKE_TYPE_WINDOW: *timer = mTimerWindow;
+        case WAKE_TYPE_FULL: *timer = mTimerFull;break;
+        case WAKE_TYPE_PARTIAL: *timer = mTimerPartial;break;
+        case WAKE_TYPE_WINDOW: *timer = mTimerWindow;break;
         default:
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            Logger::E(TAG, "line:%d, func:%s,type:%d\n", __LINE__, __func__, type);
             // throw new IllegalArgumentException("type = " + type);
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     REFCOUNT_ADD(*timer);
     return NOERROR;
@@ -1609,6 +1611,7 @@ ECode BatteryStatsImpl::Uid::Wakelock::GetStopwatchTimer(
                         &mHost->mHost->mPartialTimers, mHost->mHost->mOnBatteryScreenOffTimeBase);
                 mTimerPartial = t;
             }
+            break;
         case IBatteryStats::WAKE_TYPE_FULL:
             t = mTimerFull;
             if (t == NULL) {
@@ -1616,6 +1619,7 @@ ECode BatteryStatsImpl::Uid::Wakelock::GetStopwatchTimer(
                         &mHost->mHost->mFullTimers, mHost->mHost->mOnBatteryTimeBase);
                 mTimerFull = t;
             }
+            break;
         case IBatteryStats::WAKE_TYPE_WINDOW:
             t = mTimerWindow;
             if (t == NULL) {
@@ -1623,10 +1627,13 @@ ECode BatteryStatsImpl::Uid::Wakelock::GetStopwatchTimer(
                         &mHost->mHost->mWindowTimers, mHost->mHost->mOnBatteryTimeBase);
                 mTimerWindow = t;
             }
+            break;
         default:
+            Logger::E(TAG, "line:%d, func:%s,type:%d\n", __LINE__, __func__, type);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
             // throw new IllegalArgumentException("type=" + type);
     }
+    *timer = t;
     REFCOUNT_ADD(*timer);
     return NOERROR;
 }
@@ -8753,9 +8760,9 @@ ECode BatteryStatsImpl::ComputeUptime(
     VALIDATE_NOT_NULL(value)
     *value = 0;
     switch (which) {
-        case STATS_SINCE_CHARGED: *value = mUptime + (curTime - mUptimeStart);
-        case STATS_CURRENT: *value = curTime - mUptimeStart;
-        case STATS_SINCE_UNPLUGGED: *value = curTime - mOnBatteryTimeBase->GetUptimeStart();
+        case STATS_SINCE_CHARGED: *value = mUptime + (curTime - mUptimeStart);break;
+        case STATS_CURRENT: *value = curTime - mUptimeStart;break;
+        case STATS_SINCE_UNPLUGGED: *value = curTime - mOnBatteryTimeBase->GetUptimeStart();break;
     }
     return NOERROR;
 }
@@ -8768,9 +8775,9 @@ ECode BatteryStatsImpl::ComputeRealtime(
     VALIDATE_NOT_NULL(value)
     *value = 0;
     switch (which) {
-        case STATS_SINCE_CHARGED: *value = mRealtime + (curTime-mRealtimeStart);
-        case STATS_CURRENT: *value = (curTime - mRealtimeStart);
-        case STATS_SINCE_UNPLUGGED: *value = (curTime - mOnBatteryTimeBase->GetRealtimeStart());
+        case STATS_SINCE_CHARGED: *value = mRealtime + (curTime-mRealtimeStart);break;
+        case STATS_CURRENT: *value = (curTime - mRealtimeStart);break;
+        case STATS_SINCE_UNPLUGGED: *value = (curTime - mOnBatteryTimeBase->GetRealtimeStart());break;
     }
     return NOERROR;
 }
