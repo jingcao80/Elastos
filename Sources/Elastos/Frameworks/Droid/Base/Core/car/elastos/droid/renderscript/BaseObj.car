@@ -1,0 +1,53 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Renderscript.IAllocation;
+    interface Elastos.Droid.Renderscript.IElement;
+    interface Elastos.Droid.Renderscript.IType;
+    interface Elastos.Droid.Renderscript.IBaseObj;
+    interface Elastos.Droid.Renderscript.IFieldPacker;
+    interface Elastos.Droid.Renderscript.IRenderScript;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Renderscript {
+
+    /**
+     * BaseObj is the base class for all RenderScript objects owned by a RS context.
+     * It is responsible for lifetime management and resource tracking. This class
+     * should not be used by a user application.
+     *
+     **/
+    interface IBaseObj {
+
+        /**
+         * setName assigns a name to an object.  This object can later be looked up
+         * by this name.
+         *
+         * @param name The name to assign to the object.
+         */
+        SetName(
+            [in] String name);
+
+        /**
+         * @return name of the renderscript object
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Frees any native resources associated with this object.  The
+         * primary use is to force immediate cleanup of resources when it is
+         * believed the GC will not respond quickly enough.
+         */
+        Destroy();
+
+    }
+
+    } // namespace Renderscript
+    } // namepsace Droid
+    } // namespace Elastos
+}
