@@ -271,7 +271,7 @@ endif
 
 ##########################################################################
 
-all: $(IMPORTHS) $(DIRS) $(FIRST_TARGET) $(EXPORT_HEADERS) $(RESOURCES_OBJECTS)\
+all: $(IMPORTHS) $(APPPCK_LABLE) $(DIRS) $(FIRST_TARGET) $(EXPORT_HEADERS) $(RESOURCES_OBJECTS)\
      depend.mk $(OBJECTS) $(TARGET) $(SPECIAL_TARGET)
 
 make_car : $(CAR_OBJECTS)

@@ -407,6 +407,11 @@ ifneq "$(IMPORTS)" ""
   IMPORTHS = $(IMPORTS:.eco=.h)
 endif
 
+ifdef APPPACK
+  APPPCK_LABLE=$(MAKEDIR)/R.cpp
+endif
+
+
 ifneq "$(LIBRARIES)" ""
   LIBRARIES:= $(strip $(LIBRARIES))       # remove multiple spaces
   LIBRARIES:= $(filter-out \,$(LIBRARIES))
@@ -440,7 +445,9 @@ ifneq "$(SOURCES)" ""
     RESSECTION = __section.o
   endif
 endif
-
+ifdef APPPACK
+    OBJECTS:= $(filter-out R.0,$(OBJECTS))
+endif
 ifneq "$(RESOURCES)" ""
   ifeq "$(RESOURCES_OBJECTS)" ""
     RESOURCES_OBJECTS := $(RESOURCES:.xml=.res)
