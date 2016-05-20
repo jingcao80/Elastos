@@ -190,8 +190,12 @@ Boolean ColorFade::Prepare(
     displayInfo->GetNaturalHeight(&mDisplayHeight);
 
     // Prepare the surface for drawing.
-    if (!(CreateSurface() && CreateEglContext() && CreateEglSurface() &&
-          CaptureScreenshotTextureAndSetViewport())) {
+    //if (!(CreateSurface() && CreateEglContext() && CreateEglSurface() && CaptureScreenshotTextureAndSetViewport()))
+    Boolean createSurface = CreateSurface();
+    Boolean createEglContext = CreateEglContext();
+    Boolean createEglSurface = CreateEglSurface();
+    Boolean cstasv = CaptureScreenshotTextureAndSetViewport();
+    if (!(createSurface && createEglContext && createEglSurface && cstasv)) {
         Dismiss();
         return FALSE;
     }
@@ -672,6 +676,7 @@ Boolean ColorFade::CreateEglContext()
         eglContextAttribList->Set(2, IEGL14::EGL_NONE);
         egl14->EglCreateContext(mEglDisplay, mEglConfig,
             NULL/*CEGL14::EGL_NO_CONTEXT*/, eglContextAttribList, 0, (IEGLContext**)&mEglContext);
+
         if (mEglContext == NULL) {
             LogEglError(String("eglCreateContext"));
             return FALSE;
