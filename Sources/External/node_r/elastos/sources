@@ -1,0 +1,70 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME=elastos
+TARGET_TYPE=node
+
+VPATH := $(MAKEDIR)/addon
+VPATH += $(MAKEDIR)/bindings_node/v8
+VPATH += $(MAKEDIR)/bridge
+
+IMPORTS = Elastos.Droid.Core.eco
+
+C_DEFINES+=-DNODE_GYP_MODULE_NAME=elastos
+C_DEFINES+=-D_LARGEFILE_SOURCE
+C_DEFINES+=-D_FILE_OFFSET_BITS=64
+C_DEFINES+=-DBUILDING_NODE_EXTENSION
+C_DEFINES+=-DANDROID
+C_DEFINES+=-DHAVE_SYS_UIO_H
+
+C_FLAGS += -std=c++98
+C_FLAGS += -Wno-c++0x-compat
+C_FLAGS += -pthread
+C_FLAGS += -Wextra
+C_FLAGS += -Wno-unused-parameter
+
+#DLL_FLAGS += -Wl,--undefined,--undefined-version
+
+INCLUDES+=$(MAKEDIR)/../lib
+INCLUDES+=$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include
+INCLUDES+=$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/bionic
+INCLUDES+=$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport
+INCLUDES+=$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node
+INCLUDES+=$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/uv
+INCLUDES+=$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/v8
+INCLUDES+=$(MAKEDIR)/JavaScriptCore
+INCLUDES+=$(MAKEDIR)/JavaScriptCore/icu
+INCLUDES+=$(MAKEDIR)/JavaScriptCore/wtf
+INCLUDES+=$(MAKEDIR)/JavaScriptCore/wtf/text
+INCLUDES+=$(MAKEDIR)/JavaScriptCore/wtf/unicode
+INCLUDES+=$(MAKEDIR)/JavaScriptCore/wtf/unicode/icu
+INCLUDES+=$(MAKEDIR)/bridge
+INCLUDES+=$(MAKEDIR)/bridge/car
+INCLUDES+=$(MAKEDIR)/bridge/car/v8
+INCLUDES+=$(MAKEDIR)/bindings_node/v8
+INCLUDES+=$(MAKEDIR)/plugins
+INCLUDES+=$(MAKEDIR)/addon
+INCLUDES+=$(MAKEDIR)/platform
+INCLUDES+=$(MAKEDIR)/platform/elastos
+INCLUDES+=$(MAKEDIR)/platform/graphics
+INCLUDES+=$(MAKEDIR)/platform/text
+INCLUDES+=$(MAKEDIR)/utils
+INCLUDES+=$(MAKEDIR)/include
+INCLUDES+=$(MAKEDIR)/include
+
+
+
+SOURCES += main.cpp
+SOURCES += CarCallbackProxy.cpp
+SOURCES += CarUtility.cpp
+SOURCES += CarValueV8.cpp
+SOURCES += V8CarObject.cpp
+SOURCES += V8Utility.cpp
+
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += -lnode -llog
+
