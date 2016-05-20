@@ -481,6 +481,23 @@ ECode CContentResolverNative::CancelSync(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CContentResolverNative::GetPackageName(
+    /* [out] */ String* package)
+{
+    LOGGERD(TAG, "CContentResolverNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CContentResolverNative::ResolveUserId(
+    /* [in] */ IUri* uri,
+    /* [out] */ Int32* id)
+{
+    LOGGERD(TAG, "CContentResolverNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CContentResolverNative::ToString(
     /* [out] */ String* str)
 {

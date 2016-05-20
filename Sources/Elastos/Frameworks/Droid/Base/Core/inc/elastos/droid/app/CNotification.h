@@ -19,6 +19,7 @@ using Elastos::Droid::Widget::IRemoteViews;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Core::Object;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::ICloneable;
 using Elastos::Text::INumberFormat;
 
 namespace Elastos {
@@ -43,6 +44,7 @@ CarClass(CNotification)
     , public Object
     , public INotification
     , public IParcelable
+    , public ICloneable
 {
 public:
     class BuilderRemoteViews

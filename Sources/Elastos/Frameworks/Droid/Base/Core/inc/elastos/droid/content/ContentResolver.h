@@ -1321,10 +1321,13 @@ public:
         /* [out] */ IIContentService** contentService);
 
     /** @hide */
-    CARAPI_(String) GetPackageName();
+    CARAPI GetPackageName(
+        /* [out] */ String* package);
 
-    CARAPI_(Int32) ResolveUserId(
-        /* [in] */ IUri* uri);
+    /** @hide */
+    CARAPI ResolveUserId(
+        /* [in] */ IUri* uri,
+        /* [out] */ Int32* id);
 
 protected:
     /** @hide */

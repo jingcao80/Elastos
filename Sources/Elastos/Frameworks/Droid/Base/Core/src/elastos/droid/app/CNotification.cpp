@@ -38,6 +38,7 @@ using Elastos::Core::CSystem;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Text::INumberFormatHelper;
 using Elastos::Text::CNumberFormatHelper;
 using Elastos::Utility::Logging::Logger;
@@ -109,7 +110,7 @@ const Int32 CNotification::MAX_CHARSEQUENCE_LENGTH = 5120;//5 * 1024;
 
 const AutoPtr<IAudioAttributes> CNotification::AUDIO_ATTRIBUTES_DEFAULT = InitAUDIO_ATTRIBUTES_DEFAULT();
 
-CAR_INTERFACE_IMPL_2(CNotification, Object, INotification, IParcelable)
+CAR_INTERFACE_IMPL_3(CNotification, Object, INotification, IParcelable, ICloneable)
 
 CAR_OBJECT_IMPL(CNotification)
 

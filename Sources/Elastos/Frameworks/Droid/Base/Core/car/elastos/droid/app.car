@@ -1346,6 +1346,7 @@ module
 
         interface INotification;
         interface IParcelable;
+        interface ICloneable;
     }
 
     singleton class CNotificationHelper {

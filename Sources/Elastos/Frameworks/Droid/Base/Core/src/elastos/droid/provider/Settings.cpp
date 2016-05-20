@@ -180,7 +180,9 @@ ECode Settings::NameValueCache::PutStringForUser(
         return ec == (ECode)E_REMOTE_EXCEPTION ? NOERROR : ec;
     }
 
-    ec = cp->Call(((ContentResolver*)cr)->GetPackageName(), mCallSetCommand, name, arg, (IBundle**)&tmp);
+    String package;
+    cr->GetPackageName(&package);
+    ec = cp->Call(package, mCallSetCommand, name, arg, (IBundle**)&tmp);
     if (FAILED(ec)) {
         Slogger::W(TAG, "Can't set key %s in %s", name.string(), TO_CSTR(mUri));
         *result = FALSE;
@@ -253,8 +255,10 @@ ECode Settings::NameValueCache::GetStringForUser(
             CBundle::New((IBundle**)&args);
             args->PutInt32(ISettings::CALL_METHOD_USER_KEY, userHandle);
         }
+        String package;
+        cr->GetPackageName(&package);
         AutoPtr<IBundle> b;
-        if (SUCCEEDED(cp->Call(((ContentResolver*)cr)->GetPackageName(), mCallGetCommand, name, args, (IBundle**)&b)) && b != NULL) {
+        if (SUCCEEDED(cp->Call(package, mCallGetCommand, name, args, (IBundle**)&b)) && b != NULL) {
             String _value;
             IBaseBundle::Probe(b)->GetPairValue(&_value);
             // Don't update our cache for reads of other users' data
@@ -281,7 +285,9 @@ ECode Settings::NameValueCache::GetStringForUser(
     AutoPtr< ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
     (*selectionArgs)[0] = name;
 
-    if (FAILED(cp->Query(((ContentResolver*)cr)->GetPackageName(), mUri, SELECT_VALUE,
+    String package;
+    cr->GetPackageName(&package);
+    if (FAILED(cp->Query(package, mUri, SELECT_VALUE,
         NAME_EQ_PLACEHOLDER, selectionArgs, String(NULL), NULL, (ICursor**)&c))) {
         Slogger::W(TAG, "Can't get key %s from %p", name.string(), mUri.Get());
         if (c != NULL) {

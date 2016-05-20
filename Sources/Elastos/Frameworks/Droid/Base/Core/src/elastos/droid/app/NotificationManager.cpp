@@ -7,8 +7,9 @@
 #include "elastos/droid/os/UserHandle.h"
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Core::ICloneable;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -95,7 +96,7 @@ ECode NotificationManager::Notify(
     }
 
     AutoPtr<IInterface> tmp;
-    notification->Clone((IInterface**)&tmp);
+    ICloneable::Probe(notification)->Clone((IInterface**)&tmp);
     AutoPtr<INotification> stripped = INotification::Probe(tmp);
     CNotificationBuilder::StripForDelivery(stripped);
 
@@ -151,7 +152,7 @@ ECode NotificationManager::NotifyAsUser(
     }
 
     AutoPtr<IInterface> tmp;
-    notification->Clone((IInterface**)&tmp);
+    ICloneable::Probe(notification)->Clone((IInterface**)&tmp);
     AutoPtr<INotification> stripped = INotification::Probe(tmp);
     CNotificationBuilder::StripForDelivery(stripped);
 

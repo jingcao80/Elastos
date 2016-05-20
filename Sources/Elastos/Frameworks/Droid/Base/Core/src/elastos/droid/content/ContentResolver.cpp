@@ -292,7 +292,8 @@ ECode ContentResolver::GetType(
 //    try {
     AutoPtr<IUri> newUri;
     ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
-    Int32 userId = ResolveUserId(uri);
+    Int32 userId;
+    ResolveUserId(uri, &userId);
     AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     return am->GetProviderMimeType(newUri, userId, type);
 //    } catch (RemoteException e) {
@@ -1416,7 +1417,9 @@ ECode ContentResolver::TakePersistableUriPermission(
     // try {
     AutoPtr<IUri> newUri;
     ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
-    return am->TakePersistableUriPermission(newUri, modeFlags, ResolveUserId(uri));
+    Int32 id;
+    ResolveUserId(uri, &id);
+    return am->TakePersistableUriPermission(newUri, modeFlags, id);
     // } catch (RemoteException e) {
     // }
 }
@@ -1429,7 +1432,9 @@ ECode ContentResolver::ReleasePersistableUriPermission(
     // try {
     AutoPtr<IUri> newUri;
     ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
-    return am->ReleasePersistableUriPermission(newUri, modeFlags, ResolveUserId(uri));
+    Int32 id;
+    ResolveUserId(uri, &id);
+    return am->ReleasePersistableUriPermission(newUri, modeFlags, id);
     // } catch (RemoteException e) {
     // }
     return NOERROR;
@@ -2127,17 +2132,23 @@ ECode ContentResolver::GetContentService(
     return NOERROR;
 }
 
-String ContentResolver::GetPackageName()
+ECode ContentResolver::GetPackageName(
+    /* [out] */ String* package)
 {
-    return mPackageName;
+    VALIDATE_NOT_NULL(package);
+    *package = mPackageName;
+    return NOERROR;
 }
 
-Int32 ContentResolver::ResolveUserId(
-    /* [in] */ IUri* uri)
+ECode ContentResolver::ResolveUserId(
+    /* [in] */ IUri* uri,
+    /* [out] */ Int32* id)
 {
+    VALIDATE_NOT_NULL(id);
     Int32 userId;
     mContext->GetUserId(&userId);
-    return ContentProvider::GetUserIdFromUri(uri, userId);
+    *id = ContentProvider::GetUserIdFromUri(uri, userId);
+    return NOERROR;
 }
 
 } // namespace Content

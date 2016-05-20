@@ -263,6 +263,13 @@ public:
     CARAPI CancelSync(
         /* [in] */ IUri* uri);
 
+    CARAPI GetPackageName(
+        /* [out] */ String* package);
+
+    CARAPI ResolveUserId(
+        /* [in] */ IUri* uri,
+        /* [out] */ Int32* id);
+
     CARAPI ToString(
         /* [out] */ String* str);
 

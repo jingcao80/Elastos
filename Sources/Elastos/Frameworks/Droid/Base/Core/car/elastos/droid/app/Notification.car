@@ -833,9 +833,6 @@ module
         IsGroupSummary(
             [out] Boolean* result);
 
-        Clone(
-            [out] IInterface** result);
-
         /**
          * @hide
          */
