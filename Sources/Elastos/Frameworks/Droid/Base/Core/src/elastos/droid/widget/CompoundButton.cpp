@@ -199,7 +199,7 @@ ECode CompoundButton::SetChecked(
         RefreshDrawableState();
 
         NotifyViewAccessibilityStateChangedIfNeeded(
-                IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
+            IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
 
         // Avoid infinite recursions if setChecked() is called from a listener
         if (mBroadcasting) {
@@ -208,17 +208,14 @@ ECode CompoundButton::SetChecked(
 
         mBroadcasting = TRUE;
         if (mOnCheckedChangeListener != NULL) {
-            mOnCheckedChangeListener->OnCheckedChanged(
-                this, mChecked);
+            mOnCheckedChangeListener->OnCheckedChanged(this, mChecked);
         }
         if (mOnCheckedChangeWidgetListener != NULL) {
-            mOnCheckedChangeWidgetListener->OnCheckedChanged(
-                this, mChecked);
+            mOnCheckedChangeWidgetListener->OnCheckedChanged(this, mChecked);
         }
 
         mBroadcasting = FALSE;
     }
-
     return NOERROR;
 }
 
@@ -226,7 +223,6 @@ ECode CompoundButton::SetOnCheckedChangeListener(
     /* [in] */ ICompoundButtonOnCheckedChangeListener* listener)
 {
     mOnCheckedChangeListener = listener;
-
     return NOERROR;
 }
 
@@ -234,7 +230,6 @@ ECode CompoundButton::SetOnCheckedChangeWidgetListener(
     /* [in] */ ICompoundButtonOnCheckedChangeListener* listener)
 {
     mOnCheckedChangeWidgetListener = listener;
-
     return NOERROR;
 }
 
@@ -450,9 +445,13 @@ void CompoundButton::OnDraw(
         }
         Int32 bottom = top + drawableHeight;
         Boolean isLayoutRtl;
-        Int32 width;
-        Int32 left = (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) ? (GetWidth(&width), (width - drawableWidth)) : 0;
-        Int32 right = (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) ? (GetWidth(&width), width) : drawableWidth;
+        IsLayoutRtl(&isLayoutRtl);
+        Int32 width = 0;
+        if (isLayoutRtl) {
+            GetWidth(&width);
+        }
+        Int32 left = isLayoutRtl ? (width - drawableWidth) : 0;
+        Int32 right = isLayoutRtl ? width : drawableWidth;
 
         buttonDrawable->SetBounds(left, top, right, bottom);
 
@@ -492,6 +491,7 @@ ECode CompoundButton::OnCreateDrawableState(
     if (IsChecked(&res), res) {
         MergeDrawableStates(ds, CHECKED_STATE_SET);
     }
+
     *drawableState = ds;
     REFCOUNT_ADD(*drawableState);
     return NOERROR;

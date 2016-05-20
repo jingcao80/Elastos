@@ -51,14 +51,6 @@ namespace Graphics {
 namespace Drawable {
 
 CAR_INTERFACE_IMPL(Drawable::ConstantState, Object, IDrawableConstantState);
-ECode Drawable::ConstantState::GetWeakReference(
-    /* [out] */ IWeakReference** weakReference)
-{
-    VALIDATE_NOT_NULL(weakReference)
-    *weakReference = new WeakReferenceImpl(TO_IINTERFACE(this), CreateWeak(this));
-    REFCOUNT_ADD(*weakReference)
-    return NOERROR;
-}
 
 ECode Drawable::ConstantState::NewDrawable(
     /* [in] */ IResources* res,

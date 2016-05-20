@@ -23,7 +23,7 @@ public:
         /* [in] */ Int32 state);
 
     static CARAPI_(AutoPtr< ArrayOf<Int32> >) TrimStateSet(
-        /* [in] */ const ArrayOf<Int32>* states,
+        /* [in] */ ArrayOf<Int32>* states,
         /* [in] */ Int32 newSize);
 
     //static String dump(int[] states);

@@ -7,16 +7,19 @@
 #include "elastos/droid/graphics/drawable/CAnimationDrawable.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/R.h"
-
-using Elastos::Core::EIID_IRunnable;
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::R;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 namespace Drawable {
+
+static const String LOGTAG("AnimationDrawable");
 
 AnimationDrawable::AnimationState::AnimationState(
     /* [in] */ AnimationState* orig,
@@ -124,7 +127,8 @@ ECode AnimationDrawable::Start()
 {
     mAnimating = TRUE;
     Boolean running = FALSE;
-    if (!(IsRunning(&running), running)) {
+    IsRunning(&running);
+    if (!running) {
         return Run();
     }
     return NOERROR;
@@ -134,7 +138,8 @@ ECode AnimationDrawable::Stop()
 {
     mAnimating = FALSE;
     Boolean running = FALSE;
-    if (IsRunning(&running), running) {
+    IsRunning(&running);
+    if (running) {
         return UnscheduleSelf(this);
     }
     return NOERROR;
@@ -323,9 +328,10 @@ ECode AnimationDrawable::Inflate(
                 // Empty
             }
             if (type != IXmlPullParser::START_TAG) {
-//                throw new XmlPullParserException(parser.getPositionDescription() +
-//                        ": <item> tag requires a 'drawable' attribute or child tag" +
-//                        " defining a drawable");
+                String str;
+                parser->GetPositionDescription(&str);
+                Logger::E(LOGTAG, "XmlPullParserException: %s: <item> tag requires a 'drawable' attribute or "
+                    "child tag defining a drawable", str.string());
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
             Drawable::CreateFromXmlInner(r, parser, attrs, theme, (IDrawable**)&dr);

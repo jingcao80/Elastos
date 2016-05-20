@@ -8,9 +8,14 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/utility/StateSet.h"
 
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
+
 namespace Elastos {
 namespace Droid {
 namespace Utility {
+
+static const String TAG("StateSet");
 
 const AutoPtr< ArrayOf<Int32> > StateSet::WILD_CARD = ArrayOf<Int32>::Alloc(0);
 const AutoPtr< ArrayOf<Int32> > StateSet::NOTHING = ArrayOf<Int32>::Alloc(1);
@@ -40,6 +45,7 @@ Boolean StateSet::StateSetMatches(
     if (stateSet == NULL) {
         return (stateSpec == NULL || IsWildCard(stateSpec));
     }
+
     Int32 stateSpecSize = stateSpec->GetLength();
     Int32 stateSetSize = stateSet->GetLength();
     for (Int32 i = 0; i < stateSpecSize; i++) {
@@ -48,6 +54,7 @@ Boolean StateSet::StateSetMatches(
             // We've reached the end of the cases to match against.
             return TRUE;
         }
+
         Boolean mustMatch;
         if (stateSpecState > 0) {
             mustMatch = TRUE;
@@ -57,6 +64,7 @@ Boolean StateSet::StateSetMatches(
             mustMatch = FALSE;
             stateSpecState = -stateSpecState;
         }
+
         Boolean found = FALSE;
         for (Int32 j = 0; j < stateSetSize; j++) {
             Int32 state = (*stateSet)[j];
@@ -127,17 +135,15 @@ Boolean StateSet::StateSetMatches(
 }
 
 AutoPtr< ArrayOf<Int32> > StateSet::TrimStateSet(
-    /* [in] */ const ArrayOf<Int32>* states,
+    /* [in] */ ArrayOf<Int32>* states,
     /* [in] */ Int32 newSize)
 {
-    AutoPtr< ArrayOf<Int32> > trimmedStates;
     if (states->GetLength() == newSize) {
-        trimmedStates = const_cast< ArrayOf<Int32>*>(states);
-        return trimmedStates;
+        return states;
     }
 
     assert(newSize < states->GetLength());
-    trimmedStates = ArrayOf<Int32>::Alloc(newSize);
+    AutoPtr< ArrayOf<Int32> > trimmedStates = ArrayOf<Int32>::Alloc(newSize);
     trimmedStates->Copy(states, 0, newSize);
     return trimmedStates;
 }

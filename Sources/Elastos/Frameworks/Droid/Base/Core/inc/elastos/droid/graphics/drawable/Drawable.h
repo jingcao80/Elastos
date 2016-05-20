@@ -52,9 +52,6 @@ public:
         virtual ~ConstantState()
         {}
 
-        CARAPI GetWeakReference(
-            /* [out] */ IWeakReference** weakReference);
-
         /**
          * Create a new drawable without supplying resources the caller
          * is running in.  Note that using this means the density-dependent

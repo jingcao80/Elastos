@@ -9,7 +9,9 @@
 #include "elastos/droid/utility/StateSet.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Utility::StateSet;
 using Elastos::Droid::R;
 using Elastos::Utility::Arrays;
@@ -83,8 +85,11 @@ Boolean StateListDrawable::OnStateChange(
     /* [in] */ ArrayOf<Int32>* stateSet)
 {
     Int32 idx = mStateListState->IndexOfStateSet(stateSet);
-    // if (DEBUG) android.util.Log.i(TAG, "onStateChange " + this + " states "
-    //             + Arrays.toString(stateSet) + " found " + idx);
+    if (DEBUG) {
+        Logger::I(TAG, "OnStateChange %s states %s found %d",
+            TO_CSTR(this), Arrays::ToString(stateSet).string(), idx);
+    }
+
     if (idx < 0) {
         idx = mStateListState->IndexOfStateSet(StateSet::WILD_CARD);
     }
@@ -133,8 +138,9 @@ ECode StateListDrawable::Inflate(
     parser->GetDepth(&innerDepth);
     innerDepth += 1;
     Int32 type, depth;
-    while((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT) &&
-            ((parser->GetDepth(&depth), depth >= innerDepth) || type != IXmlPullParser::END_TAG)) {
+    while((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
+        && ((parser->GetDepth(&depth), depth >= innerDepth)
+            || type != IXmlPullParser::END_TAG)) {
         if (type != IXmlPullParser::START_TAG) {
             continue;
         }
@@ -164,7 +170,9 @@ ECode StateListDrawable::Inflate(
                 (*states)[j++] = value ? stateResId : -stateResId;
             }
         }
-        states = StateSet::TrimStateSet(states, j);
+
+        AutoPtr<ArrayOf<Int32> > temp = StateSet::TrimStateSet(states, j);
+        states = temp;
 
         AutoPtr<IDrawable> dr;
         if (drawableRes != 0) {
@@ -174,10 +182,10 @@ ECode StateListDrawable::Inflate(
             while (parser->Next(&type), type == IXmlPullParser::TEXT) {
             }
             if (type != IXmlPullParser::START_TAG) {
-//                throw new XmlPullParserException(
-//                        parser.getPositionDescription()
-//                                + ": <item> tag requires a 'drawable' attribute or "
-//                                + "child tag defining a drawable");
+                String str;
+                parser->GetPositionDescription(&str);
+                Logger::E(TAG, "XmlPullParserException: %s: <item> tag requires a 'drawable' attribute or "
+                    "child tag defining a drawable", str.string());
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
             Drawable::CreateFromXmlInner(r, parser, attrs, theme, (IDrawable**)&dr);
