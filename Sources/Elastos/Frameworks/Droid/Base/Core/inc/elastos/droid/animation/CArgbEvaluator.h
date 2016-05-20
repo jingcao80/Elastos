@@ -5,7 +5,6 @@
 #include "_Elastos_Droid_Animation_CArgbEvaluator.h"
 #include <elastos/core/Object.h>
 
-
 namespace Elastos {
 namespace Droid {
 namespace Animation {
@@ -23,6 +22,12 @@ public:
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()
+
+    CArgbEvaluator();
+
+    ~CArgbEvaluator();
+
+    CARAPI constructor();
 
     /**
      * Returns an instance of <code>ArgbEvaluator</code> that may be used in

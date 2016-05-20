@@ -277,14 +277,14 @@ public:
     virtual CARAPI SetAllowRunningAsynchronously(
         /* [in] */ Boolean mayRunAsync);
 
+protected:
+    CARAPI CloneImpl(
+        /* [in] */ IAnimator* anim);
+
 public:
     AutoPtr<IAnimatorSet> mParent;
 
 protected:
-    //@Override
-    virtual CARAPI CloneSuperData(
-        /* [in] */ Animator* anim);
-
     /**
      * The set of listeners to be sent events through the life of an animation.
      */

@@ -5,7 +5,6 @@
 #include "_Elastos_Droid_Animation_CFloatEvaluator.h"
 #include <elastos/core/Object.h>
 
-
 namespace Elastos {
 namespace Droid {
 namespace Animation {
@@ -24,6 +23,12 @@ public:
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()
+
+    CFloatEvaluator();
+
+    ~CFloatEvaluator();
+
+    CARAPI constructor();
 
     /**
      * This function returns the result of linearly interpolating the start and end values, with

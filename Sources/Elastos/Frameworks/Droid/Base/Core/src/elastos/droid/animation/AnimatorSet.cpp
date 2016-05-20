@@ -2,7 +2,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/animation/AnimatorSet.h"
 #include "elastos/droid/animation/ValueAnimator.h"
-#include "elastos/droid/animation/CAnimatorSet.h"
 #include "elastos/droid/animation/CAnimatorSetBuilder.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -16,6 +15,9 @@ namespace Droid {
 namespace Animation {
 
 static const String TAG("AnimatorSet");
+
+const Int32 AnimatorSet::Dependency::WITH = 0;
+const Int32 AnimatorSet::Dependency::AFTER = 1;
 
 //==============================================================================
 //                  AnimatorSet::DependencyListener
@@ -73,7 +75,7 @@ void AnimatorSet::DependencyListener::StartIfReady(
     for (; it != mNode->mTmpDependencies.End(); ++it) {
         AutoPtr<Dependency> dependency = *it;
         if (dependency->mRule == mRule &&
-                 dependencyAnimation == dependency->mNode->mAnimation) {
+                dependencyAnimation == dependency->mNode->mAnimation) {
             // rule fired - remove the dependency and listener and check to
             // see whether it's time to start the animation
             dependencyToRemove = dependency;
@@ -121,7 +123,7 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
             if (!animatorSet->mListeners.IsEmpty()) {
                 List<AutoPtr<IAnimatorListener> > tmpListeners(animatorSet->mListeners);
                 List<AutoPtr<IAnimatorListener> >::Iterator it;
-                for (it = tmpListeners.Begin(); it != tmpListeners.Begin(); ++it) {
+                for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
                     (*it)->OnAnimationCancel((IAnimator*)animatorSet);
                 }
             }
@@ -140,6 +142,7 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
         IValueAnimator* va = IValueAnimator::Probe(animation);
         if (va) {
             ValueAnimator* valAni = (ValueAnimator*)va;
+Logger::D("AnimatorSet::AnimatorSetListener::OnAnimationEnd", "===========Line:%d, animation:%s============", __LINE__, TO_CSTR(animation));
             assert(valAni->mParent != NULL);
         }
         assert(0 && "Error: AnimatorSet has been released!");
@@ -223,6 +226,7 @@ AnimatorSet::Node::Node()
 
 AnimatorSet::Node::~Node()
 {
+    mNodeDependents = NULL;
 }
 
 void AnimatorSet::Node::AddDependency(
@@ -321,6 +325,11 @@ AnimatorSet::AnimatorSet()
     Logger::I(TAG, " >>>> Create AnimatorSet : 0x%0x =====================", this);
 }
 
+ECode AnimatorSet::constructor()
+{
+    return NOERROR;
+}
+
 AnimatorSet::~AnimatorSet()
 {
     Logger::I(TAG, " >>>> Destory AnimatorSet: 0x%0x =====================", this);
@@ -377,7 +386,8 @@ ECode AnimatorSet::PlaySequentially(
         if (items->GetLength() == 1) {
             AutoPtr<IAnimatorSetBuilder> builder;
             Play((*items)[0], (IAnimatorSetBuilder**)&builder);
-        } else {
+        }
+        else {
             mReversible = FALSE;
             for (Int32 i = 0; i < items->GetLength() - 1; ++i) {
                 AutoPtr<IAnimatorSetBuilder> builder;
@@ -401,7 +411,8 @@ ECode AnimatorSet::PlaySequentially(
             AutoPtr<IAnimator> animator = IAnimator::Probe(obj);
             AutoPtr<IAnimatorSetBuilder> as;
             Play(animator, (IAnimatorSetBuilder**)&as);
-        } else {
+        }
+        else {
             mReversible = FALSE;
             for (Int32 i = 0; i < size - 1; ++i) {
                 AutoPtr<IInterface> obj;
@@ -661,7 +672,8 @@ ECode AnimatorSet::Pause()
     if (!previouslyPaused && mPaused) {
         if (mDelayAnim != NULL) {
             IAnimator::Probe(mDelayAnim)->Pause();
-        } else {
+        }
+        else {
             List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
             for (; it != mNodes.End(); it++) {
                 (*it)->mAnimation->Pause();
@@ -678,7 +690,8 @@ ECode AnimatorSet::Resume()
     if (previouslyPaused && !mPaused) {
         if (mDelayAnim != NULL) {
             IAnimator::Probe(mDelayAnim)->Resume();
-        } else {
+        }
+        else {
             List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
             for (; it != mNodes.End(); it++) {
                 (*it)->mAnimation->Resume();
@@ -814,10 +827,21 @@ ECode AnimatorSet::Start()
 ECode AnimatorSet::Clone(
     /* [out] */ IInterface** object)
 {
-    AutoPtr<CAnimatorSet> newObject;
-    CAnimatorSet::NewByFriend((CAnimatorSet**)&newObject);
-    AnimatorSet* anim = newObject.Get();
-    CloneSuperData(anim);
+    VALIDATE_NOT_NULL(object)
+
+    AutoPtr<IAnimatorSet> newObject = new AnimatorSet();
+    CloneImpl(newObject);
+    *object = newObject;
+    REFCOUNT_ADD(*object);
+    return NOERROR;
+}
+
+ECode AnimatorSet::CloneImpl(
+    /* [in] */ IAnimatorSet* object)
+{
+    Animator::CloneImpl(IAnimator::Probe(object));
+
+    AutoPtr<AnimatorSet> anim = (AnimatorSet*)object;
     /*
      * The basic clone() operation copies all items. This doesn't work very well for
      * AnimatorSet, because it will copy references that need to be recreated and state
@@ -890,8 +914,6 @@ ECode AnimatorSet::Clone(
         }
     }
 
-    *object = newObject->Probe(EIID_IAnimatorSet);
-    REFCOUNT_ADD(*object);
     return NOERROR;
 }
 
@@ -934,7 +956,8 @@ ECode AnimatorSet::SortNodes()
 //                    + " in AnimatorSet");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
-    } else {
+    }
+    else {
         // Doesn't need sorting, but still need to add in the nodeDependencies list
         // because these get removed as the event listeners fire and the dependencies
         // are satisfied

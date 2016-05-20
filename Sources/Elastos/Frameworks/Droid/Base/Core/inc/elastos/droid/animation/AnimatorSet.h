@@ -122,8 +122,8 @@ private:
     class Dependency : public Object
     {
     public:
-        static const Int32 WITH = 0;    // dependent node must start with this dependency node
-        static const Int32 AFTER = 1;   // dependent node must start when this dependency node finishes
+        static const Int32 WITH;    // dependent node must start with this dependency node
+        static const Int32 AFTER;   // dependent node must start when this dependency node finishes
 
         // The node that the other node with this Dependency is dependent upon
         AutoPtr<Node> mNode;
@@ -203,7 +203,7 @@ public:
          * dependency when it is a root node.
          */
         // mNodeDependents's element has this's reference in it's mNodeDependencies
-        List<Node* > mNodeDependents;
+        List<Node*> mNodeDependents;
 
         /**
          * Flag indicating whether the animation in this node is finished. This flag
@@ -244,6 +244,12 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    AnimatorSet();
+
+    CARAPI constructor();
+
+    ~AnimatorSet();
 
     /**
      * Sets up this AnimatorSet to play all of the supplied animations at the same time.
@@ -424,10 +430,9 @@ public:
     // @Override
     virtual CARAPI Reverse();
 
-    ~AnimatorSet();
-
 protected:
-    AnimatorSet();
+    CARAPI CloneImpl(
+        /* [in] */ IAnimatorSet* anim);
 
 private:
     /**

@@ -17,6 +17,8 @@ public:
 
     TimeAnimator();
 
+    CARAPI constructor();
+
     virtual ~TimeAnimator();
 
     virtual CARAPI Start();
@@ -42,6 +44,10 @@ public:
 
     virtual CARAPI Clone(
         /* [out] */ IInterface** object);
+
+protected:
+    CARAPI CloneImpl(
+        /* [in] */ ITimeAnimator* anim);
 
 private:
     AutoPtr<ITimeListener> mListener;

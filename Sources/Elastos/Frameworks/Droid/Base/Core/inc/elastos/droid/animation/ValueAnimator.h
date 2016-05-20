@@ -5,10 +5,11 @@
 #include "elastos/droid/animation/Animator.h"
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Core::IRunnable;
-using Elastos::Droid::View::IChoreographer;
 using Elastos::Droid::View::Animation::IAnimation;
+using Elastos::Droid::View::IChoreographer;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::Etl::HashMap;
+
 namespace Elastos {
 namespace Droid {
 namespace Animation {
@@ -80,6 +81,8 @@ public:
      * useful.
      */
     ValueAnimator();
+
+    CARAPI constructor();
 
     virtual ~ValueAnimator();
 
@@ -459,7 +462,7 @@ public:
     static CARAPI_(void) ClearAllAnimations();
 
     static CARAPI_(AutoPtr<IValueAnimator>) OfInt32(
-            /* [in] */ ArrayOf<Int32>* values);
+        /* [in] */ ArrayOf<Int32>* values);
 
     /**
      * Constructs and returns a ValueAnimator that animates between color values. A single
@@ -476,14 +479,14 @@ public:
         /* [in] */ ArrayOf<Int32>* values);
 
     static CARAPI_(AutoPtr<IValueAnimator>) OfFloat(
-            /* [in] */ ArrayOf<Float>* values);
+        /* [in] */ ArrayOf<Float>* values);
 
     static CARAPI_(AutoPtr<IValueAnimator>) OfPropertyValuesHolder(
-            /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
+        /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
 
     static CARAPI_(AutoPtr<IValueAnimator>) OfObject(
-            /* [in] */ ITypeEvaluator* evaluator,
-            /* [in] */ ArrayOf<IInterface*>* values);
+        /* [in] */ ITypeEvaluator* evaluator,
+        /* [in] */ ArrayOf<IInterface*>* values);
 
     /**
      * <p>Whether or not the ValueAnimator is allowed to run asynchronously off of
@@ -575,6 +578,9 @@ protected:
     virtual CARAPI AnimateValue(
         /* [in] */ Float fraction);
 
+    CARAPI CloneImpl(
+        /* [in] */ IValueAnimator* anim);
+
 private:
     CARAPI_(void) NotifyStartListeners();
 
@@ -629,10 +635,6 @@ private:
     CARAPI_(AutoPtr<AnimationHandler>) GetOrCreateAnimationHandler();
 
     CARAPI_(void) UpdateScaledDuration();
-
-protected:
-    CARAPI_(void) CloneInternal(
-        /* [in] */ ValueAnimator* anim);
 
 protected:
     /**

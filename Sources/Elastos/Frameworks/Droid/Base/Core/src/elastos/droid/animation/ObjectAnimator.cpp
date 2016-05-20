@@ -24,6 +24,11 @@ ObjectAnimator::ObjectAnimator()
     : mAutoCancel(FALSE)
 {}
 
+ECode ObjectAnimator::constructor()
+{
+    return NOERROR;
+}
+
 ECode ObjectAnimator::SetPropertyName(
     /* [in] */ const String& propertyName)
 {
@@ -76,7 +81,7 @@ ECode ObjectAnimator::GetPropertyName(
 {
     VALIDATE_NOT_NULL(name);
     String propertyName;
-    if (mPropertyName != NULL) {
+    if (!mPropertyName.IsNull()) {
         propertyName = mPropertyName;
     }
     else if (mProperty != NULL) {
@@ -85,10 +90,10 @@ ECode ObjectAnimator::GetPropertyName(
     else if (mValues != NULL && mValues->GetLength() > 0) {
         for (Int32 i = 0; i < mValues->GetLength(); ++i) {
             if (i == 0) {
-                propertyName = String("");
+                propertyName = "";
             }
             else {
-                propertyName += String(",");
+                propertyName += ",";
             }
 
             String tmp;
@@ -131,15 +136,17 @@ ECode ObjectAnimator::SetInt32Values(
     if (mValues == NULL || mValues->GetLength() == 0) {
         // No values yet - this animator is being constructed piecemeal. Init the values with
         // whatever the current propertyName is
-        AutoPtr<ArrayOf<IPropertyValuesHolder*> > params =ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+        AutoPtr<ArrayOf<IPropertyValuesHolder*> > params = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         if (mProperty != NULL) {
             params->Set(0, PropertyValuesHolder::OfInt32(mProperty, values));
             SetValues(params);
-        } else {
+        }
+        else {
             params->Set(0, PropertyValuesHolder::OfInt32(mPropertyName, values));
             SetValues(params);
         }
-    } else {
+    }
+    else {
         ValueAnimator::SetInt32Values(values);
     }
 
@@ -152,7 +159,7 @@ ECode ObjectAnimator::SetFloatValues(
     if (mValues == NULL || mValues->GetLength() == 0) {
         // No values yet - this animator is being constructed piecemeal. Init the values with
         // whatever the current propertyName is
-        AutoPtr<ArrayOf<IPropertyValuesHolder*> > params =ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+        AutoPtr<ArrayOf<IPropertyValuesHolder*> > params = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         if (mProperty != NULL) {
             AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfFloat(mProperty, values);
             params->Set(0, holder);
@@ -177,17 +184,19 @@ ECode ObjectAnimator::SetObjectValues(
     if (mValues == NULL || mValues->GetLength() == 0) {
         // No values yet - this animator is being constructed piecemeal. Init the values with
         // whatever the current propertyName is
-        AutoPtr<ArrayOf<IPropertyValuesHolder*> > params =ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+        AutoPtr<ArrayOf<IPropertyValuesHolder*> > params = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         if (mProperty != NULL) {
             AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfObject(mProperty, NULL, values);
             params->Set(0, holder);
             SetValues(params);
-        } else {
+        }
+        else {
             AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfObject(mPropertyName, NULL, values);
             params->Set(0, holder);
             SetValues(params);
         }
-    } else {
+    }
+    else {
         ValueAnimator::SetObjectValues(values);
     }
 
@@ -353,16 +362,24 @@ ECode ObjectAnimator::AnimateValue(
 ECode ObjectAnimator::Clone(
     /* [out] */ IInterface** object)
 {
-    AutoPtr<CObjectAnimator> newObject;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&newObject);
-    CloneSuperData(newObject.Get());
-    CloneInternal(newObject);
-    ObjectAnimator* anim = newObject;
+    VALIDATE_NOT_NULL(object);
+    AutoPtr<IObjectAnimator> newObject = new ObjectAnimator();
+    CloneImpl(newObject);
+    *object = newObject;
+    REFCOUNT_ADD(*object);
+    return NOERROR;
+}
+
+ECode ObjectAnimator::CloneImpl(
+    /* [in] */ IObjectAnimator* object)
+{
+    ValueAnimator::CloneImpl(IValueAnimator::Probe(object));
+
+    ObjectAnimator* anim = (ObjectAnimator*)object;
     anim->mTarget = mTarget;
     anim->mPropertyName = mPropertyName;
     anim->mProperty = mProperty;
-    *object = newObject->Probe(EIID_IObjectAnimator);
-    REFCOUNT_ADD(*object);
+
     return NOERROR;
 }
 
@@ -392,10 +409,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
         return NULL;
     }
 
-    AutoPtr<CObjectAnimator> anim;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
-    anim->constructor(target, propertyName);
-    anim->SetInt32Values(values);
+    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
+    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
+    oa->constructor(target, propertyName);
+    IValueAnimator::Probe(anim)->SetInt32Values(values);
     return anim;
 }
 
@@ -408,10 +425,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
         return NULL;
     }
 
-    AutoPtr<CObjectAnimator> anim;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
-    anim->constructor(target, property);
-    anim->SetInt32Values(values);
+    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
+    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
+    oa->constructor(target, property);
+    IValueAnimator::Probe(anim)->SetInt32Values(values);
     return anim;
 }
 
@@ -636,10 +653,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
         return NULL;
     }
 
-    AutoPtr<CObjectAnimator> anim;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
-    anim->constructor(target, propertyName);
-    anim->SetFloatValues(values);
+    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
+    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
+    oa->constructor(target, propertyName);
+    IValueAnimator::Probe(anim)->SetFloatValues(values);
     return anim;
 }
 
@@ -652,10 +669,10 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
         return NULL;
     }
 
-    AutoPtr<CObjectAnimator> anim;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
-    anim->constructor(target, property);
-    anim->SetFloatValues(values);
+    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
+    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
+    oa->constructor(target, property);
+    IValueAnimator::Probe(anim)->SetFloatValues(values);
     return anim;
 }
 
@@ -669,11 +686,12 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
         return NULL;
     }
 
-    AutoPtr<CObjectAnimator> anim;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
-    anim->constructor(target, propertyName);
-    anim->SetObjectValues(values);
-    anim->SetEvaluator(evaluator);
+    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
+    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
+    oa->constructor(target, propertyName);
+    IValueAnimator* va = IValueAnimator::Probe(anim);
+    va->SetObjectValues(values);
+    va->SetEvaluator(evaluator);
     return anim;
 }
 
@@ -687,11 +705,12 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
         return NULL;
     }
 
-    AutoPtr<CObjectAnimator> anim;
-    CObjectAnimator::NewByFriend((CObjectAnimator**)&anim);
-    anim->constructor(target, property);
-    anim->SetObjectValues(values);
-    anim->SetEvaluator(evaluator);
+    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
+    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
+    oa->constructor(target, property);
+    IValueAnimator* va = IValueAnimator::Probe(anim);
+    va->SetObjectValues(values);
+    va->SetEvaluator(evaluator);
     return anim;
 }
 
@@ -785,7 +804,7 @@ Boolean ObjectAnimator::HasSameTargetAndProperties(
                 String pn1, pn2;
                 pvhMine->GetPropertyName(&pn1);
                 pvhTheirs->GetPropertyName(&pn2);
-                if (pn1 == NULL || !pn1.Equals(pn2)) {
+                if (pn1.IsNull() || !pn1.Equals(pn2)) {
                     return FALSE;
                 }
             }
@@ -816,7 +835,6 @@ ECode ObjectAnimator::ToString(
             sb += "\n    ";
             sb += v;
         }
-        sb += "\n}";
     }
     sb += "}";
     *str = sb.ToString();

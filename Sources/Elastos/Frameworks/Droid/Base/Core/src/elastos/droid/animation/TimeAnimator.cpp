@@ -1,6 +1,5 @@
 
 #include "elastos/droid/animation/TimeAnimator.h"
-#include "elastos/droid/animation/CTimeAnimator.h"
 
 namespace Elastos {
 namespace Droid {
@@ -10,6 +9,11 @@ CAR_INTERFACE_IMPL(TimeAnimator, ValueAnimator, ITimeAnimator)
 TimeAnimator::TimeAnimator()
     : mPreviousTime(-1)
 {
+}
+
+ECode TimeAnimator::constructor()
+{
+    return NOERROR;
 }
 
 TimeAnimator::~TimeAnimator()
@@ -28,7 +32,7 @@ Boolean TimeAnimator::AnimationFrame(
         Int64 totalTime = currentTime - mStartTime;
         Int64 deltaTime = (mPreviousTime < 0) ? 0 : (currentTime - mPreviousTime);
         mPreviousTime = currentTime;
-        mListener->OnTimeUpdate((ITimeAnimator*)(this->Probe(EIID_ITimeAnimator)), totalTime, deltaTime);
+        mListener->OnTimeUpdate(this, totalTime, deltaTime);
     }
     return FALSE;
 }
@@ -56,15 +60,25 @@ ECode TimeAnimator::InitAnimation()
 ECode TimeAnimator::Clone(
     /* [out] */ IInterface** object)
 {
-    AutoPtr<CTimeAnimator> newObject;
-    CTimeAnimator::NewByFriend((CTimeAnimator**)&newObject);
-    CloneSuperData(newObject.Get());
-    CloneInternal(newObject);
-    TimeAnimator* temp = newObject;
+    VALIDATE_NOT_NULL(object)
+
+    AutoPtr<ITimeAnimator> newObject = new TimeAnimator();
+    CloneImpl(newObject);
+
+    *object = newObject;
+    REFCOUNT_ADD(*object);
+    return NOERROR;
+}
+
+ECode TimeAnimator::CloneImpl(
+    /* [in] */ ITimeAnimator* object)
+{
+    ValueAnimator::CloneImpl(IValueAnimator::Probe(object));
+
+    TimeAnimator* temp = (TimeAnimator*)object;
     temp->mListener = mListener;
     temp->mPreviousTime = mPreviousTime;
-    *object = newObject->Probe(EIID_ITimeAnimator);
-    REFCOUNT_ADD(*object);
+
     return NOERROR;
 }
 

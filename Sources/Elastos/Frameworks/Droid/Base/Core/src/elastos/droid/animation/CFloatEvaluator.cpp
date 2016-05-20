@@ -9,8 +9,19 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-CAR_OBJECT_IMPL(CFloatEvaluator);
-CAR_INTERFACE_IMPL_2(CFloatEvaluator, Object, IFloatEvaluator, ITypeEvaluator);
+CAR_OBJECT_IMPL(CFloatEvaluator)
+CAR_INTERFACE_IMPL_2(CFloatEvaluator, Object, IFloatEvaluator, ITypeEvaluator)
+
+CFloatEvaluator::CFloatEvaluator()
+{}
+
+CFloatEvaluator::~CFloatEvaluator()
+{}
+
+ECode CFloatEvaluator::constructor()
+{
+    return NOERROR;
+}
 
 ECode CFloatEvaluator::Evaluate(
     /* [in] */ Float fraction,

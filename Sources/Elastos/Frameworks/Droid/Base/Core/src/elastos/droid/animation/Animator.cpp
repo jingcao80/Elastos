@@ -177,10 +177,12 @@ ECode Animator::RemoveAllListeners()
     return NOERROR;
 }
 
-ECode Animator::CloneSuperData(
-    /* [in] */ Animator* anim)
+ECode Animator::CloneImpl(
+    /* [in] */ IAnimator* _anim)
 {
-    VALIDATE_NOT_NULL(anim);
+    VALIDATE_NOT_NULL(_anim)
+
+    Animator* anim = (Animator*)_anim;
     if (mListeners.IsEmpty() == FALSE) {
         anim->mListeners.Clear();
         Copy(mListeners.Begin(), mListeners.End(), anim->mListeners.Begin());

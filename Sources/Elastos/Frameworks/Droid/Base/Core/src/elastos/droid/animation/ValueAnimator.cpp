@@ -241,6 +241,11 @@ ValueAnimator::ValueAnimator()
     mInterpolator = sDefaultInterpolator;
 }
 
+ECode ValueAnimator::constructor()
+{
+    return NOERROR;
+}
+
 ValueAnimator::~ValueAnimator()
 {
     mValues = NULL;
@@ -270,7 +275,8 @@ ECode ValueAnimator::SetInt32Values(
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         a->Set(0, pvh);
         SetValues(a);
-    } else {
+    }
+    else {
         AutoPtr<IPropertyValuesHolder> valuesHolder = (*mValues)[0];
         valuesHolder->SetInt32Values(values);
     }
@@ -313,7 +319,8 @@ ECode ValueAnimator::SetObjectValues(
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         a->Set(0, pvh);
         SetValues(a);
-    } else {
+    }
+    else {
         AutoPtr<IPropertyValuesHolder> valuesHolder = (*mValues)[0];
         valuesHolder->SetObjectValues(values);
     }
@@ -675,7 +682,8 @@ ECode ValueAnimator::End()
         mStartedDelay = FALSE;
         StartAnimation(handler);
         mStarted = TRUE;
-    } else if (!mInitialized) {
+    }
+    else if (!mInitialized) {
         InitAnimation();
     }
 
@@ -729,9 +737,11 @@ ECode ValueAnimator::Reverse()
         Int64 currentPlayTime = currentTime - mStartTime;
         Int64 timeLeft = mDuration - currentPlayTime;
         mStartTime = currentTime - timeLeft;
-    } else if (mStarted) {
+    }
+    else if (mStarted) {
         End();
-    } else {
+    }
+    else {
         Start(TRUE);
     }
 
@@ -866,7 +876,8 @@ Boolean ValueAnimator::AnimationFrame(
                     Int32 iValue = (Int32)fraction;
                     fraction = fraction - iValue;// fraction %1.0f
                     mStartTime += mDuration;
-                } else {
+                }
+                else {
                     done = TRUE;
                     fraction = Elastos::Core::Math::Min(fraction, 1.0f);
                 }
@@ -890,7 +901,8 @@ Boolean ValueAnimator::DoAnimationFrame(
         mPlayingState = RUNNING;
         if (mSeekTime < 0) {
             mStartTime = frameTime;
-        } else {
+        }
+        else {
             mStartTime = frameTime - mSeekTime;
             // Now that we're playing, reset the seek time
             mSeekTime = -1;
@@ -902,7 +914,8 @@ Boolean ValueAnimator::DoAnimationFrame(
             mPauseTime = frameTime;
         }
         return FALSE;
-    } else if (mResumed) {
+    }
+    else if (mResumed) {
         mResumed = FALSE;
         if (mPauseTime > 0) {
             // Offset by the duration that the animation was paused
@@ -951,18 +964,23 @@ ECode ValueAnimator::AnimateValue(
 ECode ValueAnimator::Clone(
     /* [out] */ IInterface** object)
 {
-    AutoPtr<CValueAnimator> newObject;
-    CValueAnimator::NewByFriend((CValueAnimator**)&newObject);
-    CloneSuperData(newObject.Get());
-    CloneInternal(newObject);
-    *object = newObject->Probe(EIID_IValueAnimator);
+    VALIDATE_NOT_NULL(object)
+
+    AutoPtr<IValueAnimator> newObject = new ValueAnimator();
+
+    CloneImpl(newObject);
+    *object = newObject;
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
 
-void ValueAnimator::CloneInternal(
-    /* [in] */ ValueAnimator* anim)
+ECode ValueAnimator::CloneImpl(
+    /* [in] */ IValueAnimator* object)
 {
+    Animator::CloneImpl(IAnimator::Probe(object));
+
+    ValueAnimator* anim = (ValueAnimator*)object;
+
     if (mUpdateListeners.IsEmpty() == FALSE) {
        anim->mUpdateListeners.Clear();
        Copy(mUpdateListeners.Begin(), mUpdateListeners.End(), anim->mUpdateListeners.Begin());
@@ -989,6 +1007,7 @@ void ValueAnimator::CloneInternal(
             anim->mValuesMap[propertyName] = newValuesHolder;
         }
     }
+    return NOERROR;
 }
 
 Int32 ValueAnimator::GetCurrentAnimationsCount()
@@ -1020,7 +1039,7 @@ AutoPtr<ValueAnimator::AnimationHandler> ValueAnimator::GetOrCreateAnimationHand
 }
 
 AutoPtr<IValueAnimator> ValueAnimator::OfInt32(
-        /* [in] */ ArrayOf<Int32>* values)
+    /* [in] */ ArrayOf<Int32>* values)
 {
     AutoPtr<IValueAnimator> anim;
     CValueAnimator::New((IValueAnimator**)&anim);
@@ -1039,7 +1058,7 @@ AutoPtr<IValueAnimator> ValueAnimator::OfArgb(
 }
 
 AutoPtr<IValueAnimator> ValueAnimator::OfFloat(
-        /* [in] */ ArrayOf<Float>* values)
+    /* [in] */ ArrayOf<Float>* values)
 {
     AutoPtr<IValueAnimator> anim;
     CValueAnimator::New((IValueAnimator**)&anim);
@@ -1048,7 +1067,7 @@ AutoPtr<IValueAnimator> ValueAnimator::OfFloat(
 }
 
 AutoPtr<IValueAnimator> ValueAnimator::OfPropertyValuesHolder(
-        /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
+    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
 {
     AutoPtr<IValueAnimator> anim;
     CValueAnimator::New((IValueAnimator**)&anim);
@@ -1057,8 +1076,8 @@ AutoPtr<IValueAnimator> ValueAnimator::OfPropertyValuesHolder(
 }
 
 AutoPtr<IValueAnimator> ValueAnimator::OfObject(
-        /* [in] */ ITypeEvaluator* evaluator,
-        /* [in] */ ArrayOf<IInterface*>* values)
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
 {
     AutoPtr<IValueAnimator> anim;
     CValueAnimator::New((IValueAnimator**)&anim);

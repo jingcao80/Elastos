@@ -26,6 +26,8 @@ module
     namespace Animation {
 
     class CAnimatorSet {
+        constructor();
+
         interface IAnimatorSet;
         interface IAnimator;
         interface ICloneable;
@@ -40,16 +42,22 @@ module
     }
 
     class CArgbEvaluator {
+        constructor();
+
         interface IArgbEvaluator;
         interface ITypeEvaluator;
     }
 
     class CFloatEvaluator {
+        constructor();
+
         interface IFloatEvaluator;
         interface ITypeEvaluator;
     }
 
     class CInt32Evaluator {
+        constructor();
+
         interface IInt32Evaluator;
         interface ITypeEvaluator;
     }
@@ -82,6 +90,8 @@ module
     }
 
     class CTimeAnimator {
+        constructor();
+
         interface ITimeAnimator;
         interface IValueAnimator;
         interface IAnimator;
@@ -89,6 +99,8 @@ module
     }
 
     class CValueAnimator {
+        constructor();
+
         interface IValueAnimator;
         interface IAnimator;
         interface ICloneable;

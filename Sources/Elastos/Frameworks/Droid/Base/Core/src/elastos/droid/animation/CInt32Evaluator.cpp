@@ -9,8 +9,20 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-CAR_OBJECT_IMPL(CInt32Evaluator);
-CAR_INTERFACE_IMPL_2(CInt32Evaluator, Object, IInt32Evaluator, ITypeEvaluator);
+CAR_OBJECT_IMPL(CInt32Evaluator)
+CAR_INTERFACE_IMPL_2(CInt32Evaluator, Object, IInt32Evaluator, ITypeEvaluator)
+
+CInt32Evaluator::CInt32Evaluator()
+{}
+
+CInt32Evaluator::~CInt32Evaluator()
+{}
+
+ECode CInt32Evaluator::constructor()
+{
+    return NOERROR;
+}
+
 ECode CInt32Evaluator::Evaluate(
     /* [in] */ Float fraction,
     /* [in] */ IInterface* startValue,

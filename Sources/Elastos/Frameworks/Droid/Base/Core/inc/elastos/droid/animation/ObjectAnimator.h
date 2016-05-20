@@ -21,6 +21,8 @@ public:
 
     ObjectAnimator();
 
+    CARAPI constructor();
+
     /**
      * Sets the name of the property that will be animated. This name is used to derive
      * a setter function that will be called to set animated values.
@@ -669,6 +671,9 @@ protected:
     CARAPI constructor(
         /* [in] */ IInterface* target,
         /* [in] */ IProperty* property);
+
+    CARAPI CloneImpl(
+        /* [in] */ IObjectAnimator* anim);
 
 private:
     static const String LOGTAG;

@@ -24,6 +24,12 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CInt32Evaluator();
+
+    ~CInt32Evaluator();
+
+    CARAPI constructor();
+
     /**
      * This function returns the result of linearly interpolating the start and end values, with
      * <code>fraction</code> representing the proportion between the start and end values. The
