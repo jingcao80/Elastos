@@ -27,7 +27,7 @@ private:
     public:
         ClientThread(CTest* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 
@@ -42,7 +42,7 @@ private:
     public:
         ServerThread(CTest* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 
@@ -71,7 +71,7 @@ private:
     public:
         OutputRunnable(IServerSocket* inserver);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 

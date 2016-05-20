@@ -7,8 +7,8 @@ namespace Spec {
 
 const AutoPtr<IECPoint> CECPoint::POINT_INFINITY = CECPoint::InitStatic();
 
-CAR_OBJECT_IMPL(CECPoint);
-CAR_INTERFACE_IMPL(CECPoint, Object, IECPoint);
+CAR_OBJECT_IMPL(CECPoint)
+CAR_INTERFACE_IMPL(CECPoint, Object, IECPoint)
 const AutoPtr<IECPoint> CECPoint::InitStatic()
 {
     AutoPtr<CECPoint> ecp;

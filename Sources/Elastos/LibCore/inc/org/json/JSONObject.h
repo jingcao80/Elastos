@@ -94,7 +94,7 @@ public:
             /* [out] */ String* str);
     };
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JSONObject();
 

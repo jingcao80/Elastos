@@ -23,7 +23,7 @@ class CertificateFactorySpi
     , public ICertificateFactorySpi
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Constructs a new instance of this class.

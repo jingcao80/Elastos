@@ -32,9 +32,9 @@ CarClass(CStreamSource)
     , public ISource
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * <p>Zero-argument default constructor.  If this constructor is used, and

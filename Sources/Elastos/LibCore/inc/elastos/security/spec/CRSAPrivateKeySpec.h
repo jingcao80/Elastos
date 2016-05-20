@@ -14,7 +14,7 @@ namespace Spec {
 CarClass(CRSAPrivateKeySpec), public RSAPrivateKeySpec
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */IBigInteger *modulus,

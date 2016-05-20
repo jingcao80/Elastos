@@ -20,8 +20,8 @@ const AutoPtr<IBigInteger> CRSAKeyGenParameterSpec::InitStatic(
     return tmp;
 }
 
-CAR_OBJECT_IMPL(CRSAKeyGenParameterSpec);
-CAR_INTERFACE_IMPL_2(CRSAKeyGenParameterSpec, Object, IRSAKeyGenParameterSpec, IAlgorithmParameterSpec);
+CAR_OBJECT_IMPL(CRSAKeyGenParameterSpec)
+CAR_INTERFACE_IMPL_2(CRSAKeyGenParameterSpec, Object, IRSAKeyGenParameterSpec, IAlgorithmParameterSpec)
 ECode CRSAKeyGenParameterSpec::GetKeysize(
     /* [out] */ Int32 *keySize)
 {

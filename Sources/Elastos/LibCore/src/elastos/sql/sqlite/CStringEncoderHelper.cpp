@@ -5,7 +5,7 @@
 namespace Elastos {
 namespace Sql {
 namespace SQLite {
-CAR_INTERFACE_IMPL(CStringEncoderHelper, Object, IStringEncoderHelper);
+CAR_INTERFACE_IMPL(CStringEncoderHelper, Object, IStringEncoderHelper)
 
 CAR_SINGLETON_IMPL(CStringEncoderHelper)
 

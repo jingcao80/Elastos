@@ -15,9 +15,9 @@ CarClass(CKeyStoreCallbackHandlerProtection)
     , public IKeyStoreProtectionParameter
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetCallbackHandler(
         /* [out] */ ICallbackHandler **handler);

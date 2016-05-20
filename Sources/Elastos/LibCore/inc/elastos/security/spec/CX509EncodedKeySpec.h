@@ -14,9 +14,9 @@ CarClass(CX509EncodedKeySpec)
     , public IX509EncodedKeySpec
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetEncoded(
         /* [out, callee] */ ArrayOf<Byte> **encoded);

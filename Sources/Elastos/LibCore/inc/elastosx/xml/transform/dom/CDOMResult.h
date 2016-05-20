@@ -29,9 +29,9 @@ CarClass(CDOMResult)
     , public IResult
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * <p>Zero-argument default constructor.</p>

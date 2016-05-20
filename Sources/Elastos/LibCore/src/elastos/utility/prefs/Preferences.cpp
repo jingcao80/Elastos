@@ -28,7 +28,7 @@ static AutoPtr<IPreferencesFactory> InitFactory()
 
 AutoPtr<IPreferencesFactory> Preferences::mFactory = InitFactory();
 
-CAR_INTERFACE_IMPL(Preferences, Object, IPreferences);
+CAR_INTERFACE_IMPL(Preferences, Object, IPreferences)
 
 AutoPtr<IPreferencesFactory> Preferences::SetPreferencesFactory(
     /* [in] */ IPreferencesFactory* pf)

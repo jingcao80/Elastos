@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CPKIXCertPathValidatorResult);
+CAR_OBJECT_IMPL(CPKIXCertPathValidatorResult)
 ECode CPKIXCertPathValidatorResult::constructor(
     /* [in] */ ITrustAnchor *trustAnchor,
     /* [in] */ IPolicyNode *policyTree,

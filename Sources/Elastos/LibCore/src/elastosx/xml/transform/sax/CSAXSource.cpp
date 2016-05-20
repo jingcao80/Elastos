@@ -12,8 +12,8 @@ namespace Xml {
 namespace Transform {
 namespace Sax {
 
-CAR_OBJECT_IMPL(CSAXSource);
-CAR_INTERFACE_IMPL_2(CSAXSource, Object, ISAXSource, ISource);
+CAR_OBJECT_IMPL(CSAXSource)
+CAR_INTERFACE_IMPL_2(CSAXSource, Object, ISAXSource, ISource)
 
 CSAXSource::CSAXSource()
 { }

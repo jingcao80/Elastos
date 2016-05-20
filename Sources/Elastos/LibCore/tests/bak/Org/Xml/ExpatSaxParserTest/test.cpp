@@ -122,7 +122,7 @@ public:
     Boolean twoEnded;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_IMPL();
 
     void Validate() {
         assert(documentEnded);
@@ -321,7 +321,7 @@ public:
     }
 };
 
-CAR_INTERFACE_IMPL(NamespaceHandler, IContentHandler);
+CAR_INTERFACE_IMPL(NamespaceHandler, IContentHandler)
 
 int CTest::testNamespaces(int argc, char* argv[])
 {

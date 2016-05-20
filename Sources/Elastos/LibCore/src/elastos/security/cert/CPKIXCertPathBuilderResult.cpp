@@ -8,8 +8,8 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CPKIXCertPathBuilderResult);
-CAR_INTERFACE_IMPL(CPKIXCertPathBuilderResult, PKIXCertPathValidatorResult, IPKIXCertPathBuilderResult,ICertPathBuilderResult);
+CAR_OBJECT_IMPL(CPKIXCertPathBuilderResult)
+CAR_INTERFACE_IMPL(CPKIXCertPathBuilderResult, PKIXCertPathValidatorResult, IPKIXCertPathBuilderResult,ICertPathBuilderResult)
 ECode CPKIXCertPathBuilderResult::ToString(
     /* [out] */ String *str)
 {

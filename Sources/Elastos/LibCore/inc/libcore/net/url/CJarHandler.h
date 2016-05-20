@@ -19,7 +19,7 @@ CarClass(CJarHandler)
     , public IJarHandler
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 

@@ -4,8 +4,8 @@
 namespace Elastos {
 namespace Security {
 
-CAR_OBJECT_IMPL(CAccessControlContext);
-CAR_INTERFACE_IMPL(CAccessControlContext, Object, IAccessControlContext);
+CAR_OBJECT_IMPL(CAccessControlContext)
+CAR_INTERFACE_IMPL(CAccessControlContext, Object, IAccessControlContext)
 ECode CAccessControlContext::CheckPermission(
     /* [in] */ IPermission *perm)
 {

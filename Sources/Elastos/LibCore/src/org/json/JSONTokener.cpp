@@ -21,7 +21,7 @@ using Elastos::Utility::Logging::Logger;
 namespace Org {
 namespace Json {
 
-CAR_INTERFACE_IMPL(JSONTokener, Object, IJSONTokener);
+CAR_INTERFACE_IMPL(JSONTokener, Object, IJSONTokener)
 
 JSONTokener::JSONTokener()
     : mIn(NULL)

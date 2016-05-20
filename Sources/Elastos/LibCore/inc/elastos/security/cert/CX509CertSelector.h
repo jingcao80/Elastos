@@ -27,9 +27,9 @@ CarClass(CX509CertSelector)
     , public ICloneable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a new {@code X509CertSelector}.

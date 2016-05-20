@@ -15,9 +15,9 @@ CarClass(CSinFunc)
     , public IFunction
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Function(
         /* [in] */ IFunctionContext* fc,

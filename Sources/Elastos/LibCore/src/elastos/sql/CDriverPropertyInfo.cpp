@@ -4,9 +4,9 @@
 namespace Elastos {
 namespace Sql {
 
-CAR_OBJECT_IMPL(CDriverPropertyInfo);
+CAR_OBJECT_IMPL(CDriverPropertyInfo)
 
-CAR_INTERFACE_IMPL(CDriverPropertyInfo, Object, IDriverPropertyInfo);
+CAR_INTERFACE_IMPL(CDriverPropertyInfo, Object, IDriverPropertyInfo)
 
 CDriverPropertyInfo::CDriverPropertyInfo()
     : mRequired(FALSE)

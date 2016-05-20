@@ -260,7 +260,7 @@ public:
         , public ISerializable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         /**
          * Creates a new <tt>ConditionObject</tt> instance.
          */

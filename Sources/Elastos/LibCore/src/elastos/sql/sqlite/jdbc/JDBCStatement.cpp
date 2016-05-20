@@ -12,7 +12,7 @@ namespace Sql {
 namespace SQLite {
 namespace JDBC{
 
-CAR_INTERFACE_IMPL_3(JDBCStatement, Object, IJDBCStatement, IStatement, IWrapper);
+CAR_INTERFACE_IMPL_3(JDBCStatement, Object, IJDBCStatement, IStatement, IWrapper)
 
 JDBCStatement::JDBCStatement()
 {

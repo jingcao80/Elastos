@@ -22,7 +22,7 @@ class JDBCStatement
     , public IWrapper
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JDBCStatement();
 

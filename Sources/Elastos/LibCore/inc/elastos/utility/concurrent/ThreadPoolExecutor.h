@@ -34,7 +34,7 @@ public:
         , public IRejectedExecutionHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Executes task r in the caller's thread, unless the executor
@@ -57,7 +57,7 @@ public:
         , public IRejectedExecutionHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Always throws RejectedExecutionException.
@@ -86,7 +86,7 @@ public:
         , public IRejectedExecutionHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Does nothing, which has the effect of discarding task r.
@@ -110,7 +110,7 @@ public:
         , public IRejectedExecutionHandler
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Obtains and ignores the next task that the executor
@@ -144,7 +144,7 @@ private:
         , public IRunnable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Creates with given first task and thread from ThreadFactory.

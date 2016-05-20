@@ -40,7 +40,7 @@ namespace Libcore {
 namespace Net {
 namespace Url {
 
-CAR_INTERFACE_IMPL(FileURLConnection::Comparator, Object, IComparator);
+CAR_INTERFACE_IMPL(FileURLConnection::Comparator, Object, IComparator)
 
 ECode FileURLConnection::Comparator::Compare(
     /* [in] */ IInterface* a,

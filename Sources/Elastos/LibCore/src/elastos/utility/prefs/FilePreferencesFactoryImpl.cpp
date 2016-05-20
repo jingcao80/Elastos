@@ -15,7 +15,7 @@ Boolean FilePreferencesFactoryImpl::sInit;// = FilePreferencesFactoryImpl::InitS
 AutoPtr<IPreferences> FilePreferencesFactoryImpl::USER_ROOT;
 AutoPtr<IPreferences> FilePreferencesFactoryImpl::SYSTEM_ROOT;
 
-CAR_INTERFACE_IMPL(FilePreferencesFactoryImpl, Object, IPreferencesFactory);
+CAR_INTERFACE_IMPL(FilePreferencesFactoryImpl, Object, IPreferencesFactory)
 
 Boolean FilePreferencesFactoryImpl::InitStatic()
 {

@@ -18,7 +18,7 @@ public:
 
     virtual ~TimeZoneGetter();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI_(AutoPtr<ITimeZoneGetter>) GetInstance();
 

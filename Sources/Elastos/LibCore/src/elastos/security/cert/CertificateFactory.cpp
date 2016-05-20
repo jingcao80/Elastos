@@ -35,7 +35,7 @@ CertificateFactory::CertificateFactory(
     , mType(type)
 {}
 
-CAR_INTERFACE_IMPL(CertificateFactory, Object, ICertificateFactory);
+CAR_INTERFACE_IMPL(CertificateFactory, Object, ICertificateFactory)
 
 ECode CertificateFactory::Aggregate(
     /* [in] */ AggregateType type,

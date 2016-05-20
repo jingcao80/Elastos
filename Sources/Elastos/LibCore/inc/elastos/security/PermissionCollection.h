@@ -18,7 +18,7 @@ class PermissionCollection
     , public ISerializable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI IsReadOnly(
         /* [out] */ Boolean *ret);

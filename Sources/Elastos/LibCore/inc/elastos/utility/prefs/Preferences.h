@@ -76,7 +76,7 @@ class Preferences
     , public IPreferences
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @hide for testing only.

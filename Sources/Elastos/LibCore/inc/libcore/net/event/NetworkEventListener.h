@@ -19,7 +19,7 @@ class NetworkEventListener
     , public INetworkEventListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI OnNetworkConfigurationChanged();
 };

@@ -16,7 +16,7 @@ class EventObject
     , public ISerializable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     EventObject();
 

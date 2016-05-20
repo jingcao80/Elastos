@@ -23,9 +23,9 @@ namespace Sql {
 const String CTimestamp::TIME_FORMAT_REGEX("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.*");
 const String CTimestamp::PADDING("000000000");
 
-CAR_INTERFACE_IMPL(CTimestamp, Date, ITimestamp);
+CAR_INTERFACE_IMPL(CTimestamp, Date, ITimestamp)
 
-CAR_OBJECT_IMPL(CTimestamp);
+CAR_OBJECT_IMPL(CTimestamp)
 
 CTimestamp::CTimestamp()
     : mNanos(0)

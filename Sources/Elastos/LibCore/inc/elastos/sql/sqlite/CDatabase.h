@@ -12,7 +12,7 @@ namespace SQLite {
 CarClass(CDatabase) , public Database
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace SQLite

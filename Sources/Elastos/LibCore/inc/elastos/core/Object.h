@@ -24,9 +24,9 @@ class ECO_PUBLIC Object
     , public IWeakReferenceSource
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     Object();
 

@@ -12,7 +12,7 @@ namespace Libcore {
 namespace Net {
 namespace Event {
 
-CAR_INTERFACE_IMPL(NetworkEventDispatcher, Object, INetworkEventDispatcher);
+CAR_INTERFACE_IMPL(NetworkEventDispatcher, Object, INetworkEventDispatcher)
 
 AutoPtr<INetworkEventDispatcher> NetworkEventDispatcher::sInstance = new NetworkEventDispatcher();
 

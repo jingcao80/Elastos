@@ -59,7 +59,7 @@ ECode Certificate::CertificateRep::ReadResolve(
 //----------------------------------------------------------------------
 //  Certificate
 //----------------------------------------------------------------------
-CAR_INTERFACE_IMPL_2(Certificate, Object, ICertificate, ISerializable);
+CAR_INTERFACE_IMPL_2(Certificate, Object, ICertificate, ISerializable)
 
 ECode Certificate::constructor(
     /* [in] */ const String& type)

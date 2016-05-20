@@ -32,7 +32,7 @@ AutoPtr<IList> AbstractPreferences::sEvents;
 Boolean AbstractPreferences::sStaticInit;// = AbstractPreferences::staticInit();
 // AutoPtr<EventDispatcher> AbstractPreferences::sDispatcher;
 
-CAR_INTERFACE_IMPL(AbstractPreferences, Preferences, IAbstractPreferences);
+CAR_INTERFACE_IMPL(AbstractPreferences, Preferences, IAbstractPreferences)
 
 Boolean AbstractPreferences::staticInit()
 {

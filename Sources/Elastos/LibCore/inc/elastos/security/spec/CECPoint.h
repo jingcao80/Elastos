@@ -15,9 +15,9 @@ CarClass(CECPoint)
     , public IECPoint
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI_(const AutoPtr<IECPoint>) InitStatic();
 

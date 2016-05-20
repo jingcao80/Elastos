@@ -20,7 +20,7 @@ private:
         , public IFilenameFilter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         FilenameFilter(
             /* [in] */ FilePreferencesImpl* host);
@@ -35,7 +35,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI ToString(
         /* [out] */ String* info);

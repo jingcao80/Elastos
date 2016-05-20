@@ -14,7 +14,7 @@ class EncodedKeySpec
     , public IKeySpec
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     EncodedKeySpec();
 

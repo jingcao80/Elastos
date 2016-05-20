@@ -30,7 +30,7 @@ AutoPtr<IInterface> CConcurrentSkipListMap::sBASE_HEADER;// = new CObject();
 
 CAR_INTERFACE_IMPL_5(CConcurrentSkipListMap, AbstractMap, INavigableMap, ISortedMap, IConcurrentMap, ICloneable, ISerializable)
 
-CAR_OBJECT_IMPL(CConcurrentSkipListMap);
+CAR_OBJECT_IMPL(CConcurrentSkipListMap)
 
 ECode CConcurrentSkipListMap::Initialize()
 {
@@ -1705,7 +1705,7 @@ ECode CConcurrentSkipListMap::Remove(
 //====================================================================
 // CConcurrentSkipListMap::Iter::
 //====================================================================
-CAR_INTERFACE_IMPL(CConcurrentSkipListMap::Iter, Object, IIterator);
+CAR_INTERFACE_IMPL(CConcurrentSkipListMap::Iter, Object, IIterator)
 
 CConcurrentSkipListMap::Iter::Iter(
     /* [in] */ CConcurrentSkipListMap* owner)
@@ -1875,7 +1875,7 @@ ECode CConcurrentSkipListMap::PutAll(
 //====================================================================
 // CConcurrentSkipListMap::_KeySet::
 //====================================================================
-CAR_INTERFACE_IMPL_2(CConcurrentSkipListMap::_KeySet, AbstractSet, ISortedSet, INavigableSet);
+CAR_INTERFACE_IMPL_2(CConcurrentSkipListMap::_KeySet, AbstractSet, ISortedSet, INavigableSet)
 
 CConcurrentSkipListMap::_KeySet::_KeySet(
     /* [in] */ INavigableMap* map)
@@ -3345,7 +3345,7 @@ ECode CConcurrentSkipListMap::_SubMap::Remove(
 //====================================================================
 // CConcurrentSkipListMap::_SubMap::SubMapIter::
 //====================================================================
-CAR_INTERFACE_IMPL(CConcurrentSkipListMap::_SubMap::SubMapIter, Object, IIterator);
+CAR_INTERFACE_IMPL(CConcurrentSkipListMap::_SubMap::SubMapIter, Object, IIterator)
 
 CConcurrentSkipListMap::_SubMap::SubMapIter::SubMapIter(
     /* [in] */ _SubMap* owner)

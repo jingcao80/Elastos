@@ -23,7 +23,7 @@ const String CertPathValidator::PROPERTY_NAME(String("certpathvalidator.type"));
 // property is not defined in java.security file
 const String CertPathValidator::DEFAULTPROPERTY(String("PKIX"));
 
-CAR_INTERFACE_IMPL(CertPathValidator, Object, ICertPathValidator);
+CAR_INTERFACE_IMPL(CertPathValidator, Object, ICertPathValidator)
 ECode CertPathValidator::GetAlgorithm(
     /* [out] */ String *algorithm)
 {

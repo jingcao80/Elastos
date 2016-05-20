@@ -47,7 +47,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * @param url

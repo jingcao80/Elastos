@@ -20,7 +20,7 @@ const Int64 TimeUnit::MAX = Elastos::Core::Math::INT64_MAX_VALUE;
 //=============================================================
 // TimeUnit
 //=============================================================
-CAR_INTERFACE_IMPL(TimeUnit, Object, ITimeUnit);
+CAR_INTERFACE_IMPL(TimeUnit, Object, ITimeUnit)
 
 Int64 TimeUnit::X(
     /* [in] */ Int64 d,

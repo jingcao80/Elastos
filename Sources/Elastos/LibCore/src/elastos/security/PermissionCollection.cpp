@@ -6,7 +6,7 @@ using Elastos::IO::EIID_ISerializable;
 namespace Elastos {
 namespace Security {
 
-CAR_INTERFACE_IMPL_2(PermissionCollection, Object, IPermissionCollection, ISerializable);
+CAR_INTERFACE_IMPL_2(PermissionCollection, Object, IPermissionCollection, ISerializable)
 
 ECode PermissionCollection::IsReadOnly(
     /* [out] */ Boolean *ret)

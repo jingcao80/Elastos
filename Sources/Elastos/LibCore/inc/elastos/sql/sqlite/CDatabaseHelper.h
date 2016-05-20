@@ -14,7 +14,7 @@ CarClass(CDatabaseHelper)
     , public IDatabaseHelper
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CAR_SINGLETON_DECL();
 

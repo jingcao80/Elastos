@@ -31,7 +31,7 @@ class PreferenceChangeEvent
     , public IPreferenceChangeEvent
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PreferenceChangeEvent();
 

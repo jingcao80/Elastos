@@ -9,8 +9,8 @@ AutoPtr<IEngine> CAlgorithmParameterGenerator::ENGINE;
 AutoPtr<ISecureRandom> CAlgorithmParameterGenerator::RANDOM;
 Boolean CAlgorithmParameterGenerator::sInit = sInitStatic();
 
-CAR_OBJECT_IMPL(CAlgorithmParameterGenerator);
-CAR_INTERFACE_IMPL(CAlgorithmParameterGenerator, Object, IAlgorithmParameterGenerator);
+CAR_OBJECT_IMPL(CAlgorithmParameterGenerator)
+CAR_INTERFACE_IMPL(CAlgorithmParameterGenerator, Object, IAlgorithmParameterGenerator)
 
 Boolean CAlgorithmParameterGenerator::sInitStatic()
 {

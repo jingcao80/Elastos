@@ -8,7 +8,7 @@ namespace Utility {
 //==========================================================
 //       LinkedHashMap
 //==========================================================
-CAR_INTERFACE_IMPL(LinkedHashMap, HashMap, ILinkedHashMap);
+CAR_INTERFACE_IMPL(LinkedHashMap, HashMap, ILinkedHashMap)
 
 LinkedHashMap::~LinkedHashMap()
 {
@@ -406,7 +406,7 @@ ECode LinkedHashMap::Clone(
 //==========================================================
 //       LinkedHashMap::LinkedHashIterator
 //==========================================================
-CAR_INTERFACE_IMPL(LinkedHashMap::LinkedHashIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(LinkedHashMap::LinkedHashIterator, Object, IIterator)
 
 LinkedHashMap::LinkedHashIterator::LinkedHashIterator(
     /* [in] */ LinkedHashMap* host)

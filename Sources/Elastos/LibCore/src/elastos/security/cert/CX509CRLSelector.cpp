@@ -19,8 +19,8 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CX509CRLSelector);
-CAR_INTERFACE_IMPL_3(CX509CRLSelector, Object, IX509CRLSelector, ICRLSelector, ICloneable);
+CAR_OBJECT_IMPL(CX509CRLSelector)
+CAR_INTERFACE_IMPL_3(CX509CRLSelector, Object, IX509CRLSelector, ICRLSelector, ICloneable)
 CX509CRLSelector::CX509CRLSelector()
     : mDateAndTime(-1)
 {}

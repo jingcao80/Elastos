@@ -10,8 +10,8 @@ using Elastos::Core::StringUtils;
 namespace Elastos {
 namespace Security {
 
-CAR_OBJECT_IMPL(CKeyStorePrivateKeyEntry);
-CAR_INTERFACE_IMPL_2(CKeyStorePrivateKeyEntry, Object, IKeyStorePrivateKeyEntry, IKeyStoreEntry);
+CAR_OBJECT_IMPL(CKeyStorePrivateKeyEntry)
+CAR_INTERFACE_IMPL_2(CKeyStorePrivateKeyEntry, Object, IKeyStorePrivateKeyEntry, IKeyStoreEntry)
 ECode CKeyStorePrivateKeyEntry::GetPrivateKey(
     /* [out] */ IPrivateKey **privateKey)
 {

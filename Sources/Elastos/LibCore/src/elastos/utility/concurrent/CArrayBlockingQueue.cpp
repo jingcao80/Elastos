@@ -21,7 +21,7 @@ namespace Concurrent {
 //==========================================================
 CAR_INTERFACE_IMPL_3(CArrayBlockingQueue, AbstractQueue, IArrayBlockingQueue, IBlockingQueue, ISerializable)
 
-CAR_OBJECT_IMPL(CArrayBlockingQueue);
+CAR_OBJECT_IMPL(CArrayBlockingQueue)
 
 CArrayBlockingQueue::CArrayBlockingQueue()
     : mTakeIndex(0)

@@ -7,8 +7,8 @@ namespace Xml {
 namespace Transform {
 namespace Sax {
 
-CAR_OBJECT_IMPL(CSAXResult);
-CAR_INTERFACE_IMPL_2(CSAXResult, Object, ISAXResult, IResult);
+CAR_OBJECT_IMPL(CSAXResult)
+CAR_INTERFACE_IMPL_2(CSAXResult, Object, ISAXResult, IResult)
 
 CSAXResult::CSAXResult()
 {

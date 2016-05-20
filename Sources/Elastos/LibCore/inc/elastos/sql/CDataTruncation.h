@@ -18,9 +18,9 @@ CarClass(CDataTruncation)
     , public ISerializable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CDataTruncation();
 

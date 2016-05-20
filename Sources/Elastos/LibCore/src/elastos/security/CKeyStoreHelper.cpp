@@ -6,7 +6,7 @@ namespace Elastos {
 namespace Security {
 
 CAR_SINGLETON_IMPL(CKeyStoreHelper);
-CAR_INTERFACE_IMPL(CKeyStoreHelper, Singleton, IKeyStoreHelper);
+CAR_INTERFACE_IMPL(CKeyStoreHelper, Singleton, IKeyStoreHelper)
 ECode CKeyStoreHelper::GetInstance(
     /* [in] */ const String& type,
     /* [out] */ IKeyStore **instance)

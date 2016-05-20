@@ -15,9 +15,9 @@ CarClass(CTime)
     , public ITime
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI GetDate(
         /* [out] */ Int32 * pDate);

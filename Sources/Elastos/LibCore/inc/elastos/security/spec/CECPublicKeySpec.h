@@ -14,9 +14,9 @@ CarClass(CECPublicKeySpec)
     , public IKeySpec
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetParams(
         /* [out] */ IECParameterSpec **params);

@@ -35,7 +35,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Compare(
             /* [in] */ IInterface* a,
@@ -44,7 +44,7 @@ private:
 };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FileURLConnection();
 

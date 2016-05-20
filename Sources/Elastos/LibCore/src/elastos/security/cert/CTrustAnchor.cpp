@@ -10,8 +10,8 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CTrustAnchor);
-CAR_INTERFACE_IMPL(CTrustAnchor, Object, ITrustAnchor);
+CAR_OBJECT_IMPL(CTrustAnchor)
+CAR_INTERFACE_IMPL(CTrustAnchor, Object, ITrustAnchor)
 ECode CTrustAnchor::GetNameConstraints(
     /* [out, callee] */ ArrayOf<Byte> **nameConstraints)
 {

@@ -12,7 +12,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_INTERFACE_IMPL_2(X509Certificate, Certificate, IX509Certificate, IX509Extension);
+CAR_INTERFACE_IMPL_2(X509Certificate, Certificate, IX509Certificate, IX509Extension)
 
 ECode X509Certificate::constructor()
 {

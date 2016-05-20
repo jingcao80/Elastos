@@ -16,7 +16,7 @@ class NodeSet
     , public INodeList
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     NodeSet(
         /* [in] */ IIterator* nodes);

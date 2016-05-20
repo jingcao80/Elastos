@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CRSAPrivateKeySpec);
+CAR_OBJECT_IMPL(CRSAPrivateKeySpec)
 ECode CRSAPrivateKeySpec::constructor(
     /* [in] */ IBigInteger *modulus,
     /* [in] */ IBigInteger *privateExponent)

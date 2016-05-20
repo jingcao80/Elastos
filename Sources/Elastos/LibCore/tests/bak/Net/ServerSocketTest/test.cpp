@@ -5,7 +5,7 @@
 //====================================================================
 // CTest::MyRunnable::
 //====================================================================
-CAR_INTERFACE_IMPL(CTest::MyRunnable, IRunnable);
+CAR_INTERFACE_IMPL(CTest::MyRunnable, IRunnable)
 
 CTest::MyRunnable::MyRunnable(IServerSocket* serv, ArrayOf<ISocket*>* arr)
 {

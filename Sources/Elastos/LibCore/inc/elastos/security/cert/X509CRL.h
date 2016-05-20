@@ -21,7 +21,7 @@ class X509CRL
     , public IX509Extension
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI Equals(
         /* [in] */ IInterface *other,

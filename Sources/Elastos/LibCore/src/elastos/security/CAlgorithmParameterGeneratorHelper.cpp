@@ -6,7 +6,7 @@ namespace Elastos {
 namespace Security {
 
 CAR_SINGLETON_IMPL(CAlgorithmParameterGeneratorHelper);
-CAR_INTERFACE_IMPL(CAlgorithmParameterGeneratorHelper, Singleton, IAlgorithmParameterGeneratorHelper);
+CAR_INTERFACE_IMPL(CAlgorithmParameterGeneratorHelper, Singleton, IAlgorithmParameterGeneratorHelper)
 ECode CAlgorithmParameterGeneratorHelper::GetInstance(
     /* [in] */ const String& algorithm,
     /* [out] */ IAlgorithmParameterGenerator** generator) /*throws NoSuchAlgorithmException*/

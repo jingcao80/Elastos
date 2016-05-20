@@ -8,7 +8,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CPKIXBuilderParameters);
+CAR_OBJECT_IMPL(CPKIXBuilderParameters)
 CPKIXBuilderParameters::CPKIXBuilderParameters()
     : mMaxPathLength(5)
 {}

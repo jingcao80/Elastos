@@ -19,7 +19,7 @@ class Signature
     friend class SignatureImpl;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns a new instance of {@code Signature} that utilizes the specified

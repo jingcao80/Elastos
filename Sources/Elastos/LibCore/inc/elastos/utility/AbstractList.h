@@ -475,7 +475,7 @@ private:
             /* [in] */ Int32 offset,
             /* [in] */ Int32 length);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Add(
             /* [in] */ IInterface* object);
@@ -580,7 +580,7 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 };
 
 } // namespace Utility

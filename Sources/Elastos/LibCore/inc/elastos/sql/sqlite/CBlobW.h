@@ -17,9 +17,9 @@ CarClass(CBlobW)
     , public IBlobW
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CBlobW();
 

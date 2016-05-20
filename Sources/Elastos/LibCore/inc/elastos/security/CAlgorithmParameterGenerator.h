@@ -18,9 +18,9 @@ CarClass(CAlgorithmParameterGenerator)
     , public IAlgorithmParameterGenerator
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Constructs a new instance of {@code AlgorithmParameterGenerator} with the

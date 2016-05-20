@@ -5,8 +5,8 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CEllipticCurve);
-CAR_INTERFACE_IMPL(CEllipticCurve, Object, IEllipticCurve);
+CAR_OBJECT_IMPL(CEllipticCurve)
+CAR_INTERFACE_IMPL(CEllipticCurve, Object, IEllipticCurve)
 ECode CEllipticCurve::GetA(
     /* [out] */ IBigInteger **a)
 {

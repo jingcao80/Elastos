@@ -4,8 +4,8 @@
 namespace Elastos {
 namespace Security {
 
-CAR_OBJECT_IMPL(CKeyStoreCallbackHandlerProtection);
-CAR_INTERFACE_IMPL_2(CKeyStoreCallbackHandlerProtection, Object, IKeyStoreCallbackHandlerProtection, IKeyStoreProtectionParameter);
+CAR_OBJECT_IMPL(CKeyStoreCallbackHandlerProtection)
+CAR_INTERFACE_IMPL_2(CKeyStoreCallbackHandlerProtection, Object, IKeyStoreCallbackHandlerProtection, IKeyStoreProtectionParameter)
 ECode CKeyStoreCallbackHandlerProtection::GetCallbackHandler(
     /* [out] */ ICallbackHandler **handler)
 {

@@ -6,7 +6,7 @@ namespace Elastos {
 namespace Security {
 
 CAR_SINGLETON_IMPL(CAccessController);
-CAR_INTERFACE_IMPL(CAccessController, Singleton, IAccessController);
+CAR_INTERFACE_IMPL(CAccessController, Singleton, IAccessController)
 ECode CAccessController::DoPrivileged(
     /* [in] */ IPrivilegedAction *action,
     /* [out] */ IInterface **result)

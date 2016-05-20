@@ -17,9 +17,9 @@ CarClass(CBlobR)
     , public IBlobR
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI Available(
         /* [out] */ Int32* number);

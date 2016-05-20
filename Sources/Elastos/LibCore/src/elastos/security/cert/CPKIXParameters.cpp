@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CPKIXParameters);
+CAR_OBJECT_IMPL(CPKIXParameters)
 
 ECode CPKIXParameters::constructor()
 {

@@ -5,8 +5,8 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CDSAParameterSpec);
-CAR_INTERFACE_IMPL_2(CDSAParameterSpec, Object, IDSAParams, IAlgorithmParameterSpec);
+CAR_OBJECT_IMPL(CDSAParameterSpec)
+CAR_INTERFACE_IMPL_2(CDSAParameterSpec, Object, IDSAParams, IAlgorithmParameterSpec)
 ECode CDSAParameterSpec::GetG(
     /* [out] */ IBigInteger **base)
 {

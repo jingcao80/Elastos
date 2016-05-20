@@ -8,8 +8,8 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_OBJECT_IMPL(CPolicyQualifierInfo);
-CAR_INTERFACE_IMPL(CPolicyQualifierInfo, Object, IPolicyQualifierInfo);
+CAR_OBJECT_IMPL(CPolicyQualifierInfo)
+CAR_INTERFACE_IMPL(CPolicyQualifierInfo, Object, IPolicyQualifierInfo)
 ECode CPolicyQualifierInfo::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> **encoded)
 {

@@ -24,7 +24,7 @@ CPriorityQueue::PriorityIterator::PriorityIterator(
 {
 }
 
-CAR_INTERFACE_IMPL(CPriorityQueue::PriorityIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(CPriorityQueue::PriorityIterator, Object, IIterator)
 
 ECode CPriorityQueue::PriorityIterator::HasNext(
     /* [out] */ Boolean* value)

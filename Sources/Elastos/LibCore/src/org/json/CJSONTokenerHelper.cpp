@@ -7,7 +7,7 @@ namespace Json {
 
 CAR_SINGLETON_IMPL(CJSONTokenerHelper);
 
-CAR_INTERFACE_IMPL(CJSONTokenerHelper, Singleton, IJSONTokenerHelper);
+CAR_INTERFACE_IMPL(CJSONTokenerHelper, Singleton, IJSONTokenerHelper)
 
 ECode CJSONTokenerHelper::Dehexchar(
     /* [in] */ Char32 hex,

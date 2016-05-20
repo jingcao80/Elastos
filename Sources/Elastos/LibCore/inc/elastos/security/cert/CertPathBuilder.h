@@ -20,7 +20,7 @@ class CertPathBuilder
     , public ICertPathBuilder
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI GetInstance(
     /* [in] */ const String& algorithm,

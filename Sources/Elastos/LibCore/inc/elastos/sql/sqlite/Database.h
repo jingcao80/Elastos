@@ -16,7 +16,7 @@ class Database
     , public IDatabase
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Database();
     ~Database();

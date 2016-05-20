@@ -3493,7 +3493,7 @@ ECode CTreeMap::SubMap::GetValues(
 //==========================================================
 //       CTreeMap::OrderComparator
 //==========================================================
-CAR_INTERFACE_IMPL(CTreeMap::OrderComparator, Object, IComparator);
+CAR_INTERFACE_IMPL(CTreeMap::OrderComparator, Object, IComparator)
 
 ECode CTreeMap::OrderComparator::Compare(
     /* [in] */ IInterface* lhs,

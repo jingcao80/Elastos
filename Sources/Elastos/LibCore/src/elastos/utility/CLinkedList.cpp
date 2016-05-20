@@ -50,7 +50,7 @@ CLinkedList::LinkIterator::LinkIterator(
     }
 }
 
-CAR_INTERFACE_IMPL_2(CLinkedList::LinkIterator, Object, IListIterator, IIterator);
+CAR_INTERFACE_IMPL_2(CLinkedList::LinkIterator, Object, IListIterator, IIterator)
 
 ECode CLinkedList::LinkIterator::Add(
     /* [in] */ IInterface* object)
@@ -220,7 +220,7 @@ CLinkedList::ReverseLinkIterator::ReverseLinkIterator(
     mLink = mList->mVoidLink;
 }
 
-CAR_INTERFACE_IMPL(CLinkedList::ReverseLinkIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(CLinkedList::ReverseLinkIterator, Object, IIterator)
 
 ECode CLinkedList::ReverseLinkIterator::HasNext(
     /* [out] */ Boolean* result)

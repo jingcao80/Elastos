@@ -34,7 +34,7 @@ protected:
     SAXTransformerFactory();
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Get a TransformerHandler object that can process SAX

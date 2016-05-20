@@ -636,7 +636,7 @@ ECode CIdentityHashMap::IdentityHashMapEntry::SetValue(
 //==========================================================
 //       CIdentityHashMap::IdentityHashMapIterator
 //==========================================================
-CAR_INTERFACE_IMPL(CIdentityHashMap::IdentityHashMapIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(CIdentityHashMap::IdentityHashMapIterator, Object, IIterator)
 
 CIdentityHashMap::IdentityHashMapIterator::IdentityHashMapIterator(
     /* [in] */ MapEntry::Type* value,

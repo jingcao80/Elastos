@@ -6,8 +6,8 @@ namespace Elastos {
 namespace Sql {
 namespace SQLite {
 
-CAR_OBJECT_IMPL(CFunctionContext);
-CAR_INTERFACE_IMPL(CFunctionContext, Object, IFunctionContext);
+CAR_OBJECT_IMPL(CFunctionContext)
+CAR_INTERFACE_IMPL(CFunctionContext, Object, IFunctionContext)
 
 CFunctionContext::CFunctionContext()
     : mHandle(0)

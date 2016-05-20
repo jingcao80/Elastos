@@ -7,8 +7,8 @@ namespace Xml {
 namespace Transform {
 namespace Dom {
 
-CAR_OBJECT_IMPL(CDOMSource);
-CAR_INTERFACE_IMPL_2(CDOMSource, Object, IDOMSource, ISource);
+CAR_OBJECT_IMPL(CDOMSource)
+CAR_INTERFACE_IMPL_2(CDOMSource, Object, IDOMSource, ISource)
 
 ECode CDOMSource::constructor()
 {

@@ -65,7 +65,7 @@ private:
     AutoPtr<MessageDigestSpi> mSpiImpl;
 };
 
-CAR_INTERFACE_IMPL(MessageDigestImpl, MessageDigest, ICloneable);
+CAR_INTERFACE_IMPL(MessageDigestImpl, MessageDigest, ICloneable)
 MessageDigestImpl::MessageDigestImpl(
     /* [in] */ MessageDigestSpi* messageDigestSpi,
     /* [in] */ IProvider* provider,
@@ -129,7 +129,7 @@ ECode MessageDigestImpl::Clone(
 //---------------------------------------------------------------------
 const AutoPtr<IEngine> MessageDigest::ENGINE = Init_ENGINE();
 
-CAR_INTERFACE_IMPL(MessageDigest, MessageDigestSpi, IMessageDigest);
+CAR_INTERFACE_IMPL(MessageDigest, MessageDigestSpi, IMessageDigest)
 MessageDigest::MessageDigest(
     /* [in] */ const String& algorithm)
     : mAlgorithm(algorithm)

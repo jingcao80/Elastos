@@ -14,7 +14,7 @@ CarClass(CText)
     , public IText
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetNodeName(
         /* [out] */ String * pStr);

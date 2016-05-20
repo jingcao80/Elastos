@@ -40,7 +40,7 @@ Boolean CCountDownLatch::Sync::TryReleaseShared(
 
 CAR_INTERFACE_IMPL(CCountDownLatch, Object, ICountDownLatch)
 
-CAR_OBJECT_IMPL(CCountDownLatch);
+CAR_OBJECT_IMPL(CCountDownLatch)
 
 ECode CCountDownLatch::constructor(
     /* [in] */ Int32 count)

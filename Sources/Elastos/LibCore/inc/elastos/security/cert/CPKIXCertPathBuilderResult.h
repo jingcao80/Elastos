@@ -17,9 +17,9 @@ CarClass(CPKIXCertPathBuilderResult)
     , public ICertPathBuilderResult
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI ToString(
         /* [out] */ String * pStr);

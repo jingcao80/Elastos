@@ -23,7 +23,7 @@ public:
      */
     CFileDescriptor();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
     /**

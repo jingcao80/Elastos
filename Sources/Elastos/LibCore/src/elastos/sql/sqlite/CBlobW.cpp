@@ -4,9 +4,9 @@ namespace Elastos {
 namespace Sql {
 namespace SQLite {
 
-CAR_OBJECT_IMPL(CBlobW);
+CAR_OBJECT_IMPL(CBlobW)
 
-CAR_INTERFACE_IMPL(CBlobW, OutputStream, IBlobW);
+CAR_INTERFACE_IMPL(CBlobW, OutputStream, IBlobW)
 
 CBlobW::CBlobW()
     : mPos(0)

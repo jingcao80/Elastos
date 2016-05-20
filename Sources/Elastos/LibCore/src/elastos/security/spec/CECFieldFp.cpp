@@ -5,8 +5,8 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CECFieldFp);
-CAR_INTERFACE_IMPL_2(CECFieldFp, Object, IECFieldFp, IECField);
+CAR_OBJECT_IMPL(CECFieldFp)
+CAR_INTERFACE_IMPL_2(CECFieldFp, Object, IECFieldFp, IECField)
 ECode CECFieldFp::GetFieldSize(
     /* [out] */ Int32 *size)
 {

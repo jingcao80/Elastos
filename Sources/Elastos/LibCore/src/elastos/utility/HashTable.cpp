@@ -20,7 +20,7 @@ namespace Utility {
 //==========================================================
 //       HashTable::HashtableEntry
 //==========================================================
-CAR_INTERFACE_IMPL(HashTable::HashtableEntry, Object, IMapEntry);
+CAR_INTERFACE_IMPL(HashTable::HashtableEntry, Object, IMapEntry)
 
 HashTable::HashtableEntry::HashtableEntry(
     /* [in] */ IInterface* key,
@@ -200,7 +200,7 @@ ECode HashTable::HashIterator::Remove()
 //==========================================================
 //       HashTable::KeyIterator
 //==========================================================
-CAR_INTERFACE_IMPL(HashTable::KeyIterator, HashTable::HashIterator, IIterator);
+CAR_INTERFACE_IMPL(HashTable::KeyIterator, HashTable::HashIterator, IIterator)
 
 HashTable::KeyIterator::KeyIterator(
     /* [in] */ HashTable* host)
@@ -234,7 +234,7 @@ ECode HashTable::KeyIterator::Remove()
 //==========================================================
 //       HashTable::ValueIterator
 //==========================================================
-CAR_INTERFACE_IMPL(HashTable::ValueIterator, HashTable::HashIterator, IIterator);
+CAR_INTERFACE_IMPL(HashTable::ValueIterator, HashTable::HashIterator, IIterator)
 
 HashTable::ValueIterator::ValueIterator(
     /* [in] */ HashTable* host)
@@ -268,7 +268,7 @@ ECode HashTable::ValueIterator::Remove()
 //==========================================================
 //       HashTable::EntryIterator
 //==========================================================
-CAR_INTERFACE_IMPL(HashTable::EntryIterator, HashTable::HashIterator, IIterator);
+CAR_INTERFACE_IMPL(HashTable::EntryIterator, HashTable::HashIterator, IIterator)
 
 HashTable::EntryIterator::EntryIterator(
     /* [in] */ HashTable* host)
@@ -302,7 +302,7 @@ ECode HashTable::EntryIterator::Remove()
 //==========================================================
 //       HashTable::KeyEnumeration
 //==========================================================
-CAR_INTERFACE_IMPL(HashTable::KeyEnumeration, HashTable::HashIterator, IEnumeration);
+CAR_INTERFACE_IMPL(HashTable::KeyEnumeration, HashTable::HashIterator, IEnumeration)
 
 HashTable::KeyEnumeration::KeyEnumeration(
     /* [in] */ HashTable* host)
@@ -331,7 +331,7 @@ ECode HashTable::KeyEnumeration::GetNextElement(
 //==========================================================
 //       HashTable::ValueEnumeration
 //==========================================================
-CAR_INTERFACE_IMPL(HashTable::ValueEnumeration, HashTable::HashIterator, IEnumeration);
+CAR_INTERFACE_IMPL(HashTable::ValueEnumeration, HashTable::HashIterator, IEnumeration)
 
 HashTable::ValueEnumeration::ValueEnumeration(
     /* [in] */ HashTable* host)
@@ -774,7 +774,7 @@ ECode HashTable::_EntrySet::ToArray(
 //       HashTable
 //==========================================================
 
-CAR_INTERFACE_IMPL_5(HashTable, Object, IHashTable, IDictionary, IMap, ICloneable, ISerializable);
+CAR_INTERFACE_IMPL_5(HashTable, Object, IHashTable, IDictionary, IMap, ICloneable, ISerializable)
 
 const Int32 HashTable::MINIMUM_CAPACITY;
 

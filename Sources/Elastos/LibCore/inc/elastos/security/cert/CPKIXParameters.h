@@ -12,7 +12,7 @@ namespace Cert {
 CarClass(CPKIXParameters), public PKIXParameters
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor();
 

@@ -31,8 +31,8 @@ AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::InitStatic()
     return tmp;
 }
 
-CAR_OBJECT_IMPL(CMGF1ParameterSpec);
-CAR_INTERFACE_IMPL_2(CMGF1ParameterSpec, Object, IMGF1ParameterSpec, IAlgorithmParameterSpec);
+CAR_OBJECT_IMPL(CMGF1ParameterSpec)
+CAR_INTERFACE_IMPL_2(CMGF1ParameterSpec, Object, IMGF1ParameterSpec, IAlgorithmParameterSpec)
 ECode CMGF1ParameterSpec::GetDigestAlgorithm(
     /* [out] */ String *algorithm)
 {

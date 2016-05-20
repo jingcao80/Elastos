@@ -149,7 +149,7 @@ class NANOSECONDS
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };
@@ -158,7 +158,7 @@ class MICROSECONDS
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };
@@ -167,7 +167,7 @@ class MILLISECONDS
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };
@@ -176,7 +176,7 @@ class SECONDS
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };
@@ -185,7 +185,7 @@ class MINUTES
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };
@@ -194,7 +194,7 @@ class HOURS
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };
@@ -203,7 +203,7 @@ class DAYS
     : public TimeUnit
 {
 public:
-//    CAR_INTERFACE_DECL();
+//    CAR_INTERFACE_DECL()
 
     ITIMEUNIT_METHODS_DECL();
 };

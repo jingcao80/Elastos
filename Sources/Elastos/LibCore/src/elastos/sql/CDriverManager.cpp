@@ -26,7 +26,7 @@ AutoPtr<IPrintWriter> CDriverManager::mThePrintWriter;
 Int32 CDriverManager::mLoginTimeout = 0;
 Boolean CDriverManager::mIsInitflag = FALSE;
 
-CAR_INTERFACE_IMPL(CDriverManager, Object, IDriverManager);
+CAR_INTERFACE_IMPL(CDriverManager, Object, IDriverManager)
 
 CAR_SINGLETON_IMPL(CDriverManager);
 

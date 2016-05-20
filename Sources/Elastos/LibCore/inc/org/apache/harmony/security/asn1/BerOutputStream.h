@@ -21,7 +21,7 @@ class BerOutputStream
 public:
     BerOutputStream();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI EncodeTag(
         /* [in] */ Int32 tag);

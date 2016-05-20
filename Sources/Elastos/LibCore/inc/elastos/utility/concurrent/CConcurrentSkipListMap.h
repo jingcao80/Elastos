@@ -177,7 +177,7 @@ public:
         , public Object
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Iter(
             /* [in] */ CConcurrentSkipListMap* owner);
@@ -239,7 +239,7 @@ public:
         , public ISortedSet
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _KeySet(
             /* [in] */ INavigableMap* map);
@@ -506,7 +506,7 @@ public:
             , public Object
         {
         public:
-            CAR_INTERFACE_DECL();
+            CAR_INTERFACE_DECL()
 
             SubMapIter(
                 /* [in] */ _SubMap* owner);
@@ -564,7 +564,7 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         _SubMap(
             /* [in] */ CConcurrentSkipListMap* map,

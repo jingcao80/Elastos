@@ -17,7 +17,7 @@ namespace Cert {
 CarClass(CPKIXBuilderParameters), public PKIXParameters
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CPKIXBuilderParameters();
 

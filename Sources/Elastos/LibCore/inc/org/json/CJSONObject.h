@@ -12,7 +12,7 @@ CarClass(CJSONObject)
     , public JSONObject
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } //namespace Json

@@ -28,9 +28,9 @@ CarClass(CStreamResult)
     , public IResult
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Zero-argument default constructor.

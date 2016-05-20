@@ -34,7 +34,7 @@ const Boolean ThreadPoolExecutor::ONLY_ONE;
 //==========================================================
 //         ThreadPoolExecutor::Worker
 //==========================================================
-CAR_INTERFACE_IMPL(ThreadPoolExecutor::Worker, AbstractQueuedSynchronizer, IRunnable);
+CAR_INTERFACE_IMPL(ThreadPoolExecutor::Worker, AbstractQueuedSynchronizer, IRunnable)
 
 ThreadPoolExecutor::Worker::Worker(
     /* [in] */ IRunnable* firstTask,
@@ -83,7 +83,7 @@ Boolean ThreadPoolExecutor::Worker::TryRelease(
 //==========================================================
 //         ThreadPoolExecutor::CallerRunsPolicy
 //==========================================================
-CAR_INTERFACE_IMPL(ThreadPoolExecutor::CallerRunsPolicy, Object, IRejectedExecutionHandler);
+CAR_INTERFACE_IMPL(ThreadPoolExecutor::CallerRunsPolicy, Object, IRejectedExecutionHandler)
 
 ECode ThreadPoolExecutor::CallerRunsPolicy::RejectedExecution(
     /* [in] */ IRunnable* r,
@@ -100,19 +100,19 @@ ECode ThreadPoolExecutor::CallerRunsPolicy::RejectedExecution(
 //==========================================================
 //         ThreadPoolExecutor::AbortPolicy
 //==========================================================
-CAR_INTERFACE_IMPL(ThreadPoolExecutor::AbortPolicy, Object, IRejectedExecutionHandler);
+CAR_INTERFACE_IMPL(ThreadPoolExecutor::AbortPolicy, Object, IRejectedExecutionHandler)
 
 
 //==========================================================
 //         ThreadPoolExecutor::DiscardPolicy
 //==========================================================
-CAR_INTERFACE_IMPL(ThreadPoolExecutor::DiscardPolicy, Object, IRejectedExecutionHandler);
+CAR_INTERFACE_IMPL(ThreadPoolExecutor::DiscardPolicy, Object, IRejectedExecutionHandler)
 
 
 //==========================================================
 //         ThreadPoolExecutor::DiscardOldestPolicy
 //==========================================================
-CAR_INTERFACE_IMPL(ThreadPoolExecutor::DiscardOldestPolicy, Object, IRejectedExecutionHandler);
+CAR_INTERFACE_IMPL(ThreadPoolExecutor::DiscardOldestPolicy, Object, IRejectedExecutionHandler)
 
 ECode ThreadPoolExecutor::DiscardOldestPolicy::RejectedExecution(
     /* [in] */ IRunnable* r,

@@ -58,7 +58,7 @@ class JSONTokener
     , public IJSONTokener
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JSONTokener();
 

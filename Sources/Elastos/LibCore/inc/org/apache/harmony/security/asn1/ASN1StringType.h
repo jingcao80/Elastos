@@ -26,7 +26,7 @@ public:
     CARAPI constructor(
         /* [in] */ Int32 tagNumber);
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Tests provided identifier.

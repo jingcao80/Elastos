@@ -1105,7 +1105,7 @@ ECode CopyOnWriteArrayList::CowSubList::GetSubList(
 //==========================================================
 //       CopyOnWriteArrayList::CowIterator
 //==========================================================
-CAR_INTERFACE_IMPL_2(CopyOnWriteArrayList::CowIterator, Object, IListIterator, IIterator);
+CAR_INTERFACE_IMPL_2(CopyOnWriteArrayList::CowIterator, Object, IListIterator, IIterator)
 
 CopyOnWriteArrayList::CowIterator::CowIterator(
     /* [in] */ ArrayOf<IInterface*>* snapshot,

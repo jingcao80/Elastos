@@ -26,7 +26,7 @@ private:
         PriorityIterator(
             /* [in] */ CPriorityQueue* host);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI HasNext(
             /* [out] */ Boolean* value);
