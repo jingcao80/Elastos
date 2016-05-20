@@ -121,7 +121,7 @@ ECode MenuBuilder::RemoveMenuPresenter(
 {
     Int32 size;
     mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    for (Int32 i = size -1 ; i >= 0; i--) {
         AutoPtr<IInterface> elem;
         mPresenters->Get(i, (IInterface**)&elem);
         AutoPtr<IMenuPresenter> item;
@@ -129,9 +129,6 @@ ECode MenuBuilder::RemoveMenuPresenter(
 
         if (item == NULL || item.Get() == presenter) {
             mPresenters->Remove(elem);
-        }
-        else {
-            i++;
         }
     }
 

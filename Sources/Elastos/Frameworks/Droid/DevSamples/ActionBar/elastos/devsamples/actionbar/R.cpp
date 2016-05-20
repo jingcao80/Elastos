@@ -1,6 +1,5 @@
 #include "R.h"
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace ActionBar {
  
@@ -39,7 +38,6 @@ const int R::style::CustomActionButtonStyle;
 const int R::style::CustomActionOverflowButtonStyle;
 const int R::style::CustomTitleTextStyle;
 const int R::style::Theme_Custom;
-};
 };
 };
 };

@@ -1,47 +1,41 @@
 
-#ifndef __CACTIVITYONE_H__
-#define __CACTIVITYONE_H__
+#ifndef __Elastos_DevSamples_ActionBar_CActivityOne_H__
+#define __Elastos_DevSamples_ActionBar_CActivityOne_H__
 
 #include "elastos/droid/app/Activity.h"
-#include "_CActivityOne.h"
+#include "_Elastos_DevSamples_ActionBar_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace ActionBar {
 
 class CActivityOne : public Activity
 {
 public:
-    class MyListener
-        : public ElRefBase
-        , public IViewOnClickListener
-    {
-    public:
-        MyListener(
-            /* [in] */ CActivityOne* host);
+    // class MyListener
+    //     : public Object
+    //     , public IViewOnClickListener
+    // {
+    // public:
+    //     CAR_INTERFACE_DECL();
 
-        CARAPI_(PInterface) Probe(
-            /* [in]  */ REIID riid);
+    //     MyListener(
+    //         /* [in] */ CActivityOne* host);
 
-        CARAPI_(UInt32) AddRef();
+    //     CARAPI OnClick(
+    //         /* [in] */ IView* v);
 
-        CARAPI_(UInt32) Release();
+    // private:
+    //     AutoPtr<CActivityOne> mHost;
+    // };
 
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
+public:
+    CAR_OBJECT_DECL();
 
-        CARAPI OnClick(
-            /* [in] */ IView* v);
-
-    private:
-        AutoPtr<CActivityOne> mHost;
-        Int32 mRef;
-    };
+    CARAPI constructor();
 
 protected:
     CARAPI OnCreate(
@@ -68,11 +62,11 @@ private:
         /* [in] */ IIntent *data);
 
 private:
+    static const String TAG;
 };
 
 } // namespace ActionBar
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos
 
-#endif // __CACTIVITYONE_H__
+#endif // __Elastos_DevSamples_ActionBar_CActivityOne_H__

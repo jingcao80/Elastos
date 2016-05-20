@@ -982,8 +982,8 @@ ECode ActionBarView::SetMenu(
     }
     if (mActionMenuPresenter == NULL) {
         CActionMenuPresenter::New(mContext, (IActionMenuPresenter**)&mActionMenuPresenter);
-        //IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetCallback(cb);
-        IView::Probe(mActionMenuPresenter)->SetId(R::id::action_menu_presenter);
+        IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetCallback(cb);
+        IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetId(R::id::action_menu_presenter);
         mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter(this);
     }
 

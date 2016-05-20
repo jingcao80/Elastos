@@ -214,8 +214,7 @@ const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = Action
 AutoPtr< ArrayOf<Int32> > ActionBarOverlayLayout::ATTRS = ActionBarOverlayLayout::MiddleInitAttrs();
 const String ActionBarOverlayLayout::TAG("ActionBarOverlayLayout");
 
-CAR_INTERFACE_IMPL(ActionBarOverlayLayout, ViewGroup, IActionBarOverlayLayout)
-
+CAR_INTERFACE_IMPL_2(ActionBarOverlayLayout, ViewGroup, IDecorContentParent, IActionBarOverlayLayout)
 ActionBarOverlayLayout::ActionBarOverlayLayout()
     : mActionBarHeight(0)
     , mWindowVisibility(0)

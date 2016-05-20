@@ -1943,9 +1943,7 @@ ECode PhoneWindow::_DecorView::OnAttachedToWindow()
 {
     FrameLayout::OnAttachedToWindow();
 
-    Logger::I(TAG, "TODO mSettingsObserver->Observe();");
-    //assert(0 && "TODO");
-    // mSettingsObserver->Observe();
+    mSettingsObserver->Observe();
 
     UpdateWindowResizeState();
 
@@ -1972,8 +1970,7 @@ ECode PhoneWindow::_DecorView::OnDetachedFromWindow()
 {
     FrameLayout::OnDetachedFromWindow();
 
-    //assert(0 && "TODO");
-    // mSettingsObserver->Unobserve();
+    mSettingsObserver->Unobserve();
 
     AutoPtr<IWindowCallback> cb;
     mHost->GetCallback((IWindowCallback**)&cb);
@@ -2722,8 +2719,9 @@ ECode PhoneWindow::InvalidatePanelMenuRunnable::Run()
 {
     AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
-    if (w == NULL)
+    if (w == NULL) {
         return NOERROR;
+    }
 
     AutoPtr<PhoneWindow> host = (PhoneWindow*)w.Get();
     for (Int32 i = 0; i <= FEATURE_MAX; i++) {

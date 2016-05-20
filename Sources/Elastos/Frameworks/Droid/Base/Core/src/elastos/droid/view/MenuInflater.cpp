@@ -3,6 +3,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/view/MenuInflater.h"
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/R.h"
@@ -375,25 +376,27 @@ ECode MenuInflater::Inflate(
     /* [in] */ IMenu* menu)
 {
     AutoPtr<IXmlResourceParser> parser;
-    //try {
-    AutoPtr<IResources> resources;
-    mContext->GetResources((IResources**)&resources);
-    resources->GetLayout(menuRes, (IXmlResourceParser**)&parser);
-    assert(0);
-    /*AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
+    ECode ec = NOERROR;
+    do {
+        AutoPtr<IResources> resources;
+        mContext->GetResources((IResources**)&resources);
+        ec = resources->GetLayout(menuRes, (IXmlResourceParser**)&parser);
+        if (FAILED(ec)) {
+            Logger::D(TAG, "Error inflating menu XML");
+            break;
+        }
+        AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
 
-    ECode ec = ParseMenu(parser, attrs, menu);
-    if (FAILED(ec)) ec = E_INFLATE_EXCEPTION;*/
-    //}
-    // catch (XmlPullParserException e) {
-    //     throw new InflateException("Error inflating menu XML", e);
-    // } catch (IOException e) {
-    //     throw new InflateException("Error inflating menu XML", e);
-    // } finally {
+        ec = ParseMenu(IXmlPullParser::Probe(parser), attrs, menu);
+        if (FAILED(ec)) {
+            Logger::D(TAG, "Error inflating menu XML");
+            break;
+        }
+    } while (0);
+
     if (parser != NULL) parser->Close();
-    // }
-    assert(0);
-    return NOERROR;//ec;
+
+    return ec;
 }
 
 ECode MenuInflater::ParseMenu(

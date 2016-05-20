@@ -490,48 +490,17 @@ void ListPopupWindow::ForwardingListener::OnLongPress()
 Boolean ListPopupWindow::ForwardingListener::OnTouchForwarded(
     /* [in] */ IMotionEvent* srcEvent)
 {
-    // ==================before translated======================
-    // final View src = mSrc;
-    // final ListPopupWindow popup = getPopup();
-    // if (popup == null || !popup.isShowing()) {
-    //     return false;
-    // }
-    //
-    // final DropDownListView dst = popup.mDropDownList;
-    // if (dst == null || !dst.isShown()) {
-    //     return false;
-    // }
-    //
-    // // Convert event to destination-local coordinates.
-    // final MotionEvent dstEvent = MotionEvent.obtainNoHistory(srcEvent);
-    // src.toGlobalMotionEvent(dstEvent);
-    // dst.toLocalMotionEvent(dstEvent);
-    //
-    // // Forward converted event to destination view, then recycle it.
-    // final boolean handled = dst.onForwardedEvent(dstEvent, mActivePointerId);
-    // dstEvent.recycle();
-    //
-    // // Always cancel forwarding when the touch stream ends.
-    // final int action = srcEvent.getActionMasked();
-    // final boolean keepForwarding = action != MotionEvent.ACTION_UP
-    //         && action != MotionEvent.ACTION_CANCEL;
-    //
-    // return handled && keepForwarding;
-
-    assert(0);
     AutoPtr<IView> src = mSrc;
     AutoPtr<IListPopupWindow> popup;
     GetPopup((IListPopupWindow**)&popup);
     Boolean isShowing = FALSE;
-    popup->IsShowing(&isShowing);
-    if (popup == NULL || !isShowing) {
+    if (popup == NULL || (popup->IsShowing(&isShowing), !isShowing)) {
         return FALSE;
     }
 
     AutoPtr<DropDownListView> dst = ((ListPopupWindow*)popup.Get())->mDropDownList;
     Boolean isShown = FALSE;
-    dst->IsShown(&isShown);
-    if (dst == NULL || !isShown) {
+    if (dst == NULL || (dst->IsShown(&isShown), !isShown)) {
         return FALSE;
     }
 
