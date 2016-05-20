@@ -87,8 +87,7 @@ ECode CContentProviderClient::constructor(
     VALIDATE_NOT_NULL(provider)
     mContentProvider = provider;
     mContentResolver = resolver;
-    // ContentResolver* cp = (ContentResolver*)resolver;
-    //cp->GetPackageName(&mPackageName);
+    resolver->GetPackageName(&mPackageName);
     mStable = stable;
 
     mGuard->Open(String("CContentProviderClient::Release"));

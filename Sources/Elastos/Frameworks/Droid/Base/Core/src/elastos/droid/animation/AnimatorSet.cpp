@@ -142,7 +142,6 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
         IValueAnimator* va = IValueAnimator::Probe(animation);
         if (va) {
             ValueAnimator* valAni = (ValueAnimator*)va;
-Logger::D("AnimatorSet::AnimatorSetListener::OnAnimationEnd", "===========Line:%d, animation:%s============", __LINE__, TO_CSTR(animation));
             assert(valAni->mParent != NULL);
         }
         assert(0 && "Error: AnimatorSet has been released!");
@@ -225,9 +224,7 @@ AnimatorSet::Node::Node()
 {}
 
 AnimatorSet::Node::~Node()
-{
-    mNodeDependents = NULL;
-}
+{}
 
 void AnimatorSet::Node::AddDependency(
     /* [in] */ Dependency* dependency)
