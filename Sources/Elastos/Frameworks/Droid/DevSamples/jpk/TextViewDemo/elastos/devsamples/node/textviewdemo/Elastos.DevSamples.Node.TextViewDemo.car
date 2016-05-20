@@ -118,6 +118,12 @@ module
             [in] Int32 threadIndex);
     }
 
+    [local]
+    interface IActivityOne {
+        OnClickPopupWindow(
+            [in] IView* v);
+    }
+
     class CActivityOne {
         constructor();
 

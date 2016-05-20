@@ -1,4 +1,4 @@
-whmlog('=====================test_basic.js begin===================================');
+elog('=====================test_basic.js begin===================================');
 
 //----------------common config begin----------------
 
@@ -152,7 +152,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
         var bFoundConstructor = (i < im);
         if (!bFoundConstructor) {
-            whmlog('====classinfo__createObject====can not find constructor ==============');
+            elog('====classinfo__createObject====can not find constructor ==============');
             return null;
         }
 
@@ -212,7 +212,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                     break;
                 default:
                     var sCarDataType = getDataTypeCarString(iDataType);
-                    whmlog('==============argument type: to be finished================='+iDataType);
+                    elog('==============argument type: to be finished================='+iDataType);
                     break;
             }
         }
@@ -229,7 +229,7 @@ var root = global||window;
 //root.Elastos || (root.Elastos = {});
 
 root.Elastos = ( function () {
-    whmlog('==============env begin=================');
+    elog('==============env begin=================');
 
     var _api = require('./elastos.node');
 
@@ -414,7 +414,7 @@ var jso_activity_cb = (function(aoElastos){
             var jso_button_MyTextView_cb = (function(){
                 return {
                     OnClick:function(aoView){
-                        whmlog('====jso_activity_cb====MyTextView.OnClick.Start====');
+                        elog('====jso_activity_cb====MyTextView.OnClick.Start====');
                         //TODO
                     }
                 }
@@ -433,18 +433,18 @@ var jso_activity_cb = (function(aoElastos){
                         var iAction = aoEvent.GetAction();
                         var sLabel = aoEvent.GetDisplayLabel();
 
-                        whmlog("====CActivityOne::MyListener::OnKey: view '" + iId + "', keyCode: '" + aiKeyCode + "','" + sLabel + "'");
+                        elog("====CActivityOne::MyListener::OnKey: view '" + iId + "', keyCode: '" + aiKeyCode + "','" + sLabel + "'");
 
                         var KeyEvent__ACTION_DOWN = 0;
                         var KeyEvent__ACTION_UP   = 1;
                         var KeyEvent__KEYCODE_0   = 7;
                         if (iAction == IKeyEvent__ACTION_DOWN) {
                             if (aiKeyCode == IKeyEvent__KEYCODE_0) {
-                                whmlog("====CActivityOne====Key 0 is down.");
+                                elog("====CActivityOne====Key 0 is down.");
                             }
                         }
                         else if (iAction == IKeyEvent__ACTION_UP) {
-                                whmlog("====CActivityOne====IKeyEvent__ACTION_UP received.");
+                                elog("====CActivityOne====IKeyEvent__ACTION_UP received.");
                         }
 
                         out_abResult.data = false;
@@ -558,7 +558,7 @@ var jso_activity_cb = (function(aoElastos){
 
             //----------------ConnectivityManagerButton begin----------------
             function OnTestConnectivityManager(){
-                whmlog('====jso_activity_cb====OnTestConnectivityManager.begin====');
+                elog('====jso_activity_cb====OnTestConnectivityManager.begin====');
                 //TODO
             }
             var oConnectivityManagerButton = oActivity.FindViewById(R.id.ConnectivityManagerButton);
@@ -574,7 +574,7 @@ var jso_activity_cb = (function(aoElastos){
 
             //----------------PowerManagerButton begin----------------
             function OnTestPowerManager(){
-                whmlog('====jso_activity_cb====OnTestPowerManager.begin====');
+                elog('====jso_activity_cb====OnTestPowerManager.begin====');
                 //TODO
             }
             var oPowerManagerButton = oActivity.FindViewById(R.id.PowerManagerButton);
@@ -620,13 +620,13 @@ var jso_activity_cb = (function(aoElastos){
 
                                 switch (aiWhich) {
                                     case BUTTON_POSITIVE:
-                                        whmlog('====Alert========点击了确定按钮========');
+                                        elog('====Alert========点击了确定按钮========');
                                         break;
                                     case BUTTON_NEGATIVE:
-                                        whmlog('====Alert========点击了取消按钮========');
+                                        elog('====Alert========点击了取消按钮========');
                                         break;
                                     case BUTTON_NEUTRAL:
-                                        whmlog('====Alert========点击了中立按钮========');
+                                        elog('====Alert========点击了中立按钮========');
                                         break;
                                     default:
                                         break;
@@ -645,11 +645,11 @@ var jso_activity_cb = (function(aoElastos){
 
                 return {
                     OnItemClick:function(aoParent, aoView, aiPosition, aiId){
-                        whmlog("====CActivityOne::OnItemClick position = "+ aiPosition  + ", id = " + aiId);
+                        elog("====CActivityOne::OnItemClick position = "+ aiPosition  + ", id = " + aiId);
                         ShowAlert("Choosed item " + aiPosition + " with NodeJS");
                     },
                     OnItemLongClick:function(aoParent, aoView, aiPosition, aiId, out_aiResult){
-                        whmlog("====CActivityOne::OnItemLongClick position = "+ aiPosition  + ", id = " + oId);
+                        elog("====CActivityOne::OnItemLongClick position = "+ aiPosition  + ", id = " + oId);
                         out_aiResult.data = true;
                     }
                 }
@@ -668,22 +668,22 @@ var jso_activity_cb = (function(aoElastos){
             return;
         },  //OnCreate
         OnStart:function(aoContext){
-            whmlog('====jso_activity_cb====OnStart.begin====');
+            elog('====jso_activity_cb====OnStart.begin====');
         },
         OnResume:function(aoContext){
-            whmlog('====jso_activity_cb====OnResume.begin====');
+            elog('====jso_activity_cb====OnResume.begin====');
         },
         OnPause:function(aoContext){
-            whmlog('====jso_activity_cb====OnPause.begin====');
+            elog('====jso_activity_cb====OnPause.begin====');
         },
         OnStop:function(aoContext){
-            whmlog('====jso_activity_cb====OnStop.begin====');
+            elog('====jso_activity_cb====OnStop.begin====');
         },
         OnDestroy:function(aoContext){
-            whmlog('====jso_activity_cb====OnDestroy.begin====');
+            elog('====jso_activity_cb====OnDestroy.begin====');
         },
         OnActivityResult:function(aoContext, aiRequestCode, aiResultCode, aoIntentData){
-            whmlog('====jso_activity_cb====OnActivityResult.begin====');
+            elog('====jso_activity_cb====OnActivityResult.begin====');
         },
         OnCreateDialog:function(aoContext, aiId, out_aoDialog){
             var builder = Droid_New("CAlertDialogBuilder", oActivity);
@@ -700,13 +700,13 @@ var jso_activity_cb = (function(aoElastos){
 
                         switch (aiWhich) {
                             case BUTTON_POSITIVE:
-                                whmlog('==============点击了确W定按钮=================');
+                                elog('==============点击了确W定按钮=================');
                                 break;
                             case BUTTON_NEGATIVE:
-                                whmlog('==============点击了取H消按钮=================');
+                                elog('==============点击了取H消按钮=================');
                                 break;
                             case BUTTON_NEUTRAL:
-                                whmlog('==============点击了中M立按钮=================');
+                                elog('==============点击了中M立按钮=================');
                                 break;
                             default:
                                 break;
@@ -725,14 +725,14 @@ var jso_activity_cb = (function(aoElastos){
             return;
         },   //OnCreateDialog
         OnCreateContextMenu:function(aoContext, aoMenu, aoV, aoMenuInfo){
-            whmlog('====jso_activity_cb====OnCreateContextMenu.begin====');
+            elog('====jso_activity_cb====OnCreateContextMenu.begin====');
         },
         CreateNavigationBar:function(aoContext){
-            whmlog('====jso_activity_cb====CreateNavigationBar.begin====');
+            elog('====jso_activity_cb====CreateNavigationBar.begin====');
         },
     }
 })(Elastos);
 
 Application.Ready(jso_activity_cb);
 
-whmlog('=====================test_basic.js end===================================');
+elog('=====================test_basic.js end===================================');
