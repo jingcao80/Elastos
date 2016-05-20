@@ -13825,11 +13825,9 @@ ECode View::InvalidateDrawable(
         drawable->GetBounds((IRect**)&dirty);
         Int32 scrollX = mScrollX;
         Int32 scrollY = mScrollY;
-
         CRect* dirtyObj = (CRect*)dirty.Get();
         Invalidate(dirtyObj->mLeft + scrollX, dirtyObj->mTop + scrollY,
                 dirtyObj->mRight + scrollX, dirtyObj->mBottom + scrollY);
-
         mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
     }
     return NOERROR;
@@ -14094,28 +14092,29 @@ ECode View::GetDrawableState(
  */
 ECode View::OnCreateDrawableState(
     /* [in] */ Int32 extraSpace,
-    /* [out] */ ArrayOf<Int32>** _drawableState)
+    /* [out] */ ArrayOf<Int32>** result)
 {
-    VALIDATE_NOT_NULL(_drawableState);
-    if ((mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE &&
-            mParent != NULL && IView::Probe(mParent) != NULL) {
-        return VIEW_PROBE(mParent)->OnCreateDrawableState(extraSpace, _drawableState);
+    VALIDATE_NOT_NULL(result);
+
+    if ((mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE
+        && IView::Probe(mParent) != NULL) {
+        return VIEW_PROBE(mParent)->OnCreateDrawableState(extraSpace, result);
     }
 
     Int32 privateFlags = mPrivateFlags;
 
     Int32 viewStateIndex = 0;
+    Boolean bval;
     if ((privateFlags & PFLAG_PRESSED) != 0) viewStateIndex |= VIEW_STATE_PRESSED;
     if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= VIEW_STATE_ENABLED;
-    Boolean isFocused, hasWindowFocus;
-    if (IsFocused(&isFocused), isFocused) viewStateIndex |= VIEW_STATE_FOCUSED;
+    if (IsFocused(&bval), bval) viewStateIndex |= VIEW_STATE_FOCUSED;
     if ((privateFlags & PFLAG_SELECTED) != 0) viewStateIndex |= VIEW_STATE_SELECTED;
-    if (HasWindowFocus(&hasWindowFocus), hasWindowFocus) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
+    if (HasWindowFocus(&bval), bval) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
     if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= VIEW_STATE_ACTIVATED;
 
     Boolean available;
-    if (mAttachInfo != NULL && mAttachInfo->mHardwareAccelerationRequested &&
-            (HardwareRenderer::IsAvailable(&available), &available)) {
+    if (mAttachInfo != NULL && mAttachInfo->mHardwareAccelerationRequested
+        && (HardwareRenderer::IsAvailable(&available), &available)) {
         // This is set if HW acceleration is requested, even if the current
         // process doesn't allow it.  This is just to allow app preview
         // windows to better match their app.
@@ -14130,20 +14129,20 @@ ECode View::OnCreateDrawableState(
     AutoPtr<ArrayOf<Int32> > drawableState = (*VIEW_STATE_SETS)[viewStateIndex];
 
     //noinspection ConstantIfStatement
-//    if (FALSE) {
-//        Log.i(TAG, "drawableStateIndex=" + viewStateIndex);
-//        Log.i(TAG, toString()
-//                + " pressed=" + ((privateFlags & PFLAG_PRESSED) != 0)
-//                + " en=" + ((mViewFlags & ENABLED_MASK) == ENABLED)
-//                + " fo=" + hasFocus()
-//                + " sl=" + ((privateFlags & PFLAG_SELECTED) != 0)
-//                + " wf=" + hasWindowFocus
-//                + ": " + Arrays.toString(drawableState));
-//    }
+   if (FALSE) {
+        Boolean hf;
+        HasFocus(&hf);
+        Logger::I(TAG, " >>> OnCreateDrawableState extraSpace:%d, DrawableStateIndex=%d", extraSpace, viewStateIndex);
+        Logger::I(TAG, "%s pressed=%d en=%d fo=%d sl=%d wf=%d: drawableState: %p/%d",
+            TO_CSTR(this), ((privateFlags & PFLAG_PRESSED) != 0),
+             ((mViewFlags & ENABLED_MASK) == ENABLED),
+             hf, ((privateFlags & PFLAG_SELECTED) != 0),
+             bval, drawableState.Get(), drawableState ? drawableState->GetLength() : 0);
+   }
 
     if (extraSpace == 0) {
-        *_drawableState = drawableState;
-        REFCOUNT_ADD(*_drawableState);
+        *result = drawableState;
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
 
@@ -14157,8 +14156,8 @@ ECode View::OnCreateDrawableState(
         fullState = ArrayOf<Int32>::Alloc(extraSpace);
     }
 
-    *_drawableState = fullState;
-    REFCOUNT_ADD(*_drawableState);
+    *result = fullState;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

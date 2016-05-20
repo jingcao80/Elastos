@@ -37,6 +37,7 @@ public:
 
         virtual ~DrawableContainerState();
 
+        // @Override
         CARAPI GetChangingConfigurations(
             /* [out] */ Int32* configurations);
 
@@ -401,7 +402,7 @@ protected:
     CARAPI_(Boolean) NeedsMirroring();
 
 private:
-    static const Boolean DEBUG = FALSE;
+    static const Boolean DEBUG;
     static const String TAG;
 
     /**

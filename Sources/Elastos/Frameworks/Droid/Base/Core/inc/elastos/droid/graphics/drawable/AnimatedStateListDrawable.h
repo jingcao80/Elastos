@@ -70,6 +70,8 @@ private:
         : public Transition
     {
     public:
+        TO_STRING_IMPL("AnimatedStateListDrawable::AnimatableTransition")
+
         AnimatableTransition(
             /* [in] */ IAnimatable* a)
         {
@@ -96,6 +98,8 @@ private:
         : public Transition
     {
     public:
+        TO_STRING_IMPL("AnimatedStateListDrawable::AnimationDrawableTransition")
+
         AnimationDrawableTransition(
             /* [in] */ IAnimationDrawable* ad,
             /* [in] */ Boolean reversed);
@@ -126,6 +130,8 @@ private:
         : public Transition
     {
     public:
+        TO_STRING_IMPL("AnimatedStateListDrawable::AnimatedVectorDrawableTransition")
+
         AnimatedVectorDrawableTransition(
             /* [in] */ IAnimatedVectorDrawable* avd,
             /* [in] */ Boolean reversed);
@@ -152,6 +158,8 @@ protected:
         : public StateListState
     {
     public:
+        TO_STRING_IMPL("AnimatedStateListDrawable::AnimatedStateListState")
+
         AnimatedStateListState(
             /* [in] */ /*@Nullable*/ AnimatedStateListState* orig,
             /* [in] */ /*@NonNull*/ AnimatedStateListDrawable* owner,
@@ -213,6 +221,8 @@ protected:
         , public ITimeInterpolator
     {
     public:
+        TO_STRING_IMPL("AnimatedStateListDrawable::FrameInterpolator")
+
         CAR_INTERFACE_DECL()
 
         FrameInterpolator(

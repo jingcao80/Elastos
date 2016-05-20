@@ -97,7 +97,7 @@ void AnimatedStateListDrawable::AnimatedVectorDrawableTransition::Reverse()
         mAvd->Reverse();
     }
     else {
-        Logger::W(LOGTAG, String("Reverse() is called on a drawable can't reverse"));
+        Logger::W(LOGTAG, "Reverse() is called on a drawable can't reverse");
     }
 }
 
@@ -218,10 +218,12 @@ Int64 AnimatedStateListDrawable::AnimatedStateListState::GenerateTransitionKey(
     /* [in] */ Int32 fromId,
     /* [in] */ Int32 toId)
 {
-    return (Int64) fromId << 32 | toId;
+    Int64 id = fromId;
+    return (Int64)(id << 32) | toId;
 }
 
 CAR_INTERFACE_IMPL(AnimatedStateListDrawable::FrameInterpolator, Object, ITimeInterpolator);
+
 AnimatedStateListDrawable::FrameInterpolator::FrameInterpolator(
     /* [in] */ IAnimationDrawable* d,
     /* [in] */ Boolean reversed)
@@ -282,13 +284,14 @@ ECode AnimatedStateListDrawable::FrameInterpolator::GetInterpolation(
     // Remaining time is relative of total duration.
     Float frameElapsed;
     if (i < N) {
-        frameElapsed = remaining / (Float) mTotalDuration;
+        frameElapsed = remaining / (mTotalDuration * 1.0f);
     }
     else {
         frameElapsed = 0;
     }
 
-    return i / (Float) N + frameElapsed;
+    *result = i / (N * 1.0f) + frameElapsed;
+    return NOERROR;
 }
 
 ECode AnimatedStateListDrawable::FrameInterpolator::HasNativeInterpolator(
@@ -299,9 +302,9 @@ ECode AnimatedStateListDrawable::FrameInterpolator::HasNativeInterpolator(
     return NOERROR;
 }
 
-const String AnimatedStateListDrawable::LOGTAG = String("AnimatedStateListDrawable")/*AnimatedStateListDrawable.class.getSimpleName()*/;
-const String AnimatedStateListDrawable::ELEMENT_TRANSITION = String("transition");
-const String AnimatedStateListDrawable::ELEMENT_ITEM = String("item");
+const String AnimatedStateListDrawable::LOGTAG("AnimatedStateListDrawable");
+const String AnimatedStateListDrawable::ELEMENT_TRANSITION("transition");
+const String AnimatedStateListDrawable::ELEMENT_ITEM("item");
 
 CAR_INTERFACE_IMPL(AnimatedStateListDrawable, StateListDrawable, IAnimatedStateListDrawable);
 AnimatedStateListDrawable::AnimatedStateListDrawable()
@@ -358,7 +361,7 @@ ECode AnimatedStateListDrawable::AddState(
     /* [in] */ Int32 id)
 {
     if (drawable == NULL) {
-        // throw new IllegalArgumentException("Drawable must not be NULL");
+        Logger::E(LOGTAG, "Drawable must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -376,7 +379,7 @@ ECode AnimatedStateListDrawable::AddTransition(
     /* [in] */ Boolean reversible)
 {
     if (transition == NULL) {
-        // throw new IllegalArgumentException("Transition drawable must not be NULL");
+        Logger::E(LOGTAG, "DrawableTransition drawable must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -396,11 +399,6 @@ ECode AnimatedStateListDrawable::IsStateful(
 Boolean AnimatedStateListDrawable::OnStateChange(
     /* [in] */ ArrayOf<Int32>* stateSet)
 {
-    Logger::I(LOGTAG, "==================== OnStateChange ==================");
-    for (Int32 i = 0; i < stateSet->GetLength(); i++) {
-        Logger::I(LOGTAG, " > stateSet %d: %d", i, (*stateSet)[i]);
-    }
-
     Int32 keyframeIndex = mState->IndexOfKeyframe(stateSet);
     Int32 value = 0;
     GetCurrentIndex(&value);
@@ -438,7 +436,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     AutoPtr<Transition> currentTransition = mTransition;
     if (currentTransition != NULL) {
         if (toIndex == mTransitionToIndex) {
-            Logger::I(LOGTAG, " SelectTransition: %d", __LINE__);
+            Logger::I(LOGTAG, " SelectTransition: Already animating to that keyframe. %d", __LINE__);
             // Already animating to that keyframe.
             return TRUE;
         }
@@ -447,7 +445,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
             currentTransition->Reverse();
             mTransitionToIndex = mTransitionFromIndex;
             mTransitionFromIndex = toIndex;
-            Logger::I(LOGTAG, " SelectTransition: %d", __LINE__);
+            Logger::I(LOGTAG, " SelectTransition: Reverse the current animation. %d", __LINE__);
             return TRUE;
         }
 
@@ -460,7 +458,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     else {
         GetCurrentIndex(&fromIndex);
     }
-    Logger::I(LOGTAG, " fromIndex:%d, toIndex:%d", fromIndex, toIndex);
+    
     // Reset state.
     mTransition = NULL;
     mTransitionFromIndex = -1;
@@ -682,13 +680,17 @@ ECode AnimatedStateListDrawable::ParseItem(
             case R::attr::drawable:
                 attrs->GetAttributeResourceValue(i, 0, &drawableRes);
                 break;
-            default:
+            default: {
                 Boolean hasState = FALSE;
                 attrs->GetAttributeBooleanValue(i, FALSE, &hasState);
                 (*states)[j++] = hasState ? stateResId : -stateResId;
+                break;
+            }
         }
     }
-    states = StateSet::TrimStateSet(states, j);
+
+    AutoPtr<ArrayOf<Int32> > temp = StateSet::TrimStateSet(states, j);
+    states = temp;
 
     AutoPtr<IDrawable> dr;
     if (drawableRes != 0) {
@@ -699,10 +701,10 @@ ECode AnimatedStateListDrawable::ParseItem(
         while ((parser->Next(&type), type) == IXmlPullParser::TEXT) {
         }
         if (type != IXmlPullParser::START_TAG) {
-            // throw new XmlPullParserException(
-            //         parser.getPositionDescription()
-            //                 + ": <item> tag requires a 'drawable' attribute or "
-            //                 + "child tag defining a drawable");
+            String str;
+            parser->GetPositionDescription(&str);
+            Logger::E(LOGTAG, "XmlPullParserException: %s: <item> tag requires a 'drawable' attribute or "
+                "child tag defining a drawable", str.string());
             return E_XML_PULL_PARSER_EXCEPTION;
         }
         FAIL_RETURN(Drawable::CreateFromXmlInner(r, parser, attrs, theme, (IDrawable**)&dr));

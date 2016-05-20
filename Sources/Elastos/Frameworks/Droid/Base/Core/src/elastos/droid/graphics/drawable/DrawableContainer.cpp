@@ -6,7 +6,9 @@
 #include "elastos/droid/graphics/Insets.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/utility/CSparseArray.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ILayoutDirection;
@@ -18,7 +20,7 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-const Boolean DrawableContainer::DEBUG;
+const Boolean DrawableContainer::DEBUG = FALSE;
 const String DrawableContainer::TAG("DrawableContainer");
 const Boolean DrawableContainer::DEFAULT_DITHER;
 
@@ -513,9 +515,12 @@ ECode DrawableContainer::SelectDrawable(
 
     Int64 now = SystemClock::GetUptimeMillis();
 
-    // if (DEBUG) android.util.Log.i(TAG, toString() + " from " + mCurIndex + " to " + idx
-    //         + ": exit=" + mDrawableContainerState.mExitFadeDuration
-    //         + " enter=" + mDrawableContainerState.mEnterFadeDuration);
+    if (DEBUG) {
+        Logger::I(TAG, "%s from %d to %d: exit=%d enter=%d",
+            TO_CSTR(this), mCurIndex, idx,
+            mDrawableContainerState->mExitFadeDuration,
+            mDrawableContainerState->mEnterFadeDuration);
+    }
 
     if (mDrawableContainerState->mExitFadeDuration > 0) {
         if (mLastDrawable != NULL) {
@@ -549,11 +554,11 @@ ECode DrawableContainer::SelectDrawable(
             else if (mHasAlpha) {
                 d->SetAlpha(mAlpha);
             }
-
             if (mDrawableContainerState->mHasColorFilter) {
                 // Color filter always overrides tint.
                 d->SetColorFilter(mDrawableContainerState->mColorFilter);
-            } else {
+            }
+            else {
                 if (mDrawableContainerState->mHasTintList) {
                     d->SetTintList(mDrawableContainerState->mTintList);
                 }
@@ -563,7 +568,8 @@ ECode DrawableContainer::SelectDrawable(
             }
 
             Boolean visible = FALSE;
-            d->SetVisible((IsVisible(&visible), visible), TRUE, &isDifferent);
+            IsVisible(&visible);
+            d->SetVisible(visible, TRUE, &isDifferent);
             d->SetDither(mDrawableContainerState->mDither);
 
             AutoPtr<ArrayOf<Int32> > states;
