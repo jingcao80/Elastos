@@ -43,13 +43,14 @@ using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemLongClickListener;
 using Elastos::Droid::Widget::EIID_IRadioGroupOnCheckedChangeListener;
 using Elastos::Droid::Widget::CPopupWindow;
-using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::IArrayAdapter;
 using Elastos::Droid::Widget::CArrayAdapter;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::EIID_ITextView;
+using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::CSimpleAdapter;
 using Elastos::Droid::Widget::ISimpleAdapter;
-using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::IScanResult;
 using Elastos::Droid::Wifi::IWifiConfiguration;
@@ -156,7 +157,7 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::PopupWindowButton) {
         Logger::D("CActivityOne", "Show PopupWindow!");
-        mHost->OnCreatePopupWindow();
+        mHost->OnClickPopupWindow(view);
     }
     else if (id == R::id::PowerManagerButton) {
         Logger::D("CActivityOne", "Test PowerManager!");
@@ -193,19 +194,27 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::chkAndroid) {
         Logger::D("CActivityOne", "Click Android CheckBox");
-        ICheckable* checkable = ICheckable::Probe(mHost->mAndroidCheckBox);
-        checkable->SetChecked(TRUE);
-
-        checkable = ICheckable::Probe(mHost->mIosCheckBox);
-        checkable->SetChecked(FALSE);
     }
     else if (id == R::id::chkIos) {
         Logger::D("CActivityOne", "Click iOS CheckBox");
-        ICheckable* checkable = ICheckable::Probe(mHost->mAndroidCheckBox);
-        checkable->SetChecked(FALSE);
-
-        checkable = ICheckable::Probe(mHost->mIosCheckBox);
-        checkable->SetChecked(TRUE);
+    }
+    else if (id == R::id::chkUbuntu) {
+        Logger::D("CActivityOne", "Click Ubuntu CheckBox");
+    }
+    else if (id == R::id::radioMale) {
+        Logger::D("CActivityOne", "Click Man RadioButton");
+    }
+    else if (id == R::id::radioFemale) {
+        Logger::D("CActivityOne", "Click Women RadioButton");
+    }
+    else if (id == R::id::radioSecret) {
+        Logger::D("CActivityOne", "Click Secret RadioButton");
+    }
+    else if (id == R::id::toggleButton1) {
+        Logger::D("CActivityOne", "Click toggleButton1 ToggleButton");
+    }
+    else if (id == R::id::toggleButton2) {
+        Logger::D("CActivityOne", "Click toggleButton2 ToggleButton");
     }
 
     return NOERROR;
@@ -269,15 +278,30 @@ ECode CActivityOne::MyListener::OnKey(
 }
 
 ECode CActivityOne::MyListener::OnCheckedChanged(
-    /* [in] */  IRadioGroup* group,
-    /* [in] */  Int32 checkedId)
+    /* [in] */ IRadioGroup* group,
+    /* [in] */ Int32 checkedId)
 {
+    Logger::D("CActivityOne", "CActivityOne::MyListener::OnCheckedChanged %08x", checkedId);
+
+    Int32 id;
+    group->GetCheckedRadioButtonId(&id);
+
+    AutoPtr<IView> view = mHost->FindViewById(id);
+    IRadioButton* rb = IRadioButton::Probe(view);
+
+    AutoPtr<ICharSequence> cs;
+    ITextView::Probe(rb)->GetText((ICharSequence**)&cs);
+
+    Logger::D("CActivityOne", "您的选择是: %s", TO_CSTR(cs));
+
     return NOERROR;
 }
 
 //=======================================================================
 // CActivityOne
 //=======================================================================
+
+CAR_INTERFACE_IMPL(CActivityOne, Activity, IActivityOne)
 
 CAR_OBJECT_IMPL(CActivityOne)
 
@@ -391,9 +415,11 @@ ECode CActivityOne::OnCreate(
     mDialogButton->SetOnClickListener(clickListener);
     mDialogButton->SetOnKeyListener(keyListener);
 
-    mPopupWindowButton = FindViewById(R::id::PopupWindowButton);
-    assert(mPopupWindowButton != NULL);
-    mPopupWindowButton->SetOnClickListener(clickListener);
+    // set onclick handler through layout xml.
+    //
+    // mPopupWindowButton = FindViewById(R::id::PopupWindowButton);
+    // assert(mPopupWindowButton != NULL);
+    // mPopupWindowButton->SetOnClickListener(clickListener);
 
     mPowerManagerButton = FindViewById(R::id::PowerManagerButton);
     assert(mPowerManagerButton != NULL);
@@ -412,6 +438,37 @@ ECode CActivityOne::OnCreate(
     temp = FindViewById(R::id::chkIos);
     mIosCheckBox = ICheckBox::Probe(temp);
     IView::Probe(mIosCheckBox)->SetOnClickListener(clickListener);
+
+    temp = FindViewById(R::id::chkUbuntu);
+    mUbuntuCheckBox = ICheckBox::Probe(temp);
+    IView::Probe(mUbuntuCheckBox)->SetOnClickListener(clickListener);
+
+    // Setup RadioGroup
+    temp = FindViewById(R::id::radioMale);
+    mRadioButtonMale = IRadioButton::Probe(temp);
+    IView::Probe(mRadioButtonMale)->SetOnClickListener(clickListener);
+
+    temp = FindViewById(R::id::radioFemale);
+    mRadioButtonFemale = IRadioButton::Probe(temp);
+    IView::Probe(mRadioButtonFemale)->SetOnClickListener(clickListener);
+
+    temp = FindViewById(R::id::radioSecret);
+    mRadioButtonSecret = IRadioButton::Probe(temp);
+    IView::Probe(mRadioButtonSecret)->SetOnClickListener(clickListener);
+
+    // temp = FindViewById(R::id::radioSex);
+    // mRadioGroup = IRadioGroup::Probe(temp);
+    // IRadioGroupOnCheckedChangeListener* radioGroupListener = (IRadioGroupOnCheckedChangeListener*)l.Get();
+    // mRadioGroup->SetOnCheckedChangeListener(radioGroupListener);
+
+    // Setup ToggleButton
+    temp = FindViewById(R::id::toggleButton1);
+    mToggleButton1 = IToggleButton::Probe(temp);
+    IView::Probe(mToggleButton1)->SetOnClickListener(clickListener);
+
+    temp = FindViewById(R::id::toggleButton2);
+    mToggleButton2 = IToggleButton::Probe(temp);
+    IView::Probe(mToggleButton2)->SetOnClickListener(clickListener);
 
    // RegisterForContextMenu(view);
 
@@ -621,9 +678,10 @@ ECode CActivityOne::CreateNavigationBar()
     return NOERROR;
 }
 
-ECode CActivityOne::OnCreatePopupWindow()
+ECode CActivityOne::OnClickPopupWindow(
+    /* [in] */ IView* view)
 {
-    Logger::D("CActivityOne", "CActivityOne::OnCreatePopupWindow()");
+    Logger::D("CActivityOne", "CActivityOne::OnClickPopupWindow()");
     mPopupWindow = NULL;
 
     AutoPtr<IInterface> obj;
@@ -660,6 +718,7 @@ ECode CActivityOne::OnCreatePopupWindow()
 
 ECode CActivityOne::OnTestPowerManager()
 {
+    return NOERROR;
     // AutoPtr<IInterface> obj;
     // GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     // AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
@@ -733,6 +792,7 @@ ECode CActivityOne::OnTestPowerManager()
 
 ECode CActivityOne::OnTestConnectivityManager()
 {
+    return NOERROR;
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IConnectivityManager> conn = IConnectivityManager::Probe(obj);

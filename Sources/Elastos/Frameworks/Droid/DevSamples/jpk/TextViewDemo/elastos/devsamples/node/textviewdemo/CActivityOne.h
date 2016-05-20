@@ -24,7 +24,9 @@ using Elastos::Droid::Widget::ICheckBox;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IRadioButton;
 using Elastos::Droid::Widget::IRadioGroup;
+using Elastos::Droid::Widget::IToggleButton;
 
 namespace Elastos {
 namespace DevSamples {
@@ -33,6 +35,7 @@ namespace TextViewDemo {
 
 CarClass(CActivityOne)
     , public Activity
+    , public IActivityOne
 {
 public:
     class MyListener
@@ -93,6 +96,8 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     CAR_OBJECT_DECL()
 
     CARAPI constructor();
@@ -101,6 +106,9 @@ public:
         /* [in] */ IContextMenu* menu,
         /* [in] */ IView* v,
         /* [in] */ IContextMenuInfo* menuInfo);
+
+    CARAPI OnClickPopupWindow(
+        /* [in] */ IView* v);
 
 protected:
     CARAPI OnCreate(
@@ -121,8 +129,6 @@ protected:
 
     CARAPI ShowAlert(
         /* [in] */ const String& info);
-
-    CARAPI OnCreatePopupWindow();
 
     CARAPI OnTestPowerManager();
 
@@ -164,10 +170,19 @@ private:
 
     AutoPtr<ICheckBox> mAndroidCheckBox;
     AutoPtr<ICheckBox> mIosCheckBox;
+    AutoPtr<ICheckBox> mUbuntuCheckBox;
 
     AutoPtr<IEditText> mEditText;
     AutoPtr<ITextView> mTextView;
     AutoPtr<IListView> mListView;
+
+    AutoPtr<IRadioGroup> mRadioGroup;
+    AutoPtr<IRadioButton> mRadioButtonMale;
+    AutoPtr<IRadioButton> mRadioButtonFemale;
+    AutoPtr<IRadioButton> mRadioButtonSecret;
+
+    AutoPtr<IToggleButton> mToggleButton1;
+    AutoPtr<IToggleButton> mToggleButton2;
 };
 
 } // namespace TextViewDemo
@@ -175,4 +190,4 @@ private:
 } // namespace DevSamples
 } // namespace Elastos
 
-#endif // __Elastos_DevSamples_TextViewDemo_CActivityOne_H__
+#endif // __Elastos_DevSamples_TextViewDemo_Node_CActivityOne_H__
