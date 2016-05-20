@@ -9,9 +9,9 @@ namespace Sql {
 
 const String CTime::PADDING("00");
 
-CAR_OBJECT_IMPL(CTime);
+CAR_OBJECT_IMPL(CTime)
 
-CAR_INTERFACE_IMPL(CTime, Date, ITime);
+CAR_INTERFACE_IMPL(CTime, Date, ITime)
 
 ECode CTime::GetDate(
     /* [out] */ Int32 * pDate)

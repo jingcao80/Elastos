@@ -5,8 +5,8 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CRSAMultiPrimePrivateCrtKeySpec);
-CAR_INTERFACE_IMPL(CRSAMultiPrimePrivateCrtKeySpec, RSAPrivateKeySpec, IRSAMultiPrimePrivateCrtKeySpec);
+CAR_OBJECT_IMPL(CRSAMultiPrimePrivateCrtKeySpec)
+CAR_INTERFACE_IMPL(CRSAMultiPrimePrivateCrtKeySpec, RSAPrivateKeySpec, IRSAMultiPrimePrivateCrtKeySpec)
 ECode CRSAMultiPrimePrivateCrtKeySpec::GetCrtCoefficient(
     /* [out] */ IBigInteger **crtCoefficient)
 {

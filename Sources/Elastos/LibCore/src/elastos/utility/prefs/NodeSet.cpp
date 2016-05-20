@@ -9,7 +9,7 @@ namespace Elastos {
 namespace Utility {
 namespace Prefs {
 
-CAR_INTERFACE_IMPL(NodeSet, Object, INodeList);
+CAR_INTERFACE_IMPL(NodeSet, Object, INodeList)
 
 NodeSet::NodeSet(
     /* [in] */ IIterator* nodes)

@@ -12,8 +12,8 @@ namespace Elastos {
 namespace Sql {
 namespace SQLite {
 
-CAR_OBJECT_IMPL(CStmt);
-CAR_INTERFACE_IMPL(CStmt, Object, IStmt);
+CAR_OBJECT_IMPL(CStmt)
+CAR_INTERFACE_IMPL(CStmt, Object, IStmt)
 
 CStmt::CStmt()
     : mHandle(0)

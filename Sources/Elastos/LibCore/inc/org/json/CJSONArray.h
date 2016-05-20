@@ -12,7 +12,7 @@ CarClass(CJSONArray)
     , public JSONArray
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } //namespace Json

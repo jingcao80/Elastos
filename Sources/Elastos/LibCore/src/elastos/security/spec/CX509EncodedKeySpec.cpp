@@ -5,8 +5,8 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CX509EncodedKeySpec);
-CAR_INTERFACE_IMPL(CX509EncodedKeySpec, EncodedKeySpec, IX509EncodedKeySpec);
+CAR_OBJECT_IMPL(CX509EncodedKeySpec)
+CAR_INTERFACE_IMPL(CX509EncodedKeySpec, EncodedKeySpec, IX509EncodedKeySpec)
 ECode CX509EncodedKeySpec::GetFormat(
     /* [out] */ String *format)
 {

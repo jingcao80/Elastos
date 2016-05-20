@@ -122,7 +122,7 @@ public:
         , public Object
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Itr(
             /* [in] */ CLinkedTransferQueue* owner);

@@ -36,7 +36,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ const String& classPath,

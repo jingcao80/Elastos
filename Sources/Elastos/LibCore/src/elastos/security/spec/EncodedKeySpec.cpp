@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_INTERFACE_IMPL_2(EncodedKeySpec, Object, IEncodedKeySpec, IKeySpec);
+CAR_INTERFACE_IMPL_2(EncodedKeySpec, Object, IEncodedKeySpec, IKeySpec)
 EncodedKeySpec::EncodedKeySpec()
 {}
 

@@ -24,7 +24,7 @@ extern "C" const InterfaceID EIID_CertPath =
     { 0x1024033A, 0xF65A, 0x26E1, { 0xC4, 0xC9, 0x60, 0x05, 0xCB, 0xA3, 0x60, 0x0A } };
 static const Int64 sSerialVersionUID = 6068470306649138683L;
 
-CAR_INTERFACE_IMPL_2(CertPath, Object, ICertPath, ISerializable);
+CAR_INTERFACE_IMPL_2(CertPath, Object, ICertPath, ISerializable)
 CertPath::CertPath(
     /* [in] */ const String& type)
     : mType(type)
@@ -130,7 +130,7 @@ ECode CertPath::WriteReplace(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CertPath::CertPathRep, Object, ISerializable);
+CAR_INTERFACE_IMPL(CertPath::CertPathRep, Object, ISerializable)
 
 CertPath::CertPathRep::CertPathRep(
     /* [in] */ const String& type,

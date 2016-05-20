@@ -16,7 +16,7 @@ namespace Concurrent {
 //====================================================================
 // CLinkedBlockingQueue::Itr::
 //====================================================================
-CAR_INTERFACE_IMPL(CLinkedBlockingQueue::Itr, Object, IIterator);
+CAR_INTERFACE_IMPL(CLinkedBlockingQueue::Itr, Object, IIterator)
 
 CLinkedBlockingQueue::Itr::Itr(
     /* [in] */ CLinkedBlockingQueue* owner)
@@ -95,7 +95,7 @@ ECode CLinkedBlockingQueue::Itr::Remove()
 //====================================================================
 CAR_INTERFACE_IMPL_2(CLinkedBlockingQueue, AbstractQueue, IBlockingQueue, ISerializable)
 
-CAR_OBJECT_IMPL(CLinkedBlockingQueue);
+CAR_OBJECT_IMPL(CLinkedBlockingQueue)
 
 CLinkedBlockingQueue::CLinkedBlockingQueue()
     : mCapacity(0)

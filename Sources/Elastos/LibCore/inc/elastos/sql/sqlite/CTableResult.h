@@ -13,7 +13,7 @@ namespace SQLite {
 CarClass(CTableResult) , public TableResult
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // namespace SQLite

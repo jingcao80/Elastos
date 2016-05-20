@@ -557,7 +557,7 @@ ECode CEnumMap::EnumMapEntry::CheckEntryStatus()
 //==========================================================
 //       CEnumMap::EnumMapIterator
 //==========================================================
-CAR_INTERFACE_IMPL(CEnumMap::EnumMapIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(CEnumMap::EnumMapIterator, Object, IIterator)
 
 CEnumMap::EnumMapIterator::EnumMapIterator(
     /* [in] */ MapEntry::Type* value,

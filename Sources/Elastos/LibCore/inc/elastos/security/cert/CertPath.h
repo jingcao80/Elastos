@@ -22,7 +22,7 @@ class CertPath
     , public ISerializable
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the type of {@code Certificate} in this instance.

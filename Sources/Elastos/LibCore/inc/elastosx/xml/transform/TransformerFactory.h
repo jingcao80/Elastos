@@ -36,7 +36,7 @@ protected:
     TransformerFactory() { }
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * <p>Get current state of canonicalization.</p>

@@ -7,7 +7,7 @@ using Elastos::Core::EIID_IRunnable;
 namespace Elastos {
 namespace Utility {
 
-CAR_INTERFACE_IMPL_2(TimerTask, Object, ITimerTask, IRunnable);
+CAR_INTERFACE_IMPL_2(TimerTask, Object, ITimerTask, IRunnable)
 
 TimerTask::TimerTask()
     : mCancelled(FALSE)

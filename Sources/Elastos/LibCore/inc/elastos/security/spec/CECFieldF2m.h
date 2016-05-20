@@ -16,9 +16,9 @@ CarClass(CECFieldF2m)
     , public IECField
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetFieldSize(
         /* [out] */ Int32 *size);

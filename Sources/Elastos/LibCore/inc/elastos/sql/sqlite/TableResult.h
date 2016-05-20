@@ -18,7 +18,7 @@ class TableResult
     , public ICallback
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Columns(
         /* [in] */ ArrayOf<String> * coldata);

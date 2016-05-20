@@ -5,7 +5,7 @@ namespace Elastosx {
 namespace Xml {
 namespace Transform {
 
-CAR_INTERFACE_IMPL(Transformer, Object, ITransformer);
+CAR_INTERFACE_IMPL(Transformer, Object, ITransformer)
 Transformer::Transformer()
 {}
 

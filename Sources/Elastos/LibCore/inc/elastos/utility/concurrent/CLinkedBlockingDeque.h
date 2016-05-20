@@ -61,7 +61,7 @@ private:
         , public Object
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AbstractItr(
             /* [in] */ CLinkedBlockingDeque* owner);

@@ -15,9 +15,9 @@ CarClass(CSqlDate)
     , public ISQLDate
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ Int64 theDate);

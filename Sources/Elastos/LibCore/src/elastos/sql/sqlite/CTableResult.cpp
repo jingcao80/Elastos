@@ -8,7 +8,7 @@ namespace Elastos {
 namespace Sql {
 namespace SQLite {
 
-CAR_OBJECT_IMPL(CTableResult);
+CAR_OBJECT_IMPL(CTableResult)
 
 } // namespace SQLite
 } // namespace Sql

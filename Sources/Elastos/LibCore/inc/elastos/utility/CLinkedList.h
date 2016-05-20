@@ -46,7 +46,7 @@ private:
             /* [in] */ CLinkedList* object,
             /* [in] */ Int32 location);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Add(
             /* [in] */ IInterface* object);
@@ -99,7 +99,7 @@ private:
         ReverseLinkIterator(
             /* [in] */ CLinkedList* linkedList);
 
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI HasNext(
             /* [out] */ Boolean* result);

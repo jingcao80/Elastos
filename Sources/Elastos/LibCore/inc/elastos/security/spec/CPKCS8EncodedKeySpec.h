@@ -14,9 +14,9 @@ CarClass(CPKCS8EncodedKeySpec)
     , public IPKCS8EncodedKeySpec
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetFormat(
         /* [out] */ String *format);

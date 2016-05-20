@@ -17,7 +17,7 @@ CarClass(CJSONObjectHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI NumberToString(
         /* [in] */ INumber* number,

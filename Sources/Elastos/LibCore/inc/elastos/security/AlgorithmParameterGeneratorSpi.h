@@ -22,7 +22,7 @@ class AlgorithmParameterGeneratorSpi
     , public IAlgorithmParameterGeneratorSpi
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Constructs a new instance of {@code AlgorithmParameterGeneratorSpi} .

@@ -99,7 +99,7 @@ ECode CWeakHashMap::Entry::ToString(
 //==========================================================
 //       CWeakHashMap::HashIterator
 //==========================================================
-CAR_INTERFACE_IMPL(CWeakHashMap::HashIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(CWeakHashMap::HashIterator, Object, IIterator)
 
 ECode CWeakHashMap::HashIterator::HasNext(
     /* [out] */ Boolean* result)

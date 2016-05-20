@@ -31,7 +31,7 @@ protected:
         friend class Certificate;
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
     protected:
         /**
@@ -69,7 +69,7 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the certificate type.

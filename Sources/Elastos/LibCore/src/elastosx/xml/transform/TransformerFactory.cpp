@@ -5,7 +5,7 @@ namespace Elastosx {
 namespace Xml {
 namespace Transform {
 
-CAR_INTERFACE_IMPL(TransformerFactory, Object, ITransformerFactory);
+CAR_INTERFACE_IMPL(TransformerFactory, Object, ITransformerFactory)
 
 AutoPtr<ITransformerFactory> TransformerFactory::NewInstance() /*throws TransformerFactoryConfigurationError*/
 {

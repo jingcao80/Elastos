@@ -15,9 +15,9 @@ CarClass(CEllipticCurve)
     , public IEllipticCurve
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetA(
         /* [out] */ IBigInteger **a);

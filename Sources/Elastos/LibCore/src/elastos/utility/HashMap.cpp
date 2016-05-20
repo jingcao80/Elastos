@@ -1048,7 +1048,7 @@ ECode HashMap::KeyIterator::Remove()
 //==========================================================
 //       HashMap::ValueIterator
 //==========================================================
-CAR_INTERFACE_IMPL(HashMap::ValueIterator, HashIterator, IIterator);
+CAR_INTERFACE_IMPL(HashMap::ValueIterator, HashIterator, IIterator)
 
 HashMap::ValueIterator::ValueIterator(
     /* [in] */ HashMap* host)
@@ -1082,7 +1082,7 @@ ECode HashMap::ValueIterator::Remove()
 //==========================================================
 //       HashMap::EntryIterator
 //==========================================================
-CAR_INTERFACE_IMPL(HashMap::EntryIterator, HashIterator, IIterator);
+CAR_INTERFACE_IMPL(HashMap::EntryIterator, HashIterator, IIterator)
 
 HashMap::EntryIterator::EntryIterator(
     /* [in] */ HashMap* host)

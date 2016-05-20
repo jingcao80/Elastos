@@ -58,7 +58,7 @@ class JSONStringer
 {
     friend class JSONArray;
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     JSONStringer();
 

@@ -8,8 +8,8 @@ namespace Xml {
 namespace Transform {
 namespace Stream {
 
-CAR_OBJECT_IMPL(CStreamResult);
-CAR_INTERFACE_IMPL_2(CStreamResult, Object, IStreamResult, IResult);
+CAR_OBJECT_IMPL(CStreamResult)
+CAR_INTERFACE_IMPL_2(CStreamResult, Object, IStreamResult, IResult)
 ECode CStreamResult::constructor()
 {
     return NOERROR;

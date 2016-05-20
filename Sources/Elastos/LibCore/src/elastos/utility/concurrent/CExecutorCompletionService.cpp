@@ -17,7 +17,7 @@ void CExecutorCompletionService::QueueingFuture::Done()
 
 CAR_INTERFACE_IMPL(CExecutorCompletionService, Object, IExecutorCompletionService)
 
-CAR_OBJECT_IMPL(CExecutorCompletionService);
+CAR_OBJECT_IMPL(CExecutorCompletionService)
 
 ECode CExecutorCompletionService::constructor(
     /* [in] */ IExecutor* executor)

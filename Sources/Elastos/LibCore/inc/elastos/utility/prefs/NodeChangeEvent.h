@@ -28,7 +28,7 @@ class NodeChangeEvent
     , public INodeChangeEvent
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     NodeChangeEvent();
 

@@ -15,9 +15,9 @@ CarClass(CDBDump)
     , public ICallback
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Columns(
         /* [in] */ ArrayOf<String> * coldata);

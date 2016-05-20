@@ -19,7 +19,7 @@ using Org::Json::JSONStringerScope;
 namespace Org {
 namespace Json {
 
-CAR_INTERFACE_IMPL(JSONStringer, Object, IJSONStringer);
+CAR_INTERFACE_IMPL(JSONStringer, Object, IJSONStringer)
 
 JSONStringer::JSONStringer()
 {

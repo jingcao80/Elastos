@@ -545,7 +545,7 @@ void CParserAdapter::CheckNotParsing(
     }
 }
 
-CAR_INTERFACE_IMPL(CParserAdapter::AttributeListAdapter, Object, IAttributes);
+CAR_INTERFACE_IMPL(CParserAdapter::AttributeListAdapter, Object, IAttributes)
 
 CParserAdapter::AttributeListAdapter::AttributeListAdapter(
     /* [in] */ CParserAdapter* host)

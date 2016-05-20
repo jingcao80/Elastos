@@ -9,7 +9,7 @@ namespace Cert {
 extern "C" const InterfaceID EIID_X509CRLEntry =
     { 0x9CB9E71A, 0x34C3, 0xBEAC, { 0xDC, 0x56, 0x6E, 0x5F, 0x9B, 0x91, 0x01, 0xFC } };
 
-CAR_INTERFACE_IMPL_2(X509CRLEntry, Object, IX509CRLEntry, IX509Extension);
+CAR_INTERFACE_IMPL_2(X509CRLEntry, Object, IX509CRLEntry, IX509Extension)
 ECode X509CRLEntry::GetInterfaceID(
     /* [in] */ IInterface *object,
     /* [out] */ InterfaceID *pIID)

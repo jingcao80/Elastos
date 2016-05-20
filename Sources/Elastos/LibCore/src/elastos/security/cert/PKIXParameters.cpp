@@ -39,7 +39,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_INTERFACE_IMPL_2(PKIXParameters, Object, IPKIXParameters, ICertPathParameters, ICloneable);
+CAR_INTERFACE_IMPL_2(PKIXParameters, Object, IPKIXParameters, ICertPathParameters, ICloneable)
 PKIXParameters::PKIXParameters()
     : mRevocationEnabled(TRUE)
     , mExplicitPolicyRequired(FALSE)

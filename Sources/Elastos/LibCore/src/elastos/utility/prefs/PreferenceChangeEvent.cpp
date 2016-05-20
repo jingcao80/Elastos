@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Utility {
 namespace Prefs {
 
-CAR_INTERFACE_IMPL(PreferenceChangeEvent, EventObject, IPreferenceChangeEvent);
+CAR_INTERFACE_IMPL(PreferenceChangeEvent, EventObject, IPreferenceChangeEvent)
 
 PreferenceChangeEvent::PreferenceChangeEvent()
 {

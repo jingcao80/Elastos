@@ -20,7 +20,7 @@ class NetworkEventDispatcher
     , public INetworkEventDispatcher
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
     * Returns the shared {@link NetworkEventDispatcher} instance.

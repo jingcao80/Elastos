@@ -16,9 +16,9 @@ CarClass(CECParameterSpec)
     , public IAlgorithmParameterSpec
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetCofactor(
         /* [out] */ Int32 *cofactor);

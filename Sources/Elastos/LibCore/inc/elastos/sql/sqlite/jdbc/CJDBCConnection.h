@@ -34,9 +34,9 @@ CarClass(CJDBCConnection)
     , public ICloseable
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI ClearWarnings();
 

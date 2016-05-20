@@ -20,9 +20,9 @@ CarClass(CSQLPermission)
 {
 public:
     //TODO: to delete
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CARAPI constructor(
         /* [in] */ const String& name);

@@ -21,7 +21,7 @@ namespace Concurrent {
 //====================================================================
 CAR_INTERFACE_IMPL(CExchanger, Object, IExchanger)
 
-CAR_OBJECT_IMPL(CExchanger);
+CAR_OBJECT_IMPL(CExchanger)
 
 const Int32 CExchanger::sNCPU = 4;//= Runtime.getRuntime().availableProcessors();
 const Int32 CExchanger::sASHIFT = 7;

@@ -438,7 +438,7 @@ Boolean CForkJoinPool::WorkQueue::IsApparentlyUnblocked()
 //====================================================================
 CAR_INTERFACE_IMPL(CForkJoinPool, AbstractExecutorService, IForkJoinPool)
 
-CAR_OBJECT_IMPL(CForkJoinPool);
+CAR_OBJECT_IMPL(CForkJoinPool)
 
 AutoPtr<IForkJoinPoolForkJoinWorkerThreadFactory> CForkJoinPool::mDefaultForkJoinWorkerThreadFactory;
 

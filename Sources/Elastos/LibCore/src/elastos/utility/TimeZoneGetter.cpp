@@ -5,7 +5,7 @@
 namespace Elastos {
 namespace Utility {
 
-CAR_INTERFACE_IMPL(TimeZoneGetter, Object, ITimeZoneGetter);
+CAR_INTERFACE_IMPL(TimeZoneGetter, Object, ITimeZoneGetter)
 
 AutoPtr<ITimeZoneGetter> TimeZoneGetter::sInstance;
 

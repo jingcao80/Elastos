@@ -13,7 +13,7 @@ class FilePreferencesFactoryImpl
     , public IPreferencesFactory
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FilePreferencesFactoryImpl();
 

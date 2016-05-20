@@ -15,9 +15,9 @@ CarClass(CTimestamp)
     , public ITimestamp
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CTimestamp();
 

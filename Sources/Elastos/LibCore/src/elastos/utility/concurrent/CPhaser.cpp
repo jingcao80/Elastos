@@ -40,7 +40,7 @@ Int32  CPhaser::EMPTY           = 1;
 
 CAR_INTERFACE_IMPL(CPhaser, Object, IPhaser)
 
-CAR_OBJECT_IMPL(CPhaser);
+CAR_OBJECT_IMPL(CPhaser)
 
 Int32 CPhaser::UnarrivedOf(
     /* [in] */ Int64 s)
@@ -622,7 +622,7 @@ Int32 CPhaser::InternalAwaitAdvance(
 //====================================================================
 // CPhaser::QNode::
 //====================================================================
-CAR_INTERFACE_IMPL(CPhaser::QNode, Object, IForkJoinPoolManagedBlocker);
+CAR_INTERFACE_IMPL(CPhaser::QNode, Object, IForkJoinPoolManagedBlocker)
 
 CPhaser::QNode::QNode(
     /* [in] */ IPhaser* phaser,

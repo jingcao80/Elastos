@@ -61,7 +61,7 @@ ECode JSONObject::MyObject::ToString(
 //          JSONObject
 //==============================================================================
 
-CAR_INTERFACE_IMPL(JSONObject, Object, IJSONObject);
+CAR_INTERFACE_IMPL(JSONObject, Object, IJSONObject)
 
 JSONObject::JSONObject()
 {}

@@ -5,9 +5,9 @@ namespace Elastos {
 namespace Sql {
 
 //TODO: to delete
-CAR_INTERFACE_IMPL(CSQLPermission, Object, ISQLPermission);
+CAR_INTERFACE_IMPL(CSQLPermission, Object, ISQLPermission)
 
-CAR_OBJECT_IMPL(CSQLPermission);
+CAR_OBJECT_IMPL(CSQLPermission)
 
 ECode CSQLPermission::constructor(
     /* [in] */ const String& name)

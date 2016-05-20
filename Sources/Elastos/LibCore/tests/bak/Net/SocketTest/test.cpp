@@ -20,7 +20,7 @@ CTest::ClientThread::ClientThread(CTest* host)
 {
 }
 
-CAR_INTERFACE_IMPL(CTest::ClientThread, IRunnable);
+CAR_INTERFACE_IMPL(CTest::ClientThread, IRunnable)
 
 ECode CTest::ClientThread::Run()
 {
@@ -53,7 +53,7 @@ CTest::ServerThread::ServerThread(CTest* host)
 {
 }
 
-CAR_INTERFACE_IMPL(CTest::ServerThread, IRunnable);
+CAR_INTERFACE_IMPL(CTest::ServerThread, IRunnable)
 
 ECode CTest::ServerThread::Run()
 {
@@ -121,7 +121,7 @@ ECode CTest::ServerThread::WaitCreated()
 //==========================================================
 //       CTest::OutputRunnable
 //==========================================================
-CAR_INTERFACE_IMPL(CTest::OutputRunnable, IRunnable);
+CAR_INTERFACE_IMPL(CTest::OutputRunnable, IRunnable)
 
 CTest::OutputRunnable::OutputRunnable(IServerSocket* inserver)
 {

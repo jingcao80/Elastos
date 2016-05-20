@@ -42,7 +42,7 @@ protected:
     Transformer();
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual ~Transformer();
 

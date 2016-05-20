@@ -16,9 +16,9 @@ CarClass(CRSAPublicKeySpec)
     , public IKeySpec
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetModulus(
         /* [out] */ IBigInteger **modulus);

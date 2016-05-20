@@ -8,7 +8,7 @@ using Elastos::IO::EIID_ISerializable;
 namespace Elastos{
 namespace Utility{
 
-CAR_INTERFACE_IMPL_2(EventObject, Object, IEventObject, ISerializable);
+CAR_INTERFACE_IMPL_2(EventObject, Object, IEventObject, ISerializable)
 
 EventObject::EventObject()
 {

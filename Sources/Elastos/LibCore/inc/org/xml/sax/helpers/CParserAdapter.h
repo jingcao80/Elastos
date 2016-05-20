@@ -279,7 +279,7 @@ public:
         , public IAttributes
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         /**
          * Construct a new adapter.

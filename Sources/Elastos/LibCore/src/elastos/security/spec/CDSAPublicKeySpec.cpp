@@ -5,8 +5,8 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_OBJECT_IMPL(CDSAPublicKeySpec);
-CAR_INTERFACE_IMPL_2(CDSAPublicKeySpec, Object, IDSAPublicKeySpec, IKeySpec);
+CAR_OBJECT_IMPL(CDSAPublicKeySpec)
+CAR_INTERFACE_IMPL_2(CDSAPublicKeySpec, Object, IDSAPublicKeySpec, IKeySpec)
 ECode CDSAPublicKeySpec::GetG(
     /* [out] */ IBigInteger **g)
 {

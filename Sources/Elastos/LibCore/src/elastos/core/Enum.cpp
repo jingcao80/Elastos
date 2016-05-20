@@ -7,7 +7,7 @@ using Elastos::Core::EIID_IComparable;
 namespace Elastos {
 namespace Core {
 
-CAR_INTERFACE_IMPL_3(Enum, Object, IEnum, ISerializable, IComparable);
+CAR_INTERFACE_IMPL_3(Enum, Object, IEnum, ISerializable, IComparable)
 
 ECode Enum::Name(
     /* [out] */ String* str)

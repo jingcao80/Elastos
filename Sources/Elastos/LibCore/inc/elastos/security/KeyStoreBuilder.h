@@ -14,7 +14,7 @@ class KeyStoreBuilder
     , public IKeyStoreBuilder
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the {@code KeyStore} created by this {@code Builder}.
@@ -122,7 +122,7 @@ private:
         , public IKeyStoreLoadStoreParameter
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         KeyStoreTmpLSParameter(
             /* [in] */ IKeyStoreProtectionParameter *protPar);

@@ -18,7 +18,7 @@ class KeyStoreSpi
     , public IKeyStoreSpi
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the key with the given alias, using the password to recover the

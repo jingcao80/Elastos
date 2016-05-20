@@ -293,7 +293,7 @@ public:
         , public ISerializable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         /**
          * Constructor for use by subclasses
          *
@@ -498,7 +498,7 @@ public:
         , public ISerializable
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
         /**
          * Constructor for use by subclasses
          *

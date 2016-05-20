@@ -1,4 +1,4 @@
-
+    
 #include "test.h"
 
 CTest::CTest()
@@ -340,7 +340,7 @@ AutoPtr<ICookieManager> CTest::store(String** cookies, int length, IMap* respons
     return manager;
 }
 
-CAR_INTERFACE_IMPL(CTest::DummyStore, ICookieStore);
+CAR_INTERFACE_IMPL(CTest::DummyStore, ICookieStore)
 
 ECode CTest::DummyStore::Add(
     /* [in] */ IURI* uri,

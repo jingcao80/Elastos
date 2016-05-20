@@ -15,7 +15,7 @@ CarClass(CJSONTokenerHelper)
 public:
     CAR_SINGLETON_DECL();
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Dehexchar(
         /* [in] */ Char32 hex,

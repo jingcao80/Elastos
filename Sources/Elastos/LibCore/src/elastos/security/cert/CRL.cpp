@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_INTERFACE_IMPL(CRL, Object, ICRL);
+CAR_INTERFACE_IMPL(CRL, Object, ICRL)
 CRL::CRL(
     /* [in] */ const String& type)
 : mType(type)

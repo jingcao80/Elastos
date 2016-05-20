@@ -65,7 +65,7 @@ Boolean CConcurrentLinkedQueue::Node::CasNext(
 //====================================================================
 CAR_INTERFACE_IMPL_2(CConcurrentLinkedQueue, AbstractQueue, IConcurrentLinkedQueue, ISerializable)
 
-CAR_OBJECT_IMPL(CConcurrentLinkedQueue);
+CAR_OBJECT_IMPL(CConcurrentLinkedQueue)
 
 ECode CConcurrentLinkedQueue::constructor()
 {

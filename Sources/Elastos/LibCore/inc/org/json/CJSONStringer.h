@@ -12,7 +12,7 @@ CarClass(CJSONStringer)
     , public JSONStringer
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } //namespace Json

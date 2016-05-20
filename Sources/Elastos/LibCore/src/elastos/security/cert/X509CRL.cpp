@@ -14,7 +14,7 @@ namespace Cert {
 extern "C" const InterfaceID EIID_X509CRL =
         { 0x62b8cdc7, 0x7e0c, 0x5371, { 0x64, 0x09, 0x7d, 0x49, 0x31, 0x4b, 0xbc, 0x7a } };
 
-CAR_INTERFACE_IMPL(X509CRL, CRL, IX509Extension);
+CAR_INTERFACE_IMPL(X509CRL, CRL, IX509Extension)
 
 ECode X509CRL::Equals(
     /* [in] */ IInterface *other,

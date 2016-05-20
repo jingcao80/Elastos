@@ -23,7 +23,7 @@ const Boolean CJDBCPreparedStatement::mNullrepl =
 
 CAR_OBJECT_IMPL(CJDBCPreparedStatement)
 
-CAR_INTERFACE_IMPL(CJDBCPreparedStatement, JDBCStatement, IJDBCPreparedStatement);
+CAR_INTERFACE_IMPL(CJDBCPreparedStatement, JDBCStatement, IJDBCPreparedStatement)
 
 ECode CJDBCPreparedStatement::constructor(
     /* [in] */ IJDBCConnection * pConn,

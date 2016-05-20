@@ -67,7 +67,7 @@ private:
         , public IIterator
     {
      public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         AbstractItr(
             /* [in] */ CConcurrentLinkedDeque* owner);

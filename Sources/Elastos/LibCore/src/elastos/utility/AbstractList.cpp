@@ -17,7 +17,7 @@ AbstractList::SimpleListIterator::SimpleListIterator(
     , mOwner(owner)
 {}
 
-CAR_INTERFACE_IMPL(AbstractList::SimpleListIterator, Object, IIterator);
+CAR_INTERFACE_IMPL(AbstractList::SimpleListIterator, Object, IIterator)
 
 ECode AbstractList::SimpleListIterator::HasNext(
     /* [out] */ Boolean* result)
@@ -77,7 +77,7 @@ ECode AbstractList::SimpleListIterator::Remove()
 // AbstractList::FullListIterator
 //=================================================
 
-CAR_INTERFACE_IMPL(AbstractList::FullListIterator, SimpleListIterator, IListIterator);
+CAR_INTERFACE_IMPL(AbstractList::FullListIterator, SimpleListIterator, IListIterator)
 
 AbstractList::FullListIterator::FullListIterator(
     /* [in] */ Int32 start,
@@ -916,7 +916,7 @@ SubAbstractListRandomAccess::SubAbstractListRandomAccess(
 {
 }
 
-CAR_INTERFACE_IMPL(SubAbstractListRandomAccess, SubAbstractList, IRandomAccess);
+CAR_INTERFACE_IMPL(SubAbstractListRandomAccess, SubAbstractList, IRandomAccess)
 
 CAR_INTERFACE_IMPL(AbstractList, AbstractCollection, IList)
 

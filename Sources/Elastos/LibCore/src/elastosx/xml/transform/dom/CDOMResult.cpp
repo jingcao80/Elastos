@@ -7,8 +7,8 @@ namespace Xml {
 namespace Transform {
 namespace Dom {
 
-CAR_OBJECT_IMPL(CDOMResult);
-CAR_INTERFACE_IMPL_2(CDOMResult, Object, IDOMResult, IResult);
+CAR_OBJECT_IMPL(CDOMResult)
+CAR_INTERFACE_IMPL_2(CDOMResult, Object, IDOMResult, IResult)
 ECode CDOMResult::constructor()
 {
     SetNode(NULL);

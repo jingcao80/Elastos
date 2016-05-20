@@ -9,7 +9,7 @@ namespace SQLite {
 namespace JDBC{
 
 CAR_OBJECT_IMPL(CTableResultX)
-CAR_INTERFACE_IMPL(CTableResultX, TableResult, ITableResultX);
+CAR_INTERFACE_IMPL(CTableResultX, TableResult, ITableResultX)
 
 ECode CTableResultX::constructor()
 {

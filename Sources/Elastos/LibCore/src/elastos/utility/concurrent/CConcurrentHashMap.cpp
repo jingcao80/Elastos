@@ -2513,7 +2513,7 @@ const AutoPtr<IAtomicInteger32> CConcurrentHashMap::mCounterHashCodeGenerator = 
 
 CAR_INTERFACE_IMPL_3(CConcurrentHashMap, AbstractMap, IConcurrentHashMap, IConcurrentMap, ISerializable)
 
-CAR_OBJECT_IMPL(CConcurrentHashMap);
+CAR_OBJECT_IMPL(CConcurrentHashMap)
 
 ECode CConcurrentHashMap::constructor(
     /* [in] */ Int32 initialCapacity,

@@ -14,9 +14,9 @@ CarClass(CBackup)
     , public IBackup
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Finish();
 

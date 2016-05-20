@@ -14,9 +14,9 @@ CarClass(CVm)
     , public IVm
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Step(
         /* [in] */ ICallback * cb,

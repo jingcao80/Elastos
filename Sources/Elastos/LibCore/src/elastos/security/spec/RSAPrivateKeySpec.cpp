@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-CAR_INTERFACE_IMPL_2(RSAPrivateKeySpec, Object, IRSAPrivateKeySpec, IKeySpec);
+CAR_INTERFACE_IMPL_2(RSAPrivateKeySpec, Object, IRSAPrivateKeySpec, IKeySpec)
 ECode RSAPrivateKeySpec::GetModulus(
     /* [out] */ IBigInteger **modulus)
 {

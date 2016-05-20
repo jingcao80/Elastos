@@ -15,7 +15,7 @@ namespace Elastos {
 namespace Utility {
 namespace Prefs {
 
-CAR_INTERFACE_IMPL(FilePreferencesImpl::FilenameFilter, Object, IFilenameFilter);
+CAR_INTERFACE_IMPL(FilePreferencesImpl::FilenameFilter, Object, IFilenameFilter)
 
 FilePreferencesImpl::FilenameFilter::FilenameFilter(
     /* [in] */ FilePreferencesImpl* host)
@@ -34,7 +34,7 @@ ECode FilePreferencesImpl::FilenameFilter::Accept(
     return file->IsDirectory(succeeded);
 }
 
-CAR_INTERFACE_IMPL_2(FilePreferencesImpl, Object, IAbstractPreferences, IPreferences);
+CAR_INTERFACE_IMPL_2(FilePreferencesImpl, Object, IAbstractPreferences, IPreferences)
 
 const String FilePreferencesImpl::PREFS_FILE_NAME("prefs.xml");
 

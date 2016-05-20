@@ -20,7 +20,7 @@ using Org::Json::JSONStringerScope;
 namespace Org {
 namespace Json {
 
-CAR_INTERFACE_IMPL(JSONArray, Object, IJSONArray);
+CAR_INTERFACE_IMPL(JSONArray, Object, IJSONArray)
 
 JSONArray::JSONArray()
 {}

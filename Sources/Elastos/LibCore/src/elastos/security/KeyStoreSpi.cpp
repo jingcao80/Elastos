@@ -8,7 +8,7 @@
 namespace Elastos {
 namespace Security {
 
-CAR_INTERFACE_IMPL(KeyStoreSpi, Object, IKeyStoreSpi);
+CAR_INTERFACE_IMPL(KeyStoreSpi, Object, IKeyStoreSpi)
 ECode KeyStoreSpi::EngineStore(
     /* [in] */ IKeyStoreLoadStoreParameter *param)
 {

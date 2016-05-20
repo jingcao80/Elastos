@@ -6,7 +6,7 @@ namespace Xml {
 namespace Transform {
 namespace Sax {
 
-CAR_INTERFACE_IMPL(SAXTransformerFactory, TransformerFactory, ISAXTransformerFactory);
+CAR_INTERFACE_IMPL(SAXTransformerFactory, TransformerFactory, ISAXTransformerFactory)
 
 SAXTransformerFactory::SAXTransformerFactory()
 {}

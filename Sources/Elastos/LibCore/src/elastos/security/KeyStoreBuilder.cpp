@@ -16,7 +16,7 @@ namespace Security {
 
 extern "C" const InterfaceID EIID_KeyStore;
 
-CAR_INTERFACE_IMPL(KeyStoreBuilder, Object, IKeyStoreBuilder);
+CAR_INTERFACE_IMPL(KeyStoreBuilder, Object, IKeyStoreBuilder)
 KeyStoreBuilder::KeyStoreBuilder()
 {}
 
@@ -184,7 +184,7 @@ ECode KeyStoreBuilder::KeyStoreBuilderImpl::GetProtectionParameter(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyStoreBuilder::KeyStoreTmpLSParameter, Object, IKeyStoreLoadStoreParameter);
+CAR_INTERFACE_IMPL(KeyStoreBuilder::KeyStoreTmpLSParameter, Object, IKeyStoreLoadStoreParameter)
 KeyStoreBuilder::KeyStoreTmpLSParameter::KeyStoreTmpLSParameter(
     /* [in] */ IKeyStoreProtectionParameter *protPar)
     : mProtPar(protPar)

@@ -37,7 +37,7 @@ public:
         , mValue(theValue)
     {}
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI Clone(
         /* [out] */ IInterface** outface);

@@ -9,8 +9,8 @@ namespace Sql {
 
 const String CSqlDate::PADDING("0000");
 
-CAR_INTERFACE_IMPL(CSqlDate, Date, ISQLDate);
-CAR_OBJECT_IMPL(CSqlDate);
+CAR_INTERFACE_IMPL(CSqlDate, Date, ISQLDate)
+CAR_OBJECT_IMPL(CSqlDate)
 
 ECode CSqlDate::constructor(
     /* [in] */ Int32 theYear,

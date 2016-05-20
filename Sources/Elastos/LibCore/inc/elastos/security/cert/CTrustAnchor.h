@@ -16,9 +16,9 @@ CarClass(CTrustAnchor)
     , public ITrustAnchor
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI GetNameConstraints(
         /* [out, callee] */ ArrayOf<Byte> **nameConstraints);

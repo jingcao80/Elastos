@@ -51,7 +51,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     virtual CARAPI SetRawResult(
         /* [in] */ IInterface* value) = 0;

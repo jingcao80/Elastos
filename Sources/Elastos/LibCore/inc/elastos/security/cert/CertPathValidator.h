@@ -16,7 +16,7 @@ class CertPathValidator
     , public ICertPathValidator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI GetInstance(
         /* [in] */ const String& algorithm,

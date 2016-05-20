@@ -17,7 +17,7 @@ namespace Concurrent {
 //====================================================================
 CAR_INTERFACE_IMPL_2(CDelayQueue, AbstractQueue, IDelayQueue, IBlockingQueue)
 
-CAR_OBJECT_IMPL(CDelayQueue);
+CAR_OBJECT_IMPL(CDelayQueue)
 
 ECode CDelayQueue::constructor()
 {
@@ -417,7 +417,7 @@ ECode CDelayQueue::GetHashCode(
 //====================================================================
 // CDelayQueue::Itr::
 //====================================================================
-CAR_INTERFACE_IMPL(CDelayQueue::Itr, Object, IIterator);
+CAR_INTERFACE_IMPL(CDelayQueue::Itr, Object, IIterator)
 
 CDelayQueue::Itr::Itr(
     /* [in] */ IWeakReference* owner,

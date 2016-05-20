@@ -32,7 +32,7 @@ ECode SocketTaggerInner::Untag(
 AutoPtr<ISocketTagger> SocketTagger::sTagger = new SocketTaggerInner();
 
 CAR_OBJECT_IMPL(SocketTagger)
-CAR_INTERFACE_IMPL(SocketTagger, Object, ISocketTagger);
+CAR_INTERFACE_IMPL(SocketTagger, Object, ISocketTagger)
 
 ECode SocketTagger::Tag(
     /* [in] */ ISocket* socket)

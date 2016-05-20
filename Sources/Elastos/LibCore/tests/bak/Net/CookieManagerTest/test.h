@@ -23,7 +23,7 @@ private:
         , public ICookieStore
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CARAPI Add(
             /* [in] */ IURI* uri,

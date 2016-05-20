@@ -25,7 +25,7 @@ CLinkedBlockingDeque::Node::Node(
 //====================================================================
 // CLinkedBlockingDeque::AbstractItr::
 //====================================================================
-CAR_INTERFACE_IMPL(CLinkedBlockingDeque::AbstractItr, Object, IIterator);
+CAR_INTERFACE_IMPL(CLinkedBlockingDeque::AbstractItr, Object, IIterator)
 
 CLinkedBlockingDeque::AbstractItr::AbstractItr(
     /* [in] */ CLinkedBlockingDeque* owner) : mOwner(owner)
@@ -150,7 +150,7 @@ Int64 CLinkedBlockingDeque::sSerialVersionUID = -387911632671998426L;
 
 CAR_INTERFACE_IMPL_3(CLinkedBlockingDeque, AbstractQueue, IBlockingDeque, IBlockingQueue, ISerializable)
 
-CAR_OBJECT_IMPL(CLinkedBlockingDeque);
+CAR_OBJECT_IMPL(CLinkedBlockingDeque)
 
 ECode CLinkedBlockingDeque::constructor()
 {

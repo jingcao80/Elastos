@@ -6,7 +6,7 @@ namespace Utility {
 namespace Prefs {
 
 
-CAR_INTERFACE_IMPL(NodeChangeEvent, EventObject, INodeChangeEvent);
+CAR_INTERFACE_IMPL(NodeChangeEvent, EventObject, INodeChangeEvent)
 
 NodeChangeEvent::NodeChangeEvent()
 {

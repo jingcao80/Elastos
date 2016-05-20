@@ -7,7 +7,7 @@ namespace Json {
 
 CAR_SINGLETON_IMPL(CJSONObjectHelper);
 
-CAR_INTERFACE_IMPL(CJSONObjectHelper, Singleton, IJSONObjectHelper);
+CAR_INTERFACE_IMPL(CJSONObjectHelper, Singleton, IJSONObjectHelper)
 
 ECode CJSONObjectHelper::NumberToString(
     /* [in] */ INumber* number,

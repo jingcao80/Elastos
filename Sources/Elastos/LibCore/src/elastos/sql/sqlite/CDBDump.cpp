@@ -14,8 +14,8 @@ namespace Elastos {
 namespace Sql {
 namespace SQLite {
 
-CAR_OBJECT_IMPL(CDBDump);
-CAR_INTERFACE_IMPL_2(CDBDump, Object, IDBDump, ICallback);
+CAR_OBJECT_IMPL(CDBDump)
+CAR_INTERFACE_IMPL_2(CDBDump, Object, IDBDump, ICallback)
 
 ECode CDBDump::Columns(
     /* [in] */ ArrayOf<String> * coldata)

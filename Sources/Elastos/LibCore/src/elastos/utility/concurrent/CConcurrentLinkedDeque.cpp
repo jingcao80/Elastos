@@ -98,7 +98,7 @@ AutoPtr<CConcurrentLinkedDeque::Node> CConcurrentLinkedDeque::sNEXT_TERMINATOR;
 
 CAR_INTERFACE_IMPL_3(CConcurrentLinkedDeque, AbstractCollection, IDeque, IQueue, ISerializable)
 
-CAR_OBJECT_IMPL(CConcurrentLinkedDeque);
+CAR_OBJECT_IMPL(CConcurrentLinkedDeque)
 
 AutoPtr<CConcurrentLinkedDeque::Node> CConcurrentLinkedDeque::PrevTerminator()
 {

@@ -13,7 +13,7 @@ class CRL
     , public ICRL
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the type of this CRL.
