@@ -724,7 +724,6 @@ ECode Toolbar::SetLogo(
     /* [in] */ IDrawable* drawable)
 {
     AutoPtr<IViewParent> parent;
-    IView::Probe(mLogoView)->GetParent((IViewParent**)&parent);
     if (drawable != NULL) {
         EnsureLogoView();
         if (parent == NULL) {
@@ -732,7 +731,8 @@ ECode Toolbar::SetLogo(
             UpdateChildVisibilityForExpandedActionView(IView::Probe(mLogoView));
         }
     }
-    else if (mLogoView != NULL && parent != NULL) {
+    else if (mLogoView != NULL &&
+            (IView::Probe(mLogoView)->GetParent((IViewParent**)&parent), parent != NULL)) {
         RemoveView(IView::Probe(mLogoView));
     }
     if (mLogoView != NULL) {
@@ -1578,10 +1578,8 @@ ECode Toolbar::OnLayout(
         IView::Probe(bottomChild)->GetLayoutParams((IViewGroupLayoutParams**)&bottomTemp);
         AutoPtr<IViewGroupMarginLayoutParams> bottomlp = IViewGroupMarginLayoutParams::Probe(bottomTemp);
         Int32 titleWidth, subWidth;
-        IView::Probe(mTitleTextView)->GetMeasuredWidth(&titleWidth);
-        IView::Probe(mSubtitleTextView)->GetMeasuredWidth(&subWidth);
-        Boolean titleHasWidth = (layoutTitle && titleWidth > 0)
-                || (layoutSubtitle && subWidth > 0);
+        Boolean titleHasWidth = (layoutTitle && (IView::Probe(mTitleTextView)->GetMeasuredWidth(&titleWidth), titleWidth > 0))
+                || (layoutSubtitle && (IView::Probe(mSubtitleTextView)->GetMeasuredWidth(&subWidth), subWidth > 0));
 
         switch (mGravity & IGravity::VERTICAL_GRAVITY_MASK) {
             case IGravity::TOP: {
@@ -2156,8 +2154,7 @@ void Toolbar::AddCustomViewsWithGravity(
     Boolean isRtl = direction == LAYOUT_DIRECTION_RTL;
     Int32 childCount;
     GetChildCount(&childCount);
-    Int32 absGrav;
-    Gravity::GetAbsoluteGravity(gravity, direction);
+    Int32 absGrav = Gravity::GetAbsoluteGravity(gravity, direction);
     views->Clear();
     AutoPtr<IView> child;
     if (isRtl) {

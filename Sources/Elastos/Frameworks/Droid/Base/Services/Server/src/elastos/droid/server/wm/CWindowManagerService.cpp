@@ -7579,7 +7579,9 @@ ECode CWindowManagerService::ScreenshotApplications(
             // } catch (InterruptedException e) {
             // }
         }
-        synchronized(mWindowMapLock) {
+        {
+            AutoLock lock(mWindowMapLock);
+
             // Figure out the part of the screen that is actually the app.
             appWin = NULL;
             AutoPtr<WindowList> windows = displayContent->GetWindowList();
