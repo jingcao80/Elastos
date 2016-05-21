@@ -2318,7 +2318,7 @@ public:
     AutoPtr<IOnHardKeyboardStatusChangeListener> mHardKeyboardStatusChangeListener;
     AutoPtr<SettingsObserver> mSettingsObserver;
 
-    List< AutoPtr<WindowToken> > mWallpaperTokens;
+    AutoPtr<IArrayList> mWallpaperTokens;
 
     // If non-null, this is the currently visible window that is associated
     // with the wallpaper.

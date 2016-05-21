@@ -103,12 +103,12 @@ ECode CWindowManagerLayoutParams::CopyFrom(
     /* [out] */ Int32* changes)
 {
     VALIDATE_NOT_NULL(changes);
+    *changes = 0;
     if (!source) {
         return E_INVALID_ARGUMENT;
     }
 
     CWindowManagerLayoutParams* src = (CWindowManagerLayoutParams*)source;
-    *changes = 0;
 
     if (mWidth != src->mWidth) {
         mWidth = src->mWidth;

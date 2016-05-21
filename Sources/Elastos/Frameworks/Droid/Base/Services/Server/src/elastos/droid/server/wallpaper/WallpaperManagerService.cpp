@@ -1623,6 +1623,7 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
             String msg = sb.ToString();
             if (fromUser) {
                 Slogger::E(TAG, msg.string());
+                *isBinded = FALSE;
                 return E_SECURITY_EXCEPTION;
             }
             Slogger::W(TAG, msg.string());
@@ -1670,6 +1671,7 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
                     }
                     if (ec == (ECode)E_IO_EXCEPTION) {
                         if (fromUser) {
+                            *isBinded = FALSE;
                             return E_ILLEGAL_ARGUMENT_EXCEPTION;
                         }
                         Slogger::W(TAG, "%d", ec);
@@ -1685,6 +1687,7 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
                 String msg = String("Selected service is not a wallpaper: ") + msgstr;
                 if (fromUser) {
                     Slogger::E(TAG, msg.string());
+                    *isBinded = FALSE;
                     return E_SECURITY_EXCEPTION;
                 }
                 Slogger::W(TAG, msg.string());
@@ -1734,6 +1737,7 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
             String msg = String("Unable to bind service: ") + cnstr;
             if (fromUser) {
                 Slogger::E(TAG, msg.string());
+                *isBinded = FALSE;
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             Slogger::W(TAG, msg.string());
@@ -1757,6 +1761,7 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
             }
             ECode ec = mIWindowManager->AddWindowToken(_newConn->mToken, IWindowManagerLayoutParams::TYPE_WALLPAPER);
             if (FAILED(ec)) {
+                *isBinded = FALSE;
                 return E_REMOTE_EXCEPTION;
             }
             mLastWallpaper = wallpaper;

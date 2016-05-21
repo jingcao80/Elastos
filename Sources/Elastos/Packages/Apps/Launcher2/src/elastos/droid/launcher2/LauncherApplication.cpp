@@ -111,10 +111,11 @@ ECode LauncherApplication::OnCreate()
     RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter3, (IIntent**)&intent3);
 
     // Register for changes to the favorites
-    AutoPtr<IContentResolver> resolver;
-    GetContentResolver((IContentResolver**)&resolver);
-    resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
-            mFavoritesObserver);
+    // TODO:
+    // AutoPtr<IContentResolver> resolver;
+    // GetContentResolver((IContentResolver**)&resolver);
+    // resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
+    //         mFavoritesObserver);
     return NOERROR;
 }
 

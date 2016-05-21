@@ -405,7 +405,8 @@ ECode WindowState::ComputeFrameLw(
     AutoPtr<IViewGroupLayoutParams> viewGroupLp = IViewGroupLayoutParams::Probe(mAttrs);
 
     Int32 w, h, flags;
-    if (mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_SCALED) != 0) {
+    mAttrs->GetFlags(&flags);
+    if ((flags & IWindowManagerLayoutParams::FLAG_SCALED) != 0) {
         Int32 attrsW;
         viewGroupLp->GetWidth(&attrsW);
         if (attrsW < 0) {
@@ -707,7 +708,8 @@ ECode WindowState::GetNeedsMenuLw(
         if ((flags
                 & IWindowManagerLayoutParams::PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
             ws->mAttrs->GetFlags(&flags);
-            return (flags & IWindowManagerLayoutParams::FLAG_NEEDS_MENU_KEY) != 0;
+            *result = (flags & IWindowManagerLayoutParams::FLAG_NEEDS_MENU_KEY) != 0;
+            return NOERROR;
         }
         // If we reached the bottom of the range of windows we are considering,
         // assume no menu is needed.
@@ -1457,7 +1459,8 @@ void WindowState::ReportResized()
     Boolean reportDraw = mWinAnimator->mDrawState == WindowStateAnimator::DRAW_PENDING;
     AutoPtr<IConfiguration> newConfig = configChanged ? mConfiguration : NULL;
     Int32 type;
-    if (mAttrs->GetType(&type), type != IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING
+    mAttrs->GetType(&type);
+    if (type != IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING
             /* && mClient instanceof IWindow.Stub*/) {
         // To prevent deadlock simulate one-way call if win.mClient is a local object.
         AutoPtr<IRunnable> runnable = new ResizeRunnable(this, frame, overscanInsets, contentInsets,

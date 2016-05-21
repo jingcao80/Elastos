@@ -895,6 +895,7 @@ CWindowManagerService::CWindowManagerService()
     CArrayList::New((WindowList**)&mWaitingForDrawn);
     CArrayList::New((WindowList**)&mRelayoutWhileAnimating);
     CArrayList::New((WindowList**)&mInputMethodDialogs);
+    CArrayList::New((IArrayList**)&mWallpaperTokens);
     mWindowMapLock = new Object();
 }
 
@@ -2050,12 +2051,14 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
 Boolean CWindowManagerService::IsWallpaperVisible(
     /* [in] */ WindowState* wallpaperTarget)
 {
-    // if (DEBUG_WALLPAPER) Slogger::V(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
-    //         + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
-    //         + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
-    //                 ? wallpaperTarget.mAppToken.mAppAnimator.animation : null)
-    //         + " upper=" + mUpperWallpaperTarget
-    //         + " lower=" + mLowerWallpaperTarget);
+    if (DEBUG_WALLPAPER) {
+        Slogger::V(TAG, "Wallpaper vis: target %s , obscured=%s anim=%s upper=%s lower=%s",
+                TO_CSTR(wallpaperTarget),
+                (wallpaperTarget != NULL ? StringUtils::BooleanToString(wallpaperTarget->mObscured).string() : "??"),
+                ((wallpaperTarget != NULL && wallpaperTarget->mAppToken != NULL)
+                    ? TO_CSTR(wallpaperTarget->mAppToken->mAppAnimator->mAnimation) : "NULL"),
+                TO_CSTR(mUpperWallpaperTarget), TO_CSTR(mLowerWallpaperTarget));
+    }
     return (wallpaperTarget != NULL
                     && (!wallpaperTarget->mObscured || (wallpaperTarget->mAppToken != NULL
                             && wallpaperTarget->mAppToken->mAppAnimator->mAnimation != NULL)))
@@ -2119,7 +2122,8 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
         // If the app is executing an animation because the keyguard is going away, keep the
         // wallpaper during the animation so it doesn't flicker out.
         Int32 flags;
-        Boolean hasWallpaper = (w->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER) != 0)
+        w->mAttrs->GetFlags(&flags);
+        Boolean hasWallpaper = (flags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER) != 0
                 || (w->mAppToken != NULL && w->mWinAnimator->mKeyguardGoingAwayAnimation);
         if (hasWallpaper && w->IsOnScreen()
                 && (mWallpaperTarget == w || w->IsDrawFinishedLw())) {
@@ -2141,8 +2145,9 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
     }
 
     if (foundW == NULL && windowDetachedI >= 0) {
-        // if (DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
-        //         "Found animating detached wallpaper activity: #" + i + "=" + w);
+        if (DEBUG_WALLPAPER_LIGHT) {
+            Slogger::V(TAG, "Found animating detached wallpaper activity: #%d=%s", i, TO_CSTR(w));
+        }
         foundW = w;
         foundI = windowDetachedI;
     }
@@ -2174,15 +2179,14 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
             if (foundAnim && oldAnim) {
                 Int32 oldI;
                 windows->IndexOf((IWindowState*)oldW.Get(), &oldI);
-                // if (DEBUG_WALLPAPER_LIGHT) {
-                //     Slogger::V(TAG, "New i: " + foundI + " old i: " + oldI);
-                // }
+                if (DEBUG_WALLPAPER_LIGHT) {
+                    Slogger::V(TAG, "New i: %d old i: %d", foundI, oldI);
+                }
                 if (oldI >= 0) {
-                    // if (DEBUG_WALLPAPER_LIGHT) {
-                    //     Slogger::V(TAG, "Animating wallpapers: old#" + oldI
-                    //             + "=" + oldW + "; new#" + foundI
-                    //             + "=" + foundW);
-                    // }
+                    if (DEBUG_WALLPAPER_LIGHT) {
+                        Slogger::V(TAG, "Animating wallpapers: old#%d=%s; new#%d=%s",
+                                oldI, TO_CSTR(oldW), foundI, TO_CSTR(foundW));
+                    }
 
                     // Set the new target correctly.
                     if (foundW->mAppToken != NULL && foundW->mAppToken->mHiddenRequested) {
@@ -2316,12 +2320,16 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
     // Start stepping backwards from here, ensuring that our wallpaper windows
     // are correctly placed.
     Int32 changed = 0;
-    List< AutoPtr<WindowToken> >::ReverseIterator wtRit;
-    for (wtRit = mWallpaperTokens.RBegin(); wtRit != mWallpaperTokens.REnd(); ++wtRit) {
-        AutoPtr<WindowToken> token = *wtRit;
+    Int32 curTokenIndex;
+    mWallpaperTokens->GetSize(&curTokenIndex);
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<IInterface> obj;
+        mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+        WindowToken* token = To_WindowToken(obj);
         if (token->mHidden == visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slogger::D(TAG,
-                    "Wallpaper token %p hidden=%d", token.Get(), !visible);
+                    "Wallpaper token %p hidden=%d", token, !visible);
             changed |= ADJUST_WALLPAPER_VISIBILITY_CHANGED;
             token->mHidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the
@@ -2436,9 +2444,13 @@ void CWindowManagerService::SetWallpaperAnimLayerAdjustmentLocked(
 {
     if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slogger::V(TAG, "Setting wallpaper layer adj to %d", adj);
     mWallpaperAnimLayerAdjustment = adj;
-    List<AutoPtr<WindowToken> >::ReverseIterator rit;
-    for (rit = mWallpaperTokens.RBegin(); rit != mWallpaperTokens.REnd(); ++rit) {
-        AutoPtr<WindowToken> token = *rit;
+    Int32 curTokenIndex;
+    mWallpaperTokens->GetSize(&curTokenIndex);
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<IInterface> obj;
+        mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+        WindowToken* token = To_WindowToken(obj);
         Int32 curWallpaperIndex;
         token->mWindows->GetSize(&curWallpaperIndex);
         while (curWallpaperIndex > 0) {
@@ -2456,9 +2468,13 @@ void CWindowManagerService::SetWallpaperAnimLayerAdjustmentLocked(
 ECode CWindowManagerService::GetLastWallpaperX(
     /* [out] */ Int32* x)
 {
-    List< AutoPtr<WindowToken> >::ReverseIterator rit;
-    for (rit = mWallpaperTokens.RBegin(); rit != mWallpaperTokens.REnd(); ++rit) {
-        AutoPtr<WindowToken> token = *rit;
+    Int32 curTokenIndex;
+    mWallpaperTokens->GetSize(&curTokenIndex);
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<IInterface> obj;
+        mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+        WindowToken* token = To_WindowToken(obj);
         Int32 curWallpaperIndex;
         token->mWindows->GetSize(&curWallpaperIndex);
         while (curWallpaperIndex > 0) {
@@ -2476,9 +2492,13 @@ ECode CWindowManagerService::GetLastWallpaperX(
 ECode CWindowManagerService::GetLastWallpaperY(
     /* [out] */ Int32* y)
 {
-    List< AutoPtr<WindowToken> >::ReverseIterator rit;
-    for (rit = mWallpaperTokens.RBegin(); rit != mWallpaperTokens.REnd(); ++rit) {
-        AutoPtr<WindowToken> token = *rit;
+    Int32 curTokenIndex;
+    mWallpaperTokens->GetSize(&curTokenIndex);
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<IInterface> obj;
+        mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+        WindowToken* token = To_WindowToken(obj);
         Int32 curWallpaperIndex;
         token->mWindows->GetSize(&curWallpaperIndex);
         while (curWallpaperIndex > 0) {
@@ -2653,9 +2673,13 @@ void CWindowManagerService::UpdateWallpaperOffsetLocked(
         }
     }
 
-    List< AutoPtr<WindowToken> >::ReverseIterator rit;
-    for (rit = mWallpaperTokens.RBegin(); rit != mWallpaperTokens.REnd(); ++rit) {
-        AutoPtr<WindowToken> token = *rit;
+    Int32 curTokenIndex;
+    mWallpaperTokens->GetSize(&curTokenIndex);
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<IInterface> obj;
+        mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+        WindowToken* token = To_WindowToken(obj);
         Int32 curWallpaperIndex;
         token->mWindows->GetSize(&curWallpaperIndex);
         while (curWallpaperIndex > 0) {
@@ -2705,9 +2729,13 @@ void CWindowManagerService::UpdateWallpaperVisibilityLocked()
     displayInfo->GetLogicalWidth(&dw);
     displayInfo->GetLogicalHeight(&dh);
 
-    List< AutoPtr<WindowToken> >::ReverseIterator rit = mWallpaperTokens.RBegin();
-    for (; rit != mWallpaperTokens.REnd(); ++rit) {
-        AutoPtr<WindowToken> token = *rit;
+    Int32 curTokenIndex;
+    mWallpaperTokens->GetSize(&curTokenIndex);
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<IInterface> obj;
+        mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+        WindowToken* token = To_WindowToken(obj);
         if (token->mHidden == visible) {
             token->mHidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the
@@ -3531,9 +3559,13 @@ AutoPtr<IBundle> CWindowManagerService::SendWindowWallpaperCommandLocked(
     if (window == mWallpaperTarget || window == mLowerWallpaperTarget
             || window == mUpperWallpaperTarget) {
         Boolean doWait = sync;
-        List< AutoPtr<WindowToken> >::ReverseIterator rit = mWallpaperTokens.RBegin();
-        for (; rit != mWallpaperTokens.REnd(); ++rit) {
-            AutoPtr<WindowToken> token = *rit;
+        Int32 curTokenIndex;
+        mWallpaperTokens->GetSize(&curTokenIndex);
+        while (curTokenIndex > 0) {
+            curTokenIndex--;
+            AutoPtr<IInterface> obj;
+            mWallpaperTokens->Get(curTokenIndex, (IInterface**)&obj);
+            WindowToken* token = To_WindowToken(obj);
             Int32 curWallpaperIndex;
             token->mWindows->GetSize(&curWallpaperIndex);
             while (curWallpaperIndex > 0) {
@@ -3787,6 +3819,7 @@ Int32 CWindowManagerService::RelayoutWindow(
 
         Boolean wallpaperMayMove = win->mViewVisibility != viewVisibility
                 && (winFlags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER) != 0;
+        wallpaperMayMove |= (flagChanges & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER) != 0;
 
         win->mRelayoutCalled = TRUE;
         Int32 oldVisibility = win->mViewVisibility;
@@ -4335,7 +4368,7 @@ ECode CWindowManagerService::AddWindowToken(
         wtoken = new WindowToken(this, token, type, TRUE);
         mTokenMap[token] = wtoken;
         if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
-            mWallpaperTokens.PushBack(wtoken);
+            mWallpaperTokens->Add((IObject*)wtoken);
         }
     }
 
@@ -4406,11 +4439,11 @@ ECode CWindowManagerService::RemoveWindowToken(
 
                 if (delayed) {
                     if (displayContent != NULL) {
-                        displayContent->mExitingTokens.PushBack(wtoken);
+                        displayContent->mExitingTokens->Add((IObject*)wtoken);
                     }
                 }
                 else if (wtoken->mWindowType == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
-                    mWallpaperTokens.Remove(wtoken);
+                    mWallpaperTokens->Remove((IObject*)wtoken);
                 }
             }
 
@@ -11858,9 +11891,12 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         AutoPtr<IInterface> value;
         mDisplayContents->ValueAt(displayNdx, (IInterface**)&value);
         AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);
-        List<AutoPtr<WindowToken> >::ReverseIterator tokenRit = displayContent->mExitingTokens.RBegin();
-        for (; tokenRit != displayContent->mExitingTokens.REnd(); ++tokenRit) {
-            (*tokenRit)->mHasVisible = FALSE;
+        Int32 N;
+        displayContent->mExitingTokens->GetSize(&N);
+        for (i = N - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            displayContent->mExitingTokens->Get(i, (IInterface**)&obj);
+            To_WindowToken(obj)->mHasVisible = FALSE;
         }
     }
 
@@ -12122,8 +12158,8 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                     Int32 flags;
                     w->mAttrs->GetFlags(&flags);
                     if ((flags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER) != 0) {
-                        // if (DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
-                        //         "First draw done in potential wallpaper target " + w);
+                        if (DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
+                                "First draw done in potential wallpaper target %s", TO_CSTR(w));
                         mInnerFields->mWallpaperMayChange = TRUE;
                         displayContent->mPendingLayoutChanges |=
                                 IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
@@ -12333,19 +12369,19 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         AutoPtr<IInterface> value;
         mDisplayContents->ValueAt(displayNdx, (IInterface**)&value);
         AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);
-        List<AutoPtr<WindowToken> > exitingTokens = displayContent->mExitingTokens;
-        List<AutoPtr<WindowToken> >::ReverseIterator exitTokenRit = exitingTokens.RBegin();
-        while (exitTokenRit != exitingTokens.REnd()) {
-            AutoPtr<WindowToken> token = (*exitTokenRit);
+        AutoPtr<IArrayList> exitingTokens = displayContent->mExitingTokens;
+        Int32 N;
+        exitingTokens->GetSize(&N);
+        for (i = N - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            exitingTokens->Get(i, (IInterface**)&obj);
+            WindowToken* token = To_WindowToken(obj);
             if (!token->mHasVisible) {
-                exitTokenRit = List<AutoPtr<WindowToken> >::ReverseIterator(
-                        exitingTokens.Erase((++exitTokenRit).GetBase()));
+                exitingTokens->Remove(i);
                 if (token->mWindowType == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
-                    mWallpaperTokens.Remove(token);
+                    mWallpaperTokens->Remove((IObject*)token);
                 }
-                continue;
             }
-            ++exitTokenRit;
         }
     }
 

@@ -38,6 +38,7 @@ DisplayContent::DisplayContent(
 {
     CRect::New((IRect**)&mBaseDisplayRect);
     CRect::New((IRect**)&mContentRect);
+    CArrayList::New((IArrayList**)&mExitingTokens);
     CRegion::New((IRegion**)&mTouchExcludeRegion);
     CRect::New((IRect**)&mTmpRect);
 

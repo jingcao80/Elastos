@@ -155,7 +155,7 @@ public:
     Boolean mIsDefaultDisplay;
 
     /** Window tokens that are in the process of exiting, but still on screen for animations. */
-    List<AutoPtr<WindowToken> > mExitingTokens;
+    AutoPtr<IArrayList> mExitingTokens;
 
     /** Detect user tapping outside of current focused stack bounds .*/
     AutoPtr<StackTapPointerEventListener> mTapDetector;

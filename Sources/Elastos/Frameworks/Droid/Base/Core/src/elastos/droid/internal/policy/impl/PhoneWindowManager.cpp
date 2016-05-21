@@ -6447,7 +6447,7 @@ Boolean PhoneWindowManager::ProcessKeyguardSetHiddenResultLw(
         attrs->SetPrivateFlags(privateFlags|IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD);
         Int32 flags;
         attrs->GetFlags(&flags);
-        attrs->SetFlags(flags|IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
+        attrs->SetFlags(flags | IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
         return TRUE;
     }
     else if (setHiddenResult
@@ -6461,7 +6461,8 @@ Boolean PhoneWindowManager::ProcessKeyguardSetHiddenResultLw(
         attrs->GetFlags(&flags);
         attrs->SetFlags(flags | ~IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
         return TRUE;
-    } else {
+    }
+    else {
         return FALSE;
     }
 }
@@ -6473,8 +6474,9 @@ Boolean PhoneWindowManager::IsStatusBarKeyguard()
         mStatusBar->GetAttrs((IWindowManagerLayoutParams**)&attrs);
         Int32 privateFlags;
         attrs->GetPrivateFlags(&privateFlags);
-        if (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD)
+        if (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) {
             return TRUE;
+        }
     }
     return FALSE;
 }

@@ -106,4 +106,7 @@ public:
 } // Droid
 } // Elastos
 
+#define To_WindowToken(obj) \
+    ((WindowToken*)IObject::Probe(obj))
+
 #endif //__ELASTOS_DROID_SERVER_WM_WINDOWTOKEN_H__

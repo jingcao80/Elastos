@@ -4,6 +4,7 @@
 #include "elastos/droid/server/wm/ScreenRotationAnimation.h"
 #include "elastos/droid/server/wm/AccessibilityController.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/wm/WindowToken.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/StringBuilder.h>
@@ -120,11 +121,15 @@ void WindowAnimator::HideWallpapersLocked(
 {
     AutoPtr<WindowState> wallpaperTarget = mService->mWallpaperTarget;
     AutoPtr<WindowState> lowerWallpaperTarget = mService->mLowerWallpaperTarget;
-    List< AutoPtr<WindowToken> > wallpaperTokens = mService->mWallpaperTokens;
+    AutoPtr<IArrayList> wallpaperTokens = mService->mWallpaperTokens;
+
     if ((wallpaperTarget.Get() == w && lowerWallpaperTarget == NULL) || wallpaperTarget == NULL) {
-        List<AutoPtr<WindowToken> >::ReverseIterator rit = wallpaperTokens.RBegin();
-        for (; rit != wallpaperTokens.REnd(); ++rit) {
-            AutoPtr<WindowToken> token = *rit;
+        Int32 numTokens;
+        wallpaperTokens->GetSize(&numTokens);
+        for (Int32 i = numTokens - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            wallpaperTokens->Get(i, (IInterface**)&obj);
+            WindowToken* token = To_WindowToken(obj);
             Int32 numWindows;
             token->mWindows->GetSize(&numWindows);
             for (Int32 j = numWindows - 1; j >= 0; j--) {
