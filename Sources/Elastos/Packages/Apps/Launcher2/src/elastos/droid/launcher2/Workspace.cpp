@@ -402,9 +402,11 @@ ECode Workspace::ReorderAlarmListener::OnAlarm(
     /* [in] */ IAlarm* alarm)
 {
     AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
+    AutoPtr< ArrayOf<Int32> > targetCell;
     mHost->FindNearestArea((Int32)(*(mHost->mDragViewVisualCenter))[0],
             (Int32)(*(mHost->mDragViewVisualCenter))[1], mSpanX, mSpanY,
-            mHost->mDragTargetLayout, mHost->mTargetCell, (ArrayOf<Int32>**)&(mHost->mTargetCell));
+            mHost->mDragTargetLayout, mHost->mTargetCell, (ArrayOf<Int32>**)&targetCell);
+    mHost->mTargetCell = targetCell;
     mHost->mLastReorderX = (*(mHost->mTargetCell))[0];
     mHost->mLastReorderY = (*(mHost->mTargetCell))[1];
 
@@ -412,7 +414,8 @@ ECode Workspace::ReorderAlarmListener::OnAlarm(
         (Int32)(*(mHost->mDragViewVisualCenter))[0], (Int32)(*(mHost->mDragViewVisualCenter))[1],
         mMinSpanX, mMinSpanY, mSpanX, mSpanY,
         mChild, mHost->mTargetCell, resultSpan, ICellLayout::MODE_DRAG_OVER,
-        (ArrayOf<Int32>**)&(mHost->mTargetCell));
+        (ArrayOf<Int32>**)&targetCell);
+    mHost->mTargetCell = targetCell;
 
     if ((*(mHost->mTargetCell))[0] < 0 || (*(mHost->mTargetCell))[1] < 0) {
         mHost->mDragTargetLayout->RevertTempState();
@@ -2661,9 +2664,6 @@ ECode Workspace::GetChangeStateAnimation(
     if (animated) {
         anim = LauncherAnimUtils::CreateAnimatorSet();
     }
-    else {
-        anim = NULL;
-    }
 
     // Stop any scrolling, move to the current page right away
     Int32 page;
@@ -3316,9 +3316,11 @@ ECode Workspace::AcceptDrop(
             minSpanY = ((PendingAddWidgetInfo*)IPendingAddWidgetInfo::Probe(_d->mDragInfo))->mMinSpanY;
         }
 
+        AutoPtr< ArrayOf<Int32> > targetCell;
         FindNearestArea((Int32)(*mDragViewVisualCenter)[0],
                 (Int32)(*mDragViewVisualCenter)[1], minSpanX, minSpanY, dropTargetLayout,
-                mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
+                mTargetCell, (ArrayOf<Int32>**)&targetCell);
+        mTargetCell = targetCell;
         Float distance;
         dropTargetLayout->GetDistanceFromCell((*mDragViewVisualCenter)[0],
                 (*mDragViewVisualCenter)[1], mTargetCell, &distance);
@@ -3337,10 +3339,12 @@ ECode Workspace::AcceptDrop(
         }
 
         AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
+        targetCell = NULL;
         dropTargetLayout->CreateArea((Int32)(*mDragViewVisualCenter)[0],
                 (Int32)(*mDragViewVisualCenter)[1], minSpanX, minSpanY, spanX, spanY,
                 NULL, mTargetCell, resultSpan, ICellLayout::MODE_ACCEPT_DROP,
-                (ArrayOf<Int32>**)&mTargetCell);
+                (ArrayOf<Int32>**)&targetCell);
+        mTargetCell = targetCell;
         Boolean foundCell = (*mTargetCell)[0] >= 0 && (*mTargetCell)[1] >= 0;
 
         // Don't accept the drop if there's no room for the item
@@ -3638,7 +3642,7 @@ ECode Workspace::OnDrop(
             // Move internally
             AutoPtr<ICellLayout> cellLayout;
             GetParentCellLayoutForView(cell, (ICellLayout**)&cellLayout);
-            Boolean hasMovedLayouts = (TO_IINTERFACE(cellLayout) != TO_IINTERFACE(dropTargetLayout));
+            Boolean hasMovedLayouts = (cellLayout != dropTargetLayout);
             Boolean hasMovedIntoHotseat;
             mLauncher->IsHotseatLayout(IView::Probe(dropTargetLayout), &hasMovedIntoHotseat);
             Int64 container = hasMovedIntoHotseat ?
@@ -3656,16 +3660,17 @@ ECode Workspace::OnDrop(
             // First we find the cell nearest to point at which the item is
             // dropped, without any consideration to whether there is an item there.
 
+            AutoPtr< ArrayOf<Int32> > targetCell;
             FindNearestArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], spanX, spanY,
-                    dropTargetLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
+                    dropTargetLayout, mTargetCell, (ArrayOf<Int32>**)&targetCell);
+            mTargetCell = targetCell;
             Float distance;
             dropTargetLayout->GetDistanceFromCell((*mDragViewVisualCenter)[0],
                     (*mDragViewVisualCenter)[1], mTargetCell, &distance);
 
             // If the item being dropped is a shortcut and the nearest drop
             // cell also contains a shortcut, then create a folder with the two shortcuts.
-
             if (!mInScrollArea) {
                 Boolean res;
                 CreateUserFolderIfNecessary(cell, container,
@@ -3675,6 +3680,7 @@ ECode Workspace::OnDrop(
                     return NOERROR;
                 }
             }
+
             Boolean res;
             AddToExistingFolderIfNecessary(cell, dropTargetLayout, mTargetCell,
                     distance, d, FALSE, &res);
@@ -3693,10 +3699,12 @@ ECode Workspace::OnDrop(
             }
 
             AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
+            targetCell = NULL;
             dropTargetLayout->CreateArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], minSpanX, minSpanY, spanX, spanY, cell,
                     mTargetCell, resultSpan, ICellLayout::MODE_ON_DROP,
-                    (ArrayOf<Int32>**)&mTargetCell);
+                    (ArrayOf<Int32>**)&targetCell);
+            mTargetCell = targetCell;
 
             Boolean foundCell = (*mTargetCell)[0] >= 0 && (*mTargetCell)[1] >= 0;
 
@@ -4697,18 +4705,18 @@ ECode Workspace::OnDropExternal(
 
         Boolean findNearestVacantCell = TRUE;
         if (pendingInfo->mItemType == LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT) {
+            AutoPtr< ArrayOf<Int32> > targetCell;
             FindNearestArea((Int32)(*touchXY)[0], (Int32)(*touchXY)[1], spanX, spanY,
-                    cellLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
+                    cellLayout, mTargetCell, (ArrayOf<Int32>**)&targetCell);
+            mTargetCell = targetCell;
             Float distance;
             cellLayout->GetDistanceFromCell((*mDragViewVisualCenter)[0],
                     (*mDragViewVisualCenter)[1], mTargetCell, &distance);
             Boolean res;
-            WillCreateUserFolder(IItemInfo::Probe(d->mDragInfo), cellLayout, mTargetCell,
-                    distance, TRUE, &res);
-            Boolean res2;
-            WillAddToExistingUserFolder(IItemInfo::Probe(d->mDragInfo),
-                    cellLayout, mTargetCell, distance, &res2);
-            if (res || res2) {
+            if ((WillCreateUserFolder(IItemInfo::Probe(d->mDragInfo), cellLayout, mTargetCell,
+                    distance, TRUE, &res), res) ||
+                (WillAddToExistingUserFolder(IItemInfo::Probe(d->mDragInfo),
+                    cellLayout, mTargetCell, distance, &res), res)) {
                 findNearestVacantCell = FALSE;
             }
         }
@@ -4723,10 +4731,12 @@ ECode Workspace::OnDropExternal(
                 minSpanY = item->mMinSpanY;
             }
             AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
+            AutoPtr< ArrayOf<Int32> > targetCell;
             cellLayout->CreateArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], minSpanX, minSpanY,
                     info->mSpanX, info->mSpanY, NULL, mTargetCell, resultSpan,
-                    ICellLayout::MODE_ON_DROP_EXTERNAL, (ArrayOf<Int32>**)&mTargetCell);
+                    ICellLayout::MODE_ON_DROP_EXTERNAL, (ArrayOf<Int32>**)&targetCell);
+            mTargetCell = targetCell;
 
             if ((*resultSpan)[0] != item->mSpanX || (*resultSpan)[1] != item->mSpanY) {
                 updateWidgetSize = TRUE;
@@ -4802,8 +4812,10 @@ ECode Workspace::OnDropExternal(
         // First we find the cell nearest to point at which the item is
         // dropped, without any consideration to whether there is an item there.
         if (touchXY != NULL) {
+            AutoPtr< ArrayOf<Int32> > targetCell;
             FindNearestArea((Int32)(*touchXY)[0], (Int32)(*touchXY)[1], spanX, spanY,
-                    cellLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
+                    cellLayout, mTargetCell, (ArrayOf<Int32>**)&targetCell);
+            mTargetCell = targetCell;
             Float distance;
             cellLayout->GetDistanceFromCell((*mDragViewVisualCenter)[0],
                     (*mDragViewVisualCenter)[1], mTargetCell, &distance);
@@ -4823,10 +4835,12 @@ ECode Workspace::OnDropExternal(
 
         if (touchXY != NULL) {
             // when dragging and dropping, just find the closest free spot
+            AutoPtr< ArrayOf<Int32> > targetCell;
             cellLayout->CreateArea((Int32)(*mDragViewVisualCenter)[0],
                     (Int32)(*mDragViewVisualCenter)[1], 1, 1, 1, 1,
                     NULL, mTargetCell, NULL, ICellLayout::MODE_ON_DROP_EXTERNAL,
-                    (ArrayOf<Int32>**)&mTargetCell);
+                    (ArrayOf<Int32>**)&targetCell);
+            mTargetCell = targetCell;
         }
         else {
             Boolean res;

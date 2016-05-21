@@ -31,10 +31,9 @@ ShortcutAndWidgetContainer::ShortcutAndWidgetContainer()
 }
 
 ECode ShortcutAndWidgetContainer::constructor(
-        /* [in] */ IContext* context)
+    /* [in] */ IContext* context)
 {
-    ViewGroup::constructor(context);
-
+    FAIL_RETURN(ViewGroup::constructor(context));
     AutoPtr<IWallpaperManagerHelper> helper;
     CWallpaperManagerHelper::AcquireSingleton((IWallpaperManagerHelper**)&helper);
     return helper->GetInstance(context, (IWallpaperManager**)&mWallpaperManager);
@@ -70,7 +69,7 @@ ECode ShortcutAndWidgetContainer::GetChildAt(
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
         AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
-                (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
+                (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
 
         if ((lp->mCellX <= x) && (x < lp->mCellX + lp->mCellHSpan) &&
                 (lp->mCellY <= y) && (y < lp->mCellY + lp->mCellVSpan)) {
@@ -86,7 +85,6 @@ ECode ShortcutAndWidgetContainer::GetChildAt(
 ECode ShortcutAndWidgetContainer::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
-    //@SuppressWarnings("all") // suppress dead code warning
     const Boolean debug = FALSE;
     if (debug) {
         // Debug drawing for hit space
@@ -101,7 +99,8 @@ ECode ShortcutAndWidgetContainer::DispatchDraw(
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
             AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
-                    (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
+                    (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
+
             canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
         }
     }
@@ -128,8 +127,7 @@ ECode ShortcutAndWidgetContainer::SetupLp(
     /* [in] */ ICellLayoutLayoutParams* lp)
 {
     ((CellLayout::CellLayoutLayoutParams*)lp)->Setup(mCellWidth, mCellHeight,
-            mWidthGap, mHeightGap, InvertLayoutHorizontally(),
-            mCountX);
+            mWidthGap, mHeightGap, InvertLayoutHorizontally(), mCountX);
     return NOERROR;
 }
 
@@ -148,7 +146,8 @@ ECode ShortcutAndWidgetContainer::MeasureChild(
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
     AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
-            (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
+            (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
+
     lp->Setup(cellWidth, cellHeight, mWidthGap, mHeightGap,
             InvertLayoutHorizontally(), mCountX);
     Int32 childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(
@@ -194,10 +193,12 @@ ECode ShortcutAndWidgetContainer::OnLayout(
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
             AutoPtr<CellLayout::CellLayoutLayoutParams> lp =
-                    (CellLayout::CellLayoutLayoutParams*)IObject::Probe(params);
+                    (CellLayout::CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(params);
+
             Int32 childLeft = lp->mX;
             Int32 childTop = lp->mY;
             child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
+
             if (lp->mDropped) {
                 lp->mDropped = FALSE;
 

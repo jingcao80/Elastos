@@ -1593,7 +1593,6 @@ ECode CellLayout::RemoveAllViews()
 {
     ClearOccupiedCells();
     return mShortcutsAndWidgets->RemoveAllViews();
-    return NOERROR;
 }
 
 ECode CellLayout::RemoveAllViewsInLayout()
