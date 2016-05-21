@@ -61,16 +61,13 @@ const String LauncherApplication::sSharedPreferencesKey("Elastos.Droid.Launcher2
 
 LauncherApplication::LauncherApplication()
 {
-Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication enter");
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
     CLauncherApplicationContentObserver::New(handler, this, (IContentObserver**)&mFavoritesObserver);
-Slogger::E("LauncherApplication", "============================LauncherApplication::LauncherApplication return");
 }
 
 ECode LauncherApplication::OnCreate()
 {
-Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate enter");
     Application::OnCreate();
 
     // set sIsScreenXLarge and sScreenDensity *before* creating icon cache
@@ -116,10 +113,9 @@ Slogger::E("LauncherApplication", "============================LauncherApplicati
     // Register for changes to the favorites
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-    /*return*/ resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
+    resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
             mFavoritesObserver);
-Slogger::E("LauncherApplication", "============================LauncherApplication::OnCreate return");
-return NOERROR;
+    return NOERROR;
 }
 
 ECode LauncherApplication::RecreateWidgetPreviewDb()

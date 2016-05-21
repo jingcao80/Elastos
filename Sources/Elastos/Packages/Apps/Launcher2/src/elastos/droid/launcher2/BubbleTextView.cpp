@@ -180,7 +180,6 @@ ECode BubbleTextView::DrawableStateChanged()
                 mPressedOrFocusedBackground = NULL;
             }
             else {
-Slogger::E("BubbleTextView", "=====================DrawableStateChanged 1");
                 mPressedOrFocusedBackground = CreateGlowingOutline(
                         mTempCanvas, mFocusedGlowColor, mFocusedOutlineColor);
             }
@@ -296,7 +295,6 @@ ECode BubbleTextView::OnTouchEvent(
             // we pre-create it on ACTION_DOWN (it takes a small but perceptible amount of time
             // to create it)
             if (mPressedOrFocusedBackground == NULL) {
-Slogger::E("BubbleTextView", "=====================OnTouchEvent ACTION_DOWN 1");
                 mPressedOrFocusedBackground = CreateGlowingOutline(
                         mTempCanvas, mPressedGlowColor, mPressedOutlineColor);
             }

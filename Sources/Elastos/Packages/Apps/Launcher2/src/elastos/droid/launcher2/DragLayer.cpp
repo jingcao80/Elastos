@@ -1167,6 +1167,7 @@ ECode DragLayer::AnimateView(
     mAnchorView = anchorView;
 
     // Create and start the animation
+    mDropAnim = NULL;
     CValueAnimator::New((IValueAnimator**)&mDropAnim);
     IAnimator::Probe(mDropAnim)->SetInterpolator(interpolator);
     mDropAnim->SetDuration(duration);
@@ -1205,6 +1206,7 @@ ECode DragLayer::GetAnimatedView(
 
 void DragLayer::FadeOutDragView()
 {
+    mFadeOutAnim = NULL;
     CValueAnimator::New((IValueAnimator**)&mFadeOutAnim);
     mFadeOutAnim->SetDuration(150);
     AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
@@ -1215,7 +1217,6 @@ void DragLayer::FadeOutDragView()
     AutoPtr<IAnimatorUpdateListener> lisener = new MyAnimatorUpdateListener2(this);
     mFadeOutAnim->AddUpdateListener(lisener);
     AutoPtr<IAnimatorListener> adapter = new MyAnimatorListenerAdapter2(this);
-Slogger::D("DragLayer", "=======DragLayer::FadeOutDragView adapter=%p",adapter.Get());
     IAnimator::Probe(mFadeOutAnim)->AddListener(adapter);
     IAnimator::Probe(mFadeOutAnim)->Start();
 }

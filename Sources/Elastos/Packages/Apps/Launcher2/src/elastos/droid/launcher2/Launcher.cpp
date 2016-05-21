@@ -5238,10 +5238,10 @@ Boolean Launcher::WaitUntilResume(
         Slogger::I(TAG, "Deferring update until onResume");
         if (deletePreviousRunnables) {
             Boolean res;
-            while (mOnResumeCallbacks->Remove(TO_IINTERFACE(run), &res), res) {
+            while (mOnResumeCallbacks->Remove(run, &res), res) {
             }
         }
-        mOnResumeCallbacks->Add(TO_IINTERFACE(run));
+        mOnResumeCallbacks->Add(run);
         return TRUE;
     }
     else {
@@ -5259,13 +5259,15 @@ ECode Launcher::SetLoadOnResume(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
     if (mPaused) {
         Slogger::I(TAG, "setLoadOnResume");
         mOnResumeNeedsLoad = TRUE;
-        return TRUE;
-    } else {
-        return FALSE;
+        *result = TRUE;
+        return NOERROR;
+    }
+    else {
+        *result = FALSE;
+        return NOERROR;
     }
 }
 
@@ -5281,7 +5283,6 @@ ECode Launcher::GetCurrentWorkspaceScreen(
         *screen = SCREEN_COUNT / 2;
         return NOERROR;
     }
-    return NOERROR;
 }
 
 ECode Launcher::StartBinding()

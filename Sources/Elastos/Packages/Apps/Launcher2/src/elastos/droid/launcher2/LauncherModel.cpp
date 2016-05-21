@@ -290,7 +290,7 @@ ECode LauncherModel::MyRunnable3::Run()
             // Item is in a folder, make sure this folder exists
             Boolean res;
             AutoPtr<IInteger64> value = CoreUtils::Convert(mItem->mContainer);
-            sBgFolders->ContainsKey(TO_IINTERFACE(value), &res);
+            sBgFolders->ContainsKey(value, &res);
             if (!res) {
                 // An items container is being set to a that of an item which is not in
                 // the list of Folders.
@@ -311,7 +311,7 @@ ECode LauncherModel::MyRunnable3::Run()
         // that are on the desktop, as appropriate
         AutoPtr<IInterface> obj;
         AutoPtr<IInteger64> id = CoreUtils::Convert(mItemId);
-        sBgItemsIdMap->Get(TO_IINTERFACE(id), (IInterface**)&obj);
+        sBgItemsIdMap->Get(id, (IInterface**)&obj);
         AutoPtr<IItemInfo> modelItem = IItemInfo::Probe(obj);
         ItemInfo* _modelItem = (ItemInfo*)modelItem.Get();
         if (_modelItem->mContainer == LauncherSettings::Favorites::CONTAINER_DESKTOP ||
@@ -404,7 +404,7 @@ ECode LauncherModel::MyRunnable5::Run()
     synchronized(LauncherModel::sBgLock) {
         CheckItemInfoLocked(mItem->mId, mItem/*, stackTrace*/);
         AutoPtr<IInteger64> value = CoreUtils::Convert(mItem->mId);
-        LauncherModel::sBgItemsIdMap->Put(TO_IINTERFACE(value), TO_IINTERFACE(mItem));
+        LauncherModel::sBgItemsIdMap->Put(value, TO_IINTERFACE(mItem));
         switch (mItem->mItemType) {
             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
             {
@@ -485,7 +485,7 @@ ECode LauncherModel::MyRunnable6::Run()
             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
             {
                 AutoPtr<IInteger64> obj = CoreUtils::Convert(mItem->mId);
-                LauncherModel::sBgFolders->Remove(TO_IINTERFACE(obj));
+                LauncherModel::sBgFolders->Remove(obj);
                 AutoPtr<ICollection> value;
                 sBgItemsIdMap->GetValues((ICollection**)&value);
                 AutoPtr<ArrayOf<IInterface*> > array;
@@ -564,7 +564,7 @@ ECode LauncherModel::MyRunnable7::Run()
             AutoPtr<ItemInfo> childInfo = (ItemInfo*)IItemInfo::Probe(obj);
 
             AutoPtr<IInteger64> value = CoreUtils::Convert(childInfo->mId);
-            sBgItemsIdMap->Remove(TO_IINTERFACE(value));
+            sBgItemsIdMap->Remove(value);
             sBgDbIconCache->Remove(TO_IINTERFACE(childInfo));
         }
     }
@@ -1300,12 +1300,9 @@ ECode LauncherModel::LoaderTask::TryGetCallbacks(
         }
 
 
-        AutoPtr<IInterface> obj;
-        mHost->mCallbacks->Resolve(EIID_ILauncherModelCallbacks,
-                (IInterface**)&obj);
-        AutoPtr<ILauncherModelCallbacks> _callbacks =
-                ILauncherModelCallbacks::Probe(obj);
-        if (TO_IINTERFACE(_callbacks) != TO_IINTERFACE(oldCallbacks)) {
+        AutoPtr<ILauncherModelCallbacks> _callbacks;
+        mHost->mCallbacks->Resolve(EIID_ILauncherModelCallbacks, (IInterface**)&_callbacks);
+        if (_callbacks.Get() != oldCallbacks) {
             *newCallbacks = NULL;
             return NOERROR;
         }
@@ -2002,7 +1999,7 @@ void LauncherModel::LoaderTask::BindWorkspaceItems(
         AutoPtr<IRunnable> r = new MyRunnable9(this, oldCallbacks, workspaceItems,
                 start, chunkSize);
         if (postOnMainThread) {
-            deferredBindRunnables->Add(TO_IINTERFACE(r));
+            deferredBindRunnables->Add(r);
         }
         else {
             mHost->RunOnMainThread(r, MAIN_THREAD_BINDING_RUNNABLE);
@@ -2015,7 +2012,7 @@ void LauncherModel::LoaderTask::BindWorkspaceItems(
     if (!res) {
         AutoPtr<IRunnable> r = new MyRunnable10(this, oldCallbacks, folders);
         if (postOnMainThread) {
-            deferredBindRunnables->Add(TO_IINTERFACE(r));
+            deferredBindRunnables->Add(r);
         }
         else {
             mHost->RunOnMainThread(r, MAIN_THREAD_BINDING_RUNNABLE);
@@ -2030,7 +2027,7 @@ void LauncherModel::LoaderTask::BindWorkspaceItems(
         AutoPtr<ILauncherAppWidgetInfo> widget = ILauncherAppWidgetInfo::Probe(obj);
         AutoPtr<IRunnable> r = new MyRunnable11(this, oldCallbacks, widget);
         if (postOnMainThread) {
-            deferredBindRunnables->Add(TO_IINTERFACE(r));
+            deferredBindRunnables->Add(r);
         }
         else {
             mHost->RunOnMainThread(r, MAIN_THREAD_BINDING_RUNNABLE);
@@ -2046,9 +2043,8 @@ void LauncherModel::LoaderTask::BindWorkspace(
 
     // Don't use these two variables in any of the callback runnables.
     // Otherwise we hold a reference to them.
-    AutoPtr<IInterface> obj;
-    mHost->mCallbacks->Resolve(EIID_ILauncherModelCallbacks, (IInterface**)&obj);
-    AutoPtr<ILauncherModelCallbacks> oldCallbacks = ILauncherModelCallbacks::Probe(obj);
+    AutoPtr<ILauncherModelCallbacks> oldCallbacks;
+    mHost->mCallbacks->Resolve(EIID_ILauncherModelCallbacks, (IInterface**)&oldCallbacks);
     if (oldCallbacks == NULL) {
         // This launcher has exited and nobody bothered to tell us.  Just bail.
         Slogger::W(TAG, "LoaderTask running with no launcher");
@@ -3467,9 +3463,8 @@ ECode LauncherModel::StartLoaderFromBackground()
 {
     Boolean runLoader = FALSE;
     if (mCallbacks != NULL) {
-        AutoPtr<IInterface> obj;
-        mCallbacks->Resolve(EIID_ILauncherModelCallbacks, (IInterface**)&obj);
-        AutoPtr<ILauncherModelCallbacks> _callbacks = ILauncherModelCallbacks::Probe(obj);
+        AutoPtr<ILauncherModelCallbacks> _callbacks;
+        mCallbacks->Resolve(EIID_ILauncherModelCallbacks, (IInterface**)&_callbacks);
         if (_callbacks != NULL) {
             // Only actually run the loader if they're not paused.
             Boolean res;

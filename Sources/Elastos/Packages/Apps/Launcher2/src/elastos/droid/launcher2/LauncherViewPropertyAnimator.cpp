@@ -231,6 +231,7 @@ ECode LauncherViewPropertyAnimator::SetupStartValues()
 
 ECode LauncherViewPropertyAnimator::Start()
 {
+    mViewPropertyAnimator = NULL;
     mTarget->Animate((IViewPropertyAnimator**)&mViewPropertyAnimator);
 
     // FirstFrameAnimatorHelper hooks itself up to the updates on the animator,
