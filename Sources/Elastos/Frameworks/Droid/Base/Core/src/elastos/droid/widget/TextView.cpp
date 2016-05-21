@@ -333,7 +333,7 @@ Drawables::Drawables(
 }
 
 ECode Drawables::ResolveWithLayoutDirection(
-        /* [in] */ Int32 layoutDirection)
+    /* [in] */ Int32 layoutDirection)
 {
     mDrawableLeft = mDrawableLeftInitial;
     mDrawableRight = mDrawableRightInitial;
@@ -406,8 +406,8 @@ void Drawables::UpdateDrawablesLayoutDirection(
 }
 
 ECode Drawables::SetErrorDrawable(
-        /* [in] */ IDrawable* dr,
-        /* [in] */ ITextView*tv)
+    /* [in] */ IDrawable* dr,
+    /* [in] */ ITextView* tv)
 {
     if (dr != mDrawableError && mDrawableError != NULL) {
         mDrawableError->SetCallback(NULL);
@@ -432,7 +432,7 @@ ECode Drawables::SetErrorDrawable(
 }
 
 void Drawables::ApplyErrorDrawableIfNeeded(
-        /* [in] */ Int32 layoutDirection)
+    /* [in] */ Int32 layoutDirection)
 {
     // first restore the initial state if needed
     switch (mDrawableSaved) {
@@ -487,7 +487,7 @@ void Drawables::ApplyErrorDrawableIfNeeded(
 CAR_INTERFACE_IMPL_4(CharWrapper, Object, ICharWrapper, ICharSequence, IGetChars, IGraphicsOperations)
 
 CharWrapper::CharWrapper(
-    /* [in] */ const ArrayOf<Char32>* chars,
+    /* [in] */ ArrayOf<Char32>* chars,
     /* [in] */ Int32 start,
     /* [in] */ Int32 len)
     : mStart(start)
@@ -500,7 +500,7 @@ CharWrapper::CharWrapper(
 }
 
 void CharWrapper::Set(
-    /* [in] */ const ArrayOf<Char32>* chars,
+    /* [in] */ ArrayOf<Char32>* chars,
     /* [in] */ Int32 start,
     /* [in] */ Int32 len)
 {
@@ -525,6 +525,7 @@ ECode CharWrapper::GetCharAt(
     /* [out] */ Char32* c)
 {
     VALIDATE_NOT_NULL(c);
+    *c = 0;
     if (mChars == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -532,7 +533,7 @@ ECode CharWrapper::GetCharAt(
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    *c = (*mChars)[off];
+    *c = (*mChars)[off + mStart];
     return NOERROR;
 }
 
@@ -557,9 +558,11 @@ ECode CharWrapper::SubSequence(
     /* [out] */ ICharSequence** csq)
 {
     VALIDATE_NOT_NULL(csq);
+    *csq = NULL;
     if (start < 0 || end < 0 || start > mLength || end > mLength) {
-        //throw new IndexOutOfBoundsException(start + ", " + end);
+        Logger::E("CharWrapper::SubSequence", "start:%d,  end:%d", start, end);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+        //throw new IndexOutOfBoundsException(start + ", " + end);
     }
 
     if (mChars != NULL) {
@@ -570,7 +573,6 @@ ECode CharWrapper::SubSequence(
         REFCOUNT_ADD(*csq);
         return NOERROR;
     }
-    *csq = NULL;
     return NOERROR;
 }
 
@@ -581,8 +583,9 @@ ECode CharWrapper::GetChars(
     /* [in] */ Int32 destoff)
 {
     if (dest == NULL || start < 0 || end < 0 || start > mLength || end > mLength) {
-        //throw new IndexOutOfBoundsException(start + ", " + end);
+        Logger::E("CharWrapper::SubSequence", "start:%d,  end:%d", start, end);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+        //throw new IndexOutOfBoundsException(start + ", " + end);
     }
 
     dest->Copy(destoff, mChars, start + mStart, end - start);
@@ -598,7 +601,7 @@ ECode CharWrapper::DrawText(
     /* [in] */ IPaint* p)
 {
     VALIDATE_NOT_NULL(c);
-    return c->DrawText((ArrayOf<Char32>*)mChars, start + mStart, end - start, x, y, p);
+    return c->DrawText(mChars, start + mStart, end - start, x, y, p);
 }
 
 ECode CharWrapper::DrawTextRun(
@@ -615,7 +618,7 @@ ECode CharWrapper::DrawTextRun(
     VALIDATE_NOT_NULL(c);
     Int32 count = end - start;
     Int32 contextCount = contextEnd - contextStart;
-    return c->DrawTextRun((ArrayOf<Char32>*)mChars, start + mStart, count, contextStart + mStart,
+    return c->DrawTextRun(mChars, start + mStart, count, contextStart + mStart,
             contextCount, x, y, isRtl, p);
 }
 
@@ -627,13 +630,13 @@ ECode CharWrapper::MeasureText(
 {
     VALIDATE_NOT_NULL(width);
     VALIDATE_NOT_NULL(p);
-    return p->MeasureText((ArrayOf<Char32>*)mChars, start + mStart, end - start, width);
+    return p->MeasureText(mChars, start + mStart, end - start, width);
 }
 
 ECode CharWrapper::GetTextWidths(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end,
-    /* [out, callee] */ ArrayOf<Float>** widths,
+    /* [in] */ ArrayOf<Float>* widths,
     /* [in] */ IPaint* p,
     /* [out] */ Int32* count)
 {
@@ -641,15 +644,12 @@ ECode CharWrapper::GetTextWidths(
     VALIDATE_NOT_NULL(widths);
     VALIDATE_NOT_NULL(count);
     *count = 0;
-    *widths = NULL;
 
     if (end <= start || start < 0) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    *widths = ArrayOf<Float>::Alloc(end - start);
-    REFCOUNT_ADD(*widths);
-    return p->GetTextWidths((ArrayOf<Char32>*)mChars, start + mStart, end - start, *widths, count);
+    return p->GetTextWidths(mChars, start + mStart, end - start, widths, count);
 }
 
 ECode CharWrapper::GetTextRunAdvances(
@@ -658,7 +658,7 @@ ECode CharWrapper::GetTextRunAdvances(
     /* [in] */ Int32 contextStart,
     /* [in] */ Int32 contextEnd,
     /* [in] */ Boolean isRtl,
-    /* [out] */ ArrayOf<Float>* advances,
+    /* [in] */ ArrayOf<Float>* advances,
     /* [in] */ Int32 advancesIndex,
     /* [in] */ IPaint* p,
     /* [out] */ Float* advance)
@@ -669,7 +669,7 @@ ECode CharWrapper::GetTextRunAdvances(
 
     Int32 count = end - start;
     Int32 contextCount = contextEnd - contextStart;
-    return p->GetTextRunAdvances((ArrayOf<Char32>*)mChars, start + mStart, count,
+    return p->GetTextRunAdvances(mChars, start + mStart, count,
             contextStart + mStart, contextCount, isRtl, advances,
             advancesIndex, advance);
 }
@@ -685,7 +685,7 @@ ECode CharWrapper::GetTextRunCursor(
 {
     VALIDATE_NOT_NULL(cursor);
     Int32 contextCount = contextEnd - contextStart;
-    return p->GetTextRunCursor((ArrayOf<Char32>*)mChars, contextStart + mStart,
+    return p->GetTextRunCursor(mChars, contextStart + mStart,
             contextCount, dir, offset + mStart, cursorOpt, cursor);
 }
 
@@ -4567,7 +4567,7 @@ ECode TextView::SetText(
         AutoPtr<IInteger32> iobj;
         CInteger32::New(TextUtilsTruncateAt_MARQUEE, (IInteger32**)&iobj);
         Int32 spanStart = 0;
-        spanned->GetSpanStart(iobj->Probe(EIID_IInterface), &spanStart);
+        spanned->GetSpanStart(iobj, &spanStart);
         if (spanStart >= 0) {
             AutoPtr<IViewConfiguration> vc = ViewConfiguration::Get(mContext);
             Boolean enabled = FALSE;
@@ -4617,7 +4617,7 @@ ECode TextView::SetText(
     AutoPtr<IKeyListener> keyListener;
     GetKeyListener((IKeyListener**)&keyListener);
     if (type == BufferType_EDITABLE || keyListener != NULL ||
-        needEditableForNotification) {
+            needEditableForNotification) {
         CreateEditorIfNeeded();
         assert(mEditableFactory != NULL);
         AutoPtr<IEditable> t;
@@ -4686,7 +4686,6 @@ ECode TextView::SetText(
         for (Int32 i = 0; i < count; i++) {
             sp->RemoveSpan((*watchers)[i]);
         }
-        watchers = NULL;
 
         if (mChangeWatcher == NULL) {
             mChangeWatcher = new ChangeWatcher(this);
@@ -4735,8 +4734,9 @@ ECode TextView::SetText(
     Int32 oldlen = 0;
 
     if (start < 0 || len < 0 || start + len > text->GetLength()) {
-//        throw new IndexOutOfBoundsException(start + ", " + len);
+        Logger::E(TEXT_VIEW_TAG, "start:%d, len:%d", start, len);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+//        throw new IndexOutOfBoundsException(start + ", " + len);
     }
 
     /*
@@ -4754,11 +4754,6 @@ ECode TextView::SetText(
         SendBeforeTextChanged(temp, 0, 0, len);
     }
 
-    /*
-        Todo:
-        Later we'll find a workaround for CharWrapper!
-    */
-    /*
     if (mCharWrapper == NULL) {
         mCharWrapper = new CharWrapper(text, start, len);
     }
@@ -4766,13 +4761,7 @@ ECode TextView::SetText(
         mCharWrapper->Set(text, start, len);
     }
 
-    return SetText((ICharSequence*)mCharWrapper->Probe(EIID_ICharSequence),
-            mBufferType, FALSE, oldlen);
-    */
-    StringBuilder sb;
-    sb.Append(*text, start, len);
-    AutoPtr<ICharSequence> convertedText = sb.ToCharSequence();
-    return SetText(convertedText, mBufferType, FALSE, oldlen);
+    return SetText(ICharSequence::Probe(mCharWrapper), mBufferType, FALSE, oldlen);
 }
 
 ECode TextView::SetTextKeepState(
@@ -4792,7 +4781,8 @@ ECode TextView::SetTextKeepState(
         AutoPtr<ISpannable> span = ISpannable::Probe(mText);
         if (span) {
             using Elastos::Core::Math;
-            Selection::SetSelection(span, Math::Max(0, Math::Min(start, len)),
+            Selection::SetSelection(span,
+                    Math::Max(0, Math::Min(start, len)),
                     Math::Max(0, Math::Min(end, len)));
         }
     }
@@ -5685,10 +5675,13 @@ ECode TextView::InvalidateRegion(
         GetExtendedPaddingTop(&extendedPaddingTop);
         Int32 verticalPadding = extendedPaddingTop + GetVerticalOffset(TRUE);
 
-        Float left, right;
+        Int32 left, right;
         if (lineStart == lineEnd && !invalidateCursor) {
-            mLayout->GetPrimaryHorizontal(start, &left);
-            mLayout->GetPrimaryHorizontal(1 + end, &right);
+            Float l, r;
+            mLayout->GetPrimaryHorizontal(start, &l);
+            mLayout->GetPrimaryHorizontal(end, &r);
+            left = (Int32) l;
+            right = (Int32) (r + 1.0);
             left += compoundPaddingLeft;
             right += compoundPaddingLeft;
         }
@@ -6352,7 +6345,7 @@ ECode TextView::GetFocusedRect(
         mLayout->GetLineBottom(line, &b);
         Float pos;
         mLayout->GetPrimaryHorizontal(selEnd, &pos);
-        l = pos - 2;
+        l = (Int32) pos - 2;
         r = l + 4;
         rect->Set(l, t, r, b);
     }

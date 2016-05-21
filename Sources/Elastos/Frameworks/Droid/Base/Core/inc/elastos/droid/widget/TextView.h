@@ -173,12 +173,12 @@ public:
     CAR_INTERFACE_DECL()
 
     CharWrapper(
-        /* [in] */ const ArrayOf<Char32>* chars,
+        /* [in] */ ArrayOf<Char32>* chars,
         /* [in] */ Int32 start,
         /* [in] */ Int32 len);
 
     CARAPI_(void) Set(
-        /* [in] */ const ArrayOf<Char32>* chars,
+        /* [in] */ ArrayOf<Char32>* chars,
         /* [in] */ Int32 start,
         /* [in] */ Int32 len);
 
@@ -231,7 +231,7 @@ public:
     CARAPI GetTextWidths(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
-        /* [out, callee] */ ArrayOf<Float>** widths,
+        /* [in] */ ArrayOf<Float>* widths,
         /* [in] */ IPaint* p,
         /* [out] */ Int32* count);
 
@@ -241,7 +241,7 @@ public:
         /* [in] */ Int32 contextStart,
         /* [in] */ Int32 contextEnd,
         /* [in] */ Boolean isRtl,
-        /* [out] */ ArrayOf<Float>* advances,
+        /* [in] */ ArrayOf<Float>* advances,
         /* [in] */ Int32 advancesIndex,
         /* [in] */ IPaint* p,
         /* [out] */ Float* advance);
@@ -2742,10 +2742,10 @@ protected:
         /* [in] */ Float y);
 
      virtual CARAPI_(Boolean) SetFrame(
-         /* [in] */ Int32 l,
-         /* [in] */ Int32 t,
-         /* [in] */ Int32 r,
-         /* [in] */ Int32 b);
+        /* [in] */ Int32 l,
+        /* [in] */ Int32 t,
+        /* [in] */ Int32 r,
+        /* [in] */ Int32 b);
 
      virtual CARAPI OnAttachedToWindow();
 
@@ -2762,20 +2762,20 @@ protected:
      virtual CARAPI_(Int32) GetRightPaddingOffset();
 
      virtual CARAPI_(Boolean) VerifyDrawable(
-         /* [in] */ IDrawable* who);
+        /* [in] */ IDrawable* who);
 
      virtual CARAPI OnCreateDrawableState(
-         /* [in] */ Int32 extraSpace,
-         /* [out] */ ArrayOf<Int32>** drawableState);
+        /* [in] */ Int32 extraSpace,
+        /* [out] */ ArrayOf<Int32>** drawableState);
 
      virtual CARAPI_(void) OnDraw(
-         /* [in] */ ICanvas* canvas);
+        /* [in] */ ICanvas* canvas);
 
      virtual CARAPI_(Int32) GetFadeTop(
-         /* [in] */ Boolean offsetRequired);
+        /* [in] */ Boolean offsetRequired);
 
      virtual CARAPI_(Int32) GetFadeHeight(
-         /* [in] */ Boolean offsetRequired);
+        /* [in] */ Boolean offsetRequired);
 
      /**
       * The width passed in is now the desired layout width,
@@ -2783,23 +2783,23 @@ protected:
       * {@hide}
       */
      virtual CARAPI_(void) MakeNewLayout(
-         /* [in] */ Int32 w,
-         /* [in] */ Int32 hintWidth,
-         /* [in] */ IBoringLayoutMetrics* boring,
-         /* [in] */ IBoringLayoutMetrics* hintBoring,
-         /* [in] */ Int32 ellipsisWidth,
-         /* [in] */ Boolean bringIntoView);
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 hintWidth,
+        /* [in] */ IBoringLayoutMetrics* boring,
+        /* [in] */ IBoringLayoutMetrics* hintBoring,
+        /* [in] */ Int32 ellipsisWidth,
+        /* [in] */ Boolean bringIntoView);
 
      CARAPI_(void) OnMeasure(
-         /* [in] */ Int32 widthMeasureSpec,
-         /* [in] */ Int32 heightMeasureSpec);
+        /* [in] */ Int32 widthMeasureSpec,
+        /* [in] */ Int32 heightMeasureSpec);
 
      CARAPI OnLayout(
-         /* [in] */ Boolean changed,
-         /* [in] */ Int32 left,
-         /* [in] */ Int32 top,
-         /* [in] */ Int32 right,
-         /* [in] */ Int32 bottom);
+        /* [in] */ Boolean changed,
+        /* [in] */ Int32 left,
+        /* [in] */ Int32 top,
+        /* [in] */ Int32 right,
+        /* [in] */ Int32 bottom);
 
      /**
       * This method is called when the text is changed, in case any
@@ -2820,10 +2820,10 @@ protected:
       *              the length of the new text is <code>after-start</code>.
       */
      virtual CARAPI_(void) OnTextChanged(
-         /* [in] */ ICharSequence* text,
-         /* [in] */ Int32 start,
-         /* [in] */ Int32 before,
-         /* [in] */ Int32 after);
+        /* [in] */ ICharSequence* text,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 before,
+        /* [in] */ Int32 after);
 
      /**
       * This method is called when the selection has changed, in case any
@@ -2833,17 +2833,17 @@ protected:
       * @param selEnd The new selection end location.
       */
      virtual CARAPI_(void) OnSelectionChanged(
-         /* [in] */ Int32 selStart,
-         /* [in] */ Int32 selEnd);
+        /* [in] */ Int32 selStart,
+        /* [in] */ Int32 selEnd);
 
      virtual CARAPI_(void) OnFocusChanged(
-         /* [in] */ Boolean focused,
-         /* [in] */ Int32 direction,
-         /* [in] */ IRect* previouslyFocusedRect);
+        /* [in] */ Boolean focused,
+        /* [in] */ Int32 direction,
+        /* [in] */ IRect* previouslyFocusedRect);
 
      virtual CARAPI OnVisibilityChanged(
-         /* [in] */ IView* changedView,
-         /* [in] */ Int32 visibility);
+        /* [in] */ IView* changedView,
+        /* [in] */ Int32 visibility);
 
      virtual CARAPI_(Float) GetLeftFadingEdgeStrength();
 
@@ -2856,10 +2856,10 @@ protected:
      virtual CARAPI_(Int32) ComputeVerticalScrollExtent();
 
      virtual CARAPI_(void) OnScrollChanged(
-         /* [in] */ Int32 horiz,
-         /* [in] */ Int32 vert,
-         /* [in] */ Int32 oldHoriz,
-         /* [in] */ Int32 oldVert);
+        /* [in] */ Int32 horiz,
+        /* [in] */ Int32 vert,
+        /* [in] */ Int32 oldHoriz,
+        /* [in] */ Int32 oldVert);
 
      /**
       * @hide
@@ -2875,30 +2875,30 @@ protected:
      * @hide
      */
      virtual CARAPI_(void) ViewClicked(
-         /* [in] */ IInputMethodManager* imm);
+        /* [in] */ IInputMethodManager* imm);
 
      virtual CARAPI_(void) ReplaceText_internal(
-         /* [in] */ Int32 start,
-         /* [in] */ Int32 end,
-         /* [in] */ ICharSequence* chars);
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end,
+        /* [in] */ ICharSequence* chars);
 
      /**
       * Sets a span on the specified range of text
       * @hide
       */
      virtual CARAPI_(void) SetSpan_internal(
-         /* [in] */ IInterface* span,
-         /* [in] */ Int32 start,
-         /* [in] */ Int32 end,
-         /* [in] */ Int32 flags);
+        /* [in] */ IInterface* span,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end,
+        /* [in] */ Int32 flags);
 
      /**
       * Moves the cursor to the specified offset position in text
       * @hide
       */
      virtual CARAPI_(void) SetCursorPosition_internal(
-         /* [in] */ Int32 start,
-         /* [in] */ Int32 end);
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end);
 
 private:
     ECO_LOCAL CARAPI_(void) SetTypefaceFromAttrs(

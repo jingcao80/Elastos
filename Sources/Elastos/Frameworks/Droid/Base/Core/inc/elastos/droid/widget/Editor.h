@@ -21,8 +21,8 @@ using Elastos::Droid::Content::IUndoManager;
 using Elastos::Droid::Content::IUndoOwner;
 using Elastos::Droid::Content::UndoOperation;
 using Elastos::Droid::Graphics::IPath;
-using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::HandlerRunnable;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::EIID_IBundle;
@@ -244,19 +244,6 @@ public:
 private:
     Editor* mEditor;
     SuggestionsPopupWindow* mOwner;
-};
-
-//==============================================================================
-//              MyPopupWindow
-//==============================================================================
-class MyPopupWindow
-    : public PopupWindow
-{
-public:
-    MyPopupWindow(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyle = R::attr::popupWindowStyle);
 };
 
 //==============================================================================
@@ -1301,7 +1288,7 @@ private:
     private:
         Editor* mHost;
 
-        static const Int32 DISPLAY_TIMEOUT_MS = 3000;
+        static const Int32 DISPLAY_TIMEOUT_MS;
 
         AutoPtr<EasyEditPopupWindow> mPopupWindow;
 
@@ -1669,14 +1656,14 @@ private:
 
     static const String TAG;
     static const Boolean DEBUG_UNDO;
-    static const Int32 BLINK = 500;
+    static const Int32 BLINK;
 
     static AutoPtr<ArrayOf<Float> > TEMP_POSITION;
     static Object TEMP_POSITION_OBJECT;
-    static const Int32 DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
+    static const Int32 DRAG_SHADOW_MAX_TEXT_LENGTH;
 
-    static const Int32 EXTRACT_NOTHING = -2;
-    static const Int32 EXTRACT_UNKNOWN = -1;
+    static const Int32 EXTRACT_NOTHING;
+    static const Int32 EXTRACT_UNKNOWN;
 
     // Cursor Controllers.
     AutoPtr<IUndoManager> mUndoManager;

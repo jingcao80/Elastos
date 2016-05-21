@@ -266,17 +266,6 @@ ECode CustomPopupWindow::Dismiss()
 
     return NOERROR;
 }
-//==============================================================================
-//              MyPopupWindow
-//==============================================================================
-MyPopupWindow::MyPopupWindow(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle)
-    : PopupWindow()
-{
-    constructor(context, attrs, defStyle);
-}
 
 //==============================================================================
 //              PinnedPopupWindow
@@ -286,6 +275,8 @@ CAR_INTERFACE_IMPL(PinnedPopupWindow, Object, ITextViewPositionListener)
 PinnedPopupWindow::PinnedPopupWindow(
     /* [in] */ Editor* editor)
     : mEditor(editor)
+    , mPositionX(0)
+    , mPositionY(0)
 {
 }
 
@@ -393,7 +384,7 @@ void PinnedPopupWindow::UpdatePosition(
         mPopupWindow->Update(positionX, positionY, -1, -1);
     }
     else {
-        mPopupWindow->ShowAtLocation((IView*)(mEditor->mTextView->Probe(EIID_IView)),
+        mPopupWindow->ShowAtLocation((IView*)(mEditor->mTextView),
             IGravity::NO_GRAVITY, positionX, positionY);
     }
 }
@@ -449,7 +440,7 @@ ECode EasyEditPopupWindow::CreatePopupWindow()
 {
     AutoPtr<IContext> context;
     mEditor->mTextView->GetContext((IContext**)&context);
-    mPopupWindow = new MyPopupWindow(context, NULL, R::attr::textSelectHandleWindowStyle);
+    CPopupWindow::New(context, NULL, R::attr::textSelectHandleWindowStyle, (IPopupWindow**)&mPopupWindow);
     mPopupWindow->SetInputMethodMode(IPopupWindow::INPUT_METHOD_NOT_NEEDED);
     mPopupWindow->SetClippingEnabled(TRUE);
     return NOERROR;
@@ -698,6 +689,7 @@ SuggestionsPopupWindow::SuggestionsPopupWindow(
     /* [in] */ Editor* editor)
     : PinnedPopupWindow(editor)
     , mNumberOfSuggestions(0)
+    , mCursorWasVisibleBeforeSuggestions(FALSE)
     , mIsShowingUp(FALSE)
 {
     mCursorWasVisibleBeforeSuggestions = mEditor->mCursorVisible;
@@ -1500,7 +1492,7 @@ ECode ActionPopupWindow::CreatePopupWindow()
 {
     AutoPtr<IContext> context;
     mEditor->mTextView->GetContext((IContext**)&context);
-    mPopupWindow = new MyPopupWindow(context, NULL, R::attr::textSelectHandleWindowStyle);
+    CPopupWindow::New(context, NULL, R::attr::textSelectHandleWindowStyle, (IPopupWindow**)&mPopupWindow);
     mPopupWindow->SetClippingEnabled(TRUE);
     return NOERROR;
 }
@@ -3088,13 +3080,13 @@ CAR_INTERFACE_IMPL(Editor, Object, IEditor)
 
 const String Editor::TAG("Editor");
 const Boolean Editor::DEBUG_UNDO = FALSE;
-const Int32 Editor::BLINK;
+const Int32 Editor::BLINK = 500;
 
 AutoPtr<ArrayOf<Float> > Editor::TEMP_POSITION = ArrayOf<Float>::Alloc(2);
 Object Editor::TEMP_POSITION_OBJECT;
-const Int32 Editor::DRAG_SHADOW_MAX_TEXT_LENGTH;
-const Int32 Editor::EXTRACT_NOTHING;
-const Int32 Editor::EXTRACT_UNKNOWN;
+const Int32 Editor::DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
+const Int32 Editor::EXTRACT_NOTHING = -2;
+const Int32 Editor::EXTRACT_UNKNOWN = -1;
 
 Editor::Editor(
     /* [in] */ TextView* textView)
@@ -3124,6 +3116,7 @@ Editor::Editor(
     , mTextView(textView)
 {
     mCursorDrawable = ArrayOf<IDrawable *>::Alloc(2);
+    mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier(this);
 }
 
 Editor::~Editor()
@@ -4216,7 +4209,8 @@ ECode Editor::BeginBatchEdit()
                 // so turn this into a full update.
                 ims->mChangedStart = 0;
                 mTextView->GetLength(&ims->mChangedEnd);
-            } else {
+            }
+            else {
                 ims->mChangedStart = EXTRACT_UNKNOWN;
                 ims->mChangedEnd = EXTRACT_UNKNOWN;
                 ims->mContentChanged = FALSE;
@@ -4257,7 +4251,8 @@ void Editor::FinishBatchEdit(
     if (ims->mContentChanged || ims->mSelectionModeChanged) {
         mTextView->UpdateAfterEdit();
         ReportExtractedText();
-    } else if (ims->mCursorChanged) {
+    }
+    else if (ims->mCursorChanged) {
         // Cheezy way to get us to report the current cursor location.
         mTextView->InvalidateCursor();
     }
@@ -4726,7 +4721,7 @@ void Editor::UpdateCursorsPositions()
     Boolean clamped;
     layout->ShouldClampCursor(line, &clamped);
     UpdateCursorPosition(0, top, middle,
-                GetPrimaryHorizontal(layout, hintLayout, offset, clamped));
+            GetPrimaryHorizontal(layout, hintLayout, offset, clamped));
 
     if (mCursorCount == 2) {
         Float hor;
@@ -5210,7 +5205,7 @@ ECode Editor::AddSpanWatchers(
 ////////////////////////////////////////////////////////////
 //              Editor::SpanController
 ////////////////////////////////////////////////////////////
-const Int32 Editor::SpanController::DISPLAY_TIMEOUT_MS;
+const Int32 Editor::SpanController::DISPLAY_TIMEOUT_MS = 3000;
 
 CAR_INTERFACE_IMPL(Editor::SpanController, Object, ISpanWatcher)
 
@@ -5227,7 +5222,8 @@ ECode Editor::SpanController::OnSpanAdded(
 {
     if (IsNonIntermediateSelectionSpan(text, span)) {
         mHost->SendUpdateSelection();
-    } else if (IEasyEditSpan::Probe(span)) {
+    }
+    else if (IEasyEditSpan::Probe(span)) {
         if (mPopupWindow == NULL) {
             mPopupWindow = new EasyEditPopupWindow(mHost);
             mPopupWindow->constructor();
@@ -5280,7 +5276,8 @@ ECode Editor::SpanController::OnSpanRemoved(
 {
     if (IsNonIntermediateSelectionSpan(text, span)) {
         mHost->SendUpdateSelection();
-    } else if (mPopupWindow != NULL && span == IInterface::Probe(mPopupWindow->mEasyEditSpan)) {
+    }
+    else if (mPopupWindow != NULL && span == IInterface::Probe(mPopupWindow->mEasyEditSpan)) {
         Hide();
     }
     return NOERROR;
@@ -5296,7 +5293,8 @@ ECode Editor::SpanController::OnSpanChanged(
 {
     if (IsNonIntermediateSelectionSpan(text, span)) {
         mHost->SendUpdateSelection();
-    } else if (mPopupWindow != NULL && IEasyEditSpan::Probe(span)) {
+    }
+    else if (mPopupWindow != NULL && IEasyEditSpan::Probe(span)) {
         AutoPtr<IEasyEditSpan> easyEditSpan = IEasyEditSpan::Probe(span);
         SendEasySpanNotification(IEasyEditSpan::TEXT_MODIFIED, easyEditSpan);
         text->RemoveSpan(easyEditSpan);
@@ -5330,16 +5328,16 @@ void Editor::SpanController::SendEasySpanNotification(
     /* [in] */ IEasyEditSpan* span)
 {
     //try {
-        AutoPtr<IPendingIntent> pendingIntent;
-        span->GetPendingIntent((IPendingIntent**)&pendingIntent);
-        if (pendingIntent != NULL) {
-            AutoPtr<IIntent> intent;
-            CIntent::New((IIntent**)&intent);
-            intent->PutExtra(IEasyEditSpan::EXTRA_TEXT_CHANGED_TYPE, textChangedType);
-            AutoPtr<IContext> ctx;
-            mHost->mTextView->GetContext((IContext**)&ctx);
-            pendingIntent->Send(ctx, 0, intent);
-        }
+    AutoPtr<IPendingIntent> pendingIntent;
+    span->GetPendingIntent((IPendingIntent**)&pendingIntent);
+    if (pendingIntent != NULL) {
+        AutoPtr<IIntent> intent;
+        CIntent::New((IIntent**)&intent);
+        intent->PutExtra(IEasyEditSpan::EXTRA_TEXT_CHANGED_TYPE, textChangedType);
+        AutoPtr<IContext> ctx;
+        mHost->mTextView->GetContext((IContext**)&ctx);
+        pendingIntent->Send(ctx, 0, intent);
+    }
     //} catch (CanceledException e) {
         // This should not happen, as we should try to send the intent only once.
     //    Log.w(TAG, "PendingIntent for notification cannot be sent", e);
