@@ -1,12 +1,16 @@
 
 #include "CActivityOne.h"
 #include "R.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -83,6 +87,36 @@ ECode CActivityOne::OnCreateOptionsMenu(
     GetMenuInflater((IMenuInflater**)&inflater);
     inflater->Inflate(R::menu::action_menu, menu);
     return Activity::OnCreateOptionsMenu(menu, allowToShow);
+}
+
+ECode CActivityOne::OnOptionsItemSelected(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    Logger::I(TAG, " >> OnOptionsItemSelected()");
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IView> view = FindViewById(R::id::showtext);
+    ITextView* tv = ITextView::Probe(view);
+
+    Int32 itemId;
+    item->GetItemId(&itemId);
+    switch(itemId){
+    case R::id::action_share:
+        tv->SetText(CoreUtils::Convert("[Share]"));
+        break;
+    case R::id::action_search:
+        tv->SetText(CoreUtils::Convert("[Search]"));
+        break;
+    case R::id::action_settings:
+        tv->SetText(CoreUtils::Convert("[Settings]"));
+        break;
+    case R::id::action_help:
+        tv->SetText(CoreUtils::Convert("[Help]"));
+        break;
+    }
+
+    return Activity::OnOptionsItemSelected(item, result);
+
 }
 
 ECode CActivityOne::OnActivityResult(

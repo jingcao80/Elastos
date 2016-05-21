@@ -55,6 +55,10 @@ protected:
         /* [in] */ IMenu* menu,
         /* [out] */ Boolean* allowToShow);
 
+    CARAPI OnOptionsItemSelected(
+        /* [in] */ IMenuItem* item,
+        /* [out] */ Boolean* result);
+
 private:
     CARAPI OnActivityResult(
         /* [in] */ Int32 requestCode,

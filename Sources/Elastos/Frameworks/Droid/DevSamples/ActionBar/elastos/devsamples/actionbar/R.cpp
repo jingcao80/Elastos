@@ -18,6 +18,7 @@ const int R::id::action_help;
 const int R::id::action_search;
 const int R::id::action_settings;
 const int R::id::action_share;
+const int R::id::showtext;
 const int R::layout::main;
 const int R::menu::action_menu;
 const int R::string::action_help;

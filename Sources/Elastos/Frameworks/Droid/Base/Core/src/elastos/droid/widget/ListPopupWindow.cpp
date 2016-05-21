@@ -6,6 +6,7 @@
 #include "elastos/droid/text/CTextUtils.h"
 #include "elastos/droid/internal/widget/CAbsListViewAutoScroller.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
+#include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/view/animation/CAccelerateDecelerateInterpolator.h"
 #include "elastos/droid/view/CKeyEventHelper.h"
 #include "elastos/droid/view/CMotionEventHelper.h"
@@ -27,6 +28,7 @@ using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Internal::Widget::CAbsListViewAutoScroller;
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Text::CTextUtils;
 using Elastos::Droid::Text::ITextUtils;
@@ -259,18 +261,10 @@ ECode ListPopupWindow::ForwardingListener::OnViewDetachedFromWindow(
 
 Boolean ListPopupWindow::ForwardingListener::OnForwardingStarted()
 {
-    // ==================before translated======================
-    // final ListPopupWindow popup = getPopup();
-    // if (popup != null && !popup.isShowing()) {
-    //     popup.show();
-    // }
-    // return true;
-
     AutoPtr<IListPopupWindow> popup;
     GetPopup((IListPopupWindow**)&popup);
     Boolean isShowing = FALSE;
-    popup->IsShowing(&isShowing);
-    if (popup != NULL && !isShowing) {
+    if (popup != NULL && (popup->IsShowing(&isShowing), !isShowing)) {
         popup->Show();
     }
     return TRUE;
@@ -278,18 +272,10 @@ Boolean ListPopupWindow::ForwardingListener::OnForwardingStarted()
 
 Boolean ListPopupWindow::ForwardingListener::OnForwardingStopped()
 {
-    // ==================before translated======================
-    // final ListPopupWindow popup = getPopup();
-    // if (popup != null && popup.isShowing()) {
-    //     popup.dismiss();
-    // }
-    // return true;
-
     AutoPtr<IListPopupWindow> popup;
     GetPopup((IListPopupWindow**)&popup);
     Boolean isShowing = FALSE;
-    popup->IsShowing(&isShowing);
-    if (popup != NULL && !isShowing) {
+    if (popup != NULL && (popup->IsShowing(&isShowing), !isShowing)) {
         popup->Dismiss();
     }
     return TRUE;
@@ -534,9 +520,6 @@ ListPopupWindow::InnerForwardingListener::InnerForwardingListener(
     /* [in] */ ListPopupWindow* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
-
     assert(mOwner);
 }
 
@@ -544,9 +527,6 @@ ECode ListPopupWindow::InnerForwardingListener::GetPopup(
     /* [out] */ IListPopupWindow** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ListPopupWindow.this;
-
     *result = mOwner;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -599,7 +579,6 @@ ListPopupWindow::DropDownListView::DropDownListView(
     // // TODO: Add an API to control this
     // setCacheColorHint(0); // Transparent, since the background drawable could be anything.
 
-    assert(0);
     ListView::constructor(context, NULL, R::attr::dropDownListViewStyle);
     mHijackFocus = hijackFocus;
     // TODO: Add an API to control this
@@ -739,8 +718,6 @@ Boolean ListPopupWindow::DropDownListView::TouchModeDrawsInPressedState()
 {
     // ==================before translated======================
     // return mDrawsInPressedState || super.touchModeDrawsInPressedState();
-
-    assert(0);
     return mDrawsInPressedState || ListView::TouchModeDrawsInPressedState();
 }
 
@@ -829,7 +806,6 @@ void ListPopupWindow::DropDownListView::ClickPressedItem(
     // }
     // mClickAnimation = anim;
 
-    assert(0);
     Int64 id = 0;
     GetItemIdAtPosition(position, &id);
 
@@ -875,7 +851,6 @@ void ListPopupWindow::DropDownListView::ClearPressedItem()
     //     mClickAnimation = null;
     // }
 
-    assert(0);
     mDrawsInPressedState = FALSE;
     SetPressed(FALSE);
     UpdateSelectorState();
@@ -913,7 +888,6 @@ void ListPopupWindow::DropDownListView::SetPressedItem(
     //     mClickAnimation = null;
     // }
 
-    assert(0);
     mDrawsInPressedState = TRUE;
 
     // Ordering is essential. First update the pressed state and layout
@@ -1060,15 +1034,17 @@ ECode ListPopupWindow::ResizePopupRunnable::Run()
     //     show();
     // }
 
-    assert(0);
-    Int32 count = 0;
-    mOwner->mDropDownList->GetCount(&count);
-    Int32 childCount = 0;
-    mOwner->mDropDownList->GetChildCount(&childCount);
-    if (mOwner->mDropDownList && count > childCount && childCount <= mOwner->mListItemExpandMaximum) {
-        mOwner->mPopup->SetInputMethodMode(IPopupWindow::INPUT_METHOD_NOT_NEEDED);
-        mOwner->Show();
+    if (mOwner->mDropDownList != NULL) {
+        Int32 count = 0;
+        mOwner->mDropDownList->GetCount(&count);
+        Int32 childCount = 0;
+        mOwner->mDropDownList->GetChildCount(&childCount);
+        if (count > childCount && childCount <= mOwner->mListItemExpandMaximum) {
+            mOwner->mPopup->SetInputMethodMode(IPopupWindow::INPUT_METHOD_NOT_NEEDED);
+            mOwner->Show();
+        }
     }
+
     return NOERROR;
 }
 
@@ -1279,6 +1255,12 @@ ListPopupWindow::ListPopupWindow()
     , mModal(FALSE)
     , mLayoutDirection(0)
 {
+    mResizePopupRunnable = new ResizePopupRunnable(this);
+    mTouchInterceptor = new PopupTouchInterceptor(this);
+    mScrollListener = new PopupScrollListener(this);
+    mHideSelector = new ListSelectorHider(this);
+    CHandler::New((IHandler**)&mHandler);
+    CRect::New((IRect**)&mTempRect);
 }
 
 ECode ListPopupWindow::constructor(
@@ -1337,7 +1319,6 @@ ECode ListPopupWindow::constructor(
     // final Locale locale = mContext.getResources().getConfiguration().locale;
     // mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(locale);
 
-    assert(0);
     mContext = context;
 
     AutoPtr< ArrayOf<Int32> > attrsArray = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::ListPopupWindow),
@@ -1386,7 +1367,6 @@ ECode ListPopupWindow::SetAdapter(
     //     mDropDownList.setAdapter(mAdapter);
     // }
 
-    assert(0);
     if (NULL == mObserver) {
         mObserver = new PopupDataSetObserver(this);
     }
@@ -2115,7 +2095,6 @@ ECode ListPopupWindow::GetSelectedItem(
     // }
     // return mDropDownList.getSelectedItem();
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if(!isShowing) {
@@ -2137,7 +2116,6 @@ ECode ListPopupWindow::GetSelectedItemPosition(
     // }
     // return mDropDownList.getSelectedItemPosition();
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if(!isShowing) {
@@ -2159,7 +2137,6 @@ ECode ListPopupWindow::GetSelectedItemId(
     // }
     // return mDropDownList.getSelectedItemId();
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if(!isShowing) {
@@ -2181,7 +2158,6 @@ ECode ListPopupWindow::GetSelectedView(
     // }
     // return mDropDownList.getSelectedView();
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if(!isShowing) {
@@ -2306,7 +2282,6 @@ ECode ListPopupWindow::OnKeyDown(
     //
     // return false;
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if (isShowing) {
@@ -2408,7 +2383,6 @@ ECode ListPopupWindow::OnKeyUp(
     // }
     // return false;
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if (isShowing) {
@@ -2466,7 +2440,6 @@ ECode ListPopupWindow::OnKeyPreIme(
     // }
     // return false;
 
-    assert(0);
     Boolean isShowing = FALSE;
     IsShowing(&isShowing);
     if (keyCode == IKeyEvent::KEYCODE_BACK && isShowing) {
@@ -2709,7 +2682,6 @@ Int32 ListPopupWindow::BuildDropDown()
     //
     // return listContent + otherHeights;
 
-    assert(0);
     AutoPtr<IViewGroup> dropDownView;
     Int32 otherHeights = 0;
     if (mDropDownList == NULL) {

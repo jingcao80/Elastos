@@ -762,7 +762,7 @@ AutoPtr<IView> ActionMenuPresenter::FindViewForItem(
 ECode ActionMenuPresenter::ShowOverflowMenu(
     /* [out] */ Boolean* result)
 {
-    if (mMenu == NULL || mMenuView == NULL || mPostedOpenRunnable == NULL) {
+    if (mMenu == NULL || mMenuView == NULL || mPostedOpenRunnable != NULL) {
         *result = FALSE;
         return NOERROR;
     }

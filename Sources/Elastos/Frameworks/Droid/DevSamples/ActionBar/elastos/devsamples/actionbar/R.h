@@ -34,10 +34,11 @@ class ECO_PUBLIC R {
         public: static const int wunderland = 0x7f020004;
     };
     public: class id {
-        public: static const int action_help = 0x7f090003;
-        public: static const int action_search = 0x7f090001;
-        public: static const int action_settings = 0x7f090002;
-        public: static const int action_share = 0x7f090000;
+        public: static const int action_help = 0x7f090004;
+        public: static const int action_search = 0x7f090002;
+        public: static const int action_settings = 0x7f090003;
+        public: static const int action_share = 0x7f090001;
+        public: static const int showtext = 0x7f090000;
     };
     public: class layout {
         public: static const int main = 0x7f030000;

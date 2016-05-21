@@ -1238,7 +1238,7 @@ ECode MenuBuilder::Close(
 
     Int32 size;
     mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> elem;
         mPresenters->Get(i, (IInterface**)&elem);
         AutoPtr<IMenuPresenter> presenter;
@@ -1247,7 +1247,6 @@ ECode MenuBuilder::Close(
             mPresenters->Remove(elem);
         }
         else {
-            i++;
             presenter->OnCloseMenu(this, allMenusAreClosing);
         }
     }
@@ -1365,7 +1364,7 @@ ECode MenuBuilder::FlagActionItems()
     Boolean flagged = FALSE;
     Int32 size;
     mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> elem;
         mPresenters->Get(i, (IInterface**)&elem);
         AutoPtr<IMenuPresenter> presenter;
@@ -1374,7 +1373,6 @@ ECode MenuBuilder::FlagActionItems()
             mPresenters->Remove(elem);
         }
         else {
-            i++;
             Boolean flagAction = FALSE;
             flagged |= (presenter->FlagActionItems(&flagAction), flagAction);
         }
