@@ -1,5 +1,6 @@
 
 #include "elastos/droid/animation/ValueAnimator.h"
+#include "elastos/droid/animation/AnimatorSet.h"
 #include "elastos/droid/animation/CValueAnimator.h"
 #include "elastos/droid/animation/PropertyValuesHolder.h"
 #include "elastos/droid/animation/CArgbEvaluator.h"
@@ -787,6 +788,8 @@ void ValueAnimator::EndAnimation(
     // clear refcount of AnimationSet
     //
     if (mParent != NULL) {
+        AnimatorSet* parentObj = (AnimatorSet*)mParent.Get();
+        parentObj->SetLastChildAnimator(this);
         mParent = NULL;
     }
     // if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {

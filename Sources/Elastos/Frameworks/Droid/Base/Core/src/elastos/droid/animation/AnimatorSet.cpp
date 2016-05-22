@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/animation/AnimatorSet.h"
 #include "elastos/droid/animation/ValueAnimator.h"
+#include "elastos/droid/animation/CAnimatorSet.h"
 #include "elastos/droid/animation/CAnimatorSetBuilder.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -46,8 +47,9 @@ ECode AnimatorSet::DependencyListener::OnAnimationStart(
 ECode AnimatorSet::DependencyListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    if (mRule == Dependency::AFTER)
+    if (mRule == Dependency::AFTER) {
         StartIfReady(animation);
+    }
     return NOERROR;
 }
 
@@ -138,14 +140,8 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     AutoPtr<IAnimatorSet> obj;
     mWeakAnimatorSet->Resolve(EIID_IAnimatorSet, (IInterface**)&obj);
     if (obj == NULL) {
-        Logger::E(TAG, "Error: AnimatorSet has been released!");
-        IValueAnimator* va = IValueAnimator::Probe(animation);
-        if (va) {
-            ValueAnimator* valAni = (ValueAnimator*)va;
-            assert(valAni->mParent != NULL);
-        }
-        assert(0 && "Error: AnimatorSet has been released!");
-        return E_ILLEGAL_STATE_EXCEPTION;
+        Logger::D(TAG, "Warning: AnimatorSet has been released!");
+        return NOERROR;
     }
 
     AnimatorSet* animatorSet = (AnimatorSet*)obj.Get();
@@ -155,14 +151,14 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     AutoPtr<IAnimator> key = animation;
     AutoPtr<Node> animNode = (animatorSet->mNodeMap)[key];
     animNode->mDone = TRUE;
-    if (!(animatorSet->mTerminated)) {
+    if (!animatorSet->mTerminated) {
         // Listeners are already notified of the AnimatorSet ending in cancel() or
         // end(); the logic below only kicks in when animations end normally
-        List<AutoPtr<Node> > sortedNodes(animatorSet->mSortedNodes);
+        List<AutoPtr<Node> >& sortedNodes = animatorSet->mSortedNodes;
         Boolean allDone = TRUE;
-        List<AutoPtr<Node> >::Iterator sortedIt = sortedNodes.Begin();
-        for (; sortedIt != sortedNodes.End(); ++sortedIt) {
-            if (!((*sortedIt)->mDone)) {
+        List<AutoPtr<Node> >::Iterator it;
+        for (it = sortedNodes.Begin(); it != sortedNodes.End(); ++it) {
+            if (!(*it)->mDone) {
                 allDone = FALSE;
                 break;
             }
@@ -170,11 +166,11 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
         if (allDone) {
             // If this was the last child animation to end, then notify listeners that this
             // AnimatorSet has ended
-            if (animatorSet->mListeners.IsEmpty() == FALSE) {
+            if (!animatorSet->mListeners.IsEmpty()) {
                 List<AutoPtr<IAnimatorListener> > tmpListeners(animatorSet->mListeners);
-                List<AutoPtr<IAnimatorListener> >::Iterator itListeners = tmpListeners.Begin();
-                for (; itListeners != tmpListeners.End(); ++itListeners) {
-                    (*itListeners)->OnAnimationEnd((IAnimator*)animatorSet);
+                List<AutoPtr<IAnimatorListener> >::Iterator it;
+                for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
+                    (*it)->OnAnimationEnd((IAnimator*)animatorSet);
                 }
             }
             animatorSet->mStarted = FALSE;
@@ -826,7 +822,7 @@ ECode AnimatorSet::Clone(
 {
     VALIDATE_NOT_NULL(object)
 
-    AutoPtr<IAnimatorSet> newObject = new AnimatorSet();
+    AutoPtr<IAnimatorSet> newObject = new CAnimatorSet();
     CloneImpl(newObject);
     *object = newObject;
     REFCOUNT_ADD(*object);
@@ -1011,6 +1007,31 @@ ECode AnimatorSet::Reverse()
         }
     }
     return NOERROR;
+}
+
+void AnimatorSet::SetLastChildAnimator(
+    /* [in] */ IAnimator* animator)
+{
+    mLastChildAnimator = animator;
+}
+
+void AnimatorSet::OnLastStrongRef(
+    /* [in] */ const void* id)
+{
+    if (mLastChildAnimator != NULL) {
+        mLastChildAnimator->RemoveListener(mSetListener);
+    }
+    // This was the last child animation to end, notify listeners that this
+    // AnimatorSet has ended
+    if (!mListeners.IsEmpty()) {
+        List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
+        List<AutoPtr<IAnimatorListener> >::Iterator it;
+        for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
+            (*it)->OnAnimationEnd((IAnimator*)this);
+        }
+    }
+    mStarted = FALSE;
+    mPaused = FALSE;
 }
 
 }   //namespace Animation

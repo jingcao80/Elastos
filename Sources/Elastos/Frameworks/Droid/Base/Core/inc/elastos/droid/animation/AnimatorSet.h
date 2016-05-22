@@ -110,6 +110,7 @@ private:
 
         CARAPI OnAnimationStart(
             /* [in] */ IAnimator* animation);
+
     private:
         AutoPtr<IWeakReference> mWeakAnimatorSet;
     };
@@ -430,6 +431,12 @@ public:
     // @Override
     virtual CARAPI Reverse();
 
+    CARAPI_(void) SetLastChildAnimator(
+        /* [in] */ IAnimator* animator);
+
+    CARAPI_(void) OnLastStrongRef(
+        /* [in] */ const void* id);
+
 protected:
     CARAPI CloneImpl(
         /* [in] */ IAnimatorSet* anim);
@@ -519,6 +526,8 @@ private:
     AutoPtr<ITimeInterpolator> mInterpolator;
 
     Boolean mReversible;
+
+    AutoPtr<IAnimator> mLastChildAnimator;
 };
 
 }   //namespace Animation

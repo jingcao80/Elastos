@@ -2351,12 +2351,11 @@ ECode Activity::GetMenuInflater (
     VALIDATE_NOT_NULL(menuInflater);
 
     // mMenuInflater and Activity have circular reference, modified by xihao
-    //
     InitWindowDecorActionBar();
     if (mActionBar != NULL) {
         AutoPtr<IContext> context;
         mActionBar->GetThemedContext((IContext**)&context);
-        return CMenuInflater::New(context, TO_IINTERFACE(this), menuInflater);
+        return CMenuInflater::New(context, (IActivity*)this, menuInflater);
     }
     else {
         return CMenuInflater::New(this, menuInflater);
@@ -2368,12 +2367,11 @@ ECode Activity::GetMenuInflater (
     //     if (mActionBar != NULL) {
     //         AutoPtr<IContext> context;
     //         mActionBar->GetThemedContext((IContext**)&context);
-    //         FAIL_RETURN(CMenuInflater::New(context, TO_IINTERFACE(this),
-    //                (IMenuInflater**)&mMenuInflater));
+    //         FAIL_RETURN(CMenuInflater::New(context,
+    //                 (IActivity*)this, (IMenuInflater**)&mMenuInflater))
     //     }
     //     else {
-    //         FAIL_RETURN(CMenuInflater::New(this,
-    //                (IMenuInflater**)&mMenuInflater));
+    //         FAIL_RETURN(CMenuInflater::New(this, (IMenuInflater**)&mMenuInflater))
     //     }
     // }
     // *menuInflater = mMenuInflater;
