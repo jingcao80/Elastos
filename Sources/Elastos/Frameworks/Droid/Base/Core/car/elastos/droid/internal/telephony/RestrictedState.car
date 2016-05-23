@@ -28,9 +28,6 @@ module {
         IsCsRestricted(
             [out] Boolean* result);
 
-        Equals(
-            [in] Object o);
-
     }
 
     }//Telephony

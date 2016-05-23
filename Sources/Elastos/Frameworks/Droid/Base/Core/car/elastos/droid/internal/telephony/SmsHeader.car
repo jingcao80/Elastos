@@ -1,25 +1,65 @@
 
-module {
+module
+{
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    [deprecated]
     interface ISmsHeader {
-        interface ISmsHeaderPortAddrs {
-        }
+        /** SMS user data header information element identifiers.
+         * (see TS 23.040 9.2.3.24)
+         */
+        const Int32 ELT_ID_CONCATENATED_8_BIT_REFERENCE       = 0x00;
+        const Int32 ELT_ID_SPECIAL_SMS_MESSAGE_INDICATION     = 0x01;
+        const Int32 ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT  = 0x04;
+        const Int32 ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT = 0x05;
+        const Int32 ELT_ID_SMSC_CONTROL_PARAMS                = 0x06;
+        const Int32 ELT_ID_UDH_SOURCE_INDICATION              = 0x07;
+        const Int32 ELT_ID_CONCATENATED_16_BIT_REFERENCE      = 0x08;
+        const Int32 ELT_ID_WIRELESS_CTRL_MSG_PROTOCOL         = 0x09;
+        const Int32 ELT_ID_TEXT_FORMATTING                    = 0x0A;
+        const Int32 ELT_ID_PREDEFINED_SOUND                   = 0x0B;
+        const Int32 ELT_ID_USER_DEFINED_SOUND                 = 0x0C;
+        const Int32 ELT_ID_PREDEFINED_ANIMATION               = 0x0D;
+        const Int32 ELT_ID_LARGE_ANIMATION                    = 0x0E;
+        const Int32 ELT_ID_SMALL_ANIMATION                    = 0x0F;
+        const Int32 ELT_ID_LARGE_PICTURE                      = 0x10;
+        const Int32 ELT_ID_SMALL_PICTURE                      = 0x11;
+        const Int32 ELT_ID_VARIABLE_PICTURE                   = 0x12;
+        const Int32 ELT_ID_USER_PROMPT_INDICATOR              = 0x13;
+        const Int32 ELT_ID_EXTENDED_OBJECT                    = 0x14;
+        const Int32 ELT_ID_REUSED_EXTENDED_OBJECT             = 0x15;
+        const Int32 ELT_ID_COMPRESSION_CONTROL                = 0x16;
+        const Int32 ELT_ID_OBJECT_DISTR_INDICATOR             = 0x17;
+        const Int32 ELT_ID_STANDARD_WVG_OBJECT                = 0x18;
+        const Int32 ELT_ID_CHARACTER_SIZE_WVG_OBJECT          = 0x19;
+        const Int32 ELT_ID_EXTENDED_OBJECT_DATA_REQUEST_CMD   = 0x1A;
+        const Int32 ELT_ID_RFC_822_EMAIL_HEADER               = 0x20;
+        const Int32 ELT_ID_HYPERLINK_FORMAT_ELEMENT           = 0x21;
+        const Int32 ELT_ID_REPLY_ADDRESS_ELEMENT              = 0x22;
+        const Int32 ELT_ID_ENHANCED_VOICE_MAIL_INFORMATION    = 0x23;
+        const Int32 ELT_ID_NATIONAL_LANGUAGE_SINGLE_SHIFT     = 0x24;
+        const Int32 ELT_ID_NATIONAL_LANGUAGE_LOCKING_SHIFT    = 0x25;
 
-        interface ISmsHeaderConcatRef {
-        }
+        const Int32 PORT_WAP_PUSH = 2948;
+        const Int32 PORT_WAP_WSP  = 9200;
 
-        interface ISmsHeaderSpecialSmsMsg {
-        }
+        /**
+         * Create structured SmsHeader object from serialized byte array representation.
+         * (see TS 23.040 9.2.3.24)
+         * @param data is user data header bytes
+         * @return SmsHeader object
+         */
+        FromByteArray(
+            [in] ArrayOf<Byte>* data,
+            [out] ISmsHeader** result);
 
-        interface ISmsHeaderMiscElt {
-        }
-
-        ToByteArray(SmsHeader smsHeader);
+        ToByteArray(
+            [in] ISmsHeader* smsHeader,
+            [out, callee] ArrayOf<Byte>* result);
 
     }
 

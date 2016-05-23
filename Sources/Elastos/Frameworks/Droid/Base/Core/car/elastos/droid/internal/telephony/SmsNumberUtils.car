@@ -7,7 +7,10 @@ module {
     namespace Telephony {
 
     interface ISmsNumberUtils {
-        String FilterDestAddr(PhoneBase phoneBase, String destAddr);
+        FilterDestAddr(
+            [in] IPhoneBase* phoneBase,
+            [in] String destAddr,
+            [out] String* result);
 
     }
 

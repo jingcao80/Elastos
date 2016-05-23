@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    // interface Elastos.Droid.Internal.Telephony.Cat.IResultCode;
 
     namespace Elastos {
     namespace Droid {
@@ -7,15 +9,20 @@ module {
     namespace Telephony {
     namespace Cat {
 
+    [deprecated]
     interface ICatResponseMessage {
-        SetResultCode(
-            [in] ResultCode resCode);
+        // SetResultCode(
+        //     [in] IResultCode* resCode);
 
         SetMenuSelection(
             [in] Int32 selection);
 
         SetInput(
             [in] String input);
+
+        SetEventDownload(
+            [in] Int32 event,
+            [in] ArrayOf<Byte>* addedInfo);
 
         SetYesNo(
             [in] Boolean yesNo);
@@ -25,10 +32,6 @@ module {
 
         SetAdditionalInfo(
             [in] Int32 info);
-
-        GetCmdDetails(
-            [out] CommandDetails* result);
-
     }
 
     }//Cat

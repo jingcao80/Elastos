@@ -6,38 +6,30 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface ISmsAddress
+     */
+    interface ISyntheticAddress {
+    }
+
+    /**
+     * @Involve
+     * interface ISmsMessageBase
+     */
     interface ISyntheticSmsMessage {
+    }
 
-        GetMessageClass(
-            [out] MessageClass* result);
+    [deprecated]
+    interface ISyntheticSmsMessageHelper {
 
-        GetProtocolIdentifier(
-            [out] Int32* result);
-
-        IsReplace(
+        IsSyntheticPdu(
+            [in] ArrayOf<Byte>* pdu,
             [out] Boolean* result);
 
-        IsCphsMwiMessage(
-            [out] Boolean* result);
-
-        IsMWIClearMessage(
-            [out] Boolean* result);
-
-        IsMWISetMessage(
-            [out] Boolean* result);
-
-        IsMwiDontStore(
-            [out] Boolean* result);
-
-        GetStatus(
-            [out] Int32* result);
-
-        IsStatusReportMessage(
-            [out] Boolean* result);
-
-        IsReplyPathPresent(
-            [out] Boolean* result);
-
+        CreateFromPdu(
+            [in] ArrayOf<Byte>* pdu,
+            [out] ISyntheticSmsMessage** result);
     }
 
     }//Telephony

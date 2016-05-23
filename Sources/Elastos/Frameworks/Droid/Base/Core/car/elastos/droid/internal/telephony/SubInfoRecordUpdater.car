@@ -6,13 +6,47 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface ISubInfoRecordUpdater {
-        OnReceive(Context context, Intent intent);
+        /**
+         *  int[] sInsertSimState maintains all slots' SIM inserted status currently,
+         *  it may contain 4 kinds of values:
+         *    SIM_NOT_INSERT : no SIM inserted in slot i now
+         *    SIM_CHANGED    : a valid SIM insert in slot i and is different SIM from last time
+         *                     it will later become SIM_NEW or SIM_REPOSITION during update procedure
+         *    SIM_NOT_CHANGE : a valid SIM insert in slot i and is the same SIM as last time
+         *    SIM_NEW        : a valid SIM insert in slot i and is a new SIM
+         *    SIM_REPOSITION : a valid SIM insert in slot i and is inserted in different slot last time
+         *    positive integer #: index to distinguish SIM cards with the same IccId
+         */
+        const Int32 SIM_NOT_CHANGE = 0;
+        const Int32 SIM_CHANGED    = -1;
+        const Int32 SIM_NEW        = -2;
+        const Int32 SIM_REPOSITION = -3;
+        const Int32 SIM_NOT_INSERT = -99;
 
-        SetDisplayNameForNewSub(String newSubName, Int32 subId, Int32 newNameSource);
+        const Int32 STATUS_NO_SIM_INSERTED = 0x00;
+        const Int32 STATUS_SIM1_INSERTED = 0x01;
+        const Int32 STATUS_SIM2_INSERTED = 0x02;
+        const Int32 STATUS_SIM3_INSERTED = 0x04;
+        const Int32 STATUS_SIM4_INSERTED = 0x08;
 
-        HandleMessage(Message msg);
+        UpdateSubIdForNV(
+            [in] Int32 slotId);
 
+        UpdateSimInfoByIccId();
+
+        Dispose();
+    }
+
+    interface ISubInfoRecordUpdaterHelper {
+        SetDisplayNameForNewSub(
+            [in] String newSubName,
+            [in] Int32 subId,
+            [in] Int32 newNameSource);
     }
 
     }//Telephony

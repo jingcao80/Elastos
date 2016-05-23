@@ -6,6 +6,10 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IIPhoneSubInfo
+     */
     interface IPhoneSubInfoController {
         GetDeviceId(
             [out] String* result);
@@ -83,7 +87,24 @@ module {
         GetIsimDomain(
             [out] String* result);
 
-        GetIsimImpu();
+        GetIsimImpu(
+            [out, callee] ArrayOf<String>* result);
+
+        GetIsimIst(
+            [out] String* result);
+
+        GetIsimPcscf(
+            [out, callee] ArrayOf<String>* result);
+
+        GetIsimChallengeResponse(
+            [in] String nonce,
+            [out] String* result);
+
+        GetIccSimChallengeResponse(
+            [in] Int64 subId,
+            [in] Int32 appType,
+            [in] String data,
+            [out] String* result);
 
         GetGroupIdLevel1(
             [out] String* result);

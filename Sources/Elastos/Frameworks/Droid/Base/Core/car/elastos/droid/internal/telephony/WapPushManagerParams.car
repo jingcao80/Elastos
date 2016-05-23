@@ -7,6 +7,51 @@ module {
     namespace Telephony {
 
     interface IWapPushManagerParams {
+        /**
+         * Application type activity
+         */
+        const Int32 APP_TYPE_ACTIVITY = 0;
+
+        /**
+         * Application type service
+         */
+        const Int32 APP_TYPE_SERVICE = 1;
+
+        /**
+         * Process Message return value
+         * Message is handled
+         */
+        const Int32 MESSAGE_HANDLED = 0x1;
+
+        /**
+         * Process Message return value
+         * Application ID or content type was not found in the application ID table
+         */
+        const Int32 APP_QUERY_FAILED = 0x2;
+
+        /**
+         * Process Message return value
+         * Receiver application signature check failed
+         */
+        const Int32 SIGNATURE_NO_MATCH = 0x4;
+
+        /**
+         * Process Message return value
+         * Receiver application was not found
+         */
+        const Int32 INVALID_RECEIVER_NAME = 0x8;
+
+        /**
+         * Process Message return value
+         * Unknown exception
+         */
+        const Int32 EXCEPTION_CAUGHT = 0x10;
+
+        /**
+         * Process Message return value
+         * Need further processing after WapPushManager message processing
+         */
+        const Int32 FURTHER_PROCESSING = 0x8000;
     }
 
     }//Telephony

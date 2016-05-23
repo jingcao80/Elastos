@@ -6,9 +6,11 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IRunnable
+     */
     interface ISmsBroadcastUndelivered {
-        Run();
-
     }
 
     }//Telephony

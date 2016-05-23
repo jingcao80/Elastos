@@ -1,34 +1,36 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IStateMachine
+     */
     interface IWakeLockStateMachine {
+        /** New message to process. */
+        const Int32 EVENT_NEW_SMS_MESSAGE = 1;
+
         UpdatePhoneObject(
-            [in] PhoneBase phone);
+            [in] IPhoneBase* phone);
 
         Dispose();
 
         DispatchSmsMessage(
-            [in] Object obj);
+            [in] IInterface* obj);
 
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        Enter();
-
-        Exit();
-
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        ProcessMessage(
-            [in] Message msg,
+        /**
+         * Implemented by subclass to handle messages in {@link IdleState}.
+         * @param message the message to process
+         * @return true to transition to {@link WaitingState}; false to stay in {@link IdleState}
+         */
+        HandleSmsMessage(
+            [in] IMessage* message,
             [out] Boolean* result);
 
     }

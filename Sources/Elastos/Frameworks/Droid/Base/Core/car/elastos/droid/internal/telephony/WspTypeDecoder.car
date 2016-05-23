@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    using interface Elastos.Utility.IHashMap;
 
     namespace Elastos {
     namespace Droid {
@@ -7,6 +9,15 @@ module {
     namespace Telephony {
 
     interface IWspTypeDecoder {
+        const Int32 PDU_TYPE_PUSH = 0x06;
+        const Int32 PDU_TYPE_CONFIRMED_PUSH = 0x07;
+
+        const Int32 PARAMETER_ID_X_WAP_APPLICATION_ID = 0x2f;
+
+        const String CONTENT_TYPE_B_PUSH_CO = "application/vnd.wap.coc";
+        const String CONTENT_TYPE_B_MMS = "application/vnd.wap.mms-message";
+        const String CONTENT_TYPE_B_PUSH_SYNCML_NOTI = "application/vnd.syncml.notification";
+
         DecodeTextString(
             [in] Int32 startIndex,
             [out] Boolean* result);
@@ -60,7 +71,7 @@ module {
             [out] Boolean* result);
 
         SeekXWapApplicationId(
-            [in] Int32 startIndex, 
+            [in] Int32 startIndex,
             [in] Int32 endIndex,
             [out] Boolean* result);
 
@@ -81,7 +92,8 @@ module {
         GetValueString(
             [out] String* result);
 
-        GetContentParameters();
+        GetContentParameters(
+            [out] IHashMap** result);
 
     }
 

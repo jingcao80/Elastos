@@ -1,12 +1,279 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Internal.Telephony.IServiceStateTracker;
+    enum Elastos.Droid.Internal.Telephony.PhoneConstantsDataState;
+    interface Elastos.Droid.Internal.Telephony.ISubscription;
+    interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
+    interface Elastos.Droid.Telephony.IVoLteServiceState;
+
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IPhone
+     * interface IHandler
+     */
+    [deprecated]
     interface IPhoneBase {
+        /**
+         * Indicates whether Out Of Service is considered as data call disconnect.
+         */
+        const String PROPERTY_OOS_IS_DISCONNECT = "persist.telephony.oosisdc";
+
+        // Key used to read and write the saved network selection numeric value
+        const String NETWORK_SELECTION_KEY = "network_selection_key";
+        // Key used to read and write the saved network selection operator name
+        const String NETWORK_SELECTION_NAME_KEY = "network_selection_name_key";
+
+        // Key used to read/write "disable data connection on boot" pref (used for testing)
+        const String DATA_DISABLED_ON_BOOT_KEY = "disabled_on_boot_key";
+
+        // Key used to read/write current CLIR setting
+        const String CLIR_KEY = "clir_key";
+
+        // Key used for storing voice mail count
+        const String VM_COUNT = "vm_count_key";
+        // Key used to read/write the ID for storing the voice mail
+        const String VM_ID = "vm_id_key";
+
+        // Key used to read/write "disable DNS server check" pref (used for testing)
+        const String DNS_SERVER_CHECK_DISABLED_KEY = "dns_server_check_disabled_key";
+
+        //Telephony System Property used to indicate a multimode target
+        const String PROPERTY_MULTIMODE_CDMA = "ro.config.multimode_cdma";
+
+        /**
+         * Return the ActionDetached string. When this action is received by components
+         * they are to simulate detaching from the network.
+         *
+         * @return com.android.internal.telephony.{mName}.action_detached
+         *          {mName} is GSM, CDMA ...
+         */
+        GetActionDetached(
+            [out] String* result);
+
+        /**
+         * Return the ActionAttached string. When this action is received by components
+         * they are to simulate attaching to the network.
+         *
+         * @return com.android.internal.telephony.{mName}.action_detached
+         *          {mName} is GSM, CDMA ...
+         */
+        GetActionAttached(
+            [out] String* result);
+
+        /**
+         * Set a system property, unless we're in unit test mode
+         */
+        // CAF_MSIM TODO this need to be replated with TelephonyManager API ?
+        SetSystemProperty(
+            [in] String property,
+            [in] String value);
+
+        /**
+         * Set a system property, unless we're in unit test mode
+         */
+        // CAF_MSIM TODO this need to be replated with TelephonyManager API ?
+        GetSystemProperty(
+            [in] String property,
+            [in] String defValue,
+            [out] String* result);
+
+        /**
+         * Subclasses of Phone probably want to replace this with a
+         * version scoped to their packages
+         */
+        NotifyHandoverStateChanged(
+            [in] IConnection* cn);
+
+        MigrateFrom(
+            [in] IPhoneBase* from);
+
+        // Migrate(
+        //     [in] IRegistrantList* to,
+        //     [in] IRegistrantList* from);
+
+        RegisterForSimRecordsLoaded(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForSimRecordsLoaded(
+            [in] IHandler* h);
+
+        /**
+         * Method to restore the previously saved operator id, or reset to
+         * automatic selection, all depending upon the value in the shared
+         * preferences.
+         */
+        RestoreSavedNetworkSelection(
+            [in] IMessage* response);
+
+        /**
+         * Retrieves the IccFileHandler of the Phone instance
+         */
+        // GetIccFileHandler(
+        //     [out] IIccFileHandler** result);
+
+        /**
+         * Retrieves the IccRecords of the Phone instance
+         */
+        // GetIccRecords(
+        //     [out] IIccRecords** result);
+
+        /*
+         * Retrieves the Handler of the Phone instance
+         */
+        GetHandler(
+            [out] IHandler** result);
+
+        /**
+        * Retrieves the ServiceStateTracker of the phone instance.
+        */
+        GetServiceStateTracker(
+            [out] IServiceStateTracker** result);
+
+        /**
+        * Get call tracker
+        */
+        GetCallTracker(
+            [out] ICallTracker** result);
+
+        // GetCurrentUiccAppType(
+        //     [out] IAppType** result);
+
+        NotifyMessageWaitingIndicator();
+
+        NotifyDataConnection(
+            [in] String reason,
+            [in] String apnType,
+            [in] PhoneConstantsDataState* state);
+
+        NotifyDataConnection(
+            [in] String reason,
+            [in] String apnType);
+
+        NotifyDataConnection(
+            [in] String reason);
+
+        NotifyOtaspChanged(
+            [in] Int32 otaspMode);
+
+        NotifySignalStrength();
+
+        NotifyCellInfo(
+            [in] IList* cellInfo);
+
+        NotifyDataConnectionRealTimeInfo(
+            [in] IDataConnectionRealTimeInfo* dcRtInfo);
+
+        NotifyVoLteServiceStateChanged(
+            [in] IVoLteServiceState* lteState);
+
+        /**
+         * @return true if a mobile originating emergency call is active
+         */
+        IsInEmergencyCall(
+            [out] Boolean* result);
+
+        /**
+         * @return true if we are in the emergency call back mode. This is a period where
+         * the phone should be using as little power as possible and be ready to receive an
+         * incoming call from the emergency operator.
+         */
+        IsInEcm(
+            [out] Boolean* result);
+
+        IsImsVtCallPresent(
+            [out] Boolean* result);
+
+        /** sets the voice mail count of the phone and notifies listeners. */
+        SetVoiceMessageCount(
+            [in] Int32 countWaiting);
+
+        /**
+         * Notify registrants of a new ringing Connection.
+         * Subclasses of Phone probably want to replace this with a
+         * version scoped to their packages
+         */
+        NotifyNewRingingConnectionP(
+            [in] IConnection* cn);
+
+        /**
+         * Notify registrants if phone is video capable.
+         */
+        NotifyForVideoCapabilityChanged(
+            [in] Boolean isVideoCallCapable);
+
+        IsManualNetSelAllowed(
+            [in] Boolean isVideoCallCapable);
+
+        // Called by SimRecords which is constructed with a PhoneBase instead of a GSMPhone.
+        NotifyCallForwardingIndicator();
+
+        NotifyDataConnectionFailed(
+            [in] String reason,
+            [in] String apnType);
+
+        NotifyPreciseDataConnectionFailed(
+            [in] String reason,
+            [in] String apnType,
+            [in] String apn,
+            [in] String failCause);
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
+
+        /**
+         * Returns the subscription id.
+         */
+        GetSubId(
+            [out] Int64* result);
+
+        /**
+         * Returns the phone id.
+         */
+        GetPhoneId(
+            [out] Int32* result);
+
+        //Gets Subscription information in the Phone Object
+        GetSubscriptionInfo(
+            [out] ISubscription** result);
+
+        GetCallBarringOption(
+            [in] String facility,
+            [in] String password,
+            [in] IMessage* onComplete);
+
+        SetCallBarringOption(
+            [in] String facility,
+            [in] Boolean lockState,
+            [in] String password,
+            [in] IMessage* onComplete);
+
+        RequestChangeCbPsw(
+            [in] String facility,
+            [in] String oldPwd,
+            [in] String newPwd,
+            [in] IMessage* result);
+    }
+
+    interface IPhoneBaseHelper {
+        GetVideoState(
+            [in] ICall* call,
+            [out] Int32* result);
     }
 
     }//Telephony

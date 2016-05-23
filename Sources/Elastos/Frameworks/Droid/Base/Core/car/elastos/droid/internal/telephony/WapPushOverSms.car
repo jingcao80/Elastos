@@ -1,17 +1,35 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IBroadcastReceiver;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IServiceConnection
+     */
+    [deprecated]
     interface IWapPushOverSms {
-        OnServiceConnected(ComponentName name, IBinder service);
-
-        OnServiceDisconnected(ComponentName name);
-
-        Dispose();
+        /**
+         * Dispatches inbound messages that are in the WAP PDU format. See
+         * wap-230-wsp-20010705-a section 8 for details on the WAP PDU format.
+         *
+         * @param pdu The WAP PDU, made up of one or more SMS PDUs
+         * @param address The originating address
+         * @return a result code from {@link android.provider.Telephony.Sms.Intents}, or
+         *         {@link Activity#RESULT_OK} if the message has been broadcast
+         *         to applications
+         */
+        DispatchWapPdu(
+            [in] ArrayOf<Byte>* pdu,
+            [in] IBroadcastReceiver* receiver,
+            [in] IInboundSmsHandler* handler,
+            [in] String address,
+            [out] Int32* result);
     }
 
     }//Telephony

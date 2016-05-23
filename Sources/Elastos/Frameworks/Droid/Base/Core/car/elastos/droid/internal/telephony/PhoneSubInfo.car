@@ -51,20 +51,22 @@ module {
         GetIsimDomain(
             [out] String* result);
 
-        GetIsimImpu();
+        GetIsimImpu(
+            [out, callee] ArrayOf<String>* result);
 
         GetIsimIst(
             [out] String* result);
 
-        GetIsimPcscf();
+        GetIsimPcscf(
+            [out, callee] ArrayOf<String>* result);
 
         GetIsimChallengeResponse(
             [in] String nonce,
             [out] String* result);
 
         GetIccSimChallengeResponse(
-            [in] Int64 subId, 
-            [in] Int32 appType, 
+            [in] Int64 subId,
+            [in] Int32 appType,
             [in] String data,
             [out] String* result);
 

@@ -1,5 +1,10 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Internal.Telephony.Cat.IMenu;
+    interface Elastos.Droid.Internal.Telephony.Cat.IInput;
+    interface Elastos.Droid.Internal.Telephony.Cat.ITextMessage;
+    interface Elastos.Droid.Internal.Telephony.Cat.IToneSettings;
 
     namespace Elastos {
     namespace Droid {
@@ -7,56 +12,62 @@ module {
     namespace Telephony {
     namespace Cat {
 
+    /*
+     * Container for Launch Browser command settings.
+     */
+    interface IBrowserSettings {
+    }
+
+    /*
+     * Container for Call Setup command settings.
+     */
+    interface ICallSettings {
+    }
+
+    interface ISetupEventListSettings {
+    }
+
+    interface ICatCmdMessageSetupEventListConstants {
+        // Event values in SETUP_EVENT_LIST Proactive Command as per ETSI 102.223
+        const Int32 USER_ACTIVITY_EVENT          = 0x04;
+        const Int32 IDLE_SCREEN_AVAILABLE_EVENT  = 0x05;
+        const Int32 LANGUAGE_SELECTION_EVENT     = 0x07;
+        const Int32 BROWSER_TERMINATION_EVENT    = 0x08;
+        const Int32 BROWSING_STATUS_EVENT        = 0x0F;
+        const Int32 HCI_CONNECTIVITY_EVENT       = 0x13;
+    }
+
+    interface ICatCmdMessageBrowserTerminationCauses {
+        const Int32 USER_TERMINATION             = 0x00;
+        const Int32 ERROR_TERMINATION            = 0x01;
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface ICatCmdMessage {
-        interface ICatCmdMessageBrowserSettings {
-        }
-
-        interface ICatCmdMessageCallSettings {
-        }
-
-        interface ICatCmdMessageSetupEventListSettings {
-        }
-
-        interface ICatCmdMessageSetupEventListConstants {
-        }
-
-        interface ICatCmdMessageBrowserTerminationCauses {
-        }
-
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] CatCmdMessage* result);
-
-        NewArray(
-            [in] Int32 size);
-
-        DescribeContents(
-            [out] Int32* result);
 
         GetCmdType(
             [out] CommandType* result);
 
         GetMenu(
-            [out] Menu* result);
+            [out] IMenu** result);
 
         GeInput(
-            [out] Input* result);
+            [out] IInput** result);
 
         GeTextMessage(
-            [out] TextMessage* result);
+            [out] ITextMessage** result);
 
         GetBrowserSettings(
-            [out] BrowserSettings* result);
+            [out] IBrowserSettings** result);
 
         GetToneSettings(
-            [out] ToneSettings* result);
+            [out] IToneSettings** result);
 
         GetCallSettings(
-            [out] CallSettings* result);
+            [out] ICallSettings** result);
 
         HasIconLoadFailed(
             [out] Boolean* result);
@@ -65,7 +76,7 @@ module {
             [out] Boolean* result);
 
         GetSetEventList(
-            [out] SetupEventListSettings* result);
+            [out] ISetupEventListSettings** result);
 
     }
 
