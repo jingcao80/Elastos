@@ -100,6 +100,8 @@ void GridLayout::GridLayoutLayoutParams::Init(
 
 
 GridLayout::GridLayoutLayoutParams::GridLayoutLayoutParams()
+    : mRowSpec(GridLayout::Spec::UNDEFINED)
+    , mColumnSpec(GridLayout::Spec::UNDEFINED)
 {}
 
 ECode GridLayout::GridLayoutLayoutParams::SetGravity(
@@ -858,12 +860,12 @@ void GridLayout::OnMeasure(
     Int32 widthSpecSansPadding =  Adjust(widthSpec, -hPadding);
     Int32 heightSpecSansPadding = Adjust(heightSpec, -vPadding);
 
-    MeasureChildrenWithMargins(widthSpec, heightSpec, TRUE);
+    MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, TRUE);
 
     Int32 widthSansPadding = 0, heightSansPadding = 0;
 
     if (mOrientation == ILinearLayout::HORIZONTAL) {
-        widthSansPadding = mHorizontalAxis->GetMeasure(widthSpec);
+        widthSansPadding = mHorizontalAxis->GetMeasure(widthSpecSansPadding);
         MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, FALSE);
         heightSansPadding = mVerticalAxis->GetMeasure(heightSpecSansPadding);
     } else {

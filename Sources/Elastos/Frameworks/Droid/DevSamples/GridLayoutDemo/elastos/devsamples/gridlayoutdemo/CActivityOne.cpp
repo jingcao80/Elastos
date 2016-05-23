@@ -43,8 +43,8 @@ ECode CActivityOne::OnCreate(
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::main);
 
-    AutoPtr<IView> layout = FindViewById(R::id::layout);
-    mLayout = IGridLayout::Probe(layout);
+    // AutoPtr<IView> layout = FindViewById(R::id::layout);
+    // mLayout = IGridLayout::Probe(layout);
 
     return NOERROR;
 }
