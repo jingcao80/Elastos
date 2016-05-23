@@ -55,6 +55,11 @@ Int32 NetworkInfo::InternalInit()
     return 0;
 }
 
+ECode NetworkInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkInfo::constructor(
     /* [in] */ Int32 type,
     /* [in] */ Int32 subtype,

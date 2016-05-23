@@ -23,6 +23,8 @@ class NetworkState
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ INetworkInfo* networkInfo,
         /* [in] */ ILinkProperties* linkProperties,

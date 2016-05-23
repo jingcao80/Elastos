@@ -16,6 +16,11 @@ namespace Net {
 
 CAR_INTERFACE_IMPL_2(NetworkKey, Object, IParcelable, INetworkKey)
 
+ECode NetworkKey::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkKey::constructor(
     /* [in] */ IWifiKey* wifiKey)
 {

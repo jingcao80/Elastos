@@ -20,6 +20,11 @@ RssiCurve::RssiCurve()
     , mBucketWidth(0)
 {}
 
+ECode RssiCurve::constructor()
+{
+    return NOERROR;
+}
+
 ECode RssiCurve::constructor(
     /* [in] */ Int32 start,
     /* [in] */ Int32 bucketWidth,

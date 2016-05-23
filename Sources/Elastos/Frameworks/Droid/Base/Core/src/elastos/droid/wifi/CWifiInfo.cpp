@@ -756,10 +756,7 @@ ECode CWifiInfo::WriteToParcel(
     dest->WriteDouble(mRxSuccessRate);
     dest->WriteInt32(mBadRssiCount);
     dest->WriteInt32(mLowRssiCount);
-    // mSupplicantState->WriteToParcel(dest, flags);
-    AutoPtr<ISupplicantState> iSs;
-    CSupplicantState::New(mSupplicantState, (ISupplicantState**)&iSs);
-    IParcelable::Probe(iSs)->WriteToParcel(dest);
+    dest->WriteInt32(mSupplicantState);
 
     return NOERROR;
 }
@@ -770,6 +767,7 @@ ECode CWifiInfo::ReadFromParcel(
     source->ReadInt32(&mNetworkId);
     source->ReadInt32(&mRssi);
     source->ReadInt32(&mLinkSpeed);
+    source->ReadInt32(&mFrequency);
     Byte b;
     source->ReadByte(&b);
     if (b == (byte)1) {
@@ -787,9 +785,12 @@ ECode CWifiInfo::ReadFromParcel(
         CWifiSsid::New((IWifiSsid**)&mWifiSsid);
         IParcelable::Probe(mWifiSsid.Get())->ReadFromParcel(source);
     }
+
     source->ReadString(&mBSSID);
     source->ReadString(&mMacAddress);
-    source->ReadBoolean(&mMeteredHint);
+    Int32 hint;
+    source->ReadInt32(&hint);
+    mMeteredHint = hint? TRUE : FALSE;
     source->ReadInt32(&mScore);
     source->ReadDouble(&mTxSuccessRate);
     source->ReadDouble(&mTxRetriesRate);

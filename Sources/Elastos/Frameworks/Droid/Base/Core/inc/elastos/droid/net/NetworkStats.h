@@ -43,6 +43,8 @@ class NetworkStats
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int64 elapsedRealtime,
         /* [in] */ Int32 initialSize);

@@ -13,6 +13,11 @@ namespace Net {
 
 CAR_INTERFACE_IMPL_2(NetworkRequest, Object, IParcelable, INetworkRequest)
 
+ECode NetworkRequest::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkRequest::constructor(
     /* [in] */ INetworkCapabilities* nc,
     /* [in] */ Int32 legacyType,

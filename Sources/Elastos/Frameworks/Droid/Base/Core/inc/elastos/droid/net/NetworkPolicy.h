@@ -29,6 +29,7 @@ public:
 
     NetworkPolicy();
 
+    CARAPI constructor();
     // @Deprecated
     CARAPI constructor(
         /* [in] */ INetworkTemplate* networkTemplate,

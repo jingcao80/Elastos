@@ -30,6 +30,11 @@ ECode IpPrefix::CheckAndMaskAddressAndPrefixLength()
     return NetworkUtils::MaskRawAddress(mAddress, mPrefixLength);
 }
 
+ECode IpPrefix::constructor()
+{
+    return NOERROR;
+}
+
 ECode IpPrefix::constructor(
     /* [in] */ ArrayOf<Byte>* address,
     /* [in] */ Int32 prefixLength)

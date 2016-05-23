@@ -205,7 +205,6 @@ module
 
     [local]
     class CDnsPinger {
-
         constructor(
             [in] IContext* ctx,
             [in] String tagstr,
@@ -266,6 +265,8 @@ module
 
     [deprecated]
     class CIpPrefix {
+        constructor();
+
         constructor(
             [in] ArrayOf<Byte>* address1,
             [in] Int32 prefixLength);
@@ -282,6 +283,8 @@ module
     }
 
     class CLinkAddress {
+        constructor();
+
         constructor(
             [in] IInetAddress* address,
             [in] Int32 prefixLength,
@@ -400,6 +403,8 @@ module
 
     [local]
     class CNetwork {
+        constructor();
+
         constructor(
             [in] Int32 netId);
 
@@ -421,6 +426,8 @@ module
     }
 
     class CNetworkConfig {
+        constructor();
+
         constructor(
             [in] String init);
 
@@ -429,6 +436,7 @@ module
 
     [local]
     class CNetworkFactory {
+
         constructor(
             [in] ILooper* looper,
             [in] IContext* ctx,
@@ -455,6 +463,8 @@ module
     }
 
     class CNetworkInfo {
+        constructor();
+
         constructor(
             [in] Int32 type,
             [in] Int32 subtype,
@@ -491,6 +501,8 @@ module
     }
 
     class CNetworkPolicy {
+        constructor();
+
         constructor(
             [in] INetworkTemplate* networkTemplate,
             [in] Int32 cycleDay,
@@ -527,6 +539,8 @@ module
     }
 
     class CNetworkQuotaInfo {
+        constructor();
+
         constructor(
             [in] Int64 estimatedBytes,
             [in] Int64 softLimitBytes,
@@ -537,6 +551,8 @@ module
     }
 
     class CNetworkRequest {
+        constructor();
+
         constructor(
             [in] INetworkCapabilities* nc,
             [in] Int32 legacyType,
@@ -577,6 +593,8 @@ module
     }
 
     class CNetworkState {
+        constructor();
+
         constructor(
             [in] INetworkInfo* networkInfo,
             [in] ILinkProperties* linkProperties,
@@ -594,6 +612,8 @@ module
     }
 
     class CNetworkStats {
+        constructor();
+
         constructor(
             [in] Int64 elapsedRealtime,
             [in] Int32 initialSize);
@@ -632,6 +652,8 @@ module
 
     [local]
     class CNetworkStatsHistory {
+        constructor();
+
         constructor(
             [in] Int64 bucketDuration);
 
@@ -674,6 +696,8 @@ module
     }
 
     class CNetworkTemplate {
+        constructor();
+
         constructor(
             [in] Int32 matchRule,
             [in] String subscriberId,
@@ -749,6 +773,8 @@ module
     }
 
     class CRouteInfo {
+        constructor();
+
         constructor(
             [in] IIpPrefix* destination,
             [in] IInetAddress* gateway,
@@ -796,6 +822,8 @@ module
 
     [deprecated]
     class CRssiCurve {
+        constructor();
+
         constructor(
             [in] Int32 start,
             [in] Int32 bucketWidth,
@@ -853,6 +881,8 @@ module
     }
 
     class CScoredNetwork {
+        constructor();
+
         constructor(
             [in] INetworkKey* networkKey,
             [in] IRssiCurve* rssiCurve);
@@ -900,6 +930,8 @@ module
     }
 
     class CUidRange {
+        constructor();
+
         constructor(
             [in] Int32 startUid,
             [in] Int32 stopUid);
@@ -974,6 +1006,8 @@ module
     }
 
     class CWifiKey {
+        constructor();
+
         constructor(
             [in] String ssid,
             [in] String bssid);

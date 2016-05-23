@@ -27,6 +27,8 @@ public:
     CAR_INTERFACE_DECL()
 
     NetworkInfo();
+
+    CARAPI constructor();
     /**
      * @hide
      */

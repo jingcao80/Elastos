@@ -23,6 +23,8 @@ class UidRange
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 startUid,
         /* [in] */ Int32 stopUid);

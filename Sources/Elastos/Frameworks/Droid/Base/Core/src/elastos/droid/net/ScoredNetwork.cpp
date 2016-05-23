@@ -18,6 +18,11 @@ CAR_INTERFACE_IMPL_2(ScoredNetwork, Object, IParcelable, IScoredNetwork)
 ScoredNetwork::ScoredNetwork()
 {}
 
+ECode ScoredNetwork::constructor()
+{
+    return NOERROR;
+}
+
 ECode ScoredNetwork::constructor(
     /* [in] */ INetworkKey* networkKey,
     /* [in] */ IRssiCurve* rssiCurve)

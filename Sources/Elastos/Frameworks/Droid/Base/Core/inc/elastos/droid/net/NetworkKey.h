@@ -32,6 +32,7 @@ public:
 
     NetworkKey();
 
+    CARAPI constructor();
     /**
      * Construct a new {@link NetworkKey} for a Wi-Fi network.
      * @param wifiKey the {@link WifiKey} identifying this Wi-Fi network.

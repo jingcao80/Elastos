@@ -26,6 +26,11 @@ NetworkPolicy::NetworkPolicy()
     , mInferred(FALSE)
 {}
 
+ECode NetworkPolicy::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkPolicy::constructor(
     /* [in] */ INetworkTemplate* networkTemplate,
     /* [in] */ Int32 cycleDay,

@@ -38,6 +38,11 @@ CAR_INTERFACE_IMPL_2(NetworkStats, Object, IParcelable, INetworkStats)
 
 const String NetworkStats::IFACE_ALL(NULL);
 
+ECode NetworkStats::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkStats::constructor(
     /* [in] */ Int64 elapsedRealtime,
     /* [in] */ Int32 initialSize)

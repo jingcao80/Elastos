@@ -14,6 +14,11 @@ namespace Net {
 
 CAR_INTERFACE_IMPL_2(UidRange, Object, IParcelable, IUidRange)
 
+ECode UidRange::constructor()
+{
+    return NOERROR;
+}
+
 ECode UidRange::constructor(
     /* [in] */ Int32 startUid,
     /* [in] */ Int32 stopUid)

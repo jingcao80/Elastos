@@ -1720,8 +1720,10 @@ ECode BaseBundle::ReadArrayMapInternal(
     String key;
     AutoPtr<ICharSequence> keyObj;
     AutoPtr<IInterface> valueObj;
+    //Logger::E(TAG, "line:%d, func:%s, size:%d\n", __LINE__, __func__, size);
     while (size > 0) {
         source->ReadString(&key);
+        //Logger::E(TAG, "line:%d, func:%s, key:%s\n", __LINE__, __func__, key.string());
         keyObj = CoreUtils::Convert(key);
         valueObj = ReadValue(source);
 

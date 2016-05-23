@@ -42,6 +42,11 @@ Network::Network()
     mLock = IInterface::Probe(obj);
 }
 
+ECode Network::constructor()
+{
+    return NOERROR;
+}
+
 ECode Network::constructor(
     /* [in] */ Int32 netId)
 {

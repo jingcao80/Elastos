@@ -48,6 +48,7 @@ public:
 
     RssiCurve();
 
+    CARAPI constructor();
     /**
      * Construct a new {@link RssiCurve}.
      *

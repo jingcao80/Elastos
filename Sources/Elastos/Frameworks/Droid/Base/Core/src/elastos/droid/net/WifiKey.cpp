@@ -32,6 +32,11 @@ AutoPtr<IPattern> WifiKey::InitPattern(
     return rev;
 }
 
+ECode WifiKey::constructor()
+{
+    return NOERROR;
+}
+
 ECode WifiKey::constructor(
     /* [in] */ const String& ssid,
     /* [in] */ const String& bssid)

@@ -321,6 +321,11 @@ const Int32 NetworkStatsHistory::VERSION_INIT = 1;
 const Int32 NetworkStatsHistory::VERSION_ADD_PACKETS = 2;
 const Int32 NetworkStatsHistory::VERSION_ADD_ACTIVE = 3;
 
+ECode NetworkStatsHistory::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkStatsHistory::constructor(
     /* [in] */ Int64 bucketDuration)
 {

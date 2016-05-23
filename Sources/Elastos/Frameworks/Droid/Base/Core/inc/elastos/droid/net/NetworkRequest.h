@@ -22,6 +22,7 @@ class NetworkRequest
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
     /**
      * @hide
      */

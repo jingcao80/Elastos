@@ -96,6 +96,7 @@ public:
 
     Network();
 
+    CARAPI constructor();
     /**
      * @hide
      */

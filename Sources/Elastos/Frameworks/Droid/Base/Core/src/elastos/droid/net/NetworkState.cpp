@@ -10,6 +10,11 @@ namespace Net {
 
 CAR_INTERFACE_IMPL_2(NetworkState, Object, IParcelable, INetworkState)
 
+ECode NetworkState::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkState::constructor(
     /* [in] */ INetworkInfo* networkInfo,
     /* [in] */ ILinkProperties* linkProperties,

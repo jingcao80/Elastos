@@ -88,6 +88,8 @@ public:
 
     NetworkTemplate();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 matchRule,
         /* [in] */ const String& subscriberId,

@@ -17,6 +17,8 @@ using Elastos::Droid::Text::TextUtils;
 
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Net::IInetAddressHelper;
+using Elastos::Net::CInetAddressHelper;
 using Elastos::Net::IInet4Address;
 using Elastos::Net::IInet6Address;
 using Elastos::Net::IInetAddress;
@@ -1003,24 +1005,56 @@ ECode LinkProperties::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
     parcel->ReadString(&mIfaceName);
-    AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mLinkAddresses = IArrayList::Probe(obj);
-    obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mDnses = IArrayList::Probe(obj);
-    obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mRoutes = IArrayList::Probe(obj);
-    String mDomains;
-    obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mHttpProxy = IProxyInfo::Probe(obj);
+
+    Int32 addressCount;
+    parcel->ReadInt32(&addressCount);
+    for (Int32 i = 0; i < addressCount; ++i) {
+        AutoPtr<IInterface> obj;
+        parcel->ReadInterfacePtr((Handle32*)&obj);
+        Boolean result;
+        AddLinkAddress(ILinkAddress::Probe(obj), &result);
+    }
+
+    Int32 dnsCount;
+    parcel->ReadInt32(&dnsCount);
+    for (Int32 i = 0; i < dnsCount; ++i) {
+        AutoPtr<ArrayOf<Byte> > address;
+        parcel->ReadArrayOf((Handle32*)&address);
+        AutoPtr<IInetAddressHelper> naHelper;
+        CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&naHelper);
+        AutoPtr<IInetAddress> netAddress;
+        naHelper->GetByAddress(address, (IInetAddress**)&netAddress);
+        Boolean result;
+        AddDnsServer(netAddress, &result);
+    }
+
+    parcel->ReadString(&mDomains);
     parcel->ReadInt32(&mMtu);
     parcel->ReadString(&mTcpBufferSizes);
-    obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
-    mStackedLinks = IHashTable::Probe(obj);
+
+    Int32 routeCount;
+    parcel->ReadInt32(&routeCount);
+    for (Int32 i = 0; i < routeCount; ++i) {
+        AutoPtr<IInterface> obj;
+        parcel->ReadInterfacePtr((Handle32*)&obj);
+        Boolean result;
+        AddRoute(IRouteInfo::Probe(obj), &result);
+    }
+    Byte hp;;
+    parcel->ReadByte(&hp);
+    if (hp == 1) {
+        AutoPtr<IInterface> obj;
+        parcel->ReadInterfacePtr((Handle32*)&obj);
+        SetHttpProxy(IProxyInfo::Probe(obj));
+    }
+
+    AutoPtr<ArrayOf<IInterface*> > array;
+    parcel->ReadArrayOf((Handle32*)&array);
+    for (Int32 i = 0; i < array->GetLength(); ++i) {
+        AutoPtr<ILinkProperties> lp = ILinkProperties::Probe((*array)[i]);
+        Boolean result;
+        AddStackedLink(lp, &result);
+    }
     return NOERROR;
 }
 
@@ -1028,14 +1062,53 @@ ECode LinkProperties::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteString(mIfaceName);
-    dest->WriteInterfacePtr(mLinkAddresses.Get());
-    dest->WriteInterfacePtr(mDnses.Get());
-    dest->WriteInterfacePtr(mRoutes.Get());
+    Int32 size;
+    mLinkAddresses->GetSize(&size);
+    dest->WriteInt32(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mLinkAddresses->Get(i, (IInterface**)&obj);
+        dest->WriteInterfacePtr(obj);
+    }
+
+    size = 0;
+    mDnses->GetSize(&size);
+    dest->WriteInt32(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mDnses->Get(i, (IInterface**)&obj);
+        IInetAddress* d = IInetAddress::Probe(obj);
+        AutoPtr<ArrayOf<Byte> > address;
+        d->GetAddress((ArrayOf<Byte>**)&address);
+        dest->WriteArrayOf((Handle32)address.Get());
+    }
+
     dest->WriteString(mDomains);
-    dest->WriteInterfacePtr(mHttpProxy.Get());
     dest->WriteInt32(mMtu);
     dest->WriteString(mTcpBufferSizes);
-    dest->WriteInterfacePtr(mStackedLinks.Get());
+
+    size = 0;
+    mRoutes->GetSize(&size);
+    dest->WriteInt32(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mRoutes->Get(i, (IInterface**)&obj);
+        dest->WriteInterfacePtr(obj);
+    }
+    if (mHttpProxy != NULL) {
+        dest->WriteByte(1);
+        dest->WriteInterfacePtr(mHttpProxy);
+    }
+    else {
+        dest->WriteByte(0);
+    }
+
+    AutoPtr<ICollection> values;
+    mStackedLinks->GetValues((ICollection**)&values);
+    AutoPtr<ArrayOf<IInterface*> > array;
+    values->ToArray((ArrayOf<IInterface*>**)&array);
+    dest->WriteArrayOf((Handle32)array.Get());
+
     return NOERROR;
 }
 

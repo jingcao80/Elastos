@@ -11,6 +11,11 @@ namespace Net {
 
 CAR_INTERFACE_IMPL(NetworkConfig, Object, INetworkConfig)
 
+ECode NetworkConfig::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkConfig::constructor(
     /* [in] */ const String& init)
 {

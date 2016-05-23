@@ -28,6 +28,7 @@ public:
 
     WifiKey();
 
+    CARAPI constructor();
     /**
      * Construct a new {@link WifiKey} for the given Wi-Fi SSID/BSSID pair.
      *

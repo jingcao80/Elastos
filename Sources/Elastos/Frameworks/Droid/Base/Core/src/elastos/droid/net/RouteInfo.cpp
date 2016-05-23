@@ -38,6 +38,11 @@ RouteInfo::RouteInfo()
     , mHasGateway(FALSE)
 {}
 
+ECode RouteInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode RouteInfo::constructor(
     /* [in] */ IIpPrefix* destination,
     /* [in] */ IInetAddress* gateway,

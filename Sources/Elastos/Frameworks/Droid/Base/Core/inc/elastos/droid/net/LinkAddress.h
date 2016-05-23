@@ -47,6 +47,7 @@ public:
         /* [in] */ IInetAddress* addr,
         /* [out] */ Int32* result);
 
+    CARAPI constructor();
     /**
      * Constructs a new {@code LinkAddress} from an {@code InetAddress} and prefix length, with
      * the specified flags and scope. Flags and scope are not checked for validity.

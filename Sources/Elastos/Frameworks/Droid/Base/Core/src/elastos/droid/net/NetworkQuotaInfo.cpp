@@ -7,6 +7,11 @@ namespace Net {
 
 CAR_INTERFACE_IMPL_2(NetworkQuotaInfo, Object, IParcelable, INetworkQuotaInfo)
 
+ECode NetworkQuotaInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkQuotaInfo::constructor(
     /* [in] */ Int64 estimatedBytes,
     /* [in] */ Int64 softLimitBytes,

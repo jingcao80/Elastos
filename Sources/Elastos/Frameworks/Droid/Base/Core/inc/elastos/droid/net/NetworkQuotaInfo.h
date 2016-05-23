@@ -23,6 +23,7 @@ class NetworkQuotaInfo
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
     /** {@hide} */
     CARAPI constructor(
         /* [in] */ Int64 estimatedBytes,

@@ -153,6 +153,11 @@ ECode NetworkTemplate::BuildTemplateEthernet(
     return NOERROR;
 }
 
+ECode NetworkTemplate::constructor()
+{
+    return NOERROR;
+}
+
 ECode NetworkTemplate::constructor(
     /* [in] */ Int32 matchRule,
     /* [in] */ const String& subscriberId,

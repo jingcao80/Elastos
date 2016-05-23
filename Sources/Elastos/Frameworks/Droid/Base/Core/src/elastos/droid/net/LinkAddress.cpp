@@ -68,6 +68,11 @@ ECode LinkAddress::Init(
     return NOERROR;
 }
 
+ECode LinkAddress::constructor()
+{
+    return NOERROR;
+}
+
 ECode LinkAddress::constructor(
     /* [in] */ IInetAddress* address,
     /* [in] */ Int32 prefixLength,
@@ -118,7 +123,7 @@ ECode LinkAddress::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
-    result->AppendFormat("%s/%d", RETN_OUT_VAL(mAddress, GetHostAddress).string(), mPrefixLength);
+    result->AppendFormat("%s/%d", mAddress != NULL ? RETN_OUT_VAL(mAddress, GetHostAddress).string() : "", mPrefixLength);
     return NOERROR;
 }
 
@@ -226,6 +231,7 @@ ECode LinkAddress::IsGlobalPreferred(
 ECode LinkAddress::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    mAddress = NULL;
     NetworkUtils::UnparcelInetAddress(source, (IInetAddress**)&mAddress);
     source->ReadInt32(&mPrefixLength);
     source->ReadInt32(&mFlags);

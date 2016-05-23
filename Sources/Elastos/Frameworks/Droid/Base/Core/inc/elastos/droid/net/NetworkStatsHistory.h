@@ -35,6 +35,8 @@ class NetworkStatsHistory
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int64 bucketDuration);
 

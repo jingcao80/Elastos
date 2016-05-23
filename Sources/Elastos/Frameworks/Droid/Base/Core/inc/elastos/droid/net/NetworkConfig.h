@@ -22,6 +22,7 @@ class NetworkConfig
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
     /**
      * input string from config.xml resource.  Uses the form:
      * [Connection name],[ConnectivityManager connection type],

@@ -26,6 +26,7 @@ public:
 
     ScoredNetwork();
 
+    CARAPI constructor();
     /**
      * Construct a new {@link ScoredNetwork}.
      *

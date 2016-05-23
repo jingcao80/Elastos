@@ -40,6 +40,7 @@ public:
     CAR_INTERFACE_DECL()
 
 public:
+    CARAPI constructor();
     /**
      * Constructs a new {@code IpPrefix} from a byte array containing an IPv4 or IPv6 address in
      * network byte order and a prefix length. Silently truncates the address to the prefix length,
