@@ -32,10 +32,9 @@ void InputApplicationHandle::NativeDispose()
     android::AutoMutex _l(gHandleMutex);
 
     if (mPtr) {
-        mPtr = 0;
-
         NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(mPtr);
         handle->decStrong((void*)GetNativeInputApplicationHandle);
+        mPtr = 0;
     }
 }
 
