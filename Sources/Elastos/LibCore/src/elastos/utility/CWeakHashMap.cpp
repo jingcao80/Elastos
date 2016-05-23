@@ -671,6 +671,9 @@ ECode CWeakHashMap::constructor(
     /* [in] */ IMap* map)
 {
     Int32 size;
+    if (map == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     map->GetSize(&size);
     Int32 capacity = (size < 6 ? 11 : (size * 2));
     FAIL_RETURN(constructor(capacity))
