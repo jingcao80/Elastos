@@ -528,7 +528,7 @@ void ComparableTimSort<T>::BinarySort(
             default:
                 a->Copy(left + 1, a, left, n);
         }
-        a->Set(left, (*a)[start]);
+        a->Set(left, T::Probe(pivot));
     }
 }
 
