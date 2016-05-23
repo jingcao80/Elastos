@@ -1,5 +1,7 @@
 
 #include "elastos/droid/RenderScript/Allocation.h"
+#include "elastos/droid/RenderScript/CTypeBuilder.h"
+#include "elastos/droid/graphics/CBitmapFactory.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -13,6 +15,8 @@ using Elastos::Droid::Graphics::CBitmapHelper;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::CBitmapFactoryOptions;
+using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::RenderScript::EIID_IAllocation;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
@@ -36,7 +40,8 @@ namespace Elastos {
 namespace Droid {
 namespace RenderScript {
 
-HashMap<Int64, AutoPtr<Allocation> > Allocation::mAllocationMap;\
+HashMap<Int64, AutoPtr<Allocation> > Allocation::sAllocationMap;
+Object Allocation::sAllocationMapLock;
 
 AutoPtr<IBitmapFactoryOptions> InitBitmapOptions()
 {
@@ -115,8 +120,10 @@ ECode Allocation::constructor(
         UpdateCacheInfo(t);
     }
     // try {
+    // TODO: how to free?????????????????????????????????
     assert(0);
-    // RenderScript->sRegisterNativeAllocation->Invoke(RenderScript.sRuntime, mSize);
+    Int32* buf = (Int32*)malloc(mSize);
+    // RenderScript.registerNativeAllocation.invoke(RenderScript.sRuntime, mSize);
     // } catch (Exception e) {
     //     Log.e(RenderScript.LOG_TAG, "Couldn't invoke registerNativeAllocation:" + e);
     //     throw new RSRuntimeException("Couldn't invoke registerNativeAllocation:" + e);
@@ -1314,17 +1321,504 @@ ECode Allocation::Resize(
     return NOERROR;
 }
 
+ECode Allocation::CreateTyped(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IType* type,
+    /* [in] */ AllocationMipmapControl mips,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    // Trace.traceBegin(RenderScript.TRACE_TAG, "createTyped");
+    FAIL_RETURN(rs->Validate())
+    Int64 id;
+    if (type->GetID(rs, &id), id == 0) {
+        Slogger::E("Allocation", "Bad Type");
+        retyrb E_RS_INVILID_STATE_EXCEPTION;
+    }
+    Int64 id = rs->NAllocationCreateTyped(id, mips, usage, 0);
+    if (id == 0) {
+        Slogger::E("Allocation", "Allocation creation failed.");
+        retyrb E_RS_RUNTIME_EXCEPTION;
+    }
+    // Trace.traceEnd(RenderScript.TRACE_TAG);
+    *allocation = (IAllocation*)new Allocation(id, rs, type, usage);
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+}
+
+ECode Allocation::CreateTyped(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IType* type,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    return CreateTyped(rs, type, AllocationMipmapControl_MIPMAP_NONE, usage, allocation);
+}
+
+ECode Allocation::CreateTyped(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IType* type,
+    /* [out] */ IAllocation** allocation)
+{
+    return CreateTyped(rs, type, AllocationMipmapControl_MIPMAP_NONE, USAGE_SCRIPT, allocation);
+}
+
+ECode Allocation::CreateSized(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IElement* e,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    // Trace.traceBegin(RenderScript.TRACE_TAG, "createSized");
+    FAIL_RETURN(rs->Validate())
+    AutoPtr<ITyeBuilder> b;
+    CTypeBuilder::New(rs, e, (ITyeBuilder**)&b);
+    b->SetX(count);
+    AutoPtr<IType> t;
+    b->Create((IType**)&t);
+
+    Int64 tId;
+    t->GetID(rs, &tId);
+    Int64 id = rs->NAllocationCreateTyped(tId, AllocationMipmapControl_MIPMAP_NONE, usage, 0);
+    if (id == 0) {
+        Slogger::E("Allocation", "Allocation creation failed.");
+    }
+    // Trace.traceEnd(RenderScript.TRACE_TAG);
+    *allocation = (IAllocation*)new Allocation(id, rs, t, usage);
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+}
+
+ECode Allocation::CreateSized(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IElement* e,
+    /* [in] */ Int32 count,
+    /* [out] */ IAllocation** allocation)
+{
+    return CreateSized(rs, e, count, USAGE_SCRIPT);
+}
+
+ECode Allocation::ElementFromBitmap(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* b,
+    /* [out] */ IElement** e)
+{
+    VALIDATE_NOT_NULL(e)
+    *e = NULL;
+    BitmapConfig bc;
+    b->GetConfig(&bc);
+    if (bc == BitmapConfig_ALPHA_8) {
+        return Element::A_8(rs, e);
+    }
+    if (bc == BitmapConfig_ARGB_4444) {
+        return Element::RGBA_4444(rs, e);
+    }
+    if (bc == BitmapConfig_ARGB_8888) {
+        return Element::RGBA_8888(rs, e);
+    }
+    if (bc == BitmapConfig_RGB_565) {
+        return Element::RGB_565(rs, e);
+    }
+    Slogger::E("Allocation", "Bad bitmap type: %d", bc);
+    return E_RS_INVILID_STATE_EXCEPTION;
+}
+
+ECode Allocation::TypeFromBitmap(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* b,
+    /* [in] */ AllocationMipmapControl mip,
+    /* [out] */ IType** t)
+{
+    AutoPtr<IElement> e;
+    ElementFromBitmap(rs, b, (IElement**)&e);
+    AutoPtr<ITypeBuilder> tb;
+    CTypeBuilder::New(rs, e, (ITyeBuilder**)&tb);
+    Int32 width, height;
+    b->GetWidth(&width);
+    b->GetHeight(&height);
+    tb->SetX(width);
+    tb->SetY(height);
+    tb->SetMipmaps(mip == AllocationMipmapControl_MIPMAP_FULL);
+    return tb->Create(t);
+}
+
+ECode Allocation::CreateFromBitmap(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* b,
+    /* [in] */ AllocationMipmapControl mips,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    // Trace.traceBegin(RenderScript.TRACE_TAG, "createFromBitmap");
+    FAIL_RETURN(rs->Validate())
+
+    // WAR undocumented color formats
+    BitmapConfig config;
+    if (b->GetConfig(&config), config == BitmapConfig_NONE) {
+        if ((usage & USAGE_SHARED) != 0) {
+            Slogger::E("Allocation", "USAGE_SHARED cannot be used with a Bitmap that has a null config.");
+            return E_RS_INVILID_STATE_EXCEPTION;
+        }
+        Int32 width, height;
+        b->GetWidth(&width);
+        b->GetHeight(&height);
+        AutoPtr<IBitmapHelper> helper;
+        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+        AutoPtr<IBitmap> newBitmap;
+        helper->CreateBitmap(width, height, BitmapConfig_ARGB_8888, (IBitmap**)&newBitmap);
+        AutoPtr<ICanvas> c;
+        CCanvas::New(newBitmap, (ICanvas**)&c);
+        c->DrawBitmap(b, 0, 0, NULL);
+        return CreateFromBitmap(rs, newBitmap, mips, usage, allocation);
+    }
+
+    AutoPtr<IType> t;
+    TypeFromBitmap(rs, b, mips, (IType**)&t);
+
+    // enable optimized bitmap path only with no mipmap and script-only usage
+    if (mips == AllocationMipmapControl_MIPMAP_NONE) {
+        AutoPtr<IElement> e;
+        t->GetElement((IElement**)&e);
+        Boolean isCompatible;
+        AutoPtr<IElement> 8888e;
+        Element::RGBA_8888(rs, (IElement**)&8888e);
+        if ((e->IsCompatible(8888e, &isCompatible), isCompatible) &&
+                (usage == (USAGE_SHARED | USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE))) {
+            Int64 tId;
+            t->GetID(rs, &tId);
+            Int64 id = rs->NAllocationCreateBitmapBackedAllocation(tId, mips, b, usage);
+            if (id == 0) {
+                Slogger::E("Allocation", "Load failed.");
+                return E_RS_RUNTIME_EXCEPTION;
+            }
+
+            // keep a reference to the Bitmap around to prevent GC
+            *allocation = (IAllocation*)new Allocation(id, rs, t, usage);
+            (*allocation)->SetBitmap(b);
+            REFCOUNT_ADD(*allocation)
+            return NOERROR;
+        }
+    }
+
+    Int64 tId;
+    t->GetID(rs, &tId);
+    Int64 id = rs->NAllocationCreateFromBitmap(tid, mips, b, usage);
+    if (id == 0) {
+        Slogger::E("Allocation", "Load failed.");
+        return E_RS_RUNTIME_EXCEPTION;
+    }
+    // Trace.traceEnd(RenderScript.TRACE_TAG);
+    *allocation = (IAllocation*)new Allocation(id, rs, t, usage);
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+}
+
 ECode Allocation::GetSurface(
     /* [out] */ ISurface** surface)
 {
-
+    VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
+    if ((mUsage & USAGE_IO_INPUT) == 0) {
+        Slogger::E("Allocation", "Allocation is not a surface texture.");
+        return E_RS_INVILID_STATE_EXCEPTION;
+    }
+    Int64 id;
+    GetID(mRS, &id);
+    *surface = mRS->NAllocationGetSurface(id);
+    REFCOUNT_ADD(*surface)
+    return NOERROR;
 }
 
 ECode Allocation::SetSurface(
-    /* [in] */ ISurface* sur);
+    /* [in] */ ISurface* sur)
+{
+    FAIL_RETURN(mRS->Validate())
+    if ((mUsage & USAGE_IO_OUTPUT) == 0) {\
+        Slogger::E("Allocation", "Allocation is not USAGE_IO_OUTPUT.");
+        return E_RS_INVILID_STATE_EXCEPTION;
+    }
+
+    Int64 id;
+    GetID(mRS, &id);
+    mRS->NAllocationSetSurface(id, sur);
+    return NOERROR;
+}
+
+ECode Allocation::CreateFromBitmap(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* b
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    AutoPtr<IContext> ctx;
+    rs->GetApplicationContext((IContext**)&ctx);
+    AutoPtr<IApplicationInfo> info;
+    ctx->GetApplicationInfo((IApplicationInfo**)&info);
+    Int32 version;
+    if (info->GetTargetSdkVersion(&version), version >= 18) {
+        return CreateFromBitmap(rs, b, AllocationMipmapControl_MIPMAP_NONE,
+                USAGE_SHARED | USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE, allocation);
+    }
+    return CreateFromBitmap(rs, b, AllocationMipmapControl_MIPMAP_NONE,
+            USAGE_GRAPHICS_TEXTURE, allocation);
+}
+
+ECode Allocation::CreateCubemapFromBitmap(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* b,
+    /* [in] */ AllocationMipmapControl mips,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    FAIL_RETURN(rs->Validate())
+
+    Int32 height;
+    b->GetHeight(&height);
+    Int32 width;
+    b->GetWidth(&width);
+
+    if (width % 6 != 0) {
+        Slogger::E("Allocation", "Cubemap height must be multiple of 6");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (width / 6 != height) {
+        Slogger::E("Allocation", "Only square cube map faces supported");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    Boolean isPow2 = (height & (height - 1)) == 0;
+    if (!isPow2) {
+        Slogger::E("Allocation", "Only power of 2 cube faces supported");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoPtr<IElement> e;
+    ElementFromBitmap(rs, b, (IElement**)&e);
+    AutoPtr<ITypeBuilder> tb;
+    CTypeBuilder::New(rs, e, (ITypeBuilder**)&tb);
+    tb->SetX(height);
+    tb->SetY(height);
+    tb->SetFaces(TRUE);
+    tb->SetMipmaps(mips == AllocationMipmapControl_MIPMAP_FULL);
+    AutoPtr<IType> t;
+    tb->Create((IType**)&t);
+
+    Int64 tId;
+    t->GetID(rs, &tId);
+    Int64 id = rs->NAllocationCubeCreateFromBitmap(tid, mips, b, usage);
+    if(id == 0) {
+        Slogger::E("Allocation", "Load failed for bitmap %s element %s", TO_CSTR(b), TO_CSTR(e));
+        return E_RS_RUNTIME_EXCEPTION;
+    }
+    *allocation = (IAllocation*)new Allocation(id, rs, t, usage);
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+}
+
+ECode Allocation::CreateCubemapFromBitmap(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* b,
+    /* [out] */ IAllocation** allocation)
+{
+    return CreateCubemapFromBitmap(rs, b, AllocationMipmapControl_MIPMAP_NONE,
+            USAGE_GRAPHICS_TEXTURE, allocation);
+}
+
+ECode Allocation::CreateCubemapFromCubeFaces(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* xpos,
+    /* [in] */ IBitmap* xneg,
+    /* [in] */ IBitmap* ypos,
+    /* [in] */ IBitmap* yneg,
+    /* [in] */ IBitmap* zpos,
+    /* [in] */ IBitmap* zneg,
+    /* [in] */ AllocationMipmapControl mips,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    Int32 height;
+    xpos->GetHeight(&height);
+    Int32 width1, width2, width3, width4, width5, width6, height1, height2, height3, height4, height5;
+    if ((xpos->GetWidth(&width1), width1 != height) ||
+        (xneg->GetWidth(&width2), width2 != height) || (xneg->GetHeight(&height1), height1 != height) ||
+        (ypos->GetWidth(&width3), width3 != height) || (ypos->GetHeight(&height2), height2 != height) ||
+        (yneg->GetWidth(&width4), width4 != height) || (yneg->GetHeight(&height3), height3 != height) ||
+        (zpos->GetWidth(&width5), width5 != height) || (zpos->GetHeight(&height4), height4 != height) ||
+        (zneg->GetWidth(&width6), width6 != height) || (zneg->GetHeight(&height5), height5 != height)) {
+        Slogger::E("Allocation", "Only square cube map faces supported");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    Boolean isPow2 = (height & (height - 1)) == 0;
+    if (!isPow2) {
+        Slogger::E("Allocation", "Only power of 2 cube faces supported");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoPtr<IElement> e;
+    ElementFromBitmap(rs, xpos, (IElement**)&e);
+    AutoPtr<ITypeBuilder> tb;
+    CTypeBuilder::New(rs, e, (ITyeBuilder**)&tb);
+    tb->SetX(height);
+    tb->SetY(height);
+    tb->SetFaces(TRUE);
+    tb->SetMipmaps(mips == AllocationMipmapControl_MIPMAP_FULL);
+    AutoPtr<IType> t;
+    tb->Create((IType**)&t);
+    AutoPtr<IAllocation> cubemap;
+    FAIL_RETURN(CreateTyped(rs, t, mips, usage, (IAllocation**)&cubemap))
+
+    AutoPtr<IAllocationAdapter> adapter;
+    FAIL_RETURN(AllocationAdapter::Create2D(rs, cubemap, (IAllocationAdapter**)&adapter))
+    adapter->SetFace(TypeCubemapFace_POSITIVE_X);
+    AutoPtr<IAllocation> a = IAllocation::Probe(adapter);
+    a->CopyFrom(xpos);
+    adapter->SetFace(TypeCubemapFace_NEGATIVE_X);
+    a->CopyFrom(xneg);
+    adapter->SetFace(TypeCubemapFace_POSITIVE_Y);
+    a->CopyFrom(ypos);
+    adapter->SetFace(TypeCubemapFace_NEGATIVE_Y);
+    a->CopyFrom(yneg);
+    adapter->SetFace(TypeCubemapFace_POSITIVE_Z);
+    a->CopyFrom(zpos);
+    adapter->SetFace(TypeCubemapFace_NEGATIVE_Z);
+    a->CopyFrom(zneg);
+
+    *allocation = cubemap;
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+}
+
+ECode Allocation::CreateCubemapFromCubeFaces(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IBitmap* xpos,
+    /* [in] */ IBitmap* xneg,
+    /* [in] */ IBitmap* ypos,
+    /* [in] */ IBitmap* yneg,
+    /* [in] */ IBitmap* zpos,
+    /* [in] */ IBitmap* zneg,
+    /* [out] */ IAllocation** allocation)
+{
+    return CreateCubemapFromCubeFaces(rs, xpos, xneg, ypos, yneg,
+            zpos, zneg, AllocationMipmapControl_MIPMAP_NONE,
+            USAGE_GRAPHICS_TEXTURE, allocation);
+}
+
+ECode Allocation::CreateFromBitmapResource(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IResources* res,
+    /* [in] */ Int32 id,
+    /* [in] */ AllocationMipmapControl mips,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    FAIL_RETURN(rs->Validate())
+    if ((usage & (USAGE_SHARED | USAGE_IO_INPUT | USAGE_IO_OUTPUT)) != 0) {
+        Slogger::E("Allocation", "Unsupported usage specified.");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    AutoPtr<IBitmapFactory> factory;
+    CBitmapFactory::AcquireSingleton((IBitmapFactory**)&helper);
+    AutoPtr<IBitmap> b;
+    factory->DecodeResource(res, id, (IBitmap**)&b);
+    AutoPtr<IAllocation> alloc;
+    FAIL_RETURN(CreateFromBitmap(rs, b, mips, usage, (IAllocation**)&alloc))
+    b->Recycle();
+    *allocation = alloc;
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+}
+
+ECode Allocation::CreateFromBitmapResource(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ IResources* res,
+    /* [in] */ Int32 id,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    AutoPtr<IContext> ctx;
+    rs->GetApplicationContext((IContext**)&ctx);
+    AutoPtr<IApplicationInfo> info;
+    ctx->GetApplicationInfo((IApplicationInfo**)&info);
+    Int32 version;
+    if (info->GetTargetSdkVersion(&version), version >= 18) {
+        return CreateFromBitmapResource(rs, res, id,
+                AllocationMipmapControl_MIPMAP_NONE,
+                USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE, allocation);
+    }
+    return CreateFromBitmapResource(rs, res, id,
+            AllocationMipmapControl_MIPMAP_NONE,
+            USAGE_GRAPHICS_TEXTURE, allocation);
+}
+
+ECode Allocation::CreateFromString(
+    /* [in] */ IRenderScript* rs,
+    /* [in] */ String str,
+    /* [in] */ Int32 usage,
+    /* [out] */ IAllocation** allocation)
+{
+    VALIDATE_NOT_NULL(allocation)
+    *allocation = NULL;
+    FAIL_RETURN(rs->Validate())
+    AutoPtr<ArrayOf<Byte> > allocArray;
+    // try {
+    allocArray = str.GetBytes();
+    AutoPtr<IAllocation> alloc;
+    AutoPtr<IElement> e;
+    if (FAILED(Element::U8(rs, (IElement**)&e))) {
+        Slogger::E("Allocation", "Could not convert string to utf-8.");
+        return E_RS_RUNTIME_EXCEPTION;
+    }
+    AutoPtr<IAllocation> alloc;
+    FAIL_RETURN(CreateSized(rs, e, allocArray.length, usage, (IAllocation**)&alloc))
+    FAIL_RETURN(alloc->CopyFrom(allocArray))
+    *allocation = alloc;
+    REFCOUNT_ADD(*allocation)
+    return NOERROR;
+    // }
+    // catch (Exception e) {
+    //     throw new RSRuntimeException();
+    // }
+}
 
 ECode Allocation::SetOnBufferAvailableListener(
-    /* [in] */ IOnBufferAvailableListener* cb);
+    /* [in] */ IOnBufferAvailableListener* cb)
+{
+    synchronized(sAllocationMapLock) {
+        Int64 id;
+        GetID(mRS, &id);
+        sAllocationMap[id] = this;
+        mBufferNotifier = callback;
+    }
+    return NOERROR;
+}
+
+void Allocation::SendBufferNotification(
+    /* [in] */ Int64 id)
+{
+    synchronized(sAllocationMapLock) {
+        AutoPtr<Allocation> a;
+        HashMap<Int64, AutoPtr<Allocation> >::Iterator it = sAllocationMap.Find(id);
+        if (it != sAllocationMap.End()) {
+            a = it->mSecond;
+        }
+
+        if ((a != NULL) && (a->mBufferNotifier != NULL)) {
+            a->mBufferNotifier->OnBufferAvailable(a);
+        }
+    }
+}
 
 } // namespace RenderScript
 } // namespace Droid
